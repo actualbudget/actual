@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStash } from '../hooks/useStash';
-import { type User } from '../firebase';
+import { type User } from '../auth';
 import { Header } from './Header';
 import { CategoryCard } from './CategoryCard';
 import { TransactionModal } from './TransactionModal';
@@ -9,9 +9,10 @@ import { TransactionHistory } from './TransactionHistory';
 
 interface DashboardProps {
   user: User;
+  onLogout: () => void;
 }
 
-export function Dashboard({ user }: DashboardProps) {
+export function Dashboard({ user, onLogout }: DashboardProps) {
   const { t } = useTranslation();
   const { categories, transactions, total, addTransaction } = useStash();
   const [modal, setModal] = useState<{
@@ -30,7 +31,7 @@ export function Dashboard({ user }: DashboardProps) {
 
   return (
     <div className="dashboard">
-      <Header user={user} />
+      <Header user={user} onLogout={onLogout} />
 
       <main className="main">
         <div className="total-section">

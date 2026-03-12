@@ -86,27 +86,33 @@ body {
   font-size: 15px;
 }
 
-.btn-google {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
+.pin-input {
   width: 100%;
-  padding: 14px;
-  margin-top: 32px;
-  background: #fff;
-  color: #333;
-  border: none;
-  border-radius: var(--radius);
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--text);
+  font-size: 20px;
+  letter-spacing: 4px;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s;
 }
 
-.btn-google:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+.pin-input:focus {
+  border-color: var(--accent);
+}
+
+.pin-input::placeholder {
+  color: var(--text-muted);
+}
+
+.error-message {
+  color: var(--red);
+  font-size: 13px;
+  margin-top: 8px;
+  text-align: center;
 }
 
 .login-lang {
@@ -165,10 +171,8 @@ body {
   gap: 8px;
 }
 
-.avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+.user-avatar {
+  font-size: 24px;
 }
 
 .user-name {

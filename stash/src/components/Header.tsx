@@ -1,13 +1,19 @@
 import { useTranslation } from 'react-i18next';
 import { LanguageToggle } from './LanguageToggle';
-import { signOut, type User } from '../firebase';
+import { logout, type User } from '../auth';
 
 interface HeaderProps {
   user: User;
+  onLogout: () => void;
 }
 
-export function Header({ user }: HeaderProps) {
+export function Header({ user, onLogout }: HeaderProps) {
   const { t } = useTranslation();
+
+  const handleLogout = () => {
+    logout();
+    onLogout();
+  };
 
   return (
     <header className="header">
@@ -18,10 +24,10 @@ export function Header({ user }: HeaderProps) {
       <div className="header-right">
         <LanguageToggle />
         <div className="user-info">
-          {user.photoURL && <img src={user.photoURL} alt="" className="avatar" />}
-          <span className="user-name">{user.displayName?.split(' ')[0]}</span>
+          <span className="user-avatar">👤</span>
+          <span className="user-name">{user.name}</span>
         </div>
-        <button onClick={signOut} className="btn-signout">
+        <button onClick={handleLogout} className="btn-signout">
           {t('app.signOut')}
         </button>
       </div>

@@ -1,28 +1,27 @@
 import { useState, useEffect } from 'react';
-import { onAuthChange, type User } from './firebase';
-import { Login } from './components/Login';
+import { getCurrentUser, type User } from './auth';
+import { PinLogin } from './components/PinLogin';
 import { Dashboard } from './components/Dashboard';
 
 export function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(() => getCurrentUser());
 
   useEffect(() => {
-    const unsubscribe = onAuthChange((u) => {
-      setUser(u);
-      setLoading(false);
-    });
-    return unsubscribe;
+    // Keep user in sync if they log in from another tab
+    const handleStorageChange = () => {
+      setUser(getCurrentUser());
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  if (loading) {
-    return (
-      <div className="loading">
-        <h1 className="login-logo">Stash</h1>
-        <div className="spinner" />
-      </div>
-    );
+  const handleLogout = () => {
+    setUser(null);
+  };
+
+  if (!user) {
+    return <PinLogin onLogin={() => setUser(getCurrentUser())} />;
   }
 
-  return user ? <Dashboard user={user} /> : <Login />;
+  return <Dashboard user={user} onLogout={handleLogout} />;
 }
