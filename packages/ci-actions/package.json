@@ -5,7 +5,7 @@
   "scripts": {
     "tsx": "node --import=extensionless/register --experimental-strip-types",
     "test": "vitest --run",
-    "typecheck": "tsgo"
+    "typecheck": "tsgo -b"
   },
   "devDependencies": {
     "@typescript/native-preview": "^7.0.0-dev.20260309.1",
