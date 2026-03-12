@@ -5,6 +5,13 @@
   "license": "ISC",
   "author": "",
   "main": "index.js",
+  "typesVersions": {
+    "*": {
+      "types/*": [
+        "./src/types/*"
+      ]
+    }
+  },
   "exports": {
     "./client/accounts/*": "./src/client/accounts/*.ts",
     "./client/app/*": "./src/client/app/*.ts",
@@ -51,11 +58,6 @@
     "./types/*": "./src/types/*.ts",
     "./typings/*": "./typings/*.ts",
     "./lib-dist/electron/bundle.desktop.js": "./lib-dist/electron/bundle.desktop.js"
-  },
-  "typesVersions": {
-    "*": {
-      "types/*": ["./src/types/*"]
-    }
   },
   "scripts": {
     "build:node": "cross-env NODE_ENV=production vite build --config ./vite.desktop.config.ts",
