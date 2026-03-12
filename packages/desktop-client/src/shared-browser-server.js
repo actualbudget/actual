@@ -16,6 +16,36 @@ let idbHostPort = null;
 // Saved __absurd:spawn-idb-worker message so we can re-forward it to a new host.
 let lastSpawnMessage = null;
 
+// Forward SharedWorker console output to connected tabs so messages
+// appear in regular DevTools without needing chrome://inspect/#workers.
+const _originalConsole = {
+  log: console.log.bind(console),
+  warn: console.warn.bind(console),
+  error: console.error.bind(console),
+  info: console.info.bind(console),
+};
+
+function forwardConsole(level, args) {
+  // Still log locally (visible via chrome://inspect/#workers)
+  _originalConsole[level](...args);
+  // Forward to all tabs — serialise args as strings for safety
+  const serialized = args.map(a => {
+    if (a instanceof Error) return a.stack || a.message;
+    if (typeof a === 'object') {
+      try { return JSON.stringify(a); } catch { return String(a); }
+    }
+    return String(a);
+  });
+  for (const port of connectedPorts) {
+    port.postMessage({ type: '__shared-worker-console', level, args: serialized });
+  }
+}
+
+console.log = (...args) => forwardConsole('log', args);
+console.warn = (...args) => forwardConsole('warn', args);
+console.error = (...args) => forwardConsole('error', args);
+console.info = (...args) => forwardConsole('info', args);
+
 /**
  * importScripts with retry logic for loading the pre-compiled backend bundle.
  * Same as browser-server.js - needed because the backend build may finish

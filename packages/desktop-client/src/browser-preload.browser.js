@@ -50,6 +50,15 @@ function createBackendWorker() {
       // Without this, the second tab's 'connect' message arrives before the
       // onmessage handler is ready and gets lost.
       useSharedWorker = true;
+
+      // Surface SharedWorker console output in this tab's DevTools
+      worker.addEventListener('message', event => {
+        const msg = event.data;
+        if (msg && msg.type === '__shared-worker-console') {
+          const method = console[msg.level] || console.log;
+          method('[SharedWorker]', ...msg.args);
+        }
+      });
     } catch (e) {
       console.log('SharedWorker failed, falling back to Worker:', e);
       worker = new Worker(backendWorkerUrl);
