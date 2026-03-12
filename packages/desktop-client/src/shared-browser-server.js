@@ -15,6 +15,9 @@ const requestToPort = new Map();
 let idbHostPort = null;
 // Saved __absurd:spawn-idb-worker message so we can re-forward it to a new host.
 let lastSpawnMessage = null;
+// Ports that have not yet responded to the most recent heartbeat ping.
+// If a port is still here when the next ping fires, it is considered dead.
+const pendingPongs = new Set();
 
 // Forward SharedWorker console output to connected tabs so messages
 // appear in regular DevTools without needing chrome://inspect/#workers.
@@ -117,6 +120,21 @@ function broadcastToAll(msg) {
   }
 }
 
+// Heartbeat: detect tabs that closed without sending 'tab-closing'
+// (e.g. crash, mobile background kill, or missed beforeunload).
+// Each cycle, ports that failed to respond to the previous ping are pruned,
+// then a fresh ping is sent to all remaining ports.
+setInterval(() => {
+  for (const port of [...pendingPongs]) {
+    pendingPongs.delete(port);
+    removePort(port);
+  }
+  for (const port of connectedPorts) {
+    pendingPongs.add(port);
+    port.postMessage({ type: '__heartbeat-ping' });
+  }
+}, 10_000);
+
 function removePort(port) {
   const idx = connectedPorts.indexOf(port);
   if (idx !== -1) {
@@ -183,7 +201,14 @@ self.onconnect = function (e) {
 
       // Tab closing notification - clean up the port
       if (msg.type === 'tab-closing') {
+        pendingPongs.delete(port);
         removePort(port);
+        return;
+      }
+
+      // Heartbeat response - mark port as alive
+      if (msg.type === '__heartbeat-pong') {
+        pendingPongs.delete(port);
         return;
       }
 

@@ -52,11 +52,15 @@ function createBackendWorker() {
       useSharedWorker = true;
 
       // Surface SharedWorker console output in this tab's DevTools
+      // and respond to heartbeat pings so the SharedWorker can detect dead tabs.
       worker.addEventListener('message', event => {
         const msg = event.data;
         if (msg && msg.type === '__shared-worker-console') {
           const method = console[msg.level] || console.log;
           method(...msg.args);
+        }
+        if (msg && msg.type === '__heartbeat-ping') {
+          worker.postMessage({ type: '__heartbeat-pong' });
         }
       });
     } catch (e) {
