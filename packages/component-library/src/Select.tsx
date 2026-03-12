@@ -118,13 +118,13 @@ export function Select<const Value = string>({
             setIsOpen(false);
           }}
           items={options.map(item =>
-            item === Menu.line
-              ? Menu.line
-              : {
+            isValueOption(item)
+              ? {
                   name: item[0],
                   text: item[1],
                   disabled: disabledKeys.includes(item[0]),
-                },
+                }
+              : Menu.line,
           )}
           getItemStyle={option => {
             if (targetOption && targetOption[0] === option.name) {

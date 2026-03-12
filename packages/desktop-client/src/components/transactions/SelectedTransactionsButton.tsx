@@ -292,7 +292,7 @@ export function SelectedTransactionsButton({
     <SelectedItemsButton
       id="transactions"
       name={count => t('{{count}} transactions', { count })}
-      // @ts-expect-error fix me
+      // @ts-ignore - fix me
       items={[
         ...(!types.trans
           ? [

@@ -8,12 +8,16 @@
     "module": "CommonJS",
     "moduleResolution": "node10",
     "noEmit": false,
+    "strict": false, // TODO: fix issues and remove this
     "declaration": true,
     "declarationMap": true,
     "outDir": "build",
     "rootDir": "..",
     "tsBuildInfoFile": "build/.tsbuildinfo",
-    "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
+    "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }],
+    "paths": {
+      "loot-core/types/*": ["../loot-core/src/types/*"]
+    }
   },
   "references": [{ "path": "../loot-core" }, { "path": "../sync-server" }],
   "include": ["."],

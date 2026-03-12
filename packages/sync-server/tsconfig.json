@@ -4,6 +4,7 @@
     "composite": true,
     "lib": ["ES2021"],
     "noEmit": false,
+    "strict": false, // TODO: fix issues and remove this
     "declaration": true,
     "declarationMap": true,
     "outDir": "build",

@@ -414,11 +414,16 @@ function OpenIdProviderSelector({
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
 
+  const isProviderOption = (
+    p: OpenIdProviderOption | typeof Menu.line,
+  ): p is OpenIdProviderOption => p !== Menu.line;
+
   const handleProviderChange = (newValue: string) => {
-    const selectedProvider = openIdProviders.find(provider =>
-      provider !== Menu.line ? provider.value === newValue : false,
+    const selectedProvider = openIdProviders.find(
+      (p): p is OpenIdProviderOption =>
+        isProviderOption(p) && p.value === newValue,
     );
-    if (selectedProvider && selectedProvider !== Menu.line) {
+    if (selectedProvider) {
       onProviderChange(selectedProvider);
     }
   };
@@ -428,7 +433,9 @@ function OpenIdProviderSelector({
       <FormLabel title={t('OpenID provider')} htmlFor="provider-selector" />
       <Select
         options={openIdProviders.map(provider =>
-          provider === Menu.line ? Menu.line : [provider.value, provider.label],
+          isProviderOption(provider)
+            ? [provider.value, provider.label]
+            : Menu.line,
         )}
         defaultLabel={t('Select Provider')}
         value={defaultValue}
