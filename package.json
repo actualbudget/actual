@@ -84,7 +84,8 @@
     "p-limit": "^7.3.0",
     "prompts": "^2.4.2",
     "source-map-support": "^0.5.21",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.0"
   },
   "resolutions": {
     "rollup": "4.40.1",

@@ -54,7 +54,9 @@
   },
   "typesVersions": {
     "*": {
-      "types/*": ["./src/types/*"]
+      "types/*": [
+        "./src/types/*"
+      ]
     }
   },
   "scripts": {
