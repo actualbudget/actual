@@ -190,6 +190,9 @@ const virtualChannel = {
 };
 
 let appInitFailureInterval;
+// Cached init-failure payload so late-joining tabs (after ACK clears the
+// interval) still learn that initialization failed.
+let lastAppInitFailure = null;
 
 self.onconnect = function (e) {
   const port = e.ports[0];
@@ -228,11 +231,12 @@ self.onconnect = function (e) {
             !msg.hasSharedArrayBuffer &&
             !msg.isSharedArrayBufferOverrideEnabled
           ) {
+            lastAppInitFailure = {
+              type: 'app-init-failure',
+              SharedArrayBufferMissing: true,
+            };
             appInitFailureInterval = setInterval(() => {
-              broadcastToAll({
-                type: 'app-init-failure',
-                SharedArrayBufferMissing: true,
-              });
+              broadcastToAll(lastAppInitFailure);
             }, 200);
             return;
           }
@@ -245,25 +249,31 @@ self.onconnect = function (e) {
 
             backend.initApp(isDev, virtualChannel).catch(err => {
               console.log(err);
+              lastAppInitFailure = {
+                type: 'app-init-failure',
+                IDBFailure: err.message.includes('indexeddb-failure'),
+              };
               appInitFailureInterval = setInterval(() => {
-                broadcastToAll({
-                  type: 'app-init-failure',
-                  IDBFailure: err.message.includes('indexeddb-failure'),
-                });
+                broadcastToAll(lastAppInitFailure);
               }, 200);
             });
           } catch (error) {
             console.log('Failed initializing backend:', error);
+            lastAppInitFailure = {
+              type: 'app-init-failure',
+              BackendInitFailure: true,
+            };
             appInitFailureInterval = setInterval(() => {
-              broadcastToAll({
-                type: 'app-init-failure',
-                BackendInitFailure: true,
-              });
+              broadcastToAll(lastAppInitFailure);
             }, 200);
           }
         } else if (backendConnected) {
           // Backend already initialized and connected - immediately connect this port
           port.postMessage({ type: 'connect' });
+        } else if (lastAppInitFailure) {
+          // Init already failed and the interval may have been cleared by an
+          // earlier tab's ACK — replay the failure so this tab doesn't hang.
+          port.postMessage(lastAppInitFailure);
         }
         // If backend is initializing but not yet connected, the connect message
         // will be broadcast to all ports when the backend is ready
