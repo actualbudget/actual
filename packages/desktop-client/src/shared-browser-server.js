@@ -32,12 +32,20 @@ function forwardConsole(level, args) {
   const serialized = args.map(a => {
     if (a instanceof Error) return a.stack || a.message;
     if (typeof a === 'object') {
-      try { return JSON.stringify(a); } catch { return String(a); }
+      try {
+        return JSON.stringify(a);
+      } catch {
+        return String(a);
+      }
     }
     return String(a);
   });
   for (const port of connectedPorts) {
-    port.postMessage({ type: '__shared-worker-console', level, args: serialized });
+    port.postMessage({
+      type: '__shared-worker-console',
+      level,
+      args: serialized,
+    });
   }
 }
 
