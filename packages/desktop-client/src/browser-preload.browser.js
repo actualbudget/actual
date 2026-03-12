@@ -56,7 +56,7 @@ function createBackendWorker() {
         const msg = event.data;
         if (msg && msg.type === '__shared-worker-console') {
           const method = console[msg.level] || console.log;
-          method('[SharedWorker]', ...msg.args);
+          method(...msg.args);
         }
       });
     } catch (e) {
