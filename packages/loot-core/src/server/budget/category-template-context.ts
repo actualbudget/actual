@@ -611,7 +611,7 @@ export class CategoryTemplateContext {
           monthUtils.addMonths(date, numPeriods * 12);
         break;
       default:
-        throw new Error(`Unrecognized periodic period: ${period}`);
+        throw new Error(`Unrecognized periodic period: ${String(period)}`);
     }
 
     //shift the starting date until its in our month or in the future

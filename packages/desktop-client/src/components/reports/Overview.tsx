@@ -671,7 +671,7 @@ export function Overview({ dashboard }: OverviewProps) {
                                 break;
                               default:
                                 throw new Error(
-                                  `Unrecognized menu option: ${item}`,
+                                  `Unrecognized menu option: ${String(item)}`,
                                 );
                             }
                           }}

@@ -106,7 +106,7 @@
     "typescript/require-array-sort-compare": "error",
     "typescript/unbound-method": "error",
     "typescript/no-for-in-array": "warn", // TODO: covert to error
-    "typescript/restrict-template-expressions": "warn", // TODO: covert to error
+    "typescript/restrict-template-expressions": "error",
 
     // Import rules
     "import/consistent-type-specifier-style": "error",

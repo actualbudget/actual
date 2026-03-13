@@ -779,7 +779,7 @@ export function useBudgetActions() {
           });
           return null;
         default:
-          throw new Error(`Unknown budget action type: ${type}`);
+          throw new Error(`Unknown budget action type: ${String(type)}`);
       }
     },
     onSuccess: notification => {
