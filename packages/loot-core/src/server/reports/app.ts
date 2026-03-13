@@ -97,7 +97,7 @@ async function getReports() {
   const { data }: { data: CustomReportData[] } = await aqlQuery(
     q('custom_reports').select('*'),
   );
-  return sort(data.map(reportModel.toJS));
+  return sort(data.map(r => reportModel.toJS(r)));
 }
 
 async function reportNameExists(

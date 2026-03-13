@@ -142,7 +142,7 @@ class FilesService {
        WHERE files.deleted = 0 LIMIT ?`,
             [userId, userId, limit],
           )
-    ).map(this.validate);
+    ).map(item => this.validate(item));
   }
 
   findUsersWithAccess(fileId) {

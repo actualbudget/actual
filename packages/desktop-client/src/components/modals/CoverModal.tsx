@@ -98,11 +98,11 @@ export function CoverModal({
 
   return (
     <Modal name="cover">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={title}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View>
             <FieldLabel title={t('Cover this amount:')} />
@@ -148,7 +148,7 @@ export function CoverModal({
               }}
               onPress={() => {
                 _onSubmit();
-                close();
+                state.close();
               }}
             >
               <Trans>Transfer</Trans>

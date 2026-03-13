@@ -101,11 +101,11 @@ export const PluggyAiInitialiseModal = ({
 
   return (
     <Modal name="pluggyai-init" containerProps={{ style: { width: '30vw' } }}>
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Set-up Pluggy.ai')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ display: 'flex', gap: 10 }}>
             <Text>
@@ -180,7 +180,7 @@ export const PluggyAiInitialiseModal = ({
               variant="primary"
               isLoading={isLoading}
               onPress={() => {
-                void onSubmit(close);
+                void onSubmit(() => state.close());
               }}
             >
               <Trans>Save and continue</Trans>

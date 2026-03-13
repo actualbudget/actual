@@ -1,4 +1,5 @@
-import { parseDate } from './utils';
+import { filterByStartDate, parseDate } from './utils';
+import type { ImportTransaction } from './utils';
 
 describe('Import transactions', () => {
   describe('date parsing', () => {
@@ -163,5 +164,122 @@ describe('Import transactions', () => {
         });
       },
     );
+  });
+
+  describe('filterByStartDate', () => {
+    function makeTrans(
+      overrides: Partial<ImportTransaction>,
+    ): ImportTransaction {
+      return {
+        trx_id: '0',
+        existing: false,
+        ignored: false,
+        selected: true,
+        selected_merge: false,
+        amount: 0,
+        inflow: 0,
+        outflow: 0,
+        inOut: '',
+        ...overrides,
+      };
+    }
+
+    it('returns all transactions when startDate is empty', () => {
+      const transactions = [
+        makeTrans({ trx_id: '0', date: '2024-01-15' }),
+        makeTrans({ trx_id: '1', date: '2024-02-20' }),
+      ];
+      const result = filterByStartDate(transactions, '', true, null, null);
+      expect(result).toHaveLength(2);
+    });
+
+    it('filters out transactions before startDate for pre-parsed dates', () => {
+      const transactions = [
+        makeTrans({ trx_id: '0', date: '2024-01-15' }),
+        makeTrans({ trx_id: '1', date: '2024-02-20' }),
+        makeTrans({ trx_id: '2', date: '2024-03-01' }),
+      ];
+      const result = filterByStartDate(
+        transactions,
+        '2024-02-01',
+        true,
+        null,
+        null,
+      );
+      expect(result).toHaveLength(2);
+      expect(result.map(t => t.trx_id)).toEqual(['1', '2']);
+    });
+
+    it('includes transactions on the exact startDate', () => {
+      const transactions = [makeTrans({ trx_id: '0', date: '2024-02-01' })];
+      const result = filterByStartDate(
+        transactions,
+        '2024-02-01',
+        true,
+        null,
+        null,
+      );
+      expect(result).toHaveLength(1);
+    });
+
+    it('keeps transactions with unparseable dates', () => {
+      const transactions = [makeTrans({ trx_id: '0', date: 'invalid' })];
+      const result = filterByStartDate(
+        transactions,
+        '2024-02-01',
+        false,
+        null,
+        'mm dd yyyy',
+      );
+      expect(result).toHaveLength(1);
+    });
+
+    it('works with CSV dates requiring date format parsing', () => {
+      const transactions = [
+        makeTrans({ trx_id: '0', date: '01/15/2024' }),
+        makeTrans({ trx_id: '1', date: '03/01/2024' }),
+      ];
+      const result = filterByStartDate(
+        transactions,
+        '2024-02-01',
+        false,
+        null,
+        'mm dd yyyy',
+      );
+      expect(result).toHaveLength(1);
+      expect(result[0].trx_id).toBe('1');
+    });
+
+    it('works with field mappings for CSV', () => {
+      const transactions = [
+        makeTrans({
+          trx_id: '0',
+          Date: '01/15/2024',
+        } satisfies Partial<ImportTransaction>),
+        makeTrans({
+          trx_id: '1',
+          Date: '03/01/2024',
+        } satisfies Partial<ImportTransaction>),
+      ];
+      const fieldMappings = {
+        date: 'Date',
+        amount: null,
+        payee: null,
+        notes: null,
+        inOut: null,
+        category: null,
+        outflow: null,
+        inflow: null,
+      };
+      const result = filterByStartDate(
+        transactions,
+        '2024-02-01',
+        false,
+        fieldMappings,
+        'mm dd yyyy',
+      );
+      expect(result).toHaveLength(1);
+      expect(result[0].trx_id).toBe('1');
+    });
   });
 });

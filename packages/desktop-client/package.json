@@ -16,7 +16,7 @@
     "e2e": "npx playwright test --browser=chromium",
     "vrt": "cross-env VRT=true npx playwright test --browser=chromium",
     "playwright": "playwright",
-    "typecheck": "tsc --noEmit && tsc-strict"
+    "typecheck": "tsc -b && tsc-strict"
   },
   "devDependencies": {
     "@actual-app/components": "workspace:*",

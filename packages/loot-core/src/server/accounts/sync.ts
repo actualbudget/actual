@@ -18,7 +18,6 @@ import {
 import type {
   AccountEntity,
   BankSyncResponse,
-  SimpleFinBatchSyncResponse,
   TransactionEntity,
 } from '../../types/models';
 import { aqlQuery } from '../aql';
@@ -226,12 +225,12 @@ async function downloadSimpleFinTransactions(
 
   let retVal = {};
   if (batchSync) {
-    for (const [accountId, data] of Object.entries(
-      res as SimpleFinBatchSyncResponse,
-    )) {
+    const batchErrors = res.errors;
+    for (const accountId of Object.keys(res)) {
       if (accountId === 'errors') continue;
 
-      const error = res?.errors?.[accountId]?.[0];
+      const data = res[accountId];
+      const error = batchErrors?.[accountId]?.[0];
 
       retVal[accountId] = {
         transactions: data?.transactions?.all,
@@ -244,12 +243,31 @@ async function downloadSimpleFinTransactions(
         retVal[accountId].error_code = error.error_code;
       }
     }
+
+    // Add entries for accounts that only have errors (no data in the response)
+    if (batchErrors) {
+      for (const [accountId, errorList] of Object.entries(batchErrors)) {
+        if (
+          !retVal[accountId] &&
+          Array.isArray(errorList) &&
+          errorList.length > 0
+        ) {
+          const error = errorList[0];
+          retVal[accountId] = {
+            transactions: [],
+            accountBalance: [],
+            startingBalance: 0,
+            error_type: error.error_type,
+            error_code: error.error_code,
+          };
+        }
+      }
+    }
   } else {
-    const singleRes = res as BankSyncResponse;
     retVal = {
-      transactions: singleRes.transactions.all,
-      accountBalance: singleRes.balances,
-      startingBalance: singleRes.startingBalance,
+      transactions: res.transactions.all,
+      accountBalance: res.balances,
+      startingBalance: res.startingBalance,
     };
   }
 
@@ -1074,10 +1092,33 @@ export async function simpleFinBatchSync(
     startDates,
   );
 
+  if (!res) {
+    return accounts.map(account => ({
+      accountId: account.id,
+      res: {
+        error_type: 'NO_DATA',
+        error_code: 'NO_DATA',
+      },
+    }));
+  }
+
   const promises = [];
   for (let i = 0; i < accounts.length; i++) {
     const account = accounts[i];
     const download = res[account.account_id];
+
+    if (!download || Object.keys(download).length === 0) {
+      promises.push(
+        Promise.resolve({
+          accountId: account.id,
+          res: {
+            error_type: 'ACCOUNT_MISSING',
+            error_code: 'ACCOUNT_MISSING',
+          },
+        }),
+      );
+      continue;
+    }
 
     const acctRow = await db.select('accounts', account.id);
     const oldestTransaction = await getAccountOldestTransaction(account.id);
@@ -1094,13 +1135,32 @@ export async function simpleFinBatchSync(
       continue;
     }
 
+    if (!download.transactions) {
+      promises.push(
+        Promise.resolve({
+          accountId: account.id,
+          res: {
+            error_type: 'ACCOUNT_MISSING',
+            error_code: 'ACCOUNT_MISSING',
+          },
+        }),
+      );
+      continue;
+    }
+
     promises.push(
-      processBankSyncDownload(download, account.id, acctRow, newAccount).then(
-        res => ({
+      processBankSyncDownload(download, account.id, acctRow, newAccount)
+        .then(res => ({
           accountId: account.id,
           res,
-        }),
-      ),
+        }))
+        .catch(err => ({
+          accountId: account.id,
+          res: {
+            error_type: err?.category || 'INTERNAL_ERROR',
+            error_code: err?.code || 'INTERNAL_ERROR',
+          },
+        })),
     );
   }
 

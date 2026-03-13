@@ -133,7 +133,7 @@ export function CategoryGroupMenuModal({
         },
       }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             leftContent={
@@ -150,7 +150,7 @@ export function CategoryGroupMenuModal({
                 onTitleUpdate={onRename}
               />
             }
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View
             style={{
@@ -237,7 +237,7 @@ export function CategoryGroupMenuModal({
                 getItemStyle={() => defaultMenuItemStyle}
                 onApplyBudgetTemplatesInGroup={() => {
                   _onApplyBudgetTemplatesInGroup();
-                  close();
+                  state.close();
                   showUndoNotification({
                     message: t('budget templates have been applied.'),
                   });

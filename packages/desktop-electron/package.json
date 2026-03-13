@@ -9,7 +9,7 @@
     "update-client": "bin/update-client",
     "build": "yarn build:dist && electron-builder",
     "build:dist": "tsc && yarn copy-static-assets",
-    "typecheck": "tsc --noEmit && tsc-strict",
+    "typecheck": "tsc -b && tsc-strict",
     "copy-static-assets": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* build/desktop-electron",
     "watch": "yarn build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron .",
     "e2e": "npx playwright test"

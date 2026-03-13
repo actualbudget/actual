@@ -30,86 +30,169 @@ import {
 import type { InstalledTheme } from '@desktop-client/style/customThemes';
 
 const INSTALL_NEW_VALUE = '__install_new__';
+const INSTALL_CUSTOM_LIGHT = '__install_custom_light__';
+const INSTALL_CUSTOM_DARK = '__install_custom_dark__';
 
 export function ThemeSettings() {
   const { t } = useTranslation();
   const sidebar = useSidebar();
   const [theme, switchTheme] = useTheme();
   const [darkTheme, switchDarkTheme] = usePreferredDarkTheme();
-  const [showInstaller, setShowInstaller] = useState(false);
+  const [showInstaller, setShowInstaller] = useState<
+    'single' | 'light' | 'dark' | null
+  >(null);
 
   const customThemesEnabled = useFeatureFlag('customThemes');
 
   // Global prefs for custom themes
-  const [installedThemeJson, setInstalledThemeJson] = useGlobalPref(
-    'installedCustomTheme',
+  const [installedLightThemeJson, setInstalledLightThemeJson] = useGlobalPref(
+    'installedCustomLightTheme',
+  );
+  const [installedDarkThemeJson, setInstalledDarkThemeJson] = useGlobalPref(
+    'installedCustomDarkTheme',
   );
 
-  const installedTheme = parseInstalledTheme(installedThemeJson);
+  const installedCustomLightTheme = parseInstalledTheme(
+    installedLightThemeJson,
+  );
+  const installedCustomDarkTheme = parseInstalledTheme(installedDarkThemeJson);
 
-  // Build the options list
+  // Build the options list for the single (non-auto) theme selector
   const buildOptions = useCallback(() => {
     const options: Array<readonly [string, string] | typeof Menu.line> = [
       ...themeOptions,
     ];
 
-    // Add custom theme options only if feature flag is enabled
     if (customThemesEnabled) {
-      // Add installed custom theme if it exists
-      if (installedTheme) {
+      if (theme !== 'auto' && installedCustomLightTheme) {
         options.push([
-          `custom:${installedTheme.id}`,
-          installedTheme.name,
+          `custom:${installedCustomLightTheme.id}`,
+          installedCustomLightTheme.name,
         ] as const);
       }
-
-      // Add separator and "Custom theme" option
       options.push(Menu.line);
       options.push([INSTALL_NEW_VALUE, t('Custom theme')] as const);
     }
 
     return options;
-  }, [installedTheme, customThemesEnabled, t]);
+  }, [installedCustomLightTheme, customThemesEnabled, theme, t]);
 
-  // Determine current value for the select
+  // Build options for the auto-mode light theme selector
+  const buildLightOptions = useCallback(() => {
+    const options: Array<readonly [string, string] | typeof Menu.line> = [
+      ['light', t('Light')],
+    ];
+    if (customThemesEnabled) {
+      if (installedCustomLightTheme) {
+        options.push([
+          `custom-light:${installedCustomLightTheme.id}`,
+          installedCustomLightTheme.name,
+        ] as const);
+      }
+      options.push(Menu.line);
+      options.push([INSTALL_CUSTOM_LIGHT, t('Custom theme')] as const);
+    }
+    return options;
+  }, [installedCustomLightTheme, customThemesEnabled, t]);
+
+  // Build options for the auto-mode dark theme selector
+  const buildDarkOptions = useCallback(() => {
+    const options: Array<readonly [string, string] | typeof Menu.line> = [
+      ...darkThemeOptions,
+    ];
+    if (customThemesEnabled) {
+      if (installedCustomDarkTheme) {
+        options.push([
+          `custom-dark:${installedCustomDarkTheme.id}`,
+          installedCustomDarkTheme.name,
+        ] as const);
+      }
+      options.push(Menu.line);
+      options.push([INSTALL_CUSTOM_DARK, t('Custom theme')] as const);
+    }
+    return options;
+  }, [installedCustomDarkTheme, customThemesEnabled, t]);
+
+  // Determine current value for the single theme select
   const getCurrentValue = useCallback(() => {
-    if (customThemesEnabled && installedTheme) {
-      return `custom:${installedTheme.id}`;
+    if (customThemesEnabled && installedCustomLightTheme && theme !== 'auto') {
+      return `custom:${installedCustomLightTheme.id}`;
     }
     return theme;
-  }, [customThemesEnabled, installedTheme, theme]);
+  }, [customThemesEnabled, installedCustomLightTheme, theme]);
 
-  // Handle theme selection
+  // Handle theme selection (non-auto mode)
   const handleThemeChange = useCallback(
     (value: string) => {
       if (value === INSTALL_NEW_VALUE) {
-        setShowInstaller(true);
+        setShowInstaller('single');
         return;
       }
 
-      if (value.startsWith('custom:')) {
-        // Custom theme is already installed and active, no action needed
-        // (since there's only one theme, selecting it means it's already active)
-      } else {
-        // Built-in theme selected - clear the installed custom theme
-        setInstalledThemeJson(serializeInstalledTheme(null));
+      if (!value.startsWith('custom:')) {
+        setInstalledLightThemeJson(serializeInstalledTheme(null));
+        setInstalledDarkThemeJson(serializeInstalledTheme(null));
         switchTheme(value as Theme);
       }
     },
-    [setInstalledThemeJson, switchTheme],
+    [setInstalledLightThemeJson, setInstalledDarkThemeJson, switchTheme],
+  );
+
+  // Handle light theme selection (auto mode)
+  const handleLightThemeChange = useCallback(
+    (value: string) => {
+      if (value === INSTALL_CUSTOM_LIGHT) {
+        setShowInstaller('light');
+        return;
+      }
+      if (value === 'light') {
+        setInstalledLightThemeJson(serializeInstalledTheme(null));
+      }
+    },
+    [setInstalledLightThemeJson],
+  );
+
+  // Handle dark theme selection (auto mode)
+  const handleDarkThemeChange = useCallback(
+    (value: string) => {
+      if (value === INSTALL_CUSTOM_DARK) {
+        setShowInstaller('dark');
+        return;
+      }
+      if (!value.startsWith('custom-dark:')) {
+        setInstalledDarkThemeJson(serializeInstalledTheme(null));
+        switchDarkTheme(value as DarkTheme);
+      }
+    },
+    [setInstalledDarkThemeJson, switchDarkTheme],
   );
 
   // Handle theme installation
   const handleInstall = useCallback(
     (newTheme: InstalledTheme) => {
-      setInstalledThemeJson(serializeInstalledTheme(newTheme));
+      if (showInstaller === 'light') {
+        setInstalledLightThemeJson(serializeInstalledTheme(newTheme));
+      } else if (showInstaller === 'dark') {
+        setInstalledDarkThemeJson(serializeInstalledTheme(newTheme));
+      } else {
+        setInstalledLightThemeJson(serializeInstalledTheme(newTheme));
+        if (theme === 'auto') {
+          switchTheme('light');
+        }
+      }
     },
-    [setInstalledThemeJson],
+    [
+      showInstaller,
+      theme,
+      setInstalledLightThemeJson,
+      setInstalledDarkThemeJson,
+      switchTheme,
+    ],
   );
 
   // Handle installer close
   const handleInstallerClose = useCallback(() => {
-    setShowInstaller(false);
+    setShowInstaller(null);
   }, []);
 
   return (
@@ -146,24 +229,49 @@ export function ThemeSettings() {
                     '&[data-hovered]': {
                       backgroundColor: themeStyle.buttonNormalBackgroundHover,
                     },
+                    maxWidth: '100%',
                   })}
                 />
               </Column>
-              {theme === 'auto' && !installedTheme && (
-                <Column title={t('Dark theme')}>
-                  <Select<DarkTheme>
-                    onChange={value => {
-                      switchDarkTheme(value);
-                    }}
-                    value={darkTheme}
-                    options={darkThemeOptions}
-                    className={css({
-                      '&[data-hovered]': {
-                        backgroundColor: themeStyle.buttonNormalBackgroundHover,
-                      },
-                    })}
-                  />
-                </Column>
+              {theme === 'auto' && (
+                <>
+                  <Column title={t('Light theme')}>
+                    <Select<string>
+                      onChange={handleLightThemeChange}
+                      value={
+                        customThemesEnabled && installedCustomLightTheme
+                          ? `custom-light:${installedCustomLightTheme.id}`
+                          : 'light'
+                      }
+                      options={buildLightOptions()}
+                      className={css({
+                        '&[data-hovered]': {
+                          backgroundColor:
+                            themeStyle.buttonNormalBackgroundHover,
+                        },
+                        maxWidth: '100%',
+                      })}
+                    />
+                  </Column>
+                  <Column title={t('Dark theme')}>
+                    <Select<string>
+                      onChange={handleDarkThemeChange}
+                      value={
+                        customThemesEnabled && installedCustomDarkTheme
+                          ? `custom-dark:${installedCustomDarkTheme.id}`
+                          : darkTheme
+                      }
+                      options={buildDarkOptions()}
+                      className={css({
+                        '&[data-hovered]': {
+                          backgroundColor:
+                            themeStyle.buttonNormalBackgroundHover,
+                        },
+                        maxWidth: '100%',
+                      })}
+                    />
+                  </Column>
+                </>
               )}
             </View>
           )}
@@ -172,7 +280,11 @@ export function ThemeSettings() {
             <ThemeInstaller
               onInstall={handleInstall}
               onClose={handleInstallerClose}
-              installedTheme={installedTheme}
+              installedTheme={
+                showInstaller === 'dark'
+                  ? installedCustomDarkTheme
+                  : installedCustomLightTheme
+              }
             />
           )}
         </View>

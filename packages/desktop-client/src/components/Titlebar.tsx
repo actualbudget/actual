@@ -106,11 +106,11 @@ function PrivacyButton({ style }: PrivacyButtonProps) {
   );
 }
 
-type SyncButtonProps = {
+type ServerSyncButtonProps = {
   style?: CSSProperties;
   isMobile?: boolean;
 };
-function SyncButton({ style, isMobile = false }: SyncButtonProps) {
+function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
   const { t } = useTranslation();
   const [cloudFileId] = useMetadataPref('cloudFileId');
   const dispatch = useDispatch();
@@ -166,7 +166,7 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
       : syncState === 'disabled' ||
           syncState === 'offline' ||
           syncState === 'local'
-        ? theme.tableTextLight
+        ? theme.buttonBareDisabledText
         : 'inherit';
 
   const activeStyle = isMobile
@@ -213,7 +213,7 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
   return (
     <Button
       variant="bare"
-      aria-label={t('Sync')}
+      aria-label={t('Server Sync')}
       className={css({
         ...(isMobile
           ? {
@@ -230,6 +230,8 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
         '&[data-pressed]': activeStyle,
       })}
       onPress={onSync}
+      isDisabled={syncState === 'offline'}
+      aria-disabled={syncState === 'offline'}
     >
       {isMobile ? (
         syncState === 'error' ? (
@@ -243,11 +245,7 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
         <AnimatedRefresh animating={syncing} />
       )}
       <Text style={isMobile ? { ...mobileTextStyle } : { marginLeft: 3 }}>
-        {syncState === 'disabled'
-          ? t('Disabled')
-          : syncState === 'offline'
-            ? t('Offline')
-            : t('Sync')}
+        {syncState === 'disabled' ? t('Disabled') : null}
       </Text>
     </Button>
   );
@@ -346,7 +344,7 @@ export function Titlebar({ style }: TitlebarProps) {
         <UncategorizedButton />
         {isDevelopmentEnvironment() && !isTestEnv && <ThemeSelector />}
         <PrivacyButton />
-        {serverURL ? <SyncButton /> : null}
+        {serverURL ? <ServerSyncButton /> : null}
         <LoggedInUser />
         <HelpMenu />
       </SpaceBetween>
