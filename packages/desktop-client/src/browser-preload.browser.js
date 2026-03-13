@@ -33,7 +33,11 @@ function createBackendWorker() {
   // preventing sync conflicts from multiple tabs having separate database
   // connections and merkle tries. Falls back to regular Worker if SharedWorker
   // is unavailable (e.g. Playwright tests, older browsers).
-  if (typeof SharedWorker !== 'undefined' && !Platform.isPlaywright) {
+  if (
+    typeof SharedWorker !== 'undefined' &&
+    !Platform.isPlaywright &&
+    self.crossOriginIsolated
+  ) {
     try {
       const sharedWorker = new SharedWorker(sharedBackendWorkerUrl, {
         name: 'actual-backend',
