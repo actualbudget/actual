@@ -249,7 +249,7 @@ export function ThemeInstaller({
                 }
 
                 const catalogItems = [...(catalog ?? [])]
-                  .filter(t => !mode || t.mode === mode)
+                  .filter(catalogTheme => !mode || catalogTheme.mode === mode)
                   .sort((a, b) => a.name.localeCompare(b.name));
                 const itemsPerRow = getItemsPerRow(width);
                 const rows: CatalogTheme[][] = [];
