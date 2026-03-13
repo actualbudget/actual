@@ -231,7 +231,7 @@ export function useDrag<T extends { id: string }>({
       ];
     },
     onDragStart() {
-      _onDragChange.current?.({ state: 'start-preview', type, item });
+      void _onDragChange.current?.({ state: 'start-preview', type, item });
       // Clear any pending timeout before scheduling a new one
       if (dragStartTimeoutRef.current) {
         clearTimeout(dragStartTimeoutRef.current);
@@ -241,7 +241,7 @@ export function useDrag<T extends { id: string }>({
       // With useDragAndDrop, use onDragStart for immediate feedback
       // and renderDragPreview for the preview element.
       dragStartTimeoutRef.current = setTimeout(() => {
-        _onDragChange.current?.({ state: 'start' });
+        void _onDragChange.current?.({ state: 'start' });
         dragStartTimeoutRef.current = null;
       }, 0);
     },
@@ -251,7 +251,7 @@ export function useDrag<T extends { id: string }>({
         clearTimeout(dragStartTimeoutRef.current);
         dragStartTimeoutRef.current = null;
       }
-      _onDragChange.current?.({ state: 'end', type, item });
+      void _onDragChange.current?.({ state: 'end', type, item });
     },
   });
 
@@ -323,7 +323,7 @@ export function useDrop<T extends { id: string }>({
     onDropActivate() {
       // MIGRATION: This is already using react-aria's built-in long hover.
       // With useDragAndDrop, use the onDropActivate option directly.
-      onLongHover?.();
+      void onLongHover?.();
     },
     onDropExit() {
       setIsDropActive(false);
@@ -383,7 +383,7 @@ export function useDrop<T extends { id: string }>({
       const pos: DropPosition =
         hoverClientY < hoverMiddleY ? 'before' : 'after';
 
-      onDrop(parsed.id, pos, id);
+      void onDrop(parsed.id, pos, id);
     },
   });
 

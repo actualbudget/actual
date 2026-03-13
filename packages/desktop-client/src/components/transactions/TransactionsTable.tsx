@@ -2701,7 +2701,7 @@ export const TransactionTable = forwardRef(
         if (id === targetId) {
           return;
         }
-        onReorder?.(id, dropPos, targetId);
+        void onReorder?.(id, dropPos, targetId);
       },
       [onReorder],
     );
