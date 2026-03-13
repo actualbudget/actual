@@ -216,7 +216,7 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
       : false;
   return (
     <Modal name="schedule-edit">
-      {({ state: { close } }) => (
+      {({ state: modalState }) => (
         <>
           <ModalHeader
             title={
@@ -224,7 +224,9 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
                 ? t(`Schedule: {{name}}`, { name: payee.name })
                 : t('Schedule')
             }
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={
+              <ModalCloseButton onPress={() => modalState.close()} />
+            }
           />
           <ScheduleEditForm
             fields={state.fields}
@@ -251,10 +253,13 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
               alignItems: 'center',
             }}
           >
-            <Button onPress={close}>
+            <Button onPress={() => modalState.close()}>
               <Trans>Cancel</Trans>
             </Button>
-            <Button variant="primary" onPress={() => onSave(close)}>
+            <Button
+              variant="primary"
+              onPress={() => onSave(() => modalState.close())}
+            >
               {adding ? t('Add') : t('Save')}
             </Button>
           </SpaceBetween>

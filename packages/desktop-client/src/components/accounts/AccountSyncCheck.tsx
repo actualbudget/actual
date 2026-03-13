@@ -68,6 +68,11 @@ function useErrorMessage() {
           </Trans>
         );
 
+      case 'ACCOUNT_MISSING':
+        return t(
+          'This account was not found in SimpleFIN. Try unlinking and relinking the account.',
+        );
+
       default:
     }
 

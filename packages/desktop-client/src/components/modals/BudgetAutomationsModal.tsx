@@ -373,7 +373,7 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
         style: { width: 850, height: 650, paddingBottom: 20 },
       }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <SpaceBetween
           direction="vertical"
           wrap={false}
@@ -384,7 +384,7 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
             title={t('Budget automations: {{category}}', {
               category: currentCategory?.name,
             })}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           {loading ? (
             <View
@@ -453,10 +453,13 @@ export function BudgetAutomationsModal({ categoryId }: { categoryId: string }) {
               </Link>
             )}
             {/* <View style={{ flex: 1 }} /> */}
-            <Button onPress={close}>
+            <Button onPress={() => state.close()}>
               <Trans>Cancel</Trans>
             </Button>
-            <Button variant="primary" onPress={() => onSave(close)}>
+            <Button
+              variant="primary"
+              onPress={() => onSave(() => state.close())}
+            >
               <Trans>Save</Trans>
             </Button>
           </SpaceBetween>

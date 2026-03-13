@@ -164,9 +164,11 @@ function createScheduleEditReducer(useGetScheduledAmount: boolean = false) {
         const transactions = action.transactions;
         // Sort transactions if we have a transactionId to prioritize
         if (action.transactionId && transactions) {
-          transactions.sort(a => {
-            return action.transactionId === a.id ? -1 : 1;
-          });
+          transactions.sort(
+            (a, b) =>
+              (action.transactionId === b.id ? 1 : 0) -
+              (action.transactionId === a.id ? 1 : 0),
+          );
         }
         return { ...state, transactions };
       }

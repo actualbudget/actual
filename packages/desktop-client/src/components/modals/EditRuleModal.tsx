@@ -25,19 +25,19 @@ export function EditRuleModal({
 
   return (
     <Modal name="edit-rule">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Rule')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <RuleEditor
             rule={defaultRule}
             onSave={rule => {
               originalOnSave?.(rule);
-              close();
+              state.close();
             }}
-            onCancel={close}
+            onCancel={() => state.close()}
             style={{
               maxWidth: '100%',
               width: 900,

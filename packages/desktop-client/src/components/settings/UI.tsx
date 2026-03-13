@@ -118,7 +118,9 @@ export function Column({
       }}
     >
       <Text style={{ fontWeight: 500 }}>{title}</Text>
-      <View style={{ alignItems: 'flex-start', gap: '1em' }}>{children}</View>
+      <View style={{ alignItems: 'flex-start', gap: '1em', width: '100%' }}>
+        {children}
+      </View>
     </View>
   );
 }

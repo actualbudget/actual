@@ -3,6 +3,7 @@ module.exports = {
   pipeline: {
     typecheck: {
       type: 'npmScript',
+      dependsOn: ['^typecheck'],
     },
     test: {
       type: 'npmScript',

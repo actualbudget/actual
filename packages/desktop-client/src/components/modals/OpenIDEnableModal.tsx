@@ -67,11 +67,11 @@ export function OpenIDEnableModal({
 
   return (
     <Modal name="enable-openid">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Enable OpenID')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
 
           <View style={{ flexDirection: 'column' }}>

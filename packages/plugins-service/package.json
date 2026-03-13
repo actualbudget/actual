@@ -9,7 +9,7 @@
     "build": "cross-env NODE_ENV=production ./bin/build-service-worker",
     "build-dev": "cross-env NODE_ENV=development ./bin/build-service-worker",
     "watch": "cross-env NODE_ENV=development ./bin/build-service-worker --watch",
-    "typecheck": "tsc --noEmit && tsc-strict"
+    "typecheck": "tsc -b && tsc-strict"
   },
   "dependencies": {
     "workbox-precaching": "^7.4.0"

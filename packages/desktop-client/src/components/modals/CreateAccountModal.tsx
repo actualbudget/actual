@@ -335,11 +335,11 @@ export function CreateAccountModal({
 
   return (
     <Modal name="add-account">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={title}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ maxWidth: 500, gap: 30, color: theme.pageText }}>
             {upgradingAccountId == null && (

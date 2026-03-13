@@ -34,11 +34,11 @@ export function EnvelopeToBudgetMenuModal({
 
   return (
     <Modal name="envelope-summary-to-budget-menu">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             showLogo
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <ToBudgetMenu
             getItemStyle={() => defaultMenuItemStyle}
