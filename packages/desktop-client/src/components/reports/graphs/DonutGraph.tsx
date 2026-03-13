@@ -150,7 +150,11 @@ const ActiveShapeMobile = props => {
     <g>
       <text
         x={cx}
-        y={cy + outerRadius * Math.sin(-RADIAN * 270) + 15}
+        y={
+          expandInward
+            ? cy + ((outerRadius * 0.42) / 0.31) * Math.sin(-RADIAN * 270) + 15
+            : cy + outerRadius * Math.sin(-RADIAN * 270) + 15
+        }
         dy={0}
         textAnchor="middle"
         fill={fill}
@@ -322,20 +326,18 @@ const ActiveShapeTwoRing = props => {
   const yAxis = payload.name ?? payload.date;
   const sin = Math.sin(-RADIAN * midAngle);
   const cos = Math.cos(-RADIAN * midAngle);
-  const sx = cx + (expandInward ? innerRadius - 10 : outerRadius + 10) * cos;
-  const sy = cy + (expandInward ? innerRadius - 10 : outerRadius + 10) * sin;
+  const sx =
+    cx +
+    (expandInward ? innerRadius - 20 : (innerRadius / 0.31) * 0.2 - 10) * cos;
+  const sy =
+    cy +
+    (expandInward ? innerRadius - 20 : (innerRadius / 0.31) * 0.2 - 10) * sin;
   const mx =
     cx +
-    (expandInward
-      ? innerRadius - 30
-      : innerRadius - (outerRadius - innerRadius) - 30) *
-      cos;
+    (expandInward ? innerRadius - 40 : (innerRadius / 0.31) * 0.2 - 40) * cos;
   const my =
     cy +
-    (expandInward
-      ? innerRadius - 30
-      : innerRadius - (outerRadius - innerRadius) - 30) *
-      sin;
+    (expandInward ? innerRadius - 40 : (innerRadius / 0.31) * 0.2 - 40) * sin;
   const ex = cx + (cos >= 0 ? 1 : -1) * yAxis.length * 4;
   const ey = cy + 8;
   const textAnchor = cos <= 0 ? 'start' : 'end';
