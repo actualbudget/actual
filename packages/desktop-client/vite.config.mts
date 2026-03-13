@@ -2,8 +2,9 @@ import * as path from 'path';
 import { fileURLToPath } from 'url';
 
 import inject from '@rollup/plugin-inject';
+import babel from '@rolldown/plugin-babel';
 import basicSsl from '@vitejs/plugin-basic-ssl';
-import react from '@vitejs/plugin-react';
+import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import type { PreRenderedAsset } from 'rollup';
 import { visualizer } from 'rollup-plugin-visualizer';
 /// <reference types="vitest" />
@@ -12,6 +13,9 @@ import type { Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const reactCompilerInclude = new RegExp(
+  `${path.resolve(__dirname, 'src').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/.*\\.[jt]sx$`,
+);
 
 const addWatchers = (): Plugin => ({
   name: 'add-watchers',
@@ -160,6 +164,7 @@ export default defineConfig(async ({ mode }) => {
       ...(!env.IS_GENERIC_BROWSER && {
         conditions: ['electron', 'module', 'browser', 'default'],
       }),
+      tsconfigPaths: true,
     },
     plugins: [
       // electron (desktop) builds do not support PWA
@@ -208,11 +213,11 @@ export default defineConfig(async ({ mode }) => {
           }),
       injectShims(),
       addWatchers(),
-      react({
-        babel: {
-          // n.b. Must be a string to ensure plugin resolution order. See https://github.com/actualbudget/actual/pull/5853
-          plugins: ['babel-plugin-react-compiler'],
-        },
+      react(),
+      babel({
+        include: [reactCompilerInclude],
+        // n.b. Must be a string to ensure plugin resolution order. See https://github.com/actualbudget/actual/pull/5853
+        presets: [reactCompilerPreset()],
       }),
       visualizer({ template: 'raw-data' }),
       !!env.HTTPS && basicSsl(),
