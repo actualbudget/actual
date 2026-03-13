@@ -75,11 +75,8 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   const { t } = useTranslation();
   const format = useFormat();
   const [budgetTypePref] = useSyncedPref('budgetType');
-  const budgetType = (
-    budgetTypePref === 'tracking' || budgetTypePref === 'envelope'
-      ? budgetTypePref
-      : 'envelope'
-  ) as 'envelope' | 'tracking';
+  const budgetType: 'envelope' | 'tracking' =
+    budgetTypePref === 'tracking' ? 'tracking' : 'envelope';
 
   const {
     conditions,
