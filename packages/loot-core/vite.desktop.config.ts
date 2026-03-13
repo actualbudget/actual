@@ -6,7 +6,6 @@ import peggyLoader from 'vite-plugin-peggy-loader';
 
 export default defineConfig(({ mode }) => {
   const outDir = path.resolve(__dirname, 'lib-dist/electron');
-  const crdtDir = path.resolve(__dirname, '../crdt');
 
   return {
     mode,
