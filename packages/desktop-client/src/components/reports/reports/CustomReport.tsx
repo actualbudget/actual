@@ -124,7 +124,6 @@ export function CustomReport() {
   const params = useParams();
   const { data: report, isPending } = useCustomReport(params.id);
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
-  const showBudgetedType = budgetType !== 'tracking';
 
   if (isPending) {
     return <LoadingIndicator />;
@@ -135,7 +134,6 @@ export function CustomReport() {
       key={report?.id}
       report={report}
       budgetType={budgetType}
-      showBudgetedType={showBudgetedType}
     />
   );
 }
@@ -143,13 +141,11 @@ export function CustomReport() {
 type CustomReportInnerProps = {
   report?: CustomReportEntity;
   budgetType: SyncedPrefs['budgetType'];
-  showBudgetedType: boolean;
 };
 
 function CustomReportInner({
   report: initialReport,
   budgetType,
-  showBudgetedType,
 }: CustomReportInnerProps) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -273,13 +269,6 @@ function CustomReportInner({
   const [interval, setInterval] = useState(loadReport.interval);
   const [balanceType, setBalanceType] = useState(loadReport.balanceType);
   const [sortBy, setSortBy] = useState(loadReport.sortBy);
-
-  useEffect(() => {
-    if (!showBudgetedType && balanceType === 'Budgeted') {
-      setSessionReport('balanceType', 'Payment');
-      setBalanceType('Payment');
-    }
-  }, [showBudgetedType, balanceType]);
 
   const [showEmpty, setShowEmpty] = useState(loadReport.showEmpty);
   const [showOffBudget, setShowOffBudget] = useState(loadReport.showOffBudget);
@@ -912,7 +901,7 @@ function CustomReportInner({
             latestTransaction={latestTransactionDate}
             firstDayOfWeekIdx={firstDayOfWeekIdx}
             isComplexCategoryCondition={isComplexCategoryCondition}
-            showBudgetedType={showBudgetedType}
+            showBudgetedType
           />
         )}
         <View
