@@ -43,10 +43,11 @@ export function SpendingCard({
   const { t } = useTranslation();
   const format = useFormat();
   const [budgetTypePref] = useSyncedPref('budgetType');
-  const budgetType =
-    (budgetTypePref === 'tracking' || budgetTypePref === 'envelope'
+  const budgetType = (
+    budgetTypePref === 'tracking' || budgetTypePref === 'envelope'
       ? budgetTypePref
-      : 'envelope') as 'envelope' | 'tracking';
+      : 'envelope'
+  ) as 'envelope' | 'tracking';
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
