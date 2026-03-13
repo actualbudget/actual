@@ -3,13 +3,14 @@ import type {
   CategoryEntity,
   CategoryGroupEntity,
   RuleConditionEntity,
-} from 'loot-core/types/models';
+} from "loot-core/types/models";
+import type { SyncedPrefs } from "loot-core/types/prefs";
 
-import { fetchBudgetData } from './budgetDataQuery';
-import { makeQuery } from './makeQuery';
+import { fetchBudgetData } from "./budgetDataQuery";
+import { makeQuery } from "./makeQuery";
 
-import type { QueryDataEntity } from '@desktop-client/components/reports/ReportOptions';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
+import type { QueryDataEntity } from "@desktop-client/components/reports/ReportOptions";
+import { aqlQuery } from "@desktop-client/queries/aqlQuery";
 
 export async function fetchSpreadsheetQueryData({
   balanceTypeOp,
@@ -22,6 +23,7 @@ export async function fetchSpreadsheetQueryData({
   conditionsOp,
   conditionsOpKey,
   filters,
+  budgetType,
 }: {
   balanceTypeOp: balanceTypeOpType | undefined;
   startDate: string;
@@ -33,8 +35,9 @@ export async function fetchSpreadsheetQueryData({
   conditionsOp: string;
   conditionsOpKey: string;
   filters: unknown[];
+  budgetType?: SyncedPrefs["budgetType"];
 }): Promise<{ assets: QueryDataEntity[]; debts: QueryDataEntity[] }> {
-  if (balanceTypeOp === 'totalBudgeted') {
+  if (balanceTypeOp === "totalBudgeted") {
     return fetchBudgetData({
       startDate,
       endDate,
@@ -42,30 +45,24 @@ export async function fetchSpreadsheetQueryData({
       categories,
       categoryGroups,
       conditions,
-      conditionsOp: conditionsOp === 'or' ? 'or' : 'and',
+      conditionsOp: conditionsOp === "or" ? "or" : "and",
+      budgetType,
     });
   }
 
   const [assets, debts] = await Promise.all([
     aqlQuery(
       makeQuery(
-        'assets',
+        "assets",
         startDate,
         endDate,
         interval,
         conditionsOpKey,
-        filters,
-      ),
+        filters
+      )
     ).then(({ data }) => data),
     aqlQuery(
-      makeQuery(
-        'debts',
-        startDate,
-        endDate,
-        interval,
-        conditionsOpKey,
-        filters,
-      ),
+      makeQuery("debts", startDate, endDate, interval, conditionsOpKey, filters)
     ).then(({ data }) => data),
   ]);
 

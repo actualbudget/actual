@@ -1,7 +1,7 @@
-import * as d from 'date-fns';
+import * as d from "date-fns";
 
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
+import { send } from "loot-core/platform/client/connection";
+import * as monthUtils from "loot-core/shared/months";
 import type {
   AccountEntity,
   balanceTypeOpType,
@@ -13,37 +13,38 @@ import type {
   PayeeEntity,
   RuleConditionEntity,
   sortByOpType,
-} from 'loot-core/types/models';
-import type { SyncedPrefs } from 'loot-core/types/prefs';
+} from "loot-core/types/models";
+import type { SyncedPrefs } from "loot-core/types/prefs";
 
-import { calculateLegend } from './calculateLegend';
-import { fetchSpreadsheetQueryData } from './fetchSpreadsheetQueryData';
-import { filterEmptyRows } from './filterEmptyRows';
-import { filterHiddenItems } from './filterHiddenItems';
-import { recalculate } from './recalculate';
-import { sortData } from './sortData';
+import { calculateLegend } from "./calculateLegend";
+import { fetchSpreadsheetQueryData } from "./fetchSpreadsheetQueryData";
+import { filterEmptyRows } from "./filterEmptyRows";
+import { filterHiddenItems } from "./filterHiddenItems";
+import { recalculate } from "./recalculate";
+import { sortData } from "./sortData";
 import {
   determineIntervalRange,
   trimIntervalDataToRange,
   trimIntervalsToRange,
-} from './trimIntervals';
+} from "./trimIntervals";
 
 import {
   categoryLists,
   groupBySelections,
   ReportOptions,
-} from '@desktop-client/components/reports/ReportOptions';
+} from "@desktop-client/components/reports/ReportOptions";
 import type {
   QueryDataEntity,
   UncategorizedEntity,
-} from '@desktop-client/components/reports/ReportOptions';
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+} from "@desktop-client/components/reports/ReportOptions";
+import type { useSpreadsheet } from "@desktop-client/hooks/useSpreadsheet";
 
 export type createCustomSpreadsheetProps = {
   startDate: string;
   endDate: string;
   interval: string;
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
+  budgetType?: SyncedPrefs["budgetType"];
   conditions: RuleConditionEntity[];
   conditionsOp: string;
   showEmpty: boolean;
@@ -57,7 +58,7 @@ export type createCustomSpreadsheetProps = {
   payees?: PayeeEntity[];
   accounts?: AccountEntity[];
   graphType?: string;
-  firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
+  firstDayOfWeekIdx?: SyncedPrefs["firstDayOfWeekIdx"];
   setDataCheck?: (value: boolean) => void;
 };
 
@@ -66,6 +67,7 @@ export function createCustomSpreadsheet({
   endDate,
   interval,
   categories,
+  budgetType = "envelope",
   conditions = [],
   conditionsOp,
   showEmpty,
@@ -73,9 +75,9 @@ export function createCustomSpreadsheet({
   showHiddenCategories,
   showUncategorized,
   trimIntervals,
-  groupBy = '',
-  balanceTypeOp = 'totalDebts',
-  sortByOp = 'desc',
+  groupBy = "",
+  balanceTypeOp = "totalDebts",
+  sortByOp = "desc",
   payees = [],
   accounts = [],
   graphType,
@@ -86,12 +88,12 @@ export function createCustomSpreadsheet({
 
   const [groupByList, groupByLabel]: [
     groupByList: UncategorizedEntity[],
-    groupByLabel: 'category' | 'categoryGroup' | 'payee' | 'account',
+    groupByLabel: "category" | "categoryGroup" | "payee" | "account"
   ] = groupBySelections(groupBy, categoryList, categoryGroup, payees, accounts);
 
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: DataEntity) => void,
+    setData: (data: DataEntity) => void
   ) => {
     if (groupByList.length === 0) {
       setData({
@@ -111,10 +113,10 @@ export function createCustomSpreadsheet({
       return;
     }
 
-    const { filters } = await send('make-filters-from-conditions', {
-      conditions: conditions.filter(cond => !cond.customName),
+    const { filters } = await send("make-filters-from-conditions", {
+      conditions: conditions.filter((cond) => !cond.customName),
     });
-    const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
+    const conditionsOpKey = conditionsOp === "or" ? "$or" : "$and";
 
     let assets: QueryDataEntity[];
     let debts: QueryDataEntity[];
@@ -130,16 +132,17 @@ export function createCustomSpreadsheet({
       conditionsOp,
       conditionsOpKey,
       filters,
+      budgetType,
     }));
 
-    if (interval === 'Weekly' && balanceTypeOp !== 'totalBudgeted') {
-      debts = debts.map(d => {
+    if (interval === "Weekly" && balanceTypeOp !== "totalBudgeted") {
+      debts = debts.map((d) => {
         return {
           ...d,
           date: monthUtils.weekFromDate(d.date, firstDayOfWeekIdx),
         };
       });
-      assets = assets.map(d => {
+      assets = assets.map((d) => {
         return {
           ...d,
           date: monthUtils.weekFromDate(d.date, firstDayOfWeekIdx),
@@ -148,10 +151,10 @@ export function createCustomSpreadsheet({
     }
 
     const intervals =
-      interval === 'Weekly'
+      interval === "Weekly"
         ? monthUtils.weekRangeInclusive(startDate, endDate, firstDayOfWeekIdx)
         : monthUtils[
-            ReportOptions.intervalRange.get(interval) || 'rangeInclusive'
+            ReportOptions.intervalRange.get(interval) || "rangeInclusive"
           ](startDate, endDate);
 
     let totalAssets = 0;
@@ -160,7 +163,7 @@ export function createCustomSpreadsheet({
     let netDebts = 0;
 
     const groupsByCategory =
-      groupByLabel === 'category' || groupByLabel === 'categoryGroup';
+      groupByLabel === "category" || groupByLabel === "categoryGroup";
 
     const intervalData = intervals.reduce(
       (arr: IntervalEntity[], intervalItem, index) => {
@@ -171,7 +174,7 @@ export function createCustomSpreadsheet({
         let perIntervalTotals = 0;
         const stacked: Record<string, number> = {};
 
-        groupByList.map(item => {
+        groupByList.map((item) => {
           let stackAmounts = 0;
 
           const intervalAssets = filterHiddenItems(
@@ -180,13 +183,13 @@ export function createCustomSpreadsheet({
             showOffBudget,
             showHiddenCategories,
             showUncategorized,
-            groupsByCategory,
+            groupsByCategory
           )
             .filter(
-              asset =>
+              (asset) =>
                 asset.date === intervalItem &&
                 (asset[groupByLabel] === (item.id ?? null) ||
-                  (item.uncategorized_id && groupsByCategory)),
+                  (item.uncategorized_id && groupsByCategory))
             )
             .reduce((a, v) => (a = a + v.amount), 0);
           perIntervalAssets += intervalAssets;
@@ -197,34 +200,34 @@ export function createCustomSpreadsheet({
             showOffBudget,
             showHiddenCategories,
             showUncategorized,
-            groupsByCategory,
+            groupsByCategory
           )
             .filter(
-              debt =>
+              (debt) =>
                 debt.date === intervalItem &&
                 (debt[groupByLabel] === (item.id ?? null) ||
-                  (item.uncategorized_id && groupsByCategory)),
+                  (item.uncategorized_id && groupsByCategory))
             )
             .reduce((a, v) => (a = a + v.amount), 0);
           perIntervalDebts += intervalDebts;
 
           const netAmounts = intervalAssets + intervalDebts;
 
-          if (balanceTypeOp === 'totalAssets') {
+          if (balanceTypeOp === "totalAssets") {
             stackAmounts += intervalAssets;
           }
-          if (balanceTypeOp === 'totalDebts') {
+          if (balanceTypeOp === "totalDebts") {
             stackAmounts += Math.abs(intervalDebts);
           }
-          if (balanceTypeOp === 'netAssets') {
+          if (balanceTypeOp === "netAssets") {
             stackAmounts += netAmounts > 0 ? netAmounts : 0;
           }
-          if (balanceTypeOp === 'netDebts') {
+          if (balanceTypeOp === "netDebts") {
             stackAmounts = netAmounts < 0 ? Math.abs(netAmounts) : 0;
           }
           if (
-            balanceTypeOp === 'totalTotals' ||
-            balanceTypeOp === 'totalBudgeted'
+            balanceTypeOp === "totalTotals" ||
+            balanceTypeOp === "totalBudgeted"
           ) {
             stackAmounts += netAmounts;
           }
@@ -246,7 +249,7 @@ export function createCustomSpreadsheet({
         arr.push({
           date: d.format(
             d.parseISO(intervalItem),
-            ReportOptions.intervalFormat.get(interval) || '',
+            ReportOptions.intervalFormat.get(interval) || ""
           ),
           ...stacked,
           intervalStartDate: index === 0 ? startDate : intervalItem,
@@ -266,10 +269,10 @@ export function createCustomSpreadsheet({
 
         return arr;
       },
-      [],
+      []
     );
 
-    const calcData: GroupedEntity[] = groupByList.map(item => {
+    const calcData: GroupedEntity[] = groupByList.map((item) => {
       const calc = recalculate({
         item,
         intervals,
@@ -286,8 +289,8 @@ export function createCustomSpreadsheet({
     });
 
     // First, filter rows so trimming reflects the visible dataset
-    const calcDataFiltered = calcData.filter(i =>
-      filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
+    const calcDataFiltered = calcData.filter((i) =>
+      filterEmptyRows({ showEmpty, data: i, balanceTypeOp })
     );
 
     // Determine interval range across filtered groups and main intervalData
@@ -295,7 +298,7 @@ export function createCustomSpreadsheet({
       calcDataFiltered,
       intervalData,
       trimIntervals,
-      balanceTypeOp,
+      balanceTypeOp
     );
 
     // Trim only if enabled
@@ -309,7 +312,7 @@ export function createCustomSpreadsheet({
     }
 
     const sortedCalcDataFiltered = [...calcDataFiltered].sort(
-      sortData({ balanceTypeOp, sortByOp }),
+      sortData({ balanceTypeOp, sortByOp })
     );
 
     const legend = calculateLegend(
@@ -317,7 +320,7 @@ export function createCustomSpreadsheet({
       sortedCalcDataFiltered,
       groupBy,
       graphType,
-      balanceTypeOp,
+      balanceTypeOp
     );
 
     setData({

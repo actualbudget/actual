@@ -1,29 +1,30 @@
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import type { GroupedEntity } from 'loot-core/types/models';
+import { send } from "loot-core/platform/client/connection";
+import * as monthUtils from "loot-core/shared/months";
+import type { GroupedEntity } from "loot-core/types/models";
 
-import type { createCustomSpreadsheetProps } from './custom-spreadsheet';
-import { fetchSpreadsheetQueryData } from './fetchSpreadsheetQueryData';
-import { filterEmptyRows } from './filterEmptyRows';
-import { recalculate } from './recalculate';
-import { sortData } from './sortData';
+import type { createCustomSpreadsheetProps } from "./custom-spreadsheet";
+import { fetchSpreadsheetQueryData } from "./fetchSpreadsheetQueryData";
+import { filterEmptyRows } from "./filterEmptyRows";
+import { recalculate } from "./recalculate";
+import { sortData } from "./sortData";
 import {
   determineIntervalRange,
   trimGroupedDataIntervals,
-} from './trimIntervals';
+} from "./trimIntervals";
 
 import {
   categoryLists,
   ReportOptions,
-} from '@desktop-client/components/reports/ReportOptions';
-import type { QueryDataEntity } from '@desktop-client/components/reports/ReportOptions';
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+} from "@desktop-client/components/reports/ReportOptions";
+import type { QueryDataEntity } from "@desktop-client/components/reports/ReportOptions";
+import type { useSpreadsheet } from "@desktop-client/hooks/useSpreadsheet";
 
 export function createGroupedSpreadsheet({
   startDate,
   endDate,
   interval,
   categories,
+  budgetType = "envelope",
   conditions = [],
   conditionsOp,
   showEmpty,
@@ -39,17 +40,17 @@ export function createGroupedSpreadsheet({
 
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: GroupedEntity[]) => void,
+    setData: (data: GroupedEntity[]) => void
   ) => {
     if (categoryList.length === 0) {
       setData([]);
       return;
     }
 
-    const { filters } = await send('make-filters-from-conditions', {
-      conditions: conditions.filter(cond => !cond.customName),
+    const { filters } = await send("make-filters-from-conditions", {
+      conditions: conditions.filter((cond) => !cond.customName),
     });
-    const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
+    const conditionsOpKey = conditionsOp === "or" ? "$or" : "$and";
 
     let assets: QueryDataEntity[];
     let debts: QueryDataEntity[];
@@ -65,16 +66,17 @@ export function createGroupedSpreadsheet({
       conditionsOp,
       conditionsOpKey,
       filters,
+      budgetType,
     }));
 
-    if (interval === 'Weekly' && balanceTypeOp !== 'totalBudgeted') {
-      debts = debts.map(d => {
+    if (interval === "Weekly" && balanceTypeOp !== "totalBudgeted") {
+      debts = debts.map((d) => {
         return {
           ...d,
           date: monthUtils.weekFromDate(d.date, firstDayOfWeekIdx),
         };
       });
-      assets = assets.map(d => {
+      assets = assets.map((d) => {
         return {
           ...d,
           date: monthUtils.weekFromDate(d.date, firstDayOfWeekIdx),
@@ -83,20 +85,20 @@ export function createGroupedSpreadsheet({
     }
 
     const intervals =
-      interval === 'Weekly'
+      interval === "Weekly"
         ? monthUtils.weekRangeInclusive(startDate, endDate, firstDayOfWeekIdx)
         : monthUtils[
-            ReportOptions.intervalRange.get(interval) || 'rangeInclusive'
+            ReportOptions.intervalRange.get(interval) || "rangeInclusive"
           ](startDate, endDate);
 
     const groupedData: GroupedEntity[] = categoryGroup.map(
-      group => {
+      (group) => {
         const grouped = recalculate({
           item: group,
           intervals,
           assets,
           debts,
-          groupByLabel: 'categoryGroup',
+          groupByLabel: "categoryGroup",
           showOffBudget,
           showHiddenCategories,
           showUncategorized,
@@ -106,13 +108,13 @@ export function createGroupedSpreadsheet({
 
         const stackedCategories =
           group.categories &&
-          group.categories.map(item => {
+          group.categories.map((item) => {
             const calc = recalculate({
               item,
               intervals,
               assets,
               debts,
-              groupByLabel: 'category',
+              groupByLabel: "category",
               showOffBudget,
               showHiddenCategories,
               showUncategorized,
@@ -126,21 +128,21 @@ export function createGroupedSpreadsheet({
           ...grouped,
           categories:
             stackedCategories &&
-            stackedCategories.filter(i =>
-              filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
+            stackedCategories.filter((i) =>
+              filterEmptyRows({ showEmpty, data: i, balanceTypeOp })
             ),
         };
       },
-      [startDate, endDate],
+      [startDate, endDate]
     );
 
-    const groupedDataFiltered = groupedData.filter(i =>
-      filterEmptyRows({ showEmpty, data: i, balanceTypeOp }),
+    const groupedDataFiltered = groupedData.filter((i) =>
+      filterEmptyRows({ showEmpty, data: i, balanceTypeOp })
     );
 
     // Determine interval range across all groups and their nested categories
     const allGroupsForTrimming: GroupedEntity[] = [];
-    groupedDataFiltered.forEach(group => {
+    groupedDataFiltered.forEach((group) => {
       allGroupsForTrimming.push(group);
       if (group.categories) {
         allGroupsForTrimming.push(...group.categories);
@@ -151,7 +153,7 @@ export function createGroupedSpreadsheet({
       allGroupsForTrimming,
       groupedDataFiltered.length > 0 ? groupedDataFiltered[0].intervalData : [],
       trimIntervals,
-      balanceTypeOp,
+      balanceTypeOp
     );
 
     // Trim all groupedData intervals (including nested categories) based on the range
@@ -159,9 +161,9 @@ export function createGroupedSpreadsheet({
 
     const sortedGroupedDataFiltered = [...groupedDataFiltered]
       .sort(sortData({ balanceTypeOp, sortByOp }))
-      .map(g => {
+      .map((g) => {
         g.categories = [...(g.categories ?? [])].sort(
-          sortData({ balanceTypeOp, sortByOp }),
+          sortData({ balanceTypeOp, sortByOp })
         );
         return g;
       });

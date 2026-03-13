@@ -22,6 +22,7 @@ import type {
   sortByOpType,
   TransactionEntity,
 } from 'loot-core/types/models';
+import type { SyncedPrefs } from 'loot-core/types/prefs';
 import type { TransObjectLiteral } from 'loot-core/types/util';
 
 import { Warning } from '@desktop-client/components/alerts';
@@ -133,6 +134,7 @@ export function CustomReport() {
     <CustomReportInner
       key={report?.id}
       report={report}
+      budgetType={budgetType}
       showBudgetedType={showBudgetedType}
     />
   );
@@ -140,11 +142,13 @@ export function CustomReport() {
 
 type CustomReportInnerProps = {
   report?: CustomReportEntity;
+  budgetType: SyncedPrefs['budgetType'];
   showBudgetedType: boolean;
 };
 
 function CustomReportInner({
   report: initialReport,
+  budgetType,
   showBudgetedType,
 }: CustomReportInnerProps) {
   const locale = useLocale();
@@ -510,6 +514,7 @@ function CustomReportInner({
       endDate,
       interval,
       categories,
+      budgetType,
       conditions,
       conditionsOp,
       showEmpty,
@@ -525,6 +530,7 @@ function CustomReportInner({
     startDate,
     endDate,
     interval,
+    budgetType,
     balanceTypeOp,
     categories,
     conditions,
@@ -544,6 +550,7 @@ function CustomReportInner({
       endDate,
       interval,
       categories,
+      budgetType,
       conditions,
       conditionsOp,
       showEmpty,
@@ -564,6 +571,7 @@ function CustomReportInner({
     endDate,
     interval,
     groupBy,
+    budgetType,
     balanceTypeOp,
     categories,
     payees,
