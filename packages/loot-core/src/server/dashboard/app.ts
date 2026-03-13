@@ -89,7 +89,7 @@ const exportModel = {
 
       if (!isWidgetType(widget.type)) {
         throw new ValidationError(
-          `Invalid widget.${idx}.type value ${widget.type}.`,
+          `Invalid widget.${idx}.type value ${String(widget.type)}.`,
         );
       }
 
