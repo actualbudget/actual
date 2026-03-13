@@ -25,6 +25,13 @@ const ACTUAL_VERSION = Platform.isPlaywright
     : packageJson.version;
 
 // *** Start the backend ***
+// iOS (all browsers use WebKit) doesn't reliably support SharedArrayBuffer
+// inside SharedWorker, causing absurd-sql's IDB fallback to break even with
+// a single tab. Detect iOS so we can skip SharedWorker there.
+const isIOS =
+  /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
 let worker = null;
 let useSharedWorker = false;
 
@@ -32,12 +39,8 @@ function createBackendWorker() {
   // Use SharedWorker for multi-tab support: all tabs share a single backend,
   // preventing sync conflicts from multiple tabs having separate database
   // connections and merkle tries. Falls back to regular Worker if SharedWorker
-  // is unavailable (e.g. Playwright tests, older browsers).
-  if (
-    typeof SharedWorker !== 'undefined' &&
-    !Platform.isPlaywright &&
-    self.crossOriginIsolated
-  ) {
+  // is unavailable (e.g. Playwright tests, iOS, older browsers).
+  if (typeof SharedWorker !== 'undefined' && !Platform.isPlaywright && !isIOS) {
     try {
       const sharedWorker = new SharedWorker(sharedBackendWorkerUrl, {
         name: 'actual-backend',
