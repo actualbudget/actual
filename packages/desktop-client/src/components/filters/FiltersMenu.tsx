@@ -518,7 +518,7 @@ export function FilterButton<T extends RuleConditionEntity>({
           items={[
             ...translatedFilterFields
               .filter(f => (exclude ? !exclude.includes(f[0]) : true))
-              .sort()
+              .sort((a, b) => a[0].localeCompare(b[0]))
               .map(([name, text]) => ({
                 name,
                 text: titleFirst(text),

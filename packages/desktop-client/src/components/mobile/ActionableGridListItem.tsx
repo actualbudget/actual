@@ -47,7 +47,7 @@ export function ActionableGridListItem<T extends object>({
 
       if (active) {
         dragStartedRef.current = true;
-        api.start({
+        void api.start({
           x: Math.max(-actionsWidth, Math.min(0, currentX)),
           onRest: () => {
             dragStartedRef.current = false;
@@ -61,7 +61,7 @@ export function ActionableGridListItem<T extends object>({
         currentX < -actionsWidth / 2 ||
         (vx < -0.5 && currentX < -actionsWidth / 5);
 
-      api.start({
+      void api.start({
         x: shouldReveal ? -actionsWidth : 0,
         onRest: () => {
           dragStartedRef.current = false;
@@ -140,7 +140,7 @@ export function ActionableGridListItem<T extends object>({
             {typeof actions === 'function'
               ? actions({
                   close: () => {
-                    api.start({
+                    void api.start({
                       x: 0,
                       onRest: () => {
                         setIsRevealed(false);
