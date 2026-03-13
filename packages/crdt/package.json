@@ -8,6 +8,9 @@
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "build:node": "tsc",
     "proto:generate": "./bin/generate-proto",

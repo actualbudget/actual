@@ -45,10 +45,6 @@ export default defineConfig(({ mode }) => {
           find: 'handlebars',
           replacement: require.resolve('handlebars/dist/handlebars.js'),
         },
-        {
-          find: /^@actual-app\/crdt(\/.*)?$/,
-          replacement: path.resolve(crdtDir, 'src') + '$1',
-        },
       ],
     },
     plugins: [

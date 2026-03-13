@@ -62,12 +62,6 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json'],
-      alias: [
-        {
-          find: /^@actual-app\/crdt(\/.*)?$/,
-          replacement: path.resolve(crdtDir, 'src') + '$1',
-        },
-      ],
     },
     define: {
       'process.env': '{}',
