@@ -10,6 +10,9 @@ let backendConnected = false;
 const connectedPorts = [];
 // Maps request IDs to the port that sent them, so replies go to the right tab
 const requestToPort = new Map();
+// Maps request IDs to their message name, so we can detect budget-affecting
+// operations and notify other tabs when the reply is sent.
+const requestNames = new Map();
 // The port currently hosting the IDB child worker (created by initSQLBackend).
 // Tracked explicitly so we can promote another tab if the host closes.
 let idbHostPort = null;
@@ -144,6 +147,7 @@ function removePort(port) {
   for (const [id, p] of requestToPort) {
     if (p === port) {
       requestToPort.delete(id);
+      requestNames.delete(id);
     }
   }
   // If the IDB host tab closed, promote another tab and re-create the
@@ -177,7 +181,20 @@ const virtualChannel = {
       const port = requestToPort.get(msg.id);
       if (port) {
         port.postMessage(msg);
+
+        // If a tab closed the budget, notify all OTHER tabs so
+        // they update their UI (the database is now closed).
+        const name = requestNames.get(msg.id);
+        if (msg.type === 'reply' && name === 'close-budget') {
+          for (const p of connectedPorts) {
+            if (p !== port) {
+              p.postMessage({ type: 'push', name: 'show-budgets' });
+            }
+          }
+        }
+
         requestToPort.delete(msg.id);
+        requestNames.delete(msg.id);
       }
     } else if (msg.type === 'connect') {
       backendConnected = true;
@@ -288,6 +305,9 @@ self.onconnect = function (e) {
       // Track which port sent this request for reply routing
       if (msg.id) {
         requestToPort.set(msg.id, port);
+        if (msg.name) {
+          requestNames.set(msg.id, msg.name);
+        }
       }
 
       // Forward to backend message handler
