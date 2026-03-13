@@ -47,7 +47,7 @@ function zip(arr1, arr2) {
   return result;
 }
 
-function areConditionValuesEqual(left, right) {
+export function areConditionValuesEqual(left, right) {
   if (left === right) {
     return true;
   }

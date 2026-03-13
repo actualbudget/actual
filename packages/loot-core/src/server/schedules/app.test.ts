@@ -8,6 +8,7 @@ import { loadMappings } from '../db/mappings';
 import { loadRules, updateRule } from '../transactions/transaction-rules';
 
 import {
+  areConditionValuesEqual,
   createSchedule,
   deleteSchedule,
   setNextDate,
@@ -78,6 +79,49 @@ describe('schedule app', () => {
           },
         }),
       ).toBe('2020-12-30');
+    });
+
+    it('areConditionValuesEqual matches nested objects regardless of key order', () => {
+      expect(
+        areConditionValuesEqual(
+          {
+            value: {
+              start: '2020-12-20',
+              frequency: 'monthly',
+              patterns: [
+                { type: 'day', value: 15 },
+                { type: 'day', value: 30 },
+              ],
+            },
+            field: 'date',
+          },
+          {
+            field: 'date',
+            value: {
+              patterns: [
+                { value: 15, type: 'day' },
+                { value: 30, type: 'day' },
+              ],
+              frequency: 'monthly',
+              start: '2020-12-20',
+            },
+          },
+        ),
+      ).toBe(true);
+    });
+
+    it('areConditionValuesEqual returns false for different array ordering', () => {
+      expect(
+        areConditionValuesEqual(
+          [{ field: 'date' }, { field: 'account' }],
+          [{ field: 'account' }, { field: 'date' }],
+        ),
+      ).toBe(false);
+    });
+
+    it('areConditionValuesEqual distinguishes nullish values', () => {
+      expect(areConditionValuesEqual(null, undefined)).toBe(false);
+      expect(areConditionValuesEqual(undefined, undefined)).toBe(true);
     });
   });
 
