@@ -1,24 +1,24 @@
-import React from "react";
-import { Trans, useTranslation } from "react-i18next";
+import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
-import { Button } from "@actual-app/components/button";
-import { SvgArrowDown } from "@actual-app/components/icons/v1";
-import { Text } from "@actual-app/components/text";
-import { theme } from "@actual-app/components/theme";
-import { View } from "@actual-app/components/view";
+import { Button } from '@actual-app/components/button';
+import { SvgArrowDown } from '@actual-app/components/icons/v1';
+import { Text } from '@actual-app/components/text';
+import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 
-import { Information } from "@desktop-client/components/alerts";
+import { Information } from '@desktop-client/components/alerts';
 import {
   Modal,
   ModalButtons,
   ModalHeader,
-} from "@desktop-client/components/common/Modal";
-import { usePayees } from "@desktop-client/hooks/usePayees";
-import type { Modal as ModalType } from "@desktop-client/modals/modalsSlice";
+} from '@desktop-client/components/common/Modal';
+import { usePayees } from '@desktop-client/hooks/usePayees';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 const mergePayeeStyle = {
   padding: 10,
-  border: "solid",
+  border: 'solid',
   borderWidth: 1,
   borderRadius: 6,
   borderColor: theme.tableBorder,
@@ -32,8 +32,8 @@ const targetPayeeStyle = {
 
 type ConfirmPayeesMergeModalProps = Extract<
   ModalType,
-  { name: "confirm-payees-merge" }
->["options"];
+  { name: 'confirm-payees-merge' }
+>['options'];
 
 export function ConfirmPayeesMergeModal({
   payeeIds,
@@ -43,9 +43,9 @@ export function ConfirmPayeesMergeModal({
   const { t } = useTranslation();
   const { data: allPayees = [] } = usePayees();
 
-  const mergePayees = allPayees.filter((p) => payeeIds.includes(p.id));
+  const mergePayees = allPayees.filter(p => payeeIds.includes(p.id));
 
-  const targetPayee = allPayees.find((p) => p.id === targetPayeeId);
+  const targetPayee = allPayees.find(p => p.id === targetPayeeId);
 
   if (!targetPayee || mergePayees.length === 0) {
     return null;
@@ -55,26 +55,26 @@ export function ConfirmPayeesMergeModal({
     <Modal name="confirm-payees-merge">
       {({ state }) => (
         <>
-          <ModalHeader title={t("Confirm Merge")} />
+          <ModalHeader title={t('Confirm Merge')} />
 
           <View style={{ maxWidth: 500, marginTop: 20 }}>
             <View
               style={{
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
                 gap: 20,
               }}
             >
-              <View style={{ width: "100%", flexDirection: "column", gap: 10 }}>
-                {mergePayees.map((payee) => (
+              <View style={{ width: '100%', flexDirection: 'column', gap: 10 }}>
+                {mergePayees.map(payee => (
                   <View style={mergePayeeStyle} key={payee.id}>
                     <Text>{payee.name}</Text>
                   </View>
                 ))}
               </View>
               <SvgArrowDown width={20} height={20} />
-              <View style={{ width: "100%" }}>
+              <View style={{ width: '100%' }}>
                 <View style={targetPayeeStyle}>
                   <Text
                     style={{
