@@ -98,7 +98,7 @@ class WorkerBridge {
       console.log(
         '[WorkerBridge] This tab elected as LEADER — creating backend Worker',
       );
-      this._createLocalWorker(msg.initMsg);
+      this._createLocalWorker(msg.initMsg, msg.budgetToRestore);
       return;
     }
 
@@ -136,7 +136,7 @@ class WorkerBridge {
     this._dispatch(event);
   }
 
-  _createLocalWorker(initMsg) {
+  _createLocalWorker(initMsg, budgetToRestore) {
     if (localBackendWorker) {
       localBackendWorker.terminate();
     }
@@ -153,6 +153,22 @@ class WorkerBridge {
         workerMsg.type.startsWith('__absurd:')
       ) {
         return;
+      }
+      // After the backend connects, automatically reload the budget that was
+      // open before the leader left (e.g. page refresh). This lets other tabs
+      // continue working without being sent to the budget list.
+      if (workerMsg.type === 'connect' && budgetToRestore) {
+        console.log(
+          `[WorkerBridge] Backend connected, restoring budget "${budgetToRestore}"`,
+        );
+        const id = budgetToRestore;
+        budgetToRestore = null;
+        localBackendWorker.postMessage({
+          id: '__restore-budget',
+          name: 'load-budget',
+          args: { id },
+          catchErrors: true,
+        });
       }
       sharedPort.postMessage({ type: '__from-worker', msg: workerMsg });
     };

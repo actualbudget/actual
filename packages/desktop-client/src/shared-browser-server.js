@@ -97,9 +97,9 @@ function removePort(port) {
     }
   }
   // If the leader tab left, the backend Worker in that tab is gone.
-  // Promote a new leader and notify remaining tabs to return to the
-  // budget list (since the old backend's state is lost).
+  // Immediately promote another tab as leader with the same budget.
   if (port === leaderPort) {
+    const budgetToRestore = currentBudgetId;
     leaderPort = null;
     backendConnected = false;
     lastAppInitFailure = null;
@@ -109,19 +109,25 @@ function removePort(port) {
     requestBudgetIds.clear();
 
     if (connectedPorts.length > 0) {
-      broadcastToAll({ type: 'push', name: 'show-budgets' });
-      electLeader(connectedPorts[0]);
+      console.log(
+        `[SharedWorker] Leader left, promoting new leader (budget: ${budgetToRestore ?? 'none'})`,
+      );
+      electLeader(connectedPorts[0], budgetToRestore);
     }
   }
 }
 
-function electLeader(port) {
+function electLeader(port, budgetToRestore) {
   leaderPort = port;
   console.log(
     `[SharedWorker] Elected new leader (${connectedPorts.length} tabs connected)`,
   );
   if (cachedInitMsg) {
-    port.postMessage({ type: '__become-leader', initMsg: cachedInitMsg });
+    port.postMessage({
+      type: '__become-leader',
+      initMsg: cachedInitMsg,
+      budgetToRestore: budgetToRestore || null,
+    });
   }
 }
 
