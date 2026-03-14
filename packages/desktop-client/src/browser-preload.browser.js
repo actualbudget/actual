@@ -66,6 +66,28 @@ class WorkerBridge {
 
   postMessage(msg) {
     if (this._standaloneWorker) {
+      // If a standalone tab wants to load a budget, route it through the
+      // SharedWorker instead. The coordinator will either forward it to
+      // the leader (same budget → tabs share) or redirect back to
+      // standalone (different budget → new standalone Worker).
+      if (msg.name === 'load-budget') {
+        console.log(
+          '[WorkerBridge] Standalone sending load-budget — rejoining SharedWorker first',
+        );
+        this._standaloneWorker.terminate();
+        this._standaloneWorker = null;
+        this._standaloneRequestNames = null;
+        // Silent rejoin (no 'connect' reply needed, UI is already connected)
+        this._sharedPort.postMessage({ type: '__rejoin-budget-ack' });
+        // Now route through SharedWorker — messages are ordered, so
+        // __rejoin-budget-ack is processed before this load-budget.
+        this._sharedPort.postMessage(msg);
+        return;
+      }
+      // Track request names so we can detect close-budget replies
+      if (msg.id && msg.name && this._standaloneRequestNames) {
+        this._standaloneRequestNames.set(msg.id, msg.name);
+      }
       this._standaloneWorker.postMessage(msg);
     } else {
       this._sharedPort.postMessage(msg);
@@ -116,6 +138,22 @@ class WorkerBridge {
         '[WorkerBridge] Switching to STANDALONE Worker (different budget)',
       );
       this._switchToStandalone(msg.initMsg, msg.pendingMsg);
+      return;
+    }
+
+    // SharedWorker says: the leader now has the same budget as our standalone
+    // Worker. Silently switch back to routing through SharedWorker so both
+    // tabs share the backend. The UI stays on the budget without interruption.
+    if (msg && msg.type === '__rejoin-budget') {
+      console.log(
+        '[WorkerBridge] Leader loaded same budget — terminating standalone, rejoining shared',
+      );
+      if (this._standaloneWorker) {
+        this._standaloneWorker.terminate();
+        this._standaloneWorker = null;
+        this._standaloneRequestNames = null;
+      }
+      this._sharedPort.postMessage({ type: '__rejoin-budget-ack' });
       return;
     }
 
@@ -195,14 +233,31 @@ class WorkerBridge {
         pending = null;
         setTimeout(() => sw.postMessage(toSend), 0);
       }
+      // When the standalone Worker finishes closing its budget, rejoin the
+      // SharedWorker so that the next budget load goes through the coordinator.
+      if (
+        msg.type === 'reply' &&
+        this._standaloneRequestNames &&
+        this._standaloneRequestNames.get(msg.id) === 'close-budget'
+      ) {
+        this._standaloneRequestNames.delete(msg.id);
+        console.log(
+          '[WorkerBridge] Budget closed on standalone — rejoining SharedWorker',
+        );
+        sw.terminate();
+        this._standaloneWorker = null;
+        this._sharedPort.postMessage({ type: '__rejoin-shared' });
+        // Still dispatch so the UI gets the close-budget reply
+      }
       this._dispatch(event);
     };
 
-    // Disconnect from SharedWorker coordination
-    console.log(
-      '[WorkerBridge] Disconnecting from SharedWorker, booting standalone',
-    );
-    this._sharedPort.postMessage({ type: 'tab-closing' });
+    // Tell SharedWorker we're going standalone (keep connection alive)
+    console.log('[WorkerBridge] Going standalone, notifying SharedWorker');
+    this._sharedPort.postMessage({ type: '__going-standalone' });
+
+    // Track request names for the standalone Worker so we can detect close-budget
+    this._standaloneRequestNames = new Map();
 
     // Boot the standalone Worker
     sw.postMessage(initMsg);

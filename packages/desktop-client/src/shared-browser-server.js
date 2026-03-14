@@ -24,6 +24,11 @@ const requestToPort = new Map();
 const requestNames = new Map();
 // Ports that have not yet responded to the most recent heartbeat ping
 const pendingPongs = new Set();
+// Ports running their own standalone Worker (different budget). These stay
+// connected for heartbeat and coordination but are excluded from message routing.
+const standalonePorts = new Set();
+// Maps standalone ports to the budget ID they are running
+const standaloneBudgets = new Map();
 // The budget currently loaded on the leader's backend Worker (null = no budget)
 let currentBudgetId = null;
 // Maps request IDs to the budget ID for in-flight load-budget requests
@@ -67,7 +72,9 @@ console.info = (...args) => forwardConsole('info', args);
 
 function broadcastToAll(msg) {
   for (const port of connectedPorts) {
-    port.postMessage(msg);
+    if (!standalonePorts.has(port)) {
+      port.postMessage(msg);
+    }
   }
 }
 
@@ -89,6 +96,8 @@ function removePort(port) {
   if (idx !== -1) {
     connectedPorts.splice(idx, 1);
   }
+  standalonePorts.delete(port);
+  standaloneBudgets.delete(port);
   // Clean up any pending requests from this port
   for (const [id, p] of requestToPort) {
     if (p === port) {
@@ -109,10 +118,14 @@ function removePort(port) {
     requestBudgetIds.clear();
 
     if (connectedPorts.length > 0) {
-      console.log(
-        `[SharedWorker] Leader left, promoting new leader (budget: ${budgetToRestore ?? 'none'})`,
-      );
-      electLeader(connectedPorts[0], budgetToRestore);
+      // Pick the first non-standalone port to be the new leader
+      const candidate = connectedPorts.find(p => !standalonePorts.has(p));
+      if (candidate) {
+        console.log(
+          `[SharedWorker] Leader left, promoting new leader (budget: ${budgetToRestore ?? 'none'})`,
+        );
+        electLeader(candidate, budgetToRestore);
+      }
     }
   }
 }
@@ -156,6 +169,40 @@ self.onconnect = function (e) {
         return;
       }
 
+      // Standalone tab is going off on its own Worker (different budget)
+      if (msg.type === '__going-standalone') {
+        console.log(
+          `[SharedWorker] Tab going standalone (${connectedPorts.length} total, ${standalonePorts.size + 1} standalone)`,
+        );
+        standalonePorts.add(port);
+        return;
+      }
+
+      // Standalone tab wants to rejoin the shared backend (after closing its budget)
+      if (msg.type === '__rejoin-shared') {
+        standalonePorts.delete(port);
+        standaloneBudgets.delete(port);
+        console.log(
+          `[SharedWorker] Tab rejoining shared (${connectedPorts.length} total, ${standalonePorts.size} standalone)`,
+        );
+        if (backendConnected) {
+          port.postMessage({ type: 'connect' });
+        } else if (lastAppInitFailure) {
+          port.postMessage(lastAppInitFailure);
+        }
+        return;
+      }
+
+      // Standalone tab acknowledging a __rejoin-budget (silent rejoin, no connect)
+      if (msg.type === '__rejoin-budget-ack') {
+        standalonePorts.delete(port);
+        standaloneBudgets.delete(port);
+        console.log(
+          `[SharedWorker] Tab silently rejoined shared (${connectedPorts.length} total, ${standalonePorts.size} standalone)`,
+        );
+        return;
+      }
+
       if (msg.type === 'init') {
         cachedInitMsg = msg;
         if (!leaderPort) {
@@ -194,9 +241,40 @@ self.onconnect = function (e) {
               if (name === 'load-budget') {
                 const budgetId = requestBudgetIds.get(workerMsg.id);
                 if (budgetId) {
-                  console.log(`[SharedWorker] Budget loaded: "${budgetId}"`);
+                  const oldBudgetId = currentBudgetId;
+                  console.log(
+                    `[SharedWorker] Budget loaded: "${budgetId}" (was: "${oldBudgetId ?? 'none'}")`,
+                  );
                   currentBudgetId = budgetId;
                   requestBudgetIds.delete(workerMsg.id);
+
+                  // If the leader changed budgets, followers on the old
+                  // budget can no longer use the shared backend — push
+                  // them back to the budget list.
+                  if (oldBudgetId !== null && oldBudgetId !== budgetId) {
+                    for (const p of connectedPorts) {
+                      if (p !== targetPort && !standalonePorts.has(p)) {
+                        console.log(
+                          `[SharedWorker] Pushing follower to show-budgets (was on "${oldBudgetId}")`,
+                        );
+                        p.postMessage({
+                          type: 'push',
+                          name: 'show-budgets',
+                        });
+                      }
+                    }
+                  }
+
+                  // If any standalone tab has the same budget, tell it to
+                  // rejoin — both tabs should share the same backend.
+                  for (const [p, sBudget] of standaloneBudgets) {
+                    if (sBudget === budgetId) {
+                      console.log(
+                        `[SharedWorker] Standalone tab has same budget "${budgetId}" — telling it to rejoin`,
+                      );
+                      p.postMessage({ type: '__rejoin-budget' });
+                    }
+                  }
                 }
               }
               // If a tab closed the budget, notify other tabs
@@ -206,7 +284,7 @@ self.onconnect = function (e) {
                 );
                 currentBudgetId = null;
                 for (const p of connectedPorts) {
-                  if (p !== targetPort) {
+                  if (p !== targetPort && !standalonePorts.has(p)) {
                     p.postMessage({ type: 'push', name: 'show-budgets' });
                   }
                 }
@@ -229,15 +307,22 @@ self.onconnect = function (e) {
         return;
       }
 
-      // If a tab wants to load a different budget from the one the shared
-      // leader Worker already has, tell that tab to fall back to its own
-      // standalone Worker so both budgets can run independently.
+      // If a non-leader tab wants to load a different budget from the one
+      // the shared leader Worker already has, tell that tab to fall back to
+      // its own standalone Worker so both budgets can run independently.
+      // The leader tab is never redirected — it runs the backend Worker, so
+      // it always loads directly and followers on the old budget are notified.
       if (msg.name === 'load-budget' && msg.args && msg.args.id) {
         const budgetId = msg.args.id;
-        if (currentBudgetId !== null && budgetId !== currentBudgetId) {
+        if (
+          currentBudgetId !== null &&
+          budgetId !== currentBudgetId &&
+          port !== leaderPort
+        ) {
           console.log(
             `[SharedWorker] Tab wants budget "${budgetId}" but leader has "${currentBudgetId}" — sending to standalone`,
           );
+          standaloneBudgets.set(port, budgetId);
           port.postMessage({
             type: '__use-standalone',
             initMsg: cachedInitMsg,
