@@ -10,7 +10,7 @@
       "builtin",
       "external",
       "loot-core",
-      "parent",
+      ["parent", "subpath"],
       "sibling",
       "index",
       "desktop-client"

@@ -2,7 +2,6 @@
 
 import type { Currency } from '#shared/currencies';
 import { amountToInteger } from '#shared/util';
-
 import * as monthUtils from '../../shared/months';
 import {
   extractScheduleConds,

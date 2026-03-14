@@ -1,5 +1,4 @@
 import { DEFAULT_MAX_DISTANCE_METERS } from '#shared/constants';
-
 import type { Diff } from '../../shared/util';
 import type {
   NearbyPayeeEntity,
