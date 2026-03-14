@@ -3,7 +3,7 @@ import * as path from 'path';
 
 import { vi } from 'vitest';
 
-import type { RuleEntity } from 'loot-core/types/models';
+import type { RuleEntity } from '@actual-app/core/types/models';
 
 import * as api from './index';
 

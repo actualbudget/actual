@@ -154,6 +154,8 @@ export default defineConfig(async ({ mode }) => {
       extensions: resolveExtensions,
       alias: {
         '@desktop-client': path.join(__dirname, 'src'),
+        // TODO: remove this once all loot-core imports are replaced with @actual-app/core
+        'loot-core': path.join(__dirname, '../loot-core/src'),
       },
       ...(!env.IS_GENERIC_BROWSER && {
         conditions: ['electron', 'module', 'browser', 'default'],

@@ -1,14 +1,9 @@
+import type { PayeeEntity, RecurConfig, ScheduleEntity } from '#types/models';
 // @ts-strict-ignore
 import type { IRuleOptions } from '@rschedule/core';
 import * as d from 'date-fns';
 import type { Locale } from 'date-fns';
 import { t } from 'i18next';
-
-import type {
-  PayeeEntity,
-  RecurConfig,
-  ScheduleEntity,
-} from 'loot-core/types/models';
 
 import { Condition } from '../server/rules';
 

@@ -1,4 +1,4 @@
-import { DEFAULT_MAX_DISTANCE_METERS } from 'loot-core/shared/constants';
+import { DEFAULT_MAX_DISTANCE_METERS } from '#shared/constants';
 
 import type { Diff } from '../../shared/util';
 import type {
@@ -245,7 +245,7 @@ async function getNearbyPayees({
   // Get the closest location for each payee within maxDistance using window functions
   const query = `
     WITH payee_distances AS (
-      SELECT 
+      SELECT
         pl.id as location_id,
         pl.payee_id,
         pl.latitude,
@@ -260,8 +260,8 @@ async function getNearbyPayees({
         -- Haversine formula to calculate distance
         ((6371 * acos(
           MIN(1, MAX(-1,
-            cos(radians(?)) * cos(radians(pl.latitude)) * 
-            cos(radians(pl.longitude) - radians(?)) + 
+            cos(radians(?)) * cos(radians(pl.latitude)) *
+            cos(radians(pl.longitude) - radians(?)) +
             sin(radians(?)) * sin(radians(pl.latitude))
           ))
         ))) * 1000 as distance,
@@ -269,8 +269,8 @@ async function getNearbyPayees({
         ROW_NUMBER() OVER (PARTITION BY pl.payee_id ORDER BY (
           (6371 * acos(
             MIN(1, MAX(-1,
-              cos(radians(?)) * cos(radians(pl.latitude)) * 
-              cos(radians(pl.longitude) - radians(?)) + 
+              cos(radians(?)) * cos(radians(pl.latitude)) *
+              cos(radians(pl.longitude) - radians(?)) +
               sin(radians(?)) * sin(radians(pl.latitude))
             ))
           )) * 1000
@@ -282,13 +282,13 @@ async function getNearbyPayees({
         -- Filter by distance using Haversine formula
         AND (6371 * acos(
           MIN(1, MAX(-1,
-            cos(radians(?)) * cos(radians(pl.latitude)) * 
-            cos(radians(pl.longitude) - radians(?)) + 
+            cos(radians(?)) * cos(radians(pl.latitude)) *
+            cos(radians(pl.longitude) - radians(?)) +
             sin(radians(?)) * sin(radians(pl.latitude))
           ))
         )) * 1000 <= ?
     )
-    SELECT 
+    SELECT
       location_id,
       payee_id,
       latitude,
