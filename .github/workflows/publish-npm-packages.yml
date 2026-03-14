@@ -66,7 +66,7 @@ jobs:
 
       - name: Publish Core
         run: |
-          npm publish loot-core/@actual-app/core.tgz --access public --tag nightly
+          npm publish loot-core/@actual-app/core.tgz --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
