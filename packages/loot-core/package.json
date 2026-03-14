@@ -1,7 +1,6 @@
 {
   "name": "@actual-app/core",
   "version": "26.3.0",
-  "private": false,
   "description": "",
   "license": "ISC",
   "imports": {
