@@ -625,7 +625,7 @@ Standard commands documented in `package.json` scripts and the Quick Start secti
 
 - `yarn lint` / `yarn lint:fix` (uses oxlint + oxfmt)
 - `yarn test` (lage across all workspaces)
-- `yarn typecheck` (tsc + lage typecheck)
+- `yarn typecheck` (tsgo + lage typecheck)
 
 ### Testing and previewing the app
 

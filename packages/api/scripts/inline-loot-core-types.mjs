@@ -1,7 +1,11 @@
 /**
  * Post-build script: copies loot-core declaration tree into @types/loot-core
  * and rewrites index.d.ts to reference it so the published package is self-contained.
+<<<<<<< HEAD
  * Run after vite build; requires loot-core declarations (yarn workspace @actual-app/core exec tsc).
+=======
+ * Run after vite build; requires loot-core declarations (yarn workspace loot-core exec tsgo).
+>>>>>>> master
  */
 import fs from 'fs';
 import path from 'path';
@@ -23,7 +27,7 @@ function main() {
   }
   if (!fs.existsSync(lootCoreDeclSrc)) {
     console.error(
-      'Missing loot-core declarations; run: yarn workspace @actual-app/core exec tsc',
+      'Missing loot-core declarations; run: yarn workspace @actual-app/core exec tsgo',
     );
     process.exit(1);
   }

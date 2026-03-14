@@ -38,12 +38,14 @@ type ThemeInstallerProps = {
   onInstall: (theme: InstalledTheme) => void;
   onClose: () => void;
   installedTheme?: InstalledTheme | null;
+  mode?: 'light' | 'dark';
 };
 
 export function ThemeInstaller({
   onInstall,
   onClose,
   installedTheme,
+  mode,
 }: ThemeInstallerProps) {
   const { t } = useTranslation();
   const [selectedCatalogTheme, setSelectedCatalogTheme] =
@@ -246,9 +248,9 @@ export function ThemeInstaller({
                   return null;
                 }
 
-                const catalogItems = [...(catalog ?? [])].sort((a, b) =>
-                  a.name.localeCompare(b.name),
-                );
+                const catalogItems = [...(catalog ?? [])]
+                  .filter(catalogTheme => !mode || catalogTheme.mode === mode)
+                  .sort((a, b) => a.name.localeCompare(b.name));
                 const itemsPerRow = getItemsPerRow(width);
                 const rows: CatalogTheme[][] = [];
                 for (let i = 0; i < catalogItems.length; i += itemsPerRow) {

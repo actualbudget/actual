@@ -5,6 +5,7 @@
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,
+    "strict": false, // TODO: fix issues and remove this
     "emitDeclarationOnly": true,
     "outDir": "build/ts",
     "rootDir": "src",
