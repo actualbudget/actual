@@ -25,60 +25,229 @@ const ACTUAL_VERSION = Platform.isPlaywright
     : packageJson.version;
 
 // *** Start the backend ***
-// iOS (all browsers use WebKit) doesn't reliably support SharedArrayBuffer
-// inside SharedWorker, causing absurd-sql's IDB fallback to break even with
-// a single tab. Detect iOS so we can skip SharedWorker there.
-const isIOS =
-  /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
 let worker = null;
-let useSharedWorker = false;
+// The regular Worker running the backend, created only on the leader tab
+let localBackendWorker = null;
+
+/**
+ * WorkerBridge wraps a SharedWorker port and presents a Worker-like interface
+ * (onmessage, postMessage, addEventListener, start) to the connection layer.
+ *
+ * If the SharedWorker tells this tab to go standalone (because it wants a
+ * different budget from the shared leader), the bridge transparently creates
+ * its own dedicated Worker and routes all future communication through it.
+ */
+class WorkerBridge {
+  constructor(sharedPort) {
+    this._sharedPort = sharedPort;
+    this._standaloneWorker = null;
+    this._onmessage = null;
+    this._listeners = [];
+    this._started = false;
+
+    // Listen for all messages from the SharedWorker port
+    sharedPort.addEventListener('message', e => this._onSharedMessage(e));
+  }
+
+  set onmessage(handler) {
+    this._onmessage = handler;
+    // Setting onmessage on a real MessagePort implicitly starts it.
+    // We need to do this explicitly on the underlying port.
+    if (!this._started) {
+      this._started = true;
+      this._sharedPort.start();
+    }
+  }
+
+  get onmessage() {
+    return this._onmessage;
+  }
+
+  postMessage(msg) {
+    if (this._standaloneWorker) {
+      this._standaloneWorker.postMessage(msg);
+    } else {
+      this._sharedPort.postMessage(msg);
+    }
+  }
+
+  addEventListener(type, handler) {
+    this._listeners.push({ type, handler });
+  }
+
+  start() {
+    if (!this._started) {
+      this._started = true;
+      this._sharedPort.start();
+    }
+  }
+
+  _dispatch(event) {
+    if (this._onmessage) this._onmessage(event);
+    for (const { type, handler } of this._listeners) {
+      if (type === 'message') handler(event);
+    }
+  }
+
+  _onSharedMessage(event) {
+    const msg = event.data;
+
+    // Elected as leader: create the real backend Worker on this tab
+    if (msg && msg.type === '__become-leader') {
+      console.log(
+        '[WorkerBridge] This tab elected as LEADER — creating backend Worker',
+      );
+      this._createLocalWorker(msg.initMsg);
+      return;
+    }
+
+    // Forward requests from SharedWorker to our local Worker
+    if (msg && msg.type === '__to-worker') {
+      if (localBackendWorker) {
+        localBackendWorker.postMessage(msg.msg);
+      }
+      return;
+    }
+
+    // SharedWorker says: this tab needs a different budget, go standalone
+    if (msg && msg.type === '__use-standalone') {
+      console.log(
+        '[WorkerBridge] Switching to STANDALONE Worker (different budget)',
+      );
+      this._switchToStandalone(msg.initMsg, msg.pendingMsg);
+      return;
+    }
+
+    // Surface SharedWorker console output in this tab's DevTools
+    if (msg && msg.type === '__shared-worker-console') {
+      const method = console[msg.level] || console.log;
+      method(...msg.args);
+      return;
+    }
+
+    // Respond to heartbeat pings so SharedWorker can detect dead tabs
+    if (msg && msg.type === '__heartbeat-ping') {
+      this._sharedPort.postMessage({ type: '__heartbeat-pong' });
+      return;
+    }
+
+    // Everything else goes to the connection layer
+    this._dispatch(event);
+  }
+
+  _createLocalWorker(initMsg) {
+    if (localBackendWorker) {
+      localBackendWorker.terminate();
+    }
+    localBackendWorker = new Worker(backendWorkerUrl);
+    initSQLBackend(localBackendWorker);
+
+    const sharedPort = this._sharedPort;
+    localBackendWorker.onmessage = workerEvent => {
+      const workerMsg = workerEvent.data;
+      // absurd-sql internal messages are handled by initSQLBackend
+      if (
+        workerMsg &&
+        workerMsg.type &&
+        workerMsg.type.startsWith('__absurd:')
+      ) {
+        return;
+      }
+      sharedPort.postMessage({ type: '__from-worker', msg: workerMsg });
+    };
+
+    localBackendWorker.postMessage(initMsg);
+  }
+
+  _switchToStandalone(initMsg, pendingMsg) {
+    // Create a dedicated Worker just for this tab
+    const sw = new Worker(backendWorkerUrl);
+    this._standaloneWorker = sw;
+    initSQLBackend(sw);
+
+    let pending = pendingMsg;
+    sw.onmessage = event => {
+      const msg = event.data;
+      // absurd-sql internal messages are handled by initSQLBackend
+      if (msg && msg.type && msg.type.startsWith('__absurd:')) {
+        return;
+      }
+      // When the standalone Worker connects, send the queued load-budget
+      if (msg.type === 'connect' && pending) {
+        const toSend = pending;
+        pending = null;
+        setTimeout(() => sw.postMessage(toSend), 0);
+      }
+      this._dispatch(event);
+    };
+
+    // Disconnect from SharedWorker coordination
+    console.log(
+      '[WorkerBridge] Disconnecting from SharedWorker, booting standalone',
+    );
+    this._sharedPort.postMessage({ type: 'tab-closing' });
+
+    // Boot the standalone Worker
+    sw.postMessage(initMsg);
+  }
+}
 
 function createBackendWorker() {
-  // Use SharedWorker for multi-tab support: all tabs share a single backend,
-  // preventing sync conflicts from multiple tabs having separate database
-  // connections and merkle tries. Falls back to regular Worker if SharedWorker
-  // is unavailable (e.g. Playwright tests, iOS, older browsers).
-  if (typeof SharedWorker !== 'undefined' && !Platform.isPlaywright && !isIOS) {
+  // Use SharedWorker as a coordinator for multi-tab support: one tab is elected
+  // "leader" and runs the backend in a regular dedicated Worker. All other tabs
+  // send messages through the SharedWorker, which routes them to the leader.
+  // The SharedWorker never touches SharedArrayBuffer, so this works on all
+  // platforms including iOS/Safari.
+  //
+  // If two tabs open different budgets, the second tab transparently falls back
+  // to its own standalone Worker so both budgets run independently.
+  if (typeof SharedWorker !== 'undefined' && !Platform.isPlaywright) {
     try {
       const sharedWorker = new SharedWorker(sharedBackendWorkerUrl, {
         name: 'actual-backend',
       });
-      worker = sharedWorker.port;
-      // initSQLBackend listens for __absurd:spawn-idb-worker messages forwarded
-      // from the SharedWorker and creates the IndexedDB child worker on this tab's
-      // main thread. The child worker communicates with the backend in the
-      // SharedWorker via SharedArrayBuffer/Atomics.
-      initSQLBackend(worker);
-      // Don't call worker.start() here. The port must remain un-started so that
-      // messages from the SharedWorker (especially 'connect') are queued until
-      // connectWorker() sets onmessage, which implicitly starts the port.
-      // Without this, the second tab's 'connect' message arrives before the
-      // onmessage handler is ready and gets lost.
-      useSharedWorker = true;
+      const sharedPort = sharedWorker.port;
 
-      // Surface SharedWorker console output in this tab's DevTools
-      // and respond to heartbeat pings so the SharedWorker can detect dead tabs.
-      worker.addEventListener('message', event => {
-        const msg = event.data;
-        if (msg && msg.type === '__shared-worker-console') {
-          const method = console[msg.level] || console.log;
-          method(...msg.args);
-        }
-        if (msg && msg.type === '__heartbeat-ping') {
-          worker.postMessage({ type: '__heartbeat-pong' });
-        }
+      // WorkerBridge presents a Worker-like interface to the connection layer.
+      // It routes through the SharedWorker normally, and seamlessly switches
+      // to a standalone Worker if needed (different budget).
+      worker = new WorkerBridge(sharedPort);
+      console.log('[WorkerBridge] Connected to SharedWorker coordinator');
+
+      // Don't call start() here. The port must remain un-started so that
+      // messages (especially 'connect') are queued until connectWorker()
+      // sets onmessage, which implicitly starts the port via the bridge.
+
+      if (window.SharedArrayBuffer) {
+        localStorage.removeItem('SharedArrayBufferOverride');
+      }
+
+      sharedPort.postMessage({
+        type: 'init',
+        version: ACTUAL_VERSION,
+        isDev: IS_DEV,
+        publicUrl: process.env.PUBLIC_URL,
+        hash: process.env.REACT_APP_BACKEND_WORKER_HASH,
+        isSharedArrayBufferOverrideEnabled: localStorage.getItem(
+          'SharedArrayBufferOverride',
+        ),
       });
+
+      window.addEventListener('beforeunload', () => {
+        sharedPort.postMessage({ type: 'tab-closing' });
+      });
+
+      return;
     } catch (e) {
       console.log('SharedWorker failed, falling back to Worker:', e);
-      worker = new Worker(backendWorkerUrl);
-      initSQLBackend(worker);
     }
-  } else {
-    worker = new Worker(backendWorkerUrl);
-    initSQLBackend(worker);
   }
+
+  // Fallback: regular Worker (Playwright, no SharedWorker support, or failure)
+  console.log('[WorkerBridge] No SharedWorker available, using direct Worker');
+  worker = new Worker(backendWorkerUrl);
+  initSQLBackend(worker);
 
   if (window.SharedArrayBuffer) {
     localStorage.removeItem('SharedArrayBufferOverride');
@@ -95,13 +264,6 @@ function createBackendWorker() {
       'SharedArrayBufferOverride',
     ),
   });
-
-  // Notify SharedWorker when this tab is closing so it can clean up the port
-  if (useSharedWorker) {
-    window.addEventListener('beforeunload', () => {
-      worker.postMessage({ type: 'tab-closing' });
-    });
-  }
 }
 
 createBackendWorker();

@@ -1,26 +1,33 @@
-/* globals importScripts, backend */
-// SharedWorker entry point for multi-tab support.
-// All browser tabs share a single backend instance through this SharedWorker,
-// preventing the sync conflicts that occur when multiple tabs each run their
-// own backend with separate database connections and merkle tries.
-
-let hasInitialized = false;
-let backendConnected = false;
+// SharedWorker coordinator for multi-tab support.
+//
+// This SharedWorker does NOT run the backend itself. Instead, it acts as a
+// lightweight message router: one tab is elected "leader" and runs the real
+// backend in a regular dedicated Worker (where SharedArrayBuffer is universally
+// available). All other tabs send messages through this coordinator, which
+// forwards them to the leader tab for processing.
+//
+// This design avoids the iOS/Safari issue where SharedArrayBuffer is unavailable
+// inside SharedWorker contexts, causing absurd-sql's IDB fallback to break.
 
 const connectedPorts = [];
+// The port belonging to the leader tab (the one running the backend Worker)
+let leaderPort = null;
+// Cached init message so we can forward it when electing a new leader
+let cachedInitMsg = null;
+// Whether the leader's backend Worker has sent 'connect'
+let backendConnected = false;
+// Cached init-failure payload so late-joining tabs learn that init failed
+let lastAppInitFailure = null;
 // Maps request IDs to the port that sent them, so replies go to the right tab
 const requestToPort = new Map();
-// Maps request IDs to their message name, so we can detect budget-affecting
-// operations and notify other tabs when the reply is sent.
+// Maps request IDs to their message name (for close-budget cross-tab notification)
 const requestNames = new Map();
-// The port currently hosting the IDB child worker (created by initSQLBackend).
-// Tracked explicitly so we can promote another tab if the host closes.
-let idbHostPort = null;
-// Saved __absurd:spawn-idb-worker message so we can re-forward it to a new host.
-let lastSpawnMessage = null;
-// Ports that have not yet responded to the most recent heartbeat ping.
-// If a port is still here when the next ping fires, it is considered dead.
+// Ports that have not yet responded to the most recent heartbeat ping
 const pendingPongs = new Set();
+// The budget currently loaded on the leader's backend Worker (null = no budget)
+let currentBudgetId = null;
+// Maps request IDs to the budget ID for in-flight load-budget requests
+const requestBudgetIds = new Map();
 
 // Forward SharedWorker console output to connected tabs so messages
 // appear in regular DevTools without needing chrome://inspect/#workers.
@@ -32,9 +39,7 @@ const _originalConsole = {
 };
 
 function forwardConsole(level, args) {
-  // Still log locally (visible via chrome://inspect/#workers)
   _originalConsole[level](...args);
-  // Forward to all tabs — serialise args as strings for safety
   const serialized = args.map(a => {
     if (a instanceof Error) return a.stack || a.message;
     if (typeof a === 'object') {
@@ -60,63 +65,6 @@ console.warn = (...args) => forwardConsole('warn', args);
 console.error = (...args) => forwardConsole('error', args);
 console.info = (...args) => forwardConsole('info', args);
 
-/**
- * importScripts with retry logic for loading the pre-compiled backend bundle.
- * Same as browser-server.js - needed because the backend build may finish
- * after the frontend in development.
- */
-const importScriptsWithRetry = async (script, { maxRetries = 5 } = {}) => {
-  try {
-    importScripts(script);
-  } catch (error) {
-    if (maxRetries <= 0) {
-      throw error;
-    } else {
-      console.groupCollapsed(
-        `Failed to load backend, will retry ${maxRetries} more time(s)`,
-      );
-      console.log(error);
-      console.groupEnd();
-    }
-
-    await new Promise((resolve, reject) =>
-      setTimeout(() => {
-        importScriptsWithRetry(script, {
-          maxRetries: maxRetries - 1,
-        }).then(resolve, reject);
-      }, 5000),
-    );
-  }
-};
-
-/**
- * Override self.postMessage for absurd-sql compatibility.
- *
- * absurd-sql's IndexedDBBackend calls self.postMessage({type: '__absurd:spawn-idb-worker', ...})
- * to request an IndexedDB child worker. In a regular Worker, this goes to the main
- * thread where initSQLBackend handles it. In a SharedWorker, self.postMessage doesn't
- * exist natively, so we forward the message to the designated IDB host tab.
- * That tab has initSQLBackend set up on its port to create the child worker.
- * The child worker communicates with the backend via SharedArrayBuffer/Atomics,
- * so it works regardless of which tab's main thread hosts it.
- */
-self.postMessage = function (msg) {
-  if (msg && msg.type === '__absurd:spawn-idb-worker') {
-    lastSpawnMessage = msg;
-  }
-  // Send to the designated IDB host, falling back to first available port
-  const target =
-    idbHostPort && connectedPorts.includes(idbHostPort)
-      ? idbHostPort
-      : connectedPorts[0];
-  if (target) {
-    if (!idbHostPort) {
-      idbHostPort = target;
-    }
-    target.postMessage(msg);
-  }
-};
-
 function broadcastToAll(msg) {
   for (const port of connectedPorts) {
     port.postMessage(msg);
@@ -125,8 +73,6 @@ function broadcastToAll(msg) {
 
 // Heartbeat: detect tabs that closed without sending 'tab-closing'
 // (e.g. crash, mobile background kill, or missed beforeunload).
-// Each cycle, ports that failed to respond to the previous ping are pruned,
-// then a fresh ping is sent to all remaining ports.
 setInterval(() => {
   for (const port of [...pendingPongs]) {
     pendingPongs.delete(port);
@@ -143,176 +89,173 @@ function removePort(port) {
   if (idx !== -1) {
     connectedPorts.splice(idx, 1);
   }
-  // Clean up any pending requests for this port
+  // Clean up any pending requests from this port
   for (const [id, p] of requestToPort) {
     if (p === port) {
       requestToPort.delete(id);
       requestNames.delete(id);
     }
   }
-  // If the IDB host tab closed, promote another tab and re-create the
-  // IDB child worker so the backend retains database access.
-  if (port === idbHostPort) {
-    idbHostPort = connectedPorts.length > 0 ? connectedPorts[0] : null;
-    if (idbHostPort && lastSpawnMessage) {
-      idbHostPort.postMessage(lastSpawnMessage);
+  // If the leader tab left, the backend Worker in that tab is gone.
+  // Promote a new leader and notify remaining tabs to return to the
+  // budget list (since the old backend's state is lost).
+  if (port === leaderPort) {
+    leaderPort = null;
+    backendConnected = false;
+    lastAppInitFailure = null;
+    currentBudgetId = null;
+    requestToPort.clear();
+    requestNames.clear();
+    requestBudgetIds.clear();
+
+    if (connectedPorts.length > 0) {
+      broadcastToAll({ type: 'push', name: 'show-budgets' });
+      electLeader(connectedPorts[0]);
     }
   }
 }
 
-/**
- * Virtual channel that the backend uses for communication (passed to connection.init).
- *
- * It mimics a Worker's self by providing addEventListener and postMessage.
- * - Incoming messages from any tab's port are forwarded to the registered handler
- * - Outgoing replies are routed to the specific requesting port
- * - Outgoing push events are broadcast to all ports
- */
-const virtualChannel = {
-  _messageHandler: null,
-  addEventListener(type, handler) {
-    if (type === 'message') {
-      virtualChannel._messageHandler = handler;
-    }
-  },
-  postMessage(msg) {
-    if (msg.type === 'reply' || msg.type === 'error') {
-      // Route reply/error to the specific port that sent the request
-      const port = requestToPort.get(msg.id);
-      if (port) {
-        port.postMessage(msg);
-
-        // If a tab closed the budget, notify all OTHER tabs so
-        // they update their UI (the database is now closed).
-        const name = requestNames.get(msg.id);
-        if (msg.type === 'reply' && name === 'close-budget') {
-          for (const p of connectedPorts) {
-            if (p !== port) {
-              p.postMessage({ type: 'push', name: 'show-budgets' });
-            }
-          }
-        }
-
-        requestToPort.delete(msg.id);
-        requestNames.delete(msg.id);
-      }
-    } else if (msg.type === 'connect') {
-      backendConnected = true;
-      broadcastToAll(msg);
-    } else {
-      // Broadcast push events, capture-exception, etc. to all ports
-      broadcastToAll(msg);
-    }
-  },
-};
-
-let appInitFailureInterval;
-// Cached init-failure payload so late-joining tabs (after ACK clears the
-// interval) still learn that initialization failed.
-let lastAppInitFailure = null;
+function electLeader(port) {
+  leaderPort = port;
+  console.log(
+    `[SharedWorker] Elected new leader (${connectedPorts.length} tabs connected)`,
+  );
+  if (cachedInitMsg) {
+    port.postMessage({ type: '__become-leader', initMsg: cachedInitMsg });
+  }
+}
 
 self.onconnect = function (e) {
   const port = e.ports[0];
   connectedPorts.push(port);
+  console.log(
+    `[SharedWorker] Tab connected (${connectedPorts.length} total). Leader: ${leaderPort ? 'yes' : 'none'}, budget: ${currentBudgetId ?? 'none'}`,
+  );
 
-  port.onmessage = async function (event) {
+  port.onmessage = function (event) {
     try {
       const msg = event.data;
 
-      // Tab closing notification - clean up the port
       if (msg.type === 'tab-closing') {
+        console.log(
+          `[SharedWorker] Tab closing (${connectedPorts.length - 1} will remain). Was leader: ${port === leaderPort}`,
+        );
         pendingPongs.delete(port);
         removePort(port);
         return;
       }
 
-      // Heartbeat response - mark port as alive
       if (msg.type === '__heartbeat-pong') {
         pendingPongs.delete(port);
         return;
       }
 
       if (msg.type === 'init') {
-        if (!hasInitialized) {
-          hasInitialized = true;
-
-          const isDev = !!msg.isDev;
-          const hash = msg.hash;
-
-          // The main thread checks SharedArrayBuffer availability and passes
-          // the result here. We trust it because: (1) the main thread is the
-          // authoritative cross-origin-isolation context, and (2) the actual
-          // SharedArrayBuffer usage for absurd-sql's IDB child worker happens
-          // on the main thread (forwarded via __absurd:spawn-idb-worker).
-          if (
-            !msg.hasSharedArrayBuffer &&
-            !msg.isSharedArrayBufferOverrideEnabled
-          ) {
-            lastAppInitFailure = {
-              type: 'app-init-failure',
-              SharedArrayBufferMissing: true,
-            };
-            appInitFailureInterval = setInterval(() => {
-              broadcastToAll(lastAppInitFailure);
-            }, 200);
-            return;
-          }
-
-          try {
-            await importScriptsWithRetry(
-              `${msg.publicUrl}/kcab/kcab.worker.${hash}.js`,
-              { maxRetries: isDev ? 5 : 0 },
-            );
-
-            backend.initApp(isDev, virtualChannel).catch(err => {
-              console.log(err);
-              lastAppInitFailure = {
-                type: 'app-init-failure',
-                IDBFailure: err.message.includes('indexeddb-failure'),
-              };
-              appInitFailureInterval = setInterval(() => {
-                broadcastToAll(lastAppInitFailure);
-              }, 200);
-            });
-          } catch (error) {
-            console.log('Failed initializing backend:', error);
-            lastAppInitFailure = {
-              type: 'app-init-failure',
-              BackendInitFailure: true,
-            };
-            appInitFailureInterval = setInterval(() => {
-              broadcastToAll(lastAppInitFailure);
-            }, 200);
-          }
+        cachedInitMsg = msg;
+        if (!leaderPort) {
+          console.log('[SharedWorker] No leader yet, electing this tab');
+          electLeader(port);
         } else if (backendConnected) {
-          // Backend already initialized and connected - immediately connect this port
+          console.log(
+            '[SharedWorker] Backend already connected, sending connect to new tab',
+          );
           port.postMessage({ type: 'connect' });
         } else if (lastAppInitFailure) {
-          // Init already failed and the interval may have been cleared by an
-          // earlier tab's ACK — replay the failure so this tab doesn't hang.
+          console.log(
+            '[SharedWorker] Init previously failed, replaying failure to new tab',
+          );
           port.postMessage(lastAppInitFailure);
+        } else {
+          console.log(
+            '[SharedWorker] Backend still initializing, new tab will wait for connect broadcast',
+          );
         }
-        // If backend is initializing but not yet connected, the connect message
-        // will be broadcast to all ports when the backend is ready
         return;
       }
 
-      if (msg.name === '__app-init-failure-acknowledged') {
-        clearInterval(appInitFailureInterval);
+      // Leader tab forwarding its Worker's messages back for routing
+      if (msg.type === '__from-worker') {
+        const workerMsg = msg.msg;
+
+        if (workerMsg.type === 'reply' || workerMsg.type === 'error') {
+          const targetPort = requestToPort.get(workerMsg.id);
+          if (targetPort) {
+            targetPort.postMessage(workerMsg);
+
+            const name = requestNames.get(workerMsg.id);
+            if (workerMsg.type === 'reply') {
+              // Track which budget the leader's Worker currently has loaded
+              if (name === 'load-budget') {
+                const budgetId = requestBudgetIds.get(workerMsg.id);
+                if (budgetId) {
+                  console.log(`[SharedWorker] Budget loaded: "${budgetId}"`);
+                  currentBudgetId = budgetId;
+                  requestBudgetIds.delete(workerMsg.id);
+                }
+              }
+              // If a tab closed the budget, notify other tabs
+              if (name === 'close-budget') {
+                console.log(
+                  '[SharedWorker] Budget closed, clearing currentBudgetId',
+                );
+                currentBudgetId = null;
+                for (const p of connectedPorts) {
+                  if (p !== targetPort) {
+                    p.postMessage({ type: 'push', name: 'show-budgets' });
+                  }
+                }
+              }
+            }
+
+            requestToPort.delete(workerMsg.id);
+            requestNames.delete(workerMsg.id);
+          }
+        } else if (workerMsg.type === 'connect') {
+          backendConnected = true;
+          broadcastToAll(workerMsg);
+        } else if (workerMsg.type === 'app-init-failure') {
+          lastAppInitFailure = workerMsg;
+          broadcastToAll(workerMsg);
+        } else {
+          // Push events, capture-exception, etc.
+          broadcastToAll(workerMsg);
+        }
         return;
       }
 
-      // Track which port sent this request for reply routing
+      // If a tab wants to load a different budget from the one the shared
+      // leader Worker already has, tell that tab to fall back to its own
+      // standalone Worker so both budgets can run independently.
+      if (msg.name === 'load-budget' && msg.args && msg.args.id) {
+        const budgetId = msg.args.id;
+        if (currentBudgetId !== null && budgetId !== currentBudgetId) {
+          console.log(
+            `[SharedWorker] Tab wants budget "${budgetId}" but leader has "${currentBudgetId}" — sending to standalone`,
+          );
+          port.postMessage({
+            type: '__use-standalone',
+            initMsg: cachedInitMsg,
+            pendingMsg: msg,
+          });
+          return;
+        }
+      }
+
+      // Regular request from a tab — track and forward to the leader
       if (msg.id) {
         requestToPort.set(msg.id, port);
         if (msg.name) {
           requestNames.set(msg.id, msg.name);
         }
+        // Remember the budget ID for load-budget so we can set
+        // currentBudgetId when the reply arrives successfully.
+        if (msg.name === 'load-budget' && msg.args && msg.args.id) {
+          requestBudgetIds.set(msg.id, msg.args.id);
+        }
       }
 
-      // Forward to backend message handler
-      if (virtualChannel._messageHandler) {
-        virtualChannel._messageHandler({ data: msg });
+      if (leaderPort) {
+        leaderPort.postMessage({ type: '__to-worker', msg });
       }
     } catch (error) {
       console.log('Error in SharedWorker message handler:', error);
