@@ -1,8 +1,7 @@
-// @ts-strict-ignore
 import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
-import type { CategoryGroupEntity, RuleConditionEntity } from 'loot-core/types/models';
+import { q, type Query } from 'loot-core/shared/query';
+import type { CategoryEntity, CategoryGroupEntity, RuleConditionEntity } from 'loot-core/types/models';
 
 import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
@@ -21,6 +20,37 @@ type BudgetMonthGroup = {
   name: string;
   is_income: boolean;
   categories: BudgetMonthCategory[];
+};
+
+type SankeyNode = {
+  name: string;
+  toBudget?: number;
+  nodeType: 'budget' | 'income' | 'expense';
+  isNegative?: boolean;
+};
+
+type SankeyLink = {
+  source: number;
+  target: number;
+  value: number;
+  isNegative?: boolean;
+};
+
+type SankeyData = {
+  nodes: SankeyNode[];
+  links: SankeyLink[];
+};
+
+type CategoryBalance = {
+  subcategory: string;
+  value: number;
+  isNegative?: boolean;
+  actualValue?: number;
+};
+
+type CategoryData = {
+  name: string;
+  balances: CategoryBalance[];
 };
 
 // Helper function to filter category groups based on conditions
@@ -252,14 +282,14 @@ export function createTransactionsSpreadsheet(
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
     // retrieve sum of subcategory expenses
-    async function fetchCategoryData(categories) {
+    async function fetchCategoryData(categories: CategoryGroupEntity[]): Promise<CategoryData[]> {
       try {
         return await Promise.all(
-          categories.map(async mainCategory => {
+          categories.map(async (mainCategory: CategoryGroupEntity): Promise<CategoryData> => {
             const subcategoryBalances = await Promise.all(
-              mainCategory.categories
-                .filter(subcategory => !subcategory?.is_income)
-                .map(async subcategory => {
+              (mainCategory.categories || [])
+                .filter((subcategory) => !subcategory?.is_income)
+                .map(async (subcategory) => {
                   const results = await aqlQuery(
                     q('transactions')
                       .filter({
@@ -295,21 +325,20 @@ export function createTransactionsSpreadsheet(
     }
 
     // create list of Income subcategories
-    const allIncomeSubcategories = [].concat(
-      ...categories
-        .filter(category => category.is_income)
-        .map(category => category.categories),
-    );
+    const allIncomeSubcategories: CategoryEntity[] = [];
+    for (const category of categories)
+    {
+      if (category.is_income) {
+        allIncomeSubcategories.push(...(category.categories || []));
+      }
+    }
 
-    // retrieve all income subcategory payees
-    async function fetchIncomeData() {
+    const fetchIncomeData = async () => {
       // Map over allIncomeSubcategories and return an array of promises
-      const promises = allIncomeSubcategories.map(subcategory => {
-        return aqlQuery(
-          q('transactions')
-            .filter({
-              [conditionsOpKey]: filters,
-            })
+      const promises = (allIncomeSubcategories as Array<{ id: string; name: string }>)
+        .filter(subcategory => subcategory != null)
+        .map(subcategory => {
+          const baseQuery = q('transactions')
             .filter({
               $and: [
                 { date: { $gte: monthUtils.firstDayOfMonth(start) } },
@@ -318,17 +347,23 @@ export function createTransactionsSpreadsheet(
             })
             .filter({ category: subcategory.id })
             .groupBy(['payee'])
-            .select(['payee', { amount: { $sum: '$amount' } }]),
-        );
-      });
+            .select(['payee', { amount: { $sum: '$amount' } }]);
+
+          // Apply conditions filter
+          const finalQuery: Query = conditionsOpKey === '$or' 
+            ? baseQuery.filter({ $or: filters as any })
+            : baseQuery.filter({ $and: filters as any });
+
+          return aqlQuery(finalQuery);
+        });
 
       // Use Promise.all() to wait for all queries to complete
       const resultsArrays = await Promise.all(promises);
 
       // unravel the results
-      const payeesDict = {};
+      const payeesDict: Record<string, number> = {};
       resultsArrays.forEach(item => {
-        item.data.forEach(innerItem => {
+        item.data.forEach((innerItem: { payee: string; amount: number }) => {
           const key = innerItem.payee;
           if (!key) {
             return;
@@ -347,8 +382,8 @@ export function createTransactionsSpreadsheet(
       );
 
       // Convert the resulting array to a payee-name-map
-      const payeeNames = {};
-      results.data.forEach(item => {
+      const payeeNames: Record<string, number> = {};
+      results.data.forEach((item: { id: string; name: string }) => {
         if (item.name && payeesDict[item.id]) {
           payeeNames[item.name] = payeesDict[item.id];
         }
@@ -544,13 +579,13 @@ export function createDifferenceSpreadsheet(
 }
 
 function transformToSankeyData(
-  categoryData,
-  incomeData,
-  toBudgetAmount = 0,
-  rootNodeName = 'Available Funds',
-) {
-  const data = { nodes: [], links: [] };
-  const nodeNames = new Set();
+  categoryData: CategoryData[],
+  incomeData: Record<string, number>,
+  toBudgetAmount: number = 0,
+  rootNodeName: string = 'Available Funds',
+): SankeyData {
+  const data: SankeyData = { nodes: [], links: [] };
+  const nodeNames = new Set<string>();
 
   // Add the root node first with toBudget metadata
   data.nodes.push({
@@ -569,8 +604,8 @@ function transformToSankeyData(
       });
       nodeNames.add(sourceName);
       data.links.push({
-        source: sourceName,
-        target: rootNodeName,
+        source: data.nodes.length - 1, // Index of the newly added node
+        target: 0, // Root node is always at index 0
         value,
       });
     }
@@ -594,10 +629,11 @@ function transformToSankeyData(
         nodeType: 'expense',
       });
       nodeNames.add(mainCategory.name);
+      const mainCategoryIndex = data.nodes.length - 1;
 
       data.links.push({
-        source: rootNodeName,
-        target: mainCategory.name,
+        source: 0, // Root node
+        target: mainCategoryIndex,
         value: mainCategorySum,
       });
 
@@ -610,10 +646,11 @@ function transformToSankeyData(
             isNegative: subCategory.isNegative,
           });
           nodeNames.add(subCategory.subcategory);
+          const subCategoryIndex = data.nodes.length - 1;
 
           data.links.push({
-            source: mainCategory.name,
-            target: subCategory.subcategory,
+            source: mainCategoryIndex,
+            target: subCategoryIndex,
             value: subCategory.value,
             isNegative: subCategory.isNegative,
           });
@@ -621,12 +658,6 @@ function transformToSankeyData(
       }
     }
   }
-
-  // Map source and target in links to the index of the node
-  data.links.forEach(link => {
-    link.source = data.nodes.findIndex(node => node.name === link.source);
-    link.target = data.nodes.findIndex(node => node.name === link.target);
-  });
 
   return data;
 }

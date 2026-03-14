@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { useState, useMemo } from 'react';
 import type { CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
