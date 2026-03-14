@@ -33,15 +33,35 @@ const RADIAN = Math.PI / 180;
 const canDeviceHover = () => window.matchMedia('(hover: hover)').matches;
 
 // ---------------------------------------------------------------------------
-// Color helpers for two-ring donut
+// Dimension helpers
 // ---------------------------------------------------------------------------
 
-/**
- * Resolve a CSS variable like `var(--color-chartQual1)` to its actual hex
- * value from the document computed styles. If already a plain color, returns
- * as-is. Handles CSS fallback syntax e.g. `var(--color, #fallback)` by
- * stripping the fallback before lookup.
- */
+type DonutDimensions = {
+  chartInnerRadius: number;
+  chartMidRadius: number;
+  chartOuterRadius: number;
+  compact: boolean;
+};
+
+const getDonutDimensions = (
+  width: number,
+  height: number,
+  twoRings: boolean,
+): DonutDimensions => {
+  const minDim = Math.min(width, height);
+  const compact = height <= 300 || width <= 300;
+  return {
+    chartInnerRadius: minDim * (twoRings && compact ? 0.16 : 0.2),
+    chartMidRadius: minDim * (compact ? 0.27 : 0.31),
+    chartOuterRadius: minDim * (compact ? 0.36 : 0.42),
+    compact,
+  };
+};
+
+// ---------------------------------------------------------------------------
+// Color helpers
+// ---------------------------------------------------------------------------
+
 const resolveCSSVariable = (color: string): string => {
   if (!color.startsWith('var(')) return color;
   const inner = color.slice(4, -1).trim();
@@ -62,120 +82,113 @@ const hexToRgb = (hex: string) => {
     : { r: 0, g: 0, b: 0 };
 };
 
-/**
- * Lighten a color by mixing it toward white.
- * Resolves CSS variables before parsing so `var(--color-*)` works correctly.
- * percent=0 → original color, percent=1 → white
- */
-const shadeColor = (color: string, percent: number): string => {
-  const resolved = resolveCSSVariable(color);
-  const { r, g, b } = hexToRgb(resolved);
+const shadeColor = (resolvedHex: string, percent: number): string => {
+  const { r, g, b } = hexToRgb(resolvedHex);
   const adjust = (c: number) =>
     Math.min(255, Math.max(0, Math.round(c + (255 - c) * percent)));
   return `rgb(${adjust(r)}, ${adjust(g)}, ${adjust(b)})`;
 };
 
-/**
- * Build two color maps from groupedData using the legend keyed by group id.
- * Since CategoryGroup mode uses groupByLabel='categoryGroup', the legend
- * has one entry per group with the correct color.
- *
- *  - groupColorMap:    groupId → color from legend
- *  - categoryColorMap: catId   → shaded variant of parent group color
- */
-const buildColorMaps = (
+const buildColorMap = (
   groupedData: GroupedEntity[],
   legend: LegendEntity[],
-) => {
-  const groupColorMap = new Map<string, string>();
-  const categoryColorMap = new Map<string, string>();
-
+): Map<string, string> => {
   const legendById = new Map(
     legend
-      .filter(l => l.id !== null && l.id !== undefined)
-      .map(l => [l.id, l.color]),
+      .filter(l => l.id != null)
+      .map(l => [l.id, resolveCSSVariable(l.color)]),
   );
 
-  groupedData.forEach(group => {
-    if (!group.id) return;
+  return groupedData.reduce((acc, group) => {
+    if (!group.id) return acc;
 
     const groupColor = legendById.get(group.id);
-    if (!groupColor) return;
+    if (!groupColor) return acc;
 
-    const resolvedGroupColor = resolveCSSVariable(groupColor);
-    groupColorMap.set(group.id, resolvedGroupColor);
+    acc.set(group.id, groupColor);
 
-    const cats = group.categories ?? [];
-    cats.forEach((cat, catIndex) => {
+    (group.categories ?? []).forEach((cat, i) => {
       if (!cat.id) return;
-      const shade = 0.15 + (catIndex / Math.max(cats.length, 1)) * 0.5;
-      categoryColorMap.set(cat.id, shadeColor(resolvedGroupColor, shade));
+      const shade = 0.15 + (i / Math.max(group.categories.length, 1)) * 0.5;
+      acc.set(cat.id, shadeColor(groupColor, shade));
     });
-  });
 
-  return { groupColorMap, categoryColorMap };
+    return acc;
+  }, new Map<string, string>());
 };
 
 // ---------------------------------------------------------------------------
-// Active shape components
+// Active shapes
 // ---------------------------------------------------------------------------
 
-/**
- * Mobile active shape — shared by both single-ring and two-ring modes.
- * expandInward=true  → expansion arc drawn inside the inner radius (inner ring)
- * expandInward=false → expansion arc drawn outside the outer radius (outer/single ring)
- */
-const ActiveShapeMobile = props => {
-  const {
-    cx,
-    cy,
-    innerRadius,
-    outerRadius,
-    startAngle,
-    endAngle,
-    fill,
-    payload,
-    percent,
-    value,
-    format,
-    expandInward = false,
-  } = props;
+type ActiveShapeProps = {
+  cx: number;
+  cy: number;
+  midAngle: number;
+  innerRadius: number;
+  outerRadius: number;
+  startAngle: number;
+  endAngle: number;
+  fill: string;
+  payload: { name?: string; date?: string };
+  percent: number;
+  value: number;
+  expandInward: boolean;
+  chartInnerRadius: number;
+  chartMidRadius: number;
+  chartOuterRadius: number;
+};
+
+const ActiveShapeMobile = ({
+  cx,
+  cy,
+  innerRadius,
+  outerRadius,
+  startAngle,
+  endAngle,
+  fill,
+  payload,
+  percent,
+  value,
+  expandInward,
+  chartInnerRadius,
+  chartMidRadius,
+  chartOuterRadius,
+}: ActiveShapeProps) => {
+  const format = useFormat();
   const yAxis = payload.name ?? payload.date;
 
-  const sin = Math.sin(-RADIAN * 240);
-  const my = cy + outerRadius * sin;
-  const ey = my - 5;
+  const expansionInner = expandInward
+    ? chartInnerRadius - 4
+    : chartOuterRadius + 2;
+  const expansionOuter = expandInward
+    ? chartInnerRadius - 2
+    : chartOuterRadius + 4;
+  const ey = cy + chartOuterRadius * Math.sin(-RADIAN * 240) - 5;
 
   return (
     <g>
       <text
         x={cx}
-        y={
-          expandInward
-            ? cy + ((outerRadius * 0.42) / 0.31) * Math.sin(-RADIAN * 270) + 15
-            : cy + outerRadius * Math.sin(-RADIAN * 270) + 15
-        }
-        dy={0}
+        y={cy + chartOuterRadius * Math.sin(-RADIAN * 270) + 17}
         textAnchor="middle"
         fill={fill}
       >
-        {`${yAxis}`}
+        {yAxis}
       </text>
       <PrivacyFilter>
         <FinancialText
           as="text"
-          x={cx + outerRadius * Math.cos(-RADIAN * 240) - 30}
+          x={cx + chartOuterRadius * Math.cos(-RADIAN * 240) - 30}
           y={ey}
-          dy={0}
           textAnchor="end"
           fill={fill}
         >
-          {`${format(value, 'financial')}`}
+          {format(value, 'financial')}
         </FinancialText>
         <text
-          x={cx + outerRadius * Math.cos(-RADIAN * 330) + 10}
+          x={cx + chartOuterRadius * Math.cos(-RADIAN * 330) + 10}
           y={ey}
-          dy={0}
           textAnchor="start"
           fill="#999"
         >
@@ -191,53 +204,60 @@ const ActiveShapeMobile = props => {
         endAngle={endAngle}
         fill={fill}
       />
-      {/* Expansion arc — inward for inner ring, outward for outer/single ring */}
       <Sector
         cx={cx}
         cy={cy}
         startAngle={startAngle}
         endAngle={endAngle}
-        innerRadius={expandInward ? innerRadius - 8 : outerRadius + 2}
-        outerRadius={expandInward ? innerRadius - 6 : outerRadius + 4}
+        innerRadius={expansionInner}
+        outerRadius={expansionOuter}
         fill={fill}
       />
     </g>
   );
 };
 
-const ActiveShapeMobileWithFormat = props => (
-  <ActiveShapeMobile {...props} format={props.format} />
-);
-
-/**
- * Original desktop active shape — single-ring donut only.
- * Always uses innerRadius for sx/sy/mx/my. No expandInward.
- */
-const ActiveShape = props => {
-  const {
-    cx,
-    cy,
-    midAngle,
-    innerRadius,
-    outerRadius,
-    startAngle,
-    endAngle,
-    fill,
-    payload,
-    percent,
-    value,
-    format,
-  } = props;
+const ActiveShapeDesktop = ({
+  cx,
+  cy,
+  midAngle,
+  innerRadius,
+  outerRadius,
+  startAngle,
+  endAngle,
+  fill,
+  payload,
+  percent,
+  value,
+  expandInward,
+  chartInnerRadius,
+  chartMidRadius,
+  chartOuterRadius,
+}: ActiveShapeProps) => {
+  const format = useFormat();
   const yAxis = payload.name ?? payload.date;
   const sin = Math.sin(-RADIAN * midAngle);
   const cos = Math.cos(-RADIAN * midAngle);
-  const sx = cx + (innerRadius - 10) * cos;
-  const sy = cy + (innerRadius - 10) * sin;
-  const mx = cx + (innerRadius - 30) * cos;
-  const my = cy + (innerRadius - 30) * sin;
+
+  const expansionInner = expandInward
+    ? chartInnerRadius - 10
+    : chartOuterRadius + 6;
+  const expansionOuter = expandInward
+    ? chartInnerRadius - 6
+    : chartOuterRadius + 10;
+
+  const lineStart = expandInward
+    ? chartInnerRadius - 20
+    : chartInnerRadius - 10;
+  const lineMid = chartInnerRadius * 0.7;
+  const sx = cx + lineStart * cos;
+  const sy = cy + lineStart * sin;
+  const mx = cx + lineMid * cos;
+  const my = cy + lineMid * sin;
   const ex = cx + (cos >= 0 ? 1 : -1) * yAxis.length * 4;
   const ey = cy + 8;
   const textAnchor = cos <= 0 ? 'start' : 'end';
+  const labelX = ex + (cos <= 0 ? 1 : -1) * 16;
 
   return (
     <g>
@@ -255,8 +275,8 @@ const ActiveShape = props => {
         cy={cy}
         startAngle={startAngle}
         endAngle={endAngle}
-        innerRadius={outerRadius + 6}
-        outerRadius={outerRadius + 10}
+        innerRadius={expansionInner}
+        outerRadius={expansionOuter}
         fill={fill}
       />
       <path
@@ -265,30 +285,21 @@ const ActiveShape = props => {
         fill="none"
       />
       <circle cx={ex} cy={ey} r={3} fill={fill} stroke="none" />
-      <text
-        x={ex + (cos <= 0 ? 1 : -1) * 16}
-        y={ey}
-        textAnchor={textAnchor}
-        fill={fill}
-      >{`${yAxis}`}</text>
+      <text x={labelX} y={ey} textAnchor={textAnchor} fill={fill}>
+        {yAxis}
+      </text>
       <PrivacyFilter>
         <FinancialText
           as="text"
-          x={ex + (cos <= 0 ? 1 : -1) * 16}
+          x={labelX}
           y={ey}
           dy={18}
           textAnchor={textAnchor}
           fill={fill}
         >
-          {`${format(value, 'financial')}`}
+          {format(value, 'financial')}
         </FinancialText>
-        <text
-          x={ex + (cos <= 0 ? 1 : -1) * 16}
-          y={ey}
-          dy={36}
-          textAnchor={textAnchor}
-          fill="#999"
-        >
+        <text x={labelX} y={ey} dy={36} textAnchor={textAnchor} fill="#999">
           {`(${(percent * 100).toFixed(2)}%)`}
         </text>
       </PrivacyFilter>
@@ -296,119 +307,14 @@ const ActiveShape = props => {
   );
 };
 
-const ActiveShapeWithFormat = props => (
-  <ActiveShape {...props} format={props.format} />
-);
-
-/**
- * Two-ring desktop active shape — taken exactly from the latest ActiveShape
- * in the passed file, with expandInward controlling sx/sy/mx/my and the
- * expansion arc direction.
- * expandInward=true  → line starts from inner radius edge (inner ring)
- * expandInward=false → line starts from outer radius edge (outer ring)
- */
-const ActiveShapeTwoRing = props => {
-  const {
-    cx,
-    cy,
-    midAngle,
-    innerRadius,
-    outerRadius,
-    startAngle,
-    endAngle,
-    fill,
-    payload,
-    percent,
-    value,
-    format,
-    expandInward = false,
-  } = props;
-  const yAxis = payload.name ?? payload.date;
-  const sin = Math.sin(-RADIAN * midAngle);
-  const cos = Math.cos(-RADIAN * midAngle);
-  const sx =
-    cx +
-    (expandInward ? innerRadius - 20 : (innerRadius / 0.31) * 0.2 - 10) * cos;
-  const sy =
-    cy +
-    (expandInward ? innerRadius - 20 : (innerRadius / 0.31) * 0.2 - 10) * sin;
-  const mx =
-    cx +
-    (expandInward ? innerRadius - 40 : (innerRadius / 0.31) * 0.2 - 40) * cos;
-  const my =
-    cy +
-    (expandInward ? innerRadius - 40 : (innerRadius / 0.31) * 0.2 - 40) * sin;
-  const ex = cx + (cos >= 0 ? 1 : -1) * yAxis.length * 4;
-  const ey = cy + 8;
-  const textAnchor = cos <= 0 ? 'start' : 'end';
-
-  return (
-    <g>
-      <Sector
-        cx={cx}
-        cy={cy}
-        innerRadius={innerRadius}
-        outerRadius={outerRadius}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        fill={fill}
-      />
-      {/* Expansion arc — inward for inner ring, outward for outer ring */}
-      <Sector
-        cx={cx}
-        cy={cy}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        innerRadius={expandInward ? innerRadius - 10 : outerRadius + 6}
-        outerRadius={expandInward ? innerRadius - 6 : outerRadius + 10}
-        fill={fill}
-      />
-      <path
-        d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`}
-        stroke={fill}
-        fill="none"
-      />
-      <circle cx={ex} cy={ey} r={3} fill={fill} stroke="none" />
-      <text
-        x={ex + (cos <= 0 ? 1 : -1) * 16}
-        y={ey}
-        textAnchor={textAnchor}
-        fill={fill}
-      >{`${yAxis}`}</text>
-      <PrivacyFilter>
-        <FinancialText
-          as="text"
-          x={ex + (cos <= 0 ? 1 : -1) * 16}
-          y={ey}
-          dy={18}
-          textAnchor={textAnchor}
-          fill={fill}
-        >
-          {`${format(value, 'financial')}`}
-        </FinancialText>
-        <text
-          x={ex + (cos <= 0 ? 1 : -1) * 16}
-          y={ey}
-          dy={36}
-          textAnchor={textAnchor}
-          fill="#999"
-        >
-          {`(${(percent * 100).toFixed(2)}%)`}
-        </text>
-      </PrivacyFilter>
-    </g>
-  );
-};
-
-const ActiveShapeTwoRingWithFormat = props => (
-  <ActiveShapeTwoRing {...props} format={props.format} />
-);
+// ---------------------------------------------------------------------------
+// Custom label
+// ---------------------------------------------------------------------------
 
 const customLabel = props => {
   const radius =
     props.innerRadius + (props.outerRadius - props.innerRadius) * 0.5;
   const size = props.cx > props.cy ? props.cy : props.cx;
-
   const calcX = props.cx + radius * Math.cos(-props.midAngle * RADIAN);
   const calcY = props.cy + radius * Math.sin(-props.midAngle * RADIAN);
   const textAnchor = calcX > props.cx ? 'start' : 'end';
@@ -417,7 +323,6 @@ const customLabel = props => {
   const showLabel = props.percent;
   const showLabelThreshold = 0.05;
   const fill = theme.reportsInnerLabel;
-
   return renderCustomLabel(
     calcX,
     calcY,
@@ -457,7 +362,6 @@ export function DonutGraph({
   showOffBudget,
   showTooltip = true,
 }: DonutGraphProps) {
-  const format = useFormat();
   const animationProps = useRechartsAnimation({ isAnimationActive: false });
 
   const yAxis = groupBy === 'Interval' ? 'date' : 'name';
@@ -471,18 +375,13 @@ export function DonutGraph({
   const getVal = (obj: GroupedEntity | IntervalEntity) => {
     if (['totalDebts', 'netDebts'].includes(balanceTypeOp)) {
       return -1 * obj[balanceTypeOp];
-    } else {
-      return obj[balanceTypeOp];
     }
+    return obj[balanceTypeOp];
   };
 
-  // Single-ring active index (all groupBy modes except CategoryGroup)
   const [activeIndex, setActiveIndex] = useState(0);
-
-  // Two-ring state (CategoryGroup mode only)
   const [activeGroupIndex, setActiveGroupIndex] = useState(0);
   const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
-  // Tracks which ring is currently hovered so only one shows active shape at a time
   const [activeRing, setActiveRing] = useState<'group' | 'category'>(
     'category',
   );
@@ -490,10 +389,6 @@ export function DonutGraph({
   const isCategoryGroup =
     groupBy === 'CategoryGroup' && !!data.groupedData?.length;
 
-  /**
-   * Recompute group totals as the sum of their visible (non-filtered) categories.
-   * Also filter out zero-total groups to avoid invisible sectors shifting hover indices.
-   */
   const { adjustedGroupData, flatCategories } = useMemo(() => {
     if (!isCategoryGroup || !data.groupedData) {
       return { adjustedGroupData: [], flatCategories: [] };
@@ -523,25 +418,21 @@ export function DonutGraph({
     };
   }, [isCategoryGroup, data.groupedData, balanceTypeOp]);
 
-  const { groupColorMap, categoryColorMap } = useMemo(
+  const colorMap = useMemo(
     () =>
       isCategoryGroup
-        ? buildColorMaps(data.groupedData ?? [], data.legend ?? [])
-        : {
-            groupColorMap: new Map<string, string>(),
-            categoryColorMap: new Map<string, string>(),
-          },
+        ? buildColorMap(data.groupedData ?? [], data.legend ?? [])
+        : new Map<string, string>(),
     [isCategoryGroup, data.groupedData, data.legend],
   );
 
   return (
     <Container style={style}>
       {(width, height) => {
-        const compact = height <= 300 || width <= 300;
-        const minDim = Math.min(width, height);
+        const { chartInnerRadius, chartMidRadius, chartOuterRadius, compact } =
+          getDonutDimensions(width, height, isCategoryGroup);
 
-        // Shared ring boundary — both rings meet here with no gap
-        const ringBoundary = minDim * 0.31;
+        const showActiveShape = width >= 220 && height >= 130;
 
         // ---------------------------------------------------------------
         // Two-ring concentric donut (CategoryGroup mode)
@@ -557,38 +448,42 @@ export function DonutGraph({
                   height={height}
                   style={{ cursor: pointer }}
                 >
-                  {/* Inner ring — Category Groups, expansion arc goes inward */}
-                  {/* Uses adjustedGroupData so group totals match sum of visible categories */}
+                  {/* Inner ring — Category Groups */}
                   <Pie
                     dataKey={val => getVal(val)}
                     nameKey="name"
                     {...animationProps}
                     data={adjustedGroupData}
-                    innerRadius={minDim * 0.2}
-                    outerRadius={ringBoundary}
+                    innerRadius={chartInnerRadius}
+                    outerRadius={chartMidRadius}
                     startAngle={90}
                     endAngle={-270}
                     shape={(props: PieSectorShapeProps, index: number) => {
                       const item = adjustedGroupData[index];
-                      const fill = item?.id
-                        ? groupColorMap.get(item.id)
-                        : groupColorMap.get(item?.name ?? '');
-                      if (!fill) return <Sector {...props} />;
-                      const showActiveShape = width >= 220 && height >= 130;
+                      const fill =
+                        colorMap.get(item?.id ?? item?.name ?? '') ??
+                        props.fill;
                       const isActive =
-                        activeRing === 'group' &&
-                        (props.isActive || index === activeGroupIndex);
+                        activeRing === 'group' && index === activeGroupIndex;
                       if (isActive && showActiveShape) {
-                        const shapeProps = {
-                          ...props,
-                          fill,
-                          format,
-                          expandInward: true,
-                        };
                         return compact ? (
-                          <ActiveShapeMobileWithFormat {...shapeProps} />
+                          <ActiveShapeMobile
+                            {...(props as unknown as ActiveShapeProps)}
+                            fill={fill}
+                            expandInward
+                            chartInnerRadius={chartInnerRadius}
+                            chartMidRadius={chartMidRadius}
+                            chartOuterRadius={chartOuterRadius}
+                          />
                         ) : (
-                          <ActiveShapeTwoRingWithFormat {...shapeProps} />
+                          <ActiveShapeDesktop
+                            {...(props as unknown as ActiveShapeProps)}
+                            fill={fill}
+                            expandInward
+                            chartInnerRadius={chartInnerRadius}
+                            chartMidRadius={chartMidRadius}
+                            chartOuterRadius={chartOuterRadius}
+                          />
                         );
                       }
                       return <Sector {...props} fill={fill} />;
@@ -608,14 +503,14 @@ export function DonutGraph({
                     }}
                   />
 
-                  {/* Outer ring — Categories, expansion arc goes outward */}
+                  {/* Outer ring — Categories */}
                   <Pie
                     dataKey={val => getVal(val)}
                     nameKey="name"
                     {...animationProps}
                     data={flatCategories}
-                    innerRadius={ringBoundary}
-                    outerRadius={minDim * 0.42}
+                    innerRadius={chartMidRadius}
+                    outerRadius={chartOuterRadius}
                     startAngle={90}
                     endAngle={-270}
                     labelLine={false}
@@ -624,25 +519,31 @@ export function DonutGraph({
                     }
                     shape={(props: PieSectorShapeProps, index: number) => {
                       const item = flatCategories[index];
-                      const fill = item?.id
-                        ? categoryColorMap.get(item.id)
-                        : categoryColorMap.get(item?.name ?? '');
-                      if (!fill) return <Sector {...props} />;
-                      const showActiveShape = width >= 220 && height >= 130;
+                      const fill =
+                        colorMap.get(item?.id ?? item?.name ?? '') ??
+                        props.fill;
                       const isActive =
                         activeRing === 'category' &&
-                        (props.isActive || index === activeCategoryIndex);
+                        index === activeCategoryIndex;
                       if (isActive && showActiveShape) {
-                        const shapeProps = {
-                          ...props,
-                          fill,
-                          format,
-                          expandInward: false,
-                        };
                         return compact ? (
-                          <ActiveShapeMobileWithFormat {...shapeProps} />
+                          <ActiveShapeMobile
+                            {...(props as unknown as ActiveShapeProps)}
+                            fill={fill}
+                            expandInward={false}
+                            chartInnerRadius={chartInnerRadius}
+                            chartMidRadius={chartMidRadius}
+                            chartOuterRadius={chartOuterRadius}
+                          />
                         ) : (
-                          <ActiveShapeTwoRingWithFormat {...shapeProps} />
+                          <ActiveShapeDesktop
+                            {...(props as unknown as ActiveShapeProps)}
+                            fill={fill}
+                            expandInward={false}
+                            chartInnerRadius={chartInnerRadius}
+                            chartMidRadius={chartMidRadius}
+                            chartOuterRadius={chartOuterRadius}
+                          />
                         );
                       }
                       return <Sector {...props} fill={fill} />;
@@ -688,7 +589,7 @@ export function DonutGraph({
         }
 
         // ---------------------------------------------------------------
-        // Original single-ring donut (all other groupBy modes)
+        // Single-ring donut (all other groupBy modes)
         // ---------------------------------------------------------------
         return (
           data[splitData] && (
@@ -704,13 +605,8 @@ export function DonutGraph({
                   dataKey={val => getVal(val)}
                   nameKey={yAxis}
                   {...animationProps}
-                  data={
-                    data[splitData]?.map(item => ({
-                      ...item,
-                    })) ?? []
-                  }
-                  innerRadius={minDim * 0.2}
-                  fill="#8884d8"
+                  data={data[splitData]?.map(item => ({ ...item })) ?? []}
+                  innerRadius={chartInnerRadius}
                   labelLine={false}
                   label={e =>
                     viewLabels && !compact ? customLabel(e) : <div />
@@ -719,14 +615,26 @@ export function DonutGraph({
                   endAngle={-270}
                   shape={(props: PieSectorShapeProps, index: number) => {
                     const fill = data.legend[index]?.color ?? props.fill;
-                    const showActiveShape = width >= 220 && height >= 130;
-                    const isActive = props.isActive || index === activeIndex;
+                    const isActive = index === activeIndex;
                     if (isActive && showActiveShape) {
-                      const shapeProps = { ...props, fill, format };
                       return compact ? (
-                        <ActiveShapeMobileWithFormat {...shapeProps} />
+                        <ActiveShapeMobile
+                          {...(props as unknown as ActiveShapeProps)}
+                          fill={fill}
+                          expandInward
+                          chartInnerRadius={chartInnerRadius}
+                          chartMidRadius={chartMidRadius}
+                          chartOuterRadius={chartOuterRadius}
+                        />
                       ) : (
-                        <ActiveShapeWithFormat {...shapeProps} />
+                        <ActiveShapeDesktop
+                          {...(props as unknown as ActiveShapeProps)}
+                          fill={fill}
+                          expandInward={false}
+                          chartInnerRadius={chartInnerRadius}
+                          chartMidRadius={chartMidRadius}
+                          chartOuterRadius={chartOuterRadius}
+                        />
                       );
                     }
                     return <Sector {...props} fill={fill} />;
@@ -744,7 +652,6 @@ export function DonutGraph({
                     if (!canDeviceHover()) {
                       setActiveIndex(index);
                     }
-
                     if (
                       !['Group', 'Interval'].includes(groupBy) &&
                       (canDeviceHover() || activeIndex === index) &&
