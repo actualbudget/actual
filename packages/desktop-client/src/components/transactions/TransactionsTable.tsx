@@ -2954,7 +2954,7 @@ export const TransactionTable = forwardRef(
           amountPerTransaction,
         );
 
-        for (const amountIndex in amounts) {
+        for (const [amountIndex] of amounts.entries()) {
           if (remainingCents === 0) break;
 
           amounts[amountIndex] += 1;
@@ -2967,9 +2967,12 @@ export const TransactionTable = forwardRef(
           tableNavigator.onEdit(null);
         }
 
-        for (const transactionIndex in emptyTransactions) {
+        for (const [
+          transactionIndex,
+          transaction,
+        ] of emptyTransactions.entries()) {
           await onSave({
-            ...emptyTransactions[transactionIndex],
+            ...transaction,
             amount: amounts[transactionIndex],
           });
         }

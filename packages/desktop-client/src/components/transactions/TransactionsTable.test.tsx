@@ -543,7 +543,7 @@ describe('Transactions', () => {
       '{Shift>}[Enter]{/Shift}',
     ];
 
-    for (const idx in ks) {
+    for (const [idx] of ks.entries()) {
       const input = await editField(container, 'notes', 2);
       const oldValue = input.value;
       await userEvent.clear(input);
