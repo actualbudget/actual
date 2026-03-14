@@ -51,7 +51,14 @@ describe('Transactions', () => {
       deleted: [],
       updated: [expect.objectContaining({ id: 't1', amount: 5000 })],
     });
-    expect(data.map(t => ({ id: t.id, amount: t.amount })).sort()).toEqual([
+    expect(
+      data
+        .map(t => ({ id: t.id, amount: t.amount }))
+        .sort(
+          (a, b) =>
+            b.amount - a.amount || String(a.id).localeCompare(String(b.id)),
+        ),
+    ).toEqual([
       { id: expect.any(String), amount: 5000 },
       { id: 't1', amount: 5000 },
       { id: expect.any(String), amount: 3000 },
@@ -66,7 +73,14 @@ describe('Transactions', () => {
     ];
     const { data, diff } = updateTransaction(transactions, updatedTransaction);
     expect(diff).toEqual({ added: [], deleted: [], updated: [] });
-    expect(data.map(t => ({ id: t.id, amount: t.amount })).sort()).toEqual([
+    expect(
+      data
+        .map(t => ({ id: t.id, amount: t.amount }))
+        .sort(
+          (a, b) =>
+            b.amount - a.amount || String(a.id).localeCompare(String(b.id)),
+        ),
+    ).toEqual([
       { id: expect.any(String), amount: 5000 },
       { id: expect.any(String), amount: 3000 },
     ]);
@@ -85,7 +99,14 @@ describe('Transactions', () => {
       deleted: [{ id: 't1' }],
       updated: [],
     });
-    expect(data.map(t => ({ id: t.id, amount: t.amount })).sort()).toEqual([
+    expect(
+      data
+        .map(t => ({ id: t.id, amount: t.amount }))
+        .sort(
+          (a, b) =>
+            b.amount - a.amount || String(a.id).localeCompare(String(b.id)),
+        ),
+    ).toEqual([
       { id: expect.any(String), amount: 5000 },
       { id: expect.any(String), amount: 3000 },
     ]);

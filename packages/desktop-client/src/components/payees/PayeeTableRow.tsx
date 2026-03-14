@@ -209,7 +209,7 @@ export const PayeeTableRow = memo(
                   onCreateRule(id);
                   break;
                 default:
-                  throw new Error(`Unrecognized menu option: ${name}`);
+                  throw new Error(`Unrecognized menu option: ${String(name)}`);
               }
               setMenuOpen(false);
             }}

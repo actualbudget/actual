@@ -79,7 +79,7 @@ export function getDownloadError({
     default:
       const info =
         meta && typeof meta === 'object' && 'fileId' in meta && meta.fileId
-          ? `, fileId: ${meta.fileId}`
+          ? `, fileId: ${String(meta.fileId)}`
           : '';
       return t(
         'Something went wrong trying to download that file, sorry! Visit https://actualbudget.org/contact/ for support. reason: {{reason}}{{info}}',

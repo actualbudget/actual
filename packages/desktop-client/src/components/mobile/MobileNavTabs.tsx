@@ -59,7 +59,7 @@ export function MobileNavTabs() {
       // when cancel is true, it means that the user passed the upwards threshold
       // so we change the spring config to create a nice wobbly effect
       setNavbarState('open');
-      api.start({
+      void api.start({
         y: OPEN_FULL_Y,
         immediate: isTestEnv,
         config: canceled ? config.wobbly : config.stiff,
@@ -71,7 +71,7 @@ export function MobileNavTabs() {
   const openDefault = useCallback(
     (velocity = 0) => {
       setNavbarState('default');
-      api.start({
+      void api.start({
         y: OPEN_DEFAULT_Y,
         immediate: isTestEnv,
         config: { ...config.stiff, velocity },
@@ -83,7 +83,7 @@ export function MobileNavTabs() {
   const hide = useCallback(
     (velocity = 0) => {
       setNavbarState('hidden');
-      api.start({
+      void api.start({
         y: HIDDEN_Y,
         immediate: isTestEnv,
         config: { ...config.stiff, velocity },
@@ -199,7 +199,7 @@ export function MobileNavTabs() {
       } else {
         // when the user keeps dragging, we just move the sheet according to
         // the cursor position
-        api.start({ y: oy, immediate: true });
+        void api.start({ y: oy, immediate: true });
       }
     },
     {

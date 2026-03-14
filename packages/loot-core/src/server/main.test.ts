@@ -261,7 +261,9 @@ describe('Budget', () => {
     let changed = await captureChangedCells(() =>
       runHandler(handlers['transaction-add'], trans),
     );
-    expect(changed.sort()).toMatchSnapshot();
+    expect(
+      changed.sort((a, b) => (a > b ? 1 : a < b ? -1 : 0)),
+    ).toMatchSnapshot();
     // Test updates
     changed = await captureChangedCells(async () => {
       await runHandler(handlers['transaction-update'], {
@@ -269,12 +271,16 @@ describe('Budget', () => {
         amount: 7000,
       });
     });
-    expect(changed.sort()).toMatchSnapshot();
+    expect(
+      changed.sort((a, b) => (a > b ? 1 : a < b ? -1 : 0)),
+    ).toMatchSnapshot();
     // Test deletions
     changed = await captureChangedCells(async () => {
       await runHandler(handlers['transaction-delete'], { id: trans.id });
     });
-    expect(changed.sort()).toMatchSnapshot();
+    expect(
+      changed.sort((a, b) => (a > b ? 1 : a < b ? -1 : 0)),
+    ).toMatchSnapshot();
   });
 });
 
