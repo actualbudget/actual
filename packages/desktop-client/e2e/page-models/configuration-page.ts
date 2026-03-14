@@ -61,7 +61,7 @@ export class ConfigurationPage {
         break;
 
       default:
-        throw new Error(`Unrecognized import type: ${type}`);
+        throw new Error(`Unrecognized import type: ${String(type)}`);
     }
 
     const fileChooser = await fileChooserPromise;
