@@ -12,6 +12,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   customThemes: false,
   budgetAnalysisReport: false,
   enableBankingSync: false,
+  payeeLocations: false,
 };
 
 export function useFeatureFlag(name: FeatureFlag): boolean {

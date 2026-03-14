@@ -55,14 +55,13 @@
   "scripts": {
     "build:node": "cross-env NODE_ENV=production vite build --config ./vite.desktop.config.ts",
     "watch:node": "cross-env NODE_ENV=development vite build --config ./vite.desktop.config.ts --watch",
-    "build:api": "cross-env NODE_ENV=development ./bin/build-api",
     "build:browser": "cross-env NODE_ENV=production ./bin/build-browser",
     "watch:browser": "cross-env NODE_ENV=development ./bin/build-browser",
     "generate:i18n": "i18next",
     "test": "npm-run-all -cp 'test:*'",
     "test:node": "ENV=node vitest --run",
     "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
-    "typecheck": "tsc --noEmit && tsc-strict"
+    "typecheck": "tsc -b && tsc-strict"
   },
   "dependencies": {
     "@jlongster/sql.js": "^1.6.7",
@@ -76,12 +75,12 @@
     "csv-parse": "^6.1.0",
     "csv-stringify": "^6.6.0",
     "date-fns": "^4.1.0",
-    "deep-equal": "^2.2.3",
     "handlebars": "^4.7.8",
     "lru-cache": "^11.2.5",
     "md5": "^2.3.0",
     "memoize-one": "^6.0.0",
     "mitt": "^3.0.1",
+    "promise-retry": "^2.0.1",
     "slash": "5.1.0",
     "typescript": "^5.9.3",
     "typescript-strict-plugin": "^2.4.4",
@@ -89,7 +88,6 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@actual-app/api": "workspace:^",
     "@actual-app/crdt": "workspace:^",
     "@swc/core": "^1.15.11",
     "@types/adm-zip": "^0.5.7",

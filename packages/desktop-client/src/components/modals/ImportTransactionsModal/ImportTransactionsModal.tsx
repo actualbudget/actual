@@ -1,6 +1,11 @@
 // @ts-strict-ignore
 import React, { useCallback, useEffect, useEffectEvent, useState } from 'react';
-import type { ComponentProps } from 'react';
+import type {
+  ComponentProps,
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+} from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
@@ -25,6 +30,7 @@ import { Transaction } from './Transaction';
 import {
   applyFieldMappings,
   dateFormats,
+  filterByStartDate,
   isDateFormat,
   parseAmountFields,
   parseDate,
@@ -51,6 +57,28 @@ import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useSyncedPrefs } from '@desktop-client/hooks/useSyncedPrefs';
 import { payeeQueries } from '@desktop-client/payees';
+
+function CheckboxToggle({
+  id,
+  checked,
+  onChange,
+  children,
+}: {
+  id: string;
+  checked: boolean;
+  onChange: Dispatch<SetStateAction<boolean>>;
+  children: ReactNode;
+}) {
+  return (
+    <LabeledCheckbox
+      id={id}
+      checked={checked}
+      onChange={() => onChange(prev => !prev)}
+    >
+      {children}
+    </LabeledCheckbox>
+  );
+}
 
 function getFileType(filepath: string): string {
   const m = filepath.match(/\.([^.]*)$/);
@@ -212,12 +240,22 @@ export function ImportTransactionsModal({
   const [fallbackMissingPayeeToMemo, setFallbackMissingPayeeToMemo] = useState(
     String(prefs[`ofx-fallback-missing-payee-${accountId}`]) !== 'false',
   );
+  const [ofxSwapPayeeAndMemo, setOfxSwapPayeeAndMemo] = useState(
+    String(prefs[`ofx-swap-payee-memo-${accountId}`]) === 'true',
+  );
+  const [qifSwapPayeeAndMemo, setQifSwapPayeeAndMemo] = useState(
+    String(prefs[`qif-swap-payee-memo-${accountId}`]) === 'true',
+  );
+  const [camtSwapPayeeAndMemo, setCamtSwapPayeeAndMemo] = useState(
+    String(prefs[`camt-swap-payee-memo-${accountId}`]) === 'true',
+  );
 
   const [parseDateFormat, setParseDateFormat] = useState<DateFormat | null>(
     null,
   );
 
   const [clearOnImport, setClearOnImport] = useState(true);
+  const [startDate, setStartDate] = useState('');
 
   const getImportPreview = useCallback(
     async (
@@ -411,6 +449,12 @@ export function ImportTransactionsModal({
       skipEndLines,
       fallbackMissingPayeeToMemo,
       importNotes,
+      swapPayeeAndMemo: getSwapOption(
+        fileType,
+        ofxSwapPayeeAndMemo,
+        qifSwapPayeeAndMemo,
+        camtSwapPayeeAndMemo,
+      ),
     });
 
     void parse(originalFileName, parseOptions);
@@ -422,6 +466,9 @@ export function ImportTransactionsModal({
     skipEndLines,
     fallbackMissingPayeeToMemo,
     importNotes,
+    ofxSwapPayeeAndMemo,
+    qifSwapPayeeAndMemo,
+    camtSwapPayeeAndMemo,
     parse,
   ]);
 
@@ -469,6 +516,12 @@ export function ImportTransactionsModal({
       skipEndLines,
       fallbackMissingPayeeToMemo,
       importNotes,
+      swapPayeeAndMemo: getSwapOption(
+        fileType,
+        ofxSwapPayeeAndMemo,
+        qifSwapPayeeAndMemo,
+        camtSwapPayeeAndMemo,
+      ),
     });
 
     void parse(res[0], parseOptions);
@@ -623,6 +676,7 @@ export function ImportTransactionsModal({
         [`ofx-fallback-missing-payee-${accountId}`]: String(
           fallbackMissingPayeeToMemo,
         ),
+        [`ofx-swap-payee-memo-${accountId}`]: String(ofxSwapPayeeAndMemo),
       });
     }
 
@@ -644,6 +698,18 @@ export function ImportTransactionsModal({
       savePrefs({
         [`flip-amount-${accountId}-${filetype}`]: String(flipAmount),
         [`import-notes-${accountId}-${filetype}`]: String(importNotes),
+      });
+    }
+
+    if (filetype === 'qif') {
+      savePrefs({
+        [`qif-swap-payee-memo-${accountId}`]: String(qifSwapPayeeAndMemo),
+      });
+    }
+
+    if (isCamtFile(filetype)) {
+      savePrefs({
+        [`camt-swap-payee-memo-${accountId}`]: String(camtSwapPayeeAndMemo),
       });
     }
 
@@ -672,9 +738,19 @@ export function ImportTransactionsModal({
   const importPreviewTransactions = useImportPreviewTransactionsMutation();
 
   const onImportPreview = useEffectEvent(async () => {
+    // Filter by start date before preview and deduplication
+    const isPreParsed = isOfxFile(filetype) || isCamtFile(filetype);
+    const filteredTransactions = filterByStartDate(
+      parsedTransactions,
+      startDate,
+      isPreParsed,
+      fieldMappings,
+      parseDateFormat,
+    );
+
     // always start from the original parsed transactions, not the previewed ones to ensure rules run
     const previewTransactionsToImport = await getImportPreview(
-      parsedTransactions,
+      filteredTransactions,
       filetype,
       flipAmount,
       fieldMappings,
@@ -699,7 +775,7 @@ export function ImportTransactionsModal({
             return map;
           }, {});
 
-          const previewTransactions = parsedTransactions
+          const previewTransactions = filteredTransactions
             .filter(trans => !trans.isMatchedTransaction)
             .reduce((previous, currentTrx) => {
               let next = previous;
@@ -750,7 +826,13 @@ export function ImportTransactionsModal({
     }
 
     void onImportPreview();
-  }, [loadingState, parsedTransactions.length]);
+  }, [
+    loadingState,
+    parsedTransactions.length,
+    startDate,
+    fieldMappings,
+    parseDateFormat,
+  ]);
 
   const headers: ComponentProps<typeof TableHeader>['headers'] = [
     { name: t('Date'), width: 200 },
@@ -794,14 +876,14 @@ export function ImportTransactionsModal({
       isLoading={loadingState === 'parsing'}
       containerProps={{ style: { width: 800 } }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={
               t('Import transactions') +
               (filetype ? ` (${filetype.toUpperCase()})` : '')
             }
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           {error && !error.parsed && (
             <View style={{ alignItems: 'center', marginBottom: 15 }}>
@@ -884,6 +966,39 @@ export function ImportTransactionsModal({
             </View>
           )}
 
+          <View
+            style={{
+              marginTop: 10,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 5,
+            }}
+          >
+            <label
+              htmlFor="start-date-filter"
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                gap: 5,
+                alignItems: 'baseline',
+              }}
+            >
+              <Trans>Only import transactions since:</Trans>
+              <Input
+                id="start-date-filter"
+                type="date"
+                value={startDate}
+                onChangeValue={value => setStartDate(value)}
+                style={{ width: 150 }}
+              />
+            </label>
+            {startDate && (
+              <Button onPress={() => setStartDate('')}>
+                <Trans>Clear</Trans>
+              </Button>
+            )}
+          </View>
+
           {filetype === 'csv' && (
             <View style={{ marginTop: 10 }}>
               <FieldMappings
@@ -898,39 +1013,62 @@ export function ImportTransactionsModal({
           )}
 
           {isOfxFile(filetype) && (
-            <LabeledCheckbox
-              id="form_fallback_missing_payee"
-              checked={fallbackMissingPayeeToMemo}
-              onChange={() => {
-                setFallbackMissingPayeeToMemo(state => !state);
-              }}
-            >
-              <Trans>Use Memo as a fallback for empty Payees</Trans>
-            </LabeledCheckbox>
+            <>
+              <CheckboxToggle
+                id="form_fallback_missing_payee"
+                checked={fallbackMissingPayeeToMemo}
+                onChange={setFallbackMissingPayeeToMemo}
+              >
+                <Trans>Use Memo as a fallback for empty Payees</Trans>
+              </CheckboxToggle>
+              <CheckboxToggle
+                id="form_ofx_swap_payee_memo"
+                checked={ofxSwapPayeeAndMemo}
+                onChange={setOfxSwapPayeeAndMemo}
+              >
+                <Trans>Swap Payee and Memo</Trans>
+              </CheckboxToggle>
+            </>
           )}
 
           {filetype !== 'csv' && (
-            <LabeledCheckbox
+            <CheckboxToggle
               id="import_notes"
               checked={importNotes}
-              onChange={() => {
-                setImportNotes(!importNotes);
-              }}
+              onChange={setImportNotes}
             >
               <Trans>Import notes from file</Trans>
-            </LabeledCheckbox>
+            </CheckboxToggle>
+          )}
+
+          {filetype === 'qif' && (
+            <CheckboxToggle
+              id="form_qif_swap_payee_memo"
+              checked={qifSwapPayeeAndMemo}
+              onChange={setQifSwapPayeeAndMemo}
+            >
+              <Trans>Swap Payee and Memo</Trans>
+            </CheckboxToggle>
+          )}
+
+          {isCamtFile(filetype) && (
+            <CheckboxToggle
+              id="form_camt_swap_payee_memo"
+              checked={camtSwapPayeeAndMemo}
+              onChange={setCamtSwapPayeeAndMemo}
+            >
+              <Trans>Swap Payee and Memo</Trans>
+            </CheckboxToggle>
           )}
 
           {(isOfxFile(filetype) || isCamtFile(filetype)) && (
-            <LabeledCheckbox
+            <CheckboxToggle
               id="form_dont_reconcile"
               checked={reconcile}
-              onChange={() => {
-                setReconcile(!reconcile);
-              }}
+              onChange={setReconcile}
             >
               <Trans>Merge with existing transactions</Trans>
-            </LabeledCheckbox>
+            </CheckboxToggle>
           )}
 
           {/*Import Options */}
@@ -1028,33 +1166,27 @@ export function ImportTransactionsModal({
                         style={{ width: 50 }}
                       />
                     </label>
-                    <LabeledCheckbox
+                    <CheckboxToggle
                       id="form_has_header"
                       checked={hasHeaderRow}
-                      onChange={() => {
-                        setHasHeaderRow(!hasHeaderRow);
-                      }}
+                      onChange={setHasHeaderRow}
                     >
                       <Trans>File has header row</Trans>
-                    </LabeledCheckbox>
-                    <LabeledCheckbox
+                    </CheckboxToggle>
+                    <CheckboxToggle
                       id="clear_on_import"
                       checked={clearOnImport}
-                      onChange={() => {
-                        setClearOnImport(!clearOnImport);
-                      }}
+                      onChange={setClearOnImport}
                     >
                       <Trans>Clear transactions on import</Trans>
-                    </LabeledCheckbox>
-                    <LabeledCheckbox
+                    </CheckboxToggle>
+                    <CheckboxToggle
                       id="form_dont_reconcile"
                       checked={reconcile}
-                      onChange={() => {
-                        setReconcile(!reconcile);
-                      }}
+                      onChange={setReconcile}
                     >
                       <Trans>Merge with existing transactions</Trans>
-                    </LabeledCheckbox>
+                    </CheckboxToggle>
                   </View>
                 )}
 
@@ -1062,15 +1194,13 @@ export function ImportTransactionsModal({
 
                 <View style={{ marginRight: 10, gap: 5 }}>
                   <SectionLabel title={t('AMOUNT OPTIONS')} />
-                  <LabeledCheckbox
+                  <CheckboxToggle
                     id="form_flip"
                     checked={flipAmount}
-                    onChange={() => {
-                      setFlipAmount(!flipAmount);
-                    }}
+                    onChange={setFlipAmount}
                   >
                     <Trans>Flip amount</Trans>
-                  </LabeledCheckbox>
+                  </CheckboxToggle>
                   <MultiplierOption
                     multiplierEnabled={multiplierEnabled}
                     multiplierAmount={multiplierAmount}
@@ -1133,7 +1263,7 @@ export function ImportTransactionsModal({
                     isDisabled={count === 0}
                     isLoading={loadingState === 'importing'}
                     onPress={() => {
-                      void onImport(close);
+                      void onImport(() => state.close());
                     }}
                   >
                     <Trans count={count}>Import {{ count }} transactions</Trans>
@@ -1154,15 +1284,41 @@ function getParseOptions(fileType: string, options: ParseFileOptions = {}) {
     return { delimiter, hasHeaderRow, skipStartLines, skipEndLines };
   }
   if (isOfxFile(fileType)) {
-    const { fallbackMissingPayeeToMemo, importNotes } = options;
-    return { fallbackMissingPayeeToMemo, importNotes };
+    const { fallbackMissingPayeeToMemo, importNotes, swapPayeeAndMemo } =
+      options;
+    return { fallbackMissingPayeeToMemo, importNotes, swapPayeeAndMemo };
+  }
+  if (fileType === 'qif') {
+    const { importNotes, swapPayeeAndMemo } = options;
+    return { importNotes, swapPayeeAndMemo };
   }
   if (isCamtFile(fileType)) {
-    const { importNotes } = options;
-    return { importNotes };
+    const { importNotes, swapPayeeAndMemo } = options;
+    return { importNotes, swapPayeeAndMemo };
   }
   const { importNotes } = options;
   return { importNotes };
+}
+
+function getSwapOption(
+  fileType: string,
+  ofxSwapPayeeAndMemo: boolean,
+  qifSwapPayeeAndMemo: boolean,
+  camtSwapPayeeAndMemo: boolean,
+) {
+  if (isOfxFile(fileType)) {
+    return ofxSwapPayeeAndMemo;
+  }
+
+  if (fileType === 'qif') {
+    return qifSwapPayeeAndMemo;
+  }
+
+  if (isCamtFile(fileType)) {
+    return camtSwapPayeeAndMemo;
+  }
+
+  return false;
 }
 
 function isOfxFile(fileType: string) {

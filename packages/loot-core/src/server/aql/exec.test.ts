@@ -271,7 +271,7 @@ describe('compileAndRunQuery', () => {
       'SELECT id FROM transactions WHERE amount < -50',
     );
     const ids = rows.slice(0, 3).map(row => row.id);
-    ids.sort();
+    ids.sort((a, b) => String(a).localeCompare(String(b)));
 
     const { data } = await compileAndRunAqlQuery(
       q('transactions')
@@ -280,6 +280,10 @@ describe('compileAndRunQuery', () => {
         .raw()
         .serialize(),
     );
-    expect(data.map(row => row.id).sort()).toEqual(ids);
+    expect(
+      data
+        .map(row => row.id)
+        .sort((a, b) => String(a).localeCompare(String(b))),
+    ).toEqual(ids);
   });
 });

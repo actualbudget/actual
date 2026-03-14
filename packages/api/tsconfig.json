@@ -5,8 +5,8 @@
     // Using ES2021 because that's the newest version where
     // the latest Node 16.x release supports all of the features
     "target": "ES2021",
-    "module": "CommonJS",
-    "moduleResolution": "node10",
+    "module": "es2022",
+    "moduleResolution": "bundler",
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,
@@ -14,13 +14,9 @@
     "rootDir": ".",
     "declarationDir": "@types",
     "tsBuildInfoFile": "dist/.tsbuildinfo",
-    "paths": {
-      // TEMPORARY
-      "loot-core/*": ["../loot-core/src/*"]
-    },
     "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },
   "references": [{ "path": "../crdt" }, { "path": "../loot-core" }],
   "include": ["."],
-  "exclude": ["**/node_modules/*", "dist", "@types", "*.test.ts"]
+  "exclude": ["**/node_modules/*", "dist", "@types", "*.test.ts", "*.config.ts"]
 }

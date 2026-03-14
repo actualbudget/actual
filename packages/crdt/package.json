@@ -13,7 +13,7 @@
     "proto:generate": "./bin/generate-proto",
     "build": "rm -rf dist && yarn run build:node",
     "test": "vitest --run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc -b"
   },
   "dependencies": {
     "google-protobuf": "^3.21.4",

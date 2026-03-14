@@ -1,0 +1,17 @@
+!Type:Bank
+D01/23/2019
+PPayee Name
+MNote Text
+T-10.00
+^
+D01/23/2019
+PPayee Name Only
+T-20.00
+^
+D01/23/2019
+MNote Only Text
+T-30.00
+^
+D01/23/2019
+T-40.00
+^

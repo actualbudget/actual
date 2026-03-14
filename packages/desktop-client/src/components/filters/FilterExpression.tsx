@@ -131,9 +131,23 @@ export function FilterExpression<T extends RuleConditionEntity>({
             return false;
           }
 
+          if (
+            element instanceof HTMLElement &&
+            (element.closest('[data-testid="account-autocomplete-modal"]') ||
+              element.closest('[data-testid="payee-autocomplete-modal"]') ||
+              element.closest('[data-testid="category-autocomplete-modal"]'))
+          ) {
+            return false;
+          }
+
           return true;
         }}
-        style={{ width: 275, padding: 15, color: theme.menuItemText }}
+        style={{
+          width: 275,
+          padding: 15,
+          color: theme.menuItemText,
+          zIndex: '2500 !important',
+        }}
         data-testid="filters-menu-tooltip"
       >
         <FilterEditor

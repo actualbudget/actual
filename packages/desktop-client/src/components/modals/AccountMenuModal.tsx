@@ -114,7 +114,7 @@ export function AccountMenuModal({
         },
       }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             leftContent={
@@ -140,7 +140,7 @@ export function AccountMenuModal({
                 )}
               </Fragment>
             }
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View
             style={{
@@ -295,7 +295,7 @@ function AdditionalAccountMenu({
                   onToggleReconciled?.();
                   break;
                 default:
-                  throw new Error(`Unrecognized menu option: ${name}`);
+                  throw new Error(`Unrecognized menu option: ${String(name)}`);
               }
             }}
           />

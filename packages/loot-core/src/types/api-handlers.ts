@@ -15,7 +15,9 @@ import type { QueryState } from '../shared/query';
 
 import type {
   ImportTransactionEntity,
+  NearbyPayeeEntity,
   NewRuleEntity,
+  PayeeLocationEntity,
   RuleEntity,
   ScheduleEntity,
   TransactionEntity,
@@ -231,6 +233,24 @@ export type ApiHandlers = {
   }) => Promise<void>;
 
   'api/tag-delete': (arg: { id: APITagEntity['id'] }) => Promise<void>;
+
+  'api/payee-location-create': (arg: {
+    payeeId: string;
+    latitude: number;
+    longitude: number;
+  }) => Promise<string>;
+
+  'api/payee-locations-get': (arg: {
+    payeeId: string;
+  }) => Promise<PayeeLocationEntity[]>;
+
+  'api/payee-location-delete': (arg: { id: string }) => Promise<void>;
+
+  'api/payees-get-nearby': (arg: {
+    latitude: number;
+    longitude: number;
+    maxDistance?: number;
+  }) => Promise<NearbyPayeeEntity[]>;
 
   'api/rules-get': () => Promise<RuleEntity[]>;
 

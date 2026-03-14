@@ -1086,7 +1086,7 @@ async function simpleFinBatchSync({
       const matchedTransactions: Array<TransactionEntity['id']> = [];
       const updatedAccounts: Array<AccountEntity['id']> = [];
 
-      if (syncResponse.res.error_code) {
+      if (syncResponse.res?.error_code) {
         errors.push(
           handleSyncError(
             {
@@ -1098,7 +1098,7 @@ async function simpleFinBatchSync({
             account,
           ),
         );
-      } else {
+      } else if (syncResponse.res) {
         const syncResponseData = await handleSyncResponse(
           syncResponse.res,
           account,
@@ -1107,6 +1107,15 @@ async function simpleFinBatchSync({
         newTransactions.push(...syncResponseData.newTransactions);
         matchedTransactions.push(...syncResponseData.matchedTransactions);
         updatedAccounts.push(...syncResponseData.updatedAccounts);
+      } else {
+        errors.push(
+          handleSyncError(
+            new Error(
+              'Failed syncing account "' + account.name + '": empty response',
+            ),
+            account,
+          ),
+        );
       }
 
       retVal.push({
@@ -1115,19 +1124,17 @@ async function simpleFinBatchSync({
       });
     }
   } catch (err) {
-    const errors = [];
     for (const account of accounts) {
+      const error = err as Error;
       retVal.push({
         accountId: account.id,
         res: {
-          errors,
+          errors: [handleSyncError(error, account)],
           newTransactions: [],
           matchedTransactions: [],
           updatedAccounts: [],
         },
       });
-      const error = err as Error;
-      errors.push(handleSyncError(error, account));
     }
   }
 

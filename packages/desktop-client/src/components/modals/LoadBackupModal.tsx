@@ -89,11 +89,11 @@ export function LoadBackupModal({
 
   return (
     <Modal name="load-backup" containerProps={{ style: { maxWidth: '30vw' } }}>
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Load Backup')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ marginBottom: 30 }}>
             <View

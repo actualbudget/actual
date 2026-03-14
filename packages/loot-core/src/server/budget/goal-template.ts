@@ -258,7 +258,7 @@ async function processTemplate(
     };
   }
 
-  const priorities = new Int32Array([...prioritiesSet]).sort();
+  const priorities = new Int32Array([...prioritiesSet]).sort((a, b) => a - b);
   // run each priority level
   for (const priority of priorities) {
     const availStart = availBudget;

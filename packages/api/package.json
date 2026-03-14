@@ -10,27 +10,25 @@
   "main": "dist/index.js",
   "types": "@types/index.d.ts",
   "scripts": {
-    "build:app": "yarn workspace loot-core build:api",
-    "build:crdt": "yarn workspace @actual-app/crdt build",
-    "build:node": "tsc && tsc-alias",
-    "build:migrations": "cp migrations/*.sql dist/migrations",
-    "build:default-db": "cp default-db.sqlite dist/",
-    "build": "yarn run clean && yarn run build:app && yarn run build:node && yarn run build:migrations && yarn run build:default-db",
-    "test": "yarn run clean && yarn run build:app && yarn run build:crdt && vitest --run",
-    "clean": "rm -rf dist @types",
-    "typecheck": "yarn build && tsc --noEmit && tsc-strict"
+    "build": "yarn workspace loot-core exec tsc && vite build && node scripts/inline-loot-core-types.mjs",
+    "test": "vitest --run",
+    "typecheck": "tsc -b && tsc-strict"
   },
   "dependencies": {
     "@actual-app/crdt": "workspace:^",
     "better-sqlite3": "^12.6.2",
     "compare-versions": "^6.1.1",
+    "loot-core": "workspace:^",
     "node-fetch": "^3.3.2",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "tsc-alias": "^1.8.16",
+    "rollup-plugin-visualizer": "^6.0.5",
     "typescript": "^5.9.3",
     "typescript-strict-plugin": "^2.4.4",
+    "vite": "^7.3.1",
+    "vite-plugin-dts": "^4.5.4",
+    "vite-plugin-peggy-loader": "^2.0.1",
     "vitest": "^4.0.18"
   },
   "engines": {

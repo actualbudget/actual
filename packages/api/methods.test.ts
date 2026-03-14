@@ -1,9 +1,28 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
+import { vi } from 'vitest';
+
 import type { RuleEntity } from 'loot-core/types/models';
 
 import * as api from './index';
+
+// In tests we run from source; loot-core's API fs uses __dirname (for the built dist/).
+// Mock the fs so path constants point at loot-core package root where migrations live.
+vi.mock(
+  '../loot-core/src/platform/server/fs/index.api',
+  async importOriginal => {
+    const actual = (await importOriginal()) as Record<string, unknown>;
+    const pathMod = await import('path');
+    const lootCoreRoot = pathMod.join(__dirname, '..', 'loot-core');
+    return {
+      ...actual,
+      migrationsPath: pathMod.join(lootCoreRoot, 'migrations'),
+      bundledDatabasePath: pathMod.join(lootCoreRoot, 'default-db.sqlite'),
+      demoBudgetPath: pathMod.join(lootCoreRoot, 'demo-budget'),
+    };
+  },
+);
 
 const budgetName = 'test-budget';
 

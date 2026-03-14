@@ -41,11 +41,11 @@ export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
 
   return (
     <Modal name="hold-buffer">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Hold for next month')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View>
             <FieldLabel title={t('Hold this amount:')} />{' '}
@@ -64,7 +64,7 @@ export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
                 onUpdate={setAmount}
                 onEnter={() => {
                   _onSubmit(amount);
-                  close();
+                  state.close();
                 }}
               />
             </InitialFocus>
