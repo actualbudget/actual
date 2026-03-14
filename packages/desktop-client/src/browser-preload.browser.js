@@ -120,7 +120,7 @@ class WorkerBridge {
       console.log(
         '[WorkerBridge] This tab elected as LEADER — creating backend Worker',
       );
-      this._createLocalWorker(msg.initMsg, msg.budgetToRestore);
+      this._createLocalWorker(msg.initMsg, msg.budgetToRestore, msg.pendingMsg);
       return;
     }
 
@@ -138,6 +138,45 @@ class WorkerBridge {
         '[WorkerBridge] Switching to STANDALONE Worker (different budget)',
       );
       this._switchToStandalone(msg.initMsg, msg.pendingMsg);
+      return;
+    }
+
+    // Leader swap: this tab is being demoted from leader. Convert our
+    // backend Worker into a standalone Worker (it keeps running with
+    // the current budget). The SharedWorker has already updated its
+    // bookkeeping — we just need to stop forwarding and dispatch locally.
+    if (msg && msg.type === '__demote-to-standalone') {
+      console.log('[WorkerBridge] Demoted from leader — becoming standalone');
+      const sw = localBackendWorker;
+      localBackendWorker = null;
+      this._standaloneWorker = sw;
+      this._standaloneRequestNames = new Map();
+
+      // Change Worker's onmessage from leader-forwarding to standalone
+      sw.onmessage = event => {
+        const workerMsg = event.data;
+        if (
+          workerMsg &&
+          workerMsg.type &&
+          workerMsg.type.startsWith('__absurd:')
+        ) {
+          return;
+        }
+        if (
+          workerMsg.type === 'reply' &&
+          this._standaloneRequestNames &&
+          this._standaloneRequestNames.get(workerMsg.id) === 'close-budget'
+        ) {
+          this._standaloneRequestNames.delete(workerMsg.id);
+          console.log(
+            '[WorkerBridge] Budget closed on standalone — rejoining SharedWorker',
+          );
+          sw.terminate();
+          this._standaloneWorker = null;
+          this._sharedPort.postMessage({ type: '__rejoin-shared' });
+        }
+        this._dispatch(event);
+      };
       return;
     }
 
@@ -174,7 +213,7 @@ class WorkerBridge {
     this._dispatch(event);
   }
 
-  _createLocalWorker(initMsg, budgetToRestore) {
+  _createLocalWorker(initMsg, budgetToRestore, pendingMsg) {
     if (localBackendWorker) {
       localBackendWorker.terminate();
     }
@@ -195,18 +234,34 @@ class WorkerBridge {
       // After the backend connects, automatically reload the budget that was
       // open before the leader left (e.g. page refresh). This lets other tabs
       // continue working without being sent to the budget list.
-      if (workerMsg.type === 'connect' && budgetToRestore) {
-        console.log(
-          `[WorkerBridge] Backend connected, restoring budget "${budgetToRestore}"`,
-        );
-        const id = budgetToRestore;
-        budgetToRestore = null;
-        localBackendWorker.postMessage({
-          id: '__restore-budget',
-          name: 'load-budget',
-          args: { id },
-          catchErrors: true,
-        });
+      if (workerMsg.type === 'connect') {
+        if (budgetToRestore) {
+          console.log(
+            `[WorkerBridge] Backend connected, restoring budget "${budgetToRestore}"`,
+          );
+          const id = budgetToRestore;
+          budgetToRestore = null;
+          localBackendWorker.postMessage({
+            id: '__restore-budget',
+            name: 'load-budget',
+            args: { id },
+            catchErrors: true,
+          });
+          // Tell SharedWorker to track the restore request so
+          // currentBudgetId gets updated when the reply arrives.
+          sharedPort.postMessage({
+            type: '__track-restore',
+            requestId: '__restore-budget',
+            budgetId: id,
+          });
+        } else if (pendingMsg) {
+          console.log(
+            '[WorkerBridge] Backend connected, forwarding pending load-budget',
+          );
+          const toSend = pendingMsg;
+          pendingMsg = null;
+          localBackendWorker.postMessage(toSend);
+        }
       }
       sharedPort.postMessage({ type: '__from-worker', msg: workerMsg });
     };

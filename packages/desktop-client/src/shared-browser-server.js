@@ -130,7 +130,7 @@ function removePort(port) {
   }
 }
 
-function electLeader(port, budgetToRestore) {
+function electLeader(port, budgetToRestore, pendingMsg) {
   leaderPort = port;
   console.log(
     `[SharedWorker] Elected new leader (${connectedPorts.length} tabs connected)`,
@@ -140,6 +140,7 @@ function electLeader(port, budgetToRestore) {
       type: '__become-leader',
       initMsg: cachedInitMsg,
       budgetToRestore: budgetToRestore || null,
+      pendingMsg: pendingMsg || null,
     });
   }
 }
@@ -200,6 +201,15 @@ self.onconnect = function (e) {
         console.log(
           `[SharedWorker] Tab silently rejoined shared (${connectedPorts.length} total, ${standalonePorts.size} standalone)`,
         );
+        return;
+      }
+
+      // Leader tab registering a restore-budget request so the reply
+      // updates currentBudgetId (used after leader failover).
+      if (msg.type === '__track-restore') {
+        requestToPort.set(msg.requestId, port);
+        requestNames.set(msg.requestId, 'load-budget');
+        requestBudgetIds.set(msg.requestId, msg.budgetId);
         return;
       }
 
@@ -319,6 +329,48 @@ self.onconnect = function (e) {
           budgetId !== currentBudgetId &&
           port !== leaderPort
         ) {
+          // Check if a standalone tab already has this budget. If so,
+          // swap the leader instead of creating yet another standalone —
+          // demote the current leader, promote the requesting tab, and
+          // the existing standalone will rejoin once the budget loads.
+          let hasStandaloneMatch = false;
+          for (const [, sBudget] of standaloneBudgets) {
+            if (sBudget === budgetId) {
+              hasStandaloneMatch = true;
+              break;
+            }
+          }
+
+          if (hasStandaloneMatch) {
+            console.log(
+              `[SharedWorker] Leader swap: demoting leader (budget "${currentBudgetId}"), promoting for "${budgetId}"`,
+            );
+
+            // Demote current leader to standalone
+            leaderPort.postMessage({ type: '__demote-to-standalone' });
+            standalonePorts.add(leaderPort);
+            standaloneBudgets.set(leaderPort, currentBudgetId);
+
+            // Clear leader state
+            leaderPort = null;
+            backendConnected = false;
+            lastAppInitFailure = null;
+            currentBudgetId = null;
+            requestToPort.clear();
+            requestNames.clear();
+            requestBudgetIds.clear();
+
+            // Pre-register the pending load-budget so the reply routes
+            // correctly and updates currentBudgetId.
+            requestToPort.set(msg.id, port);
+            requestNames.set(msg.id, 'load-budget');
+            requestBudgetIds.set(msg.id, budgetId);
+
+            // Elect requesting tab as new leader with the pending request
+            electLeader(port, null, msg);
+            return;
+          }
+
           console.log(
             `[SharedWorker] Tab wants budget "${budgetId}" but leader has "${currentBudgetId}" — sending to standalone`,
           );
