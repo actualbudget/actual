@@ -137,7 +137,7 @@ export function Value<T>({
 
           return '…';
         default:
-          throw new Error(`Unknown field ${field}`);
+          throw new Error(`Unknown field ${String(field)}`);
       }
     }
   }

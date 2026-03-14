@@ -8,7 +8,8 @@
     "strict": true,
     "types": ["node"],
     "outDir": "dist",
-    "rootDir": "."
+    "rootDir": ".",
+    "composite": true
   },
   "include": ["src/**/*", "bin/**/*"],
   "exclude": ["node_modules"]

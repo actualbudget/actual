@@ -400,7 +400,7 @@ expect.extend({
     } else {
       return {
         message: () =>
-          `Expected ${validPayeeListWithFavorite} to have favorite stars`,
+          `Expected ${String(validPayeeListWithFavorite)} to have favorite stars`,
         pass: true,
       };
     }
@@ -448,7 +448,7 @@ describe('Transactions', () => {
               ?.name
           : 'Categorize',
       );
-      if (transaction.amount <= 0) {
+      if (transaction.amount < 0) {
         expect(queryField(container, 'debit', 'div', idx).textContent).toBe(
           integerToCurrency(-transaction.amount),
         );
@@ -543,7 +543,7 @@ describe('Transactions', () => {
       '{Shift>}[Enter]{/Shift}',
     ];
 
-    for (const idx in ks) {
+    for (const [idx] of ks.entries()) {
       const input = await editField(container, 'notes', 2);
       const oldValue = input.value;
       await userEvent.clear(input);

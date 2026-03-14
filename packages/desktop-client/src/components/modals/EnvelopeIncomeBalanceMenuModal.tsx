@@ -117,7 +117,7 @@ export function EnvelopeIncomeBalanceMenuModal({
                   onShowActivity?.();
                   break;
                 default:
-                  throw new Error(`Unrecognized menu option: ${name}`);
+                  throw new Error(`Unrecognized menu option: ${String(name)}`);
               }
             }}
             items={[
