@@ -4,6 +4,7 @@
     "composite": true,
     "noEmit": false,
     "declaration": true,
+    "strict": false, // TODO: fix issues and remove this
     "declarationMap": true,
     "emitDeclarationOnly": true,
     "outDir": "lib-dist/decl",

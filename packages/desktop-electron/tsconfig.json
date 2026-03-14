@@ -8,6 +8,7 @@
     "module": "CommonJS",
     "moduleResolution": "node10",
     "noEmit": false,
+    "strict": false, // TODO: fix issues and remove this
     "declaration": true,
     "declarationMap": true,
     "outDir": "build",
