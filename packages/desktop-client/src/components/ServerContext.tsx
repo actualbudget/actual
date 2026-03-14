@@ -159,22 +159,6 @@ export function ServerProvider({ children }: { children: ReactNode }) {
 
   const setURL = useCallback(
     async (url: string, opts: { validate?: boolean } = {}) => {
-      // Make a preflight request from the main thread to trigger any
-      // browser permission prompts (e.g. Brave's "access other apps and
-      // services on this device" for localhost). SharedWorkers can't
-      // show these prompts, so the main thread must acquire the
-      // permission first. Once granted, the SharedWorker's fetch
-      // requests to the same host will succeed.
-      if (opts.validate !== false && url) {
-        try {
-          const cleanUrl = url.replace(/\/+$/, '');
-          await fetch(cleanUrl + '/info', { method: 'GET', mode: 'cors' });
-        } catch {
-          // Ignored — the real validation happens in the worker.
-          // This fetch only exists to trigger the permission prompt.
-        }
-      }
-
       const { error } = await send('set-server-url', { ...opts, url });
       if (!error) {
         const serverURL = await send('get-server-url');
