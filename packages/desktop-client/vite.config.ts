@@ -38,11 +38,7 @@ const addWatchers = (): Plugin => ({
 
 const injectPlugin = (options?: Parameters<typeof inject>[0]): Plugin => {
   // Rollup plugins are curerntly slightly API-incompatible with Rolldown plugins, but not in a way that prevents them from working here.
-  const plugin = inject(options) as unknown as Plugin;
-  return {
-    ...plugin,
-    name: `vite-inject-${plugin.name}`,
-  };
+  return inject(options) as unknown as Plugin;
 };
 
 // Inject build shims using the inject plugin
@@ -56,7 +52,7 @@ const injectShims = (): Plugin[] => {
 
   return [
     {
-      name: 'inject-build-process',
+      name: 'define-build-process',
       config: () => ({
         // rename process.env in build mode so it doesn't get set to an empty object up by the vite:define plugin
         // this isn't needed in serve mode, because vite:define doesn't empty it in serve mode. And defines also happen last anyways in serve mode.
@@ -71,7 +67,6 @@ const injectShims = (): Plugin[] => {
       apply: 'build',
     },
     {
-      name: 'inject-dev-process',
       enforce: 'post',
       apply: 'serve',
       ...injectPlugin({
@@ -80,7 +75,7 @@ const injectShims = (): Plugin[] => {
       }),
     },
     {
-      name: 'inject-build-process-inject',
+      name: 'inject-build-process',
       enforce: 'post',
       apply: 'build',
       config: () => ({
