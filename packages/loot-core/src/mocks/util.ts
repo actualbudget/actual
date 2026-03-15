@@ -76,7 +76,7 @@ export function patchFetchForSqlJS(baseURL: string) {
           },
         });
       }
-      return Promise.reject(new Error(`fetch not mocked for ${url}`));
+      return Promise.reject(new Error(`fetch not mocked for ${String(url)}`));
     },
   );
 }

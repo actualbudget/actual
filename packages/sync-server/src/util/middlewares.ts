@@ -55,7 +55,7 @@ const requestLoggerMiddleware = expressWinston.logger({
       const { timestamp, level, meta } = args;
       const { res, req } = meta as { res: Response; req: Request };
 
-      return `${timestamp} ${level}: ${req.method} ${res.statusCode} ${req.url}`;
+      return `${String(timestamp)} ${String(level)}: ${req.method} ${res.statusCode} ${req.url}`;
     }),
   ),
 });

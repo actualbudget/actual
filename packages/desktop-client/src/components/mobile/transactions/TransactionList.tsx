@@ -506,7 +506,7 @@ function SelectedTransactionsFloatingActionBar({
                           : integerToCurrency(Number(value));
                         break;
                       case 'notes':
-                        displayValue = `${mode} with ${value}`;
+                        displayValue = `${mode} with ${String(value)}`;
                         break;
                       default:
                         displayValue = value;
@@ -514,15 +514,15 @@ function SelectedTransactionsFloatingActionBar({
                     }
 
                     showUndoNotification({
-                      message: `Successfully updated ${name} of ${ids.length} transaction${ids.length > 1 ? 's' : ''} to [${displayValue}](#${displayValue}).`,
+                      message: `Successfully updated ${name} of ${ids.length} transaction${ids.length > 1 ? 's' : ''} to [${String(displayValue)}](#${String(displayValue)}).`,
                       messageActions: {
                         [String(displayValue)]: () => {
                           switch (name) {
                             case 'account':
-                              void navigate(`/accounts/${value}`);
+                              void navigate(`/accounts/${String(value)}`);
                               break;
                             case 'category':
-                              void navigate(`/categories/${value}`);
+                              void navigate(`/categories/${String(value)}`);
                               break;
                             case 'payee':
                               void navigate(`/payees`);
