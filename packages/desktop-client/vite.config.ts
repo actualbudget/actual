@@ -36,6 +36,15 @@ const addWatchers = (): Plugin => ({
   },
 });
 
+const injectPlugin = (options?: Parameters<typeof inject>[0]): Plugin => {
+  // Rollup plugins are curerntly slightly API-incompatible with Rolldown plugins, but not in a way that prevents them from working here.
+  const plugin = inject(options) as unknown as Plugin;
+  return {
+    ...plugin,
+    name: `vite-inject-${plugin.name}`,
+  };
+};
+
 // Inject build shims using the inject plugin
 const injectShims = (): Plugin[] => {
   const buildShims = path.resolve('./src/build-shims.js');
@@ -65,17 +74,9 @@ const injectShims = (): Plugin[] => {
       name: 'inject-dev-process',
       enforce: 'post',
       apply: 'serve',
-      config: () => ({
-        build: {
-          rolldownOptions: {
-            transform: {
-              inject: {
-                ...commonInject,
-                process: [buildShims, 'process'],
-              },
-            },
-          },
-        },
+      ...injectPlugin({
+        ...commonInject,
+        process: [buildShims, 'process'],
       }),
     },
     {
