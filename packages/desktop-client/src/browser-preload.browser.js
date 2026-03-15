@@ -117,9 +117,6 @@ class WorkerBridge {
 
     // Elected as leader: create the real backend Worker on this tab
     if (msg && msg.type === '__become-leader') {
-      console.log(
-        '[WorkerBridge] This tab elected as LEADER — creating backend Worker',
-      );
       this._createLocalWorker(msg.initMsg, msg.budgetToRestore, msg.pendingMsg);
       return;
     }
@@ -280,9 +277,6 @@ class WorkerBridge {
             budgetId: id,
           });
         } else if (pendingMsg) {
-          console.log(
-            '[WorkerBridge] Backend connected, forwarding pending load-budget',
-          );
           const toSend = pendingMsg;
           pendingMsg = null;
           localBackendWorker.postMessage(toSend);
@@ -333,7 +327,6 @@ class WorkerBridge {
     };
 
     // Tell SharedWorker we're going standalone (keep connection alive)
-    console.log('[WorkerBridge] Going standalone, notifying SharedWorker');
     this._sharedPort.postMessage({ type: '__going-standalone' });
 
     // Track request names for the standalone Worker so we can detect close-budget

@@ -150,17 +150,16 @@ self.onconnect = function (e) {
   const port = e.ports[0];
   connectedPorts.push(port);
   console.log(
-    `[SharedWorker] Tab connected (${connectedPorts.length} total). Leader: ${leaderPort ? 'yes' : 'none'}, budget: ${currentBudgetId ?? 'none'}`,
+    `[SharedWorker] Tab connected (${connectedPorts.length} tabs, budget: ${currentBudgetId ?? 'none'})`,
   );
 
   port.onmessage = function (event) {
     try {
       const msg = event.data;
 
+      // ── Tab lifecycle ──────────────────────────────────────────────
+
       if (msg.type === 'tab-closing') {
-        console.log(
-          `[SharedWorker] Tab closing (${connectedPorts.length - 1} will remain). Was leader: ${port === leaderPort}`,
-        );
         pendingPongs.delete(port);
         removePort(port);
         return;
@@ -171,11 +170,10 @@ self.onconnect = function (e) {
         return;
       }
 
+      // ── Standalone coordination ────────────────────────────────────
+
       // Standalone tab is going off on its own Worker (different budget)
       if (msg.type === '__going-standalone') {
-        console.log(
-          `[SharedWorker] Tab going standalone (${connectedPorts.length} total, ${standalonePorts.size + 1} standalone)`,
-        );
         standalonePorts.add(port);
         port.postMessage({ type: '__role-change', role: 'STANDALONE' });
         return;
@@ -185,9 +183,6 @@ self.onconnect = function (e) {
       if (msg.type === '__rejoin-shared') {
         standalonePorts.delete(port);
         standaloneBudgets.delete(port);
-        console.log(
-          `[SharedWorker] Tab rejoining shared (${connectedPorts.length} total, ${standalonePorts.size} standalone)`,
-        );
         if (backendConnected) {
           port.postMessage({ type: '__role-change', role: 'FOLLOWER' });
           port.postMessage({ type: 'connect' });
@@ -201,12 +196,11 @@ self.onconnect = function (e) {
       if (msg.type === '__rejoin-budget-ack') {
         standalonePorts.delete(port);
         standaloneBudgets.delete(port);
-        console.log(
-          `[SharedWorker] Tab silently rejoined shared (${connectedPorts.length} total, ${standalonePorts.size} standalone)`,
-        );
         port.postMessage({ type: '__role-change', role: 'FOLLOWER' });
         return;
       }
+
+      // ── Initialization ─────────────────────────────────────────────
 
       // Leader tab registering a restore-budget request so the reply
       // updates currentBudgetId (used after leader failover).
@@ -220,26 +214,17 @@ self.onconnect = function (e) {
       if (msg.type === 'init') {
         cachedInitMsg = msg;
         if (!leaderPort) {
-          console.log('[SharedWorker] No leader yet, electing this tab');
           electLeader(port);
         } else if (backendConnected) {
-          console.log(
-            '[SharedWorker] Backend already connected, sending connect to new tab',
-          );
           port.postMessage({ type: '__role-change', role: 'FOLLOWER' });
           port.postMessage({ type: 'connect' });
         } else if (lastAppInitFailure) {
-          console.log(
-            '[SharedWorker] Init previously failed, replaying failure to new tab',
-          );
           port.postMessage(lastAppInitFailure);
-        } else {
-          console.log(
-            '[SharedWorker] Backend still initializing, new tab will wait for connect broadcast',
-          );
         }
         return;
       }
+
+      // ── Worker message routing ──────────────────────────────────────
 
       // Leader tab forwarding its Worker's messages back for routing
       if (msg.type === '__from-worker') {
@@ -269,9 +254,6 @@ self.onconnect = function (e) {
                   if (oldBudgetId !== null && oldBudgetId !== budgetId) {
                     for (const p of connectedPorts) {
                       if (p !== targetPort && !standalonePorts.has(p)) {
-                        console.log(
-                          `[SharedWorker] Pushing follower to show-budgets (was on "${oldBudgetId}")`,
-                        );
                         p.postMessage({
                           type: 'push',
                           name: 'show-budgets',
@@ -284,19 +266,13 @@ self.onconnect = function (e) {
                   // rejoin — both tabs should share the same backend.
                   for (const [p, sBudget] of standaloneBudgets) {
                     if (sBudget === budgetId) {
-                      console.log(
-                        `[SharedWorker] Standalone tab has same budget "${budgetId}" — telling it to rejoin`,
-                      );
                       p.postMessage({ type: '__rejoin-budget' });
                     }
                   }
                 }
               }
-              // If a tab closed the budget, notify other tabs
+              // If a tab closed the budget, clear state and notify other tabs
               if (name === 'close-budget') {
-                console.log(
-                  '[SharedWorker] Budget closed, clearing currentBudgetId',
-                );
                 currentBudgetId = null;
                 for (const p of connectedPorts) {
                   if (p !== targetPort && !standalonePorts.has(p)) {
@@ -321,6 +297,8 @@ self.onconnect = function (e) {
         }
         return;
       }
+
+      // ── Request interception & routing ──────────────────────────────
 
       // If a non-leader tab wants to load a different budget from the one
       // the shared leader Worker already has, tell that tab to fall back to
@@ -389,6 +367,8 @@ self.onconnect = function (e) {
         }
       }
 
+      // ── Default: track request and forward to leader ────────────────
+
       // Regular request from a tab — track and forward to the leader
       if (msg.id) {
         requestToPort.set(msg.id, port);
@@ -445,9 +425,6 @@ self.onconnect = function (e) {
         // Just send a synthetic reply so the follower's UI navigates
         // to show-budgets without disturbing anyone else.
         if (msg.name === 'close-budget' && port !== leaderPort) {
-          console.log(
-            '[SharedWorker] Follower closing budget — sending synthetic reply (backend stays open)',
-          );
           port.postMessage({
             type: 'reply',
             id: msg.id,
@@ -488,7 +465,7 @@ self.onconnect = function (e) {
         leaderPort.postMessage({ type: '__to-worker', msg });
       }
     } catch (error) {
-      console.log('Error in SharedWorker message handler:', error);
+      console.error('[SharedWorker] Error in message handler:', error);
     }
   };
 
