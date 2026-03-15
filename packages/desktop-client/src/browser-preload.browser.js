@@ -8,7 +8,7 @@ import packageJson from '../package.json';
 
 const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
 const sharedBackendWorkerUrl = new URL(
-  './shared-browser-server.ts',
+  './shared-browser-server.js',
   import.meta.url,
 );
 
