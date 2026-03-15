@@ -5,7 +5,7 @@ import babel from '@rolldown/plugin-babel';
 import inject from '@rollup/plugin-inject';
 import basicSsl from '@vitejs/plugin-basic-ssl';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
-import type { PreRenderedAsset } from 'rollup';
+import type { PreRenderedAsset } from 'rolldown';
 import { visualizer } from 'rollup-plugin-visualizer';
 /// <reference types="vitest" />
 import { defineConfig, loadEnv } from 'vite';
@@ -37,14 +37,11 @@ const addWatchers = (): Plugin => ({
 });
 
 // Inject build shims using the inject plugin
-const injectShims = ({
-  processEnv,
-}: {
-  processEnv: Record<string, string>;
-}): Plugin[] => {
+const injectShims = (): Plugin[] => {
   const buildShims = path.resolve('./src/build-shims.js');
-  const commonInject = {
-    exclude: ['src/setupTests.ts'],
+  const commonInject: {
+    global: [string, string];
+  } = {
     global: [buildShims, 'global'],
   };
 
@@ -52,26 +49,51 @@ const injectShims = ({
     {
       name: 'inject-build-process',
       config: () => ({
-        define: {
-          'process.env': JSON.stringify(processEnv),
+        // rename process.env in build mode so it doesn't get set to an empty object up by the vite:define plugin
+        // this isn't needed in serve mode, because vite:define doesn't empty it in serve mode. And defines also happen last anyways in serve mode.
+        environments: {
+          client: {
+            define: {
+              'process.env': '_process.env',
+            },
+          },
         },
       }),
       apply: 'build',
     },
     {
-      ...inject({
-        ...commonInject,
-        process: [buildShims, 'process'],
-      }),
+      name: 'inject-dev-process',
       enforce: 'post',
       apply: 'serve',
+      config: () => ({
+        build: {
+          rolldownOptions: {
+            transform: {
+              inject: {
+                ...commonInject,
+                process: [buildShims, 'process'],
+              },
+            },
+          },
+        },
+      }),
     },
     {
-      ...inject({
-        ...commonInject,
-      }),
+      name: 'inject-build-process-inject',
       enforce: 'post',
       apply: 'build',
+      config: () => ({
+        build: {
+          rolldownOptions: {
+            transform: {
+              inject: {
+                ...commonInject,
+                _process: [buildShims, 'process'],
+              },
+            },
+          },
+        },
+      }),
     },
   ];
 };
@@ -90,12 +112,6 @@ export default defineConfig(async ({ mode }) => {
     process.env.REACT_APP_REVIEW_ID = process.env.REVIEW_ID;
     process.env.REACT_APP_BRANCH = process.env.BRANCH;
   }
-
-  const processEnv = Object.fromEntries(
-    Object.entries(process.env).filter(([key]) => key.startsWith('REACT_APP_')),
-  ) as Record<string, string>;
-  processEnv.NODE_ENV = mode === 'development' ? 'development' : 'production';
-  processEnv.PUBLIC_URL = '/'.slice(0, -1);
 
   let resolveExtensions = [
     '.mjs',
@@ -221,7 +237,7 @@ export default defineConfig(async ({ mode }) => {
               ],
             },
           }),
-      injectShims({ processEnv }),
+      injectShims(),
       addWatchers(),
       react(),
       babel({
