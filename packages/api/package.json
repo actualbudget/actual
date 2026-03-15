@@ -10,7 +10,7 @@
   "main": "dist/index.js",
   "types": "@types/index.d.ts",
   "scripts": {
-    "build": "yarn workspace @actual-app/core exec tsgo && vite build && node scripts/inline-loot-core-types.mjs",
+    "build": "vite build",
     "test": "vitest --run",
     "typecheck": "tsgo -b && tsc-strict"
   },
