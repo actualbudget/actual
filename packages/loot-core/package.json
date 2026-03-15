@@ -1,16 +1,22 @@
 {
-  "name": "loot-core",
-  "version": "0.0.2",
+  "name": "@actual-app/core",
+  "version": "26.3.0",
   "description": "",
   "license": "ISC",
-  "author": "",
-  "main": "index.js",
   "typesVersions": {
     "*": {
       "types/*": [
         "./src/types/*"
       ]
     }
+  },
+  "imports": {
+    "#*": [
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts",
+      "./src/*/index.tsx"
+    ]
   },
   "exports": {
     "./client/accounts/*": "./src/client/accounts/*.ts",
@@ -94,7 +100,7 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@actual-app/crdt": "workspace:^",
+    "@actual-app/crdt": "workspace:*",
     "@swc/core": "^1.15.11",
     "@types/adm-zip": "^0.5.7",
     "@types/better-sqlite3": "^7.6.13",

@@ -23,11 +23,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/api@workspace:packages/api"
   dependencies:
-    "@actual-app/crdt": "workspace:^"
+    "@actual-app/core": "workspace:*"
+    "@actual-app/crdt": "workspace:*"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
     better-sqlite3: "npm:^12.6.2"
     compare-versions: "npm:^6.1.1"
-    loot-core: "workspace:^"
     node-fetch: "npm:^3.3.2"
     rollup-plugin-visualizer: "npm:^6.0.5"
     typescript-strict-plugin: "npm:^2.4.4"
@@ -75,6 +75,64 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@actual-app/core@workspace:*, @actual-app/core@workspace:packages/loot-core":
+  version: 0.0.0-use.local
+  resolution: "@actual-app/core@workspace:packages/loot-core"
+  dependencies:
+    "@actual-app/crdt": "workspace:*"
+    "@jlongster/sql.js": "npm:^1.6.7"
+    "@reduxjs/toolkit": "npm:^2.11.2"
+    "@rschedule/core": "npm:^1.5.0"
+    "@rschedule/json-tools": "npm:^1.5.0"
+    "@rschedule/standard-date-adapter": "npm:^1.5.0"
+    "@swc/core": "npm:^1.15.11"
+    "@types/adm-zip": "npm:^0.5.7"
+    "@types/better-sqlite3": "npm:^7.6.13"
+    "@types/emscripten": "npm:^1.41.5"
+    "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
+    "@types/node": "npm:^22.19.10"
+    "@types/pegjs": "npm:^0.10.6"
+    "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
+    absurd-sql: "npm:0.0.54"
+    adm-zip: "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch"
+    assert: "npm:^2.1.0"
+    better-sqlite3: "npm:^12.6.2"
+    browserify-zlib: "npm:^0.2.0"
+    buffer: "npm:^6.0.3"
+    cross-env: "npm:^10.1.0"
+    csv-parse: "npm:^6.1.0"
+    csv-stringify: "npm:^6.6.0"
+    date-fns: "npm:^4.1.0"
+    fake-indexeddb: "npm:^6.2.5"
+    fast-check: "npm:4.5.3"
+    handlebars: "npm:^4.7.8"
+    i18next: "npm:^25.8.4"
+    jest-diff: "npm:^30.2.0"
+    jsverify: "npm:^0.8.4"
+    lru-cache: "npm:^11.2.5"
+    md5: "npm:^2.3.0"
+    memoize-one: "npm:^6.0.0"
+    mitt: "npm:^3.0.1"
+    mockdate: "npm:^3.0.5"
+    npm-run-all: "npm:^4.1.5"
+    path-browserify: "npm:^1.0.1"
+    peggy: "npm:5.0.6"
+    promise-retry: "npm:^2.0.1"
+    rollup-plugin-visualizer: "npm:^6.0.5"
+    slash: "npm:5.1.0"
+    stream-browserify: "npm:^3.0.0"
+    ts-node: "npm:^10.9.2"
+    typescript-strict-plugin: "npm:^2.4.4"
+    ua-parser-js: "npm:^2.0.9"
+    uuid: "npm:^13.0.0"
+    vite: "npm:^7.3.1"
+    vite-plugin-node-polyfills: "npm:^0.25.0"
+    vite-plugin-peggy-loader: "npm:^2.0.1"
+    vitest: "npm:^4.0.18"
+    yargs: "npm:^18.0.0"
+  languageName: unknown
+  linkType: soft
+
 "@actual-app/crdt@npm:2.1.0":
   version: 2.1.0
   resolution: "@actual-app/crdt@npm:2.1.0"
@@ -86,7 +144,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actual-app/crdt@workspace:^, @actual-app/crdt@workspace:packages/crdt":
+"@actual-app/crdt@workspace:*, @actual-app/crdt@workspace:packages/crdt":
   version: 0.0.0-use.local
   resolution: "@actual-app/crdt@workspace:packages/crdt"
   dependencies:
@@ -151,6 +209,7 @@ __metadata:
   resolution: "@actual-app/web@workspace:packages/desktop-client"
   dependencies:
     "@actual-app/components": "workspace:*"
+    "@actual-app/core": "workspace:*"
     "@codemirror/autocomplete": "npm:^6.20.0"
     "@codemirror/lang-javascript": "npm:^6.2.4"
     "@codemirror/language": "npm:^6.12.1"
@@ -193,7 +252,6 @@ __metadata:
     i18next-resources-to-backend: "npm:^1.2.1"
     jsdom: "npm:^27.4.0"
     lodash: "npm:^4.17.23"
-    loot-core: "workspace:*"
     mdast-util-newline-to-break: "npm:^2.0.0"
     memoize-one: "npm:^6.0.0"
     pikaday: "npm:1.8.2"
@@ -15101,6 +15159,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "desktop-electron@workspace:packages/desktop-electron"
   dependencies:
+    "@actual-app/core": "workspace:*"
     "@actual-app/sync-server": "workspace:*"
     "@electron/notarize": "npm:3.1.1"
     "@electron/rebuild": "npm:4.0.2"
@@ -15114,7 +15173,6 @@ __metadata:
     electron: "npm:39.2.7"
     electron-builder: "npm:26.4.0"
     fs-extra: "npm:^11.3.3"
-    loot-core: "workspace:*"
     promise-retry: "npm:^2.0.1"
     typescript-strict-plugin: "npm:^2.4.4"
   languageName: unknown
@@ -20565,64 +20623,6 @@ __metadata:
   checksum: 10/6517e24e0cad87ec9888f500c5b5947032cdfe6ef65e1c1936a0c48a524b81e65542c9c3edc91c97d5bddc806ee2a985dbc79be89215d613b1de5db6d1cfe6f4
   languageName: node
   linkType: hard
-
-"loot-core@workspace:*, loot-core@workspace:^, loot-core@workspace:packages/loot-core":
-  version: 0.0.0-use.local
-  resolution: "loot-core@workspace:packages/loot-core"
-  dependencies:
-    "@actual-app/crdt": "workspace:^"
-    "@jlongster/sql.js": "npm:^1.6.7"
-    "@reduxjs/toolkit": "npm:^2.11.2"
-    "@rschedule/core": "npm:^1.5.0"
-    "@rschedule/json-tools": "npm:^1.5.0"
-    "@rschedule/standard-date-adapter": "npm:^1.5.0"
-    "@swc/core": "npm:^1.15.11"
-    "@types/adm-zip": "npm:^0.5.7"
-    "@types/better-sqlite3": "npm:^7.6.13"
-    "@types/emscripten": "npm:^1.41.5"
-    "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
-    "@types/node": "npm:^22.19.10"
-    "@types/pegjs": "npm:^0.10.6"
-    "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
-    absurd-sql: "npm:0.0.54"
-    adm-zip: "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch"
-    assert: "npm:^2.1.0"
-    better-sqlite3: "npm:^12.6.2"
-    browserify-zlib: "npm:^0.2.0"
-    buffer: "npm:^6.0.3"
-    cross-env: "npm:^10.1.0"
-    csv-parse: "npm:^6.1.0"
-    csv-stringify: "npm:^6.6.0"
-    date-fns: "npm:^4.1.0"
-    fake-indexeddb: "npm:^6.2.5"
-    fast-check: "npm:4.5.3"
-    handlebars: "npm:^4.7.8"
-    i18next: "npm:^25.8.4"
-    jest-diff: "npm:^30.2.0"
-    jsverify: "npm:^0.8.4"
-    lru-cache: "npm:^11.2.5"
-    md5: "npm:^2.3.0"
-    memoize-one: "npm:^6.0.0"
-    mitt: "npm:^3.0.1"
-    mockdate: "npm:^3.0.5"
-    npm-run-all: "npm:^4.1.5"
-    path-browserify: "npm:^1.0.1"
-    peggy: "npm:5.0.6"
-    promise-retry: "npm:^2.0.1"
-    rollup-plugin-visualizer: "npm:^6.0.5"
-    slash: "npm:5.1.0"
-    stream-browserify: "npm:^3.0.0"
-    ts-node: "npm:^10.9.2"
-    typescript-strict-plugin: "npm:^2.4.4"
-    ua-parser-js: "npm:^2.0.9"
-    uuid: "npm:^13.0.0"
-    vite: "npm:^7.3.1"
-    vite-plugin-node-polyfills: "npm:^0.25.0"
-    vite-plugin-peggy-loader: "npm:^2.0.1"
-    vitest: "npm:^4.0.18"
-    yargs: "npm:^18.0.0"
-  languageName: unknown
-  linkType: soft
 
 "loupe@npm:^3.1.0, loupe@npm:^3.1.4, loupe@npm:^3.2.1":
   version: 3.2.1

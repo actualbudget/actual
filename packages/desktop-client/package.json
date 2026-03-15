@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@actual-app/components": "workspace:*",
+    "@actual-app/core": "workspace:*",
     "@codemirror/autocomplete": "^6.20.0",
     "@codemirror/lang-javascript": "^6.2.4",
     "@codemirror/language": "^6.12.1",
@@ -62,7 +63,6 @@
     "i18next-resources-to-backend": "^1.2.1",
     "jsdom": "^27.4.0",
     "lodash": "^4.17.23",
-    "loot-core": "workspace:*",
     "mdast-util-newline-to-break": "^2.0.0",
     "memoize-one": "^6.0.0",
     "pikaday": "1.8.2",

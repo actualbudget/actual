@@ -16,6 +16,10 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
 
+      - name: Pack the core package
+        run: |
+          yarn workspace @actual-app/core pack --filename @actual-app/core.tgz
+
       - name: Build Web
         run: yarn build:server
 
@@ -36,6 +40,7 @@ jobs:
         with:
           name: npm-packages
           path: |
+            packages/loot-core/@actual-app/core.tgz
             packages/desktop-client/@actual-app/web.tgz
             packages/sync-server/@actual-app/sync-server.tgz
             packages/api/@actual-app/api.tgz
@@ -58,6 +63,12 @@ jobs:
         with:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish Core
+        run: |
+          npm publish loot-core/@actual-app/core.tgz --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish Web
         run: |

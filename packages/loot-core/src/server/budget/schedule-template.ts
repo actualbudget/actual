@@ -1,8 +1,7 @@
 // @ts-strict-ignore
 
-import type { Currency } from 'loot-core/shared/currencies';
-import { amountToInteger } from 'loot-core/shared/util';
-
+import type { Currency } from '#shared/currencies';
+import { amountToInteger } from '#shared/util';
 import * as monthUtils from '../../shared/months';
 import {
   extractScheduleConds,

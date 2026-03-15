@@ -25,7 +25,7 @@ import type {
 import { copy, exists, mkdir, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
 
-import type { GlobalPrefsJson } from 'loot-core/types/prefs';
+import type { GlobalPrefsJson } from '@actual-app/core/types/prefs';
 
 import { getMenu } from './menu';
 import {

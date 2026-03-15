@@ -1,7 +1,6 @@
-import { getCurrency } from 'loot-core/shared/currencies';
-import type { Currency } from 'loot-core/shared/currencies';
-import { q } from 'loot-core/shared/query';
-
+import { getCurrency } from '#shared/currencies';
+import type { Currency } from '#shared/currencies';
+import { q } from '#shared/query';
 import * as monthUtils from '../../shared/months';
 import { amountToInteger, integerToAmount } from '../../shared/util';
 import type { CategoryEntity } from '../../types/models';

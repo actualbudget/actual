@@ -10,7 +10,7 @@
       "builtin",
       "external",
       "loot-core",
-      "parent",
+      ["parent", "subpath"],
       "sibling",
       "index",
       "desktop-client"
@@ -22,7 +22,7 @@
       },
       {
         "groupName": "loot-core",
-        "elementNamePattern": ["loot-core/**"]
+        "elementNamePattern": ["loot-core/**", "@actual-app/core/**"]
       },
       {
         "groupName": "desktop-client",

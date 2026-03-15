@@ -1,7 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { q } from 'loot-core/shared/query';
-
+import { q } from '#shared/query';
 import type { CustomReportData, CustomReportEntity } from '../../types/models';
 import { createApp } from '../app';
 import { aqlQuery } from '../aql';

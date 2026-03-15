@@ -21,6 +21,7 @@
     "promise-retry": "^2.0.1"
   },
   "devDependencies": {
+    "@actual-app/core": "workspace:*",
     "@electron/notarize": "3.1.1",
     "@electron/rebuild": "4.0.2",
     "@playwright/test": "1.58.2",
@@ -31,7 +32,6 @@
     "cross-env": "^10.1.0",
     "electron": "39.2.7",
     "electron-builder": "26.4.0",
-    "loot-core": "workspace:*",
     "typescript-strict-plugin": "^2.4.4"
   },
   "build": {
