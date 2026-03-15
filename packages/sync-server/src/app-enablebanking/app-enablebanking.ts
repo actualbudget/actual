@@ -288,17 +288,13 @@ post('/transactions', async req => {
   const currentBalance =
     await enableBankingService.getCurrentBalance(account_id);
 
-  // Convert to integer cents
+  // Return current balance in integer cents — the client computes the
+  // opening balance by subtracting fetched transactions, same as
+  // GoCardless and PluggyAI.
   const currentBalanceCents = Math.round(currentBalance * 100);
-
-  // Compute opening balance: current balance minus sum of all transaction amounts
-  const totalTransactionsCents = transactions.reduce(
-    (sum, t) => sum + Math.round(t.amount * 100),
-    0,
-  );
 
   return {
     transactions,
-    startingBalance: currentBalanceCents - totalTransactionsCents,
+    startingBalance: currentBalanceCents,
   };
 });
