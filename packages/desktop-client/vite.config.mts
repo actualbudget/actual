@@ -1,8 +1,8 @@
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 
-import inject from '@rollup/plugin-inject';
 import babel from '@rolldown/plugin-babel';
+import inject from '@rollup/plugin-inject';
 import basicSsl from '@vitejs/plugin-basic-ssl';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import type { PreRenderedAsset } from 'rollup';
