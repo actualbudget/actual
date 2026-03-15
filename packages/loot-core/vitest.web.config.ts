@@ -26,12 +26,6 @@ export default defineConfig({
     maxWorkers: 2,
   },
   resolve: {
-    alias: [
-      {
-        find: /^@actual-app\/crdt(\/.*)?$/,
-        replacement: path.resolve('../../../crdt/src$1'),
-      },
-    ],
     extensions: resolveExtensions,
   },
   plugins: [peggyLoader()],

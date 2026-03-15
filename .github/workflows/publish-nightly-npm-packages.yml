@@ -20,11 +20,13 @@ jobs:
       - name: Update package versions
         run: |
           # Get new nightly versions
+          NEW_CORE_VERSION=$(node ./packages/ci-actions/bin/get-next-package-version.js --package-json ./packages/loot-core/package.json --type nightly)
           NEW_WEB_VERSION=$(node ./packages/ci-actions/bin/get-next-package-version.js --package-json ./packages/desktop-client/package.json --type nightly)
           NEW_SYNC_VERSION=$(node ./packages/ci-actions/bin/get-next-package-version.js --package-json ./packages/sync-server/package.json --type nightly)
           NEW_API_VERSION=$(node ./packages/ci-actions/bin/get-next-package-version.js --package-json ./packages/api/package.json --type nightly)
 
           # Set package versions
+          npm version $NEW_CORE_VERSION --no-git-tag-version --workspace=@actual-app/core --no-workspaces-update
           npm version $NEW_WEB_VERSION --no-git-tag-version --workspace=@actual-app/web --no-workspaces-update
           npm version $NEW_SYNC_VERSION --no-git-tag-version --workspace=@actual-app/sync-server --no-workspaces-update
           npm version $NEW_API_VERSION --no-git-tag-version --workspace=@actual-app/api --no-workspaces-update
@@ -32,6 +34,10 @@ jobs:
       - name: Yarn install
         run: |
           yarn install
+
+      - name: Pack the core package
+        run: |
+          yarn workspace @actual-app/core pack --filename @actual-app/core.tgz
 
       - name: Build Server & Web
         run: yarn build:server
@@ -53,6 +59,7 @@ jobs:
         with:
           name: npm-packages
           path: |
+            packages/loot-core/@actual-app/core.tgz
             packages/desktop-client/@actual-app/web.tgz
             packages/sync-server/@actual-app/sync-server.tgz
             packages/api/@actual-app/api.tgz
@@ -75,6 +82,12 @@ jobs:
         with:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish Core
+        run: |
+          npm publish loot-core/@actual-app/core.tgz --access public --tag nightly
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish Web
         run: |
