@@ -54,8 +54,9 @@ export function useEnableBankingStatus() {
         }
 
         setConfiguredEnableBanking(true);
-      } catch {
-        setConfiguredEnableBanking(false);
+      } catch (error) {
+        console.error('Failed to check Enable Banking status:', error);
+        setConfiguredEnableBanking(null);
       } finally {
         setIsLoading(false);
       }

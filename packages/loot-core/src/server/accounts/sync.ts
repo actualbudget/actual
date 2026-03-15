@@ -22,8 +22,8 @@ import type {
 } from '../../types/models';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
-import { createBankSyncError } from '../errors';
 import { TRANSACTION_SORT_INCREMENT } from '../db/sort';
+import { createBankSyncError } from '../errors';
 import { runMutator } from '../mutators';
 import { post } from '../post';
 import { getServer } from '../server-config';

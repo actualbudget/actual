@@ -127,12 +127,26 @@ function normalizeDanishTransaction(
   // Clean metadata from notes for display
   const cleanNotes = notes.replace(/\s*\|\s*col\d+=.*$/i, '').trim();
 
-  const parsedAmount = t.transaction_amount?.amount
-    ? parseFloat(t.transaction_amount.amount)
-    : 0;
-  const amount = Number.isNaN(parsedAmount)
-    ? 0
-    : parsedAmount * (isDebtor ? -1 : 1);
+  const transactionIdentifier =
+    t.entry_reference ??
+    t.transaction_id ??
+    t.remittance_information?.[0] ??
+    'unknown';
+
+  const rawAmount = t.transaction_amount?.amount;
+  const parsedAmount = rawAmount ? parseFloat(rawAmount) : Number.NaN;
+
+  if (
+    !rawAmount ||
+    !Number.isFinite(parsedAmount) ||
+    Number.isNaN(parsedAmount)
+  ) {
+    throw new Error(
+      `Missing or invalid transaction amount for Enable Banking transaction: ${transactionIdentifier}`,
+    );
+  }
+
+  const amount = parsedAmount * (isDebtor ? -1 : 1);
 
   const currency = t.transaction_amount?.currency;
   if (!currency) {

@@ -370,7 +370,7 @@ type LinkAccountBasePayload = {
 type LinkAccountPayload = LinkAccountBasePayload & {
   requisitionId: string;
   account: SyncServerGoCardlessAccount;
-  syncSource?: 'goCardless' | 'enablebanking';
+  syncSource: 'goCardless' | 'enablebanking';
 };
 
 export function useLinkAccountMutation() {
@@ -388,19 +388,18 @@ export function useLinkAccountMutation() {
       startingBalance,
       syncSource,
     }: LinkAccountPayload) => {
-      const method: 'enablebanking-accounts-link' | 'gocardless-accounts-link' =
-        syncSource === 'enablebanking'
-          ? 'enablebanking-accounts-link'
-          : 'gocardless-accounts-link';
+      const methodBySyncSource = {
+        enablebanking: 'enablebanking-accounts-link',
+        goCardless: 'gocardless-accounts-link',
+      } as const;
 
-      await send(method, {
+      await send(methodBySyncSource[syncSource], {
         requisitionId,
         account,
         upgradingId,
         offBudget,
         startingDate,
         startingBalance,
-        syncSource,
       });
     },
     onSuccess: () => {

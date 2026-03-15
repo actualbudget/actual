@@ -1,15 +1,15 @@
 import { sign } from 'jws';
 import type { Header } from 'jws';
 
-const getJWTHeader = (applicationId: string): Header => {
+function getJWTHeader(applicationId: string): Header {
   return {
     typ: 'JWT',
     alg: 'RS256',
     kid: applicationId,
   };
-};
+}
 
-const getJWTBody = (exp = 3600) => {
+function getJWTBody(exp = 3600) {
   const timestamp = Math.floor(new Date().getTime() / 1000);
   return {
     iss: 'enablebanking.com',
@@ -17,13 +17,9 @@ const getJWTBody = (exp = 3600) => {
     iat: timestamp,
     exp: timestamp + exp,
   };
-};
+}
 
-export const getJWT = (
-  applicationId: string,
-  privateKey: string,
-  exp = 3600,
-) => {
+export function getJWT(applicationId: string, privateKey: string, exp = 3600) {
   const jwtHeaders = getJWTHeader(applicationId);
   const jwtBody = getJWTBody(exp);
 
@@ -32,4 +28,4 @@ export const getJWT = (
     payload: jwtBody,
     privateKey,
   });
-};
+}

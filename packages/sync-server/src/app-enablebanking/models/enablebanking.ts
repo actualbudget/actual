@@ -65,7 +65,6 @@ export type ConfigureBody = {
 export type TransactionsBody = {
   account_id: string;
   startDate?: string;
-  endDate?: string;
   bank_id?: string;
 };
 

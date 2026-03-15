@@ -219,7 +219,9 @@ export function ExperimentalFeatures() {
               flag="enableBankingSync"
               feedbackLink="https://github.com/actualbudget/actual/pull/5570"
             >
-              <Trans>Enable Banking bank sync</Trans>
+              <Trans values={{ provider: 'Enable Banking' }}>
+                {'{{provider}}'} bank sync
+              </Trans>
             </FeatureToggle>
             <FeatureToggle
               flag="payeeLocations"

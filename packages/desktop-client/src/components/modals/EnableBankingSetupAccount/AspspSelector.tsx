@@ -17,8 +17,8 @@ import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { COUNTRY_OPTIONS } from '@desktop-client/components/util/countries';
 
 export function AspspSelector({
-  init_country,
-  init_aspsp,
+  initialCountry,
+  initialAspsp,
   onComplete,
   onError,
 }: AspspSelectorProps) {
@@ -38,10 +38,10 @@ export function AspspSelector({
     EnableBankingBank[] | null
   >(null);
   const [country, setCountry] = useState<{ id: string; name: string } | null>(
-    COUNTRY_OPTIONS.find(country => country.id === init_country) ?? null,
+    COUNTRY_OPTIONS.find(country => country.id === initialCountry) ?? null,
   );
   const [aspsp, setAspsp] = useState<string | null>(
-    init_aspsp ? init_aspsp : null,
+    initialAspsp ? initialAspsp : null,
   );
   const [startingAuth, setStartingAuth] = useState<boolean>(false);
   const autoTriggeredRef = useRef(false);
@@ -83,8 +83,8 @@ export function AspspSelector({
 
   useEffect(() => {
     if (
-      init_country &&
-      init_aspsp &&
+      initialCountry &&
+      initialAspsp &&
       country &&
       aspsp &&
       !startingAuth &&
@@ -93,7 +93,7 @@ export function AspspSelector({
       autoTriggeredRef.current = true;
       void onLink();
     }
-  }, [aspsp, country, init_aspsp, init_country, onLink, startingAuth]);
+  }, [aspsp, country, initialAspsp, initialCountry, onLink, startingAuth]);
 
   useEffect(() => {
     let cancelled = false;

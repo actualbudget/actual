@@ -107,8 +107,8 @@ export function EnableBankingSetupAccountModal({
     case 'selectingAspsp':
       component = (
         <AspspSelector
-          init_country={initialCountry}
-          init_aspsp={initialAspsp}
+          initialCountry={initialCountry}
+          initialAspsp={initialAspsp}
           onComplete={(response: EnableBankingAuthenticationStartResponse) => {
             setError(null);
             setAuthenticationStartResponse(response);
@@ -248,7 +248,7 @@ export function EnableBankingSetupAccountModal({
               <Paragraph style={{ fontSize: 15 }}>
                 <Trans>
                   To link your bank account, you will be redirected to a new
-                  page where EnableBanking will ask to connect to your bank.
+                  page where Enable Banking will ask to connect to your bank.
                   Enable Banking will not be able to withdraw funds from your
                   accounts.
                 </Trans>

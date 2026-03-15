@@ -112,24 +112,24 @@ export const EnableBankingInitialiseModal = ({
         return (
           <>
             <ModalHeader
-              title={t('Set up Enable Banking')}
+              title={t('Set up {{provider}}', { provider: 'Enable Banking' })}
               rightContent={<ModalCloseButton onPress={closeModal} />}
             />
             <View style={{ display: 'flex', gap: 10 }}>
               {window.location.protocol === 'http:' ? (
                 <ErrorAlert>
-                  <Trans>
-                    Enable Banking requires HTTPS. Please access the app via
+                  <Trans values={{ provider: 'Enable Banking' }}>
+                    {'{{provider}}'} requires HTTPS. Please access the app via
                     HTTPS to use this feature.
                   </Trans>
                 </ErrorAlert>
               ) : (
                 <>
                   <Text>
-                    <Trans>
-                      In order to enable bank sync via Enable Banking (only for
-                      EU banks) you will need to create application credentials
-                      at{' '}
+                    <Trans values={{ provider: 'Enable Banking' }}>
+                      In order to enable bank sync via {'{{provider}}'} (only
+                      for EU banks) you will need to create application
+                      credentials at{' '}
                       <Link
                         variant="external"
                         to="https://enablebanking.com/cp/applications"

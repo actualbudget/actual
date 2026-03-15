@@ -54,8 +54,8 @@ export type AccountHandlers = {
   'account-balance': typeof getAccountBalance;
   'account-properties': typeof getAccountProperties;
   'get-bank': typeof getBank;
-  'enablebanking-accounts-link': typeof linkBankAccount;
-  'gocardless-accounts-link': typeof linkBankAccount;
+  'enablebanking-accounts-link': typeof linkEnableBankingAccount;
+  'gocardless-accounts-link': typeof linkGoCardlessAccount;
   'simplefin-accounts-link': typeof linkSimpleFinAccount;
   'pluggyai-accounts-link': typeof linkPluggyAiAccount;
   'account-create': typeof createAccount;
@@ -157,19 +157,21 @@ async function getBank({ id }: { id: string }) {
   );
 }
 
+type LinkBankAccountParams = LinkAccountBaseParams & {
+  requisitionId: string;
+  account: SyncServerGoCardlessAccount;
+  syncSource: 'goCardless' | 'enablebanking';
+};
+
 async function linkBankAccount({
   requisitionId,
   account,
   upgradingId,
   offBudget = false,
-  syncSource = 'goCardless',
+  syncSource,
   startingDate,
   startingBalance,
-}: LinkAccountBaseParams & {
-  requisitionId: string;
-  account: SyncServerGoCardlessAccount;
-  syncSource?: 'goCardless' | 'enablebanking';
-}) {
+}: LinkBankAccountParams) {
   let id;
   const institution =
     typeof account.institution === 'string'
@@ -228,6 +230,18 @@ async function linkBankAccount({
   });
 
   return 'ok';
+}
+
+async function linkGoCardlessAccount(
+  params: Omit<LinkBankAccountParams, 'syncSource'>,
+) {
+  return await linkBankAccount({ ...params, syncSource: 'goCardless' });
+}
+
+async function linkEnableBankingAccount(
+  params: Omit<LinkBankAccountParams, 'syncSource'>,
+) {
+  return await linkBankAccount({ ...params, syncSource: 'enablebanking' });
 }
 
 async function linkSimpleFinAccount({
@@ -1288,8 +1302,8 @@ app.method('accounts-get', getAccounts);
 app.method('account-balance', getAccountBalance);
 app.method('account-properties', getAccountProperties);
 app.method('get-bank', getBank);
-app.method('enablebanking-accounts-link', linkBankAccount);
-app.method('gocardless-accounts-link', linkBankAccount);
+app.method('enablebanking-accounts-link', linkEnableBankingAccount);
+app.method('gocardless-accounts-link', linkGoCardlessAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);
 app.method('pluggyai-accounts-link', linkPluggyAiAccount);
 app.method('account-create', mutator(undoable(createAccount)));

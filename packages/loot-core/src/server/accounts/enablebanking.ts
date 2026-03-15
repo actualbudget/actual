@@ -166,12 +166,19 @@ async function pollAuth({
   }
 }
 
-async function stopAuthPoll() {
-  // Stop all active polls
-  for (const controller of activePollControllers.values()) {
-    controller.abort();
+async function stopAuthPoll({ state }: { state?: string } = {}) {
+  if (state) {
+    const controller = activePollControllers.get(state);
+    if (controller) {
+      controller.abort();
+      activePollControllers.delete(state);
+    }
+  } else {
+    for (const controller of activePollControllers.values()) {
+      controller.abort();
+    }
+    activePollControllers.clear();
   }
-  activePollControllers.clear();
 }
 
 async function completeAuth({ state, code }: { state: string; code: string }) {

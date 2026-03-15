@@ -5,8 +5,8 @@ import type {
 } from 'loot-core/types/models/enablebanking';
 
 export type AspspSelectorProps = {
-  init_country?: string;
-  init_aspsp?: string;
+  initialCountry?: string;
+  initialAspsp?: string;
   onComplete: (data: EnableBankingAuthenticationStartResponse) => void;
   onError: (error: EnableBankingErrorInterface) => void;
 };

@@ -95,90 +95,79 @@ const SESSION_TTL_MS = 30 * 60 * 1000;
 // Cleanup interval (5 minutes)
 const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
 
-class SessionStore {
-  private sessions = new Map<string, SessionEntry>();
-  private pendingCreations = new Map<string, Promise<string>>();
-  private cleanupTimer: ReturnType<typeof setInterval> | null = null;
+const sessions = new Map<string, SessionEntry>();
+const pendingCreations = new Map<string, Promise<string>>();
 
-  constructor() {
-    // Start periodic cleanup
-    this.cleanupTimer = setInterval(() => this.cleanup(), CLEANUP_INTERVAL_MS);
-    // Don't keep process alive just for cleanup
-    this.cleanupTimer.unref();
+const cleanupTimer = setInterval(() => {
+  const now = Date.now();
+  for (const [state, entry] of sessions) {
+    if (now > entry.expiresAt) {
+      sessions.delete(state);
+    }
   }
+}, CLEANUP_INTERVAL_MS);
+cleanupTimer.unref();
 
+const sessionStore = {
   set(state: string, sessionId: string): void {
-    this.sessions.set(state, {
+    sessions.set(state, {
       sessionId,
       error: undefined,
       expiresAt: Date.now() + SESSION_TTL_MS,
     });
-  }
+  },
 
   setFailure(state: string, error: string): void {
-    this.sessions.set(state, {
+    sessions.set(state, {
       sessionId: null,
       error,
       expiresAt: Date.now() + SESSION_TTL_MS,
     });
-  }
+  },
 
   setPending(state: string, promise: Promise<string>): void {
-    this.pendingCreations.set(state, promise);
-  }
+    pendingCreations.set(state, promise);
+  },
 
   getPending(state: string): Promise<string> | undefined {
-    return this.pendingCreations.get(state);
-  }
+    return pendingCreations.get(state);
+  },
 
   deletePending(state: string): void {
-    this.pendingCreations.delete(state);
-  }
+    pendingCreations.delete(state);
+  },
 
   get(state: string): string | undefined {
-    const entry = this.sessions.get(state);
+    const entry = sessions.get(state);
     if (!entry) return undefined;
 
-    // Check if expired
     if (Date.now() > entry.expiresAt) {
-      this.sessions.delete(state);
+      sessions.delete(state);
       return undefined;
     }
 
     return entry.sessionId ?? undefined;
-  }
+  },
 
   getEntry(state: string): SessionEntry | undefined {
-    const entry = this.sessions.get(state);
+    const entry = sessions.get(state);
     if (!entry) return undefined;
 
-    // Check if expired
     if (Date.now() > entry.expiresAt) {
-      this.sessions.delete(state);
+      sessions.delete(state);
       return undefined;
     }
 
     return entry;
-  }
-
-  private cleanup(): void {
-    const now = Date.now();
-    for (const [state, entry] of this.sessions) {
-      if (now > entry.expiresAt) {
-        this.sessions.delete(state);
-      }
-    }
-  }
+  },
 
   clear(): number {
-    const count = this.sessions.size;
-    this.sessions.clear();
-    this.pendingCreations.clear();
+    const count = sessions.size;
+    sessions.clear();
+    pendingCreations.clear();
     return count;
-  }
-}
-
-const sessionStore = new SessionStore();
+  },
+};
 
 export const enableBankingService = {
   HOSTNAME: 'https://api.enablebanking.com/',
@@ -392,7 +381,11 @@ export const enableBankingService = {
             body: { code },
           });
         isDefined(data);
-        sessionStore.set(state, data.session_id);
+        // Only store the session if the pending entry was not cleared
+        // (guards against a concurrent clearAllSessions having invalidated it)
+        if (sessionStore.getPending(state) !== undefined) {
+          sessionStore.set(state, data.session_id);
+        }
         return data.session_id;
       } finally {
         sessionStore.deletePending(state);

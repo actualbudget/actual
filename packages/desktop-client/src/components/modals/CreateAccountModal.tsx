@@ -319,10 +319,23 @@ export function CreateAccountModal({
     });
   };
 
-  const onEnableBankingReset = () => {
-    void deconfigureEnableBanking().then(() => {
+  const onEnableBankingReset = async () => {
+    try {
+      await deconfigureEnableBanking();
       setIsEnableBankingSetupComplete(false);
-    });
+    } catch (error) {
+      console.error('Failed to deconfigure Enable Banking:', error);
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: t(
+              'Failed to reset Enable Banking configuration. Please try again.',
+            ),
+          },
+        }),
+      );
+    }
   };
 
   const onPluggyAiReset = () => {
@@ -609,7 +622,7 @@ export function CreateAccountModal({
                                       <Menu
                                         onMenuSelect={item => {
                                           if (item === 'reconfigure') {
-                                            onEnableBankingReset();
+                                            void onEnableBankingReset();
                                           }
                                         }}
                                         items={[

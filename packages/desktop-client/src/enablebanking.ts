@@ -54,7 +54,6 @@ export async function selectEnableBankingAccounts(
           account,
           requisitionId: token.bank_id,
           upgradingId: accountEntity.id,
-          syncSource: 'enablebanking',
         });
         dispatch(
           addNotification({
@@ -69,6 +68,8 @@ export async function selectEnableBankingAccounts(
             },
           }),
         );
+        dispatch(closeModal());
+        return;
       } catch (error) {
         console.error('Error linking account:', error);
         dispatch(
@@ -82,7 +83,6 @@ export async function selectEnableBankingAccounts(
           }),
         );
       }
-      dispatch(closeModal());
       return;
     }
   }

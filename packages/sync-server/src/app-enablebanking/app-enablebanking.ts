@@ -80,10 +80,17 @@ post('/configure', async req => {
     throw badRequestVariableError('secret', '/enablebanking/configure');
   }
 
-  if (applicationId === null || secret === null) {
+  if (applicationId === null && secret === null) {
     secretsService.set(SecretName.enablebanking_applicationId, null);
     secretsService.set(SecretName.enablebanking_secret, null);
     return;
+  }
+
+  if (applicationId === null) {
+    throw badRequestVariableError('applicationId', '/enablebanking/configure');
+  }
+  if (secret === null) {
+    throw badRequestVariableError('secret', '/enablebanking/configure');
   }
 
   await enableBankingService.setupSecrets(applicationId, secret);
@@ -266,7 +273,7 @@ post('/transactions', async req => {
   if (!enableBankingService.secretsAreSetup()) {
     throw new EnableBankingSetupError();
   }
-  const { startDate, endDate, account_id, bank_id } = req.body;
+  const { startDate, account_id, bank_id } = req.body;
 
   if (!account_id) {
     throw badRequestVariableError('account_id', '/enablebanking/transactions');
@@ -274,7 +281,7 @@ post('/transactions', async req => {
   const transactions = await enableBankingService.getTransactions(
     account_id,
     startDate,
-    endDate,
+    undefined,
     bank_id,
   );
 
@@ -284,8 +291,14 @@ post('/transactions', async req => {
   // Convert to integer cents
   const currentBalanceCents = Math.round(currentBalance * 100);
 
+  // Compute opening balance: current balance minus sum of all transaction amounts
+  const totalTransactionsCents = transactions.reduce(
+    (sum, t) => sum + Math.round(t.amount * 100),
+    0,
+  );
+
   return {
     transactions,
-    startingBalance: currentBalanceCents, // Return current balance, client will calculate starting balance
+    startingBalance: currentBalanceCents - totalTransactionsCents,
   };
 });
