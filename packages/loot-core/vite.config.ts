@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => {
         fileName: () =>
           isDev ? 'kcab.worker.dev.js' : `kcab.worker.[hash].js`,
       },
-      rollupOptions: {
+      rolldownOptions: {
         onwarn(warning, warn) {
           // Suppress sourcemap warnings from peggy-loader
           if (

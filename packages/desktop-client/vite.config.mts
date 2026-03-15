@@ -127,7 +127,7 @@ export default defineConfig(async ({ mode }) => {
       manifest: true,
       assetsInlineLimit: 0,
       chunkSizeWarningLimit: 1500,
-      rollupOptions: {
+      rolldownOptions: {
         output: {
           assetFileNames: (assetInfo: PreRenderedAsset) => {
             const info = assetInfo.name?.split('.') ?? [];
