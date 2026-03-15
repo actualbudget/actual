@@ -217,6 +217,7 @@ function createBackendWorker() {
     try {
       const sharedWorker = new SharedWorker(sharedBackendWorkerUrl, {
         name: 'actual-backend',
+        type: 'module',
       });
       const sharedPort = sharedWorker.port;
 
