@@ -85,7 +85,7 @@ export function Overview({ dashboard }: OverviewProps) {
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
-  const showBudgetAnalysisReport =
+  const budgetAnalysisReportEnabled =
     budgetAnalysisReportEnabled && budgetType !== 'tracking';
 
   const formulaMode = useFeatureFlag('formulaMode');
@@ -583,7 +583,7 @@ export function Overview({ dashboard }: OverviewProps) {
                               name: 'spending-card' as const,
                               text: t('Spending analysis'),
                             },
-                            ...(showBudgetAnalysisReport
+                            ...(budgetAnalysisReportEnabled
                               ? [
                                   {
                                     name: 'budget-analysis-card' as const,
@@ -800,7 +800,7 @@ export function Overview({ dashboard }: OverviewProps) {
                           }
                         />
                       ) : widget.type === 'budget-analysis-card' &&
-                        showBudgetAnalysisReport ? (
+                        budgetAnalysisReportEnabled ? (
                         <BudgetAnalysisCard
                           widgetId={item.i}
                           isEditing={isEditing}
