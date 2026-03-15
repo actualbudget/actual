@@ -396,12 +396,6 @@ export function CreateAccountModal({
     !multiuserEnabled || hasPermission(Permissions.ADMINISTRATOR);
   const isEnableBankingSyncFeatureEnabled = useFeatureFlag('enableBankingSync');
 
-  const requiresSecretSetupPermission =
-    !isGoCardlessSetupComplete ||
-    !isSimpleFinSetupComplete ||
-    !isPluggyAiSetupComplete ||
-    (isEnableBankingSyncFeatureEnabled && !isEnableBankingSetupComplete);
-
   return (
     <Modal name="add-account">
       {({ state }) => {
@@ -717,7 +711,12 @@ export function CreateAccountModal({
                         </Text>
                       </>
                     )}
-                    {requiresSecretSetupPermission && !canSetSecrets && (
+                    {(!isGoCardlessSetupComplete ||
+                      !isSimpleFinSetupComplete ||
+                      !isPluggyAiSetupComplete ||
+                      (isEnableBankingSyncFeatureEnabled &&
+                        !isEnableBankingSetupComplete)) &&
+                      !canSetSecrets && (
                       <Warning>
                         <Trans>
                           You don&apos;t have the required permissions to set up
