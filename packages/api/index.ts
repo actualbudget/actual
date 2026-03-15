@@ -3,8 +3,8 @@ import type {
   RequestInit as FetchInit,
 } from 'node-fetch';
 
-import { init as initLootCore } from 'loot-core/server/main';
-import type { InitConfig, lib } from 'loot-core/server/main';
+import { init as initLootCore } from '@actual-app/core/server/main';
+import type { InitConfig, lib } from '@actual-app/core/server/main';
 
 import { validateNodeVersion } from './validateNodeVersion';
 

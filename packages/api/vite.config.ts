@@ -81,12 +81,6 @@ export default defineConfig({
   ],
   resolve: {
     extensions: ['.api.ts', '.js', '.ts', '.tsx', '.json'],
-    alias: [
-      {
-        find: /^@actual-app\/crdt(\/.*)?$/,
-        replacement: path.resolve(__dirname, '../crdt/src') + '$1',
-      },
-    ],
   },
   test: {
     globals: true,

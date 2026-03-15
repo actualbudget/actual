@@ -118,8 +118,8 @@ yarn workspace <workspace-name> run <command>
 Examples:
 
 ```bash
-# Run tests for loot-core
-yarn workspace loot-core run test
+# Run tests for @actual-app/core
+yarn workspace @actual-app/core run test
 
 # Start the docs development server
 yarn workspace docs start

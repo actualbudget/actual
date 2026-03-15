@@ -25,7 +25,7 @@ import type {
 import { copy, exists, mkdir, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
 
-import type { GlobalPrefsJson } from 'loot-core/src/types/prefs';
+import type { GlobalPrefsJson } from '@actual-app/core/types/prefs';
 
 import { getMenu } from './menu';
 import {
@@ -323,7 +323,10 @@ async function startSyncServer() {
 
     return await Promise.race([syncServerPromise, syncServerTimeout]); // Either the server has started or the timeout is reached
   } catch (error) {
-    logMessage('error', `Sync-Server: Error starting sync server: ${error}`);
+    logMessage(
+      'error',
+      `Sync-Server: Error starting sync server: ${String(error)}`,
+    );
   }
 }
 
@@ -661,7 +664,7 @@ ipcMain.handle(
     } catch (error) {
       logMessage(
         'error',
-        `There was an error moving your directory:  ${error}`,
+        `There was an error moving your directory:  ${String(error)}`,
       );
       throw error;
     }
@@ -687,7 +690,7 @@ ipcMain.handle(
       // This call needs to succeed to allow the user to continue using the app with the files in the new location.
       logMessage(
         'error',
-        `There was an error removing the old directory: ${error}`,
+        `There was an error removing the old directory: ${String(error)}`,
       );
     }
   },

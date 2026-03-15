@@ -21,6 +21,7 @@ import { createSpendingSpreadsheet } from '@desktop-client/components/reports/sp
 import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useFormat } from '@desktop-client/hooks/useFormat';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 type SpendingCardProps = {
   widgetId: string;
@@ -41,6 +42,9 @@ export function SpendingCard({
 }: SpendingCardProps) {
   const { t } = useTranslation();
   const format = useFormat();
+  const [budgetTypePref] = useSyncedPref('budgetType');
+  const budgetType: 'envelope' | 'tracking' =
+    budgetTypePref === 'tracking' ? 'tracking' : 'envelope';
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
@@ -60,8 +64,9 @@ export function SpendingCard({
       conditionsOp: meta?.conditionsOp,
       compare,
       compareTo,
+      budgetType,
     });
-  }, [meta?.conditions, meta?.conditionsOp, compare, compareTo]);
+  }, [meta?.conditions, meta?.conditionsOp, compare, compareTo, budgetType]);
 
   const data = useReport('default', getGraphData);
   const todayDay =

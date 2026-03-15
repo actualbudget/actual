@@ -40,7 +40,7 @@
     "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
     "start:storybook": "storybook dev -p 6006",
     "build:storybook": "storybook build",
-    "typecheck": "tsc -b"
+    "typecheck": "tsgo -b"
   },
   "dependencies": {
     "@emotion/css": "^11.13.5",
@@ -54,6 +54,7 @@
     "@storybook/react-vite": "^10.2.7",
     "@svgr/cli": "^8.1.0",
     "@types/react": "^19.2.5",
+    "@typescript/native-preview": "^7.0.0-dev.20260309.1",
     "eslint-plugin-storybook": "^10.2.7",
     "react": "19.2.4",
     "react-dom": "19.2.4",

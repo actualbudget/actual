@@ -285,6 +285,11 @@ export function ThemeSettings() {
                   ? installedCustomDarkTheme
                   : installedCustomLightTheme
               }
+              mode={
+                showInstaller === 'light' || showInstaller === 'dark'
+                  ? showInstaller
+                  : undefined
+              }
             />
           )}
         </View>

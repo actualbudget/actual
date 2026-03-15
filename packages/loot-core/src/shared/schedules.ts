@@ -4,12 +4,7 @@ import * as d from 'date-fns';
 import type { Locale } from 'date-fns';
 import { t } from 'i18next';
 
-import type {
-  PayeeEntity,
-  RecurConfig,
-  ScheduleEntity,
-} from 'loot-core/types/models';
-
+import type { PayeeEntity, RecurConfig, ScheduleEntity } from '#types/models';
 import { Condition } from '../server/rules';
 
 import * as monthUtils from './months';
