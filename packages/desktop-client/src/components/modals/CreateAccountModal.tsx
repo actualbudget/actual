@@ -717,24 +717,24 @@ export function CreateAccountModal({
                       (isEnableBankingSyncFeatureEnabled &&
                         !isEnableBankingSetupComplete)) &&
                       !canSetSecrets && (
-                      <Warning>
-                        <Trans>
-                          You don&apos;t have the required permissions to set up
-                          secrets. Please contact an Admin to configure
-                        </Trans>{' '}
-                        {[
-                          isGoCardlessSetupComplete ? '' : 'GoCardless',
-                          isSimpleFinSetupComplete ? '' : 'SimpleFIN',
-                          isEnableBankingSetupComplete
-                            ? ''
-                            : t('Enable Banking'),
-                          isPluggyAiSetupComplete ? '' : 'Pluggy.ai',
-                        ]
-                          .filter(Boolean)
-                          .join(' or ')}
-                        .
-                      </Warning>
-                    )}
+                        <Warning>
+                          <Trans>
+                            You don&apos;t have the required permissions to set
+                            up secrets. Please contact an Admin to configure
+                          </Trans>{' '}
+                          {[
+                            isGoCardlessSetupComplete ? '' : 'GoCardless',
+                            isSimpleFinSetupComplete ? '' : 'SimpleFIN',
+                            isEnableBankingSetupComplete
+                              ? ''
+                              : t('Enable Banking'),
+                            isPluggyAiSetupComplete ? '' : 'Pluggy.ai',
+                          ]
+                            .filter(Boolean)
+                            .join(' or ')}
+                          .
+                        </Warning>
+                      )}
                   </>
                 ) : (
                   <>
