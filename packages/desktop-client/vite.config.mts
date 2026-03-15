@@ -37,7 +37,11 @@ const addWatchers = (): Plugin => ({
 });
 
 // Inject build shims using the inject plugin
-const injectShims = (): Plugin[] => {
+const injectShims = ({
+  processEnv,
+}: {
+  processEnv: Record<string, string>;
+}): Plugin[] => {
   const buildShims = path.resolve('./src/build-shims.js');
   const commonInject = {
     exclude: ['src/setupTests.ts'],
@@ -48,10 +52,8 @@ const injectShims = (): Plugin[] => {
     {
       name: 'inject-build-process',
       config: () => ({
-        // rename process.env in build mode so it doesn't get set to an empty object up by the vite:define plugin
-        // this isn't needed in serve mode, because vite:define doesn't empty it in serve mode. And defines also happen last anyways in serve mode.
         define: {
-          'process.env': `_process.env`,
+          'process.env': JSON.stringify(processEnv),
         },
       }),
       apply: 'build',
@@ -67,7 +69,6 @@ const injectShims = (): Plugin[] => {
     {
       ...inject({
         ...commonInject,
-        _process: [buildShims, 'process'],
       }),
       enforce: 'post',
       apply: 'build',
@@ -89,6 +90,12 @@ export default defineConfig(async ({ mode }) => {
     process.env.REACT_APP_REVIEW_ID = process.env.REVIEW_ID;
     process.env.REACT_APP_BRANCH = process.env.BRANCH;
   }
+
+  const processEnv = Object.fromEntries(
+    Object.entries(process.env).filter(([key]) => key.startsWith('REACT_APP_')),
+  ) as Record<string, string>;
+  processEnv.NODE_ENV = mode === 'development' ? 'development' : 'production';
+  processEnv.PUBLIC_URL = '/'.slice(0, -1);
 
   let resolveExtensions = [
     '.mjs',
@@ -214,7 +221,7 @@ export default defineConfig(async ({ mode }) => {
               ],
             },
           }),
-      injectShims(),
+      injectShims({ processEnv }),
       addWatchers(),
       react(),
       babel({
