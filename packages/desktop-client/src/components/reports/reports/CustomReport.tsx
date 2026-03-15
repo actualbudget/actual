@@ -901,7 +901,6 @@ function CustomReportInner({
             latestTransaction={latestTransactionDate}
             firstDayOfWeekIdx={firstDayOfWeekIdx}
             isComplexCategoryCondition={isComplexCategoryCondition}
-            showBudgetedType
           />
         )}
         <View

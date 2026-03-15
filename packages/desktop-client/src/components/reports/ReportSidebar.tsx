@@ -76,7 +76,6 @@ type ReportSidebarProps = {
   latestTransaction: TransactionEntity['date'];
   firstDayOfWeekIdx: SyncedPrefs['firstDayOfWeekIdx'];
   isComplexCategoryCondition?: boolean;
-  showBudgetedType?: boolean;
 };
 
 export function ReportSidebar({
@@ -109,7 +108,6 @@ export function ReportSidebar({
   latestTransaction,
   firstDayOfWeekIdx,
   isComplexCategoryCondition = false,
-  showBudgetedType = false,
 }: ReportSidebarProps) {
   const { t } = useTranslation();
   const locale = useLocale();
@@ -320,9 +318,10 @@ export function ReportSidebar({
           <Select
             value={customReportItems.balanceType}
             onChange={e => onChangeBalanceType(e)}
-            options={ReportOptions.balanceType
-              .filter(option => showBudgetedType || option.key !== 'Budgeted')
-              .map(option => [option.key, option.description])}
+            options={ReportOptions.balanceType.map(option => [
+              option.key,
+              option.description,
+            ])}
             disabledKeys={disabledItems('type')}
           />
         </View>
