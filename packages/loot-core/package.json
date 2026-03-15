@@ -127,7 +127,6 @@
     "stream-browserify": "^3.0.0",
     "timers-browserify": "^2.0.12",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3",
     "util": "^0.12.5",
     "vite": "^8.0.0",
     "vite-plugin-node-polyfills": "^0.25.0",

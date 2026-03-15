@@ -37,7 +37,7 @@ const addWatchers = (): Plugin => ({
 });
 
 const injectPlugin = (options?: Parameters<typeof inject>[0]): Plugin => {
-  // Rollup plugins are curerntly slightly API-incompatible with Rolldown plugins, but not in a way that prevents them from working here.
+  // Rollup plugins are currently slightly API-incompatible with Rolldown plugins, but not in a way that prevents them from working here.
   return inject(options) as unknown as Plugin;
 };
 

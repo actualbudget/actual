@@ -10,7 +10,6 @@
   "devDependencies": {
     "@typescript/native-preview": "^7.0.0-dev.20260309.1",
     "extensionless": "^2.0.6",
-    "typescript": "^5.9.3",
     "vitest": "^4.1.0"
   },
   "extensionless": {
