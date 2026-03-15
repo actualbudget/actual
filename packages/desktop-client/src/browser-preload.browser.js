@@ -141,6 +141,25 @@ class WorkerBridge {
       return;
     }
 
+    // Leadership transfer: this tab is closing the budget but other tabs
+    // still need it. Terminate our Worker (don't actually close-budget on
+    // the backend) and dispatch a synthetic reply so the UI navigates to
+    // show-budgets normally.
+    if (msg && msg.type === '__close-and-transfer') {
+      console.log(
+        '[WorkerBridge] Leadership transferred — terminating Worker, sending synthetic close reply',
+      );
+      if (localBackendWorker) {
+        localBackendWorker.terminate();
+        localBackendWorker = null;
+      }
+      // Dispatch a synthetic close-budget reply to the UI
+      this._dispatch({
+        data: { type: 'reply', id: msg.requestId, data: {} },
+      });
+      return;
+    }
+
     // Leader swap: this tab is being demoted from leader. Convert our
     // backend Worker into a standalone Worker (it keeps running with
     // the current budget). The SharedWorker has already updated its
@@ -193,6 +212,12 @@ class WorkerBridge {
         this._standaloneRequestNames = null;
       }
       this._sharedPort.postMessage({ type: '__rejoin-budget-ack' });
+      return;
+    }
+
+    // Role change notification — only sent to the specific tab whose role changed
+    if (msg && msg.type === '__role-change') {
+      console.log(`[WorkerBridge] Role: ${msg.role}`);
       return;
     }
 

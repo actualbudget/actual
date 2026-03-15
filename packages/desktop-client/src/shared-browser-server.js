@@ -135,6 +135,7 @@ function electLeader(port, budgetToRestore, pendingMsg) {
   console.log(
     `[SharedWorker] Elected new leader (${connectedPorts.length} tabs connected)`,
   );
+  port.postMessage({ type: '__role-change', role: 'LEADER' });
   if (cachedInitMsg) {
     port.postMessage({
       type: '__become-leader',
@@ -176,6 +177,7 @@ self.onconnect = function (e) {
           `[SharedWorker] Tab going standalone (${connectedPorts.length} total, ${standalonePorts.size + 1} standalone)`,
         );
         standalonePorts.add(port);
+        port.postMessage({ type: '__role-change', role: 'STANDALONE' });
         return;
       }
 
@@ -187,6 +189,7 @@ self.onconnect = function (e) {
           `[SharedWorker] Tab rejoining shared (${connectedPorts.length} total, ${standalonePorts.size} standalone)`,
         );
         if (backendConnected) {
+          port.postMessage({ type: '__role-change', role: 'FOLLOWER' });
           port.postMessage({ type: 'connect' });
         } else if (lastAppInitFailure) {
           port.postMessage(lastAppInitFailure);
@@ -201,6 +204,7 @@ self.onconnect = function (e) {
         console.log(
           `[SharedWorker] Tab silently rejoined shared (${connectedPorts.length} total, ${standalonePorts.size} standalone)`,
         );
+        port.postMessage({ type: '__role-change', role: 'FOLLOWER' });
         return;
       }
 
@@ -222,6 +226,7 @@ self.onconnect = function (e) {
           console.log(
             '[SharedWorker] Backend already connected, sending connect to new tab',
           );
+          port.postMessage({ type: '__role-change', role: 'FOLLOWER' });
           port.postMessage({ type: 'connect' });
         } else if (lastAppInitFailure) {
           console.log(
@@ -394,6 +399,88 @@ self.onconnect = function (e) {
         // currentBudgetId when the reply arrives successfully.
         if (msg.name === 'load-budget' && msg.args && msg.args.id) {
           requestBudgetIds.set(msg.id, msg.args.id);
+        }
+
+        // If the leader is closing the budget but other followers still
+        // have it open, transfer leadership instead of closing the
+        // backend. The leader tab gets a synthetic reply so its UI
+        // navigates to show-budgets, and a follower is promoted to keep
+        // the budget running for remaining tabs.
+        if (msg.name === 'close-budget' && port === leaderPort) {
+          const followers = connectedPorts.filter(
+            p => p !== port && !standalonePorts.has(p),
+          );
+          if (followers.length > 0) {
+            const budgetToRestore = currentBudgetId;
+            const newLeader = followers[0];
+            console.log(
+              `[SharedWorker] Leader closing budget but ${followers.length} follower(s) remain — transferring leadership`,
+            );
+
+            // Tell the leader tab to terminate its Worker and give
+            // the UI a synthetic close-budget reply.
+            port.postMessage({
+              type: '__close-and-transfer',
+              requestId: msg.id,
+            });
+
+            // Clear leader state
+            leaderPort = null;
+            backendConnected = false;
+            lastAppInitFailure = null;
+            currentBudgetId = null;
+            requestToPort.clear();
+            requestNames.clear();
+            requestBudgetIds.clear();
+
+            // Promote a follower as new leader; it creates a new
+            // Worker and restores the same budget.
+            electLeader(newLeader, budgetToRestore);
+            return;
+          }
+        }
+
+        // If a follower is closing the budget, don't forward to the
+        // backend — the leader and other followers still need it.
+        // Just send a synthetic reply so the follower's UI navigates
+        // to show-budgets without disturbing anyone else.
+        if (msg.name === 'close-budget' && port !== leaderPort) {
+          console.log(
+            '[SharedWorker] Follower closing budget — sending synthetic reply (backend stays open)',
+          );
+          port.postMessage({
+            type: 'reply',
+            id: msg.id,
+            data: {},
+          });
+          requestToPort.delete(msg.id);
+          requestNames.delete(msg.id);
+          return;
+        }
+
+        // Budget-replacing operations (create-budget, create-demo-budget,
+        // import-budget) destroy the currently loaded budget on disk and
+        // replace it with a new one. If other tabs are using the shared
+        // backend, push them to show-budgets first so they don't get
+        // corrupted state. The requesting tab continues normally — it will
+        // end up on the newly created budget.
+        if (
+          currentBudgetId !== null &&
+          (msg.name === 'create-budget' ||
+            msg.name === 'create-demo-budget' ||
+            msg.name === 'import-budget')
+        ) {
+          const others = connectedPorts.filter(
+            p => p !== port && !standalonePorts.has(p),
+          );
+          if (others.length > 0) {
+            console.log(
+              `[SharedWorker] Budget-replacing operation "${msg.name}" — pushing ${others.length} other tab(s) to show-budgets`,
+            );
+            for (const p of others) {
+              p.postMessage({ type: 'push', name: 'show-budgets' });
+            }
+          }
         }
       }
 
