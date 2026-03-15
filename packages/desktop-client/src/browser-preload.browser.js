@@ -34,14 +34,15 @@ let localBackendWorker = null;
  * WorkerBridge wraps a SharedWorker port and presents a Worker-like interface
  * (onmessage, postMessage, addEventListener, start) to the connection layer.
  *
- * If the SharedWorker tells this tab to go standalone (because it wants a
- * different budget from the shared leader), the bridge transparently creates
- * its own dedicated Worker and routes all future communication through it.
+ * The SharedWorker coordinator assigns each tab a role per budget:
+ *   - LEADER: this tab runs the backend in a dedicated Worker
+ *   - FOLLOWER: this tab routes messages through the SharedWorker to the leader
+ *
+ * Multiple budgets can be open simultaneously — each has its own leader.
  */
 class WorkerBridge {
   constructor(sharedPort) {
     this._sharedPort = sharedPort;
-    this._standaloneWorker = null;
     this._onmessage = null;
     this._listeners = [];
     this._started = false;
@@ -65,33 +66,9 @@ class WorkerBridge {
   }
 
   postMessage(msg) {
-    if (this._standaloneWorker) {
-      // If a standalone tab wants to load a budget, route it through the
-      // SharedWorker instead. The coordinator will either forward it to
-      // the leader (same budget → tabs share) or redirect back to
-      // standalone (different budget → new standalone Worker).
-      if (msg.name === 'load-budget') {
-        console.log(
-          '[WorkerBridge] Standalone sending load-budget — rejoining SharedWorker first',
-        );
-        this._standaloneWorker.terminate();
-        this._standaloneWorker = null;
-        this._standaloneRequestNames = null;
-        // Silent rejoin (no 'connect' reply needed, UI is already connected)
-        this._sharedPort.postMessage({ type: '__rejoin-budget-ack' });
-        // Now route through SharedWorker — messages are ordered, so
-        // __rejoin-budget-ack is processed before this load-budget.
-        this._sharedPort.postMessage(msg);
-        return;
-      }
-      // Track request names so we can detect close-budget replies
-      if (msg.id && msg.name && this._standaloneRequestNames) {
-        this._standaloneRequestNames.set(msg.id, msg.name);
-      }
-      this._standaloneWorker.postMessage(msg);
-    } else {
-      this._sharedPort.postMessage(msg);
-    }
+    // All messages go through the SharedWorker for coordination.
+    // The SharedWorker forwards to the leader's Worker via __to-worker.
+    this._sharedPort.postMessage(msg);
   }
 
   addEventListener(type, handler) {
@@ -129,92 +106,32 @@ class WorkerBridge {
       return;
     }
 
-    // SharedWorker says: this tab needs a different budget, go standalone
-    if (msg && msg.type === '__use-standalone') {
-      console.log(
-        '[WorkerBridge] Switching to STANDALONE Worker (different budget)',
-      );
-      this._switchToStandalone(msg.initMsg, msg.pendingMsg);
-      return;
-    }
-
     // Leadership transfer: this tab is closing the budget but other tabs
     // still need it. Terminate our Worker (don't actually close-budget on
     // the backend) and dispatch a synthetic reply so the UI navigates to
     // show-budgets normally.
     if (msg && msg.type === '__close-and-transfer') {
-      console.log(
-        '[WorkerBridge] Leadership transferred — terminating Worker, sending synthetic close reply',
-      );
+      console.log('[WorkerBridge] Leadership transferred — terminating Worker');
       if (localBackendWorker) {
         localBackendWorker.terminate();
         localBackendWorker = null;
       }
-      // Dispatch a synthetic close-budget reply to the UI
-      this._dispatch({
-        data: { type: 'reply', id: msg.requestId, data: {} },
-      });
-      return;
-    }
-
-    // Leader swap: this tab is being demoted from leader. Convert our
-    // backend Worker into a standalone Worker (it keeps running with
-    // the current budget). The SharedWorker has already updated its
-    // bookkeeping — we just need to stop forwarding and dispatch locally.
-    if (msg && msg.type === '__demote-to-standalone') {
-      console.log('[WorkerBridge] Demoted from leader — becoming standalone');
-      const sw = localBackendWorker;
-      localBackendWorker = null;
-      this._standaloneWorker = sw;
-      this._standaloneRequestNames = new Map();
-
-      // Change Worker's onmessage from leader-forwarding to standalone
-      sw.onmessage = event => {
-        const workerMsg = event.data;
-        if (
-          workerMsg &&
-          workerMsg.type &&
-          workerMsg.type.startsWith('__absurd:')
-        ) {
-          return;
-        }
-        if (
-          workerMsg.type === 'reply' &&
-          this._standaloneRequestNames &&
-          this._standaloneRequestNames.get(workerMsg.id) === 'close-budget'
-        ) {
-          this._standaloneRequestNames.delete(workerMsg.id);
-          console.log(
-            '[WorkerBridge] Budget closed on standalone — rejoining SharedWorker',
-          );
-          sw.terminate();
-          this._standaloneWorker = null;
-          this._sharedPort.postMessage({ type: '__rejoin-shared' });
-        }
-        this._dispatch(event);
-      };
-      return;
-    }
-
-    // SharedWorker says: the leader now has the same budget as our standalone
-    // Worker. Silently switch back to routing through SharedWorker so both
-    // tabs share the backend. The UI stays on the budget without interruption.
-    if (msg && msg.type === '__rejoin-budget') {
-      console.log(
-        '[WorkerBridge] Leader loaded same budget — terminating standalone, rejoining shared',
-      );
-      if (this._standaloneWorker) {
-        this._standaloneWorker.terminate();
-        this._standaloneWorker = null;
-        this._standaloneRequestNames = null;
+      // Only dispatch a synthetic reply if there's an actual close-budget
+      // request to complete. When requestId is null the eviction was
+      // triggered externally (e.g. another tab deleted this budget).
+      if (msg.requestId) {
+        this._dispatch({
+          data: { type: 'reply', id: msg.requestId, data: {} },
+        });
       }
-      this._sharedPort.postMessage({ type: '__rejoin-budget-ack' });
       return;
     }
 
-    // Role change notification — only sent to the specific tab whose role changed
+    // Role change notification
     if (msg && msg.type === '__role-change') {
-      console.log(`[WorkerBridge] Role: ${msg.role}`);
+      console.log(
+        `[WorkerBridge] Role: ${msg.role}${msg.budgetId ? ` (budget: ${msg.budgetId})` : ''}`,
+      );
       return;
     }
 
@@ -225,7 +142,7 @@ class WorkerBridge {
       return;
     }
 
-    // Respond to heartbeat pings so SharedWorker can detect dead tabs
+    // Respond to heartbeat pings
     if (msg && msg.type === '__heartbeat-ping') {
       this._sharedPort.postMessage({ type: '__heartbeat-pong' });
       return;
@@ -287,65 +204,15 @@ class WorkerBridge {
 
     localBackendWorker.postMessage(initMsg);
   }
-
-  _switchToStandalone(initMsg, pendingMsg) {
-    // Create a dedicated Worker just for this tab
-    const sw = new Worker(backendWorkerUrl);
-    this._standaloneWorker = sw;
-    initSQLBackend(sw);
-
-    let pending = pendingMsg;
-    sw.onmessage = event => {
-      const msg = event.data;
-      // absurd-sql internal messages are handled by initSQLBackend
-      if (msg && msg.type && msg.type.startsWith('__absurd:')) {
-        return;
-      }
-      // When the standalone Worker connects, send the queued load-budget
-      if (msg.type === 'connect' && pending) {
-        const toSend = pending;
-        pending = null;
-        setTimeout(() => sw.postMessage(toSend), 0);
-      }
-      // When the standalone Worker finishes closing its budget, rejoin the
-      // SharedWorker so that the next budget load goes through the coordinator.
-      if (
-        msg.type === 'reply' &&
-        this._standaloneRequestNames &&
-        this._standaloneRequestNames.get(msg.id) === 'close-budget'
-      ) {
-        this._standaloneRequestNames.delete(msg.id);
-        console.log(
-          '[WorkerBridge] Budget closed on standalone — rejoining SharedWorker',
-        );
-        sw.terminate();
-        this._standaloneWorker = null;
-        this._sharedPort.postMessage({ type: '__rejoin-shared' });
-        // Still dispatch so the UI gets the close-budget reply
-      }
-      this._dispatch(event);
-    };
-
-    // Tell SharedWorker we're going standalone (keep connection alive)
-    this._sharedPort.postMessage({ type: '__going-standalone' });
-
-    // Track request names for the standalone Worker so we can detect close-budget
-    this._standaloneRequestNames = new Map();
-
-    // Boot the standalone Worker
-    sw.postMessage(initMsg);
-  }
 }
 
 function createBackendWorker() {
-  // Use SharedWorker as a coordinator for multi-tab support: one tab is elected
-  // "leader" and runs the backend in a regular dedicated Worker. All other tabs
-  // send messages through the SharedWorker, which routes them to the leader.
+  // Use SharedWorker as a coordinator for multi-tab, multi-budget support.
+  // Each budget gets its own leader tab running a dedicated Worker. All other
+  // tabs on the same budget are followers — their messages are routed through
+  // the SharedWorker to the leader's Worker.
   // The SharedWorker never touches SharedArrayBuffer, so this works on all
   // platforms including iOS/Safari.
-  //
-  // If two tabs open different budgets, the second tab transparently falls back
-  // to its own standalone Worker so both budgets run independently.
   if (typeof SharedWorker !== 'undefined' && !Platform.isPlaywright) {
     try {
       const sharedWorker = new SharedWorker(sharedBackendWorkerUrl, {
@@ -353,9 +220,6 @@ function createBackendWorker() {
       });
       const sharedPort = sharedWorker.port;
 
-      // WorkerBridge presents a Worker-like interface to the connection layer.
-      // It routes through the SharedWorker normally, and seamlessly switches
-      // to a standalone Worker if needed (different budget).
       worker = new WorkerBridge(sharedPort);
       console.log('[WorkerBridge] Connected to SharedWorker coordinator');
 

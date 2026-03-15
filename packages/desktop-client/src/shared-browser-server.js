@@ -1,41 +1,57 @@
-// SharedWorker coordinator for multi-tab support.
+// SharedWorker coordinator for multi-tab, multi-budget support.
 //
-// This SharedWorker does NOT run the backend itself. Instead, it acts as a
-// lightweight message router: one tab is elected "leader" and runs the real
-// backend in a regular dedicated Worker (where SharedArrayBuffer is universally
-// available). All other tabs send messages through this coordinator, which
-// forwards them to the leader tab for processing.
+// Architecture:
+//   - This SharedWorker is a pure message router. It never runs a backend.
+//   - Each open budget has exactly ONE leader tab that runs a dedicated Worker
+//     (where SharedArrayBuffer is universally available, including iOS/Safari).
+//   - Additional tabs on the same budget become followers — their messages are
+//     routed through the SharedWorker to the leader's Worker.
+//   - Tabs on different budgets each get their own leader/follower group.
+//   - The SharedWorker tracks per-budget groups and handles leader election,
+//     failover, and cross-tab coordination.
 //
-// This design avoids the iOS/Safari issue where SharedArrayBuffer is unavailable
-// inside SharedWorker contexts, causing absurd-sql's IDB fallback to break.
+// Data model:
+//   budgetGroups: Map<budgetId, BudgetGroup>
+//     BudgetGroup = { leaderPort, followers: Set<port>, backendConnected,
+//                     requestToPort, requestNames, requestBudgetIds }
+//   portToBudget: Map<port, budgetId>   — which budget a port belongs to
+//   unassignedPorts: Set<port>          — connected but not yet on a budget
 
+// ── State ────────────────────────────────────────────────────────────────
+
+// All connected ports (for heartbeat + console forwarding)
 const connectedPorts = [];
-// The port belonging to the leader tab (the one running the backend Worker)
-let leaderPort = null;
-// Cached init message so we can forward it when electing a new leader
+// Cached init message so we can forward it to new leaders
 let cachedInitMsg = null;
-// Whether the leader's backend Worker has sent 'connect'
-let backendConnected = false;
-// Cached init-failure payload so late-joining tabs learn that init failed
+// Cached init-failure payload so late-joining tabs learn init failed
 let lastAppInitFailure = null;
-// Maps request IDs to the port that sent them, so replies go to the right tab
-const requestToPort = new Map();
-// Maps request IDs to their message name (for close-budget cross-tab notification)
-const requestNames = new Map();
-// Ports that have not yet responded to the most recent heartbeat ping
+// Ports that haven't responded to heartbeat
 const pendingPongs = new Set();
-// Ports running their own standalone Worker (different budget). These stay
-// connected for heartbeat and coordination but are excluded from message routing.
-const standalonePorts = new Set();
-// Maps standalone ports to the budget ID they are running
-const standaloneBudgets = new Map();
-// The budget currently loaded on the leader's backend Worker (null = no budget)
-let currentBudgetId = null;
-// Maps request IDs to the budget ID for in-flight load-budget requests
-const requestBudgetIds = new Map();
 
-// Forward SharedWorker console output to connected tabs so messages
-// appear in regular DevTools without needing chrome://inspect/#workers.
+// Per-budget group state
+// budgetId → { leaderPort, followers, backendConnected, requestToPort, requestNames, requestBudgetIds }
+const budgetGroups = new Map();
+// port → budgetId (which group a port belongs to, null if unassigned)
+const portToBudget = new Map();
+// Ports that are connected but not yet assigned to any budget
+const unassignedPorts = new Set();
+
+function createBudgetGroup(leaderPort) {
+  return {
+    leaderPort,
+    followers: new Set(),
+    backendConnected: false,
+    // Maps request IDs → port that sent them
+    requestToPort: new Map(),
+    // Maps request IDs → message name
+    requestNames: new Map(),
+    // Maps request IDs → budget ID (for in-flight load-budget)
+    requestBudgetIds: new Map(),
+  };
+}
+
+// ── Console forwarding ───────────────────────────────────────────────────
+
 const _originalConsole = {
   log: console.log.bind(console),
   warn: console.warn.bind(console),
@@ -70,16 +86,37 @@ console.warn = (...args) => forwardConsole('warn', args);
 console.error = (...args) => forwardConsole('error', args);
 console.info = (...args) => forwardConsole('info', args);
 
-function broadcastToAll(msg) {
-  for (const port of connectedPorts) {
-    if (!standalonePorts.has(port)) {
-      port.postMessage(msg);
+// ── Helpers ──────────────────────────────────────────────────────────────
+
+function logState(action) {
+  const groups = [];
+  for (const [bid, g] of budgetGroups) {
+    groups.push(`"${bid}": leader + ${g.followers.size} follower(s)`);
+  }
+  console.log(
+    `[SharedWorker] ${action} — ${connectedPorts.length} tab(s), ${unassignedPorts.size} unassigned, groups: [${groups.join(', ') || 'none'}]`,
+  );
+}
+
+function broadcastToGroup(budgetId, msg, excludePort) {
+  const group = budgetGroups.get(budgetId);
+  if (!group) return;
+  if (group.leaderPort !== excludePort) {
+    group.leaderPort.postMessage(msg);
+  }
+  for (const p of group.followers) {
+    if (p !== excludePort) {
+      p.postMessage(msg);
     }
   }
 }
 
-// Heartbeat: detect tabs that closed without sending 'tab-closing'
-// (e.g. crash, mobile background kill, or missed beforeunload).
+function broadcastToAllInGroup(budgetId, msg) {
+  broadcastToGroup(budgetId, msg, null);
+}
+
+// ── Heartbeat ────────────────────────────────────────────────────────────
+
 setInterval(() => {
   for (const port of [...pendingPongs]) {
     pendingPongs.delete(port);
@@ -91,51 +128,78 @@ setInterval(() => {
   }
 }, 10_000);
 
+// ── Port removal & leader failover ──────────────────────────────────────
+
 function removePort(port) {
   const idx = connectedPorts.indexOf(port);
-  if (idx !== -1) {
-    connectedPorts.splice(idx, 1);
-  }
-  standalonePorts.delete(port);
-  standaloneBudgets.delete(port);
-  // Clean up any pending requests from this port
-  for (const [id, p] of requestToPort) {
-    if (p === port) {
-      requestToPort.delete(id);
-      requestNames.delete(id);
-    }
-  }
-  // If the leader tab left, the backend Worker in that tab is gone.
-  // Immediately promote another tab as leader with the same budget.
-  if (port === leaderPort) {
-    const budgetToRestore = currentBudgetId;
-    leaderPort = null;
-    backendConnected = false;
-    lastAppInitFailure = null;
-    currentBudgetId = null;
-    requestToPort.clear();
-    requestNames.clear();
-    requestBudgetIds.clear();
+  if (idx !== -1) connectedPorts.splice(idx, 1);
+  unassignedPorts.delete(port);
 
-    if (connectedPorts.length > 0) {
-      // Pick the first non-standalone port to be the new leader
-      const candidate = connectedPorts.find(p => !standalonePorts.has(p));
-      if (candidate) {
-        console.log(
-          `[SharedWorker] Leader left, promoting new leader (budget: ${budgetToRestore ?? 'none'})`,
-        );
-        electLeader(candidate, budgetToRestore);
+  const budgetId = portToBudget.get(port);
+  portToBudget.delete(port);
+  if (!budgetId) return;
+
+  const group = budgetGroups.get(budgetId);
+  if (!group) return;
+
+  if (port === group.leaderPort) {
+    // Leader left — promote a follower
+    if (group.followers.size > 0) {
+      const candidate = group.followers.values().next().value;
+      group.followers.delete(candidate);
+      console.log(
+        `[SharedWorker] Leader left budget "${budgetId}" — promoting follower`,
+      );
+      electLeader(budgetId, candidate, budgetId);
+    } else {
+      // No followers — remove the group entirely
+      console.log(
+        `[SharedWorker] Last tab left budget "${budgetId}" — removing group`,
+      );
+      budgetGroups.delete(budgetId);
+    }
+  } else {
+    group.followers.delete(port);
+    // Clean up any pending requests from this port
+    for (const [id, p] of group.requestToPort) {
+      if (p === port) {
+        group.requestToPort.delete(id);
+        group.requestNames.delete(id);
       }
     }
   }
 }
 
-function electLeader(port, budgetToRestore, pendingMsg) {
-  leaderPort = port;
+// ── Leader election ─────────────────────────────────────────────────────
+
+function electLeader(budgetId, port, budgetToRestore, pendingMsg) {
+  let group = budgetGroups.get(budgetId);
+  if (!group) {
+    group = createBudgetGroup(port);
+    budgetGroups.set(budgetId, group);
+  } else {
+    group.leaderPort = port;
+    group.backendConnected = false;
+    group.requestToPort.clear();
+    group.requestNames.clear();
+    group.requestBudgetIds.clear();
+  }
+  // Remove port from any previous group
+  const prevBudget = portToBudget.get(port);
+  if (prevBudget && prevBudget !== budgetId) {
+    removePortFromGroup(port, prevBudget);
+  }
+  portToBudget.set(port, budgetId);
+  unassignedPorts.delete(port);
+
   console.log(
-    `[SharedWorker] Elected new leader (${connectedPorts.length} tabs connected)`,
+    `[SharedWorker] Elected leader for "${budgetId}" (${group.followers.size} follower(s))`,
   );
-  port.postMessage({ type: '__role-change', role: 'LEADER' });
+  port.postMessage({
+    type: '__role-change',
+    role: 'LEADER',
+    budgetId,
+  });
   if (cachedInitMsg) {
     port.postMessage({
       type: '__become-leader',
@@ -146,22 +210,101 @@ function electLeader(port, budgetToRestore, pendingMsg) {
   }
 }
 
+function addFollower(budgetId, port) {
+  const group = budgetGroups.get(budgetId);
+  if (!group) return;
+
+  // Remove from any previous group
+  const prevBudget = portToBudget.get(port);
+  if (prevBudget && prevBudget !== budgetId) {
+    removePortFromGroup(port, prevBudget);
+  }
+
+  group.followers.add(port);
+  portToBudget.set(port, budgetId);
+  unassignedPorts.delete(port);
+
+  port.postMessage({
+    type: '__role-change',
+    role: 'FOLLOWER',
+    budgetId,
+  });
+  if (group.backendConnected) {
+    port.postMessage({ type: 'connect' });
+  }
+}
+
+function removePortFromGroup(port, budgetId) {
+  const group = budgetGroups.get(budgetId);
+  if (!group) return;
+  group.followers.delete(port);
+  for (const [id, p] of group.requestToPort) {
+    if (p === port) {
+      group.requestToPort.delete(id);
+      group.requestNames.delete(id);
+    }
+  }
+}
+
+// Push every tab out of a budget group and tear it down. The leader's
+// Worker is told to close-and-transfer (terminate without close-budget)
+// and all tabs are sent to show-budgets.
+function evictGroup(budgetId, excludePort) {
+  const group = budgetGroups.get(budgetId);
+  if (!group) return;
+
+  const evicted = [];
+  // Push followers out
+  for (const p of group.followers) {
+    if (p !== excludePort) {
+      p.postMessage({ type: 'push', name: 'show-budgets' });
+      portToBudget.delete(p);
+      unassignedPorts.add(p);
+      evicted.push(p);
+    }
+  }
+  group.followers.clear();
+
+  // Push the leader out (terminate its Worker)
+  if (group.leaderPort && group.leaderPort !== excludePort) {
+    group.leaderPort.postMessage({
+      type: '__close-and-transfer',
+      requestId: null, // no pending close-budget request
+    });
+    group.leaderPort.postMessage({ type: 'push', name: 'show-budgets' });
+    portToBudget.delete(group.leaderPort);
+    unassignedPorts.add(group.leaderPort);
+    evicted.push(group.leaderPort);
+  }
+
+  budgetGroups.delete(budgetId);
+  if (evicted.length > 0) {
+    console.log(
+      `[SharedWorker] Evicted ${evicted.length} tab(s) from budget "${budgetId}"`,
+    );
+  }
+}
+
+// ── Connection handler ──────────────────────────────────────────────────
+
 self.onconnect = function (e) {
   const port = e.ports[0];
   connectedPorts.push(port);
-  console.log(
-    `[SharedWorker] Tab connected (${connectedPorts.length} tabs, budget: ${currentBudgetId ?? 'none'})`,
-  );
+  unassignedPorts.add(port);
+  logState('Tab connected');
 
   port.onmessage = function (event) {
     try {
       const msg = event.data;
+      const portBudget = portToBudget.get(port);
+      const group = portBudget ? budgetGroups.get(portBudget) : null;
 
-      // ── Tab lifecycle ──────────────────────────────────────────────
+      // ── Tab lifecycle ────────────────────────────────────────────
 
       if (msg.type === 'tab-closing') {
         pendingPongs.delete(port);
         removePort(port);
+        logState('Tab closed');
         return;
       }
 
@@ -170,299 +313,334 @@ self.onconnect = function (e) {
         return;
       }
 
-      // ── Standalone coordination ────────────────────────────────────
-
-      // Standalone tab is going off on its own Worker (different budget)
-      if (msg.type === '__going-standalone') {
-        standalonePorts.add(port);
-        port.postMessage({ type: '__role-change', role: 'STANDALONE' });
-        return;
-      }
-
-      // Standalone tab wants to rejoin the shared backend (after closing its budget)
-      if (msg.type === '__rejoin-shared') {
-        standalonePorts.delete(port);
-        standaloneBudgets.delete(port);
-        if (backendConnected) {
-          port.postMessage({ type: '__role-change', role: 'FOLLOWER' });
-          port.postMessage({ type: 'connect' });
-        } else if (lastAppInitFailure) {
-          port.postMessage(lastAppInitFailure);
-        }
-        return;
-      }
-
-      // Standalone tab acknowledging a __rejoin-budget (silent rejoin, no connect)
-      if (msg.type === '__rejoin-budget-ack') {
-        standalonePorts.delete(port);
-        standaloneBudgets.delete(port);
-        port.postMessage({ type: '__role-change', role: 'FOLLOWER' });
-        return;
-      }
-
-      // ── Initialization ─────────────────────────────────────────────
-
-      // Leader tab registering a restore-budget request so the reply
-      // updates currentBudgetId (used after leader failover).
-      if (msg.type === '__track-restore') {
-        requestToPort.set(msg.requestId, port);
-        requestNames.set(msg.requestId, 'load-budget');
-        requestBudgetIds.set(msg.requestId, msg.budgetId);
-        return;
-      }
+      // ── Initialization ───────────────────────────────────────────
 
       if (msg.type === 'init') {
         cachedInitMsg = msg;
-        if (!leaderPort) {
-          electLeader(port);
-        } else if (backendConnected) {
-          port.postMessage({ type: '__role-change', role: 'FOLLOWER' });
-          port.postMessage({ type: 'connect' });
-        } else if (lastAppInitFailure) {
+        // Tab is now connected but not on any budget yet.
+        // It stays unassigned until it sends load-budget.
+        // If there's a group with a connected backend, that means the
+        // app is already running — just tell the tab to connect.
+        // Otherwise check for init failure.
+        if (lastAppInitFailure) {
           port.postMessage(lastAppInitFailure);
-        }
-        return;
-      }
-
-      // ── Worker message routing ──────────────────────────────────────
-
-      // Leader tab forwarding its Worker's messages back for routing
-      if (msg.type === '__from-worker') {
-        const workerMsg = msg.msg;
-
-        if (workerMsg.type === 'reply' || workerMsg.type === 'error') {
-          const targetPort = requestToPort.get(workerMsg.id);
-          if (targetPort) {
-            targetPort.postMessage(workerMsg);
-
-            const name = requestNames.get(workerMsg.id);
-            if (workerMsg.type === 'reply') {
-              // Track which budget the leader's Worker currently has loaded
-              if (name === 'load-budget') {
-                const budgetId = requestBudgetIds.get(workerMsg.id);
-                if (budgetId) {
-                  const oldBudgetId = currentBudgetId;
-                  console.log(
-                    `[SharedWorker] Budget loaded: "${budgetId}" (was: "${oldBudgetId ?? 'none'}")`,
-                  );
-                  currentBudgetId = budgetId;
-                  requestBudgetIds.delete(workerMsg.id);
-
-                  // If the leader changed budgets, followers on the old
-                  // budget can no longer use the shared backend — push
-                  // them back to the budget list.
-                  if (oldBudgetId !== null && oldBudgetId !== budgetId) {
-                    for (const p of connectedPorts) {
-                      if (p !== targetPort && !standalonePorts.has(p)) {
-                        p.postMessage({
-                          type: 'push',
-                          name: 'show-budgets',
-                        });
-                      }
-                    }
-                  }
-
-                  // If any standalone tab has the same budget, tell it to
-                  // rejoin — both tabs should share the same backend.
-                  for (const [p, sBudget] of standaloneBudgets) {
-                    if (sBudget === budgetId) {
-                      p.postMessage({ type: '__rejoin-budget' });
-                    }
-                  }
-                }
-              }
-              // If a tab closed the budget, clear state and notify other tabs
-              if (name === 'close-budget') {
-                currentBudgetId = null;
-                for (const p of connectedPorts) {
-                  if (p !== targetPort && !standalonePorts.has(p)) {
-                    p.postMessage({ type: 'push', name: 'show-budgets' });
-                  }
-                }
-              }
-            }
-
-            requestToPort.delete(workerMsg.id);
-            requestNames.delete(workerMsg.id);
-          }
-        } else if (workerMsg.type === 'connect') {
-          backendConnected = true;
-          broadcastToAll(workerMsg);
-        } else if (workerMsg.type === 'app-init-failure') {
-          lastAppInitFailure = workerMsg;
-          broadcastToAll(workerMsg);
         } else {
-          // Push events, capture-exception, etc.
-          broadcastToAll(workerMsg);
-        }
-        return;
-      }
-
-      // ── Request interception & routing ──────────────────────────────
-
-      // If a non-leader tab wants to load a different budget from the one
-      // the shared leader Worker already has, tell that tab to fall back to
-      // its own standalone Worker so both budgets can run independently.
-      // The leader tab is never redirected — it runs the backend Worker, so
-      // it always loads directly and followers on the old budget are notified.
-      if (msg.name === 'load-budget' && msg.args && msg.args.id) {
-        const budgetId = msg.args.id;
-        if (
-          currentBudgetId !== null &&
-          budgetId !== currentBudgetId &&
-          port !== leaderPort
-        ) {
-          // Check if a standalone tab already has this budget. If so,
-          // swap the leader instead of creating yet another standalone —
-          // demote the current leader, promote the requesting tab, and
-          // the existing standalone will rejoin once the budget loads.
-          let hasStandaloneMatch = false;
-          for (const [, sBudget] of standaloneBudgets) {
-            if (sBudget === budgetId) {
-              hasStandaloneMatch = true;
+          // Find any group that's connected to piggyback the connect event.
+          // If no groups exist yet, this is the first tab — elect it as
+          // leader for a "lobby" that will get a real budget when load-budget arrives.
+          let anyConnected = false;
+          for (const [, g] of budgetGroups) {
+            if (g.backendConnected) {
+              anyConnected = true;
               break;
             }
           }
-
-          if (hasStandaloneMatch) {
-            console.log(
-              `[SharedWorker] Leader swap: demoting leader (budget "${currentBudgetId}"), promoting for "${budgetId}"`,
-            );
-
-            // Demote current leader to standalone
-            leaderPort.postMessage({ type: '__demote-to-standalone' });
-            standalonePorts.add(leaderPort);
-            standaloneBudgets.set(leaderPort, currentBudgetId);
-
-            // Clear leader state
-            leaderPort = null;
-            backendConnected = false;
-            lastAppInitFailure = null;
-            currentBudgetId = null;
-            requestToPort.clear();
-            requestNames.clear();
-            requestBudgetIds.clear();
-
-            // Pre-register the pending load-budget so the reply routes
-            // correctly and updates currentBudgetId.
-            requestToPort.set(msg.id, port);
-            requestNames.set(msg.id, 'load-budget');
-            requestBudgetIds.set(msg.id, budgetId);
-
-            // Elect requesting tab as new leader with the pending request
-            electLeader(port, null, msg);
-            return;
+          if (anyConnected) {
+            // At least one backend is running. Tab can interact immediately.
+            port.postMessage({ type: '__role-change', role: 'UNASSIGNED' });
+            port.postMessage({ type: 'connect' });
+          } else if (budgetGroups.size > 0) {
+            // Backend is booting. Tab will get 'connect' when it's ready.
+            port.postMessage({ type: '__role-change', role: 'UNASSIGNED' });
+          } else {
+            // First tab — elect as leader with no budget
+            electLeader('__lobby', port);
           }
-
-          console.log(
-            `[SharedWorker] Tab wants budget "${budgetId}" but leader has "${currentBudgetId}" — sending to standalone`,
-          );
-          standaloneBudgets.set(port, budgetId);
-          port.postMessage({
-            type: '__use-standalone',
-            initMsg: cachedInitMsg,
-            pendingMsg: msg,
-          });
-          return;
         }
+        return;
       }
 
-      // ── Default: track request and forward to leader ────────────────
+      // ── Leader tab forwarding Worker messages back ───────────────
 
-      // Regular request from a tab — track and forward to the leader
-      if (msg.id) {
-        requestToPort.set(msg.id, port);
-        if (msg.name) {
-          requestNames.set(msg.id, msg.name);
+      if (msg.type === '__from-worker') {
+        if (!group || port !== group.leaderPort) return;
+        const workerMsg = msg.msg;
+
+        if (workerMsg.type === 'reply' || workerMsg.type === 'error') {
+          const targetPort = group.requestToPort.get(workerMsg.id);
+          if (targetPort) {
+            targetPort.postMessage(workerMsg);
+
+            const name = group.requestNames.get(workerMsg.id);
+            if (workerMsg.type === 'reply' && name === 'load-budget') {
+              const budgetId = group.requestBudgetIds.get(workerMsg.id);
+              if (budgetId) {
+                group.requestBudgetIds.delete(workerMsg.id);
+                handleBudgetLoaded(port, portBudget, budgetId, targetPort);
+              }
+            }
+            if (workerMsg.type === 'reply' && name === 'close-budget') {
+              handleBudgetClosed(targetPort, portBudget);
+            }
+            // After a budget-replacing op (create/import), the backend
+            // loaded a new budget but we don't know its ID yet. The
+            // next load-prefs reply reveals it — rename the temp group.
+            if (
+              workerMsg.type === 'reply' &&
+              name === 'load-prefs' &&
+              portBudget &&
+              portBudget.startsWith('__creating-') &&
+              workerMsg.result &&
+              workerMsg.result.id
+            ) {
+              handleBudgetLoaded(
+                port,
+                portBudget,
+                workerMsg.result.id,
+                targetPort,
+              );
+            }
+
+            group.requestToPort.delete(workerMsg.id);
+            group.requestNames.delete(workerMsg.id);
+          }
+        } else if (workerMsg.type === 'connect') {
+          group.backendConnected = true;
+          broadcastToAllInGroup(portBudget, workerMsg);
+          // Also notify unassigned ports that a backend is ready
+          for (const p of unassignedPorts) {
+            p.postMessage(workerMsg);
+          }
+        } else if (workerMsg.type === 'app-init-failure') {
+          lastAppInitFailure = workerMsg;
+          broadcastToAllInGroup(portBudget, workerMsg);
+        } else {
+          broadcastToAllInGroup(portBudget, workerMsg);
         }
-        // Remember the budget ID for load-budget so we can set
-        // currentBudgetId when the reply arrives successfully.
-        if (msg.name === 'load-budget' && msg.args && msg.args.id) {
-          requestBudgetIds.set(msg.id, msg.args.id);
+        return;
+      }
+
+      // ── Leader tab registering a budget restore ──────────────────
+
+      if (msg.type === '__track-restore') {
+        if (group) {
+          group.requestToPort.set(msg.requestId, port);
+          group.requestNames.set(msg.requestId, 'load-budget');
+          group.requestBudgetIds.set(msg.requestId, msg.budgetId);
+        }
+        return;
+      }
+
+      // ── Request interception & routing ───────────────────────────
+
+      // load-budget: assign to the right group (or create one)
+      if (msg.name === 'load-budget' && msg.args && msg.args.id) {
+        const budgetId = msg.args.id;
+        const existingGroup = budgetGroups.get(budgetId);
+
+        if (existingGroup && existingGroup.backendConnected) {
+          // Budget already has a running backend — become a follower
+          // and forward the load-budget to the existing leader
+          addFollower(budgetId, port);
+          existingGroup.requestToPort.set(msg.id, port);
+          existingGroup.requestNames.set(msg.id, msg.name);
+          existingGroup.requestBudgetIds.set(msg.id, budgetId);
+          existingGroup.leaderPort.postMessage({ type: '__to-worker', msg });
+          logState(`Tab joined budget "${budgetId}" as follower`);
+          return;
         }
 
-        // If the leader is closing the budget but other followers still
-        // have it open, transfer leadership instead of closing the
-        // backend. The leader tab gets a synthetic reply so its UI
-        // navigates to show-budgets, and a follower is promoted to keep
-        // the budget running for remaining tabs.
-        if (msg.name === 'close-budget' && port === leaderPort) {
-          const followers = connectedPorts.filter(
-            p => p !== port && !standalonePorts.has(p),
+        if (existingGroup && !existingGroup.backendConnected) {
+          // Group exists but backend isn't ready yet — add as follower,
+          // queue the request for when the backend connects
+          addFollower(budgetId, port);
+          existingGroup.requestToPort.set(msg.id, port);
+          existingGroup.requestNames.set(msg.id, msg.name);
+          existingGroup.requestBudgetIds.set(msg.id, budgetId);
+          existingGroup.leaderPort.postMessage({ type: '__to-worker', msg });
+          logState(
+            `Tab joined budget "${budgetId}" as follower (backend booting)`,
           );
-          if (followers.length > 0) {
-            const budgetToRestore = currentBudgetId;
-            const newLeader = followers[0];
-            console.log(
-              `[SharedWorker] Leader closing budget but ${followers.length} follower(s) remain — transferring leadership`,
-            );
+          return;
+        }
 
-            // Tell the leader tab to terminate its Worker and give
-            // the UI a synthetic close-budget reply.
+        // No group for this budget yet — this tab becomes the leader.
+        // If it's currently in the lobby group, migrate it.
+        if (portBudget === '__lobby') {
+          migrateLobbyLeader(port, budgetId, msg);
+        } else if (group && port === group.leaderPort) {
+          // Leader is loading a different budget — push followers off first
+          for (const p of group.followers) {
+            p.postMessage({ type: 'push', name: 'show-budgets' });
+            portToBudget.delete(p);
+            unassignedPorts.add(p);
+          }
+          if (group.followers.size > 0) {
+            console.log(
+              `[SharedWorker] Leader switching budgets — pushed ${group.followers.size} follower(s) off "${portBudget}"`,
+            );
+            group.followers.clear();
+          }
+          group.requestToPort.set(msg.id, port);
+          group.requestNames.set(msg.id, msg.name);
+          group.requestBudgetIds.set(msg.id, budgetId);
+          group.leaderPort.postMessage({ type: '__to-worker', msg });
+        } else {
+          // New budget, tab not in lobby — elect as new leader
+          electLeader(budgetId, port, null, msg);
+          const newGroup = budgetGroups.get(budgetId);
+          if (newGroup) {
+            newGroup.requestToPort.set(msg.id, port);
+            newGroup.requestNames.set(msg.id, msg.name);
+            newGroup.requestBudgetIds.set(msg.id, budgetId);
+          }
+          logState(`Tab became leader for new budget "${budgetId}"`);
+        }
+        return;
+      }
+
+      // close-budget: handle leader vs follower
+      if (msg.name === 'close-budget' && group) {
+        if (port === group.leaderPort) {
+          if (group.followers.size > 0) {
+            // Leader closing but followers remain — transfer leadership
+            const newLeader = group.followers.values().next().value;
+            group.followers.delete(newLeader);
+            console.log(
+              `[SharedWorker] Leader closing budget "${portBudget}" but ${group.followers.size + 1} tab(s) remain — transferring`,
+            );
             port.postMessage({
               type: '__close-and-transfer',
               requestId: msg.id,
             });
-
-            // Clear leader state
-            leaderPort = null;
-            backendConnected = false;
-            lastAppInitFailure = null;
-            currentBudgetId = null;
-            requestToPort.clear();
-            requestNames.clear();
-            requestBudgetIds.clear();
-
-            // Promote a follower as new leader; it creates a new
-            // Worker and restores the same budget.
-            electLeader(newLeader, budgetToRestore);
+            electLeader(portBudget, newLeader, portBudget);
+            // Move the closing tab to unassigned
+            portToBudget.delete(port);
+            unassignedPorts.add(port);
+            logState(`Leadership transferred for "${portBudget}"`);
             return;
           }
-        }
-
-        // If a follower is closing the budget, don't forward to the
-        // backend — the leader and other followers still need it.
-        // Just send a synthetic reply so the follower's UI navigates
-        // to show-budgets without disturbing anyone else.
-        if (msg.name === 'close-budget' && port !== leaderPort) {
-          port.postMessage({
-            type: 'reply',
-            id: msg.id,
-            data: {},
-          });
-          requestToPort.delete(msg.id);
-          requestNames.delete(msg.id);
+          // No followers — let the close go through normally
+          group.requestToPort.set(msg.id, port);
+          group.requestNames.set(msg.id, msg.name);
+          group.leaderPort.postMessage({ type: '__to-worker', msg });
+          return;
+        } else {
+          // Follower closing — synthetic reply, don't touch the backend
+          group.followers.delete(port);
+          portToBudget.delete(port);
+          unassignedPorts.add(port);
+          port.postMessage({ type: 'reply', id: msg.id, data: {} });
+          logState(`Follower left budget "${portBudget}"`);
           return;
         }
+      }
 
-        // Budget-replacing operations (create-budget, create-demo-budget,
-        // import-budget) destroy the currently loaded budget on disk and
-        // replace it with a new one. If other tabs are using the shared
-        // backend, push them to show-budgets first so they don't get
-        // corrupted state. The requesting tab continues normally — it will
-        // end up on the newly created budget.
-        if (
-          currentBudgetId !== null &&
-          (msg.name === 'create-budget' ||
-            msg.name === 'create-demo-budget' ||
-            msg.name === 'import-budget')
+      // delete-budget: if another group is running this budget, evict it
+      if (msg.name === 'delete-budget' && msg.args) {
+        const targetId = msg.args.id;
+        if (targetId && budgetGroups.has(targetId)) {
+          evictGroup(targetId, port);
+          logState(`Evicted group for deleted budget "${targetId}"`);
+        }
+        // After eviction the only Worker may be gone. If no connected
+        // group remains, spin up a temporary Worker for this tab so
+        // the delete can actually execute.
+        let hasConnected = false;
+        for (const [, g] of budgetGroups) {
+          if (g.backendConnected) {
+            hasConnected = true;
+            break;
+          }
+        }
+        if (!hasConnected) {
+          const tempId = '__deleting-' + Date.now();
+          electLeader(tempId, port, null, msg);
+          const newGroup = budgetGroups.get(tempId);
+          if (newGroup && msg.id) {
+            newGroup.requestToPort.set(msg.id, port);
+            newGroup.requestNames.set(msg.id, msg.name);
+          }
+          logState(`Tab became leader for budget deletion ("${tempId}")`);
+          return;
+        }
+        // Otherwise fall through to default handler
+      }
+
+      // Budget-replacing operations (create/import/duplicate) change which
+      // budget the Worker is running. They must only execute on the tab's
+      // OWN Worker — never on another group's leader.
+      if (
+        msg.name === 'create-budget' ||
+        msg.name === 'create-demo-budget' ||
+        msg.name === 'import-budget' ||
+        msg.name === 'duplicate-budget'
+      ) {
+        // Demo and test budgets use fixed IDs. If another group already
+        // has that budget open, evict it before we recreate it.
+        if (msg.name === 'create-demo-budget') {
+          evictGroup('_demo-budget', port);
+        } else if (
+          msg.name === 'create-budget' &&
+          msg.args &&
+          msg.args.testMode
         ) {
-          const others = connectedPorts.filter(
-            p => p !== port && !standalonePorts.has(p),
-          );
-          if (others.length > 0) {
+          evictGroup('_test-budget', port);
+        }
+        if (group && port === group.leaderPort) {
+          // Leader is creating/importing — push followers off first,
+          // then forward to own Worker (falls through to default handler)
+          for (const p of group.followers) {
+            p.postMessage({ type: 'push', name: 'show-budgets' });
+            portToBudget.delete(p);
+            unassignedPorts.add(p);
+          }
+          if (group.followers.size > 0) {
             console.log(
-              `[SharedWorker] Budget-replacing operation "${msg.name}" — pushing ${others.length} other tab(s) to show-budgets`,
+              `[SharedWorker] Budget-replacing "${msg.name}" — pushed ${group.followers.size} tab(s) off "${portBudget}"`,
             );
-            for (const p of others) {
-              p.postMessage({ type: 'push', name: 'show-budgets' });
-            }
+            group.followers.clear();
+          }
+          // Fall through to default handler to forward to this leader's Worker
+        } else {
+          // Follower or unassigned tab — needs its own Worker.
+          // Remove from current group if it's a follower.
+          if (group) {
+            group.followers.delete(port);
+            portToBudget.delete(port);
+            unassignedPorts.add(port);
+          }
+          const tempId = '__creating-' + Date.now();
+          electLeader(tempId, port, null, msg);
+          const newGroup = budgetGroups.get(tempId);
+          if (newGroup && msg.id) {
+            newGroup.requestToPort.set(msg.id, port);
+            newGroup.requestNames.set(msg.id, msg.name);
+          }
+          logState(`Tab became leader for budget creation ("${tempId}")`);
+          return;
+        }
+      }
+
+      // ── Default: track and forward to leader ─────────────────────
+
+      // If the port is unassigned, try to route to any available leader.
+      // Non-budget messages (e.g. get-budgets) work the same regardless
+      // of which backend Worker handles them.
+      let targetGroup = group;
+      if (!targetGroup) {
+        for (const [, g] of budgetGroups) {
+          if (g.backendConnected) {
+            targetGroup = g;
+            break;
           }
         }
       }
 
-      if (leaderPort) {
-        leaderPort.postMessage({ type: '__to-worker', msg });
+      if (targetGroup) {
+        if (msg.id) {
+          // Request expecting a reply — track so we can route the reply back
+          targetGroup.requestToPort.set(msg.id, port);
+          if (msg.name) {
+            targetGroup.requestNames.set(msg.id, msg.name);
+          }
+          if (msg.name === 'load-budget' && msg.args && msg.args.id) {
+            targetGroup.requestBudgetIds.set(msg.id, msg.args.id);
+          }
+        }
+        // Forward to the leader's Worker (both requests and
+        // fire-and-forget messages like client-connected-to-backend)
+        targetGroup.leaderPort.postMessage({ type: '__to-worker', msg });
       }
     } catch (error) {
       console.error('[SharedWorker] Error in message handler:', error);
@@ -471,3 +649,76 @@ self.onconnect = function (e) {
 
   port.start();
 };
+
+// ── Budget lifecycle helpers ────────────────────────────────────────────
+
+function handleBudgetLoaded(
+  leaderPort,
+  oldGroupId,
+  newBudgetId,
+  requestingPort,
+) {
+  const oldGroup = budgetGroups.get(oldGroupId);
+  if (!oldGroup) return;
+
+  if (oldGroupId !== newBudgetId) {
+    // Leader loaded a real budget (from lobby or different budget).
+    const existingTarget = budgetGroups.get(newBudgetId);
+    if (existingTarget && existingTarget !== oldGroup) {
+      // Another group already owns this budget — can't rename. This
+      // shouldn't happen in practice because load-budget routing would
+      // have redirected to the existing group. Just log a warning.
+      console.warn(
+        `[SharedWorker] handleBudgetLoaded: conflict — group "${newBudgetId}" already exists`,
+      );
+      return;
+    }
+    budgetGroups.delete(oldGroupId);
+    budgetGroups.set(newBudgetId, oldGroup);
+    portToBudget.set(leaderPort, newBudgetId);
+
+    // Update all followers to the new budget ID
+    for (const p of oldGroup.followers) {
+      portToBudget.set(p, newBudgetId);
+    }
+
+    console.log(
+      `[SharedWorker] Budget loaded: "${newBudgetId}" (leader + ${oldGroup.followers.size} follower(s))`,
+    );
+  }
+
+  logState(`Budget "${newBudgetId}" ready`);
+}
+
+function handleBudgetClosed(closingPort, budgetId) {
+  const group = budgetGroups.get(budgetId);
+  if (!group) return;
+
+  if (closingPort === group.leaderPort && group.followers.size === 0) {
+    // Last tab closed the budget — clean up the group
+    budgetGroups.delete(budgetId);
+    portToBudget.delete(closingPort);
+    unassignedPorts.add(closingPort);
+    logState(`Budget "${budgetId}" closed (no tabs remain)`);
+  }
+}
+
+function migrateLobbyLeader(port, budgetId, pendingMsg) {
+  const lobbyGroup = budgetGroups.get('__lobby');
+  if (lobbyGroup && port === lobbyGroup.leaderPort) {
+    // Rename the lobby group directly — the Worker is already running
+    budgetGroups.delete('__lobby');
+    budgetGroups.set(budgetId, lobbyGroup);
+    portToBudget.set(port, budgetId);
+    lobbyGroup.requestToPort.set(pendingMsg.id, port);
+    lobbyGroup.requestNames.set(pendingMsg.id, pendingMsg.name);
+    lobbyGroup.requestBudgetIds.set(pendingMsg.id, budgetId);
+    lobbyGroup.leaderPort.postMessage({ type: '__to-worker', msg: pendingMsg });
+    port.postMessage({
+      type: '__role-change',
+      role: 'LEADER',
+      budgetId,
+    });
+    logState(`Lobby leader now on budget "${budgetId}"`);
+  }
+}
