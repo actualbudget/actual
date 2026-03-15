@@ -19,8 +19,6 @@ export function ReportRouter() {
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
-  const budgetAnalysisReportEnabled =
-    budgetAnalysisReportEnabled && budgetType !== 'tracking';
 
   return (
     <Routes>

@@ -85,8 +85,6 @@ export function Overview({ dashboard }: OverviewProps) {
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
-  const budgetAnalysisReportEnabled =
-    budgetAnalysisReportEnabled && budgetType !== 'tracking';
 
   const formulaMode = useFeatureFlag('formulaMode');
 
