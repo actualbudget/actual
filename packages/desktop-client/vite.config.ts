@@ -44,7 +44,14 @@ const injectPlugin = (options?: Parameters<typeof inject>[0]): Plugin => {
 // Inject build shims using the inject plugin
 const injectShims = (): Plugin[] => {
   const buildShims = path.resolve('./src/build-shims.js');
-  const commonInject: {
+  const serveInject: {
+    exclude: string[];
+    global: [string, string];
+  } = {
+    exclude: ['src/setupTests.ts'],
+    global: [buildShims, 'global'],
+  };
+  const buildInject: {
     global: [string, string];
   } = {
     global: [buildShims, 'global'],
@@ -70,7 +77,7 @@ const injectShims = (): Plugin[] => {
       enforce: 'post',
       apply: 'serve',
       ...injectPlugin({
-        ...commonInject,
+        ...serveInject,
         process: [buildShims, 'process'],
       }),
     },
@@ -83,7 +90,7 @@ const injectShims = (): Plugin[] => {
           rolldownOptions: {
             transform: {
               inject: {
-                ...commonInject,
+                ...buildInject,
                 _process: [buildShims, 'process'],
               },
             },
