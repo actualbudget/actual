@@ -331,6 +331,13 @@ function transformToSankeyData(
   const data: SankeyData = { nodes: [], links: [] };
   const nodeNames = new Set<string>();
 
+  // Sort category data by total value (sum of subcategories) in descending order
+  categoryData.sort((a, b) => {
+    const aTotal = a.balances.reduce((sum, bal) => sum + bal.value, 0);
+    const bTotal = b.balances.reduce((sum, bal) => sum + bal.value, 0);
+    return bTotal - aTotal;
+  });
+
   // Add the root node first with toBudget metadata
   data.nodes.push({
     name: rootNodeName,
@@ -342,6 +349,9 @@ function transformToSankeyData(
 
   // add all category expenses that have valid subcategories and a balance
   for (const mainCategory of categoryData) {
+    // Sort subcategories by value in descending order
+    mainCategory.balances.sort((a, b) => b.value - a.value);
+
     if (!nodeNames.has(mainCategory.name) && mainCategory.balances.length > 0) {
       let mainCategorySum = 0;
       for (const subCategory of mainCategory.balances) {
