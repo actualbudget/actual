@@ -36,6 +36,6 @@
     "@typescript/native-preview": "^7.0.0-dev.20260309.1",
     "protoc-gen-js": "3.21.4-4",
     "ts-protoc-gen": "0.15.0",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.0"
   }
 }

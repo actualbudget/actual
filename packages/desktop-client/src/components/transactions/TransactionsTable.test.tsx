@@ -39,14 +39,11 @@ import { payeeQueries } from '@desktop-client/payees';
 const queryClient = createTestQueryClient();
 
 vi.mock('loot-core/platform/client/connection');
-vi.mock('../../hooks/useFeatureFlag', () => ({
-  default: vi.fn().mockReturnValue(false),
-}));
 vi.mock('../../hooks/useSyncedPref', () => ({
   useSyncedPref: vi.fn().mockReturnValue([undefined, vi.fn()]),
 }));
 vi.mock('../../hooks/useFeatureFlag', () => ({
-  useFeatureFlag: () => false,
+  useFeatureFlag: vi.fn(() => false),
 }));
 
 const accounts = [generateAccount('Bank of America')];

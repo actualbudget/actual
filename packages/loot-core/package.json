@@ -113,6 +113,7 @@
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
     "cross-env": "^10.1.0",
+    "crypto-browserify": "^3.12.1",
     "fake-indexeddb": "^6.2.5",
     "fast-check": "4.5.3",
     "i18next": "^25.8.4",
@@ -124,11 +125,13 @@
     "peggy": "5.0.6",
     "rollup-plugin-visualizer": "^6.0.5",
     "stream-browserify": "^3.0.0",
+    "timers-browserify": "^2.0.12",
     "ts-node": "^10.9.2",
-    "vite": "^7.3.1",
+    "util": "^0.12.5",
+    "vite": "^8.0.0",
     "vite-plugin-node-polyfills": "^0.25.0",
     "vite-plugin-peggy-loader": "^2.0.1",
-    "vitest": "^4.0.18",
+    "vitest": "^4.1.0",
     "yargs": "^18.0.0"
   }
 }
