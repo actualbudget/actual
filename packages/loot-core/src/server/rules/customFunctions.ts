@@ -22,7 +22,7 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
       state,
       this.metadata('FIXED'),
       (number: number, decimals: number = 0) => {
-        return Number(number).toFixed(decimals);
+        return Number(Number(number).toFixed(decimals));
       },
     );
   }
