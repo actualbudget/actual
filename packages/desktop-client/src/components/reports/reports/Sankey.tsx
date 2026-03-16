@@ -435,12 +435,12 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                     </Paragraph>
                     <ul style={{ marginTop: 0, paddingLeft: 20 }}>
                       <li style={{ marginBottom: 5 }}>
-                        <strong>Budgeted:</strong> Shows how income flows into
-                        your budget and is allocated across categories.
-                      </li>
-                      <li style={{ marginBottom: 5 }}>
                         <strong>Spent:</strong> Displays actual spending by
                         category from transactions.
+                      </li>
+                      <li style={{ marginBottom: 5 }}>
+                        <strong>Budgeted:</strong> Shows how income flows into
+                        your budget and is allocated across categories.
                       </li>
                       <li>
                         <strong>Difference:</strong> Highlights budget vs. actual
