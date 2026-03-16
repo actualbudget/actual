@@ -91,7 +91,7 @@ __metadata:
     "@types/better-sqlite3": "npm:^7.6.13"
     "@types/emscripten": "npm:^1.41.5"
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
-    "@types/node": "npm:^22.19.10"
+    "@types/node": "npm:^22.19.15"
     "@types/pegjs": "npm:^0.10.6"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
     absurd-sql: "npm:0.0.54"
@@ -178,7 +178,7 @@ __metadata:
     "@types/cors": "npm:^2.8.19"
     "@types/express": "npm:^5.0.6"
     "@types/express-actuator": "npm:^1.8.3"
-    "@types/node": "npm:^22.19.10"
+    "@types/node": "npm:^22.19.15"
     "@types/supertest": "npm:^6.0.3"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
     bcrypt: "npm:^6.0.0"
@@ -10056,12 +10056,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^22.19.10":
-  version: 22.19.11
-  resolution: "@types/node@npm:22.19.11"
+"@types/node@npm:^22.19.15":
+  version: 22.19.15
+  resolution: "@types/node@npm:22.19.15"
   dependencies:
     undici-types: "npm:~6.21.0"
-  checksum: 10/bb899551432ce2bf3e1a175d58802f25dfb6a96e574ce1f0056d55d0ce48513961976ee3621215565142a8ad99a2464d9c384fa53ccba0650def031d218800f7
+  checksum: 10/c75bc9a8dbc49a61f3e6f49304cf7b1c05e818a1071b46e9effd1a51af7a1b5c10fd2e04f314b74ce78f4ca7e3ddc1d6e61c94c2e3354c8be9f9f7ee5e79e23c
   languageName: node
   linkType: hard
 
@@ -11328,7 +11328,7 @@ __metadata:
   resolution: "actual@workspace:."
   dependencies:
     "@octokit/rest": "npm:^22.0.1"
-    "@types/node": "npm:^22.19.10"
+    "@types/node": "npm:^22.19.15"
     "@types/prompts": "npm:^2.4.9"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
     "@yarnpkg/types": "npm:^4.0.1"
@@ -23339,7 +23339,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "plugins-service@workspace:packages/plugins-service"
   dependencies:
-    "@types/node": "npm:^22.19.10"
+    "@types/node": "npm:^22.19.15"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
     cross-env: "npm:^10.1.0"
     typescript-strict-plugin: "npm:^2.4.4"
