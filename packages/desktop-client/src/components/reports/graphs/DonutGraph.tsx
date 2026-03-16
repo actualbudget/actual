@@ -160,10 +160,10 @@ const ActiveShapeMobile = ({
 
   const expansionInner = expandInward
     ? chartInnerRadius - 4
-    : chartOuterRadius + 2;
+    : outerRadius + 2;
   const expansionOuter = expandInward
     ? chartInnerRadius - 2
-    : chartOuterRadius + 4;
+    : outerRadius + 4;
   const ey = cy + chartOuterRadius * Math.sin(-RADIAN * 240) - 5;
 
   return (
@@ -241,10 +241,10 @@ const ActiveShapeDesktop = ({
 
   const expansionInner = expandInward
     ? chartInnerRadius - 10
-    : chartOuterRadius + 6;
+    : outerRadius + 6;
   const expansionOuter = expandInward
     ? chartInnerRadius - 6
-    : chartOuterRadius + 10;
+    : outerRadius + 10;
 
   const lineStart = expandInward
     ? chartInnerRadius - 20
