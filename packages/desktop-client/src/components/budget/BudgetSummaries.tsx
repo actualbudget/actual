@@ -58,7 +58,9 @@ export function BudgetSummaries() {
     }
 
     const to = -offsetX;
-    void spring.start({ from: { x: from }, to: { x: to } });
+    if (from !== to) {
+      void spring.start({ from: { x: from }, to: { x: to } });
+    }
   }, [spring, firstMonth, monthWidth, allMonths]);
 
   useLayoutEffect(() => {
