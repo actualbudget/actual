@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import * as d from 'date-fns';
-import deepEqual from 'deep-equal';
 import { v4 as uuidv4 } from 'uuid';
 
 import { captureBreadcrumb } from '../../platform/exceptions';
@@ -17,7 +16,7 @@ import {
   getStatus,
   recurConfigToRSchedule,
 } from '../../shared/schedules';
-import type { ScheduleEntity } from '../../types/models';
+import type { RuleConditionEntity, ScheduleEntity } from '../../types/models';
 import { addTransactions } from '../accounts/sync';
 import { createApp } from '../app';
 import { aqlQuery } from '../aql';
@@ -46,6 +45,57 @@ function zip(arr1, arr2) {
     result.push([arr1[i], arr2[i]]);
   }
   return result;
+}
+
+export function areConditionValuesEqual(left, right) {
+  if (left === right) {
+    return true;
+  }
+
+  if (left == null || right == null) {
+    return left === right;
+  }
+
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return (
+      Array.isArray(left) &&
+      Array.isArray(right) &&
+      left.length === right.length &&
+      left.every((value, index) => areConditionValuesEqual(value, right[index]))
+    );
+  }
+
+  if (typeof left === 'object' && typeof right === 'object') {
+    const leftKeys = Object.keys(left).sort();
+    const rightKeys = Object.keys(right).sort();
+
+    return (
+      leftKeys.length === rightKeys.length &&
+      leftKeys.every((key, index) => {
+        const rightKey = rightKeys[index];
+        return (
+          key === rightKey &&
+          areConditionValuesEqual(left[key], right[rightKey])
+        );
+      })
+    );
+  }
+
+  return false;
+}
+
+function areScheduleConditionsEqual(
+  left?: RuleConditionEntity,
+  right?: RuleConditionEntity,
+) {
+  if (left == null || right == null) {
+    return left === right;
+  }
+
+  const { type: _leftType, ...leftCondition } = left;
+  const { type: _rightType, ...rightCondition } = right;
+
+  return areConditionValuesEqual(leftCondition, rightCondition);
 }
 
 export function updateConditions(conditions, newConditions) {
@@ -111,11 +161,13 @@ export async function setNextDate({
   start,
   conditions,
   reset,
+  skipRequested,
 }: {
   id: string;
   start?;
   conditions?;
   reset?: boolean;
+  skipRequested?: boolean;
 }) {
   if (conditions == null) {
     const rule = await getRuleForSchedule(id);
@@ -127,9 +179,25 @@ export async function setNextDate({
 
   const { date: dateCond } = extractScheduleConds(conditions);
 
-  const { data: nextDate } = await aqlQuery(
+  let { data: nextDate } = await aqlQuery(
     q('schedules').filter({ id }).calculate('next_date'),
   );
+
+  if (skipRequested === true) {
+    const skipWeekend: boolean = dateCond.value?.skipWeekend;
+    const weekendSolveMode: string = dateCond.value?.weekendSolveMode;
+
+    if (weekendSolveMode === 'before' && skipWeekend === true) {
+      const parsedNextDate = parseDate(nextDate);
+      if (d.isFriday(parsedNextDate) || d.isWeekend(parsedNextDate)) {
+        // nextDate is on weekend or friday, moving to monday
+        // so getNextDate and getDateWithSkippedWeekend
+        // don't push the date back to Friday, thus causing
+        // `(newNextDate !== nextDate) ` to be false and not updating the next date
+        nextDate = dayFromDate(d.nextMonday(parsedNextDate));
+      }
+    }
+  }
 
   // Only do this if a date condition exists
   if (dateCond) {
@@ -242,8 +310,8 @@ export async function updateSchedule({
   conditions,
   resetNextDate,
 }: {
-  schedule;
-  conditions?;
+  schedule: Partial<ScheduleEntity> & Pick<ScheduleEntity, 'id'>;
+  conditions?: RuleConditionEntity[];
   resetNextDate?: boolean;
 }) {
   if (schedule.rule) {
@@ -288,11 +356,11 @@ export async function updateSchedule({
       // might switch accounts from a closed one
       if (
         resetNextDate ||
-        !deepEqual(
+        !areScheduleConditionsEqual(
           oldConditions.find(c => c.field === 'account'),
-          oldConditions.find(c => c.field === 'account'),
+          newConditions.find(c => c.field === 'account'),
         ) ||
-        !deepEqual(
+        !areConditionValuesEqual(
           stripType(oldConditions.find(c => c.field === 'date') || {}),
           stripType(newConditions.find(c => c.field === 'date') || {}),
         )
@@ -324,12 +392,13 @@ export async function deleteSchedule({ id }) {
   });
 }
 
-async function skipNextDate({ id }) {
+export async function skipNextDate({ id }) {
   return setNextDate({
     id,
     start: nextDate => {
       return d.addDays(parseDate(nextDate), 1);
     },
+    skipRequested: true,
   });
 }
 

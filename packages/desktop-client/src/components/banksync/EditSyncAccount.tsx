@@ -195,13 +195,13 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
       name="synced-account-edit"
       containerProps={{ style: { width: 800 } }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('{{accountName}} bank sync settings', {
               accountName: potentiallyTruncatedAccountName,
             })}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
 
           <Text style={{ fontSize: 15 }}>
@@ -246,20 +246,20 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             <Button
               style={{ color: theme.errorText }}
               onPress={() => {
-                void onUnlink(close);
+                void onUnlink(() => state.close());
               }}
             >
               <Trans>Unlink account</Trans>
             </Button>
 
             <SpaceBetween gap={10}>
-              <Button onPress={close}>
+              <Button onPress={() => state.close()}>
                 <Trans>Cancel</Trans>
               </Button>
               <Button
                 variant="primary"
                 onPress={() => {
-                  void onSave(close);
+                  void onSave(() => state.close());
                 }}
               >
                 <Trans>Save</Trans>

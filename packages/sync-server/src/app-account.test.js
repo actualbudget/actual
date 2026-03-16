@@ -1,7 +1,8 @@
 import request from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
 
-import { getAccountDb, getServerPrefs } from './account-db';
+import { getAccountDb, getLoginMethod, getServerPrefs } from './account-db';
+import { bootstrapPassword } from './accounts/password';
 import { handlers as app } from './app-account';
 
 const ADMIN_ROLE = 'ADMIN';
@@ -32,6 +33,119 @@ const generateSessionToken = () => `token-${uuidv4()}`;
 const clearServerPrefs = () => {
   getAccountDb().mutate('DELETE FROM server_prefs');
 };
+
+const insertAuthRow = (method, active, extraData = null) => {
+  getAccountDb().mutate(
+    'INSERT INTO auth (method, display_name, extra_data, active) VALUES (?, ?, ?, ?)',
+    [method, method, extraData, active],
+  );
+};
+
+const clearAuth = () => {
+  getAccountDb().mutate('DELETE FROM auth');
+};
+
+describe('/change-password', () => {
+  let userId, sessionToken;
+
+  beforeEach(() => {
+    userId = uuidv4();
+    sessionToken = generateSessionToken();
+    createUser(userId, 'testuser', ADMIN_ROLE);
+    createSession(userId, sessionToken);
+  });
+
+  afterEach(() => {
+    deleteUser(userId);
+    clearAuth();
+  });
+
+  it('should return 401 if no session token is provided', async () => {
+    const res = await request(app).post('/change-password').send({
+      password: 'newpassword',
+    });
+
+    expect(res.statusCode).toEqual(401);
+    expect(res.body).toHaveProperty('status', 'error');
+    expect(res.body).toHaveProperty('reason', 'unauthorized');
+  });
+
+  it('should return 403 when active auth method is openid', async () => {
+    insertAuthRow('openid', 1);
+
+    const res = await request(app)
+      .post('/change-password')
+      .set('x-actual-token', sessionToken)
+      .send({ password: 'newpassword' });
+
+    expect(res.statusCode).toEqual(403);
+    expect(res.body).toEqual({
+      status: 'error',
+      reason: 'forbidden',
+      details: 'password-auth-not-active',
+    });
+  });
+
+  it('should return 400 when active method is password but password is empty', async () => {
+    bootstrapPassword('oldpassword');
+
+    const res = await request(app)
+      .post('/change-password')
+      .set('x-actual-token', sessionToken)
+      .send({ password: '' });
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toEqual({ status: 'error', reason: 'invalid-password' });
+  });
+
+  it('should return 200 when active method is password and new password is valid', async () => {
+    bootstrapPassword('oldpassword');
+
+    const res = await request(app)
+      .post('/change-password')
+      .set('x-actual-token', sessionToken)
+      .send({ password: 'newpassword' });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toEqual({ status: 'ok', data: {} });
+  });
+});
+
+describe('getLoginMethod()', () => {
+  afterEach(() => {
+    clearAuth();
+  });
+
+  it('returns the active DB method when no req is provided', () => {
+    insertAuthRow('password', 1);
+    expect(getLoginMethod(undefined)).toBe('password');
+  });
+
+  it('honors a client-requested method when it is active in DB', () => {
+    insertAuthRow('openid', 1);
+    const req = { body: { loginMethod: 'openid' } };
+    expect(getLoginMethod(req)).toBe('openid');
+  });
+
+  it('ignores a client-requested method that is inactive in DB', () => {
+    insertAuthRow('openid', 1);
+    insertAuthRow('password', 0);
+    const req = { body: { loginMethod: 'password' } };
+    expect(getLoginMethod(req)).toBe('openid');
+  });
+
+  it('ignores a client-requested method that is not in DB', () => {
+    insertAuthRow('openid', 1);
+    const req = { body: { loginMethod: 'password' } };
+    expect(getLoginMethod(req)).toBe('openid');
+  });
+
+  it('falls back to config default when auth table is empty and no req', () => {
+    // auth table is empty — getActiveLoginMethod() returns undefined
+    // config default for loginMethod is 'password'
+    expect(getLoginMethod(undefined)).toBe('password');
+  });
+});
 
 describe('/server-prefs', () => {
   describe('POST /server-prefs', () => {

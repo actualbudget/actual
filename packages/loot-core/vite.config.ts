@@ -9,7 +9,6 @@ import peggyLoader from 'vite-plugin-peggy-loader';
 export default defineConfig(({ mode }) => {
   const isDev = mode === 'development';
   const outDir = path.resolve(__dirname, 'lib-dist/browser');
-  const crdtDir = path.resolve(__dirname, '../crdt');
 
   return {
     mode,
@@ -25,7 +24,7 @@ export default defineConfig(({ mode }) => {
         fileName: () =>
           isDev ? 'kcab.worker.dev.js' : `kcab.worker.[hash].js`,
       },
-      rollupOptions: {
+      rolldownOptions: {
         onwarn(warning, warn) {
           // Suppress sourcemap warnings from peggy-loader
           if (
@@ -62,12 +61,6 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json'],
-      alias: [
-        {
-          find: /^@actual-app\/crdt(\/.*)?$/,
-          replacement: path.resolve(crdtDir, 'src') + '$1',
-        },
-      ],
     },
     define: {
       'process.env': '{}',
@@ -83,6 +76,9 @@ export default defineConfig(({ mode }) => {
           'process',
           'stream',
           'path',
+          'crypto',
+          'timers',
+          'util',
           'zlib',
           'fs',
           'assert',
@@ -100,8 +96,11 @@ export default defineConfig(({ mode }) => {
         'buffer',
         'process',
         'assert',
+        'crypto-browserify',
         'path-browserify',
         'stream-browserify',
+        'timers-browserify',
+        'util',
         'browserify-zlib',
       ],
     },

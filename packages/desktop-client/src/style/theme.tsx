@@ -103,22 +103,54 @@ export function ThemeStyle() {
 /**
  * CustomThemeStyle injects CSS from the installed custom theme (if any).
  * This is rendered after ThemeStyle to allow custom themes to override base theme variables.
+ *
+ * When `theme === 'auto'`, separate custom themes can be set for light and dark modes,
+ * injected via @media (prefers-color-scheme) rules. Otherwise, a single custom theme applies.
  */
 export function CustomThemeStyle() {
   const customThemesEnabled = useFeatureFlag('customThemes');
-  const [installedThemeJson] = useGlobalPref('installedCustomTheme');
+  const [activeTheme] = useTheme();
+  const [installedCustomLightThemeJson] = useGlobalPref(
+    'installedCustomLightTheme',
+  );
+  const [installedCustomDarkThemeJson] = useGlobalPref(
+    'installedCustomDarkTheme',
+  );
 
-  // Parse installed theme (single theme, not array)
-  const installedTheme = parseInstalledTheme(installedThemeJson);
-
-  // Get CSS content from the theme (cssContent is required)
-  const { cssContent } = installedTheme ?? {};
-
-  // Memoize validated CSS to avoid re-validation on every render
   const validatedCss = useMemo(() => {
-    if (!customThemesEnabled || !cssContent) {
-      return null;
+    if (!customThemesEnabled) return null;
+
+    if (activeTheme === 'auto') {
+      const lightTheme = parseInstalledTheme(installedCustomLightThemeJson);
+      const darkTheme = parseInstalledTheme(installedCustomDarkThemeJson);
+
+      let css = '';
+
+      if (lightTheme?.cssContent) {
+        try {
+          const validated = validateThemeCss(lightTheme.cssContent);
+          css += `@media (prefers-color-scheme: light) { ${validated} }\n`;
+        } catch (error) {
+          console.error('Invalid custom light theme CSS', { error });
+        }
+      }
+
+      if (darkTheme?.cssContent) {
+        try {
+          const validated = validateThemeCss(darkTheme.cssContent);
+          css += `@media (prefers-color-scheme: dark) { ${validated} }\n`;
+        } catch (error) {
+          console.error('Invalid custom dark theme CSS', { error });
+        }
+      }
+
+      return css || null;
     }
+
+    const installedTheme = parseInstalledTheme(installedCustomLightThemeJson);
+    const { cssContent } = installedTheme ?? {};
+
+    if (!cssContent) return null;
 
     try {
       return validateThemeCss(cssContent);
@@ -126,7 +158,12 @@ export function CustomThemeStyle() {
       console.error('Invalid custom theme CSS', { error, cssContent });
       return null;
     }
-  }, [customThemesEnabled, cssContent]);
+  }, [
+    customThemesEnabled,
+    activeTheme,
+    installedCustomLightThemeJson,
+    installedCustomDarkThemeJson,
+  ]);
 
   if (!validatedCss) {
     return null;

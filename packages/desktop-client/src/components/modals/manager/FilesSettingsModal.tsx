@@ -162,12 +162,14 @@ export function FilesSettingsModal() {
 
   return (
     <Modal name="files-settings">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Settings')}
             rightContent={
-              <ModalCloseButton onPress={() => closeModal(close)} />
+              <ModalCloseButton
+                onPress={() => closeModal(() => state.close())}
+              />
             }
           />
           <View
@@ -189,7 +191,7 @@ export function FilesSettingsModal() {
                 fontSize: 14,
                 alignSelf: 'center',
               }}
-              onPress={() => closeModal(close)}
+              onPress={() => closeModal(() => state.close())}
             >
               <Trans>OK</Trans>
             </Button>

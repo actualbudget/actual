@@ -13,9 +13,6 @@ export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';
 let rootPath = path.join(__dirname, '..', '..', '..', '..');
 
 switch (path.basename(__filename)) {
-  case 'bundle.api.js': // api bundle uses the electron bundle - account for its file structure
-    rootPath = path.join(__dirname, '..');
-    break;
   case 'bundle.desktop.js': // electron app
     rootPath = path.join(__dirname, '..', '..');
     break;
@@ -49,7 +46,8 @@ export const demoBudgetPath: typeof T.demoBudgetPath = path.join(
   'demo-budget',
 );
 
-export const join: typeof T.join = path.join;
+export const join: typeof T.join = (...args: Parameters<typeof path.join>) =>
+  path.join(...args);
 
 export const basename: typeof T.basename = filepath => path.basename(filepath);
 

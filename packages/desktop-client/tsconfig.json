@@ -1,15 +1,28 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "noEmit": true,
+    "composite": true,
+    "noEmit": false,
+    "declaration": true,
+    "declarationMap": true,
+    "strict": false, // TODO: fix issues and remove this
+    "emitDeclarationOnly": true,
+    "outDir": "build/ts",
+    "rootDir": ".",
+    "tsBuildInfoFile": "build/ts/.tsbuildinfo",
+    "paths": {
+      // TODO: remove and replace with imports from "@actual-app/core"
+      "loot-core/*": ["../loot-core/src/*"],
+      // TODO: move to subpath imports
+      "@desktop-client/*": ["./src/*"]
+    },
     "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "../../packages/loot-core/typings/pegjs.ts",
-    "../../packages/loot-core/typings/window.ts"
+  "references": [
+    { "path": "../loot-core" },
+    { "path": "../component-library" }
   ],
+  "include": ["**/*.ts", "src/**/*.tsx", "src/**/*.js"],
   "exclude": [
     "node_modules",
     "build",

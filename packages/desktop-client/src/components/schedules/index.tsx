@@ -72,7 +72,7 @@ export function Schedules() {
           await send('schedule/delete', { id });
           break;
         default:
-          throw new Error(`Unknown action: ${name}`);
+          throw new Error(`Unknown action: ${String(name)}`);
       }
     },
     [],

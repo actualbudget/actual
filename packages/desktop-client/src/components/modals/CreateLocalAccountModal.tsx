@@ -83,13 +83,13 @@ export function CreateLocalAccountModal() {
   };
   return (
     <Modal name="add-local-account">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={
               <ModalTitle title={t('Create Local Account')} shrinkOnOverflow />
             }
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View>
             <Form onSubmit={onSubmit}>
@@ -191,7 +191,7 @@ export function CreateLocalAccountModal() {
               )}
 
               <ModalButtons>
-                <Button onPress={close}>
+                <Button onPress={() => state.close()}>
                   <Trans>Back</Trans>
                 </Button>
                 <Button

@@ -103,7 +103,7 @@ export function MergeUnusedPayeesModal({
 
   return (
     <Modal name="merge-unused-payees">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <View style={{ padding: 20, maxWidth: 500 }}>
           <View>
             <Paragraph style={{ marginBottom: 10, fontWeight: 500 }}>
@@ -198,7 +198,7 @@ export function MergeUnusedPayeesModal({
                 style={{ marginRight: 10 }}
                 onPress={() => {
                   void onMerge(targetPayee);
-                  close();
+                  state.close();
                 }}
               >
                 <Trans>Merge</Trans>
@@ -208,13 +208,13 @@ export function MergeUnusedPayeesModal({
                   style={{ marginRight: 10 }}
                   onPress={() => {
                     void onMergeAndCreateRule(targetPayee);
-                    close();
+                    state.close();
                   }}
                 >
                   <Trans>Merge and edit rule</Trans>
                 </Button>
               )}
-              <Button style={{ marginRight: 10 }} onPress={close}>
+              <Button style={{ marginRight: 10 }} onPress={() => state.close()}>
                 <Trans>Do nothing</Trans>
               </Button>
             </ModalButtons>

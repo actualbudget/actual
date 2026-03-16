@@ -147,15 +147,29 @@ function checkDatabaseValidity(
   appliedIds: number[],
   available: string[],
 ): void {
-  for (let i = 0; i < appliedIds.length; i++) {
-    if (
-      i >= available.length ||
-      appliedIds[i] !== getMigrationId(available[i])
-    ) {
-      logger.error('Database is out of sync with migrations:', {
+  if (appliedIds.length > available.length) {
+    logger.error(
+      'Database is out of sync with migrations (index past available):',
+      {
         appliedIds,
         available,
-      });
+      },
+    );
+    throw new Error('out-of-sync-migrations');
+  }
+
+  for (let i = 0; i < appliedIds.length; i++) {
+    if (appliedIds[i] !== getMigrationId(available[i])) {
+      logger.error(
+        'Database is out of sync with migrations (migration id mismatch):',
+        {
+          appliedIds,
+          available,
+          missing: available.filter(
+            m => !appliedIds.includes(getMigrationId(m)),
+          ),
+        },
+      );
       throw new Error('out-of-sync-migrations');
     }
   }
