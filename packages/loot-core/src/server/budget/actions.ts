@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 
-import { getCurrency } from 'loot-core/shared/currencies';
-
+import { getCurrency } from '#shared/currencies';
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import { getLocale } from '../../shared/locale';
 import * as monthUtils from '../../shared/months';

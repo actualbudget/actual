@@ -5,11 +5,14 @@
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,
+    "strict": false, // TODO: fix issues and remove this
     "emitDeclarationOnly": true,
     "outDir": "build/ts",
-    "rootDir": "src",
+    "rootDir": ".",
     "tsBuildInfoFile": "build/ts/.tsbuildinfo",
     "paths": {
+      // TODO: remove and replace with imports from "@actual-app/core"
+      "loot-core/*": ["../loot-core/src/*"],
       // TODO: move to subpath imports
       "@desktop-client/*": ["./src/*"]
     },
@@ -19,7 +22,7 @@
     { "path": "../loot-core" },
     { "path": "../component-library" }
   ],
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js"],
+  "include": ["**/*.ts", "src/**/*.tsx", "src/**/*.js"],
   "exclude": [
     "node_modules",
     "build",

@@ -20,6 +20,7 @@ type createSpendingSpreadsheetProps = {
   conditionsOp?: string;
   compare?: string;
   compareTo?: string;
+  budgetType?: 'envelope' | 'tracking';
 };
 
 export function createSpendingSpreadsheet({
@@ -27,6 +28,7 @@ export function createSpendingSpreadsheet({
   conditionsOp,
   compare,
   compareTo,
+  budgetType = 'envelope',
 }: createSpendingSpreadsheetProps) {
   const startDate = monthUtils.subMonths(compare, 3) + '-01';
   const endDate = monthUtils.getMonthEnd(compare + '-01');
@@ -113,9 +115,11 @@ export function createSpendingSpreadsheet({
     const combineDebts = [...debts, ...overlapDebts];
 
     const budgetMonth = parseInt(compare.replace('-', ''));
+    const budgetTable =
+      budgetType === 'tracking' ? 'reflect_budgets' : 'zero_budgets';
     const [budgets] = await Promise.all([
       aqlQuery(
-        q('zero_budgets')
+        q(budgetTable)
           .filter({
             $and: [{ month: { $eq: budgetMonth } }],
           })

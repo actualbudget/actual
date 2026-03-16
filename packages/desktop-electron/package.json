@@ -8,8 +8,8 @@
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
     "build": "yarn build:dist && electron-builder",
-    "build:dist": "tsc && yarn copy-static-assets",
-    "typecheck": "tsc -b && tsc-strict",
+    "build:dist": "tsgo && yarn copy-static-assets",
+    "typecheck": "tsgo -b && tsc-strict",
     "copy-static-assets": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* build/desktop-electron",
     "watch": "yarn build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron .",
     "e2e": "npx playwright test"
@@ -21,17 +21,17 @@
     "promise-retry": "^2.0.1"
   },
   "devDependencies": {
+    "@actual-app/core": "workspace:*",
     "@electron/notarize": "3.1.1",
     "@electron/rebuild": "4.0.2",
     "@playwright/test": "1.58.2",
     "@types/copyfiles": "^2",
     "@types/fs-extra": "^11",
+    "@typescript/native-preview": "^7.0.0-dev.20260309.1",
     "copyfiles": "^2.4.1",
     "cross-env": "^10.1.0",
     "electron": "39.2.7",
     "electron-builder": "26.4.0",
-    "loot-core": "workspace:*",
-    "typescript": "^5.9.3",
     "typescript-strict-plugin": "^2.4.4"
   },
   "build": {

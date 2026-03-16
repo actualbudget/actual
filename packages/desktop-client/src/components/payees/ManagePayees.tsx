@@ -191,9 +191,25 @@ export const ManagePayees = ({
 
   async function onMerge() {
     const ids = [...selected.items];
-    await props.onMerge(ids);
+    if (ids.length < 2) return;
 
-    selected.dispatch({ type: 'select-none' });
+    const targetPayeeId = ids[0];
+
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'confirm-payees-merge',
+          options: {
+            payeeIds: ids.filter(id => id !== targetPayeeId),
+            targetPayeeId,
+            onConfirm: async () => {
+              await props.onMerge(ids);
+              selected.dispatch({ type: 'select-none' });
+            },
+          },
+        },
+      }),
+    );
   }
 
   const onChangeCategoryLearning = useCallback(() => {

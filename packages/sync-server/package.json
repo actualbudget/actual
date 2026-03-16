@@ -15,8 +15,8 @@
   "scripts": {
     "start": "yarn build && node build/app",
     "start-monitor": "nodemon --exec 'yarn build && node build/app' --ignore './build/**/*' --ext 'ts,js' build/app",
-    "build": "tsc && yarn add-import-extensions && yarn copy-static-assets",
-    "typecheck": "tsc -b && tsc-strict",
+    "build": "tsgo && yarn add-import-extensions && yarn copy-static-assets",
+    "typecheck": "tsgo -b && tsc-strict",
     "add-import-extensions": "node bin/add-import-extensions.mjs",
     "copy-static-assets": "rm -rf build/src/sql && cp -r src/sql build/src/sql",
     "test": "NODE_ENV=test NODE_OPTIONS='--experimental-vm-modules --import ./register-loader.mjs --trace-warnings' vitest --run",
@@ -61,11 +61,11 @@
     "@types/express-actuator": "^1.8.3",
     "@types/node": "^22.19.10",
     "@types/supertest": "^6.0.3",
+    "@typescript/native-preview": "^7.0.0-dev.20260309.1",
     "http-proxy-middleware": "^3.0.5",
     "nodemon": "^3.1.11",
     "supertest": "^7.2.2",
-    "typescript": "^5.9.3",
     "typescript-strict-plugin": "^2.4.4",
-    "vitest": "^4.0.18"
+    "vitest": "^4.1.0"
   }
 }

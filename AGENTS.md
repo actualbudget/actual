@@ -84,7 +84,7 @@ The core application logic that runs on any platform.
 
   ```bash
   # Run all loot-core tests
-  yarn workspace loot-core run test
+  yarn workspace @actual-app/core run test
 
   # Or run tests across all packages using lage
   yarn test
@@ -219,7 +219,7 @@ yarn test
 yarn test:debug
 
 # Run tests for a specific package
-yarn workspace loot-core run test
+yarn workspace @actual-app/core run test
 ```
 
 **E2E Tests (Playwright)**
@@ -625,7 +625,7 @@ Standard commands documented in `package.json` scripts and the Quick Start secti
 
 - `yarn lint` / `yarn lint:fix` (uses oxlint + oxfmt)
 - `yarn test` (lage across all workspaces)
-- `yarn typecheck` (tsc + lage typecheck)
+- `yarn typecheck` (tsgo + lage typecheck)
 
 ### Testing and previewing the app
 

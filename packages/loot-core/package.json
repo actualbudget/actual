@@ -1,10 +1,23 @@
 {
-  "name": "loot-core",
-  "version": "0.0.2",
+  "name": "@actual-app/core",
+  "version": "26.3.0",
   "description": "",
   "license": "ISC",
-  "author": "",
-  "main": "index.js",
+  "typesVersions": {
+    "*": {
+      "types/*": [
+        "./src/types/*"
+      ]
+    }
+  },
+  "imports": {
+    "#*": [
+      "./src/*.ts",
+      "./src/*.tsx",
+      "./src/*/index.ts",
+      "./src/*/index.tsx"
+    ]
+  },
   "exports": {
     "./client/accounts/*": "./src/client/accounts/*.ts",
     "./client/app/*": "./src/client/app/*.ts",
@@ -61,7 +74,7 @@
     "test": "npm-run-all -cp 'test:*'",
     "test:node": "ENV=node vitest --run",
     "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
-    "typecheck": "tsc -b && tsc-strict"
+    "typecheck": "tsgo -b && tsc-strict"
   },
   "dependencies": {
     "@jlongster/sql.js": "^1.6.7",
@@ -75,7 +88,6 @@
     "csv-parse": "^6.1.0",
     "csv-stringify": "^6.6.0",
     "date-fns": "^4.1.0",
-    "deep-equal": "^2.2.3",
     "handlebars": "^4.7.8",
     "lru-cache": "^11.2.5",
     "md5": "^2.3.0",
@@ -83,13 +95,12 @@
     "mitt": "^3.0.1",
     "promise-retry": "^2.0.1",
     "slash": "5.1.0",
-    "typescript": "^5.9.3",
     "typescript-strict-plugin": "^2.4.4",
     "ua-parser-js": "^2.0.9",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@actual-app/crdt": "workspace:^",
+    "@actual-app/crdt": "workspace:*",
     "@swc/core": "^1.15.11",
     "@types/adm-zip": "^0.5.7",
     "@types/better-sqlite3": "^7.6.13",
@@ -97,10 +108,12 @@
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
     "@types/node": "^22.19.10",
     "@types/pegjs": "^0.10.6",
+    "@typescript/native-preview": "^7.0.0-dev.20260309.1",
     "assert": "^2.1.0",
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
     "cross-env": "^10.1.0",
+    "crypto-browserify": "^3.12.1",
     "fake-indexeddb": "^6.2.5",
     "fast-check": "4.5.3",
     "i18next": "^25.8.4",
@@ -112,12 +125,13 @@
     "peggy": "5.0.6",
     "rollup-plugin-visualizer": "^6.0.5",
     "stream-browserify": "^3.0.0",
+    "timers-browserify": "^2.0.12",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3",
-    "vite": "^7.3.1",
+    "util": "^0.12.5",
+    "vite": "^8.0.0",
     "vite-plugin-node-polyfills": "^0.25.0",
     "vite-plugin-peggy-loader": "^2.0.1",
-    "vitest": "^4.0.18",
+    "vitest": "^4.1.0",
     "yargs": "^18.0.0"
   }
 }
