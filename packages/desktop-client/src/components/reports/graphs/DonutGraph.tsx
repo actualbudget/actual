@@ -158,12 +158,8 @@ const ActiveShapeMobile = ({
   const format = useFormat();
   const yAxis = payload.name ?? payload.date;
 
-  const expansionInner = expandInward
-    ? chartInnerRadius - 4
-    : outerRadius + 2;
-  const expansionOuter = expandInward
-    ? chartInnerRadius - 2
-    : outerRadius + 4;
+  const expansionInner = expandInward ? chartInnerRadius - 4 : outerRadius + 2;
+  const expansionOuter = expandInward ? chartInnerRadius - 2 : outerRadius + 4;
   const ey = cy + chartOuterRadius * Math.sin(-RADIAN * 240) - 5;
 
   return (
@@ -239,12 +235,8 @@ const ActiveShapeDesktop = ({
   const sin = Math.sin(-RADIAN * midAngle);
   const cos = Math.cos(-RADIAN * midAngle);
 
-  const expansionInner = expandInward
-    ? chartInnerRadius - 10
-    : outerRadius + 6;
-  const expansionOuter = expandInward
-    ? chartInnerRadius - 6
-    : outerRadius + 10;
+  const expansionInner = expandInward ? chartInnerRadius - 10 : outerRadius + 6;
+  const expansionOuter = expandInward ? chartInnerRadius - 6 : outerRadius + 10;
 
   const lineStart = expandInward
     ? chartInnerRadius - 20
