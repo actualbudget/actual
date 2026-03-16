@@ -5,7 +5,6 @@ export class SankeyPage {
   readonly pageContent: Locator;
   readonly budgetedButton: Locator;
   readonly spentButton: Locator;
-  readonly differenceButton: Locator;
   readonly monthSelect: Locator;
   readonly saveButton: Locator;
 
@@ -13,14 +12,11 @@ export class SankeyPage {
     this.page = page;
     this.pageContent = page.getByTestId('reports-page');
 
-    this.budgetedButton = this.pageContent.getByRole('button', {
-      name: 'Budgeted',
-    });
     this.spentButton = this.pageContent.getByRole('button', {
       name: 'Spent',
     });
-    this.differenceButton = this.pageContent.getByRole('button', {
-      name: 'Difference',
+    this.budgetedButton = this.pageContent.getByRole('button', {
+      name: 'Budgeted',
     });
     this.saveButton = this.pageContent.getByRole('button', {
       name: 'Save',
@@ -35,14 +31,11 @@ export class SankeyPage {
 
   async selectMode(mode: 'budgeted' | 'spent' | 'difference') {
     switch (mode) {
-      case 'budgeted':
-        await this.budgetedButton.click();
-        break;
       case 'spent':
         await this.spentButton.click();
         break;
-      case 'difference':
-        await this.differenceButton.click();
+      case 'budgeted':
+        await this.budgetedButton.click();
         break;
       default:
         throw new Error(`Unrecognized mode: ${mode}`);

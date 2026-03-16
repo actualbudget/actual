@@ -46,7 +46,6 @@ test.describe('Sankey Report', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-
   test('changes month and verifies graph updates', async () => {
     reportsPage = await navigation.goToReportsPage();
     sankeyPage = await reportsPage.goToSankeyPage();

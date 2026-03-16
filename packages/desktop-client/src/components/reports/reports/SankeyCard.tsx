@@ -1,4 +1,5 @@
-import { type ReactElement, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
