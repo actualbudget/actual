@@ -66,7 +66,7 @@ export function BudgetSummaries() {
   }, [firstMonth]);
 
   useLayoutEffect(() => {
-    void spring.start({ from: { x: -monthWidth }, to: { x: -monthWidth } });
+    void spring.start({ to: { x: -monthWidth }, immediate: true });
   }, [spring, monthWidth]);
 
   const { SummaryComponent } = useBudgetComponents();
