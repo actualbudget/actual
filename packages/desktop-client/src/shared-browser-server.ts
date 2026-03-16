@@ -7,4 +7,5 @@
 import { createCoordinator } from './shared-browser-server-core';
 
 const coordinator = createCoordinator({ enableConsoleForwarding: true });
-self.onconnect = coordinator.onconnect;
+(self as unknown as { onconnect: typeof coordinator.onconnect }).onconnect =
+  coordinator.onconnect;

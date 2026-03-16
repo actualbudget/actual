@@ -6,11 +6,9 @@ import * as Platform from 'loot-core/shared/platform';
 // oxlint-disable-next-line typescript-paths/absolute-parent-import
 import packageJson from '../package.json';
 
+import SharedBrowserServerWorker from './shared-browser-server.ts?sharedworker';
+
 const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
-const sharedBackendWorkerUrl = new URL(
-  './shared-browser-server.js',
-  import.meta.url,
-);
 
 // This file installs global variables that the app expects.
 // Normally these are already provided by electron, but in a real
@@ -215,12 +213,11 @@ function createBackendWorker() {
   // platforms including iOS/Safari.
   if (typeof SharedWorker !== 'undefined' && !Platform.isPlaywright) {
     try {
-      const sharedWorker = new SharedWorker(sharedBackendWorkerUrl, {
+      const sharedWorker = new SharedBrowserServerWorker({
         name: 'actual-backend',
-        type: 'module',
       });
-      const sharedPort = sharedWorker.port;
 
+      const sharedPort = sharedWorker.port;
       worker = new WorkerBridge(sharedPort);
       console.log('[WorkerBridge] Connected to SharedWorker coordinator');
 
