@@ -72,12 +72,15 @@ async function filterCategoryGroups(
 
   // Build a map of category IDs to check against filters
   const categoryIdToNameMap = new Map<string, string>();
-  const categoryIdToGroupMap = new Map<string, string>();
+  const categoryIdToGroupMap = new Map<
+    string,
+    {id: string; name: string}
+  >();
 
   allCategories.forEach(group => {
     group.categories?.forEach(cat => {
       categoryIdToNameMap.set(cat.id, cat.name);
-      categoryIdToGroupMap.set(cat.id, group.name);
+      categoryIdToGroupMap.set(cat.id, {id: group.id, name: group.name});
     });
   });
 
@@ -93,34 +96,70 @@ async function filterCategoryGroups(
 
   // Function to check if a category matches the conditions
   const categoryMatchesConditions = (categoryId: string): boolean => {
+    const categoryName = categoryIdToNameMap.get(categoryId) ?? '';
+    const categoryGroup = categoryIdToGroupMap.get(categoryId);
+    const categoryGroupId = categoryGroup?.id ?? '';
+    const categoryGroupName = categoryGroup?.name ?? '';
+
+    const matchesCondition = (cond: RuleConditionEntity): boolean => {
+      const value = cond.value;
+      const op = cond.op as string;
+
+      if (op === 'is') {
+        return categoryId === value;
+      } else if (op === 'isNot') {
+        return categoryId !== value;
+      } else if (op === 'oneOf') {
+        return Array.isArray(value) && value.includes(categoryId);
+      } else if (op === 'notOneOf') {
+        return !Array.isArray(value) || !value.includes(categoryId);
+      } else if (op === 'category_group') {
+        if (Array.isArray(value)) {
+          return (
+            value.includes(categoryGroupId) || value.includes(categoryGroupName)
+          );
+        }
+        return (
+          categoryGroupId === value || categoryGroupName === value
+        );
+      } else if (op === 'contains') {
+        return (
+          typeof value === 'string' &&
+          categoryName.toLowerCase().includes(value.toLowerCase())
+        );
+      } else if (op === 'doesNotContain') {
+        return (
+          typeof value === 'string' &&
+          !categoryName.toLowerCase().includes(value.toLowerCase())
+        );
+      } else if (op === 'matches') {
+        if (typeof value !== 'string') {
+          return false;
+        }
+        try {
+          const regex =
+            value.startsWith('/') && value.lastIndexOf('/') > 0
+              ? new RegExp(
+                  value.slice(1, value.lastIndexOf('/')),
+                  value.slice(value.lastIndexOf('/') + 1),
+                )
+              : new RegExp(value);
+          return regex.test(categoryName);
+        } catch {
+          return false;
+        }
+      }
+
+      // Unknown/unsupported operation should not match by default
+      return false;
+    };
+
     if (conditionsOp === 'or') {
       // For OR, category matches if it matches ANY condition
-      return categoryConditions.some(cond => {
-        if (cond.op === 'is') {
-          return categoryId === cond.value;
-        } else if (cond.op === 'isNot') {
-          return categoryId !== cond.value;
-        } else if (cond.op === 'oneOf') {
-          return Array.isArray(cond.value) && cond.value.includes(categoryId);
-        } else if (cond.op === 'notOneOf') {
-          return !Array.isArray(cond.value) || !cond.value.includes(categoryId);
-        }
-        return true;
-      });
+      return categoryConditions.some(matchesCondition);
     } else {
       // For AND, category matches if it matches ALL conditions
-      return categoryConditions.every(cond => {
-        if (cond.op === 'is') {
-          return categoryId === cond.value;
-        } else if (cond.op === 'isNot') {
-          return categoryId !== cond.value;
-        } else if (cond.op === 'oneOf') {
-          return Array.isArray(cond.value) && cond.value.includes(categoryId);
-        } else if (cond.op === 'notOneOf') {
-          return !Array.isArray(cond.value) || !cond.value.includes(categoryId);
-        }
-        return true;
-      });
+      return categoryConditions.every(matchesCondition);
     }
   };
 
