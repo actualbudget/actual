@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "^3.9.2",
-    "@types/react": "^19.2.5"
+    "@types/react": "^19.2.14"
   },
   "browserslist": {
     "production": [
