@@ -281,7 +281,7 @@ __metadata:
     react-simple-pull-to-refresh: "npm:^1.3.4"
     react-spring: "npm:^10.0.3"
     react-swipeable: "npm:^7.0.2"
-    react-virtualized-auto-sizer: "npm:^2.0.2"
+    react-virtualized-auto-sizer: "npm:^2.0.3"
     recharts: "npm:^3.7.0"
     rehype-external-links: "npm:^3.0.0"
     remark-gfm: "npm:^4.0.1"
@@ -25270,13 +25270,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-virtualized-auto-sizer@npm:^2.0.2":
-  version: 2.0.2
-  resolution: "react-virtualized-auto-sizer@npm:2.0.2"
+"react-virtualized-auto-sizer@npm:^2.0.3":
+  version: 2.0.3
+  resolution: "react-virtualized-auto-sizer@npm:2.0.3"
   peerDependencies:
     react: ^18.0.0 || ^19.0.0
     react-dom: ^18.0.0 || ^19.0.0
-  checksum: 10/ae8e442573c01ad357a25f30f0e838bd56016cefce3995b5505417de3b06e2dd666350616ab9d5d0d2dc7fccab2878845dc59d611252122a37a7ec153a922bfa
+  checksum: 10/85054963d8b418915ffbd73c528ca580f63e3a73e8a2946ad761a94b86986ba9fd1b89e84a99f9b08b04d6d24fabba318a42d3622d1228092c0da8647fba81ea
   languageName: node
   linkType: hard
 
