@@ -58,7 +58,7 @@
     "cmdk": "^1.1.1",
     "cross-env": "^10.1.0",
     "date-fns": "^4.1.0",
-    "downshift": "9.0.10",
+    "downshift": "9.3.2",
     "hyperformula": "^3.2.0",
     "i18next": "^25.8.14",
     "i18next-parser": "^9.4.0",
