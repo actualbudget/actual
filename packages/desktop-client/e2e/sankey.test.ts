@@ -55,21 +55,18 @@ test.describe('Sankey Report', () => {
     sankeyPage = await reportsPage.goToSankeyPage();
     await sankeyPage.waitToLoad();
 
-    // Get the month select and choose a different month
+    // Get the month select and ensure a second month is available
     const monthOptions = await sankeyPage.monthSelect.locator('option').count();
+    expect(monthOptions).toBeGreaterThan(1);
 
-    // If there are multiple months available, select the second one
-    if (monthOptions > 1) {
-      const secondMonthValue = await sankeyPage.monthSelect
-        .locator('option')
-        .nth(1)
-        .getAttribute('value');
+    const secondMonthValue = await sankeyPage.monthSelect
+      .locator('option')
+      .nth(1)
+      .getAttribute('value');
+    expect(secondMonthValue).toBeTruthy();
 
-      if (secondMonthValue) {
-        await sankeyPage.selectMonth(secondMonthValue);
-        await expect(page).toMatchThemeScreenshots();
-      }
-    }
+    await sankeyPage.selectMonth(secondMonthValue);
+    await expect(page).toMatchThemeScreenshots();
   });
 
   test('verifies both modes work correctly', async () => {
