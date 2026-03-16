@@ -118,7 +118,7 @@ __metadata:
     mockdate: "npm:^3.0.5"
     npm-run-all: "npm:^4.1.5"
     path-browserify: "npm:^1.0.1"
-    peggy: "npm:5.0.6"
+    peggy: "npm:5.1.0"
     promise-retry: "npm:^2.0.1"
     rollup-plugin-visualizer: "npm:^6.0.11"
     slash: "npm:5.1.0"
@@ -5887,12 +5887,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@peggyjs/from-mem@npm:3.1.1":
-  version: 3.1.1
-  resolution: "@peggyjs/from-mem@npm:3.1.1"
+"@peggyjs/from-mem@npm:3.1.3":
+  version: 3.1.3
+  resolution: "@peggyjs/from-mem@npm:3.1.3"
   dependencies:
-    semver: "npm:7.7.2"
-  checksum: 10/8317f751dd4f7ebd536a669f2d7642f19e0c76a9ff8f706953a2a6e12efbb64d14d5d5cda72ae0e59b310c86c85115049fcfe007c1b0d2206f21136fd7132627
+    semver: "npm:7.7.4"
+  checksum: 10/29901aee6701f635d6021f684ccf576d587135a1ada9f44b83706fe614059ff70d41b12eb1b6fff5ac7b1b65fb31422ef9695c307023dfa20f04bc17a27d88f4
   languageName: node
   linkType: hard
 
@@ -13501,13 +13501,6 @@ __metadata:
   version: 12.1.0
   resolution: "commander@npm:12.1.0"
   checksum: 10/cdaeb672d979816853a4eed7f1310a9319e8b976172485c2a6b437ed0db0a389a44cfb222bfbde772781efa9f215bdd1b936f80d6b249485b465c6cb906e1f93
-  languageName: node
-  linkType: hard
-
-"commander@npm:^14.0.0":
-  version: 14.0.2
-  resolution: "commander@npm:14.0.2"
-  checksum: 10/2d202db5e5f9bb770112a3c1579b893d17ac6f6d932183077308bdd96d0f87f0bbe6a68b5b9ed2cf3b2514be6bb7de637480703c0e2db9741ee1b383237deb26
   languageName: node
   linkType: hard
 
@@ -23243,16 +23236,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"peggy@npm:5.0.6":
-  version: 5.0.6
-  resolution: "peggy@npm:5.0.6"
+"peggy@npm:5.1.0":
+  version: 5.1.0
+  resolution: "peggy@npm:5.1.0"
   dependencies:
-    "@peggyjs/from-mem": "npm:3.1.1"
-    commander: "npm:^14.0.0"
-    source-map-generator: "npm:2.0.2"
+    "@peggyjs/from-mem": "npm:3.1.3"
+    commander: "npm:^14.0.3"
+    source-map-generator: "npm:2.0.6"
   bin:
     peggy: bin/peggy.js
-  checksum: 10/a4b95b7455be6d590a254acac8aa1e398c6c86c6d6d52fb0344626e534933b750f64b92f33a7790bab480f43ce823ce143ccbceddf1a68b3055eac579fe46b5d
+  checksum: 10/be8fa9130c7b4f7e9a341f402fff92261f9cbf0fecdcce2a9b48e911d489a337e73f083ee557f801d1dded400d6fd7b768899e82c52380b5958977e17907f9e7
   languageName: node
   linkType: hard
 
@@ -26472,12 +26465,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"semver@npm:7.7.2":
-  version: 7.7.2
-  resolution: "semver@npm:7.7.2"
+"semver@npm:7.7.4":
+  version: 7.7.4
+  resolution: "semver@npm:7.7.4"
   bin:
     semver: bin/semver.js
-  checksum: 10/7a24cffcaa13f53c09ce55e05efe25cd41328730b2308678624f8b9f5fc3093fc4d189f47950f0b811ff8f3c3039c24a2c36717ba7961615c682045bf03e1dda
+  checksum: 10/26bdc6d58b29528f4142d29afb8526bc335f4fc04c4a10f2b98b217f277a031c66736bf82d3d3bb354a2f6a3ae50f18fd62b053c4ac3f294a3d10a61f5075b75
   languageName: node
   linkType: hard
 
@@ -27041,10 +27034,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"source-map-generator@npm:2.0.2":
-  version: 2.0.2
-  resolution: "source-map-generator@npm:2.0.2"
-  checksum: 10/19f4970bc445908273ff648a8c145dc6f77a122a018475deb926072edd8fadcc0b26015eb0f8ab8737c91c3929499c67cd14fce37e137326bc60cbb994e8f26f
+"source-map-generator@npm:2.0.6":
+  version: 2.0.6
+  resolution: "source-map-generator@npm:2.0.6"
+  checksum: 10/a634587d5c017225e331f7f97416b4599ca1a82609077e18e2c6eb3a1759c77802e1fddf8c9c642b22258b0f34669b584ba3ac250bb8c45ff97c813d54660c49
   languageName: node
   linkType: hard
 

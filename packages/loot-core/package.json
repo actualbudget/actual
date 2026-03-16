@@ -122,7 +122,7 @@
     "mockdate": "^3.0.5",
     "npm-run-all": "^4.1.5",
     "path-browserify": "^1.0.1",
-    "peggy": "5.0.6",
+    "peggy": "5.1.0",
     "rollup-plugin-visualizer": "^6.0.11",
     "stream-browserify": "^3.0.0",
     "timers-browserify": "^2.0.12",
