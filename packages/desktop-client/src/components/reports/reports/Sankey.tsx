@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -17,7 +17,7 @@ import type { SankeyData } from 'recharts/types/chart/Sankey';
 
 import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import type { SankeyWidget, RuleConditionEntity } from 'loot-core/types/models';
+import type { SankeyWidget, RuleConditionEntity, TimeFrame } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
 import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
@@ -28,6 +28,8 @@ import {
   Page,
   PageHeader,
 } from '@desktop-client/components/Page';
+
+import { Header } from '@desktop-client/components/reports/Header';
 import { SankeyGraph } from '@desktop-client/components/reports/graphs/SankeyGraph';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { ModeButton } from '@desktop-client/components/reports/ModeButton';
@@ -41,6 +43,7 @@ import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionF
 import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { useUpdateDashboardWidgetMutation } from '@desktop-client/reports/mutations';
 
 export function Sankey() {
   const params = useParams();
@@ -54,6 +57,53 @@ export function Sankey() {
   }
 
   return <SankeyInner widget={widget} />;
+}
+
+type GraphMode = 'budgeted' | 'spent' | 'difference';
+
+type GraphModeSelectorProps = {
+  mode: GraphMode;
+  onChange: (mode: GraphMode) => void;
+};
+
+function GraphModeSelector({ mode, onChange }: GraphModeSelectorProps) {
+  return (
+    <SpaceBetween gap={5}>
+      <ModeButton
+        selected={mode === 'spent'}
+        style={{
+          backgroundColor: 'inherit',
+        }}
+        onSelect={() => {
+          onChange('spent');
+        }}
+      >
+        <Trans>Spent</Trans>
+      </ModeButton>
+      <ModeButton
+        selected={mode === 'budgeted'}
+        onSelect={() => {
+          onChange('budgeted');
+        }}
+        style={{
+          backgroundColor: 'inherit',
+        }}
+      >
+        <Trans>Budgeted</Trans>
+      </ModeButton>
+      <ModeButton
+        selected={mode === 'difference'}
+        style={{
+          backgroundColor: 'inherit',
+        }}
+        onSelect={() => {
+          onChange('difference');
+        }}
+      >
+        <Trans>Difference</Trans>
+      </ModeButton>
+    </SpaceBetween>
+  );
 }
 
 type SankeyInnerProps = {
@@ -81,13 +131,14 @@ function SankeyInner({ widget }: SankeyInnerProps) {
   const emptyMonths: { name: string; pretty: string }[] = [];
   const [allMonths, setAllMonths] = useState(emptyMonths);
 
-  const initialMonth =
-    widget?.meta?.timeFrame?.start ?? monthUtils.currentMonth();
-  const [selectedMonth, setSelectedMonth] = useState(initialMonth);
+  const [start, setStart] = useState(monthUtils.currentMonth());
+  const [end, setEnd] = useState(monthUtils.currentMonth());
 
-  const initialMode = widget?.meta?.mode ?? 'budgeted';
-  const [mode, setMode] = useState<'budgeted' | 'spent' | 'difference'>(
-    initialMode,
+  const [earliestTransaction, setEarliestTransaction] = useState('');
+  const [latestTransaction, setLatestTransaction] = useState('');
+
+  const [graphMode, setGraphMode] = useState<GraphMode>(
+    widget?.meta?.mode ?? 'spent',
   );
 
   const { data: { grouped: groupedCategories = [] } = { grouped: [] } } =
@@ -96,28 +147,41 @@ function SankeyInner({ widget }: SankeyInnerProps) {
   const reportParams = useMemo(
     () =>
       sankeySpreadsheet(
-        selectedMonth,
-        selectedMonth,
+        start,
+        end,
         groupedCategories,
         conditions,
         conditionsOp,
-        mode,
+        graphMode,
       ),
-    [selectedMonth, groupedCategories, conditions, conditionsOp, mode],
+    [start, end, groupedCategories, conditions, conditionsOp, graphMode],
   );
   const data = useReport('sankey', reportParams);
 
   useEffect(() => {
     async function run() {
-      const earliestTrans = await send('get-earliest-transaction');
-      const latestTrans = await send('get-latest-transaction');
+      const earliestTransaction = await send('get-earliest-transaction');
+      setEarliestTransaction(
+        earliestTransaction
+          ? earliestTransaction.date
+          : monthUtils.currentDay(),
+      );
+
+      const latestTransaction = await send('get-latest-transaction');
+      setLatestTransaction(
+        latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
+      );
 
       const currentMonth = monthUtils.currentMonth();
-      let earliestMonth = earliestTrans
-        ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(earliestTrans.date)))
+      let earliestMonth = earliestTransaction
+        ? monthUtils.monthFromDate(
+          d.parseISO(fromDateRepr(earliestTransaction.date)),
+        )
         : currentMonth;
-      const latestTransactionMonth = latestTrans
-        ? monthUtils.monthFromDate(d.parseISO(fromDateRepr(latestTrans.date)))
+      const latestTransactionMonth = latestTransaction
+        ? monthUtils.monthFromDate(
+          d.parseISO(fromDateRepr(latestTransaction.date)),
+        )
         : currentMonth;
 
       const latestMonth =
@@ -125,7 +189,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
           ? latestTransactionMonth
           : currentMonth;
 
-      // Make sure the month selects are at least populated with a
+      // Make sure the month selects are at least populates with a
       // year's worth of months. We can undo this when we have fancier
       // date selects.
       const yearAgo = monthUtils.subMonths(latestMonth, 12);
@@ -137,41 +201,54 @@ function SankeyInner({ widget }: SankeyInnerProps) {
         .rangeInclusive(earliestMonth, latestMonth)
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
+          pretty: monthUtils.format(month, 'MMMM yyyy', locale),
         }))
         .reverse();
 
       setAllMonths(allMonths);
     }
-    run();
+    void run();
   }, [locale]);
+  function onChangeDates(start: string, end: string) {
+    setStart(start);
+    setEnd(end);
+  }
 
+  const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
   async function onSaveWidget() {
     if (!widget) {
       throw new Error('No widget that could be saved.');
     }
 
-    await send('dashboard-update-widget', {
-      id: widget.id,
-      meta: {
-        ...(widget.meta ?? {}),
-        conditions,
-        conditionsOp,
-        mode,
-        timeFrame: {
-          start: selectedMonth,
-          end: selectedMonth,
-          mode: 'static',
+    updateDashboardWidgetMutation.mutate(
+      {
+        widget: {
+          id: widget.id,
+          meta: {
+            ...(widget.meta ?? {}),
+            conditions,
+            conditionsOp,
+            mode: graphMode,
+            timeFrame: {
+              start,
+              end,
+              mode: 'static',
+            },
+          },
         },
       },
-    });
-    dispatch(
-      addNotification({
-        notification: {
-          type: 'message',
-          message: t('Dashboard widget successfully saved.'),
+      {
+        onSuccess: () => {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'message',
+                message: t('Dashboard widget successfully saved.'),
+              },
+            }),
+          );
         },
-      }),
+      },
     );
   }
 
@@ -191,6 +268,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
   };
 
   const title = widget?.meta?.name || t('Sankey');
+
 
   if (!data) {
     return null;
@@ -223,254 +301,161 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       }
       padding={0}
     >
-      <View
-        style={{
-          paddingLeft: 20,
-          paddingRight: 20,
-          paddingTop: 15,
-          paddingBottom: 20,
-          flexShrink: 0,
-        }}
+      <Header
+        allMonths={allMonths}
+        start={start}
+        end={end}
+        earliestTransaction={earliestTransaction}
+        latestTransaction={latestTransaction}
+        onChangeDates={onChangeDates}
+        filters={conditions}
+        onApply={onApplyFilter}
+        onUpdateFilter={onUpdateFilter}
+        onDeleteFilter={onDeleteFilter}
+        conditionsOp={conditionsOp}
+        onConditionsOpChange={onConditionsOpChange}
+        inlineContent={
+          <>
+            <View
+              style={{
+                width: 1,
+                height: 28,
+                backgroundColor: theme.pillBorderDark,
+                marginRight: 10,
+                marginLeft: 10,
+              }}
+            />
+            <GraphModeSelector mode={graphMode} onChange={setGraphMode} />
+            <View
+              style={{
+                width: 1,
+                height: 28,
+                backgroundColor: theme.pillBorderDark,
+                marginRight: 10,
+                marginLeft: 10,
+              }}
+            />
+          </>
+        }
       >
-        {!isNarrowWidth && (
-          <SpaceBetween gap={0}>
-            <SpaceBetween gap={5}>
-              <Text>
-                <Trans>Month</Trans>
-              </Text>
-              <Select
-                value={selectedMonth}
-                onChange={setSelectedMonth}
-                options={allMonths.map(
-                  ({ name, pretty }) => [name, pretty] as const,
-                )}
-                style={{ width: 150 }}
-                popoverStyle={{ width: 150 }}
-              />
-            </SpaceBetween>
-
-            <View
-              style={{
-                width: 1,
-                height: 28,
-                backgroundColor: theme.pillBorderDark,
-                marginRight: 10,
-                marginLeft: 10,
-              }}
-            />
-
-            <SpaceBetween gap={5}>
-              <ModeButton
-                selected={mode === 'budgeted'}
-                onSelect={() => {
-                  setMode('budgeted');
-                }}
-                style={{
-                  backgroundColor: 'inherit',
-                }}
-              >
-                <Trans>Budgeted</Trans>
-              </ModeButton>
-              <ModeButton
-                selected={mode === 'spent'}
-                style={{
-                  backgroundColor: 'inherit',
-                }}
-                onSelect={() => {
-                  setMode('spent');
-                }}
-              >
-                <Trans>Spent</Trans>
-              </ModeButton>
-              <ModeButton
-                selected={mode === 'difference'}
-                style={{
-                  backgroundColor: 'inherit',
-                }}
-                onSelect={() => {
-                  setMode('difference');
-                }}
-              >
-                <Trans>Difference</Trans>
-              </ModeButton>
-            </SpaceBetween>
-
-            <View
-              style={{
-                width: 1,
-                height: 28,
-                backgroundColor: theme.pillBorderDark,
-                marginRight: 10,
-                marginLeft: 10,
-              }}
-            />
-
-            <View
-              style={{
-                alignItems: 'center',
-                flexDirection: 'row',
-                flex: 1,
-              }}
-            >
-              <FilterButton
-                onApply={onApplyFilter}
-                compact={isNarrowWidth}
-                hover={false}
-                exclude={['date']}
-              />
-              <View style={{ flex: 1 }} />
-
-              {widget && (
-                <Tooltip
-                  placement="top end"
-                  content={
-                    <Text>
-                      <Trans>Save month and filter options</Trans>
-                    </Text>
-                  }
-                  style={{
-                    ...styles.tooltip,
-                    lineHeight: 1.5,
-                    padding: '6px 10px',
-                    marginLeft: 10,
-                  }}
-                >
-                  <Button
-                    variant="primary"
-                    style={{
-                      marginLeft: 10,
-                    }}
-                    onPress={onSaveWidget}
-                  >
-                    <Trans>Save</Trans>
-                  </Button>
-                </Tooltip>
-              )}
-            </View>
-          </SpaceBetween>
+        {widget && (
+          <Button variant="primary" onPress={onSaveWidget}>
+            <Trans>Save widget</Trans>
+          </Button>
         )}
-
-        {conditions && conditions.length > 0 && (
-          <View
-            style={{
-              marginTop: 5,
-              flexShrink: 0,
-              flexDirection: 'row',
-              spacing: 2,
-            }}
-          >
-            <AppliedFilters
-              conditions={conditions}
-              onUpdate={onUpdateFilter}
-              onDelete={onDeleteFilter}
-              conditionsOp={conditionsOp}
-              onConditionsOpChange={onConditionsOpChange}
-            />
-          </View>
-        )}
-      </View>
-
+      </Header>
       <View
         style={{
-          display: 'flex',
-          flexDirection: 'row',
+          backgroundColor: theme.tableBackground,
+          padding: 20,
           paddingTop: 0,
-          flexGrow: 1,
+          flex: '1 0 auto',
+          overflowY: 'visible',
         }}
       >
         <View
           style={{
+            display: 'flex',
+            flexDirection: 'row',
+            paddingTop: 0,
             flexGrow: 1,
           }}
         >
           <View
             style={{
-              backgroundColor: theme.tableBackground,
-              padding: 20,
-              paddingTop: 0,
-              flex: '1 0 auto',
-              overflowY: 'auto',
+              flexGrow: 1,
             }}
           >
             <View
               style={{
-                flexDirection: 'column',
-                flexGrow: 1,
-                padding: 10,
-                paddingTop: 10,
+                backgroundColor: theme.tableBackground,
+                padding: 20,
+                paddingTop: 0,
+                flex: '1 0 auto',
+                overflowY: 'auto',
               }}
             >
-              {data && data.links && data.links.length > 0 ? (
-                <SankeyGraph
-                  style={{ flexGrow: 1 }}
-                  data={data as SankeyData}
-                />
-              ) : (
-                <View
-                  style={{
-                    flexGrow: 1,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: theme.pageTextSubdued,
-                  }}
-                >
-                  <Text style={{ fontSize: 16, textAlign: 'center' }}>
-                    {mode === 'budgeted' && (
-                      <Trans>
-                        No data available for this month. Try budgeting
-                        categories or selecting a different month.
-                      </Trans>
-                    )}
-                    {mode === 'spent' && (
-                      <Trans>
-                        No data available for this month. Try adding
-                        transactions or selecting a different month.
-                      </Trans>
-                    )}
-                    {mode === 'difference' && (
-                      <Trans>
-                        No data available for this month. Try budgeting or
-                        adding transactions, or selecting a different month.
-                      </Trans>
-                    )}
-                  </Text>
-                </View>
-              )}
+              <View
+                style={{
+                  flexDirection: 'column',
+                  flexGrow: 1,
+                  padding: 10,
+                  paddingTop: 10,
+                }}
+              >
+                {data && data.links && data.links.length > 0 ? (
+                  <SankeyGraph
+                    style={{ flexGrow: 1 }}
+                    data={data as SankeyData}
+                  />
+                ) : (
+                  <View
+                    style={{
+                      flexGrow: 1,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: theme.pageTextSubdued,
+                    }}
+                  >
+                    <Text style={{ fontSize: 16, textAlign: 'center' }}>
+                      {graphMode === 'budgeted' && (
+                        <Trans>
+                          No data available for this month. Try budgeting
+                          categories or selecting a different month.
+                        </Trans>
+                      )}
+                      {graphMode === 'spent' && (
+                        <Trans>
+                          No data available for this month. Try adding
+                          transactions or selecting a different month.
+                        </Trans>
+                      )}
+                      {graphMode === 'difference' && (
+                        <Trans>
+                          No data available for this month. Try budgeting or
+                          adding transactions, or selecting a different month.
+                        </Trans>
+                      )}
+                    </Text>
+                  </View>
+                )}
 
-              <View style={{ marginTop: 30 }}>
-                <Trans>
-                  <Paragraph>
-                    <strong>What is a Sankey plot?</strong>
-                  </Paragraph>
-                  <Paragraph>
-                    A Sankey plot visualizes the flow of quantities between
-                    multiple categories, emphasizing the distribution and
-                    proportional relationships of data streams.
-                  </Paragraph>
-                  <Paragraph>
-                    <strong>View options:</strong>
-                  </Paragraph>
-                  <ul style={{ marginTop: 0, paddingLeft: 20 }}>
-                    <li style={{ marginBottom: 5 }}>
-                      <strong>Budgeted:</strong> Shows how income flows into
-                      your budget and is allocated across categories.
-                    </li>
-                    <li style={{ marginBottom: 5 }}>
-                      <strong>Spent:</strong> Displays actual spending by
-                      category from transactions.
-                    </li>
-                    <li>
-                      <strong>Difference:</strong> Highlights budget vs. actual
-                      variance, showing overspent categories in red and unspent
-                      amounts.
-                    </li>
-                  </ul>
-                </Trans>
+                <View style={{ marginTop: 30 }}>
+                  <Trans>
+                    <Paragraph>
+                      <strong>What is a Sankey plot?</strong>
+                    </Paragraph>
+                    <Paragraph>
+                      A Sankey plot visualizes the flow of quantities between
+                      multiple categories, emphasizing the distribution and
+                      proportional relationships of data streams.
+                    </Paragraph>
+                    <Paragraph>
+                      <strong>View options:</strong>
+                    </Paragraph>
+                    <ul style={{ marginTop: 0, paddingLeft: 20 }}>
+                      <li style={{ marginBottom: 5 }}>
+                        <strong>Budgeted:</strong> Shows how income flows into
+                        your budget and is allocated across categories.
+                      </li>
+                      <li style={{ marginBottom: 5 }}>
+                        <strong>Spent:</strong> Displays actual spending by
+                        category from transactions.
+                      </li>
+                      <li>
+                        <strong>Difference:</strong> Highlights budget vs. actual
+                        variance, showing overspent categories in red and unspent
+                        amounts.
+                      </li>
+                    </ul>
+                  </Trans>
+                </View>
               </View>
             </View>
           </View>
         </View>
       </View>
+
     </Page>
   );
 }
