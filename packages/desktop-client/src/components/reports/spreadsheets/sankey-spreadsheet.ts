@@ -331,7 +331,7 @@ function transformToSankeyData(
   compact: boolean = false,
 ): SankeyData {
   const data: SankeyData = { nodes: [], links: [] };
-  const nodeNames = new Set<string>();
+  const nodeKeys = new Set<string>();
 
   // Sort category data by total value (sum of subcategories) in descending order
   categoryData.sort((a, b) => {
@@ -346,17 +346,18 @@ function transformToSankeyData(
     toBudget: toBudgetAmount,
     nodeType: 'budget',
   });
-  nodeNames.add(rootNodeName);
+  nodeKeys.add(`root:${rootNodeName}`);
 
   // add all category expenses that have valid subcategories and a balance
   for (const mainCategory of categoryData) {
     // Sort subcategories by value in descending order
     mainCategory.balances.sort((a, b) => b.value - a.value);
 
-    if (!nodeNames.has(mainCategory.name) && mainCategory.balances.length > 0) {
+    const mainCategoryKey = `group:${mainCategory.name}`;
+    if (!nodeKeys.has(mainCategoryKey) && mainCategory.balances.length > 0) {
       let mainCategorySum = 0;
       for (const subCategory of mainCategory.balances) {
-        if (!nodeNames.has(subCategory.subcategory) && subCategory.value > 0) {
+        if (subCategory.value > 0) {
           mainCategorySum += subCategory.value;
         }
       }
@@ -368,7 +369,7 @@ function transformToSankeyData(
         name: mainCategory.name,
         nodeType: 'expense',
       });
-      nodeNames.add(mainCategory.name);
+      nodeKeys.add(mainCategoryKey);
       const mainCategoryIndex = data.nodes.length - 1;
 
       data.links.push({
@@ -379,13 +380,14 @@ function transformToSankeyData(
 
       // add the subcategories of the main category
       for (const subCategory of mainCategory.balances) {
-        if (!nodeNames.has(subCategory.subcategory) && subCategory.value > 0) {
+        const subCategoryKey = `subcategory:${mainCategory.name}/${subCategory.subcategory}`;
+        if (!nodeKeys.has(subCategoryKey) && subCategory.value > 0) {
           data.nodes.push({
             name: subCategory.subcategory,
             nodeType: 'expense',
             isNegative: subCategory.isNegative,
           });
-          nodeNames.add(subCategory.subcategory);
+          nodeKeys.add(subCategoryKey);
           const subCategoryIndex = data.nodes.length - 1;
 
           data.links.push({
