@@ -144,6 +144,7 @@ export function createSpreadsheet(
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
   mode: 'budgeted' | 'spent' = 'spent',
+  compact: boolean = false,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -155,6 +156,7 @@ export function createSpreadsheet(
         categories,
         conditions,
         conditionsOp,
+        compact,
       )(spreadsheet, setData);
       return data;
     } else if (mode === 'spent') {
@@ -164,6 +166,7 @@ export function createSpreadsheet(
         categories,
         conditions,
         conditionsOp,
+        compact,
       )(spreadsheet, setData);
       return data;
     }
@@ -175,6 +178,7 @@ export function createBudgetSpreadsheet(
   categories: CategoryGroupEntity[],
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
+  compact: boolean = false,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -231,11 +235,7 @@ export function createBudgetSpreadsheet(
     }
 
     setData(
-      transformToSankeyData(
-        categoryData,
-        toBudget,
-        'Available Funds',
-      ),
+      transformToSankeyData(categoryData, toBudget, 'Available Funds', compact),
     );
   };
 }
@@ -246,6 +246,7 @@ export function createTransactionsSpreadsheet(
   categories: CategoryGroupEntity[],
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
+  compact: boolean = false,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -319,7 +320,7 @@ export function createTransactionsSpreadsheet(
     const categoryData = await fetchCategoryData(categories);
 
     // convert retrieved data into the proper sankey format
-    setData(transformToSankeyData(categoryData, 0, 'Spent'));
+    setData(transformToSankeyData(categoryData, 0, 'Spent', compact));
   };
 }
 
@@ -327,6 +328,7 @@ function transformToSankeyData(
   categoryData: CategoryData[],
   toBudgetAmount: number = 0,
   rootNodeName: string,
+  compact: boolean = false,
 ): SankeyData {
   const data: SankeyData = { nodes: [], links: [] };
   const nodeNames = new Set<string>();
@@ -345,7 +347,6 @@ function transformToSankeyData(
     nodeType: 'budget',
   });
   nodeNames.add(rootNodeName);
-
 
   // add all category expenses that have valid subcategories and a balance
   for (const mainCategory of categoryData) {
@@ -396,6 +397,86 @@ function transformToSankeyData(
         }
       }
     }
+  }
+
+  // If compact mode is enabled, keep only the first 2 levels of the sankey (root node and main categories) and sum all subcategories into their main category
+  if (compact) {
+    const compactedData: SankeyData = { nodes: [], links: [] };
+    const compactedNodeNames = new Set<string>();
+    const topN = 5; // Number of top categories to show, the rest will be grouped into "Other"
+
+    // Add root node
+    compactedData.nodes.push(data.nodes[0]);
+    compactedNodeNames.add(data.nodes[0].name);
+
+    // Collect main categories and their total values
+    const mainCategoryTotals = new Map<string, number>();
+    for (const link of data.links) {
+      const sourceNode = data.nodes[link.source];
+      const targetNode = data.nodes[link.target];
+      if (
+        sourceNode.name === rootNodeName &&
+        targetNode.nodeType === 'expense'
+      ) {
+        mainCategoryTotals.set(
+          targetNode.name,
+          (mainCategoryTotals.get(targetNode.name) || 0) + link.value,
+        );
+      }
+    }
+
+    // Sort main categories by total value descending
+    const sortedCategories = Array.from(mainCategoryTotals.entries()).sort(
+      (a, b) => b[1] - a[1],
+    );
+
+    // Take top N, lump the rest into "Other"
+    const topCategories = sortedCategories.slice(0, topN);
+    const otherCategories = sortedCategories.slice(topN);
+    const otherTotal = otherCategories.reduce(
+      (sum, [, value]) => sum + value,
+      0,
+    );
+
+    // Add top categories and "Other" if needed
+    const categoriesToAdd = [...topCategories.map(([name]) => name)];
+    if (otherTotal > 0) {
+      categoriesToAdd.push('Other');
+    }
+
+    for (const categoryName of categoriesToAdd) {
+      if (!compactedNodeNames.has(categoryName)) {
+        const originalNode = data.nodes.find(n => n.name === categoryName);
+        compactedData.nodes.push(
+          originalNode || { name: categoryName, nodeType: 'expense' },
+        );
+        compactedNodeNames.add(categoryName);
+      }
+    }
+
+    // Add links for top categories
+    for (const [categoryName, value] of topCategories) {
+      const targetIndex = compactedData.nodes.findIndex(
+        n => n.name === categoryName,
+      );
+      compactedData.links.push({
+        source: 0, // Root node
+        target: targetIndex,
+        value,
+      });
+    }
+
+    // Add link for "Other" if needed
+    if (otherTotal > 0) {
+      const otherIndex = compactedData.nodes.findIndex(n => n.name === 'Other');
+      compactedData.links.push({
+        source: 0, // Root node
+        target: otherIndex,
+        value: otherTotal,
+      });
+    }
+
+    return compactedData;
   }
 
   return data;

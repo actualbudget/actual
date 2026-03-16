@@ -228,45 +228,15 @@ function SankeyNode({
   );
 }
 
-function convertToCondensed(data: SankeyData) {
-  const budgetNodeIndex = data.nodes.findIndex(
-    node => node.name === BUDGET_NODE_NAME,
-  );
-
-  const totalIncome = data.links.reduce(
-    (acc, link) => (link.target === budgetNodeIndex ? acc + link.value : acc),
-    0,
-  );
-
-  const totalExpenses = data.links.reduce(
-    (acc, link) => (link.source === budgetNodeIndex ? acc + link.value : acc),
-    0,
-  );
-
-  return {
-    nodes: [
-      { name: 'Income' },
-      { name: BUDGET_NODE_NAME },
-      { name: 'Expenses' },
-    ],
-    links: [
-      { source: 0, target: 1, value: totalIncome },
-      { source: 1, target: 2, value: totalExpenses },
-    ],
-  };
-}
-
 type SankeyGraphProps = {
   style?: CSSProperties;
   data: SankeyData;
-  compact?: boolean;
   showTooltip?: boolean;
   collapsedNodes?: string[];
 };
 export function SankeyGraph({
   style,
   data,
-  compact = false,
   showTooltip = true,
   collapsedNodes = [],
 }: SankeyGraphProps) {
@@ -276,14 +246,13 @@ export function SankeyGraph({
 
   const collapsedSet = useMemo(() => new Set(collapsedNodes), [collapsedNodes]);
   const sankeyData = useMemo(() => {
-    if (compact) return convertToCondensed(data);
     return collapseSankeyBranches(data, collapsedSet);
-  }, [compact, data, collapsedSet]);
+  }, [data, collapsedSet]);
 
   if (!sankeyData.links?.length) return null;
 
   return (
-    <Container style={{ ...style, ...(compact && { height: 'auto' }) }}>
+    <Container style={style}>
       {(width, height) => (
         <ResponsiveContainer>
           <Sankey
@@ -311,8 +280,8 @@ export function SankeyGraph({
             margin={{
               left: 0,
               right: 0,
-              top: compact ? 0 : 10,
-              bottom: compact ? 0 : 25,
+              top: 10,
+              bottom: 25,
             }}
           >
             {showTooltip && (

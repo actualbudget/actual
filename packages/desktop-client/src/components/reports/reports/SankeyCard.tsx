@@ -1,7 +1,10 @@
-import { useMemo, useState } from 'react';
+import { type ReactElement, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Block } from '@actual-app/components/block';
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import * as d from 'date-fns';
 
 import type { SankeyWidget } from 'loot-core/types/models';
 
@@ -14,6 +17,7 @@ import { calculateTimeRange } from '@desktop-client/components/reports/reportRan
 import { createSpreadsheet as sankeySpreadsheet } from '@desktop-client/components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type SankeyCardProps = {
   widgetId: string;
@@ -30,6 +34,7 @@ export function SankeyCard({
   onRemove,
 }: SankeyCardProps) {
   const { t } = useTranslation();
+  const locale = useLocale();
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const { data: { grouped: groupedCategories = [] } = { grouped: [] } } =
     useCategories();
@@ -46,10 +51,28 @@ export function SankeyCard({
         meta?.conditions ?? [],
         meta?.conditionsOp ?? 'and',
         mode,
+        true, // compact
       ),
     [start, end, groupedCategories, meta?.conditions, meta?.conditionsOp, mode],
   );
   const data = useReport('sankey', params);
+
+  const startDate = d.parseISO(start);
+  const endDate = d.parseISO(end);
+  const formattedStartDate = d.format(startDate, 'MMM yyyy', { locale });
+  const formattedEndDate = d.format(endDate, 'MMM yyyy', { locale });
+
+  let dateDescription: string | ReactElement;
+  if (
+    startDate.getFullYear() !== endDate.getFullYear() ||
+    startDate.getMonth() !== endDate.getMonth()
+  ) {
+    dateDescription = formattedStartDate + ' - ' + formattedEndDate;
+  } else {
+    dateDescription = formattedEndDate;
+  }
+
+  dateDescription += ' (' + mode + ')';
 
   return (
     <ReportCard
@@ -94,14 +117,15 @@ export function SankeyCard({
               }}
               onClose={() => setNameMenuOpen(false)}
             />
-            <DateRange start={start} end={end} />
+            <Block style={{ color: theme.pageTextSubdued }}>
+              {dateDescription}
+            </Block>
           </View>
         </View>
 
         {data ? (
           <SankeyGraph
             data={data}
-            compact
             showTooltip={!isEditing}
             style={{ height: 'auto', flex: 1 }}
           />
