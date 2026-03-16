@@ -134,6 +134,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
   const [timeFrameMode, setTimeFrameMode] = useState<TimeFrame['mode']>(
     widget?.meta?.timeFrame?.mode ?? 'sliding-window',
   );
+  const [datesInitialized, setDatesInitialized] = useState(false);
 
   const [earliestTransaction, setEarliestTransaction] = useState('');
   const [latestTransaction, setLatestTransaction] = useState('');
@@ -145,19 +146,30 @@ function SankeyInner({ widget }: SankeyInnerProps) {
   const { data: { grouped: groupedCategories = [] } = { grouped: [] } } =
     useCategories();
 
-  const reportParams = useMemo(
-    () =>
-      sankeySpreadsheet(
-        start,
-        end,
-        groupedCategories,
-        conditions,
-        conditionsOp,
-        graphMode,
-      ),
-    [start, end, groupedCategories, conditions, conditionsOp, graphMode],
-  );
-  const data = useReport('sankey', reportParams);
+  const reportParams = useMemo(() => {
+    if (!datesInitialized) {
+      return null;
+    }
+
+    return sankeySpreadsheet(
+      start,
+      end,
+      groupedCategories,
+      conditions,
+      conditionsOp,
+      graphMode,
+    );
+  }, [
+    datesInitialized,
+    start,
+    end,
+    groupedCategories,
+    conditions,
+    conditionsOp,
+    graphMode,
+  ]);
+
+  const data = useReport('sankey', reportParams ?? (async () => {}));
 
   useEffect(() => {
     async function run() {
@@ -181,17 +193,18 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       setStart(initialStart);
       setEnd(initialEnd);
       setTimeFrameMode(initialMode);
+      setDatesInitialized(true);
 
       const currentMonth = monthUtils.currentMonth();
       let earliestMonth = earliestTransaction
         ? monthUtils.monthFromDate(
-            d.parseISO(fromDateRepr(earliestTransaction.date)),
-          )
+          d.parseISO(fromDateRepr(earliestTransaction.date)),
+        )
         : currentMonth;
       const latestTransactionMonth = latestTransaction
         ? monthUtils.monthFromDate(
-            d.parseISO(fromDateRepr(latestTransaction.date)),
-          )
+          d.parseISO(fromDateRepr(latestTransaction.date)),
+        )
         : currentMonth;
 
       const latestMonth =
@@ -280,8 +293,8 @@ function SankeyInner({ widget }: SankeyInnerProps) {
 
   const title = widget?.meta?.name || t('Sankey');
 
-  if (!data) {
-    return null;
+  if (!datesInitialized || !data) {
+    return <LoadingIndicator />;
   }
 
   return (
