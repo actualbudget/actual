@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -18,8 +18,8 @@ import type { SankeyData } from 'recharts/types/chart/Sankey';
 import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import type {
-  SankeyWidget,
   RuleConditionEntity,
+  SankeyWidget,
   TimeFrame,
 } from 'loot-core/types/models';
 
@@ -36,6 +36,7 @@ import { SankeyGraph } from '@desktop-client/components/reports/graphs/SankeyGra
 import { Header } from '@desktop-client/components/reports/Header';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { ModeButton } from '@desktop-client/components/reports/ModeButton';
+import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createSpreadsheet as sankeySpreadsheet } from '@desktop-client/components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
@@ -120,11 +121,19 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     widget?.meta?.conditionsOp,
   );
 
-  const emptyMonths: { name: string; pretty: string }[] = [];
-  const [allMonths, setAllMonths] = useState(emptyMonths);
+  const currentMonth = monthUtils.currentMonth();
+  const [allMonths, setAllMonths] = useState([
+    {
+      name: currentMonth,
+      pretty: monthUtils.format(currentMonth, 'MMMM yyyy', locale),
+    },
+  ]);
 
   const [start, setStart] = useState(monthUtils.currentMonth());
   const [end, setEnd] = useState(monthUtils.currentMonth());
+  const [timeFrameMode, setTimeFrameMode] = useState<TimeFrame['mode']>(
+    widget?.meta?.timeFrame?.mode ?? 'sliding-window',
+  );
 
   const [earliestTransaction, setEarliestTransaction] = useState('');
   const [latestTransaction, setLatestTransaction] = useState('');
@@ -153,27 +162,36 @@ function SankeyInner({ widget }: SankeyInnerProps) {
   useEffect(() => {
     async function run() {
       const earliestTransaction = await send('get-earliest-transaction');
-      setEarliestTransaction(
-        earliestTransaction
-          ? earliestTransaction.date
-          : monthUtils.currentDay(),
-      );
+      const earliestTransactionDate = earliestTransaction
+        ? earliestTransaction.date
+        : monthUtils.currentDay();
+      setEarliestTransaction(earliestTransactionDate);
 
       const latestTransaction = await send('get-latest-transaction');
-      setLatestTransaction(
-        latestTransaction ? latestTransaction.date : monthUtils.currentDay(),
+      const latestTransactionDate = latestTransaction
+        ? latestTransaction.date
+        : monthUtils.currentDay();
+      setLatestTransaction(latestTransactionDate);
+
+      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
+        widget?.meta?.timeFrame,
+        undefined,
+        latestTransactionDate,
       );
+      setStart(initialStart);
+      setEnd(initialEnd);
+      setTimeFrameMode(initialMode);
 
       const currentMonth = monthUtils.currentMonth();
       let earliestMonth = earliestTransaction
         ? monthUtils.monthFromDate(
-          d.parseISO(fromDateRepr(earliestTransaction.date)),
-        )
+            d.parseISO(fromDateRepr(earliestTransaction.date)),
+          )
         : currentMonth;
       const latestTransactionMonth = latestTransaction
         ? monthUtils.monthFromDate(
-          d.parseISO(fromDateRepr(latestTransaction.date)),
-        )
+            d.parseISO(fromDateRepr(latestTransaction.date)),
+          )
         : currentMonth;
 
       const latestMonth =
@@ -181,7 +199,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
           ? latestTransactionMonth
           : currentMonth;
 
-      // Make sure the month selects are at least populates with a
+      // Make sure the month selects are at least populats with a
       // year's worth of months. We can undo this when we have fancier
       // date selects.
       const yearAgo = monthUtils.subMonths(latestMonth, 12);
@@ -200,10 +218,11 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       setAllMonths(allMonths);
     }
     void run();
-  }, [locale]);
-  function onChangeDates(start: string, end: string) {
+  }, [locale, widget?.meta?.timeFrame]);
+  function onChangeDates(start: string, end: string, mode: TimeFrame['mode']) {
     setStart(start);
     setEnd(end);
+    setTimeFrameMode(mode);
   }
 
   const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
@@ -224,7 +243,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
             timeFrame: {
               start,
               end,
-              mode: 'static',
+              mode: timeFrameMode,
             },
           },
         },
@@ -296,6 +315,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
         allMonths={allMonths}
         start={start}
         end={end}
+        mode={timeFrameMode}
         earliestTransaction={earliestTransaction}
         latestTransaction={latestTransaction}
         onChangeDates={onChangeDates}

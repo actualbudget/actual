@@ -205,6 +205,6 @@ export type SankeyWidget = AbstractWidget<
     conditions?: RuleConditionEntity[];
     conditionsOp?: 'and' | 'or';
     timeFrame?: TimeFrame;
-    mode?: 'budgeted' | 'spent' | 'difference';
+    mode?: 'budgeted' | 'spent';
   } | null
 >;
