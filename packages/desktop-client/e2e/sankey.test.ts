@@ -20,6 +20,10 @@ test.describe('Sankey Report', () => {
 
     await page.goto('/');
     await configurationPage.createTestFile();
+
+    // Enable the Sankey feature flag
+    const settingsPage = await navigation.goToSettingsPage();
+    await settingsPage.enableExperimentalFeature('Sankey report');
   });
 
   test.afterEach(async () => {
