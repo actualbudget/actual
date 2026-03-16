@@ -72,15 +72,12 @@ async function filterCategoryGroups(
 
   // Build a map of category IDs to check against filters
   const categoryIdToNameMap = new Map<string, string>();
-  const categoryIdToGroupMap = new Map<
-    string,
-    {id: string; name: string}
-  >();
+  const categoryIdToGroupMap = new Map<string, { id: string; name: string }>();
 
   allCategories.forEach(group => {
     group.categories?.forEach(cat => {
       categoryIdToNameMap.set(cat.id, cat.name);
-      categoryIdToGroupMap.set(cat.id, {id: group.id, name: group.name});
+      categoryIdToGroupMap.set(cat.id, { id: group.id, name: group.name });
     });
   });
 
@@ -119,9 +116,7 @@ async function filterCategoryGroups(
             value.includes(categoryGroupId) || value.includes(categoryGroupName)
           );
         }
-        return (
-          categoryGroupId === value || categoryGroupName === value
-        );
+        return categoryGroupId === value || categoryGroupName === value;
       } else if (op === 'contains') {
         return (
           typeof value === 'string' &&
@@ -233,13 +228,15 @@ export function createBudgetSpreadsheet(
       toBudget: number;
     };
 
-    
-
-    const months = (end && end !== start) ? monthUtils.range(start, end) : [start];
+    const months =
+      end && end !== start ? monthUtils.range(start, end) : [start];
 
     const monthResponses = (await Promise.all(
-      months.map(m =>
-        send('api/budget-month', { month: m }) as unknown as Promise<BudgetMonthResponse>,
+      months.map(
+        m =>
+          send('api/budget-month', {
+            month: m,
+          }) as unknown as Promise<BudgetMonthResponse>,
       ),
     )) as BudgetMonthResponse[];
 
@@ -269,12 +266,11 @@ export function createBudgetSpreadsheet(
               return;
             }
 
-            existingCat.budgeted = (existingCat.budgeted ?? 0) +
-              (cat.budgeted ?? 0);
-            existingCat.spent = (existingCat.spent ?? 0) +
-              (cat.spent ?? 0);
-            existingCat.balance = (existingCat.balance ?? 0) +
-              (cat.balance ?? 0);
+            existingCat.budgeted =
+              (existingCat.budgeted ?? 0) + (cat.budgeted ?? 0);
+            existingCat.spent = (existingCat.spent ?? 0) + (cat.spent ?? 0);
+            existingCat.balance =
+              (existingCat.balance ?? 0) + (cat.balance ?? 0);
           });
         });
 

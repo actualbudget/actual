@@ -45,6 +45,7 @@ import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
+import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { useUpdateDashboardWidgetMutation } from '@desktop-client/reports/mutations';
@@ -169,7 +170,12 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     graphMode,
   ]);
 
-  const data = useReport('sankey', reportParams ?? (async () => {}));
+  const defaultGetData = async (
+    spreadsheet: ReturnType<typeof useSpreadsheet>,
+    setData: (data: SankeyData) => void,
+  ) => setData({ nodes: [], links: [] });
+
+  const data = useReport('sankey', reportParams ?? defaultGetData);
 
   useEffect(() => {
     async function run() {
@@ -198,13 +204,13 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       const currentMonth = monthUtils.currentMonth();
       let earliestMonth = earliestTransaction
         ? monthUtils.monthFromDate(
-          d.parseISO(fromDateRepr(earliestTransaction.date)),
-        )
+            d.parseISO(fromDateRepr(earliestTransaction.date)),
+          )
         : currentMonth;
       const latestTransactionMonth = latestTransaction
         ? monthUtils.monthFromDate(
-          d.parseISO(fromDateRepr(latestTransaction.date)),
-        )
+            d.parseISO(fromDateRepr(latestTransaction.date)),
+          )
         : currentMonth;
 
       const latestMonth =

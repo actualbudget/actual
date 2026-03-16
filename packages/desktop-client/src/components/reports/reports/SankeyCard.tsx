@@ -14,9 +14,9 @@ import { SankeyGraph } from '@desktop-client/components/reports/graphs/SankeyGra
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
-import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createSpreadsheet as sankeySpreadsheet } from '@desktop-client/components/reports/spreadsheets/sankey-spreadsheet';
+import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
@@ -41,7 +41,7 @@ export function SankeyCard({
   const locale = useLocale();
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
-      useDashboardWidgetCopyMenu(onCopy);
+    useDashboardWidgetCopyMenu(onCopy);
   const { data: { grouped: groupedCategories = [] } = { grouped: [] } } =
     useCategories();
 

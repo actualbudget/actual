@@ -882,7 +882,6 @@ export function Overview({ dashboard }: OverviewProps) {
                           onCopy={targetDashboardId =>
                             onCopyWidget(item.i, targetDashboardId)
                           }
-
                         />
                       ) : null}
                     </div>
