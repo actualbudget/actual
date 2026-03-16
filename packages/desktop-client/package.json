@@ -35,7 +35,7 @@
     "@playwright/test": "1.58.2",
     "@rolldown/plugin-babel": "~0.1.8",
     "@rollup/plugin-inject": "^5.0.5",
-    "@swc/core": "^1.15.11",
+    "@swc/core": "^1.15.18",
     "@swc/helpers": "^0.5.18",
     "@tanstack/react-query": "^5.90.20",
     "@testing-library/dom": "10.4.1",
