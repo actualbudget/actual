@@ -199,7 +199,7 @@ export function MobileNavTabs() {
       } else {
         // when the user keeps dragging, we just move the sheet according to
         // the cursor position
-        void api.start({ y: oy, immediate: true });
+        void api.start({ to: { y: oy }, immediate: true });
       }
     },
     {
