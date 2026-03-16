@@ -75,7 +75,7 @@
     "eslint-plugin-typescript-paths": "^0.0.33",
     "html-to-image": "^1.11.13",
     "husky": "^9.1.7",
-    "lage": "^2.14.17",
+    "lage": "^2.14.19",
     "lint-staged": "^16.2.7",
     "minimatch": "^10.1.2",
     "node-jq": "^6.3.1",
