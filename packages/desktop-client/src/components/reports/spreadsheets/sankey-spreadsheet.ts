@@ -1,6 +1,7 @@
 import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import { q, type Query } from 'loot-core/shared/query';
+import { q } from 'loot-core/shared/query';
+import type { Query } from 'loot-core/shared/query';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
@@ -165,7 +166,7 @@ export function createSpreadsheet(
         conditionsOp,
       )(spreadsheet, setData);
       return data;
-    } 
+    }
   };
 }
 
@@ -355,8 +356,8 @@ export function createTransactionsSpreadsheet(
           // Apply conditions filter
           const finalQuery: Query =
             conditionsOpKey === '$or'
-              ? baseQuery.filter({ $or: filters as any })
-              : baseQuery.filter({ $and: filters as any });
+              ? baseQuery.filter({ $or: filters as unknown })
+              : baseQuery.filter({ $and: filters as unknown });
 
           return aqlQuery(finalQuery);
         });

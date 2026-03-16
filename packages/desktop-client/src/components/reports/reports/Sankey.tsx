@@ -316,7 +316,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
         start={start}
         end={end}
         mode={timeFrameMode}
-        show1Month={true}
+        show1Month
         earliestTransaction={earliestTransaction}
         latestTransaction={latestTransaction}
         onChangeDates={onChangeDates}
