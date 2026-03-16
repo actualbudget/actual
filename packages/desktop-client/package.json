@@ -60,7 +60,7 @@
     "date-fns": "^4.1.0",
     "downshift": "9.0.10",
     "hyperformula": "^3.2.0",
-    "i18next": "^25.8.4",
+    "i18next": "^25.8.14",
     "i18next-parser": "^9.3.0",
     "i18next-resources-to-backend": "^1.2.1",
     "jsdom": "^27.4.0",

@@ -108,7 +108,7 @@ __metadata:
     fake-indexeddb: "npm:^6.2.5"
     fast-check: "npm:4.5.3"
     handlebars: "npm:^4.7.8"
-    i18next: "npm:^25.8.4"
+    i18next: "npm:^25.8.14"
     jest-diff: "npm:^30.2.0"
     jsverify: "npm:^0.8.4"
     lru-cache: "npm:^11.2.5"
@@ -253,7 +253,7 @@ __metadata:
     date-fns: "npm:^4.1.0"
     downshift: "npm:9.0.10"
     hyperformula: "npm:^3.2.0"
-    i18next: "npm:^25.8.4"
+    i18next: "npm:^25.8.14"
     i18next-parser: "npm:^9.3.0"
     i18next-resources-to-backend: "npm:^1.2.1"
     jsdom: "npm:^27.4.0"
@@ -2007,7 +2007,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.10.3, @babel/runtime@npm:^7.11.2, @babel/runtime@npm:^7.12.13, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.23.2, @babel/runtime@npm:^7.24.5, @babel/runtime@npm:^7.25.0, @babel/runtime@npm:^7.25.9, @babel/runtime@npm:^7.26.10, @babel/runtime@npm:^7.28.4, @babel/runtime@npm:^7.9.2":
+"@babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.10.3, @babel/runtime@npm:^7.11.2, @babel/runtime@npm:^7.12.13, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.23.2, @babel/runtime@npm:^7.24.5, @babel/runtime@npm:^7.25.0, @babel/runtime@npm:^7.25.9, @babel/runtime@npm:^7.26.10, @babel/runtime@npm:^7.28.4, @babel/runtime@npm:^7.28.6, @babel/runtime@npm:^7.9.2":
   version: 7.28.6
   resolution: "@babel/runtime@npm:7.28.6"
   checksum: 10/fbcd439cb74d4a681958eb064c509829e3f46d8a4bfaaf441baa81bb6733d1e680bccc676c813883d7741bcaada1d0d04b15aa320ef280b5734e2192b50decf9
@@ -18523,17 +18523,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:^25.8.4":
-  version: 25.8.11
-  resolution: "i18next@npm:25.8.11"
+"i18next@npm:^25.8.14":
+  version: 25.8.18
+  resolution: "i18next@npm:25.8.18"
   dependencies:
-    "@babel/runtime": "npm:^7.28.4"
+    "@babel/runtime": "npm:^7.28.6"
   peerDependencies:
     typescript: ^5
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10/088cb151c18d35c7061bf48e858d3d4298bdc8a9f011e99cf64570298f6a33e13f50bcdc65dc2c2babd545b2a677e2e9c02ea869932c18c6a5fa67971ebdfe44
+  checksum: 10/a5b9be29bd664dc12002f200b6c01dc6436c1a014f46b9f97e11c0733511328d3063409829af7dfd88cd744b5e0bd3575be71bb39c0955c6cfe747ae78274269
   languageName: node
   linkType: hard
 
