@@ -412,14 +412,14 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                     <Text style={{ fontSize: 16, textAlign: 'center' }}>
                       {graphMode === 'budgeted' && (
                         <Trans>
-                          No data available for this month. Try budgeting
-                          categories or selecting a different month.
+                          No data available for this period. Try budgeting
+                          categories or selecting a different period.
                         </Trans>
                       )}
                       {graphMode === 'spent' && (
                         <Trans>
-                          No data available for this month. Try adding
-                          transactions or selecting a different month.
+                          No data available for this period. Try adding
+                          transactions or selecting a different period.
                         </Trans>
                       )}
                     </Text>
