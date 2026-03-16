@@ -192,6 +192,7 @@ export function createSpreadsheet(
     if (mode === 'budgeted') {
       const data = await createBudgetSpreadsheet(
         start,
+        end,
         categories,
         conditions,
         conditionsOp,
@@ -214,6 +215,7 @@ export function createSpreadsheet(
 
 export function createBudgetSpreadsheet(
   start: string,
+  end: string,
   categories: CategoryGroupEntity[],
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
@@ -231,15 +233,69 @@ export function createBudgetSpreadsheet(
       toBudget: number;
     };
 
-    const {
-      categoryGroups,
-      totalIncome: _totalIncome,
-      fromLastMonth,
-      forNextMonth,
-      toBudget,
-    } = (await send('api/budget-month', {
-      month: start,
-    })) as unknown as BudgetMonthResponse;
+    
+
+    const months = (end && end !== start) ? monthUtils.range(start, end) : [start];
+
+    const monthResponses = (await Promise.all(
+      months.map(m =>
+        send('api/budget-month', { month: m }) as unknown as Promise<BudgetMonthResponse>,
+      ),
+    )) as BudgetMonthResponse[];
+
+    const aggregated = monthResponses.reduce(
+      (acc, response) => {
+        acc.toBudget += response.toBudget;
+        acc.fromLastMonth += response.fromLastMonth;
+        acc.forNextMonth += response.forNextMonth;
+        acc.totalIncome += response.totalIncome;
+
+        response.categoryGroups.forEach(group => {
+          const existingGroup = acc.categoryGroupsMap.get(group.id);
+          if (!existingGroup) {
+            acc.categoryGroupsMap.set(group.id, {
+              ...group,
+              categories: group.categories.map(cat => ({ ...cat })),
+            });
+            return;
+          }
+
+          group.categories.forEach(cat => {
+            const existingCat = existingGroup.categories.find(
+              c => c.id === cat.id,
+            );
+            if (!existingCat) {
+              existingGroup.categories.push({ ...cat });
+              return;
+            }
+
+            existingCat.budgeted = (existingCat.budgeted ?? 0) +
+              (cat.budgeted ?? 0);
+            existingCat.spent = (existingCat.spent ?? 0) +
+              (cat.spent ?? 0);
+            existingCat.balance = (existingCat.balance ?? 0) +
+              (cat.balance ?? 0);
+          });
+        });
+
+        return acc;
+      },
+      {
+        toBudget: 0,
+        fromLastMonth: 0,
+        forNextMonth: 0,
+        totalIncome: 0,
+        categoryGroupsMap: new Map<string, BudgetMonthGroup>(),
+      } as {
+        toBudget: number;
+        fromLastMonth: number;
+        forNextMonth: number;
+        totalIncome: number;
+        categoryGroupsMap: Map<string, BudgetMonthGroup>;
+      },
+    );
+
+    const categoryGroups = Array.from(aggregated.categoryGroupsMap.values());
 
     // Apply filters to category groups
     const filteredCategoryGroups = await filterCategoryGroups(
@@ -260,6 +316,8 @@ export function createBudgetSpreadsheet(
         value: cat.budgeted ?? 0,
       })),
     }));
+
+    const { forNextMonth, toBudget } = aggregated;
 
     if (forNextMonth > 0) {
       categoryData.push({
