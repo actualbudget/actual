@@ -29,7 +29,7 @@ __metadata:
     better-sqlite3: "npm:^12.6.2"
     compare-versions: "npm:^6.1.1"
     node-fetch: "npm:^3.3.2"
-    rollup-plugin-visualizer: "npm:^6.0.5"
+    rollup-plugin-visualizer: "npm:^6.0.11"
     typescript-strict-plugin: "npm:^2.4.4"
     uuid: "npm:^13.0.0"
     vite: "npm:^8.0.0"
@@ -120,7 +120,7 @@ __metadata:
     path-browserify: "npm:^1.0.1"
     peggy: "npm:5.0.6"
     promise-retry: "npm:^2.0.1"
-    rollup-plugin-visualizer: "npm:^6.0.5"
+    rollup-plugin-visualizer: "npm:^6.0.11"
     slash: "npm:5.1.0"
     stream-browserify: "npm:^3.0.0"
     timers-browserify: "npm:^2.0.12"
@@ -285,7 +285,7 @@ __metadata:
     recharts: "npm:^3.7.0"
     rehype-external-links: "npm:^3.0.0"
     remark-gfm: "npm:^4.0.1"
-    rollup-plugin-visualizer: "npm:^6.0.5"
+    rollup-plugin-visualizer: "npm:^6.0.11"
     sass: "npm:^1.97.3"
     typescript-strict-plugin: "npm:^2.4.4"
     usehooks-ts: "npm:^3.1.1"
@@ -26050,9 +26050,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup-plugin-visualizer@npm:^6.0.5":
-  version: 6.0.5
-  resolution: "rollup-plugin-visualizer@npm:6.0.5"
+"rollup-plugin-visualizer@npm:^6.0.11":
+  version: 6.0.11
+  resolution: "rollup-plugin-visualizer@npm:6.0.11"
   dependencies:
     open: "npm:^8.0.0"
     picomatch: "npm:^4.0.2"
@@ -26068,7 +26068,7 @@ __metadata:
       optional: true
   bin:
     rollup-plugin-visualizer: dist/bin/cli.js
-  checksum: 10/e2bcad7ee239f1a911339bc50ae24f92fb5ec86405e2f62c1a29eb1b4e1b1d450edb303ba2e65d6edcdb84271c1948f50befe75cd5785feec31e186859bfacde
+  checksum: 10/990f97b9dee576940dcbb47e86a844fabfc14179d8e583179ad1b6e0dea55d090cd0c17925137e637aa74ca88b782ffbce0c61ffe15755f448c6f23b45f65020
   languageName: node
   linkType: hard
 
