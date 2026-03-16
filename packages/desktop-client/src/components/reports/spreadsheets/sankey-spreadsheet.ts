@@ -328,10 +328,6 @@ function transformToSankeyData(
   toBudgetAmount: number = 0,
   rootNodeName: string,
 ): SankeyData {
-  // DEBUG: Log the input category data to verify its structure
-  console.log('Transforming category data to Sankey format:', categoryData);
-
-
   const data: SankeyData = { nodes: [], links: [] };
   const nodeNames = new Set<string>();
 
