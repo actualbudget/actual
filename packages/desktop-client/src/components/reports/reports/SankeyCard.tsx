@@ -73,7 +73,9 @@ export function SankeyCard({
     dateDescription = formattedEndDate;
   }
 
-  dateDescription += ' (' + mode + ')';
+  const modeLabel = mode === 'budgeted' ? t('Budgeted') : t('Spent');
+
+  dateDescription += ` (${modeLabel})`;
 
   return (
     <ReportCard
