@@ -41,7 +41,7 @@ export function SankeyCard({
     useCategories();
 
   const [start, end] = calculateTimeRange(meta?.timeFrame);
-  const mode = meta?.mode ?? 'budgeted';
+  const mode = meta?.mode ?? 'spent';
 
   const params = useMemo(
     () =>
