@@ -28,32 +28,24 @@ test.describe('Sankey Report', () => {
     }
   });
 
-  test('loads sankey report and checks budgeted view', async () => {
+  test('loads sankey report and checks spent view', async () => {
     reportsPage = await navigation.goToReportsPage();
     sankeyPage = await reportsPage.goToSankeyPage();
     await sankeyPage.waitToLoad();
 
-    // Should be in budgeted mode by default
+    // Should be in spent mode by default
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('switches to spent view and checks visuals', async () => {
+  test('switches to budgeted view and checks visuals', async () => {
     reportsPage = await navigation.goToReportsPage();
     sankeyPage = await reportsPage.goToSankeyPage();
     await sankeyPage.waitToLoad();
 
-    await sankeyPage.selectMode('spent');
+    await sankeyPage.selectMode('budgeted');
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('switches to difference view and checks visuals', async () => {
-    reportsPage = await navigation.goToReportsPage();
-    sankeyPage = await reportsPage.goToSankeyPage();
-    await sankeyPage.waitToLoad();
-
-    await sankeyPage.selectMode('difference');
-    await expect(page).toMatchThemeScreenshots();
-  });
 
   test('changes month and verifies graph updates', async () => {
     reportsPage = await navigation.goToReportsPage();
@@ -77,7 +69,7 @@ test.describe('Sankey Report', () => {
     }
   });
 
-  test('verifies all three modes work correctly', async () => {
+  test('verifies both modes work correctly', async () => {
     reportsPage = await navigation.goToReportsPage();
     sankeyPage = await reportsPage.goToSankeyPage();
     await sankeyPage.waitToLoad();
@@ -89,11 +81,5 @@ test.describe('Sankey Report', () => {
     // Test spent mode
     await sankeyPage.selectMode('spent');
     await expect(sankeyPage.spentButton).toBeVisible();
-
-    // Test difference mode
-    await sankeyPage.selectMode('difference');
-    await expect(sankeyPage.differenceButton).toBeVisible();
-
-    await expect(page).toMatchThemeScreenshots();
   });
 });
