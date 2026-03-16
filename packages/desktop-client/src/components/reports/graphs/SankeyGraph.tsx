@@ -303,7 +303,7 @@ export function SankeyGraph({
                 onMouseLeave={() => setHoveredLinkIndex(null)}
               />
             )}
-            sort={false}
+            sort={true}
             iterations={1000}
             nodePadding={23}
             width={width}

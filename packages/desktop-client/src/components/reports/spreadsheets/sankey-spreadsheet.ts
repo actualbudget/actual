@@ -142,7 +142,7 @@ export function createSpreadsheet(
   categories: CategoryGroupEntity[],
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
-  mode: 'budgeted' | 'spent' | 'difference' = 'budgeted',
+  mode: 'budgeted' | 'spent' = 'spent',
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -165,17 +165,7 @@ export function createSpreadsheet(
         conditionsOp,
       )(spreadsheet, setData);
       return data;
-    } else {
-      // mode === 'difference'
-      const data = await createDifferenceSpreadsheet(
-        start,
-        end,
-        categories,
-        conditions,
-        conditionsOp,
-      )(spreadsheet, setData);
-      return data;
-    }
+    } 
   };
 }
 
@@ -410,185 +400,6 @@ export function createTransactionsSpreadsheet(
 
     // convert retrieved data into the proper sankey format
     setData(transformToSankeyData(categoryData, incomeData, 0, 'Spent'));
-  };
-}
-
-export function createDifferenceSpreadsheet(
-  start: string,
-  end: string,
-  categories: CategoryGroupEntity[],
-  conditions: RuleConditionEntity[] = [],
-  conditionsOp: 'and' | 'or' = 'and',
-) {
-  return async (
-    spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: ReturnType<typeof transformToSankeyData>) => void,
-  ) => {
-    type BudgetMonthResponse = {
-      categoryGroups: BudgetMonthGroup[];
-      totalIncome: number;
-      fromLastMonth: number;
-      forNextMonth: number;
-      toBudget: number;
-    };
-
-    // Fetch budgeted data
-    const {
-      categoryGroups,
-      totalIncome: _totalIncome,
-      fromLastMonth,
-      forNextMonth: _forNextMonth,
-    } = (await send('api/budget-month', {
-      month: start,
-    })) as unknown as BudgetMonthResponse;
-
-    // Apply filters to category groups
-    const filteredCategoryGroups = await filterCategoryGroups(
-      categoryGroups,
-      conditions,
-      conditionsOp,
-      categories,
-    );
-
-    const budgetedData: Record<string, { budgeted: number; name: string }> = {};
-    const categoryGroupMap: Record<string, string> = {};
-
-    filteredCategoryGroups.forEach(group => {
-      if (!group.is_income) {
-        group.categories.forEach(cat => {
-          budgetedData[cat.id] = {
-            budgeted: cat.budgeted || 0,
-            name: cat.name,
-          };
-          categoryGroupMap[cat.id] = group.name;
-        });
-      }
-    });
-
-    // Fetch spent data using transactions
-    const { filters } = await send('make-filters-from-conditions', {
-      conditions: conditions.filter(cond => !cond.customName),
-    });
-    const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
-
-    // Use filtered categories instead of all categories
-    // Only get expense categories (non-income)
-    const filteredExpenseCategories = filteredCategoryGroups
-      .filter(group => !group.is_income)
-      .flatMap(group => group.categories);
-
-    async function fetchSpentData() {
-      const promises = filteredExpenseCategories.map(subcategory => {
-        return aqlQuery(
-          q('transactions')
-            .filter({
-              [conditionsOpKey]: filters,
-            })
-            .filter({
-              $and: [
-                { date: { $gte: monthUtils.firstDayOfMonth(start) } },
-                { date: { $lte: monthUtils.lastDayOfMonth(end) } },
-              ],
-            })
-            .filter({ category: subcategory.id })
-            .calculate({ $sum: '$amount' }),
-        );
-      });
-
-      const results = await Promise.all(promises);
-      const spentData: Record<string, number> = {};
-
-      filteredExpenseCategories.forEach((subcategory, index) => {
-        spentData[subcategory.id] = Math.abs(results[index].data || 0);
-      });
-
-      return spentData;
-    }
-
-    const spentData = await fetchSpentData();
-
-    // Calculate difference (budgeted - spent)
-    const differenceData: Array<{
-      name: string;
-      groupName: string;
-      difference: number;
-      isNegative: boolean;
-    }> = [];
-
-    Object.keys(budgetedData).forEach(catId => {
-      const budgeted = budgetedData[catId].budgeted;
-      const spent = spentData[catId] || 0;
-      const difference = budgeted - spent;
-
-      // Include all categories, even with zero difference
-      differenceData.push({
-        name: budgetedData[catId].name,
-        groupName: categoryGroupMap[catId],
-        difference,
-        isNegative: difference < 0,
-      });
-    });
-
-    // Group by category group
-    const groupedData: Array<{
-      name: string;
-      balances: Array<{
-        subcategory: string;
-        value: number;
-        isNegative?: boolean;
-        actualValue?: number;
-      }>;
-    }> = [];
-
-    const groupMap = new Map<
-      string,
-      Array<{
-        subcategory: string;
-        value: number;
-        isNegative?: boolean;
-        actualValue?: number;
-      }>
-    >();
-
-    differenceData.forEach(item => {
-      if (!groupMap.has(item.groupName)) {
-        groupMap.set(item.groupName, []);
-      }
-      groupMap.get(item.groupName)?.push({
-        subcategory: item.name,
-        value: Math.abs(item.difference),
-        isNegative: item.isNegative,
-        actualValue: item.difference, // Store the actual value for display
-      });
-    });
-
-    groupMap.forEach((balances, groupName) => {
-      groupedData.push({
-        name: groupName,
-        balances,
-      });
-    });
-
-    // Fetch income data for the income side
-    const incomeCategories = filteredCategoryGroups
-      .filter(group => group.is_income)
-      .flatMap(group => group.categories);
-
-    const incomeData: Record<string, number> = {};
-    incomeCategories.forEach(cat => {
-      if (cat.received && cat.received > 0) {
-        incomeData[cat.name] = cat.received;
-      }
-    });
-
-    if (fromLastMonth > 0) {
-      incomeData['From Last Month'] = fromLastMonth;
-    }
-
-    // convert retrieved data into the proper sankey format
-    setData(
-      transformToSankeyData(groupedData, incomeData, 0, 'Available Funds'),
-    );
   };
 }
 

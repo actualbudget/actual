@@ -62,7 +62,7 @@ export function Sankey() {
   return <SankeyInner widget={widget} />;
 }
 
-type GraphMode = 'budgeted' | 'spent' | 'difference';
+type GraphMode = 'budgeted' | 'spent';
 
 type GraphModeSelectorProps = {
   mode: GraphMode;
@@ -93,17 +93,6 @@ function GraphModeSelector({ mode, onChange }: GraphModeSelectorProps) {
         }}
       >
         <Trans>Budgeted</Trans>
-      </ModeButton>
-      <ModeButton
-        selected={mode === 'difference'}
-        style={{
-          backgroundColor: 'inherit',
-        }}
-        onSelect={() => {
-          onChange('difference');
-        }}
-      >
-        <Trans>Difference</Trans>
       </ModeButton>
     </SpaceBetween>
   );
@@ -412,12 +401,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                           transactions or selecting a different month.
                         </Trans>
                       )}
-                      {graphMode === 'difference' && (
-                        <Trans>
-                          No data available for this month. Try budgeting or
-                          adding transactions, or selecting a different month.
-                        </Trans>
-                      )}
                     </Text>
                   </View>
                 )}
@@ -443,11 +426,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                       <li style={{ marginBottom: 5 }}>
                         <strong>Budgeted:</strong> Shows how income flows into
                         your budget and is allocated across categories.
-                      </li>
-                      <li>
-                        <strong>Difference:</strong> Highlights budget vs.
-                        actual variance, showing overspent categories in red and
-                        unspent amounts.
                       </li>
                     </ul>
                   </Trans>
