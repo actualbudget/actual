@@ -254,7 +254,7 @@ __metadata:
     downshift: "npm:9.0.10"
     hyperformula: "npm:^3.2.0"
     i18next: "npm:^25.8.14"
-    i18next-parser: "npm:^9.3.0"
+    i18next-parser: "npm:^9.4.0"
     i18next-resources-to-backend: "npm:^1.2.1"
     jsdom: "npm:^27.4.0"
     lodash: "npm:^4.17.23"
@@ -18473,9 +18473,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next-parser@npm:^9.3.0":
-  version: 9.3.0
-  resolution: "i18next-parser@npm:9.3.0"
+"i18next-parser@npm:^9.4.0":
+  version: 9.4.0
+  resolution: "i18next-parser@npm:9.4.0"
   dependencies:
     "@babel/runtime": "npm:^7.25.0"
     broccoli-plugin: "npm:^4.0.7"
@@ -18496,7 +18496,7 @@ __metadata:
     vinyl-fs: "npm:^4.0.0"
   bin:
     i18next: bin/cli.js
-  checksum: 10/32b81864aa9cc27b7db41fde6fdf2c686c985e07a9b62a8dd10b4e86c8c0db7fe6ef3e569461a593521932265b31d12c091a6dda461406e54ebb0fc9ff6a55d0
+  checksum: 10/dbc7216ff4332365b0a0f8b0e0e21be78508d54daf16be21d9b262b9c8d3ff477bb002ddfe05e89e3c65357cec01fdf5ec5983a0e0b51b8587135a4fdd4c33b7
   languageName: node
   linkType: hard
 
