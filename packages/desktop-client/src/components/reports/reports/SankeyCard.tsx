@@ -14,6 +14,7 @@ import { SankeyGraph } from '@desktop-client/components/reports/graphs/SankeyGra
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
+import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createSpreadsheet as sankeySpreadsheet } from '@desktop-client/components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
@@ -26,6 +27,7 @@ type SankeyCardProps = {
   meta?: SankeyWidget['meta'];
   onMetaChange: (newMeta: SankeyWidget['meta']) => void;
   onRemove: () => void;
+  onCopy: (targetDashboardId: string) => void;
 };
 export function SankeyCard({
   widgetId,
@@ -33,10 +35,13 @@ export function SankeyCard({
   meta,
   onMetaChange,
   onRemove,
+  onCopy,
 }: SankeyCardProps) {
   const { t } = useTranslation();
   const locale = useLocale();
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
+  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
+      useDashboardWidgetCopyMenu(onCopy);
   const { data: { grouped: groupedCategories = [] } = { grouped: [] } } =
     useCategories();
 
@@ -91,8 +96,10 @@ export function SankeyCard({
           name: 'remove',
           text: t('Remove'),
         },
+        ...copyMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleCopyMenuSelect(item)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);

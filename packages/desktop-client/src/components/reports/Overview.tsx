@@ -879,6 +879,10 @@ export function Overview({ dashboard }: OverviewProps) {
                           meta={widget.meta}
                           onMetaChange={newMeta => onMetaChange(item, newMeta)}
                           onRemove={() => onRemoveWidget(item.i)}
+                          onCopy={targetDashboardId =>
+                            onCopyWidget(item.i, targetDashboardId)
+                          }
+
                         />
                       ) : null}
                     </div>
