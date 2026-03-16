@@ -18,6 +18,7 @@ import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 export function ReportRouter() {
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
+  const sankeyReportEnabled = useFeatureFlag('sankeyReport');
 
   return (
     <Routes>
@@ -49,8 +50,12 @@ export function ReportRouter() {
       <Route path="/calendar/:id" element={<Calendar />} />
       <Route path="/formula" element={<Formula />} />
       <Route path="/formula/:id" element={<Formula />} />
-      <Route path="/sankey" element={<Sankey />} />
-      <Route path="/sankey/:id" element={<Sankey />} />
+      {sankeyReportEnabled && (
+        <>
+          <Route path="/sankey" element={<Sankey />} />
+          <Route path="/sankey/:id" element={<Sankey />} />
+        </>
+      )}
     </Routes>
   );
 }
