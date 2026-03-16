@@ -273,7 +273,7 @@ __metadata:
     react-error-boundary: "npm:^6.0.3"
     react-grid-layout: "npm:^2.2.2"
     react-hotkeys-hook: "npm:^5.2.4"
-    react-i18next: "npm:^16.5.4"
+    react-i18next: "npm:^16.5.6"
     react-markdown: "npm:^10.1.0"
     react-modal: "npm:3.16.3"
     react-redux: "npm:^9.2.0"
@@ -24926,9 +24926,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-i18next@npm:^16.5.4":
-  version: 16.5.4
-  resolution: "react-i18next@npm:16.5.4"
+"react-i18next@npm:^16.5.6":
+  version: 16.5.8
+  resolution: "react-i18next@npm:16.5.8"
   dependencies:
     "@babel/runtime": "npm:^7.28.4"
     html-parse-stringify: "npm:^3.0.1"
@@ -24944,7 +24944,7 @@ __metadata:
       optional: true
     typescript:
       optional: true
-  checksum: 10/68319027cf93d33a7b782a9c8e9d27bda4df30790d2e8b17fe6f81181c4f7c729b02001e03b4462f44c7141a5cc6983e038c92bb2e4a531f046a75a853f9c203
+  checksum: 10/df806b150fa838f7b37a29e59d5743df98ce37cd3bb521e77cad69c15ceb74b53c4fe8853d51986ea01383d05066f23c8221f0cf96964481728ac9298bb4fa3e
   languageName: node
   linkType: hard
 
