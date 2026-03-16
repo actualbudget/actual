@@ -1,7 +1,11 @@
 import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { q, type Query } from 'loot-core/shared/query';
-import type { CategoryEntity, CategoryGroupEntity, RuleConditionEntity } from 'loot-core/types/models';
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
+  RuleConditionEntity,
+} from 'loot-core/types/models';
 
 import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
@@ -282,41 +286,49 @@ export function createTransactionsSpreadsheet(
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
     // retrieve sum of subcategory expenses
-    async function fetchCategoryData(categories: CategoryGroupEntity[]): Promise<CategoryData[]> {
+    async function fetchCategoryData(
+      categories: CategoryGroupEntity[],
+    ): Promise<CategoryData[]> {
       try {
         return await Promise.all(
-          categories.map(async (mainCategory: CategoryGroupEntity): Promise<CategoryData> => {
-            const subcategoryBalances = await Promise.all(
-              (mainCategory.categories || [])
-                .filter((subcategory) => !subcategory?.is_income)
-                .map(async (subcategory) => {
-                  const results = await aqlQuery(
-                    q('transactions')
-                      .filter({
-                        [conditionsOpKey]: filters,
-                      })
-                      .filter({
-                        $and: [
-                          { date: { $gte: monthUtils.firstDayOfMonth(start) } },
-                          { date: { $lte: monthUtils.lastDayOfMonth(end) } },
-                        ],
-                      })
-                      .filter({ category: subcategory.id })
-                      .calculate({ $sum: '$amount' }),
-                  );
-                  return {
-                    subcategory: subcategory.name,
-                    value: results.data * -1,
-                  };
-                }),
-            );
+          categories.map(
+            async (
+              mainCategory: CategoryGroupEntity,
+            ): Promise<CategoryData> => {
+              const subcategoryBalances = await Promise.all(
+                (mainCategory.categories || [])
+                  .filter(subcategory => !subcategory?.is_income)
+                  .map(async subcategory => {
+                    const results = await aqlQuery(
+                      q('transactions')
+                        .filter({
+                          [conditionsOpKey]: filters,
+                        })
+                        .filter({
+                          $and: [
+                            {
+                              date: { $gte: monthUtils.firstDayOfMonth(start) },
+                            },
+                            { date: { $lte: monthUtils.lastDayOfMonth(end) } },
+                          ],
+                        })
+                        .filter({ category: subcategory.id })
+                        .calculate({ $sum: '$amount' }),
+                    );
+                    return {
+                      subcategory: subcategory.name,
+                      value: results.data * -1,
+                    };
+                  }),
+              );
 
-            // Here you could combine, reduce or transform the subcategoryBalances if needed
-            return {
-              name: mainCategory.name,
-              balances: subcategoryBalances,
-            };
-          }),
+              // Here you could combine, reduce or transform the subcategoryBalances if needed
+              return {
+                name: mainCategory.name,
+                balances: subcategoryBalances,
+              };
+            },
+          ),
         );
       } catch (error) {
         console.error('Error fetching category data:', error);
@@ -326,8 +338,7 @@ export function createTransactionsSpreadsheet(
 
     // create list of Income subcategories
     const allIncomeSubcategories: CategoryEntity[] = [];
-    for (const category of categories)
-    {
+    for (const category of categories) {
       if (category.is_income) {
         allIncomeSubcategories.push(...(category.categories || []));
       }
@@ -335,7 +346,9 @@ export function createTransactionsSpreadsheet(
 
     const fetchIncomeData = async () => {
       // Map over allIncomeSubcategories and return an array of promises
-      const promises = (allIncomeSubcategories as Array<{ id: string; name: string }>)
+      const promises = (
+        allIncomeSubcategories as Array<{ id: string; name: string }>
+      )
         .filter(subcategory => subcategory != null)
         .map(subcategory => {
           const baseQuery = q('transactions')
@@ -350,9 +363,10 @@ export function createTransactionsSpreadsheet(
             .select(['payee', { amount: { $sum: '$amount' } }]);
 
           // Apply conditions filter
-          const finalQuery: Query = conditionsOpKey === '$or' 
-            ? baseQuery.filter({ $or: filters as any })
-            : baseQuery.filter({ $and: filters as any });
+          const finalQuery: Query =
+            conditionsOpKey === '$or'
+              ? baseQuery.filter({ $or: filters as any })
+              : baseQuery.filter({ $and: filters as any });
 
           return aqlQuery(finalQuery);
         });
@@ -389,7 +403,7 @@ export function createTransactionsSpreadsheet(
         }
       });
       return payeeNames;
-    }
+    };
 
     const incomeData = await fetchIncomeData();
     const categoryData = await fetchCategoryData(categories);

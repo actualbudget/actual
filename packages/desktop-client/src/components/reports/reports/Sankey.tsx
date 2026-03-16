@@ -17,7 +17,11 @@ import type { SankeyData } from 'recharts/types/chart/Sankey';
 
 import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import type { SankeyWidget, RuleConditionEntity, TimeFrame } from 'loot-core/types/models';
+import type {
+  SankeyWidget,
+  RuleConditionEntity,
+  TimeFrame,
+} from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
 import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
@@ -28,19 +32,18 @@ import {
   Page,
   PageHeader,
 } from '@desktop-client/components/Page';
-
-import { Header } from '@desktop-client/components/reports/Header';
 import { SankeyGraph } from '@desktop-client/components/reports/graphs/SankeyGraph';
+import { Header } from '@desktop-client/components/reports/Header';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { ModeButton } from '@desktop-client/components/reports/ModeButton';
 import { createSpreadsheet as sankeySpreadsheet } from '@desktop-client/components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
 import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
-import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { useUpdateDashboardWidgetMutation } from '@desktop-client/reports/mutations';
@@ -269,7 +272,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
 
   const title = widget?.meta?.name || t('Sankey');
 
-
   if (!data) {
     return null;
   }
@@ -443,9 +445,9 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                         your budget and is allocated across categories.
                       </li>
                       <li>
-                        <strong>Difference:</strong> Highlights budget vs. actual
-                        variance, showing overspent categories in red and unspent
-                        amounts.
+                        <strong>Difference:</strong> Highlights budget vs.
+                        actual variance, showing overspent categories in red and
+                        unspent amounts.
                       </li>
                     </ul>
                   </Trans>
@@ -455,7 +457,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
           </View>
         </View>
       </View>
-
     </Page>
   );
 }

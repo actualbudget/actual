@@ -47,14 +47,7 @@ export function SankeyCard({
         meta?.conditionsOp ?? 'and',
         mode,
       ),
-    [
-      start,
-      end,
-      groupedCategories,
-      meta?.conditions,
-      meta?.conditionsOp,
-      mode,
-    ],
+    [start, end, groupedCategories, meta?.conditions, meta?.conditionsOp, mode],
   );
   const data = useReport('sankey', params);
 

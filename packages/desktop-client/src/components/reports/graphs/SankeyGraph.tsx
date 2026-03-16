@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
 
@@ -38,13 +38,9 @@ type SankeyTooltipProps = {
 function SankeyCustomTooltip({ active, payload }: SankeyTooltipProps) {
   const format = useFormat();
 
-  if (!active || !payload || payload.length === 0) {
-    return null;
-  }
+  if (!active || !payload?.length) return null;
 
-  const item = payload[0];
-  const value = item.value ?? item.payload?.value ?? 0;
-  const name = item.name ?? item.payload?.name ?? '';
+  const { value = 0, name = '' } = payload[0];
 
   return (
     <div
@@ -110,19 +106,13 @@ function SankeyLink({
   onMouseEnter,
   onMouseLeave,
 }: SankeyLinkProps) {
-  // Use red color for negative differences (overspent), blue for others
   const linkColor = payload.isNegative ? theme.errorText : theme.reportsGray;
-
-  // Enhanced styling on hover: thicker stroke and full opacity
   const strokeWidth = isHovered ? linkWidth + 2 : linkWidth;
   const strokeOpacity = isHovered ? 1 : 0.5;
 
   return (
     <path
-      d={`
-        M${sourceX},${sourceY}
-        C${sourceControlX},${sourceY} ${targetControlX},${targetY} ${targetX},${targetY}
-      `}
+      d={`M${sourceX},${sourceY} C${sourceControlX},${sourceY} ${targetControlX},${targetY} ${targetX},${targetY}`}
       fill="none"
       stroke={linkColor}
       strokeWidth={strokeWidth}
@@ -130,9 +120,7 @@ function SankeyLink({
       cursor="default"
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      style={{
-        transition: 'stroke-opacity 0.2s ease',
-      }}
+      style={{ transition: 'stroke-opacity 0.2s ease' }}
     />
   );
 }
@@ -157,147 +145,85 @@ function SankeyNode({
   containerWidth,
 }: SankeyNodeProps) {
   const privacyMode = usePrivacyMode();
-  const isOut = x + width + 6 > containerWidth;
-  const nodeLabel = payload.name;
   const format = useFormat();
+  const isOut = x + width + 6 > containerWidth;
 
-  // Use red color for negative (overspent) categories, blue for others
   const fillColor = payload.isNegative ? theme.errorText : theme.reportsBlue;
-  const fillOpacity = 1;
-
-  // Use actualValue if available (for difference view with zero values), otherwise use payload.value
   const displayValue =
     payload.actualValue !== undefined
       ? Math.abs(payload.actualValue)
       : payload.value;
 
-  // Check if this is the Budget node with unallocated funds
   const isBudgetNode = payload.name === BUDGET_NODE_NAME;
   const hasToBudget = isBudgetNode && payload.toBudget && payload.toBudget > 0;
 
-  // Calculate the position for "To Budget" label in the unallocated portion
-  let toBudgetLabelY = y + height / 2 + 26; // Default position
-  if (hasToBudget && payload.value > 0) {
-    // Calculate what proportion of the node is allocated vs unallocated
+  const renderText = (
+    text: string,
+    yOffset: number,
+    fontSize = 13,
+    opacity = 1,
+  ) => (
+    <text
+      textAnchor={isOut ? 'end' : 'start'}
+      x={isOut ? x - 6 : x + width + 6}
+      y={y + yOffset}
+      fontSize={fontSize}
+      strokeOpacity={opacity}
+      fill={theme.pageText}
+      fontFamily={privacyMode ? t('Redacted Script') : undefined}
+    >
+      {text}
+    </text>
+  );
+
+  if (hasToBudget) {
     const totalValue = payload.value;
     const allocatedValue = totalValue - (payload.toBudget || 0);
     const allocatedRatio = allocatedValue / totalValue;
-
-    // The allocated portion takes up allocatedRatio * height
-    // Position the label in the middle of the remaining (unallocated) portion
     const allocatedHeight = height * allocatedRatio;
     const unallocatedHeight = height - allocatedHeight;
-    toBudgetLabelY = y + allocatedHeight + unallocatedHeight / 2;
-  }
+    const toBudgetLabelY = y + allocatedHeight + unallocatedHeight / 2;
 
-  // Calculate allocated and unallocated heights for Budget node with two-tone coloring
-  let allocatedHeight = height;
-  let unallocatedHeight = 0;
-  if (hasToBudget && payload.value > 0) {
-    const totalValue = payload.value;
-    const allocatedValue = totalValue - (payload.toBudget || 0);
-    const allocatedRatio = allocatedValue / totalValue;
-    allocatedHeight = height * allocatedRatio;
-    unallocatedHeight = height - allocatedHeight;
+    return (
+      <Layer key={`CustomNode${index}`}>
+        <Rectangle
+          x={x}
+          y={y}
+          width={width}
+          height={allocatedHeight}
+          fill={fillColor}
+        />
+        <Rectangle
+          x={x}
+          y={y + allocatedHeight}
+          width={width}
+          height={unallocatedHeight}
+          fill={theme.warningText}
+          fillOpacity={0.5}
+        />
+        {renderText(t('Budgeted'), allocatedHeight / 2)}
+        {renderText(
+          format(allocatedValue, 'financial'),
+          allocatedHeight / 2 + 13,
+          11,
+          0.5,
+        )}
+        {renderText(t('To Budget'), toBudgetLabelY - y)}
+        {renderText(
+          format(payload.toBudget, 'financial'),
+          toBudgetLabelY - y + 13,
+          11,
+          1,
+        )}
+      </Layer>
+    );
   }
 
   return (
     <Layer key={`CustomNode${index}`}>
-      {/* For Budget node with unallocated funds, draw two rectangles */}
-      {hasToBudget ? (
-        <>
-          {/* Allocated portion (top) - blue */}
-          <Rectangle
-            x={x}
-            y={y}
-            width={width}
-            height={allocatedHeight}
-            fill={fillColor}
-            fillOpacity={fillOpacity}
-          />
-          {/* Unallocated portion (bottom) - yellow */}
-          <Rectangle
-            x={x}
-            y={y + allocatedHeight}
-            width={width}
-            height={unallocatedHeight}
-            fill={theme.warningText}
-            fillOpacity={0.5}
-          />
-          <text
-            textAnchor={isOut ? 'end' : 'start'}
-            x={isOut ? x - 6 : x + width + 6}
-            y={y + allocatedHeight / 2}
-            fontSize="13"
-            fill={theme.pageText}
-          >
-            <Trans>Budgeted</Trans>
-          </text>
-          <text
-            textAnchor={isOut ? 'end' : 'start'}
-            x={isOut ? x - 6 : x + width + 6}
-            y={y + allocatedHeight / 2 + 13}
-            fontSize="11"
-            strokeOpacity="0.5"
-            fill={theme.pageText}
-            fontFamily={privacyMode ? t('Redacted Script') : undefined}
-          >
-            {format(payload.value - (payload.toBudget || 0), 'financial')}
-          </text>
-          <text
-            textAnchor={isOut ? 'end' : 'start'}
-            x={isOut ? x - 6 : x + width + 6}
-            y={toBudgetLabelY}
-            fontSize="13"
-            fill={theme.pageText}
-          >
-            <Trans>To Budget</Trans>
-          </text>
-          <text
-            textAnchor={isOut ? 'end' : 'start'}
-            x={isOut ? x - 6 : x + width + 6}
-            y={toBudgetLabelY + 13}
-            fontSize="11"
-            strokeOpacity="1"
-            fill={theme.pageText}
-            fontFamily={privacyMode ? t('Redacted Script') : undefined}
-          >
-            {format(payload.toBudget, 'financial')}
-          </text>
-        </>
-      ) : (
-        /* Regular single-color rectangle for all other nodes */
-        <>
-          <Rectangle
-            x={x}
-            y={y}
-            width={width}
-            height={height}
-            fill={fillColor}
-            fillOpacity={fillOpacity}
-          />
-          <text
-            textAnchor={isOut ? 'end' : 'start'}
-            x={isOut ? x - 6 : x + width + 6}
-            y={y + height / 2}
-            fontSize="13"
-            fill={theme.pageText}
-          >
-            {nodeLabel}
-          </text>
-          <text
-            textAnchor={isOut ? 'end' : 'start'}
-            x={isOut ? x - 6 : x + width + 6}
-            y={y + height / 2 + 13}
-            fontSize="11"
-            strokeOpacity="0.5"
-            fill={theme.pageText}
-            fontFamily={privacyMode ? t('Redacted Script') : undefined}
-          >
-            {format(displayValue, 'financial')}
-          </text>
-        </>
-      )}
+      <Rectangle x={x} y={y} width={width} height={height} fill={fillColor} />
+      {renderText(payload.name || '', height / 2)}
+      {renderText(format(displayValue, 'financial'), height / 2 + 13, 11, 0.5)}
     </Layer>
   );
 }
@@ -307,15 +233,15 @@ function convertToCondensed(data: SankeyData) {
     node => node.name === BUDGET_NODE_NAME,
   );
 
-  // Calculate total income (links going into the "Budget" node)
-  const totalIncome = data.links.reduce((acc, link) => {
-    return link.target === budgetNodeIndex ? acc + link.value : acc;
-  }, 0);
+  const totalIncome = data.links.reduce(
+    (acc, link) => (link.target === budgetNodeIndex ? acc + link.value : acc),
+    0,
+  );
 
-  // Calculate total expenses (links going out of the "Budget" node)
-  const totalExpenses = data.links.reduce((acc, link) => {
-    return link.source === budgetNodeIndex ? acc + link.value : acc;
-  }, 0);
+  const totalExpenses = data.links.reduce(
+    (acc, link) => (link.source === budgetNodeIndex ? acc + link.value : acc),
+    0,
+  );
 
   return {
     nodes: [
@@ -350,13 +276,11 @@ export function SankeyGraph({
 
   const collapsedSet = useMemo(() => new Set(collapsedNodes), [collapsedNodes]);
   const sankeyData = useMemo(() => {
-    if (compact) {
-      return convertToCondensed(data);
-    }
+    if (compact) return convertToCondensed(data);
     return collapseSankeyBranches(data, collapsedSet);
   }, [compact, data, collapsedSet]);
 
-  if (!sankeyData.links || sankeyData.links.length === 0) return null;
+  if (!sankeyData.links?.length) return null;
 
   return (
     <Container style={{ ...style, ...(compact && { height: 'auto' }) }}>
