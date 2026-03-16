@@ -30,7 +30,7 @@ type BudgetMonthGroup = {
 type SankeyNode = {
   name: string;
   toBudget?: number;
-  nodeType: 'budget' | 'income' | 'expense';
+  nodeType: 'budget' | 'expense';
   isNegative?: boolean;
 };
 
@@ -206,24 +206,6 @@ export function createBudgetSpreadsheet(
       categories,
     );
 
-    // Build income data from income category groups
-    const incomeGroups = filteredCategoryGroups.filter(
-      group => group.is_income === true,
-    );
-    const incomeData = incomeGroups.reduce<Record<string, number>>(
-      (acc, group) => {
-        acc[group.name] = group.categories.reduce((categorySum, cat) => {
-          return categorySum + (cat.received ?? 0);
-        }, 0);
-        return acc;
-      },
-      {},
-    );
-
-    if (fromLastMonth > 0) {
-      incomeData['From Last Month'] = fromLastMonth;
-    }
-
     // Build expense category data using budgeted amounts from the budget month
     const expenseGroups = filteredCategoryGroups.filter(
       group => group.is_income !== true,
@@ -251,7 +233,6 @@ export function createBudgetSpreadsheet(
     setData(
       transformToSankeyData(
         categoryData,
-        incomeData,
         toBudget,
         'Available Funds',
       ),
@@ -331,85 +312,26 @@ export function createTransactionsSpreadsheet(
     const allIncomeSubcategories: CategoryEntity[] = [];
     for (const category of categories) {
       if (category.is_income) {
-        allIncomeSubcategories.push(...(category.categories || []));
+        // allIncomeSubcategories.push(...(category.categories || []));
       }
     }
 
-    const fetchIncomeData = async () => {
-      // Map over allIncomeSubcategories and return an array of promises
-      const promises = (
-        allIncomeSubcategories as Array<{ id: string; name: string }>
-      )
-        .filter(subcategory => subcategory != null)
-        .map(subcategory => {
-          const baseQuery = q('transactions')
-            .filter({
-              $and: [
-                { date: { $gte: monthUtils.firstDayOfMonth(start) } },
-                { date: { $lte: monthUtils.lastDayOfMonth(end) } },
-              ],
-            })
-            .filter({ category: subcategory.id })
-            .groupBy(['payee'])
-            .select(['payee', { amount: { $sum: '$amount' } }]);
-
-          // Apply conditions filter
-          const finalQuery: Query =
-            conditionsOpKey === '$or'
-              ? baseQuery.filter({ $or: filters as unknown })
-              : baseQuery.filter({ $and: filters as unknown });
-
-          return aqlQuery(finalQuery);
-        });
-
-      // Use Promise.all() to wait for all queries to complete
-      const resultsArrays = await Promise.all(promises);
-
-      // unravel the results
-      const payeesDict: Record<string, number> = {};
-      resultsArrays.forEach(item => {
-        item.data.forEach((innerItem: { payee: string; amount: number }) => {
-          const key = innerItem.payee;
-          if (!key) {
-            return;
-          }
-          payeesDict[key] = (payeesDict[key] ?? 0) + innerItem.amount;
-        });
-      });
-
-      // First, collect all unique IDs from payeesDict
-      const payeeIds = Object.keys(payeesDict);
-
-      const results = await aqlQuery(
-        q('payees')
-          .filter({ id: { $oneof: payeeIds } })
-          .select(['id', 'name']),
-      );
-
-      // Convert the resulting array to a payee-name-map
-      const payeeNames: Record<string, number> = {};
-      results.data.forEach((item: { id: string; name: string }) => {
-        if (item.name && payeesDict[item.id]) {
-          payeeNames[item.name] = payeesDict[item.id];
-        }
-      });
-      return payeeNames;
-    };
-
-    const incomeData = await fetchIncomeData();
     const categoryData = await fetchCategoryData(categories);
 
     // convert retrieved data into the proper sankey format
-    setData(transformToSankeyData(categoryData, incomeData, 0, 'Spent'));
+    setData(transformToSankeyData(categoryData, 0, 'Spent'));
   };
 }
 
 function transformToSankeyData(
   categoryData: CategoryData[],
-  incomeData: Record<string, number>,
   toBudgetAmount: number = 0,
-  rootNodeName: string = 'Available Funds',
+  rootNodeName: string,
 ): SankeyData {
+  // DEBUG: Log the input category data to verify its structure
+  console.log('Transforming category data to Sankey format:', categoryData);
+
+
   const data: SankeyData = { nodes: [], links: [] };
   const nodeNames = new Set<string>();
 
@@ -421,21 +343,6 @@ function transformToSankeyData(
   });
   nodeNames.add(rootNodeName);
 
-  // Handle the income sources and link them to the Budget node.
-  Object.entries(incomeData).forEach(([sourceName, value]) => {
-    if (!nodeNames.has(sourceName) && (value as number) > 0) {
-      data.nodes.push({
-        name: sourceName,
-        nodeType: 'income',
-      });
-      nodeNames.add(sourceName);
-      data.links.push({
-        source: data.nodes.length - 1, // Index of the newly added node
-        target: 0, // Root node is always at index 0
-        value,
-      });
-    }
-  });
 
   // add all category expenses that have valid subcategories and a balance
   for (const mainCategory of categoryData) {
