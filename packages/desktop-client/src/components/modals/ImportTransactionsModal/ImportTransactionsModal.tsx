@@ -211,6 +211,7 @@ export function ImportTransactionsModal({
   const [flipAmount, setFlipAmount] = useState(false);
   const [multiplierEnabled, setMultiplierEnabled] = useState(false);
   const [reconcile, setReconcile] = useState(true);
+  const [reimportDeleted, setReimportDeleted] = useState(false);
   const [importNotes, setImportNotes] = useState(true);
 
   // This cannot be set after parsing the file, because changing it
@@ -718,6 +719,7 @@ export function ImportTransactionsModal({
         accountId,
         transactions: finalTransactions,
         reconcile,
+        reimportDeleted,
       },
       {
         onSuccess: async didChange => {
@@ -766,6 +768,7 @@ export function ImportTransactionsModal({
       {
         accountId,
         transactions: previewTransactionsToImport,
+        reimportDeleted,
       },
       {
         onSuccess: previewTrx => {
@@ -832,6 +835,7 @@ export function ImportTransactionsModal({
     startDate,
     fieldMappings,
     parseDateFormat,
+    reimportDeleted,
   ]);
 
   const headers: ComponentProps<typeof TableHeader>['headers'] = [
@@ -1071,6 +1075,16 @@ export function ImportTransactionsModal({
             </CheckboxToggle>
           )}
 
+          {(isOfxFile(filetype) || isCamtFile(filetype)) && reconcile && (
+            <CheckboxToggle
+              id="form_reimport_deleted"
+              checked={reimportDeleted}
+              onChange={setReimportDeleted}
+            >
+              <Trans>Reimport deleted transactions</Trans>
+            </CheckboxToggle>
+          )}
+
           {/*Import Options */}
           {(filetype === 'qif' || filetype === 'csv') && (
             <View style={{ marginTop: 10 }}>
@@ -1187,6 +1201,15 @@ export function ImportTransactionsModal({
                     >
                       <Trans>Merge with existing transactions</Trans>
                     </CheckboxToggle>
+                    {reconcile && (
+                      <CheckboxToggle
+                        id="form_reimport_deleted_csv"
+                        checked={reimportDeleted}
+                        onChange={setReimportDeleted}
+                      >
+                        <Trans>Reimport deleted transactions</Trans>
+                      </CheckboxToggle>
+                    )}
                   </View>
                 )}
 

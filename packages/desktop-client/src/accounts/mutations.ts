@@ -207,6 +207,7 @@ export function useMoveAccountMutation() {
 type ImportPreviewTransactionsPayload = {
   accountId: string;
   transactions: TransactionEntity[];
+  reimportDeleted?: boolean;
 };
 
 export function useImportPreviewTransactionsMutation() {
@@ -218,6 +219,7 @@ export function useImportPreviewTransactionsMutation() {
     mutationFn: async ({
       accountId,
       transactions,
+      reimportDeleted,
     }: ImportPreviewTransactionsPayload) => {
       const { errors = [], updatedPreview } = await send(
         'transactions-import',
@@ -225,6 +227,7 @@ export function useImportPreviewTransactionsMutation() {
           accountId,
           transactions,
           isPreview: true,
+          opts: reimportDeleted !== undefined ? { reimportDeleted } : undefined,
         },
       );
 
@@ -259,6 +262,7 @@ type ImportTransactionsPayload = {
   accountId: string;
   transactions: TransactionEntity[];
   reconcile: boolean;
+  reimportDeleted?: boolean;
 };
 
 export function useImportTransactionsMutation() {
@@ -271,6 +275,7 @@ export function useImportTransactionsMutation() {
       accountId,
       transactions,
       reconcile,
+      reimportDeleted,
     }: ImportTransactionsPayload) => {
       if (!reconcile) {
         await send('api/transactions-add', {
@@ -289,6 +294,7 @@ export function useImportTransactionsMutation() {
         accountId,
         transactions,
         isPreview: false,
+        opts: reimportDeleted !== undefined ? { reimportDeleted } : undefined,
       });
 
       errors.forEach(error => {
