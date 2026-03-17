@@ -20,10 +20,10 @@ jobs:
       - name: Update package versions
         run: |
           # Get new nightly versions
-          NEW_CORE_VERSION=$(node ./packages/ci-actions/bin/get-next-package-version.js --package-json ./packages/loot-core/package.json --type nightly)
-          NEW_WEB_VERSION=$(node ./packages/ci-actions/bin/get-next-package-version.js --package-json ./packages/desktop-client/package.json --type nightly)
-          NEW_SYNC_VERSION=$(node ./packages/ci-actions/bin/get-next-package-version.js --package-json ./packages/sync-server/package.json --type nightly)
-          NEW_API_VERSION=$(node ./packages/ci-actions/bin/get-next-package-version.js --package-json ./packages/api/package.json --type nightly)
+          NEW_CORE_VERSION=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts --package-json ./packages/loot-core/package.json --type nightly)
+          NEW_WEB_VERSION=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts --package-json ./packages/desktop-client/package.json --type nightly)
+          NEW_SYNC_VERSION=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts --package-json ./packages/sync-server/package.json --type nightly)
+          NEW_API_VERSION=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts --package-json ./packages/api/package.json --type nightly)
 
           # Set package versions
           npm version $NEW_CORE_VERSION --no-git-tag-version --workspace=@actual-app/core --no-workspaces-update

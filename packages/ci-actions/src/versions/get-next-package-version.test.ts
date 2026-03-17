@@ -77,7 +77,7 @@ describe('getNextVersion (lib)', () => {
     expect(() =>
       getNextVersion({
         currentVersion: '25.8.4',
-        type: 'unknown',
+        type: 'unknown' as never,
         currentDate: new Date('2025-08-10'),
       }),
     ).toThrow(/Invalid type/);
