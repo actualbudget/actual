@@ -107,9 +107,11 @@ const buildColorMap = (
 
     acc.set(group.id, groupColor);
 
-    (group.categories ?? []).forEach((cat, i) => {
+    // Fix 1: capture cats once to avoid group.categories.length on undefined
+    const cats = group.categories ?? [];
+    cats.forEach((cat, i) => {
       if (!cat.id) return;
-      const shade = 0.15 + (i / Math.max(group.categories.length, 1)) * 0.5;
+      const shade = 0.15 + (i / Math.max(cats.length, 1)) * 0.5;
       acc.set(cat.id, shadeColor(groupColor, shade));
     });
 
@@ -156,7 +158,8 @@ const ActiveShapeMobile = ({
   chartOuterRadius,
 }: ActiveShapeProps) => {
   const format = useFormat();
-  const yAxis = payload.name ?? payload.date;
+  // Fix 2: guard against undefined payload.name and payload.date
+  const yAxis = payload.name ?? payload.date ?? '';
 
   const expansionInner = expandInward ? chartInnerRadius - 4 : outerRadius + 2;
   const expansionOuter = expandInward ? chartInnerRadius - 2 : outerRadius + 4;
@@ -231,7 +234,8 @@ const ActiveShapeDesktop = ({
   chartOuterRadius,
 }: ActiveShapeProps) => {
   const format = useFormat();
-  const yAxis = payload.name ?? payload.date;
+  // Fix 2: guard against undefined payload.name and payload.date
+  const yAxis = payload.name ?? payload.date ?? '';
   const sin = Math.sin(-RADIAN * midAngle);
   const cos = Math.cos(-RADIAN * midAngle);
 
@@ -606,7 +610,8 @@ export function DonutGraph({
                   startAngle={90}
                   endAngle={-270}
                   shape={(props: PieSectorShapeProps, index: number) => {
-                    const fill = data.legend[index]?.color ?? props.fill;
+                    // Fix 3: optional chain data.legend to guard against undefined
+                    const fill = data.legend?.[index]?.color ?? props.fill;
                     const isActive = index === activeIndex;
                     if (isActive && showActiveShape) {
                       return compact ? (
