@@ -507,7 +507,7 @@ export function DonutGraph({
                     endAngle={-270}
                     labelLine={false}
                     label={e =>
-                      viewLabels && !compact ? customLabel(e) : <div />
+                      viewLabels && !compact ? customLabel(e) : null
                     }
                     shape={(props: PieSectorShapeProps, index: number) => {
                       const item = flatCategories[index];
