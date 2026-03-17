@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { ChangeEvent, KeyboardEvent } from 'react';
+import type { KeyboardEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -124,8 +124,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
           }
           inputProps={{
             value: tag || '',
-            onInput: ({ target: { value } }: ChangeEvent<HTMLInputElement>) =>
-              setTag(value.replace(/\s/g, '')),
+            onChange: e => setTag(e.target.value.replace(/\s/g, '')),
             placeholder: t('New tag'),
             ref: tagInput,
           }}

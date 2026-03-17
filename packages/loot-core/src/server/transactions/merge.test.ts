@@ -284,6 +284,59 @@ describe('Merging success', () => {
     });
   });
 
+  it('preserves schedule link from dropped transaction when kept transaction has none', async () => {
+    const t1 = await db.insertTransaction({
+      account: 'one',
+      amount: 5,
+      date: '2025-01-01',
+      imported_id: 'imported_1',
+    });
+    const t2 = await db.insertTransaction({
+      ...transaction2,
+      schedule: 'schedule-1',
+    });
+
+    expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t1);
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(1);
+    expect(transactions[0].schedule).toBe('schedule-1');
+  });
+
+  it('preserves schedule link from kept transaction when both have schedules', async () => {
+    const t1 = await db.insertTransaction({
+      ...transaction1,
+      imported_id: 'imported_1',
+      schedule: 'schedule-keep',
+    });
+    const t2 = await db.insertTransaction({
+      ...transaction2,
+      schedule: 'schedule-drop',
+    });
+
+    expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t1);
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(1);
+    expect(transactions[0].schedule).toBe('schedule-keep');
+  });
+
+  it('preserves schedule link when merging manual scheduled with banksynced', async () => {
+    // Manual transaction linked to a schedule
+    const t1 = await db.insertTransaction({
+      ...transaction1,
+      schedule: 'schedule-1',
+    });
+    // Bank-synced transaction (kept due to imported_id priority)
+    const t2 = await db.insertTransaction({
+      ...transaction2,
+      imported_id: 'imported_2',
+    });
+
+    expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t2);
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(1);
+    expect(transactions[0].schedule).toBe('schedule-1');
+  });
+
   it('preserves split categories when merging split transaction with uncategorized imported transaction', async () => {
     // Create a manual transaction with splits
     const manualParent = await db.insertTransaction({

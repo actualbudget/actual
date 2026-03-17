@@ -53,7 +53,7 @@
     "@storybook/addon-docs": "^10.2.7",
     "@storybook/react-vite": "^10.2.7",
     "@svgr/cli": "^8.1.0",
-    "@types/react": "^19.2.5",
+    "@types/react": "^19.2.14",
     "@typescript/native-preview": "^7.0.0-dev.20260309.1",
     "@vitejs/plugin-react": "^6.0.0",
     "eslint-plugin-storybook": "^10.2.7",
