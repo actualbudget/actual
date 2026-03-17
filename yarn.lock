@@ -59,7 +59,7 @@ __metadata:
     "@storybook/addon-docs": "npm:^10.2.7"
     "@storybook/react-vite": "npm:^10.2.7"
     "@svgr/cli": "npm:^8.1.0"
-    "@types/react": "npm:^19.2.5"
+    "@types/react": "npm:^19.2.14"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
     "@vitejs/plugin-react": "npm:^6.0.0"
     eslint-plugin-storybook: "npm:^10.2.7"
@@ -95,7 +95,7 @@ __metadata:
     "@types/pegjs": "npm:^0.10.6"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
     absurd-sql: "npm:0.0.54"
-    adm-zip: "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch"
+    adm-zip: "npm:^0.5.16"
     assert: "npm:^2.1.0"
     better-sqlite3: "npm:^12.6.2"
     browserify-zlib: "npm:^0.2.0"
@@ -238,7 +238,7 @@ __metadata:
     "@types/lodash": "npm:^4"
     "@types/pikaday": "npm:^1.7.10"
     "@types/promise-retry": "npm:^1.1.6"
-    "@types/react": "npm:^19.2.5"
+    "@types/react": "npm:^19.2.14"
     "@types/react-dom": "npm:^19.2.3"
     "@types/react-modal": "npm:^3.16.3"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
@@ -10197,12 +10197,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^19.2.5":
+"@types/react@npm:*":
   version: 19.2.5
   resolution: "@types/react@npm:19.2.5"
   dependencies:
     csstype: "npm:^3.0.2"
   checksum: 10/31067648e1380f6ddade8f586c7ff54db89c1b11e23cb307fb69e5bfceae22105721568e2eec15be2af03e63bf5fb6da4284b8621447d20ade7b7afab043b945
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:^19.2.14":
+  version: 19.2.14
+  resolution: "@types/react@npm:19.2.14"
+  dependencies:
+    csstype: "npm:^3.2.2"
+  checksum: 10/fbff239089ee64b6bd9b00543594db498278b06de527ef1b0f71bb0eb09cc4445a71b5dd3c0d3d0257255c4eed94406be40a74ad4a987ade8a8d5dd65c82bc5f
   languageName: node
   linkType: hard
 
@@ -11340,13 +11349,6 @@ __metadata:
   version: 1.2.2
   resolution: "address@npm:1.2.2"
   checksum: 10/57d80a0c6ccadc8769ad3aeb130c1599e8aee86a8d25f671216c40df9b8489d6c3ef879bc2752b40d1458aa768f947c2d91e5b2fedfe63cf702c40afdfda9ba9
-  languageName: node
-  linkType: hard
-
-"adm-zip@npm:0.5.10":
-  version: 0.5.10
-  resolution: "adm-zip@npm:0.5.10"
-  checksum: 10/c5ab79b77114d8277f0cbfd6cca830198d6c7ee4971f6960f48e08cd2375953b11dc71729b7f396abd51d2d6cce8c862fad185ea90cb2c84ab5161c37ed1b099
   languageName: node
   linkType: hard
 
@@ -14280,6 +14282,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"csstype@npm:^3.2.2":
+  version: 3.2.3
+  resolution: "csstype@npm:3.2.3"
+  checksum: 10/ad41baf7e2ffac65ab544d79107bf7cd1a4bb9bab9ac3302f59ab4ba655d5e30942a8ae46e10ba160c6f4ecea464cc95b975ca2fefbdeeacd6ac63f12f99fe1f
+  languageName: node
+  linkType: hard
+
 "csv-parse@npm:^6.1.0":
   version: 6.1.0
   resolution: "csv-parse@npm:6.1.0"
@@ -15187,7 +15196,7 @@ __metadata:
     "@easyops-cn/docusaurus-search-local": "npm:^0.52.3"
     "@mdx-js/react": "npm:^3.1.1"
     "@r74tech/docusaurus-plugin-panzoom": "npm:^2.4.0"
-    "@types/react": "npm:^19.2.5"
+    "@types/react": "npm:^19.2.14"
     clsx: "npm:^2.1.1"
     prism-react-renderer: "npm:^2.4.1"
     react: "npm:^19.2.4"

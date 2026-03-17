@@ -1,9 +1,9 @@
 import React from 'react';
-import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgChartPie } from '@actual-app/components/icons/v1';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { css, cx } from '@emotion/css';
 

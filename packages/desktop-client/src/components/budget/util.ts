@@ -1,7 +1,6 @@
 // @ts-strict-ignore
-import type { CSSProperties } from 'react';
-
 import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { t } from 'i18next';
 
