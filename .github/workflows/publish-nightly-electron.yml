@@ -39,6 +39,9 @@ jobs:
           source .venv/bin/activate
           python3 -m pip install setuptools
 
+      - name: Set up environment
+        uses: ./.github/actions/setup
+
       - if: ${{ startsWith(matrix.os, 'ubuntu') }}
         name: Setup Flatpak dependencies
         run: |
@@ -56,8 +59,6 @@ jobs:
           VERSION=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts --package-json ./packages/desktop-electron/package.json --type nightly)
           sed -i "s/%RELEASE_VERSION%/$VERSION/g; s/%RELEASE_DATE%/$TODAY/g" "$METAINFO_FILE"
           flatpak run --command=flatpak-builder-lint org.flatpak.Builder appstream "$METAINFO_FILE"
-      - name: Set up environment
-        uses: ./.github/actions/setup
 
       - name: Update package versions
         run: |
