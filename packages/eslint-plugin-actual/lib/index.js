@@ -12,5 +12,6 @@ module.exports = {
     'prefer-const': require('./rules/prefer-const'),
     'no-anchor-tag': require('./rules/no-anchor-tag'),
     'no-react-default-import': require('./rules/no-react-default-import'),
+    'no-cross-package-imports': require('./rules/no-cross-package-imports'),
   },
 };
