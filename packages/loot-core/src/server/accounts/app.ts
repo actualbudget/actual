@@ -1,6 +1,7 @@
 import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
+import { type ImportTransactionsOpts } from '#types/api-handlers';
 import { captureException } from '../../platform/exceptions';
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as connection from '../../platform/server/connection';
@@ -37,7 +38,6 @@ import { undoable, withUndo } from '../undo';
 import * as link from './link';
 import { getStartingBalancePayee } from './payees';
 import * as bankSync from './sync';
-import { ImportTransactionsOpts } from '#types/api-handlers';
 
 // Shared base type for link account parameters
 type LinkAccountBaseParams = {
