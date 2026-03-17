@@ -57,6 +57,7 @@
     "lint": "oxfmt --check . && oxlint --type-aware --quiet",
     "lint:fix": "oxfmt . && oxlint --fix --type-aware --quiet",
     "install:server": "yarn workspaces focus @actual-app/sync-server --production",
+    "constraints": "yarn constraints",
     "typecheck": "tsgo -p tsconfig.root.json --noEmit && lage typecheck",
     "jq": "./node_modules/node-jq/bin/jq",
     "prepare": "husky"
@@ -66,6 +67,7 @@
     "@types/node": "^22.19.10",
     "@types/prompts": "^2.4.9",
     "@typescript/native-preview": "^7.0.0-dev.20260309.1",
+    "@yarnpkg/types": "^4.0.1",
     "baseline-browser-mapping": "^2.9.19",
     "cross-env": "^10.1.0",
     "eslint": "^9.39.2",
