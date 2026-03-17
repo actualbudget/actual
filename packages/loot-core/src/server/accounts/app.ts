@@ -1,7 +1,7 @@
 import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
-import { type ImportTransactionsOpts } from '#types/api-handlers';
+import type { ImportTransactionsOpts } from '#types/api-handlers';
 import { captureException } from '../../platform/exceptions';
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import * as connection from '../../platform/server/connection';
