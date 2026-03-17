@@ -22,10 +22,15 @@ void runClassic(
         code: 'import React from "react";',
         filename: 'packages/component-library/src/Button.tsx',
       },
-      // Relative imports are always allowed
+      // Relative imports within same package are allowed
       {
         code: 'import { helper } from "./utils";',
         filename: 'packages/component-library/src/Button.tsx',
+      },
+      // Relative import to parent within same package is allowed
+      {
+        code: 'import { helper } from "../../shared/utils";',
+        filename: 'packages/loot-core/src/server/deep/file.ts',
       },
       // Files outside packages/ are not checked
       {
@@ -109,6 +114,20 @@ void runClassic(
       {
         code: 'const web = require("@actual-app/web");',
         filename: 'packages/component-library/src/test.js',
+        errors: [
+          {
+            messageId: 'noCrossPackageImport',
+            data: {
+              currentPackage: '@actual-app/components',
+              importedPackage: '@actual-app/web',
+            },
+          },
+        ],
+      },
+      // Relative import crossing into another package is blocked
+      {
+        code: 'import * as theme from "../../desktop-client/src/style/themes/dark";',
+        filename: 'packages/component-library/.storybook/preview.tsx',
         errors: [
           {
             messageId: 'noCrossPackageImport',

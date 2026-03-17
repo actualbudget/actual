@@ -4,10 +4,12 @@ import type { Preview } from '@storybook/react-vite';
 
 // Not ideal to import from desktop-client, but we need a source of truth for theme variables
 // TODO: this needs refactoring
+// oxlint-disable actual/no-cross-package-imports -- intentional cross-package import, needs refactoring
 import * as darkTheme from '../../desktop-client/src/style/themes/dark';
 import * as developmentTheme from '../../desktop-client/src/style/themes/development';
 import * as lightTheme from '../../desktop-client/src/style/themes/light';
 import * as midnightTheme from '../../desktop-client/src/style/themes/midnight';
+// oxlint-enable actual/no-cross-package-imports
 
 const THEMES = {
   light: lightTheme,

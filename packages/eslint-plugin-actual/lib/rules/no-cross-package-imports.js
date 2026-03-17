@@ -1,8 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 
-// Module-level cache: packageDir -> { name: string, allowedDeps: Set<string> }
+// Module-level cache: packageDir -> { name: string, allowedDeps: Set<string>, dirName: string }
 const packageCache = new Map();
+
+// Reverse map: directory name -> package name (e.g. 'desktop-client' -> '@actual-app/web')
+const dirToPackageName = new Map();
 
 // Find monorepo root by walking up from this file's directory
 let monorepoRoot = null;
@@ -64,8 +67,13 @@ function getPackageInfo(filename) {
         }
       }
     }
-    const info = { name: pkgJson.name, allowedDeps: allowed };
+    const info = {
+      name: pkgJson.name,
+      allowedDeps: allowed,
+      dirName: packageDir,
+    };
     packageCache.set(packageDir, info);
+    dirToPackageName.set(packageDir, pkgJson.name);
     return info;
   } catch {
     return null;
@@ -81,13 +89,42 @@ function extractActualPackageName(importSource) {
   return match ? match[1] : null;
 }
 
+/**
+ * For a relative import, resolves which packages/<dir> it lands in.
+ * Returns the target directory name if it crosses into a different package, null otherwise.
+ */
+function resolveRelativeCrossPackage(importSource, filename, currentDirName) {
+  if (!importSource.startsWith('.')) return null;
+
+  const fileDir = path.dirname(filename).replace(/\\/g, '/');
+  const resolved = path.posix.normalize(path.posix.join(fileDir, importSource));
+  const match = resolved.match(/packages\/([^/]+)\//);
+  if (!match) return null;
+
+  const targetDir = match[1];
+  if (targetDir === currentDirName) return null;
+
+  return targetDir;
+}
+
+/**
+ * Gets the package name for a directory, loading its package.json if needed.
+ */
+function getPackageNameForDir(targetDir) {
+  if (dirToPackageName.has(targetDir)) return dirToPackageName.get(targetDir);
+
+  // Force loading the package info which populates dirToPackageName
+  const info = getPackageInfo(`packages/${targetDir}/dummy.ts`);
+  return info ? info.name : null;
+}
+
 /** @type {import('eslint').Rule.RuleModule} */
 module.exports = {
   meta: {
     type: 'problem',
     docs: {
       description:
-        'Disallow importing @actual-app/* packages not declared as dependencies in package.json',
+        'Disallow importing from other packages unless declared as a dependency in package.json',
     },
     fixable: null,
     schema: [],
@@ -107,21 +144,42 @@ module.exports = {
     function checkImportSource(node, source) {
       if (typeof source !== 'string') return;
 
+      // Check @actual-app/* imports
       const importedPackage = extractActualPackageName(source);
-      if (!importedPackage) return;
+      if (importedPackage) {
+        if (importedPackage === pkgInfo.name) return;
 
-      // Self-import is allowed
-      if (importedPackage === pkgInfo.name) return;
+        if (!pkgInfo.allowedDeps.has(importedPackage)) {
+          context.report({
+            node,
+            messageId: 'noCrossPackageImport',
+            data: {
+              currentPackage: pkgInfo.name,
+              importedPackage,
+            },
+          });
+        }
+        return;
+      }
 
-      if (!pkgInfo.allowedDeps.has(importedPackage)) {
-        context.report({
-          node,
-          messageId: 'noCrossPackageImport',
-          data: {
-            currentPackage: pkgInfo.name,
-            importedPackage,
-          },
-        });
+      // Check relative imports that cross package boundaries
+      const targetDir = resolveRelativeCrossPackage(
+        source,
+        filename,
+        pkgInfo.dirName,
+      );
+      if (targetDir) {
+        const targetPkgName = getPackageNameForDir(targetDir) || targetDir;
+        if (!pkgInfo.allowedDeps.has(targetPkgName)) {
+          context.report({
+            node,
+            messageId: 'noCrossPackageImport',
+            data: {
+              currentPackage: pkgInfo.name,
+              importedPackage: targetPkgName,
+            },
+          });
+        }
       }
     }
 
