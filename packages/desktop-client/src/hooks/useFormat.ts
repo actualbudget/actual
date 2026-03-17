@@ -57,12 +57,19 @@ function format(
     case 'number':
       if (typeof value !== 'number') {
         throw new Error(
-          'Value is not a number (' + typeof value + '): ' + value,
+          'Value is not a number (' +
+            typeof value +
+            '): ' +
+            (typeof value === 'object' ? JSON.stringify(value) : String(value)),
         );
       }
       return { numericValue: value, formattedString: formatter.format(value) };
     case 'percentage':
-      return { formattedString: value + '%' };
+      return {
+        formattedString:
+          (typeof value === 'object' ? JSON.stringify(value) : String(value)) +
+          '%',
+      };
     case 'financial-with-sign':
     case 'financial-no-decimals':
     case 'financial': {
@@ -89,7 +96,12 @@ function format(
 
       if (typeof localValue !== 'number') {
         throw new Error(
-          'Value is not a number (' + typeof localValue + '): ' + localValue,
+          'Value is not a number (' +
+            typeof localValue +
+            '): ' +
+            (typeof localValue === 'object'
+              ? JSON.stringify(localValue)
+              : String(localValue)),
         );
       }
 
@@ -116,18 +128,12 @@ export function useFormat(): UseFormatResult {
     'currencySpaceBetweenAmountAndSymbol',
   );
 
-  const activeCurrency = useMemo(() => {
-    return getCurrency(defaultCurrencyCodePref || '');
-  }, [defaultCurrencyCodePref]);
+  const activeCurrency = getCurrency(defaultCurrencyCodePref || '');
 
-  const numberFormatConfig = useMemo(
-    () =>
-      parseNumberFormat({
-        format: numberFormatPref,
-        hideFraction: hideFractionPref === 'true',
-      }),
-    [numberFormatPref, hideFractionPref],
-  );
+  const numberFormatConfig = parseNumberFormat({
+    format: numberFormatPref,
+    hideFraction: hideFractionPref === 'true',
+  });
 
   // Hack: keep the global number format in sync - update the settings when
   // the underlying configuration changes.
@@ -137,147 +143,124 @@ export function useFormat(): UseFormatResult {
     setNumberFormat(numberFormatConfig);
   }, [numberFormatConfig]);
 
-  const applyCurrencyStyling = useCallback(
-    (formattedNumericValue: string, currencySymbol: string): string => {
-      if (!currencySymbol) {
-        return formattedNumericValue;
+  function applyCurrencyStyling(
+    formattedNumericValue: string,
+    currencySymbol: string,
+  ): string {
+    if (!currencySymbol) {
+      return formattedNumericValue;
+    }
+
+    let sign = '';
+    let valueWithoutSign = formattedNumericValue;
+    if (formattedNumericValue.startsWith('-')) {
+      sign = '-';
+      valueWithoutSign = formattedNumericValue.slice(1);
+    }
+
+    const space = spaceEnabledPref === 'true' ? '\u202F' : '';
+    const position = symbolPositionPref || 'before';
+
+    const styledAmount =
+      position === 'after'
+        ? `${valueWithoutSign}${space}${currencySymbol}`
+        : `\u202A${currencySymbol}\u202C${space}${valueWithoutSign}`;
+
+    return sign + styledAmount;
+  }
+
+  function formatDisplay(value: unknown, type: FormatType = 'string'): string {
+    const isFinancialType =
+      type === 'financial' ||
+      type === 'financial-with-sign' ||
+      type === 'financial-no-decimals';
+
+    let displayDecimalPlaces: number | undefined;
+
+    if (isFinancialType) {
+      if (type === 'financial-no-decimals' || hideFractionPref === 'true') {
+        displayDecimalPlaces = 0;
+      } else {
+        displayDecimalPlaces = activeCurrency.decimalPlaces;
       }
+    }
 
-      let sign = '';
-      let valueWithoutSign = formattedNumericValue;
-      if (formattedNumericValue.startsWith('-')) {
-        sign = '-';
-        valueWithoutSign = formattedNumericValue.slice(1);
-      }
+    const intlFormatter = getNumberFormat({
+      format: numberFormatConfig.format,
+      decimalPlaces: displayDecimalPlaces,
+    }).formatter;
 
-      const space = spaceEnabledPref === 'true' ? '\u202F' : '';
-      const position = symbolPositionPref || 'before';
-
-      const styledAmount =
-        position === 'after'
-          ? `${valueWithoutSign}${space}${currencySymbol}`
-          : `\u202A${currencySymbol}\u202C${space}${valueWithoutSign}`;
-
-      return sign + styledAmount;
-    },
-    [symbolPositionPref, spaceEnabledPref],
-  );
-
-  const formatDisplay = useCallback(
-    (value: unknown, type: FormatType = 'string'): string => {
-      const isFinancialType =
-        type === 'financial' ||
-        type === 'financial-with-sign' ||
-        type === 'financial-no-decimals';
-
-      let displayDecimalPlaces: number | undefined;
-
-      if (isFinancialType) {
-        if (type === 'financial-no-decimals' || hideFractionPref === 'true') {
-          displayDecimalPlaces = 0;
-        } else {
-          displayDecimalPlaces = activeCurrency.decimalPlaces;
-        }
-      }
-
-      const intlFormatter = getNumberFormat({
-        format: numberFormatConfig.format,
-        decimalPlaces: displayDecimalPlaces,
-      }).formatter;
-
-      const { numericValue, formattedString } = format(
-        value,
-        type,
-        intlFormatter,
-        activeCurrency.decimalPlaces,
-      );
-
-      let styledValue = formattedString;
-      if (isFinancialType && activeCurrency && activeCurrency.code !== '') {
-        styledValue = applyCurrencyStyling(
-          formattedString,
-          activeCurrency.symbol,
-        );
-      }
-
-      if (
-        type === 'financial-with-sign' &&
-        numericValue != null &&
-        numericValue >= 0
-      ) {
-        return '+' + styledValue;
-      }
-      return styledValue;
-    },
-    [
-      activeCurrency,
-      numberFormatConfig,
-      applyCurrencyStyling,
-      hideFractionPref,
-    ],
-  );
-
-  const toAmount = useCallback(
-    (value: number) => integerToAmount(value, activeCurrency.decimalPlaces),
-    [activeCurrency.decimalPlaces],
-  );
-
-  const fromAmount = useCallback(
-    (value: number) => amountToInteger(value, activeCurrency.decimalPlaces),
-    [activeCurrency.decimalPlaces],
-  );
-
-  const forEdit = useCallback(
-    (value: IntegerAmount) => {
-      const amount = toAmount(value);
-      const decimalPlaces =
-        hideFractionPref === 'true' ? 0 : activeCurrency.decimalPlaces;
-      const editFormatter = getNumberFormat({
-        format: numberFormatConfig.format,
-        decimalPlaces,
-      }).formatter;
-      return editFormatter.format(amount);
-    },
-    [
-      toAmount,
-      hideFractionPref,
+    const { numericValue, formattedString } = format(
+      value,
+      type,
+      intlFormatter,
       activeCurrency.decimalPlaces,
-      numberFormatConfig.format,
-    ],
-  );
+    );
 
-  const fromEdit = useCallback(
-    (
-      value: string,
-      defaultValue: number | null = null,
-    ): IntegerAmount | null => {
-      if (value == null) {
-        return defaultValue;
-      }
+    let styledValue = formattedString;
+    if (isFinancialType && activeCurrency && activeCurrency.code !== '') {
+      styledValue = applyCurrencyStyling(
+        formattedString,
+        activeCurrency.symbol,
+      );
+    }
 
-      const trimmed = value.trim();
-      if (trimmed === '') {
-        return defaultValue;
-      }
+    if (
+      type === 'financial-with-sign' &&
+      numericValue != null &&
+      numericValue >= 0
+    ) {
+      return '+' + styledValue;
+    }
+    return styledValue;
+  }
 
-      // strip directional formatting characters and letters
-      const normalized = trimmed
-        .replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '')
-        .replace(/\p{L}+/gu, '');
-      let numericValue: number | null = evalArithmetic(normalized, null);
+  const toAmount = (value: number) =>
+    integerToAmount(value, activeCurrency.decimalPlaces);
 
-      if (numericValue === null || isNaN(numericValue)) {
-        numericValue = currencyToAmount(normalized);
-      }
+  const fromAmount = (value: number) =>
+    amountToInteger(value, activeCurrency.decimalPlaces);
 
-      if (numericValue !== null && !isNaN(numericValue)) {
-        return fromAmount(numericValue);
-      }
+  function forEdit(value: IntegerAmount) {
+    const amount = toAmount(value);
+    const decimalPlaces =
+      hideFractionPref === 'true' ? 0 : activeCurrency.decimalPlaces;
+    const editFormatter = getNumberFormat({
+      format: numberFormatConfig.format,
+      decimalPlaces,
+    }).formatter;
+    return editFormatter.format(amount);
+  }
 
+  function fromEdit(
+    value: string,
+    defaultValue: number | null = null,
+  ): IntegerAmount | null {
+    if (value == null) {
       return defaultValue;
-    },
-    [fromAmount],
-  );
+    }
+
+    const trimmed = value.trim();
+    if (trimmed === '') {
+      return defaultValue;
+    }
+
+    // strip directional formatting characters and letters
+    const normalized = trimmed
+      .replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '')
+      .replace(/\p{L}+/gu, '');
+    let numericValue: number | null = evalArithmetic(normalized, null);
+
+    if (numericValue === null || isNaN(numericValue)) {
+      numericValue = currencyToAmount(normalized);
+    }
+
+    if (numericValue !== null && !isNaN(numericValue)) {
+      return fromAmount(numericValue);
+    }
+
+    return defaultValue;
+  }
 
   return Object.assign(formatDisplay, {
     forEdit,

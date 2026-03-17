@@ -269,12 +269,19 @@ function SingleAutocomplete<T extends AutocompleteItem>({
         }
       : {};
 
+  const originalStyle = inputProps.style;
   inputProps = {
     ...inputProps,
-    style: {
-      ...narrowInputStyle,
-      ...inputProps.style,
-    },
+    style:
+      typeof originalStyle === 'function'
+        ? renderProps => ({
+            ...narrowInputStyle,
+            ...originalStyle(renderProps),
+          })
+        : {
+            ...narrowInputStyle,
+            ...originalStyle,
+          },
   };
 
   // Update the selected item if the suggestion list or initial

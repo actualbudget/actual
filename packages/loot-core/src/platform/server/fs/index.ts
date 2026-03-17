@@ -409,7 +409,7 @@ export const removeDirRecursively = async function (dirpath) {
   }
 };
 
-export const getModifiedTime = async (filepath: string): Promise<Date> => {
+export const getModifiedTime = async (_filepath: string): Promise<Date> => {
   throw new Error(
     'getModifiedTime not supported on the web (only used for backups)',
   );
