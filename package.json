@@ -88,6 +88,7 @@
     "typescript": "^5.9.3"
   },
   "resolutions": {
+    "adm-zip": "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch",
     "rollup": "4.40.1",
     "socks": ">=2.8.3"
   },

@@ -55,12 +55,13 @@
     "@svgr/cli": "^8.1.0",
     "@types/react": "^19.2.5",
     "@typescript/native-preview": "^7.0.0-dev.20260309.1",
+    "@vitejs/plugin-react": "^6.0.0",
     "eslint-plugin-storybook": "^10.2.7",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "storybook": "^10.2.7",
-    "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^4.0.18"
+    "vite": "^8.0.0",
+    "vitest": "^4.1.0"
   },
   "peerDependencies": {
     "react": ">=19.2",
