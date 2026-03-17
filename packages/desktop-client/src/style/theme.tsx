@@ -3,7 +3,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { isNonProductionEnvironment } from 'loot-core/shared/environment';
 import type { DarkTheme, Theme } from 'loot-core/types/prefs';
 
-import { parseInstalledTheme, validateThemeCss } from './customThemes';
+import {
+  type BaseTheme,
+  parseInstalledTheme,
+  validateThemeCss,
+} from './customThemes';
 import * as darkTheme from './themes/dark';
 import * as developmentTheme from './themes/development';
 import * as lightTheme from './themes/light';
@@ -44,9 +48,20 @@ export function usePreferredDarkTheme() {
   return [darkTheme, setDarkTheme] as const;
 }
 
+function getBaseThemeColors(baseTheme: BaseTheme) {
+  return themes[baseTheme]?.colors;
+}
+
 export function ThemeStyle() {
   const [activeTheme] = useTheme();
   const [darkThemePreference] = usePreferredDarkTheme();
+  const customThemesEnabled = useFeatureFlag('customThemes');
+  const [installedCustomLightThemeJson] = useGlobalPref(
+    'installedCustomLightTheme',
+  );
+  const [installedCustomDarkThemeJson] = useGlobalPref(
+    'installedCustomDarkTheme',
+  );
   const [themeColors, setThemeColors] = useState<
     | typeof lightTheme
     | typeof darkTheme
@@ -57,13 +72,27 @@ export function ThemeStyle() {
 
   useEffect(() => {
     if (activeTheme === 'auto') {
-      const darkTheme = themes[darkThemePreference];
+      const installedLight = customThemesEnabled
+        ? parseInstalledTheme(installedCustomLightThemeJson)
+        : null;
+      const installedDark = customThemesEnabled
+        ? parseInstalledTheme(installedCustomDarkThemeJson)
+        : null;
+
+      const lightColors =
+        (installedLight?.baseTheme &&
+          getBaseThemeColors(installedLight.baseTheme)) ||
+        themes['light'].colors;
+      const darkColors =
+        (installedDark?.baseTheme &&
+          getBaseThemeColors(installedDark.baseTheme)) ||
+        themes[darkThemePreference].colors;
 
       function darkThemeMediaQueryListener(event: MediaQueryListEvent) {
         if (event.matches) {
-          setThemeColors(darkTheme.colors);
+          setThemeColors(darkColors);
         } else {
-          setThemeColors(themes['light'].colors);
+          setThemeColors(lightColors);
         }
       }
       const darkThemeMediaQuery = window.matchMedia(
@@ -76,9 +105,9 @@ export function ThemeStyle() {
       );
 
       if (darkThemeMediaQuery.matches) {
-        setThemeColors(darkTheme.colors);
+        setThemeColors(darkColors);
       } else {
-        setThemeColors(themes['light'].colors);
+        setThemeColors(lightColors);
       }
 
       return () => {
@@ -88,9 +117,25 @@ export function ThemeStyle() {
         );
       };
     } else {
-      setThemeColors(themes[activeTheme as ThemeKey]?.colors);
+      const installedTheme = customThemesEnabled
+        ? parseInstalledTheme(installedCustomLightThemeJson)
+        : null;
+      if (installedTheme?.baseTheme) {
+        setThemeColors(
+          getBaseThemeColors(installedTheme.baseTheme) ??
+            themes[activeTheme as ThemeKey]?.colors,
+        );
+      } else {
+        setThemeColors(themes[activeTheme as ThemeKey]?.colors);
+      }
     }
-  }, [activeTheme, darkThemePreference]);
+  }, [
+    activeTheme,
+    darkThemePreference,
+    customThemesEnabled,
+    installedCustomLightThemeJson,
+    installedCustomDarkThemeJson,
+  ]);
 
   if (!themeColors) return null;
 
@@ -128,7 +173,10 @@ export function CustomThemeStyle() {
 
       if (lightTheme?.cssContent) {
         try {
-          const validated = validateThemeCss(lightTheme.cssContent);
+          let validated = validateThemeCss(lightTheme.cssContent);
+          if (lightTheme.overrideCss) {
+            validated += '\n' + validateThemeCss(lightTheme.overrideCss);
+          }
           css += `@media (prefers-color-scheme: light) { ${validated} }\n`;
         } catch (error) {
           console.error('Invalid custom light theme CSS', { error });
@@ -137,7 +185,10 @@ export function CustomThemeStyle() {
 
       if (darkTheme?.cssContent) {
         try {
-          const validated = validateThemeCss(darkTheme.cssContent);
+          let validated = validateThemeCss(darkTheme.cssContent);
+          if (darkTheme.overrideCss) {
+            validated += '\n' + validateThemeCss(darkTheme.overrideCss);
+          }
           css += `@media (prefers-color-scheme: dark) { ${validated} }\n`;
         } catch (error) {
           console.error('Invalid custom dark theme CSS', { error });
@@ -148,12 +199,16 @@ export function CustomThemeStyle() {
     }
 
     const installedTheme = parseInstalledTheme(installedCustomLightThemeJson);
-    const { cssContent } = installedTheme ?? {};
+    const { cssContent, overrideCss } = installedTheme ?? {};
 
     if (!cssContent) return null;
 
     try {
-      return validateThemeCss(cssContent);
+      let validated = validateThemeCss(cssContent);
+      if (overrideCss) {
+        validated += '\n' + validateThemeCss(overrideCss);
+      }
+      return validated;
     } catch (error) {
       console.error('Invalid custom theme CSS', { error, cssContent });
       return null;

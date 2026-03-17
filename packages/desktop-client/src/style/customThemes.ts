@@ -9,11 +9,16 @@ export type CatalogTheme = {
   mode: 'dark' | 'light';
 };
 
+export const BASE_THEME_OPTIONS = ['light', 'dark', 'midnight'] as const;
+export type BaseTheme = (typeof BASE_THEME_OPTIONS)[number];
+
 export type InstalledTheme = {
   id: string;
   name: string;
   repo: string;
   cssContent: string; // CSS content stored when theme is installed (required)
+  baseTheme?: BaseTheme; // Which built-in theme to use as base (defaults to contextual theme)
+  overrideCss?: string; // Additional free-text CSS overrides on top of cssContent
 };
 
 /**
@@ -303,12 +308,24 @@ export function parseInstalledTheme(
       typeof parsed.repo === 'string' &&
       typeof parsed.cssContent === 'string'
     ) {
-      return {
+      const result: InstalledTheme = {
         id: parsed.id,
         name: parsed.name,
         repo: parsed.repo,
         cssContent: parsed.cssContent,
-      } satisfies InstalledTheme;
+      };
+      if (
+        typeof parsed.baseTheme === 'string' &&
+        BASE_THEME_OPTIONS.includes(
+          parsed.baseTheme as (typeof BASE_THEME_OPTIONS)[number],
+        )
+      ) {
+        result.baseTheme = parsed.baseTheme as BaseTheme;
+      }
+      if (typeof parsed.overrideCss === 'string' && parsed.overrideCss) {
+        result.overrideCss = parsed.overrideCss;
+      }
+      return result;
     }
     return null;
   } catch {
