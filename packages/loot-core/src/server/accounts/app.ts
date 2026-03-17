@@ -37,6 +37,7 @@ import { undoable, withUndo } from '../undo';
 import * as link from './link';
 import { getStartingBalancePayee } from './payees';
 import * as bankSync from './sync';
+import { ImportTransactionsOpts } from '#types/api-handlers';
 
 // Shared base type for link account parameters
 type LinkAccountBaseParams = {
@@ -1148,10 +1149,7 @@ async function importTransactions({
   accountId: AccountEntity['id'];
   transactions: ImportTransactionEntity[];
   isPreview: boolean;
-  opts?: {
-    defaultCleared?: boolean;
-    reimportDeleted?: boolean;
-  };
+  opts?: ImportTransactionsOpts;
 }): Promise<ImportTransactionsResult> {
   if (typeof accountId !== 'string') {
     throw APIError('transactions-import: accountId must be an id');
