@@ -52,6 +52,16 @@ void runClassic(
         code: 'const core = require("@actual-app/core");',
         filename: 'packages/desktop-client/src/test.js',
       },
+      // export { foo } from declared dep is allowed
+      {
+        code: 'export { something } from "@actual-app/core";',
+        filename: 'packages/desktop-client/src/index.ts',
+      },
+      // export * from declared dep is allowed
+      {
+        code: 'export * from "@actual-app/core";',
+        filename: 'packages/desktop-client/src/index.ts',
+      },
     ],
     invalid: [
       // @actual-app/components has no internal deps — cannot import @actual-app/core
@@ -82,13 +92,13 @@ void runClassic(
           },
         ],
       },
-      // @actual-app/core cannot import @actual-app/web
+      // @actual-app/core cannot import @actual-app/web (hard ban)
       {
         code: 'import { Component } from "@actual-app/web";',
         filename: 'packages/loot-core/src/server/main.ts',
         errors: [
           {
-            messageId: 'noCrossPackageImport',
+            messageId: 'hardBannedImport',
             data: {
               currentPackage: '@actual-app/core',
               importedPackage: '@actual-app/web',
@@ -133,6 +143,48 @@ void runClassic(
             messageId: 'noCrossPackageImport',
             data: {
               currentPackage: '@actual-app/components',
+              importedPackage: '@actual-app/web',
+            },
+          },
+        ],
+      },
+      // export * from undeclared dep is blocked
+      {
+        code: 'export * from "@actual-app/web";',
+        filename: 'packages/component-library/src/index.ts',
+        errors: [
+          {
+            messageId: 'noCrossPackageImport',
+            data: {
+              currentPackage: '@actual-app/components',
+              importedPackage: '@actual-app/web',
+            },
+          },
+        ],
+      },
+      // export { foo } from undeclared dep is blocked
+      {
+        code: 'export { Page } from "@actual-app/web";',
+        filename: 'packages/component-library/src/index.ts',
+        errors: [
+          {
+            messageId: 'noCrossPackageImport',
+            data: {
+              currentPackage: '@actual-app/components',
+              importedPackage: '@actual-app/web',
+            },
+          },
+        ],
+      },
+      // export * from @actual-app/web in loot-core triggers hard ban
+      {
+        code: 'export * from "@actual-app/web";',
+        filename: 'packages/loot-core/src/index.ts',
+        errors: [
+          {
+            messageId: 'hardBannedImport',
+            data: {
+              currentPackage: '@actual-app/core',
               importedPackage: '@actual-app/web',
             },
           },

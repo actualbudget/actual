@@ -27,28 +27,50 @@ function findMonorepoRoot() {
 }
 
 /**
+ * Computes a monorepo-root-relative path for reliable package detection.
+ * This avoids false matches when the checkout itself is under a directory named "packages/".
+ */
+function toMonorepoRelative(filename) {
+  const monoRoot = findMonorepoRoot();
+  if (!monoRoot) return null;
+
+  const normalized = filename.replace(/\\/g, '/');
+  const normalizedRoot = monoRoot.replace(/\\/g, '/');
+
+  if (normalized.startsWith(normalizedRoot + '/')) {
+    return normalized.substring(normalizedRoot.length + 1);
+  }
+
+  // For relative paths, try to resolve against monorepo root
+  const resolved = path.resolve(monoRoot, filename).replace(/\\/g, '/');
+  if (resolved.startsWith(normalizedRoot + '/')) {
+    return resolved.substring(normalizedRoot.length + 1);
+  }
+
+  return null;
+}
+
+/**
  * Finds the package info for a given filename by locating the nearest
- * packages/<dir>/package.json in the file path.
+ * packages/<dir>/package.json in the file path, anchored to the monorepo root.
  */
 function getPackageInfo(filename) {
-  const normalized = filename.replace(/\\/g, '/');
-  const match = normalized.match(/packages\/([^/]+)\//);
+  const relative = toMonorepoRelative(filename);
+  if (!relative) return null;
+
+  const match = relative.match(/^packages\/([^/]+)\//);
   if (!match) return null;
 
   const packageDir = match[1];
   if (packageCache.has(packageDir)) return packageCache.get(packageDir);
 
-  // Try to find package.json using the path as-is first (works for absolute paths)
-  const packagesIndex = normalized.indexOf('packages/' + packageDir + '/');
-  const root = normalized.substring(0, packagesIndex);
-  let pkgJsonPath = path.join(root, 'packages', packageDir, 'package.json');
-
-  // If not found (e.g. relative path with different cwd), use monorepo root
-  if (!fs.existsSync(pkgJsonPath)) {
-    const monoRoot = findMonorepoRoot();
-    if (!monoRoot) return null;
-    pkgJsonPath = path.join(monoRoot, 'packages', packageDir, 'package.json');
-  }
+  const monoRoot = findMonorepoRoot();
+  const pkgJsonPath = path.join(
+    monoRoot,
+    'packages',
+    packageDir,
+    'package.json',
+  );
 
   try {
     const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
@@ -96,9 +118,12 @@ function extractActualPackageName(importSource) {
 function resolveRelativeCrossPackage(importSource, filename, currentDirName) {
   if (!importSource.startsWith('.')) return null;
 
-  const fileDir = path.dirname(filename).replace(/\\/g, '/');
+  const relative = toMonorepoRelative(filename);
+  if (!relative) return null;
+
+  const fileDir = path.posix.dirname(relative);
   const resolved = path.posix.normalize(path.posix.join(fileDir, importSource));
-  const match = resolved.match(/packages\/([^/]+)\//);
+  const match = resolved.match(/^packages\/([^/]+)\//);
   if (!match) return null;
 
   const targetDir = match[1];
@@ -131,6 +156,8 @@ module.exports = {
     messages: {
       noCrossPackageImport:
         'Package "{{currentPackage}}" does not declare a dependency on "{{importedPackage}}". Add it to dependencies in package.json or remove the import.',
+      hardBannedImport:
+        'Package "{{currentPackage}}" must never import "{{importedPackage}}". This boundary is enforced unconditionally to keep {{currentPackage}} platform-agnostic.',
     },
   },
 
@@ -141,6 +168,15 @@ module.exports = {
     // Not inside a recognized package — nothing to check
     if (!pkgInfo) return {};
 
+    // Hard-banned import pairs: these are always forbidden regardless of package.json deps
+    const HARD_BANS = [{ from: '@actual-app/core', to: '@actual-app/web' }];
+
+    function isHardBanned(currentPkg, targetPkg) {
+      return HARD_BANS.some(
+        ban => ban.from === currentPkg && ban.to === targetPkg,
+      );
+    }
+
     function checkImportSource(node, source) {
       if (typeof source !== 'string') return;
 
@@ -148,6 +184,18 @@ module.exports = {
       const importedPackage = extractActualPackageName(source);
       if (importedPackage) {
         if (importedPackage === pkgInfo.name) return;
+
+        if (isHardBanned(pkgInfo.name, importedPackage)) {
+          context.report({
+            node,
+            messageId: 'hardBannedImport',
+            data: {
+              currentPackage: pkgInfo.name,
+              importedPackage,
+            },
+          });
+          return;
+        }
 
         if (!pkgInfo.allowedDeps.has(importedPackage)) {
           context.report({
@@ -170,6 +218,19 @@ module.exports = {
       );
       if (targetDir) {
         const targetPkgName = getPackageNameForDir(targetDir) || targetDir;
+
+        if (isHardBanned(pkgInfo.name, targetPkgName)) {
+          context.report({
+            node,
+            messageId: 'hardBannedImport',
+            data: {
+              currentPackage: pkgInfo.name,
+              importedPackage: targetPkgName,
+            },
+          });
+          return;
+        }
+
         if (!pkgInfo.allowedDeps.has(targetPkgName)) {
           context.report({
             node,
@@ -203,6 +264,20 @@ module.exports = {
       // Dynamic import()
       ImportExpression(node) {
         if (node.source.type === 'Literal') {
+          checkImportSource(node, node.source.value);
+        }
+      },
+
+      // export { foo } from '...'
+      ExportNamedDeclaration(node) {
+        if (node.source) {
+          checkImportSource(node, node.source.value);
+        }
+      },
+
+      // export * from '...'
+      ExportAllDeclaration(node) {
+        if (node.source) {
           checkImportSource(node, node.source.value);
         }
       },
