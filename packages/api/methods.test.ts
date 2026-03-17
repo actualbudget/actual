@@ -950,19 +950,15 @@ describe('API CRUD operations', () => {
     // Delete the transaction
     await api.deleteTransaction(result1.added[0]);
 
-    // Reimport the same transaction with reimportDeleted=true (default behavior)
-    const result2 = await api.importTransactions(
-      accountId,
-      [
-        {
-          date: '2023-11-03',
-          imported_id: 'reimport-test-2',
-          amount: 200,
-          account: accountId,
-        },
-      ],
-      { reimportDeleted: true },
-    );
+    // Reimport the same transaction relying on reimportDeleted=true default
+    const result2 = await api.importTransactions(accountId, [
+      {
+        date: '2023-11-03',
+        imported_id: 'reimport-test-2',
+        amount: 200,
+        account: accountId,
+      },
+    ]);
 
     // Should create a new transaction since deleted ones are ignored
     expect(result2.added).toHaveLength(1);
