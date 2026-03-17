@@ -491,10 +491,36 @@ export function DonutGraph({
                         setActiveRing('group');
                       }
                     }}
-                    onClick={(_, index) => {
+                    onClick={(item, index) => {
                       if (!canDeviceHover()) {
                         setActiveGroupIndex(index);
                         setActiveRing('group');
+                      }
+                      if (
+                        (canDeviceHover() || activeGroupIndex === index) &&
+                        ((compact && showTooltip) || !compact)
+                      ) {
+                        const groupCategoryIds = (
+                          data.groupedData?.find(g => g.id === item.id)
+                            ?.categories ?? []
+                        )
+                          .map(c => c.id)
+                          .filter((c): c is string => c != null);
+
+                        showActivity({
+                          navigate,
+                          categories,
+                          accounts,
+                          balanceTypeOp,
+                          filters,
+                          showHiddenCategories,
+                          showOffBudget,
+                          type: 'totals',
+                          startDate: data.startDate,
+                          endDate: data.endDate,
+                          field: 'category',
+                          id: groupCategoryIds,
+                        });
                       }
                     }}
                   />
@@ -650,10 +676,20 @@ export function DonutGraph({
                       setActiveIndex(index);
                     }
                     if (
-                      !['Group', 'Interval'].includes(groupBy) &&
+                      !['Interval'].includes(groupBy) &&
                       (canDeviceHover() || activeIndex === index) &&
                       ((compact && showTooltip) || !compact)
                     ) {
+                      const groupCategoryIds =
+                        groupBy === 'Group'
+                          ? (
+                              categories.grouped.find(g => g.id === item.id)
+                                ?.categories ?? []
+                            )
+                              .map(c => c.id)
+                              .filter((c): c is string => c != null)
+                          : undefined;
+
                       showActivity({
                         navigate,
                         categories,
@@ -665,8 +701,11 @@ export function DonutGraph({
                         type: 'totals',
                         startDate: data.startDate,
                         endDate: data.endDate,
-                        field: groupBy.toLowerCase(),
-                        id: item.id,
+                        field:
+                          groupBy === 'Group'
+                            ? 'category'
+                            : groupBy.toLowerCase(),
+                        id: groupBy === 'Group' ? groupCategoryIds : item.id,
                       });
                     }
                   }}
