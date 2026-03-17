@@ -234,7 +234,7 @@ const ActiveShapeDesktop = ({
   chartOuterRadius,
 }: ActiveShapeProps) => {
   const format = useFormat();
-  // Fix 2: guard against undefined payload.name and payload.date
+  // Fix 2: guard against undefined payload.name  and payload.date
   const yAxis = payload.name ?? payload.date ?? '';
   const sin = Math.sin(-RADIAN * midAngle);
   const cos = Math.cos(-RADIAN * midAngle);
