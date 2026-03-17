@@ -3,11 +3,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { isNonProductionEnvironment } from 'loot-core/shared/environment';
 import type { DarkTheme, Theme } from 'loot-core/types/prefs';
 
-import {
-  type BaseTheme,
-  parseInstalledTheme,
-  validateThemeCss,
-} from './customThemes';
+import { parseInstalledTheme, validateThemeCss } from './customThemes';
+import type { BaseTheme } from './customThemes';
 import * as darkTheme from './themes/dark';
 import * as developmentTheme from './themes/development';
 import * as lightTheme from './themes/light';

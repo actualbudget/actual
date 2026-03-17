@@ -2,15 +2,16 @@
  * Custom theme utilities: fetch, validation, and storage helpers.
  */
 
+export const BASE_THEME_OPTIONS = ['light', 'dark', 'midnight'] as const;
+export type BaseTheme = (typeof BASE_THEME_OPTIONS)[number];
+
 export type CatalogTheme = {
   name: string;
   repo: string;
   colors?: string[];
   mode: 'dark' | 'light';
+  baseTheme?: BaseTheme;
 };
-
-export const BASE_THEME_OPTIONS = ['light', 'dark', 'midnight'] as const;
-export type BaseTheme = (typeof BASE_THEME_OPTIONS)[number];
 
 export type InstalledTheme = {
   id: string;

@@ -62,10 +62,17 @@ export function ThemeInstaller({
     error: catalogError,
   } = useThemeCatalog();
 
-  // Initialize pastedCss with installed custom theme CSS if it exists
+  // Initialize state from installed theme
   useEffect(() => {
-    // If there's an installed theme with empty repo (custom pasted CSS), restore it
-    if (installedTheme && !installedTheme.repo) {
+    if (!installedTheme) return;
+
+    if (installedTheme.repo) {
+      // Catalog theme installed — restore overrideCss into text area if present
+      if (installedTheme.overrideCss) {
+        setPastedCss(installedTheme.overrideCss);
+      }
+    } else {
+      // Custom pasted CSS — restore into text area
       setPastedCss(installedTheme.cssContent);
     }
   }, [installedTheme]);
@@ -105,6 +112,7 @@ export function ThemeInstaller({
       id: string;
       errorMessage: string;
       catalogTheme?: CatalogTheme | null;
+      overrideCss?: string;
     }) => {
       setError(null);
       setErroringTheme(null);
@@ -115,13 +123,18 @@ export function ThemeInstaller({
           typeof options.css === 'string' ? options.css : await options.css;
         const validatedCss = validateThemeCss(css);
 
-        const installedTheme: InstalledTheme = {
+        const newTheme: InstalledTheme = {
           id: options.id,
           name: options.name,
           repo: options.repo,
           cssContent: validatedCss,
+          baseTheme: options.catalogTheme?.baseTheme,
         };
-        onInstall(installedTheme);
+        if (options.overrideCss) {
+          const validatedOverride = validateThemeCss(options.overrideCss);
+          newTheme.overrideCss = validatedOverride;
+        }
+        onInstall(newTheme);
         // Only set selectedCatalogTheme on success if it's a catalog theme
         if (options.catalogTheme) {
           setSelectedCatalogTheme(options.catalogTheme);
@@ -142,7 +155,6 @@ export function ThemeInstaller({
 
   const handleCatalogThemeClick = useCallback(
     async (theme: CatalogTheme) => {
-      setPastedCss('');
       setSelectedCatalogTheme(theme);
 
       const normalizedRepo = normalizeGitHubRepo(theme.repo);
@@ -153,14 +165,14 @@ export function ThemeInstaller({
         id: generateThemeId(normalizedRepo),
         errorMessage: t('Failed to load theme'),
         catalogTheme: theme,
+        overrideCss: pastedCss.trim() || undefined,
       });
     },
-    [installTheme, t],
+    [installTheme, pastedCss, t],
   );
 
   const handlePastedCssChange = useCallback((value: string) => {
     setPastedCss(value);
-    setSelectedCatalogTheme(null);
     setErroringTheme(null);
     setError(null);
   }, []);
@@ -168,14 +180,28 @@ export function ThemeInstaller({
   const handleInstallPastedCss = useCallback(() => {
     if (!pastedCss.trim()) return;
 
-    void installTheme({
-      css: pastedCss.trim(),
-      name: t('Custom Theme'),
-      repo: '',
-      id: generateThemeId(`pasted-${Date.now()}`),
-      errorMessage: t('Failed to validate theme CSS'),
-    });
-  }, [pastedCss, installTheme, t]);
+    if (selectedCatalogTheme) {
+      // Re-install the catalog theme with the pasted CSS as overrides
+      const normalizedRepo = normalizeGitHubRepo(selectedCatalogTheme.repo);
+      void installTheme({
+        css: fetchThemeCss(selectedCatalogTheme.repo),
+        name: selectedCatalogTheme.name,
+        repo: normalizedRepo,
+        id: generateThemeId(normalizedRepo),
+        errorMessage: t('Failed to load theme'),
+        catalogTheme: selectedCatalogTheme,
+        overrideCss: pastedCss.trim(),
+      });
+    } else {
+      void installTheme({
+        css: pastedCss.trim(),
+        name: t('Custom Theme'),
+        repo: '',
+        id: generateThemeId(`pasted-${Date.now()}`),
+        errorMessage: t('Failed to validate theme CSS'),
+      });
+    }
+  }, [pastedCss, selectedCatalogTheme, installTheme, t]);
 
   return (
     <View
@@ -402,7 +428,11 @@ export function ThemeInstaller({
         }}
       >
         <Text style={{ marginBottom: 8, color: themeStyle.pageTextSubdued }}>
-          <Trans>or paste CSS directly:</Trans>
+          {selectedCatalogTheme ? (
+            <Trans>Additional CSS overrides:</Trans>
+          ) : (
+            <Trans>or paste CSS directly:</Trans>
+          )}
         </Text>
         <TextArea
           value={pastedCss}
