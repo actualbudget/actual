@@ -10,7 +10,6 @@ export type CatalogTheme = {
   repo: string;
   colors?: string[];
   mode: 'dark' | 'light';
-  baseTheme?: BaseTheme;
 };
 
 export type InstalledTheme = {

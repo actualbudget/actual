@@ -10,8 +10,7 @@
       "#fffef9",
       "#d4b896"
     ],
-    "mode": "light",
-    "baseTheme": "light"
+    "mode": "light"
   },
   {
     "name": "Shades of Coffee",
@@ -24,8 +23,7 @@
       "#604b39",
       "#c29670"
     ],
-    "mode": "light",
-    "baseTheme": "light"
+    "mode": "light"
   },
   {
     "name": "Miami Beach",
@@ -38,8 +36,7 @@
       "#f9deb8",
       "#1e9484"
     ],
-    "mode": "light",
-    "baseTheme": "light"
+    "mode": "light"
   },
   {
     "name": "Simple Dark",
@@ -52,8 +49,7 @@
       "#edbe5e",
       "#d9e2ec"
     ],
-    "mode": "dark",
-    "baseTheme": "dark"
+    "mode": "dark"
   },
   {
     "name": "Matrix",
@@ -66,8 +62,7 @@
       "#39ff14",
       "#00ff00"
     ],
-    "mode": "dark",
-    "baseTheme": "dark"
+    "mode": "dark"
   },
   {
     "name": "Black Gold",
@@ -80,8 +75,7 @@
       "#FFD700",
       "#8F7A20"
     ],
-    "mode": "dark",
-    "baseTheme": "dark"
+    "mode": "dark"
   },
   {
     "name": "Color-blind (Dark)",
@@ -94,8 +88,7 @@
       "#b88115",
       "#00304d"
     ],
-    "mode": "dark",
-    "baseTheme": "dark"
+    "mode": "dark"
   },
   {
     "name": "Theme from 1970",
@@ -108,8 +101,7 @@
       "#f4ebe7",
       "#dad18b"
     ],
-    "mode": "light",
-    "baseTheme": "light"
+    "mode": "light"
   },
   {
     "name": "Shades of Gray (light)",
@@ -122,8 +114,7 @@
       "#99ffff",
       "hsl(0, 0%, 35%)"
     ],
-    "mode": "light",
-    "baseTheme": "light"
+    "mode": "light"
   },
   {
     "name": "Catppuccin Latte",
@@ -136,8 +127,7 @@
       "#1e66f5",
       "#4c4f69"
     ],
-    "mode": "light",
-    "baseTheme": "light"
+    "mode": "light"
   },
   {
     "name": "Catppuccin Frappé",
@@ -150,8 +140,7 @@
       "#8caaee",
       "#c6d0f5"
     ],
-    "mode": "dark",
-    "baseTheme": "dark"
+    "mode": "dark"
   },
   {
     "name": "Catppuccin Macchiato",
@@ -164,8 +153,7 @@
       "#8aadf4",
       "#cad3f5"
     ],
-    "mode": "dark",
-    "baseTheme": "dark"
+    "mode": "dark"
   },
   {
     "name": "Catppuccin Mocha",
@@ -178,8 +166,7 @@
       "#89b4fa",
       "#cdd6f4"
     ],
-    "mode": "dark",
-    "baseTheme": "dark"
+    "mode": "dark"
   },
   {
     "name": "You Need A Dark Mode",
@@ -192,8 +179,7 @@
       "#D4D4D4",
       "#333333"
     ],
-    "mode": "dark",
-    "baseTheme": "dark"
+    "mode": "dark"
   },
   {
     "name": "Butterfly",
@@ -206,8 +192,7 @@
       "#E5E7EB",
       "#1B8366"
     ],
-    "mode": "dark",
-    "baseTheme": "dark"
+    "mode": "dark"
   },
   {
     "name": "High-contrast (Light)",
@@ -220,8 +205,7 @@
       "hsl(0, 0%, 90%)",
       "hsl(90, 100%, 17%)"
     ],
-    "mode": "light",
-    "baseTheme": "light"
+    "mode": "light"
   },
   {
     "name": "Notion Dark Mode",
@@ -234,7 +218,6 @@
       "#383838",
       "#f0efed"
     ],
-    "mode": "dark",
-    "baseTheme": "dark"
+    "mode": "dark"
   }
 ]

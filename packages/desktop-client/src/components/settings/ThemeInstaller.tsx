@@ -128,7 +128,7 @@ export function ThemeInstaller({
           name: options.name,
           repo: options.repo,
           cssContent: validatedCss,
-          baseTheme: options.catalogTheme?.baseTheme,
+          baseTheme: options.catalogTheme?.mode === 'dark' ? 'dark' : 'light',
         };
         if (options.overrideCss) {
           const validatedOverride = validateThemeCss(options.overrideCss);
