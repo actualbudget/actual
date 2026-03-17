@@ -1,0 +1,13 @@
+#!/bin/sh
+# Run yarn install when switching branches (if yarn.lock changed)
+
+# $3 is 1 for branch checkout, 0 for file checkout
+if [ "$3" != "1" ]; then
+  exit 0
+fi
+
+# Check if yarn.lock changed between the old and new HEAD
+if git diff --name-only "$1" "$2" | grep -q "^yarn.lock$"; then
+  echo "yarn.lock changed — running yarn install..."
+  yarn install
+fi
