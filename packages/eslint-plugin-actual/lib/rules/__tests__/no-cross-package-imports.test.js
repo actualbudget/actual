@@ -92,13 +92,13 @@ void runClassic(
           },
         ],
       },
-      // @actual-app/core cannot import @actual-app/web (hard ban)
+      // @actual-app/core cannot import @actual-app/web (not in its deps)
       {
         code: 'import { Component } from "@actual-app/web";',
         filename: 'packages/loot-core/src/server/main.ts',
         errors: [
           {
-            messageId: 'hardBannedImport',
+            messageId: 'noCrossPackageImport',
             data: {
               currentPackage: '@actual-app/core',
               importedPackage: '@actual-app/web',
@@ -176,13 +176,13 @@ void runClassic(
           },
         ],
       },
-      // export * from @actual-app/web in loot-core triggers hard ban
+      // export * from @actual-app/web in loot-core is blocked (not in its deps)
       {
         code: 'export * from "@actual-app/web";',
         filename: 'packages/loot-core/src/index.ts',
         errors: [
           {
-            messageId: 'hardBannedImport',
+            messageId: 'noCrossPackageImport',
             data: {
               currentPackage: '@actual-app/core',
               importedPackage: '@actual-app/web',

@@ -41,7 +41,7 @@ function toMonorepoRelative(filename) {
     return normalized.substring(normalizedRoot.length + 1);
   }
 
-  // For relative paths, try to resolve against monorepo root
+  // Resolve relative paths (e.g. from test harnesses) against monorepo root
   const resolved = path.resolve(monoRoot, filename).replace(/\\/g, '/');
   if (resolved.startsWith(normalizedRoot + '/')) {
     return resolved.substring(normalizedRoot.length + 1);
@@ -156,8 +156,6 @@ module.exports = {
     messages: {
       noCrossPackageImport:
         'Package "{{currentPackage}}" does not declare a dependency on "{{importedPackage}}". Add it to dependencies in package.json or remove the import.',
-      hardBannedImport:
-        'Package "{{currentPackage}}" must never import "{{importedPackage}}". This boundary is enforced unconditionally to keep {{currentPackage}} platform-agnostic.',
     },
   },
 
@@ -168,79 +166,32 @@ module.exports = {
     // Not inside a recognized package — nothing to check
     if (!pkgInfo) return {};
 
-    // Hard-banned import pairs: these are always forbidden regardless of package.json deps
-    const HARD_BANS = [{ from: '@actual-app/core', to: '@actual-app/web' }];
-
-    function isHardBanned(currentPkg, targetPkg) {
-      return HARD_BANS.some(
-        ban => ban.from === currentPkg && ban.to === targetPkg,
-      );
-    }
-
     function checkImportSource(node, source) {
       if (typeof source !== 'string') return;
 
-      // Check @actual-app/* imports
-      const importedPackage = extractActualPackageName(source);
-      if (importedPackage) {
-        if (importedPackage === pkgInfo.name) return;
-
-        if (isHardBanned(pkgInfo.name, importedPackage)) {
-          context.report({
-            node,
-            messageId: 'hardBannedImport',
-            data: {
-              currentPackage: pkgInfo.name,
-              importedPackage,
-            },
-          });
-          return;
-        }
-
-        if (!pkgInfo.allowedDeps.has(importedPackage)) {
-          context.report({
-            node,
-            messageId: 'noCrossPackageImport',
-            data: {
-              currentPackage: pkgInfo.name,
-              importedPackage,
-            },
-          });
-        }
-        return;
+      // Resolve the target package name from either @actual-app/* or relative imports
+      let importedPackage = extractActualPackageName(source);
+      if (!importedPackage) {
+        const targetDir = resolveRelativeCrossPackage(
+          source,
+          filename,
+          pkgInfo.dirName,
+        );
+        if (!targetDir) return;
+        importedPackage = getPackageNameForDir(targetDir) || targetDir;
       }
 
-      // Check relative imports that cross package boundaries
-      const targetDir = resolveRelativeCrossPackage(
-        source,
-        filename,
-        pkgInfo.dirName,
-      );
-      if (targetDir) {
-        const targetPkgName = getPackageNameForDir(targetDir) || targetDir;
+      if (importedPackage === pkgInfo.name) return;
 
-        if (isHardBanned(pkgInfo.name, targetPkgName)) {
-          context.report({
-            node,
-            messageId: 'hardBannedImport',
-            data: {
-              currentPackage: pkgInfo.name,
-              importedPackage: targetPkgName,
-            },
-          });
-          return;
-        }
-
-        if (!pkgInfo.allowedDeps.has(targetPkgName)) {
-          context.report({
-            node,
-            messageId: 'noCrossPackageImport',
-            data: {
-              currentPackage: pkgInfo.name,
-              importedPackage: targetPkgName,
-            },
-          });
-        }
+      if (!pkgInfo.allowedDeps.has(importedPackage)) {
+        context.report({
+          node,
+          messageId: 'noCrossPackageImport',
+          data: {
+            currentPackage: pkgInfo.name,
+            importedPackage,
+          },
+        });
       }
     }
 
