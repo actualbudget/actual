@@ -209,11 +209,11 @@ export function DiscoverSchedules() {
       name="schedules-discover"
       containerProps={{ style: { width: 850, height: 650 } }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Found Schedules')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <Paragraph>
             <Trans>
@@ -248,7 +248,7 @@ export function DiscoverSchedules() {
               isDisabled={selectedInst.items.size === 0}
               onPress={() => {
                 void onCreate();
-                close();
+                state.close();
               }}
             >
               <Trans>Create schedules</Trans>

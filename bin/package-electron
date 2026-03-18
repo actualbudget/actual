@@ -51,16 +51,16 @@ fi
 export NODE_OPTIONS="--max-old-space-size=4096"
 
 yarn workspace plugins-service build
-yarn workspace loot-core build:node
+yarn workspace @actual-app/core build:node
 yarn workspace @actual-app/web build --mode=desktop # electron specific build
 
 # required for running the sync-server server
-yarn workspace loot-core build:browser
+yarn workspace @actual-app/core build:browser
 yarn workspace @actual-app/web build:browser
 yarn workspace @actual-app/sync-server build
 
-# Emit loot-core declarations so desktop-electron (which includes typings/window.ts) can build
-yarn workspace loot-core exec tsc -p tsconfig.json
+# Emit @actual-app/core declarations so desktop-electron (which includes typings/window.ts) can build
+yarn workspace @actual-app/core exec tsgo -p tsconfig.json
 
 yarn workspace desktop-electron update-client
 

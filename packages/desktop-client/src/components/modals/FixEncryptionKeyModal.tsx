@@ -64,7 +64,7 @@ export function FixEncryptionKeyModal({
 
   return (
     <Modal name="fix-encryption-key">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={
@@ -72,7 +72,7 @@ export function FixEncryptionKeyModal({
                 ? t('Decrypt budget file')
                 : t('This file is encrypted')
             }
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View
             style={{
@@ -111,7 +111,7 @@ export function FixEncryptionKeyModal({
           <Form
             onSubmit={e => {
               e.preventDefault();
-              void onUpdateKey(close);
+              void onUpdateKey(() => state.close());
             }}
           >
             <View
@@ -164,7 +164,7 @@ export function FixEncryptionKeyModal({
                   height: isNarrowWidth ? styles.mobileMinHeight : undefined,
                   marginRight: 10,
                 }}
-                onPress={close}
+                onPress={() => state.close()}
               >
                 <Trans>Back</Trans>
               </Button>

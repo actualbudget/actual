@@ -3,26 +3,18 @@ import type {
   RequestInit as FetchInit,
 } from 'node-fetch';
 
-// loot-core types
-import type { InitConfig } from 'loot-core/server/main';
+import { init as initLootCore } from '@actual-app/core/server/main';
+import type { InitConfig, lib } from '@actual-app/core/server/main';
 
-// oxlint-disable-next-line typescript/ban-ts-comment
-// @ts-ignore: bundle not available until we build it
-import * as bundle from './app/bundle.api.js';
-import * as injected from './injected';
 import { validateNodeVersion } from './validateNodeVersion';
-
-let actualApp: null | typeof bundle.lib;
-export const internal = bundle.lib;
 
 export * from './methods';
 export * as utils from './utils';
 
-export async function init(config: InitConfig = {}) {
-  if (actualApp) {
-    return;
-  }
+/** @deprecated Please use return value of `init` instead */
+export let internal: typeof lib | null = null;
 
+export async function init(config: InitConfig = {}) {
   validateNodeVersion();
 
   if (!globalThis.fetch) {
@@ -33,21 +25,19 @@ export async function init(config: InitConfig = {}) {
     };
   }
 
-  await bundle.init(config);
-  actualApp = bundle.lib;
-
-  injected.override(bundle.lib.send);
-  return bundle.lib;
+  internal = await initLootCore(config);
+  return internal;
 }
 
 export async function shutdown() {
-  if (actualApp) {
+  if (internal) {
     try {
-      await actualApp.send('sync');
+      await internal.send('sync');
     } catch {
       // most likely that no budget is loaded, so the sync failed
     }
-    await actualApp.send('close-budget');
-    actualApp = null;
+
+    await internal.send('close-budget');
+    internal = null;
   }
 }

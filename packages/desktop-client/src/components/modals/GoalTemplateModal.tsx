@@ -17,11 +17,11 @@ export function GoalTemplateModal() {
 
   return (
     <Modal name="goal-templates" containerProps={{ style: { width: 850 } }}>
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Goal Templates')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View>
             <TableHeader>

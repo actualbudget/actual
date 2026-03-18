@@ -8,6 +8,7 @@ import { loadMappings } from '../db/mappings';
 import { loadRules, updateRule } from '../transactions/transaction-rules';
 
 import {
+  areConditionValuesEqual,
   createSchedule,
   deleteSchedule,
   setNextDate,
@@ -78,6 +79,49 @@ describe('schedule app', () => {
           },
         }),
       ).toBe('2020-12-30');
+    });
+
+    it('areConditionValuesEqual matches nested objects regardless of key order', () => {
+      expect(
+        areConditionValuesEqual(
+          {
+            value: {
+              start: '2020-12-20',
+              frequency: 'monthly',
+              patterns: [
+                { type: 'day', value: 15 },
+                { type: 'day', value: 30 },
+              ],
+            },
+            field: 'date',
+          },
+          {
+            field: 'date',
+            value: {
+              patterns: [
+                { value: 15, type: 'day' },
+                { value: 30, type: 'day' },
+              ],
+              frequency: 'monthly',
+              start: '2020-12-20',
+            },
+          },
+        ),
+      ).toBe(true);
+    });
+
+    it('areConditionValuesEqual returns false for different array ordering', () => {
+      expect(
+        areConditionValuesEqual(
+          [{ field: 'date' }, { field: 'account' }],
+          [{ field: 'account' }, { field: 'date' }],
+        ),
+      ).toBe(false);
+    });
+
+    it('areConditionValuesEqual distinguishes nullish values', () => {
+      expect(areConditionValuesEqual(null, undefined)).toBe(false);
+      expect(areConditionValuesEqual(undefined, undefined)).toBe(true);
     });
   });
 
@@ -174,6 +218,85 @@ describe('schedule app', () => {
       // Updating the date condition updates `next_date`
       expect(row.next_date).toBe('2021-05-18');
       expect(row.posts_transaction).toBe(true);
+    });
+
+    it('updateSchedule does not update `next_date` when unrelated conditions change', async () => {
+      const id = await createSchedule({
+        conditions: [
+          { op: 'is', field: 'payee', value: 'foo' },
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: '2020-12-20',
+              frequency: 'monthly',
+              patterns: [
+                { type: 'day', value: 15 },
+                { type: 'day', value: 30 },
+              ],
+            },
+          },
+        ],
+      });
+
+      MockDate.set(new Date(2021, 4, 17));
+
+      await updateSchedule({
+        schedule: { id },
+        conditions: [{ op: 'is', field: 'payee', value: 'bar' }],
+      });
+
+      const {
+        data: [row],
+      } = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
+
+      expect(row.next_date).toBe('2020-12-30');
+    });
+
+    it('updateSchedule ignores the condition `type` field when date value is unchanged', async () => {
+      const id = await createSchedule({
+        conditions: [
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: '2020-12-20',
+              frequency: 'monthly',
+              patterns: [
+                { type: 'day', value: 15 },
+                { type: 'day', value: 30 },
+              ],
+            },
+          },
+        ],
+      });
+
+      MockDate.set(new Date(2021, 4, 17));
+
+      await updateSchedule({
+        schedule: { id },
+        conditions: [
+          {
+            op: 'is',
+            field: 'date',
+            type: 'date',
+            value: {
+              start: '2020-12-20',
+              frequency: 'monthly',
+              patterns: [
+                { type: 'day', value: 15 },
+                { type: 'day', value: 30 },
+              ],
+            },
+          },
+        ],
+      });
+
+      const {
+        data: [row],
+      } = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
+
+      expect(row.next_date).toBe('2020-12-30');
     });
 
     it('deleteSchedule deletes a schedule', async () => {

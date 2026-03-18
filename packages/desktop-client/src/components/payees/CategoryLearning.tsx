@@ -23,11 +23,11 @@ export function CategoryLearning() {
       name="payee-category-learning"
       containerProps={{ style: { width: 600 } }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Category Learning')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <Paragraph>
             <Trans>

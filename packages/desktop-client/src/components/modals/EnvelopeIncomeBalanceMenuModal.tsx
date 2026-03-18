@@ -54,11 +54,11 @@ export function EnvelopeIncomeBalanceMenuModal({
 
   return (
     <Modal name="envelope-income-balance-menu">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={<ModalTitle title={category.name} shrinkOnOverflow />}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View
             style={{
@@ -117,7 +117,7 @@ export function EnvelopeIncomeBalanceMenuModal({
                   onShowActivity?.();
                   break;
                 default:
-                  throw new Error(`Unrecognized menu option: ${name}`);
+                  throw new Error(`Unrecognized menu option: ${String(name)}`);
               }
             }}
             items={[

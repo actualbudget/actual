@@ -7,6 +7,7 @@ import type {
 } from 'react';
 
 import { Button } from '@actual-app/components/button';
+import type { CSSProperties as EmotionCSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -167,7 +168,9 @@ type FocusableAmountInputProps = Omit<AmountInputProps, 'onFocus'> & {
   focused?: boolean;
   disabled?: boolean;
   focusedStyle?: CSSProperties;
-  buttonProps?: ComponentPropsWithRef<typeof Button>;
+  buttonProps?: Omit<ComponentPropsWithRef<typeof Button>, 'style'> & {
+    style?: EmotionCSSProperties;
+  };
   onFocus?: () => void;
 };
 

@@ -128,7 +128,7 @@ export function SelectLinkedAccountsModal({
             externalAccounts: toSort as SyncServerGoCardlessAccount[],
           };
         default:
-          throw new Error(`Unrecognized sync source: ${syncSource}`);
+          throw new Error(`Unrecognized sync source: ${String(syncSource)}`);
       }
     }, [externalAccounts, syncSource, requisitionId]);
 
@@ -347,13 +347,13 @@ export function SelectLinkedAccountsModal({
           : { width: 1000 },
       }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <View
           style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
         >
           <ModalHeader
             title={t('Link Accounts')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
 
           <View

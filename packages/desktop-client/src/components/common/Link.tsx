@@ -17,8 +17,12 @@ type TextLinkProps = {
   children?: ReactNode;
 };
 
-type ButtonLinkProps = Omit<ComponentProps<typeof Button>, 'variant'> & {
+type ButtonLinkProps = Omit<
+  ComponentProps<typeof Button>,
+  'variant' | 'style'
+> & {
   buttonVariant?: ComponentProps<typeof Button>['variant'];
+  style?: CSSProperties;
   to?: string;
   activeStyle?: CSSProperties;
 };

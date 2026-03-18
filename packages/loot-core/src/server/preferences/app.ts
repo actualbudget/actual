@@ -99,10 +99,16 @@ async function saveGlobalPrefs(prefs: GlobalPrefs) {
       prefs.preferredDarkTheme,
     );
   }
-  if (prefs.installedCustomTheme !== undefined) {
+  if (prefs.installedCustomLightTheme !== undefined) {
     await asyncStorage.setItem(
       'installed-custom-theme',
-      prefs.installedCustomTheme,
+      prefs.installedCustomLightTheme,
+    );
+  }
+  if (prefs.installedCustomDarkTheme !== undefined) {
+    await asyncStorage.setItem(
+      'installed-custom-dark-theme',
+      prefs.installedCustomDarkTheme,
     );
   }
   if (prefs.serverSelfSignedCert !== undefined) {
@@ -133,7 +139,8 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     language,
     theme,
     'preferred-dark-theme': preferredDarkTheme,
-    'installed-custom-theme': installedCustomTheme,
+    'installed-custom-theme': installedCustomLightTheme,
+    'installed-custom-dark-theme': installedCustomDarkTheme,
     'server-self-signed-cert': serverSelfSignedCert,
     syncServerConfig,
     notifyWhenUpdateIsAvailable,
@@ -147,6 +154,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     'theme',
     'preferred-dark-theme',
     'installed-custom-theme',
+    'installed-custom-dark-theme',
     'server-self-signed-cert',
     'syncServerConfig',
     'notifyWhenUpdateIsAvailable',
@@ -170,7 +178,8 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
       preferredDarkTheme === 'dark' || preferredDarkTheme === 'midnight'
         ? preferredDarkTheme
         : 'dark',
-    installedCustomTheme: installedCustomTheme || undefined,
+    installedCustomLightTheme: installedCustomLightTheme || undefined,
+    installedCustomDarkTheme: installedCustomDarkTheme || undefined,
     serverSelfSignedCert: serverSelfSignedCert || undefined,
     syncServerConfig: syncServerConfig || undefined,
     notifyWhenUpdateIsAvailable:

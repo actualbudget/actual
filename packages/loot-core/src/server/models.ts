@@ -156,7 +156,7 @@ export const categoryGroupModel = {
       ...categoryGroupEntity,
       categories: categories
         .filter(category => category.cat_group === categoryGroup.id)
-        .map(categoryModel.fromDb),
+        .map(c => categoryModel.fromDb(c)),
     };
   },
 };

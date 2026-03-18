@@ -30,11 +30,11 @@ export function ConfirmUnlinkAccountModal({
       name="confirm-unlink-account"
       containerProps={{ style: { width: '30vw' } }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Confirm Unlink')} // Use translation for title
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ lineHeight: 1.5 }}>
             <Paragraph>
@@ -59,7 +59,7 @@ export function ConfirmUnlinkAccountModal({
                 justifyContent: 'flex-end',
               }}
             >
-              <Button style={{ marginRight: 10 }} onPress={close}>
+              <Button style={{ marginRight: 10 }} onPress={() => state.close()}>
                 <Trans>Cancel</Trans>
               </Button>
               <InitialFocus>
@@ -67,7 +67,7 @@ export function ConfirmUnlinkAccountModal({
                   variant="primary"
                   onPress={() => {
                     onUnlink();
-                    close();
+                    state.close();
                   }}
                 >
                   <Trans>Unlink</Trans>
