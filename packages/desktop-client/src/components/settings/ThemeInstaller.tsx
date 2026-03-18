@@ -178,8 +178,6 @@ export function ThemeInstaller({
   }, []);
 
   const handleInstallPastedCss = useCallback(() => {
-    if (!pastedCss.trim()) return;
-
     if (selectedCatalogTheme) {
       // Re-install the catalog theme with the pasted CSS as overrides
       const normalizedRepo = normalizeGitHubRepo(selectedCatalogTheme.repo);
@@ -190,9 +188,9 @@ export function ThemeInstaller({
         id: generateThemeId(normalizedRepo),
         errorMessage: t('Failed to load theme'),
         catalogTheme: selectedCatalogTheme,
-        overrideCss: pastedCss.trim(),
+        overrideCss: pastedCss.trim() || undefined,
       });
-    } else {
+    } else if (pastedCss.trim()) {
       void installTheme({
         css: pastedCss.trim(),
         name: t('Custom Theme'),
@@ -455,7 +453,7 @@ export function ThemeInstaller({
           <Button
             variant="normal"
             onPress={handleInstallPastedCss}
-            isDisabled={!pastedCss.trim() || isLoading}
+            isDisabled={isLoading}
           >
             <Trans>Apply</Trans>
           </Button>
