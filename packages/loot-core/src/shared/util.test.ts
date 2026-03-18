@@ -125,11 +125,12 @@ describe('utility functions', () => {
   test('number formatting works with apostrophe-dot format', () => {
     setNumberFormat({ format: 'apostrophe-dot', hideFraction: false });
     let formatter = getNumberFormat().formatter;
-    expect(formatter.format(Number('1234.56'))).toBe(`1\u2019234.56`);
+    // Node.js / ICU may output U+0027 (apostrophe) or U+2019 (right single quotation mark)
+    expect(formatter.format(Number('1234.56'))).toMatch(/^1['\u2019]234\.56$/);
 
     setNumberFormat({ format: 'apostrophe-dot', hideFraction: true });
     formatter = getNumberFormat().formatter;
-    expect(formatter.format(Number('1234.56'))).toBe(`1\u2019235`);
+    expect(formatter.format(Number('1234.56'))).toMatch(/^1['\u2019]235$/);
   });
 
   test('number formatting works with small negative numbers with 0 decimal places', () => {
