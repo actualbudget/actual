@@ -53,7 +53,7 @@ jobs:
 
       - name: Comment on PR with VRT report link
         if: steps.metadata.outputs.should_comment == 'true'
-        uses: marocchino/sticky-pull-request-comment@773744901bac0e8cbb5a0dc842800d45e9b2b405 # v2.9.4
+        uses: marocchino/sticky-pull-request-comment@70d2764d1a7d5d9560b100cbea0077fc8f633987 # v3.0.2
         with:
           number: ${{ steps.metadata.outputs.pr_number }}
           header: vrt-comment
