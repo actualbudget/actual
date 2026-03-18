@@ -11,9 +11,8 @@ on:
 
 env:
   IMAGES: |
-    actualbudget/actual-server
-    ghcr.io/actualbudget/actual-server
-    ghcr.io/actualbudget/actual
+    ghcr.io/${{ github.repository_owner }}/actual-server
+    ghcr.io/${{ github.repository_owner }}/actual
 
   # Creates the following tags:
   # - actual-server:latest (see docker/metadata-action flavor inputs, below)
@@ -56,12 +55,6 @@ jobs:
             latest=true
             suffix=-alpine,onlatest=true
           tags: ${{ env.TAGS }}
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0

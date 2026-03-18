@@ -17,7 +17,6 @@ permissions:
 
 env:
   IMAGES: |
-    ${{ !github.event.repository.fork && 'actualbudget/actual-server' || '' }}
     ghcr.io/${{ github.repository_owner }}/actual-server
     ghcr.io/${{ github.repository_owner }}/actual
 
@@ -29,7 +28,6 @@ env:
 
 jobs:
   build:
-    if: github.event_name == 'workflow_dispatch' || !github.event.repository.fork
     name: Build Docker image
     runs-on: ubuntu-latest
     strategy:
@@ -52,13 +50,6 @@ jobs:
           images: ${{ env.IMAGES }}
           flavor: ${{ matrix.os != 'ubuntu' && format('suffix=-{0}', matrix.os) || '' }}
           tags: ${{ env.TAGS }}
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
-        if: github.event_name != 'pull_request' && !github.event.repository.fork
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
