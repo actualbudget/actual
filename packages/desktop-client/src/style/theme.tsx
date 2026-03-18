@@ -1,11 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { isNonProductionEnvironment } from 'loot-core/shared/environment';
 import type { DarkTheme, Theme } from 'loot-core/types/prefs';
 
 import { parseInstalledTheme, validateThemeCss } from './customThemes';
 import * as darkTheme from './themes/dark';
-import * as developmentTheme from './themes/development';
 import * as lightTheme from './themes/light';
 import * as midnightTheme from './themes/midnight';
 
@@ -17,9 +15,6 @@ const themes = {
   dark: { name: 'Dark', colors: darkTheme },
   midnight: { name: 'Midnight', colors: midnightTheme },
   auto: { name: 'System default', colors: darkTheme },
-  ...(isNonProductionEnvironment() && {
-    development: { name: 'Development', colors: developmentTheme },
-  }),
 } as const;
 
 type ThemeKey = keyof typeof themes;
@@ -48,11 +43,7 @@ export function ThemeStyle() {
   const [activeTheme] = useTheme();
   const [darkThemePreference] = usePreferredDarkTheme();
   const [themeColors, setThemeColors] = useState<
-    | typeof lightTheme
-    | typeof darkTheme
-    | typeof midnightTheme
-    | typeof developmentTheme
-    | undefined
+    typeof lightTheme | typeof darkTheme | typeof midnightTheme | undefined
   >(undefined);
 
   useEffect(() => {

@@ -92,13 +92,7 @@ export type LocalPrefs = Partial<{
   'mobile.showSpentColumn': boolean;
 }>;
 
-export type Theme =
-  | 'light'
-  | 'dark'
-  | 'auto'
-  | 'midnight'
-  | 'development'
-  | string;
+export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | string;
 export type DarkTheme = 'dark' | 'midnight';
 
 // GlobalPrefs are the parsed global-store.json values

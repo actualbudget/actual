@@ -937,6 +937,7 @@ export type TransactionForRules = TransactionEntity & {
   balance?: number;
   _category_name?: string;
   _account_name?: string;
+  parent_amount?: number;
 };
 
 export async function prepareTransactionForRules(
@@ -1032,6 +1033,22 @@ export async function finalizeTransactionForRules(
 
   if ('balance' in trans) {
     delete trans.balance;
+  }
+
+  if ('parent_amount' in trans) {
+    delete trans.parent_amount;
+  }
+
+  if (trans.subtransactions?.length) {
+    trans.subtransactions.forEach(stx => {
+      if ('balance' in stx) {
+        delete stx.balance;
+      }
+
+      if ('parent_amount' in stx) {
+        delete stx.parent_amount;
+      }
+    });
   }
 
   return trans;
