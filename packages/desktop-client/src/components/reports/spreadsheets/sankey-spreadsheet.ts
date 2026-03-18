@@ -95,25 +95,38 @@ function filterCategoryGroups(
 
       if (op === 'is') return categoryId === value;
       if (op === 'isNot') return categoryId !== value;
-      if (op === 'oneOf') return Array.isArray(value) && value.includes(categoryId);
-      if (op === 'notOneOf') return !Array.isArray(value) || !value.includes(categoryId);
+      if (op === 'oneOf') {
+        return Array.isArray(value) && value.includes(categoryId);
+      }
+      if (op === 'notOneOf') {
+        return !Array.isArray(value) || !value.includes(categoryId);
+      }
       if (op === 'category_group') {
         return Array.isArray(value)
           ? value.includes(groupId) || value.includes(groupName)
           : groupId === value || groupName === value;
       }
       if (op === 'contains') {
-        return typeof value === 'string' && categoryName.toLowerCase().includes(value.toLowerCase());
+        return (
+          typeof value === 'string' &&
+          categoryName.toLowerCase().includes(value.toLowerCase())
+        );
       }
       if (op === 'doesNotContain') {
-        return typeof value === 'string' && !categoryName.toLowerCase().includes(value.toLowerCase());
+        return (
+          typeof value === 'string' &&
+          !categoryName.toLowerCase().includes(value.toLowerCase())
+        );
       }
       if (op === 'matches') {
         if (typeof value !== 'string') return false;
         try {
           const regex =
             value.startsWith('/') && value.lastIndexOf('/') > 0
-              ? new RegExp(value.slice(1, value.lastIndexOf('/')), value.slice(value.lastIndexOf('/') + 1))
+              ? new RegExp(
+                  value.slice(1, value.lastIndexOf('/')),
+                  value.slice(value.lastIndexOf('/') + 1),
+                )
               : new RegExp(value);
           return regex.test(categoryName);
         } catch {
@@ -189,8 +202,11 @@ export function createBudgetSpreadsheet(
       end && end !== start ? monthUtils.range(start, end) : [start];
 
     const monthResponses = await Promise.all(
-      months.map(m =>
-        send('api/budget-month', { month: m }) as unknown as Promise<BudgetMonthResponse>,
+      months.map(
+        m =>
+          send('api/budget-month', {
+            month: m,
+          }) as unknown as Promise<BudgetMonthResponse>,
       ),
     );
 
@@ -211,14 +227,18 @@ export function createBudgetSpreadsheet(
           }
 
           for (const cat of group.categories) {
-            const existingCat = existingGroup.categories.find(c => c.id === cat.id);
+            const existingCat = existingGroup.categories.find(
+              c => c.id === cat.id,
+            );
             if (!existingCat) {
               existingGroup.categories.push({ ...cat });
               continue;
             }
-            existingCat.budgeted = (existingCat.budgeted ?? 0) + (cat.budgeted ?? 0);
+            existingCat.budgeted =
+              (existingCat.budgeted ?? 0) + (cat.budgeted ?? 0);
             existingCat.spent = (existingCat.spent ?? 0) + (cat.spent ?? 0);
-            existingCat.balance = (existingCat.balance ?? 0) + (cat.balance ?? 0);
+            existingCat.balance =
+              (existingCat.balance ?? 0) + (cat.balance ?? 0);
           }
         }
 
@@ -282,7 +302,13 @@ export function createTransactionsSpreadsheet(
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    const categoryData = await fetchCategoryData(categories, conditionsOpKey, filters, start, end);
+    const categoryData = await fetchCategoryData(
+      categories,
+      conditionsOpKey,
+      filters,
+      start,
+      end,
+    );
 
     // convert retrieved data into the proper sankey format
     setData(transformToSankeyData(categoryData, 0, 'Spent', compact));
@@ -293,38 +319,38 @@ export function createTransactionsSpreadsheet(
 async function fetchCategoryData(
   categories: CategoryGroupEntity[],
   conditionsOpKey: string = '$and',
-  filters: any[] = [],
+  filters: unknown[] = [],
   start: string,
   end: string,
 ): Promise<CategoryEntry[]> {
   const nested = await Promise.all(
-      categories.map(async (mainCategory: CategoryGroupEntity) => {
-        const entries = await Promise.all(
-          (mainCategory.categories || [])
-            .filter(subcategory => !subcategory?.is_income)
-            .map(async subcategory => {
-              const results = await aqlQuery(
-                q('transactions')
-                  .filter({ [conditionsOpKey]: filters })
-                  .filter({
-                    $and: [
-                      { date: { $gte: monthUtils.firstDayOfMonth(start) } },
-                      { date: { $lte: monthUtils.lastDayOfMonth(end) } },
-                    ],
-                  })
-                  .filter({ category: subcategory.id })
-                  .calculate({ $sum: '$amount' }),
-              );
-              return {
-                mainCategory: mainCategory.name,
-                subcategory: subcategory.name,
-                value: results.data * -1,
-              } satisfies CategoryEntry;
-            }),
-        );
-        return entries;
-      }),
-    );
+    categories.map(async (mainCategory: CategoryGroupEntity) => {
+      const entries = await Promise.all(
+        (mainCategory.categories || [])
+          .filter(subcategory => !subcategory?.is_income)
+          .map(async subcategory => {
+            const results = await aqlQuery(
+              q('transactions')
+                .filter({ [conditionsOpKey]: filters })
+                .filter({
+                  $and: [
+                    { date: { $gte: monthUtils.firstDayOfMonth(start) } },
+                    { date: { $lte: monthUtils.lastDayOfMonth(end) } },
+                  ],
+                })
+                .filter({ category: subcategory.id })
+                .calculate({ $sum: '$amount' }),
+            );
+            return {
+              mainCategory: mainCategory.name,
+              subcategory: subcategory.name,
+              value: results.data * -1,
+            } satisfies CategoryEntry;
+          }),
+      );
+      return entries;
+    }),
+  );
   return nested.flat();
 }
 
@@ -362,17 +388,29 @@ function transformToSankeyData(
   );
 
   // Add the root node first with toBudget metadata
-  data.nodes.push({ name: rootNodeName, toBudget: toBudgetAmount, nodeType: 'budget' });
+  data.nodes.push({
+    name: rootNodeName,
+    toBudget: toBudgetAmount,
+    nodeType: 'budget',
+  });
 
   // Collect (mainCategoryIndex, sum) pairs for a single shared "Other" node
-  const otherLinks: Array<{ source: number; value: number; entries: Array<{ name: string; value: number }> }> = [];
+  const otherLinks: Array<{
+    source: number;
+    value: number;
+    entries: Array<{ name: string; value: number }>;
+  }> = [];
 
   for (const mainCategoryName of sortedMainCategories) {
     const mainCategorySum = categoryTotals.get(mainCategoryName) ?? 0;
 
     data.nodes.push({ name: mainCategoryName, nodeType: 'expense' });
     const mainCategoryIndex = data.nodes.length - 1;
-    data.links.push({ source: 0, target: mainCategoryIndex, value: mainCategorySum });
+    data.links.push({
+      source: 0,
+      target: mainCategoryIndex,
+      value: mainCategorySum,
+    });
 
     const subcategories = categoryData
       .filter(e => e.mainCategory === mainCategoryName && e.value > 0)
@@ -382,7 +420,11 @@ function transformToSankeyData(
     const otherEntries: Array<{ name: string; value: number }> = [];
     for (const entry of subcategories) {
       if (topKeys.has(`${entry.mainCategory}/${entry.subcategory}`)) {
-        data.nodes.push({ name: entry.subcategory, nodeType: 'expense', isNegative: entry.isNegative });
+        data.nodes.push({
+          name: entry.subcategory,
+          nodeType: 'expense',
+          isNegative: entry.isNegative,
+        });
         data.links.push({
           source: mainCategoryIndex,
           target: data.nodes.length - 1,
@@ -395,7 +437,11 @@ function transformToSankeyData(
       }
     }
     if (otherSum > 0) {
-      otherLinks.push({ source: mainCategoryIndex, value: otherSum, entries: otherEntries });
+      otherLinks.push({
+        source: mainCategoryIndex,
+        value: otherSum,
+        entries: otherEntries,
+      });
     }
   }
 
@@ -404,7 +450,12 @@ function transformToSankeyData(
     data.nodes.push({ name: 'Other', nodeType: 'expense' });
     const otherIndex = data.nodes.length - 1;
     for (const link of otherLinks) {
-      data.links.push({ source: link.source, target: otherIndex, value: link.value, tooltipInfo: link.entries });
+      data.links.push({
+        source: link.source,
+        target: otherIndex,
+        value: link.value,
+        tooltipInfo: link.entries,
+      });
     }
   }
 
@@ -415,10 +466,7 @@ function transformToSankeyData(
   return data;
 }
 
-function compactSankeyData(
-  data: SankeyData,
-  topN: number = 5,
-): SankeyData {
+function compactSankeyData(data: SankeyData, topN: number = 5): SankeyData {
   const compactedData: SankeyData = { nodes: [], links: [] };
 
   // Add root node

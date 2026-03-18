@@ -18,7 +18,6 @@ import { Container } from '@desktop-client/components/reports/Container';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
-
 type SankeyGraphNode = SankeyData['nodes'][number] & {
   hasChildren?: boolean;
   isCollapsed?: boolean;
@@ -130,7 +129,13 @@ function SankeyNode({
     <Layer key={`CustomNode${index}`}>
       <Rectangle x={x} y={y} width={width} height={height} fill={fillColor} />
       {renderText(payload.name || '', height / 2)}
-      {renderText(format(payload.value, 'financial'), height / 2 + 13, 11, 0.5, privacyMode ? t('Redacted Script') : undefined)}
+      {renderText(
+        format(payload.value, 'financial'),
+        height / 2 + 13,
+        11,
+        0.5,
+        privacyMode ? t('Redacted Script') : undefined,
+      )}
     </Layer>
   );
 }
@@ -156,12 +161,7 @@ export function SankeyGraph({
         <ResponsiveContainer>
           <Sankey
             data={data}
-            node={props => (
-              <SankeyNode
-                {...props}
-                containerWidth={width}
-              />
-            )}
+            node={props => <SankeyNode {...props} containerWidth={width} />}
             link={props => (
               <SankeyLink
                 {...props}
@@ -189,7 +189,14 @@ export function SankeyGraph({
                   const { value = 0, name = '' } = payload[0];
                   const tooltipInfo =
                     hoveredLinkIndex !== null
-                      ? (data.links[hoveredLinkIndex] as { tooltipInfo?: Array<{ name: string; value: number }> })?.tooltipInfo
+                      ? (
+                          data.links[hoveredLinkIndex] as {
+                            tooltipInfo?: Array<{
+                              name: string;
+                              value: number;
+                            }>;
+                          }
+                        )?.tooltipInfo
                       : undefined;
                   return (
                     <div
@@ -205,11 +212,33 @@ export function SankeyGraph({
                     >
                       <div style={{ lineHeight: 1.4 }}>
                         {name && <div style={{ marginBottom: 5 }}>{name}</div>}
-                        <div style={{ fontFamily: privacyMode ? t('Redacted Script') : undefined }}>{format(value, 'financial')}</div>
+                        <div
+                          style={{
+                            fontFamily: privacyMode
+                              ? t('Redacted Script')
+                              : undefined,
+                          }}
+                        >
+                          {format(value, 'financial')}
+                        </div>
                         {tooltipInfo && tooltipInfo.length > 0 && (
-                          <div style={{ marginTop: 6, fontSize: 11, opacity: 0.7 }}>
+                          <div
+                            style={{ marginTop: 6, fontSize: 11, opacity: 0.7 }}
+                          >
                             {tooltipInfo.map(item => (
-                              <div key={item.name}>{item.name} (<span style={{ fontFamily: privacyMode ? t('Redacted Script') : undefined }}>{format(item.value, 'financial')}</span>)</div>
+                              <div key={item.name}>
+                                {item.name} (
+                                <span
+                                  style={{
+                                    fontFamily: privacyMode
+                                      ? t('Redacted Script')
+                                      : undefined,
+                                  }}
+                                >
+                                  {format(item.value, 'financial')}
+                                </span>
+                                )
+                              </div>
                             ))}
                           </div>
                         )}
