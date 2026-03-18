@@ -113,6 +113,7 @@ export function ThemeInstaller({
       id: string;
       errorMessage: string;
       catalogTheme?: CatalogTheme | null;
+      baseTheme?: 'light' | 'dark' | 'midnight';
       overrideCss?: string;
     }) => {
       setError(null);
@@ -129,7 +130,11 @@ export function ThemeInstaller({
           name: options.name,
           repo: options.repo,
           cssContent: validatedCss,
-          baseTheme: options.catalogTheme?.mode === 'dark' ? 'dark' : 'light',
+          baseTheme: options.catalogTheme
+            ? options.catalogTheme.mode === 'dark'
+              ? 'dark'
+              : 'light'
+            : options.baseTheme,
         };
         if (options.overrideCss) {
           newTheme.overrideCss = validateThemeCss(options.overrideCss);
@@ -181,21 +186,37 @@ export function ThemeInstaller({
   }, []);
 
   const handleInstallPastedCss = useCallback(() => {
+    // Determine the base catalog CSS: prefer the in-session selection,
+    // fall back to the previously installed catalog theme
+    const hasCatalog = selectedCatalogTheme || installedTheme?.repo;
+    const baseCss = selectedCatalogTheme
+      ? cachedCatalogCss
+      : (installedTheme?.cssContent ?? '');
     const repo = selectedCatalogTheme
       ? normalizeGitHubRepo(selectedCatalogTheme.repo)
-      : '';
+      : (installedTheme?.repo ?? '');
+
     void installTheme({
-      css: selectedCatalogTheme ? cachedCatalogCss : '',
-      name: selectedCatalogTheme?.name ?? t('Custom Theme'),
+      css: hasCatalog ? baseCss : '',
+      name:
+        selectedCatalogTheme?.name ?? installedTheme?.name ?? t('Custom Theme'),
       repo,
       id: repo
         ? generateThemeId(repo)
         : generateThemeId(`pasted-${Date.now()}`),
       errorMessage: t('Failed to validate theme CSS'),
       catalogTheme: selectedCatalogTheme,
+      baseTheme: installedTheme?.baseTheme,
       overrideCss: pastedCss.trim() || undefined,
     });
-  }, [pastedCss, selectedCatalogTheme, cachedCatalogCss, installTheme, t]);
+  }, [
+    pastedCss,
+    selectedCatalogTheme,
+    cachedCatalogCss,
+    installedTheme,
+    installTheme,
+    t,
+  ]);
 
   return (
     <View
