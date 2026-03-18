@@ -18,6 +18,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.repository == 'actualbudget/actual'
     # this is so the assets can be added to the release
     permissions:
       contents: write
@@ -118,7 +119,7 @@ jobs:
   publish-microsoft-store:
     needs: build
     runs-on: windows-latest
-    if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
+    if: ${{ github.repository == 'actualbudget/actual' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
     steps:
       - name: Install StoreBroker
         shell: powershell
