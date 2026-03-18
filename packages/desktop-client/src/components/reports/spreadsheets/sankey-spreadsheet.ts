@@ -1,9 +1,7 @@
 import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
-import type { Query } from 'loot-core/shared/query';
 import type {
-  CategoryEntity,
   CategoryGroupEntity,
   RuleConditionEntity,
 } from 'loot-core/types/models';
@@ -14,7 +12,6 @@ import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 type BudgetMonthCategory = {
   id: string;
   name: string;
-  received?: number;
   spent?: number;
   budgeted?: number;
   balance?: number;
@@ -25,6 +22,21 @@ type BudgetMonthGroup = {
   name: string;
   is_income: boolean;
   categories: BudgetMonthCategory[];
+};
+
+type BudgetMonthResponse = {
+  categoryGroups: BudgetMonthGroup[];
+  totalIncome: number;
+  fromLastMonth: number;
+  forNextMonth: number;
+  toBudget: number;
+};
+
+type AggregatedBudget = {
+  toBudget: number;
+  fromLastMonth: number;
+  forNextMonth: number;
+  categoryGroupsMap: Map<string, BudgetMonthGroup>;
 };
 
 type SankeyNode = {
@@ -46,129 +58,83 @@ type SankeyData = {
   links: SankeyLink[];
 };
 
-type CategoryBalance = {
+type CategoryEntry = {
+  mainCategory: string;
   subcategory: string;
   value: number;
   isNegative?: boolean;
-  actualValue?: number;
 };
 
-type CategoryData = {
-  name: string;
-  balances: CategoryBalance[];
-};
-
-// Helper function to filter category groups based on conditions
-async function filterCategoryGroups(
+// Filter budget category groups to only those matching the user's conditions.
+// Budget data is fetched unconditionally from api/budget-month, so we must
+// apply category conditions manually in JS (unlike the transaction path which
+// passes conditions directly into the AQL query).
+function filterCategoryGroups(
   categoryGroups: BudgetMonthGroup[],
   conditions: RuleConditionEntity[],
   conditionsOp: 'and' | 'or',
-  allCategories: CategoryGroupEntity[],
-): Promise<BudgetMonthGroup[]> {
-  // If no conditions, return all groups
-  if (!conditions || conditions.length === 0) {
-    return categoryGroups;
-  }
-
-  // Build a map of category IDs to check against filters
-  const categoryIdToNameMap = new Map<string, string>();
-  const categoryIdToGroupMap = new Map<string, { id: string; name: string }>();
-
-  allCategories.forEach(group => {
-    group.categories?.forEach(cat => {
-      categoryIdToNameMap.set(cat.id, cat.name);
-      categoryIdToGroupMap.set(cat.id, { id: group.id, name: group.name });
-    });
-  });
-
-  // Extract category-related conditions
+): BudgetMonthGroup[] {
   const categoryConditions = conditions.filter(
     cond => cond.field === 'category',
   );
 
-  // If no category conditions, return all groups (other filters will be applied to transactions)
   if (categoryConditions.length === 0) {
     return categoryGroups;
   }
 
-  // Function to check if a category matches the conditions
-  const categoryMatchesConditions = (categoryId: string): boolean => {
-    const categoryName = categoryIdToNameMap.get(categoryId) ?? '';
-    const categoryGroup = categoryIdToGroupMap.get(categoryId);
-    const categoryGroupId = categoryGroup?.id ?? '';
-    const categoryGroupName = categoryGroup?.name ?? '';
-
+  const categoryMatchesConditions = (
+    categoryId: string,
+    categoryName: string,
+    groupId: string,
+    groupName: string,
+  ): boolean => {
     const matchesCondition = (cond: RuleConditionEntity): boolean => {
       const value = cond.value;
       const op = cond.op as string;
 
-      if (op === 'is') {
-        return categoryId === value;
-      } else if (op === 'isNot') {
-        return categoryId !== value;
-      } else if (op === 'oneOf') {
-        return Array.isArray(value) && value.includes(categoryId);
-      } else if (op === 'notOneOf') {
-        return !Array.isArray(value) || !value.includes(categoryId);
-      } else if (op === 'category_group') {
-        if (Array.isArray(value)) {
-          return (
-            value.includes(categoryGroupId) || value.includes(categoryGroupName)
-          );
-        }
-        return categoryGroupId === value || categoryGroupName === value;
-      } else if (op === 'contains') {
-        return (
-          typeof value === 'string' &&
-          categoryName.toLowerCase().includes(value.toLowerCase())
-        );
-      } else if (op === 'doesNotContain') {
-        return (
-          typeof value === 'string' &&
-          !categoryName.toLowerCase().includes(value.toLowerCase())
-        );
-      } else if (op === 'matches') {
-        if (typeof value !== 'string') {
-          return false;
-        }
+      if (op === 'is') return categoryId === value;
+      if (op === 'isNot') return categoryId !== value;
+      if (op === 'oneOf') return Array.isArray(value) && value.includes(categoryId);
+      if (op === 'notOneOf') return !Array.isArray(value) || !value.includes(categoryId);
+      if (op === 'category_group') {
+        return Array.isArray(value)
+          ? value.includes(groupId) || value.includes(groupName)
+          : groupId === value || groupName === value;
+      }
+      if (op === 'contains') {
+        return typeof value === 'string' && categoryName.toLowerCase().includes(value.toLowerCase());
+      }
+      if (op === 'doesNotContain') {
+        return typeof value === 'string' && !categoryName.toLowerCase().includes(value.toLowerCase());
+      }
+      if (op === 'matches') {
+        if (typeof value !== 'string') return false;
         try {
           const regex =
             value.startsWith('/') && value.lastIndexOf('/') > 0
-              ? new RegExp(
-                  value.slice(1, value.lastIndexOf('/')),
-                  value.slice(value.lastIndexOf('/') + 1),
-                )
+              ? new RegExp(value.slice(1, value.lastIndexOf('/')), value.slice(value.lastIndexOf('/') + 1))
               : new RegExp(value);
           return regex.test(categoryName);
         } catch {
           return false;
         }
       }
-
-      // Unknown/unsupported operation should not match by default
       return false;
     };
 
-    if (conditionsOp === 'or') {
-      // For OR, category matches if it matches ANY condition
-      return categoryConditions.some(matchesCondition);
-    } else {
-      // For AND, category matches if it matches ALL conditions
-      return categoryConditions.every(matchesCondition);
-    }
+    return conditionsOp === 'or'
+      ? categoryConditions.some(matchesCondition)
+      : categoryConditions.every(matchesCondition);
   };
 
-  // Filter category groups and their categories
-  const filteredGroups = categoryGroups
+  return categoryGroups
     .map(group => ({
       ...group,
       categories: group.categories.filter(cat =>
-        categoryMatchesConditions(cat.id),
+        categoryMatchesConditions(cat.id, cat.name, group.id, group.name),
       ),
     }))
     .filter(group => group.categories.length > 0);
-
-  return filteredGroups;
 }
 
 export function createSpreadsheet(
@@ -188,7 +154,6 @@ export function createSpreadsheet(
       const data = await createBudgetSpreadsheet(
         start,
         end,
-        categories,
         conditions,
         conditionsOp,
         compact,
@@ -211,7 +176,6 @@ export function createSpreadsheet(
 export function createBudgetSpreadsheet(
   start: string,
   end: string,
-  categories: CategoryGroupEntity[],
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
   compact: boolean = false,
@@ -220,59 +184,42 @@ export function createBudgetSpreadsheet(
     spreadsheet: ReturnType<typeof useSpreadsheet>,
     setData: (data: ReturnType<typeof transformToSankeyData>) => void,
   ) => {
-    type BudgetMonthResponse = {
-      categoryGroups: BudgetMonthGroup[];
-      totalIncome: number;
-      fromLastMonth: number;
-      forNextMonth: number;
-      toBudget: number;
-    };
-
     const months =
       end && end !== start ? monthUtils.range(start, end) : [start];
 
-    const monthResponses = (await Promise.all(
-      months.map(
-        m =>
-          send('api/budget-month', {
-            month: m,
-          }) as unknown as Promise<BudgetMonthResponse>,
+    const monthResponses = await Promise.all(
+      months.map(m =>
+        send('api/budget-month', { month: m }) as unknown as Promise<BudgetMonthResponse>,
       ),
-    )) as BudgetMonthResponse[];
+    );
 
-    const aggregated = monthResponses.reduce(
+    const aggregated = monthResponses.reduce<AggregatedBudget>(
       (acc, response) => {
         acc.toBudget += response.toBudget;
         acc.fromLastMonth += response.fromLastMonth;
         acc.forNextMonth += response.forNextMonth;
-        acc.totalIncome += response.totalIncome;
 
-        response.categoryGroups.forEach(group => {
+        for (const group of response.categoryGroups) {
           const existingGroup = acc.categoryGroupsMap.get(group.id);
           if (!existingGroup) {
             acc.categoryGroupsMap.set(group.id, {
               ...group,
               categories: group.categories.map(cat => ({ ...cat })),
             });
-            return;
+            continue;
           }
 
-          group.categories.forEach(cat => {
-            const existingCat = existingGroup.categories.find(
-              c => c.id === cat.id,
-            );
+          for (const cat of group.categories) {
+            const existingCat = existingGroup.categories.find(c => c.id === cat.id);
             if (!existingCat) {
               existingGroup.categories.push({ ...cat });
-              return;
+              continue;
             }
-
-            existingCat.budgeted =
-              (existingCat.budgeted ?? 0) + (cat.budgeted ?? 0);
+            existingCat.budgeted = (existingCat.budgeted ?? 0) + (cat.budgeted ?? 0);
             existingCat.spent = (existingCat.spent ?? 0) + (cat.spent ?? 0);
-            existingCat.balance =
-              (existingCat.balance ?? 0) + (cat.balance ?? 0);
-          });
-        });
+            existingCat.balance = (existingCat.balance ?? 0) + (cat.balance ?? 0);
+          }
+        }
 
         return acc;
       },
@@ -280,56 +227,39 @@ export function createBudgetSpreadsheet(
         toBudget: 0,
         fromLastMonth: 0,
         forNextMonth: 0,
-        totalIncome: 0,
         categoryGroupsMap: new Map<string, BudgetMonthGroup>(),
-      } as {
-        toBudget: number;
-        fromLastMonth: number;
-        forNextMonth: number;
-        totalIncome: number;
-        categoryGroupsMap: Map<string, BudgetMonthGroup>;
       },
     );
 
     const categoryGroups = Array.from(aggregated.categoryGroupsMap.values());
 
-    // Apply filters to category groups
-    const filteredCategoryGroups = await filterCategoryGroups(
+    const filteredCategoryGroups = filterCategoryGroups(
       categoryGroups,
       conditions,
       conditionsOp,
-      categories,
     );
 
-    // Build expense category data using budgeted amounts from the budget month
-    const expenseGroups = filteredCategoryGroups.filter(
-      group => group.is_income !== true,
-    );
-    const categoryData = expenseGroups.map(group => ({
-      name: group.name,
-      balances: group.categories.map(cat => ({
-        subcategory: cat.name,
-        value: cat.budgeted ?? 0,
-      })),
-    }));
+    const categoryData: CategoryEntry[] = filteredCategoryGroups
+      .filter(group => !group.is_income)
+      .flatMap(group =>
+        group.categories.map(cat => ({
+          mainCategory: group.name,
+          subcategory: cat.name,
+          value: cat.budgeted ?? 0,
+        })),
+      );
 
     const { forNextMonth, toBudget } = aggregated;
 
     if (forNextMonth > 0) {
       categoryData.push({
-        name: 'For Next Month',
-        balances: [
-          {
-            subcategory: 'For Next Month',
-            value: forNextMonth,
-          },
-        ],
+        mainCategory: 'For Next Month',
+        subcategory: 'For Next Month',
+        value: forNextMonth,
       });
     }
 
-    setData(
-      transformToSankeyData(categoryData, toBudget, 'Available Funds', compact),
-    );
+    setData(transformToSankeyData(categoryData, toBudget, 'Budgeted', compact));
   };
 }
 
@@ -351,228 +281,172 @@ export function createTransactionsSpreadsheet(
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    // retrieve sum of subcategory expenses
-    async function fetchCategoryData(
-      categories: CategoryGroupEntity[],
-    ): Promise<CategoryData[]> {
-      try {
-        return await Promise.all(
-          categories.map(
-            async (
-              mainCategory: CategoryGroupEntity,
-            ): Promise<CategoryData> => {
-              const subcategoryBalances = await Promise.all(
-                (mainCategory.categories || [])
-                  .filter(subcategory => !subcategory?.is_income)
-                  .map(async subcategory => {
-                    const results = await aqlQuery(
-                      q('transactions')
-                        .filter({
-                          [conditionsOpKey]: filters,
-                        })
-                        .filter({
-                          $and: [
-                            {
-                              date: { $gte: monthUtils.firstDayOfMonth(start) },
-                            },
-                            { date: { $lte: monthUtils.lastDayOfMonth(end) } },
-                          ],
-                        })
-                        .filter({ category: subcategory.id })
-                        .calculate({ $sum: '$amount' }),
-                    );
-                    return {
-                      subcategory: subcategory.name,
-                      value: results.data * -1,
-                    };
-                  }),
-              );
-
-              // Here you could combine, reduce or transform the subcategoryBalances if needed
-              return {
-                name: mainCategory.name,
-                balances: subcategoryBalances,
-              };
-            },
-          ),
-        );
-      } catch (error) {
-        console.error('Error fetching category data:', error);
-        throw error; // Re-throw if you want the error to propagate
-      }
-    }
-
-    // create list of Income subcategories
-    const allIncomeSubcategories: CategoryEntity[] = [];
-    for (const category of categories) {
-      if (category.is_income) {
-        // allIncomeSubcategories.push(...(category.categories || []));
-      }
-    }
-
-    const categoryData = await fetchCategoryData(categories);
+    const categoryData = await fetchCategoryData(categories, conditionsOpKey, filters, start, end);
 
     // convert retrieved data into the proper sankey format
     setData(transformToSankeyData(categoryData, 0, 'Spent', compact));
   };
 }
 
+// retrieve sum of subcategory expenses
+async function fetchCategoryData(
+  categories: CategoryGroupEntity[],
+  conditionsOpKey: string = '$and',
+  filters: any[] = [],
+  start: string,
+  end: string,
+): Promise<CategoryEntry[]> {
+  const nested = await Promise.all(
+      categories.map(async (mainCategory: CategoryGroupEntity) => {
+        const entries = await Promise.all(
+          (mainCategory.categories || [])
+            .filter(subcategory => !subcategory?.is_income)
+            .map(async subcategory => {
+              const results = await aqlQuery(
+                q('transactions')
+                  .filter({ [conditionsOpKey]: filters })
+                  .filter({
+                    $and: [
+                      { date: { $gte: monthUtils.firstDayOfMonth(start) } },
+                      { date: { $lte: monthUtils.lastDayOfMonth(end) } },
+                    ],
+                  })
+                  .filter({ category: subcategory.id })
+                  .calculate({ $sum: '$amount' }),
+              );
+              return {
+                mainCategory: mainCategory.name,
+                subcategory: subcategory.name,
+                value: results.data * -1,
+              } satisfies CategoryEntry;
+            }),
+        );
+        return entries;
+      }),
+    );
+  return nested.flat();
+}
+
 function transformToSankeyData(
-  categoryData: CategoryData[],
+  categoryData: CategoryEntry[],
   toBudgetAmount: number = 0,
   rootNodeName: string,
   compact: boolean = false,
 ): SankeyData {
   const data: SankeyData = { nodes: [], links: [] };
-  const nodeKeys = new Set<string>();
 
-  // Sort category data by total value (sum of subcategories) in descending order
-  categoryData.sort((a, b) => {
-    const aTotal = a.balances.reduce((sum, bal) => sum + bal.value, 0);
-    const bTotal = b.balances.reduce((sum, bal) => sum + bal.value, 0);
-    return bTotal - aTotal;
-  });
+  // Compute per-main-category totals and sort descending
+  const categoryTotals = new Map<string, number>();
+  for (const entry of categoryData) {
+    if (entry.value > 0) {
+      categoryTotals.set(
+        entry.mainCategory,
+        (categoryTotals.get(entry.mainCategory) ?? 0) + entry.value,
+      );
+    }
+  }
+  const sortedMainCategories = [...categoryTotals.keys()].sort(
+    (a, b) => (categoryTotals.get(b) ?? 0) - (categoryTotals.get(a) ?? 0),
+  );
 
   // Add the root node first with toBudget metadata
-  data.nodes.push({
-    name: rootNodeName,
-    toBudget: toBudgetAmount,
-    nodeType: 'budget',
-  });
-  nodeKeys.add(`root:${rootNodeName}`);
+  data.nodes.push({ name: rootNodeName, toBudget: toBudgetAmount, nodeType: 'budget' });
 
-  // add all category expenses that have valid subcategories and a balance
-  for (const mainCategory of categoryData) {
-    // Sort subcategories by value in descending order
-    mainCategory.balances.sort((a, b) => b.value - a.value);
+  for (const mainCategoryName of sortedMainCategories) {
+    const mainCategorySum = categoryTotals.get(mainCategoryName) ?? 0;
 
-    const mainCategoryKey = `group:${mainCategory.name}`;
-    if (!nodeKeys.has(mainCategoryKey) && mainCategory.balances.length > 0) {
-      let mainCategorySum = 0;
-      for (const subCategory of mainCategory.balances) {
-        if (subCategory.value > 0) {
-          mainCategorySum += subCategory.value;
-        }
-      }
-      if (mainCategorySum === 0) {
-        continue;
-      }
+    data.nodes.push({ name: mainCategoryName, nodeType: 'expense' });
+    const mainCategoryIndex = data.nodes.length - 1;
+    data.links.push({ source: 0, target: mainCategoryIndex, value: mainCategorySum });
 
-      data.nodes.push({
-        name: mainCategory.name,
-        nodeType: 'expense',
-      });
-      nodeKeys.add(mainCategoryKey);
-      const mainCategoryIndex = data.nodes.length - 1;
+    const subcategories = categoryData
+      .filter(e => e.mainCategory === mainCategoryName && e.value > 0)
+      .sort((a, b) => b.value - a.value);
 
+    for (const entry of subcategories) {
+      data.nodes.push({ name: entry.subcategory, nodeType: 'expense', isNegative: entry.isNegative });
       data.links.push({
-        source: 0, // Root node
-        target: mainCategoryIndex,
-        value: mainCategorySum,
+        source: mainCategoryIndex,
+        target: data.nodes.length - 1,
+        value: entry.value,
+        isNegative: entry.isNegative,
       });
-
-      // add the subcategories of the main category
-      for (const subCategory of mainCategory.balances) {
-        const subCategoryKey = `subcategory:${mainCategory.name}/${subCategory.subcategory}`;
-        if (!nodeKeys.has(subCategoryKey) && subCategory.value > 0) {
-          data.nodes.push({
-            name: subCategory.subcategory,
-            nodeType: 'expense',
-            isNegative: subCategory.isNegative,
-          });
-          nodeKeys.add(subCategoryKey);
-          const subCategoryIndex = data.nodes.length - 1;
-
-          data.links.push({
-            source: mainCategoryIndex,
-            target: subCategoryIndex,
-            value: subCategory.value,
-            isNegative: subCategory.isNegative,
-          });
-        }
-      }
     }
   }
 
-  // If compact mode is enabled, keep only the first 2 levels of the sankey (root node and main categories) and sum all subcategories into their main category
   if (compact) {
-    const compactedData: SankeyData = { nodes: [], links: [] };
-    const compactedNodeNames = new Set<string>();
-    const topN = 5; // Number of top categories to show, the rest will be grouped into "Other"
-
-    // Add root node
-    compactedData.nodes.push(data.nodes[0]);
-    compactedNodeNames.add(data.nodes[0].name);
-
-    // Collect main categories and their total values
-    const mainCategoryTotals = new Map<string, number>();
-    for (const link of data.links) {
-      const sourceNode = data.nodes[link.source];
-      const targetNode = data.nodes[link.target];
-      if (
-        sourceNode.name === rootNodeName &&
-        targetNode.nodeType === 'expense'
-      ) {
-        mainCategoryTotals.set(
-          targetNode.name,
-          (mainCategoryTotals.get(targetNode.name) || 0) + link.value,
-        );
-      }
-    }
-
-    // Sort main categories by total value descending
-    const sortedCategories = Array.from(mainCategoryTotals.entries()).sort(
-      (a, b) => b[1] - a[1],
-    );
-
-    // Take top N, lump the rest into "Other"
-    const topCategories = sortedCategories.slice(0, topN);
-    const otherCategories = sortedCategories.slice(topN);
-    const otherTotal = otherCategories.reduce(
-      (sum, [, value]) => sum + value,
-      0,
-    );
-
-    // Add top categories and "Other" if needed
-    const categoriesToAdd = [...topCategories.map(([name]) => name)];
-    if (otherTotal > 0) {
-      categoriesToAdd.push('Other');
-    }
-
-    for (const categoryName of categoriesToAdd) {
-      if (!compactedNodeNames.has(categoryName)) {
-        const originalNode = data.nodes.find(n => n.name === categoryName);
-        compactedData.nodes.push(
-          originalNode || { name: categoryName, nodeType: 'expense' },
-        );
-        compactedNodeNames.add(categoryName);
-      }
-    }
-
-    // Add links for top categories
-    for (const [categoryName, value] of topCategories) {
-      const targetIndex = compactedData.nodes.findIndex(
-        n => n.name === categoryName,
-      );
-      compactedData.links.push({
-        source: 0, // Root node
-        target: targetIndex,
-        value,
-      });
-    }
-
-    // Add link for "Other" if needed
-    if (otherTotal > 0) {
-      const otherIndex = compactedData.nodes.findIndex(n => n.name === 'Other');
-      compactedData.links.push({
-        source: 0, // Root node
-        target: otherIndex,
-        value: otherTotal,
-      });
-    }
-
-    return compactedData;
+    return compactSankeyData(data, 5);
   }
 
   return data;
+}
+
+function compactSankeyData(
+  data: SankeyData,
+  topN: number = 5,
+): SankeyData {
+  const compactedData: SankeyData = { nodes: [], links: [] };
+
+  // Add root node
+  const rootNodeName = data.nodes[0].name;
+  compactedData.nodes.push(data.nodes[0]);
+
+  // Collect main categories and their total values
+  const mainCategoryTotals = new Map<string, number>();
+  for (const link of data.links) {
+    const sourceNode = data.nodes[link.source];
+    const targetNode = data.nodes[link.target];
+    if (sourceNode.name === rootNodeName && targetNode.nodeType === 'expense') {
+      mainCategoryTotals.set(
+        targetNode.name,
+        (mainCategoryTotals.get(targetNode.name) || 0) + link.value,
+      );
+    }
+  }
+
+  // Sort main categories by total value descending
+  const sortedCategories = Array.from(mainCategoryTotals.entries()).sort(
+    (a, b) => b[1] - a[1],
+  );
+
+  // Take top N, lump the rest into "Other"
+  const topCategories = sortedCategories.slice(0, topN);
+  const otherCategories = sortedCategories.slice(topN);
+  const otherTotal = otherCategories.reduce((sum, [, value]) => sum + value, 0);
+
+  // Add top categories and "Other" if needed
+  const categoriesToAdd = [...topCategories.map(([name]) => name)];
+  if (otherTotal > 0) {
+    categoriesToAdd.push('Other');
+  }
+
+  for (const categoryName of categoriesToAdd) {
+    const originalNode = data.nodes.find(n => n.name === categoryName);
+    compactedData.nodes.push(
+      originalNode || { name: categoryName, nodeType: 'expense' },
+    );
+  }
+
+  // Add links for top categories
+  for (const [categoryName, value] of topCategories) {
+    const targetIndex = compactedData.nodes.findIndex(
+      n => n.name === categoryName,
+    );
+    compactedData.links.push({
+      source: 0, // Root node
+      target: targetIndex,
+      value,
+    });
+  }
+
+  // Add link for "Other" if needed
+  if (otherTotal > 0) {
+    const otherIndex = compactedData.nodes.findIndex(n => n.name === 'Other');
+    compactedData.links.push({
+      source: 0, // Root node
+      target: otherIndex,
+      value: otherTotal,
+    });
+  }
+  return compactedData;
 }
