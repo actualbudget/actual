@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import type { CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
 
@@ -17,48 +17,7 @@ import type { SankeyData } from 'recharts/types/chart/Sankey';
 import { Container } from '@desktop-client/components/reports/Container';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
-type SankeyTooltipProps = {
-  active?: boolean;
-  payload?: Array<{
-    payload?: {
-      source?: SankeyGraphNode;
-      target?: SankeyGraphNode;
-      value?: number;
-      name?: string;
-    };
-    value?: number;
-    name?: string;
-  }>;
-};
-
-function SankeyCustomTooltip({ active, payload }: SankeyTooltipProps) {
-  const format = useFormat();
-
-  if (!active || !payload?.length) return null;
-
-  const { value = 0, name = '' } = payload[0];
-
-  return (
-    <div
-      className={css({
-        zIndex: 1000,
-        pointerEvents: 'none',
-        borderRadius: 2,
-        boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-        backgroundColor: theme.menuBackground,
-        color: theme.menuItemText,
-        padding: 10,
-      })}
-    >
-      <div style={{ lineHeight: 1.0 }}>
-        {name && <div style={{ marginBottom: 5 }}>{name}</div>}
-        <div>{format(value, 'financial')}</div>
-      </div>
-    </div>
-  );
-}
 
 type SankeyGraphNode = SankeyData['nodes'][number] & {
   hasChildren?: boolean;
@@ -146,16 +105,13 @@ function SankeyNode({
   const isOut = x + width + 6 > containerWidth;
 
   const fillColor = payload.isNegative ? theme.errorText : theme.reportsBlue;
-  const displayValue =
-    payload.actualValue !== undefined
-      ? Math.abs(payload.actualValue)
-      : payload.value;
 
   const renderText = (
     text: string,
     yOffset: number,
     fontSize = 13,
     opacity = 1,
+    fontFamily?: string,
   ) => (
     <text
       textAnchor={isOut ? 'end' : 'start'}
@@ -164,7 +120,7 @@ function SankeyNode({
       fontSize={fontSize}
       strokeOpacity={opacity}
       fill={theme.pageText}
-      fontFamily={privacyMode ? t('Redacted Script') : undefined}
+      fontFamily={fontFamily}
     >
       {text}
     </text>
@@ -174,7 +130,7 @@ function SankeyNode({
     <Layer key={`CustomNode${index}`}>
       <Rectangle x={x} y={y} width={width} height={height} fill={fillColor} />
       {renderText(payload.name || '', height / 2)}
-      {renderText(format(displayValue, 'financial'), height / 2 + 13, 11, 0.5)}
+      {renderText(format(payload.value, 'financial'), height / 2 + 13, 11, 0.5, privacyMode ? t('Redacted Script') : undefined)}
     </Layer>
   );
 }
@@ -190,6 +146,8 @@ export function SankeyGraph({
   data,
   showTooltip = true,
 }: SankeyGraphProps) {
+  const privacyMode = usePrivacyMode();
+  const format = useFormat();
   const [hoveredLinkIndex, setHoveredLinkIndex] = useState<number | null>(null);
 
   return (
@@ -226,7 +184,39 @@ export function SankeyGraph({
           >
             {showTooltip && (
               <Tooltip
-                content={<SankeyCustomTooltip />}
+                content={({ active, payload }) => {
+                  if (!active || !payload?.length) return null;
+                  const { value = 0, name = '' } = payload[0];
+                  const tooltipInfo =
+                    hoveredLinkIndex !== null
+                      ? (data.links[hoveredLinkIndex] as { tooltipInfo?: Array<{ name: string; value: number }> })?.tooltipInfo
+                      : undefined;
+                  return (
+                    <div
+                      className={css({
+                        zIndex: 1000,
+                        pointerEvents: 'none',
+                        borderRadius: 2,
+                        boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+                        backgroundColor: theme.menuBackground,
+                        color: theme.menuItemText,
+                        padding: 10,
+                      })}
+                    >
+                      <div style={{ lineHeight: 1.4 }}>
+                        {name && <div style={{ marginBottom: 5 }}>{name}</div>}
+                        <div style={{ fontFamily: privacyMode ? t('Redacted Script') : undefined }}>{format(value, 'financial')}</div>
+                        {tooltipInfo && tooltipInfo.length > 0 && (
+                          <div style={{ marginTop: 6, fontSize: 11, opacity: 0.7 }}>
+                            {tooltipInfo.map(item => (
+                              <div key={item.name}>{item.name} (<span style={{ fontFamily: privacyMode ? t('Redacted Script') : undefined }}>{format(item.value, 'financial')}</span>)</div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                }}
                 isAnimationActive={false}
               />
             )}

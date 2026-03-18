@@ -51,6 +51,7 @@ type SankeyLink = {
   target: number;
   value: number;
   isNegative?: boolean;
+  tooltipInfo?: Array<{ name: string; value: number }>;
 };
 
 type SankeyData = {
@@ -332,8 +333,18 @@ function transformToSankeyData(
   toBudgetAmount: number = 0,
   rootNodeName: string,
   compact: boolean = false,
+  topNSubcategories: number = 15,
 ): SankeyData {
   const data: SankeyData = { nodes: [], links: [] };
+
+  // Determine the top 19 subcategory entries globally by value
+  const topKeys = new Set(
+    [...categoryData]
+      .filter(e => e.value > 0)
+      .sort((a, b) => b.value - a.value)
+      .slice(0, topNSubcategories - 1)
+      .map(e => `${e.mainCategory}/${e.subcategory}`),
+  );
 
   // Compute per-main-category totals and sort descending
   const categoryTotals = new Map<string, number>();
@@ -345,12 +356,16 @@ function transformToSankeyData(
       );
     }
   }
+
   const sortedMainCategories = [...categoryTotals.keys()].sort(
     (a, b) => (categoryTotals.get(b) ?? 0) - (categoryTotals.get(a) ?? 0),
   );
 
   // Add the root node first with toBudget metadata
   data.nodes.push({ name: rootNodeName, toBudget: toBudgetAmount, nodeType: 'budget' });
+
+  // Collect (mainCategoryIndex, sum) pairs for a single shared "Other" node
+  const otherLinks: Array<{ source: number; value: number; entries: Array<{ name: string; value: number }> }> = [];
 
   for (const mainCategoryName of sortedMainCategories) {
     const mainCategorySum = categoryTotals.get(mainCategoryName) ?? 0;
@@ -363,14 +378,33 @@ function transformToSankeyData(
       .filter(e => e.mainCategory === mainCategoryName && e.value > 0)
       .sort((a, b) => b.value - a.value);
 
+    let otherSum = 0;
+    const otherEntries: Array<{ name: string; value: number }> = [];
     for (const entry of subcategories) {
-      data.nodes.push({ name: entry.subcategory, nodeType: 'expense', isNegative: entry.isNegative });
-      data.links.push({
-        source: mainCategoryIndex,
-        target: data.nodes.length - 1,
-        value: entry.value,
-        isNegative: entry.isNegative,
-      });
+      if (topKeys.has(`${entry.mainCategory}/${entry.subcategory}`)) {
+        data.nodes.push({ name: entry.subcategory, nodeType: 'expense', isNegative: entry.isNegative });
+        data.links.push({
+          source: mainCategoryIndex,
+          target: data.nodes.length - 1,
+          value: entry.value,
+          isNegative: entry.isNegative,
+        });
+      } else {
+        otherSum += entry.value;
+        otherEntries.push({ name: entry.subcategory, value: entry.value });
+      }
+    }
+    if (otherSum > 0) {
+      otherLinks.push({ source: mainCategoryIndex, value: otherSum, entries: otherEntries });
+    }
+  }
+
+  // Single shared "Other" node for all below-top-N subcategories
+  if (otherLinks.length > 0) {
+    data.nodes.push({ name: 'Other', nodeType: 'expense' });
+    const otherIndex = data.nodes.length - 1;
+    for (const link of otherLinks) {
+      data.links.push({ source: link.source, target: otherIndex, value: link.value, tooltipInfo: link.entries });
     }
   }
 
