@@ -19,8 +19,6 @@ import { useFormat } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
-const BUDGET_NODE_NAME = 'Available Funds';
-
 type SankeyTooltipProps = {
   active?: boolean;
   payload?: Array<{
@@ -54,7 +52,7 @@ function SankeyCustomTooltip({ active, payload }: SankeyTooltipProps) {
         padding: 10,
       })}
     >
-      <div style={{ lineHeight: 1.5 }}>
+      <div style={{ lineHeight: 1.0 }}>
         {name && <div style={{ marginBottom: 5 }}>{name}</div>}
         <div>{format(value, 'financial')}</div>
       </div>
@@ -133,7 +131,6 @@ type SankeyNodeProps = {
   index: number;
   payload: SankeyGraphNode;
   containerWidth: number;
-  currencyCode: string;
 };
 function SankeyNode({
   x,
@@ -154,9 +151,6 @@ function SankeyNode({
       ? Math.abs(payload.actualValue)
       : payload.value;
 
-  const isBudgetNode = payload.name === BUDGET_NODE_NAME;
-  const hasToBudget = isBudgetNode && payload.toBudget && payload.toBudget > 0;
-
   const renderText = (
     text: string,
     yOffset: number,
@@ -175,49 +169,6 @@ function SankeyNode({
       {text}
     </text>
   );
-
-  if (hasToBudget) {
-    const totalValue = payload.value;
-    const allocatedValue = totalValue - (payload.toBudget || 0);
-    const allocatedRatio = allocatedValue / totalValue;
-    const allocatedHeight = height * allocatedRatio;
-    const unallocatedHeight = height - allocatedHeight;
-    const toBudgetLabelY = y + allocatedHeight + unallocatedHeight / 2;
-
-    return (
-      <Layer key={`CustomNode${index}`}>
-        <Rectangle
-          x={x}
-          y={y}
-          width={width}
-          height={allocatedHeight}
-          fill={fillColor}
-        />
-        <Rectangle
-          x={x}
-          y={y + allocatedHeight}
-          width={width}
-          height={unallocatedHeight}
-          fill={theme.warningText}
-          fillOpacity={0.5}
-        />
-        {renderText(t('Budgeted'), allocatedHeight / 2)}
-        {renderText(
-          format(allocatedValue, 'financial'),
-          allocatedHeight / 2 + 13,
-          11,
-          0.5,
-        )}
-        {renderText(t('To Budget'), toBudgetLabelY - y)}
-        {renderText(
-          format(payload.toBudget, 'financial'),
-          toBudgetLabelY - y + 13,
-          11,
-          1,
-        )}
-      </Layer>
-    );
-  }
 
   return (
     <Layer key={`CustomNode${index}`}>
@@ -238,30 +189,19 @@ export function SankeyGraph({
   style,
   data,
   showTooltip = true,
-  collapsedNodes = [],
 }: SankeyGraphProps) {
-  const [defaultCurrencyCode] = useSyncedPref('defaultCurrencyCode');
-  const currencyCode = defaultCurrencyCode || 'USD';
   const [hoveredLinkIndex, setHoveredLinkIndex] = useState<number | null>(null);
-
-  const collapsedSet = useMemo(() => new Set(collapsedNodes), [collapsedNodes]);
-  const sankeyData = useMemo(() => {
-    return collapseSankeyBranches(data, collapsedSet);
-  }, [data, collapsedSet]);
-
-  if (!sankeyData.links?.length) return null;
 
   return (
     <Container style={style}>
       {(width, height) => (
         <ResponsiveContainer>
           <Sankey
-            data={sankeyData}
+            data={data}
             node={props => (
               <SankeyNode
                 {...props}
                 containerWidth={width}
-                currencyCode={currencyCode}
               />
             )}
             link={props => (
@@ -295,126 +235,4 @@ export function SankeyGraph({
       )}
     </Container>
   );
-}
-
-function collapseSankeyBranches(
-  data: SankeyData,
-  collapsedNodes: Set<string>,
-): SankeyData {
-  const nameToIndex = new Map<string, number>();
-  data.nodes.forEach((node, index) => {
-    if (typeof node.name === 'string') {
-      nameToIndex.set(node.name, index);
-    }
-  });
-
-  // Build map of parent to children based on links
-  const childrenByParent = new Map<number, Set<number>>();
-  data.links.forEach(link => {
-    const sourceIndex = normalizeIndex(link.source, nameToIndex);
-    const targetIndex = normalizeIndex(link.target, nameToIndex);
-    if (sourceIndex !== null && targetIndex !== null) {
-      if (!childrenByParent.has(sourceIndex)) {
-        childrenByParent.set(sourceIndex, new Set());
-      }
-      childrenByParent.get(sourceIndex)!.add(targetIndex);
-    }
-  });
-
-  // Find collapsed parent indexes
-  const collapsedIndexes = new Set<number>();
-  collapsedNodes.forEach(name => {
-    const index = nameToIndex.get(name);
-    if (index !== undefined && data.nodes[index]?.name !== BUDGET_NODE_NAME) {
-      collapsedIndexes.add(index);
-    }
-  });
-
-  // Find all children of collapsed parents (recursively)
-  const hiddenIndexes = new Set<number>();
-  const findAllChildren = (parentIndex: number) => {
-    const children = childrenByParent.get(parentIndex);
-    if (children) {
-      children.forEach(childIndex => {
-        hiddenIndexes.add(childIndex);
-        findAllChildren(childIndex);
-      });
-    }
-  };
-  collapsedIndexes.forEach(index => findAllChildren(index));
-
-  // Filter links that involve hidden children
-  const filteredLinks = data.links.filter(link => {
-    const sourceIndex = normalizeIndex(link.source, nameToIndex);
-    const targetIndex = normalizeIndex(link.target, nameToIndex);
-    if (sourceIndex === null || targetIndex === null) {
-      return false;
-    }
-    return !hiddenIndexes.has(sourceIndex) && !hiddenIndexes.has(targetIndex);
-  });
-
-  // Determine which nodes to keep
-  const usedIndexes = new Set<number>();
-  filteredLinks.forEach(link => {
-    const sourceIndex = normalizeIndex(link.source, nameToIndex);
-    const targetIndex = normalizeIndex(link.target, nameToIndex);
-    if (sourceIndex !== null) usedIndexes.add(sourceIndex);
-    if (targetIndex !== null) usedIndexes.add(targetIndex);
-  });
-
-  // Always include Available Funds node
-  const budgetIndex = nameToIndex.get(BUDGET_NODE_NAME);
-  if (budgetIndex !== undefined) {
-    usedIndexes.add(budgetIndex);
-  }
-
-  // Build new node list
-  const nodesWithIndex = data.nodes
-    .map((node, index) => ({ node, index }))
-    .filter(({ index }) => usedIndexes.has(index));
-
-  const indexMap = new Map<number, number>();
-  const nodes = nodesWithIndex.map(({ node, index }, newIndex) => {
-    indexMap.set(index, newIndex);
-    return {
-      ...node,
-      hasChildren:
-        childrenByParent.has(index) && childrenByParent.get(index)!.size > 0,
-      isCollapsed: collapsedIndexes.has(index),
-    };
-  });
-
-  // Remap links
-  const links = filteredLinks
-    .map(link => {
-      const sourceIndex = normalizeIndex(link.source, nameToIndex);
-      const targetIndex = normalizeIndex(link.target, nameToIndex);
-      if (sourceIndex === null || targetIndex === null) {
-        return null;
-      }
-      const mappedSource = indexMap.get(sourceIndex);
-      const mappedTarget = indexMap.get(targetIndex);
-      if (mappedSource === undefined || mappedTarget === undefined) {
-        return null;
-      }
-      return {
-        ...link,
-        source: mappedSource,
-        target: mappedTarget,
-      };
-    })
-    .filter((link): link is SankeyData['links'][number] => link !== null);
-
-  return { nodes, links };
-}
-
-function normalizeIndex(
-  value: number | string,
-  nameToIndex: Map<string, number>,
-): number | null {
-  if (typeof value === 'number') {
-    return value;
-  }
-  const index = nameToIndex.get(value);
-  return index ?? null;
 }
