@@ -113,7 +113,7 @@ jobs:
 
       - name: Upload patch artifact
         if: steps.create-patch.outputs.has_changes == 'true'
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: vrt-patch-${{ github.event.issue.number }}
           path: vrt-update.patch
@@ -129,7 +129,7 @@ jobs:
 
       - name: Upload PR metadata
         if: steps.create-patch.outputs.has_changes == 'true'
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: vrt-metadata-${{ github.event.issue.number }}
           path: pr-metadata/
