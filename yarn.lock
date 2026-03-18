@@ -54,12 +54,12 @@ __metadata:
   resolution: "@actual-app/cli@workspace:packages/cli"
   dependencies:
     "@actual-app/api": "workspace:*"
-    "@types/node": "npm:^22.19.10"
+    "@types/node": "npm:^22.19.15"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
     cli-table3: "npm:^0.6.5"
     commander: "npm:^13.0.0"
     cosmiconfig: "npm:^9.0.0"
-    rollup-plugin-visualizer: "npm:^6.0.5"
+    rollup-plugin-visualizer: "npm:^6.0.11"
     vite: "npm:^8.0.0"
     vitest: "npm:^4.1.0"
   bin:
@@ -10111,15 +10111,6 @@ __metadata:
   version: 17.0.45
   resolution: "@types/node@npm:17.0.45"
   checksum: 10/b45fff7270b5e81be19ef91a66b764a8b21473a97a8d211218a52e3426b79ad48f371819ab9153370756b33ba284e5c875463de4d2cf48a472e9098d7f09e8a2
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:^22.19.10":
-  version: 22.19.11
-  resolution: "@types/node@npm:22.19.11"
-  dependencies:
-    undici-types: "npm:~6.21.0"
-  checksum: 10/bb899551432ce2bf3e1a175d58802f25dfb6a96e574ce1f0056d55d0ce48513961976ee3621215565142a8ad99a2464d9c384fa53ccba0650def031d218800f7
   languageName: node
   linkType: hard
 
@@ -26156,28 +26147,6 @@ __metadata:
   bin:
     rollup-plugin-visualizer: dist/bin/cli.js
   checksum: 10/990f97b9dee576940dcbb47e86a844fabfc14179d8e583179ad1b6e0dea55d090cd0c17925137e637aa74ca88b782ffbce0c61ffe15755f448c6f23b45f65020
-  languageName: node
-  linkType: hard
-
-"rollup-plugin-visualizer@npm:^6.0.5":
-  version: 6.0.5
-  resolution: "rollup-plugin-visualizer@npm:6.0.5"
-  dependencies:
-    open: "npm:^8.0.0"
-    picomatch: "npm:^4.0.2"
-    source-map: "npm:^0.7.4"
-    yargs: "npm:^17.5.1"
-  peerDependencies:
-    rolldown: 1.x || ^1.0.0-beta
-    rollup: 2.x || 3.x || 4.x
-  peerDependenciesMeta:
-    rolldown:
-      optional: true
-    rollup:
-      optional: true
-  bin:
-    rollup-plugin-visualizer: dist/bin/cli.js
-  checksum: 10/e2bcad7ee239f1a911339bc50ae24f92fb5ec86405e2f62c1a29eb1b4e1b1d450edb303ba2e65d6edcdb84271c1948f50befe75cd5785feec31e186859bfacde
   languageName: node
   linkType: hard
 
