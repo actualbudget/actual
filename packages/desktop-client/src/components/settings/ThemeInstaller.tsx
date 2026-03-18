@@ -52,6 +52,7 @@ export function ThemeInstaller({
     useState<CatalogTheme | null>(null);
   const [erroringTheme, setErroringTheme] = useState<CatalogTheme | null>(null);
   const [pastedCss, setPastedCss] = useState('');
+  const [cachedCatalogCss, setCachedCatalogCss] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -133,6 +134,9 @@ export function ThemeInstaller({
         if (options.overrideCss) {
           newTheme.overrideCss = validateThemeCss(options.overrideCss);
         }
+        if (options.catalogTheme) {
+          setCachedCatalogCss(validatedCss);
+        }
         onInstall(newTheme);
         // Only set selectedCatalogTheme on success if it's a catalog theme
         if (options.catalogTheme) {
@@ -181,21 +185,17 @@ export function ThemeInstaller({
       ? normalizeGitHubRepo(selectedCatalogTheme.repo)
       : '';
     void installTheme({
-      css: selectedCatalogTheme
-        ? fetchThemeCss(selectedCatalogTheme.repo)
-        : Promise.resolve(''),
+      css: selectedCatalogTheme ? cachedCatalogCss : '',
       name: selectedCatalogTheme?.name ?? t('Custom Theme'),
       repo,
       id: repo
         ? generateThemeId(repo)
         : generateThemeId(`pasted-${Date.now()}`),
-      errorMessage: selectedCatalogTheme
-        ? t('Failed to load theme')
-        : t('Failed to validate theme CSS'),
+      errorMessage: t('Failed to validate theme CSS'),
       catalogTheme: selectedCatalogTheme,
       overrideCss: pastedCss.trim() || undefined,
     });
-  }, [pastedCss, selectedCatalogTheme, installTheme, t]);
+  }, [pastedCss, selectedCatalogTheme, cachedCatalogCss, installTheme, t]);
 
   return (
     <View
