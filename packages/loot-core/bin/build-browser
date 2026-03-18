@@ -29,7 +29,7 @@ if [ $NODE_ENV == 'development' ]; then
   ln -snf "$ROOT"/../lib-dist/browser ../../desktop-client/public/kcab
 fi
 
-# cp ../../../node_modules/@sqlite.org/sqlite-wasm/dist/sqlite3.wasm "$PUBLIC_DIR"/sqlite3.wasm
+cp ../../../node_modules/@sqlite.org/sqlite-wasm/dist/sqlite3.wasm "$PUBLIC_DIR"/sqlite3.wasm
 
 yarn vite build --config ../vite.config.ts --mode $NODE_ENV $VITE_ARGS
 
