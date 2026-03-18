@@ -337,7 +337,7 @@ function transformToSankeyData(
 ): SankeyData {
   const data: SankeyData = { nodes: [], links: [] };
 
-  // Determine the top 19 subcategory entries globally by value
+  // Determine the top N subcategory entries globally by value
   const topKeys = new Set(
     [...categoryData]
       .filter(e => e.value > 0)
