@@ -20,6 +20,7 @@ concurrency:
 
 jobs:
   publish-flathub:
+    if: github.repository == 'actualbudget/actual'
     runs-on: ubuntu-22.04
     steps:
       - name: Resolve version

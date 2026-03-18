@@ -8,6 +8,7 @@ on:
 
 jobs:
   build-and-pack:
+    if: github.repository == 'actualbudget/actual'
     runs-on: ubuntu-latest
     name: Build and pack npm packages
     steps:
@@ -41,6 +42,7 @@ jobs:
             packages/api/@actual-app/api.tgz
 
   publish:
+    if: github.repository == 'actualbudget/actual'
     runs-on: ubuntu-latest
     name: Publish npm packages
     needs: build-and-pack

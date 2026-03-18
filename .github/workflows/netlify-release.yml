@@ -18,6 +18,7 @@ concurrency:
 
 jobs:
   build-and-deploy:
+    if: github.repository == 'actualbudget/actual'
     runs-on: ubuntu-latest
     steps:
       - name: Repository Checkout
