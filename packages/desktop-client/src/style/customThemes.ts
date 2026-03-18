@@ -277,6 +277,21 @@ export function validateThemeCss(css: string): string {
 }
 
 /**
+ * Validate and concatenate cssContent and overrideCss into a single CSS string.
+ * Returns empty string if neither is present.
+ */
+export function validateAndCombineThemeCss(
+  cssContent?: string,
+  overrideCss?: string,
+): string {
+  const parts = [
+    cssContent && validateThemeCss(cssContent),
+    overrideCss && validateThemeCss(overrideCss),
+  ].filter(Boolean);
+  return parts.join('\n');
+}
+
+/**
  * Generate a unique ID for a theme based on its repo URL or direct CSS URL.
  */
 export function generateThemeId(urlOrRepo: string): string {

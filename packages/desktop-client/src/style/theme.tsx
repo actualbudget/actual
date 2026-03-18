@@ -3,7 +3,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { isNonProductionEnvironment } from 'loot-core/shared/environment';
 import type { DarkTheme, Theme } from 'loot-core/types/prefs';
 
-import { parseInstalledTheme, validateThemeCss } from './customThemes';
+import {
+  parseInstalledTheme,
+  validateAndCombineThemeCss,
+} from './customThemes';
 import type { BaseTheme } from './customThemes';
 import * as darkTheme from './themes/dark';
 import * as developmentTheme from './themes/development';
@@ -168,56 +171,42 @@ export function CustomThemeStyle() {
 
       let css = '';
 
-      if (lightTheme?.cssContent || lightTheme?.overrideCss) {
-        try {
-          let validated = '';
-          if (lightTheme.cssContent) {
-            validated += validateThemeCss(lightTheme.cssContent);
-          }
-          if (lightTheme.overrideCss) {
-            validated +=
-              (validated ? '\n' : '') +
-              validateThemeCss(lightTheme.overrideCss);
-          }
-          css += `@media (prefers-color-scheme: light) { ${validated} }\n`;
-        } catch (error) {
-          console.error('Invalid custom light theme CSS', { error });
+      try {
+        const lightCss = validateAndCombineThemeCss(
+          lightTheme?.cssContent,
+          lightTheme?.overrideCss,
+        );
+        if (lightCss) {
+          css += `@media (prefers-color-scheme: light) { ${lightCss} }\n`;
         }
+      } catch (error) {
+        console.error('Invalid custom light theme CSS', { error });
       }
 
-      if (darkTheme?.cssContent || darkTheme?.overrideCss) {
-        try {
-          let validated = '';
-          if (darkTheme.cssContent) {
-            validated += validateThemeCss(darkTheme.cssContent);
-          }
-          if (darkTheme.overrideCss) {
-            validated +=
-              (validated ? '\n' : '') + validateThemeCss(darkTheme.overrideCss);
-          }
-          css += `@media (prefers-color-scheme: dark) { ${validated} }\n`;
-        } catch (error) {
-          console.error('Invalid custom dark theme CSS', { error });
+      try {
+        const darkCss = validateAndCombineThemeCss(
+          darkTheme?.cssContent,
+          darkTheme?.overrideCss,
+        );
+        if (darkCss) {
+          css += `@media (prefers-color-scheme: dark) { ${darkCss} }\n`;
         }
+      } catch (error) {
+        console.error('Invalid custom dark theme CSS', { error });
       }
 
       return css || null;
     }
 
     const installedTheme = parseInstalledTheme(installedCustomLightThemeJson);
-    const { cssContent, overrideCss } = installedTheme ?? {};
-
-    if (!cssContent && !overrideCss) return null;
 
     try {
-      let validated = '';
-      if (cssContent) {
-        validated += validateThemeCss(cssContent);
-      }
-      if (overrideCss) {
-        validated += (validated ? '\n' : '') + validateThemeCss(overrideCss);
-      }
-      return validated;
+      return (
+        validateAndCombineThemeCss(
+          installedTheme?.cssContent,
+          installedTheme?.overrideCss,
+        ) || null
+      );
     } catch (error) {
       console.error('Invalid custom theme CSS', { error });
       return null;
