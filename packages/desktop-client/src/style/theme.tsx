@@ -168,11 +168,16 @@ export function CustomThemeStyle() {
 
       let css = '';
 
-      if (lightTheme?.cssContent) {
+      if (lightTheme?.cssContent || lightTheme?.overrideCss) {
         try {
-          let validated = validateThemeCss(lightTheme.cssContent);
+          let validated = '';
+          if (lightTheme.cssContent) {
+            validated += validateThemeCss(lightTheme.cssContent);
+          }
           if (lightTheme.overrideCss) {
-            validated += '\n' + validateThemeCss(lightTheme.overrideCss);
+            validated +=
+              (validated ? '\n' : '') +
+              validateThemeCss(lightTheme.overrideCss);
           }
           css += `@media (prefers-color-scheme: light) { ${validated} }\n`;
         } catch (error) {
@@ -180,11 +185,15 @@ export function CustomThemeStyle() {
         }
       }
 
-      if (darkTheme?.cssContent) {
+      if (darkTheme?.cssContent || darkTheme?.overrideCss) {
         try {
-          let validated = validateThemeCss(darkTheme.cssContent);
+          let validated = '';
+          if (darkTheme.cssContent) {
+            validated += validateThemeCss(darkTheme.cssContent);
+          }
           if (darkTheme.overrideCss) {
-            validated += '\n' + validateThemeCss(darkTheme.overrideCss);
+            validated +=
+              (validated ? '\n' : '') + validateThemeCss(darkTheme.overrideCss);
           }
           css += `@media (prefers-color-scheme: dark) { ${validated} }\n`;
         } catch (error) {
@@ -198,16 +207,19 @@ export function CustomThemeStyle() {
     const installedTheme = parseInstalledTheme(installedCustomLightThemeJson);
     const { cssContent, overrideCss } = installedTheme ?? {};
 
-    if (!cssContent) return null;
+    if (!cssContent && !overrideCss) return null;
 
     try {
-      let validated = validateThemeCss(cssContent);
+      let validated = '';
+      if (cssContent) {
+        validated += validateThemeCss(cssContent);
+      }
       if (overrideCss) {
-        validated += '\n' + validateThemeCss(overrideCss);
+        validated += (validated ? '\n' : '') + validateThemeCss(overrideCss);
       }
       return validated;
     } catch (error) {
-      console.error('Invalid custom theme CSS', { error, cssContent });
+      console.error('Invalid custom theme CSS', { error });
       return null;
     }
   }, [

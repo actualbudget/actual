@@ -121,7 +121,7 @@ export function ThemeInstaller({
       try {
         const css =
           typeof options.css === 'string' ? options.css : await options.css;
-        const validatedCss = validateThemeCss(css);
+        const validatedCss = css ? validateThemeCss(css) : '';
 
         const newTheme: InstalledTheme = {
           id: options.id,
@@ -131,8 +131,7 @@ export function ThemeInstaller({
           baseTheme: options.catalogTheme?.mode === 'dark' ? 'dark' : 'light',
         };
         if (options.overrideCss) {
-          const validatedOverride = validateThemeCss(options.overrideCss);
-          newTheme.overrideCss = validatedOverride;
+          newTheme.overrideCss = validateThemeCss(options.overrideCss);
         }
         onInstall(newTheme);
         // Only set selectedCatalogTheme on success if it's a catalog theme
@@ -178,27 +177,24 @@ export function ThemeInstaller({
   }, []);
 
   const handleInstallPastedCss = useCallback(() => {
-    if (selectedCatalogTheme) {
-      // Re-install the catalog theme with the pasted CSS as overrides
-      const normalizedRepo = normalizeGitHubRepo(selectedCatalogTheme.repo);
-      void installTheme({
-        css: fetchThemeCss(selectedCatalogTheme.repo),
-        name: selectedCatalogTheme.name,
-        repo: normalizedRepo,
-        id: generateThemeId(normalizedRepo),
-        errorMessage: t('Failed to load theme'),
-        catalogTheme: selectedCatalogTheme,
-        overrideCss: pastedCss.trim() || undefined,
-      });
-    } else if (pastedCss.trim()) {
-      void installTheme({
-        css: pastedCss.trim(),
-        name: t('Custom Theme'),
-        repo: '',
-        id: generateThemeId(`pasted-${Date.now()}`),
-        errorMessage: t('Failed to validate theme CSS'),
-      });
-    }
+    const repo = selectedCatalogTheme
+      ? normalizeGitHubRepo(selectedCatalogTheme.repo)
+      : '';
+    void installTheme({
+      css: selectedCatalogTheme
+        ? fetchThemeCss(selectedCatalogTheme.repo)
+        : Promise.resolve(''),
+      name: selectedCatalogTheme?.name ?? t('Custom Theme'),
+      repo,
+      id: repo
+        ? generateThemeId(repo)
+        : generateThemeId(`pasted-${Date.now()}`),
+      errorMessage: selectedCatalogTheme
+        ? t('Failed to load theme')
+        : t('Failed to validate theme CSS'),
+      catalogTheme: selectedCatalogTheme,
+      overrideCss: pastedCss.trim() || undefined,
+    });
   }, [pastedCss, selectedCatalogTheme, installTheme, t]);
 
   return (
@@ -426,11 +422,7 @@ export function ThemeInstaller({
         }}
       >
         <Text style={{ marginBottom: 8, color: themeStyle.pageTextSubdued }}>
-          {selectedCatalogTheme ? (
-            <Trans>Additional CSS overrides:</Trans>
-          ) : (
-            <Trans>or paste CSS directly:</Trans>
-          )}
+          <Trans>Additional CSS overrides:</Trans>
         </Text>
         <TextArea
           value={pastedCss}
