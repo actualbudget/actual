@@ -34,8 +34,6 @@ type BudgetMonthResponse = {
 
 type AggregatedBudget = {
   toBudget: number;
-  fromLastMonth: number;
-  forNextMonth: number;
   categoryGroupsMap: Map<string, BudgetMonthGroup>;
 };
 
@@ -199,7 +197,7 @@ export function createBudgetSpreadsheet(
     setData: (data: ReturnType<typeof transformToSankeyData>) => void,
   ) => {
     const months =
-      end && end !== start ? monthUtils.range(start, end) : [start];
+      end && end !== start ? monthUtils.rangeInclusive(start, end) : [start];
 
     const monthResponses = await Promise.all(
       months.map(
@@ -213,8 +211,6 @@ export function createBudgetSpreadsheet(
     const aggregated = monthResponses.reduce<AggregatedBudget>(
       (acc, response) => {
         acc.toBudget += response.toBudget;
-        acc.fromLastMonth += response.fromLastMonth;
-        acc.forNextMonth += response.forNextMonth;
 
         for (const group of response.categoryGroups) {
           const existingGroup = acc.categoryGroupsMap.get(group.id);
@@ -246,8 +242,6 @@ export function createBudgetSpreadsheet(
       },
       {
         toBudget: 0,
-        fromLastMonth: 0,
-        forNextMonth: 0,
         categoryGroupsMap: new Map<string, BudgetMonthGroup>(),
       },
     );
@@ -270,15 +264,7 @@ export function createBudgetSpreadsheet(
         })),
       );
 
-    const { forNextMonth, toBudget } = aggregated;
-
-    if (forNextMonth > 0) {
-      categoryData.push({
-        mainCategory: 'For Next Month',
-        subcategory: 'For Next Month',
-        value: forNextMonth,
-      });
-    }
+    const { toBudget } = aggregated;
 
     setData(transformToSankeyData(categoryData, toBudget, 'Budgeted', compact));
   };

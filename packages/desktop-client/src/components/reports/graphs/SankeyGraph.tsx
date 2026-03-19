@@ -105,17 +105,22 @@ function SankeyNode({
 
   const fillColor = payload.isNegative ? theme.errorText : theme.reportsBlue;
 
+  const toBudget = payload.toBudget ?? 0;
+  const toBudgetHeight =
+    toBudget > 0 && payload.value ? height * (toBudget / payload.value) : 0;
+
   const renderText = (
     text: string,
     yOffset: number,
     fontSize = 13,
     opacity = 1,
     fontFamily?: string,
+    yBase = y,
   ) => (
     <text
       textAnchor={isOut ? 'end' : 'start'}
       x={isOut ? x - 6 : x + width + 6}
-      y={y + yOffset}
+      y={yBase + yOffset}
       fontSize={fontSize}
       strokeOpacity={opacity}
       fill={theme.pageText}
@@ -126,8 +131,17 @@ function SankeyNode({
   );
 
   return (
-    <Layer key={`CustomNode${index}`}>
+    <Layer>
       <Rectangle x={x} y={y} width={width} height={height} fill={fillColor} />
+      {toBudgetHeight > 0 && (
+        <Rectangle
+          x={x}
+          y={y + height}
+          width={width}
+          height={toBudgetHeight}
+          fill={theme.toBudgetPositive}
+        />
+      )}
       {renderText(payload.name || '', height / 2)}
       {renderText(
         format(payload.value, 'financial'),
@@ -136,6 +150,24 @@ function SankeyNode({
         0.5,
         privacyMode ? t('Redacted Script') : undefined,
       )}
+      {toBudgetHeight > 0 &&
+        renderText(
+          format(toBudget, 'financial'),
+          toBudgetHeight / 2 + 13,
+          11,
+          0.5,
+          privacyMode ? t('Redacted Script') : undefined,
+          y + height,
+        )}
+      {toBudgetHeight > 0 &&
+        renderText(
+          t('To budget'),
+          toBudgetHeight / 2,
+          13,
+          1,
+          undefined,
+          y + height,
+        )}
     </Layer>
   );
 }
