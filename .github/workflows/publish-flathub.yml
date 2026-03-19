@@ -92,7 +92,7 @@ jobs:
           echo "APPIMAGE_ARM64_SHA256=$APPIMAGE_ARM64_SHA256" >> "$GITHUB_ENV"
 
       - name: Checkout Flathub repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: flathub/com.actualbudget.actual
           token: ${{ secrets.FLATHUB_GITHUB_TOKEN }}
@@ -113,7 +113,7 @@ jobs:
           cat com.actualbudget.actual.yml
 
       - name: Create PR in Flathub repo
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         with:
           token: ${{ secrets.FLATHUB_GITHUB_TOKEN }}
           commit-message: 'Update Actual flatpak to version ${{ steps.resolve_version.outputs.version }}'

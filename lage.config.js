@@ -17,6 +17,7 @@ module.exports = {
     },
     build: {
       type: 'npmScript',
+      dependsOn: ['^build'],
       cache: true,
       options: {
         outputGlob: ['lib-dist/**', 'dist/**', 'build/**'],

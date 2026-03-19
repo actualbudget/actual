@@ -2,6 +2,7 @@ Abanca
 ABNAMRO
 ABNANL
 Activo
+actualrc
 AESUDEF
 ALZEY
 Anglais
@@ -110,8 +111,8 @@ KBCBE
 Keycloak
 Khurozov
 KORT
-KRW
 Kreditbank
+KRW
 lage
 LHV
 LHVBEE
