@@ -1153,15 +1153,6 @@ describe('validateThemeCss - @font-face blocks', () => {
       expect(() => validateThemeCss(css)).toThrow(/data: URIs/);
     });
 
-    it('should reject @font-face with non-font MIME type', () => {
-      const css = `@font-face {
-  font-family: 'Bad Font';
-  src: url('data:text/html;base64,${TINY_WOFF2_BASE64}') format('woff2');
-}
-:root { --font-family: 'Bad Font', sans-serif; }`;
-      expect(() => validateThemeCss(css)).toThrow(/MIME type/);
-    });
-
     it('should reject @font-face with javascript: protocol', () => {
       const css = `@font-face {
   font-family: 'Bad Font';
@@ -1169,61 +1160,6 @@ describe('validateThemeCss - @font-face blocks', () => {
 }
 :root { --font-family: 'Bad Font', sans-serif; }`;
       expect(() => validateThemeCss(css)).toThrow(/data: URIs/);
-    });
-
-    it('should reject @font-face with data: image MIME type', () => {
-      const css = `@font-face {
-  font-family: 'Bad Font';
-  src: url('data:image/svg+xml;base64,${TINY_WOFF2_BASE64}') format('woff2');
-}
-:root { --font-family: 'Bad Font', sans-serif; }`;
-      expect(() => validateThemeCss(css)).toThrow(/MIME type/);
-    });
-
-    it('should reject @font-face with forbidden property', () => {
-      const css = `@font-face {
-  font-family: 'Bad Font';
-  src: url('${TINY_WOFF2_DATA_URI}') format('woff2');
-  content: 'malicious';
-}
-:root { --font-family: 'Bad Font', sans-serif; }`;
-      expect(() => validateThemeCss(css)).toThrow(
-        /Invalid @font-face property/,
-      );
-    });
-
-    it('should reject @font-face with invalid format hint', () => {
-      const css = `@font-face {
-  font-family: 'Bad Font';
-  src: url('${TINY_WOFF2_DATA_URI}') format('svg');
-}
-:root { --font-family: 'Bad Font', sans-serif; }`;
-      expect(() => validateThemeCss(css)).toThrow(/font format hint/);
-    });
-
-    it('should reject @font-face without font-family', () => {
-      const css = `@font-face {
-  src: url('${TINY_WOFF2_DATA_URI}') format('woff2');
-}
-:root { --color-primary: #007bff; }`;
-      expect(() => validateThemeCss(css)).toThrow(/font-family/);
-    });
-
-    it('should reject @font-face without src', () => {
-      const css = `@font-face {
-  font-family: 'No Src Font';
-}
-:root { --color-primary: #007bff; }`;
-      expect(() => validateThemeCss(css)).toThrow(/src/);
-    });
-
-    it('should reject font-family with special characters in name', () => {
-      const css = `@font-face {
-  font-family: 'Font<script>';
-  src: url('${TINY_WOFF2_DATA_URI}') format('woff2');
-}
-:root { --color-primary: #007bff; }`;
-      expect(() => validateThemeCss(css)).toThrow(/font-family name/);
     });
 
     it('should accept any font name in --font-family (no allowlist)', () => {

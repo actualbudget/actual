@@ -213,41 +213,6 @@ export const MAX_FONT_FILE_SIZE = 2 * 1024 * 1024;
 /** Maximum total size of all embedded font data across all @font-face blocks. 10 MB. */
 export const MAX_TOTAL_FONT_SIZE = 10 * 1024 * 1024;
 
-/** Allowed MIME types for data: URI fonts. */
-const FONT_DATA_URI_MIME_TYPES = new Set([
-  'font/woff2',
-  'font/woff',
-  'font/ttf',
-  'font/otf',
-  'font/opentype',
-  'application/font-woff',
-  'application/font-woff2',
-  'application/x-font-ttf',
-  'application/x-font-opentype',
-]);
-
-/** Allowed format() hints in @font-face src. */
-const FONT_FORMAT_HINTS = new Set([
-  'woff2',
-  'woff',
-  'truetype',
-  'opentype',
-  'embedded-opentype',
-]);
-
-/** Allowed properties inside @font-face. Values are not validated beyond
- *  font-family (name format) and src (data: URIs only) — the other properties
- *  are harmless rendering hints that don't affect security. */
-const FONT_FACE_ALLOWED_PROPERTIES = new Set([
-  'font-family',
-  'src',
-  'font-weight',
-  'font-style',
-  'font-display',
-  'font-stretch',
-  'unicode-range',
-]);
-
 /**
  * Extract @font-face blocks from CSS. Returns the blocks and the remaining CSS.
  * Only matches top-level @font-face blocks (not nested inside other rules).
@@ -280,94 +245,46 @@ function extractFontFaceBlocks(css: string): {
 }
 
 /**
- * Validate a data: URI for a font. Returns the estimated decoded size.
- * Only allows font/* and application/font-* MIME types with base64 encoding.
+ * Validate @font-face blocks: only data: URIs allowed (no remote URLs).
+ * Enforces size limits to prevent DoS.
  */
-function validateFontDataUri(uri: string): number {
-  // Pattern: data:<mime>;base64,<data>
-  const match = uri.match(
-    /^data:([a-zA-Z0-9/._+-]+);base64,([A-Za-z0-9+/=\s]+)$/,
-  );
-  if (!match) {
-    throw new Error(
-      'Invalid font src: only data: URIs with base64 encoding are allowed. ' +
-        'Remote URLs are not permitted to protect user privacy.',
-    );
-  }
-
-  const mime = match[1].toLowerCase();
-  const base64Data = match[2].replace(/\s/g, '');
-
-  if (!FONT_DATA_URI_MIME_TYPES.has(mime)) {
-    throw new Error(
-      `Invalid font MIME type "${mime}". Allowed types: ${[...FONT_DATA_URI_MIME_TYPES].join(', ')}.`,
-    );
-  }
-
-  // Validate that the base64 content is valid
-  if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64Data)) {
-    throw new Error('Invalid base64 encoding in font data: URI.');
-  }
-
-  // Estimate decoded size (base64 is ~4/3 of original)
-  const decodedSize = Math.ceil((base64Data.length * 3) / 4);
-  if (decodedSize > MAX_FONT_FILE_SIZE) {
-    throw new Error(
-      `Font file exceeds maximum size of ${MAX_FONT_FILE_SIZE / 1024 / 1024}MB.`,
-    );
-  }
-
-  return decodedSize;
-}
-
-/**
- * Validate the `src` property of an @font-face block.
- * Only allows `url(data:font/...;base64,...) format('...')` syntax.
- * Returns the estimated total decoded font size.
- */
-function validateFontFaceSrc(value: string): number {
-  const trimmed = value.trim();
+function validateFontFaceBlocks(fontFaceBlocks: string[]): void {
   let totalSize = 0;
+  // Match url() with quoted or unquoted content. Quoted URLs use a non-greedy
+  // match up to the closing quote; unquoted URLs match non-whitespace/non-paren.
+  const urlRegex = /url\(\s*(?:'([^']*)'|"([^"]*)"|([^'")\s]+))\s*\)/g;
 
-  // Match url(...) entries with optional format(...) hints.
-  // We use a regex to find url() blocks rather than splitting by comma,
-  // because data: URIs contain commas in `base64,<data>`.
-  const urlEntryRegex =
-    /url\(\s*(['"]?)([\s\S]*?)\1\s*\)(\s+format\(\s*(['"]?)([^'")\s]+)\4\s*\))?/g;
-  let match;
-  let foundAny = false;
-
-  while ((match = urlEntryRegex.exec(trimmed)) !== null) {
-    foundAny = true;
-    const uri = match[2];
-    const formatHint = match[5];
-
-    // URI must be a data: URI
-    if (!uri.startsWith('data:')) {
-      throw new Error(
-        'Invalid font src: only data: URIs are allowed in @font-face. ' +
-          'Remote URLs (http/https) are not permitted to protect user privacy. ' +
-          'Font files are automatically embedded when installing from GitHub.',
-      );
-    }
-
-    totalSize += validateFontDataUri(uri);
-
-    // Validate format hint if present
-    if (formatHint && !FONT_FORMAT_HINTS.has(formatHint.toLowerCase())) {
-      throw new Error(
-        `Invalid font format hint "${formatHint}". Allowed: ${[...FONT_FORMAT_HINTS].join(', ')}.`,
-      );
+  for (const block of fontFaceBlocks) {
+    urlRegex.lastIndex = 0;
+    let match;
+    while ((match = urlRegex.exec(block)) !== null) {
+      const uri = (match[1] ?? match[2] ?? match[3]).trim();
+      if (!uri.startsWith('data:')) {
+        throw new Error(
+          'Invalid font src: only data: URIs are allowed in @font-face. ' +
+            'Remote URLs (http/https) are not permitted to protect user privacy. ' +
+            'Font files are automatically embedded when installing from GitHub.',
+        );
+      }
+      // Estimate decoded size from base64 content
+      const base64Match = uri.match(/;base64,(.+)$/);
+      if (base64Match) {
+        const size = Math.ceil((base64Match[1].length * 3) / 4);
+        if (size > MAX_FONT_FILE_SIZE) {
+          throw new Error(
+            `Font file exceeds maximum size of ${MAX_FONT_FILE_SIZE / 1024 / 1024}MB.`,
+          );
+        }
+        totalSize += size;
+      }
     }
   }
 
-  if (!foundAny) {
+  if (totalSize > MAX_TOTAL_FONT_SIZE) {
     throw new Error(
-      "Invalid @font-face src value. Expected: url('data:font/...;base64,...') format('woff2').",
+      `Total embedded font data exceeds maximum of ${MAX_TOTAL_FONT_SIZE / 1024 / 1024}MB.`,
     );
   }
-
-  return totalSize;
 }
 
 /**
@@ -410,58 +327,6 @@ function splitDeclarations(content: string): string[] {
   if (trimmed) declarations.push(trimmed);
 
   return declarations;
-}
-
-/**
- * Validate a single @font-face block's content and collect the declared font-family.
- * Returns the estimated font data size.
- */
-function validateFontFaceBlock(blockContent: string): number {
-  const declarations = splitDeclarations(blockContent);
-
-  let fontFamily: string | null = null;
-  let hasSrc = false;
-  let blockSize = 0;
-
-  for (const decl of declarations) {
-    const colonIndex = decl.indexOf(':');
-    if (colonIndex === -1) {
-      throw new Error(`Invalid @font-face declaration: "${decl}"`);
-    }
-
-    const property = decl.substring(0, colonIndex).trim().toLowerCase();
-    const value = decl.substring(colonIndex + 1).trim();
-
-    if (!FONT_FACE_ALLOWED_PROPERTIES.has(property)) {
-      throw new Error(
-        `Invalid @font-face property "${property}". Allowed properties: ${[...FONT_FACE_ALLOWED_PROPERTIES].join(', ')}.`,
-      );
-    }
-
-    // Only font-family and src need value validation — the rest are
-    // harmless rendering hints gated by the property allowlist above.
-    if (property === 'font-family') {
-      const name = stripQuotes(value);
-      if (!name || !/^[a-zA-Z0-9 _-]+$/.test(name)) {
-        throw new Error(
-          `Invalid @font-face font-family name "${value}". Must be a simple alphanumeric name (letters, digits, spaces, hyphens, underscores).`,
-        );
-      }
-      fontFamily = name;
-    } else if (property === 'src') {
-      blockSize = validateFontFaceSrc(value);
-      hasSrc = true;
-    }
-  }
-
-  if (!fontFamily) {
-    throw new Error('@font-face block must include a font-family declaration.');
-  }
-  if (!hasSrc) {
-    throw new Error('@font-face block must include a src declaration.');
-  }
-
-  return blockSize;
 }
 
 // ─── :root block validation ─────────────────────────────────────────────────
@@ -546,18 +411,8 @@ export function validateThemeCss(css: string): string {
   // Extract @font-face blocks (if any) from the CSS
   const { fontFaceBlocks, remaining } = extractFontFaceBlocks(cleaned);
 
-  // Validate each @font-face block
-  let totalFontSize = 0;
-
-  for (const block of fontFaceBlocks) {
-    totalFontSize += validateFontFaceBlock(block);
-  }
-
-  if (totalFontSize > MAX_TOTAL_FONT_SIZE) {
-    throw new Error(
-      `Total embedded font data exceeds maximum of ${MAX_TOTAL_FONT_SIZE / 1024 / 1024}MB.`,
-    );
-  }
+  // Validate @font-face blocks (reject remote URLs, enforce size limits)
+  validateFontFaceBlocks(fontFaceBlocks);
 
   // Now validate the remaining CSS (should be exactly :root { ... })
   const rootMatch = remaining.match(/^:root\s*\{/);
