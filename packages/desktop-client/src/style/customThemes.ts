@@ -80,142 +80,22 @@ export async function fetchDirectCss(url: string): Promise<string> {
 }
 
 /**
- * Allowlist of safe font families for custom themes.
- *
- * Security rationale: For --font-* CSS variables, we allow:
- * 1. System-installed and bundled fonts (zero network requests)
- * 2. Custom font names declared via @font-face in the same theme CSS
- *    (fonts are embedded as data: URIs at install time — no runtime requests)
- *
- * This prevents third-party tracking via font requests while still
- * enabling truly custom fonts through local embedding.
- */
-export const SAFE_FONT_FAMILIES: ReadonlySet<string> = new Set([
-  // === CSS generic font families ===
-  'sans-serif',
-  'serif',
-  'monospace',
-  'cursive',
-  'fantasy',
-  'system-ui',
-  'ui-sans-serif',
-  'ui-serif',
-  'ui-monospace',
-  'ui-rounded',
-  'math',
-  'emoji',
-
-  // === Bundled with Actual ===
-  'Inter Variable',
-  'Redacted Script',
-
-  // === Common web-safe / system fonts ===
-  // Sans-serif
-  'Arial',
-  'Helvetica',
-  'Helvetica Neue',
-  'Verdana',
-  'Geneva',
-  'Tahoma',
-  'Trebuchet MS',
-  'Segoe UI',
-  'Roboto',
-  'Ubuntu',
-  'Cantarell',
-  'Fira Sans',
-  'Droid Sans',
-  'Oxygen',
-  'Lucida Grande',
-  'Lucida Sans Unicode',
-  'Lucida Sans',
-  'DejaVu Sans',
-  'Noto Sans',
-  'Liberation Sans',
-  'Calibri',
-  'Gill Sans',
-  'Optima',
-  'Futura',
-  'Century Gothic',
-  'Franklin Gothic Medium',
-  // macOS
-  'SF Pro',
-  'SF Pro Display',
-  'SF Pro Text',
-  'SF Pro Rounded',
-  '-apple-system',
-  'BlinkMacSystemFont',
-
-  // Serif
-  'Georgia',
-  'Times New Roman',
-  'Times',
-  'Palatino',
-  'Palatino Linotype',
-  'Book Antiqua',
-  'Garamond',
-  'Cambria',
-  'Constantia',
-  'Baskerville',
-  'Hoefler Text',
-  'Didot',
-  'Bodoni MT',
-  'Rockwell',
-  'DejaVu Serif',
-  'Noto Serif',
-  'Liberation Serif',
-  // macOS
-  'New York',
-  'Charter',
-  'Iowan Old Style',
-
-  // Monospace
-  'Courier New',
-  'Courier',
-  'Consolas',
-  'Monaco',
-  'Menlo',
-  'Andale Mono',
-  'Lucida Console',
-  'DejaVu Sans Mono',
-  'Noto Sans Mono',
-  'Liberation Mono',
-  'Source Code Pro',
-  'Fira Mono',
-  'Fira Code',
-  'JetBrains Mono',
-  'IBM Plex Mono',
-  // macOS
-  'SF Mono',
-]);
-
-/**
- * Normalised lookup: lower-cased font name → canonical (display) name.
- * Used for case-insensitive matching while preserving original casing.
- */
-const SAFE_FONT_FAMILIES_LOWER: ReadonlyMap<string, string> = new Map(
-  [...SAFE_FONT_FAMILIES].map(f => [f.toLowerCase(), f]),
-);
-
-/**
  * Validate a font-family value for a --font-* CSS variable.
  *
- * Accepts a comma-separated list of font names. Each font name is
- * matched case-insensitively against either:
- * 1. The static SAFE_FONT_FAMILIES allowlist (system/web-safe fonts)
- * 2. Font names declared via @font-face in the same theme CSS
+ * Any font name is allowed — referencing a font the user doesn't have
+ * installed simply triggers the browser's normal fallback behaviour
+ * (no network requests). The only things we block are function calls
+ * (url(), expression(), etc.) because those could load external resources
+ * or execute expressions.
  *
  * Quoted or unquoted font names are both accepted.
  *
  * Examples of accepted values:
  *   Georgia, serif
  *   'Fira Code', monospace
- *   "My Theme Font", sans-serif     (if declared in @font-face)
+ *   "My Theme Font", sans-serif
  */
-function validateFontFamilyValue(
-  value: string,
-  property: string,
-  declaredFonts?: ReadonlySet<string>,
-): void {
+function validateFontFamilyValue(value: string, property: string): void {
   const trimmed = value.trim();
   if (!trimmed) return; // empty values are allowed
 
@@ -238,30 +118,12 @@ function validateFontFamilyValue(
       );
     }
 
-    // Reject anything that looks like a function call (url(), etc.)
+    // Reject anything that looks like a function call (url(), expression(), etc.)
     if (/\(/.test(name)) {
       throw new Error(
-        `Invalid font-family value for "${property}": function calls are not allowed. Only safe font names are permitted.`,
+        `Invalid font-family value for "${property}": function calls are not allowed. Only font names are permitted.`,
       );
     }
-
-    // Case-insensitive lookup against static allowlist
-    if (SAFE_FONT_FAMILIES_LOWER.has(name.toLowerCase())) {
-      continue;
-    }
-
-    // Check against custom fonts declared in @font-face blocks
-    if (declaredFonts) {
-      const lowerName = name.toLowerCase();
-      if ([...declaredFonts].some(f => f.toLowerCase() === lowerName)) {
-        continue;
-      }
-    }
-
-    throw new Error(
-      `Invalid font-family value "${name}" for "${property}". Only safe system/web-safe fonts and fonts declared via @font-face are allowed. ` +
-        `External fonts are not permitted to protect user privacy.`,
-    );
   }
 }
 
@@ -280,16 +142,11 @@ function isValidSimpleVarValue(value: string): boolean {
  * Allows: colors (hex, rgb/rgba, hsl/hsla), lengths, numbers, keywords, and var(--name) only (no fallbacks).
  * Font properties (--font-*) are validated against a safe font family allowlist instead.
  */
-function validatePropertyValue(
-  value: string,
-  property: string,
-  declaredFonts?: ReadonlySet<string>,
-): void {
-  // Font-family properties use a dedicated validator: comma-separated safe font names only.
-  // We match specific property name patterns rather than all --font-* to avoid
-  // catching unrelated variables like --font-weight or --font-size.
-  if (/^--font-(family|mono|heading|ui|display|code)$/i.test(property)) {
-    validateFontFamilyValue(value, property, declaredFonts);
+function validatePropertyValue(value: string, property: string): void {
+  // Font properties use a dedicated validator that accepts any font name
+  // but rejects function calls (url(), expression(), etc.).
+  if (/^--font-/i.test(property)) {
+    validateFontFamilyValue(value, property);
     return;
   }
   if (!value || value.length === 0) {
@@ -678,10 +535,7 @@ function validateFontFaceBlock(
  * Validate the content inside a :root { ... } block.
  * Only CSS custom properties (--*) with safe values are allowed.
  */
-function validateRootContent(
-  rootContent: string,
-  declaredFonts?: ReadonlySet<string>,
-): void {
+function validateRootContent(rootContent: string): void {
   // Check for forbidden at-rules inside :root
   if (/@[a-z-]+/i.test(rootContent)) {
     throw new Error(
@@ -741,7 +595,7 @@ function validateRootContent(
     }
 
     const value = decl.substring(colonIndex + 1).trim();
-    validatePropertyValue(value, property, declaredFonts);
+    validatePropertyValue(value, property);
   }
 }
 
@@ -807,8 +661,8 @@ export function validateThemeCss(css: string): string {
 
   const rootContent = remaining.substring(openBrace + 1, closeBrace).trim();
 
-  // Validate :root content with knowledge of declared fonts
-  validateRootContent(rootContent, declaredFonts);
+  // Validate :root content
+  validateRootContent(rootContent);
 
   // Check nothing after :root
   const afterRoot = remaining.substring(closeBrace + 1).trim();

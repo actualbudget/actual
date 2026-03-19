@@ -4,7 +4,6 @@ import { describe, expect, it } from 'vitest';
 import {
   MAX_FONT_FILE_SIZE,
   parseInstalledTheme,
-  SAFE_FONT_FAMILIES,
   validateThemeCss,
 } from './customThemes';
 import type { InstalledTheme } from './customThemes';
@@ -967,12 +966,6 @@ describe('validateThemeCss - font properties (--font-*)', () => {
   describe('invalid font-family values - security', () => {
     it.each([
       {
-        description: 'unknown/external font name',
-        css: `:root { --font-family: 'Comic Sans MS'; }`,
-        expectedPattern:
-          /Only safe system\/web-safe fonts and fonts declared via @font-face/,
-      },
-      {
         description: 'url() function in font value',
         css: `:root { --font-family: url('https://evil.com/font.woff2'); }`,
         expectedPattern: /function calls are not allowed/,
@@ -983,31 +976,14 @@ describe('validateThemeCss - font properties (--font-*)', () => {
         expectedPattern: /function calls are not allowed/,
       },
       {
-        description: 'javascript: in font value',
-        css: `:root { --font-family: javascript:alert(1); }`,
-        expectedPattern: /function calls are not allowed/,
-      },
-      {
         description: 'expression() in font value',
         css: `:root { --font-family: expression(alert(1)); }`,
         expectedPattern: /function calls are not allowed/,
       },
       {
-        description: 'font with unknown name in stack',
-        css: `:root { --font-family: 'My Custom Font', sans-serif; }`,
-        expectedPattern:
-          /Only safe system\/web-safe fonts and fonts declared via @font-face/,
-      },
-      {
         description: 'empty font name between commas',
         css: `:root { --font-family: Arial, , sans-serif; }`,
         expectedPattern: /empty font name/,
-      },
-      {
-        description: 'random string that is not a font',
-        css: `:root { --font-family: something-random; }`,
-        expectedPattern:
-          /Only safe system\/web-safe fonts and fonts declared via @font-face/,
       },
       {
         description: 'Google Fonts URL attempt',
@@ -1024,49 +1000,33 @@ describe('validateThemeCss - font properties (--font-*)', () => {
         css: `:root { --font-family: format('woff2'); }`,
         expectedPattern: /function calls are not allowed/,
       },
+      {
+        description: 'rgb() function in font property',
+        css: `:root { --font-family: rgb(0, 0, 0); }`,
+        expectedPattern: /function calls are not allowed/,
+      },
     ])('should reject CSS with $description', ({ css, expectedPattern }) => {
       expect(() => validateThemeCss(css)).toThrow(expectedPattern);
     });
   });
 
-  describe('font properties do not accept color-style values', () => {
-    it('should reject hex color in font property', () => {
-      const css = `:root { --font-family: #007bff; }`;
-      expect(() => validateThemeCss(css)).toThrow(
-        /Only safe system\/web-safe fonts and fonts declared via @font-face/,
-      );
-    });
-
-    it('should reject rgb() in font property', () => {
-      const css = `:root { --font-family: rgb(0, 0, 0); }`;
-      expect(() => validateThemeCss(css)).toThrow(/function calls/);
-    });
-  });
-
-  describe('SAFE_FONT_FAMILIES allowlist', () => {
-    it('should contain common generic families', () => {
-      expect(SAFE_FONT_FAMILIES.has('sans-serif')).toBe(true);
-      expect(SAFE_FONT_FAMILIES.has('serif')).toBe(true);
-      expect(SAFE_FONT_FAMILIES.has('monospace')).toBe(true);
-      expect(SAFE_FONT_FAMILIES.has('system-ui')).toBe(true);
-    });
-
-    it('should contain the bundled fonts', () => {
-      expect(SAFE_FONT_FAMILIES.has('Inter Variable')).toBe(true);
-      expect(SAFE_FONT_FAMILIES.has('Redacted Script')).toBe(true);
-    });
-
-    it('should contain common web-safe fonts', () => {
-      expect(SAFE_FONT_FAMILIES.has('Arial')).toBe(true);
-      expect(SAFE_FONT_FAMILIES.has('Georgia')).toBe(true);
-      expect(SAFE_FONT_FAMILIES.has('Courier New')).toBe(true);
-      expect(SAFE_FONT_FAMILIES.has('Verdana')).toBe(true);
-    });
-
-    it('should not contain arbitrary fonts', () => {
-      expect(SAFE_FONT_FAMILIES.has('Comic Sans MS')).toBe(false);
-      expect(SAFE_FONT_FAMILIES.has('Papyrus')).toBe(false);
-      expect(SAFE_FONT_FAMILIES.has('My Custom Font')).toBe(false);
+  describe('any font name is valid (no allowlist)', () => {
+    it.each([
+      {
+        description: 'Comic Sans MS',
+        css: `:root { --font-family: 'Comic Sans MS'; }`,
+      },
+      {
+        description: 'custom font name',
+        css: `:root { --font-family: 'My Custom Font', sans-serif; }`,
+      },
+      {
+        description: 'arbitrary string',
+        css: `:root { --font-family: something-random; }`,
+      },
+      { description: 'Papyrus', css: `:root { --font-family: Papyrus; }` },
+    ])('should accept $description as a font name', ({ css }) => {
+      expect(() => validateThemeCss(css)).not.toThrow();
     });
   });
 });
@@ -1266,15 +1226,13 @@ describe('validateThemeCss - @font-face blocks', () => {
       expect(() => validateThemeCss(css)).toThrow(/font-family name/);
     });
 
-    it('should reject undeclared custom font in --font-family', () => {
+    it('should accept any font name in --font-family (no allowlist)', () => {
       const css = `@font-face {
   font-family: 'Declared Font';
   src: url('${TINY_WOFF2_DATA_URI}') format('woff2');
 }
 :root { --font-family: 'Undeclared Font', sans-serif; }`;
-      expect(() => validateThemeCss(css)).toThrow(
-        /Only safe system\/web-safe fonts and fonts declared via @font-face/,
-      );
+      expect(() => validateThemeCss(css)).not.toThrow();
     });
 
     it('should reject oversized font data', () => {
