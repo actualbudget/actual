@@ -1,7 +1,11 @@
 // oxlint-disable eslint/no-script-url
 import { describe, expect, it } from 'vitest';
 
-import { parseInstalledTheme, validateThemeCss } from './customThemes';
+import {
+  parseInstalledTheme,
+  SAFE_FONT_FAMILIES,
+  validateThemeCss,
+} from './customThemes';
 import type { InstalledTheme } from './customThemes';
 
 describe('validateThemeCss', () => {
@@ -780,12 +784,6 @@ describe('validateThemeCss', () => {
       }`,
       },
       {
-        description: 'value with comma-separated values',
-        css: `:root {
-        --font-family: Arial, sans-serif;
-      }`,
-      },
-      {
         description: 'property name with invalid characters',
         css: `:root {
         --color[primary]: #007bff;
@@ -864,6 +862,198 @@ describe('validateThemeCss', () => {
       }`;
 
       expect(() => validateThemeCss(css)).toThrow();
+    });
+  });
+});
+
+describe('validateThemeCss - font properties (--font-*)', () => {
+  describe('valid font-family values', () => {
+    it.each([
+      {
+        description: 'single generic family',
+        css: `:root { --font-body: sans-serif; }`,
+      },
+      {
+        description: 'single generic family (serif)',
+        css: `:root { --font-body: serif; }`,
+      },
+      {
+        description: 'single generic family (monospace)',
+        css: `:root { --font-body: monospace; }`,
+      },
+      {
+        description: 'system-ui keyword',
+        css: `:root { --font-body: system-ui; }`,
+      },
+      {
+        description: 'bundled font (Inter Variable)',
+        css: `:root { --font-body: Inter Variable; }`,
+      },
+      {
+        description: 'quoted bundled font',
+        css: `:root { --font-body: 'Inter Variable'; }`,
+      },
+      {
+        description: 'double-quoted bundled font',
+        css: `:root { --font-body: "Inter Variable"; }`,
+      },
+      {
+        description: 'web-safe font (Georgia)',
+        css: `:root { --font-body: Georgia; }`,
+      },
+      {
+        description: 'web-safe font (Times New Roman) quoted',
+        css: `:root { --font-body: 'Times New Roman'; }`,
+      },
+      {
+        description: 'comma-separated font stack',
+        css: `:root { --font-body: Georgia, serif; }`,
+      },
+      {
+        description: 'full font stack with multiple fonts',
+        css: `:root { --font-body: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }`,
+      },
+      {
+        description: 'monospace font stack',
+        css: `:root { --font-mono: 'Fira Code', Consolas, Monaco, monospace; }`,
+      },
+      {
+        description: 'case-insensitive matching (arial)',
+        css: `:root { --font-body: arial; }`,
+      },
+      {
+        description: 'case-insensitive matching (GEORGIA)',
+        css: `:root { --font-body: GEORGIA; }`,
+      },
+      {
+        description: 'macOS system font',
+        css: `:root { --font-body: 'SF Pro', -apple-system, sans-serif; }`,
+      },
+      {
+        description: 'mixed with color variables',
+        css: `:root {
+        --color-primary: #007bff;
+        --font-body: Georgia, serif;
+        --color-secondary: #6c757d;
+      }`,
+      },
+      {
+        description: '--font-mono property',
+        css: `:root { --font-mono: 'JetBrains Mono', 'Fira Code', monospace; }`,
+      },
+      {
+        description: '--font-heading property',
+        css: `:root { --font-heading: Palatino, 'Book Antiqua', serif; }`,
+      },
+      {
+        description: 'empty value',
+        css: `:root { --font-body: ; }`,
+      },
+    ])('should accept CSS with $description', ({ css }) => {
+      expect(() => validateThemeCss(css)).not.toThrow();
+    });
+  });
+
+  describe('invalid font-family values - security', () => {
+    it.each([
+      {
+        description: 'unknown/external font name',
+        css: `:root { --font-body: 'Comic Sans MS'; }`,
+        expectedPattern: /Only safe system and web-safe fonts are allowed/,
+      },
+      {
+        description: 'url() function in font value',
+        css: `:root { --font-body: url('https://evil.com/font.woff2'); }`,
+        expectedPattern: /function calls are not allowed/,
+      },
+      {
+        description: 'url() with data: URI',
+        css: `:root { --font-body: url(data:font/woff2;base64,abc123); }`,
+        expectedPattern: /function calls are not allowed/,
+      },
+      {
+        description: 'javascript: in font value',
+        css: `:root { --font-body: javascript:alert(1); }`,
+        expectedPattern: /function calls are not allowed/,
+      },
+      {
+        description: 'expression() in font value',
+        css: `:root { --font-body: expression(alert(1)); }`,
+        expectedPattern: /function calls are not allowed/,
+      },
+      {
+        description: 'font with unknown name in stack',
+        css: `:root { --font-body: 'My Custom Font', sans-serif; }`,
+        expectedPattern: /Only safe system and web-safe fonts are allowed/,
+      },
+      {
+        description: 'empty font name between commas',
+        css: `:root { --font-body: Arial, , sans-serif; }`,
+        expectedPattern: /empty font name/,
+      },
+      {
+        description: 'random string that is not a font',
+        css: `:root { --font-body: something-random; }`,
+        expectedPattern: /Only safe system and web-safe fonts are allowed/,
+      },
+      {
+        description: 'Google Fonts URL attempt',
+        css: `:root { --font-body: url(https://fonts.googleapis.com/css2?family=Roboto); }`,
+        expectedPattern: /function calls are not allowed/,
+      },
+      {
+        description: 'local() function',
+        css: `:root { --font-body: local(Arial); }`,
+        expectedPattern: /function calls are not allowed/,
+      },
+      {
+        description: 'format() function',
+        css: `:root { --font-body: format('woff2'); }`,
+        expectedPattern: /function calls are not allowed/,
+      },
+    ])('should reject CSS with $description', ({ css, expectedPattern }) => {
+      expect(() => validateThemeCss(css)).toThrow(expectedPattern);
+    });
+  });
+
+  describe('font properties do not accept color-style values', () => {
+    it('should reject hex color in font property', () => {
+      const css = `:root { --font-body: #007bff; }`;
+      expect(() => validateThemeCss(css)).toThrow(
+        /Only safe system and web-safe fonts are allowed/,
+      );
+    });
+
+    it('should reject rgb() in font property', () => {
+      const css = `:root { --font-body: rgb(0, 0, 0); }`;
+      expect(() => validateThemeCss(css)).toThrow(/function calls/);
+    });
+  });
+
+  describe('SAFE_FONT_FAMILIES allowlist', () => {
+    it('should contain common generic families', () => {
+      expect(SAFE_FONT_FAMILIES.has('sans-serif')).toBe(true);
+      expect(SAFE_FONT_FAMILIES.has('serif')).toBe(true);
+      expect(SAFE_FONT_FAMILIES.has('monospace')).toBe(true);
+      expect(SAFE_FONT_FAMILIES.has('system-ui')).toBe(true);
+    });
+
+    it('should contain the bundled fonts', () => {
+      expect(SAFE_FONT_FAMILIES.has('Inter Variable')).toBe(true);
+      expect(SAFE_FONT_FAMILIES.has('Redacted Script')).toBe(true);
+    });
+
+    it('should contain common web-safe fonts', () => {
+      expect(SAFE_FONT_FAMILIES.has('Arial')).toBe(true);
+      expect(SAFE_FONT_FAMILIES.has('Georgia')).toBe(true);
+      expect(SAFE_FONT_FAMILIES.has('Courier New')).toBe(true);
+      expect(SAFE_FONT_FAMILIES.has('Verdana')).toBe(true);
+    });
+
+    it('should not contain arbitrary fonts', () => {
+      expect(SAFE_FONT_FAMILIES.has('Comic Sans MS')).toBe(false);
+      expect(SAFE_FONT_FAMILIES.has('Papyrus')).toBe(false);
+      expect(SAFE_FONT_FAMILIES.has('My Custom Font')).toBe(false);
     });
   });
 });

@@ -79,6 +79,176 @@ export async function fetchDirectCss(url: string): Promise<string> {
   return response.text();
 }
 
+/**
+ * Allowlist of safe font families for custom themes.
+ *
+ * Security rationale: We ONLY allow system-installed and bundled fonts.
+ * This avoids any network requests that could be used for user tracking
+ * (e.g., Google Fonts, Adobe Fonts, or any external font URL could leak
+ * user IP addresses, timing data, and user-agent strings to third parties).
+ *
+ * No @font-face, no url(), no external resources — just fonts the OS
+ * or the app already ships.
+ */
+export const SAFE_FONT_FAMILIES: ReadonlySet<string> = new Set([
+  // === CSS generic font families ===
+  'sans-serif',
+  'serif',
+  'monospace',
+  'cursive',
+  'fantasy',
+  'system-ui',
+  'ui-sans-serif',
+  'ui-serif',
+  'ui-monospace',
+  'ui-rounded',
+  'math',
+  'emoji',
+
+  // === Bundled with Actual ===
+  'Inter Variable',
+  'Redacted Script',
+
+  // === Common web-safe / system fonts ===
+  // Sans-serif
+  'Arial',
+  'Helvetica',
+  'Helvetica Neue',
+  'Verdana',
+  'Geneva',
+  'Tahoma',
+  'Trebuchet MS',
+  'Segoe UI',
+  'Roboto',
+  'Ubuntu',
+  'Cantarell',
+  'Fira Sans',
+  'Droid Sans',
+  'Oxygen',
+  'Lucida Grande',
+  'Lucida Sans Unicode',
+  'Lucida Sans',
+  'DejaVu Sans',
+  'Noto Sans',
+  'Liberation Sans',
+  'Calibri',
+  'Gill Sans',
+  'Optima',
+  'Futura',
+  'Century Gothic',
+  'Franklin Gothic Medium',
+  // macOS
+  'SF Pro',
+  'SF Pro Display',
+  'SF Pro Text',
+  'SF Pro Rounded',
+  '-apple-system',
+  'BlinkMacSystemFont',
+
+  // Serif
+  'Georgia',
+  'Times New Roman',
+  'Times',
+  'Palatino',
+  'Palatino Linotype',
+  'Book Antiqua',
+  'Garamond',
+  'Cambria',
+  'Constantia',
+  'Baskerville',
+  'Hoefler Text',
+  'Didot',
+  'Bodoni MT',
+  'Rockwell',
+  'DejaVu Serif',
+  'Noto Serif',
+  'Liberation Serif',
+  // macOS
+  'New York',
+  'Charter',
+  'Iowan Old Style',
+
+  // Monospace
+  'Courier New',
+  'Courier',
+  'Consolas',
+  'Monaco',
+  'Menlo',
+  'Andale Mono',
+  'Lucida Console',
+  'DejaVu Sans Mono',
+  'Noto Sans Mono',
+  'Liberation Mono',
+  'Source Code Pro',
+  'Fira Mono',
+  'Fira Code',
+  'JetBrains Mono',
+  'IBM Plex Mono',
+  // macOS
+  'SF Mono',
+]);
+
+/**
+ * Normalised lookup: lower-cased font name → canonical (display) name.
+ * Used for case-insensitive matching while preserving original casing.
+ */
+const SAFE_FONT_FAMILIES_LOWER: ReadonlyMap<string, string> = new Map(
+  [...SAFE_FONT_FAMILIES].map(f => [f.toLowerCase(), f]),
+);
+
+/**
+ * Validate a font-family value for a --font-* CSS variable.
+ *
+ * Accepts a comma-separated list of font names. Each font name is
+ * matched case-insensitively against the safe font allowlist.
+ * Quoted or unquoted font names are both accepted.
+ *
+ * Examples of accepted values:
+ *   Georgia, serif
+ *   'Fira Code', monospace
+ *   "SF Pro", -apple-system, sans-serif
+ *   system-ui
+ */
+function validateFontFamilyValue(value: string, property: string): void {
+  const trimmed = value.trim();
+  if (!trimmed) return; // empty values are allowed
+
+  // Split on commas, then validate each font name
+  const families = trimmed.split(',');
+
+  for (const raw of families) {
+    // Strip leading/trailing whitespace and optional quotes
+    let name = raw.trim();
+    if (
+      (name.startsWith("'") && name.endsWith("'")) ||
+      (name.startsWith('"') && name.endsWith('"'))
+    ) {
+      name = name.slice(1, -1).trim();
+    }
+
+    if (!name) {
+      throw new Error(
+        `Invalid font-family value for "${property}": empty font name in comma-separated list.`,
+      );
+    }
+
+    // Reject anything that looks like a function call (url(), etc.)
+    if (/\(/.test(name)) {
+      throw new Error(
+        `Invalid font-family value for "${property}": function calls are not allowed. Only safe font names are permitted.`,
+      );
+    }
+
+    // Case-insensitive lookup
+    if (!SAFE_FONT_FAMILIES_LOWER.has(name.toLowerCase())) {
+      throw new Error(
+        `Invalid font-family value "${name}" for "${property}". Only safe system and web-safe fonts are allowed. ` +
+          `External fonts are not permitted to protect user privacy.`,
+      );
+    }
+  }
+}
+
 /** Only var(--custom-property-name) is allowed; no fallbacks. Variable name: -- then [a-zA-Z0-9_-]+ (no trailing dash). */
 const VAR_ONLY_PATTERN = /^var\s*\(\s*(--[a-zA-Z0-9_-]+)\s*\)$/i;
 
@@ -92,8 +262,16 @@ function isValidSimpleVarValue(value: string): boolean {
 /**
  * Validate that a CSS property value only contains allowed content (allowlist approach).
  * Allows: colors (hex, rgb/rgba, hsl/hsla), lengths, numbers, keywords, and var(--name) only (no fallbacks).
+ * Font properties (--font-*) are validated against a safe font family allowlist instead.
  */
 function validatePropertyValue(value: string, property: string): void {
+  // Font-family properties use a dedicated validator: comma-separated safe font names only.
+  // We match specific property name patterns rather than all --font-* to avoid
+  // catching unrelated variables like --font-weight or --font-size.
+  if (/^--font-(body|mono|heading|family|ui|display|code)$/i.test(property)) {
+    validateFontFamilyValue(value, property);
+    return;
+  }
   if (!value || value.length === 0) {
     return; // Empty values are allowed
   }
