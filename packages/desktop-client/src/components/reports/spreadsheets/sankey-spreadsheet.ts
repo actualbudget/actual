@@ -40,7 +40,6 @@ type AggregatedBudget = {
 type SankeyNode = {
   name: string;
   toBudget?: number;
-  nodeType: 'budget' | 'expense';
   isNegative?: boolean;
 };
 
@@ -377,7 +376,6 @@ function transformToSankeyData(
   data.nodes.push({
     name: rootNodeName,
     toBudget: toBudgetAmount,
-    nodeType: 'budget',
   });
 
   // Collect (mainCategoryIndex, sum) pairs for a single shared "Other" node
@@ -390,7 +388,7 @@ function transformToSankeyData(
   for (const mainCategoryName of sortedMainCategories) {
     const mainCategorySum = categoryTotals.get(mainCategoryName) ?? 0;
 
-    data.nodes.push({ name: mainCategoryName, nodeType: 'expense' });
+    data.nodes.push({ name: mainCategoryName });
     const mainCategoryIndex = data.nodes.length - 1;
     data.links.push({
       source: 0,
@@ -408,7 +406,6 @@ function transformToSankeyData(
       if (topKeys.has(`${entry.mainCategory}/${entry.subcategory}`)) {
         data.nodes.push({
           name: entry.subcategory,
-          nodeType: 'expense',
           isNegative: entry.isNegative,
         });
         data.links.push({
@@ -433,7 +430,7 @@ function transformToSankeyData(
 
   // Single shared "Other" node for all below-top-N subcategories
   if (otherLinks.length > 0) {
-    data.nodes.push({ name: 'Other', nodeType: 'expense' });
+    data.nodes.push({ name: 'Other' });
     const otherIndex = data.nodes.length - 1;
     for (const link of otherLinks) {
       data.links.push({
@@ -449,6 +446,7 @@ function transformToSankeyData(
     return compactSankeyData(data, 5);
   }
 
+  console.log('Sankey data', data);
   return data;
 }
 
@@ -464,7 +462,7 @@ function compactSankeyData(data: SankeyData, topN: number = 5): SankeyData {
   for (const link of data.links) {
     const sourceNode = data.nodes[link.source];
     const targetNode = data.nodes[link.target];
-    if (sourceNode.name === rootNodeName && targetNode.nodeType === 'expense') {
+    if (sourceNode.name === rootNodeName) {
       mainCategoryTotals.set(
         targetNode.name,
         (mainCategoryTotals.get(targetNode.name) || 0) + link.value,
@@ -490,9 +488,7 @@ function compactSankeyData(data: SankeyData, topN: number = 5): SankeyData {
 
   for (const categoryName of categoriesToAdd) {
     const originalNode = data.nodes.find(n => n.name === categoryName);
-    compactedData.nodes.push(
-      originalNode || { name: categoryName, nodeType: 'expense' },
-    );
+    compactedData.nodes.push(originalNode || { name: categoryName });
   }
 
   // Add links for top categories

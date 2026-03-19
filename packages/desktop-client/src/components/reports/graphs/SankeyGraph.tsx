@@ -22,7 +22,6 @@ type SankeyGraphNode = SankeyData['nodes'][number] & {
   hasChildren?: boolean;
   isCollapsed?: boolean;
   toBudget?: number;
-  nodeType?: 'income' | 'expense' | 'budget';
   isNegative?: boolean;
   actualValue?: number;
   targetLinks?: Array<Record<string, unknown>>;
@@ -89,6 +88,7 @@ type SankeyNodeProps = {
   index: number;
   payload: SankeyGraphNode;
   containerWidth: number;
+  containerHeight: number;
 };
 function SankeyNode({
   x,
@@ -98,6 +98,7 @@ function SankeyNode({
   index,
   payload,
   containerWidth,
+  containerHeight,
 }: SankeyNodeProps) {
   const privacyMode = usePrivacyMode();
   const format = useFormat();
@@ -106,8 +107,11 @@ function SankeyNode({
   const fillColor = payload.isNegative ? theme.errorText : theme.reportsBlue;
 
   const toBudget = payload.toBudget ?? 0;
-  const toBudgetHeight =
+  const availableBelow = Math.max(0, containerHeight - 25 - (y + height));
+  const proportionalHeight =
     toBudget > 0 && payload.value ? height * (toBudget / payload.value) : 0;
+  const isClamped = proportionalHeight > availableBelow;
+  const toBudgetHeight = Math.min(proportionalHeight, availableBelow);
 
   const renderText = (
     text: string,
@@ -133,15 +137,27 @@ function SankeyNode({
   return (
     <Layer>
       <Rectangle x={x} y={y} width={width} height={height} fill={fillColor} />
-      {toBudgetHeight > 0 && (
-        <Rectangle
-          x={x}
-          y={y + height}
-          width={width}
-          height={toBudgetHeight}
-          fill={theme.toBudgetPositive}
-        />
-      )}
+      {toBudgetHeight > 0 &&
+        (isClamped ? (
+          <polygon
+            points={`
+              ${x},${y + height}
+              ${x + width},${y + height}
+              ${x + width},${y + height + toBudgetHeight - 8}
+              ${x + width / 2},${y + height + toBudgetHeight}
+              ${x},${y + height + toBudgetHeight - 8}
+            `}
+            fill={theme.toBudgetPositive}
+          />
+        ) : (
+          <Rectangle
+            x={x}
+            y={y + height}
+            width={width}
+            height={toBudgetHeight}
+            fill={theme.toBudgetPositive}
+          />
+        ))}
       {renderText(payload.name || '', height / 2)}
       {renderText(
         format(payload.value, 'financial'),
@@ -193,7 +209,13 @@ export function SankeyGraph({
         <ResponsiveContainer>
           <Sankey
             data={data}
-            node={props => <SankeyNode {...props} containerWidth={width} />}
+            node={props => (
+              <SankeyNode
+                {...props}
+                containerWidth={width}
+                containerHeight={height}
+              />
+            )}
             link={props => (
               <SankeyLink
                 {...props}
