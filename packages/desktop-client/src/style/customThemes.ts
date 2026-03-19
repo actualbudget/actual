@@ -235,7 +235,9 @@ const FONT_FORMAT_HINTS = new Set([
   'embedded-opentype',
 ]);
 
-/** Allowed properties inside @font-face. */
+/** Allowed properties inside @font-face. Values are not validated beyond
+ *  font-family (name format) and src (data: URIs only) — the other properties
+ *  are harmless rendering hints that don't affect security. */
 const FONT_FACE_ALLOWED_PROPERTIES = new Set([
   'font-family',
   'src',
@@ -245,23 +247,6 @@ const FONT_FACE_ALLOWED_PROPERTIES = new Set([
   'font-stretch',
   'unicode-range',
 ]);
-
-/** Valid font-weight values. */
-const FONT_WEIGHT_PATTERN = /^(normal|bold|lighter|bolder|\d{3})(\s+\d{3})?$/i;
-
-/** Valid font-style values. */
-const FONT_STYLE_PATTERN = /^(normal|italic|oblique(\s+\d+deg)?)$/i;
-
-/** Valid font-display values. */
-const FONT_DISPLAY_PATTERN = /^(auto|block|swap|fallback|optional)$/i;
-
-/** Valid font-stretch values. */
-const FONT_STRETCH_PATTERN =
-  /^(normal|ultra-condensed|extra-condensed|condensed|semi-condensed|semi-expanded|expanded|extra-expanded|ultra-expanded|\d+%(\s+\d+%)?)$/i;
-
-/** Valid unicode-range values. */
-const UNICODE_RANGE_PATTERN =
-  /^(U\+[0-9a-fA-F]{1,6}(-[0-9a-fA-F]{1,6})?)(\s*,\s*U\+[0-9a-fA-F]{1,6}(-[0-9a-fA-F]{1,6})?)*$/i;
 
 /**
  * Extract @font-face blocks from CSS. Returns the blocks and the remaining CSS.
@@ -453,56 +438,19 @@ function validateFontFaceBlock(blockContent: string): number {
       );
     }
 
-    switch (property) {
-      case 'font-family': {
-        const name = stripQuotes(value);
-        if (!name || !/^[a-zA-Z0-9 _-]+$/.test(name)) {
-          throw new Error(
-            `Invalid @font-face font-family name "${value}". Must be a simple alphanumeric name (letters, digits, spaces, hyphens, underscores).`,
-          );
-        }
-        fontFamily = name;
-        break;
+    // Only font-family and src need value validation — the rest are
+    // harmless rendering hints gated by the property allowlist above.
+    if (property === 'font-family') {
+      const name = stripQuotes(value);
+      if (!name || !/^[a-zA-Z0-9 _-]+$/.test(name)) {
+        throw new Error(
+          `Invalid @font-face font-family name "${value}". Must be a simple alphanumeric name (letters, digits, spaces, hyphens, underscores).`,
+        );
       }
-      case 'src':
-        blockSize = validateFontFaceSrc(value);
-        hasSrc = true;
-        break;
-      case 'font-weight':
-        if (!FONT_WEIGHT_PATTERN.test(value)) {
-          throw new Error(
-            `Invalid @font-face font-weight "${value}". Expected: normal, bold, or a numeric weight (100-900).`,
-          );
-        }
-        break;
-      case 'font-style':
-        if (!FONT_STYLE_PATTERN.test(value)) {
-          throw new Error(
-            `Invalid @font-face font-style "${value}". Expected: normal, italic, or oblique.`,
-          );
-        }
-        break;
-      case 'font-display':
-        if (!FONT_DISPLAY_PATTERN.test(value)) {
-          throw new Error(
-            `Invalid @font-face font-display "${value}". Expected: auto, block, swap, fallback, or optional.`,
-          );
-        }
-        break;
-      case 'font-stretch':
-        if (!FONT_STRETCH_PATTERN.test(value)) {
-          throw new Error(`Invalid @font-face font-stretch "${value}".`);
-        }
-        break;
-      case 'unicode-range':
-        if (!UNICODE_RANGE_PATTERN.test(value)) {
-          throw new Error(
-            `Invalid @font-face unicode-range "${value}". Expected: U+hex or U+hex-hex ranges.`,
-          );
-        }
-        break;
-      default:
-        break;
+      fontFamily = name;
+    } else if (property === 'src') {
+      blockSize = validateFontFaceSrc(value);
+      hasSrc = true;
     }
   }
 
@@ -651,8 +599,9 @@ export function validateThemeCss(css: string): string {
     );
   }
 
-  // Return the original CSS so it can be injected properly
-  return css.trim();
+  // Return the comment-stripped CSS — this is what was actually validated,
+  // so we inject exactly what we checked (defense-in-depth).
+  return cleaned;
 }
 
 // ─── Font embedding (install-time) ─────────────────────────────────────────
