@@ -451,65 +451,36 @@ function transformToSankeyData(
 
 function compactSankeyData(data: SankeyData, topN: number = 5): SankeyData {
   const compactedData: SankeyData = { nodes: [], links: [] };
+  compactedData.nodes.push(data.nodes[0]); // root node
 
-  // Add root node
-  const rootNodeName = data.nodes[0].name;
-  compactedData.nodes.push(data.nodes[0]);
+  // Find all root→mainCategory links and sort by value descending
+  const rootLinks = data.links
+    .filter(link => link.source === 0)
+    .sort((a, b) => b.value - a.value);
 
-  // Collect main categories and their total values
-  const mainCategoryTotals = new Map<string, number>();
-  for (const link of data.links) {
-    const sourceNode = data.nodes[link.source];
-    const targetNode = data.nodes[link.target];
-    if (sourceNode.name === rootNodeName) {
-      mainCategoryTotals.set(
-        targetNode.name,
-        (mainCategoryTotals.get(targetNode.name) || 0) + link.value,
-      );
-    }
-  }
+  const topLinks = rootLinks.slice(0, topN - 1);
+  const otherLinks = rootLinks.slice(topN - 1);
+  const otherTotal = otherLinks.reduce((sum, link) => sum + link.value, 0);
 
-  // Sort main categories by total value descending
-  const sortedCategories = Array.from(mainCategoryTotals.entries()).sort(
-    (a, b) => b[1] - a[1],
-  );
-
-  // Take top N, lump the rest into "Other"
-  const topCategories = sortedCategories.slice(0, topN);
-  const otherCategories = sortedCategories.slice(topN);
-  const otherTotal = otherCategories.reduce((sum, [, value]) => sum + value, 0);
-
-  // Add top categories and "Other" if needed
-  const categoriesToAdd = [...topCategories.map(([name]) => name)];
-  if (otherTotal > 0) {
-    categoriesToAdd.push('Other');
-  }
-
-  for (const categoryName of categoriesToAdd) {
-    const originalNode = data.nodes.find(n => n.name === categoryName);
-    compactedData.nodes.push(originalNode || { name: categoryName });
-  }
-
-  // Add links for top categories
-  for (const [categoryName, value] of topCategories) {
-    const targetIndex = compactedData.nodes.findIndex(
-      n => n.name === categoryName,
-    );
+  // Add top category nodes and their links from root
+  for (const link of topLinks) {
+    compactedData.nodes.push(data.nodes[link.target]);
     compactedData.links.push({
-      source: 0, // Root node
-      target: targetIndex,
-      value,
+      source: 0,
+      target: compactedData.nodes.length - 1,
+      value: link.value,
     });
   }
 
-  // Add link for "Other" if needed
+  // Lump remaining categories into a single "Other" node
   if (otherTotal > 0) {
-    const otherIndex = compactedData.nodes.findIndex(n => n.name === 'Other');
+    compactedData.nodes.push({ name: 'Other' });
     compactedData.links.push({
-      source: 0, // Root node
-      target: otherIndex,
+      source: 0,
+      target: compactedData.nodes.length - 1,
       value: otherTotal,
     });
   }
+
   return compactedData;
 }

@@ -64,8 +64,8 @@ function SankeyLink({
   color,
 }: SankeyLinkProps) {
   const linkColor = payload.isNegative ? theme.errorText : color;
-  const strokeWidth = isHovered ? linkWidth + 2 : linkWidth;
-  const strokeOpacity = isHovered ? 1 : 0.5;
+  const strokeWidth = linkWidth;
+  const strokeOpacity = isHovered ? 1 : 0.6;
 
   return (
     <path
