@@ -82,13 +82,13 @@ export async function fetchDirectCss(url: string): Promise<string> {
 /**
  * Allowlist of safe font families for custom themes.
  *
- * Security rationale: We ONLY allow system-installed and bundled fonts.
- * This avoids any network requests that could be used for user tracking
- * (e.g., Google Fonts, Adobe Fonts, or any external font URL could leak
- * user IP addresses, timing data, and user-agent strings to third parties).
+ * Security rationale: For --font-* CSS variables, we allow:
+ * 1. System-installed and bundled fonts (zero network requests)
+ * 2. Custom font names declared via @font-face in the same theme CSS
+ *    (fonts are embedded as data: URIs at install time — no runtime requests)
  *
- * No @font-face, no url(), no external resources — just fonts the OS
- * or the app already ships.
+ * This prevents third-party tracking via font requests while still
+ * enabling truly custom fonts through local embedding.
  */
 export const SAFE_FONT_FAMILIES: ReadonlySet<string> = new Set([
   // === CSS generic font families ===
@@ -200,16 +200,22 @@ const SAFE_FONT_FAMILIES_LOWER: ReadonlyMap<string, string> = new Map(
  * Validate a font-family value for a --font-* CSS variable.
  *
  * Accepts a comma-separated list of font names. Each font name is
- * matched case-insensitively against the safe font allowlist.
+ * matched case-insensitively against either:
+ * 1. The static SAFE_FONT_FAMILIES allowlist (system/web-safe fonts)
+ * 2. Font names declared via @font-face in the same theme CSS
+ *
  * Quoted or unquoted font names are both accepted.
  *
  * Examples of accepted values:
  *   Georgia, serif
  *   'Fira Code', monospace
- *   "SF Pro", -apple-system, sans-serif
- *   system-ui
+ *   "My Theme Font", sans-serif     (if declared in @font-face)
  */
-function validateFontFamilyValue(value: string, property: string): void {
+function validateFontFamilyValue(
+  value: string,
+  property: string,
+  declaredFonts?: ReadonlySet<string>,
+): void {
   const trimmed = value.trim();
   if (!trimmed) return; // empty values are allowed
 
@@ -239,13 +245,23 @@ function validateFontFamilyValue(value: string, property: string): void {
       );
     }
 
-    // Case-insensitive lookup
-    if (!SAFE_FONT_FAMILIES_LOWER.has(name.toLowerCase())) {
-      throw new Error(
-        `Invalid font-family value "${name}" for "${property}". Only safe system and web-safe fonts are allowed. ` +
-          `External fonts are not permitted to protect user privacy.`,
-      );
+    // Case-insensitive lookup against static allowlist
+    if (SAFE_FONT_FAMILIES_LOWER.has(name.toLowerCase())) {
+      continue;
     }
+
+    // Check against custom fonts declared in @font-face blocks
+    if (declaredFonts) {
+      const lowerName = name.toLowerCase();
+      if ([...declaredFonts].some(f => f.toLowerCase() === lowerName)) {
+        continue;
+      }
+    }
+
+    throw new Error(
+      `Invalid font-family value "${name}" for "${property}". Only safe system/web-safe fonts and fonts declared via @font-face are allowed. ` +
+        `External fonts are not permitted to protect user privacy.`,
+    );
   }
 }
 
@@ -264,12 +280,16 @@ function isValidSimpleVarValue(value: string): boolean {
  * Allows: colors (hex, rgb/rgba, hsl/hsla), lengths, numbers, keywords, and var(--name) only (no fallbacks).
  * Font properties (--font-*) are validated against a safe font family allowlist instead.
  */
-function validatePropertyValue(value: string, property: string): void {
+function validatePropertyValue(
+  value: string,
+  property: string,
+  declaredFonts?: ReadonlySet<string>,
+): void {
   // Font-family properties use a dedicated validator: comma-separated safe font names only.
   // We match specific property name patterns rather than all --font-* to avoid
   // catching unrelated variables like --font-weight or --font-size.
   if (/^--font-(body|mono|heading|family|ui|display|code)$/i.test(property)) {
-    validateFontFamilyValue(value, property);
+    validateFontFamilyValue(value, property, declaredFonts);
     return;
   }
   if (!value || value.length === 0) {
@@ -323,73 +343,359 @@ function validatePropertyValue(value: string, property: string): void {
   );
 }
 
+// ─── @font-face validation ──────────────────────────────────────────────────
+
+/** Maximum size of a single base64-encoded font (bytes of decoded data). 2 MB. */
+export const MAX_FONT_FILE_SIZE = 2 * 1024 * 1024;
+
+/** Maximum total size of all embedded font data across all @font-face blocks. 10 MB. */
+export const MAX_TOTAL_FONT_SIZE = 10 * 1024 * 1024;
+
+/** Allowed MIME types for data: URI fonts. */
+const FONT_DATA_URI_MIME_TYPES = new Set([
+  'font/woff2',
+  'font/woff',
+  'font/ttf',
+  'font/otf',
+  'font/opentype',
+  'application/font-woff',
+  'application/font-woff2',
+  'application/x-font-ttf',
+  'application/x-font-opentype',
+]);
+
+/** Allowed format() hints in @font-face src. */
+const FONT_FORMAT_HINTS = new Set([
+  'woff2',
+  'woff',
+  'truetype',
+  'opentype',
+  'embedded-opentype',
+]);
+
+/** Allowed properties inside @font-face. */
+const FONT_FACE_ALLOWED_PROPERTIES = new Set([
+  'font-family',
+  'src',
+  'font-weight',
+  'font-style',
+  'font-display',
+  'font-stretch',
+  'unicode-range',
+]);
+
+/** Valid font-weight values. */
+const FONT_WEIGHT_PATTERN = /^(normal|bold|lighter|bolder|\d{3})(\s+\d{3})?$/i;
+
+/** Valid font-style values. */
+const FONT_STYLE_PATTERN = /^(normal|italic|oblique(\s+\d+deg)?)$/i;
+
+/** Valid font-display values. */
+const FONT_DISPLAY_PATTERN = /^(auto|block|swap|fallback|optional)$/i;
+
+/** Valid font-stretch values. */
+const FONT_STRETCH_PATTERN =
+  /^(normal|ultra-condensed|extra-condensed|condensed|semi-condensed|semi-expanded|expanded|extra-expanded|ultra-expanded|\d+%(\s+\d+%)?)$/i;
+
+/** Valid unicode-range values. */
+const UNICODE_RANGE_PATTERN =
+  /^(U\+[0-9a-fA-F]{1,6}(-[0-9a-fA-F]{1,6})?)(\s*,\s*U\+[0-9a-fA-F]{1,6}(-[0-9a-fA-F]{1,6})?)*$/i;
+
 /**
- * Validate that CSS contains only :root { ... } with CSS custom property (variable) declarations.
- * Must contain exactly :root { ... } and nothing else.
- * Returns the validated CSS or throws an error.
+ * Extract @font-face blocks from CSS. Returns the blocks and the remaining CSS.
+ * Only matches top-level @font-face blocks (not nested inside other rules).
  */
-export function validateThemeCss(css: string): string {
-  // Strip multi-line comments before validation
-  // Note: Single-line comments (//) are not stripped to avoid corrupting CSS values like URLs
-  const cleaned = css.replace(/\/\*[\s\S]*?\*\//g, '').trim();
+function extractFontFaceBlocks(css: string): {
+  fontFaceBlocks: string[];
+  remaining: string;
+} {
+  const fontFaceBlocks: string[] = [];
+  let remaining = css;
 
-  // Must contain exactly :root { ... } and nothing else
-  // Find :root { ... } and extract content, then check there's nothing after
-  const rootMatch = cleaned.match(/^:root\s*\{/);
-  if (!rootMatch) {
+  // Match @font-face { ... } blocks. We use indexOf-based parsing
+  // instead of regex to handle the braces correctly.
+  const searchFrom = 0;
+  while (searchFrom < remaining.length) {
+    const atIdx = remaining.indexOf('@font-face', searchFrom);
+    if (atIdx === -1) break;
+
+    const openBrace = remaining.indexOf('{', atIdx);
+    if (openBrace === -1) break;
+
+    const closeBrace = remaining.indexOf('}', openBrace + 1);
+    if (closeBrace === -1) break;
+
+    const blockContent = remaining.substring(openBrace + 1, closeBrace).trim();
+    fontFaceBlocks.push(blockContent);
+
+    // Remove the @font-face block from remaining
+    remaining =
+      remaining.substring(0, atIdx) + remaining.substring(closeBrace + 1);
+    // Don't advance searchFrom — the string shifted
+  }
+
+  return { fontFaceBlocks, remaining: remaining.trim() };
+}
+
+/**
+ * Validate a data: URI for a font. Returns the estimated decoded size.
+ * Only allows font/* and application/font-* MIME types with base64 encoding.
+ */
+function validateFontDataUri(uri: string): number {
+  // Pattern: data:<mime>;base64,<data>
+  const match = uri.match(
+    /^data:([a-zA-Z0-9/._+-]+);base64,([A-Za-z0-9+/=\s]+)$/,
+  );
+  if (!match) {
     throw new Error(
-      'Theme CSS must contain exactly :root { ... } with CSS variable definitions. No other selectors or content allowed.',
+      'Invalid font src: only data: URIs with base64 encoding are allowed. ' +
+        'Remote URLs are not permitted to protect user privacy.',
     );
   }
 
-  // Find the opening brace after :root
-  const rootStart = cleaned.indexOf(':root');
-  const openBrace = cleaned.indexOf('{', rootStart);
+  const mime = match[1].toLowerCase();
+  const base64Data = match[2].replace(/\s/g, '');
 
-  if (openBrace === -1) {
+  if (!FONT_DATA_URI_MIME_TYPES.has(mime)) {
     throw new Error(
-      'Theme CSS must contain exactly :root { ... } with CSS variable definitions. No other selectors or content allowed.',
+      `Invalid font MIME type "${mime}". Allowed types: ${[...FONT_DATA_URI_MIME_TYPES].join(', ')}.`,
     );
   }
 
-  // Find the first closing brace (nested blocks will be caught by the check below)
-  const closeBrace = cleaned.indexOf('}', openBrace + 1);
+  // Validate that the base64 content is valid
+  if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64Data)) {
+    throw new Error('Invalid base64 encoding in font data: URI.');
+  }
 
-  if (closeBrace === -1) {
+  // Estimate decoded size (base64 is ~4/3 of original)
+  const decodedSize = Math.ceil((base64Data.length * 3) / 4);
+  if (decodedSize > MAX_FONT_FILE_SIZE) {
     throw new Error(
-      'Theme CSS must contain exactly :root { ... } with CSS variable definitions. No other selectors or content allowed.',
+      `Font file exceeds maximum size of ${MAX_FONT_FILE_SIZE / 1024 / 1024}MB.`,
     );
   }
 
-  // Extract content inside :root { ... }
-  const rootContent = cleaned.substring(openBrace + 1, closeBrace).trim();
+  return decodedSize;
+}
 
-  // Check for forbidden at-rules first (before nested block check, since at-rules with braces would trigger that)
-  // Comprehensive list of CSS at-rules that should not be allowed
-  // This includes @import, @media, @keyframes, @font-face, @supports, @charset,
-  // @namespace, @page, @layer, @container, @scope, and any other at-rules
+/**
+ * Validate the `src` property of an @font-face block.
+ * Only allows `url(data:font/...;base64,...) format('...')` syntax.
+ * Returns the estimated total decoded font size.
+ */
+function validateFontFaceSrc(value: string): number {
+  const trimmed = value.trim();
+  let totalSize = 0;
+
+  // Match url(...) entries with optional format(...) hints.
+  // We use a regex to find url() blocks rather than splitting by comma,
+  // because data: URIs contain commas in `base64,<data>`.
+  const urlEntryRegex =
+    /url\(\s*(['"]?)([\s\S]*?)\1\s*\)(\s+format\(\s*(['"]?)([^'")\s]+)\4\s*\))?/g;
+  let match;
+  let foundAny = false;
+
+  while ((match = urlEntryRegex.exec(trimmed)) !== null) {
+    foundAny = true;
+    const uri = match[2];
+    const formatHint = match[5];
+
+    // URI must be a data: URI
+    if (!uri.startsWith('data:')) {
+      throw new Error(
+        'Invalid font src: only data: URIs are allowed in @font-face. ' +
+          'Remote URLs (http/https) are not permitted to protect user privacy. ' +
+          'Font files are automatically embedded when installing from GitHub.',
+      );
+    }
+
+    totalSize += validateFontDataUri(uri);
+
+    // Validate format hint if present
+    if (formatHint && !FONT_FORMAT_HINTS.has(formatHint.toLowerCase())) {
+      throw new Error(
+        `Invalid font format hint "${formatHint}". Allowed: ${[...FONT_FORMAT_HINTS].join(', ')}.`,
+      );
+    }
+  }
+
+  if (!foundAny) {
+    throw new Error(
+      "Invalid @font-face src value. Expected: url('data:font/...;base64,...') format('woff2').",
+    );
+  }
+
+  return totalSize;
+}
+
+/**
+ * Split CSS declarations by semicolons, but respect quoted strings and url() contents.
+ * This is needed because data: URIs contain semicolons (e.g., "data:font/woff2;base64,...").
+ */
+function splitDeclarations(content: string): string[] {
+  const declarations: string[] = [];
+  let current = '';
+  let inSingleQuote = false;
+  let inDoubleQuote = false;
+  let parenDepth = 0;
+
+  for (let i = 0; i < content.length; i++) {
+    const ch = content[i];
+
+    if (ch === "'" && !inDoubleQuote && parenDepth === 0) {
+      inSingleQuote = !inSingleQuote;
+    } else if (ch === '"' && !inSingleQuote && parenDepth === 0) {
+      inDoubleQuote = !inDoubleQuote;
+    } else if (ch === '(' && !inSingleQuote && !inDoubleQuote) {
+      parenDepth++;
+    } else if (
+      ch === ')' &&
+      !inSingleQuote &&
+      !inDoubleQuote &&
+      parenDepth > 0
+    ) {
+      parenDepth--;
+    }
+
+    if (ch === ';' && !inSingleQuote && !inDoubleQuote && parenDepth === 0) {
+      const trimmed = current.trim();
+      if (trimmed) declarations.push(trimmed);
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+
+  const trimmed = current.trim();
+  if (trimmed) declarations.push(trimmed);
+
+  return declarations;
+}
+
+/**
+ * Validate a single @font-face block's content and collect the declared font-family.
+ * Returns the estimated font data size.
+ */
+function validateFontFaceBlock(
+  blockContent: string,
+  declaredFonts: Set<string>,
+): number {
+  const declarations = splitDeclarations(blockContent);
+
+  let fontFamily: string | null = null;
+  let hasSrc = false;
+  let blockSize = 0;
+
+  for (const decl of declarations) {
+    const colonIndex = decl.indexOf(':');
+    if (colonIndex === -1) {
+      throw new Error(`Invalid @font-face declaration: "${decl}"`);
+    }
+
+    const property = decl.substring(0, colonIndex).trim().toLowerCase();
+    const value = decl.substring(colonIndex + 1).trim();
+
+    if (!FONT_FACE_ALLOWED_PROPERTIES.has(property)) {
+      throw new Error(
+        `Invalid @font-face property "${property}". Allowed properties: ${[...FONT_FACE_ALLOWED_PROPERTIES].join(', ')}.`,
+      );
+    }
+
+    switch (property) {
+      case 'font-family': {
+        // Must be a quoted string
+        let name = value;
+        if (
+          (name.startsWith("'") && name.endsWith("'")) ||
+          (name.startsWith('"') && name.endsWith('"'))
+        ) {
+          name = name.slice(1, -1).trim();
+        }
+        if (!name || !/^[a-zA-Z0-9 _-]+$/.test(name)) {
+          throw new Error(
+            `Invalid @font-face font-family name "${value}". Must be a simple alphanumeric name (letters, digits, spaces, hyphens, underscores).`,
+          );
+        }
+        fontFamily = name;
+        break;
+      }
+      case 'src':
+        blockSize = validateFontFaceSrc(value);
+        hasSrc = true;
+        break;
+      case 'font-weight':
+        if (!FONT_WEIGHT_PATTERN.test(value)) {
+          throw new Error(
+            `Invalid @font-face font-weight "${value}". Expected: normal, bold, or a numeric weight (100-900).`,
+          );
+        }
+        break;
+      case 'font-style':
+        if (!FONT_STYLE_PATTERN.test(value)) {
+          throw new Error(
+            `Invalid @font-face font-style "${value}". Expected: normal, italic, or oblique.`,
+          );
+        }
+        break;
+      case 'font-display':
+        if (!FONT_DISPLAY_PATTERN.test(value)) {
+          throw new Error(
+            `Invalid @font-face font-display "${value}". Expected: auto, block, swap, fallback, or optional.`,
+          );
+        }
+        break;
+      case 'font-stretch':
+        if (!FONT_STRETCH_PATTERN.test(value)) {
+          throw new Error(`Invalid @font-face font-stretch "${value}".`);
+        }
+        break;
+      case 'unicode-range':
+        if (!UNICODE_RANGE_PATTERN.test(value)) {
+          throw new Error(
+            `Invalid @font-face unicode-range "${value}". Expected: U+hex or U+hex-hex ranges.`,
+          );
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  if (!fontFamily) {
+    throw new Error('@font-face block must include a font-family declaration.');
+  }
+  if (!hasSrc) {
+    throw new Error('@font-face block must include a src declaration.');
+  }
+
+  declaredFonts.add(fontFamily);
+  return blockSize;
+}
+
+// ─── :root block validation ─────────────────────────────────────────────────
+
+/**
+ * Validate the content inside a :root { ... } block.
+ * Only CSS custom properties (--*) with safe values are allowed.
+ */
+function validateRootContent(
+  rootContent: string,
+  declaredFonts?: ReadonlySet<string>,
+): void {
+  // Check for forbidden at-rules inside :root
   if (/@[a-z-]+/i.test(rootContent)) {
     throw new Error(
       'Theme CSS contains forbidden at-rules (@import, @media, @keyframes, etc.). Only CSS variable declarations are allowed inside :root { ... }.',
     );
   }
 
-  // Check for nested blocks (additional selectors) - should not have any { after extracting :root content
+  // Check for nested blocks
   if (/\{/.test(rootContent)) {
     throw new Error(
       'Theme CSS contains nested blocks or additional selectors. Only CSS variable declarations are allowed inside :root { ... }.',
     );
   }
 
-  // Check that there's nothing after the closing brace
-  const afterRoot = cleaned.substring(closeBrace + 1).trim();
-  if (afterRoot.length > 0) {
-    throw new Error(
-      'Theme CSS must contain exactly :root { ... } with CSS variable definitions. No other selectors or content allowed.',
-    );
-  }
-
-  // Parse declarations and validate each one
   const declarations = rootContent
     .split(';')
     .map(d => d.trim())
@@ -403,27 +709,18 @@ export function validateThemeCss(css: string): string {
 
     const property = decl.substring(0, colonIndex).trim();
 
-    // Property must start with --
     if (!property.startsWith('--')) {
       throw new Error(
         `Invalid property "${property}". Only CSS custom properties (starting with --) are allowed.`,
       );
     }
 
-    // Validate property name format
-    // CSS custom property names must:
-    // - Start with --
-    // - Not be empty (not just --)
-    // - Not end with a dash
-    // - Contain only valid characters (letters, digits, underscore, dash, but not at start/end positions)
     if (property === '--' || property === '-') {
       throw new Error(
         `Invalid property "${property}". Property name cannot be empty or contain only dashes.`,
       );
     }
 
-    // Check for invalid characters in property name (no brackets, spaces, special chars except dash/underscore)
-    // Property name after -- should only contain: letters, digits, underscore, and dashes (not consecutive dashes at start/end)
     const propertyNameAfterDashes = property.substring(2);
     if (propertyNameAfterDashes.length === 0) {
       throw new Error(
@@ -431,27 +728,208 @@ export function validateThemeCss(css: string): string {
       );
     }
 
-    // Check for invalid characters (no brackets, no special characters except underscore and dash)
     if (!/^[a-zA-Z0-9_-]+$/.test(propertyNameAfterDashes)) {
       throw new Error(
         `Invalid property "${property}". Property name contains invalid characters. Only letters, digits, underscores, and dashes are allowed.`,
       );
     }
 
-    // Check that property doesn't end with a dash (after the -- prefix)
     if (property.endsWith('-')) {
       throw new Error(
         `Invalid property "${property}". Property name cannot end with a dash.`,
       );
     }
 
-    // Extract and validate the value
     const value = decl.substring(colonIndex + 1).trim();
-    validatePropertyValue(value, property);
+    validatePropertyValue(value, property, declaredFonts);
+  }
+}
+
+// ─── Main validation entry point ────────────────────────────────────────────
+
+/**
+ * Validate theme CSS. Accepts:
+ * 1. Optional @font-face blocks (with data: URI fonts only)
+ * 2. Exactly one :root { ... } block with CSS variable declarations
+ *
+ * @font-face blocks must appear before :root.
+ * Font names declared in @font-face are allowed in --font-* property values.
+ *
+ * Returns the validated CSS or throws an error.
+ */
+export function validateThemeCss(css: string): string {
+  // Strip multi-line comments before validation
+  const cleaned = css.replace(/\/\*[\s\S]*?\*\//g, '').trim();
+
+  // Extract @font-face blocks (if any) from the CSS
+  const { fontFaceBlocks, remaining } = extractFontFaceBlocks(cleaned);
+
+  // Validate each @font-face block and collect declared font names
+  const declaredFonts = new Set<string>();
+  let totalFontSize = 0;
+
+  for (const block of fontFaceBlocks) {
+    totalFontSize += validateFontFaceBlock(block, declaredFonts);
   }
 
-  // Return the original CSS (with :root wrapper) so it can be injected properly
+  if (totalFontSize > MAX_TOTAL_FONT_SIZE) {
+    throw new Error(
+      `Total embedded font data exceeds maximum of ${MAX_TOTAL_FONT_SIZE / 1024 / 1024}MB.`,
+    );
+  }
+
+  // Now validate the remaining CSS (should be exactly :root { ... })
+  const rootMatch = remaining.match(/^:root\s*\{/);
+  if (!rootMatch) {
+    // If there are @font-face blocks but no :root, that's an error
+    // If there's nothing at all, that's also an error
+    throw new Error(
+      'Theme CSS must contain :root { ... } with CSS variable definitions. No other selectors or content allowed.',
+    );
+  }
+
+  const rootStart = remaining.indexOf(':root');
+  const openBrace = remaining.indexOf('{', rootStart);
+
+  if (openBrace === -1) {
+    throw new Error(
+      'Theme CSS must contain :root { ... } with CSS variable definitions. No other selectors or content allowed.',
+    );
+  }
+
+  const closeBrace = remaining.indexOf('}', openBrace + 1);
+
+  if (closeBrace === -1) {
+    throw new Error(
+      'Theme CSS must contain :root { ... } with CSS variable definitions. No other selectors or content allowed.',
+    );
+  }
+
+  const rootContent = remaining.substring(openBrace + 1, closeBrace).trim();
+
+  // Validate :root content with knowledge of declared fonts
+  validateRootContent(rootContent, declaredFonts);
+
+  // Check nothing after :root
+  const afterRoot = remaining.substring(closeBrace + 1).trim();
+  if (afterRoot.length > 0) {
+    throw new Error(
+      'Theme CSS must contain :root { ... } with CSS variable definitions. No other selectors or content allowed.',
+    );
+  }
+
+  // Return the original CSS so it can be injected properly
   return css.trim();
+}
+
+// ─── Font embedding (install-time) ─────────────────────────────────────────
+
+/** Map of file extensions to font MIME types for data: URI construction. */
+const FONT_EXTENSION_MIME: Record<string, string> = {
+  '.woff2': 'font/woff2',
+  '.woff': 'font/woff',
+  '.ttf': 'font/ttf',
+  '.otf': 'font/opentype',
+};
+
+/**
+ * Embed fonts referenced in @font-face blocks by fetching them from a GitHub
+ * repo and converting to data: URIs.
+ *
+ * This runs at install time only. Relative URL references like
+ * `url('./fonts/MyFont.woff2')` are resolved relative to the repo's root
+ * directory and fetched from GitHub's raw content API.
+ *
+ * The returned CSS has all font URLs replaced with self-contained data: URIs,
+ * so no network requests are needed at runtime.
+ *
+ * @param css - The raw theme CSS (may contain relative url() references)
+ * @param repo - GitHub repo in "owner/repo" format
+ * @returns CSS with all font URLs replaced by data: URIs
+ */
+export async function embedThemeFonts(
+  css: string,
+  repo: string,
+): Promise<string> {
+  const baseUrl = `https://raw.githubusercontent.com/${repo}/refs/heads/main/`;
+
+  // Find all url() references inside @font-face blocks
+  // We process the full CSS string and replace url() values that are
+  // relative paths (not data: URIs) within @font-face contexts
+  const fontFaceRegex = /@font-face\s*\{[^}]*\}/g;
+  let result = css;
+
+  const fontFaceMatches = [...css.matchAll(fontFaceRegex)];
+
+  for (const fontFaceMatch of fontFaceMatches) {
+    const block = fontFaceMatch[0];
+    let newBlock = block;
+
+    // Find url() references in this block
+    const urlRegex = /url\(\s*(['"]?)([^'")\s]+)\1\s*\)/g;
+    const urlMatches = [...block.matchAll(urlRegex)];
+
+    for (const urlMatch of urlMatches) {
+      const fullUrl = urlMatch[0];
+      const quote = urlMatch[1];
+      const path = urlMatch[2];
+
+      // Skip data: URIs — they're already embedded
+      if (path.startsWith('data:')) continue;
+
+      // Skip absolute URLs (http/https) — these are not allowed
+      if (/^https?:\/\//i.test(path)) {
+        throw new Error(
+          `Remote font URL "${path}" is not allowed. Only relative paths to fonts in the same GitHub repo are supported.`,
+        );
+      }
+
+      // Resolve relative path
+      const cleanPath = path.replace(/^\.\//, '');
+      const fontUrl = baseUrl + cleanPath;
+
+      // Determine MIME type from extension
+      const ext = cleanPath.substring(cleanPath.lastIndexOf('.')).toLowerCase();
+      const mime = FONT_EXTENSION_MIME[ext];
+      if (!mime) {
+        throw new Error(
+          `Unsupported font file extension "${ext}". Supported: ${Object.keys(FONT_EXTENSION_MIME).join(', ')}.`,
+        );
+      }
+
+      // Fetch the font file
+      const response = await fetch(fontUrl);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch font file "${cleanPath}" from ${fontUrl}: ${response.status} ${response.statusText}`,
+        );
+      }
+
+      // Convert to base64
+      const buffer = await response.arrayBuffer();
+      if (buffer.byteLength > MAX_FONT_FILE_SIZE) {
+        throw new Error(
+          `Font file "${cleanPath}" exceeds maximum size of ${MAX_FONT_FILE_SIZE / 1024 / 1024}MB.`,
+        );
+      }
+
+      const bytes = new Uint8Array(buffer);
+      let binary = '';
+      for (const byte of bytes) {
+        binary += String.fromCharCode(byte);
+      }
+      const base64 = btoa(binary);
+      const dataUri = `data:${mime};base64,${base64}`;
+
+      // Replace the url() reference with the data: URI
+      const q = quote || "'";
+      newBlock = newBlock.replace(fullUrl, `url(${q}${dataUri}${q})`);
+    }
+
+    result = result.replace(block, newBlock);
+  }
+
+  return result;
 }
 
 /**

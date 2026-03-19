@@ -2,11 +2,21 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  MAX_FONT_FILE_SIZE,
   parseInstalledTheme,
   SAFE_FONT_FAMILIES,
   validateThemeCss,
 } from './customThemes';
 import type { InstalledTheme } from './customThemes';
+
+// Small valid woff2 data URI for testing (actual content doesn't matter for validation)
+const TINY_WOFF2_BASE64 = 'AAAAAAAAAA==';
+const TINY_WOFF2_DATA_URI = `data:font/woff2;base64,${TINY_WOFF2_BASE64}`;
+const FONT_FACE_BLOCK = `@font-face {
+  font-family: 'Test Font';
+  src: url('${TINY_WOFF2_DATA_URI}') format('woff2');
+  font-display: swap;
+}`;
 
 describe('validateThemeCss', () => {
   describe('valid CSS', () => {
@@ -78,7 +88,7 @@ describe('validateThemeCss', () => {
       },
     ])('should reject $description', ({ css }) => {
       expect(() => validateThemeCss(css)).toThrow(
-        'Theme CSS must contain exactly :root { ... } with CSS variable definitions. No other selectors or content allowed.',
+        'Theme CSS must contain :root { ... } with CSS variable definitions. No other selectors or content allowed.',
       );
     });
   });
@@ -94,7 +104,7 @@ describe('validateThemeCss', () => {
         color: red;
       }`,
         expectedError:
-          'Theme CSS must contain exactly :root { ... } with CSS variable definitions. No other selectors or content allowed.',
+          'Theme CSS must contain :root { ... } with CSS variable definitions. No other selectors or content allowed.',
       },
       {
         description: 'multiple selectors',
@@ -105,7 +115,7 @@ describe('validateThemeCss', () => {
         --color-primary: #ffffff;
       }`,
         expectedError:
-          'Theme CSS must contain exactly :root { ... } with CSS variable definitions. No other selectors or content allowed.',
+          'Theme CSS must contain :root { ... } with CSS variable definitions. No other selectors or content allowed.',
       },
       {
         description: 'media queries',
@@ -118,7 +128,7 @@ describe('validateThemeCss', () => {
         }
       }`,
         expectedError:
-          'Theme CSS must contain exactly :root { ... } with CSS variable definitions. No other selectors or content allowed.',
+          'Theme CSS must contain :root { ... } with CSS variable definitions. No other selectors or content allowed.',
       },
       {
         description: 'custom selector before :root',
@@ -129,7 +139,7 @@ describe('validateThemeCss', () => {
         --color-primary: #007bff;
       }`,
         expectedError:
-          'Theme CSS must contain exactly :root { ... } with CSS variable definitions. No other selectors or content allowed.',
+          'Theme CSS must contain :root { ... } with CSS variable definitions. No other selectors or content allowed.',
       },
     ])('should reject CSS with $description', ({ css, expectedError }) => {
       expect(() => validateThemeCss(css)).toThrow(expectedError);
@@ -275,7 +285,7 @@ describe('validateThemeCss', () => {
       },
     ])('should reject $description', ({ css }) => {
       expect(() => validateThemeCss(css)).toThrow(
-        'Theme CSS must contain exactly :root { ... } with CSS variable definitions. No other selectors or content allowed.',
+        'Theme CSS must contain :root { ... } with CSS variable definitions. No other selectors or content allowed.',
       );
     });
   });
@@ -959,7 +969,8 @@ describe('validateThemeCss - font properties (--font-*)', () => {
       {
         description: 'unknown/external font name',
         css: `:root { --font-body: 'Comic Sans MS'; }`,
-        expectedPattern: /Only safe system and web-safe fonts are allowed/,
+        expectedPattern:
+          /Only safe system\/web-safe fonts and fonts declared via @font-face/,
       },
       {
         description: 'url() function in font value',
@@ -984,7 +995,8 @@ describe('validateThemeCss - font properties (--font-*)', () => {
       {
         description: 'font with unknown name in stack',
         css: `:root { --font-body: 'My Custom Font', sans-serif; }`,
-        expectedPattern: /Only safe system and web-safe fonts are allowed/,
+        expectedPattern:
+          /Only safe system\/web-safe fonts and fonts declared via @font-face/,
       },
       {
         description: 'empty font name between commas',
@@ -994,7 +1006,8 @@ describe('validateThemeCss - font properties (--font-*)', () => {
       {
         description: 'random string that is not a font',
         css: `:root { --font-body: something-random; }`,
-        expectedPattern: /Only safe system and web-safe fonts are allowed/,
+        expectedPattern:
+          /Only safe system\/web-safe fonts and fonts declared via @font-face/,
       },
       {
         description: 'Google Fonts URL attempt',
@@ -1020,7 +1033,7 @@ describe('validateThemeCss - font properties (--font-*)', () => {
     it('should reject hex color in font property', () => {
       const css = `:root { --font-body: #007bff; }`;
       expect(() => validateThemeCss(css)).toThrow(
-        /Only safe system and web-safe fonts are allowed/,
+        /Only safe system\/web-safe fonts and fonts declared via @font-face/,
       );
     });
 
@@ -1054,6 +1067,246 @@ describe('validateThemeCss - font properties (--font-*)', () => {
       expect(SAFE_FONT_FAMILIES.has('Comic Sans MS')).toBe(false);
       expect(SAFE_FONT_FAMILIES.has('Papyrus')).toBe(false);
       expect(SAFE_FONT_FAMILIES.has('My Custom Font')).toBe(false);
+    });
+  });
+});
+
+describe('validateThemeCss - @font-face blocks', () => {
+  describe('valid @font-face with data: URIs', () => {
+    it('should accept @font-face with data: URI and :root', () => {
+      const css = `${FONT_FACE_BLOCK}
+:root { --font-body: 'Test Font', sans-serif; }`;
+      expect(() => validateThemeCss(css)).not.toThrow();
+    });
+
+    it('should accept multiple @font-face blocks', () => {
+      const css = `@font-face {
+  font-family: 'Test Font';
+  src: url('${TINY_WOFF2_DATA_URI}') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Test Font';
+  src: url('${TINY_WOFF2_DATA_URI}') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+:root { --font-body: 'Test Font', sans-serif; }`;
+      expect(() => validateThemeCss(css)).not.toThrow();
+    });
+
+    it('should accept @font-face with font/woff MIME type', () => {
+      const css = `@font-face {
+  font-family: 'Woff Font';
+  src: url('data:font/woff;base64,${TINY_WOFF2_BASE64}') format('woff');
+}
+:root { --font-body: 'Woff Font', sans-serif; }`;
+      expect(() => validateThemeCss(css)).not.toThrow();
+    });
+
+    it('should accept @font-face with font/ttf MIME type', () => {
+      const css = `@font-face {
+  font-family: 'TTF Font';
+  src: url('data:font/ttf;base64,${TINY_WOFF2_BASE64}') format('truetype');
+}
+:root { --font-body: 'TTF Font', sans-serif; }`;
+      expect(() => validateThemeCss(css)).not.toThrow();
+    });
+
+    it('should accept @font-face with application/font-woff2 MIME type', () => {
+      const css = `@font-face {
+  font-family: 'App Font';
+  src: url('data:application/font-woff2;base64,${TINY_WOFF2_BASE64}') format('woff2');
+}
+:root { --font-body: 'App Font', sans-serif; }`;
+      expect(() => validateThemeCss(css)).not.toThrow();
+    });
+
+    it('should accept @font-face with font-stretch', () => {
+      const css = `@font-face {
+  font-family: 'Stretch Font';
+  src: url('${TINY_WOFF2_DATA_URI}') format('woff2');
+  font-stretch: condensed;
+}
+:root { --font-body: 'Stretch Font', sans-serif; }`;
+      expect(() => validateThemeCss(css)).not.toThrow();
+    });
+
+    it('should accept @font-face with unicode-range', () => {
+      const css = `@font-face {
+  font-family: 'Unicode Font';
+  src: url('${TINY_WOFF2_DATA_URI}') format('woff2');
+  unicode-range: U+0000-00FF;
+}
+:root { --font-body: 'Unicode Font', sans-serif; }`;
+      expect(() => validateThemeCss(css)).not.toThrow();
+    });
+
+    it('should allow custom font name in --font-body after @font-face declaration', () => {
+      const css = `@font-face {
+  font-family: 'My Custom Font';
+  src: url('${TINY_WOFF2_DATA_URI}') format('woff2');
+}
+:root { --font-body: 'My Custom Font', Georgia, serif; }`;
+      expect(() => validateThemeCss(css)).not.toThrow();
+    });
+
+    it('should accept @font-face alongside color variables', () => {
+      const css = `${FONT_FACE_BLOCK}
+:root {
+  --color-primary: #007bff;
+  --font-body: 'Test Font', sans-serif;
+  --color-secondary: #6c757d;
+}`;
+      expect(() => validateThemeCss(css)).not.toThrow();
+    });
+  });
+
+  describe('invalid @font-face - security', () => {
+    it('should reject @font-face with remote HTTP URL', () => {
+      const css = `@font-face {
+  font-family: 'Bad Font';
+  src: url('https://evil.com/font.woff2') format('woff2');
+}
+:root { --font-body: 'Bad Font', sans-serif; }`;
+      expect(() => validateThemeCss(css)).toThrow(/data: URIs/);
+    });
+
+    it('should reject @font-face with remote HTTPS URL', () => {
+      const css = `@font-face {
+  font-family: 'Bad Font';
+  src: url('https://fonts.example.com/custom.woff2') format('woff2');
+}
+:root { --font-body: 'Bad Font', sans-serif; }`;
+      expect(() => validateThemeCss(css)).toThrow(/data: URIs/);
+    });
+
+    it('should reject @font-face with relative URL (not embedded)', () => {
+      const css = `@font-face {
+  font-family: 'Bad Font';
+  src: url('./fonts/custom.woff2') format('woff2');
+}
+:root { --font-body: 'Bad Font', sans-serif; }`;
+      expect(() => validateThemeCss(css)).toThrow(/data: URIs/);
+    });
+
+    it('should reject @font-face with non-font MIME type', () => {
+      const css = `@font-face {
+  font-family: 'Bad Font';
+  src: url('data:text/html;base64,${TINY_WOFF2_BASE64}') format('woff2');
+}
+:root { --font-body: 'Bad Font', sans-serif; }`;
+      expect(() => validateThemeCss(css)).toThrow(/MIME type/);
+    });
+
+    it('should reject @font-face with javascript: protocol', () => {
+      const css = `@font-face {
+  font-family: 'Bad Font';
+  src: url('javascript:alert(1)');
+}
+:root { --font-body: 'Bad Font', sans-serif; }`;
+      expect(() => validateThemeCss(css)).toThrow(/data: URIs/);
+    });
+
+    it('should reject @font-face with data: image MIME type', () => {
+      const css = `@font-face {
+  font-family: 'Bad Font';
+  src: url('data:image/svg+xml;base64,${TINY_WOFF2_BASE64}') format('woff2');
+}
+:root { --font-body: 'Bad Font', sans-serif; }`;
+      expect(() => validateThemeCss(css)).toThrow(/MIME type/);
+    });
+
+    it('should reject @font-face with forbidden property', () => {
+      const css = `@font-face {
+  font-family: 'Bad Font';
+  src: url('${TINY_WOFF2_DATA_URI}') format('woff2');
+  content: 'malicious';
+}
+:root { --font-body: 'Bad Font', sans-serif; }`;
+      expect(() => validateThemeCss(css)).toThrow(
+        /Invalid @font-face property/,
+      );
+    });
+
+    it('should reject @font-face with invalid format hint', () => {
+      const css = `@font-face {
+  font-family: 'Bad Font';
+  src: url('${TINY_WOFF2_DATA_URI}') format('svg');
+}
+:root { --font-body: 'Bad Font', sans-serif; }`;
+      expect(() => validateThemeCss(css)).toThrow(/font format hint/);
+    });
+
+    it('should reject @font-face without font-family', () => {
+      const css = `@font-face {
+  src: url('${TINY_WOFF2_DATA_URI}') format('woff2');
+}
+:root { --color-primary: #007bff; }`;
+      expect(() => validateThemeCss(css)).toThrow(/font-family/);
+    });
+
+    it('should reject @font-face without src', () => {
+      const css = `@font-face {
+  font-family: 'No Src Font';
+}
+:root { --color-primary: #007bff; }`;
+      expect(() => validateThemeCss(css)).toThrow(/src/);
+    });
+
+    it('should reject font-family with special characters in name', () => {
+      const css = `@font-face {
+  font-family: 'Font<script>';
+  src: url('${TINY_WOFF2_DATA_URI}') format('woff2');
+}
+:root { --color-primary: #007bff; }`;
+      expect(() => validateThemeCss(css)).toThrow(/font-family name/);
+    });
+
+    it('should reject undeclared custom font in --font-body', () => {
+      const css = `@font-face {
+  font-family: 'Declared Font';
+  src: url('${TINY_WOFF2_DATA_URI}') format('woff2');
+}
+:root { --font-body: 'Undeclared Font', sans-serif; }`;
+      expect(() => validateThemeCss(css)).toThrow(
+        /Only safe system\/web-safe fonts and fonts declared via @font-face/,
+      );
+    });
+
+    it('should reject oversized font data', () => {
+      // Create a base64 string that would decode to > MAX_FONT_FILE_SIZE
+      const oversizedBase64 = 'A'.repeat(
+        Math.ceil((MAX_FONT_FILE_SIZE * 4) / 3) + 100,
+      );
+      const css = `@font-face {
+  font-family: 'Big Font';
+  src: url('data:font/woff2;base64,${oversizedBase64}') format('woff2');
+}
+:root { --font-body: 'Big Font', sans-serif; }`;
+      expect(() => validateThemeCss(css)).toThrow(/maximum size/);
+    });
+  });
+
+  describe('CSS without @font-face still works', () => {
+    it('should accept plain :root without @font-face', () => {
+      const css = `:root { --color-primary: #007bff; }`;
+      expect(() => validateThemeCss(css)).not.toThrow();
+    });
+
+    it('should reject other at-rules (not @font-face)', () => {
+      const css = `@import url('other.css');
+:root { --color-primary: #007bff; }`;
+      expect(() => validateThemeCss(css)).toThrow();
+    });
+
+    it('should reject @media outside :root', () => {
+      const css = `@media (max-width: 600px) { :root { --color-primary: #ff0000; } }
+:root { --color-primary: #007bff; }`;
+      expect(() => validateThemeCss(css)).toThrow();
     });
   });
 });
