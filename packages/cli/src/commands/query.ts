@@ -26,7 +26,10 @@ export function parseOrderBy(
     if (colonIndex === -1) {
       return trimmed;
     }
-    const field = trimmed.slice(0, colonIndex);
+    const field = trimmed.slice(0, colonIndex).trim();
+    if (!field) {
+      throw new Error(`Invalid order field in "${trimmed}". Field name cannot be empty.`);
+    }
     const direction = trimmed.slice(colonIndex + 1);
     if (direction !== 'asc' && direction !== 'desc') {
       throw new Error(
@@ -102,6 +105,8 @@ const TABLE_SCHEMA: Record<
     completed: { type: 'boolean' },
   },
 };
+
+const AVAILABLE_TABLES = Object.keys(TABLE_SCHEMA).join(', ');
 
 const LAST_DEFAULT_SELECT = [
   'date',
@@ -213,8 +218,6 @@ function buildQueryFromFlags(cmdOpts: Record<string, string | undefined>) {
   return queryObj;
 }
 
-const AVAILABLE_TABLES = Object.keys(TABLE_SCHEMA).join(', ');
-
 const RUN_EXAMPLES = `
 Examples:
   # Show last 5 transactions (shortcut)
@@ -229,8 +232,8 @@ Examples:
   # Count transactions
   actual query run --table transactions --count
 
-  # Group by category
-  actual query run --table transactions --group-by "category.name" --select "category.name,amount"
+  # Group by category (use --file for aggregate expressions)
+  echo '{"table":"transactions","groupBy":["category.name"],"select":["category.name",{"amount":{"$sum":"$amount"}}]}' | actual query run --file -
 
   # Pagination
   actual query run --table transactions --order-by "date:desc" --limit 10 --offset 20

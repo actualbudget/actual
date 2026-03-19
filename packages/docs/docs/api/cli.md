@@ -324,8 +324,8 @@ actual query run --table transactions --count
 # Count with a filter
 actual query run --table transactions --filter '{"category.name":"Groceries"}' --count
 
-# Group by category with aggregate
-actual query run --table transactions --group-by "category.name" --select "category.name,amount"
+# Group by category with aggregate (use --file for aggregate expressions)
+echo '{"table":"transactions","groupBy":["category.name"],"select":["category.name",{"amount":{"$sum":"$amount"}}]}' | actual query run --file -
 
 # Pagination: skip first 20, show next 10
 actual query run --table transactions --order-by "date:desc" --limit 10 --offset 20

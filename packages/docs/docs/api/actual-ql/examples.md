@@ -119,8 +119,8 @@ actual query run --table transactions --order-by "date:desc"
 # Search by month (JS: .filter({ date: { $transform: '$month', $eq: '2021-01' } }))
 actual query run --table transactions --filter '{"date":{"$transform":"$month","$eq":"2021-01"}}'
 
-# Group by payee with sum (JS: .groupBy('payee.name').select(['payee.name', { amount: { $sum: '$amount' } }]))
-actual query run --table transactions --group-by "payee.name" --select "payee.name,amount"
+# Group by payee with sum — use --file for aggregate queries
+echo '{"table":"transactions","groupBy":["payee.name"],"select":["payee.name",{"amount":{"$sum":"$amount"}}]}' | actual query run --file -
 
 # Count transactions (JS: .calculate({ $count: '*' }))
 actual query run --table transactions --count
