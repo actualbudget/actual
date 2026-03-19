@@ -28,7 +28,9 @@ export function parseOrderBy(
     }
     const field = trimmed.slice(0, colonIndex).trim();
     if (!field) {
-      throw new Error(`Invalid order field in "${trimmed}". Field name cannot be empty.`);
+      throw new Error(
+        `Invalid order field in "${trimmed}". Field name cannot be empty.`,
+      );
     }
     const direction = trimmed.slice(colonIndex + 1);
     if (direction !== 'asc' && direction !== 'desc') {
