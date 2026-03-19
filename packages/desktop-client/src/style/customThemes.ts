@@ -288,7 +288,7 @@ function validatePropertyValue(
   // Font-family properties use a dedicated validator: comma-separated safe font names only.
   // We match specific property name patterns rather than all --font-* to avoid
   // catching unrelated variables like --font-weight or --font-size.
-  if (/^--font-(body|mono|heading|family|ui|display|code)$/i.test(property)) {
+  if (/^--font-(family|mono|heading|ui|display|code)$/i.test(property)) {
     validateFontFamilyValue(value, property, declaredFonts);
     return;
   }
