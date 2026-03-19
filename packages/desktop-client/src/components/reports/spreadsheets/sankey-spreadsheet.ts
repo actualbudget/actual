@@ -446,7 +446,6 @@ function transformToSankeyData(
     return compactSankeyData(data, 5);
   }
 
-  console.log('Sankey data', data);
   return data;
 }
 

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import type { CSSProperties } from 'react';
-import { Trans } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
@@ -14,6 +13,7 @@ import {
 } from 'recharts';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 
+import { getColorScale } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
@@ -46,6 +46,7 @@ type SankeyLinkProps = {
   isHovered: boolean;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
+  color: string;
 };
 
 function SankeyLink({
@@ -60,8 +61,9 @@ function SankeyLink({
   isHovered,
   onMouseEnter,
   onMouseLeave,
+  color,
 }: SankeyLinkProps) {
-  const linkColor = payload.isNegative ? theme.errorText : theme.reportsGray;
+  const linkColor = payload.isNegative ? theme.errorText : color;
   const strokeWidth = isHovered ? linkWidth + 2 : linkWidth;
   const strokeOpacity = isHovered ? 1 : 0.5;
 
@@ -203,6 +205,19 @@ export function SankeyGraph({
   const format = useFormat();
   const [hoveredLinkIndex, setHoveredLinkIndex] = useState<number | null>(null);
 
+  const colors = getColorScale('qualitative');
+  const sourceColorMap = new Map(
+    [
+      ...new Set(
+        data.links
+          .filter(l => (l.source as number) !== 0)
+          .map(l => data.nodes[l.source as number]?.name),
+      ),
+    ]
+      .filter(Boolean)
+      .map((name, i) => [name, colors[i % colors.length]]),
+  );
+
   return (
     <Container style={style}>
       {(width, height) => (
@@ -222,6 +237,10 @@ export function SankeyGraph({
                 isHovered={hoveredLinkIndex === props.index}
                 onMouseEnter={() => setHoveredLinkIndex(props.index)}
                 onMouseLeave={() => setHoveredLinkIndex(null)}
+                color={
+                  sourceColorMap.get(props.payload.source.name) ??
+                  theme.reportsGray
+                }
               />
             )}
             sort={false}
