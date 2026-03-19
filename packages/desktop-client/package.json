@@ -103,6 +103,7 @@
     "test": "vitest --run",
     "e2e": "npx playwright test --browser=chromium",
     "vrt": "cross-env VRT=true npx playwright test --browser=chromium",
+    "prune-vrt-snapshots": "node ./bin/prune-vrt-snapshots.mjs",
     "playwright": "playwright",
     "typecheck": "tsgo -b && tsc-strict"
   },

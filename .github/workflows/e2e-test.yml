@@ -96,6 +96,23 @@ jobs:
           download-translations: 'false'
       - name: Run VRT Tests
         run: yarn vrt --shard=${{ matrix.shard }}/5
+      - name: Validate VRT manifest vs snapshot files
+        if: success()
+        run: yarn workspace @actual-app/web run prune-vrt-snapshots -- --check
+      - name: Stage VRT manifest for merge job
+        if: success()
+        run: |
+          mkdir -p "_vrt-manifest-artifact/shard-${{ matrix.shard }}"
+          if [ -d packages/desktop-client/e2e/.vrt-manifest ]; then
+            cp -a packages/desktop-client/e2e/.vrt-manifest/. "_vrt-manifest-artifact/shard-${{ matrix.shard }}/"
+          fi
+      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        if: success()
+        with:
+          name: vrt-manifest-shard-${{ matrix.shard }}
+          path: _vrt-manifest-artifact
+          retention-days: 1
+          overwrite: true
       - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         if: always()
         with:
@@ -115,6 +132,16 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Set up environment
         uses: ./.github/actions/setup
+      - name: Download VRT manifest shards
+        if: needs.vrt.result == 'success'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: packages/desktop-client/e2e/.vrt-manifest-ci
+          pattern: vrt-manifest-shard-*
+          merge-multiple: true
+      - name: Validate VRT manifest vs snapshots (all shards, strict — no extra PNGs)
+        if: needs.vrt.result == 'success'
+        run: yarn workspace @actual-app/web run prune-vrt-snapshots -- --check --strict packages/desktop-client/e2e/.vrt-manifest-ci
       - name: Download all blob reports
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:

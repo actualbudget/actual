@@ -59,6 +59,9 @@ yarn vrt:docker
 
     # To update snapshots, use the following command:
     yarn vrt:docker --e2e-start-url https://ip:port --update-snapshots
+
+    # After updating, remove PNGs that are no longer referenced by tests:
+    yarn vrt:prune
 ```
 
 Run manually:

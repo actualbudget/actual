@@ -53,6 +53,7 @@
     "e2e:desktop": "yarn build:desktop --skip-exe-build --skip-translations && yarn workspace desktop-electron e2e",
     "playwright": "yarn workspace @actual-app/web run playwright",
     "vrt": "yarn workspace @actual-app/web run vrt",
+    "vrt:prune": "yarn workspace @actual-app/web run prune-vrt-snapshots",
     "vrt:docker": "./bin/run-vrt",
     "rebuild-electron": "./node_modules/.bin/electron-rebuild -m ./packages/loot-core && ./node_modules/.bin/electron-rebuild  -m ./packages/desktop-electron -o better-sqlite3,bcrypt",
     "rebuild-node": "yarn workspace @actual-app/core rebuild",
