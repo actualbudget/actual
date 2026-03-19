@@ -79,6 +79,18 @@ export async function fetchDirectCss(url: string): Promise<string> {
   return response.text();
 }
 
+/** Strip surrounding single or double quotes from a string. */
+function stripQuotes(s: string): string {
+  const t = s.trim();
+  if (
+    (t.startsWith("'") && t.endsWith("'")) ||
+    (t.startsWith('"') && t.endsWith('"'))
+  ) {
+    return t.slice(1, -1).trim();
+  }
+  return t;
+}
+
 /**
  * Validate a font-family value for a --font-* CSS variable.
  *
@@ -103,14 +115,7 @@ function validateFontFamilyValue(value: string, property: string): void {
   const families = trimmed.split(',');
 
   for (const raw of families) {
-    // Strip leading/trailing whitespace and optional quotes
-    let name = raw.trim();
-    if (
-      (name.startsWith("'") && name.endsWith("'")) ||
-      (name.startsWith('"') && name.endsWith('"'))
-    ) {
-      name = name.slice(1, -1).trim();
-    }
+    const name = stripQuotes(raw);
 
     if (!name) {
       throw new Error(
@@ -269,11 +274,10 @@ function extractFontFaceBlocks(css: string): {
   const fontFaceBlocks: string[] = [];
   let remaining = css;
 
-  // Match @font-face { ... } blocks. We use indexOf-based parsing
-  // instead of regex to handle the braces correctly.
-  const searchFrom = 0;
-  while (searchFrom < remaining.length) {
-    const atIdx = remaining.indexOf('@font-face', searchFrom);
+  // Extract @font-face { ... } blocks one at a time using indexOf-based
+  // parsing. Each iteration removes the matched block from `remaining`.
+  for (;;) {
+    const atIdx = remaining.indexOf('@font-face');
     if (atIdx === -1) break;
 
     const openBrace = remaining.indexOf('{', atIdx);
@@ -282,13 +286,9 @@ function extractFontFaceBlocks(css: string): {
     const closeBrace = remaining.indexOf('}', openBrace + 1);
     if (closeBrace === -1) break;
 
-    const blockContent = remaining.substring(openBrace + 1, closeBrace).trim();
-    fontFaceBlocks.push(blockContent);
-
-    // Remove the @font-face block from remaining
+    fontFaceBlocks.push(remaining.substring(openBrace + 1, closeBrace).trim());
     remaining =
       remaining.substring(0, atIdx) + remaining.substring(closeBrace + 1);
-    // Don't advance searchFrom — the string shifted
   }
 
   return { fontFaceBlocks, remaining: remaining.trim() };
@@ -391,7 +391,7 @@ function validateFontFaceSrc(value: string): number {
  */
 function splitDeclarations(content: string): string[] {
   const declarations: string[] = [];
-  let current = '';
+  let start = 0;
   let inSingleQuote = false;
   let inDoubleQuote = false;
   let parenDepth = 0;
@@ -415,15 +415,13 @@ function splitDeclarations(content: string): string[] {
     }
 
     if (ch === ';' && !inSingleQuote && !inDoubleQuote && parenDepth === 0) {
-      const trimmed = current.trim();
+      const trimmed = content.substring(start, i).trim();
       if (trimmed) declarations.push(trimmed);
-      current = '';
-    } else {
-      current += ch;
+      start = i + 1;
     }
   }
 
-  const trimmed = current.trim();
+  const trimmed = content.substring(start).trim();
   if (trimmed) declarations.push(trimmed);
 
   return declarations;
@@ -433,10 +431,7 @@ function splitDeclarations(content: string): string[] {
  * Validate a single @font-face block's content and collect the declared font-family.
  * Returns the estimated font data size.
  */
-function validateFontFaceBlock(
-  blockContent: string,
-  declaredFonts: Set<string>,
-): number {
+function validateFontFaceBlock(blockContent: string): number {
   const declarations = splitDeclarations(blockContent);
 
   let fontFamily: string | null = null;
@@ -460,14 +455,7 @@ function validateFontFaceBlock(
 
     switch (property) {
       case 'font-family': {
-        // Must be a quoted string
-        let name = value;
-        if (
-          (name.startsWith("'") && name.endsWith("'")) ||
-          (name.startsWith('"') && name.endsWith('"'))
-        ) {
-          name = name.slice(1, -1).trim();
-        }
+        const name = stripQuotes(value);
         if (!name || !/^[a-zA-Z0-9 _-]+$/.test(name)) {
           throw new Error(
             `Invalid @font-face font-family name "${value}". Must be a simple alphanumeric name (letters, digits, spaces, hyphens, underscores).`,
@@ -525,7 +513,6 @@ function validateFontFaceBlock(
     throw new Error('@font-face block must include a src declaration.');
   }
 
-  declaredFonts.add(fontFamily);
   return blockSize;
 }
 
@@ -550,12 +537,7 @@ function validateRootContent(rootContent: string): void {
     );
   }
 
-  const declarations = rootContent
-    .split(';')
-    .map(d => d.trim())
-    .filter(d => d.length > 0);
-
-  for (const decl of declarations) {
+  for (const decl of splitDeclarations(rootContent)) {
     const colonIndex = decl.indexOf(':');
     if (colonIndex === -1) {
       throw new Error(`Invalid CSS declaration: "${decl}"`);
@@ -607,8 +589,6 @@ function validateRootContent(rootContent: string): void {
  * 2. Exactly one :root { ... } block with CSS variable declarations
  *
  * @font-face blocks must appear before :root.
- * Font names declared in @font-face are allowed in --font-* property values.
- *
  * Returns the validated CSS or throws an error.
  */
 export function validateThemeCss(css: string): string {
@@ -618,12 +598,11 @@ export function validateThemeCss(css: string): string {
   // Extract @font-face blocks (if any) from the CSS
   const { fontFaceBlocks, remaining } = extractFontFaceBlocks(cleaned);
 
-  // Validate each @font-face block and collect declared font names
-  const declaredFonts = new Set<string>();
+  // Validate each @font-face block
   let totalFontSize = 0;
 
   for (const block of fontFaceBlocks) {
-    totalFontSize += validateFontFaceBlock(block, declaredFonts);
+    totalFontSize += validateFontFaceBlock(block);
   }
 
   if (totalFontSize > MAX_TOTAL_FONT_SIZE) {
@@ -686,6 +665,18 @@ const FONT_EXTENSION_MIME: Record<string, string> = {
   '.otf': 'font/opentype',
 };
 
+/** Convert an ArrayBuffer to a base64 string using chunked processing. */
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  const chunks: string[] = [];
+  // Process in 8 KB chunks to avoid excessive string concatenation
+  for (let i = 0; i < bytes.length; i += 8192) {
+    const chunk = bytes.subarray(i, Math.min(i + 8192, bytes.length));
+    chunks.push(String.fromCharCode(...chunk));
+  }
+  return btoa(chunks.join(''));
+}
+
 /**
  * Embed fonts referenced in @font-face blocks by fetching them from a GitHub
  * repo and converting to data: URIs.
@@ -707,42 +698,51 @@ export async function embedThemeFonts(
 ): Promise<string> {
   const baseUrl = `https://raw.githubusercontent.com/${repo}/refs/heads/main/`;
 
-  // Find all url() references inside @font-face blocks
-  // We process the full CSS string and replace url() values that are
-  // relative paths (not data: URIs) within @font-face contexts
-  const fontFaceRegex = /@font-face\s*\{[^}]*\}/g;
-  let result = css;
+  // Collect all url() references that need fetching across all @font-face blocks
+  const urlRegex = /url\(\s*(['"]?)([^'")\s]+)\1\s*\)/g;
+  type FontRef = {
+    fullMatch: string;
+    quote: string;
+    path: string;
+    cleanPath: string;
+    mime: string;
+  };
+  const fontRefs: FontRef[] = [];
 
-  const fontFaceMatches = [...css.matchAll(fontFaceRegex)];
+  // Use extractFontFaceBlocks-style indexOf parsing to find @font-face blocks
+  // and their url() references, without duplicating the regex approach
+  let searchCss = css;
+  let offset = 0;
+  for (;;) {
+    const atIdx = searchCss.indexOf('@font-face', 0);
+    if (atIdx === -1) break;
 
-  for (const fontFaceMatch of fontFaceMatches) {
-    const block = fontFaceMatch[0];
-    let newBlock = block;
+    const openBrace = searchCss.indexOf('{', atIdx);
+    if (openBrace === -1) break;
 
-    // Find url() references in this block
-    const urlRegex = /url\(\s*(['"]?)([^'")\s]+)\1\s*\)/g;
-    const urlMatches = [...block.matchAll(urlRegex)];
+    const closeBrace = searchCss.indexOf('}', openBrace + 1);
+    if (closeBrace === -1) break;
 
-    for (const urlMatch of urlMatches) {
-      const fullUrl = urlMatch[0];
+    const blockContent = searchCss.substring(openBrace + 1, closeBrace);
+
+    // Find url() references within this block
+    let urlMatch;
+    urlRegex.lastIndex = 0;
+    while ((urlMatch = urlRegex.exec(blockContent)) !== null) {
+      const fullMatch = urlMatch[0];
       const quote = urlMatch[1];
       const path = urlMatch[2];
 
-      // Skip data: URIs — they're already embedded
+      // Skip data: URIs — already embedded
       if (path.startsWith('data:')) continue;
 
-      // Skip absolute URLs (http/https) — these are not allowed
       if (/^https?:\/\//i.test(path)) {
         throw new Error(
           `Remote font URL "${path}" is not allowed. Only relative paths to fonts in the same GitHub repo are supported.`,
         );
       }
 
-      // Resolve relative path
       const cleanPath = path.replace(/^\.\//, '');
-      const fontUrl = baseUrl + cleanPath;
-
-      // Determine MIME type from extension
       const ext = cleanPath.substring(cleanPath.lastIndexOf('.')).toLowerCase();
       const mime = FONT_EXTENSION_MIME[ext];
       if (!mime) {
@@ -751,36 +751,41 @@ export async function embedThemeFonts(
         );
       }
 
-      // Fetch the font file
+      fontRefs.push({ fullMatch, quote, path, cleanPath, mime });
+    }
+
+    offset = closeBrace + 1;
+    searchCss = searchCss.substring(offset);
+  }
+
+  if (fontRefs.length === 0) return css;
+
+  // Fetch all fonts in parallel
+  const fetched = await Promise.all(
+    fontRefs.map(async ref => {
+      const fontUrl = baseUrl + ref.cleanPath;
       const response = await fetch(fontUrl);
       if (!response.ok) {
         throw new Error(
-          `Failed to fetch font file "${cleanPath}" from ${fontUrl}: ${response.status} ${response.statusText}`,
+          `Failed to fetch font file "${ref.cleanPath}" from ${fontUrl}: ${response.status} ${response.statusText}`,
         );
       }
-
-      // Convert to base64
       const buffer = await response.arrayBuffer();
       if (buffer.byteLength > MAX_FONT_FILE_SIZE) {
         throw new Error(
-          `Font file "${cleanPath}" exceeds maximum size of ${MAX_FONT_FILE_SIZE / 1024 / 1024}MB.`,
+          `Font file "${ref.cleanPath}" exceeds maximum size of ${MAX_FONT_FILE_SIZE / 1024 / 1024}MB.`,
         );
       }
+      const base64 = arrayBufferToBase64(buffer);
+      return { ref, dataUri: `data:${ref.mime};base64,${base64}` };
+    }),
+  );
 
-      const bytes = new Uint8Array(buffer);
-      let binary = '';
-      for (const byte of bytes) {
-        binary += String.fromCharCode(byte);
-      }
-      const base64 = btoa(binary);
-      const dataUri = `data:${mime};base64,${base64}`;
-
-      // Replace the url() reference with the data: URI
-      const q = quote || "'";
-      newBlock = newBlock.replace(fullUrl, `url(${q}${dataUri}${q})`);
-    }
-
-    result = result.replace(block, newBlock);
+  // Replace each url() reference with its data: URI
+  let result = css;
+  for (const { ref, dataUri } of fetched) {
+    const q = ref.quote || "'";
+    result = result.replace(ref.fullMatch, `url(${q}${dataUri}${q})`);
   }
 
   return result;
