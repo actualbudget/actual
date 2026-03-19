@@ -445,31 +445,33 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                   </View>
                 )}
 
-                <View style={{ marginTop: 30 }}>
-                  <Trans>
-                    <Paragraph>
-                      <strong>What is a Sankey plot?</strong>
-                    </Paragraph>
-                    <Paragraph>
-                      A Sankey plot visualizes the flow of quantities between
-                      multiple categories, emphasizing the distribution and
-                      proportional relationships of data streams.
-                    </Paragraph>
-                    <Paragraph>
-                      <strong>View options:</strong>
-                    </Paragraph>
-                    <ul style={{ marginTop: 0, paddingLeft: 20 }}>
-                      <li style={{ marginBottom: 5 }}>
-                        <strong>Spent:</strong> Displays actual spending by
-                        category from transactions.
-                      </li>
-                      <li style={{ marginBottom: 5 }}>
-                        <strong>Budgeted:</strong> Shows how income flows into
-                        your budget and is allocated across categories.
-                      </li>
-                    </ul>
-                  </Trans>
-                </View>
+                {!isNarrowWidth && (
+                  <View style={{ marginTop: 30 }}>
+                    <Trans>
+                      <Paragraph>
+                        <strong>What is a Sankey plot?</strong>
+                      </Paragraph>
+                      <Paragraph>
+                        A Sankey plot visualizes the flow of quantities between
+                        multiple categories, emphasizing the distribution and
+                        proportional relationships of data streams.
+                      </Paragraph>
+                      <Paragraph>
+                        <strong>View options:</strong>
+                      </Paragraph>
+                      <ul style={{ marginTop: 0, paddingLeft: 20 }}>
+                        <li style={{ marginBottom: 5 }}>
+                          <strong>Spent:</strong> Displays actual spending by
+                          category from transactions.
+                        </li>
+                        <li style={{ marginBottom: 5 }}>
+                          <strong>Budgeted:</strong> Shows how income flows into
+                          your budget and is allocated across categories.
+                        </li>
+                      </ul>
+                    </Trans>
+                  </View>
+                )}
               </View>
             </View>
           </View>
