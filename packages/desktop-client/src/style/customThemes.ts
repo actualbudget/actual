@@ -109,7 +109,11 @@ function stripQuotes(s: string): string {
  */
 function validateFontFamilyValue(value: string, property: string): void {
   const trimmed = value.trim();
-  if (!trimmed) return; // empty values are allowed
+  if (!trimmed) {
+    throw new Error(
+      `Invalid font-family value for "${property}": value must not be empty.`,
+    );
+  }
 
   // Split on commas, then validate each font name
   const families = trimmed.split(',');

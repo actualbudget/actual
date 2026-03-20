@@ -954,10 +954,6 @@ describe('validateThemeCss - font properties (--font-*)', () => {
         description: '--font-heading property',
         css: `:root { --font-heading: Palatino, 'Book Antiqua', serif; }`,
       },
-      {
-        description: 'empty value',
-        css: `:root { --font-family: ; }`,
-      },
     ])('should accept CSS with $description', ({ css }) => {
       expect(() => validateThemeCss(css)).not.toThrow();
     });
@@ -965,6 +961,11 @@ describe('validateThemeCss - font properties (--font-*)', () => {
 
   describe('invalid font-family values - security', () => {
     it.each([
+      {
+        description: 'empty value',
+        css: `:root { --font-family: ; }`,
+        expectedPattern: /value must not be empty/,
+      },
       {
         description: 'url() function in font value',
         css: `:root { --font-family: url('https://evil.com/font.woff2'); }`,
