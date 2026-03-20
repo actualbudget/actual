@@ -362,18 +362,27 @@ function validateRootContent(rootContent: string): void {
 
     const property = decl.substring(0, colonIndex).trim();
 
+    // Property must start with --
     if (!property.startsWith('--')) {
       throw new Error(
         `Invalid property "${property}". Only CSS custom properties (starting with --) are allowed.`,
       );
     }
 
+    // Validate property name format
+    // CSS custom property names must:
+    // - Start with --
+    // - Not be empty (not just --)
+    // - Not end with a dash
+    // - Contain only valid characters (letters, digits, underscore, dash, but not at start/end positions)
     if (property === '--' || property === '-') {
       throw new Error(
         `Invalid property "${property}". Property name cannot be empty or contain only dashes.`,
       );
     }
 
+    // Check for invalid characters in property name (no brackets, spaces, special chars except dash/underscore)
+    // Property name after -- should only contain: letters, digits, underscore, and dashes (not consecutive dashes at start/end)
     const propertyNameAfterDashes = property.substring(2);
     if (propertyNameAfterDashes.length === 0) {
       throw new Error(
@@ -381,18 +390,21 @@ function validateRootContent(rootContent: string): void {
       );
     }
 
+    // Check for invalid characters (no brackets, no special characters except underscore and dash)
     if (!/^[a-zA-Z0-9_-]+$/.test(propertyNameAfterDashes)) {
       throw new Error(
         `Invalid property "${property}". Property name contains invalid characters. Only letters, digits, underscores, and dashes are allowed.`,
       );
     }
 
+    // Check that property doesn't end with a dash (after the -- prefix)
     if (property.endsWith('-')) {
       throw new Error(
         `Invalid property "${property}". Property name cannot end with a dash.`,
       );
     }
 
+    // Extract and validate the value
     const value = decl.substring(colonIndex + 1).trim();
     validatePropertyValue(value, property);
   }
