@@ -82,7 +82,6 @@ export function Overview({ dashboard }: OverviewProps) {
   const dispatch = useDispatch();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
-  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
 

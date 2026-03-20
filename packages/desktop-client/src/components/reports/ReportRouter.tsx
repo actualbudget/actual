@@ -13,12 +13,10 @@ import { Summary } from './reports/Summary';
 import { ReportsDashboardRouter } from './ReportsDashboardRouter';
 
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export function ReportRouter() {
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
-  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
   return (
     <Routes>

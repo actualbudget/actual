@@ -59,7 +59,6 @@ export type createCustomSpreadsheetProps = {
   accounts?: AccountEntity[];
   graphType?: string;
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
-  setDataCheck?: (value: boolean) => void;
 };
 
 export function createCustomSpreadsheet({
@@ -82,7 +81,6 @@ export function createCustomSpreadsheet({
   accounts = [],
   graphType,
   firstDayOfWeekIdx,
-  setDataCheck,
 }: createCustomSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(categories);
 
@@ -109,7 +107,6 @@ export function createCustomSpreadsheet({
         totalTotals: 0,
         totalBudgeted: 0,
       });
-      setDataCheck?.(true);
       return;
     }
 
@@ -338,6 +335,5 @@ export function createCustomSpreadsheet({
       totalTotals: totalAssets + totalDebts,
       totalBudgeted: totalAssets + totalDebts,
     });
-    setDataCheck?.(true);
   };
 }
