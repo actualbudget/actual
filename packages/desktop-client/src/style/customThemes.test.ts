@@ -1,7 +1,8 @@
 // oxlint-disable eslint/no-script-url
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  embedThemeFonts,
   MAX_FONT_FILE_SIZE,
   parseInstalledTheme,
   validateThemeCss,
@@ -1469,5 +1470,104 @@ describe('parseInstalledTheme', () => {
       expect(result).toEqual(theme);
       expect(result?.repo).toBe('owner/repo');
     });
+  });
+});
+
+describe('embedThemeFonts', () => {
+  const mockFetch = (
+    responseBody: ArrayBuffer,
+    ok = true,
+    status = 200,
+  ): typeof globalThis.fetch =>
+    vi.fn().mockResolvedValue({
+      ok,
+      status,
+      statusText: ok ? 'OK' : 'Not Found',
+      arrayBuffer: () => Promise.resolve(responseBody),
+    } as Partial<Response>);
+
+  const tinyBuffer = new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0]).buffer;
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('should rewrite url() references to data URIs', async () => {
+    vi.stubGlobal('fetch', mockFetch(tinyBuffer));
+
+    const css = `@font-face {
+  font-family: 'Test';
+  src: url('fonts/test.woff2') format('woff2');
+}
+:root { --color-primary: #007bff; }`;
+
+    const result = await embedThemeFonts(css, 'owner/repo');
+    expect(result).toContain('data:font/woff2;base64,');
+    expect(result).not.toContain('fonts/test.woff2');
+    expect(result).toContain(':root');
+  });
+
+  it('should handle quoted filenames with spaces', async () => {
+    vi.stubGlobal('fetch', mockFetch(tinyBuffer));
+
+    const css = `@font-face {
+  font-family: 'Inter';
+  src: url("Inter Variable.woff2") format('woff2');
+}
+:root { --color-primary: #007bff; }`;
+
+    const result = await embedThemeFonts(css, 'owner/repo');
+    expect(result).toContain('data:font/woff2;base64,');
+    expect(result).not.toContain('Inter Variable.woff2');
+  });
+
+  it('should reject path traversal with ".."', async () => {
+    const css = `@font-face {
+  font-family: 'Evil';
+  src: url('../escape/font.woff2') format('woff2');
+}
+:root { --color-primary: #007bff; }`;
+
+    await expect(embedThemeFonts(css, 'owner/repo')).rejects.toThrow(
+      'is not allowed',
+    );
+  });
+
+  it('should reject root-anchored paths', async () => {
+    const css = `@font-face {
+  font-family: 'Evil';
+  src: url('/etc/passwd') format('woff2');
+}
+:root { --color-primary: #007bff; }`;
+
+    await expect(embedThemeFonts(css, 'owner/repo')).rejects.toThrow(
+      'is not allowed',
+    );
+  });
+
+  it('should reject oversized font files', async () => {
+    const oversized = new ArrayBuffer(MAX_FONT_FILE_SIZE + 1);
+    vi.stubGlobal('fetch', mockFetch(oversized));
+
+    const css = `@font-face {
+  font-family: 'Big';
+  src: url('big.woff2') format('woff2');
+}
+:root { --color-primary: #007bff; }`;
+
+    await expect(embedThemeFonts(css, 'owner/repo')).rejects.toThrow(
+      'exceeds maximum size',
+    );
+  });
+
+  it('should return CSS unchanged when no url() refs exist', async () => {
+    const css = `@font-face {
+  font-family: 'Test';
+  src: url('${TINY_WOFF2_DATA_URI}') format('woff2');
+}
+:root { --color-primary: #007bff; }`;
+
+    const result = await embedThemeFonts(css, 'owner/repo');
+    expect(result).toBe(css);
   });
 });

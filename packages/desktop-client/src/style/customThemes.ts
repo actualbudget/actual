@@ -519,7 +519,7 @@ export async function embedThemeFonts(
   const baseUrl = `https://raw.githubusercontent.com/${repo}/refs/heads/main/`;
 
   // Collect all url() references that need fetching across all @font-face blocks
-  const urlRegex = /url\(\s*(['"]?)([^'")\s]+)\1\s*\)/g;
+  const urlRegex = /url\(\s*(?:(['"])([^'"]*?)\1|([^'")\s]+))\s*\)/g;
   type FontRef = {
     fullMatch: string;
     quote: string;
@@ -550,8 +550,8 @@ export async function embedThemeFonts(
     urlRegex.lastIndex = 0;
     while ((urlMatch = urlRegex.exec(blockContent)) !== null) {
       const fullMatch = urlMatch[0];
-      const quote = urlMatch[1];
-      const path = urlMatch[2];
+      const quote = urlMatch[1] || '';
+      const path = urlMatch[2] ?? urlMatch[3];
 
       // Skip data: URIs — already embedded
       if (path.startsWith('data:')) continue;
@@ -563,6 +563,13 @@ export async function embedThemeFonts(
       }
 
       const cleanPath = path.replace(/^\.\//, '');
+
+      if (cleanPath.startsWith('/') || cleanPath.includes('..')) {
+        throw new Error(
+          `Font path "${path}" is not allowed. Only relative paths within the repo are supported (no "/" prefix or ".." segments).`,
+        );
+      }
+
       const ext = cleanPath.substring(cleanPath.lastIndexOf('.')).toLowerCase();
       const mime = FONT_EXTENSION_MIME[ext];
       if (!mime) {
