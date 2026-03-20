@@ -55,6 +55,7 @@ If a function isn’t listed here, it still might work. Actual uses HyperFormula
 | `AND`               | Query, Rules | Returns TRUE if all arguments are TRUE.                             | `=AND(1=1, 2=2)`                                                   | Accepts more than 2 conditions                    |
 | `AVERAGE`           | Query        | Returns the average of all numbers in a range.                      | `=AVERAGE(1, 2, 3)`                                                | Accepts more than 2 values                        |
 | `AVERAGEA`          | Query        | Returns the average, including text and logical values.             | `=AVERAGEA(1, TRUE, "2")`                                          | Accepts more than 2 values                        |
+| `BUDGET_QUERY`      | Query        | Returns a budget dimension total for a set of categories over a month range. Dimension is one of: `budgeted`, `spent`, `balance_start`, `balance_end`, `goal`. | `=BUDGET_QUERY("spent", QUERY_EXTRACT_CATEGORIES("q"), QUERY_EXTRACT_TIMEFRAME_START("q"), QUERY_EXTRACT_TIMEFRAME_END("q"))` | — |
 | `CEILING`           | Query, Rules | Rounds up to nearest multiple of significance.                      | `=CEILING(10.2, 1)`                                                | —                                                 |
 | `CHAR`              | Query, Rules | Converts number to character.                                       | `=CHAR(65)`                                                        | —                                                 |
 | `CHOOSE`            | Query        | Returns value from list based on index.                             | `=CHOOSE(2, "A", "B", "C")`                                        | Accepts more than 2 values                        |
@@ -132,6 +133,9 @@ If a function isn’t listed here, it still might work. Actual uses HyperFormula
 | `QUARTILE`          | Query        | Returns the quartile of a dataset.                                  | `=QUARTILE(A1:A100, 1)`                                            | —                                                 |
 | `QUERY`             | Query        | Execute a query and return the result.                              | `=QUERY("expenses")`                                               | —                                                 |
 | `QUERY_COUNT`       | Query        | Execute a query and return the number of matching rows.             | `=QUERY_COUNT("expenses")`                                         | —                                                 |
+| `QUERY_EXTRACT_CATEGORIES`     | Query        | Determines which categories to include based on a named query's category filters; used as the `categories` argument in `BUDGET_QUERY`.      | `=QUERY_EXTRACT_CATEGORIES("expenses")`                            | —                                                 |
+| `QUERY_EXTRACT_TIMEFRAME_END`  | Query        | Extracts the end month from a named query's date range; used as the `endMonth` argument in `BUDGET_QUERY`.             | `=QUERY_EXTRACT_TIMEFRAME_END("expenses")`                         | —                                                 |
+| `QUERY_EXTRACT_TIMEFRAME_START`| Query        | Extracts the start month from a named query's date range; used as the `startMonth` argument in `BUDGET_QUERY`.         | `=QUERY_EXTRACT_TIMEFRAME_START("expenses")`                       | —                                                 |
 | `RANK`              | Query        | Returns the rank of a number in a list.                             | `=RANK(10, A1:A10, 0)`                                             | —                                                 |
 | `RATE`              | Query        | Calculates interest rate per period.                                | `=RATE(60, -200, 10000)`                                           | —                                                 |
 | `REPLACE`           | Query, Rules | Replaces substring at specified position.                           | `=REPLACE(notes, 1, 5, "")`                                        | —                                                 |
@@ -195,6 +199,56 @@ In the Formula editor page, use **Query Definitions**:
 3. Add **Filters** (same style as report filters)
 
 ![Placeholder: formula editor and Query Definitions panel](/img/experimental/formulas/formula-editor-and-queries.png)
+
+### Budget queries with `BUDGET_QUERY`
+
+`BUDGET_QUERY` reads directly from your **envelope budget** (budgeted amounts, spending, balances, and goals) for a fixed set of categories over a month range.
+
+Syntax:
+
+```text
+=BUDGET_QUERY("dimension", categories, startMonth, endMonth)
+```
+
+| Parameter    | Description                                                                                       |
+| ------------ | ------------------------------------------------------------------------------------------------- |
+| `dimension`  | What to return. One of: `budgeted`, `spent`, `balance_start`, `balance_end`, `goal`               |
+| `categories` | Which categories to include — use `QUERY_EXTRACT_CATEGORIES("queryName")` to pull from a named query's filters. Advanced: a literal array of category IDs (`{"id1";"id2"}`) is also accepted, but using the extract function is recommended. |
+| `startMonth` | Start month in `YYYY-MM` format, or `QUERY_EXTRACT_TIMEFRAME_START("queryName")`                  |
+| `endMonth`   | End month in `YYYY-MM` format, or `QUERY_EXTRACT_TIMEFRAME_END("queryName")`                      |
+
+The result is in normal "money" units (e.g. `-123.45`), the same as `QUERY()`.
+
+**Dimension reference:**
+
+| Dimension       | Description                                                                            |
+| --------------- | -------------------------------------------------------------------------------------- |
+| `budgeted`      | Total amount budgeted across the month range                                           |
+| `spent`         | Total amount spent (sum of transactions) across the month range                        |
+| `balance_start` | Carryover balance at the **start** of the first month (leftover from the prior month)    |
+| `balance_end`   | Running balance at the **end** of the last month (budgeted + spent + carryover)          |
+| `goal`          | Total goal amount across the month range                                               |
+
+#### Using `QUERY_EXTRACT_*` helpers
+
+These three helpers pull values out of a named query definition so you can reuse a query's filters and date range as inputs to `BUDGET_QUERY`:
+
+- **`QUERY_EXTRACT_CATEGORIES("queryName")`** — uses the query's category filters to determine which categories to include. If the query has no category filter, all non-income, non-hidden categories are included.
+- **`QUERY_EXTRACT_TIMEFRAME_START("queryName")`** — returns the query's start month as a `YYYY-MM` string.
+- **`QUERY_EXTRACT_TIMEFRAME_END("queryName")`** — returns the query's end month as a `YYYY-MM` string.
+
+Example — total spent for the same categories and date range as a named query called `expenses`:
+
+```text
+=BUDGET_QUERY("spent", QUERY_EXTRACT_CATEGORIES("expenses"), QUERY_EXTRACT_TIMEFRAME_START("expenses"), QUERY_EXTRACT_TIMEFRAME_END("expenses"))
+```
+
+Example — compare budgeted vs actual spent for a hard-coded month range:
+
+```text
+=BUDGET_QUERY("budgeted", QUERY_EXTRACT_CATEGORIES("expenses"), "2025-01", "2025-03")
+  - BUDGET_QUERY("spent", QUERY_EXTRACT_CATEGORIES("expenses"), "2025-01", "2025-03")
+```
 
 ### Optional: conditional color
 
