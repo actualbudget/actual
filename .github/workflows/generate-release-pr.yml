@@ -17,9 +17,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ github.event.inputs.ref }}
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
       - name: Bump package versions
         id: bump_package_versions
         shell: bash
@@ -35,12 +39,12 @@ jobs:
             pkg="${packages[$key]}"
 
             if [[ -n "${{ github.event.inputs.version }}" ]]; then
-              version=$(node ./packages/ci-actions/bin/get-next-package-version.js \
+              version=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts \
                 --package-json "./packages/$pkg/package.json" \
                 --version "${{ github.event.inputs.version }}" \
                 --update)
             else
-              version=$(node ./packages/ci-actions/bin/get-next-package-version.js \
+              version=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts \
                 --package-json "./packages/$pkg/package.json" \
                 --type auto \
                 --update)
@@ -51,7 +55,7 @@ jobs:
 
           echo "version=$NEW_WEB_VERSION" >> "$GITHUB_OUTPUT"
       - name: Create PR
-        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         with:
           token: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
           commit-message: '🔖 (${{ steps.bump_package_versions.outputs.version }})'

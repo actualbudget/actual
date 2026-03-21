@@ -8,7 +8,7 @@ For most cases, we suggest opting for one of the simpler alternatives:
 
 - [Pikapods](/docs/install/pikapods)
 - [Desktop Client](/download)
-- [CLI tool](/docs/install/cli-tool)
+- [Server CLI](/docs/install/cli-tool)
 - [Docker](/docs/install/docker)
 
 :::

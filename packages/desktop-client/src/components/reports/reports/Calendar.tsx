@@ -447,15 +447,18 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   const openY = 0;
   const [mobileTransactionsOpen, setMobileTransactionsOpen] = useState(false);
 
-  const [{ y }, api] = useSpring(() => ({
-    y: closeY.current,
-    immediate: false,
-  }));
+  const [{ y }, api] = useSpring(
+    () => ({
+      from: { y: closeY.current },
+      immediate: false,
+    }),
+    [],
+  );
 
   useEffect(() => {
     closeY.current = totalHeight;
     void api.start({
-      y: mobileTransactionsOpen ? openY : closeY.current,
+      to: { y: mobileTransactionsOpen ? openY : closeY.current },
       immediate: false,
     });
   }, [totalHeight, mobileTransactionsOpen, api]);
@@ -463,7 +466,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   const open = useCallback(
     ({ canceled }: { canceled: boolean }) => {
       void api.start({
-        y: openY,
+        to: { y: openY },
         immediate: false,
         config: canceled ? config.wobbly : config.stiff,
       });
@@ -475,7 +478,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   const close = useCallback(
     (velocity = 0) => {
       void api.start({
-        y: closeY.current,
+        to: { y: closeY.current },
         config: { ...config.stiff, velocity },
       });
       setMobileTransactionsOpen(false);
@@ -487,7 +490,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     ({ offset: [, oy], cancel }) => {
       if (oy < 0) {
         cancel();
-        void api.start({ y: 0, immediate: true });
+        void api.start({ to: { y: 0 }, immediate: true });
         return;
       }
 
@@ -501,7 +504,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
           open({ canceled: true });
           setMobileTransactionsOpen(true);
         } else {
-          void api.start({ y: oy, immediate: true });
+          void api.start({ to: { y: oy }, immediate: true });
         }
       }
     },

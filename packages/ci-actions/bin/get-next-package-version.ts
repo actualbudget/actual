@@ -2,13 +2,13 @@
 
 // This script is used in GitHub Actions to get the next version based on the current package.json version.
 // It supports three types of versioning: nightly, hotfix, and monthly.
-
 import fs from 'node:fs';
 import { parseArgs } from 'node:util';
 
-import { getNextVersion } from '../src/versions/get-next-package-version.js';
-
-const args = process.argv;
+import {
+  getNextVersion,
+  isValidVersionType,
+} from '../src/versions/get-next-package-version';
 
 const options = {
   'package-json': {
@@ -28,40 +28,53 @@ const options = {
     short: 'u',
     default: false,
   },
-};
+} as const;
+
+function fail(message: string): never {
+  console.error(message);
+  process.exit(1);
+}
 
 const { values } = parseArgs({
-  args,
   options,
   allowPositionals: true,
 });
 
-if (!values['package-json']) {
-  console.error(
+const packageJsonPath = values['package-json'];
+if (!packageJsonPath) {
+  fail(
     'Please specify the path to package.json using --package-json or -p option.',
   );
-  process.exit(1);
 }
 
 try {
-  const packageJsonPath = values['package-json'];
   const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+
+  if (!('version' in packageJson) || typeof packageJson.version !== 'string') {
+    fail('The specified package.json does not contain a valid version field.');
+  }
+
   const currentVersion = packageJson.version;
 
   const explicitVersion = values.version;
   let newVersion;
+
   if (explicitVersion) {
     newVersion = explicitVersion;
   } else {
+    const type = values.type;
+    if (!type || !isValidVersionType(type)) {
+      fail('Please specify the release type using --type or -t.');
+    }
+
     try {
       newVersion = getNextVersion({
         currentVersion,
-        type: values.type,
+        type,
         currentDate: new Date(),
       });
-    } catch (e) {
-      console.error(e.message);
-      process.exit(1);
+    } catch (error) {
+      fail(error instanceof Error ? error.message : String(error));
     }
   }
 
@@ -76,6 +89,5 @@ try {
     );
   }
 } catch (error) {
-  console.error('Error:', error.message);
-  process.exit(1);
+  fail(`Error: ${error instanceof Error ? error.message : String(error)}`);
 }

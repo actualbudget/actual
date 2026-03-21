@@ -99,6 +99,9 @@ yarn build:desktop
 # Build API package
 yarn build:api
 
+# Build CLI package
+yarn build:cli
+
 # Build sync server
 yarn build:server
 ```
@@ -159,6 +162,9 @@ yarn build:desktop
 
 # API build
 yarn build:api
+
+# CLI build
+yarn build:cli
 
 # Sync server build
 yarn build:server
