@@ -208,5 +208,6 @@ export type SankeyWidget = AbstractWidget<
     mode?: 'budgeted' | 'spent';
     globalOther?: boolean;
     topNSubcategories?: number;
+    subcategorySort?: 'per-category' | 'global';
   } | null
 >;

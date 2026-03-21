@@ -158,6 +158,7 @@ export function createSpreadsheet(
   compact: boolean = false,
   globalOther: boolean = false,
   topNSubcategories: number = 15,
+  subcategorySort: 'per-category' | 'global' = 'per-category',
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -172,6 +173,7 @@ export function createSpreadsheet(
         compact,
         globalOther,
         topNSubcategories,
+        subcategorySort,
       )(spreadsheet, setData);
       return data;
     } else if (mode === 'spent') {
@@ -184,6 +186,7 @@ export function createSpreadsheet(
         compact,
         globalOther,
         topNSubcategories,
+        subcategorySort,
       )(spreadsheet, setData);
       return data;
     }
@@ -198,6 +201,7 @@ export function createBudgetSpreadsheet(
   compact: boolean = false,
   globalOther: boolean = false,
   topNSubcategories: number = 15,
+  subcategorySort: 'per-category' | 'global' = 'per-category',
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -281,6 +285,7 @@ export function createBudgetSpreadsheet(
         compact,
         topNSubcategories,
         globalOther,
+        subcategorySort,
       ),
     );
   };
@@ -295,6 +300,7 @@ export function createTransactionsSpreadsheet(
   compact: boolean = false,
   globalOther: boolean = false,
   topNSubcategories: number = 15,
+  subcategorySort: 'per-category' | 'global' = 'per-category',
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -323,6 +329,7 @@ export function createTransactionsSpreadsheet(
         compact,
         topNSubcategories,
         globalOther,
+        subcategorySort,
       ),
     );
   };
@@ -471,6 +478,7 @@ function transformToSankeyData(
   compact: boolean = false,
   topNSubcategories: number = 15,
   globalOther: boolean = false,
+  subcategorySort: 'per-category' | 'global' = 'per-category',
 ): SankeyData {
   // Phase 1 — Initialise leaves
   const allLeaves: LeafState[] = categoryData
@@ -510,22 +518,25 @@ function transformToSankeyData(
   const links: SankeyLink[] = [];
   const catNodeIndexMap = new Map<string, number>();
 
+  // Add all category nodes first (needed for global sort so indices are known)
   for (const catName of sortedCategories) {
     nodes.push({ name: catName });
-    const catIdx = nodes.length - 1;
-    catNodeIndexMap.set(catName, catIdx);
+    catNodeIndexMap.set(catName, nodes.length - 1);
     links.push({
       source: 0,
-      target: catIdx,
+      target: nodes.length - 1,
       value: categoryTotals.get(catName) ?? 0,
     });
+  }
 
-    // Visible individual subcategory nodes, sorted descending
-    const visibleLeaves = allLeaves
-      .filter(l => l.mainCategory === catName && l.visible)
+  if (subcategorySort === 'global') {
+    // All visible subcategories sorted by value globally
+    const allVisibleLeaves = allLeaves
+      .filter(l => l.visible)
       .sort((a, b) => b.value - a.value);
 
-    for (const leaf of visibleLeaves) {
+    for (const leaf of allVisibleLeaves) {
+      const catIdx = catNodeIndexMap.get(leaf.mainCategory) ?? 0;
       nodes.push({ name: leaf.subcategory, isNegative: leaf.isNegative });
       links.push({
         source: catIdx,
@@ -535,17 +546,53 @@ function transformToSankeyData(
       });
     }
 
-    // Per-category Other node (globalOther=false only)
+    // Per-category Other nodes (globalOther=false only)
     if (!globalOther) {
-      const bucket = perCategoryOther.get(catName);
-      if (bucket) {
-        nodes.push({ name: 'Other' });
+      for (const catName of sortedCategories) {
+        const bucket = perCategoryOther.get(catName);
+        if (bucket) {
+          const catIdx = catNodeIndexMap.get(catName) ?? 0;
+          nodes.push({ name: 'Other' });
+          links.push({
+            source: catIdx,
+            target: nodes.length - 1,
+            value: bucket.total,
+            tooltipInfo: [...bucket.entries].sort((a, b) => b.value - a.value),
+          });
+        }
+      }
+    }
+  } else {
+    // Per-category sort: each category's subcategories sorted independently
+    for (const catName of sortedCategories) {
+      const catIdx = catNodeIndexMap.get(catName) ?? 0;
+
+      const visibleLeaves = allLeaves
+        .filter(l => l.mainCategory === catName && l.visible)
+        .sort((a, b) => b.value - a.value);
+
+      for (const leaf of visibleLeaves) {
+        nodes.push({ name: leaf.subcategory, isNegative: leaf.isNegative });
         links.push({
           source: catIdx,
           target: nodes.length - 1,
-          value: bucket.total,
-          tooltipInfo: [...bucket.entries].sort((a, b) => b.value - a.value),
+          value: leaf.value,
+          isNegative: leaf.isNegative,
         });
+      }
+
+      // Per-category Other node (globalOther=false only)
+      if (!globalOther) {
+        const bucket = perCategoryOther.get(catName);
+        if (bucket) {
+          nodes.push({ name: 'Other' });
+          links.push({
+            source: catIdx,
+            target: nodes.length - 1,
+            value: bucket.total,
+            tooltipInfo: [...bucket.entries].sort((a, b) => b.value - a.value),
+          });
+        }
       }
     }
   }

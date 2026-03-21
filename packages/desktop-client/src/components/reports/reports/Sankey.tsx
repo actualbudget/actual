@@ -4,7 +4,7 @@ import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { SvgList } from '@actual-app/components/icons/v1';
+import { SvgArrowDown, SvgList } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Popover } from '@actual-app/components/popover';
@@ -165,6 +165,59 @@ function TopNSelector({ value, onChange }: TopNSelectorProps) {
   );
 }
 
+type SubcategorySortSelectorProps = {
+  value: 'per-category' | 'global';
+  onChange: (value: 'per-category' | 'global') => void;
+};
+
+function SubcategorySortSelector({
+  value,
+  onChange,
+}: SubcategorySortSelectorProps) {
+  const { t } = useTranslation();
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const options: Array<{ key: 'per-category' | 'global'; label: string }> = [
+    { key: 'per-category', label: t('Sort per category') },
+    { key: 'global', label: t('Sort globally') },
+  ];
+
+  const currentLabel =
+    value === 'global' ? t('Sort globally') : t('Sort per category');
+
+  return (
+    <>
+      <Button
+        ref={triggerRef}
+        variant="bare"
+        onPress={() => setIsOpen(true)}
+        aria-label={t('Change subcategory sort order')}
+      >
+        <SvgArrowDown style={{ width: 12, height: 12 }} />
+        <span style={{ marginLeft: 5 }}>{currentLabel}</span>
+      </Button>
+      <Popover
+        triggerRef={triggerRef}
+        placement="bottom start"
+        isOpen={isOpen}
+        onOpenChange={() => setIsOpen(false)}
+      >
+        <Menu
+          onMenuSelect={item => {
+            onChange(item as 'per-category' | 'global');
+            setIsOpen(false);
+          }}
+          items={options.map(({ key, label }) => ({
+            name: key,
+            text: label,
+          }))}
+        />
+      </Popover>
+    </>
+  );
+}
+
 type GraphModeSelectorProps = {
   mode: GraphMode;
   onChange: (mode: GraphMode) => void;
@@ -251,6 +304,10 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     widget?.meta?.topNSubcategories ?? 15,
   );
 
+  const [subcategorySort, setSubcategorySort] = useState<
+    'per-category' | 'global'
+  >(widget?.meta?.subcategorySort ?? 'per-category');
+
   const { data: { grouped: groupedCategories = [] } = { grouped: [] } } =
     useCategories();
 
@@ -269,6 +326,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       false,
       globalOther,
       topNSubcategories,
+      subcategorySort,
     );
   }, [
     datesInitialized,
@@ -280,6 +338,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     graphMode,
     globalOther,
     topNSubcategories,
+    subcategorySort,
   ]);
 
   const defaultGetData = async (
@@ -373,6 +432,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
             mode: graphMode,
             globalOther,
             topNSubcategories,
+            subcategorySort,
             timeFrame: {
               start,
               end,
@@ -483,6 +543,10 @@ function SankeyInner({ widget }: SankeyInnerProps) {
             <TopNSelector
               value={topNSubcategories}
               onChange={setTopNSubcategories}
+            />
+            <SubcategorySortSelector
+              value={subcategorySort}
+              onChange={setSubcategorySort}
             />
             <OtherModeSelector
               globalOther={globalOther}
