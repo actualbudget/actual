@@ -339,114 +339,229 @@ async function fetchCategoryData(
   return nested.flat();
 }
 
+type LeafState = {
+  mainCategory: string;
+  subcategory: string;
+  value: number;
+  isNegative: boolean;
+  visible: boolean;
+};
+
+type OtherBucket = {
+  total: number;
+  entries: Array<{ name: string; value: number }>;
+};
+
+type GreedyReductionResult = {
+  allLeaves: LeafState[];
+  perCategoryOther: Map<string, OtherBucket>;
+  globalOtherBucket: OtherBucket;
+};
+
+function greedyReduceLeaves(
+  allLeaves: LeafState[],
+  topNSubcategories: number,
+  globalOther: boolean,
+): GreedyReductionResult {
+  const perCategoryOther = new Map<string, OtherBucket>();
+  const globalOtherBucket: OtherBucket = { total: 0, entries: [] };
+
+  let visibleCount = allLeaves.length;
+  let otherNodeCount = 0;
+
+  // Collapse the lowest-value visible leaf into an Other bucket until the
+  // total displayed node count (individual + Other nodes) <= topNSubcategories.
+  while (
+    visibleCount + otherNodeCount > topNSubcategories &&
+    visibleCount > 0
+  ) {
+    const minLeaf = allLeaves
+      .filter(l => l.visible)
+      .reduce((min, l) => (l.value < min.value ? l : min));
+
+    minLeaf.visible = false;
+    visibleCount -= 1;
+
+    if (globalOther) {
+      if (globalOtherBucket.total === 0) otherNodeCount += 1;
+      globalOtherBucket.total += minLeaf.value;
+      globalOtherBucket.entries.push({
+        name: minLeaf.subcategory,
+        value: minLeaf.value,
+      });
+    } else {
+      if (!perCategoryOther.has(minLeaf.mainCategory)) otherNodeCount += 1;
+      const bucket = perCategoryOther.get(minLeaf.mainCategory) ?? {
+        total: 0,
+        entries: [],
+      };
+      bucket.total += minLeaf.value;
+      bucket.entries.push({ name: minLeaf.subcategory, value: minLeaf.value });
+      perCategoryOther.set(minLeaf.mainCategory, bucket);
+    }
+  }
+
+  // Promote single-entry Other buckets back to visible — a 1-item "Other"
+  // node wastes a slot and hides information.
+  if (globalOther) {
+    if (globalOtherBucket.entries.length === 1) {
+      const entry = globalOtherBucket.entries[0];
+      const leaf = allLeaves.find(
+        l => l.subcategory === entry.name && !l.visible,
+      );
+      if (leaf) {
+        leaf.visible = true;
+        globalOtherBucket.total = 0;
+        globalOtherBucket.entries = [];
+      }
+    }
+  } else {
+    for (const [catName, bucket] of perCategoryOther) {
+      if (bucket.entries.length === 1) {
+        const entry = bucket.entries[0];
+        const leaf = allLeaves.find(
+          l =>
+            l.mainCategory === catName &&
+            l.subcategory === entry.name &&
+            !l.visible,
+        );
+        if (leaf) {
+          leaf.visible = true;
+          perCategoryOther.delete(catName);
+        }
+      }
+    }
+  }
+
+  return { allLeaves, perCategoryOther, globalOtherBucket };
+}
+
 function transformToSankeyData(
   categoryData: CategoryEntry[],
   toBudgetAmount: number = 0,
   rootNodeName: string,
   compact: boolean = false,
   topNSubcategories: number = 15,
+  globalOther: boolean = false,
 ): SankeyData {
-  const data: SankeyData = { nodes: [], links: [] };
+  // Phase 1 — Initialise leaves
+  const allLeaves: LeafState[] = categoryData
+    .filter(e => e.value > 0)
+    .map(e => ({
+      mainCategory: e.mainCategory,
+      subcategory: e.subcategory,
+      value: e.value,
+      isNegative: e.isNegative ?? false,
+      visible: true,
+    }));
 
-  // Determine the top N subcategory entries globally by value
-  const topKeys = new Set(
-    [...categoryData]
-      .filter(e => e.value > 0)
-      .sort((a, b) => b.value - a.value)
-      .slice(0, topNSubcategories - 1)
-      .map(e => `${e.mainCategory}/${e.subcategory}`),
+  // Phase 2 — Greedy reduction (collapse lowest-value leaves into Other buckets)
+  const { perCategoryOther, globalOtherBucket } = greedyReduceLeaves(
+    allLeaves,
+    topNSubcategories,
+    globalOther,
   );
 
-  // Compute per-main-category totals and sort descending
+  // Phase 3 — Compute category totals (sum of ALL leaves including collapsed)
   const categoryTotals = new Map<string, number>();
-  for (const entry of categoryData) {
-    if (entry.value > 0) {
-      categoryTotals.set(
-        entry.mainCategory,
-        (categoryTotals.get(entry.mainCategory) ?? 0) + entry.value,
-      );
-    }
+  for (const leaf of allLeaves) {
+    categoryTotals.set(
+      leaf.mainCategory,
+      (categoryTotals.get(leaf.mainCategory) ?? 0) + leaf.value,
+    );
   }
 
-  const sortedMainCategories = [...categoryTotals.keys()].sort(
+  const sortedCategories = [...categoryTotals.keys()].sort(
     (a, b) => (categoryTotals.get(b) ?? 0) - (categoryTotals.get(a) ?? 0),
   );
 
-  // Add the root node first with toBudget metadata
-  data.nodes.push({
-    name: rootNodeName,
-    toBudget: toBudgetAmount,
-  });
+  // Phase 4 — Build nodes/links
+  const nodes: SankeyNode[] = [
+    { name: rootNodeName, toBudget: toBudgetAmount },
+  ];
+  const links: SankeyLink[] = [];
+  const catNodeIndexMap = new Map<string, number>();
 
-  // Collect (mainCategoryIndex, sum) pairs for a single shared "Other" node
-  const otherLinks: Array<{
-    source: number;
-    value: number;
-    entries: Array<{ name: string; value: number }>;
-  }> = [];
-
-  for (const mainCategoryName of sortedMainCategories) {
-    const mainCategorySum = categoryTotals.get(mainCategoryName) ?? 0;
-
-    data.nodes.push({ name: mainCategoryName });
-    const mainCategoryIndex = data.nodes.length - 1;
-    data.links.push({
+  for (const catName of sortedCategories) {
+    nodes.push({ name: catName });
+    const catIdx = nodes.length - 1;
+    catNodeIndexMap.set(catName, catIdx);
+    links.push({
       source: 0,
-      target: mainCategoryIndex,
-      value: mainCategorySum,
+      target: catIdx,
+      value: categoryTotals.get(catName) ?? 0,
     });
 
-    const subcategories = categoryData
-      .filter(e => e.mainCategory === mainCategoryName && e.value > 0)
+    // Visible individual subcategory nodes, sorted descending
+    const visibleLeaves = allLeaves
+      .filter(l => l.mainCategory === catName && l.visible)
       .sort((a, b) => b.value - a.value);
 
-    let otherSum = 0;
-    const otherEntries: Array<{ name: string; value: number }> = [];
-    for (const entry of subcategories) {
-      if (topKeys.has(`${entry.mainCategory}/${entry.subcategory}`)) {
-        data.nodes.push({
-          name: entry.subcategory,
-          isNegative: entry.isNegative,
+    for (const leaf of visibleLeaves) {
+      nodes.push({ name: leaf.subcategory, isNegative: leaf.isNegative });
+      links.push({
+        source: catIdx,
+        target: nodes.length - 1,
+        value: leaf.value,
+        isNegative: leaf.isNegative,
+      });
+    }
+
+    // Per-category Other node (globalOther=false only)
+    if (!globalOther) {
+      const bucket = perCategoryOther.get(catName);
+      if (bucket) {
+        nodes.push({ name: 'Other' });
+        links.push({
+          source: catIdx,
+          target: nodes.length - 1,
+          value: bucket.total,
+          tooltipInfo: [...bucket.entries].sort((a, b) => b.value - a.value),
         });
-        data.links.push({
-          source: mainCategoryIndex,
-          target: data.nodes.length - 1,
-          value: entry.value,
-          isNegative: entry.isNegative,
-        });
-      } else {
-        otherSum += entry.value;
-        otherEntries.push({ name: entry.subcategory, value: entry.value });
       }
     }
-    if (otherSum > 0) {
-      otherLinks.push({
-        source: mainCategoryIndex,
-        value: otherSum,
-        entries: otherEntries,
+  }
+
+  // Global Other node (globalOther=true only)
+  if (globalOther && globalOtherBucket.total > 0) {
+    nodes.push({ name: 'Other' });
+    const globalOtherIdx = nodes.length - 1;
+
+    // Group entries by main category and emit one link per group
+    const byCategory = new Map<
+      string,
+      Array<{ name: string; value: number }>
+    >();
+    for (const entry of globalOtherBucket.entries) {
+      // Find which main category this subcategory belongs to
+      const leaf = allLeaves.find(
+        l => l.subcategory === entry.name && !l.visible,
+      );
+      if (!leaf) continue;
+      const group = byCategory.get(leaf.mainCategory) ?? [];
+      group.push(entry);
+      byCategory.set(leaf.mainCategory, group);
+    }
+
+    for (const [catName, entries] of byCategory) {
+      const sourceCatIdx = catNodeIndexMap.get(catName);
+      if (sourceCatIdx === undefined) continue;
+      const groupTotal = entries.reduce((sum, e) => sum + e.value, 0);
+      links.push({
+        source: sourceCatIdx,
+        target: globalOtherIdx,
+        value: groupTotal,
+        tooltipInfo: [...entries].sort((a, b) => b.value - a.value),
       });
     }
   }
 
-  // Single shared "Other" node for all below-top-N subcategories
-  if (otherLinks.length > 0) {
-    data.nodes.push({ name: 'Other' });
-    const otherIndex = data.nodes.length - 1;
-    for (const link of otherLinks) {
-      data.links.push({
-        source: link.source,
-        target: otherIndex,
-        value: link.value,
-        tooltipInfo: link.entries,
-      });
-    }
-  }
-
+  // Phase 5 — compact pass
   if (compact) {
-    return compactSankeyData(data, 5);
+    return compactSankeyData({ nodes, links }, 5);
   }
 
-  return data;
+  return { nodes, links };
 }
 
 function compactSankeyData(data: SankeyData, topN: number = 5): SankeyData {
