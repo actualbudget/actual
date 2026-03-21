@@ -84,7 +84,9 @@ function OtherModeSelector({ globalOther, onChange }: OtherModeSelectorProps) {
     { key: 'global', label: t('Global Other') },
   ];
 
-  const currentLabel = globalOther ? t('Global Other') : t('Per category Other');
+  const currentLabel = globalOther
+    ? t('Global Other')
+    : t('Per category Other');
 
   return (
     <>
@@ -112,6 +114,50 @@ function OtherModeSelector({ globalOther, onChange }: OtherModeSelectorProps) {
           items={options.map(({ key, label }) => ({
             name: key,
             text: label,
+          }))}
+        />
+      </Popover>
+    </>
+  );
+}
+
+const TOP_N_OPTIONS = [10, 15, 20, 25, 30] as const;
+
+type TopNSelectorProps = {
+  value: number;
+  onChange: (value: number) => void;
+};
+
+function TopNSelector({ value, onChange }: TopNSelectorProps) {
+  const { t } = useTranslation();
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <Button
+        ref={triggerRef}
+        variant="bare"
+        onPress={() => setIsOpen(true)}
+        aria-label={t('Change subcategory limit')}
+      >
+        <SvgList style={{ width: 12, height: 12 }} />
+        <span style={{ marginLeft: 5 }}>{t('Show {{n}}', { n: value })}</span>
+      </Button>
+      <Popover
+        triggerRef={triggerRef}
+        placement="bottom start"
+        isOpen={isOpen}
+        onOpenChange={() => setIsOpen(false)}
+      >
+        <Menu
+          onMenuSelect={item => {
+            onChange(Number(item));
+            setIsOpen(false);
+          }}
+          items={TOP_N_OPTIONS.map(n => ({
+            name: String(n),
+            text: t('Top {{n}}', { n }),
           }))}
         />
       </Popover>
@@ -201,6 +247,10 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     widget?.meta?.globalOther ?? false,
   );
 
+  const [topNSubcategories, setTopNSubcategories] = useState<number>(
+    widget?.meta?.topNSubcategories ?? 15,
+  );
+
   const { data: { grouped: groupedCategories = [] } = { grouped: [] } } =
     useCategories();
 
@@ -218,6 +268,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       graphMode,
       false,
       globalOther,
+      topNSubcategories,
     );
   }, [
     datesInitialized,
@@ -228,6 +279,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     conditionsOp,
     graphMode,
     globalOther,
+    topNSubcategories,
   ]);
 
   const defaultGetData = async (
@@ -320,6 +372,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
             conditionsOp,
             mode: graphMode,
             globalOther,
+            topNSubcategories,
             timeFrame: {
               start,
               end,
@@ -426,6 +479,10 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                 marginRight: 10,
                 marginLeft: 10,
               }}
+            />
+            <TopNSelector
+              value={topNSubcategories}
+              onChange={setTopNSubcategories}
             />
             <OtherModeSelector
               globalOther={globalOther}

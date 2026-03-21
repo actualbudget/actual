@@ -157,6 +157,7 @@ export function createSpreadsheet(
   mode: 'budgeted' | 'spent' = 'spent',
   compact: boolean = false,
   globalOther: boolean = false,
+  topNSubcategories: number = 15,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -170,6 +171,7 @@ export function createSpreadsheet(
         conditionsOp,
         compact,
         globalOther,
+        topNSubcategories,
       )(spreadsheet, setData);
       return data;
     } else if (mode === 'spent') {
@@ -181,6 +183,7 @@ export function createSpreadsheet(
         conditionsOp,
         compact,
         globalOther,
+        topNSubcategories,
       )(spreadsheet, setData);
       return data;
     }
@@ -194,6 +197,7 @@ export function createBudgetSpreadsheet(
   conditionsOp: 'and' | 'or' = 'and',
   compact: boolean = false,
   globalOther: boolean = false,
+  topNSubcategories: number = 15,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -269,7 +273,16 @@ export function createBudgetSpreadsheet(
 
     const { toBudget } = aggregated;
 
-    setData(transformToSankeyData(categoryData, toBudget, 'Budgeted', compact, 15, globalOther));
+    setData(
+      transformToSankeyData(
+        categoryData,
+        toBudget,
+        'Budgeted',
+        compact,
+        topNSubcategories,
+        globalOther,
+      ),
+    );
   };
 }
 
@@ -281,6 +294,7 @@ export function createTransactionsSpreadsheet(
   conditionsOp: 'and' | 'or' = 'and',
   compact: boolean = false,
   globalOther: boolean = false,
+  topNSubcategories: number = 15,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -301,7 +315,16 @@ export function createTransactionsSpreadsheet(
     );
 
     // convert retrieved data into the proper sankey format
-    setData(transformToSankeyData(categoryData, 0, 'Spent', compact, 15, globalOther));
+    setData(
+      transformToSankeyData(
+        categoryData,
+        0,
+        'Spent',
+        compact,
+        topNSubcategories,
+        globalOther,
+      ),
+    );
   };
 }
 

@@ -207,5 +207,6 @@ export type SankeyWidget = AbstractWidget<
     timeFrame?: TimeFrame;
     mode?: 'budgeted' | 'spent';
     globalOther?: boolean;
+    topNSubcategories?: number;
   } | null
 >;
