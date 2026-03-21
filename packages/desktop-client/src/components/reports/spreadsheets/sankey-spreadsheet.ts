@@ -156,6 +156,7 @@ export function createSpreadsheet(
   conditionsOp: 'and' | 'or' = 'and',
   mode: 'budgeted' | 'spent' = 'spent',
   compact: boolean = false,
+  globalOther: boolean = false,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -168,6 +169,7 @@ export function createSpreadsheet(
         conditions,
         conditionsOp,
         compact,
+        globalOther,
       )(spreadsheet, setData);
       return data;
     } else if (mode === 'spent') {
@@ -178,6 +180,7 @@ export function createSpreadsheet(
         conditions,
         conditionsOp,
         compact,
+        globalOther,
       )(spreadsheet, setData);
       return data;
     }
@@ -190,6 +193,7 @@ export function createBudgetSpreadsheet(
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
   compact: boolean = false,
+  globalOther: boolean = false,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -265,7 +269,7 @@ export function createBudgetSpreadsheet(
 
     const { toBudget } = aggregated;
 
-    setData(transformToSankeyData(categoryData, toBudget, 'Budgeted', compact));
+    setData(transformToSankeyData(categoryData, toBudget, 'Budgeted', compact, 15, globalOther));
   };
 }
 
@@ -276,6 +280,7 @@ export function createTransactionsSpreadsheet(
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
   compact: boolean = false,
+  globalOther: boolean = false,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -296,7 +301,7 @@ export function createTransactionsSpreadsheet(
     );
 
     // convert retrieved data into the proper sankey format
-    setData(transformToSankeyData(categoryData, 0, 'Spent', compact));
+    setData(transformToSankeyData(categoryData, 0, 'Spent', compact, 15, globalOther));
   };
 }
 

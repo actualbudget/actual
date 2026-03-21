@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { SvgList } from '@actual-app/components/icons/v1';
+import { Menu } from '@actual-app/components/menu';
 import { Paragraph } from '@actual-app/components/paragraph';
+import { Popover } from '@actual-app/components/popover';
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
@@ -65,6 +68,56 @@ export function Sankey() {
 }
 
 type GraphMode = 'budgeted' | 'spent';
+
+type OtherModeSelectorProps = {
+  globalOther: boolean;
+  onChange: (globalOther: boolean) => void;
+};
+
+function OtherModeSelector({ globalOther, onChange }: OtherModeSelectorProps) {
+  const { t } = useTranslation();
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const options = [
+    { key: 'per-category', label: t('Per category Other') },
+    { key: 'global', label: t('Global Other') },
+  ];
+
+  const currentLabel = globalOther ? t('Global Other') : t('Per category Other');
+
+  return (
+    <>
+      <Button
+        ref={triggerRef}
+        variant="bare"
+        onPress={() => setIsOpen(true)}
+        aria-label={t('Change Other grouping')}
+      >
+        <SvgList style={{ width: 12, height: 12 }} />
+        <span style={{ marginLeft: 5 }}>{currentLabel}</span>
+      </Button>
+
+      <Popover
+        triggerRef={triggerRef}
+        placement="bottom start"
+        isOpen={isOpen}
+        onOpenChange={() => setIsOpen(false)}
+      >
+        <Menu
+          onMenuSelect={item => {
+            onChange(item === 'global');
+            setIsOpen(false);
+          }}
+          items={options.map(({ key, label }) => ({
+            name: key,
+            text: label,
+          }))}
+        />
+      </Popover>
+    </>
+  );
+}
 
 type GraphModeSelectorProps = {
   mode: GraphMode;
@@ -144,6 +197,10 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     widget?.meta?.mode ?? 'spent',
   );
 
+  const [globalOther, setGlobalOther] = useState<boolean>(
+    widget?.meta?.globalOther ?? false,
+  );
+
   const { data: { grouped: groupedCategories = [] } = { grouped: [] } } =
     useCategories();
 
@@ -159,6 +216,8 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       conditions,
       conditionsOp,
       graphMode,
+      false,
+      globalOther,
     );
   }, [
     datesInitialized,
@@ -168,6 +227,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     conditions,
     conditionsOp,
     graphMode,
+    globalOther,
   ]);
 
   const defaultGetData = async (
@@ -259,6 +319,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
             conditions,
             conditionsOp,
             mode: graphMode,
+            globalOther,
             timeFrame: {
               start,
               end,
@@ -357,6 +418,19 @@ function SankeyInner({ widget }: SankeyInnerProps) {
               }}
             />
             <GraphModeSelector mode={graphMode} onChange={setGraphMode} />
+            <View
+              style={{
+                width: 1,
+                height: 28,
+                backgroundColor: theme.pillBorderDark,
+                marginRight: 10,
+                marginLeft: 10,
+              }}
+            />
+            <OtherModeSelector
+              globalOther={globalOther}
+              onChange={setGlobalOther}
+            />
             <View
               style={{
                 width: 1,
