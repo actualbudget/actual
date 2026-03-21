@@ -94,16 +94,18 @@ function filterCategoryGroups(
     if (op === 'isNot') return id !== value;
     if (op === 'oneOf') return Array.isArray(value) && value.includes(id);
     if (op === 'notOneOf') return !Array.isArray(value) || !value.includes(id);
-    if (op === 'contains')
-      {return (
+    if (op === 'contains') {
+      return (
         typeof value === 'string' &&
         name.toLowerCase().includes(value.toLowerCase())
-      );}
-    if (op === 'doesNotContain')
-      {return (
+      );
+    }
+    if (op === 'doesNotContain') {
+      return (
         typeof value === 'string' &&
         !name.toLowerCase().includes(value.toLowerCase())
-      );}
+      );
+    }
     if (op === 'matches') {
       if (typeof value !== 'string') return false;
       try {
