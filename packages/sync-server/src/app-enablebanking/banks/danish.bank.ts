@@ -38,6 +38,11 @@ function extractPayeeFromNotes(notes: string): string {
   }
   // Remove MobilePay prefix if followed by merchant name
   clean = clean.replace(/^MobilePay:?\s*/i, '').trim();
+  // Remove "køb" (purchase) prefix common in MobilePay transactions
+  // Pattern: "MobilePay køb MobilePay BilBasen" → after first strip → "køb MobilePay BilBasen"
+  clean = clean.replace(/^køb\s+/i, '').trim();
+  // Strip second MobilePay if present (e.g. "MobilePay køb MobilePay <merchant>")
+  clean = clean.replace(/^MobilePay:?\s*/i, '').trim();
 
   // Handle foreign currency transactions where merchant is AFTER "Nota nr. XXXXX"
   // Pattern: "GBP 8,99 Kurs 861,73 Nota nr. 33856 Audible UK, adbl.co/pymt"

@@ -1,44 +1,3 @@
-export type EnableBankingEndpoints = {
-  '/configure': Endpoint<ConfigureBody, void>;
-  '/status': Endpoint<undefined, EnableBankingStatusResponse>;
-  '/countries': Endpoint<undefined, string[]>;
-  '/get_aspsps': Endpoint<{ country?: string }, EnableBankingBank[]>;
-  '/start_auth': Endpoint<
-    { country: string; aspsp: string },
-    EnableBankingAuthenticationStartResponse
-  >;
-  '/get_session': Endpoint<{ state: string }, EnableBankingToken>;
-  '/complete_auth': Endpoint<{ state: string; code: string }, void>;
-  '/fail_auth': Endpoint<{ state: string; error?: string }, void>;
-  '/get_accounts': Endpoint<{ session_id: string }, EnableBankingToken>;
-  '/transactions': Endpoint<TransactionsBody, TransactionsResponse>;
-};
-
-export type Endpoint<BodyType, ResponseType> = {
-  body: BodyType;
-  response: ResponseType;
-};
-
-export type EnableBankingResponse<T extends keyof EnableBankingEndpoints> =
-  | {
-      data: EnableBankingEndpoints[T]['response'];
-      error?: undefined;
-      error_code?: undefined;
-      error_type?: undefined;
-    }
-  | {
-      data?: undefined;
-      error: EnableBankingErrorInterface;
-      error_code?: undefined;
-      error_type?: undefined;
-    }
-  | {
-      data?: undefined;
-      error?: undefined;
-      error_code: EnableBankingErrorCode;
-      error_type: string;
-    };
-
 export type EnableBankingErrorCode =
   | 'ENABLEBANKING_SECRETS_INVALID'
   | 'ENABLEBANKING_APPLICATION_INACTIVE'
@@ -55,24 +14,6 @@ export type EnableBankingErrorCode =
 export type EnableBankingErrorInterface = {
   error_code: EnableBankingErrorCode;
   error_type: string;
-};
-
-export type ConfigureBody = {
-  applicationId: string | null;
-  secret: string | null;
-};
-
-export type TransactionsBody = {
-  account_id: string;
-  startDate?: string;
-  bank_id?: string;
-};
-
-export type EnableBankingBank = {
-  name: string;
-  logo: string;
-  BIC?: string;
-  country: string;
 };
 
 export type EnableBankingAuthenticationStartResponse = {
@@ -93,10 +34,6 @@ export type SyncServerEnableBankingAccount = {
   balance: number;
 };
 
-export type EnableBankingStatusResponse = {
-  configured: boolean;
-};
-
 export type Transaction = {
   amount: number;
   payeeName: string;
@@ -111,10 +48,4 @@ export type Transaction = {
   /** Stable unique identifier for deduplication; mapped from entry_reference */
   transactionId: string | null;
   [x: string]: unknown;
-};
-
-export type TransactionsResponse = {
-  transactions: Transaction[];
-  /** Current account balance in integer cents */
-  startingBalance: number;
 };

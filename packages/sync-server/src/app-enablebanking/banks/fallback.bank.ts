@@ -37,7 +37,9 @@ export function normalizeFallbackTransaction(
 
   const payeeObject = isDebtor ? t.creditor : t.debtor;
 
-  const payeeName = payeeObject && payeeObject.name ? payeeObject.name : '';
+  const payeeName =
+    (payeeObject && payeeObject.name ? payeeObject.name : '') ||
+    (t.remittance_information ? t.remittance_information.join(' ') : '');
   const rawAmount = t.transaction_amount?.amount;
   const parsedAmount = rawAmount ? parseFloat(rawAmount) : Number.NaN;
 

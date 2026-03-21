@@ -1,12 +1,10 @@
 import { inspect } from 'util';
 
 import createDebug from 'debug';
-import type { Request, RequestHandler, Response } from 'express';
-import type { ParamsDictionary } from 'express-serve-static-core';
+import type { RequestHandler } from 'express';
 
 import type { components } from '../models/enablebanking-openapi.js';
 import type {
-  EnableBankingEndpoints,
   EnableBankingErrorCode,
   EnableBankingErrorInterface,
 } from '../models/enablebanking.js';
@@ -14,13 +12,6 @@ import type {
 const debug = createDebug('actual:enablebanking:errors');
 
 export type ErrorResponse = components['schemas']['ErrorResponse'];
-
-type EnableBankingRouteData<T extends keyof EnableBankingEndpoints> =
-  | EnableBankingEndpoints[T]['response']
-  | {
-      error_code: EnableBankingErrorCode;
-      error_type: string;
-    };
 
 export class EnableBankingError extends Error {
   error_code: EnableBankingErrorCode;
@@ -186,28 +177,13 @@ export function handleErrorResponse(
   }
 }
 
-export function handleError<T extends keyof EnableBankingEndpoints>(
+export function handleError(
   func: (
-    req: Request<
-      ParamsDictionary,
-      { status: 'ok'; data: EnableBankingRouteData<T> },
-      EnableBankingEndpoints[T]['body']
-    >,
-    res: Response<{ status: 'ok'; data: EnableBankingRouteData<T> }>,
+    req: Parameters<RequestHandler>[0],
+    res: Parameters<RequestHandler>[1],
   ) => Promise<void>,
-): RequestHandler<
-  ParamsDictionary,
-  { status: 'ok'; data: EnableBankingRouteData<T> },
-  EnableBankingEndpoints[T]['body']
-> {
-  return (
-    req: Request<
-      ParamsDictionary,
-      { status: 'ok'; data: EnableBankingRouteData<T> },
-      EnableBankingEndpoints[T]['body']
-    >,
-    res: Response<{ status: 'ok'; data: EnableBankingRouteData<T> }>,
-  ) => {
+): RequestHandler {
+  return (req, res) => {
     func(req, res).catch(err => {
       if (!(err instanceof EnableBankingError)) {
         console.error(
