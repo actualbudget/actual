@@ -725,9 +725,10 @@ export function CreateAccountModal({
                           {[
                             isGoCardlessSetupComplete ? '' : 'GoCardless',
                             isSimpleFinSetupComplete ? '' : 'SimpleFIN',
-                            isEnableBankingSetupComplete
-                              ? ''
-                              : t('Enable Banking'),
+                            isEnableBankingSyncFeatureEnabled &&
+                            !isEnableBankingSetupComplete
+                              ? 'Enable Banking'
+                              : '',
                             isPluggyAiSetupComplete ? '' : 'Pluggy.ai',
                           ]
                             .filter(Boolean)

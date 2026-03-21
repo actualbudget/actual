@@ -967,10 +967,11 @@ async function processBankSyncDownload(
       balanceToUse = customStartingBalance;
     } else if (acctRow.account_sync_source === 'enablebanking') {
       const previousBalance = transactions.reduce(
-        (total, trans) => total - trans.transactionAmount.amount * 100,
+        (total, trans) =>
+          total - amountToInteger(trans.transactionAmount.amount),
         currentBalance,
       );
-      balanceToUse = Math.round(previousBalance);
+      balanceToUse = previousBalance;
     } else if (acctRow.account_sync_source === 'simpleFin') {
       const previousBalance = transactions.reduce((total, trans) => {
         return (

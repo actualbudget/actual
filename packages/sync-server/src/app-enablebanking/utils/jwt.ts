@@ -10,6 +10,9 @@ function getJWTHeader(applicationId: string): Header {
 }
 
 function getJWTBody(exp = 3600) {
+  if (!Number.isInteger(exp) || exp <= 0) {
+    throw new Error('Invalid exp: must be a positive integer');
+  }
   const timestamp = Math.floor(new Date().getTime() / 1000);
   return {
     iss: 'enablebanking.com',

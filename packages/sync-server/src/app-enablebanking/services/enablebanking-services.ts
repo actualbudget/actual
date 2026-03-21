@@ -44,14 +44,14 @@ function isDefined<T>(value: T | undefined): asserts value is T {
 function parseAmountSafe(amount: string | undefined): number {
   if (!amount || typeof amount !== 'string') {
     throw new EnableBankingError(
-      'BAD_REQUEST',
+      'INTERNAL_ERROR',
       'Invalid amount: expected a numeric string',
     );
   }
   const parsed = parseFloat(amount);
   if (isNaN(parsed)) {
     throw new EnableBankingError(
-      'BAD_REQUEST',
+      'INTERNAL_ERROR',
       `Invalid amount: cannot parse "${amount}" as a number`,
     );
   }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
@@ -41,12 +41,12 @@ export function AspspSelector({
     COUNTRY_OPTIONS.find(country => country.id === initialCountry) ?? null,
   );
   const [aspsp, setAspsp] = useState<string | null>(
-    initialAspsp ? initialAspsp : null,
+    initialAspsp ?? null,
   );
   const [startingAuth, setStartingAuth] = useState<boolean>(false);
   const autoTriggeredRef = useRef(false);
 
-  const onLink = useCallback(async () => {
+  const onLink = async () => {
     if (country === null || aspsp === null) {
       onErrorRef.current({ error_code: 'INTERNAL_ERROR', error_type: '' });
       return;
@@ -79,7 +79,7 @@ export function AspspSelector({
     } finally {
       setStartingAuth(false);
     }
-  }, [aspsp, country]);
+  };
 
   useEffect(() => {
     if (
@@ -161,7 +161,7 @@ export function AspspSelector({
   if (availableCountries === null) {
     return (
       <WaitingIndicator
-        message={t('Getting the available countries from Enable Banking.')}
+        message={t('Getting the available countries from {{provider}}.', { provider: 'Enable Banking' })}
       />
     );
   }

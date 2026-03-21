@@ -31,23 +31,12 @@ export async function selectEnableBankingAccounts(
       };
     },
   );
-  if (
-    accountEntity &&
-    (accountEntity.account_id || accountEntity.official_name)
-  ) {
-    //Find appropriate account
-    const account = accounts.find(tokenAccount => {
-      // Try matching on account_id first (strongest match)
-      if (
+  if (accountEntity && accountEntity.account_id) {
+    const account = accounts.find(
+      tokenAccount =>
         tokenAccount.account_id &&
-        accountEntity.account_id &&
-        tokenAccount.account_id === accountEntity.account_id
-      ) {
-        return true;
-      }
-      // Fall back to official_name match
-      return tokenAccount.official_name === accountEntity.official_name;
-    });
+        tokenAccount.account_id === accountEntity.account_id,
+    );
     if (account) {
       try {
         await send('enablebanking-accounts-link', {

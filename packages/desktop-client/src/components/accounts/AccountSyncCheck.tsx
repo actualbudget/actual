@@ -71,7 +71,11 @@ function useErrorMessage() {
         );
 
       case 'ENABLEBANKING_SESSION_CLOSED':
-        return <Trans>The Enable Banking session has expired.</Trans>;
+        return (
+          <Trans values={{ provider: 'Enable Banking' }}>
+            The {'{{provider}}'} session has expired.
+          </Trans>
+        );
 
       case 'ACCOUNT_MISSING':
         return t(
