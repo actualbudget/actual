@@ -1490,6 +1490,7 @@ describe('embedThemeFonts', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   it('should rewrite url() references to data URIs', async () => {
