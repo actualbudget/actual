@@ -587,26 +587,32 @@ export async function embedThemeFonts(
 
   if (fontRefs.length === 0) return css;
 
-  // Fetch all fonts in parallel
-  const fetched = await Promise.all(
-    fontRefs.map(async ref => {
-      const fontUrl = baseUrl + ref.cleanPath;
-      const response = await fetch(fontUrl);
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch font file "${ref.cleanPath}" from ${fontUrl}: ${response.status} ${response.statusText}`,
-        );
-      }
-      const buffer = await response.arrayBuffer();
-      if (buffer.byteLength > MAX_FONT_FILE_SIZE) {
-        throw new Error(
-          `Font file "${ref.cleanPath}" exceeds maximum size of ${MAX_FONT_FILE_SIZE / 1024 / 1024}MB.`,
-        );
-      }
-      const base64 = arrayBufferToBase64(buffer);
-      return { ref, dataUri: `data:${ref.mime};base64,${base64}` };
-    }),
-  );
+  // Fetch fonts sequentially to enforce a running total size budget
+  const fetched: { ref: FontRef; dataUri: string }[] = [];
+  let totalBytes = 0;
+  for (const ref of fontRefs) {
+    const fontUrl = baseUrl + ref.cleanPath;
+    const response = await fetch(fontUrl);
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch font file "${ref.cleanPath}" from ${fontUrl}: ${response.status} ${response.statusText}`,
+      );
+    }
+    const buffer = await response.arrayBuffer();
+    if (buffer.byteLength > MAX_FONT_FILE_SIZE) {
+      throw new Error(
+        `Font file "${ref.cleanPath}" exceeds maximum size of ${MAX_FONT_FILE_SIZE / 1024 / 1024}MB.`,
+      );
+    }
+    totalBytes += buffer.byteLength;
+    if (totalBytes > MAX_TOTAL_FONT_SIZE) {
+      throw new Error(
+        `Total embedded font data exceeds maximum of ${MAX_TOTAL_FONT_SIZE / 1024 / 1024}MB.`,
+      );
+    }
+    const base64 = arrayBufferToBase64(buffer);
+    fetched.push({ ref, dataUri: `data:${ref.mime};base64,${base64}` });
+  }
 
   // Replace each url() reference with its data: URI
   let result = css;

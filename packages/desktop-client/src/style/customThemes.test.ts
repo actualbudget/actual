@@ -1560,6 +1560,26 @@ describe('embedThemeFonts', () => {
     );
   });
 
+  it('should reject when total font size exceeds budget', async () => {
+    // Each font is under the per-file limit but together they exceed the total
+    // Use MAX_FONT_FILE_SIZE (2MB) per font, need 6 to exceed 10MB total
+    const bigBuffer = new ArrayBuffer(MAX_FONT_FILE_SIZE);
+    vi.stubGlobal('fetch', mockFetch(bigBuffer));
+
+    const fontBlocks = Array.from(
+      { length: 6 },
+      (_, i) => `@font-face {
+  font-family: 'Font${i}';
+  src: url('font${i}.woff2') format('woff2');
+}`,
+    ).join('\n');
+    const css = `${fontBlocks}\n:root { --color-primary: #007bff; }`;
+
+    await expect(embedThemeFonts(css, 'owner/repo')).rejects.toThrow(
+      'Total embedded font data exceeds maximum',
+    );
+  });
+
   it('should return CSS unchanged when no url() refs exist', async () => {
     const css = `@font-face {
   font-family: 'Test';
