@@ -2,6 +2,9 @@
  * Custom theme utilities: fetch, validation, and storage helpers.
  */
 
+export const BASE_THEME_OPTIONS = ['light', 'dark', 'midnight'] as const;
+export type BaseTheme = (typeof BASE_THEME_OPTIONS)[number];
+
 export type CatalogTheme = {
   name: string;
   repo: string;
@@ -14,6 +17,8 @@ export type InstalledTheme = {
   name: string;
   repo: string;
   cssContent: string; // CSS content stored when theme is installed (required)
+  baseTheme?: BaseTheme; // Which built-in theme to use as base (defaults to contextual theme)
+  overrideCss?: string; // Additional free-text CSS overrides on top of cssContent
 };
 
 /**
@@ -272,6 +277,21 @@ export function validateThemeCss(css: string): string {
 }
 
 /**
+ * Validate and concatenate cssContent and overrideCss into a single CSS string.
+ * Returns empty string if neither is present.
+ */
+export function validateAndCombineThemeCss(
+  cssContent?: string,
+  overrideCss?: string,
+): string {
+  const parts = [
+    cssContent && validateThemeCss(cssContent),
+    overrideCss && validateThemeCss(overrideCss),
+  ].filter(Boolean);
+  return parts.join('\n');
+}
+
+/**
  * Generate a unique ID for a theme based on its repo URL or direct CSS URL.
  */
 export function generateThemeId(urlOrRepo: string): string {
@@ -303,12 +323,24 @@ export function parseInstalledTheme(
       typeof parsed.repo === 'string' &&
       typeof parsed.cssContent === 'string'
     ) {
-      return {
+      const result: InstalledTheme = {
         id: parsed.id,
         name: parsed.name,
         repo: parsed.repo,
         cssContent: parsed.cssContent,
-      } satisfies InstalledTheme;
+      };
+      if (
+        typeof parsed.baseTheme === 'string' &&
+        BASE_THEME_OPTIONS.includes(
+          parsed.baseTheme as (typeof BASE_THEME_OPTIONS)[number],
+        )
+      ) {
+        result.baseTheme = parsed.baseTheme as BaseTheme;
+      }
+      if (typeof parsed.overrideCss === 'string' && parsed.overrideCss) {
+        result.overrideCss = parsed.overrideCss;
+      }
+      return result;
     }
     return null;
   } catch {

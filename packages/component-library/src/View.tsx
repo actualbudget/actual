@@ -5,7 +5,7 @@ import { css, cx } from '@emotion/css';
 
 import type { CSSProperties } from './styles';
 
-type ViewProps = HTMLProps<HTMLDivElement> & {
+type ViewProps = Omit<HTMLProps<HTMLDivElement>, 'style'> & {
   className?: string;
   style?: CSSProperties;
   nativeStyle?: CSSProperties;

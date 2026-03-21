@@ -1,4 +1,7 @@
 class Query {
+  /** @type {import('loot-core/shared/query').QueryState} */
+  state;
+
   constructor(state) {
     this.state = {
       filterExpressions: state.filterExpressions || [],

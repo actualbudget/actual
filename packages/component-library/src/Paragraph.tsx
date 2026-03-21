@@ -4,7 +4,7 @@ import { css } from '@emotion/css';
 
 import type { CSSProperties } from './styles';
 
-type ParagraphProps = HTMLProps<HTMLDivElement> & {
+type ParagraphProps = Omit<HTMLProps<HTMLDivElement>, 'style'> & {
   style?: CSSProperties;
   isLast?: boolean;
 };

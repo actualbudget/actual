@@ -29,7 +29,7 @@ jobs:
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - if: ${{ startsWith(matrix.os, 'windows') }}
         run: pip.exe install setuptools
       - if: ${{ ! startsWith(matrix.os, 'windows') }}
@@ -74,7 +74,7 @@ jobs:
         if: ${{ ! startsWith(matrix.os, 'macos') }}
         run: ./bin/package-electron
       - name: Upload Build
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: actual-electron-${{ matrix.os }}
           path: |
@@ -85,13 +85,13 @@ jobs:
             packages/desktop-electron/dist/*.flatpak
       - name: Upload Windows Store Build
         if: ${{ startsWith(matrix.os, 'windows') }}
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: actual-electron-${{ matrix.os }}-appx
           path: |
             packages/desktop-electron/dist/*.appx
       - name: Add to new release
-        uses: softprops/action-gh-release@5be0e66d93ac7ed76da52eca8bb058f665c3a5fe # v2.4.2
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
         with:
           draft: true
           body: |
@@ -126,7 +126,7 @@ jobs:
           Install-Module -Name StoreBroker -AcceptLicense -Force -Scope CurrentUser -Verbose
 
       - name: Download Microsoft Store artifacts
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: actual-electron-windows-latest-appx
 

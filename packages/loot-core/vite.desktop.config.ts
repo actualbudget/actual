@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => {
         formats: ['cjs'],
       },
       sourcemap: true,
-      rollupOptions: {
+      rolldownOptions: {
         output: {
           entryFileNames: 'bundle.desktop.js',
           format: 'cjs',

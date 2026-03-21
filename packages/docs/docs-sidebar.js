@@ -230,6 +230,7 @@ const sidebars = {
           link: { type: 'doc', id: 'api/index' },
           items: [
             'api/reference',
+            'api/cli',
             {
               type: 'category',
               label: 'ActualQL',

@@ -1,0 +1,7 @@
+#!/bin/sh
+# Run yarn install after pulling/merging (if yarn.lock changed)
+
+if git diff --name-only ORIG_HEAD HEAD | grep -q "^yarn.lock$"; then
+  echo "yarn.lock changed — running yarn install..."
+  yarn install
+fi

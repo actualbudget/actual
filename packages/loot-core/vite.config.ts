@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => {
         fileName: () =>
           isDev ? 'kcab.worker.dev.js' : `kcab.worker.[hash].js`,
       },
-      rollupOptions: {
+      rolldownOptions: {
         onwarn(warning, warn) {
           // Suppress sourcemap warnings from peggy-loader
           if (
@@ -76,6 +76,9 @@ export default defineConfig(({ mode }) => {
           'process',
           'stream',
           'path',
+          'crypto',
+          'timers',
+          'util',
           'zlib',
           'fs',
           'assert',
@@ -93,8 +96,11 @@ export default defineConfig(({ mode }) => {
         'buffer',
         'process',
         'assert',
+        'crypto-browserify',
         'path-browserify',
         'stream-browserify',
+        'timers-browserify',
+        'util',
         'browserify-zlib',
       ],
     },
