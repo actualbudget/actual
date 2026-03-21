@@ -110,6 +110,27 @@ export async function mergeTransactions(
     await batchUpdateTransactions(diff);
   }
 
+  // If either transaction has a schedule, mark the schedule as paid by
+  // advancing it to the next occurrence. This fixes the issue where
+  // merged scheduled transactions were still showing as "Due".
+  if (keep.schedule || drop.schedule) {
+    const scheduleId = keep.schedule || drop.schedule;
+    const { data: schedules } = await aqlQuery(
+      q('schedules').filter({ id: scheduleId }),
+    );
+    if (schedules.length > 0) {
+      const schedule = schedules[0];
+      // Mark the schedule as paid by setting _date to null
+      // This triggers the schedule to be advanced to the next occurrence
+      if (!schedule.completed && schedule.next_date) {
+        await db.runQuery(
+          'UPDATE schedules SET _date = null WHERE id = ?',
+          [scheduleId],
+        );
+      }
+    }
+  }
+
   return keep.id;
 }
 

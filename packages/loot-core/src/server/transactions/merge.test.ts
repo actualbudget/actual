@@ -337,6 +337,46 @@ describe('Merging success', () => {
     expect(transactions[0].schedule).toBe('schedule-1');
   });
 
+  it('advances schedule after merging scheduled transaction', async () => {
+    // Create a schedule
+    await db.insertSchedule({
+      name: 'Test Schedule',
+      id: 'schedule-adv-1',
+      account: 'one',
+      _payee: 'Test Payee',
+      _amount: [{ amount: 100, account: 'budget' }],
+      next_date: '2025-01-15',
+      _conditions: [{ op: 'is', field: 'date', value: '2025-01-15' }],
+    });
+
+    // Scheduled transaction (created by the system)
+    const t1 = await db.insertTransaction({
+      account: 'one',
+      date: '2025-01-15',
+      payee: 'Test Payee',
+      amount: 100,
+      schedule: 'schedule-adv-1',
+      cleared: false,
+    });
+
+    // Bank-synced transaction that matches
+    const t2 = await db.insertTransaction({
+      account: 'one',
+      date: '2025-01-15',
+      payee: 'Test Payee',
+      amount: 100,
+      cleared: true,
+      imported_id: 'imported_adv_2',
+    });
+
+    expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t2);
+
+    // After merge, the schedule should be advanced (marked as paid)
+    // by setting _date to null so it recalculates next_date
+    const schedule = await db.getSchedule('schedule-adv-1');
+    expect(schedule._date).toBeNull();
+  });
+
   it('preserves split categories when merging split transaction with uncategorized imported transaction', async () => {
     // Create a manual transaction with splits
     const manualParent = await db.insertTransaction({
