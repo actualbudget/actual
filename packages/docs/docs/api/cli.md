@@ -274,15 +274,79 @@ actual schedules delete <id>
 
 ### Query (ActualQL)
 
-Run queries using [ActualQL](./actual-ql/index.md):
+Run queries using [ActualQL](./actual-ql/index.md).
+
+#### Subcommands
+
+| Subcommand             | Description                       |
+| ---------------------- | --------------------------------- |
+| `query run`            | Execute an AQL query              |
+| `query tables`         | List available tables             |
+| `query fields <table>` | List fields and types for a table |
+
+#### `query run` Options
+
+| Option                | Description                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------- |
+| `--table <table>`     | Table to query (use `actual query tables` to list)                                          |
+| `--select <fields>`   | Comma-separated fields to select                                                            |
+| `--filter <json>`     | Filter as JSON (e.g. `'{"amount":{"$lt":0}}'`)                                              |
+| `--where <json>`      | Alias for `--filter` (cannot be used together)                                              |
+| `--order-by <fields>` | Fields with optional direction: `field1:desc,field2` (default: asc)                         |
+| `--limit <n>`         | Limit number of results                                                                     |
+| `--offset <n>`        | Skip first N results (for pagination)                                                       |
+| `--last <n>`          | Show last N transactions (shortcut: implies `--table transactions`, `--order-by date:desc`) |
+| `--count`             | Count matching rows instead of returning them                                               |
+| `--group-by <fields>` | Comma-separated fields to group by                                                          |
+| `--file <path>`       | Read query from JSON file (use `-` for stdin)                                               |
+
+#### Examples
 
 ```bash
-# Run a query (inline)
-actual query run --table transactions --select "date,amount,payee" --filter '{"amount":{"$lt":0}}' --limit 10
+# Show last 5 transactions (convenience shortcut)
+actual query run --last 5
 
-# Run a query (from file)
+# Override default columns with --last
+actual query run --last 10 --select "date,amount,notes"
+
+# Transactions ordered by date descending with limit
+actual query run --table transactions --select "date,amount,payee.name" --order-by "date:desc" --limit 10
+
+# Filter with JSON — negative amounts (expenses)
+actual query run --table transactions --filter '{"amount":{"$lt":0}}' --limit 5
+
+# Use --where (alias for --filter, more intuitive for SQL users)
+actual query run --table transactions --where '{"payee.name":"Grocery Store"}' --limit 5
+
+# Count all transactions
+actual query run --table transactions --count
+
+# Count with a filter
+actual query run --table transactions --filter '{"category.name":"Groceries"}' --count
+
+# Group by category with aggregate (use --file for aggregate expressions)
+echo '{"table":"transactions","groupBy":["category.name"],"select":["category.name",{"amount":{"$sum":"$amount"}}]}' | actual query run --file -
+
+# Pagination: skip first 20, show next 10
+actual query run --table transactions --order-by "date:desc" --limit 10 --offset 20
+
+# Multi-field ordering
+actual query run --table transactions --order-by "date:desc,amount:asc" --limit 10
+
+# Run a query from a JSON file
 actual query run --file query.json
+
+# Pipe query from stdin
+echo '{"table":"transactions","select":["date","amount"],"limit":5}' | actual query run --file -
+
+# List available tables
+actual query tables
+
+# List fields for a table
+actual query fields transactions
 ```
+
+See [ActualQL](./actual-ql/index.md) for full filter/function reference including `$transform`, `$month`, `$year`, and aggregate functions.
 
 ### Server
 
