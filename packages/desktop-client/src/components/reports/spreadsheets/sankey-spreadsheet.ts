@@ -75,67 +75,77 @@ function filterCategoryGroups(
   const categoryConditions = conditions.filter(
     cond => cond.field === 'category',
   );
+  const categoryGroupConditions = conditions.filter(
+    cond => cond.field === 'category_group',
+  );
 
-  if (categoryConditions.length === 0) {
+  if (categoryConditions.length === 0 && categoryGroupConditions.length === 0) {
     return categoryGroups;
   }
 
+  const matchesStringCondition = (
+    id: string,
+    name: string,
+    cond: RuleConditionEntity,
+  ): boolean => {
+    const value = cond.value;
+    const op = cond.op as string;
+    if (op === 'is') return id === value;
+    if (op === 'isNot') return id !== value;
+    if (op === 'oneOf') return Array.isArray(value) && value.includes(id);
+    if (op === 'notOneOf') return !Array.isArray(value) || !value.includes(id);
+    if (op === 'contains')
+      {return (
+        typeof value === 'string' &&
+        name.toLowerCase().includes(value.toLowerCase())
+      );}
+    if (op === 'doesNotContain')
+      {return (
+        typeof value === 'string' &&
+        !name.toLowerCase().includes(value.toLowerCase())
+      );}
+    if (op === 'matches') {
+      if (typeof value !== 'string') return false;
+      try {
+        const regex =
+          value.startsWith('/') && value.lastIndexOf('/') > 0
+            ? new RegExp(
+                value.slice(1, value.lastIndexOf('/')),
+                value.slice(value.lastIndexOf('/') + 1),
+              )
+            : new RegExp(value);
+        return regex.test(name);
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  };
+
   const categoryMatchesConditions = (
-    categoryId: string,
-    categoryName: string,
+    catId: string,
+    catName: string,
     groupId: string,
     groupName: string,
   ): boolean => {
-    const matchesCondition = (cond: RuleConditionEntity): boolean => {
-      const value = cond.value;
-      const op = cond.op as string;
+    const matchesCat = (cond: RuleConditionEntity) =>
+      matchesStringCondition(catId, catName, cond);
+    const matchesGroup = (cond: RuleConditionEntity) =>
+      matchesStringCondition(groupId, groupName, cond);
 
-      if (op === 'is') return categoryId === value;
-      if (op === 'isNot') return categoryId !== value;
-      if (op === 'oneOf') {
-        return Array.isArray(value) && value.includes(categoryId);
-      }
-      if (op === 'notOneOf') {
-        return !Array.isArray(value) || !value.includes(categoryId);
-      }
-      if (op === 'category_group') {
-        return Array.isArray(value)
-          ? value.includes(groupId) || value.includes(groupName)
-          : groupId === value || groupName === value;
-      }
-      if (op === 'contains') {
-        return (
-          typeof value === 'string' &&
-          categoryName.toLowerCase().includes(value.toLowerCase())
-        );
-      }
-      if (op === 'doesNotContain') {
-        return (
-          typeof value === 'string' &&
-          !categoryName.toLowerCase().includes(value.toLowerCase())
-        );
-      }
-      if (op === 'matches') {
-        if (typeof value !== 'string') return false;
-        try {
-          const regex =
-            value.startsWith('/') && value.lastIndexOf('/') > 0
-              ? new RegExp(
-                  value.slice(1, value.lastIndexOf('/')),
-                  value.slice(value.lastIndexOf('/') + 1),
-                )
-              : new RegExp(value);
-          return regex.test(categoryName);
-        } catch {
-          return false;
-        }
-      }
-      return false;
-    };
-
-    return conditionsOp === 'or'
-      ? categoryConditions.some(matchesCondition)
-      : categoryConditions.every(matchesCondition);
+    if (conditionsOp === 'or') {
+      return (
+        categoryConditions.some(matchesCat) ||
+        categoryGroupConditions.some(matchesGroup)
+      );
+    }
+    // 'and': all category conditions AND all category_group conditions must match
+    const catMatch =
+      categoryConditions.length === 0 || categoryConditions.every(matchesCat);
+    const groupMatch =
+      categoryGroupConditions.length === 0 ||
+      categoryGroupConditions.every(matchesGroup);
+    return catMatch && groupMatch;
   };
 
   return categoryGroups

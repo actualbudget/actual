@@ -519,6 +519,15 @@ function SankeyInner({ widget }: SankeyInnerProps) {
         onDeleteFilter={onDeleteFilter}
         conditionsOp={conditionsOp}
         onConditionsOpChange={onConditionsOpChange}
+        filterExclude={[
+          'date',
+          'payee',
+          'notes',
+          'amount',
+          'cleared',
+          'reconciled',
+          'transfer',
+        ]}
         inlineContent={
           <>
             <View
