@@ -1927,9 +1927,10 @@ type TransactionErrorProps = {
   error: NonNullable<TransactionEntity['error']>;
   isDeposit: boolean;
   onAddSplit: () => void;
-  onDistributeRemainder: () => void;
+  onDistributeRemainder: (mode: 'empty' | 'proportional') => void;
   style?: CSSProperties;
   canDistributeRemainder: boolean;
+  canProportionallyDistributeRemainder: boolean;
 };
 
 function TransactionError({
@@ -1939,6 +1940,7 @@ function TransactionError({
   onDistributeRemainder,
   style,
   canDistributeRemainder,
+  canProportionallyDistributeRemainder,
 }: TransactionErrorProps) {
   switch (error.type) {
     case 'SplitTransactionError':
@@ -1965,7 +1967,16 @@ function TransactionError({
             <Button
               variant="normal"
               style={{ marginLeft: 15 }}
-              onPress={onDistributeRemainder}
+              onPress={() => onDistributeRemainder('proportional')}
+              data-testid="proportionally-distribute-split-button"
+              isDisabled={!canProportionallyDistributeRemainder}
+            >
+              <Trans>Proportionally Distribute</Trans>
+            </Button>
+            <Button
+              variant="normal"
+              style={{ marginLeft: 15 }}
+              onPress={() => onDistributeRemainder('empty')}
               data-testid="distribute-split-button"
               isDisabled={!canDistributeRemainder}
             >
@@ -2002,7 +2013,10 @@ type NewTransactionProps = {
   onClose: () => void;
   onCreatePayee: (name: string) => Promise<null | PayeeEntity['id']>;
   onDelete: (id: TransactionEntity['id']) => void;
-  onDistributeRemainder: (id: TransactionEntity['id']) => void;
+  onDistributeRemainder: (
+    id: TransactionEntity['id'],
+    mode: 'empty' | 'proportional',
+  ) => void;
   onEdit: (id: TransactionEntity['id'], field: string) => void;
   onManagePayees: (id: PayeeEntity['id'] | undefined) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
@@ -2063,6 +2077,9 @@ function NewTransaction({
     t => t.parent_id === transactions[0].id,
   );
   const emptyChildTransactions = childTransactions.filter(t => t.amount === 0);
+  const nonEmptyChildTransactions = childTransactions.filter(
+    t => t.amount !== 0,
+  );
 
   const addButtonRef = useRef(null);
   useProperFocus(addButtonRef, focusedField === 'add');
@@ -2150,10 +2167,13 @@ function NewTransaction({
             error={error}
             isDeposit={isDeposit}
             onAddSplit={() => onAddSplit(transactions[0].id)}
-            onDistributeRemainder={() =>
-              onDistributeRemainder(transactions[0].id)
+            onDistributeRemainder={mode =>
+              onDistributeRemainder(transactions[0].id, mode)
             }
             canDistributeRemainder={emptyChildTransactions.length > 0}
+            canProportionallyDistributeRemainder={
+              nonEmptyChildTransactions.length > 0
+            }
           />
         ) : (
           <Button
@@ -2240,7 +2260,10 @@ type TransactionTableInnerProps = {
   onCheckEnter: (e: KeyboardEvent) => void;
   onAddTemporary: (id?: TransactionEntity['id']) => void;
   onAddAndCloseTemporary: () => void;
-  onDistributeRemainder: (id: TransactionEntity['id']) => void;
+  onDistributeRemainder: (
+    id: TransactionEntity['id'],
+    mode: 'empty' | 'proportional',
+  ) => void;
   onToggleSplit: (id: TransactionEntity['id']) => void;
   onManagePayees: (id?: PayeeEntity['id']) => void;
 
@@ -2370,6 +2393,9 @@ function TransactionTableInner({
     const emptyChildTransactions = props.transactionsByParent[
       (trans.is_parent ? trans.id : trans.parent_id) || ''
     ]?.filter(t => t.amount === 0);
+    const nonEmptyChildTransactions = props.transactionsByParent[
+      (trans.is_parent ? trans.id : trans.parent_id) || ''
+    ]?.filter(t => t.amount !== 0);
 
     // Get sibling count for child transactions (used for drag/drop)
     const siblingCount =
@@ -2447,10 +2473,13 @@ function TransactionTableInner({
               error={error}
               isDeposit={!!isChildDeposit}
               onAddSplit={() => props.onAddSplit(trans.id)}
-              onDistributeRemainder={() =>
-                props.onDistributeRemainder(trans.id)
+              onDistributeRemainder={mode =>
+                props.onDistributeRemainder(trans.id, mode)
               }
               canDistributeRemainder={emptyChildTransactions.length > 0}
+              canProportionallyDistributeRemainder={
+                nonEmptyChildTransactions.length > 0
+              }
             />
           )
         }
@@ -3222,7 +3251,7 @@ export const TransactionTable = forwardRef(
     );
 
     const onDistributeRemainder = useCallback(
-      async (id: TransactionEntity['id']) => {
+      async (id: TransactionEntity['id'], mode: 'empty' | 'proportional') => {
         const { transactions, newNavigator, tableNavigator, newTransactions } =
           latestState.current;
 
@@ -3259,37 +3288,78 @@ export const TransactionTable = forwardRef(
           parentTransaction.amount -
           siblingTransactions.reduce((acc, t) => acc + t.amount, 0);
 
-        const amountPerTransaction = Math.floor(
-          remainingAmount / emptyTransactions.length,
-        );
-        let remainingCents =
-          remainingAmount - amountPerTransaction * emptyTransactions.length;
+        let amounts: number[] = [];
+        if (mode === 'empty') {
+          const amountPerTransaction = Math.floor(
+            remainingAmount / emptyTransactions.length,
+          );
+          let remainingCents =
+            remainingAmount - amountPerTransaction * emptyTransactions.length;
 
-        const amounts = new Array(emptyTransactions.length).fill(
-          amountPerTransaction,
-        );
+          amounts = new Array(emptyTransactions.length).fill(
+            amountPerTransaction,
+          );
 
-        for (const [amountIndex] of amounts.entries()) {
-          if (remainingCents === 0) break;
+          for (const [amountIndex] of amounts.entries()) {
+            if (remainingCents === 0) break;
 
-          amounts[amountIndex] += 1;
-          remainingCents--;
-        }
+            amounts[amountIndex] += 1;
+            remainingCents--;
+          }
 
-        if (isTemporaryId(id)) {
-          newNavigator.onEdit(null);
-        } else {
-          tableNavigator.onEdit(null);
-        }
+          if (isTemporaryId(id)) {
+            newNavigator.onEdit(null);
+          } else {
+            tableNavigator.onEdit(null);
+          }
 
-        for (const [
-          transactionIndex,
-          transaction,
-        ] of emptyTransactions.entries()) {
-          await onSave({
-            ...transaction,
-            amount: amounts[transactionIndex],
-          });
+          for (const [
+            transactionIndex,
+            transaction,
+          ] of emptyTransactions.entries()) {
+            await onSave({
+              ...transaction,
+              amount: amounts[transactionIndex],
+            });
+          }
+        } else if (mode === 'proportional') {
+          const siblingTotal = siblingTransactions.reduce(
+            (acc, t) => acc + t.amount,
+            0,
+          );
+          const siblingProportions = siblingTransactions.map(
+            t => t.amount / siblingTotal,
+          );
+
+          amounts = siblingProportions.map(p =>
+            Math.round(p * remainingAmount),
+          );
+
+          let remainingCents =
+            remainingAmount - amounts.reduce((acc, a) => acc + a, 0);
+
+          for (const [amountIndex] of amounts.entries()) {
+            if (remainingCents === 0) break;
+
+            amounts[amountIndex] += 1;
+            remainingCents--;
+          }
+
+          if (isTemporaryId(id)) {
+            newNavigator.onEdit(null);
+          } else {
+            tableNavigator.onEdit(null);
+          }
+
+          for (const [
+            transactionIndex,
+            transaction,
+          ] of siblingTransactions.entries()) {
+            await onSave({
+              ...transaction,
+              amount: amounts[transactionIndex] + (transaction.amount || 0),
+            });
+          }
         }
       },
       [onSave],
