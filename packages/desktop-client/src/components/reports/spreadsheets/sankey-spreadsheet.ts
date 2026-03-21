@@ -479,6 +479,10 @@ function compactSankeyData(data: SankeyData, topN: number = 5): SankeyData {
       source: 0,
       target: compactedData.nodes.length - 1,
       value: otherTotal,
+      tooltipInfo: otherLinks.map(link => ({
+        name: data.nodes[link.target].name,
+        value: link.value,
+      })),
     });
   }
 
