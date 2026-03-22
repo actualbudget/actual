@@ -1321,8 +1321,8 @@ const Transaction = memo(function Transaction({
           triggerRef={triggerRef}
           placement="bottom start"
           isOpen={menuOpen}
-          onOpenChange={(isOpen) => {
-            if(!isOpen) setMenuOpen(false);
+          onOpenChange={isOpen => {
+            if (!isOpen) setMenuOpen(false);
           }}
           {...position}
           style={{ width: 200, margin: 1 }}
