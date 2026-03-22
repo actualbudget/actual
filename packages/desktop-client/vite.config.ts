@@ -117,6 +117,9 @@ export default defineConfig(async ({ mode }) => {
   }
 
   const resolveExtensions = [
+    ...(env.IS_GENERIC_BROWSER
+      ? []
+      : ['.electron.js', '.electron.ts', '.electron.tsx']),
     '.mjs',
     '.js',
     '.mts',
