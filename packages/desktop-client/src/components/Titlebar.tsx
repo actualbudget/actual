@@ -281,6 +281,8 @@ export function Titlebar({ style }: TitlebarProps) {
   return isNarrowWidth ? null : (
     <View
       style={{
+        display: 'none',
+        backgroundColor: 'red',
         flexDirection: 'row',
         alignItems: 'center',
         padding: '0 10px 0 15px',

@@ -131,21 +131,30 @@ const DynamicBudgetTable = ({
         opacity: width <= 0 || height <= 0 ? 0 : 1,
       }}
     >
-      <View style={{ width: '100%', maxWidth }}>
+      <View
+        style={{
+          width: '100%',
+          alignItems: 'center',
+          // maxWidth,
+        }}
+      >
         <BudgetPageHeader
           startMonth={prewarmStartMonth}
           numMonths={numMonths}
           monthBounds={monthBounds}
           onMonthSelect={_onMonthSelect}
         />
-        <BudgetTable
-          type={type}
-          prewarmStartMonth={prewarmStartMonth}
-          startMonth={startMonth}
-          numMonths={numMonths}
-          monthBounds={monthBounds}
-          {...props}
-        />
+
+        <View style={{ maxWidth, width: '100%', flex: 1 }}>
+          <BudgetTable
+            type={type}
+            prewarmStartMonth={prewarmStartMonth}
+            startMonth={startMonth}
+            numMonths={numMonths}
+            monthBounds={monthBounds}
+            {...props}
+          />
+        </View>
       </View>
     </View>
   );
