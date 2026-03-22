@@ -184,7 +184,7 @@ export function ReportSidebar({
     setBalanceType(cond);
 
     if (cond === 'Budgeted') {
-      // Budgeted only supports Category and Group splits
+      // Budgeted does not support Payee and Account splits
       if (
         customReportItems.groupBy === 'Payee' ||
         customReportItems.groupBy === 'Account'
@@ -200,6 +200,14 @@ export function ReportSidebar({
       ) {
         setSessionReport('interval', 'Monthly');
         setInterval('Monthly');
+        if (
+          ReportOptions.dateRange
+            .filter(d => !d['Monthly' as keyof dateRangeProps])
+            .map(int => int.key)
+            .includes(customReportItems.dateRange)
+        ) {
+          onSelectRange(defaultsList.intervalRange.get('Monthly') || '');
+        }
       }
     }
   };

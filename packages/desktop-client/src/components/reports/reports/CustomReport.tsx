@@ -120,6 +120,10 @@ function useSelectedCategories(
   }, [existingCategoryCondition, categories]);
 }
 
+const BUDGETED_SUPPORTED_CONDITION_FIELDS = new Set<
+  RuleConditionEntity['field']
+>(['category']);
+
 export function CustomReport() {
   const params = useParams();
   const { data: report, isPending } = useCustomReport(params.id);
@@ -496,6 +500,26 @@ function CustomReportInner({
     payees,
     accounts,
   });
+
+  useEffect(() => {
+    if (balanceTypeOp !== 'totalBudgeted') {
+      return;
+    }
+
+    const supportedConditions = conditions.filter(cond =>
+      BUDGETED_SUPPORTED_CONDITION_FIELDS.has(cond.field),
+    );
+
+    if (supportedConditions.length === conditions.length) {
+      return;
+    }
+
+    setSessionReport('conditions', supportedConditions);
+    onApplyFilter(null);
+    supportedConditions.forEach(condition => {
+      onApplyFilter(condition);
+    });
+  }, [balanceTypeOp, conditions, onApplyFilter]);
 
   const getGroupData = useMemo(() => {
     return createGroupedSpreadsheet({
