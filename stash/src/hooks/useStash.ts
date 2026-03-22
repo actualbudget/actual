@@ -1,62 +1,40 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Category, Transaction, DEFAULT_CATEGORIES, StashData } from '../types';
-
-const STORAGE_KEY = 'stash-data';
-
-function loadData(): StashData {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      return JSON.parse(saved);
-    }
-  } catch {
-    // ignore parse errors
-  }
-  return {
-    categories: DEFAULT_CATEGORIES,
-    transactions: [],
-  };
-}
-
-function saveData(data: StashData) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
+import { api, type Category, type Transaction } from '../api';
 
 export function useStash() {
-  const [categories, setCategories] = useState<Category[]>(() => loadData().categories);
-  const [transactions, setTransactions] = useState<Transaction[]>(() => loadData().transactions);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = useCallback(async () => {
+    try {
+      const [cats, txs] = await Promise.all([api.getCategories(), api.getTransactions()]);
+      setCategories(cats);
+      setTransactions(txs);
+    } catch (err) {
+      console.error('Failed to load data:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    saveData({ categories, transactions });
-  }, [categories, transactions]);
+    refresh();
+  }, [refresh]);
 
   const total = categories.reduce((sum, cat) => sum + cat.amount, 0);
 
   const addTransaction = useCallback(
-    (categoryId: string, amount: number, type: 'deposit' | 'withdrawal', note: string) => {
-      const tx: Transaction = {
-        id: crypto.randomUUID(),
-        categoryId,
-        amount,
-        type,
-        note,
-        date: new Date().toISOString(),
-      };
-
-      setTransactions((prev) => [tx, ...prev]);
+    async (categoryId: string, amount: number, type: 'deposit' | 'withdrawal', note: string) => {
+      const { transaction, newAmount } = await api.addTransaction(categoryId, amount, type, note);
 
       setCategories((prev) =>
-        prev.map((cat) => {
-          if (cat.id === categoryId) {
-            const newAmount = type === 'deposit' ? cat.amount + amount : cat.amount - amount;
-            return { ...cat, amount: Math.max(0, newAmount) };
-          }
-          return cat;
-        }),
+        prev.map((cat) => (cat.id === categoryId ? { ...cat, amount: newAmount } : cat)),
       );
+      setTransactions((prev) => [transaction, ...prev].slice(0, 50));
     },
     [],
   );
 
-  return { categories, transactions, total, addTransaction };
+  return { categories, transactions, total, addTransaction, loading, refresh };
 }

@@ -3,10 +3,13 @@
     "title": "Stash",
     "subtitle": "Tu rastreador de ahorros familiar",
     "total": "Total en Stash",
-    "signIn": "Iniciar sesión con Google",
     "signOut": "Cerrar Sesión",
-    "welcome": "Bienvenido/a",
-    "dashboard": "Tablero"
+    "enterPin": "Ingresa tu PIN",
+    "enter": "Entrar",
+    "yourName": "Tu Nombre",
+    "namePlaceholder": "ej., Juan",
+    "continue": "Continuar",
+    "incorrectPin": "PIN incorrecto"
   },
   "actions": {
     "add": "Agregar Dinero",
@@ -18,26 +21,12 @@
     "deposit": "Depósito",
     "withdrawal": "Retiro"
   },
-  "categories": {
-    "saving": "Ahorro",
-    "giving": "Diezmo",
-    "travel": "Viajes",
-    "kupuri": "Kupuri",
-    "bills": "Cuentas",
-    "emergency": "Emergencia",
-    "pleasure": "Placer",
-    "medical": "Médico"
-  },
   "history": {
     "title": "Actividad Reciente",
     "noTransactions": "No hay transacciones aún",
-    "deposited": "Depositó",
-    "withdrew": "Retiró",
+    "deposited": "depositó",
+    "withdrew": "retiró",
     "to": "a",
     "from": "de"
-  },
-  "language": {
-    "en": "English",
-    "es": "Español"
   }
 }

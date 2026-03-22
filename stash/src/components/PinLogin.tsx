@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LanguageToggle } from './LanguageToggle';
-import { verifyPin, getOrCreateUser } from '../auth';
+import { api, type User } from '../api';
 
 interface PinLoginProps {
-  onLogin: () => void;
+  onLogin: (user: User) => void;
 }
 
 export function PinLogin({ onLogin }: PinLoginProps) {
@@ -13,24 +13,29 @@ export function PinLogin({ onLogin }: PinLoginProps) {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [step, setStep] = useState<'pin' | 'name'>('pin');
+  const [verifiedPin, setVerifiedPin] = useState('');
 
-  const handlePinSubmit = (e: React.FormEvent) => {
+  const handlePinSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (verifyPin(pin)) {
+    try {
+      await api.verifyPin(pin);
+      setVerifiedPin(pin);
       setError('');
       setStep('name');
-      setPin('');
-    } else {
-      setError('Incorrect PIN');
+    } catch {
+      setError(t('app.incorrectPin') || 'Incorrect PIN');
       setPin('');
     }
   };
 
-  const handleNameSubmit = (e: React.FormEvent) => {
+  const handleNameSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (name.trim()) {
-      getOrCreateUser(name.trim());
-      onLogin();
+    if (!name.trim()) return;
+    try {
+      const { user } = await api.login(verifiedPin, name.trim());
+      onLogin(user);
+    } catch (err: any) {
+      setError(err.message);
     }
   };
 
@@ -45,7 +50,7 @@ export function PinLogin({ onLogin }: PinLoginProps) {
         {step === 'pin' ? (
           <form onSubmit={handlePinSubmit}>
             <div className="form-group">
-              <label>Enter PIN</label>
+              <label>{t('app.enterPin')}</label>
               <input
                 type="password"
                 inputMode="numeric"
@@ -58,25 +63,26 @@ export function PinLogin({ onLogin }: PinLoginProps) {
               />
             </div>
             {error && <p className="error-message">{error}</p>}
-            <button type="submit" className="btn-confirm btn-deposit" disabled={!pin}>
-              Enter
+            <button type="submit" className="btn-confirm btn-deposit" style={{ width: '100%', marginTop: '16px' }} disabled={!pin}>
+              {t('app.enter')}
             </button>
           </form>
         ) : (
           <form onSubmit={handleNameSubmit}>
             <div className="form-group">
-              <label>Your Name</label>
+              <label>{t('app.yourName')}</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g., Partner 1"
+                placeholder={t('app.namePlaceholder')}
                 autoFocus
                 className="note-input"
               />
             </div>
-            <button type="submit" className="btn-confirm btn-deposit" disabled={!name.trim()}>
-              Continue
+            {error && <p className="error-message">{error}</p>}
+            <button type="submit" className="btn-confirm btn-deposit" style={{ width: '100%', marginTop: '16px' }} disabled={!name.trim()}>
+              {t('app.continue')}
             </button>
           </form>
         )}

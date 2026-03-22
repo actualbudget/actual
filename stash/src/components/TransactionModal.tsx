@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Category } from '../types';
+import { type Category } from '../api';
 
 interface TransactionModalProps {
   category: Category;

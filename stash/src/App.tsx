@@ -1,26 +1,39 @@
 import { useState, useEffect } from 'react';
-import { getCurrentUser, type User } from './auth';
+import { api, type User } from './api';
 import { PinLogin } from './components/PinLogin';
 import { Dashboard } from './components/Dashboard';
 
 export function App() {
-  const [user, setUser] = useState<User | null>(() => getCurrentUser());
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Keep user in sync if they log in from another tab
-    const handleStorageChange = () => {
-      setUser(getCurrentUser());
-    };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    api.me()
+      .then(({ user }) => setUser(user))
+      .catch(() => setUser(null))
+      .finally(() => setLoading(false));
   }, []);
 
-  const handleLogout = () => {
+  const handleLogin = (user: User) => {
+    setUser(user);
+  };
+
+  const handleLogout = async () => {
+    await api.logout().catch(() => {});
     setUser(null);
   };
 
+  if (loading) {
+    return (
+      <div className="loading">
+        <h1 className="login-logo">Stash</h1>
+        <div className="spinner" />
+      </div>
+    );
+  }
+
   if (!user) {
-    return <PinLogin onLogin={() => setUser(getCurrentUser())} />;
+    return <PinLogin onLogin={handleLogin} />;
   }
 
   return <Dashboard user={user} onLogout={handleLogout} />;

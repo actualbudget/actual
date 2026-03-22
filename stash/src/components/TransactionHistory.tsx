@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Transaction, Category } from '../types';
+import { type Transaction, type Category } from '../api';
 
 interface TransactionHistoryProps {
   transactions: Transaction[];
@@ -9,7 +9,7 @@ interface TransactionHistoryProps {
 export function TransactionHistory({ transactions, categories }: TransactionHistoryProps) {
   const { t, i18n } = useTranslation();
   const isSpanish = i18n.language === 'es';
-  const recent = transactions.slice(0, 10);
+  const recent = transactions.slice(0, 15);
 
   const getCategoryName = (id: string) => {
     const cat = categories.find((c) => c.id === id);
@@ -49,6 +49,7 @@ export function TransactionHistory({ transactions, categories }: TransactionHist
               <span className="history-icon">{getCategoryIcon(tx.categoryId)}</span>
               <div className="history-details">
                 <span className="history-label">
+                  <strong>{tx.userName}</strong>{' '}
                   {isDeposit ? t('history.deposited') : t('history.withdrew')}{' '}
                   {isDeposit ? t('history.to') : t('history.from')}{' '}
                   <strong>{getCategoryName(tx.categoryId)}</strong>

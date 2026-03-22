@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { LanguageToggle } from './LanguageToggle';
-import { logout, type User } from '../auth';
+import { type User } from '../api';
 
 interface HeaderProps {
   user: User;
@@ -9,11 +9,6 @@ interface HeaderProps {
 
 export function Header({ user, onLogout }: HeaderProps) {
   const { t } = useTranslation();
-
-  const handleLogout = () => {
-    logout();
-    onLogout();
-  };
 
   return (
     <header className="header">
@@ -27,7 +22,7 @@ export function Header({ user, onLogout }: HeaderProps) {
           <span className="user-avatar">👤</span>
           <span className="user-name">{user.name}</span>
         </div>
-        <button onClick={handleLogout} className="btn-signout">
+        <button onClick={onLogout} className="btn-signout">
           {t('app.signOut')}
         </button>
       </div>

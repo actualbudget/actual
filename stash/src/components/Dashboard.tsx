@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStash } from '../hooks/useStash';
-import { type User } from '../auth';
+import { type User } from '../api';
 import { Header } from './Header';
 import { CategoryCard } from './CategoryCard';
 import { TransactionModal } from './TransactionModal';
@@ -14,7 +14,7 @@ interface DashboardProps {
 
 export function Dashboard({ user, onLogout }: DashboardProps) {
   const { t } = useTranslation();
-  const { categories, transactions, total, addTransaction } = useStash();
+  const { categories, transactions, total, addTransaction, loading } = useStash();
   const [modal, setModal] = useState<{
     categoryId: string;
     type: 'deposit' | 'withdrawal';
@@ -28,6 +28,14 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(total);
+
+  if (loading) {
+    return (
+      <div className="loading">
+        <div className="spinner" />
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard">
@@ -57,8 +65,8 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
         <TransactionModal
           category={activeCategory}
           type={modal.type}
-          onConfirm={(amount, note) => {
-            addTransaction(modal.categoryId, amount, modal.type, note);
+          onConfirm={async (amount, note) => {
+            await addTransaction(modal.categoryId, amount, modal.type, note);
             setModal(null);
           }}
           onCancel={() => setModal(null)}
