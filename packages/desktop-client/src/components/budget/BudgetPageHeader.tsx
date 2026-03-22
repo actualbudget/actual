@@ -289,7 +289,8 @@ export const BudgetPageHeader = memo<BudgetPageHeaderProps>(
         <BudgetTitlebar />
         <View
           style={{
-            marginRight: 5 + getScrollbarWidth() - offsetMultipleMonths,
+            width: '60%',
+            // marginRight: 5 + getScrollbarWidth() - offsetMultipleMonths,
           }}
         >
           <MonthPicker
