@@ -1348,8 +1348,8 @@ const Transaction = memo(function Transaction({
             isOpen
             isNonModal
             style={{
-              maxWidth: 500,
-              minWidth: 375,
+              maxWidth: 600,
+              minWidth: 500,
               padding: 5,
               maxHeight: '38px !important',
             }}
