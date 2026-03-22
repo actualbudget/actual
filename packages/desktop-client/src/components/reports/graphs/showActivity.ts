@@ -105,9 +105,9 @@ export function showActivity({
   ].filter(f => f);
 
   void navigate(balanceTypeOp === 'totalBudgeted' ? '/budget' : '/accounts', {
-    state: {
-      goBack: true,
-      filterConditions,
-    },
+    state:
+      balanceTypeOp === 'totalBudgeted'
+        ? { goBack: true }
+        : { goBack: true, filterConditions },
   });
 }
