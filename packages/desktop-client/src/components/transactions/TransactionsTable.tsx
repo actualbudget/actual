@@ -3024,11 +3024,13 @@ export const TransactionTable = forwardRef(
     }
 
     const onAddTemporary = useCallback(() => {
-      shouldAdd.current = true;
-      // A little hacky - this forces a rerender which will cause the
-      // effect we want to run. We have to wait for all updates to be
-      // committed (the input could still be saving a value).
-      forceRerender({});
+      afterSave(() => {
+        shouldAdd.current = true;
+        // A little hacky - this forces a rerender which will cause the
+        // effect we want to run. We have to wait for all updates to be
+        // committed (the input could still be saving a value).
+        forceRerender({});
+      });
     }, []);
 
     const onAddAndCloseTemporary = useCallback(() => {
