@@ -78,6 +78,12 @@ export function transactions(
   return query;
 }
 
+// Escape special characters in search string for use in LIKE queries
+// This prevents user input like '?' or '%' from being treated as wildcards
+function escapeSearchForLike(search: string): string {
+  return search.replace(/[%?]/g, '\\$&');
+}
+
 export function transactionsSearch(
   currentQuery: Query,
   search: string,
@@ -95,13 +101,15 @@ export function transactionsSearch(
     parsedDate = parseDate(search, dateFormat, new Date());
   }
 
+  const escapedSearch = escapeSearchForLike(search);
+
   return currentQuery.filter({
     $or: {
-      'payee.name': { $like: `%${search}%` },
-      'payee.transfer_acct.name': { $like: `%${search}%` },
-      notes: { $like: `%${search}%` },
-      'category.name': { $like: `%${search}%` },
-      'account.name': { $like: `%${search}%` },
+      'payee.name': { $like: `%${escapedSearch}%` },
+      'payee.transfer_acct.name': { $like: `%${escapedSearch}%` },
+      notes: { $like: `%${escapedSearch}%` },
+      'category.name': { $like: `%${escapedSearch}%` },
+      'account.name': { $like: `%${escapedSearch}%` },
       $or: [
         isDateValid(parsedDate) && { date: dayFromDate(parsedDate) },
         amount != null && {

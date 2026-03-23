@@ -16,13 +16,21 @@ export function unicodeLike(
 
   let cachedRegExp = likePatternCache.get(pattern);
   if (!cachedRegExp) {
-    // we don't escape ? and % because we don't know
-    // whether they originate from the user input or from our query compiler.
-    // Maybe improve the query compiler to correctly process these characters?
-    const processedPattern = pattern
-      .replace(/[.*+^${}()|[\]\\]/g, '\\$&')
+    // Process escaped special characters first (from escaped search input)
+    // Unescape literal \? and \% so they are matched as regular characters
+    let processedPattern = pattern
+      .replace(/\\\?/g, '?')
+      .replace(/\\%/g, '%');
+
+    // Escape regex special characters (except ? and % which are our wildcards)
+    processedPattern = processedPattern
+      .replace(/[.*+^${}()|[\]\\]/g, '\\$&');
+
+    // Now replace wildcards with regex equivalents
+    processedPattern = processedPattern
       .replaceAll('?', '.')
       .replaceAll('%', '.*');
+
     cachedRegExp = new RegExp(processedPattern, 'i');
     likePatternCache.set(pattern, cachedRegExp);
   }

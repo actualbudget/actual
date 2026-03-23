@@ -55,4 +55,25 @@ describe('unicode LIKE functionality', () => {
 
     expect(result).toBe(0);
   });
+
+  it('should match literal ? when escaped', () => {
+    // Escaped question mark should match a literal ?
+    const result = unicodeLike('\\?', '?');
+
+    expect(result).toBe(1);
+  });
+
+  it('should match literal % when escaped', () => {
+    // Escaped percent should match a literal %
+    const result = unicodeLike('\\%', '%');
+
+    expect(result).toBe(1);
+  });
+
+  it('should match question mark in text when escaped', () => {
+    // Escaped question mark should match literal ? anywhere in text
+    const result = unicodeLike('\\?', 'What? Really!');
+
+    expect(result).toBe(1);
+  });
 });
