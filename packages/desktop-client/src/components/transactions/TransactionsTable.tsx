@@ -1348,8 +1348,8 @@ const Transaction = memo(function Transaction({
             isOpen
             isNonModal
             style={{
-              maxWidth: 600,
-              minWidth: 500,
+              maxWidth: 500,
+              minWidth: 375,
               padding: 5,
               maxHeight: '38px !important',
             }}
@@ -1927,10 +1927,8 @@ type TransactionErrorProps = {
   error: NonNullable<TransactionEntity['error']>;
   isDeposit: boolean;
   onAddSplit: () => void;
-  onDistributeRemainder: (mode: 'empty' | 'proportional') => void;
+  onDistributeRemainder: () => void;
   style?: CSSProperties;
-  canDistributeRemainder: boolean;
-  canProportionallyDistributeRemainder: boolean;
 };
 
 function TransactionError({
@@ -1939,8 +1937,6 @@ function TransactionError({
   onAddSplit,
   onDistributeRemainder,
   style,
-  canDistributeRemainder,
-  canProportionallyDistributeRemainder,
 }: TransactionErrorProps) {
   switch (error.type) {
     case 'SplitTransactionError':
@@ -1967,18 +1963,8 @@ function TransactionError({
             <Button
               variant="normal"
               style={{ marginLeft: 15 }}
-              onPress={() => onDistributeRemainder('proportional')}
-              data-testid="proportionally-distribute-split-button"
-              isDisabled={!canProportionallyDistributeRemainder}
-            >
-              <Trans>Proportionally Distribute</Trans>
-            </Button>
-            <Button
-              variant="normal"
-              style={{ marginLeft: 15 }}
-              onPress={() => onDistributeRemainder('empty')}
+              onPress={onDistributeRemainder}
               data-testid="distribute-split-button"
-              isDisabled={!canDistributeRemainder}
             >
               <Trans>Distribute</Trans>
             </Button>
@@ -2013,10 +1999,7 @@ type NewTransactionProps = {
   onClose: () => void;
   onCreatePayee: (name: string) => Promise<null | PayeeEntity['id']>;
   onDelete: (id: TransactionEntity['id']) => void;
-  onDistributeRemainder: (
-    id: TransactionEntity['id'],
-    mode: 'empty' | 'proportional',
-  ) => void;
+  onDistributeRemainder: (id: TransactionEntity['id']) => void;
   onEdit: (id: TransactionEntity['id'], field: string) => void;
   onManagePayees: (id: PayeeEntity['id'] | undefined) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
@@ -2075,10 +2058,6 @@ function NewTransaction({
 
   const childTransactions = transactions.filter(
     t => t.parent_id === transactions[0].id,
-  );
-  const emptyChildTransactions = childTransactions.filter(t => t.amount === 0);
-  const nonEmptyChildTransactions = childTransactions.filter(
-    t => t.amount !== 0,
   );
 
   const addButtonRef = useRef(null);
@@ -2167,12 +2146,8 @@ function NewTransaction({
             error={error}
             isDeposit={isDeposit}
             onAddSplit={() => onAddSplit(transactions[0].id)}
-            onDistributeRemainder={mode =>
-              onDistributeRemainder(transactions[0].id, mode)
-            }
-            canDistributeRemainder={emptyChildTransactions.length > 0}
-            canProportionallyDistributeRemainder={
-              nonEmptyChildTransactions.length > 0
+            onDistributeRemainder={() =>
+              onDistributeRemainder(transactions[0].id)
             }
           />
         ) : (
@@ -2260,10 +2235,7 @@ type TransactionTableInnerProps = {
   onCheckEnter: (e: KeyboardEvent) => void;
   onAddTemporary: (id?: TransactionEntity['id']) => void;
   onAddAndCloseTemporary: () => void;
-  onDistributeRemainder: (
-    id: TransactionEntity['id'],
-    mode: 'empty' | 'proportional',
-  ) => void;
+  onDistributeRemainder: (id: TransactionEntity['id']) => void;
   onToggleSplit: (id: TransactionEntity['id']) => void;
   onManagePayees: (id?: PayeeEntity['id']) => void;
 
@@ -2390,12 +2362,6 @@ function TransactionTableInner({
     const childTransactions = trans.is_parent
       ? props.transactionsByParent[trans.id]
       : null;
-    const emptyChildTransactions = props.transactionsByParent[
-      (trans.is_parent ? trans.id : trans.parent_id) || ''
-    ]?.filter(t => t.amount === 0);
-    const nonEmptyChildTransactions = props.transactionsByParent[
-      (trans.is_parent ? trans.id : trans.parent_id) || ''
-    ]?.filter(t => t.amount !== 0);
 
     // Get sibling count for child transactions (used for drag/drop)
     const siblingCount =
@@ -2473,12 +2439,8 @@ function TransactionTableInner({
               error={error}
               isDeposit={!!isChildDeposit}
               onAddSplit={() => props.onAddSplit(trans.id)}
-              onDistributeRemainder={mode =>
-                props.onDistributeRemainder(trans.id, mode)
-              }
-              canDistributeRemainder={emptyChildTransactions.length > 0}
-              canProportionallyDistributeRemainder={
-                nonEmptyChildTransactions.length > 0
+              onDistributeRemainder={() =>
+                props.onDistributeRemainder(trans.id)
               }
             />
           )
@@ -3251,7 +3213,7 @@ export const TransactionTable = forwardRef(
     );
 
     const onDistributeRemainder = useCallback(
-      async (id: TransactionEntity['id'], mode: 'empty' | 'proportional') => {
+      async (id: TransactionEntity['id']) => {
         const { transactions, newNavigator, tableNavigator, newTransactions } =
           latestState.current;
 
@@ -3289,7 +3251,7 @@ export const TransactionTable = forwardRef(
           siblingTransactions.reduce((acc, t) => acc + t.amount, 0);
 
         let amounts: number[] = [];
-        if (mode === 'empty') {
+        if (emptyTransactions.length > 0) {
           const amountPerTransaction = Math.floor(
             remainingAmount / emptyTransactions.length,
           );
@@ -3322,7 +3284,10 @@ export const TransactionTable = forwardRef(
               amount: amounts[transactionIndex],
             });
           }
-        } else if (mode === 'proportional') {
+        } else if (
+          emptyTransactions.length === 0 &&
+          siblingTransactions.length > 0
+        ) {
           const siblingTotal = siblingTransactions.reduce(
             (acc, t) => acc + t.amount,
             0,
@@ -3331,18 +3296,30 @@ export const TransactionTable = forwardRef(
             t => t.amount / siblingTotal,
           );
 
-          amounts = siblingProportions.map(p =>
-            Math.round(p * remainingAmount),
-          );
+          for (const [
+            transactionIndex,
+            transaction,
+          ] of siblingTransactions.entries()) {
+            amounts[transactionIndex] =
+              Math.floor(
+                siblingProportions[transactionIndex] * remainingAmount,
+              ) + transaction.amount;
+          }
 
           let remainingCents =
-            remainingAmount - amounts.reduce((acc, a) => acc + a, 0);
+            parentTransaction.amount - amounts.reduce((acc, a) => acc + a, 0);
 
-          for (const [amountIndex] of amounts.entries()) {
-            if (remainingCents === 0) break;
-
-            amounts[amountIndex] += 1;
-            remainingCents--;
+          let amountIndex = 0;
+          while (remainingCents !== 0) {
+            amountIndex = amountIndex % amounts.length;
+            if (remainingCents > 0) {
+              amounts[amountIndex] += 1;
+              remainingCents--;
+            } else {
+              amounts[amountIndex] -= 1;
+              remainingCents++;
+            }
+            amountIndex++;
           }
 
           if (isTemporaryId(id)) {
@@ -3357,7 +3334,7 @@ export const TransactionTable = forwardRef(
           ] of siblingTransactions.entries()) {
             await onSave({
               ...transaction,
-              amount: amounts[transactionIndex] + (transaction.amount || 0),
+              amount: amounts[transactionIndex],
             });
           }
         }
