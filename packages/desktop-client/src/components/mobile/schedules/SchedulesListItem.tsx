@@ -1,4 +1,5 @@
 import React from 'react';
+import { composeRenderProps } from 'react-aria-components';
 import type { GridListItemProps } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -10,8 +11,8 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { format as monthUtilFormat } from 'loot-core/shared/months';
-import type { ScheduleStatusType } from 'loot-core/shared/schedules';
 import { getScheduledAmount } from 'loot-core/shared/schedules';
+import type { ScheduleStatus } from 'loot-core/shared/schedules';
 import type { ScheduleEntity } from 'loot-core/types/models';
 import type { WithRequired } from 'loot-core/types/util';
 
@@ -21,9 +22,11 @@ import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
+export const ROW_HEIGHT = 110;
+
 type SchedulesListItemProps = {
   onDelete: () => void;
-  status: ScheduleStatusType;
+  status: ScheduleStatus;
 } & WithRequired<GridListItemProps<ScheduleEntity>, 'value'>;
 
 export function SchedulesListItem({
@@ -50,13 +53,19 @@ export function SchedulesListItem({
       id={schedule.id}
       value={schedule}
       textValue={schedule.name || t('Unnamed schedule')}
-      style={{ ...styles.mobileListItem, padding: '8px 16px', ...style }}
+      style={composeRenderProps(style, propStyle => ({
+        minHeight: ROW_HEIGHT,
+        width: '100%',
+        borderBottom: `1px solid ${theme.tableBorder}`,
+        ...propStyle,
+      }))}
       actions={
         <Button
           variant="bare"
           onPress={onDelete}
           style={{
             color: theme.errorText,
+            minHeight: ROW_HEIGHT,
             width: '100%',
           }}
         >

@@ -1,4 +1,5 @@
 import React from 'react';
+import { composeRenderProps } from 'react-aria-components';
 import type { GridListItemProps } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -14,6 +15,8 @@ import type { WithRequired } from 'loot-core/types/util';
 import { ActionableGridListItem } from '@desktop-client/components/mobile/ActionableGridListItem';
 import { PayeeRuleCountLabel } from '@desktop-client/components/payees/PayeeRuleCountLabel';
 
+export const ROW_HEIGHT = 55;
+
 type PayeesListItemProps = {
   ruleCount: number;
   isRuleCountLoading?: boolean;
@@ -27,6 +30,7 @@ export function PayeesListItem({
   isRuleCountLoading,
   onDelete,
   onViewRules,
+  style,
   ...props
 }: PayeesListItemProps) {
   const { t } = useTranslation();
@@ -41,9 +45,22 @@ export function PayeesListItem({
       value={payee}
       textValue={label}
       actionsWidth={200}
+      style={composeRenderProps(style, propStyle => ({
+        height: ROW_HEIGHT,
+        width: '100%',
+        borderBottom: `1px solid ${theme.tableBorder}`,
+        ...propStyle,
+      }))}
       actions={
         !payee.transfer_acct && (
-          <View style={{ flexDirection: 'row', flex: 1 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              flex: 1,
+              height: ROW_HEIGHT,
+              width: '100%',
+            }}
+          >
             <Button
               variant="bare"
               onPress={onViewRules}

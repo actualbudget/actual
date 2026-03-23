@@ -1,10 +1,10 @@
 import React from 'react';
+import { composeRenderProps } from 'react-aria-components';
 import type { GridListItemProps } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SpaceBetween } from '@actual-app/components/space-between';
-import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
@@ -15,6 +15,8 @@ import { ActionableGridListItem } from '@desktop-client/components/mobile/Action
 import { ActionExpression } from '@desktop-client/components/rules/ActionExpression';
 import { ConditionExpression } from '@desktop-client/components/rules/ConditionExpression';
 import { groupActionsBySplitIndex } from '@desktop-client/util/ruleUtils';
+
+export const ROW_HEIGHT = 150;
 
 type RulesListItemProps = {
   onDelete: () => void;
@@ -37,13 +39,19 @@ export function RulesListItem({
       id={rule.id}
       value={rule}
       textValue={t('Rule {{id}}', { id: rule.id })}
-      style={{ ...styles.mobileListItem, padding: '8px 16px', ...style }}
+      style={composeRenderProps(style, propStyle => ({
+        minHeight: ROW_HEIGHT,
+        width: '100%',
+        borderBottom: `1px solid ${theme.tableBorder}`,
+        ...propStyle,
+      }))}
       actions={
         <Button
           variant="bare"
           onPress={onDelete}
           style={{
             color: theme.errorText,
+            minHeight: ROW_HEIGHT,
             width: '100%',
           }}
         >

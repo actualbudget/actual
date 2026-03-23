@@ -1,11 +1,10 @@
 import React, { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { GridListItem } from 'react-aria-components';
+import { composeRenderProps, GridListItem } from 'react-aria-components';
 import type { GridListItemProps } from 'react-aria-components';
 import { animated, config, useSpring } from 'react-spring';
 
 import { Button } from '@actual-app/components/button';
-import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { useDrag } from '@use-gesture/react';
 
@@ -92,14 +91,11 @@ export function ActionableGridListItem<T extends object>({
       {...props}
       value={value}
       textValue={textValue}
-      style={{
-        ...styles.mobileListItem,
-        padding: 0,
-        backgroundColor: hasActions
-          ? actionsBackgroundColor
-          : (styles.mobileListItem.backgroundColor ?? 'transparent'),
+      style={composeRenderProps(props.style, propStyle => ({
+        backgroundColor: hasActions ? actionsBackgroundColor : undefined,
         overflow: 'hidden',
-      }}
+        ...propStyle,
+      }))}
     >
       <animated.div
         {...(hasActions ? bind() : {})}

@@ -7,6 +7,7 @@ import type { IntegerAmount } from 'loot-core/shared/util';
 import type { ScheduleEntity, TransactionEntity } from 'loot-core/types/models';
 
 import { useCachedSchedules } from './useCachedSchedules';
+import { useScheduleStatus } from './useScheduleStatus';
 import { useSyncedPref } from './useSyncedPref';
 import { calculateRunningBalancesBottomUp } from './useTransactions';
 
@@ -42,26 +43,38 @@ export function usePreviewTransactions({
   const {
     isLoading: isSchedulesLoading,
     error: scheduleQueryError,
-    schedules,
-    statuses,
+    data: schedules = [],
   } = useCachedSchedules();
-  const [isLoading, setIsLoading] = useState(isSchedulesLoading);
+  const {
+    isLoading: isScheduleStatusLoading,
+    data: { statusLookup = {} } = {},
+  } = useScheduleStatus({ schedules });
+  const [isLoading, setIsLoading] = useState(
+    isSchedulesLoading || isScheduleStatusLoading,
+  );
   const [error, setError] = useState<Error | undefined>(undefined);
 
   const [upcomingLength] = useSyncedPref('upcomingScheduledTransactionLength');
 
   const scheduleTransactions = useMemo(() => {
-    if (isSchedulesLoading) {
+    if (isSchedulesLoading || isScheduleStatusLoading) {
       return [];
     }
 
     return computeSchedulePreviewTransactions(
       schedules,
-      statuses,
+      statusLookup,
       upcomingLength,
       filter,
     );
-  }, [filter, isSchedulesLoading, schedules, statuses, upcomingLength]);
+  }, [
+    filter,
+    isSchedulesLoading,
+    isScheduleStatusLoading,
+    schedules,
+    statusLookup,
+    upcomingLength,
+  ]);
 
   useEffect(() => {
     let isUnmounted = false;
@@ -86,7 +99,7 @@ export function usePreviewTransactions({
         if (!isUnmounted) {
           const withDefaults = newTrans.map(t => ({
             ...t,
-            category: t.schedule != null ? statuses.get(t.schedule) : undefined,
+            category: t.schedule != null ? statusLookup[t.schedule] : undefined,
             schedule: t.schedule,
             subtransactions: t.subtransactions?.map(
               (st: TransactionEntity) => ({
@@ -113,7 +126,7 @@ export function usePreviewTransactions({
     return () => {
       isUnmounted = true;
     };
-  }, [scheduleTransactions, schedules, statuses, upcomingLength]);
+  }, [scheduleTransactions, schedules, statusLookup, upcomingLength]);
 
   const runningBalances = useMemo(() => {
     if (!options?.calculateRunningBalances) {
@@ -137,7 +150,7 @@ export function usePreviewTransactions({
   return {
     previewTransactions,
     runningBalances,
-    isLoading: isLoading || isSchedulesLoading,
+    isLoading: isLoading || isSchedulesLoading || isScheduleStatusLoading,
     ...(returnError && { error: returnError }),
   };
 }

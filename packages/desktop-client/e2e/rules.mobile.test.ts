@@ -79,8 +79,7 @@ test.describe('Mobile Rules', () => {
     await page.waitForTimeout(500);
 
     // Check that empty message is shown
-    const emptyMessage = page.getByText(/No rules found/);
-    await expect(emptyMessage).toBeVisible();
+    await expect(rulesPage.noRulesFoundText).toBeVisible();
 
     // Check that no rule items are visible
     const rules = rulesPage.getAllRules();

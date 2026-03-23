@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
@@ -24,6 +24,7 @@ import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
+import { useScheduleStatus } from '@desktop-client/hooks/useScheduleStatus';
 import { useUndo } from '@desktop-client/hooks/useUndo';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
@@ -38,12 +39,13 @@ export function MobileSchedulesPage() {
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
-  const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
+  const { isLoading: isSchedulesLoading, data: schedules = [] } = useSchedules({
+    query: q('schedules').select('*'),
+  });
   const {
-    isLoading: isSchedulesLoading,
-    schedules,
-    statuses,
-  } = useSchedules({ query: schedulesQuery });
+    isLoading: isScheduleStatusLoading,
+    data: { statusLookup = {} } = {},
+  } = useScheduleStatus({ schedules });
 
   const { data: payees = [] } = usePayees();
   const { data: accounts = [] } = useAccounts();
@@ -69,7 +71,7 @@ export function MobileSchedulesPage() {
         const dateStr = schedule.next_date
           ? monthUtilFormat(schedule.next_date, dateFormat)
           : null;
-        const statusLabel = statuses.get(schedule.id);
+        const statusLabel = statusLookup[schedule.id];
 
         return (
           filterIncludes(schedule.name) ||
@@ -137,10 +139,6 @@ export function MobileSchedulesPage() {
           alignItems: 'center',
           backgroundColor: theme.mobilePageBackground,
           padding: 10,
-          width: '100%',
-          borderBottomWidth: 2,
-          borderBottomStyle: 'solid',
-          borderBottomColor: theme.tableBorder,
         }}
       >
         <Search
@@ -157,8 +155,8 @@ export function MobileSchedulesPage() {
       </View>
       <SchedulesList
         schedules={filteredSchedules}
-        isLoading={isSchedulesLoading}
-        statuses={statuses}
+        isLoading={isSchedulesLoading || isScheduleStatusLoading}
+        statusLookup={statusLookup}
         onSchedulePress={handleSchedulePress}
         onScheduleDelete={handleScheduleDelete}
         hasCompletedSchedules={hasCompletedSchedules}

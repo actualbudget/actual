@@ -1,18 +1,21 @@
 import type { Locator, Page } from '@playwright/test';
 
+const NO_RULES_FOUND_TEXT =
+  'No rules found. Create your first rule to get started!';
+
 export class MobileRulesPage {
   readonly page: Page;
   readonly searchBox: Locator;
   readonly addButton: Locator;
   readonly rulesList: Locator;
-  readonly emptyMessage: Locator;
+  readonly noRulesFoundText: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.searchBox = page.getByPlaceholder('Filter rules…');
     this.addButton = page.getByRole('button', { name: 'Add new rule' });
-    this.rulesList = page.getByRole('main');
-    this.emptyMessage = page.getByText('No rules found');
+    this.rulesList = page.getByRole('grid', { name: 'Rules' });
+    this.noRulesFoundText = this.rulesList.getByText(NO_RULES_FOUND_TEXT);
   }
 
   async waitFor(options?: {
@@ -47,7 +50,11 @@ export class MobileRulesPage {
    * Get all visible rule items
    */
   getAllRules() {
-    return this.page.getByRole('grid', { name: 'Rules' }).getByRole('row');
+    // `GridList.renderEmptyState` still renders a row with "No rules found" text
+    // when no rules are present, so we need to filter that out to get the actual rule items.
+    return this.rulesList
+      .getByRole('row')
+      .filter({ hasNotText: NO_RULES_FOUND_TEXT });
   }
 
   /**

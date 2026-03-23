@@ -1,5 +1,5 @@
 import { GridList, ListLayout, Virtualizer } from 'react-aria-components';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { Text } from '@actual-app/components/text';
@@ -8,7 +8,7 @@ import { View } from '@actual-app/components/view';
 
 import type { RuleEntity } from 'loot-core/types/models';
 
-import { RulesListItem } from './RulesListItem';
+import { ROW_HEIGHT, RulesListItem } from './RulesListItem';
 
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
 
@@ -27,7 +27,7 @@ export function RulesList({
 }: RulesListProps) {
   const { t } = useTranslation();
 
-  if (isLoading && rules.length === 0) {
+  if (isLoading) {
     return (
       <View
         style={{
@@ -42,36 +42,12 @@ export function RulesList({
     );
   }
 
-  if (rules.length === 0) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
-          paddingHorizontal: 20,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 16,
-            color: theme.pageTextSubdued,
-            textAlign: 'center',
-          }}
-        >
-          {t('No rules found. Create your first rule to get started!')}
-        </Text>
-      </View>
-    );
-  }
-
   return (
     <View style={{ flex: 1, overflow: 'auto' }}>
       <Virtualizer
         layout={ListLayout}
         layoutOptions={{
-          estimatedRowHeight: 140,
-          padding: 0,
+          estimatedRowHeight: ROW_HEIGHT,
         }}
       >
         <GridList
@@ -81,6 +57,28 @@ export function RulesList({
           style={{
             paddingBottom: MOBILE_NAV_HEIGHT,
           }}
+          renderEmptyState={() => (
+            <View
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: theme.mobilePageBackground,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 15,
+                  color: theme.pageTextSubdued,
+                  textAlign: 'center',
+                }}
+              >
+                <Trans>
+                  No rules found. Create your first rule to get started!
+                </Trans>
+              </Text>
+            </View>
+          )}
         >
           {rule => (
             <RulesListItem

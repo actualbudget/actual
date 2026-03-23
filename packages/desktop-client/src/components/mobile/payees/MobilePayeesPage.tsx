@@ -117,10 +117,6 @@ export function MobilePayeesPage() {
           alignItems: 'center',
           backgroundColor: theme.mobilePageBackground,
           padding: 10,
-          width: '100%',
-          borderBottomWidth: 2,
-          borderBottomStyle: 'solid',
-          borderBottomColor: theme.tableBorder,
         }}
       >
         <Search

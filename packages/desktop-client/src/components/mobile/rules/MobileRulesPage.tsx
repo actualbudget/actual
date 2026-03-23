@@ -37,8 +37,8 @@ export function MobileRulesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState('');
 
-  const { schedules = [] } = useSchedules({
-    query: useMemo(() => q('schedules').select('*'), []),
+  const { data: schedules = [] } = useSchedules({
+    query: q('schedules').select('*'),
   });
   const { data: { list: categories } = { list: [] } } = useCategories();
   const { data: payees = [] } = usePayees();
@@ -179,10 +179,6 @@ export function MobileRulesPage() {
           alignItems: 'center',
           backgroundColor: theme.mobilePageBackground,
           padding: 10,
-          width: '100%',
-          borderBottomWidth: 2,
-          borderBottomStyle: 'solid',
-          borderBottomColor: theme.tableBorder,
         }}
       >
         <Search

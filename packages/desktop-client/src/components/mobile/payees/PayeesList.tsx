@@ -33,7 +33,7 @@ export function PayeesList({
 }: PayeesListProps) {
   const { t } = useTranslation();
 
-  if (isLoading && payees.length === 0) {
+  if (isLoading) {
     return (
       <View
         style={{
@@ -44,29 +44,6 @@ export function PayeesList({
         }}
       >
         <AnimatedLoading style={{ width: 25, height: 25 }} />
-      </View>
-    );
-  }
-
-  if (payees.length === 0) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
-          paddingHorizontal: 20,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 16,
-            color: theme.pageTextSubdued,
-            textAlign: 'center',
-          }}
-        >
-          <Trans>No payees found.</Trans>
-        </Text>
       </View>
     );
   }
@@ -84,6 +61,26 @@ export function PayeesList({
             overflow: 'auto',
           }}
           dependencies={[ruleCounts, isRuleCountsLoading]}
+          renderEmptyState={() => (
+            <View
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: theme.mobilePageBackground,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 15,
+                  color: theme.pageTextSubdued,
+                  textAlign: 'center',
+                }}
+              >
+                <Trans>No payees found.</Trans>
+              </Text>
+            </View>
+          )}
         >
           {payee => (
             <PayeesListItem
