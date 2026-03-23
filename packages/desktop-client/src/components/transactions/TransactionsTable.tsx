@@ -2883,11 +2883,13 @@ export const TransactionTable = forwardRef(
 
     useEffect(() => {
       if (savePending.current && afterSaveFunc.current) {
-        afterSaveFunc.current();
+        const func = afterSaveFunc.current;
         afterSaveFunc.current = null;
+        savePending.current = false;
+        func();
+      } else {
+        savePending.current = false;
       }
-
-      savePending.current = false;
     }, [newTransactions, props, props.transactions]);
 
     function getFieldsNewTransaction(item?: TransactionEntity) {
