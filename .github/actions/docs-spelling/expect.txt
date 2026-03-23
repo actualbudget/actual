@@ -112,7 +112,6 @@ Keycloak
 Khurozov
 KORT
 Kreditbank
-KRW
 lage
 LHV
 LHVBEE
@@ -173,6 +172,7 @@ tada
 taskbar
 templating
 THB
+TIMEFRAME
 touchscreen
 triaging
 UAH
