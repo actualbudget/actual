@@ -18,13 +18,10 @@ export function unicodeLike(
   if (!cachedRegExp) {
     // Process escaped special characters first (from escaped search input)
     // Unescape literal \? and \% so they are matched as regular characters
-    let processedPattern = pattern
-      .replace(/\\\?/g, '?')
-      .replace(/\\%/g, '%');
+    let processedPattern = pattern.replace(/\\\?/g, '?').replace(/\\%/g, '%');
 
     // Escape regex special characters (except ? and % which are our wildcards)
-    processedPattern = processedPattern
-      .replace(/[.*+^${}()|[\]\\]/g, '\\$&');
+    processedPattern = processedPattern.replace(/[.*+^${}()|[\]\\]/g, '\\$&');
 
     // Now replace wildcards with regex equivalents
     processedPattern = processedPattern
