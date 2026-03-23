@@ -520,7 +520,10 @@ export async function coverOverbudgeted({
 }): Promise<void> {
   const sheetName = monthUtils.sheetForMonth(month);
   const categoryBudget = await getSheetValue(sheetName, 'budget-' + category);
-  const categoryLeftover = await getSheetValue( sheetName, 'leftover-' + category);
+  const categoryLeftover = await getSheetValue(
+    sheetName,
+    'leftover-' + category,
+  );
 
   // Cover provided amount (can be partial) or full overbudgeted amount.
   const amountToCover = amount
