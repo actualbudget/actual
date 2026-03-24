@@ -69,58 +69,6 @@ export function Sankey() {
 
 type GraphMode = 'budgeted' | 'spent';
 
-type OtherModeSelectorProps = {
-  globalOther: boolean;
-  onChange: (globalOther: boolean) => void;
-};
-
-function OtherModeSelector({ globalOther, onChange }: OtherModeSelectorProps) {
-  const { t } = useTranslation();
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
-
-  const options = [
-    { key: 'per-category', label: t('Per category Other') },
-    { key: 'global', label: t('Global Other') },
-  ];
-
-  const currentLabel = globalOther
-    ? t('Global Other')
-    : t('Per category Other');
-
-  return (
-    <>
-      <Button
-        ref={triggerRef}
-        variant="bare"
-        onPress={() => setIsOpen(true)}
-        aria-label={t('Change Other grouping')}
-      >
-        <SvgList style={{ width: 12, height: 12 }} />
-        <span style={{ marginLeft: 5 }}>{currentLabel}</span>
-      </Button>
-
-      <Popover
-        triggerRef={triggerRef}
-        placement="bottom start"
-        isOpen={isOpen}
-        onOpenChange={() => setIsOpen(false)}
-      >
-        <Menu
-          onMenuSelect={item => {
-            onChange(item === 'global');
-            setIsOpen(false);
-          }}
-          items={options.map(({ key, label }) => ({
-            name: key,
-            text: label,
-          }))}
-        />
-      </Popover>
-    </>
-  );
-}
-
 const TOP_N_OPTIONS = [10, 15, 20, 25, 30] as const;
 
 type TopNSelectorProps = {
@@ -139,7 +87,7 @@ function TopNSelector({ value, onChange }: TopNSelectorProps) {
         ref={triggerRef}
         variant="bare"
         onPress={() => setIsOpen(true)}
-        aria-label={t('Change subcategory limit')}
+        aria-label={t('Change category limit')}
       >
         <SvgList style={{ width: 12, height: 12 }} />
         <span style={{ marginLeft: 5 }}>{t('Show {{n}}', { n: value })}</span>
@@ -157,7 +105,7 @@ function TopNSelector({ value, onChange }: TopNSelectorProps) {
           }}
           items={TOP_N_OPTIONS.map(n => ({
             name: String(n),
-            text: t('Top {{n}}', { n }),
+            text: t('Show {{n}}', { n }),
           }))}
         />
       </Popover>
@@ -165,26 +113,26 @@ function TopNSelector({ value, onChange }: TopNSelectorProps) {
   );
 }
 
-type SubcategorySortSelectorProps = {
-  value: 'per-category' | 'global';
-  onChange: (value: 'per-category' | 'global') => void;
+type CategorySortSelectorProps = {
+  value: 'per-group' | 'global';
+  onChange: (value: 'per-group' | 'global') => void;
 };
 
-function SubcategorySortSelector({
+function CategorySortSelector({
   value,
   onChange,
-}: SubcategorySortSelectorProps) {
+}: CategorySortSelectorProps) {
   const { t } = useTranslation();
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  const options: Array<{ key: 'per-category' | 'global'; label: string }> = [
-    { key: 'per-category', label: t('Sort per category') },
-    { key: 'global', label: t('Sort globally') },
+  const options: Array<{ key: 'per-group' | 'global'; label: string }> = [
+    { key: 'per-group', label: t('Sort per group') },
+    { key: 'global', label: t('Sort all') },
   ];
 
   const currentLabel =
-    value === 'global' ? t('Sort globally') : t('Sort per category');
+    value === 'global' ? t('Sort all') : t('Sort per group');
 
   return (
     <>
@@ -192,7 +140,7 @@ function SubcategorySortSelector({
         ref={triggerRef}
         variant="bare"
         onPress={() => setIsOpen(true)}
-        aria-label={t('Change subcategory sort order')}
+        aria-label={t('Change category sort order')}
       >
         <SvgArrowDown style={{ width: 12, height: 12 }} />
         <span style={{ marginLeft: 5 }}>{currentLabel}</span>
@@ -205,7 +153,7 @@ function SubcategorySortSelector({
       >
         <Menu
           onMenuSelect={item => {
-            onChange(item as 'per-category' | 'global');
+            onChange(item as 'per-group' | 'global');
             setIsOpen(false);
           }}
           items={options.map(({ key, label }) => ({
@@ -296,17 +244,13 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     widget?.meta?.mode ?? 'spent',
   );
 
-  const [globalOther, setGlobalOther] = useState<boolean>(
-    widget?.meta?.globalOther ?? false,
+  const [topNcategories, settopNcategories] = useState<number>(
+    widget?.meta?.topNcategories ?? 15,
   );
 
-  const [topNSubcategories, setTopNSubcategories] = useState<number>(
-    widget?.meta?.topNSubcategories ?? 15,
-  );
-
-  const [subcategorySort, setSubcategorySort] = useState<
-    'per-category' | 'global'
-  >(widget?.meta?.subcategorySort ?? 'per-category');
+  const [categorySort, setCategorySort] = useState<
+    'per-group' | 'global'
+  >(widget?.meta?.categorySort ?? 'per-group');
 
   const { data: { grouped: groupedCategories = [] } = { grouped: [] } } =
     useCategories();
@@ -324,9 +268,8 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       conditionsOp,
       graphMode,
       false,
-      globalOther,
-      topNSubcategories,
-      subcategorySort,
+      topNcategories,
+      categorySort,
     );
   }, [
     datesInitialized,
@@ -336,9 +279,8 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     conditions,
     conditionsOp,
     graphMode,
-    globalOther,
-    topNSubcategories,
-    subcategorySort,
+    topNcategories,
+    categorySort,
   ]);
 
   const defaultGetData = async (
@@ -430,9 +372,8 @@ function SankeyInner({ widget }: SankeyInnerProps) {
             conditions,
             conditionsOp,
             mode: graphMode,
-            globalOther,
-            topNSubcategories,
-            subcategorySort,
+            topNcategories,
+            categorySort,
             timeFrame: {
               start,
               end,
@@ -550,26 +491,14 @@ function SankeyInner({ widget }: SankeyInnerProps) {
               }}
             />
             <TopNSelector
-              value={topNSubcategories}
-              onChange={setTopNSubcategories}
+              value={topNcategories}
+              onChange={settopNcategories}
             />
-            <SubcategorySortSelector
-              value={subcategorySort}
-              onChange={setSubcategorySort}
+            <CategorySortSelector
+              value={categorySort}
+              onChange={setCategorySort}
             />
-            <OtherModeSelector
-              globalOther={globalOther}
-              onChange={setGlobalOther}
-            />
-            <View
-              style={{
-                width: 1,
-                height: 28,
-                backgroundColor: theme.pillBorderDark,
-                marginRight: 10,
-                marginLeft: 10,
-              }}
-            />
+            
           </>
         }
       >

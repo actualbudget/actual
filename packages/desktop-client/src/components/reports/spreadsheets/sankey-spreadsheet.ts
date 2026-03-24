@@ -58,7 +58,7 @@ type SankeyData = {
 
 type CategoryEntry = {
   mainCategory: string;
-  subcategory: string;
+  group: string;
   value: number;
   isNegative?: boolean;
 };
@@ -168,10 +168,22 @@ export function createSpreadsheet(
   conditionsOp: 'and' | 'or' = 'and',
   mode: 'budgeted' | 'spent' = 'spent',
   compact: boolean = false,
-  globalOther: boolean = false,
   topNSubcategories: number = 15,
-  subcategorySort: 'per-category' | 'global' = 'per-category',
+  categorySort: 'per-group' | 'global' = 'per-group',
 ) {
+
+  let globalOther: boolean;
+  let groupSort: 'per-group' | 'global';
+
+  if (categorySort === 'global') {
+    globalOther = true;
+    groupSort = 'global';
+  }
+  else if (categorySort === 'per-group') {
+    globalOther = false;
+    groupSort = 'per-group';
+  }
+
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
     setData: (data: ReturnType<typeof transformToSankeyData>) => void,
@@ -185,7 +197,7 @@ export function createSpreadsheet(
         compact,
         globalOther,
         topNSubcategories,
-        subcategorySort,
+        groupSort,
       )(spreadsheet, setData);
       return data;
     } else if (mode === 'spent') {
@@ -198,7 +210,7 @@ export function createSpreadsheet(
         compact,
         globalOther,
         topNSubcategories,
-        subcategorySort,
+        groupSort,
       )(spreadsheet, setData);
       return data;
     }
@@ -213,7 +225,7 @@ export function createBudgetSpreadsheet(
   compact: boolean = false,
   globalOther: boolean = false,
   topNSubcategories: number = 15,
-  subcategorySort: 'per-category' | 'global' = 'per-category',
+  groupSort: 'per-group' | 'global' = 'per-group',
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -282,7 +294,7 @@ export function createBudgetSpreadsheet(
       .flatMap(group =>
         group.categories.map(cat => ({
           mainCategory: group.name,
-          subcategory: cat.name,
+          group: cat.name,
           value: cat.budgeted ?? 0,
         })),
       );
@@ -297,7 +309,7 @@ export function createBudgetSpreadsheet(
         compact,
         topNSubcategories,
         globalOther,
-        subcategorySort,
+        groupSort,
       ),
     );
   };
@@ -312,7 +324,7 @@ export function createTransactionsSpreadsheet(
   compact: boolean = false,
   globalOther: boolean = false,
   topNSubcategories: number = 15,
-  subcategorySort: 'per-category' | 'global' = 'per-category',
+  groupSort: 'per-group' | 'global' = 'per-group',
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -341,13 +353,13 @@ export function createTransactionsSpreadsheet(
         compact,
         topNSubcategories,
         globalOther,
-        subcategorySort,
+        groupSort,
       ),
     );
   };
 }
 
-// retrieve sum of subcategory expenses
+// retrieve sum of group expenses
 async function fetchCategoryData(
   categories: CategoryGroupEntity[],
   conditionsOpKey: string = '$and',
@@ -359,8 +371,8 @@ async function fetchCategoryData(
     categories.map(async (mainCategory: CategoryGroupEntity) => {
       const entries = await Promise.all(
         (mainCategory.categories || [])
-          .filter(subcategory => !subcategory?.is_income)
-          .map(async subcategory => {
+          .filter(group => !group?.is_income)
+          .map(async group => {
             const results = await aqlQuery(
               q('transactions')
                 .filter({ [conditionsOpKey]: filters })
@@ -370,12 +382,12 @@ async function fetchCategoryData(
                     { date: { $lte: monthUtils.lastDayOfMonth(end) } },
                   ],
                 })
-                .filter({ category: subcategory.id })
+                .filter({ category: group.id })
                 .calculate({ $sum: '$amount' }),
             );
             return {
               mainCategory: mainCategory.name,
-              subcategory: subcategory.name,
+              group: group.name,
               value: results.data * -1,
             } satisfies CategoryEntry;
           }),
@@ -388,7 +400,7 @@ async function fetchCategoryData(
 
 type LeafState = {
   mainCategory: string;
-  subcategory: string;
+  group: string;
   value: number;
   isNegative: boolean;
   visible: boolean;
@@ -433,7 +445,7 @@ function greedyReduceLeaves(
       if (globalOtherBucket.total === 0) otherNodeCount += 1;
       globalOtherBucket.total += minLeaf.value;
       globalOtherBucket.entries.push({
-        name: minLeaf.subcategory,
+        name: minLeaf.group,
         value: minLeaf.value,
       });
     } else {
@@ -443,7 +455,7 @@ function greedyReduceLeaves(
         entries: [],
       };
       bucket.total += minLeaf.value;
-      bucket.entries.push({ name: minLeaf.subcategory, value: minLeaf.value });
+      bucket.entries.push({ name: minLeaf.group, value: minLeaf.value });
       perCategoryOther.set(minLeaf.mainCategory, bucket);
     }
   }
@@ -454,7 +466,7 @@ function greedyReduceLeaves(
     if (globalOtherBucket.entries.length === 1) {
       const entry = globalOtherBucket.entries[0];
       const leaf = allLeaves.find(
-        l => l.subcategory === entry.name && !l.visible,
+        l => l.group === entry.name && !l.visible,
       );
       if (leaf) {
         leaf.visible = true;
@@ -469,7 +481,7 @@ function greedyReduceLeaves(
         const leaf = allLeaves.find(
           l =>
             l.mainCategory === catName &&
-            l.subcategory === entry.name &&
+            l.group === entry.name &&
             !l.visible,
         );
         if (leaf) {
@@ -490,14 +502,14 @@ function transformToSankeyData(
   compact: boolean = false,
   topNSubcategories: number = 15,
   globalOther: boolean = false,
-  subcategorySort: 'per-category' | 'global' = 'per-category',
+  groupSort: 'per-group' | 'global' = 'per-group',
 ): SankeyData {
   // Phase 1 — Initialise leaves
   const allLeaves: LeafState[] = categoryData
     .filter(e => e.value > 0)
     .map(e => ({
       mainCategory: e.mainCategory,
-      subcategory: e.subcategory,
+      group: e.group,
       value: e.value,
       isNegative: e.isNegative ?? false,
       visible: true,
@@ -541,7 +553,7 @@ function transformToSankeyData(
     });
   }
 
-  if (subcategorySort === 'global') {
+  if (groupSort === 'global') {
     // All visible subcategories sorted by value globally
     const allVisibleLeaves = allLeaves
       .filter(l => l.visible)
@@ -549,7 +561,7 @@ function transformToSankeyData(
 
     for (const leaf of allVisibleLeaves) {
       const catIdx = catNodeIndexMap.get(leaf.mainCategory) ?? 0;
-      nodes.push({ name: leaf.subcategory, isNegative: leaf.isNegative });
+      nodes.push({ name: leaf.group, isNegative: leaf.isNegative });
       links.push({
         source: catIdx,
         target: nodes.length - 1,
@@ -558,7 +570,7 @@ function transformToSankeyData(
       });
     }
 
-    // Per-category Other nodes (globalOther=false only)
+    // per-group Other nodes (globalOther=false only)
     if (!globalOther) {
       for (const catName of sortedCategories) {
         const bucket = perCategoryOther.get(catName);
@@ -575,7 +587,7 @@ function transformToSankeyData(
       }
     }
   } else {
-    // Per-category sort: each category's subcategories sorted independently
+    // per-group sort: each category's subcategories sorted independently
     for (const catName of sortedCategories) {
       const catIdx = catNodeIndexMap.get(catName) ?? 0;
 
@@ -584,7 +596,7 @@ function transformToSankeyData(
         .sort((a, b) => b.value - a.value);
 
       for (const leaf of visibleLeaves) {
-        nodes.push({ name: leaf.subcategory, isNegative: leaf.isNegative });
+        nodes.push({ name: leaf.group, isNegative: leaf.isNegative });
         links.push({
           source: catIdx,
           target: nodes.length - 1,
@@ -593,7 +605,7 @@ function transformToSankeyData(
         });
       }
 
-      // Per-category Other node (globalOther=false only)
+      // per-group Other node (globalOther=false only)
       if (!globalOther) {
         const bucket = perCategoryOther.get(catName);
         if (bucket) {
@@ -620,9 +632,9 @@ function transformToSankeyData(
       Array<{ name: string; value: number }>
     >();
     for (const entry of globalOtherBucket.entries) {
-      // Find which main category this subcategory belongs to
+      // Find which main category this group belongs to
       const leaf = allLeaves.find(
-        l => l.subcategory === entry.name && !l.visible,
+        l => l.group === entry.name && !l.visible,
       );
       if (!leaf) continue;
       const group = byCategory.get(leaf.mainCategory) ?? [];
