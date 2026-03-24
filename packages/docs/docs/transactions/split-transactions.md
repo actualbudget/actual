@@ -10,7 +10,6 @@ Oftentimes a single transaction covers multiple categories. For example, a trip 
 
 ![Image of buttons when managing split transactions](/img/split-transactions/split-transactions-buttons.png)
 
-
 ## Distributing the Remainder
 
 The **Distribute** button works in two different ways depending on the state of the child transactions.
@@ -27,11 +26,11 @@ If all splits already have amounts entered in, clicking **Distribute** divides t
 
 For example, consider a $40.00 transaction split into two.
 
-| Split | Before | Proportion | Added | After |
-|-------|--------|------------|-------|-------|
-| A | $20.00 | 2/3 | $6.66 | $26.66 |
-| B | $10.00 | 1/3 | $3.34 | $13.34 |
-| **Total** | **$30.00** | | **$10.00** | **$40.00** |
+| Split     | Before     | Proportion | Added      | After      |
+| --------- | ---------- | ---------- | ---------- | ---------- |
+| A         | $20.00     | 2/3        | $6.66      | $26.66     |
+| B         | $10.00     | 1/3        | $3.34      | $13.34     |
+| **Total** | **$30.00** |            | **$10.00** | **$40.00** |
 
 Each split receives a share of the remainder proportional to its existing amount relative to the current total of the child transactions ($30.00).
 
@@ -41,12 +40,9 @@ When the remainder can't be divided evenly, the remaining cents are distributed 
 
 ## Unsplit Transactions
 
-Right-click any splits of the parent transaction and click **Unsplit 1 Transaction** to convert it into a regular transaction. You can also select and unsplit multiple rows at the same time. The total amount of the original transaction will be adjusted accordingly. 
+Right-click any splits of the parent transaction and click **Unsplit 1 Transaction** to convert it into a regular transaction. You can also select and unsplit multiple rows at the same time. The total amount of the original transaction will be adjusted accordingly.
 
 :::tip
 Right-clicking the original transaction and unsplitting it will convert all splits into regular transactions.
-Alternatively, to convert a split transaction back into a regular transaction, delete all the splits. 
+Alternatively, to convert a split transaction back into a regular transaction, delete all the splits.
 :::
-
-
-
