@@ -64,7 +64,10 @@ type SelectedBalanceProps = {
   account?: AccountEntity;
 };
 
-function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
+export function SelectedBalance({
+  selectedItems,
+  account,
+}: SelectedBalanceProps) {
   const { t } = useTranslation();
 
   const name = `selected-balance-${[...selectedItems].join('-')}`;
