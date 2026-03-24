@@ -43,6 +43,6 @@ When the remainder can't be divided evenly, the remaining cents are distributed 
 Right-click any splits of the parent transaction and click **Unsplit 1 Transaction** to convert it into a regular transaction. You can also select and unsplit multiple rows at the same time. The total amount of the original transaction will be adjusted accordingly.
 
 :::tip
-Right-clicking the original transaction and unsplitting it will convert all splits into regular transactions.
+Right-click the original transaction and unsplit it to convert all the splits into regular transactions.
 Alternatively, to convert a split transaction back into a regular transaction, delete all the splits.
 :::
