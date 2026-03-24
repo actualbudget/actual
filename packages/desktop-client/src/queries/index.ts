@@ -84,7 +84,7 @@ export function transactionsSearch(
   dateFormat: SyncedPrefs['dateFormat'],
 ) {
   const amount = currencyToAmount(search);
-  const escapedSearch = search.replace(/[\\%_?]/g, '\\$&');
+  const escapedSearch = search.replace(/[\\%?]/g, '\\$&');
 
   // Support various date formats
   let parsedDate;
