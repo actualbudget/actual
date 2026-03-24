@@ -9,7 +9,7 @@ function likePatternToRegex(pattern: string): RegExp {
     const ch = pattern[i];
     if (ch === '\\' && i + 1 < pattern.length) {
       const next = pattern[i + 1];
-      if (next === '%' || next === '?') {
+      if (next === '%' || next === '?' || next === '\\') {
         // escaped wildcard — treat as literal character
         regexStr += next.replace(/[.*+^${}()|[\]\\?]/g, '\\$&'); // ? added here
         i += 2;
