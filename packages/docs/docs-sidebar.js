@@ -168,6 +168,7 @@ const sidebars = {
             'transactions/payees',
             'transactions/bulk-editing',
             'transactions/tags',
+            'transactions/split-transactions',
             {
               type: 'category',
               label: 'Connecting Your Bank',
