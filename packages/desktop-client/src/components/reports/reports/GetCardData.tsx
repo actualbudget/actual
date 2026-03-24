@@ -24,6 +24,7 @@ import { ReportOptions } from '@desktop-client/components/reports/ReportOptions'
 import { createCustomSpreadsheet } from '@desktop-client/components/reports/spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '@desktop-client/components/reports/spreadsheets/grouped-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 function ErrorFallback() {
   return (
@@ -84,6 +85,7 @@ export function GetCardData({
   showTooltip?: boolean;
 }) {
   const { isNarrowWidth } = useResponsive();
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
   let startDate = report.startDate;
   let endDate = report.endDate;
@@ -126,6 +128,7 @@ export function GetCardData({
       endDate,
       interval: report.interval,
       categories,
+      budgetType,
       conditions: report.conditions ?? [],
       conditionsOp: report.conditionsOp,
       showEmpty: report.showEmpty,
@@ -137,13 +140,14 @@ export function GetCardData({
       firstDayOfWeekIdx,
       sortByOp: report.sortBy,
     });
-  }, [report, categories, startDate, endDate, firstDayOfWeekIdx]);
+  }, [report, categories, startDate, endDate, firstDayOfWeekIdx, budgetType]);
   const getGraphData = useMemo(() => {
     return createCustomSpreadsheet({
       startDate,
       endDate,
       interval: report.interval,
       categories,
+      budgetType,
       conditions: report.conditions ?? [],
       conditionsOp: report.conditionsOp,
       showEmpty: report.showEmpty,
@@ -167,6 +171,7 @@ export function GetCardData({
     startDate,
     endDate,
     firstDayOfWeekIdx,
+    budgetType,
   ]);
   const graphData = useReport('default' + report.name, getGraphData);
   const groupedData = useReport('grouped' + report.name, getGroupData);

@@ -17,6 +17,7 @@ import { Link } from '@desktop-client/components/common/Link';
 import { FixedSizeList } from '@desktop-client/components/FixedSizeList';
 import { useThemeCatalog } from '@desktop-client/hooks/useThemeCatalog';
 import {
+  embedThemeFonts,
   extractRepoOwner,
   fetchThemeCss,
   generateThemeId,
@@ -166,8 +167,12 @@ export function ThemeInstaller({
       setSelectedCatalogTheme(theme);
 
       const normalizedRepo = normalizeGitHubRepo(theme.repo);
+      // Fetch CSS and embed any referenced font files as data: URIs
+      const cssWithFonts = fetchThemeCss(theme.repo).then(css =>
+        embedThemeFonts(css, theme.repo),
+      );
       await installTheme({
-        css: fetchThemeCss(theme.repo),
+        css: cssWithFonts,
         name: theme.name,
         repo: normalizedRepo,
         id: generateThemeId(normalizedRepo),

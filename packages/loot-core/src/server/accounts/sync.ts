@@ -353,6 +353,9 @@ async function normalizeTransactions(
     // Strip off the irregular properties
     const { payee_name: originalPayeeName, subtransactions, ...rest } = trans;
     trans = rest;
+    const explicitFields = Object.entries(rest)
+      .filter(([, value]) => value != null)
+      .map(([field]) => field);
 
     let payee_name = originalPayeeName;
     if (payee_name) {
@@ -379,6 +382,7 @@ async function normalizeTransactions(
 
     normalized.push({
       payee_name,
+      explicitFields,
       subtransactions: subtransactions
         ? subtransactions.map(t => ({ ...t, account: acctId }))
         : null,
@@ -879,15 +883,28 @@ export async function addTransactions(
   const accounts: db.DbAccount[] = await db.getAccounts();
   const accountsMap = new Map(accounts.map(account => [account.id, account]));
 
-  for (const { trans: originalTrans, subtransactions } of normalized) {
+  for (const {
+    trans: originalTrans,
+    subtransactions,
+    explicitFields,
+  } of normalized) {
     // Run the rules
     const trans = await runRules(originalTrans, accountsMap);
 
+    // Rules should enrich missing fields but not override explicit values provided by API clients.
+    const transWithExplicitFields = { ...trans };
+    for (const field of explicitFields) {
+      transWithExplicitFields[field] = originalTrans[field];
+    }
+
     const finalTransaction = {
       id: uuidv4(),
-      ...trans,
+      ...transWithExplicitFields,
       account: acctId,
-      cleared: trans.cleared != null ? trans.cleared : true,
+      cleared:
+        transWithExplicitFields.cleared != null
+          ? transWithExplicitFields.cleared
+          : true,
     };
 
     // Add split transactions if they are given

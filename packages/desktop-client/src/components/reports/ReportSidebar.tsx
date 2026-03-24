@@ -182,6 +182,34 @@ export function ReportSidebar({
     setSessionReport('balanceType', cond);
     onReportChange({ type: 'modify' });
     setBalanceType(cond);
+
+    if (cond === 'Budgeted') {
+      // Budgeted does not support Payee and Account splits
+      if (
+        customReportItems.groupBy === 'Payee' ||
+        customReportItems.groupBy === 'Account'
+      ) {
+        setSessionReport('groupBy', 'Category');
+        setGroupBy('Category');
+        defaultItems('Category');
+      }
+      // Budgeted only supports Monthly and Yearly intervals
+      if (
+        customReportItems.interval === 'Daily' ||
+        customReportItems.interval === 'Weekly'
+      ) {
+        setSessionReport('interval', 'Monthly');
+        setInterval('Monthly');
+        if (
+          ReportOptions.dateRange
+            .filter(d => !d['Monthly' as keyof dateRangeProps])
+            .map(int => int.key)
+            .includes(customReportItems.dateRange)
+        ) {
+          onSelectRange(defaultsList.intervalRange.get('Monthly') || '');
+        }
+      }
+    }
   };
 
   const onChangeSortBy = (cond?: sortByOpType) => {
@@ -277,7 +305,11 @@ export function ReportSidebar({
               option.key,
               option.description,
             ])}
-            disabledKeys={disabledItems('split')}
+            disabledKeys={
+              customReportItems.balanceType === 'Budgeted'
+                ? [...new Set([...disabledItems('split'), 'Payee', 'Account'])]
+                : disabledItems('split')
+            }
           />
         </View>
 
@@ -330,7 +362,11 @@ export function ReportSidebar({
               option.key,
               option.description,
             ])}
-            disabledKeys={[]}
+            disabledKeys={
+              customReportItems.balanceType === 'Budgeted'
+                ? ['Daily', 'Weekly']
+                : []
+            }
           />
         </View>
 

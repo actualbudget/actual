@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import type { ComponentProps } from 'react';
 import { FocusScope } from 'react-aria';
 import { Form } from 'react-aria-components';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -475,6 +476,23 @@ export function FilterButton<T extends RuleConditionEntity>({
     scopes: ['app'],
   });
 
+  const filterMenuItems: ComponentProps<typeof Menu>['items'] =
+    translatedFilterFields
+      .filter(f => (exclude ? !exclude.includes(f[0]) : true))
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([name, text]) => ({
+        name,
+        text: titleFirst(text),
+      }));
+
+  if (!exclude?.includes('saved')) {
+    filterMenuItems.push(Menu.line);
+    filterMenuItems.push({
+      name: 'saved',
+      text: titleFirst(mapField('saved')),
+    });
+  }
+
   return (
     <View>
       <View ref={triggerRef}>
@@ -513,24 +531,9 @@ export function FilterButton<T extends RuleConditionEntity>({
       >
         <Menu
           onMenuSelect={name => {
-            dispatch({ type: 'configure', field: name });
+            dispatch({ type: 'configure', field: name as string });
           }}
-          items={[
-            ...translatedFilterFields
-              .filter(f => (exclude ? !exclude.includes(f[0]) : true))
-              .sort((a, b) => a[0].localeCompare(b[0]))
-              .map(([name, text]) => ({
-                name,
-                text: titleFirst(text),
-              })),
-
-            Menu.line,
-
-            {
-              name: 'saved',
-              text: titleFirst(mapField('saved')),
-            },
-          ]}
+          items={filterMenuItems}
         />
       </Popover>
 
