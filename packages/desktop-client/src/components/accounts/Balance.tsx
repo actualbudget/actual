@@ -64,7 +64,10 @@ type SelectedBalanceProps = {
   account?: AccountEntity;
 };
 
-function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
+export function SelectedBalance({
+  selectedItems,
+  account,
+}: SelectedBalanceProps) {
   const { t } = useTranslation();
 
   const name = `selected-balance-${[...selectedItems].join('-')}`;
@@ -97,22 +100,22 @@ function SelectedBalance({ selectedItems, account }: SelectedBalanceProps) {
     return null;
   }
 
-  const previewIds = [...selectedItems]
-    .filter(id => isPreviewId(id))
-    .map(id => id.slice(8));
   let isExactBalance = true;
 
-  for (const s of schedules) {
-    if (previewIds.includes(s.id)) {
+  for (const id of [...selectedItems].filter(isPreviewId)) {
+    // Preview IDs are in the format `preview/<schedule_id>/<date>`
+    const scheduleId = id.slice(8).split('/')[0];
+    const schedule = schedules.find(s => s.id === scheduleId);
+    if (schedule) {
       // If a schedule is `between X and Y` then we calculate the average
-      if (s._amountOp === 'isbetween') {
+      if (schedule._amountOp === 'isbetween') {
         isExactBalance = false;
       }
 
-      if (!account || account.id === s._account) {
-        scheduleBalance += getScheduledAmount(s._amount);
+      if (!account || account.id === schedule._account) {
+        scheduleBalance += getScheduledAmount(schedule._amount);
       } else {
-        scheduleBalance -= getScheduledAmount(s._amount);
+        scheduleBalance -= getScheduledAmount(schedule._amount);
       }
     }
   }
