@@ -45,6 +45,31 @@ function makeSchedule(
   } satisfies ScheduleEntity;
 }
 
+describe('SelectedBalance – normal transactions', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(useCachedSchedules).mockReturnValue({
+      isLoading: false,
+      schedules: [],
+    });
+  });
+
+  test('shows balance for selected normal transactions', () => {
+    vi.mocked(useSheetValue)
+      .mockReturnValueOnce(null)
+      .mockReturnValueOnce(-5000);
+
+    render(
+      <TestProviders>
+        <SelectedBalance selectedItems={new Set(['tx-123'])} />
+      </TestProviders>,
+    );
+
+    expect(screen.getByText('Selected balance:')).toBeInTheDocument();
+    expect(screen.getByText('-50.00')).toBeInTheDocument();
+  });
+});
+
 describe('SelectedBalance – preview (scheduled) transactions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
