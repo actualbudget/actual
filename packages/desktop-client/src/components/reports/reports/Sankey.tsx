@@ -114,25 +114,30 @@ function TopNSelector({ value, onChange }: TopNSelectorProps) {
 }
 
 type CategorySortSelectorProps = {
-  value: 'per-group' | 'global';
-  onChange: (value: 'per-group' | 'global') => void;
+  value: 'per-group' | 'global' | 'budget-order';
+  onChange: (value: 'per-group' | 'global' | 'budget-order') => void;
 };
 
-function CategorySortSelector({
-  value,
-  onChange,
-}: CategorySortSelectorProps) {
+function CategorySortSelector({ value, onChange }: CategorySortSelectorProps) {
   const { t } = useTranslation();
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  const options: Array<{ key: 'per-group' | 'global'; label: string }> = [
+  const options: Array<{
+    key: 'per-group' | 'global' | 'budget-order';
+    label: string;
+  }> = [
     { key: 'per-group', label: t('Sort per group') },
     { key: 'global', label: t('Sort all') },
+    { key: 'budget-order', label: t('Sort as budget') },
   ];
 
   const currentLabel =
-    value === 'global' ? t('Sort all') : t('Sort per group');
+    value === 'global'
+      ? t('Sort all')
+      : value === 'budget-order'
+        ? t('Sort as budget')
+        : t('Sort per group');
 
   return (
     <>
@@ -153,7 +158,7 @@ function CategorySortSelector({
       >
         <Menu
           onMenuSelect={item => {
-            onChange(item as 'per-group' | 'global');
+            onChange(item as 'per-group' | 'global' | 'budget-order');
             setIsOpen(false);
           }}
           items={options.map(({ key, label }) => ({
@@ -249,7 +254,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
   );
 
   const [categorySort, setCategorySort] = useState<
-    'per-group' | 'global'
+    'per-group' | 'global' | 'budget-order'
   >(widget?.meta?.categorySort ?? 'per-group');
 
   const { data: { grouped: groupedCategories = [] } = { grouped: [] } } =
@@ -490,15 +495,11 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                 marginLeft: 10,
               }}
             />
-            <TopNSelector
-              value={topNcategories}
-              onChange={settopNcategories}
-            />
+            <TopNSelector value={topNcategories} onChange={settopNcategories} />
             <CategorySortSelector
               value={categorySort}
               onChange={setCategorySort}
             />
-            
           </>
         }
       >
@@ -598,8 +599,8 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                           category from transactions.
                         </li>
                         <li style={{ marginBottom: 5 }}>
-                          <strong>Budgeted:</strong> Shows how income flows into
-                          your budget and is allocated across categories.
+                          <strong>Budgeted:</strong> Shows how your budget is
+                          allocated across categories.
                         </li>
                       </ul>
                     </Trans>

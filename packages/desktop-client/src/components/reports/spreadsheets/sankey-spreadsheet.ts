@@ -63,6 +63,8 @@ type CategoryEntry = {
   isNegative?: boolean;
 };
 
+type CategoryOrder = Array<{ mainCategory: string; categories: string[] }>;
+
 // Filter budget category groups to only those matching the user's conditions.
 // Budget data is fetched unconditionally from api/budget-month, so we must
 // apply category conditions manually in JS (unlike the transaction path which
@@ -168,18 +170,28 @@ export function createSpreadsheet(
   conditionsOp: 'and' | 'or' = 'and',
   mode: 'budgeted' | 'spent' = 'spent',
   compact: boolean = false,
-  topNSubcategories: number = 15,
-  categorySort: 'per-group' | 'global' = 'per-group',
+  topNcategories: number = 15,
+  categorySort: 'per-group' | 'global' | 'budget-order' = 'per-group',
 ) {
-
   let globalOther: boolean;
   let groupSort: 'per-group' | 'global';
+  let categoryOrder: CategoryOrder | undefined;
 
   if (categorySort === 'global') {
     globalOther = true;
     groupSort = 'global';
-  }
-  else if (categorySort === 'per-group') {
+  } else if (categorySort === 'budget-order') {
+    globalOther = false;
+    groupSort = 'per-group';
+    categoryOrder = categories
+      .filter(g => !g.hidden && !g.is_income)
+      .map(g => ({
+        mainCategory: g.name,
+        categories: (g.categories ?? [])
+          .filter(c => !c.hidden)
+          .map(c => c.name),
+      }));
+  } else {
     globalOther = false;
     groupSort = 'per-group';
   }
@@ -196,8 +208,9 @@ export function createSpreadsheet(
         conditionsOp,
         compact,
         globalOther,
-        topNSubcategories,
+        topNcategories,
         groupSort,
+        categoryOrder,
       )(spreadsheet, setData);
       return data;
     } else if (mode === 'spent') {
@@ -209,8 +222,9 @@ export function createSpreadsheet(
         conditionsOp,
         compact,
         globalOther,
-        topNSubcategories,
+        topNcategories,
         groupSort,
+        categoryOrder,
       )(spreadsheet, setData);
       return data;
     }
@@ -224,8 +238,9 @@ export function createBudgetSpreadsheet(
   conditionsOp: 'and' | 'or' = 'and',
   compact: boolean = false,
   globalOther: boolean = false,
-  topNSubcategories: number = 15,
+  topNcategories: number = 15,
   groupSort: 'per-group' | 'global' = 'per-group',
+  categoryOrder?: CategoryOrder,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -307,9 +322,10 @@ export function createBudgetSpreadsheet(
         toBudget,
         'Budgeted',
         compact,
-        topNSubcategories,
+        topNcategories,
         globalOther,
         groupSort,
+        categoryOrder,
       ),
     );
   };
@@ -323,8 +339,9 @@ export function createTransactionsSpreadsheet(
   conditionsOp: 'and' | 'or' = 'and',
   compact: boolean = false,
   globalOther: boolean = false,
-  topNSubcategories: number = 15,
+  topNcategories: number = 15,
   groupSort: 'per-group' | 'global' = 'per-group',
+  categoryOrder?: CategoryOrder,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -351,9 +368,10 @@ export function createTransactionsSpreadsheet(
         0,
         'Spent',
         compact,
-        topNSubcategories,
+        topNcategories,
         globalOther,
         groupSort,
+        categoryOrder,
       ),
     );
   };
@@ -419,7 +437,7 @@ type GreedyReductionResult = {
 
 function greedyReduceLeaves(
   allLeaves: LeafState[],
-  topNSubcategories: number,
+  topNcategories: number,
   globalOther: boolean,
 ): GreedyReductionResult {
   const perCategoryOther = new Map<string, OtherBucket>();
@@ -429,11 +447,8 @@ function greedyReduceLeaves(
   let otherNodeCount = 0;
 
   // Collapse the lowest-value visible leaf into an Other bucket until the
-  // total displayed node count (individual + Other nodes) <= topNSubcategories.
-  while (
-    visibleCount + otherNodeCount > topNSubcategories &&
-    visibleCount > 0
-  ) {
+  // total displayed node count (individual + Other nodes) <= topNcategories.
+  while (visibleCount + otherNodeCount > topNcategories && visibleCount > 0) {
     const minLeaf = allLeaves
       .filter(l => l.visible)
       .reduce((min, l) => (l.value < min.value ? l : min));
@@ -465,9 +480,7 @@ function greedyReduceLeaves(
   if (globalOther) {
     if (globalOtherBucket.entries.length === 1) {
       const entry = globalOtherBucket.entries[0];
-      const leaf = allLeaves.find(
-        l => l.group === entry.name && !l.visible,
-      );
+      const leaf = allLeaves.find(l => l.group === entry.name && !l.visible);
       if (leaf) {
         leaf.visible = true;
         globalOtherBucket.total = 0;
@@ -480,9 +493,7 @@ function greedyReduceLeaves(
         const entry = bucket.entries[0];
         const leaf = allLeaves.find(
           l =>
-            l.mainCategory === catName &&
-            l.group === entry.name &&
-            !l.visible,
+            l.mainCategory === catName && l.group === entry.name && !l.visible,
         );
         if (leaf) {
           leaf.visible = true;
@@ -500,9 +511,10 @@ function transformToSankeyData(
   toBudgetAmount: number = 0,
   rootNodeName: string,
   compact: boolean = false,
-  topNSubcategories: number = 15,
+  topNcategories: number = 15,
   globalOther: boolean = false,
   groupSort: 'per-group' | 'global' = 'per-group',
+  categoryOrder?: CategoryOrder,
 ): SankeyData {
   // Phase 1 — Initialise leaves
   const allLeaves: LeafState[] = categoryData
@@ -518,7 +530,7 @@ function transformToSankeyData(
   // Phase 2 — Greedy reduction (collapse lowest-value leaves into Other buckets)
   const { perCategoryOther, globalOtherBucket } = greedyReduceLeaves(
     allLeaves,
-    topNSubcategories,
+    topNcategories,
     globalOther,
   );
 
@@ -531,9 +543,21 @@ function transformToSankeyData(
     );
   }
 
-  const sortedCategories = [...categoryTotals.keys()].sort(
-    (a, b) => (categoryTotals.get(b) ?? 0) - (categoryTotals.get(a) ?? 0),
-  );
+  const sortedCategories = categoryOrder
+    ? categoryOrder
+        .map(c => c.mainCategory)
+        .filter(name => categoryTotals.has(name))
+        .concat(
+          [...categoryTotals.keys()]
+            .filter(name => !categoryOrder.some(c => c.mainCategory === name))
+            .sort(
+              (a, b) =>
+                (categoryTotals.get(b) ?? 0) - (categoryTotals.get(a) ?? 0),
+            ),
+        )
+    : [...categoryTotals.keys()].sort(
+        (a, b) => (categoryTotals.get(b) ?? 0) - (categoryTotals.get(a) ?? 0),
+      );
 
   // Phase 4 — Build nodes/links
   const nodes: SankeyNode[] = [
@@ -554,7 +578,7 @@ function transformToSankeyData(
   }
 
   if (groupSort === 'global') {
-    // All visible subcategories sorted by value globally
+    // All visible categories sorted by value globally
     const allVisibleLeaves = allLeaves
       .filter(l => l.visible)
       .sort((a, b) => b.value - a.value);
@@ -587,13 +611,27 @@ function transformToSankeyData(
       }
     }
   } else {
-    // per-group sort: each category's subcategories sorted independently
+    // per-group sort or budget-order: each category's categories sorted independently
     for (const catName of sortedCategories) {
       const catIdx = catNodeIndexMap.get(catName) ?? 0;
 
+      const subcatOrder = categoryOrder?.find(
+        c => c.mainCategory === catName,
+      )?.categories;
+
       const visibleLeaves = allLeaves
         .filter(l => l.mainCategory === catName && l.visible)
-        .sort((a, b) => b.value - a.value);
+        .sort((a, b) => {
+          if (subcatOrder) {
+            const ai = subcatOrder.indexOf(a.group);
+            const bi = subcatOrder.indexOf(b.group);
+            if (ai === -1 && bi === -1) return b.value - a.value;
+            if (ai === -1) return 1;
+            if (bi === -1) return -1;
+            return ai - bi;
+          }
+          return b.value - a.value;
+        });
 
       for (const leaf of visibleLeaves) {
         nodes.push({ name: leaf.group, isNegative: leaf.isNegative });
@@ -633,9 +671,7 @@ function transformToSankeyData(
     >();
     for (const entry of globalOtherBucket.entries) {
       // Find which main category this group belongs to
-      const leaf = allLeaves.find(
-        l => l.group === entry.name && !l.visible,
-      );
+      const leaf = allLeaves.find(l => l.group === entry.name && !l.visible);
       if (!leaf) continue;
       const group = byCategory.get(leaf.mainCategory) ?? [];
       group.push(entry);
