@@ -169,7 +169,6 @@ export function createSpreadsheet(
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
   mode: 'budgeted' | 'spent' = 'spent',
-  compact: boolean = false,
   topNcategories: number = 15,
   categorySort: 'per-group' | 'global' | 'budget-order' = 'per-group',
 ) {
@@ -206,7 +205,6 @@ export function createSpreadsheet(
         end,
         conditions,
         conditionsOp,
-        compact,
         globalOther,
         topNcategories,
         groupSort,
@@ -220,7 +218,6 @@ export function createSpreadsheet(
         categories,
         conditions,
         conditionsOp,
-        compact,
         globalOther,
         topNcategories,
         groupSort,
@@ -236,7 +233,6 @@ export function createBudgetSpreadsheet(
   end: string,
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
-  compact: boolean = false,
   globalOther: boolean = false,
   topNcategories: number = 15,
   groupSort: 'per-group' | 'global' = 'per-group',
@@ -321,7 +317,6 @@ export function createBudgetSpreadsheet(
         categoryData,
         toBudget,
         'Budgeted',
-        compact,
         topNcategories,
         globalOther,
         groupSort,
@@ -337,7 +332,6 @@ export function createTransactionsSpreadsheet(
   categories: CategoryGroupEntity[],
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
-  compact: boolean = false,
   globalOther: boolean = false,
   topNcategories: number = 15,
   groupSort: 'per-group' | 'global' = 'per-group',
@@ -367,7 +361,6 @@ export function createTransactionsSpreadsheet(
         categoryData,
         0,
         'Spent',
-        compact,
         topNcategories,
         globalOther,
         groupSort,
@@ -510,7 +503,6 @@ function transformToSankeyData(
   categoryData: CategoryEntry[],
   toBudgetAmount: number = 0,
   rootNodeName: string,
-  compact: boolean = false,
   topNcategories: number = 15,
   globalOther: boolean = false,
   groupSort: 'per-group' | 'global' = 'per-group',
@@ -691,15 +683,13 @@ function transformToSankeyData(
     }
   }
 
-  // Phase 5 — compact pass
-  if (compact) {
-    return compactSankeyData({ nodes, links }, 5);
-  }
-
   return { nodes, links };
 }
 
-function compactSankeyData(data: SankeyData, topN: number = 5): SankeyData {
+export function compactSankeyData(
+  data: SankeyData,
+  topN: number = 5,
+): SankeyData {
   const compactedData: SankeyData = { nodes: [], links: [] };
   compactedData.nodes.push(data.nodes[0]); // root node
 

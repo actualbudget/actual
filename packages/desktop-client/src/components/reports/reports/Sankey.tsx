@@ -272,7 +272,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       conditions,
       conditionsOp,
       graphMode,
-      false,
       topNcategories,
       categorySort,
     );

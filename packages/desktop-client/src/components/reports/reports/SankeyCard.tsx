@@ -15,11 +15,15 @@ import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndi
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
-import { createSpreadsheet as sankeySpreadsheet } from '@desktop-client/components/reports/spreadsheets/sankey-spreadsheet';
+import {
+  compactSankeyData,
+  createSpreadsheet as sankeySpreadsheet,
+} from '@desktop-client/components/reports/spreadsheets/sankey-spreadsheet';
 import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
 type SankeyCardProps = {
   widgetId: string;
@@ -48,6 +52,11 @@ export function SankeyCard({
   const [start, end] = calculateTimeRange(meta?.timeFrame);
   const mode = meta?.mode ?? 'spent';
 
+  const [cardHeight, setCardHeight] = useState(0);
+  const containerRef = useResizeObserver<HTMLDivElement>(rect => {
+    setCardHeight(rect.height);
+  });
+
   const params = useMemo(
     () =>
       sankeySpreadsheet(
@@ -57,11 +66,22 @@ export function SankeyCard({
         meta?.conditions ?? [],
         meta?.conditionsOp ?? 'and',
         mode,
-        true, // compact
       ),
     [start, end, groupedCategories, meta?.conditions, meta?.conditionsOp, mode],
   );
   const data = useReport('sankey', params);
+
+  const HEADER_HEIGHT = 82;
+  const PX_PER_NODE = 50;
+  const topN = Math.max(
+    2,
+    Math.floor((cardHeight - HEADER_HEIGHT) / PX_PER_NODE),
+  );
+
+  const compactData = useMemo(
+    () => (data ? compactSankeyData(data, topN) : null),
+    [data, topN],
+  );
 
   const startDate = d.parseISO(start);
   const endDate = d.parseISO(end);
@@ -112,7 +132,7 @@ export function SankeyCard({
         }
       }}
     >
-      <View style={{ flex: 1 }}>
+      <View ref={containerRef} style={{ flex: 1 }}>
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <ReportCardName
@@ -133,9 +153,9 @@ export function SankeyCard({
           </View>
         </View>
 
-        {data ? (
+        {compactData ? (
           <SankeyGraph
-            data={data}
+            data={compactData}
             showTooltip={!isEditing}
             style={{ height: 'auto', flex: 1 }}
           />
