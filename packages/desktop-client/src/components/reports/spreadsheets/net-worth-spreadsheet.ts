@@ -41,7 +41,7 @@ export function createSpreadsheet(
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
     // Convert dates to ensure we have the full range. Then clamp end date to avoid future projections
-    const startDate = monthUtils.firstDayOfMonth(start);
+    let startDate = monthUtils.lastDayOfMonth(monthUtils.prevMonth(start));
 
     // Start with the provided end-of-month date, then adjust for current context
     let endDate = monthUtils.lastDayOfMonth(end);
@@ -193,6 +193,7 @@ function recalculate(
   );
 
   let hasNegative = false;
+  let startNetWorth = 0;
   let endNetWorth = 0;
   let lowestNetWorth: number | null = null;
   let highestNetWorth: number | null = null;
@@ -242,6 +243,9 @@ function recalculate(
 
     const change = last ? total - last.y : total - priorPeriodNetWorth;
 
+    if (arr.length === 0) {
+      startNetWorth = total;
+    }
     endNetWorth = total;
 
     // Use standardized format from ReportOptions
@@ -293,7 +297,7 @@ function recalculate(
       end: endDate,
     },
     netWorth: endNetWorth,
-    totalChange: endNetWorth - priorPeriodNetWorth,
+    totalChange: endNetWorth - startNetWorth,
     lowestNetWorth,
     highestNetWorth,
     accounts: data
