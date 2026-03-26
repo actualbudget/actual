@@ -84,4 +84,4 @@ const addJSXAttribute = ({ types: t, template }, opts) => {
   };
 };
 
-module.exports = addJSXAttribute;
+export default addJSXAttribute;
