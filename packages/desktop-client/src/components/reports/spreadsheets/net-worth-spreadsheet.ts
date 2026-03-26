@@ -40,8 +40,23 @@ export function createSpreadsheet(
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    // Convert dates to ensure we have the full range. Then clamp end date to avoid future projections
-    let startDate = monthUtils.lastDayOfMonth(monthUtils.prevMonth(start));
+    // Go back exactly one interval before the selected range start 
+    // to get the correct starting balance for the first period
+    const rangeStart = d.parseISO(monthUtils.firstDayOfMonth(start));
+    let startDate: string;
+    if (interval === 'Daily') {
+      startDate = monthUtils.dayFromDate(d.subDays(rangeStart, 1));
+    } else if (interval === 'Weekly') {
+      startDate = monthUtils.weekFromDate(
+        d.subDays(rangeStart, 1),
+        firstDayOfWeekIdx,
+      );
+    } else if (interval === 'Yearly') {
+      startDate = String(rangeStart.getFullYear() - 1) + '-01-01';
+    } else {
+      // Monthly
+      startDate = monthUtils.firstDayOfMonth(monthUtils.prevMonth(start));
+    }
 
     // Start with the provided end-of-month date, then adjust for current context
     let endDate = monthUtils.lastDayOfMonth(end);
