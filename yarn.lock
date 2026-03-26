@@ -202,7 +202,7 @@ __metadata:
     "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
     bcrypt: "npm:^6.0.0"
     better-sqlite3: "npm:^12.6.2"
-    convict: "npm:^6.2.4"
+    convict: "npm:^6.2.5"
     cors: "npm:^2.8.6"
     date-fns: "npm:^4.1.0"
     debug: "npm:^4.4.3"
@@ -13749,13 +13749,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"convict@npm:^6.2.4":
-  version: 6.2.4
-  resolution: "convict@npm:6.2.4"
+"convict@npm:^6.2.5":
+  version: 6.2.5
+  resolution: "convict@npm:6.2.5"
   dependencies:
     lodash.clonedeep: "npm:^4.5.0"
     yargs-parser: "npm:^20.2.7"
-  checksum: 10/d4b9c50dcddf4b5da7a80c1d99d1cfae8a47d78d291f0cc11637ab25b6b4515f5f0e9029abd45bcc30cc3e33032aa8814ead22142b4563c4e4959d2e56bdf1ae
+  checksum: 10/998fce29b699aa07eb6128b9f2b0833af3d3f5df96b6d775d5c44ae5d56f07d9a87b1cacc79e04db3ebd47037463218698fec30331cfa63e44e0c4e7f331c863
   languageName: node
   linkType: hard
 
