@@ -40,7 +40,7 @@ export function createSpreadsheet(
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    // Go back exactly one interval before the selected range start 
+    // Go back exactly one interval before the selected range start
     // to get the correct starting balance for the first period
     const rangeStart = d.parseISO(monthUtils.firstDayOfMonth(start));
     let startDate: string;
