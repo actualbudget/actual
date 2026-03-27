@@ -35,7 +35,11 @@ const CONFIG = {
     'release-notes/**/*',
     'upcoming-release-notes/**/*',
   ],
-  DOCS_FILES_PATTERN: 'packages/docs/**/*',
+  DOCS_FILES_PATTERNS: [
+    'packages/docs/**/*',
+    '!packages/docs/package.json',
+    '.github/actions/docs-spelling/*',
+  ],
 };
 
 /**
@@ -276,13 +280,25 @@ async function countContributorPoints() {
             ),
         );
 
-        const docsFiles = filteredFiles.filter(file =>
-          minimatch(file.filename, CONFIG.DOCS_FILES_PATTERN, { dot: true }),
-        );
-        const codeFiles = filteredFiles.filter(
-          file =>
-            !minimatch(file.filename, CONFIG.DOCS_FILES_PATTERN, { dot: true }),
-        );
+        const isDocsFile = file => {
+          const positivePatterns = CONFIG.DOCS_FILES_PATTERNS.filter(
+            p => !p.startsWith('!'),
+          );
+          const negativePatterns = CONFIG.DOCS_FILES_PATTERNS.filter(p =>
+            p.startsWith('!'),
+          );
+          return (
+            positivePatterns.some(p =>
+              minimatch(file.filename, p, { dot: true }),
+            ) &&
+            negativePatterns.every(p =>
+              minimatch(file.filename, p, { dot: true }),
+            )
+          );
+        };
+
+        const docsFiles = filteredFiles.filter(isDocsFile);
+        const codeFiles = filteredFiles.filter(file => !isDocsFile(file));
 
         const docsChanges = docsFiles.reduce(
           (sum, file) => sum + file.additions + file.deletions,
