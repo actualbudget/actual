@@ -51,10 +51,8 @@ export function createSpreadsheet(
         d.subDays(rangeStart, 1),
         firstDayOfWeekIdx,
       );
-    } else if (interval === 'Yearly') {
-      startDate = String(rangeStart.getFullYear() - 1) + '-01-01';
     } else {
-      // Monthly
+      // Monthly or yearly
       startDate = monthUtils.firstDayOfMonth(monthUtils.prevMonth(start));
     }
 
