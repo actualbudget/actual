@@ -68,11 +68,6 @@ function getAccountBalance(account) {
 }
 
 async function updateAccountBalance(id: AccountEntity['id'], balance: number) {
-  // Use db.update (which goes through the CRDT sync layer via
-  // sendMessages) instead of raw SQL so that balance_current changes
-  // propagate to all synced clients.  The previous raw runQuery write
-  // only updated the local database, meaning API clients calling
-  // api.sync() would never receive updated bank balances.
   await db.update('accounts', { id, balance_current: balance });
 }
 
