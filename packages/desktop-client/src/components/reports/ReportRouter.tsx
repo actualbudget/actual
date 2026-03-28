@@ -4,6 +4,7 @@ import { Route, Routes } from 'react-router';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 
 import { AgeOfMoney } from './reports/AgeOfMoney';
+import { BalanceForecast } from './reports/BalanceForecast';
 import { BudgetAnalysis } from './reports/BudgetAnalysis';
 import { Calendar } from './reports/Calendar';
 import { CashFlow } from './reports/CashFlow';
@@ -18,6 +19,7 @@ import { ReportsDashboardRouter } from './ReportsDashboardRouter';
 
 export function ReportRouter() {
   const ageOfMoneyReportEnabled = useFeatureFlag('ageOfMoneyReport');
+  const balanceForecastReportEnabled = useFeatureFlag('balanceForecastReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
   const sankeyReportEnabled = useFeatureFlag('sankeyReport');
 
@@ -53,6 +55,12 @@ export function ReportRouter() {
       <Route path="/calendar/:id" element={<Calendar />} />
       <Route path="/formula" element={<Formula />} />
       <Route path="/formula/:id" element={<Formula />} />
+      {balanceForecastReportEnabled && (
+        <>
+          <Route path="/forecast" element={<BalanceForecast />} />
+          <Route path="/forecast/:id" element={<BalanceForecast />} />
+        </>
+      )}
       {sankeyReportEnabled && (
         <>
           <Route path="/sankey" element={<Sankey />} />
