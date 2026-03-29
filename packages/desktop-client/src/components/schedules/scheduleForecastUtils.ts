@@ -73,27 +73,41 @@ export function buildForecast(
       );
 
       while (cursor <= windowEndDay) {
+        // getNextDate with noSkipWeekend=true so we get the raw (unshifted)
+        // schedule date — used purely to advance the cursor reliably.
+        const nextDateRaw = getNextDate(conds.date, cursor, true);
+        if (!nextDateRaw) break;
+
+        const nextDayRaw = d.startOfDay(monthUtils._parse(nextDateRaw));
+        if (nextDayRaw > windowEndDay) break;
+
+        // Get the actual (possibly weekend-adjusted) date for display/bucketing.
         const nextDate = getNextDate(conds.date, cursor);
         if (!nextDate) break;
 
         const nextDay = d.startOfDay(monthUtils._parse(nextDate));
-        if (nextDay > windowEndDay) break;
 
-        const occMonth = monthUtils.monthFromDate(nextDate);
+        // Only bucket if the adjusted date is still within the window.
+        if (nextDay <= windowEndDay) {
+          const occMonth = monthUtils.monthFromDate(nextDate);
 
-        if (buckets.has(occMonth)) {
-          buckets.get(occMonth)!.push({
-            scheduleId: schedule.id,
-            scheduleName,
-            payeeName,
-            accountId,
-            amount,
-            date: nextDate,
-          });
+          if (buckets.has(occMonth)) {
+            buckets.get(occMonth)!.push({
+              scheduleId: schedule.id,
+              scheduleName,
+              payeeName,
+              accountId,
+              amount,
+              date: nextDate,
+            });
+          }
         }
 
-        // Advance one day past this occurrence to find the next one
-        cursor = d.addDays(nextDay, 1);
+        // Always advance past the RAW occurrence date so the cursor moves
+        // forward even when weekend-skipping shifts the adjusted date backwards
+        // (e.g. 30th on Saturday → Friday 29th). Without this, cursor would
+        // land on the 30th again next iteration and loop forever.
+        cursor = d.addDays(nextDayRaw, 1);
       }
     } else {
       // Single (non-recurring) date
