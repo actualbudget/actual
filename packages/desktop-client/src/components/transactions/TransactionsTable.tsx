@@ -1321,10 +1321,12 @@ const Transaction = memo(function Transaction({
           triggerRef={triggerRef}
           placement="bottom start"
           isOpen={menuOpen}
-          onOpenChange={() => setMenuOpen(false)}
+          onOpenChange={isOpen => {
+            if (!isOpen) setMenuOpen(false);
+          }}
           {...position}
           style={{ width: 200, margin: 1 }}
-          isNonModal
+          isNonModal={false}
         >
           <TransactionMenu
             transaction={transaction}
@@ -2881,11 +2883,13 @@ export const TransactionTable = forwardRef(
 
     useEffect(() => {
       if (savePending.current && afterSaveFunc.current) {
-        afterSaveFunc.current();
+        const func = afterSaveFunc.current;
         afterSaveFunc.current = null;
+        savePending.current = false;
+        func();
+      } else {
+        savePending.current = false;
       }
-
-      savePending.current = false;
     }, [newTransactions, props, props.transactions]);
 
     function getFieldsNewTransaction(item?: TransactionEntity) {
@@ -3022,11 +3026,13 @@ export const TransactionTable = forwardRef(
     }
 
     const onAddTemporary = useCallback(() => {
-      shouldAdd.current = true;
-      // A little hacky - this forces a rerender which will cause the
-      // effect we want to run. We have to wait for all updates to be
-      // committed (the input could still be saving a value).
-      forceRerender({});
+      afterSave(() => {
+        shouldAdd.current = true;
+        // A little hacky - this forces a rerender which will cause the
+        // effect we want to run. We have to wait for all updates to be
+        // committed (the input could still be saving a value).
+        forceRerender({});
+      });
     }, []);
 
     const onAddAndCloseTemporary = useCallback(() => {

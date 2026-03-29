@@ -638,7 +638,11 @@ app.events.on('sync', ({ type }) => {
     if (lastScheduleRun !== currentDay()) {
       void runMutator(() => advanceSchedulesService(type === 'success'));
 
-      void prefs.savePrefs({ lastScheduleRun: currentDay() });
+      // Only mark the day as done when sync succeeded, so that
+      // schedule auto-posting is retried on subsequent successful syncs
+      if (type === 'success') {
+        void prefs.savePrefs({ lastScheduleRun: currentDay() });
+      }
     }
   }
 });

@@ -37,6 +37,7 @@ import {
   AutocompleteFooter,
   defaultFilterSuggestion,
 } from './Autocomplete';
+import { rankAutocompleteMatch } from './autocompleteRanking';
 import { ItemHeader } from './ItemHeader';
 
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
@@ -343,14 +344,10 @@ function PayeeList({
 }
 
 function customSort(obj: PayeeAutocompleteItem, value: string): number {
-  const name = getNormalisedString(obj.name);
   if (obj.id === 'new') {
-    return -2;
+    return -5;
   }
-  if (name.includes(value)) {
-    return -1;
-  }
-  return 1;
+  return rankAutocompleteMatch(obj.name, value);
 }
 
 export type PayeeAutocompleteProps = ComponentProps<

@@ -76,7 +76,7 @@ export function showActivity({
     },
     !(
       ['netAssets', 'netDebts'].includes(balanceTypeOp) ||
-      (balanceTypeOp === 'totalTotals' &&
+      (['totalTotals', 'totalBudgeted'].includes(balanceTypeOp) &&
         (type === 'totals' || type === 'time'))
     ) && {
       field: 'amount',
@@ -104,10 +104,10 @@ export function showActivity({
       },
   ].filter(f => f);
 
-  void navigate('/accounts', {
-    state: {
-      goBack: true,
-      filterConditions,
-    },
+  void navigate(balanceTypeOp === 'totalBudgeted' ? '/budget' : '/accounts', {
+    state:
+      balanceTypeOp === 'totalBudgeted'
+        ? { goBack: true }
+        : { goBack: true, filterConditions },
   });
 }

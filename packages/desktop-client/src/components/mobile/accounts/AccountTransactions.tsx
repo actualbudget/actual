@@ -54,17 +54,26 @@ function TransactionListWithPreviews({
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const baseTransactionsQuery = useCallback(
-    () =>
-      queries.transactions(account.id).options({ splits: 'all' }).select('*'),
-    [account.id],
-  );
-
   const [showRunningBalances] = useSyncedPref(`show-balances-${account.id}`);
   const [hideReconciled] = useSyncedPref(`hide-reconciled-${account.id}`);
+
+  const baseTransactionsQuery = useCallback(() => {
+    let query = queries
+      .transactions(account.id)
+      .options({ splits: 'all' })
+      .select('*');
+    if (hideReconciled === 'true') {
+      query = query.filter({ reconciled: { $eq: false } });
+    }
+    return query;
+  }, [account.id, hideReconciled]);
   const [transactionsQuery, setTransactionsQuery] = useState<Query>(
     baseTransactionsQuery(),
   );
+
+  useEffect(() => {
+    setTransactionsQuery(baseTransactionsQuery());
+  }, [baseTransactionsQuery]);
 
   const { isSearching, search: onSearch } = useTransactionsSearch({
     updateQuery: setTransactionsQuery,
@@ -191,14 +200,10 @@ function TransactionListWithPreviews({
     [account],
   );
 
-  const baseTransactions = !isSearching
+  const transactionsToDisplay = !isSearching
     ? // Do not render child transactions in the list, unless searching
       previewTransactions.concat(transactions.filter(t => !t.is_child))
     : transactions;
-  const transactionsToDisplay =
-    hideReconciled === 'true'
-      ? baseTransactions.filter(t => !t.reconciled)
-      : baseTransactions;
 
   return (
     <TransactionListWithBalances

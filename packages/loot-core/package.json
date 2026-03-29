@@ -88,7 +88,7 @@
     "csv-parse": "^6.1.0",
     "csv-stringify": "^6.6.0",
     "date-fns": "^4.1.0",
-    "handlebars": "^4.7.8",
+    "handlebars": "^4.7.9",
     "lru-cache": "^11.2.6",
     "md5": "^2.3.0",
     "memoize-one": "^6.0.0",
