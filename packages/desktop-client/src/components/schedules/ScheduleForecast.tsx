@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Select } from '@actual-app/components/select';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import * as d from 'date-fns';
 import {
   Bar,
   CartesianGrid,
@@ -29,9 +30,9 @@ import { FinancialText } from '@desktop-client/components/FinancialText';
 import { Page } from '@desktop-client/components/Page';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import type { FormatType } from '@desktop-client/hooks/useFormat';
-import { usePayeesById } from '@desktop-client/hooks/usePayees';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import {
@@ -39,10 +40,88 @@ import {
   onBudgetAccountBalance,
 } from '@desktop-client/spreadsheet/bindings';
 
-const MONTH_OPTIONS = [3, 6, 12] as const;
+const MONTH_OPTIONS = [1, 3, 6, 12] as const;
 type MonthOption = (typeof MONTH_OPTIONS)[number];
 
+type AccountScope = 'all' | 'onbudget' | 'offbudget';
+
+type Granularity = 'day' | 'week' | 'month' | 'year';
+
 const schedulesQuery = q('schedules').select('*');
+
+type ChartRow = {
+  name: string;
+  income: number;
+  expenses: number;
+  balance: number;
+};
+
+function getBucketKey(date: string, granularity: Granularity): string {
+  if (granularity === 'day') return date;
+  if (granularity === 'year') return date.slice(0, 4);
+  // week: use ISO week start date as a sortable key
+  const weekStart = d.startOfISOWeek(d.parseISO(date));
+  return d.format(weekStart, 'yyyy-MM-dd');
+}
+
+function getBucketLabel(date: string, granularity: Granularity): string {
+  if (granularity === 'day') return d.format(d.parseISO(date), 'd MMM');
+  if (granularity === 'year') return date.slice(0, 4);
+  // week
+  const weekStart = d.startOfISOWeek(d.parseISO(date));
+  return d.format(weekStart, "'W'w MMM yy");
+}
+
+function buildChartData(
+  forecastData: ForecastMonth[],
+  granularity: Granularity,
+  startingBalance: number,
+): ChartRow[] {
+  if (granularity === 'month') {
+    return forecastData.map(m => ({
+      name: monthUtils.format(monthUtils.firstDayOfMonth(m.month), 'MMM yy'),
+      income: m.projectedIncome / 100,
+      expenses: m.projectedExpenses / 100,
+      balance: m.runningBalance / 100,
+    }));
+  }
+
+  const allOccs: ForecastOccurrence[] = forecastData.flatMap(
+    m => m.scheduleOccurrences,
+  );
+
+  const buckets = new Map<
+    string,
+    { label: string; income: number; expenses: number }
+  >();
+
+  for (const occ of allOccs) {
+    const key = getBucketKey(occ.date, granularity);
+    const label = getBucketLabel(occ.date, granularity);
+    if (!buckets.has(key)) {
+      buckets.set(key, { label, income: 0, expenses: 0 });
+    }
+    const b = buckets.get(key)!;
+    if (occ.amount >= 0) {
+      b.income += occ.amount;
+    } else {
+      b.expenses += Math.abs(occ.amount);
+    }
+  }
+
+  const sorted = [...buckets.entries()].sort(([a], [b]) => a.localeCompare(b));
+
+  let running = startingBalance;
+  return sorted.map(([, b]) => {
+    running += b.income - b.expenses;
+    return {
+      name: b.label,
+      income: b.income / 100,
+      expenses: b.expenses / 100,
+      balance: running / 100,
+    };
+  });
+}
 
 type ForecastTooltipProps = {
   active?: boolean;
@@ -142,13 +221,7 @@ function SummaryCard({
   );
 }
 
-function MonthRow({
-  data,
-  payeesById,
-}: {
-  data: ForecastMonth;
-  payeesById: Record<string, { name: string }>;
-}) {
+function MonthRow({ data }: { data: ForecastMonth }) {
   const { t } = useTranslation();
   const format = useFormat();
   const [expanded, setExpanded] = useState(false);
@@ -225,61 +298,88 @@ function MonthRow({
       </View>
 
       {expanded &&
-        data.scheduleOccurrences.map((occ: ForecastOccurrence, idx: number) => {
-          const payee = payeesById[occ.payeeName];
-          const displayName =
-            payee?.name ?? occ.payeeName ?? t('Unknown payee');
-          return (
-            <View
-              key={`${occ.scheduleId}-${idx}`}
+        data.scheduleOccurrences.map((occ: ForecastOccurrence, idx: number) => (
+          <View
+            key={`${occ.scheduleId}-${idx}`}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              padding: '6px 12px 6px 36px',
+              borderBottom: `1px solid ${theme.tableBorder}`,
+              backgroundColor: theme.tableRowBackgroundHover,
+              gap: 8,
+            }}
+          >
+            {/* Name */}
+            <span
               style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                padding: '6px 12px 6px 36px',
-                borderBottom: `1px solid ${theme.tableBorder}`,
-                backgroundColor: theme.tableRowBackgroundHover,
-                gap: 8,
+                width: 130,
+                fontSize: 13,
+                color: theme.tableTextLight,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
               }}
             >
-              <span
+              {occ.scheduleName || t('—')}
+            </span>
+            {/* Payee */}
+            <span
+              style={{
+                flex: 1,
+                fontSize: 13,
+                color: theme.tableTextLight,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <DisplayId type="payees" id={occ.payeeName} />
+            </span>
+            {/* Account */}
+            <span
+              style={{
+                width: 130,
+                fontSize: 13,
+                color: theme.tableTextLight,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <DisplayId type="accounts" id={occ.accountId} />
+            </span>
+            {/* Date */}
+            <span
+              style={{
+                fontSize: 12,
+                color: theme.tableTextLight,
+                width: 95,
+                textAlign: 'right',
+              }}
+            >
+              {occ.date}
+            </span>
+            {/* Amount */}
+            <PrivacyFilter>
+              <FinancialText
                 style={{
-                  flex: 1,
-                  fontSize: 13,
-                  color: theme.tableTextLight,
-                }}
-              >
-                {displayName}
-              </span>
-              <span
-                style={{
-                  fontSize: 12,
-                  color: theme.tableTextLight,
-                  width: 95,
+                  width: 110,
                   textAlign: 'right',
+                  fontSize: 13,
+                  color:
+                    occ.amount >= 0
+                      ? theme.reportsNumberPositive
+                      : theme.reportsNumberNegative,
                 }}
               >
-                {occ.date}
-              </span>
-              <PrivacyFilter>
-                <FinancialText
-                  style={{
-                    width: 110,
-                    textAlign: 'right',
-                    fontSize: 13,
-                    color:
-                      occ.amount >= 0
-                        ? theme.reportsNumberPositive
-                        : theme.reportsNumberNegative,
-                  }}
-                >
-                  {format(occ.amount, 'financial')}
-                </FinancialText>
-              </PrivacyFilter>
-              <span style={{ width: 110 }} />
-              <span style={{ width: 120 }} />
-            </View>
-          );
-        })}
+                {format(occ.amount, 'financial')}
+              </FinancialText>
+            </PrivacyFilter>
+            <span style={{ width: 110 }} />
+            <span style={{ width: 120 }} />
+          </View>
+        ))}
     </>
   );
 }
@@ -288,8 +388,9 @@ export function ScheduleForecast() {
   const { t } = useTranslation();
   const format = useFormat();
   const [monthCount, setMonthCount] = useState<MonthOption>(6);
+  const [accountScope, setAccountScope] = useState<AccountScope>('all');
+  const [granularity, setGranularity] = useState<Granularity>('month');
 
-  const { data: payeesById = {} } = usePayeesById();
   const { isLoading, schedules = [] } = useSchedules({ query: schedulesQuery });
 
   const onBudgetBalance =
@@ -300,7 +401,12 @@ export function ScheduleForecast() {
     useSheetValue<'account', 'offbudget-accounts-balance'>(
       offBudgetAccountBalance(),
     ) ?? 0;
-  const startingBalance = onBudgetBalance + offBudgetBalance;
+  const startingBalance =
+    accountScope === 'onbudget'
+      ? onBudgetBalance
+      : accountScope === 'offbudget'
+        ? offBudgetBalance
+        : onBudgetBalance + offBudgetBalance;
 
   const forecastData: ForecastMonth[] = isLoading
     ? []
@@ -317,33 +423,57 @@ export function ScheduleForecast() {
       ? forecastData[forecastData.length - 1].runningBalance
       : startingBalance;
 
-  const chartData = forecastData.map(m => ({
-    name: monthUtils.format(monthUtils.firstDayOfMonth(m.month), 'MMM yy'),
-    income: m.projectedIncome / 100,
-    expenses: m.projectedExpenses / 100,
-    balance: m.runningBalance / 100,
-  }));
+  const chartData = buildChartData(forecastData, granularity, startingBalance);
 
   return (
-    <Page header={t('Forecast')}>
-      {isLoading ? (
-        <LoadingIndicator message={t('Loading forecast...')} />
-      ) : (
-        <View style={{ gap: 20 }}>
-          {/* Month selector */}
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-            }}
-          >
+    <Page
+      header={
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginLeft: 20,
+            marginRight: 20,
+            marginBottom: 10,
+          }}
+        >
+          <View style={{ fontSize: 25, fontWeight: 500 }}>
+            <Trans>Forecast</Trans>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Select<AccountScope>
+              value={accountScope}
+              onChange={v => setAccountScope(v)}
+              options={[
+                ['all', t('All accounts')],
+                ['onbudget', t('On budget')],
+                ['offbudget', t('Off budget')],
+              ]}
+            />
+            <Select<Granularity>
+              value={granularity}
+              onChange={v => setGranularity(v)}
+              options={[
+                ['day', t('Day')],
+                ['week', t('Week')],
+                ['month', t('Month')],
+                ['year', t('Year')],
+              ]}
+            />
             <Select<MonthOption>
               value={monthCount}
               onChange={v => setMonthCount(v)}
               options={MONTH_OPTIONS.map(n => [n, t('{{n}} months', { n })])}
             />
           </View>
+        </View>
+      }
+    >
+      {isLoading ? (
+        <LoadingIndicator message={t('Loading forecast...')} />
+      ) : (
+        <View style={{ gap: 20 }}>
           <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
             <SummaryCard label={t('Current Balance')} value={startingBalance} />
             <SummaryCard
@@ -509,11 +639,7 @@ export function ScheduleForecast() {
             </View>
 
             {forecastData.map(monthData => (
-              <MonthRow
-                key={monthData.month}
-                data={monthData}
-                payeesById={payeesById}
-              />
+              <MonthRow key={monthData.month} data={monthData} />
             ))}
 
             {forecastData.length === 0 && (

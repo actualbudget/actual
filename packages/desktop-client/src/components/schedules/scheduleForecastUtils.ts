@@ -11,7 +11,9 @@ import type { ScheduleEntity } from 'loot-core/types/models';
 
 export type ForecastOccurrence = {
   scheduleId: string;
+  scheduleName: string;
   payeeName: string;
+  accountId: string;
   amount: number;
   date: string;
 };
@@ -52,6 +54,8 @@ export function buildForecast(
     const amount = getScheduledAmount(schedule._amount);
     // _payee is the payee ID; display name resolved in the UI layer.
     const payeeName = schedule._payee ?? '';
+    const accountId = schedule._account ?? '';
+    const scheduleName = schedule.name ?? '';
     const conds = extractScheduleConds(schedule._conditions ?? []);
 
     if (!conds.date) {
@@ -80,7 +84,9 @@ export function buildForecast(
         if (buckets.has(occMonth)) {
           buckets.get(occMonth)!.push({
             scheduleId: schedule.id,
+            scheduleName,
             payeeName,
+            accountId,
             amount,
             date: nextDate,
           });
@@ -102,7 +108,9 @@ export function buildForecast(
       if (buckets.has(occMonth)) {
         buckets.get(occMonth)!.push({
           scheduleId: schedule.id,
+          scheduleName,
           payeeName,
+          accountId,
           amount,
           date: effectiveDate,
         });
