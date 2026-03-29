@@ -22,6 +22,7 @@ import { Reports } from './reports';
 import { LoadingIndicator } from './reports/LoadingIndicator';
 import { NarrowAlternate, WideComponent } from './responsive';
 import { UserDirectoryPage } from './responsive/wide';
+import { ScheduleForecast } from './schedules/ScheduleForecast';
 import { useMultiuserEnabled } from './ServerContext';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
@@ -266,6 +267,7 @@ export function FinancesApp() {
                   path="/schedules"
                   element={<NarrowAlternate name="Schedules" />}
                 />
+                <Route path="/forecast" element={<ScheduleForecast />} />
                 <Route
                   path="/schedules/:id"
                   element={
