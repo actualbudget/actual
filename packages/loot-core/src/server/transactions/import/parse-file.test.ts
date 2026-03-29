@@ -221,4 +221,30 @@ describe('File import', () => {
     expect(errors.length).toBe(0);
     expect(await getTransactions('one')).toMatchSnapshot();
   });
+
+  test('qif import preserves categories from L lines', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/data-with-categories.qif',
+    );
+    expect(errors.length).toBe(0);
+    expect(transactions).toBeTruthy();
+    // oxlint-disable-next-line typescript/no-explicit-any
+    const txns = transactions as Array<Record<string, unknown>>;
+    expect(txns[0].category).toBe('Usual Expenses:Shopping');
+    expect(txns[1].category).toBe('Groceries');
+    expect(txns[2].category).toBe('Food');
+  });
+
+  test('qif import handles missing category gracefully', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/data.qif',
+      { importNotes: true },
+    );
+    expect(errors.length).toBe(0);
+    expect(transactions).toBeTruthy();
+    // oxlint-disable-next-line typescript/no-explicit-any
+    const txns = transactions as Array<Record<string, unknown>>;
+    // Existing data.qif has no L lines - category should be null
+    expect(txns.every(t => t.category === null)).toBe(true);
+  });
 });
