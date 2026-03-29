@@ -651,57 +651,59 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
             >
               {!isNarrowWidth ? (
                 <SplitsExpandedProvider initialMode="collapse">
-                  <TransactionList
-                    tableRef={table}
-                    account={undefined}
-                    transactions={transactionsGrouped}
-                    allTransactions={allTransactions}
-                    loadMoreTransactions={loadMoreTransactions}
-                    accounts={accounts}
-                    category={undefined}
-                    categoryGroups={categoryGroups}
-                    payees={payees}
-                    balances={null}
-                    showBalances={false}
-                    showReconciled
-                    showCleared={false}
-                    showAccount
-                    isAdding={false}
-                    isNew={() => false}
-                    isMatched={() => false}
-                    dateFormat={dateFormat}
-                    hideFraction={false}
-                    renderEmpty={() => (
-                      <View
-                        style={{
-                          color: theme.tableText,
-                          marginTop: 20,
-                          textAlign: 'center',
-                          fontStyle: 'italic',
-                        }}
-                      >
-                        <Trans>No transactions</Trans>
-                      </View>
-                    )}
-                    onSort={onSort}
-                    sortField={sortField}
-                    ascDesc={ascDesc}
-                    onChange={() => {}}
-                    onRefetch={() => setDirty(true)}
-                    onCloseAddTransaction={() => {}}
-                    onCreatePayee={async () => null}
-                    onApplyFilter={() => {}}
-                    onBatchDelete={() => {}}
-                    onBatchDuplicate={() => {}}
-                    onBatchLinkSchedule={() => {}}
-                    onBatchUnlinkSchedule={() => {}}
-                    onCreateRule={() => {}}
-                    onScheduleAction={() => {}}
-                    onMakeAsNonSplitTransactions={() => {}}
-                    showSelection={false}
-                    allowSplitTransaction={false}
-                    allowReorder={false}
-                  />
+                  <DisplayPayeeProvider transactions={allTransactions}>
+                    <TransactionList
+                      tableRef={table}
+                      account={undefined}
+                      transactions={transactionsGrouped}
+                      allTransactions={allTransactions}
+                      loadMoreTransactions={loadMoreTransactions}
+                      accounts={accounts}
+                      category={undefined}
+                      categoryGroups={categoryGroups}
+                      payees={payees}
+                      balances={null}
+                      showBalances={false}
+                      showReconciled
+                      showCleared={false}
+                      showAccount
+                      isAdding={false}
+                      isNew={() => false}
+                      isMatched={() => false}
+                      dateFormat={dateFormat}
+                      hideFraction={false}
+                      renderEmpty={() => (
+                        <View
+                          style={{
+                            color: theme.tableText,
+                            marginTop: 20,
+                            textAlign: 'center',
+                            fontStyle: 'italic',
+                          }}
+                        >
+                          <Trans>No transactions</Trans>
+                        </View>
+                      )}
+                      onSort={onSort}
+                      sortField={sortField}
+                      ascDesc={ascDesc}
+                      onChange={() => {}}
+                      onRefetch={() => setDirty(true)}
+                      onCloseAddTransaction={() => {}}
+                      onCreatePayee={async () => null}
+                      onApplyFilter={() => {}}
+                      onBatchDelete={() => {}}
+                      onBatchDuplicate={() => {}}
+                      onBatchLinkSchedule={() => {}}
+                      onBatchUnlinkSchedule={() => {}}
+                      onCreateRule={() => {}}
+                      onScheduleAction={() => {}}
+                      onMakeAsNonSplitTransactions={() => {}}
+                      showSelection={false}
+                      allowSplitTransaction={false}
+                      allowReorder={false}
+                    />
+                  </DisplayPayeeProvider>
                 </SplitsExpandedProvider>
               ) : (
                 <animated.div
