@@ -510,6 +510,36 @@ describe('Transaction rules', () => {
     // todo: isapprox
   });
 
+  test('transactions can be queried by hasTags when tag starts with dollar', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+    const payeeId = await db.insertPayee({ name: 'payee' });
+
+    await db.insertTransaction({
+      id: '1',
+      date: '2020-10-01',
+      account,
+      payee: payeeId,
+      notes: 'Follow up #$Bug_Test issue',
+      amount: 123,
+    });
+
+    await db.insertTransaction({
+      id: '2',
+      date: '2020-10-01',
+      account,
+      payee: payeeId,
+      notes: 'Follow up #Tag_1 issue',
+      amount: 123,
+    });
+
+    const transactions = await getMatchingTransactions([
+      { field: 'notes', op: 'hasTags', value: '#$Bug_Test' },
+    ]);
+
+    expect(transactions.map(t => t.id)).toEqual(['1']);
+  });
+
   test('and sub expression builds $and condition', async () => {
     const conds = [{ field: 'category', op: 'is', value: null }];
     const { filters } = conditionsToAQL(conds);

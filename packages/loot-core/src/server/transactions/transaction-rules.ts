@@ -601,18 +601,21 @@ export function conditionsToAQL(
 
       case 'hasTags':
         const tagValues = [];
+        const seenTags = new Set();
         for (const [_, tag] of value.matchAll(/(?<!#)(#[^#\s]+)/g)) {
-          if (!tagValues.find(t => t.tag === tag)) {
+          if (!seenTags.has(tag)) {
+            seenTags.add(tag);
             tagValues.push(tag);
           }
         }
 
         return {
           $and: tagValues.map(v => {
-            const regex = new RegExp(
-              `(?<!#)${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
-            );
-            return apply(field, '$regexp', regex.source);
+            const escapedTag = v
+              .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+              .replace(/\\\$/g, '[$]');
+            const pattern = `(?<!#)${escapedTag}([\\s#]|$)`;
+            return apply(field, '$regexp', pattern);
           }),
         };
 
