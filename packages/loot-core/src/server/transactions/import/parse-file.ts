@@ -51,6 +51,7 @@ type StructuredTransaction = {
   payee_name: string;
   imported_payee: string;
   notes: string;
+  category?: string;
 };
 
 // CSV files return raw data that are not guaranteed to be StructuredTransactions
@@ -183,6 +184,11 @@ async function parseQIF(
         const memoSource = swap ? trans.payee : trans.memo;
         const fallbackUsed = !payeeSource && swap;
 
+        const importedCategory =
+          trans.category && trans.subcategory
+            ? `${trans.category}:${trans.subcategory}`
+            : trans.category || trans.subcategory || null;
+
         return {
           amount:
             trans.amount != null ? looselyParseAmount(trans.amount) : null,
@@ -191,6 +197,7 @@ async function parseQIF(
           imported_payee: payeeSource || (fallbackUsed ? memoSource : null),
           notes:
             options.importNotes && !fallbackUsed ? memoSource || null : null,
+          category: importedCategory,
         };
       })
       .filter(trans => trans.date != null && trans.amount != null),
