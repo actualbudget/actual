@@ -15,7 +15,7 @@ If you have any unused payees, they are readily available by clicking on the _Sh
 Select the payees you want to merge or delete and choose the corresponding function in
 the dropdown seen inside the red box.
 
-If you need to undo a merge or a delete operation, you can press <Key mod="ctrl" fixed k="k" /> on a
-Windows machine, or <Key mod="cmd" fixed k="k" /> on a Mac.
+If you need to undo a merge or a delete operation, you can press <Key mod="ctrl" fixed k="Z" /> on a
+Windows machine, or <Key mod="cmd" fixed k="Z" /> on a Mac.
 
 ![](/img/a-tour-of-actual/tour-payees-delete-merge.webp)
