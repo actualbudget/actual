@@ -1,7 +1,6 @@
 # The Budget
 
-This view lets you manage your budget for various months. You'll find more information about how to do budgeting with Actual
-in the [Budgeting](/docs/budgeting/) part of this manual.
+This view lets you manage your budget for various months. You'll find more information about how to do budgeting with Actual in the [Budgeting](/docs/budgeting/) part of this manual.
 
 ![](/img/a-tour-of-actual/tour-budget-overview.webp)
 
@@ -19,8 +18,7 @@ Based on this, you can then choose which months to show:
 
 At the top of each month, you have a couple of choices in the user interface.
 
-- Clicking on the note icon lets you add a note. Actual fully supports Markdown and the note will be
-  rendered according to your Markdown when the cursor is hovering over the note
+- Clicking on the note icon lets you add a note. Actual fully supports Markdown and the note will be rendered according to your Markdown when the cursor is hovering over the note
 - You can minimize the header by clicking on the chevrons (seen in the yellow box).
 - Clicking on the three vertical dots lets you execute the following functions on that month's budget categories:
   - Copy last month's budget.
@@ -49,8 +47,7 @@ Clicking on the three vertical dots (in the yellow box) allows you to toggle hid
 
 When you hover over a category group (outlined by the green box), you can add a new category to the group by clicking the + icon or add a note by clicking the note icon. All notes on the Budget page support full Markdown. The dropdown will allow you to toggle between hide or show the _category group_, rename or delete the group.
 
-Let's look at a category (as seen in the purple box). Categories have the same functionality as groups: hide, rename and delete. And, of course, you
-can also add a note here, with information specific to the category.
+Categories (as seen in the purple box) have the same functionality as groups: hide, rename and delete. You can also add a note here, with information specific to the category.
 
 ![](/img/a-tour-of-actual/tour-budget-details.webp)
 
