@@ -49,7 +49,7 @@ Clicking on the three vertical dots (in the yellow box) allows you to toggle hid
 
 When you hover over a category group (outlined by the green box), you can add a new category to the group by clicking the + icon or add a note by clicking the note icon. All notes on the Budget page support full Markdown. The dropdown will allow you to toggle between hide or show the _category group_, rename or delete the group.
 
-Let's look at a category (as seen in the purple box). Categories have the same functionality groups: hide, rename and delete. And, of course, you
+Let's look at a category (as seen in the purple box). Categories have the same functionality as groups: hide, rename and delete. And, of course, you
 can also add a note here, with information specific to the category.
 
 ![](/img/a-tour-of-actual/tour-budget-details.webp)
