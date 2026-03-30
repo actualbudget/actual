@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { ComponentProps, CSSProperties, ReactNode } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { SvgDownAndRightArrow } from '@actual-app/components/icons/v2';
 import { SpaceBetween } from '@actual-app/components/space-between';
@@ -146,7 +146,7 @@ function CategoryDisplay({ resolved, t }: CategoryDisplayProps): ReactNode {
   if (isNewCategory) {
     return (
       <span style={{ fontStyle: 'italic', color: theme.pageTextSubdued }}>
-        {categoryName} ({t('new')})
+        {categoryName} ({<Trans>New</Trans>})
       </span>
     );
   }
@@ -241,7 +241,7 @@ export function Transaction({
     categoryResolved === null
       ? undefined
       : categoryResolved.isNewCategory
-        ? `${categoryResolved.categoryName} (${t('new')})`
+        ? `${categoryResolved.categoryName} (${t('New')})`
         : categoryResolved.categoryName;
 
   return (

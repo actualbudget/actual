@@ -109,7 +109,7 @@ function GroupSelector({
 
 type ImportCategoriesModalProps = {
   newCategories: string[];
-  onConfirm: (mappings: NewCategoryMapping[]) => void;
+  onConfirm: (mappings: NewCategoryMapping[]) => void | Promise<void>;
   onCancel: () => void;
 };
 
@@ -130,6 +130,8 @@ export function ImportCategoriesModal({
 
   const defaultGroupId =
     categoryGroups.find(g => !g.is_income && !g.hidden)?.id || null;
+
+  const [isConfirmLoading, setIsConfirmLoading] = useState(false);
 
   const [mappings, setMappings] = useState<Map<string, NewCategoryMapping>>(
     () => {
@@ -181,7 +183,7 @@ export function ImportCategoriesModal({
         existingCategoryId: categoryId,
         finalName: categoryId
           ? categories.find(c => c.id === categoryId)?.name || mapping.finalName
-          : mapping.finalName,
+          : mapping.originalName,
       });
       return newMappings;
     });
@@ -238,9 +240,16 @@ export function ImportCategoriesModal({
     });
   }
 
-  function handleConfirm() {
-    onConfirm(Array.from(mappings.values()));
-    dispatch(popModal());
+  async function handleConfirm() {
+    setIsConfirmLoading(true);
+    try {
+      await onConfirm(Array.from(mappings.values()));
+      dispatch(popModal());
+    } catch {
+      // Keep the modal open if confirmation fails.
+    } finally {
+      setIsConfirmLoading(false);
+    }
   }
 
   function handleCancel() {
@@ -364,7 +373,11 @@ export function ImportCategoriesModal({
             <Button onPress={handleCancel}>
               <Trans>Cancel</Trans>
             </Button>
-            <ButtonWithLoading variant="primary" onPress={handleConfirm}>
+            <ButtonWithLoading
+              variant="primary"
+              isLoading={isConfirmLoading}
+              onPress={handleConfirm}
+            >
               <Trans>Continue Import</Trans>
             </ButtonWithLoading>
           </View>
