@@ -45,6 +45,10 @@ function execSplitActions(actions: Action[], transaction) {
     }
     newTransactions[splitTransactionIndex].parent_amount = transaction.amount;
     newTransactions[splitTransactionIndex].balance = transaction.balance;
+    if (transaction._balanceOfPrefetched) {
+      newTransactions[splitTransactionIndex]._balanceOfPrefetched =
+        transaction._balanceOfPrefetched;
+    }
     action.exec(newTransactions[splitTransactionIndex]);
   });
 

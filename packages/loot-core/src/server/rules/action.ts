@@ -10,6 +10,7 @@ import { currentDay, format, parseDate } from '../../shared/months';
 import { FIELD_TYPES } from '../../shared/rules';
 import type { TransactionForRules } from '../transactions/transaction-rules';
 
+import { substituteBalanceOfLiterals } from './balanceOfFormula';
 import {
   CustomFunctionsPlugin,
   customFunctionsTranslations,
@@ -324,6 +325,9 @@ export class Action {
       };
 
       for (const key of Object.keys(fieldValues)) {
+        if (key === '_balanceOfPrefetched') {
+          continue;
+        }
         let cellValue: string | number | boolean;
         if (
           fieldValues[key] === undefined ||
@@ -337,8 +341,13 @@ export class Action {
         hfInstance.addNamedExpression(key, cellValue);
       }
 
+      const evaluatedFormula = substituteBalanceOfLiterals(
+        formula,
+        transaction._balanceOfPrefetched,
+      );
+
       hfInstance.setCellContents({ sheet: sheetId, col: 0, row: 0 }, [
-        [formula],
+        [evaluatedFormula],
       ]);
 
       const cellAddress = { sheet: sheetId, col: 0, row: 0 };

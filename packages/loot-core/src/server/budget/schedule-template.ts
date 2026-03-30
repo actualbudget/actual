@@ -8,10 +8,12 @@ import {
   getDateWithSkippedWeekend,
   getNextDate,
 } from '../../shared/schedules';
-import type { CategoryEntity } from '../../types/models';
+import type { CategoryEntity, TransactionEntity } from '../../types/models';
 import type { ScheduleTemplate, Template } from '../../types/models/templates';
 import * as db from '../db';
+import { collectFormulasFromActions } from '../rules/balanceOfFormula';
 import { getRuleForSchedule } from '../schedules/app';
+import { prefetchBalanceOfForTransaction } from '../transactions/transaction-rules';
 
 import { getSheetValue, isReflectBudget } from './actions';
 
@@ -74,10 +76,31 @@ async function createScheduleList(
 
     scheduleAmount = Math.round(scheduleAmount);
 
-    const { amount: postRuleAmount, subtransactions } = rule.execActions({
+    const next_date_string = getNextDate(
+      dateConditions,
+      monthUtils._parse(current_month),
+    );
+
+    const accounts = (await db.getAccounts()) ?? [];
+    const accountsMap = new Map(accounts.map(a => [a.id, a]));
+    const scheduleRuleContext: TransactionEntity = {
       amount: scheduleAmount,
       category: category.id,
       subtransactions: [],
+      ...(next_date_string ? { date: next_date_string } : {}),
+      id: null,
+      sort_order: null,
+    } as TransactionEntity;
+    const formulaStrings = collectFormulasFromActions(rule.actions);
+    const balanceOfPrefetched = await prefetchBalanceOfForTransaction(
+      scheduleRuleContext,
+      accountsMap,
+      formulaStrings,
+    );
+
+    const { amount: postRuleAmount, subtransactions } = rule.execActions({
+      ...scheduleRuleContext,
+      _balanceOfPrefetched: balanceOfPrefetched,
     });
     const categorySubtransactions = subtransactions?.filter(
       t => t.category === category.id,
@@ -91,10 +114,6 @@ async function createScheduleList(
         ? categorySubtransactions.reduce((acc, t) => acc + t.amount, 0)
         : (postRuleAmount ?? scheduleAmount));
 
-    const next_date_string = getNextDate(
-      dateConditions,
-      monthUtils._parse(current_month),
-    );
     const target_interval = dateConditions.value.interval
       ? dateConditions.value.interval
       : 1;

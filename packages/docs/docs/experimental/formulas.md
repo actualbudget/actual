@@ -290,6 +290,13 @@ Rule formulas evaluate with named variables from the transaction context, includ
   - Represents the running balance at this transaction
   - To convert to dollars: `=balance / 100`
 
+**`BALANCE_OF` function (other accounts):**
+
+- `BALANCE_OF("…")` — Running balance for another account, in **cents**, using the same cutoff as `balance` (same `date`, `sort_order`, and `id` ordering as the current transaction).
+- Pass a **quoted account id** (matches an account id in your budget) for a deterministic result, or a **quoted account name** for an exact name match. If the account name is ambiguous (duplicates), the first match is used.
+- If the account is not found, the value is **0**.
+- For the **current** transaction’s account, use the `balance` variable instead of `BALANCE_OF`.
+
 **Text variables:**
 
 - `notes` — Transaction notes/memo field (string, may be empty)
