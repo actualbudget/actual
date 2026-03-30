@@ -21,7 +21,7 @@ At the top of each month, you have a couple of choices in the user interface.
 
 - Clicking on the note icon lets you add a note. Actual fully supports Markdown and the note will be
   rendered according to your Markdown when the cursor is hovering over the note
-- You can minimize the header by clicking on the cheverons (seen in the yellow box).
+- You can minimize the header by clicking on the chevrons (seen in the yellow box).
 - Clicking on the three vertical dots lets you execute the following functions on that month's budget categories:
   - Copy last month's budget.
   - Set budgets to zero.
