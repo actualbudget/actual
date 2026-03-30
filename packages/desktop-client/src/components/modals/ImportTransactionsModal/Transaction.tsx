@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { ComponentProps, CSSProperties, ReactNode } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { SvgDownAndRightArrow } from '@actual-app/components/icons/v2';
 import { SpaceBetween } from '@actual-app/components/space-between';
@@ -146,7 +146,7 @@ function CategoryDisplay({ resolved, t }: CategoryDisplayProps): ReactNode {
   if (isNewCategory) {
     return (
       <span style={{ fontStyle: 'italic', color: theme.pageTextSubdued }}>
-        {categoryName} ({<Trans>New</Trans>})
+        {categoryName} (<Trans>New</Trans>)
       </span>
     );
   }
