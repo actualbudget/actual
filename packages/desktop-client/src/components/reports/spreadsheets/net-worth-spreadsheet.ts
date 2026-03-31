@@ -56,6 +56,27 @@ export function createSpreadsheet(
       startDate = monthUtils.firstDayOfMonth(monthUtils.prevMonth(start));
     }
 
+    // If the earliest transaction is on or after the first day of the start
+    // month, the prior period lookback would be empty (all zeros). Skip it to
+    // avoid rendering an empty data point.
+    const earliestTransaction = await send('get-earliest-transaction');
+    if (
+      earliestTransaction &&
+      earliestTransaction.date >= monthUtils.firstDayOfMonth(start)
+    ) {
+      if (interval === 'Daily') {
+        startDate = earliestTransaction.date;
+      } else if (interval === 'Weekly') {
+        startDate = monthUtils.weekFromDate(
+          earliestTransaction.date,
+          firstDayOfWeekIdx,
+        );
+      } else {
+        // Monthly or Yearly
+        startDate = monthUtils.firstDayOfMonth(start);
+      }
+    }
+
     // Start with the provided end-of-month date, then adjust for current context
     let endDate = monthUtils.lastDayOfMonth(end);
 
