@@ -33,7 +33,7 @@
     "@actual-app/web": "workspace:*",
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.6.2",
-    "convict": "^6.2.4",
+    "convict": "^6.2.5",
     "cors": "^2.8.6",
     "date-fns": "^4.1.0",
     "debug": "^4.4.3",
