@@ -81,8 +81,16 @@ async function createScheduleList(
       monthUtils._parse(current_month),
     );
 
+    // Schedule templates call rule.execActions() on the rule attached to each
+    // schedule, so we prefetch balances and pass _balanceOfPrefetched here too.
+    // Without that, BALANCE_OF would behave wrong or always look empty for
+    // schedule rules.
     const accounts = (await db.getAccounts()) ?? [];
     const accountsMap = new Map(accounts.map(a => [a.id, a]));
+
+    // Use the schedule's next occurrence date so "balance as of this moment"
+    // matches the scheduled date; id/sort_order are unset so we don't exclude a
+    // non-existent transaction from the balance query.
     const scheduleRuleContext: TransactionEntity = {
       amount: scheduleAmount,
       category: category.id,
