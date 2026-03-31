@@ -37,6 +37,8 @@ async function createScheduleList(
 ) {
   const t: Array<ScheduleTemplateTarget> = [];
   const errors: string[] = [];
+  const accounts = (await db.getAccounts()) ?? [];
+  const accountsMap = new Map(accounts.map(a => [a.id, a]));
 
   for (const template of templates) {
     const { id: sid, completed } = await db.first<
@@ -85,8 +87,7 @@ async function createScheduleList(
     // schedule, so we prefetch balances and pass _balanceOfPrefetched here too.
     // Without that, BALANCE_OF would behave wrong or always look empty for
     // schedule rules.
-    const accounts = (await db.getAccounts()) ?? [];
-    const accountsMap = new Map(accounts.map(a => [a.id, a]));
+    const formulaStrings = collectFormulasFromActions(rule.actions);
 
     // Use the schedule's next occurrence date so "balance as of this moment"
     // matches the scheduled date; id/sort_order are unset so we don't exclude a
@@ -99,7 +100,7 @@ async function createScheduleList(
       id: null,
       sort_order: null,
     } as TransactionEntity;
-    const formulaStrings = collectFormulasFromActions(rule.actions);
+
     const balanceOfPrefetched = await prefetchBalanceOfForTransaction(
       scheduleRuleContext,
       accountsMap,
