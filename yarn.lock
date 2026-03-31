@@ -12006,7 +12006,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.2.1":
+"axios@npm:1.14.0":
   version: 1.14.0
   resolution: "axios@npm:1.14.0"
   dependencies:
