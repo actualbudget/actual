@@ -77,6 +77,7 @@ type AccountProps<FieldName extends SheetFields<'account'>> = {
   onDrop?: OnDropCallback;
   titleAccount?: boolean;
   isExactPathMatch?: boolean;
+  balanceTestId?: string;
 };
 
 export function Account<FieldName extends SheetFields<'account'>>({
@@ -94,6 +95,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
   onDrop,
   titleAccount,
   isExactPathMatch,
+  balanceTestId,
 }: AccountProps<FieldName>) {
   const isTestEnv = useIsTestEnv();
   const { t } = useTranslation();
@@ -138,6 +140,8 @@ export function Account<FieldName extends SheetFields<'account'>>({
   const needsTooltip = !!account?.id && !isTouchDevice;
   const reopenAccount = useReopenAccountMutation();
   const updateAccount = useUpdateAccountMutation();
+
+  const balanceCell = <CellValue binding={query} type="financial" />;
 
   const accountRow = (
     <View
@@ -241,7 +245,13 @@ export function Account<FieldName extends SheetFields<'account'>>({
                   name
                 )
               }
-              right={<CellValue binding={query} type="financial" />}
+              right={
+                balanceTestId ? (
+                  <View data-testid={balanceTestId}>{balanceCell}</View>
+                ) : (
+                  balanceCell
+                )
+              }
             />
           </Link>
           {account && (
