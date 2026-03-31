@@ -22,8 +22,8 @@ import { runMutator } from '../mutators';
 import { postBinary } from '../post';
 import * as prefs from '../prefs';
 import { getServer } from '../server-config';
-import { resolveName } from '../spreadsheet/util';
 import * as sheet from '../sheet';
+import { resolveName } from '../spreadsheet/util';
 import * as undo from '../undo';
 
 import * as encoder from './encoder';
