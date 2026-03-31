@@ -22,6 +22,7 @@ import { runMutator } from '../mutators';
 import { postBinary } from '../post';
 import * as prefs from '../prefs';
 import { getServer } from '../server-config';
+import { resolveName } from '../spreadsheet/util';
 import * as sheet from '../sheet';
 import * as undo from '../undo';
 
@@ -277,7 +278,7 @@ export const applyMessages = sequential(async (messages: Message[]) => {
     return 0;
   });
 
-  const idsPerTable = {};
+  const idsPerTable: Record<string, string[]> = {};
   messages.forEach(msg => {
     if (msg.dataset === 'prefs') {
       return;
@@ -401,6 +402,26 @@ export const applyMessages = sequential(async (messages: Message[]) => {
     triggerBudgetChanges(oldData, newData);
     sheet.get().triggerDatabaseChanges(oldData, newData);
     sheet.endTransaction();
+
+    // Transfers insert the source row in one sync batch and the counterparty in
+    // a second. triggerDatabaseChanges should dirty aggregate query cells, but
+    // explicitly recompute global account totals so the second batch always
+    // refreshes sidebar "All accounts" / On budget / etc. (see bindings.ts).
+    if (idsPerTable.transactions?.length) {
+      const s = sheet.get();
+      const globalAggregateCells = [
+        'accounts-balance',
+        'onbudget-accounts-balance',
+        'offbudget-accounts-balance',
+        'closed-accounts-balance',
+      ] as const;
+      for (const cellName of globalAggregateCells) {
+        const fullName = resolveName('__global', cellName);
+        if (s.hasCell(fullName)) {
+          s.recompute(fullName);
+        }
+      }
+    }
 
     // Allow the cache to be used in the future. At this point it's guaranteed
     // to be up-to-date because we are done mutating any other data
