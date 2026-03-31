@@ -2,13 +2,13 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
-  SelectCell,
   Cell,
+  SelectCell,
   TableHeader,
 } from '@desktop-client/components/table';
 import {
-  useSelectedItems,
   useSelectedDispatch,
+  useSelectedItems,
 } from '@desktop-client/hooks/useSelected';
 
 export function UserDirectoryHeader() {

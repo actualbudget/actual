@@ -61,7 +61,9 @@ It is important to note that both level 1 and level 2 headings are prominently d
 
 ```markdown
 ## Level 2 Markdown Heading: Main Section Headings are used to split the document into main sections
+
 ### Level 3 Markdown Heading: Subsections Headings are used to split each section
+
 #### Level 4 Markdown Heading: Use this if you need to split the Subsection further
 ```
 

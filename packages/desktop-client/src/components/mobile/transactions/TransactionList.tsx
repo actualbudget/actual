@@ -4,15 +4,16 @@ import React, {
   useMemo,
   useRef,
   useState,
-  type CSSProperties,
 } from 'react';
+import type { CSSProperties } from 'react';
 import {
-  ListBox,
-  ListBoxSection,
-  Header,
   Collection,
-  Virtualizer,
+  Header,
+  ListBox,
+  ListBoxItem,
+  ListBoxSection,
   ListLayout,
+  Virtualizer,
 } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -20,11 +21,8 @@ import { Button } from '@actual-app/components/button';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SvgDelete } from '@actual-app/components/icons/v0';
 import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
-import {
-  Menu,
-  type MenuItem,
-  type MenuItemObject,
-} from '@actual-app/components/menu';
+import { Menu } from '@actual-app/components/menu';
+import type { MenuItem, MenuItemObject } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -34,18 +32,15 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from 'loot-core/shared/months';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
-import {
-  groupById,
-  type IntegerAmount,
-  integerToCurrency,
-} from 'loot-core/shared/util';
-import { type TransactionEntity } from 'loot-core/types/models';
+import { groupById, integerToCurrency } from 'loot-core/shared/util';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type { CategoryEntity, TransactionEntity } from 'loot-core/types/models';
 
 import { ROW_HEIGHT, TransactionListItem } from './TransactionListItem';
 
 import { FloatingActionBar } from '@desktop-client/components/mobile/FloatingActionBar';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useCategoriesById } from '@desktop-client/hooks/useCategories';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { usePayees } from '@desktop-client/hooks/usePayees';
@@ -161,14 +156,14 @@ export function TransactionList({
   );
 
   return (
-    <>
+    <View style={{ flex: 1 }}>
       {isLoading && (
         <Loading
-          style={{ paddingBottom: 8 }}
+          style={{ flex: 'none', paddingBottom: 8 }}
           aria-label={t('Loading transactions...')}
         />
       )}
-      <View style={{ flex: 1, overflow: 'auto' }}>
+      <View style={{ flex: 1 }}>
         <Virtualizer
           layout={ListLayout}
           layoutOptions={{
@@ -181,6 +176,7 @@ export function TransactionList({
             selectionMode={
               selectedTransactions.size > 0 ? 'multiple' : 'single'
             }
+            style={{ flex: 1, overflow: 'auto' }}
             selectedKeys={selectedTransactions}
             dependencies={[
               selectedTransactions,
@@ -232,14 +228,18 @@ export function TransactionList({
                   )}
                 >
                   {transaction => (
-                    <TransactionListItem
-                      key={transaction.id}
-                      showRunningBalance={showRunningBalances}
-                      runningBalance={runningBalances?.get(transaction.id)}
-                      value={transaction}
-                      onPress={trans => onTransactionPress(trans)}
-                      onLongPress={trans => onTransactionPress(trans, true)}
-                    />
+                    <ListBoxItem textValue={transaction.id} value={transaction}>
+                      {itemProps => (
+                        <TransactionListItem
+                          {...itemProps}
+                          showRunningBalance={showRunningBalances}
+                          runningBalance={runningBalances?.get(transaction.id)}
+                          transaction={transaction}
+                          onPress={trans => onTransactionPress(trans)}
+                          onLongPress={trans => onTransactionPress(trans, true)}
+                        />
+                      )}
+                    </ListBoxItem>
                   )}
                 </Collection>
               </ListBoxSection>
@@ -264,7 +264,7 @@ export function TransactionList({
           showMakeTransfer={showMakeTransfer}
         />
       )}
-    </>
+    </View>
   );
 }
 
@@ -334,14 +334,17 @@ function SelectedTransactionsFloatingActionBar({
   } = useTransactionBatchActions();
 
   const navigate = useNavigate();
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const accountsById = useMemo(() => groupById(accounts), [accounts]);
 
-  const payees = usePayees();
+  const { data: payees = [] } = usePayees();
   const payeesById = useMemo(() => groupById(payees), [payees]);
 
-  const { list: categories } = useCategories();
-  const categoriesById = useMemo(() => groupById(categories), [categories]);
+  const {
+    data: { list: categoriesById } = {
+      list: {} as Record<string, CategoryEntity>,
+    },
+  } = useCategoriesById();
 
   const dispatch = useDispatch();
   useEffect(() => {
@@ -480,7 +483,7 @@ function SelectedTransactionsFloatingActionBar({
               getItemStyle={getMenuItemStyle}
               style={{ backgroundColor: theme.floatingActionBarBackground }}
               onMenuSelect={name => {
-                onBatchEdit?.({
+                void onBatchEdit?.({
                   name,
                   ids: selectedTransactionsArray,
                   onSuccess: (ids, name, value, mode) => {
@@ -503,7 +506,7 @@ function SelectedTransactionsFloatingActionBar({
                           : integerToCurrency(Number(value));
                         break;
                       case 'notes':
-                        displayValue = `${mode} with ${value}`;
+                        displayValue = `${mode} with ${String(value)}`;
                         break;
                       default:
                         displayValue = value;
@@ -511,18 +514,18 @@ function SelectedTransactionsFloatingActionBar({
                     }
 
                     showUndoNotification({
-                      message: `Successfully updated ${name} of ${ids.length} transaction${ids.length > 1 ? 's' : ''} to [${displayValue}](#${displayValue}).`,
+                      message: `Successfully updated ${name} of ${ids.length} transaction${ids.length > 1 ? 's' : ''} to [${String(displayValue)}](#${String(displayValue)}).`,
                       messageActions: {
                         [String(displayValue)]: () => {
                           switch (name) {
                             case 'account':
-                              navigate(`/accounts/${value}`);
+                              void navigate(`/accounts/${String(value)}`);
                               break;
                             case 'category':
-                              navigate(`/categories/${value}`);
+                              void navigate(`/categories/${String(value)}`);
                               break;
                             case 'payee':
-                              navigate(`/payees`);
+                              void navigate(`/payees`);
                               break;
                             default:
                               break;
@@ -598,7 +601,7 @@ function SelectedTransactionsFloatingActionBar({
               style={{ backgroundColor: theme.floatingActionBarBackground }}
               onMenuSelect={type => {
                 if (type === 'duplicate') {
-                  onBatchDuplicate?.({
+                  void onBatchDuplicate?.({
                     ids: selectedTransactionsArray,
                     onSuccess: ids => {
                       showUndoNotification({
@@ -610,7 +613,7 @@ function SelectedTransactionsFloatingActionBar({
                     },
                   });
                 } else if (type === 'link-schedule') {
-                  onBatchLinkSchedule?.({
+                  void onBatchLinkSchedule?.({
                     ids: selectedTransactionsArray,
                     onSuccess: (ids, schedule) => {
                       // TODO: When schedule becomes available in mobile, update undo notification message
@@ -624,7 +627,7 @@ function SelectedTransactionsFloatingActionBar({
                     },
                   });
                 } else if (type === 'unlink-schedule') {
-                  onBatchUnlinkSchedule?.({
+                  void onBatchUnlinkSchedule?.({
                     ids: selectedTransactionsArray,
                     onSuccess: ids => {
                       showUndoNotification({
@@ -636,7 +639,7 @@ function SelectedTransactionsFloatingActionBar({
                     },
                   });
                 } else if (type === 'delete') {
-                  onBatchDelete?.({
+                  void onBatchDelete?.({
                     ids: selectedTransactionsArray,
                     onSuccess: ids => {
                       showUndoNotification({
@@ -649,7 +652,7 @@ function SelectedTransactionsFloatingActionBar({
                     },
                   });
                 } else if (type === 'transfer') {
-                  onSetTransfer?.(selectedTransactionsArray, payees, ids =>
+                  void onSetTransfer?.(selectedTransactionsArray, payees, ids =>
                     showUndoNotification({
                       message: t(
                         'Successfully marked {{count}} transactions as transfer.',
@@ -660,7 +663,7 @@ function SelectedTransactionsFloatingActionBar({
                     }),
                   );
                 } else if (type === 'merge') {
-                  onMerge?.(selectedTransactionsArray, () =>
+                  void onMerge?.(selectedTransactionsArray, () =>
                     showUndoNotification({
                       message: t('Successfully merged transactions'),
                     }),

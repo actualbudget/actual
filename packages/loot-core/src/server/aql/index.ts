@@ -1,11 +1,9 @@
-import { Query, type QueryState } from '../../shared/query';
+import { Query } from '../../shared/query';
+import type { QueryState } from '../../shared/query';
 
-import { type CompilerState, type SqlPieces } from './compiler';
-import {
-  type AqlQueryParams,
-  compileAndRunAqlQuery,
-  runCompiledAqlQuery,
-} from './exec';
+import type { CompilerState, SqlPieces } from './compiler';
+import { compileAndRunAqlQuery, runCompiledAqlQuery } from './exec';
+import type { AqlQueryParams } from './exec';
 import { schema, schemaConfig } from './schema';
 import { schemaExecutors } from './schema/executors';
 

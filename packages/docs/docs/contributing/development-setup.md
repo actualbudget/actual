@@ -99,6 +99,9 @@ yarn build:desktop
 # Build API package
 yarn build:api
 
+# Build CLI package
+yarn build:cli
+
 # Build sync server
 yarn build:server
 ```
@@ -118,8 +121,8 @@ yarn workspace <workspace-name> run <command>
 Examples:
 
 ```bash
-# Run tests for loot-core
-yarn workspace loot-core run test
+# Run tests for @actual-app/core
+yarn workspace @actual-app/core run test
 
 # Start the docs development server
 yarn workspace docs start
@@ -159,6 +162,9 @@ yarn build:desktop
 
 # API build
 yarn build:api
+
+# CLI build
+yarn build:cli
 
 # Sync server build
 yarn build:server

@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import { type Locale, formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
+import type { Locale } from 'date-fns';
 
 export function last<T>(arr: Array<T>) {
   return arr[arr.length - 1];
@@ -219,12 +220,15 @@ export function reapplyThousandSeparators(amountText: string) {
     return amountText;
   }
 
-  const { decimalSeparator, thousandsSeparator } = getNumberFormat();
+  const { decimalSeparator, thousandsSeparator, value } = getNumberFormat();
   const [integerPartRaw, decimalPart = ''] = amountText.split(decimalSeparator);
 
-  const numericValue = Number(
-    integerPartRaw.replaceAll(thousandsSeparator, ''),
-  );
+  // Apostrophe-dot: accept both U+2019 and keyboard U+0027 on input (see getNumberFormat formatter)
+  const stripThousands =
+    value === 'apostrophe-dot'
+      ? (s: string) => s.replaceAll(/[\u2019\u0027]/g, '')
+      : (s: string) => s.replaceAll(thousandsSeparator, '');
+  const numericValue = Number(stripThousands(integerPartRaw));
   if (isNaN(numericValue)) {
     return amountText; // Return original if parsing fails
   }
@@ -341,7 +345,7 @@ export function getNumberFormat({
       break;
     case 'apostrophe-dot':
       locale = 'de-CH';
-      thousandsSeparator = "'";
+      thousandsSeparator = '\u2019'; // Intl may return U+0027 (Node <24.13.1/ICU 77)
       decimalSeparator = '.';
       break;
     case 'comma-dot-in':
@@ -373,9 +377,14 @@ export function getNumberFormat({
   const intlFormatter = new Intl.NumberFormat(locale, fractionDigitsOptions);
 
   // Wrapper to handle -0 edge case
+  // Normalize apostrophe-dot to U+2019 for consistency across
+  // Node/ICU versions (https://github.com/nodejs/node/issues/61861)
   const formatter = {
     format: (value: number) => {
-      const formatted = intlFormatter.format(value);
+      let formatted = intlFormatter.format(value);
+      if (currentFormat === 'apostrophe-dot') {
+        formatted = formatted.replace(/'/g, '\u2019');
+      }
       return formatted === '-0' ? '0' : formatted;
     },
   };
@@ -549,6 +558,8 @@ export function looselyParseAmount(amount: string) {
     return v.replace(/[^0-9-]/g, '');
   }
 
+  amount = amount.trim();
+
   if (amount.startsWith('(') && amount.endsWith(')')) {
     // Remove Unicode minus inside parentheses before converting to ASCII minus
     amount = amount.replace(/\u2212/g, '');
@@ -602,4 +613,21 @@ export function tsToRelativeTime(
   }
 
   return distance;
+}
+
+export function applyFindReplace(
+  text: string | null | undefined,
+  find: string,
+  replace: string,
+  useRegex: boolean,
+): string {
+  if (find === '') return text ?? '';
+  if (!text) return '';
+
+  try {
+    const pattern = useRegex ? new RegExp(find, 'g') : find;
+    return text.replaceAll(pattern, replace);
+  } catch {
+    return text;
+  }
 }

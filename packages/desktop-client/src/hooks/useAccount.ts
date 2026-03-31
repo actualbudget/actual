@@ -1,8 +1,11 @@
-import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
-import { useAccounts } from './useAccounts';
+import { accountQueries } from '@desktop-client/accounts';
 
 export function useAccount(id: string) {
-  const accounts = useAccounts();
-  return useMemo(() => accounts.find(a => a.id === id), [id, accounts]);
+  const query = useQuery({
+    ...accountQueries.list(),
+    select: data => data.find(c => c.id === id),
+  });
+  return query.data;
 }

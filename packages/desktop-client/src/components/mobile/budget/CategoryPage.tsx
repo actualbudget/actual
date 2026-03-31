@@ -13,7 +13,7 @@ import { UncategorizedTransactions } from './UncategorizedTransactions';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import { AddTransactionButton } from '@desktop-client/components/mobile/transactions/AddTransactionButton';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
-import { useCategories } from '@desktop-client/hooks/useCategories';
+import { useCategory } from '@desktop-client/hooks/useCategory';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
@@ -26,8 +26,7 @@ export function CategoryPage() {
   const { id: categoryIdParam } = useParams();
   const [searchParams] = useSearchParams();
   const month = searchParams.get('month') || monthUtils.currentMonth();
-  const { list: categories } = useCategories();
-  const category = categories.find(c => c.id === categoryIdParam);
+  const { data: category } = useCategory(categoryIdParam);
 
   return (
     <Page

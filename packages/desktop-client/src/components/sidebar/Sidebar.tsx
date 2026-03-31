@@ -1,4 +1,5 @@
-import React, { type CSSProperties, useState } from 'react';
+import React, { useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';

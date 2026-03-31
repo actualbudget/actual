@@ -1,4 +1,4 @@
-import { type RecurConfig, type ScheduleEntity } from './schedule';
+import type { RecurConfig, ScheduleEntity } from './schedule';
 
 export type NewRuleEntity = {
   stage: 'pre' | null | 'post';
@@ -18,6 +18,7 @@ export type FieldValueTypes = {
   account: string;
   amount: number;
   category: string;
+  category_group: string;
   date: string | RecurConfig;
   notes: string;
   payee: string;
@@ -47,7 +48,7 @@ type BaseConditionEntity<
     month?: boolean;
     year?: boolean;
   };
-  conditionsOp?: string;
+  conditionsOp?: 'and' | 'or';
   type?: 'id' | 'boolean' | 'date' | 'number' | 'string';
   customName?: string;
   queryFilter?: Record<string, { $oneof: string[] }>;
@@ -77,6 +78,16 @@ export type RuleConditionEntity =
       | 'matches'
     >
   | BaseConditionEntity<
+      'category_group',
+      | 'is'
+      | 'isNot'
+      | 'oneOf'
+      | 'notOneOf'
+      | 'contains'
+      | 'doesNotContain'
+      | 'matches'
+    >
+  | BaseConditionEntity<
       'amount',
       'is' | 'isapprox' | 'isbetween' | 'gt' | 'gte' | 'lt' | 'lte'
     >
@@ -86,14 +97,7 @@ export type RuleConditionEntity =
     >
   | BaseConditionEntity<
       'notes',
-      | 'is'
-      | 'isNot'
-      | 'oneOf'
-      | 'notOneOf'
-      | 'contains'
-      | 'doesNotContain'
-      | 'matches'
-      | 'hasTags'
+      'is' | 'isNot' | 'contains' | 'doesNotContain' | 'matches' | 'hasTags'
     >
   | BaseConditionEntity<
       'payee',
@@ -142,10 +146,11 @@ export type SetRuleActionEntity = {
 
 export type SetSplitAmountRuleActionEntity = {
   op: 'set-split-amount';
-  value: number;
+  value: number | null;
   options?: {
     splitIndex?: number;
-    method: 'fixed-amount' | 'fixed-percent' | 'remainder';
+    method: 'fixed-amount' | 'fixed-percent' | 'formula' | 'remainder';
+    formula?: string;
   };
 };
 

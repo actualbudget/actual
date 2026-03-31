@@ -1,18 +1,20 @@
-import React, { type JSX } from 'react';
+import React from 'react';
+import type { JSX } from 'react';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
-import { type Locale } from 'date-fns';
+import type { Locale } from 'date-fns';
 import * as d from 'date-fns';
 import { t } from 'i18next';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
-import { type RuleConditionEntity } from 'loot-core/types/models';
+import type { RuleConditionEntity } from 'loot-core/types/models';
 
-import { runAll, indexCashFlow } from '@desktop-client/components/reports/util';
-import { type FormatType } from '@desktop-client/hooks/useFormat';
-import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import { FinancialText } from '@desktop-client/components/FinancialText';
+import { indexCashFlow, runAll } from '@desktop-client/components/reports/util';
+import type { FormatType } from '@desktop-client/hooks/useFormat';
+import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
 export function simpleCashFlow(
   startMonth: string,
@@ -221,25 +223,39 @@ function recalculate(
           <div style={{ lineHeight: 1.5 }}>
             <AlignedText
               left={t('Income:')}
-              right={format(income, 'financial')}
+              right={
+                <FinancialText>{format(income, 'financial')}</FinancialText>
+              }
             />
             <AlignedText
               left={t('Expenses:')}
-              right={format(expense, 'financial')}
+              right={
+                <FinancialText>{format(expense, 'financial')}</FinancialText>
+              }
             />
             <AlignedText
               left={t('Change:')}
-              right={<strong>{format(income + expense, 'financial')}</strong>}
+              right={
+                <FinancialText as="strong">
+                  {format(income + expense, 'financial')}
+                </FinancialText>
+              }
             />
             {creditTransfers + debitTransfers !== 0 && (
               <AlignedText
                 left={t('Transfers:')}
-                right={format(creditTransfers + debitTransfers, 'financial')}
+                right={
+                  <FinancialText>
+                    {format(creditTransfers + debitTransfers, 'financial')}
+                  </FinancialText>
+                }
               />
             )}
             <AlignedText
               left={t('Balance:')}
-              right={format(balance, 'financial')}
+              right={
+                <FinancialText>{format(balance, 'financial')}</FinancialText>
+              }
             />
           </div>
         </div>

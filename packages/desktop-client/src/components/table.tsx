@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import React, {
-  type FocusEvent,
   forwardRef,
   useCallback,
   useImperativeHandle,
@@ -8,25 +7,30 @@ import React, {
   useMemo,
   useRef,
   useState,
-  type ComponentProps,
-  type JSX,
-  type KeyboardEvent,
-  type ReactElement,
-  type ReactNode,
-  type Ref,
-  type RefObject,
-  type UIEvent,
 } from 'react';
-import AutoSizer from 'react-virtualized-auto-sizer';
+import type {
+  ComponentProps,
+  FocusEvent,
+  JSX,
+  KeyboardEvent,
+  ReactElement,
+  ReactNode,
+  Ref,
+  RefObject,
+  UIEvent,
+} from 'react';
+import { AutoSizer } from 'react-virtualized-auto-sizer';
 
 import { Button } from '@actual-app/components/button';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SvgDelete, SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { SvgCheckmark } from '@actual-app/components/icons/v1';
 import { Input } from '@actual-app/components/input';
-import { Menu, type MenuItem } from '@actual-app/components/menu';
+import { Menu } from '@actual-app/components/menu';
+import type { MenuItem } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
-import { type CSSProperties, styles } from '@actual-app/components/styles';
+import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -37,7 +41,8 @@ import {
   mergeConditionalPrivacyFilterProps,
 } from './PrivacyFilter';
 
-import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import type { FormatType } from '@desktop-client/hooks/useFormat';
 import { useModalState } from '@desktop-client/hooks/useModalState';
 import {
   AvoidRefocusScrollProvider,
@@ -45,11 +50,11 @@ import {
 } from '@desktop-client/hooks/useProperFocus';
 import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import {
-  type Spreadsheets,
-  type SheetFields,
-  type SheetNames,
-  type Binding,
+import type {
+  Binding,
+  SheetFields,
+  SheetNames,
+  Spreadsheets,
 } from '@desktop-client/spreadsheet';
 
 export const ROW_HEIGHT = 32;
@@ -789,7 +794,6 @@ export function TableHeader({
   return (
     <View
       style={{
-        borderRadius: '6px 6px 0 0',
         overflow: 'hidden',
         flexShrink: 0,
       }}
@@ -956,7 +960,7 @@ export const Table = forwardRef(
       contentHeader,
       loading,
       rowHeight = ROW_HEIGHT,
-      backgroundColor = theme.tableHeaderBackground,
+      backgroundColor = theme.tableBackground,
       renderItem,
       renderEmpty,
       getItemKey,
@@ -1088,6 +1092,7 @@ export const Table = forwardRef(
             ...rowStyle,
             zIndex: editing || selected ? 101 : 'auto',
             transform: 'translateY(var(--pos))',
+            backgroundColor,
           }}
           nativeStyle={{ '--pos': `${style.top - 1}px` }}
           data-focus-key={item.id}
@@ -1156,9 +1161,10 @@ export const Table = forwardRef(
         style={{
           flex: 1,
           outline: 'none',
+          overflow: 'hidden',
           ...style,
         }}
-        tabIndex={1}
+        tabIndex={0}
         {...getNavigatorProps(props)}
         data-testid="table"
       >
@@ -1177,8 +1183,8 @@ export const Table = forwardRef(
           {isEmpty ? (
             getEmptyContent(renderEmpty)
           ) : (
-            <AutoSizer>
-              {({ width, height }) => {
+            <AutoSizer
+              renderProp={({ width = 0, height = 0 }) => {
                 if (width === 0 || height === 0) {
                   return null;
                 }
@@ -1213,7 +1219,7 @@ export const Table = forwardRef(
                   </AvoidRefocusScrollProvider>
                 );
               }}
-            </AutoSizer>
+            />
           )}
         </View>
       </View>

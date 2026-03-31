@@ -33,7 +33,9 @@ packages/desktop-electron/dist
 packages/desktop-electron/loot-core
 packages/desktop-client/service-worker
 packages/plugins-service/dist
+packages/component-library/dist
 packages/loot-core/lib-dist
+**/.tsbuildinfo
 packages/sync-server/coverage
 bundle.desktop.js
 bundle.desktop.js.map
@@ -76,3 +78,13 @@ build/
 
 # Lage cache
 .lage/
+
+*storybook.log
+storybook-static
+
+# cli config when testing locally
+.actualrc.json
+.actualrc
+.actualrc.yaml
+.actualrc.yml
+actual.config.js

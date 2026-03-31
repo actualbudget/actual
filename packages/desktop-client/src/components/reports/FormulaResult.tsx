@@ -1,21 +1,22 @@
 import React, {
-  type Ref,
-  type RefObject,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
+import type { Ref, RefObject } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import debounce from 'lodash/debounce';
 
-import { chartTheme } from './chart-theme';
+import { amountToInteger } from 'loot-core/shared/util';
+
 import { LoadingIndicator } from './LoadingIndicator';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
+import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
@@ -48,8 +49,10 @@ export function FormulaResult({
   containerRef,
 }: FormulaResultProps) {
   const [fontSize, setFontSize] = useState<number>(initialFontSize);
+  const [hasSized, setHasSized] = useState(false);
   const refDiv = useRef<HTMLDivElement>(null);
   const previousFontSizeRef = useRef<number>(initialFontSize);
+  const format = useFormat();
 
   // Format the display value - just show what we got
   const displayValue = useMemo(() => {
@@ -57,10 +60,15 @@ export function FormulaResult({
       return error;
     } else if (value === null || value === undefined) {
       return '';
+    } else if (typeof value === 'number') {
+      return format(
+        amountToInteger(value, format.currency.decimalPlaces),
+        'financial',
+      );
     } else {
       return String(value);
     }
-  }, [error, value]);
+  }, [error, value, format]);
 
   const calculateFontSize = useCallback(() => {
     if (!refDiv.current) return;
@@ -82,7 +90,10 @@ export function FormulaResult({
       height, // Ensure the text fits vertically by using the height as the limiting factor
     );
 
-    setFontSize(calculatedFontSize);
+    if (calculatedFontSize > 0) {
+      setFontSize(calculatedFontSize);
+      setHasSized(true);
+    }
 
     // Only call fontSizeChanged if the font size actually changed
     if (
@@ -136,6 +147,7 @@ export function FormulaResult({
   useEffect(() => {
     if (fontSizeMode === 'static') {
       setFontSize(staticFontSize);
+      setHasSized(true);
     }
   }, [fontSizeMode, staticFontSize]);
 
@@ -143,8 +155,10 @@ export function FormulaResult({
   const color = customColor
     ? customColor
     : error
-      ? chartTheme.colors.red
+      ? theme.errorText
       : theme.pageText;
+
+  const showContent = hasSized || fontSizeMode === 'static';
 
   return (
     <View style={{ flex: 1 }}>
@@ -168,9 +182,13 @@ export function FormulaResult({
             color,
           }}
         >
-          <span aria-hidden="true">
-            <PrivacyFilter>{displayValue}</PrivacyFilter>
-          </span>
+          {!showContent ? (
+            <LoadingIndicator />
+          ) : (
+            <span aria-hidden="true">
+              <PrivacyFilter>{displayValue}</PrivacyFilter>
+            </span>
+          )}
         </View>
       )}
     </View>

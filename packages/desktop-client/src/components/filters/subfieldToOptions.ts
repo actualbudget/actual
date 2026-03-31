@@ -1,4 +1,4 @@
-import { type RuleConditionEntity } from 'loot-core/types/models';
+import type { RuleConditionEntity } from 'loot-core/types/models';
 
 export function subfieldToOptions(field: string, subfield: string) {
   let setOptions: RuleConditionEntity['options'];

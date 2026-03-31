@@ -1,26 +1,28 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
-import { send } from 'loot-core/platform/client/fetch';
-import { type IntegerAmount } from 'loot-core/shared/util';
-import { type File } from 'loot-core/types/file';
-import {
-  type AccountEntity,
-  type CategoryEntity,
-  type CategoryGroupEntity,
-  type GoCardlessToken,
-  type NewRuleEntity,
-  type RuleEntity,
-  type ScheduleEntity,
-  type TransactionEntity,
-  type UserEntity,
-  type UserAccessEntity,
-  type NewUserEntity,
-  type NoteEntity,
+import { send } from 'loot-core/platform/client/connection';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type { File } from 'loot-core/types/file';
+import type {
+  AccountEntity,
+  CategoryEntity,
+  CategoryGroupEntity,
+  GoCardlessToken,
+  NewRuleEntity,
+  NewUserEntity,
+  NoteEntity,
+  RuleEntity,
+  ScheduleEntity,
+  TransactionEntity,
+  UserAccessEntity,
+  UserEntity,
 } from 'loot-core/types/models';
-import { type Template } from 'loot-core/types/models/templates';
+import type { Template } from 'loot-core/types/models/templates';
 
+import { accountQueries } from '@desktop-client/accounts';
 import { resetApp, setAppState } from '@desktop-client/app/appSlice';
-import { type SelectLinkedAccountsModalProps } from '@desktop-client/components/modals/SelectLinkedAccountsModal';
+import type { SelectLinkedAccountsModalProps } from '@desktop-client/components/modals/SelectLinkedAccountsModal';
 import { createAppAsyncThunk } from '@desktop-client/redux';
 import { signOut } from '@desktop-client/users/usersSlice';
 
@@ -63,6 +65,14 @@ export type Modal =
         onDelete: (transferCategoryId: CategoryEntity['id']) => void;
         category?: CategoryEntity['id'];
         group?: CategoryGroupEntity['id'];
+      };
+    }
+  | {
+      name: 'confirm-payees-merge';
+      options: {
+        payeeIds: string[];
+        targetPayeeId: string;
+        onConfirm: () => void;
       };
     }
   | {
@@ -203,8 +213,15 @@ export type Modal =
         name: keyof Pick<TransactionEntity, 'date' | 'amount' | 'notes'>;
         onSubmit: (
           name: keyof Pick<TransactionEntity, 'date' | 'amount' | 'notes'>,
-          value: string | number,
-          mode?: 'prepend' | 'append' | 'replace' | null,
+          value:
+            | string
+            | number
+            | {
+                useRegex: boolean;
+                find: string;
+                replace: string;
+              },
+          mode?: 'prepend' | 'append' | 'replace' | 'findAndReplace' | null,
         ) => void;
         onClose?: () => void;
       };
@@ -215,6 +232,19 @@ export type Modal =
         title?: string;
         categoryGroups?: CategoryGroupEntity[];
         onSelect: (categoryId: string, categoryName: string) => void;
+        month?: string | undefined;
+        showHiddenCategories?: boolean;
+        closeOnSelect?: boolean;
+        clearOnSelect?: boolean;
+        onClose?: () => void;
+      };
+    }
+  | {
+      name: 'category-group-autocomplete';
+      options: {
+        title?: string;
+        categoryGroups?: CategoryGroupEntity[];
+        onSelect: (categoryGroupId: string, categoryGroupName: string) => void;
         month?: string | undefined;
         showHiddenCategories?: boolean;
         closeOnSelect?: boolean;
@@ -281,6 +311,7 @@ export type Modal =
         onEditNotes: (id: NoteEntity['id']) => void;
         onClose?: () => void;
         onToggleRunningBalance?: () => void;
+        onToggleReconciled?: () => void;
       };
     }
   | {
@@ -303,6 +334,7 @@ export type Modal =
         onCopyLastMonthAverage: () => void;
         onSetMonthsAverage: (numberOfMonths: number) => void;
         onApplyBudgetTemplate: () => void;
+        onEditNotes: (id: NoteEntity['id'], month: string) => void;
       };
     }
   | {
@@ -314,6 +346,7 @@ export type Modal =
         onCopyLastMonthAverage: () => void;
         onSetMonthsAverage: (numberOfMonths: number) => void;
         onApplyBudgetTemplate: () => void;
+        onEditNotes: (id: NoteEntity['id'], month: string) => void;
       };
     }
   | {
@@ -465,9 +498,6 @@ export type Modal =
       };
     }
   | {
-      name: 'schedules-page-menu';
-    }
-  | {
       name: 'envelope-budget-month-menu';
       options: {
         month: string;
@@ -482,9 +512,6 @@ export type Modal =
         onBudgetAction: (month: string, action: string, arg?: unknown) => void;
         onEditNotes: (id: NoteEntity['id']) => void;
       };
-    }
-  | {
-      name: 'budget-file-selection';
     }
   | {
       name: 'confirm-transaction-edit';
@@ -509,6 +536,12 @@ export type Modal =
       options: {
         message: string;
         onConfirm: () => void;
+      };
+    }
+  | {
+      name: 'copy-widget-to-dashboard';
+      options: {
+        onSelect: (dashboardId: string) => void;
       };
     }
   | {
@@ -583,10 +616,7 @@ type OpenAccountCloseModalPayload = {
 
 export const openAccountCloseModal = createAppAsyncThunk(
   `${sliceName}/openAccountCloseModal`,
-  async (
-    { accountId }: OpenAccountCloseModalPayload,
-    { dispatch, getState },
-  ) => {
+  async ({ accountId }: OpenAccountCloseModalPayload, { dispatch, extra }) => {
     const {
       balance,
       numTransactions,
@@ -596,9 +626,9 @@ export const openAccountCloseModal = createAppAsyncThunk(
         id: accountId,
       },
     );
-    const account = getState().account.accounts.find(
-      acct => acct.id === accountId,
-    );
+    const queryClient = extra.queryClient;
+    const accounts = await queryClient.ensureQueryData(accountQueries.list());
+    const account = accounts.find(acct => acct.id === accountId);
 
     if (!account) {
       throw new Error(`Account with ID ${accountId} does not exist.`);

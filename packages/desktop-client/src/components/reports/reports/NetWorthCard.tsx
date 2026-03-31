@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
@@ -6,13 +6,11 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type AccountEntity,
-  type NetWorthWidget,
-} from 'loot-core/types/models';
+import type { AccountEntity, NetWorthWidget } from 'loot-core/types/models';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { Change } from '@desktop-client/components/reports/Change';
 import { DateRange } from '@desktop-client/components/reports/DateRange';
@@ -22,6 +20,7 @@ import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '@desktop-client/components/reports/spreadsheets/net-worth-spreadsheet';
+import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
@@ -34,6 +33,7 @@ type NetWorthCardProps = {
   meta?: NetWorthWidget['meta'];
   onMetaChange: (newMeta: NetWorthWidget['meta']) => void;
   onRemove: () => void;
+  onCopy: (targetDashboardId: string) => void;
 };
 
 export function NetWorthCard({
@@ -43,6 +43,7 @@ export function NetWorthCard({
   meta = {},
   onMetaChange,
   onRemove,
+  onCopy,
 }: NetWorthCardProps) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -55,6 +56,9 @@ export function NetWorthCard({
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [isCardHovered, setIsCardHovered] = useState(false);
 
+  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
+    useDashboardWidgetCopyMenu(onCopy);
+
   useEffect(() => {
     async function fetchLatestTransaction() {
       const latestTrans = await send('get-latest-transaction');
@@ -62,7 +66,7 @@ export function NetWorthCard({
         latestTrans ? latestTrans.date : monthUtils.currentDay(),
       );
     }
-    fetchLatestTransaction();
+    void fetchLatestTransaction();
   }, []);
 
   const [start, end] = calculateTimeRange(
@@ -114,8 +118,10 @@ export function NetWorthCard({
           name: 'remove',
           text: t('Remove'),
         },
+        ...copyMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleCopyMenuSelect(item)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);
@@ -159,7 +165,9 @@ export function NetWorthCard({
                 }}
               >
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  {format(data.netWorth, 'financial')}
+                  <FinancialText>
+                    {format(data.netWorth, 'financial')}
+                  </FinancialText>
                 </PrivacyFilter>
               </Block>
               <PrivacyFilter activationFilters={[!isCardHovered]}>
@@ -172,9 +180,11 @@ export function NetWorthCard({
         {data ? (
           <NetWorthGraph
             graphData={data.graphData}
+            accounts={data.accounts}
             compact
             showTooltip={!isEditing && !isNarrowWidth}
             interval={meta?.interval || 'Monthly'}
+            mode={meta?.mode || 'trend'}
             style={{ height: 'auto', flex: 1 }}
           />
         ) : (

@@ -1,13 +1,8 @@
-import React, {
-  type ComponentProps,
-  type ComponentType,
-  type CSSProperties,
-  useCallback,
-  useState,
-} from 'react';
+import React, { useCallback, useState } from 'react';
+import type { ComponentProps, ComponentType, CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
-import { useSpring, animated, config } from 'react-spring';
+import { animated, config, useSpring } from 'react-spring';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import {
@@ -57,44 +52,44 @@ export function MobileNavTabs() {
     maxWidth: `${100 / COLUMN_COUNT}%`,
   };
 
-  const [{ y }, api] = useSpring(() => ({ y: OPEN_DEFAULT_Y }));
+  const [{ y }, api] = useSpring(() => ({ from: { y: OPEN_DEFAULT_Y } }), []);
 
   const openFull = useCallback(
     ({ canceled }: { canceled?: boolean }) => {
       // when cancel is true, it means that the user passed the upwards threshold
       // so we change the spring config to create a nice wobbly effect
       setNavbarState('open');
-      api.start({
-        y: OPEN_FULL_Y,
-        immediate: false,
+      void api.start({
+        to: { y: OPEN_FULL_Y },
+        immediate: isTestEnv,
         config: canceled ? config.wobbly : config.stiff,
       });
     },
-    [api],
+    [api, isTestEnv],
   );
 
   const openDefault = useCallback(
     (velocity = 0) => {
       setNavbarState('default');
-      api.start({
-        y: OPEN_DEFAULT_Y,
-        immediate: false,
+      void api.start({
+        to: { y: OPEN_DEFAULT_Y },
+        immediate: isTestEnv,
         config: { ...config.stiff, velocity },
       });
     },
-    [api],
+    [api, isTestEnv],
   );
 
   const hide = useCallback(
     (velocity = 0) => {
       setNavbarState('hidden');
-      api.start({
-        y: HIDDEN_Y,
-        immediate: false,
+      void api.start({
+        to: { y: HIDDEN_Y },
+        immediate: isTestEnv,
         config: { ...config.stiff, velocity },
       });
     },
-    [api],
+    [api, isTestEnv],
   );
 
   const navTabs = [
@@ -204,7 +199,7 @@ export function MobileNavTabs() {
       } else {
         // when the user keeps dragging, we just move the sheet according to
         // the cursor position
-        api.start({ y: oy, immediate: true });
+        void api.start({ to: { y: oy }, immediate: true });
       }
     },
     {

@@ -1,9 +1,5 @@
-import React, {
-  type ComponentProps,
-  type ReactNode,
-  useRef,
-  useState,
-} from 'react';
+import React, { useRef, useState } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
@@ -33,14 +29,14 @@ import { View } from '@actual-app/components/view';
 import { format as formatDate } from 'date-fns';
 
 import { tsToRelativeTime } from 'loot-core/shared/util';
-import {
-  type AccountEntity,
-  type RuleConditionEntity,
-  type TransactionEntity,
-  type TransactionFilterEntity,
+import type {
+  AccountEntity,
+  RuleConditionEntity,
+  TransactionEntity,
+  TransactionFilterEntity,
 } from 'loot-core/types/models';
 
-import { type TableRef } from './Account';
+import type { TableRef } from './Account';
 import { Balances } from './Balance';
 import { BalanceHistoryGraph } from './BalanceHistoryGraph';
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
@@ -49,7 +45,7 @@ import { AnimatedRefresh } from '@desktop-client/components/AnimatedRefresh';
 import { Search } from '@desktop-client/components/common/Search';
 import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
 import { FiltersStack } from '@desktop-client/components/filters/FiltersStack';
-import { type SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
+import type { SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
 import { NotesButton } from '@desktop-client/components/NotesButton';
 import { SelectedTransactionsButton } from '@desktop-client/components/transactions/SelectedTransactionsButton';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';

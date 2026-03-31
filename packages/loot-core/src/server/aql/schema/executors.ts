@@ -1,17 +1,15 @@
 // @ts-strict-ignore
 
 import { aqlQuery } from '..';
-import { q, type QueryState } from '../../../shared/query';
-import { type CategoryEntity } from '../../../types/models';
+import { q } from '../../../shared/query';
+import type { QueryState } from '../../../shared/query';
+import type { CategoryEntity } from '../../../types/models';
 import * as db from '../../db';
 import { whereIn } from '../../db/util';
-import {
-  type CompilerState,
-  isAggregateQuery,
-  type OutputTypes,
-  type SqlPieces,
-} from '../compiler';
-import { type AqlQueryExecutor, execQuery } from '../exec';
+import { isAggregateQuery } from '../compiler';
+import type { CompilerState, OutputTypes, SqlPieces } from '../compiler';
+import { execQuery } from '../exec';
+import type { AqlQueryExecutor } from '../exec';
 import { convertOutputType } from '../schema-helpers';
 
 // Transactions executor

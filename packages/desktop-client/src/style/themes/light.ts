@@ -1,4 +1,3 @@
-// oxlint-disable-next-line eslint/no-restricted-imports
 import * as colorPalette from '@desktop-client/style/palette';
 
 export const pageBackground = colorPalette.navy100;
@@ -39,6 +38,19 @@ export const tableRowBackgroundHighlightText = colorPalette.navy700;
 export const tableRowHeaderBackground = colorPalette.navy50;
 export const tableRowHeaderText = colorPalette.navy800;
 
+export const numberPositive = colorPalette.green700;
+export const numberNegative = colorPalette.red500;
+export const numberNeutral = colorPalette.navy100;
+export const budgetNumberNegative = numberNegative;
+export const budgetNumberZero = tableTextSubdued;
+export const budgetNumberNeutral = tableText;
+export const budgetNumberPositive = budgetNumberNeutral;
+export const templateNumberFunded = numberPositive;
+export const templateNumberUnderFunded = colorPalette.orange700;
+export const toBudgetPositive = numberPositive;
+export const toBudgetZero = numberPositive;
+export const toBudgetNegative = budgetNumberNegative;
+
 export const sidebarBackground = colorPalette.navy900;
 export const sidebarItemBackgroundPending = colorPalette.orange200;
 export const sidebarItemBackgroundPositive = colorPalette.green500;
@@ -47,6 +59,7 @@ export const sidebarItemBackgroundHover = colorPalette.navy800;
 export const sidebarItemAccentSelected = colorPalette.purple200;
 export const sidebarItemText = colorPalette.navy150;
 export const sidebarItemTextSelected = colorPalette.purple200;
+export const sidebarBudgetName = colorPalette.navy150;
 
 export const menuBackground = colorPalette.white;
 export const menuItemBackground = colorPalette.navy50;
@@ -199,11 +212,15 @@ export const reportsGreen = colorPalette.green400;
 export const reportsGray = colorPalette.gray400;
 export const reportsLabel = colorPalette.navy900;
 export const reportsInnerLabel = colorPalette.navy800;
+export const reportsNumberPositive = numberPositive;
+export const reportsNumberNegative = numberNegative;
+export const reportsNumberNeutral = numberNeutral;
+export const reportsChartFill = reportsNumberPositive;
 
-export const noteTagBackground = colorPalette.purple100;
+export const noteTagBackground = colorPalette.purple125;
 export const noteTagBackgroundHover = colorPalette.purple150;
-export const noteTagDefault = colorPalette.purple700;
-export const noteTagText = colorPalette.purple700;
+export const noteTagDefault = colorPalette.purple125;
+export const noteTagText = colorPalette.black;
 
 export const budgetCurrentMonth = tableBackground;
 export const budgetOtherMonth = colorPalette.gray50;
@@ -219,3 +236,16 @@ export const tooltipBackground = colorPalette.white;
 export const tooltipBorder = colorPalette.navy150;
 
 export const calendarCellBackground = colorPalette.navy100;
+
+export const overlayBackground = 'rgba(0, 0, 0, 0.3)';
+
+// Chart colors - Qualitative scale (9 colors)
+export const chartQual1 = colorPalette.chartQual1;
+export const chartQual2 = colorPalette.chartQual2;
+export const chartQual3 = colorPalette.chartQual3;
+export const chartQual4 = colorPalette.chartQual4;
+export const chartQual5 = colorPalette.chartQual5;
+export const chartQual6 = colorPalette.chartQual6;
+export const chartQual7 = colorPalette.chartQual7;
+export const chartQual8 = colorPalette.chartQual8;
+export const chartQual9 = colorPalette.chartQual9;

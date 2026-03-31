@@ -1,19 +1,14 @@
-import React, {
-  useState,
-  useEffect,
-  useMemo,
-  type CSSProperties,
-  type Ref,
-} from 'react';
-import AutoSizer from 'react-virtualized-auto-sizer';
+import React, { useEffect, useMemo, useState } from 'react';
+import type { CSSProperties, Ref } from 'react';
+import { AutoSizer } from 'react-virtualized-auto-sizer';
 
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { subMonths, format, eachMonthOfInterval } from 'date-fns';
-import { AreaChart, Area, YAxis, Tooltip as RechartsTooltip } from 'recharts';
+import { eachMonthOfInterval, format, subMonths } from 'date-fns';
+import { Area, AreaChart, Tooltip as RechartsTooltip, YAxis } from 'recharts';
 
 import * as monthUtils from 'loot-core/shared/months';
 import { integerToCurrency } from 'loot-core/shared/util';
@@ -208,8 +203,12 @@ export function BalanceHistoryGraph({
 
   return (
     <View ref={ref} style={{ margin: 10, ...style }}>
-      <AutoSizer>
-        {({ width, height }: { width: number; height: number }) => {
+      <AutoSizer
+        renderProp={({ width = 0, height = 0 }) => {
+          if (width === 0 || height === 0) {
+            return null;
+          }
+
           if (loading) {
             return (
               <div style={{ width, height }}>
@@ -326,7 +325,7 @@ export function BalanceHistoryGraph({
             </View>
           );
         }}
-      </AutoSizer>
+      />
     </View>
   );
 }

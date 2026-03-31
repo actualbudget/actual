@@ -1,28 +1,31 @@
 import fs from 'fs';
-import { createServer, type Server } from 'http';
+import { createServer } from 'http';
+import type { Server } from 'http';
 import path from 'path';
 
 import {
-  net,
   app,
-  ipcMain,
   BrowserWindow,
-  Menu,
   dialog,
-  shell,
+  ipcMain,
+  Menu,
+  net,
   powerMonitor,
   protocol,
+  shell,
   utilityProcess,
-  type UtilityProcess,
-  type OpenDialogSyncOptions,
-  type SaveDialogOptions,
-  type Env,
-  type ForkOptions,
+} from 'electron';
+import type {
+  Env,
+  ForkOptions,
+  OpenDialogSyncOptions,
+  SaveDialogOptions,
+  UtilityProcess,
 } from 'electron';
 import { copy, exists, mkdir, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
 
-import type { GlobalPrefsJson } from '../loot-core/src/types/prefs';
+import type { GlobalPrefsJson } from '@actual-app/core/types/prefs';
 
 import { getMenu } from './menu';
 import {
@@ -82,7 +85,7 @@ const logMessage = (loglevel: 'info' | 'error', message: string) => {
     queuedClientWinLogs.push(`console.${loglevel}(${trimmedMessage})`);
   } else {
     // Send the queued up logs to the devtools console
-    clientWin.webContents.executeJavaScript(
+    void clientWin.webContents.executeJavaScript(
       `console.${loglevel}(${trimmedMessage})`,
     );
   }
@@ -104,9 +107,11 @@ const createOAuthServer = async () => {
       const code = query.get('token');
       if (code && clientWin) {
         if (isDev) {
-          clientWin.loadURL(`http://localhost:3001/openid-cb?token=${code}`);
+          void clientWin.loadURL(
+            `http://localhost:3001/openid-cb?token=${code}`,
+          );
         } else {
-          clientWin.loadURL(`app://actual/openid-cb?token=${code}`);
+          void clientWin.loadURL(`app://actual/openid-cb?token=${code}`);
         }
 
         // Respond to the browser
@@ -261,7 +266,7 @@ async function startSyncServer() {
 
     // ACTUAL_SERVER_DATA_DIR is the root directory for the sync-server
     if (!fs.existsSync(syncServerConfig.ACTUAL_SERVER_DATA_DIR)) {
-      mkdir(syncServerConfig.ACTUAL_SERVER_DATA_DIR, { recursive: true });
+      void mkdir(syncServerConfig.ACTUAL_SERVER_DATA_DIR, { recursive: true });
     }
 
     let forkOptions: ForkOptions = {
@@ -318,7 +323,10 @@ async function startSyncServer() {
 
     return await Promise.race([syncServerPromise, syncServerTimeout]); // Either the server has started or the timeout is reached
   } catch (error) {
-    logMessage('error', `Sync-Server: Error starting sync server: ${error}`);
+    logMessage(
+      'error',
+      `Sync-Server: Error starting sync server: ${String(error)}`,
+    );
   }
 }
 
@@ -357,13 +365,15 @@ async function createWindow() {
   const unlistenToState = listenToWindowState(win, windowState);
 
   if (isDev) {
-    win.loadURL(`file://${__dirname}/loading.html`);
+    void win.loadURL(`file://${__dirname}/loading.html`);
     // Wait for the development server to start
     setTimeout(() => {
-      promiseRetry(retry => win.loadURL('http://localhost:3001/').catch(retry));
+      void promiseRetry(retry =>
+        win.loadURL('http://localhost:3001/').catch(retry),
+      );
     }, 3000);
   } else {
-    win.loadURL(`app://actual/`);
+    void win.loadURL(`app://actual/`);
   }
 
   win.on('closed', () => {
@@ -382,7 +392,7 @@ async function createWindow() {
     if (clientWin) {
       const url = clientWin.webContents.getURL();
       if (url.includes('app://') || url.includes('localhost:')) {
-        clientWin.webContents.executeJavaScript(
+        void clientWin.webContents.executeJavaScript(
           'window.__actionsForMenu.appFocused()',
         );
       }
@@ -393,7 +403,7 @@ async function createWindow() {
   // always deny, optionally redirect to browser
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (isExternalUrl(url)) {
-      shell.openExternal(url);
+      void shell.openExternal(url);
     }
 
     return { action: 'deny' };
@@ -403,7 +413,7 @@ async function createWindow() {
   // optionally redirect to browser
   win.webContents.on('will-navigate', (event, url) => {
     if (isExternalUrl(url)) {
-      shell.openExternal(url);
+      void shell.openExternal(url);
       event.preventDefault();
     }
   });
@@ -413,8 +423,10 @@ async function createWindow() {
   clientWin = win;
 
   // Execute queued logs - displaying them in the client window
-  queuedClientWinLogs.map((log: string) =>
-    win.webContents.executeJavaScript(log),
+  void Promise.all(
+    queuedClientWinLogs.map((log: string) =>
+      win.webContents.executeJavaScript(log),
+    ),
   );
 
   queuedClientWinLogs = [];
@@ -512,7 +524,7 @@ app.on('before-quit', () => {
 
 app.on('activate', () => {
   if (clientWin === null) {
-    createWindow();
+    void createWindow();
   }
 });
 
@@ -550,7 +562,7 @@ ipcMain.handle('restart-server', () => {
     serverProcess = null;
   }
 
-  createBackgroundProcess();
+  void createBackgroundProcess();
 });
 
 ipcMain.handle('relaunch', () => {
@@ -603,7 +615,7 @@ ipcMain.handle(
 );
 
 ipcMain.handle('open-external-url', (event, url) => {
-  shell.openExternal(url);
+  void shell.openExternal(url);
 });
 
 ipcMain.handle('open-in-file-manager', (event, filepath) => {
@@ -621,7 +633,7 @@ ipcMain.on('message', (_event, msg) => {
 ipcMain.on('set-theme', (_event, theme: string) => {
   const obj = { theme };
   if (clientWin) {
-    clientWin.webContents.executeJavaScript(
+    void clientWin.webContents.executeJavaScript(
       `window.__actionsForMenu && window.__actionsForMenu.saveGlobalPrefs({ prefs: ${JSON.stringify(obj)} })`,
     );
   }
@@ -652,7 +664,7 @@ ipcMain.handle(
     } catch (error) {
       logMessage(
         'error',
-        `There was an error moving your directory:  ${error}`,
+        `There was an error moving your directory:  ${String(error)}`,
       );
       throw error;
     }
@@ -678,7 +690,7 @@ ipcMain.handle(
       // This call needs to succeed to allow the user to continue using the app with the files in the new location.
       logMessage(
         'error',
-        `There was an error removing the old directory: ${error}`,
+        `There was an error removing the old directory: ${String(error)}`,
       );
     }
   },

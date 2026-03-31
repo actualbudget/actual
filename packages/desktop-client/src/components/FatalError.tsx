@@ -1,5 +1,6 @@
-import React, { useState, type ReactNode } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import React, { useState } from 'react';
+import type { ReactNode } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';

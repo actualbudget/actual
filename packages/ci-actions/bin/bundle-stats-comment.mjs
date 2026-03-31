@@ -174,6 +174,7 @@ function parseArgs(argv) {
   return {
     sections,
     identifier: getSingleValue(args, 'identifier') ?? 'bundle-stats',
+    format: getSingleValue(args, 'format') ?? 'pr-body',
   };
 }
 
@@ -463,6 +464,12 @@ const TOTAL_HEADERS = makeHeader([
   'Total bundle size',
   '% Changed',
 ]);
+const SUMMARY_HEADERS = makeHeader([
+  'Bundle',
+  'Files count',
+  'Total bundle size',
+  '% Changed',
+]);
 const TABLE_HEADERS = makeHeader(['Asset', 'File Size', '% Changed']);
 const CHUNK_TABLE_HEADERS = makeHeader(['File', 'Δ', 'Size']);
 
@@ -596,6 +603,24 @@ function printTotalAssetTable(statsDiff) {
   return `**Total**\n${TOTAL_HEADERS}\n${printAssetTableRow(statsDiff.total)}`;
 }
 
+function printSummaryTable(sections) {
+  if (sections.length === 0) {
+    return `${SUMMARY_HEADERS}\nNo bundle stats were generated.`;
+  }
+
+  const rows = sections.map(section => {
+    const total = section.statsDiff.total;
+    return [
+      section.name,
+      total.name,
+      toFileSizeDiffCell(total),
+      conditionalPercentage(total.diffPercentage),
+    ].join(' | ');
+  });
+
+  return `${SUMMARY_HEADERS}\n${rows.join('\n')}`;
+}
+
 function renderSection(title, statsDiff, chunkModuleDiff) {
   const { total, ...groups } = statsDiff;
   const parts = [`#### ${title}`, '', printTotalAssetTable({ total })];
@@ -615,8 +640,30 @@ function renderSection(title, statsDiff, chunkModuleDiff) {
   return parts.join('\n');
 }
 
+function renderSections(sections) {
+  return sections
+    .map(section =>
+      renderSection(section.name, section.statsDiff, section.chunkDiff),
+    )
+    .join('\n\n---\n\n');
+}
+
+function getIdentifierMarkers(key) {
+  const label = 'bundlestats-action-comment';
+  return {
+    start: `<!--- ${label} key:${key} start --->`,
+    end: `<!--- ${label} key:${key} end --->`,
+  };
+}
+
 async function main() {
   const args = parseArgs(process.argv);
+  const allowedFormats = new Set(['comment', 'pr-body']);
+  if (!allowedFormats.has(args.format)) {
+    throw new Error(
+      `Invalid format "${args.format}". Use "comment" or "pr-body".`,
+    );
+  }
 
   console.error(
     `[bundle-stats] Found ${args.sections.length} sections to process`,
@@ -654,22 +701,29 @@ async function main() {
     });
   }
 
-  const identifier = `<!--- bundlestats-action-comment key:${args.identifier} --->`;
+  const markers = getIdentifierMarkers(args.identifier);
+  const sectionsContent = renderSections(sections);
+  const summaryTable = printSummaryTable(sections);
 
-  const comment = [
+  const detailedBody = ['### Bundle Stats', '', sectionsContent].join('\n');
+
+  const commentBody = [markers.start, detailedBody, '', markers.end, ''].join(
+    '\n',
+  );
+
+  const prBody = [
+    markers.start,
     '### Bundle Stats',
     '',
-    sections
-      .map(section =>
-        renderSection(section.name, section.statsDiff, section.chunkDiff),
-      )
-      .join('\n\n---\n\n'),
+    summaryTable,
     '',
-    identifier,
+    `<details>\n<summary>View detailed bundle stats</summary>\n\n${sectionsContent}\n</details>`,
+    '',
+    markers.end,
     '',
   ].join('\n');
 
-  process.stdout.write(comment);
+  process.stdout.write(args.format === 'comment' ? commentBody : prBody);
 }
 
 main().catch(error => {

@@ -1,17 +1,14 @@
-import React, {
-  useEffect,
-  useRef,
-  useLayoutEffect,
-  useState,
-  type ReactNode,
-  type ComponentPropsWithoutRef,
-  type ComponentPropsWithRef,
-  type CSSProperties,
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import type {
+  ComponentPropsWithoutRef,
+  ComponentPropsWithRef,
+  CSSProperties,
+  ReactNode,
 } from 'react';
 import {
-  ModalOverlay as ReactAriaModalOverlay,
-  Modal as ReactAriaModal,
   Dialog,
+  Modal as ReactAriaModal,
+  ModalOverlay as ReactAriaModalOverlay,
 } from 'react-aria-components';
 import { useHotkeysContext } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
@@ -313,15 +310,16 @@ export function ModalHeader({
 }: ModalHeaderProps) {
   const { t } = useTranslation();
   return (
-    <View
-      role="heading"
-      aria-level={1}
+    <h1
       style={{
         justifyContent: 'center',
         alignItems: 'center',
         position: 'relative',
         height: 60,
         flex: 'none',
+        display: 'flex',
+        margin: 0,
+        padding: 0,
       }}
     >
       <View
@@ -369,7 +367,7 @@ export function ModalHeader({
           {rightContent}
         </View>
       )}
-    </View>
+    </h1>
   );
 }
 

@@ -1,22 +1,24 @@
 // @ts-strict-ignore
-import { listen } from 'loot-core/platform/client/fetch';
+import type { QueryClient } from '@tanstack/react-query';
+
+import { listen } from 'loot-core/platform/client/connection';
 import * as undo from 'loot-core/platform/client/undo';
 
-import { reloadAccounts } from './accounts/accountsSlice';
+import { accountQueries } from './accounts';
 import { setAppState } from './app/appSlice';
-import { reloadCategories } from './budget/budgetSlice';
+import { categoryQueries } from './budget';
 import { closeBudgetUI } from './budgetfiles/budgetfilesSlice';
 import { closeModal, pushModal, replaceModal } from './modals/modalsSlice';
 import {
   addGenericErrorNotification,
   addNotification,
 } from './notifications/notificationsSlice';
-import { reloadPayees } from './payees/payeesSlice';
+import { payeeQueries } from './payees';
 import { loadPrefs } from './prefs/prefsSlice';
-import { type AppStore } from './redux/store';
+import type { AppStore } from './redux/store';
 import * as syncEvents from './sync-events';
 
-export function handleGlobalEvents(store: AppStore) {
+export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
   const unlistenServerError = listen('server-error', () => {
     store.dispatch(addGenericErrorNotification());
   });
@@ -45,7 +47,7 @@ export function handleGlobalEvents(store: AppStore) {
     );
   });
 
-  const unlistenSync = syncEvents.listenForSyncEvent(store);
+  const unlistenSync = syncEvents.listenForSyncEvent(store, queryClient);
 
   const unlistenUndo = listen('undo-event', undoState => {
     const { tables, undoTag } = undoState;
@@ -56,7 +58,11 @@ export function handleGlobalEvents(store: AppStore) {
       tables.includes('category_groups') ||
       tables.includes('category_mapping')
     ) {
-      promises.push(store.dispatch(reloadCategories()));
+      promises.push(
+        queryClient.invalidateQueries({
+          queryKey: categoryQueries.lists(),
+        }),
+      );
     }
 
     if (
@@ -64,17 +70,23 @@ export function handleGlobalEvents(store: AppStore) {
       tables.includes('payees') ||
       tables.includes('payee_mapping')
     ) {
-      promises.push(store.dispatch(reloadPayees()));
+      void queryClient.invalidateQueries({
+        queryKey: payeeQueries.lists(),
+      });
     }
 
     if (tables.includes('accounts')) {
-      promises.push(store.dispatch(reloadAccounts()));
+      promises.push(
+        queryClient.invalidateQueries({
+          queryKey: accountQueries.lists(),
+        }),
+      );
     }
 
     const tagged = undo.getTaggedState(undoTag);
 
     if (tagged) {
-      Promise.all(promises).then(() => {
+      void Promise.all(promises).then(() => {
         undo.setUndoState('undoEvent', undoState);
 
         // If a modal has been tagged, open it instead of navigating
@@ -94,7 +106,7 @@ export function handleGlobalEvents(store: AppStore) {
             window.location.href.replace(window.location.origin, '') !==
             tagged.url
           ) {
-            window.__navigate(tagged.url);
+            void window.__navigate(tagged.url);
             // This stops propagation of the undo event, which is
             // important because if we are changing URLs any existing
             // undo listeners on the current page don't need to be run
@@ -122,33 +134,33 @@ export function handleGlobalEvents(store: AppStore) {
   });
 
   const unlistenStartLoad = listen('start-load', () => {
-    store.dispatch(closeBudgetUI());
+    void store.dispatch(closeBudgetUI());
     store.dispatch(setAppState({ loadingText: '' }));
   });
 
   const unlistenFinishLoad = listen('finish-load', () => {
     store.dispatch(closeModal());
     store.dispatch(setAppState({ loadingText: null }));
-    store.dispatch(loadPrefs());
+    void store.dispatch(loadPrefs());
   });
 
   const unlistenStartImport = listen('start-import', () => {
-    store.dispatch(closeBudgetUI());
+    void store.dispatch(closeBudgetUI());
   });
 
   const unlistenFinishImport = listen('finish-import', () => {
     store.dispatch(closeModal());
     store.dispatch(setAppState({ loadingText: null }));
-    store.dispatch(loadPrefs());
+    void store.dispatch(loadPrefs());
   });
 
   const unlistenShowBudgets = listen('show-budgets', () => {
-    store.dispatch(closeBudgetUI());
+    void store.dispatch(closeBudgetUI());
     store.dispatch(setAppState({ loadingText: null }));
   });
 
   const unlistenApiFetchRedirected = listen('api-fetch-redirected', () => {
-    window.Actual.reload();
+    void window.Actual.reload();
   });
 
   return () => {

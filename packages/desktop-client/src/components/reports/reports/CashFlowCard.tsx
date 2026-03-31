@@ -1,28 +1,21 @@
-import React, {
-  useState,
-  useMemo,
-  useCallback,
-  useEffect,
-  type SVGAttributes,
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { SVGAttributes } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { Bar, BarChart, LabelList } from 'recharts';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import { type CashFlowWidget } from 'loot-core/types/models';
+import type { CashFlowWidget } from 'loot-core/types/models';
 
 import { defaultTimeFrame } from './CashFlow';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { Change } from '@desktop-client/components/reports/Change';
-import {
-  chartTheme,
-  useRechartsAnimation,
-} from '@desktop-client/components/reports/chart-theme';
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
 import { DateRange } from '@desktop-client/components/reports/DateRange';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
@@ -30,6 +23,7 @@ import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 import { simpleCashFlow } from '@desktop-client/components/reports/spreadsheets/cash-flow-spreadsheet';
+import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
@@ -86,14 +80,15 @@ function CustomLabel({
       >
         {name}
       </text>
-      <text
+      <FinancialText
+        as="text"
         x={x + barWidth + valueXOffsets[position]}
         y={yOffset + 26}
         textAnchor={anchorValue[position]}
         fill={theme.tableText}
       >
         <PrivacyFilter>{format(value, 'financial')}</PrivacyFilter>
-      </text>
+      </FinancialText>
     </>
   );
 }
@@ -104,6 +99,7 @@ type CashFlowCardProps = {
   meta?: CashFlowWidget['meta'];
   onMetaChange: (newMeta: CashFlowWidget['meta']) => void;
   onRemove: () => void;
+  onCopy: (targetDashboardId: string) => void;
 };
 
 export function CashFlowCard({
@@ -112,11 +108,15 @@ export function CashFlowCard({
   meta = {},
   onMetaChange,
   onRemove,
+  onCopy,
 }: CashFlowCardProps) {
   const { t } = useTranslation();
   const animationProps = useRechartsAnimation();
   const [latestTransaction, setLatestTransaction] = useState<string>('');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
+
+  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
+    useDashboardWidgetCopyMenu(onCopy);
 
   useEffect(() => {
     async function fetchLatestTransaction() {
@@ -125,7 +125,7 @@ export function CashFlowCard({
         latestTrans ? latestTrans.date : monthUtils.currentDay(),
       );
     }
-    fetchLatestTransaction();
+    void fetchLatestTransaction();
   }, []);
 
   const [start, end] = calculateTimeRange(
@@ -162,8 +162,10 @@ export function CashFlowCard({
           name: 'remove',
           text: t('Remove'),
         },
+        ...copyMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleCopyMenuSelect(item)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);
@@ -226,7 +228,7 @@ export function CashFlowCard({
               >
                 <Bar
                   dataKey="income"
-                  fill={chartTheme.colors.blue}
+                  fill={theme.reportsNumberPositive}
                   barSize={14}
                   {...animationProps}
                 >
@@ -239,7 +241,7 @@ export function CashFlowCard({
 
                 <Bar
                   dataKey="expenses"
-                  fill={chartTheme.colors.red}
+                  fill={theme.reportsNumberNegative}
                   barSize={14}
                   {...animationProps}
                 >

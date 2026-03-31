@@ -5,10 +5,11 @@ import { Trans, useTranslation } from 'react-i18next';
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { q } from 'loot-core/shared/query';
 import { getRecurringDescription } from 'loot-core/shared/schedules';
 import type { DiscoverScheduleEntity } from 'loot-core/types/models';
@@ -21,20 +22,20 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import {
+  Field,
+  Row,
+  SelectCell,
   Table,
   TableHeader,
-  Row,
-  Field,
-  SelectCell,
 } from '@desktop-client/components/table';
 import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import {
+  SelectedProvider,
   useSelected,
   useSelectedDispatch,
   useSelectedItems,
-  SelectedProvider,
 } from '@desktop-client/hooks/useSelected';
 import { useSendPlatformRequest } from '@desktop-client/hooks/useSendPlatformRequest';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
@@ -117,7 +118,7 @@ function DiscoverSchedulesTable({
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.tableContainer}>
       <TableHeader height={ROW_HEIGHT} inset={15}>
         <SelectCell
           exposed={!loading}
@@ -208,11 +209,11 @@ export function DiscoverSchedules() {
       name="schedules-discover"
       containerProps={{ style: { width: 850, height: 650 } }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Found Schedules')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <Paragraph>
             <Trans>
@@ -246,8 +247,8 @@ export function DiscoverSchedules() {
               isLoading={creating}
               isDisabled={selectedInst.items.size === 0}
               onPress={() => {
-                onCreate();
-                close();
+                void onCreate();
+                state.close();
               }}
             >
               <Trans>Create schedules</Trans>

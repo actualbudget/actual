@@ -1,20 +1,15 @@
-import React, {
-  type RefObject,
-  useCallback,
-  useLayoutEffect,
-  useRef,
-  type UIEventHandler,
-} from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
+import type { RefObject, UIEventHandler } from 'react';
 
 import { Block } from '@actual-app/components/block';
-import { type CSSProperties } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import {
-  type GroupedEntity,
-  type DataEntity,
-  type balanceTypeOpType,
-  type RuleConditionEntity,
+import type {
+  balanceTypeOpType,
+  DataEntity,
+  GroupedEntity,
+  RuleConditionEntity,
 } from 'loot-core/types/models';
 
 import { ReportTableHeader } from './ReportTableHeader';
@@ -83,7 +78,7 @@ export function ReportTable({
     }
   });
 
-  const renderRow = useCallback(({ item, mode, style }: renderRowProps) => {
+  const renderRow = ({ item, mode, style }: renderRowProps) => {
     return (
       <ReportTableRow
         item={item}
@@ -102,42 +97,39 @@ export function ReportTable({
         interval={interval}
       />
     );
-  }, []);
+  };
 
-  const renderTotals = useCallback(
-    ({
-      metadata,
-      mode,
-      totalsStyle,
-      testStyle,
-      scrollWidthTotals,
-    }: renderTotalsProps) => {
-      return (
-        <ReportTableRow
-          item={metadata}
-          balanceTypeOp={balanceTypeOp}
-          groupBy={groupBy}
-          mode={mode}
-          filters={filters}
-          startDate={data.startDate}
-          endDate={data.endDate}
-          intervalsCount={intervalsCount}
-          compact={compact}
-          style={totalsStyle}
-          compactStyle={compactStyle}
-          showHiddenCategories={showHiddenCategories}
-          showOffBudget={showOffBudget}
-          totalStyle={testStyle}
-          totalScrollRef={totalScrollRef}
-          handleScroll={handleScroll}
-          height={32 + scrollWidthTotals}
-          interval={interval}
-          colorized
-        />
-      );
-    },
-    [],
-  );
+  const renderTotals = ({
+    metadata,
+    mode,
+    totalsStyle,
+    testStyle,
+    scrollWidthTotals,
+  }: renderTotalsProps) => {
+    return (
+      <ReportTableRow
+        item={metadata}
+        balanceTypeOp={balanceTypeOp}
+        groupBy={groupBy}
+        mode={mode}
+        filters={filters}
+        startDate={data.startDate}
+        endDate={data.endDate}
+        intervalsCount={intervalsCount}
+        compact={compact}
+        style={totalsStyle}
+        compactStyle={compactStyle}
+        showHiddenCategories={showHiddenCategories}
+        showOffBudget={showOffBudget}
+        totalStyle={testStyle}
+        totalScrollRef={totalScrollRef}
+        handleScroll={handleScroll}
+        height={32 + scrollWidthTotals}
+        interval={interval}
+        colorized
+      />
+    );
+  };
 
   return (
     <View>
@@ -160,7 +152,7 @@ export function ReportTable({
           outline: 'none',
           '& .animated .animated-row': { transition: '.25s transform' },
         }}
-        tabIndex={1}
+        tabIndex={0}
       >
         <Block
           innerRef={listScrollRef}

@@ -7,10 +7,10 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { PossibleRoles } from 'loot-core/shared/user';
-import { type UserEntity } from 'loot-core/types/models';
+import type { UserEntity } from 'loot-core/types/models';
 
 import { Checkbox } from '@desktop-client/components/forms';
-import { SelectCell, Row, Cell } from '@desktop-client/components/table';
+import { Cell, Row, SelectCell } from '@desktop-client/components/table';
 import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
 
 type UserDirectoryProps = {

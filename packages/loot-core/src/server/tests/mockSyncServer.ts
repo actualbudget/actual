@@ -1,13 +1,8 @@
 // @ts-strict-ignore
-import {
-  type Clock,
-  makeClock,
-  Timestamp,
-  merkle,
-  SyncProtoBuf,
-} from '@actual-app/crdt';
+import { makeClock, merkle, SyncProtoBuf, Timestamp } from '@actual-app/crdt';
+import type { Clock } from '@actual-app/crdt';
 
-import { type Message } from '../sync';
+import type { Message } from '../sync';
 
 import { basic as defaultMockData } from './mockData.json';
 

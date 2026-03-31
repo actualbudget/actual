@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from 'loot-core/types/models';
 
 import { Account } from './Account';
 import { SecondaryItem } from './SecondaryItem';
 
-import { moveAccount } from '@desktop-client/accounts/accountsSlice';
+import { useMoveAccountMutation } from '@desktop-client/accounts';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useClosedAccounts } from '@desktop-client/hooks/useClosedAccounts';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
@@ -17,21 +17,20 @@ import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useOffBudgetAccounts } from '@desktop-client/hooks/useOffBudgetAccounts';
 import { useOnBudgetAccounts } from '@desktop-client/hooks/useOnBudgetAccounts';
 import { useUpdatedAccounts } from '@desktop-client/hooks/useUpdatedAccounts';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useSelector } from '@desktop-client/redux';
 import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 const fontWeight = 600;
 
 export function Accounts() {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
   const [isDragging, setIsDragging] = useState(false);
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const failedAccounts = useFailedAccounts();
   const updatedAccounts = useUpdatedAccounts();
-  const offbudgetAccounts = useOffBudgetAccounts();
-  const onBudgetAccounts = useOnBudgetAccounts();
-  const closedAccounts = useClosedAccounts();
+  const { data: offbudgetAccounts = [] } = useOffBudgetAccounts();
+  const { data: onBudgetAccounts = [] } = useOnBudgetAccounts();
+  const { data: closedAccounts = [] } = useClosedAccounts();
   const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
 
   const getAccountPath = (account: AccountEntity) => `/accounts/${account.id}`;
@@ -43,6 +42,8 @@ export function Accounts() {
   function onDragChange(drag: { state: string }) {
     setIsDragging(drag.state === 'start');
   }
+
+  const moveAccount = useMoveAccountMutation();
 
   const makeDropPadding = (i: number) => {
     if (i === 0) {
@@ -56,16 +57,16 @@ export function Accounts() {
 
   async function onReorder(
     id: string,
-    dropPos: 'top' | 'bottom',
-    targetId: unknown,
+    dropPos: 'top' | 'bottom' | null,
+    targetId: string,
   ) {
-    let targetIdToMove = targetId;
+    let targetIdToMove: string | null = targetId;
     if (dropPos === 'bottom') {
       const idx = accounts.findIndex(a => a.id === targetId) + 1;
       targetIdToMove = idx < accounts.length ? accounts[idx].id : null;
     }
 
-    dispatch(moveAccount({ id, targetId: targetIdToMove as string }));
+    moveAccount.mutate({ id, targetId: targetIdToMove });
   }
 
   const onToggleClosedAccounts = () => {
@@ -96,6 +97,7 @@ export function Accounts() {
           to="/accounts"
           query={bindings.allAccountBalance()}
           style={{ fontWeight, marginTop: 15 }}
+          isExactPathMatch
         />
 
         {onBudgetAccounts.length > 0 && (

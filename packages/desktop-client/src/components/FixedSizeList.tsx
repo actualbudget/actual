@@ -1,13 +1,6 @@
 // @ts-strict-ignore
-import {
-  createRef,
-  PureComponent,
-  type ReactNode,
-  type Ref,
-  type RefObject,
-  type UIEvent,
-  type CSSProperties,
-} from 'react';
+import { createRef, PureComponent } from 'react';
+import type { CSSProperties, ReactNode, Ref, RefObject, UIEvent } from 'react';
 
 import { View } from '@actual-app/components/view';
 import memoizeOne from 'memoize-one';

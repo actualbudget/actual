@@ -2,12 +2,13 @@
 // We have to bundle in JS migrations manually to avoid having to `eval`
 // them which doesn't play well with CSP. There isn't great, and eventually
 // we can remove this migration.
-import { type Database } from '@jlongster/sql.js';
+import type { Database } from '@jlongster/sql.js';
 
 import m1632571489012 from '../../../migrations/1632571489012_remove_cache';
 import m1722717601000 from '../../../migrations/1722717601000_reports_move_selected_categories';
 import m1722804019000 from '../../../migrations/1722804019000_create_dashboard_table';
 import m1723665565000 from '../../../migrations/1723665565000_prefs';
+import m1765518577215 from '../../../migrations/1765518577215_multiple_dashboards';
 import * as fs from '../../platform/server/fs';
 import { logger } from '../../platform/server/log';
 import * as sqlite from '../../platform/server/sqlite';
@@ -20,6 +21,7 @@ const javascriptMigrations = {
   1722717601000: m1722717601000,
   1722804019000: m1722804019000,
   1723665565000: m1723665565000,
+  1765518577215: m1765518577215,
 };
 
 export async function withMigrationsDir(
@@ -53,17 +55,17 @@ async function patchBadMigrations(db: Database) {
   const newFiltersMigration = 1688749527273;
   const appliedIds = await getAppliedMigrations(db);
   if (appliedIds.includes(badFiltersMigration)) {
-    await sqlite.runQuery(db, 'DELETE FROM __migrations__ WHERE id = ?', [
+    sqlite.runQuery(db, 'DELETE FROM __migrations__ WHERE id = ?', [
       badFiltersMigration,
     ]);
-    await sqlite.runQuery(db, 'INSERT INTO __migrations__ (id) VALUES (?)', [
+    sqlite.runQuery(db, 'INSERT INTO __migrations__ (id) VALUES (?)', [
       newFiltersMigration,
     ]);
   }
 }
 
 export async function getAppliedMigrations(db: Database): Promise<number[]> {
-  const rows = await sqlite.runQuery<{ id: number }>(
+  const rows = sqlite.runQuery<{ id: number }>(
     db,
     'SELECT * FROM __migrations__ ORDER BY id ASC',
     [],
@@ -118,7 +120,7 @@ async function applyJavaScript(db, id) {
 
 async function applySql(db, sql) {
   try {
-    await sqlite.execQuery(db, sql);
+    sqlite.execQuery(db, sql);
   } catch (e) {
     logger.log('Error applying sql:', sql);
     throw e;
@@ -136,7 +138,7 @@ export async function applyMigration(
   } else {
     await applySql(db, code);
   }
-  await sqlite.runQuery(db, 'INSERT INTO __migrations__ (id) VALUES (?)', [
+  sqlite.runQuery(db, 'INSERT INTO __migrations__ (id) VALUES (?)', [
     getMigrationId(name),
   ]);
 }
@@ -145,15 +147,29 @@ function checkDatabaseValidity(
   appliedIds: number[],
   available: string[],
 ): void {
-  for (let i = 0; i < appliedIds.length; i++) {
-    if (
-      i >= available.length ||
-      appliedIds[i] !== getMigrationId(available[i])
-    ) {
-      logger.error('Database is out of sync with migrations:', {
+  if (appliedIds.length > available.length) {
+    logger.error(
+      'Database is out of sync with migrations (index past available):',
+      {
         appliedIds,
         available,
-      });
+      },
+    );
+    throw new Error('out-of-sync-migrations');
+  }
+
+  for (let i = 0; i < appliedIds.length; i++) {
+    if (appliedIds[i] !== getMigrationId(available[i])) {
+      logger.error(
+        'Database is out of sync with migrations (migration id mismatch):',
+        {
+          appliedIds,
+          available,
+          missing: available.filter(
+            m => !appliedIds.includes(getMigrationId(m)),
+          ),
+        },
+      );
       throw new Error('out-of-sync-migrations');
     }
   }

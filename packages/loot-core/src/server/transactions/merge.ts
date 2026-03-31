@@ -1,9 +1,9 @@
 import { q } from '../../shared/query';
 import {
-  ungroupTransactions,
   deleteTransaction as sharedDeleteTransaction,
+  ungroupTransactions,
 } from '../../shared/transactions';
-import { type TransactionEntity } from '../../types/models';
+import type { TransactionEntity } from '../../types/models';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
 
@@ -81,6 +81,7 @@ export async function mergeTransactions(
       notes: keep.notes || drop.notes,
       cleared: keep.cleared || drop.cleared,
       reconciled: keep.reconciled || drop.reconciled,
+      schedule: keep.schedule || drop.schedule,
     } as unknown as TransactionEntity);
   } else {
     // Normal merge without subtransactions
@@ -91,6 +92,7 @@ export async function mergeTransactions(
       notes: keep.notes || drop.notes,
       cleared: keep.cleared || drop.cleared,
       reconciled: keep.reconciled || drop.reconciled,
+      schedule: keep.schedule || drop.schedule,
     } as TransactionEntity);
   }
 

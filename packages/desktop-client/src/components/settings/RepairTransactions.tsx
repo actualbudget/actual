@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
@@ -7,8 +7,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
-import { type Handlers } from 'loot-core/types/handlers';
+import { send } from 'loot-core/platform/client/connection';
+import type { Handlers } from 'loot-core/types/handlers';
 
 import { Setting } from './UI';
 
@@ -151,7 +151,7 @@ export function RepairTransactions() {
           relating to split transactions or transfers and the "Reset budget
           cache" button above does not help, this tool may fix them. Some
           examples of bugs include seeing blank payees on splits or incorrect
-          account balances. This tool does four things:
+          account balances. This tool does six things:
         </Text>
         <ul style={{ margin: 0, paddingLeft: '1.5em' }}>
           <li style={{ marginBottom: '0.5em' }}>

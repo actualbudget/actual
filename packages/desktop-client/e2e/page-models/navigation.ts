@@ -1,4 +1,4 @@
-import { type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 import { AccountPage } from './account-page';
 import { BankSyncPage } from './bank-sync-page';

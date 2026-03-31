@@ -43,12 +43,12 @@ through the list of available commands. You can also quickly move to any of the 
 - <Key k="0" /> (zero) View the current month.
 - <Key arrow="left" /> View the previous month.
 - <Key arrow="right" /> View the next month.
-  
+
 ### Account page shortcuts
 
 - <Key mod="ctrl" k="B" /> Initiate bank sync.
 - <Key mod="ctrl" k="I" /> ( i ) Import transactions.
-- <Key k="t" /> Add new transaction with date picker open, or open date picker and set date for selected transactions.
+- <Key k="t" /> Add new transaction with date picker open.
 - <Key k="f" /> Show only selected transactions. If no transaction is selected, it brings up the Filter dropdown menu.
 
 #### Selection shortcuts
@@ -60,7 +60,7 @@ through the list of available commands. You can also quickly move to any of the 
 - <Key k="K" /> or <Key arrow="up" /> With a transaction selected, move to the next transaction up. Hold to scroll up.
 
 #### Transaction shortcuts
-  
+
 - <Key k="enter" /> when editing will move down. In a dropdown, this will save the value and close the dropdown. in either the Payment or Deposit columns this will add the transaction; the form remains open for the next addition.
 - <Key mod="shift" k="enter" /> when editing will move up. In a dropdown, this will save the value and close the dropdown.
 - <Key mod="ctrl" k="enter" /> will add the transaction and close the form regardless of where you are editing.
@@ -75,7 +75,7 @@ Transaction(s) must be selected for the following shortcuts, or as noted.
 See [Bulk Actions](/docs/transactions/bulk-editing.md) for guidance on working with multiple transactions.
 :::
 
-- <Key k="t" /> Open date picker and set date for selected transactions or open a new transaction if none are selected.
+- <Key k="e" /> Open date picker and set date for selected transactions.
 - <Key k="p" /> Set payee for selected transactions.
 - <Key k="n" /> Set notes for selected transactions.
 - <Key k="c" /> Set category for selected transactions.

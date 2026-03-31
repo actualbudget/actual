@@ -1,7 +1,7 @@
 import murmurhash from 'murmurhash';
 import { v4 as uuidv4 } from 'uuid';
 
-import { type TrieNode } from './merkle';
+import type { TrieNode } from './merkle';
 
 /**
  * Hybrid Unique Logical Clock (HULC) timestamp generator

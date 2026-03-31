@@ -1,18 +1,16 @@
-import React, {
-  type MouseEventHandler,
-  type ReactNode,
-  type ComponentProps,
-} from 'react';
+import React from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 
-import { type CSSProperties } from '@actual-app/components/styles';
-import { View } from '@actual-app/components/view';
+import { Button } from '@actual-app/components/button';
+import type { CSSProperties } from '@actual-app/components/styles';
+import type { View } from '@actual-app/components/view';
 
 import { Link } from '@desktop-client/components/common/Link';
 
 type ItemContentProps = {
   style: ComponentProps<typeof View>['style'];
   to: string;
-  onClick: MouseEventHandler<HTMLDivElement>;
+  onClick: ComponentProps<typeof Button>['onPress'];
   activeStyle: CSSProperties;
   children: ReactNode;
   forceActive?: boolean;
@@ -27,21 +25,17 @@ export function ItemContent({
   children,
 }: ItemContentProps) {
   return onClick ? (
-    <View
-      role="button"
-      tabIndex={0}
+    <Button
+      variant="bare"
       style={{
+        justifyContent: 'flex-start',
         ...style,
-        touchAction: 'auto',
-        userSelect: 'none',
-        userDrag: 'none',
-        cursor: 'pointer',
         ...(forceActive ? activeStyle : {}),
       }}
-      onClick={onClick}
+      onPress={onClick}
     >
       {children}
-    </View>
+    </Button>
   ) : (
     <Link variant="internal" to={to} style={style} activeStyle={activeStyle}>
       {children}

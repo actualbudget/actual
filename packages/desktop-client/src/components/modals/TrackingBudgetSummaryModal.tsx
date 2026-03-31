@@ -16,7 +16,7 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type TrackingBudgetSummaryModalProps = Extract<
   ModalType,
@@ -30,11 +30,11 @@ export function TrackingBudgetSummaryModal({
   const currentMonth = monthUtils.currentMonth();
   return (
     <Modal name="tracking-budget-summary">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Budget Summary')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <SheetNameProvider name={sheetForMonth(month)}>
             <SpaceBetween

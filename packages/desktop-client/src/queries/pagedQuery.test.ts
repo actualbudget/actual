@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import * as fetch from 'loot-core/platform/client/fetch';
+import * as connection from 'loot-core/platform/client/connection';
 import { subDays } from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { resetTracer, tracer } from 'loot-core/shared/test-helpers';
@@ -125,10 +125,10 @@ async function mockSend(name, args, { delay }) {
 }
 
 function mockServer({ send = mockSend, listen = mockListen }) {
-  vi.spyOn(fetch, 'send').mockImplementation((name, args) => {
+  vi.spyOn(connection, 'send').mockImplementation((name, args) => {
     return send(name, args, { delay: 0 });
   });
-  vi.spyOn(fetch, 'listen').mockImplementation(listen);
+  vi.spyOn(connection, 'listen').mockImplementation(listen);
 }
 
 function clearMockServer() {
@@ -275,15 +275,15 @@ describe('pagedQuery', () => {
     // Users should never call `run` manually but we'll do it to
     // test
 
-    lq.run();
+    void lq.run();
     await wait(0);
-    lq.run();
+    void lq.run();
     await wait(0);
-    lq.run();
+    void lq.run();
     await wait(0);
-    lq.run();
+    void lq.run();
     await wait(0);
-    lq.run();
+    void lq.run();
 
     // Wait for the same delay the server has
     await wait(500);
@@ -469,10 +469,10 @@ describe('pagedQuery', () => {
     await tracer.expect('server-query', ['id']);
     await tracer.expect('data', vi.fn());
 
-    paged.fetchNext();
-    paged.fetchNext();
+    void paged.fetchNext();
+    void paged.fetchNext();
     await wait(2);
-    paged.fetchNext();
+    void paged.fetchNext();
 
     await tracer.expect('server-query', ['id']);
     await tracer.expect('data', vi.fn());
@@ -538,7 +538,7 @@ describe('pagedQuery', () => {
 
     tracer.start();
 
-    paged.fetchNext().then(() => {
+    void paged.fetchNext().then(() => {
       tracer.event('page-finished');
     });
 
@@ -586,7 +586,7 @@ describe('pagedQuery', () => {
     tracer.start();
 
     const item = data.find(row => row.id === 300);
-    paged.refetchUpToRow(item.id, { field: 'date', order: 'desc' });
+    void paged.refetchUpToRow(item.id, { field: 'date', order: 'desc' });
 
     await tracer.expect(
       'server-query',

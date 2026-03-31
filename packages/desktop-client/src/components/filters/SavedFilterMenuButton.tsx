@@ -7,10 +7,10 @@ import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { send, sendCatch } from 'loot-core/platform/client/fetch';
-import {
-  type TransactionFilterEntity,
-  type RuleConditionEntity,
+import { send, sendCatch } from 'loot-core/platform/client/connection';
+import type {
+  RuleConditionEntity,
+  TransactionFilterEntity,
 } from 'loot-core/types/models';
 
 import { FilterMenu } from './FilterMenu';

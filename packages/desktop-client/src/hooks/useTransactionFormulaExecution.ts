@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useLocale } from './useLocale';
 
@@ -113,7 +113,7 @@ export function useTransactionFormulaExecution(
       }
     }
 
-    executeFormula();
+    void executeFormula();
 
     return () => {
       cancelled = true;

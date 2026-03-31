@@ -2,10 +2,19 @@
   "name": "@actual-app/ci-actions",
   "private": true,
   "type": "module",
-  "devDependencies": {
-    "vitest": "^4.0.9"
-  },
   "scripts": {
-    "test": "vitest --run"
+    "tsx": "bin/tsx",
+    "test": "vitest --run",
+    "typecheck": "tsgo -b"
+  },
+  "devDependencies": {
+    "@typescript/native-preview": "^7.0.0-dev.20260309.1",
+    "extensionless": "^2.0.6",
+    "vitest": "^4.1.0"
+  },
+  "extensionless": {
+    "lookFor": [
+      "ts"
+    ]
   }
 }

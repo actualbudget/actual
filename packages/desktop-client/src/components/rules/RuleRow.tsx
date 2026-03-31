@@ -13,12 +13,12 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { friendlyOp, translateRuleStage } from 'loot-core/shared/rules';
-import { type RuleEntity } from 'loot-core/types/models';
+import type { RuleEntity } from 'loot-core/types/models';
 
 import { ActionExpression } from './ActionExpression';
 import { ConditionExpression } from './ConditionExpression';
 
-import { SelectCell, Row, Field, Cell } from '@desktop-client/components/table';
+import { Cell, Field, Row, SelectCell } from '@desktop-client/components/table';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
 import { groupActionsBySplitIndex } from '@desktop-client/util/ruleUtils';
@@ -99,7 +99,7 @@ export const RuleRow = memo(
                   onEditRule(rule);
                   break;
                 default:
-                  throw new Error(`Unrecognized menu option: ${name}`);
+                  throw new Error(`Unrecognized menu option: ${String(name)}`);
               }
               setMenuOpen(false);
             }}

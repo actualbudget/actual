@@ -1,6 +1,6 @@
 import * as asyncStorage from '../../platform/server/asyncStorage';
 import { logger } from '../../platform/server/log';
-import { type OpenIdConfig } from '../../types/models';
+import type { OpenIdConfig } from '../../types/models';
 import { createApp } from '../app';
 import * as encryption from '../encryption';
 import { PostError } from '../errors';
@@ -174,6 +174,7 @@ async function getUser() {
         userId = null,
         displayName = null,
         loginMethod = null,
+        prefs: serverPrefs,
       } = {},
     } = JSON.parse(res) || {};
 
@@ -195,6 +196,7 @@ async function getUser() {
       displayName,
       loginMethod,
       tokenExpired,
+      serverPrefs,
     };
   } catch (e) {
     logger.log(e);

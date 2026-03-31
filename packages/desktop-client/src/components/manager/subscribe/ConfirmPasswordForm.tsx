@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { type ChangeEvent, type ReactNode, useState } from 'react';
+import React, { useState } from 'react';
+import type { ChangeEvent, ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { ButtonWithLoading } from '@actual-app/components/button';

@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { t } from 'i18next';
 
-import { type FieldValueTypes, type RuleConditionOp } from '../types/models';
+import type { FieldValueTypes, RuleConditionOp } from '../types/models';
 
 // For now, this info is duplicated from the backend. Figure out how
 // to share it later.
@@ -68,9 +68,14 @@ const FIELD_INFO = {
   payee: { type: 'id', disallowedOps: new Set(['onBudget', 'offBudget']) },
   payee_name: { type: 'string' },
   date: { type: 'date' },
-  notes: { type: 'string' },
+  notes: { type: 'string', disallowedOps: new Set(['oneOf', 'notOneOf']) },
   amount: { type: 'number' },
   category: {
+    type: 'id',
+    disallowedOps: new Set(['onBudget', 'offBudget']),
+    internalOps: new Set(['and']),
+  },
+  category_group: {
     type: 'id',
     disallowedOps: new Set(['onBudget', 'offBudget']),
     internalOps: new Set(['and']),
@@ -113,10 +118,11 @@ export function getValidOps(field: keyof FieldValueTypes): RuleConditionOp[] {
   );
 }
 
-export function getAllocationMethods() {
+export function getAllocationMethods(hasFormulaMode = false) {
   return {
     'fixed-amount': t('a fixed amount'),
     'fixed-percent': t('a fixed percent of the remainder'),
+    ...(hasFormulaMode && { formula: t('based on a formula') }),
     remainder: t('an equal portion of the remainder'),
   };
 }
@@ -146,6 +152,8 @@ export function mapField(field, opts?) {
       return t('date');
     case 'category':
       return t('category');
+    case 'category_group':
+      return t('category group');
     case 'notes':
       return t('notes');
     case 'payee':

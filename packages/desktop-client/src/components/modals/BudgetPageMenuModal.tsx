@@ -1,7 +1,5 @@
-import React, {
-  type ComponentPropsWithoutRef,
-  type CSSProperties,
-} from 'react';
+import React from 'react';
+import type { ComponentPropsWithoutRef, CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
@@ -14,7 +12,7 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type BudgetPageMenuModalProps = Extract<
   ModalType,
@@ -35,11 +33,11 @@ export function BudgetPageMenuModal({
 
   return (
     <Modal name="budget-page-menu">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             showLogo
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <BudgetPageMenu
             getItemStyle={() => defaultMenuItemStyle}

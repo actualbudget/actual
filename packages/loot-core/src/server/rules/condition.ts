@@ -3,19 +3,19 @@ import * as dateFns from 'date-fns';
 
 import { logger } from '../../platform/server/log';
 import {
-  monthFromDate,
-  yearFromDate,
-  isBefore,
-  isAfter,
   addDays,
-  subDays,
+  isAfter,
+  isBefore,
+  monthFromDate,
   parseDate,
+  subDays,
+  yearFromDate,
 } from '../../shared/months';
 import {
-  sortNumbers,
+  FIELD_TYPES,
   getApproxNumberThreshold,
   isValidOp,
-  FIELD_TYPES,
+  sortNumbers,
 } from '../../shared/rules';
 
 import {

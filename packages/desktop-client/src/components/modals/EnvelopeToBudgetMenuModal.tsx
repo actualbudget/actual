@@ -1,4 +1,5 @@
-import React, { type CSSProperties } from 'react';
+import React from 'react';
+import type { CSSProperties } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -9,7 +10,7 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type EnvelopeToBudgetMenuModalProps = Extract<
   ModalType,
@@ -33,11 +34,11 @@ export function EnvelopeToBudgetMenuModal({
 
   return (
     <Modal name="envelope-summary-to-budget-menu">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             showLogo
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <ToBudgetMenu
             getItemStyle={() => defaultMenuItemStyle}

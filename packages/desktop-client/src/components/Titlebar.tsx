@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
-import { Routes, Route, useLocation } from 'react-router';
+import { Route, Routes, useLocation } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -13,13 +13,14 @@ import {
   SvgViewShow,
 } from '@actual-app/components/icons/v2';
 import { SpaceBetween } from '@actual-app/components/space-between';
-import { styles, type CSSProperties } from '@actual-app/components/styles';
+import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { listen } from 'loot-core/platform/client/fetch';
+import { listen } from 'loot-core/platform/client/connection';
 import { isDevelopmentEnvironment } from 'loot-core/shared/environment';
 import * as Platform from 'loot-core/shared/platform';
 
@@ -105,11 +106,11 @@ function PrivacyButton({ style }: PrivacyButtonProps) {
   );
 }
 
-type SyncButtonProps = {
+type ServerSyncButtonProps = {
   style?: CSSProperties;
   isMobile?: boolean;
 };
-function SyncButton({ style, isMobile = false }: SyncButtonProps) {
+function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
   const { t } = useTranslation();
   const [cloudFileId] = useMetadataPref('cloudFileId');
   const dispatch = useDispatch();
@@ -165,7 +166,7 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
       : syncState === 'disabled' ||
           syncState === 'offline' ||
           syncState === 'local'
-        ? theme.tableTextLight
+        ? theme.buttonBareDisabledText
         : 'inherit';
 
   const activeStyle = isMobile
@@ -212,7 +213,7 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
   return (
     <Button
       variant="bare"
-      aria-label={t('Sync')}
+      aria-label={t('Server Sync')}
       className={css({
         ...(isMobile
           ? {
@@ -229,6 +230,8 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
         '&[data-pressed]': activeStyle,
       })}
       onPress={onSync}
+      isDisabled={syncState === 'offline'}
+      aria-disabled={syncState === 'offline'}
     >
       {isMobile ? (
         syncState === 'error' ? (
@@ -242,11 +245,7 @@ function SyncButton({ style, isMobile = false }: SyncButtonProps) {
         <AnimatedRefresh animating={syncing} />
       )}
       <Text style={isMobile ? { ...mobileTextStyle } : { marginLeft: 3 }}>
-        {syncState === 'disabled'
-          ? t('Disabled')
-          : syncState === 'offline'
-            ? t('Offline')
-            : t('Sync')}
+        {syncState === 'disabled' ? t('Disabled') : null}
       </Text>
     </Button>
   );
@@ -321,7 +320,7 @@ export function Titlebar({ style }: TitlebarProps) {
 
       <Routes>
         <Route
-          path="/accounts"
+          path="*"
           element={
             location.state?.goBack ? (
               <Button variant="bare" onPress={() => navigate(-1)}>
@@ -339,15 +338,13 @@ export function Titlebar({ style }: TitlebarProps) {
         <Route path="/accounts/:id" element={<AccountSyncCheck />} />
 
         <Route path="/budget" element={<BudgetTitlebar />} />
-
-        <Route path="*" element={null} />
       </Routes>
       <View style={{ flex: 1 }} />
       <SpaceBetween gap={10}>
         <UncategorizedButton />
         {isDevelopmentEnvironment() && !isTestEnv && <ThemeSelector />}
         <PrivacyButton />
-        {serverURL ? <SyncButton /> : null}
+        {serverURL ? <ServerSyncButton /> : null}
         <LoggedInUser />
         <HelpMenu />
       </SpaceBetween>

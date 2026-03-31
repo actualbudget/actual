@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { fastSetMerge } from '../../shared/util';
 
-import { type Rule } from './rule';
+import type { Rule } from './rule';
 
 export class RuleIndexer {
   field: string;

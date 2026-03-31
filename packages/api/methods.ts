@@ -5,16 +5,17 @@ import type {
   APIFileEntity,
   APIPayeeEntity,
   APIScheduleEntity,
-} from 'loot-core/server/api-models';
-import type { Query } from 'loot-core/shared/query';
-import type { Handlers } from 'loot-core/types/handlers';
+  APITagEntity,
+} from '@actual-app/core/server/api-models';
+import { lib } from '@actual-app/core/server/main';
+import type { Query } from '@actual-app/core/shared/query';
+import type { ImportTransactionsOpts } from '@actual-app/core/types/api-handlers';
+import type { Handlers } from '@actual-app/core/types/handlers';
 import type {
   ImportTransactionEntity,
   RuleEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
-
-import * as injected from './injected';
+} from '@actual-app/core/types/models';
 
 export { q } from './app/query';
 
@@ -22,7 +23,7 @@ function send<K extends keyof Handlers, T extends Handlers[K]>(
   name: K,
   args?: Parameters<T>[0],
 ): Promise<Awaited<ReturnType<T>>> {
-  return injected.send(name, args);
+  return lib.send(name, args);
 }
 
 export async function runImport(
@@ -124,11 +125,6 @@ export function addTransactions(
     runTransfers,
   });
 }
-
-export type ImportTransactionsOpts = {
-  defaultCleared?: boolean;
-  dryRun?: boolean;
-};
 
 export function importTransactions(
   accountId: APIAccountEntity['id'],
@@ -272,6 +268,25 @@ export function updatePayee(
 
 export function deletePayee(id: APIPayeeEntity['id']) {
   return send('api/payee-delete', { id });
+}
+
+export function getTags() {
+  return send('api/tags-get');
+}
+
+export function createTag(tag: Omit<APITagEntity, 'id'>) {
+  return send('api/tag-create', { tag });
+}
+
+export function updateTag(
+  id: APITagEntity['id'],
+  fields: Partial<Omit<APITagEntity, 'id'>>,
+) {
+  return send('api/tag-update', { id, fields });
+}
+
+export function deleteTag(id: APITagEntity['id']) {
+  return send('api/tag-delete', { id });
 }
 
 export function mergePayees(

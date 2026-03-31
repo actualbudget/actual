@@ -1,13 +1,12 @@
-// @ts-strict-ignore
 import React, {
   createContext,
-  useEffect,
-  useRef,
-  useLayoutEffect,
-  useState,
   useContext,
-  type Context,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
 } from 'react';
+import type { DropPosition as AriaDropPosition } from 'react-aria';
 import { useDrag, useDrop } from 'react-dnd';
 
 import { theme } from '@actual-app/components/theme';
@@ -47,10 +46,10 @@ export function useDraggable<T>({
   const [, dragRef] = useDrag({
     type,
     item: () => {
-      _onDragChange.current({ state: 'start-preview', type, item });
+      void _onDragChange.current({ state: 'start-preview', type, item });
 
       setTimeout(() => {
-        _onDragChange.current({ state: 'start' });
+        void _onDragChange.current({ state: 'start' });
       }, 0);
 
       return { type, item };
@@ -58,7 +57,7 @@ export function useDraggable<T>({
     collect: monitor => ({ isDragging: monitor.isDragging() }),
 
     end(dragState) {
-      _onDragChange.current({ state: 'end', type, item: dragState.item });
+      void _onDragChange.current({ state: 'end', type, item: dragState.item });
     },
 
     canDrag() {
@@ -68,14 +67,14 @@ export function useDraggable<T>({
 
   useLayoutEffect(() => {
     _onDragChange.current = onDragChange;
-  });
+  }, [onDragChange]);
 
   return { dragRef };
 }
 
 export type OnDropCallback = (
   id: string,
-  dropPos: DropPosition,
+  dropPos: DropPosition | null,
   targetId: string,
 ) => Promise<void> | void;
 
@@ -94,7 +93,8 @@ export function useDroppable<T extends { id: string }>({
   onDrop,
   onLongHover,
 }: UseDroppableArgs) {
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement | null>(null);
+  const onLongHoverRef = useRef(onLongHover);
   const [dropPos, setDropPos] = useState<DropPosition | null>(null);
 
   const [{ isOver }, dropRef] = useDrop<
@@ -104,13 +104,15 @@ export function useDroppable<T extends { id: string }>({
   >({
     accept: types,
     drop({ item }) {
-      onDrop(item.id, dropPos, id);
+      void onDrop(item.id, dropPos, id);
     },
     hover(_, monitor) {
+      if (!ref.current) return;
       const hoverBoundingRect = ref.current.getBoundingClientRect();
       const hoverMiddleY =
         (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
       const clientOffset = monitor.getClientOffset();
+      if (!clientOffset) return;
       const hoverClientY = clientOffset.y - hoverBoundingRect.top;
       const pos: DropPosition = hoverClientY < hoverMiddleY ? 'top' : 'bottom';
 
@@ -123,12 +125,20 @@ export function useDroppable<T extends { id: string }>({
   const handleDropRef = useDragRef(dropRef);
 
   useEffect(() => {
-    let timeout;
-    if (onLongHover && isOver) {
-      timeout = setTimeout(onLongHover, 700);
+    onLongHoverRef.current = onLongHover;
+  }, [onLongHover]);
+
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+    if (onLongHoverRef.current && isOver) {
+      timeout = setTimeout(() => onLongHoverRef.current?.(), 700);
     }
 
-    return () => timeout && clearTimeout(timeout);
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    };
   }, [isOver]);
 
   return {
@@ -138,11 +148,12 @@ export function useDroppable<T extends { id: string }>({
 }
 
 type ItemPosition = 'first' | 'last' | null;
-export const DropHighlightPosContext: Context<ItemPosition> =
-  createContext(null);
+export const DropHighlightPosContext = createContext<ItemPosition>(null);
 
 type DropHighlightProps = {
-  pos: DropPosition;
+  // Supports legacy ('top'/'bottom') and react-aria ('before'/'after'/'on') positions
+  // 'on' is not used in our UI but is included for type compatibility
+  pos: DropPosition | AriaDropPosition | null;
   offset?: {
     top?: number;
     bottom?: number;
@@ -151,15 +162,17 @@ type DropHighlightProps = {
 export function DropHighlight({ pos, offset }: DropHighlightProps) {
   const itemPos = useContext(DropHighlightPosContext);
 
-  if (pos == null) {
+  // 'on' position is not supported for highlight (used for dropping onto items, not between)
+  if (pos == null || pos === 'on') {
     return null;
   }
 
   const topOffset = (itemPos === 'first' ? 2 : 0) + (offset?.top || 0);
   const bottomOffset = (itemPos === 'last' ? 2 : 0) + (offset?.bottom || 0);
 
-  const posStyle =
-    pos === 'top' ? { top: -2 + topOffset } : { bottom: -1 + bottomOffset };
+  // Support both legacy ('top'/'bottom') and aria ('before'/'after') position names
+  const isTop = pos === 'top' || pos === 'before';
+  const posStyle = isTop ? { top: topOffset } : { bottom: bottomOffset };
 
   return (
     <View

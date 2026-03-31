@@ -10,18 +10,18 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
-import { TableHeader, Row, Field } from '@desktop-client/components/table';
+import { Field, Row, TableHeader } from '@desktop-client/components/table';
 
 export function GoalTemplateModal() {
   const { t } = useTranslation();
 
   return (
     <Modal name="goal-templates" containerProps={{ style: { width: 850 } }}>
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Goal Templates')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View>
             <TableHeader>

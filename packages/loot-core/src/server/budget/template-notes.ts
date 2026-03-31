@@ -3,11 +3,11 @@ import type { Template } from '../../types/models/templates';
 import { storeTemplates } from './goal-template';
 import { parse } from './goal-template.pegjs';
 import {
-  type CategoryWithTemplateNote,
   getActiveSchedules,
   getCategoriesWithTemplateNotes,
   resetCategoryGoalDefsWithNoTemplates,
 } from './statements';
+import type { CategoryWithTemplateNote } from './statements';
 
 type Notification = {
   type?: 'message' | 'error' | 'warning' | undefined;
@@ -99,16 +99,21 @@ async function getCategoriesWithTemplates(): Promise<
 
         // Validate schedule adjustments
         if (
-          parsedTemplate.type === 'schedule' &&
+          (parsedTemplate.type === 'average' ||
+            parsedTemplate.type === 'schedule') &&
           parsedTemplate.adjustment !== undefined
         ) {
-          if (
-            parsedTemplate.adjustment <= -100 ||
-            parsedTemplate.adjustment > 1000
-          ) {
-            throw new Error(
-              `Invalid adjustment percentage (${parsedTemplate.adjustment}%). Must be between -100% and 1000%`,
-            );
+          if (parsedTemplate.adjustmentType === 'percent') {
+            if (
+              parsedTemplate.adjustment <= -100 ||
+              parsedTemplate.adjustment > 1000
+            ) {
+              throw new Error(
+                `Invalid adjustment percentage (${parsedTemplate.adjustment}%). Must be between -100% and 1000%`,
+              );
+            }
+          } else if (parsedTemplate.adjustmentType === 'fixed') {
+            //placeholder for potential validation of amount/fixed adjustments
           }
         }
 
@@ -137,8 +142,17 @@ async function getCategoriesWithTemplates(): Promise<
   return templatesForCategory;
 }
 
+function prefixFromPriority(priority: number | null): string {
+  return priority === null ? TEMPLATE_PREFIX : `${TEMPLATE_PREFIX}-${priority}`;
+}
+
 export async function unparse(templates: Template[]): Promise<string> {
-  return templates
+  // Refill will be merged into the limit template if both exist
+  // Assumption: at most one limit and one refill template per category
+  const refill = templates.find(t => t.type === 'refill');
+  const withoutRefill = templates.filter(t => t.type !== 'refill');
+
+  return withoutRefill
     .flatMap(template => {
       if (template.type === 'error') {
         return [];
@@ -148,9 +162,7 @@ export async function unparse(templates: Template[]): Promise<string> {
         return `${GOAL_PREFIX} ${template.amount}`;
       }
 
-      const prefix = template.priority
-        ? `${TEMPLATE_PREFIX}-${template.priority}`
-        : TEMPLATE_PREFIX;
+      const prefix = prefixFromPriority(template.priority);
 
       switch (template.type) {
         case 'simple': {
@@ -175,7 +187,8 @@ export async function unparse(templates: Template[]): Promise<string> {
             const adj = template.adjustment;
             const op = adj >= 0 ? 'increase' : 'decrease';
             const val = Math.abs(adj);
-            result += ` [${op} ${val}%]`;
+            const type = template.adjustmentType === 'percent' ? '%' : '';
+            result += ` [${op} ${val}${type}]`;
           }
           return result;
         }
@@ -221,14 +234,34 @@ export async function unparse(templates: Template[]): Promise<string> {
           return result;
         }
         case 'average': {
-          // #template average <numMonths> months
-          return `${prefix} average ${template.numMonths} months`;
+          let result = `${prefix} average ${template.numMonths} months`;
+
+          if (template.adjustment !== undefined) {
+            const adj = template.adjustment;
+            const op = adj >= 0 ? 'increase' : 'decrease';
+            const val = Math.abs(adj);
+            const type = template.adjustmentType === 'percent' ? '%' : '';
+            result += ` [${op} ${val}${type}]`;
+          }
+
+          // #template average <numMonths> months [increase/decrease {number|number%}]
+          return result;
         }
         case 'copy': {
           // #template copy from <lookBack> months ago [limit]
           const result = `${prefix} copy from ${template.lookBack} months ago`;
           return result;
         }
+        case 'limit': {
+          if (!refill) {
+            // #template 0 up to <limit>
+            return `${prefix} 0 ${limitToString(template)}`;
+          }
+          // #template up to <limit>
+          const mergedPrefix = prefixFromPriority(refill.priority);
+          return `${mergedPrefix} ${limitToString(template)}`;
+        }
+        // No 'refill' support since a refill requires a limit
         default:
           return [];
       }

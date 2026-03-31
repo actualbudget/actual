@@ -1,10 +1,10 @@
 // @ts-strict-ignore
 import {
+  Action,
+  Condition,
+  iterateIds,
   parseDateString,
   rankRules,
-  iterateIds,
-  Condition,
-  Action,
   Rule,
   RuleIndexer,
 } from '.';
@@ -37,8 +37,8 @@ describe('Condition', () => {
     cond = new Condition('matches', 'notes', '^fo*$', null);
     expect(cond.eval({ notes: null })).toBe(false);
 
-    cond = new Condition('oneOf', 'notes', ['foo'], null);
-    expect(cond.eval({ notes: null })).toBe(false);
+    cond = new Condition('oneOf', 'imported_payee', ['foo'], null);
+    expect(cond.eval({ imported_payee: null })).toBe(false);
 
     ['gt', 'gte', 'lt', 'lte', 'isapprox'].forEach(op => {
       const cond = new Condition(op, 'date', '2020-01-01', null);
@@ -202,11 +202,11 @@ describe('Condition', () => {
     expect(cond.eval({ notes: 'FOO' })).toBe(true);
     expect(cond.eval({ notes: 'foo2' })).toBe(false);
 
-    cond = new Condition('oneOf', 'notes', ['foo', 'bar'], null);
-    expect(cond.eval({ notes: 'foo' })).toBe(true);
-    expect(cond.eval({ notes: 'FOO' })).toBe(true);
-    expect(cond.eval({ notes: 'Bar' })).toBe(true);
-    expect(cond.eval({ notes: 'bar2' })).toBe(false);
+    cond = new Condition('oneOf', 'imported_payee', ['foo', 'bar'], null);
+    expect(cond.eval({ imported_payee: 'foo' })).toBe(true);
+    expect(cond.eval({ imported_payee: 'FOO' })).toBe(true);
+    expect(cond.eval({ imported_payee: 'Bar' })).toBe(true);
+    expect(cond.eval({ imported_payee: 'bar2' })).toBe(false);
 
     cond = new Condition('contains', 'notes', 'foo', null);
     expect(cond.eval({ notes: 'bar foo baz' })).toBe(true);
@@ -863,6 +863,102 @@ describe('Rule', () => {
         subtransactions: [{ amount: 100 }, { amount: 100 }],
       });
     });
+
+    describe('formula support', () => {
+      test('fixed-amount with formula calculates split amount', () => {
+        const rule = new Rule({
+          conditionsOp: 'and',
+          conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
+          actions: [
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              value: 0,
+              options: { splitIndex: 1, method: 'formula', formula: '=300' },
+            },
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              value: 0,
+              options: {
+                splitIndex: 2,
+                method: 'remainder',
+              },
+            },
+          ],
+        });
+
+        // Fixed amount 300, remainder = 700
+        expect(
+          rule.exec({ imported_payee: 'James', amount: 100000 }),
+        ).toMatchObject({
+          subtransactions: [{ amount: 30000 }, { amount: 70000 }],
+        });
+      });
+
+      test('fixed-percent formula calculates 50/50 split', () => {
+        const rule = new Rule({
+          conditionsOp: 'and',
+          conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
+          actions: [
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              value: 0,
+              options: {
+                splitIndex: 1,
+                method: 'formula',
+                formula: '=INTEGER_TO_AMOUNT(parent_amount) * 0.5',
+              },
+            },
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              value: 0,
+              options: {
+                splitIndex: 2,
+                method: 'remainder',
+              },
+            },
+          ],
+        });
+
+        // Fixed amount 10000 (100 in formula = $100.00 = 10000 cents), remainder = 10000
+        expect(
+          rule.exec({ imported_payee: 'James', amount: 20000 }),
+        ).toMatchObject({
+          subtransactions: [{ amount: 10000 }, { amount: 10000 }],
+        });
+      });
+
+      test('multiple fixed-amount formulas work together', () => {
+        const rule = new Rule({
+          conditionsOp: 'and',
+          conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
+          actions: [
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              value: 0,
+              options: { splitIndex: 1, method: 'formula', formula: '=100' },
+            },
+            {
+              op: 'set-split-amount',
+              field: 'amount',
+              value: 0,
+              options: { splitIndex: 2, method: 'formula', formula: '=100' },
+            },
+          ],
+        });
+
+        // Both splits get 100 each
+        expect(
+          rule.exec({ imported_payee: 'James', amount: 20000 }),
+        ).toMatchObject({
+          subtransactions: [{ amount: 10000 }, { amount: 10000 }],
+        });
+      });
+    });
   });
 
   test('rules are deterministically ranked', () => {
@@ -886,7 +982,9 @@ describe('Rule', () => {
 
     rules = [
       rule('id1', [{ op: 'contains', field: 'notes', value: 'sar' }]),
-      rule('id2', [{ op: 'oneOf', field: 'notes', value: ['jim', 'sar'] }]),
+      rule('id2', [
+        { op: 'oneOf', field: 'imported_payee', value: ['jim', 'sar'] },
+      ]),
       rule('id3', [{ op: 'is', field: 'notes', value: 'James' }]),
       rule('id4', [
         { op: 'is', field: 'notes', value: 'James' },
@@ -1052,12 +1150,19 @@ describe('RuleIndexer', () => {
   });
 
   test('indexing works with the oneOf operator', () => {
-    const indexer = new RuleIndexer({ field: 'notes', method: 'firstchar' });
+    const indexer = new RuleIndexer({
+      field: 'imported_payee',
+      method: 'firstchar',
+    });
 
     const rule = new Rule({
       conditionsOp: 'and',
       conditions: [
-        { op: 'oneOf', field: 'notes', value: ['James', 'Sarah', 'Evy'] },
+        {
+          op: 'oneOf',
+          field: 'imported_payee',
+          value: ['James', 'Sarah', 'Evy'],
+        },
       ],
       actions: [{ op: 'set', field: 'category', value: 'Food' }],
     });
@@ -1065,21 +1170,21 @@ describe('RuleIndexer', () => {
 
     const rule2 = new Rule({
       conditionsOp: 'and',
-      conditions: [{ op: 'is', field: 'notes', value: 'Georgia' }],
+      conditions: [{ op: 'is', field: 'imported_payee', value: 'Georgia' }],
       actions: [{ op: 'set', field: 'category', value: 'Food' }],
     });
     indexer.index(rule2);
 
-    expect(indexer.getApplicableRules({ notes: 'James' })).toEqual(
+    expect(indexer.getApplicableRules({ imported_payee: 'James' })).toEqual(
       new Set([rule]),
     );
-    expect(indexer.getApplicableRules({ notes: 'Evy' })).toEqual(
+    expect(indexer.getApplicableRules({ imported_payee: 'Evy' })).toEqual(
       new Set([rule]),
     );
-    expect(indexer.getApplicableRules({ notes: 'Charlotte' })).toEqual(
+    expect(indexer.getApplicableRules({ imported_payee: 'Charlotte' })).toEqual(
       new Set([]),
     );
-    expect(indexer.getApplicableRules({ notes: 'Georgia' })).toEqual(
+    expect(indexer.getApplicableRules({ imported_payee: 'Georgia' })).toEqual(
       new Set([rule2]),
     );
   });

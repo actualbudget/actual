@@ -2,19 +2,20 @@
 import {
   forwardRef,
   useCallback,
+  useEffectEvent,
   useLayoutEffect,
   useState,
-  type ComponentProps,
-  type ComponentRef,
 } from 'react';
+import type { ComponentProps, ComponentRef } from 'react';
 
+import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type PayeeEntity } from 'loot-core/types/models';
+import type { PayeeEntity } from 'loot-core/types/models';
 
 import { PayeeTableRow } from './PayeeTableRow';
 
-import { useTableNavigator, Table } from '@desktop-client/components/table';
+import { Table, useTableNavigator } from '@desktop-client/components/table';
 import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 
 // Table items require an ID to work, it's optional in the loot-core
@@ -40,11 +41,15 @@ export const PayeeTable = forwardRef<
     const [hovered, setHovered] = useState(null);
     const selectedItems = useSelectedItems();
 
-    useLayoutEffect(() => {
+    const onScrollToSelected = useEffectEvent(() => {
       const firstSelected = [...selectedItems][0] as string;
       if (typeof ref !== 'function') {
         ref.current.scrollTo(firstSelected, 'center');
       }
+    });
+
+    useLayoutEffect(() => {
+      onScrollToSelected();
     }, []);
 
     const onHover = useCallback(id => {
@@ -63,6 +68,7 @@ export const PayeeTable = forwardRef<
           navigator={tableNavigator}
           ref={ref}
           items={payees}
+          backgroundColor={theme.tableBackground}
           renderItem={({ item, editing, focusedField, onEdit }) => {
             return (
               <PayeeTableRow

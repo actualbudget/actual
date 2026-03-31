@@ -2,11 +2,11 @@
 import * as db from '../db';
 
 import {
-  migrate,
-  withMigrationsDir,
   getAppliedMigrations,
   getMigrationList,
   getPending,
+  migrate,
+  withMigrationsDir,
 } from './migrations';
 
 beforeEach(global.emptyDatabase(true));
@@ -45,7 +45,7 @@ describe('Migrations', () => {
       __dirname + '/../../mocks/migrations',
       async () => {
         // Insert a random migration id
-        await db.runQuery('INSERT INTO __migrations__ (id) VALUES (1000)');
+        db.runQuery('INSERT INTO __migrations__ (id) VALUES (1000)');
 
         try {
           await migrate(db.getDatabase());

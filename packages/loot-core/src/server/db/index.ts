@@ -1,13 +1,13 @@
 // @ts-strict-ignore
 import {
-  makeClock,
-  setClock,
-  serializeClock,
   deserializeClock,
   makeClientId,
+  makeClock,
+  serializeClock,
+  setClock,
   Timestamp,
 } from '@actual-app/crdt';
-import { type Database } from '@jlongster/sql.js';
+import type { Database, Statement } from '@jlongster/sql.js';
 import { LRUCache } from 'lru-cache';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -15,38 +15,43 @@ import * as fs from '../../platform/server/fs';
 import * as sqlite from '../../platform/server/sqlite';
 import * as monthUtils from '../../shared/months';
 import { groupById } from '../../shared/util';
-import { type TransactionEntity } from '../../types/models';
-import { type WithRequired } from '../../types/util';
+import type { TransactionEntity } from '../../types/models';
+import type { WithRequired } from '../../types/util';
 import {
-  schema,
-  schemaConfig,
   convertForInsert,
   convertForUpdate,
   convertFromSelect,
+  schema,
+  schemaConfig,
 } from '../aql';
 import {
-  toDateRepr,
   accountModel,
-  categoryModel,
   categoryGroupModel,
+  categoryModel,
   payeeModel,
+  toDateRepr,
 } from '../models';
-import { sendMessages, batchMessages } from '../sync';
+import { batchMessages, sendMessages } from '../sync';
 
-import { shoveSortOrders, SORT_INCREMENT } from './sort';
 import {
-  type DbAccount,
-  type DbBank,
-  type DbCategory,
-  type DbCategoryGroup,
-  type DbCategoryMapping,
-  type DbClockMessage,
-  type DbPayee,
-  type DbPayeeMapping,
-  type DbTag,
-  type DbTransaction,
-  type DbViewTransaction,
-  type DbViewTransactionInternalAlive,
+  shoveSortOrders,
+  shoveSortOrdersDescending,
+  SORT_INCREMENT,
+  TRANSACTION_SORT_INCREMENT,
+} from './sort';
+import type {
+  DbAccount,
+  DbBank,
+  DbCategory,
+  DbCategoryGroup,
+  DbCategoryMapping,
+  DbClockMessage,
+  DbPayee,
+  DbPayeeMapping,
+  DbTag,
+  DbTransaction,
+  DbViewTransaction,
+  DbViewTransactionInternalAlive,
 } from './types';
 
 export * from './types';
@@ -64,7 +69,7 @@ export function getDatabasePath() {
 
 export async function openDatabase(id?: string) {
   if (db) {
-    await sqlite.closeDatabase(db);
+    sqlite.closeDatabase(db);
   }
 
   dbPath = fs.join(fs.getBudgetDir(id), 'db.sqlite');
@@ -73,9 +78,9 @@ export async function openDatabase(id?: string) {
   // await execQuery('PRAGMA journal_mode = WAL');
 }
 
-export async function closeDatabase() {
+export function closeDatabase() {
   if (db) {
-    await sqlite.closeDatabase(db);
+    sqlite.closeDatabase(db);
     setDatabase(null);
   }
 }
@@ -101,7 +106,7 @@ export async function loadClock() {
     const clock = makeClock(timestamp);
     setClock(clock);
 
-    await runQuery('INSERT INTO messages_clock (id, clock) VALUES (?, ?)', [
+    runQuery('INSERT INTO messages_clock (id, clock) VALUES (?, ?)', [
       1,
       serializeClock(clock),
     ]);
@@ -110,19 +115,19 @@ export async function loadClock() {
 
 // Functions
 export function runQuery(
-  sql: string,
+  sql: string | Statement,
   params?: Array<string | number>,
   fetchAll?: false,
 ): { changes: unknown };
 
 export function runQuery<T>(
-  sql: string,
+  sql: string | Statement,
   params: Array<string | number> | undefined,
   fetchAll: true,
 ): T[];
 
 export function runQuery<T>(
-  sql: string,
+  sql: string | Statement,
   params: (string | number)[],
   fetchAll: boolean,
 ) {
@@ -139,7 +144,7 @@ export function execQuery(sql: string) {
 
 // This manages an LRU cache of prepared query statements. This is
 // only needed in hot spots when you are running lots of queries.
-let _queryCache = new LRUCache<string, string>({ max: 100 });
+let _queryCache = new LRUCache<string, Statement>({ max: 100 });
 export function cache(sql: string) {
   const cached = _queryCache.get(sql);
   if (cached) {
@@ -152,7 +157,7 @@ export function cache(sql: string) {
 }
 
 function resetQueryCache() {
-  _queryCache = new LRUCache<string, string>({ max: 100 });
+  _queryCache = new LRUCache<string, Statement>({ max: 100 });
 }
 
 export function transaction(fn: () => void) {
@@ -171,7 +176,7 @@ export async function all<T>(sql: string, params?: (string | number)[]) {
 }
 
 export async function first<T>(sql, params?: (string | number)[]) {
-  const arr = await runQuery<T>(sql, params, true);
+  const arr = runQuery<T>(sql, params, true);
   return arr.length === 0 ? null : arr[0];
 }
 
@@ -190,11 +195,7 @@ export async function run(sql, params?: (string | number)[]) {
 }
 
 export async function select(table, id) {
-  const rows = await runQuery(
-    'SELECT * FROM ' + table + ' WHERE id = ?',
-    [id],
-    true,
-  );
+  const rows = runQuery('SELECT * FROM ' + table + ' WHERE id = ?', [id], true);
   // TODO: In the next phase, we will make this function generic
   // and pass the type of the return type to `runQuery`.
   // oxlint-disable-next-line typescript/no-explicit-any
@@ -274,7 +275,7 @@ export async function deleteAll(table: string) {
 }
 
 export async function selectWithSchema(table, sql, params) {
-  const rows = await runQuery(sql, params, true);
+  const rows = runQuery(sql, params, true);
   const convertedRows = rows
     .map(row => convertFromSelect(schema, schemaConfig, table, row))
     .filter(Boolean);
@@ -331,13 +332,13 @@ export async function getCategoriesGrouped(
     ? `cg.id IN (${toSqlQueryParameters(ids)}) AND`
     : '';
   const categoryGroupQuery = `SELECT cg.* FROM category_groups cg WHERE ${categoryGroupWhereIn} cg.tombstone = 0
-    ORDER BY cg.is_income, cg.sort_order, cg.id`;
+                              ORDER BY cg.is_income, cg.sort_order, cg.id`;
 
   const categoryWhereIn = ids
     ? `c.cat_group IN (${toSqlQueryParameters(ids)}) AND`
     : '';
   const categoryQuery = `SELECT c.* FROM categories c WHERE ${categoryWhereIn} c.tombstone = 0
-    ORDER BY c.sort_order, c.id`;
+                         ORDER BY c.sort_order, c.id`;
 
   const groups = ids
     ? await all<DbCategoryGroup>(categoryGroupQuery, [...ids])
@@ -385,9 +386,20 @@ export async function insertCategoryGroup(
   return id;
 }
 
-export function updateCategoryGroup(
-  group: WithRequired<Partial<DbCategoryGroup>, 'name' | 'is_income'>,
+export async function updateCategoryGroup(
+  group: WithRequired<Partial<DbCategoryGroup>, 'id' | 'name' | 'is_income'>,
 ) {
+  const existingGroup = await first<
+    Pick<DbCategoryGroup, 'id' | 'name' | 'hidden'>
+  >(
+    `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? AND id != ? AND tombstone = 0 LIMIT 1`,
+    [group.name.toUpperCase(), group.id],
+  );
+  if (existingGroup) {
+    throw new Error(
+      `A ${existingGroup.hidden ? 'hidden ' : ''}'${existingGroup.name}' category group already exists.`,
+    );
+  }
   group = categoryGroupModel.validate(group, { update: true });
   return update('category_groups', group);
 }
@@ -760,9 +772,9 @@ export async function moveAccount(
   const { updates, sort_order } = shoveSortOrders(accounts, targetId);
   await batchMessages(async () => {
     for (const info of updates) {
-      update('accounts', info);
+      void update('accounts', info);
     }
-    update('accounts', { id, sort_order });
+    void update('accounts', { id, sort_order });
   });
 }
 
@@ -803,6 +815,142 @@ export async function deleteTransaction(transaction) {
   return delete_('transactions', transaction.id);
 }
 
+/**
+ * Move a transaction to a new position within the same date.
+ * Uses the same midpoint/shove algorithm as category reordering.
+ *
+ * @param id - The ID of the transaction to move
+ * @param accountId - The account the transaction belongs to
+ * @param targetId - The ID of the transaction to place AFTER, or null to place at top
+ */
+export async function moveTransaction(
+  id: string,
+  accountId: string,
+  targetId: string | null,
+) {
+  await batchMessages(async () => {
+    const transaction = await getTransaction(id);
+    if (!transaction) {
+      throw new Error(`Transaction not found: ${id}`);
+    }
+
+    // Validate that the transaction belongs to the specified account
+    if (transaction.account !== accountId) {
+      throw new Error(
+        `Transaction ${id} does not belong to account ${accountId}`,
+      );
+    }
+
+    // Convert date string (YYYY-MM-DD) to integer format (YYYYMMDD) for SQL query
+    const dateInt = parseInt(transaction.date.replace(/-/g, ''), 10);
+
+    // Get transactions to reorder against.
+    // If this is a child transaction, scope to siblings with the same parent_id.
+    // Otherwise, get all parent transactions for the same date (excluding children).
+    // Query in DESC order to match UI display order.
+    const isChild = transaction.is_child && transaction.parent_id;
+    const transactions = await all<{ id: string; sort_order: number }>(
+      isChild
+        ? `SELECT vt.id, vt.sort_order
+           FROM v_transactions vt
+           WHERE vt.parent_id = ?
+           ORDER BY sort_order DESC, id`
+        : `SELECT vt.id, vt.sort_order
+           FROM v_transactions vt
+           WHERE vt.account = ?
+             AND vt.date = ?
+             AND vt.is_child = 0
+           ORDER BY sort_order DESC, id`,
+      isChild ? [transaction.parent_id] : [accountId, dateInt],
+    );
+
+    // Calculate new sort_order using the descending shove algorithm
+    // - If targetId is null, place at TOP (highest sort_order)
+    // - Otherwise, place AFTER target (sort_order between target and next)
+    const { sort_order: newSortOrder, updates } = shoveSortOrdersDescending(
+      transactions,
+      targetId,
+      id,
+      TRANSACTION_SORT_INCREMENT,
+    );
+
+    // Apply updates to shuffle other transactions if needed
+    for (const info of updates) {
+      await update('transactions', info);
+      // Only move subtransactions for parent transactions
+      if (!isChild) {
+        await moveSubtransactions(info.id, info.sort_order, accountId, dateInt);
+      }
+    }
+
+    // Update the moved transaction
+    await update('transactions', { id, sort_order: newSortOrder });
+    // Only move subtransactions for parent transactions
+    if (!isChild) {
+      await moveSubtransactions(id, newSortOrder, accountId, dateInt);
+    }
+  });
+}
+
+/**
+ * Update sort_order of child/subtransactions to maintain relative ordering.
+ * Children are distributed evenly between the parent's sort_order and the
+ * next sibling's sort_order to avoid collisions.
+ *
+ * This ensures split transaction children move with their parent.
+ *
+ * @param parentId - The ID of the parent transaction
+ * @param parentSortOrder - The sort_order of the parent transaction
+ * @param accountId - The account ID to scope the next sibling lookup
+ * @param txnDate - The transaction date (as integer YYYYMMDD) to scope the next sibling lookup
+ */
+async function moveSubtransactions(
+  parentId: string,
+  parentSortOrder: number,
+  accountId: string,
+  txnDate: number,
+) {
+  const subtransactions = await all<{ id: string }>(
+    'SELECT id FROM v_transactions WHERE parent_id = ? ORDER BY sort_order DESC',
+    [parentId],
+  );
+
+  if (subtransactions.length === 0) {
+    return;
+  }
+
+  // Find the next sibling's sort_order (transaction with lower sort_order that isn't a child)
+  // Scoped to the same account and date to avoid picking transactions from other contexts
+  const nextSibling = await first<{ sort_order: number }>(
+    `SELECT sort_order FROM v_transactions
+     WHERE parent_id IS NULL
+       AND is_child = 0
+       AND sort_order < ?
+       AND account = ?
+       AND date = ?
+     ORDER BY sort_order DESC
+     LIMIT 1`,
+    [parentSortOrder, accountId, txnDate],
+  );
+
+  // Calculate the available gap for distributing children
+  // Use a sensible fallback if no next sibling exists
+  const nextSiblingSortOrder =
+    nextSibling?.sort_order ?? parentSortOrder - TRANSACTION_SORT_INCREMENT;
+  const gap = parentSortOrder - nextSiblingSortOrder;
+
+  // Distribute children evenly within the gap
+  // Avoid rounding to prevent duplicate sort_order values in tight gaps
+  for (const [index, sub] of subtransactions.entries()) {
+    const newSortOrder =
+      parentSortOrder - ((index + 1) * gap) / (subtransactions.length + 1);
+    await update('transactions', {
+      id: sub.id,
+      sort_order: newSortOrder,
+    });
+  }
+}
+
 function toSqlQueryParameters(params: unknown[]) {
   return params.map(() => '?').join(',');
 }
@@ -839,10 +987,10 @@ export function updateTag(tag) {
 export function findTags() {
   return all<{ notes: string }>(
     `
-    SELECT notes
-    FROM transactions
-    WHERE tombstone = 0 AND notes LIKE ?
-  `,
+      SELECT notes
+      FROM transactions
+      WHERE tombstone = 0 AND notes LIKE ?
+    `,
     ['%#%'],
   );
 }

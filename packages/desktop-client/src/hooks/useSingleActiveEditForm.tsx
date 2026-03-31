@@ -1,11 +1,6 @@
 // @ts-strict-ignore
-import React, {
-  type ReactNode,
-  createContext,
-  useContext,
-  useState,
-  useRef,
-} from 'react';
+import React, { createContext, useContext, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 
 type ActiveEditCleanup = () => void;
 type ActiveEditAction = () => void | ActiveEditCleanup;

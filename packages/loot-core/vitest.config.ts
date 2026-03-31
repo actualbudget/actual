@@ -19,7 +19,11 @@ export default defineConfig({
   test: {
     globals: true,
     setupFiles: ['./src/mocks/setup.ts'],
-    exclude: ['src/**/*.web.test.(js|jsx|ts|tsx)', 'node_modules'],
+    exclude: [
+      'src/platform/server/sqlite/index.test.ts',
+      'src/platform/server/fs/index.test.ts',
+      'node_modules',
+    ],
     onConsoleLog(log: string, type: 'stdout' | 'stderr'): boolean | void {
       // print only console.error
       return type === 'stderr';
@@ -27,12 +31,6 @@ export default defineConfig({
     maxWorkers: 2,
   },
   resolve: {
-    alias: [
-      {
-        find: /^@actual-app\/crdt(\/.*)?$/,
-        replacement: path.resolve(path.join(__dirname, '../crdt/src$1')),
-      },
-    ],
     extensions: resolveExtensions,
   },
   plugins: [peggyLoader()],

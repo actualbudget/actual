@@ -64,11 +64,14 @@ export type ScheduleTemplate = {
   name: string;
   full?: boolean;
   adjustment?: number;
+  adjustmentType?: 'percent' | 'fixed';
 } & BaseTemplateWithPriority;
 
 export type AverageTemplate = {
   type: 'average';
   numMonths: number;
+  adjustment?: number;
+  adjustmentType?: 'percent' | 'fixed';
 } & BaseTemplateWithPriority;
 
 export type CopyTemplate = {
@@ -88,6 +91,10 @@ export type RemainderTemplate = {
   directive: 'template';
   priority: null;
 } & BaseTemplate;
+
+export type RefillTemplate = {
+  type: 'refill';
+} & BaseTemplateWithPriority;
 
 export type GoalTemplate = {
   type: 'goal';
@@ -123,5 +130,6 @@ export type Template =
   | AverageTemplate
   | GoalTemplate
   | CopyTemplate
+  | RefillTemplate
   | LimitTemplate
   | ErrorTemplate;

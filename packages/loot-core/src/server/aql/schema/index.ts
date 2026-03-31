@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { type SchemaConfig } from '../compiler';
+import type { SchemaConfig } from '../compiler';
 
 function f(type: string, opts?: Record<string, unknown>) {
   return { type, ...opts };
@@ -182,14 +182,28 @@ export const schema = {
     goal: f('integer'),
     long_goal: f('integer'),
   },
+  dashboard_pages: {
+    id: f('id'),
+    name: f('string'),
+    tombstone: f('boolean'),
+  },
   dashboard: {
     id: f('id'),
+    dashboard_page_id: f('id', { ref: 'dashboard_pages' }),
     type: f('string', { required: true }),
     width: f('integer', { required: true }),
     height: f('integer', { required: true }),
     x: f('integer', { required: true }),
     y: f('integer', { required: true }),
     meta: f('json'),
+    tombstone: f('boolean'),
+  },
+  payee_locations: {
+    id: f('id'),
+    payee_id: f('id', { ref: 'payees', required: true }),
+    latitude: f('float', { required: true }),
+    longitude: f('float', { required: true }),
+    created_at: f('integer', { required: true }),
     tombstone: f('boolean'),
   },
 };

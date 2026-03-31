@@ -161,6 +161,16 @@ export const objects = {
         </span>
       ),
     },
+    {
+      name: 'balance_current',
+      type: 'number | null',
+      description: (
+        <span>
+          The current balance of the account as reported by bank sync. Can also
+          be set manually. Defaults to <code>null</code>
+        </span>
+      ),
+    },
   ],
 
   category: [
@@ -406,6 +416,13 @@ export const objects = {
         </span>
       ),
     },
+  ],
+
+  tag: [
+    { name: 'id', type: types.id },
+    { name: 'tag', type: 'string', required: true },
+    { name: 'color', type: 'string' },
+    { name: 'description', type: 'string' },
   ],
 
   condition: [

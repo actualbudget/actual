@@ -1,25 +1,25 @@
 import * as d from 'date-fns';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type AccountEntity,
-  type PayeeEntity,
-  type CategoryEntity,
-  type RuleConditionEntity,
-  type CategoryGroupEntity,
-  type balanceTypeOpType,
-  type sortByOpType,
-  type DataEntity,
-  type GroupedEntity,
-  type IntervalEntity,
+import type {
+  AccountEntity,
+  balanceTypeOpType,
+  CategoryEntity,
+  CategoryGroupEntity,
+  DataEntity,
+  GroupedEntity,
+  IntervalEntity,
+  PayeeEntity,
+  RuleConditionEntity,
+  sortByOpType,
 } from 'loot-core/types/models';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
+import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { calculateLegend } from './calculateLegend';
+import { fetchSpreadsheetQueryData } from './fetchSpreadsheetQueryData';
 import { filterEmptyRows } from './filterEmptyRows';
 import { filterHiddenItems } from './filterHiddenItems';
-import { makeQuery } from './makeQuery';
 import { recalculate } from './recalculate';
 import { sortData } from './sortData';
 import {
@@ -31,18 +31,20 @@ import {
 import {
   categoryLists,
   groupBySelections,
-  type QueryDataEntity,
   ReportOptions,
-  type UncategorizedEntity,
 } from '@desktop-client/components/reports/ReportOptions';
-import { type useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
+import type {
+  QueryDataEntity,
+  UncategorizedEntity,
+} from '@desktop-client/components/reports/ReportOptions';
+import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
 export type createCustomSpreadsheetProps = {
   startDate: string;
   endDate: string;
   interval: string;
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
+  budgetType?: SyncedPrefs['budgetType'];
   conditions: RuleConditionEntity[];
   conditionsOp: string;
   showEmpty: boolean;
@@ -57,7 +59,6 @@ export type createCustomSpreadsheetProps = {
   accounts?: AccountEntity[];
   graphType?: string;
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
-  setDataCheck?: (value: boolean) => void;
 };
 
 export function createCustomSpreadsheet({
@@ -65,6 +66,7 @@ export function createCustomSpreadsheet({
   endDate,
   interval,
   categories,
+  budgetType = 'envelope',
   conditions = [],
   conditionsOp,
   showEmpty,
@@ -79,7 +81,6 @@ export function createCustomSpreadsheet({
   accounts = [],
   graphType,
   firstDayOfWeekIdx,
-  setDataCheck,
 }: createCustomSpreadsheetProps) {
   const [categoryList, categoryGroup] = categoryLists(categories);
 
@@ -93,6 +94,19 @@ export function createCustomSpreadsheet({
     setData: (data: DataEntity) => void,
   ) => {
     if (groupByList.length === 0) {
+      setData({
+        data: [],
+        intervalData: [],
+        legend: [],
+        startDate,
+        endDate,
+        totalAssets: 0,
+        totalDebts: 0,
+        netAssets: 0,
+        netDebts: 0,
+        totalTotals: 0,
+        totalBudgeted: 0,
+      });
       return;
     }
 
@@ -103,30 +117,22 @@ export function createCustomSpreadsheet({
 
     let assets: QueryDataEntity[];
     let debts: QueryDataEntity[];
-    [assets, debts] = await Promise.all([
-      aqlQuery(
-        makeQuery(
-          'assets',
-          startDate,
-          endDate,
-          interval,
-          conditionsOpKey,
-          filters,
-        ),
-      ).then(({ data }) => data),
-      aqlQuery(
-        makeQuery(
-          'debts',
-          startDate,
-          endDate,
-          interval,
-          conditionsOpKey,
-          filters,
-        ),
-      ).then(({ data }) => data),
-    ]);
 
-    if (interval === 'Weekly') {
+    ({ assets, debts } = await fetchSpreadsheetQueryData({
+      balanceTypeOp,
+      startDate,
+      endDate,
+      interval,
+      categories: categories.list,
+      categoryGroups: categories.grouped,
+      conditions,
+      conditionsOp,
+      conditionsOpKey,
+      filters,
+      budgetType,
+    }));
+
+    if (interval === 'Weekly' && balanceTypeOp !== 'totalBudgeted') {
       debts = debts.map(d => {
         return {
           ...d,
@@ -216,24 +222,22 @@ export function createCustomSpreadsheet({
           if (balanceTypeOp === 'netDebts') {
             stackAmounts = netAmounts < 0 ? Math.abs(netAmounts) : 0;
           }
-          if (balanceTypeOp === 'totalTotals') {
+          if (
+            balanceTypeOp === 'totalTotals' ||
+            balanceTypeOp === 'totalBudgeted'
+          ) {
             stackAmounts += netAmounts;
           }
 
-          stacked[item.name] = stackAmounts;
+          // Use id as key to prevent collisions when categories have the same name
+          stacked[item.id || item.name] = stackAmounts;
 
-          perIntervalNetAssets =
-            netAmounts > 0
-              ? perIntervalNetAssets + netAmounts
-              : perIntervalNetAssets;
-          perIntervalNetDebts =
-            netAmounts < 0
-              ? perIntervalNetDebts + netAmounts
-              : perIntervalNetDebts;
           perIntervalTotals += netAmounts;
 
           return null;
         });
+        perIntervalNetAssets = perIntervalTotals > 0 ? perIntervalTotals : 0;
+        perIntervalNetDebts = perIntervalTotals < 0 ? perIntervalTotals : 0;
         totalAssets += perIntervalAssets;
         totalDebts += perIntervalDebts;
         netAssets += perIntervalNetAssets;
@@ -254,7 +258,10 @@ export function createCustomSpreadsheet({
           totalDebts: perIntervalDebts,
           netAssets: perIntervalNetAssets,
           netDebts: perIntervalNetDebts,
+          // `totalBudgeted` intentionally mirrors `totalTotals`; the difference is
+          // the underlying dataset when `balanceTypeOp === 'totalBudgeted'`.
           totalTotals: perIntervalTotals,
+          totalBudgeted: perIntervalTotals,
         });
 
         return arr;
@@ -323,8 +330,10 @@ export function createCustomSpreadsheet({
       totalDebts,
       netAssets,
       netDebts,
+      // `totalBudgeted` intentionally mirrors `totalTotals`; the difference is
+      // the underlying dataset when `balanceTypeOp === 'totalBudgeted'`.
       totalTotals: totalAssets + totalDebts,
+      totalBudgeted: totalAssets + totalDebts,
     });
-    setDataCheck?.(true);
   };
 }

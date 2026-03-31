@@ -1,8 +1,9 @@
-import React, {
-  type ChangeEvent,
-  type ComponentPropsWithRef,
-  type KeyboardEvent,
-  type FocusEvent,
+import React from 'react';
+import type {
+  ChangeEvent,
+  ComponentPropsWithRef,
+  FocusEvent,
+  KeyboardEvent,
 } from 'react';
 import { Input as ReactAriaInput } from 'react-aria-components';
 

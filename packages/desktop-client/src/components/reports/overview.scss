@@ -4,6 +4,10 @@
   transition: none;
 }
 
+.react-grid-item:hover {
+  z-index: 1;
+}
+
 .react-grid-item.react-grid-placeholder {
   background-color: #8719e0;
 }

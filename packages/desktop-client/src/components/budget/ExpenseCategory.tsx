@@ -1,12 +1,13 @@
 // @ts-strict-ignore
-import React, { type ComponentProps } from 'react';
+import React from 'react';
+import type { ComponentProps } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import {
-  type CategoryGroupEntity,
-  type CategoryEntity,
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
 } from 'loot-core/types/models';
 
 import { RenderMonths } from './RenderMonths';
@@ -15,12 +16,14 @@ import { SidebarCategory } from './SidebarCategory';
 import { useBudgetComponents } from '.';
 
 import {
+  DropHighlight,
   useDraggable,
   useDroppable,
-  DropHighlight,
-  type DragState,
-  type OnDragChangeCallback,
-  type OnDropCallback,
+} from '@desktop-client/components/sort';
+import type {
+  DragState,
+  OnDragChangeCallback,
+  OnDropCallback,
 } from '@desktop-client/components/sort';
 import { Row } from '@desktop-client/components/table';
 import { useDragRef } from '@desktop-client/hooks/useDragRef';
@@ -81,7 +84,7 @@ export function ExpenseCategory({
       innerRef={dropRef}
       collapsed
       style={{
-        backgroundColor: theme.tableBackground,
+        backgroundColor: theme.budgetCurrentMonth,
         opacity: cat.hidden || categoryGroup?.hidden ? 0.5 : undefined,
       }}
     >

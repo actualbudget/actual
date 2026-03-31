@@ -4,16 +4,17 @@ import { Trans, useTranslation } from 'react-i18next';
 import { SvgRightArrow2 } from '@actual-app/components/icons/v0';
 import { SvgEquals } from '@actual-app/components/icons/v1';
 import { Select } from '@actual-app/components/select';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import {
-  type MappableFieldWithExample,
-  type TransactionDirection,
+import type {
+  MappableFieldWithExample,
+  TransactionDirection,
 } from './EditSyncAccount';
 
-import { Row, Cell, TableHeader } from '@desktop-client/components/table';
+import { Cell, Row, TableHeader } from '@desktop-client/components/table';
 
 const useTransactionDirectionOptions = () => {
   const { t } = useTranslation();
@@ -103,7 +104,7 @@ export function FieldMapping({
           </Trans>
         </Text>
       ) : (
-        <>
+        <View style={styles.tableContainer}>
           <TableHeader>
             <Cell
               width={calculatedActualFieldWidth}
@@ -136,11 +137,11 @@ export function FieldMapping({
                 key={field.actualField}
                 style={{
                   fontSize: 13,
-                  backgroundColor: theme.tableRowBackgroundHover,
+                  backgroundColor: theme.tableBackground,
                   display: 'flex',
                   alignItems: 'center',
-                  border: '1px solid var(--color-tableBorder)',
                   minHeight: '40px',
+                  borderTop: '1px solid ' + theme.tableBorder,
                 }}
                 collapsed
               >
@@ -225,7 +226,7 @@ export function FieldMapping({
               </Row>
             );
           })}
-        </>
+        </View>
       )}
     </>
   );

@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 
 import { getAccountDb } from '../../../account-db';
 import { FileNotFound } from '../../errors';
-import { FilesService, File, FileUpdate } from '../../services/files-service'; // Adjust the path as necessary
+import { File, FilesService, FileUpdate } from '../../services/files-service'; // Adjust the path as necessary
 describe('FilesService', () => {
   let filesService;
   let accountDb;

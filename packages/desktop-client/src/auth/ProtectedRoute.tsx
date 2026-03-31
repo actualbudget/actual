@@ -1,12 +1,13 @@
-import { useEffect, useState, type ReactElement } from 'react';
+import { useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
 import { Trans } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
 
-import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
+import type { RemoteFile, SyncedLocalFile } from 'loot-core/types/file';
 
 import { useAuth } from './AuthProvider';
-import { type Permissions } from './types';
+import type { Permissions } from './types';
 
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useSelector } from '@desktop-client/redux';

@@ -1,7 +1,8 @@
 // @ts-strict-ignore
-import React, { useEffect, type ComponentProps } from 'react';
+import React, { useEffect } from 'react';
+import type { ComponentProps } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import AutoSizer from 'react-virtualized-auto-sizer';
+import { AutoSizer } from 'react-virtualized-auto-sizer';
 
 import { View } from '@actual-app/components/view';
 
@@ -60,7 +61,7 @@ const DynamicBudgetTable = ({
 
   useEffect(() => {
     setDisplayMax(numPossible);
-  }, [numPossible]);
+  }, [setDisplayMax, numPossible]);
 
   function getValidMonth(month) {
     const start = monthBounds.start;
@@ -162,11 +163,15 @@ type AutoSizingBudgetTableProps = Omit<
 
 export const AutoSizingBudgetTable = (props: AutoSizingBudgetTableProps) => {
   return (
-    <AutoSizer>
-      {({ width, height }) => (
-        <DynamicBudgetTable width={width} height={height} {...props} />
-      )}
-    </AutoSizer>
+    <AutoSizer
+      renderProp={({ width = 0, height = 0 }) => {
+        if (width === 0 || height === 0) {
+          return null;
+        }
+
+        return <DynamicBudgetTable width={width} height={height} {...props} />;
+      }}
+    />
   );
 };
 

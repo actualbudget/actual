@@ -5,13 +5,15 @@ import { Button } from '@actual-app/components/button';
 import { Label } from '@actual-app/components/label';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 
 import { Setting } from './UI';
 
 import {
-  useMultiuserEnabled,
   useLoginMethod,
+  useMultiuserEnabled,
 } from '@desktop-client/components/ServerContext';
+import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -21,6 +23,14 @@ export function AuthSettings() {
   const multiuserEnabled = useMultiuserEnabled();
   const loginMethod = useLoginMethod();
   const dispatch = useDispatch();
+  const serverStatus = useSyncServerStatus();
+
+  // Hide the OpenID block entirely when no server is configured
+  if (serverStatus === 'no-server') {
+    return null;
+  }
+
+  const isOffline = serverStatus === 'offline';
 
   return (
     <Setting
@@ -32,6 +42,15 @@ export function AuthSettings() {
               {loginMethod === 'openid' ? t('enabled') : t('disabled')}
             </label>
           </label>
+          {isOffline && (
+            <View>
+              <Text style={{ paddingTop: 5, color: theme.warningText }}>
+                <Trans>
+                  Server is offline. OpenID settings are unavailable.
+                </Trans>
+              </Text>
+            </View>
+          )}
           {loginMethod === 'password' && (
             <>
               <Button
@@ -40,6 +59,7 @@ export function AuthSettings() {
                   marginTop: '10px',
                 }}
                 variant="normal"
+                isDisabled={isOffline}
                 onPress={() =>
                   dispatch(
                     pushModal({
@@ -66,6 +86,7 @@ export function AuthSettings() {
                   marginTop: '10px',
                 }}
                 variant="normal"
+                isDisabled={isOffline}
                 onPress={() =>
                   dispatch(
                     pushModal({

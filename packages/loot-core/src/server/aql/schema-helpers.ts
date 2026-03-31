@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import { dayFromDate } from '../../shared/months';
-import { toDateRepr, fromDateRepr } from '../models';
+import { fromDateRepr, toDateRepr } from '../models';
 
 function isRequired(name, fieldDesc) {
   return fieldDesc.required || name === 'id';

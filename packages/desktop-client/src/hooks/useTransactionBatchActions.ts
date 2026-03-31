@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import {
@@ -11,15 +11,17 @@ import {
   updateTransaction,
 } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
-import { applyChanges, type Diff } from 'loot-core/shared/util';
-import {
-  type PayeeEntity,
-  type AccountEntity,
-  type ScheduleEntity,
-  type TransactionEntity,
+import { applyChanges, applyFindReplace } from 'loot-core/shared/util';
+import type { Diff } from 'loot-core/shared/util';
+import type {
+  AccountEntity,
+  PayeeEntity,
+  ScheduleEntity,
+  TransactionEntity,
 } from 'loot-core/types/models';
 
 import { pushModal } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
 
@@ -29,8 +31,15 @@ type BatchEditProps = {
   onSuccess?: (
     ids: Array<TransactionEntity['id']>,
     name: keyof TransactionEntity,
-    value: string | number | boolean | null,
-    mode: 'prepend' | 'append' | 'replace' | null | undefined,
+    value:
+      | Parameters<
+          Extract<ModalType, { name: 'edit-field' }>['options']['onSubmit']
+        >[1]
+      | boolean
+      | null,
+    mode: Parameters<
+      Extract<ModalType, { name: 'edit-field' }>['options']['onSubmit']
+    >[2],
   ) => void;
 };
 
@@ -73,8 +82,8 @@ export function useTransactionBatchActions() {
 
     const onChange = async (
       name: keyof TransactionEntity,
-      value: string | number | boolean | null,
-      mode?: 'prepend' | 'append' | 'replace' | null | undefined,
+      value: Parameters<NonNullable<BatchEditProps['onSuccess']>>[2],
+      mode?: Parameters<NonNullable<BatchEditProps['onSuccess']>>[3],
     ) => {
       let transactionsToChange = transactions;
 
@@ -111,12 +120,23 @@ export function useTransactionBatchActions() {
         if (name === 'notes') {
           if (mode === 'prepend') {
             valueToSet =
-              trans.notes === null ? value : `${value}${trans.notes}`;
+              trans.notes === null ? value : `${String(value)}${trans.notes}`;
           } else if (mode === 'append') {
             valueToSet =
-              trans.notes === null ? value : `${trans.notes}${value}`;
+              trans.notes === null ? value : `${trans.notes}${String(value)}`;
           } else if (mode === 'replace') {
             valueToSet = value;
+          } else if (
+            mode === 'findAndReplace' &&
+            typeof value === 'object' &&
+            'useRegex' in value
+          ) {
+            valueToSet = applyFindReplace(
+              trans.notes,
+              value.find,
+              value.replace,
+              value.useRegex,
+            );
           }
         }
         const transaction = {
@@ -256,7 +276,7 @@ export function useTransactionBatchActions() {
     if (name === 'cleared') {
       // Cleared just toggles it on/off and it depends on the data
       // loaded. Need to clean this up in the future.
-      onChange('cleared', null);
+      void onChange('cleared', null);
     } else if (name === 'category') {
       pushCategoryAutocompleteModal();
     } else if (name === 'payee') {

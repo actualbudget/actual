@@ -60,7 +60,7 @@ export function ImportActualModal() {
       setError(null);
       try {
         await dispatch(importBudget({ filepath: res[0], type: 'actual' }));
-        navigate('/budget');
+        void navigate('/budget');
       } catch (err) {
         setError(err.message);
       } finally {
@@ -71,11 +71,11 @@ export function ImportActualModal() {
 
   return (
     <Modal name="import-actual" containerProps={{ style: { width: 400 } }}>
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Import from Actual export')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ ...styles.smallText, lineHeight: 1.5, marginTop: 20 }}>
             {error && (

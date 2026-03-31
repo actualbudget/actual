@@ -6,12 +6,12 @@ import { Menu } from '@actual-app/components/menu';
 
 import { q } from 'loot-core/shared/query';
 import {
-  scheduleIsRecurring,
   extractScheduleConds,
+  scheduleIsRecurring,
 } from 'loot-core/shared/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
-import { type TransactionEntity } from 'loot-core/types/models';
+import type { TransactionEntity } from 'loot-core/types/models';
 
 import { SelectedItemsButton } from '@desktop-client/components/table';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';

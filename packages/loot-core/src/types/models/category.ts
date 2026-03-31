@@ -1,4 +1,4 @@
-import { type CategoryGroupEntity } from './category-group';
+import type { CategoryGroupEntity } from './category-group';
 
 export type CategoryEntity = {
   id: string;

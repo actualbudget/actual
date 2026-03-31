@@ -1,18 +1,19 @@
 // @ts-strict-ignore
-import React, { type CSSProperties } from 'react';
+import React from 'react';
+import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 import {
-  ComposedChart,
-  Line,
   Bar,
   CartesianGrid,
+  ComposedChart,
+  Line,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
 } from 'recharts';
 
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';

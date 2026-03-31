@@ -1,11 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import { q, type Query } from 'loot-core/shared/query';
+import { q } from 'loot-core/shared/query';
+import type { Query } from 'loot-core/shared/query';
 import {
+  getHasTransactionsQuery,
   getStatus,
   getStatusLabel,
-  getHasTransactionsQuery,
 } from 'loot-core/shared/schedules';
+import type { ScheduleStatuses } from 'loot-core/shared/schedules';
 import type {
   AccountEntity,
   ScheduleEntity,
@@ -15,10 +17,8 @@ import type {
 import { useSyncedPref } from './useSyncedPref';
 
 import { accountFilter } from '@desktop-client/queries';
-import { liveQuery, type LiveQuery } from '@desktop-client/queries/liveQuery';
-
-export type ScheduleStatusType = ReturnType<typeof getStatus>;
-export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
+import { liveQuery } from '@desktop-client/queries/liveQuery';
+import type { LiveQuery } from '@desktop-client/queries/liveQuery';
 
 export type ScheduleStatusLabelType = ReturnType<typeof getStatusLabel>;
 export type ScheduleStatusLabels = Map<

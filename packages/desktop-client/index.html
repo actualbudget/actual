@@ -31,8 +31,9 @@
       body,
       button,
       input {
-        font-family:
-          'Inter var',
+        font-family: var(
+          --font-family,
+          'Inter Variable',
           -apple-system,
           BlinkMacSystemFont,
           'Segoe UI',
@@ -45,7 +46,8 @@
           'Helvetica Neue',
           'Helvetica',
           'Arial',
-          sans-serif;
+          sans-serif
+        );
       }
 
       a {
@@ -67,8 +69,9 @@
       input,
       textarea {
         font-size: 1em;
-        font-family:
-          'Inter var',
+        font-family: var(
+          --font-family,
+          'Inter Variable',
           -apple-system,
           BlinkMacSystemFont,
           'Segoe UI',
@@ -81,7 +84,9 @@
           'Helvetica Neue',
           'Helvetica',
           'Arial',
-          sans-serif;
+          sans-serif
+        );
+        font-feature-settings: 'ss01', 'ss04';
       }
 
       html,

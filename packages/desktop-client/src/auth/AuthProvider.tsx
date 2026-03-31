@@ -1,6 +1,7 @@
-import React, { createContext, useContext, type ReactNode } from 'react';
+import React, { createContext, useContext } from 'react';
+import type { ReactNode } from 'react';
 
-import { type Permissions } from './types';
+import type { Permissions } from './types';
 
 import { useServerURL } from '@desktop-client/components/ServerContext';
 import { useSelector } from '@desktop-client/redux';

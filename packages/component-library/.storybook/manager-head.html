@@ -1,0 +1,99 @@
+<!--
+  Override the default favicon used in the Storybook in the browser tab.
+ -->
+<link
+  rel="shortcut icon"
+  type="image/x-icon"
+  href="https://design.actualbudget.org/favicon.ico"
+/>
+<link href="/global-styles.css" rel="stylesheet" />
+
+<!-- Primary meta tags -->
+<meta name="title" content="Actual Budget Design System" />
+<meta
+  name="description"
+  content="Actual Budget is a super fast and privacy-focused app for managing your finances. At its heart is the well proven and much loved Envelope Budgeting methodology."
+/>
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://design.actualbudget.org" />
+<meta property="og:title" content="Actual Budget Design System" />
+<meta
+  property="og:description"
+  content="Actual Budget is a super fast and privacy-focused app for managing your finances. At its heart is the well proven and much loved Envelope Budgeting methodology."
+/>
+<meta property="og:locale" content="en" />
+<meta property="og:image" content="https://design.actualbudget.org/og.webp" />
+<meta property="og:image:type" content="image/webp" />
+<meta property="og:image:alt" content="Actual Budget Design System" />
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://design.actualbudget.org/og.webp" />
+
+<!--
+  Override the default styles used in the Storybook svg icons for the left tree panel.
+
+  @see https://storybook.js.org/docs/react/configure/theming#css-escape-hatches
+
+  > 💡 NOTE:
+  >
+  > This is brittle way for providing custom non thenable styles for manager UI
+  >
+  > Those selectors might change on any storybook version bump.
+ -->
+
+<style>
+  #storybook-explorer-searchfield {
+    font-weight: 400 !important;
+    font-size: 14px !important;
+    line-height: 14px !important;
+  }
+
+  .sidebar-item svg,
+  .sidebar-svg-icon {
+    color: #272630 !important;
+  }
+
+  .sidebar-item[data-selected='true'] svg,
+  .sidebar-item[data-selected='true'] .sidebar-svg-icon {
+    color: #ffffff !important;
+  }
+
+  .sidebar-subheading button,
+  button[data-action='collapse-ref'] {
+    display: flex !important;
+    align-items: center !important;
+    font-weight: 600 !important;
+    font-size: 16px !important;
+    line-height: 24px !important;
+    letter-spacing: -0.01em !important;
+    text-transform: none !important;
+    color: #272630 !important;
+  }
+
+  .sidebar-subheading:hover button,
+  button[data-action='collapse-ref']:hover {
+    background-color: transparent !important;
+  }
+
+  .sidebar-item {
+    align-items: center !important;
+    font-weight: 400 !important;
+    font-size: 16px !important;
+    line-height: 24px !important;
+    color: #272630 !important;
+  }
+
+  .sidebar-item a {
+    align-items: center !important;
+  }
+
+  .sidebar-item[data-selected='true'] {
+    font-weight: 600 !important;
+    font-size: 16px !important;
+    line-height: 24px !important;
+    color: #ffffff !important;
+  }
+</style>

@@ -1,4 +1,5 @@
-import React, { type CSSProperties } from 'react';
+import React from 'react';
+import type { CSSProperties } from 'react';
 
 import { Select } from '@actual-app/components/select';
 
@@ -25,7 +26,7 @@ export function SelectField({
         option,
         hasHeaderRow
           ? option
-          : `Column ${parseInt(option) + 1} (${firstTransaction[option]})`,
+          : `Column ${parseInt(option) + 1} (${String(firstTransaction[option])})`,
       ] as const,
   );
 

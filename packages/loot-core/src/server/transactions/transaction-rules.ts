@@ -2,44 +2,44 @@
 
 import { logger } from '../../platform/server/log';
 import {
-  currentDay,
   addDays,
-  subDays,
-  parseDate,
+  currentDay,
   dayFromDate,
+  parseDate,
+  subDays,
 } from '../../shared/months';
 import { q } from '../../shared/query';
-import { sortNumbers, getApproxNumberThreshold } from '../../shared/rules';
+import { getApproxNumberThreshold, sortNumbers } from '../../shared/rules';
 import { ungroupTransaction } from '../../shared/transactions';
-import { partitionByField, fastSetMerge } from '../../shared/util';
-import {
-  type TransactionEntity,
-  type RuleActionEntity,
-  type RuleEntity,
+import { fastSetMerge, partitionByField } from '../../shared/util';
+import type {
+  RuleActionEntity,
+  RuleEntity,
+  TransactionEntity,
 } from '../../types/models';
 import { aqlQuery, schemaConfig } from '../aql';
 import * as db from '../db';
 import {
+  getAccount,
+  getCategory,
   getPayee,
   getPayeeByName,
   insertPayee,
-  getAccount,
-  getCategory,
 } from '../db';
 import { getMappings } from '../db/mappings';
 import { RuleError } from '../errors';
 import { requiredFields, toDateRepr } from '../models';
 import {
-  Condition,
   Action,
+  Condition,
+  execActions,
+  iterateIds,
+  migrateIds,
+  rankRules,
   Rule,
   RuleIndexer,
-  rankRules,
-  migrateIds,
-  iterateIds,
-  execActions,
 } from '../rules';
-import { batchMessages, addSyncListener } from '../sync';
+import { addSyncListener, batchMessages } from '../sync';
 
 import { batchUpdateTransactions } from '.';
 
@@ -451,6 +451,8 @@ export function conditionsToAQL(
       } else {
         op = 'false';
       }
+    } else if (field === 'category_group') {
+      field = 'category.group';
     }
 
     const apply = (field, aqlOp, value) => {
@@ -935,6 +937,7 @@ export type TransactionForRules = TransactionEntity & {
   balance?: number;
   _category_name?: string;
   _account_name?: string;
+  parent_amount?: number;
 };
 
 export async function prepareTransactionForRules(
@@ -1030,6 +1033,22 @@ export async function finalizeTransactionForRules(
 
   if ('balance' in trans) {
     delete trans.balance;
+  }
+
+  if ('parent_amount' in trans) {
+    delete trans.parent_amount;
+  }
+
+  if (trans.subtransactions?.length) {
+    trans.subtransactions.forEach(stx => {
+      if ('balance' in stx) {
+        delete stx.balance;
+      }
+
+      if ('parent_amount' in stx) {
+        delete stx.parent_amount;
+      }
+    });
   }
 
   return trans;

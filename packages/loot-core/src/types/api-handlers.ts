@@ -1,6 +1,4 @@
 // @ts-strict-ignore
-import { type ImportTransactionsOpts } from '@actual-app/api';
-
 import type { ImportTransactionsResult } from '../server/accounts/app';
 import type {
   APIAccountEntity,
@@ -9,18 +7,27 @@ import type {
   APIFileEntity,
   APIPayeeEntity,
   APIScheduleEntity,
+  APITagEntity,
 } from '../server/api-models';
-import { type BudgetFileHandlers } from '../server/budgetfiles/app';
-import { type batchUpdateTransactions } from '../server/transactions';
+import type { BudgetFileHandlers } from '../server/budgetfiles/app';
+import type { batchUpdateTransactions } from '../server/transactions';
 import type { QueryState } from '../shared/query';
 
 import type {
   ImportTransactionEntity,
+  NearbyPayeeEntity,
   NewRuleEntity,
+  PayeeLocationEntity,
   RuleEntity,
-  TransactionEntity,
   ScheduleEntity,
+  TransactionEntity,
 } from './models';
+
+export type ImportTransactionsOpts = {
+  defaultCleared?: boolean;
+  dryRun?: boolean;
+  reimportDeleted?: boolean;
+};
 
 export type ApiHandlers = {
   'api/batch-budget-start': () => Promise<void>;
@@ -186,14 +193,12 @@ export type ApiHandlers = {
     fields;
     // TODO: fix me
     // fields: Partial<APICategoryEntity>;
-  }) => Promise<{ error: { type: 'category-exists' } } | object>;
+  }) => Promise<void>;
 
   'api/category-delete': (arg: {
     id: APICategoryEntity['id'];
     transferCategoryId?: APICategoryEntity['id'];
-  }) => Promise<
-    { error: 'no-categories' } | { error: 'category-type' } | object
-  >;
+  }) => Promise<void>;
 
   'api/payees-get': () => Promise<APIPayeeEntity[]>;
 
@@ -216,6 +221,37 @@ export type ApiHandlers = {
     targetId: APIPayeeEntity['id'];
     mergeIds: string[];
   }) => Promise<void>;
+
+  'api/tags-get': () => Promise<APITagEntity[]>;
+
+  'api/tag-create': (arg: {
+    tag: Omit<APITagEntity, 'id'>;
+  }) => Promise<APITagEntity['id']>;
+
+  'api/tag-update': (arg: {
+    id: APITagEntity['id'];
+    fields: Partial<Omit<APITagEntity, 'id'>>;
+  }) => Promise<void>;
+
+  'api/tag-delete': (arg: { id: APITagEntity['id'] }) => Promise<void>;
+
+  'api/payee-location-create': (arg: {
+    payeeId: string;
+    latitude: number;
+    longitude: number;
+  }) => Promise<string>;
+
+  'api/payee-locations-get': (arg: {
+    payeeId: string;
+  }) => Promise<PayeeLocationEntity[]>;
+
+  'api/payee-location-delete': (arg: { id: string }) => Promise<void>;
+
+  'api/payees-get-nearby': (arg: {
+    latitude: number;
+    longitude: number;
+    maxDistance?: number;
+  }) => Promise<NearbyPayeeEntity[]>;
 
   'api/rules-get': () => Promise<RuleEntity[]>;
 

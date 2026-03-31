@@ -1,5 +1,426 @@
 # Release Notes
 
+## 26.3.0
+
+Release date: 2026-03-02
+
+This release contains an important security fix for all users of the sync server. We suggest you update as soon as feasible.
+
+This release also includes several user-facing improvements and performance work, along with numerous other fixes:
+
+- Reports: now accessible via the command bar
+
+- Bank sync: UX improvements to the account linking flow, as well as API support for balance updates
+
+- Tags: Support for managing tags via the API
+
+- Performance and responsiveness improvements
+
+- Custom themes: bar/pie chart theming support, simpler custom-theme CSS variables, and a new high-contrast light theme.
+
+**Docker Tag: v26.3.0**
+
+#### Features
+
+- [#6702](https://github.com/actualbudget/actual/pull/6702) Adds "Back" button to reports config pages — thanks @aelxxs
+- [#6746](https://github.com/actualbudget/actual/pull/6746) Adds API support to manage tags (`getTags`, `createTag`, `updateTag`, `deleteTag`). — thanks @pouwerkerk
+- [#6909](https://github.com/actualbudget/actual/pull/6909) add theme variables for bar/pie chart pieces for custom themes — thanks @Karimkodera
+- [#7028](https://github.com/actualbudget/actual/pull/7028) Adds Dominican Peso (DOP) currency — thanks @csuriel
+
+#### Enhancements
+
+- [#6629](https://github.com/actualbudget/actual/pull/6629) Add ability to specify custom starting date and balance when linking new bank sync accounts — thanks @StephenBrown2
+- [#6690](https://github.com/actualbudget/actual/pull/6690) Implement missing logic for refill template type — thanks @jfdoming
+- [#6692](https://github.com/actualbudget/actual/pull/6692) Add limit/refill automation editors — thanks @jfdoming
+- [#6748](https://github.com/actualbudget/actual/pull/6748) Month-year dates are now correctly formatted without a comma, e.g., "January 2026" instead of "January, 2026" — thanks @TDurrr1
+- [#6798](https://github.com/actualbudget/actual/pull/6798) automatically sign out on token expiry — thanks @saahiljaffer
+- [#6834](https://github.com/actualbudget/actual/pull/6834) Add filter option for category groups — thanks @bonroyage & @ericparton
+- [#6844](https://github.com/actualbudget/actual/pull/6844) Import nYNAB scheduled transactions into Actual schedules — thanks @StephenBrown2
+- [#6846](https://github.com/actualbudget/actual/pull/6846) Add South Korean Won to list of currencies — thanks @jintakhan
+- [#6850](https://github.com/actualbudget/actual/pull/6850) Add bank sync option to allow overwriting dates with the bank's value. — thanks @kleinweby
+- [#6857](https://github.com/actualbudget/actual/pull/6857) Add Catppuccin Themes to custom theme catalog — thanks @noahjalex
+- [#6866](https://github.com/actualbudget/actual/pull/6866) Apply tag colors to match YNAB flags when importing from nYNAB — thanks @StephenBrown2
+- [#6880](https://github.com/actualbudget/actual/pull/6880) Migrate payee and account state management from Redux to React Query for improved performance. — thanks @joel-jeremy
+- [#6891](https://github.com/actualbudget/actual/pull/6891) Add "You Need A Dark Mode" custom theme to the theme catalog — thanks @distantvapor
+- [#6896](https://github.com/actualbudget/actual/pull/6896) Add option to hide reconciled transactions using the mobile interface — thanks @adastx
+- [#6900](https://github.com/actualbudget/actual/pull/6900) Added Butterfly custom theme — thanks @samekh248
+- [#6915](https://github.com/actualbudget/actual/pull/6915) The Account API now allows `balance_current` to be set, making balances visible for reconciliation when using custom importers. — thanks @totallynotjon
+- [#6941](https://github.com/actualbudget/actual/pull/6941) Migrate tag management from Redux to React Query for improved state handling and performance. — thanks @joel-jeremy
+- [#6957](https://github.com/actualbudget/actual/pull/6957) Refactor dashboard data fetching to use React Query for improved performance and maintainability. — thanks @joel-jeremy
+- [#6958](https://github.com/actualbudget/actual/pull/6958) Improve error handling in category server app and React Query mutations for better clarity. — thanks @joel-jeremy
+- [#6960](https://github.com/actualbudget/actual/pull/6960) Include category groups on transaction export — thanks @yzAlvin
+- [#7002](https://github.com/actualbudget/actual/pull/7002) Add reports to command bar — thanks @bonroyage
+- [#7012](https://github.com/actualbudget/actual/pull/7012) When covering overspending the initial focus should be on the category, not the amount. — thanks @Dagur
+- [#7018](https://github.com/actualbudget/actual/pull/7018) Custom themes: allow using simple CSS variables — thanks @MatissJanis
+- [#7032](https://github.com/actualbudget/actual/pull/7032) 🎨 High-contrast (7.0:1 or higher) light theme. — thanks @Juulz
+
+#### Bugfixes
+
+- [#6346](https://github.com/actualbudget/actual/pull/6346) Fix sync-server migrations to use ESM loader — thanks @jgranick
+- [#6765](https://github.com/actualbudget/actual/pull/6765) Simplified compact view handling for more consistent CashFlow behavior — thanks @MatthiasBenaets
+- [#6812](https://github.com/actualbudget/actual/pull/6812) The app now checks your preferred browser languages in order and uses the first one we support, otherwise English. — thanks @elevennprime
+- [#6843](https://github.com/actualbudget/actual/pull/6843) Fix double negative sign in budget summary amounts — thanks @StephenBrown2
+- [#6845](https://github.com/actualbudget/actual/pull/6845) Fixing Widget Delete button translation issue — thanks @namos2502
+- [#6849](https://github.com/actualbudget/actual/pull/6849) Fix report card tooltips from being obscured by adjacent widgets — thanks @MatthiasBenaets
+- [#6858](https://github.com/actualbudget/actual/pull/6858) Update DesktopLinkedNotes so links stay inline — thanks @Juulz
+- [#6875](https://github.com/actualbudget/actual/pull/6875) Budget Analysis Fix: correct date range calculation for card view — thanks @tabedzki
+- [#6878](https://github.com/actualbudget/actual/pull/6878) Avoid duplicate category import errors in YNAB5 importer — thanks @StephenBrown2
+- [#6905](https://github.com/actualbudget/actual/pull/6905) Fix crash when setting a rule date field and leaving it empty — thanks @rznn7
+- [#6911](https://github.com/actualbudget/actual/pull/6911) Fix Ctrl+Enter losing amount value when adding transaction — thanks @xaviuzz
+- [#6914](https://github.com/actualbudget/actual/pull/6914) Fix feedback link for budget analysis report experimental flag. — thanks @diepala
+- [#6922](https://github.com/actualbudget/actual/pull/6922) Fix template balance carryover handling in the tracking budget — thanks @youngcw
+- [#6925](https://github.com/actualbudget/actual/pull/6925) Prevent past missed schedule dates from being marked as upcoming — thanks @rznn7
+- [#6942](https://github.com/actualbudget/actual/pull/6942) Update `send` function to propagate any errors and fix `catchErrors` to return the error in result when an unknown command/method is sent to the browser server. — thanks @joel-jeremy
+- [#6945](https://github.com/actualbudget/actual/pull/6945) Fix mobile budget amount inputs when hide decimal places is enabled — thanks @piyush-1337
+- [#6953](https://github.com/actualbudget/actual/pull/6953) Fix react query cache not being cleared when switching budgets — thanks @joel-jeremy
+- [#6966](https://github.com/actualbudget/actual/pull/6966) Prevent single-slash paths from being parsed as filepaths — thanks @PratikSilwal5
+- [#6968](https://github.com/actualbudget/actual/pull/6968) Correctly calculate the net worth change value on the first month of the report. — thanks @PratikSilwal5
+- [#6983](https://github.com/actualbudget/actual/pull/6983) Fix status bar color synchronization on iOS Safari by enhancing theme color management. — thanks @MatissJanis
+- [#6993](https://github.com/actualbudget/actual/pull/6993) Fix arithmetic expression parsing so operators with the same precedence (`*`/`/`, `+`/`-`) are evaluated left-to-right. — thanks @HadiAyache
+- [#7007](https://github.com/actualbudget/actual/pull/7007) Fix redirect to accounts page when no accounts exist, improving user experience. — thanks @joel-jeremy
+- [#7030](https://github.com/actualbudget/actual/pull/7030) Hide selected accounts in the filter. — thanks @mnil
+- [#7031](https://github.com/actualbudget/actual/pull/7031) Fix missing tooltip on imported payee column in rule result window — thanks @danielalanbates
+- [#7048](https://github.com/actualbudget/actual/pull/7048) Change menuAutoCompleteTextHover color to green400 in Midnight theme. — thanks @Juulz
+- [#7067](https://github.com/actualbudget/actual/pull/7067) Validate file IDs for correctness — thanks @jfdoming
+- [#7076](https://github.com/actualbudget/actual/pull/7076) Fix server migrations when running on Windows — thanks @MikesGlitch
+- [#7081](https://github.com/actualbudget/actual/pull/7081) Mobile: adjust rules list for better alignment and full-width container display. — thanks @MatissJanis
+- [#7084](https://github.com/actualbudget/actual/pull/7084) API: fix module resolution — thanks @MatissJanis
+- [#7103](https://github.com/actualbudget/actual/pull/7103) Fix bugfix categorization in contributor points counting script — thanks @matt-fidd
+
+#### Maintenance
+
+- [#5977](https://github.com/actualbudget/actual/pull/5977) Move redux state to react query - category states — thanks @joel-jeremy
+- [#6140](https://github.com/actualbudget/actual/pull/6140) Migrate account state management from Redux to React Query with updated hooks. — thanks @joel-jeremy
+- [#6481](https://github.com/actualbudget/actual/pull/6481) ci: update contributor point counting script to account for PR authors — thanks @MatissJanis
+- [#6721](https://github.com/actualbudget/actual/pull/6721) lint: fix low-hanging fruit violations — thanks @MatissJanis
+- [#6757](https://github.com/actualbudget/actual/pull/6757) Refactor useTransactions hook to utilize react-query for improved transaction data fetching. — thanks @joel-jeremy
+- [#6784](https://github.com/actualbudget/actual/pull/6784) Enhance bug report template with clearer structure and detailed reproduction requirements for users. — thanks @MatissJanis
+- [#6796](https://github.com/actualbudget/actual/pull/6796) lint: disallow importing theme files directly — thanks @MatissJanis
+- [#6801](https://github.com/actualbudget/actual/pull/6801) typescript: port arithmetic.ts to strict TS — thanks @MatissJanis
+- [#6805](https://github.com/actualbudget/actual/pull/6805) lint: add "import/consistent-type-specifier-style" rule — thanks @MatissJanis
+- [#6820](https://github.com/actualbudget/actual/pull/6820) Use consistent color variables for desktop budget pages, both envelope and tracking. — thanks @Juulz
+- [#6840](https://github.com/actualbudget/actual/pull/6840) Switch to node alpine docker image — thanks @matt-fidd
+- [#6861](https://github.com/actualbudget/actual/pull/6861) Generalize `findSortDown` and `findSortUp` functions to accept any type with `id: string`. — thanks @joel-jeremy
+- [#6862](https://github.com/actualbudget/actual/pull/6862) Refactor modal closing behavior to improve code clarity and eliminate eslint disable patterns. — thanks @joel-jeremy
+- [#6863](https://github.com/actualbudget/actual/pull/6863) Fix react-hooks/exhaustive-deps in in PayeeTable — thanks @joel-jeremy
+- [#6864](https://github.com/actualbudget/actual/pull/6864) Fix react-hooks/exhaustive-deps in DateSelect — thanks @joel-jeremy
+- [#6867](https://github.com/actualbudget/actual/pull/6867) Fix type safety issues and react-hooks/exhaustive-deps errors in CustomReport — thanks @joel-jeremy
+- [#6868](https://github.com/actualbudget/actual/pull/6868) Fix react-hooks/exhaustive-deps in ImportTransactionsModal — thanks @joel-jeremy
+- [#6874](https://github.com/actualbudget/actual/pull/6874) Adding more components to the Storybook docs & improving storybook caching — thanks @MikesGlitch
+- [#6882](https://github.com/actualbudget/actual/pull/6882) Migrate category state management from Redux to React Query, updating hooks and components accordingly. — thanks @joel-jeremy
+- [#6883](https://github.com/actualbudget/actual/pull/6883) Add Electron build artifacts to TypeScript configuration excludes to improve compilation efficiency. — thanks @joel-jeremy
+- [#6910](https://github.com/actualbudget/actual/pull/6910) Automated the Flathub release PR to be draft until we publish the main release. — thanks @MikesGlitch
+- [#6924](https://github.com/actualbudget/actual/pull/6924) Styling updates to the design system, reorganization and additional component docs — thanks @MikesGlitch
+- [#6928](https://github.com/actualbudget/actual/pull/6928) Remove duplicate type definition for CrossoverData — thanks @jonner
+- [#6936](https://github.com/actualbudget/actual/pull/6936) Add refetchOnSync option to useTransactions hook to consolidate duplicate sync-event handling logic. — thanks @joel-jeremy
+- [#6940](https://github.com/actualbudget/actual/pull/6940) Add remaining component-library components to design system docs — thanks @MikesGlitch
+- [#6943](https://github.com/actualbudget/actual/pull/6943) Rename fetch module to connection, simplifying imports and reducing confusion with native fetch. — thanks @joel-jeremy
+- [#6951](https://github.com/actualbudget/actual/pull/6951) Refactor report data fetching to utilize React Query for improved performance and reliability. — thanks @joel-jeremy
+- [#6955](https://github.com/actualbudget/actual/pull/6955) Upgrade oxlint and oxfmt — thanks @MatissJanis
+- [#6963](https://github.com/actualbudget/actual/pull/6963) Add Claude Code Pro subscription benefit details for core contributors in documentation. — thanks @MatissJanis
+- [#6964](https://github.com/actualbudget/actual/pull/6964) Establish mandatory [AI] prefix for commit messages and PR titles in AGENTS.md documentation. — thanks @MatissJanis
+- [#6965](https://github.com/actualbudget/actual/pull/6965) Add Architecture Decision Records documentation page with bank sync credential storage example. — thanks @MatissJanis
+- [#6969](https://github.com/actualbudget/actual/pull/6969) Fix some low-hanging-fruit `@ts-strict-ignore` — thanks @jfdoming
+- [#6970](https://github.com/actualbudget/actual/pull/6970) lint: convert warnings to errors — thanks @MatissJanis
+- [#6984](https://github.com/actualbudget/actual/pull/6984) lint: introduce type-aware linting — thanks @MatissJanis
+- [#6985](https://github.com/actualbudget/actual/pull/6985) config: update how CodeRabbit handles 'suspect ai generated' labels — thanks @MatissJanis
+- [#6987](https://github.com/actualbudget/actual/pull/6987) lint: fix typescript/await-thenable and typescript/no-floating-promises issues — thanks @MatissJanis
+- [#6989](https://github.com/actualbudget/actual/pull/6989) Add structured sections to the pull request template for standardized submissions. — thanks @MatissJanis
+- [#6992](https://github.com/actualbudget/actual/pull/6992) Address some more low-hanging fruit for ts-strict-ignore — thanks @jfdoming
+- [#7009](https://github.com/actualbudget/actual/pull/7009) Refactor `useAccounts` to return full query states, enhancing data handling across components. — thanks @joel-jeremy
+- [#7013](https://github.com/actualbudget/actual/pull/7013) Mid-month dependency bump — thanks @matt-fidd
+- [#7019](https://github.com/actualbudget/actual/pull/7019) TypeScript: individual tsconfig files per package, running via lage — thanks @MatissJanis
+- [#7020](https://github.com/actualbudget/actual/pull/7020) Bump @isaacs/brace-expansion — thanks @matt-fidd
+- [#7021](https://github.com/actualbudget/actual/pull/7021) Bump @playwright/test — thanks @matt-fidd
+- [#7022](https://github.com/actualbudget/actual/pull/7022) Bump recharts — thanks @matt-fidd
+- [#7033](https://github.com/actualbudget/actual/pull/7033) Remove usage of 'web' file types — thanks @MatissJanis
+- [#7052](https://github.com/actualbudget/actual/pull/7052) Bump version number — thanks @MatissJanis
+- [#7058](https://github.com/actualbudget/actual/pull/7058) Rename 'Okabe Ito' theme to 'Color-blind (dark)'. — thanks @Juulz
+- [#7087](https://github.com/actualbudget/actual/pull/7087) Remove 'suspect ai generated' label and delete associated workflow for streamlined labeling system. — thanks @Copilot
+- [#7088](https://github.com/actualbudget/actual/pull/7088) Add Cursor Cloud setup instructions and troubleshooting tips to AGENTS.md documentation. — thanks @MatissJanis
+- [#7094](https://github.com/actualbudget/actual/pull/7094) Add 'unfreeze' label that can be used to unfreeze PRs during the merge freeze — thanks @MatissJanis
+
+## 26.2.1
+
+Release date: 2026-02-22
+
+This release contains two critical security fixes for users of SimpleFin, Pluggy or the multi-user feature. If you do not use these features: feel free to skip this version.
+
+**Docker Tag: v26.2.1**
+
+#### Bugfixes
+
+- [#7034](https://github.com/actualbudget/actual/pull/7034) Fix: simplefin and pluggy not requiring auth — thanks @MatissJanis
+- [#7040](https://github.com/actualbudget/actual/pull/7040) Fix: unauthorized file access in multi-user setups — thanks @MatissJanis
+
+## 26.2.0
+
+Release date: 2026-02-02
+
+This release contains the following notable improvements, along with numerous fixes:
+
+- Allow multiple dashboard pages
+- Experimental feature: Custom themes [docs](https://actualbudget.org/docs/experimental/custom-themes)
+- Experimental feature: Budget analysis report [docs](https://actualbudget.org/docs/experimental/budget-analysis-report)
+
+**Docker Tag: v26.2.0**
+
+#### Features
+
+- [#6137](https://github.com/actualbudget/actual/pull/6137) Add "Budget Analysis" : a report that tracks the balance of your budget categories over time. Displays budgeted amounts, actual spending, overspending adjustments, and cumulative balance, considering category rollover settings. — thanks @tabedzki
+- [#6411](https://github.com/actualbudget/actual/pull/6411) Add multiple tabs/pages to "Reports" allowing for different widget layouts per page — thanks @Durbatuluk1701
+- [#6540](https://github.com/actualbudget/actual/pull/6540) Add session token authentication option to API initialization, enhancing authentication flexibility. — thanks @BCNelson
+- [#6603](https://github.com/actualbudget/actual/pull/6603) Creates an option for a stacked line graph in the net worth card. — thanks @mnil
+- [#6612](https://github.com/actualbudget/actual/pull/6612) Ability to install custom color themes — thanks @MatissJanis
+- [#6639](https://github.com/actualbudget/actual/pull/6639) Add the ability to specify expected contributions to the crossover point report. — thanks @jonner
+
+#### Enhancements
+
+- [#6234](https://github.com/actualbudget/actual/pull/6234) Add server preferences for improved user settings consistency across devices. — thanks @lelemm
+- [#6282](https://github.com/actualbudget/actual/pull/6282) Add find and replace (with RegEx support) mode when editing transaction notes — thanks @matt8100
+- [#6373](https://github.com/actualbudget/actual/pull/6373) Allow user to adjust target income in crossover report — thanks @jonner
+- [#6438](https://github.com/actualbudget/actual/pull/6438) Fixes redacted content to work with currency symbols — thanks @StephenBrown2
+- [#6448](https://github.com/actualbudget/actual/pull/6448) Tags: add light colors to tag color picker, update tag hover depending on tag background brightness — thanks @Juulz
+- [#6493](https://github.com/actualbudget/actual/pull/6493) Proper formatting of the Formula Card — thanks @MatthiasBenaets
+- [#6500](https://github.com/actualbudget/actual/pull/6500) Added Czech Koruna (CZK) and Hungarian Forint (HUF) to the list of available currencies. — thanks @Andrii256
+- [#6543](https://github.com/actualbudget/actual/pull/6543) Sort import preview transactions by (parsed) date, descending — thanks @kivikakk
+- [#6551](https://github.com/actualbudget/actual/pull/6551) Improves the notification UX for mobile devices by stacking notifications on the z-axis in a card-like fashion, placing the action button on the same row to make more compact and added rounded corners to align with other components such as cards and alerts. — thanks @danielkerwin
+- [#6559](https://github.com/actualbudget/actual/pull/6559) Update category schedule indicator to honor the upcoming days length setting — thanks @joel-jeremy
+- [#6589](https://github.com/actualbudget/actual/pull/6589) Add new projection types to crossover point report — thanks @jonner
+- [#6622](https://github.com/actualbudget/actual/pull/6622) Update job trigger for auto-generated release notes to improve automation and efficiency. — thanks @Copilot
+- [#6645](https://github.com/actualbudget/actual/pull/6645) Add FIXED to EXCEL functions — thanks @matt-fidd
+- [#6661](https://github.com/actualbudget/actual/pull/6661) Apply tabular number styles more consistently — thanks @matt-fidd
+- [#6672](https://github.com/actualbudget/actual/pull/6672) Use consistent colours on the reports page — thanks @matt-fidd
+- [#6681](https://github.com/actualbudget/actual/pull/6681) Themes: async fetch the theme catalog — thanks @MatissJanis
+- [#6688](https://github.com/actualbudget/actual/pull/6688) Add Black Gold custom theme to theme catalog — thanks @MikesGlitch
+- [#6689](https://github.com/actualbudget/actual/pull/6689) Themes: improved error handling and more themes in the catalog. — thanks @MatissJanis
+- [#6696](https://github.com/actualbudget/actual/pull/6696) Add Simple Dark and Okabe Ito custom themes to theme catalog — thanks @Juulz
+- [#6697](https://github.com/actualbudget/actual/pull/6697) Adds consistent styling (border, border radius, background colors) to tables — thanks @aelxxs
+- [#6711](https://github.com/actualbudget/actual/pull/6711) Enhance Average Goal Template to allow adjusting the budgeted amount from the average by a percent or fixed amount — thanks @totallynotjon
+- [#6722](https://github.com/actualbudget/actual/pull/6722) Themes: use color palette for preview instead of screenshots — thanks @MatissJanis
+- [#6730](https://github.com/actualbudget/actual/pull/6730) Theme from 1970. Custom light theme based on the colors of 1970. — thanks @Juulz
+- [#6739](https://github.com/actualbudget/actual/pull/6739) Light custom theme in shades of gray (and a few colors). — thanks @Juulz
+- [#6747](https://github.com/actualbudget/actual/pull/6747) Use consistent colours on the budget page — thanks @matt-fidd
+- [#6754](https://github.com/actualbudget/actual/pull/6754) Add toBudgetPositive, toBudgetZero and toBudgetNegative color variables. — thanks @Juulz
+- [#6755](https://github.com/actualbudget/actual/pull/6755) Mobile: improve transaction list performance — thanks @MatissJanis
+- [#6789](https://github.com/actualbudget/actual/pull/6789) Add user-friendly error message for clock-drift issues — thanks @MatissJanis
+
+#### Bugfixes
+
+- [#6459](https://github.com/actualbudget/actual/pull/6459) Avoid truncating numbers in budgeted column by collapsing the dropdown arrow. — thanks @diepala
+- [#6497](https://github.com/actualbudget/actual/pull/6497) Fix month filter edit popup showing date in wrong format for non-default date formats. — thanks @Faizanq
+- [#6499](https://github.com/actualbudget/actual/pull/6499) Prevent renaming category groups to existing names. — thanks @skliaruk
+- [#6501](https://github.com/actualbudget/actual/pull/6501) Unsplit transaction without losing parent's transaction information (amount, notes, etc.) — thanks @skliaruk
+- [#6533](https://github.com/actualbudget/actual/pull/6533) Fix LHV bank adapter not being loaded, causing card payment payee names to show full remittance string instead of extracted merchant name. — thanks @lnagel
+- [#6538](https://github.com/actualbudget/actual/pull/6538) Fix fatal error on budget page load when using tracking budget type — thanks @copilot
+- [#6552](https://github.com/actualbudget/actual/pull/6552) Move saved filters to end of dropdown with separator — thanks @FictionFics
+- [#6554](https://github.com/actualbudget/actual/pull/6554) Remove responsive prop from StackedBarGraph to prevent infinite loop — thanks @FictionFics
+- [#6561](https://github.com/actualbudget/actual/pull/6561) Fix transactions table payee schedule icon not showing if linked schedule has a different account configured — thanks @joel-jeremy
+- [#6566](https://github.com/actualbudget/actual/pull/6566) Fix refill templates not handling negative carryover properly — thanks @youngcw
+- [#6567](https://github.com/actualbudget/actual/pull/6567) Fix crash when changing Notes filter to "one of" or "not one of" operation — thanks @majiayu000
+- [#6569](https://github.com/actualbudget/actual/pull/6569) Skip schedule prompt when editing transaction already linked to a schedule — thanks @majiayu000
+- [#6570](https://github.com/actualbudget/actual/pull/6570) Closes the popover on second Escape press once autocomplete options are closed. — thanks @skliaruk
+- [#6572](https://github.com/actualbudget/actual/pull/6572) Fix autoDecimal behaviour based on hideFraction preference — thanks @skliaruk
+- [#6573](https://github.com/actualbudget/actual/pull/6573) Update KeybordShortcutModal.tsx so "E" is set date for selected transactions. Regroup and rearrange list to match docs. — thanks @Juulz
+- [#6577](https://github.com/actualbudget/actual/pull/6577) Enable include current month option for last month — thanks @csenel
+- [#6583](https://github.com/actualbudget/actual/pull/6583) Fix iOS keyboard suddenly hiding while editing budget amounts — thanks @joelson-c
+- [#6594](https://github.com/actualbudget/actual/pull/6594) Fix payee filter functionality to improve transaction filtering in the application. — thanks @RMcGhee
+- [#6610](https://github.com/actualbudget/actual/pull/6610) Fix schedule template regressions where categories are being underbudgeted and to improve functionality and user experience. — thanks @youngcw
+- [#6625](https://github.com/actualbudget/actual/pull/6625) Remove url check that throws error in development — thanks @RMcGhee
+- [#6669](https://github.com/actualbudget/actual/pull/6669) Fix reports link highlighting issue in the sidebar for improved user navigation. — thanks @Copilot
+- [#6675](https://github.com/actualbudget/actual/pull/6675) Fix inaccuracies in net payment/deposit calculations — thanks @matt-fidd
+- [#6695](https://github.com/actualbudget/actual/pull/6695) Limit custom css textarea to resize vertically — thanks @MatthiasBenaets
+- [#6698](https://github.com/actualbudget/actual/pull/6698) Fix mobile Calendar crash by adding DisplayPayeeProvider context to TransactionListMobile component. — thanks @Copilot
+- [#6716](https://github.com/actualbudget/actual/pull/6716) Fix show completed schedules toggle being persisted — thanks @matt-fidd
+- [#6723](https://github.com/actualbudget/actual/pull/6723) Auth settings: handle server offline & no-server state — thanks @MatissJanis
+- [#6729](https://github.com/actualbudget/actual/pull/6729) Fix notification container width for improved positioning on desktop screens. — thanks @MatissJanis
+- [#6733](https://github.com/actualbudget/actual/pull/6733) Reports: correctly render categories with identical names — thanks @MatissJanis
+- [#6756](https://github.com/actualbudget/actual/pull/6756) Fix monthly spending number colouring — thanks @matt-fidd
+- [#6758](https://github.com/actualbudget/actual/pull/6758) Fix rendering issue in mobile uncategorised transactions banner — thanks @matt-fidd
+- [#6763](https://github.com/actualbudget/actual/pull/6763) Fix report drag and drop reordering — thanks @matt-fidd
+- [#6764](https://github.com/actualbudget/actual/pull/6764) Make colors on budget page more legible and increase number coloring consistency — thanks @matt-fidd
+- [#6767](https://github.com/actualbudget/actual/pull/6767) Update package versions with release action when explicit version passed — thanks @matt-fidd
+- [#6791](https://github.com/actualbudget/actual/pull/6791) Fix Budget Analysis graph to enhance Balance (line and points) for legibility. — thanks @Juulz
+- [#6792](https://github.com/actualbudget/actual/pull/6792) Mobile: fix schedule amount color — thanks @MatissJanis
+- [#6795](https://github.com/actualbudget/actual/pull/6795) Fix arithmetic parser to accept keyboard apostrophe in apostrophe-dot format. — thanks @Copilot
+- [#6803](https://github.com/actualbudget/actual/pull/6803) Mobile: show bottom nav bar in the reports page — thanks @MatissJanis
+- [#6808](https://github.com/actualbudget/actual/pull/6808) Fix keyboard navigation not working on desktop datepicker — thanks @MatissJanis
+- [#6821](https://github.com/actualbudget/actual/pull/6821) Fix crossover report resizing bug — thanks @matt-fidd
+- [#6823](https://github.com/actualbudget/actual/pull/6823) Fix spacing and borders on bank sync page — thanks @matt-fidd
+- [#6824](https://github.com/actualbudget/actual/pull/6824) Fix reconciliation when experimental currency support is enabled — thanks @matt-fidd
+- [#6825](https://github.com/actualbudget/actual/pull/6825) Fix bank sync table borders. — thanks @aelxxs
+
+#### Maintenance
+
+- [#6436](https://github.com/actualbudget/actual/pull/6436) Migrate Inter font from inter-ui to @fontsource-variable/inter — thanks @StephenBrown2
+- [#6468](https://github.com/actualbudget/actual/pull/6468) lint: create new custom rules for eslint rules that are not in oxlint — thanks @MatissJanis
+- [#6506](https://github.com/actualbudget/actual/pull/6506) test: add mobile payees page unit test — thanks @MatissJanis
+- [#6530](https://github.com/actualbudget/actual/pull/6530) Add token-based authentication to GitHub Actions for PR creation and release notes generation. — thanks @MatissJanis
+- [#6531](https://github.com/actualbudget/actual/pull/6531) Disable some CI workflows in forks — thanks @jfdoming
+- [#6536](https://github.com/actualbudget/actual/pull/6536) Disable CodeRabbit generated PR summaries — thanks @MatissJanis
+- [#6544](https://github.com/actualbudget/actual/pull/6544) Fix electron workflow job ordering for calculating hashes for Flathub release. — thanks @MikesGlitch
+- [#6545](https://github.com/actualbudget/actual/pull/6545) Fix electron master publish to Flathub caused by hashes calculation — thanks @MikesGlitch
+- [#6560](https://github.com/actualbudget/actual/pull/6560) Upgrade oxlint and oxfmt dependencies, improve accessibility, and fix JSON formatting issues. — thanks @MatissJanis
+- [#6581](https://github.com/actualbudget/actual/pull/6581) Add merge_group trigger to e2e tests workflow for executing during merge queue events. — thanks @MatissJanis
+- [#6582](https://github.com/actualbudget/actual/pull/6582) Update CodeRabbit configuration to include review workflow and labeling instructions. — thanks @MatissJanis
+- [#6584](https://github.com/actualbudget/actual/pull/6584) Remove ESLint, migrate to oxlint, and enforce new import sorting rules across files. — thanks @MatissJanis
+- [#6592](https://github.com/actualbudget/actual/pull/6592) Add custom checks to CodeRabbit configuration for settings evaluation, linting, and typecheck enforcement. — thanks @MatissJanis
+- [#6593](https://github.com/actualbudget/actual/pull/6593) Switch Flathub validation to flatpak-builder-lint for metainfo validations — thanks @MikesGlitch
+- [#6608](https://github.com/actualbudget/actual/pull/6608) Bump react-router version from 7.9.6 to 7.12.0 for improved functionality and performance. — thanks @dependabot
+- [#6611](https://github.com/actualbudget/actual/pull/6611) Update Flathub screenshots to better comply with quality guidelines — thanks @MikesGlitch
+- [#6626](https://github.com/actualbudget/actual/pull/6626) Remove the force reload feature from the application settings. — thanks @MatissJanis
+- [#6627](https://github.com/actualbudget/actual/pull/6627) Copy hex color definitions from colors.ts (oldColors) into palette.ts — thanks @Juulz
+- [#6636](https://github.com/actualbudget/actual/pull/6636) lint: patch some low-hanging fruit lint violations — thanks @MatissJanis
+- [#6638](https://github.com/actualbudget/actual/pull/6638) Remove obsolete help text after removing linear trend from crossover report — thanks @jonner
+- [#6641](https://github.com/actualbudget/actual/pull/6641) Fix lint warnings in generated release notes for improved clarity and consistency. — thanks @Copilot
+- [#6642](https://github.com/actualbudget/actual/pull/6642) lint: patch some no-empty-function violations — thanks @MatissJanis
+- [#6647](https://github.com/actualbudget/actual/pull/6647) Update baseline browser mapping — thanks @matt-fidd
+- [#6656](https://github.com/actualbudget/actual/pull/6656) Bump various dependencies — thanks @matt-fidd
+- [#6657](https://github.com/actualbudget/actual/pull/6657) Add GitHub workflow to automatically welcome contributors of forked pull requests. — thanks @MatissJanis
+- [#6658](https://github.com/actualbudget/actual/pull/6658) Bump undici dependency version from 7.16.0 to 7.18.2 for improved performance and security. — thanks @dependabot
+- [#6659](https://github.com/actualbudget/actual/pull/6659) Give contributor points for marking issues as duplicates — thanks @matt-fidd
+- [#6665](https://github.com/actualbudget/actual/pull/6665) Add missing theme color variable `sidebarBudgetName`. — thanks @Juulz
+- [#6667](https://github.com/actualbudget/actual/pull/6667) lint: patch some react oxlint violations — thanks @MatissJanis
+- [#6670](https://github.com/actualbudget/actual/pull/6670) LLM: add code review guidelines — thanks @MatissJanis
+- [#6677](https://github.com/actualbudget/actual/pull/6677) Post bundle size comparison comment in the PR body instead — thanks @matt-fidd
+- [#6679](https://github.com/actualbudget/actual/pull/6679) lint: fix various a11y issues — thanks @MatissJanis
+- [#6680](https://github.com/actualbudget/actual/pull/6680) lint: sort named imports — thanks @MatissJanis
+- [#6691](https://github.com/actualbudget/actual/pull/6691) Correct capitalization of "Flathub" in documentation and spelling expectations, removing duplicates. — thanks @jfdoming
+- [#6694](https://github.com/actualbudget/actual/pull/6694) Run `yarn dedupe` on the repository — thanks @jfdoming
+- [#6699](https://github.com/actualbudget/actual/pull/6699) Reduce payees E2E test flakiness. — thanks @MatissJanis
+- [#6703](https://github.com/actualbudget/actual/pull/6703) Bump electron versions — thanks @matt-fidd
+- [#6707](https://github.com/actualbudget/actual/pull/6707) Update release notes category from 'Bugfix' to 'Bugfixes' for consistency. — thanks @jfdoming
+- [#6715](https://github.com/actualbudget/actual/pull/6715) Add separator between PR body and bundle statistics — thanks @matt-fidd
+- [#6717](https://github.com/actualbudget/actual/pull/6717) Upgrade various React dependencies — thanks @matt-fidd
+- [#6719](https://github.com/actualbudget/actual/pull/6719) lint: upgrade oxlint & oxfmt — thanks @MatissJanis
+- [#6720](https://github.com/actualbudget/actual/pull/6720) lint: enable oxfmt on the docs package — thanks @MatissJanis
+- [#6728](https://github.com/actualbudget/actual/pull/6728) Mobile: unify file-switching experience — thanks @MatissJanis
+- [#6731](https://github.com/actualbudget/actual/pull/6731) Remove broken bank identifier link from GoCardless README and clarify its non-existence. — thanks @Copilot
+- [#6751](https://github.com/actualbudget/actual/pull/6751) Reinstate nightly edge deploys — thanks @MikesGlitch
+- [#6753](https://github.com/actualbudget/actual/pull/6753) Fix edge nightly workflow — thanks @MikesGlitch
+- [#6770](https://github.com/actualbudget/actual/pull/6770) Add Storybook Documentation into the component library — thanks @MikesGlitch
+- [#6810](https://github.com/actualbudget/actual/pull/6810) Remove 'suspect ai generated' label when 'AI Generated' is added — thanks @StephenBrown2
+- [#6822](https://github.com/actualbudget/actual/pull/6822) Remove GitHub pages deploys in favor of Netlify — thanks @MikesGlitch
+
+## 26.1.0
+
+Release date: 2026-01-04
+
+This release contains the following notable improvements, along with numerous fixes:
+
+- **Currency display in budget** — Shows currency symbols in the budget view
+- **Mobile schedules page** — Full schedules functionality now available on mobile devices
+- **Link detection in transaction notes** — URLs in transaction notes are now automatically detected and made clickable
+- **Historical data** — Minimum transaction year extended from 2000 to 1995
+
+For Linux users, we have officially released to [Flathub](https://flathub.org/en/apps/com.actualbudget.actual)!
+
+**Docker Tag: v26.1.0**
+
+#### Features
+
+- [#5908](https://github.com/actualbudget/actual/pull/5908) Adds currency display to the budget — thanks @misu-dev
+- [#6158](https://github.com/actualbudget/actual/pull/6158) Mobile schedules page — thanks @MatissJanis
+- [#6306](https://github.com/actualbudget/actual/pull/6306) Add link detection in transaction notes — thanks @raf-vale
+- [#6432](https://github.com/actualbudget/actual/pull/6432) Add feedback mechanism for Excel formulas to enhance user experience and error handling. — thanks @lelemm
+
+#### Enhancements
+
+- [#5985](https://github.com/actualbudget/actual/pull/5985) Add INTEGER_TO_AMOUNT function, enhance formula card styling, and introduce balance field to formula rule action execution. — thanks @lelemm
+- [#6222](https://github.com/actualbudget/actual/pull/6222) Adds date filter "Last Month" on reports — thanks @espege
+- [#6235](https://github.com/actualbudget/actual/pull/6235) Use more concise language in the category and group menus for applying budget templates to reflect actual functionality. — thanks @Juulz
+- [#6240](https://github.com/actualbudget/actual/pull/6240) Preserve splits when manually merging transactions — thanks @Golenspade & @Respheal
+- [#6245](https://github.com/actualbudget/actual/pull/6245) Improve tag readability in light theme. All themes now use same custom color schema. — thanks @Juulz
+- [#6287](https://github.com/actualbudget/actual/pull/6287) [WIP] Ensure proper line-endings for bin/ scripts — thanks @jgranick
+- [#6335](https://github.com/actualbudget/actual/pull/6335) Add keywords, categories and comment to Linux .desktop file for better searchability — thanks @MikesGlitch
+- [#6355](https://github.com/actualbudget/actual/pull/6355) Right-align report table numeric columns — thanks @StephenBrown2
+- [#6359](https://github.com/actualbudget/actual/pull/6359) Implement parallelization of E2E tests using matrix-based sharding in GitHub Actions workflow. — thanks @MatissJanis
+- [#6384](https://github.com/actualbudget/actual/pull/6384) Add a nest egg field to show projected net worth on the crossover point report — thanks @sjones512
+- [#6413](https://github.com/actualbudget/actual/pull/6413) Enhance formula feedback functionality for improved user experience and interaction. — thanks @lelemm
+- [#6440](https://github.com/actualbudget/actual/pull/6440) Change minimum transaction year from 2000 to 1995 — thanks @MatissJanis
+- [#6503](https://github.com/actualbudget/actual/pull/6503) Expand `verbose: false` support in the API — thanks @matt-fidd
+
+#### Bugfix
+
+- [#6247](https://github.com/actualbudget/actual/pull/6247) Fix number parsing to recognize Unicode minus as a valid negative indicator. — thanks @MatissJanis
+- [#6263](https://github.com/actualbudget/actual/pull/6263) Exclude transfers from summary cards in the default dashboard — thanks @mreimbold
+- [#6268](https://github.com/actualbudget/actual/pull/6268) Fix schedule templates not budgeting enough under certain conditions — thanks @youngcw
+- [#6272](https://github.com/actualbudget/actual/pull/6272) Makes category group rows fully clickable in the mobile budget view, allowing users to tap anywhere on a row to expand or collapse it. This improves touch accessibility and overall mobile usability while keeping the existing arrow functionality intact. — thanks @KaiBelmo
+- [#6274](https://github.com/actualbudget/actual/pull/6274) Fix for budget can't be balanced when "Hide decimal places" in the setting is on — thanks @rcgomezap
+- [#6296](https://github.com/actualbudget/actual/pull/6296) Fix failing GoCardless sync when incorrect account information is received — thanks @matt-fidd
+- [#6298](https://github.com/actualbudget/actual/pull/6298) Fix PWA icon showing white border on older versions of ios — thanks @MikesGlitch
+- [#6324](https://github.com/actualbudget/actual/pull/6324) Fixed a grammar error in the repair transactions description. — thanks @Andrew-T-Smith
+- [#6331](https://github.com/actualbudget/actual/pull/6331) Updates the `Query` class in `packages/api/app/query.js` to include the missing `reset()` and `serializeAsString()` methods. — thanks @BHChen24
+- [#6336](https://github.com/actualbudget/actual/pull/6336) Add error handling prompts for missing accounts and categories on the transaction creation page. — thanks @MatissJanis
+- [#6337](https://github.com/actualbudget/actual/pull/6337) Fix API `downloadBudget` failing with "Could not get remote files" error when authentication fails silently during `init()`. — thanks @MatissJanis
+- [#6338](https://github.com/actualbudget/actual/pull/6338) Fix authorization bypass preventing non-owners from deleting shared budgets in the application. — thanks @Copilot
+- [#6367](https://github.com/actualbudget/actual/pull/6367) Exclude transfers from calendar summary card in the default dashboard — thanks @TildenWinston
+- [#6371](https://github.com/actualbudget/actual/pull/6371) Fix incorrect detection of crossover point for low expense months — thanks @jonner
+- [#6372](https://github.com/actualbudget/actual/pull/6372) Change crossover point default project type to Hampel filtered median — thanks @jonner
+- [#6379](https://github.com/actualbudget/actual/pull/6379) This PR address the bug of toggling running balance on mobile not updating the view immediately (required navigating to another screen and back). — thanks @Tundesjaiyesmi
+- [#6383](https://github.com/actualbudget/actual/pull/6383) Fix bugs with different Live date ranges on report header — thanks @sjones512
+- [#6393](https://github.com/actualbudget/actual/pull/6393) Hide the "Merge and edit rule" button when "Automatically rename these payees in the future" is unchecked (no rule will be created). — thanks @plsdev89
+- [#6416](https://github.com/actualbudget/actual/pull/6416) Fixed the issue of duplicate keyboard shortcuts for date and add transaction by changing the date hotkey to `E` — thanks @Tundesjaiyesmi
+- [#6418](https://github.com/actualbudget/actual/pull/6418) Fix data table custom report group row coloring when scrolling horizontally — thanks @KyeongJooni
+- [#6425](https://github.com/actualbudget/actual/pull/6425) Rename "Nest egg" to "Life Savings" in crossover report graph — thanks @jonner
+- [#6427](https://github.com/actualbudget/actual/pull/6427) Rules: allow adding a 'date' action — thanks @MatissJanis
+- [#6437](https://github.com/actualbudget/actual/pull/6437) Fix schedule upcoming length years off-by-1 calculation — thanks
+- [#6445](https://github.com/actualbudget/actual/pull/6445) Fix dynamic font size calculation in formula reports — thanks @matt-fidd
+- [#6469](https://github.com/actualbudget/actual/pull/6469) Fix date handling of Live date modes on crossover card report — thanks @sjones512
+- [#6488](https://github.com/actualbudget/actual/pull/6488) Fix mobile cover overspending amount not updating correctly when selecting categories — thanks @Faizanq
+- [#6491](https://github.com/actualbudget/actual/pull/6491) Fix crash by ensuring proper filter value conversion between single and multi-value modes. — thanks @Copilot
+
+#### Maintenance
+
+- [#6120](https://github.com/actualbudget/actual/pull/6120) Agents.md: add missing information — thanks @MatissJanis
+- [#6142](https://github.com/actualbudget/actual/pull/6142) Update validate-user.js to validate-user.ts. — thanks @accountingnerd
+- [#6179](https://github.com/actualbudget/actual/pull/6179) Remove usage of file extensions in sync-server — thanks @MatissJanis
+- [#6259](https://github.com/actualbudget/actual/pull/6259) Move prettier and eslint to `oxc` — thanks @MatissJanis
+- [#6280](https://github.com/actualbudget/actual/pull/6280) Bump express to 5.2.1 — thanks @matt-fidd
+- [#6295](https://github.com/actualbudget/actual/pull/6295) Upgrade `jws` dependency from 4.0.0 to 4.0.1 — thanks @MatissJanis
+- [#6299](https://github.com/actualbudget/actual/pull/6299) Fix no-unused-vars lint violations — thanks @MatissJanis
+- [#6300](https://github.com/actualbudget/actual/pull/6300) Fix various lint issues — thanks @MatissJanis
+- [#6301](https://github.com/actualbudget/actual/pull/6301) Fix more lint issues — thanks @MatissJanis
+- [#6307](https://github.com/actualbudget/actual/pull/6307) Automate the release to the Flathub store — thanks @MikesGlitch
+- [#6312](https://github.com/actualbudget/actual/pull/6312) Port react rules from eslint to oxlint — thanks @MatissJanis
+- [#6321](https://github.com/actualbudget/actual/pull/6321) Supply additional icon sizes to Mac desktop app for more tailored rendering — thanks @MikesGlitch
+- [#6348](https://github.com/actualbudget/actual/pull/6348) Apply ESLint ignore rules to Oxfmt to prevent false positives when running 'npm lint' — thanks @jgranick
+- [#6349](https://github.com/actualbudget/actual/pull/6349) Change to personal access token on vrt update workflow to trigger ci — thanks @MatissJanis
+- [#6356](https://github.com/actualbudget/actual/pull/6356) Use personal access token for update-vrt workflow — thanks @MatissJanis
+- [#6361](https://github.com/actualbudget/actual/pull/6361) Automatically add core team as reviewers to the Flathub Release PR — thanks @MikesGlitch
+- [#6363](https://github.com/actualbudget/actual/pull/6363) Another approach at triggering ci jobs after update-vrt workflow — thanks @MatissJanis
+- [#6364](https://github.com/actualbudget/actual/pull/6364) Preventing Github UI Workflows when unrelated files change — thanks @MikesGlitch
+- [#6376](https://github.com/actualbudget/actual/pull/6376) Add Flathub badge to release notes for easier access to application installation. — thanks @MikesGlitch
+- [#6380](https://github.com/actualbudget/actual/pull/6380) Trigger VRT update workflow only if '/update-vrt' comment is added — thanks @MatissJanis
+- [#6386](https://github.com/actualbudget/actual/pull/6386) Workflow and config added for docs site move to Github Pages — thanks @MikesGlitch
+- [#6388](https://github.com/actualbudget/actual/pull/6388) Run e2e tests against a local build instead of netlify — thanks @MatissJanis
+- [#6398](https://github.com/actualbudget/actual/pull/6398) lint: move some more rules to oxlint/oxfmt and upgrade linter versions — thanks @MatissJanis
+- [#6399](https://github.com/actualbudget/actual/pull/6399) Lint: run formatter against the docs package — thanks @MatissJanis
+- [#6400](https://github.com/actualbudget/actual/pull/6400) lint: enable linter in docs and fix issues — thanks @MatissJanis
+- [#6420](https://github.com/actualbudget/actual/pull/6420) CI: fix vrt update workflow not working on PRs coming from forks — thanks @MatissJanis
+- [#6421](https://github.com/actualbudget/actual/pull/6421) ci: fix vrt-generate and apply workflows — thanks @MatissJanis
+- [#6428](https://github.com/actualbudget/actual/pull/6428) lint: remove usage of eslint-plugin-import — thanks @MatissJanis
+- [#6429](https://github.com/actualbudget/actual/pull/6429) Prevent downloading translations for all vrt workflows — thanks @MikesGlitch
+- [#6439](https://github.com/actualbudget/actual/pull/6439) ci: improve vrt-update UX — thanks @MatissJanis
+- [#6443](https://github.com/actualbudget/actual/pull/6443) Simplify linting configuration by migrating from ESLint to Oxlint with updated rules. — thanks @MatissJanis
+- [#6444](https://github.com/actualbudget/actual/pull/6444) lint: remove deprecated eslint rules — thanks @MatissJanis
+- [#6449](https://github.com/actualbudget/actual/pull/6449) lint: move more native eslint rules to oxlint — thanks @MatissJanis
+- [#6450](https://github.com/actualbudget/actual/pull/6450) lint: patch typescript lint issues — thanks @MatissJanis
+- [#6451](https://github.com/actualbudget/actual/pull/6451) lint: move jsx-a11y rules over to oxlint — thanks @MatissJanis
+- [#6454](https://github.com/actualbudget/actual/pull/6454) lint: move actual/typography from enforcing curly braces to disallowing these — thanks @MatissJanis
+- [#6455](https://github.com/actualbudget/actual/pull/6455) Improve api unit test stability for local runs — thanks @MatissJanis
+- [#6456](https://github.com/actualbudget/actual/pull/6456) lint: fix eslint/default-case rule violations — thanks @MatissJanis
+- [#6457](https://github.com/actualbudget/actual/pull/6457) lint: fix most eslint/no-empty-function violations — thanks @MatissJanis
+- [#6460](https://github.com/actualbudget/actual/pull/6460) Bring back i18n extraction ci job — thanks @MatissJanis
+- [#6461](https://github.com/actualbudget/actual/pull/6461) Disable CodeRabbit issue enrichment — thanks @jfdoming
+- [#6462](https://github.com/actualbudget/actual/pull/6462) lint: move actual eslint rules to oxlint and some eslint — thanks @MatissJanis
+- [#6463](https://github.com/actualbudget/actual/pull/6463) Add a name to the local ESLint plugin. — thanks @connorshea
+- [#6464](https://github.com/actualbudget/actual/pull/6464) lint: add react/jsx-boolean-value lint rule — thanks @MatissJanis
+- [#6465](https://github.com/actualbudget/actual/pull/6465) lint: clean up unnecessary config and disables — thanks @MatissJanis
+- [#6489](https://github.com/actualbudget/actual/pull/6489) test: improve help-menu e2e test stability — thanks @MatissJanis
+- [#6492](https://github.com/actualbudget/actual/pull/6492) Fix release notes formatting by adjusting newlines to prevent extra whitespace in API payload. — thanks @MatissJanis
+- [#6505](https://github.com/actualbudget/actual/pull/6505) Add configuration to use built-in test explorer in VS Code — thanks @jfdoming
+
 ## 25.12.0
 
 Release date: 2025-12-03
@@ -11,8 +432,6 @@ This release contains the following notable improvements, along with numerous fi
 - Add ability to quickly create single instance schedules from the account ledger.
 - Add running balance on mobile account view.
 - Add CTRL/CMD+Enter keyboard command for entering only a single new transaction on desktop.
-
-<!--truncate-->
 
 **Docker Tag: v25.12.0**
 
@@ -129,8 +548,6 @@ This release contains the following notable improvements, along with numerous fi
 - Experimental feature: formula card and rule/report formulas
 
 _Note:_ We are dropping support for Node versions older than 22 in this release. If you are using one of these versions of Node you will need to upgrade to at least Node 22.
-
-<!--truncate-->
 
 **Docker tag: 25.11.0**
 
@@ -251,8 +668,6 @@ This release contains the following improvements, along with numerous fixes:
 - Expand the range of display currencies available
 - Introduce a graph to show balance over time on account pages
 
-<!--truncate-->
-
 **Docker tag: 25.10.0**
 
 #### Features
@@ -344,8 +759,6 @@ This release contains the following improvements, along with numerous fixes:
 - Add a mobile view for the rules page
 - Show experimental budget currency on reports page
 - Release experimental Pluggy.ai bank connector
-
-<!--truncate-->
 
 **Docker tag: 25.9.0**
 
@@ -457,8 +870,6 @@ This release contains the following improvements:
 - New experimental feature to display currency in some areas of the app
 - Upgraded keyboard shortcut help menu
 
-<!--truncate-->
-
 **Docker tag: 25.8.0**
 
 #### Features
@@ -543,8 +954,6 @@ This release contains the following improvements:
 
 - Fix the amount input in the rules and schedules page not allowing decimals
 
-<!--truncate-->
-
 **Docker tag: 25.7.1**
 
 #### Bugfix
@@ -562,8 +971,6 @@ This release has many notable improvements. Some highlights:
 - Open a command bar with Ctrl-K (Cmd-K on Mac)
 
 As of this release we are also now publishing **nightly** versions of all the NPM packages, giving more consistency for anyone testing features before they are released.
-
-<!--truncate-->
 
 **Docker tag: 25.7.0**
 
@@ -658,8 +1065,6 @@ This release contains the following improvements:
 - Fixes a rare crash when selecting dates
 - Upgrades the Docker image to use Node.js version 20
 
-<!--truncate-->
-
 **Docker tag: 25.6.1**
 
 #### Bugfix
@@ -681,8 +1086,6 @@ Other notable improvements:
 
 - Upcoming/missed/due schedules in a category template are now shown on the desktop budget table
 - Numerous fixes for bugs and visual glitches
-
-<!--truncate-->
 
 **Docker tag: 25.6.0**
 
@@ -795,8 +1198,6 @@ This release has many notable improvements. Some highlights:
 - Merge different transactions into a single transaction
 - Run Actual outside of a Docker container without building from source—for more information, please check out the [docs](https://actualbudget.org/docs/install/cli-tool)
 - Use Cloudflare Access tunnels to connect to an Actual instance (newly fixed)
-
-<!--truncate-->
 
 **Docker tag: 25.5.0**
 
@@ -1051,8 +1452,6 @@ Starting next release, we plan on deprecating the `@actual-app/web` NPM package.
 
 :::
 
-<!--truncate-->
-
 **Docker tag: 25.3.0**
 
 #### Features
@@ -1174,8 +1573,6 @@ The release has the following notable improvements:
 - Ability to switch the interface language, with experimental support for the `nl`, `pt-BR`, `uk`, and `en-GB` locales
 - Ability to disable category learning
 - Combined account view on mobile
-
-<!--truncate-->
 
 **Docker tag: 25.2.0**
 

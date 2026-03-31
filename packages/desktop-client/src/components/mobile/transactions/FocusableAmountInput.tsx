@@ -1,15 +1,13 @@
-import React, {
-  type Ref,
-  type ComponentPropsWithRef,
-  type HTMLProps,
-  memo,
-  useEffect,
-  useRef,
-  useState,
-  type CSSProperties,
+import React, { memo, useEffect, useRef, useState } from 'react';
+import type {
+  ComponentPropsWithRef,
+  CSSProperties,
+  HTMLProps,
+  Ref,
 } from 'react';
 
 import { Button } from '@actual-app/components/button';
+import type { CSSProperties as EmotionCSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -170,7 +168,9 @@ type FocusableAmountInputProps = Omit<AmountInputProps, 'onFocus'> & {
   focused?: boolean;
   disabled?: boolean;
   focusedStyle?: CSSProperties;
-  buttonProps?: ComponentPropsWithRef<typeof Button>;
+  buttonProps?: Omit<ComponentPropsWithRef<typeof Button>, 'style'> & {
+    style?: EmotionCSSProperties;
+  };
   onFocus?: () => void;
 };
 
@@ -227,7 +227,9 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
         focused={focused && !disabled}
         style={{
           ...makeAmountFullStyle(value, {
-            zeroColor: isNegative ? theme.errorText : theme.noticeText,
+            zeroColor: isNegative ? theme.numberNegative : theme.numberNeutral,
+            positiveColor: theme.numberPositive,
+            negativeColor: theme.numberNegative,
           }),
           width: 80,
           justifyContent: 'center',
@@ -277,7 +279,11 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
           >
             <Text
               style={{
-                ...makeAmountFullStyle(value),
+                ...makeAmountFullStyle(value, {
+                  positiveColor: theme.numberPositive,
+                  negativeColor: theme.numberNegative,
+                  zeroColor: theme.numberNeutral,
+                }),
                 fontSize: 15,
                 userSelect: 'none',
                 ...textStyle,

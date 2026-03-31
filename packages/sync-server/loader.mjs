@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { resolve as nodeResolve, dirname, extname } from 'node:path';
+import { dirname, extname, resolve as nodeResolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const extensions = ['.ts', '.js', '.mts', '.mjs'];

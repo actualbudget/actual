@@ -35,7 +35,7 @@ const lazyLoadBackend = async (isDev: boolean) => {
   } catch (error) {
     console.error('Failed to init the server bundle after all retries:', error);
     throw new Error(
-      `Failed to init the server bundle after all retries: ${error}`,
+      `Failed to init the server bundle after all retries: ${String(error)}`,
     );
   }
 };
@@ -43,4 +43,4 @@ const lazyLoadBackend = async (isDev: boolean) => {
 const isDev = false;
 
 // Start the app
-lazyLoadBackend(isDev);
+void lazyLoadBackend(isDev);

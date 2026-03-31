@@ -37,7 +37,7 @@ async function run() {
       choices: [
         { title: '✨ Features', value: 'Features' },
         { title: '👍 Enhancements', value: 'Enhancements' },
-        { title: '🐛 Bugfix', value: 'Bugfix' },
+        { title: '🐛 Bugfixes', value: 'Bugfixes' },
         { title: '⚙️  Maintenance', value: 'Maintenance' },
       ],
     },
@@ -160,7 +160,8 @@ category: ${type}
 authors: [${username}]
 ---
 
-${summary}`;
+${summary}
+`;
 }
 
 // simple exec that fails silently and returns an empty string on failure
@@ -177,4 +178,4 @@ async function execAsync(cmd: string, errorLog?: string): Promise<string> {
   });
 }
 
-run();
+void run();

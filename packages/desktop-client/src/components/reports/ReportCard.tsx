@@ -1,11 +1,5 @@
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  type ComponentProps,
-  type ReactNode,
-  type CSSProperties,
-} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import type { ComponentProps, CSSProperties, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -27,8 +21,8 @@ type ReportCardProps = {
   disableClick?: boolean;
   to?: string;
   children: ReactNode;
-  menuItems?: ComponentProps<typeof Menu>['items'];
-  onMenuSelect?: ComponentProps<typeof Menu>['onMenuSelect'];
+  menuItems?: ComponentProps<typeof Menu<string>>['items'];
+  onMenuSelect?: ComponentProps<typeof Menu<string>>['onMenuSelect'];
   size?: number;
   style?: CSSProperties;
 };
@@ -104,22 +98,23 @@ export function ReportCard({
     </View>
   );
 
-  if (to) {
+  if (to && !isEditing && !disableClick) {
     return (
       <Layout {...layoutProps}>
-        <View
-          role="button"
-          onClick={isEditing || disableClick ? undefined : () => navigate(to)}
+        <Button
+          variant="bare"
+          onPress={() => navigate(to, { state: { goBack: true } })}
           style={{
             height: '100%',
             width: '100%',
-            ':hover': {
-              cursor: 'pointer',
-            },
+            background: 'transparent',
+            padding: 0,
+            textAlign: 'left',
+            overflow: 'visible',
           }}
         >
           {content}
-        </View>
+        </Button>
       </Layout>
     );
   }

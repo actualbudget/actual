@@ -1,11 +1,11 @@
 // @ts-strict-ignore
-import React, {
-  type ComponentType,
-  type ComponentPropsWithoutRef,
-  type CSSProperties,
-  useCallback,
+import React, { useCallback } from 'react';
+import type {
+  ComponentPropsWithoutRef,
+  ComponentType,
+  CSSProperties,
 } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgArrowThinRight } from '@actual-app/components/icons/v1';
@@ -15,7 +15,7 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { type TransObjectLiteral } from 'loot-core/types/util';
+import type { TransObjectLiteral } from 'loot-core/types/util';
 
 import { makeBalanceAmountStyle } from './util';
 
@@ -26,7 +26,7 @@ import {
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import { type Binding } from '@desktop-client/spreadsheet';
+import type { Binding } from '@desktop-client/spreadsheet';
 
 type CarryoverIndicatorProps = {
   style?: CSSProperties;
@@ -160,11 +160,11 @@ export function BalanceWithCarryover({
         <>
           <span style={{ fontWeight: 'bold' }}>
             {getDifferenceToGoal(balanceValue) === 0 ? (
-              <span style={{ color: theme.noticeText }}>
+              <span style={{ color: theme.templateNumberFunded }}>
                 <Trans>Fully funded</Trans>
               </span>
             ) : getDifferenceToGoal(balanceValue) > 0 ? (
-              <span style={{ color: theme.noticeText }}>
+              <span style={{ color: theme.templateNumberFunded }}>
                 <Trans>
                   Overfunded (
                   {{
@@ -177,7 +177,7 @@ export function BalanceWithCarryover({
                 </Trans>
               </span>
             ) : (
-              <span style={{ color: theme.errorText }}>
+              <span style={{ color: theme.templateNumberUnderFunded }}>
                 <Trans>
                   Underfunded (
                   {{

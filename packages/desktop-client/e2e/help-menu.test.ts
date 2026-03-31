@@ -1,4 +1,4 @@
-import { type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
@@ -58,7 +58,7 @@ test.describe('Help menu', () => {
     await backButton.click();
     await expect(searchBox).toHaveValue('');
 
-    await keyboardShortcutsModal.getByText('General').click();
+    await keyboardShortcutsModal.getByText('Global').click();
     await expect(
       keyboardShortcutsModal.getByText('Open the help menu'),
     ).toBeVisible();

@@ -1,11 +1,12 @@
-// @ts-strict-ignore
-import React, { type ReactElement, useEffect, useRef } from 'react';
+import React, { useEffect, useEffectEvent, useRef } from 'react';
+import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Route, Routes, Navigate, useLocation, useHref } from 'react-router';
+import { Navigate, Route, Routes, useHref, useLocation } from 'react-router';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { useQuery } from '@tanstack/react-query';
 
 import * as undo from 'loot-core/platform/client/undo';
 
@@ -27,6 +28,7 @@ import { FloatableSidebar } from './sidebar';
 import { ManageTagsPage } from './tags/ManageTagsPage';
 import { Titlebar } from './Titlebar';
 
+import { accountQueries } from '@desktop-client/accounts';
 import { getLatestAppVersion, sync } from '@desktop-client/app/appSlice';
 import { ProtectedRoute } from '@desktop-client/auth/ProtectedRoute';
 import { Permissions } from '@desktop-client/auth/types';
@@ -37,7 +39,7 @@ import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { ScrollProvider } from '@desktop-client/hooks/useScrollListener';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -50,18 +52,24 @@ function NarrowNotSupported({
   const navigate = useNavigate();
   useEffect(() => {
     if (isNarrowWidth) {
-      navigate(redirectTo);
+      void navigate(redirectTo);
     }
   }, [isNarrowWidth, navigate, redirectTo]);
   return isNarrowWidth ? null : children;
 }
 
-function WideNotSupported({ children, redirectTo = '/budget' }) {
+function WideNotSupported({
+  children,
+  redirectTo = '/budget',
+}: {
+  redirectTo?: string;
+  children: ReactElement;
+}) {
   const { isNarrowWidth } = useResponsive();
   const navigate = useNavigate();
   useEffect(() => {
     if (!isNarrowWidth) {
-      navigate(redirectTo);
+      void navigate(redirectTo);
     }
   }, [isNarrowWidth, navigate, redirectTo]);
   return isNarrowWidth ? children : null;
@@ -79,13 +87,12 @@ function RouterBehaviors() {
 
 export function FinancesApp() {
   const { isNarrowWidth } = useResponsive();
-  useMetaThemeColor(isNarrowWidth ? theme.mobileViewTheme : null);
+  useMetaThemeColor(isNarrowWidth ? theme.mobileViewTheme : undefined);
 
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const accounts = useAccounts();
-  const isAccountsLoaded = useSelector(state => state.account.isAccountsLoaded);
+  const { data: accounts, isFetching: isAccountsFetching } = useAccounts();
 
   const versionInfo = useSelector(state => state.app.versionInfo);
   const [notifyWhenUpdateIsAvailable] = useGlobalPref(
@@ -97,15 +104,13 @@ export function FinancesApp() {
 
   const multiuserEnabled = useMultiuserEnabled();
 
-  useEffect(() => {
+  const init = useEffectEvent(() => {
     // Wait a little bit to make sure the sync button will get the
     // sync start event. This can be improved later.
     setTimeout(async () => {
       await dispatch(sync());
     }, 100);
-  }, []);
 
-  useEffect(() => {
     async function run() {
       await global.Actual.waitForUpdateReadyForDownload(); // This will only resolve when an update is ready
       dispatch(
@@ -129,11 +134,13 @@ export function FinancesApp() {
       );
     }
 
-    run();
-  }, []);
+    void run();
+  });
+
+  useEffect(() => init(), []);
 
   useEffect(() => {
-    dispatch(getLatestAppVersion());
+    void dispatch(getLatestAppVersion());
   }, [dispatch]);
 
   useEffect(() => {
@@ -236,16 +243,14 @@ export function FinancesApp() {
                 <Route
                   path="/"
                   element={
-                    isAccountsLoaded ? (
-                      accounts.length > 0 ? (
-                        <Navigate to="/budget" replace />
-                      ) : (
-                        // If there are no accounts, we want to redirect the user to
-                        // the All Accounts screen which will prompt them to add an account
-                        <Navigate to="/accounts" replace />
-                      )
-                    ) : (
+                    isAccountsFetching || !accounts ? (
                       <LoadingIndicator />
+                    ) : accounts.length > 0 ? (
+                      <Navigate to="/budget" replace />
+                    ) : (
+                      // If there are no accounts, we want to redirect the user to
+                      // the All Accounts screen which will prompt them to add an account
+                      <Navigate to="/accounts" replace />
                     )
                   }
                 />
@@ -370,6 +375,7 @@ export function FinancesApp() {
               <Route path="/accounts" element={<MobileNavTabs />} />
               <Route path="/settings" element={<MobileNavTabs />} />
               <Route path="/reports" element={<MobileNavTabs />} />
+              <Route path="/reports/:dashboardId" element={<MobileNavTabs />} />
               <Route path="/bank-sync" element={<MobileNavTabs />} />
               <Route path="/rules" element={<MobileNavTabs />} />
               <Route path="/payees" element={<MobileNavTabs />} />

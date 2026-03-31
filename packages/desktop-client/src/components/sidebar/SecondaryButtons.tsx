@@ -1,4 +1,5 @@
-import React, { type ComponentType, type SVGProps } from 'react';
+import React from 'react';
+import type { ComponentType, SVGProps } from 'react';
 
 import { View } from '@actual-app/components/view';
 

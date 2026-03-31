@@ -1,0 +1,35 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": false,
+    "declaration": true,
+    "declarationMap": true,
+    "strict": false, // TODO: fix issues and remove this
+    "emitDeclarationOnly": true,
+    "outDir": "build/ts",
+    "rootDir": ".",
+    "tsBuildInfoFile": "build/ts/.tsbuildinfo",
+    "paths": {
+      // TODO: remove and replace with imports from "@actual-app/core"
+      "loot-core/*": ["../loot-core/src/*"],
+      // TODO: move to subpath imports
+      "@desktop-client/*": ["./src/*"]
+    },
+    "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
+  },
+  "references": [
+    { "path": "../loot-core" },
+    { "path": "../component-library" }
+  ],
+  "include": ["**/*.ts", "src/**/*.tsx", "src/**/*.js"],
+  "exclude": [
+    "node_modules",
+    "build",
+    "**/service-worker/**",
+    "e2e",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/setupTests.ts"
+  ]
+}

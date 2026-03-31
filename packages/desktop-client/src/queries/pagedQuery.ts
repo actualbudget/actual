@@ -1,9 +1,11 @@
 // @ts-strict-ignore
 import { once } from 'loot-core/shared/async';
-import { getPrimaryOrderBy, type Query } from 'loot-core/shared/query';
+import { getPrimaryOrderBy } from 'loot-core/shared/query';
+import type { Query } from 'loot-core/shared/query';
 
 import { aqlQuery } from './aqlQuery';
-import { LiveQuery, type LiveQueryOptions } from './liveQuery';
+import { LiveQuery } from './liveQuery';
+import type { LiveQueryOptions } from './liveQuery';
 
 export function pagedQuery<TResponse = unknown>(
   query: Query,
@@ -83,7 +85,7 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
       this._hasReachedEnd = false;
 
       // Also fetch the total count
-      this.fetchCount();
+      void this.fetchCount();
 
       // If data is null, we haven't fetched anything yet so just
       // fetch the first page
@@ -113,7 +115,7 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
       onPageData,
       options,
     );
-    pagedQuery.run();
+    void pagedQuery.run();
     return pagedQuery;
   };
 
@@ -122,7 +124,7 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
       this._hasReachedEnd = false;
 
       // Also fetch the total count
-      this.fetchCount();
+      void this.fetchCount();
 
       const orderDesc = getPrimaryOrderBy(this.query, defaultOrderBy);
       if (orderDesc == null) {

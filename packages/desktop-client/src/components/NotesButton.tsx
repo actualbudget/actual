@@ -1,22 +1,17 @@
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  type ComponentProps,
-  type CSSProperties,
-  useCallback,
-} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type { ComponentProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgCustomNotesPaper } from '@actual-app/components/icons/v2';
 import { Popover } from '@actual-app/components/popover';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 
 import { Notes } from './Notes';
 

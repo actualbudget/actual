@@ -1,8 +1,8 @@
 // @ts-strict-ignore
 
 import * as connection from '../../platform/server/connection';
-import { type Diff } from '../../shared/util';
-import { type PayeeEntity, type TransactionEntity } from '../../types/models';
+import type { Diff } from '../../shared/util';
+import type { PayeeEntity, TransactionEntity } from '../../types/models';
 import * as db from '../db';
 import { incrFetch, whereIn } from '../db/util';
 import { batchMessages } from '../sync';

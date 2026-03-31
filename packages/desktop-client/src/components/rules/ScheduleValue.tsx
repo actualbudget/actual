@@ -6,13 +6,12 @@ import { View } from '@actual-app/components/view';
 
 import { q } from 'loot-core/shared/query';
 import { describeSchedule } from 'loot-core/shared/schedules';
-import { type ScheduleEntity } from 'loot-core/types/models';
+import type { ScheduleEntity } from 'loot-core/types/models';
 
 import { Value } from './Value';
 
-import { usePayees } from '@desktop-client/hooks/usePayees';
+import { usePayeesById } from '@desktop-client/hooks/usePayees';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import { getPayeesById } from '@desktop-client/payees/payeesSlice';
 
 type ScheduleValueProps = {
   value: ScheduleEntity;
@@ -20,8 +19,7 @@ type ScheduleValueProps = {
 
 export function ScheduleValue({ value }: ScheduleValueProps) {
   const { t } = useTranslation();
-  const payees = usePayees();
-  const byId = getPayeesById(payees);
+  const { data: byId = {} } = usePayeesById();
   const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
   const { schedules = [], isLoading } = useSchedules({ query: schedulesQuery });
 

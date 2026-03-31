@@ -1,13 +1,13 @@
 import { Action } from './action';
 import { Condition } from './condition';
 import { registerHandlebarsHelpers } from './handlebars-helpers';
-import { Rule, execActions } from './rule';
+import { execActions, Rule } from './rule';
 import { RuleIndexer } from './rule-indexer';
 import {
+  iterateIds,
+  migrateIds,
   parseDateString,
   rankRules,
-  migrateIds,
-  iterateIds,
 } from './rule-utils';
 
 // Ensure helpers are registered

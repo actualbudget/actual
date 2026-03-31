@@ -1,26 +1,26 @@
-// @ts-strict-ignore
-import { type Currency, getCurrency } from 'loot-core/shared/currencies';
-import { q } from 'loot-core/shared/query';
-
+import { getCurrency } from '#shared/currencies';
+import type { Currency } from '#shared/currencies';
+import { q } from '#shared/query';
 import * as monthUtils from '../../shared/months';
 import { amountToInteger, integerToAmount } from '../../shared/util';
-import { type CategoryEntity } from '../../types/models';
-import {
-  type AverageTemplate,
-  type ByTemplate,
-  type CopyTemplate,
-  type GoalTemplate,
-  type PercentageTemplate,
-  type RemainderTemplate,
-  type SimpleTemplate,
-  type SpendTemplate,
-  type Template,
-  type PeriodicTemplate,
+import type { CategoryEntity } from '../../types/models';
+import type {
+  AverageTemplate,
+  ByTemplate,
+  CopyTemplate,
+  GoalTemplate,
+  PercentageTemplate,
+  PeriodicTemplate,
+  RefillTemplate,
+  RemainderTemplate,
+  SimpleTemplate,
+  SpendTemplate,
+  Template,
 } from '../../types/models/templates';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
 
-import { getSheetValue, getSheetBoolean } from './actions';
+import { getSheetBoolean, getSheetValue, isReflectBudget } from './actions';
 import { runSchedule } from './schedule-template';
 import { getActiveSchedules } from './statements';
 
@@ -54,7 +54,7 @@ export class CategoryTemplateContext {
     const lastMonthSheet = monthUtils.sheetForMonth(
       monthUtils.subMonths(month, 1),
     );
-    const lastMonthBalance = await getSheetValue(
+    let fromLastMonth = await getSheetValue(
       lastMonthSheet,
       `leftover-${category.id}`,
     );
@@ -62,15 +62,15 @@ export class CategoryTemplateContext {
       lastMonthSheet,
       `carryover-${category.id}`,
     );
-    let fromLastMonth;
-    if (lastMonthBalance < 0 && !carryover) {
+
+    if (
+      (fromLastMonth < 0 && !carryover) || // overspend no carryover
+      category.is_income || // tracking budget income categories
+      (isReflectBudget() && !carryover) // tracking budget regular categories
+    ) {
       fromLastMonth = 0;
-    } else if (category.is_income) {
-      //for tracking budget
-      fromLastMonth = 0;
-    } else {
-      fromLastMonth = lastMonthBalance;
     }
+
     // run all checks
     await CategoryTemplateContext.checkByAndScheduleAndSpend(templates, month);
     await CategoryTemplateContext.checkPercentage(templates);
@@ -123,7 +123,9 @@ export class CategoryTemplateContext {
   // what is the full requested amount this month
   async runAll(available: number) {
     let toBudget: number = 0;
-    const prioritiesSorted = new Int32Array([...this.getPriorities()].sort());
+    const prioritiesSorted = new Int32Array(
+      [...this.getPriorities()].sort((a, b) => a - b),
+    );
     for (let i = 0; i < prioritiesSorted.length; i++) {
       const p = prioritiesSorted[i];
       toBudget += await this.runTemplatesForPriority(p, available, available);
@@ -155,6 +157,10 @@ export class CategoryTemplateContext {
       switch (template.type) {
         case 'simple': {
           newBudget = CategoryTemplateContext.runSimple(template, this);
+          break;
+        }
+        case 'refill': {
+          newBudget = CategoryTemplateContext.runRefill(template, this);
           break;
         }
         case 'copy': {
@@ -199,6 +205,7 @@ export class CategoryTemplateContext {
               toBudget,
               [],
               this.category,
+              this.currency,
             );
             // Schedules assume that its to budget value is the whole thing so this
             // needs to remove the previous funds so they aren't double counted
@@ -239,11 +246,11 @@ export class CategoryTemplateContext {
 
     // don't overbudget when using a priority unless income category
     if (priority > 0 && available < 0 && !this.category.is_income) {
-      this.fullAmount += toBudget;
+      this.fullAmount = (this.fullAmount || 0) + toBudget;
       toBudget = Math.max(0, toBudget + available);
       this.toBudgetAmount += toBudget;
     } else {
-      this.fullAmount += toBudget;
+      this.fullAmount = (this.fullAmount || 0) + toBudget;
       this.toBudgetAmount += toBudget;
     }
     return this.category.is_income ? -toBudget : toBudget;
@@ -299,9 +306,9 @@ export class CategoryTemplateContext {
   readonly hideDecimal: boolean = false;
   private remainderWeight: number = 0;
   private toBudgetAmount: number = 0; // amount that will be budgeted by the templates
-  private fullAmount: number = null; // the full requested amount, start null for remainder only cats
-  private isLongGoal: boolean = null; //defaulting the goals to null so templates can be unset
-  private goalAmount: number = null;
+  private fullAmount: number | null = null; // the full requested amount, start null for remainder only cats
+  private isLongGoal: boolean | null = null; //defaulting the goals to null so templates can be unset
+  private goalAmount: number | null = null;
   private fromLastMonth = 0; // leftover from last month
   private limitMet = false;
   private limitExcess: number = 0;
@@ -548,8 +555,15 @@ export class CategoryTemplateContext {
         templateContext.currency.decimalPlaces,
       );
     } else {
-      return templateContext.limitAmount;
+      return templateContext.limitAmount - templateContext.fromLastMonth;
     }
+  }
+
+  static runRefill(
+    template: RefillTemplate,
+    templateContext: CategoryTemplateContext,
+  ): number {
+    return templateContext.limitAmount - templateContext.fromLastMonth;
   }
 
   static async runCopy(
@@ -576,7 +590,8 @@ export class CategoryTemplateContext {
     );
     const period = template.period.period;
     const numPeriods = template.period.amount;
-    let date = template.starting;
+    let date =
+      template.starting ?? monthUtils.firstDayOfMonth(templateContext.month);
 
     let dateShiftFunction;
     switch (period) {
@@ -591,11 +606,11 @@ export class CategoryTemplateContext {
         break;
       case 'year':
         // the addYears function doesn't return the month number, so use addMonths
-        dateShiftFunction = (date, numPeriods) =>
+        dateShiftFunction = (date: string | Date, numPeriods: number) =>
           monthUtils.addMonths(date, numPeriods * 12);
         break;
       default:
-        throw new Error(`Unrecognized periodic period: ${period}`);
+        throw new Error(`Unrecognized periodic period: ${String(period)}`);
     }
 
     //shift the starting date until its in our month or in the future
@@ -714,6 +729,11 @@ export class CategoryTemplateContext {
       const incomeCat = (await db.getCategories()).find(
         c => c.is_income && c.name.toLowerCase() === cat,
       );
+      if (!incomeCat) {
+        throw new Error(
+          `Income category "${template.category}" not found for percentage template`,
+        );
+      }
       monthlyIncome = await getSheetValue(
         sheetName,
         `sum-amount-${incomeCat.id}`,
@@ -737,7 +757,31 @@ export class CategoryTemplateContext {
         `sum-amount-${templateContext.category.id}`,
       );
     }
-    return -Math.round(sum / template.numMonths);
+
+    // negate as sheet value is cost ie negative
+    let average = -(sum / template.numMonths);
+
+    if (template.adjustment !== undefined && template.adjustmentType) {
+      switch (template.adjustmentType) {
+        case 'percent': {
+          const adjustmentFactor = 1 + template.adjustment / 100;
+          average = adjustmentFactor * average;
+          break;
+        }
+        case 'fixed': {
+          average += amountToInteger(
+            template.adjustment,
+            templateContext.currency.decimalPlaces,
+          );
+          break;
+        }
+
+        default:
+        //no valid adjustment was found
+      }
+    }
+
+    return Math.round(average);
   }
 
   static runBy(templateContext: CategoryTemplateContext): number {
@@ -746,7 +790,7 @@ export class CategoryTemplateContext {
     );
     const savedInfo = [];
     let totalNeeded = 0;
-    let shortNumMonths;
+    let workingShortNumMonths;
     //find shortest time period
     for (let i = 0; i < byTemplates.length; i++) {
       const template = byTemplates[i];
@@ -768,12 +812,16 @@ export class CategoryTemplateContext {
         );
       }
       savedInfo.push({ numMonths, period });
-      if (numMonths < shortNumMonths || shortNumMonths === undefined) {
-        shortNumMonths = numMonths;
+      if (
+        workingShortNumMonths === undefined ||
+        numMonths < workingShortNumMonths
+      ) {
+        workingShortNumMonths = numMonths;
       }
     }
 
     // calculate needed funds per template
+    const shortNumMonths = workingShortNumMonths || 0;
     for (let i = 0; i < byTemplates.length; i++) {
       const template = byTemplates[i];
       const numMonths = savedInfo[i].numMonths;

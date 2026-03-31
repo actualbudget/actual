@@ -1,4 +1,5 @@
-import React, { useRef, type ReactNode, type UIEvent } from 'react';
+import React, { useRef } from 'react';
+import type { ReactNode, UIEvent } from 'react';
 
 import { View } from '@actual-app/components/view';
 
@@ -41,7 +42,7 @@ export function InfiniteScrollWrapper({
         // Hide the last border of the item in the table
         marginBottom: -1,
       }}
-      tabIndex={1}
+      tabIndex={0}
       data-testid="table"
     >
       <View

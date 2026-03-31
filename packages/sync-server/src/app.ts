@@ -128,6 +128,10 @@ app.get('/metrics', (_req, res) => {
 app.use((req, res, next) => {
   res.set('Cross-Origin-Opener-Policy', 'same-origin');
   res.set('Cross-Origin-Embedder-Policy', 'require-corp');
+  res.set(
+    'Content-Security-Policy',
+    "default-src 'self' blob:; img-src 'self' blob: data:; script-src 'self' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src http: https:;",
+  );
   next();
 });
 if (process.env.NODE_ENV === 'development') {
@@ -163,6 +167,7 @@ function parseHTTPSConfig(value: string) {
 
 function sendServerStartedMessage() {
   // Signify to any parent process that the server has started. Used in electron desktop app
+  // oxlint-disable-next-line typescript/ban-ts-comment
   // @ts-ignore-error electron types
   process.parentPort?.postMessage({ type: 'server-started' });
   console.log(

@@ -10,9 +10,9 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { PossibleRoles } from 'loot-core/shared/user';
-import { type NewUserEntity, type UserEntity } from 'loot-core/types/models';
+import type { NewUserEntity, UserEntity } from 'loot-core/types/models';
 
 import {
   Modal,
@@ -24,10 +24,8 @@ import {
   FormField,
   FormLabel,
 } from '@desktop-client/components/forms';
-import {
-  type Modal as ModalType,
-  popModal,
-} from '@desktop-client/modals/modalsSlice';
+import { popModal } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
 import { signOut } from '@desktop-client/users/usersSlice';
@@ -104,7 +102,7 @@ function useSaveUser() {
               button: {
                 title: t('Go to login'),
                 action: () => {
-                  dispatch(signOut());
+                  void dispatch(signOut());
                 },
               },
             },
@@ -135,7 +133,7 @@ export function EditUserFinanceApp({
   const isExistingUser = 'id' in defaultUser && !!defaultUser.id;
   return (
     <Modal name="edit-user">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={
@@ -145,14 +143,14 @@ export function EditUserFinanceApp({
                   })
                 : t('Add user')
             }
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <EditUser
             defaultUser={defaultUser}
             onSave={async (method, user, setError) => {
               if (await saveUser(method, user, setError)) {
                 originalOnSave(user);
-                close();
+                state.close();
               }
             }}
           />

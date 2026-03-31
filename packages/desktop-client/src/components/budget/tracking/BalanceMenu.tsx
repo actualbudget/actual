@@ -1,4 +1,5 @@
-import React, { type ComponentPropsWithoutRef } from 'react';
+import React from 'react';
+import type { ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
@@ -33,7 +34,7 @@ export function BalanceMenu({
             onCarryover?.(!carryover);
             break;
           default:
-            throw new Error(`Unrecognized menu option: ${name}`);
+            throw new Error(`Unrecognized menu option: ${String(name)}`);
         }
       }}
       items={[

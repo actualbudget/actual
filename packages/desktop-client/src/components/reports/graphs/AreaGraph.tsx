@@ -1,31 +1,31 @@
-import React, { type SVGAttributes, type CSSProperties } from 'react';
+import React from 'react';
+import type { CSSProperties, SVGAttributes } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 import {
-  AreaChart,
   Area,
+  AreaChart,
   CartesianGrid,
+  LabelList,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  LabelList,
-  type LabelProps,
 } from 'recharts';
+import type { LabelProps } from 'recharts';
 
-import {
-  type balanceTypeOpType,
-  type DataEntity,
-} from 'loot-core/types/models';
+import type { balanceTypeOpType, DataEntity } from 'loot-core/types/models';
 
 import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { Container } from '@desktop-client/components/reports/Container';
-import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import type { FormatType } from '@desktop-client/hooks/useFormat';
 import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type PayloadItem = {
@@ -36,6 +36,7 @@ type PayloadItem = {
     netAssets: number;
     netDebts: number;
     totalTotals: number;
+    totalBudgeted: number;
   };
 };
 
@@ -72,37 +73,64 @@ const CustomTooltip = ({
             <strong>{payload[0].payload.date}</strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
+            {['totalAssets', 'totalTotals', 'totalBudgeted'].includes(
+              balanceTypeOp,
+            ) && (
               <AlignedText
                 left={t('Assets:')}
-                right={format(payload[0].payload.totalAssets, 'financial')}
+                right={
+                  <FinancialText>
+                    {format(payload[0].payload.totalAssets, 'financial')}
+                  </FinancialText>
+                }
               />
             )}
-            {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
+            {['totalDebts', 'totalTotals', 'totalBudgeted'].includes(
+              balanceTypeOp,
+            ) && (
               <AlignedText
                 left={t('Debts:')}
-                right={format(payload[0].payload.totalDebts, 'financial')}
+                right={
+                  <FinancialText>
+                    {format(payload[0].payload.totalDebts, 'financial')}
+                  </FinancialText>
+                }
               />
             )}
             {['netAssets'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Net Assets:')}
-                right={format(payload[0].payload.netAssets, 'financial')}
+                right={
+                  <FinancialText>
+                    {format(payload[0].payload.netAssets, 'financial')}
+                  </FinancialText>
+                }
               />
             )}
             {['netDebts'].includes(balanceTypeOp) && (
               <AlignedText
                 left={t('Net Debts:')}
-                right={format(payload[0].payload.netDebts, 'financial')}
+                right={
+                  <FinancialText>
+                    {format(payload[0].payload.netDebts, 'financial')}
+                  </FinancialText>
+                }
               />
             )}
-            {['totalTotals'].includes(balanceTypeOp) && (
+            {['totalTotals', 'totalBudgeted'].includes(balanceTypeOp) && (
               <AlignedText
-                left={t('Net:')}
+                left={
+                  balanceTypeOp === 'totalBudgeted' ? t('Budgeted:') : t('Net:')
+                }
                 right={
-                  <strong>
-                    {format(payload[0].payload.totalTotals, 'financial')}
-                  </strong>
+                  <FinancialText as="strong">
+                    {format(
+                      balanceTypeOp === 'totalBudgeted'
+                        ? payload[0].payload.totalBudgeted
+                        : payload[0].payload.totalTotals,
+                      'financial',
+                    )}
+                  </FinancialText>
                 }
               />
             )}
@@ -272,12 +300,12 @@ export function AreaGraph({
                 >
                   <stop
                     offset={off}
-                    stopColor={theme.reportsBlue}
+                    stopColor={theme.reportsNumberPositive}
                     stopOpacity={0.2}
                   />
                   <stop
                     offset={off}
-                    stopColor={theme.reportsRed}
+                    stopColor={theme.reportsNumberNegative}
                     stopOpacity={0.2}
                   />
                 </linearGradient>
@@ -290,12 +318,12 @@ export function AreaGraph({
                 >
                   <stop
                     offset={off}
-                    stopColor={theme.reportsBlue}
+                    stopColor={theme.reportsNumberPositive}
                     stopOpacity={1}
                   />
                   <stop
                     offset={off}
-                    stopColor={theme.reportsRed}
+                    stopColor={theme.reportsNumberNegative}
                     stopOpacity={1}
                   />
                 </linearGradient>

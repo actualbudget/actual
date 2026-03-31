@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
@@ -14,7 +14,7 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type ConvertToScheduleModalProps = Extract<
   ModalType,
@@ -42,11 +42,11 @@ export function ConvertToScheduleModal({
       name="convert-to-schedule"
       containerProps={{ style: { width: '30vw' } }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Convert to Schedule')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ lineHeight: 1.5 }}>
             <Block>
@@ -95,7 +95,7 @@ export function ConvertToScheduleModal({
                   ...(isNarrowWidth && { flex: 1 }),
                 }}
                 onPress={() => {
-                  close();
+                  state.close();
                   onCancel?.();
                 }}
               >
@@ -110,7 +110,7 @@ export function ConvertToScheduleModal({
                     ...(isNarrowWidth && { flex: 1 }),
                   }}
                   onPress={() => {
-                    close();
+                    state.close();
                     onConfirm();
                   }}
                 >

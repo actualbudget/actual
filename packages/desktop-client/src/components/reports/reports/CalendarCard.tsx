@@ -1,13 +1,11 @@
 import React, {
-  useState,
+  useCallback,
+  useEffect,
   useMemo,
   useRef,
-  type Ref,
-  useEffect,
-  type Dispatch,
-  type SetStateAction,
-  useCallback,
+  useState,
 } from 'react';
+import type { Dispatch, Ref, SetStateAction } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
@@ -24,25 +22,25 @@ import { View } from '@actual-app/components/view';
 import { format as formatDate } from 'date-fns';
 import debounce from 'lodash/debounce';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import { type CalendarWidget } from 'loot-core/types/models';
-import { type SyncedPrefs } from 'loot-core/types/prefs';
+import type { CalendarWidget } from 'loot-core/types/models';
+import type { SyncedPrefs } from 'loot-core/types/prefs';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { chartTheme } from '@desktop-client/components/reports/chart-theme';
 import { DateRange } from '@desktop-client/components/reports/DateRange';
 import { CalendarGraph } from '@desktop-client/components/reports/graphs/CalendarGraph';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
 import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
-import {
-  type CalendarDataType,
-  calendarSpreadsheet,
-} from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
+import { calendarSpreadsheet } from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
+import type { CalendarDataType } from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
+import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '@desktop-client/components/reports/useReport';
-import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import type { FormatType } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
@@ -53,6 +51,7 @@ type CalendarCardProps = {
   meta?: CalendarWidget['meta'];
   onMetaChange: (newMeta: CalendarWidget['meta']) => void;
   onRemove: () => void;
+  onCopy: (targetDashboardId: string) => void;
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
 };
 
@@ -62,6 +61,7 @@ export function CalendarCard({
   meta = {},
   onMetaChange,
   onRemove,
+  onCopy,
   firstDayOfWeekIdx,
 }: CalendarCardProps) {
   const { t } = useTranslation();
@@ -76,7 +76,7 @@ export function CalendarCard({
         latestTrans ? latestTrans.date : monthUtils.currentDay(),
       );
     }
-    fetchLatestTransaction();
+    void fetchLatestTransaction();
   }, []);
 
   const [start, end] = calculateTimeRange(
@@ -168,9 +168,13 @@ export function CalendarCard({
     return data?.calendarData.length;
   }, [data]);
 
+  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
+    useDashboardWidgetCopyMenu(onCopy);
+
   return (
     <ReportCard
       isEditing={isEditing}
+      disableClick={nameMenuOpen}
       to={`/reports/calendar/${widgetId}`}
       menuItems={[
         {
@@ -181,8 +185,10 @@ export function CalendarCard({
           name: 'remove',
           text: t('Remove'),
         },
+        ...copyMenuItems,
       ]}
       onMenuSelect={item => {
+        if (handleCopyMenuSelect(item)) return;
         switch (item) {
           case 'rename':
             setNameMenuOpen(true);
@@ -241,10 +247,12 @@ export function CalendarCard({
                           >
                             <Trans>Income:</Trans>
                           </View>
-                          <View style={{ color: chartTheme.colors.blue }}>
+                          <View style={{ color: theme.reportsNumberPositive }}>
                             {totalIncome !== 0 ? (
                               <PrivacyFilter>
-                                {format(totalIncome, 'financial')}
+                                <FinancialText>
+                                  {format(totalIncome, 'financial')}
+                                </FinancialText>
                               </PrivacyFilter>
                             ) : (
                               ''
@@ -262,10 +270,12 @@ export function CalendarCard({
                           >
                             <Trans>Expenses:</Trans>
                           </View>
-                          <View style={{ color: chartTheme.colors.red }}>
+                          <View style={{ color: theme.reportsNumberNegative }}>
                             {totalExpense !== 0 ? (
                               <PrivacyFilter>
-                                {format(totalExpense, 'financial')}
+                                <FinancialText>
+                                  {format(totalExpense, 'financial')}
+                                </FinancialText>
                               </PrivacyFilter>
                             ) : (
                               ''
@@ -477,7 +487,7 @@ function CalendarCardInner({
               marginBottom: 6,
             }}
             onPress={() => {
-              navigate(
+              void navigate(
                 `/reports/calendar/${widgetId}?month=${formatDate(calendar.start, 'yyyy-MM')}`,
               );
             }}
@@ -494,7 +504,7 @@ function CalendarCardInner({
         >
           <View
             style={{
-              color: chartTheme.colors.blue,
+              color: theme.reportsNumberPositive,
               flexDirection: 'row',
               fontSize: '10px',
               marginRight: 10,
@@ -509,7 +519,9 @@ function CalendarCardInner({
                   style={{ flexShrink: 0 }}
                 />
                 <PrivacyFilter>
-                  {format(calendar.totalIncome, 'financial')}
+                  <FinancialText>
+                    {format(calendar.totalIncome, 'financial')}
+                  </FinancialText>
                 </PrivacyFilter>
               </>
             ) : (
@@ -518,7 +530,7 @@ function CalendarCardInner({
           </View>
           <View
             style={{
-              color: chartTheme.colors.red,
+              color: theme.reportsNumberNegative,
               flexDirection: 'row',
               fontSize: '10px',
             }}
@@ -532,7 +544,9 @@ function CalendarCardInner({
                   style={{ flexShrink: 0 }}
                 />
                 <PrivacyFilter>
-                  {format(calendar.totalExpense, 'financial')}
+                  <FinancialText>
+                    {format(calendar.totalExpense, 'financial')}
+                  </FinancialText>
                 </PrivacyFilter>
               </>
             ) : (
@@ -548,11 +562,11 @@ function CalendarCardInner({
         isEditing={isEditing}
         onDayClick={date => {
           if (date) {
-            navigate(
+            void navigate(
               `/reports/calendar/${widgetId}?day=${formatDate(date, 'yyyy-MM-dd')}`,
             );
           } else {
-            navigate(`/reports/calendar/${widgetId}`);
+            void navigate(`/reports/calendar/${widgetId}`);
           }
         }}
       />

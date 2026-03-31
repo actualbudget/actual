@@ -1,4 +1,4 @@
-import { type QueryState } from '../shared/query';
+import type { QueryState } from '../shared/query';
 
 export type ServerHandlers = {
   undo: () => Promise<void>;

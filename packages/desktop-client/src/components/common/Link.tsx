@@ -1,12 +1,10 @@
-import React, {
-  type MouseEventHandler,
-  type ComponentProps,
-  type ReactNode,
-} from 'react';
+import React from 'react';
+import type { ComponentProps, MouseEventHandler, ReactNode } from 'react';
 import { NavLink, useMatch } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
-import { styles, type CSSProperties } from '@actual-app/components/styles';
+import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
@@ -19,8 +17,12 @@ type TextLinkProps = {
   children?: ReactNode;
 };
 
-type ButtonLinkProps = Omit<ComponentProps<typeof Button>, 'variant'> & {
+type ButtonLinkProps = Omit<
+  ComponentProps<typeof Button>,
+  'variant' | 'style'
+> & {
   buttonVariant?: ComponentProps<typeof Button>['variant'];
+  style?: CSSProperties;
   to?: string;
   activeStyle?: CSSProperties;
 };
@@ -31,6 +33,7 @@ type InternalLinkProps = {
   activeStyle?: CSSProperties;
   children?: ReactNode;
   isDisabled?: boolean;
+  isExactPathMatch?: boolean;
 };
 
 const externalLinkColors = {
@@ -43,21 +46,23 @@ type ExternalLinkProps = {
   children?: ReactNode;
   to?: string;
   linkColor?: keyof typeof externalLinkColors;
+  onClick?: MouseEventHandler;
 };
 
 const ExternalLink = ({
   children,
   to,
   linkColor = 'blue',
+  onClick,
 }: ExternalLinkProps) => {
   return (
     // we can't use <ExternalLink /> here for obvious reasons
-    // eslint-disable-next-line no-restricted-syntax
     <a
       href={to ?? ''}
       target="_blank"
       rel="noopener noreferrer"
       style={{ color: externalLinkColors[linkColor] }}
+      onClick={onClick}
     >
       {children}
     </a>
@@ -89,7 +94,7 @@ const TextLink = ({ style, onClick, children, ...props }: TextLinkProps) => {
 const ButtonLink = ({ to, style, activeStyle, ...props }: ButtonLinkProps) => {
   const navigate = useNavigate();
   const path = to ?? '';
-  const match = useMatch({ path });
+  const match = useMatch({ path, end: false });
   return (
     <Button
       className={() =>
@@ -105,7 +110,7 @@ const ButtonLink = ({ to, style, activeStyle, ...props }: ButtonLinkProps) => {
       variant={props.buttonVariant}
       onPress={e => {
         props.onPress?.(e);
-        navigate(path);
+        void navigate(path);
       }}
     />
   );
@@ -117,9 +122,10 @@ const InternalLink = ({
   activeStyle,
   children,
   isDisabled,
+  isExactPathMatch = false,
 }: InternalLinkProps) => {
   const path = to ?? '';
-  const match = useMatch({ path });
+  const match = useMatch({ path, end: isExactPathMatch });
 
   return (
     <NavLink

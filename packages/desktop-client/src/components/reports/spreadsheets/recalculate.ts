@@ -1,14 +1,11 @@
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type GroupedEntity,
-  type IntervalEntity,
-} from 'loot-core/types/models';
+import type { GroupedEntity, IntervalEntity } from 'loot-core/types/models';
 
 import { filterHiddenItems } from './filterHiddenItems';
 
-import {
-  type UncategorizedEntity,
-  type QueryDataEntity,
+import type {
+  QueryDataEntity,
+  UncategorizedEntity,
 } from '@desktop-client/components/reports/ReportOptions';
 
 type recalculateProps = {
@@ -88,6 +85,7 @@ export function recalculate({
         netAssets: intervalTotals > 0 ? intervalTotals : 0,
         netDebts: intervalTotals < 0 ? intervalTotals : 0,
         totalTotals: intervalTotals,
+        totalBudgeted: intervalTotals,
         change,
         intervalStartDate: index === 0 ? startDate : intervalItem,
         intervalEndDate:
@@ -111,6 +109,7 @@ export function recalculate({
     netAssets: totalTotals > 0 ? totalTotals : 0,
     netDebts: totalTotals < 0 ? totalTotals : 0,
     totalTotals,
+    totalBudgeted: totalTotals,
     intervalData,
   };
 }

@@ -1,4 +1,5 @@
-import React, { type CSSProperties, type MouseEventHandler } from 'react';
+import React from 'react';
+import type { CSSProperties, MouseEventHandler } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
@@ -14,6 +15,7 @@ import {
   useEnvelopeSheetName,
   useEnvelopeSheetValue,
 } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
@@ -50,6 +52,7 @@ export function ToBudgetAmount({
   }
   const num = availableValue ?? 0;
   const isNegative = num < 0;
+  const isPositive = num > 0;
 
   return (
     <View style={{ alignItems: 'center', ...style }}>
@@ -83,19 +86,25 @@ export function ToBudgetAmount({
                   fontWeight: 400,
                   userSelect: 'none',
                   cursor: 'pointer',
-                  color: isNegative ? theme.errorText : theme.pageTextPositive,
+                  color: isPositive
+                    ? theme.toBudgetPositive
+                    : isNegative
+                      ? theme.toBudgetNegative
+                      : theme.toBudgetZero,
                   marginBottom: -1,
                   borderBottom: '1px solid transparent',
                   ':hover': {
-                    borderColor: isNegative
-                      ? theme.errorBorder
-                      : theme.pageTextPositive,
+                    borderColor: isPositive
+                      ? theme.toBudgetPositive
+                      : isNegative
+                        ? theme.toBudgetNegative
+                        : theme.toBudgetZero,
                   },
                 },
                 amountStyle,
               ])}
             >
-              {format(num, 'financial')}
+              <FinancialText>{format(num, 'financial')}</FinancialText>
             </Block>
           </PrivacyFilter>
         </Tooltip>

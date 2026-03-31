@@ -1,24 +1,22 @@
 // @ts-strict-ignore
-import React, {
-  type Ref,
-  useRef,
-  useState,
-  useEffect,
-  type FocusEventHandler,
-  type KeyboardEvent,
-  type CSSProperties,
-  useCallback,
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type {
+  CSSProperties,
+  FocusEventHandler,
+  KeyboardEvent,
+  Ref,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgAdd, SvgSubtract } from '@actual-app/components/icons/v1';
 import { baseInputStyle, Input } from '@actual-app/components/input';
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
-import { type IntegerAmount } from 'loot-core/shared/util';
+import type { IntegerAmount } from 'loot-core/shared/util';
 
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
@@ -206,7 +204,7 @@ export function AmountInput({
         inputMode="decimal"
         value={value}
         disabled={disabled}
-        style={inputStyle}
+        style={{ ...inputStyle, ...styles.tnum }}
         className={cx(
           css({
             width: '100%',

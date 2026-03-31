@@ -1,4 +1,4 @@
-import { type Locator, type Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 import { MobileAccountPage } from './mobile-account-page';
 import { BalanceMenuModal } from './mobile-balance-menu-modal';
@@ -148,7 +148,7 @@ export class MobileBudgetPage {
     return groupNameText;
   }
 
-  #getButtonForCategoryGroup(categoryGroupName: string | RegExp) {
+  async #getButtonForCategoryGroup(categoryGroupName: string | RegExp) {
     return this.categoryGroupRows.getByRole('button', {
       name: categoryGroupName,
       exact: true,
@@ -169,7 +169,7 @@ export class MobileBudgetPage {
     return categoryNameText;
   }
 
-  #getButtonForCategory(categoryName: string | RegExp) {
+  async #getButtonForCategory(categoryName: string | RegExp) {
     return this.categoryRows.getByRole('button', {
       name: categoryName,
       exact: true,

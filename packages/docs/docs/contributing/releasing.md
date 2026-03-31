@@ -4,7 +4,7 @@ In the open-source version of Actual, there are 3 NPM packages:
 
 - [@actual-app/api](https://www.npmjs.com/package/@actual-app/api): The API for the underlying functionality. This includes the entire backend of Actual, meant to be used with Node.
 - [@actual-app/web](https://www.npmjs.com/package/@actual-app/web): A web build that will serve the app with a web frontend. This includes both the frontend and backend of Actual. It includes the backend as well because it's built to be used as a Web Worker.
-- [@actual-app/sync-server](https://www.npmjs.com/package/@actual-app/sync-server): The entire sync-server and underlying web client in one package. This includes a CLI tool, meant to be used with Node.
+- [@actual-app/sync-server](https://www.npmjs.com/package/@actual-app/sync-server): The entire sync-server and underlying web client in one package. This includes the Server CLI, meant to be used with Node.
 
 All packages and the main Actual release are versioned together. That makes it clear which version of the package should be used with the version of Actual.
 
@@ -27,10 +27,6 @@ For example:
 
 - [ ] Run [this GitHub Action](https://github.com/actualbudget/actual/actions/workflows/generate-release-pr.yml) to generate a release PR (for a regular monthly release, leave the arguments set to their default values).
 - [ ] Open the generated PR and ensure the release notes workflow has started to collate the release notes into a comment in the PR. You may need to push an empty commit in order to trigger CI.
-
-### Docs
-
-- [ ] Open the release PR `release/vYY.MM.xx`
 - [ ] After the release notes workflows in the PR has been run, copy the collated notes into a new blog post using a previous release as a template. The release notes will also need adding to the `docs/releases.md` file.
 - [ ] Fix spelling as needed.
 
@@ -57,15 +53,15 @@ All NPM packages should be automatically released and pushed to the NPM registry
 
 For the Windows Store desktop app, a submission will be automatically uploaded and submitted for certification. The certification process can take up to 3 business days; once complete the app will be in the Store. You can check the update status [here](https://partner.microsoft.com/en-us/dashboard) if you have permission. Note that the Store UI will not correctly reflect the submission status for about 30 minutes after submission.
 
-For the Flathub desktop app, a PR will be created against the [Actual Flathub Repository](https://github.com/flathub/com.actualbudget.actual/pulls) and the core maintainers will be assigned as reviewers. Once created, a Flatpak Build will be kicked off and will validated the release. Once successful, the Core team will review the PR and merge it to `master`, which will kick off a production release to the Flathub Store. It can take anywhere from hours to a few days before the app will be available in the Flathub Store.
-
 Finally, a draft GitHub release should be automatically created [here](https://github.com/actualbudget/actual/releases).
+
+Once the GitHub release is published, the Flathub publish workflow will trigger for the Linux desktop app. A PR will be created against the [Actual Flathub Repository](https://github.com/flathub/com.actualbudget.actual/pulls) and the core maintainers will be assigned as reviewers. The Core team will review the PR and merge it to `master`, which will kick off a production release to the Flathub Store. It can take anywhere from hours to a few days before the app will be available in the Flathub Store.
 
 ## Finalize the release
 
-- [ ] Approve and merge the [Flathub Release PR](https://github.com/flathub/com.actualbudget.actual/pulls) to master.
 - [ ] After the Docker image for the release is ready and pushed to Docker Hub, remember to deploy it and do a quick smoke test to verify things still work as expected.
 - [ ] Un-draft the GitHub release which will send announcement notifications to all apps.
+- [ ] Approve and merge the [Flathub Release PR](https://github.com/flathub/com.actualbudget.actual/pulls) to master.
 - [ ] Wrap up by sending an announcement on Discord and Twitter.
 - [ ] Wait one to two days to see if any new bugs show up that need a patch release. If none show up, end the merge freeze.
 

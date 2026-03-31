@@ -1,10 +1,9 @@
 // @ts-strict-ignore
 import SQL from 'better-sqlite3';
-import { logger } from '../log';
-
 import { v4 as uuidv4 } from 'uuid';
 
-import { removeFile, readFile } from '../fs';
+import { readFile, removeFile } from '../fs';
+import { logger } from '../log';
 
 import { normalise } from './normalise';
 import { unicodeLike } from './unicodeLike';
@@ -101,7 +100,7 @@ function regexp(regex: string, text: string | null) {
   return new RegExp(regex).test(text || '') ? 1 : 0;
 }
 
-export function openDatabase(pathOrBuffer: string | Buffer) {
+export function openDatabase(pathOrBuffer: string | Buffer): SQL.Database {
   const db = new SQL(pathOrBuffer);
   // Define Unicode-aware LOWER, UPPER, and LIKE implementation.
   // This is necessary because better-sqlite3 uses SQLite build without ICU support.
@@ -118,7 +117,7 @@ export function openDatabase(pathOrBuffer: string | Buffer) {
 }
 
 export function closeDatabase(db: SQL.Database) {
-  return db.close();
+  db.close();
 }
 
 export async function exportDatabase(db: SQL.Database) {

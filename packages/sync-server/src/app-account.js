@@ -2,11 +2,14 @@ import express from 'express';
 
 import {
   bootstrap,
-  needsBootstrap,
-  getLoginMethod,
-  listLoginMethods,
-  getUserInfo,
   getActiveLoginMethod,
+  getLoginMethod,
+  getServerPrefs,
+  getUserInfo,
+  isAdmin,
+  listLoginMethods,
+  needsBootstrap,
+  setServerPrefs,
 } from './account-db';
 import { isValidRedirectUrl, loginWithOpenIdSetup } from './accounts/openid';
 import { changePassword, loginWithPassword } from './accounts/password';
@@ -118,12 +121,55 @@ app.post('/change-password', (req, res) => {
   const session = validateSession(req, res);
   if (!session) return;
 
+  if (!isAdmin(session.user_id)) {
+    res.status(403).send({
+      status: 'error',
+      reason: 'forbidden',
+      details: 'permission-not-found',
+    });
+    return;
+  }
+
+  if (session.auth_method !== 'password') {
+    res.status(403).send({
+      status: 'error',
+      reason: 'forbidden',
+      details: 'password-auth-not-active',
+    });
+    return;
+  }
+
   const { error } = changePassword(req.body.password);
 
   if (error) {
     res.status(400).send({ status: 'error', reason: error });
     return;
   }
+
+  res.send({ status: 'ok', data: {} });
+});
+
+app.post('/server-prefs', (req, res) => {
+  const session = validateSession(req, res);
+  if (!session) return;
+
+  if (!isAdmin(session.user_id)) {
+    res.status(403).send({
+      status: 'error',
+      reason: 'forbidden',
+      details: 'permission-not-found',
+    });
+    return;
+  }
+
+  const { prefs } = req.body || {};
+
+  if (!prefs || typeof prefs !== 'object') {
+    res.status(400).send({ status: 'error', reason: 'invalid-prefs' });
+    return;
+  }
+
+  setServerPrefs(prefs);
 
   res.send({ status: 'ok', data: {} });
 });
@@ -146,6 +192,7 @@ app.get('/validate', (req, res) => {
         userId: session?.user_id,
         displayName: user?.display_name,
         loginMethod: session?.auth_method,
+        prefs: getServerPrefs(),
       },
     });
   }

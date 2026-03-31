@@ -13,7 +13,7 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { useDispatch, useSelector } from '@desktop-client/redux';
 
 type DeleteFileModalProps = Extract<
@@ -46,11 +46,11 @@ export function DeleteFileModal({ file }: DeleteFileModalProps) {
 
   return (
     <Modal name="delete-budget">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Delete {{fileName}}', { fileName: file.name })}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View
             style={{
@@ -95,7 +95,7 @@ export function DeleteFileModal({ file }: DeleteFileModalProps) {
                         );
                         setLoadingState(null);
 
-                        close();
+                        state.close();
                       }}
                     >
                       <Trans>Delete file from all devices</Trans>
@@ -176,7 +176,7 @@ export function DeleteFileModal({ file }: DeleteFileModalProps) {
                     await dispatch(deleteBudget({ id: file.id }));
                     setLoadingState(null);
 
-                    close();
+                    state.close();
                   }}
                 >
                   <Trans>Delete file locally</Trans>

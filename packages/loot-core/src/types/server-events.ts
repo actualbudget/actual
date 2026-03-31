@@ -1,5 +1,5 @@
-import { type Backup } from '../server/budgetfiles/backups';
-import { type UndoState } from '../server/undo';
+import type { Backup } from '../server/budgetfiles/backups';
+import type { UndoState } from '../server/undo';
 
 type SyncSubtype =
   | 'out-of-sync'

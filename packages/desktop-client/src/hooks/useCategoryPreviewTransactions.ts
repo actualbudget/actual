@@ -1,10 +1,7 @@
 import { useCallback, useMemo } from 'react';
 
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type ScheduleEntity,
-  type CategoryEntity,
-} from 'loot-core/types/models';
+import type { CategoryEntity, ScheduleEntity } from 'loot-core/types/models';
 
 import { useCategory } from './useCategory';
 import { useCategoryScheduleGoalTemplates } from './useCategoryScheduleGoalTemplates';
@@ -26,7 +23,7 @@ export function useCategoryPreviewTransactions({
   categoryId,
   month,
 }: UseCategoryPreviewTransactionsProps): UseCategoryPreviewTransactionsResult {
-  const category = useCategory(categoryId);
+  const { data: category } = useCategory(categoryId);
   const { schedules } = useCategoryScheduleGoalTemplates({
     category,
   });

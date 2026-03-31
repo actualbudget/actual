@@ -1,5 +1,5 @@
 import React, { memo, useRef, useState } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
@@ -63,7 +63,7 @@ export const BudgetTotals = memo(function BudgetTotals({
     <View
       data-testid="budget-totals"
       style={{
-        backgroundColor: theme.tableBackground,
+        backgroundColor: theme.budgetCurrentMonth, //use budget colors, not generic table colors
         flexDirection: 'row',
         flexShrink: 0,
         boxShadow: styles.cardShadow,
@@ -83,7 +83,7 @@ export const BudgetTotals = memo(function BudgetTotals({
       <View
         style={{
           width: 200 + 100 * categoryExpandedState,
-          color: theme.pageTextLight,
+          color: theme.tableHeaderText,
           justifyContent: 'center',
           paddingLeft: 5,
           paddingRight: 5,
@@ -141,7 +141,7 @@ export const BudgetTotals = memo(function BudgetTotals({
           <SvgDotsHorizontalTriple
             width={15}
             height={15}
-            style={{ color: theme.pageTextLight }}
+            style={{ color: theme.tableHeaderText }}
           />
         </Button>
 

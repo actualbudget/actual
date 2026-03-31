@@ -4,7 +4,8 @@ import { Timestamp } from '@actual-app/crdt';
 import * as fs from '../platform/server/fs';
 import type { MetadataPrefs } from '../types/prefs';
 
-import { type Message, sendMessages } from './sync';
+import { sendMessages } from './sync';
+import type { Message } from './sync';
 
 export const BUDGET_TYPES = ['tracking', 'envelope'] as const;
 export type BudgetType = (typeof BUDGET_TYPES)[number];

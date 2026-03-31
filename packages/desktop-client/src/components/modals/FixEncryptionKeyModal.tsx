@@ -13,7 +13,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { getTestKeyError } from 'loot-core/shared/errors';
 
 import { Link } from '@desktop-client/components/common/Link';
@@ -23,7 +23,7 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type FixEncryptionKeyModalProps = Extract<
   ModalType,
@@ -64,7 +64,7 @@ export function FixEncryptionKeyModal({
 
   return (
     <Modal name="fix-encryption-key">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={
@@ -72,7 +72,7 @@ export function FixEncryptionKeyModal({
                 ? t('Decrypt budget file')
                 : t('This file is encrypted')
             }
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View
             style={{
@@ -111,7 +111,7 @@ export function FixEncryptionKeyModal({
           <Form
             onSubmit={e => {
               e.preventDefault();
-              onUpdateKey(close);
+              void onUpdateKey(() => state.close());
             }}
           >
             <View
@@ -164,7 +164,7 @@ export function FixEncryptionKeyModal({
                   height: isNarrowWidth ? styles.mobileMinHeight : undefined,
                   marginRight: 10,
                 }}
-                onPress={close}
+                onPress={() => state.close()}
               >
                 <Trans>Back</Trans>
               </Button>

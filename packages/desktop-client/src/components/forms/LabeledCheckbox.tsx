@@ -1,8 +1,5 @@
-import React, {
-  type CSSProperties,
-  type ComponentProps,
-  type ReactNode,
-} from 'react';
+import React from 'react';
+import type { ComponentProps, CSSProperties, ReactNode } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';

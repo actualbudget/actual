@@ -1,5 +1,6 @@
-import React, { type ReactNode, useEffect } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import React, { useEffect } from 'react';
+import type { ReactNode } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -10,7 +11,7 @@ import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { listen } from 'loot-core/platform/client/fetch';
+import { listen } from 'loot-core/platform/client/connection';
 import { isElectron } from 'loot-core/shared/environment';
 
 import { AuthSettings } from './AuthSettings';
@@ -23,7 +24,7 @@ import { ExportBudget } from './Export';
 import { FormatSettings } from './Format';
 import { LanguageSettings } from './LanguageSettings';
 import { RepairTransactions } from './RepairTransactions';
-import { ForceReload, ResetCache, ResetSync } from './Reset';
+import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
 
@@ -43,14 +44,14 @@ import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { loadPrefs } from '@desktop-client/prefs/prefsSlice';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 
 function About() {
   const version = useServerVersion();
   const versionInfo = useSelector(state => state.app.versionInfo);
   const [notifyWhenUpdateIsAvailable, setNotifyWhenUpdateIsAvailablePref] =
     useGlobalPref('notifyWhenUpdateIsAvailable', () => {
-      dispatch(getLatestAppVersion());
+      void dispatch(getLatestAppVersion());
     });
   const dispatch = useDispatch();
 
@@ -176,19 +177,18 @@ export function Settings() {
   const [budgetName] = useMetadataPref('budgetName');
   const dispatch = useDispatch();
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
-  const isForceReloadEnabled = useFeatureFlag('forceReload');
   const [_, setDefaultCurrencyCodePref] = useSyncedPref('defaultCurrencyCode');
 
   const onCloseBudget = () => {
-    dispatch(closeBudget());
+    void dispatch(closeBudget());
   };
 
   useEffect(() => {
     const unlisten = listen('prefs-updated', () => {
-      dispatch(loadPrefs());
+      void dispatch(loadPrefs());
     });
 
-    dispatch(loadPrefs());
+    void dispatch(loadPrefs());
     return () => unlisten();
   }, [dispatch]);
 
@@ -253,7 +253,6 @@ export function Settings() {
         <ExportBudget />
         <AdvancedToggle>
           <AdvancedAbout />
-          {isForceReloadEnabled && <ForceReload />}
           <ResetCache />
           <ResetSync />
           <RepairTransactions />

@@ -1,5 +1,6 @@
 // @ts-strict-ignore
-import React, { type CSSProperties, type RefCallback, useRef } from 'react';
+import React, { useRef } from 'react';
+import type { CSSProperties, RefCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -13,9 +14,9 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 
-import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
 } from 'loot-core/types/models';
 
 import { NotesButton } from '@desktop-client/components/NotesButton';
@@ -207,7 +208,7 @@ export function SidebarGroup({
       style={{
         ...style,
         width: 200 + 100 * categoryExpandedState,
-        backgroundColor: theme.tableRowHeaderBackground,
+        backgroundColor: theme.budgetHeaderCurrentMonth,
         overflow: 'hidden',
         '& .hover-visible': {
           display: 'none',

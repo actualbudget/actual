@@ -1,5 +1,5 @@
 import React from 'react';
-import { type GridListItemProps } from 'react-aria-components';
+import type { GridListItemProps } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -8,8 +8,8 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type PayeeEntity } from 'loot-core/types/models';
-import { type WithRequired } from 'loot-core/types/util';
+import type { PayeeEntity } from 'loot-core/types/models';
+import type { WithRequired } from 'loot-core/types/util';
 
 import { ActionableGridListItem } from '@desktop-client/components/mobile/ActionableGridListItem';
 import { PayeeRuleCountLabel } from '@desktop-client/components/payees/PayeeRuleCountLabel';

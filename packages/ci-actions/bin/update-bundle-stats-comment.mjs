@@ -14,10 +14,14 @@ import process from 'node:process';
 
 import { Octokit } from '@octokit/rest';
 
+const BOT_BOUNDARY_MARKER = '<!--- actual-bot-sections --->';
+const BOT_BOUNDARY_TEXT = `${BOT_BOUNDARY_MARKER}\n<hr />`;
+
 function parseArgs(argv) {
   const args = {
     commentFile: null,
     identifier: null,
+    target: 'comment',
   };
 
   for (let i = 2; i < argv.length; i += 2) {
@@ -41,6 +45,9 @@ function parseArgs(argv) {
       case '--identifier':
         args.identifier = value;
         break;
+      case '--target':
+        args.target = value;
+        break;
       default:
         throw new Error(`Unknown argument "${key}".`);
     }
@@ -52,6 +59,12 @@ function parseArgs(argv) {
 
   if (!args.identifier) {
     throw new Error('Missing required argument "--identifier".');
+  }
+
+  if (!['comment', 'pr-body'].includes(args.target)) {
+    throw new Error(
+      `Invalid value "${args.target}" for "--target". Use "comment" or "pr-body".`,
+    );
   }
 
   return args;
@@ -110,20 +123,123 @@ function isGitHubActionsBot(comment) {
   return comment.user?.login === 'github-actions[bot]';
 }
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function getIdentifierMarkers(identifier) {
+  if (identifier.includes('<!---')) {
+    return {
+      start: identifier,
+      end: null,
+    };
+  }
+
+  const label = 'bundlestats-action-comment';
+  return {
+    start: `<!--- ${label} key:${identifier} start --->`,
+    end: `<!--- ${label} key:${identifier} end --->`,
+  };
+}
+
+function upsertBlock(existingBody, block, markers) {
+  const body = existingBody ?? '';
+
+  if (markers.end) {
+    const pattern = new RegExp(
+      `${escapeRegExp(markers.start)}[\\s\\S]*?${escapeRegExp(markers.end)}`,
+      'm',
+    );
+
+    if (pattern.test(body)) {
+      return body.replace(pattern, block.trim());
+    }
+  }
+
+  if (body.trim().length === 0) {
+    return block.trim();
+  }
+
+  const separator = body.endsWith('\n') ? '\n' : '\n\n';
+  const boundary = body.includes(BOT_BOUNDARY_MARKER)
+    ? ''
+    : `${BOT_BOUNDARY_TEXT}\n\n`;
+  return `${body}${separator}${boundary}${block.trim()}`;
+}
+
+async function updatePullRequestBody(
+  octokit,
+  owner,
+  repo,
+  pullNumber,
+  block,
+  markers,
+) {
+  const { data } = await octokit.rest.pulls.get({
+    owner,
+    repo,
+    pull_number: pullNumber,
+  });
+  const nextBody = upsertBlock(data.body ?? '', block, markers);
+
+  await octokit.rest.pulls.update({
+    owner,
+    repo,
+    pull_number: pullNumber,
+    body: nextBody,
+  });
+}
+
+async function deleteExistingComment(
+  octokit,
+  owner,
+  repo,
+  issueNumber,
+  markers,
+) {
+  const comments = await listComments(octokit, owner, repo, issueNumber);
+  const existingComment = comments.find(
+    comment =>
+      isGitHubActionsBot(comment) && comment.body?.includes(markers.start),
+  );
+
+  if (existingComment) {
+    await octokit.rest.issues.deleteComment({
+      owner,
+      repo,
+      comment_id: existingComment.id,
+    });
+  }
+}
+
 async function main() {
-  const { commentFile, identifier } = parseArgs(process.argv);
+  const { commentFile, identifier, target } = parseArgs(process.argv);
   const commentBody = await loadCommentBody(commentFile);
   const token = assertGitHubToken();
   const { owner, repo } = getRepoInfo();
   const issueNumber = getPullRequestNumber();
+  const markers = getIdentifierMarkers(identifier);
 
   const octokit = new Octokit({ auth: token });
 
-  const comments = await listComments(octokit, owner, repo, issueNumber);
+  if (target === 'pr-body') {
+    await updatePullRequestBody(
+      octokit,
+      owner,
+      repo,
+      issueNumber,
+      commentBody,
+      markers,
+    );
+    await deleteExistingComment(octokit, owner, repo, issueNumber, markers);
+    console.log('Updated pull request body with bundle stats.');
+    return;
+  }
 
+  const comments = await listComments(octokit, owner, repo, issueNumber);
   const existingComment = comments.find(
     comment =>
-      isGitHubActionsBot(comment) && comment.body?.includes(identifier),
+      isGitHubActionsBot(comment) && comment.body?.includes(markers.start),
   );
 
   if (existingComment) {
@@ -134,15 +250,16 @@ async function main() {
       body: commentBody,
     });
     console.log('Updated existing bundle stats comment.');
-  } else {
-    await octokit.rest.issues.createComment({
-      owner,
-      repo,
-      issue_number: issueNumber,
-      body: commentBody,
-    });
-    console.log('Created new bundle stats comment.');
+    return;
   }
+
+  await octokit.rest.issues.createComment({
+    owner,
+    repo,
+    issue_number: issueNumber,
+    body: commentBody,
+  });
+  console.log('Created new bundle stats comment.');
 }
 
 main().catch(error => {

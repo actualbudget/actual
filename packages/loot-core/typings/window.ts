@@ -1,5 +1,9 @@
-// @ts-strict-ignore
-export {};
+import type EventEmitter from 'events';
+
+export type IpcClient = {
+  on: EventEmitter['on'];
+  emit: (name: string, data: unknown) => void;
+};
 
 type FileDialogOptions = {
   properties?: Array<'openFile' | 'openDirectory'>;
@@ -28,7 +32,7 @@ type Actual = {
     newDirectory: string,
   ) => Promise<void>;
   applyAppUpdate: () => Promise<void>;
-  ipcConnect: (callback: (client) => void) => void;
+  ipcConnect: (callback: (client: IpcClient) => void) => void;
   getServerSocket: () => Promise<Worker | null>;
   setTheme: (theme: string) => void;
   logToTerminal: (...args: unknown[]) => void;
@@ -46,6 +50,11 @@ type Actual = {
 
 declare global {
   var Actual: Actual;
+
+  // oxlint-disable-next-line typescript/consistent-type-definitions -- global Window augmentation requires interface
+  interface Window {
+    Actual: Actual;
+  }
 
   var IS_TESTING: boolean;
 

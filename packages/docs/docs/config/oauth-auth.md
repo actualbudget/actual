@@ -114,6 +114,10 @@ When setup is done, you will be redirected to the _login_ page:
 
 ![](/img/oauth/first-login.webp)
 
+:::warning
+The first user to log in with OpenID/OAuth2 will be granted admin permissions and become the server owner. The server owner cannot be changed from the UI once set.
+:::
+
 ### Environment Variables
 
 #### `ACTUAL_OPENID_DISCOVERY_URL`
@@ -174,6 +178,12 @@ Use `oauth2` for providers like GitHub that don't fully support OpenID discovery
   - `"never"` (tokens never expire - **current default**)
   - `"openid-provider"` (tokens follow the expiration time from the OpenID provider)
   - A numeric value in seconds (e.g., `3600` for 1 hour)
+
+#### `ACTUAL_USER_CREATION_MODE`
+
+- **Purpose:** In `manual` (default) users must be created manually with matching usernames in Actual before they are able to authenticate with OpenID/OAuth2. When set to `login`, users authenticating with OpenID/OAuth2 for the first time will be created in Actual automatically.
+
+  **Possible Values:** `manual` or `login` (default is `manual`)
 
 :::tip
 Configuring the OpenID provider from options supports discovery; otherwise, use [file configuration](oauth-auth#config-using-configuration-file)

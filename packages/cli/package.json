@@ -1,0 +1,35 @@
+{
+  "name": "@actual-app/cli",
+  "version": "26.3.0",
+  "description": "CLI for Actual Budget",
+  "license": "MIT",
+  "bin": {
+    "actual": "./dist/cli.js",
+    "actual-cli": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest --run",
+    "typecheck": "tsgo -b"
+  },
+  "dependencies": {
+    "@actual-app/api": "workspace:*",
+    "cli-table3": "^0.6.5",
+    "commander": "^13.0.0",
+    "cosmiconfig": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.15",
+    "@typescript/native-preview": "^7.0.0-dev.20260309.1",
+    "rollup-plugin-visualizer": "^6.0.11",
+    "vite": "^8.0.0",
+    "vitest": "^4.1.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

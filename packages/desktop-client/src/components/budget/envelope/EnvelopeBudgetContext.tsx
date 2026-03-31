@@ -1,4 +1,5 @@
-import React, { type ReactNode, createContext, useContext } from 'react';
+import React, { createContext, useContext } from 'react';
+import type { ReactNode } from 'react';
 
 import * as monthUtils from 'loot-core/shared/months';
 

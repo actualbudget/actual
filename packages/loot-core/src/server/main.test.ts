@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { getClock, deserializeClock } from '@actual-app/crdt';
+import { deserializeClock, getClock } from '@actual-app/crdt';
 import { v4 as uuidv4 } from 'uuid';
 
 import { expectSnapshotWithDiffer } from '../mocks/util';
@@ -12,10 +12,10 @@ import * as budget from './budget/base';
 import * as db from './db';
 import { handlers } from './main';
 import {
-  runHandler,
-  runMutator,
   disableGlobalMutations,
   enableGlobalMutations,
+  runHandler,
+  runMutator,
 } from './mutators';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
@@ -88,7 +88,7 @@ describe('Budgets', () => {
     await createTestBudget('default-budget-template');
 
     await db.openDatabase('test-budget');
-    await db.runQuery('INSERT INTO __migrations__ (id) VALUES (1000)');
+    db.runQuery('INSERT INTO __migrations__ (id) VALUES (1000)');
 
     const spy = vi.spyOn(console, 'warn').mockImplementation(() => null);
 
@@ -180,7 +180,7 @@ describe('Budget', () => {
     // Add a transaction (which needs an account) earlier then the
     // current earliest budget to test if it creates the necessary
     // budgets for the earlier months
-    await db.runQuery("INSERT INTO accounts (id, name) VALUES ('one', 'boa')");
+    db.runQuery("INSERT INTO accounts (id, name) VALUES ('one', 'boa')");
     await runHandler(handlers['transaction-add'], {
       id: uuidv4(),
       date: '2016-05-06',
@@ -219,18 +219,10 @@ describe('Budget', () => {
 
     // Force the system to start tracking these months so budgets are
     // automatically updated when adding/deleting categories
-    await db.runQuery('INSERT INTO created_budgets (month) VALUES (?)', [
-      '2017-01',
-    ]);
-    await db.runQuery('INSERT INTO created_budgets (month) VALUES (?)', [
-      '2017-02',
-    ]);
-    await db.runQuery('INSERT INTO created_budgets (month) VALUES (?)', [
-      '2017-03',
-    ]);
-    await db.runQuery('INSERT INTO created_budgets (month) VALUES (?)', [
-      '2017-04',
-    ]);
+    db.runQuery('INSERT INTO created_budgets (month) VALUES (?)', ['2017-01']);
+    db.runQuery('INSERT INTO created_budgets (month) VALUES (?)', ['2017-02']);
+    db.runQuery('INSERT INTO created_budgets (month) VALUES (?)', ['2017-03']);
+    db.runQuery('INSERT INTO created_budgets (month) VALUES (?)', ['2017-04']);
 
     let categories;
     await captureChangedCells(async () => {
@@ -257,7 +249,7 @@ describe('Budget', () => {
       ];
     });
 
-    await db.runQuery("INSERT INTO accounts (id, name) VALUES ('boa', 'boa')");
+    db.runQuery("INSERT INTO accounts (id, name) VALUES ('boa', 'boa')");
     const trans = {
       id: 'boa-transaction',
       date: '2017-02-06',
@@ -269,7 +261,9 @@ describe('Budget', () => {
     let changed = await captureChangedCells(() =>
       runHandler(handlers['transaction-add'], trans),
     );
-    expect(changed.sort()).toMatchSnapshot();
+    expect(
+      changed.sort((a, b) => (a > b ? 1 : a < b ? -1 : 0)),
+    ).toMatchSnapshot();
     // Test updates
     changed = await captureChangedCells(async () => {
       await runHandler(handlers['transaction-update'], {
@@ -277,12 +271,16 @@ describe('Budget', () => {
         amount: 7000,
       });
     });
-    expect(changed.sort()).toMatchSnapshot();
+    expect(
+      changed.sort((a, b) => (a > b ? 1 : a < b ? -1 : 0)),
+    ).toMatchSnapshot();
     // Test deletions
     changed = await captureChangedCells(async () => {
       await runHandler(handlers['transaction-delete'], { id: trans.id });
     });
-    expect(changed.sort()).toMatchSnapshot();
+    expect(
+      changed.sort((a, b) => (a > b ? 1 : a < b ? -1 : 0)),
+    ).toMatchSnapshot();
   });
 });
 
@@ -372,11 +370,12 @@ describe('Categories', () => {
 
     // Transfering an income category to an expense just doesn't make
     // sense. Make sure this doesn't do anything.
-    const { error } = await runHandler(handlers['category-delete'], {
-      id: 'income1',
-      transferId: 'bar',
-    });
-    expect(error).toBe('category-type');
+    await expect(
+      runHandler(handlers['category-delete'], {
+        id: 'income1',
+        transferId: 'bar',
+      }),
+    ).rejects.toThrow('Cannot transfer between income and expense categories.');
 
     let categories = await db.getCategories();
     expect(categories.find(cat => cat.id === 'income1')).toBeDefined();

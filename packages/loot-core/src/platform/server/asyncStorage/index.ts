@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { type GlobalPrefsJson } from '../../../types/prefs';
+import type { GlobalPrefsJson } from '../../../types/prefs';
 import { getDatabase } from '../indexeddb';
 
 import type * as T from './index-types';
@@ -28,7 +28,7 @@ export const setItem: T.SetItem = async function (key, value) {
   const transaction = db.transaction(['asyncStorage'], 'readwrite');
   const objectStore = transaction.objectStore('asyncStorage');
 
-  new Promise((resolve, reject) => {
+  void new Promise((resolve, reject) => {
     const req = objectStore.put(value, key);
     req.onerror = e => reject(e);
     req.onsuccess = () => resolve(undefined);

@@ -3,17 +3,14 @@ import { Form } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
+import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
-import {
-  amountToInteger,
-  integerToCurrency,
-  type IntegerAmount,
-} from 'loot-core/shared/util';
-import { type CategoryEntity } from 'loot-core/types/models';
+import { amountToInteger, integerToCurrency } from 'loot-core/shared/util';
+import type { IntegerAmount } from 'loot-core/shared/util';
+import type { CategoryEntity } from 'loot-core/types/models';
 
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import {
@@ -39,7 +36,8 @@ export function CoverMenu({
 }: CoverMenuProps) {
   const { t } = useTranslation();
 
-  const { grouped: originalCategoryGroups } = useCategories();
+  const { data: { grouped: originalCategoryGroups } = { grouped: [] } } =
+    useCategories();
 
   const [fromCategoryId, setFromCategoryId] = useState<string | null>(null);
 
@@ -54,7 +52,7 @@ export function CoverMenu({
   }, [categoryId, showToBeBudgeted, originalCategoryGroups]);
 
   const _initialAmount = integerToCurrency(Math.abs(initialAmount ?? 0));
-  const [amount, setAmount] = useState<string | null>(null);
+  const [amount, setAmount] = useState<string>(_initialAmount);
 
   function _onSubmit() {
     const parsedAmount = evalArithmetic(amount || '');
@@ -76,9 +74,12 @@ export function CoverMenu({
           <Trans>Cover this amount:</Trans>
         </View>
         <View>
-          <InitialFocus>
-            <Input defaultValue={_initialAmount} onUpdate={setAmount} />
-          </InitialFocus>
+          <Input
+            defaultValue={_initialAmount}
+            onUpdate={setAmount}
+            onChangeValue={setAmount}
+            style={styles.tnum}
+          />
         </View>
         <View style={{ margin: '10px 0 5px 0' }}>
           <Trans>From:</Trans>
@@ -87,6 +88,7 @@ export function CoverMenu({
         <CategoryAutocomplete
           categoryGroups={filteredCategoryGroups}
           value={null}
+          focused
           openOnFocus
           onSelect={(id: string | undefined) => setFromCategoryId(id || null)}
           inputProps={{

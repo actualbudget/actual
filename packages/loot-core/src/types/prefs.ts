@@ -5,8 +5,9 @@ export type FeatureFlag =
   | 'formulaMode'
   | 'currency'
   | 'crossoverReport'
-  | 'plugins'
-  | 'forceReload';
+  | 'customThemes'
+  | 'budgetAnalysisReport'
+  | 'payeeLocations';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
@@ -23,7 +24,6 @@ export type SyncedPrefs = Partial<
     | 'currencySymbolPosition'
     | 'currencySpaceBetweenAmountAndSymbol'
     | 'defaultCurrencyCode'
-    | 'plugins'
     | `show-account-${string}-net-worth-chart`
     | `side-nav.show-balance-history-${string}`
     | `show-balances-${string}`
@@ -44,7 +44,11 @@ export type SyncedPrefs = Partial<
     | `sync-reimport-deleted-${string}`
     | `sync-import-notes-${string}`
     | `sync-import-transactions-${string}`
+    | `sync-update-dates-${string}`
     | `ofx-fallback-missing-payee-${string}`
+    | `ofx-swap-payee-memo-${string}`
+    | `qif-swap-payee-memo-${string}`
+    | `camt-swap-payee-memo-${string}`
     | `flip-amount-${string}-${'csv' | 'qif'}`
     | `flags.${FeatureFlag}`
     | `learn-categories`,
@@ -88,13 +92,7 @@ export type LocalPrefs = Partial<{
   'mobile.showSpentColumn': boolean;
 }>;
 
-export type Theme =
-  | 'light'
-  | 'dark'
-  | 'auto'
-  | 'midnight'
-  | 'development'
-  | string;
+export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | string;
 export type DarkTheme = 'dark' | 'midnight';
 
 // GlobalPrefs are the parsed global-store.json values
@@ -117,6 +115,8 @@ export type GlobalPrefs = Partial<{
       colors: Record<string, string>;
     }
   >; // Complete plugin theme metadata
+  installedCustomLightTheme?: string; // JSON of InstalledTheme for light custom theme (also used as single custom theme in non-auto mode)
+  installedCustomDarkTheme?: string; // JSON of InstalledTheme for auto-mode dark custom theme
   documentDir: string; // Electron only
   serverSelfSignedCert: string; // Electron only
   syncServerConfig?: {
@@ -145,6 +145,8 @@ export type GlobalPrefsJson = Partial<{
   language?: GlobalPrefs['language'];
   theme?: GlobalPrefs['theme'];
   'preferred-dark-theme'?: GlobalPrefs['preferredDarkTheme'];
+  'installed-custom-theme'?: GlobalPrefs['installedCustomLightTheme'];
+  'installed-custom-dark-theme'?: GlobalPrefs['installedCustomDarkTheme'];
   plugins?: string; // "true" or "false"
   'plugin-theme'?: string; // JSON string of complete plugin theme (current selected plugin theme)
   'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
@@ -153,3 +155,7 @@ export type GlobalPrefsJson = Partial<{
 }>;
 
 export type AuthMethods = 'password' | 'openid';
+
+export type ServerPrefs = Partial<{
+  'flags.plugins': 'true' | 'false';
+}>;

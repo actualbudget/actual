@@ -1,0 +1,3 @@
+{
+  "jsPlugins": ["eslint-plugin-storybook"]
+}

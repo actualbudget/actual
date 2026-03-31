@@ -1,7 +1,8 @@
 // @ts-strict-ignore
-import React, { type ComponentProps } from 'react';
+import React from 'react';
+import type { ComponentProps } from 'react';
 
-import { type CategoryEntity } from 'loot-core/types/models';
+import type { CategoryEntity } from 'loot-core/types/models';
 
 import { RenderMonths } from './RenderMonths';
 import { SidebarCategory } from './SidebarCategory';
@@ -9,11 +10,13 @@ import { SidebarCategory } from './SidebarCategory';
 import { useBudgetComponents } from '.';
 
 import {
+  DropHighlight,
   useDraggable,
   useDroppable,
-  DropHighlight,
-  type OnDragChangeCallback,
-  type OnDropCallback,
+} from '@desktop-client/components/sort';
+import type {
+  OnDragChangeCallback,
+  OnDropCallback,
 } from '@desktop-client/components/sort';
 import { Row } from '@desktop-client/components/table';
 import { useDragRef } from '@desktop-client/hooks/useDragRef';

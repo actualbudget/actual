@@ -1,12 +1,5 @@
-import React, {
-  type Ref,
-  useRef,
-  useState,
-  useEffect,
-  type FocusEventHandler,
-  type FocusEvent,
-  type CSSProperties,
-} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import type { CSSProperties, FocusEvent, FocusEventHandler, Ref } from 'react';
 
 import { Input } from '@actual-app/components/input';
 

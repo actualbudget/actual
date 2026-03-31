@@ -47,7 +47,7 @@ export default async function runMigration(db, { fs, fileId }) {
         }
 
         // insert the synced prefs in the new table
-        await db.runQuery('INSERT INTO preferences (id, value) VALUES (?, ?)', [
+        db.runQuery('INSERT INTO preferences (id, value) VALUES (?, ?)', [
           key,
           String(prefs[key]),
         ]);

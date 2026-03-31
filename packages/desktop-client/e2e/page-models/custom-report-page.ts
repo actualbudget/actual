@@ -1,4 +1,4 @@
-import { type Locator, type Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 export class CustomReportPage {
   readonly page: Page;
@@ -39,7 +39,7 @@ export class CustomReportPage {
           .click();
         break;
       default:
-        throw new Error(`Unrecognized mode: ${mode}`);
+        throw new Error(`Unrecognized mode: ${String(mode)}`);
     }
   }
 }

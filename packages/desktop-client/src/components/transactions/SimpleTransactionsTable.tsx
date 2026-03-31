@@ -1,14 +1,8 @@
-import React, {
-  memo,
-  useMemo,
-  useCallback,
-  type CSSProperties,
-  type ReactNode,
-} from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import React, { memo, useCallback, useMemo } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { SvgArrowsSynchronize } from '@actual-app/components/icons/v2';
-import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import {
   format as formatDate,
@@ -17,8 +11,9 @@ import {
 } from 'date-fns';
 
 import * as monthUtils from 'loot-core/shared/months';
-import { type TransactionEntity } from 'loot-core/types/models';
+import type { TransactionEntity } from 'loot-core/types/models';
 
+import { FinancialText } from '@desktop-client/components/FinancialText';
 import {
   Cell,
   Field,
@@ -30,10 +25,11 @@ import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useCategory } from '@desktop-client/hooks/useCategory';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { type FormatType, useFormat } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '@desktop-client/hooks/useFormat';
+import type { FormatType } from '@desktop-client/hooks/useFormat';
 import {
-  useSelectedItems,
   useSelectedDispatch,
+  useSelectedItems,
 } from '@desktop-client/hooks/useSelected';
 
 function serializeTransaction(
@@ -67,7 +63,7 @@ const TransactionRow = memo(function TransactionRow({
 }: TransactionRowProps) {
   const { t } = useTranslation();
 
-  const category = useCategory(transaction.category || '');
+  const { data: category } = useCategory(transaction.category);
   const account = useAccount(transaction.account);
 
   const dispatchSelected = useSelectedDispatch();
@@ -96,7 +92,7 @@ const TransactionRow = memo(function TransactionRow({
             );
           case 'imported_payee':
             return (
-              <Field key={i} width="flex">
+              <Field key={i} width="flex" title={transaction.imported_payee}>
                 {transaction.imported_payee}
               </Field>
             );
@@ -154,12 +150,10 @@ const TransactionRow = memo(function TransactionRow({
             );
           case 'amount':
             return (
-              <Field
-                key={i}
-                width={75}
-                style={{ textAlign: 'right', ...styles.tnum }}
-              >
-                {format(transaction.amount, 'financial')}
+              <Field key={i} width={75} style={{ textAlign: 'right' }}>
+                <FinancialText>
+                  {format(transaction.amount, 'financial')}
+                </FinancialText>
               </Field>
             );
           default:
@@ -210,6 +204,7 @@ export function SimpleTransactionsTable({
   return (
     <Table
       style={style}
+      backgroundColor={theme.tableBackground}
       items={serializedTransactions}
       renderEmpty={renderEmpty}
       headers={

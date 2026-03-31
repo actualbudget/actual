@@ -56,16 +56,16 @@ icon={<Linuxsvg width="100" height="100" fill="#6B46C1" />}
 platform="Linux"
 links={[
 {
+label: 'Flathub',
+url: 'https://flathub.org/en/apps/com.actualbudget.actual'
+},
+{
 label: 'AppImage (x64)',
 url: 'https://github.com/actualbudget/actual/releases/latest/download/Actual-linux-x86_64.AppImage'
 },
 {
 label: 'AppImage (arm64)',
 url: 'https://github.com/actualbudget/actual/releases/latest/download/Actual-linux-arm64.AppImage'
-},
-{
-label: 'Flatpak',
-url: 'https://github.com/actualbudget/actual/releases/latest/download/Actual-linux-x86_64.flatpak'
 }
 ]}
 />
@@ -78,7 +78,7 @@ Actual has two parts, the client and a sync server. The primary task of the sync
 
 - [PikaPods](/docs/install/pikapods)
 - [Fly.io](/docs/install/fly)
-- [CLI Tool](/docs/install/cli-tool)
+- [Server CLI](/docs/install/cli-tool)
 - [Docker Install](/docs/install/docker)
 - [Build from source](/docs/install/build-from-source)
 

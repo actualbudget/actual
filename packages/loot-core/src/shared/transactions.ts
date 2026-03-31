@@ -1,9 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
+
 import { logger } from '../platform/server/log';
+import type { TransactionEntity } from '../types/models';
 
-import { type TransactionEntity } from '../types/models';
-
-import { last, diffItems, applyChanges } from './util';
+import { applyChanges, diffItems, last } from './util';
 
 export function isTemporaryId(id: string) {
   return id.indexOf('temp') !== -1;
@@ -50,6 +50,8 @@ export function makeChild<T extends GenericTransactionEntity>(
       parent.starting_balance_flag != null
         ? parent.starting_balance_flag
         : null,
+    sort_order:
+      'sort_order' in data ? data.sort_order : (parent.sort_order ?? null),
     is_child: true,
     parent_id: parent.id,
     error: null,
@@ -65,10 +67,21 @@ function makeNonChild<T extends GenericTransactionEntity>(
     ...data,
     cleared: parent.cleared != null ? parent.cleared : null,
     reconciled: parent.reconciled != null ? parent.reconciled : null,
-    sort_order: parent.sort_order || null,
+    sort_order: parent.sort_order ?? null,
     starting_balance_flag: null,
     is_child: false,
     parent_id: null,
+  } as unknown as T;
+}
+
+function makeTransactionWithChildCategory<T extends GenericTransactionEntity>(
+  parent: T,
+  data: Partial<TransactionEntity>,
+) {
+  return {
+    ...parent,
+    is_parent: false,
+    category: data.category || null,
   } as unknown as T;
 }
 
@@ -375,6 +388,21 @@ export function makeAsNonChildTransactions(
     t =>
       !newNonChildTransactions.some(updatedTrans => updatedTrans.id === t.id),
   );
+  if (
+    childTransactions.length === 1 &&
+    childTransactionsToUpdate.length === 1 &&
+    childTransactionsToUpdate[0].id === childTransactions[0].id
+  ) {
+    return {
+      updated: [
+        makeTransactionWithChildCategory(
+          parentTransaction,
+          childTransactionsToUpdate[0],
+        ),
+      ],
+      deleted: [childTransactionsToUpdate[0]],
+    };
+  }
 
   const nonChildTransactionsToUpdate =
     remainingChildTransactions.length === 1

@@ -1,11 +1,11 @@
-import { type Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 import * as monthUtils from 'loot-core/shared/months';
 import { amountToCurrency, currencyToAmount } from 'loot-core/shared/util';
 
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
-import { type MobileBudgetPage } from './page-models/mobile-budget-page';
+import type { MobileBudgetPage } from './page-models/mobile-budget-page';
 import { MobileNavigation } from './page-models/mobile-navigation';
 
 const copyLastMonthBudget = async (
@@ -350,8 +350,8 @@ budgetTypes.forEach(budgetType => {
       await expect(budgetedButton).toHaveText(
         amountToCurrency(amountToTemplate),
       );
-      const notification = page.getByRole('alert').first();
-      await expect(notification).toContainText(templateNotes);
+      const templateNotification = page.getByRole('alert').nth(1);
+      await expect(templateNotification).toContainText(templateNotes);
       await expect(page).toMatchThemeScreenshots();
     });
 

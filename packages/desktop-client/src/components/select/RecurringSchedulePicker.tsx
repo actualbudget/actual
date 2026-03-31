@@ -1,13 +1,6 @@
-import {
-  type CSSProperties,
-  type Dispatch,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-  useState,
-} from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import type { CSSProperties, Dispatch } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -22,14 +15,11 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { sendCatch } from 'loot-core/platform/client/fetch';
+import { sendCatch } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { getRecurringDescription } from 'loot-core/shared/schedules';
-import { type RecurConfig, type RecurPattern } from 'loot-core/types/models';
-import {
-  type TransObjectLiteral,
-  type WithRequired,
-} from 'loot-core/types/util';
+import type { RecurConfig, RecurPattern } from 'loot-core/types/models';
+import type { TransObjectLiteral, WithRequired } from 'loot-core/types/util';
 
 import { DateSelect } from './DateSelect';
 
@@ -423,7 +413,7 @@ function RecurringScheduleTooltip({
       });
       setPreviewDates(error ? t('Invalid rule') : data);
     }
-    run();
+    void run();
   }, [config, t]);
 
   if (previewDates == null) {

@@ -6,7 +6,7 @@ import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import type { Template } from 'loot-core/types/models/templates';
 
 import { Link } from '@desktop-client/components/common/Link';
@@ -27,7 +27,7 @@ export function UnmigrateBudgetAutomationsModal({
   templates: Template[];
 }) {
   const { t } = useTranslation();
-  const category = useCategory(categoryId);
+  const { data: category } = useCategory(categoryId);
   const existingNotes = useNotes(categoryId) || '';
   const [editedNotes, setEditedNotes] = useState<string>('');
 
@@ -36,7 +36,7 @@ export function UnmigrateBudgetAutomationsModal({
 
   useEffect(() => {
     let mounted = true;
-    (async () => {
+    void (async () => {
       try {
         const text: string = await send(
           'budget/render-note-templates',
@@ -108,13 +108,13 @@ export function UnmigrateBudgetAutomationsModal({
         style: { width: 850, height: 650, paddingBottom: 20 },
       }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <SpaceBetween direction="vertical" style={{ height: '100%' }}>
           <ModalHeader
             title={t('Un-migrate automations: {{category}}', {
               category: category?.name,
             })}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           {rendered === null ? (
             <View
@@ -167,12 +167,12 @@ export function UnmigrateBudgetAutomationsModal({
             </SpaceBetween>
           )}
           <SpaceBetween gap={10} style={{ justifyContent: 'flex-end' }}>
-            <Button onPress={() => close()}>
+            <Button onPress={() => state.close()}>
               <Trans>Cancel</Trans>
             </Button>
             <Button
               variant="primary"
-              onPress={() => onSave(close)}
+              onPress={() => onSave(() => state.close())}
               isDisabled={saving}
             >
               {saving && (

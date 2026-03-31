@@ -51,4 +51,9 @@ As a core contributor, you are eligible for a sponsored [Cursor] subscription. T
 
 Some helpful Cursor usage tips can be found [here](./cursor-ide.md).
 
+### Claude Code Subscription
+
+As a core contributor, you are also eligible for a sponsored [Claude Code] Pro plan subscription. The process is the same as Cursor: purchase your [Claude Code] Pro subscription, and then submit the expense to OpenCollective for reimbursement. To minimize administrative overhead, we encourage you to submit expenses quarterly rather than monthly. This benefit has been pre-approved for all core contributors, so there's no need to request permission - simply follow the reimbursement process through OpenCollective.
+
 [Cursor]: https://www.cursor.com
+[Claude Code]: https://claude.ai/code

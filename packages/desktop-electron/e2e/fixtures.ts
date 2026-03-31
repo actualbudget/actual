@@ -1,14 +1,8 @@
-/* oxlint-disable react-hooks/rules-of-hooks */
 import path from 'node:path';
 
-import {
-  test as base,
-  _electron,
-  type Page,
-  type ElectronApplication,
-  type TestInfo,
-} from '@playwright/test';
-import { remove, ensureDir } from 'fs-extra';
+import { _electron, test as base } from '@playwright/test';
+import type { ElectronApplication, Page, TestInfo } from '@playwright/test';
+import { ensureDir, remove } from 'fs-extra';
 
 type ElectronFixtures = {
   electronApp: ElectronApplication;

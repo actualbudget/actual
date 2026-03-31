@@ -1,15 +1,11 @@
-import React, {
-  type HTMLProps,
-  type Ref,
-  type ReactNode,
-  forwardRef,
-} from 'react';
+import React, { forwardRef } from 'react';
+import type { HTMLProps, ReactNode, Ref } from 'react';
 
 import { css, cx } from '@emotion/css';
 
-import { type CSSProperties } from './styles';
+import type { CSSProperties } from './styles';
 
-type TextProps = HTMLProps<HTMLSpanElement> & {
+type TextProps = Omit<HTMLProps<HTMLSpanElement>, 'style'> & {
   innerRef?: Ref<HTMLSpanElement>;
   className?: string;
   children?: ReactNode;

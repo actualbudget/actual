@@ -1,5 +1,5 @@
 import { getBankSyncError } from '../shared/errors';
-import { type ServerHandlers } from '../types/server-handlers';
+import type { ServerHandlers } from '../types/server-handlers';
 
 import { installAPI } from './api';
 vi.mock('../shared/errors', () => ({

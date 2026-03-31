@@ -1,6 +1,5 @@
 import React from 'react';
 
-import { Block } from '@actual-app/components/block';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
@@ -42,15 +41,16 @@ export const ReportCardName = ({
   }
 
   return (
-    <Block
+    <h2
       style={{
+        display: 'block',
+        margin: 0,
+        padding: 0,
         ...styles.mediumText,
         marginBottom: 5,
       }}
-      role="heading"
-      aria-level={2}
     >
       {name}
-    </Block>
+    </h2>
   );
 };

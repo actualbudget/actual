@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
 
-import { type CategoryEntity } from 'loot-core/types/models';
+import type { CategoryEntity } from 'loot-core/types/models';
 
 import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
 
@@ -45,7 +45,7 @@ export function IncomeMenu({
               onClose();
               break;
             default:
-              throw new Error(`Unrecognized menu option: ${name}`);
+              throw new Error(`Unrecognized menu option: ${String(name)}`);
           }
         }}
         items={[

@@ -1,9 +1,9 @@
 import React from 'react';
 
-import { type CSSProperties } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import { type RuleConditionEntity } from 'loot-core/types/models';
+import type { RuleConditionEntity } from 'loot-core/types/models';
 
 import { ConditionsOpMenu } from './ConditionsOpMenu';
 import { FilterExpression } from './FilterExpression';

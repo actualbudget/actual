@@ -1,10 +1,18 @@
-import React, { useState, useEffect, type CSSProperties } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import {
+  SvgCheveronDown,
+  SvgCheveronUp,
+} from '@actual-app/components/icons/v1';
+import { SvgNotesPaper } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { t } from 'i18next';
 
 import * as Platform from 'loot-core/shared/platform';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
@@ -18,14 +26,16 @@ import {
   ModalTitle,
 } from '@desktop-client/components/common/Modal';
 import { FocusableAmountInput } from '@desktop-client/components/mobile/transactions/FocusableAmountInput';
+import { Notes } from '@desktop-client/components/Notes';
 import { useCategory } from '@desktop-client/hooks/useCategory';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { useNotes } from '@desktop-client/hooks/useNotes';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
 
-type EnvelopeBudgetMenuModalProps = Omit<
-  Extract<ModalType, { name: 'envelope-budget-menu' }>['options'],
-  'month'
->;
+type EnvelopeBudgetMenuModalProps = Extract<
+  ModalType,
+  { name: 'envelope-budget-menu' }
+>['options'];
 
 export function EnvelopeBudgetMenuModal({
   categoryId,
@@ -33,7 +43,17 @@ export function EnvelopeBudgetMenuModal({
   onCopyLastMonthAverage,
   onSetMonthsAverage,
   onApplyBudgetTemplate,
+  onEditNotes,
+  month,
 }: EnvelopeBudgetMenuModalProps) {
+  const buttonStyle: CSSProperties = {
+    ...styles.mediumText,
+    height: styles.mobileMinHeight,
+    color: theme.formLabelText,
+    // Adjust based on desired number of buttons per row.
+    flexBasis: '100%',
+  };
+
   const defaultMenuItemStyle: CSSProperties = {
     ...styles.mobileMenuItem,
     color: theme.menuItemText,
@@ -44,11 +64,25 @@ export function EnvelopeBudgetMenuModal({
   const budgeted = useEnvelopeSheetValue(
     envelopeBudget.catBudgeted(categoryId),
   );
-  const category = useCategory(categoryId);
+  const { data: category } = useCategory(categoryId);
   const [amountFocused, setAmountFocused] = useState(false);
 
+  const notesId = category ? `${category.id}-${month}` : '';
+  const originalNotes = useNotes(notesId) ?? '';
   const _onUpdateBudget = (amount: number) => {
     onUpdateBudget?.(amountToInteger(amount));
+  };
+
+  const [showMore, setShowMore] = useState(false);
+
+  const onShowMore = () => {
+    setShowMore(!showMore);
+  };
+
+  const _onEditNotes = () => {
+    if (category && month) {
+      onEditNotes?.(`${category.id}-${month}`, month);
+    }
   };
 
   useEffect(() => {
@@ -65,17 +99,16 @@ export function EnvelopeBudgetMenuModal({
 
   return (
     <Modal name="envelope-budget-menu">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={<ModalTitle title={category.name} shrinkOnOverflow />}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View
             style={{
               justifyContent: 'center',
               alignItems: 'center',
-              marginBottom: 20,
             }}
           >
             <Text
@@ -91,7 +124,7 @@ export function EnvelopeBudgetMenuModal({
               focused={amountFocused}
               onFocus={() => setAmountFocused(true)}
               onBlur={() => setAmountFocused(false)}
-              onEnter={close}
+              onEnter={() => state.close()}
               zeroSign="+"
               focusedStyle={{
                 width: 'auto',
@@ -105,12 +138,71 @@ export function EnvelopeBudgetMenuModal({
               data-testid="budget-amount"
             />
           </View>
-          <BudgetMenu
-            getItemStyle={() => defaultMenuItemStyle}
-            onCopyLastMonthAverage={onCopyLastMonthAverage}
-            onSetMonthsAverage={onSetMonthsAverage}
-            onApplyBudgetTemplate={onApplyBudgetTemplate}
-          />
+          <View
+            style={{
+              display: showMore ? 'none' : undefined,
+              overflowY: 'auto',
+              flex: 1,
+            }}
+          >
+            <Notes
+              notes={originalNotes.length > 0 ? originalNotes : t('No notes')}
+              editable={false}
+              focused={false}
+              getStyle={() => ({
+                borderRadius: 6,
+                ...(originalNotes.length === 0 && {
+                  justifySelf: 'center',
+                  alignSelf: 'center',
+                  color: theme.pageTextSubdued,
+                }),
+              })}
+            />
+          </View>
+          <View
+            style={{
+              display: showMore ? 'none' : undefined,
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              justifyContent: 'space-between',
+              alignContent: 'space-between',
+            }}
+          >
+            <Button style={buttonStyle} onPress={_onEditNotes}>
+              <SvgNotesPaper
+                width={20}
+                height={20}
+                style={{ paddingRight: 5 }}
+              />
+              <Trans>Edit notes</Trans>
+            </Button>
+          </View>
+          <View>
+            <Button variant="bare" style={buttonStyle} onPress={onShowMore}>
+              {!showMore ? (
+                <SvgCheveronUp
+                  width={30}
+                  height={30}
+                  style={{ paddingRight: 5 }}
+                />
+              ) : (
+                <SvgCheveronDown
+                  width={30}
+                  height={30}
+                  style={{ paddingRight: 5 }}
+                />
+              )}
+              <Trans>Actions</Trans>
+            </Button>
+          </View>
+          {showMore && (
+            <BudgetMenu
+              getItemStyle={() => defaultMenuItemStyle}
+              onCopyLastMonthAverage={onCopyLastMonthAverage}
+              onSetMonthsAverage={onSetMonthsAverage}
+              onApplyBudgetTemplate={onApplyBudgetTemplate}
+            />
+          )}
         </>
       )}
     </Modal>

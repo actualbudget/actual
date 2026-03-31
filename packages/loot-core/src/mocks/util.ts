@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import fs from 'fs/promises';
-import { join, dirname, basename } from 'path';
+import { basename, dirname, join } from 'path';
 
 import { diff } from 'jest-diff';
 
@@ -76,7 +76,7 @@ export function patchFetchForSqlJS(baseURL: string) {
           },
         });
       }
-      return Promise.reject(new Error(`fetch not mocked for ${url}`));
+      return Promise.reject(new Error(`fetch not mocked for ${String(url)}`));
     },
   );
 }

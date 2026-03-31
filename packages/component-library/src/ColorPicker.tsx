@@ -1,15 +1,17 @@
-import { type ChangeEvent, type ReactNode } from 'react';
+import type { ChangeEvent, ReactNode } from 'react';
 import {
   ColorPicker as AriaColorPicker,
-  type ColorPickerProps as AriaColorPickerProps,
+  ColorSwatch as AriaColorSwatch,
+  ColorSwatchPicker as AriaColorSwatchPicker,
+  ColorField,
+  ColorSwatchPickerItem,
   Dialog,
   DialogTrigger,
-  ColorSwatch as AriaColorSwatch,
-  type ColorSwatchProps,
-  ColorSwatchPicker as AriaColorSwatchPicker,
-  ColorSwatchPickerItem,
-  ColorField,
   parseColor,
+} from 'react-aria-components';
+import type {
+  ColorPickerProps as AriaColorPickerProps,
+  ColorSwatchProps,
 } from 'react-aria-components';
 
 import { css } from '@emotion/css';
@@ -32,7 +34,6 @@ function ColorSwatch(props: ColorSwatchProps) {
   );
 }
 
-// colors from https://materialui.co/colors
 const DEFAULT_COLOR_SET = [
   '#690CB0',
   '#D32F2F',
@@ -54,6 +55,26 @@ const DEFAULT_COLOR_SET = [
   '#5D4037',
   '#616161',
   '#455A64',
+  '#FF6666', //red
+  '#FF99FF', //magenta
+  '#C39DDF', //purple
+  '#6666FF', //blue
+  '#B2FFFF', //cyan
+  '#99cb99', //green
+  '#FFFF7F', //yellow
+  '#FFAB66', //orange
+  '#D4B89C', //brown
+  '#BFBFBF', //gray
+  '#FFAEAE', //colors repeat from above with a lighter tint
+  '#FFCCFF',
+  '#E4D4FF', //this is now purple125
+  '#B0B0FF',
+  '#D8FFFF',
+  '#CFE5CF',
+  '#FFFFB2',
+  '#FFD5B3',
+  '#E4D3C3',
+  '#DADADA',
 ];
 
 type ColorSwatchPickerProps = {

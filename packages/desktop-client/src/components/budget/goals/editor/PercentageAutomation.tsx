@@ -5,16 +5,14 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
 
 import type {
-  CategoryGroupEntity,
   CategoryEntity,
+  CategoryGroupEntity,
 } from 'loot-core/types/models';
 import type { PercentageTemplate } from 'loot-core/types/models/templates';
 
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
-import {
-  type Action,
-  updateTemplate,
-} from '@desktop-client/components/budget/goals/actions';
+import { updateTemplate } from '@desktop-client/components/budget/goals/actions';
+import type { Action } from '@desktop-client/components/budget/goals/actions';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
 import { PercentInput } from '@desktop-client/components/util/PercentInput';
 

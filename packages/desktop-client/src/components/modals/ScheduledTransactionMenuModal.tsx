@@ -1,8 +1,5 @@
-import React, {
-  useMemo,
-  type ComponentPropsWithoutRef,
-  type CSSProperties,
-} from 'react';
+import React, { useMemo } from 'react';
+import type { ComponentPropsWithoutRef, CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
@@ -14,8 +11,8 @@ import { View } from '@actual-app/components/view';
 import { format } from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import {
-  scheduleIsRecurring,
   extractScheduleConds,
+  scheduleIsRecurring,
 } from 'loot-core/shared/schedules';
 
 import {
@@ -26,7 +23,7 @@ import {
 } from '@desktop-client/components/common/Modal';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type ScheduledTransactionMenuModalProps = Extract<
   ModalType,
@@ -67,11 +64,11 @@ export function ScheduledTransactionMenuModal({
 
   return (
     <Modal name="scheduled-transaction-menu">
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={<ModalTitle title={schedule?.name || ''} shrinkOnOverflow />}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View
             style={{

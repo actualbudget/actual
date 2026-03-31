@@ -11,18 +11,18 @@ import {
   recalculateSplit,
 } from '../../shared/transactions';
 import {
-  hasFieldsChanged,
   amountToInteger,
+  hasFieldsChanged,
   integerToAmount,
 } from '../../shared/util';
-import {
-  type AccountEntity,
-  type BankSyncResponse,
-  type SimpleFinBatchSyncResponse,
-  type TransactionEntity,
+import type {
+  AccountEntity,
+  BankSyncResponse,
+  TransactionEntity,
 } from '../../types/models';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
+import { TRANSACTION_SORT_INCREMENT } from '../db/sort';
 import { runMutator } from '../mutators';
 import { post } from '../post';
 import { getServer } from '../server-config';
@@ -68,10 +68,7 @@ function getAccountBalance(account) {
 }
 
 async function updateAccountBalance(id: AccountEntity['id'], balance: number) {
-  await db.runQuery('UPDATE accounts SET balance_current = ? WHERE id = ?', [
-    balance,
-    id,
-  ]);
+  await db.update('accounts', { id, balance_current: balance });
 }
 
 async function getAccountOldestTransaction(id): Promise<TransactionEntity> {
@@ -226,12 +223,12 @@ async function downloadSimpleFinTransactions(
 
   let retVal = {};
   if (batchSync) {
-    for (const [accountId, data] of Object.entries(
-      res as SimpleFinBatchSyncResponse,
-    )) {
+    const batchErrors = res.errors;
+    for (const accountId of Object.keys(res)) {
       if (accountId === 'errors') continue;
 
-      const error = res?.errors?.[accountId]?.[0];
+      const data = res[accountId];
+      const error = batchErrors?.[accountId]?.[0];
 
       retVal[accountId] = {
         transactions: data?.transactions?.all,
@@ -244,12 +241,31 @@ async function downloadSimpleFinTransactions(
         retVal[accountId].error_code = error.error_code;
       }
     }
+
+    // Add entries for accounts that only have errors (no data in the response)
+    if (batchErrors) {
+      for (const [accountId, errorList] of Object.entries(batchErrors)) {
+        if (
+          !retVal[accountId] &&
+          Array.isArray(errorList) &&
+          errorList.length > 0
+        ) {
+          const error = errorList[0];
+          retVal[accountId] = {
+            transactions: [],
+            accountBalance: [],
+            startingBalance: 0,
+            error_type: error.error_type,
+            error_code: error.error_code,
+          };
+        }
+      }
+    }
   } else {
-    const singleRes = res as BankSyncResponse;
     retVal = {
-      transactions: singleRes.transactions.all,
-      accountBalance: singleRes.balances,
-      startingBalance: singleRes.startingBalance,
+      transactions: res.transactions.all,
+      accountBalance: res.balances,
+      startingBalance: res.startingBalance,
     };
   }
 
@@ -334,6 +350,9 @@ async function normalizeTransactions(
     // Strip off the irregular properties
     const { payee_name: originalPayeeName, subtransactions, ...rest } = trans;
     trans = rest;
+    const explicitFields = Object.entries(rest)
+      .filter(([, value]) => value != null)
+      .map(([field]) => field);
 
     let payee_name = originalPayeeName;
     if (payee_name) {
@@ -360,6 +379,7 @@ async function normalizeTransactions(
 
     normalized.push({
       payee_name,
+      explicitFields,
       subtransactions: subtransactions
         ? subtransactions.map(t => ({ ...t, account: acctId }))
         : null,
@@ -488,6 +508,8 @@ export async function reconcileTransactions(
   strictIdChecking = true,
   isPreview = false,
   defaultCleared = true,
+  updateDates = false,
+  reimportDeleted?: boolean,
 ): Promise<ReconcileTransactionsResult> {
   logger.log('Performing transaction reconciliation');
 
@@ -506,6 +528,7 @@ export async function reconcileTransactions(
     transactions,
     isBankSyncAccount,
     strictIdChecking,
+    reimportDeleted,
   );
 
   // Finally, generate & commit the changes
@@ -536,6 +559,10 @@ export async function reconcileTransactions(
           existing.raw_synced_data ?? trans.raw_synced_data ?? null,
       };
 
+      if (updateDates && trans.date) {
+        updates['date'] = trans.date;
+      }
+
       const fieldsToMarkUpdated = Object.keys(updates).filter(k => {
         // do not mark raw_synced_data if it's gone from falsy to falsy
         if (!existing.raw_synced_data && !trans.raw_synced_data) {
@@ -558,13 +585,27 @@ export async function reconcileTransactions(
         updatedPreview.push({ transaction: trans, ignored: true });
       }
 
-      if (existing.is_parent && existing.cleared !== updates.cleared) {
+      const clearedUpdated = existing.cleared !== updates.cleared;
+      const dateUpdated =
+        updateDates && trans.date && existing.date !== trans.date;
+
+      if (existing.is_parent && (clearedUpdated || dateUpdated)) {
         const children = await db.all<Pick<db.DbViewTransaction, 'id'>>(
           'SELECT id FROM v_transactions WHERE parent_id = ?',
           [existing.id],
         );
+        const childUpdates = {};
+
+        if (clearedUpdated) {
+          childUpdates['cleared'] = updates.cleared;
+        }
+
+        if (dateUpdated) {
+          childUpdates['date'] = trans.date;
+        }
+
         for (const child of children) {
-          updated.push({ id: child.id, cleared: updates.cleared });
+          updated.push({ id: child.id, ...childUpdates });
         }
       }
     } else if (trans.tombstone) {
@@ -596,7 +637,7 @@ export async function reconcileTransactions(
   // Maintain the sort order of the server
   const now = Date.now();
   added.forEach((t, index) => {
-    t.sort_order ??= now - index;
+    t.sort_order ??= now - index * TRANSACTION_SORT_INCREMENT;
   });
 
   if (!isPreview) {
@@ -625,14 +666,18 @@ export async function matchTransactions(
   transactions,
   isBankSyncAccount = false,
   strictIdChecking = true,
+  reimportDeletedOverride?: boolean,
 ) {
   logger.log('Performing transaction reconciliation matching');
 
-  const reimportDeleted = await aqlQuery(
-    q('preferences')
-      .filter({ id: `sync-reimport-deleted-${acctId}` })
-      .select('value'),
-  ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
+  const reimportDeleted =
+    reimportDeletedOverride !== undefined
+      ? reimportDeletedOverride
+      : await aqlQuery(
+          q('preferences')
+            .filter({ id: `sync-reimport-deleted-${acctId}` })
+            .select('value'),
+        ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
 
   const hasMatched = new Set();
 
@@ -835,15 +880,28 @@ export async function addTransactions(
   const accounts: db.DbAccount[] = await db.getAccounts();
   const accountsMap = new Map(accounts.map(account => [account.id, account]));
 
-  for (const { trans: originalTrans, subtransactions } of normalized) {
+  for (const {
+    trans: originalTrans,
+    subtransactions,
+    explicitFields,
+  } of normalized) {
     // Run the rules
     const trans = await runRules(originalTrans, accountsMap);
 
+    // Rules should enrich missing fields but not override explicit values provided by API clients.
+    const transWithExplicitFields = { ...trans };
+    for (const field of explicitFields) {
+      transWithExplicitFields[field] = originalTrans[field];
+    }
+
     const finalTransaction = {
       id: uuidv4(),
-      ...trans,
+      ...transWithExplicitFields,
       account: acctId,
-      cleared: trans.cleared != null ? trans.cleared : true,
+      cleared:
+        transWithExplicitFields.cleared != null
+          ? transWithExplicitFields.cleared
+          : true,
     };
 
     // Add split transactions if they are given
@@ -859,6 +917,14 @@ export async function addTransactions(
   }
 
   await createNewPayees(payeesToCreate, added);
+
+  // Assign decreasing sort_order values to preserve import file order.
+  // Transactions are displayed in sort_order DESC order, so first transaction
+  // in the file should have the highest sort_order.
+  const now = Date.now();
+  added.forEach((t, index) => {
+    t.sort_order ??= now - index * TRANSACTION_SORT_INCREMENT;
+  });
 
   let newTransactions;
   if (runTransfers || learnCategories) {
@@ -883,6 +949,8 @@ async function processBankSyncDownload(
   id,
   acctRow,
   initialSync = false,
+  customStartingBalance?: number,
+  customStartingDate?: string,
 ) {
   // If syncing an account from sync source it must not use strictIdChecking. This allows
   // the fuzzy search to match transactions where the import IDs are different. It is a known quirk
@@ -895,6 +963,12 @@ async function processBankSyncDownload(
       .select('value'),
   ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
 
+  const updateDates = await aqlQuery(
+    q('preferences')
+      .filter({ id: `sync-update-dates-${id}` })
+      .select('value'),
+  ).then(data => String(data?.data?.[0]?.value ?? 'false') === 'true');
+
   /** Starting balance is actually the current balance of the account. */
   const {
     transactions: originalTransactions,
@@ -905,16 +979,17 @@ async function processBankSyncDownload(
     const { transactions } = download;
     let balanceToUse = currentBalance;
 
-    if (acctRow.account_sync_source === 'simpleFin') {
+    // Use custom starting balance if provided, otherwise calculate it
+    if (customStartingBalance !== undefined) {
+      balanceToUse = customStartingBalance;
+    } else if (acctRow.account_sync_source === 'simpleFin') {
       const previousBalance = transactions.reduce((total, trans) => {
         return (
           total - parseInt(trans.transactionAmount.amount.replace('.', ''))
         );
       }, currentBalance);
       balanceToUse = previousBalance;
-    }
-
-    if (acctRow.account_sync_source === 'pluggyai') {
+    } else if (acctRow.account_sync_source === 'pluggyai') {
       const currentBalance = download.startingBalance;
       const previousBalance = transactions.reduce(
         (total, trans) => total - trans.transactionAmount.amount * 100,
@@ -925,10 +1000,15 @@ async function processBankSyncDownload(
 
     const oldestTransaction = transactions[transactions.length - 1];
 
-    const oldestDate =
-      transactions.length > 0
-        ? oldestTransaction.date
-        : monthUtils.currentDay();
+    // Use custom starting date if provided, otherwise use oldest transaction date or current day
+    let startingBalanceDate: string;
+    if (customStartingDate) {
+      startingBalanceDate = customStartingDate;
+    } else if (transactions.length > 0) {
+      startingBalanceDate = oldestTransaction.date;
+    } else {
+      startingBalanceDate = monthUtils.currentDay();
+    }
 
     const payee = await getStartingBalancePayee();
 
@@ -938,7 +1018,7 @@ async function processBankSyncDownload(
         amount: balanceToUse,
         category: acctRow.offbudget === 0 ? payee.category : null,
         payee: payee.id,
-        date: oldestDate,
+        date: startingBalanceDate,
         cleared: true,
         starting_balance_flag: true,
       });
@@ -948,6 +1028,9 @@ async function processBankSyncDownload(
         transactions,
         true,
         useStrictIdChecking,
+        false,
+        true,
+        updateDates,
       );
       return {
         ...result,
@@ -967,6 +1050,9 @@ async function processBankSyncDownload(
       importTransactions ? transactions : [],
       true,
       useStrictIdChecking,
+      false,
+      true,
+      updateDates,
     );
 
     if (currentBalance != null) {
@@ -983,10 +1069,13 @@ export async function syncAccount(
   id: string,
   acctId: string,
   bankId: string,
+  customStartingDate?: string,
+  customStartingBalance?: number,
 ) {
   const acctRow = await db.select('accounts', id);
 
-  const syncStartDate = await getAccountSyncStartDate(id);
+  const syncStartDate =
+    customStartingDate ?? (await getAccountSyncStartDate(id));
   const oldestTransaction = await getAccountOldestTransaction(id);
   const newAccount = oldestTransaction == null;
 
@@ -1010,7 +1099,14 @@ export async function syncAccount(
     );
   }
 
-  return processBankSyncDownload(download, id, acctRow, newAccount);
+  return processBankSyncDownload(
+    download,
+    id,
+    acctRow,
+    newAccount,
+    customStartingBalance,
+    customStartingDate,
+  );
 }
 
 export async function simpleFinBatchSync(
@@ -1025,10 +1121,33 @@ export async function simpleFinBatchSync(
     startDates,
   );
 
+  if (!res) {
+    return accounts.map(account => ({
+      accountId: account.id,
+      res: {
+        error_type: 'NO_DATA',
+        error_code: 'NO_DATA',
+      },
+    }));
+  }
+
   const promises = [];
   for (let i = 0; i < accounts.length; i++) {
     const account = accounts[i];
     const download = res[account.account_id];
+
+    if (!download || Object.keys(download).length === 0) {
+      promises.push(
+        Promise.resolve({
+          accountId: account.id,
+          res: {
+            error_type: 'ACCOUNT_MISSING',
+            error_code: 'ACCOUNT_MISSING',
+          },
+        }),
+      );
+      continue;
+    }
 
     const acctRow = await db.select('accounts', account.id);
     const oldestTransaction = await getAccountOldestTransaction(account.id);
@@ -1045,13 +1164,32 @@ export async function simpleFinBatchSync(
       continue;
     }
 
+    if (!download.transactions) {
+      promises.push(
+        Promise.resolve({
+          accountId: account.id,
+          res: {
+            error_type: 'ACCOUNT_MISSING',
+            error_code: 'ACCOUNT_MISSING',
+          },
+        }),
+      );
+      continue;
+    }
+
     promises.push(
-      processBankSyncDownload(download, account.id, acctRow, newAccount).then(
-        res => ({
+      processBankSyncDownload(download, account.id, acctRow, newAccount)
+        .then(res => ({
           accountId: account.id,
           res,
-        }),
-      ),
+        }))
+        .catch(err => ({
+          accountId: account.id,
+          res: {
+            error_type: err?.category || 'INTERNAL_ERROR',
+            error_code: err?.code || 'INTERNAL_ERROR',
+          },
+        })),
     );
   }
 

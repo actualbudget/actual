@@ -1,6 +1,7 @@
-import React, { type ReactNode, type ComponentProps } from 'react';
+import React from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 
-import { type CSSProperties } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -85,7 +86,7 @@ export const FormField = ({ style, children }: FormFieldProps) => {
 
 // Custom inputs
 
-type CheckboxProps = ComponentProps<'input'> & {
+type CheckboxProps = Omit<ComponentProps<'input'>, 'style'> & {
   style?: CSSProperties;
 };
 

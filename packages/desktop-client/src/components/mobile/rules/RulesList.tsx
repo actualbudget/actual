@@ -1,4 +1,4 @@
-import { Virtualizer, GridList, ListLayout } from 'react-aria-components';
+import { GridList, ListLayout, Virtualizer } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
@@ -6,7 +6,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type RuleEntity } from 'loot-core/types/models';
+import type { RuleEntity } from 'loot-core/types/models';
 
 import { RulesListItem } from './RulesListItem';
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTransition, animated } from 'react-spring';
+import { animated, useTransition } from 'react-spring';
 
 import { Block } from '@actual-app/components/block';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';

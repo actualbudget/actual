@@ -1,10 +1,11 @@
-import React, { type ReactNode, type CSSProperties } from 'react';
+import React from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 import { View } from '@actual-app/components/view';
 
-import { type GroupedEntity } from 'loot-core/types/models';
+import type { GroupedEntity } from 'loot-core/types/models';
 
-import { type renderRowProps } from './ReportTable';
+import type { renderRowProps } from './ReportTable';
 
 type RenderTableRowProps = {
   index: number;

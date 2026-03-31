@@ -42,6 +42,12 @@ yarn start:desktop
 - Use `yarn workspace <workspace-name> run <command>` for workspace-specific tasks
 - Tests run once and exit by default (using `vitest --run`)
 
+### ⚠️ CRITICAL REQUIREMENT: AI-Generated Commit Messages and PR Titles
+
+**ALL commit messages and PR titles MUST be prefixed with `[AI]`.** No exceptions.
+
+See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for the full specification, including git safety rules, pre-commit checklist, and PR workflow.
+
 ### Task Orchestration with Lage
 
 The project uses **[lage](https://microsoft.github.io/lage/)** (a task runner for JavaScript monorepos) to efficiently run tests and other tasks across multiple workspaces:
@@ -78,7 +84,7 @@ The core application logic that runs on any platform.
 
   ```bash
   # Run all loot-core tests
-  yarn workspace loot-core run test
+  yarn workspace @actual-app/core run test
 
   # Or run tests across all packages using lage
   yarn test
@@ -169,7 +175,7 @@ Custom ESLint rules specific to Actual.
 
 - `no-untranslated-strings`: Enforces i18n usage
 - `prefer-trans-over-t`: Prefers Trans component over t() function
-- `prefer-logger-over-console`: Enforces using logger instead of console
+- `prefer-logger-over-console`: Enforces using logger instead of console in `packages/loot-core/`
 - `typography`: Typography rules
 - `prefer-if-statement`: Prefers explicit if statements
 
@@ -213,7 +219,7 @@ yarn test
 yarn test:debug
 
 # Run tests for a specific package
-yarn workspace loot-core run test
+yarn workspace @actual-app/core run test
 ```
 
 **E2E Tests (Playwright)**
@@ -259,6 +265,10 @@ Always run `yarn typecheck` before committing.
 - Generate i18n files: `yarn generate:i18n`
 - Custom ESLint rules enforce translation usage
 
+### 5. Financial Number Typography
+
+- Wrap standalone financial numbers with `FinancialText` or apply `styles.tnum` directly if wrapping is not possible
+
 ## Code Style & Conventions
 
 ### TypeScript Guidelines
@@ -288,6 +298,7 @@ Always run `yarn typecheck` before committing.
 
 **React Patterns:**
 
+- The project uses **React Compiler** (`babel-plugin-react-compiler`) in the desktop-client. The compiler auto-memoizes component bodies, so you can omit manual `useCallback`, `useMemo`, and `React.memo` when adding or refactoring code; prefer inline callbacks and values unless a stable identity is required by a non-compiled dependency.
 - Don't use `React.FunctionComponent` or `React.FC` - type props directly
 - Don't use `React.*` patterns - use named imports instead
 - Use `<Link>` instead of `<a>` tags
@@ -328,18 +339,13 @@ Always maintain newlines between import groups.
 
 **Never:**
 
-- Use `console.*` (use logger instead - enforced by ESLint)
 - Import from `uuid` without destructuring: use `import { v4 as uuidv4 } from 'uuid'`
 - Import colors directly - use theme instead
 - Import `@actual-app/web/*` in `loot-core`
 
 **Git Commands:**
 
-- Never update git config
-- Never run destructive git operations (force push, hard reset) unless explicitly requested
-- Never skip hooks (--no-verify, --no-gpg-sign)
-- Never force push to main/master
-- Never commit unless explicitly asked
+See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for complete git safety rules, commit message requirements, and PR workflow.
 
 ## File Structure Patterns
 
@@ -502,7 +508,7 @@ Icons in `packages/component-library/src/icons/` are auto-generated. Don't manua
 
 1. Clean build artifacts: `rm -rf packages/*/dist packages/*/lib-dist packages/*/build`
 2. Reinstall dependencies: `yarn install`
-3. Check Node.js version (requires >=20)
+3. Check Node.js version (requires >=22)
 4. Check Yarn version (requires ^4.9.1)
 
 ## Testing Patterns
@@ -538,10 +544,10 @@ Icons in `packages/component-library/src/icons/` are auto-generated. Don't manua
 
 Before committing changes, ensure:
 
+- [ ] Commit and PR rules followed (see [PR and Commit Rules](.github/agents/pr-and-commit-rules.md))
 - [ ] `yarn typecheck` passes
 - [ ] `yarn lint:fix` has been run
 - [ ] Relevant tests pass
-- [ ] No new console.\* usage (use logger)
 - [ ] User-facing strings are translated
 - [ ] Prefer `type` over `interface`
 - [ ] Named exports used (not default exports)
@@ -551,9 +557,11 @@ Before committing changes, ensure:
 
 ## Pull Request Guidelines
 
-When creating pull requests:
+See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for complete PR creation rules, including title prefix requirements, labeling, and PR template handling.
 
-- **AI-Generated PRs**: If you create a PR using AI assistance, add the **"AI generated"** label to the pull request. This helps maintainers understand the nature of the contribution.
+## Code Review Guidelines
+
+When performing code reviews (especially for LLM agents): **see [CODE_REVIEW_GUIDELINES.md](./CODE_REVIEW_GUIDELINES.md)** for specific guidelines.
 
 ## Performance Considerations
 
@@ -580,7 +588,7 @@ yarn install:server
 
 ## Environment Requirements
 
-- **Node.js**: >=20
+- **Node.js**: >=22
 - **Yarn**: ^4.9.1 (managed by packageManager field)
 - **Browser Targets**: Electron >= 35.0, modern browsers (see browserslist)
 
@@ -593,3 +601,40 @@ The codebase is actively being migrated:
 - **React.\* → Named Imports**: Legacy React.\* patterns being removed
 
 When working with older code, follow the newer patterns described in this guide.
+
+## Cursor Cloud specific instructions
+
+### Services overview
+
+| Service             | Command                 | Port | Required                      |
+| ------------------- | ----------------------- | ---- | ----------------------------- |
+| Web Frontend (Vite) | `yarn start`            | 3001 | Yes                           |
+| Sync Server         | `yarn start:server-dev` | 5006 | Optional (sync features only) |
+
+All storage is **SQLite** (file-based via `better-sqlite3`). No external databases or services are needed.
+
+### Running the app
+
+- `yarn start` builds the plugins-service worker, loot-core browser backend, and starts the Vite dev server on port **3001**.
+- `yarn start:server-dev` starts both the sync server (port 5006) and the web frontend together.
+- The Vite HMR dev server serves many unbundled modules. In constrained environments, the browser may hit `ERR_INSUFFICIENT_RESOURCES`. If that happens, use `yarn build:browser` followed by serving the built output from `packages/desktop-client/build/` with proper COOP/COEP headers (`Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: require-corp`).
+
+### Lint, test, typecheck
+
+Standard commands documented in `package.json` scripts and the Quick Start section above:
+
+- `yarn lint` / `yarn lint:fix` (uses oxlint + oxfmt)
+- `yarn test` (lage across all workspaces)
+- `yarn typecheck` (tsgo + lage typecheck)
+
+### Testing and previewing the app
+
+When running the app for manual testing or demos, use **"View demo"** on the initial setup screen (after selecting "Don't use a server"). This creates a test budget pre-populated with realistic sample data (accounts, transactions, categories, and budgeted amounts), which is far more useful than starting with an empty budget.
+
+### Gotchas
+
+- The `engines` field requires **Node.js >=22** and **Yarn ^4.9.1**. The `.nvmrc` specifies `v22/*`.
+- Pre-commit hook runs `lint-staged` (oxfmt + oxlint) via Husky. Run `yarn prepare` once after install to set up hooks.
+- Lage caches test results in `.lage/`. If tests behave unexpectedly, clear with `rm -rf .lage`.
+- Native modules (`better-sqlite3`, `bcrypt`) require build tools (`gcc`, `make`, `python3`). These are pre-installed in the Cloud VM.
+- All yarn commands must be run from the repository root, never from child workspaces.

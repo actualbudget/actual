@@ -1,45 +1,46 @@
 // @ts-strict-ignore
 // TODO: remove strict
-import { useCallback, useLayoutEffect, useRef, type RefObject } from 'react';
+import { useCallback, useLayoutEffect, useRef } from 'react';
+import type { RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import { getUpcomingDays } from 'loot-core/shared/schedules';
 import {
   addSplitTransaction,
   applyTransactionDiff,
+  isPreviewId,
   realizeTempTransactions,
   splitTransaction,
   updateTransaction,
 } from 'loot-core/shared/transactions';
 import { applyChanges, getChangedValues } from 'loot-core/shared/util';
-import {
-  type AccountEntity,
-  type CategoryEntity,
-  type PayeeEntity,
-  type RuleActionEntity,
-  type RuleConditionEntity,
-  type ScheduleEntity,
-  type TransactionEntity,
-  type TransactionFilterEntity,
+import type {
+  AccountEntity,
+  CategoryEntity,
+  PayeeEntity,
+  RuleActionEntity,
+  RuleConditionEntity,
+  ScheduleEntity,
+  TransactionEntity,
+  TransactionFilterEntity,
 } from 'loot-core/types/models';
 
-import {
-  TransactionTable,
-  type TransactionTableProps,
-} from './TransactionsTable';
+import { TransactionTable } from './TransactionsTable';
+import type { TransactionTableProps } from './TransactionsTable';
 
-import { type TableHandleRef } from '@desktop-client/components/table';
+import type { TableHandleRef } from '@desktop-client/components/table';
+import { isValidBoundaryDrop } from '@desktop-client/hooks/useDragDrop';
+import type { DropPosition } from '@desktop-client/hooks/useDragDrop';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
-
 // When data changes, there are two ways to update the UI:
 //
 // * Optimistic updates: we apply the needed updates to local data
@@ -76,9 +77,9 @@ async function saveDiffAndApply(diff, changes, onChange, learnCategories) {
   const remoteDiff = await saveDiff(diff, learnCategories);
   onChange(
     // TODO:
-    // @ts-ignore testing
+    // @ts-expect-error - fix me
     applyTransactionDiff(changes.newTransaction, remoteDiff),
-    // @ts-ignore testing
+    // @ts-expect-error - fix me
     applyChanges(remoteDiff, changes.data),
   );
 }
@@ -271,6 +272,8 @@ type TransactionListProps = Pick<
   allTransactions: TransactionEntity[];
   account: AccountEntity | undefined;
   category: CategoryEntity | undefined;
+  isFiltered?: boolean;
+  allowReorder?: boolean;
   onChange: (
     transaction: TransactionEntity,
     transactions: TransactionEntity[],
@@ -299,6 +302,8 @@ export function TransactionList({
   isAdding,
   isNew,
   isMatched,
+  isFiltered,
+  allowReorder = true,
   dateFormat,
   hideFraction,
   renderEmpty,
@@ -381,8 +386,13 @@ export function TransactionList({
       newTransactions = realizeTempTransactions(newTransactions);
 
       const parentTransaction = newTransactions.find(t => !t.is_child);
+      const isLinkedToSchedule = !!parentTransaction?.schedule;
 
-      if (parentTransaction && isFutureTransaction(parentTransaction)) {
+      if (
+        parentTransaction &&
+        isFutureTransaction(parentTransaction) &&
+        !isLinkedToSchedule
+      ) {
         const transactionWithSubtransactions = {
           ...parentTransaction,
           subtransactions: newTransactions.filter(
@@ -430,7 +440,7 @@ export function TransactionList({
             onRefetch();
           } else {
             onChange(changes.newTransaction, changes.data);
-            saveDiffAndApply(
+            void saveDiffAndApply(
               changes.diff,
               changes,
               onChange,
@@ -440,7 +450,8 @@ export function TransactionList({
         }
       };
 
-      if (isFutureTransaction(transaction)) {
+      const isLinkedToSchedule = !!transaction.schedule;
+      if (isFutureTransaction(transaction) && !isLinkedToSchedule) {
         const originalTransaction = transactionsLatest.current.find(
           t => t.id === transaction.id,
         );
@@ -472,7 +483,7 @@ export function TransactionList({
     (id: TransactionEntity['id']) => {
       const changes = addSplitTransaction(transactionsLatest.current, id);
       onChange(changes.newTransaction, changes.data);
-      saveDiffAndApply(
+      void saveDiffAndApply(
         changes.diff,
         changes,
         onChange,
@@ -487,7 +498,7 @@ export function TransactionList({
     (id: TransactionEntity['id']) => {
       const changes = splitTransaction(transactionsLatest.current, id);
       onChange(changes.newTransaction, changes.data);
-      saveDiffAndApply(
+      void saveDiffAndApply(
         changes.diff,
         changes,
         onChange,
@@ -556,14 +567,17 @@ export function TransactionList({
 
   const onManagePayees = useCallback(
     (id: PayeeEntity['id']) => {
-      navigate('/payees', id ? { state: { selectedPayee: id } } : undefined);
+      void navigate(
+        '/payees',
+        id ? { state: { selectedPayee: id } } : undefined,
+      );
     },
     [navigate],
   );
 
   const onNavigateToTransferAccount = useCallback(
     (accountId: AccountEntity['id']) => {
-      navigate(`/accounts/${accountId}`);
+      void navigate(`/accounts/${accountId}`);
     },
     [navigate],
   );
@@ -589,6 +603,123 @@ export function TransactionList({
       });
     },
     [onApplyFilter],
+  );
+
+  const onReorder = useCallback(
+    async (id: string, dropPos: DropPosition, targetId: string) => {
+      // Don't support reorder while sorted by non-date field or filtered
+      if ((sortField && sortField !== 'date') || isFiltered) {
+        return;
+      }
+
+      if (id === targetId) {
+        return;
+      }
+
+      // Find the transaction being dragged to determine if it's a child
+      const draggedTrans = allTransactions.find(t => t.id === id);
+      if (!draggedTrans) {
+        return;
+      }
+
+      // Child transaction reordering: siblings only
+      if (draggedTrans.is_child && draggedTrans.parent_id) {
+        const siblings = allTransactions.filter(
+          t => t.parent_id === draggedTrans.parent_id && !isPreviewId(t.id),
+        );
+
+        const targetTransIdx = siblings.findIndex(t => t.id === targetId);
+        if (targetTransIdx === -1) {
+          return; // Target is not a sibling
+        }
+
+        // Convert dropPos to API targetId for child reordering
+        // API places transaction AFTER targetId; null means move to top of siblings
+        let apiTargetId: string | null;
+        if (dropPos === 'after') {
+          apiTargetId = targetId;
+        } else {
+          const aboveIdx = targetTransIdx - 1;
+          apiTargetId = aboveIdx >= 0 ? siblings[aboveIdx].id : null;
+        }
+
+        await send('transaction-move', {
+          id,
+          accountId: draggedTrans.account,
+          targetId: apiTargetId,
+        });
+        onRefetch();
+        return;
+      }
+
+      // Build a reorderable list that excludes child and preview/scheduled transactions
+      const reorderable = allTransactions.filter(
+        t => !t.is_child && !isPreviewId(t.id),
+      );
+
+      const transIdx = reorderable.findIndex(t => t.id === id);
+      const targetTransIdx = reorderable.findIndex(t => t.id === targetId);
+
+      if (transIdx === -1 || targetTransIdx === -1) {
+        return;
+      }
+
+      const trans = reorderable[transIdx];
+      const targetTrans = reorderable[targetTransIdx];
+      const isAscending = sortField === 'date' && ascDesc === 'asc';
+
+      // Validate drop position: same date or at a date boundary
+      let isValidDrop = targetTrans.date === trans.date;
+      if (!isValidDrop) {
+        const neighborIdx =
+          dropPos === 'before' ? targetTransIdx - 1 : targetTransIdx + 1;
+        const neighborTrans =
+          neighborIdx >= 0 && neighborIdx < reorderable.length
+            ? reorderable[neighborIdx]
+            : null;
+        isValidDrop = isValidBoundaryDrop(
+          dropPos,
+          targetTrans.date,
+          trans.date,
+          neighborTrans?.date ?? null,
+          isAscending,
+        );
+      }
+
+      if (!isValidDrop) {
+        return;
+      }
+
+      // Convert dropPos to API targetId
+      // API places transaction AFTER targetId; null means move to top
+      let apiTargetId: string | null;
+      if (dropPos === 'after') {
+        // Prevent inserting immediately after a split parent
+        if (targetTrans.is_parent) {
+          return;
+        }
+        apiTargetId = targetTrans.date === trans.date ? targetId : null;
+      } else {
+        const aboveIdx = targetTransIdx - 1;
+        const aboveTrans = aboveIdx >= 0 ? reorderable[aboveIdx] : null;
+        // For parent-level reordering, always anchor to parent transactions.
+        // Using a child id here makes the backend miss the target and append.
+        if (aboveTrans?.is_parent) {
+          apiTargetId = aboveTrans.date === trans.date ? aboveTrans.id : null;
+        } else {
+          apiTargetId =
+            aboveTrans && aboveTrans.date === trans.date ? aboveTrans.id : null;
+        }
+      }
+
+      await send('transaction-move', {
+        id,
+        accountId: trans.account,
+        targetId: apiTargetId,
+      });
+      onRefetch();
+    },
+    [sortField, ascDesc, isFiltered, allTransactions, onRefetch],
   );
 
   return (
@@ -628,6 +759,8 @@ export function TransactionList({
       onSort={onSort}
       sortField={sortField}
       ascDesc={ascDesc}
+      isFiltered={isFiltered}
+      onReorder={allowReorder ? onReorder : undefined}
       onBatchDelete={onBatchDelete}
       onBatchDuplicate={onBatchDuplicate}
       onBatchLinkSchedule={onBatchLinkSchedule}

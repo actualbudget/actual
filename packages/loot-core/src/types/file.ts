@@ -1,6 +1,6 @@
-import { type UsersWithAccess } from '../server/cloud-storage';
+import type { UsersWithAccess } from '../server/cloud-storage';
 
-import { type Budget } from './budget';
+import type { Budget } from './budget';
 
 export type FileState =
   | 'local'

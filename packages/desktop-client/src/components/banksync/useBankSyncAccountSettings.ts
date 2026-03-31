@@ -2,16 +2,16 @@ import { useState } from 'react';
 
 import {
   defaultMappings,
-  type Mappings,
   mappingsFromString,
   mappingsToString,
 } from 'loot-core/server/util/custom-sync-mapping';
+import type { Mappings } from 'loot-core/server/util/custom-sync-mapping';
 import { q } from 'loot-core/shared/query';
 
-import {
-  type TransactionDirection,
-  type MappableFieldWithExample,
-  getFields,
+import { getFields } from './EditSyncAccount';
+import type {
+  MappableFieldWithExample,
+  TransactionDirection,
 } from './EditSyncAccount';
 
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
@@ -32,6 +32,10 @@ export function useBankSyncAccountSettings(accountId: string) {
   const [savedImportTransactions = true, setSavedImportTransactions] =
     useSyncedPref(`sync-import-transactions-${accountId}`);
 
+  const [savedUpdateDates = false, setSavedUpdateDates] = useSyncedPref(
+    `sync-update-dates-${accountId}`,
+  );
+
   const [transactionDirection, setTransactionDirection] =
     useState<TransactionDirection>('payment');
   const [importPending, setImportPending] = useState(
@@ -48,6 +52,9 @@ export function useBankSyncAccountSettings(accountId: string) {
   );
   const [importTransactions, setImportTransactions] = useState(
     String(savedImportTransactions) === 'true',
+  );
+  const [updateDates, setUpdateDates] = useState(
+    String(savedUpdateDates) === 'true',
   );
 
   const transactionQuery = q('transactions')
@@ -84,6 +91,7 @@ export function useBankSyncAccountSettings(accountId: string) {
     setSavedImportNotes(String(importNotes));
     setSavedReimportDeleted(String(reimportDeleted));
     setSavedImportTransactions(String(importTransactions));
+    setSavedUpdateDates(String(updateDates));
   };
 
   const setMapping = (field: string, value: string) => {
@@ -110,6 +118,8 @@ export function useBankSyncAccountSettings(accountId: string) {
     setReimportDeleted,
     importTransactions,
     setImportTransactions,
+    updateDates,
+    setUpdateDates,
     mappings,
     setMapping,
     exampleTransaction,

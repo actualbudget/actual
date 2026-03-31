@@ -27,7 +27,7 @@ export function isDateFormat(format: string): format is DateFormat {
 export function parseDate(
   str: string | number | null | Array<unknown> | object,
   order: DateFormat,
-) {
+): string | null {
   if (typeof str !== 'string') {
     return null;
   }
@@ -261,6 +261,28 @@ export function parseAmountFields(
       inflow: null,
     };
   }
+}
+
+export function filterByStartDate(
+  transactions: ImportTransaction[],
+  startDate: string,
+  isPreParsedDate: boolean,
+  fieldMappings: FieldMapping | null,
+  parseDateFormat: DateFormat | null,
+): ImportTransaction[] {
+  if (!startDate) return transactions;
+  return transactions.filter(trans => {
+    const mapped = fieldMappings
+      ? applyFieldMappings(trans, fieldMappings)
+      : trans;
+    const date = isPreParsedDate
+      ? (mapped.date ?? null)
+      : parseDateFormat
+        ? parseDate(mapped.date ?? null, parseDateFormat)
+        : null;
+    // Keep transactions with unparseable dates (they'll error later in the normal flow)
+    return date == null || date >= startDate;
+  });
 }
 
 export function stripCsvImportTransaction(transaction: ImportTransaction) {

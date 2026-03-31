@@ -1,8 +1,9 @@
-import React, { useState, type ReactNode } from 'react';
+import React, { useState } from 'react';
+import type { ReactNode } from 'react';
 import { Trans } from 'react-i18next';
 import { useLocation } from 'react-router';
 
-import { type CSSProperties } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
@@ -117,7 +118,9 @@ export function Column({
       }}
     >
       <Text style={{ fontWeight: 500 }}>{title}</Text>
-      <View style={{ alignItems: 'flex-start', gap: '1em' }}>{children}</View>
+      <View style={{ alignItems: 'flex-start', gap: '1em', width: '100%' }}>
+        {children}
+      </View>
     </View>
   );
 }

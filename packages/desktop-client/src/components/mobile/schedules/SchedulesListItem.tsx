@@ -1,5 +1,5 @@
 import React from 'react';
-import { type GridListItemProps } from 'react-aria-components';
+import type { GridListItemProps } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -10,16 +10,16 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { format as monthUtilFormat } from 'loot-core/shared/months';
+import type { ScheduleStatusType } from 'loot-core/shared/schedules';
 import { getScheduledAmount } from 'loot-core/shared/schedules';
-import { type ScheduleEntity } from 'loot-core/types/models';
-import { type WithRequired } from 'loot-core/types/util';
+import type { ScheduleEntity } from 'loot-core/types/models';
+import type { WithRequired } from 'loot-core/types/util';
 
 import { ActionableGridListItem } from '@desktop-client/components/mobile/ActionableGridListItem';
 import { StatusBadge } from '@desktop-client/components/schedules/StatusBadge';
 import { DisplayId } from '@desktop-client/components/util/DisplayId';
 import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
 import { useFormat } from '@desktop-client/hooks/useFormat';
-import { type ScheduleStatusType } from '@desktop-client/hooks/useSchedules';
 
 type SchedulesListItemProps = {
   onDelete: () => void;
@@ -111,7 +111,9 @@ export function SchedulesListItem({
               <Text style={{ color: theme.pageTextSubdued }}>
                 <Trans>Amount:</Trans>
               </Text>
-              <Text style={{ color: theme.pageText }}>{amountStr}</Text>
+              <Text style={{ ...styles.tnum, color: theme.pageText }}>
+                {amountStr}
+              </Text>
             </SpaceBetween>
             {schedule.next_date && (
               <SpaceBetween gap={4} direction="horizontal">

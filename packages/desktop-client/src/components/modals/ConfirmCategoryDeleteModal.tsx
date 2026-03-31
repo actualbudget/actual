@@ -8,7 +8,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type TransObjectLiteral } from 'loot-core/types/util';
+import type { TransObjectLiteral } from 'loot-core/types/util';
 
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import {
@@ -17,7 +17,7 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { useCategories } from '@desktop-client/hooks/useCategories';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type ConfirmCategoryDeleteModalProps = Extract<
   ModalType,
@@ -32,7 +32,12 @@ export function ConfirmCategoryDeleteModal({
   const { t } = useTranslation(); // Initialize translation hook
   const [transferCategory, setTransferCategory] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { grouped: categoryGroups, list: categories } = useCategories();
+  const {
+    data: { grouped: categoryGroups, list: categories } = {
+      grouped: [],
+      list: [],
+    },
+  } = useCategories();
   const group = categoryGroups.find(g => g.id === groupId);
   const category = categories.find(c => c.id === categoryId);
 
@@ -66,11 +71,11 @@ export function ConfirmCategoryDeleteModal({
       name="confirm-category-delete"
       containerProps={{ style: { width: '30vw' } }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Confirm Delete')} // Use translation for title
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ lineHeight: 1.5 }}>
             {group ? (
@@ -172,7 +177,7 @@ export function ConfirmCategoryDeleteModal({
                     setError('required-transfer');
                   } else {
                     onDelete(transferCategory);
-                    close();
+                    state.close();
                   }
                 }}
               >

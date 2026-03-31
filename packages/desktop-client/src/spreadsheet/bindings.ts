@@ -1,12 +1,8 @@
 import { q } from 'loot-core/shared/query';
 import type { AccountEntity, CategoryEntity } from 'loot-core/types/models';
 
-import {
-  parametrizedField,
-  type SheetFields,
-  type Binding,
-  type SheetNames,
-} from '.';
+import { parametrizedField } from '.';
+import type { Binding, SheetFields, SheetNames } from '.';
 
 import { uncategorizedTransactions } from '@desktop-client/queries';
 

@@ -1,4 +1,4 @@
-import { type Page, type Locator } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 export class BalanceMenuModal {
   readonly page: Page;

@@ -1,4 +1,5 @@
-import React, { type SVGProps } from 'react';
+import React from 'react';
+import type { SVGProps } from 'react';
 
 type PieProgressProps = {
   style?: SVGProps<SVGSVGElement>['style'];

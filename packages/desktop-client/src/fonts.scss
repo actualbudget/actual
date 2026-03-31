@@ -1,5 +1,3 @@
 @use '@fontsource/redacted-script';
-@use 'inter-ui/variable' with (
-  $inter-font-path: '../../../node_modules/inter-ui/Inter (web)'
-);
-@include variable.default;
+@use '@fontsource-variable/inter/wght.css' as *;
+@use '@fontsource-variable/inter/wght-italic.css' as *;

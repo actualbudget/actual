@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import md5 from 'md5';
 
-import { schema, schemaConfig, makeViews } from './aql';
+import { makeViews, schema, schemaConfig } from './aql';
 import * as db from './db';
 import * as migrations from './migrate/migrations';
 
@@ -23,11 +23,11 @@ async function updateViews() {
   const currentHash = md5(views);
 
   if (hash !== currentHash) {
-    await db.execQuery(views);
-    await db.runQuery(
-      'INSERT OR REPLACE INTO __meta__ (key, value) VALUES (?, ?)',
-      [hashKey, currentHash],
-    );
+    db.execQuery(views);
+    db.runQuery('INSERT OR REPLACE INTO __meta__ (key, value) VALUES (?, ?)', [
+      hashKey,
+      currentHash,
+    ]);
   }
 }
 

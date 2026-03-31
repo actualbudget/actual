@@ -1,21 +1,21 @@
 // @ts-strict-ignore
 import { useEffect, useEffectEvent, useReducer, useState } from 'react';
 
-import { send, sendCatch } from 'loot-core/platform/client/fetch';
+import { send, sendCatch } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import {
   extractScheduleConds,
   getScheduledAmount,
 } from 'loot-core/shared/schedules';
-import {
-  type TransactionEntity,
-  type ScheduleEntity,
-  type RecurConfig,
+import type {
+  RecurConfig,
+  ScheduleEntity,
+  TransactionEntity,
 } from 'loot-core/types/models';
 
 import { updateScheduleConditions } from '@desktop-client/components/schedules/schedule-edit-utils';
-import { type ScheduleFormFields } from '@desktop-client/components/schedules/ScheduleEditForm';
+import type { ScheduleFormFields } from '@desktop-client/components/schedules/ScheduleEditForm';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { liveQuery } from '@desktop-client/queries/liveQuery';
 
@@ -164,9 +164,11 @@ function createScheduleEditReducer(useGetScheduledAmount: boolean = false) {
         const transactions = action.transactions;
         // Sort transactions if we have a transactionId to prioritize
         if (action.transactionId && transactions) {
-          transactions.sort(a => {
-            return action.transactionId === a.id ? -1 : 1;
-          });
+          transactions.sort(
+            (a, b) =>
+              (action.transactionId === b.id ? 1 : 0) -
+              (action.transactionId === a.id ? 1 : 0),
+          );
         }
         return { ...state, transactions };
       }
@@ -289,7 +291,7 @@ export function useScheduleEdit({
 
   // Load schedule on mount
   useEffect(() => {
-    setSchedule();
+    void setSchedule();
   }, []);
 
   // Update upcoming dates when date changes
@@ -318,7 +320,7 @@ export function useScheduleEdit({
       });
       dispatch({ type: 'set-upcoming-dates', dates: data });
     }
-    run();
+    void run();
   }, [state.fields.date]);
 
   // Load linked transactions
@@ -372,7 +374,7 @@ export function useScheduleEdit({
         return typedCond;
       });
 
-      send('make-filters-from-conditions', {
+      void send('make-filters-from-conditions', {
         conditions,
       }).then(({ filters }) => {
         if (current) {

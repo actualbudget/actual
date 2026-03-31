@@ -1,4 +1,5 @@
-import React, { useRef, useState, type CSSProperties } from 'react';
+import React, { useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -32,7 +33,6 @@ export function ThemeSelector({ style }: ThemeSelectorProps) {
     dark: SvgMoonStars,
     auto: SvgSystem,
     midnight: SvgMoonStars,
-    development: SvgMoonStars,
   } as const;
 
   type ThemeIconKey = keyof typeof themeIcons;

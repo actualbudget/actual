@@ -1,10 +1,5 @@
-import {
-  type ComponentProps,
-  type CSSProperties,
-  Fragment,
-  useRef,
-  useState,
-} from 'react';
+import { Fragment, useRef, useState } from 'react';
+import type { ComponentProps, CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -20,7 +15,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from 'loot-core/types/models';
 
 import {
   Modal,
@@ -34,7 +29,7 @@ import { useAccount } from '@desktop-client/hooks/useAccount';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useNotes } from '@desktop-client/hooks/useNotes';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type AccountMenuModalProps = Extract<
   ModalType,
@@ -49,10 +44,11 @@ export function AccountMenuModal({
   onEditNotes,
   onClose,
   onToggleRunningBalance,
+  onToggleReconciled,
 }: AccountMenuModalProps) {
   const { t } = useTranslation();
   const account = useAccount(accountId);
-  const accounts = useAccounts();
+  const { data: accounts = [] } = useAccounts();
   const originalNotes = useNotes(`account-${accountId}`);
   const [accountNameError, setAccountNameError] = useState('');
   const [currentAccountName, setCurrentAccountName] = useState(
@@ -118,7 +114,7 @@ export function AccountMenuModal({
         },
       }}
     >
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             leftContent={
@@ -127,6 +123,7 @@ export function AccountMenuModal({
                 onClose={onCloseAccount}
                 onReopen={onReopenAccount}
                 onToggleRunningBalance={onToggleRunningBalance}
+                onToggleReconciled={onToggleReconciled}
               />
             }
             title={
@@ -143,7 +140,7 @@ export function AccountMenuModal({
                 )}
               </Fragment>
             }
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View
             style={{
@@ -205,6 +202,7 @@ type AdditionalAccountMenuProps = {
   onClose?: (accountId: string) => void;
   onReopen?: (accountId: string) => void;
   onToggleRunningBalance?: () => void;
+  onToggleReconciled?: () => void;
 };
 
 function AdditionalAccountMenu({
@@ -212,6 +210,7 @@ function AdditionalAccountMenu({
   onClose,
   onReopen,
   onToggleRunningBalance,
+  onToggleReconciled,
 }: AdditionalAccountMenuProps) {
   const { t } = useTranslation();
   const triggerRef = useRef(null);
@@ -226,6 +225,7 @@ function AdditionalAccountMenu({
     ...(item.name === 'close' && { color: theme.errorTextMenu }),
   });
   const [showBalances] = useSyncedPref(`show-balances-${account.id}`);
+  const [hideReconciled] = useSyncedPref(`hide-reconciled-${account.id}`);
 
   return (
     <View>
@@ -258,6 +258,13 @@ function AdditionalAccountMenu({
                     ? t('Hide running balance')
                     : t('Show running balance'),
               },
+              {
+                name: 'toggle-reconciled',
+                text:
+                  hideReconciled !== 'true'
+                    ? t('Hide reconciled transactions')
+                    : t('Show reconciled transactions'),
+              },
               account.closed
                 ? {
                     name: 'reopen',
@@ -284,8 +291,11 @@ function AdditionalAccountMenu({
                 case 'balance':
                   onToggleRunningBalance?.();
                   break;
+                case 'toggle-reconciled':
+                  onToggleReconciled?.();
+                  break;
                 default:
-                  throw new Error(`Unrecognized menu option: ${name}`);
+                  throw new Error(`Unrecognized menu option: ${String(name)}`);
               }
             }}
           />

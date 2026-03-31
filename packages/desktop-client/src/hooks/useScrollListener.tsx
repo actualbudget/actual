@@ -1,13 +1,12 @@
 import React, {
-  type ReactNode,
-  type RefObject,
   createContext,
+  useCallback,
   useContext,
   useEffect,
-  useCallback,
-  useRef,
   useMemo,
+  useRef,
 } from 'react';
+import type { ReactNode, RefObject } from 'react';
 
 import debounce from 'lodash/debounce';
 
@@ -33,7 +32,7 @@ type IScrollContext = {
 const ScrollContext = createContext<IScrollContext | undefined>(undefined);
 
 type ScrollProviderProps<T extends Element> = {
-  scrollableRef: RefObject<T>;
+  scrollableRef: RefObject<T | null>;
   isDisabled?: boolean;
   delayMs?: number;
   children?: ReactNode;

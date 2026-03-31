@@ -1,7 +1,7 @@
-import {
-  type GroupedEntity,
-  type IntervalEntity,
-  type balanceTypeOpType,
+import type {
+  balanceTypeOpType,
+  GroupedEntity,
+  IntervalEntity,
 } from 'loot-core/types/models';
 
 function isEmptyForMetric(
@@ -18,6 +18,9 @@ function isEmptyForMetric(
     case 'netDebts':
       return interval.netDebts === 0;
     case 'totalTotals':
+      return interval.totalTotals === 0;
+    case 'totalBudgeted':
+      return interval.totalBudgeted === 0;
     default:
       return interval.totalTotals === 0;
   }

@@ -1,15 +1,10 @@
 // @ts-strict-ignore
 import type { IRuleOptions } from '@rschedule/core';
 import * as d from 'date-fns';
-import { type Locale } from 'date-fns';
+import type { Locale } from 'date-fns';
 import { t } from 'i18next';
 
-import {
-  type PayeeEntity,
-  type RecurConfig,
-  type ScheduleEntity,
-} from 'loot-core/types/models';
-
+import type { PayeeEntity, RecurConfig, ScheduleEntity } from '#types/models';
 import { Condition } from '../server/rules';
 
 import * as monthUtils from './months';
@@ -258,16 +253,20 @@ export function getRecurringDescription(
   return `${desc}${suffix}`.trim();
 }
 
+type ScheduleRuleOptions = IRuleOptions & {
+  frequency: string;
+  interval?: number;
+  byHourOfDay?: number[];
+};
+
 export function recurConfigToRSchedule(config) {
-  const base: IRuleOptions = {
+  const base: ScheduleRuleOptions = {
     start: monthUtils.parseDate(config.start),
-    // @ts-ignore: issues with https://gitlab.com/john.carroll.p/rschedule/-/issues/86
     frequency: config.frequency.toUpperCase(),
     byHourOfDay: [12],
   };
 
   if (config.interval) {
-    // @ts-ignore: issues with https://gitlab.com/john.carroll.p/rschedule/-/issues/86
     base.interval = config.interval;
   }
 
@@ -468,4 +467,94 @@ export function scheduleIsRecurring(dateCond: Condition | null) {
   const value = cond.getValue();
 
   return value.type === 'recur';
+}
+
+export type ScheduleStatusType = ReturnType<typeof getStatus>;
+export type ScheduleStatuses = Map<ScheduleEntity['id'], ScheduleStatusType>;
+
+export function isForPreview(
+  schedule: ScheduleEntity,
+  statuses: ScheduleStatuses,
+) {
+  const status = statuses.get(schedule.id);
+  return (
+    !schedule.completed &&
+    ['due', 'upcoming', 'missed', 'paid'].includes(status!)
+  );
+}
+
+export function computeSchedulePreviewTransactions(
+  schedules: readonly ScheduleEntity[],
+  statuses: ScheduleStatuses,
+  upcomingLength?: string,
+  filter?: (schedule: ScheduleEntity) => boolean,
+) {
+  const schedulesForPreview = schedules
+    .filter(s => isForPreview(s, statuses))
+    .filter(filter ? filter : () => true);
+
+  const today = d.startOfDay(monthUtils.parseDate(monthUtils.currentDay()));
+
+  const upcomingPeriodEnd = d.startOfDay(
+    monthUtils.parseDate(
+      monthUtils.addDays(today, getUpcomingDays(upcomingLength)),
+    ),
+  );
+
+  return schedulesForPreview
+    .flatMap(schedule => {
+      const { date: dateConditions } = extractScheduleConds(
+        schedule._conditions,
+      );
+
+      const status = statuses.get(schedule.id);
+      const isRecurring = scheduleIsRecurring(dateConditions);
+
+      const dates = [schedule.next_date];
+      let day = d.startOfDay(monthUtils.parseDate(schedule.next_date));
+      if (isRecurring) {
+        while (day <= upcomingPeriodEnd) {
+          const nextDate = getNextDate(dateConditions, day);
+
+          if (
+            d.startOfDay(monthUtils.parseDate(nextDate)) > upcomingPeriodEnd
+          ) {
+            break;
+          }
+
+          if (dates.includes(nextDate)) {
+            day = d.startOfDay(
+              monthUtils.parseDate(monthUtils.addDays(day, 1)),
+            );
+            continue;
+          }
+
+          dates.push(nextDate);
+          day = d.startOfDay(
+            monthUtils.parseDate(monthUtils.addDays(nextDate, 1)),
+          );
+        }
+      }
+
+      if (status === 'paid') {
+        dates.shift();
+      }
+
+      return dates.map(date => ({
+        id: 'preview/' + schedule.id + `/${date}`,
+        payee: schedule._payee,
+        account: schedule._account,
+        amount: getScheduledAmount(schedule._amount),
+        date,
+        schedule: schedule.id,
+        forceUpcoming:
+          (date !== schedule.next_date || status === 'paid') &&
+          date >= monthUtils.currentDay(),
+      }));
+    })
+    .sort(
+      (a, b) =>
+        monthUtils.parseDate(b.date).getTime() -
+          monthUtils.parseDate(a.date).getTime() || a.amount - b.amount,
+    );
 }

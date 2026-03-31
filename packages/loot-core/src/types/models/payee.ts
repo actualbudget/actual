@@ -1,4 +1,4 @@
-import { type AccountEntity } from './account';
+import type { AccountEntity } from './account';
 
 export type PayeeEntity = {
   id: string;

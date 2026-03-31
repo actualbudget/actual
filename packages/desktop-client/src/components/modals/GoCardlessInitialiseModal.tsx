@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import React, { useState } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
@@ -8,7 +8,7 @@ import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import { getSecretsError } from 'loot-core/shared/errors';
 
 import { Error } from '@desktop-client/components/alerts';
@@ -20,7 +20,7 @@ import {
   ModalHeader,
 } from '@desktop-client/components/common/Modal';
 import { FormField, FormLabel } from '@desktop-client/components/forms';
-import { type Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
 
 type GoCardlessInitialiseModalProps = Extract<
   ModalType,
@@ -83,11 +83,11 @@ export const GoCardlessInitialiseModal = ({
 
   return (
     <Modal name="gocardless-init" containerProps={{ style: { width: '30vw' } }}>
-      {({ state: { close } }) => (
+      {({ state }) => (
         <>
           <ModalHeader
             title={t('Set up GoCardless')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ display: 'flex', gap: 10 }}>
             <Text>
@@ -142,7 +142,7 @@ export const GoCardlessInitialiseModal = ({
               variant="primary"
               isLoading={isLoading}
               onPress={() => {
-                onSubmit(close);
+                void onSubmit(() => state.close());
               }}
             >
               <Trans>Save and continue</Trans>

@@ -9,7 +9,7 @@ import {
 import * as Handlebars from 'handlebars';
 
 import { logger } from '../../platform/server/log';
-import { addDays, subDays, parseDate, format } from '../../shared/months';
+import { addDays, format, parseDate, subDays } from '../../shared/months';
 
 export function registerHandlebarsHelpers() {
   const regexTest = /^\/(.*)\/([gimuy]*)$/;

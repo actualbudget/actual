@@ -1,6 +1,7 @@
 import { rebuild } from '@electron/rebuild';
 import copyFiles from 'copyfiles';
-import { Arch, type AfterPackContext } from 'electron-builder';
+import { Arch } from 'electron-builder';
+import type { AfterPackContext } from 'electron-builder';
 
 /* The beforePackHook runs before packing the Electron app for an architecture
 We hook in here to build anything architecture dependent - such as beter-sqlite3

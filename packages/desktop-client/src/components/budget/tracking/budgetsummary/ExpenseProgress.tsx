@@ -6,7 +6,7 @@ import { fraction } from './fraction';
 import { PieProgress } from './PieProgress';
 
 import { useTrackingSheetValue } from '@desktop-client/components/budget/tracking/TrackingBudgetComponents';
-import { type Binding } from '@desktop-client/spreadsheet';
+import type { Binding } from '@desktop-client/spreadsheet';
 
 type ExpenseProgressProps = {
   current: Binding<'tracking-budget', 'total-spent'>;
@@ -34,8 +34,8 @@ export function ExpenseProgress({ current, target }: ExpenseProgressProps) {
   return (
     <PieProgress
       progress={frac}
-      color={over ? theme.errorText : theme.noticeTextLight}
-      backgroundColor={over ? theme.errorBackground : theme.tableBackground}
+      color={over ? theme.numberNegative : theme.numberPositive}
+      backgroundColor={over ? theme.errorBackground : theme.budgetCurrentMonth}
       style={{ width: 20, height: 20 }}
     />
   );

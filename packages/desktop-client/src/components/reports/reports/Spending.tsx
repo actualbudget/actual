@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -16,11 +16,11 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 
-import { send } from 'loot-core/platform/client/fetch';
+import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
-import {
-  type SpendingWidget,
-  type RuleConditionEntity,
+import type {
+  RuleConditionEntity,
+  SpendingWidget,
 } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
@@ -41,22 +41,24 @@ import { calculateSpendingReportTimeRange } from '@desktop-client/components/rep
 import { createSpendingSpreadsheet } from '@desktop-client/components/reports/spreadsheets/spending-spreadsheet';
 import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
+import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
-import { useWidget } from '@desktop-client/hooks/useWidget';
+import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useDispatch } from '@desktop-client/redux';
+import { useUpdateDashboardWidgetMutation } from '@desktop-client/reports/mutations';
 
 export function Spending() {
   const params = useParams();
-  const { data: widget, isLoading } = useWidget<SpendingWidget>(
-    params.id ?? '',
-    'spending-card',
-  );
+  const { data: widget, isPending } = useDashboardWidget<SpendingWidget>({
+    id: params.id,
+    type: 'spending-card',
+  });
 
-  if (isLoading) {
+  if (isPending) {
     return <LoadingIndicator />;
   }
 
@@ -72,6 +74,9 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const format = useFormat();
+  const [budgetTypePref] = useSyncedPref('budgetType');
+  const budgetType: 'envelope' | 'tracking' =
+    budgetTypePref === 'tracking' ? 'tracking' : 'envelope';
 
   const {
     conditions,
@@ -128,13 +133,13 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
         .rangeInclusive(earliestMonth, latestMonth)
         .map(month => ({
           name: month,
-          pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
+          pretty: monthUtils.format(month, 'MMMM yyyy', locale),
         }))
         .reverse();
 
       setAllIntervals(allMonths);
     }
-    run();
+    void run();
   }, [locale]);
 
   const getGraphData = useMemo(
@@ -144,38 +149,49 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
         conditionsOp,
         compare,
         compareTo,
+        budgetType,
       }),
-    [conditions, conditionsOp, compare, compareTo],
+    [conditions, conditionsOp, compare, compareTo, budgetType],
   );
 
   const data = useReport('default', getGraphData);
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
+  const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
+
   async function onSaveWidget() {
     if (!widget) {
       throw new Error('No widget that could be saved.');
     }
 
-    await send('dashboard-update-widget', {
-      id: widget.id,
-      meta: {
-        ...(widget.meta ?? {}),
-        conditions,
-        conditionsOp,
-        compare,
-        compareTo,
-        isLive,
-        mode: reportMode,
-      },
-    });
-    dispatch(
-      addNotification({
-        notification: {
-          type: 'message',
-          message: t('Dashboard widget successfully saved.'),
+    updateDashboardWidgetMutation.mutate(
+      {
+        widget: {
+          id: widget.id,
+          meta: {
+            ...(widget.meta ?? {}),
+            conditions,
+            conditionsOp,
+            compare,
+            compareTo,
+            isLive,
+            mode: reportMode,
+          },
         },
-      }),
+      },
+      {
+        onSuccess: () => {
+          dispatch(
+            addNotification({
+              notification: {
+                type: 'message',
+                message: t('Dashboard widget successfully saved.'),
+              },
+            }),
+          );
+        },
+      },
     );
   }
 
@@ -210,11 +226,13 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
     }
 
     const name = newName || t('Monthly Spending');
-    await send('dashboard-update-widget', {
-      id: widget.id,
-      meta: {
-        ...(widget.meta ?? {}),
-        name,
+    updateDashboardWidgetMutation.mutate({
+      widget: {
+        id: widget.id,
+        meta: {
+          ...(widget.meta ?? {}),
+          name,
+        },
       },
     });
   };
@@ -470,14 +488,14 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                 <View>
                   <LegendItem
                     color={theme.reportsGreen}
-                    label={monthUtils.format(compare, 'MMM, yyyy', locale)}
+                    label={monthUtils.format(compare, 'MMM yyyy', locale)}
                     style={{ padding: 0, paddingBottom: 10 }}
                   />
                   <LegendItem
                     color={theme.reportsGray}
                     label={
                       reportMode === 'single-month'
-                        ? monthUtils.format(compareTo, 'MMM, yyyy', locale)
+                        ? monthUtils.format(compareTo, 'MMM yyyy', locale)
                         : reportMode === 'budget'
                           ? t('Budgeted')
                           : t('Average')
@@ -502,14 +520,14 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                               ? t('Spent {{monthYearFormatted}} MTD', {
                                   monthYearFormatted: monthUtils.format(
                                     compare,
-                                    'MMM, yyyy',
+                                    'MMM yyyy',
                                     locale,
                                   ),
                                 })
-                              : t('Spent {{monthYearFormatted}}:', {
+                              : t('Spent {{monthYearFormatted}}', {
                                   monthYearFormatted: monthUtils.format(
                                     compare,
-                                    'MMM, yyyy',
+                                    'MMM yyyy',
                                     locale,
                                   ),
                                 })}
@@ -537,14 +555,14 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                               ? t('Spent {{monthYearFormatted}} MTD:', {
                                   monthYearFormatted: monthUtils.format(
                                     compareTo,
-                                    'MMM, yyyy',
+                                    'MMM yyyy',
                                     locale,
                                   ),
                                 })
                               : t('Spent {{monthYearFormatted}}:', {
                                   monthYearFormatted: monthUtils.format(
                                     compareTo,
-                                    'MMM, yyyy',
+                                    'MMM yyyy',
                                     locale,
                                   ),
                                 })}
@@ -598,13 +616,15 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                             ? t('Spent Average {{monthYearFormatted}} MTD:', {
                                 monthYearFormatted: monthUtils.format(
                                   compare,
-                                  'MMM, yyyy',
+                                  'MMM yyyy',
+                                  locale,
                                 ),
                               })
                             : t('Spent Average {{monthYearFormatted}}:', {
                                 monthYearFormatted: monthUtils.format(
                                   compare,
-                                  'MMM, yyyy',
+                                  'MMM yyyy',
+                                  locale,
                                 ),
                               })}
                         </Block>

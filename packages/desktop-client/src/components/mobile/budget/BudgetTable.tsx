@@ -1,4 +1,5 @@
-import React, { useCallback, useMemo, type CSSProperties } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -14,9 +15,9 @@ import { AutoTextSize } from 'auto-text-size';
 
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
-import {
-  type CategoryEntity,
-  type CategoryGroupEntity,
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
 } from 'loot-core/types/models';
 
 import { ExpenseGroupList } from './ExpenseGroupList';
@@ -31,7 +32,7 @@ import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { type Binding } from '@desktop-client/spreadsheet';
+import type { Binding } from '@desktop-client/spreadsheet';
 import {
   envelopeBudget,
   trackingBudget,
@@ -111,14 +112,15 @@ function ToBudget({ toBudget, onPress, show3Columns }: ToBudgetProps) {
                     maxFontSizePx={12}
                     mode="oneline"
                     style={{
+                      ...styles.tnum,
                       fontSize: 12,
                       fontWeight: '700',
                       color:
                         amount < 0
-                          ? theme.errorText
+                          ? theme.toBudgetNegative
                           : amount > 0
-                            ? theme.noticeText
-                            : theme.formInputText,
+                            ? theme.toBudgetPositive
+                            : theme.budgetNumberNeutral,
                     }}
                   >
                     {format(value, type)}
@@ -209,6 +211,7 @@ function Saved({ projected, onPress, show3Columns }: SavedProps) {
                     maxFontSizePx={12}
                     mode="oneline"
                     style={{
+                      ...styles.tnum,
                       textAlign: 'left',
                       fontSize: 12,
                       fontWeight: '700',
@@ -431,7 +434,8 @@ function BudgetTableHeader({
   const columnWidth = getColumnWidth({ show3Columns });
 
   const amountStyle: CSSProperties = {
-    color: theme.formInputText,
+    ...styles.tnum,
+    color: theme.budgetNumberNeutral,
     textAlign: 'right',
     fontSize: 12,
     fontWeight: '500',

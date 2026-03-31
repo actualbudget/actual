@@ -3,11 +3,11 @@ import * as db from '../db';
 
 import { parse } from './goal-template.pegjs';
 import {
-  type CategoryWithTemplateNote,
   getActiveSchedules,
   getCategoriesWithTemplateNotes,
   resetCategoryGoalDefsWithNoTemplates,
 } from './statements';
+import type { CategoryWithTemplateNote } from './statements';
 import {
   checkTemplateNotes,
   storeNoteTemplates,
@@ -352,5 +352,42 @@ describe('unparse/parse round-trip', () => {
     const reparsed: Template = parse(serialized);
 
     expect(parsed).toEqual(reparsed);
+  });
+});
+
+describe('unparse limit templates', () => {
+  it('serializes refill limits to notes syntax', async () => {
+    const serialized = await unparse([
+      {
+        type: 'limit',
+        amount: 150,
+        hold: false,
+        period: 'monthly',
+        directive: 'template',
+        priority: null,
+      },
+      {
+        type: 'refill',
+        directive: 'template',
+        priority: 2,
+      },
+    ]);
+
+    expect(serialized).toBe('#template-2 up to 150');
+  });
+
+  it('serializes non-refill limits with a zero base amount', async () => {
+    const serialized = await unparse([
+      {
+        type: 'limit',
+        amount: 200,
+        hold: false,
+        period: 'monthly',
+        directive: 'template',
+        priority: null,
+      },
+    ]);
+
+    expect(serialized).toBe('#template 0 up to 200');
   });
 });

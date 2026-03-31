@@ -1,8 +1,8 @@
 import {
-  looselyParseAmount,
-  getNumberFormat,
-  setNumberFormat,
   currencyToAmount,
+  getNumberFormat,
+  looselyParseAmount,
+  setNumberFormat,
   stringToInteger,
   titleFirst,
 } from './util';
@@ -70,6 +70,15 @@ describe('utility functions', () => {
     // thought through more.
     expect(looselyParseAmount('3_45_23.10')).toBe(34523.1);
     expect(looselyParseAmount('(1 500.99)')).toBe(-1500.99);
+  });
+
+  test('looseParseAmount handles trailing whitespace', () => {
+    expect(looselyParseAmount('1055 ')).toBe(1055);
+    expect(looselyParseAmount('$1,055 ')).toBe(1055);
+    expect(looselyParseAmount('$1,055.00 ')).toBe(1055);
+    expect(looselyParseAmount(' $1,055 ')).toBe(1055);
+    expect(looselyParseAmount('3.45 ')).toBe(3.45);
+    expect(looselyParseAmount(' 3.45 ')).toBe(3.45);
   });
 
   test('number formatting works with comma-dot format', () => {
@@ -182,6 +191,26 @@ describe('utility functions', () => {
     expect(currencyToAmount('3,')).toBe(3);
     expect(currencyToAmount('3,000')).toBe(3000);
     expect(currencyToAmount('3,000.')).toBe(3000);
+  });
+
+  test('currencyToAmount works with apostrophe-dot format', () => {
+    setNumberFormat({ format: 'apostrophe-dot', hideFraction: false });
+
+    // Test with regular apostrophe (U+0027) - what users type on keyboard
+    const keyboardApostrophe = '12\u0027345.67';
+    expect(keyboardApostrophe.charCodeAt(2)).toBe(0x0027); // Verify it's U+0027
+    expect(currencyToAmount(keyboardApostrophe)).toBe(12345.67);
+    expect(currencyToAmount('1\u0027234.56')).toBe(1234.56);
+    expect(currencyToAmount('1\u0027000.33')).toBe(1000.33);
+    expect(currencyToAmount('100\u0027000.99')).toBe(100000.99);
+    expect(currencyToAmount('1\u0027000\u0027000.50')).toBe(1000000.5);
+
+    // Test with right single quotation mark (U+2019) - what Intl.NumberFormat outputs
+    const intlApostrophe = '12\u2019345.67';
+    expect(intlApostrophe.charCodeAt(2)).toBe(0x2019); // Verify it's U+2019
+    expect(currencyToAmount(intlApostrophe)).toBe(12345.67);
+    expect(currencyToAmount('1\u2019234.56')).toBe(1234.56);
+    expect(currencyToAmount('1\u2019000.33')).toBe(1000.33);
   });
 
   test('currencyToAmount works with dot-comma', () => {

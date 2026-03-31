@@ -2,7 +2,7 @@ import React from 'react';
 
 import { View } from '@actual-app/components/view';
 
-import { type AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from 'loot-core/types/models';
 
 import { AccountRow } from './AccountRow';
 
@@ -30,7 +30,7 @@ export function AccountsList({
   return (
     <View
       style={{
-        minHeight: 'initial',
+        marginBottom: -1,
       }}
     >
       {accounts.map(account => {

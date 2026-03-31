@@ -1,13 +1,12 @@
 // @ts-strict-ignore
 import React, {
   createContext,
-  useRef,
-  useLayoutEffect,
   useContext,
+  useLayoutEffect,
   useMemo,
-  type ReactElement,
-  type RefObject,
+  useRef,
 } from 'react';
+import type { ReactElement, RefObject } from 'react';
 
 function getFocusedKey(el: HTMLElement): string | null {
   let node: HTMLElement | ParentNode = el;

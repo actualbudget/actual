@@ -1,4 +1,5 @@
-import React, { type ReactNode, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -73,7 +74,7 @@ function EditableBudgetName() {
         setEditing(true);
         break;
       case 'settings':
-        navigate('/settings');
+        void navigate('/settings');
         break;
       case 'loadBackup':
         if (isElectron()) {
@@ -85,7 +86,7 @@ function EditableBudgetName() {
         }
         break;
       case 'close':
-        dispatch(closeBudget());
+        void dispatch(closeBudget());
         break;
       default:
     }
@@ -126,7 +127,7 @@ function EditableBudgetName() {
         ref={triggerRef}
         variant="bare"
         style={{
-          color: theme.buttonNormalBorder,
+          color: theme.sidebarBudgetName,
           fontSize: 16,
           fontWeight: 500,
           marginLeft: -5,

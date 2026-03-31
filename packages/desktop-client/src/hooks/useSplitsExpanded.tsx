@@ -1,13 +1,12 @@
 import React, {
   createContext,
-  useMemo,
-  useEffect,
   useContext,
+  useEffect,
+  useMemo,
   useReducer,
-  type Dispatch,
-  type ReactNode,
   useRef,
 } from 'react';
+import type { Dispatch, ReactNode } from 'react';
 
 type SplitMode = 'collapse' | 'expand';
 type SplitState = {

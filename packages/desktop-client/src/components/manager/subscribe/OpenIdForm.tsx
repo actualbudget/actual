@@ -1,6 +1,8 @@
-import { type ReactNode, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useLocation, type Location } from 'react-router';
+import { useLocation } from 'react-router';
+import type { Location } from 'react-router';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -13,7 +15,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type OpenIdConfig } from 'loot-core/types/models';
+import type { OpenIdConfig } from 'loot-core/types/models';
 
 import { Link } from '@desktop-client/components/common/Link';
 import { FormField, FormLabel } from '@desktop-client/components/forms';

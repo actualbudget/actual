@@ -1,4 +1,4 @@
-import { type RuleConditionEntity } from './rule';
+import type { RuleConditionEntity } from './rule';
 
 export type CustomReportEntity = {
   id: string;
@@ -21,7 +21,7 @@ export type CustomReportEntity = {
   graphType: string;
   conditions?: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
-  data?: GroupedEntity;
+  metadata?: GroupedEntity;
   tombstone?: boolean;
 };
 
@@ -30,7 +30,8 @@ export type balanceTypeOpType =
   | 'totalDebts'
   | 'totalTotals'
   | 'netAssets'
-  | 'netDebts';
+  | 'netDebts'
+  | 'totalBudgeted';
 
 export type sortByOpType = 'asc' | 'desc' | 'name' | 'budget';
 
@@ -80,12 +81,14 @@ export type DataEntity = {
   netAssets: number;
   netDebts: number;
   totalTotals: number;
+  totalBudgeted: number;
 };
 
 export type LegendEntity = {
   name: string;
   id: string | null;
   color: string;
+  dataKey: string; // Uses id for unique data lookup when categories have same name
 };
 
 export type IntervalEntity = {
@@ -98,6 +101,7 @@ export type IntervalEntity = {
   netAssets: number;
   netDebts: number;
   totalTotals: number;
+  totalBudgeted: number;
 };
 
 export type GroupedEntity = {
@@ -110,6 +114,7 @@ export type GroupedEntity = {
   totalTotals: number;
   netAssets: number;
   netDebts: number;
+  totalBudgeted: number;
   categories?: GroupedEntity[];
 };
 

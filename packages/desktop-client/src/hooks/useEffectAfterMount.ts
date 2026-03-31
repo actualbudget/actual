@@ -1,9 +1,5 @@
-import {
-  type DependencyList,
-  type EffectCallback,
-  useEffect,
-  useRef,
-} from 'react';
+import { useEffect, useRef } from 'react';
+import type { DependencyList, EffectCallback } from 'react';
 
 /**
  * A version of useEffect that doesn't run on the initial mount.
@@ -19,5 +15,6 @@ export function useEffectAfterMount(
       return effect();
     }
     isFirstRender.current = false;
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- caller owns deps
   }, deps);
 }

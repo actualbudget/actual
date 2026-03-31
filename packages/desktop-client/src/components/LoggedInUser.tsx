@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, type CSSProperties } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
 
@@ -10,9 +11,9 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { listen } from 'loot-core/platform/client/fetch';
-import { type RemoteFile, type SyncedLocalFile } from 'loot-core/types/file';
-import { type TransObjectLiteral } from 'loot-core/types/util';
+import { listen } from 'loot-core/platform/client/connection';
+import type { RemoteFile, SyncedLocalFile } from 'loot-core/types/file';
+import type { TransObjectLiteral } from 'loot-core/types/util';
 
 import { PrivacyFilter } from './PrivacyFilter';
 import { useMultiuserEnabled, useServerURL } from './ServerContext';
@@ -22,7 +23,7 @@ import { Permissions } from '@desktop-client/auth/types';
 import { closeBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
 import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 import { getUserData, signOut } from '@desktop-client/users/usersSlice';
 
 type LoggedInUserProps = {
@@ -56,7 +57,7 @@ export function LoggedInUser({
   const currentFile = remoteFiles.find(f => f.cloudFileId === cloudFileId);
   const hasSyncedPrefs = useSelector(state => state.prefs.synced);
 
-  const initializeUserData = async () => {
+  const initializeUserData = useCallback(async () => {
     try {
       await dispatch(getUserData());
     } catch (error) {
@@ -64,11 +65,11 @@ export function LoggedInUser({
     } finally {
       setLoading(false);
     }
-  };
+  }, [dispatch]);
 
   useEffect(() => {
-    initializeUserData();
-  }, []);
+    void initializeUserData();
+  }, [initializeUserData]);
 
   useEffect(() => {
     return listen('sync-event', ({ type }) => {
@@ -84,12 +85,12 @@ export function LoggedInUser({
           (type === 'error' && !userData.offline));
 
       if (shouldReinitialize) {
-        initializeUserData();
+        void initializeUserData();
       } else {
         setLoading(false);
       }
     });
-  }, [userData]);
+  }, [initializeUserData, userData]);
 
   async function onCloseBudget() {
     await dispatch(closeBudget());
@@ -97,7 +98,7 @@ export function LoggedInUser({
 
   async function onChangePassword() {
     await onCloseBudget();
-    navigate('/change-password');
+    void navigate('/change-password');
   }
 
   const handleMenuSelect = async (type: string) => {
@@ -105,27 +106,27 @@ export function LoggedInUser({
 
     switch (type) {
       case 'change-password':
-        onChangePassword();
+        void onChangePassword();
         break;
       case 'sign-in':
         await onCloseBudget();
-        navigate('/login');
+        void navigate('/login');
         break;
       case 'user-access':
-        navigate('/user-access');
+        void navigate('/user-access');
         break;
       case 'user-directory':
-        navigate('/user-directory');
+        void navigate('/user-directory');
         break;
       case 'index':
-        navigate('/');
+        void navigate('/');
         break;
       case 'sign-out':
-        dispatch(signOut());
+        void dispatch(signOut());
         break;
       case 'config-server':
         await onCloseBudget();
-        navigate('/config-server');
+        void navigate('/config-server');
         break;
       default:
         break;
