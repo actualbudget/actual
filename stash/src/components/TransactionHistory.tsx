@@ -37,7 +37,7 @@ export function TransactionHistory({ transactions, categories }: TransactionHist
         {recent.map((tx) => {
           const isDeposit = tx.type === 'deposit';
           const date = new Date(tx.date);
-          const formatted = date.toLocaleDateString(isSpanish ? 'es-MX' : 'en-US', {
+          const formatted = date.toLocaleString(isSpanish ? 'es-MX' : 'en-US', {
             month: 'short',
             day: 'numeric',
             hour: '2-digit',
