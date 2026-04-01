@@ -110,7 +110,6 @@ __metadata:
     "@types/emscripten": "npm:^1.41.5"
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
     "@types/node": "npm:^22.19.15"
-    "@types/pegjs": "npm:^0.10.6"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
     absurd-sql: "npm:0.0.54"
     adm-zip: "npm:^0.5.16"
@@ -10131,13 +10130,6 @@ __metadata:
   version: 4.0.2
   resolution: "@types/parse-json@npm:4.0.2"
   checksum: 10/5bf62eec37c332ad10059252fc0dab7e7da730764869c980b0714777ad3d065e490627be9f40fc52f238ffa3ac4199b19de4127196910576c2fe34dd47c7a470
-  languageName: node
-  linkType: hard
-
-"@types/pegjs@npm:^0.10.6":
-  version: 0.10.6
-  resolution: "@types/pegjs@npm:0.10.6"
-  checksum: 10/be219504714e219b37daee7ef3214b6876d98405cc56b2d084763134032fd46394c5d0e387216ee3e52bd519fe7341e25bdec855f2a911c49a593b21fd8ea4a6
   languageName: node
   linkType: hard
 
