@@ -68,10 +68,7 @@ function getAccountBalance(account) {
 }
 
 async function updateAccountBalance(id: AccountEntity['id'], balance: number) {
-  db.runQuery('UPDATE accounts SET balance_current = ? WHERE id = ?', [
-    balance,
-    id,
-  ]);
+  await db.update('accounts', { id, balance_current: balance });
 }
 
 async function getAccountOldestTransaction(id): Promise<TransactionEntity> {
