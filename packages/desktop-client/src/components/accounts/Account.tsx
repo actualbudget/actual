@@ -262,7 +262,6 @@ type AccountInternalState = {
   workingHard: boolean;
   reconcileAmount: null | number;
   transactions: TransactionEntity[];
-  transactionCount: number;
   transactionsFiltered?: boolean;
   showBalances?: boolean | undefined;
   balances: Record<TransactionEntity['id'], IntegerAmount> | null;
@@ -314,7 +313,6 @@ class AccountInternal extends PureComponent<
       workingHard: false,
       reconcileAmount: null,
       transactions: [],
-      transactionCount: 0,
       showBalances: props.showBalances,
       balances: null,
       showCleared: props.showCleared,
@@ -500,7 +498,6 @@ class AccountInternal extends PureComponent<
         this.setState(
           {
             transactions: data,
-            transactionCount: this.paged?.totalCount ?? 0,
             transactionsFiltered: isFiltered,
             loading: false,
             workingHard: false,
@@ -835,7 +832,6 @@ class AccountInternal extends PureComponent<
           this.setState(
             {
               transactions: [],
-              transactionCount: 0,
               filterConditions: [],
               search: '',
               sort: null,
@@ -1551,7 +1547,6 @@ class AccountInternal extends PureComponent<
       this.setState(
         {
           transactions: [],
-          transactionCount: 0,
           filterConditions: conditions,
         },
         () => {
