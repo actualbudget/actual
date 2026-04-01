@@ -206,7 +206,7 @@ async function linkGoCardlessAccount({
     startingBalance,
   );
 
-  await handleSyncResponse(syncRes, account.account_id);
+  await handleSyncResponse(syncRes, id);
 
   connection.send('sync-event', {
     type: 'success',
@@ -280,7 +280,7 @@ async function linkSimpleFinAccount({
     startingBalance,
   );
 
-  await handleSyncResponse(syncRes, externalAccount.account_id);
+  await handleSyncResponse(syncRes, id);
 
   connection.send('sync-event', {
     type: 'success',
@@ -354,7 +354,7 @@ async function linkPluggyAiAccount({
     startingBalance,
   );
 
-  await handleSyncResponse(syncRes, externalAccount.account_id);
+  await handleSyncResponse(syncRes, id);
 
   connection.send('sync-event', {
     type: 'success',
@@ -877,17 +877,17 @@ async function handleSyncResponse(
 
 type SyncError =
   | {
-      type: 'SyncError';
-      accountId: AccountEntity['id'];
-      message: string;
-      category: string;
-      code: string;
-    }
+    type: 'SyncError';
+    accountId: AccountEntity['id'];
+    message: string;
+    category: string;
+    code: string;
+  }
   | {
-      accountId: AccountEntity['id'];
-      message: string;
-      internal?: string;
-    };
+    accountId: AccountEntity['id'];
+    message: string;
+    internal?: string;
+  };
 
 /**
  * Type guard to check if an error is a BankSyncError.
