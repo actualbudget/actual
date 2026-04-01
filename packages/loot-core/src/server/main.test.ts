@@ -139,7 +139,6 @@ describe('Accounts', () => {
       await db.all<db.DbTransaction>('SELECT * FROM transactions'),
     );
 
-    let transaction = await db.getTransaction(id);
     await runHandler(handlers['transaction-update'], {
       ...(await db.getTransaction(id)),
       payee: 'transfer-three',
@@ -149,7 +148,7 @@ describe('Accounts', () => {
       await db.all<db.DbTransaction>('SELECT * FROM transactions'),
     );
 
-    transaction = await db.getTransaction(id);
+    const transaction = await db.getTransaction(id);
     await runHandler(handlers['transaction-delete'], transaction);
     differ.expectToMatchDiff(
       await db.all<db.DbTransaction>('SELECT * FROM transactions'),

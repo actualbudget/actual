@@ -136,7 +136,7 @@ export function createSpendingSpreadsheet({
 
     const dailyBudget =
       budgets &&
-      budgets.reduce((a, v) => (a = a + v.amount), 0) / compareInterval.length;
+      budgets.reduce((a, v) => a + v.amount, 0) / compareInterval.length;
 
     const intervals = monthUtils.dayRangeInclusive(startDate, endDate);
     if (endDateTo < startDate || startDateTo > endDate) {
@@ -182,13 +182,13 @@ export function createSpendingSpreadsheet({
             const intervalAssets = combineAssets
               .filter(e => !e.categoryIncome && !e.accountOffBudget)
               .filter(asset => asset.date === intervalItem)
-              .reduce((a, v) => (a = a + v.amount), 0);
+              .reduce((a, v) => a + v.amount, 0);
             perIntervalAssets += intervalAssets;
 
             const intervalDebts = combineDebts
               .filter(e => !e.categoryIncome && !e.accountOffBudget)
               .filter(debt => debt.date === intervalItem)
-              .reduce((a, v) => (a = a + v.amount), 0);
+              .reduce((a, v) => a + v.amount, 0);
             perIntervalDebts += intervalDebts;
 
             totalAssets += perIntervalAssets;
@@ -242,7 +242,7 @@ export function createSpendingSpreadsheet({
           b.cumulative === null ? a : b,
         ).cumulative;
 
-        const totalDaily = data.reduce((a, v) => (a = a + v.totalTotals), 0);
+        const totalDaily = data.reduce((a, v) => a + v.totalTotals, 0);
 
         return {
           date: data[0].date,
