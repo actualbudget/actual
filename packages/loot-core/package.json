@@ -90,7 +90,6 @@
     "date-fns": "^4.1.0",
     "handlebars": "^4.7.9",
     "lru-cache": "^11.2.6",
-    "md5": "^2.3.0",
     "memoize-one": "^6.0.0",
     "mitt": "^3.0.1",
     "promise-retry": "^2.0.1",
