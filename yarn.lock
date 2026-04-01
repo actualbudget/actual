@@ -11387,7 +11387,6 @@ __metadata:
     "@types/prompts": "npm:^2.4.9"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
     "@yarnpkg/types": "npm:^4.0.1"
-    baseline-browser-mapping: "npm:^2.10.0"
     cross-env: "npm:^10.1.0"
     eslint: "npm:^9.39.3"
     eslint-plugin-perfectionist: "npm:^5.6.0"
@@ -11404,7 +11403,6 @@ __metadata:
     oxlint-tsgolint: "npm:^0.13.0"
     p-limit: "npm:^7.3.0"
     prompts: "npm:^2.4.2"
-    source-map-support: "npm:^0.5.21"
     ts-node: "npm:^10.9.2"
     typescript: "npm:^5.9.3"
   languageName: unknown
@@ -12201,15 +12199,6 @@ __metadata:
   version: 1.5.1
   resolution: "base64-js@npm:1.5.1"
   checksum: 10/669632eb3745404c2f822a18fc3a0122d2f9a7a13f7fb8b5823ee19d1d2ff9ee5b52c53367176ea4ad093c332fd5ab4bd0ebae5a8e27917a4105a4cfc86b1005
-  languageName: node
-  linkType: hard
-
-"baseline-browser-mapping@npm:^2.10.0":
-  version: 2.10.8
-  resolution: "baseline-browser-mapping@npm:2.10.8"
-  bin:
-    baseline-browser-mapping: dist/cli.cjs
-  checksum: 10/820972372c87c65c2e665134d70aa44d5722492fb907aa79170fec84086a75de4675f6a7b717cf0a31b4c4f71cd0289b056b71e32007de97a37973a501d31dcb
   languageName: node
   linkType: hard
 
@@ -26987,7 +26976,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"source-map-support@npm:^0.5.19, source-map-support@npm:^0.5.21, source-map-support@npm:~0.5.20":
+"source-map-support@npm:^0.5.19, source-map-support@npm:~0.5.20":
   version: 0.5.21
   resolution: "source-map-support@npm:0.5.21"
   dependencies:
