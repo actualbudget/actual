@@ -4,13 +4,10 @@ export type FeatureFlag =
   | 'actionTemplating'
   | 'formulaMode'
   | 'currency'
-  | 'plugins'
   | 'crossoverReport'
   | 'customThemes'
   | 'budgetAnalysisReport'
   | 'payeeLocations'
-  | 'plugins'
-  | 'forceReload'
   | 'sankeyReport';
 
 /**
