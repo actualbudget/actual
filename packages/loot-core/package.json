@@ -93,7 +93,6 @@
     "memoize-one": "^6.0.0",
     "mitt": "^3.0.1",
     "promise-retry": "^2.0.1",
-    "slash": "5.1.0",
     "typescript-strict-plugin": "^2.4.4",
     "ua-parser-js": "^2.0.9",
     "uuid": "^13.0.0"
