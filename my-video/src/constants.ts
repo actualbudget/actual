@@ -53,7 +53,7 @@ export const TIER1_FEATURES: Feature[] = [
 export const TIER2_FEATURES: Feature[] = [
   {
     title: "Budget Notes",
-    tagline: "Annotate your budget",
+    tagline: "Monthly per-category notes",
     screenshot: "budget-notes.png",
     accentColor: COLORS.accentCoral,
   },
