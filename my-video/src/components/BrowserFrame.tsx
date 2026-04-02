@@ -1,4 +1,5 @@
 import { type ReactNode } from "react";
+import { interpolate, useCurrentFrame, useVideoConfig } from "remotion";
 import { COLORS } from "../constants";
 
 type BrowserFrameProps = {
@@ -10,12 +11,25 @@ export function BrowserFrame({
   children,
   accentColor = COLORS.accentCyan,
 }: BrowserFrameProps) {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+
+  // Subtle pulsing glow: oscillates between 0.3 and 0.7 over ~2 seconds
+  const pulse = interpolate(
+    Math.sin((frame / fps) * Math.PI),
+    [-1, 1],
+    [0.3, 0.7],
+  );
+
+  const glowSpread = interpolate(pulse, [0.3, 0.7], [30, 50]);
+
   return (
     <div
       style={{
         borderRadius: 12,
         overflow: "hidden",
-        boxShadow: `0 0 40px ${accentColor}44, 0 0 80px ${accentColor}22`,
+        boxShadow: `0 0 ${glowSpread}px ${accentColor}${Math.round(pulse * 99).toString().padStart(2, "0")}, 0 0 ${glowSpread * 2}px ${accentColor}${Math.round(pulse * 44).toString().padStart(2, "0")}`,
+        border: `1px solid ${accentColor}${Math.round(pulse * 55).toString().padStart(2, "0")}`,
         display: "flex",
         flexDirection: "column",
         width: "100%",
