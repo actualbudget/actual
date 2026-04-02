@@ -246,7 +246,7 @@ export function CommandBar() {
   const filteredSections = sections.map(section => ({
     ...section,
     items: section.items.filter(item =>
-      item.name?.toLowerCase().includes(searchLower),
+      item.name.toLowerCase().includes(searchLower),
     ),
   }));
   const hasResults = filteredSections.some(section => !!section.items.length);
