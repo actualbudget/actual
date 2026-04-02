@@ -1,4 +1,4 @@
-import { AbsoluteFill, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig, Video } from "remotion";
+import { AbsoluteFill, Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { loadFont } from "@remotion/google-fonts/Inter";
 import { type Feature, COLORS, FRAMES_PER_BEAT } from "../constants";
 import { AnimatedText } from "./AnimatedText";
@@ -25,12 +25,6 @@ export function FeatureScene({ feature }: FeatureSceneProps) {
   });
 
   const translateX = interpolate(slideProgress, [0, 1], [400, 0]);
-
-  // Subtle zoom from 1.0 to 1.05 over 5 seconds (150 frames)
-  const zoom = interpolate(frame, [0, 150], [1.0, 1.05], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
 
   return (
     <AbsoluteFill
@@ -98,31 +92,19 @@ export function FeatureScene({ feature }: FeatureSceneProps) {
         />
       </div>
 
-      {/* Browser frame with video */}
+      {/* Browser frame with screenshot */}
       <div
         style={{
           flex: 1,
-          height: "100%",
           transform: `translateX(${translateX}px)`,
           zIndex: 1,
         }}
       >
         <BrowserFrame accentColor={feature.accentColor}>
-          <div
-            style={{
-              width: "100%",
-              height: "100%",
-              transform: `scale(${zoom})`,
-              transformOrigin: "center center",
-              overflow: "hidden",
-            }}
-          >
-            <Video
-              src={staticFile(`recordings/${feature.recording}`)}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              muted
-            />
-          </div>
+          <Img
+            src={staticFile(`screenshots/${feature.screenshot}`)}
+            style={{ width: "100%", display: "block" }}
+          />
         </BrowserFrame>
       </div>
     </AbsoluteFill>

@@ -25,7 +25,7 @@ export const COLORS = {
 export type Feature = {
   title: string;
   tagline: string;
-  recording: string;
+  screenshot: string;
   accentColor: string;
 };
 
@@ -33,19 +33,19 @@ export const TIER1_FEATURES: Feature[] = [
   {
     title: "Drag & Drop Reordering",
     tagline: "Reorder transactions — your way",
-    recording: "drag-drop.webm",
+    screenshot: "drag-drop.png",
     accentColor: COLORS.accentCyan,
   },
   {
     title: "Donut Chart Reports",
     tagline: "Beautiful category breakdowns",
-    recording: "donut-chart.webm",
+    screenshot: "donut-chart.png",
     accentColor: COLORS.accentCyan,
   },
   {
     title: "Payee Locations",
     tagline: "Know where you spend",
-    recording: "payee-locations.webm",
+    screenshot: "payee-locations.png",
     accentColor: COLORS.accentCyan,
   },
 ];
@@ -54,25 +54,25 @@ export const TIER2_FEATURES: Feature[] = [
   {
     title: "Budget Notes",
     tagline: "Annotate your budget",
-    recording: "budget-notes.webm",
+    screenshot: "budget-notes.png",
     accentColor: COLORS.accentCoral,
   },
   {
     title: "Actual CLI",
     tagline: "Your budget, from the command line",
-    recording: "cli-tool.webm",
+    screenshot: "cli-tool.png",
     accentColor: COLORS.accentCoral,
   },
   {
     title: "Custom Themes",
     tagline: "Make it yours",
-    recording: "themes.webm",
+    screenshot: "themes.png",
     accentColor: COLORS.accentCoral,
   },
   {
     title: "Smarter Imports",
     tagline: "More control over your data",
-    recording: "imports.webm",
+    screenshot: "imports.png",
     accentColor: COLORS.accentCoral,
   },
 ];

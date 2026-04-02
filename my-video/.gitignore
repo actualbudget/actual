@@ -2,4 +2,6 @@ node_modules/
 out/
 .playwright-cli/
 .superpowers/
+# Temp screenshots from playwright-cli
 *.png
+!public/screenshots/*.png

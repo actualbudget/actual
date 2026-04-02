@@ -1,46 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     background: #1e1e2e;
-    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
     color: #f8f8f2;
     padding: 40px;
     width: 1024px;
     height: 576px;
   }
+  pre {
+    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.7;
+    white-space: pre;
+  }
   .prompt { color: #50fa7b; }
   .dim { color: #6272a4; }
   .red { color: #ff5555; }
-  .line { line-height: 1.8; font-size: 16px; }
-  .table { margin-top: 12px; }
-  .cursor { animation: blink 1s step-end infinite; }
-  @keyframes blink { 50% { opacity: 0; } }
 </style>
 </head>
 <body>
-  <div class="line"><span class="prompt">❯</span> actual-cli accounts list</div>
-  <div class="table">
-    <div class="line dim">┌─────────────────────┬────────────┬──────────┐</div>
-    <div class="line">│ Name                │ Balance    │ Type     │</div>
-    <div class="line dim">├─────────────────────┼────────────┼──────────┤</div>
-    <div class="line">│ Bank of America     │   6,929.07 │ checking │</div>
-    <div class="line">│ Ally Savings        │   3,425.74 │ savings  │</div>
-    <div class="line">│ Capital One         │   1,388.56 │ checking │</div>
-    <div class="line"><span class="red">│ HSBC                │    -531.05 │ credit   │</span></div>
-    <div class="line">│ Vanguard 401k       │   4,399.38 │ invest.  │</div>
-    <div class="line">│ Roth IRA            │   3,439.18 │ invest.  │</div>
-    <div class="line dim">└─────────────────────┴────────────┴──────────┘</div>
-  </div>
-  <div class="line" style="margin-top: 16px;"><span class="prompt">❯</span> actual-cli budget summary --month 2026-04</div>
-  <div class="table">
-    <div class="line" style="margin-top: 8px; color: #bd93f9;">Budget Summary: April 2026</div>
-    <div class="line">  Income:     <span style="color: #50fa7b;">$4,600.00</span></div>
-    <div class="line">  Budgeted:   $4,350.00</div>
-    <div class="line">  Available:  <span style="color: #50fa7b;">$250.00</span></div>
-  </div>
-  <div class="line" style="margin-top: 16px;"><span class="prompt">❯</span> <span class="cursor">_</span></div>
+<pre>
+<span class="prompt">$</span> actual-cli accounts list --format table
+
+<span class="dim">  id                                    name               offBudget  closed  balance_current</span>
+  99e8f789-c982-4618-b686-3b331985374b  Bank of America    false      false         6,929.07
+  cbcec281-9899-4595-9ef3-5e33725555bb  Ally Savings       false      false         3,425.74
+  5f8e1bc3-136a-4669-9e00-6e36088eebc3  Capital One        false      false         1,388.56
+  713d293e-ec6b-4813-aafd-6c9e63579375  HSBC               false      false   <span class="red">       -531.05</span>
+  2ce33e0b-0517-458c-98d6-796c7ede90f7  Vanguard 401k      true       false         4,399.38
+  6f6d9cb2-25ea-4b62-a6f6-0a4f2bb167ad  Mortgage           true       false   <span class="red">  -301,380.72</span>
+  7f3ff788-9af8-4109-aef5-b0b2971097df  House Asset        true       false       341,300.00
+  59aec8a4-0c61-4a4a-932e-4ae927f1adb6  Roth IRA           true       false         3,439.18
+
+<span class="prompt">$</span> <span style="opacity:0.7">_</span>
+</pre>
 </body>
 </html>
