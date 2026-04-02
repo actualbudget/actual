@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1e1e2e;
+    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+    color: #f8f8f2;
+    padding: 40px;
+    width: 1024px;
+    height: 576px;
+  }
+  .prompt { color: #50fa7b; }
+  .dim { color: #6272a4; }
+  .red { color: #ff5555; }
+  .line { line-height: 1.8; font-size: 16px; }
+  .table { margin-top: 12px; }
+  .cursor { animation: blink 1s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+</style>
+</head>
+<body>
+  <div class="line"><span class="prompt">❯</span> actual-cli accounts list</div>
+  <div class="table">
+    <div class="line dim">┌─────────────────────┬────────────┬──────────┐</div>
+    <div class="line">│ Name                │ Balance    │ Type     │</div>
+    <div class="line dim">├─────────────────────┼────────────┼──────────┤</div>
+    <div class="line">│ Bank of America     │   6,929.07 │ checking │</div>
+    <div class="line">│ Ally Savings        │   3,425.74 │ savings  │</div>
+    <div class="line">│ Capital One         │   1,388.56 │ checking │</div>
+    <div class="line"><span class="red">│ HSBC                │    -531.05 │ credit   │</span></div>
+    <div class="line">│ Vanguard 401k       │   4,399.38 │ invest.  │</div>
+    <div class="line">│ Roth IRA            │   3,439.18 │ invest.  │</div>
+    <div class="line dim">└─────────────────────┴────────────┴──────────┘</div>
+  </div>
+  <div class="line" style="margin-top: 16px;"><span class="prompt">❯</span> actual-cli budget summary --month 2026-04</div>
+  <div class="table">
+    <div class="line" style="margin-top: 8px; color: #bd93f9;">Budget Summary: April 2026</div>
+    <div class="line">  Income:     <span style="color: #50fa7b;">$4,600.00</span></div>
+    <div class="line">  Budgeted:   $4,350.00</div>
+    <div class="line">  Available:  <span style="color: #50fa7b;">$250.00</span></div>
+  </div>
+  <div class="line" style="margin-top: 16px;"><span class="prompt">❯</span> <span class="cursor">_</span></div>
+</body>
+</html>
