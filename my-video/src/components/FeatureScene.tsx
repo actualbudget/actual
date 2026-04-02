@@ -67,9 +67,11 @@ export function FeatureScene({ feature }: FeatureSceneProps) {
       {/* Text area */}
       <div
         style={{
-          flex: "0 0 360px",
+          flex: feature.screenshot ? "0 0 360px" : 1,
           display: "flex",
           flexDirection: "column",
+          alignItems: feature.screenshot ? "flex-start" : "center",
+          justifyContent: feature.screenshot ? "flex-start" : "center",
           gap: 16,
           zIndex: 1,
         }}
@@ -77,36 +79,38 @@ export function FeatureScene({ feature }: FeatureSceneProps) {
         <AnimatedText
           text={feature.title}
           delay={0}
-          fontSize={42}
+          fontSize={feature.screenshot ? 42 : 56}
           fontWeight="bold"
           color={feature.accentColor}
-          style={{ lineHeight: 1.2 }}
+          style={{ lineHeight: 1.2, textAlign: feature.screenshot ? "left" : "center" }}
         />
         <AnimatedText
           text={feature.tagline}
           delay={FRAMES_PER_BEAT}
-          fontSize={22}
+          fontSize={feature.screenshot ? 22 : 28}
           fontWeight={400}
           color={COLORS.textSecondary}
-          style={{ lineHeight: 1.5 }}
+          style={{ lineHeight: 1.5, textAlign: feature.screenshot ? "left" : "center" }}
         />
       </div>
 
       {/* Browser frame with screenshot */}
-      <div
-        style={{
-          flex: 1,
-          transform: `translateX(${translateX}px)`,
-          zIndex: 1,
-        }}
-      >
-        <BrowserFrame accentColor={feature.accentColor}>
-          <Img
-            src={staticFile(`screenshots/${feature.screenshot}`)}
-            style={{ width: "100%", display: "block" }}
-          />
-        </BrowserFrame>
-      </div>
+      {feature.screenshot && (
+        <div
+          style={{
+            flex: 1,
+            transform: `translateX(${translateX}px)`,
+            zIndex: 1,
+          }}
+        >
+          <BrowserFrame accentColor={feature.accentColor}>
+            <Img
+              src={staticFile(`screenshots/${feature.screenshot}`)}
+              style={{ width: "100%", display: "block" }}
+            />
+          </BrowserFrame>
+        </div>
+      )}
     </AbsoluteFill>
   );
 }

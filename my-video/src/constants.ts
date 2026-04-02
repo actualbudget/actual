@@ -25,7 +25,7 @@ export const COLORS = {
 export type Feature = {
   title: string;
   tagline: string;
-  screenshot: string;
+  screenshot?: string;
   accentColor: string;
 };
 
@@ -60,7 +60,6 @@ export const TIER2_FEATURES: Feature[] = [
   {
     title: "And much more...",
     tagline: "Custom themes, import improvements, payee locations",
-    screenshot: "themes.png",
     accentColor: COLORS.accentCoral,
   },
 ];
