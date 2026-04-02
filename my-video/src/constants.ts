@@ -49,7 +49,7 @@ export const TIER2_FEATURES: Feature[] = [
     title: "Drag & Drop Reordering",
     tagline: "Reorder transactions — your way",
     screenshot: "drag-drop.png",
-    accentColor: COLORS.accentCoral,
+    accentColor: COLORS.accentCyan,
   },
   {
     title: "Actual CLI",
