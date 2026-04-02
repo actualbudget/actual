@@ -55,11 +55,11 @@ export const TIER2_FEATURES: Feature[] = [
     title: "Actual CLI",
     tagline: "Your budget, from the command line",
     screenshot: "cli-tool.png",
-    accentColor: COLORS.accentCoral,
+    accentColor: COLORS.accentCyan,
   },
   {
     title: "And much more...",
-    tagline: "Custom themes, import improvements, payee locations",
+    tagline: "45 enhancements, 32 bugfixes",
     accentColor: COLORS.accentCoral,
   },
 ];

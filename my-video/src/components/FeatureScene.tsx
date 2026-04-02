@@ -52,9 +52,9 @@ export function FeatureScene({ feature }: FeatureSceneProps) {
       <div
         style={{
           position: "absolute",
-          left: -100,
+          left: feature.screenshot ? -100 : "50%",
           top: "50%",
-          transform: "translateY(-50%)",
+          transform: feature.screenshot ? "translateY(-50%)" : "translate(-50%, -50%)",
           width: 500,
           height: 500,
           borderRadius: "50%",
