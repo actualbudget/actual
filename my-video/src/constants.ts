@@ -31,24 +31,24 @@ export type Feature = {
 
 export const TIER1_FEATURES: Feature[] = [
   {
-    title: "Drag & Drop Reordering",
-    tagline: "Reorder transactions — your way",
-    screenshot: "drag-drop.png",
-    accentColor: COLORS.accentCyan,
-  },
-  {
     title: "Donut Chart Reports",
     tagline: "Beautiful category breakdowns",
     screenshot: "donut-chart.png",
+    accentColor: COLORS.accentCyan,
+  },
+  {
+    title: "Budget Notes",
+    tagline: "Monthly per-category notes",
+    screenshot: "budget-notes.png",
     accentColor: COLORS.accentCyan,
   },
 ];
 
 export const TIER2_FEATURES: Feature[] = [
   {
-    title: "Budget Notes",
-    tagline: "Monthly per-category notes",
-    screenshot: "budget-notes.png",
+    title: "Drag & Drop Reordering",
+    tagline: "Reorder transactions — your way",
+    screenshot: "drag-drop.png",
     accentColor: COLORS.accentCoral,
   },
   {
