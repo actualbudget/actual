@@ -715,11 +715,6 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
       // Dedupe the ids
       const ids = [...new Set(right)];
 
-      if (ids.length === 0) {
-        // Empty IN () is invalid SQL; no matches possible
-        return '0';
-      }
-
       return (
         `${String(left)} IN (` +
         ids.map(id => `'${String(id)}'`).join(',') +
