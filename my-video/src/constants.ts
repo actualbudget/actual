@@ -42,12 +42,6 @@ export const TIER1_FEATURES: Feature[] = [
     screenshot: "donut-chart.png",
     accentColor: COLORS.accentCyan,
   },
-  {
-    title: "Payee Locations",
-    tagline: "Know where you spend",
-    screenshot: "payee-locations.png",
-    accentColor: COLORS.accentCyan,
-  },
 ];
 
 export const TIER2_FEATURES: Feature[] = [
@@ -67,12 +61,6 @@ export const TIER2_FEATURES: Feature[] = [
     title: "Custom Themes",
     tagline: "Make it yours",
     screenshot: "themes.png",
-    accentColor: COLORS.accentCoral,
-  },
-  {
-    title: "Smarter Imports",
-    tagline: "More control over your data",
-    screenshot: "imports.png",
     accentColor: COLORS.accentCoral,
   },
 ];
