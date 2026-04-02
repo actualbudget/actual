@@ -13,9 +13,7 @@ export function TitleCard() {
     frame,
     fps,
     config: {
-      damping: 15,
-      stiffness: 80,
-      mass: 2,
+      damping: 200,
     },
   });
 
