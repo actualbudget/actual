@@ -59,7 +59,7 @@ export const TIER2_FEATURES: Feature[] = [
   },
   {
     title: "And much more...",
-    tagline: "45 enhancements, 32 bugfixes",
+    tagline: "Thanks to all the contributors",
     accentColor: COLORS.accentCoral,
   },
 ];
