@@ -1,7 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 
+import type { AccountEntity } from 'loot-core/types/models';
+
 import { accountQueries } from '@desktop-client/accounts';
 
+const emptyAccounts: AccountEntity[] = [];
+
 export function useClosedAccounts() {
-  return useQuery(accountQueries.listClosed());
+  const result = useQuery(accountQueries.listClosed());
+  return { ...result, data: result.data ?? emptyAccounts };
 }
