@@ -58,8 +58,8 @@ export const TIER2_FEATURES: Feature[] = [
     accentColor: COLORS.accentCoral,
   },
   {
-    title: "Custom Themes",
-    tagline: "Make it yours",
+    title: "And much more...",
+    tagline: "Custom themes, import improvements, payee locations",
     screenshot: "themes.png",
     accentColor: COLORS.accentCoral,
   },
