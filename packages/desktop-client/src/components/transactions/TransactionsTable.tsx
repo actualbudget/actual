@@ -1173,7 +1173,6 @@ const Transaction = memo(function Transaction({
 
     const id = setTimeout(() => {
       window.dispatchEvent(new Event('resize')); //Force popover to recalculate position
-      //
     }, 1);
     return () => clearTimeout(id);
   }, [splitError, allTransactions]);
