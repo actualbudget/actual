@@ -12,6 +12,7 @@
  */
 
 let proxy: HTMLInputElement | null = null;
+let safetyTimer: ReturnType<typeof setTimeout> | null = null;
 
 /** Call synchronously inside a tap/click handler. */
 export function acquireIOSKeyboard(): void {
@@ -33,10 +34,22 @@ export function transferIOSKeyboardFocus(target: HTMLInputElement): void {
   releaseIOSKeyboard();
 }
 
-/** Remove the proxy (idempotent). */
+/** Remove the proxy and cancel any pending safety timer (idempotent). */
 export function releaseIOSKeyboard(): void {
+  if (safetyTimer !== null) {
+    clearTimeout(safetyTimer);
+    safetyTimer = null;
+  }
   if (proxy) {
     proxy.remove();
     proxy = null;
   }
+}
+
+/** Schedule a safety cleanup in case focus transfer never happens. */
+export function scheduleSafetyRelease(ms = 3000): void {
+  if (safetyTimer !== null) {
+    clearTimeout(safetyTimer);
+  }
+  safetyTimer = setTimeout(releaseIOSKeyboard, ms);
 }

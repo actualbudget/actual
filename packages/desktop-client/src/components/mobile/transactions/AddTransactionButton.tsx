@@ -5,7 +5,10 @@ import { Button } from '@actual-app/components/button';
 import { SvgAdd } from '@actual-app/components/icons/v1';
 import * as Platform from '@actual-app/core/shared/platform';
 
-import { acquireIOSKeyboard, releaseIOSKeyboard } from './iosKeyboardProxy';
+import {
+  acquireIOSKeyboard,
+  scheduleSafetyRelease,
+} from './iosKeyboardProxy';
 
 import { useNavigate } from '#hooks/useNavigate';
 
@@ -35,9 +38,11 @@ export function AddTransactionButton({
         // amount input on mount and then clean up the proxy.
         if (Platform.isIOSAgent) {
           acquireIOSKeyboard();
-          // Safety: if the destination page never calls releaseIOSKeyboard
-          // (e.g. navigation is cancelled), clean up after a timeout.
-          setTimeout(releaseIOSKeyboard, 3000);
+          // Safety: if the destination page never calls
+          // releaseIOSKeyboard (e.g. navigation is cancelled), clean up
+          // after a timeout. scheduleSafetyRelease cancels any prior
+          // timer so a rapid double-tap won't release a newer proxy.
+          scheduleSafetyRelease();
         }
         void navigate(to, { state: { accountId, categoryId } });
       }}
