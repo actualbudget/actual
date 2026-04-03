@@ -599,7 +599,7 @@ export function conditionsToAQL(
         }
         return { $or: values.map(v => apply(field, '$eq', v)) };
 
-      case 'hasTags':
+      case 'hasTags': {
         const tagValues = [];
         const seenTags = new Set();
         for (const [_, tag] of value.matchAll(/(?<!#)(#[^#\s]+)/g)) {
@@ -618,6 +618,7 @@ export function conditionsToAQL(
             return apply(field, '$regexp', pattern);
           }),
         };
+      }
 
       case 'notOneOf':
         const notValues = value;
