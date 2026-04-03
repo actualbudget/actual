@@ -613,7 +613,7 @@ export function conditionsToAQL(
           $and: tagValues.map(v => {
             const escapedTag = v
               .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-              .replace(/\\\$/g, '[$]');
+              .replace(/\\\$/g, '[$]'); // Use '[$]' instead of '\$' so AQL string unescaping doesn't turn it into a bare '$' end-of-string anchor
             const pattern = `(?<!#)${escapedTag}([\\s#]|$)`;
             return apply(field, '$regexp', pattern);
           }),
