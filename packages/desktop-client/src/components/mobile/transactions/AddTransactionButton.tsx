@@ -3,12 +3,11 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgAdd } from '@actual-app/components/icons/v1';
-
 import * as Platform from '@actual-app/core/shared/platform';
 
-import { useNavigate } from '#hooks/useNavigate';
-
 import { acquireIOSKeyboard, releaseIOSKeyboard } from './iosKeyboardProxy';
+
+import { useNavigate } from '#hooks/useNavigate';
 
 type AddTransactionButtonProps = {
   to?: string;
