@@ -30,29 +30,30 @@ impl SidecarState {
 
 /// Find the loot-core server bundle path.
 fn find_server_bundle() -> Option<PathBuf> {
-    // In development, the bundle is at a known relative path
-    let dev_paths = vec![
-        PathBuf::from("../../loot-core/lib-dist/electron/bundle.desktop.js"),
-        PathBuf::from("../../../packages/loot-core/lib-dist/electron/bundle.desktop.js"),
+    let exe_dir = std::env::current_exe().ok()?;
+    let exe_parent = exe_dir.parent()?;
+
+    // Paths relative to the binary location
+    let candidates = vec![
+        // Dev: binary is at src-tauri/target/debug/actual-desktop
+        // Bundle is at packages/loot-core/lib-dist/electron/bundle.desktop.js
+        exe_parent.join("../../../loot-core/lib-dist/electron/bundle.desktop.js"),
+        exe_parent.join("../../../../packages/loot-core/lib-dist/electron/bundle.desktop.js"),
+        // Production: binary is at the app root
+        exe_parent.join("resources/loot-core/lib-dist/electron/bundle.desktop.js"),
+        exe_parent.join("../Resources/loot-core/lib-dist/electron/bundle.desktop.js"),
     ];
 
-    for path in dev_paths {
-        if path.exists() {
-            return Some(path.canonicalize().unwrap_or(path));
-        }
-    }
+    // Also try paths relative to current working directory
+    let cwd_candidates = vec![
+        PathBuf::from("../../loot-core/lib-dist/electron/bundle.desktop.js"),
+        PathBuf::from("../../../packages/loot-core/lib-dist/electron/bundle.desktop.js"),
+        PathBuf::from("packages/loot-core/lib-dist/electron/bundle.desktop.js"),
+    ];
 
-    // In production, check near the binary
-    if let Ok(exe_dir) = std::env::current_exe() {
-        let exe_parent = exe_dir.parent()?;
-        let prod_paths = vec![
-            exe_parent.join("resources/loot-core/lib-dist/electron/bundle.desktop.js"),
-            exe_parent.join("../Resources/loot-core/lib-dist/electron/bundle.desktop.js"),
-        ];
-        for path in prod_paths {
-            if path.exists() {
-                return Some(path);
-            }
+    for path in candidates.iter().chain(cwd_candidates.iter()) {
+        if path.exists() {
+            return Some(path.canonicalize().unwrap_or_else(|_| path.clone()));
         }
     }
 
@@ -61,15 +62,31 @@ fn find_server_bundle() -> Option<PathBuf> {
 
 /// Find the sidecar server.js entry point.
 fn find_sidecar_entry() -> Option<PathBuf> {
-    let paths = vec![
-        PathBuf::from("../sidecar/server.js"),
-        PathBuf::from("../../desktop-tauri/sidecar/server.js"),
-        PathBuf::from("../../../packages/desktop-tauri/sidecar/server.js"),
+    let exe_dir = std::env::current_exe().ok()?;
+    let exe_parent = exe_dir.parent()?;
+
+    // Paths relative to the binary location
+    let candidates = vec![
+        // Dev: binary at src-tauri/target/debug/actual-desktop
+        // Sidecar at packages/desktop-tauri/sidecar/server.js
+        exe_parent.join("../../../sidecar/server.js"),
+        exe_parent.join("../../../../packages/desktop-tauri/sidecar/server.js"),
+        // Production
+        exe_parent.join("resources/sidecar/server.js"),
+        exe_parent.join("../Resources/sidecar/server.js"),
     ];
 
-    for path in paths {
+    // Also try paths relative to current working directory
+    let cwd_candidates = vec![
+        PathBuf::from("sidecar/server.js"),
+        PathBuf::from("../sidecar/server.js"),
+        PathBuf::from("../../desktop-tauri/sidecar/server.js"),
+        PathBuf::from("packages/desktop-tauri/sidecar/server.js"),
+    ];
+
+    for path in candidates.iter().chain(cwd_candidates.iter()) {
         if path.exists() {
-            return Some(path.canonicalize().unwrap_or(path));
+            return Some(path.canonicalize().unwrap_or_else(|_| path.clone()));
         }
     }
 

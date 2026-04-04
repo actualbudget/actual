@@ -15233,6 +15233,7 @@ __metadata:
   dependencies:
     "@actual-app/core": "workspace:*"
     "@actual-app/sync-server": "workspace:*"
+    "@playwright/test": "npm:1.58.2"
     "@tauri-apps/api": "npm:^2.5.0"
     "@tauri-apps/cli": "npm:^2.5.0"
     "@types/fs-extra": "npm:^11"

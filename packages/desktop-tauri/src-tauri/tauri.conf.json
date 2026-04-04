@@ -9,15 +9,7 @@
   },
   "app": {
     "withGlobalTauri": false,
-    "windows": [
-      {
-        "title": "Actual Budget",
-        "width": 1000,
-        "height": 700,
-        "minWidth": 600,
-        "minHeight": 400
-      }
-    ],
+    "windows": [],
     "security": {
       "csp": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' http://localhost:* https://*; img-src 'self' data: blob:"
     }

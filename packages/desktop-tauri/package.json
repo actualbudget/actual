@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "cargo tauri dev",
     "build": "cargo tauri build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "e2e": "npx playwright test"
   },
   "dependencies": {
     "@actual-app/sync-server": "workspace:*",
@@ -18,6 +19,7 @@
   },
   "devDependencies": {
     "@actual-app/core": "workspace:*",
+    "@playwright/test": "1.58.2",
     "@tauri-apps/cli": "^2.5.0",
     "@types/fs-extra": "^11",
     "typescript": "^5.7.3"

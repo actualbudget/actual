@@ -5,7 +5,7 @@ mod window_state;
 
 use std::sync::Mutex;
 
-use tauri::Manager;
+use tauri::webview::WebviewWindowBuilder;
 
 pub fn run() {
     env_logger::init();
@@ -21,10 +21,17 @@ pub fn run() {
         .setup(|app| {
             let app_handle = app.handle().clone();
 
-            // Restore window state
-            if let Some(window) = app.get_webview_window("main") {
-                window_state::restore_window_state(&app_handle, &window);
-            }
+            // Create the main window programmatically so we can inject
+            // the preload as an initialization_script. This ensures
+            // window.Actual is available before any page JS runs.
+            let window = WebviewWindowBuilder::new(app, "main", Default::default())
+                .title("Actual Budget")
+                .inner_size(1000.0, 700.0)
+                .min_inner_size(600.0, 400.0)
+                .initialization_script(include_str!("../../tauri-preload-inject.js"))
+                .build()?;
+
+            window_state::restore_window_state(&app_handle, &window);
 
             // Start the Node.js sidecar backend
             let sidecar_handle = app_handle.clone();
