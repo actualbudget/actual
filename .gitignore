@@ -26,6 +26,8 @@ packages/desktop-client/public/kcab
 packages/desktop-client/locale
 packages/desktop-client/playwright-report
 packages/desktop-client/test-results
+packages/desktop-tauri/e2e/test-results
+packages/desktop-client/build-tauri
 packages/desktop-electron/client-build
 packages/desktop-electron/build
 packages/desktop-electron/.electron-symbols
