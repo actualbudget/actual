@@ -312,8 +312,8 @@ export function registerQueryCommand(program: Command) {
 
         const result = await api.aqlQuery(queryObj);
 
-        if (!isRecord(result)) {
-          throw new Error('Query result is not a record');
+        if (!isRecord(result) || !('data' in result)) {
+          throw new Error('Query result missing data');
         }
 
         if (cmdOpts.count) {
