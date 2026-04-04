@@ -95,10 +95,6 @@ async function createScheduleList(
       dateConditions,
       monthUtils._parse(current_month),
     );
-    if (next_date_string === null) {
-      errors.push(`Schedule ${template.name} is in the Past.`);
-      continue;
-    }
     const target_interval = dateConditions.value.interval
       ? dateConditions.value.interval
       : 1;
@@ -138,9 +134,6 @@ async function createScheduleList(
             monthUtils._parse(current_month),
             true,
           );
-          if (nextBaseDate === null) {
-            break;
-          }
           let nextDate = dateConditions.value.skipWeekend
             ? monthUtils.dayFromDate(
                 getDateWithSkippedWeekend(
@@ -158,9 +151,6 @@ async function createScheduleList(
               monthUtils._parse(oneDayLater),
               true,
             );
-            if (nextBaseDate === null) {
-              break;
-            }
             nextDate = dateConditions.value.skipWeekend
               ? monthUtils.dayFromDate(
                   getDateWithSkippedWeekend(

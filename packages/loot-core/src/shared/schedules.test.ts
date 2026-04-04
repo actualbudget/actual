@@ -620,7 +620,7 @@ describe('schedules', () => {
   });
 
   describe('getNextDate', () => {
-    it('returns null for a recurring schedule with an end date in the past', () => {
+    it('returns last occurrence for a recurring schedule with an end date in the past', () => {
       const dateCond = {
         op: 'isapprox',
         value: {
@@ -638,22 +638,19 @@ describe('schedules', () => {
       expect(result).toBe('2016-08-25');
     });
 
-    it('returns null when no occurrences exist at all', () => {
+    it('returns null when the end date is before the start date', () => {
       const dateCond = {
         op: 'isapprox',
         value: {
-          start: '2016-01-25',
+          start: '2016-03-25',
           frequency: 'monthly',
           endMode: 'on_date',
           endDate: '2016-01-25',
-          endOccurrences: 1,
         },
       };
 
-      // Start searching from after the only occurrence
       const result = getNextDate(dateCond, new Date(2017, 0, 1));
-      // Should return the last occurrence via reverse lookup, not crash
-      expect(result).not.toBeNull();
+      expect(result).toBeNull();
     });
   });
 });
