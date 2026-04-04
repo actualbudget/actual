@@ -4,11 +4,7 @@ import type { Command } from 'commander';
 import { withConnection } from '../connection';
 import { readJsonInput } from '../input';
 import { printOutput } from '../output';
-import { parseIntFlag } from '../utils';
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
+import { isRecord, parseIntFlag } from '../utils';
 
 /**
  * Parse order-by strings like "date:desc,amount:asc,id" into
