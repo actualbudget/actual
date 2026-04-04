@@ -148,7 +148,12 @@ export default defineConfig(async ({ mode }) => {
       },
       target: 'es2022',
       sourcemap: true,
-      outDir: mode === 'desktop' ? 'build-electron' : 'build',
+      outDir:
+        mode === 'desktop'
+          ? 'build-electron'
+          : mode === 'tauri'
+            ? 'build-tauri'
+            : 'build',
       assetsDir: 'static',
       manifest: true,
       assetsInlineLimit: 0,
@@ -196,8 +201,8 @@ export default defineConfig(async ({ mode }) => {
       tsconfigPaths: true,
     },
     plugins: [
-      // electron (desktop) builds do not support PWA
-      mode === 'desktop'
+      // electron (desktop) and tauri builds do not support PWA
+      mode === 'desktop' || mode === 'tauri'
         ? undefined
         : VitePWA({
             registerType: 'prompt',

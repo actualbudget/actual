@@ -1,0 +1,28 @@
+#!/bin/bash -e
+
+# Build the Actual Budget desktop app using Tauri.
+#
+# Steps:
+# 1. Build the plugins service worker
+# 2. Build the loot-core Node.js backend (for the sidecar)
+# 3. Build the desktop-client frontend in tauri mode
+# 4. Build the Tauri application
+
+ROOT="$(cd "$(dirname "$0")/.."; pwd)"
+
+cd "$ROOT"
+
+echo "Building plugins service..."
+yarn workspace plugins-service build
+
+echo "Building loot-core backend (Node.js sidecar)..."
+yarn workspace @actual-app/core build:node
+
+echo "Building desktop client for Tauri..."
+yarn workspace @actual-app/web build --mode tauri
+
+echo "Building Tauri application..."
+cd packages/desktop-tauri
+cargo tauri build
+
+echo "Done! Tauri build artifacts are in packages/desktop-tauri/src-tauri/target/release/bundle/"

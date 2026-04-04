@@ -1,0 +1,5 @@
+# Rust/Tauri build artifacts
+src-tauri/target/
+
+# Node modules
+node_modules/
