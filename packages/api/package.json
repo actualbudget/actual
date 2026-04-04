@@ -10,7 +10,11 @@
   "main": "dist/index.js",
   "types": "@types/index.d.ts",
   "exports": {
-    ".": "./index.ts"
+    ".": {
+      "types": "./@types/index.d.ts",
+      "development": "./index.ts",
+      "default": "./dist/index.js"
+    }
   },
   "publishConfig": {
     "exports": {
