@@ -252,7 +252,7 @@ Common filter operators: $eq, $ne, $lt, $lte, $gt, $gte, $like, $and, $or
 See ActualQL docs for full reference: https://actualbudget.org/docs/api/actual-ql/
 
 Tips:
-  - Amounts are stored as integer cents (e.g. 166500 = 1,665.00).
+  - Amounts are stored as integer cents (e.g. 166500 = 1665.00).
     Table and CSV output auto-formats these as decimals; JSON keeps raw cents.
   - Filter "is_parent": false to avoid double-counting split transactions.
   - Fetch all data in a single query with a date range instead of running
