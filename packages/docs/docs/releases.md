@@ -2,7 +2,7 @@
 
 ## 26.4.0
 
-Release date: 2026-04-06
+Release date: 2026-04-05
 
 This release contains the following notable improvements, along with numerous fixes:
 
