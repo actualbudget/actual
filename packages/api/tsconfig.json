@@ -7,6 +7,7 @@
     "target": "ES2021",
     "module": "es2022",
     "moduleResolution": "bundler",
+    "customConditions": ["api"],
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,
