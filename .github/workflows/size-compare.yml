@@ -130,7 +130,7 @@ jobs:
           path: head
           allow_forks: true
       - name: Download CLI build artifact from ${{github.base_ref}}
-        uses: dawidd6/action-download-artifact@ac66b43f0e6a346234dd65d4d0c8fbb31cb316e5 # v11
+        uses: dawidd6/action-download-artifact@1f8785ff7a5130826f848e7f72725c85d241860f # v18
         with:
           branch: ${{github.base_ref}}
           workflow: build.yml
@@ -138,7 +138,7 @@ jobs:
           name: cli-build-stats
           path: base
       - name: Download CLI stats from PR
-        uses: dawidd6/action-download-artifact@ac66b43f0e6a346234dd65d4d0c8fbb31cb316e5 # v11
+        uses: dawidd6/action-download-artifact@1f8785ff7a5130826f848e7f72725c85d241860f # v18
         with:
           pr: ${{github.event.pull_request.number}}
           workflow: build.yml
