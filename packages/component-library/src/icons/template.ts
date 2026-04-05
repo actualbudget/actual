@@ -15,4 +15,4 @@ export const ${componentName} = (${props}) => (
 `;
 };
 
-export default tmpl;
+module.exports = tmpl;
