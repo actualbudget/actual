@@ -29,6 +29,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     resolve: {
+      conditions: ['electron'],
       extensions: [
         '.electron.js',
         '.electron.ts',

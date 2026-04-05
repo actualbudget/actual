@@ -11,6 +11,26 @@
     }
   },
   "imports": {
+    "#platform/server/asyncStorage": {
+      "electron": "./src/platform/server/asyncStorage/index.electron.ts",
+      "default": "./src/platform/server/asyncStorage/index.ts"
+    },
+    "#platform/server/connection": {
+      "electron": "./src/platform/server/connection/index.electron.ts",
+      "default": "./src/platform/server/connection/index.ts"
+    },
+    "#platform/server/fetch": {
+      "electron": "./src/platform/server/fetch/index.electron.ts",
+      "default": "./src/platform/server/fetch/index.ts"
+    },
+    "#platform/server/fs": {
+      "electron": "./src/platform/server/fs/index.electron.ts",
+      "default": "./src/platform/server/fs/index.ts"
+    },
+    "#platform/server/sqlite": {
+      "electron": "./src/platform/server/sqlite/index.electron.ts",
+      "default": "./src/platform/server/sqlite/index.ts"
+    },
     "#*": [
       "./src/*.ts",
       "./src/*.tsx",
