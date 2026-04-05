@@ -18,7 +18,7 @@ The formatting options allow you to select the following:
 
 ### Encryption
 
-End-to-end encryption allows you to encrypt the data on your remote server with a password. If you don't trust the server's owners, enable this setting to fully encrypt the data. Read more about this feature on the [Syncing Across Devices page.](../getting-started/sync/#end-to-end-encryption)
+End-to-end encryption allows you to encrypt your budget data on the remote server with a password. If you don't trust the server's owners, enable this setting to encrypt your budget data. Note that [bank sync](../advanced/bank-sync.md) tokens are stored separately on the server and are not covered by this encryption. Read more about this feature on the [Syncing Across Devices page.](../getting-started/sync/#end-to-end-encryption)
 
 ![](/img/using-actual/settings-encryption.webp)
 
