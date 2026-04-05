@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import AdmZip from 'adm-zip';
+import normalizePathSep from 'slash';
 import { v4 as uuidv4 } from 'uuid';
 
 import { logger } from '../../platform/server/log';
@@ -395,7 +396,7 @@ export async function doImport(data: YNAB4.YFull) {
 }
 
 export function getBudgetName(filepath) {
-  let unixFilepath = filepath.replace(/\\/g, '/');
+  let unixFilepath = normalizePathSep(filepath);
 
   if (!/\.zip/.test(unixFilepath)) {
     return null;
