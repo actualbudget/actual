@@ -1,6 +1,6 @@
 // @ts-strict-ignore
-import { APIError } from '../../../server/errors';
-import { isMutating, runHandler } from '../../../server/mutators';
+import { APIError } from '#server/errors';
+import { isMutating, runHandler } from '#server/mutators';
 import { captureException } from '../../exceptions';
 import { logger } from '../log';
 
