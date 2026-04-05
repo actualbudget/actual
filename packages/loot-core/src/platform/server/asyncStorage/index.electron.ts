@@ -2,8 +2,8 @@
 import * as fs from 'fs';
 import { join } from 'path';
 
-import * as lootFs from '#platform/server/fs';
 import type { GlobalPrefsJson } from '#types/prefs';
+import * as lootFs from '../fs';
 
 import type * as T from './index-types';
 

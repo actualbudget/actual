@@ -55,7 +55,11 @@ function copyMigrationsAndDefaultDb() {
 }
 
 export default defineConfig({
-  ssr: { noExternal: true, external: ['better-sqlite3'] },
+  ssr: {
+    noExternal: true,
+    external: ['better-sqlite3'],
+    resolve: { conditions: ['api'] },
+  },
   build: {
     ssr: true,
     target: 'node20',
@@ -80,6 +84,7 @@ export default defineConfig({
     visualizer({ template: 'raw-data', filename: 'app/stats.json' }),
   ],
   resolve: {
+    conditions: ['api'],
     extensions: ['.api.ts', '.js', '.ts', '.tsx', '.json'],
   },
   test: {
