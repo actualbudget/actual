@@ -4,6 +4,7 @@ ABNANL
 Activo
 actualrc
 AESUDEF
+ajv
 ALZEY
 Anglais
 ANZ
@@ -132,6 +133,7 @@ overbudgeting
 oxc
 Paribas
 passwordless
+picomatch
 pluggyai
 Poste
 PPABPLPK
@@ -175,6 +177,8 @@ THB
 TIMEFRAME
 touchscreen
 triaging
+tsgo
+TWD
 UAH
 ubuntu
 undici
