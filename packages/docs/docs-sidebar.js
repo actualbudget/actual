@@ -29,23 +29,6 @@ const sidebars = {
     'releases',
     {
       type: 'category',
-      label: 'A Tour of Actual',
-      link: {
-        type: 'doc',
-        id: 'tour/index',
-      },
-      items: [
-        'tour/user-interface',
-        'tour/budget',
-        'tour/accounts',
-        'tour/reports',
-        'tour/schedules',
-        'tour/payees',
-        'tour/rules',
-      ],
-    },
-    {
-      type: 'category',
       label: 'Getting Started',
       collapsible: false,
       className: 'no-indent',
