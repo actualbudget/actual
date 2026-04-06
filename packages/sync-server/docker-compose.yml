@@ -23,7 +23,7 @@ services:
       # Enable health check for the instance
       test: ['CMD-SHELL', 'node src/scripts/health-check.js']
       # health check using self signed certs
-      # test: ['CMD-SHELL', 'NODE_EXTRA_CA_CERTS=/data/selfhost.crt', 'node src/scripts/health-check.js']
+      # test: ['CMD-SHELL', 'NODE_EXTRA_CA_CERTS=/data/selfhost.crt node src/scripts/health-check.js']
       interval: 60s
       timeout: 10s
       retries: 3
