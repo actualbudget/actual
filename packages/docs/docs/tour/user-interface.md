@@ -5,7 +5,7 @@ The user interface is divided into three parts:
 Standard on most screens:
 
 - The left sidebar lets you easily switch between the various views, such as Budget, Reports, and Accounts.
-- The server status (if used) is shown in the red box in the upper right corner.
+- The server status (if used) is shown in the upper right corner (red box in the screenshot).
 - The content of the rest of the interface depends on the view you have chosen in the sidebar. This screenshot shows an example of a Budget view.
 
 ![Full user interface with top right corner highlighted](/img/a-tour-of-actual/tour-overview-of-user-interface.webp)
@@ -13,8 +13,8 @@ Standard on most screens:
 ## Top Right Corner
 
 - The eye icon will scramble the numbers on the screen. This is useful if you need to report a bug to the Actual team but want to keep your numbers private. There are some caveats to this, so please read [Scramble and Hide Data](/docs/getting-started/tips-tricks#scramble-and-hide-data) in the Tips & Tricks guide.
-- Clicking on the sync icon will force a sync of your local file to the server. Note: it does not perform a bank sync.
-- The current text, _Server online_ shows the connection status. Thus, it could easily read _Server offline_ if you are disconnected from your server. If you are not using a server it will display _No server_. If you click on this text, you can change your password, sign out of the server or change the server URL.
+- Clicking on the refresh icon will force a sync of your local file to the server. Note: it does **not** perform a bank sync.
+- The current text, _Server online_ shows the connection status. It will read _Server offline_ if you are disconnected from your server or _No server_ if you are not using a server. If you click on this text, you can change your password, sign out of the server or change the server URL.
 
 ![Top right corner](/img/a-tour-of-actual/tour-overview-top-right.webp)
 
