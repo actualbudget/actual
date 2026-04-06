@@ -13,7 +13,7 @@
 
 /** @type {import('@docusaurus/plugin-content-docs').SidebarsConfig} */
 const sidebars = {
-  tour: [
+  tourSidebar: [
     'tour/index',
     'tour/user-interface',
     'tour/budget',
