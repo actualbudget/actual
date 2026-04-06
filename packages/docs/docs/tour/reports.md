@@ -1,6 +1,6 @@
 # Reports
 
-This view gives you access to the built in reports, two of which are _Net Worth_ and _Cash Flow_, and also to your own custom reports.
+This view gives you access to the built-in reports, two of which are _Net Worth_ and _Cash Flow_, and also to your own custom reports.
 
 All reports in this view are shown in their tiled version. Clicking on a tile will take you to that very report.
 
@@ -10,7 +10,7 @@ All reports in this view are shown in their tiled version. Clicking on a tile wi
 
 **Cash flow** tracks your spending over time by focusing solely on budget accounts and displaying their balances. It includes separate visualizations for income and expenses, providing a quick overview of how these factors affect your available money over time. By considering your budgeted accounts as "cash on hand," cash flow clearly shows how your available funds fluctuate.
 
-See the [Reports Dashboard](/docs/reports/) for more detail on these and the other built in reports.
+See the [Reports Dashboard](/docs/reports/) for more detail on these and the other built-in reports.
 
 ![Cashflow report](/img/a-tour-of-actual/tour-reports-cashflow.webp)
 
@@ -18,7 +18,7 @@ See the [Reports Dashboard](/docs/reports/) for more detail on these and the oth
 
 Actual's custom reports will give you in-depth analysis on your spending habits and your income. You can find them thoroughly covered in [Custom Reports](/docs/reports/custom-reports).
 
-Below are examples of reports covering *Daily Expenses* over the last six months. One report shows this as a graph, the other as a table. Note that the table version also shows the sum and average (over six months) for the various categories.
+Below are examples of reports covering _Daily Expenses_ over the last six months. One report shows this as a graph, the other as a table. Note that the table version also shows the sum and average (over six months) for the various categories.
 
 ![Custom report showing daily expenses as graph](/img/a-tour-of-actual/tour-reports-daily-expenses-graph.webp)
 
