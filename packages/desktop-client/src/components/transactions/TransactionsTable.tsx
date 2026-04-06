@@ -1165,16 +1165,16 @@ const Transaction = memo(function Transaction({
   // a variable (with a small delay in order for the next render cycle to pick up
   // the change instead of the current). We pass the integer to the Popover which
   // causes it to re-calculate the positioning. Thus fixing the problem.
-  const [_, setUpdateId] = useState(1);
   useEffect(() => {
     // The hack applies to only transactions with split errors
     if (!splitError) {
       return;
     }
 
-    setTimeout(() => {
-      setUpdateId(state => state + 1);
+    const id = setTimeout(() => {
+      window.dispatchEvent(new Event('resize')); //Force popover to recalculate position
     }, 1);
+    return () => clearTimeout(id);
   }, [splitError, allTransactions]);
 
   const { setMenuOpen, menuOpen, handleContextMenu, position } =

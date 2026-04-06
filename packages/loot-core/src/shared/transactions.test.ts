@@ -201,6 +201,40 @@ describe('Transactions', () => {
     expect(data.length).toBe(5);
   });
 
+  test('partially updating a split parent preserves amount and does not set error', () => {
+    const transactions = [
+      makeTransaction({ amount: 2001 }),
+      ...makeSplitTransaction({ id: 't1', amount: 2500 }, [
+        { id: 't2', amount: 2000 },
+        { id: 't3', amount: 500 },
+      ]),
+      makeTransaction({ amount: 3002 }),
+    ];
+
+    // Simulate a partial update (only `notes`) on the parent — this is
+    // how `api.updateTransaction(id, { notes: '...' })` calls it in
+    // `api.ts`: `updateTransaction(transactions, { id, ...fields })`.
+    const { data, diff } = updateTransaction(transactions, {
+      id: 't1',
+      notes: 'updated note',
+    } as TransactionEntity);
+
+    // The parent should get the updated notes without an error
+    const parent = data.find(d => d.id === 't1');
+    expect(parent?.notes).toBe('updated note');
+    expect(parent?.amount).toBe(2500);
+    expect(parent?.error).toBeNull();
+
+    // Children should be unchanged
+    expect(data.filter(t => t.parent_id === 't1').length).toBe(2);
+
+    expect(diff).toEqual({
+      added: [],
+      deleted: [],
+      updated: [expect.objectContaining({ id: 't1', notes: 'updated note' })],
+    });
+  });
+
   test('deleting a split transaction works', () => {
     const transactions = [
       makeTransaction({ amount: 2001 }),

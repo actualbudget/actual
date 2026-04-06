@@ -11,7 +11,7 @@ export const SvgEditPencil = (props: SVGProps<SVGSVGElement>) => (
     }}
   >
     <path
-      d="m12.3 3.7 4 4L4 20H0v-4L12.3 3.7zm1.4-1.4L16 0l4 4-2.3 2.3-4-4z"
+      d="m12.3 3.7 4 4L4 20H0v-4zm1.4-1.4L16 0l4 4-2.3 2.3z"
       fill="currentColor"
     />
   </svg>
