@@ -157,7 +157,7 @@ describe('ThemeInstaller', () => {
       });
     });
 
-    it('clears pasted CSS when a catalog theme is selected', async () => {
+    it('preserves pasted CSS when a catalog theme is selected', async () => {
       const user = userEvent.setup();
       render(
         <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
@@ -173,7 +173,7 @@ describe('ThemeInstaller', () => {
       expect(textArea).toHaveValue(cssText);
 
       await user.click(screen.getByRole('button', { name: 'Demo Theme' }));
-      expect(textArea).toHaveValue('');
+      expect(textArea).toHaveValue(cssText);
     });
 
     it('clears error when a catalog theme is selected', async () => {
@@ -347,7 +347,7 @@ describe('ThemeInstaller', () => {
           expect.objectContaining({
             name: 'Custom Theme',
             repo: '',
-            cssContent: mockValidCss,
+            overrideCss: mockValidCss,
           }),
         );
       });
@@ -372,21 +372,28 @@ describe('ThemeInstaller', () => {
       expect(validateThemeCss).toHaveBeenCalledWith(cssWithWhitespace.trim());
     });
 
-    it('does not call onInstall when Apply is clicked with empty CSS', async () => {
+    it('calls onInstall with empty cssContent when Apply is clicked with empty CSS', async () => {
       const user = userEvent.setup();
       render(
         <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
       );
 
       const applyButton = screen.getByText('Apply');
-      expect(applyButton).toBeDisabled();
+      expect(applyButton).not.toBeDisabled();
 
       await user.click(applyButton);
 
-      expect(mockOnInstall).not.toHaveBeenCalled();
+      await waitFor(() => {
+        expect(mockOnInstall).toHaveBeenCalledTimes(1);
+        expect(mockOnInstall).toHaveBeenCalledWith(
+          expect.objectContaining({
+            cssContent: '',
+          }),
+        );
+      });
     });
 
-    it('does not call onInstall when Apply is clicked with whitespace-only CSS', async () => {
+    it('calls onInstall with empty cssContent when Apply is clicked with whitespace-only CSS', async () => {
       const user = userEvent.setup();
       render(
         <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
@@ -399,9 +406,18 @@ describe('ThemeInstaller', () => {
       await user.paste('   ');
 
       const applyButton = screen.getByText('Apply');
-      expect(applyButton).toBeDisabled();
+      expect(applyButton).not.toBeDisabled();
 
       await user.click(applyButton);
+
+      await waitFor(() => {
+        expect(mockOnInstall).toHaveBeenCalledTimes(1);
+        expect(mockOnInstall).toHaveBeenCalledWith(
+          expect.objectContaining({
+            cssContent: '',
+          }),
+        );
+      });
     });
 
     it('populates text box with installed custom theme CSS when reopening', () => {

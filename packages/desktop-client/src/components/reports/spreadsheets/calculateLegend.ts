@@ -40,8 +40,16 @@ export function calculateLegend(
         return theme.reportsNumberNegative;
       }
 
-      if (balanceTypeOp === 'totalTotals') {
-        if (data.totalTotals < 0) {
+      if (
+        balanceTypeOp === 'totalTotals' ||
+        balanceTypeOp === 'totalBudgeted'
+      ) {
+        const total =
+          balanceTypeOp === 'totalBudgeted'
+            ? data.totalBudgeted
+            : data.totalTotals;
+
+        if (total < 0) {
           return theme.reportsNumberNegative;
         }
 

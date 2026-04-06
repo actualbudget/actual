@@ -101,12 +101,18 @@
     "typescript/no-var-requires": "error",
     // we want to allow unions such as "{ name: DbAccount['name'] | DbPayee['name'] }"
     "typescript/no-duplicate-type-constituents": "off",
+    // we want to allow unions such as "string | 'network' | 'file-key-mismatch'"
+    "typescript/no-redundant-type-constituents": "off",
     "typescript/await-thenable": "error",
-    "typescript/no-floating-promises": "warn", // TODO: covert to error
-    "typescript/require-array-sort-compare": "warn", // TODO: covert to error
+    "typescript/no-floating-promises": "error",
+    "typescript/require-array-sort-compare": "error",
     "typescript/unbound-method": "error",
-    "typescript/no-for-in-array": "warn", // TODO: covert to error
-    "typescript/restrict-template-expressions": "warn", // TODO: covert to error
+    "typescript/no-for-in-array": "error",
+    "typescript/restrict-template-expressions": "error",
+    "typescript/no-misused-spread": "warn", // TODO: enable this
+    "typescript/no-base-to-string": "warn", // TODO: enable this
+    "typescript/no-unsafe-unary-minus": "warn", // TODO: enable this
+    "typescript/no-unsafe-type-assertion": "warn", // TODO: enable this
 
     // Import rules
     "import/consistent-type-specifier-style": "error",

@@ -89,7 +89,7 @@ export function ReportTableHeader({
                 />
               );
             })
-          : balanceTypeOp === 'totalTotals' && (
+          : ['totalTotals', 'totalBudgeted'].includes(balanceTypeOp) && (
               <>
                 <Cell
                   style={{

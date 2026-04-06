@@ -23,7 +23,7 @@ type showActivityProps = {
   startDate: string;
   endDate?: string;
   field?: string;
-  id?: string;
+  id?: string | string[]; // changed: supports array for oneOf
   interval?: string;
 };
 
@@ -55,7 +55,13 @@ export function showActivity({
 
   const filterConditions = [
     ...filters,
-    id && { field, op: 'is', value: id, type: 'id' },
+    id && {
+      // changed: use oneOf when id is an array, is when it's a string
+      field,
+      op: Array.isArray(id) ? 'oneOf' : 'is',
+      value: id,
+      type: 'id',
+    },
     {
       field: 'date',
       op: isDateOp ? 'gte' : 'is',
@@ -70,7 +76,7 @@ export function showActivity({
     },
     !(
       ['netAssets', 'netDebts'].includes(balanceTypeOp) ||
-      (balanceTypeOp === 'totalTotals' &&
+      (['totalTotals', 'totalBudgeted'].includes(balanceTypeOp) &&
         (type === 'totals' || type === 'time'))
     ) && {
       field: 'amount',
@@ -97,10 +103,11 @@ export function showActivity({
         type: 'id',
       },
   ].filter(f => f);
-  void navigate('/accounts', {
-    state: {
-      goBack: true,
-      filterConditions,
-    },
+
+  void navigate(balanceTypeOp === 'totalBudgeted' ? '/budget' : '/accounts', {
+    state:
+      balanceTypeOp === 'totalBudgeted'
+        ? { goBack: true }
+        : { goBack: true, filterConditions },
   });
 }

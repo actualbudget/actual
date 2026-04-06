@@ -78,7 +78,7 @@ Actual has two parts, the client and a sync server. The primary task of the sync
 
 - [PikaPods](/docs/install/pikapods)
 - [Fly.io](/docs/install/fly)
-- [CLI Tool](/docs/install/cli-tool)
+- [Server CLI](/docs/install/cli-tool)
 - [Docker Install](/docs/install/docker)
 - [Build from source](/docs/install/build-from-source)
 

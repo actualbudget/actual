@@ -22,7 +22,7 @@ jobs:
   api:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
@@ -34,12 +34,12 @@ jobs:
       - name: Prepare bundle stats artifact
         run: cp packages/api/app/stats.json api-stats.json
       - name: Upload Build
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: actual-api
           path: packages/api/actual-api.tgz
       - name: Upload API bundle stats
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: api-build-stats
           path: api-stats.json
@@ -47,7 +47,7 @@ jobs:
   crdt:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
@@ -57,7 +57,7 @@ jobs:
       - name: Create package tgz
         run: cd packages/crdt && yarn pack && mv package.tgz actual-crdt.tgz
       - name: Upload Build
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: actual-crdt
           path: packages/crdt/actual-crdt.tgz
@@ -65,26 +65,51 @@ jobs:
   web:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Web
         run: yarn build:browser
       - name: Upload Build
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: actual-web
           path: packages/desktop-client/build
       - name: Upload Build Stats
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: build-stats
           path: packages/desktop-client/build-stats
 
+  cli:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Build CLI
+        run: yarn build:cli
+      - name: Create package tgz
+        run: cd packages/cli && yarn pack && mv package.tgz actual-cli.tgz
+      - name: Prepare bundle stats artifact
+        run: cp packages/cli/dist/stats.json cli-stats.json
+      - name: Upload Build
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: actual-cli
+          path: packages/cli/actual-cli.tgz
+      - name: Upload CLI bundle stats
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: cli-build-stats
+          path: cli-stats.json
+
   server:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
@@ -92,7 +117,7 @@ jobs:
       - name: Build Server
         run: yarn workspace @actual-app/sync-server build
       - name: Upload Build
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: sync-server
           path: packages/sync-server/build

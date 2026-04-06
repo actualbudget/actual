@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { isNonProductionEnvironment } from 'loot-core/shared/environment';
 import type { DarkTheme, Theme } from 'loot-core/types/prefs';
 
-import { parseInstalledTheme, validateThemeCss } from './customThemes';
+import {
+  parseInstalledTheme,
+  validateAndCombineThemeCss,
+} from './customThemes';
+import type { BaseTheme } from './customThemes';
 import * as darkTheme from './themes/dark';
-import * as developmentTheme from './themes/development';
 import * as lightTheme from './themes/light';
 import * as midnightTheme from './themes/midnight';
 
@@ -17,9 +19,6 @@ const themes = {
   dark: { name: 'Dark', colors: darkTheme },
   midnight: { name: 'Midnight', colors: midnightTheme },
   auto: { name: 'System default', colors: darkTheme },
-  ...(isNonProductionEnvironment() && {
-    development: { name: 'Development', colors: developmentTheme },
-  }),
 } as const;
 
 type ThemeKey = keyof typeof themes;
@@ -44,26 +43,47 @@ export function usePreferredDarkTheme() {
   return [darkTheme, setDarkTheme] as const;
 }
 
+function getBaseThemeColors(baseTheme: BaseTheme) {
+  return themes[baseTheme]?.colors;
+}
+
 export function ThemeStyle() {
   const [activeTheme] = useTheme();
   const [darkThemePreference] = usePreferredDarkTheme();
+  const customThemesEnabled = useFeatureFlag('customThemes');
+  const [installedCustomLightThemeJson] = useGlobalPref(
+    'installedCustomLightTheme',
+  );
+  const [installedCustomDarkThemeJson] = useGlobalPref(
+    'installedCustomDarkTheme',
+  );
   const [themeColors, setThemeColors] = useState<
-    | typeof lightTheme
-    | typeof darkTheme
-    | typeof midnightTheme
-    | typeof developmentTheme
-    | undefined
+    typeof lightTheme | typeof darkTheme | typeof midnightTheme | undefined
   >(undefined);
 
   useEffect(() => {
     if (activeTheme === 'auto') {
-      const darkTheme = themes[darkThemePreference];
+      const installedLight = customThemesEnabled
+        ? parseInstalledTheme(installedCustomLightThemeJson)
+        : null;
+      const installedDark = customThemesEnabled
+        ? parseInstalledTheme(installedCustomDarkThemeJson)
+        : null;
+
+      const lightColors =
+        (installedLight?.baseTheme &&
+          getBaseThemeColors(installedLight.baseTheme)) ||
+        themes['light'].colors;
+      const darkColors =
+        (installedDark?.baseTheme &&
+          getBaseThemeColors(installedDark.baseTheme)) ||
+        themes[darkThemePreference].colors;
 
       function darkThemeMediaQueryListener(event: MediaQueryListEvent) {
         if (event.matches) {
-          setThemeColors(darkTheme.colors);
+          setThemeColors(darkColors);
         } else {
-          setThemeColors(themes['light'].colors);
+          setThemeColors(lightColors);
         }
       }
       const darkThemeMediaQuery = window.matchMedia(
@@ -76,9 +96,9 @@ export function ThemeStyle() {
       );
 
       if (darkThemeMediaQuery.matches) {
-        setThemeColors(darkTheme.colors);
+        setThemeColors(darkColors);
       } else {
-        setThemeColors(themes['light'].colors);
+        setThemeColors(lightColors);
       }
 
       return () => {
@@ -88,9 +108,25 @@ export function ThemeStyle() {
         );
       };
     } else {
-      setThemeColors(themes[activeTheme as ThemeKey]?.colors);
+      const installedTheme = customThemesEnabled
+        ? parseInstalledTheme(installedCustomLightThemeJson)
+        : null;
+      if (installedTheme?.baseTheme) {
+        setThemeColors(
+          getBaseThemeColors(installedTheme.baseTheme) ??
+            themes[activeTheme as ThemeKey]?.colors,
+        );
+      } else {
+        setThemeColors(themes[activeTheme as ThemeKey]?.colors);
+      }
     }
-  }, [activeTheme, darkThemePreference]);
+  }, [
+    activeTheme,
+    darkThemePreference,
+    customThemesEnabled,
+    installedCustomLightThemeJson,
+    installedCustomDarkThemeJson,
+  ]);
 
   if (!themeColors) return null;
 
@@ -126,36 +162,44 @@ export function CustomThemeStyle() {
 
       let css = '';
 
-      if (lightTheme?.cssContent) {
-        try {
-          const validated = validateThemeCss(lightTheme.cssContent);
-          css += `@media (prefers-color-scheme: light) { ${validated} }\n`;
-        } catch (error) {
-          console.error('Invalid custom light theme CSS', { error });
+      try {
+        const lightCss = validateAndCombineThemeCss(
+          lightTheme?.cssContent,
+          lightTheme?.overrideCss,
+        );
+        if (lightCss) {
+          css += `@media (prefers-color-scheme: light) { ${lightCss} }\n`;
         }
+      } catch (error) {
+        console.error('Invalid custom light theme CSS', { error });
       }
 
-      if (darkTheme?.cssContent) {
-        try {
-          const validated = validateThemeCss(darkTheme.cssContent);
-          css += `@media (prefers-color-scheme: dark) { ${validated} }\n`;
-        } catch (error) {
-          console.error('Invalid custom dark theme CSS', { error });
+      try {
+        const darkCss = validateAndCombineThemeCss(
+          darkTheme?.cssContent,
+          darkTheme?.overrideCss,
+        );
+        if (darkCss) {
+          css += `@media (prefers-color-scheme: dark) { ${darkCss} }\n`;
         }
+      } catch (error) {
+        console.error('Invalid custom dark theme CSS', { error });
       }
 
       return css || null;
     }
 
     const installedTheme = parseInstalledTheme(installedCustomLightThemeJson);
-    const { cssContent } = installedTheme ?? {};
-
-    if (!cssContent) return null;
 
     try {
-      return validateThemeCss(cssContent);
+      return (
+        validateAndCombineThemeCss(
+          installedTheme?.cssContent,
+          installedTheme?.overrideCss,
+        ) || null
+      );
     } catch (error) {
-      console.error('Invalid custom theme CSS', { error, cssContent });
+      console.error('Invalid custom theme CSS', { error });
       return null;
     }
   }, [

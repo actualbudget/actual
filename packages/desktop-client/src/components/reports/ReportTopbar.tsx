@@ -243,7 +243,21 @@ export function ReportTopbar({
             onApplyFilter(e);
             onReportChange({ type: 'modify' });
           }}
-          exclude={[]}
+          exclude={
+            customReportItems.balanceType === 'Budgeted'
+              ? [
+                  'date',
+                  'account',
+                  'payee',
+                  'notes',
+                  'amount',
+                  'cleared',
+                  'reconciled',
+                  'transfer',
+                  'saved',
+                ]
+              : []
+          }
         />
         <SaveReportWrapper
           customReportItems={customReportItems}

@@ -52,15 +52,15 @@ export function MobileNavTabs() {
     maxWidth: `${100 / COLUMN_COUNT}%`,
   };
 
-  const [{ y }, api] = useSpring(() => ({ y: OPEN_DEFAULT_Y }));
+  const [{ y }, api] = useSpring(() => ({ from: { y: OPEN_DEFAULT_Y } }), []);
 
   const openFull = useCallback(
     ({ canceled }: { canceled?: boolean }) => {
       // when cancel is true, it means that the user passed the upwards threshold
       // so we change the spring config to create a nice wobbly effect
       setNavbarState('open');
-      api.start({
-        y: OPEN_FULL_Y,
+      void api.start({
+        to: { y: OPEN_FULL_Y },
         immediate: isTestEnv,
         config: canceled ? config.wobbly : config.stiff,
       });
@@ -71,8 +71,8 @@ export function MobileNavTabs() {
   const openDefault = useCallback(
     (velocity = 0) => {
       setNavbarState('default');
-      api.start({
-        y: OPEN_DEFAULT_Y,
+      void api.start({
+        to: { y: OPEN_DEFAULT_Y },
         immediate: isTestEnv,
         config: { ...config.stiff, velocity },
       });
@@ -83,8 +83,8 @@ export function MobileNavTabs() {
   const hide = useCallback(
     (velocity = 0) => {
       setNavbarState('hidden');
-      api.start({
-        y: HIDDEN_Y,
+      void api.start({
+        to: { y: HIDDEN_Y },
         immediate: isTestEnv,
         config: { ...config.stiff, velocity },
       });
@@ -199,7 +199,7 @@ export function MobileNavTabs() {
       } else {
         // when the user keeps dragging, we just move the sheet according to
         // the cursor position
-        api.start({ y: oy, immediate: true });
+        void api.start({ to: { y: oy }, immediate: true });
       }
     },
     {

@@ -22,6 +22,7 @@ import type {
 } from '../../types/models';
 import { aqlQuery } from '../aql';
 import * as db from '../db';
+import { TRANSACTION_SORT_INCREMENT } from '../db/sort';
 import { runMutator } from '../mutators';
 import { post } from '../post';
 import { getServer } from '../server-config';
@@ -67,10 +68,7 @@ function getAccountBalance(account) {
 }
 
 async function updateAccountBalance(id: AccountEntity['id'], balance: number) {
-  db.runQuery('UPDATE accounts SET balance_current = ? WHERE id = ?', [
-    balance,
-    id,
-  ]);
+  await db.update('accounts', { id, balance_current: balance });
 }
 
 async function getAccountOldestTransaction(id): Promise<TransactionEntity> {
@@ -507,6 +505,7 @@ export async function reconcileTransactions(
   isPreview = false,
   defaultCleared = true,
   updateDates = false,
+  reimportDeleted?: boolean,
 ): Promise<ReconcileTransactionsResult> {
   logger.log('Performing transaction reconciliation');
 
@@ -525,6 +524,7 @@ export async function reconcileTransactions(
     transactions,
     isBankSyncAccount,
     strictIdChecking,
+    reimportDeleted,
   );
 
   // Finally, generate & commit the changes
@@ -633,7 +633,7 @@ export async function reconcileTransactions(
   // Maintain the sort order of the server
   const now = Date.now();
   added.forEach((t, index) => {
-    t.sort_order ??= now - index;
+    t.sort_order ??= now - index * TRANSACTION_SORT_INCREMENT;
   });
 
   if (!isPreview) {
@@ -662,14 +662,18 @@ export async function matchTransactions(
   transactions,
   isBankSyncAccount = false,
   strictIdChecking = true,
+  reimportDeletedOverride?: boolean,
 ) {
   logger.log('Performing transaction reconciliation matching');
 
-  const reimportDeleted = await aqlQuery(
-    q('preferences')
-      .filter({ id: `sync-reimport-deleted-${acctId}` })
-      .select('value'),
-  ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
+  const reimportDeleted =
+    reimportDeletedOverride !== undefined
+      ? reimportDeletedOverride
+      : await aqlQuery(
+          q('preferences')
+            .filter({ id: `sync-reimport-deleted-${acctId}` })
+            .select('value'),
+        ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
 
   const hasMatched = new Set();
 
@@ -896,6 +900,14 @@ export async function addTransactions(
   }
 
   await createNewPayees(payeesToCreate, added);
+
+  // Assign decreasing sort_order values to preserve import file order.
+  // Transactions are displayed in sort_order DESC order, so first transaction
+  // in the file should have the highest sort_order.
+  const now = Date.now();
+  added.forEach((t, index) => {
+    t.sort_order ??= now - index * TRANSACTION_SORT_INCREMENT;
+  });
 
   let newTransactions;
   if (runTransfers || learnCategories) {

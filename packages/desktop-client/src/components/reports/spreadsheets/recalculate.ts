@@ -85,6 +85,7 @@ export function recalculate({
         netAssets: intervalTotals > 0 ? intervalTotals : 0,
         netDebts: intervalTotals < 0 ? intervalTotals : 0,
         totalTotals: intervalTotals,
+        totalBudgeted: intervalTotals,
         change,
         intervalStartDate: index === 0 ? startDate : intervalItem,
         intervalEndDate:
@@ -108,6 +109,7 @@ export function recalculate({
     netAssets: totalTotals > 0 ? totalTotals : 0,
     netDebts: totalTotals < 0 ? totalTotals : 0,
     totalTotals,
+    totalBudgeted: totalTotals,
     intervalData,
   };
 }

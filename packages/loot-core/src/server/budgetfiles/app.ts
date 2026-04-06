@@ -408,6 +408,11 @@ async function createBudget({
     id = testBudgetId || TEST_BUDGET_ID;
 
     if (await fs.exists(fs.getBudgetDir(id))) {
+      // Close the budget first if it's currently loaded, so the
+      // database is properly shut down before we remove its files.
+      if (prefs.getPrefs()?.id === id) {
+        await closeBudget();
+      }
       await fs.removeDirRecursively(fs.getBudgetDir(id));
     }
   } else {

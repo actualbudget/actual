@@ -17,6 +17,7 @@ import { Link } from '@desktop-client/components/common/Link';
 import { FixedSizeList } from '@desktop-client/components/FixedSizeList';
 import { useThemeCatalog } from '@desktop-client/hooks/useThemeCatalog';
 import {
+  embedThemeFonts,
   extractRepoOwner,
   fetchThemeCss,
   generateThemeId,
@@ -38,18 +39,21 @@ type ThemeInstallerProps = {
   onInstall: (theme: InstalledTheme) => void;
   onClose: () => void;
   installedTheme?: InstalledTheme | null;
+  mode?: 'light' | 'dark';
 };
 
 export function ThemeInstaller({
   onInstall,
   onClose,
   installedTheme,
+  mode,
 }: ThemeInstallerProps) {
   const { t } = useTranslation();
   const [selectedCatalogTheme, setSelectedCatalogTheme] =
     useState<CatalogTheme | null>(null);
   const [erroringTheme, setErroringTheme] = useState<CatalogTheme | null>(null);
   const [pastedCss, setPastedCss] = useState('');
+  const [cachedCatalogCss, setCachedCatalogCss] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,10 +64,17 @@ export function ThemeInstaller({
     error: catalogError,
   } = useThemeCatalog();
 
-  // Initialize pastedCss with installed custom theme CSS if it exists
+  // Initialize state from installed theme
   useEffect(() => {
-    // If there's an installed theme with empty repo (custom pasted CSS), restore it
-    if (installedTheme && !installedTheme.repo) {
+    if (!installedTheme) return;
+
+    if (installedTheme.repo) {
+      // Catalog theme installed — restore overrideCss into text area if present
+      if (installedTheme.overrideCss) {
+        setPastedCss(installedTheme.overrideCss);
+      }
+    } else {
+      // Custom pasted CSS — restore into text area
       setPastedCss(installedTheme.cssContent);
     }
   }, [installedTheme]);
@@ -103,6 +114,8 @@ export function ThemeInstaller({
       id: string;
       errorMessage: string;
       catalogTheme?: CatalogTheme | null;
+      baseTheme?: 'light' | 'dark' | 'midnight';
+      overrideCss?: string;
     }) => {
       setError(null);
       setErroringTheme(null);
@@ -111,15 +124,26 @@ export function ThemeInstaller({
       try {
         const css =
           typeof options.css === 'string' ? options.css : await options.css;
-        const validatedCss = validateThemeCss(css);
+        const validatedCss = css ? validateThemeCss(css) : '';
 
-        const installedTheme: InstalledTheme = {
+        const newTheme: InstalledTheme = {
           id: options.id,
           name: options.name,
           repo: options.repo,
           cssContent: validatedCss,
+          baseTheme: options.catalogTheme
+            ? options.catalogTheme.mode === 'dark'
+              ? 'dark'
+              : 'light'
+            : options.baseTheme,
         };
-        onInstall(installedTheme);
+        if (options.overrideCss) {
+          newTheme.overrideCss = validateThemeCss(options.overrideCss);
+        }
+        if (options.catalogTheme) {
+          setCachedCatalogCss(validatedCss);
+        }
+        onInstall(newTheme);
         // Only set selectedCatalogTheme on success if it's a catalog theme
         if (options.catalogTheme) {
           setSelectedCatalogTheme(options.catalogTheme);
@@ -140,40 +164,64 @@ export function ThemeInstaller({
 
   const handleCatalogThemeClick = useCallback(
     async (theme: CatalogTheme) => {
-      setPastedCss('');
       setSelectedCatalogTheme(theme);
 
       const normalizedRepo = normalizeGitHubRepo(theme.repo);
+      // Fetch CSS and embed any referenced font files as data: URIs
+      const cssWithFonts = fetchThemeCss(theme.repo).then(css =>
+        embedThemeFonts(css, theme.repo),
+      );
       await installTheme({
-        css: fetchThemeCss(theme.repo),
+        css: cssWithFonts,
         name: theme.name,
         repo: normalizedRepo,
         id: generateThemeId(normalizedRepo),
         errorMessage: t('Failed to load theme'),
         catalogTheme: theme,
+        overrideCss: pastedCss.trim() || undefined,
       });
     },
-    [installTheme, t],
+    [installTheme, pastedCss, t],
   );
 
   const handlePastedCssChange = useCallback((value: string) => {
     setPastedCss(value);
-    setSelectedCatalogTheme(null);
     setErroringTheme(null);
     setError(null);
   }, []);
 
   const handleInstallPastedCss = useCallback(() => {
-    if (!pastedCss.trim()) return;
+    // Determine the base catalog CSS: prefer the in-session selection,
+    // fall back to the previously installed catalog theme
+    const hasCatalog = selectedCatalogTheme || installedTheme?.repo;
+    const baseCss = selectedCatalogTheme
+      ? cachedCatalogCss
+      : (installedTheme?.cssContent ?? '');
+    const repo = selectedCatalogTheme
+      ? normalizeGitHubRepo(selectedCatalogTheme.repo)
+      : (installedTheme?.repo ?? '');
 
     void installTheme({
-      css: pastedCss.trim(),
-      name: t('Custom Theme'),
-      repo: '',
-      id: generateThemeId(`pasted-${Date.now()}`),
+      css: hasCatalog ? baseCss : '',
+      name:
+        selectedCatalogTheme?.name ?? installedTheme?.name ?? t('Custom Theme'),
+      repo,
+      id: repo
+        ? generateThemeId(repo)
+        : generateThemeId(`pasted-${Date.now()}`),
       errorMessage: t('Failed to validate theme CSS'),
+      catalogTheme: selectedCatalogTheme,
+      baseTheme: installedTheme?.baseTheme,
+      overrideCss: pastedCss.trim() || undefined,
     });
-  }, [pastedCss, installTheme, t]);
+  }, [
+    pastedCss,
+    selectedCatalogTheme,
+    cachedCatalogCss,
+    installedTheme,
+    installTheme,
+    t,
+  ]);
 
   return (
     <View
@@ -246,9 +294,9 @@ export function ThemeInstaller({
                   return null;
                 }
 
-                const catalogItems = [...(catalog ?? [])].sort((a, b) =>
-                  a.name.localeCompare(b.name),
-                );
+                const catalogItems = [...(catalog ?? [])]
+                  .filter(catalogTheme => !mode || catalogTheme.mode === mode)
+                  .sort((a, b) => a.name.localeCompare(b.name));
                 const itemsPerRow = getItemsPerRow(width);
                 const rows: CatalogTheme[][] = [];
                 for (let i = 0; i < catalogItems.length; i += itemsPerRow) {
@@ -400,7 +448,7 @@ export function ThemeInstaller({
         }}
       >
         <Text style={{ marginBottom: 8, color: themeStyle.pageTextSubdued }}>
-          <Trans>or paste CSS directly:</Trans>
+          <Trans>Additional CSS overrides:</Trans>
         </Text>
         <TextArea
           value={pastedCss}
@@ -423,7 +471,7 @@ export function ThemeInstaller({
           <Button
             variant="normal"
             onPress={handleInstallPastedCss}
-            isDisabled={!pastedCss.trim() || isLoading}
+            isDisabled={isLoading}
           >
             <Trans>Apply</Trans>
           </Button>

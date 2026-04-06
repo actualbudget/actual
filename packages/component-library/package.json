@@ -40,7 +40,7 @@
     "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
     "start:storybook": "storybook dev -p 6006",
     "build:storybook": "storybook build",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsgo -b"
   },
   "dependencies": {
     "@emotion/css": "^11.13.5",
@@ -48,18 +48,21 @@
     "usehooks-ts": "^3.1.1"
   },
   "devDependencies": {
-    "@chromatic-com/storybook": "^5.0.0",
-    "@storybook/addon-a11y": "^10.2.7",
-    "@storybook/addon-docs": "^10.2.7",
-    "@storybook/react-vite": "^10.2.7",
+    "@chromatic-com/storybook": "^5.0.1",
+    "@storybook/addon-a11y": "^10.2.16",
+    "@storybook/addon-docs": "^10.2.16",
+    "@storybook/react-vite": "^10.2.16",
+    "@svgr/babel-plugin-add-jsx-attribute": "^8.0.0",
     "@svgr/cli": "^8.1.0",
-    "@types/react": "^19.2.5",
-    "eslint-plugin-storybook": "^10.2.7",
+    "@types/react": "^19.2.14",
+    "@typescript/native-preview": "^7.0.0-dev.20260309.1",
+    "@vitejs/plugin-react": "^6.0.0",
+    "eslint-plugin-storybook": "^10.2.16",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "storybook": "^10.2.7",
-    "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^4.0.18"
+    "storybook": "^10.2.16",
+    "vite": "^8.0.0",
+    "vitest": "^4.1.0"
   },
   "peerDependencies": {
     "react": ">=19.2",

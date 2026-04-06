@@ -12,7 +12,7 @@ jobs:
     name: Build and pack npm packages
     if: github.event.repository.fork == false
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Set up environment
         uses: ./.github/actions/setup
@@ -20,18 +20,26 @@ jobs:
       - name: Update package versions
         run: |
           # Get new nightly versions
-          NEW_WEB_VERSION=$(node ./packages/ci-actions/bin/get-next-package-version.js --package-json ./packages/desktop-client/package.json --type nightly)
-          NEW_SYNC_VERSION=$(node ./packages/ci-actions/bin/get-next-package-version.js --package-json ./packages/sync-server/package.json --type nightly)
-          NEW_API_VERSION=$(node ./packages/ci-actions/bin/get-next-package-version.js --package-json ./packages/api/package.json --type nightly)
+          NEW_CORE_VERSION=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts --package-json ./packages/loot-core/package.json --type nightly)
+          NEW_WEB_VERSION=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts --package-json ./packages/desktop-client/package.json --type nightly)
+          NEW_SYNC_VERSION=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts --package-json ./packages/sync-server/package.json --type nightly)
+          NEW_API_VERSION=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts --package-json ./packages/api/package.json --type nightly)
+          NEW_CLI_VERSION=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts --package-json ./packages/cli/package.json --type nightly)
 
           # Set package versions
+          npm version $NEW_CORE_VERSION --no-git-tag-version --workspace=@actual-app/core --no-workspaces-update
           npm version $NEW_WEB_VERSION --no-git-tag-version --workspace=@actual-app/web --no-workspaces-update
           npm version $NEW_SYNC_VERSION --no-git-tag-version --workspace=@actual-app/sync-server --no-workspaces-update
           npm version $NEW_API_VERSION --no-git-tag-version --workspace=@actual-app/api --no-workspaces-update
+          npm version $NEW_CLI_VERSION --no-git-tag-version --workspace=@actual-app/cli --no-workspaces-update
 
       - name: Yarn install
         run: |
           yarn install
+
+      - name: Pack the core package
+        run: |
+          yarn workspace @actual-app/core pack --filename @actual-app/core.tgz
 
       - name: Build Server & Web
         run: yarn build:server
@@ -48,14 +56,23 @@ jobs:
         run: |
           yarn workspace @actual-app/api pack --filename @actual-app/api.tgz
 
+      - name: Build CLI
+        run: yarn workspace @actual-app/cli build
+
+      - name: Pack the cli package
+        run: |
+          yarn workspace @actual-app/cli pack --filename @actual-app/cli.tgz
+
       - name: Upload package artifacts
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: npm-packages
           path: |
+            packages/loot-core/@actual-app/core.tgz
             packages/desktop-client/@actual-app/web.tgz
             packages/sync-server/@actual-app/sync-server.tgz
             packages/api/@actual-app/api.tgz
+            packages/cli/@actual-app/cli.tgz
 
   publish:
     runs-on: ubuntu-latest
@@ -66,15 +83,21 @@ jobs:
       packages: write
     steps:
       - name: Download the artifacts
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: npm-packages
 
       - name: Setup node and npm registry
-        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish Core
+        run: |
+          npm publish loot-core/@actual-app/core.tgz --access public --tag nightly
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish Web
         run: |
@@ -91,5 +114,11 @@ jobs:
       - name: Publish API
         run: |
           npm publish api/@actual-app/api.tgz --access public --tag nightly
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish CLI
+        run: |
+          npm publish cli/@actual-app/cli.tgz --access public --tag nightly
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

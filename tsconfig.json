@@ -7,7 +7,8 @@
     { "path": "./packages/api" },
     { "path": "./packages/desktop-client" },
     { "path": "./packages/sync-server" },
-    { "path": "./packages/desktop-electron" }
+    { "path": "./packages/desktop-electron" },
+    { "path": "./packages/cli" }
   ],
   "compilerOptions": {
     "target": "ES2022",

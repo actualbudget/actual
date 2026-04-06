@@ -22,6 +22,7 @@ import type {
   sortByOpType,
   TransactionEntity,
 } from 'loot-core/types/models';
+import type { SyncedPrefs } from 'loot-core/types/prefs';
 import type { TransObjectLiteral } from 'loot-core/types/util';
 
 import { Warning } from '@desktop-client/components/alerts';
@@ -119,22 +120,37 @@ function useSelectedCategories(
   }, [existingCategoryCondition, categories]);
 }
 
+const BUDGETED_SUPPORTED_CONDITION_FIELDS = new Set<
+  RuleConditionEntity['field']
+>(['category']);
+
 export function CustomReport() {
   const params = useParams();
   const { data: report, isPending } = useCustomReport(params.id);
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
   if (isPending) {
     return <LoadingIndicator />;
   }
 
-  return <CustomReportInner key={report?.id} report={report} />;
+  return (
+    <CustomReportInner
+      key={report?.id}
+      report={report}
+      budgetType={budgetType}
+    />
+  );
 }
 
 type CustomReportInnerProps = {
   report?: CustomReportEntity;
+  budgetType: SyncedPrefs['budgetType'];
 };
 
-function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
+function CustomReportInner({
+  report: initialReport,
+  budgetType,
+}: CustomReportInnerProps) {
   const locale = useLocale();
   const { t } = useTranslation();
   const format = useFormat();
@@ -174,7 +190,11 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     ? JSON.parse(reportFromSessionStorage)
     : {};
   const combine = initialReport ?? defaultReport;
-  const loadReport: CustomReportEntity = { ...combine, ...session };
+
+  const loadReport: CustomReportEntity = {
+    ...combine,
+    ...session,
+  };
 
   const [allIntervals, setAllIntervals] = useState<
     Array<{
@@ -269,7 +289,6 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const [graphType, setGraphType] = useState(loadReport.graphType);
 
   const [dateRange, setDateRange] = useState(loadReport.dateRange);
-  const [dataCheck, setDataCheck] = useState(false);
   const dateRangeLine =
     interval === 'Daily'
       ? 0
@@ -482,12 +501,33 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     accounts,
   });
 
+  useEffect(() => {
+    if (balanceTypeOp !== 'totalBudgeted') {
+      return;
+    }
+
+    const supportedConditions = conditions.filter(cond =>
+      BUDGETED_SUPPORTED_CONDITION_FIELDS.has(cond.field),
+    );
+
+    if (supportedConditions.length === conditions.length) {
+      return;
+    }
+
+    setSessionReport('conditions', supportedConditions);
+    onApplyFilter(null);
+    supportedConditions.forEach(condition => {
+      onApplyFilter(condition);
+    });
+  }, [balanceTypeOp, conditions, onApplyFilter]);
+
   const getGroupData = useMemo(() => {
     return createGroupedSpreadsheet({
       startDate,
       endDate,
       interval,
       categories,
+      budgetType,
       conditions,
       conditionsOp,
       showEmpty,
@@ -503,6 +543,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     startDate,
     endDate,
     interval,
+    budgetType,
     balanceTypeOp,
     categories,
     conditions,
@@ -517,13 +558,12 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   ]);
 
   const getGraphData = useMemo(() => {
-    // TODO: fix me - state mutations should not happen inside `useMemo`
-    setDataCheck(false);
     return createCustomSpreadsheet({
       startDate,
       endDate,
       interval,
       categories,
+      budgetType,
       conditions,
       conditionsOp,
       showEmpty,
@@ -538,13 +578,13 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
       accounts,
       graphType,
       firstDayOfWeekIdx,
-      setDataCheck,
     });
   }, [
     startDate,
     endDate,
     interval,
     groupBy,
+    budgetType,
     balanceTypeOp,
     categories,
     payees,
@@ -563,7 +603,9 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);
 
-  const data: DataEntity = { ...graphData, groupedData } as DataEntity;
+  const data: DataEntity | null = graphData
+    ? { ...graphData, groupedData }
+    : null;
 
   const customReportItems: CustomReportEntity = {
     id: '',
@@ -601,7 +643,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     }
   }, [setViewLegendPref, setViewLabelsPref, mode, graphType]);
 
-  if (!allIntervals || !data) {
+  if (allIntervals.length === 0) {
     return null;
   }
 
@@ -731,7 +773,9 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
     setTrimIntervals(input.trimIntervals);
     setGraphType(input.graphType);
     onApplyFilter(null);
-    (input.conditions || []).forEach(condition => onApplyFilter(condition));
+    (input.conditions || []).forEach(condition => {
+      onApplyFilter(condition);
+    });
     onConditionsOpChange(input.conditionsOp);
   };
 
@@ -791,7 +835,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         setReport(defaultReport);
         setReportData(defaultReport);
         break;
-      case 'choose':
+      case 'choose': {
         sessionStorage.clear();
         const newReport = params.savedReport || report;
         setSessionReport('savedStatus', 'saved');
@@ -800,6 +844,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
         setReportData(newReport);
         void navigate(`/reports/custom/${newReport.id}`);
         break;
+      }
       default:
     }
   };
@@ -970,7 +1015,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
                 padding: 10,
               }}
             >
-              {graphType !== 'TableGraph' && (
+              {graphType !== 'TableGraph' && data && (
                 <View
                   style={{
                     alignItems: 'flex-end',
@@ -998,7 +1043,7 @@ function CustomReportInner({ report: initialReport }: CustomReportInnerProps) {
                 </View>
               )}
               <View style={{ flex: 1, overflow: 'auto' }}>
-                {dataCheck ? (
+                {data ? (
                   <ChooseGraph
                     data={data}
                     filters={conditions}

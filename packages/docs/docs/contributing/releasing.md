@@ -4,7 +4,7 @@ In the open-source version of Actual, there are 3 NPM packages:
 
 - [@actual-app/api](https://www.npmjs.com/package/@actual-app/api): The API for the underlying functionality. This includes the entire backend of Actual, meant to be used with Node.
 - [@actual-app/web](https://www.npmjs.com/package/@actual-app/web): A web build that will serve the app with a web frontend. This includes both the frontend and backend of Actual. It includes the backend as well because it's built to be used as a Web Worker.
-- [@actual-app/sync-server](https://www.npmjs.com/package/@actual-app/sync-server): The entire sync-server and underlying web client in one package. This includes a CLI tool, meant to be used with Node.
+- [@actual-app/sync-server](https://www.npmjs.com/package/@actual-app/sync-server): The entire sync-server and underlying web client in one package. This includes the Server CLI, meant to be used with Node.
 
 All packages and the main Actual release are versioned together. That makes it clear which version of the package should be used with the version of Actual.
 

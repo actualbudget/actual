@@ -128,7 +128,7 @@ export function SelectLinkedAccountsModal({
             externalAccounts: toSort as SyncServerGoCardlessAccount[],
           };
         default:
-          throw new Error(`Unrecognized sync source: ${syncSource}`);
+          throw new Error(`Unrecognized sync source: ${String(syncSource)}`);
       }
     }, [externalAccounts, syncSource, requisitionId]);
 

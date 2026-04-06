@@ -188,6 +188,10 @@ const DATE_FUNCTIONS = new Set([
 const QUERY_FUNCTIONS = new Set([
   'QUERY',
   'QUERY_COUNT',
+  'BUDGET_QUERY',
+  'QUERY_EXTRACT_CATEGORIES',
+  'QUERY_EXTRACT_TIMEFRAME_START',
+  'QUERY_EXTRACT_TIMEFRAME_END',
   'LOOKUP',
   'VLOOKUP',
   'HLOOKUP',
@@ -403,6 +407,15 @@ const transactionFields: Completion[] = [
       'Account balance as of the date of the transaction, excluding the transaction amount. Use for calculations and comparisons.\n\nExample: `=IF(balance < 0, "Negative Balance", "Positive Balance")`',
     ),
   },
+  {
+    label: 'parent_amount',
+    type: 'variable',
+    section: '💰 Transaction Fields',
+    boost: 5,
+    info: t(
+      'The amount of the parent transaction in cents in split transactions.\n\nExample: `=(parent_amount / 100) * .05`',
+    ),
+  },
 ];
 
 // Convert function definitions to completions with grouping
@@ -484,6 +497,50 @@ export function excelFormulaAutocomplete(
           ),
           apply: `QUERY_COUNT("${queryName}")`,
           boost: 14,
+        },
+        {
+          label: `BUDGET_QUERY("budgeted", QUERY_EXTRACT_CATEGORIES("${queryName}"), QUERY_EXTRACT_TIMEFRAME_START("${queryName}"), QUERY_EXTRACT_TIMEFRAME_END("${queryName}"))`,
+          type: 'function',
+          section: '🔍 Query Functions',
+          info: t(
+            'Sum of budgeted amounts with extracted parameters from {{queryName}}.',
+            { queryName },
+          ),
+          apply: `BUDGET_QUERY("budgeted", QUERY_EXTRACT_CATEGORIES("${queryName}"), QUERY_EXTRACT_TIMEFRAME_START("${queryName}"), QUERY_EXTRACT_TIMEFRAME_END("${queryName}"))`,
+          boost: 13,
+        },
+        {
+          label: `BUDGET_QUERY("spent", QUERY_EXTRACT_CATEGORIES("${queryName}"), QUERY_EXTRACT_TIMEFRAME_START("${queryName}"), QUERY_EXTRACT_TIMEFRAME_END("${queryName}"))`,
+          type: 'function',
+          section: '🔍 Query Functions',
+          info: t(
+            'Sum of spending with extracted parameters from {{queryName}}.',
+            { queryName },
+          ),
+          apply: `BUDGET_QUERY("spent", QUERY_EXTRACT_CATEGORIES("${queryName}"), QUERY_EXTRACT_TIMEFRAME_START("${queryName}"), QUERY_EXTRACT_TIMEFRAME_END("${queryName}"))`,
+          boost: 13,
+        },
+        {
+          label: `BUDGET_QUERY("balance_start", QUERY_EXTRACT_CATEGORIES("${queryName}"), QUERY_EXTRACT_TIMEFRAME_START("${queryName}"), QUERY_EXTRACT_TIMEFRAME_END("${queryName}"))`,
+          type: 'function',
+          section: '🔍 Query Functions',
+          info: t(
+            'Opening balance with extracted parameters from {{queryName}}.',
+            { queryName },
+          ),
+          apply: `BUDGET_QUERY("balance_start", QUERY_EXTRACT_CATEGORIES("${queryName}"), QUERY_EXTRACT_TIMEFRAME_START("${queryName}"), QUERY_EXTRACT_TIMEFRAME_END("${queryName}"))`,
+          boost: 13,
+        },
+        {
+          label: `BUDGET_QUERY("balance_end", QUERY_EXTRACT_CATEGORIES("${queryName}"), QUERY_EXTRACT_TIMEFRAME_START("${queryName}"), QUERY_EXTRACT_TIMEFRAME_END("${queryName}"))`,
+          type: 'function',
+          section: '🔍 Query Functions',
+          info: t(
+            'Closing balance with extracted parameters from {{queryName}}.',
+            { queryName },
+          ),
+          apply: `BUDGET_QUERY("balance_end", QUERY_EXTRACT_CATEGORIES("${queryName}"), QUERY_EXTRACT_TIMEFRAME_START("${queryName}"), QUERY_EXTRACT_TIMEFRAME_END("${queryName}"))`,
+          boost: 13,
         },
       ])
     : [];

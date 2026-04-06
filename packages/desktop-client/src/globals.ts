@@ -1,1 +1,1 @@
-import 'loot-core/typings/window';
+import '@actual-app/core/typings/window';

@@ -21,10 +21,10 @@ const deleteUser = userId => {
   getAccountDb().mutate('DELETE FROM users WHERE id = ?', [userId]);
 };
 
-const createSession = (userId, sessionToken) => {
+const createSession = (userId, sessionToken, authMethod = null) => {
   getAccountDb().mutate(
-    'INSERT INTO sessions (token, user_id, expires_at) VALUES (?, ?, ?)',
-    [sessionToken, userId, Math.floor(Date.now() / 1000) + 60 * 60], // Expire in 1 hour (stored in seconds)
+    'INSERT INTO sessions (token, user_id, expires_at, auth_method) VALUES (?, ?, ?, ?)',
+    [sessionToken, userId, Math.floor(Date.now() / 1000) + 60 * 60, authMethod], // Expire in 1 hour (stored in seconds)
   );
 };
 
@@ -46,17 +46,28 @@ const clearAuth = () => {
 };
 
 describe('/change-password', () => {
-  let userId, sessionToken;
+  let adminUserId,
+    basicUserId,
+    adminPasswordToken,
+    adminOpenidToken,
+    basicPasswordToken;
 
   beforeEach(() => {
-    userId = uuidv4();
-    sessionToken = generateSessionToken();
-    createUser(userId, 'testuser', ADMIN_ROLE);
-    createSession(userId, sessionToken);
+    adminUserId = uuidv4();
+    basicUserId = uuidv4();
+    adminPasswordToken = generateSessionToken();
+    adminOpenidToken = generateSessionToken();
+    basicPasswordToken = generateSessionToken();
+    createUser(adminUserId, 'admin', ADMIN_ROLE);
+    createUser(basicUserId, 'basic', BASIC_ROLE);
+    createSession(adminUserId, adminPasswordToken, 'password');
+    createSession(adminUserId, adminOpenidToken, 'openid');
+    createSession(basicUserId, basicPasswordToken, 'password');
   });
 
   afterEach(() => {
-    deleteUser(userId);
+    deleteUser(adminUserId);
+    deleteUser(basicUserId);
     clearAuth();
   });
 
@@ -70,12 +81,28 @@ describe('/change-password', () => {
     expect(res.body).toHaveProperty('reason', 'unauthorized');
   });
 
-  it('should return 403 when active auth method is openid', async () => {
-    insertAuthRow('openid', 1);
+  it('should return 403 when user is not an admin', async () => {
+    bootstrapPassword('oldpassword');
 
     const res = await request(app)
       .post('/change-password')
-      .set('x-actual-token', sessionToken)
+      .set('x-actual-token', basicPasswordToken)
+      .send({ password: 'newpassword' });
+
+    expect(res.statusCode).toEqual(403);
+    expect(res.body).toEqual({
+      status: 'error',
+      reason: 'forbidden',
+      details: 'permission-not-found',
+    });
+  });
+
+  it('should return 403 when admin session uses openid auth method', async () => {
+    bootstrapPassword('oldpassword');
+
+    const res = await request(app)
+      .post('/change-password')
+      .set('x-actual-token', adminOpenidToken)
       .send({ password: 'newpassword' });
 
     expect(res.statusCode).toEqual(403);
@@ -86,24 +113,24 @@ describe('/change-password', () => {
     });
   });
 
-  it('should return 400 when active method is password but password is empty', async () => {
+  it('should return 400 when admin password-auth session sends empty password', async () => {
     bootstrapPassword('oldpassword');
 
     const res = await request(app)
       .post('/change-password')
-      .set('x-actual-token', sessionToken)
+      .set('x-actual-token', adminPasswordToken)
       .send({ password: '' });
 
     expect(res.statusCode).toEqual(400);
     expect(res.body).toEqual({ status: 'error', reason: 'invalid-password' });
   });
 
-  it('should return 200 when active method is password and new password is valid', async () => {
+  it('should return 200 when admin with password-auth session sends valid password', async () => {
     bootstrapPassword('oldpassword');
 
     const res = await request(app)
       .post('/change-password')
-      .set('x-actual-token', sessionToken)
+      .set('x-actual-token', adminPasswordToken)
       .send({ password: 'newpassword' });
 
     expect(res.statusCode).toEqual(200);
@@ -127,11 +154,11 @@ describe('getLoginMethod()', () => {
     expect(getLoginMethod(req)).toBe('openid');
   });
 
-  it('ignores a client-requested method that is inactive in DB', () => {
+  it('honors a client-requested method that exists but is inactive in DB', () => {
     insertAuthRow('openid', 1);
     insertAuthRow('password', 0);
     const req = { body: { loginMethod: 'password' } };
-    expect(getLoginMethod(req)).toBe('openid');
+    expect(getLoginMethod(req)).toBe('password');
   });
 
   it('ignores a client-requested method that is not in DB', () => {
@@ -144,6 +171,43 @@ describe('getLoginMethod()', () => {
     // auth table is empty — getActiveLoginMethod() returns undefined
     // config default for loginMethod is 'password'
     expect(getLoginMethod(undefined)).toBe('password');
+  });
+});
+
+describe('/login', () => {
+  afterEach(() => {
+    clearAuth();
+  });
+
+  it('should allow password login when OIDC is the active method', async () => {
+    bootstrapPassword('testpassword');
+    insertAuthRow('openid', 1);
+    getAccountDb().mutate(
+      "UPDATE auth SET active = 0 WHERE method = 'password'",
+    );
+
+    const res = await request(app)
+      .post('/login')
+      .send({ loginMethod: 'password', password: 'testpassword' });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toHaveProperty('status', 'ok');
+    expect(res.body.data).toHaveProperty('token');
+  });
+
+  it('should reject wrong password even when method is explicitly requested', async () => {
+    bootstrapPassword('testpassword');
+    insertAuthRow('openid', 1);
+    getAccountDb().mutate(
+      "UPDATE auth SET active = 0 WHERE method = 'password'",
+    );
+
+    const res = await request(app)
+      .post('/login')
+      .send({ loginMethod: 'password', password: 'wrongpassword' });
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toHaveProperty('reason', 'invalid-password');
   });
 });
 

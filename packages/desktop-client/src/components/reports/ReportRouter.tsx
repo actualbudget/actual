@@ -8,6 +8,7 @@ import { Crossover } from './reports/Crossover';
 import { CustomReport } from './reports/CustomReport';
 import { Formula } from './reports/Formula';
 import { NetWorth } from './reports/NetWorth';
+import { Sankey } from './reports/Sankey';
 import { Spending } from './reports/Spending';
 import { Summary } from './reports/Summary';
 import { ReportsDashboardRouter } from './ReportsDashboardRouter';
@@ -17,6 +18,7 @@ import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 export function ReportRouter() {
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
+  const sankeyReportEnabled = useFeatureFlag('sankeyReport');
 
   return (
     <Routes>
@@ -48,6 +50,12 @@ export function ReportRouter() {
       <Route path="/calendar/:id" element={<Calendar />} />
       <Route path="/formula" element={<Formula />} />
       <Route path="/formula/:id" element={<Formula />} />
+      {sankeyReportEnabled && (
+        <>
+          <Route path="/sankey" element={<Sankey />} />
+          <Route path="/sankey/:id" element={<Sankey />} />
+        </>
+      )}
     </Routes>
   );
 }

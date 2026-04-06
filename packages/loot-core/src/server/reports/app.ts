@@ -1,7 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { q } from 'loot-core/shared/query';
-
+import { q } from '#shared/query';
 import type { CustomReportData, CustomReportEntity } from '../../types/models';
 import { createApp } from '../app';
 import { aqlQuery } from '../aql';
@@ -32,7 +31,7 @@ export const reportModel = {
   toJS(row: CustomReportData): CustomReportEntity {
     return {
       id: row.id,
-      name: row.name,
+      name: row.name ?? '',
       startDate: row.start_date,
       endDate: row.end_date,
       isDateStatic: row.date_static === 1,

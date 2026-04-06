@@ -3,8 +3,8 @@ import * as monthUtils from 'loot-core/shared/months';
 import type { GroupedEntity } from 'loot-core/types/models';
 
 import type { createCustomSpreadsheetProps } from './custom-spreadsheet';
+import { fetchSpreadsheetQueryData } from './fetchSpreadsheetQueryData';
 import { filterEmptyRows } from './filterEmptyRows';
-import { makeQuery } from './makeQuery';
 import { recalculate } from './recalculate';
 import { sortData } from './sortData';
 import {
@@ -18,13 +18,13 @@ import {
 } from '@desktop-client/components/reports/ReportOptions';
 import type { QueryDataEntity } from '@desktop-client/components/reports/ReportOptions';
 import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 export function createGroupedSpreadsheet({
   startDate,
   endDate,
   interval,
   categories,
+  budgetType = 'envelope',
   conditions = [],
   conditionsOp,
   showEmpty,
@@ -43,6 +43,7 @@ export function createGroupedSpreadsheet({
     setData: (data: GroupedEntity[]) => void,
   ) => {
     if (categoryList.length === 0) {
+      setData([]);
       return;
     }
 
@@ -53,30 +54,22 @@ export function createGroupedSpreadsheet({
 
     let assets: QueryDataEntity[];
     let debts: QueryDataEntity[];
-    [assets, debts] = await Promise.all([
-      aqlQuery(
-        makeQuery(
-          'assets',
-          startDate,
-          endDate,
-          interval,
-          conditionsOpKey,
-          filters,
-        ),
-      ).then(({ data }) => data),
-      aqlQuery(
-        makeQuery(
-          'debts',
-          startDate,
-          endDate,
-          interval,
-          conditionsOpKey,
-          filters,
-        ),
-      ).then(({ data }) => data),
-    ]);
 
-    if (interval === 'Weekly') {
+    ({ assets, debts } = await fetchSpreadsheetQueryData({
+      balanceTypeOp,
+      startDate,
+      endDate,
+      interval,
+      categories: categories.list,
+      categoryGroups: categories.grouped,
+      conditions,
+      conditionsOp,
+      conditionsOpKey,
+      filters,
+      budgetType,
+    }));
+
+    if (interval === 'Weekly' && balanceTypeOp !== 'totalBudgeted') {
       debts = debts.map(d => {
         return {
           ...d,

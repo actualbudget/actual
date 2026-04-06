@@ -1367,6 +1367,7 @@ export function useTableNavigator<T extends TableItem>(
           case 'ArrowUp':
           case 'k':
             if (e.target.tagName !== 'INPUT') {
+              e.preventDefault();
               onMove('up');
             }
             break;
@@ -1374,6 +1375,7 @@ export function useTableNavigator<T extends TableItem>(
           case 'ArrowDown':
           case 'j':
             if (e.target.tagName !== 'INPUT') {
+              e.preventDefault();
               onMove('down');
             }
             break;

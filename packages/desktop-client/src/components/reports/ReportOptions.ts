@@ -48,11 +48,17 @@ const balanceTypeOptions = [
     key: 'Net Deposit',
     format: 'netAssets' as const,
   },
+  {
+    description: t('Budgeted'),
+    key: 'Budgeted',
+    format: 'totalBudgeted' as const,
+  },
 ];
 
 const groupByOptions = [
   { description: t('Category'), key: 'Category' },
   { description: t('Group'), key: 'Group' },
+  { description: t('Category+Group'), key: 'CategoryGroup' }, // new: two-ring donut support
   { description: t('Payee'), key: 'Payee' },
   { description: t('Account'), key: 'Account' },
   { description: t('Interval'), key: 'Interval' },
@@ -220,12 +226,10 @@ const intervalOptions: intervalOptionsProps[] = [
     format: 'yy-MM-dd',
     range: 'weekRangeInclusive',
   },
-  //{ value: 3, description: 'Fortnightly', name: 3},
   {
     description: t('Monthly'),
     key: 'Monthly',
     name: 'Month',
-
     format: "MMM ''yy",
     range: 'rangeInclusive',
   },
@@ -328,17 +332,11 @@ export const categoryLists = (categories: {
   const categoriesToSort = [...categories.list];
   const categoryList: UncategorizedEntity[] = [
     ...categoriesToSort.sort((a, b) => {
-      //The point of this sorting is to make the graphs match the "budget" page
       const catGroupA = categories.grouped.find(f => f.id === a.group);
       const catGroupB = categories.grouped.find(f => f.id === b.group);
-      //initial check that both a and b have a sort_order and category group
       return a.sort_order && b.sort_order && catGroupA && catGroupB
-        ? /*sorting by "is_income" because sort_order for this group is
-        separate from other groups*/
-          Number(catGroupA.is_income) - Number(catGroupB.is_income) ||
-            //Next, sorting by group sort_order
+        ? Number(catGroupA.is_income) - Number(catGroupB.is_income) ||
             (catGroupA.sort_order ?? 0) - (catGroupB.sort_order ?? 0) ||
-            //Finally, sorting by category within each group
             a.sort_order - b.sort_order
         : 0;
     }),
@@ -372,6 +370,20 @@ export const groupBySelections = (
       groupByLabel = 'category';
       break;
     case 'Group':
+      groupByList = categoryGroup.map(group => {
+        return {
+          ...group,
+          id: group.id,
+          name: group.name,
+          hidden: group.hidden,
+        };
+      });
+      groupByLabel = 'categoryGroup';
+      break;
+    // CategoryGroup uses category-level data from createCustomSpreadsheet.
+    // The group-level data comes from groupedData (createGroupedSpreadsheet).
+    // This case just prevents the default throw so the spreadsheet doesn't error.
+    case 'CategoryGroup':
       groupByList = categoryGroup.map(group => {
         return {
           ...group,

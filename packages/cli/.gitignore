@@ -1,0 +1,7 @@
+dist
+coverage
+.actualrc.json
+.actualrc
+.actualrc.yaml
+.actualrc.yml
+actual.config.js
