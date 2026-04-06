@@ -10,7 +10,7 @@ fi
 # Worktree creation: node_modules doesn't exist yet, always install
 if [ ! -d "node_modules" ]; then
   echo "New worktree detected — running yarn install..."
-  yarn install
+  yarn install || exit 1
   exit 0
 fi
 
