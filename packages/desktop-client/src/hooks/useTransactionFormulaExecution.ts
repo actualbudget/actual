@@ -1,6 +1,20 @@
 import { useEffect, useState } from 'react';
 
+import { HyperFormula } from 'hyperformula';
+import enUS from 'hyperformula/i18n/languages/enUS';
+
+import {
+  CustomFunctionsPlugin,
+  customFunctionsTranslations,
+} from '@actual-app/core/server/rules/customFunctions';
+
 import { useLocale } from './useLocale';
+
+HyperFormula.registerLanguage('enUS', enUS);
+HyperFormula.registerFunctionPlugin(
+  CustomFunctionsPlugin,
+  customFunctionsTranslations,
+);
 
 type TransactionContext = {
   amount?: number;
@@ -26,8 +40,7 @@ export function useTransactionFormulaExecution(
   useEffect(() => {
     let cancelled = false;
 
-    async function executeFormula() {
-      const { HyperFormula } = await import('hyperformula');
+    function executeFormula() {
       let hfInstance: ReturnType<typeof HyperFormula.buildEmpty> | null = null;
 
       if (!formula || !formula.startsWith('=')) {
@@ -40,7 +53,12 @@ export function useTransactionFormulaExecution(
         // Create HyperFormula instance
         hfInstance = HyperFormula.buildEmpty({
           licenseKey: 'gpl-v3',
+          language: 'enUS',
           localeLang: typeof locale === 'string' ? locale : 'en-US',
+          context: {
+            // No server prefetch in preview
+            balanceOfPrefetch: new Map(),
+          },
         });
 
         // Add a sheet
@@ -59,7 +77,12 @@ export function useTransactionFormulaExecution(
         };
 
         for (const [key, value] of Object.entries(fieldValues)) {
-          if (value !== undefined && value !== null) {
+          if (
+            value !== undefined &&
+            value !== null &&
+            typeof value !== 'object' &&
+            !key.startsWith('_')
+          ) {
             // Set the value in a cell
             hfInstance.setCellContents({ sheet: sheetId, col: 0, row }, [
               [value],

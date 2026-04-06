@@ -10,7 +10,6 @@ import { currentDay, format, parseDate } from '../../shared/months';
 import { FIELD_TYPES } from '../../shared/rules';
 import type { TransactionForRules } from '../transactions/transaction-rules';
 
-import { substituteBalanceOfLiterals } from './balanceOfFormula';
 import {
   CustomFunctionsPlugin,
   customFunctionsTranslations,
@@ -304,6 +303,10 @@ export class Action {
       hfInstance = HyperFormula.buildEmpty({
         licenseKey: 'gpl-v3',
         language: 'enUS',
+        context: {
+          balanceOfPrefetch:
+            transaction['_balanceOfPrefetched'] ?? new Map(),
+        },
       });
 
       const sheetName = hfInstance.addSheet('Sheet1');
@@ -341,13 +344,8 @@ export class Action {
         hfInstance.addNamedExpression(key, cellValue);
       }
 
-      const evaluatedFormula = substituteBalanceOfLiterals(
-        formula,
-        transaction._balanceOfPrefetched,
-      );
-
       hfInstance.setCellContents({ sheet: sheetId, col: 0, row: 0 }, [
-        [evaluatedFormula],
+        [formula],
       ]);
 
       const cellAddress = { sheet: sheetId, col: 0, row: 0 };

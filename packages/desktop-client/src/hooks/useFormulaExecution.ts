@@ -327,8 +327,8 @@ export function useFormulaExecution(
         // Create HyperFormula instance
         hfInstance = HyperFormula.buildEmpty({
           licenseKey: 'gpl-v3',
-          localeLang: typeof locale === 'string' ? locale : 'en-US',
           language: 'enUS',
+          localeLang: typeof locale === 'string' ? locale : 'en-US',
         });
 
         // Add a sheet and set the formula in cell A1

@@ -26,19 +26,26 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
       },
     );
   }
+
+  balanceOf(ast: ProcedureAst, state: InterpreterState) {
+    return this.runFunction(
+      ast.args,
+      state,
+      this.metadata('BALANCE_OF'),
+      (accountKey: string) => {
+        const ctx = this.config.context as
+          | { balanceOfPrefetch?: Map<string, number> }
+          | undefined;
+        return ctx?.balanceOfPrefetch?.get(accountKey) ?? 0;
+      },
+    );
+  }
 }
 
 CustomFunctionsPlugin.implementedFunctions = {
-  INTEGER_TO_AMOUNT: {
-    method: 'integerToAmount',
-    parameters: [
-      { argumentType: FunctionArgumentType.NUMBER },
-      {
-        argumentType: FunctionArgumentType.NUMBER,
-        optionalArg: true,
-        defaultValue: 2,
-      },
-    ],
+  BALANCE_OF: {
+    method: 'balanceOf',
+    parameters: [{ argumentType: FunctionArgumentType.STRING }],
   },
   FIXED: {
     method: 'fixed',
@@ -51,11 +58,23 @@ CustomFunctionsPlugin.implementedFunctions = {
       },
     ],
   },
+  INTEGER_TO_AMOUNT: {
+    method: 'integerToAmount',
+    parameters: [
+      { argumentType: FunctionArgumentType.NUMBER },
+      {
+        argumentType: FunctionArgumentType.NUMBER,
+        optionalArg: true,
+        defaultValue: 2,
+      },
+    ],
+  },
 };
 
 export const customFunctionsTranslations = {
   enUS: {
-    INTEGER_TO_AMOUNT: 'INTEGER_TO_AMOUNT',
+    BALANCE_OF: 'BALANCE_OF',
     FIXED: 'FIXED',
+    INTEGER_TO_AMOUNT: 'INTEGER_TO_AMOUNT',
   },
 };

@@ -54,21 +54,3 @@ export function resolveAccountIdForBalanceOf(
   }
   return null;
 }
-
-/**
- * Replace each BALANCE_OF("…") with a cent literal so HyperFormula never needs
- * runtime DB (prefetch map is keyed by decoded string literals).
- */
-export function substituteBalanceOfLiterals(
-  formula: string,
-  map: Map<string, number> | null | undefined,
-): string {
-  return formula.replace(
-    /BALANCE_OF\s*\(\s*"((?:[^"\\]|\\.)*)"\s*\)/gi,
-    (_match, inner: string) => {
-      const key = decodeBalanceOfQuotedLiteral(inner);
-      const cents = map?.get(key) ?? 0;
-      return String(cents);
-    },
-  );
-}

@@ -6,7 +6,6 @@ import {
   decodeBalanceOfQuotedLiteral,
   extractBalanceOfLiterals,
   resolveAccountIdForBalanceOf,
-  substituteBalanceOfLiterals,
 } from './balanceOfFormula';
 
 describe('balanceOfFormula', () => {
@@ -23,19 +22,6 @@ describe('balanceOfFormula', () => {
 
   it('decodeBalanceOfQuotedLiteral unescapes quotes and backslashes', () => {
     expect(decodeBalanceOfQuotedLiteral(String.raw`\"x\"`)).toBe('"x"');
-  });
-
-  it('substituteBalanceOfLiterals replaces calls with cent literals', () => {
-    const map = new Map([
-      ['Checking', 42],
-      ['id-1', 99],
-    ]);
-    expect(substituteBalanceOfLiterals('=BALANCE_OF("Checking")+1', map)).toBe(
-      '=42+1',
-    );
-    expect(substituteBalanceOfLiterals('=BALANCE_OF("Missing")', map)).toBe(
-      '=0',
-    );
   });
 
   it('resolveAccountIdForBalanceOf prefers map key then name', () => {
