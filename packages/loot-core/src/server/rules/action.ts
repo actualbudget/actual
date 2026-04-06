@@ -304,8 +304,7 @@ export class Action {
         licenseKey: 'gpl-v3',
         language: 'enUS',
         context: {
-          balanceOfPrefetch:
-            transaction['_balanceOfPrefetched'] ?? new Map(),
+          balanceOfPrefetch: transaction['_balanceOfPrefetched'] ?? new Map(),
         },
       });
 
