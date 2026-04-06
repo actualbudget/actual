@@ -13,6 +13,16 @@
 
 /** @type {import('@docusaurus/plugin-content-docs').SidebarsConfig} */
 const sidebars = {
+  tourSidebar: [
+    'tour/index',
+    'tour/user-interface',
+    'tour/budget',
+    'tour/accounts',
+    'tour/reports',
+    'tour/schedules',
+    'tour/payees',
+    'tour/rules',
+  ],
   docs: [
     'index',
     'vision',
