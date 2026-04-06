@@ -6,4 +6,4 @@ Rules dictate how transactions are handled. When transactions are imported or sy
 
 For detailed information, please see [Rules](/docs/budgeting/rules/).
 
-![](/img/a-tour-of-actual/tour-rules-overview.webp)
+![Rules overview](/img/a-tour-of-actual/tour-rules-overview.webp)
