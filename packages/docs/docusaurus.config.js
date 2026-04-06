@@ -83,6 +83,11 @@ module.exports = {
             position: 'left',
           },
           {
+            to: '/docs/tour/index',
+            label: 'Tour Actual',
+            position: 'left',
+          },
+            {
             type: 'doc',
             docId: 'index',
             label: 'Docs',

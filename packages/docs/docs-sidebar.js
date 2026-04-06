@@ -13,27 +13,20 @@
 
 /** @type {import('@docusaurus/plugin-content-docs').SidebarsConfig} */
 const sidebars = {
+  tour: [
+    'tour/index',
+    'tour/user-interface',
+    'tour/budget',
+    'tour/accounts',
+    'tour/reports',
+    'tour/schedules',
+    'tour/payees',
+    'tour/rules',
+  ],
   docs: [
     'index',
     'vision',
     'releases',
-    {
-      type: 'category',
-      label: 'A Tour of Actual',
-      link: {
-        type: 'doc',
-        id: 'tour/index',
-      },
-      items: [
-        'tour/user-interface',
-        'tour/budget',
-        'tour/accounts',
-        'tour/reports',
-        'tour/schedules',
-        'tour/payees',
-        'tour/rules',
-      ],
-    },
     {
       type: 'category',
       label: 'Getting Started',
