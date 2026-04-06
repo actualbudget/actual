@@ -2,7 +2,7 @@
 
 This view gives you access both to the built-in reports and also to your own custom reports.
 
-All reports in this view are shown in their tiled version. Clicking on a tile will take you to a full screen version of that report.
+All reports in this view are shown in their tiled version. Clicking on a tile will take you to a full-screen version of that report.
 
 ![Reports overview](/img/a-tour-of-actual/tour-reports-overview.webp)
 
