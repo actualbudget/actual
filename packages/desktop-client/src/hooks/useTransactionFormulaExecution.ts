@@ -136,7 +136,7 @@ export function useTransactionFormulaExecution(
       }
     }
 
-     executeFormula();
+    executeFormula();
 
     return () => {
       cancelled = true;
