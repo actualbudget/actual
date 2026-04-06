@@ -85,7 +85,7 @@ module.exports = {
           {
             type: 'docSidebar',
             sidebarId: 'tourSidebar',
-            label: 'Tour Actual',
+            label: 'Tour',
             position: 'left',
           },
           {
