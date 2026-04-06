@@ -20,7 +20,6 @@ Use a self-signed certificate. This is the easiest way to get HTTPS working, but
   test: ['CMD-SHELL','NODE_EXTRA_CA_CERTS=/data/selfhost.crt', 'node src/scripts/health-check.js']
   ```
 
-
 ### Obtain a certificate without exposing to the internet
 
 Use a service like [Tailscale](https://tailscale.com/kb/1153/enabling-https/) or [Caddy](https://caddyserver.com/docs/automatic-https#dns-challenge) that allows you to create a valid HTTPS certificate without having to expose your server to the wider internet.
