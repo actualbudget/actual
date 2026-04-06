@@ -4,7 +4,7 @@ title: A Tour of Actual
 
 Welcome to the Actual tour, where we will give you insights into the Interface.
 
-This Tour of Actual is not meant to replace the user documentation. If you want to dive directly into how to install and use the software, please consult the [**Docs**](/docs/index).
+This Tour of Actual is not meant to replace the user documentation. If you want to dive directly into how to install and use the software, please consult the [**Docs**](/docs).
 
 When you decide that Actual Budget is right for you, read our thorough [Starting Fresh](/docs/getting-started/starting-fresh) guide.
 
