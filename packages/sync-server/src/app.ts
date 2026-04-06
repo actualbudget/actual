@@ -128,6 +128,10 @@ app.get('/metrics', (_req, res) => {
 app.use((req, res, next) => {
   res.set('Cross-Origin-Opener-Policy', 'same-origin');
   res.set('Cross-Origin-Embedder-Policy', 'require-corp');
+  res.set(
+    'Content-Security-Policy',
+    "default-src 'self' blob:; img-src 'self' blob: data:; script-src 'self' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src http: https:;",
+  );
   next();
 });
 if (process.env.NODE_ENV === 'development') {

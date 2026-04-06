@@ -4,6 +4,7 @@ ABNANL
 Activo
 actualrc
 AESUDEF
+ajv
 ALZEY
 Anglais
 ANZ
@@ -112,7 +113,6 @@ Keycloak
 Khurozov
 KORT
 Kreditbank
-KRW
 lage
 LHV
 LHVBEE
@@ -133,6 +133,7 @@ overbudgeting
 oxc
 Paribas
 passwordless
+picomatch
 pluggyai
 Poste
 PPABPLPK
@@ -173,8 +174,11 @@ tada
 taskbar
 templating
 THB
+TIMEFRAME
 touchscreen
 triaging
+tsgo
+TWD
 UAH
 ubuntu
 undici

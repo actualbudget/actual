@@ -187,7 +187,7 @@ export const ReportTableRow = memo(
                   />
                 );
               })
-            : balanceTypeOp === 'totalTotals' && (
+            : ['totalTotals', 'totalBudgeted'].includes(balanceTypeOp) && (
                 <>
                   <Cell
                     value={format(item.totalAssets, 'financial')}
