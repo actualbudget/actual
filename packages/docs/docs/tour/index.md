@@ -4,17 +4,13 @@ title: A Tour of Actual
 
 Welcome to the Actual tour, where we will give you insights into the Interface.
 
-This Tour of Actual is not meant to replace the user manual. If you want to dive directly into how to use the software, please consult the section on the left called **Using Actual**.
+This Tour of Actual is not meant to replace the user manual. If you want to dive directly into how to install and use the software, please consult the [**User Manual**](/docs/index).
 
-You could also read our thorough [Starting Fresh guide](/docs/getting-started/starting-fresh), but save that for when you decide that Actual Budget is for you.
+When you decide that Actual Budget is right for you, read our thorough [Starting Fresh guide](/docs/getting-started/starting-fresh).
 
-## Are you using other budgeting software?
+## Are you looking into using Actual as your budgeting software?
 
-If you are looking at this Tour of Actual, you are likely using some other software and want to learn about Actual. To do so, just go ahead and click on the various tour topics on the left.
-
-## Are you looking into using Actual as your electronic budgeting software?
-
-Suppose you have yet to use any budgeting software before. In that case, it's worth noting that Actual uses the [envelope budgeting model](/docs/getting-started/envelope-budgeting). The big and beautiful difference between envelope budgeting and more common methods is that with envelope budgeting, you can only budget with the money you actually have, not the money you think you will get in the future.
+It's worth noting that Actual has two budgeting methods included: [the envelope budgeting model](/docs/getting-started/envelope-budgeting) and the more traditional [tracking budget](/docs/getting-started/tracking-budget). The big and beautiful difference between envelope budgeting and more common methods is that with envelope budgeting, you can only budget with the money you actually have, not the money you think you will get in the future. The tracking budget allows you to budget future income. Actual defaults to the envelope method and we suggest you start there.
 
 Our tour will touch on the following topics:
 
