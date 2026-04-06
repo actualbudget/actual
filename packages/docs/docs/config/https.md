@@ -20,8 +20,7 @@ Use a self-signed certificate. This is the easiest way to get HTTPS working, but
   test:
     [
       'CMD-SHELL',
-      'NODE_EXTRA_CA_CERTS=/data/selfhost.crt',
-      'node src/scripts/health-check.js',
+      'NODE_EXTRA_CA_CERTS=/data/selfhost.crt node src/scripts/health-check.js',
     ]
   ```
 
