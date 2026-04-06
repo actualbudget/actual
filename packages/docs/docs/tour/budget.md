@@ -6,7 +6,7 @@ This view lets you manage your budget. You'll find more information about envelo
 
 The maximum number of months you can see at any one time is defined by the width of your screen.
 
-You can select fewer months than the screen can display by clicking on the corresponding number of calendar icons in the top left corner.
+You can choose how many months to display by clicking on the corresponding number of calendar icons in the top left corner.
 
 ![Budget calendar icons](/img/a-tour-of-actual/tour-budget-calendar.webp)
 
