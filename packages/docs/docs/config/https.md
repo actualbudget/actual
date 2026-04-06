@@ -18,12 +18,11 @@ Use a self-signed certificate. This is the easiest way to get HTTPS working, but
 
 Add the `NODE_EXTRA_CA_CERTS=/data/selfhost.pem` environment variable to the health check command:
 
-``` json
+```json
 test: ['CMD-SHELL','NODE_EXTRA_CA_CERTS=/data/selfhost.pem', 'node src/scripts/health-check.js']
 ```
+
 This allows node to recognize and trust the self-signed certificate during the health check.
-
-
 
 ### Obtain a certificate without exposing to the internet
 
