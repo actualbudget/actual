@@ -114,13 +114,13 @@ type SpecializedWidget =
   | MarkdownWidget
   | SummaryWidget
   | CalendarWidget
-  | FormulaWidget;
+  | FormulaWidget
+  | SankeyWidget;
 export type DashboardWidgetEntity = SpecializedWidget | CustomReportWidget;
 export type NewDashboardWidgetEntity = Omit<
   DashboardWidgetEntity,
   'id' | 'tombstone' | 'dashboard_page_id'
 >;
-
 // Exported/imported (json) widget definition
 export type ExportImportCustomReportWidget = Omit<
   CustomReportWidget,
@@ -195,5 +195,18 @@ export type FormulaWidget = AbstractWidget<
         timeFrame?: TimeFrame;
       }
     >;
+  } | null
+>;
+
+export type SankeyWidget = AbstractWidget<
+  'sankey-card',
+  {
+    name?: string;
+    conditions?: RuleConditionEntity[];
+    conditionsOp?: 'and' | 'or';
+    timeFrame?: TimeFrame;
+    mode?: 'budgeted' | 'spent';
+    topNcategories?: number;
+    categorySort?: 'per-group' | 'global' | 'budget-order';
   } | null
 >;

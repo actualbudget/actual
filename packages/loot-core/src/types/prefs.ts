@@ -7,7 +7,8 @@ export type FeatureFlag =
   | 'crossoverReport'
   | 'customThemes'
   | 'budgetAnalysisReport'
-  | 'payeeLocations';
+  | 'payeeLocations'
+  | 'sankeyReport';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.

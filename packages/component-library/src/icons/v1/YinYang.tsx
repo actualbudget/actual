@@ -12,7 +12,7 @@ export const SvgYinYang = (props: SVGProps<SVGSVGElement>) => (
   >
     <path
       fillRule="evenodd"
-      d="M10 20a10 10 0 1 1 0-20 10 10 0 0 1 0 20zm0-18a8 8 0 1 0 0 16 4 4 0 1 1 0-8 4 4 0 1 0 0-8zm0 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0-8a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"
+      d="M10 20a10 10 0 1 1 0-20 10 10 0 0 1 0 20m0-18a8 8 0 1 0 0 16 4 4 0 1 1 0-8 4 4 0 1 0 0-8m0 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2m0-8a1 1 0 1 1 0-2 1 1 0 0 1 0 2"
       fill="currentColor"
     />
   </svg>
