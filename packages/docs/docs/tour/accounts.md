@@ -2,7 +2,7 @@
 
 This view lets you manage your transactions for an account. Consult [Accounts & Transactions](/docs/accounts/) for detailed information on how to work with this view.
 
-![](/img/a-tour-of-actual/tour-account-register-overview.webp)
+![Account register overview](/img/a-tour-of-actual/tour-account-register-overview.webp)
 
 ## The Account Header
 
@@ -16,13 +16,13 @@ It is possible to split a transaction into more than one category. By clicking o
 
 The three horizontal dots, shown in the blue box, will allow you to perform various manipulations on the account. These range from reconciling and exporting your account to closing or [Connecting Your Bank](/docs/advanced/bank-sync) for transaction syncing. You can show or hide the account's running balance, previously reconciled transactions and the cleared checkbox column to the far right of the transaction's row.
 
-![](/img/a-tour-of-actual/tour-account-register-header.webp)
+![Account register header](/img/a-tour-of-actual/tour-account-register-header.webp)
 
 Clicking on **Import** will let you [import transactions](/docs/transactions/importing) from CSV, QIF, OFX, QFX or CAMT files.
 
 Manually add transactions by clicking on **Add New**. The Payee and the Category fields will provide a dropdown menu of available options. You can add new payees directly from this view, but if you need to add a new category, you can only do so from the [Budget View](./budget).
 
-![](/img/a-tour-of-actual/tour-account-register-adding-transaction.webp)
+![Adding a transaction](/img/a-tour-of-actual/tour-account-register-adding-transaction.webp)
 
 ## Filtering on transactions
 
@@ -32,7 +32,7 @@ If you are filtering for the same things over and over, you can save your filter
 
 Consult [Filtering Transactions](/docs/transactions/filters) for more information.
 
-![](/img/a-tour-of-actual/tour-account-register-filter.webp)
+![Filtering transactions](/img/a-tour-of-actual/tour-account-register-filter.webp)
 
 ## Working on selected transactions
 
@@ -42,4 +42,4 @@ The number of selected transactions is shown in the red box. If you click on thi
 
 Another powerful feature allows you to perform [Bulk Actions](/docs/transactions/bulk-editing).
 
-![](/img/a-tour-of-actual/tour-account-register-selected-transactions.webp)
+![Selecting transactions](/img/a-tour-of-actual/tour-account-register-selected-transactions.webp)
