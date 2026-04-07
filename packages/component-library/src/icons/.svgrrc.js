@@ -1,4 +1,8 @@
 module.exports = {
+  prettier: true,
+  prettierConfig: {
+    singleQuote: true,
+  },
   svgoConfig: {
     plugins: [
       {

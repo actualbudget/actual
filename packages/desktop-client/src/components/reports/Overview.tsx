@@ -26,6 +26,7 @@ import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 import { DashboardHeader } from './DashboardHeader';
 import { DashboardSelector } from './DashboardSelector';
 import { LoadingIndicator } from './LoadingIndicator';
+import { AgeOfMoneyCard } from './reports/AgeOfMoneyCard';
 import { BudgetAnalysisCard } from './reports/BudgetAnalysisCard';
 import { CalendarCard } from './reports/CalendarCard';
 import { CashFlowCard } from './reports/CashFlowCard';
@@ -34,8 +35,9 @@ import { CustomReportListCards } from './reports/CustomReportListCards';
 import { FormulaCard } from './reports/FormulaCard';
 import { MarkdownCard } from './reports/MarkdownCard';
 import { NetWorthCard } from './reports/NetWorthCard';
-import { SpendingCard } from './reports/SpendingCard';
+import { SankeyCard } from './reports/SankeyCard';
 import './overview.scss';
+import { SpendingCard } from './reports/SpendingCard';
 import { SummaryCard } from './reports/SummaryCard';
 
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
@@ -83,6 +85,7 @@ export function Overview({ dashboard }: OverviewProps) {
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');
+  const ageOfMoneyReportEnabled = useFeatureFlag('ageOfMoneyReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
 
   const formulaMode = useFeatureFlag('formulaMode');
@@ -96,6 +99,8 @@ export function Overview({ dashboard }: OverviewProps) {
 
   const { data: customReports = [], isPending: isCustomReportsLoading } =
     useReports();
+
+  const sankeyFeatureFlag = useFeatureFlag('sankeyReport');
 
   const customReportMap = useMemo(
     () => new Map(customReports.map(report => [report.id, report])),
@@ -576,6 +581,14 @@ export function Overview({ dashboard }: OverviewProps) {
                                   },
                                 ]
                               : []),
+                            ...(ageOfMoneyReportEnabled
+                              ? [
+                                  {
+                                    name: 'age-of-money-card' as const,
+                                    text: t('Age of Money'),
+                                  },
+                                ]
+                              : []),
                             {
                               name: 'spending-card' as const,
                               text: t('Spending analysis'),
@@ -605,6 +618,14 @@ export function Overview({ dashboard }: OverviewProps) {
                                   {
                                     name: 'formula-card' as const,
                                     text: t('Formula card'),
+                                  },
+                                ]
+                              : []),
+                            ...(sankeyFeatureFlag
+                              ? [
+                                  {
+                                    name: 'sankey-card' as const,
+                                    text: t('Sankey card'),
                                   },
                                 ]
                               : []),
@@ -774,6 +795,18 @@ export function Overview({ dashboard }: OverviewProps) {
                             onCopyWidget(item.i, targetDashboardId)
                           }
                         />
+                      ) : widget.type === 'age-of-money-card' &&
+                        ageOfMoneyReportEnabled ? (
+                        <AgeOfMoneyCard
+                          widgetId={item.i}
+                          isEditing={isEditing}
+                          meta={widget.meta}
+                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                          onRemove={() => onRemoveWidget(item.i)}
+                          onCopy={targetDashboardId =>
+                            onCopyWidget(item.i, targetDashboardId)
+                          }
+                        />
                       ) : widget.type === 'cash-flow-card' ? (
                         <CashFlowCard
                           widgetId={item.i}
@@ -852,6 +885,17 @@ export function Overview({ dashboard }: OverviewProps) {
                         />
                       ) : widget.type === 'formula-card' && formulaMode ? (
                         <FormulaCard
+                          widgetId={item.i}
+                          isEditing={isEditing}
+                          meta={widget.meta}
+                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                          onRemove={() => onRemoveWidget(item.i)}
+                          onCopy={targetDashboardId =>
+                            onCopyWidget(item.i, targetDashboardId)
+                          }
+                        />
+                      ) : widget.type === 'sankey-card' && sankeyFeatureFlag ? (
+                        <SankeyCard
                           widgetId={item.i}
                           isEditing={isEditing}
                           meta={widget.meta}

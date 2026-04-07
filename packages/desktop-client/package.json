@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "26.3.0",
+  "version": "26.4.0",
   "license": "MIT",
   "files": [
     "build"
@@ -64,12 +64,10 @@
     "i18next-parser": "^9.4.0",
     "i18next-resources-to-backend": "^1.2.1",
     "jsdom": "^27.4.0",
-    "lodash": "^4.17.23",
+    "lodash": "^4.18.1",
     "mdast-util-newline-to-break": "^2.0.0",
-    "memoize-one": "^6.0.0",
     "pikaday": "1.8.2",
     "promise-retry": "^2.0.1",
-    "prop-types": "^15.8.1",
     "re-resizable": "^6.11.2",
     "react": "19.2.4",
     "react-aria": "^3.46.0",
@@ -97,7 +95,7 @@
     "typescript-strict-plugin": "^2.4.4",
     "usehooks-ts": "^3.1.1",
     "uuid": "^13.0.0",
-    "vite": "^8.0.0",
+    "vite": "^8.0.5",
     "vite-plugin-pwa": "^1.2.0",
     "vitest": "^4.1.0",
     "xml2js": "^0.6.2"
