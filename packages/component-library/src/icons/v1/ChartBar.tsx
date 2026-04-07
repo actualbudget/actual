@@ -11,7 +11,7 @@ export const SvgChartBar = (props: SVGProps<SVGSVGElement>) => (
     }}
   >
     <path
-      d="M1 10h3v10H1V10zM6 0h3v20H6V0zm5 8h3v12h-3V8zm5-4h3v16h-3V4z"
+      d="M1 10h3v10H1zM6 0h3v20H6zm5 8h3v12h-3zm5-4h3v16h-3z"
       fill="currentColor"
     />
   </svg>
