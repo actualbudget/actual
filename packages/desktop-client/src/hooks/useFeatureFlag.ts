@@ -12,6 +12,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   customThemes: false,
   budgetAnalysisReport: false,
   payeeLocations: false,
+  sankeyReport: false,
 };
 
 export function useFeatureFlag(name: FeatureFlag): boolean {

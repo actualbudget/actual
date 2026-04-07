@@ -75,6 +75,7 @@ import {
   pushModal,
   replaceModal,
 } from '@desktop-client/modals/modalsSlice';
+import type { ConfirmTransactionEditReason } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useCreatePayeeMutation } from '@desktop-client/payees';
 import * as queries from '@desktop-client/queries';
@@ -1230,7 +1231,7 @@ class AccountInternal extends PureComponent<
 
   checkForReconciledTransactions = async (
     ids: string[],
-    confirmReason: string,
+    confirmReason: ConfirmTransactionEditReason,
     onConfirm: (ids: string[]) => void,
   ) => {
     const { data } = await aqlQuery(

@@ -43,6 +43,7 @@ if [ $SKIP_TRANSLATIONS == false ]; then
 
   pushd packages/desktop-client/locale > /dev/null
 
+  git checkout .
   git pull
   popd > /dev/null
   packages/desktop-client/bin/remove-untranslated-languages

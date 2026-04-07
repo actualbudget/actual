@@ -1,8 +1,3 @@
-import type {
-  RequestInfo as FetchInfo,
-  RequestInit as FetchInit,
-} from 'node-fetch';
-
 import { init as initLootCore } from '@actual-app/core/server/main';
 import type { InitConfig, lib } from '@actual-app/core/server/main';
 
@@ -16,14 +11,6 @@ export let internal: typeof lib | null = null;
 
 export async function init(config: InitConfig = {}) {
   validateNodeVersion();
-
-  if (!globalThis.fetch) {
-    globalThis.fetch = (url: URL | RequestInfo, init?: RequestInit) => {
-      return import('node-fetch').then(({ default: fetch }) =>
-        fetch(url as unknown as FetchInfo, init as unknown as FetchInit),
-      ) as unknown as Promise<Response>;
-    };
-  }
 
   internal = await initLootCore(config);
   return internal;
