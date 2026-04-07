@@ -44,6 +44,8 @@ __metadata:
   dependencies:
     "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
     extensionless: "npm:^2.0.6"
+    gray-matter: "npm:^4.0.3"
+    listify: "npm:^1.0.3"
     vitest: "npm:^4.1.0"
   languageName: unknown
   linkType: soft
@@ -20065,6 +20067,13 @@ __metadata:
   bin:
     lint-staged: bin/lint-staged.js
   checksum: 10/eb7aa0d43e321bbf282ce0c693a3db762aa9b8e5bf29419a49c8877a247cd3a14cf8d519f914f8c8dcd2aea73ac83c0bb44fadb97a30004219e060a780dda74e
+  languageName: node
+  linkType: hard
+
+"listify@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "listify@npm:1.0.3"
+  checksum: 10/1f9756ac1ad7641b1eb4552348c663419e6df98a3c2486d6a5b579ac20f12f2ac9bb634a966d34da61b0357fec2baf09b5c346d089d4c0a7c48bef904cdc5a42
   languageName: node
   linkType: hard
 
