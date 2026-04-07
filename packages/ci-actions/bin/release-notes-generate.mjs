@@ -52,25 +52,74 @@ await collapsedLog('API Response', apiResult);
 
 const prData = apiResult.data.repository.pullRequests.edges[0].node;
 
-await setOutput('pr_number', prData.number);
-const version = prData.headRefName.split('/')[1];
+const version = prData.headRefName.split('/')[1].replace(/^v/, '');
+const today = new Date().toISOString().slice(0, 10);
+const author = process.env.GITHUB_ACTOR || 'TODO';
 
 const { notesByCategory, files } = await parseReleaseNotes(
   'upcoming-release-notes',
 );
-const notes = printNotes(notesByCategory);
+const categorizedNotes = formatNotes(notesByCategory);
 
-await collapsedLog('Release Notes', notes);
-
-await setOutput(
-  'comment',
-  `<!-- auto-generated-release-notes -->\nHere are the automatically generated release notes!\n\n~~~markdown\n${notes}\n~~~`,
-);
+await collapsedLog('Release Notes', categorizedNotes);
 
 if (files.length === 0) {
-  console.log('No release notes found, no cleanup needed');
+  console.log('No release notes found, nothing to generate');
   process.exit(0);
 }
+
+const highlights = '- TODO: Add release highlights';
+
+await group('Generate blog post', async () => {
+  const slug = version.replace(/\./g, '-');
+  const filename = `${today}-release-${slug}.md`;
+  const blogPath = join('packages/docs/blog', filename);
+
+  const blogContent = `---
+title: Release ${version}
+description: New release of Actual.
+date: ${today}T10:00
+slug: release-${version}
+tags: [announcement, release]
+hide_table_of_contents: false
+authors: ${author}
+---
+
+${highlights}
+
+<!--truncate-->
+
+**Docker Tag: v${version}**
+
+${categorizedNotes}
+`;
+
+  await fs.writeFile(blogPath, blogContent);
+  console.log(`Wrote ${blogPath}`);
+});
+
+await group('Update releases.md', async () => {
+  const releasesPath = 'packages/docs/docs/releases.md';
+  const existing = await fs.readFile(releasesPath, 'utf-8');
+
+  const newSection = `## ${version}
+
+Release date: ${today}
+
+${highlights}
+
+**Docker Tag: v${version}**
+
+${categorizedNotes}`;
+
+  const updated = existing.replace(
+    '# Release Notes\n',
+    `# Release Notes\n\n${newSection}\n`,
+  );
+
+  await fs.writeFile(releasesPath, updated);
+  console.log(`Updated ${releasesPath}`);
+});
 
 await group('Remove used release notes', async () => {
   if (process.env.GITHUB_HEAD_REF) {
@@ -87,10 +136,13 @@ await group('Remove used release notes', async () => {
 });
 
 await group('Commit and push', async () => {
-  await exec('git add upcoming-release-notes', { stdio: 'inherit' });
+  await exec(
+    'git add upcoming-release-notes packages/docs/blog packages/docs/docs/releases.md',
+    { stdio: 'inherit' },
+  );
   const name = 'github-actions[bot]';
   const email = '41898282+github-actions[bot]@users.noreply.github.com';
-  await exec("git commit -m 'Remove used release notes'", {
+  await exec(`git commit -m 'Generate release notes for v${version}'`, {
     stdio: 'inherit',
     env: {
       ...process.env,
@@ -134,11 +186,11 @@ async function parseReleaseNotes(dir) {
   return { notesByCategory, files };
 }
 
-function printNotes(notes) {
-  const printedNotes = Object.entries(notes)
+function formatNotes(notes) {
+  return Object.entries(notes)
     .filter(([_, values]) => values.length > 0)
-    .map(([category, values]) => `#### ${category}\n\n${values.join('\n')}`);
-  return `Version: ${version}\n\n${printedNotes.join('\n\n')}`;
+    .map(([category, values]) => `#### ${category}\n\n${values.join('\n')}`)
+    .join('\n\n');
 }
 
 async function collapsedLog(name, value) {
@@ -155,12 +207,4 @@ async function group(name, cb) {
   console.log(`::group::${name}`);
   await cb();
   console.log('::endgroup::');
-}
-
-async function setOutput(name, value) {
-  const delimiter = Math.random().toString(36).slice(2);
-  await fs.appendFile(
-    process.env.GITHUB_OUTPUT,
-    `\n${name}<<${delimiter}\n${value}\n${delimiter}\n`,
-  );
 }

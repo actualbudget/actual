@@ -1,5 +1,5 @@
 name: Generate release notes
-description: Aggregate individual release note files into a formatted PR comment
+description: Generate release documentation from release note files
 
 runs:
   using: composite
