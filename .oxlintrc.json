@@ -361,7 +361,9 @@
     ],
     "eslint/no-useless-constructor": "error",
     "eslint/no-undef": "error",
-    "eslint/no-unused-expressions": "error"
+    "eslint/no-unused-expressions": "error",
+    "eslint/no-return-assign": "error",
+    "eslint/no-unused-vars": "error"
   },
   "overrides": [
     {

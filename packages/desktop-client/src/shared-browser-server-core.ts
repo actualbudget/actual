@@ -335,6 +335,17 @@ export function createCoordinator({
       portToBudget.delete(closingPort);
       unassignedPorts.add(closingPort);
       logState(`Budget "${budgetId}" closed (no tabs remain)`);
+
+      // if it was the last group, re-establish a lobby so the tab can
+      // still route messages
+      if (budgetGroups.size === 0) {
+        unassignedPorts.delete(closingPort);
+        const lobbyGroup = createBudgetGroup(closingPort);
+        lobbyGroup.backendConnected = true;
+        budgetGroups.set('__lobby', lobbyGroup);
+        portToBudget.set(closingPort, '__lobby');
+        logState('Re-established lobby after last budget closed');
+      }
     }
   }
 

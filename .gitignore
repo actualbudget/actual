@@ -58,6 +58,10 @@ bundle.mobile.js.map
 # IntelliJ IDEA
 .idea
 
+# Claude Code
+.claude/worktrees/*
+.claude/settings.local.json
+
 # Misc
 .#*
 

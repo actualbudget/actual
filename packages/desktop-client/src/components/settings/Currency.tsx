@@ -28,6 +28,7 @@ export function CurrencySettings() {
         ['BYN', t('Belarusian Ruble')],
         ['CAD', t('Canadian Dollar')],
         ['CHF', t('Swiss Franc')],
+        ['CLP', t('Chilean Peso')],
         ['CNY', t('Yuan Renminbi')],
         ['COP', t('Colombian Peso')],
         ['CRC', t('Costa Rican Colón')],
