@@ -8,6 +8,7 @@ import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { baseInputStyle } from '@actual-app/components/input';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
+import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme as themeStyle } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
@@ -29,10 +30,11 @@ import type {
   InstalledTheme,
 } from '@desktop-client/style/customThemes';
 
-// Theme item fixed dimensions
-const THEME_ITEM_HEIGHT = 140;
-const THEME_ITEM_WIDTH = 140;
+// Theme item dimensions
+const ITEMS_PER_ROW = 3;
 const THEME_ITEM_GAP = 12;
+const THEME_ITEM_PADDING = 4; // horizontal padding on each side
+const SCROLLBAR_WIDTH = 8;
 const CATALOG_MAX_HEIGHT = 300;
 
 type ThemeInstallerProps = {
@@ -79,15 +81,12 @@ export function ThemeInstaller({
     }
   }, [installedTheme]);
 
-  // Calculate items per row based on container width
-  const getItemsPerRow = useCallback((containerWidth: number) => {
-    const padding = 8; // 4px on each side
-    const availableWidth = containerWidth - padding;
-    return Math.max(
-      1,
-      Math.floor(
-        (availableWidth + THEME_ITEM_GAP) / (THEME_ITEM_WIDTH + THEME_ITEM_GAP),
-      ),
+  // Calculate theme item width based on container width (always 3 per row)
+  const getItemWidth = useCallback((containerWidth: number) => {
+    const availableWidth =
+      containerWidth - THEME_ITEM_PADDING * 2 - SCROLLBAR_WIDTH;
+    return Math.floor(
+      (availableWidth - (ITEMS_PER_ROW - 1) * THEME_ITEM_GAP) / ITEMS_PER_ROW,
     );
   }, []);
 
@@ -297,10 +296,10 @@ export function ThemeInstaller({
                 const catalogItems = [...(catalog ?? [])]
                   .filter(catalogTheme => !mode || catalogTheme.mode === mode)
                   .sort((a, b) => a.name.localeCompare(b.name));
-                const itemsPerRow = getItemsPerRow(width);
+                const itemWidth = getItemWidth(width);
                 const rows: CatalogTheme[][] = [];
-                for (let i = 0; i < catalogItems.length; i += itemsPerRow) {
-                  rows.push(catalogItems.slice(i, i + itemsPerRow));
+                for (let i = 0; i < catalogItems.length; i += ITEMS_PER_ROW) {
+                  rows.push(catalogItems.slice(i, i + ITEMS_PER_ROW));
                 }
 
                 return (
@@ -308,17 +307,18 @@ export function ThemeInstaller({
                     width={width}
                     height={height}
                     itemCount={rows.length}
-                    itemSize={THEME_ITEM_HEIGHT + THEME_ITEM_GAP}
+                    itemSize={itemWidth + THEME_ITEM_GAP}
                     itemKey={index => `row-${index}`}
-                    renderRow={({ index, style }) => {
+                    renderRow={({ index, key, style }) => {
                       const rowThemes = rows[index];
                       return (
                         <div
+                          key={key}
                           style={{
                             ...style,
                             display: 'flex',
                             gap: THEME_ITEM_GAP,
-                            padding: '0 4px',
+                            padding: `0 ${THEME_ITEM_PADDING + SCROLLBAR_WIDTH}px ${THEME_ITEM_GAP}px ${THEME_ITEM_PADDING}px`,
                           }}
                         >
                           {rowThemes.map((theme, themeIndex) => {
@@ -339,9 +339,10 @@ export function ThemeInstaller({
                                 aria-label={theme.name}
                                 onPress={() => handleCatalogThemeClick(theme)}
                                 style={{
-                                  width: THEME_ITEM_WIDTH,
-                                  height: THEME_ITEM_HEIGHT,
+                                  width: itemWidth,
+                                  height: itemWidth,
                                   padding: 8,
+                                  overflow: 'hidden',
                                   borderRadius: 6,
                                   border: `2px solid ${
                                     hasError
@@ -391,23 +392,26 @@ export function ThemeInstaller({
                                   />
                                 </View>
                                 <ColorPalette colors={theme.colors} />
-                                <Text
+                                <TextOneLine
                                   style={{
                                     fontSize: 12,
                                     fontWeight: 500,
                                     textAlign: 'center',
+                                    width: '100%',
                                   }}
+                                  title={theme.name}
                                 >
                                   {theme.name}
-                                </Text>
+                                </TextOneLine>
 
                                 <SpaceBetween
                                   direction="horizontal"
                                   align="center"
+                                  wrap={false}
                                   gap={4}
                                   style={{ fontSize: 10 }}
                                 >
-                                  <Text
+                                  <TextOneLine
                                     style={{
                                       color: themeStyle.pageTextSubdued,
                                     }}
@@ -416,7 +420,7 @@ export function ThemeInstaller({
                                     <Text style={{ fontWeight: 'bold' }}>
                                       {extractRepoOwner(theme.repo)}
                                     </Text>
-                                  </Text>
+                                  </TextOneLine>
                                   <Link
                                     variant="external"
                                     to={normalizeGitHubRepo(theme.repo)}

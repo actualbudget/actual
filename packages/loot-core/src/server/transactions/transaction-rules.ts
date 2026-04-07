@@ -772,8 +772,7 @@ function* getOneOfSetterRules(
       rule.actions[0].field === actionField &&
       (actionValue == null || rule.actions[0].value === actionValue) &&
       rule.conditions.length === 1 &&
-      (rule.conditions[0].op === 'oneOf' ||
-        rule.conditions[0].op === 'oneOf') &&
+      rule.conditions[0].op === 'oneOf' &&
       rule.conditions[0].field === condField &&
       (condValue == null || rule.conditions[0].value.indexOf(condValue) !== -1)
     ) {

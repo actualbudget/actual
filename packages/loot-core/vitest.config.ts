@@ -1,5 +1,3 @@
-import path from 'path';
-
 import peggyLoader from 'vite-plugin-peggy-loader';
 import { defineConfig } from 'vitest/config';
 

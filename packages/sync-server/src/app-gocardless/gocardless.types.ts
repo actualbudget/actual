@@ -1,7 +1,9 @@
 import type {
   Balance,
   GoCardlessAccountDetails,
+  GoCardlessAccountId,
   GoCardlessAccountMetadata,
+  GoCardlessInstitutionId,
   Institution,
   Transaction,
   Transactions,
@@ -10,7 +12,7 @@ import type {
 export type DetailedAccount = Omit<GoCardlessAccountDetails, 'status'> &
   GoCardlessAccountMetadata;
 export type DetailedAccountWithInstitution = DetailedAccount & {
-  institution: Institution;
+  institution: Institution | null;
 };
 export type TransactionWithBookedStatus = Transaction & { booked: boolean };
 
@@ -18,12 +20,12 @@ export type NormalizedAccountDetails = {
   /**
    * Id of the account
    */
-  account_id: string;
+  account_id: GoCardlessAccountId;
 
   /**
    * Institution of account
    */
-  institution: Institution;
+  institution: Institution | null;
 
   /**
    * last 4 digits from the account iban
@@ -55,12 +57,12 @@ export type GetTransactionsParams = {
   /**
    * Id of the institution from GoCardless
    */
-  institutionId: string;
+  institutionId: GoCardlessInstitutionId;
 
   /**
    * Id of account from the GoCardless app
    */
-  accountId: string;
+  accountId: GoCardlessAccountId;
 
   /**
    * Begin date of the period from which we want to download transactions
@@ -80,7 +82,7 @@ export type GetTransactionsResponse = {
 };
 
 export type CreateRequisitionParams = {
-  institutionId: string;
+  institutionId: GoCardlessInstitutionId;
 
   /**
    * Host of your frontend app - on this host you will be redirected after linking with bank
