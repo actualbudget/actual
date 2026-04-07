@@ -31,13 +31,29 @@
       "api": "./src/platform/server/fs/index.api.ts",
       "default": "./src/platform/server/fs/index.ts"
     },
+    "#platform/server/fs/path-join": {
+      "electron": "./src/platform/server/fs/path-join.electron.ts",
+      "api": "./src/platform/server/fs/path-join.api.ts",
+      "default": "./src/platform/server/fs/path-join.ts"
+    },
     "#platform/server/sqlite": {
       "electron": "./src/platform/server/sqlite/index.electron.ts",
       "api": "./src/platform/server/sqlite/index.api.ts",
       "default": "./src/platform/server/sqlite/index.ts"
     },
     "#platform/server/log": "./src/platform/server/log/index.ts",
+    "#platform/server/indexeddb": "./src/platform/server/indexeddb/index.ts",
     "#platform/exceptions": "./src/platform/exceptions/index.ts",
+    "#server/encryption/encryption-internals": {
+      "electron": "./src/server/encryption/encryption-internals.electron.ts",
+      "api": "./src/server/encryption/encryption-internals.api.ts",
+      "default": "./src/server/encryption/encryption-internals.ts"
+    },
+    "#shared/platform": {
+      "electron": "./src/shared/platform.electron.ts",
+      "api": "./src/shared/platform.api.ts",
+      "default": "./src/shared/platform.ts"
+    },
     "#*": [
       "./src/*.ts",
       "./src/*.tsx",
@@ -102,6 +118,11 @@
     },
     "./server/budget/types/*": "./src/server/budget/types/*.d.ts",
     "./server/*": "./src/server/*.ts",
+    "./shared/platform": {
+      "electron": "./src/shared/platform.electron.ts",
+      "api": "./src/shared/platform.api.ts",
+      "default": "./src/shared/platform.ts"
+    },
     "./shared/*": "./src/shared/*.ts",
     "./types/models": "./src/types/models/index.ts",
     "./types/*": "./src/types/*.ts",

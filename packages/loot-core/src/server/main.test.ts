@@ -2,9 +2,9 @@
 import { deserializeClock, getClock } from '@actual-app/crdt';
 import { v4 as uuidv4 } from 'uuid';
 
+import * as connection from '#platform/server/connection';
+import * as fs from '#platform/server/fs';
 import { expectSnapshotWithDiffer } from '../mocks/util';
-import * as connection from '../platform/server/connection';
-import * as fs from '../platform/server/fs';
 import * as monthUtils from '../shared/months';
 
 import * as budgetActions from './budget/actions';

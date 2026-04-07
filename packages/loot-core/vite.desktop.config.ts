@@ -9,7 +9,11 @@ export default defineConfig(({ mode }) => {
 
   return {
     mode,
-    ssr: { noExternal: true, external: ['better-sqlite3'] },
+    ssr: {
+      noExternal: true,
+      external: ['better-sqlite3'],
+      resolve: { conditions: ['electron'] },
+    },
     build: {
       target: 'node18',
       outDir,
