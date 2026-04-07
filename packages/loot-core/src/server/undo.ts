@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { Timestamp } from '@actual-app/crdt';
 
-import * as connection from '../platform/server/connection';
+import * as connection from '#platform/server/connection';
 import { getIn } from '../shared/util';
 import type { HandlerFunctions } from '../types/handlers';
 

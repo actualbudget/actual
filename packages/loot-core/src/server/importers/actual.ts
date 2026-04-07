@@ -1,6 +1,6 @@
 // @ts-strict-ignore
-import * as fs from '../../platform/server/fs';
-import * as sqlite from '../../platform/server/sqlite';
+import * as fs from '#platform/server/fs';
+import * as sqlite from '#platform/server/sqlite';
 import * as cloudStorage from '../cloud-storage';
 import { handlers } from '../main';
 import { waitOnSpreadsheet } from '../sheet';

@@ -11,6 +11,49 @@
     }
   },
   "imports": {
+    "#platform/server/asyncStorage": {
+      "electron": "./src/platform/server/asyncStorage/index.electron.ts",
+      "api": "./src/platform/server/asyncStorage/index.api.ts",
+      "default": "./src/platform/server/asyncStorage/index.ts"
+    },
+    "#platform/server/connection": {
+      "electron": "./src/platform/server/connection/index.electron.ts",
+      "api": "./src/platform/server/connection/index.api.ts",
+      "default": "./src/platform/server/connection/index.ts"
+    },
+    "#platform/server/fetch": {
+      "electron": "./src/platform/server/fetch/index.electron.ts",
+      "api": "./src/platform/server/fetch/index.api.ts",
+      "default": "./src/platform/server/fetch/index.ts"
+    },
+    "#platform/server/fs": {
+      "electron": "./src/platform/server/fs/index.electron.ts",
+      "api": "./src/platform/server/fs/index.api.ts",
+      "default": "./src/platform/server/fs/index.ts"
+    },
+    "#platform/server/fs/path-join": {
+      "electron": "./src/platform/server/fs/path-join.electron.ts",
+      "api": "./src/platform/server/fs/path-join.api.ts",
+      "default": "./src/platform/server/fs/path-join.ts"
+    },
+    "#platform/server/sqlite": {
+      "electron": "./src/platform/server/sqlite/index.electron.ts",
+      "api": "./src/platform/server/sqlite/index.api.ts",
+      "default": "./src/platform/server/sqlite/index.ts"
+    },
+    "#platform/server/log": "./src/platform/server/log/index.ts",
+    "#platform/server/indexeddb": "./src/platform/server/indexeddb/index.ts",
+    "#platform/exceptions": "./src/platform/exceptions/index.ts",
+    "#server/encryption/encryption-internals": {
+      "electron": "./src/server/encryption/encryption-internals.electron.ts",
+      "api": "./src/server/encryption/encryption-internals.api.ts",
+      "default": "./src/server/encryption/encryption-internals.ts"
+    },
+    "#shared/platform": {
+      "electron": "./src/shared/platform.electron.ts",
+      "api": "./src/shared/platform.api.ts",
+      "default": "./src/shared/platform.ts"
+    },
     "#*": [
       "./src/*.ts",
       "./src/*.tsx",
@@ -32,10 +75,6 @@
     "./client/store": "./src/client/store/index.ts",
     "./client/store/mock": "./src/client/store/mock.ts",
     "./client/users/*": "./src/client/users/*.ts",
-    "./client/platform": {
-      "node": "./src/client/platform.electron.ts",
-      "default": "./src/client/platform.web.ts"
-    },
     "./client/queries": "./src/client/queries.ts",
     "./client/query-helpers": "./src/client/query-helpers.ts",
     "./client/query-hooks": "./src/client/query-hooks.ts",
@@ -51,14 +90,39 @@
     },
     "./platform/client/undo": "./src/platform/client/undo/index.ts",
     "./platform/exceptions": "./src/platform/exceptions/index.ts",
-    "./platform/server/asyncStorage": "./src/platform/server/asyncStorage/index.ts",
-    "./platform/server/connection": "./src/platform/server/connection/index.ts",
-    "./platform/server/fetch": "./src/platform/server/fetch/index.ts",
-    "./platform/server/fs": "./src/platform/server/fs/index.ts",
+    "./platform/server/asyncStorage": {
+      "electron": "./src/platform/server/asyncStorage/index.electron.ts",
+      "api": "./src/platform/server/asyncStorage/index.api.ts",
+      "default": "./src/platform/server/asyncStorage/index.ts"
+    },
+    "./platform/server/connection": {
+      "electron": "./src/platform/server/connection/index.electron.ts",
+      "api": "./src/platform/server/connection/index.api.ts",
+      "default": "./src/platform/server/connection/index.ts"
+    },
+    "./platform/server/fetch": {
+      "electron": "./src/platform/server/fetch/index.electron.ts",
+      "api": "./src/platform/server/fetch/index.api.ts",
+      "default": "./src/platform/server/fetch/index.ts"
+    },
+    "./platform/server/fs": {
+      "electron": "./src/platform/server/fs/index.electron.ts",
+      "api": "./src/platform/server/fs/index.api.ts",
+      "default": "./src/platform/server/fs/index.ts"
+    },
     "./platform/server/log": "./src/platform/server/log/index.ts",
-    "./platform/server/sqlite": "./src/platform/server/sqlite/index.ts",
+    "./platform/server/sqlite": {
+      "electron": "./src/platform/server/sqlite/index.electron.ts",
+      "api": "./src/platform/server/sqlite/index.api.ts",
+      "default": "./src/platform/server/sqlite/index.ts"
+    },
     "./server/budget/types/*": "./src/server/budget/types/*.d.ts",
     "./server/*": "./src/server/*.ts",
+    "./shared/platform": {
+      "electron": "./src/shared/platform.electron.ts",
+      "api": "./src/shared/platform.api.ts",
+      "default": "./src/shared/platform.ts"
+    },
     "./shared/*": "./src/shared/*.ts",
     "./types/models": "./src/types/models/index.ts",
     "./types/*": "./src/types/*.ts",

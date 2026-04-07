@@ -11,8 +11,8 @@ import type { Database, Statement } from '@jlongster/sql.js';
 import { LRUCache } from 'lru-cache';
 import { v4 as uuidv4 } from 'uuid';
 
-import * as fs from '../../platform/server/fs';
-import * as sqlite from '../../platform/server/sqlite';
+import * as fs from '#platform/server/fs';
+import * as sqlite from '#platform/server/sqlite';
 import * as monthUtils from '../../shared/months';
 import { groupById } from '../../shared/util';
 import type { TransactionEntity } from '../../types/models';
