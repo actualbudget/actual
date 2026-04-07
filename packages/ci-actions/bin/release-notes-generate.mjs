@@ -33,11 +33,6 @@ const apiResult = await fetch('https://api.github.com/graphql', {
             edges {
               node {
                 number
-                baseRef {
-                  target {
-                    oid
-                  }
-                }
                 headRefName
               }
             }
@@ -59,18 +54,11 @@ const prData = apiResult.data.repository.pullRequests.edges[0].node;
 
 await setOutput('pr_number', prData.number);
 const version = prData.headRefName.split('/')[1];
-const baseRef = prData.baseRef.target.oid;
 
-await group('Checkout base ref in worktree', async () => {
-  await exec(`git fetch origin ${baseRef}`, { stdio: 'inherit' });
-  await exec(`git worktree add ../../tmp ${baseRef}`, {
-    stdio: 'inherit',
-  });
-});
-
-const notes = printNotes(
-  await parseReleaseNotes('../../tmp/upcoming-release-notes'),
+const { notesByCategory, files } = await parseReleaseNotes(
+  'upcoming-release-notes',
 );
+const notes = printNotes(notesByCategory);
 
 await collapsedLog('Release Notes', notes);
 
@@ -79,13 +67,7 @@ await setOutput(
   `<!-- auto-generated-release-notes -->\nHere are the automatically generated release notes!\n\n~~~markdown\n${notes}\n~~~`,
 );
 
-const releaseNotes = await fs
-  .readdir('upcoming-release-notes')
-  .then(contents =>
-    contents.filter(f => f.endsWith('.md') && f !== 'README.md'),
-  );
-
-if (releaseNotes.length === 0) {
+if (files.length === 0) {
   console.log('No release notes found, no cleanup needed');
   process.exit(0);
 }
@@ -99,10 +81,9 @@ await group('Remove used release notes', async () => {
       stdio: 'inherit',
     });
   }
-  await exec('rm -r upcoming-release-notes/*.md', { stdio: 'inherit' });
-  await exec('git checkout upcoming-release-notes/README.md', {
-    stdio: 'inherit',
-  });
+  await Promise.all(
+    files.map(f => fs.unlink(join('upcoming-release-notes', f))),
+  );
 });
 
 await group('Commit and push', async () => {
@@ -123,23 +104,22 @@ await group('Commit and push', async () => {
 });
 
 async function parseReleaseNotes(dir) {
-  const notes = (await fs.readdir(dir))
-    .filter(f => f.match(/^\d+\.md$/))
-    .map(async name => {
-      const content = await fs.readFile(join(dir, name), 'utf-8');
-      const { data, content: body } = matter(content);
-      const number = name.replace('.md', '');
-      const authors = listify(
-        data.authors.map(a => `@${a}`),
-        { finalWord: '&' },
-      );
-      return {
-        category: categoryAutocorrections[data.category] ?? data.category,
-        value: `- [#${number}](https://github.com/actualbudget/${repo}/pull/${number}) ${body.trim()} — thanks ${authors}`,
-      };
-    });
+  const files = (await fs.readdir(dir)).filter(f => f.match(/^\d+\.md$/));
+  const notes = files.map(async name => {
+    const content = await fs.readFile(join(dir, name), 'utf-8');
+    const { data, content: body } = matter(content);
+    const number = name.replace('.md', '');
+    const authors = listify(
+      data.authors.map(a => `@${a}`),
+      { finalWord: '&' },
+    );
+    return {
+      category: categoryAutocorrections[data.category] ?? data.category,
+      value: `- [#${number}](https://github.com/actualbudget/${repo}/pull/${number}) ${body.trim()} — thanks ${authors}`,
+    };
+  });
 
-  return (await Promise.all(notes)).reduce(
+  const notesByCategory = (await Promise.all(notes)).reduce(
     (acc, note) => {
       if (!acc[note.category]) {
         console.log(`WARNING: Unrecognized category "${note.category}"`);
@@ -150,6 +130,8 @@ async function parseReleaseNotes(dir) {
     },
     Object.fromEntries(categoryOrder.map(c => [c, []])),
   );
+
+  return { notesByCategory, files };
 }
 
 function printNotes(notes) {
