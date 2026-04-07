@@ -34,7 +34,7 @@ jobs:
             [sync]="sync-server"
             [api]="api"
             [cli]="cli"
-            [core]="core"
+            [core]="loot-core"
           )
 
           for key in "${!packages[@]}"; do
