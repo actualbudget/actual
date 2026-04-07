@@ -97,7 +97,7 @@ function SankeyNode({
   y,
   width,
   height,
-  index,
+  index: _index,
   payload,
   containerWidth,
   containerHeight,

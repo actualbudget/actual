@@ -202,7 +202,7 @@ describe('SharedWorker coordinator', () => {
     });
 
     it('second tab joins existing budget as follower', () => {
-      const leader = setupBudgetGroup(coordinator, 'budget-1');
+      setupBudgetGroup(coordinator, 'budget-1');
 
       const follower = connectTab(coordinator);
       sendInit(follower);

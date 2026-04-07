@@ -28,6 +28,17 @@ import { signOut } from '@desktop-client/users/usersSlice';
 
 const sliceName = 'modals';
 
+export type ConfirmTransactionEditReason =
+  | 'batchDeleteWithReconciled'
+  | 'batchDeleteWithReconciledTransfer'
+  | 'batchEditWithReconciled'
+  | 'batchEditWithReconciledTransfer'
+  | 'batchDuplicateWithReconciled'
+  | 'batchDuplicateWithReconciledTransfer'
+  | 'editReconciled'
+  | 'unlockReconciled'
+  | 'deleteReconciled';
+
 export type Modal =
   | {
       name: 'import-transactions';
@@ -518,7 +529,7 @@ export type Modal =
       options: {
         onConfirm: () => void;
         onCancel?: () => void;
-        confirmReason: string;
+        confirmReason: ConfirmTransactionEditReason;
       };
     }
   | {

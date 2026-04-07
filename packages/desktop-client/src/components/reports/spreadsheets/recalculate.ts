@@ -55,7 +55,7 @@ export function recalculate({
             (asset[groupByLabel] === (item.id ?? null) ||
               (item.uncategorized_id && groupsByCategory)),
         )
-        .reduce((a, v) => (a = a + v.amount), 0);
+        .reduce((a, v) => a + v.amount, 0);
       totalAssets += intervalAssets;
 
       const intervalDebts = filterHiddenItems(
@@ -72,7 +72,7 @@ export function recalculate({
             (debt[groupByLabel] === (item.id ?? null) ||
               (item.uncategorized_id && groupsByCategory)),
         )
-        .reduce((a, v) => (a = a + v.amount), 0);
+        .reduce((a, v) => a + v.amount, 0);
       totalDebts += intervalDebts;
 
       const intervalTotals = intervalAssets + intervalDebts;
