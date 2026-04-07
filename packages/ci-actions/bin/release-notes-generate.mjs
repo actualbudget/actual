@@ -13,8 +13,6 @@ import {
 
 const exec = promisify(childProcess.exec);
 
-await collapsedLog('Environment', process.env);
-
 const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 
 const apiResult = await fetch('https://api.github.com/graphql', {
