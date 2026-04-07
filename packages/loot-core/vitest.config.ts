@@ -27,11 +27,11 @@ export default defineConfig({
     maxWorkers: 2,
   },
   ssr: {
-    resolve: { conditions: ['electron'] },
+    resolve: { conditions: ['electron', 'module', 'node', 'development'] },
   },
   resolve: {
     extensions: resolveExtensions,
-    conditions: ['electron'],
+    conditions: ['electron', 'module', 'browser', 'development'],
   },
   plugins: [peggyLoader()],
 });
