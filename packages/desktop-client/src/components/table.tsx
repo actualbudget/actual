@@ -130,8 +130,10 @@ export function UnexposedCellContent({
   style,
   ...props
 }: Pick<CellProps, 'value' | 'formatter' | 'style'>) {
+  const formatted = formatter ? formatter(value) : value;
   return (
     <Text
+      title={typeof formatted === 'string' ? formatted : value}
       style={{
         flexGrow: 1,
         whiteSpace: 'nowrap',
@@ -141,7 +143,7 @@ export function UnexposedCellContent({
         ...props,
       }}
     >
-      {formatter ? formatter(value) : value}
+      {formatted}
     </Text>
   );
 }

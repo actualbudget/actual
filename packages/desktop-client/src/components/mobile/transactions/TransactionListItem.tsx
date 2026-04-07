@@ -263,6 +263,7 @@ export function TransactionListItem({
             )}
             {notes && (
               <TextOneLine
+                title={notes}
                 style={{
                   fontSize: 11,
                   marginTop: 4,
