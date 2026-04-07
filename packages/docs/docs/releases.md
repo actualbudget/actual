@@ -1,5 +1,58 @@
 # Release Notes
 
+## 100.0.0
+
+Release date: 2026-04-07
+
+- TODO: Add release highlights
+
+**Docker Tag: v100.0.0**
+
+#### Features
+
+- [#6685](https://github.com/actualbudget/actual/pull/6685) Added Age of Money report. — thanks @sztomi
+- [#7220](https://github.com/actualbudget/actual/pull/7220) Add Sankey diagram report with two view modes (spent and budgeted) to visualize money flow through categories — thanks @emiltb & @andrewhumble
+
+#### Enhancements
+
+- [#7257](https://github.com/actualbudget/actual/pull/7257) Add option to distribute remaining amount proportionally — thanks @victle
+- [#7346](https://github.com/actualbudget/actual/pull/7346) Add CLP currency — thanks @vectorcrumb
+- [#7378](https://github.com/actualbudget/actual/pull/7378) cli: account ordering, better agent instructions, fix types — thanks @MatissJanis
+- [#7392](https://github.com/actualbudget/actual/pull/7392) Clarify that end-to-end encryption only protects budget data, excluding bank sync tokens. — thanks @MatissJanis
+
+#### Bugfixes
+
+- [#7242](https://github.com/actualbudget/actual/pull/7242) Fix `api.updateTransaction()` corrupting split parent transactions when doing partial updates — thanks @lwarrenthompson
+- [#7253](https://github.com/actualbudget/actual/pull/7253) Custom Themes: improved responsiveness of the theme catalog — thanks @MatissJanis
+- [#7269](https://github.com/actualbudget/actual/pull/7269) Show confirmation dialog when editing/duplicating/deleting transfers where the other half is reconciled — thanks @matt-fidd
+- [#7283](https://github.com/actualbudget/actual/pull/7283) Standardise ledger scrolling when using keyboard shortcuts — thanks @JSkinnerUK
+- [#7284](https://github.com/actualbudget/actual/pull/7284) Handle normalisation of some common non-latin diacritic characters, ł, ø, ß, œ. — thanks @JSkinnerUK
+- [#7347](https://github.com/actualbudget/actual/pull/7347) Update code to record timestamp from account linking using handleSyncResponse. — thanks @JkBoyo
+- [#7356](https://github.com/actualbudget/actual/pull/7356) Fix custom report editor retaining unsaved settings when navigating between routes. — thanks @tmchow
+- [#7368](https://github.com/actualbudget/actual/pull/7368) Allow end to end encryption of budget files in the desktop apps — thanks @pickle-and-pork
+- [#7381](https://github.com/actualbudget/actual/pull/7381) Fix crash when viewing account ledger with expired recurring schedules. — thanks @MatissJanis
+
+#### Maintenance
+
+- [#7281](https://github.com/actualbudget/actual/pull/7281) Fix yarn generate:icons command — thanks @JSkinnerUK
+- [#7344](https://github.com/actualbudget/actual/pull/7344) Add claude code worktree folder to .gitignore — thanks @MatissJanis
+- [#7350](https://github.com/actualbudget/actual/pull/7350) Remove some unused/unnecessary dependencies — thanks @matt-fidd
+- [#7352](https://github.com/actualbudget/actual/pull/7352) Replace nordigen-node with our own GoCardless implementation — thanks @matt-fidd
+- [#7354](https://github.com/actualbudget/actual/pull/7354) Fix useless assignments to local variables — thanks @matt-fidd
+- [#7355](https://github.com/actualbudget/actual/pull/7355) Pin minimatch versions to resolve vulnerability reports — thanks @matt-fidd
+- [#7360](https://github.com/actualbudget/actual/pull/7360) Add documentation for bypassing self-signed SSL certificate verification in CLI usage. — thanks @MatissJanis
+- [#7367](https://github.com/actualbudget/actual/pull/7367) Bump electron dependencies — thanks @dependabot & @matt-fidd
+- [#7380](https://github.com/actualbudget/actual/pull/7380) Bump lodash from 4.17.23 to 4.18.1 — thanks @dependabot
+- [#7383](https://github.com/actualbudget/actual/pull/7383) Improved module resolution for better platform compatibility. — thanks @MatissJanis
+- [#7393](https://github.com/actualbudget/actual/pull/7393) Improve post-checkout hook to automatically install dependencies for newly created git worktrees. — thanks @MatissJanis
+- [#7397](https://github.com/actualbudget/actual/pull/7397) Add documentation for configuring Docker health checks with self-signed certificates using `NODE_EXTRA_CA_CERTS`. — thanks @Kennedy242
+- [#7398](https://github.com/actualbudget/actual/pull/7398) Bump vite from 8.0.0 to 8.0.5 — thanks @dependabot
+- [#7406](https://github.com/actualbudget/actual/pull/7406) Consolidate all GitHub actions into the main repository — thanks @matt-fidd
+- [#7407](https://github.com/actualbudget/actual/pull/7407) Improve release note actions — thanks @matt-fidd
+- [#7408](https://github.com/actualbudget/actual/pull/7408) Improve release automation to generate docs pages directly from release notes — thanks @matt-fidd
+- [#7411](https://github.com/actualbudget/actual/pull/7411) Fix redirect to login page after signing out of a server — thanks @matt-fidd
+- [#7412](https://github.com/actualbudget/actual/pull/7412) Moving View styles into the component library — thanks @MikesGlitch
+
 ## 26.4.0
 
 Release date: 2026-04-05
