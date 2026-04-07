@@ -1,0 +1,34 @@
+name: Generate release notes
+description: Aggregate individual release note files into a formatted PR comment
+
+runs:
+  using: composite
+  steps:
+    - uses: ./.github/actions/setup
+      with:
+        download-translations: 'false'
+    - name: Generate release notes
+      id: generate
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: node packages/ci-actions/bin/release-notes-generate.mjs
+    - name: Find Comment
+      uses: peter-evans/find-comment@v2
+      id: fc
+      with:
+        issue-number: ${{ steps.generate.outputs.pr_number }}
+        body-includes: auto-generated-release-notes
+    - name: Create Comment
+      if: ${{ steps.fc.outputs.comment-id == 0 }}
+      uses: peter-evans/create-or-update-comment@v2
+      with:
+        issue-number: ${{ steps.generate.outputs.pr_number }}
+        body: ${{ steps.generate.outputs.comment }}
+    - name: Update Comment
+      if: ${{ steps.fc.outputs.comment-id != 0 }}
+      uses: peter-evans/create-or-update-comment@v2
+      with:
+        comment-id: ${{ steps.fc.outputs.comment-id }}
+        edit-mode: replace
+        body: ${{ steps.generate.outputs.comment }}
