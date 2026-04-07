@@ -4,9 +4,12 @@ description: Validate that a PR includes a properly formatted release note file
 runs:
   using: composite
   steps:
-    - uses: ./.github/actions/setup
+    - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
       with:
-        download-translations: 'false'
+        node-version: 22
+    - name: Install dependencies
+      shell: bash
+      run: yarn --immutable
     - name: Check release notes
       env:
         PR_NUMBER: ${{ github.event.pull_request.number }}
