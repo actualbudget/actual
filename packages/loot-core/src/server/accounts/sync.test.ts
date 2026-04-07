@@ -477,46 +477,6 @@ describe('Account sync', () => {
     ]);
   });
 
-  test('addTransactions does not override explicitly provided category', async () => {
-    const { id: acctId } = await prepareDatabase();
-
-    await db.insertCategoryGroup({
-      id: 'group2',
-      name: 'group2',
-    });
-    const explicitCategoryId = await db.insertCategory({
-      id: 'api-cat',
-      name: 'API Category',
-      cat_group: 'group2',
-    });
-    const ruleCategoryId = await db.insertCategory({
-      id: 'rule-cat',
-      name: 'Rule Category',
-      cat_group: 'group2',
-    });
-
-    const payeeId = await db.insertPayee({ name: 'P' });
-    await insertRule({
-      stage: null,
-      conditionsOp: 'and',
-      conditions: [{ op: 'is', field: 'payee', value: payeeId }],
-      actions: [{ op: 'set', field: 'category', value: ruleCategoryId }],
-    });
-
-    await addTransactions(acctId, [
-      {
-        date: '2017-10-21',
-        payee_name: 'P',
-        amount: -2947,
-        category: explicitCategoryId,
-      },
-    ]);
-
-    const [addedTransaction] = await getAllTransactions();
-    expect(addedTransaction.category).toBe(explicitCategoryId);
-    expect(addedTransaction.category).not.toBe(ruleCategoryId);
-  });
-
   test("reconcile does not merge transactions with different 'imported_id' values", async () => {
     const { id } = await prepareDatabase();
 

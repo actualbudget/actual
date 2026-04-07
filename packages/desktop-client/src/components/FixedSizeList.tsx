@@ -134,8 +134,7 @@ export class FixedSizeList extends PureComponent<
     const { initialScrollOffset } = this.props;
 
     if (typeof initialScrollOffset === 'number' && this._outerRef != null) {
-      let outerRef = this._outerRef;
-      outerRef = this._outerRef;
+      const outerRef = this._outerRef;
       outerRef.scrollTop = initialScrollOffset;
     }
 

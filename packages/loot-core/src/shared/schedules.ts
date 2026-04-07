@@ -345,7 +345,7 @@ export function getNextDate(
   dateCond,
   start = new Date(monthUtils.currentDay()),
   noSkipWeekend = false,
-) {
+): string | null {
   start = d.startOfDay(start);
 
   const cond = new Condition(dateCond.op, 'date', dateCond.value, null);
@@ -515,6 +515,10 @@ export function computeSchedulePreviewTransactions(
       if (isRecurring) {
         while (day <= upcomingPeriodEnd) {
           const nextDate = getNextDate(dateConditions, day);
+
+          if (nextDate === null) {
+            break;
+          }
 
           if (
             d.startOfDay(monthUtils.parseDate(nextDate)) > upcomingPeriodEnd

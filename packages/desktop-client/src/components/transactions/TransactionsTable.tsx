@@ -152,6 +152,7 @@ import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { getPayeesById } from '@desktop-client/payees';
+import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 import { useDispatch } from '@desktop-client/redux';
 
 type TransactionHeaderProps = {
@@ -993,7 +994,7 @@ const Transaction = memo(function Transaction({
   const [showReconciliationWarning, setShowReconciliationWarning] =
     useState(false);
 
-  const onUpdate: TransactionUpdateFunction = (name, value) => {
+  const onUpdate: TransactionUpdateFunction = async (name, value) => {
     // Had some issues with this is called twice which is a problem now that we are showing a warning
     // modal if the transaction is locked. I added a boolean to guard against showing the modal twice.
     // I'm still not completely happy with how the cells update pre/post modal. Sometimes you have to
@@ -1002,14 +1003,14 @@ const Transaction = memo(function Transaction({
     // of the cell all have different implications as well.
 
     if (transaction[name] !== value) {
-      if (
-        transaction.reconciled === true &&
-        (name === 'credit' ||
-          name === 'debit' ||
-          name === 'payee' ||
-          name === 'account' ||
-          name === 'date')
-      ) {
+      const isReconciledField =
+        name === 'credit' ||
+        name === 'debit' ||
+        name === 'payee' ||
+        name === 'account' ||
+        name === 'date';
+
+      if (transaction.reconciled === true && isReconciledField) {
         if (showReconciliationWarning === false) {
           setShowReconciliationWarning(true);
           dispatch(
@@ -1029,6 +1030,38 @@ const Transaction = memo(function Transaction({
               },
             }),
           );
+        }
+      } else if (
+        isReconciledField &&
+        transaction.transfer_id &&
+        showReconciliationWarning === false
+      ) {
+        const { data } = await aqlQuery(
+          q('transactions')
+            .filter({ id: transaction.transfer_id, reconciled: true })
+            .select('id'),
+        );
+        if ((data as TransactionEntity[]).length > 0) {
+          setShowReconciliationWarning(true);
+          dispatch(
+            pushModal({
+              modal: {
+                name: 'confirm-transaction-edit',
+                options: {
+                  onCancel: () => {
+                    setShowReconciliationWarning(false);
+                  },
+                  onConfirm: () => {
+                    setShowReconciliationWarning(false);
+                    onUpdateAfterConfirm(name, value);
+                  },
+                  confirmReason: 'batchEditWithReconciledTransfer',
+                },
+              },
+            }),
+          );
+        } else {
+          onUpdateAfterConfirm(name, value);
         }
       } else {
         onUpdateAfterConfirm(name, value);
@@ -1165,16 +1198,16 @@ const Transaction = memo(function Transaction({
   // a variable (with a small delay in order for the next render cycle to pick up
   // the change instead of the current). We pass the integer to the Popover which
   // causes it to re-calculate the positioning. Thus fixing the problem.
-  const [_, setUpdateId] = useState(1);
   useEffect(() => {
     // The hack applies to only transactions with split errors
     if (!splitError) {
       return;
     }
 
-    setTimeout(() => {
-      setUpdateId(state => state + 1);
+    const id = setTimeout(() => {
+      window.dispatchEvent(new Event('resize')); // Force popover to recalculate position
     }, 1);
+    return () => clearTimeout(id);
   }, [splitError, allTransactions]);
 
   const { setMenuOpen, menuOpen, handleContextMenu, position } =
@@ -1931,7 +1964,6 @@ type TransactionErrorProps = {
   onAddSplit: () => void;
   onDistributeRemainder: () => void;
   style?: CSSProperties;
-  canDistributeRemainder: boolean;
 };
 
 function TransactionError({
@@ -1940,7 +1972,6 @@ function TransactionError({
   onAddSplit,
   onDistributeRemainder,
   style,
-  canDistributeRemainder,
 }: TransactionErrorProps) {
   switch (error.type) {
     case 'SplitTransactionError':
@@ -1969,7 +2000,6 @@ function TransactionError({
               style={{ marginLeft: 15 }}
               onPress={onDistributeRemainder}
               data-testid="distribute-split-button"
-              isDisabled={!canDistributeRemainder}
             >
               <Trans>Distribute</Trans>
             </Button>
@@ -2064,7 +2094,6 @@ function NewTransaction({
   const childTransactions = transactions.filter(
     t => t.parent_id === transactions[0].id,
   );
-  const emptyChildTransactions = childTransactions.filter(t => t.amount === 0);
 
   const addButtonRef = useRef(null);
   useProperFocus(addButtonRef, focusedField === 'add');
@@ -2155,7 +2184,6 @@ function NewTransaction({
             onDistributeRemainder={() =>
               onDistributeRemainder(transactions[0].id)
             }
-            canDistributeRemainder={emptyChildTransactions.length > 0}
           />
         ) : (
           <Button
@@ -2369,9 +2397,6 @@ function TransactionTableInner({
     const childTransactions = trans.is_parent
       ? props.transactionsByParent[trans.id]
       : null;
-    const emptyChildTransactions = props.transactionsByParent[
-      (trans.is_parent ? trans.id : trans.parent_id) || ''
-    ]?.filter(t => t.amount === 0);
 
     // Get sibling count for child transactions (used for drag/drop)
     const siblingCount =
@@ -2452,7 +2477,6 @@ function TransactionTableInner({
               onDistributeRemainder={() =>
                 props.onDistributeRemainder(trans.id)
               }
-              canDistributeRemainder={emptyChildTransactions.length > 0}
             />
           )
         }
@@ -3265,37 +3289,93 @@ export const TransactionTable = forwardRef(
           parentTransaction.amount -
           siblingTransactions.reduce((acc, t) => acc + t.amount, 0);
 
-        const amountPerTransaction = Math.floor(
-          remainingAmount / emptyTransactions.length,
-        );
-        let remainingCents =
-          remainingAmount - amountPerTransaction * emptyTransactions.length;
+        let amounts: number[] = [];
+        if (emptyTransactions.length > 0) {
+          const amountPerTransaction = Math.floor(
+            remainingAmount / emptyTransactions.length,
+          );
+          let remainingCents =
+            remainingAmount - amountPerTransaction * emptyTransactions.length;
 
-        const amounts = new Array(emptyTransactions.length).fill(
-          amountPerTransaction,
-        );
+          amounts = new Array(emptyTransactions.length).fill(
+            amountPerTransaction,
+          );
 
-        for (const [amountIndex] of amounts.entries()) {
-          if (remainingCents === 0) break;
+          for (const [amountIndex] of amounts.entries()) {
+            if (remainingCents === 0) break;
 
-          amounts[amountIndex] += 1;
-          remainingCents--;
-        }
+            amounts[amountIndex] += 1;
+            remainingCents--;
+          }
 
-        if (isTemporaryId(id)) {
-          newNavigator.onEdit(null);
-        } else {
-          tableNavigator.onEdit(null);
-        }
+          if (isTemporaryId(id)) {
+            newNavigator.onEdit(null);
+          } else {
+            tableNavigator.onEdit(null);
+          }
 
-        for (const [
-          transactionIndex,
-          transaction,
-        ] of emptyTransactions.entries()) {
-          await onSave({
-            ...transaction,
-            amount: amounts[transactionIndex],
-          });
+          for (const [
+            transactionIndex,
+            transaction,
+          ] of emptyTransactions.entries()) {
+            await onSave({
+              ...transaction,
+              amount: amounts[transactionIndex],
+            });
+          }
+        } else if (
+          emptyTransactions.length === 0 &&
+          siblingTransactions.length > 0
+        ) {
+          const siblingTotal = siblingTransactions.reduce(
+            (acc, t) => acc + t.amount,
+            0,
+          );
+          const siblingProportions = siblingTransactions.map(
+            t => t.amount / siblingTotal,
+          );
+
+          for (const [
+            transactionIndex,
+            transaction,
+          ] of siblingTransactions.entries()) {
+            amounts[transactionIndex] =
+              Math.floor(
+                siblingProportions[transactionIndex] * remainingAmount,
+              ) + transaction.amount;
+          }
+
+          let remainingCents =
+            parentTransaction.amount - amounts.reduce((acc, a) => acc + a, 0);
+
+          let amountIndex = 0;
+          while (remainingCents !== 0) {
+            amountIndex = amountIndex % amounts.length;
+            if (remainingCents > 0) {
+              amounts[amountIndex] += 1;
+              remainingCents--;
+            } else {
+              amounts[amountIndex] -= 1;
+              remainingCents++;
+            }
+            amountIndex++;
+          }
+
+          if (isTemporaryId(id)) {
+            newNavigator.onEdit(null);
+          } else {
+            tableNavigator.onEdit(null);
+          }
+
+          for (const [
+            transactionIndex,
+            transaction,
+          ] of siblingTransactions.entries()) {
+            await onSave({
+              ...transaction,
+              amount: amounts[transactionIndex],
+            });
+          }
         }
       },
       [onSave],

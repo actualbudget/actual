@@ -19,6 +19,6 @@
     "@typescript/native-preview": "^7.0.0-dev.20260309.1",
     "cross-env": "^10.1.0",
     "typescript-strict-plugin": "^2.4.4",
-    "vite": "^8.0.0"
+    "vite": "^8.0.5"
   }
 }

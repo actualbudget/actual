@@ -1,6 +1,6 @@
 {
   "name": "desktop-electron",
-  "version": "26.3.0",
+  "version": "26.4.0",
   "description": "A simple and powerful personal finance system",
   "author": "Actual",
   "main": "build/desktop-electron/index.js",
@@ -23,15 +23,14 @@
   "devDependencies": {
     "@actual-app/core": "workspace:*",
     "@electron/notarize": "3.1.1",
-    "@electron/rebuild": "4.0.2",
     "@playwright/test": "1.58.2",
     "@types/copyfiles": "^2",
     "@types/fs-extra": "^11",
     "@typescript/native-preview": "^7.0.0-dev.20260309.1",
     "copyfiles": "^2.4.1",
     "cross-env": "^10.1.0",
-    "electron": "39.2.7",
-    "electron-builder": "26.4.0",
+    "electron": "39.8.4",
+    "electron-builder": "26.8.1",
     "typescript-strict-plugin": "^2.4.4"
   },
   "build": {

@@ -46,7 +46,7 @@ process.env.lootCoreScript = isDev
 // This allows relative URLs to be resolved to app:// which makes
 // local assets load correctly
 protocol.registerSchemesAsPrivileged([
-  { scheme: 'app', privileges: { standard: true } },
+  { scheme: 'app', privileges: { standard: true, secure: true } },
 ]);
 
 if (isPlaywrightTest) {

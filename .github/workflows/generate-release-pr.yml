@@ -33,6 +33,8 @@ jobs:
             [electron]="desktop-electron"
             [sync]="sync-server"
             [api]="api"
+            [cli]="cli"
+            [core]="core"
           )
 
           for key in "${!packages[@]}"; do

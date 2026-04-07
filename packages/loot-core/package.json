@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/core",
-  "version": "26.3.0",
+  "version": "26.4.0",
   "description": "",
   "license": "ISC",
   "typesVersions": {
@@ -88,13 +88,11 @@
     "csv-parse": "^6.1.0",
     "csv-stringify": "^6.6.0",
     "date-fns": "^4.1.0",
-    "handlebars": "^4.7.8",
+    "handlebars": "^4.7.9",
     "lru-cache": "^11.2.6",
-    "md5": "^2.3.0",
     "memoize-one": "^6.0.0",
     "mitt": "^3.0.1",
     "promise-retry": "^2.0.1",
-    "slash": "5.1.0",
     "typescript-strict-plugin": "^2.4.4",
     "ua-parser-js": "^2.0.9",
     "uuid": "^13.0.0"
@@ -107,7 +105,6 @@
     "@types/emscripten": "^1.41.5",
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
     "@types/node": "^22.19.15",
-    "@types/pegjs": "^0.10.6",
     "@typescript/native-preview": "^7.0.0-dev.20260309.1",
     "assert": "^2.1.0",
     "browserify-zlib": "^0.2.0",
@@ -128,8 +125,8 @@
     "timers-browserify": "^2.0.12",
     "ts-node": "^10.9.2",
     "util": "^0.12.5",
-    "vite": "^8.0.0",
-    "vite-plugin-node-polyfills": "^0.25.0",
+    "vite": "^8.0.5",
+    "vite-plugin-node-polyfills": "^0.26.0",
     "vite-plugin-peggy-loader": "^2.0.1",
     "vitest": "^4.1.0",
     "yargs": "^18.0.0"

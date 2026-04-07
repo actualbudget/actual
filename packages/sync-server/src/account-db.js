@@ -60,11 +60,10 @@ export function getLoginMethod(req) {
     config.get('allowedLoginMethods').includes(req.body.loginMethod)
   ) {
     const accountDb = getAccountDb();
-    const activeRow = accountDb.first(
-      'SELECT method FROM auth WHERE method = ? AND active = 1',
-      [req.body.loginMethod],
-    );
-    if (activeRow) return req.body.loginMethod;
+    const row = accountDb.first('SELECT method FROM auth WHERE method = ?', [
+      req.body.loginMethod,
+    ]);
+    if (row) return req.body.loginMethod;
   }
 
   //BY-PASS ANY OTHER CONFIGURATION TO ENSURE HEADER AUTH
