@@ -788,7 +788,9 @@ export function Overview({ dashboard }: OverviewProps) {
                             isEditing={isEditing}
                             accounts={accounts}
                             meta={widget.meta}
-                            onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
                             onRemove={() => onRemoveWidget(item.i)}
                             onCopy={targetDashboardId =>
                               onCopyWidget(item.i, targetDashboardId)
@@ -801,7 +803,9 @@ export function Overview({ dashboard }: OverviewProps) {
                             isEditing={isEditing}
                             accounts={accounts}
                             meta={widget.meta}
-                            onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
                             onRemove={() => onRemoveWidget(item.i)}
                             onCopy={targetDashboardId =>
                               onCopyWidget(item.i, targetDashboardId)
@@ -813,7 +817,9 @@ export function Overview({ dashboard }: OverviewProps) {
                             widgetId={item.i}
                             isEditing={isEditing}
                             meta={widget.meta}
-                            onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
                             onRemove={() => onRemoveWidget(item.i)}
                             onCopy={targetDashboardId =>
                               onCopyWidget(item.i, targetDashboardId)
@@ -824,7 +830,9 @@ export function Overview({ dashboard }: OverviewProps) {
                             widgetId={item.i}
                             isEditing={isEditing}
                             meta={widget.meta}
-                            onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
                             onRemove={() => onRemoveWidget(item.i)}
                             onCopy={targetDashboardId =>
                               onCopyWidget(item.i, targetDashboardId)
@@ -835,7 +843,9 @@ export function Overview({ dashboard }: OverviewProps) {
                             widgetId={item.i}
                             isEditing={isEditing}
                             meta={widget.meta}
-                            onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
                             onRemove={() => onRemoveWidget(item.i)}
                             onCopy={targetDashboardId =>
                               onCopyWidget(item.i, targetDashboardId)
@@ -847,7 +857,9 @@ export function Overview({ dashboard }: OverviewProps) {
                             widgetId={item.i}
                             isEditing={isEditing}
                             meta={widget.meta}
-                            onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
                             onRemove={() => onRemoveWidget(item.i)}
                             onCopy={targetDashboardId =>
                               onCopyWidget(item.i, targetDashboardId)
@@ -857,7 +869,9 @@ export function Overview({ dashboard }: OverviewProps) {
                           <MarkdownCard
                             isEditing={isEditing}
                             meta={widget.meta}
-                            onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
                             onRemove={() => onRemoveWidget(item.i)}
                             onCopy={targetDashboardId =>
                               onCopyWidget(item.i, targetDashboardId)
@@ -877,7 +891,9 @@ export function Overview({ dashboard }: OverviewProps) {
                             widgetId={item.i}
                             isEditing={isEditing}
                             meta={widget.meta}
-                            onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
                             onRemove={() => onRemoveWidget(item.i)}
                             onCopy={targetDashboardId =>
                               onCopyWidget(item.i, targetDashboardId)
@@ -889,7 +905,9 @@ export function Overview({ dashboard }: OverviewProps) {
                             isEditing={isEditing}
                             meta={widget.meta}
                             firstDayOfWeekIdx={firstDayOfWeekIdx}
-                            onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
                             onRemove={() => onRemoveWidget(item.i)}
                             onCopy={targetDashboardId =>
                               onCopyWidget(item.i, targetDashboardId)
@@ -900,18 +918,23 @@ export function Overview({ dashboard }: OverviewProps) {
                             widgetId={item.i}
                             isEditing={isEditing}
                             meta={widget.meta}
-                            onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
                             onRemove={() => onRemoveWidget(item.i)}
                             onCopy={targetDashboardId =>
                               onCopyWidget(item.i, targetDashboardId)
                             }
                           />
-                        ) : widget.type === 'sankey-card' && sankeyFeatureFlag ? (
+                        ) : widget.type === 'sankey-card' &&
+                          sankeyFeatureFlag ? (
                           <SankeyCard
                             widgetId={item.i}
                             isEditing={isEditing}
                             meta={widget.meta}
-                            onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
                             onRemove={() => onRemoveWidget(item.i)}
                             onCopy={targetDashboardId =>
                               onCopyWidget(item.i, targetDashboardId)
