@@ -6,6 +6,7 @@ import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
+import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -46,6 +47,7 @@ export type ScheduleFormFields = {
   amountOp: null | string;
   date: null | string | RecurConfig;
   posts_transaction: boolean;
+  custom_upcoming_length: null | string;
   name: null | string;
 };
 
@@ -74,6 +76,11 @@ export type ScheduleEditFormDispatch =
       type: 'set-field';
       field: 'posts_transaction';
       value: boolean;
+    }
+  | {
+      type: 'set-field';
+      field: 'custom_upcoming_length';
+      value: string | null;
     }
   | {
       type: 'set-repeats';
@@ -365,6 +372,61 @@ export function ScheduleEditForm({
               for you in the specified account
             </Trans>
           </Text>
+
+          <View
+            style={{
+              marginTop: 10,
+              flexDirection: 'row',
+              alignItems: 'center',
+              userSelect: 'none',
+              justifyContent: 'flex-end',
+            }}
+          >
+            <Checkbox
+              id="form_custom_upcoming_length"
+              checked={fields.custom_upcoming_length != null}
+              onChange={e => {
+                dispatch({
+                  type: 'set-field',
+                  field: 'custom_upcoming_length',
+                  value: e.target.checked ? '7' : null,
+                });
+              }}
+            />
+            <label
+              htmlFor="form_custom_upcoming_length"
+              style={{ userSelect: 'none' }}
+            >
+              <Trans>Custom upcoming length</Trans>
+            </label>
+          </View>
+
+          {fields.custom_upcoming_length != null && (
+            <View
+              style={{
+                marginTop: 5,
+                alignItems: 'flex-end',
+              }}
+            >
+              <Select
+                options={[
+                  ['1', t('1 day')],
+                  ['7', t('1 week')],
+                  ['14', t('2 weeks')],
+                  ['oneMonth', t('1 month')],
+                  ['currentMonth', t('End of the current month')],
+                ]}
+                value={fields.custom_upcoming_length}
+                onChange={value => {
+                  dispatch({
+                    type: 'set-field',
+                    field: 'custom_upcoming_length',
+                    value,
+                  });
+                }}
+              />
+            </View>
+          )}
 
           {!adding && schedule.rule && (
             <SpaceBetween style={{ marginTop: 20, alignItems: 'center' }}>

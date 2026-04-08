@@ -495,14 +495,16 @@ export function computeSchedulePreviewTransactions(
 
   const today = d.startOfDay(monthUtils.parseDate(monthUtils.currentDay()));
 
-  const upcomingPeriodEnd = d.startOfDay(
-    monthUtils.parseDate(
-      monthUtils.addDays(today, getUpcomingDays(upcomingLength)),
-    ),
-  );
-
   return schedulesForPreview
     .flatMap(schedule => {
+      const effectiveUpcomingLength =
+        schedule.custom_upcoming_length ?? upcomingLength;
+      const upcomingPeriodEnd = d.startOfDay(
+        monthUtils.parseDate(
+          monthUtils.addDays(today, getUpcomingDays(effectiveUpcomingLength)),
+        ),
+      );
+
       const { date: dateConditions } = extractScheduleConds(
         schedule._conditions,
       );

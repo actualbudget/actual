@@ -129,6 +129,7 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
         schedule: {
           id: state.schedule.id,
           posts_transaction: state.fields.posts_transaction,
+          custom_upcoming_length: state.fields.custom_upcoming_length,
           name: state.fields.name,
         },
         conditions,
