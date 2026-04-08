@@ -1,7 +1,7 @@
+import * as db from '#server/db';
+import * as sheet from '#server/sheet';
 // @ts-strict-ignore
-import * as monthUtils from '../../shared/months';
-import * as db from '../db';
-import * as sheet from '../sheet';
+import * as monthUtils from '#shared/months';
 
 import { createAllBudgets } from './base';
 

@@ -1,5 +1,5 @@
 import * as fs from '#platform/server/fs';
-import { logger } from '../platform/server/log';
+import { logger } from '#platform/server/log';
 
 type ServerConfig = {
   BASE_SERVER: string;

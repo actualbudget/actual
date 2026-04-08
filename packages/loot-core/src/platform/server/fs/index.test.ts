@@ -1,9 +1,9 @@
 import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
 
+import { patchFetchForSqlJS } from '#mocks/util';
 import * as idb from '#platform/server/indexeddb';
 import * as sqlite from '#platform/server/sqlite';
-import { patchFetchForSqlJS } from '../../../mocks/util';
 
 import { exists, init, join, pathToId, readFile, writeFile } from './index';
 

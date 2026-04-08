@@ -1,11 +1,11 @@
 // @ts-strict-ignore
 import MockDate from 'mockdate';
 
-import { q } from '../../shared/query';
-import { getNextDate } from '../../shared/schedules';
-import { aqlQuery } from '../aql';
-import { loadMappings } from '../db/mappings';
-import { loadRules, updateRule } from '../transactions/transaction-rules';
+import { aqlQuery } from '#server/aql';
+import { loadMappings } from '#server/db/mappings';
+import { loadRules, updateRule } from '#server/transactions/transaction-rules';
+import { q } from '#shared/query';
+import { getNextDate } from '#shared/schedules';
 
 import {
   areConditionValuesEqual,

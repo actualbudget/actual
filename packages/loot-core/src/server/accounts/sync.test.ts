@@ -1,13 +1,13 @@
 // @ts-strict-ignore
 import * as asyncStorage from '#platform/server/asyncStorage';
-import * as monthUtils from '../../shared/months';
-import type { SyncedPrefs } from '../../types/prefs';
-import * as db from '../db';
-import { loadMappings } from '../db/mappings';
-import { post } from '../post';
-import { getServer } from '../server-config';
-import { handlers } from '../tests/mockSyncServer';
-import { insertRule, loadRules } from '../transactions/transaction-rules';
+import * as db from '#server/db';
+import { loadMappings } from '#server/db/mappings';
+import { post } from '#server/post';
+import { getServer } from '#server/server-config';
+import { handlers } from '#server/tests/mockSyncServer';
+import { insertRule, loadRules } from '#server/transactions/transaction-rules';
+import * as monthUtils from '#shared/months';
+import type { SyncedPrefs } from '#types/prefs';
 
 import {
   addTransactions,
@@ -15,8 +15,8 @@ import {
   simpleFinBatchSync,
 } from './sync';
 
-vi.mock('../../shared/months', async () => ({
-  ...(await vi.importActual('../../shared/months')),
+vi.mock('#shared/months', async () => ({
+  ...(await vi.importActual('#shared/months')),
   currentDay: vi.fn(),
   currentMonth: vi.fn(),
 }));

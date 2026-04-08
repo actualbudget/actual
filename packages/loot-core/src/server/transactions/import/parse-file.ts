@@ -2,8 +2,8 @@
 import { parse as csv2json } from 'csv-parse/sync';
 
 import * as fs from '#platform/server/fs';
-import { logger } from '../../../platform/server/log';
-import { looselyParseAmount } from '../../../shared/util';
+import { logger } from '#platform/server/log';
+import { looselyParseAmount } from '#shared/util';
 
 import { ofx2json } from './ofx2json';
 import { qif2json } from './qif2json';

@@ -1,9 +1,11 @@
+import { aqlQuery } from '#server/aql';
+import * as db from '#server/db';
 import { getCurrency } from '#shared/currencies';
 import type { Currency } from '#shared/currencies';
+import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
-import * as monthUtils from '../../shared/months';
-import { amountToInteger, integerToAmount } from '../../shared/util';
-import type { CategoryEntity } from '../../types/models';
+import { amountToInteger, integerToAmount } from '#shared/util';
+import type { CategoryEntity } from '#types/models';
 import type {
   AverageTemplate,
   ByTemplate,
@@ -16,9 +18,7 @@ import type {
   SimpleTemplate,
   SpendTemplate,
   Template,
-} from '../../types/models/templates';
-import { aqlQuery } from '../aql';
-import * as db from '../db';
+} from '#types/models/templates';
 
 import { getSheetBoolean, getSheetValue, isReflectBudget } from './actions';
 import { runSchedule } from './schedule-template';

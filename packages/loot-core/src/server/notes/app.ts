@@ -1,8 +1,8 @@
-import type { NoteEntity } from '../../types/models';
-import { createApp } from '../app';
-import * as db from '../db';
-import { mutator } from '../mutators';
-import { undoable } from '../undo';
+import { createApp } from '#server/app';
+import * as db from '#server/db';
+import { mutator } from '#server/mutators';
+import { undoable } from '#server/undo';
+import type { NoteEntity } from '#types/models';
 
 export type NotesHandlers = {
   'notes-save': typeof updateNotes;

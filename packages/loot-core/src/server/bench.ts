@@ -2,7 +2,7 @@
 // @ts-strict-ignore
 import * as fs from 'fs';
 
-import { logger } from '../platform/server/log';
+import { logger } from '#platform/server/log';
 
 import * as db from './db';
 

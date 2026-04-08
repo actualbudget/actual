@@ -1,3 +1,4 @@
+import type { TransactionForRules } from '#server/transactions/transaction-rules';
 // @ts-strict-ignore
 import {
   addSplitTransaction,
@@ -5,9 +6,8 @@ import {
   recalculateSplit,
   splitTransaction,
   ungroupTransaction,
-} from '../../shared/transactions';
-import type { RuleEntity } from '../../types/models';
-import type { TransactionForRules } from '../transactions/transaction-rules';
+} from '#shared/transactions';
+import type { RuleEntity } from '#types/models';
 
 import { Action } from './action';
 import { Condition } from './condition';
