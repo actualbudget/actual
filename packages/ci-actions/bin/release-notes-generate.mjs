@@ -79,8 +79,8 @@ await group('Prepare branch', async () => {
     });
   }
 
-  // drop the previous release note generation commit, otherwise we can't get
-  // the previously generated notes back for generation
+  // the previous generation commit deletes source files from
+  // upcoming-release-notes, rebase it out so we can regenerate from all of them
   const { stdout: commitHash } = await exec(
     `git log --grep='${commitMessage}' --format=%H -1`,
   );
