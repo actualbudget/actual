@@ -672,6 +672,7 @@ function PayeeCell({
         const payeeName = (
           <UnexposedCellContent
             {...props}
+            title={importedPayee ? '' : undefined}
             style={
               importedPayee
                 ? { borderBottom: `1px dashed ${theme.pageTextSubdued}` }

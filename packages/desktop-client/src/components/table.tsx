@@ -127,13 +127,20 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
 export function UnexposedCellContent({
   value,
   formatter,
+  title,
   style,
   ...props
-}: Pick<CellProps, 'value' | 'formatter' | 'style'>) {
+}: Pick<CellProps, 'value' | 'formatter' | 'style'> & { title?: string }) {
   const formatted = formatter ? formatter(value) : value;
+  const resolvedTitle =
+    title !== undefined
+      ? title
+      : typeof formatted === 'string'
+        ? formatted
+        : value;
   return (
     <Text
-      title={typeof formatted === 'string' ? formatted : value}
+      title={resolvedTitle || undefined}
       style={{
         flexGrow: 1,
         whiteSpace: 'nowrap',
