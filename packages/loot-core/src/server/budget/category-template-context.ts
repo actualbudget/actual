@@ -711,7 +711,7 @@ export class CategoryTemplateContext {
     const cat = template.category.toLowerCase();
     const prev = template.previous;
     let sheetName;
-    let monthlyIncome = 1;
+    let monthlyIncome;
 
     //choose the sheet to find income for
     if (prev) {

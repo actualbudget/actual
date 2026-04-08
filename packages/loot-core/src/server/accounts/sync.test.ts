@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import * as asyncStorage from '../../platform/server/asyncStorage';
+import * as asyncStorage from '#platform/server/asyncStorage';
 import * as monthUtils from '../../shared/months';
 import type { SyncedPrefs } from '../../types/prefs';
 import * as db from '../db';

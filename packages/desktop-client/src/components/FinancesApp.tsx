@@ -6,7 +6,6 @@ import { Navigate, Route, Routes, useHref, useLocation } from 'react-router';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { useQuery } from '@tanstack/react-query';
 
 import * as undo from 'loot-core/platform/client/undo';
 
@@ -28,7 +27,6 @@ import { FloatableSidebar } from './sidebar';
 import { ManageTagsPage } from './tags/ManageTagsPage';
 import { Titlebar } from './Titlebar';
 
-import { accountQueries } from '@desktop-client/accounts';
 import { getLatestAppVersion, sync } from '@desktop-client/app/appSlice';
 import { ProtectedRoute } from '@desktop-client/auth/ProtectedRoute';
 import { Permissions } from '@desktop-client/auth/types';

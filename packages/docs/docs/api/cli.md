@@ -89,8 +89,8 @@ actual <command> <subcommand> [options]
 ### Accounts
 
 ```bash
-# List all accounts
-actual accounts list
+# List all accounts (excludes closed by default)
+actual accounts list [--include-closed]
 
 # Create an account
 actual accounts create --name "Checking" [--offbudget] [--balance 50000]
@@ -374,13 +374,15 @@ All monetary amounts are represented as **integer cents**:
 
 When providing amounts, always use integer cents. For example, to budget $50, pass `5000`.
 
+**Output formatting:** Table (`--format table`) and CSV (`--format csv`) output automatically converts cent values to decimal (e.g. `1665.00` instead of `166500`). JSON output always returns raw cents for programmatic use.
+
 ## Output Formats
 
 The `--format` flag controls how results are displayed:
 
-- **`json`** (default) — Machine-readable JSON output, ideal for scripting
-- **`table`** — Human-readable table format
-- **`csv`** — Comma-separated values for spreadsheet import
+- **`json`** (default) — Machine-readable JSON output, ideal for scripting. Query results are returned as a bare array of records.
+- **`table`** — Human-readable table format. Amount fields are auto-formatted as decimals.
+- **`csv`** — Comma-separated values for spreadsheet import. Amount fields are auto-formatted as decimals.
 
 Use `--verbose` to enable informational messages on stderr for debugging or visibility into what the CLI is doing.
 
@@ -412,6 +414,32 @@ actual transactions list --account <id> --start 2026-01-01 --end 2026-12-31 --fo
 ```bash
 actual transactions add --account <id> --data '[{"date":"2026-03-14","amount":-2500,"payee_name":"Coffee Shop"}]'
 ```
+
+## Tips & Common Pitfalls
+
+- **Split transactions:** When summing or counting transactions, filter `"is_parent": false` to avoid double-counting. A split parent holds the total amount, and its children hold the individual parts — including both counts the total twice.
+- **Avoid rapid sequential requests:** Each CLI invocation opens a new server connection. Running queries in a tight loop (e.g. one per month) may trigger rate limiting or authentication failures. Instead, fetch all data in a single query with a date range filter and process locally.
+- **Uncategorized transactions:** `category.name` is `null` for transactions without a category. Account for this when filtering or grouping by category.
+- **No date sub-fields in AQL:** `date.month`, `date.year`, etc. are not supported as query fields. To group by month, fetch raw transactions with a date range filter and aggregate locally in a script.
+
+## Self-Signed SSL Certificates
+
+If your Actual sync server uses a self-signed SSL certificate, the CLI will reject the connection by default. To allow connections with self-signed certificates, set the `NODE_TLS_REJECT_UNAUTHORIZED` environment variable:
+
+```bash
+NODE_TLS_REJECT_UNAUTHORIZED=0 actual budgets list
+```
+
+Or export it for the entire session:
+
+```bash
+export NODE_TLS_REJECT_UNAUTHORIZED=0
+actual budgets list
+```
+
+:::caution Security
+Setting `NODE_TLS_REJECT_UNAUTHORIZED=0` disables all TLS certificate verification, which makes the connection vulnerable to man-in-the-middle attacks. Only use this in trusted network environments where you control the server and understand the risks.
+:::
 
 ## Error Handling
 

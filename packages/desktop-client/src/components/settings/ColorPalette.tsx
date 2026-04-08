@@ -17,7 +17,8 @@ export function ColorPalette({ colors }: ColorPaletteProps) {
         gridTemplateColumns: 'repeat(3, 1fr)',
         gridTemplateRows: 'repeat(2, 1fr)',
         width: '100%',
-        height: 60,
+        flex: 1,
+        minHeight: 0,
         borderRadius: 4,
         overflow: 'hidden',
       }}

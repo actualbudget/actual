@@ -3,6 +3,8 @@ import { join } from 'path';
 
 import { cosmiconfig } from 'cosmiconfig';
 
+import { isRecord } from './utils';
+
 export type CliConfig = {
   serverUrl: string;
   password?: string;
@@ -40,10 +42,6 @@ const configFileKeys: readonly string[] = [
   'dataDir',
   'encryptionPassword',
 ];
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
 
 function validateConfigFileContent(value: unknown): ConfigFileContent {
   if (!isRecord(value)) {

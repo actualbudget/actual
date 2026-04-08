@@ -75,7 +75,10 @@ describe('Formula-based rule actions', () => {
   it('should provide today variable', () => {
     const action = new Action('set', 'date', null, {});
     const transaction = { date: '2024-01-01' };
-    const result = action.executeFormulaSync('=today', transaction);
+    const result = action.executeFormulaSync(
+      '=TEXT(today,"YYYY-MM-DD")',
+      transaction,
+    );
 
     // Should be a date string in YYYY-MM-DD format
     expect(typeof result).toBe('string');

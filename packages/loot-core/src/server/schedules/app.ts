@@ -2,9 +2,9 @@
 import * as d from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
+import * as connection from '#platform/server/connection';
+import { logger } from '#platform/server/log';
 import { captureBreadcrumb } from '../../platform/exceptions';
-import * as connection from '../../platform/server/connection';
-import { logger } from '../../platform/server/log';
 import { currentDay, dayFromDate, parseDate } from '../../shared/months';
 import { q } from '../../shared/query';
 import {
@@ -206,7 +206,7 @@ export async function setNextDate({
       start ? start(nextDate) : new Date(),
     );
 
-    if (newNextDate !== nextDate) {
+    if (newNextDate != null && newNextDate !== nextDate) {
       // Our `update` functon requires the id of the item and we don't
       // have it, so we need to query it
       const nd = await db.first<

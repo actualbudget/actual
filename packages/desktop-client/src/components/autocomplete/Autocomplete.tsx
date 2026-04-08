@@ -14,7 +14,7 @@ import { Input } from '@actual-app/components/input';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
+import { View, viewStyles } from '@actual-app/components/view';
 import { css, cx } from '@emotion/css';
 import Downshift from 'downshift';
 import type { StateChangeTypes } from 'downshift';
@@ -469,7 +469,7 @@ function SingleAutocomplete<T extends AutocompleteItem>({
           // can't use a View here, but we can fake it be using the
           // className
           <div
-            className={cx('view', css({ display: 'flex' }))}
+            className={cx(viewStyles, css({ display: 'flex' }))}
             {...containerProps}
           >
             <View ref={triggerRef} style={{ flexShrink: 0 }}>

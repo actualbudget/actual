@@ -14,6 +14,15 @@ Use a self-signed certificate. This is the easiest way to get HTTPS working, but
 
 - A command line tool like [mkcert](https://github.com/FiloSottile/mkcert) can automate this process.
 - Alternately, you can manually generate the certificates. Install OpenSSL for your operating system, then run `openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout selfhost.key -out selfhost.crt` in a terminal to generate the certificate and private key. You'll need to enter a two-letter country code to get the `.crt` file to be generated, but you can leave the rest of the fields blank (just hit enter at each prompt). Move the `selfhost.key` and `selfhost.crt` files to a location accessible to the Actual server.
+- When using a self-signed certificate, you may need to update the health check test command in your docker-compose.yml file to ensure it trusts the certificate. Add the `NODE_EXTRA_CA_CERTS=/data/selfhost.crt` environment variable to the health check command:
+
+  ```yaml
+  test:
+    [
+      'CMD-SHELL',
+      'NODE_EXTRA_CA_CERTS=/data/selfhost.crt node src/scripts/health-check.js',
+    ]
+  ```
 
 ### Obtain a certificate without exposing to the internet
 

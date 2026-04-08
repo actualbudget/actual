@@ -9,7 +9,6 @@ import * as d from 'date-fns';
 
 import type { SankeyWidget } from 'loot-core/types/models';
 
-import { DateRange } from '@desktop-client/components/reports/DateRange';
 import { SankeyGraph } from '@desktop-client/components/reports/graphs/SankeyGraph';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';

@@ -1,10 +1,10 @@
 // @ts-strict-ignore
 import './polyfills';
-import * as asyncStorage from '../platform/server/asyncStorage';
-import * as connection from '../platform/server/connection';
-import * as fs from '../platform/server/fs';
-import { logger, setVerboseMode } from '../platform/server/log';
-import * as sqlite from '../platform/server/sqlite';
+import * as asyncStorage from '#platform/server/asyncStorage';
+import * as connection from '#platform/server/connection';
+import * as fs from '#platform/server/fs';
+import { logger, setVerboseMode } from '#platform/server/log';
+import * as sqlite from '#platform/server/sqlite';
 import { q } from '../shared/query';
 import { amountToInteger, integerToAmount } from '../shared/util';
 import type { Handlers } from '../types/handlers';
