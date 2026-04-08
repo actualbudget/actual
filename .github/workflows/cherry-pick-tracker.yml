@@ -8,6 +8,10 @@ on:
 permissions:
   pull-requests: write
 
+concurrency:
+  group: cherry-pick-tracker
+  cancel-in-progress: false
+
 jobs:
   track-merged-pr:
     if: github.event.pull_request.merged == true
@@ -20,11 +24,10 @@ jobs:
           script: |
             const { owner, repo } = context.repo;
 
-            const { data: pulls } = await github.rest.pulls.list({
+            const pulls = await github.paginate(github.rest.pulls.list, {
               owner,
               repo,
               state: 'open',
-              per_page: 100,
             });
             const releasePR = pulls.find(pr => pr.head.ref.startsWith('release/'));
 
@@ -42,15 +45,24 @@ jobs:
               .replace(/[<>]/g, '')
               .trim();
 
-            const entry = `- [ ] #${mergedPR.number} ${title} <!-- sha:${sha} -->`;
-
             let body = releasePR.body || '';
 
-            if (body.includes('Cherry-pick candidates')) {
-              body = body.replace(
-                /(\n<\/details>\s*$)/,
-                `\n${entry}\n$1`,
-              );
+            if (body.includes(`<!-- sha:${sha} -->`)) {
+              console.log(`#${mergedPR.number} already tracked, skipping`);
+              return;
+            }
+
+            const entry = `- [ ] #${mergedPR.number} ${title} <!-- sha:${sha} -->`;
+
+            const headerIndex = body.indexOf('Cherry-pick candidates');
+            if (headerIndex !== -1) {
+              const closeIndex = body.indexOf('</details>', headerIndex);
+              if (closeIndex !== -1) {
+                body = body.slice(0, closeIndex) + entry + '\n\n' + body.slice(closeIndex);
+              } else {
+                console.log('Could not find closing </details> tag');
+                body += `\n${entry}\n`;
+              }
             } else {
               body += [
                 '',

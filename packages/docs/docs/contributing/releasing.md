@@ -44,7 +44,7 @@ After the release branch is cut, PRs that merge to master are tracked in a check
   ```bash
   git checkout release/vX.Y.Z
   git tag vX.Y.Z
-  git push vX.Y.Z
+  git push {remote} vX.Y.Z
   ```
 
 All NPM packages should be automatically released and pushed to the NPM registry. Check them here:
