@@ -2,7 +2,7 @@
 import * as dateFns from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
-import * as asyncStorage from '../../platform/server/asyncStorage';
+import * as asyncStorage from '#platform/server/asyncStorage';
 import { logger } from '../../platform/server/log';
 import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';

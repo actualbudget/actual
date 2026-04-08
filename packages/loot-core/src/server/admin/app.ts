@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import * as asyncStorage from '../../platform/server/asyncStorage';
+import * as asyncStorage from '#platform/server/asyncStorage';
 import type {
   NewUserAccessEntity,
   UserAvailable,

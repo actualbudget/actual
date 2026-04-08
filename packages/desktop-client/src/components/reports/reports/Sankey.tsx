@@ -8,12 +8,9 @@ import { SvgArrowDown, SvgList } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Popover } from '@actual-app/components/popover';
-import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
-import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import * as d from 'date-fns';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
@@ -27,8 +24,6 @@ import type {
 } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
-import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
-import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
   MobilePageHeader,

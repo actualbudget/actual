@@ -7,10 +7,10 @@ import {
   Timestamp,
 } from '@actual-app/crdt';
 
+import * as asyncStorage from '#platform/server/asyncStorage';
+import * as connection from '#platform/server/connection';
+import { logger } from '#platform/server/log';
 import { captureException } from '../../platform/exceptions';
-import * as asyncStorage from '../../platform/server/asyncStorage';
-import * as connection from '../../platform/server/connection';
-import { logger } from '../../platform/server/log';
 import { once, sequential } from '../../shared/async';
 import { getIn, setIn } from '../../shared/util';
 import type { MetadataPrefs } from '../../types/prefs';

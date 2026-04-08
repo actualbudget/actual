@@ -11,11 +11,28 @@ export function registerAccountsCommand(program: Command) {
   accounts
     .command('list')
     .description('List all accounts')
-    .action(async () => {
+    .option('--include-closed', 'Include closed accounts', false)
+    .action(async cmdOpts => {
       const opts = program.opts();
       await withConnection(opts, async () => {
-        const result = await api.getAccounts();
-        printOutput(result, opts.format);
+        const allAccounts = await api.getAccounts();
+        const accounts = allAccounts.filter(
+          a => cmdOpts.includeClosed || !a.closed,
+        );
+        // Stable sort: on-budget first, off-budget second
+        // (preserves API sort_order within each group)
+        accounts.sort((a, b) => Number(a.offbudget) - Number(b.offbudget));
+        const balances = await Promise.all(
+          accounts.map(a => api.getAccountBalance(a.id)),
+        );
+        const output = accounts.map((a, i) => ({
+          id: a.id,
+          name: a.name,
+          offbudget: a.offbudget,
+          closed: a.closed,
+          balance: balances[i],
+        }));
+        printOutput(output, opts.format);
       });
     });
 
@@ -24,7 +41,11 @@ export function registerAccountsCommand(program: Command) {
     .description('Create a new account')
     .requiredOption('--name <name>', 'Account name')
     .option('--offbudget', 'Create as off-budget account', false)
-    .option('--balance <amount>', 'Initial balance in cents', '0')
+    .option(
+      '--balance <amount>',
+      'Initial balance in cents (e.g. 50000 = 500.00)',
+      '0',
+    )
     .action(async cmdOpts => {
       const balance = parseIntFlag(cmdOpts.balance, '--balance');
       const opts = program.opts();

@@ -4,11 +4,7 @@ import type { Command } from 'commander';
 import { withConnection } from '../connection';
 import { readJsonInput } from '../input';
 import { printOutput } from '../output';
-import { parseIntFlag } from '../utils';
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
+import { isRecord, parseIntFlag } from '../utils';
 
 /**
  * Parse order-by strings like "date:desc,amount:asc,id" into
@@ -253,7 +249,17 @@ Available tables: ${AVAILABLE_TABLES}
 Use "actual query tables" and "actual query fields <table>" for schema info.
 
 Common filter operators: $eq, $ne, $lt, $lte, $gt, $gte, $like, $and, $or
-See ActualQL docs for full reference: https://actualbudget.org/docs/api/actual-ql/`;
+See ActualQL docs for full reference: https://actualbudget.org/docs/api/actual-ql/
+
+Tips:
+  - Amounts are stored as integer cents (e.g. 166500 = 1665.00).
+    Table and CSV output auto-formats these as decimals; JSON keeps raw cents.
+  - Filter "is_parent": false to avoid double-counting split transactions.
+  - Fetch all data in a single query with a date range instead of running
+    one query per month — rapid sequential requests may cause auth failures.
+  - date.month, date.year etc. are not supported as fields in AQL.
+    To group by month, fetch raw transactions with a date range filter
+    and aggregate locally (e.g. in a script).`;
 
 export function registerQueryCommand(program: Command) {
   const query = program
@@ -306,10 +312,14 @@ export function registerQueryCommand(program: Command) {
 
         const result = await api.aqlQuery(queryObj);
 
+        if (!isRecord(result) || !('data' in result)) {
+          throw new Error('Query result missing data');
+        }
+
         if (cmdOpts.count) {
           printOutput({ count: result.data }, opts.format);
         } else {
-          printOutput(result, opts.format);
+          printOutput(result.data, opts.format);
         }
       });
     });

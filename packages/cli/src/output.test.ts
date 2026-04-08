@@ -60,6 +60,33 @@ describe('formatOutput', () => {
       expect(result).toContain('a');
       expect(result).toContain('b');
     });
+
+    it('formats amount fields as decimal values', () => {
+      const data = [{ name: 'Groceries', amount: -250000 }];
+      const result = formatOutput(data, 'table');
+      expect(result).toContain('-2500.00');
+      expect(result).not.toContain('-250000');
+    });
+
+    it('formats balance fields as decimal values', () => {
+      const data = [{ id: 'acc1', balance: 166500 }];
+      const result = formatOutput(data, 'table');
+      expect(result).toContain('1665.00');
+    });
+
+    it('formats budgeted and spent fields as decimal values', () => {
+      const data = [{ budgeted: 50000, spent: -32150 }];
+      const result = formatOutput(data, 'table');
+      expect(result).toContain('500.00');
+      expect(result).toContain('-321.50');
+    });
+
+    it('does not format non-amount numeric fields', () => {
+      const data = [{ id: 12345, sort_order: 100 }];
+      const result = formatOutput(data, 'table');
+      expect(result).toContain('12345');
+      expect(result).toContain('100');
+    });
   });
 
   describe('csv', () => {
@@ -111,6 +138,21 @@ describe('formatOutput', () => {
       const result = formatOutput(data, 'csv');
       const lines = result.split('\n');
       expect(lines[0]).toBe('a,b');
+    });
+
+    it('formats amount fields as decimal values', () => {
+      const data = [{ name: 'Coffee', amount: -2500 }];
+      const result = formatOutput(data, 'csv');
+      const lines = result.split('\n');
+      expect(lines[0]).toBe('name,amount');
+      expect(lines[1]).toBe('Coffee,-25.00');
+    });
+
+    it('does not format amount fields in json output', () => {
+      const data = [{ amount: 166500 }];
+      const result = formatOutput(data, 'json');
+      expect(result).toContain('166500');
+      expect(result).not.toContain('1665.00');
     });
   });
 });

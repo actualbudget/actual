@@ -82,7 +82,10 @@ export function registerBudgetsCommand(program: Command) {
     .description('Set budget amount for a category in a month')
     .requiredOption('--month <month>', 'Budget month (YYYY-MM)')
     .requiredOption('--category <id>', 'Category ID')
-    .requiredOption('--amount <amount>', 'Amount in cents')
+    .requiredOption(
+      '--amount <amount>',
+      'Amount in cents (e.g. 50000 = 500.00)',
+    )
     .action(async cmdOpts => {
       const amount = parseIntFlag(cmdOpts.amount, '--amount');
       const opts = program.opts();
@@ -111,7 +114,10 @@ export function registerBudgetsCommand(program: Command) {
     .command('hold-next-month')
     .description('Hold budget amount for next month')
     .requiredOption('--month <month>', 'Budget month (YYYY-MM)')
-    .requiredOption('--amount <amount>', 'Amount in cents')
+    .requiredOption(
+      '--amount <amount>',
+      'Amount in cents (e.g. 50000 = 500.00)',
+    )
     .action(async cmdOpts => {
       const parsedAmount = parseIntFlag(cmdOpts.amount, '--amount');
       const opts = program.opts();
