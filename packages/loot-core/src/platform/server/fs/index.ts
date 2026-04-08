@@ -314,7 +314,7 @@ export const init = async function () {
 
 export const basename = function (filepath) {
   const parts = filepath.split('/');
-  return parts[parts.length - 1];
+  return parts.slice(0, -1).join('/');
 };
 
 export const listDir = async function (filepath) {
