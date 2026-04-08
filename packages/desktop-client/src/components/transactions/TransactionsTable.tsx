@@ -1727,7 +1727,7 @@ const Transaction = memo(function Transaction({
             title={
               categoryId
                 ? (getCategoriesById(categoryGroups)[categoryId]?.name ??
-                    undefined)
+                  undefined)
                 : undefined
             }
             value={categoryId}
