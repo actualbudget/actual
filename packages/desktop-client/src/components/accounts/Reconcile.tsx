@@ -183,7 +183,7 @@ export function ReconcileMenu({
             <Input
               value={inputValue}
               onChangeValue={setInputValue}
-              style={{ margin: '7px 0' }}
+              style={{ margin: '7px 0', textAlign: 'right' }}
             />
           </InitialFocus>
         )}
@@ -192,6 +192,7 @@ export function ReconcileMenu({
             <Text>
               <Trans>Last Balance from Bank: </Trans>
               {format(lastSyncedBalance, 'financial')}
+              style={{ marginRight: '8px', textAlign: 'right' }}
             </Text>
             <Button
               onPress={() =>
