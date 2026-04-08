@@ -646,7 +646,8 @@ async function uploadFileWeb({
     return null;
   }
 
-  await fs.writeFile('/uploads/' + filename, contents);
+  const safeName = fs.basename(filename);
+  await fs.writeFile('/uploads/' + safeName, contents);
   return {};
 }
 
