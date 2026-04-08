@@ -42,6 +42,7 @@ type HeaderProps = {
   inlineContent?: ReactNode;
   // no separate category filter; use main filters instead
   filterExclude?: string[];
+  filterInclude?: string[];
 } & (
   | {
       filters: RuleConditionEntity[];
@@ -82,6 +83,7 @@ export function Header({
   children,
   inlineContent,
   filterExclude,
+  filterInclude,
 }: HeaderProps) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -295,6 +297,7 @@ export function Header({
                 onApply={onApply}
                 hover={false}
                 exclude={filterExclude}
+                include={filterInclude}
               />
             )}
             {inlineContent}

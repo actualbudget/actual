@@ -11,7 +11,7 @@ export const SvgHeart = (props: SVGProps<SVGSVGElement>) => (
     }}
   >
     <path
-      d="m10 3.22-.61-.6a5.5 5.5 0 0 0-7.78 7.77L10 18.78l8.39-8.4a5.5 5.5 0 0 0-7.78-7.77l-.61.61z"
+      d="m10 3.22-.61-.6a5.5 5.5 0 0 0-7.78 7.77L10 18.78l8.39-8.4a5.5 5.5 0 0 0-7.78-7.77z"
       fill="currentColor"
     />
   </svg>

@@ -1,4 +1,4 @@
-import * as connection from '../platform/server/connection';
+import * as connection from '#platform/server/connection';
 import type { Handlers } from '../types/handlers';
 
 import { createApp } from './app';

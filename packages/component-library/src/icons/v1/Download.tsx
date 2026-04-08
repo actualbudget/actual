@@ -10,6 +10,6 @@ export const SvgDownload = (props: SVGProps<SVGSVGElement>) => (
       ...props.style,
     }}
   >
-    <path d="M13 8V2H7v6H2l8 8 8-8h-5zM0 18h20v2H0v-2z" fill="currentColor" />
+    <path d="M13 8V2H7v6H2l8 8 8-8zM0 18h20v2H0z" fill="currentColor" />
   </svg>
 );

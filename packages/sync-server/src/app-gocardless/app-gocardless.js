@@ -1,6 +1,5 @@
 import path from 'path';
 
-import { isAxiosError } from 'axios';
 import express from 'express';
 
 import { sha256String } from '../util/hash';
@@ -17,6 +16,27 @@ import {
 } from './errors';
 import { goCardlessService } from './services/gocardless-service';
 import { handleError } from './util/handle-error';
+
+function validateOrigin(origin) {
+  let url;
+  try {
+    url = new URL(origin);
+  } catch {
+    throw new Error('Invalid Origin header');
+  }
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    throw new Error('Invalid Origin header');
+  }
+  return url.origin;
+}
+
+const SAFE_ID = /^[a-zA-Z0-9_-]+$/;
+function sanitizeId(id) {
+  if (typeof id !== 'string' || !SAFE_ID.test(id)) {
+    throw new Error(`Invalid GoCardless identifier: ${String(id)}`);
+  }
+  return id;
+}
 
 const app = express();
 app.use(requestLoggerMiddleware);
@@ -41,12 +61,13 @@ app.post('/status', async (req, res) => {
 app.post(
   '/create-web-token',
   handleError(async (req, res) => {
-    const { institutionId } = req.body || {};
-    const { origin } = req.headers;
+    const { institutionId: rawInstitutionId } = req.body || {};
+    const institutionId = sanitizeId(rawInstitutionId);
+    const host = validateOrigin(req.headers.origin);
 
     const { link, requisitionId } = await goCardlessService.createRequisition({
       institutionId,
-      host: origin,
+      host,
     });
 
     res.send({
@@ -62,7 +83,7 @@ app.post(
 app.post(
   '/get-accounts',
   handleError(async (req, res) => {
-    const { requisitionId } = req.body || {};
+    const requisitionId = sanitizeId((req.body || {}).requisitionId);
 
     try {
       const { requisition, accounts } =
@@ -97,7 +118,8 @@ app.post(
 app.post(
   '/get-banks',
   handleError(async (req, res) => {
-    const { country, showDemo = false } = req.body || {};
+    const { country: rawCountry, showDemo = false } = req.body || {};
+    const country = sanitizeId(rawCountry);
 
     await goCardlessService.setToken();
     const data = await goCardlessService.getInstitutions(country);
@@ -120,7 +142,7 @@ app.post(
 app.post(
   '/remove-account',
   handleError(async (req, res) => {
-    const { requisitionId } = req.body || {};
+    const requisitionId = sanitizeId((req.body || {}).requisitionId);
 
     const data = await goCardlessService.deleteRequisition(requisitionId);
     if (data.summary === 'Requisition deleted') {
@@ -144,12 +166,14 @@ app.post(
   '/transactions',
   handleError(async (req, res) => {
     const {
-      requisitionId,
+      requisitionId: rawRequisitionId,
       startDate,
       endDate,
-      accountId,
+      accountId: rawAccountId,
       includeBalance = true,
     } = req.body || {};
+    const requisitionId = sanitizeId(rawRequisitionId);
+    const accountId = sanitizeId(rawAccountId);
 
     try {
       if (includeBalance) {
@@ -206,7 +230,7 @@ app.post(
 
       const rateLimitHeaders = Object.fromEntries(
         Object.entries(headers).filter(([key]) =>
-          key.startsWith('http_x_ratelimit'),
+          key.startsWith('x-ratelimit-'),
         ),
       );
 
@@ -244,17 +268,6 @@ app.post(
           break;
         case error instanceof GenericGoCardlessError:
           console.log('Something went wrong', error.message);
-          sendErrorResponse({
-            error_type: 'SYNC_ERROR',
-            error_code: 'NORDIGEN_ERROR',
-          });
-          break;
-        case isAxiosError(error):
-          console.log(
-            'Something went wrong',
-            error.message,
-            error.response?.data?.summary || error.response?.data?.detail || '',
-          );
           sendErrorResponse({
             error_type: 'SYNC_ERROR',
             error_code: 'NORDIGEN_ERROR',

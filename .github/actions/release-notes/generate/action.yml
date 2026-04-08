@@ -1,0 +1,17 @@
+name: Generate release notes
+description: Generate release documentation from release note files
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+      with:
+        node-version: 22
+    - name: Install dependencies
+      shell: bash
+      run: yarn --immutable
+    - name: Generate release notes
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: node packages/ci-actions/bin/release-notes-generate.mjs

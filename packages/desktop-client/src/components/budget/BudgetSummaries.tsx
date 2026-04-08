@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import { animated, useSpring } from 'react-spring';
 
-import { View } from '@actual-app/components/view';
+import { View, viewStyles } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { addMonths, subMonths } from 'loot-core/shared/months';
@@ -85,7 +85,7 @@ export function BudgetSummaries() {
       ref={containerRef}
     >
       <animated.div
-        className="view"
+        className={viewStyles}
         style={{
           flexDirection: 'row',
           width: widthState,

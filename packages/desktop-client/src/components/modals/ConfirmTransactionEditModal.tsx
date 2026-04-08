@@ -47,11 +47,27 @@ export function ConfirmTransactionEditModal({
             rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ lineHeight: 1.5 }}>
-            {confirmReason === 'batchDeleteWithReconciled' ? (
+            {confirmReason === 'batchDeleteWithReconciledTransfer' ? (
+              <Block>
+                <Trans>
+                  This transfer has a linked transaction in another account that
+                  is reconciled. Deleting it may bring that account's
+                  reconciliation out of balance.
+                </Trans>
+              </Block>
+            ) : confirmReason === 'batchDeleteWithReconciled' ? (
               <Block>
                 <Trans>
                   Deleting reconciled transactions may bring your reconciliation
                   out of balance.
+                </Trans>
+              </Block>
+            ) : confirmReason === 'batchEditWithReconciledTransfer' ? (
+              <Block>
+                <Trans>
+                  This transfer has a linked transaction in another account that
+                  is reconciled. Editing it may bring that account's
+                  reconciliation out of balance.
                 </Trans>
               </Block>
             ) : confirmReason === 'batchEditWithReconciled' ? (
@@ -59,6 +75,14 @@ export function ConfirmTransactionEditModal({
                 <Trans>
                   Editing reconciled transactions may bring your reconciliation
                   out of balance.
+                </Trans>
+              </Block>
+            ) : confirmReason === 'batchDuplicateWithReconciledTransfer' ? (
+              <Block>
+                <Trans>
+                  This transfer has a linked transaction in another account that
+                  is reconciled. Duplicating it may bring that account's
+                  reconciliation out of balance.
                 </Trans>
               </Block>
             ) : confirmReason === 'batchDuplicateWithReconciled' ? (

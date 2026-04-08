@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components';
+import { ErrorBoundary } from 'react-error-boundary';
 import ReactGridLayout from 'react-grid-layout';
 import type { Layout } from 'react-grid-layout';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -26,6 +27,7 @@ import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 import { DashboardHeader } from './DashboardHeader';
 import { DashboardSelector } from './DashboardSelector';
 import { LoadingIndicator } from './LoadingIndicator';
+import { AgeOfMoneyCard } from './reports/AgeOfMoneyCard';
 import { BudgetAnalysisCard } from './reports/BudgetAnalysisCard';
 import { CalendarCard } from './reports/CalendarCard';
 import { CashFlowCard } from './reports/CashFlowCard';
@@ -33,9 +35,11 @@ import { CrossoverCard } from './reports/CrossoverCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
 import { FormulaCard } from './reports/FormulaCard';
 import { MarkdownCard } from './reports/MarkdownCard';
+import { MissingReportCard } from './reports/MissingReportCard';
 import { NetWorthCard } from './reports/NetWorthCard';
-import { SpendingCard } from './reports/SpendingCard';
+import { SankeyCard } from './reports/SankeyCard';
 import './overview.scss';
+import { SpendingCard } from './reports/SpendingCard';
 import { SummaryCard } from './reports/SummaryCard';
 
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
@@ -83,6 +87,7 @@ export function Overview({ dashboard }: OverviewProps) {
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');
+  const ageOfMoneyReportEnabled = useFeatureFlag('ageOfMoneyReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
 
   const formulaMode = useFeatureFlag('formulaMode');
@@ -96,6 +101,8 @@ export function Overview({ dashboard }: OverviewProps) {
 
   const { data: customReports = [], isPending: isCustomReportsLoading } =
     useReports();
+
+  const sankeyFeatureFlag = useFeatureFlag('sankeyReport');
 
   const customReportMap = useMemo(
     () => new Map(customReports.map(report => [report.id, report])),
@@ -576,6 +583,14 @@ export function Overview({ dashboard }: OverviewProps) {
                                   },
                                 ]
                               : []),
+                            ...(ageOfMoneyReportEnabled
+                              ? [
+                                  {
+                                    name: 'age-of-money-card' as const,
+                                    text: t('Age of Money'),
+                                  },
+                                ]
+                              : []),
                             {
                               name: 'spending-card' as const,
                               text: t('Spending analysis'),
@@ -605,6 +620,14 @@ export function Overview({ dashboard }: OverviewProps) {
                                   {
                                     name: 'formula-card' as const,
                                     text: t('Formula card'),
+                                  },
+                                ]
+                              : []),
+                            ...(sankeyFeatureFlag
+                              ? [
+                                  {
+                                    name: 'sankey-card' as const,
+                                    text: t('Sankey card'),
                                   },
                                 ]
                               : []),
@@ -749,119 +772,176 @@ export function Overview({ dashboard }: OverviewProps) {
 
                   return (
                     <div key={item.i}>
-                      {widget.type === 'net-worth-card' ? (
-                        <NetWorthCard
-                          widgetId={item.i}
-                          isEditing={isEditing}
-                          accounts={accounts}
-                          meta={widget.meta}
-                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                          onRemove={() => onRemoveWidget(item.i)}
-                          onCopy={targetDashboardId =>
-                            onCopyWidget(item.i, targetDashboardId)
-                          }
-                        />
-                      ) : widget.type === 'crossover-card' &&
-                        crossoverReportEnabled ? (
-                        <CrossoverCard
-                          widgetId={item.i}
-                          isEditing={isEditing}
-                          accounts={accounts}
-                          meta={widget.meta}
-                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                          onRemove={() => onRemoveWidget(item.i)}
-                          onCopy={targetDashboardId =>
-                            onCopyWidget(item.i, targetDashboardId)
-                          }
-                        />
-                      ) : widget.type === 'cash-flow-card' ? (
-                        <CashFlowCard
-                          widgetId={item.i}
-                          isEditing={isEditing}
-                          meta={widget.meta}
-                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                          onRemove={() => onRemoveWidget(item.i)}
-                          onCopy={targetDashboardId =>
-                            onCopyWidget(item.i, targetDashboardId)
-                          }
-                        />
-                      ) : widget.type === 'spending-card' ? (
-                        <SpendingCard
-                          widgetId={item.i}
-                          isEditing={isEditing}
-                          meta={widget.meta}
-                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                          onRemove={() => onRemoveWidget(item.i)}
-                          onCopy={targetDashboardId =>
-                            onCopyWidget(item.i, targetDashboardId)
-                          }
-                        />
-                      ) : widget.type === 'budget-analysis-card' &&
-                        budgetAnalysisReportEnabled ? (
-                        <BudgetAnalysisCard
-                          widgetId={item.i}
-                          isEditing={isEditing}
-                          meta={widget.meta}
-                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                          onRemove={() => onRemoveWidget(item.i)}
-                          onCopy={targetDashboardId =>
-                            onCopyWidget(item.i, targetDashboardId)
-                          }
-                        />
-                      ) : widget.type === 'markdown-card' ? (
-                        <MarkdownCard
-                          isEditing={isEditing}
-                          meta={widget.meta}
-                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                          onRemove={() => onRemoveWidget(item.i)}
-                          onCopy={targetDashboardId =>
-                            onCopyWidget(item.i, targetDashboardId)
-                          }
-                        />
-                      ) : widget.type === 'custom-report' ? (
-                        <CustomReportListCards
-                          isEditing={isEditing}
-                          report={customReportMap.get(widget.meta.id)}
-                          onRemove={() => onRemoveWidget(item.i)}
-                          onCopy={targetDashboardId =>
-                            onCopyWidget(item.i, targetDashboardId)
-                          }
-                        />
-                      ) : widget.type === 'summary-card' ? (
-                        <SummaryCard
-                          widgetId={item.i}
-                          isEditing={isEditing}
-                          meta={widget.meta}
-                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                          onRemove={() => onRemoveWidget(item.i)}
-                          onCopy={targetDashboardId =>
-                            onCopyWidget(item.i, targetDashboardId)
-                          }
-                        />
-                      ) : widget.type === 'calendar-card' ? (
-                        <CalendarCard
-                          widgetId={item.i}
-                          isEditing={isEditing}
-                          meta={widget.meta}
-                          firstDayOfWeekIdx={firstDayOfWeekIdx}
-                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                          onRemove={() => onRemoveWidget(item.i)}
-                          onCopy={targetDashboardId =>
-                            onCopyWidget(item.i, targetDashboardId)
-                          }
-                        />
-                      ) : widget.type === 'formula-card' && formulaMode ? (
-                        <FormulaCard
-                          widgetId={item.i}
-                          isEditing={isEditing}
-                          meta={widget.meta}
-                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
-                          onRemove={() => onRemoveWidget(item.i)}
-                          onCopy={targetDashboardId =>
-                            onCopyWidget(item.i, targetDashboardId)
-                          }
-                        />
-                      ) : null}
+                      <ErrorBoundary
+                        fallbackRender={() => (
+                          <MissingReportCard
+                            isEditing={isEditing}
+                            onRemove={() => onRemoveWidget(item.i)}
+                          >
+                            <Trans>This widget has failed to load.</Trans>
+                          </MissingReportCard>
+                        )}
+                      >
+                        {widget.type === 'net-worth-card' ? (
+                          <NetWorthCard
+                            widgetId={item.i}
+                            isEditing={isEditing}
+                            accounts={accounts}
+                            meta={widget.meta}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
+                            onRemove={() => onRemoveWidget(item.i)}
+                            onCopy={targetDashboardId =>
+                              onCopyWidget(item.i, targetDashboardId)
+                            }
+                          />
+                        ) : widget.type === 'crossover-card' &&
+                          crossoverReportEnabled ? (
+                          <CrossoverCard
+                            widgetId={item.i}
+                            isEditing={isEditing}
+                            accounts={accounts}
+                            meta={widget.meta}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
+                            onRemove={() => onRemoveWidget(item.i)}
+                            onCopy={targetDashboardId =>
+                              onCopyWidget(item.i, targetDashboardId)
+                            }
+                          />
+                        ) : widget.type === 'age-of-money-card' &&
+                          ageOfMoneyReportEnabled ? (
+                          <AgeOfMoneyCard
+                            widgetId={item.i}
+                            isEditing={isEditing}
+                            meta={widget.meta}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
+                            onRemove={() => onRemoveWidget(item.i)}
+                            onCopy={targetDashboardId =>
+                              onCopyWidget(item.i, targetDashboardId)
+                            }
+                          />
+                        ) : widget.type === 'cash-flow-card' ? (
+                          <CashFlowCard
+                            widgetId={item.i}
+                            isEditing={isEditing}
+                            meta={widget.meta}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
+                            onRemove={() => onRemoveWidget(item.i)}
+                            onCopy={targetDashboardId =>
+                              onCopyWidget(item.i, targetDashboardId)
+                            }
+                          />
+                        ) : widget.type === 'spending-card' ? (
+                          <SpendingCard
+                            widgetId={item.i}
+                            isEditing={isEditing}
+                            meta={widget.meta}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
+                            onRemove={() => onRemoveWidget(item.i)}
+                            onCopy={targetDashboardId =>
+                              onCopyWidget(item.i, targetDashboardId)
+                            }
+                          />
+                        ) : widget.type === 'budget-analysis-card' &&
+                          budgetAnalysisReportEnabled ? (
+                          <BudgetAnalysisCard
+                            widgetId={item.i}
+                            isEditing={isEditing}
+                            meta={widget.meta}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
+                            onRemove={() => onRemoveWidget(item.i)}
+                            onCopy={targetDashboardId =>
+                              onCopyWidget(item.i, targetDashboardId)
+                            }
+                          />
+                        ) : widget.type === 'markdown-card' ? (
+                          <MarkdownCard
+                            isEditing={isEditing}
+                            meta={widget.meta}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
+                            onRemove={() => onRemoveWidget(item.i)}
+                            onCopy={targetDashboardId =>
+                              onCopyWidget(item.i, targetDashboardId)
+                            }
+                          />
+                        ) : widget.type === 'custom-report' ? (
+                          <CustomReportListCards
+                            isEditing={isEditing}
+                            report={customReportMap.get(widget.meta.id)}
+                            onRemove={() => onRemoveWidget(item.i)}
+                            onCopy={targetDashboardId =>
+                              onCopyWidget(item.i, targetDashboardId)
+                            }
+                          />
+                        ) : widget.type === 'summary-card' ? (
+                          <SummaryCard
+                            widgetId={item.i}
+                            isEditing={isEditing}
+                            meta={widget.meta}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
+                            onRemove={() => onRemoveWidget(item.i)}
+                            onCopy={targetDashboardId =>
+                              onCopyWidget(item.i, targetDashboardId)
+                            }
+                          />
+                        ) : widget.type === 'calendar-card' ? (
+                          <CalendarCard
+                            widgetId={item.i}
+                            isEditing={isEditing}
+                            meta={widget.meta}
+                            firstDayOfWeekIdx={firstDayOfWeekIdx}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
+                            onRemove={() => onRemoveWidget(item.i)}
+                            onCopy={targetDashboardId =>
+                              onCopyWidget(item.i, targetDashboardId)
+                            }
+                          />
+                        ) : widget.type === 'formula-card' && formulaMode ? (
+                          <FormulaCard
+                            widgetId={item.i}
+                            isEditing={isEditing}
+                            meta={widget.meta}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
+                            onRemove={() => onRemoveWidget(item.i)}
+                            onCopy={targetDashboardId =>
+                              onCopyWidget(item.i, targetDashboardId)
+                            }
+                          />
+                        ) : widget.type === 'sankey-card' &&
+                          sankeyFeatureFlag ? (
+                          <SankeyCard
+                            widgetId={item.i}
+                            isEditing={isEditing}
+                            meta={widget.meta}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
+                            onRemove={() => onRemoveWidget(item.i)}
+                            onCopy={targetDashboardId =>
+                              onCopyWidget(item.i, targetDashboardId)
+                            }
+                          />
+                        ) : null}
+                      </ErrorBoundary>
                     </div>
                   );
                 })}

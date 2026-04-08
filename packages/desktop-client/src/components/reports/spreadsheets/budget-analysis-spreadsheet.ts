@@ -46,11 +46,22 @@ export function createBudgetAnalysisSpreadsheet({
     setData: (data: BudgetAnalysisData) => void,
   ) => {
     // Get all categories
-    const { list: allCategories } = await send('get-categories');
+    const { list: allCategories, grouped: allCategoryGroups } =
+      await send('get-categories');
 
-    // Filter categories based on conditions
-    const categoryConditions = conditions.filter(
-      cond => !cond.customName && cond.field === 'category',
+    // Build a UUID → name map for category groups so text-based operators
+    // (contains, doesNotContain, matches) can match against the group name.
+    const groupNameById = new Map<string, string>(
+      allCategoryGroups.map(
+        (g: { id: string; name: string }) => [g.id, g.name] as const,
+      ),
+    );
+
+    // Filter categories based on conditions (supports both 'category' and 'category_group' fields)
+    const relevantConditions = conditions.filter(
+      cond =>
+        !cond.customName &&
+        (cond.field === 'category' || cond.field === 'category_group'),
     );
 
     // Base set: expense categories only (exclude income and hidden)
@@ -59,18 +70,53 @@ export function createBudgetAnalysisSpreadsheet({
     );
 
     let categoriesToInclude: CategoryEntity[];
-    if (categoryConditions.length > 0) {
-      // Evaluate each condition to get sets of matching categories
-      const conditionResults = categoryConditions.map(cond => {
+    if (relevantConditions.length > 0) {
+      // Evaluate each condition to get sets of matching categories.
+      // category_group conditions are expanded to their member categories via cat.group.
+      const conditionResults = relevantConditions.map(cond => {
+        const getKey = (cat: CategoryEntity) =>
+          cond.field === 'category_group' ? cat.group : cat.id;
+        const matchesRegex =
+          cond.op === 'matches' &&
+          typeof cond.value === 'string' &&
+          cond.value.length <= 256
+            ? (() => {
+                try {
+                  return new RegExp(cond.value, 'i');
+                } catch {
+                  return null;
+                }
+              })()
+            : null;
         return baseCategories.filter((cat: CategoryEntity) => {
+          const key = getKey(cat);
+          // For text-based operators, compare against the human-readable name
+          // rather than the UUID. For category_group, resolve UUID → name via
+          // the map; for category, use the category's own name directly.
+          const textValue =
+            cond.field === 'category_group'
+              ? (groupNameById.get(key) ?? key)
+              : cat.name;
           if (cond.op === 'is') {
-            return cond.value === cat.id;
+            return cond.value === key;
           } else if (cond.op === 'isNot') {
-            return cond.value !== cat.id;
+            return cond.value !== key;
           } else if (cond.op === 'oneOf') {
-            return cond.value.includes(cat.id);
+            return Array.isArray(cond.value) && cond.value.includes(key);
           } else if (cond.op === 'notOneOf') {
-            return !cond.value.includes(cat.id);
+            return Array.isArray(cond.value) && !cond.value.includes(key);
+          } else if (cond.op === 'contains') {
+            return (
+              typeof cond.value === 'string' &&
+              textValue.toLowerCase().includes(cond.value.toLowerCase())
+            );
+          } else if (cond.op === 'doesNotContain') {
+            return (
+              typeof cond.value === 'string' &&
+              !textValue.toLowerCase().includes(cond.value.toLowerCase())
+            );
+          } else if (cond.op === 'matches') {
+            return matchesRegex?.test(textValue) ?? false;
           }
           return false;
         });
@@ -104,7 +150,7 @@ export function createBudgetAnalysisSpreadsheet({
         }
       }
     } else {
-      // No category filter, use all expense categories
+      // No category or category group filter — include all expense categories
       categoriesToInclude = baseCategories;
     }
 

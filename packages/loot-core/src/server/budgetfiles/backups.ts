@@ -3,10 +3,10 @@ import type { Database } from '@jlongster/sql.js';
 import AdmZip from 'adm-zip';
 import * as dateFns from 'date-fns';
 
-import * as connection from '../../platform/server/connection';
-import * as fs from '../../platform/server/fs';
-import { logger } from '../../platform/server/log';
-import * as sqlite from '../../platform/server/sqlite';
+import * as connection from '#platform/server/connection';
+import * as fs from '#platform/server/fs';
+import { logger } from '#platform/server/log';
+import * as sqlite from '#platform/server/sqlite';
 import * as monthUtils from '../../shared/months';
 import * as cloudStorage from '../cloud-storage';
 import * as prefs from '../prefs';

@@ -1,8 +1,8 @@
 import isMatch from 'lodash/isMatch';
 import { v4 as uuidv4 } from 'uuid';
 
+import * as fs from '#platform/server/fs';
 import { captureException } from '../../platform/exceptions';
-import * as fs from '../../platform/server/fs';
 import { DEFAULT_DASHBOARD_STATE } from '../../shared/dashboard';
 import { q } from '../../shared/query';
 import type {
@@ -40,6 +40,7 @@ function isWidgetType(type: string): type is DashboardWidgetEntity['type'] {
     'calendar-card',
     'formula-card',
     'custom-report',
+    'sankey-card',
   ].includes(type);
 }
 

@@ -40,8 +40,42 @@ export function createSpreadsheet(
     });
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    // Convert dates to ensure we have the full range. Then clamp end date to avoid future projections
-    const startDate = monthUtils.firstDayOfMonth(start);
+    // Go back exactly one interval before the selected range start
+    // to get the correct starting balance for the first period
+    const rangeStart = d.parseISO(monthUtils.firstDayOfMonth(start));
+    let startDate: string;
+    if (interval === 'Daily') {
+      startDate = monthUtils.dayFromDate(d.subDays(rangeStart, 1));
+    } else if (interval === 'Weekly') {
+      startDate = monthUtils.weekFromDate(
+        d.subDays(rangeStart, 1),
+        firstDayOfWeekIdx,
+      );
+    } else {
+      // Monthly or yearly
+      startDate = monthUtils.firstDayOfMonth(monthUtils.prevMonth(start));
+    }
+
+    // If the earliest transaction is on or after the first day of the start
+    // month, the prior period lookback would be empty (all zeros). Skip it to
+    // avoid rendering an empty data point.
+    const earliestTransaction = await send('get-earliest-transaction');
+    if (
+      earliestTransaction &&
+      earliestTransaction.date >= monthUtils.firstDayOfMonth(start)
+    ) {
+      if (interval === 'Daily') {
+        startDate = earliestTransaction.date;
+      } else if (interval === 'Weekly') {
+        startDate = monthUtils.weekFromDate(
+          earliestTransaction.date,
+          firstDayOfWeekIdx,
+        );
+      } else {
+        // Monthly or Yearly
+        startDate = monthUtils.firstDayOfMonth(start);
+      }
+    }
 
     // Start with the provided end-of-month date, then adjust for current context
     let endDate = monthUtils.lastDayOfMonth(end);
@@ -193,6 +227,7 @@ function recalculate(
   );
 
   let hasNegative = false;
+  let startNetWorth = 0;
   let endNetWorth = 0;
   let lowestNetWorth: number | null = null;
   let highestNetWorth: number | null = null;
@@ -242,6 +277,9 @@ function recalculate(
 
     const change = last ? total - last.y : total - priorPeriodNetWorth;
 
+    if (arr.length === 0) {
+      startNetWorth = total;
+    }
     endNetWorth = total;
 
     // Use standardized format from ReportOptions
@@ -293,7 +331,7 @@ function recalculate(
       end: endDate,
     },
     netWorth: endNetWorth,
-    totalChange: endNetWorth - priorPeriodNetWorth,
+    totalChange: endNetWorth - startNetWorth,
     lowestNetWorth,
     highestNetWorth,
     accounts: data

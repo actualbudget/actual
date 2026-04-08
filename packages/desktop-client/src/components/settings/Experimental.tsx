@@ -196,12 +196,23 @@ export function ExperimentalFeatures() {
             >
               <Trans>Currency support</Trans>
             </FeatureToggle>
-
+            <FeatureToggle
+              flag="sankeyReport"
+              feedbackLink="https://github.com/actualbudget/actual/issues/1919"
+            >
+              <Trans>Sankey report</Trans>
+            </FeatureToggle>
             <FeatureToggle
               flag="crossoverReport"
               feedbackLink="https://github.com/actualbudget/actual/issues/6134"
             >
               <Trans>Crossover Report</Trans>
+            </FeatureToggle>
+            <FeatureToggle
+              flag="ageOfMoneyReport"
+              feedbackLink="https://github.com/actualbudget/actual/issues/2994"
+            >
+              <Trans>Age of Money Report</Trans>
             </FeatureToggle>
             <FeatureToggle
               flag="customThemes"
