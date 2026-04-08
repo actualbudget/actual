@@ -204,7 +204,10 @@ export function ReconcileMenu({
             </Button>
           </View>
         )}
-        <Text style={{ color: theme.pageTextSubdued, paddingBottom: 6 }}>
+        <Button type="submit" variant="primary">
+          <Trans>Reconcile</Trans>
+        </Button>
+        <Text style={{ color: theme.pageTextLight, paddingBottom: 6 }}>
           {account?.last_reconciled
             ? t('Reconciled {{ relativeTimeAgo }} ({{ absoluteDate }})', {
                 relativeTimeAgo: tsToRelativeTime(
@@ -219,9 +222,6 @@ export function ReconcileMenu({
               })
             : t('Not yet reconciled')}
         </Text>
-        <Button type="submit" variant="primary">
-          <Trans>Reconcile</Trans>
-        </Button>
       </View>
     </Form>
   );
