@@ -189,7 +189,7 @@ export function ReconcileMenu({
         )}
         {lastSyncedBalance != null && (
           <View>
-            <Text style={{ marginRight: '8px', textAlign: 'right' }}>
+            <Text style={{ margin: '8px 8px 8px 0', textAlign: 'right' }}>
               <Trans>Last Balance from Bank: </Trans>
               {format(lastSyncedBalance, 'financial')}
             </Text>
@@ -206,7 +206,7 @@ export function ReconcileMenu({
         <Button type="submit" variant="primary">
           <Trans>Reconcile</Trans>
         </Button>
-        <Text style={{ color: theme.pageTextLight, paddingBottom: 6 }}>
+        <Text style={{ color: theme.pageTextLight, marginTop: 8px  }}>
           {account?.last_reconciled
             ? t('Reconciled {{ relativeTimeAgo }} ({{ absoluteDate }})', {
                 relativeTimeAgo: tsToRelativeTime(
