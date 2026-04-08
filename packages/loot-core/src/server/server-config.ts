@@ -1,4 +1,4 @@
-import * as fs from '../platform/server/fs';
+import * as fs from '#platform/server/fs';
 import { logger } from '../platform/server/log';
 
 type ServerConfig = {

@@ -32,7 +32,7 @@ export const PayeeFilter = ({ value, op, onChange }: PayeeFilterProps) => {
   const { t } = useTranslation();
   const multi = ['oneOf', 'notOneOf'].includes(op);
 
-  let coercedValue: PayeeFilterValue = value;
+  let coercedValue: PayeeFilterValue;
   if (multi) {
     coercedValue = Array.isArray(value) ? value : [];
   } else {

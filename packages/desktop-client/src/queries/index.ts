@@ -84,6 +84,7 @@ export function transactionsSearch(
   dateFormat: SyncedPrefs['dateFormat'],
 ) {
   const amount = currencyToAmount(search);
+  const escapedSearch = search.replace(/[\\%?]/g, '\\$&');
 
   // Support various date formats
   let parsedDate;
@@ -97,11 +98,11 @@ export function transactionsSearch(
 
   return currentQuery.filter({
     $or: {
-      'payee.name': { $like: `%${search}%` },
-      'payee.transfer_acct.name': { $like: `%${search}%` },
-      notes: { $like: `%${search}%` },
-      'category.name': { $like: `%${search}%` },
-      'account.name': { $like: `%${search}%` },
+      'payee.name': { $like: `%${escapedSearch}%` },
+      'payee.transfer_acct.name': { $like: `%${escapedSearch}%` },
+      notes: { $like: `%${escapedSearch}%` },
+      'category.name': { $like: `%${escapedSearch}%` },
+      'account.name': { $like: `%${escapedSearch}%` },
       $or: [
         isDateValid(parsedDate) && { date: dayFromDate(parsedDate) },
         amount != null && {

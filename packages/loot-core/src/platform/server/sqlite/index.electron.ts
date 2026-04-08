@@ -2,8 +2,8 @@
 import SQL from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 
-import { readFile, removeFile } from '../fs';
-import { logger } from '../log';
+import { readFile, removeFile } from '#platform/server/fs';
+import { logger } from '#platform/server/log';
 
 import { normalise } from './normalise';
 import { unicodeLike } from './unicodeLike';

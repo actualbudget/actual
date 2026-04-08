@@ -188,7 +188,7 @@ export function createCustomSpreadsheet({
                 (asset[groupByLabel] === (item.id ?? null) ||
                   (item.uncategorized_id && groupsByCategory)),
             )
-            .reduce((a, v) => (a = a + v.amount), 0);
+            .reduce((a, v) => a + v.amount, 0);
           perIntervalAssets += intervalAssets;
 
           const intervalDebts = filterHiddenItems(
@@ -205,7 +205,7 @@ export function createCustomSpreadsheet({
                 (debt[groupByLabel] === (item.id ?? null) ||
                   (item.uncategorized_id && groupsByCategory)),
             )
-            .reduce((a, v) => (a = a + v.amount), 0);
+            .reduce((a, v) => a + v.amount, 0);
           perIntervalDebts += intervalDebts;
 
           const netAmounts = intervalAssets + intervalDebts;

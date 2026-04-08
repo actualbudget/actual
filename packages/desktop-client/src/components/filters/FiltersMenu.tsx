@@ -356,18 +356,47 @@ function ConfigureField<T extends RuleConditionEntity>({
   );
 }
 
+/**
+ * Props for the shared report filter picker.
+ * Note: the `include` and `exclude` props only control which fields are shown in the picker, they do not limit the fields that can be applied as filters. Additionally, if both `include` and `exclude` are provided, `include` acts as the allowlist before `exclude` is applied.
+ */
 type FilterButtonProps<T extends RuleConditionEntity> = {
   onApply: (cond: T) => void;
   compact: boolean;
   hover: boolean;
+  /** Fields hidden from the picker unless allowed by `include`. */
   exclude?: string[];
+  /** If both are provided, `include` acts as the allowlist before `exclude` is applied. */
+  include?: string[];
 };
 
+/**
+ * Returns whether a filter field should be shown in the picker.
+ *
+ * If both `include` and `exclude` are provided, `include` acts as the
+ * allowlist before `exclude` is applied.
+ */
+function shouldShowFilterField(
+  field: string,
+  include?: string[],
+  exclude?: string[],
+) {
+  if (include && !include.includes(field)) {
+    return false;
+  }
+
+  return exclude ? !exclude.includes(field) : true;
+}
+
+/**
+ * Shared filter picker used by reports to choose and apply filter conditions.
+ */
 export function FilterButton<T extends RuleConditionEntity>({
   onApply,
   compact,
   hover,
   exclude,
+  include,
 }: FilterButtonProps<T>) {
   const { t } = useTranslation();
   const filters = useTransactionFilters();
@@ -476,16 +505,17 @@ export function FilterButton<T extends RuleConditionEntity>({
     scopes: ['app'],
   });
 
-  const filterMenuItems: ComponentProps<typeof Menu>['items'] =
-    translatedFilterFields
-      .filter(f => (exclude ? !exclude.includes(f[0]) : true))
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([name, text]) => ({
-        name,
-        text: titleFirst(text),
-      }));
+  const visibleFilterFields = translatedFilterFields
+    .filter(([field]) => shouldShowFilterField(field, include, exclude))
+    .sort((a, b) => a[0].localeCompare(b[0]));
 
-  if (!exclude?.includes('saved')) {
+  const filterMenuItems: ComponentProps<typeof Menu>['items'] =
+    visibleFilterFields.map(([name, text]) => ({
+      name,
+      text: titleFirst(text),
+    }));
+
+  if (shouldShowFilterField('saved', include, exclude)) {
     filterMenuItems.push(Menu.line);
     filterMenuItems.push({
       name: 'saved',

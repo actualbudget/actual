@@ -31,7 +31,7 @@ export const reportModel = {
   toJS(row: CustomReportData): CustomReportEntity {
     return {
       id: row.id,
-      name: row.name,
+      name: row.name ?? '',
       startDate: row.start_date,
       endDate: row.end_date,
       isDateStatic: row.date_static === 1,

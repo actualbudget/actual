@@ -183,7 +183,7 @@ function CustomReportInner({
   sessionStorage.setItem('prevUrl', prevUrl);
   sessionStorage.setItem('url', location.pathname);
 
-  if (['/reports'].includes(prevUrl)) sessionStorage.clear();
+  if (prevUrl !== location.pathname) sessionStorage.clear();
 
   const reportFromSessionStorage = sessionStorage.getItem('report');
   const session: Partial<CustomReportEntity> = reportFromSessionStorage

@@ -154,7 +154,6 @@ const ActiveShapeMobile = ({
   value,
   expandInward,
   chartInnerRadius,
-  chartMidRadius,
   chartOuterRadius,
 }: ActiveShapeProps) => {
   const format = useFormat();
@@ -230,8 +229,6 @@ const ActiveShapeDesktop = ({
   value,
   expandInward,
   chartInnerRadius,
-  chartMidRadius,
-  chartOuterRadius,
 }: ActiveShapeProps) => {
   const format = useFormat();
   // Fix 2: guard against undefined payload.name  and payload.date

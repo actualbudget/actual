@@ -51,7 +51,7 @@ export const dashboardQueries = {
         const { data }: { data: DashboardPageEntity[] } = await aqlQuery(
           q('dashboard_pages').select('*'),
         );
-        return data;
+        return data.map(page => ({ ...page, name: page.name ?? '' }));
       },
     }),
 };

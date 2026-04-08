@@ -2,7 +2,7 @@
 import * as dateFns from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
-import * as asyncStorage from '../../platform/server/asyncStorage';
+import * as asyncStorage from '#platform/server/asyncStorage';
 import { logger } from '../../platform/server/log';
 import * as monthUtils from '../../shared/months';
 import { q } from '../../shared/query';
@@ -350,9 +350,6 @@ async function normalizeTransactions(
     // Strip off the irregular properties
     const { payee_name: originalPayeeName, subtransactions, ...rest } = trans;
     trans = rest;
-    const explicitFields = Object.entries(rest)
-      .filter(([, value]) => value != null)
-      .map(([field]) => field);
 
     let payee_name = originalPayeeName;
     if (payee_name) {
@@ -379,7 +376,6 @@ async function normalizeTransactions(
 
     normalized.push({
       payee_name,
-      explicitFields,
       subtransactions: subtransactions
         ? subtransactions.map(t => ({ ...t, account: acctId }))
         : null,
@@ -880,28 +876,15 @@ export async function addTransactions(
   const accounts: db.DbAccount[] = await db.getAccounts();
   const accountsMap = new Map(accounts.map(account => [account.id, account]));
 
-  for (const {
-    trans: originalTrans,
-    subtransactions,
-    explicitFields,
-  } of normalized) {
+  for (const { trans: originalTrans, subtransactions } of normalized) {
     // Run the rules
     const trans = await runRules(originalTrans, accountsMap);
 
-    // Rules should enrich missing fields but not override explicit values provided by API clients.
-    const transWithExplicitFields = { ...trans };
-    for (const field of explicitFields) {
-      transWithExplicitFields[field] = originalTrans[field];
-    }
-
     const finalTransaction = {
       id: uuidv4(),
-      ...transWithExplicitFields,
+      ...trans,
       account: acctId,
-      cleared:
-        transWithExplicitFields.cleared != null
-          ? transWithExplicitFields.cleared
-          : true,
+      cleared: trans.cleared != null ? trans.cleared : true,
     };
 
     // Add split transactions if they are given

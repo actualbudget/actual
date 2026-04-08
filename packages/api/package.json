@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/api",
-  "version": "26.3.0",
+  "version": "26.4.0",
   "description": "An API for Actual",
   "license": "MIT",
   "files": [
@@ -11,6 +11,7 @@
   "types": "@types/index.d.ts",
   "exports": {
     ".": {
+      "types": "./@types/index.d.ts",
       "development": "./index.ts",
       "default": "./dist/index.js"
     }
@@ -33,14 +34,13 @@
     "@actual-app/crdt": "workspace:*",
     "better-sqlite3": "^12.6.2",
     "compare-versions": "^6.1.1",
-    "node-fetch": "^3.3.2",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@typescript/native-preview": "^7.0.0-dev.20260309.1",
     "rollup-plugin-visualizer": "^6.0.11",
     "typescript-strict-plugin": "^2.4.4",
-    "vite": "^8.0.0",
+    "vite": "^8.0.5",
     "vite-plugin-dts": "^4.5.4",
     "vite-plugin-peggy-loader": "^2.0.1",
     "vitest": "^4.1.0"

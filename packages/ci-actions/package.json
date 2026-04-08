@@ -10,6 +10,8 @@
   "devDependencies": {
     "@typescript/native-preview": "^7.0.0-dev.20260309.1",
     "extensionless": "^2.0.6",
+    "gray-matter": "^4.0.3",
+    "listify": "^1.0.3",
     "vitest": "^4.1.0"
   },
   "extensionless": {

@@ -303,6 +303,7 @@ export class Action {
       hfInstance = HyperFormula.buildEmpty({
         licenseKey: 'gpl-v3',
         language: 'enUS',
+        dateFormats: ['DD/MM/YYYY', 'YYYY-MM-DD', 'YYYY/MM/DD'],
       });
 
       const sheetName = hfInstance.addSheet('Sheet1');
@@ -336,7 +337,6 @@ export class Action {
         }
         hfInstance.addNamedExpression(key, cellValue);
       }
-
       hfInstance.setCellContents({ sheet: sheetId, col: 0, row: 0 }, [
         [formula],
       ]);

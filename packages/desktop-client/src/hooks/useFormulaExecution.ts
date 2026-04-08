@@ -329,6 +329,7 @@ export function useFormulaExecution(
           licenseKey: 'gpl-v3',
           localeLang: typeof locale === 'string' ? locale : 'en-US',
           language: 'enUS',
+          dateFormats: ['DD/MM/YYYY', 'YYYY-MM-DD', 'YYYY/MM/DD'],
         });
 
         // Add a sheet and set the formula in cell A1

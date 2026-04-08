@@ -75,6 +75,7 @@ import {
   pushModal,
   replaceModal,
 } from '@desktop-client/modals/modalsSlice';
+import type { ConfirmTransactionEditReason } from '@desktop-client/modals/modalsSlice';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { useCreatePayeeMutation } from '@desktop-client/payees';
 import * as queries from '@desktop-client/queries';
@@ -262,7 +263,6 @@ type AccountInternalState = {
   workingHard: boolean;
   reconcileAmount: null | number;
   transactions: TransactionEntity[];
-  transactionCount: number;
   transactionsFiltered?: boolean;
   showBalances?: boolean | undefined;
   balances: Record<TransactionEntity['id'], IntegerAmount> | null;
@@ -314,7 +314,6 @@ class AccountInternal extends PureComponent<
       workingHard: false,
       reconcileAmount: null,
       transactions: [],
-      transactionCount: 0,
       showBalances: props.showBalances,
       balances: null,
       showCleared: props.showCleared,
@@ -500,7 +499,6 @@ class AccountInternal extends PureComponent<
         this.setState(
           {
             transactions: data,
-            transactionCount: this.paged?.totalCount ?? 0,
             transactionsFiltered: isFiltered,
             loading: false,
             workingHard: false,
@@ -835,7 +833,6 @@ class AccountInternal extends PureComponent<
           this.setState(
             {
               transactions: [],
-              transactionCount: 0,
               filterConditions: [],
               search: '',
               sort: null,
@@ -1230,7 +1227,7 @@ class AccountInternal extends PureComponent<
 
   checkForReconciledTransactions = async (
     ids: string[],
-    confirmReason: string,
+    confirmReason: ConfirmTransactionEditReason,
     onConfirm: (ids: string[]) => void,
   ) => {
     const { data } = await aqlQuery(
@@ -1551,7 +1548,6 @@ class AccountInternal extends PureComponent<
       this.setState(
         {
           transactions: [],
-          transactionCount: 0,
           filterConditions: conditions,
         },
         () => {
