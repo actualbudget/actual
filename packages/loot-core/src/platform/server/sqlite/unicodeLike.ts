@@ -2,6 +2,8 @@ import { LRUCache } from 'lru-cache';
 
 const likePatternCache = new LRUCache<string, RegExp>({ max: 500 });
 
+const REGEX_SPECIAL = /[.*+^${}()|[\]\\?]/g;
+
 function likePatternToRegex(pattern: string): RegExp {
   let regexStr = '';
   let i = 0;
@@ -11,7 +13,7 @@ function likePatternToRegex(pattern: string): RegExp {
       const next = pattern[i + 1];
       if (next === '%' || next === '?' || next === '\\') {
         // escaped wildcard — treat as literal character
-        regexStr += next.replace(/[.*+^${}()|[\]\\?]/g, '\\$&'); // ? added here
+        regexStr += next.replace(REGEX_SPECIAL, '\\$&'); // ? added here
         i += 2;
         continue;
       }
@@ -21,7 +23,7 @@ function likePatternToRegex(pattern: string): RegExp {
     } else if (ch === '?') {
       regexStr += '.';
     } else {
-      regexStr += ch.replace(/[.*+^${}()|[\]\\]/g, '\\$&');
+      regexStr += ch.replace(REGEX_SPECIAL, '\\$&');
     }
     i++;
   }
