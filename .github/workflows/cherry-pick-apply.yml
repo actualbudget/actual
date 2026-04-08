@@ -63,6 +63,8 @@ jobs:
 
           RESULTS="[]"
 
+          git fetch origin master
+
           for row in $(echo "$PICKS" | jq -c '.[]'); do
             NUMBER=$(echo "$row" | jq -r '.number')
             SHA=$(echo "$row" | jq -r '.sha')
@@ -73,7 +75,6 @@ jobs:
             fi
 
             echo "Cherry-picking #${NUMBER} (${SHA})..."
-            git fetch origin master
 
             if git cherry-pick -m 1 "$SHA" --no-edit; then
               echo "  Success"
