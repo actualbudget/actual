@@ -21,26 +21,28 @@ For example:
 - `v23.3.2` - another bugfix launched later in the month of March;
 - `v23.4.0` - first release launched on 9th of April, 2023;
 
-## Set up the PR
+## Release branch
 
-### Code
+A release branch and PR are automatically cut at 17:00 UTC on the 25th of each month. To cut one manually, run [this GitHub Action](https://github.com/actualbudget/actual/actions/workflows/cut-release-branch.yml).
 
-- [ ] A release branch and PR are automatically cut at 17:00 UTC on the 25th of each month. To cut one manually, run [this GitHub Action](https://github.com/actualbudget/actual/actions/workflows/cut-release-branch.yml).
-- [ ] Open the generated PR and ensure the release notes workflow has started to collate the release notes into a comment in the PR. You may need to push an empty commit in order to trigger CI.
-- [ ] After the release notes workflows in the PR has been run, copy the collated notes into a new blog post using a previous release as a template. The release notes will also need adding to the `docs/releases.md` file.
-- [ ] Fix spelling as needed.
+The release notes workflow automatically generates a blog post and updates `docs/releases.md` from the files in `upcoming-release-notes/`. This runs each time the release PR is updated, so there is no need to manually copy notes into the docs.
 
-## Await approval of the Release PR
+## Cherry-picking fixes into the release
 
-- [ ] Remove `[WIP]` from the PR title to mark it as ready for review, and share in the release channel on Discord.
-- [ ] Wait until at least 2 other maintainers have approved the release before merging the release PR.
+After the release branch is cut, PRs that merge to master are tracked in a checklist on the release PR. To include a fix in the release, tick the checkbox next to it and the cherry-pick will be applied automatically. If a cherry-pick conflicts, it will be flagged on the PR and will need to be applied manually.
 
-## Trigger the release pipeline
+## Stabilise the release
 
-Once the release PRs have been merged, the commit in `actual` needs to be tagged. When the tag is pushed, it will trigger the Docker stable image, all NPM package and the Desktop app to be built and published.
+- [ ] Fix spelling in the generated release notes as needed.
+- [ ] Share the release PR in the release channel on Discord.
+- [ ] Wait until at least 2 other maintainers have approved the release.
 
-- [ ] Run the below in the `actual` repository, or use the GitHub UI.
+## Merge and tag the release
+
+- [ ] Merge the release PR to master.
+- [ ] Create the tag on the **release branch** and push it. When the tag is pushed, it triggers the Docker stable image, all NPM packages and the Desktop app to be built and published.
   ```bash
+  git checkout release/vX.Y.Z
   git tag vX.Y.Z
   git push vX.Y.Z
   ```
@@ -63,6 +65,4 @@ Once the GitHub release is published, the Flathub publish workflow will trigger 
 - [ ] Un-draft the GitHub release which will send announcement notifications to all apps.
 - [ ] Approve and merge the [Flathub Release PR](https://github.com/flathub/com.actualbudget.actual/pulls) to master.
 - [ ] Wrap up by sending an announcement on Discord and Twitter.
-- [ ] Wait one to two days to see if any new bugs show up that need a patch release. If none show up, end the merge freeze.
-
-:tada:
+- [ ] Wait one to two days to see if any new bugs show up that need a patch release.
