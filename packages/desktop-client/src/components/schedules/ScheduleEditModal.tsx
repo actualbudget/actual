@@ -130,6 +130,8 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
           id: state.schedule.id,
           posts_transaction: state.fields.posts_transaction,
           name: state.fields.name,
+          due_date_days_offset: state.fields.due_date_days_offset,
+          grace_period_days: state.fields.grace_period_days,
         },
         conditions,
       },

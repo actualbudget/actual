@@ -43,6 +43,8 @@ function loadStatuses(
             s.completed,
             hasTrans.has(s.id),
             upcomingLength,
+            s.due_date_days_offset,
+            s.grace_period_days,
           ),
         ]),
       ) as ScheduleStatuses;

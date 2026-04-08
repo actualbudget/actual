@@ -15,24 +15,36 @@ export function getStatus(
   completed: boolean,
   hasTrans: boolean,
   upcomingLength: string = '7',
+  dueDateDaysOffset?: number | null,
+  gracePeriodDays?: number | null,
 ) {
   const upcomingDays = getUpcomingDays(upcomingLength);
   const today = monthUtils.currentDay();
+  const offset = dueDateDaysOffset ?? 0;
+  const grace = gracePeriodDays ?? 0;
+  const dueDate = offset > 0 ? monthUtils.addDays(nextDate, offset) : nextDate;
+  const missedAfterDate =
+    grace > 0 ? monthUtils.addDays(dueDate, grace) : dueDate;
+
   if (completed) {
     return 'completed';
   } else if (hasTrans) {
     return 'paid';
-  } else if (nextDate === today) {
-    return 'due';
-  } else if (
-    nextDate > today &&
-    nextDate <= monthUtils.addDays(today, upcomingDays)
-  ) {
-    return 'upcoming';
-  } else if (nextDate < today) {
-    return 'missed';
-  } else {
+  } else if (nextDate > today) {
+    // Invoice date is in the future
+    if (nextDate <= monthUtils.addDays(today, upcomingDays)) {
+      return 'upcoming';
+    }
     return 'scheduled';
+  } else if (nextDate <= today && today <= dueDate) {
+    // Invoice date reached but not yet past due date
+    return 'due';
+  } else if (dueDate < today && today <= missedAfterDate) {
+    // Past due date but within grace period
+    return 'overdue';
+  } else {
+    // Past due date + grace period
+    return 'missed';
   }
 }
 
@@ -48,6 +60,8 @@ export function getStatusLabel(status: string) {
       return t('upcoming');
     case 'missed':
       return t('missed');
+    case 'overdue':
+      return t('overdue');
     case 'scheduled':
       return t('scheduled');
     default:
@@ -58,14 +72,16 @@ export function getStatusLabel(status: string) {
 export function getHasTransactionsQuery(schedules) {
   const filters = schedules.map(schedule => {
     const dateCond = schedule._conditions?.find(c => c.field === 'date');
+    const baseLookback = dateCond && dateCond.op === 'is' ? 0 : 2;
+    const totalWindow =
+      (schedule.due_date_days_offset ?? 0) +
+      (schedule.grace_period_days ?? 0) +
+      baseLookback;
     return {
       $and: {
         schedule: schedule.id,
         date: {
-          $gte:
-            dateCond && dateCond.op === 'is'
-              ? schedule.next_date
-              : monthUtils.subDays(schedule.next_date, 2),
+          $gte: monthUtils.subDays(schedule.next_date, totalWindow),
         },
       },
     };
@@ -479,7 +495,7 @@ export function isForPreview(
   const status = statuses.get(schedule.id);
   return (
     !schedule.completed &&
-    ['due', 'upcoming', 'missed', 'paid'].includes(status!)
+    ['due', 'upcoming', 'missed', 'overdue', 'paid'].includes(status!)
   );
 }
 

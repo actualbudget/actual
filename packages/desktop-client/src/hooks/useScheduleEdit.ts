@@ -60,6 +60,11 @@ type ScheduleEditAction =
       value: boolean;
     }
   | {
+      type: 'set-field';
+      field: 'due_date_days_offset' | 'grace_period_days';
+      value: number | null;
+    }
+  | {
       type: 'set-transactions';
       transactions: TransactionEntity[];
       transactionId?: string;
@@ -110,6 +115,8 @@ function createScheduleEditReducer(useGetScheduledAmount: boolean = false) {
             date: schedule._date ?? null,
             posts_transaction: action.schedule.posts_transaction ?? false,
             name: schedule.name ?? null,
+            due_date_days_offset: schedule.due_date_days_offset ?? null,
+            grace_period_days: schedule.grace_period_days ?? null,
           },
         };
       }
@@ -256,6 +263,8 @@ export function useScheduleEdit({
       date: null,
       posts_transaction: false,
       name: null,
+      due_date_days_offset: null,
+      grace_period_days: null,
     },
     transactions: [],
     transactionsMode: adding ? 'matched' : 'linked',

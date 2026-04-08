@@ -26,6 +26,8 @@ export type ScheduleEntity = {
   next_date: string;
   completed: boolean;
   posts_transaction: boolean;
+  due_date_days_offset?: number | null;
+  grace_period_days?: number | null;
   tombstone: boolean;
 
   // These are special fields that are actually pulled from the

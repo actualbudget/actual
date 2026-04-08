@@ -47,6 +47,8 @@ export type ScheduleFormFields = {
   date: null | string | RecurConfig;
   posts_transaction: boolean;
   name: null | string;
+  due_date_days_offset: null | number;
+  grace_period_days: null | number;
 };
 
 export type ScheduleEditFormDispatch =
@@ -74,6 +76,11 @@ export type ScheduleEditFormDispatch =
       type: 'set-field';
       field: 'posts_transaction';
       value: boolean;
+    }
+  | {
+      type: 'set-field';
+      field: 'due_date_days_offset' | 'grace_period_days';
+      value: number | null;
     }
   | {
       type: 'set-repeats';
@@ -365,6 +372,90 @@ export function ScheduleEditForm({
               for you in the specified account
             </Trans>
           </Text>
+
+          <View style={{ marginTop: 15 }}>
+            <SpaceBetween
+              style={{
+                display: isNarrowWidth ? 'grid' : 'flex',
+                gridTemplateColumns: '1fr 1fr',
+                gap: 10,
+              }}
+            >
+              <FormField style={{ flex: 1 }}>
+                <FormLabel
+                  title={t('Days until due')}
+                  htmlFor="due-date-offset-field"
+                />
+                <Input
+                  id="due-date-offset-field"
+                  type="number"
+                  min="0"
+                  value={
+                    fields.due_date_days_offset != null
+                      ? String(fields.due_date_days_offset)
+                      : ''
+                  }
+                  placeholder="0"
+                  onChangeValue={value => {
+                    const parsed = parseInt(value, 10);
+                    dispatch({
+                      type: 'set-field',
+                      field: 'due_date_days_offset',
+                      value: isNaN(parsed) ? null : Math.max(0, parsed),
+                    });
+                  }}
+                />
+                <Text
+                  style={{
+                    color: theme.pageTextLight,
+                    fontSize: 12,
+                    marginTop: 3,
+                  }}
+                >
+                  <Trans>
+                    Days after the scheduled date before payment is due
+                  </Trans>
+                </Text>
+              </FormField>
+
+              <FormField style={{ flex: 1 }}>
+                <FormLabel
+                  title={t('Grace period (days)')}
+                  htmlFor="grace-period-field"
+                />
+                <Input
+                  id="grace-period-field"
+                  type="number"
+                  min="0"
+                  value={
+                    fields.grace_period_days != null
+                      ? String(fields.grace_period_days)
+                      : ''
+                  }
+                  placeholder="0"
+                  onChangeValue={value => {
+                    const parsed = parseInt(value, 10);
+                    dispatch({
+                      type: 'set-field',
+                      field: 'grace_period_days',
+                      value: isNaN(parsed) ? null : Math.max(0, parsed),
+                    });
+                  }}
+                />
+                <Text
+                  style={{
+                    color: theme.pageTextLight,
+                    fontSize: 12,
+                    marginTop: 3,
+                  }}
+                >
+                  <Trans>
+                    Additional days after the due date before marked as missed
+                  </Trans>
+                </Text>
+              </FormField>
+            </SpaceBetween>
+          </View>
 
           {!adding && schedule.rule && (
             <SpaceBetween style={{ marginTop: 20, alignItems: 'center' }}>

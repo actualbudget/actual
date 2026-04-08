@@ -1,0 +1,6 @@
+BEGIN TRANSACTION;
+
+ALTER TABLE schedules ADD COLUMN due_date_days_offset INTEGER DEFAULT NULL;
+ALTER TABLE schedules ADD COLUMN grace_period_days INTEGER DEFAULT NULL;
+
+COMMIT;

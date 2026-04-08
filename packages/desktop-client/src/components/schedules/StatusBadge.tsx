@@ -45,6 +45,12 @@ export function getStatusProps(status: StatusTypes | null | undefined) {
         backgroundColor: theme.warningBackground,
         Icon: SvgAlertTriangle,
       };
+    case 'overdue':
+      return {
+        color: theme.errorText,
+        backgroundColor: theme.errorBackground,
+        Icon: SvgAlertTriangle,
+      };
     case 'upcoming':
       return {
         color: theme.upcomingText,

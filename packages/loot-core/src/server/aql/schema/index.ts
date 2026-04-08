@@ -104,6 +104,8 @@ export const schema = {
     next_date: f('date'),
     completed: f('boolean'),
     posts_transaction: f('boolean'),
+    due_date_days_offset: f('integer'),
+    grace_period_days: f('integer'),
     tombstone: f('boolean'),
 
     // These are special fields that are actually pulled from the

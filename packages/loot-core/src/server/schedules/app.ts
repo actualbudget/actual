@@ -541,6 +541,8 @@ async function advanceSchedulesService(syncSuccess) {
       schedule.completed,
       hasTrans.has(schedule.id),
       upcomingLength[0]?.value ?? '7',
+      schedule.due_date_days_offset,
+      schedule.grace_period_days,
     );
 
     if (status === 'paid') {
@@ -563,7 +565,7 @@ async function advanceSchedulesService(syncSuccess) {
         }
       }
     } else if (
-      (status === 'due' || status === 'missed') &&
+      (status === 'due' || status === 'missed' || status === 'overdue') &&
       schedule.posts_transaction &&
       schedule._account
     ) {
