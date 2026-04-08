@@ -4,12 +4,77 @@ import * as db from '../db';
 import * as sheet from '../sheet';
 
 import {
+  copyToFutureMonths,
   coverOverbudgeted,
   getSheetValue,
   setBudget,
   setCategoryCarryover,
 } from './actions';
 import * as budget from './base';
+
+describe('copyToFutureMonths', () => {
+  beforeEach(global.emptyDatabase());
+  afterEach(global.emptyDatabase());
+
+  async function setupDatabase() {
+    await db.insertCategoryGroup({
+      id: 'income-group',
+      name: 'Income',
+      is_income: 1,
+    });
+    await db.insertCategory({
+      id: 'income-cat',
+      name: 'Income',
+      cat_group: 'income-group',
+      is_income: 1,
+    });
+    await db.insertCategoryGroup({
+      id: 'group1',
+      name: 'group1',
+      is_income: 0,
+    });
+    await db.insertCategory({
+      id: 'cat1',
+      name: 'cat1',
+      cat_group: 'group1',
+      is_income: 0,
+    });
+    await sheet.loadSpreadsheet(db);
+    await budget.createBudget(['2024-01', '2024-02', '2024-03']);
+  }
+
+  it('copies the current month budget to all future created months', async () => {
+    await setupDatabase();
+
+    await setBudget({ category: 'cat1', month: '2024-01', amount: 5000 });
+    await setBudget({ category: 'cat1', month: '2024-02', amount: 1000 });
+    await setBudget({ category: 'cat1', month: '2024-03', amount: 2000 });
+    await sheet.waitOnSpreadsheet();
+
+    await copyToFutureMonths({ month: '2024-01', category: 'cat1' });
+    await sheet.waitOnSpreadsheet();
+
+    expect(await getSheetValue('budget202401', 'budget-cat1')).toBe(5000);
+    expect(await getSheetValue('budget202402', 'budget-cat1')).toBe(5000);
+    expect(await getSheetValue('budget202403', 'budget-cat1')).toBe(5000);
+  });
+
+  it('does not affect months before or equal to the current month', async () => {
+    await setupDatabase();
+
+    await setBudget({ category: 'cat1', month: '2024-01', amount: 1000 });
+    await setBudget({ category: 'cat1', month: '2024-02', amount: 5000 });
+    await setBudget({ category: 'cat1', month: '2024-03', amount: 2000 });
+    await sheet.waitOnSpreadsheet();
+
+    await copyToFutureMonths({ month: '2024-02', category: 'cat1' });
+    await sheet.waitOnSpreadsheet();
+
+    expect(await getSheetValue('budget202401', 'budget-cat1')).toBe(1000);
+    expect(await getSheetValue('budget202402', 'budget-cat1')).toBe(5000);
+    expect(await getSheetValue('budget202403', 'budget-cat1')).toBe(5000);
+  });
+});
 
 describe('coverOverbudgeted', () => {
   beforeEach(global.emptyDatabase());

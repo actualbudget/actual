@@ -13,11 +13,13 @@ type BudgetMenuProps = Omit<
   onCopyLastMonthAverage: () => void;
   onSetMonthsAverage: (numberOfMonths: number) => void;
   onApplyBudgetTemplate: () => void;
+  onCopyToFutureMonths: () => void;
 };
 export function BudgetMenu({
   onCopyLastMonthAverage,
   onSetMonthsAverage,
   onApplyBudgetTemplate,
+  onCopyToFutureMonths,
   ...props
 }: BudgetMenuProps) {
   const { t } = useTranslation();
@@ -38,6 +40,9 @@ export function BudgetMenu({
         break;
       case 'apply-single-category-template':
         onApplyBudgetTemplate?.();
+        break;
+      case 'copy-to-future-months':
+        onCopyToFutureMonths?.();
         break;
       default:
         throw new Error(`Unrecognized menu item: ${name}`);
@@ -64,6 +69,10 @@ export function BudgetMenu({
         {
           name: 'set-single-12-avg',
           text: t('Set to yearly average'),
+        },
+        {
+          name: 'copy-to-future-months',
+          text: t('Copy to future months'),
         },
         ...(isGoalTemplatesEnabled
           ? [

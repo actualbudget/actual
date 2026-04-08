@@ -131,6 +131,14 @@ export function BudgetCell<
                 pre: categoryNotes ?? undefined,
               });
             },
+            onCopyToFutureMonths: () => {
+              onBudgetAction(month, 'copy-to-future-months', {
+                category: category.id,
+              });
+              showUndoNotification({
+                message: `${category.name} budget copied to future months.`,
+              });
+            },
           },
         },
       }),

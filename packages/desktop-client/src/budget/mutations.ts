@@ -649,6 +649,13 @@ type ApplyBudgetActionPayload =
       args: {
         category: CategoryEntity['id'];
       };
+    }
+  | {
+      type: 'copy-to-future-months';
+      month: string;
+      args: {
+        category: CategoryEntity['id'];
+      };
     };
 
 export function useBudgetActions() {
@@ -774,6 +781,12 @@ export function useBudgetActions() {
           return null;
         case 'copy-single-last':
           await send('budget/copy-single-month', {
+            month,
+            category: args.category,
+          });
+          return null;
+        case 'copy-to-future-months':
+          await send('budget/copy-to-future-months', {
             month,
             category: args.category,
           });
