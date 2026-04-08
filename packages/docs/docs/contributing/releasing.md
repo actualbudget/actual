@@ -27,9 +27,7 @@ A release branch and PR are automatically cut at 17:00 UTC on the 25th of each m
 
 The release notes workflow automatically generates a blog post and updates `docs/releases.md` from the files in `upcoming-release-notes/`. This runs each time the release PR is updated, so there is no need to manually copy notes into the docs.
 
-## Cherry-picking fixes into the release
-
-After the release branch is cut, PRs that merge to master are tracked in a checklist on the release PR. To include a fix in the release, tick the checkbox next to it and the cherry-pick will be applied automatically. If a cherry-pick conflicts, it will be flagged on the PR and will need to be applied manually.
+Fixes that need to be included in the release should be cherry-picked onto the release branch manually.
 
 ## Stabilise the release
 
