@@ -189,7 +189,7 @@ export function ReconcileMenu({
         )}
         {lastSyncedBalance != null && (
           <View>
-            <Text style={{ margin: '8px 8px 8px 0', textAlign: 'right' }}>
+            <Text style={{ margin: '0 6px 8px 0', textAlign: 'right' }}>
               <Trans>Last Balance from Bank: </Trans>
               {format(lastSyncedBalance, 'financial')}
             </Text>
