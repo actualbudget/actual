@@ -647,6 +647,7 @@ function PayeeCell({
     <CustomCell
       width="flex"
       name="payee"
+      title={displayPayee || undefined}
       textAlign="flex"
       value={payee?.id}
       valueStyle={valueStyle}
@@ -672,7 +673,6 @@ function PayeeCell({
         const payeeName = (
           <UnexposedCellContent
             {...props}
-            title={importedPayee ? '' : undefined}
             style={
               importedPayee
                 ? { borderBottom: `1px dashed ${theme.pageTextSubdued}` }
@@ -1576,6 +1576,7 @@ const Transaction = memo(function Transaction({
         <InputCell
           width="flex"
           name="notes"
+          title={notes || undefined}
           textAlign="flex"
           exposed={focusedField === 'notes'}
           focused={focusedField === 'notes'}
@@ -1723,6 +1724,12 @@ const Transaction = memo(function Transaction({
             name="category"
             width="flex"
             textAlign="flex"
+            title={
+              categoryId
+                ? (getCategoriesById(categoryGroups)[categoryId]?.name ??
+                    undefined)
+                : undefined
+            }
             value={categoryId}
             formatter={value =>
               value
