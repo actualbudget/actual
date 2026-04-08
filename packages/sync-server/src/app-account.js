@@ -127,7 +127,7 @@ app.post('/login', authRateLimiter, async (req, res) => {
   res.send({ status: 'ok', data: { token } });
 });
 
-app.post('/change-password', authRateLimiter, (req, res) => {
+app.post('/change-password', (req, res) => {
   const session = validateSession(req, res);
   if (!session) return;
 
