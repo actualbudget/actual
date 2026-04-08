@@ -64,7 +64,7 @@ jobs:
             else
               version=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts \
                 --package-json "./packages/$pkg/package.json" \
-                --type monthly \
+                --type auto \
                 --update)
             fi
 
