@@ -27,6 +27,8 @@ jobs:
       - name: Bump package versions
         id: bump_package_versions
         shell: bash
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
           declare -A packages=(
             [web]="desktop-client"
@@ -40,10 +42,10 @@ jobs:
           for key in "${!packages[@]}"; do
             pkg="${packages[$key]}"
 
-            if [[ -n "${{ github.event.inputs.version }}" ]]; then
+            if [[ -n "$INPUT_VERSION" ]]; then
               version=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts \
                 --package-json "./packages/$pkg/package.json" \
-                --version "${{ github.event.inputs.version }}" \
+                --version "$INPUT_VERSION" \
                 --update)
             else
               version=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts \
