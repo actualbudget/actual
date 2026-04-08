@@ -25,7 +25,7 @@ For example:
 
 ### Code
 
-- [ ] Run [this GitHub Action](https://github.com/actualbudget/actual/actions/workflows/generate-release-pr.yml) to generate a release PR (for a regular monthly release, leave the arguments set to their default values).
+- [ ] A release branch and PR are automatically cut at 17:00 UTC on the 25th of each month. To cut one manually, run [this GitHub Action](https://github.com/actualbudget/actual/actions/workflows/cut-release-branch.yml).
 - [ ] Open the generated PR and ensure the release notes workflow has started to collate the release notes into a comment in the PR. You may need to push an empty commit in order to trigger CI.
 - [ ] After the release notes workflows in the PR has been run, copy the collated notes into a new blog post using a previous release as a template. The release notes will also need adding to the `docs/releases.md` file.
 - [ ] Fix spelling as needed.

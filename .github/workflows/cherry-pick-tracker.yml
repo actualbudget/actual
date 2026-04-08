@@ -1,0 +1,75 @@
+name: Cherry-pick tracker
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [master]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  track-merged-pr:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add to release PR cherry-pick list
+        # uses default GITHUB_TOKEN so this edit does not trigger cherry-pick-apply
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+
+            const { data: pulls } = await github.rest.pulls.list({
+              owner,
+              repo,
+              state: 'open',
+              per_page: 100,
+            });
+            const releasePR = pulls.find(pr => pr.head.ref.startsWith('release/'));
+
+            if (!releasePR) {
+              console.log('No open release PR found');
+              return;
+            }
+
+            const mergedPR = context.payload.pull_request;
+            const sha = mergedPR.merge_commit_sha;
+
+            // strip HTML comments and angle brackets to prevent marker injection
+            const title = mergedPR.title
+              .replace(/<!--[\s\S]*?-->/g, '')
+              .replace(/[<>]/g, '')
+              .trim();
+
+            const entry = `- [ ] #${mergedPR.number} ${title} <!-- sha:${sha} -->`;
+
+            let body = releasePR.body || '';
+
+            if (body.includes('Cherry-pick candidates')) {
+              body = body.replace(
+                /(\n<\/details>\s*$)/,
+                `\n${entry}\n$1`,
+              );
+            } else {
+              body += [
+                '',
+                '',
+                '<details>',
+                '<summary>Cherry-pick candidates</summary>',
+                '',
+                entry,
+                '',
+                '</details>',
+                '',
+              ].join('\n');
+            }
+
+            await github.rest.pulls.update({
+              owner,
+              repo,
+              pull_number: releasePR.number,
+              body,
+            });
+
+            console.log(`Added #${mergedPR.number} to release PR #${releasePR.number}`);

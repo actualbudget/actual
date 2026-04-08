@@ -1,0 +1,139 @@
+name: Cherry-pick apply
+
+on:
+  pull_request:
+    types: [edited]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: cherry-pick-${{ github.event.pull_request.number }}
+
+jobs:
+  apply-cherry-picks:
+    if: >-
+      github.event.changes.body != null
+      && startsWith(github.event.pull_request.head.ref, 'release/')
+      && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
+    runs-on: ubuntu-latest
+    steps:
+      - name: Find newly checked items
+        id: find-picks
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+            const lines = body.split('\n');
+            const picks = [];
+
+            for (const line of lines) {
+              if (/<!-- sha:[a-f0-9]+ -->\s*\[(?:done|conflict)\]/.test(line)) continue;
+
+              const match = line.match(
+                /^- \[x\] #(\d+)\s+.+?<!-- sha:([a-f0-9]+) -->/
+              );
+              if (match) {
+                picks.push({ number: match[1], sha: match[2] });
+              }
+            }
+
+            console.log(`Found ${picks.length} cherry-pick(s) to process`);
+            core.setOutput('picks', JSON.stringify(picks));
+            core.setOutput('count', picks.length);
+
+      - name: Checkout release branch
+        if: steps.find-picks.outputs.count > 0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
+          fetch-depth: 0
+
+      - name: Cherry-pick commits
+        if: steps.find-picks.outputs.count > 0
+        id: cherry-pick
+        shell: bash
+        env:
+          PICKS: ${{ steps.find-picks.outputs.picks }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          RESULTS="[]"
+
+          for row in $(echo "$PICKS" | jq -c '.[]'); do
+            NUMBER=$(echo "$row" | jq -r '.number')
+            SHA=$(echo "$row" | jq -r '.sha')
+
+            if ! [[ "$SHA" =~ ^[a-f0-9]+$ ]]; then
+              echo "  Skipping invalid SHA: $SHA"
+              continue
+            fi
+
+            echo "Cherry-picking #${NUMBER} (${SHA})..."
+            git fetch origin master
+
+            if git cherry-pick -m 1 "$SHA" --no-edit; then
+              echo "  Success"
+              RESULTS=$(echo "$RESULTS" | jq -c ". + [{\"number\": \"$NUMBER\", \"status\": \"ok\"}]")
+            else
+              git cherry-pick --abort 2>/dev/null || true
+              echo "  Failed — conflict"
+              RESULTS=$(echo "$RESULTS" | jq -c ". + [{\"number\": \"$NUMBER\", \"status\": \"conflict\"}]")
+            fi
+          done
+
+          echo "results=$RESULTS" >> "$GITHUB_OUTPUT"
+
+      - name: Push cherry-picks
+        if: steps.find-picks.outputs.count > 0
+        run: git push origin
+
+      - name: Update PR body with results
+        if: steps.find-picks.outputs.count > 0
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        env:
+          CHERRY_PICK_RESULTS: ${{ steps.cherry-pick.outputs.results }}
+        with:
+          script: |
+            const results = JSON.parse(process.env.CHERRY_PICK_RESULTS);
+            if (results.length === 0) return;
+
+            const { owner, repo } = context.repo;
+            const prNumber = context.payload.pull_request.number;
+
+            const { data: pr } = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: prNumber,
+            });
+
+            let body = pr.body;
+
+            for (const { number, status } of results) {
+              const marker = status === 'ok' ? '[done]' : '[conflict]';
+              body = body.replace(
+                new RegExp(`(- \\[x\\] #${number}\\s+.+?<!-- sha:[a-f0-9]+ -->)`),
+                `$1 ${marker}`,
+              );
+            }
+
+            await github.rest.pulls.update({
+              owner,
+              repo,
+              pull_number: prNumber,
+              body,
+            });
+
+            const failures = results.filter(r => r.status === 'conflict');
+            if (failures.length > 0) {
+              const list = failures.map(f => `- #${f.number}`).join('\n');
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body: `Cherry-pick failed with conflicts:\n\n${list}\n\nThese will need to be cherry-picked manually.`,
+              });
+            }
