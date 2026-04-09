@@ -8,9 +8,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-export function FeatureErrorFallback({
-  resetErrorBoundary,
-}: FallbackProps) {
+export function FeatureErrorFallback({ resetErrorBoundary }: FallbackProps) {
   return (
     <View
       style={{
