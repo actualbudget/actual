@@ -541,7 +541,7 @@ async function advanceSchedulesService(syncSuccess) {
       schedule.completed,
       hasTrans.has(schedule.id),
       upcomingLength[0]?.value ?? '7',
-      schedule.due_date_days_offset,
+      schedule.due_day_of_month,
       schedule.grace_period_days,
     );
 

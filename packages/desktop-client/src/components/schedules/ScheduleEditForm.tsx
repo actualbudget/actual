@@ -6,6 +6,7 @@ import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
+import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -47,7 +48,7 @@ export type ScheduleFormFields = {
   date: null | string | RecurConfig;
   posts_transaction: boolean;
   name: null | string;
-  due_date_days_offset: null | number;
+  due_day_of_month: null | number;
   grace_period_days: null | number;
 };
 
@@ -79,7 +80,7 @@ export type ScheduleEditFormDispatch =
     }
   | {
       type: 'set-field';
-      field: 'due_date_days_offset' | 'grace_period_days';
+      field: 'due_day_of_month' | 'grace_period_days';
       value: number | null;
     }
   | {
@@ -383,25 +384,30 @@ export function ScheduleEditForm({
             >
               <FormField style={{ flex: 1 }}>
                 <FormLabel
-                  title={t('Days until due')}
-                  htmlFor="due-date-offset-field"
+                  title={t('Due day of month')}
+                  htmlFor="due-day-of-month-field"
                 />
-                <Input
-                  id="due-date-offset-field"
-                  type="number"
-                  min="0"
+                <Select
+                  id="due-day-of-month-field"
+                  options={[
+                    ['', t('Same as schedule date')] as const,
+                    ['-1', t('Last day of month')] as const,
+                    ...Array.from(
+                      { length: 31 },
+                      (_, i) =>
+                        [String(i + 1), String(i + 1)] as [string, string],
+                    ),
+                  ]}
                   value={
-                    fields.due_date_days_offset != null
-                      ? String(fields.due_date_days_offset)
+                    fields.due_day_of_month != null
+                      ? String(fields.due_day_of_month)
                       : ''
                   }
-                  placeholder="0"
-                  onChangeValue={value => {
-                    const parsed = parseInt(value, 10);
+                  onChange={value => {
                     dispatch({
                       type: 'set-field',
-                      field: 'due_date_days_offset',
-                      value: isNaN(parsed) ? null : Math.max(0, parsed),
+                      field: 'due_day_of_month',
+                      value: value === '' ? null : parseInt(value, 10),
                     });
                   }}
                 />
@@ -412,9 +418,7 @@ export function ScheduleEditForm({
                     marginTop: 3,
                   }}
                 >
-                  <Trans>
-                    Days after the scheduled date before payment is due
-                  </Trans>
+                  <Trans>Day of month when payment is actually due</Trans>
                 </Text>
               </FormField>
 

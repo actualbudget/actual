@@ -10,19 +10,72 @@ import { Condition } from '../server/rules';
 import * as monthUtils from './months';
 import { q } from './query';
 
+/**
+ * Compute the due date for a schedule occurrence.
+ *
+ * If `dueDayOfMonth` is set, the due date is that day-of-month in the
+ * same month as `nextDate` (or the following month when the due day is
+ * before the schedule day). A value of -1 means "last day of month".
+ *
+ * Returns the same date as `nextDate` when no override is configured.
+ */
+export function computeDueDate(
+  nextDate: string,
+  dueDayOfMonth?: number | null,
+): string {
+  if (dueDayOfMonth == null || dueDayOfMonth === 0) {
+    return nextDate;
+  }
+
+  const parsed = monthUtils.parseDate(nextDate);
+  const scheduleDay = parsed.getDate();
+  const year = parsed.getFullYear();
+  const month = parsed.getMonth(); // 0-based
+
+  if (dueDayOfMonth === -1) {
+    // Last day of month
+    const lastDay = new Date(year, month + 1, 0);
+    if (lastDay.getDate() <= scheduleDay) {
+      // If last day <= schedule day (shouldn't normally happen, but handle it)
+      // Use last day of next month instead
+      const nextMonthLast = new Date(year, month + 2, 0);
+      return monthUtils.dayFromDate(nextMonthLast);
+    }
+    return monthUtils.dayFromDate(lastDay);
+  }
+
+  // Clamp to actual days in the target month
+  function clampedDate(y: number, m: number, day: number): Date {
+    const lastOfMonth = new Date(y, m + 1, 0).getDate();
+    return new Date(y, m, Math.min(day, lastOfMonth));
+  }
+
+  // If due day is after the schedule day, it's in the same month
+  if (dueDayOfMonth > scheduleDay) {
+    return monthUtils.dayFromDate(clampedDate(year, month, dueDayOfMonth));
+  }
+
+  // Due day <= schedule day means due date is in the next month
+  const nextMonth = month + 1;
+  const nextYear = nextMonth > 11 ? year + 1 : year;
+  const normalizedMonth = nextMonth > 11 ? 0 : nextMonth;
+  return monthUtils.dayFromDate(
+    clampedDate(nextYear, normalizedMonth, dueDayOfMonth),
+  );
+}
+
 export function getStatus(
   nextDate: string,
   completed: boolean,
   hasTrans: boolean,
   upcomingLength: string = '7',
-  dueDateDaysOffset?: number | null,
+  dueDayOfMonth?: number | null,
   gracePeriodDays?: number | null,
 ) {
   const upcomingDays = getUpcomingDays(upcomingLength);
   const today = monthUtils.currentDay();
-  const offset = dueDateDaysOffset ?? 0;
   const grace = gracePeriodDays ?? 0;
-  const dueDate = offset > 0 ? monthUtils.addDays(nextDate, offset) : nextDate;
+  const dueDate = computeDueDate(nextDate, dueDayOfMonth);
   const missedAfterDate =
     grace > 0 ? monthUtils.addDays(dueDate, grace) : dueDate;
 
@@ -31,7 +84,7 @@ export function getStatus(
   } else if (hasTrans) {
     return 'paid';
   } else if (nextDate > today) {
-    // Invoice date is in the future
+    // Invoice/schedule date is in the future
     if (nextDate <= monthUtils.addDays(today, upcomingDays)) {
       return 'upcoming';
     }
@@ -73,10 +126,19 @@ export function getHasTransactionsQuery(schedules) {
   const filters = schedules.map(schedule => {
     const dateCond = schedule._conditions?.find(c => c.field === 'date');
     const baseLookback = dateCond && dateCond.op === 'is' ? 0 : 2;
+    // When due_day_of_month is set, the due date can be up to ~31 days
+    // after the schedule date. Compute the actual window so we don't
+    // miss transactions posted in that range.
+    const dueDate = computeDueDate(
+      schedule.next_date,
+      schedule.due_day_of_month,
+    );
+    const dueDateSpan = Math.max(
+      0,
+      monthUtils.differenceInCalendarDays(dueDate, schedule.next_date),
+    );
     const totalWindow =
-      (schedule.due_date_days_offset ?? 0) +
-      (schedule.grace_period_days ?? 0) +
-      baseLookback;
+      dueDateSpan + (schedule.grace_period_days ?? 0) + baseLookback;
     return {
       $and: {
         schedule: schedule.id,

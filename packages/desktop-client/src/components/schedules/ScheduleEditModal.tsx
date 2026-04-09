@@ -123,6 +123,27 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
       return;
     }
 
+    function normalizeNonNegativeInt(value: number | null | undefined) {
+      if (value == null || !Number.isFinite(value) || value < 0) {
+        return null;
+      }
+      return Math.trunc(value);
+    }
+
+    function normalizeDueDayOfMonth(value: number | null | undefined) {
+      if (value == null || !Number.isFinite(value)) {
+        return null;
+      }
+      // -1 = last day of month; 1-31 = specific day
+      if (value === -1) {
+        return -1;
+      }
+      if (value < 1 || value > 31) {
+        return null;
+      }
+      return Math.trunc(value);
+    }
+
     const res = await sendCatch(
       adding ? 'schedule/create' : 'schedule/update',
       {
@@ -130,8 +151,12 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
           id: state.schedule.id,
           posts_transaction: state.fields.posts_transaction,
           name: state.fields.name,
-          due_date_days_offset: state.fields.due_date_days_offset,
-          grace_period_days: state.fields.grace_period_days,
+          due_day_of_month: normalizeDueDayOfMonth(
+            state.fields.due_day_of_month,
+          ),
+          grace_period_days: normalizeNonNegativeInt(
+            state.fields.grace_period_days,
+          ),
         },
         conditions,
       },

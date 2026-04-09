@@ -104,7 +104,7 @@ export const schema = {
     next_date: f('date'),
     completed: f('boolean'),
     posts_transaction: f('boolean'),
-    due_date_days_offset: f('integer'),
+    due_day_of_month: f('integer'),
     grace_period_days: f('integer'),
     tombstone: f('boolean'),
 

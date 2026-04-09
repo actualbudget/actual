@@ -120,7 +120,7 @@ export type DbSchedule = {
   active: 1 | 0;
   completed: 1 | 0;
   posts_transaction: 1 | 0;
-  due_date_days_offset: number | null;
+  due_day_of_month: number | null;
   grace_period_days: number | null;
   tombstone: 1 | 0;
 };
@@ -325,7 +325,7 @@ export type DbViewSchedule = {
   active: DbSchedule['active'];
   completed: DbSchedule['completed'];
   posts_transaction: DbSchedule['posts_transaction'];
-  due_date_days_offset: DbSchedule['due_date_days_offset'];
+  due_day_of_month: DbSchedule['due_day_of_month'];
   grace_period_days: DbSchedule['grace_period_days'];
   tombstone: DbSchedule['tombstone'];
   _payee: DbPayeeMapping['targetId'];

@@ -26,7 +26,7 @@ export type ScheduleEntity = {
   next_date: string;
   completed: boolean;
   posts_transaction: boolean;
-  due_date_days_offset?: number | null;
+  due_day_of_month?: number | null;
   grace_period_days?: number | null;
   tombstone: boolean;
 
