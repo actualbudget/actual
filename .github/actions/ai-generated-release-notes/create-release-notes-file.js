@@ -76,6 +76,17 @@ async function createReleaseNotesFile() {
       return;
     }
 
+    // Validate PR number - must be a positive integer. The value comes from
+    // the GitHub API, but we harden it because it's used to build a file path
+    // and a commit message.
+    const validatedPrNumber = Number(summaryData.prNumber);
+    if (!Number.isInteger(validatedPrNumber) || validatedPrNumber <= 0) {
+      console.log(
+        `Invalid PR number "${summaryData.prNumber}", aborting release notes creation`,
+      );
+      return;
+    }
+
     const fileContent = `---
 category: ${cleanCategory}
 authors: [${author}]
@@ -84,11 +95,11 @@ authors: [${author}]
 ${cleanSummary}
 `;
 
-    const fileName = `upcoming-release-notes/${summaryData.prNumber}.md`;
+    const fileName = `upcoming-release-notes/${validatedPrNumber}.md`;
 
-    console.log(`Creating release notes file: ${fileName}`);
-    console.log('File content:');
-    console.log(fileContent);
+    console.log(
+      `Creating release notes file: ${fileName} (category: ${cleanCategory}, author: ${author})`,
+    );
 
     // Get PR info
     const { data: pr } = await octokit.rest.pulls.get({
@@ -110,7 +121,7 @@ ${cleanSummary}
       owner: headOwner,
       repo: headRepo,
       path: fileName,
-      message: `Add release notes for PR #${summaryData.prNumber}`,
+      message: `Add release notes for PR #${validatedPrNumber}`,
       content: Buffer.from(fileContent).toString('base64'),
       branch: prBranch,
       committer: {

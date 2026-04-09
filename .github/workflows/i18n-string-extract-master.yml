@@ -27,24 +27,30 @@ jobs:
       - name: Configure i18n client
         run: |
           pip install wlc
-
-      - name: Lock translations
+      - name: Configure Weblate API credentials
         env:
           WEBLATE_API_KEY: ${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}
         run: |
+          # Write the API key to wlc's config file instead of passing it on
+          # the command line, so the secret doesn't appear in process listings.
+          mkdir -p "$HOME/.config"
+          umask 077
+          cat > "$HOME/.config/weblate" <<EOF
+          [keys]
+          https://hosted.weblate.org/api/ = ${WEBLATE_API_KEY}
+          EOF
+
+      - name: Lock translations
+        run: |
           wlc \
             --url https://hosted.weblate.org/api/ \
-            --key "$WEBLATE_API_KEY" \
             lock \
             actualbudget/actual
 
       - name: Update VCS with latest translations
-        env:
-          WEBLATE_API_KEY: ${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}
         run: |
           wlc \
             --url https://hosted.weblate.org/api/ \
-            --key "$WEBLATE_API_KEY" \
             push \
             actualbudget/actual
       - name: Check out updated translations
@@ -74,22 +80,16 @@ jobs:
             echo "No changes to commit"
           fi
       - name: Update Weblate with latest translations
-        env:
-          WEBLATE_API_KEY: ${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}
         run: |
           wlc \
             --url https://hosted.weblate.org/api/ \
-            --key "$WEBLATE_API_KEY" \
             pull \
             actualbudget/actual
 
       - name: Unlock translations
         if: always() # Clean up even on failure
-        env:
-          WEBLATE_API_KEY: ${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}
         run: |
           wlc \
             --url https://hosted.weblate.org/api/ \
-            --key "$WEBLATE_API_KEY" \
             unlock \
             actualbudget/actual
