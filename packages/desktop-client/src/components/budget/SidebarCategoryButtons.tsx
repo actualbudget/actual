@@ -1,7 +1,6 @@
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import type { CategoryEntity } from 'loot-core/types/models/category';
+import type { CategoryEntity } from '@actual-app/core/types/models/category';
 
 import { NotesButton } from '#components/NotesButton';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';

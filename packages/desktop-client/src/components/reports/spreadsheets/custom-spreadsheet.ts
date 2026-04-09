@@ -1,7 +1,5 @@
-import * as d from 'date-fns';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   AccountEntity,
   balanceTypeOpType,
@@ -13,8 +11,9 @@ import type {
   PayeeEntity,
   RuleConditionEntity,
   sortByOpType,
-} from 'loot-core/types/models';
-import type { SyncedPrefs } from 'loot-core/types/prefs';
+} from '@actual-app/core/types/models';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
+import * as d from 'date-fns';
 
 import {
   categoryLists,

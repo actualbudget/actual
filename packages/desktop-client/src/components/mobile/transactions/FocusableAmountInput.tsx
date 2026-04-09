@@ -11,14 +11,13 @@ import type { CSSProperties as EmotionCSSProperties } from '@actual-app/componen
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
-
 import {
   amountToCurrency,
   appendDecimals,
   currencyToAmount,
   reapplyThousandSeparators,
-} from 'loot-core/shared/util';
+} from '@actual-app/core/shared/util';
+import { css } from '@emotion/css';
 
 import { makeAmountFullStyle } from '#components/budget/util';
 import { useMergedRefs } from '#hooks/useMergedRefs';

@@ -5,9 +5,8 @@ import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { currencies, getCurrency } from '@actual-app/core/shared/currencies';
 import { css } from '@emotion/css';
-
-import { currencies, getCurrency } from 'loot-core/shared/currencies';
 
 import { Checkbox } from '#components/forms';
 import { useSyncedPref } from '#hooks/useSyncedPref';

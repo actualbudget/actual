@@ -5,11 +5,10 @@ import type { RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
-import { getUpcomingDays } from 'loot-core/shared/schedules';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
+import { getUpcomingDays } from '@actual-app/core/shared/schedules';
 import {
   addSplitTransaction,
   applyTransactionDiff,
@@ -17,8 +16,8 @@ import {
   realizeTempTransactions,
   splitTransaction,
   updateTransaction,
-} from 'loot-core/shared/transactions';
-import { applyChanges, getChangedValues } from 'loot-core/shared/util';
+} from '@actual-app/core/shared/transactions';
+import { applyChanges, getChangedValues } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -28,7 +27,7 @@ import type {
   ScheduleEntity,
   TransactionEntity,
   TransactionFilterEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
 import type { TableHandleRef } from '#components/table';
 import { isValidBoundaryDrop } from '#hooks/useDragDrop';

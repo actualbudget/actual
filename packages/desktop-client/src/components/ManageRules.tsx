@@ -9,18 +9,17 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as undo from 'loot-core/platform/client/undo';
-import { getNormalisedString } from 'loot-core/shared/normalisation';
-import { q } from 'loot-core/shared/query';
-import { friendlyOp, mapField } from 'loot-core/shared/rules';
-import { describeSchedule } from 'loot-core/shared/schedules';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as undo from '@actual-app/core/platform/client/undo';
+import { getNormalisedString } from '@actual-app/core/shared/normalisation';
+import { q } from '@actual-app/core/shared/query';
+import { friendlyOp, mapField } from '@actual-app/core/shared/rules';
+import { describeSchedule } from '@actual-app/core/shared/schedules';
 import type {
   NewRuleEntity,
   RuleEntity,
   ScheduleEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';

@@ -6,8 +6,7 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import type { AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from '@actual-app/core/types/models';
 
 import { useUnlinkAccountMutation } from '#accounts';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';

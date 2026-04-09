@@ -4,14 +4,13 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { SvgArrowsSynchronize } from '@actual-app/components/icons/v2';
 import { theme } from '@actual-app/components/theme';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 import {
   format as formatDate,
   isValid as isDateValid,
   parseISO,
 } from 'date-fns';
-
-import * as monthUtils from 'loot-core/shared/months';
-import type { TransactionEntity } from 'loot-core/types/models';
 
 import { FinancialText } from '#components/FinancialText';
 import { Cell, Field, Row, SelectCell, Table } from '#components/table';

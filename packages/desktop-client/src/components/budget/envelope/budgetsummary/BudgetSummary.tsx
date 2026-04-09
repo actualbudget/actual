@@ -11,9 +11,8 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import * as monthUtils from '@actual-app/core/shared/months';
 import { css } from '@emotion/css';
-
-import * as monthUtils from 'loot-core/shared/months';
 
 import { useEnvelopeBudget } from '#components/budget/envelope/EnvelopeBudgetContext';
 import { NotesButton } from '#components/NotesButton';

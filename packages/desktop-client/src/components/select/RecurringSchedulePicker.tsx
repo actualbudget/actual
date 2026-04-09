@@ -14,12 +14,14 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { sendCatch } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { getRecurringDescription } from 'loot-core/shared/schedules';
-import type { RecurConfig, RecurPattern } from 'loot-core/types/models';
-import type { TransObjectLiteral, WithRequired } from 'loot-core/types/util';
+import { sendCatch } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { getRecurringDescription } from '@actual-app/core/shared/schedules';
+import type { RecurConfig, RecurPattern } from '@actual-app/core/types/models';
+import type {
+  TransObjectLiteral,
+  WithRequired,
+} from '@actual-app/core/types/util';
 
 import { Modal } from '#components/common/Modal';
 import { Checkbox } from '#components/forms';

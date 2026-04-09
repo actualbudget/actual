@@ -1,14 +1,16 @@
-import { createSlice } from '@reduxjs/toolkit';
-import type { PayloadAction } from '@reduxjs/toolkit';
-
-import { send } from 'loot-core/platform/client/connection';
-import { parseNumberFormat, setNumberFormat } from 'loot-core/shared/util';
+import { send } from '@actual-app/core/platform/client/connection';
+import {
+  parseNumberFormat,
+  setNumberFormat,
+} from '@actual-app/core/shared/util';
 import type {
   GlobalPrefs,
   MetadataPrefs,
   ServerPrefs,
   SyncedPrefs,
-} from 'loot-core/types/prefs';
+} from '@actual-app/core/types/prefs';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { resetApp } from '#app/appSlice';
 import { setI18NextLanguage } from '#i18n';

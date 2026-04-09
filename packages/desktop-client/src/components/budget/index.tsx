@@ -4,13 +4,12 @@ import type { ComponentType } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
 import {
   useBudgetActions,

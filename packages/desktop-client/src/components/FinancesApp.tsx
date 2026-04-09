@@ -6,8 +6,7 @@ import { Navigate, Route, Routes, useHref, useLocation } from 'react-router';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import * as undo from 'loot-core/platform/client/undo';
+import * as undo from '@actual-app/core/platform/client/undo';
 
 import { getLatestAppVersion, sync } from '#app/appSlice';
 import { ProtectedRoute } from '#auth/ProtectedRoute';

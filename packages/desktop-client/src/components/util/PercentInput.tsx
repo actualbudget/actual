@@ -2,8 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, FocusEvent, FocusEventHandler, Ref } from 'react';
 
 import { Input } from '@actual-app/components/input';
-
-import { evalArithmetic } from 'loot-core/shared/arithmetic';
+import { evalArithmetic } from '@actual-app/core/shared/arithmetic';
 
 import { useFormat } from '#hooks/useFormat';
 import { useMergedRefs } from '#hooks/useMergedRefs';

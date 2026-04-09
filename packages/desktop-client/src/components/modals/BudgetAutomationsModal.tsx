@@ -7,16 +7,15 @@ import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import uniqueId from 'lodash/uniqueId';
-
-import { send } from 'loot-core/platform/client/connection';
-import { dayFromDate, firstDayOfMonth } from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
+import { send } from '@actual-app/core/platform/client/connection';
+import { dayFromDate, firstDayOfMonth } from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
 import type {
   CategoryGroupEntity,
   ScheduleEntity,
-} from 'loot-core/types/models';
-import type { Template } from 'loot-core/types/models/templates';
+} from '@actual-app/core/types/models';
+import type { Template } from '@actual-app/core/types/models/templates';
+import uniqueId from 'lodash/uniqueId';
 
 import { Warning } from '#components/alerts';
 import { BudgetAutomation } from '#components/budget/goals/BudgetAutomation';

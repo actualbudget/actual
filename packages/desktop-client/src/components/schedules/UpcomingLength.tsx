@@ -5,8 +5,7 @@ import { Button } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Select } from '@actual-app/components/select';
 import { View } from '@actual-app/components/view';
-
-import type { SyncedPrefs } from 'loot-core/types/prefs';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { useSyncedPref } from '#hooks/useSyncedPref';

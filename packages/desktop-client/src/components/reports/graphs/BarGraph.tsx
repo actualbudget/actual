@@ -5,6 +5,11 @@ import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
+import type {
+  balanceTypeOpType,
+  DataEntity,
+  RuleConditionEntity,
+} from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 import {
   Bar,
@@ -18,12 +23,6 @@ import {
   YAxis,
 } from 'recharts';
 import type { BarShapeProps } from 'recharts';
-
-import type {
-  balanceTypeOpType,
-  DataEntity,
-  RuleConditionEntity,
-} from 'loot-core/types/models';
 
 import { FinancialText } from '#components/FinancialText';
 import { useRechartsAnimation } from '#components/reports/chart-theme';

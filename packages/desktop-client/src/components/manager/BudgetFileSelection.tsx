@@ -28,19 +28,18 @@ import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
-
 import {
   isElectron,
   isNonProductionEnvironment,
-} from 'loot-core/shared/environment';
+} from '@actual-app/core/shared/environment';
 import type {
   File,
   LocalFile,
   RemoteFile,
   SyncableLocalFile,
   SyncedLocalFile,
-} from 'loot-core/types/file';
+} from '@actual-app/core/types/file';
+import { css } from '@emotion/css';
 
 import {
   closeAndDownloadBudget,

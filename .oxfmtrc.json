@@ -9,7 +9,6 @@
       "react",
       "builtin",
       "external",
-      "loot-core",
       ["parent", "subpath"],
       "sibling",
       "index"
@@ -18,10 +17,6 @@
       {
         "groupName": "react",
         "elementNamePattern": ["react", "react-dom/*", "react-*"]
-      },
-      {
-        "groupName": "loot-core",
-        "elementNamePattern": ["loot-core/**", "@actual-app/core/**"]
       }
     ],
     "newlinesBetween": true

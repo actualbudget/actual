@@ -5,9 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { Block } from '@actual-app/components/block';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { SankeyWidget } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
-
-import type { SankeyWidget } from 'loot-core/types/models';
 
 import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';

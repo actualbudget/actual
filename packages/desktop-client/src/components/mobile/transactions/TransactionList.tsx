@@ -28,13 +28,15 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import * as monthUtils from 'loot-core/shared/months';
-import { isPreviewId } from 'loot-core/shared/transactions';
-import { validForTransfer } from 'loot-core/shared/transfer';
-import { groupById, integerToCurrency } from 'loot-core/shared/util';
-import type { IntegerAmount } from 'loot-core/shared/util';
-import type { CategoryEntity, TransactionEntity } from 'loot-core/types/models';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { isPreviewId } from '@actual-app/core/shared/transactions';
+import { validForTransfer } from '@actual-app/core/shared/transfer';
+import { groupById, integerToCurrency } from '@actual-app/core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
+import type {
+  CategoryEntity,
+  TransactionEntity,
+} from '@actual-app/core/types/models';
 
 import { FloatingActionBar } from '#components/mobile/FloatingActionBar';
 import { useAccounts } from '#hooks/useAccounts';

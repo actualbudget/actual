@@ -11,13 +11,12 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { Query } from '@actual-app/core/shared/query';
+import { tsToRelativeTime } from '@actual-app/core/shared/util';
+import type { AccountEntity } from '@actual-app/core/types/models';
+import type { TransObjectLiteral } from '@actual-app/core/types/util';
 import { format as formatDate } from 'date-fns';
 import { t } from 'i18next';
-
-import type { Query } from 'loot-core/shared/query';
-import { tsToRelativeTime } from 'loot-core/shared/util';
-import type { AccountEntity } from 'loot-core/types/models';
-import type { TransObjectLiteral } from 'loot-core/types/util';
 
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';

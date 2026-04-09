@@ -7,13 +7,12 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { format } from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
+import { format } from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
 import {
   extractScheduleConds,
   scheduleIsRecurring,
-} from 'loot-core/shared/schedules';
+} from '@actual-app/core/shared/schedules';
 
 import {
   Modal,

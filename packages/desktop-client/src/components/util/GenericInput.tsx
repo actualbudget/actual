@@ -5,9 +5,11 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
-
-import { getMonthYearFormat } from 'loot-core/shared/months';
-import type { RecurConfig, RuleConditionOp } from 'loot-core/types/models';
+import { getMonthYearFormat } from '@actual-app/core/shared/months';
+import type {
+  RecurConfig,
+  RuleConditionOp,
+} from '@actual-app/core/types/models';
 
 import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplete';
 import { Autocomplete } from '#components/autocomplete/Autocomplete';

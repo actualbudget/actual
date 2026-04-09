@@ -4,12 +4,11 @@ import type { CSSProperties, RefObject, UIEventHandler } from 'react';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
 import type {
   balanceTypeOpType,
   GroupedEntity,
   RuleConditionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
 import { FinancialText } from '#components/FinancialText';
 import { showActivity } from '#components/reports/graphs/showActivity';

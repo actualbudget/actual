@@ -3,12 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
-
 import type {
   CategoryEntity,
   CategoryGroupEntity,
-} from 'loot-core/types/models';
-import type { PercentageTemplate } from 'loot-core/types/models/templates';
+} from '@actual-app/core/types/models';
+import type { PercentageTemplate } from '@actual-app/core/types/models/templates';
 
 import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
 import { updateTemplate } from '#components/budget/goals/actions';

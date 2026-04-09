@@ -8,11 +8,10 @@ import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
-
 import type {
   CustomReportEntity,
   DashboardPageEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
 import { FormField, FormLabel } from '#components/forms';
 import { useDashboardPages } from '#hooks/useDashboardPages';

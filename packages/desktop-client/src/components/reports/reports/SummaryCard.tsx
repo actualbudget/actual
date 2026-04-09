@@ -2,10 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import type { SummaryContent, SummaryWidget } from 'loot-core/types/models';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type {
+  SummaryContent,
+  SummaryWidget,
+} from '@actual-app/core/types/models';
 
 import { DateRange } from '#components/reports/DateRange';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';

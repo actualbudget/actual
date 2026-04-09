@@ -5,10 +5,9 @@ import { useTranslation } from 'react-i18next';
 
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { getMonthYearFormat } from '@actual-app/core/shared/months';
+import { getRecurringDescription } from '@actual-app/core/shared/schedules';
 import { format as formatDate, parseISO } from 'date-fns';
-
-import { getMonthYearFormat } from 'loot-core/shared/months';
-import { getRecurringDescription } from 'loot-core/shared/schedules';
 
 import { Link } from '#components/common/Link';
 import { FinancialText } from '#components/FinancialText';

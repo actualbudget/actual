@@ -1,10 +1,10 @@
 // @ts-strict-ignore
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   CategoryEntity,
   RuleConditionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 

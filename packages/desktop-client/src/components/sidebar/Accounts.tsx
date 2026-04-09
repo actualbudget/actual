@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import type { AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from '@actual-app/core/types/models';
 
 import { useMoveAccountMutation } from '#accounts';
 import { useAccounts } from '#hooks/useAccounts';

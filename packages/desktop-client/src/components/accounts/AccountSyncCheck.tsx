@@ -7,8 +7,7 @@ import { SvgExclamationOutline } from '@actual-app/components/icons/v1';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import type { AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from '@actual-app/core/types/models';
 
 import { useUnlinkAccountMutation } from '#accounts';
 import { Link } from '#components/common/Link';

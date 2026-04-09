@@ -14,8 +14,7 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import type { AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from '@actual-app/core/types/models';
 
 import {
   Modal,

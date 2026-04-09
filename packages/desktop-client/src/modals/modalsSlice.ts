@@ -1,9 +1,6 @@
-import { createSlice } from '@reduxjs/toolkit';
-import type { PayloadAction } from '@reduxjs/toolkit';
-
-import { send } from 'loot-core/platform/client/connection';
-import type { IntegerAmount } from 'loot-core/shared/util';
-import type { File } from 'loot-core/types/file';
+import { send } from '@actual-app/core/platform/client/connection';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
+import type { File } from '@actual-app/core/types/file';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -17,8 +14,10 @@ import type {
   TransactionEntity,
   UserAccessEntity,
   UserEntity,
-} from 'loot-core/types/models';
-import type { Template } from 'loot-core/types/models/templates';
+} from '@actual-app/core/types/models';
+import type { Template } from '@actual-app/core/types/models/templates';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { accountQueries } from '#accounts';
 import { resetApp, setAppState } from '#app/appSlice';

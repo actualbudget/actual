@@ -1,9 +1,8 @@
+import { groupById } from '@actual-app/core/shared/util';
+import type { AccountEntity } from '@actual-app/core/types/models';
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import memoizeOne from 'memoize-one';
-
-import { groupById } from 'loot-core/shared/util';
-import type { AccountEntity } from 'loot-core/types/models';
 
 import { resetApp } from '#app/appSlice';
 

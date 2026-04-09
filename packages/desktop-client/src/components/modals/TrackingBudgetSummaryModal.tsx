@@ -3,9 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
-
-import { sheetForMonth } from 'loot-core/shared/months';
-import * as monthUtils from 'loot-core/shared/months';
+import { sheetForMonth } from '@actual-app/core/shared/months';
+import * as monthUtils from '@actual-app/core/shared/months';
 
 import { ExpenseTotal } from '#components/budget/tracking/budgetsummary/ExpenseTotal';
 import { IncomeTotal } from '#components/budget/tracking/budgetsummary/IncomeTotal';

@@ -3,8 +3,7 @@ import { Trans } from 'react-i18next';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
-
-import { send } from 'loot-core/platform/client/connection';
+import { send } from '@actual-app/core/platform/client/connection';
 
 import { Link } from '#components/common/Link';
 import { useSyncedPref } from '#hooks/useSyncedPref';

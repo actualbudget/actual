@@ -7,10 +7,9 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
+import { numberFormats } from '@actual-app/core/shared/util';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import { css } from '@emotion/css';
-
-import { numberFormats } from 'loot-core/shared/util';
-import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { Checkbox } from '#components/forms';
 import { useSidebar } from '#components/sidebar/SidebarProvider';

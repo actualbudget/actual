@@ -5,8 +5,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { AutoSizer } from 'react-virtualized-auto-sizer';
 
 import { View } from '@actual-app/components/view';
-
-import * as monthUtils from 'loot-core/shared/months';
+import * as monthUtils from '@actual-app/core/shared/months';
 
 import { useGlobalPref } from '#hooks/useGlobalPref';
 

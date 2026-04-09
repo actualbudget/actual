@@ -4,11 +4,10 @@ import type { ComponentProps } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
 import type {
   CategoryEntity,
   CategoryGroupEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
 import { DropHighlight, useDraggable, useDroppable } from '#components/sort';
 import type {

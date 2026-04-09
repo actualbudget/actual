@@ -1,5 +1,8 @@
-import * as monthUtils from 'loot-core/shared/months';
-import type { GroupedEntity, IntervalEntity } from 'loot-core/types/models';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type {
+  GroupedEntity,
+  IntervalEntity,
+} from '@actual-app/core/types/models';
 
 import type {
   QueryDataEntity,

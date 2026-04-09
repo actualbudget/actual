@@ -2,8 +2,7 @@ import type { RefObject } from 'react';
 
 import { Button } from '@actual-app/components/button';
 import { ColorPicker } from '@actual-app/components/color-picker';
-
-import type { TagEntity } from 'loot-core/types/models';
+import type { TagEntity } from '@actual-app/core/types/models';
 
 import { useTagCSS } from '#hooks/useTagCSS';
 import { useUpdateTagMutation } from '#tags';

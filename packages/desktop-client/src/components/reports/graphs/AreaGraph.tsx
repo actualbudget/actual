@@ -4,6 +4,10 @@ import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
+import type {
+  balanceTypeOpType,
+  DataEntity,
+} from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 import {
   Area,
@@ -15,8 +19,6 @@ import {
   YAxis,
 } from 'recharts';
 import type { LabelProps } from 'recharts';
-
-import type { balanceTypeOpType, DataEntity } from 'loot-core/types/models';
 
 import { FinancialText } from '#components/FinancialText';
 import { useRechartsAnimation } from '#components/reports/chart-theme';

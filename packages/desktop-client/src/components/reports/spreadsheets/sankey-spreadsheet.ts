@@ -1,10 +1,10 @@
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
 import type {
   CategoryGroupEntity,
   RuleConditionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { aqlQuery } from '#queries/aqlQuery';

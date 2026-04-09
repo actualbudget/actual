@@ -3,10 +3,9 @@ import { useTranslation } from 'react-i18next';
 
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { View } from '@actual-app/components/view';
-
-import { q } from 'loot-core/shared/query';
-import { describeSchedule } from 'loot-core/shared/schedules';
-import type { ScheduleEntity } from 'loot-core/types/models';
+import { q } from '@actual-app/core/shared/query';
+import { describeSchedule } from '@actual-app/core/shared/schedules';
+import type { ScheduleEntity } from '@actual-app/core/types/models';
 
 import { usePayeesById } from '#hooks/usePayees';
 import { useSchedules } from '#hooks/useSchedules';

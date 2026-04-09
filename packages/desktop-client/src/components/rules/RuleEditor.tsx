@@ -22,12 +22,9 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
-import { v4 as uuid } from 'uuid';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
 import {
   FIELD_TYPES,
   friendlyOp,
@@ -39,13 +36,15 @@ import {
   mapField,
   parse,
   unparse,
-} from 'loot-core/shared/rules';
-import type { ScheduleStatusType } from 'loot-core/shared/schedules';
+} from '@actual-app/core/shared/rules';
+import type { ScheduleStatusType } from '@actual-app/core/shared/schedules';
 import type {
   NewRuleEntity,
   RuleActionEntity,
   RuleEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { css } from '@emotion/css';
+import { v4 as uuid } from 'uuid';
 
 import { FinancialText } from '#components/FinancialText';
 import { StatusBadge } from '#components/schedules/StatusBadge';

@@ -11,9 +11,8 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { friendlyOp, translateRuleStage } from 'loot-core/shared/rules';
-import type { RuleEntity } from 'loot-core/types/models';
+import { friendlyOp, translateRuleStage } from '@actual-app/core/shared/rules';
+import type { RuleEntity } from '@actual-app/core/types/models';
 
 import { Cell, Field, Row, SelectCell } from '#components/table';
 import { useContextMenu } from '#hooks/useContextMenu';

@@ -1,5 +1,8 @@
-import { q } from 'loot-core/shared/query';
-import type { AccountEntity, CategoryEntity } from 'loot-core/types/models';
+import { q } from '@actual-app/core/shared/query';
+import type {
+  AccountEntity,
+  CategoryEntity,
+} from '@actual-app/core/types/models';
 
 import { uncategorizedTransactions } from '#queries';
 

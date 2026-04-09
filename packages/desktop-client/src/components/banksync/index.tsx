@@ -5,8 +5,10 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
-
-import type { AccountEntity, BankSyncProviders } from 'loot-core/types/models';
+import type {
+  AccountEntity,
+  BankSyncProviders,
+} from '@actual-app/core/types/models';
 
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { Page } from '#components/Page';

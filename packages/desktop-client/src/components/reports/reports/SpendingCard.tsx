@@ -5,9 +5,8 @@ import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import * as monthUtils from 'loot-core/shared/months';
-import type { SpendingWidget } from 'loot-core/types/models';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type { SpendingWidget } from '@actual-app/core/types/models';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';

@@ -17,14 +17,13 @@ import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { css, cx } from '@emotion/css';
-
-import { getNormalisedString } from 'loot-core/shared/normalisation';
-import { integerToCurrency } from 'loot-core/shared/util';
+import { getNormalisedString } from '@actual-app/core/shared/normalisation';
+import { integerToCurrency } from '@actual-app/core/shared/util';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { css, cx } from '@emotion/css';
 
 import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
 import { makeAmountFullStyle } from '#components/budget/util';

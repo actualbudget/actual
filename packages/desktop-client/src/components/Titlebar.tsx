@@ -18,11 +18,10 @@ import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { listen } from '@actual-app/core/platform/client/connection';
+import { isDevelopmentEnvironment } from '@actual-app/core/shared/environment';
+import * as Platform from '@actual-app/core/shared/platform';
 import { css } from '@emotion/css';
-
-import { listen } from 'loot-core/platform/client/connection';
-import { isDevelopmentEnvironment } from 'loot-core/shared/environment';
-import * as Platform from 'loot-core/shared/platform';
 
 import { sync } from '#app/appSlice';
 import { useGlobalPref } from '#hooks/useGlobalPref';

@@ -12,11 +12,13 @@ import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type {
+  RuleConditionEntity,
+  TimeFrame,
+} from '@actual-app/core/types/models';
 import { parseISO } from 'date-fns';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import type { RuleConditionEntity, TimeFrame } from 'loot-core/types/models';
 
 import { AppliedFilters } from '#components/filters/AppliedFilters';
 import { FilterButton } from '#components/filters/FiltersMenu';

@@ -14,14 +14,13 @@ import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
 import type {
   CustomReportWidget,
   DashboardPageEntity,
   DashboardWidgetEntity,
   ExportImportDashboard,
   MarkdownWidget,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { MobilePageHeader, Page } from '#components/Page';

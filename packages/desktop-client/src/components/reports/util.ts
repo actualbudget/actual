@@ -1,11 +1,11 @@
 // @ts-strict-ignore
-import type { Query } from 'loot-core/shared/query';
+import type { Query } from '@actual-app/core/shared/query';
 import type {
   AccountEntity,
   CategoryEntity,
   PayeeEntity,
   RuleConditionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
 import { aqlQuery } from '#queries/aqlQuery';
 

@@ -26,15 +26,14 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { format as formatDate } from 'date-fns';
-
-import { tsToRelativeTime } from 'loot-core/shared/util';
+import { tsToRelativeTime } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   RuleConditionEntity,
   TransactionEntity,
   TransactionFilterEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { format as formatDate } from 'date-fns';
 
 import { AnimatedRefresh } from '#components/AnimatedRefresh';
 import { Search } from '#components/common/Search';

@@ -9,9 +9,8 @@ import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
 import { css, cx } from '@emotion/css';
-
-import { send } from 'loot-core/platform/client/connection';
 
 import { useNotes } from '#hooks/useNotes';
 

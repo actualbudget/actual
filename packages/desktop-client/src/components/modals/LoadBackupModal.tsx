@@ -6,9 +6,8 @@ import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { listen, send } from 'loot-core/platform/client/connection';
-import type { Backup } from 'loot-core/server/budgetfiles/backups';
+import { listen, send } from '@actual-app/core/platform/client/connection';
+import type { Backup } from '@actual-app/core/server/budgetfiles/backups';
 
 import { loadBackup, makeBackup } from '#budgetfiles/budgetfilesSlice';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';

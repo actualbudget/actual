@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import type { DarkTheme, Theme } from 'loot-core/types/prefs';
+import type { DarkTheme, Theme } from '@actual-app/core/types/prefs';
 
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';

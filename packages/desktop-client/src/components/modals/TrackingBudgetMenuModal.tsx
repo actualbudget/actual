@@ -12,10 +12,9 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import * as Platform from '@actual-app/core/shared/platform';
+import { amountToInteger, integerToAmount } from '@actual-app/core/shared/util';
 import { t } from 'i18next';
-
-import * as Platform from 'loot-core/shared/platform';
-import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 
 import { BudgetMenu } from '#components/budget/tracking/BudgetMenu';
 import { useTrackingSheetValue } from '#components/budget/tracking/TrackingBudgetComponents';

@@ -6,9 +6,8 @@ import { Label } from '@actual-app/components/label';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import type { IntegerAmount } from 'loot-core/shared/util';
-import type { TransactionEntity } from 'loot-core/types/models';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 
 import { Search } from '#components/common/Search';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';

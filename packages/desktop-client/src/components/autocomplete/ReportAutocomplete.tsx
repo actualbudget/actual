@@ -1,7 +1,7 @@
 import React from 'react';
 import type { ComponentProps } from 'react';
 
-import type { CustomReportEntity } from 'loot-core/types/models';
+import type { CustomReportEntity } from '@actual-app/core/types/models';
 
 import { useReports } from '#hooks/useReports';
 

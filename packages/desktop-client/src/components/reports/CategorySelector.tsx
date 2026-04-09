@@ -11,11 +11,10 @@ import {
 } from '@actual-app/components/icons/v2';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
-
 import type {
   CategoryEntity,
   CategoryGroupEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
 import { Checkbox } from '#components/forms';
 

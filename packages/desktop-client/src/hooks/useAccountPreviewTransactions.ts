@@ -1,13 +1,13 @@
 import { useCallback, useMemo } from 'react';
 
-import { groupById } from 'loot-core/shared/util';
-import type { IntegerAmount } from 'loot-core/shared/util';
+import { groupById } from '@actual-app/core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   PayeeEntity,
   ScheduleEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
 import * as bindings from '#spreadsheet/bindings';
 

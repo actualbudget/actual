@@ -5,9 +5,8 @@ import { Trans } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { PossibleRoles } from 'loot-core/shared/user';
-import type { UserEntity } from 'loot-core/types/models';
+import { PossibleRoles } from '@actual-app/core/shared/user';
+import type { UserEntity } from '@actual-app/core/types/models';
 
 import { Checkbox } from '#components/forms';
 import { Cell, Row, SelectCell } from '#components/table';

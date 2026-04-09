@@ -7,9 +7,8 @@ import { SvgBookmark } from '@actual-app/components/icons/v1';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import type { PayeeEntity } from 'loot-core/types/models';
-import type { WithRequired } from 'loot-core/types/util';
+import type { PayeeEntity } from '@actual-app/core/types/models';
+import type { WithRequired } from '@actual-app/core/types/util';
 
 import { ActionableGridListItem } from '#components/mobile/ActionableGridListItem';
 import { PayeeRuleCountLabel } from '#components/payees/PayeeRuleCountLabel';

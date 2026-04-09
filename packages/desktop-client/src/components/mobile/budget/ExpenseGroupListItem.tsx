@@ -11,14 +11,13 @@ import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
-import { AutoTextSize } from 'auto-text-size';
-
-import * as monthUtils from 'loot-core/shared/months';
+import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { css } from '@emotion/css';
+import { AutoTextSize } from 'auto-text-size';
 
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { CellValue } from '#components/spreadsheet/CellValue';

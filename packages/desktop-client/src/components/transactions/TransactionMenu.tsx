@@ -3,14 +3,13 @@ import type { ComponentPropsWithoutRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
-
-import { q } from 'loot-core/shared/query';
+import { q } from '@actual-app/core/shared/query';
 import {
   extractScheduleConds,
   scheduleIsRecurring,
-} from 'loot-core/shared/schedules';
-import { isPreviewId } from 'loot-core/shared/transactions';
-import type { TransactionEntity } from 'loot-core/types/models';
+} from '@actual-app/core/shared/schedules';
+import { isPreviewId } from '@actual-app/core/shared/transactions';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 
 import { useSchedules } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';

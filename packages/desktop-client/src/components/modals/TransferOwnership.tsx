@@ -8,12 +8,11 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { send } from 'loot-core/platform/client/connection';
-import { getUserAccessErrors } from 'loot-core/shared/errors';
-import type { Budget } from 'loot-core/types/budget';
-import type { RemoteFile, SyncedLocalFile } from 'loot-core/types/file';
-import type { Handlers } from 'loot-core/types/handlers';
+import { send } from '@actual-app/core/platform/client/connection';
+import { getUserAccessErrors } from '@actual-app/core/shared/errors';
+import type { Budget } from '@actual-app/core/types/budget';
+import type { RemoteFile, SyncedLocalFile } from '@actual-app/core/types/file';
+import type { Handlers } from '@actual-app/core/types/handlers';
 
 import { closeAndLoadBudget } from '#budgetfiles/budgetfilesSlice';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';

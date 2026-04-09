@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-import type { MetadataPrefs } from 'loot-core/types/prefs';
+import type { MetadataPrefs } from '@actual-app/core/types/prefs';
 
 import { savePrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';

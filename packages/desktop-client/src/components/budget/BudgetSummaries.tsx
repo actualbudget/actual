@@ -9,9 +9,8 @@ import React, {
 import { animated, useSpring } from 'react-spring';
 
 import { View, viewStyles } from '@actual-app/components/view';
+import { addMonths, subMonths } from '@actual-app/core/shared/months';
 import { css } from '@emotion/css';
-
-import { addMonths, subMonths } from 'loot-core/shared/months';
 
 import { useResizeObserver } from '#hooks/useResizeObserver';
 

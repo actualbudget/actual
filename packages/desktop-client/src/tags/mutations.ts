@@ -1,11 +1,10 @@
 import { useTranslation } from 'react-i18next';
 
+import { send } from '@actual-app/core/platform/client/connection';
+import type { TagEntity } from '@actual-app/core/types/models';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { QueryClient, QueryKey } from '@tanstack/react-query';
 import { v4 as uuidv4 } from 'uuid';
-
-import { send } from 'loot-core/platform/client/connection';
-import type { TagEntity } from 'loot-core/types/models';
 
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';

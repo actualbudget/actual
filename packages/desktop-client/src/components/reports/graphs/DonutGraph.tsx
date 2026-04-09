@@ -3,9 +3,6 @@ import React, { useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 
 import { theme } from '@actual-app/components/theme';
-import { Pie, PieChart, Sector } from 'recharts';
-import type { PieSectorShapeProps } from 'recharts';
-
 import type {
   balanceTypeOpType,
   DataEntity,
@@ -13,7 +10,9 @@ import type {
   IntervalEntity,
   LegendEntity,
   RuleConditionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { Pie, PieChart, Sector } from 'recharts';
+import type { PieSectorShapeProps } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';

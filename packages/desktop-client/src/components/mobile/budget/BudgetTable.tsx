@@ -11,14 +11,13 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { AutoTextSize } from 'auto-text-size';
-
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { AutoTextSize } from 'auto-text-size';
 
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';

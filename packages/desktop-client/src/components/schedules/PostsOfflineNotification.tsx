@@ -7,9 +7,8 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-
-import { send } from 'loot-core/platform/client/connection';
-import type { PayeeEntity } from 'loot-core/types/models';
+import { send } from '@actual-app/core/platform/client/connection';
+import type { PayeeEntity } from '@actual-app/core/types/models';
 
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { DisplayId } from '#components/util/DisplayId';

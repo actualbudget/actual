@@ -6,17 +6,12 @@ import { Navigate, useLocation, useParams } from 'react-router';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { t } from 'i18next';
-import debounce from 'lodash/debounce';
-import isEqual from 'lodash/isEqual';
-import { v4 as uuidv4 } from 'uuid';
-
-import { listen, send } from 'loot-core/platform/client/connection';
-import * as undo from 'loot-core/platform/client/undo';
-import type { UndoState } from 'loot-core/server/undo';
-import { currentDay } from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
-import type { Query } from 'loot-core/shared/query';
+import { listen, send } from '@actual-app/core/platform/client/connection';
+import * as undo from '@actual-app/core/platform/client/undo';
+import type { UndoState } from '@actual-app/core/server/undo';
+import { currentDay } from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
+import type { Query } from '@actual-app/core/shared/query';
 import {
   makeAsNonChildTransactions,
   makeChild,
@@ -24,9 +19,9 @@ import {
   ungroupTransaction,
   ungroupTransactions,
   updateTransaction,
-} from 'loot-core/shared/transactions';
-import { applyChanges } from 'loot-core/shared/util';
-import type { IntegerAmount } from 'loot-core/shared/util';
+} from '@actual-app/core/shared/transactions';
+import { applyChanges } from '@actual-app/core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   CategoryGroupEntity,
@@ -36,7 +31,11 @@ import type {
   RuleConditionEntity,
   TransactionEntity,
   TransactionFilterEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { t } from 'i18next';
+import debounce from 'lodash/debounce';
+import isEqual from 'lodash/isEqual';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   useReopenAccountMutation,

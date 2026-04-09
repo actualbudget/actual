@@ -1,7 +1,10 @@
 import { useCallback, useMemo } from 'react';
 
-import * as monthUtils from 'loot-core/shared/months';
-import type { CategoryEntity, ScheduleEntity } from 'loot-core/types/models';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type {
+  CategoryEntity,
+  ScheduleEntity,
+} from '@actual-app/core/types/models';
 
 import { categoryBalance } from '#spreadsheet/bindings';
 

@@ -14,8 +14,7 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import type { OpenIdConfig } from 'loot-core/types/models';
+import type { OpenIdConfig } from '@actual-app/core/types/models';
 
 import { Link } from '#components/common/Link';
 import { FormField, FormLabel } from '#components/forms';

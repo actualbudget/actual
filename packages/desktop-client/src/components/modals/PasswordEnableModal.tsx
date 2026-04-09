@@ -6,9 +6,8 @@ import { Label } from '@actual-app/components/label';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as asyncStorage from '@actual-app/core/platform/server/asyncStorage';
 
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
 import { Error as ErrorAlert } from '#components/alerts';

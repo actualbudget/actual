@@ -2,13 +2,12 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
-
 import {
   format as formatMonth,
   prevMonth,
   sheetForMonth,
-} from 'loot-core/shared/months';
-import type { CategoryEntity } from 'loot-core/types/models/category';
+} from '@actual-app/core/shared/months';
+import type { CategoryEntity } from '@actual-app/core/types/models/category';
 
 import { ToBudgetAmount } from '#components/budget/envelope/budgetsummary/ToBudgetAmount';
 import { TotalsList } from '#components/budget/envelope/budgetsummary/TotalsList';

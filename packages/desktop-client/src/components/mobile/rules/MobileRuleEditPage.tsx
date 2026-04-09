@@ -5,10 +5,9 @@ import { useLocation, useParams } from 'react-router';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { send } from 'loot-core/platform/client/connection';
-import { q } from 'loot-core/shared/query';
-import type { NewRuleEntity, RuleEntity } from 'loot-core/types/models';
+import { send } from '@actual-app/core/platform/client/connection';
+import { q } from '@actual-app/core/shared/query';
+import type { NewRuleEntity, RuleEntity } from '@actual-app/core/types/models';
 
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page } from '#components/Page';

@@ -5,13 +5,12 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { send } from 'loot-core/platform/client/connection';
-import { format as monthUtilFormat } from 'loot-core/shared/months';
-import { getNormalisedString } from 'loot-core/shared/normalisation';
-import { q } from 'loot-core/shared/query';
-import { getScheduledAmount } from 'loot-core/shared/schedules';
-import type { ScheduleEntity } from 'loot-core/types/models';
+import { send } from '@actual-app/core/platform/client/connection';
+import { format as monthUtilFormat } from '@actual-app/core/shared/months';
+import { getNormalisedString } from '@actual-app/core/shared/normalisation';
+import { q } from '@actual-app/core/shared/query';
+import { getScheduledAmount } from '@actual-app/core/shared/schedules';
+import type { ScheduleEntity } from '@actual-app/core/types/models';
 
 import { Search } from '#components/common/Search';
 import { MobilePageHeader, Page } from '#components/Page';

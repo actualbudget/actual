@@ -8,11 +8,10 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { send } from 'loot-core/platform/client/connection';
-import { q } from 'loot-core/shared/query';
-import { getRecurringDescription } from 'loot-core/shared/schedules';
-import type { DiscoverScheduleEntity } from 'loot-core/types/models';
+import { send } from '@actual-app/core/platform/client/connection';
+import { q } from '@actual-app/core/shared/query';
+import { getRecurringDescription } from '@actual-app/core/shared/schedules';
+import type { DiscoverScheduleEntity } from '@actual-app/core/types/models';
 
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { Field, Row, SelectCell, Table, TableHeader } from '#components/table';

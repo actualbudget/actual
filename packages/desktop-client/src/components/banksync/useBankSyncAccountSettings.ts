@@ -4,9 +4,9 @@ import {
   defaultMappings,
   mappingsFromString,
   mappingsToString,
-} from 'loot-core/server/util/custom-sync-mapping';
-import type { Mappings } from 'loot-core/server/util/custom-sync-mapping';
-import { q } from 'loot-core/shared/query';
+} from '@actual-app/core/server/util/custom-sync-mapping';
+import type { Mappings } from '@actual-app/core/server/util/custom-sync-mapping';
+import { q } from '@actual-app/core/shared/query';
 
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useTransactions } from '#hooks/useTransactions';

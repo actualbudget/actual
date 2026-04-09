@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { AlignedText } from '@actual-app/components/aligned-text';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import * as monthUtils from '@actual-app/core/shared/months';
 import { css } from '@emotion/css';
 import {
   Bar,
@@ -15,8 +16,6 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-
-import * as monthUtils from 'loot-core/shared/months';
 
 import { FinancialText } from '#components/FinancialText';
 import { Container } from '#components/reports/Container';

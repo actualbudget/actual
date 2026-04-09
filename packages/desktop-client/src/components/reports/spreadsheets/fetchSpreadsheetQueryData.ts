@@ -3,8 +3,8 @@ import type {
   CategoryEntity,
   CategoryGroupEntity,
   RuleConditionEntity,
-} from 'loot-core/types/models';
-import type { SyncedPrefs } from 'loot-core/types/prefs';
+} from '@actual-app/core/types/models';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import type { QueryDataEntity } from '#components/reports/ReportOptions';
 import { aqlQuery } from '#queries/aqlQuery';

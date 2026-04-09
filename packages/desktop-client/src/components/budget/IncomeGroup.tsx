@@ -2,8 +2,7 @@
 import React from 'react';
 
 import { theme } from '@actual-app/components/theme';
-
-import type { CategoryGroupEntity } from 'loot-core/types/models';
+import type { CategoryGroupEntity } from '@actual-app/core/types/models';
 
 import { Row } from '#components/table';
 

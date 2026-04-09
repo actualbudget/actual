@@ -16,11 +16,10 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
+import type { ParseFileOptions } from '@actual-app/core/server/transactions/import/parse-file';
+import { amountToInteger } from '@actual-app/core/shared/util';
 import { useQueryClient } from '@tanstack/react-query';
-
-import { send } from 'loot-core/platform/client/connection';
-import type { ParseFileOptions } from 'loot-core/server/transactions/import/parse-file';
-import { amountToInteger } from 'loot-core/shared/util';
 
 import {
   useImportPreviewTransactionsMutation,

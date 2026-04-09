@@ -19,9 +19,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import type { AccountEntity } from '@actual-app/core/types/models';
 import { css, cx } from '@emotion/css';
-
-import type { AccountEntity } from 'loot-core/types/models';
 
 import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
 import { BalanceHistoryGraph } from '#components/accounts/BalanceHistoryGraph';

@@ -9,10 +9,8 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import * as d from 'date-fns';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   balanceTypeOpType,
   CategoryEntity,
@@ -21,9 +19,10 @@ import type {
   RuleConditionEntity,
   sortByOpType,
   TransactionEntity,
-} from 'loot-core/types/models';
-import type { SyncedPrefs } from 'loot-core/types/prefs';
-import type { TransObjectLiteral } from 'loot-core/types/util';
+} from '@actual-app/core/types/models';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
+import type { TransObjectLiteral } from '@actual-app/core/types/util';
+import * as d from 'date-fns';
 
 import { Warning } from '#components/alerts';
 import { AppliedFilters } from '#components/filters/AppliedFilters';

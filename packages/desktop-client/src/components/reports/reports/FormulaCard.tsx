@@ -2,8 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
-
-import type { FormulaWidget } from 'loot-core/types/models';
+import type { FormulaWidget } from '@actual-app/core/types/models';
 
 import { FormulaResult } from '#components/reports/FormulaResult';
 import { ReportCard } from '#components/reports/ReportCard';

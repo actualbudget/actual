@@ -1,20 +1,19 @@
 import { useTranslation } from 'react-i18next';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { QueryClient, QueryKey } from '@tanstack/react-query';
-import { v4 as uuidv4 } from 'uuid';
-
-import { sendCatch } from 'loot-core/platform/client/connection';
-import type { send } from 'loot-core/platform/client/connection';
+import { sendCatch } from '@actual-app/core/platform/client/connection';
+import type { send } from '@actual-app/core/platform/client/connection';
 import type {
   CustomReportEntity,
   DashboardPageEntity,
   DashboardWidgetEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 import type {
   EverythingButIdOptional,
   WithOptional,
-} from 'loot-core/types/util';
+} from '@actual-app/core/types/util';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { QueryClient, QueryKey } from '@tanstack/react-query';
+import { v4 as uuidv4 } from 'uuid';
 
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';

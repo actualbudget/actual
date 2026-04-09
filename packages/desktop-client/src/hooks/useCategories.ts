@@ -1,6 +1,5 @@
+import { groupById } from '@actual-app/core/shared/util';
 import { useQuery } from '@tanstack/react-query';
-
-import { groupById } from 'loot-core/shared/util';
 
 import { categoryQueries } from '#budget';
 

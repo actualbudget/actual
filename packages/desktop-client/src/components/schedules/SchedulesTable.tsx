@@ -12,15 +12,14 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { format as monthUtilFormat } from 'loot-core/shared/months';
-import { getNormalisedString } from 'loot-core/shared/normalisation';
-import { getScheduledAmount } from 'loot-core/shared/schedules';
+import { format as monthUtilFormat } from '@actual-app/core/shared/months';
+import { getNormalisedString } from '@actual-app/core/shared/normalisation';
+import { getScheduledAmount } from '@actual-app/core/shared/schedules';
 import type {
   ScheduleStatuses,
   ScheduleStatusType,
-} from 'loot-core/shared/schedules';
-import type { ScheduleEntity } from 'loot-core/types/models';
+} from '@actual-app/core/shared/schedules';
+import type { ScheduleEntity } from '@actual-app/core/types/models';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';

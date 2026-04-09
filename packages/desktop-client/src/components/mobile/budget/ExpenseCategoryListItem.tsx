@@ -10,10 +10,9 @@ import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import type { BudgetType } from 'loot-core/server/prefs';
-import * as monthUtils from 'loot-core/shared/months';
-import type { CategoryEntity } from 'loot-core/types/models';
+import type { BudgetType } from '@actual-app/core/server/prefs';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type { CategoryEntity } from '@actual-app/core/types/models';
 
 import { useCategoriesById } from '#hooks/useCategories';
 import { useFormat } from '#hooks/useFormat';

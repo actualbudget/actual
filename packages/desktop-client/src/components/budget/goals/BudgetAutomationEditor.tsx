@@ -7,11 +7,10 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-
 import type {
   CategoryGroupEntity,
   ScheduleEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
 import { FormField, FormLabel, FormTextLabel } from '#components/forms';
 

@@ -3,8 +3,7 @@ import type { ReactElement } from 'react';
 import { Trans } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
-
-import type { RemoteFile, SyncedLocalFile } from 'loot-core/types/file';
+import type { RemoteFile, SyncedLocalFile } from '@actual-app/core/types/file';
 
 import { useMetadataPref } from '#hooks/useMetadataPref';
 import { useSelector } from '#redux';

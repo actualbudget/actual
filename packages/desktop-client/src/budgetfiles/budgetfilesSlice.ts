@@ -1,13 +1,12 @@
+import { send } from '@actual-app/core/platform/client/connection';
+import type { RemoteFile } from '@actual-app/core/server/cloud-storage';
+import { getDownloadError, getSyncError } from '@actual-app/core/shared/errors';
+import type { Budget } from '@actual-app/core/types/budget';
+import type { File } from '@actual-app/core/types/file';
+import type { Handlers } from '@actual-app/core/types/handlers';
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { t } from 'i18next';
-
-import { send } from 'loot-core/platform/client/connection';
-import type { RemoteFile } from 'loot-core/server/cloud-storage';
-import { getDownloadError, getSyncError } from 'loot-core/shared/errors';
-import type { Budget } from 'loot-core/types/budget';
-import type { File } from 'loot-core/types/file';
-import type { Handlers } from 'loot-core/types/handlers';
 
 import { resetApp, setAppState } from '#app/appSlice';
 import { closeModal, pushModal } from '#modals/modalsSlice';

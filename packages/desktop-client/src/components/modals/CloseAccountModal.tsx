@@ -12,10 +12,9 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { integerToCurrency } from 'loot-core/shared/util';
-import type { AccountEntity } from 'loot-core/types/models';
-import type { TransObjectLiteral } from 'loot-core/types/util';
+import { integerToCurrency } from '@actual-app/core/shared/util';
+import type { AccountEntity } from '@actual-app/core/types/models';
+import type { TransObjectLiteral } from '@actual-app/core/types/util';
 
 import { useCloseAccountMutation } from '#accounts';
 import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplete';

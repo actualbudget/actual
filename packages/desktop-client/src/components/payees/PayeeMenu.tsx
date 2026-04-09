@@ -6,8 +6,7 @@ import { Menu } from '@actual-app/components/menu';
 import type { MenuItem } from '@actual-app/components/menu';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import type { PayeeEntity } from 'loot-core/types/models';
+import type { PayeeEntity } from '@actual-app/core/types/models';
 
 import { useSyncedPref } from '#hooks/useSyncedPref';
 

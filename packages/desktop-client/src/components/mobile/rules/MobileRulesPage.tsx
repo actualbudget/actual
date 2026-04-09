@@ -4,12 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { listen, send } from 'loot-core/platform/client/connection';
-import * as undo from 'loot-core/platform/client/undo';
-import { getNormalisedString } from 'loot-core/shared/normalisation';
-import { q } from 'loot-core/shared/query';
-import type { RuleEntity } from 'loot-core/types/models';
+import { listen, send } from '@actual-app/core/platform/client/connection';
+import * as undo from '@actual-app/core/platform/client/undo';
+import { getNormalisedString } from '@actual-app/core/shared/normalisation';
+import { q } from '@actual-app/core/shared/query';
+import type { RuleEntity } from '@actual-app/core/types/models';
 
 import { Search } from '#components/common/Search';
 import { ruleToString } from '#components/ManageRules';

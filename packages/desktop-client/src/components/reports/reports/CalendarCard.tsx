@@ -19,13 +19,12 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type { CalendarWidget } from '@actual-app/core/types/models';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import { format as formatDate } from 'date-fns';
 import debounce from 'lodash/debounce';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import type { CalendarWidget } from 'loot-core/types/models';
-import type { SyncedPrefs } from 'loot-core/types/prefs';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';

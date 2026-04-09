@@ -23,19 +23,17 @@ import { styles } from '@actual-app/components/styles';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
-import { addDays, format, isValid, parse, parseISO, subDays } from 'date-fns';
-import type { Locale } from 'date-fns';
-import Pikaday from 'pikaday';
-
 import {
   currentDate,
   getDayMonthFormat,
   getDayMonthRegex,
   getShortYearFormat,
   getShortYearRegex,
-} from 'loot-core/shared/months';
-
+} from '@actual-app/core/shared/months';
+import { css } from '@emotion/css';
+import { addDays, format, isValid, parse, parseISO, subDays } from 'date-fns';
+import type { Locale } from 'date-fns';
+import Pikaday from 'pikaday';
 import 'pikaday/css/pikaday.css';
 import { InputField } from '#components/mobile/MobileForms';
 import { useLocale } from '#hooks/useLocale';

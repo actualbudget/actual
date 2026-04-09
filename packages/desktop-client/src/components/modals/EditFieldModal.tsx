@@ -7,10 +7,12 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { currentDay, dayFromDate } from '@actual-app/core/shared/months';
+import {
+  amountToInteger,
+  currencyToInteger,
+} from '@actual-app/core/shared/util';
 import { format as formatDate, parse as parseDate, parseISO } from 'date-fns';
-
-import { currentDay, dayFromDate } from 'loot-core/shared/months';
-import { amountToInteger, currencyToInteger } from 'loot-core/shared/util';
 
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { SectionLabel } from '#components/forms';

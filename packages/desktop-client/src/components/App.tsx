@@ -9,12 +9,11 @@ import { BrowserRouter } from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
-import { useQueryClient } from '@tanstack/react-query';
-
 import {
   init as initConnection,
   send,
-} from 'loot-core/platform/client/connection';
+} from '@actual-app/core/platform/client/connection';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { setAppState, sync } from '#app/appSlice';
 import { closeBudget, loadBudget } from '#budgetfiles/budgetfilesSlice';

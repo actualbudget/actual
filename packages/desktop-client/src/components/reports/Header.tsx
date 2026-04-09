@@ -6,10 +6,12 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
-
-import * as monthUtils from 'loot-core/shared/months';
-import type { RuleConditionEntity, TimeFrame } from 'loot-core/types/models';
-import type { SyncedPrefs } from 'loot-core/types/prefs';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type {
+  RuleConditionEntity,
+  TimeFrame,
+} from '@actual-app/core/types/models';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import { AppliedFilters } from '#components/filters/AppliedFilters';
 import { FilterButton } from '#components/filters/FiltersMenu';

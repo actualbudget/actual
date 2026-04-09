@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 
-import { isPreviewId } from 'loot-core/shared/transactions';
-import type { TransactionEntity } from 'loot-core/types/models';
+import { isPreviewId } from '@actual-app/core/shared/transactions';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 
 import { TransactionListWithBalances } from '#components/mobile/transactions/TransactionListWithBalances';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';

@@ -5,10 +5,12 @@ import { Block } from '@actual-app/components/block';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import type { AccountEntity, NetWorthWidget } from 'loot-core/types/models';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type {
+  AccountEntity,
+  NetWorthWidget,
+} from '@actual-app/core/types/models';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';

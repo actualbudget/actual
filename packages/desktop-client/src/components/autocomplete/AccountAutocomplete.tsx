@@ -13,9 +13,8 @@ import { styles } from '@actual-app/components/styles';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { AccountEntity } from '@actual-app/core/types/models';
 import { css, cx } from '@emotion/css';
-
-import type { AccountEntity } from 'loot-core/types/models';
 
 import { useAccounts } from '#hooks/useAccounts';
 

@@ -3,9 +3,8 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
-
-import type { ScheduleEntity } from 'loot-core/types/models';
-import type { ScheduleTemplate } from 'loot-core/types/models/templates';
+import type { ScheduleEntity } from '@actual-app/core/types/models';
+import type { ScheduleTemplate } from '@actual-app/core/types/models/templates';
 
 import { updateTemplate } from '#components/budget/goals/actions';
 import type { Action } from '#components/budget/goals/actions';

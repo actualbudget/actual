@@ -1,8 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
-
-import type { CategoryEntity } from 'loot-core/types/models';
+import type { CategoryEntity } from '@actual-app/core/types/models';
 
 import { envelopeBudget } from '#spreadsheet/bindings';
 

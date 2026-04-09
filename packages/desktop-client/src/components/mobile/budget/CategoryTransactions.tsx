@@ -1,8 +1,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { q } from 'loot-core/shared/query';
-import { isPreviewId } from 'loot-core/shared/transactions';
-import type { CategoryEntity, TransactionEntity } from 'loot-core/types/models';
+import { q } from '@actual-app/core/shared/query';
+import { isPreviewId } from '@actual-app/core/shared/transactions';
+import type {
+  CategoryEntity,
+  TransactionEntity,
+} from '@actual-app/core/types/models';
 
 import { TransactionListWithBalances } from '#components/mobile/transactions/TransactionListWithBalances';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';

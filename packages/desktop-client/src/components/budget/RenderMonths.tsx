@@ -3,8 +3,7 @@ import type { CSSProperties, ReactNode } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import * as monthUtils from 'loot-core/shared/months';
+import * as monthUtils from '@actual-app/core/shared/months';
 
 import { SheetNameProvider } from '#hooks/useSheetName';
 

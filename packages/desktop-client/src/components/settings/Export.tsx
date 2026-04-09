@@ -5,9 +5,8 @@ import { Block } from '@actual-app/components/block';
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { send } from '@actual-app/core/platform/client/connection';
 import { format } from 'date-fns';
-
-import { send } from 'loot-core/platform/client/connection';
 
 import { useMetadataPref } from '#hooks/useMetadataPref';
 

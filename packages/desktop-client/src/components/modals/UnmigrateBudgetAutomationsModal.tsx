@@ -5,9 +5,8 @@ import { Button } from '@actual-app/components/button';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
-
-import { send } from 'loot-core/platform/client/connection';
-import type { Template } from 'loot-core/types/models/templates';
+import { send } from '@actual-app/core/platform/client/connection';
+import type { Template } from '@actual-app/core/types/models/templates';
 
 import { Link } from '#components/common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';

@@ -7,9 +7,8 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { send } from 'loot-core/platform/client/connection';
-import type { PayeeEntity } from 'loot-core/types/models';
+import { send } from '@actual-app/core/platform/client/connection';
+import type { PayeeEntity } from '@actual-app/core/types/models';
 
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { InputField } from '#components/mobile/MobileForms';

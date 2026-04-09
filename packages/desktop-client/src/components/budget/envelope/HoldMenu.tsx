@@ -5,8 +5,7 @@ import { Trans } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { View } from '@actual-app/components/view';
-
-import type { IntegerAmount } from 'loot-core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
 
 import { FinancialInput } from '#components/util/FinancialInput';
 import { useSheetValue } from '#hooks/useSheetValue';

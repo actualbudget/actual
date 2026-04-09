@@ -11,9 +11,8 @@ import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { isElectron } from 'loot-core/shared/environment';
-import * as Platform from 'loot-core/shared/platform';
+import { isElectron } from '@actual-app/core/shared/environment';
+import * as Platform from '@actual-app/core/shared/platform';
 
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
 import { useContextMenu } from '#hooks/useContextMenu';

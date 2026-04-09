@@ -15,21 +15,20 @@ import {
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
-import { useDrag } from '@use-gesture/react';
-import { format as formatDate, parseISO } from 'date-fns';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
-import type { Query } from 'loot-core/shared/query';
-import { ungroupTransactions } from 'loot-core/shared/transactions';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
+import type { Query } from '@actual-app/core/shared/query';
+import { ungroupTransactions } from '@actual-app/core/shared/transactions';
 import type {
   CalendarWidget,
   RuleConditionEntity,
   TimeFrame,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { css } from '@emotion/css';
+import { useDrag } from '@use-gesture/react';
+import { format as formatDate, parseISO } from 'date-fns';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { FinancialText } from '#components/FinancialText';

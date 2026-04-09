@@ -9,9 +9,8 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { CategoryEntity } from '@actual-app/core/types/models';
 import { AutoTextSize } from 'auto-text-size';
-
-import type { CategoryEntity } from 'loot-core/types/models';
 
 import { makeAmountGrey } from '#components/budget/util';
 import { PrivacyFilter } from '#components/PrivacyFilter';

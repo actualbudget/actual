@@ -6,8 +6,7 @@ import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-
-import type { TagEntity } from 'loot-core/types/models';
+import type { TagEntity } from '@actual-app/core/types/models';
 
 import {
   Cell,

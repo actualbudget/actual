@@ -7,9 +7,8 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import type { RuleEntity } from 'loot-core/types/models';
-import type { WithRequired } from 'loot-core/types/util';
+import type { RuleEntity } from '@actual-app/core/types/models';
+import type { WithRequired } from '@actual-app/core/types/util';
 
 import { ActionableGridListItem } from '#components/mobile/ActionableGridListItem';
 import { ActionExpression } from '#components/rules/ActionExpression';

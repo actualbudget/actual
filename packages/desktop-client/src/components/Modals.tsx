@@ -2,8 +2,8 @@
 import React, { Fragment, useEffect, useEffectEvent } from 'react';
 import { useLocation } from 'react-router';
 
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
 
 import { useMetadataPref } from '#hooks/useMetadataPref';
 import { useModalState } from '#hooks/useModalState';

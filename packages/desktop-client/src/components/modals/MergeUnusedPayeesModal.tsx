@@ -6,10 +6,9 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { send } from 'loot-core/platform/client/connection';
-import type { PayeeEntity } from 'loot-core/types/models';
-import type { TransObjectLiteral } from 'loot-core/types/util';
+import { send } from '@actual-app/core/platform/client/connection';
+import type { PayeeEntity } from '@actual-app/core/types/models';
+import type { TransObjectLiteral } from '@actual-app/core/types/util';
 
 import { Information } from '#components/alerts';
 import { Modal, ModalButtons } from '#components/common/Modal';

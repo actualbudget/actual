@@ -8,12 +8,11 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { format as monthUtilFormat } from 'loot-core/shared/months';
-import type { ScheduleStatusType } from 'loot-core/shared/schedules';
-import { getScheduledAmount } from 'loot-core/shared/schedules';
-import type { ScheduleEntity } from 'loot-core/types/models';
-import type { WithRequired } from 'loot-core/types/util';
+import { format as monthUtilFormat } from '@actual-app/core/shared/months';
+import type { ScheduleStatusType } from '@actual-app/core/shared/schedules';
+import { getScheduledAmount } from '@actual-app/core/shared/schedules';
+import type { ScheduleEntity } from '@actual-app/core/types/models';
+import type { WithRequired } from '@actual-app/core/types/util';
 
 import { ActionableGridListItem } from '#components/mobile/ActionableGridListItem';
 import { StatusBadge } from '#components/schedules/StatusBadge';

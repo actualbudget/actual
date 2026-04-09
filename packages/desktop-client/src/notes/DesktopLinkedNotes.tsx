@@ -2,8 +2,7 @@ import type { MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
-
-import { isElectron } from 'loot-core/shared/environment';
+import { isElectron } from '@actual-app/core/shared/environment';
 
 import { Link } from '#components/common/Link';
 import { addNotification } from '#notifications/notificationsSlice';

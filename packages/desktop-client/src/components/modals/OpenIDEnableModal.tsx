@@ -6,11 +6,10 @@ import { Label } from '@actual-app/components/label';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
-import { getOpenIdErrors } from 'loot-core/shared/errors';
-import type { OpenIdConfig } from 'loot-core/types/models';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as asyncStorage from '@actual-app/core/platform/server/asyncStorage';
+import { getOpenIdErrors } from '@actual-app/core/shared/errors';
+import type { OpenIdConfig } from '@actual-app/core/types/models';
 
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
 import { Error } from '#components/alerts';

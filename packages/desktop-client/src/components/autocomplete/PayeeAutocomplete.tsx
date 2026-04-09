@@ -22,15 +22,14 @@ import { styles } from '@actual-app/components/styles';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { css, cx } from '@emotion/css';
-
-import { formatDistance } from 'loot-core/shared/location-utils';
-import { getNormalisedString } from 'loot-core/shared/normalisation';
+import { formatDistance } from '@actual-app/core/shared/location-utils';
+import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 import type {
   AccountEntity,
   NearbyPayeeEntity,
   PayeeEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { css, cx } from '@emotion/css';
 
 import { useAccounts } from '#hooks/useAccounts';
 import { useCommonPayees } from '#hooks/useCommonPayees';

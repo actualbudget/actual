@@ -1,11 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { QueryClient, QueryKey } from '@tanstack/react-query';
-import { v4 as uuidv4 } from 'uuid';
-
-import { send } from 'loot-core/platform/client/connection';
-import type { SyncResponseWithErrors } from 'loot-core/server/accounts/app';
+import { send } from '@actual-app/core/platform/client/connection';
+import type { SyncResponseWithErrors } from '@actual-app/core/server/accounts/app';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -13,7 +9,10 @@ import type {
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { QueryClient, QueryKey } from '@tanstack/react-query';
+import { v4 as uuidv4 } from 'uuid';
 
 import { sync } from '#app/appSlice';
 import { useAccounts } from '#hooks/useAccounts';

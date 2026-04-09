@@ -5,9 +5,8 @@ import { Button } from '@actual-app/components/button';
 import { SvgChartPie } from '@actual-app/components/icons/v1';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import type { CategoryEntity } from '@actual-app/core/types/models';
 import { css, cx } from '@emotion/css';
-
-import type { CategoryEntity } from 'loot-core/types/models';
 
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { pushModal } from '#modals/modalsSlice';

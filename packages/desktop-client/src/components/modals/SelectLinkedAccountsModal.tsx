@@ -10,15 +10,14 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { format as formatDate, parseISO } from 'date-fns';
-
-import { currentDay, subDays } from 'loot-core/shared/months';
+import { currentDay, subDays } from '@actual-app/core/shared/months';
 import type {
   AccountEntity,
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { format as formatDate, parseISO } from 'date-fns';
 
 import {
   useLinkAccountMutation,

@@ -7,8 +7,7 @@ import { SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { View } from '@actual-app/components/view';
-
-import type { DashboardPageEntity } from 'loot-core/types/models';
+import type { DashboardPageEntity } from '@actual-app/core/types/models';
 
 import { useNavigate } from '#hooks/useNavigate';
 import { useCreateDashboardPageMutation } from '#reports/mutations';

@@ -45,12 +45,9 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { format as formatDate, parseISO } from 'date-fns';
-import memoizeOne from 'memoize-one';
-
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
-import { getStatusLabel } from 'loot-core/shared/schedules';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
+import { getStatusLabel } from '@actual-app/core/shared/schedules';
 import {
   addSplitTransaction,
   deleteTransaction,
@@ -60,14 +57,14 @@ import {
   splitTransaction,
   ungroupTransactions,
   updateTransaction,
-} from 'loot-core/shared/transactions';
+} from '@actual-app/core/shared/transactions';
 import {
   amountToCurrency,
   currencyToAmount,
   integerToCurrency,
   titleFirst,
-} from 'loot-core/shared/util';
-import type { IntegerAmount } from 'loot-core/shared/util';
+} from '@actual-app/core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -76,7 +73,9 @@ import type {
   RuleEntity,
   ScheduleEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { format as formatDate, parseISO } from 'date-fns';
+import memoizeOne from 'memoize-one';
 
 import { getAccountsById } from '#accounts/accountsSlice';
 import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplete';

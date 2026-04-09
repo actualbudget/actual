@@ -11,8 +11,7 @@ import {
 } from '@actual-app/components/icons/v2';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
-
-import type { Theme } from 'loot-core/types/prefs';
+import type { Theme } from '@actual-app/core/types/prefs';
 
 import { themeOptions, useTheme } from '#style';
 

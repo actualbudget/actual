@@ -7,10 +7,9 @@ import { SvgAdd } from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import * as Platform from '@actual-app/core/shared/platform';
 import { css } from '@emotion/css';
 import { Resizable } from 're-resizable';
-
-import * as Platform from 'loot-core/shared/platform';
 
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';

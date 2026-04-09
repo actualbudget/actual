@@ -5,8 +5,10 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import type { AccountEntity, BankSyncProviders } from 'loot-core/types/models';
+import type {
+  AccountEntity,
+  BankSyncProviders,
+} from '@actual-app/core/types/models';
 
 import { Search } from '#components/common/Search';
 import { MobilePageHeader, Page } from '#components/Page';

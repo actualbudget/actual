@@ -3,11 +3,10 @@ import React, { memo, useMemo, useState } from 'react';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
 import type {
   CategoryEntity,
   CategoryGroupEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
 import { DropHighlightPosContext } from '#components/sort';
 import type { DragState, OnDropCallback } from '#components/sort';

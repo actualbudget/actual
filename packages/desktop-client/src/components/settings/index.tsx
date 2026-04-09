@@ -9,10 +9,9 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
+import { listen } from '@actual-app/core/platform/client/connection';
+import { isElectron } from '@actual-app/core/shared/environment';
 import { css } from '@emotion/css';
-
-import { listen } from 'loot-core/platform/client/connection';
-import { isElectron } from 'loot-core/shared/environment';
 
 import { getLatestAppVersion } from '#app/appSlice';
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';

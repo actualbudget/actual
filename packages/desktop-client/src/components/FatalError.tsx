@@ -8,8 +8,7 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
-
-import { LazyLoadFailedError } from 'loot-core/shared/errors';
+import { LazyLoadFailedError } from '@actual-app/core/shared/errors';
 
 import { useModalState } from '#hooks/useModalState';
 

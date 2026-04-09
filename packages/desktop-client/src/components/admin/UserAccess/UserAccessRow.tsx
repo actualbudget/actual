@@ -4,10 +4,9 @@ import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { send } from 'loot-core/platform/client/connection';
-import { getUserAccessErrors } from 'loot-core/shared/errors';
-import type { UserAvailable } from 'loot-core/types/models';
+import { send } from '@actual-app/core/platform/client/connection';
+import { getUserAccessErrors } from '@actual-app/core/shared/errors';
+import type { UserAvailable } from '@actual-app/core/types/models';
 
 import { Checkbox } from '#components/forms';
 import { Cell, Row } from '#components/table';

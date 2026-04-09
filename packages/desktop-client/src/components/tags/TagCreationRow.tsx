@@ -7,8 +7,7 @@ import { ColorPicker } from '@actual-app/components/color-picker';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import type { TagEntity } from 'loot-core/types/models';
+import type { TagEntity } from '@actual-app/core/types/models';
 
 import { InputCell, Row, useTableNavigator } from '#components/table';
 import { useInitialMount } from '#hooks/useInitialMount';

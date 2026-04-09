@@ -12,8 +12,7 @@ import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { toRelaxedNumber } from 'loot-core/shared/util';
+import { toRelaxedNumber } from '@actual-app/core/shared/util';
 
 import { useCreateAccountMutation } from '#accounts';
 import { Link } from '#components/common/Link';

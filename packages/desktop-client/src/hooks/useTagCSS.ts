@@ -1,9 +1,8 @@
 import { useCallback } from 'react';
 
 import { theme as themeStyle } from '@actual-app/components/theme';
+import type { Theme } from '@actual-app/core/types/prefs';
 import { css } from '@emotion/css';
-
-import type { Theme } from 'loot-core/types/prefs';
 
 import { useTheme } from '#style';
 

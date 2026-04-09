@@ -1,18 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { q } from 'loot-core/shared/query';
-import type { Query } from 'loot-core/shared/query';
+import { q } from '@actual-app/core/shared/query';
+import type { Query } from '@actual-app/core/shared/query';
 import {
   getHasTransactionsQuery,
   getStatus,
   getStatusLabel,
-} from 'loot-core/shared/schedules';
-import type { ScheduleStatuses } from 'loot-core/shared/schedules';
+} from '@actual-app/core/shared/schedules';
+import type { ScheduleStatuses } from '@actual-app/core/shared/schedules';
 import type {
   AccountEntity,
   ScheduleEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
 import { accountFilter } from '#queries';
 import { liveQuery } from '#queries/liveQuery';
