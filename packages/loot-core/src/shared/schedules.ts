@@ -35,7 +35,7 @@ export function computeDueDate(
   if (dueDayOfMonth === -1) {
     // Last day of month
     const lastDay = new Date(year, month + 1, 0);
-    if (lastDay.getDate() <= scheduleDay) {
+    if (lastDay.getDate() < scheduleDay) {
       // If last day <= schedule day (shouldn't normally happen, but handle it)
       // Use last day of next month instead
       const nextMonthLast = new Date(year, month + 2, 0);
@@ -51,7 +51,7 @@ export function computeDueDate(
   }
 
   // If due day is after the schedule day, it's in the same month
-  if (dueDayOfMonth > scheduleDay) {
+  if (dueDayOfMonth >= scheduleDay) {
     return monthUtils.dayFromDate(clampedDate(year, month, dueDayOfMonth));
   }
 
@@ -126,24 +126,23 @@ export function getHasTransactionsQuery(schedules) {
   const filters = schedules.map(schedule => {
     const dateCond = schedule._conditions?.find(c => c.field === 'date');
     const baseLookback = dateCond && dateCond.op === 'is' ? 0 : 2;
-    // When due_day_of_month is set, the due date can be up to ~31 days
-    // after the schedule date. Compute the actual window so we don't
-    // miss transactions posted in that range.
+    // Extend the upper bound (not the lower) so late payments within
+    // the due-date + grace window are matched without accidentally
+    // including transactions from a prior occurrence.
     const dueDate = computeDueDate(
       schedule.next_date,
       schedule.due_day_of_month,
     );
-    const dueDateSpan = Math.max(
-      0,
-      monthUtils.differenceInCalendarDays(dueDate, schedule.next_date),
+    const windowEnd = monthUtils.addDays(
+      dueDate,
+      schedule.grace_period_days ?? 0,
     );
-    const totalWindow =
-      dueDateSpan + (schedule.grace_period_days ?? 0) + baseLookback;
     return {
       $and: {
         schedule: schedule.id,
         date: {
-          $gte: monthUtils.subDays(schedule.next_date, totalWindow),
+          $gte: monthUtils.subDays(schedule.next_date, baseLookback),
+          $lte: windowEnd,
         },
       },
     };
