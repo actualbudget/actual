@@ -26,6 +26,7 @@ import {
   FormLabel,
 } from '@desktop-client/components/forms';
 import { OpSelect } from '@desktop-client/components/rules/RuleEditor';
+import { CustomUpcomingLength } from '@desktop-client/components/schedules/CustomUpcomingLength';
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
 import { RecurringSchedulePicker } from '@desktop-client/components/select/RecurringSchedulePicker';
 import { SelectedItemsButton } from '@desktop-client/components/table';
@@ -415,16 +416,37 @@ export function ScheduleEditForm({
                   ['14', t('2 weeks')],
                   ['oneMonth', t('1 month')],
                   ['currentMonth', t('End of the current month')],
+                  ['custom', t('Custom length')],
                 ]}
-                value={fields.custom_upcoming_length}
+                value={
+                  ['1', '7', '14', 'oneMonth', 'currentMonth'].includes(
+                    fields.custom_upcoming_length,
+                  )
+                    ? fields.custom_upcoming_length
+                    : 'custom'
+                }
                 onChange={value => {
                   dispatch({
                     type: 'set-field',
                     field: 'custom_upcoming_length',
-                    value,
+                    value: value === 'custom' ? '1-day' : value,
                   });
                 }}
               />
+              {!['1', '7', '14', 'oneMonth', 'currentMonth'].includes(
+                fields.custom_upcoming_length,
+              ) && (
+                <CustomUpcomingLength
+                  tempValue={fields.custom_upcoming_length}
+                  onChange={value => {
+                    dispatch({
+                      type: 'set-field',
+                      field: 'custom_upcoming_length',
+                      value,
+                    });
+                  }}
+                />
+              )}
             </View>
           )}
 
