@@ -8,9 +8,8 @@ import type { AccountEntity } from 'loot-core/types/models';
 
 import { BankSyncAccountsListItem } from './BankSyncAccountsListItem';
 
+import type { SyncProviders } from '@desktop-client/components/banksync/bankSyncUtils';
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
-
-type SyncProviders = 'goCardless' | 'simpleFin' | 'pluggyai' | 'unlinked';
 
 type BankSyncAccountsListProps = {
   groupedAccounts: Record<SyncProviders, AccountEntity[]>;
