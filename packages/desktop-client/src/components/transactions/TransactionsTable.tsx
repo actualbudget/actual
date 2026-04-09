@@ -647,7 +647,7 @@ function PayeeCell({
     <CustomCell
       width="flex"
       name="payee"
-      title={displayPayee || undefined}
+      title={!importedPayee ? displayPayee || undefined : undefined}
       textAlign="flex"
       value={payee?.id}
       valueStyle={valueStyle}
