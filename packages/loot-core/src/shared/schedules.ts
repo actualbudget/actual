@@ -26,6 +26,9 @@ export function computeDueDate(
   if (dueDayOfMonth == null || dueDayOfMonth === 0) {
     return nextDate;
   }
+  if (dueDayOfMonth !== -1 && (dueDayOfMonth < 1 || dueDayOfMonth > 31)) {
+    return nextDate;
+  }
 
   const parsed = monthUtils.parseDate(nextDate);
   const scheduleDay = parsed.getDate();
@@ -74,7 +77,7 @@ export function getStatus(
 ) {
   const upcomingDays = getUpcomingDays(upcomingLength);
   const today = monthUtils.currentDay();
-  const grace = gracePeriodDays ?? 0;
+  const grace = Math.max(0, gracePeriodDays ?? 0);
   const dueDate = computeDueDate(nextDate, dueDayOfMonth);
   const missedAfterDate =
     grace > 0 ? monthUtils.addDays(dueDate, grace) : dueDate;
@@ -133,10 +136,8 @@ export function getHasTransactionsQuery(schedules) {
       schedule.next_date,
       schedule.due_day_of_month,
     );
-    const windowEnd = monthUtils.addDays(
-      dueDate,
-      schedule.grace_period_days ?? 0,
-    );
+    const grace = Math.max(0, schedule.grace_period_days ?? 0);
+    const windowEnd = monthUtils.addDays(dueDate, grace);
     return {
       $and: {
         schedule: schedule.id,
