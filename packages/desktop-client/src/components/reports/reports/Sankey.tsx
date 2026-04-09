@@ -40,6 +40,7 @@ import { useReport } from '@desktop-client/components/reports/useReport';
 import { fromDateRepr } from '@desktop-client/components/reports/util';
 import { useCategories } from '@desktop-client/hooks/useCategories';
 import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
+import { useFormatList } from '@desktop-client/hooks/useFormatList';
 import { useLocale } from '@desktop-client/hooks/useLocale';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
@@ -206,7 +207,7 @@ type SankeyInnerProps = {
 function SankeyInner({ widget }: SankeyInnerProps) {
   const locale = useLocale();
   const dispatch = useDispatch();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
@@ -413,6 +414,24 @@ function SankeyInner({ widget }: SankeyInnerProps) {
 
   const title = widget?.meta?.name || t('Sankey');
 
+  const ignoredFilterFields =
+    graphMode === 'budgeted'
+      ? [
+          ...new Set(
+            conditions
+              .filter(
+                c => c.field !== 'category' && c.field !== 'category_group',
+              )
+              .map(c => c.field),
+          ),
+        ]
+      : [];
+
+  const ignoredFilterFieldsList = useFormatList(
+    ignoredFilterFields,
+    i18n.language,
+  );
+
   if (!datesInitialized || !data) {
     return <LoadingIndicator />;
   }
@@ -459,15 +478,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
         onDeleteFilter={onDeleteFilter}
         conditionsOp={conditionsOp}
         onConditionsOpChange={onConditionsOpChange}
-        filterExclude={[
-          'date',
-          'payee',
-          'notes',
-          'amount',
-          'cleared',
-          'reconciled',
-          'transfer',
-        ]}
+        filterExclude={['date']}
         inlineContent={
           <>
             <View
@@ -569,6 +580,25 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                           transactions or selecting a different period.
                         </Trans>
                       )}
+                    </Text>
+                  </View>
+                )}
+
+                {ignoredFilterFields.length > 0 && (
+                  <View
+                    style={{
+                      marginTop: 10,
+                      padding: '8px 12px',
+                      backgroundColor: theme.warningBackground,
+                      borderRadius: 4,
+                      color: theme.warningText,
+                    }}
+                  >
+                    <Text style={{ fontSize: 13 }}>
+                      <Trans>
+                        Filters on <strong>{ignoredFilterFieldsList}</strong>{' '}
+                        are ignored in <strong>Budgeted</strong> mode.
+                      </Trans>
                     </Text>
                   </View>
                 )}
