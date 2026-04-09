@@ -219,5 +219,11 @@
       "#f0efed"
     ],
     "mode": "dark"
+  },
+  {
+    "name": "YNA Theme Light",
+    "repo": "Juulz/YNA-Theme-Light",
+    "colors": ["#1c1f58", "#fff", "#192ee6", "#f5f6ff", "#93d53e", "#191898"],
+    "mode": "light"
   }
 ]
