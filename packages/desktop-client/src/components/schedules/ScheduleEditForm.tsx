@@ -326,14 +326,97 @@ export function ScheduleEditForm({
         </SpaceBetween>
 
         <SpaceBetween
+          style={{
+            marginTop: 20,
+            display: isNarrowWidth ? 'grid' : 'flex',
+            gridTemplateColumns: '1fr 1fr',
+          }}
+        >
+          <FormField style={{ flex: 1 }}>
+            <FormLabel
+              title={t('Due day of month')}
+              htmlFor="due-day-of-month-field"
+            />
+            <Select
+              id="due-day-of-month-field"
+              options={[
+                ['', t('Same as schedule date')] as const,
+                ['-1', t('Last day of month')] as const,
+                ...Array.from(
+                  { length: 31 },
+                  (_, i) => [String(i + 1), String(i + 1)] as [string, string],
+                ),
+              ]}
+              value={
+                fields.due_day_of_month != null
+                  ? String(fields.due_day_of_month)
+                  : ''
+              }
+              onChange={value => {
+                dispatch({
+                  type: 'set-field',
+                  field: 'due_day_of_month',
+                  value: value === '' ? null : parseInt(value, 10),
+                });
+              }}
+            />
+            <Text
+              style={{
+                color: theme.pageTextLight,
+                fontSize: 12,
+                marginTop: 3,
+              }}
+            >
+              <Trans>Day of month when payment is actually due</Trans>
+            </Text>
+          </FormField>
+
+          <FormField style={{ flex: 1 }}>
+            <FormLabel
+              title={t('Grace period (days)')}
+              htmlFor="grace-period-field"
+            />
+            <Input
+              id="grace-period-field"
+              type="number"
+              min="0"
+              value={
+                fields.grace_period_days != null
+                  ? String(fields.grace_period_days)
+                  : ''
+              }
+              placeholder="0"
+              onChangeValue={value => {
+                const parsed = parseInt(value, 10);
+                dispatch({
+                  type: 'set-field',
+                  field: 'grace_period_days',
+                  value: isNaN(parsed) ? null : Math.max(0, parsed),
+                });
+              }}
+            />
+            <Text
+              style={{
+                color: theme.pageTextLight,
+                fontSize: 12,
+                marginTop: 3,
+              }}
+            >
+              <Trans>
+                Additional days after the due date before marked as missed
+              </Trans>
+            </Text>
+          </FormField>
+        </SpaceBetween>
+
+        <SpaceBetween
           gap={5}
           direction="vertical"
           align="end"
-          style={{ marginTop: 10 }}
+          style={{ marginTop: 20 }}
         >
           <View
             style={{
-              marginTop: 5,
               flexDirection: 'row',
               alignItems: 'center',
               userSelect: 'none',
@@ -373,93 +456,6 @@ export function ScheduleEditForm({
               for you in the specified account
             </Trans>
           </Text>
-
-          <View style={{ marginTop: 15 }}>
-            <SpaceBetween
-              style={{
-                display: isNarrowWidth ? 'grid' : 'flex',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 10,
-              }}
-            >
-              <FormField style={{ flex: 1 }}>
-                <FormLabel
-                  title={t('Due day of month')}
-                  htmlFor="due-day-of-month-field"
-                />
-                <Select
-                  id="due-day-of-month-field"
-                  options={[
-                    ['', t('Same as schedule date')] as const,
-                    ['-1', t('Last day of month')] as const,
-                    ...Array.from(
-                      { length: 31 },
-                      (_, i) =>
-                        [String(i + 1), String(i + 1)] as [string, string],
-                    ),
-                  ]}
-                  value={
-                    fields.due_day_of_month != null
-                      ? String(fields.due_day_of_month)
-                      : ''
-                  }
-                  onChange={value => {
-                    dispatch({
-                      type: 'set-field',
-                      field: 'due_day_of_month',
-                      value: value === '' ? null : parseInt(value, 10),
-                    });
-                  }}
-                />
-                <Text
-                  style={{
-                    color: theme.pageTextLight,
-                    fontSize: 12,
-                    marginTop: 3,
-                  }}
-                >
-                  <Trans>Day of month when payment is actually due</Trans>
-                </Text>
-              </FormField>
-
-              <FormField style={{ flex: 1 }}>
-                <FormLabel
-                  title={t('Grace period (days)')}
-                  htmlFor="grace-period-field"
-                />
-                <Input
-                  id="grace-period-field"
-                  type="number"
-                  min="0"
-                  value={
-                    fields.grace_period_days != null
-                      ? String(fields.grace_period_days)
-                      : ''
-                  }
-                  placeholder="0"
-                  onChangeValue={value => {
-                    const parsed = parseInt(value, 10);
-                    dispatch({
-                      type: 'set-field',
-                      field: 'grace_period_days',
-                      value: isNaN(parsed) ? null : Math.max(0, parsed),
-                    });
-                  }}
-                />
-                <Text
-                  style={{
-                    color: theme.pageTextLight,
-                    fontSize: 12,
-                    marginTop: 3,
-                  }}
-                >
-                  <Trans>
-                    Additional days after the due date before marked as missed
-                  </Trans>
-                </Text>
-              </FormField>
-            </SpaceBetween>
-          </View>
 
           {!adding && schedule.rule && (
             <SpaceBetween style={{ marginTop: 20, alignItems: 'center' }}>
