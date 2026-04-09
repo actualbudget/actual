@@ -34,16 +34,7 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       conditions: ['electron'],
-      extensions: [
-        '.electron.js',
-        '.electron.ts',
-        '.electron.tsx',
-        '.js',
-        '.ts',
-        '.tsx',
-        '.json',
-        '.pegjs',
-      ],
+      extensions: ['.js', '.ts', '.tsx', '.json', '.pegjs'],
       alias: [
         {
           find: 'handlebars',
