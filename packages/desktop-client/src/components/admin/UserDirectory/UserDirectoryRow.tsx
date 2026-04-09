@@ -9,9 +9,9 @@ import { View } from '@actual-app/components/view';
 import { PossibleRoles } from 'loot-core/shared/user';
 import type { UserEntity } from 'loot-core/types/models';
 
-import { Checkbox } from '@desktop-client/components/forms';
-import { Cell, Row, SelectCell } from '@desktop-client/components/table';
-import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
+import { Checkbox } from '#components/forms';
+import { Cell, Row, SelectCell } from '#components/table';
+import { useSelectedDispatch } from '#hooks/useSelected';
 
 type UserDirectoryProps = {
   user: UserEntity;

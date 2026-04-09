@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 
 import type { DarkTheme, Theme } from 'loot-core/types/prefs';
 
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useGlobalPref } from '#hooks/useGlobalPref';
+
 import {
   parseInstalledTheme,
   validateAndCombineThemeCss,
@@ -10,9 +13,6 @@ import type { BaseTheme } from './customThemes';
 import * as darkTheme from './themes/dark';
 import * as lightTheme from './themes/light';
 import * as midnightTheme from './themes/midnight';
-
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 const themes = {
   light: { name: 'Light', colors: lightTheme },

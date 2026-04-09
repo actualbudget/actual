@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Text } from '@actual-app/components/text';
 
-import { useTagCSS } from '@desktop-client/hooks/useTagCSS';
+import { useTagCSS } from '#hooks/useTagCSS';
 
 type MobileTaggedNotesProps = {
   content: string;

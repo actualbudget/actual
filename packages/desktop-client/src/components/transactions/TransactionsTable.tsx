@@ -78,6 +78,63 @@ import type {
   TransactionEntity,
 } from 'loot-core/types/models';
 
+import { getAccountsById } from '#accounts/accountsSlice';
+import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplete';
+import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
+import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
+import { getStatusProps } from '#components/schedules/StatusBadge';
+import type { StatusTypes } from '#components/schedules/StatusBadge';
+import { DateSelect } from '#components/select/DateSelect';
+import {
+  Cell,
+  CellButton,
+  CustomCell,
+  DeleteCell,
+  Field,
+  InputCell,
+  Row,
+  SelectCell,
+  Table,
+  UnexposedCellContent,
+  useTableNavigator,
+} from '#components/table';
+import type {
+  TableHandleRef,
+  TableNavigator,
+  TableProps,
+} from '#components/table';
+import {
+  SchedulesProvider,
+  useCachedSchedules,
+} from '#hooks/useCachedSchedules';
+import { useContextMenu } from '#hooks/useContextMenu';
+import { DisplayPayeeProvider, useDisplayPayee } from '#hooks/useDisplayPayee';
+import {
+  DropHighlight,
+  isValidBoundaryDrop,
+  useDrag,
+  useDrop,
+} from '#hooks/useDragDrop';
+import type {
+  DropPosition,
+  OnDragChangeCallback,
+  OnDropCallback,
+} from '#hooks/useDragDrop';
+import { useLocalPref } from '#hooks/useLocalPref';
+import { useMergedRefs } from '#hooks/useMergedRefs';
+import { usePrevious } from '#hooks/usePrevious';
+import { useProperFocus } from '#hooks/useProperFocus';
+import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
+import { SheetNameProvider } from '#hooks/useSheetName';
+import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
+import type { SplitsExpandedContextValue } from '#hooks/useSplitsExpanded';
+import { pushModal } from '#modals/modalsSlice';
+import { NotesTagFormatter } from '#notes/NotesTagFormatter';
+import { addNotification } from '#notifications/notificationsSlice';
+import { getPayeesById } from '#payees';
+import { aqlQuery } from '#queries/aqlQuery';
+import { useDispatch } from '#redux';
+
 import {
   deserializeTransaction,
   isLastChild,
@@ -91,69 +148,6 @@ import type {
   TransactionUpdateFunction,
 } from './table/utils';
 import { TransactionMenu } from './TransactionMenu';
-
-import { getAccountsById } from '@desktop-client/accounts/accountsSlice';
-import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
-import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
-import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
-import { getStatusProps } from '@desktop-client/components/schedules/StatusBadge';
-import type { StatusTypes } from '@desktop-client/components/schedules/StatusBadge';
-import { DateSelect } from '@desktop-client/components/select/DateSelect';
-import {
-  Cell,
-  CellButton,
-  CustomCell,
-  DeleteCell,
-  Field,
-  InputCell,
-  Row,
-  SelectCell,
-  Table,
-  UnexposedCellContent,
-  useTableNavigator,
-} from '@desktop-client/components/table';
-import type {
-  TableHandleRef,
-  TableNavigator,
-  TableProps,
-} from '@desktop-client/components/table';
-import {
-  SchedulesProvider,
-  useCachedSchedules,
-} from '@desktop-client/hooks/useCachedSchedules';
-import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import {
-  DisplayPayeeProvider,
-  useDisplayPayee,
-} from '@desktop-client/hooks/useDisplayPayee';
-import {
-  DropHighlight,
-  isValidBoundaryDrop,
-  useDrag,
-  useDrop,
-} from '@desktop-client/hooks/useDragDrop';
-import type {
-  DropPosition,
-  OnDragChangeCallback,
-  OnDropCallback,
-} from '@desktop-client/hooks/useDragDrop';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
-import { usePrevious } from '@desktop-client/hooks/usePrevious';
-import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
-import {
-  useSelectedDispatch,
-  useSelectedItems,
-} from '@desktop-client/hooks/useSelected';
-import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
-import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
-import type { SplitsExpandedContextValue } from '@desktop-client/hooks/useSplitsExpanded';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { getPayeesById } from '@desktop-client/payees';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import { useDispatch } from '@desktop-client/redux';
 
 type TransactionHeaderProps = {
   hasSelected: boolean;

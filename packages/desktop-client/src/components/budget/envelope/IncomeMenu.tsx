@@ -4,9 +4,9 @@ import { Menu } from '@actual-app/components/menu';
 
 import type { CategoryEntity } from 'loot-core/types/models';
 
-import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
+import { envelopeBudget } from '#spreadsheet/bindings';
 
-import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
+import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
 
 type IncomeMenuProps = {
   categoryId: string;

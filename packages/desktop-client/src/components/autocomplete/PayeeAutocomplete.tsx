@@ -32,6 +32,16 @@ import type {
   PayeeEntity,
 } from 'loot-core/types/models';
 
+import { useAccounts } from '#hooks/useAccounts';
+import { useCommonPayees } from '#hooks/useCommonPayees';
+import { useNearbyPayees } from '#hooks/useNearbyPayees';
+import { usePayees } from '#hooks/usePayees';
+import {
+  getActivePayees,
+  useCreatePayeeMutation,
+  useDeletePayeeLocationMutation,
+} from '#payees';
+
 import {
   Autocomplete,
   AutocompleteFooter,
@@ -39,16 +49,6 @@ import {
 } from './Autocomplete';
 import { rankAutocompleteMatch } from './autocompleteRanking';
 import { ItemHeader } from './ItemHeader';
-
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useCommonPayees } from '@desktop-client/hooks/useCommonPayees';
-import { useNearbyPayees } from '@desktop-client/hooks/useNearbyPayees';
-import { usePayees } from '@desktop-client/hooks/usePayees';
-import {
-  getActivePayees,
-  useCreatePayeeMutation,
-  useDeletePayeeLocationMutation,
-} from '@desktop-client/payees';
 
 type PayeeAutocompleteItem = PayeeEntity &
   PayeeItemType & {

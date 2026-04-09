@@ -27,30 +27,26 @@ import type {
   TimeFrame,
 } from 'loot-core/types/models';
 
-import { getAgeColor } from './AgeOfMoneyCard';
+import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
+import { MobileBackButton } from '#components/mobile/MobileBackButton';
+import { MobilePageHeader, Page, PageHeader } from '#components/Page';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { AgeOfMoneyGraph } from '#components/reports/graphs/AgeOfMoneyGraph';
+import { Header } from '#components/reports/Header';
+import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { calculateTimeRange } from '#components/reports/reportRanges';
+import { createAgeOfMoneySpreadsheet } from '#components/reports/spreadsheets/age-of-money-spreadsheet';
+import { useReport } from '#components/reports/useReport';
+import { fromDateRepr } from '#components/reports/util';
+import { useDashboardWidget } from '#hooks/useDashboardWidget';
+import { useLocale } from '#hooks/useLocale';
+import { useNavigate } from '#hooks/useNavigate';
+import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
 
-import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
-import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
-import {
-  MobilePageHeader,
-  Page,
-  PageHeader,
-} from '@desktop-client/components/Page';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { AgeOfMoneyGraph } from '@desktop-client/components/reports/graphs/AgeOfMoneyGraph';
-import { Header } from '@desktop-client/components/reports/Header';
-import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
-import { createAgeOfMoneySpreadsheet } from '@desktop-client/components/reports/spreadsheets/age-of-money-spreadsheet';
-import { useReport } from '@desktop-client/components/reports/useReport';
-import { fromDateRepr } from '@desktop-client/components/reports/util';
-import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { getAgeColor } from './AgeOfMoneyCard';
 
 export function AgeOfMoney() {
   const params = useParams();

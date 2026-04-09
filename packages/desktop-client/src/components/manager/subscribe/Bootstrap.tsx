@@ -10,14 +10,14 @@ import { View } from '@actual-app/components/view';
 
 import { send } from 'loot-core/platform/client/connection';
 
+import { createBudget } from '#budgetfiles/budgetfilesSlice';
+import { Link } from '#components/common/Link';
+import { useRefreshLoginMethods } from '#components/ServerContext';
+import { useNavigate } from '#hooks/useNavigate';
+import { useDispatch } from '#redux';
+
 import { Title, useBootstrapped } from './common';
 import { ConfirmPasswordForm } from './ConfirmPasswordForm';
-
-import { createBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
-import { Link } from '@desktop-client/components/common/Link';
-import { useRefreshLoginMethods } from '@desktop-client/components/ServerContext';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useDispatch } from '@desktop-client/redux';
 
 export function Bootstrap() {
   const { t } = useTranslation();

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { PayeeEntity } from 'loot-core/types/models';
 
-import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
+import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
 
 type PayeeFilterValue = PayeeEntity['id'] | PayeeEntity['id'][];
 

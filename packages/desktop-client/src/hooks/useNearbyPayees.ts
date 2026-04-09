@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { useLocationPermission } from './useLocationPermission';
+import { payeeQueries } from '#payees';
 
-import { payeeQueries } from '@desktop-client/payees';
+import { useLocationPermission } from './useLocationPermission';
 
 export function useNearbyPayees() {
   const locationAccess = useLocationPermission();

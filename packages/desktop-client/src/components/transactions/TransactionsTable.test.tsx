@@ -26,15 +26,15 @@ import type {
   TransactionEntity,
 } from 'loot-core/types/models';
 
-import { TransactionTable } from './TransactionsTable';
+import { AuthProvider } from '#auth/AuthProvider';
+import { SchedulesProvider } from '#hooks/useCachedSchedules';
+import { SelectedProviderWithItems } from '#hooks/useSelected';
+import { SplitsExpandedProvider } from '#hooks/useSplitsExpanded';
+import { SpreadsheetProvider } from '#hooks/useSpreadsheet';
+import { createTestQueryClient, TestProviders } from '#mocks';
+import { payeeQueries } from '#payees';
 
-import { AuthProvider } from '@desktop-client/auth/AuthProvider';
-import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
-import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
-import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
-import { SpreadsheetProvider } from '@desktop-client/hooks/useSpreadsheet';
-import { createTestQueryClient, TestProviders } from '@desktop-client/mocks';
-import { payeeQueries } from '@desktop-client/payees';
+import { TransactionTable } from './TransactionsTable';
 
 const queryClient = createTestQueryClient();
 

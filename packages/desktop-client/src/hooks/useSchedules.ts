@@ -14,11 +14,11 @@ import type {
   TransactionEntity,
 } from 'loot-core/types/models';
 
-import { useSyncedPref } from './useSyncedPref';
+import { accountFilter } from '#queries';
+import { liveQuery } from '#queries/liveQuery';
+import type { LiveQuery } from '#queries/liveQuery';
 
-import { accountFilter } from '@desktop-client/queries';
-import { liveQuery } from '@desktop-client/queries/liveQuery';
-import type { LiveQuery } from '@desktop-client/queries/liveQuery';
+import { useSyncedPref } from './useSyncedPref';
 
 export type ScheduleStatusLabelType = ReturnType<typeof getStatusLabel>;
 export type ScheduleStatusLabels = Map<

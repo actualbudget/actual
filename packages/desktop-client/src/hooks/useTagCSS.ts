@@ -5,9 +5,9 @@ import { css } from '@emotion/css';
 
 import type { Theme } from 'loot-core/types/prefs';
 
-import { useTags } from './useTags';
+import { useTheme } from '#style';
 
-import { useTheme } from '@desktop-client/style';
+import { useTags } from './useTags';
 
 export function useTagCSS() {
   const { data: tags = [] } = useTags();

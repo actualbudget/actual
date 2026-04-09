@@ -9,15 +9,11 @@ import { View } from '@actual-app/components/view';
 import { send } from 'loot-core/platform/client/connection';
 import type { Template } from 'loot-core/types/models/templates';
 
-import { Link } from '@desktop-client/components/common/Link';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { Notes } from '@desktop-client/components/Notes';
-import { useCategory } from '@desktop-client/hooks/useCategory';
-import { useNotes } from '@desktop-client/hooks/useNotes';
+import { Link } from '#components/common/Link';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { Notes } from '#components/Notes';
+import { useCategory } from '#hooks/useCategory';
+import { useNotes } from '#hooks/useNotes';
 
 export function UnmigrateBudgetAutomationsModal({
   categoryId,

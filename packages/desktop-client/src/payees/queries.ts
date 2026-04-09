@@ -10,9 +10,9 @@ import type {
   PayeeEntity,
 } from 'loot-core/types/models';
 
-import { locationService } from './location';
+import { getAccountsById } from '#accounts/accountsSlice';
 
-import { getAccountsById } from '@desktop-client/accounts/accountsSlice';
+import { locationService } from './location';
 
 export const payeeQueries = {
   all: () => ['payees'],

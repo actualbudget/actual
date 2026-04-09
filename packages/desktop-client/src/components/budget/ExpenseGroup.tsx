@@ -10,23 +10,19 @@ import type {
   CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { RenderMonths } from './RenderMonths';
-import { SidebarGroup } from './SidebarGroup';
-
-import { useBudgetComponents } from '.';
-
-import {
-  DropHighlight,
-  useDraggable,
-  useDroppable,
-} from '@desktop-client/components/sort';
+import { DropHighlight, useDraggable, useDroppable } from '#components/sort';
 import type {
   DragState,
   OnDragChangeCallback,
   OnDropCallback,
-} from '@desktop-client/components/sort';
-import { Row, ROW_HEIGHT } from '@desktop-client/components/table';
-import { useDragRef } from '@desktop-client/hooks/useDragRef';
+} from '#components/sort';
+import { Row, ROW_HEIGHT } from '#components/table';
+import { useDragRef } from '#hooks/useDragRef';
+
+import { RenderMonths } from './RenderMonths';
+import { SidebarGroup } from './SidebarGroup';
+
+import { useBudgetComponents } from '.';
 
 type ExpenseGroupProps = {
   group: ComponentProps<typeof SidebarGroup>['group'];

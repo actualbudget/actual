@@ -9,7 +9,7 @@ import { View } from '@actual-app/components/view';
 
 import type { PayeeEntity } from 'loot-core/types/models';
 
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 type PayeeMenuProps = {
   payeesById: Record<PayeeEntity['id'], PayeeEntity>;

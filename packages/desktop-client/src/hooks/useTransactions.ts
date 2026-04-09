@@ -12,7 +12,7 @@ import type { IntegerAmount } from 'loot-core/shared/util';
 import type { TransactionEntity } from 'loot-core/types/models';
 import type { ServerEvents } from 'loot-core/types/server-events';
 
-import { transactionQueries } from '@desktop-client/transactions';
+import { transactionQueries } from '#transactions';
 
 // Mirrors the `splits` AQL option from the server
 type TransactionSplitsOption = 'all' | 'inline' | 'grouped' | 'none';

@@ -7,16 +7,16 @@ import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
 
-import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
+import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '@desktop-client/components/common/Modal';
-import { SectionLabel } from '@desktop-client/components/forms';
-import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+} from '#components/common/Modal';
+import { SectionLabel } from '#components/forms';
+import { SheetNameProvider } from '#hooks/useSheetName';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type CategoryAutocompleteModalProps = Extract<
   ModalType,

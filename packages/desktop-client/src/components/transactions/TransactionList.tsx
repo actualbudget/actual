@@ -30,17 +30,17 @@ import type {
   TransactionFilterEntity,
 } from 'loot-core/types/models';
 
+import type { TableHandleRef } from '#components/table';
+import { isValidBoundaryDrop } from '#hooks/useDragDrop';
+import type { DropPosition } from '#hooks/useDragDrop';
+import { useNavigate } from '#hooks/useNavigate';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { pushModal } from '#modals/modalsSlice';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
+
 import { TransactionTable } from './TransactionsTable';
 import type { TransactionTableProps } from './TransactionsTable';
-
-import type { TableHandleRef } from '@desktop-client/components/table';
-import { isValidBoundaryDrop } from '@desktop-client/hooks/useDragDrop';
-import type { DropPosition } from '@desktop-client/hooks/useDragDrop';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
 // When data changes, there are two ways to update the UI:
 //
 // * Optimistic updates: we apply the needed updates to local data

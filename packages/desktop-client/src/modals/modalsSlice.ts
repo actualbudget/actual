@@ -20,11 +20,11 @@ import type {
 } from 'loot-core/types/models';
 import type { Template } from 'loot-core/types/models/templates';
 
-import { accountQueries } from '@desktop-client/accounts';
-import { resetApp, setAppState } from '@desktop-client/app/appSlice';
-import type { SelectLinkedAccountsModalProps } from '@desktop-client/components/modals/SelectLinkedAccountsModal';
-import { createAppAsyncThunk } from '@desktop-client/redux';
-import { signOut } from '@desktop-client/users/usersSlice';
+import { accountQueries } from '#accounts';
+import { resetApp, setAppState } from '#app/appSlice';
+import type { SelectLinkedAccountsModalProps } from '#components/modals/SelectLinkedAccountsModal';
+import { createAppAsyncThunk } from '#redux';
+import { signOut } from '#users/usersSlice';
 
 const sliceName = 'modals';
 

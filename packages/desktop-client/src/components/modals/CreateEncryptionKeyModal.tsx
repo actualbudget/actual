@@ -17,18 +17,18 @@ import { css } from '@emotion/css';
 import { send } from 'loot-core/platform/client/connection';
 import { getCreateKeyError } from 'loot-core/shared/errors';
 
-import { sync } from '@desktop-client/app/appSlice';
-import { loadAllFiles } from '@desktop-client/budgetfiles/budgetfilesSlice';
-import { Link } from '@desktop-client/components/common/Link';
+import { sync } from '#app/appSlice';
+import { loadAllFiles } from '#budgetfiles/budgetfilesSlice';
+import { Link } from '#components/common/Link';
 import {
   Modal,
   ModalButtons,
   ModalCloseButton,
   ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { loadGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
-import { useDispatch } from '@desktop-client/redux';
+} from '#components/common/Modal';
+import type { Modal as ModalType } from '#modals/modalsSlice';
+import { loadGlobalPrefs } from '#prefs/prefsSlice';
+import { useDispatch } from '#redux';
 
 type CreateEncryptionKeyModalProps = Extract<
   ModalType,

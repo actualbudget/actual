@@ -17,9 +17,9 @@ import { css, cx } from '@emotion/css';
 
 import type { CategoryGroupEntity } from 'loot-core/types/models';
 
-import { Autocomplete } from './Autocomplete';
+import { useCategories } from '#hooks/useCategories';
 
-import { useCategories } from '@desktop-client/hooks/useCategories';
+import { Autocomplete } from './Autocomplete';
 
 type CategoryGroupAutocompleteItem = CategoryGroupEntity;
 

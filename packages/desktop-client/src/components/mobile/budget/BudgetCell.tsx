@@ -11,19 +11,19 @@ import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import type { CategoryEntity } from 'loot-core/types/models';
 
-import { getColumnWidth, PILL_STYLE } from './BudgetTable';
+import { makeAmountGrey } from '#components/budget/util';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { CellValue } from '#components/spreadsheet/CellValue';
+import { useFormat } from '#hooks/useFormat';
+import { useLocale } from '#hooks/useLocale';
+import { useNotes } from '#hooks/useNotes';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useUndo } from '#hooks/useUndo';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
+import type { SheetFields } from '#spreadsheet';
 
-import { makeAmountGrey } from '@desktop-client/components/budget/util';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useNotes } from '@desktop-client/hooks/useNotes';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useUndo } from '@desktop-client/hooks/useUndo';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import type { SheetFields } from '@desktop-client/spreadsheet';
+import { getColumnWidth, PILL_STYLE } from './BudgetTable';
 
 type BudgetCellProps<
   SheetFieldName extends SheetFields<'envelope-budget' | 'tracking-budget'>,

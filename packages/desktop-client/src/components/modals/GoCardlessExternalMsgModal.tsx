@@ -14,22 +14,18 @@ import type {
   GoCardlessToken,
 } from 'loot-core/types/models';
 
-import { Error, Warning } from '@desktop-client/components/alerts';
-import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
-import { Link } from '@desktop-client/components/common/Link';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { FormField, FormLabel } from '@desktop-client/components/forms';
-import { COUNTRY_OPTIONS } from '@desktop-client/components/util/countries';
-import { getCountryFromBrowser } from '@desktop-client/components/util/localeToCountry';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { Error, Warning } from '#components/alerts';
+import { Autocomplete } from '#components/autocomplete/Autocomplete';
+import { Link } from '#components/common/Link';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { FormField, FormLabel } from '#components/forms';
+import { COUNTRY_OPTIONS } from '#components/util/countries';
+import { getCountryFromBrowser } from '#components/util/localeToCountry';
+import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useGoCardlessStatus } from '#hooks/useGoCardlessStatus';
+import { pushModal } from '#modals/modalsSlice';
+import type { Modal as ModalType } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 function useAvailableBanks(country: string) {
   const [banks, setBanks] = useState<GoCardlessInstitution[]>([]);

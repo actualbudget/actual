@@ -18,23 +18,19 @@ import type {
 } from 'loot-core/types/models';
 import type { Template } from 'loot-core/types/models/templates';
 
-import { Warning } from '@desktop-client/components/alerts';
-import { BudgetAutomation } from '@desktop-client/components/budget/goals/BudgetAutomation';
-import type { DisplayTemplateType } from '@desktop-client/components/budget/goals/constants';
-import { DEFAULT_PRIORITY } from '@desktop-client/components/budget/goals/reducer';
-import { useBudgetAutomationCategories } from '@desktop-client/components/budget/goals/useBudgetAutomationCategories';
-import { Link } from '@desktop-client/components/common/Link';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { useBudgetAutomations } from '@desktop-client/hooks/useBudgetAutomations';
-import { useCategory } from '@desktop-client/hooks/useCategory';
-import { useNotes } from '@desktop-client/hooks/useNotes';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { Warning } from '#components/alerts';
+import { BudgetAutomation } from '#components/budget/goals/BudgetAutomation';
+import type { DisplayTemplateType } from '#components/budget/goals/constants';
+import { DEFAULT_PRIORITY } from '#components/budget/goals/reducer';
+import { useBudgetAutomationCategories } from '#components/budget/goals/useBudgetAutomationCategories';
+import { Link } from '#components/common/Link';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { useBudgetAutomations } from '#hooks/useBudgetAutomations';
+import { useCategory } from '#hooks/useCategory';
+import { useNotes } from '#hooks/useNotes';
+import { useSchedules } from '#hooks/useSchedules';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 type AutomationEntry = {
   id: string;

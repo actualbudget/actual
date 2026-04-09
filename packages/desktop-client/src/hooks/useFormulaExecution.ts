@@ -13,10 +13,10 @@ import type {
   TimeFrame,
 } from 'loot-core/types/models';
 
-import { useLocale } from './useLocale';
+import { getLiveRange } from '#components/reports/getLiveRange';
+import { calculateTimeRange } from '#components/reports/reportRanges';
 
-import { getLiveRange } from '@desktop-client/components/reports/getLiveRange';
-import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
+import { useLocale } from './useLocale';
 
 type QueryConfig = {
   conditions?: RuleConditionEntity[];

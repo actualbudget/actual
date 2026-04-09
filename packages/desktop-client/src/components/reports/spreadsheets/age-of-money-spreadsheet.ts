@@ -8,8 +8,8 @@ import type {
   RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { runAll } from '@desktop-client/components/reports/util';
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import { runAll } from '#components/reports/util';
+import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 
 export type AgeOfMoneyData = {
   graphData: Array<{

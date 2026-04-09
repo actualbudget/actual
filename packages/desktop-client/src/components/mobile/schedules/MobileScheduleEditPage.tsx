@@ -14,15 +14,15 @@ import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import type { RecurConfig, ScheduleEntity } from 'loot-core/types/models';
 
-import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
-import { MobilePageHeader, Page } from '@desktop-client/components/Page';
-import { updateScheduleConditions } from '@desktop-client/components/schedules/schedule-edit-utils';
-import { ScheduleEditForm } from '@desktop-client/components/schedules/ScheduleEditForm';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useScheduleEdit } from '@desktop-client/hooks/useScheduleEdit';
-import { useSelected } from '@desktop-client/hooks/useSelected';
-import { useUndo } from '@desktop-client/hooks/useUndo';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
+import { MobileBackButton } from '#components/mobile/MobileBackButton';
+import { MobilePageHeader, Page } from '#components/Page';
+import { updateScheduleConditions } from '#components/schedules/schedule-edit-utils';
+import { ScheduleEditForm } from '#components/schedules/ScheduleEditForm';
+import { useNavigate } from '#hooks/useNavigate';
+import { useScheduleEdit } from '#hooks/useScheduleEdit';
+import { useSelected } from '#hooks/useSelected';
+import { useUndo } from '#hooks/useUndo';
+import { aqlQuery } from '#queries/aqlQuery';
 
 export function MobileScheduleEditPage() {
   const { t } = useTranslation();

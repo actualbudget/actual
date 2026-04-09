@@ -10,10 +10,10 @@ import type {
   SpendingMonthEntity,
 } from 'loot-core/types/models';
 
-import { makeQuery } from './makeQuery';
+import type { useSpreadsheet } from '#hooks/useSpreadsheet';
+import { aqlQuery } from '#queries/aqlQuery';
 
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
+import { makeQuery } from './makeQuery';
 
 type createSpendingSpreadsheetProps = {
   conditions?: RuleConditionEntity[];

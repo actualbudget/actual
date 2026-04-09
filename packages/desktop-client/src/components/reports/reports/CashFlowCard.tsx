@@ -10,22 +10,22 @@ import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import type { CashFlowWidget } from 'loot-core/types/models';
 
-import { defaultTimeFrame } from './CashFlow';
+import { FinancialText } from '#components/FinancialText';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { Change } from '#components/reports/Change';
+import { useRechartsAnimation } from '#components/reports/chart-theme';
+import { Container } from '#components/reports/Container';
+import { DateRange } from '#components/reports/DateRange';
+import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportCard } from '#components/reports/ReportCard';
+import { ReportCardName } from '#components/reports/ReportCardName';
+import { calculateTimeRange } from '#components/reports/reportRanges';
+import { simpleCashFlow } from '#components/reports/spreadsheets/cash-flow-spreadsheet';
+import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
+import { useReport } from '#components/reports/useReport';
+import { useFormat } from '#hooks/useFormat';
 
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { Change } from '@desktop-client/components/reports/Change';
-import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
-import { Container } from '@desktop-client/components/reports/Container';
-import { DateRange } from '@desktop-client/components/reports/DateRange';
-import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { ReportCard } from '@desktop-client/components/reports/ReportCard';
-import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
-import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
-import { simpleCashFlow } from '@desktop-client/components/reports/spreadsheets/cash-flow-spreadsheet';
-import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
-import { useReport } from '@desktop-client/components/reports/useReport';
-import { useFormat } from '@desktop-client/hooks/useFormat';
+import { defaultTimeFrame } from './CashFlow';
 
 type CustomLabelProps = {
   value?: number;

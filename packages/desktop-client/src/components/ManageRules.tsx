@@ -22,22 +22,19 @@ import type {
   ScheduleEntity,
 } from 'loot-core/types/models';
 
+import { useAccounts } from '#hooks/useAccounts';
+import { useCategories } from '#hooks/useCategories';
+import { usePayees } from '#hooks/usePayees';
+import { useSchedules } from '#hooks/useSchedules';
+import { SelectedProvider, useSelected } from '#hooks/useSelected';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
+
 import { InfiniteScrollWrapper } from './common/InfiniteScrollWrapper';
 import { Link } from './common/Link';
 import { Search } from './common/Search';
 import { RulesHeader } from './rules/RulesHeader';
 import { RulesList } from './rules/RulesList';
-
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { usePayees } from '@desktop-client/hooks/usePayees';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import {
-  SelectedProvider,
-  useSelected,
-} from '@desktop-client/hooks/useSelected';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
 
 export type FilterData = {
   payees?: Array<{ id: string; name: string }>;

@@ -7,12 +7,12 @@ import { generateAccount } from 'loot-core/mocks';
 import { q } from 'loot-core/shared/query';
 import type { AccountEntity } from 'loot-core/types/models';
 
+import { useSheetValue } from '#hooks/useSheetValue';
+import { TestProviders } from '#mocks';
+
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
 
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import { TestProviders } from '@desktop-client/mocks';
-
-vi.mock('@desktop-client/hooks/useSheetValue', () => ({
+vi.mock('#hooks/useSheetValue', () => ({
   useSheetValue: vi.fn(),
 }));
 

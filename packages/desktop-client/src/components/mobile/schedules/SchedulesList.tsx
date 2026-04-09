@@ -9,10 +9,10 @@ import { View } from '@actual-app/components/view';
 import type { ScheduleStatusType } from 'loot-core/shared/schedules';
 import type { ScheduleEntity } from 'loot-core/types/models';
 
-import { SchedulesListItem } from './SchedulesListItem';
+import { ActionableGridListItem } from '#components/mobile/ActionableGridListItem';
+import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 
-import { ActionableGridListItem } from '@desktop-client/components/mobile/ActionableGridListItem';
-import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
+import { SchedulesListItem } from './SchedulesListItem';
 
 type CompletedSchedulesItem = { id: 'show-completed' };
 type SchedulesListEntry = ScheduleEntity | CompletedSchedulesItem;

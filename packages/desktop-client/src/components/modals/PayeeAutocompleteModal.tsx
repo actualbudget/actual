@@ -4,17 +4,17 @@ import { useTranslation } from 'react-i18next';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 
-import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
+import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '@desktop-client/components/common/Modal';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { usePayees } from '@desktop-client/hooks/usePayees';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+} from '#components/common/Modal';
+import { useAccounts } from '#hooks/useAccounts';
+import { useNavigate } from '#hooks/useNavigate';
+import { usePayees } from '#hooks/usePayees';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type PayeeAutocompleteModalProps = Extract<
   ModalType,

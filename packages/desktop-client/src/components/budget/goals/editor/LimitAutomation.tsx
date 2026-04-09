@@ -12,12 +12,12 @@ import { currentDate, dayFromDate, parseDate } from 'loot-core/shared/months';
 import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
 import type { LimitTemplate } from 'loot-core/types/models/templates';
 
-import { updateTemplate } from '@desktop-client/components/budget/goals/actions';
-import type { Action } from '@desktop-client/components/budget/goals/actions';
-import { FormField, FormLabel } from '@desktop-client/components/forms';
-import { AmountInput } from '@desktop-client/components/util/AmountInput';
-import { useDaysOfWeek } from '@desktop-client/hooks/useDaysOfWeek';
-import { useFormat } from '@desktop-client/hooks/useFormat';
+import { updateTemplate } from '#components/budget/goals/actions';
+import type { Action } from '#components/budget/goals/actions';
+import { FormField, FormLabel } from '#components/forms';
+import { AmountInput } from '#components/util/AmountInput';
+import { useDaysOfWeek } from '#hooks/useDaysOfWeek';
+import { useFormat } from '#hooks/useFormat';
 
 type LimitAutomationProps = {
   template: LimitTemplate;

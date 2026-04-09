@@ -16,6 +16,17 @@ import type {
 } from 'loot-core/types/models';
 import type { SyncedPrefs } from 'loot-core/types/prefs';
 
+import {
+  categoryLists,
+  groupBySelections,
+  ReportOptions,
+} from '#components/reports/ReportOptions';
+import type {
+  QueryDataEntity,
+  UncategorizedEntity,
+} from '#components/reports/ReportOptions';
+import type { useSpreadsheet } from '#hooks/useSpreadsheet';
+
 import { calculateLegend } from './calculateLegend';
 import { fetchSpreadsheetQueryData } from './fetchSpreadsheetQueryData';
 import { filterEmptyRows } from './filterEmptyRows';
@@ -27,17 +38,6 @@ import {
   trimIntervalDataToRange,
   trimIntervalsToRange,
 } from './trimIntervals';
-
-import {
-  categoryLists,
-  groupBySelections,
-  ReportOptions,
-} from '@desktop-client/components/reports/ReportOptions';
-import type {
-  QueryDataEntity,
-  UncategorizedEntity,
-} from '@desktop-client/components/reports/ReportOptions';
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
 export type createCustomSpreadsheetProps = {
   startDate: string;

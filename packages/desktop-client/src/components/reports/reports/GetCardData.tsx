@@ -17,14 +17,14 @@ import type {
 } from 'loot-core/types/models';
 import type { SyncedPrefs } from 'loot-core/types/prefs';
 
-import { ChooseGraph } from '@desktop-client/components/reports/ChooseGraph';
-import { getLiveRange } from '@desktop-client/components/reports/getLiveRange';
-import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
-import { createCustomSpreadsheet } from '@desktop-client/components/reports/spreadsheets/custom-spreadsheet';
-import { createGroupedSpreadsheet } from '@desktop-client/components/reports/spreadsheets/grouped-spreadsheet';
-import { useReport } from '@desktop-client/components/reports/useReport';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { ChooseGraph } from '#components/reports/ChooseGraph';
+import { getLiveRange } from '#components/reports/getLiveRange';
+import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportOptions } from '#components/reports/ReportOptions';
+import { createCustomSpreadsheet } from '#components/reports/spreadsheets/custom-spreadsheet';
+import { createGroupedSpreadsheet } from '#components/reports/spreadsheets/grouped-spreadsheet';
+import { useReport } from '#components/reports/useReport';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 function ErrorFallback() {
   return (

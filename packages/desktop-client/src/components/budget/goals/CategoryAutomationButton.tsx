@@ -9,9 +9,9 @@ import { css, cx } from '@emotion/css';
 
 import type { CategoryEntity } from 'loot-core/types/models';
 
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 type CategoryAutomationButtonProps = {
   category: CategoryEntity;

@@ -7,7 +7,7 @@ import type {
   LegendEntity,
 } from 'loot-core/types/models';
 
-import { getColorScale } from '@desktop-client/components/reports/chart-theme';
+import { getColorScale } from '#components/reports/chart-theme';
 
 export function calculateLegend(
   intervalData: IntervalEntity[],

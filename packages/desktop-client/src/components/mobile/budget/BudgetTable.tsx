@@ -20,23 +20,20 @@ import type {
   CategoryGroupEntity,
 } from 'loot-core/types/models';
 
+import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
+import { PullToRefresh } from '#components/mobile/PullToRefresh';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { CellValue } from '#components/spreadsheet/CellValue';
+import { SchedulesProvider } from '#hooks/useCachedSchedules';
+import { useFormat } from '#hooks/useFormat';
+import { useLocalPref } from '#hooks/useLocalPref';
+import { useSheetValue } from '#hooks/useSheetValue';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import type { Binding } from '#spreadsheet';
+import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
+
 import { ExpenseGroupList } from './ExpenseGroupList';
 import { IncomeGroup } from './IncomeGroup';
-
-import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
-import { PullToRefresh } from '@desktop-client/components/mobile/PullToRefresh';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
-import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import type { Binding } from '@desktop-client/spreadsheet';
-import {
-  envelopeBudget,
-  trackingBudget,
-} from '@desktop-client/spreadsheet/bindings';
 
 export const ROW_HEIGHT = 50;
 

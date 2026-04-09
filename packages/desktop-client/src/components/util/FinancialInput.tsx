@@ -7,7 +7,7 @@ import { styles } from '@actual-app/components/styles';
 
 import type { IntegerAmount } from 'loot-core/shared/util';
 
-import { useFormat } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '#hooks/useFormat';
 
 type FinancialInputProps = Omit<
   InputProps,

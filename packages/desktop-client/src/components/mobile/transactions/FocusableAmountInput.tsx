@@ -20,9 +20,9 @@ import {
   reapplyThousandSeparators,
 } from 'loot-core/shared/util';
 
-import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { makeAmountFullStyle } from '#components/budget/util';
+import { useMergedRefs } from '#hooks/useMergedRefs';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 type AmountInputProps = {
   value: number;

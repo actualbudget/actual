@@ -6,8 +6,8 @@ import { q } from 'loot-core/shared/query';
 import type { RuleConditionEntity } from 'loot-core/types/models';
 import type { SyncedPrefs } from 'loot-core/types/prefs';
 
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
+import type { useSpreadsheet } from '#hooks/useSpreadsheet';
+import { aqlQuery } from '#queries/aqlQuery';
 
 export type CalendarDataType = {
   date: Date;

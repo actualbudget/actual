@@ -6,9 +6,9 @@ import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
 
-import { MonthsContext } from './MonthsContext';
+import { SheetNameProvider } from '#hooks/useSheetName';
 
-import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
+import { MonthsContext } from './MonthsContext';
 
 type RenderMonthsProps = {
   children: ReactNode | (({ month }: { month: string }) => ReactNode);

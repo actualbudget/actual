@@ -5,12 +5,12 @@ import { theme } from '@actual-app/components/theme';
 
 import type { CategoryGroupEntity } from 'loot-core/types/models';
 
+import { Row } from '#components/table';
+
 import { RenderMonths } from './RenderMonths';
 import { SidebarGroup } from './SidebarGroup';
 
 import { useBudgetComponents } from '.';
-
-import { Row } from '@desktop-client/components/table';
 
 type IncomeGroupProps = {
   group: CategoryGroupEntity;

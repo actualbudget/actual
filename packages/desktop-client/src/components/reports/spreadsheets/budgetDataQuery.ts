@@ -8,9 +8,9 @@ import type {
 } from 'loot-core/types/models';
 import type { SyncedPrefs } from 'loot-core/types/prefs';
 
-import type { BudgetMonthCell } from './budgetMonthCell';
+import type { QueryDataEntity } from '#components/reports/ReportOptions';
 
-import type { QueryDataEntity } from '@desktop-client/components/reports/ReportOptions';
+import type { BudgetMonthCell } from './budgetMonthCell';
 
 type BudgetDataConditionsOp = 'and' | 'or';
 

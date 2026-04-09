@@ -12,17 +12,14 @@ import { AutoTextSize } from 'auto-text-size';
 
 import type { CategoryEntity } from 'loot-core/types/models';
 
-import { getColumnWidth, PILL_STYLE } from './BudgetTable';
+import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { useFormat } from '#hooks/useFormat';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import type { Binding } from '#spreadsheet';
+import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
 
-import { BalanceWithCarryover } from '@desktop-client/components/budget/BalanceWithCarryover';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import type { Binding } from '@desktop-client/spreadsheet';
-import {
-  envelopeBudget,
-  trackingBudget,
-} from '@desktop-client/spreadsheet/bindings';
+import { getColumnWidth, PILL_STYLE } from './BudgetTable';
 
 type BalanceCellProps = {
   binding: Binding<

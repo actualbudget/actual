@@ -2,8 +2,8 @@ import { useCallback } from 'react';
 
 import type { GlobalPrefs } from 'loot-core/types/prefs';
 
-import { saveGlobalPrefs } from '@desktop-client/prefs/prefsSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
+import { saveGlobalPrefs } from '#prefs/prefsSlice';
+import { useDispatch, useSelector } from '#redux';
 
 type SetGlobalPrefAction<K extends keyof GlobalPrefs> = (
   value: GlobalPrefs[K],

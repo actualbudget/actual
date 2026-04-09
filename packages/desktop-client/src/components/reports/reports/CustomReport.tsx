@@ -25,54 +25,47 @@ import type {
 import type { SyncedPrefs } from 'loot-core/types/prefs';
 import type { TransObjectLiteral } from 'loot-core/types/util';
 
-import { Warning } from '@desktop-client/components/alerts';
-import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
-import {
-  MobilePageHeader,
-  Page,
-  PageHeader,
-} from '@desktop-client/components/Page';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { ChooseGraph } from '@desktop-client/components/reports/ChooseGraph';
+import { Warning } from '#components/alerts';
+import { AppliedFilters } from '#components/filters/AppliedFilters';
+import { FinancialText } from '#components/FinancialText';
+import { MobileBackButton } from '#components/mobile/MobileBackButton';
+import { MobilePageHeader, Page, PageHeader } from '#components/Page';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { ChooseGraph } from '#components/reports/ChooseGraph';
 import {
   defaultsGraphList,
   defaultsList,
   disabledGraphList,
   disabledLegendLabel,
   disabledList,
-} from '@desktop-client/components/reports/disabledList';
-import { getLiveRange } from '@desktop-client/components/reports/getLiveRange';
-import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { ReportLegend } from '@desktop-client/components/reports/ReportLegend';
+} from '#components/reports/disabledList';
+import { getLiveRange } from '#components/reports/getLiveRange';
+import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportLegend } from '#components/reports/ReportLegend';
 import {
   defaultReport,
   ReportOptions,
-} from '@desktop-client/components/reports/ReportOptions';
-import type { dateRangeProps } from '@desktop-client/components/reports/ReportOptions';
-import { ReportSidebar } from '@desktop-client/components/reports/ReportSidebar';
-import { ReportSummary } from '@desktop-client/components/reports/ReportSummary';
-import { ReportTopbar } from '@desktop-client/components/reports/ReportTopbar';
-import type { SavedStatus } from '@desktop-client/components/reports/SaveReportMenu';
-import { setSessionReport } from '@desktop-client/components/reports/setSessionReport';
-import { createCustomSpreadsheet } from '@desktop-client/components/reports/spreadsheets/custom-spreadsheet';
-import { createGroupedSpreadsheet } from '@desktop-client/components/reports/spreadsheets/grouped-spreadsheet';
-import { useReport } from '@desktop-client/components/reports/useReport';
-import {
-  calculateHasWarning,
-  fromDateRepr,
-} from '@desktop-client/components/reports/util';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { usePayees } from '@desktop-client/hooks/usePayees';
-import { useReport as useCustomReport } from '@desktop-client/hooks/useReport';
-import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+} from '#components/reports/ReportOptions';
+import type { dateRangeProps } from '#components/reports/ReportOptions';
+import { ReportSidebar } from '#components/reports/ReportSidebar';
+import { ReportSummary } from '#components/reports/ReportSummary';
+import { ReportTopbar } from '#components/reports/ReportTopbar';
+import type { SavedStatus } from '#components/reports/SaveReportMenu';
+import { setSessionReport } from '#components/reports/setSessionReport';
+import { createCustomSpreadsheet } from '#components/reports/spreadsheets/custom-spreadsheet';
+import { createGroupedSpreadsheet } from '#components/reports/spreadsheets/grouped-spreadsheet';
+import { useReport } from '#components/reports/useReport';
+import { calculateHasWarning, fromDateRepr } from '#components/reports/util';
+import { useAccounts } from '#hooks/useAccounts';
+import { useCategories } from '#hooks/useCategories';
+import { useFormat } from '#hooks/useFormat';
+import { useLocale } from '#hooks/useLocale';
+import { useLocalPref } from '#hooks/useLocalPref';
+import { useNavigate } from '#hooks/useNavigate';
+import { usePayees } from '#hooks/usePayees';
+import { useReport as useCustomReport } from '#hooks/useReport';
+import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 /**
  * Transform `selectedCategories` into `conditions`.

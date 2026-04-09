@@ -8,15 +8,15 @@ import { View } from '@actual-app/components/view';
 
 import type { AccountEntity, BankSyncProviders } from 'loot-core/types/models';
 
+import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
+import { Page } from '#components/Page';
+import { useAccounts } from '#hooks/useAccounts';
+import { useGlobalPref } from '#hooks/useGlobalPref';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
+
 import { AccountsHeader } from './AccountsHeader';
 import { AccountsList } from './AccountsList';
-
-import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
-import { Page } from '@desktop-client/components/Page';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
 
 type SyncProviders = BankSyncProviders | 'unlinked';
 

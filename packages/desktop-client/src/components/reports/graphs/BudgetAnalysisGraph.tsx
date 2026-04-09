@@ -18,14 +18,14 @@ import {
 
 import * as monthUtils from 'loot-core/shared/months';
 
-import { computePadding } from './util/computePadding';
+import { FinancialText } from '#components/FinancialText';
+import { Container } from '#components/reports/Container';
+import { useFormat } from '#hooks/useFormat';
+import type { FormatType } from '#hooks/useFormat';
+import { useLocale } from '#hooks/useLocale';
+import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { Container } from '@desktop-client/components/reports/Container';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import type { FormatType } from '@desktop-client/hooks/useFormat';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
+import { computePadding } from './util/computePadding';
 
 /**
  * Interval data for the Budget Analysis graph.

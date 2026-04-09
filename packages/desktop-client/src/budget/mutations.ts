@@ -12,12 +12,12 @@ import type {
   CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { categoryQueries } from './queries';
+import { pushModal } from '#modals/modalsSlice';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
+import type { AppDispatch } from '#redux/store';
 
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import type { AppDispatch } from '@desktop-client/redux/store';
+import { categoryQueries } from './queries';
 
 function invalidateQueries(queryClient: QueryClient, queryKey?: QueryKey) {
   void queryClient.invalidateQueries({

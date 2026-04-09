@@ -6,10 +6,10 @@ import { View } from '@actual-app/components/view';
 
 import type { DataEntity, GroupedEntity } from 'loot-core/types/models';
 
+import { Row } from '#components/table';
+
 import { RenderTableRow } from './RenderTableRow';
 import type { renderRowProps } from './ReportTable';
-
-import { Row } from '@desktop-client/components/table';
 
 type ReportTableListProps = {
   data: DataEntity;

@@ -1,12 +1,12 @@
 import * as monthUtils from 'loot-core/shared/months';
 import type { GroupedEntity, IntervalEntity } from 'loot-core/types/models';
 
-import { filterHiddenItems } from './filterHiddenItems';
-
 import type {
   QueryDataEntity,
   UncategorizedEntity,
-} from '@desktop-client/components/reports/ReportOptions';
+} from '#components/reports/ReportOptions';
+
+import { filterHiddenItems } from './filterHiddenItems';
 
 type recalculateProps = {
   item: UncategorizedEntity;

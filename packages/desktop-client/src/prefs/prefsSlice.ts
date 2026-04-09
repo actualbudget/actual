@@ -10,11 +10,11 @@ import type {
   SyncedPrefs,
 } from 'loot-core/types/prefs';
 
-import { resetApp } from '@desktop-client/app/appSlice';
-import { setI18NextLanguage } from '@desktop-client/i18n';
-import { closeModal } from '@desktop-client/modals/modalsSlice';
-import { createAppAsyncThunk } from '@desktop-client/redux';
-import { getUserData } from '@desktop-client/users/usersSlice';
+import { resetApp } from '#app/appSlice';
+import { setI18NextLanguage } from '#i18n';
+import { closeModal } from '#modals/modalsSlice';
+import { createAppAsyncThunk } from '#redux';
+import { getUserData } from '#users/usersSlice';
 
 const sliceName = 'prefs';
 

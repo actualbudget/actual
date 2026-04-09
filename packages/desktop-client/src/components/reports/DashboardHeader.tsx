@@ -10,7 +10,7 @@ import { View } from '@actual-app/components/view';
 
 import type { DashboardPageEntity } from 'loot-core/types/models';
 
-import { useRenameDashboardPageMutation } from '@desktop-client/reports/mutations';
+import { useRenameDashboardPageMutation } from '#reports/mutations';
 
 type DashboardHeaderProps = {
   dashboard: DashboardPageEntity;

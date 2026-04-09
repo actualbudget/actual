@@ -15,17 +15,14 @@ import { getScheduledAmount } from 'loot-core/shared/schedules';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import type { AccountEntity } from 'loot-core/types/models';
 
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import {
-  CellValue,
-  CellValueText,
-} from '@desktop-client/components/spreadsheet/CellValue';
-import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useSelectedItems } from '@desktop-client/hooks/useSelected';
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import type { Binding } from '@desktop-client/spreadsheet';
+import { FinancialText } from '#components/FinancialText';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
+import { useCachedSchedules } from '#hooks/useCachedSchedules';
+import { useFormat } from '#hooks/useFormat';
+import { useSelectedItems } from '#hooks/useSelected';
+import { useSheetValue } from '#hooks/useSheetValue';
+import type { Binding } from '#spreadsheet';
 
 type DetailedBalanceProps = {
   name: string;

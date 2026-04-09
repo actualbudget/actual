@@ -16,11 +16,11 @@ import type {
   CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { SidebarCategoryButtons } from './SidebarCategoryButtons';
+import { InputCell } from '#components/table';
+import { useContextMenu } from '#hooks/useContextMenu';
+import { useGlobalPref } from '#hooks/useGlobalPref';
 
-import { InputCell } from '@desktop-client/components/table';
-import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { SidebarCategoryButtons } from './SidebarCategoryButtons';
 
 type SidebarCategoryProps = {
   innerRef: Ref<HTMLDivElement>;

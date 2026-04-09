@@ -12,9 +12,7 @@
     "tsBuildInfoFile": "build/ts/.tsbuildinfo",
     "paths": {
       // TODO: remove and replace with imports from "@actual-app/core"
-      "loot-core/*": ["../loot-core/src/*"],
-      // TODO: move to subpath imports
-      "@desktop-client/*": ["./src/*"]
+      "loot-core/*": ["../loot-core/src/*"]
     },
     "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },

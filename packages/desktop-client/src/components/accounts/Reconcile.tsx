@@ -19,11 +19,11 @@ import { tsToRelativeTime } from 'loot-core/shared/util';
 import type { AccountEntity } from 'loot-core/types/models';
 import type { TransObjectLiteral } from 'loot-core/types/util';
 
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import * as bindings from '@desktop-client/spreadsheet/bindings';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useFormat } from '#hooks/useFormat';
+import { useLocale } from '#hooks/useLocale';
+import { useSheetValue } from '#hooks/useSheetValue';
+import * as bindings from '#spreadsheet/bindings';
 
 type ReconcilingMessageProps = {
   balanceQuery: { name: `balance-query-${string}`; query: Query };

@@ -24,31 +24,27 @@ import type {
   TimeFrame,
 } from 'loot-core/types/models';
 
-import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
-import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
-import {
-  MobilePageHeader,
-  Page,
-  PageHeader,
-} from '@desktop-client/components/Page';
-import { SankeyGraph } from '@desktop-client/components/reports/graphs/SankeyGraph';
-import { Header } from '@desktop-client/components/reports/Header';
-import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { ModeButton } from '@desktop-client/components/reports/ModeButton';
-import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
-import { createSpreadsheet as sankeySpreadsheet } from '@desktop-client/components/reports/spreadsheets/sankey-spreadsheet';
-import { useReport } from '@desktop-client/components/reports/useReport';
-import { fromDateRepr } from '@desktop-client/components/reports/util';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
-import { useFormatList } from '@desktop-client/hooks/useFormatList';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import { useUpdateDashboardWidgetMutation } from '@desktop-client/reports/mutations';
+import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
+import { MobileBackButton } from '#components/mobile/MobileBackButton';
+import { MobilePageHeader, Page, PageHeader } from '#components/Page';
+import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
+import { Header } from '#components/reports/Header';
+import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ModeButton } from '#components/reports/ModeButton';
+import { calculateTimeRange } from '#components/reports/reportRanges';
+import { createSpreadsheet as sankeySpreadsheet } from '#components/reports/spreadsheets/sankey-spreadsheet';
+import { useReport } from '#components/reports/useReport';
+import { fromDateRepr } from '#components/reports/util';
+import { useCategories } from '#hooks/useCategories';
+import { useDashboardWidget } from '#hooks/useDashboardWidget';
+import { useFormatList } from '#hooks/useFormatList';
+import { useLocale } from '#hooks/useLocale';
+import { useNavigate } from '#hooks/useNavigate';
+import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
+import type { useSpreadsheet } from '#hooks/useSpreadsheet';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
+import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 
 export function Sankey() {
   const params = useParams();

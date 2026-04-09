@@ -16,11 +16,11 @@ import type {
   WithOptional,
 } from 'loot-core/types/util';
 
-import { dashboardQueries, reportQueries } from './queries';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
+import type { AppDispatch } from '#redux/store';
 
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import type { AppDispatch } from '@desktop-client/redux/store';
+import { dashboardQueries, reportQueries } from './queries';
 
 const sendThrow: typeof send = async (name, args) => {
   const { error, data } = await sendCatch(name, args);

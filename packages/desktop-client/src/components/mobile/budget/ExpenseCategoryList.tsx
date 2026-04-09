@@ -10,9 +10,9 @@ import type {
   CategoryGroupEntity,
 } from 'loot-core/types/models';
 
-import { ExpenseCategoryListItem } from './ExpenseCategoryListItem';
+import { useMoveCategoryMutation } from '#budget';
 
-import { useMoveCategoryMutation } from '@desktop-client/budget';
+import { ExpenseCategoryListItem } from './ExpenseCategoryListItem';
 
 type ExpenseCategoryListProps = {
   categoryGroup: CategoryGroupEntity;

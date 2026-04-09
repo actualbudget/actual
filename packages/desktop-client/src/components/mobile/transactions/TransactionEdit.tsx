@@ -64,40 +64,40 @@ import type {
   TransactionEntity,
 } from 'loot-core/types/models';
 
-import { FocusableAmountInput } from './FocusableAmountInput';
-
-import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
+import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import {
   FieldLabel,
   InputField,
   TapField,
   ToggleField,
-} from '@desktop-client/components/mobile/MobileForms';
-import { getPrettyPayee } from '@desktop-client/components/mobile/utils';
-import { MobilePageHeader, Page } from '@desktop-client/components/Page';
-import { createSingleTimeScheduleFromTransaction } from '@desktop-client/components/transactions/TransactionList';
-import { AmountInput } from '@desktop-client/components/util/AmountInput';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useLocationPermission } from '@desktop-client/hooks/useLocationPermission';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useNearbyPayees } from '@desktop-client/hooks/useNearbyPayees';
-import { usePayees } from '@desktop-client/hooks/usePayees';
+} from '#components/mobile/MobileForms';
+import { getPrettyPayee } from '#components/mobile/utils';
+import { MobilePageHeader, Page } from '#components/Page';
+import { createSingleTimeScheduleFromTransaction } from '#components/transactions/TransactionList';
+import { AmountInput } from '#components/util/AmountInput';
+import { useAccounts } from '#hooks/useAccounts';
+import { useCategories } from '#hooks/useCategories';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useInitialMount } from '#hooks/useInitialMount';
+import { useLocalPref } from '#hooks/useLocalPref';
+import { useLocationPermission } from '#hooks/useLocationPermission';
+import { useNavigate } from '#hooks/useNavigate';
+import { useNearbyPayees } from '#hooks/useNearbyPayees';
+import { usePayees } from '#hooks/usePayees';
 import {
   SingleActiveEditFormProvider,
   useSingleActiveEditForm,
-} from '@desktop-client/hooks/useSingleActiveEditForm';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useSavePayeeLocationMutation } from '@desktop-client/payees';
-import { locationService } from '@desktop-client/payees/location';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import { useDispatch, useSelector } from '@desktop-client/redux';
-import { setLastTransaction } from '@desktop-client/transactions/transactionsSlice';
+} from '#hooks/useSingleActiveEditForm';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { pushModal } from '#modals/modalsSlice';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useSavePayeeLocationMutation } from '#payees';
+import { locationService } from '#payees/location';
+import { aqlQuery } from '#queries/aqlQuery';
+import { useDispatch, useSelector } from '#redux';
+import { setLastTransaction } from '#transactions/transactionsSlice';
+
+import { FocusableAmountInput } from './FocusableAmountInput';
 
 function getFieldName(transactionId: TransactionEntity['id'], field: string) {
   return `${field}-${transactionId}`;

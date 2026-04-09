@@ -5,12 +5,8 @@ import { theme } from '@actual-app/components/theme';
 
 import type { NewRuleEntity, RuleEntity } from 'loot-core/types/models';
 
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { RuleEditor } from '@desktop-client/components/rules/RuleEditor';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { RuleEditor } from '#components/rules/RuleEditor';
 
 type EditRuleModalProps = {
   rule: RuleEntity | NewRuleEntity;

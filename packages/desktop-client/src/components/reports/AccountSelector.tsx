@@ -13,9 +13,9 @@ import { View } from '@actual-app/components/view';
 
 import type { AccountEntity } from 'loot-core/types/models';
 
-import { GraphButton } from './GraphButton';
+import { Checkbox } from '#components/forms';
 
-import { Checkbox } from '@desktop-client/components/forms';
+import { GraphButton } from './GraphButton';
 
 type AccountSelectorProps = {
   accounts: AccountEntity[];

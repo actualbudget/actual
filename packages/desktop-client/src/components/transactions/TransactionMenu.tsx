@@ -12,10 +12,10 @@ import {
 import { isPreviewId } from 'loot-core/shared/transactions';
 import type { TransactionEntity } from 'loot-core/types/models';
 
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import { useSelectedItems } from '@desktop-client/hooks/useSelected';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { useSchedules } from '#hooks/useSchedules';
+import { useSelectedItems } from '#hooks/useSelected';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 type BalanceMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,

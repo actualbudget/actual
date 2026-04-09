@@ -11,8 +11,8 @@ import {
   useSetLoginMethods,
   useSetMultiuserEnabled,
   useSetServerURL,
-} from '@desktop-client/components/ServerContext';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
+} from '#components/ServerContext';
+import { useNavigate } from '#hooks/useNavigate';
 
 // There are two URLs that dance with each other: `/login` and
 // `/bootstrap`. Both of these URLs check the state of the the server

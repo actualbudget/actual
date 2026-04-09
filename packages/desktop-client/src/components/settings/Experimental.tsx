@@ -8,20 +8,17 @@ import { View } from '@actual-app/components/view';
 
 import type { FeatureFlag, ServerPrefs } from 'loot-core/types/prefs';
 
-import { Setting } from './UI';
+import { useAuth } from '#auth/AuthProvider';
+import { Permissions } from '#auth/types';
+import { Link } from '#components/common/Link';
+import { Checkbox } from '#components/forms';
+import { useLoginMethod, useMultiuserEnabled } from '#components/ServerContext';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useServerPref } from '#hooks/useServerPref';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
-import { useAuth } from '@desktop-client/auth/AuthProvider';
-import { Permissions } from '@desktop-client/auth/types';
-import { Link } from '@desktop-client/components/common/Link';
-import { Checkbox } from '@desktop-client/components/forms';
-import {
-  useLoginMethod,
-  useMultiuserEnabled,
-} from '@desktop-client/components/ServerContext';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useServerPref } from '@desktop-client/hooks/useServerPref';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
+import { Setting } from './UI';
 
 type FeatureToggleProps = {
   flag: FeatureFlag;

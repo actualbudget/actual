@@ -7,11 +7,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { send } from 'loot-core/platform/client/connection';
 import type { TagEntity } from 'loot-core/types/models';
 
-import { tagQueries } from './queries';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
+import type { AppDispatch } from '#redux/store';
 
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import type { AppDispatch } from '@desktop-client/redux/store';
+import { tagQueries } from './queries';
 
 function invalidateQueries(queryClient: QueryClient, queryKey?: QueryKey) {
   void queryClient.invalidateQueries({

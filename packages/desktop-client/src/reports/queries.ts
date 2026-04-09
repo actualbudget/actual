@@ -8,7 +8,7 @@ import type {
   DashboardWidgetEntity,
 } from 'loot-core/types/models';
 
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
+import { aqlQuery } from '#queries/aqlQuery';
 
 export const reportQueries = {
   all: () => ['reports'],

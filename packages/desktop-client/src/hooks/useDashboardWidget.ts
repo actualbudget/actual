@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import type { DashboardWidgetEntity } from 'loot-core/types/models';
 
-import { dashboardQueries } from '@desktop-client/reports';
+import { dashboardQueries } from '#reports';
 
 type UseDashboardWidgetProps<W extends DashboardWidgetEntity> = Partial<
   Pick<W, 'id' | 'type'>

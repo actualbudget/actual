@@ -7,10 +7,10 @@ import { css } from '@emotion/css';
 
 import { isElectron } from 'loot-core/shared/environment';
 
-import { normalizeUrl } from './linkParser';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
 
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { normalizeUrl } from './linkParser';
 
 type MobileLinkedNotesProps = {
   displayText: string;

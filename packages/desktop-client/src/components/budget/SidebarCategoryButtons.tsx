@@ -3,11 +3,11 @@ import { View } from '@actual-app/components/view';
 
 import type { CategoryEntity } from 'loot-core/types/models/category';
 
-import { CategoryAutomationButton } from './goals/CategoryAutomationButton';
+import { NotesButton } from '#components/NotesButton';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useNotes } from '#hooks/useNotes';
 
-import { NotesButton } from '@desktop-client/components/NotesButton';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useNotes } from '@desktop-client/hooks/useNotes';
+import { CategoryAutomationButton } from './goals/CategoryAutomationButton';
 
 type SidebarCategoryButtonsProps = {
   category: CategoryEntity;

@@ -13,11 +13,11 @@ import { css } from '@emotion/css';
 
 import { addMonths, subMonths } from 'loot-core/shared/months';
 
+import { useResizeObserver } from '#hooks/useResizeObserver';
+
 import { MonthsContext } from './MonthsContext';
 
 import { useBudgetComponents } from '.';
-
-import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
 export function BudgetSummaries() {
   const { months } = useContext(MonthsContext);

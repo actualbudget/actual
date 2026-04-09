@@ -24,6 +24,9 @@ import type {
 } from 'loot-core/types/models';
 import type { SyncedPrefs } from 'loot-core/types/prefs';
 
+import { Information } from '#components/alerts';
+import { useLocale } from '#hooks/useLocale';
+
 import { CategorySelector } from './CategorySelector';
 import { defaultsList, disabledList } from './disabledList';
 import { getLiveRange } from './getLiveRange';
@@ -32,9 +35,6 @@ import { ReportOptions } from './ReportOptions';
 import type { dateRangeProps } from './ReportOptions';
 import { validateEnd, validateStart } from './reportRanges';
 import { setSessionReport } from './setSessionReport';
-
-import { Information } from '@desktop-client/components/alerts';
-import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type ReportSidebarProps = {
   customReportItems: CustomReportEntity;

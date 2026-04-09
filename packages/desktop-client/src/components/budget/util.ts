@@ -14,10 +14,10 @@ import type {
 } from 'loot-core/types/models';
 import type { SyncedPrefs } from 'loot-core/types/prefs';
 
-import { getValidMonthBounds } from './MonthsContext';
+import type { DropPosition } from '#components/sort';
+import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 
-import type { DropPosition } from '@desktop-client/components/sort';
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import { getValidMonthBounds } from './MonthsContext';
 
 export function addToBeBudgetedGroup(groups: CategoryGroupEntity[]) {
   return [

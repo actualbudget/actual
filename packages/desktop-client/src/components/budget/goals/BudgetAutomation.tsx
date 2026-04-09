@@ -10,12 +10,12 @@ import type {
 } from 'loot-core/types/models';
 import type { Template } from 'loot-core/types/models/templates';
 
+import { useEffectAfterMount } from '#hooks/useEffectAfterMount';
+
 import { BudgetAutomationEditor } from './BudgetAutomationEditor';
 import { BudgetAutomationReadOnly } from './BudgetAutomationReadOnly';
 import type { DisplayTemplateType } from './constants';
 import { DEFAULT_PRIORITY, getInitialState, templateReducer } from './reducer';
-
-import { useEffectAfterMount } from '@desktop-client/hooks/useEffectAfterMount';
 
 type BudgetAutomationProps = {
   categories: CategoryGroupEntity[];

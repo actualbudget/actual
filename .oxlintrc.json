@@ -397,7 +397,10 @@
       }
     },
     {
-      "files": ["packages/loot-core/src/**/*.{ts,tsx}"],
+      "files": [
+        "packages/loot-core/src/**/*.{ts,tsx}",
+        "packages/desktop-client/src/**/*.{ts,tsx}"
+      ],
       "rules": {
         "actual/prefer-subpath-imports": "error"
       }

@@ -12,10 +12,10 @@ import { View } from '@actual-app/components/view';
 import { friendlyOp, mapField } from 'loot-core/shared/rules';
 import type { RuleConditionEntity } from 'loot-core/types/models';
 
+import { Value } from '#components/rules/Value';
+
 import { FilterEditor } from './FiltersMenu';
 import { subfieldFromFilter } from './subfieldFromFilter';
-
-import { Value } from '@desktop-client/components/rules/Value';
 
 let isDatepickerClick = false;
 

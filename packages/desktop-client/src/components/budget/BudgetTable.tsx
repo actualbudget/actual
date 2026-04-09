@@ -11,6 +11,12 @@ import type {
   CategoryGroupEntity,
 } from 'loot-core/types/models';
 
+import type { DropPosition } from '#components/sort';
+import { SchedulesProvider } from '#hooks/useCachedSchedules';
+import { useCategories } from '#hooks/useCategories';
+import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useLocalPref } from '#hooks/useLocalPref';
+
 import { BudgetCategories } from './BudgetCategories';
 import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
@@ -22,12 +28,6 @@ import {
   getScrollbarWidth,
   separateGroups,
 } from './util';
-
-import type { DropPosition } from '@desktop-client/components/sort';
-import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 
 type BudgetTableProps = {
   type: string;

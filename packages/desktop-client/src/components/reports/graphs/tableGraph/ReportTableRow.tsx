@@ -11,13 +11,13 @@ import type {
   RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { showActivity } from '@desktop-client/components/reports/graphs/showActivity';
-import { Cell, Row } from '@desktop-client/components/table';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { FinancialText } from '#components/FinancialText';
+import { showActivity } from '#components/reports/graphs/showActivity';
+import { Cell, Row } from '#components/table';
+import { useAccounts } from '#hooks/useAccounts';
+import { useCategories } from '#hooks/useCategories';
+import { useFormat } from '#hooks/useFormat';
+import { useNavigate } from '#hooks/useNavigate';
 
 type ReportTableRowProps = {
   item: GroupedEntity;

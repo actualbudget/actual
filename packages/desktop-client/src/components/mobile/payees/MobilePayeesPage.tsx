@@ -9,16 +9,16 @@ import { send } from 'loot-core/platform/client/connection';
 import { getNormalisedString } from 'loot-core/shared/normalisation';
 import type { PayeeEntity, RuleEntity } from 'loot-core/types/models';
 
-import { PayeesList } from './PayeesList';
+import { Search } from '#components/common/Search';
+import { MobilePageHeader, Page } from '#components/Page';
+import { useNavigate } from '#hooks/useNavigate';
+import { usePayeeRuleCounts } from '#hooks/usePayeeRuleCounts';
+import { usePayees } from '#hooks/usePayees';
+import { useUndo } from '#hooks/useUndo';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
 
-import { Search } from '@desktop-client/components/common/Search';
-import { MobilePageHeader, Page } from '@desktop-client/components/Page';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { usePayeeRuleCounts } from '@desktop-client/hooks/usePayeeRuleCounts';
-import { usePayees } from '@desktop-client/hooks/usePayees';
-import { useUndo } from '@desktop-client/hooks/useUndo';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { PayeesList } from './PayeesList';
 
 export function MobilePayeesPage() {
   const { t } = useTranslation();

@@ -7,10 +7,10 @@ import { Text } from '@actual-app/components/text';
 import type { ScheduleEntity } from 'loot-core/types/models';
 import type { ScheduleTemplate } from 'loot-core/types/models/templates';
 
-import { updateTemplate } from '@desktop-client/components/budget/goals/actions';
-import type { Action } from '@desktop-client/components/budget/goals/actions';
-import { Link } from '@desktop-client/components/common/Link';
-import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { updateTemplate } from '#components/budget/goals/actions';
+import type { Action } from '#components/budget/goals/actions';
+import { Link } from '#components/common/Link';
+import { FormField, FormLabel } from '#components/forms';
 
 type ScheduleAutomationProps = {
   schedules: readonly ScheduleEntity[];

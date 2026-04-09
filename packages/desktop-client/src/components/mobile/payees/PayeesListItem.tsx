@@ -11,8 +11,8 @@ import { View } from '@actual-app/components/view';
 import type { PayeeEntity } from 'loot-core/types/models';
 import type { WithRequired } from 'loot-core/types/util';
 
-import { ActionableGridListItem } from '@desktop-client/components/mobile/ActionableGridListItem';
-import { PayeeRuleCountLabel } from '@desktop-client/components/payees/PayeeRuleCountLabel';
+import { ActionableGridListItem } from '#components/mobile/ActionableGridListItem';
+import { PayeeRuleCountLabel } from '#components/payees/PayeeRuleCountLabel';
 
 type PayeesListItemProps = {
   ruleCount: number;

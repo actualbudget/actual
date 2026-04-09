@@ -9,23 +9,20 @@ import { theme } from '@actual-app/components/theme';
 
 import type { TagEntity } from 'loot-core/types/models';
 
-import { TagEditor } from './TagEditor';
-
 import {
   Cell,
   CellButton,
   InputCell,
   Row,
   SelectCell,
-} from '@desktop-client/components/table';
-import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
-import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
-import {
-  useDeleteTagMutation,
-  useUpdateTagMutation,
-} from '@desktop-client/tags';
+} from '#components/table';
+import { useContextMenu } from '#hooks/useContextMenu';
+import { useNavigate } from '#hooks/useNavigate';
+import { useProperFocus } from '#hooks/useProperFocus';
+import { useSelectedDispatch } from '#hooks/useSelected';
+import { useDeleteTagMutation, useUpdateTagMutation } from '#tags';
+
+import { TagEditor } from './TagEditor';
 
 type TagRowProps = {
   tag: TagEntity;

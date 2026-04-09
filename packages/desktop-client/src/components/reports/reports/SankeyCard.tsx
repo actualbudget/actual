@@ -9,20 +9,20 @@ import * as d from 'date-fns';
 
 import type { SankeyWidget } from 'loot-core/types/models';
 
-import { SankeyGraph } from '@desktop-client/components/reports/graphs/SankeyGraph';
-import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { ReportCard } from '@desktop-client/components/reports/ReportCard';
-import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
-import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
+import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
+import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportCard } from '#components/reports/ReportCard';
+import { ReportCardName } from '#components/reports/ReportCardName';
+import { calculateTimeRange } from '#components/reports/reportRanges';
 import {
   compactSankeyData,
   createSpreadsheet as sankeySpreadsheet,
-} from '@desktop-client/components/reports/spreadsheets/sankey-spreadsheet';
-import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
-import { useReport } from '@desktop-client/components/reports/useReport';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
+} from '#components/reports/spreadsheets/sankey-spreadsheet';
+import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
+import { useReport } from '#components/reports/useReport';
+import { useCategories } from '#hooks/useCategories';
+import { useLocale } from '#hooks/useLocale';
+import { useResizeObserver } from '#hooks/useResizeObserver';
 
 type SankeyCardProps = {
   widgetId: string;

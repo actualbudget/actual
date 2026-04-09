@@ -9,14 +9,14 @@ import type {
   TransactionEntity,
 } from 'loot-core/types/models';
 
+import * as bindings from '#spreadsheet/bindings';
+
 import { useAccounts } from './useAccounts';
 import { usePayees } from './usePayees';
 import { usePreviewTransactions } from './usePreviewTransactions';
 import { useSheetValue } from './useSheetValue';
 import { useSyncedPref } from './useSyncedPref';
 import { calculateRunningBalancesBottomUp } from './useTransactions';
-
-import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 type UseAccountPreviewTransactionsProps = {
   accountId?: AccountEntity['id'] | undefined;

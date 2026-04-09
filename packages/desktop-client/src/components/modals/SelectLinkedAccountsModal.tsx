@@ -25,31 +25,21 @@ import {
   useLinkAccountPluggyAiMutation,
   useLinkAccountSimpleFinMutation,
   useUnlinkAccountMutation,
-} from '@desktop-client/accounts';
-import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
-import type { AutocompleteItem } from '@desktop-client/components/autocomplete/Autocomplete';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import {
-  Cell,
-  Field,
-  Row,
-  Table,
-  TableHeader,
-} from '@desktop-client/components/table';
-import { AmountInput } from '@desktop-client/components/util/AmountInput';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { closeModal } from '@desktop-client/modals/modalsSlice';
-import { transactions } from '@desktop-client/queries';
-import { liveQuery } from '@desktop-client/queries/liveQuery';
-import { useDispatch } from '@desktop-client/redux';
+} from '#accounts';
+import { Autocomplete } from '#components/autocomplete/Autocomplete';
+import type { AutocompleteItem } from '#components/autocomplete/Autocomplete';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { FinancialText } from '#components/FinancialText';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { Cell, Field, Row, Table, TableHeader } from '#components/table';
+import { AmountInput } from '#components/util/AmountInput';
+import { useAccounts } from '#hooks/useAccounts';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useFormat } from '#hooks/useFormat';
+import { closeModal } from '#modals/modalsSlice';
+import { transactions } from '#queries';
+import { liveQuery } from '#queries/liveQuery';
+import { useDispatch } from '#redux';
 
 function useAddBudgetAccountOptions() {
   const { t } = useTranslation();

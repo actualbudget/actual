@@ -13,9 +13,9 @@ import { css, cx } from '@emotion/css';
 
 import { send } from 'loot-core/platform/client/connection';
 
-import { Notes } from './Notes';
+import { useNotes } from '#hooks/useNotes';
 
-import { useNotes } from '@desktop-client/hooks/useNotes';
+import { Notes } from './Notes';
 
 type NotesButtonProps = {
   id: string;

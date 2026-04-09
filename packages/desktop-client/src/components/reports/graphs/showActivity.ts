@@ -9,7 +9,7 @@ import type {
   RuleConditionEntity,
 } from 'loot-core/types/models';
 
-import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
+import { ReportOptions } from '#components/reports/ReportOptions';
 
 type showActivityProps = {
   navigate: NavigateFunction;

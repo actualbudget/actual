@@ -14,10 +14,10 @@ import type {
   TransactionEntity,
 } from 'loot-core/types/models';
 
-import { updateScheduleConditions } from '@desktop-client/components/schedules/schedule-edit-utils';
-import type { ScheduleFormFields } from '@desktop-client/components/schedules/ScheduleEditForm';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import { liveQuery } from '@desktop-client/queries/liveQuery';
+import { updateScheduleConditions } from '#components/schedules/schedule-edit-utils';
+import type { ScheduleFormFields } from '#components/schedules/ScheduleEditForm';
+import { aqlQuery } from '#queries/aqlQuery';
+import { liveQuery } from '#queries/liveQuery';
 
 export type ScheduleEditState = {
   isCustom?: boolean;

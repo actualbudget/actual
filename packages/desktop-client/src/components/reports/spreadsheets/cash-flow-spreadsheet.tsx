@@ -11,10 +11,10 @@ import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import type { RuleConditionEntity } from 'loot-core/types/models';
 
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { indexCashFlow, runAll } from '@desktop-client/components/reports/util';
-import type { FormatType } from '@desktop-client/hooks/useFormat';
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import { FinancialText } from '#components/FinancialText';
+import { indexCashFlow, runAll } from '#components/reports/util';
+import type { FormatType } from '#hooks/useFormat';
+import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 
 export function simpleCashFlow(
   startMonth: string,

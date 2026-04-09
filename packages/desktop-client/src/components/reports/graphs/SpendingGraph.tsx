@@ -17,15 +17,15 @@ import {
 
 import type { SpendingEntity } from 'loot-core/types/models';
 
-import { computePadding } from './util/computePadding';
+import { FinancialText } from '#components/FinancialText';
+import { useRechartsAnimation } from '#components/reports/chart-theme';
+import { Container } from '#components/reports/Container';
+import { numberFormatterTooltip } from '#components/reports/numberFormatter';
+import { useFormat } from '#hooks/useFormat';
+import type { FormatType } from '#hooks/useFormat';
+import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
-import { Container } from '@desktop-client/components/reports/Container';
-import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import type { FormatType } from '@desktop-client/hooks/useFormat';
-import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
+import { computePadding } from './util/computePadding';
 
 type PayloadItem = {
   value: number;

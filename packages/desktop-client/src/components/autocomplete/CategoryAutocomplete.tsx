@@ -26,20 +26,17 @@ import type {
   CategoryGroupEntity,
 } from 'loot-core/types/models';
 
+import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
+import { makeAmountFullStyle } from '#components/budget/util';
+import { FinancialText } from '#components/FinancialText';
+import { useCategories } from '#hooks/useCategories';
+import { useSheetValue } from '#hooks/useSheetValue';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
+
 import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
 import { rankAutocompleteMatch } from './autocompleteRanking';
 import { ItemHeader } from './ItemHeader';
-
-import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
-import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import {
-  envelopeBudget,
-  trackingBudget,
-} from '@desktop-client/spreadsheet/bindings';
 
 type CategoryAutocompleteItem = Omit<CategoryEntity, 'group'> & {
   group?: CategoryGroupEntity;

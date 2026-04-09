@@ -8,9 +8,9 @@ import { View } from '@actual-app/components/view';
 
 import type { PayeeEntity } from 'loot-core/types/models';
 
-import { PayeesListItem } from './PayeesListItem';
+import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 
-import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
+import { PayeesListItem } from './PayeesListItem';
 
 type PayeesListProps = {
   payees: PayeeEntity[];

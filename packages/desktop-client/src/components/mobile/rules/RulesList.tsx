@@ -8,9 +8,9 @@ import { View } from '@actual-app/components/view';
 
 import type { RuleEntity } from 'loot-core/types/models';
 
-import { RulesListItem } from './RulesListItem';
+import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 
-import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
+import { RulesListItem } from './RulesListItem';
 
 type RulesListProps = {
   rules: RuleEntity[];

@@ -10,8 +10,8 @@ import { View } from '@actual-app/components/view';
 
 import type { DashboardPageEntity } from 'loot-core/types/models';
 
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useCreateDashboardPageMutation } from '@desktop-client/reports/mutations';
+import { useNavigate } from '#hooks/useNavigate';
+import { useCreateDashboardPageMutation } from '#reports/mutations';
 
 type DashboardSelectorProps = {
   dashboards: readonly DashboardPageEntity[];

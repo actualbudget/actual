@@ -11,11 +11,11 @@ import { View } from '@actual-app/components/view';
 
 import { LazyLoadFailedError } from 'loot-core/shared/errors';
 
+import { useModalState } from '#hooks/useModalState';
+
 import { Link } from './common/Link';
 import { Modal, ModalHeader } from './common/Modal';
 import { Checkbox } from './forms';
-
-import { useModalState } from '@desktop-client/hooks/useModalState';
 
 type AppError = Error & {
   type?: string;

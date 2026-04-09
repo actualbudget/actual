@@ -7,25 +7,25 @@ import { isPreviewId } from 'loot-core/shared/transactions';
 import type { IntegerAmount } from 'loot-core/shared/util';
 import type { AccountEntity, TransactionEntity } from 'loot-core/types/models';
 
-import { useSyncAndDownloadMutation } from '@desktop-client/accounts';
-import { markAccountRead } from '@desktop-client/accounts/accountsSlice';
-import { TransactionListWithBalances } from '@desktop-client/components/mobile/transactions/TransactionListWithBalances';
-import { useAccountPreviewTransactions } from '@desktop-client/hooks/useAccountPreviewTransactions';
-import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { getSchedulesQuery } from '@desktop-client/hooks/useSchedules';
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useSyncAndDownloadMutation } from '#accounts';
+import { markAccountRead } from '#accounts/accountsSlice';
+import { TransactionListWithBalances } from '#components/mobile/transactions/TransactionListWithBalances';
+import { useAccountPreviewTransactions } from '#hooks/useAccountPreviewTransactions';
+import { SchedulesProvider } from '#hooks/useCachedSchedules';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useNavigate } from '#hooks/useNavigate';
+import { getSchedulesQuery } from '#hooks/useSchedules';
+import { useSheetValue } from '#hooks/useSheetValue';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 import {
   calculateRunningBalancesTopDown,
   useTransactions,
-} from '@desktop-client/hooks/useTransactions';
-import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
-import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
-import * as queries from '@desktop-client/queries';
-import { useDispatch } from '@desktop-client/redux';
-import * as bindings from '@desktop-client/spreadsheet/bindings';
+} from '#hooks/useTransactions';
+import { useTransactionsSearch } from '#hooks/useTransactionsSearch';
+import { collapseModals, pushModal } from '#modals/modalsSlice';
+import * as queries from '#queries';
+import { useDispatch } from '#redux';
+import * as bindings from '#spreadsheet/bindings';
 
 export function AccountTransactions({
   account,

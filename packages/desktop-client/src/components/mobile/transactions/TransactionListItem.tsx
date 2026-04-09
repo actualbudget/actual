@@ -32,16 +32,16 @@ import { integerToCurrency } from 'loot-core/shared/util';
 import type { IntegerAmount } from 'loot-core/shared/util';
 import type { AccountEntity, TransactionEntity } from 'loot-core/types/models';
 
-import { lookupName, Status } from './TransactionEdit';
+import { makeAmountFullStyle } from '#components/budget/util';
+import { useAccount } from '#hooks/useAccount';
+import { useCachedSchedules } from '#hooks/useCachedSchedules';
+import { useCategories } from '#hooks/useCategories';
+import { useDisplayPayee } from '#hooks/useDisplayPayee';
+import { usePayee } from '#hooks/usePayee';
+import { NotesTagFormatter } from '#notes/NotesTagFormatter';
+import { useSelector } from '#redux';
 
-import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
-import { useAccount } from '@desktop-client/hooks/useAccount';
-import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
-import { usePayee } from '@desktop-client/hooks/usePayee';
-import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
-import { useSelector } from '@desktop-client/redux';
+import { lookupName, Status } from './TransactionEdit';
 
 export const ROW_HEIGHT = 60;
 

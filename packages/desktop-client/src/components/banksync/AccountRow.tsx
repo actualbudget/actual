@@ -11,7 +11,7 @@ import type { Locale } from 'date-fns';
 import { tsToRelativeTime } from 'loot-core/shared/util';
 import type { AccountEntity } from 'loot-core/types/models';
 
-import { Cell, Row } from '@desktop-client/components/table';
+import { Cell, Row } from '#components/table';
 
 type AccountRowProps = {
   account: AccountEntity;

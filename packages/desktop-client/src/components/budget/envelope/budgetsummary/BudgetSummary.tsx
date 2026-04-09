@@ -15,15 +15,15 @@ import { css } from '@emotion/css';
 
 import * as monthUtils from 'loot-core/shared/months';
 
+import { useEnvelopeBudget } from '#components/budget/envelope/EnvelopeBudgetContext';
+import { NotesButton } from '#components/NotesButton';
+import { useLocale } from '#hooks/useLocale';
+import { SheetNameProvider } from '#hooks/useSheetName';
+import { useUndo } from '#hooks/useUndo';
+
 import { BudgetMonthMenu } from './BudgetMonthMenu';
 import { ToBudget } from './ToBudget';
 import { TotalsList } from './TotalsList';
-
-import { useEnvelopeBudget } from '@desktop-client/components/budget/envelope/EnvelopeBudgetContext';
-import { NotesButton } from '@desktop-client/components/NotesButton';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
-import { useUndo } from '@desktop-client/hooks/useUndo';
 
 type BudgetSummaryProps = {
   month: string;

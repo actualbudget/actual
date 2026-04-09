@@ -18,8 +18,8 @@ import { css, cx } from '@emotion/css';
 
 import type { IntegerAmount } from 'loot-core/shared/util';
 
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
+import { useFormat } from '#hooks/useFormat';
+import { useMergedRefs } from '#hooks/useMergedRefs';
 
 type AmountInputProps = {
   id?: string;

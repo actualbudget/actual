@@ -6,11 +6,11 @@ import { Text } from '@actual-app/components/text';
 
 import { send } from 'loot-core/platform/client/connection';
 
-import { Setting } from './UI';
+import { resetSync } from '#app/appSlice';
+import { useMetadataPref } from '#hooks/useMetadataPref';
+import { useDispatch } from '#redux';
 
-import { resetSync } from '@desktop-client/app/appSlice';
-import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
-import { useDispatch } from '@desktop-client/redux';
+import { Setting } from './UI';
 
 export function ResetCache() {
   const [resetting, setResetting] = useState(false);

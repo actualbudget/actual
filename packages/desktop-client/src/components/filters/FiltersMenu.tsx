@@ -35,6 +35,11 @@ import { titleFirst } from 'loot-core/shared/util';
 import type { IntegerAmount } from 'loot-core/shared/util';
 import type { RuleConditionEntity } from 'loot-core/types/models';
 
+import { GenericInput } from '#components/util/GenericInput';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useFormat } from '#hooks/useFormat';
+import { useTransactionFilters } from '#hooks/useTransactionFilters';
+
 import { CompactFiltersButton } from './CompactFiltersButton';
 import { FiltersButton } from './FiltersButton';
 import { OpButton } from './OpButton';
@@ -42,11 +47,6 @@ import { PayeeFilter } from './PayeeFilter';
 import { subfieldFromFilter } from './subfieldFromFilter';
 import { subfieldToOptions } from './subfieldToOptions';
 import { updateFilterReducer } from './updateFilterReducer';
-
-import { GenericInput } from '@desktop-client/components/util/GenericInput';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useTransactionFilters } from '@desktop-client/hooks/useTransactionFilters';
 
 type FilterReducerState<T extends RuleConditionEntity> = Pick<
   T,

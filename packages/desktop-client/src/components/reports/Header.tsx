@@ -11,6 +11,10 @@ import * as monthUtils from 'loot-core/shared/months';
 import type { RuleConditionEntity, TimeFrame } from 'loot-core/types/models';
 import type { SyncedPrefs } from 'loot-core/types/prefs';
 
+import { AppliedFilters } from '#components/filters/AppliedFilters';
+import { FilterButton } from '#components/filters/FiltersMenu';
+import { useLocale } from '#hooks/useLocale';
+
 import { getLiveRange } from './getLiveRange';
 import {
   calculateTimeRange,
@@ -19,10 +23,6 @@ import {
   validateEnd,
   validateStart,
 } from './reportRanges';
-
-import { AppliedFilters } from '@desktop-client/components/filters/AppliedFilters';
-import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
-import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type HeaderProps = {
   start: TimeFrame['start'];

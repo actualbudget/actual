@@ -5,8 +5,8 @@ import { Input } from '@actual-app/components/input';
 
 import { evalArithmetic } from 'loot-core/shared/arithmetic';
 
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
+import { useFormat } from '#hooks/useFormat';
+import { useMergedRefs } from '#hooks/useMergedRefs';
 
 type PercentInputProps = {
   id?: string;

@@ -9,14 +9,14 @@ import { applyChanges } from 'loot-core/shared/util';
 import type { Diff } from 'loot-core/shared/util';
 import type { NewRuleEntity, PayeeEntity } from 'loot-core/types/models';
 
-import { ManagePayees } from './ManagePayees';
+import { useOrphanedPayees } from '#hooks/useOrphanedPayees';
+import { usePayeeRuleCounts } from '#hooks/usePayeeRuleCounts';
+import { usePayees } from '#hooks/usePayees';
+import { pushModal } from '#modals/modalsSlice';
+import { payeeQueries } from '#payees';
+import { useDispatch } from '#redux';
 
-import { useOrphanedPayees } from '@desktop-client/hooks/useOrphanedPayees';
-import { usePayeeRuleCounts } from '@desktop-client/hooks/usePayeeRuleCounts';
-import { usePayees } from '@desktop-client/hooks/usePayees';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { payeeQueries } from '@desktop-client/payees';
-import { useDispatch } from '@desktop-client/redux';
+import { ManagePayees } from './ManagePayees';
 
 type ManagePayeesWithDataProps = {
   initialSelectedIds: string[];

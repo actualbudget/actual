@@ -8,7 +8,7 @@ import { View } from '@actual-app/components/view';
 import { tsToRelativeTime } from 'loot-core/shared/util';
 import type { AccountEntity } from 'loot-core/types/models';
 
-import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useLocale } from '#hooks/useLocale';
 
 type BankSyncAccountsListItemProps = {
   account: AccountEntity;

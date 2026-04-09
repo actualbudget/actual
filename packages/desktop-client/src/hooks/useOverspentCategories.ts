@@ -5,14 +5,11 @@ import { groupById } from 'loot-core/shared/util';
 import type { IntegerAmount } from 'loot-core/shared/util';
 import type { CategoryEntity } from 'loot-core/types/models';
 
+import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
+
 import { useCategories } from './useCategories';
 import { useSpreadsheet } from './useSpreadsheet';
 import { useSyncedPref } from './useSyncedPref';
-
-import {
-  envelopeBudget,
-  trackingBudget,
-} from '@desktop-client/spreadsheet/bindings';
 
 type UseOverspentCategoriesProps = {
   month: string;

@@ -5,7 +5,7 @@ import memoizeOne from 'memoize-one';
 import { groupById } from 'loot-core/shared/util';
 import type { AccountEntity } from 'loot-core/types/models';
 
-import { resetApp } from '@desktop-client/app/appSlice';
+import { resetApp } from '#app/appSlice';
 
 const sliceName = 'account';
 

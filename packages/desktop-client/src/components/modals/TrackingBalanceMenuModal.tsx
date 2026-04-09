@@ -10,18 +10,18 @@ import { View } from '@actual-app/components/view';
 import {
   BalanceWithCarryover,
   CarryoverIndicator,
-} from '@desktop-client/components/budget/BalanceWithCarryover';
-import { BalanceMenu } from '@desktop-client/components/budget/tracking/BalanceMenu';
+} from '#components/budget/BalanceWithCarryover';
+import { BalanceMenu } from '#components/budget/tracking/BalanceMenu';
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '@desktop-client/components/common/Modal';
-import { CellValueText } from '@desktop-client/components/spreadsheet/CellValue';
-import { useCategory } from '@desktop-client/hooks/useCategory';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { trackingBudget } from '@desktop-client/spreadsheet/bindings';
+} from '#components/common/Modal';
+import { CellValueText } from '#components/spreadsheet/CellValue';
+import { useCategory } from '#hooks/useCategory';
+import type { Modal as ModalType } from '#modals/modalsSlice';
+import { trackingBudget } from '#spreadsheet/bindings';
 
 type TrackingBalanceMenuModalProps = Omit<
   Extract<ModalType, { name: 'tracking-balance-menu' }>['options'],

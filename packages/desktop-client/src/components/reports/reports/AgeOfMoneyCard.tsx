@@ -11,16 +11,16 @@ import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import type { AgeOfMoneyWidget } from 'loot-core/types/models';
 
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { DateRange } from '@desktop-client/components/reports/DateRange';
-import { AgeOfMoneyGraph } from '@desktop-client/components/reports/graphs/AgeOfMoneyGraph';
-import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { ReportCard } from '@desktop-client/components/reports/ReportCard';
-import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
-import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
-import { createAgeOfMoneySpreadsheet } from '@desktop-client/components/reports/spreadsheets/age-of-money-spreadsheet';
-import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
-import { useReport } from '@desktop-client/components/reports/useReport';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { DateRange } from '#components/reports/DateRange';
+import { AgeOfMoneyGraph } from '#components/reports/graphs/AgeOfMoneyGraph';
+import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportCard } from '#components/reports/ReportCard';
+import { ReportCardName } from '#components/reports/ReportCardName';
+import { calculateTimeRange } from '#components/reports/reportRanges';
+import { createAgeOfMoneySpreadsheet } from '#components/reports/spreadsheets/age-of-money-spreadsheet';
+import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
+import { useReport } from '#components/reports/useReport';
 
 // Determine status color based on age
 export function getAgeColor(age: number | null) {

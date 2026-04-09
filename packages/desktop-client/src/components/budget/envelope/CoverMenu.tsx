@@ -12,12 +12,12 @@ import { amountToInteger, integerToCurrency } from 'loot-core/shared/util';
 import type { IntegerAmount } from 'loot-core/shared/util';
 import type { CategoryEntity } from 'loot-core/types/models';
 
-import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
+import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
 import {
   addToBeBudgetedGroup,
   removeCategoriesFromGroups,
-} from '@desktop-client/components/budget/util';
-import { useCategories } from '@desktop-client/hooks/useCategories';
+} from '#components/budget/util';
+import { useCategories } from '#hooks/useCategories';
 
 type CoverMenuProps = {
   showToBeBudgeted?: boolean;

@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { groupById } from 'loot-core/shared/util';
 
-import { categoryQueries } from '@desktop-client/budget';
+import { categoryQueries } from '#budget';
 
 export function useCategories() {
   return useQuery(categoryQueries.list());

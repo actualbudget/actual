@@ -6,7 +6,7 @@ import { View } from '@actual-app/components/view';
 
 import type { RuleConditionEntity } from 'loot-core/types/models';
 
-import { FieldSelect } from '@desktop-client/components/rules/RuleEditor';
+import { FieldSelect } from '#components/rules/RuleEditor';
 
 export function ConditionsOpMenu({
   conditionsOp,

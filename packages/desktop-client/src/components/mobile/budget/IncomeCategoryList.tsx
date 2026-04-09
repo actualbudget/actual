@@ -7,9 +7,9 @@ import { css } from '@emotion/css';
 
 import type { CategoryEntity } from 'loot-core/types/models';
 
-import { IncomeCategoryListItem } from './IncomeCategoryListItem';
+import { useMoveCategoryMutation } from '#budget';
 
-import { useMoveCategoryMutation } from '@desktop-client/budget';
+import { IncomeCategoryListItem } from './IncomeCategoryListItem';
 
 type IncomeCategoryListProps = {
   categories: CategoryEntity[];

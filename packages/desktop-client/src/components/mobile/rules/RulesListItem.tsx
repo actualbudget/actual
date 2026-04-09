@@ -11,10 +11,10 @@ import { View } from '@actual-app/components/view';
 import type { RuleEntity } from 'loot-core/types/models';
 import type { WithRequired } from 'loot-core/types/util';
 
-import { ActionableGridListItem } from '@desktop-client/components/mobile/ActionableGridListItem';
-import { ActionExpression } from '@desktop-client/components/rules/ActionExpression';
-import { ConditionExpression } from '@desktop-client/components/rules/ConditionExpression';
-import { groupActionsBySplitIndex } from '@desktop-client/util/ruleUtils';
+import { ActionableGridListItem } from '#components/mobile/ActionableGridListItem';
+import { ActionExpression } from '#components/rules/ActionExpression';
+import { ConditionExpression } from '#components/rules/ConditionExpression';
+import { groupActionsBySplitIndex } from '#util/ruleUtils';
 
 type RulesListItemProps = {
   onDelete: () => void;

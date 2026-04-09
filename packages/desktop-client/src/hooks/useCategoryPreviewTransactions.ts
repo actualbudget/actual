@@ -3,12 +3,12 @@ import { useCallback, useMemo } from 'react';
 import * as monthUtils from 'loot-core/shared/months';
 import type { CategoryEntity, ScheduleEntity } from 'loot-core/types/models';
 
+import { categoryBalance } from '#spreadsheet/bindings';
+
 import { useCategory } from './useCategory';
 import { useCategoryScheduleGoalTemplates } from './useCategoryScheduleGoalTemplates';
 import { usePreviewTransactions } from './usePreviewTransactions';
 import { useSheetValue } from './useSheetValue';
-
-import { categoryBalance } from '@desktop-client/spreadsheet/bindings';
 
 type UseCategoryPreviewTransactionsProps = {
   categoryId: CategoryEntity['id'];

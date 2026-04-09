@@ -5,7 +5,7 @@ import type {
   DashboardWidgetEntity,
 } from 'loot-core/types/models';
 
-import { dashboardQueries } from '@desktop-client/reports';
+import { dashboardQueries } from '#reports';
 
 export function useDashboardPages() {
   return useQuery(dashboardQueries.listDashboardPages());

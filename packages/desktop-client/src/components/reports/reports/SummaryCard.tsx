@@ -7,16 +7,16 @@ import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import type { SummaryContent, SummaryWidget } from 'loot-core/types/models';
 
-import { DateRange } from '@desktop-client/components/reports/DateRange';
-import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { ReportCard } from '@desktop-client/components/reports/ReportCard';
-import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
-import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
-import { summarySpreadsheet } from '@desktop-client/components/reports/spreadsheets/summary-spreadsheet';
-import { SummaryNumber } from '@desktop-client/components/reports/SummaryNumber';
-import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
-import { useReport } from '@desktop-client/components/reports/useReport';
-import { useLocale } from '@desktop-client/hooks/useLocale';
+import { DateRange } from '#components/reports/DateRange';
+import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportCard } from '#components/reports/ReportCard';
+import { ReportCardName } from '#components/reports/ReportCardName';
+import { calculateTimeRange } from '#components/reports/reportRanges';
+import { summarySpreadsheet } from '#components/reports/spreadsheets/summary-spreadsheet';
+import { SummaryNumber } from '#components/reports/SummaryNumber';
+import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
+import { useReport } from '#components/reports/useReport';
+import { useLocale } from '#hooks/useLocale';
 
 type SummaryCardProps = {
   widgetId: string;

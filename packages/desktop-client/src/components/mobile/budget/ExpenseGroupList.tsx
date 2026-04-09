@@ -10,12 +10,12 @@ import type {
   CategoryGroupEntity,
 } from 'loot-core/types/models';
 
+import { useMoveCategoryGroupMutation } from '#budget';
+
 import {
   ExpenseGroupHeader,
   ExpenseGroupListItem,
 } from './ExpenseGroupListItem';
-
-import { useMoveCategoryGroupMutation } from '@desktop-client/budget';
 
 type ExpenseGroupListProps = {
   categoryGroups: CategoryGroupEntity[];

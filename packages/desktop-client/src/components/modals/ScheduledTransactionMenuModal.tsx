@@ -20,10 +20,10 @@ import {
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '@desktop-client/components/common/Modal';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+} from '#components/common/Modal';
+import { useLocale } from '#hooks/useLocale';
+import { useSchedules } from '#hooks/useSchedules';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type ScheduledTransactionMenuModalProps = Extract<
   ModalType,

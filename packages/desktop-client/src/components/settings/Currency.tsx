@@ -9,10 +9,10 @@ import { css } from '@emotion/css';
 
 import { currencies, getCurrency } from 'loot-core/shared/currencies';
 
-import { Column, Setting } from './UI';
+import { Checkbox } from '#components/forms';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
-import { Checkbox } from '@desktop-client/components/forms';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { Column, Setting } from './UI';
 
 export function CurrencySettings() {
   const { t } = useTranslation();

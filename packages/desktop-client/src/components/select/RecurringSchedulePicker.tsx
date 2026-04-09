@@ -21,12 +21,12 @@ import { getRecurringDescription } from 'loot-core/shared/schedules';
 import type { RecurConfig, RecurPattern } from 'loot-core/types/models';
 import type { TransObjectLiteral, WithRequired } from 'loot-core/types/util';
 
-import { DateSelect } from './DateSelect';
+import { Modal } from '#components/common/Modal';
+import { Checkbox } from '#components/forms';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useLocale } from '#hooks/useLocale';
 
-import { Modal } from '@desktop-client/components/common/Modal';
-import { Checkbox } from '@desktop-client/components/forms';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useLocale } from '@desktop-client/hooks/useLocale';
+import { DateSelect } from './DateSelect';
 
 // ex: There is no 6th Friday of the Month
 const MAX_DAY_OF_WEEK_INTERVAL = 5;
