@@ -402,53 +402,63 @@ export function ScheduleEditForm({
             </label>
           </View>
 
-          {fields.custom_upcoming_length != null && (
-            <View
-              style={{
-                marginTop: 5,
-                alignItems: 'flex-end',
-              }}
-            >
-              <Select
-                options={[
-                  ['1', t('1 day')],
-                  ['7', t('1 week')],
-                  ['14', t('2 weeks')],
-                  ['oneMonth', t('1 month')],
-                  ['currentMonth', t('End of the current month')],
-                  ['custom', t('Custom length')],
-                ]}
-                value={
-                  ['1', '7', '14', 'oneMonth', 'currentMonth'].includes(
-                    fields.custom_upcoming_length,
-                  )
-                    ? fields.custom_upcoming_length
-                    : 'custom'
-                }
-                onChange={value => {
-                  dispatch({
-                    type: 'set-field',
-                    field: 'custom_upcoming_length',
-                    value: value === 'custom' ? '1-day' : value,
-                  });
-                }}
-              />
-              {!['1', '7', '14', 'oneMonth', 'currentMonth'].includes(
+          {fields.custom_upcoming_length != null &&
+            (() => {
+              const presetValues = [
+                '1',
+                '7',
+                '14',
+                'oneMonth',
+                'currentMonth',
+              ];
+              const isPreset = presetValues.includes(
                 fields.custom_upcoming_length,
-              ) && (
-                <CustomUpcomingLength
-                  tempValue={fields.custom_upcoming_length}
-                  onChange={value => {
-                    dispatch({
-                      type: 'set-field',
-                      field: 'custom_upcoming_length',
-                      value,
-                    });
+              );
+              const safeCustomValue =
+                !isPreset && fields.custom_upcoming_length.includes('-')
+                  ? fields.custom_upcoming_length
+                  : '1-day';
+
+              return (
+                <View
+                  style={{
+                    marginTop: 5,
+                    alignItems: 'flex-end',
                   }}
-                />
-              )}
-            </View>
-          )}
+                >
+                  <Select
+                    options={[
+                      ['1', t('1 day')],
+                      ['7', t('1 week')],
+                      ['14', t('2 weeks')],
+                      ['oneMonth', t('1 month')],
+                      ['currentMonth', t('End of the current month')],
+                      ['custom', t('Custom length')],
+                    ]}
+                    value={isPreset ? fields.custom_upcoming_length : 'custom'}
+                    onChange={value => {
+                      dispatch({
+                        type: 'set-field',
+                        field: 'custom_upcoming_length',
+                        value: value === 'custom' ? '1-day' : value,
+                      });
+                    }}
+                  />
+                  {!isPreset && (
+                    <CustomUpcomingLength
+                      tempValue={safeCustomValue}
+                      onChange={value => {
+                        dispatch({
+                          type: 'set-field',
+                          field: 'custom_upcoming_length',
+                          value,
+                        });
+                      }}
+                    />
+                  )}
+                </View>
+              );
+            })()}
 
           {!adding && schedule.rule && (
             <SpaceBetween style={{ marginTop: 20, alignItems: 'center' }}>
