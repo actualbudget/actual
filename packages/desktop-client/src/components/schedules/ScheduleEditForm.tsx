@@ -404,13 +404,7 @@ export function ScheduleEditForm({
 
           {fields.custom_upcoming_length != null &&
             (() => {
-              const presetValues = [
-                '1',
-                '7',
-                '14',
-                'oneMonth',
-                'currentMonth',
-              ];
+              const presetValues = ['1', '7', '14', 'oneMonth', 'currentMonth'];
               const isPreset = presetValues.includes(
                 fields.custom_upcoming_length,
               );
