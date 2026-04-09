@@ -142,6 +142,43 @@ export const transactionModeFunctions: Record<string, FunctionDef> = {
       { name: 'decimals', description: 'Decimals' },
     ],
   },
+  FORMATNUMBER: {
+    name: 'FORMATNUMBER',
+    description: t(
+      'Formats a number with thousands separators and specified decimal places.',
+    ),
+    parameters: [
+      { name: 'value', description: 'Number to format' },
+      { name: 'decimals', description: 'Decimal places (default: 2)' },
+      {
+        name: 'thousandsSeparator',
+        description: 'Thousands separator (default: ",")',
+      },
+      {
+        name: 'decimalSeparator',
+        description: 'Decimal separator (default: ".")',
+      },
+    ],
+  },
+  FORMATCURRENCY: {
+    name: 'FORMATCURRENCY',
+    description: t(
+      'Formats a number as currency with symbol, thousands separators, and decimals.',
+    ),
+    parameters: [
+      { name: 'value', description: 'Number to format' },
+      { name: 'currencySymbol', description: 'Currency symbol (default: "$")' },
+      { name: 'decimals', description: 'Decimal places (default: 2)' },
+      {
+        name: 'thousandsSeparator',
+        description: 'Thousands separator (default: ",")',
+      },
+      {
+        name: 'decimalSeparator',
+        description: 'Decimal separator (default: ".")',
+      },
+    ],
+  },
   REPT: {
     name: 'REPT',
     description: t('Repeats text specified number of times.'),
