@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { send } from 'loot-core/platform/client/connection';
-import type { BankSyncProviders } from 'loot-core/types/models';
+import type { AccountEntity, BankSyncProviders } from 'loot-core/types/models';
 import type { SyncServerSimpleFinAccount } from 'loot-core/types/models/simplefin';
 
 import { BUILT_IN_BANK_SYNC_PROVIDERS } from './bankSyncUtils';
@@ -57,7 +57,32 @@ export type BuiltInBankSyncProviderState = {
   onReset: ProviderAction;
 };
 
-export function useBuiltInBankSyncProviders() {
+type SecretSetResponse = {
+  error?: string;
+  error_code?: string;
+  reason?: string;
+};
+
+type UseBuiltInBankSyncProvidersOptions = {
+  upgradingAccountId?: AccountEntity['id'];
+};
+
+async function ensureSuccessResponse(
+  response: SecretSetResponse,
+  fallbackMessage: string,
+) {
+  if (response.error_code) {
+    throw new Error(response.reason || response.error_code);
+  }
+
+  if (response.error) {
+    throw new Error(response.reason || response.error || fallbackMessage);
+  }
+}
+
+export function useBuiltInBankSyncProviders({
+  upgradingAccountId,
+}: UseBuiltInBankSyncProvidersOptions = {}) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const syncServerStatus = useSyncServerStatus();
@@ -133,52 +158,96 @@ export function useBuiltInBankSyncProviders() {
     );
   }, [dispatch]);
 
-  const onGoCardlessReset = useCallback(() => {
-    void send('secret-set', {
-      name: 'gocardless_secretId',
-      value: null,
-    }).then(() => {
-      void send('secret-set', {
-        name: 'gocardless_secretKey',
-        value: null,
-      }).then(() => {
-        setIsGoCardlessSetupComplete(false);
-      });
-    });
-  }, []);
+  const notifyResetFailure = useCallback(
+    (providerName: string, error: unknown) => {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            title: t('Failed to reset {{provider}}', {
+              provider: providerName,
+            }),
+            message: error instanceof Error ? error.message : String(error),
+            timeout: 5000,
+          },
+        }),
+      );
+    },
+    [dispatch, t],
+  );
 
-  const onSimpleFinReset = useCallback(() => {
-    void send('secret-set', {
-      name: 'simplefin_token',
-      value: null,
-    }).then(() => {
-      void send('secret-set', {
-        name: 'simplefin_accessKey',
-        value: null,
-      }).then(() => {
-        setIsSimpleFinSetupComplete(false);
-      });
-    });
-  }, []);
+  const onGoCardlessReset = useCallback(async () => {
+    try {
+      await ensureSuccessResponse(
+        await send('secret-set', {
+          name: 'gocardless_secretId',
+          value: null,
+        }),
+        'Failed to clear GoCardless secret ID',
+      );
+      await ensureSuccessResponse(
+        await send('secret-set', {
+          name: 'gocardless_secretKey',
+          value: null,
+        }),
+        'Failed to clear GoCardless secret key',
+      );
+      setIsGoCardlessSetupComplete(false);
+    } catch (error) {
+      notifyResetFailure('GoCardless', error);
+    }
+  }, [notifyResetFailure]);
 
-  const onPluggyAiReset = useCallback(() => {
-    void send('secret-set', {
-      name: 'pluggyai_clientId',
-      value: null,
-    }).then(() => {
-      void send('secret-set', {
-        name: 'pluggyai_clientSecret',
-        value: null,
-      }).then(() => {
-        void send('secret-set', {
+  const onSimpleFinReset = useCallback(async () => {
+    try {
+      await ensureSuccessResponse(
+        await send('secret-set', {
+          name: 'simplefin_token',
+          value: null,
+        }),
+        'Failed to clear SimpleFIN token',
+      );
+      await ensureSuccessResponse(
+        await send('secret-set', {
+          name: 'simplefin_accessKey',
+          value: null,
+        }),
+        'Failed to clear SimpleFIN access key',
+      );
+      setIsSimpleFinSetupComplete(false);
+    } catch (error) {
+      notifyResetFailure('SimpleFIN', error);
+    }
+  }, [notifyResetFailure]);
+
+  const onPluggyAiReset = useCallback(async () => {
+    try {
+      await ensureSuccessResponse(
+        await send('secret-set', {
+          name: 'pluggyai_clientId',
+          value: null,
+        }),
+        'Failed to clear Pluggy.ai client ID',
+      );
+      await ensureSuccessResponse(
+        await send('secret-set', {
+          name: 'pluggyai_clientSecret',
+          value: null,
+        }),
+        'Failed to clear Pluggy.ai client secret',
+      );
+      await ensureSuccessResponse(
+        await send('secret-set', {
           name: 'pluggyai_itemIds',
           value: null,
-        }).then(() => {
-          setIsPluggyAiSetupComplete(false);
-        });
-      });
-    });
-  }, []);
+        }),
+        'Failed to clear Pluggy.ai item IDs',
+      );
+      setIsPluggyAiSetupComplete(false);
+    } catch (error) {
+      notifyResetFailure('Pluggy.ai', error);
+    }
+  }, [notifyResetFailure]);
 
   const onConnectGoCardless = useCallback(() => {
     if (!isGoCardlessSetupComplete) {
@@ -186,8 +255,13 @@ export function useBuiltInBankSyncProviders() {
       return;
     }
 
-    void authorizeBank(dispatch);
-  }, [dispatch, isGoCardlessSetupComplete, onGoCardlessInit]);
+    void authorizeBank(dispatch, upgradingAccountId);
+  }, [
+    dispatch,
+    isGoCardlessSetupComplete,
+    onGoCardlessInit,
+    upgradingAccountId,
+  ]);
 
   const onConnectSimpleFin = useCallback(async () => {
     if (!isSimpleFinSetupComplete) {
@@ -205,6 +279,9 @@ export function useBuiltInBankSyncProviders() {
       const results = await send('simplefin-accounts');
       if (results.error_code) {
         throw new Error(results.reason);
+      }
+      if ('error' in results && results.error) {
+        throw new Error(results.reason || results.error);
       }
 
       const externalAccounts: SyncServerSimpleFinAccount[] = (
@@ -225,6 +302,7 @@ export function useBuiltInBankSyncProviders() {
             options: {
               externalAccounts,
               syncSource: 'simpleFin',
+              upgradingAccountId,
             },
           },
         }),
@@ -239,6 +317,7 @@ export function useBuiltInBankSyncProviders() {
     isSimpleFinSetupComplete,
     loadingSimpleFinAccounts,
     onSimpleFinInit,
+    upgradingAccountId,
   ]);
 
   const onConnectPluggyAi = useCallback(async () => {
@@ -280,6 +359,7 @@ export function useBuiltInBankSyncProviders() {
             options: {
               externalAccounts,
               syncSource: 'pluggyai',
+              upgradingAccountId,
             },
           },
         }),
@@ -297,7 +377,13 @@ export function useBuiltInBankSyncProviders() {
       );
       onPluggyAiInit();
     }
-  }, [dispatch, isPluggyAiSetupComplete, onPluggyAiInit, t]);
+  }, [
+    dispatch,
+    isPluggyAiSetupComplete,
+    onPluggyAiInit,
+    t,
+    upgradingAccountId,
+  ]);
 
   const configuredProviders = {
     goCardless: Boolean(isGoCardlessSetupComplete),

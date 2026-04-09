@@ -1,12 +1,26 @@
 import type { AccountEntity, BankSyncProviders } from 'loot-core/types/models';
 
 export type SyncProviders = BankSyncProviders | 'unlinked';
+export type GroupedBankSyncAccounts = Partial<
+  Record<SyncProviders, AccountEntity[]>
+>;
 
 export const BUILT_IN_BANK_SYNC_PROVIDERS = [
   'goCardless',
   'simpleFin',
   'pluggyai',
 ] as const satisfies BankSyncProviders[];
+
+const SYNC_PROVIDER_KEYS = [
+  ...BUILT_IN_BANK_SYNC_PROVIDERS,
+  'unlinked',
+] as const satisfies readonly SyncProviders[];
+
+const syncProviderKeysSet = new Set<string>(SYNC_PROVIDER_KEYS);
+
+function isSyncProvider(value: string): value is SyncProviders {
+  return syncProviderKeysSet.has(value);
+}
 
 export function getSyncSourceReadable(
   translate: (key: string) => string,
@@ -19,30 +33,50 @@ export function getSyncSourceReadable(
   };
 }
 
-export function groupBankSyncAccounts(accounts: AccountEntity[]) {
-  const unsorted = accounts
-    .filter(account => !account.closed)
-    .reduce(
-      (acc, account) => {
-        const syncSource = account.account_sync_source ?? 'unlinked';
-        acc[syncSource] = acc[syncSource] || [];
-        acc[syncSource].push(account);
-        return acc;
-      },
-      {} as Record<SyncProviders, AccountEntity[]>,
-    );
+export function groupBankSyncAccounts(
+  accounts: AccountEntity[],
+): GroupedBankSyncAccounts {
+  const groupedAccounts: GroupedBankSyncAccounts = {};
 
-  const sortedKeys = Object.keys(unsorted).sort((keyA, keyB) => {
-    if (keyA === 'unlinked') return 1;
-    if (keyB === 'unlinked') return -1;
-    return keyA.localeCompare(keyB);
-  });
+  for (const account of accounts) {
+    if (account.closed) {
+      continue;
+    }
 
-  return sortedKeys.reduce(
-    (sorted, key) => {
-      sorted[key as SyncProviders] = unsorted[key as SyncProviders];
-      return sorted;
-    },
-    {} as Record<SyncProviders, AccountEntity[]>,
+    const syncSource = account.account_sync_source ?? 'unlinked';
+    const existingAccounts = groupedAccounts[syncSource];
+
+    if (existingAccounts) {
+      existingAccounts.push(account);
+    } else {
+      groupedAccounts[syncSource] = [account];
+    }
+  }
+
+  const sortedEntries = Object.entries(groupedAccounts)
+    .filter(
+      (entry): entry is [SyncProviders, AccountEntity[]] =>
+        isSyncProvider(entry[0]) && entry[1] != null,
+    )
+    .sort(([keyA], [keyB]) => {
+      if (keyA === 'unlinked') return 1;
+      if (keyB === 'unlinked') return -1;
+      return keyA.localeCompare(keyB);
+    });
+
+  const sortedAccounts: GroupedBankSyncAccounts = {};
+  for (const [syncSource, providerAccounts] of sortedEntries) {
+    sortedAccounts[syncSource] = providerAccounts;
+  }
+
+  return sortedAccounts;
+}
+
+export function getGroupedBankSyncEntries(
+  groupedAccounts: GroupedBankSyncAccounts,
+): Array<[SyncProviders, AccountEntity[]]> {
+  return Object.entries(groupedAccounts).filter(
+    (entry): entry is [SyncProviders, AccountEntity[]] =>
+      isSyncProvider(entry[0]) && entry[1] != null,
   );
 }

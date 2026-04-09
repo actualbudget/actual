@@ -8,11 +8,15 @@ import type { AccountEntity } from 'loot-core/types/models';
 
 import { BankSyncAccountsListItem } from './BankSyncAccountsListItem';
 
-import type { SyncProviders } from '@desktop-client/components/banksync/bankSyncUtils';
+import { getGroupedBankSyncEntries } from '@desktop-client/components/banksync/bankSyncUtils';
+import type {
+  GroupedBankSyncAccounts,
+  SyncProviders,
+} from '@desktop-client/components/banksync/bankSyncUtils';
 import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
 
 type BankSyncAccountsListProps = {
-  groupedAccounts: Record<SyncProviders, AccountEntity[]>;
+  groupedAccounts: GroupedBankSyncAccounts;
   syncSourceReadable: Record<SyncProviders, string>;
   onAction: (account: AccountEntity, action: 'link' | 'edit') => void;
 };
@@ -22,7 +26,8 @@ export function BankSyncAccountsList({
   syncSourceReadable,
   onAction,
 }: BankSyncAccountsListProps) {
-  const allAccounts = Object.values(groupedAccounts).flat();
+  const groupedAccountEntries = getGroupedBankSyncEntries(groupedAccounts);
+  const allAccounts = groupedAccountEntries.flatMap(([, accounts]) => accounts);
 
   if (allAccounts.length === 0) {
     return (
@@ -47,15 +52,13 @@ export function BankSyncAccountsList({
     );
   }
 
-  const shouldShowProviderHeaders = Object.keys(groupedAccounts).length > 1;
+  const shouldShowProviderHeaders = groupedAccountEntries.length > 1;
 
   return (
     <div
       style={{ flex: 1, overflow: 'auto', paddingBottom: MOBILE_NAV_HEIGHT }}
     >
-      {(
-        Object.entries(groupedAccounts) as [SyncProviders, AccountEntity[]][]
-      ).map(([provider, accounts]) => (
+      {groupedAccountEntries.map(([provider, accounts]) => (
         <div key={provider}>
           {shouldShowProviderHeaders && (
             <div

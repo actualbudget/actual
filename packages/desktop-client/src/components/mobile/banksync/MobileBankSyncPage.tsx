@@ -11,10 +11,11 @@ import type { AccountEntity } from 'loot-core/types/models';
 import { BankSyncAccountsList } from './BankSyncAccountsList';
 
 import {
+  getGroupedBankSyncEntries,
   getSyncSourceReadable,
   groupBankSyncAccounts,
 } from '@desktop-client/components/banksync/bankSyncUtils';
-import type { SyncProviders } from '@desktop-client/components/banksync/bankSyncUtils';
+import type { GroupedBankSyncAccounts } from '@desktop-client/components/banksync/bankSyncUtils';
 import { Search } from '@desktop-client/components/common/Search';
 import { MobilePageHeader, Page } from '@desktop-client/components/Page';
 import { useAccounts } from '@desktop-client/hooks/useAccounts';
@@ -44,20 +45,20 @@ export function MobileBankSyncPage() {
     if (!filter) return groupedAccounts;
 
     const filterLower = filter.toLowerCase();
-    const filtered = {} as typeof groupedAccounts;
+    const filtered: GroupedBankSyncAccounts = {};
 
-    (
-      Object.entries(groupedAccounts) as [SyncProviders, AccountEntity[]][]
-    ).forEach(([provider, accounts]) => {
-      const filteredAccounts = accounts.filter(
-        account =>
-          account.name.toLowerCase().includes(filterLower) ||
-          account.bankName?.toLowerCase().includes(filterLower),
-      );
-      if (filteredAccounts.length > 0) {
-        filtered[provider] = filteredAccounts;
-      }
-    });
+    getGroupedBankSyncEntries(groupedAccounts).forEach(
+      ([provider, accounts]) => {
+        const filteredAccounts = accounts.filter(
+          account =>
+            account.name.toLowerCase().includes(filterLower) ||
+            account.bankName?.toLowerCase().includes(filterLower),
+        );
+        if (filteredAccounts.length > 0) {
+          filtered[provider] = filteredAccounts;
+        }
+      },
+    );
 
     return filtered;
   }, [groupedAccounts, filter]);

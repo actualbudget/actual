@@ -37,7 +37,7 @@ export function CreateAccountModal({
     syncServerStatus,
     showPermissionWarning,
     providersNeedingConfiguration,
-  } = useBuiltInBankSyncProviders();
+  } = useBuiltInBankSyncProviders({ upgradingAccountId });
 
   const onCreateLocalAccount = () => {
     dispatch(pushModal({ modal: { name: 'add-local-account' } }));

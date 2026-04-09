@@ -1,5 +1,5 @@
 import { send } from 'loot-core/platform/client/connection';
-import type { GoCardlessToken } from 'loot-core/types/models';
+import type { AccountEntity, GoCardlessToken } from 'loot-core/types/models';
 
 import { pushModal } from './modals/modalsSlice';
 import type { AppDispatch } from './redux/store';
@@ -41,7 +41,10 @@ function _authorize(
   );
 }
 
-export async function authorizeBank(dispatch: AppDispatch) {
+export async function authorizeBank(
+  dispatch: AppDispatch,
+  upgradingAccountId?: AccountEntity['id'],
+) {
   _authorize(dispatch, {
     onSuccess: async data => {
       dispatch(
@@ -52,6 +55,7 @@ export async function authorizeBank(dispatch: AppDispatch) {
               externalAccounts: data.accounts,
               requisitionId: data.id,
               syncSource: 'goCardless',
+              upgradingAccountId,
             },
           },
         }),

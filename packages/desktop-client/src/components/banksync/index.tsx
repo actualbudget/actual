@@ -10,8 +10,11 @@ import type { AccountEntity } from 'loot-core/types/models';
 
 import { AccountsHeader } from './AccountsHeader';
 import { AccountsList } from './AccountsList';
-import { getSyncSourceReadable, groupBankSyncAccounts } from './bankSyncUtils';
-import type { SyncProviders } from './bankSyncUtils';
+import {
+  getGroupedBankSyncEntries,
+  getSyncSourceReadable,
+  groupBankSyncAccounts,
+} from './bankSyncUtils';
 import { BuiltInProviders } from './BuiltInProviders';
 import { useBuiltInBankSyncProviders } from './useBuiltInBankSyncProviders';
 
@@ -43,6 +46,10 @@ export function BankSync() {
   const groupedAccounts = useMemo(
     () => groupBankSyncAccounts(accounts),
     [accounts],
+  );
+  const groupedAccountEntries = useMemo(
+    () => getGroupedBankSyncEntries(groupedAccounts),
+    [groupedAccounts],
   );
   const openAccounts = useMemo(
     () => accounts.filter(account => !account.closed),
@@ -107,12 +114,10 @@ export function BankSync() {
           </Text>
         )}
 
-        {(
-          Object.entries(groupedAccounts) as [SyncProviders, AccountEntity[]][]
-        ).map(([syncProvider, accounts]) => {
+        {groupedAccountEntries.map(([syncProvider, accounts]) => {
           return (
             <View key={syncProvider} style={{ minHeight: 'initial' }}>
-              {Object.keys(groupedAccounts).length > 1 && (
+              {groupedAccountEntries.length > 1 && (
                 <Text
                   style={{ fontWeight: 500, fontSize: 20, margin: '.5em 0' }}
                 >
