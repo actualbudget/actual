@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type * as db from '../db';
+import type * as db from '#server/db';
 
 import {
   decodeBalanceOfQuotedLiteral,

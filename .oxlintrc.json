@@ -397,6 +397,12 @@
       }
     },
     {
+      "files": ["packages/loot-core/src/**/*.{ts,tsx}"],
+      "rules": {
+        "actual/prefer-subpath-imports": "error"
+      }
+    },
+    {
       "files": ["packages/desktop-client/**/*.{js,ts,jsx,tsx}"],
       "rules": {
         "typescript-paths/absolute-parent-import": [

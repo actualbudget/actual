@@ -2,7 +2,7 @@ import { enUS } from 'date-fns/locale';
 import i18next from 'i18next';
 import MockDate from 'mockdate';
 
-import type { ScheduleEntity } from '../types/models';
+import type { ScheduleEntity } from '#types/models';
 
 import * as monthUtils from './months';
 import {

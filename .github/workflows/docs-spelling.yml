@@ -79,12 +79,12 @@ jobs:
     steps:
       - name: check-spelling
         id: spelling
-        uses: check-spelling/check-spelling@main
+        uses: check-spelling/check-spelling@cfb6f7e75bbfc89c71eaa30366d0c166f1bd9c8c # main
         with:
           suppress_push_for_open_pull_request: 1
           checkout: true
           check_file_names: 1
-          spell_check_this: check-spelling/spell-check-this@prerelease
+          spell_check_this: check-spelling/spell-check-this@92453f59cac8985482dfc301a8ece4c6d7de8a0c # prerelease
           post_comment: 0
           use_magic_file: 1
           experimental_apply_changes_via_bot: 1
@@ -114,10 +114,10 @@ jobs:
     if: (success() || failure()) && needs.spelling.outputs.followup && github.event_name == 'push'
     steps:
       - name: comment
-        uses: check-spelling/check-spelling@main
+        uses: check-spelling/check-spelling@cfb6f7e75bbfc89c71eaa30366d0c166f1bd9c8c # main
         with:
           checkout: true
-          spell_check_this: check-spelling/spell-check-this@prerelease
+          spell_check_this: check-spelling/spell-check-this@92453f59cac8985482dfc301a8ece4c6d7de8a0c # prerelease
           task: ${{ needs.spelling.outputs.followup }}
           config: .github/actions/docs-spelling
 
@@ -131,10 +131,10 @@ jobs:
     if: (success() || failure()) && needs.spelling.outputs.followup && contains(github.event_name, 'pull_request')
     steps:
       - name: comment
-        uses: check-spelling/check-spelling@main
+        uses: check-spelling/check-spelling@cfb6f7e75bbfc89c71eaa30366d0c166f1bd9c8c # main
         with:
           checkout: true
-          spell_check_this: check-spelling/spell-check-this@prerelease
+          spell_check_this: check-spelling/spell-check-this@92453f59cac8985482dfc301a8ece4c6d7de8a0c # prerelease
           task: ${{ needs.spelling.outputs.followup }}
           experimental_apply_changes_via_bot: 1
           config: .github/actions/docs-spelling
@@ -156,7 +156,7 @@ jobs:
       cancel-in-progress: false
     steps:
       - name: apply spelling updates
-        uses: check-spelling/check-spelling@main
+        uses: check-spelling/check-spelling@cfb6f7e75bbfc89c71eaa30366d0c166f1bd9c8c # main
         with:
           experimental_apply_changes_via_bot: 1
           checkout: true

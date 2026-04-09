@@ -1,19 +1,19 @@
 // @ts-strict-ignore
 
+import * as db from '#server/db';
+import { collectFormulasFromActions } from '#server/rules/balanceOfFormula';
+import { getRuleForSchedule } from '#server/schedules/app';
+import { prefetchBalanceOfForTransaction } from '#server/transactions/transaction-rules';
 import type { Currency } from '#shared/currencies';
-import { amountToInteger } from '#shared/util';
-import * as monthUtils from '../../shared/months';
+import * as monthUtils from '#shared/months';
 import {
   extractScheduleConds,
   getDateWithSkippedWeekend,
   getNextDate,
-} from '../../shared/schedules';
-import type { CategoryEntity, TransactionEntity } from '../../types/models';
-import type { ScheduleTemplate, Template } from '../../types/models/templates';
-import * as db from '../db';
-import { collectFormulasFromActions } from '../rules/balanceOfFormula';
-import { getRuleForSchedule } from '../schedules/app';
-import { prefetchBalanceOfForTransaction } from '../transactions/transaction-rules';
+} from '#shared/schedules';
+import { amountToInteger } from '#shared/util';
+import type { CategoryEntity, TransactionEntity } from '#types/models';
+import type { ScheduleTemplate, Template } from '#types/models/templates';
 
 import { getSheetValue, isReflectBudget } from './actions';
 

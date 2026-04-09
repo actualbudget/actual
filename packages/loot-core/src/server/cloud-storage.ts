@@ -7,7 +7,7 @@ import { fetch } from '#platform/server/fetch';
 import * as fs from '#platform/server/fs';
 import { logger } from '#platform/server/log';
 import * as sqlite from '#platform/server/sqlite';
-import * as monthUtils from '../shared/months';
+import * as monthUtils from '#shared/months';
 
 import * as encryption from './encryption';
 import {

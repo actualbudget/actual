@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { fastSetMerge } from '../../shared/util';
+import { fastSetMerge } from '#shared/util';
 
 import type { Rule } from './rule';
 

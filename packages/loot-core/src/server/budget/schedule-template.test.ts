@@ -1,16 +1,16 @@
+import * as db from '#server/db';
+import { Rule } from '#server/rules';
+import { getRuleForSchedule } from '#server/schedules/app';
 import type { Currency } from '#shared/currencies';
-import type { CategoryEntity } from '../../types/models';
-import * as db from '../db';
-import { Rule } from '../rules';
-import { getRuleForSchedule } from '../schedules/app';
+import type { CategoryEntity } from '#types/models';
 
 import { isReflectBudget } from './actions';
 import { runSchedule } from './schedule-template';
 
-vi.mock('../db');
+vi.mock('#server/db');
 vi.mock('./actions');
-vi.mock('../schedules/app', async () => {
-  const actualModule = await vi.importActual('../schedules/app');
+vi.mock('#server/schedules/app', async () => {
+  const actualModule = await vi.importActual('#server/schedules/app');
   return {
     ...actualModule,
     getRuleForSchedule: vi.fn(),

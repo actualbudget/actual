@@ -1,5 +1,5 @@
-import type { Template } from '../../types/models/templates';
-import * as db from '../db';
+import * as db from '#server/db';
+import type { Template } from '#types/models/templates';
 
 import { parse } from './goal-template.pegjs';
 import {
@@ -14,7 +14,7 @@ import {
   unparse,
 } from './template-notes';
 
-vi.mock('../db');
+vi.mock('#server/db');
 vi.mock('./statements');
 
 function mockGetTemplateNotesForCategories(

@@ -1,4 +1,4 @@
-import type * as db from '../db';
+import type * as db from '#server/db';
 
 /** Collect formula strings from serialized or live rule actions. */
 export function collectFormulasFromActions(

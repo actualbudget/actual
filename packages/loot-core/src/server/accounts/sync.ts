@@ -3,36 +3,36 @@ import * as dateFns from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
 import * as asyncStorage from '#platform/server/asyncStorage';
-import { logger } from '../../platform/server/log';
-import * as monthUtils from '../../shared/months';
-import { q } from '../../shared/query';
+import { logger } from '#platform/server/log';
+import { aqlQuery } from '#server/aql';
+import * as db from '#server/db';
+import { TRANSACTION_SORT_INCREMENT } from '#server/db/sort';
+import { runMutator } from '#server/mutators';
+import { post } from '#server/post';
+import { getServer } from '#server/server-config';
+import { batchMessages } from '#server/sync';
+import { batchUpdateTransactions } from '#server/transactions';
+import { runRules } from '#server/transactions/transaction-rules';
+import {
+  defaultMappings,
+  mappingsFromString,
+} from '#server/util/custom-sync-mapping';
+import * as monthUtils from '#shared/months';
+import { q } from '#shared/query';
 import {
   makeChild as makeChildTransaction,
   recalculateSplit,
-} from '../../shared/transactions';
+} from '#shared/transactions';
 import {
   amountToInteger,
   hasFieldsChanged,
   integerToAmount,
-} from '../../shared/util';
+} from '#shared/util';
 import type {
   AccountEntity,
   BankSyncResponse,
   TransactionEntity,
-} from '../../types/models';
-import { aqlQuery } from '../aql';
-import * as db from '../db';
-import { TRANSACTION_SORT_INCREMENT } from '../db/sort';
-import { runMutator } from '../mutators';
-import { post } from '../post';
-import { getServer } from '../server-config';
-import { batchMessages } from '../sync';
-import { batchUpdateTransactions } from '../transactions';
-import { runRules } from '../transactions/transaction-rules';
-import {
-  defaultMappings,
-  mappingsFromString,
-} from '../util/custom-sync-mapping';
+} from '#types/models';
 
 import { getStartingBalancePayee } from './payees';
 import { title } from './title';

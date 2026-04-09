@@ -1,6 +1,6 @@
+import { getDatabase } from '#platform/server/indexeddb';
 // @ts-strict-ignore
-import type { GlobalPrefsJson } from '../../../types/prefs';
-import { getDatabase } from '../indexeddb';
+import type { GlobalPrefsJson } from '#types/prefs';
 
 import type * as T from './index-types';
 

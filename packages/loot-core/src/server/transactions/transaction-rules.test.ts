@@ -1,8 +1,8 @@
+import { aqlQuery } from '#server/aql';
+import * as db from '#server/db';
+import { loadMappings } from '#server/db/mappings';
 // @ts-strict-ignore
-import { q } from '../../shared/query';
-import { aqlQuery } from '../aql';
-import * as db from '../db';
-import { loadMappings } from '../db/mappings';
+import { q } from '#shared/query';
 
 import {
   conditionsToAQL,

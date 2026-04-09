@@ -183,13 +183,13 @@ export function ReconcileMenu({
             <Input
               value={inputValue}
               onChangeValue={setInputValue}
-              style={{ margin: '7px 0' }}
+              style={{ margin: '7px 0', textAlign: 'right' }}
             />
           </InitialFocus>
         )}
         {lastSyncedBalance != null && (
           <View>
-            <Text>
+            <Text style={{ margin: '0 6px 8px 0', textAlign: 'right' }}>
               <Trans>Last Balance from Bank: </Trans>
               {format(lastSyncedBalance, 'financial')}
             </Text>
@@ -203,7 +203,16 @@ export function ReconcileMenu({
             </Button>
           </View>
         )}
-        <Text style={{ color: theme.pageTextSubdued, paddingBottom: 6 }}>
+        <Button type="submit" variant="primary">
+          <Trans>Reconcile</Trans>
+        </Button>
+        <Text
+          style={{
+            color: theme.pageTextLight,
+            marginTop: '8px',
+            textAlign: 'center',
+          }}
+        >
           {account?.last_reconciled
             ? t('Reconciled {{ relativeTimeAgo }} ({{ absoluteDate }})', {
                 relativeTimeAgo: tsToRelativeTime(
@@ -218,9 +227,6 @@ export function ReconcileMenu({
               })
             : t('Not yet reconciled')}
         </Text>
-        <Button type="submit" variant="primary">
-          <Trans>Reconcile</Trans>
-        </Button>
       </View>
     </Form>
   );

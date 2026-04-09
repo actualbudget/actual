@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
-import * as undo from '../undo';
+import * as undo from '#platform/client/undo';
 
 import type * as T from './index-types';
 

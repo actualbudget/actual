@@ -1,10 +1,10 @@
 // @ts-strict-ignore
 import { getClock, Timestamp } from '@actual-app/crdt';
 
-import * as db from '../db';
-import * as prefs from '../prefs';
-import * as sheet from '../sheet';
-import * as mockSyncServer from '../tests/mockSyncServer';
+import * as db from '#server/db';
+import * as prefs from '#server/prefs';
+import * as sheet from '#server/sheet';
+import * as mockSyncServer from '#server/tests/mockSyncServer';
 
 import * as encoder from './encoder';
 import { isError } from './utils';

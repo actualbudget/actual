@@ -2,7 +2,7 @@
 import { makeClock, merkle, SyncProtoBuf, Timestamp } from '@actual-app/crdt';
 import type { Clock } from '@actual-app/crdt';
 
-import type { Message } from '../sync';
+import type { Message } from '#server/sync';
 
 import { basic as defaultMockData } from './mockData.json';
 
