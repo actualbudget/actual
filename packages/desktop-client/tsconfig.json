@@ -10,6 +10,7 @@
     "outDir": "build/ts",
     "rootDir": ".",
     "tsBuildInfoFile": "build/ts/.tsbuildinfo",
+    "customConditions": ["electron-renderer"],
     "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },
   "references": [
