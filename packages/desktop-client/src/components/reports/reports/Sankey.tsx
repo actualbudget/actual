@@ -17,6 +17,7 @@ import type { SankeyData } from 'recharts/types/chart/Sankey';
 
 import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
+import { mapField } from 'loot-core/shared/rules';
 import type {
   RuleConditionEntity,
   SankeyWidget,
@@ -422,7 +423,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
               .filter(
                 c => c.field !== 'category' && c.field !== 'category_group',
               )
-              .map(c => c.field),
+              .map(c => mapField(c.field)),
           ),
         ]
       : [];
