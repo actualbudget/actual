@@ -25,8 +25,6 @@ try {
     process.exit(0);
   }
 
-  console.log('CodeRabbit comment body:', commentBody);
-
   const data = JSON.stringify({
     model: 'gpt-4o-mini',
     messages: [

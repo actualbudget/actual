@@ -16,6 +16,15 @@ if (!token || !repo || !issueNumber || !summaryDataJson || !category) {
 const [owner, repoName] = repo.split('/');
 const octokit = new Octokit({ auth: token });
 
+const VALID_CATEGORIES = [
+  'Features',
+  'Bugfixes',
+  'Enhancements',
+  'Maintenance',
+];
+const GITHUB_USERNAME_RE =
+  /^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/;
+
 async function createReleaseNotesFile() {
   try {
     const summaryData = JSON.parse(summaryDataJson);
@@ -34,19 +43,45 @@ async function createReleaseNotesFile() {
       return;
     }
 
-    // Create file content - ensure category is not quoted
+    // Normalize category - strip surrounding quotes and validate against allow-list
     const cleanCategory =
       typeof category === 'string'
         ? category.replace(/^["']|["']$/g, '')
         : category;
     console.log('Debug - Clean category:', cleanCategory);
 
+    if (!VALID_CATEGORIES.includes(cleanCategory)) {
+      console.log(
+        `Invalid category "${cleanCategory}". Must be one of: ${VALID_CATEGORIES.join(', ')}`,
+      );
+      return;
+    }
+
+    // Validate author is a plausible GitHub username
+    const author = String(summaryData.author || '');
+    if (!GITHUB_USERNAME_RE.test(author)) {
+      console.log(
+        `Invalid author "${author}", aborting release notes creation`,
+      );
+      return;
+    }
+
+    // Normalize summary: collapse whitespace to a single line so it cannot
+    // introduce extra YAML frontmatter or break the markdown structure.
+    const cleanSummary = String(summaryData.summary || '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (!cleanSummary) {
+      console.log('Empty summary, aborting release notes creation');
+      return;
+    }
+
     const fileContent = `---
 category: ${cleanCategory}
-authors: [${summaryData.author}]
+authors: [${author}]
 ---
 
-${summaryData.summary}
+${cleanSummary}
 `;
 
     const fileName = `upcoming-release-notes/${summaryData.prNumber}.md`;

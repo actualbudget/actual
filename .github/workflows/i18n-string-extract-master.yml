@@ -29,18 +29,22 @@ jobs:
           pip install wlc
 
       - name: Lock translations
+        env:
+          WEBLATE_API_KEY: ${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}
         run: |
           wlc \
             --url https://hosted.weblate.org/api/ \
-            --key "${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}" \
+            --key "$WEBLATE_API_KEY" \
             lock \
             actualbudget/actual
 
       - name: Update VCS with latest translations
+        env:
+          WEBLATE_API_KEY: ${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}
         run: |
           wlc \
             --url https://hosted.weblate.org/api/ \
-            --key "${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}" \
+            --key "$WEBLATE_API_KEY" \
             push \
             actualbudget/actual
       - name: Check out updated translations
@@ -70,18 +74,22 @@ jobs:
             echo "No changes to commit"
           fi
       - name: Update Weblate with latest translations
+        env:
+          WEBLATE_API_KEY: ${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}
         run: |
           wlc \
             --url https://hosted.weblate.org/api/ \
-            --key "${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}" \
+            --key "$WEBLATE_API_KEY" \
             pull \
             actualbudget/actual
 
       - name: Unlock translations
         if: always() # Clean up even on failure
+        env:
+          WEBLATE_API_KEY: ${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}
         run: |
           wlc \
             --url https://hosted.weblate.org/api/ \
-            --key "${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}" \
+            --key "$WEBLATE_API_KEY" \
             unlock \
             actualbudget/actual
