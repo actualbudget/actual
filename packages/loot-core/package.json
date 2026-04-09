@@ -42,7 +42,7 @@
       "default": "./src/platform/server/sqlite/index.ts"
     },
     "#platform/client/connection": {
-      "electron": "./src/platform/client/connection/index.ts",
+      "electron-renderer": "./src/platform/client/connection/index.ts",
       "default": "./src/platform/client/connection/index.browser.ts"
     },
     "#server/encryption/encryption-internals": {
@@ -101,7 +101,7 @@
     "./client/undo": "./src/client/undo.ts",
     "./mocks": "./src/mocks/index.ts",
     "./platform/client/connection": {
-      "electron": "./src/platform/client/connection/index.ts",
+      "electron-renderer": "./src/platform/client/connection/index.ts",
       "default": "./src/platform/client/connection/index.browser.ts"
     },
     "./platform/client/undo": "./src/platform/client/undo/index.ts",
