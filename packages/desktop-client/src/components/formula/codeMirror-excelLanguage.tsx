@@ -71,19 +71,15 @@ function FieldTooltip({ label, info }: { label: string; info: string }) {
 type FormulaMode = 'query' | 'transaction';
 
 // Function categories for different syntax highlighting
+// Cleanup: Removed range-based functions that don't work with Actual's named expressions
+// Removed: AVERAGEA, COUNT, COUNTA, COUNTBLANK, COUNTIF, COUNTIFS, MAXA, MINA,
+//          SUMIF, SUMIFS, SUMPRODUCT, SUMSQ, MEDIAN, MODE, STDEV, STDEVP, VAR, VARP,
+//          PERCENTILE, QUARTILE, RANK
 const MATH_FUNCTIONS = new Set([
   'SUM',
   'AVERAGE',
-  'AVERAGEA',
-  'COUNT',
-  'COUNTA',
-  'COUNTBLANK',
-  'COUNTIF',
-  'COUNTIFS',
   'MAX',
-  'MAXA',
   'MIN',
-  'MINA',
   'ABS',
   'ROUND',
   'ROUNDUP',
@@ -105,19 +101,6 @@ const MATH_FUNCTIONS = new Set([
   'LOG10',
   'EXP',
   'PRODUCT',
-  'SUMIF',
-  'SUMIFS',
-  'SUMPRODUCT',
-  'SUMSQ',
-  'MEDIAN',
-  'MODE',
-  'STDEV',
-  'STDEVP',
-  'VAR',
-  'VARP',
-  'PERCENTILE',
-  'QUARTILE',
-  'RANK',
   'PMT',
   'FV',
   'PV',
@@ -187,6 +170,8 @@ const DATE_FUNCTIONS = new Set([
   'ISOWEEKNUM',
 ]);
 
+// Cleanup: Removed lookup functions that require arrays/ranges
+// Removed: LOOKUP, VLOOKUP, HLOOKUP, INDEX, MATCH, ISREF
 const QUERY_FUNCTIONS = new Set([
   'QUERY',
   'QUERY_COUNT',
@@ -194,11 +179,6 @@ const QUERY_FUNCTIONS = new Set([
   'QUERY_EXTRACT_CATEGORIES',
   'QUERY_EXTRACT_TIMEFRAME_START',
   'QUERY_EXTRACT_TIMEFRAME_END',
-  'LOOKUP',
-  'VLOOKUP',
-  'HLOOKUP',
-  'INDEX',
-  'MATCH',
   'CHOOSE',
   'ISBLANK',
   'ISERROR',
@@ -206,7 +186,6 @@ const QUERY_FUNCTIONS = new Set([
   'ISNUMBER',
   'ISTEXT',
   'ISLOGICAL',
-  'ISREF',
   'ISEVEN',
   'ISODD',
 ]);
