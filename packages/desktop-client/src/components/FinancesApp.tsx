@@ -89,6 +89,7 @@ export function FinancesApp() {
   const { isNarrowWidth } = useResponsive();
   useMetaThemeColor(isNarrowWidth ? theme.mobileViewTheme : undefined);
 
+  const location = useLocation();
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
@@ -290,7 +291,10 @@ export function FinancesApp() {
                 <Route
                   path="/rules"
                   element={
-                    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+                    <ErrorBoundary
+                      FallbackComponent={FeatureErrorFallback}
+                      resetKeys={[location.pathname]}
+                    >
                       <NarrowAlternate name="Rules" />
                     </ErrorBoundary>
                   }
@@ -298,7 +302,10 @@ export function FinancesApp() {
                 <Route
                   path="/rules/:id"
                   element={
-                    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+                    <ErrorBoundary
+                      FallbackComponent={FeatureErrorFallback}
+                      resetKeys={[location.pathname]}
+                    >
                       <NarrowAlternate name="RuleEdit" />
                     </ErrorBoundary>
                   }
