@@ -29,10 +29,6 @@ async function createReleaseNotesFile() {
   try {
     const summaryData = JSON.parse(summaryDataJson);
 
-    console.log('Debug - Category value:', category);
-    console.log('Debug - Category type:', typeof category);
-    console.log('Debug - Category JSON stringified:', JSON.stringify(category));
-
     if (!summaryData) {
       console.log('No summary data available, cannot create file');
       return;
@@ -48,7 +44,6 @@ async function createReleaseNotesFile() {
       typeof category === 'string'
         ? category.replace(/^["']|["']$/g, '')
         : category;
-    console.log('Debug - Clean category:', cleanCategory);
 
     if (!VALID_CATEGORIES.includes(cleanCategory)) {
       console.log(
