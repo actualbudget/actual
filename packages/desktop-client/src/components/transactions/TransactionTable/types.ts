@@ -17,6 +17,8 @@ export type TransactionTableState = {
   editingId: TransactionEntity['id'] | null;
   editingField: string | null;
   expandedSplitIds: Set<TransactionEntity['id']>;
+  expandedRowIds: Set<TransactionEntity['id']>;
+  rowHeights: Map<TransactionEntity['id'], number>;
   dragState: DragState | null;
 };
 
@@ -32,6 +34,10 @@ export type TableAction =
   | { type: 'TOGGLE_SPLIT'; id: TransactionEntity['id'] }
   | { type: 'EXPAND_SPLIT'; id: TransactionEntity['id'] }
   | { type: 'COLLAPSE_SPLIT'; id: TransactionEntity['id'] }
+  | { type: 'TOGGLE_ROW_EXPANSION'; id: TransactionEntity['id'] }
+  | { type: 'EXPAND_ROW'; id: TransactionEntity['id'] }
+  | { type: 'COLLAPSE_ROW'; id: TransactionEntity['id'] }
+  | { type: 'SET_ROW_HEIGHT'; id: TransactionEntity['id']; height: number }
   | { type: 'START_DRAG'; id: TransactionEntity['id']; date: string; parentId: TransactionEntity['parent_id'] | null }
   | { type: 'END_DRAG' }
   | { type: 'RESET' };
@@ -111,11 +117,15 @@ export type TransactionRowProps = {
   isNew: boolean;
   isMatched: boolean;
   isExpanded: boolean;
+  isSplitExpanded: boolean;
+  rowHeight?: number;
   dateFormat: string;
   onEdit: (id: TransactionEntity['id'], field: string) => void;
   onSave: (transaction: TransactionEntity) => void;
   onDelete: (id: TransactionEntity['id']) => void;
   onToggleSplit: (id: TransactionEntity['id']) => void;
+  onToggleRowExpansion: (id: TransactionEntity['id']) => void;
+  onSetRowHeight: (id: TransactionEntity['id'], height: number) => void;
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
   onNotesTagClick: (tag: string) => void;

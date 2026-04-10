@@ -7,6 +7,8 @@ export function createInitialState(): TransactionTableState {
     editingId: null,
     editingField: null,
     expandedSplitIds: new Set(),
+    expandedRowIds: new Set(),
+    rowHeights: new Map(),
     dragState: null,
   };
 }
@@ -61,6 +63,46 @@ export function tableReducer(
       };
     }
 
+    case 'TOGGLE_ROW_EXPANSION': {
+      const newExpandedRowIds = new Set(state.expandedRowIds);
+      if (newExpandedRowIds.has(action.id)) {
+        newExpandedRowIds.delete(action.id);
+      } else {
+        newExpandedRowIds.add(action.id);
+      }
+      return {
+        ...state,
+        expandedRowIds: newExpandedRowIds,
+      };
+    }
+
+    case 'EXPAND_ROW': {
+      const newExpandedRowIds = new Set(state.expandedRowIds);
+      newExpandedRowIds.add(action.id);
+      return {
+        ...state,
+        expandedRowIds: newExpandedRowIds,
+      };
+    }
+
+    case 'COLLAPSE_ROW': {
+      const newExpandedRowIds = new Set(state.expandedRowIds);
+      newExpandedRowIds.delete(action.id);
+      return {
+        ...state,
+        expandedRowIds: newExpandedRowIds,
+      };
+    }
+
+    case 'SET_ROW_HEIGHT': {
+      const newRowHeights = new Map(state.rowHeights);
+      newRowHeights.set(action.id, action.height);
+      return {
+        ...state,
+        rowHeights: newRowHeights,
+      };
+    }
+
     case 'START_DRAG':
       return {
         ...state,
@@ -101,6 +143,24 @@ export function isTransactionEditing(
     return state.editingId === id && state.editingField === field;
   }
   return state.editingId === id;
+}
+
+export function isRowExpanded(
+  state: TransactionTableState,
+  id: TransactionEntity['id'],
+): boolean {
+  return state.expandedRowIds.has(id);
+}
+
+export function getRowHeight(
+  state: TransactionTableState,
+  id: TransactionEntity['id'],
+  defaultHeight: number = 32,
+): number {
+  if (!state.expandedRowIds.has(id)) {
+    return defaultHeight;
+  }
+  return state.rowHeights.get(id) || defaultHeight;
 }
 
 export function getVisibleTransactions(
