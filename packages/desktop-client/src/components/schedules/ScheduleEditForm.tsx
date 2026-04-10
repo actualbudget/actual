@@ -344,8 +344,13 @@ export function ScheduleEditForm({
                 presetValues.includes(fields.custom_upcoming_length);
               const isCustomValue =
                 fields.custom_upcoming_length != null && !isPreset;
+              const isValidCustomFormat =
+                fields.custom_upcoming_length != null &&
+                /^[1-9]\d*-(day|week|month|year)$/.test(
+                  fields.custom_upcoming_length,
+                );
               const safeCustomValue =
-                isCustomValue && fields.custom_upcoming_length.includes('-')
+                isCustomValue && isValidCustomFormat
                   ? fields.custom_upcoming_length
                   : '1-day';
 
@@ -417,7 +422,7 @@ export function ScheduleEditForm({
                 flexDirection: 'row',
                 alignItems: 'center',
                 userSelect: 'none',
-                height: 28,
+                minHeight: 28,
               }}
             >
               <Checkbox
