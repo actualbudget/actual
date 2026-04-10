@@ -116,7 +116,7 @@ export function SelectedBalance({
     }
   }
 
-  if (!balance && !scheduleBalance) {
+  if (typeof balance !== 'number' && !scheduleBalance) {
     return null;
   } else {
     balance = (balance ?? 0) + scheduleBalance;
