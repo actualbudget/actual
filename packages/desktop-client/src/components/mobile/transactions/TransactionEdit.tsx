@@ -55,6 +55,7 @@ import {
   groupById,
   integerToAmount,
   integerToCurrency,
+  shouldApplyRuleDiffField,
   titleFirst,
 } from 'loot-core/shared/util';
 import type {
@@ -1563,15 +1564,13 @@ function TransactionEditUnconnected({
         if (diff) {
           Object.keys(diff).forEach(key => {
             const field = key as keyof TransactionEntity;
-            // Update "empty" fields in general
-            // Or update all fields if the payee changes (assists location-based entry by
-            // applying rules to prefill category, notes, etc. based on the selected payee)
             if (
-              newTransaction[field] == null ||
-              newTransaction[field] === '' ||
-              newTransaction[field] === 0 ||
-              newTransaction[field] === false ||
-              updatedField === 'payee'
+              shouldApplyRuleDiffField(
+                key,
+                newTransaction[field],
+                diff[field],
+                updatedField,
+              )
             ) {
               (newTransaction as Record<string, unknown>)[field] = diff[field];
             }

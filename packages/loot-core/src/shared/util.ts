@@ -29,6 +29,42 @@ export function getChangedValues<T extends { id?: string }>(obj1: T, obj2: T) {
   return hasChanged ? diff : null;
 }
 
+/**
+ * Whether a field from `getChangedValues(before, afterRules)` should be merged
+ * into the working transaction after rules run (e.g. when saving a new row).
+ * Empty fields always accept rule output; when the payee was just updated, all
+ * diffs apply (prefill). For non-empty `notes`, only apply when the rule result
+ * clearly extends the existing text (append / prepend), so arbitrary `set notes`
+ * rules still respect user-entered notes (see issue #7303).
+ */
+export function shouldApplyRuleDiffField(
+  field: string,
+  prev: unknown,
+  next: unknown,
+  updatedFieldName: string | null = null,
+): boolean {
+  if (updatedFieldName === 'payee') {
+    return true;
+  }
+
+  if (prev == null || prev === '' || prev === 0 || prev === false) {
+    return true;
+  }
+
+  if (
+    field === 'notes' &&
+    typeof prev === 'string' &&
+    typeof next === 'string'
+  ) {
+    return (
+      next.length > prev.length &&
+      (next.startsWith(prev) || next.endsWith(prev))
+    );
+  }
+
+  return false;
+}
+
 export function hasFieldsChanged<T extends object>(
   obj1: T,
   obj2: T,

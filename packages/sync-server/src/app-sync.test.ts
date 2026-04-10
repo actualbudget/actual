@@ -472,9 +472,11 @@ describe('/upload-user-file', () => {
       ],
     );
 
-    fs.writeFile(getPathForUserFile(fileId), oldFileContent, err => {
-      if (err) throw err;
-    });
+    await fs.promises.writeFile(
+      getPathForUserFile(fileId),
+      oldFileContent,
+      'utf8',
+    );
 
     const res = await request(app)
       .post('/upload-user-file')
