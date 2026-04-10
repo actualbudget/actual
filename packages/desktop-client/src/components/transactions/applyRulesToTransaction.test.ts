@@ -1,5 +1,3 @@
-import { describe, expect, it } from 'vitest';
-
 import type { TransactionEntity } from 'loot-core/types/models';
 
 import { applyRulesToTransaction } from './applyRulesToTransaction';
