@@ -15,11 +15,11 @@ vi.mock('@actual-app/api', () => ({
   getAccountBalance: vi.fn().mockResolvedValue(10000),
 }));
 
-vi.mock('../connection', () => ({
+vi.mock('#connection', () => ({
   withConnection: vi.fn((_opts, fn) => fn()),
 }));
 
-vi.mock('../output', () => ({
+vi.mock('#output', () => ({
   printOutput: vi.fn(),
 }));
 
