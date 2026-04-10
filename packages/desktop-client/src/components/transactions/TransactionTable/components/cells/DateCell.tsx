@@ -52,10 +52,11 @@ export function DateCell({
     >
       {exposed && !isPreview && (
         <DateSelect
-          value={date}
+          value={date || ''}
           dateFormat={dateFormat}
+          clearOnBlur
           onUpdate={value => onUpdate('date', value)}
-          isOpen
+          onSelect={() => {}}
         />
       )}
     </Cell>

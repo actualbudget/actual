@@ -36,13 +36,13 @@ export function AmountCell({
 
   const displayValue = useMemo(() => {
     if (type === 'debit' && amount < 0) {
-      return format(-amount, 'financial', { hideFraction });
+      return format(-amount, 'financial');
     }
     if (type === 'credit' && amount > 0) {
-      return format(amount, 'financial', { hideFraction });
+      return format(amount, 'financial');
     }
     return '';
-  }, [amount, type, format, hideFraction]);
+  }, [amount, type, format]);
 
   const inputValue = useMemo(() => {
     if (type === 'debit' && amount < 0) {

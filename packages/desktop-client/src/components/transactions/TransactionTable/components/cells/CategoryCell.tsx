@@ -72,11 +72,13 @@ export function CategoryCell({
     >
       {exposed && !isPreview && !isSplit && (
         <CategoryAutocomplete
-          value={category?.id || null}
           categoryGroups={categoryGroups}
+          value={category?.id || null}
+          focused
+          clearOnBlur={false}
           showHiddenCategories={showHiddenCategories}
-          onUpdate={value => onUpdate('category', value)}
-          isOpen
+          onUpdate={(value) => onUpdate('category', value)}
+          onSelect={() => {}}
         />
       )}
     </Cell>

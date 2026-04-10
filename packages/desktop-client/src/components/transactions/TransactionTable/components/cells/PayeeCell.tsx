@@ -51,7 +51,12 @@ export function PayeeCell({
   onNavigateToTransferAccount,
   onNavigateToSchedule,
 }: PayeeCellProps) {
-  const displayPayee = useDisplayPayee(payee, transferAccount);
+  const displayPayee = useMemo(() => {
+    if (transferAccount) {
+      return transferAccount.name;
+    }
+    return payee?.name || '';
+  }, [payee, transferAccount]);
 
   const payeeIcon = useMemo(() => {
     const iconStyle = {
@@ -134,12 +139,14 @@ export function PayeeCell({
     >
       {exposed && !isPreview && (
         <PayeeAutocomplete
-          value={payee?.id || null}
           payees={payees}
-          onUpdate={value => onUpdate('payee', value)}
-          onCreatePayee={onCreatePayee}
-          onManagePayees={onManagePayees}
-          isOpen
+          value={payee?.id || null}
+          focused
+          clearOnBlur={false}
+          showManagePayees
+          onUpdate={(_, value) => onUpdate('payee', value)}
+          onSelect={() => {}}
+          onManagePayees={() => onManagePayees(payee?.id)}
         />
       )}
     </Cell>

@@ -136,17 +136,13 @@ export const TransactionTable = forwardRef(
       [onBatchDelete],
     );
 
-    const getItemSize = useCallback(
-      (index: number) => {
-        const transaction = visibleTransactions[index];
-        if (!transaction) return ROW_HEIGHT;
-        return getRowHeight(state, transaction.id, ROW_HEIGHT);
-      },
-      [visibleTransactions, state],
-    );
+    // Note: Current Table component uses FixedSizeList, so all rows have same height
+    // For variable heights, we'd need to implement VariableSizeList support
+    // For now, expandable rows will have a fixed expanded height
 
     const renderRow = useCallback(
-      ({ item, index, editing }: { item: TransactionEntity; index: number; editing: boolean }) => {
+      ({ item, index }: { item: TransactionEntity; index: number }) => {
+        const editing = isTransactionEditing(state, item.id);
         const selected = selectedItems.has(item.id);
         const balance = balances?.[item.id] ?? null;
         const rowHeight = getRowHeight(state, item.id, ROW_HEIGHT);
@@ -224,7 +220,7 @@ export const TransactionTable = forwardRef(
       ],
     );
 
-    const handleScroll = useCallback((parent: number, child: number) => {
+    const saveScrollWidth = useCallback((parent: number, child: number) => {
       const width = parent > 0 && child > 0 && parent - child;
       setScrollWidth(!width ? 0 : width);
     }, []);
@@ -246,11 +242,11 @@ export const TransactionTable = forwardRef(
         <Table
           ref={tableRef}
           items={visibleTransactions}
-          getItemSize={getItemSize}
           renderItem={renderRow}
           renderEmpty={renderEmpty}
           loadMore={loadMoreTransactions}
-          onScroll={handleScroll}
+          saveScrollWidth={saveScrollWidth}
+          rowHeight={ROW_HEIGHT}
           style={{
             backgroundColor: theme.tableBackground,
           }}

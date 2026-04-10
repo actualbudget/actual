@@ -34,7 +34,16 @@ export function NotesCell({
       value={notes || ''}
       style={{ marginLeft: -5 }}
       unexposedContent={({ value }) => (
-        <NotesTagFormatter notes={value} onTagClick={onNotesTagClick} />
+        <div
+          style={{
+            flexGrow: 1,
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {value}
+        </div>
       )}
     >
       {exposed && !isPreview && (

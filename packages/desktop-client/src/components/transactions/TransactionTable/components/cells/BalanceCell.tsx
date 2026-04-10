@@ -22,8 +22,8 @@ export function BalanceCell({
 
   const displayValue = useMemo(() => {
     if (balance == null) return '';
-    return format(balance, 'financial', { hideFraction });
-  }, [balance, format, hideFraction]);
+    return format(balance, 'financial');
+  }, [balance, format]);
 
   return (
     <Cell

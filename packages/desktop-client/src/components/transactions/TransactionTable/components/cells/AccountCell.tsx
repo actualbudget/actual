@@ -43,9 +43,10 @@ export function AccountCell({
       {exposed && !isPreview && (
         <AccountAutocomplete
           value={account?.id || null}
-          accounts={accounts}
+          focused
+          clearOnBlur={false}
           onUpdate={value => onUpdate('account', value)}
-          isOpen
+          onSelect={() => {}}
         />
       )}
     </Cell>
