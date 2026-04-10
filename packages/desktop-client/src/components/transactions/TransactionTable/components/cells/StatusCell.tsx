@@ -4,9 +4,9 @@ import { theme } from '@actual-app/components/theme';
 
 import type { TransactionEntity } from 'loot-core/types/models';
 
-import { Cell, CellButton } from '@desktop-client/components/table';
 import { getStatusProps } from '@desktop-client/components/schedules/StatusBadge';
 import type { StatusTypes } from '@desktop-client/components/schedules/StatusBadge';
+import { Cell, CellButton } from '@desktop-client/components/table';
 
 type StatusCellProps = {
   id: TransactionEntity['id'];

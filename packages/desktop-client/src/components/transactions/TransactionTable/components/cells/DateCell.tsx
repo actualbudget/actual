@@ -2,8 +2,8 @@ import { useMemo } from 'react';
 
 import type { TransactionEntity } from 'loot-core/types/models';
 
-import { Cell } from '@desktop-client/components/table';
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
+import { Cell } from '@desktop-client/components/table';
 
 type DateCellProps = {
   id: TransactionEntity['id'];
@@ -56,7 +56,7 @@ export function DateCell({
           dateFormat={dateFormat}
           clearOnBlur
           onUpdate={value => onUpdate('date', value)}
-          onSelect={() => {}}
+          onSelect={() => undefined}
         />
       )}
     </Cell>

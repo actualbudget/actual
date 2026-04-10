@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 import type { IntegerAmount } from 'loot-core/shared/util';
 import type {
@@ -38,7 +38,12 @@ export type TableAction =
   | { type: 'EXPAND_ROW'; id: TransactionEntity['id'] }
   | { type: 'COLLAPSE_ROW'; id: TransactionEntity['id'] }
   | { type: 'SET_ROW_HEIGHT'; id: TransactionEntity['id']; height: number }
-  | { type: 'START_DRAG'; id: TransactionEntity['id']; date: string; parentId: TransactionEntity['parent_id'] | null }
+  | {
+      type: 'START_DRAG';
+      id: TransactionEntity['id'];
+      date: string;
+      parentId: TransactionEntity['parent_id'] | null;
+    }
   | { type: 'END_DRAG' }
   | { type: 'RESET' };
 
@@ -62,7 +67,7 @@ export type TransactionTableProps = {
   isFiltered?: boolean;
   dateFormat: string | undefined;
   hideFraction: boolean;
-  renderEmpty: React.ReactNode | (() => React.ReactNode);
+  renderEmpty: ReactNode | (() => ReactNode);
   onSave: (transaction: TransactionEntity) => void;
   onApplyRules: (
     transaction: TransactionEntity,

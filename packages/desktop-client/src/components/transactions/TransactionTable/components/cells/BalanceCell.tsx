@@ -14,10 +14,7 @@ type BalanceCellProps = {
   hideFraction: boolean;
 };
 
-export function BalanceCell({
-  balance,
-  hideFraction,
-}: BalanceCellProps) {
+export function BalanceCell({ balance }: BalanceCellProps) {
   const format = useFormat();
 
   const displayValue = useMemo(() => {

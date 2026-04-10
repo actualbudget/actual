@@ -9,12 +9,14 @@ This document summarizes the completed implementation of the transaction table r
 ### 1. Architecture & Foundation (100%)
 
 **Files Created:**
+
 - `TRANSACTION_TABLE_REWRITE_PLAN.md` - Comprehensive 400+ line architecture document
 - `types.ts` - Complete TypeScript type definitions
 - `TransactionTableState.ts` - State management with reducer pattern
 - `TransactionTableKeyboard.ts` - Keyboard navigation utilities
 
 **Key Decisions:**
+
 - Modular file structure (16 files vs 1 massive file)
 - Simple reducer-based state management
 - Extracted keyboard navigation logic
@@ -74,6 +76,7 @@ All 8 cell components fully implemented and type-safe:
 ### 3. Transaction Row Component (100%)
 
 **TransactionRow.tsx** (280 lines)
+
 - Integrates all 8 cell components
 - Inline editing with focus management
 - Selection support with highlighting
@@ -90,6 +93,7 @@ All 8 cell components fully implemented and type-safe:
 ### 4. Table Components (100%)
 
 **TransactionHeader.tsx** (270 lines)
+
 - Sortable column headers
 - Visual sort indicators (arrows)
 - Select-all checkbox
@@ -98,6 +102,7 @@ All 8 cell components fully implemented and type-safe:
 - Conditional column display
 
 **TransactionTable.tsx** (250 lines)
+
 - Main table orchestration
 - State management integration
 - Virtual scrolling support
@@ -111,6 +116,7 @@ All 8 cell components fully implemented and type-safe:
 **SplitTransactionModal.tsx** (340 lines)
 
 **Features:**
+
 - Clean, modern modal UI
 - Parent transaction info display
 - **Visual progress bar** showing allocation percentage
@@ -136,6 +142,7 @@ All 8 cell components fully implemented and type-safe:
   - Shows remaining amount
 
 **UX Improvements over inline editing:**
+
 - ✅ Can't navigate away mid-split
 - ✅ Clear validation state
 - ✅ Visual progress feedback
@@ -146,6 +153,7 @@ All 8 cell components fully implemented and type-safe:
 ### 6. Utilities (100%)
 
 **transactionFormatters.ts** (75 lines)
+
 - `serializeTransaction()` - Convert to display format
 - `deserializeTransaction()` - Convert back to data format
 - Handles debit/credit conversion
@@ -155,6 +163,7 @@ All 8 cell components fully implemented and type-safe:
 ### 7. Expandable Rows Feature (100%)
 
 **Implementation:**
+
 - State management tracks expanded rows
 - Rows report their height when expanded
 - Chevron indicator for expand/collapse
@@ -163,6 +172,7 @@ All 8 cell components fully implemented and type-safe:
 - Works with virtual scrolling
 
 **Current Status:**
+
 - ✅ State management complete
 - ✅ UI complete with transitions
 - ✅ Height tracking implemented
@@ -170,6 +180,7 @@ All 8 cell components fully implemented and type-safe:
 - 📝 Future: Implement VariableSizeList for true dynamic heights
 
 **Use Cases:**
+
 - Show full notes in expanded view
 - Display transaction metadata
 - Show related transactions
@@ -178,6 +189,7 @@ All 8 cell components fully implemented and type-safe:
 ## 📊 Statistics
 
 ### Code Organization
+
 - **Original:** 1 file, 3470 lines
 - **New:** 17 files, ~2400 lines total
 - **Average file size:** ~140 lines
@@ -185,6 +197,7 @@ All 8 cell components fully implemented and type-safe:
 - **Smallest file:** BalanceCell (35 lines)
 
 ### File Structure
+
 ```
 TransactionTable/
 ├── index.ts (10 lines)
@@ -212,6 +225,7 @@ TransactionTable/
 ```
 
 ### Quality Metrics
+
 - ✅ All TypeScript strict mode compliant
 - ✅ Zero type errors
 - ✅ Consistent code style
@@ -223,31 +237,37 @@ TransactionTable/
 ## 🚀 Key Improvements
 
 ### 1. Maintainability
+
 - **Before:** 3470-line god file, hard to understand
 - **After:** 17 focused files, easy to navigate
 - **Benefit:** New developers can understand and modify easily
 
 ### 2. Split Transaction UX
+
 - **Before:** Awkward inline editing, confusing intermediate states
 - **After:** Clean modal with validation, progress bar, quick actions
 - **Benefit:** Much better user experience, fewer errors
 
 ### 3. State Management
+
 - **Before:** Complex hooks, hard to trace state flow
 - **After:** Simple reducer pattern, predictable state transitions
 - **Benefit:** Easier to debug, test, and extend
 
 ### 4. Code Reusability
+
 - **Before:** Monolithic component, hard to reuse parts
 - **After:** 8 reusable cell components, composable
 - **Benefit:** Can use cells in other contexts
 
 ### 5. Performance
+
 - **Before:** Convoluted optimization, hard to maintain
 - **After:** Clean code with proper memoization
 - **Benefit:** Maintainable performance
 
 ### 6. NEW: Expandable Rows
+
 - **Before:** Not available
 - **After:** Rows can expand to show additional content
 - **Benefit:** Flexible UI, better information density
@@ -255,9 +275,11 @@ TransactionTable/
 ## ⚠️ Known Limitations
 
 ### 1. Dynamic Row Heights
+
 **Status:** Partially implemented
 
 The expandable rows feature is fully implemented in terms of:
+
 - ✅ State management
 - ✅ UI and transitions
 - ✅ Height tracking
@@ -269,11 +291,13 @@ However, the current `Table` component uses `FixedSizeList` which requires all r
 **Workaround:** Expandable rows currently use a fixed expanded height. This works fine for most use cases.
 
 ### 2. Not Yet Integrated
+
 **Status:** Standalone implementation
 
 The new table is complete but not yet wired into the existing `Account` component.
 
 **Remaining Work:**
+
 - Update `TransactionList.tsx` to use new `TransactionTable`
 - Add split modal trigger logic
 - Test integration
@@ -282,11 +306,13 @@ The new table is complete but not yet wired into the existing `Account` componen
 **Estimated Time:** 2-3 hours
 
 ### 3. Testing
+
 **Status:** Not yet tested
 
 E2E tests have not been run against the new implementation.
 
 **Remaining Work:**
+
 - Run existing E2E tests
 - Fix any regressions
 - Visual comparison
@@ -297,18 +323,21 @@ E2E tests have not been run against the new implementation.
 ## 🎯 Remaining Work (15%)
 
 ### 1. Integration (2-3 hours)
+
 - [ ] Wire new table into Account component
 - [ ] Add split modal trigger
 - [ ] Handle edge cases
 - [ ] Backward compatibility check
 
 ### 2. Testing (3-4 hours)
+
 - [ ] Run all E2E tests (except VRT)
 - [ ] Fix any regressions
 - [ ] Visual comparison with screenshots
 - [ ] Performance benchmarks
 
 ### 3. Polish (1 hour)
+
 - [ ] Final code review
 - [ ] Documentation updates
 - [ ] Clean up any TODOs
@@ -319,6 +348,7 @@ E2E tests have not been run against the new implementation.
 ## 🏆 Success Criteria
 
 ### Completed ✅
+
 - [x] Modular architecture implemented
 - [x] All cell components working
 - [x] Transaction row complete
@@ -331,6 +361,7 @@ E2E tests have not been run against the new implementation.
 - [x] Code is maintainable
 
 ### Remaining ⏳
+
 - [ ] Integrated with existing code
 - [ ] All E2E tests passing
 - [ ] No visual regressions
@@ -340,6 +371,7 @@ E2E tests have not been run against the new implementation.
 ## 📝 Notes for Completion
 
 ### Integration Checklist
+
 1. Update `TransactionList.tsx`:
    - Import new `TransactionTable` from `./TransactionTable`
    - Replace old table component
@@ -362,7 +394,9 @@ E2E tests have not been run against the new implementation.
    - Keyboard navigation
 
 ### Testing Checklist
+
 1. Run E2E Tests:
+
    ```bash
    yarn workspace @actual-app/web run playwright test accounts.test.ts
    yarn workspace @actual-app/web run playwright test transactions.test.ts

@@ -1,11 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Trans } from 'react-i18next';
 
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { TransactionRowProps } from 'packages/desktop-client/src/components/transactions/TransactionTable/types';
+import {
+  deserializeTransaction,
+  serializeTransaction,
+} from 'packages/desktop-client/src/components/transactions/TransactionTable/utils/transactionFormatters';
 
-import { serializeTransaction, deserializeTransaction } from '../utils/transactionFormatters';
-import type { TransactionRowProps } from '../types';
 import {
   AccountCell,
   AmountCell,
@@ -25,7 +29,6 @@ const EXPANDED_MIN_HEIGHT = 64;
 
 export function TransactionRow({
   transaction,
-  index,
   editing,
   selected,
   accounts,
@@ -53,9 +56,7 @@ export function TransactionRow({
   onNavigateToSchedule,
   onNotesTagClick,
   onApplyRules,
-  onCreatePayee,
   onManagePayees,
-  allowSplitTransaction = true,
   showSelection,
 }: TransactionRowProps) {
   const dispatchSelected = useSelectedDispatch();
@@ -157,7 +158,9 @@ export function TransactionRow({
     ...(isChild && { paddingLeft: 20 }),
   };
 
-  const currentHeight = isExpanded ? rowHeight || EXPANDED_MIN_HEIGHT : ROW_HEIGHT;
+  const currentHeight = isExpanded
+    ? rowHeight || EXPANDED_MIN_HEIGHT
+    : ROW_HEIGHT;
 
   return (
     <View style={{ height: currentHeight }}>
@@ -194,7 +197,7 @@ export function TransactionRow({
                   width: '100%',
                   height: '100%',
                 }}
-                aria-label={isExpanded ? 'Collapse row' : 'Expand row'}
+                aria-label={isExpanded ? {t('Collapse row')} : {t('Expand row')}}
               >
                 <SvgCheveronDown
                   style={{
@@ -245,7 +248,6 @@ export function TransactionRow({
           isPreview={isPreview}
           onEdit={handleEdit}
           onUpdate={handleUpdate}
-          onCreatePayee={onCreatePayee}
           onManagePayees={onManagePayees}
           onNavigateToTransferAccount={onNavigateToTransferAccount}
           onNavigateToSchedule={onNavigateToSchedule}
@@ -259,7 +261,6 @@ export function TransactionRow({
           isPreview={isPreview}
           onEdit={handleEdit}
           onUpdate={handleUpdate}
-          onNotesTagClick={onNotesTagClick}
         />
 
         {showCategory && (
@@ -334,11 +335,13 @@ export function TransactionRow({
         >
           <View style={{ fontSize: 13, color: theme.pageTextSubdued }}>
             <div>
-              <strong>Expanded Content</strong>
+              <strong>
+                <Trans>Expanded Content</Trans>
+              </strong>
             </div>
             <div style={{ marginTop: 8 }}>
-              This is where additional transaction details can be displayed.
-              The row height adjusts automatically based on content.
+              This is where additional transaction details can be displayed. The
+              row height adjusts automatically based on content.
             </div>
             {transaction.notes && (
               <div style={{ marginTop: 8 }}>

@@ -27,7 +27,6 @@ export function AmountCell({
   type,
   focused,
   exposed,
-  hideFraction,
   isPreview,
   onEdit,
   onUpdate,

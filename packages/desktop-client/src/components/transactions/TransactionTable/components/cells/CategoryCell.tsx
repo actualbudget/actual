@@ -8,8 +8,8 @@ import type {
   TransactionEntity,
 } from 'loot-core/types/models';
 
-import { Cell } from '@desktop-client/components/table';
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
+import { Cell } from '@desktop-client/components/table';
 
 type CategoryCellProps = {
   id: TransactionEntity['id'];
@@ -77,8 +77,8 @@ export function CategoryCell({
           focused
           clearOnBlur={false}
           showHiddenCategories={showHiddenCategories}
-          onUpdate={(value) => onUpdate('category', value)}
-          onSelect={() => {}}
+          onUpdate={value => onUpdate('category', value)}
+          onSelect={() => undefined}
         />
       )}
     </Cell>

@@ -1,16 +1,23 @@
 import { memo } from 'react';
-import { useTranslation } from 'react-i18next';
+import type { KeyboardEvent } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { SvgArrowDown, SvgArrowUp } from '@actual-app/components/icons/v1';
 import { SvgSubtract } from '@actual-app/components/icons/v2';
-import { Button } from '@actual-app/components/button';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 
-import { Row, Field, SelectCell, CustomCell, UnexposedCellContent } from '@desktop-client/components/table';
+import {
+  CustomCell,
+  Field,
+  Row,
+  SelectCell,
+  UnexposedCellContent,
+} from '@desktop-client/components/table';
 import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
-import type { CSSProperties } from '@actual-app/components/styles';
 
 type TransactionHeaderProps = {
   hasSelected: boolean;
@@ -148,7 +155,7 @@ export const TransactionHeader = memo(
               borderBottomWidth: 0,
             }}
             icon={<SvgSubtract width={6} height={6} />}
-            onSelect={(e: React.KeyboardEvent<HTMLDivElement>) =>
+            onSelect={(e: KeyboardEvent<HTMLDivElement>) =>
               dispatchSelected({
                 type: 'select-all',
                 isRangeSelect: e.shiftKey,

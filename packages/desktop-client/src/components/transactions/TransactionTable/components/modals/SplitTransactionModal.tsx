@@ -1,17 +1,24 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgAdd, SvgDelete } from '@actual-app/components/icons/v0';
-import { Modal, ModalCloseButton, ModalHeader } from '@actual-app/components/modal';
+import {
+  Modal,
+  ModalCloseButton,
+  ModalHeader,
+} from '@actual-app/components/modal';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { v4 as uuidv4 } from 'uuid';
 
-import { integerToCurrency, amountToCurrency } from 'loot-core/shared/util';
-import type { TransactionEntity, CategoryGroupEntity, PayeeEntity, AccountEntity } from 'loot-core/types/models';
+import { integerToCurrency } from 'loot-core/shared/util';
+import type {
+  CategoryGroupEntity,
+  TransactionEntity,
+} from 'loot-core/types/models';
 
 import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
 import { InputCell } from '@desktop-client/components/table';
@@ -30,7 +37,10 @@ type SplitTransactionModalProps = {
   categoryGroups: CategoryGroupEntity[];
   dateFormat: string;
   hideFraction: boolean;
-  onSave: (parent: TransactionEntity, children: TransactionEntity[]) => Promise<void>;
+  onSave: (
+    parent: TransactionEntity,
+    children: TransactionEntity[],
+  ) => Promise<void>;
   onClose: () => void;
 };
 
@@ -60,9 +70,6 @@ export function SplitTransactionModal({
     ];
   });
 
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingField, setEditingField] = useState<string | null>(null);
-
   const totalSplitAmount = useMemo(() => {
     return splits.reduce((sum, split) => sum + split.amount, 0);
   }, [splits]);
@@ -89,13 +96,16 @@ export function SplitTransactionModal({
     setSplits(prev => prev.filter(s => s.id !== id));
   }, []);
 
-  const handleUpdateSplit = useCallback((id: string, field: keyof SplitItem, value: unknown) => {
-    setSplits(prev =>
-      prev.map(split =>
-        split.id === id ? { ...split, [field]: value } : split,
-      ),
-    );
-  }, []);
+  const handleUpdateSplit = useCallback(
+    (id: string, field: keyof SplitItem, value: unknown) => {
+      setSplits(prev =>
+        prev.map(split =>
+          split.id === id ? { ...split, [field]: value } : split,
+        ),
+      );
+    },
+    [],
+  );
 
   const handleDistributeRemainder = useCallback(() => {
     if (remainingAmount === 0 || splits.length === 0) return;
@@ -114,17 +124,20 @@ export function SplitTransactionModal({
   const handleSave = useCallback(async () => {
     if (!isValid) return;
 
-    const children: TransactionEntity[] = splits.map(split => ({
-      id: split.id.startsWith('temp-') ? uuidv4() : split.id,
-      account: transaction.account,
-      date: transaction.date,
-      amount: split.amount,
-      category: split.category,
-      notes: split.notes,
-      is_child: true,
-      parent_id: transaction.id,
-      cleared: transaction.cleared,
-    } as TransactionEntity));
+    const children: TransactionEntity[] = splits.map(
+      split =>
+        ({
+          id: split.id.startsWith('temp-') ? uuidv4() : split.id,
+          account: transaction.account,
+          date: transaction.date,
+          amount: split.amount,
+          category: split.category,
+          notes: split.notes,
+          is_child: true,
+          parent_id: transaction.id,
+          cleared: transaction.cleared,
+        }) as TransactionEntity,
+    );
 
     await onSave(transaction, children);
     onClose();
@@ -148,7 +161,13 @@ export function SplitTransactionModal({
                 marginBottom: 20,
               }}
             >
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  marginBottom: 8,
+                }}
+              >
                 <Text style={{ fontWeight: 600 }}>
                   <Trans>Transaction Amount:</Trans>
                 </Text>
@@ -157,7 +176,12 @@ export function SplitTransactionModal({
                 </Text>
               </View>
               {transaction.payee && (
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                  }}
+                >
                   <Text style={{ color: theme.pageTextSubdued }}>
                     <Trans>Payee:</Trans>
                   </Text>
@@ -168,7 +192,13 @@ export function SplitTransactionModal({
 
             {/* Progress Bar */}
             <View style={{ marginBottom: 20 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  marginBottom: 8,
+                }}
+              >
                 <Text style={{ fontSize: 13, fontWeight: 500 }}>
                   <Trans>Allocated:</Trans> {percentageAllocated.toFixed(1)}%
                 </Text>
@@ -176,10 +206,14 @@ export function SplitTransactionModal({
                   style={{
                     fontSize: 13,
                     fontWeight: 500,
-                    color: remainingAmount === 0 ? theme.noticeTextLight : theme.warningText,
+                    color:
+                      remainingAmount === 0
+                        ? theme.noticeTextLight
+                        : theme.warningText,
                   }}
                 >
-                  <Trans>Remaining:</Trans> {format(remainingAmount, 'financial')}
+                  <Trans>Remaining:</Trans>{' '}
+                  {format(remainingAmount, 'financial')}
                 </Text>
               </View>
               <View
@@ -227,7 +261,7 @@ export function SplitTransactionModal({
                 <View style={{ width: 40 }} />
               </View>
 
-              {splits.map((split, index) => (
+              {splits.map(split => (
                 <View
                   key={split.id}
                   style={{
@@ -242,20 +276,35 @@ export function SplitTransactionModal({
                     <CategoryAutocomplete
                       categoryGroups={categoryGroups}
                       value={split.category}
-                      focused={editingId === split.id && editingField === 'category'}
+                      focused={
+                        editingId === split.id && editingField === 'category'
+                      }
                       clearOnBlur={false}
-                      onUpdate={value => handleUpdateSplit(split.id, 'category', value)}
-                      onSelect={() => {}}
+                      onUpdate={value =>
+                        handleUpdateSplit(split.id, 'category', value)
+                      }
+                      onSelect={() => undefined}
                     />
                   </View>
                   <View style={{ flex: 1, marginRight: 12 }}>
                     <InputCell
-                      value={split.amount !== 0 ? integerToCurrency(Math.abs(split.amount)) : ''}
+                      value={
+                        split.amount !== 0
+                          ? integerToCurrency(Math.abs(split.amount))
+                          : ''
+                      }
                       onUpdate={value => {
-                        const parsed = parseFloat(value.replace(/[^0-9.-]/g, ''));
-                        const amount = isNaN(parsed) ? 0 : Math.round(parsed * 100);
+                        const parsed = parseFloat(
+                          value.replace(/[^0-9.-]/g, ''),
+                        );
+                        const amount = isNaN(parsed)
+                          ? 0
+                          : Math.round(parsed * 100);
                         // Match sign of parent transaction
-                        const signedAmount = transaction.amount < 0 ? -Math.abs(amount) : Math.abs(amount);
+                        const signedAmount =
+                          transaction.amount < 0
+                            ? -Math.abs(amount)
+                            : Math.abs(amount);
                         handleUpdateSplit(split.id, 'amount', signedAmount);
                       }}
                       inputProps={{
@@ -275,7 +324,11 @@ export function SplitTransactionModal({
                         style={{ padding: 4 }}
                         aria-label={t('Remove split')}
                       >
-                        <SvgDelete width={16} height={16} style={{ color: theme.errorText }} />
+                        <SvgDelete
+                          width={16}
+                          height={16}
+                          style={{ color: theme.errorText }}
+                        />
                       </Button>
                     )}
                   </View>
@@ -309,7 +362,9 @@ export function SplitTransactionModal({
                 <Text style={{ fontSize: 13, color: theme.warningText }}>
                   {remainingAmount !== 0 && (
                     <Trans>
-                      Splits must add up to the transaction amount. {format(Math.abs(remainingAmount), 'financial')} remaining.
+                      Splits must add up to the transaction amount.{' '}
+                      {format(Math.abs(remainingAmount), 'financial')}{' '}
+                      remaining.
                     </Trans>
                   )}
                   {remainingAmount === 0 && splits.some(s => !s.category) && (
@@ -320,7 +375,13 @@ export function SplitTransactionModal({
             )}
 
             {/* Footer Buttons */}
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 12 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'flex-end',
+                gap: 12,
+              }}
+            >
               <Button variant="normal" onPress={close}>
                 <Trans>Cancel</Trans>
               </Button>

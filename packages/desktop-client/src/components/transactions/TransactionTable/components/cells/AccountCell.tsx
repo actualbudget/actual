@@ -2,8 +2,8 @@ import { useMemo } from 'react';
 
 import type { AccountEntity, TransactionEntity } from 'loot-core/types/models';
 
-import { Cell } from '@desktop-client/components/table';
 import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
+import { Cell } from '@desktop-client/components/table';
 
 type AccountCellProps = {
   id: TransactionEntity['id'];
@@ -19,7 +19,6 @@ type AccountCellProps = {
 export function AccountCell({
   id,
   account,
-  accounts,
   focused,
   exposed,
   isPreview,
@@ -46,7 +45,7 @@ export function AccountCell({
           focused
           clearOnBlur={false}
           onUpdate={value => onUpdate('account', value)}
-          onSelect={() => {}}
+          onSelect={() => undefined}
         />
       )}
     </Cell>

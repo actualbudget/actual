@@ -103,6 +103,7 @@ packages/desktop-client/src/components/transactions/
 ### Split Transaction Modal Design
 
 #### Current Flow (Inline)
+
 ```
 1. User clicks "Split" button
 2. Child rows appear inline below parent
@@ -112,6 +113,7 @@ packages/desktop-client/src/components/transactions/
 ```
 
 #### New Flow (Modal)
+
 ```
 1. User clicks "Split" button
 2. Modal opens with:
@@ -128,8 +130,9 @@ packages/desktop-client/src/components/transactions/
 ```
 
 #### Modal Features
+
 - **Visual Feedback**: Progress bar showing how much of parent amount is allocated
-- **Quick Actions**: 
+- **Quick Actions**:
   - "Distribute Remainder" - evenly split remaining amount
   - "Clear All" - remove all splits
 - **Keyboard Support**: Tab through fields, Enter to add split, Esc to cancel
@@ -179,7 +182,7 @@ type NavigationContext = {
 function handleKeyDown(
   event: KeyboardEvent,
   context: NavigationContext,
-  actions: TableActions
+  actions: TableActions,
 ): void {
   switch (event.key) {
     case 'ArrowUp': // Move to previous row
@@ -197,35 +200,41 @@ function handleKeyDown(
 ## Implementation Phases
 
 ### Phase 1: Setup & Foundation (2-3 hours)
+
 - [x] Create new directory structure
 - [ ] Set up TypeScript types
 - [ ] Create base state management
 - [ ] Create keyboard navigation utilities
 
 ### Phase 2: Core Components (4-5 hours)
+
 - [ ] Implement cell components (StatusCell, DateCell, etc.)
 - [ ] Implement TransactionRow (without splits)
 - [ ] Implement TransactionHeader
 - [ ] Implement basic TransactionTable shell
 
 ### Phase 3: Split Transaction Modal (3-4 hours)
+
 - [ ] Design and implement SplitTransactionModal
 - [ ] Add validation and real-time feedback
 - [ ] Integrate with transaction save flow
 - [ ] Add keyboard shortcuts
 
 ### Phase 4: Advanced Features (3-4 hours)
+
 - [ ] Implement drag & drop reordering
 - [ ] Add selection and batch operations
 - [ ] Implement context menus
 - [ ] Add split row display (read-only inline)
 
 ### Phase 5: Integration (2-3 hours)
+
 - [ ] Replace old TransactionTable with new implementation
 - [ ] Update TransactionList.tsx to use new API
 - [ ] Ensure backward compatibility
 
 ### Phase 6: Testing & Polish (3-4 hours)
+
 - [ ] Run all E2E tests
 - [ ] Fix any regressions
 - [ ] Performance testing
@@ -237,23 +246,27 @@ function handleKeyDown(
 ## Testing Strategy
 
 ### Unit Tests
+
 - State management functions
 - Keyboard navigation logic
 - Validation functions
 - Calculation utilities
 
 ### Integration Tests
+
 - Cell component interactions
 - Row component behavior
 - Modal save/cancel flows
 
 ### E2E Tests (Must Pass)
+
 - All existing Playwright tests in `e2e/transactions.test.ts`
 - All existing Playwright tests in `e2e/accounts.test.ts`
 - Keyboard navigation flows
 - Split transaction creation and editing
 
 ### Visual Regression Tests
+
 - Compare screenshots with current implementation
 - Ensure theming consistency
 - Verify responsive behavior
@@ -261,17 +274,21 @@ function handleKeyDown(
 ## Migration Strategy
 
 ### Backward Compatibility
+
 - Keep same props interface for `TransactionTable`
 - Keep same ref API for parent components
 - Maintain same event callbacks
 
 ### Feature Flags (Optional)
+
 Could add a feature flag to toggle between old and new implementation:
+
 ```typescript
 const useNewTransactionTable = useLocalPref('feature.newTransactionTable');
 ```
 
 ### Rollback Plan
+
 - Keep old `TransactionsTable.tsx` as `TransactionsTableLegacy.tsx`
 - Easy to revert if critical issues found
 
@@ -288,18 +305,23 @@ const useNewTransactionTable = useLocalPref('feature.newTransactionTable');
 ## Risks & Mitigation
 
 ### Risk: Performance Regression
+
 **Mitigation**: Profile before and after, maintain virtual scrolling, use React.memo strategically
 
 ### Risk: Keyboard Navigation Breaks
+
 **Mitigation**: Extensive testing, preserve exact key handling logic
 
 ### Risk: Visual Differences
+
 **Mitigation**: Pixel-perfect comparison with screenshots, careful CSS preservation
 
 ### Risk: E2E Test Failures
+
 **Mitigation**: Run tests frequently during development, fix issues immediately
 
 ### Risk: Scope Creep
+
 **Mitigation**: Stick to plan, don't add new features, focus on refactoring
 
 ## Next Steps

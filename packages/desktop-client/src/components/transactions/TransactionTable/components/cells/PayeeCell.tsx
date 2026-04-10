@@ -14,9 +14,8 @@ import type {
   TransactionEntity,
 } from 'loot-core/types/models';
 
-import { Cell } from '@desktop-client/components/table';
 import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
-import { useDisplayPayee } from '@desktop-client/hooks/useDisplayPayee';
+import { Cell } from '@desktop-client/components/table';
 
 type PayeeCellProps = {
   id: TransactionEntity['id'];
@@ -46,7 +45,6 @@ export function PayeeCell({
   isPreview,
   onEdit,
   onUpdate,
-  onCreatePayee,
   onManagePayees,
   onNavigateToTransferAccount,
   onNavigateToSchedule,
@@ -100,9 +98,7 @@ export function PayeeCell({
       style={{ marginLeft: -5 }}
       valueStyle={{
         cursor: showClickable ? 'pointer' : undefined,
-        ':hover': showClickable
-          ? { textDecoration: 'underline' }
-          : undefined,
+        ':hover': showClickable ? { textDecoration: 'underline' } : undefined,
       }}
       unexposedContent={({ value }) => (
         <div
@@ -145,7 +141,7 @@ export function PayeeCell({
           clearOnBlur={false}
           showManagePayees
           onUpdate={(_, value) => onUpdate('payee', value)}
-          onSelect={() => {}}
+          onSelect={() => undefined}
           onManagePayees={() => onManagePayees(payee?.id)}
         />
       )}

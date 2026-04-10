@@ -38,7 +38,10 @@ export function getFieldIndex(field: string): number {
   return index === -1 ? 0 : index;
 }
 
-export function getNextField(currentField: string, showAccount: boolean): string {
+export function getNextField(
+  currentField: string,
+  showAccount: boolean,
+): string {
   const currentIndex = getFieldIndex(currentField);
   let nextIndex = currentIndex + 1;
 
@@ -53,7 +56,10 @@ export function getNextField(currentField: string, showAccount: boolean): string
   return FIELD_ORDER[nextIndex];
 }
 
-export function getPreviousField(currentField: string, showAccount: boolean): string {
+export function getPreviousField(
+  currentField: string,
+  showAccount: boolean,
+): string {
   const currentIndex = getFieldIndex(currentField);
   let prevIndex = currentIndex - 1;
 
@@ -145,7 +151,10 @@ export function handleKeyboardNavigation(
     }
 
     case 'ArrowUp': {
-      if (isEditing && (currentField === 'notes' || currentField === 'category')) {
+      if (
+        isEditing &&
+        (currentField === 'notes' || currentField === 'category')
+      ) {
         return false;
       }
 
@@ -166,7 +175,10 @@ export function handleKeyboardNavigation(
     }
 
     case 'ArrowDown': {
-      if (isEditing && (currentField === 'notes' || currentField === 'category')) {
+      if (
+        isEditing &&
+        (currentField === 'notes' || currentField === 'category')
+      ) {
         return false;
       }
 

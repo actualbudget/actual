@@ -12,23 +12,24 @@ import type { ForwardedRef } from 'react';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import {
-  createInitialState,
-  tableReducer,
-  getVisibleTransactions,
-  getRowHeight,
-  isRowExpanded,
-  isTransactionEditing,
-} from './TransactionTableState';
+import type { TransactionEntity } from 'loot-core/types/models';
+
 import { TransactionHeader } from './components/TransactionHeader';
 import { TransactionRow } from './components/TransactionRow';
+import {
+  createInitialState,
+  getRowHeight,
+  getVisibleTransactions,
+  isRowExpanded,
+  isTransactionEditing,
+  tableReducer,
+} from './TransactionTableState';
 import type { TransactionTableProps } from './types';
 
 import { Table } from '@desktop-client/components/table';
 import type { TableHandleRef } from '@desktop-client/components/table';
 import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
-import type { TransactionEntity } from 'loot-core/types/models';
 
 const ROW_HEIGHT = 32;
 
@@ -108,12 +109,9 @@ export const TransactionTable = forwardRef(
       dispatch({ type: 'END_EDIT' });
     }, []);
 
-    const handleToggleSplit = useCallback(
-      (id: TransactionEntity['id']) => {
-        dispatch({ type: 'TOGGLE_SPLIT', id });
-      },
-      [],
-    );
+    const handleToggleSplit = useCallback((id: TransactionEntity['id']) => {
+      dispatch({ type: 'TOGGLE_SPLIT', id });
+    }, []);
 
     const handleToggleRowExpansion = useCallback(
       (id: TransactionEntity['id']) => {
@@ -141,8 +139,7 @@ export const TransactionTable = forwardRef(
     // For now, expandable rows will have a fixed expanded height
 
     const renderRow = useCallback(
-      ({ item, index }: { item: TransactionEntity; index: number }) => {
-        const editing = isTransactionEditing(state, item.id);
+      ({ item }: { item: TransactionEntity; index: number }) => {
         const selected = selectedItems.has(item.id);
         const balance = balances?.[item.id] ?? null;
         const rowHeight = getRowHeight(state, item.id, ROW_HEIGHT);

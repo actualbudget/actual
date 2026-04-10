@@ -1,7 +1,6 @@
 import type { TransactionEntity } from 'loot-core/types/models';
 
 import { Cell, InputCell } from '@desktop-client/components/table';
-import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
 
 type NotesCellProps = {
   id: TransactionEntity['id'];
@@ -11,7 +10,6 @@ type NotesCellProps = {
   isPreview?: boolean;
   onEdit: (id: TransactionEntity['id'], field: string) => void;
   onUpdate: (field: string, value: string) => void;
-  onNotesTagClick: (tag: string) => void;
 };
 
 export function NotesCell({
@@ -22,7 +20,6 @@ export function NotesCell({
   isPreview,
   onEdit,
   onUpdate,
-  onNotesTagClick,
 }: NotesCellProps) {
   return (
     <Cell
