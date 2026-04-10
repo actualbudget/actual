@@ -35,6 +35,31 @@
     "#util/title": "./src/util/title/index.js",
     "#util/*": "./src/util/*.ts"
   },
+  "publishConfig": {
+    "imports": {
+      "#account-db": "./build/src/account-db.js",
+      "#load-config": "./build/src/load-config.js",
+      "#migrations": "./build/src/migrations.js",
+      "#accounts/*": "./build/src/accounts/*.js",
+      "#app-gocardless/banks/bank.interface": "./build/src/app-gocardless/banks/bank.interface.js",
+      "#app-gocardless/banks/*": "./build/src/app-gocardless/banks/*.js",
+      "#app-gocardless/errors": "./build/src/app-gocardless/errors.js",
+      "#app-gocardless/gocardless-node.types": "./build/src/app-gocardless/gocardless-node.types.js",
+      "#app-gocardless/gocardless.types": "./build/src/app-gocardless/gocardless.types.js",
+      "#app-gocardless/services/*": "./build/src/app-gocardless/services/*.js",
+      "#app-gocardless/services/tests/*": "./build/src/app-gocardless/services/tests/*.js",
+      "#app-gocardless/util/*": "./build/src/app-gocardless/util/*.js",
+      "#app-gocardless/*": "./build/src/app-gocardless/*.js",
+      "#app-pluggyai/*": "./build/src/app-pluggyai/*.js",
+      "#app-simplefin/*": "./build/src/app-simplefin/*.js",
+      "#app-sync/services/*": "./build/src/app-sync/services/*.js",
+      "#app-sync/*": "./build/src/app-sync/*.js",
+      "#scripts/*": "./build/src/scripts/*.js",
+      "#services/*": "./build/src/services/*.js",
+      "#util/title": "./build/src/util/title/index.js",
+      "#util/*": "./build/src/util/*.js"
+    }
+  },
   "scripts": {
     "start": "yarn build && node build/app",
     "start-monitor": "nodemon --exec 'yarn build && node build/app' --ignore './build/**/*' --ext 'ts,js' build/app",
