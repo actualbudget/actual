@@ -336,7 +336,7 @@
         ],
         "patterns": [
           {
-            "group": ["**/*.api", "**/*.web", "**/*.electron"],
+            "group": ["**/*.api", "**/*.electron"],
             "message": "Don't directly reference imports from other platforms"
           },
           {

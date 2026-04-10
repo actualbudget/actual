@@ -42,8 +42,8 @@
       "default": "./src/platform/server/sqlite/index.ts"
     },
     "#platform/client/connection": {
-      "electron-renderer": "./src/platform/client/connection/index.ts",
-      "default": "./src/platform/client/connection/index.browser.ts"
+      "electron-renderer": "./src/platform/client/connection/index.electron.ts",
+      "default": "./src/platform/client/connection/index.ts"
     },
     "#server/encryption/encryption-internals": {
       "electron": "./src/server/encryption/encryption-internals.electron.ts",
@@ -101,8 +101,8 @@
     "./client/undo": "./src/client/undo.ts",
     "./mocks": "./src/mocks/index.ts",
     "./platform/client/connection": {
-      "electron-renderer": "./src/platform/client/connection/index.ts",
-      "default": "./src/platform/client/connection/index.browser.ts"
+      "electron-renderer": "./src/platform/client/connection/index.electron.ts",
+      "default": "./src/platform/client/connection/index.ts"
     },
     "./platform/client/undo": "./src/platform/client/undo/index.ts",
     "./platform/exceptions": "./src/platform/exceptions/index.ts",

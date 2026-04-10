@@ -37,7 +37,10 @@ import { TransactionTable } from './TransactionsTable';
 
 const queryClient = createTestQueryClient();
 
-vi.mock('@actual-app/core/platform/client/connection');
+vi.mock(
+  '@actual-app/core/platform/client/connection',
+  () => import('../../mocks/connection'),
+);
 vi.mock('../../hooks/useSyncedPref', () => ({
   useSyncedPref: vi.fn().mockReturnValue([undefined, vi.fn()]),
 }));
