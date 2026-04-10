@@ -16,7 +16,6 @@ import type { DropPosition } from '@desktop-client/hooks/useDragDrop';
 export type TransactionTableState = {
   editingId: TransactionEntity['id'] | null;
   editingField: string | null;
-  expandedSplitIds: Set<TransactionEntity['id']>;
   expandedRowIds: Set<TransactionEntity['id']>;
   rowHeights: Map<TransactionEntity['id'], number>;
   dragState: DragState | null;
@@ -31,9 +30,6 @@ export type DragState = {
 export type TableAction =
   | { type: 'START_EDIT'; id: TransactionEntity['id']; field: string }
   | { type: 'END_EDIT' }
-  | { type: 'TOGGLE_SPLIT'; id: TransactionEntity['id'] }
-  | { type: 'EXPAND_SPLIT'; id: TransactionEntity['id'] }
-  | { type: 'COLLAPSE_SPLIT'; id: TransactionEntity['id'] }
   | { type: 'TOGGLE_ROW_EXPANSION'; id: TransactionEntity['id'] }
   | { type: 'EXPAND_ROW'; id: TransactionEntity['id'] }
   | { type: 'COLLAPSE_ROW'; id: TransactionEntity['id'] }
@@ -107,8 +103,7 @@ export type TransactionTableProps = {
 
 export type TransactionRowProps = {
   transaction: TransactionEntity;
-  index: number;
-  editing: boolean;
+  focusedField?: string | null;
   selected: boolean;
   accounts: AccountEntity[];
   categoryGroups: CategoryGroupEntity[];
@@ -127,19 +122,52 @@ export type TransactionRowProps = {
   dateFormat: string;
   onEdit: (id: TransactionEntity['id'], field: string) => void;
   onSave: (transaction: TransactionEntity) => void;
-  onDelete: (id: TransactionEntity['id']) => void;
   onToggleSplit: (id: TransactionEntity['id']) => void;
   onToggleRowExpansion: (id: TransactionEntity['id']) => void;
   onSetRowHeight: (id: TransactionEntity['id'], height: number) => void;
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
-  onNotesTagClick: (tag: string) => void;
   onApplyRules: (
     transaction: TransactionEntity,
     field: string | null,
   ) => Promise<TransactionEntity>;
-  onCreatePayee: (name: string) => Promise<null | PayeeEntity['id']>;
   onManagePayees: (id?: PayeeEntity['id']) => void;
+  onOpenSplitModal: (id: TransactionEntity['id']) => void;
+  allowSplitTransaction?: boolean;
+  showSelection: boolean;
+};
+
+export type TransactionRowContentProps = {
+  transaction: TransactionEntity;
+  focusedField?: string | null;
+  selected: boolean;
+  accounts: AccountEntity[];
+  categoryGroups: CategoryGroupEntity[];
+  payees: PayeeEntity[];
+  showCleared: boolean;
+  showAccount: boolean;
+  showBalances: boolean;
+  showCategory: boolean;
+  balance: IntegerAmount | null;
+  hideFraction: boolean;
+  dateFormat: string;
+  isPreview: boolean;
+  isSplitExpanded: boolean;
+  account: AccountEntity | null | undefined;
+  payee: PayeeEntity | null | undefined;
+  category: CategoryEntity | null | undefined;
+  transferAccount: AccountEntity | null | undefined;
+  schedule: ScheduleEntity | null | undefined;
+  notesValue?: string;
+  previewStatus?: string | null;
+  onEdit: (id: TransactionEntity['id'], field: string) => void;
+  onUpdate: (field: string, value: unknown) => Promise<void>;
+  onSelect: () => void;
+  onToggleSplit: (id: TransactionEntity['id']) => void;
+  onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
+  onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
+  onManagePayees: (id?: PayeeEntity['id']) => void;
+  onOpenSplitModal: (id: TransactionEntity['id']) => void;
   allowSplitTransaction?: boolean;
   showSelection: boolean;
 };
@@ -157,11 +185,7 @@ export type CellProps<T = unknown> = {
 export type SplitTransactionModalProps = {
   transaction: TransactionEntity;
   childTransactions: TransactionEntity[];
-  accounts: AccountEntity[];
   categoryGroups: CategoryGroupEntity[];
-  payees: PayeeEntity[];
-  dateFormat: string;
-  hideFraction: boolean;
   onSave: (
     parent: TransactionEntity,
     children: TransactionEntity[],

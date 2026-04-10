@@ -30,8 +30,8 @@ import type {
   TransactionFilterEntity,
 } from 'loot-core/types/models';
 
-import { TransactionTable } from './TransactionsTable';
-import type { TransactionTableProps } from './TransactionsTable';
+import { TransactionTable } from './TransactionTable';
+import type { TransactionTableProps } from './TransactionTable';
 
 import type { TableHandleRef } from '@desktop-client/components/table';
 import { isValidBoundaryDrop } from '@desktop-client/hooks/useDragDrop';

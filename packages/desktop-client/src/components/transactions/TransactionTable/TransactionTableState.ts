@@ -6,7 +6,6 @@ export function createInitialState(): TransactionTableState {
   return {
     editingId: null,
     editingField: null,
-    expandedSplitIds: new Set(),
     expandedRowIds: new Set(),
     rowHeights: new Map(),
     dragState: null,
@@ -31,37 +30,6 @@ export function tableReducer(
         editingId: null,
         editingField: null,
       };
-
-    case 'TOGGLE_SPLIT': {
-      const newExpandedIds = new Set(state.expandedSplitIds);
-      if (newExpandedIds.has(action.id)) {
-        newExpandedIds.delete(action.id);
-      } else {
-        newExpandedIds.add(action.id);
-      }
-      return {
-        ...state,
-        expandedSplitIds: newExpandedIds,
-      };
-    }
-
-    case 'EXPAND_SPLIT': {
-      const newExpandedIds = new Set(state.expandedSplitIds);
-      newExpandedIds.add(action.id);
-      return {
-        ...state,
-        expandedSplitIds: newExpandedIds,
-      };
-    }
-
-    case 'COLLAPSE_SPLIT': {
-      const newExpandedIds = new Set(state.expandedSplitIds);
-      newExpandedIds.delete(action.id);
-      return {
-        ...state,
-        expandedSplitIds: newExpandedIds,
-      };
-    }
 
     case 'TOGGLE_ROW_EXPANSION': {
       const newExpandedRowIds = new Set(state.expandedRowIds);
@@ -127,13 +95,6 @@ export function tableReducer(
   }
 }
 
-export function isTransactionExpanded(
-  state: TransactionTableState,
-  id: TransactionEntity['id'],
-): boolean {
-  return state.expandedSplitIds.has(id);
-}
-
 export function isTransactionEditing(
   state: TransactionTableState,
   id: TransactionEntity['id'],
@@ -165,11 +126,11 @@ export function getRowHeight(
 
 export function getVisibleTransactions(
   transactions: readonly TransactionEntity[],
-  state: TransactionTableState,
+  isSplitExpanded: (id: string) => boolean,
 ): TransactionEntity[] {
   return transactions.filter(t => {
     if (t.parent_id) {
-      return state.expandedSplitIds.has(t.parent_id);
+      return isSplitExpanded(t.parent_id);
     }
     return true;
   });

@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import type { TransactionEntity } from 'loot-core/types/models';
 
 import { DateSelect } from '@desktop-client/components/select/DateSelect';
-import { Cell } from '@desktop-client/components/table';
+import { CustomCell } from '@desktop-client/components/table';
 
 type DateCellProps = {
   id: TransactionEntity['id'];
@@ -41,24 +41,31 @@ export function DateCell({
   }, [date]);
 
   return (
-    <Cell
+    <CustomCell
       name="date"
       width={110}
+      textAlign="flex"
       focused={focused}
       exposed={exposed}
-      onExpose={() => onEdit(id, 'date')}
-      value={formattedDate}
+      onExpose={() => !isPreview && onEdit(id, 'date')}
+      value={date || ''}
+      formatter={() => formattedDate}
       style={{ marginLeft: -5 }}
+      onUpdate={value => onUpdate('date', value)}
     >
-      {exposed && !isPreview && (
-        <DateSelect
-          value={date || ''}
-          dateFormat={dateFormat}
-          clearOnBlur
-          onUpdate={value => onUpdate('date', value)}
-          onSelect={() => undefined}
-        />
-      )}
-    </Cell>
+      {({ onBlur, onKeyDown, onUpdate: setValue, onSave, shouldSaveFromKey, inputStyle }) =>
+        !isPreview ? (
+          <DateSelect
+            value={date || ''}
+            dateFormat={dateFormat}
+            inputProps={{ onBlur, onKeyDown, style: inputStyle }}
+            shouldSaveFromKey={shouldSaveFromKey}
+            clearOnBlur
+            onUpdate={setValue}
+            onSelect={onSave}
+          />
+        ) : null
+      }
+    </CustomCell>
   );
 }

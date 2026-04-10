@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import type { AccountEntity, TransactionEntity } from 'loot-core/types/models';
 
 import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
-import { Cell } from '@desktop-client/components/table';
+import { CustomCell } from '@desktop-client/components/table';
 
 type AccountCellProps = {
   id: TransactionEntity['id'];
@@ -30,24 +30,34 @@ export function AccountCell({
   }, [account]);
 
   return (
-    <Cell
+    <CustomCell
       name="account"
       width="flex"
+      textAlign="flex"
       focused={focused}
       exposed={exposed}
-      onExpose={() => onEdit(id, 'account')}
-      value={accountName}
+      onExpose={() => !isPreview && onEdit(id, 'account')}
+      value={account?.id || ''}
+      formatter={() => accountName}
       style={{ marginLeft: -5 }}
+      onUpdate={value => {
+        if (value) {
+          onUpdate('account', value);
+        }
+      }}
     >
-      {exposed && !isPreview && (
-        <AccountAutocomplete
-          value={account?.id || null}
-          focused
-          clearOnBlur={false}
-          onUpdate={value => onUpdate('account', value)}
-          onSelect={() => undefined}
-        />
-      )}
-    </Cell>
+      {({ onBlur, onKeyDown, onUpdate: setValue, onSave, inputStyle }) =>
+        !isPreview ? (
+          <AccountAutocomplete
+            value={account?.id || null}
+            focused
+            clearOnBlur={false}
+            inputProps={{ onBlur, onKeyDown, style: inputStyle }}
+            onUpdate={setValue}
+            onSelect={onSave}
+          />
+        ) : null
+      }
+    </CustomCell>
   );
 }

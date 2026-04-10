@@ -1,10 +1,5 @@
 import { useMemo } from 'react';
 
-import {
-  SvgArrowsSynchronize,
-  SvgCalendar3,
-  SvgHyperlink2,
-} from '@actual-app/components/icons/v2';
 import { theme } from '@actual-app/components/theme';
 
 import type {
@@ -15,7 +10,8 @@ import type {
 } from 'loot-core/types/models';
 
 import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
-import { Cell } from '@desktop-client/components/table';
+import { CustomCell } from '@desktop-client/components/table';
+import { PayeeCellDisplay } from './PayeeCellDisplay';
 
 type PayeeCellProps = {
   id: TransactionEntity['id'];
@@ -28,7 +24,6 @@ type PayeeCellProps = {
   isPreview?: boolean;
   onEdit: (id: TransactionEntity['id'], field: string) => void;
   onUpdate: (field: string, value: string | null) => void;
-  onCreatePayee: (name: string) => Promise<null | PayeeEntity['id']>;
   onManagePayees: (id?: PayeeEntity['id']) => void;
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
@@ -49,32 +44,21 @@ export function PayeeCell({
   onNavigateToTransferAccount,
   onNavigateToSchedule,
 }: PayeeCellProps) {
-  const displayPayee = useMemo(() => {
-    if (transferAccount) {
-      return transferAccount.name;
-    }
-    return payee?.name || '';
-  }, [payee, transferAccount]);
+  const displayPayee = useMemo(
+    () => (transferAccount ? transferAccount.name : payee?.name || ''),
+    [payee, transferAccount],
+  );
 
-  const payeeIcon = useMemo(() => {
-    const iconStyle = {
-      width: 10,
-      height: 10,
-      marginRight: 5,
-      color: theme.pageTextSubdued,
-      flexShrink: 0,
-    };
-
+  const displayMode = useMemo(() => {
     if (schedule) {
-      return <SvgCalendar3 style={iconStyle} />;
+      return 'schedule' as const;
     }
-    if (transferAccount) {
-      return <SvgArrowsSynchronize style={iconStyle} />;
+
+    if (transferAccount || payee?.transfer_acct) {
+      return 'transfer' as const;
     }
-    if (payee?.transfer_acct) {
-      return <SvgArrowsSynchronize style={iconStyle} />;
-    }
-    return null;
+
+    return 'plain' as const;
   }, [schedule, transferAccount, payee]);
 
   const handleClick = () => {
@@ -88,63 +72,45 @@ export function PayeeCell({
   const showClickable = !!(transferAccount || schedule);
 
   return (
-    <Cell
+    <CustomCell
       name="payee"
       width="flex"
       focused={focused}
       exposed={exposed}
-      onExpose={() => onEdit(id, 'payee')}
-      value={displayPayee}
+      onExpose={() => !isPreview && onEdit(id, 'payee')}
+      textAlign="flex"
+      value={payee?.id || ''}
+      formatter={() => displayPayee}
       style={{ marginLeft: -5 }}
+      onUpdate={value => onUpdate('payee', value || null)}
       valueStyle={{
-        cursor: showClickable ? 'pointer' : undefined,
-        ':hover': showClickable ? { textDecoration: 'underline' } : undefined,
+        cursor: displayMode !== 'plain' ? 'pointer' : undefined,
+        ':hover':
+          displayMode !== 'plain' ? { textDecoration: 'underline' } : undefined,
       }}
-      unexposedContent={({ value }) => (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            flexGrow: 1,
-            overflow: 'hidden',
-          }}
-          onClick={showClickable ? handleClick : undefined}
-        >
-          {payeeIcon}
-          {showClickable && (
-            <SvgHyperlink2
-              style={{
-                width: 9,
-                height: 9,
-                marginRight: 4,
-                color: theme.pageTextLink,
-              }}
-            />
-          )}
-          <span
-            style={{
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {value}
-          </span>
-        </div>
-      )}
-    >
-      {exposed && !isPreview && (
-        <PayeeAutocomplete
-          payees={payees}
-          value={payee?.id || null}
-          focused
-          clearOnBlur={false}
-          showManagePayees
-          onUpdate={(_, value) => onUpdate('payee', value)}
-          onSelect={() => undefined}
-          onManagePayees={() => onManagePayees(payee?.id)}
+      unexposedContent={() => (
+        <PayeeCellDisplay
+          displayPayee={displayPayee}
+          mode={displayMode}
+          onClick={handleClick}
         />
       )}
-    </Cell>
+    >
+      {({ onBlur, onKeyDown, onUpdate: setValue, onSave, inputStyle }) =>
+        !isPreview ? (
+          <PayeeAutocomplete
+            payees={payees}
+            value={payee?.id || null}
+            focused
+            clearOnBlur={false}
+            showManagePayees
+            inputProps={{ onBlur, onKeyDown, style: inputStyle }}
+            onUpdate={(_, value) => setValue(value || '')}
+            onSelect={value => onSave(Array.isArray(value) ? '' : (value ?? ''))}
+            onManagePayees={() => onManagePayees(payee?.id)}
+          />
+        ) : null
+      }
+    </CustomCell>
   );
 }

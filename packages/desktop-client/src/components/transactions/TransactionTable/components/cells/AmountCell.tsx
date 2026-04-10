@@ -6,7 +6,7 @@ import { theme } from '@actual-app/components/theme';
 import { integerToCurrency } from 'loot-core/shared/util';
 import type { TransactionEntity } from 'loot-core/types/models';
 
-import { Cell, InputCell } from '@desktop-client/components/table';
+import { InputCell } from '@desktop-client/components/table';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 
 type AmountCellProps = {
@@ -54,33 +54,28 @@ export function AmountCell({
   }, [amount, type]);
 
   return (
-    <Cell
+    <InputCell
       name={type}
       width={100}
       textAlign="right"
       focused={focused}
       exposed={exposed}
-      onExpose={() => onEdit(id, type)}
+      onExpose={() => !isPreview && onEdit(id, type)}
       value={displayValue}
       valueStyle={{
         ...styles.tnum,
         color: amount === 0 ? theme.tableTextInactive : undefined,
       }}
       style={{ marginRight: -5 }}
-    >
-      {exposed && !isPreview && (
-        <InputCell
-          value={inputValue}
-          onUpdate={value => onUpdate(type, value)}
-          inputProps={{
-            placeholder: '0.00',
-            style: {
-              textAlign: 'right',
-              ...styles.tnum,
-            },
-          }}
-        />
-      )}
-    </Cell>
+      inputProps={{
+        value: inputValue,
+        placeholder: '0.00',
+        style: {
+          textAlign: 'right',
+          ...styles.tnum,
+        },
+      }}
+      onUpdate={value => onUpdate(type, value)}
+    />
   );
 }

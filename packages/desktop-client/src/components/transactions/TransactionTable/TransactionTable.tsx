@@ -1,6 +1,7 @@
 import {
   forwardRef,
   useCallback,
+  useEffect,
   useImperativeHandle,
   useMemo,
   useReducer,
@@ -8,28 +9,38 @@ import {
   useState,
 } from 'react';
 import type { ForwardedRef } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import {
+  isTemporaryId,
+  recalculateSplit,
+  updateTransaction,
+} from 'loot-core/shared/transactions';
 import type { TransactionEntity } from 'loot-core/types/models';
 
 import { TransactionHeader } from './components/TransactionHeader';
+import { SplitTransactionModal } from './components/modals/SplitTransactionModal';
 import { TransactionRow } from './components/TransactionRow';
 import {
   createInitialState,
   getRowHeight,
   getVisibleTransactions,
   isRowExpanded,
-  isTransactionEditing,
   tableReducer,
 } from './TransactionTableState';
 import type { TransactionTableProps } from './types';
+import { makeTemporaryTransactions } from '../table/utils';
 
-import { Table } from '@desktop-client/components/table';
+import { Table, useTableNavigator } from '@desktop-client/components/table';
 import type { TableHandleRef } from '@desktop-client/components/table';
 import { useSelectedItems } from '@desktop-client/hooks/useSelected';
 import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
+import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { useDispatch } from '@desktop-client/redux';
 
 const ROW_HEIGHT = 32;
 
@@ -38,6 +49,7 @@ export const TransactionTable = forwardRef(
     props: TransactionTableProps,
     ref: ForwardedRef<TableHandleRef<TransactionEntity>>,
   ) => {
+    const { t } = useTranslation();
     const {
       transactions,
       loadMoreTransactions,
@@ -55,63 +67,104 @@ export const TransactionTable = forwardRef(
       isAdding,
       isNew,
       isMatched,
-      isFiltered,
       dateFormat = 'MM/dd/yyyy',
       hideFraction,
       renderEmpty,
       onSave,
       onApplyRules,
-      onSplit,
-      onAddSplit,
       onCloseAddTransaction,
       onAdd,
-      onCreatePayee,
       style,
       onNavigateToTransferAccount,
       onNavigateToSchedule,
-      onNotesTagClick,
       onSort,
       sortField,
       ascDesc,
-      onReorder,
       onBatchDelete,
-      onBatchDuplicate,
-      onBatchLinkSchedule,
-      onBatchUnlinkSchedule,
-      onCreateRule,
-      onScheduleAction,
-      onMakeAsNonSplitTransactions,
+      allowSplitTransaction,
       showSelection,
-      allowSplitTransaction = true,
       onManagePayees,
     } = props;
 
     const [state, dispatch] = useReducer(tableReducer, createInitialState());
     const [scrollWidth, setScrollWidth] = useState(0);
+    const [temporaryTransactions, setTemporaryTransactions] = useState<
+      TransactionEntity[]
+    >([]);
+    const [splitModalTransactionId, setSplitModalTransactionId] = useState<
+      TransactionEntity['id'] | null
+    >(null);
     const tableRef = useRef<TableHandleRef<TransactionEntity>>(null);
+    const previousIsAdding = useRef(isAdding);
+    const previousTemporaryTransactionId = useRef<TransactionEntity['id'] | null>(
+      null,
+    );
     const selectedItems = useSelectedItems();
     const splitsExpanded = useSplitsExpanded();
+    const dispatchRedux = useDispatch();
 
     useImperativeHandle(ref, () => tableRef.current!);
 
-    const visibleTransactions = useMemo(() => {
-      return getVisibleTransactions(transactions, state);
-    }, [transactions, state]);
+    useEffect(() => {
+      if (!previousIsAdding.current && isAdding) {
+        setTemporaryTransactions(
+          makeTemporaryTransactions(currentAccountId, currentCategoryId),
+        );
+      } else if (previousIsAdding.current && !isAdding) {
+        setTemporaryTransactions([]);
+      }
 
-    const handleEdit = useCallback(
-      (id: TransactionEntity['id'], field: string) => {
-        dispatch({ type: 'START_EDIT', id, field });
-      },
-      [],
+      previousIsAdding.current = isAdding;
+    }, [isAdding, currentAccountId, currentCategoryId]);
+
+    const visibleTransactions = useMemo(() => {
+      return getVisibleTransactions(transactions, splitsExpanded.isExpanded);
+    }, [transactions, splitsExpanded]);
+
+    const navigatorTransactions = useMemo(() => {
+      if (temporaryTransactions.length === 0) {
+        return visibleTransactions;
+      }
+
+      return [...temporaryTransactions, ...visibleTransactions];
+    }, [temporaryTransactions, visibleTransactions]);
+
+    const tableItems = useMemo(() => {
+      return visibleTransactions.filter(
+        transaction => !isTemporaryId(transaction.id),
+      );
+    }, [visibleTransactions]);
+
+    const splitModalTransactionsSource = useMemo(
+      () => [...temporaryTransactions, ...transactions],
+      [temporaryTransactions, transactions],
     );
 
-    const handleEndEdit = useCallback(() => {
-      dispatch({ type: 'END_EDIT' });
-    }, []);
+    const splitModalTransaction = useMemo(() => {
+      if (!splitModalTransactionId) {
+        return null;
+      }
+
+      return (
+        splitModalTransactionsSource.find(
+          transaction => transaction.id === splitModalTransactionId,
+        ) ?? null
+      );
+    }, [splitModalTransactionId, splitModalTransactionsSource]);
+
+    const splitModalChildTransactions = useMemo(() => {
+      if (!splitModalTransactionId) {
+        return [];
+      }
+
+      return splitModalTransactionsSource.filter(
+        transaction => transaction.parent_id === splitModalTransactionId,
+      );
+    }, [splitModalTransactionId, splitModalTransactionsSource]);
 
     const handleToggleSplit = useCallback((id: TransactionEntity['id']) => {
-      dispatch({ type: 'TOGGLE_SPLIT', id });
-    }, []);
+      splitsExpanded.dispatch({ type: 'toggle-split', id });
+    }, [splitsExpanded]);
 
     const handleToggleRowExpansion = useCallback(
       (id: TransactionEntity['id']) => {
@@ -127,19 +180,289 @@ export const TransactionTable = forwardRef(
       [],
     );
 
-    const handleDelete = useCallback(
-      (id: TransactionEntity['id']) => {
-        onBatchDelete([id]);
+    const getEditableFields = useCallback(
+      (item?: TransactionEntity) => {
+        const fields: string[] = [];
+
+        if (showSelection) {
+          fields.push('select');
+        }
+
+        if (!item?.is_child) {
+          fields.push('date');
+          if (showAccount) {
+            fields.push('account');
+          }
+        }
+
+        fields.push('payee', 'notes');
+
+        if (showCategory) {
+          fields.push('category');
+        }
+
+        fields.push('debit', 'credit');
+
+        if (showCleared) {
+          fields.push('cleared');
+        }
+
+        return fields;
       },
-      [onBatchDelete],
+      [showSelection, showAccount, showCategory, showCleared],
     );
+
+    const tableNavigator = useTableNavigator(
+      navigatorTransactions,
+      getEditableFields,
+    );
+
+    useEffect(() => {
+      const currentTemporaryTransactionId = temporaryTransactions[0]?.id ?? null;
+
+      if (
+        currentTemporaryTransactionId &&
+        currentTemporaryTransactionId !== previousTemporaryTransactionId.current
+      ) {
+        tableNavigator.onEdit(currentTemporaryTransactionId, 'date');
+        tableRef.current?.scrollToTop();
+      }
+
+      previousTemporaryTransactionId.current = currentTemporaryTransactionId;
+    }, [temporaryTransactions, tableNavigator]);
+
+    const handleSave = useCallback(
+      (transaction: TransactionEntity) => {
+        if (isTemporaryId(transaction.id)) {
+          setTemporaryTransactions(prev => updateTransaction(prev, transaction).data);
+          return;
+        }
+
+        onSave(transaction);
+      },
+      [onSave],
+    );
+
+    const handleOpenSplitModal = useCallback(
+      (id: TransactionEntity['id']) => {
+        setSplitModalTransactionId(id);
+      },
+      [],
+    );
+
+    const handleCloseSplitModal = useCallback(() => {
+      setSplitModalTransactionId(null);
+    }, []);
+
+    const handleSaveSplitTransaction = useCallback(
+      async (parent: TransactionEntity, children: TransactionEntity[]) => {
+        handleSave(
+          recalculateSplit({
+            ...parent,
+            is_parent: true,
+            subtransactions: children,
+          }),
+        );
+      },
+      [handleSave],
+    );
+
+    const handleCloseAddTransaction = useCallback(() => {
+      setTemporaryTransactions([]);
+      onCloseAddTransaction();
+    }, [onCloseAddTransaction]);
+
+    const handleAddTemporaryTransaction = useCallback(
+      (closeAfterAdd: boolean) => {
+        if (temporaryTransactions.length === 0) {
+          return;
+        }
+
+        const parentTransaction = temporaryTransactions[0];
+
+        if (parentTransaction.account == null) {
+          dispatchRedux(
+            addNotification({
+              notification: {
+                type: 'error',
+                message: t('Account is a required field'),
+              },
+            }),
+          );
+          tableNavigator.onEdit(parentTransaction.id, 'account');
+          return;
+        }
+
+        if (parentTransaction.error) {
+          return;
+        }
+
+        onAdd(temporaryTransactions);
+
+        if (closeAfterAdd) {
+          handleCloseAddTransaction();
+          return;
+        }
+
+        const lastDate = temporaryTransactions[0]?.date ?? null;
+        const nextTemporaryTransactions = makeTemporaryTransactions(
+          currentAccountId,
+          currentCategoryId,
+          lastDate,
+        );
+
+        setTemporaryTransactions(nextTemporaryTransactions);
+        tableNavigator.onEdit(nextTemporaryTransactions[0].id, 'date');
+        tableRef.current?.scrollToTop();
+      },
+      [
+        temporaryTransactions,
+        onAdd,
+        dispatchRedux,
+        handleCloseAddTransaction,
+        currentAccountId,
+        currentCategoryId,
+        tableNavigator,
+        t,
+      ],
+    );
+
+    const temporaryParentTransaction = temporaryTransactions[0] ?? null;
+    const canAddTemporaryTransactions =
+      !!temporaryParentTransaction &&
+      temporaryParentTransaction.account != null &&
+      !temporaryParentTransaction.error;
+
+    const renderTemporaryTransactionSection = useMemo(() => {
+      if (temporaryTransactions.length === 0) {
+        return null;
+      }
+
+      return (
+        <View
+          style={{
+            borderBottom: `1px solid ${theme.tableBorderHover}`,
+            paddingBottom: 6,
+            backgroundColor: theme.tableBackground,
+          }}
+          data-testid="new-transaction"
+        >
+          {temporaryTransactions.map((transaction, index) => (
+            <TransactionRow
+              key={transaction.id}
+              transaction={transaction}
+              focusedField={
+                tableNavigator.editingId === transaction.id
+                  ? tableNavigator.focusedField
+                  : null
+              }
+              selected={false}
+              accounts={accounts}
+              categoryGroups={categoryGroups}
+              payees={payees}
+              showCleared={showCleared}
+              showAccount={showAccount}
+              showBalances={showBalances}
+              showCategory={showCategory}
+              balance={null}
+              hideFraction={hideFraction}
+              isNew={index === 0}
+              isMatched={false}
+              isExpanded={false}
+              isSplitExpanded={splitsExpanded.isExpanded(transaction.id)}
+              rowHeight={ROW_HEIGHT}
+              dateFormat={dateFormat}
+              onEdit={tableNavigator.onEdit}
+              onSave={handleSave}
+              onToggleSplit={handleToggleSplit}
+              onToggleRowExpansion={handleToggleRowExpansion}
+              onSetRowHeight={handleSetRowHeight}
+              onNavigateToTransferAccount={onNavigateToTransferAccount}
+              onNavigateToSchedule={onNavigateToSchedule}
+              onApplyRules={onApplyRules}
+              onManagePayees={onManagePayees}
+              onOpenSplitModal={handleOpenSplitModal}
+              allowSplitTransaction={allowSplitTransaction}
+              showSelection={showSelection}
+            />
+          ))}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              marginTop: 6,
+              marginRight: 20,
+            }}
+          >
+            <Button
+              style={{ marginRight: 10, padding: '4px 10px' }}
+              onPress={handleCloseAddTransaction}
+              data-testid="cancel-button"
+            >
+              <Trans>Cancel</Trans>
+            </Button>
+            <Button
+              variant="primary"
+              style={{ padding: '4px 10px' }}
+              onPress={event =>
+                handleAddTemporaryTransaction(
+                  !!(event.metaKey || event.ctrlKey),
+                )
+              }
+              isDisabled={!canAddTemporaryTransactions}
+              data-testid="add-button"
+            >
+              <Trans>Add</Trans>
+            </Button>
+          </View>
+        </View>
+      );
+    }, [
+      temporaryTransactions,
+      tableNavigator,
+      accounts,
+      categoryGroups,
+      payees,
+      showCleared,
+      showAccount,
+      showBalances,
+      showCategory,
+      hideFraction,
+      splitsExpanded,
+      dateFormat,
+      handleSave,
+      handleToggleSplit,
+      handleToggleRowExpansion,
+      handleSetRowHeight,
+      onNavigateToTransferAccount,
+      onNavigateToSchedule,
+      onApplyRules,
+      onManagePayees,
+      showSelection,
+      handleCloseAddTransaction,
+      handleAddTemporaryTransaction,
+      canAddTemporaryTransactions,
+    ]);
 
     // Note: Current Table component uses FixedSizeList, so all rows have same height
     // For variable heights, we'd need to implement VariableSizeList support
     // For now, expandable rows will have a fixed expanded height
 
     const renderRow = useCallback(
-      ({ item }: { item: TransactionEntity; index: number }) => {
+      ({
+        item,
+        index,
+        editing,
+        focusedField,
+        onEdit,
+      }: {
+        item: TransactionEntity;
+        index: number;
+        editing: boolean;
+        focusedField: string | null;
+        onEdit: (id: TransactionEntity['id'], field: string) => void;
+      }) => {
         const selected = selectedItems.has(item.id);
         const balance = balances?.[item.id] ?? null;
         const rowHeight = getRowHeight(state, item.id, ROW_HEIGHT);
@@ -149,8 +472,7 @@ export const TransactionTable = forwardRef(
         return (
           <TransactionRow
             transaction={item}
-            index={index}
-            editing={isTransactionEditing(state, item.id)}
+            focusedField={editing ? focusedField : null}
             selected={selected}
             accounts={accounts}
             categoryGroups={categoryGroups}
@@ -167,18 +489,16 @@ export const TransactionTable = forwardRef(
             isSplitExpanded={isSplitExpanded}
             rowHeight={rowHeight}
             dateFormat={dateFormat}
-            onEdit={handleEdit}
-            onSave={onSave}
-            onDelete={handleDelete}
+            onEdit={onEdit}
+            onSave={handleSave}
             onToggleSplit={handleToggleSplit}
             onToggleRowExpansion={handleToggleRowExpansion}
             onSetRowHeight={handleSetRowHeight}
             onNavigateToTransferAccount={onNavigateToTransferAccount}
             onNavigateToSchedule={onNavigateToSchedule}
-            onNotesTagClick={onNotesTagClick}
             onApplyRules={onApplyRules}
-            onCreatePayee={onCreatePayee}
             onManagePayees={onManagePayees}
+            onOpenSplitModal={handleOpenSplitModal}
             allowSplitTransaction={allowSplitTransaction}
             showSelection={showSelection}
           />
@@ -200,18 +520,15 @@ export const TransactionTable = forwardRef(
         isNew,
         isMatched,
         dateFormat,
-        handleEdit,
-        onSave,
-        handleDelete,
+        handleSave,
         handleToggleSplit,
         handleToggleRowExpansion,
         handleSetRowHeight,
         onNavigateToTransferAccount,
         onNavigateToSchedule,
-        onNotesTagClick,
         onApplyRules,
-        onCreatePayee,
         onManagePayees,
+        handleOpenSplitModal,
         allowSplitTransaction,
         showSelection,
       ],
@@ -238,7 +555,9 @@ export const TransactionTable = forwardRef(
         />
         <Table
           ref={tableRef}
-          items={visibleTransactions}
+          items={tableItems}
+          navigator={tableNavigator}
+          contentHeader={renderTemporaryTransactionSection}
           renderItem={renderRow}
           renderEmpty={renderEmpty}
           loadMore={loadMoreTransactions}
@@ -248,6 +567,15 @@ export const TransactionTable = forwardRef(
             backgroundColor: theme.tableBackground,
           }}
         />
+        {splitModalTransaction && (
+          <SplitTransactionModal
+            transaction={splitModalTransaction}
+            childTransactions={splitModalChildTransactions}
+            categoryGroups={categoryGroups}
+            onSave={handleSaveSplitTransaction}
+            onClose={handleCloseSplitModal}
+          />
+        )}
       </View>
     );
   },
