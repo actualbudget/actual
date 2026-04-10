@@ -21,11 +21,11 @@ vi.mock('@actual-app/api', () => {
   };
 });
 
-vi.mock('../connection', () => ({
+vi.mock('#connection', () => ({
   withConnection: vi.fn((_opts, fn) => fn()),
 }));
 
-vi.mock('../output', () => ({
+vi.mock('#output', () => ({
   printOutput: vi.fn(),
 }));
 
