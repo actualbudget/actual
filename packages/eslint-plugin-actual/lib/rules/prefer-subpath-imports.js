@@ -42,12 +42,18 @@ module.exports = {
       const resolved = path.posix.join(fileDir, importSource);
 
       // Check that the resolved path is inside src/
-      if (!resolved.startsWith(srcDir.slice(0, -1))) {
+      const srcRoot = srcDir.slice(0, -1);
+      const relativeToSrc = path.posix.relative(srcRoot, resolved);
+      if (
+        relativeToSrc === '' ||
+        relativeToSrc.startsWith('..') ||
+        path.posix.isAbsolute(relativeToSrc)
+      ) {
         return null;
       }
 
       // Get path relative to src/
-      let subpath = resolved.slice(srcDir.length);
+      let subpath = relativeToSrc;
 
       // Strip file extensions
       subpath = subpath.replace(/\.(ts|tsx|js|jsx)$/, '');
