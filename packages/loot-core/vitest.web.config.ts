@@ -2,7 +2,6 @@ import peggyLoader from 'vite-plugin-peggy-loader';
 import { defineConfig } from 'vitest/config';
 
 const resolveExtensions = [
-  '.testing.ts',
   '.mjs',
   '.js',
   '.mts',
