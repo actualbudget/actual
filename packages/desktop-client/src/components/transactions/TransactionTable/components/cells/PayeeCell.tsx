@@ -1,7 +1,5 @@
 import { useMemo } from 'react';
 
-import { theme } from '@actual-app/components/theme';
-
 import type {
   AccountEntity,
   PayeeEntity,
@@ -68,8 +66,6 @@ export function PayeeCell({
       onNavigateToSchedule(schedule.id);
     }
   };
-
-  const showClickable = !!(transferAccount || schedule);
 
   return (
     <CustomCell
