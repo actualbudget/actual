@@ -1,14 +1,13 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
-
 import {
   insertRule,
   loadRules,
   resetState,
   runRules,
-} from '../transactions/transaction-rules';
+} from '#server/transactions/transaction-rules';
 
 // Integration tests for formula-based rule actions
 // These tests validate formulas with real transaction data and rule execution
@@ -38,7 +37,8 @@ describe('Formula Rule Actions - Integration Tests', () => {
             field: 'notes',
             value: null,
             options: {
-              formula: '=CONCATENATE("Interest: ", FORMATCURRENCY(amount * 0.05))',
+              formula:
+                '=CONCATENATE("Interest: ", FORMATCURRENCY(amount * 0.05))',
             },
           },
         ],
@@ -59,7 +59,9 @@ describe('Formula Rule Actions - Integration Tests', () => {
       await insertRule({
         stage: null,
         conditionsOp: 'and',
-        conditions: [{ field: 'imported_payee', op: 'contains', value: 'Store' }],
+        conditions: [
+          { field: 'imported_payee', op: 'contains', value: 'Store' },
+        ],
         actions: [
           {
             op: 'set',
@@ -88,7 +90,9 @@ describe('Formula Rule Actions - Integration Tests', () => {
       await insertRule({
         stage: null,
         conditionsOp: 'and',
-        conditions: [{ field: 'imported_payee', op: 'contains', value: 'Shop' }],
+        conditions: [
+          { field: 'imported_payee', op: 'contains', value: 'Shop' },
+        ],
         actions: [
           {
             op: 'set',
@@ -162,8 +166,7 @@ describe('Formula Rule Actions - Integration Tests', () => {
             field: 'notes',
             value: null,
             options: {
-              formula:
-                '=CONCATENATE("Store: ", RIGHT(imported_payee, 10))',
+              formula: '=CONCATENATE("Store: ", RIGHT(imported_payee, 10))',
             },
           },
         ],
@@ -247,7 +250,9 @@ describe('Formula Rule Actions - Integration Tests', () => {
       await insertRule({
         stage: null,
         conditionsOp: 'and',
-        conditions: [{ field: 'imported_payee', op: 'contains', value: 'Split' }],
+        conditions: [
+          { field: 'imported_payee', op: 'contains', value: 'Split' },
+        ],
         actions: [
           {
             op: 'set',
@@ -337,7 +342,9 @@ describe('Formula Rule Actions - Integration Tests', () => {
       await insertRule({
         stage: null,
         conditionsOp: 'and',
-        conditions: [{ field: 'imported_payee', op: 'contains', value: 'Math' }],
+        conditions: [
+          { field: 'imported_payee', op: 'contains', value: 'Math' },
+        ],
         actions: [
           {
             op: 'set',
@@ -368,7 +375,9 @@ describe('Formula Rule Actions - Integration Tests', () => {
       await insertRule({
         stage: null,
         conditionsOp: 'and',
-        conditions: [{ field: 'imported_payee', op: 'contains', value: 'Date' }],
+        conditions: [
+          { field: 'imported_payee', op: 'contains', value: 'Date' },
+        ],
         actions: [
           {
             op: 'set',
@@ -397,7 +406,9 @@ describe('Formula Rule Actions - Integration Tests', () => {
       await insertRule({
         stage: null,
         conditionsOp: 'and',
-        conditions: [{ field: 'imported_payee', op: 'contains', value: 'Days' }],
+        conditions: [
+          { field: 'imported_payee', op: 'contains', value: 'Days' },
+        ],
         actions: [
           {
             op: 'set',
@@ -458,7 +469,9 @@ describe('Formula Rule Actions - Integration Tests', () => {
       await insertRule({
         stage: null,
         conditionsOp: 'and',
-        conditions: [{ field: 'imported_payee', op: 'contains', value: 'Week' }],
+        conditions: [
+          { field: 'imported_payee', op: 'contains', value: 'Week' },
+        ],
         actions: [
           {
             op: 'set',
@@ -520,7 +533,9 @@ describe('Formula Rule Actions - Integration Tests', () => {
       await insertRule({
         stage: null,
         conditionsOp: 'and',
-        conditions: [{ field: 'imported_payee', op: 'contains', value: 'Error' }],
+        conditions: [
+          { field: 'imported_payee', op: 'contains', value: 'Error' },
+        ],
         actions: [
           {
             op: 'set',
@@ -643,7 +658,9 @@ describe('Formula Rule Actions - Integration Tests', () => {
       await insertRule({
         stage: null,
         conditionsOp: 'and',
-        conditions: [{ field: 'imported_payee', op: 'contains', value: 'Euro' }],
+        conditions: [
+          { field: 'imported_payee', op: 'contains', value: 'Euro' },
+        ],
         actions: [
           {
             op: 'set',
@@ -678,8 +695,7 @@ describe('Formula Rule Actions - Integration Tests', () => {
             field: 'notes',
             value: null,
             options: {
-              formula:
-                '=FORMATCURRENCY(amount / 100, "€", 2, ".", ",")',
+              formula: '=FORMATCURRENCY(amount / 100, "€", 2, ".", ",")',
             },
           },
         ],
@@ -700,7 +716,9 @@ describe('Formula Rule Actions - Integration Tests', () => {
       await insertRule({
         stage: null,
         conditionsOp: 'and',
-        conditions: [{ field: 'imported_payee', op: 'contains', value: 'Whole' }],
+        conditions: [
+          { field: 'imported_payee', op: 'contains', value: 'Whole' },
+        ],
         actions: [
           {
             op: 'set',
@@ -932,7 +950,9 @@ describe('Formula Rule Actions - Integration Tests', () => {
       await insertRule({
         stage: null,
         conditionsOp: 'and',
-        conditions: [{ field: 'imported_payee', op: 'contains', value: 'Text' }],
+        conditions: [
+          { field: 'imported_payee', op: 'contains', value: 'Text' },
+        ],
         actions: [
           {
             op: 'set',
@@ -961,15 +981,16 @@ describe('Formula Rule Actions - Integration Tests', () => {
       await insertRule({
         stage: null,
         conditionsOp: 'and',
-        conditions: [{ field: 'imported_payee', op: 'contains', value: 'Even' }],
+        conditions: [
+          { field: 'imported_payee', op: 'contains', value: 'Even' },
+        ],
         actions: [
           {
             op: 'set',
             field: 'notes',
             value: null,
             options: {
-              formula:
-                '=IF(ISEVEN(ABS(amount)), "Even amount", "Odd amount")',
+              formula: '=IF(ISEVEN(ABS(amount)), "Even amount", "Odd amount")',
             },
           },
         ],
@@ -999,7 +1020,8 @@ describe('Formula Rule Actions - Integration Tests', () => {
             field: 'notes',
             value: null,
             options: {
-              formula: '=IF(ISBLANK(imported_payee), "No payee", CONCATENATE("Payee: ", imported_payee))',
+              formula:
+                '=IF(ISBLANK(imported_payee), "No payee", CONCATENATE("Payee: ", imported_payee))',
             },
           },
         ],
@@ -1117,7 +1139,9 @@ describe('Formula Rule Actions - Integration Tests', () => {
       await insertRule({
         stage: null,
         conditionsOp: 'and',
-        conditions: [{ field: 'imported_payee', op: 'contains', value: 'Calc' }],
+        conditions: [
+          { field: 'imported_payee', op: 'contains', value: 'Calc' },
+        ],
         actions: [
           {
             op: 'set',

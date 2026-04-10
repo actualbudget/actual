@@ -13,6 +13,7 @@ import { amountToInteger } from '#shared/util';
 import {
   CustomFunctionsPlugin,
   customFunctionsTranslations,
+  loadUserPreferencesForFormulas,
 } from './customFunctions';
 import { assert } from './rule-utils';
 
@@ -21,6 +22,10 @@ HyperFormula.registerFunctionPlugin(
   CustomFunctionsPlugin,
   customFunctionsTranslations,
 );
+
+// Load user preferences on module initialization for formatting functions
+// This is async but happens once when the module loads
+void loadUserPreferencesForFormulas();
 
 const ACTION_OPS = [
   'set',

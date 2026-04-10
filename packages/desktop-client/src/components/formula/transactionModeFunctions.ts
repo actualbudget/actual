@@ -145,37 +145,46 @@ export const transactionModeFunctions: Record<string, FunctionDef> = {
   FORMATNUMBER: {
     name: 'FORMATNUMBER',
     description: t(
-      'Formats a number with thousands separators and specified decimal places.',
+      'Formats a number with thousands separators. Uses your app number format settings by default.',
     ),
     parameters: [
       { name: 'value', description: 'Number to format' },
-      { name: 'decimals', description: 'Decimal places (default: 2)' },
+      {
+        name: 'decimals',
+        description: 'Decimal places (optional, uses app settings)',
+      },
       {
         name: 'thousandsSeparator',
-        description: 'Thousands separator (default: ",")',
+        description: 'Thousands separator (optional, uses app settings)',
       },
       {
         name: 'decimalSeparator',
-        description: 'Decimal separator (default: ".")',
+        description: 'Decimal separator (optional, uses app settings)',
       },
     ],
   },
   FORMATCURRENCY: {
     name: 'FORMATCURRENCY',
     description: t(
-      'Formats a number as currency with symbol, thousands separators, and decimals.',
+      'Formats a number as currency. Uses your app currency and number format settings by default.',
     ),
     parameters: [
       { name: 'value', description: 'Number to format' },
-      { name: 'currencySymbol', description: 'Currency symbol (default: "$")' },
-      { name: 'decimals', description: 'Decimal places (default: 2)' },
+      {
+        name: 'currencySymbol',
+        description: 'Currency symbol (optional, uses app settings)',
+      },
+      {
+        name: 'decimals',
+        description: 'Decimal places (optional, uses app settings)',
+      },
       {
         name: 'thousandsSeparator',
-        description: 'Thousands separator (default: ",")',
+        description: 'Thousands separator (optional, uses app settings)',
       },
       {
         name: 'decimalSeparator',
-        description: 'Decimal separator (default: ".")',
+        description: 'Decimal separator (optional, uses app settings)',
       },
     ],
   },

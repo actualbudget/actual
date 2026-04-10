@@ -1,17 +1,16 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { HyperFormula } from 'hyperformula';
+import enUS from 'hyperformula/i18n/languages/enUS';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
-import { conditionsToAQL } from '#server/transactions/transaction-rules';
-import { q } from '#shared/query';
-import { HyperFormula } from 'hyperformula';
-import enUS from 'hyperformula/i18n/languages/enUS';
-
 import {
   CustomFunctionsPlugin,
   customFunctionsTranslations,
-} from '../rules/customFunctions';
+} from '#server/rules/customFunctions';
+import { conditionsToAQL } from '#server/transactions/transaction-rules';
+import { q } from '#shared/query';
 
 // Integration tests for formula cards with real database queries
 // These tests validate formulas with actual query results from the database
@@ -19,7 +18,7 @@ import {
 // Register HyperFormula language and plugins if not already registered
 try {
   HyperFormula.registerLanguage('enUS', enUS);
-} catch (e) {
+} catch {
   // Already registered, ignore
 }
 
@@ -28,7 +27,7 @@ try {
     CustomFunctionsPlugin,
     customFunctionsTranslations,
   );
-} catch (e) {
+} catch {
   // Already registered, ignore
 }
 
@@ -316,10 +315,7 @@ describe('Formula Card - Integration Tests with Queries', () => {
       const incomeGroup = await createCategoryGroup('Income');
       const incomeCategory = await createTestCategory('Salary', incomeGroup, 1);
       const savingsGroup = await createCategoryGroup('Savings');
-      const savingsCategory = await createTestCategory(
-        'Savings',
-        savingsGroup,
-      );
+      const savingsCategory = await createTestCategory('Savings', savingsGroup);
 
       await createTestTransaction({
         accountId,
@@ -569,7 +565,6 @@ describe('Formula Card - Integration Tests with Queries', () => {
   describe('Error Handling with Queries', () => {
     it('should handle empty query results', async () => {
       // Integration test: Query with no matching transactions
-      await createTestAccount('Checking');
       const groupId = await createCategoryGroup('Expenses');
       const categoryId = await createTestCategory('Empty', groupId);
 
