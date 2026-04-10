@@ -326,102 +326,35 @@ export function ScheduleEditForm({
         </SpaceBetween>
 
         <SpaceBetween
-          gap={5}
-          direction="vertical"
-          align="end"
-          style={{ marginTop: 10 }}
+          style={{
+            marginTop: 20,
+            display: isNarrowWidth ? 'grid' : 'flex',
+            gridTemplateColumns: '1fr 1fr',
+          }}
         >
-          <View
-            style={{
-              marginTop: 5,
-              flexDirection: 'row',
-              alignItems: 'center',
-              userSelect: 'none',
-              justifyContent: 'flex-end',
-            }}
-          >
-            <Checkbox
-              id="form_posts_transaction"
-              checked={fields.posts_transaction}
-              onChange={e => {
-                dispatch({
-                  type: 'set-field',
-                  field: 'posts_transaction',
-                  value: e.target.checked,
-                });
-              }}
+          <FormField style={{ flex: 1 }}>
+            <FormLabel
+              title={t('Upcoming length')}
+              htmlFor="upcoming-length-field"
             />
-            <label
-              htmlFor="form_posts_transaction"
-              style={{ userSelect: 'none' }}
-            >
-              <Trans>Automatically add transaction</Trans>
-            </label>
-          </View>
-
-          <Text
-            style={{
-              maxWidth: 350,
-              textAlign: 'right',
-              color: theme.pageTextLight,
-              fontSize: 13,
-              lineHeight: '1.4em',
-            }}
-          >
-            <Trans>
-              If checked, the schedule will automatically create transactions
-              for you in the specified account
-            </Trans>
-          </Text>
-
-          <View
-            style={{
-              marginTop: 10,
-              flexDirection: 'row',
-              alignItems: 'center',
-              userSelect: 'none',
-              justifyContent: 'flex-end',
-            }}
-          >
-            <Checkbox
-              id="form_custom_upcoming_length"
-              checked={fields.custom_upcoming_length != null}
-              onChange={e => {
-                dispatch({
-                  type: 'set-field',
-                  field: 'custom_upcoming_length',
-                  value: e.target.checked ? '7' : null,
-                });
-              }}
-            />
-            <label
-              htmlFor="form_custom_upcoming_length"
-              style={{ userSelect: 'none' }}
-            >
-              <Trans>Custom upcoming length</Trans>
-            </label>
-          </View>
-
-          {fields.custom_upcoming_length != null &&
-            (() => {
+            {(() => {
               const presetValues = ['1', '7', '14', 'oneMonth', 'currentMonth'];
-              const isPreset = presetValues.includes(
-                fields.custom_upcoming_length,
-              );
+              const isPreset =
+                fields.custom_upcoming_length != null &&
+                presetValues.includes(fields.custom_upcoming_length);
+              const isCustomValue =
+                fields.custom_upcoming_length != null && !isPreset;
               const safeCustomValue =
-                !isPreset && fields.custom_upcoming_length.includes('-')
+                isCustomValue && fields.custom_upcoming_length.includes('-')
                   ? fields.custom_upcoming_length
                   : '1-day';
 
               return (
-                <View
-                  style={{
-                    marginTop: 5,
-                    alignItems: 'flex-end',
-                  }}
-                >
+                <>
                   <Select
+                    id="upcoming-length-field"
                     options={[
+                      ['', t('Use global default')],
                       ['1', t('1 day')],
                       ['7', t('1 week')],
                       ['14', t('2 weeks')],
@@ -429,16 +362,27 @@ export function ScheduleEditForm({
                       ['currentMonth', t('End of the current month')],
                       ['custom', t('Custom length')],
                     ]}
-                    value={isPreset ? fields.custom_upcoming_length : 'custom'}
+                    value={
+                      fields.custom_upcoming_length == null
+                        ? ''
+                        : isPreset
+                          ? fields.custom_upcoming_length
+                          : 'custom'
+                    }
                     onChange={value => {
                       dispatch({
                         type: 'set-field',
                         field: 'custom_upcoming_length',
-                        value: value === 'custom' ? '1-day' : value,
+                        value:
+                          value === ''
+                            ? null
+                            : value === 'custom'
+                              ? '1-day'
+                              : value,
                       });
                     }}
                   />
-                  {!isPreset && (
+                  {isCustomValue && (
                     <CustomUpcomingLength
                       tempValue={safeCustomValue}
                       onChange={value => {
@@ -450,12 +394,72 @@ export function ScheduleEditForm({
                       }}
                     />
                   )}
-                </View>
+                </>
               );
             })()}
+            <Text
+              style={{
+                color: theme.pageTextLight,
+                fontSize: 12,
+                marginTop: 3,
+              }}
+            >
+              <Trans>
+                How far in advance this schedule appears as upcoming
+              </Trans>
+            </Text>
+          </FormField>
 
+          <FormField style={{ flex: 1 }}>
+            <FormLabel title=" " />
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                userSelect: 'none',
+                height: 28,
+              }}
+            >
+              <Checkbox
+                id="form_posts_transaction"
+                checked={fields.posts_transaction}
+                onChange={e => {
+                  dispatch({
+                    type: 'set-field',
+                    field: 'posts_transaction',
+                    value: e.target.checked,
+                  });
+                }}
+              />
+              <label
+                htmlFor="form_posts_transaction"
+                style={{ userSelect: 'none' }}
+              >
+                <Trans>Automatically add transaction</Trans>
+              </label>
+            </View>
+            <Text
+              style={{
+                color: theme.pageTextLight,
+                fontSize: 12,
+                marginTop: 3,
+              }}
+            >
+              <Trans>
+                Automatically create transactions in the specified account
+              </Trans>
+            </Text>
+          </FormField>
+        </SpaceBetween>
+
+        <SpaceBetween
+          gap={5}
+          direction="vertical"
+          align="end"
+          style={{ marginTop: 10 }}
+        >
           {!adding && schedule.rule && (
-            <SpaceBetween style={{ marginTop: 20, alignItems: 'center' }}>
+            <SpaceBetween style={{ marginTop: 10, alignItems: 'center' }}>
               {isCustom && (
                 <Text
                   style={{
