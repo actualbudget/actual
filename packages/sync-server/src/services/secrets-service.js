@@ -1,6 +1,6 @@
 import createDebug from 'debug';
 
-import { getAccountDb } from '../account-db';
+import { getAccountDb } from '#account-db';
 
 /**
  * An enum of valid secret names.

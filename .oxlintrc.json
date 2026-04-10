@@ -36,6 +36,7 @@
     "actual/prefer-const": "error",
     "actual/no-anchor-tag": "error",
     "actual/no-react-default-import": "error",
+    "actual/prefer-subpath-imports": "error",
 
     // JSX A11y rules
     "jsx-a11y/no-autofocus": [
@@ -394,15 +395,6 @@
       "files": ["packages/docs/**/*"],
       "rules": {
         "actual/no-anchor-tag": "off"
-      }
-    },
-    {
-      "files": [
-        "packages/loot-core/src/**/*.{ts,tsx}",
-        "packages/desktop-client/src/**/*.{ts,tsx}"
-      ],
-      "rules": {
-        "actual/prefer-subpath-imports": "error"
       }
     },
     {

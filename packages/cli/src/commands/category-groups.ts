@@ -1,9 +1,9 @@
 import * as api from '@actual-app/api';
 import type { Command } from 'commander';
 
-import { withConnection } from '../connection';
-import { printOutput } from '../output';
-import { parseBoolFlag } from '../utils';
+import { withConnection } from '#connection';
+import { printOutput } from '#output';
+import { parseBoolFlag } from '#utils';
 
 export function registerCategoryGroupsCommand(program: Command) {
   const groups = program

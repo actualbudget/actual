@@ -1,7 +1,7 @@
 import * as api from '@actual-app/api';
 import { Command } from 'commander';
 
-import { printOutput } from '../output';
+import { printOutput } from '#output';
 
 import { registerAccountsCommand } from './accounts';
 
