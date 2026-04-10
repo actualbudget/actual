@@ -1,22 +1,22 @@
 // @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
-import { addTransactions } from '../server/accounts/sync';
-import { aqlQuery } from '../server/aql';
-import * as budgetActions from '../server/budget/actions';
-import * as budget from '../server/budget/base';
-import * as db from '../server/db';
-import { runHandler, runMutator } from '../server/mutators';
-import * as sheet from '../server/sheet';
-import { batchMessages, setSyncingMode } from '../server/sync';
-import * as monthUtils from '../shared/months';
-import { q } from '../shared/query';
-import type { Handlers } from '../types/handlers';
+import { addTransactions } from '#server/accounts/sync';
+import { aqlQuery } from '#server/aql';
+import * as budgetActions from '#server/budget/actions';
+import * as budget from '#server/budget/base';
+import * as db from '#server/db';
+import { runHandler, runMutator } from '#server/mutators';
+import * as sheet from '#server/sheet';
+import { batchMessages, setSyncingMode } from '#server/sync';
+import * as monthUtils from '#shared/months';
+import { q } from '#shared/query';
+import type { Handlers } from '#types/handlers';
 import type {
   CategoryGroupEntity,
   PayeeEntity,
   TransactionEntity,
-} from '../types/models';
+} from '#types/models';
 
 import { random } from './random';
 

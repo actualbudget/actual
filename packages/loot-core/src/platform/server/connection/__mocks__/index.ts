@@ -1,4 +1,4 @@
-import type * as T from '../index-types';
+import type * as T from '#platform/server/connection/index-types';
 
 let events = [];
 

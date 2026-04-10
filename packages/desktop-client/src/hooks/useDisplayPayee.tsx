@@ -2,12 +2,12 @@ import { createContext, useContext, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { q } from 'loot-core/shared/query';
+import { q } from '@actual-app/core/shared/query';
 import type {
   AccountEntity,
   PayeeEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
 import { useAccounts } from './useAccounts';
 import { usePayeesById } from './usePayees';

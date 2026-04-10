@@ -1,5 +1,5 @@
-import * as db from '../db';
-import { loadMappings } from '../db/mappings';
+import * as db from '#server/db';
+import { loadMappings } from '#server/db/mappings';
 
 import { app } from './app';
 import * as bankSync from './sync';

@@ -11,6 +11,7 @@ import {
   ServiceError,
   UnknownError,
 } from '../../errors';
+import { GoCardlessApiError } from '../gocardless-api';
 import {
   client,
   goCardlessService,
@@ -505,53 +506,57 @@ describe('goCardlessService', () => {
 });
 
 describe('#handleGoCardlessError', () => {
+  const apiError = status =>
+    new GoCardlessApiError(`error: ${status}`, status, {});
+
   it('throws InvalidInputDataError for status code 400', () => {
-    const response = { response: { status: 400 } };
-    expect(() => handleGoCardlessError(response)).toThrow(
+    expect(() => handleGoCardlessError(apiError(400))).toThrow(
       InvalidInputDataError,
     );
   });
 
   it('throws InvalidGoCardlessTokenError for status code 401', () => {
-    const response = { response: { status: 401 } };
-    expect(() => handleGoCardlessError(response)).toThrow(
+    expect(() => handleGoCardlessError(apiError(401))).toThrow(
       InvalidGoCardlessTokenError,
     );
   });
 
   it('throws AccessDeniedError for status code 403', () => {
-    const response = { response: { status: 403 } };
-    expect(() => handleGoCardlessError(response)).toThrow(AccessDeniedError);
+    expect(() => handleGoCardlessError(apiError(403))).toThrow(
+      AccessDeniedError,
+    );
   });
 
   it('throws NotFoundError for status code 404', () => {
-    const response = { response: { status: 404 } };
-    expect(() => handleGoCardlessError(response)).toThrow(NotFoundError);
+    expect(() => handleGoCardlessError(apiError(404))).toThrow(NotFoundError);
   });
 
   it('throws ResourceSuspended for status code 409', () => {
-    const response = { response: { status: 409 } };
-    expect(() => handleGoCardlessError(response)).toThrow(ResourceSuspended);
+    expect(() => handleGoCardlessError(apiError(409))).toThrow(
+      ResourceSuspended,
+    );
   });
 
   it('throws RateLimitError for status code 429', () => {
-    const response = { response: { status: 429 } };
-    expect(() => handleGoCardlessError(response)).toThrow(RateLimitError);
+    expect(() => handleGoCardlessError(apiError(429))).toThrow(RateLimitError);
   });
 
   it('throws UnknownError for status code 500', () => {
-    const response = { response: { status: 500 } };
-    expect(() => handleGoCardlessError(response)).toThrow(UnknownError);
+    expect(() => handleGoCardlessError(apiError(500))).toThrow(UnknownError);
   });
 
   it('throws ServiceError for status code 503', () => {
-    const response = { response: { status: 503 } };
-    expect(() => handleGoCardlessError(response)).toThrow(ServiceError);
+    expect(() => handleGoCardlessError(apiError(503))).toThrow(ServiceError);
   });
 
-  it('throws a generic error when the status code is not recognised', () => {
-    const response = { response: { status: 0 } };
-    expect(() => handleGoCardlessError(response)).toThrow(
+  it('throws GenericGoCardlessError for unrecognised status codes', () => {
+    expect(() => handleGoCardlessError(apiError(0))).toThrow(
+      GenericGoCardlessError,
+    );
+  });
+
+  it('throws GenericGoCardlessError for non-API errors', () => {
+    expect(() => handleGoCardlessError(new Error('network down'))).toThrow(
       GenericGoCardlessError,
     );
   });

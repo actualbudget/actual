@@ -1,7 +1,5 @@
-import * as d from 'date-fns';
-
 import { send } from '@actual-app/core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
+import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   AccountEntity,
   balanceTypeOpType,
@@ -13,8 +11,20 @@ import type {
   PayeeEntity,
   RuleConditionEntity,
   sortByOpType,
-} from 'loot-core/types/models';
-import type { SyncedPrefs } from 'loot-core/types/prefs';
+} from '@actual-app/core/types/models';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
+import * as d from 'date-fns';
+
+import {
+  categoryLists,
+  groupBySelections,
+  ReportOptions,
+} from '#components/reports/ReportOptions';
+import type {
+  QueryDataEntity,
+  UncategorizedEntity,
+} from '#components/reports/ReportOptions';
+import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 
 import { calculateLegend } from './calculateLegend';
 import { fetchSpreadsheetQueryData } from './fetchSpreadsheetQueryData';
@@ -27,17 +37,6 @@ import {
   trimIntervalDataToRange,
   trimIntervalsToRange,
 } from './trimIntervals';
-
-import {
-  categoryLists,
-  groupBySelections,
-  ReportOptions,
-} from '@desktop-client/components/reports/ReportOptions';
-import type {
-  QueryDataEntity,
-  UncategorizedEntity,
-} from '@desktop-client/components/reports/ReportOptions';
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
 export type createCustomSpreadsheetProps = {
   startDate: string;
@@ -188,7 +187,7 @@ export function createCustomSpreadsheet({
                 (asset[groupByLabel] === (item.id ?? null) ||
                   (item.uncategorized_id && groupsByCategory)),
             )
-            .reduce((a, v) => (a = a + v.amount), 0);
+            .reduce((a, v) => a + v.amount, 0);
           perIntervalAssets += intervalAssets;
 
           const intervalDebts = filterHiddenItems(
@@ -205,7 +204,7 @@ export function createCustomSpreadsheet({
                 (debt[groupByLabel] === (item.id ?? null) ||
                   (item.uncategorized_id && groupsByCategory)),
             )
-            .reduce((a, v) => (a = a + v.amount), 0);
+            .reduce((a, v) => a + v.amount, 0);
           perIntervalDebts += intervalDebts;
 
           const netAmounts = intervalAssets + intervalDebts;

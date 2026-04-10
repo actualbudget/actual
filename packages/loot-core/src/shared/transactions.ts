@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { logger } from '../platform/server/log';
-import type { TransactionEntity } from '../types/models';
+import { logger } from '#platform/server/log';
+import type { TransactionEntity } from '#types/models';
 
 import { applyChanges, diffItems, last } from './util';
 
@@ -262,7 +262,8 @@ export function updateTransaction(
 ) {
   return replaceTransactions(transactions, transaction.id, trans => {
     if (trans.is_parent) {
-      const parent = trans.id === transaction.id ? transaction : trans;
+      const parent =
+        trans.id === transaction.id ? { ...trans, ...transaction } : trans;
       const originalSubtransactions =
         parent.subtransactions ?? trans.subtransactions;
       const sub = originalSubtransactions?.map(t => {

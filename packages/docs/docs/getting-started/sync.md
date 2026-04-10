@@ -18,15 +18,19 @@ If you have already created files, after logging in Actual will show you all the
 
 In addition to the requirement to enter your password before the Actual server will allow you to access your budget, you can optionally enable end-to-end encryption. This will require you to enter a second password to access the budget, and that the server will no longer be able to access your budget information. On the one hand, this improves security if you're worried that someone else will have access to the server's file or if you don't trust the server to check the password correctly (that said, we have done our best to make the server secure). On the other hand, you **will not be able to recover your data if you forget your encryption password**. If you forget the encryption password and you still have a copy of your data locally, you can reset your key which will do a [sync reset](#what-does-resetting-sync-mean) and generate a new key.
 
-End-to-end encryption offers the ability for you to generate a key based on a password and encrypt it so that hosted services can't read the data. Before your data leaves your device, it is encrypted using keys only you have.
+End-to-end encryption offers the ability for you to generate a key based on a password and encrypt it so that hosted services can't read your budget data. Before your data leaves your device, it is encrypted using keys only you have.
 
-This guarantees that only you will ever have access to your data. This is optional and using it requires you to enter a password whenever downloading [cloud files](#this-file-is-not-a-cloud-file) (this only needs to be done once per device). The password you enter should be different from the main server password.
+This guarantees that only you will ever have access to your budget data. This is optional and using it requires you to enter a password whenever downloading [cloud files](#this-file-is-not-a-cloud-file) (this only needs to be done once per device). The password you enter should be different from the main server password.
+
+:::note
+End-to-end encryption applies only to your budget data. If you use [bank sync](/docs/advanced/bank-sync), the bank sync tokens (e.g. SimpleFIN, GoCardless, or Pluggy credentials) are stored separately on the server and are **not** covered by end-to-end encryption. Server administrators or hosting providers with direct access to the server's database can read these tokens. If this is a concern, consider self-hosting your server.
+:::
 
 Data on your local device is still unencrypted. We recommend full disk encryption if you are interested in local encryption.
 
 There are some things to consider with end-to-end encryption:
 
-- **Pro:** Your data is fully secure and nobody except you can read it
+- **Pro:** Your budget data is fully secure and nobody except you can read it
 - **Pro:** If you don't want to sync across devices, this still allows you keep a fully encrypted backup of your data
 - **Pro:** If you want to share the server with someone else, you can use different passwords to encrypt separate budget files, and you won't be able to access each other's budgets.
 - **Con:** If you lose your local data copy and forget your password, you can never recover your data

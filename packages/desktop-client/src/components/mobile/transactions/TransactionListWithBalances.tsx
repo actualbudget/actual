@@ -6,29 +6,18 @@ import { Label } from '@actual-app/components/label';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 
-import type { IntegerAmount } from 'loot-core/shared/util';
-import type { TransactionEntity } from 'loot-core/types/models';
+import { Search } from '#components/common/Search';
+import { PullToRefresh } from '#components/mobile/PullToRefresh';
+import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
+import { DisplayPayeeProvider } from '#hooks/useDisplayPayee';
+import { SelectedProvider, useSelected } from '#hooks/useSelected';
+import { useSheetValue } from '#hooks/useSheetValue';
+import type { Binding, SheetFields, SheetNames } from '#spreadsheet';
 
 import { TransactionList } from './TransactionList';
-
-import { Search } from '@desktop-client/components/common/Search';
-import { PullToRefresh } from '@desktop-client/components/mobile/PullToRefresh';
-import {
-  CellValue,
-  CellValueText,
-} from '@desktop-client/components/spreadsheet/CellValue';
-import { DisplayPayeeProvider } from '@desktop-client/hooks/useDisplayPayee';
-import {
-  SelectedProvider,
-  useSelected,
-} from '@desktop-client/hooks/useSelected';
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import type {
-  Binding,
-  SheetFields,
-  SheetNames,
-} from '@desktop-client/spreadsheet';
 
 type TransactionSearchInputProps = {
   placeholder: string;

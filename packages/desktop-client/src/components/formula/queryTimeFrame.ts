@@ -1,4 +1,4 @@
-import * as monthUtils from 'loot-core/shared/months';
+import * as monthUtils from '@actual-app/core/shared/months';
 
 function isMonthString(dateOrMonth: string) {
   // Month format: YYYY-MM

@@ -4,11 +4,11 @@ import * as Handlebars from 'handlebars';
 import { HyperFormula } from 'hyperformula';
 import enUS from 'hyperformula/i18n/languages/enUS';
 
+import { logger } from '#platform/server/log';
+import type { TransactionForRules } from '#server/transactions/transaction-rules';
+import { currentDay, format, parseDate } from '#shared/months';
+import { FIELD_TYPES } from '#shared/rules';
 import { amountToInteger } from '#shared/util';
-import { logger } from '../../platform/server/log';
-import { currentDay, format, parseDate } from '../../shared/months';
-import { FIELD_TYPES } from '../../shared/rules';
-import type { TransactionForRules } from '../transactions/transaction-rules';
 
 import {
   CustomFunctionsPlugin,
@@ -303,6 +303,7 @@ export class Action {
       hfInstance = HyperFormula.buildEmpty({
         licenseKey: 'gpl-v3',
         language: 'enUS',
+        dateFormats: ['DD/MM/YYYY', 'YYYY-MM-DD', 'YYYY/MM/DD'],
       });
 
       const sheetName = hfInstance.addSheet('Sheet1');
@@ -336,7 +337,6 @@ export class Action {
         }
         hfInstance.addNamedExpression(key, cellValue);
       }
-
       hfInstance.setCellContents({ sheet: sheetId, col: 0, row: 0 }, [
         [formula],
       ]);

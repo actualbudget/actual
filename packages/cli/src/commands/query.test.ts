@@ -145,6 +145,25 @@ describe('query commands', () => {
       ]);
     });
 
+    it('outputs unwrapped data array (not the full result envelope)', async () => {
+      const mockData = [{ id: '1', amount: -500 }];
+      vi.mocked(api.aqlQuery).mockResolvedValueOnce({
+        data: mockData,
+        dependencies: [],
+      });
+
+      await run([
+        'query',
+        'run',
+        '--table',
+        'transactions',
+        '--select',
+        'id,amount',
+      ]);
+
+      expect(printOutput).toHaveBeenCalledWith(mockData, undefined);
+    });
+
     it('passes --filter as JSON', async () => {
       await run([
         'query',

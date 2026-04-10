@@ -7,21 +7,19 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { currentDay, dayFromDate } from '@actual-app/core/shared/months';
+import {
+  amountToInteger,
+  currencyToInteger,
+} from '@actual-app/core/shared/util';
 import { format as formatDate, parse as parseDate, parseISO } from 'date-fns';
 
-import { currentDay, dayFromDate } from 'loot-core/shared/months';
-import { amountToInteger, currencyToInteger } from 'loot-core/shared/util';
-
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { SectionLabel } from '@desktop-client/components/forms';
-import { LabeledCheckbox } from '@desktop-client/components/forms/LabeledCheckbox';
-import { DateSelect } from '@desktop-client/components/select/DateSelect';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { SectionLabel } from '#components/forms';
+import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
+import { DateSelect } from '#components/select/DateSelect';
+import { useDateFormat } from '#hooks/useDateFormat';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 const itemStyle: CSSProperties = {
   fontSize: 17,

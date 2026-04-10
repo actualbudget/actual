@@ -62,14 +62,28 @@ describe('accounts commands', () => {
   });
 
   describe('list', () => {
-    it('calls api.getAccounts and prints result', async () => {
-      const accounts = [{ id: '1', name: 'Checking' }];
+    it('calls api.getAccounts and prints result with computed balance', async () => {
+      const accounts = [
+        { id: '1', name: 'Checking', offbudget: false, closed: false },
+      ];
       vi.mocked(api.getAccounts).mockResolvedValue(accounts);
 
       await run(['accounts', 'list']);
 
       expect(api.getAccounts).toHaveBeenCalled();
-      expect(printOutput).toHaveBeenCalledWith(accounts, undefined);
+      expect(api.getAccountBalance).toHaveBeenCalledWith('1');
+      expect(printOutput).toHaveBeenCalledWith(
+        [
+          {
+            id: '1',
+            name: 'Checking',
+            offbudget: false,
+            closed: false,
+            balance: 10000,
+          },
+        ],
+        undefined,
+      );
     });
 
     it('passes format option to printOutput', async () => {
@@ -78,6 +92,59 @@ describe('accounts commands', () => {
       await run(['--format', 'csv', 'accounts', 'list']);
 
       expect(printOutput).toHaveBeenCalledWith([], 'csv');
+    });
+
+    it('filters out closed accounts by default', async () => {
+      vi.mocked(api.getAccounts).mockResolvedValue([
+        { id: '1', name: 'Open', offbudget: false, closed: false },
+        { id: '2', name: 'Closed', offbudget: false, closed: true },
+      ]);
+
+      await run(['accounts', 'list']);
+
+      expect(printOutput).toHaveBeenCalledWith(
+        [
+          {
+            id: '1',
+            name: 'Open',
+            offbudget: false,
+            closed: false,
+            balance: 10000,
+          },
+        ],
+        undefined,
+      );
+    });
+
+    it('includes closed accounts when --include-closed is passed', async () => {
+      vi.mocked(api.getAccounts).mockResolvedValue([
+        { id: '1', name: 'Open', offbudget: false, closed: false },
+        { id: '2', name: 'Closed', offbudget: false, closed: true },
+      ]);
+
+      await run(['accounts', 'list', '--include-closed']);
+
+      expect(printOutput).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({ id: '2', closed: true }),
+        ]),
+        undefined,
+      );
+    });
+
+    it('sorts on-budget accounts before off-budget', async () => {
+      vi.mocked(api.getAccounts).mockResolvedValue([
+        { id: '1', name: 'OffBudget', offbudget: true, closed: false },
+        { id: '2', name: 'OnBudget', offbudget: false, closed: false },
+      ]);
+
+      await run(['accounts', 'list']);
+
+      const output = vi.mocked(printOutput).mock.calls[0][0] as Array<{
+        id: string;
+      }>;
+      expect(output[0].id).toBe('2'); // on-budget first
+      expect(output[1].id).toBe('1'); // off-budget second
     });
   });
 

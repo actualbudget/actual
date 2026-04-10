@@ -41,6 +41,7 @@ export function useTransactionFormulaExecution(
         hfInstance = HyperFormula.buildEmpty({
           licenseKey: 'gpl-v3',
           localeLang: typeof locale === 'string' ? locale : 'en-US',
+          dateFormats: ['DD/MM/YYYY', 'YYYY-MM-DD', 'YYYY/MM/DD'],
         });
 
         // Add a sheet

@@ -15,14 +15,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import {
-  format as formatDate,
-  isValid as isDateValid,
-  parse as parseDate,
-} from 'date-fns';
-
 import { send } from '@actual-app/core/platform/client/connection';
-import { getMonthYearFormat } from 'loot-core/shared/months';
+import { getMonthYearFormat } from '@actual-app/core/shared/months';
 import {
   deserializeField,
   FIELD_TYPES,
@@ -30,10 +24,20 @@ import {
   getValidOps,
   mapField,
   unparse,
-} from 'loot-core/shared/rules';
-import { titleFirst } from 'loot-core/shared/util';
-import type { IntegerAmount } from 'loot-core/shared/util';
-import type { RuleConditionEntity } from 'loot-core/types/models';
+} from '@actual-app/core/shared/rules';
+import { titleFirst } from '@actual-app/core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
+import type { RuleConditionEntity } from '@actual-app/core/types/models';
+import {
+  format as formatDate,
+  isValid as isDateValid,
+  parse as parseDate,
+} from 'date-fns';
+
+import { GenericInput } from '#components/util/GenericInput';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useFormat } from '#hooks/useFormat';
+import { useTransactionFilters } from '#hooks/useTransactionFilters';
 
 import { CompactFiltersButton } from './CompactFiltersButton';
 import { FiltersButton } from './FiltersButton';
@@ -42,11 +46,6 @@ import { PayeeFilter } from './PayeeFilter';
 import { subfieldFromFilter } from './subfieldFromFilter';
 import { subfieldToOptions } from './subfieldToOptions';
 import { updateFilterReducer } from './updateFilterReducer';
-
-import { GenericInput } from '@desktop-client/components/util/GenericInput';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useTransactionFilters } from '@desktop-client/hooks/useTransactionFilters';
 
 type FilterReducerState<T extends RuleConditionEntity> = Pick<
   T,
@@ -356,18 +355,47 @@ function ConfigureField<T extends RuleConditionEntity>({
   );
 }
 
+/**
+ * Props for the shared report filter picker.
+ * Note: the `include` and `exclude` props only control which fields are shown in the picker, they do not limit the fields that can be applied as filters. Additionally, if both `include` and `exclude` are provided, `include` acts as the allowlist before `exclude` is applied.
+ */
 type FilterButtonProps<T extends RuleConditionEntity> = {
   onApply: (cond: T) => void;
   compact: boolean;
   hover: boolean;
+  /** Fields hidden from the picker unless allowed by `include`. */
   exclude?: string[];
+  /** If both are provided, `include` acts as the allowlist before `exclude` is applied. */
+  include?: string[];
 };
 
+/**
+ * Returns whether a filter field should be shown in the picker.
+ *
+ * If both `include` and `exclude` are provided, `include` acts as the
+ * allowlist before `exclude` is applied.
+ */
+function shouldShowFilterField(
+  field: string,
+  include?: string[],
+  exclude?: string[],
+) {
+  if (include && !include.includes(field)) {
+    return false;
+  }
+
+  return exclude ? !exclude.includes(field) : true;
+}
+
+/**
+ * Shared filter picker used by reports to choose and apply filter conditions.
+ */
 export function FilterButton<T extends RuleConditionEntity>({
   onApply,
   compact,
   hover,
   exclude,
+  include,
 }: FilterButtonProps<T>) {
   const { t } = useTranslation();
   const filters = useTransactionFilters();
@@ -476,16 +504,17 @@ export function FilterButton<T extends RuleConditionEntity>({
     scopes: ['app'],
   });
 
-  const filterMenuItems: ComponentProps<typeof Menu>['items'] =
-    translatedFilterFields
-      .filter(f => (exclude ? !exclude.includes(f[0]) : true))
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([name, text]) => ({
-        name,
-        text: titleFirst(text),
-      }));
+  const visibleFilterFields = translatedFilterFields
+    .filter(([field]) => shouldShowFilterField(field, include, exclude))
+    .sort((a, b) => a[0].localeCompare(b[0]));
 
-  if (!exclude?.includes('saved')) {
+  const filterMenuItems: ComponentProps<typeof Menu>['items'] =
+    visibleFilterFields.map(([name, text]) => ({
+      name,
+      text: titleFirst(text),
+    }));
+
+  if (shouldShowFilterField('saved', include, exclude)) {
     filterMenuItems.push(Menu.line);
     filterMenuItems.push({
       name: 'saved',

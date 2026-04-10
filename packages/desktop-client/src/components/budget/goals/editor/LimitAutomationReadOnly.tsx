@@ -1,9 +1,9 @@
 import { Trans } from 'react-i18next';
 
-import { amountToInteger } from 'loot-core/shared/util';
-import type { LimitTemplate } from 'loot-core/types/models/templates';
+import { amountToInteger } from '@actual-app/core/shared/util';
+import type { LimitTemplate } from '@actual-app/core/types/models/templates';
 
-import { useFormat } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '#hooks/useFormat';
 
 type LimitAutomationReadOnlyProps = {
   template: LimitTemplate;

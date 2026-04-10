@@ -1,9 +1,9 @@
-import type { TagEntity } from '../../types/models';
-import { createApp } from '../app';
-import * as db from '../db';
-import { mutator } from '../mutators';
-import { batchMessages } from '../sync';
-import { undoable } from '../undo';
+import { createApp } from '#server/app';
+import * as db from '#server/db';
+import { mutator } from '#server/mutators';
+import { batchMessages } from '#server/sync';
+import { undoable } from '#server/undo';
+import type { TagEntity } from '#types/models';
 
 export type TagsHandlers = {
   'tags-get': typeof getTags;

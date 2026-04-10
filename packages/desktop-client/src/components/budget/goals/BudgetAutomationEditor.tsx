@@ -7,11 +7,12 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-
 import type {
   CategoryGroupEntity,
   ScheduleEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+
+import { FormField, FormLabel, FormTextLabel } from '#components/forms';
 
 import { setType } from './actions';
 import type { Action } from './actions';
@@ -23,12 +24,6 @@ import { PercentageAutomation } from './editor/PercentageAutomation';
 import { RefillAutomation } from './editor/RefillAutomation';
 import { ScheduleAutomation } from './editor/ScheduleAutomation';
 import { WeekAutomation } from './editor/WeekAutomation';
-
-import {
-  FormField,
-  FormLabel,
-  FormTextLabel,
-} from '@desktop-client/components/forms';
 
 type BudgetAutomationEditorProps = {
   inline: boolean;

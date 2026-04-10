@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import * as dateFns from 'date-fns';
 
-import { logger } from '../../platform/server/log';
+import { logger } from '#platform/server/log';
 import {
   addDays,
   isAfter,
@@ -10,13 +10,13 @@ import {
   parseDate,
   subDays,
   yearFromDate,
-} from '../../shared/months';
+} from '#shared/months';
 import {
   FIELD_TYPES,
   getApproxNumberThreshold,
   isValidOp,
   sortNumbers,
-} from '../../shared/rules';
+} from '#shared/rules';
 
 import {
   assert,

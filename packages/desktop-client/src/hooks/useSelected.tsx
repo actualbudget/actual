@@ -10,8 +10,8 @@ import React, {
 import type { Dispatch, ReactElement, ReactNode } from 'react';
 
 import { listen } from '@actual-app/core/platform/client/connection';
-import * as undo from 'loot-core/platform/client/undo';
-import type { UndoState } from 'loot-core/server/undo';
+import * as undo from '@actual-app/core/platform/client/undo';
+import type { UndoState } from '@actual-app/core/server/undo';
 
 type Range<T> = { start: T; end: T | null };
 type Item = { id: string };

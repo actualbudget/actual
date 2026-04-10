@@ -1,23 +1,22 @@
+import { generateAccount } from '@actual-app/core/mocks';
+import type {
+  AccountEntity,
+  NearbyPayeeEntity,
+  PayeeEntity,
+} from '@actual-app/core/types/models';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import type { Screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 
-import { generateAccount } from 'loot-core/mocks';
-import type {
-  AccountEntity,
-  NearbyPayeeEntity,
-  PayeeEntity,
-} from 'loot-core/types/models';
+import { AuthProvider } from '#auth/AuthProvider';
+import { useNearbyPayees } from '#hooks/useNearbyPayees';
+import { createTestQueryClient, TestProviders } from '#mocks';
+import { payeeQueries } from '#payees';
 
 import { PayeeAutocomplete } from './PayeeAutocomplete';
 import type { PayeeAutocompleteProps } from './PayeeAutocomplete';
-
-import { AuthProvider } from '@desktop-client/auth/AuthProvider';
-import { useNearbyPayees } from '@desktop-client/hooks/useNearbyPayees';
-import { createTestQueryClient, TestProviders } from '@desktop-client/mocks';
-import { payeeQueries } from '@desktop-client/payees';
 
 const PAYEE_SELECTOR = '[data-testid][role=option]';
 const PAYEE_SECTION_SELECTOR = '[data-testid$="-item-group"]';
@@ -108,7 +107,7 @@ async function clickAutocomplete(autocomplete: HTMLElement) {
   await waitForAutocomplete();
 }
 
-vi.mock('@desktop-client/hooks/useNearbyPayees', () => ({
+vi.mock('#hooks/useNearbyPayees', () => ({
   useNearbyPayees: vi.fn(),
 }));
 

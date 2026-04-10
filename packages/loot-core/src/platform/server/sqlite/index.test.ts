@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { patchFetchForSqlJS } from '../../../mocks/util';
+import { patchFetchForSqlJS } from '#mocks/util';
 
 import { execQuery, init, openDatabase, runQuery, transaction } from './index';
 
