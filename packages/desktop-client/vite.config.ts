@@ -116,16 +116,6 @@ export default defineConfig(async ({ mode }) => {
     process.env.REACT_APP_BRANCH = process.env.BRANCH;
   }
 
-  const resolveExtensions = [
-    '.mjs',
-    '.js',
-    '.mts',
-    '.ts',
-    '.jsx',
-    '.tsx',
-    '.json',
-  ];
-
   const browserOpen = env.BROWSER_OPEN ? `//${env.BROWSER_OPEN}` : true;
 
   return {
@@ -174,7 +164,6 @@ export default defineConfig(async ({ mode }) => {
       },
     },
     resolve: {
-      extensions: resolveExtensions,
       ...(!env.IS_GENERIC_BROWSER && {
         conditions: ['electron-renderer', 'module', 'browser', 'default'],
       }),

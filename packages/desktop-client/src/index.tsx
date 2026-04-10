@@ -1,6 +1,6 @@
 // This file will initialize the app if we are in a real browser
 // environment (not electron)
-import './browser-preload';
+import '#browser-preload';
 import './fonts.scss';
 import './i18n';
 import React from 'react';
