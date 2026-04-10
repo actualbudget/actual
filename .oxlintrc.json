@@ -120,9 +120,6 @@
     "import/no-amd": "error",
     "import/no-default-export": "error",
     "import/no-webpack-loader-syntax": "error",
-    "import/no-useless-path-segments": "error",
-    "import/no-unresolved": "error",
-    "import/no-unused-modules": "error",
     "import/no-duplicates": [
       "error",
       {
@@ -160,7 +157,6 @@
     "react/no-danger-with-children": "error",
     "react/no-direct-mutation-state": "error",
     "react/no-is-mounted": "error",
-    "react/no-unstable-nested-components": "error",
     "react/require-render-return": "error",
     "react/rules-of-hooks": "error",
     "react/self-closing-comp": "error",
@@ -234,7 +230,7 @@
     "eslint/require-yield": "error",
     "eslint/getter-return": "error",
     "eslint/unicode-bom": ["error", "never"],
-    "eslint/no-use-isnan": "error",
+    "eslint/use-isnan": "error",
     "eslint/valid-typeof": "error",
     "eslint/no-useless-rename": [
       "error",
