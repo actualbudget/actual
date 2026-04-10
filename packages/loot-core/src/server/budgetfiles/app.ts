@@ -646,8 +646,7 @@ async function uploadFileWeb({
     return null;
   }
 
-  // eslint-disable-next-line no-control-regex
-  const safeName = filename.split(/[/\\]/).pop()?.replace(/\0/g, '');
+  const safeName = filename.split(/[/\\]/).pop()?.replaceAll('\0', '');
   if (!safeName || safeName === '.' || safeName === '..') {
     throw new Error('Invalid upload filename');
   }
