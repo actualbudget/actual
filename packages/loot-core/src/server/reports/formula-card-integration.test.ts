@@ -569,7 +569,7 @@ describe('Formula Card - Integration Tests with Queries', () => {
   describe('Error Handling with Queries', () => {
     it('should handle empty query results', async () => {
       // Integration test: Query with no matching transactions
-      const accountId = await createTestAccount('Checking');
+      await createTestAccount('Checking');
       const groupId = await createCategoryGroup('Expenses');
       const categoryId = await createTestCategory('Empty', groupId);
 
