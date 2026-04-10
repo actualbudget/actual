@@ -7,7 +7,7 @@
   ],
   "imports": {
     "#browser-preload": {
-      "electron": "./src/browser-preload.electron.ts",
+      "electron-renderer": "./src/browser-preload.electron.ts",
       "default": "./src/browser-preload.js"
     },
     "#accounts": "./src/accounts/index.ts",

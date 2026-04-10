@@ -1,5 +1,5 @@
+import * as Platform from '@actual-app/core/shared/platform';
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
-import * as Platform from 'loot-core/shared/platform';
 import { registerSW } from 'virtual:pwa-register';
 
 // oxlint-disable-next-line typescript-paths/absolute-parent-import
