@@ -15,6 +15,7 @@ type CategoryCellProps = {
   id: TransactionEntity['id'];
   category: CategoryEntity | null | undefined;
   categoryGroups: CategoryGroupEntity[];
+  width: number;
   focused: boolean;
   exposed: boolean;
   isPreview?: boolean;
@@ -28,6 +29,7 @@ export function CategoryCell({
   id,
   category,
   categoryGroups,
+  width,
   focused,
   exposed,
   isPreview,
@@ -53,7 +55,7 @@ export function CategoryCell({
   return (
     <CustomCell
       name="category"
-      width="flex"
+      width={width}
       textAlign="flex"
       focused={focused}
       exposed={exposed}

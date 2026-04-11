@@ -46,6 +46,7 @@ export function PreviewTransactionRowCells({
   showSelection,
   isExpanded,
   onToggleRowExpansion,
+  columnWidths,
 }: PreviewTransactionRowCellsProps) {
   return (
     <>
@@ -64,6 +65,7 @@ export function PreviewTransactionRowCells({
         id={transaction.id}
         date={transaction.date}
         dateFormat={dateFormat}
+        width={columnWidths.date}
         focused={focusedField === 'date'}
         exposed={focusedField === 'date'}
         isPreview
@@ -76,6 +78,7 @@ export function PreviewTransactionRowCells({
           id={transaction.id}
           account={account}
           accounts={accounts}
+          width={columnWidths.account}
           focused={focusedField === 'account'}
           exposed={focusedField === 'account'}
           isPreview
@@ -90,6 +93,7 @@ export function PreviewTransactionRowCells({
         transferAccount={transferAccount}
         schedule={schedule}
         payees={payees}
+        width={columnWidths.payee}
         focused={focusedField === 'payee'}
         exposed={focusedField === 'payee'}
         isPreview
@@ -103,6 +107,7 @@ export function PreviewTransactionRowCells({
       <NotesCell
         id={transaction.id}
         notes={notesValue}
+        width={columnWidths.notes}
         focused={focusedField === 'notes'}
         exposed={focusedField === 'notes'}
         isPreview
@@ -114,6 +119,7 @@ export function PreviewTransactionRowCells({
         <PreviewCategoryCell
           previewStatus={previewStatus}
           selected={selected}
+          width={columnWidths.category}
         />
       )}
 
@@ -121,6 +127,7 @@ export function PreviewTransactionRowCells({
         id={transaction.id}
         amount={transaction.amount}
         type="debit"
+        width={columnWidths.payment}
         focused={focusedField === 'debit'}
         exposed={focusedField === 'debit'}
         hideFraction={hideFraction}
@@ -133,6 +140,7 @@ export function PreviewTransactionRowCells({
         id={transaction.id}
         amount={transaction.amount}
         type="credit"
+        width={columnWidths.deposit}
         focused={focusedField === 'credit'}
         exposed={focusedField === 'credit'}
         hideFraction={hideFraction}
@@ -145,6 +153,7 @@ export function PreviewTransactionRowCells({
         <BalanceCell
           id={transaction.id}
           balance={balance}
+          width={columnWidths.balance}
           hideFraction={hideFraction}
         />
       )}

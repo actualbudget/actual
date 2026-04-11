@@ -11,6 +11,7 @@ import { Cell, CellButton } from '@desktop-client/components/table';
 
 type SplitCategoryCellProps = {
   id: TransactionEntity['id'];
+  width: number;
   focused: boolean;
   isPreview: boolean;
   isExpanded: boolean;
@@ -20,6 +21,7 @@ type SplitCategoryCellProps = {
 
 export function SplitCategoryCell({
   id,
+  width,
   focused,
   isPreview,
   isExpanded,
@@ -29,7 +31,7 @@ export function SplitCategoryCell({
   return (
     <Cell
       name="category"
-      width="flex"
+      width={width}
       focused={focused}
       plain
       style={{

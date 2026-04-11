@@ -49,6 +49,7 @@ export function RegularTransactionRowCells({
   showSelection,
   isExpanded,
   onToggleRowExpansion,
+  columnWidths,
 }: RegularTransactionRowCellsProps) {
   return (
     <>
@@ -67,6 +68,7 @@ export function RegularTransactionRowCells({
         id={transaction.id}
         date={transaction.date}
         dateFormat={dateFormat}
+        width={columnWidths.date}
         focused={focusedField === 'date'}
         exposed={focusedField === 'date'}
         onEdit={onEdit}
@@ -78,6 +80,7 @@ export function RegularTransactionRowCells({
           id={transaction.id}
           account={account}
           accounts={accounts}
+          width={columnWidths.account}
           focused={focusedField === 'account'}
           exposed={focusedField === 'account'}
           onEdit={onEdit}
@@ -91,6 +94,7 @@ export function RegularTransactionRowCells({
         transferAccount={transferAccount}
         schedule={schedule}
         payees={payees}
+        width={columnWidths.payee}
         focused={focusedField === 'payee'}
         exposed={focusedField === 'payee'}
         onEdit={onEdit}
@@ -103,6 +107,7 @@ export function RegularTransactionRowCells({
       <NotesCell
         id={transaction.id}
         notes={notesValue}
+        width={columnWidths.notes}
         focused={focusedField === 'notes'}
         exposed={focusedField === 'notes'}
         onEdit={onEdit}
@@ -114,6 +119,7 @@ export function RegularTransactionRowCells({
           id={transaction.id}
           category={category}
           categoryGroups={categoryGroups}
+          width={columnWidths.category}
           focused={focusedField === 'category'}
           exposed={focusedField === 'category'}
           showSplitOption={allowSplitTransaction}
@@ -127,6 +133,7 @@ export function RegularTransactionRowCells({
         id={transaction.id}
         amount={transaction.amount}
         type="debit"
+        width={columnWidths.payment}
         focused={focusedField === 'debit'}
         exposed={focusedField === 'debit'}
         hideFraction={hideFraction}
@@ -138,6 +145,7 @@ export function RegularTransactionRowCells({
         id={transaction.id}
         amount={transaction.amount}
         type="credit"
+        width={columnWidths.deposit}
         focused={focusedField === 'credit'}
         exposed={focusedField === 'credit'}
         hideFraction={hideFraction}
@@ -149,6 +157,7 @@ export function RegularTransactionRowCells({
         <BalanceCell
           id={transaction.id}
           balance={balance}
+          width={columnWidths.balance}
           hideFraction={hideFraction}
         />
       )}

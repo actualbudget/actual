@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import type { KeyboardEvent } from 'react';
+import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 
@@ -18,6 +18,11 @@ import {
   UnexposedCellContent,
 } from '@desktop-client/components/table';
 import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
+import {
+  TRANSACTION_CLEARED_COLUMN_WIDTH,
+  TRANSACTION_SELECTION_COLUMN_WIDTH,
+} from '../transactionTableColumns';
+import type { TransactionColumnId, TransactionColumnWidths } from '../types';
 
 type TransactionHeaderProps = {
   hasSelected: boolean;
@@ -30,17 +35,26 @@ type TransactionHeaderProps = {
   onSort: (field: string, ascDesc: 'asc' | 'desc') => void;
   ascDesc: 'asc' | 'desc';
   field: string;
+  columnWidths: TransactionColumnWidths;
+  getResizeHandleProps: (
+    columnId: TransactionColumnId,
+  ) => {
+    isResizable: boolean;
+    onPointerDown: (event: ReactPointerEvent<HTMLDivElement>) => void;
+  };
 };
 
 type HeaderCellProps = {
   value: string;
-  id: string;
+  id: TransactionColumnId | 'cleared';
   icon?: 'asc' | 'desc' | 'clickable';
   onClick?: () => void;
   width?: CSSProperties['width'];
   alignItems?: CSSProperties['alignItems'];
   marginLeft?: CSSProperties['marginLeft'];
   marginRight?: CSSProperties['marginRight'];
+  isResizable?: boolean;
+  onResizePointerDown?: (event: ReactPointerEvent<HTMLDivElement>) => void;
 };
 
 function HeaderCell({
@@ -52,6 +66,8 @@ function HeaderCell({
   marginRight,
   icon,
   onClick,
+  isResizable,
+  onResizePointerDown,
 }: HeaderCellProps) {
   const style = {
     whiteSpace: 'nowrap' as CSSProperties['whiteSpace'],
@@ -72,22 +88,67 @@ function HeaderCell({
       style={{
         borderTopWidth: 0,
         borderBottomWidth: 0,
+        paddingRight: isResizable ? 8 : undefined,
       }}
-      unexposedContent={({ value: cellValue }) =>
-        onClick ? (
-          <Button variant="bare" onPress={onClick} style={style}>
-            <UnexposedCellContent value={cellValue} />
-            {icon === 'asc' && (
-              <SvgArrowDown width={10} height={10} style={{ marginLeft: 5 }} />
-            )}
-            {icon === 'desc' && (
-              <SvgArrowUp width={10} height={10} style={{ marginLeft: 5 }} />
-            )}
-          </Button>
-        ) : (
-          <Text style={style}>{cellValue}</Text>
-        )
-      }
+      unexposedContent={({ value: cellValue }) => (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'stretch',
+            width: '100%',
+            height: '100%',
+            position: 'relative',
+          }}
+        >
+          {onClick ? (
+            <Button
+              variant="bare"
+              onPress={onClick}
+              style={{ ...style, flex: 1, minWidth: 0 }}
+            >
+              <UnexposedCellContent value={cellValue} />
+              {icon === 'asc' && (
+                <SvgArrowDown width={10} height={10} style={{ marginLeft: 5 }} />
+              )}
+              {icon === 'desc' && (
+                <SvgArrowUp width={10} height={10} style={{ marginLeft: 5 }} />
+              )}
+            </Button>
+          ) : (
+            <Text style={{ ...style, flex: 1, minWidth: 0 }}>{cellValue}</Text>
+          )}
+          {isResizable && onResizePointerDown && (
+            <div
+              role="separator"
+              aria-orientation="vertical"
+              data-testid={`transaction-header-resize-${id}`}
+              onPointerDown={onResizePointerDown}
+              style={{
+                position: 'absolute',
+                top: 0,
+                right: -6,
+                width: 14,
+                height: '100%',
+                cursor: 'col-resize',
+                zIndex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <div
+                style={{
+                  width: 2,
+                  height: '55%',
+                  borderRadius: 999,
+                  backgroundColor: theme.tableBorder,
+                  opacity: 0.9,
+                }}
+              />
+            </div>
+          )}
+        </div>
+      )}
     />
   );
 }
@@ -117,9 +178,45 @@ export const TransactionHeader = memo(
     ascDesc,
     field,
     showSelection,
+    columnWidths,
+    getResizeHandleProps,
   }: TransactionHeaderProps) => {
     const dispatchSelected = useSelectedDispatch();
     const { t } = useTranslation();
+    const renderResizableHeaderCell = ({
+      columnId,
+      value,
+      alignItems,
+      marginLeft,
+      marginRight,
+      icon,
+      onClick,
+    }: {
+      columnId: TransactionColumnId;
+      value: string;
+      alignItems?: CSSProperties['alignItems'];
+      marginLeft?: CSSProperties['marginLeft'];
+      marginRight?: CSSProperties['marginRight'];
+      icon?: 'asc' | 'desc' | 'clickable';
+      onClick?: () => void;
+    }) => {
+      const resizeHandle = getResizeHandleProps(columnId);
+
+      return (
+        <HeaderCell
+          value={value}
+          width={columnWidths[columnId]}
+          alignItems={alignItems}
+          marginLeft={marginLeft}
+          marginRight={marginRight}
+          id={columnId}
+          icon={icon}
+          isResizable={resizeHandle.isResizable}
+          onResizePointerDown={resizeHandle.onPointerDown}
+          onClick={onClick}
+        />
+      );
+    };
 
     useHotkeys(
       'ctrl+a, cmd+a, meta+a',
@@ -149,7 +246,7 @@ export const TransactionHeader = memo(
             exposed
             focused={false}
             selected={hasSelected}
-            width={20}
+            width={TRANSACTION_SELECTION_COLUMN_WIDTH}
             style={{
               borderTopWidth: 0,
               borderBottomWidth: 0,
@@ -166,108 +263,102 @@ export const TransactionHeader = memo(
         {!showSelection && (
           <Field
             style={{
-              width: '20px',
+              width: `${TRANSACTION_SELECTION_COLUMN_WIDTH}px`,
               border: 0,
             }}
           />
         )}
-        <HeaderCell
-          value={t('Date')}
-          width={110}
-          alignItems="flex"
-          marginLeft={-5}
-          id="date"
-          icon={field === 'date' ? ascDesc : 'clickable'}
-          onClick={() =>
-            onSort('date', selectAscDesc(field, ascDesc, 'date', 'desc'))
-          }
-        />
+        {renderResizableHeaderCell({
+          columnId: 'date',
+          value: t('Date'),
+          alignItems: 'flex',
+          marginLeft: -5,
+          icon: field === 'date' ? ascDesc : 'clickable',
+          onClick: () =>
+            onSort('date', selectAscDesc(field, ascDesc, 'date', 'desc')),
+        })}
         {showAccount && (
-          <HeaderCell
-            value={t('Account')}
-            width="flex"
-            alignItems="flex"
-            marginLeft={-5}
-            id="account"
-            icon={field === 'account' ? ascDesc : 'clickable'}
-            onClick={() =>
-              onSort('account', selectAscDesc(field, ascDesc, 'account', 'asc'))
-            }
-          />
+          renderResizableHeaderCell({
+            columnId: 'account',
+            value: t('Account'),
+            alignItems: 'flex',
+            marginLeft: -5,
+            icon: field === 'account' ? ascDesc : 'clickable',
+            onClick: () =>
+              onSort(
+                'account',
+                selectAscDesc(field, ascDesc, 'account', 'asc'),
+              ),
+          })
         )}
-        <HeaderCell
-          value={t('Payee')}
-          width="flex"
-          alignItems="flex"
-          marginLeft={-5}
-          id="payee"
-          icon={field === 'payee' ? ascDesc : 'clickable'}
-          onClick={() =>
-            onSort('payee', selectAscDesc(field, ascDesc, 'payee', 'asc'))
-          }
-        />
-        <HeaderCell
-          value={t('Notes')}
-          width="flex"
-          alignItems="flex"
-          marginLeft={-5}
-          id="notes"
-          icon={field === 'notes' ? ascDesc : 'clickable'}
-          onClick={() =>
-            onSort('notes', selectAscDesc(field, ascDesc, 'notes', 'asc'))
-          }
-        />
+        {renderResizableHeaderCell({
+          columnId: 'payee',
+          value: t('Payee'),
+          alignItems: 'flex',
+          marginLeft: -5,
+          icon: field === 'payee' ? ascDesc : 'clickable',
+          onClick: () =>
+            onSort('payee', selectAscDesc(field, ascDesc, 'payee', 'asc')),
+        })}
+        {renderResizableHeaderCell({
+          columnId: 'notes',
+          value: t('Notes'),
+          alignItems: 'flex',
+          marginLeft: -5,
+          icon: field === 'notes' ? ascDesc : 'clickable',
+          onClick: () =>
+            onSort('notes', selectAscDesc(field, ascDesc, 'notes', 'asc')),
+        })}
         {showCategory && (
-          <HeaderCell
-            value={t('Category')}
-            width="flex"
-            alignItems="flex"
-            marginLeft={-5}
-            id="category"
-            icon={field === 'category' ? ascDesc : 'clickable'}
-            onClick={() =>
+          renderResizableHeaderCell({
+            columnId: 'category',
+            value: t('Category'),
+            alignItems: 'flex',
+            marginLeft: -5,
+            icon: field === 'category' ? ascDesc : 'clickable',
+            onClick: () =>
               onSort(
                 'category',
                 selectAscDesc(field, ascDesc, 'category', 'asc'),
-              )
-            }
-          />
+              ),
+          })
         )}
-        <HeaderCell
-          value={t('Payment')}
-          width={100}
-          alignItems="flex-end"
-          marginRight={-5}
-          id="payment"
-          icon={field === 'payment' ? ascDesc : 'clickable'}
-          onClick={() =>
-            onSort('payment', selectAscDesc(field, ascDesc, 'payment', 'asc'))
-          }
-        />
-        <HeaderCell
-          value={t('Deposit')}
-          width={100}
-          alignItems="flex-end"
-          marginRight={-5}
-          id="deposit"
-          icon={field === 'deposit' ? ascDesc : 'clickable'}
-          onClick={() =>
-            onSort('deposit', selectAscDesc(field, ascDesc, 'deposit', 'desc'))
-          }
-        />
+        {renderResizableHeaderCell({
+          columnId: 'payment',
+          value: t('Payment'),
+          alignItems: 'flex-end',
+          marginRight: -5,
+          icon: field === 'payment' ? ascDesc : 'clickable',
+          onClick: () =>
+            onSort(
+              'payment',
+              selectAscDesc(field, ascDesc, 'payment', 'asc'),
+            ),
+        })}
+        {renderResizableHeaderCell({
+          columnId: 'deposit',
+          value: t('Deposit'),
+          alignItems: 'flex-end',
+          marginRight: -5,
+          icon: field === 'deposit' ? ascDesc : 'clickable',
+          onClick: () =>
+            onSort(
+              'deposit',
+              selectAscDesc(field, ascDesc, 'deposit', 'desc'),
+            ),
+        })}
         {showBalance && (
-          <HeaderCell
-            value={t('Balance')}
-            width={103}
-            alignItems="flex-end"
-            marginRight={-5}
-            id="balance"
-          />
+          renderResizableHeaderCell({
+            columnId: 'balance',
+            value: t('Balance'),
+            alignItems: 'flex-end',
+            marginRight: -5,
+          })
         )}
         {showCleared && (
           <HeaderCell
             value="✓"
-            width={38}
+            width={TRANSACTION_CLEARED_COLUMN_WIDTH}
             alignItems="center"
             id="cleared"
             icon={field === 'cleared' ? ascDesc : 'clickable'}

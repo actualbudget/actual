@@ -9,6 +9,7 @@ type DateCellProps = {
   id: TransactionEntity['id'];
   date: string;
   dateFormat: string;
+  width: number;
   focused: boolean;
   exposed: boolean;
   isPreview?: boolean;
@@ -20,6 +21,7 @@ export function DateCell({
   id,
   date,
   dateFormat,
+  width,
   focused,
   exposed,
   isPreview,
@@ -43,7 +45,7 @@ export function DateCell({
   return (
     <CustomCell
       name="date"
-      width={110}
+      width={width}
       textAlign="flex"
       focused={focused}
       exposed={exposed}

@@ -36,6 +36,7 @@ export function SplitChildTransactionRowCells({
   onNavigateToSchedule,
   onManagePayees,
   showSelection,
+  columnWidths,
 }: TransactionRowContentProps) {
   return (
     <>
@@ -54,9 +55,8 @@ export function SplitChildTransactionRowCells({
       )}
 
       <Field
-        width={110}
+        width={columnWidths.date}
         style={{
-          width: 110,
           marginLeft: -5,
           backgroundColor: theme.tableRowBackgroundHover,
           border: 0,
@@ -65,8 +65,8 @@ export function SplitChildTransactionRowCells({
 
       {showAccount && (
         <Field
+          width={columnWidths.account}
           style={{
-            flex: 1,
             marginLeft: -5,
             backgroundColor: theme.tableRowBackgroundHover,
             border: 0,
@@ -80,6 +80,7 @@ export function SplitChildTransactionRowCells({
         transferAccount={transferAccount}
         schedule={schedule}
         payees={payees}
+        width={columnWidths.payee}
         focused={focusedField === 'payee'}
         exposed={focusedField === 'payee'}
         isPreview={isPreview}
@@ -93,6 +94,7 @@ export function SplitChildTransactionRowCells({
       <NotesCell
         id={transaction.id}
         notes={notesValue}
+        width={columnWidths.notes}
         focused={focusedField === 'notes'}
         exposed={focusedField === 'notes'}
         isPreview={isPreview}
@@ -105,6 +107,7 @@ export function SplitChildTransactionRowCells({
           id={transaction.id}
           category={category}
           categoryGroups={categoryGroups}
+          width={columnWidths.category}
           focused={focusedField === 'category'}
           exposed={focusedField === 'category'}
           isPreview={isPreview}
@@ -118,6 +121,7 @@ export function SplitChildTransactionRowCells({
         id={transaction.id}
         amount={transaction.amount}
         type="debit"
+        width={columnWidths.payment}
         focused={focusedField === 'debit'}
         exposed={focusedField === 'debit'}
         hideFraction={hideFraction}
@@ -130,6 +134,7 @@ export function SplitChildTransactionRowCells({
         id={transaction.id}
         amount={transaction.amount}
         type="credit"
+        width={columnWidths.deposit}
         focused={focusedField === 'credit'}
         exposed={focusedField === 'credit'}
         hideFraction={hideFraction}
@@ -142,6 +147,7 @@ export function SplitChildTransactionRowCells({
         <BalanceCell
           id={transaction.id}
           balance={null}
+          width={columnWidths.balance}
           hideFraction={hideFraction}
         />
       )}

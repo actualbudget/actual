@@ -11,10 +11,11 @@ import { useFormat } from '@desktop-client/hooks/useFormat';
 type BalanceCellProps = {
   id: TransactionEntity['id'];
   balance: IntegerAmount | null;
+  width: number;
   hideFraction: boolean;
 };
 
-export function BalanceCell({ balance }: BalanceCellProps) {
+export function BalanceCell({ balance, width }: BalanceCellProps) {
   const format = useFormat();
 
   const displayValue = useMemo(() => {
@@ -25,7 +26,7 @@ export function BalanceCell({ balance }: BalanceCellProps) {
   return (
     <Cell
       name="balance"
-      width={103}
+      width={width}
       textAlign="right"
       plain
       value={displayValue}

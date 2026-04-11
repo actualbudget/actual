@@ -17,6 +17,7 @@ type PayeeCellProps = {
   transferAccount: AccountEntity | null | undefined;
   schedule: ScheduleEntity | null | undefined;
   payees: PayeeEntity[];
+  width: number;
   focused: boolean;
   exposed: boolean;
   isPreview?: boolean;
@@ -33,6 +34,7 @@ export function PayeeCell({
   transferAccount,
   schedule,
   payees,
+  width,
   focused,
   exposed,
   isPreview,
@@ -70,7 +72,7 @@ export function PayeeCell({
   return (
     <CustomCell
       name="payee"
-      width="flex"
+      width={width}
       focused={focused}
       exposed={exposed}
       onExpose={() => !isPreview && onEdit(id, 'payee')}

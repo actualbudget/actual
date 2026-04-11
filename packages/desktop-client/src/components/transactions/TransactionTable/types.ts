@@ -13,6 +13,26 @@ import type {
 
 import type { DropPosition } from '@desktop-client/hooks/useDragDrop';
 
+export type TransactionColumnId =
+  | 'date'
+  | 'account'
+  | 'payee'
+  | 'notes'
+  | 'category'
+  | 'payment'
+  | 'deposit'
+  | 'balance';
+
+export type TransactionColumnWidths = Record<TransactionColumnId, number>;
+
+export type VisibleTransactionColumn = {
+  id: TransactionColumnId;
+  defaultWidth: number;
+  minWidth: number;
+};
+
+export type TransactionTableVariantKey = string;
+
 export type TransactionTableState = {
   editingId: TransactionEntity['id'] | null;
   editingField: string | null;
@@ -120,6 +140,7 @@ export type TransactionRowProps = {
   isSplitExpanded: boolean;
   rowHeight?: number;
   dateFormat: string;
+  columnWidths: TransactionColumnWidths;
   onEdit: (id: TransactionEntity['id'], field: string) => void;
   onSave: (transaction: TransactionEntity) => void;
   onToggleSplit: (id: TransactionEntity['id']) => void;
@@ -160,6 +181,7 @@ export type TransactionRowContentProps = {
   schedule: ScheduleEntity | null | undefined;
   notesValue?: string;
   previewStatus?: string | null;
+  columnWidths: TransactionColumnWidths;
   onEdit: (id: TransactionEntity['id'], field: string) => void;
   onUpdate: (field: string, value: unknown) => Promise<void>;
   onSelect: () => void;

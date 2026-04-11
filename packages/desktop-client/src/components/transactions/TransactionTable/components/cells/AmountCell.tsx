@@ -13,6 +13,7 @@ type AmountCellProps = {
   id: TransactionEntity['id'];
   amount: number;
   type: 'debit' | 'credit';
+  width: number;
   focused: boolean;
   exposed: boolean;
   hideFraction: boolean;
@@ -25,6 +26,7 @@ export function AmountCell({
   id,
   amount,
   type,
+  width,
   focused,
   exposed,
   isPreview,
@@ -56,7 +58,7 @@ export function AmountCell({
   return (
     <InputCell
       name={type}
-      width={100}
+      width={width}
       textAlign="right"
       focused={focused}
       exposed={exposed}

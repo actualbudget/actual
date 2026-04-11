@@ -33,6 +33,7 @@ import {
   tableReducer,
 } from './TransactionTableState';
 import type { TransactionTableProps } from './types';
+import { useTransactionTableColumnLayout } from './useTransactionTableColumnLayout';
 import { makeTemporaryTransactions } from '../table/utils';
 
 import { Table, useTableNavigator } from '@desktop-client/components/table';
@@ -93,6 +94,7 @@ export const TransactionTable = forwardRef(
       TransactionEntity['id'] | null
     >(null);
     const tableRef = useRef<TableHandleRef<TransactionEntity>>(null);
+    const tableContainerRef = useRef<HTMLDivElement>(null);
     const previousIsAdding = useRef(isAdding);
     const previousTemporaryTransactionId = useRef<TransactionEntity['id'] | null>(
       null,
@@ -100,8 +102,33 @@ export const TransactionTable = forwardRef(
     const selectedItems = useSelectedItems();
     const splitsExpanded = useSplitsExpanded();
     const dispatchRedux = useDispatch();
+    const [containerWidth, setContainerWidth] = useState(0);
 
     useImperativeHandle(ref, () => tableRef.current!);
+
+    useEffect(() => {
+      function updateContainerWidth() {
+        setContainerWidth(tableContainerRef.current?.clientWidth ?? 0);
+      }
+
+      updateContainerWidth();
+
+      const resizeObserver =
+        typeof ResizeObserver !== 'undefined'
+          ? new ResizeObserver(() => updateContainerWidth())
+          : null;
+
+      if (tableContainerRef.current && resizeObserver) {
+        resizeObserver.observe(tableContainerRef.current);
+      } else {
+        window.addEventListener('resize', updateContainerWidth);
+      }
+
+      return () => {
+        resizeObserver?.disconnect();
+        window.removeEventListener('resize', updateContainerWidth);
+      };
+    }, []);
 
     useEffect(() => {
       if (!previousIsAdding.current && isAdding) {
@@ -214,6 +241,18 @@ export const TransactionTable = forwardRef(
       navigatorTransactions,
       getEditableFields,
     );
+    const {
+      columnWidths,
+      tableWidth,
+      getResizeHandleProps,
+    } = useTransactionTableColumnLayout({
+      containerWidth,
+      showAccount,
+      showBalances,
+      showCategory,
+      showCleared,
+      showSelection,
+    });
 
     useEffect(() => {
       const currentTemporaryTransactionId = temporaryTransactions[0]?.id ?? null;
@@ -370,6 +409,7 @@ export const TransactionTable = forwardRef(
               isSplitExpanded={splitsExpanded.isExpanded(transaction.id)}
               rowHeight={ROW_HEIGHT}
               dateFormat={dateFormat}
+              columnWidths={columnWidths}
               onEdit={tableNavigator.onEdit}
               onSave={handleSave}
               onToggleSplit={handleToggleSplit}
@@ -427,6 +467,7 @@ export const TransactionTable = forwardRef(
       showBalances,
       showCategory,
       hideFraction,
+      columnWidths,
       splitsExpanded,
       dateFormat,
       handleSave,
@@ -487,6 +528,7 @@ export const TransactionTable = forwardRef(
             isSplitExpanded={isSplitExpanded}
             rowHeight={rowHeight}
             dateFormat={dateFormat}
+            columnWidths={columnWidths}
             onEdit={onEdit}
             onSave={handleSave}
             onToggleSplit={handleToggleSplit}
@@ -505,6 +547,7 @@ export const TransactionTable = forwardRef(
       [
         selectedItems,
         balances,
+        columnWidths,
         state,
         splitsExpanded,
         accounts,
@@ -539,32 +582,51 @@ export const TransactionTable = forwardRef(
 
     return (
       <View style={{ flex: 1, ...style }}>
-        <TransactionHeader
-          hasSelected={selectedItems.size > 0}
-          showAccount={showAccount}
-          showCategory={showCategory}
-          showBalance={showBalances}
-          showCleared={showCleared}
-          scrollWidth={scrollWidth}
-          showSelection={showSelection}
-          onSort={onSort}
-          ascDesc={ascDesc}
-          field={sortField}
-        />
-        <Table
-          ref={tableRef}
-          items={tableItems}
-          navigator={tableNavigator}
-          contentHeader={renderTemporaryTransactionSection}
-          renderItem={renderRow}
-          renderEmpty={renderEmpty}
-          loadMore={loadMoreTransactions}
-          saveScrollWidth={saveScrollWidth}
-          rowHeight={ROW_HEIGHT}
+        <View
+          innerRef={tableContainerRef}
           style={{
-            backgroundColor: theme.tableBackground,
+            flex: 1,
+            overflowX: 'auto',
+            overflowY: 'hidden',
           }}
-        />
+        >
+          <View
+            style={{
+              flex: 1,
+              width: tableWidth,
+              minWidth: containerWidth || tableWidth,
+            }}
+          >
+            <TransactionHeader
+              hasSelected={selectedItems.size > 0}
+              showAccount={showAccount}
+              showCategory={showCategory}
+              showBalance={showBalances}
+              showCleared={showCleared}
+              scrollWidth={scrollWidth}
+              showSelection={showSelection}
+              onSort={onSort}
+              ascDesc={ascDesc}
+              field={sortField}
+              columnWidths={columnWidths}
+              getResizeHandleProps={getResizeHandleProps}
+            />
+            <Table
+              ref={tableRef}
+              items={tableItems}
+              navigator={tableNavigator}
+              contentHeader={renderTemporaryTransactionSection}
+              renderItem={renderRow}
+              renderEmpty={renderEmpty}
+              loadMore={loadMoreTransactions}
+              saveScrollWidth={saveScrollWidth}
+              rowHeight={ROW_HEIGHT}
+              style={{
+                backgroundColor: theme.tableBackground,
+              }}
+            />
+          </View>
+        </View>
         {splitModalTransaction && (
           <SplitTransactionModal
             transaction={splitModalTransaction}

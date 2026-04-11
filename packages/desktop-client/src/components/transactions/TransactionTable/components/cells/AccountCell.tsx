@@ -9,6 +9,7 @@ type AccountCellProps = {
   id: TransactionEntity['id'];
   account: AccountEntity | null | undefined;
   accounts: AccountEntity[];
+  width: number;
   focused: boolean;
   exposed: boolean;
   isPreview?: boolean;
@@ -19,6 +20,7 @@ type AccountCellProps = {
 export function AccountCell({
   id,
   account,
+  width,
   focused,
   exposed,
   isPreview,
@@ -32,7 +34,7 @@ export function AccountCell({
   return (
     <CustomCell
       name="account"
-      width="flex"
+      width={width}
       textAlign="flex"
       focused={focused}
       exposed={exposed}

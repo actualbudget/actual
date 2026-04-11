@@ -5,6 +5,7 @@ import { InputCell } from '@desktop-client/components/table';
 type NotesCellProps = {
   id: TransactionEntity['id'];
   notes: string | null | undefined;
+  width: number;
   focused: boolean;
   exposed: boolean;
   isPreview?: boolean;
@@ -15,6 +16,7 @@ type NotesCellProps = {
 export function NotesCell({
   id,
   notes,
+  width,
   focused,
   exposed,
   isPreview,
@@ -24,7 +26,7 @@ export function NotesCell({
   return (
     <InputCell
       name="notes"
-      width="flex"
+      width={width}
       focused={focused}
       exposed={exposed}
       onExpose={() => !isPreview && onEdit(id, 'notes')}

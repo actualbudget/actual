@@ -10,16 +10,18 @@ import { Cell } from '@desktop-client/components/table';
 type PreviewCategoryCellProps = {
   previewStatus?: string | null;
   selected: boolean;
+  width: number;
 };
 
 export function PreviewCategoryCell({
   previewStatus,
   selected,
+  width,
 }: PreviewCategoryCellProps) {
   return (
     <Cell
       name="category"
-      width="flex"
+      width={width}
       plain
       style={{
         padding: 0,
