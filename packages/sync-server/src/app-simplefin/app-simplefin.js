@@ -2,12 +2,12 @@ import https from 'https';
 
 import express from 'express';
 
-import { handleError } from '../app-gocardless/util/handle-error';
-import { SecretName, secretsService } from '../services/secrets-service';
+import { handleError } from '#app-gocardless/util/handle-error';
+import { SecretName, secretsService } from '#services/secrets-service';
 import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
-} from '../util/middlewares';
+} from '#util/middlewares';
 
 const app = express();
 export { app as handlers };

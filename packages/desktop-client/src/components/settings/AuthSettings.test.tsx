@@ -1,19 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import { vi } from 'vitest';
 
+import { useLoginMethod, useMultiuserEnabled } from '#components/ServerContext';
+import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
+import { TestProviders } from '#mocks';
+
 import { AuthSettings } from './AuthSettings';
 
-import {
-  useLoginMethod,
-  useMultiuserEnabled,
-} from '@desktop-client/components/ServerContext';
-import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
-import { TestProviders } from '@desktop-client/mocks';
-
-vi.mock('@desktop-client/hooks/useSyncServerStatus', () => ({
+vi.mock('#hooks/useSyncServerStatus', () => ({
   useSyncServerStatus: vi.fn(),
 }));
-vi.mock('@desktop-client/components/ServerContext', () => ({
+vi.mock('#components/ServerContext', () => ({
   useMultiuserEnabled: vi.fn(),
   useLoginMethod: vi.fn(),
 }));

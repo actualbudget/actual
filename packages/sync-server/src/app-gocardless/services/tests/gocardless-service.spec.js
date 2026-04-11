@@ -10,13 +10,13 @@ import {
   ResourceSuspended,
   ServiceError,
   UnknownError,
-} from '../../errors';
-import { GoCardlessApiError } from '../gocardless-api';
+} from '#app-gocardless/errors';
+import { GoCardlessApiError } from '#app-gocardless/services/gocardless-api';
 import {
   client,
   goCardlessService,
   handleGoCardlessError,
-} from '../gocardless-service';
+} from '#app-gocardless/services/gocardless-service';
 
 import {
   mockAccountDetails,

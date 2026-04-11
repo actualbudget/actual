@@ -12,41 +12,38 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import * as d from 'date-fns';
-import type { SankeyData } from 'recharts/types/chart/Sankey';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { mapField } from '@actual-app/core/shared/rules';
 import type {
   RuleConditionEntity,
   SankeyWidget,
   TimeFrame,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import * as d from 'date-fns';
+import type { SankeyData } from 'recharts/types/chart/Sankey';
 
-import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
-import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
-import {
-  MobilePageHeader,
-  Page,
-  PageHeader,
-} from '@desktop-client/components/Page';
-import { SankeyGraph } from '@desktop-client/components/reports/graphs/SankeyGraph';
-import { Header } from '@desktop-client/components/reports/Header';
-import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { ModeButton } from '@desktop-client/components/reports/ModeButton';
-import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
-import { createSpreadsheet as sankeySpreadsheet } from '@desktop-client/components/reports/spreadsheets/sankey-spreadsheet';
-import { useReport } from '@desktop-client/components/reports/useReport';
-import { fromDateRepr } from '@desktop-client/components/reports/util';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import { useUpdateDashboardWidgetMutation } from '@desktop-client/reports/mutations';
+import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
+import { MobileBackButton } from '#components/mobile/MobileBackButton';
+import { MobilePageHeader, Page, PageHeader } from '#components/Page';
+import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
+import { Header } from '#components/reports/Header';
+import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ModeButton } from '#components/reports/ModeButton';
+import { calculateTimeRange } from '#components/reports/reportRanges';
+import { createSpreadsheet as sankeySpreadsheet } from '#components/reports/spreadsheets/sankey-spreadsheet';
+import { useReport } from '#components/reports/useReport';
+import { fromDateRepr } from '#components/reports/util';
+import { useCategories } from '#hooks/useCategories';
+import { useDashboardWidget } from '#hooks/useDashboardWidget';
+import { useFormatList } from '#hooks/useFormatList';
+import { useLocale } from '#hooks/useLocale';
+import { useNavigate } from '#hooks/useNavigate';
+import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
+import type { useSpreadsheet } from '#hooks/useSpreadsheet';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
+import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 
 export function Sankey() {
   const params = useParams();
@@ -206,7 +203,7 @@ type SankeyInnerProps = {
 function SankeyInner({ widget }: SankeyInnerProps) {
   const locale = useLocale();
   const dispatch = useDispatch();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 
@@ -413,6 +410,24 @@ function SankeyInner({ widget }: SankeyInnerProps) {
 
   const title = widget?.meta?.name || t('Sankey');
 
+  const ignoredFilterFields =
+    graphMode === 'budgeted'
+      ? [
+          ...new Set(
+            conditions
+              .filter(
+                c => c.field !== 'category' && c.field !== 'category_group',
+              )
+              .map(c => mapField(c.field)),
+          ),
+        ]
+      : [];
+
+  const ignoredFilterFieldsList = useFormatList(
+    ignoredFilterFields,
+    i18n.language,
+  );
+
   if (!datesInitialized || !data) {
     return <LoadingIndicator />;
   }
@@ -459,15 +474,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
         onDeleteFilter={onDeleteFilter}
         conditionsOp={conditionsOp}
         onConditionsOpChange={onConditionsOpChange}
-        filterExclude={[
-          'date',
-          'payee',
-          'notes',
-          'amount',
-          'cleared',
-          'reconciled',
-          'transfer',
-        ]}
+        filterExclude={['date']}
         inlineContent={
           <>
             <View
@@ -569,6 +576,25 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                           transactions or selecting a different period.
                         </Trans>
                       )}
+                    </Text>
+                  </View>
+                )}
+
+                {ignoredFilterFields.length > 0 && (
+                  <View
+                    style={{
+                      marginTop: 10,
+                      padding: '8px 12px',
+                      backgroundColor: theme.warningBackground,
+                      borderRadius: 4,
+                      color: theme.warningText,
+                    }}
+                  >
+                    <Text style={{ fontSize: 13 }}>
+                      <Trans>
+                        Filters on <strong>{ignoredFilterFieldsList}</strong>{' '}
+                        are ignored in <strong>Budgeted</strong> mode.
+                      </Trans>
                     </Text>
                   </View>
                 )}

@@ -116,26 +116,6 @@ export default defineConfig(async ({ mode }) => {
     process.env.REACT_APP_BRANCH = process.env.BRANCH;
   }
 
-  let resolveExtensions = [
-    '.mjs',
-    '.js',
-    '.mts',
-    '.ts',
-    '.jsx',
-    '.tsx',
-    '.json',
-  ];
-
-  if (env.IS_GENERIC_BROWSER) {
-    resolveExtensions = [
-      '.browser.js',
-      '.browser.jsx',
-      '.browser.ts',
-      '.browser.tsx',
-      ...resolveExtensions,
-    ];
-  }
-
   const browserOpen = env.BROWSER_OPEN ? `//${env.BROWSER_OPEN}` : true;
 
   return {
@@ -184,14 +164,8 @@ export default defineConfig(async ({ mode }) => {
       },
     },
     resolve: {
-      extensions: resolveExtensions,
-      alias: {
-        '@desktop-client': path.join(__dirname, 'src'),
-        // TODO: remove this once all loot-core imports are replaced with @actual-app/core
-        'loot-core': path.join(__dirname, '../loot-core/src'),
-      },
       ...(!env.IS_GENERIC_BROWSER && {
-        conditions: ['electron', 'module', 'browser', 'default'],
+        conditions: ['electron-renderer', 'module', 'browser', 'default'],
       }),
       tsconfigPaths: true,
     },

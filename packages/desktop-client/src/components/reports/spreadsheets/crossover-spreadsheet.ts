@@ -1,11 +1,10 @@
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
+import type { AccountEntity } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
 
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
-import type { AccountEntity } from 'loot-core/types/models';
-
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
+import type { useSpreadsheet } from '#hooks/useSpreadsheet';
+import { aqlQuery } from '#queries/aqlQuery';
 
 type MonthlyAgg = { date: string; amount: number };
 

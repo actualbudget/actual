@@ -1,15 +1,14 @@
-import * as d from 'date-fns';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
 import type {
   AgeOfMoneyGranularity,
   RuleConditionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import * as d from 'date-fns';
 
-import { runAll } from '@desktop-client/components/reports/util';
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import { runAll } from '#components/reports/util';
+import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 
 export type AgeOfMoneyData = {
   graphData: Array<{

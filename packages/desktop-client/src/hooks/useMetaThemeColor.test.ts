@@ -1,13 +1,13 @@
 import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useMetaThemeColor } from './useMetaThemeColor';
+import { usePreferredDarkTheme, useTheme } from '#style/theme';
 
-import { usePreferredDarkTheme, useTheme } from '@desktop-client/style/theme';
+import { useMetaThemeColor } from './useMetaThemeColor';
 
 const DEFAULT_THEME_COLOR = '#5c3dbb';
 
-vi.mock('@desktop-client/style/theme', () => ({
+vi.mock('#style/theme', () => ({
   useTheme: vi.fn(),
   usePreferredDarkTheme: vi.fn(),
 }));

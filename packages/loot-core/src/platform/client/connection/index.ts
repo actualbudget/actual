@@ -1,83 +1,159 @@
 // @ts-strict-ignore
+import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
 import * as undo from '#platform/client/undo';
+import { captureBreadcrumb, captureException } from '#platform/exceptions';
 
 import type * as T from './index-types';
 
 const replyHandlers = new Map();
 const listeners = new Map();
 let messageQueue = [];
-let socketClient = null;
 
-function connectSocket(onOpen) {
-  global.Actual.ipcConnect(function (client) {
-    client.on('message', data => {
-      const msg = data;
+let globalWorker = null;
 
-      if (msg.type === 'error') {
-        // An error happened while handling a message so cleanup the
-        // current reply handler and reject the promise. The error will
-        // be propagated to the caller through this promise rejection.
-        const { id, error } = msg;
-        const handler = replyHandlers.get(id);
-        if (handler) {
-          replyHandlers.delete(id);
-          handler.reject(error);
-        }
-      } else if (msg.type === 'reply') {
-        let { result } = msg;
-        const { id, mutated, undoTag } = msg;
+class ReconstructedError extends Error {
+  url: string;
+  line: string;
+  column: string;
 
-        // Check if the result is a serialized buffer, and if so
-        // convert it to a Uint8Array. This is only needed when working
-        // with node; the web version connection layer automatically
-        // supports buffers
-        if (result && result.type === 'Buffer' && Array.isArray(result.data)) {
-          result = new Uint8Array(result.data);
-        }
+  constructor(message, stack, url, line, column) {
+    super(message);
+    this.name = this.constructor.name;
+    this.message = message;
 
-        const handler = replyHandlers.get(id);
-        if (handler) {
-          replyHandlers.delete(id);
-
-          if (!mutated) {
-            undo.gc(undoTag);
-          }
-
-          handler.resolve(result);
-        }
-      } else if (msg.type === 'push') {
-        const { name, args } = msg;
-
-        const listens = listeners.get(name);
-        if (listens) {
-          for (let i = 0; i < listens.length; i++) {
-            const stop = listens[i](args);
-            if (stop === true) {
-              break;
-            }
-          }
-        }
-      } else {
-        throw new Error('Unknown message type: ' + JSON.stringify(msg));
-      }
+    Object.defineProperty(this, 'stack', {
+      get: function () {
+        return 'extended ' + this._stack;
+      },
+      set: function (value) {
+        this._stack = value;
+      },
     });
 
-    socketClient = client;
+    this.stack = stack;
+    this.url = url;
+    this.line = line;
+    this.column = column;
+  }
+}
 
-    // Send any messages that were queued while closed
-    if (messageQueue.length > 0) {
-      messageQueue.forEach(msg => client.emit('message', msg));
-      messageQueue = [];
+function handleMessage(msg) {
+  if (msg.type === 'error') {
+    // An error happened while handling a message so cleanup the
+    // current reply handler and reject the promise. The error will
+    // be propagated to the caller through this promise rejection.
+    const { id, error } = msg;
+    const handler = replyHandlers.get(id);
+    if (handler) {
+      replyHandlers.delete(id);
+      handler.reject(error);
     }
+  } else if (msg.type === 'reply') {
+    const { id, result, mutated, undoTag } = msg;
 
-    onOpen();
-  });
+    const handler = replyHandlers.get(id);
+    if (handler) {
+      replyHandlers.delete(id);
+
+      if (!mutated) {
+        undo.gc(undoTag);
+      }
+
+      handler.resolve(result);
+    }
+  } else if (msg.type === 'push') {
+    const { name, args } = msg;
+
+    const listens = listeners.get(name);
+    if (listens) {
+      for (let i = 0; i < listens.length; i++) {
+        const stop = listens[i](args);
+        if (stop === true) {
+          break;
+        }
+      }
+    }
+  } else {
+    // Ignore internal messages that start with __
+    if (!msg.type.startsWith('__')) {
+      throw new Error('Unknown message type: ' + JSON.stringify(msg));
+    }
+  }
+}
+
+// Note that this does not support retry. If the worker
+// dies, it will permanently be disconnected. That should be OK since
+// I don't think a worker should ever die due to a system error.
+function connectWorker(worker, onOpen, onError) {
+  globalWorker = worker;
+
+  worker.onmessage = event => {
+    const msg = event.data;
+
+    // The worker implementation implements its own concept of a
+    // 'connect' event because the worker is immediately
+    // available, but we don't know when the backend is actually
+    // ready to handle messages.
+    if (msg.type === 'connect') {
+      // Send any messages that were queued while closed
+      if (messageQueue?.length > 0) {
+        messageQueue.forEach(msg => worker.postMessage(msg));
+        messageQueue = null;
+      }
+
+      // signal to the backend that we're connected to it
+      globalWorker.postMessage({
+        name: 'client-connected-to-backend',
+      });
+      onOpen();
+    } else if (msg.type === 'app-init-failure') {
+      globalWorker.postMessage({
+        name: '__app-init-failure-acknowledged',
+      });
+      onError(msg);
+    } else if (msg.type === 'capture-exception') {
+      captureException(
+        msg.stack
+          ? new ReconstructedError(
+              msg.message,
+              msg.stack,
+              msg.url,
+              msg.line,
+              msg.column,
+            )
+          : msg.exc,
+      );
+
+      if (msg.message && msg.message.includes('indexeddb-quota-error')) {
+        alert(
+          t(
+            'We hit a limit on the local storage available. Edits may not be saved. Please get in touch https://actualbudget.org/contact/ so we can help debug this.',
+          ),
+        );
+      }
+    } else if (msg.type === 'capture-breadcrumb') {
+      captureBreadcrumb(msg.data);
+    } else {
+      handleMessage(msg);
+    }
+  };
+
+  // In browsers that don't support wasm in workers well (Safari),
+  // we run the server on the main process for now. This might not
+  // actually be a worker, but instead a message port which we
+  // need to start.
+  if (worker instanceof MessagePort) {
+    worker.start();
+  }
 }
 
 export const init: T.Init = async function () {
-  return new Promise(connectSocket);
+  const worker = await global.Actual.getServerSocket();
+  return new Promise((resolve, reject) =>
+    connectWorker(worker, resolve, reject),
+  );
 };
 
 export const send: T.Send = function (
@@ -86,24 +162,19 @@ export const send: T.Send = function (
   const [name, args, { catchErrors = false } = {}] = params;
   return new Promise((resolve, reject) => {
     const id = uuidv4();
-    replyHandlers.set(id, { resolve, reject });
 
-    if (socketClient) {
-      socketClient.emit('message', {
-        id,
-        name,
-        args,
-        undoTag: undo.snapshot(),
-        catchErrors: !!catchErrors,
-      });
+    replyHandlers.set(id, { resolve, reject });
+    const message = {
+      id,
+      name,
+      args,
+      undoTag: undo.snapshot(),
+      catchErrors,
+    };
+    if (messageQueue) {
+      messageQueue.push(message);
     } else {
-      messageQueue.push({
-        id,
-        name,
-        args,
-        undoTag: undo.snapshot(),
-        catchErrors,
-      });
+      globalWorker.postMessage(message);
     }
   });
 };
@@ -120,12 +191,10 @@ export const listen: T.Listen = function (name, cb) {
 
   return () => {
     const arr = listeners.get(name);
-    if (arr) {
-      listeners.set(
-        name,
-        arr.filter(cb_ => cb_ !== cb),
-      );
-    }
+    listeners.set(
+      name,
+      arr.filter(cb_ => cb_ !== cb),
+    );
   };
 };
 
@@ -133,23 +202,12 @@ export const unlisten: T.Unlisten = function (name) {
   listeners.set(name, []);
 };
 
-async function closeSocket(onClose) {
-  socketClient.onclose = () => {
-    socketClient = null;
-    onClose();
-  };
-
-  await socketClient.close();
-}
-
-export const clearServer: T.ClearServer = async function () {
-  if (socketClient != null) {
-    return new Promise(closeSocket);
-  }
-};
 export const initServer: T.InitServer = async function () {
   // initServer is used in tests to mock the server
 };
 export const serverPush: T.ServerPush = async function () {
   // serverPush is used in tests to mock the server
+};
+export const clearServer: T.ClearServer = async function () {
+  // clearServer is used in tests to mock the server
 };

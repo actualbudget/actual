@@ -1,9 +1,8 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
-import { vi } from 'vitest';
-
 import type { RuleEntity } from '@actual-app/core/types/models';
+import { vi } from 'vitest';
 
 import * as api from './index';
 

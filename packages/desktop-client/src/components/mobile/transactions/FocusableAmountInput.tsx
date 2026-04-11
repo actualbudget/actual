@@ -11,18 +11,17 @@ import type { CSSProperties as EmotionCSSProperties } from '@actual-app/componen
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
-
 import {
   amountToCurrency,
   appendDecimals,
   currencyToAmount,
   reapplyThousandSeparators,
-} from 'loot-core/shared/util';
+} from '@actual-app/core/shared/util';
+import { css } from '@emotion/css';
 
-import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { makeAmountFullStyle } from '#components/budget/util';
+import { useMergedRefs } from '#hooks/useMergedRefs';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 type AmountInputProps = {
   value: number;

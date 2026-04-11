@@ -1,4 +1,4 @@
-import SpkMarburgBiedenkopfHeladef1mar from '../spk_marburg_biedenkopf_heladef1mar';
+import SpkMarburgBiedenkopfHeladef1mar from '#app-gocardless/banks/spk_marburg_biedenkopf_heladef1mar';
 
 describe('SpkMarburgBiedenkopfHeladef1mar', () => {
   describe('#normalizeAccount', () => {

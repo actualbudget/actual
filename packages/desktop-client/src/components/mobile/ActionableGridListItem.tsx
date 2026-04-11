@@ -7,9 +7,8 @@ import { animated, config, useSpring } from 'react-spring';
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import type { WithRequired } from '@actual-app/core/types/util';
 import { useDrag } from '@use-gesture/react';
-
-import type { WithRequired } from 'loot-core/types/util';
 
 type ActionableGridListItemProps<T> = {
   actions?: ReactNode | ((params: { close: () => void }) => ReactNode);

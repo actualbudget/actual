@@ -15,12 +15,12 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
+import { removeNotification } from '#notifications/notificationsSlice';
+import type { NotificationWithId } from '#notifications/notificationsSlice';
+import { useDispatch, useSelector } from '#redux';
+
 import { Link } from './common/Link';
 import { MODAL_Z_INDEX } from './common/Modal';
-
-import { removeNotification } from '@desktop-client/notifications/notificationsSlice';
-import type { NotificationWithId } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
 
 // Notification stacking configuration
 const MAX_VISIBLE_NOTIFICATIONS = 3; // Maximum number of notifications visible in the stack

@@ -26,34 +26,33 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { format as formatDate } from 'date-fns';
-
-import { tsToRelativeTime } from 'loot-core/shared/util';
+import { tsToRelativeTime } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   RuleConditionEntity,
   TransactionEntity,
   TransactionFilterEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { format as formatDate } from 'date-fns';
+
+import { AnimatedRefresh } from '#components/AnimatedRefresh';
+import { Search } from '#components/common/Search';
+import { FilterButton } from '#components/filters/FiltersMenu';
+import { FiltersStack } from '#components/filters/FiltersStack';
+import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
+import { NotesButton } from '#components/NotesButton';
+import { SelectedTransactionsButton } from '#components/transactions/SelectedTransactionsButton';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useLocale } from '#hooks/useLocale';
+import { useLocalPref } from '#hooks/useLocalPref';
+import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
 import type { TableRef } from './Account';
 import { Balances } from './Balance';
 import { BalanceHistoryGraph } from './BalanceHistoryGraph';
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
-
-import { AnimatedRefresh } from '@desktop-client/components/AnimatedRefresh';
-import { Search } from '@desktop-client/components/common/Search';
-import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
-import { FiltersStack } from '@desktop-client/components/filters/FiltersStack';
-import type { SavedFilter } from '@desktop-client/components/filters/SavedFilterMenuButton';
-import { NotesButton } from '@desktop-client/components/NotesButton';
-import { SelectedTransactionsButton } from '@desktop-client/components/transactions/SelectedTransactionsButton';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 
 type AccountHeaderProps = {
   tableRef: TableRef;

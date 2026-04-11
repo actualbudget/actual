@@ -1,10 +1,10 @@
 import * as api from '@actual-app/api';
 import type { Command } from 'commander';
 
-import { resolveConfig } from '../config';
-import { withConnection } from '../connection';
-import { printOutput } from '../output';
-import { parseBoolFlag, parseIntFlag } from '../utils';
+import { resolveConfig } from '#config';
+import { withConnection } from '#connection';
+import { printOutput } from '#output';
+import { parseBoolFlag, parseIntFlag } from '#utils';
 
 export function registerBudgetsCommand(program: Command) {
   const budgets = program.command('budgets').description('Manage budgets');

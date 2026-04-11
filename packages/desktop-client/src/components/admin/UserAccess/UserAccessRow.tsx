@@ -4,17 +4,16 @@ import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
+import { getUserAccessErrors } from '@actual-app/core/shared/errors';
+import type { UserAvailable } from '@actual-app/core/types/models';
 
-import { send } from 'loot-core/platform/client/connection';
-import { getUserAccessErrors } from 'loot-core/shared/errors';
-import type { UserAvailable } from 'loot-core/types/models';
-
-import { Checkbox } from '@desktop-client/components/forms';
-import { Cell, Row } from '@desktop-client/components/table';
-import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import { signOut } from '@desktop-client/users/usersSlice';
+import { Checkbox } from '#components/forms';
+import { Cell, Row } from '#components/table';
+import { useMetadataPref } from '#hooks/useMetadataPref';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
+import { signOut } from '#users/usersSlice';
 
 type UserAccessProps = {
   access: UserAvailable;

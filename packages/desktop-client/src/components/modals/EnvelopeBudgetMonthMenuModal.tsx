@@ -12,21 +12,16 @@ import { styles } from '@actual-app/components/styles';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import * as monthUtils from '@actual-app/core/shared/months';
 import { css } from '@emotion/css';
 
-import * as monthUtils from 'loot-core/shared/months';
-
-import { BudgetMonthMenu } from '@desktop-client/components/budget/envelope/budgetsummary/BudgetMonthMenu';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { Notes } from '@desktop-client/components/Notes';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useNotes } from '@desktop-client/hooks/useNotes';
-import { useUndo } from '@desktop-client/hooks/useUndo';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { BudgetMonthMenu } from '#components/budget/envelope/budgetsummary/BudgetMonthMenu';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { Notes } from '#components/Notes';
+import { useLocale } from '#hooks/useLocale';
+import { useNotes } from '#hooks/useNotes';
+import { useUndo } from '#hooks/useUndo';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type EnvelopeBudgetMonthMenuModalProps = Extract<
   ModalType,

@@ -1,6 +1,6 @@
-import { q } from 'loot-core/shared/query';
+import { q } from '@actual-app/core/shared/query';
 
-import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
+import { ReportOptions } from '#components/reports/ReportOptions';
 
 export function makeQuery(
   name: string,

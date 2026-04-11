@@ -1,4 +1,4 @@
-import type { FeatureFlag } from 'loot-core/types/prefs';
+import type { FeatureFlag } from '@actual-app/core/types/prefs';
 
 import { useSyncedPref } from './useSyncedPref';
 

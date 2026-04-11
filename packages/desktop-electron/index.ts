@@ -3,6 +3,7 @@ import { createServer } from 'http';
 import type { Server } from 'http';
 import path from 'path';
 
+import type { GlobalPrefsJson } from '@actual-app/core/types/prefs';
 import {
   app,
   BrowserWindow,
@@ -24,8 +25,6 @@ import type {
 } from 'electron';
 import { copy, exists, mkdir, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
-
-import type { GlobalPrefsJson } from '@actual-app/core/types/prefs';
 
 import { getMenu } from './menu';
 import {

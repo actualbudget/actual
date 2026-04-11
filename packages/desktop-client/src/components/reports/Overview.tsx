@@ -14,17 +14,46 @@ import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
 import type {
   CustomReportWidget,
   DashboardPageEntity,
   DashboardWidgetEntity,
   ExportImportDashboard,
   MarkdownWidget,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+
+import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
+import { MobilePageHeader, Page } from '#components/Page';
+import { useAccounts } from '#hooks/useAccounts';
+import {
+  useDashboardPages,
+  useDashboardPageWidgets,
+} from '#hooks/useDashboardPages';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useNavigate } from '#hooks/useNavigate';
+import { useReports } from '#hooks/useReports';
+import { useResizeObserver } from '#hooks/useResizeObserver';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useUndo } from '#hooks/useUndo';
+import {
+  addNotification,
+  removeNotification,
+} from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
+import {
+  useAddDashboardWidgetMutation,
+  useCopyDashboardWidgetMutation,
+  useDeleteDashboardPageMutation,
+  useImportDashboardPageMutation,
+  useRemoveDashboardWidgetMutation,
+  useResetDashboardPageMutation,
+  useUpdateDashboardWidgetMutation,
+  useUpdateDashboardWidgetsMutation,
+} from '#reports/mutations';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 import { DashboardHeader } from './DashboardHeader';
+import './overview.scss';
 import { DashboardSelector } from './DashboardSelector';
 import { LoadingIndicator } from './LoadingIndicator';
 import { AgeOfMoneyCard } from './reports/AgeOfMoneyCard';
@@ -38,38 +67,8 @@ import { MarkdownCard } from './reports/MarkdownCard';
 import { MissingReportCard } from './reports/MissingReportCard';
 import { NetWorthCard } from './reports/NetWorthCard';
 import { SankeyCard } from './reports/SankeyCard';
-import './overview.scss';
 import { SpendingCard } from './reports/SpendingCard';
 import { SummaryCard } from './reports/SummaryCard';
-
-import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
-import { MobilePageHeader, Page } from '@desktop-client/components/Page';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import {
-  useDashboardPages,
-  useDashboardPageWidgets,
-} from '@desktop-client/hooks/useDashboardPages';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useReports } from '@desktop-client/hooks/useReports';
-import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useUndo } from '@desktop-client/hooks/useUndo';
-import {
-  addNotification,
-  removeNotification,
-} from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import {
-  useAddDashboardWidgetMutation,
-  useCopyDashboardWidgetMutation,
-  useDeleteDashboardPageMutation,
-  useImportDashboardPageMutation,
-  useRemoveDashboardWidgetMutation,
-  useResetDashboardPageMutation,
-  useUpdateDashboardWidgetMutation,
-  useUpdateDashboardWidgetsMutation,
-} from '@desktop-client/reports/mutations';
 
 function isCustomReportWidget(
   widget: DashboardWidgetEntity,

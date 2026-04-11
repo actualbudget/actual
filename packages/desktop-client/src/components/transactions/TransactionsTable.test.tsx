@@ -1,44 +1,46 @@
 import React, { useEffect, useState } from 'react';
 
-import { fireEvent, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { format as formatDate, parse as parseDate } from 'date-fns';
-import { v4 as uuidv4 } from 'uuid';
-
 import {
   generateAccount,
   generateCategoryGroups,
   generateTransaction,
-} from 'loot-core/mocks';
-import { initServer } from 'loot-core/platform/client/connection';
+} from '@actual-app/core/mocks';
+import { initServer } from '@actual-app/core/platform/client/connection';
 import {
   addSplitTransaction,
   realizeTempTransactions,
   splitTransaction,
   updateTransaction,
-} from 'loot-core/shared/transactions';
-import { integerToCurrency } from 'loot-core/shared/util';
+} from '@actual-app/core/shared/transactions';
+import { integerToCurrency } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   CategoryEntity,
   CategoryGroupEntity,
   PayeeEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { format as formatDate, parse as parseDate } from 'date-fns';
+import { v4 as uuidv4 } from 'uuid';
+
+import { AuthProvider } from '#auth/AuthProvider';
+import { SchedulesProvider } from '#hooks/useCachedSchedules';
+import { SelectedProviderWithItems } from '#hooks/useSelected';
+import { SplitsExpandedProvider } from '#hooks/useSplitsExpanded';
+import { SpreadsheetProvider } from '#hooks/useSpreadsheet';
+import { createTestQueryClient, TestProviders } from '#mocks';
+import { payeeQueries } from '#payees';
 
 import { TransactionTable } from './TransactionsTable';
 
-import { AuthProvider } from '@desktop-client/auth/AuthProvider';
-import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
-import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
-import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
-import { SpreadsheetProvider } from '@desktop-client/hooks/useSpreadsheet';
-import { createTestQueryClient, TestProviders } from '@desktop-client/mocks';
-import { payeeQueries } from '@desktop-client/payees';
-
 const queryClient = createTestQueryClient();
 
-vi.mock('loot-core/platform/client/connection');
+vi.mock(
+  '@actual-app/core/platform/client/connection',
+  () => import('../../mocks/connection'),
+);
 vi.mock('../../hooks/useSyncedPref', () => ({
   useSyncedPref: vi.fn().mockReturnValue([undefined, vi.fn()]),
 }));

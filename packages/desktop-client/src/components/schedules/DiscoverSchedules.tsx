@@ -8,37 +8,26 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
+import { q } from '@actual-app/core/shared/query';
+import { getRecurringDescription } from '@actual-app/core/shared/schedules';
+import type { DiscoverScheduleEntity } from '@actual-app/core/types/models';
 
-import { send } from 'loot-core/platform/client/connection';
-import { q } from 'loot-core/shared/query';
-import { getRecurringDescription } from 'loot-core/shared/schedules';
-import type { DiscoverScheduleEntity } from 'loot-core/types/models';
-
-import { ScheduleAmountCell } from './SchedulesTable';
-
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import {
-  Field,
-  Row,
-  SelectCell,
-  Table,
-  TableHeader,
-} from '@desktop-client/components/table';
-import { DisplayId } from '@desktop-client/components/util/DisplayId';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useLocale } from '@desktop-client/hooks/useLocale';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { Field, Row, SelectCell, Table, TableHeader } from '#components/table';
+import { DisplayId } from '#components/util/DisplayId';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useLocale } from '#hooks/useLocale';
 import {
   SelectedProvider,
   useSelected,
   useSelectedDispatch,
   useSelectedItems,
-} from '@desktop-client/hooks/useSelected';
-import { useSendPlatformRequest } from '@desktop-client/hooks/useSendPlatformRequest';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
+} from '#hooks/useSelected';
+import { useSendPlatformRequest } from '#hooks/useSendPlatformRequest';
+import { aqlQuery } from '#queries/aqlQuery';
+
+import { ScheduleAmountCell } from './SchedulesTable';
 
 const ROW_HEIGHT = 43;
 

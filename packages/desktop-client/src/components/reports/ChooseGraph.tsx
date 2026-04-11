@@ -2,8 +2,10 @@ import React, { useRef } from 'react';
 import type { CSSProperties, UIEvent } from 'react';
 
 import { styles } from '@actual-app/components/styles';
-
-import type { DataEntity, RuleConditionEntity } from 'loot-core/types/models';
+import type {
+  DataEntity,
+  RuleConditionEntity,
+} from '@actual-app/core/types/models';
 
 import { AreaGraph } from './graphs/AreaGraph';
 import { BarGraph } from './graphs/BarGraph';
