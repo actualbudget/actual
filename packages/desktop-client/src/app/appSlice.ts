@@ -1,14 +1,13 @@
+import { send } from '@actual-app/core/platform/client/connection';
+import { getUploadError } from '@actual-app/core/shared/errors';
+import type { AtLeastOne } from '@actual-app/core/types/util';
 import { createAction, createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
-import { send } from 'loot-core/platform/client/connection';
-import { getUploadError } from 'loot-core/shared/errors';
-import type { AtLeastOne } from 'loot-core/types/util';
-
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { loadPrefs } from '@desktop-client/prefs/prefsSlice';
-import { createAppAsyncThunk } from '@desktop-client/redux';
-import { getIsOutdated, getLatestVersion } from '@desktop-client/util/versions';
+import { pushModal } from '#modals/modalsSlice';
+import { loadPrefs } from '#prefs/prefsSlice';
+import { createAppAsyncThunk } from '#redux';
+import { getIsOutdated, getLatestVersion } from '#util/versions';
 
 const sliceName = 'app';
 

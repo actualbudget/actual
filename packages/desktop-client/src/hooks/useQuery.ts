@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { DependencyList } from 'react';
 
-import type { Query } from 'loot-core/shared/query';
+import type { Query } from '@actual-app/core/shared/query';
 
-import { liveQuery } from '@desktop-client/queries/liveQuery';
-import type { LiveQuery } from '@desktop-client/queries/liveQuery';
+import { liveQuery } from '#queries/liveQuery';
+import type { LiveQuery } from '#queries/liveQuery';
 
 type UseQueryResult<Response> = {
   data: null | ReadonlyArray<Response>;

@@ -7,8 +7,11 @@ import type {
   GoCardlessRequisitionId,
   Institution,
   Requisition,
-} from '../gocardless-node.types';
-import type { GetBalances, GetTransactionsResponse } from '../gocardless.types';
+} from '#app-gocardless/gocardless-node.types';
+import type {
+  GetBalances,
+  GetTransactionsResponse,
+} from '#app-gocardless/gocardless.types';
 
 const BASE_URL = 'https://bankaccountdata.gocardless.com/api/v2';
 const ALLOWED_ORIGIN = new URL(BASE_URL).origin;

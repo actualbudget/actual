@@ -9,24 +9,14 @@
       "react",
       "builtin",
       "external",
-      "loot-core",
       ["parent", "subpath"],
       "sibling",
-      "index",
-      "desktop-client"
+      "index"
     ],
     "customGroups": [
       {
         "groupName": "react",
         "elementNamePattern": ["react", "react-dom/*", "react-*"]
-      },
-      {
-        "groupName": "loot-core",
-        "elementNamePattern": ["loot-core/**", "@actual-app/core/**"]
-      },
-      {
-        "groupName": "desktop-client",
-        "elementNamePattern": ["@desktop-client/**"]
       }
     ],
     "newlinesBetween": true

@@ -85,7 +85,6 @@ export default defineConfig({
   ],
   resolve: {
     conditions: ['api'],
-    extensions: ['.api.ts', '.js', '.ts', '.tsx', '.json'],
   },
   test: {
     globals: true,

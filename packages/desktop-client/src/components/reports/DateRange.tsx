@@ -6,11 +6,10 @@ import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import * as monthUtils from '@actual-app/core/shared/months';
 import * as d from 'date-fns';
 
-import * as monthUtils from 'loot-core/shared/months';
-
-import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useLocale } from '#hooks/useLocale';
 
 type DateRangeProps = {
   start: string;

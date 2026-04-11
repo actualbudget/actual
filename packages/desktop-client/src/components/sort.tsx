@@ -12,8 +12,8 @@ import { useDrag, useDrop } from 'react-dnd';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { useDragRef } from '@desktop-client/hooks/useDragRef';
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
+import { useDragRef } from '#hooks/useDragRef';
+import { useMergedRefs } from '#hooks/useMergedRefs';
 
 export type DragState<T> = {
   state: 'start-preview' | 'start' | 'end';

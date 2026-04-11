@@ -1,10 +1,10 @@
 import { Trans } from 'react-i18next';
 
-import type { PeriodicTemplate } from 'loot-core/types/models/templates';
-import type { TransObjectLiteral } from 'loot-core/types/util';
+import type { PeriodicTemplate } from '@actual-app/core/types/models/templates';
+import type { TransObjectLiteral } from '@actual-app/core/types/util';
 
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { useFormat } from '@desktop-client/hooks/useFormat';
+import { FinancialText } from '#components/FinancialText';
+import { useFormat } from '#hooks/useFormat';
 
 type WeekAutomationReadOnlyProps = {
   template: PeriodicTemplate;

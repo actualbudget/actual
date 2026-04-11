@@ -5,29 +5,21 @@ import { Button } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
-
-import type { IntegerAmount } from 'loot-core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
 
 import {
   addToBeBudgetedGroup,
   removeCategoriesFromGroups,
-} from '@desktop-client/components/budget/util';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import {
-  FieldLabel,
-  TapField,
-} from '@desktop-client/components/mobile/MobileForms';
-import { AmountInput } from '@desktop-client/components/util/AmountInput';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+} from '#components/budget/util';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { FieldLabel, TapField } from '#components/mobile/MobileForms';
+import { AmountInput } from '#components/util/AmountInput';
+import { useCategories } from '#hooks/useCategories';
+import { useInitialMount } from '#hooks/useInitialMount';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { pushModal } from '#modals/modalsSlice';
+import type { Modal as ModalType } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 type CoverModalProps = Extract<ModalType, { name: 'cover' }>['options'];
 

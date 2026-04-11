@@ -1,4 +1,4 @@
-import { getAccountDb } from '../account-db';
+import { getAccountDb } from '#account-db';
 
 export function getUserByUsername(userName) {
   if (!userName || typeof userName !== 'string') {

@@ -1,5 +1,5 @@
-import { firstDayOfMonth } from 'loot-core/shared/months';
-import type { Template } from 'loot-core/types/models/templates';
+import { firstDayOfMonth } from '@actual-app/core/shared/months';
+import type { Template } from '@actual-app/core/types/models/templates';
 
 import type { Action } from './actions';
 import type { DisplayTemplateType, ReducerState } from './constants';

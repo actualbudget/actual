@@ -1,9 +1,9 @@
 import * as api from '@actual-app/api';
 import type { Command } from 'commander';
 
-import { withConnection } from '../connection';
-import { printOutput } from '../output';
-import { parseBoolFlag, parseIntFlag } from '../utils';
+import { withConnection } from '#connection';
+import { printOutput } from '#output';
+import { parseBoolFlag, parseIntFlag } from '#utils';
 
 export function registerAccountsCommand(program: Command) {
   const accounts = program.command('accounts').description('Manage accounts');

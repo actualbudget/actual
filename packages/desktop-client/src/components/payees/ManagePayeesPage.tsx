@@ -2,11 +2,11 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
 
-import type { PayeeEntity } from 'loot-core/types/models';
+import type { PayeeEntity } from '@actual-app/core/types/models';
+
+import { Page } from '#components/Page';
 
 import { ManagePayeesWithData } from './ManagePayeesWithData';
-
-import { Page } from '@desktop-client/components/Page';
 
 export function ManagePayeesPage() {
   const { t } = useTranslation();

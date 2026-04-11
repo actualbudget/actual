@@ -12,43 +12,38 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import * as d from 'date-fns';
-import type { SankeyData } from 'recharts/types/chart/Sankey';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { mapField } from 'loot-core/shared/rules';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { mapField } from '@actual-app/core/shared/rules';
 import type {
   RuleConditionEntity,
   SankeyWidget,
   TimeFrame,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import * as d from 'date-fns';
+import type { SankeyData } from 'recharts/types/chart/Sankey';
 
-import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
-import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
-import {
-  MobilePageHeader,
-  Page,
-  PageHeader,
-} from '@desktop-client/components/Page';
-import { SankeyGraph } from '@desktop-client/components/reports/graphs/SankeyGraph';
-import { Header } from '@desktop-client/components/reports/Header';
-import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { ModeButton } from '@desktop-client/components/reports/ModeButton';
-import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
-import { createSpreadsheet as sankeySpreadsheet } from '@desktop-client/components/reports/spreadsheets/sankey-spreadsheet';
-import { useReport } from '@desktop-client/components/reports/useReport';
-import { fromDateRepr } from '@desktop-client/components/reports/util';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
-import { useFormatList } from '@desktop-client/hooks/useFormatList';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import { useUpdateDashboardWidgetMutation } from '@desktop-client/reports/mutations';
+import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
+import { MobileBackButton } from '#components/mobile/MobileBackButton';
+import { MobilePageHeader, Page, PageHeader } from '#components/Page';
+import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
+import { Header } from '#components/reports/Header';
+import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ModeButton } from '#components/reports/ModeButton';
+import { calculateTimeRange } from '#components/reports/reportRanges';
+import { createSpreadsheet as sankeySpreadsheet } from '#components/reports/spreadsheets/sankey-spreadsheet';
+import { useReport } from '#components/reports/useReport';
+import { fromDateRepr } from '#components/reports/util';
+import { useCategories } from '#hooks/useCategories';
+import { useDashboardWidget } from '#hooks/useDashboardWidget';
+import { useFormatList } from '#hooks/useFormatList';
+import { useLocale } from '#hooks/useLocale';
+import { useNavigate } from '#hooks/useNavigate';
+import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
+import type { useSpreadsheet } from '#hooks/useSpreadsheet';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
+import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 
 export function Sankey() {
   const params = useParams();

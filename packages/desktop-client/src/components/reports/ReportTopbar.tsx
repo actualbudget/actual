@@ -16,21 +16,20 @@ import {
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { toPng } from 'html-to-image';
-
-import * as monthUtils from 'loot-core/shared/months';
+import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   CustomReportEntity,
   RuleConditionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { toPng } from 'html-to-image';
+
+import { FilterButton } from '#components/filters/FiltersMenu';
 
 import { GraphButton } from './GraphButton';
 import { SaveReportWrapper } from './SaveReport';
 import type { SavedStatus } from './SaveReportMenu';
 import { setSessionReport } from './setSessionReport';
 import { SnapshotButton } from './SnapshotButton';
-
-import { FilterButton } from '@desktop-client/components/filters/FiltersMenu';
 
 type ReportTopbarProps = {
   customReportItems: CustomReportEntity;
