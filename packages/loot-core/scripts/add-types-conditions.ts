@@ -13,10 +13,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkgPath = resolve(__dirname, '..', 'package.json');
 const backupPath = resolve(__dirname, '..', 'package.json.bak');
 
-type ExportValue = string | Record<string, string>;
+type ExportValue = string | Record<string, ExportValue>;
 type ExportMap = Record<string, ExportValue>;
 
-// Derive the .d.ts types path from a source .ts/.tsx path
 function toTypesPath(srcPath: string): string | null {
   if (srcPath.startsWith('./src/')) {
     return srcPath
