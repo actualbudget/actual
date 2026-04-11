@@ -155,8 +155,8 @@
     "test:node": "ENV=node vitest --run",
     "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
     "typecheck": "tsgo -b && tsc-strict",
-    "prepack": "ts-node --esm scripts/add-types-conditions.ts",
-    "postpack": "ts-node --esm scripts/restore-package-json.ts"
+    "prepack": "ts-node scripts/add-types-conditions.mts",
+    "postpack": "ts-node scripts/restore-package-json.mts"
   },
   "dependencies": {
     "@jlongster/sql.js": "^1.6.7",
