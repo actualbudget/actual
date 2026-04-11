@@ -5,8 +5,8 @@ license: MIT
 compatibility: Requires openspec CLI.
 metadata:
   author: openspec
-  version: "1.0"
-  generatedBy: "1.2.0"
+  version: '1.0'
+  generatedBy: '1.2.0'
 ---
 
 Verify that an implementation matches the change artifacts (specs, tasks, design).
@@ -26,9 +26,11 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
    **IMPORTANT**: Do NOT guess or auto-select a change. Always let the user choose.
 
 2. **Check status to understand the schema**
+
    ```bash
    openspec status --change "<name>" --json
    ```
+
    Parse the JSON to understand:
    - `schemaName`: The workflow being used (e.g., "spec-driven")
    - Which artifacts exist for this change
@@ -110,6 +112,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
 8. **Generate Verification Report**
 
    **Summary Scorecard**:
+
    ```
    ## Verification Report: <change-name>
 
@@ -122,7 +125,6 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
    ```
 
    **Issues by Priority**:
-
    1. **CRITICAL** (Must fix before archive):
       - Incomplete tasks
       - Missing requirement implementations
@@ -161,6 +163,7 @@ Verify that an implementation matches the change artifacts (specs, tasks, design
 **Output Format**
 
 Use clear markdown with:
+
 - Table for summary scorecard
 - Grouped lists for issues (CRITICAL/WARNING/SUGGESTION)
 - Code references in format: `file.ts:123`

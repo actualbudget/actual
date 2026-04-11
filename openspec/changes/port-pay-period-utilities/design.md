@@ -5,12 +5,14 @@ The pay period feature on `opsx_pp_13_99` has a working engine (`pay-periods.ts`
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Add mode-agnostic utility functions that work transparently with both calendar months and pay period IDs
 - Wire budget header highlighting to work correctly in pay period mode
 - Provide query filter resolution for transaction filtering
 - Handle stale start month preferences when toggling pay period mode
 
 **Non-Goals:**
+
 - Refactoring the PayPeriodProvider or context pattern (already established)
 - Mobile CategoryPage/CategoryTransactions wiring (separate change — context pattern already handles this)
 - Changes to pay period generation, navigation, or configuration

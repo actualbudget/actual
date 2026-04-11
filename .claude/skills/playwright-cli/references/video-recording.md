@@ -30,12 +30,12 @@ playwright-cli video-stop recordings/checkout-test-run-42.webm
 
 ## Tracing vs Video
 
-| Feature | Video | Tracing |
-|---------|-------|---------|
-| Output | WebM file | Trace file (viewable in Trace Viewer) |
-| Shows | Visual recording | DOM snapshots, network, console, actions |
-| Use case | Demos, documentation | Debugging, analysis |
-| Size | Larger | Smaller |
+| Feature  | Video                | Tracing                                  |
+| -------- | -------------------- | ---------------------------------------- |
+| Output   | WebM file            | Trace file (viewable in Trace Viewer)    |
+| Shows    | Visual recording     | DOM snapshots, network, console, actions |
+| Use case | Demos, documentation | Debugging, analysis                      |
+| Size     | Larger               | Smaller                                  |
 
 ## Limitations
 
