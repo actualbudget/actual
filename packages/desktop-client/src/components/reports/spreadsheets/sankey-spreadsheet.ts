@@ -738,8 +738,8 @@ export function withPercentageLabels(data: SankeyData): SankeyData {
   while (changed) {
     changed = false;
     for (const link of data.links) {
-      const src = link.source as number;
-      const tgt = link.target as number;
+      const src = link.source;
+      const tgt = link.target;
       if (depth[src] >= 0 && depth[tgt] < 0) {
         depth[tgt] = depth[src] + 1;
         changed = true;
