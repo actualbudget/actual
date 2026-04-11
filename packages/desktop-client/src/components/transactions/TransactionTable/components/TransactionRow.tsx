@@ -11,10 +11,7 @@ import {
   serializeTransaction,
 } from '../utils/transactionFormatters';
 
-import { RegularTransactionRowCells } from './RegularTransactionRowCells';
-import { PreviewTransactionRowCells } from './PreviewTransactionRowCells';
-import { SplitChildTransactionRowCells } from './SplitChildTransactionRowCells';
-import { SplitParentTransactionRowCells } from './SplitParentTransactionRowCells';
+import { TransactionRowCells } from './TransactionRowCells';
 
 import { Row } from '@desktop-client/components/table';
 import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
@@ -199,27 +196,11 @@ export function TransactionRow({
         data-transaction-id={transaction.id}
         data-testid="transaction-row"
       >
-        {transaction.is_child ? (
-          <SplitChildTransactionRowCells {...contentProps} />
-        ) : isPreview ? (
-          <PreviewTransactionRowCells
-            {...contentProps}
-            isExpanded={isExpanded}
-            onToggleRowExpansion={() => onToggleRowExpansion(transaction.id)}
-          />
-        ) : transaction.is_parent ? (
-          <SplitParentTransactionRowCells
-            {...contentProps}
-            isExpanded={isExpanded}
-            onToggleRowExpansion={() => onToggleRowExpansion(transaction.id)}
-          />
-        ) : (
-          <RegularTransactionRowCells
-            {...contentProps}
-            isExpanded={isExpanded}
-            onToggleRowExpansion={() => onToggleRowExpansion(transaction.id)}
-          />
-        )}
+        <TransactionRowCells
+          {...contentProps}
+          isExpanded={isExpanded}
+          onToggleRowExpansion={() => onToggleRowExpansion(transaction.id)}
+        />
       </Row>
 
       {isExpanded && (
