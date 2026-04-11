@@ -1,4 +1,4 @@
-# Syncing Across Devices
+# Server Syncing
 
 Actual is a different kind of app. It stores all of your data on your installed Actual server by default AND it stores all of your data on your local device. That means it works regardless of your network connection, and you always have direct access to your data. Your data never goes to any external servers that you don't choose. It's your data, and you're in control.
 
