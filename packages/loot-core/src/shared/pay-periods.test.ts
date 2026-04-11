@@ -1,11 +1,10 @@
 import { afterEach, beforeEach, vi } from 'vitest';
 
-import type { PayPeriodConfig } from '../types/prefs';
+import type { PayPeriodConfig } from '#types/prefs';
 
 import * as monthUtils from './months';
 import {
   addPayPeriods,
-  generatePayPeriodRange,
   generatePayPeriods,
   getCurrentPayPeriod,
   getPayPeriodFromDate,

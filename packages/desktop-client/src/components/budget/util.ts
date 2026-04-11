@@ -13,7 +13,10 @@ import type {
   CategoryEntity,
   CategoryGroupEntity,
 } from '@actual-app/core/types/models';
-import type { PayPeriodConfig, SyncedPrefs } from '@actual-app/core/types/prefs';
+import type {
+  PayPeriodConfig,
+  SyncedPrefs,
+} from '@actual-app/core/types/prefs';
 import { t } from 'i18next';
 
 import type { DropPosition } from '#components/sort';

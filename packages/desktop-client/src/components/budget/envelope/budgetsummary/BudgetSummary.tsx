@@ -12,11 +12,14 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
+import {
+  getPayPeriodLabel,
+  isPayPeriod,
+} from '@actual-app/core/shared/pay-periods';
 import { css } from '@emotion/css';
 
-import { getPayPeriodLabel, isPayPeriod } from '@actual-app/core/shared/pay-periods';
-
 import { useEnvelopeBudget } from '#components/budget/envelope/EnvelopeBudgetContext';
+import { usePayPeriodConfig } from '#components/budget/PayPeriodContext';
 import { NotesButton } from '#components/NotesButton';
 import { useLocale } from '#hooks/useLocale';
 import { SheetNameProvider } from '#hooks/useSheetName';
@@ -25,8 +28,6 @@ import { useUndo } from '#hooks/useUndo';
 import { BudgetMonthMenu } from './BudgetMonthMenu';
 import { ToBudget } from './ToBudget';
 import { TotalsList } from './TotalsList';
-
-import { usePayPeriodConfig } from '#components/budget/PayPeriodContext';
 
 type BudgetSummaryProps = {
   month: string;

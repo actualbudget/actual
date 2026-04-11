@@ -28,11 +28,13 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
+import {
+  getPayPeriodLabel,
+  isPayPeriod,
+} from '@actual-app/core/shared/pay-periods';
 import { groupById } from '@actual-app/core/shared/util';
-import type { TransObjectLiteral } from '@actual-app/core/types/util';
-
-import { getPayPeriodLabel, isPayPeriod } from '@actual-app/core/shared/pay-periods';
 import type { PayPeriodConfig } from '@actual-app/core/types/prefs';
+import type { TransObjectLiteral } from '@actual-app/core/types/util';
 
 import { sync } from '#app/appSlice';
 import {

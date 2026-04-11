@@ -5,21 +5,22 @@ import { useParams, useSearchParams } from 'react-router';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
+import {
+  getPayPeriodLabel,
+  isPayPeriod,
+} from '@actual-app/core/shared/pay-periods';
 
-import { getPayPeriodLabel, isPayPeriod } from '@actual-app/core/shared/pay-periods';
-
+import { PayPeriodProvider } from '#components/budget/PayPeriodContext';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { AddTransactionButton } from '#components/mobile/transactions/AddTransactionButton';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useCategory } from '#hooks/useCategory';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useLocale } from '#hooks/useLocale';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
 import { CategoryTransactions } from './CategoryTransactions';
 import { UncategorizedTransactions } from './UncategorizedTransactions';
-
-import { PayPeriodProvider } from '#components/budget/PayPeriodContext';
-import { useFeatureFlag } from '#hooks/useFeatureFlag';
 
 export function CategoryPage() {
   const locale = useLocale();

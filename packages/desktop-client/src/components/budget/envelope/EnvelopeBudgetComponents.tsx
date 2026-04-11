@@ -15,6 +15,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { isCurrentPeriod } from '@actual-app/core/shared/pay-periods';
 import { css } from '@emotion/css';
+import type { CategoryGroupMonthProps, CategoryMonthProps } from 'packages';
 
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
 import { usePayPeriodConfig } from '#components/budget/PayPeriodContext';
@@ -32,7 +33,6 @@ import { useSheetValue } from '#hooks/useSheetValue';
 import { useUndo } from '#hooks/useUndo';
 import type { Binding, SheetFields } from '#spreadsheet';
 import { envelopeBudget } from '#spreadsheet/bindings';
-import type { CategoryGroupMonthProps, CategoryMonthProps } from '..';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';

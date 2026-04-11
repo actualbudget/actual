@@ -1,6 +1,5 @@
-import type { Page } from '@playwright/test';
-
 import * as monthUtils from '@actual-app/core/shared/months';
+import type { Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';

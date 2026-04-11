@@ -1,4 +1,4 @@
-import type { PayPeriodConfig } from '../types/prefs';
+import type { PayPeriodConfig } from '#types/prefs';
 
 import * as monthUtils from './months';
 
