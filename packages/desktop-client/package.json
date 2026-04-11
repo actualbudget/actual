@@ -25,6 +25,7 @@
     "#gocardless": "./src/gocardless.ts",
     "#i18n": "./src/i18n.ts",
     "#mocks": "./src/mocks.tsx",
+    "#mocks/*": "./src/mocks/*.ts",
     "#polyfills": "./src/polyfills.ts",
     "#components/forms": "./src/components/forms/index.tsx",
     "#components/banksync": "./src/components/banksync/index.tsx",
