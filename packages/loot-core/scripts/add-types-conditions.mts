@@ -5,7 +5,13 @@
  * This runs via the "prepack" lifecycle hook. The original package.json is
  * backed up and restored by restore-package-json.ts (postpack).
  */
-import { copyFileSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  constants,
+  copyFileSync,
+  existsSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -63,7 +69,12 @@ function transformMap(map: ExportMap): ExportMap {
 }
 
 // Backup and transform
-copyFileSync(pkgPath, backupPath);
+if (existsSync(backupPath)) {
+  throw new Error(
+    'prepack: package.json.bak already exists; run postpack cleanup first.',
+  );
+}
+copyFileSync(pkgPath, backupPath, constants.COPYFILE_EXCL);
 
 const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
 
