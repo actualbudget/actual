@@ -85,7 +85,8 @@
     "p-limit": "^7.3.0",
     "prompts": "^2.4.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0"
   },
   "resolutions": {
     "adm-zip": "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch",
