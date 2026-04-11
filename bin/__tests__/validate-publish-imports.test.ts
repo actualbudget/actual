@@ -69,6 +69,19 @@ describe('derivePublishImports', () => {
     expect(derivePublishImports({})).toEqual({});
   });
 
+  it('throws error for non-string imports values', () => {
+    const imports = {
+      '#foo': './src/foo.js',
+      '#conditional': {
+        browser: './src/browser.js',
+        node: './src/node.js',
+      },
+    };
+    expect(() => derivePublishImports(imports)).toThrow(
+      'Unsupported imports target for "#conditional". Expected a string path.',
+    );
+  });
+
   it('handles paths with /index.js suffix', () => {
     const imports = {
       '#util/title': './src/util/title/index.js',

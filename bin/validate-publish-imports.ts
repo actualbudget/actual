@@ -7,10 +7,15 @@ import path from 'node:path';
  * 2. Replacing .ts/.tsx extensions with .js
  */
 export function derivePublishImports(
-  imports: Record<string, string>,
+  imports: Record<string, string | object>,
 ): Record<string, string> {
   const result: Record<string, string> = {};
   for (const [key, value] of Object.entries(imports)) {
+    if (typeof value !== 'string') {
+      throw new Error(
+        `Unsupported imports target for "${key}". Expected a string path.`,
+      );
+    }
     const withBuildPrefix = value.replace(/^\.\//, './build/');
     const withJsExtension = withBuildPrefix.replace(/\.tsx?$/, '.js');
     result[key] = withJsExtension;
@@ -39,7 +44,7 @@ export function validatePackage(packageJsonPath: string): {
   const content = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
   const packageName: string = content.name ?? packageJsonPath;
 
-  const imports: Record<string, string> | undefined = content.imports;
+  const imports: Record<string, string | object> | undefined = content.imports;
   const publishImports: Record<string, string> | undefined =
     content.publishConfig?.imports;
 
