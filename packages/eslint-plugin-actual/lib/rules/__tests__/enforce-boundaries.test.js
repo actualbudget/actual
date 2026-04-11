@@ -38,6 +38,13 @@ void runClassic(
       `const config = { compilerOptions: { strict: true } }`,
       `const config = { resolve: { conditions: ['module'] } }`,
 
+      // Export without source clause
+      `const foo = 1; export { foo }`,
+
+      // Non-literal require/import arguments
+      `const foo = require(variable)`,
+      `const mod = import(variable)`,
+
       // Properties named paths/alias but NOT in forbidden context
       `const config = { paths: { foo: 'bar' } }`,
       `const config = { alias: { foo: 'bar' } }`,
@@ -134,6 +141,18 @@ void runClassic(
       },
       {
         code: `export default { resolve: { alias: { "~": "/src" } } }`,
+        output: null,
+        errors: [{ messageId: 'noResolveAlias' }],
+      },
+
+      // ── String-keyed config properties ─────────────────────────
+      {
+        code: `const config = { "compilerOptions": { "paths": { "@/*": ["./src/*"] } } }`,
+        output: null,
+        errors: [{ messageId: 'noTsconfigPaths' }],
+      },
+      {
+        code: `const config = { "resolve": { "alias": { "@": "./src" } } }`,
         output: null,
         errors: [{ messageId: 'noResolveAlias' }],
       },

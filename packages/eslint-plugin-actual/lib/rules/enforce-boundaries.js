@@ -19,9 +19,6 @@ module.exports = {
   },
 
   create(context) {
-    /**
-     * Get the name of a Property key (handles Identifier and Literal).
-     */
     function getPropertyName(node) {
       if (!node || !node.key) return null;
       if (node.key.type === 'Identifier') return node.key.name;
@@ -29,16 +26,10 @@ module.exports = {
       return null;
     }
 
-    /**
-     * Check whether an import source is a backtracked import (../../).
-     */
     function isBacktrackedImport(source) {
       return typeof source === 'string' && source.startsWith('../../');
     }
 
-    /**
-     * Report a backtracked import violation.
-     */
     function reportBacktrackedImport(node, source) {
       if (!source || !isBacktrackedImport(source.value)) return;
       context.report({
@@ -49,13 +40,10 @@ module.exports = {
     }
 
     return {
-      // ── Check 1 & 2: config object patterns ──────────────────────
       Property(node) {
         const name = getPropertyName(node);
-        if (!name) return;
+        if (name !== 'paths' && name !== 'alias') return;
 
-        // We need the grandparent Property (parent is ObjectExpression,
-        // grandparent is the Property whose value is that ObjectExpression).
         const parentObject = node.parent;
         if (!parentObject || parentObject.type !== 'ObjectExpression') return;
 
@@ -64,18 +52,15 @@ module.exports = {
 
         const grandparentName = getPropertyName(grandparent);
 
-        // Check 1: compilerOptions.paths
         if (name === 'paths' && grandparentName === 'compilerOptions') {
           context.report({ node, messageId: 'noTsconfigPaths' });
         }
 
-        // Check 2: resolve.alias
         if (name === 'alias' && grandparentName === 'resolve') {
           context.report({ node, messageId: 'noResolveAlias' });
         }
       },
 
-      // ── Check 3: backtracked imports ──────────────────────────────
       ImportDeclaration(node) {
         reportBacktrackedImport(node, node.source);
       },
@@ -88,7 +73,6 @@ module.exports = {
         reportBacktrackedImport(node, node.source);
       },
 
-      // require('../../...')
       CallExpression(node) {
         if (
           node.callee.type === 'Identifier' &&
@@ -105,7 +89,6 @@ module.exports = {
         }
       },
 
-      // import('../../...')
       ImportExpression(node) {
         if (
           node.source.type === 'Literal' &&
