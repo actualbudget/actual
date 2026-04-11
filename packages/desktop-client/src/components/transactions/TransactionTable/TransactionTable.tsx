@@ -245,6 +245,8 @@ export const TransactionTable = forwardRef(
       columnWidths,
       tableWidth,
       getResizeHandleProps,
+      resetAllColumnWidths,
+      resetColumnWidth,
     } = useTransactionTableColumnLayout({
       containerWidth,
       showAccount,
@@ -610,6 +612,8 @@ export const TransactionTable = forwardRef(
               field={sortField}
               columnWidths={columnWidths}
               getResizeHandleProps={getResizeHandleProps}
+              onResetAllColumnWidths={resetAllColumnWidths}
+              onResetColumnWidth={resetColumnWidth}
             />
             <Table
               ref={tableRef}

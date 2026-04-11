@@ -1,5 +1,9 @@
-import { memo } from 'react';
-import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
+import { memo, useRef, useState } from 'react';
+import type {
+  KeyboardEvent,
+  MouseEvent as ReactMouseEvent,
+  PointerEvent as ReactPointerEvent,
+} from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 
@@ -18,6 +22,9 @@ import {
   UnexposedCellContent,
 } from '@desktop-client/components/table';
 import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
+import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
+import { Menu } from '@actual-app/components/menu';
+import { Popover } from '@actual-app/components/popover';
 import {
   TRANSACTION_CLEARED_COLUMN_WIDTH,
   TRANSACTION_SELECTION_COLUMN_WIDTH,
@@ -42,6 +49,8 @@ type TransactionHeaderProps = {
     isResizable: boolean;
     onPointerDown: (event: ReactPointerEvent<HTMLDivElement>) => void;
   };
+  onResetAllColumnWidths: () => void;
+  onResetColumnWidth: (columnId: TransactionColumnId) => void;
 };
 
 type HeaderCellProps = {
@@ -55,6 +64,7 @@ type HeaderCellProps = {
   marginRight?: CSSProperties['marginRight'];
   isResizable?: boolean;
   onResizePointerDown?: (event: ReactPointerEvent<HTMLDivElement>) => void;
+  onContextMenu?: (event: ReactMouseEvent<HTMLDivElement>) => void;
 };
 
 function HeaderCell({
@@ -68,6 +78,7 @@ function HeaderCell({
   onClick,
   isResizable,
   onResizePointerDown,
+  onContextMenu,
 }: HeaderCellProps) {
   const style = {
     whiteSpace: 'nowrap' as CSSProperties['whiteSpace'],
@@ -99,6 +110,7 @@ function HeaderCell({
             height: '100%',
             position: 'relative',
           }}
+          onContextMenu={onContextMenu}
         >
           {onClick ? (
             <Button
@@ -180,9 +192,26 @@ export const TransactionHeader = memo(
     showSelection,
     columnWidths,
     getResizeHandleProps,
+    onResetAllColumnWidths,
+    onResetColumnWidth,
   }: TransactionHeaderProps) => {
     const dispatchSelected = useSelectedDispatch();
     const { t } = useTranslation();
+    const triggerRef = useRef<HTMLDivElement>(null);
+    const { menuOpen, setMenuOpen, handleContextMenu, position } =
+      useContextMenu();
+    const [contextColumnId, setContextColumnId] =
+      useState<TransactionColumnId | null>(null);
+    const columnLabelById: Record<TransactionColumnId, string> = {
+      date: t('Date'),
+      account: t('Account'),
+      payee: t('Payee'),
+      notes: t('Notes'),
+      category: t('Category'),
+      payment: t('Payment'),
+      deposit: t('Deposit'),
+      balance: t('Balance'),
+    };
     const renderResizableHeaderCell = ({
       columnId,
       value,
@@ -201,6 +230,10 @@ export const TransactionHeader = memo(
       onClick?: () => void;
     }) => {
       const resizeHandle = getResizeHandleProps(columnId);
+      const handleColumnContextMenu = (event: ReactMouseEvent<HTMLDivElement>) => {
+        setContextColumnId(columnId);
+        handleContextMenu(event);
+      };
 
       return (
         <HeaderCell
@@ -214,6 +247,7 @@ export const TransactionHeader = memo(
           isResizable={resizeHandle.isResizable}
           onResizePointerDown={resizeHandle.onPointerDown}
           onClick={onClick}
+          onContextMenu={handleColumnContextMenu}
         />
       );
     };
@@ -230,6 +264,7 @@ export const TransactionHeader = memo(
 
     return (
       <Row
+        ref={triggerRef}
         style={{
           fontWeight: 300,
           zIndex: 200,
@@ -241,6 +276,39 @@ export const TransactionHeader = memo(
           borderColor: theme.tableBorder,
         }}
       >
+        <Popover
+          triggerRef={triggerRef}
+          placement="bottom start"
+          isOpen={menuOpen}
+          onOpenChange={() => setMenuOpen(false)}
+          {...position}
+          style={{ width: 220, margin: 1 }}
+          isNonModal
+        >
+          <Menu
+            items={[
+              contextColumnId && {
+                name: 'reset-column',
+                text: t('Reset {{columnName}} size', {
+                  columnName: columnLabelById[contextColumnId],
+                }),
+              },
+              {
+                name: 'reset-all',
+                text: t('Reset all'),
+              },
+            ]}
+            onMenuSelect={name => {
+              if (name === 'reset-column' && contextColumnId) {
+                onResetColumnWidth(contextColumnId);
+              } else if (name === 'reset-all') {
+                onResetAllColumnWidths();
+              }
+
+              setMenuOpen(false);
+            }}
+          />
+        </Popover>
         {showSelection && (
           <SelectCell
             exposed

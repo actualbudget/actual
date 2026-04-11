@@ -12,6 +12,7 @@ import {
   getVisibleColumnsWidth,
   getVisibleNeighborColumnId,
   parseTransactionColumnWidthsPref,
+  resetTransactionColumnWidth,
   resolveTransactionColumnWidths,
   serializeTransactionColumnWidthsPref,
 } from './transactionTableColumnLayout';
@@ -65,6 +66,7 @@ export function useTransactionTableColumnLayout({
   const [isResizing, setIsResizing] = useState(false);
   const draftWidthsRef = useRef<Partial<TransactionColumnWidths> | null>(null);
   const resizeStateRef = useRef<ResizeState | null>(null);
+  const previousContainerWidthRef = useRef<number | null>(null);
   const visibleColumns = useMemo(
     () =>
       getVisibleTransactionColumns({
@@ -82,10 +84,12 @@ export function useTransactionTableColumnLayout({
       }),
     [showCleared, showSelection],
   );
-  const persistedWidths = useMemo(
+  const parsedPersistedLayout = useMemo(
     () => parseTransactionColumnWidthsPref(persistedValue),
     [persistedValue],
   );
+  const persistedWidths = parsedPersistedLayout.widths;
+  const persistedOriginalWidths = parsedPersistedLayout.originalWidths;
   const activeWidths = draftWidths ?? persistedWidths;
   const availableDataWidth =
     containerWidth > 0 ? Math.max(containerWidth - utilityWidth, 0) : null;
@@ -110,6 +114,28 @@ export function useTransactionTableColumnLayout({
       setDraftWidths(null);
     }
   }, [persistedValue, variantKey]);
+
+  useEffect(() => {
+    if (!containerWidth) {
+      return;
+    }
+
+    const previousContainerWidth = previousContainerWidthRef.current;
+    previousContainerWidthRef.current = containerWidth;
+
+    if (
+      previousContainerWidth == null ||
+      previousContainerWidth === containerWidth ||
+      isResizing
+    ) {
+      return;
+    }
+
+    resizeStateRef.current = null;
+    setIsResizing(false);
+    setDraftWidths(null);
+    setPersistedValue(serializeTransactionColumnWidthsPref({}));
+  }, [containerWidth, isResizing, setPersistedValue]);
 
   useEffect(() => {
     if (!isResizing || !resizeStateRef.current) {
@@ -142,7 +168,13 @@ export function useTransactionTableColumnLayout({
       resizeStateRef.current = null;
       setIsResizing(false);
       const nextWidths = draftWidthsRef.current ?? resizeState.startWidths;
-      setPersistedValue(serializeTransactionColumnWidthsPref(nextWidths));
+      const originalWidths =
+        Object.keys(persistedOriginalWidths).length > 0
+          ? persistedOriginalWidths
+          : resizeState.startWidths;
+      setPersistedValue(
+        serializeTransactionColumnWidthsPref(nextWidths, originalWidths),
+      );
     }
 
     window.addEventListener('pointermove', handlePointerMove);
@@ -152,7 +184,7 @@ export function useTransactionTableColumnLayout({
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerUp);
     };
-  }, [isResizing, setPersistedValue, visibleColumns]);
+  }, [isResizing, persistedOriginalWidths, setPersistedValue, visibleColumns]);
 
   function beginResize(activeColumnId: TransactionColumnId, clientX: number) {
     const startWidths = resolveTransactionColumnWidths({
@@ -187,11 +219,35 @@ export function useTransactionTableColumnLayout({
     };
   }
 
+  function resetColumnWidth(columnId: TransactionColumnId) {
+    const nextWidths = resetTransactionColumnWidth({
+      widths: columnWidths,
+      visibleColumns,
+      columnId,
+      originalWidths: persistedOriginalWidths,
+    });
+    resizeStateRef.current = null;
+    setIsResizing(false);
+    setDraftWidths(null);
+    setPersistedValue(
+      serializeTransactionColumnWidthsPref(nextWidths, persistedOriginalWidths),
+    );
+  }
+
+  function resetAllColumnWidths() {
+    resizeStateRef.current = null;
+    setIsResizing(false);
+    setDraftWidths(null);
+    setPersistedValue(serializeTransactionColumnWidthsPref({}));
+  }
+
   return {
     columnWidths,
     tableWidth,
     variantKey,
     visibleColumns,
     getResizeHandleProps,
+    resetAllColumnWidths,
+    resetColumnWidth,
   };
 }

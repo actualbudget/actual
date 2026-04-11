@@ -76,9 +76,16 @@ describe('useTransactionTableColumnLayout', () => {
     expect(
       parseTransactionColumnWidthsPref(setPref.mock.calls[0][0] as string),
     ).toMatchObject({
-      payee: payeeWidthBefore + 35,
-      notes: notesWidthBefore - 35,
-      account: accountWidthBefore,
+      widths: {
+        payee: payeeWidthBefore + 35,
+        notes: notesWidthBefore - 35,
+        account: accountWidthBefore,
+      },
+      originalWidths: {
+        payee: payeeWidthBefore,
+        notes: notesWidthBefore,
+        account: accountWidthBefore,
+      },
     });
   });
 

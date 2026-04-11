@@ -121,12 +121,22 @@ describe('transactionTableColumnLayout', () => {
     const serialized = serializeTransactionColumnWidthsPref({
       payee: 250,
       notes: 180,
+    }, {
+      payee: 220,
     });
 
     expect(parseTransactionColumnWidthsPref(serialized)).toEqual({
-      payee: 250,
-      notes: 180,
+      widths: {
+        payee: 250,
+        notes: 180,
+      },
+      originalWidths: {
+        payee: 220,
+      },
     });
-    expect(parseTransactionColumnWidthsPref('{bad json')).toEqual({});
+    expect(parseTransactionColumnWidthsPref('{bad json')).toEqual({
+      widths: {},
+      originalWidths: {},
+    });
   });
 });
