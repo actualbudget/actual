@@ -152,7 +152,7 @@ export default defineConfig(async ({ mode }) => {
     },
     server: {
       host: true,
-      headers: mode === 'development' ? devHeaders : undefined,
+      headers: devHeaders,
       port: +env.PORT || 5173,
       open: env.BROWSER
         ? ['chrome', 'firefox', 'edge', 'browser', 'browserPrivate'].includes(
