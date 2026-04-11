@@ -15,8 +15,11 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { isCurrentPeriod } from '@actual-app/core/shared/pay-periods';
 import { css } from '@emotion/css';
-import type { CategoryGroupMonthProps, CategoryMonthProps } from 'packages';
 
+import type {
+  CategoryGroupMonthProps,
+  CategoryMonthProps,
+} from '#components/budget';
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
 import { usePayPeriodConfig } from '#components/budget/PayPeriodContext';
 import { makeAmountGrey } from '#components/budget/util';
