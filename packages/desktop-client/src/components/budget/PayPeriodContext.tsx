@@ -1,7 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
 
-import type { PayPeriodConfig } from 'loot-core/types/prefs';
+import type { PayPeriodConfig } from '@actual-app/core/types/prefs';
 
 const PayPeriodContext = createContext<PayPeriodConfig | undefined>(undefined);
 

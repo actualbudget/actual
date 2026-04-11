@@ -13,10 +13,12 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import * as monthUtils from '@actual-app/core/shared/months';
+import { isCurrentPeriod } from '@actual-app/core/shared/pay-periods';
 import { css } from '@emotion/css';
+import type { CategoryGroupMonthProps, CategoryMonthProps } from 'packages';
 
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
+import { usePayPeriodConfig } from '#components/budget/PayPeriodContext';
 import { makeAmountGrey } from '#components/budget/util';
 import { NotesButton } from '#components/NotesButton';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
@@ -31,7 +33,6 @@ import { useSheetValue } from '#hooks/useSheetValue';
 import { useUndo } from '#hooks/useUndo';
 import type { Binding, SheetFields } from '#spreadsheet';
 import { envelopeBudget } from '#spreadsheet/bindings';
-import type { CategoryGroupMonthProps, CategoryMonthProps } from '..';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
@@ -144,13 +145,14 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
   group,
 }: CategoryGroupMonthProps) {
   const { id } = group;
+  const payPeriodConfig = usePayPeriodConfig();
 
   return (
     <View
       style={{
         flex: 1,
         flexDirection: 'row',
-        backgroundColor: monthUtils.isCurrentMonth(month)
+        backgroundColor: isCurrentPeriod(month, payPeriodConfig)
           ? theme.budgetHeaderCurrentMonth
           : theme.budgetHeaderOtherMonth,
       }}
@@ -203,6 +205,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
 }: CategoryMonthProps) {
   const { t } = useTranslation();
   const format = useFormat();
+  const payPeriodConfig = usePayPeriodConfig();
 
   const budgetMenuTriggerRef = useRef(null);
   const balanceMenuTriggerRef = useRef(null);
@@ -243,7 +246,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       style={{
         flex: 1,
         flexDirection: 'row',
-        backgroundColor: monthUtils.isCurrentMonth(month)
+        backgroundColor: isCurrentPeriod(month, payPeriodConfig)
           ? theme.budgetCurrentMonth
           : theme.budgetOtherMonth,
         '& .hover-visible': {
@@ -532,6 +535,7 @@ type IncomeGroupMonthProps = {
   month: string;
 };
 export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
+  const payPeriodConfig = usePayPeriodConfig();
   return (
     <View style={{ flex: 1 }}>
       <EnvelopeSheetCell
@@ -542,7 +546,7 @@ export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
           fontWeight: 600,
           paddingRight: styles.monthRightPadding,
           ...styles.tnum,
-          backgroundColor: monthUtils.isCurrentMonth(month)
+          backgroundColor: isCurrentPeriod(month, payPeriodConfig)
             ? theme.budgetHeaderCurrentMonth
             : theme.budgetHeaderOtherMonth,
         }}
@@ -562,6 +566,7 @@ export function IncomeCategoryMonth({
   onShowActivity,
   onBudgetAction,
 }: CategoryMonthProps) {
+  const payPeriodConfig = usePayPeriodConfig();
   const incomeMenuTriggerRef = useRef(null);
   const {
     setMenuOpen: setIncomeMenuOpen,
@@ -581,7 +586,7 @@ export function IncomeCategoryMonth({
         style={{
           textAlign: 'right',
           ...(isLast && { borderBottomWidth: 0 }),
-          backgroundColor: monthUtils.isCurrentMonth(month)
+          backgroundColor: isCurrentPeriod(month, payPeriodConfig)
             ? theme.budgetCurrentMonth
             : theme.budgetOtherMonth,
         }}

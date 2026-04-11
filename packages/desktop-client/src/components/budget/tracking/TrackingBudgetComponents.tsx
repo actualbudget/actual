@@ -14,11 +14,13 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import * as monthUtils from '@actual-app/core/shared/months';
+import { isCurrentPeriod } from '@actual-app/core/shared/pay-periods';
 import { css } from '@emotion/css';
 import { t } from 'i18next';
+import type { CategoryGroupMonthProps, CategoryMonthProps } from 'packages';
 
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
+import { usePayPeriodConfig } from '#components/budget/PayPeriodContext';
 import { makeAmountGrey } from '#components/budget/util';
 import { NotesButton } from '#components/NotesButton';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
@@ -31,7 +33,6 @@ import { useSheetValue } from '#hooks/useSheetValue';
 import { useUndo } from '#hooks/useUndo';
 import type { Binding, SheetFields } from '#spreadsheet';
 import { trackingBudget } from '#spreadsheet/bindings';
-import type { CategoryGroupMonthProps, CategoryMonthProps } from '..';
 
 import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
@@ -140,13 +141,14 @@ export const GroupMonth = memo(function GroupMonth({
   group,
 }: CategoryGroupMonthProps) {
   const { id } = group;
+  const payPeriodConfig = usePayPeriodConfig();
 
   return (
     <View
       style={{
         flex: 1,
         flexDirection: 'row',
-        backgroundColor: monthUtils.isCurrentMonth(month)
+        backgroundColor: isCurrentPeriod(month, payPeriodConfig)
           ? theme.budgetHeaderCurrentMonth
           : theme.budgetHeaderOtherMonth,
       }}
@@ -202,6 +204,7 @@ export const CategoryMonth = memo(function CategoryMonth({
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
   const format = useFormat();
+  const payPeriodConfig = usePayPeriodConfig();
 
   const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
   const triggerBalanceMenuRef = useRef(null);
@@ -229,7 +232,7 @@ export const CategoryMonth = memo(function CategoryMonth({
       style={{
         flex: 1,
         flexDirection: 'row',
-        backgroundColor: monthUtils.isCurrentMonth(month)
+        backgroundColor: isCurrentPeriod(month, payPeriodConfig)
           ? theme.budgetCurrentMonth
           : theme.budgetOtherMonth,
         '& .hover-visible': {

@@ -13,13 +13,19 @@ import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
+import {
+  getPayPeriodLabel,
+  isPayPeriod,
+} from '@actual-app/core/shared/pay-periods';
 import { css } from '@emotion/css';
 
 import { BudgetMonthMenu } from '#components/budget/envelope/budgetsummary/BudgetMonthMenu';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { Notes } from '#components/Notes';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useLocale } from '#hooks/useLocale';
 import { useNotes } from '#hooks/useNotes';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useUndo } from '#hooks/useUndo';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 
@@ -62,7 +68,20 @@ export function EnvelopeBudgetMonthMenuModal({
     setShowMore(!showMore);
   };
 
-  const displayMonth = monthUtils.format(month, "MMMM ''yy", locale);
+  const isPayPeriodsEnabled = useFeatureFlag('payPeriodsEnabled');
+  const [showPayPeriods] = useSyncedPref('showPayPeriods');
+  const [payPeriodFrequency] = useSyncedPref('payPeriodFrequency');
+  const [payPeriodStartDate] = useSyncedPref('payPeriodStartDate');
+  const payPeriodConfig = {
+    enabled: isPayPeriodsEnabled && showPayPeriods === 'true',
+    payFrequency:
+      (payPeriodFrequency as 'weekly' | 'biweekly' | 'monthly') ?? 'monthly',
+    startDate: payPeriodStartDate ?? '',
+  };
+  const displayMonth =
+    isPayPeriod(month) && payPeriodConfig.enabled
+      ? getPayPeriodLabel(month, payPeriodConfig, 'summary', locale)
+      : monthUtils.format(month, "MMMM ''yy", locale);
   const { t } = useTranslation();
 
   return (

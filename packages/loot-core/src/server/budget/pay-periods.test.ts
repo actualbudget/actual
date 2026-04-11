@@ -1,11 +1,11 @@
+import * as db from '#server/db';
+import * as sheet from '#server/sheet';
 // @ts-strict-ignore
-import * as monthUtils from '../../shared/months';
-import { generatePayPeriods, isPayPeriod } from '../../shared/pay-periods';
-import type { PayPeriodConfig } from '../../types/prefs';
-import * as db from '../db';
-import * as sheet from '../sheet';
+import * as monthUtils from '#shared/months';
+import { generatePayPeriods, isPayPeriod } from '#shared/pay-periods';
+import type { PayPeriodConfig } from '#types/prefs';
 
-import { createAllBudgets, createBudget, getBudgetRange } from './base';
+import { createBudget, getBudgetRange } from './base';
 
 const biweeklyConfig: PayPeriodConfig = {
   enabled: true,

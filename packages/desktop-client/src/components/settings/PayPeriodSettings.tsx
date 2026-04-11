@@ -7,14 +7,10 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { Setting } from './UI';
+import { Checkbox, FormField, FormLabel } from '#components/forms';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
-import {
-  Checkbox,
-  FormField,
-  FormLabel,
-} from '@desktop-client/components/forms';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { Setting } from './UI';
 
 const FREQUENCY_OPTIONS: [string, string][] = [
   ['weekly', 'Weekly'],

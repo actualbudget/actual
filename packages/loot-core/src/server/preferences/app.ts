@@ -14,7 +14,12 @@ import { getServer } from '#server/server-config';
 import * as sheet from '#server/sheet';
 import { undoable } from '#server/undo';
 import { stringToInteger } from '#shared/util';
-import type { GlobalPrefs, MetadataPrefs, PayPeriodConfig, SyncedPrefs } from '#types/prefs';
+import type {
+  GlobalPrefs,
+  MetadataPrefs,
+  PayPeriodConfig,
+  SyncedPrefs,
+} from '#types/prefs';
 
 const PAY_PERIOD_PREF_KEYS = new Set<keyof SyncedPrefs>([
   'showPayPeriods',

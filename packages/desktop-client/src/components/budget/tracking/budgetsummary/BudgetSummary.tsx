@@ -14,10 +14,13 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
+import {
+  getPayPeriodLabel,
+  isPayPeriod,
+} from '@actual-app/core/shared/pay-periods';
 import { css } from '@emotion/css';
 
-import { getPayPeriodLabel, isPayPeriod } from '@actual-app/core/shared/pay-periods';
-
+import { usePayPeriodConfig } from '#components/budget/PayPeriodContext';
 import { useTrackingBudget } from '#components/budget/tracking/TrackingBudgetContext';
 import { NotesButton } from '#components/NotesButton';
 import { useLocale } from '#hooks/useLocale';
@@ -28,8 +31,6 @@ import { BudgetMonthMenu } from './BudgetMonthMenu';
 import { ExpenseTotal } from './ExpenseTotal';
 import { IncomeTotal } from './IncomeTotal';
 import { Saved } from './Saved';
-
-import { usePayPeriodConfig } from '#components/budget/PayPeriodContext';
 
 type BudgetSummaryProps = {
   month: string;

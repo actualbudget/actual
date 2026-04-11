@@ -1,16 +1,19 @@
-import type { PayPeriodConfig } from '../types/prefs';
+import { afterEach, beforeEach, vi } from 'vitest';
+
+import type { PayPeriodConfig } from '#types/prefs';
 
 import * as monthUtils from './months';
 import {
   addPayPeriods,
-  generatePayPeriodRange,
   generatePayPeriods,
   getCurrentPayPeriod,
   getPayPeriodFromDate,
   getPayPeriodLabel,
+  isCurrentPeriod,
   isPayPeriod,
   nextPayPeriod,
   prevPayPeriod,
+  resolveMonthToDateFilter,
 } from './pay-periods';
 
 const biweeklyConfig: PayPeriodConfig = {
@@ -469,5 +472,78 @@ describe('getPayPeriodLabel', () => {
     const label = getPayPeriodLabel('2024-13', biweeklyConfig, 'summary');
     expect(label).toContain(' - ');
     expect(label).not.toMatch(/–/); // no en-dash
+  });
+
+  test('short format: returns date range without period number', () => {
+    // 2024-13 (biweekly): Jan 4 - Jan 17
+    expect(getPayPeriodLabel('2024-13', biweeklyConfig, 'short')).toBe(
+      'Jan 4 - Jan 17',
+    );
+  });
+});
+
+// ── isCurrentPeriod ──────────────────────────────────────────────────────────
+
+describe('isCurrentPeriod', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    // Anchor "now" to 2024-01-10 (a Wednesday), which falls inside biweekly
+    // period 2024-13 (Jan 4 - Jan 17) for biweeklyConfig.
+    vi.setSystemTime(new Date(2024, 0, 10, 12));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test('returns true for current calendar month without config', () => {
+    expect(isCurrentPeriod('2024-01')).toBe(true);
+  });
+
+  test('returns false for non-current calendar month without config', () => {
+    expect(isCurrentPeriod('2024-02')).toBe(false);
+  });
+
+  test('returns true for current pay period with config', () => {
+    expect(isCurrentPeriod('2024-13', biweeklyConfig)).toBe(true);
+  });
+
+  test('returns false for non-current pay period with config', () => {
+    expect(isCurrentPeriod('2024-14', biweeklyConfig)).toBe(false);
+  });
+
+  test('calendar ID with config falls back to calendar comparison', () => {
+    // '2024-01' is a calendar format (MM < 13), so it bypasses pay period
+    // comparison and returns true because the current date is in Jan 2024.
+    expect(isCurrentPeriod('2024-01', biweeklyConfig)).toBe(true);
+  });
+});
+
+// ── resolveMonthToDateFilter ─────────────────────────────────────────────────
+
+describe('resolveMonthToDateFilter', () => {
+  test('calendar month without config returns transform filter', () => {
+    expect(resolveMonthToDateFilter('2024-01')).toEqual({
+      date: { $transform: '$month', $eq: '2024-01' },
+    });
+  });
+
+  test('calendar month with config returns transform filter', () => {
+    expect(resolveMonthToDateFilter('2024-01', biweeklyConfig)).toEqual({
+      date: { $transform: '$month', $eq: '2024-01' },
+    });
+  });
+
+  test('pay period with config returns date range filter', () => {
+    // biweeklyConfig: 2024-13 spans Jan 4 - Jan 17
+    expect(resolveMonthToDateFilter('2024-13', biweeklyConfig)).toEqual({
+      date: { $gte: '2024-01-04', $lte: '2024-01-17' },
+    });
+  });
+
+  test('pay period without config falls back to transform filter', () => {
+    expect(resolveMonthToDateFilter('2024-13')).toEqual({
+      date: { $transform: '$month', $eq: '2024-13' },
+    });
   });
 });

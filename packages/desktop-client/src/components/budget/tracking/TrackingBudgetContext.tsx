@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 
 import * as monthUtils from '@actual-app/core/shared/months';
 
-import { usePayPeriodConfig } from '@desktop-client/components/budget/PayPeriodContext';
+import { usePayPeriodConfig } from '#components/budget/PayPeriodContext';
 
 type TrackingBudgetContextDefinition = {
   summaryCollapsed: boolean;

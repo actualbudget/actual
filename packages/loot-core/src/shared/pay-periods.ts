@@ -2,7 +2,7 @@ import * as d from 'date-fns';
 import type { Locale } from 'date-fns';
 import memoizeOne from 'memoize-one';
 
-import type { PayPeriodConfig } from '../types/prefs';
+import type { PayPeriodConfig } from '#types/prefs';
 
 export type { PayPeriodConfig };
 
@@ -308,11 +308,15 @@ export function generatePayPeriodRange(
  *   calendar month.
  *
  * 'summary' format: '{startDate} - {endDate} (PP{globalN})' — e.g. 'Jan 5 - Jan 18 (PP1)'
+ *
+ * 'short' format: '{startDate} - {endDate}' — e.g. 'Jan 5 - Jan 18'
+ *   A compact date range without the period number, suitable for mobile
+ *   budget headings where space is constrained.
  */
 export function getPayPeriodLabel(
   monthId: string,
   config: PayPeriodConfig,
-  format: 'picker' | 'summary' = 'summary',
+  format: 'picker' | 'summary' | 'short' = 'summary',
   locale?: Locale,
 ): string {
   const year = parseInt(monthId.slice(0, 4), 10);
@@ -354,7 +358,59 @@ export function getPayPeriodLabel(
     return `${monthLetter}${withinMonthCount}`;
   }
 
-  // 'summary' format
   const formatDate = (dt: Date) => d.format(dt, 'MMM d', { locale });
+
+  if (format === 'short') {
+    return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+  }
+
+  // 'summary' format
   return `${formatDate(startDate)} - ${formatDate(endDate)} (PP${periodNumber})`;
+}
+
+/**
+ * Returns true when `month` represents the current period.
+ *
+ * Mode-agnostic: when `month` is a pay period ID and a valid config is
+ * provided, compares against the current pay period. Otherwise compares
+ * against the current calendar month (`YYYY-MM`). Lets callers highlight
+ * the "current" column without knowing whether pay periods are active.
+ */
+export function isCurrentPeriod(
+  month: string,
+  config?: PayPeriodConfig,
+): boolean {
+  if (isPayPeriod(month) && config?.enabled) {
+    return getPayPeriodFromDate(new Date(), config) === month;
+  }
+  return d.format(new Date(), 'yyyy-MM') === month;
+}
+
+type DateFilter =
+  | { $gte: string; $lte: string }
+  | { $transform: string; $eq: string };
+
+/**
+ * Converts a month or pay period ID into a query-compatible date filter.
+ *
+ * For active pay period IDs, returns a `{ $gte, $lte }` range covering the
+ * period's start/end dates. For calendar months (or when config is absent),
+ * returns a `{ $transform: '$month', $eq: month }` filter. The shape matches
+ * existing filter objects used by loot-core queries.
+ */
+export function resolveMonthToDateFilter(
+  month: string,
+  config?: PayPeriodConfig,
+): { date: DateFilter } {
+  if (isPayPeriod(month) && config?.enabled) {
+    const year = parseInt(month.slice(0, 4), 10);
+    const periods = generatePayPeriods(year, config);
+    const period = periods.find(p => p.monthId === month);
+    if (period) {
+      return {
+        date: { $gte: period.startDate, $lte: period.endDate },
+      };
+    }
+  }
+  return { date: { $transform: '$month', $eq: month } };
 }
