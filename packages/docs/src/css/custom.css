@@ -32,7 +32,7 @@ h1 {
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 
   --ifm-font-family-base:
-    'Inter Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+    'Inter Variable', -apple-system, 'BlinkMacSystemFont', 'Segoe UI', 'Roboto',
     'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
     'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
 
