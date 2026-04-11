@@ -129,12 +129,17 @@ function findPackageJsonFiles(): string[] {
 }
 
 function resolvePackageJsonPaths(filePaths: string[]): string[] {
+  const packagesRoot = path.resolve(__dirname, '..', 'packages');
   const seen = new Set<string>();
   for (const filePath of filePaths) {
-    let dir = path.dirname(path.resolve(filePath));
-    while (dir !== path.dirname(dir)) {
+    const resolvedPath = path.resolve(filePath);
+    let dir = path.dirname(resolvedPath);
+    while (dir.startsWith(packagesRoot + path.sep)) {
       const candidate = path.join(dir, 'package.json');
-      if (fs.existsSync(candidate)) {
+      if (
+        fs.existsSync(candidate) &&
+        candidate.startsWith(packagesRoot + path.sep)
+      ) {
         seen.add(candidate);
         break;
       }
