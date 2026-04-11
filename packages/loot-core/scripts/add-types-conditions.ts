@@ -3,18 +3,21 @@
  * so that npm consumers resolve .d.ts declarations instead of raw .ts source.
  *
  * This runs via the "prepack" lifecycle hook. The original package.json is
- * backed up and restored by restore-package-json.mjs (postpack).
+ * backed up and restored by restore-package-json.ts (postpack).
  */
-import { copyFileSync, readFileSync, writeFileSync } from 'fs';
-import { dirname, resolve } from 'path';
-import { fileURLToPath } from 'url';
+import { copyFileSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkgPath = resolve(__dirname, '..', 'package.json');
 const backupPath = resolve(__dirname, '..', 'package.json.bak');
 
+type ExportValue = string | Record<string, string>;
+type ExportMap = Record<string, ExportValue>;
+
 // Derive the .d.ts types path from a source .ts/.tsx path
-function toTypesPath(srcPath) {
+function toTypesPath(srcPath: string): string | null {
   if (srcPath.startsWith('./src/')) {
     return srcPath
       .replace(/^\.\/src\//, './lib-dist/decl/src/')
@@ -28,15 +31,12 @@ function toTypesPath(srcPath) {
   return null;
 }
 
-function shouldSkip(value) {
-  if (typeof value === 'string') {
-    // Already a .d.ts file or a .js runtime-only entry
-    return value.endsWith('.d.ts') || value.endsWith('.js');
-  }
-  return false;
+function shouldSkip(value: string): boolean {
+  // Already a .d.ts file or a .js runtime-only entry
+  return value.endsWith('.d.ts') || value.endsWith('.js');
 }
 
-function transformEntry(value) {
+function transformEntry(value: ExportValue): ExportValue {
   if (typeof value === 'string') {
     if (shouldSkip(value)) return value;
     const typesPath = toTypesPath(value);
@@ -44,23 +44,19 @@ function transformEntry(value) {
     return { types: typesPath, default: value };
   }
 
-  if (typeof value === 'object' && value !== null) {
-    // Find the "default" value to derive the types path
-    const defaultValue = value.default;
-    if (!defaultValue || shouldSkip(defaultValue)) return value;
+  // Find the "default" value to derive the types path
+  const defaultValue = value.default;
+  if (!defaultValue || shouldSkip(defaultValue)) return value;
 
-    const typesPath = toTypesPath(defaultValue);
-    if (!typesPath) return value;
+  const typesPath = toTypesPath(defaultValue);
+  if (!typesPath) return value;
 
-    // Insert "types" as the first key
-    return { types: typesPath, ...value };
-  }
-
-  return value;
+  // Insert "types" as the first key
+  return { types: typesPath, ...value };
 }
 
-function transformMap(map) {
-  const result = {};
+function transformMap(map: ExportMap): ExportMap {
+  const result: ExportMap = {};
   for (const [key, value] of Object.entries(map)) {
     result[key] = transformEntry(value);
   }
