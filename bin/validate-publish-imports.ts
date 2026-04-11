@@ -123,9 +123,31 @@ function findPackageJsonFiles(): string[] {
   return results;
 }
 
+function resolvePackageJsonPaths(filePaths: string[]): string[] {
+  const seen = new Set<string>();
+  for (const filePath of filePaths) {
+    let dir = path.dirname(path.resolve(filePath));
+    while (dir !== path.dirname(dir)) {
+      const candidate = path.join(dir, 'package.json');
+      if (fs.existsSync(candidate)) {
+        seen.add(candidate);
+        break;
+      }
+      dir = path.dirname(dir);
+    }
+  }
+  return [...seen];
+}
+
 function main() {
-  const fixMode = process.argv.includes('--fix');
-  const packageJsonFiles = findPackageJsonFiles();
+  const args = process.argv.slice(2);
+  const fixMode = args.includes('--fix');
+  const filePaths = args.filter(arg => !arg.startsWith('--'));
+
+  const packageJsonFiles =
+    filePaths.length > 0
+      ? resolvePackageJsonPaths(filePaths)
+      : findPackageJsonFiles();
 
   let hasErrors = false;
   const allWarnings: string[] = [];
@@ -179,4 +201,6 @@ function main() {
   }
 }
 
-main();
+if (require.main === module) {
+  main();
+}
