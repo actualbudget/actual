@@ -3,7 +3,7 @@ import * as d from 'date-fns';
 import type { Locale } from 'date-fns';
 import memoizeOne from 'memoize-one';
 
-import type { PayPeriodConfig, SyncedPrefs } from '../types/prefs';
+import type { PayPeriodConfig, SyncedPrefs } from '#types/prefs';
 
 import {
   addPayPeriods,

@@ -1,9 +1,9 @@
-import { send } from 'loot-core/platform/client/connection';
-import type { LocationCoordinates } from 'loot-core/shared/location-utils';
+import { send } from '@actual-app/core/platform/client/connection';
+import type { LocationCoordinates } from '@actual-app/core/shared/location-utils';
 import type {
   NearbyPayeeEntity,
   PayeeLocationEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
 /**
  * Abstraction for geolocation functionality

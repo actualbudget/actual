@@ -1,18 +1,17 @@
-import { queryOptions } from '@tanstack/react-query';
-import { t } from 'i18next';
-import memoizeOne from 'memoize-one';
-
-import { send } from 'loot-core/platform/client/connection';
-import { groupById } from 'loot-core/shared/util';
+import { send } from '@actual-app/core/platform/client/connection';
+import { groupById } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   NearbyPayeeEntity,
   PayeeEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { queryOptions } from '@tanstack/react-query';
+import { t } from 'i18next';
+import memoizeOne from 'memoize-one';
+
+import { getAccountsById } from '#accounts/accountsSlice';
 
 import { locationService } from './location';
-
-import { getAccountsById } from '@desktop-client/accounts/accountsSlice';
 
 export const payeeQueries = {
   all: () => ['payees'],

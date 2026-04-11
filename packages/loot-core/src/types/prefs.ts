@@ -5,10 +5,12 @@ export type FeatureFlag =
   | 'formulaMode'
   | 'currency'
   | 'crossoverReport'
+  | 'ageOfMoneyReport'
   | 'customThemes'
   | 'budgetAnalysisReport'
   | 'payeeLocations'
-  | 'payPeriodsEnabled';
+  | 'payPeriodsEnabled'
+  | 'sankeyReport';
 
 export type PayPeriodConfig = {
   enabled: boolean;

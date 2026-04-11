@@ -1,25 +1,20 @@
-import * as asyncStorage from '../../platform/server/asyncStorage';
-import * as fs from '../../platform/server/fs';
-import { stringToInteger } from '../../shared/util';
-import type {
-  GlobalPrefs,
-  MetadataPrefs,
-  PayPeriodConfig,
-  SyncedPrefs,
-} from '../../types/prefs';
-import { createApp } from '../app';
-import * as db from '../db';
-import { PostError } from '../errors';
-import { getDefaultDocumentDir } from '../main';
-import { mutator } from '../mutators';
-import { post } from '../post';
+import * as asyncStorage from '#platform/server/asyncStorage';
+import * as fs from '#platform/server/fs';
+import { createApp } from '#server/app';
+import * as db from '#server/db';
+import { PostError } from '#server/errors';
+import { getDefaultDocumentDir } from '#server/main';
+import { mutator } from '#server/mutators';
+import { post } from '#server/post';
 import {
   getPrefs as _getMetadataPrefs,
   savePrefs as _saveMetadataPrefs,
-} from '../prefs';
-import { getServer } from '../server-config';
-import * as sheet from '../sheet';
-import { undoable } from '../undo';
+} from '#server/prefs';
+import { getServer } from '#server/server-config';
+import * as sheet from '#server/sheet';
+import { undoable } from '#server/undo';
+import { stringToInteger } from '#shared/util';
+import type { GlobalPrefs, MetadataPrefs, PayPeriodConfig, SyncedPrefs } from '#types/prefs';
 
 const PAY_PERIOD_PREF_KEYS = new Set<keyof SyncedPrefs>([
   'showPayPeriods',

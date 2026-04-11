@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
 
-import type { PeriodicTemplate } from 'loot-core/types/models/templates';
+import type { PeriodicTemplate } from '@actual-app/core/types/models/templates';
 
-import { updateTemplate } from '@desktop-client/components/budget/goals/actions';
-import type { Action } from '@desktop-client/components/budget/goals/actions';
-import { FormField, FormLabel } from '@desktop-client/components/forms';
-import { AmountInput } from '@desktop-client/components/util/AmountInput';
+import { updateTemplate } from '#components/budget/goals/actions';
+import type { Action } from '#components/budget/goals/actions';
+import { FormField, FormLabel } from '#components/forms';
+import { AmountInput } from '#components/util/AmountInput';
 
 type WeekAutomationProps = {
   template: PeriodicTemplate;

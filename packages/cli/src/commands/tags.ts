@@ -1,8 +1,8 @@
 import * as api from '@actual-app/api';
 import type { Command } from 'commander';
 
-import { withConnection } from '../connection';
-import { printOutput } from '../output';
+import { withConnection } from '#connection';
+import { printOutput } from '#output';
 
 export function registerTagsCommand(program: Command) {
   const tags = program.command('tags').description('Manage tags');

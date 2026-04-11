@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { DEFAULT_DASHBOARD_STATE } from '../src/shared/dashboard';
+import { DEFAULT_DASHBOARD_STATE } from '#shared/dashboard';
 
 export default async function runMigration(db) {
   db.transaction(() => {

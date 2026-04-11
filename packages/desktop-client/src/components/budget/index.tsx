@@ -4,22 +4,13 @@ import type { ComponentType } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { isPayPeriod } from 'loot-core/shared/pay-periods';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { isPayPeriod } from '@actual-app/core/shared/pay-periods';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
-} from 'loot-core/types/models';
-
-import { AutoSizingBudgetTable } from './DynamicBudgetTable';
-import * as envelopeBudget from './envelope/EnvelopeBudgetComponents';
-import { EnvelopeBudgetProvider } from './envelope/EnvelopeBudgetContext';
-import { PayPeriodProvider } from './PayPeriodContext';
-import * as trackingBudget from './tracking/TrackingBudgetComponents';
-import { TrackingBudgetProvider } from './tracking/TrackingBudgetContext';
-import { prewarmAllMonths, prewarmMonth } from './util';
+} from '@actual-app/core/types/models';
 
 import {
   useBudgetActions,
@@ -29,15 +20,23 @@ import {
   useReorderCategoryMutation,
   useSaveCategoryGroupMutation,
   useSaveCategoryMutation,
-} from '@desktop-client/budget';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
-import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+} from '#budget';
+import { useCategories } from '#hooks/useCategories';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useLocalPref } from '#hooks/useLocalPref';
+import { useNavigate } from '#hooks/useNavigate';
+import { SheetNameProvider } from '#hooks/useSheetName';
+import { useSpreadsheet } from '#hooks/useSpreadsheet';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+
+import { AutoSizingBudgetTable } from './DynamicBudgetTable';
+import * as envelopeBudget from './envelope/EnvelopeBudgetComponents';
+import { EnvelopeBudgetProvider } from './envelope/EnvelopeBudgetContext';
+import { PayPeriodProvider } from './PayPeriodContext';
+import * as trackingBudget from './tracking/TrackingBudgetComponents';
+import { TrackingBudgetProvider } from './tracking/TrackingBudgetContext';
+import { prewarmAllMonths, prewarmMonth } from './util';
 
 export function Budget() {
   const isPayPeriodsEnabled = useFeatureFlag('payPeriodsEnabled');

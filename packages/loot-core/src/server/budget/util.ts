@@ -1,8 +1,8 @@
+import { number } from '#server/spreadsheet/globals';
 // @ts-strict-ignore
-import { safeNumber } from '../../shared/util';
-import { number } from '../spreadsheet/globals';
+import { safeNumber } from '#shared/util';
 
-export { number } from '../spreadsheet/globals';
+export { number } from '#server/spreadsheet/globals';
 
 export function sumAmounts(...amounts) {
   return safeNumber(

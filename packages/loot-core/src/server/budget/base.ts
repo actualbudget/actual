@@ -1,19 +1,19 @@
+import { aqlQuery } from '#server/aql';
+import * as db from '#server/db';
+import * as sheet from '#server/sheet';
+import { resolveName } from '#server/spreadsheet/util';
 // @ts-strict-ignore
-import * as monthUtils from '../../shared/months';
+import * as monthUtils from '#shared/months';
 import {
   addPayPeriods,
   generatePayPeriodRange,
   getPayPeriodFromDate,
   isPayPeriod,
-} from '../../shared/pay-periods';
-import { q } from '../../shared/query';
-import { getChangedValues } from '../../shared/util';
-import type { CategoryGroupEntity } from '../../types/models';
-import type { PayPeriodConfig } from '../../types/prefs';
-import { aqlQuery } from '../aql';
-import * as db from '../db';
-import * as sheet from '../sheet';
-import { resolveName } from '../spreadsheet/util';
+} from '#shared/pay-periods';
+import { q } from '#shared/query';
+import { getChangedValues } from '#shared/util';
+import type { CategoryGroupEntity } from '#types/models';
+import type { PayPeriodConfig } from '#types/prefs';
 
 import * as budgetActions from './actions';
 import * as envelopeBudget from './envelope';

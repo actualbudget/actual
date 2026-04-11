@@ -1,8 +1,8 @@
 import * as api from '@actual-app/api';
 import type { Command } from 'commander';
 
-import { withConnection } from '../connection';
-import { printOutput } from '../output';
+import { withConnection } from '#connection';
+import { printOutput } from '#output';
 
 export function registerPayeesCommand(program: Command) {
   const payees = program.command('payees').description('Manage payees');

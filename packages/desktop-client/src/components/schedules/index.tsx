@@ -4,19 +4,18 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
+import { q } from '@actual-app/core/shared/query';
+import type { ScheduleEntity } from '@actual-app/core/types/models';
 
-import { send } from 'loot-core/platform/client/connection';
-import { q } from 'loot-core/shared/query';
-import type { ScheduleEntity } from 'loot-core/types/models';
+import { Search } from '#components/common/Search';
+import { Page } from '#components/Page';
+import { useSchedules } from '#hooks/useSchedules';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 import { SchedulesTable } from './SchedulesTable';
 import type { ScheduleItemAction } from './SchedulesTable';
-
-import { Search } from '@desktop-client/components/common/Search';
-import { Page } from '@desktop-client/components/Page';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
 
 export function Schedules() {
   const { t } = useTranslation();

@@ -1,10 +1,10 @@
 // @ts-strict-ignore
 import { SyncProtoBuf, Timestamp } from '@actual-app/crdt';
 
-import { logger } from '../../platform/server/log';
-import * as encryption from '../encryption';
-import { SyncError } from '../errors';
-import * as prefs from '../prefs';
+import { logger } from '#platform/server/log';
+import * as encryption from '#server/encryption';
+import { SyncError } from '#server/errors';
+import * as prefs from '#server/prefs';
 
 import type { Message } from './index';
 

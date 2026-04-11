@@ -2,15 +2,14 @@ import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
+import type { FormulaWidget } from '@actual-app/core/types/models';
 
-import type { FormulaWidget } from 'loot-core/types/models';
-
-import { FormulaResult } from '@desktop-client/components/reports/FormulaResult';
-import { ReportCard } from '@desktop-client/components/reports/ReportCard';
-import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
-import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
-import { useFormulaExecution } from '@desktop-client/hooks/useFormulaExecution';
-import { useThemeColors } from '@desktop-client/hooks/useThemeColors';
+import { FormulaResult } from '#components/reports/FormulaResult';
+import { ReportCard } from '#components/reports/ReportCard';
+import { ReportCardName } from '#components/reports/ReportCardName';
+import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
+import { useFormulaExecution } from '#hooks/useFormulaExecution';
+import { useThemeColors } from '#hooks/useThemeColors';
 
 type FormulaCardProps = {
   widgetId: string;

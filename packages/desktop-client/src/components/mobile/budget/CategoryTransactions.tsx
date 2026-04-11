@@ -1,21 +1,24 @@
 import React, { useCallback, useMemo, useState } from 'react';
 
-import * as monthUtils from 'loot-core/shared/months';
-import { isPayPeriod } from 'loot-core/shared/pay-periods';
-import { q } from 'loot-core/shared/query';
-import { isPreviewId } from 'loot-core/shared/transactions';
-import type { CategoryEntity, TransactionEntity } from 'loot-core/types/models';
-import type { PayPeriodConfig } from 'loot-core/types/prefs';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { isPayPeriod } from '@actual-app/core/shared/pay-periods';
+import { q } from '@actual-app/core/shared/query';
+import { isPreviewId } from '@actual-app/core/shared/transactions';
+import type {
+  CategoryEntity,
+  TransactionEntity,
+} from '@actual-app/core/types/models';
+import type { PayPeriodConfig } from '@actual-app/core/types/prefs';
 
-import { usePayPeriodConfig } from '@desktop-client/components/budget/PayPeriodContext';
-import { TransactionListWithBalances } from '@desktop-client/components/mobile/transactions/TransactionListWithBalances';
-import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
-import { useCategoryPreviewTransactions } from '@desktop-client/hooks/useCategoryPreviewTransactions';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useTransactions } from '@desktop-client/hooks/useTransactions';
-import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
-import * as bindings from '@desktop-client/spreadsheet/bindings';
+import { usePayPeriodConfig } from '#components/budget/PayPeriodContext';
+import { TransactionListWithBalances } from '#components/mobile/transactions/TransactionListWithBalances';
+import { SchedulesProvider } from '#hooks/useCachedSchedules';
+import { useCategoryPreviewTransactions } from '#hooks/useCategoryPreviewTransactions';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useNavigate } from '#hooks/useNavigate';
+import { useTransactions } from '#hooks/useTransactions';
+import { useTransactionsSearch } from '#hooks/useTransactionsSearch';
+import * as bindings from '#spreadsheet/bindings';
 
 type CategoryTransactionsProps = {
   category: CategoryEntity;

@@ -1,6 +1,13 @@
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import type { GroupedEntity } from 'loot-core/types/models';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type { GroupedEntity } from '@actual-app/core/types/models';
+
+import {
+  categoryLists,
+  ReportOptions,
+} from '#components/reports/ReportOptions';
+import type { QueryDataEntity } from '#components/reports/ReportOptions';
+import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 
 import type { createCustomSpreadsheetProps } from './custom-spreadsheet';
 import { fetchSpreadsheetQueryData } from './fetchSpreadsheetQueryData';
@@ -11,13 +18,6 @@ import {
   determineIntervalRange,
   trimGroupedDataIntervals,
 } from './trimIntervals';
-
-import {
-  categoryLists,
-  ReportOptions,
-} from '@desktop-client/components/reports/ReportOptions';
-import type { QueryDataEntity } from '@desktop-client/components/reports/ReportOptions';
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
 
 export function createGroupedSpreadsheet({
   startDate,

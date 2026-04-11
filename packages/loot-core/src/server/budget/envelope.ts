@@ -1,10 +1,10 @@
+import * as db from '#server/db';
+import * as sheet from '#server/sheet';
+import { resolveName } from '#server/spreadsheet/util';
 // @ts-strict-ignore
-import * as monthUtils from '../../shared/months';
-import { safeNumber } from '../../shared/util';
-import type { PayPeriodConfig } from '../../types/prefs';
-import * as db from '../db';
-import * as sheet from '../sheet';
-import { resolveName } from '../spreadsheet/util';
+import * as monthUtils from '#shared/months';
+import { safeNumber } from '#shared/util';
+import type { PayPeriodConfig } from '#types/prefs';
 
 import { createCategory as createCategoryFromBase } from './base';
 import { flatten2, number, sumAmounts, unflatten2 } from './util';

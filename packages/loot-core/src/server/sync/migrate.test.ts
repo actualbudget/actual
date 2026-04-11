@@ -2,10 +2,10 @@
 import { Timestamp } from '@actual-app/crdt';
 import fc from 'fast-check';
 
-import * as arbs from '../../mocks/arbitrary-schema';
-import { execTracer } from '../../shared/test-helpers';
-import { convertInputType, schema, schemaConfig } from '../aql';
-import * as db from '../db';
+import * as arbs from '#mocks/arbitrary-schema';
+import { convertInputType, schema, schemaConfig } from '#server/aql';
+import * as db from '#server/db';
+import { execTracer } from '#shared/test-helpers';
 
 import { listen, unlisten } from './migrate';
 

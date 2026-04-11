@@ -15,64 +15,59 @@ import {
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
-import { useDrag } from '@use-gesture/react';
-import { format as formatDate, parseISO } from 'date-fns';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
-import type { Query } from 'loot-core/shared/query';
-import { ungroupTransactions } from 'loot-core/shared/transactions';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
+import type { Query } from '@actual-app/core/shared/query';
+import { ungroupTransactions } from '@actual-app/core/shared/transactions';
 import type {
   CalendarWidget,
   RuleConditionEntity,
   TimeFrame,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { css } from '@emotion/css';
+import { useDrag } from '@use-gesture/react';
+import { format as formatDate, parseISO } from 'date-fns';
 
-import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
-import { TransactionList as TransactionListMobile } from '@desktop-client/components/mobile/transactions/TransactionList';
-import {
-  MobilePageHeader,
-  Page,
-  PageHeader,
-} from '@desktop-client/components/Page';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { DateRange } from '@desktop-client/components/reports/DateRange';
-import { CalendarGraph } from '@desktop-client/components/reports/graphs/CalendarGraph';
-import { Header } from '@desktop-client/components/reports/Header';
-import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
-import { calendarSpreadsheet } from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
-import type { CalendarDataType } from '@desktop-client/components/reports/spreadsheets/calendar-spreadsheet';
-import { useReport } from '@desktop-client/components/reports/useReport';
-import { fromDateRepr } from '@desktop-client/components/reports/util';
-import type { TableHandleRef } from '@desktop-client/components/table';
-import { TransactionList } from '@desktop-client/components/transactions/TransactionList';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { DisplayPayeeProvider } from '@desktop-client/hooks/useDisplayPayee';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import type { FormatType } from '@desktop-client/hooks/useFormat';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { usePayees } from '@desktop-client/hooks/usePayees';
-import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
-import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
-import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
-import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useTransactions } from '@desktop-client/hooks/useTransactions';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import { useUpdateDashboardWidgetMutation } from '@desktop-client/reports/mutations';
+import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
+import { FinancialText } from '#components/FinancialText';
+import { MobileBackButton } from '#components/mobile/MobileBackButton';
+import { TransactionList as TransactionListMobile } from '#components/mobile/transactions/TransactionList';
+import { MobilePageHeader, Page, PageHeader } from '#components/Page';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { DateRange } from '#components/reports/DateRange';
+import { CalendarGraph } from '#components/reports/graphs/CalendarGraph';
+import { Header } from '#components/reports/Header';
+import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { calculateTimeRange } from '#components/reports/reportRanges';
+import { calendarSpreadsheet } from '#components/reports/spreadsheets/calendar-spreadsheet';
+import type { CalendarDataType } from '#components/reports/spreadsheets/calendar-spreadsheet';
+import { useReport } from '#components/reports/useReport';
+import { fromDateRepr } from '#components/reports/util';
+import type { TableHandleRef } from '#components/table';
+import { TransactionList } from '#components/transactions/TransactionList';
+import { useAccounts } from '#hooks/useAccounts';
+import { SchedulesProvider } from '#hooks/useCachedSchedules';
+import { useCategories } from '#hooks/useCategories';
+import { useDashboardWidget } from '#hooks/useDashboardWidget';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { DisplayPayeeProvider } from '#hooks/useDisplayPayee';
+import { useFormat } from '#hooks/useFormat';
+import type { FormatType } from '#hooks/useFormat';
+import { useLocale } from '#hooks/useLocale';
+import { useMergedRefs } from '#hooks/useMergedRefs';
+import { useNavigate } from '#hooks/useNavigate';
+import { usePayees } from '#hooks/usePayees';
+import { useResizeObserver } from '#hooks/useResizeObserver';
+import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
+import { SelectedProviderWithItems } from '#hooks/useSelected';
+import { SplitsExpandedProvider } from '#hooks/useSplitsExpanded';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useTransactions } from '#hooks/useTransactions';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
+import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 
 const CHEVRON_HEIGHT = 42;
 const SUMMARY_HEIGHT = 140;

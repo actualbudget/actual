@@ -1,9 +1,9 @@
 // @ts-strict-ignore
 import { Timestamp } from '@actual-app/crdt';
 
-import * as connection from '../platform/server/connection';
-import { getIn } from '../shared/util';
-import type { HandlerFunctions } from '../types/handlers';
+import * as connection from '#platform/server/connection';
+import { getIn } from '#shared/util';
+import type { HandlerFunctions } from '#types/handlers';
 
 import { getMutatorContext, withMutatorContext } from './mutators';
 import { sendMessages } from './sync';

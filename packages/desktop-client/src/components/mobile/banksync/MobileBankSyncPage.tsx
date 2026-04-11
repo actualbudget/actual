@@ -5,17 +5,19 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type {
+  AccountEntity,
+  BankSyncProviders,
+} from '@actual-app/core/types/models';
 
-import type { AccountEntity, BankSyncProviders } from 'loot-core/types/models';
+import { Search } from '#components/common/Search';
+import { MobilePageHeader, Page } from '#components/Page';
+import { useAccounts } from '#hooks/useAccounts';
+import { useNavigate } from '#hooks/useNavigate';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 import { BankSyncAccountsList } from './BankSyncAccountsList';
-
-import { Search } from '@desktop-client/components/common/Search';
-import { MobilePageHeader, Page } from '@desktop-client/components/Page';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
 
 type SyncProviders = BankSyncProviders | 'unlinked';
 

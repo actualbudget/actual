@@ -45,12 +45,9 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { format as formatDate, parseISO } from 'date-fns';
-import memoizeOne from 'memoize-one';
-
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
-import { getStatusLabel } from 'loot-core/shared/schedules';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
+import { getStatusLabel } from '@actual-app/core/shared/schedules';
 import {
   addSplitTransaction,
   deleteTransaction,
@@ -60,14 +57,14 @@ import {
   splitTransaction,
   ungroupTransactions,
   updateTransaction,
-} from 'loot-core/shared/transactions';
+} from '@actual-app/core/shared/transactions';
 import {
   amountToCurrency,
   currencyToAmount,
   integerToCurrency,
   titleFirst,
-} from 'loot-core/shared/util';
-import type { IntegerAmount } from 'loot-core/shared/util';
+} from '@actual-app/core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -76,7 +73,66 @@ import type {
   RuleEntity,
   ScheduleEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { format as formatDate, parseISO } from 'date-fns';
+import memoizeOne from 'memoize-one';
+
+import { getAccountsById } from '#accounts/accountsSlice';
+import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplete';
+import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
+import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
+import { getStatusProps } from '#components/schedules/StatusBadge';
+import type { StatusTypes } from '#components/schedules/StatusBadge';
+import { DateSelect } from '#components/select/DateSelect';
+import {
+  Cell,
+  CellButton,
+  CustomCell,
+  DeleteCell,
+  Field,
+  InputCell,
+  Row,
+  SelectCell,
+  Table,
+  UnexposedCellContent,
+  useTableNavigator,
+} from '#components/table';
+import type {
+  TableHandleRef,
+  TableNavigator,
+  TableProps,
+} from '#components/table';
+import {
+  SchedulesProvider,
+  useCachedSchedules,
+} from '#hooks/useCachedSchedules';
+import { useContextMenu } from '#hooks/useContextMenu';
+import { DisplayPayeeProvider, useDisplayPayee } from '#hooks/useDisplayPayee';
+import {
+  DropHighlight,
+  isValidBoundaryDrop,
+  useDrag,
+  useDrop,
+} from '#hooks/useDragDrop';
+import type {
+  DropPosition,
+  OnDragChangeCallback,
+  OnDropCallback,
+} from '#hooks/useDragDrop';
+import { useLocalPref } from '#hooks/useLocalPref';
+import { useMergedRefs } from '#hooks/useMergedRefs';
+import { usePrevious } from '#hooks/usePrevious';
+import { useProperFocus } from '#hooks/useProperFocus';
+import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
+import { SheetNameProvider } from '#hooks/useSheetName';
+import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
+import type { SplitsExpandedContextValue } from '#hooks/useSplitsExpanded';
+import { pushModal } from '#modals/modalsSlice';
+import { NotesTagFormatter } from '#notes/NotesTagFormatter';
+import { addNotification } from '#notifications/notificationsSlice';
+import { getPayeesById } from '#payees';
+import { aqlQuery } from '#queries/aqlQuery';
+import { useDispatch } from '#redux';
 
 import {
   deserializeTransaction,
@@ -91,68 +147,6 @@ import type {
   TransactionUpdateFunction,
 } from './table/utils';
 import { TransactionMenu } from './TransactionMenu';
-
-import { getAccountsById } from '@desktop-client/accounts/accountsSlice';
-import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
-import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
-import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
-import { getStatusProps } from '@desktop-client/components/schedules/StatusBadge';
-import type { StatusTypes } from '@desktop-client/components/schedules/StatusBadge';
-import { DateSelect } from '@desktop-client/components/select/DateSelect';
-import {
-  Cell,
-  CellButton,
-  CustomCell,
-  DeleteCell,
-  Field,
-  InputCell,
-  Row,
-  SelectCell,
-  Table,
-  UnexposedCellContent,
-  useTableNavigator,
-} from '@desktop-client/components/table';
-import type {
-  TableHandleRef,
-  TableNavigator,
-  TableProps,
-} from '@desktop-client/components/table';
-import {
-  SchedulesProvider,
-  useCachedSchedules,
-} from '@desktop-client/hooks/useCachedSchedules';
-import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import {
-  DisplayPayeeProvider,
-  useDisplayPayee,
-} from '@desktop-client/hooks/useDisplayPayee';
-import {
-  DropHighlight,
-  isValidBoundaryDrop,
-  useDrag,
-  useDrop,
-} from '@desktop-client/hooks/useDragDrop';
-import type {
-  DropPosition,
-  OnDragChangeCallback,
-  OnDropCallback,
-} from '@desktop-client/hooks/useDragDrop';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
-import { usePrevious } from '@desktop-client/hooks/usePrevious';
-import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
-import {
-  useSelectedDispatch,
-  useSelectedItems,
-} from '@desktop-client/hooks/useSelected';
-import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
-import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
-import type { SplitsExpandedContextValue } from '@desktop-client/hooks/useSplitsExpanded';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { NotesTagFormatter } from '@desktop-client/notes/NotesTagFormatter';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { getPayeesById } from '@desktop-client/payees';
-import { useDispatch } from '@desktop-client/redux';
 
 type TransactionHeaderProps = {
   hasSelected: boolean;
@@ -993,7 +987,7 @@ const Transaction = memo(function Transaction({
   const [showReconciliationWarning, setShowReconciliationWarning] =
     useState(false);
 
-  const onUpdate: TransactionUpdateFunction = (name, value) => {
+  const onUpdate: TransactionUpdateFunction = async (name, value) => {
     // Had some issues with this is called twice which is a problem now that we are showing a warning
     // modal if the transaction is locked. I added a boolean to guard against showing the modal twice.
     // I'm still not completely happy with how the cells update pre/post modal. Sometimes you have to
@@ -1002,14 +996,14 @@ const Transaction = memo(function Transaction({
     // of the cell all have different implications as well.
 
     if (transaction[name] !== value) {
-      if (
-        transaction.reconciled === true &&
-        (name === 'credit' ||
-          name === 'debit' ||
-          name === 'payee' ||
-          name === 'account' ||
-          name === 'date')
-      ) {
+      const isReconciledField =
+        name === 'credit' ||
+        name === 'debit' ||
+        name === 'payee' ||
+        name === 'account' ||
+        name === 'date';
+
+      if (transaction.reconciled === true && isReconciledField) {
         if (showReconciliationWarning === false) {
           setShowReconciliationWarning(true);
           dispatch(
@@ -1029,6 +1023,38 @@ const Transaction = memo(function Transaction({
               },
             }),
           );
+        }
+      } else if (
+        isReconciledField &&
+        transaction.transfer_id &&
+        showReconciliationWarning === false
+      ) {
+        const { data } = await aqlQuery(
+          q('transactions')
+            .filter({ id: transaction.transfer_id, reconciled: true })
+            .select('id'),
+        );
+        if ((data as TransactionEntity[]).length > 0) {
+          setShowReconciliationWarning(true);
+          dispatch(
+            pushModal({
+              modal: {
+                name: 'confirm-transaction-edit',
+                options: {
+                  onCancel: () => {
+                    setShowReconciliationWarning(false);
+                  },
+                  onConfirm: () => {
+                    setShowReconciliationWarning(false);
+                    onUpdateAfterConfirm(name, value);
+                  },
+                  confirmReason: 'batchEditWithReconciledTransfer',
+                },
+              },
+            }),
+          );
+        } else {
+          onUpdateAfterConfirm(name, value);
         }
       } else {
         onUpdateAfterConfirm(name, value);
@@ -1172,7 +1198,7 @@ const Transaction = memo(function Transaction({
     }
 
     const id = setTimeout(() => {
-      window.dispatchEvent(new Event('resize')); //Force popover to recalculate position
+      window.dispatchEvent(new Event('resize')); // Force popover to recalculate position
     }, 1);
     return () => clearTimeout(id);
   }, [splitError, allTransactions]);
@@ -1931,7 +1957,6 @@ type TransactionErrorProps = {
   onAddSplit: () => void;
   onDistributeRemainder: () => void;
   style?: CSSProperties;
-  canDistributeRemainder: boolean;
 };
 
 function TransactionError({
@@ -1940,7 +1965,6 @@ function TransactionError({
   onAddSplit,
   onDistributeRemainder,
   style,
-  canDistributeRemainder,
 }: TransactionErrorProps) {
   switch (error.type) {
     case 'SplitTransactionError':
@@ -1969,7 +1993,6 @@ function TransactionError({
               style={{ marginLeft: 15 }}
               onPress={onDistributeRemainder}
               data-testid="distribute-split-button"
-              isDisabled={!canDistributeRemainder}
             >
               <Trans>Distribute</Trans>
             </Button>
@@ -2064,7 +2087,6 @@ function NewTransaction({
   const childTransactions = transactions.filter(
     t => t.parent_id === transactions[0].id,
   );
-  const emptyChildTransactions = childTransactions.filter(t => t.amount === 0);
 
   const addButtonRef = useRef(null);
   useProperFocus(addButtonRef, focusedField === 'add');
@@ -2155,7 +2177,6 @@ function NewTransaction({
             onDistributeRemainder={() =>
               onDistributeRemainder(transactions[0].id)
             }
-            canDistributeRemainder={emptyChildTransactions.length > 0}
           />
         ) : (
           <Button
@@ -2369,9 +2390,6 @@ function TransactionTableInner({
     const childTransactions = trans.is_parent
       ? props.transactionsByParent[trans.id]
       : null;
-    const emptyChildTransactions = props.transactionsByParent[
-      (trans.is_parent ? trans.id : trans.parent_id) || ''
-    ]?.filter(t => t.amount === 0);
 
     // Get sibling count for child transactions (used for drag/drop)
     const siblingCount =
@@ -2452,7 +2470,6 @@ function TransactionTableInner({
               onDistributeRemainder={() =>
                 props.onDistributeRemainder(trans.id)
               }
-              canDistributeRemainder={emptyChildTransactions.length > 0}
             />
           )
         }
@@ -3265,37 +3282,93 @@ export const TransactionTable = forwardRef(
           parentTransaction.amount -
           siblingTransactions.reduce((acc, t) => acc + t.amount, 0);
 
-        const amountPerTransaction = Math.floor(
-          remainingAmount / emptyTransactions.length,
-        );
-        let remainingCents =
-          remainingAmount - amountPerTransaction * emptyTransactions.length;
+        let amounts: number[] = [];
+        if (emptyTransactions.length > 0) {
+          const amountPerTransaction = Math.floor(
+            remainingAmount / emptyTransactions.length,
+          );
+          let remainingCents =
+            remainingAmount - amountPerTransaction * emptyTransactions.length;
 
-        const amounts = new Array(emptyTransactions.length).fill(
-          amountPerTransaction,
-        );
+          amounts = new Array(emptyTransactions.length).fill(
+            amountPerTransaction,
+          );
 
-        for (const [amountIndex] of amounts.entries()) {
-          if (remainingCents === 0) break;
+          for (const [amountIndex] of amounts.entries()) {
+            if (remainingCents === 0) break;
 
-          amounts[amountIndex] += 1;
-          remainingCents--;
-        }
+            amounts[amountIndex] += 1;
+            remainingCents--;
+          }
 
-        if (isTemporaryId(id)) {
-          newNavigator.onEdit(null);
-        } else {
-          tableNavigator.onEdit(null);
-        }
+          if (isTemporaryId(id)) {
+            newNavigator.onEdit(null);
+          } else {
+            tableNavigator.onEdit(null);
+          }
 
-        for (const [
-          transactionIndex,
-          transaction,
-        ] of emptyTransactions.entries()) {
-          await onSave({
-            ...transaction,
-            amount: amounts[transactionIndex],
-          });
+          for (const [
+            transactionIndex,
+            transaction,
+          ] of emptyTransactions.entries()) {
+            await onSave({
+              ...transaction,
+              amount: amounts[transactionIndex],
+            });
+          }
+        } else if (
+          emptyTransactions.length === 0 &&
+          siblingTransactions.length > 0
+        ) {
+          const siblingTotal = siblingTransactions.reduce(
+            (acc, t) => acc + t.amount,
+            0,
+          );
+          const siblingProportions = siblingTransactions.map(
+            t => t.amount / siblingTotal,
+          );
+
+          for (const [
+            transactionIndex,
+            transaction,
+          ] of siblingTransactions.entries()) {
+            amounts[transactionIndex] =
+              Math.floor(
+                siblingProportions[transactionIndex] * remainingAmount,
+              ) + transaction.amount;
+          }
+
+          let remainingCents =
+            parentTransaction.amount - amounts.reduce((acc, a) => acc + a, 0);
+
+          let amountIndex = 0;
+          while (remainingCents !== 0) {
+            amountIndex = amountIndex % amounts.length;
+            if (remainingCents > 0) {
+              amounts[amountIndex] += 1;
+              remainingCents--;
+            } else {
+              amounts[amountIndex] -= 1;
+              remainingCents++;
+            }
+            amountIndex++;
+          }
+
+          if (isTemporaryId(id)) {
+            newNavigator.onEdit(null);
+          } else {
+            tableNavigator.onEdit(null);
+          }
+
+          for (const [
+            transactionIndex,
+            transaction,
+          ] of siblingTransactions.entries()) {
+            await onSave({
+              ...transaction,
+              amount: amounts[transactionIndex],
+            });
+          }
         }
       },
       [onSave],
