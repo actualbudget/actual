@@ -54,7 +54,7 @@ export function CategoryPage() {
 
   const periodLabel =
     isPayPeriod(month) && payPeriodConfig.enabled
-      ? getPayPeriodLabel(month, payPeriodConfig, 'summary', locale)
+      ? getPayPeriodLabel(month, payPeriodConfig, 'short', locale)
       : monthUtils.format(month, "MMMM ''yy", locale);
 
   return (

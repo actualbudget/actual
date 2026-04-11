@@ -13,8 +13,8 @@ import {
   Checkbox,
   FormField,
   FormLabel,
-} from '@desktop-client/components/forms';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+} from '#components/forms';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 const FREQUENCY_OPTIONS: [string, string][] = [
   ['weekly', 'Weekly'],

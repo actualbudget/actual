@@ -1047,7 +1047,7 @@ function MonthSelector({
 
   const periodLabel =
     isPayPeriod(month) && payPeriodConfig?.enabled
-      ? getPayPeriodLabel(month, payPeriodConfig, 'summary', locale)
+      ? getPayPeriodLabel(month, payPeriodConfig, 'short', locale)
       : monthUtils.format(month, "MMMM ''yy", locale);
 
   const arrowButtonStyle = {

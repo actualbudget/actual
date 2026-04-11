@@ -298,6 +298,25 @@ export function isCurrentMonth(month: DateLike): boolean {
   return month === currentMonth();
 }
 
+/**
+ * Returns `stored` when its format matches the current mode, otherwise
+ * `fallback`. Bridges the gap when preferences contain a pay period ID
+ * after the user has disabled pay periods (or a calendar ID after they've
+ * enabled them), preventing stale start-month values from persisting.
+ */
+export function resolveStartMonth(
+  stored: string,
+  config: PayPeriodConfig | undefined,
+  fallback: string,
+): string {
+  const storedIsPayPeriod = isPayPeriod(stored);
+  const configEnabled = config?.enabled ?? false;
+  if (storedIsPayPeriod === configEnabled) {
+    return stored;
+  }
+  return fallback;
+}
+
 export function isCurrentDay(day: DateLike): boolean {
   return day === currentDay();
 }

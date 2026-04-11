@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 import {
-  format as formatMonth,
+  nameForMonth,
   prevMonth,
   sheetForMonth,
 } from '@actual-app/core/shared/months';
@@ -14,9 +14,11 @@ import { TotalsList } from '#components/budget/envelope/budgetsummary/TotalsList
 import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { useCategoriesById } from '#hooks/useCategories';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { SheetNameProvider } from '#hooks/useSheetName';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useUndo } from '#hooks/useUndo';
 import { collapseModals, pushModal } from '#modals/modalsSlice';
 import type { Modal as ModalType } from '#modals/modalsSlice';
@@ -37,7 +39,24 @@ export function EnvelopeBudgetSummaryModal({
 
   const locale = useLocale();
   const dispatch = useDispatch();
-  const prevMonthName = formatMonth(prevMonth(month), 'MMM', locale);
+
+  const isPayPeriodsEnabled = useFeatureFlag('payPeriodsEnabled');
+  const [showPayPeriods] = useSyncedPref('showPayPeriods');
+  const [payPeriodFrequency] = useSyncedPref('payPeriodFrequency');
+  const [payPeriodStartDate] = useSyncedPref('payPeriodStartDate');
+  const payPeriodConfig = {
+    enabled: isPayPeriodsEnabled && showPayPeriods === 'true',
+    payFrequency:
+      (payPeriodFrequency as 'weekly' | 'biweekly' | 'monthly') ?? 'monthly',
+    startDate: payPeriodStartDate ?? '',
+  };
+
+  const prevMonthName = nameForMonth(
+    prevMonth(month, payPeriodConfig.enabled ? payPeriodConfig : undefined),
+    locale,
+    payPeriodConfig.enabled ? payPeriodConfig : undefined,
+    true,
+  );
   const sheetValue =
     useEnvelopeSheetValue({
       name: envelopeBudget.toBudget,
