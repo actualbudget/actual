@@ -14,10 +14,12 @@ void runClassic(
       // Subpath imports are always allowed
       `import foo from '#utils/foo'`,
 
-      // Node.js built-ins are allowed
+      // Node.js built-ins are allowed (including subpaths)
       `import fs from 'fs'`,
       `import path from 'path'`,
       `import crypto from 'node:crypto'`,
+      `import { readFile } from 'fs/promises'`,
+      `import posix from 'path/posix'`,
 
       // Virtual modules are allowed
       `import { registerSW } from 'virtual:pwa-register'`,

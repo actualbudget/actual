@@ -20,43 +20,50 @@ function getPackageName(source) {
 function findPackageJson(dir) {
   if (pkgCache.has(dir)) return pkgCache.get(dir);
 
+  const visited = [dir];
   let current = dir;
+  let result = null;
+
   while (true) {
     const pkgPath = path.join(current, 'package.json');
     try {
       const content = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
       if (content.name) {
-        const result = {
+        result = {
           name: content.name,
           deps: new Set([
             ...Object.keys(content.dependencies || {}),
             ...Object.keys(content.devDependencies || {}),
           ]),
         };
-        pkgCache.set(dir, result);
-        return result;
+        break;
       }
     } catch {
-      // no package.json here, keep walking
+      // keep walking
     }
     const parent = path.dirname(current);
     if (parent === current) break;
     current = parent;
+    visited.push(current);
   }
 
-  pkgCache.set(dir, null);
-  return null;
+  for (const d of visited) {
+    pkgCache.set(d, result);
+  }
+  return result;
 }
 
 function isExternalImport(source) {
   if (
     source.startsWith('.') ||
     source.startsWith('#') ||
-    source.startsWith('virtual:') ||
-    builtins.has(source)
+    source.startsWith('virtual:')
   ) {
     return false;
   }
+  // Check builtins using the package name to handle subpaths like fs/promises
+  const pkgName = getPackageName(source);
+  if (pkgName && builtins.has(pkgName)) return false;
   return true;
 }
 
