@@ -99,6 +99,9 @@
     "socks": ">=2.8.3"
   },
   "lint-staged": {
+    "packages/*/package.json": [
+      "ts-node ./bin/validate-publish-imports.ts --fix"
+    ],
     "*.{js,mjs,jsx,ts,tsx,md,json,yml,yaml}": [
       "oxfmt --no-error-on-unmatched-pattern"
     ],
