@@ -43,14 +43,10 @@ const sidebars = {
       collapsed: true,
       items: [
         {
-        type: 'category',
-        label: 'Install Actual',
-        collapsed: true,
-        items: [
-          'install/index',
-          'install/desktop-app',
-          'install/pikapods',
-        ],
+          type: 'category',
+          label: 'Install Actual',
+          collapsed: true,
+          items: ['install/index', 'install/desktop-app', 'install/pikapods'],
         },
         'getting-started/add-accounts',
         'getting-started/add-categories',
@@ -66,7 +62,6 @@ const sidebars = {
       collapsible: false,
       className: 'no-indent',
       items: [
-        
         {
           type: 'category',
           label: 'Installation & Configuration',
@@ -81,21 +76,33 @@ const sidebars = {
               label: 'On Your Own Machine',
               collapsible: false,
               className: 'no-indent',
-              items: ['install/desktop-app', 'install/docker', 'install/cli-tool', 'install/build-from-source'],
+              items: [
+                'install/desktop-app',
+                'install/docker',
+                'install/cli-tool',
+                'install/build-from-source',
+              ],
             },
             {
               type: 'category',
               label: 'In the Cloud',
               collapsible: false,
               className: 'no-indent',
-              items: ['install/pikapods','install/fly'],
+              items: ['install/pikapods', 'install/fly'],
             },
             {
               type: 'category',
               label: 'Configuration',
               collapsible: false,
               className: 'no-indent',
-              items: ['config/index', 'config/https', 'config/reverse-proxies', 'config/oauth-auth', 'config/multi-user', 'advanced/http-header-auth'],
+              items: [
+                'config/index',
+                'config/https',
+                'config/reverse-proxies',
+                'config/oauth-auth',
+                'config/multi-user',
+                'advanced/http-header-auth',
+              ],
             },
           ],
         },
@@ -119,68 +126,71 @@ const sidebars = {
             type: 'doc',
             id: 'accounts/index',
           },
-           items: [
-           'accounts/add-accounts',
-           {
-             type: 'category',
-             label: 'Credit Cards',
-             collapsed: true,
-             link: {
-               type: 'doc',
-               id: 'accounts/credit-cards/index',
+          items: [
+            'accounts/add-accounts',
+            {
+              type: 'category',
+              label: 'Credit Cards',
+              collapsed: true,
+              link: {
+                type: 'doc',
+                id: 'accounts/credit-cards/index',
+              },
+              items: [
+                'accounts/credit-cards/carrying-debt',
+                'accounts/credit-cards/paying-in-full',
+              ],
             },
-             items: ['accounts/credit-cards/carrying-debt', 'accounts/credit-cards/paying-in-full'],
-           },
-           'accounts/joint-accounts',
-           'accounts/reconciliation',
-           {
-             type: 'category',
-             label: 'Connecting Your Bank',
-             collapsed: true,
-             link: {
-               type: 'doc',
-               id: 'accounts/bank-sync',
-             },
-            items: [
-              'accounts/bank-sync/gocardless', 
-              'accounts/bank-sync/simplefin', 
-              'accounts/bank-sync/pluggyai',
-            ],
-           },
+            'accounts/joint-accounts',
+            'accounts/reconciliation',
+            {
+              type: 'category',
+              label: 'Connecting Your Bank',
+              collapsed: true,
+              link: {
+                type: 'doc',
+                id: 'accounts/bank-sync',
+              },
+              items: [
+                'accounts/bank-sync/gocardless',
+                'accounts/bank-sync/simplefin',
+                'accounts/bank-sync/pluggyai',
+              ],
+            },
           ],
         },
         //end accounts, begin transactions
         {
-         type: 'category',
-         label: 'Transactions',
-         collapsed: true,
-         link: {
-         type: 'doc',
-        id: 'transactions/importing',
-         },
-         items: [
-           'transactions/split-transactions', 
-           'transactions/transfers', 
-           'transactions/schedules', 
-           'transactions/filters',
-           {
-            type: 'category',
-            label: 'Rules',
-           collapsed: true,
-           link: {
-           type: 'doc',
-           id: 'transactions/rules/index',
-           },
-           items: [
-            'transactions/rules/custom',
-            'transactions/rules/rule-templating',
-            'transactions/rules/multi-currency',
-           ],
+          type: 'category',
+          label: 'Transactions',
+          collapsed: true,
+          link: {
+            type: 'doc',
+            id: 'transactions/importing',
           },
-           'transactions/merging', 
-           'transactions/payees', 
-           'transactions/tags',
-           'transactions/bulk-editing',
+          items: [
+            'transactions/split-transactions',
+            'transactions/transfers',
+            'transactions/schedules',
+            'transactions/filters',
+            {
+              type: 'category',
+              label: 'Rules',
+              collapsed: true,
+              link: {
+                type: 'doc',
+                id: 'transactions/rules/index',
+              },
+              items: [
+                'transactions/rules/custom',
+                'transactions/rules/rule-templating',
+                'transactions/rules/multi-currency',
+              ],
+            },
+            'transactions/merging',
+            'transactions/payees',
+            'transactions/tags',
+            'transactions/bulk-editing',
           ],
         },
         //end transactions, begin budgeting
@@ -211,8 +221,8 @@ const sidebars = {
             id: 'reports/index',
           },
           items: [
-            'reports/custom-reports', 
-            'reports/crossover-point-report', 
+            'reports/custom-reports',
+            'reports/crossover-point-report',
             'reports/budget-analysis-report',
             'reports/formulas',
           ],
@@ -236,7 +246,7 @@ const sidebars = {
             'troubleshooting/shared-array-buffer',
             'troubleshooting/server',
             'troubleshooting/actual-server-repo-move',
-            ],
+          ],
         },
         //end troubleshooting
         'community-repos',
@@ -308,6 +318,6 @@ const sidebars = {
         },
       ],
     },
- ],
+  ],
 };
 module.exports = sidebars;
