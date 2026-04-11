@@ -763,10 +763,10 @@ export function withPercentageLabels(data: SankeyData): SankeyData {
 
   const nodes = data.nodes.map((node, i) => {
     const total = layerTotal.get(depth[i]) ?? 0;
-    if (total === 0) return node;
     return {
       ...node,
-      percentageLabel: `${((nodeValue(i) / total) * 100).toFixed(1)}%`,
+      percentageLabel:
+        total === 0 ? '0%' : `${((nodeValue(i) / total) * 100).toFixed(1)}%`,
     };
   });
 
