@@ -164,7 +164,7 @@ export default defineConfig(async ({ mode }) => {
       },
     },
     resolve: {
-      ...(!env.IS_GENERIC_BROWSER && {
+      ...(mode !== 'browser' && {
         conditions: ['electron-renderer', 'module', 'browser', 'default'],
       }),
       tsconfigPaths: true,
