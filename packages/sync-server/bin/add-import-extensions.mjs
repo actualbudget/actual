@@ -76,10 +76,10 @@ function resolveSubpathImport(importPath, fromFile) {
   }
 
   for (const [pattern, target] of wildcardEntries) {
-    const prefix = pattern.replace('*', '');
+    const prefix = pattern.replaceAll('*', '');
     if (importPath.startsWith(prefix)) {
       const wildcard = importPath.slice(prefix.length);
-      return toRelativePath(target.replace('*', wildcard), fromFile);
+      return toRelativePath(target.replaceAll('*', wildcard), fromFile);
     }
   }
 
