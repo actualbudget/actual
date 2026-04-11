@@ -12,306 +12,137 @@
   },
   "imports": {
     "#platform/server/asyncStorage": {
-      "types": "./lib-dist/decl/src/platform/server/asyncStorage/index.d.ts",
       "electron": "./src/platform/server/asyncStorage/index.electron.ts",
       "api": "./src/platform/server/asyncStorage/index.api.ts",
       "default": "./src/platform/server/asyncStorage/index.ts"
     },
     "#platform/server/connection": {
-      "types": "./lib-dist/decl/src/platform/server/connection/index.d.ts",
       "electron": "./src/platform/server/connection/index.electron.ts",
       "api": "./src/platform/server/connection/index.api.ts",
       "default": "./src/platform/server/connection/index.ts"
     },
     "#platform/server/fetch": {
-      "types": "./lib-dist/decl/src/platform/server/fetch/index.d.ts",
       "electron": "./src/platform/server/fetch/index.electron.ts",
       "api": "./src/platform/server/fetch/index.api.ts",
       "default": "./src/platform/server/fetch/index.ts"
     },
     "#platform/server/fs": {
-      "types": "./lib-dist/decl/src/platform/server/fs/index.d.ts",
       "electron": "./src/platform/server/fs/index.electron.ts",
       "api": "./src/platform/server/fs/index.api.ts",
       "default": "./src/platform/server/fs/index.ts"
     },
     "#platform/server/fs/path-join": {
-      "types": "./lib-dist/decl/src/platform/server/fs/path-join.d.ts",
       "electron": "./src/platform/server/fs/path-join.electron.ts",
       "api": "./src/platform/server/fs/path-join.api.ts",
       "default": "./src/platform/server/fs/path-join.ts"
     },
     "#platform/server/sqlite": {
-      "types": "./lib-dist/decl/src/platform/server/sqlite/index.d.ts",
       "electron": "./src/platform/server/sqlite/index.electron.ts",
       "api": "./src/platform/server/sqlite/index.api.ts",
       "default": "./src/platform/server/sqlite/index.ts"
     },
     "#platform/client/connection": {
-      "types": "./lib-dist/decl/src/platform/client/connection/index.d.ts",
       "electron-renderer": "./src/platform/client/connection/index.ts",
       "default": "./src/platform/client/connection/index.browser.ts"
     },
     "#server/encryption/encryption-internals": {
-      "types": "./lib-dist/decl/src/server/encryption/encryption-internals.d.ts",
       "electron": "./src/server/encryption/encryption-internals.electron.ts",
       "api": "./src/server/encryption/encryption-internals.api.ts",
       "default": "./src/server/encryption/encryption-internals.ts"
     },
     "#shared/platform": {
-      "types": "./lib-dist/decl/src/shared/platform.d.ts",
       "electron": "./src/shared/platform.electron.ts",
       "api": "./src/shared/platform.api.ts",
       "default": "./src/shared/platform.ts"
     },
-    "#mocks": {
-      "types": "./lib-dist/decl/src/mocks/index.d.ts",
-      "default": "./src/mocks/index.ts"
-    },
-    "#platform/client/undo": {
-      "types": "./lib-dist/decl/src/platform/client/undo/index.d.ts",
-      "default": "./src/platform/client/undo/index.ts"
-    },
-    "#platform/exceptions": {
-      "types": "./lib-dist/decl/src/platform/exceptions/index.d.ts",
-      "default": "./src/platform/exceptions/index.ts"
-    },
-    "#platform/server/indexeddb": {
-      "types": "./lib-dist/decl/src/platform/server/indexeddb/index.d.ts",
-      "default": "./src/platform/server/indexeddb/index.ts"
-    },
-    "#platform/server/log": {
-      "types": "./lib-dist/decl/src/platform/server/log/index.d.ts",
-      "default": "./src/platform/server/log/index.ts"
-    },
-    "#server/aql": {
-      "types": "./lib-dist/decl/src/server/aql/index.d.ts",
-      "default": "./src/server/aql/index.ts"
-    },
-    "#server/db": {
-      "types": "./lib-dist/decl/src/server/db/index.d.ts",
-      "default": "./src/server/db/index.ts"
-    },
-    "#server/encryption": {
-      "types": "./lib-dist/decl/src/server/encryption/index.d.ts",
-      "default": "./src/server/encryption/index.ts"
-    },
-    "#server/importers": {
-      "types": "./lib-dist/decl/src/server/importers/index.d.ts",
-      "default": "./src/server/importers/index.ts"
-    },
-    "#server/rules": {
-      "types": "./lib-dist/decl/src/server/rules/index.d.ts",
-      "default": "./src/server/rules/index.ts"
-    },
-    "#server/sync": {
-      "types": "./lib-dist/decl/src/server/sync/index.d.ts",
-      "default": "./src/server/sync/index.ts"
-    },
-    "#server/transactions": {
-      "types": "./lib-dist/decl/src/server/transactions/index.d.ts",
-      "default": "./src/server/transactions/index.ts"
-    },
-    "#types/models": {
-      "types": "./lib-dist/decl/src/types/models/index.d.ts",
-      "default": "./src/types/models/index.ts"
-    },
-    "#platform/client/*": {
-      "types": "./lib-dist/decl/src/platform/client/*.d.ts",
-      "default": "./src/platform/client/*.ts"
-    },
-    "#platform/server/*": {
-      "types": "./lib-dist/decl/src/platform/server/*.d.ts",
-      "default": "./src/platform/server/*.ts"
-    },
-    "#platform/*": {
-      "types": "./lib-dist/decl/src/platform/*.d.ts",
-      "default": "./src/platform/*.ts"
-    },
-    "#server/*": {
-      "types": "./lib-dist/decl/src/server/*.d.ts",
-      "default": "./src/server/*.ts"
-    },
-    "#shared/*": {
-      "types": "./lib-dist/decl/src/shared/*.d.ts",
-      "default": "./src/shared/*.ts"
-    },
-    "#types/*": {
-      "types": "./lib-dist/decl/src/types/*.d.ts",
-      "default": "./src/types/*.ts"
-    },
-    "#mocks/*": {
-      "types": "./lib-dist/decl/src/mocks/*.d.ts",
-      "default": "./src/mocks/*.ts"
-    },
-    "#*": {
-      "types": "./lib-dist/decl/src/*.d.ts",
-      "default": "./src/*.ts"
-    }
+    "#mocks": "./src/mocks/index.ts",
+    "#platform/client/undo": "./src/platform/client/undo/index.ts",
+    "#platform/exceptions": "./src/platform/exceptions/index.ts",
+    "#platform/server/indexeddb": "./src/platform/server/indexeddb/index.ts",
+    "#platform/server/log": "./src/platform/server/log/index.ts",
+    "#server/aql": "./src/server/aql/index.ts",
+    "#server/db": "./src/server/db/index.ts",
+    "#server/encryption": "./src/server/encryption/index.ts",
+    "#server/importers": "./src/server/importers/index.ts",
+    "#server/rules": "./src/server/rules/index.ts",
+    "#server/sync": "./src/server/sync/index.ts",
+    "#server/transactions": "./src/server/transactions/index.ts",
+    "#types/models": "./src/types/models/index.ts",
+    "#platform/client/*": "./src/platform/client/*.ts",
+    "#platform/server/*": "./src/platform/server/*.ts",
+    "#platform/*": "./src/platform/*.ts",
+    "#server/*": "./src/server/*.ts",
+    "#shared/*": "./src/shared/*.ts",
+    "#types/*": "./src/types/*.ts",
+    "#mocks/*": "./src/mocks/*.ts",
+    "#*": "./src/*.ts"
   },
   "exports": {
-    "./client/accounts/*": {
-      "types": "./lib-dist/decl/src/client/accounts/*.d.ts",
-      "default": "./src/client/accounts/*.ts"
-    },
-    "./client/app/*": {
-      "types": "./lib-dist/decl/src/client/app/*.d.ts",
-      "default": "./src/client/app/*.ts"
-    },
-    "./client/budgets/*": {
-      "types": "./lib-dist/decl/src/client/budgets/*.d.ts",
-      "default": "./src/client/budgets/*.ts"
-    },
-    "./client/data-hooks/schedules": {
-      "types": "./lib-dist/decl/src/client/data-hooks/schedules.d.ts",
-      "default": "./src/client/data-hooks/schedules.tsx"
-    },
-    "./client/data-hooks/*": {
-      "types": "./lib-dist/decl/src/client/data-hooks/*.d.ts",
-      "default": "./src/client/data-hooks/*.ts"
-    },
-    "./client/modals/*": {
-      "types": "./lib-dist/decl/src/client/modals/*.d.ts",
-      "default": "./src/client/modals/*.ts"
-    },
-    "./client/notifications/*": {
-      "types": "./lib-dist/decl/src/client/notifications/*.d.ts",
-      "default": "./src/client/notifications/*.ts"
-    },
-    "./client/prefs/*": {
-      "types": "./lib-dist/decl/src/client/prefs/*.d.ts",
-      "default": "./src/client/prefs/*.ts"
-    },
-    "./client/queries/*": {
-      "types": "./lib-dist/decl/src/client/queries/*.d.ts",
-      "default": "./src/client/queries/*.ts"
-    },
-    "./client/redux": {
-      "types": "./lib-dist/decl/src/client/redux/index.d.ts",
-      "default": "./src/client/redux/index.ts"
-    },
-    "./client/store": {
-      "types": "./lib-dist/decl/src/client/store/index.d.ts",
-      "default": "./src/client/store/index.ts"
-    },
-    "./client/store/mock": {
-      "types": "./lib-dist/decl/src/client/store/mock.d.ts",
-      "default": "./src/client/store/mock.ts"
-    },
-    "./client/users/*": {
-      "types": "./lib-dist/decl/src/client/users/*.d.ts",
-      "default": "./src/client/users/*.ts"
-    },
-    "./client/queries": {
-      "types": "./lib-dist/decl/src/client/queries.d.ts",
-      "default": "./src/client/queries.ts"
-    },
-    "./client/query-helpers": {
-      "types": "./lib-dist/decl/src/client/query-helpers.d.ts",
-      "default": "./src/client/query-helpers.ts"
-    },
-    "./client/query-hooks": {
-      "types": "./lib-dist/decl/src/client/query-hooks.d.ts",
-      "default": "./src/client/query-hooks.ts"
-    },
-    "./client/reports": {
-      "types": "./lib-dist/decl/src/client/reports.d.ts",
-      "default": "./src/client/reports.ts"
-    },
-    "./client/shared-listeners": {
-      "types": "./lib-dist/decl/src/client/shared-listeners.d.ts",
-      "default": "./src/client/shared-listeners.ts"
-    },
-    "./client/SpreadsheetProvider": {
-      "types": "./lib-dist/decl/src/client/SpreadsheetProvider.d.ts",
-      "default": "./src/client/SpreadsheetProvider.tsx"
-    },
-    "./client/transfer": {
-      "types": "./lib-dist/decl/src/client/transfer.d.ts",
-      "default": "./src/client/transfer.ts"
-    },
-    "./client/undo": {
-      "types": "./lib-dist/decl/src/client/undo.d.ts",
-      "default": "./src/client/undo.ts"
-    },
-    "./mocks": {
-      "types": "./lib-dist/decl/src/mocks/index.d.ts",
-      "default": "./src/mocks/index.ts"
-    },
+    "./client/accounts/*": "./src/client/accounts/*.ts",
+    "./client/app/*": "./src/client/app/*.ts",
+    "./client/budgets/*": "./src/client/budgets/*.ts",
+    "./client/data-hooks/schedules": "./src/client/data-hooks/schedules.tsx",
+    "./client/data-hooks/*": "./src/client/data-hooks/*.ts",
+    "./client/modals/*": "./src/client/modals/*.ts",
+    "./client/notifications/*": "./src/client/notifications/*.ts",
+    "./client/prefs/*": "./src/client/prefs/*.ts",
+    "./client/queries/*": "./src/client/queries/*.ts",
+    "./client/redux": "./src/client/redux/index.ts",
+    "./client/store": "./src/client/store/index.ts",
+    "./client/store/mock": "./src/client/store/mock.ts",
+    "./client/users/*": "./src/client/users/*.ts",
+    "./client/queries": "./src/client/queries.ts",
+    "./client/query-helpers": "./src/client/query-helpers.ts",
+    "./client/query-hooks": "./src/client/query-hooks.ts",
+    "./client/reports": "./src/client/reports.ts",
+    "./client/shared-listeners": "./src/client/shared-listeners.ts",
+    "./client/SpreadsheetProvider": "./src/client/SpreadsheetProvider.tsx",
+    "./client/transfer": "./src/client/transfer.ts",
+    "./client/undo": "./src/client/undo.ts",
+    "./mocks": "./src/mocks/index.ts",
     "./platform/client/connection": {
-      "types": "./lib-dist/decl/src/platform/client/connection/index.d.ts",
       "electron-renderer": "./src/platform/client/connection/index.ts",
       "default": "./src/platform/client/connection/index.browser.ts"
     },
-    "./platform/client/undo": {
-      "types": "./lib-dist/decl/src/platform/client/undo/index.d.ts",
-      "default": "./src/platform/client/undo/index.ts"
-    },
-    "./platform/exceptions": {
-      "types": "./lib-dist/decl/src/platform/exceptions/index.d.ts",
-      "default": "./src/platform/exceptions/index.ts"
-    },
+    "./platform/client/undo": "./src/platform/client/undo/index.ts",
+    "./platform/exceptions": "./src/platform/exceptions/index.ts",
     "./platform/server/asyncStorage": {
-      "types": "./lib-dist/decl/src/platform/server/asyncStorage/index.d.ts",
       "electron": "./src/platform/server/asyncStorage/index.electron.ts",
       "api": "./src/platform/server/asyncStorage/index.api.ts",
       "default": "./src/platform/server/asyncStorage/index.ts"
     },
     "./platform/server/connection": {
-      "types": "./lib-dist/decl/src/platform/server/connection/index.d.ts",
       "electron": "./src/platform/server/connection/index.electron.ts",
       "api": "./src/platform/server/connection/index.api.ts",
       "default": "./src/platform/server/connection/index.ts"
     },
     "./platform/server/fetch": {
-      "types": "./lib-dist/decl/src/platform/server/fetch/index.d.ts",
       "electron": "./src/platform/server/fetch/index.electron.ts",
       "api": "./src/platform/server/fetch/index.api.ts",
       "default": "./src/platform/server/fetch/index.ts"
     },
     "./platform/server/fs": {
-      "types": "./lib-dist/decl/src/platform/server/fs/index.d.ts",
       "electron": "./src/platform/server/fs/index.electron.ts",
       "api": "./src/platform/server/fs/index.api.ts",
       "default": "./src/platform/server/fs/index.ts"
     },
-    "./platform/server/log": {
-      "types": "./lib-dist/decl/src/platform/server/log/index.d.ts",
-      "default": "./src/platform/server/log/index.ts"
-    },
+    "./platform/server/log": "./src/platform/server/log/index.ts",
     "./platform/server/sqlite": {
-      "types": "./lib-dist/decl/src/platform/server/sqlite/index.d.ts",
       "electron": "./src/platform/server/sqlite/index.electron.ts",
       "api": "./src/platform/server/sqlite/index.api.ts",
       "default": "./src/platform/server/sqlite/index.ts"
     },
     "./server/budget/types/*": "./src/server/budget/types/*.d.ts",
-    "./server/*": {
-      "types": "./lib-dist/decl/src/server/*.d.ts",
-      "default": "./src/server/*.ts"
-    },
+    "./server/*": "./src/server/*.ts",
     "./shared/platform": {
-      "types": "./lib-dist/decl/src/shared/platform.d.ts",
       "electron": "./src/shared/platform.electron.ts",
       "api": "./src/shared/platform.api.ts",
       "default": "./src/shared/platform.ts"
     },
-    "./shared/*": {
-      "types": "./lib-dist/decl/src/shared/*.d.ts",
-      "default": "./src/shared/*.ts"
-    },
-    "./types/models": {
-      "types": "./lib-dist/decl/src/types/models/index.d.ts",
-      "default": "./src/types/models/index.ts"
-    },
-    "./types/*": {
-      "types": "./lib-dist/decl/src/types/*.d.ts",
-      "default": "./src/types/*.ts"
-    },
-    "./typings/*": {
-      "types": "./lib-dist/decl/typings/*.d.ts",
-      "default": "./typings/*.ts"
-    },
+    "./shared/*": "./src/shared/*.ts",
+    "./types/models": "./src/types/models/index.ts",
+    "./types/*": "./src/types/*.ts",
+    "./typings/*": "./typings/*.ts",
     "./lib-dist/electron/bundle.desktop.js": "./lib-dist/electron/bundle.desktop.js"
   },
   "scripts": {
@@ -323,7 +154,9 @@
     "test": "npm-run-all -cp 'test:*'",
     "test:node": "ENV=node vitest --run",
     "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
-    "typecheck": "tsgo -b && tsc-strict"
+    "typecheck": "tsgo -b && tsc-strict",
+    "prepack": "node scripts/add-types-conditions.mjs",
+    "postpack": "node scripts/restore-package-json.mjs"
   },
   "dependencies": {
     "@jlongster/sql.js": "^1.6.7",

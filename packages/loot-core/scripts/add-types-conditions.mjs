@@ -1,0 +1,83 @@
+/**
+ * Pre-pack script: adds "types" conditions to imports/exports in package.json
+ * so that npm consumers resolve .d.ts declarations instead of raw .ts source.
+ *
+ * This runs via the "prepack" lifecycle hook. The original package.json is
+ * backed up and restored by restore-package-json.mjs (postpack).
+ */
+import { copyFileSync, readFileSync, writeFileSync } from 'fs';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkgPath = resolve(__dirname, '..', 'package.json');
+const backupPath = resolve(__dirname, '..', 'package.json.bak');
+
+// Derive the .d.ts types path from a source .ts/.tsx path
+function toTypesPath(srcPath) {
+  if (srcPath.startsWith('./src/')) {
+    return srcPath
+      .replace(/^\.\/src\//, './lib-dist/decl/src/')
+      .replace(/\.tsx?$/, '.d.ts');
+  }
+  if (srcPath.startsWith('./typings/')) {
+    return srcPath
+      .replace(/^\.\/typings\//, './lib-dist/decl/typings/')
+      .replace(/\.tsx?$/, '.d.ts');
+  }
+  return null;
+}
+
+function shouldSkip(value) {
+  if (typeof value === 'string') {
+    // Already a .d.ts file or a .js runtime-only entry
+    return value.endsWith('.d.ts') || value.endsWith('.js');
+  }
+  return false;
+}
+
+function transformEntry(value) {
+  if (typeof value === 'string') {
+    if (shouldSkip(value)) return value;
+    const typesPath = toTypesPath(value);
+    if (!typesPath) return value;
+    return { types: typesPath, default: value };
+  }
+
+  if (typeof value === 'object' && value !== null) {
+    // Find the "default" value to derive the types path
+    const defaultValue = value.default;
+    if (!defaultValue || shouldSkip(defaultValue)) return value;
+
+    const typesPath = toTypesPath(defaultValue);
+    if (!typesPath) return value;
+
+    // Insert "types" as the first key
+    return { types: typesPath, ...value };
+  }
+
+  return value;
+}
+
+function transformMap(map) {
+  const result = {};
+  for (const [key, value] of Object.entries(map)) {
+    result[key] = transformEntry(value);
+  }
+  return result;
+}
+
+// Backup and transform
+copyFileSync(pkgPath, backupPath);
+
+const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
+
+if (pkg.imports) {
+  pkg.imports = transformMap(pkg.imports);
+}
+if (pkg.exports) {
+  pkg.exports = transformMap(pkg.exports);
+}
+
+writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+console.log('prepack: added types conditions to package.json');
