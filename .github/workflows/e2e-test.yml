@@ -62,6 +62,9 @@ jobs:
           download-translations: 'false'
       - name: Trust the repository directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Rebuild Desktop app dependencies
+        run: |
+          yarn rebuild-electron
       - name: Run Desktop app E2E Tests
         run: |
           xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" -- yarn e2e:desktop
