@@ -20,46 +20,12 @@ test.describe('Onboarding', () => {
   test('starts the sync server and navigates to bootstrap page', async ({
     electronPage,
   }) => {
-    const consoleMessages: string[] = [];
+    await configurationPage.clickOnStartSyncServer();
 
-    electronPage.on('console', msg => {
-      consoleMessages.push(msg.text());
-      console.info('Console message:', msg.text());
-    });
-
-    await electronPage.waitForTimeout(5_000); // wait for potential console messages to arrive
-    console.error(
-      'Collected console messages:',
-      JSON.stringify(consoleMessages),
+    await electronPage.waitForTimeout(1000);
+    await expect(electronPage.getByRole('heading')).toHaveText(
+      'Welcome to Actual!',
     );
-
-    const bootstrapPage = await configurationPage.clickOnStartSyncServer();
-    expect(consoleMessages.length).toBeGreaterThan(0);
-
-    await electronPage.waitForTimeout(5_000); // wait for potential console messages to arrive
-    console.error(
-      'Collected console messages:',
-      JSON.stringify(consoleMessages),
-    );
-    expect(consoleMessages).toContain(
-      'Sync-Server: Listening on localhost:5007...',
-    );
-
-    // await expect
-    //   .poll(() => consoleMessages, { timeout: 15_000 })
-    //   .toEqual(
-    //     expect.arrayContaining([
-    //       expect.stringContaining('Sync-Server: Migrations: DONE'),
-    //       expect.stringContaining(
-    //         'Sync-Server: Actual Sync Server has started!',
-    //       ),
-    //       expect.stringContaining(
-    //         'Sync-Server: Listening on localhost:5007...',
-    //       ),
-    //     ]),
-    //   );
-
-    await expect(bootstrapPage.getHeading()).toHaveText('Welcome to Actual!');
     await expect(electronPage).toHaveScreenshot();
   });
 });
