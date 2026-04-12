@@ -25,6 +25,7 @@ export class ConfigurationPage {
 
   async clickOnStartSyncServer() {
     await this.page.getByRole('button', { name: 'Start' }).click();
+    await this.page.waitForURL('**/bootstrap');
     return new BootstrapPage(this.page);
   }
 
