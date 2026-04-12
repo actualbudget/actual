@@ -12,7 +12,7 @@ This release contains the following notable improvements, along with numerous fi
 - Experimental: Payee Locations: Actual can now remember where you've used a payee and suggest payees based on nearby locations
 - Experimental: Actual CLI: a new command-line tool for interacting with your budget, see [the docs](/docs/api/cli) to get started
 
-**Docker Tag: v26.4.0**
+**Docker Tag: 26.4.0**
 
 #### Features
 
@@ -154,7 +154,7 @@ This release also includes several user-facing improvements and performance work
 
 - Custom themes: bar/pie chart theming support, simpler custom-theme CSS variables, and a new high-contrast light theme.
 
-**Docker Tag: v26.3.0**
+**Docker Tag: 26.3.0**
 
 #### Features
 
@@ -282,7 +282,7 @@ Release date: 2026-02-22
 
 This release contains two critical security fixes for users of SimpleFin, Pluggy or the multi-user feature. If you do not use these features: feel free to skip this version.
 
-**Docker Tag: v26.2.1**
+**Docker Tag: 26.2.1**
 
 #### Bugfixes
 
@@ -299,7 +299,7 @@ This release contains the following notable improvements, along with numerous fi
 - Experimental feature: Custom themes [docs](https://actualbudget.org/docs/experimental/custom-themes)
 - Experimental feature: Budget analysis report [docs](https://actualbudget.org/docs/experimental/budget-analysis-report)
 
-**Docker Tag: v26.2.0**
+**Docker Tag: 26.2.0**
 
 #### Features
 
@@ -451,7 +451,7 @@ This release contains the following notable improvements, along with numerous fi
 
 For Linux users, we have officially released to [Flathub](https://flathub.org/en/apps/com.actualbudget.actual)!
 
-**Docker Tag: v26.1.0**
+**Docker Tag: 26.1.0**
 
 #### Features
 
@@ -569,7 +569,7 @@ This release contains the following notable improvements, along with numerous fi
 - Add running balance on mobile account view.
 - Add CTRL/CMD+Enter keyboard command for entering only a single new transaction on desktop.
 
-**Docker Tag: v25.12.0**
+**Docker Tag: 25.12.0**
 
 #### Features
 
