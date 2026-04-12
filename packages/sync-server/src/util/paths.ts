@@ -1,6 +1,6 @@
 import { join, resolve } from 'node:path';
 
-import { config } from '../load-config';
+import { config } from '#load-config';
 
 import type { BrandedId } from './types';
 

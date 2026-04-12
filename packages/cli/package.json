@@ -11,6 +11,14 @@
     "dist"
   ],
   "type": "module",
+  "imports": {
+    "#commands/*": "./src/commands/*.ts",
+    "#config": "./src/config.ts",
+    "#connection": "./src/connection.ts",
+    "#input": "./src/input.ts",
+    "#output": "./src/output.ts",
+    "#utils": "./src/utils.ts"
+  },
   "scripts": {
     "build": "vite build",
     "test": "vitest --run",

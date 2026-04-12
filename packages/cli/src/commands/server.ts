@@ -2,8 +2,8 @@ import * as api from '@actual-app/api';
 import { Option } from 'commander';
 import type { Command } from 'commander';
 
-import { withConnection } from '../connection';
-import { printOutput } from '../output';
+import { withConnection } from '#connection';
+import { printOutput } from '#output';
 
 export function registerServerCommand(program: Command) {
   const server = program.command('server').description('Server utilities');

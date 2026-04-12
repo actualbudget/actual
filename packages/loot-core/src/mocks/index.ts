@@ -1,12 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import * as monthUtils from '../shared/months';
+import * as monthUtils from '#shared/months';
 import type {
   AccountEntity,
   CategoryEntity,
   CategoryGroupEntity,
   TransactionEntity,
-} from '../types/models';
+} from '#types/models';
 
 import { random } from './random';
 

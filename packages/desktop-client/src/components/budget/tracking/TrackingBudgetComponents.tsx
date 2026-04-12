@@ -14,32 +14,27 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import * as monthUtils from '@actual-app/core/shared/months';
 import { css } from '@emotion/css';
 import { t } from 'i18next';
 
-import * as monthUtils from 'loot-core/shared/months';
-
+import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
+import { makeAmountGrey } from '#components/budget/util';
+import { NotesButton } from '#components/NotesButton';
+import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
+import { Field, SheetCell } from '#components/table';
+import type { SheetCellProps } from '#components/table';
+import { useCategoryScheduleGoalTemplateIndicator } from '#hooks/useCategoryScheduleGoalTemplateIndicator';
+import { useFormat } from '#hooks/useFormat';
+import { useNavigate } from '#hooks/useNavigate';
+import { useSheetValue } from '#hooks/useSheetValue';
+import { useUndo } from '#hooks/useUndo';
+import type { Binding, SheetFields } from '#spreadsheet';
+import { trackingBudget } from '#spreadsheet/bindings';
 import type { CategoryGroupMonthProps, CategoryMonthProps } from '..';
 
 import { BalanceMenu } from './BalanceMenu';
 import { BudgetMenu } from './BudgetMenu';
-
-import { BalanceWithCarryover } from '@desktop-client/components/budget/BalanceWithCarryover';
-import { makeAmountGrey } from '@desktop-client/components/budget/util';
-import { NotesButton } from '@desktop-client/components/NotesButton';
-import {
-  CellValue,
-  CellValueText,
-} from '@desktop-client/components/spreadsheet/CellValue';
-import { Field, SheetCell } from '@desktop-client/components/table';
-import type { SheetCellProps } from '@desktop-client/components/table';
-import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import { useUndo } from '@desktop-client/hooks/useUndo';
-import type { Binding, SheetFields } from '@desktop-client/spreadsheet';
-import { trackingBudget } from '@desktop-client/spreadsheet/bindings';
 
 export const useTrackingSheetValue = <
   FieldName extends SheetFields<'tracking-budget'>,

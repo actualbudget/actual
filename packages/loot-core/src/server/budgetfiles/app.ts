@@ -1,36 +1,40 @@
 // @ts-strict-ignore
 import * as CRDT from '@actual-app/crdt';
 
+import { createTestBudget } from '#mocks/budget';
+import { captureBreadcrumb, captureException } from '#platform/exceptions';
 import * as asyncStorage from '#platform/server/asyncStorage';
 import * as connection from '#platform/server/connection';
 import * as fs from '#platform/server/fs';
 import { logger } from '#platform/server/log';
-import * as Platform from '#shared/platform';
-import { createTestBudget } from '../../mocks/budget';
-import { captureBreadcrumb, captureException } from '../../platform/exceptions';
-import type { Budget } from '../../types/budget';
-import { createApp } from '../app';
-import * as budget from '../budget/base';
-import * as cloudStorage from '../cloud-storage';
-import * as db from '../db';
-import * as mappings from '../db/mappings';
-import { handleBudgetImport } from '../importers';
-import type { ImportableBudgetType } from '../importers';
-import { app as mainApp } from '../main-app';
-import { mutator } from '../mutators';
-import * as prefs from '../prefs';
-import { getServer } from '../server-config';
-import * as sheet from '../sheet';
-import { clearFullSyncTimeout, initialFullSync, setSyncingMode } from '../sync';
-import * as syncMigrations from '../sync/migrate';
-import * as rules from '../transactions/transaction-rules';
-import { clearUndo } from '../undo';
-import { updateVersion } from '../update';
+import { createApp } from '#server/app';
+import * as budget from '#server/budget/base';
+import * as cloudStorage from '#server/cloud-storage';
+import * as db from '#server/db';
+import * as mappings from '#server/db/mappings';
+import { handleBudgetImport } from '#server/importers';
+import type { ImportableBudgetType } from '#server/importers';
+import { app as mainApp } from '#server/main-app';
+import { mutator } from '#server/mutators';
+import * as prefs from '#server/prefs';
+import { getServer } from '#server/server-config';
+import * as sheet from '#server/sheet';
+import {
+  clearFullSyncTimeout,
+  initialFullSync,
+  setSyncingMode,
+} from '#server/sync';
+import * as syncMigrations from '#server/sync/migrate';
+import * as rules from '#server/transactions/transaction-rules';
+import { clearUndo } from '#server/undo';
+import { updateVersion } from '#server/update';
 import {
   idFromBudgetName,
   uniqueBudgetName,
   validateBudgetName,
-} from '../util/budget-name';
+} from '#server/util/budget-name';
+import * as Platform from '#shared/platform';
+import type { Budget } from '#types/budget';
 
 import {
   loadBackup as _loadBackup,
@@ -646,7 +650,11 @@ async function uploadFileWeb({
     return null;
   }
 
-  await fs.writeFile('/uploads/' + filename, contents);
+  const safeName = filename.split(/[/\\]/).pop()?.replaceAll('\0', '');
+  if (!safeName || safeName === '.' || safeName === '..') {
+    throw new Error('Invalid upload filename');
+  }
+  await fs.writeFile(fs.join('/uploads', safeName), contents);
   return {};
 }
 

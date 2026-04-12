@@ -12,25 +12,24 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import * as Platform from '@actual-app/core/shared/platform';
+import { amountToInteger, integerToAmount } from '@actual-app/core/shared/util';
 import { t } from 'i18next';
 
-import * as Platform from 'loot-core/shared/platform';
-import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
-
-import { BudgetMenu } from '@desktop-client/components/budget/envelope/BudgetMenu';
-import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
+import { BudgetMenu } from '#components/budget/envelope/BudgetMenu';
+import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '@desktop-client/components/common/Modal';
-import { FocusableAmountInput } from '@desktop-client/components/mobile/transactions/FocusableAmountInput';
-import { Notes } from '@desktop-client/components/Notes';
-import { useCategory } from '@desktop-client/hooks/useCategory';
-import { useNotes } from '@desktop-client/hooks/useNotes';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
+} from '#components/common/Modal';
+import { FocusableAmountInput } from '#components/mobile/transactions/FocusableAmountInput';
+import { Notes } from '#components/Notes';
+import { useCategory } from '#hooks/useCategory';
+import { useNotes } from '#hooks/useNotes';
+import type { Modal as ModalType } from '#modals/modalsSlice';
+import { envelopeBudget } from '#spreadsheet/bindings';
 
 type EnvelopeBudgetMenuModalProps = Extract<
   ModalType,

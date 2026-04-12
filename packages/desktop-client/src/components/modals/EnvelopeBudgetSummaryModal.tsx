@@ -2,31 +2,26 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
-
 import {
   format as formatMonth,
   prevMonth,
   sheetForMonth,
-} from 'loot-core/shared/months';
-import type { CategoryEntity } from 'loot-core/types/models/category';
+} from '@actual-app/core/shared/months';
+import type { CategoryEntity } from '@actual-app/core/types/models/category';
 
-import { ToBudgetAmount } from '@desktop-client/components/budget/envelope/budgetsummary/ToBudgetAmount';
-import { TotalsList } from '@desktop-client/components/budget/envelope/budgetsummary/TotalsList';
-import { useEnvelopeSheetValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { useCategoriesById } from '@desktop-client/hooks/useCategories';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
-import { useUndo } from '@desktop-client/hooks/useUndo';
-import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
+import { ToBudgetAmount } from '#components/budget/envelope/budgetsummary/ToBudgetAmount';
+import { TotalsList } from '#components/budget/envelope/budgetsummary/TotalsList';
+import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { useCategoriesById } from '#hooks/useCategories';
+import { useFormat } from '#hooks/useFormat';
+import { useLocale } from '#hooks/useLocale';
+import { SheetNameProvider } from '#hooks/useSheetName';
+import { useUndo } from '#hooks/useUndo';
+import { collapseModals, pushModal } from '#modals/modalsSlice';
+import type { Modal as ModalType } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
+import { envelopeBudget } from '#spreadsheet/bindings';
 
 type EnvelopeBudgetSummaryModalProps = Extract<
   ModalType,

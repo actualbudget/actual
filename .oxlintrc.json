@@ -36,6 +36,7 @@
     "actual/prefer-const": "error",
     "actual/no-anchor-tag": "error",
     "actual/no-react-default-import": "error",
+    "actual/prefer-subpath-imports": "error",
 
     // JSX A11y rules
     "jsx-a11y/no-autofocus": [
@@ -335,7 +336,7 @@
         ],
         "patterns": [
           {
-            "group": ["**/*.api", "**/*.web", "**/*.electron"],
+            "group": ["**/*.api", "**/*.electron"],
             "message": "Don't directly reference imports from other platforms"
           },
           {

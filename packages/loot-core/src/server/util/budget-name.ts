@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import * as fs from '#platform/server/fs';
-import { handlers } from '../main';
+import { handlers } from '#server/main';
 
 export async function uniqueBudgetName(
   initialName: string = 'My Finances',

@@ -5,25 +5,24 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type { CategoryEntity } from '@actual-app/core/types/models';
 import { AutoTextSize } from 'auto-text-size';
 
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import type { CategoryEntity } from 'loot-core/types/models';
+import { makeAmountGrey } from '#components/budget/util';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { CellValue } from '#components/spreadsheet/CellValue';
+import { useFormat } from '#hooks/useFormat';
+import { useLocale } from '#hooks/useLocale';
+import { useNotes } from '#hooks/useNotes';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useUndo } from '#hooks/useUndo';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
+import type { SheetFields } from '#spreadsheet';
 
 import { getColumnWidth, PILL_STYLE } from './BudgetTable';
-
-import { makeAmountGrey } from '@desktop-client/components/budget/util';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useNotes } from '@desktop-client/hooks/useNotes';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useUndo } from '@desktop-client/hooks/useUndo';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import type { SheetFields } from '@desktop-client/spreadsheet';
 
 type BudgetCellProps<
   SheetFieldName extends SheetFields<'envelope-budget' | 'tracking-budget'>,

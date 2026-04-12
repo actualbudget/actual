@@ -1,11 +1,11 @@
+import { aqlQuery } from '#server/aql';
+import * as db from '#server/db';
+import { batchMessages } from '#server/sync';
 // @ts-strict-ignore
-import * as monthUtils from '../../shared/months';
-import { q } from '../../shared/query';
-import type { CategoryEntity, CategoryGroupEntity } from '../../types/models';
-import type { Template } from '../../types/models/templates';
-import { aqlQuery } from '../aql';
-import * as db from '../db';
-import { batchMessages } from '../sync';
+import * as monthUtils from '#shared/months';
+import { q } from '#shared/query';
+import type { CategoryEntity, CategoryGroupEntity } from '#types/models';
+import type { Template } from '#types/models/templates';
 
 import { getSheetValue, isReflectBudget, setBudget, setGoal } from './actions';
 import { CategoryTemplateContext } from './category-template-context';

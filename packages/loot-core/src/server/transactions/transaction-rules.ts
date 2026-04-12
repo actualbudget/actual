@@ -1,34 +1,18 @@
 // @ts-strict-ignore
 
-import { logger } from '../../platform/server/log';
-import {
-  addDays,
-  currentDay,
-  dayFromDate,
-  parseDate,
-  subDays,
-} from '../../shared/months';
-import { q } from '../../shared/query';
-import { getApproxNumberThreshold, sortNumbers } from '../../shared/rules';
-import { ungroupTransaction } from '../../shared/transactions';
-import { fastSetMerge, partitionByField } from '../../shared/util';
-import type {
-  RuleActionEntity,
-  RuleEntity,
-  TransactionEntity,
-} from '../../types/models';
-import { aqlQuery, schemaConfig } from '../aql';
-import * as db from '../db';
+import { logger } from '#platform/server/log';
+import { aqlQuery, schemaConfig } from '#server/aql';
+import * as db from '#server/db';
 import {
   getAccount,
   getCategory,
   getPayee,
   getPayeeByName,
   insertPayee,
-} from '../db';
-import { getMappings } from '../db/mappings';
-import { RuleError } from '../errors';
-import { requiredFields, toDateRepr } from '../models';
+} from '#server/db';
+import { getMappings } from '#server/db/mappings';
+import { RuleError } from '#server/errors';
+import { requiredFields, toDateRepr } from '#server/models';
 import {
   Action,
   Condition,
@@ -38,8 +22,24 @@ import {
   rankRules,
   Rule,
   RuleIndexer,
-} from '../rules';
-import { addSyncListener, batchMessages } from '../sync';
+} from '#server/rules';
+import { addSyncListener, batchMessages } from '#server/sync';
+import {
+  addDays,
+  currentDay,
+  dayFromDate,
+  parseDate,
+  subDays,
+} from '#shared/months';
+import { q } from '#shared/query';
+import { getApproxNumberThreshold, sortNumbers } from '#shared/rules';
+import { ungroupTransaction } from '#shared/transactions';
+import { fastSetMerge, partitionByField } from '#shared/util';
+import type {
+  RuleActionEntity,
+  RuleEntity,
+  TransactionEntity,
+} from '#types/models';
 
 import { batchUpdateTransactions } from '.';
 
@@ -48,7 +48,7 @@ import { batchUpdateTransactions } from '.';
 // * We could also make the "create rule" button a dropdown that
 //   provides different "templates" like "create renaming rule"
 
-export { iterateIds } from '../rules';
+export { iterateIds } from '#server/rules';
 
 let allRules;
 let unlistenSync;
@@ -599,22 +599,26 @@ export function conditionsToAQL(
         }
         return { $or: values.map(v => apply(field, '$eq', v)) };
 
-      case 'hasTags':
+      case 'hasTags': {
         const tagValues = [];
+        const seenTags = new Set();
         for (const [_, tag] of value.matchAll(/(?<!#)(#[^#\s]+)/g)) {
-          if (!tagValues.find(t => t.tag === tag)) {
+          if (!seenTags.has(tag)) {
+            seenTags.add(tag);
             tagValues.push(tag);
           }
         }
 
         return {
           $and: tagValues.map(v => {
-            const regex = new RegExp(
-              `(?<!#)${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
-            );
-            return apply(field, '$regexp', regex.source);
+            const escapedTag = v
+              .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+              .replace(/\\\$/g, '[$]'); // Use '[$]' instead of '\$' so AQL string unescaping doesn't turn it into a bare '$' end-of-string anchor
+            const pattern = `(?<!#)${escapedTag}([\\s#]|$)`;
+            return apply(field, '$regexp', pattern);
           }),
         };
+      }
 
       case 'notOneOf':
         const notValues = value;

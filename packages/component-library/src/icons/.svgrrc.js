@@ -18,7 +18,7 @@ module.exports = {
     babelConfig: {
       plugins: [
         [
-          './add-attribute',
+          './add-attribute.ts',
           {
             elements: ['path', 'Path', 'rect', 'Rect'],
             attributes: [

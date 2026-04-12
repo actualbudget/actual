@@ -41,9 +41,10 @@
       "api": "./src/platform/server/sqlite/index.api.ts",
       "default": "./src/platform/server/sqlite/index.ts"
     },
-    "#platform/server/log": "./src/platform/server/log/index.ts",
-    "#platform/server/indexeddb": "./src/platform/server/indexeddb/index.ts",
-    "#platform/exceptions": "./src/platform/exceptions/index.ts",
+    "#platform/client/connection": {
+      "electron-renderer": "./src/platform/client/connection/index.electron.ts",
+      "default": "./src/platform/client/connection/index.ts"
+    },
     "#server/encryption/encryption-internals": {
       "electron": "./src/server/encryption/encryption-internals.electron.ts",
       "api": "./src/server/encryption/encryption-internals.api.ts",
@@ -54,12 +55,27 @@
       "api": "./src/shared/platform.api.ts",
       "default": "./src/shared/platform.ts"
     },
-    "#*": [
-      "./src/*.ts",
-      "./src/*.tsx",
-      "./src/*/index.ts",
-      "./src/*/index.tsx"
-    ]
+    "#mocks": "./src/mocks/index.ts",
+    "#platform/client/undo": "./src/platform/client/undo/index.ts",
+    "#platform/exceptions": "./src/platform/exceptions/index.ts",
+    "#platform/server/indexeddb": "./src/platform/server/indexeddb/index.ts",
+    "#platform/server/log": "./src/platform/server/log/index.ts",
+    "#server/aql": "./src/server/aql/index.ts",
+    "#server/db": "./src/server/db/index.ts",
+    "#server/encryption": "./src/server/encryption/index.ts",
+    "#server/importers": "./src/server/importers/index.ts",
+    "#server/rules": "./src/server/rules/index.ts",
+    "#server/sync": "./src/server/sync/index.ts",
+    "#server/transactions": "./src/server/transactions/index.ts",
+    "#types/models": "./src/types/models/index.ts",
+    "#platform/client/*": "./src/platform/client/*.ts",
+    "#platform/server/*": "./src/platform/server/*.ts",
+    "#platform/*": "./src/platform/*.ts",
+    "#server/*": "./src/server/*.ts",
+    "#shared/*": "./src/shared/*.ts",
+    "#types/*": "./src/types/*.ts",
+    "#mocks/*": "./src/mocks/*.ts",
+    "#*": "./src/*.ts"
   },
   "exports": {
     "./client/accounts/*": "./src/client/accounts/*.ts",
@@ -85,8 +101,8 @@
     "./client/undo": "./src/client/undo.ts",
     "./mocks": "./src/mocks/index.ts",
     "./platform/client/connection": {
-      "electron": "./src/platform/client/connection/index.ts",
-      "default": "./src/platform/client/connection/index.browser.ts"
+      "electron-renderer": "./src/platform/client/connection/index.electron.ts",
+      "default": "./src/platform/client/connection/index.ts"
     },
     "./platform/client/undo": "./src/platform/client/undo/index.ts",
     "./platform/exceptions": "./src/platform/exceptions/index.ts",

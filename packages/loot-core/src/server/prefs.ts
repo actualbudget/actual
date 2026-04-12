@@ -2,7 +2,7 @@
 import { Timestamp } from '@actual-app/crdt';
 
 import * as fs from '#platform/server/fs';
-import type { MetadataPrefs } from '../types/prefs';
+import type { MetadataPrefs } from '#types/prefs';
 
 import { sendMessages } from './sync';
 import type { Message } from './sync';

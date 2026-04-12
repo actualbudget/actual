@@ -2,7 +2,7 @@ import { FunctionArgumentType, FunctionPlugin } from 'hyperformula';
 import type { InterpreterState } from 'hyperformula/typings/interpreter/InterpreterState';
 import type { ProcedureAst } from 'hyperformula/typings/parser';
 
-import { integerToAmount } from '../../shared/util';
+import { integerToAmount } from '#shared/util';
 
 export class CustomFunctionsPlugin extends FunctionPlugin {
   integerToAmount(ast: ProcedureAst, state: InterpreterState) {

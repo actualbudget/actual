@@ -1,26 +1,26 @@
 import isMatch from 'lodash/isMatch';
 import { v4 as uuidv4 } from 'uuid';
 
+import { captureException } from '#platform/exceptions';
 import * as fs from '#platform/server/fs';
-import { captureException } from '../../platform/exceptions';
-import { DEFAULT_DASHBOARD_STATE } from '../../shared/dashboard';
-import { q } from '../../shared/query';
+import { createApp } from '#server/app';
+import { aqlQuery } from '#server/aql';
+import * as db from '#server/db';
+import { ValidationError } from '#server/errors';
+import { requiredFields } from '#server/models';
+import { mutator } from '#server/mutators';
+import { reportModel } from '#server/reports/app';
+import { batchMessages } from '#server/sync';
+import { undoable } from '#server/undo';
+import { DEFAULT_DASHBOARD_STATE } from '#shared/dashboard';
+import { q } from '#shared/query';
 import type {
   DashboardWidgetEntity,
   ExportImportCustomReportWidget,
   ExportImportDashboard,
   ExportImportDashboardWidget,
-} from '../../types/models';
-import type { EverythingButIdOptional, WithOptional } from '../../types/util';
-import { createApp } from '../app';
-import { aqlQuery } from '../aql';
-import * as db from '../db';
-import { ValidationError } from '../errors';
-import { requiredFields } from '../models';
-import { mutator } from '../mutators';
-import { reportModel } from '../reports/app';
-import { batchMessages } from '../sync';
-import { undoable } from '../undo';
+} from '#types/models';
+import type { EverythingButIdOptional, WithOptional } from '#types/util';
 
 function isExportedCustomReportWidget(
   widget: ExportImportDashboardWidget,

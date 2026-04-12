@@ -8,22 +8,22 @@ import {
   getDownloadError,
   getSyncError,
   getTestKeyError,
-} from '../shared/errors';
-import * as monthUtils from '../shared/months';
-import { q } from '../shared/query';
+} from '#shared/errors';
+import * as monthUtils from '#shared/months';
+import { q } from '#shared/query';
 import {
   deleteTransaction,
   ungroupTransactions,
   updateTransaction,
-} from '../shared/transactions';
-import { integerToAmount } from '../shared/util';
-import type { Handlers } from '../types/handlers';
+} from '#shared/transactions';
+import { integerToAmount } from '#shared/util';
+import type { Handlers } from '#types/handlers';
 import type {
   AccountEntity,
   CategoryGroupEntity,
   ScheduleEntity,
-} from '../types/models';
-import type { ServerHandlers } from '../types/server-handlers';
+} from '#types/models';
+import type { ServerHandlers } from '#types/server-handlers';
 
 import { addTransactions } from './accounts/sync';
 import {

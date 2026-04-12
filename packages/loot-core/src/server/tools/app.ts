@@ -1,11 +1,11 @@
+import { createApp } from '#server/app';
+import { aqlQuery } from '#server/aql';
+import * as db from '#server/db';
+import { runMutator } from '#server/mutators';
+import { batchUpdateTransactions } from '#server/transactions';
 // @ts-strict-ignore
-import { q } from '../../shared/query';
-import type { TransactionEntity } from '../../types/models';
-import { createApp } from '../app';
-import { aqlQuery } from '../aql';
-import * as db from '../db';
-import { runMutator } from '../mutators';
-import { batchUpdateTransactions } from '../transactions';
+import { q } from '#shared/query';
+import type { TransactionEntity } from '#types/models';
 
 export type ToolsHandlers = {
   'tools/fix-split-transactions': typeof fixSplitTransactions;

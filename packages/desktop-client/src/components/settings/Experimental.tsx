@@ -5,23 +5,19 @@ import { Trans } from 'react-i18next';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { FeatureFlag, ServerPrefs } from '@actual-app/core/types/prefs';
 
-import type { FeatureFlag, ServerPrefs } from 'loot-core/types/prefs';
+import { useAuth } from '#auth/AuthProvider';
+import { Permissions } from '#auth/types';
+import { Link } from '#components/common/Link';
+import { Checkbox } from '#components/forms';
+import { useLoginMethod, useMultiuserEnabled } from '#components/ServerContext';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useServerPref } from '#hooks/useServerPref';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
 import { Setting } from './UI';
-
-import { useAuth } from '@desktop-client/auth/AuthProvider';
-import { Permissions } from '@desktop-client/auth/types';
-import { Link } from '@desktop-client/components/common/Link';
-import { Checkbox } from '@desktop-client/components/forms';
-import {
-  useLoginMethod,
-  useMultiuserEnabled,
-} from '@desktop-client/components/ServerContext';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useServerPref } from '@desktop-client/hooks/useServerPref';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
 
 type FeatureToggleProps = {
   flag: FeatureFlag;
@@ -210,7 +206,7 @@ export function ExperimentalFeatures() {
             </FeatureToggle>
             <FeatureToggle
               flag="ageOfMoneyReport"
-              feedbackLink="https://github.com/actualbudget/actual/issues/2994"
+              feedbackLink="https://github.com/actualbudget/actual/issues/7006"
             >
               <Trans>Age of Money Report</Trans>
             </FeatureToggle>

@@ -1,8 +1,11 @@
-import type { Balance, Transaction } from '../gocardless-node.types';
+import type {
+  Balance,
+  Transaction,
+} from '#app-gocardless/gocardless-node.types';
 import type {
   DetailedAccountWithInstitution,
   NormalizedAccountDetails,
-} from '../gocardless.types';
+} from '#app-gocardless/gocardless.types';
 
 type TransactionExtended = Transaction & {
   date?: string;

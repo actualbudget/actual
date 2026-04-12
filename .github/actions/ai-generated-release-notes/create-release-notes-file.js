@@ -16,13 +16,18 @@ if (!token || !repo || !issueNumber || !summaryDataJson || !category) {
 const [owner, repoName] = repo.split('/');
 const octokit = new Octokit({ auth: token });
 
+const VALID_CATEGORIES = [
+  'Features',
+  'Bugfixes',
+  'Enhancements',
+  'Maintenance',
+];
+const GITHUB_USERNAME_RE =
+  /^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$/;
+
 async function createReleaseNotesFile() {
   try {
     const summaryData = JSON.parse(summaryDataJson);
-
-    console.log('Debug - Category value:', category);
-    console.log('Debug - Category type:', typeof category);
-    console.log('Debug - Category JSON stringified:', JSON.stringify(category));
 
     if (!summaryData) {
       console.log('No summary data available, cannot create file');
@@ -34,26 +39,62 @@ async function createReleaseNotesFile() {
       return;
     }
 
-    // Create file content - ensure category is not quoted
+    // Normalize category - strip surrounding quotes and validate against allow-list
     const cleanCategory =
       typeof category === 'string'
         ? category.replace(/^["']|["']$/g, '')
         : category;
-    console.log('Debug - Clean category:', cleanCategory);
+
+    if (!VALID_CATEGORIES.includes(cleanCategory)) {
+      console.log(
+        `Invalid category "${cleanCategory}". Must be one of: ${VALID_CATEGORIES.join(', ')}`,
+      );
+      return;
+    }
+
+    // Validate author is a plausible GitHub username
+    const author = String(summaryData.author || '');
+    if (!GITHUB_USERNAME_RE.test(author)) {
+      console.log(
+        `Invalid author "${author}", aborting release notes creation`,
+      );
+      return;
+    }
+
+    // Normalize summary: collapse whitespace to a single line so it cannot
+    // introduce extra YAML frontmatter or break the markdown structure.
+    const cleanSummary = String(summaryData.summary || '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (!cleanSummary) {
+      console.log('Empty summary, aborting release notes creation');
+      return;
+    }
+
+    // Validate PR number - must be a positive integer. The value comes from
+    // the GitHub API, but we harden it because it's used to build a file path
+    // and a commit message.
+    const validatedPrNumber = Number(summaryData.prNumber);
+    if (!Number.isInteger(validatedPrNumber) || validatedPrNumber <= 0) {
+      console.log(
+        `Invalid PR number "${summaryData.prNumber}", aborting release notes creation`,
+      );
+      return;
+    }
 
     const fileContent = `---
 category: ${cleanCategory}
-authors: [${summaryData.author}]
+authors: [${author}]
 ---
 
-${summaryData.summary}
+${cleanSummary}
 `;
 
-    const fileName = `upcoming-release-notes/${summaryData.prNumber}.md`;
+    const fileName = `upcoming-release-notes/${validatedPrNumber}.md`;
 
-    console.log(`Creating release notes file: ${fileName}`);
-    console.log('File content:');
-    console.log(fileContent);
+    console.log(
+      `Creating release notes file: ${fileName} (category: ${cleanCategory}, author: ${author})`,
+    );
 
     // Get PR info
     const { data: pr } = await octokit.rest.pulls.get({
@@ -75,7 +116,7 @@ ${summaryData.summary}
       owner: headOwner,
       repo: headRepo,
       path: fileName,
-      message: `Add release notes for PR #${summaryData.prNumber}`,
+      message: `Add release notes for PR #${validatedPrNumber}`,
       content: Buffer.from(fileContent).toString('base64'),
       branch: prBranch,
       committer: {

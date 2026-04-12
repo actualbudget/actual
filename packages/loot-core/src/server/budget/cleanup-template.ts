@@ -1,6 +1,6 @@
+import * as db from '#server/db';
 // @ts-strict-ignore
-import * as monthUtils from '../../shared/months';
-import * as db from '../db';
+import * as monthUtils from '#shared/months';
 
 import { getSheetValue, setBudget, setGoal } from './actions';
 import { parse } from './cleanup-template.pegjs';

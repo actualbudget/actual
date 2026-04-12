@@ -4,7 +4,7 @@ import type {
   AccountEntity,
   PayeeEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
 type GetPrettyPayeeProps = {
   t: ReturnType<typeof useTranslation>['t'];

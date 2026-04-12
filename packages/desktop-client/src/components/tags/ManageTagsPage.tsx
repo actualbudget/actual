@@ -1,9 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ManageTags } from './ManageTags';
+import { Page } from '#components/Page';
 
-import { Page } from '@desktop-client/components/Page';
+import { ManageTags } from './ManageTags';
 
 export const ManageTagsPage = () => {
   const { t } = useTranslation();

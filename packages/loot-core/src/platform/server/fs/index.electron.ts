@@ -4,7 +4,7 @@ import * as path from 'path';
 
 import promiseRetry from 'promise-retry';
 
-import { logger } from '../log';
+import { logger } from '#platform/server/log';
 
 import type * as T from './index';
 

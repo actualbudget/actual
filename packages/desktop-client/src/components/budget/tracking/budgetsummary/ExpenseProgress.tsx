@@ -2,11 +2,11 @@ import React from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
+import { useTrackingSheetValue } from '#components/budget/tracking/TrackingBudgetComponents';
+import type { Binding } from '#spreadsheet';
+
 import { fraction } from './fraction';
 import { PieProgress } from './PieProgress';
-
-import { useTrackingSheetValue } from '@desktop-client/components/budget/tracking/TrackingBudgetComponents';
-import type { Binding } from '@desktop-client/spreadsheet';
 
 type ExpenseProgressProps = {
   current: Binding<'tracking-budget', 'total-spent'>;

@@ -1,4 +1,4 @@
-import CBCcregbebb from '../cbc_cregbebb';
+import CBCcregbebb from '#app-gocardless/banks/cbc_cregbebb';
 
 describe('cbc_cregbebb', () => {
   describe('#normalizeTransaction', () => {

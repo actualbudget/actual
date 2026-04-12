@@ -27,9 +27,6 @@ export default defineConfig(({ mode }) => {
         mangle: false,
       },
     },
-    resolve: {
-      extensions: ['.js', '.ts', '.json'],
-    },
     define: {
       'process.env': '{}',
       'process.env.IS_DEV': JSON.stringify(isDev),
