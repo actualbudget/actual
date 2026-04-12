@@ -20,12 +20,9 @@ test.describe('Onboarding', () => {
   test('starts the sync server and navigates to bootstrap page', async ({
     electronPage,
   }) => {
-    await configurationPage.clickOnStartSyncServer();
+    const bootstrapPage = await configurationPage.clickOnStartSyncServer();
 
-    await electronPage.waitForTimeout(1000);
-    await expect(electronPage.getByRole('heading')).toHaveText(
-      'Welcome to Actual!',
-    );
+    await expect(bootstrapPage.getHeading()).toHaveText('Welcome to Actual!');
     await expect(electronPage).toHaveScreenshot();
   });
 });
