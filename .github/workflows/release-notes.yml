@@ -31,22 +31,12 @@ jobs:
             console.log(`Skip: ${skip}`);
             core.setOutput('skip', String(skip));
 
-      - name: Checkout (fork)
-        if: >-
-          steps.bot-check.outputs.skip != 'true'
-          && github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          fetch-depth: 0
-
       - name: Checkout
-        if: >-
-          steps.bot-check.outputs.skip != 'true'
-          && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
+        if: steps.bot-check.outputs.skip != 'true'
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
-          token: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
+          token: ${{ secrets.ACTIONS_UPDATE_TOKEN || github.token }}
 
       - name: Get changed files
         if: steps.bot-check.outputs.skip != 'true'
@@ -74,4 +64,5 @@ jobs:
         if: >-
           steps.bot-check.outputs.skip != 'true'
           && startsWith(github.head_ref, 'release/') == true
+          && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
         uses: ./.github/actions/release-notes/generate
