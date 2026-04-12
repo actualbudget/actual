@@ -77,7 +77,7 @@ jobs:
         id: release_date
         shell: bash
         env:
-          INPUT_DATE: ${{ github.event.inputs.release-date }}
+          INPUT_DATE: ${{ github.event.inputs['release-date'] }}
         run: |
           if [[ -n "$INPUT_DATE" ]]; then
             echo "date=$INPUT_DATE" >> "$GITHUB_OUTPUT"
