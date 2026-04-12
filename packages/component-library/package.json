@@ -2,6 +2,9 @@
   "name": "@actual-app/components",
   "version": "0.0.1",
   "license": "MIT",
+  "imports": {
+    "#tokens": "./src/tokens.ts"
+  },
   "exports": {
     "./hooks/*": "./src/hooks/*.ts",
     "./icons/logo": "./src/icons/logo/index.ts",

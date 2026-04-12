@@ -8,7 +8,7 @@ zip export, you can restore this backup by importing it using the Import File bu
 ### Steps to Restore a Backup:
 
 1. Close your current budget by clicking on the budget name in the top left
-   corner of the screen and choosing the option to close the budget file.
+   corner of the screen and choosing the option to _Switch file_.
 
 ![Close the current budget file](/img/backup-restore/restore-close-budget.webp)
 

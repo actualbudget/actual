@@ -1,10 +1,10 @@
 import * as api from '@actual-app/api';
 import type { Command } from 'commander';
 
-import { withConnection } from '../connection';
-import { readJsonInput } from '../input';
-import { printOutput } from '../output';
-import { isRecord, parseIntFlag } from '../utils';
+import { withConnection } from '#connection';
+import { readJsonInput } from '#input';
+import { printOutput } from '#output';
+import { isRecord, parseIntFlag } from '#utils';
 
 /**
  * Parse order-by strings like "date:desc,amount:asc,id" into

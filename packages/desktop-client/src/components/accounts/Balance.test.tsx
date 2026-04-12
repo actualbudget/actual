@@ -67,6 +67,18 @@ describe('SelectedBalance – normal transactions', () => {
     expect(screen.getByText('Selected balance:')).toBeInTheDocument();
     expect(screen.getByText('-50.00')).toBeInTheDocument();
   });
+
+  test('shows balance when balance is falsy', () => {
+    vi.mocked(useSheetValue).mockReturnValueOnce(null).mockReturnValueOnce(0);
+
+    render(
+      <TestProviders>
+        <SelectedBalance selectedItems={new Set(['tx-123'])} />
+      </TestProviders>,
+    );
+
+    expect(screen.getByText('Selected balance:')).toBeInTheDocument();
+  });
 });
 
 describe('SelectedBalance – preview (scheduled) transactions', () => {

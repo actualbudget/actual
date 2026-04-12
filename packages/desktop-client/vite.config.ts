@@ -116,26 +116,6 @@ export default defineConfig(async ({ mode }) => {
     process.env.REACT_APP_BRANCH = process.env.BRANCH;
   }
 
-  let resolveExtensions = [
-    '.mjs',
-    '.js',
-    '.mts',
-    '.ts',
-    '.jsx',
-    '.tsx',
-    '.json',
-  ];
-
-  if (env.IS_GENERIC_BROWSER) {
-    resolveExtensions = [
-      '.browser.js',
-      '.browser.jsx',
-      '.browser.ts',
-      '.browser.tsx',
-      ...resolveExtensions,
-    ];
-  }
-
   const browserOpen = env.BROWSER_OPEN ? `//${env.BROWSER_OPEN}` : true;
 
   return {
@@ -184,7 +164,6 @@ export default defineConfig(async ({ mode }) => {
       },
     },
     resolve: {
-      extensions: resolveExtensions,
       ...(!env.IS_GENERIC_BROWSER && {
         conditions: ['electron-renderer', 'module', 'browser', 'default'],
       }),

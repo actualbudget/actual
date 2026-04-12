@@ -79,13 +79,14 @@
     "lint-staged": "^16.3.2",
     "minimatch": "^10.2.4",
     "npm-run-all": "^4.1.5",
-    "oxfmt": "^0.32.0",
-    "oxlint": "^1.51.0",
-    "oxlint-tsgolint": "^0.13.0",
+    "oxfmt": "^0.44.0",
+    "oxlint": "^1.59.0",
+    "oxlint-tsgolint": "^0.20.0",
     "p-limit": "^7.3.0",
     "prompts": "^2.4.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0"
   },
   "resolutions": {
     "adm-zip": "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch",

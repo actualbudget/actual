@@ -1,4 +1,4 @@
-import IngIngddeff from '../ing_ingddeff';
+import IngIngddeff from '#app-gocardless/banks/ing_ingddeff';
 
 describe('IngIngddeff', () => {
   describe('#normalizeAccount', () => {
