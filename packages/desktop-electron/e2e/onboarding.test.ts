@@ -27,13 +27,20 @@ test.describe('Onboarding', () => {
       console.info('Console message:', msg.text());
     });
 
-    await electronPage.waitForTimeout(20_000); // wait for potential console messages to arrive
+    await electronPage.waitForTimeout(5_000); // wait for potential console messages to arrive
     console.error(
       'Collected console messages:',
       JSON.stringify(consoleMessages),
     );
+
+    const bootstrapPage = await configurationPage.clickOnStartSyncServer();
     expect(consoleMessages.length).toBeGreaterThan(0);
 
+    await electronPage.waitForTimeout(5_000); // wait for potential console messages to arrive
+    console.error(
+      'Collected console messages:',
+      JSON.stringify(consoleMessages),
+    );
     expect(consoleMessages).toContain(
       'Sync-Server: Listening on localhost:5007...',
     );
@@ -52,7 +59,6 @@ test.describe('Onboarding', () => {
     //     ]),
     //   );
 
-    const bootstrapPage = await configurationPage.clickOnStartSyncServer();
     await expect(bootstrapPage.getHeading()).toHaveText('Welcome to Actual!');
     await expect(electronPage).toHaveScreenshot();
   });
