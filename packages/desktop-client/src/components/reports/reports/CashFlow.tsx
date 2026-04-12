@@ -10,41 +10,36 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import * as d from 'date-fns';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   CashFlowWidget,
   RuleConditionEntity,
   TimeFrame,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import * as d from 'date-fns';
 
-import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
-import {
-  MobilePageHeader,
-  Page,
-  PageHeader,
-} from '@desktop-client/components/Page';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { Change } from '@desktop-client/components/reports/Change';
-import { CashFlowGraph } from '@desktop-client/components/reports/graphs/CashFlowGraph';
-import { Header } from '@desktop-client/components/reports/Header';
-import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
-import { cashFlowByDate } from '@desktop-client/components/reports/spreadsheets/cash-flow-spreadsheet';
-import { useReport } from '@desktop-client/components/reports/useReport';
-import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useRuleConditionFilters } from '@desktop-client/hooks/useRuleConditionFilters';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import { useUpdateDashboardWidgetMutation } from '@desktop-client/reports/mutations';
+import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
+import { FinancialText } from '#components/FinancialText';
+import { MobileBackButton } from '#components/mobile/MobileBackButton';
+import { MobilePageHeader, Page, PageHeader } from '#components/Page';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { Change } from '#components/reports/Change';
+import { CashFlowGraph } from '#components/reports/graphs/CashFlowGraph';
+import { Header } from '#components/reports/Header';
+import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { calculateTimeRange } from '#components/reports/reportRanges';
+import { cashFlowByDate } from '#components/reports/spreadsheets/cash-flow-spreadsheet';
+import { useReport } from '#components/reports/useReport';
+import { useDashboardWidget } from '#hooks/useDashboardWidget';
+import { useFormat } from '#hooks/useFormat';
+import { useLocale } from '#hooks/useLocale';
+import { useNavigate } from '#hooks/useNavigate';
+import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
+import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 
 export const defaultTimeFrame = {
   start: monthUtils.dayFromDate(monthUtils.currentMonth()),

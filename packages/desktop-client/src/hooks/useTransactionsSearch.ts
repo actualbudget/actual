@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import type { Query } from '@actual-app/core/shared/query';
 import debounce from 'lodash/debounce';
 
-import type { Query } from 'loot-core/shared/query';
-
-import * as queries from '@desktop-client/queries';
+import * as queries from '#queries';
 
 type UseTransactionsSearchProps = {
   updateQuery: (updateFn: (searchQuery: Query) => Query) => void;

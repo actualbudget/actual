@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Cell, TableHeader } from '@desktop-client/components/table';
+import { Cell, TableHeader } from '#components/table';
 
 type AccountsHeaderProps = {
   unlinked: boolean;

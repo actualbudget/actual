@@ -10,7 +10,7 @@ import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { Link } from '@desktop-client/components/common/Link';
+import { Link } from '#components/common/Link';
 
 type SettingProps = {
   primaryAction?: ReactNode;

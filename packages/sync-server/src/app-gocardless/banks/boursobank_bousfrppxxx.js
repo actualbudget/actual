@@ -1,4 +1,4 @@
-import { title } from '../../util/title/index';
+import { title } from '#util/title';
 
 import Fallback from './integration-bank';
 

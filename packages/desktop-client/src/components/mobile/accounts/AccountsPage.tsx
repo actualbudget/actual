@@ -20,31 +20,24 @@ import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { AccountEntity } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 
-import type { AccountEntity } from 'loot-core/types/models';
-
-import {
-  useMoveAccountMutation,
-  useSyncAndDownloadMutation,
-} from '@desktop-client/accounts';
-import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
-import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
-import { PullToRefresh } from '@desktop-client/components/mobile/PullToRefresh';
-import { MobilePageHeader, Page } from '@desktop-client/components/Page';
-import {
-  CellValue,
-  CellValueText,
-} from '@desktop-client/components/spreadsheet/CellValue';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { replaceModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
-import type { Binding, SheetFields } from '@desktop-client/spreadsheet';
-import * as bindings from '@desktop-client/spreadsheet/bindings';
+import { useMoveAccountMutation, useSyncAndDownloadMutation } from '#accounts';
+import { makeAmountFullStyle } from '#components/budget/util';
+import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
+import { PullToRefresh } from '#components/mobile/PullToRefresh';
+import { MobilePageHeader, Page } from '#components/Page';
+import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
+import { useAccounts } from '#hooks/useAccounts';
+import { useFailedAccounts } from '#hooks/useFailedAccounts';
+import { useLocalPref } from '#hooks/useLocalPref';
+import { useNavigate } from '#hooks/useNavigate';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { replaceModal } from '#modals/modalsSlice';
+import { useDispatch, useSelector } from '#redux';
+import type { Binding, SheetFields } from '#spreadsheet';
+import * as bindings from '#spreadsheet/bindings';
 
 const ROW_HEIGHT = 60;
 

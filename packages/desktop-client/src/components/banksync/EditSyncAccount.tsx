@@ -6,21 +6,16 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { AccountEntity } from '@actual-app/core/types/models';
 
-import type { AccountEntity } from 'loot-core/types/models';
+import { useUnlinkAccountMutation } from '#accounts';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 import { BankSyncCheckboxOptions } from './BankSyncCheckboxOptions';
 import { FieldMapping } from './FieldMapping';
 import { useBankSyncAccountSettings } from './useBankSyncAccountSettings';
-
-import { useUnlinkAccountMutation } from '@desktop-client/accounts';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
 
 export type TransactionDirection = 'payment' | 'deposit';
 

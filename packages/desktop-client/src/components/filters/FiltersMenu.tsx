@@ -15,14 +15,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import {
-  format as formatDate,
-  isValid as isDateValid,
-  parse as parseDate,
-} from 'date-fns';
-
-import { send } from 'loot-core/platform/client/connection';
-import { getMonthYearFormat } from 'loot-core/shared/months';
+import { send } from '@actual-app/core/platform/client/connection';
+import { getMonthYearFormat } from '@actual-app/core/shared/months';
 import {
   deserializeField,
   FIELD_TYPES,
@@ -30,10 +24,20 @@ import {
   getValidOps,
   mapField,
   unparse,
-} from 'loot-core/shared/rules';
-import { titleFirst } from 'loot-core/shared/util';
-import type { IntegerAmount } from 'loot-core/shared/util';
-import type { RuleConditionEntity } from 'loot-core/types/models';
+} from '@actual-app/core/shared/rules';
+import { titleFirst } from '@actual-app/core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
+import type { RuleConditionEntity } from '@actual-app/core/types/models';
+import {
+  format as formatDate,
+  isValid as isDateValid,
+  parse as parseDate,
+} from 'date-fns';
+
+import { GenericInput } from '#components/util/GenericInput';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useFormat } from '#hooks/useFormat';
+import { useTransactionFilters } from '#hooks/useTransactionFilters';
 
 import { CompactFiltersButton } from './CompactFiltersButton';
 import { FiltersButton } from './FiltersButton';
@@ -42,11 +46,6 @@ import { PayeeFilter } from './PayeeFilter';
 import { subfieldFromFilter } from './subfieldFromFilter';
 import { subfieldToOptions } from './subfieldToOptions';
 import { updateFilterReducer } from './updateFilterReducer';
-
-import { GenericInput } from '@desktop-client/components/util/GenericInput';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useTransactionFilters } from '@desktop-client/hooks/useTransactionFilters';
 
 type FilterReducerState<T extends RuleConditionEntity> = Pick<
   T,

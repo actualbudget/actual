@@ -7,15 +7,14 @@ import { SvgExclamationOutline } from '@actual-app/components/icons/v1';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { AccountEntity } from '@actual-app/core/types/models';
 
-import type { AccountEntity } from 'loot-core/types/models';
-
-import { useUnlinkAccountMutation } from '@desktop-client/accounts';
-import { Link } from '@desktop-client/components/common/Link';
-import { authorizeBank } from '@desktop-client/gocardless';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
-import { useDispatch } from '@desktop-client/redux';
+import { useUnlinkAccountMutation } from '#accounts';
+import { Link } from '#components/common/Link';
+import { authorizeBank } from '#gocardless';
+import { useAccounts } from '#hooks/useAccounts';
+import { useFailedAccounts } from '#hooks/useFailedAccounts';
+import { useDispatch } from '#redux';
 
 function useErrorMessage() {
   const { t } = useTranslation();

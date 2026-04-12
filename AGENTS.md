@@ -331,7 +331,7 @@ Always maintain newlines between import groups.
 
 ### Platform-Specific Code
 
-- Don't directly reference platform-specific imports (`.api`, `.web`, `.electron`)
+- Don't directly reference platform-specific imports (`.api`, `.electron`)
 - Use conditional exports in `loot-core` for platform-specific code
 - Platform resolution happens at build time via package.json exports
 
@@ -501,7 +501,7 @@ Icons in `packages/component-library/src/icons/` are auto-generated. Don't manua
 
 1. Check `tsconfig.json` for path mappings
 2. Check package.json `exports` field (especially for loot-core)
-3. Verify platform-specific imports (`.web`, `.electron`, `.api`)
+3. Verify platform-specific imports (`.electron`, `.api`)
 4. Use absolute imports in `desktop-client` (enforced by ESLint)
 
 ### Build Failures

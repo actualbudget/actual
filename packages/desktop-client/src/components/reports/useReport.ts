@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
+import { useSpreadsheet } from '#hooks/useSpreadsheet';
 
 export function useReport<T>(
   sheetName: string,

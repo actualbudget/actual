@@ -1,7 +1,7 @@
 import * as api from '@actual-app/api';
 import { Command } from 'commander';
 
-import { printOutput } from '../output';
+import { printOutput } from '#output';
 
 import { registerAccountsCommand } from './accounts';
 
@@ -15,11 +15,11 @@ vi.mock('@actual-app/api', () => ({
   getAccountBalance: vi.fn().mockResolvedValue(10000),
 }));
 
-vi.mock('../connection', () => ({
+vi.mock('#connection', () => ({
   withConnection: vi.fn((_opts, fn) => fn()),
 }));
 
-vi.mock('../output', () => ({
+vi.mock('#output', () => ({
   printOutput: vi.fn(),
 }));
 

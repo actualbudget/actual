@@ -1,11 +1,11 @@
 import express from 'express';
 
-import { handleError } from '../app-gocardless/util/handle-error';
-import { SecretName, secretsService } from '../services/secrets-service';
+import { handleError } from '#app-gocardless/util/handle-error';
+import { SecretName, secretsService } from '#services/secrets-service';
 import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
-} from '../util/middlewares';
+} from '#util/middlewares';
 
 import { pluggyaiService } from './pluggyai-service';
 

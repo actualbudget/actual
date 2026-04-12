@@ -7,25 +7,21 @@ import { SvgArrowButtonRight1 } from '@actual-app/components/icons/v2';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { q } from '@actual-app/core/shared/query';
+import type { Query } from '@actual-app/core/shared/query';
+import { getScheduledAmount } from '@actual-app/core/shared/schedules';
+import { isPreviewId } from '@actual-app/core/shared/transactions';
+import type { AccountEntity } from '@actual-app/core/types/models';
 import { useHover } from 'usehooks-ts';
 
-import { q } from 'loot-core/shared/query';
-import type { Query } from 'loot-core/shared/query';
-import { getScheduledAmount } from 'loot-core/shared/schedules';
-import { isPreviewId } from 'loot-core/shared/transactions';
-import type { AccountEntity } from 'loot-core/types/models';
-
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import {
-  CellValue,
-  CellValueText,
-} from '@desktop-client/components/spreadsheet/CellValue';
-import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useSelectedItems } from '@desktop-client/hooks/useSelected';
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import type { Binding } from '@desktop-client/spreadsheet';
+import { FinancialText } from '#components/FinancialText';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
+import { useCachedSchedules } from '#hooks/useCachedSchedules';
+import { useFormat } from '#hooks/useFormat';
+import { useSelectedItems } from '#hooks/useSelected';
+import { useSheetValue } from '#hooks/useSheetValue';
+import type { Binding } from '#spreadsheet';
 
 type DetailedBalanceProps = {
   name: string;
@@ -120,7 +116,7 @@ export function SelectedBalance({
     }
   }
 
-  if (!balance && !scheduleBalance) {
+  if (typeof balance !== 'number' && !scheduleBalance) {
     return null;
   } else {
     balance = (balance ?? 0) + scheduleBalance;

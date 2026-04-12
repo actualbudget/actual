@@ -5,6 +5,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
+import type { SpendingEntity } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 import {
   Area,
@@ -15,17 +16,15 @@ import {
   YAxis,
 } from 'recharts';
 
-import type { SpendingEntity } from 'loot-core/types/models';
+import { FinancialText } from '#components/FinancialText';
+import { useRechartsAnimation } from '#components/reports/chart-theme';
+import { Container } from '#components/reports/Container';
+import { numberFormatterTooltip } from '#components/reports/numberFormatter';
+import { useFormat } from '#hooks/useFormat';
+import type { FormatType } from '#hooks/useFormat';
+import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 import { computePadding } from './util/computePadding';
-
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
-import { Container } from '@desktop-client/components/reports/Container';
-import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import type { FormatType } from '@desktop-client/hooks/useFormat';
-import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type PayloadItem = {
   value: number;

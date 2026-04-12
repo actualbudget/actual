@@ -2,11 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, FocusEvent, FocusEventHandler, Ref } from 'react';
 
 import { Input } from '@actual-app/components/input';
+import { evalArithmetic } from '@actual-app/core/shared/arithmetic';
 
-import { evalArithmetic } from 'loot-core/shared/arithmetic';
-
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
+import { useFormat } from '#hooks/useFormat';
+import { useMergedRefs } from '#hooks/useMergedRefs';
 
 type PercentInputProps = {
   id?: string;

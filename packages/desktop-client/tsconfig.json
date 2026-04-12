@@ -10,12 +10,7 @@
     "outDir": "build/ts",
     "rootDir": ".",
     "tsBuildInfoFile": "build/ts/.tsbuildinfo",
-    "paths": {
-      // TODO: remove and replace with imports from "@actual-app/core"
-      "loot-core/*": ["../loot-core/src/*"],
-      // TODO: move to subpath imports
-      "@desktop-client/*": ["./src/*"]
-    },
+    "customConditions": ["electron-renderer"],
     "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },
   "references": [

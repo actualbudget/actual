@@ -2,17 +2,17 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ThemeInstaller } from './ThemeInstaller';
-
-import { useThemeCatalog } from '@desktop-client/hooks/useThemeCatalog';
+import { useThemeCatalog } from '#hooks/useThemeCatalog';
 import {
   fetchThemeCss,
   generateThemeId,
   validateThemeCss,
-} from '@desktop-client/style/customThemes';
+} from '#style/customThemes';
 
-vi.mock('@desktop-client/style/customThemes', async () => {
-  const actual = await vi.importActual('@desktop-client/style/customThemes');
+import { ThemeInstaller } from './ThemeInstaller';
+
+vi.mock('#style/customThemes', async () => {
+  const actual = await vi.importActual('#style/customThemes');
   return {
     ...actual,
     fetchThemeCss: vi.fn(),
@@ -30,7 +30,7 @@ vi.mock('@desktop-client/style/customThemes', async () => {
   };
 });
 
-vi.mock('@desktop-client/hooks/useThemeCatalog', () => ({
+vi.mock('#hooks/useThemeCatalog', () => ({
   useThemeCatalog: vi.fn(),
 }));
 

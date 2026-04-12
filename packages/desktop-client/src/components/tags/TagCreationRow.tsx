@@ -7,18 +7,13 @@ import { ColorPicker } from '@actual-app/components/color-picker';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { TagEntity } from '@actual-app/core/types/models';
 
-import type { TagEntity } from 'loot-core/types/models';
-
-import {
-  InputCell,
-  Row,
-  useTableNavigator,
-} from '@desktop-client/components/table';
-import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
-import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
-import { useTagCSS } from '@desktop-client/hooks/useTagCSS';
-import { useCreateTagMutation } from '@desktop-client/tags';
+import { InputCell, Row, useTableNavigator } from '#components/table';
+import { useInitialMount } from '#hooks/useInitialMount';
+import { useProperFocus } from '#hooks/useProperFocus';
+import { useTagCSS } from '#hooks/useTagCSS';
+import { useCreateTagMutation } from '#tags';
 
 type TagCreationRowProps = {
   tags: TagEntity[];

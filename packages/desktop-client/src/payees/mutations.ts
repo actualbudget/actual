@@ -1,18 +1,17 @@
 import { useTranslation } from 'react-i18next';
 
+import { send } from '@actual-app/core/platform/client/connection';
+import type { PayeeEntity } from '@actual-app/core/types/models';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { QueryClient, QueryKey } from '@tanstack/react-query';
 import { v4 as uuidv4 } from 'uuid';
 
-import { send } from 'loot-core/platform/client/connection';
-import type { PayeeEntity } from 'loot-core/types/models';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
+import type { AppDispatch } from '#redux/store';
 
 import { locationService } from './location';
 import { payeeQueries } from './queries';
-
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import type { AppDispatch } from '@desktop-client/redux/store';
 
 function invalidateQueries(queryClient: QueryClient, queryKey?: QueryKey) {
   void queryClient.invalidateQueries({
