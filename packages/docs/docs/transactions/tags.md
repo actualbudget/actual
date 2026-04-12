@@ -7,7 +7,7 @@ An example would be to tag all transactions for a trip with `#Vacation2025`
 
 - A tag is a string of any characters (except `#`) prefixed by the `#` symbol; it can be added anywhere within the _Notes_ field of a transaction.
 - It is possible to have multiple tags for a single transaction.
-- Tags are case-sensitive, meaning that `#tag` and `#TAG` are different. 
+- Tags are case-sensitive, meaning that `#tag` and `#TAG` are different.
 - Tags cannot contain a space as you can see in the screenshots below. Use `#camelText`, `#dashed-entries` or `#underscored_separators` instead of spaces in tags.
 - To use the `#` symbol in the _Notes_ field without tagging, you can escape it by inputting it twice: `##do-not-tag-this`.
 
