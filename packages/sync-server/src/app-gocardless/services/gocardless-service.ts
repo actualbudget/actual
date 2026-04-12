@@ -311,7 +311,7 @@ export const goCardlessService = {
       return await client
         .initSession({
           ...body,
-          accessValidForDays: 90,
+          accessValidForDays: 89,
           maxHistoricalDays: 89,
         })
         .catch(handleGoCardlessError);
