@@ -1,4 +1,4 @@
-import * as colorPalette from '@desktop-client/style/palette';
+import * as colorPalette from '#style/palette';
 
 export const pageBackground = colorPalette.gray900;
 export const pageBackgroundModalActive = colorPalette.gray800;

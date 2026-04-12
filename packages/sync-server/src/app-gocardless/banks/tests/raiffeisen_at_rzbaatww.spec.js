@@ -1,5 +1,5 @@
-import { mockTransactionAmount } from '../../services/tests/fixtures';
-import RaiffeisenAtRzbaatww from '../raiffeisen_at_rzbaatww';
+import RaiffeisenAtRzbaatww from '#app-gocardless/banks/raiffeisen_at_rzbaatww';
+import { mockTransactionAmount } from '#app-gocardless/services/tests/fixtures';
 
 describe('raiffeisen_at', () => {
   describe('#normalizeTransaction', () => {

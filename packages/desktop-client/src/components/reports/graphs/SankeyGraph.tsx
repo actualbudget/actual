@@ -13,10 +13,10 @@ import {
 } from 'recharts';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 
-import { getColorScale } from '@desktop-client/components/reports/chart-theme';
-import { Container } from '@desktop-client/components/reports/Container';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
+import { getColorScale } from '#components/reports/chart-theme';
+import { Container } from '#components/reports/Container';
+import { useFormat } from '#hooks/useFormat';
+import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 type SankeyGraphNode = SankeyData['nodes'][number] & {
   hasChildren?: boolean;

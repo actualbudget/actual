@@ -1,6 +1,6 @@
 import { Trans, useTranslation } from 'react-i18next';
 
-import type { PercentageTemplate } from 'loot-core/types/models/templates';
+import type { PercentageTemplate } from '@actual-app/core/types/models/templates';
 
 type PercentageAutomationReadOnlyProps = {
   template: PercentageTemplate;

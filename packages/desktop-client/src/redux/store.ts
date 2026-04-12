@@ -9,36 +9,36 @@ import type { QueryClient } from '@tanstack/react-query';
 import {
   name as accountsSliceName,
   reducer as accountsSliceReducer,
-} from '@desktop-client/accounts/accountsSlice';
+} from '#accounts/accountsSlice';
 import {
   name as appSliceName,
   reducer as appSliceReducer,
-} from '@desktop-client/app/appSlice';
+} from '#app/appSlice';
 import {
   name as budgetfilesSliceName,
   reducer as budgetfilesSliceReducer,
-} from '@desktop-client/budgetfiles/budgetfilesSlice';
+} from '#budgetfiles/budgetfilesSlice';
 import {
   name as modalsSliceName,
   reducer as modalsSliceReducer,
-} from '@desktop-client/modals/modalsSlice';
+} from '#modals/modalsSlice';
 import {
   addNotification,
   name as notificationsSliceName,
   reducer as notificationsSliceReducer,
-} from '@desktop-client/notifications/notificationsSlice';
+} from '#notifications/notificationsSlice';
 import {
   name as prefsSliceName,
   reducer as prefsSliceReducer,
-} from '@desktop-client/prefs/prefsSlice';
+} from '#prefs/prefsSlice';
 import {
   name as transactionsSliceName,
   reducer as transactionsSliceReducer,
-} from '@desktop-client/transactions/transactionsSlice';
+} from '#transactions/transactionsSlice';
 import {
   name as usersSliceName,
   reducer as usersSliceReducer,
-} from '@desktop-client/users/usersSlice';
+} from '#users/usersSlice';
 
 const rootReducer = combineReducers({
   [accountsSliceName]: accountsSliceReducer,

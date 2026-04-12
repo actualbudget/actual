@@ -9,19 +9,18 @@ import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
 
-import { send } from 'loot-core/platform/client/connection';
-
-import { duplicateBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
+import { duplicateBudget } from '#budgetfiles/budgetfilesSlice';
 import {
   Modal,
   ModalButtons,
   ModalCloseButton,
   ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
+} from '#components/common/Modal';
+import type { Modal as ModalType } from '#modals/modalsSlice';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
 
 type DuplicateFileModalProps = Extract<
   ModalType,

@@ -3,22 +3,21 @@ import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { AccountEntity } from '@actual-app/core/types/models';
 
-import type { AccountEntity } from 'loot-core/types/models';
+import { useMoveAccountMutation } from '#accounts';
+import { useAccounts } from '#hooks/useAccounts';
+import { useClosedAccounts } from '#hooks/useClosedAccounts';
+import { useFailedAccounts } from '#hooks/useFailedAccounts';
+import { useLocalPref } from '#hooks/useLocalPref';
+import { useOffBudgetAccounts } from '#hooks/useOffBudgetAccounts';
+import { useOnBudgetAccounts } from '#hooks/useOnBudgetAccounts';
+import { useUpdatedAccounts } from '#hooks/useUpdatedAccounts';
+import { useSelector } from '#redux';
+import * as bindings from '#spreadsheet/bindings';
 
 import { Account } from './Account';
 import { SecondaryItem } from './SecondaryItem';
-
-import { useMoveAccountMutation } from '@desktop-client/accounts';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useClosedAccounts } from '@desktop-client/hooks/useClosedAccounts';
-import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useOffBudgetAccounts } from '@desktop-client/hooks/useOffBudgetAccounts';
-import { useOnBudgetAccounts } from '@desktop-client/hooks/useOnBudgetAccounts';
-import { useUpdatedAccounts } from '@desktop-client/hooks/useUpdatedAccounts';
-import { useSelector } from '@desktop-client/redux';
-import * as bindings from '@desktop-client/spreadsheet/bindings';
 
 const fontWeight = 600;
 

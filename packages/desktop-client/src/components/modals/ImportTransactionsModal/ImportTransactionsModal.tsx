@@ -16,11 +16,23 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
+import type { ParseFileOptions } from '@actual-app/core/server/transactions/import/parse-file';
+import { amountToInteger } from '@actual-app/core/shared/util';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { send } from 'loot-core/platform/client/connection';
-import type { ParseFileOptions } from 'loot-core/server/transactions/import/parse-file';
-import { amountToInteger } from 'loot-core/shared/util';
+import {
+  useImportPreviewTransactionsMutation,
+  useImportTransactionsMutation,
+} from '#accounts';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { SectionLabel } from '#components/forms';
+import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
+import { TableHeader, TableWithNavigator } from '#components/table';
+import { useCategories } from '#hooks/useCategories';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useSyncedPrefs } from '#hooks/useSyncedPrefs';
+import { payeeQueries } from '#payees';
 
 import { DateFormatSelect } from './DateFormatSelect';
 import { FieldMappings } from './FieldMappings';
@@ -37,26 +49,6 @@ import {
   stripCsvImportTransaction,
 } from './utils';
 import type { DateFormat, FieldMapping, ImportTransaction } from './utils';
-
-import {
-  useImportPreviewTransactionsMutation,
-  useImportTransactionsMutation,
-} from '@desktop-client/accounts';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { SectionLabel } from '@desktop-client/components/forms';
-import { LabeledCheckbox } from '@desktop-client/components/forms/LabeledCheckbox';
-import {
-  TableHeader,
-  TableWithNavigator,
-} from '@desktop-client/components/table';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useSyncedPrefs } from '@desktop-client/hooks/useSyncedPrefs';
-import { payeeQueries } from '@desktop-client/payees';
 
 function CheckboxToggle({
   id,

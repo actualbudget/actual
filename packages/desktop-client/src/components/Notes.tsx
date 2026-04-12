@@ -14,7 +14,7 @@ import {
   markdownBaseStyles,
   remarkBreaks,
   sequentialNewlinesPlugin,
-} from '@desktop-client/util/markdown';
+} from '#util/markdown';
 
 const remarkPlugins = [sequentialNewlinesPlugin, remarkGfm, remarkBreaks];
 

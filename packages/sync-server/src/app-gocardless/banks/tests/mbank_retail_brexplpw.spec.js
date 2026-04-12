@@ -1,4 +1,4 @@
-import MbankRetailBrexplpw from '../mbank_retail_brexplpw';
+import MbankRetailBrexplpw from '#app-gocardless/banks/mbank_retail_brexplpw';
 
 describe('MbankRetailBrexplpw', () => {
   describe('#normalizeAccount', () => {

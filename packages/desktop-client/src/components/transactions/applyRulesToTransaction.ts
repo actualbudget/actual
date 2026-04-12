@@ -1,5 +1,5 @@
-import { getChangedValues } from 'loot-core/shared/util';
-import type { TransactionEntity } from 'loot-core/types/models';
+import { getChangedValues } from '@actual-app/core/shared/util';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 
 function isOverwritableRuleTarget(value: unknown) {
   return value == null || value === '' || value === 0 || value === false;

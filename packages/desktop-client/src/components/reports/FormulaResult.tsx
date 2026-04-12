@@ -9,16 +9,15 @@ import type { Ref, RefObject } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { amountToInteger } from '@actual-app/core/shared/util';
 import debounce from 'lodash/debounce';
 
-import { amountToInteger } from 'loot-core/shared/util';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { useFormat } from '#hooks/useFormat';
+import { useMergedRefs } from '#hooks/useMergedRefs';
+import { useResizeObserver } from '#hooks/useResizeObserver';
 
 import { LoadingIndicator } from './LoadingIndicator';
-
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
-import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
 const FONT_SIZE_SCALE_FACTOR = 1.6;
 const CONTAINER_MARGIN = 8;

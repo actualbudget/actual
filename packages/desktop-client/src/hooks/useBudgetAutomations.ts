@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-import { send } from 'loot-core/platform/client/connection';
-import type { Template } from 'loot-core/types/models/templates';
+import { send } from '@actual-app/core/platform/client/connection';
+import type { Template } from '@actual-app/core/types/models/templates';
 
 export function useBudgetAutomations({
   categoryId,

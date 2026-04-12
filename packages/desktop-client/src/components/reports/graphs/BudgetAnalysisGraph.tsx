@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { AlignedText } from '@actual-app/components/aligned-text';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import * as monthUtils from '@actual-app/core/shared/months';
 import { css } from '@emotion/css';
 import {
   Bar,
@@ -16,16 +17,14 @@ import {
   YAxis,
 } from 'recharts';
 
-import * as monthUtils from 'loot-core/shared/months';
+import { FinancialText } from '#components/FinancialText';
+import { Container } from '#components/reports/Container';
+import { useFormat } from '#hooks/useFormat';
+import type { FormatType } from '#hooks/useFormat';
+import { useLocale } from '#hooks/useLocale';
+import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 import { computePadding } from './util/computePadding';
-
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { Container } from '@desktop-client/components/reports/Container';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import type { FormatType } from '@desktop-client/hooks/useFormat';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 /**
  * Interval data for the Budget Analysis graph.

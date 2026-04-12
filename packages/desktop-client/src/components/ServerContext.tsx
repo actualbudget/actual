@@ -7,14 +7,13 @@ import React, {
 } from 'react';
 import type { ReactNode } from 'react';
 
+import { send } from '@actual-app/core/platform/client/connection';
+import type { Handlers } from '@actual-app/core/types/handlers';
 import { t } from 'i18next';
 
-import { send } from 'loot-core/platform/client/connection';
-import type { Handlers } from 'loot-core/types/handlers';
-
-import { useOnVisible } from '@desktop-client/hooks/useOnVisible';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { useOnVisible } from '#hooks/useOnVisible';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
 
 type LoginMethod = {
   method: string;

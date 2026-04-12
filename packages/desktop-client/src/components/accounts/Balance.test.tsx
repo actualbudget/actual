@@ -1,25 +1,24 @@
 import React from 'react';
 
+import type { ScheduleEntity } from '@actual-app/core/types/models';
 import { render, screen } from '@testing-library/react';
 
-import type { ScheduleEntity } from 'loot-core/types/models';
+import { useCachedSchedules } from '#hooks/useCachedSchedules';
+import { useSelectedItems } from '#hooks/useSelected';
+import { useSheetValue } from '#hooks/useSheetValue';
+import { TestProviders } from '#mocks';
 
 import { SelectedBalance } from './Balance';
 
-import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
-import { useSelectedItems } from '@desktop-client/hooks/useSelected';
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import { TestProviders } from '@desktop-client/mocks';
-
-vi.mock('@desktop-client/hooks/useSelected', () => ({
+vi.mock('#hooks/useSelected', () => ({
   useSelectedItems: vi.fn(),
 }));
 
-vi.mock('@desktop-client/hooks/useSheetValue', () => ({
+vi.mock('#hooks/useSheetValue', () => ({
   useSheetValue: vi.fn(),
 }));
 
-vi.mock('@desktop-client/hooks/useCachedSchedules', () => ({
+vi.mock('#hooks/useCachedSchedules', () => ({
   useCachedSchedules: vi.fn(),
 }));
 
@@ -67,6 +66,18 @@ describe('SelectedBalance – normal transactions', () => {
 
     expect(screen.getByText('Selected balance:')).toBeInTheDocument();
     expect(screen.getByText('-50.00')).toBeInTheDocument();
+  });
+
+  test('shows balance when balance is falsy', () => {
+    vi.mocked(useSheetValue).mockReturnValueOnce(null).mockReturnValueOnce(0);
+
+    render(
+      <TestProviders>
+        <SelectedBalance selectedItems={new Set(['tx-123'])} />
+      </TestProviders>,
+    );
+
+    expect(screen.getByText('Selected balance:')).toBeInTheDocument();
   });
 });
 
