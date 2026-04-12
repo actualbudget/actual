@@ -127,7 +127,7 @@ ${highlights}
 
 <!--truncate-->
 
-**Docker Tag: v${version}**
+**Docker Tag: ${version}**
 
 ${categorizedNotes}
 `;
@@ -146,7 +146,7 @@ Release date: ${releaseDate}
 
 ${highlights}
 
-**Docker Tag: v${version}**
+**Docker Tag: ${version}**
 
 ${categorizedNotes}`;
 
