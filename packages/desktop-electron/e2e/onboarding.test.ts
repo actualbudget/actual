@@ -21,7 +21,7 @@ test.describe('Onboarding', () => {
     electronPage,
   }) => {
     const bootstrapPage = await configurationPage.clickOnStartSyncServer();
-    await expect(bootstrapPage.heading).toHaveText('Welcome to Actual!');
+    await expect(bootstrapPage.getHeading()).toHaveText('Welcome to Actual!');
     await expect(electronPage).toHaveScreenshot();
   });
 });
