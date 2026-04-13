@@ -49,14 +49,18 @@ function transformEntry(value: ExportValue): ExportValue {
     return { types: typesPath, default: value };
   }
 
-  // Find the "default" value to derive the types path
+  // Derive the types path from the "default" condition. Nested conditional
+  // exports (where `default` is itself an object) are not supported here —
+  // if that shape ever shows up, leave the entry untouched rather than
+  // crash on `.endsWith()`.
   const defaultValue = value.default;
-  if (!defaultValue || shouldSkip(defaultValue)) return value;
+  if (typeof defaultValue !== 'string' || shouldSkip(defaultValue)) {
+    return value;
+  }
 
   const typesPath = toTypesPath(defaultValue);
   if (!typesPath) return value;
 
-  // Insert "types" as the first key
   return { types: typesPath, ...value };
 }
 
