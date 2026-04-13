@@ -19,35 +19,24 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import type { AccountEntity } from '@actual-app/core/types/models';
 import { css, cx } from '@emotion/css';
 
-import type { AccountEntity } from 'loot-core/types/models';
-
-import {
-  useReopenAccountMutation,
-  useUpdateAccountMutation,
-} from '@desktop-client/accounts';
-import { BalanceHistoryGraph } from '@desktop-client/components/accounts/BalanceHistoryGraph';
-import { Link } from '@desktop-client/components/common/Link';
-import { Notes } from '@desktop-client/components/Notes';
-import {
-  DropHighlight,
-  useDraggable,
-  useDroppable,
-} from '@desktop-client/components/sort';
-import type {
-  OnDragChangeCallback,
-  OnDropCallback,
-} from '@desktop-client/components/sort';
-import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
-import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { useDragRef } from '@desktop-client/hooks/useDragRef';
-import { useIsTestEnv } from '@desktop-client/hooks/useIsTestEnv';
-import { useNotes } from '@desktop-client/hooks/useNotes';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { openAccountCloseModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import type { Binding, SheetFields } from '@desktop-client/spreadsheet';
+import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
+import { BalanceHistoryGraph } from '#components/accounts/BalanceHistoryGraph';
+import { Link } from '#components/common/Link';
+import { Notes } from '#components/Notes';
+import { DropHighlight, useDraggable, useDroppable } from '#components/sort';
+import type { OnDragChangeCallback, OnDropCallback } from '#components/sort';
+import { CellValue } from '#components/spreadsheet/CellValue';
+import { useContextMenu } from '#hooks/useContextMenu';
+import { useDragRef } from '#hooks/useDragRef';
+import { useIsTestEnv } from '#hooks/useIsTestEnv';
+import { useNotes } from '#hooks/useNotes';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { openAccountCloseModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
+import type { Binding, SheetFields } from '#spreadsheet';
 
 export const accountNameStyle: CSSProperties = {
   marginTop: -2,

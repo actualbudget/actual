@@ -1,4 +1,4 @@
-import SwedbankHabaLV22 from '../swedbank_habalv22';
+import SwedbankHabaLV22 from '#app-gocardless/banks/swedbank_habalv22';
 
 describe('#normalizeTransaction', () => {
   const bookedCardTransaction = {

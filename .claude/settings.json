@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(gh pr create*)",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"ask\",\"permissionDecisionReason\":\"STOP: Read .github/agents/pr-and-commit-rules.md FIRST, then create the PR following its rules (title prefix, labels, blank template).\"}}'",
+            "statusMessage": "Checking PR creation rules..."
+          }
+        ]
+      }
+    ]
+  }
+}

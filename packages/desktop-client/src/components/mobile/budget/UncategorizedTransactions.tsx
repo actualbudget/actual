@@ -1,16 +1,16 @@
 import React, { useCallback, useState } from 'react';
 
-import { isPreviewId } from 'loot-core/shared/transactions';
-import type { TransactionEntity } from 'loot-core/types/models';
+import { isPreviewId } from '@actual-app/core/shared/transactions';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 
-import { TransactionListWithBalances } from '@desktop-client/components/mobile/transactions/TransactionListWithBalances';
-import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useTransactions } from '@desktop-client/hooks/useTransactions';
-import { useTransactionsSearch } from '@desktop-client/hooks/useTransactionsSearch';
-import { uncategorizedTransactions } from '@desktop-client/queries';
-import * as bindings from '@desktop-client/spreadsheet/bindings';
+import { TransactionListWithBalances } from '#components/mobile/transactions/TransactionListWithBalances';
+import { SchedulesProvider } from '#hooks/useCachedSchedules';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useNavigate } from '#hooks/useNavigate';
+import { useTransactions } from '#hooks/useTransactions';
+import { useTransactionsSearch } from '#hooks/useTransactionsSearch';
+import { uncategorizedTransactions } from '#queries';
+import * as bindings from '#spreadsheet/bindings';
 
 export function UncategorizedTransactions() {
   const navigate = useNavigate();

@@ -1,13 +1,13 @@
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
 import type {
   CategoryGroupEntity,
   RuleConditionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
-import type { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
+import type { useSpreadsheet } from '#hooks/useSpreadsheet';
+import { aqlQuery } from '#queries/aqlQuery';
 
 type BudgetMonthCategory = {
   id: string;
@@ -41,6 +41,7 @@ type SankeyNode = {
   name: string;
   toBudget?: number;
   isNegative?: boolean;
+  percentageLabel?: string;
 };
 
 type SankeyLink = {
@@ -727,4 +728,47 @@ export function compactSankeyData(
   }
 
   return compactedData;
+}
+
+export function withPercentageLabels(data: SankeyData): SankeyData {
+  // Assign a layer depth to each node, starting from the root (node 0 = depth 0).
+  const depth = new Array<number>(data.nodes.length).fill(-1);
+  depth[0] = 0;
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const link of data.links) {
+      const src = link.source;
+      const tgt = link.target;
+      if (depth[src] >= 0 && depth[tgt] < 0) {
+        depth[tgt] = depth[src] + 1;
+        changed = true;
+      }
+    }
+  }
+
+  // Each node's value is the sum of its incoming links.
+  // The root has no incoming links, so use its outgoing links instead.
+  const nodeValue = (i: number) =>
+    data.links
+      .filter(l => (depth[i] === 0 ? l.source === i : l.target === i))
+      .reduce((sum, l) => sum + l.value, 0);
+
+  // Compute the total value per layer so percentages within each layer sum to 100%.
+  const layerTotal = new Map<number, number>();
+  data.nodes.forEach((_, i) => {
+    const d = depth[i];
+    if (d >= 0) layerTotal.set(d, (layerTotal.get(d) ?? 0) + nodeValue(i));
+  });
+
+  const nodes = data.nodes.map((node, i) => {
+    const total = layerTotal.get(depth[i]) ?? 0;
+    return {
+      ...node,
+      percentageLabel:
+        total === 0 ? '0%' : `${((nodeValue(i) / total) * 100).toFixed(1)}%`,
+    };
+  });
+
+  return { ...data, nodes };
 }

@@ -3,14 +3,14 @@ import type {
   CategoryEntity,
   CategoryGroupEntity,
   RuleConditionEntity,
-} from 'loot-core/types/models';
-import type { SyncedPrefs } from 'loot-core/types/prefs';
+} from '@actual-app/core/types/models';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
+
+import type { QueryDataEntity } from '#components/reports/ReportOptions';
+import { aqlQuery } from '#queries/aqlQuery';
 
 import { fetchBudgetData } from './budgetDataQuery';
 import { makeQuery } from './makeQuery';
-
-import type { QueryDataEntity } from '@desktop-client/components/reports/ReportOptions';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
 
 export async function fetchSpreadsheetQueryData({
   balanceTypeOp,

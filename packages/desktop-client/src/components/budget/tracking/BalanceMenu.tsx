@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
 
-import { useTrackingSheetValue } from './TrackingBudgetComponents';
+import { trackingBudget } from '#spreadsheet/bindings';
 
-import { trackingBudget } from '@desktop-client/spreadsheet/bindings';
+import { useTrackingSheetValue } from './TrackingBudgetComponents';
 
 type BalanceMenuProps = Omit<
   ComponentPropsWithoutRef<typeof Menu>,

@@ -1,32 +1,32 @@
 import { useTranslation } from 'react-i18next';
 
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
 import {
   deleteTransaction,
   realizeTempTransactions,
   ungroupTransaction,
   ungroupTransactions,
   updateTransaction,
-} from 'loot-core/shared/transactions';
-import { validForTransfer } from 'loot-core/shared/transfer';
-import { applyChanges, applyFindReplace } from 'loot-core/shared/util';
-import type { Diff } from 'loot-core/shared/util';
+} from '@actual-app/core/shared/transactions';
+import { validForTransfer } from '@actual-app/core/shared/transfer';
+import { applyChanges, applyFindReplace } from '@actual-app/core/shared/util';
+import type { Diff } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   PayeeEntity,
   ScheduleEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
-import { pushModal } from '@desktop-client/modals/modalsSlice';
+import { pushModal } from '#modals/modalsSlice';
 import type {
   ConfirmTransactionEditReason,
   Modal as ModalType,
-} from '@desktop-client/modals/modalsSlice';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import { useDispatch } from '@desktop-client/redux';
+} from '#modals/modalsSlice';
+import { aqlQuery } from '#queries/aqlQuery';
+import { useDispatch } from '#redux';
 
 type BatchReconciledReason = Extract<
   ConfirmTransactionEditReason,

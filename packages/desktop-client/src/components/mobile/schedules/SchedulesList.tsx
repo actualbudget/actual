@@ -5,14 +5,13 @@ import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { ScheduleStatusType } from '@actual-app/core/shared/schedules';
+import type { ScheduleEntity } from '@actual-app/core/types/models';
 
-import type { ScheduleStatusType } from 'loot-core/shared/schedules';
-import type { ScheduleEntity } from 'loot-core/types/models';
+import { ActionableGridListItem } from '#components/mobile/ActionableGridListItem';
+import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 
 import { SchedulesListItem } from './SchedulesListItem';
-
-import { ActionableGridListItem } from '@desktop-client/components/mobile/ActionableGridListItem';
-import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
 
 type CompletedSchedulesItem = { id: 'show-completed' };
 type SchedulesListEntry = ScheduleEntity | CompletedSchedulesItem;

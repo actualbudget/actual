@@ -7,18 +7,17 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
+import type { PayeeEntity } from '@actual-app/core/types/models';
 
-import { send } from 'loot-core/platform/client/connection';
-import type { PayeeEntity } from 'loot-core/types/models';
-
-import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
-import { InputField } from '@desktop-client/components/mobile/MobileForms';
-import { MobilePageHeader, Page } from '@desktop-client/components/Page';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { usePayees } from '@desktop-client/hooks/usePayees';
-import { useUndo } from '@desktop-client/hooks/useUndo';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { MobileBackButton } from '#components/mobile/MobileBackButton';
+import { InputField } from '#components/mobile/MobileForms';
+import { MobilePageHeader, Page } from '#components/Page';
+import { useNavigate } from '#hooks/useNavigate';
+import { usePayees } from '#hooks/usePayees';
+import { useUndo } from '#hooks/useUndo';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
 
 export function MobilePayeeEditPage() {
   const { t } = useTranslation();

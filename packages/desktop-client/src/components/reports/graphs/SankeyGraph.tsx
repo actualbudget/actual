@@ -13,10 +13,10 @@ import {
 } from 'recharts';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 
-import { getColorScale } from '@desktop-client/components/reports/chart-theme';
-import { Container } from '@desktop-client/components/reports/Container';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
+import { getColorScale } from '#components/reports/chart-theme';
+import { Container } from '#components/reports/Container';
+import { useFormat } from '#hooks/useFormat';
+import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 type SankeyGraphNode = SankeyData['nodes'][number] & {
   hasChildren?: boolean;
@@ -24,6 +24,7 @@ type SankeyGraphNode = SankeyData['nodes'][number] & {
   toBudget?: number;
   isNegative?: boolean;
   actualValue?: number;
+  percentageLabel?: string;
   targetLinks?: Array<Record<string, unknown>>;
   sourceLinks?: Array<Record<string, unknown>>;
 };
@@ -91,6 +92,7 @@ type SankeyNodeProps = {
   payload: SankeyGraphNode;
   containerWidth: number;
   containerHeight: number;
+  showPercentages?: boolean;
 };
 function SankeyNode({
   x,
@@ -101,6 +103,7 @@ function SankeyNode({
   payload,
   containerWidth,
   containerHeight,
+  showPercentages,
 }: SankeyNodeProps) {
   const privacyMode = usePrivacyMode();
   const format = useFormat();
@@ -162,7 +165,9 @@ function SankeyNode({
         ))}
       {renderText(payload.name || '', height / 2)}
       {renderText(
-        format(payload.value, 'financial'),
+        showPercentages && payload.percentageLabel
+          ? payload.percentageLabel
+          : format(payload.value, 'financial'),
         height / 2 + 13,
         11,
         0.5,
@@ -195,11 +200,13 @@ type SankeyGraphProps = {
   data: SankeyData;
   showTooltip?: boolean;
   collapsedNodes?: string[];
+  showPercentages?: boolean;
 };
 export function SankeyGraph({
   style,
   data,
   showTooltip = true,
+  showPercentages = false,
 }: SankeyGraphProps) {
   const privacyMode = usePrivacyMode();
   const format = useFormat();
@@ -229,6 +236,7 @@ export function SankeyGraph({
                 {...props}
                 containerWidth={width}
                 containerHeight={height}
+                showPercentages={showPercentages}
               />
             )}
             link={props => (

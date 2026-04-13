@@ -1,4 +1,4 @@
-import type { BrandedId } from '../util/types';
+import type { BrandedId } from '#util/types';
 
 export type GoCardlessAccountId = BrandedId<'gocardless-account'>;
 export type GoCardlessRequisitionId = BrandedId<'gocardless-requisition'>;

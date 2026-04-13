@@ -2,8 +2,14 @@
 import React, { Fragment, useEffect, useEffectEvent } from 'react';
 import { useLocation } from 'react-router';
 
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+
+import { useMetadataPref } from '#hooks/useMetadataPref';
+import { useModalState } from '#hooks/useModalState';
+import { SheetNameProvider } from '#hooks/useSheetName';
+import { closeModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 import { EditSyncAccount } from './banksync/EditSyncAccount';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
@@ -78,12 +84,6 @@ import { PostsOfflineNotification } from './schedules/PostsOfflineNotification';
 import { ScheduleEditModal } from './schedules/ScheduleEditModal';
 import { ScheduleLink } from './schedules/ScheduleLink';
 import { UpcomingLength } from './schedules/UpcomingLength';
-
-import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
-import { useModalState } from '@desktop-client/hooks/useModalState';
-import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
-import { closeModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
 
 export function Modals() {
   const location = useLocation();

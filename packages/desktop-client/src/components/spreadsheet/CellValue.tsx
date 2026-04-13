@@ -4,18 +4,18 @@ import type { ComponentPropsWithoutRef, CSSProperties, ReactNode } from 'react';
 
 import { Text } from '@actual-app/components/text';
 
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import type { FormatType } from '@desktop-client/hooks/useFormat';
-import { useSheetName } from '@desktop-client/hooks/useSheetName';
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
+import { FinancialText } from '#components/FinancialText';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { useFormat } from '#hooks/useFormat';
+import type { FormatType } from '#hooks/useFormat';
+import { useSheetName } from '#hooks/useSheetName';
+import { useSheetValue } from '#hooks/useSheetValue';
 import type {
   Binding,
   SheetFields,
   SheetNames,
   Spreadsheets,
-} from '@desktop-client/spreadsheet';
+} from '#spreadsheet';
 
 type CellValueProps<
   SheetName extends SheetNames,

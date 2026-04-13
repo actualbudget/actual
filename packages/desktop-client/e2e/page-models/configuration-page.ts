@@ -1,6 +1,7 @@
 import type { Locator, Page } from '@playwright/test';
 
 import { AccountPage } from './account-page';
+import { BootstrapPage } from './bootstrap-page';
 import { BudgetPage } from './budget-page';
 
 export class ConfigurationPage {
@@ -20,6 +21,12 @@ export class ConfigurationPage {
 
   async clickOnNoServer() {
     await this.page.getByRole('button', { name: "Don't use a server" }).click();
+  }
+
+  async clickOnStartSyncServer() {
+    await this.page.getByRole('button', { name: 'Start' }).click();
+    await this.page.waitForURL('**/bootstrap');
+    return new BootstrapPage(this.page);
   }
 
   async startFresh() {

@@ -5,24 +5,24 @@ import { useTranslation } from 'react-i18next';
 import { Block } from '@actual-app/components/block';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { SankeyWidget } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
 
-import type { SankeyWidget } from 'loot-core/types/models';
-
-import { SankeyGraph } from '@desktop-client/components/reports/graphs/SankeyGraph';
-import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { ReportCard } from '@desktop-client/components/reports/ReportCard';
-import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
-import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
+import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
+import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportCard } from '#components/reports/ReportCard';
+import { ReportCardName } from '#components/reports/ReportCardName';
+import { calculateTimeRange } from '#components/reports/reportRanges';
 import {
   compactSankeyData,
   createSpreadsheet as sankeySpreadsheet,
-} from '@desktop-client/components/reports/spreadsheets/sankey-spreadsheet';
-import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
-import { useReport } from '@desktop-client/components/reports/useReport';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
+  withPercentageLabels,
+} from '#components/reports/spreadsheets/sankey-spreadsheet';
+import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
+import { useReport } from '#components/reports/useReport';
+import { useCategories } from '#hooks/useCategories';
+import { useLocale } from '#hooks/useLocale';
+import { useResizeObserver } from '#hooks/useResizeObserver';
 
 type SankeyCardProps = {
   widgetId: string;
@@ -154,7 +154,12 @@ export function SankeyCard({
 
         {compactData ? (
           <SankeyGraph
-            data={compactData}
+            data={
+              meta?.showPercentages
+                ? withPercentageLabels(compactData)
+                : compactData
+            }
+            showPercentages={meta?.showPercentages}
             showTooltip={!isEditing}
             style={{ height: 'auto', flex: 1 }}
           />

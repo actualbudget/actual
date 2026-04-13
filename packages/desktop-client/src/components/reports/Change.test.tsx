@@ -3,9 +3,9 @@ import React from 'react';
 import { theme } from '@actual-app/components/theme';
 import { render, screen } from '@testing-library/react';
 
-import { Change } from './Change';
+import { TestProviders } from '#mocks';
 
-import { TestProviders } from '@desktop-client/mocks';
+import { Change } from './Change';
 
 describe('Change', () => {
   it('renders a positive amount with a plus sign and positive color', () => {

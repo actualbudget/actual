@@ -6,7 +6,7 @@ module.exports = {
     type: 'suggestion',
     docs: {
       description:
-        'Prefer subpath imports (#path/to/module) over relative backtracked imports (../path/to/module) in loot-core',
+        'Prefer subpath imports (#path/to/module) over relative backtracked imports (../path/to/module)',
     },
     fixable: 'code',
     schema: [],
@@ -20,19 +20,17 @@ module.exports = {
     const filenameRaw = context.getFilename();
     const normalizedFilename = filenameRaw.replace(/\\/g, '/');
 
-    // Only apply to files inside packages/loot-core/src/
-    const lootCoreMatch = normalizedFilename.match(
-      /packages\/loot-core\/src\//,
-    );
-    if (!lootCoreMatch) {
+    // Only apply to files inside packages/*/src/
+    const pkgMatch = normalizedFilename.match(/packages\/[^/]+\/src\//);
+    if (!pkgMatch) {
       return {};
     }
 
     // Get the absolute path to the src/ directory
-    const srcIndex =
-      normalizedFilename.indexOf('packages/loot-core/src/') +
-      'packages/loot-core/src/'.length;
-    const srcDir = normalizedFilename.slice(0, srcIndex);
+    const srcDir = normalizedFilename.slice(
+      0,
+      pkgMatch.index + pkgMatch[0].length,
+    );
 
     function getSubpathImport(importSource) {
       // Only transform backtracked imports
@@ -44,12 +42,18 @@ module.exports = {
       const resolved = path.posix.join(fileDir, importSource);
 
       // Check that the resolved path is inside src/
-      if (!resolved.startsWith(srcDir.slice(0, -1))) {
+      const srcRoot = srcDir.slice(0, -1);
+      const relativeToSrc = path.posix.relative(srcRoot, resolved);
+      if (
+        relativeToSrc === '' ||
+        relativeToSrc.startsWith('..') ||
+        path.posix.isAbsolute(relativeToSrc)
+      ) {
         return null;
       }
 
       // Get path relative to src/
-      let subpath = resolved.slice(srcDir.length);
+      let subpath = relativeToSrc;
 
       // Strip file extensions
       subpath = subpath.replace(/\.(ts|tsx|js|jsx)$/, '');

@@ -1,11 +1,10 @@
-import { queryOptions } from '@tanstack/react-query';
-import i18n from 'i18next';
-
-import { send } from 'loot-core/platform/client/connection';
+import { send } from '@actual-app/core/platform/client/connection';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { queryOptions } from '@tanstack/react-query';
+import i18n from 'i18next';
 
 type CategoryViews = {
   grouped: CategoryGroupEntity[];

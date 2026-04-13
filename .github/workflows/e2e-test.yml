@@ -62,8 +62,14 @@ jobs:
           download-translations: 'false'
       - name: Trust the repository directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      # Build tools are needed to rebuild native modules like better-sqlite3 used by the Desktop app, which is required to run E2E tests on the Desktop app.
+      - name: Install build tools
+        run: apt-get update && apt-get install -y build-essential python3
+
       - name: Run Desktop app E2E Tests
         run: |
+          yarn rebuild-electron
           xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" -- yarn e2e:desktop
       - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         if: always()
