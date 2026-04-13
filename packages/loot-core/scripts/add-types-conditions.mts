@@ -25,12 +25,12 @@ type ExportMap = Record<string, ExportValue>;
 function toTypesPath(srcPath: string): string | null {
   if (srcPath.startsWith('./src/')) {
     return srcPath
-      .replace(/^\.\/src\//, './lib-dist/decl/src/')
+      .replace(/^\.\/src\//, './@types/src/')
       .replace(/\.tsx?$/, '.d.ts');
   }
   if (srcPath.startsWith('./typings/')) {
     return srcPath
-      .replace(/^\.\/typings\//, './lib-dist/decl/typings/')
+      .replace(/^\.\/typings\//, './@types/typings/')
       .replace(/\.tsx?$/, '.d.ts');
   }
   return null;

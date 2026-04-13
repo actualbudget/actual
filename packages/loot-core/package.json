@@ -3,13 +3,17 @@
   "version": "26.4.0",
   "description": "",
   "license": "ISC",
-  "typesVersions": {
-    "*": {
-      "types/*": [
-        "./src/types/*"
-      ]
-    }
-  },
+  "files": [
+    "src",
+    "@types",
+    "migrations",
+    "typings",
+    "default-db.sqlite",
+    "!src/**/*.test.ts",
+    "!src/**/__tests__/**",
+    "!src/**/__snapshots__/**",
+    "!src/**/__mocks__/**"
+  ],
   "imports": {
     "#platform/server/asyncStorage": {
       "electron": "./src/platform/server/asyncStorage/index.electron.ts",

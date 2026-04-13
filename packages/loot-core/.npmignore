@@ -1,4 +1,0 @@
-lib-node
-lib-dist/*
-!lib-dist/decl
-!*.d.ts
