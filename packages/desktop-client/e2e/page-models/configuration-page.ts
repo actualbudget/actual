@@ -19,6 +19,11 @@ export class ConfigurationPage {
     return new BudgetPage(this.page);
   }
 
+  async createDemoFile() {
+    await this.page.getByRole('button', { name: 'View demo' }).click();
+    return new BudgetPage(this.page);
+  }
+
   async clickOnNoServer() {
     await this.page.getByRole('button', { name: "Don't use a server" }).click();
   }
