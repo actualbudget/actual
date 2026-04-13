@@ -158,9 +158,7 @@
   },
   "dependencies": {
     "@jlongster/sql.js": "^1.6.7",
-    "@reduxjs/toolkit": "^2.11.2",
     "@rschedule/core": "^1.5.0",
-    "@rschedule/json-tools": "^1.5.0",
     "@rschedule/standard-date-adapter": "^1.5.0",
     "absurd-sql": "0.0.54",
     "adm-zip": "^0.5.16",
@@ -168,14 +166,18 @@
     "csv-parse": "^6.1.0",
     "csv-stringify": "^6.6.0",
     "date-fns": "^4.1.0",
+    "google-protobuf": "^3.21.4",
     "handlebars": "^4.7.9",
+    "hyperformula": "^3.2.0",
+    "lodash": "^4.18.1",
     "lru-cache": "^11.2.6",
     "memoize-one": "^6.0.0",
     "mitt": "^3.0.1",
     "promise-retry": "^2.0.1",
     "typescript-strict-plugin": "^2.4.4",
     "ua-parser-js": "^2.0.9",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
     "@actual-app/crdt": "workspace:*",

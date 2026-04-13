@@ -8,6 +8,7 @@
     "typecheck": "tsgo -b"
   },
   "devDependencies": {
+    "@octokit/rest": "^22.0.1",
     "@typescript/native-preview": "^7.0.0-dev.20260309.1",
     "extensionless": "^2.0.6",
     "gray-matter": "^4.0.3",

@@ -13,5 +13,6 @@ module.exports = {
     'no-anchor-tag': require('./rules/no-anchor-tag'),
     'no-react-default-import': require('./rules/no-react-default-import'),
     'prefer-subpath-imports': require('./rules/prefer-subpath-imports'),
+    'no-extraneous-dependencies': require('./rules/no-extraneous-dependencies'),
   },
 };
