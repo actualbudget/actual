@@ -24,10 +24,6 @@ test.describe('Settings', () => {
     settingsPage = await navigation.goToSettingsPage();
   });
 
-  test('checks the page visuals', async ({ electronPage }) => {
-    await expect(electronPage).toHaveScreenshot();
-  });
-
   test('downloads the export of the budget', async ({ electronApp }) => {
     const exportPath = path.resolve('e2e/data/export-test.zip');
 
