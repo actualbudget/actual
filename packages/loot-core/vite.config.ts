@@ -59,9 +59,6 @@ export default defineConfig(({ mode }) => {
         mangle: false,
       },
     },
-    resolve: {
-      extensions: ['.js', '.ts', '.tsx', '.json'],
-    },
     define: {
       'process.env': '{}',
       'process.env.IS_DEV': JSON.stringify(isDev),
@@ -71,6 +68,7 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       peggyLoader(),
+      // https://github.com/davidmyersdev/vite-plugin-node-polyfills/issues/142
       nodePolyfills({
         include: [
           'process',

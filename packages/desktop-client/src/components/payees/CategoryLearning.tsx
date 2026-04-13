@@ -4,13 +4,9 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
 
-import { Link } from '@desktop-client/components/common/Link';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { Link } from '#components/common/Link';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 export function CategoryLearning() {
   const { t } = useTranslation();

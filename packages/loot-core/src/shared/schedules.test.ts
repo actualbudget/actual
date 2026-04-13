@@ -2,11 +2,12 @@ import { enUS } from 'date-fns/locale';
 import i18next from 'i18next';
 import MockDate from 'mockdate';
 
-import type { ScheduleEntity } from '../types/models';
+import type { ScheduleEntity } from '#types/models';
 
 import * as monthUtils from './months';
 import {
   computeSchedulePreviewTransactions,
+  getNextDate,
   getRecurringDescription,
   getStatus,
   getUpcomingDays,
@@ -565,6 +566,91 @@ describe('schedules', () => {
             .every(r => r.forceUpcoming === true),
         ).toBe(true);
       });
+    });
+
+    it('does not crash when a recurring schedule has an end date in the past', () => {
+      function makeSchedule(
+        overrides: Partial<ScheduleEntity> &
+          Pick<ScheduleEntity, 'id' | 'next_date' | '_conditions'>,
+      ): ScheduleEntity {
+        return {
+          rule: 'rule-1',
+          completed: false,
+          posts_transaction: false,
+          tombstone: false,
+          _payee: 'payee-1',
+          _account: 'acct-1',
+          _amount: -10000,
+          _amountOp: 'is',
+          _date: overrides.next_date,
+          _actions: [],
+          ...overrides,
+        };
+      }
+
+      // Schedule that recurs monthly but ended in the past (2016-08-25)
+      // while current date is 2017-01-01
+      const schedule = makeSchedule({
+        id: 'sched-expired',
+        next_date: '2016-08-25',
+        _conditions: [
+          {
+            field: 'date',
+            op: 'isapprox',
+            value: {
+              start: '2016-01-25',
+              frequency: 'monthly',
+              endMode: 'on_date',
+              endDate: '2016-08-25',
+            },
+          },
+        ],
+      });
+
+      const statuses: ScheduleStatuses = new Map([['sched-expired', 'missed']]);
+      const result = computeSchedulePreviewTransactions(
+        [schedule],
+        statuses,
+        '7',
+      );
+
+      // Should not crash; schedule with past end date produces its next_date entry only
+      expect(result).toBeDefined();
+    });
+  });
+
+  describe('getNextDate', () => {
+    it('returns last occurrence for a recurring schedule with an end date in the past', () => {
+      const dateCond = {
+        op: 'isapprox',
+        value: {
+          start: '2016-01-25',
+          frequency: 'monthly',
+          endMode: 'on_date',
+          endDate: '2016-08-25',
+        },
+      };
+
+      // Current date is 2017-01-01 via MockDate
+      const result = getNextDate(dateCond);
+      expect(result).not.toBeNull();
+      // The last occurrence should be returned (reverse lookup)
+      expect(result).toBe('2016-08-25');
+    });
+
+    it('returns null when the end date is before the start date', () => {
+      const dateCond = {
+        op: 'isapprox',
+        value: {
+          start: '2016-03-25',
+          frequency: 'monthly',
+          endMode: 'on_date',
+          endDate: '2016-01-25',
+        },
+      };
+
+      const result = getNextDate(dateCond, new Date(2017, 0, 1));
+      expect(result).toBeNull();
     });
   });
 });

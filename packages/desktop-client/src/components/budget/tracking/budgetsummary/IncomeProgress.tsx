@@ -3,11 +3,11 @@ import type { ComponentProps } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
+import type { CellValue } from '#components/spreadsheet/CellValue';
+import { useSheetValue } from '#hooks/useSheetValue';
+
 import { fraction } from './fraction';
 import { PieProgress } from './PieProgress';
-
-import type { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
 
 type IncomeProgressProps = {
   current: ComponentProps<typeof CellValue>['binding'];

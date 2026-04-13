@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/core",
-  "version": "26.3.0",
+  "version": "26.4.0",
   "description": "",
   "license": "ISC",
   "typesVersions": {
@@ -11,12 +11,71 @@
     }
   },
   "imports": {
-    "#*": [
-      "./src/*.ts",
-      "./src/*.tsx",
-      "./src/*/index.ts",
-      "./src/*/index.tsx"
-    ]
+    "#platform/server/asyncStorage": {
+      "electron": "./src/platform/server/asyncStorage/index.electron.ts",
+      "api": "./src/platform/server/asyncStorage/index.api.ts",
+      "default": "./src/platform/server/asyncStorage/index.ts"
+    },
+    "#platform/server/connection": {
+      "electron": "./src/platform/server/connection/index.electron.ts",
+      "api": "./src/platform/server/connection/index.api.ts",
+      "default": "./src/platform/server/connection/index.ts"
+    },
+    "#platform/server/fetch": {
+      "electron": "./src/platform/server/fetch/index.electron.ts",
+      "api": "./src/platform/server/fetch/index.api.ts",
+      "default": "./src/platform/server/fetch/index.ts"
+    },
+    "#platform/server/fs": {
+      "electron": "./src/platform/server/fs/index.electron.ts",
+      "api": "./src/platform/server/fs/index.api.ts",
+      "default": "./src/platform/server/fs/index.ts"
+    },
+    "#platform/server/fs/path-join": {
+      "electron": "./src/platform/server/fs/path-join.electron.ts",
+      "api": "./src/platform/server/fs/path-join.api.ts",
+      "default": "./src/platform/server/fs/path-join.ts"
+    },
+    "#platform/server/sqlite": {
+      "electron": "./src/platform/server/sqlite/index.electron.ts",
+      "api": "./src/platform/server/sqlite/index.api.ts",
+      "default": "./src/platform/server/sqlite/index.ts"
+    },
+    "#platform/client/connection": {
+      "electron-renderer": "./src/platform/client/connection/index.electron.ts",
+      "default": "./src/platform/client/connection/index.ts"
+    },
+    "#server/encryption/encryption-internals": {
+      "electron": "./src/server/encryption/encryption-internals.electron.ts",
+      "api": "./src/server/encryption/encryption-internals.api.ts",
+      "default": "./src/server/encryption/encryption-internals.ts"
+    },
+    "#shared/platform": {
+      "electron": "./src/shared/platform.electron.ts",
+      "api": "./src/shared/platform.api.ts",
+      "default": "./src/shared/platform.ts"
+    },
+    "#mocks": "./src/mocks/index.ts",
+    "#platform/client/undo": "./src/platform/client/undo/index.ts",
+    "#platform/exceptions": "./src/platform/exceptions/index.ts",
+    "#platform/server/indexeddb": "./src/platform/server/indexeddb/index.ts",
+    "#platform/server/log": "./src/platform/server/log/index.ts",
+    "#server/aql": "./src/server/aql/index.ts",
+    "#server/db": "./src/server/db/index.ts",
+    "#server/encryption": "./src/server/encryption/index.ts",
+    "#server/importers": "./src/server/importers/index.ts",
+    "#server/rules": "./src/server/rules/index.ts",
+    "#server/sync": "./src/server/sync/index.ts",
+    "#server/transactions": "./src/server/transactions/index.ts",
+    "#types/models": "./src/types/models/index.ts",
+    "#platform/client/*": "./src/platform/client/*.ts",
+    "#platform/server/*": "./src/platform/server/*.ts",
+    "#platform/*": "./src/platform/*.ts",
+    "#server/*": "./src/server/*.ts",
+    "#shared/*": "./src/shared/*.ts",
+    "#types/*": "./src/types/*.ts",
+    "#mocks/*": "./src/mocks/*.ts",
+    "#*": "./src/*.ts"
   },
   "exports": {
     "./client/accounts/*": "./src/client/accounts/*.ts",
@@ -32,10 +91,6 @@
     "./client/store": "./src/client/store/index.ts",
     "./client/store/mock": "./src/client/store/mock.ts",
     "./client/users/*": "./src/client/users/*.ts",
-    "./client/platform": {
-      "node": "./src/client/platform.electron.ts",
-      "default": "./src/client/platform.web.ts"
-    },
     "./client/queries": "./src/client/queries.ts",
     "./client/query-helpers": "./src/client/query-helpers.ts",
     "./client/query-hooks": "./src/client/query-hooks.ts",
@@ -46,19 +101,44 @@
     "./client/undo": "./src/client/undo.ts",
     "./mocks": "./src/mocks/index.ts",
     "./platform/client/connection": {
-      "electron": "./src/platform/client/connection/index.ts",
-      "default": "./src/platform/client/connection/index.browser.ts"
+      "electron-renderer": "./src/platform/client/connection/index.electron.ts",
+      "default": "./src/platform/client/connection/index.ts"
     },
     "./platform/client/undo": "./src/platform/client/undo/index.ts",
     "./platform/exceptions": "./src/platform/exceptions/index.ts",
-    "./platform/server/asyncStorage": "./src/platform/server/asyncStorage/index.ts",
-    "./platform/server/connection": "./src/platform/server/connection/index.ts",
-    "./platform/server/fetch": "./src/platform/server/fetch/index.ts",
-    "./platform/server/fs": "./src/platform/server/fs/index.ts",
+    "./platform/server/asyncStorage": {
+      "electron": "./src/platform/server/asyncStorage/index.electron.ts",
+      "api": "./src/platform/server/asyncStorage/index.api.ts",
+      "default": "./src/platform/server/asyncStorage/index.ts"
+    },
+    "./platform/server/connection": {
+      "electron": "./src/platform/server/connection/index.electron.ts",
+      "api": "./src/platform/server/connection/index.api.ts",
+      "default": "./src/platform/server/connection/index.ts"
+    },
+    "./platform/server/fetch": {
+      "electron": "./src/platform/server/fetch/index.electron.ts",
+      "api": "./src/platform/server/fetch/index.api.ts",
+      "default": "./src/platform/server/fetch/index.ts"
+    },
+    "./platform/server/fs": {
+      "electron": "./src/platform/server/fs/index.electron.ts",
+      "api": "./src/platform/server/fs/index.api.ts",
+      "default": "./src/platform/server/fs/index.ts"
+    },
     "./platform/server/log": "./src/platform/server/log/index.ts",
-    "./platform/server/sqlite": "./src/platform/server/sqlite/index.ts",
+    "./platform/server/sqlite": {
+      "electron": "./src/platform/server/sqlite/index.electron.ts",
+      "api": "./src/platform/server/sqlite/index.api.ts",
+      "default": "./src/platform/server/sqlite/index.ts"
+    },
     "./server/budget/types/*": "./src/server/budget/types/*.d.ts",
     "./server/*": "./src/server/*.ts",
+    "./shared/platform": {
+      "electron": "./src/shared/platform.electron.ts",
+      "api": "./src/shared/platform.api.ts",
+      "default": "./src/shared/platform.ts"
+    },
     "./shared/*": "./src/shared/*.ts",
     "./types/models": "./src/types/models/index.ts",
     "./types/*": "./src/types/*.ts",
@@ -78,9 +158,7 @@
   },
   "dependencies": {
     "@jlongster/sql.js": "^1.6.7",
-    "@reduxjs/toolkit": "^2.11.2",
     "@rschedule/core": "^1.5.0",
-    "@rschedule/json-tools": "^1.5.0",
     "@rschedule/standard-date-adapter": "^1.5.0",
     "absurd-sql": "0.0.54",
     "adm-zip": "^0.5.16",
@@ -88,16 +166,18 @@
     "csv-parse": "^6.1.0",
     "csv-stringify": "^6.6.0",
     "date-fns": "^4.1.0",
+    "google-protobuf": "^3.21.4",
     "handlebars": "^4.7.9",
+    "hyperformula": "^3.2.0",
+    "lodash": "^4.18.1",
     "lru-cache": "^11.2.6",
-    "md5": "^2.3.0",
     "memoize-one": "^6.0.0",
     "mitt": "^3.0.1",
     "promise-retry": "^2.0.1",
-    "slash": "5.1.0",
     "typescript-strict-plugin": "^2.4.4",
     "ua-parser-js": "^2.0.9",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
     "@actual-app/crdt": "workspace:*",
@@ -107,7 +187,6 @@
     "@types/emscripten": "^1.41.5",
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
     "@types/node": "^22.19.15",
-    "@types/pegjs": "^0.10.6",
     "@typescript/native-preview": "^7.0.0-dev.20260309.1",
     "assert": "^2.1.0",
     "browserify-zlib": "^0.2.0",
@@ -128,8 +207,8 @@
     "timers-browserify": "^2.0.12",
     "ts-node": "^10.9.2",
     "util": "^0.12.5",
-    "vite": "^8.0.0",
-    "vite-plugin-node-polyfills": "^0.25.0",
+    "vite": "^8.0.5",
+    "vite-plugin-node-polyfills": "^0.26.0",
     "vite-plugin-peggy-loader": "^2.0.1",
     "vitest": "^4.1.0",
     "yargs": "^18.0.0"

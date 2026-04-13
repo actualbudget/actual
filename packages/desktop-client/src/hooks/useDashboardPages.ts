@@ -1,11 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
-
 import type {
   DashboardPageEntity,
   DashboardWidgetEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { useQuery } from '@tanstack/react-query';
 
-import { dashboardQueries } from '@desktop-client/reports';
+import { dashboardQueries } from '#reports';
 
 export function useDashboardPages() {
   return useQuery(dashboardQueries.listDashboardPages());

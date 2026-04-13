@@ -1,4 +1,4 @@
-import type { Transaction } from '../app-gocardless/gocardless-node.types';
+import type { Transaction } from '#app-gocardless/gocardless-node.types';
 
 import { title } from './title/index';
 

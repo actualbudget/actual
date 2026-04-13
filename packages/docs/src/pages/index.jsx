@@ -20,7 +20,7 @@ export default function Hello() {
       <img alt="" src="/img/homepage/hero-bg.svg" className={classes.heroBg} />
 
       <div className={`${classes.main} ${classes.container}`}>
-        <h1>Your Finances — made simple</h1>
+        <h1 className={classes.heroHeading}>Your Finances — made simple</h1>
         <p className={classes.heroText}>
           Actual Budget is a super fast and privacy-focused app for managing
           your finances. At its heart is the well proven and much loved Envelope

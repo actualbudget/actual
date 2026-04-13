@@ -1,4 +1,4 @@
-import Sabadell from '../bancsabadell_bsabesbbb';
+import Sabadell from '#app-gocardless/banks/bancsabadell_bsabesbbb';
 
 describe('BancSabadell', () => {
   describe('#normalizeTransaction', () => {

@@ -1,10 +1,9 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-
-import type { LocationCoordinates } from 'loot-core/shared/location-utils';
+import type { LocationCoordinates } from '@actual-app/core/shared/location-utils';
 import type {
   NearbyPayeeEntity,
   PayeeLocationEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import type {
   GeolocationAdapter,

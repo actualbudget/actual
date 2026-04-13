@@ -1,4 +1,4 @@
-import type { Template } from 'loot-core/types/models/templates';
+import type { Template } from '@actual-app/core/types/models/templates';
 
 import { migrateTemplatesToAutomations } from './BudgetAutomationsModal';
 

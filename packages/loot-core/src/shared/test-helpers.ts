@@ -1,4 +1,4 @@
-import { logger } from '../platform/server/log';
+import { logger } from '#platform/server/log';
 
 export let tracer: null | ReturnType<typeof execTracer> = null;
 

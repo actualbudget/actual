@@ -1,14 +1,14 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import { createApp } from '#server/app';
+import { aqlQuery } from '#server/aql';
+import * as db from '#server/db';
+import { ValidationError } from '#server/errors';
+import { requiredFields } from '#server/models';
+import { mutator } from '#server/mutators';
+import { undoable } from '#server/undo';
 import { q } from '#shared/query';
-import type { CustomReportData, CustomReportEntity } from '../../types/models';
-import { createApp } from '../app';
-import { aqlQuery } from '../aql';
-import * as db from '../db';
-import { ValidationError } from '../errors';
-import { requiredFields } from '../models';
-import { mutator } from '../mutators';
-import { undoable } from '../undo';
+import type { CustomReportData, CustomReportEntity } from '#types/models';
 
 export const reportModel = {
   validate(
@@ -31,7 +31,7 @@ export const reportModel = {
   toJS(row: CustomReportData): CustomReportEntity {
     return {
       id: row.id,
-      name: row.name,
+      name: row.name ?? '',
       startDate: row.start_date,
       endDate: row.end_date,
       isDateStatic: row.date_static === 1,

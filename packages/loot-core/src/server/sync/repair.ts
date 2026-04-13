@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { getClock, merkle, serializeClock, Timestamp } from '@actual-app/crdt';
 
-import * as db from '../db';
+import * as db from '#server/db';
 
 export function rebuildMerkleHash(): {
   numMessages: number;

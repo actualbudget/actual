@@ -3,6 +3,7 @@ import { createServer } from 'http';
 import type { Server } from 'http';
 import path from 'path';
 
+import type { GlobalPrefsJson } from '@actual-app/core/types/prefs';
 import {
   app,
   BrowserWindow,
@@ -25,8 +26,6 @@ import type {
 import { copy, exists, mkdir, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
 
-import type { GlobalPrefsJson } from '@actual-app/core/types/prefs';
-
 import { getMenu } from './menu';
 import {
   get as getWindowState,
@@ -46,7 +45,7 @@ process.env.lootCoreScript = isDev
 // This allows relative URLs to be resolved to app:// which makes
 // local assets load correctly
 protocol.registerSchemesAsPrivileged([
-  { scheme: 'app', privileges: { standard: true } },
+  { scheme: 'app', privileges: { standard: true, secure: true } },
 ]);
 
 if (isPlaywrightTest) {
@@ -223,7 +222,7 @@ async function startSyncServer() {
 
     const syncServerConfig = {
       port: globalPrefs.syncServerConfig?.port || 5007,
-      hostname: 'localhost',
+      hostname: '127.0.0.1',
       ACTUAL_SERVER_DATA_DIR: path.resolve(
         process.env.ACTUAL_DATA_DIR!,
         'actual-server',

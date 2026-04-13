@@ -5,28 +5,27 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
+import { format as monthUtilFormat } from '@actual-app/core/shared/months';
+import { getNormalisedString } from '@actual-app/core/shared/normalisation';
+import { q } from '@actual-app/core/shared/query';
+import { getScheduledAmount } from '@actual-app/core/shared/schedules';
+import type { ScheduleEntity } from '@actual-app/core/types/models';
 
-import { send } from 'loot-core/platform/client/connection';
-import { format as monthUtilFormat } from 'loot-core/shared/months';
-import { getNormalisedString } from 'loot-core/shared/normalisation';
-import { q } from 'loot-core/shared/query';
-import { getScheduledAmount } from 'loot-core/shared/schedules';
-import type { ScheduleEntity } from 'loot-core/types/models';
+import { Search } from '#components/common/Search';
+import { MobilePageHeader, Page } from '#components/Page';
+import { useAccounts } from '#hooks/useAccounts';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useFormat } from '#hooks/useFormat';
+import { useNavigate } from '#hooks/useNavigate';
+import { usePayees } from '#hooks/usePayees';
+import { useSchedules } from '#hooks/useSchedules';
+import { useUndo } from '#hooks/useUndo';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
 
 import { AddScheduleButton } from './AddScheduleButton';
 import { SchedulesList } from './SchedulesList';
-
-import { Search } from '@desktop-client/components/common/Search';
-import { MobilePageHeader, Page } from '@desktop-client/components/Page';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { usePayees } from '@desktop-client/hooks/usePayees';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import { useUndo } from '@desktop-client/hooks/useUndo';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
 
 export function MobileSchedulesPage() {
   const { t } = useTranslation();

@@ -1,5 +1,5 @@
-import { mockTransactionAmount } from '../../services/tests/fixtures';
-import Virgin from '../virgin_nrnbgb22';
+import Virgin from '#app-gocardless/banks/virgin_nrnbgb22';
+import { mockTransactionAmount } from '#app-gocardless/services/tests/fixtures';
 
 describe('Virgin', () => {
   describe('#normalizeTransaction', () => {

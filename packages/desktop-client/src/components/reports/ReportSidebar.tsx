@@ -12,8 +12,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-
-import * as monthUtils from 'loot-core/shared/months';
+import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
@@ -21,8 +20,11 @@ import type {
   sortByOpType,
   TimeFrame,
   TransactionEntity,
-} from 'loot-core/types/models';
-import type { SyncedPrefs } from 'loot-core/types/prefs';
+} from '@actual-app/core/types/models';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
+
+import { Information } from '#components/alerts';
+import { useLocale } from '#hooks/useLocale';
 
 import { CategorySelector } from './CategorySelector';
 import { defaultsList, disabledList } from './disabledList';
@@ -32,9 +34,6 @@ import { ReportOptions } from './ReportOptions';
 import type { dateRangeProps } from './ReportOptions';
 import { validateEnd, validateStart } from './reportRanges';
 import { setSessionReport } from './setSessionReport';
-
-import { Information } from '@desktop-client/components/alerts';
-import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type ReportSidebarProps = {
   customReportItems: CustomReportEntity;

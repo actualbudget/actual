@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import * as db from '../db';
-import * as sheet from '../sheet';
+import * as db from '#server/db';
+import * as sheet from '#server/sheet';
 
 import {
   coverOverbudgeted,

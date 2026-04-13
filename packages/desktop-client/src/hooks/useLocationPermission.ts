@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 
-import { useFeatureFlag } from './useFeatureFlag';
+import { locationService } from '#payees/location';
 
-import { locationService } from '@desktop-client/payees/location';
+import { useFeatureFlag } from './useFeatureFlag';
 
 /**
  * Custom hook to manage geolocation permission status

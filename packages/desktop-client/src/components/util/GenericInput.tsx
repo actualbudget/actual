@@ -5,27 +5,29 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
+import { getMonthYearFormat } from '@actual-app/core/shared/months';
+import type {
+  RecurConfig,
+  RuleConditionOp,
+} from '@actual-app/core/types/models';
 
-import { getMonthYearFormat } from 'loot-core/shared/months';
-import type { RecurConfig, RuleConditionOp } from 'loot-core/types/models';
+import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplete';
+import { Autocomplete } from '#components/autocomplete/Autocomplete';
+import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
+import { CategoryGroupAutocomplete } from '#components/autocomplete/CategoryGroupAutocomplete';
+import { FilterAutocomplete } from '#components/autocomplete/FilterAutocomplete';
+import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
+import { ReportAutocomplete } from '#components/autocomplete/ReportAutocomplete';
+import { Checkbox } from '#components/forms';
+import { DateSelect } from '#components/select/DateSelect';
+import { RecurringSchedulePicker } from '#components/select/RecurringSchedulePicker';
+import { useCategories } from '#hooks/useCategories';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 import { AmountInput } from './AmountInput';
 import { PercentInput } from './PercentInput';
-
-import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
-import { Autocomplete } from '@desktop-client/components/autocomplete/Autocomplete';
-import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
-import { CategoryGroupAutocomplete } from '@desktop-client/components/autocomplete/CategoryGroupAutocomplete';
-import { FilterAutocomplete } from '@desktop-client/components/autocomplete/FilterAutocomplete';
-import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
-import { ReportAutocomplete } from '@desktop-client/components/autocomplete/ReportAutocomplete';
-import { Checkbox } from '@desktop-client/components/forms';
-import { DateSelect } from '@desktop-client/components/select/DateSelect';
-import { RecurringSchedulePicker } from '@desktop-client/components/select/RecurringSchedulePicker';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
 
 type GenericInputProps = {
   ref?: Ref<HTMLInputElement>;

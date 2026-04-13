@@ -2,7 +2,7 @@
 import initSqlJS from '@jlongster/sql.js';
 import type { Database, SqlJsStatic, Statement } from '@jlongster/sql.js';
 
-import { logger } from '../log';
+import { logger } from '#platform/server/log';
 
 import { normalise } from './normalise';
 import { unicodeLike } from './unicodeLike';

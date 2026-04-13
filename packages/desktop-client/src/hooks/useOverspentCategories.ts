@@ -1,18 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import * as monthUtils from 'loot-core/shared/months';
-import { groupById } from 'loot-core/shared/util';
-import type { IntegerAmount } from 'loot-core/shared/util';
-import type { CategoryEntity } from 'loot-core/types/models';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { groupById } from '@actual-app/core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
+import type { CategoryEntity } from '@actual-app/core/types/models';
+
+import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
 
 import { useCategories } from './useCategories';
 import { useSpreadsheet } from './useSpreadsheet';
 import { useSyncedPref } from './useSyncedPref';
-
-import {
-  envelopeBudget,
-  trackingBudget,
-} from '@desktop-client/spreadsheet/bindings';
 
 type UseOverspentCategoriesProps = {
   month: string;

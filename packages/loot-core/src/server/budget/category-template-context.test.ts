@@ -1,10 +1,10 @@
 import { vi } from 'vitest';
 
-import { amountToInteger } from '../../shared/util';
-import type { CategoryEntity } from '../../types/models';
-import type { Template } from '../../types/models/templates';
-import * as aql from '../aql';
-import * as db from '../db';
+import * as aql from '#server/aql';
+import * as db from '#server/db';
+import { amountToInteger } from '#shared/util';
+import type { CategoryEntity } from '#types/models';
+import type { Template } from '#types/models/templates';
 
 import * as actions from './actions';
 import { CategoryTemplateContext } from './category-template-context';
@@ -16,11 +16,11 @@ vi.mock('./actions', () => ({
   isReflectBudget: vi.fn(),
 }));
 
-vi.mock('../db', () => ({
+vi.mock('#server/db', () => ({
   getCategories: vi.fn(),
 }));
 
-vi.mock('../aql', () => ({
+vi.mock('#server/aql', () => ({
   aqlQuery: vi.fn(),
 }));
 

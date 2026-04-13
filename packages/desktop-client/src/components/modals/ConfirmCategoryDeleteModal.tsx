@@ -7,17 +7,12 @@ import { Button } from '@actual-app/components/button';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { TransObjectLiteral } from '@actual-app/core/types/util';
 
-import type { TransObjectLiteral } from 'loot-core/types/util';
-
-import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { useCategories } from '#hooks/useCategories';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type ConfirmCategoryDeleteModalProps = Extract<
   ModalType,
