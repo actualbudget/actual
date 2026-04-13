@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 
-import { HyperFormula } from 'hyperformula';
-import enUS from 'hyperformula/i18n/languages/enUS';
-
 import {
   CustomFunctionsPlugin,
   customFunctionsTranslations,
 } from '@actual-app/core/server/rules/customFunctions';
+import { HyperFormula } from 'hyperformula';
+import enUS from 'hyperformula/i18n/languages/enUS';
 
 import { useLocale } from './useLocale';
 
