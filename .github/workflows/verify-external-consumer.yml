@@ -1,0 +1,95 @@
+name: Verify external API consumer
+
+# Verifies that the published @actual-app/api package works against a real
+# downstream TypeScript consumer (NikxDa/actual-moneymoney). Catches
+# regressions such as actualbudget/actual#7410, where a broken
+# @types/index.d.ts shipped to npm and made `tsc --noEmit` fail in consumer
+# projects — something the in-workspace vitest tests cannot detect because
+# they resolve @actual-app/api through the workspace symlink rather than the
+# packed tarball.
+
+on:
+  schedule:
+    # 2h after the nightly publish workflow (which runs at 00:00 UTC) so the
+    # freshly-published `nightly` dist-tag has propagated through npm's CDN.
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      api_version:
+        description: 'Dist-tag or version of @actual-app/api to test (e.g. nightly, latest, 26.4.0)'
+        required: false
+        default: 'nightly'
+      consumer_ref:
+        description: 'Git ref of NikxDa/actual-moneymoney to test against'
+        required: false
+        default: 'main'
+
+jobs:
+  verify-moneymoney:
+    runs-on: ubuntu-latest
+    name: Verify NikxDa/actual-moneymoney builds against @actual-app/api
+    if: github.event.repository.fork == false
+    steps:
+      - name: Check out actual-moneymoney
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: NikxDa/actual-moneymoney
+          ref: ${{ github.event.inputs.consumer_ref || 'main' }}
+          path: consumer
+
+      - name: Set up Node
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: 22
+
+      - name: Detect package manager and install dependencies
+        working-directory: consumer
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            corepack enable
+            pnpm install --frozen-lockfile
+          elif [ -f yarn.lock ]; then
+            corepack enable
+            yarn install --frozen-lockfile
+          elif [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Override @actual-app/api with the version under test
+        working-directory: consumer
+        env:
+          API_VERSION: ${{ github.event.inputs.api_version || 'nightly' }}
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            pnpm add "@actual-app/api@${API_VERSION}"
+          elif [ -f yarn.lock ]; then
+            yarn add "@actual-app/api@${API_VERSION}"
+          else
+            npm install "@actual-app/api@${API_VERSION}"
+          fi
+
+      - name: Report installed @actual-app/api version
+        working-directory: consumer
+        run: |
+          node -e "console.log(require('@actual-app/api/package.json').version)"
+
+      - name: Type-check the consumer (catches #7410-class regressions)
+        working-directory: consumer
+        run: npx --no-install tsc --noEmit
+
+      - name: Build the consumer (catches runtime regressions)
+        working-directory: consumer
+        run: |
+          if node -e "process.exit(require('./package.json').scripts?.build ? 0 : 1)"; then
+            if [ -f pnpm-lock.yaml ]; then
+              pnpm run build
+            elif [ -f yarn.lock ]; then
+              yarn run build
+            else
+              npm run build
+            fi
+          else
+            echo "No build script defined in consumer; type-check alone is the gate."
+          fi
