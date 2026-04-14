@@ -5,9 +5,11 @@ export type FeatureFlag =
   | 'formulaMode'
   | 'currency'
   | 'crossoverReport'
+  | 'ageOfMoneyReport'
   | 'customThemes'
   | 'budgetAnalysisReport'
-  | 'payeeLocations';
+  | 'payeeLocations'
+  | 'sankeyReport';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
@@ -92,13 +94,7 @@ export type LocalPrefs = Partial<{
   'mobile.showSpentColumn': boolean;
 }>;
 
-export type Theme =
-  | 'light'
-  | 'dark'
-  | 'auto'
-  | 'midnight'
-  | 'development'
-  | string;
+export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | string;
 export type DarkTheme = 'dark' | 'midnight';
 
 // GlobalPrefs are the parsed global-store.json values

@@ -2,7 +2,7 @@ import type {
   CategoryEntity,
   CategoryGroupEntity,
   PayeeEntity,
-} from '../types/models';
+} from '#types/models';
 
 import {
   convertForInsert,

@@ -1,5 +1,5 @@
-import { mockTransactionAmount } from '../../services/tests/fixtures';
-import Nationwide from '../nationwide_naiagb21';
+import Nationwide from '#app-gocardless/banks/nationwide_naiagb21';
+import { mockTransactionAmount } from '#app-gocardless/services/tests/fixtures';
 
 describe('Nationwide', () => {
   describe('#normalizeTransaction', () => {

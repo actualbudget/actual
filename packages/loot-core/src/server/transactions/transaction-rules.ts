@@ -1,34 +1,18 @@
 // @ts-strict-ignore
 
-import { logger } from '../../platform/server/log';
-import {
-  addDays,
-  currentDay,
-  dayFromDate,
-  parseDate,
-  subDays,
-} from '../../shared/months';
-import { q } from '../../shared/query';
-import { getApproxNumberThreshold, sortNumbers } from '../../shared/rules';
-import { ungroupTransaction } from '../../shared/transactions';
-import { fastSetMerge, partitionByField } from '../../shared/util';
-import type {
-  RuleActionEntity,
-  RuleEntity,
-  TransactionEntity,
-} from '../../types/models';
-import { aqlQuery, schemaConfig } from '../aql';
-import * as db from '../db';
+import { logger } from '#platform/server/log';
+import { aqlQuery, schemaConfig } from '#server/aql';
+import * as db from '#server/db';
 import {
   getAccount,
   getCategory,
   getPayee,
   getPayeeByName,
   insertPayee,
-} from '../db';
-import { getMappings } from '../db/mappings';
-import { RuleError } from '../errors';
-import { requiredFields, toDateRepr } from '../models';
+} from '#server/db';
+import { getMappings } from '#server/db/mappings';
+import { RuleError } from '#server/errors';
+import { requiredFields, toDateRepr } from '#server/models';
 import {
   Action,
   Condition,
@@ -38,8 +22,29 @@ import {
   rankRules,
   Rule,
   RuleIndexer,
-} from '../rules';
-import { addSyncListener, batchMessages } from '../sync';
+} from '#server/rules';
+import {
+  collectFormulasFromActions,
+  extractBalanceOfLiterals,
+  resolveAccountIdForBalanceOf,
+} from '#server/rules/balanceOfFormula';
+import { addSyncListener, batchMessages } from '#server/sync';
+import {
+  addDays,
+  currentDay,
+  dayFromDate,
+  parseDate,
+  subDays,
+} from '#shared/months';
+import { q } from '#shared/query';
+import { getApproxNumberThreshold, sortNumbers } from '#shared/rules';
+import { ungroupTransaction } from '#shared/transactions';
+import { fastSetMerge, partitionByField } from '#shared/util';
+import type {
+  RuleActionEntity,
+  RuleEntity,
+  TransactionEntity,
+} from '#types/models';
 
 import { batchUpdateTransactions } from '.';
 
@@ -48,7 +53,7 @@ import { batchUpdateTransactions } from '.';
 // * We could also make the "create rule" button a dropdown that
 //   provides different "templates" like "create renaming rule"
 
-export { iterateIds } from '../rules';
+export { iterateIds } from '#server/rules';
 
 let allRules;
 let unlistenSync;
@@ -345,6 +350,15 @@ export async function runRules(
     ),
   );
 
+  const formulaStrings = rules.flatMap(rule =>
+    collectFormulasFromActions(rule.actions),
+  );
+  finalTrans._balanceOfPrefetched = await prefetchBalanceOfForTransaction(
+    finalTrans,
+    accountsMap,
+    formulaStrings,
+  );
+
   for (let i = 0; i < rules.length; i++) {
     // If there is a scheduleRuleID (meaning this transaction came from a schedule) then exclude rules linked to other schedules.
     if (scheduleRuleID !== '') {
@@ -599,22 +613,26 @@ export function conditionsToAQL(
         }
         return { $or: values.map(v => apply(field, '$eq', v)) };
 
-      case 'hasTags':
+      case 'hasTags': {
         const tagValues = [];
+        const seenTags = new Set();
         for (const [_, tag] of value.matchAll(/(?<!#)(#[^#\s]+)/g)) {
-          if (!tagValues.find(t => t.tag === tag)) {
+          if (!seenTags.has(tag)) {
+            seenTags.add(tag);
             tagValues.push(tag);
           }
         }
 
         return {
           $and: tagValues.map(v => {
-            const regex = new RegExp(
-              `(?<!#)${v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([\\s#]|$)`,
-            );
-            return apply(field, '$regexp', regex.source);
+            const escapedTag = v
+              .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+              .replace(/\\\$/g, '[$]'); // Use '[$]' instead of '\$' so AQL string unescaping doesn't turn it into a bare '$' end-of-string anchor
+            const pattern = `(?<!#)${escapedTag}([\\s#]|$)`;
+            return apply(field, '$regexp', pattern);
           }),
         };
+      }
 
       case 'notOneOf':
         const notValues = value;
@@ -704,6 +722,16 @@ export async function applyActions(
     ),
   );
 
+  const formulaStrings = collectFormulasFromActions(parsedActions);
+  const balanceOfPrefetchResults = await Promise.all(
+    transactionsForRules.map(trans =>
+      prefetchBalanceOfForTransaction(trans, accountsMap, formulaStrings),
+    ),
+  );
+  transactionsForRules.forEach((trans, i) => {
+    trans._balanceOfPrefetched = balanceOfPrefetchResults[i];
+  });
+
   const updated = transactionsForRules.flatMap(trans => {
     return ungroupTransaction(execActions(parsedActions, trans));
   });
@@ -772,8 +800,7 @@ function* getOneOfSetterRules(
       rule.actions[0].field === actionField &&
       (actionValue == null || rule.actions[0].value === actionValue) &&
       rule.conditions.length === 1 &&
-      (rule.conditions[0].op === 'oneOf' ||
-        rule.conditions[0].op === 'oneOf') &&
+      rule.conditions[0].op === 'oneOf' &&
       rule.conditions[0].field === condField &&
       (condValue == null || rule.conditions[0].value.indexOf(condValue) !== -1)
     ) {
@@ -937,7 +964,81 @@ export type TransactionForRules = TransactionEntity & {
   balance?: number;
   _category_name?: string;
   _account_name?: string;
+  parent_amount?: number;
+  /** Prefetched cent balances for BALANCE_OF("…") in rule formulas; cleared in finalize */
+  _balanceOfPrefetched?: Map<string, number>;
 };
+
+/**
+ * Running balance for `accountId` before the current transaction row (same cutoff as `balance`).
+ */
+export async function getRunningBalanceBeforeTransaction(
+  trans: TransactionEntity,
+  accountId: string,
+): Promise<number> {
+  const dateBoundary = trans.date ?? currentDay();
+  let query = q('transactions')
+    .filter({ account: accountId, is_parent: false })
+    .options({ splits: 'inline' });
+
+  if (trans.id) {
+    query = query.filter({ id: { $ne: trans.id } });
+  }
+
+  const sameDayFilter =
+    trans.sort_order != null
+      ? {
+          $and: [
+            { date: dateBoundary },
+            { sort_order: { $lt: trans.sort_order } },
+          ],
+        }
+      : {
+          $and: [
+            { date: dateBoundary },
+            {
+              $or: [
+                { sort_order: { $ne: null } }, // ordered items come before null sort_order
+                ...(trans.id ? [{ id: { $lt: trans.id } }] : []), // among nulls, tie-break by id
+              ],
+            },
+          ],
+        };
+
+  const { data: balance } = await aqlQuery(
+    query
+      .filter({ $or: [{ date: { $lt: dateBoundary } }, sameDayFilter] })
+      .calculate({ $sum: '$amount' }),
+  );
+
+  return balance ?? 0;
+}
+
+export async function prefetchBalanceOfForTransaction(
+  trans: TransactionEntity,
+  accountsMap: Map<string, db.DbAccount>,
+  formulas: string[],
+): Promise<Map<string, number>> {
+  const map = new Map<string, number>();
+  const literals = new Set<string>();
+  for (const f of formulas) {
+    for (const lit of extractBalanceOfLiterals(f)) {
+      literals.add(lit);
+    }
+  }
+  for (const literal of literals) {
+    const accountId = resolveAccountIdForBalanceOf(literal, accountsMap);
+    if (accountId) {
+      map.set(
+        literal,
+        await getRunningBalanceBeforeTransaction(trans, accountId),
+      );
+    } else {
+      map.set(literal, 0);
+    }
+  }
+  return map;
+}
 
 export async function prepareTransactionForRules(
   trans: TransactionEntity,
@@ -962,42 +1063,7 @@ export async function prepareTransactionForRules(
       r._account_name = r._account?.name || '';
     }
 
-    const dateBoundary = trans.date ?? currentDay();
-    let query = q('transactions')
-      .filter({ account: trans.account, is_parent: false })
-      .options({ splits: 'inline' });
-
-    if (trans.id) {
-      query = query.filter({ id: { $ne: trans.id } });
-    }
-
-    const sameDayFilter =
-      trans.sort_order != null
-        ? {
-            $and: [
-              { date: dateBoundary },
-              { sort_order: { $lt: trans.sort_order } },
-            ],
-          }
-        : {
-            $and: [
-              { date: dateBoundary },
-              {
-                $or: [
-                  { sort_order: { $ne: null } }, // ordered items come before null sort_order
-                  ...(trans.id ? [{ id: { $lt: trans.id } }] : []), // among nulls, tie-break by id
-                ],
-              },
-            ],
-          };
-
-    const { data: balance } = await aqlQuery(
-      query
-        .filter({ $or: [{ date: { $lt: dateBoundary } }, sameDayFilter] })
-        .calculate({ $sum: '$amount' }),
-    );
-
-    r.balance = balance ?? 0;
+    r.balance = await getRunningBalanceBeforeTransaction(trans, trans.account);
   }
 
   if (trans.category) {
@@ -1032,6 +1098,30 @@ export async function finalizeTransactionForRules(
 
   if ('balance' in trans) {
     delete trans.balance;
+  }
+
+  if ('_balanceOfPrefetched' in trans) {
+    delete trans._balanceOfPrefetched;
+  }
+
+  if ('parent_amount' in trans) {
+    delete trans.parent_amount;
+  }
+
+  if (trans.subtransactions?.length) {
+    trans.subtransactions.forEach(stx => {
+      if ('balance' in stx) {
+        delete stx.balance;
+      }
+
+      if ('_balanceOfPrefetched' in stx) {
+        delete stx._balanceOfPrefetched;
+      }
+
+      if ('parent_amount' in stx) {
+        delete stx.parent_amount;
+      }
+    });
   }
 
   return trans;

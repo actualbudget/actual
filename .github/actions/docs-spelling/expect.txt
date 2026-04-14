@@ -2,7 +2,9 @@ Abanca
 ABNAMRO
 ABNANL
 Activo
+actualrc
 AESUDEF
+ajv
 ALZEY
 Anglais
 ANZ
@@ -110,7 +112,6 @@ KBCBE
 Keycloak
 Khurozov
 KORT
-KRW
 Kreditbank
 lage
 LHV
@@ -125,6 +126,7 @@ Moldovan
 murmurhash
 NETWORKDAYS
 nginx
+nodenext
 OIDC
 Okabe
 overbudgeted
@@ -132,6 +134,8 @@ overbudgeting
 oxc
 Paribas
 passwordless
+PAYPAL
+picomatch
 pluggyai
 Poste
 PPABPLPK
@@ -172,8 +176,11 @@ tada
 taskbar
 templating
 THB
+TIMEFRAME
 touchscreen
 triaging
+tsgo
+TWD
 UAH
 ubuntu
 undici

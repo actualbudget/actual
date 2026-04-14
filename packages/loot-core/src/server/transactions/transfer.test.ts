@@ -1,6 +1,6 @@
 // @ts-strict-ignore
-import { expectSnapshotWithDiffer } from '../../mocks/util';
-import * as db from '../db';
+import { expectSnapshotWithDiffer } from '#mocks/util';
+import * as db from '#server/db';
 
 import * as transfer from './transfer';
 

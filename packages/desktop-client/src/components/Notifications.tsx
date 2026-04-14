@@ -15,12 +15,12 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
+import { removeNotification } from '#notifications/notificationsSlice';
+import type { NotificationWithId } from '#notifications/notificationsSlice';
+import { useDispatch, useSelector } from '#redux';
+
 import { Link } from './common/Link';
 import { MODAL_Z_INDEX } from './common/Modal';
-
-import { removeNotification } from '@desktop-client/notifications/notificationsSlice';
-import type { NotificationWithId } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
 
 // Notification stacking configuration
 const MAX_VISIBLE_NOTIFICATIONS = 3; // Maximum number of notifications visible in the stack
@@ -153,22 +153,27 @@ function Notification({
   const yOffset = index * Y_OFFSET_PER_LEVEL;
 
   const [isSwiped, setIsSwiped] = useState(false);
-  const [spring, api] = useSpring(() => ({
-    x: 0,
-    y: yOffset,
-    opacity: stackOpacity,
-    scale,
-  }));
+  const [spring, api] = useSpring(
+    () => ({
+      from: {
+        x: 0,
+        y: yOffset,
+        opacity: stackOpacity,
+        scale,
+      },
+    }),
+    [],
+  );
 
   // Update scale, opacity, and y-position when index changes
   useEffect(() => {
-    void api.start({ scale, opacity: stackOpacity, y: yOffset });
+    void api.start({ to: { scale, opacity: stackOpacity, y: yOffset } });
   }, [index, scale, stackOpacity, yOffset, api]);
 
   const swipeHandlers = useSwipeable({
     onSwiping: ({ deltaX }) => {
       if (!isSwiped) {
-        void api.start({ x: deltaX });
+        void api.start({ to: { x: deltaX } });
       }
     },
     onSwiped: ({ velocity, deltaX }) => {
@@ -179,14 +184,13 @@ function Notification({
       if (Math.abs(deltaX) > threshold || velocity > 0.5) {
         // Animate out & remove item after animation
         void api.start({
-          x: direction * 1000,
-          opacity: 0,
+          to: { x: direction * 1000, opacity: 0 },
           onRest: onRemove,
         });
         setIsSwiped(true);
       } else {
         // Reset position if not swiped far enough
-        void api.start({ x: 0 });
+        void api.start({ to: { x: 0 } });
       }
     },
     trackMouse: true,

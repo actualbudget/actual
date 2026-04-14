@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import type { UndoState as ServerUndoState } from '../../../server/undo';
+import type { UndoState as ServerUndoState } from '#server/undo';
 
 // oxlint-disable-next-line @typescript-eslint/no-explicit-any
 type Modal = any; // TODO: fix me

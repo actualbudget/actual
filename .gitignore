@@ -58,6 +58,10 @@ bundle.mobile.js.map
 # IntelliJ IDEA
 .idea
 
+# Claude Code
+.claude/worktrees/*
+.claude/settings.local.json
+
 # Misc
 .#*
 
@@ -81,3 +85,10 @@ build/
 
 *storybook.log
 storybook-static
+
+# cli config when testing locally
+.actualrc.json
+.actualrc
+.actualrc.yaml
+.actualrc.yml
+actual.config.js

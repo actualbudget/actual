@@ -7,14 +7,10 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { Information } from '@desktop-client/components/alerts';
-import {
-  Modal,
-  ModalButtons,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { usePayees } from '@desktop-client/hooks/usePayees';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { Information } from '#components/alerts';
+import { Modal, ModalButtons, ModalHeader } from '#components/common/Modal';
+import { usePayees } from '#hooks/usePayees';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 const mergePayeeStyle = {
   padding: 10,

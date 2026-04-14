@@ -5,22 +5,24 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type { CategoryEntity } from '@actual-app/core/types/models';
 import { AutoTextSize } from 'auto-text-size';
 
-import type { CategoryEntity } from 'loot-core/types/models';
+import { makeAmountGrey } from '#components/budget/util';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { CellValue } from '#components/spreadsheet/CellValue';
+import { useFormat } from '#hooks/useFormat';
+import { useLocale } from '#hooks/useLocale';
+import { useNotes } from '#hooks/useNotes';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useUndo } from '#hooks/useUndo';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
+import type { SheetFields } from '#spreadsheet';
 
 import { getColumnWidth, PILL_STYLE } from './BudgetTable';
-
-import { makeAmountGrey } from '@desktop-client/components/budget/util';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useNotes } from '@desktop-client/hooks/useNotes';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useUndo } from '@desktop-client/hooks/useUndo';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import type { SheetFields } from '@desktop-client/spreadsheet';
 
 type BudgetCellProps<
   SheetFieldName extends SheetFields<'envelope-budget' | 'tracking-budget'>,
@@ -43,12 +45,38 @@ export function BudgetCell<
   ...props
 }: BudgetCellProps<SheetFieldName>) {
   const { t } = useTranslation();
+  const locale = useLocale();
   const columnWidth = getColumnWidth();
   const dispatch = useDispatch();
   const format = useFormat();
   const { showUndoNotification } = useUndo();
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const categoryNotes = useNotes(category.id);
+
+  const onSaveNotes = useCallback(async (id: string, notes: string) => {
+    await send('notes-save', { id, note: notes });
+  }, []);
+
+  const onEditNotes = useCallback(
+    (id: string, month: string) => {
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'notes',
+            options: {
+              id,
+              name:
+                category.name +
+                ' - ' +
+                monthUtils.format(month, "MMMM ''yy", locale),
+              onSave: onSaveNotes,
+            },
+          },
+        }),
+      );
+    },
+    [category.name, locale, dispatch, onSaveNotes],
+  );
 
   const onOpenCategoryBudgetMenu = useCallback(() => {
     const modalBudgetType = budgetType === 'envelope' ? 'envelope' : 'tracking';
@@ -60,6 +88,7 @@ export function BudgetCell<
           options: {
             categoryId: category.id,
             month,
+            onEditNotes,
             onUpdateBudget: amount => {
               onBudgetAction(month, 'budget-amount', {
                 category: category.id,
@@ -114,6 +143,7 @@ export function BudgetCell<
     month,
     onBudgetAction,
     showUndoNotification,
+    onEditNotes,
     format,
   ]);
 

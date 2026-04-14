@@ -1,15 +1,15 @@
 // @ts-strict-ignore
 
+import * as asyncStorage from '#platform/server/asyncStorage';
+import * as db from '#server/db';
+import * as sheet from '#server/sheet';
+import { batchMessages } from '#server/sync';
 import { getCurrency } from '#shared/currencies';
-import * as asyncStorage from '../../platform/server/asyncStorage';
-import { getLocale } from '../../shared/locale';
-import * as monthUtils from '../../shared/months';
-import { integerToCurrency, safeNumber } from '../../shared/util';
-import type { IntegerAmount } from '../../shared/util';
-import type { CategoryEntity } from '../../types/models';
-import * as db from '../db';
-import * as sheet from '../sheet';
-import { batchMessages } from '../sync';
+import { getLocale } from '#shared/locale';
+import * as monthUtils from '#shared/months';
+import { integerToCurrency, safeNumber } from '#shared/util';
+import type { IntegerAmount } from '#shared/util';
+import type { CategoryEntity } from '#types/models';
 
 export async function getSheetValue(
   sheetName: string,
@@ -520,6 +520,10 @@ export async function coverOverbudgeted({
 }): Promise<void> {
   const sheetName = monthUtils.sheetForMonth(month);
   const categoryBudget = await getSheetValue(sheetName, 'budget-' + category);
+  const categoryLeftover = await getSheetValue(
+    sheetName,
+    'leftover-' + category,
+  );
 
   // Cover provided amount (can be partial) or full overbudgeted amount.
   const amountToCover = amount
@@ -527,12 +531,12 @@ export async function coverOverbudgeted({
       -amount
     : await getSheetValue(sheetName, 'to-budget');
 
-  if (amountToCover >= 0 || categoryBudget <= 0) {
+  if (amountToCover >= 0 || categoryLeftover <= 0) {
     return;
   }
 
-  // Don't allow the budget of the covering category to go negative.
-  const coverableAmount = Math.min(Math.abs(amountToCover), categoryBudget);
+  // Don't exceed the available balance of the covering category.
+  const coverableAmount = Math.min(Math.abs(amountToCover), categoryLeftover);
 
   await batchMessages(async () => {
     await setBudget({

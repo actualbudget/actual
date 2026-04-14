@@ -1,9 +1,9 @@
 // @ts-strict-ignore
 import { v4 as uuidv4 } from 'uuid';
 
-import { q } from '../../shared/query';
-import { makeChild } from '../../shared/transactions';
-import * as db from '../db';
+import * as db from '#server/db';
+import { q } from '#shared/query';
+import { makeChild } from '#shared/transactions';
 
 import * as aql from './exec';
 import { schema, schemaConfig } from './schema';

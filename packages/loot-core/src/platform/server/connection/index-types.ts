@@ -1,5 +1,5 @@
-import type { Handlers } from '../../../types/handlers';
-import type { ServerEvents } from '../../../types/server-events';
+import type { Handlers } from '#types/handlers';
+import type { ServerEvents } from '#types/server-events';
 
 export declare function init(
   channel: Window | number, // in electron the port number, in web the worker

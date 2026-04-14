@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { ChangeEvent, KeyboardEvent } from 'react';
+import type { KeyboardEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -7,18 +7,13 @@ import { ColorPicker } from '@actual-app/components/color-picker';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { TagEntity } from '@actual-app/core/types/models';
 
-import type { TagEntity } from 'loot-core/types/models';
-
-import {
-  InputCell,
-  Row,
-  useTableNavigator,
-} from '@desktop-client/components/table';
-import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
-import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
-import { useTagCSS } from '@desktop-client/hooks/useTagCSS';
-import { useCreateTagMutation } from '@desktop-client/tags';
+import { InputCell, Row, useTableNavigator } from '#components/table';
+import { useInitialMount } from '#hooks/useInitialMount';
+import { useProperFocus } from '#hooks/useProperFocus';
+import { useTagCSS } from '#hooks/useTagCSS';
+import { useCreateTagMutation } from '#tags';
 
 type TagCreationRowProps = {
   tags: TagEntity[];
@@ -124,8 +119,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
           }
           inputProps={{
             value: tag || '',
-            onInput: ({ target: { value } }: ChangeEvent<HTMLInputElement>) =>
-              setTag(value.replace(/\s/g, '')),
+            onChange: e => setTag(e.target.value.replace(/\s/g, '')),
             placeholder: t('New tag'),
             ref: tagInput,
           }}

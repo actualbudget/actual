@@ -1,13 +1,13 @@
 // @ts-strict-ignore
-import * as asyncStorage from '../../platform/server/asyncStorage';
-import * as monthUtils from '../../shared/months';
-import type { SyncedPrefs } from '../../types/prefs';
-import * as db from '../db';
-import { loadMappings } from '../db/mappings';
-import { post } from '../post';
-import { getServer } from '../server-config';
-import { handlers } from '../tests/mockSyncServer';
-import { insertRule, loadRules } from '../transactions/transaction-rules';
+import * as asyncStorage from '#platform/server/asyncStorage';
+import * as db from '#server/db';
+import { loadMappings } from '#server/db/mappings';
+import { post } from '#server/post';
+import { getServer } from '#server/server-config';
+import { handlers } from '#server/tests/mockSyncServer';
+import { insertRule, loadRules } from '#server/transactions/transaction-rules';
+import * as monthUtils from '#shared/months';
+import type { SyncedPrefs } from '#types/prefs';
 
 import {
   addTransactions,
@@ -15,8 +15,8 @@ import {
   simpleFinBatchSync,
 } from './sync';
 
-vi.mock('../../shared/months', async () => ({
-  ...(await vi.importActual('../../shared/months')),
+vi.mock('#shared/months', async () => ({
+  ...(await vi.importActual('#shared/months')),
   currentDay: vi.fn(),
   currentMonth: vi.fn(),
 }));
@@ -171,6 +171,88 @@ describe('Account sync', () => {
     const transactions2 = await getAllTransactions();
     expect(transactions2.length).toBe(2);
     expect(transactions2).toMatchSnapshot();
+  });
+
+  test('reconcile doesnt rematch deleted transactions with reimportDeleted override false', async () => {
+    const { id: acctId } = await prepareDatabase();
+
+    await reconcileTransactions(acctId, [
+      { date: '2020-01-01', imported_id: 'finid-override' },
+    ]);
+
+    const transactions1 = await getAllTransactions();
+    expect(transactions1.length).toBe(1);
+
+    await db.deleteTransaction(transactions1[0]);
+
+    await reconcileTransactions(
+      acctId,
+      [{ date: '2020-01-01', imported_id: 'finid-override' }],
+      false,
+      true,
+      false,
+      true,
+      false,
+      false,
+    );
+    const transactions2 = await getAllTransactions();
+    expect(transactions2.length).toBe(1);
+  });
+
+  test('reconcile does rematch deleted transactions with reimportDeleted override true', async () => {
+    const { id: acctId } = await prepareDatabase();
+
+    await reconcileTransactions(acctId, [
+      { date: '2020-01-01', imported_id: 'finid-override2' },
+    ]);
+
+    const transactions1 = await getAllTransactions();
+    expect(transactions1.length).toBe(1);
+
+    await db.deleteTransaction(transactions1[0]);
+
+    await reconcileTransactions(
+      acctId,
+      [{ date: '2020-01-01', imported_id: 'finid-override2' }],
+      false,
+      true,
+      false,
+      true,
+      false,
+      true,
+    );
+    const transactions2 = await getAllTransactions();
+    expect(transactions2.length).toBe(2);
+  });
+
+  test('reimportDeleted override takes precedence over stored preference', async () => {
+    const { id: acctId } = await prepareDatabase();
+    const reimportKey =
+      `sync-reimport-deleted-${acctId}` satisfies keyof SyncedPrefs;
+    // Preference says reimport (true), but override says don't (false)
+    await db.update('preferences', { id: reimportKey, value: 'true' });
+
+    await reconcileTransactions(acctId, [
+      { date: '2020-01-01', imported_id: 'finid-precedence' },
+    ]);
+
+    const transactions1 = await getAllTransactions();
+    expect(transactions1.length).toBe(1);
+
+    await db.deleteTransaction(transactions1[0]);
+
+    await reconcileTransactions(
+      acctId,
+      [{ date: '2020-01-01', imported_id: 'finid-precedence' }],
+      false,
+      true,
+      false,
+      true,
+      false,
+      false,
+    );
+    const transactions2 = await getAllTransactions();
+    expect(transactions2.length).toBe(1);
   });
 
   test('reconcile run rules with inferred payee', async () => {

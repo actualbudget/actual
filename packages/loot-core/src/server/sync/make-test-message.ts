@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { SyncProtoBuf } from '@actual-app/crdt';
 
-import * as encryption from '../encryption';
+import * as encryption from '#server/encryption';
 
 function randomString() {
   return encryption.randomBytes(12).toString();

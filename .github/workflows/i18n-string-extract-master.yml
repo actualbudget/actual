@@ -12,7 +12,7 @@ jobs:
     if: github.repository == 'actualbudget/actual'
     steps:
       - name: Check out main repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           path: actual
       - name: Set up environment
@@ -27,12 +27,23 @@ jobs:
       - name: Configure i18n client
         run: |
           pip install wlc
+      - name: Configure Weblate API credentials
+        env:
+          WEBLATE_API_KEY: ${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}
+        run: |
+          # Write the API key to wlc's config file instead of passing it on
+          # the command line, so the secret doesn't appear in process listings.
+          mkdir -p "$HOME/.config"
+          umask 077
+          cat > "$HOME/.config/weblate" <<EOF
+          [keys]
+          https://hosted.weblate.org/api/ = ${WEBLATE_API_KEY}
+          EOF
 
       - name: Lock translations
         run: |
           wlc \
             --url https://hosted.weblate.org/api/ \
-            --key "${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}" \
             lock \
             actualbudget/actual
 
@@ -40,11 +51,10 @@ jobs:
         run: |
           wlc \
             --url https://hosted.weblate.org/api/ \
-            --key "${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}" \
             push \
             actualbudget/actual
       - name: Check out updated translations
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ssh-key: ${{ secrets.STRING_IMPORT_DEPLOY_KEY }}
           repository: actualbudget/translations
@@ -73,7 +83,6 @@ jobs:
         run: |
           wlc \
             --url https://hosted.weblate.org/api/ \
-            --key "${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}" \
             pull \
             actualbudget/actual
 
@@ -82,6 +91,5 @@ jobs:
         run: |
           wlc \
             --url https://hosted.weblate.org/api/ \
-            --key "${{ secrets.WEBLATE_API_KEY_CI_STRINGS }}" \
             unlock \
             actualbudget/actual

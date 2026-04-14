@@ -22,12 +22,9 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
-import { v4 as uuid } from 'uuid';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
 import {
   FIELD_TYPES,
   friendlyOp,
@@ -39,34 +36,33 @@ import {
   mapField,
   parse,
   unparse,
-} from 'loot-core/shared/rules';
-import type { ScheduleStatusType } from 'loot-core/shared/schedules';
+} from '@actual-app/core/shared/rules';
+import type { ScheduleStatusType } from '@actual-app/core/shared/schedules';
 import type {
   NewRuleEntity,
   RuleActionEntity,
   RuleEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { css } from '@emotion/css';
+import { v4 as uuid } from 'uuid';
+
+import { FinancialText } from '#components/FinancialText';
+import { StatusBadge } from '#components/schedules/StatusBadge';
+import { SimpleTransactionsTable } from '#components/transactions/SimpleTransactionsTable';
+import { BetweenAmountInput } from '#components/util/AmountInput';
+import { DisplayId } from '#components/util/DisplayId';
+import { GenericInput } from '#components/util/GenericInput';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useFormat } from '#hooks/useFormat';
+import { useSchedules } from '#hooks/useSchedules';
+import { SelectedProvider, useSelected } from '#hooks/useSelected';
+import { addNotification } from '#notifications/notificationsSlice';
+import { aqlQuery } from '#queries/aqlQuery';
+import { useDispatch } from '#redux';
+import { disableUndo, enableUndo } from '#undo';
 
 import { FormulaActionEditor } from './FormulaActionEditor';
-
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { StatusBadge } from '@desktop-client/components/schedules/StatusBadge';
-import { SimpleTransactionsTable } from '@desktop-client/components/transactions/SimpleTransactionsTable';
-import { BetweenAmountInput } from '@desktop-client/components/util/AmountInput';
-import { DisplayId } from '@desktop-client/components/util/DisplayId';
-import { GenericInput } from '@desktop-client/components/util/GenericInput';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import {
-  SelectedProvider,
-  useSelected,
-} from '@desktop-client/hooks/useSelected';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import { useDispatch } from '@desktop-client/redux';
-import { disableUndo, enableUndo } from '@desktop-client/undo';
 
 function updateValue(array, value, update) {
   return array.map(v => (v === value ? update() : v));
@@ -449,8 +445,8 @@ function getSplitActionFields() {
     ([field]) => !parentOnlyFields.includes(field),
   );
 }
-function getAllocationMethodOptions() {
-  return Object.entries(getAllocationMethods());
+function getAllocationMethodOptions(isFormulaEnabled = false) {
+  return Object.entries(getAllocationMethods(isFormulaEnabled));
 }
 
 type ActionEditorProps = {
@@ -569,31 +565,15 @@ function ActionEditor({
                     : onChange('formula', options.formula || value || '=')
                 }
               >
-                {hasFormula ? (
-                  <span
-                    style={{
-                      fontSize: 14,
-                      fontFamily: 'serif',
-                      textAlign: 'center',
-                    }}
-                  >
-                    ƒ
-                  </span>
-                ) : hasFormula ? (
-                  <SvgCode
-                    style={{ width: 12, height: 12, color: 'inherit' }}
-                  />
-                ) : (
-                  <span
-                    style={{
-                      fontSize: 14,
-                      fontFamily: 'serif',
-                      textAlign: 'center',
-                    }}
-                  >
-                    ƒ
-                  </span>
-                )}
+                <span
+                  style={{
+                    fontSize: 14,
+                    fontFamily: 'serif',
+                    textAlign: 'center',
+                  }}
+                >
+                  ƒ
+                </span>
               </Button>
             )}
           {isTemplatingEnabled &&
@@ -629,7 +609,7 @@ function ActionEditor({
           </View>
 
           <SplitAmountMethodSelect
-            options={getAllocationMethodOptions()}
+            options={getAllocationMethodOptions(isFormulaEnabled)}
             value={options.method}
             onChange={onChange}
           />
@@ -640,7 +620,12 @@ function ActionEditor({
               minWidth: options.method === 'fixed-percent' ? 45 : 70,
             }}
           >
-            {options.method !== 'remainder' && (
+            {options.method === 'formula' ? (
+              <FormulaActionEditor
+                value={options?.formula || '='}
+                onChange={v => onChange('formula', v, { formula: true })}
+              />
+            ) : options.method !== 'remainder' ? (
               <GenericInput
                 key={inputKey}
                 // @ts-expect-error fix this
@@ -653,8 +638,34 @@ function ActionEditor({
                 value={value}
                 onChange={v => onChange('value', v)}
               />
-            )}
+            ) : null}
           </View>
+          {options.method === 'formula' && (
+            <View
+              style={{
+                padding: 5,
+                backgroundColor: theme.buttonPrimaryBackground,
+                height: 24,
+                width: 24,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 4,
+              }}
+              aria-label={t('Formula mode indicator')}
+              role="img"
+            >
+              <span
+                style={{
+                  fontSize: 14,
+                  fontFamily: 'serif',
+                  textAlign: 'center',
+                }}
+              >
+                ƒ
+              </span>
+            </View>
+          )}
         </>
       ) : op === 'link-schedule' ? (
         <>

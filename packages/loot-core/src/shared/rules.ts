@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import { t } from 'i18next';
 
-import type { FieldValueTypes, RuleConditionOp } from '../types/models';
+import type { FieldValueTypes, RuleConditionOp } from '#types/models';
 
 // For now, this info is duplicated from the backend. Figure out how
 // to share it later.
@@ -118,10 +118,11 @@ export function getValidOps(field: keyof FieldValueTypes): RuleConditionOp[] {
   );
 }
 
-export function getAllocationMethods() {
+export function getAllocationMethods(hasFormulaMode = false) {
   return {
     'fixed-amount': t('a fixed amount'),
     'fixed-percent': t('a fixed percent of the remainder'),
+    ...(hasFormulaMode && { formula: t('based on a formula') }),
     remainder: t('an equal portion of the remainder'),
   };
 }

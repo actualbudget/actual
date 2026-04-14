@@ -9,7 +9,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useNavigate } from '#hooks/useNavigate';
 
 type TextLinkProps = {
   style?: CSSProperties;
@@ -17,8 +17,12 @@ type TextLinkProps = {
   children?: ReactNode;
 };
 
-type ButtonLinkProps = Omit<ComponentProps<typeof Button>, 'variant'> & {
+type ButtonLinkProps = Omit<
+  ComponentProps<typeof Button>,
+  'variant' | 'style'
+> & {
   buttonVariant?: ComponentProps<typeof Button>['variant'];
+  style?: CSSProperties;
   to?: string;
   activeStyle?: CSSProperties;
 };

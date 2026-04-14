@@ -1,12 +1,12 @@
 ---
-title: 'CLI tool'
+title: 'Server CLI'
 ---
 
-## Hosting Actual with the CLI tool
+## Hosting Actual with the Server CLI
 
 The Actual sync-server is available as an NPM package. The package is designed to make running the sync-server as easy as possible and is published to the official NPM registry under [@@actual-app/sync-server](https://www.npmjs.com/package/@actual-app/sync-server).
 
-### Installing the CLI tool
+### Installing the Server CLI
 
 Node.js v22 or higher is required for the `@actual-app/sync-server` npm package
 
@@ -22,7 +22,7 @@ Once installed, you can execute commands directly from your terminal using `actu
 
 > Before running the tool, navigate to the directory that you wish your files to be located.
 
-Run the CLI tool with the following syntax:
+Run the Server CLI with the following syntax:
 
 ```bash
 actual-server [options]
@@ -67,7 +67,7 @@ Reset your password
 actual-server --reset-password
 ```
 
-### Updating the CLI tool
+### Updating the Server CLI
 
 The sync server can be updated with a simple command.
 
@@ -75,7 +75,7 @@ The sync server can be updated with a simple command.
 npm update -g @actual-app/sync-server
 ```
 
-### Uninstalling the CLI tool
+### Uninstalling the Server CLI
 
 The sync server can be uninstalled with a simple command.
 

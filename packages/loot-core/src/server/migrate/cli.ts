@@ -5,8 +5,8 @@ import * as path from 'path';
 
 import yargs from 'yargs';
 
-import { logger } from '../../platform/server/log';
-import * as sqlite from '../../platform/server/sqlite';
+import { logger } from '#platform/server/log';
+import * as sqlite from '#platform/server/sqlite';
 
 import {
   getAppliedMigrations,

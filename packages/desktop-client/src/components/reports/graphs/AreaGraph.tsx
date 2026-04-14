@@ -4,6 +4,10 @@ import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
+import type {
+  balanceTypeOpType,
+  DataEntity,
+} from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 import {
   Area,
@@ -16,17 +20,15 @@ import {
 } from 'recharts';
 import type { LabelProps } from 'recharts';
 
-import type { balanceTypeOpType, DataEntity } from 'loot-core/types/models';
+import { FinancialText } from '#components/FinancialText';
+import { useRechartsAnimation } from '#components/reports/chart-theme';
+import { Container } from '#components/reports/Container';
+import { useFormat } from '#hooks/useFormat';
+import type { FormatType } from '#hooks/useFormat';
+import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
-
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
-import { Container } from '@desktop-client/components/reports/Container';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import type { FormatType } from '@desktop-client/hooks/useFormat';
-import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type PayloadItem = {
   payload: {
@@ -36,6 +38,7 @@ type PayloadItem = {
     netAssets: number;
     netDebts: number;
     totalTotals: number;
+    totalBudgeted: number;
   };
 };
 
@@ -72,7 +75,9 @@ const CustomTooltip = ({
             <strong>{payload[0].payload.date}</strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
+            {['totalAssets', 'totalTotals', 'totalBudgeted'].includes(
+              balanceTypeOp,
+            ) && (
               <AlignedText
                 left={t('Assets:')}
                 right={
@@ -82,7 +87,9 @@ const CustomTooltip = ({
                 }
               />
             )}
-            {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
+            {['totalDebts', 'totalTotals', 'totalBudgeted'].includes(
+              balanceTypeOp,
+            ) && (
               <AlignedText
                 left={t('Debts:')}
                 right={
@@ -112,12 +119,19 @@ const CustomTooltip = ({
                 }
               />
             )}
-            {['totalTotals'].includes(balanceTypeOp) && (
+            {['totalTotals', 'totalBudgeted'].includes(balanceTypeOp) && (
               <AlignedText
-                left={t('Net:')}
+                left={
+                  balanceTypeOp === 'totalBudgeted' ? t('Budgeted:') : t('Net:')
+                }
                 right={
                   <FinancialText as="strong">
-                    {format(payload[0].payload.totalTotals, 'financial')}
+                    {format(
+                      balanceTypeOp === 'totalBudgeted'
+                        ? payload[0].payload.totalBudgeted
+                        : payload[0].payload.totalTotals,
+                      'financial',
+                    )}
                   </FinancialText>
                 }
               />

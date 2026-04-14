@@ -1,8 +1,7 @@
+import { listen } from '@actual-app/core/platform/client/connection';
+import * as undo from '@actual-app/core/platform/client/undo';
 // @ts-strict-ignore
 import type { QueryClient } from '@tanstack/react-query';
-
-import { listen } from 'loot-core/platform/client/connection';
-import * as undo from 'loot-core/platform/client/undo';
 
 import { accountQueries } from './accounts';
 import { setAppState } from './app/appSlice';

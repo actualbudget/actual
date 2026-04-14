@@ -22,32 +22,32 @@ import { styles } from '@actual-app/components/styles';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { css, cx } from '@emotion/css';
-
-import { formatDistance } from 'loot-core/shared/location-utils';
-import { getNormalisedString } from 'loot-core/shared/normalisation';
+import { formatDistance } from '@actual-app/core/shared/location-utils';
+import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 import type {
   AccountEntity,
   NearbyPayeeEntity,
   PayeeEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { css, cx } from '@emotion/css';
+
+import { useAccounts } from '#hooks/useAccounts';
+import { useCommonPayees } from '#hooks/useCommonPayees';
+import { useNearbyPayees } from '#hooks/useNearbyPayees';
+import { usePayees } from '#hooks/usePayees';
+import {
+  getActivePayees,
+  useCreatePayeeMutation,
+  useDeletePayeeLocationMutation,
+} from '#payees';
 
 import {
   Autocomplete,
   AutocompleteFooter,
   defaultFilterSuggestion,
 } from './Autocomplete';
+import { rankAutocompleteMatch } from './autocompleteRanking';
 import { ItemHeader } from './ItemHeader';
-
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useCommonPayees } from '@desktop-client/hooks/useCommonPayees';
-import { useNearbyPayees } from '@desktop-client/hooks/useNearbyPayees';
-import { usePayees } from '@desktop-client/hooks/usePayees';
-import {
-  getActivePayees,
-  useCreatePayeeMutation,
-  useDeletePayeeLocationMutation,
-} from '@desktop-client/payees';
 
 type PayeeAutocompleteItem = PayeeEntity &
   PayeeItemType & {
@@ -343,14 +343,10 @@ function PayeeList({
 }
 
 function customSort(obj: PayeeAutocompleteItem, value: string): number {
-  const name = getNormalisedString(obj.name);
   if (obj.id === 'new') {
-    return -2;
+    return -5;
   }
-  if (name.includes(value)) {
-    return -1;
-  }
-  return 1;
+  return rankAutocompleteMatch(obj.name, value);
 }
 
 export type PayeeAutocompleteProps = ComponentProps<

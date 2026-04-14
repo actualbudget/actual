@@ -7,9 +7,8 @@ import { animated, config, useSpring } from 'react-spring';
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import type { WithRequired } from '@actual-app/core/types/util';
 import { useDrag } from '@use-gesture/react';
-
-import type { WithRequired } from 'loot-core/types/util';
 
 type ActionableGridListItemProps<T> = {
   actions?: ReactNode | ((params: { close: () => void }) => ReactNode);
@@ -34,10 +33,13 @@ export function ActionableGridListItem<T extends object>({
   const hasActions = !!actions;
 
   // Spring animation for the swipe
-  const [{ x }, api] = useSpring(() => ({
-    x: 0,
-    config: config.stiff,
-  }));
+  const [{ x }, api] = useSpring(
+    () => ({
+      from: { x: 0 },
+      config: config.stiff,
+    }),
+    [],
+  );
 
   // Handle drag gestures
   const bind = useDrag(
@@ -48,7 +50,7 @@ export function ActionableGridListItem<T extends object>({
       if (active) {
         dragStartedRef.current = true;
         void api.start({
-          x: Math.max(-actionsWidth, Math.min(0, currentX)),
+          to: { x: Math.max(-actionsWidth, Math.min(0, currentX)) },
           onRest: () => {
             dragStartedRef.current = false;
           },
@@ -62,7 +64,7 @@ export function ActionableGridListItem<T extends object>({
         (vx < -0.5 && currentX < -actionsWidth / 5);
 
       void api.start({
-        x: shouldReveal ? -actionsWidth : 0,
+        to: { x: shouldReveal ? -actionsWidth : 0 },
         onRest: () => {
           dragStartedRef.current = false;
           setIsRevealed(shouldReveal);
@@ -141,7 +143,7 @@ export function ActionableGridListItem<T extends object>({
               ? actions({
                   close: () => {
                     void api.start({
-                      x: 0,
+                      to: { x: 0 },
                       onRest: () => {
                         setIsRevealed(false);
                       },

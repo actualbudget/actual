@@ -2,16 +2,16 @@
 import * as d from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
-import { dayFromDate, parseDate } from '../../shared/months';
-import { q } from '../../shared/query';
-import { getApproxNumberThreshold } from '../../shared/rules';
-import { recurConfigToRSchedule } from '../../shared/schedules';
-import { groupBy } from '../../shared/util';
-import { aqlQuery } from '../aql';
-import * as db from '../db';
-import { fromDateRepr } from '../models';
-import { conditionsToAQL } from '../transactions/transaction-rules';
-import { RSchedule } from '../util/rschedule';
+import { aqlQuery } from '#server/aql';
+import * as db from '#server/db';
+import { fromDateRepr } from '#server/models';
+import { conditionsToAQL } from '#server/transactions/transaction-rules';
+import { RSchedule } from '#server/util/rschedule';
+import { dayFromDate, parseDate } from '#shared/months';
+import { q } from '#shared/query';
+import { getApproxNumberThreshold } from '#shared/rules';
+import { recurConfigToRSchedule } from '#shared/schedules';
+import { groupBy } from '#shared/util';
 
 function takeDates(config) {
   const schedule = new RSchedule({ rrules: recurConfigToRSchedule(config) });

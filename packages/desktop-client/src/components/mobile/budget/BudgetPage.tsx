@@ -26,15 +26,12 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { groupById } from '@actual-app/core/shared/util';
+import type { TransObjectLiteral } from '@actual-app/core/types/util';
 
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { groupById } from 'loot-core/shared/util';
-import type { TransObjectLiteral } from 'loot-core/types/util';
-
-import { BudgetTable, PILL_STYLE } from './BudgetTable';
-
-import { sync } from '@desktop-client/app/appSlice';
+import { sync } from '#app/appSlice';
 import {
   useBudgetActions,
   useCreateCategoryGroupMutation,
@@ -43,28 +40,30 @@ import {
   useDeleteCategoryMutation,
   useSaveCategoryGroupMutation,
   useSaveCategoryMutation,
-} from '@desktop-client/budget';
-import { closeBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
-import { prewarmMonth } from '@desktop-client/components/budget/util';
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { MobilePageHeader, Page } from '@desktop-client/components/Page';
-import { SyncRefresh } from '@desktop-client/components/SyncRefresh';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useOverspentCategories } from '@desktop-client/hooks/useOverspentCategories';
-import { SheetNameProvider } from '@desktop-client/hooks/useSheetName';
-import { useSheetValue } from '@desktop-client/hooks/useSheetValue';
-import { useSpreadsheet } from '@desktop-client/hooks/useSpreadsheet';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useTransactions } from '@desktop-client/hooks/useTransactions';
-import { useUndo } from '@desktop-client/hooks/useUndo';
-import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
-import { uncategorizedTransactions } from '@desktop-client/queries';
-import { useDispatch } from '@desktop-client/redux';
-import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
+} from '#budget';
+import { closeBudget } from '#budgetfiles/budgetfilesSlice';
+import { prewarmMonth } from '#components/budget/util';
+import { FinancialText } from '#components/FinancialText';
+import { MobilePageHeader, Page } from '#components/Page';
+import { SyncRefresh } from '#components/SyncRefresh';
+import { useCategories } from '#hooks/useCategories';
+import { useFormat } from '#hooks/useFormat';
+import { useLocale } from '#hooks/useLocale';
+import { useLocalPref } from '#hooks/useLocalPref';
+import { useNavigate } from '#hooks/useNavigate';
+import { useOverspentCategories } from '#hooks/useOverspentCategories';
+import { SheetNameProvider } from '#hooks/useSheetName';
+import { useSheetValue } from '#hooks/useSheetValue';
+import { useSpreadsheet } from '#hooks/useSpreadsheet';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useTransactions } from '#hooks/useTransactions';
+import { useUndo } from '#hooks/useUndo';
+import { collapseModals, pushModal } from '#modals/modalsSlice';
+import { uncategorizedTransactions } from '#queries';
+import { useDispatch } from '#redux';
+import { envelopeBudget } from '#spreadsheet/bindings';
+
+import { BudgetTable, PILL_STYLE } from './BudgetTable';
 
 function isBudgetType(input?: string): input is 'envelope' | 'tracking' {
   return ['envelope', 'tracking'].includes(input);

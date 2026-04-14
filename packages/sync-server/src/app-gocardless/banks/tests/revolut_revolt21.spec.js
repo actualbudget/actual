@@ -1,4 +1,4 @@
-import RevolutRevolt21 from '../revolut_revolt21';
+import RevolutRevolt21 from '#app-gocardless/banks/revolut_revolt21';
 
 describe('RevolutRevolt21', () => {
   describe('#normalizeTransaction', () => {

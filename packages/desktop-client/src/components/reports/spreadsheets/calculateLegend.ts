@@ -1,13 +1,12 @@
 import { theme } from '@actual-app/components/theme';
-
 import type {
   balanceTypeOpType,
   GroupedEntity,
   IntervalEntity,
   LegendEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
-import { getColorScale } from '@desktop-client/components/reports/chart-theme';
+import { getColorScale } from '#components/reports/chart-theme';
 
 export function calculateLegend(
   intervalData: IntervalEntity[],
@@ -40,8 +39,16 @@ export function calculateLegend(
         return theme.reportsNumberNegative;
       }
 
-      if (balanceTypeOp === 'totalTotals') {
-        if (data.totalTotals < 0) {
+      if (
+        balanceTypeOp === 'totalTotals' ||
+        balanceTypeOp === 'totalBudgeted'
+      ) {
+        const total =
+          balanceTypeOp === 'totalBudgeted'
+            ? data.totalBudgeted
+            : data.totalTotals;
+
+        if (total < 0) {
           return theme.reportsNumberNegative;
         }
 

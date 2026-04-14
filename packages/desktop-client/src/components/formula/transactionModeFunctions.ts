@@ -58,6 +58,18 @@ export const transactionModeFunctions: Record<string, FunctionDef> = {
       },
     ],
   },
+  BALANCE_OF: {
+    name: 'BALANCE_OF',
+    description: t(
+      'Running balance for another account (cents) at this transaction, same cutoff as balance. Use a quoted account id for a deterministic match, or a quoted account name. Use the balance variable instead for the current account.',
+    ),
+    parameters: [
+      {
+        name: 'account_id_or_name',
+        description: t('Quoted account id or exact account name'),
+      },
+    ],
+  },
   MID: {
     name: 'MID',
     description: t('Returns substring from specified position.'),

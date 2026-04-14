@@ -1,23 +1,19 @@
-import * as asyncStorage from '../../platform/server/asyncStorage';
-import * as fs from '../../platform/server/fs';
-import { stringToInteger } from '../../shared/util';
-import type {
-  GlobalPrefs,
-  MetadataPrefs,
-  SyncedPrefs,
-} from '../../types/prefs';
-import { createApp } from '../app';
-import * as db from '../db';
-import { PostError } from '../errors';
-import { getDefaultDocumentDir } from '../main';
-import { mutator } from '../mutators';
-import { post } from '../post';
+import * as asyncStorage from '#platform/server/asyncStorage';
+import * as fs from '#platform/server/fs';
+import { createApp } from '#server/app';
+import * as db from '#server/db';
+import { PostError } from '#server/errors';
+import { getDefaultDocumentDir } from '#server/main';
+import { mutator } from '#server/mutators';
+import { post } from '#server/post';
 import {
   getPrefs as _getMetadataPrefs,
   savePrefs as _saveMetadataPrefs,
-} from '../prefs';
-import { getServer } from '../server-config';
-import { undoable } from '../undo';
+} from '#server/prefs';
+import { getServer } from '#server/server-config';
+import { undoable } from '#server/undo';
+import { stringToInteger } from '#shared/util';
+import type { GlobalPrefs, MetadataPrefs, SyncedPrefs } from '#types/prefs';
 
 export type PreferencesHandlers = {
   'preferences/save': typeof saveSyncedPrefs;
@@ -170,7 +166,6 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
       theme === 'light' ||
       theme === 'dark' ||
       theme === 'auto' ||
-      theme === 'development' ||
       theme === 'midnight'
         ? theme
         : 'auto',

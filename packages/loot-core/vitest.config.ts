@@ -1,19 +1,5 @@
-import path from 'path';
-
 import peggyLoader from 'vite-plugin-peggy-loader';
 import { defineConfig } from 'vitest/config';
-
-const resolveExtensions = [
-  '.testing.ts',
-  '.electron.ts',
-  '.mjs',
-  '.js',
-  '.mts',
-  '.ts',
-  '.jsx',
-  '.tsx',
-  '.json',
-];
 
 export default defineConfig({
   test: {
@@ -30,8 +16,11 @@ export default defineConfig({
     },
     maxWorkers: 2,
   },
+  ssr: {
+    resolve: { conditions: ['electron', 'module', 'node', 'development'] },
+  },
   resolve: {
-    extensions: resolveExtensions,
+    conditions: ['electron', 'module', 'browser', 'development'],
   },
   plugins: [peggyLoader()],
 });

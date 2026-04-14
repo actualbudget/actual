@@ -2,37 +2,37 @@
 import * as dateFns from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
-import * as asyncStorage from '../../platform/server/asyncStorage';
-import { logger } from '../../platform/server/log';
-import * as monthUtils from '../../shared/months';
-import { q } from '../../shared/query';
+import * as asyncStorage from '#platform/server/asyncStorage';
+import { logger } from '#platform/server/log';
+import { aqlQuery } from '#server/aql';
+import * as db from '#server/db';
+import { TRANSACTION_SORT_INCREMENT } from '#server/db/sort';
+import { runMutator } from '#server/mutators';
+import { post } from '#server/post';
+import { getServer } from '#server/server-config';
+import { batchMessages } from '#server/sync';
+import { batchUpdateTransactions } from '#server/transactions';
+import { runRules } from '#server/transactions/transaction-rules';
+import {
+  defaultMappings,
+  mappingsFromString,
+} from '#server/util/custom-sync-mapping';
+import * as monthUtils from '#shared/months';
+import { q } from '#shared/query';
 import {
   makeChild as makeChildTransaction,
   recalculateSplit,
-} from '../../shared/transactions';
+} from '#shared/transactions';
 import {
   amountToInteger,
   hasFieldsChanged,
   integerToAmount,
-} from '../../shared/util';
+} from '#shared/util';
 import type {
   AccountEntity,
   BankSyncResponse,
   TransactionEntity,
-} from '../../types/models';
-import { aqlQuery } from '../aql';
-import * as db from '../db';
-import { TRANSACTION_SORT_INCREMENT } from '../db/sort';
-import { runMutator } from '../mutators';
-import { post } from '../post';
-import { getServer } from '../server-config';
-import { batchMessages } from '../sync';
-import { batchUpdateTransactions } from '../transactions';
-import { runRules } from '../transactions/transaction-rules';
-import {
-  defaultMappings,
-  mappingsFromString,
-} from '../util/custom-sync-mapping';
+} from '#types/models';
 
 import { getStartingBalancePayee } from './payees';
 import { title } from './title';
@@ -68,10 +68,7 @@ function getAccountBalance(account) {
 }
 
 async function updateAccountBalance(id: AccountEntity['id'], balance: number) {
-  db.runQuery('UPDATE accounts SET balance_current = ? WHERE id = ?', [
-    balance,
-    id,
-  ]);
+  await db.update('accounts', { id, balance_current: balance });
 }
 
 async function getAccountOldestTransaction(id): Promise<TransactionEntity> {
@@ -508,6 +505,7 @@ export async function reconcileTransactions(
   isPreview = false,
   defaultCleared = true,
   updateDates = false,
+  reimportDeleted?: boolean,
 ): Promise<ReconcileTransactionsResult> {
   logger.log('Performing transaction reconciliation');
 
@@ -526,6 +524,7 @@ export async function reconcileTransactions(
     transactions,
     isBankSyncAccount,
     strictIdChecking,
+    reimportDeleted,
   );
 
   // Finally, generate & commit the changes
@@ -663,14 +662,18 @@ export async function matchTransactions(
   transactions,
   isBankSyncAccount = false,
   strictIdChecking = true,
+  reimportDeletedOverride?: boolean,
 ) {
   logger.log('Performing transaction reconciliation matching');
 
-  const reimportDeleted = await aqlQuery(
-    q('preferences')
-      .filter({ id: `sync-reimport-deleted-${acctId}` })
-      .select('value'),
-  ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
+  const reimportDeleted =
+    reimportDeletedOverride !== undefined
+      ? reimportDeletedOverride
+      : await aqlQuery(
+          q('preferences')
+            .filter({ id: `sync-reimport-deleted-${acctId}` })
+            .select('value'),
+        ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
 
   const hasMatched = new Set();
 

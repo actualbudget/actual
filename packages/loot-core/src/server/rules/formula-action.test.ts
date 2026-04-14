@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { TransactionForRules } from '../transactions/transaction-rules';
+import type { TransactionForRules } from '#server/transactions/transaction-rules';
 
 import { Action } from './action';
 
@@ -75,7 +75,10 @@ describe('Formula-based rule actions', () => {
   it('should provide today variable', () => {
     const action = new Action('set', 'date', null, {});
     const transaction = { date: '2024-01-01' };
-    const result = action.executeFormulaSync('=today', transaction);
+    const result = action.executeFormulaSync(
+      '=TEXT(today,"YYYY-MM-DD")',
+      transaction,
+    );
 
     // Should be a date string in YYYY-MM-DD format
     expect(typeof result).toBe('string');
@@ -109,6 +112,41 @@ describe('Formula-based rule actions', () => {
     const result = action.executeFormulaSync('=balance * 2', transaction);
 
     expect(result).toBe(300000);
+  });
+
+  it('should support BALANCE_OF with prefetched map', () => {
+    const action = new Action('set', 'notes', null, {});
+    const transaction: Partial<TransactionForRules> = {
+      notes: 'original',
+      _balanceOfPrefetched: new Map([
+        ['Savings', 50000],
+        ['550e8400-e29b-41d4-a716-446655440000', 1200],
+      ]),
+    };
+    const byName = action.executeFormulaSync(
+      '=BALANCE_OF("Savings") + 100',
+      transaction,
+    );
+    expect(byName).toBe(5010000);
+
+    const byId = action.executeFormulaSync(
+      '=BALANCE_OF("550e8400-e29b-41d4-a716-446655440000")',
+      transaction,
+    );
+    expect(byId).toBe(120000);
+  });
+
+  it('should return 0 for BALANCE_OF when literal missing from prefetch map', () => {
+    const action = new Action('set', 'amount', null, {});
+    const transaction: Partial<TransactionForRules> = {
+      amount: 100,
+      _balanceOfPrefetched: new Map(),
+    };
+    const result = action.executeFormulaSync(
+      '=BALANCE_OF("Unknown")',
+      transaction,
+    );
+    expect(result).toBe(0);
   });
 
   it('should execute formula and convert to number type', () => {

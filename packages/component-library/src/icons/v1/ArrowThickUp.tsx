@@ -10,6 +10,6 @@ export const SvgArrowThickUp = (props: SVGProps<SVGSVGElement>) => (
       ...props.style,
     }}
   >
-    <path d="M7 10v8h6v-8h5l-8-8-8 8h5z" fill="currentColor" />
+    <path d="M7 10v8h6v-8h5l-8-8-8 8z" fill="currentColor" />
   </svg>
 );

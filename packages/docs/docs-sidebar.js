@@ -13,27 +13,20 @@
 
 /** @type {import('@docusaurus/plugin-content-docs').SidebarsConfig} */
 const sidebars = {
+  tourSidebar: [
+    'tour/index',
+    'tour/user-interface',
+    'tour/budget',
+    'tour/accounts',
+    'tour/reports',
+    'tour/schedules',
+    'tour/payees',
+    'tour/rules',
+  ],
   docs: [
     'index',
     'vision',
     'releases',
-    {
-      type: 'category',
-      label: 'A Tour of Actual',
-      link: {
-        type: 'doc',
-        id: 'tour/index',
-      },
-      items: [
-        'tour/user-interface',
-        'tour/budget',
-        'tour/accounts',
-        'tour/reports',
-        'tour/schedules',
-        'tour/payees',
-        'tour/rules',
-      ],
-    },
     {
       type: 'category',
       label: 'Getting Started',
@@ -168,6 +161,7 @@ const sidebars = {
             'transactions/payees',
             'transactions/bulk-editing',
             'transactions/tags',
+            'transactions/split-transactions',
             {
               type: 'category',
               label: 'Connecting Your Bank',
@@ -230,6 +224,7 @@ const sidebars = {
           link: { type: 'doc', id: 'api/index' },
           items: [
             'api/reference',
+            'api/cli',
             {
               type: 'category',
               label: 'ActualQL',

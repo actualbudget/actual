@@ -5,6 +5,11 @@ import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
+import type {
+  balanceTypeOpType,
+  DataEntity,
+  RuleConditionEntity,
+} from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 import {
   Bar,
@@ -19,27 +24,21 @@ import {
 } from 'recharts';
 import type { BarShapeProps } from 'recharts';
 
-import type {
-  balanceTypeOpType,
-  DataEntity,
-  RuleConditionEntity,
-} from 'loot-core/types/models';
+import { FinancialText } from '#components/FinancialText';
+import { useRechartsAnimation } from '#components/reports/chart-theme';
+import { Container } from '#components/reports/Container';
+import { getCustomTick } from '#components/reports/getCustomTick';
+import { numberFormatterTooltip } from '#components/reports/numberFormatter';
+import { useAccounts } from '#hooks/useAccounts';
+import { useCategories } from '#hooks/useCategories';
+import { useFormat } from '#hooks/useFormat';
+import type { FormatType } from '#hooks/useFormat';
+import { useNavigate } from '#hooks/useNavigate';
+import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
-
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
-import { Container } from '@desktop-client/components/reports/Container';
-import { getCustomTick } from '@desktop-client/components/reports/getCustomTick';
-import { numberFormatterTooltip } from '@desktop-client/components/reports/numberFormatter';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import type { FormatType } from '@desktop-client/hooks/useFormat';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
 
 type PayloadChild = {
   props: {
@@ -56,6 +55,7 @@ type PayloadItem = {
     netAssets: number;
     netDebts: number;
     totalTotals: number;
+    totalBudgeted: number;
     networth: number;
     totalChange: number;
     children: [PayloadChild];
@@ -97,7 +97,9 @@ const CustomTooltip = ({
             <strong>{payload[0].payload[yAxis]}</strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            {['totalAssets', 'totalTotals'].includes(balanceTypeOp) && (
+            {['totalAssets', 'totalTotals', 'totalBudgeted'].includes(
+              balanceTypeOp,
+            ) && (
               <AlignedText
                 left={t('Assets:')}
                 right={
@@ -107,7 +109,9 @@ const CustomTooltip = ({
                 }
               />
             )}
-            {['totalDebts', 'totalTotals'].includes(balanceTypeOp) && (
+            {['totalDebts', 'totalTotals', 'totalBudgeted'].includes(
+              balanceTypeOp,
+            ) && (
               <AlignedText
                 left={t('Debts:')}
                 right={
@@ -137,12 +141,19 @@ const CustomTooltip = ({
                 }
               />
             )}
-            {['totalTotals'].includes(balanceTypeOp) && (
+            {['totalTotals', 'totalBudgeted'].includes(balanceTypeOp) && (
               <AlignedText
-                left={t('Net:')}
+                left={
+                  balanceTypeOp === 'totalBudgeted' ? t('Budgeted:') : t('Net:')
+                }
                 right={
                   <FinancialText as="strong">
-                    {format(payload[0].payload.totalTotals, 'financial')}
+                    {format(
+                      balanceTypeOp === 'totalBudgeted'
+                        ? payload[0].payload.totalBudgeted
+                        : payload[0].payload.totalTotals,
+                      'financial',
+                    )}
                   </FinancialText>
                 }
               />
@@ -162,7 +173,10 @@ const customLabel = (props, typeOp, format) => {
     props.value !== 0 && `${format(props.value, 'financial-no-decimals')}`;
   const textSize = adjustTextSize({
     sized: props.width,
-    type: typeOp === 'totalTotals' ? 'default' : 'variable',
+    type:
+      typeOp === 'totalTotals' || typeOp === 'totalBudgeted'
+        ? 'default'
+        : 'variable',
     values: props.value,
   });
 

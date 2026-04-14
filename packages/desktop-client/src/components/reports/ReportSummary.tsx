@@ -5,16 +5,18 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type {
+  balanceTypeOpType,
+  DataEntity,
+} from '@actual-app/core/types/models';
 
-import * as monthUtils from 'loot-core/shared/months';
-import type { balanceTypeOpType, DataEntity } from 'loot-core/types/models';
+import { FinancialText } from '#components/FinancialText';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { useFormat } from '#hooks/useFormat';
+import { useLocale } from '#hooks/useLocale';
 
 import { ReportOptions } from './ReportOptions';
-
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useLocale } from '@desktop-client/hooks/useLocale';
 
 type ReportSummaryProps = {
   startDate: string;
@@ -113,7 +115,9 @@ export function ReportSummary({
             ? t('TOTAL SPENDING')
             : balanceTypeOp === 'totalAssets'
               ? t('TOTAL DEPOSITS')
-              : t('NET {{net}}', { net })}
+              : balanceTypeOp === 'totalBudgeted'
+                ? t('TOTAL BUDGETED')
+                : t('NET {{net}}', { net })}
         </Text>
         <FinancialText
           style={{
@@ -152,7 +156,9 @@ export function ReportSummary({
             ? t('AVERAGE SPENDING')
             : balanceTypeOp === 'totalAssets'
               ? t('AVERAGE DEPOSIT')
-              : t('AVERAGE NET')}
+              : balanceTypeOp === 'totalBudgeted'
+                ? t('AVERAGE BUDGETED')
+                : t('AVERAGE NET')}
         </Text>
         <FinancialText
           style={{

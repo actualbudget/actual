@@ -9,22 +9,18 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type { CategoryEntity } from '@actual-app/core/types/models';
 
-import * as monthUtils from 'loot-core/shared/months';
-import type { CategoryEntity } from 'loot-core/types/models';
+import { useNavigate } from '#hooks/useNavigate';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { collapseModals, pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
+import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
 
 import { BalanceCell } from './BalanceCell';
 import { BudgetCell } from './BudgetCell';
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
-
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { collapseModals, pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import {
-  envelopeBudget,
-  trackingBudget,
-} from '@desktop-client/spreadsheet/bindings';
 
 type IncomeCategoryNameProps = {
   category: CategoryEntity;

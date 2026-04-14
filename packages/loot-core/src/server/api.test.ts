@@ -1,8 +1,8 @@
-import { getBankSyncError } from '../shared/errors';
-import type { ServerHandlers } from '../types/server-handlers';
+import { getBankSyncError } from '#shared/errors';
+import type { ServerHandlers } from '#types/server-handlers';
 
 import { installAPI } from './api';
-vi.mock('../shared/errors', () => ({
+vi.mock('#shared/errors', () => ({
   getBankSyncError: vi.fn(error => `Bank sync error: ${error}`),
 }));
 

@@ -1,6 +1,5 @@
+import type { sortByOpType } from '@actual-app/core/types/models';
 import { t } from 'i18next';
-
-import type { sortByOpType } from 'loot-core/types/models';
 
 const intervalOptions = [
   {
@@ -67,10 +66,12 @@ type graphOptions = {
   disableLabel?: boolean;
   disableSort?: boolean;
 };
+
 const totalGraphOptions: graphOptions[] = [
   {
     description: 'TableGraph',
-    disabledSplit: [],
+    // CategoryGroup is only valid for DonutGraph
+    disabledSplit: ['CategoryGroup'],
     defaultSplit: 'Category',
     disabledType: [],
     defaultType: 'Payment',
@@ -80,7 +81,8 @@ const totalGraphOptions: graphOptions[] = [
   },
   {
     description: 'BarGraph',
-    disabledSplit: [],
+    // CategoryGroup is only valid for DonutGraph
+    disabledSplit: ['CategoryGroup'],
     defaultSplit: 'Category',
     disabledType: [],
     defaultType: 'Payment',
@@ -88,7 +90,8 @@ const totalGraphOptions: graphOptions[] = [
   },
   {
     description: 'AreaGraph',
-    disabledSplit: ['Category', 'Group', 'Payee', 'Account'],
+    // CategoryGroup is only valid for DonutGraph
+    disabledSplit: ['Category', 'Group', 'CategoryGroup', 'Payee', 'Account'],
     defaultSplit: 'Interval',
     disabledType: [],
     defaultType: 'Payment',
@@ -98,6 +101,7 @@ const totalGraphOptions: graphOptions[] = [
   },
   {
     description: 'DonutGraph',
+    // CategoryGroup is allowed here — it enables the two-ring concentric donut
     disabledSplit: [],
     defaultSplit: 'Category',
     disabledType: ['Net'],
@@ -109,7 +113,8 @@ const totalGraphOptions: graphOptions[] = [
 const timeGraphOptions: graphOptions[] = [
   {
     description: 'TableGraph',
-    disabledSplit: ['Interval'],
+    // CategoryGroup disabled in time mode (DonutGraph not available in time mode)
+    disabledSplit: ['Interval', 'CategoryGroup'],
     defaultSplit: 'Category',
     disabledType: ['Net Payment', 'Net Deposit'],
     defaultType: 'Payment',
@@ -120,7 +125,8 @@ const timeGraphOptions: graphOptions[] = [
   },
   {
     description: 'StackedBarGraph',
-    disabledSplit: ['Interval'],
+    // CategoryGroup disabled in time mode
+    disabledSplit: ['Interval', 'CategoryGroup'],
     defaultSplit: 'Category',
     disabledType: [],
     defaultType: 'Payment',
@@ -129,7 +135,8 @@ const timeGraphOptions: graphOptions[] = [
   },
   {
     description: 'LineGraph',
-    disabledSplit: ['Interval'],
+    // CategoryGroup disabled in time mode
+    disabledSplit: ['Interval', 'CategoryGroup'],
     defaultSplit: 'Category',
     disabledType: [],
     defaultType: 'Payment',
