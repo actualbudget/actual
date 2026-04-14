@@ -401,10 +401,9 @@ describe('ThemeInstaller', () => {
       render(
         <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
       );
-      const textarea = screen.getByLabelText(
-        'Custom Theme CSS',
-      ) as HTMLTextAreaElement;
-      expect(textarea.value).toBe(':root { --color-accent: #ff00aa; }');
+      expect(screen.getByLabelText('Custom Theme CSS')).toHaveValue(
+        ':root { --color-accent: #ff00aa; }',
+      );
     });
 
     it('leaves the textarea empty when customCssOverride is undefined', () => {
@@ -412,10 +411,7 @@ describe('ThemeInstaller', () => {
       render(
         <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
       );
-      const textarea = screen.getByLabelText(
-        'Custom Theme CSS',
-      ) as HTMLTextAreaElement;
-      expect(textarea.value).toBe('');
+      expect(screen.getByLabelText('Custom Theme CSS')).toHaveValue('');
     });
 
     it('writes validated CSS to customCssOverride when Apply is pressed', async () => {

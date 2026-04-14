@@ -180,6 +180,7 @@ export function ThemeInstaller({
     try {
       const validated = pastedCss.trim() ? validateThemeCss(pastedCss) : '';
       setCustomCssOverride(validated);
+      setPastedCss(validated);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : t('Failed to validate theme CSS'),

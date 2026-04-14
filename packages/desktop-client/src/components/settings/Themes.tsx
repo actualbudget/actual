@@ -196,8 +196,12 @@ export function ThemeSettings() {
   }, []);
 
   const handleEditOverride = useCallback(() => {
-    setShowInstaller({ slot: 'light' });
-  }, []);
+    setShowInstaller(
+      theme === 'auto'
+        ? { slot: 'light', catalogMode: 'light' }
+        : { slot: 'light' },
+    );
+  }, [theme]);
 
   return (
     <Setting
