@@ -86,7 +86,7 @@
     "date-fns": "^4.1.0",
     "debug": "^4.4.3",
     "express": "^5.2.1",
-    "express-rate-limit": "^8.3.0",
+    "express-rate-limit": "^8.3.2",
     "express-winston": "^4.2.0",
     "ipaddr.js": "^2.3.0",
     "migrate": "^2.1.0",
