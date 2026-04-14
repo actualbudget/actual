@@ -59,7 +59,7 @@ __metadata:
     "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"
     cli-table3: "npm:^0.6.5"
     commander: "npm:^13.1.0"
-    cosmiconfig: "npm:^9.0.0"
+    cosmiconfig: "npm:^9.0.1"
     rollup-plugin-visualizer: "npm:^6.0.11"
     vite: "npm:^8.0.5"
     vitest: "npm:^4.1.2"
@@ -14140,7 +14140,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cosmiconfig@npm:^9.0.0":
+"cosmiconfig@npm:^9.0.1":
   version: 9.0.1
   resolution: "cosmiconfig@npm:9.0.1"
   dependencies:
