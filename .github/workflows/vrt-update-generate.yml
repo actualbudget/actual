@@ -69,9 +69,14 @@ jobs:
         with:
           download-translations: 'false'
 
+      # Build tools are needed to rebuild native modules like better-sqlite3 used by the Desktop app, which is required to run VRT tests on the Desktop app and generate updated snapshots.
+      - name: Install build tools
+        run: apt-get update && apt-get install -y build-essential python3
+
       - name: Run VRT Tests on Desktop app
         continue-on-error: true
         run: |
+          yarn rebuild-electron
           xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" -- yarn e2e:desktop --update-snapshots
 
       - name: Run VRT Tests

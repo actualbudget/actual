@@ -225,5 +225,11 @@
     "repo": "Juulz/YNA-Theme-Light",
     "colors": ["#1c1f58", "#fff", "#192ee6", "#f5f6ff", "#93d53e", "#191898"],
     "mode": "light"
+  },
+  {
+    "name": "YNA Theme Dark",
+    "repo": "Juulz/YNA-Theme-Dark",
+    "colors": ["#121330", "#fff", "#0c0d22", "#0f1443", "#93d53e", "#191898"],
+    "mode": "dark"
   }
 ]

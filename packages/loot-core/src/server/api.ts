@@ -550,6 +550,7 @@ handlers['api/transaction-update'] = withMutation(async function ({
     return [];
   }
 
+  // @ts-expect-error - fix me
   const { diff } = updateTransaction(transactions, { id, ...fields });
   return handlers['transactions-batch-update'](diff)['updated'];
 });
@@ -592,6 +593,7 @@ handlers['api/account-create'] = withMutation(async function ({
 
 handlers['api/account-update'] = withMutation(async function ({ id, fields }) {
   checkFileOpen();
+  // @ts-expect-error - fix me
   return db.updateAccount({ id, ...accountModel.fromExternal(fields) });
 });
 
@@ -659,6 +661,7 @@ handlers['api/category-group-update'] = withMutation(async function ({
   checkFileOpen();
   return handlers['category-group-update']({
     id,
+    // @ts-expect-error - fix me
     ...categoryGroupModel.fromExternal(fields),
   });
 });
@@ -688,6 +691,7 @@ handlers['api/category-update'] = withMutation(async function ({ id, fields }) {
   checkFileOpen();
   return handlers['category-update']({
     id,
+    // @ts-expect-error - fix me
     ...categoryModel.fromExternal(fields),
   });
 });
@@ -723,6 +727,7 @@ handlers['api/payee-create'] = withMutation(async function ({ payee }) {
 handlers['api/payee-update'] = withMutation(async function ({ id, fields }) {
   checkFileOpen();
   return handlers['payees-batch-change']({
+    // @ts-expect-error - fix me
     updated: [{ id, ...payeeModel.fromExternal(fields) }],
   });
 });

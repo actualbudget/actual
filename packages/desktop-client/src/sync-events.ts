@@ -371,8 +371,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
           console.trace('unknown error', event);
           notif = {
             message: t(
-              'We had problems syncing your changes. Please report this as a bug by [opening a GitHub issue]({{githubIssueLink}}).',
-              { githubIssueLink },
+              'There was a problem syncing your changes. Please confirm that your server is accessible.',
             ),
           };
       }

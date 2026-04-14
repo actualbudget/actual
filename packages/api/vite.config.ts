@@ -3,7 +3,6 @@ import path from 'path';
 
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
-import dts from 'vite-plugin-dts';
 import peggyLoader from 'vite-plugin-peggy-loader';
 
 const lootCoreRoot = path.resolve(__dirname, '../loot-core');
@@ -75,11 +74,6 @@ export default defineConfig({
   plugins: [
     cleanOutputDirs(),
     peggyLoader(),
-    dts({
-      tsconfigPath: path.resolve(__dirname, 'tsconfig.json'),
-      outDir: path.resolve(__dirname, '@types'),
-      rollupTypes: true,
-    }),
     copyMigrationsAndDefaultDb(),
     visualizer({ template: 'raw-data', filename: 'app/stats.json' }),
   ],
