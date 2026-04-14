@@ -38,7 +38,7 @@
     "actual/no-react-default-import": "error",
     "actual/prefer-subpath-imports": "error",
     "actual/enforce-boundaries": "error",
-    "actual/no-extraneous-dependencies": "error"
+    "actual/no-extraneous-dependencies": "error",
 
     // JSX A11y rules
     "jsx-a11y/no-autofocus": [

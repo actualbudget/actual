@@ -14,6 +14,6 @@ module.exports = {
     'no-react-default-import': require('./rules/no-react-default-import'),
     'prefer-subpath-imports': require('./rules/prefer-subpath-imports'),
     'enforce-boundaries': require('./rules/enforce-boundaries'),
-    'no-extraneous-dependencies': require('./rules/no-extraneous-dependencies')
+    'no-extraneous-dependencies': require('./rules/no-extraneous-dependencies'),
   },
 };
