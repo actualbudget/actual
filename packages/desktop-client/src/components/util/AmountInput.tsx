@@ -14,12 +14,11 @@ import { baseInputStyle, Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
 import { css, cx } from '@emotion/css';
 
-import type { IntegerAmount } from 'loot-core/shared/util';
-
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
+import { useFormat } from '#hooks/useFormat';
+import { useMergedRefs } from '#hooks/useMergedRefs';
 
 type AmountInputProps = {
   id?: string;

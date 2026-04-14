@@ -40,7 +40,7 @@
     "build:browser": "./bin/package-browser",
     "build:desktop": "./bin/package-electron",
     "build:plugins-service": "yarn workspace plugins-service build",
-    "build:api": "yarn workspace @actual-app/api build",
+    "build:api": "yarn build --scope=@actual-app/api",
     "build:cli": "yarn build --scope=@actual-app/cli",
     "build:docs": "yarn workspace docs build",
     "build:storybook": "yarn workspace @actual-app/components build:storybook",
@@ -54,7 +54,7 @@
     "playwright": "yarn workspace @actual-app/web run playwright",
     "vrt": "yarn workspace @actual-app/web run vrt",
     "vrt:docker": "./bin/run-vrt",
-    "rebuild-electron": "./node_modules/.bin/electron-rebuild -m ./packages/loot-core",
+    "rebuild-electron": "./node_modules/.bin/electron-rebuild -m ./packages/loot-core && ./node_modules/.bin/electron-rebuild  -m ./packages/desktop-electron -o better-sqlite3,bcrypt",
     "rebuild-node": "yarn workspace @actual-app/core rebuild",
     "lint": "oxfmt --check . && oxlint --type-aware --quiet",
     "lint:fix": "oxfmt . && oxlint --fix --type-aware --quiet",
@@ -79,13 +79,14 @@
     "lint-staged": "^16.3.2",
     "minimatch": "^10.2.4",
     "npm-run-all": "^4.1.5",
-    "oxfmt": "^0.32.0",
-    "oxlint": "^1.51.0",
-    "oxlint-tsgolint": "^0.13.0",
+    "oxfmt": "^0.44.0",
+    "oxlint": "^1.59.0",
+    "oxlint-tsgolint": "^0.20.0",
     "p-limit": "^7.3.0",
     "prompts": "^2.4.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0"
   },
   "resolutions": {
     "adm-zip": "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch",
@@ -99,6 +100,9 @@
     "socks": ">=2.8.3"
   },
   "lint-staged": {
+    "packages/*/package.json": [
+      "ts-node ./bin/validate-publish-imports.ts --fix"
+    ],
     "*.{js,mjs,jsx,ts,tsx,md,json,yml,yaml}": [
       "oxfmt --no-error-on-unmatched-pattern"
     ],

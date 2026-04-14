@@ -4,33 +4,23 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { SvgArrowsSynchronize } from '@actual-app/components/icons/v2';
 import { theme } from '@actual-app/components/theme';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 import {
   format as formatDate,
   isValid as isDateValid,
   parseISO,
 } from 'date-fns';
 
-import * as monthUtils from 'loot-core/shared/months';
-import type { TransactionEntity } from 'loot-core/types/models';
-
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import {
-  Cell,
-  Field,
-  Row,
-  SelectCell,
-  Table,
-} from '@desktop-client/components/table';
-import { DisplayId } from '@desktop-client/components/util/DisplayId';
-import { useAccount } from '@desktop-client/hooks/useAccount';
-import { useCategory } from '@desktop-client/hooks/useCategory';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import type { FormatType } from '@desktop-client/hooks/useFormat';
-import {
-  useSelectedDispatch,
-  useSelectedItems,
-} from '@desktop-client/hooks/useSelected';
+import { FinancialText } from '#components/FinancialText';
+import { Cell, Field, Row, SelectCell, Table } from '#components/table';
+import { DisplayId } from '#components/util/DisplayId';
+import { useAccount } from '#hooks/useAccount';
+import { useCategory } from '#hooks/useCategory';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useFormat } from '#hooks/useFormat';
+import type { FormatType } from '#hooks/useFormat';
+import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 
 function serializeTransaction(
   transaction: TransactionEntity,

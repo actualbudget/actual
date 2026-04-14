@@ -2,11 +2,28 @@
 import * as d from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
+import { captureBreadcrumb } from '#platform/exceptions';
 import * as connection from '#platform/server/connection';
 import { logger } from '#platform/server/log';
-import { captureBreadcrumb } from '../../platform/exceptions';
-import { currentDay, dayFromDate, parseDate } from '../../shared/months';
-import { q } from '../../shared/query';
+import { addTransactions } from '#server/accounts/sync';
+import { createApp } from '#server/app';
+import { aqlQuery } from '#server/aql';
+import * as db from '#server/db';
+import { toDateRepr } from '#server/models';
+import { mutator, runMutator } from '#server/mutators';
+import * as prefs from '#server/prefs';
+import { Rule } from '#server/rules';
+import { addSyncListener, batchMessages } from '#server/sync';
+import {
+  getRules,
+  insertRule,
+  ruleModel,
+  updateRule,
+} from '#server/transactions/transaction-rules';
+import { undoable } from '#server/undo';
+import { RSchedule } from '#server/util/rschedule';
+import { currentDay, dayFromDate, parseDate } from '#shared/months';
+import { q } from '#shared/query';
 import {
   extractScheduleConds,
   getDateWithSkippedWeekend,
@@ -15,25 +32,8 @@ import {
   getScheduledAmount,
   getStatus,
   recurConfigToRSchedule,
-} from '../../shared/schedules';
-import type { RuleConditionEntity, ScheduleEntity } from '../../types/models';
-import { addTransactions } from '../accounts/sync';
-import { createApp } from '../app';
-import { aqlQuery } from '../aql';
-import * as db from '../db';
-import { toDateRepr } from '../models';
-import { mutator, runMutator } from '../mutators';
-import * as prefs from '../prefs';
-import { Rule } from '../rules';
-import { addSyncListener, batchMessages } from '../sync';
-import {
-  getRules,
-  insertRule,
-  ruleModel,
-  updateRule,
-} from '../transactions/transaction-rules';
-import { undoable } from '../undo';
-import { RSchedule } from '../util/rschedule';
+} from '#shared/schedules';
+import type { RuleConditionEntity, ScheduleEntity } from '#types/models';
 
 import { findSchedules } from './find-schedules';
 

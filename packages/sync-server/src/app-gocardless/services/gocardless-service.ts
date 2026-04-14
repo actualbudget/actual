@@ -1,8 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { SecretName, secretsService } from '../../services/secrets-service';
-import { BankFactory, isSpecialContinuousAccessBank } from '../bank-factory';
-import type { IBank } from '../banks/bank.interface';
+import {
+  BankFactory,
+  isSpecialContinuousAccessBank,
+} from '#app-gocardless/bank-factory';
+import type { IBank } from '#app-gocardless/banks/bank.interface';
 import {
   AccessDeniedError,
   AccountNotLinkedToRequisition,
@@ -15,7 +17,7 @@ import {
   ResourceSuspended,
   ServiceError,
   UnknownError,
-} from '../errors';
+} from '#app-gocardless/errors';
 import type {
   Balance,
   GoCardlessAccountId,
@@ -25,7 +27,7 @@ import type {
   Institution,
   Requisition,
   Transaction,
-} from '../gocardless-node.types';
+} from '#app-gocardless/gocardless-node.types';
 import type {
   CreateRequisitionParams,
   DetailedAccount,
@@ -35,7 +37,8 @@ import type {
   GetTransactionsResponse,
   NormalizedAccountDetails,
   TransactionWithBookedStatus,
-} from '../gocardless.types';
+} from '#app-gocardless/gocardless.types';
+import { SecretName, secretsService } from '#services/secrets-service';
 
 import type { AccountDetailsResponse, TokenResponse } from './gocardless-api';
 import { GoCardlessApi, GoCardlessApiError } from './gocardless-api';

@@ -25,7 +25,7 @@
     }
   },
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && tsgo --emitDeclarationOnly",
     "test": "vitest --run",
     "typecheck": "tsgo -b && tsc-strict"
   },
@@ -41,7 +41,6 @@
     "rollup-plugin-visualizer": "^6.0.11",
     "typescript-strict-plugin": "^2.4.4",
     "vite": "^8.0.5",
-    "vite-plugin-dts": "^4.5.4",
     "vite-plugin-peggy-loader": "^2.0.1",
     "vitest": "^4.1.0"
   },

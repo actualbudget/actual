@@ -1,7 +1,7 @@
 /**
  *  Credit for this code goes to Nebukadneza at https://github.com/Nebukadneza
  */
-import { amountToInteger } from '../utils';
+import { amountToInteger } from '#app-gocardless/utils';
 
 import Fallback from './integration-bank';
 /** @type {import('./bank.interface').IBank} */

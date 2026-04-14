@@ -1,18 +1,20 @@
-// @ts-strict-ignore
-import { isValid as isDateValid, parse as parseDate } from 'date-fns';
-
 import {
   dayFromDate,
   getDayMonthFormat,
   getDayMonthRegex,
   getShortYearFormat,
   getShortYearRegex,
-} from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
-import type { Query } from 'loot-core/shared/query';
-import { amountToInteger, currencyToAmount } from 'loot-core/shared/util';
-import type { AccountEntity } from 'loot-core/types/models';
-import type { SyncedPrefs } from 'loot-core/types/prefs';
+} from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
+import type { Query } from '@actual-app/core/shared/query';
+import {
+  amountToInteger,
+  currencyToAmount,
+} from '@actual-app/core/shared/util';
+import type { AccountEntity } from '@actual-app/core/types/models';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
+// @ts-strict-ignore
+import { isValid as isDateValid, parse as parseDate } from 'date-fns';
 
 export function accountFilter(
   accountId?:

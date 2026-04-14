@@ -3,13 +3,17 @@
   "version": "26.4.0",
   "description": "",
   "license": "ISC",
-  "typesVersions": {
-    "*": {
-      "types/*": [
-        "./src/types/*"
-      ]
-    }
-  },
+  "files": [
+    "src",
+    "@types",
+    "migrations",
+    "typings",
+    "default-db.sqlite",
+    "!src/**/*.test.ts",
+    "!src/**/__tests__/**",
+    "!src/**/__snapshots__/**",
+    "!src/**/__mocks__/**"
+  ],
   "imports": {
     "#platform/server/asyncStorage": {
       "electron": "./src/platform/server/asyncStorage/index.electron.ts",
@@ -41,9 +45,10 @@
       "api": "./src/platform/server/sqlite/index.api.ts",
       "default": "./src/platform/server/sqlite/index.ts"
     },
-    "#platform/server/log": "./src/platform/server/log/index.ts",
-    "#platform/server/indexeddb": "./src/platform/server/indexeddb/index.ts",
-    "#platform/exceptions": "./src/platform/exceptions/index.ts",
+    "#platform/client/connection": {
+      "electron-renderer": "./src/platform/client/connection/index.electron.ts",
+      "default": "./src/platform/client/connection/index.ts"
+    },
     "#server/encryption/encryption-internals": {
       "electron": "./src/server/encryption/encryption-internals.electron.ts",
       "api": "./src/server/encryption/encryption-internals.api.ts",
@@ -54,12 +59,27 @@
       "api": "./src/shared/platform.api.ts",
       "default": "./src/shared/platform.ts"
     },
-    "#*": [
-      "./src/*.ts",
-      "./src/*.tsx",
-      "./src/*/index.ts",
-      "./src/*/index.tsx"
-    ]
+    "#mocks": "./src/mocks/index.ts",
+    "#platform/client/undo": "./src/platform/client/undo/index.ts",
+    "#platform/exceptions": "./src/platform/exceptions/index.ts",
+    "#platform/server/indexeddb": "./src/platform/server/indexeddb/index.ts",
+    "#platform/server/log": "./src/platform/server/log/index.ts",
+    "#server/aql": "./src/server/aql/index.ts",
+    "#server/db": "./src/server/db/index.ts",
+    "#server/encryption": "./src/server/encryption/index.ts",
+    "#server/importers": "./src/server/importers/index.ts",
+    "#server/rules": "./src/server/rules/index.ts",
+    "#server/sync": "./src/server/sync/index.ts",
+    "#server/transactions": "./src/server/transactions/index.ts",
+    "#types/models": "./src/types/models/index.ts",
+    "#platform/client/*": "./src/platform/client/*.ts",
+    "#platform/server/*": "./src/platform/server/*.ts",
+    "#platform/*": "./src/platform/*.ts",
+    "#server/*": "./src/server/*.ts",
+    "#shared/*": "./src/shared/*.ts",
+    "#types/*": "./src/types/*.ts",
+    "#mocks/*": "./src/mocks/*.ts",
+    "#*": "./src/*.ts"
   },
   "exports": {
     "./client/accounts/*": "./src/client/accounts/*.ts",
@@ -85,8 +105,8 @@
     "./client/undo": "./src/client/undo.ts",
     "./mocks": "./src/mocks/index.ts",
     "./platform/client/connection": {
-      "electron": "./src/platform/client/connection/index.ts",
-      "default": "./src/platform/client/connection/index.browser.ts"
+      "electron-renderer": "./src/platform/client/connection/index.electron.ts",
+      "default": "./src/platform/client/connection/index.ts"
     },
     "./platform/client/undo": "./src/platform/client/undo/index.ts",
     "./platform/exceptions": "./src/platform/exceptions/index.ts",
@@ -138,13 +158,14 @@
     "test": "npm-run-all -cp 'test:*'",
     "test:node": "ENV=node vitest --run",
     "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
-    "typecheck": "tsgo -b && tsc-strict"
+    "typecheck": "tsgo -b && tsc-strict",
+    "build": "tsgo -b",
+    "prepack": "yarn build && ts-node scripts/add-types-conditions.mts",
+    "postpack": "ts-node scripts/restore-package-json.mts"
   },
   "dependencies": {
     "@jlongster/sql.js": "^1.6.7",
-    "@reduxjs/toolkit": "^2.11.2",
     "@rschedule/core": "^1.5.0",
-    "@rschedule/json-tools": "^1.5.0",
     "@rschedule/standard-date-adapter": "^1.5.0",
     "absurd-sql": "0.0.54",
     "adm-zip": "^0.5.16",
@@ -152,14 +173,18 @@
     "csv-parse": "^6.1.0",
     "csv-stringify": "^6.6.0",
     "date-fns": "^4.1.0",
+    "google-protobuf": "^3.21.4",
     "handlebars": "^4.7.9",
+    "hyperformula": "^3.2.0",
+    "lodash": "^4.18.1",
     "lru-cache": "^11.2.6",
     "memoize-one": "^6.0.0",
     "mitt": "^3.0.1",
     "promise-retry": "^2.0.1",
     "typescript-strict-plugin": "^2.4.4",
     "ua-parser-js": "^2.0.9",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
     "@actual-app/crdt": "workspace:*",

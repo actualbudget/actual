@@ -1,11 +1,11 @@
 // @ts-strict-ignore
 
 import * as connection from '#platform/server/connection';
-import type { Diff } from '../../shared/util';
-import type { PayeeEntity, TransactionEntity } from '../../types/models';
-import * as db from '../db';
-import { incrFetch, whereIn } from '../db/util';
-import { batchMessages } from '../sync';
+import * as db from '#server/db';
+import { incrFetch, whereIn } from '#server/db/util';
+import { batchMessages } from '#server/sync';
+import type { Diff } from '#shared/util';
+import type { PayeeEntity, TransactionEntity } from '#types/models';
 
 import * as rules from './transaction-rules';
 import * as transfer from './transfer';

@@ -5,9 +5,9 @@ import * as connection from '#platform/server/connection';
 import * as fs from '#platform/server/fs';
 import { logger, setVerboseMode } from '#platform/server/log';
 import * as sqlite from '#platform/server/sqlite';
-import { q } from '../shared/query';
-import { amountToInteger, integerToAmount } from '../shared/util';
-import type { Handlers } from '../types/handlers';
+import { q } from '#shared/query';
+import { amountToInteger, integerToAmount } from '#shared/util';
+import type { Handlers } from '#types/handlers';
 
 import { app as accountsApp } from './accounts/app';
 import { app as adminApp } from './admin/app';
@@ -182,7 +182,8 @@ async function setupDocumentsDir() {
 
 export async function initApp(isDev, socketName) {
   await sqlite.init();
-  await Promise.all([asyncStorage.init(), fs.init()]);
+  asyncStorage.init();
+  await fs.init();
   await setupDocumentsDir();
 
   const keysStr = await asyncStorage.getItem('encrypt-keys');
@@ -270,7 +271,8 @@ export async function init(config: InitConfig) {
   }
 
   await sqlite.init();
-  await Promise.all([asyncStorage.init({ persist: false }), fs.init()]);
+  asyncStorage.init({ persist: false });
+  await fs.init();
   fs._setDocumentDir(dataDir || process.cwd());
 
   if (serverURL) {

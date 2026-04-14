@@ -14,9 +14,9 @@ import {
   YAxis,
 } from 'recharts';
 
-import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
-import { Container } from '@desktop-client/components/reports/Container';
-import { usePrivacyMode } from '@desktop-client/hooks/usePrivacyMode';
+import { useRechartsAnimation } from '#components/reports/chart-theme';
+import { Container } from '#components/reports/Container';
+import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 type PayloadItem = {
   payload: {

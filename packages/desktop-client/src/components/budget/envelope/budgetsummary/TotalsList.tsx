@@ -8,11 +8,11 @@ import { styles } from '@actual-app/components/styles';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import { EnvelopeCellValue } from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
-import { CellValueText } from '@desktop-client/components/spreadsheet/CellValue';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import type { FormatType } from '@desktop-client/hooks/useFormat';
-import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
+import { EnvelopeCellValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
+import { CellValueText } from '#components/spreadsheet/CellValue';
+import { useFormat } from '#hooks/useFormat';
+import type { FormatType } from '#hooks/useFormat';
+import { envelopeBudget } from '#spreadsheet/bindings';
 
 /**
  * Creates a formatter that displays values with explicit +/- signs.

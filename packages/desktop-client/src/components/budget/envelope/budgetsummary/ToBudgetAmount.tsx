@@ -9,16 +9,16 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { TotalsList } from './TotalsList';
-
 import {
   useEnvelopeSheetName,
   useEnvelopeSheetValue,
-} from '@desktop-client/components/budget/envelope/EnvelopeBudgetComponents';
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
+} from '#components/budget/envelope/EnvelopeBudgetComponents';
+import { FinancialText } from '#components/FinancialText';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { useFormat } from '#hooks/useFormat';
+import { envelopeBudget } from '#spreadsheet/bindings';
+
+import { TotalsList } from './TotalsList';
 
 type ToBudgetAmountProps = {
   prevMonthName: string;

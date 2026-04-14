@@ -60,7 +60,7 @@ function resolveType(
     currentDate.getFullYear() === 2000 + versionYear &&
     currentDate.getMonth() + 1 === versionMonth;
 
-  if (inPatchMonth && currentDate.getDate() <= 25) {
+  if (inPatchMonth && currentDate.getDate() < 25) {
     return 'hotfix';
   }
 

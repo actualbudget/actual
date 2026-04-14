@@ -28,7 +28,7 @@ jobs:
         with:
           download-translations: 'false'
       - name: Build API
-        run: cd packages/api && yarn build
+        run: yarn build:api
       - name: Create package tgz
         run: cd packages/api && yarn pack && mv package.tgz actual-api.tgz
       - name: Prepare bundle stats artifact

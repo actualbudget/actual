@@ -1,4 +1,4 @@
-import CommerzbankCobadeff from '../commerzbank_cobadeff';
+import CommerzbankCobadeff from '#app-gocardless/banks/commerzbank_cobadeff';
 
 describe('CommerzbankCobadeff', () => {
   describe('#normalizeTransaction', () => {

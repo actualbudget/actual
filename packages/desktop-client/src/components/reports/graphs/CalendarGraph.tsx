@@ -7,6 +7,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import {
   addDays,
   format as formatDate,
@@ -16,12 +17,10 @@ import {
   startOfWeek,
 } from 'date-fns';
 
-import type { SyncedPrefs } from 'loot-core/types/prefs';
-
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
+import { FinancialText } from '#components/FinancialText';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { useFormat } from '#hooks/useFormat';
+import { useResizeObserver } from '#hooks/useResizeObserver';
 
 type CalendarGraphProps = {
   data: {

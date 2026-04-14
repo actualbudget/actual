@@ -2,10 +2,10 @@
 import AdmZip from 'adm-zip';
 import { v4 as uuidv4 } from 'uuid';
 
-import { logger } from '../../platform/server/log';
-import * as monthUtils from '../../shared/months';
-import { amountToInteger, groupBy, sortByKey } from '../../shared/util';
-import { send } from '../main-app';
+import { logger } from '#platform/server/log';
+import { send } from '#server/main-app';
+import * as monthUtils from '#shared/months';
+import { amountToInteger, groupBy, sortByKey } from '#shared/util';
 
 import type * as YNAB4 from './ynab4-types';
 

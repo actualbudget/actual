@@ -9,7 +9,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { useNavigate } from '#hooks/useNavigate';
 
 type TextLinkProps = {
   style?: CSSProperties;

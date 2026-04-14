@@ -6,30 +6,25 @@ import { Label } from '@actual-app/components/label';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as asyncStorage from '@actual-app/core/platform/server/asyncStorage';
 
-import { send } from 'loot-core/platform/client/connection';
-import * as asyncStorage from 'loot-core/platform/server/asyncStorage';
-
-import { closeBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
-import { Error as ErrorAlert } from '@desktop-client/components/alerts';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { FormField } from '@desktop-client/components/forms';
+import { closeBudget } from '#budgetfiles/budgetfilesSlice';
+import { Error as ErrorAlert } from '#components/alerts';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { FormField } from '#components/forms';
 import {
   ConfirmOldPasswordForm,
   ConfirmPasswordForm,
-} from '@desktop-client/components/manager/subscribe/ConfirmPasswordForm';
+} from '#components/manager/subscribe/ConfirmPasswordForm';
 import {
   useAvailableLoginMethods,
   useMultiuserEnabled,
   useRefreshLoginMethods,
-} from '@desktop-client/components/ServerContext';
-import { popModal } from '@desktop-client/modals/modalsSlice';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+} from '#components/ServerContext';
+import { popModal } from '#modals/modalsSlice';
+import type { Modal as ModalType } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 type PasswordEnableModalProps = Extract<
   ModalType,
