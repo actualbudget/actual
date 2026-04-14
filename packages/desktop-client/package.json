@@ -157,7 +157,7 @@
     "i18next-resources-to-backend": "^1.2.1",
     "jsdom": "^27.4.0",
     "lodash": "^4.18.1",
-    "lru-cache": "^11.2.6",
+    "lru-cache": "^11.2.7",
     "mdast-util-newline-to-break": "^2.0.0",
     "memoize-one": "^6.0.0",
     "pikaday": "1.8.2",

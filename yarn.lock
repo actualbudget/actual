@@ -132,7 +132,7 @@ __metadata:
     jest-diff: "npm:^30.2.0"
     jsverify: "npm:^0.8.4"
     lodash: "npm:^4.18.1"
-    lru-cache: "npm:^11.2.6"
+    lru-cache: "npm:^11.2.7"
     memoize-one: "npm:^6.0.0"
     mitt: "npm:^3.0.1"
     mockdate: "npm:^3.0.5"
@@ -280,7 +280,7 @@ __metadata:
     i18next-resources-to-backend: "npm:^1.2.1"
     jsdom: "npm:^27.4.0"
     lodash: "npm:^4.18.1"
-    lru-cache: "npm:^11.2.6"
+    lru-cache: "npm:^11.2.7"
     mdast-util-newline-to-break: "npm:^2.0.0"
     memoize-one: "npm:^6.0.0"
     pikaday: "npm:1.8.2"
@@ -20626,10 +20626,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lru-cache@npm:^11.2.6":
-  version: 11.2.7
-  resolution: "lru-cache@npm:11.2.7"
-  checksum: 10/fbff4b8dee8189dde9b52cdfb3ea89b4c9cec094c1538cd30d1f47299477ff312efdb35f7994477ec72328f8e754e232b26a143feda1bd1f79ff22da6664d2c5
+"lru-cache@npm:^11.2.7":
+  version: 11.3.5
+  resolution: "lru-cache@npm:11.3.5"
+  checksum: 10/3701b77e87765a3aea453402a7850bdbf7e02445210f35bd5ba1561f601f605f488bf9932be4a3851a6664073924f671a1ec99c4a1a98c457e0d126872a3e04f
   languageName: node
   linkType: hard
 
