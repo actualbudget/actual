@@ -292,7 +292,7 @@ __metadata:
     react-dnd: "npm:^16.0.1"
     react-dnd-html5-backend: "npm:^16.0.1"
     react-dom: "npm:19.2.4"
-    react-error-boundary: "npm:^6.0.3"
+    react-error-boundary: "npm:^6.1.1"
     react-grid-layout: "npm:^2.2.3"
     react-hotkeys-hook: "npm:^5.2.4"
     react-i18next: "npm:^16.6.6"
@@ -24917,12 +24917,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-error-boundary@npm:^6.0.3":
-  version: 6.0.3
-  resolution: "react-error-boundary@npm:6.0.3"
+"react-error-boundary@npm:^6.1.1":
+  version: 6.1.1
+  resolution: "react-error-boundary@npm:6.1.1"
   peerDependencies:
     react: ^18.0.0 || ^19.0.0
-  checksum: 10/3370b08df88620084d18815c3d5c8e0400ddfcbbdfcafe2426b2d78e79252dd9a86aafee7c8939e944af2337290e2376dee298058cab05c92676921fa9cbdac3
+  checksum: 10/6a2b2d75466c9917b1657048cecff8a617ce5a2de8208677eb98802f6d324ba8a8d3acdce2e23e3deae3b7d35876675bc982e97a9f929a19ce2e926588097d71
   languageName: node
   linkType: hard
 
