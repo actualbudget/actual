@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { FallbackProps } from 'react-error-boundary';
 import { Trans } from 'react-i18next';
 
@@ -8,7 +8,14 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-export function FeatureErrorFallback({ resetErrorBoundary }: FallbackProps) {
+export function FeatureErrorFallback({
+  error,
+  resetErrorBoundary,
+}: FallbackProps) {
+  useEffect(() => {
+    console.error(error);
+  }, [error]);
+
   return (
     <View
       style={{
@@ -21,6 +28,21 @@ export function FeatureErrorFallback({ resetErrorBoundary }: FallbackProps) {
       <Text style={{ ...styles.mediumText, color: theme.errorText }}>
         <Trans>Something went wrong loading this section.</Trans>
       </Text>
+      {error?.message && (
+        <Text
+          style={{
+            ...styles.smallText,
+            fontFamily: 'monospace',
+            color: theme.errorText,
+            marginTop: 10,
+            maxWidth: 600,
+            textAlign: 'center',
+            userSelect: 'text',
+          }}
+        >
+          {error.message}
+        </Text>
+      )}
       <Button onPress={resetErrorBoundary} style={{ marginTop: 15 }}>
         <Trans>Try again</Trans>
       </Button>
