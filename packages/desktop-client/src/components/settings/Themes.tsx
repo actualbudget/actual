@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -37,6 +37,7 @@ const INSTALL_CUSTOM_DARK = '__install_custom_dark__';
 type InstallerState = {
   slot: 'light' | 'dark';
   catalogMode?: 'light' | 'dark';
+  switchThemeOnSuccess?: Theme;
 } | null;
 
 export function ThemeSettings() {
@@ -45,6 +46,8 @@ export function ThemeSettings() {
   const [theme, switchTheme] = useTheme();
   const [darkTheme, switchDarkTheme] = usePreferredDarkTheme();
   const [showInstaller, setShowInstaller] = useState<InstallerState>(null);
+  const showInstallerRef = useRef<InstallerState>(null);
+  showInstallerRef.current = showInstaller;
 
   const customThemesEnabled = useFeatureFlag('customThemes');
 
@@ -131,12 +134,10 @@ export function ThemeSettings() {
   const handleThemeChange = useCallback(
     (value: string) => {
       if (value === INSTALL_NEW_VALUE) {
-        // Pre-switch out of auto so the just-installed theme is immediately
-        // visible regardless of the OS color-scheme preference.
-        if (theme === 'auto') {
-          switchTheme('light');
-        }
-        setShowInstaller({ slot: 'light' });
+        setShowInstaller({
+          slot: 'light',
+          switchThemeOnSuccess: theme === 'auto' ? 'light' : undefined,
+        });
         return;
       }
 
@@ -180,14 +181,20 @@ export function ThemeSettings() {
 
   const handleInstall = useCallback(
     (newTheme: InstalledTheme) => {
-      if (!showInstaller) return;
-      if (showInstaller.slot === 'dark') {
+      // Read via ref so a late-resolving install (dialog already closed) is
+      // dropped instead of writing to a stale slot.
+      const current = showInstallerRef.current;
+      if (!current) return;
+      if (current.slot === 'dark') {
         setInstalledDarkThemeJson(serializeInstalledTheme(newTheme));
       } else {
         setInstalledLightThemeJson(serializeInstalledTheme(newTheme));
       }
+      if (current.switchThemeOnSuccess) {
+        switchTheme(current.switchThemeOnSuccess);
+      }
     },
-    [showInstaller, setInstalledLightThemeJson, setInstalledDarkThemeJson],
+    [setInstalledLightThemeJson, setInstalledDarkThemeJson, switchTheme],
   );
 
   // Handle installer close

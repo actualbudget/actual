@@ -433,6 +433,9 @@ describe('ThemeInstaller', () => {
       expect(mockSetCustomCssOverride).toHaveBeenCalledWith(
         ':root { --color-accent: #ff0000; }',
       );
+      // Textarea must also reflect the normalized value so the editor stays
+      // in sync with what was actually persisted.
+      expect(textarea).toHaveValue(':root { --color-accent: #ff0000; }');
     });
 
     it('clears customCssOverride when Apply is pressed with an empty textarea', async () => {
