@@ -170,7 +170,7 @@
     "absurd-sql": "0.0.54",
     "adm-zip": "^0.5.17",
     "better-sqlite3": "^12.8.0",
-    "csv-parse": "^6.1.0",
+    "csv-parse": "^6.2.1",
     "csv-stringify": "^6.6.0",
     "date-fns": "^4.1.0",
     "google-protobuf": "^3.21.4",
