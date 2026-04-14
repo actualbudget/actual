@@ -150,8 +150,8 @@
     "./lib-dist/electron/bundle.desktop.js": "./lib-dist/electron/bundle.desktop.js"
   },
   "scripts": {
-    "build:node": "cross-env NODE_ENV=production vite build --config ./vite.desktop.config.ts",
-    "watch:node": "cross-env NODE_ENV=development vite build --config ./vite.desktop.config.ts --watch",
+    "build:node": "cross-env NODE_ENV=production vite build --config ./vite.desktop.config.mts",
+    "watch:node": "cross-env NODE_ENV=development vite build --config ./vite.desktop.config.mts --watch",
     "build:browser": "cross-env NODE_ENV=production ./bin/build-browser",
     "watch:browser": "cross-env NODE_ENV=development ./bin/build-browser",
     "generate:i18n": "i18next",
@@ -209,7 +209,7 @@
     "npm-run-all": "^4.1.5",
     "path-browserify": "^1.0.1",
     "peggy": "5.1.0",
-    "rollup-plugin-visualizer": "^6.0.11",
+    "rollup-plugin-visualizer": "^7.0.1",
     "stream-browserify": "^3.0.0",
     "timers-browserify": "^2.0.12",
     "ts-node": "^10.9.2",

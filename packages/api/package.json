@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@typescript/native-preview": "^7.0.0-dev.20260404.1",
-    "rollup-plugin-visualizer": "^6.0.11",
+    "rollup-plugin-visualizer": "^7.0.1",
     "typescript-strict-plugin": "^2.4.4",
     "vite": "^8.0.5",
     "vite-plugin-peggy-loader": "^2.0.1",
