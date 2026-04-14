@@ -121,7 +121,7 @@ __metadata:
     cross-env: "npm:^10.1.0"
     crypto-browserify: "npm:^3.12.1"
     csv-parse: "npm:^6.2.1"
-    csv-stringify: "npm:^6.6.0"
+    csv-stringify: "npm:^6.7.0"
     date-fns: "npm:^4.1.0"
     fake-indexeddb: "npm:^6.2.5"
     fast-check: "npm:4.5.3"
@@ -14668,10 +14668,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"csv-stringify@npm:^6.6.0":
-  version: 6.6.0
-  resolution: "csv-stringify@npm:6.6.0"
-  checksum: 10/8ff6340c9352e85974961ee8719de1dc725e7d2cb7085a02c641bbe71a2c3eec6868e2bb296201d239d855df280952da5336cfd01a46db0c66e54597d753e7d6
+"csv-stringify@npm:^6.7.0":
+  version: 6.7.0
+  resolution: "csv-stringify@npm:6.7.0"
+  checksum: 10/aa635f1c941b4682ac17479c640f7cf48825e5e442e28f093696a345006dbfe481f7962530ca314147bc88ff85d2cffc0690682934991e35f8c31a055aaa4566
   languageName: node
   linkType: hard
 
