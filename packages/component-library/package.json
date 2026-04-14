@@ -53,7 +53,7 @@
   "devDependencies": {
     "@chromatic-com/storybook": "^5.1.1",
     "@storybook/addon-a11y": "^10.3.4",
-    "@storybook/addon-docs": "^10.2.16",
+    "@storybook/addon-docs": "^10.3.4",
     "@storybook/react-vite": "^10.2.16",
     "@svgr/babel-plugin-add-jsx-attribute": "^8.0.0",
     "@svgr/cli": "^8.1.0",

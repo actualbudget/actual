@@ -76,7 +76,7 @@ __metadata:
     "@chromatic-com/storybook": "npm:^5.1.1"
     "@emotion/css": "npm:^11.13.5"
     "@storybook/addon-a11y": "npm:^10.3.4"
-    "@storybook/addon-docs": "npm:^10.2.16"
+    "@storybook/addon-docs": "npm:^10.3.4"
     "@storybook/react-vite": "npm:^10.2.16"
     "@svgr/babel-plugin-add-jsx-attribute": "npm:^8.0.0"
     "@svgr/cli": "npm:^8.1.0"
@@ -9032,20 +9032,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/addon-docs@npm:^10.2.16":
-  version: 10.2.19
-  resolution: "@storybook/addon-docs@npm:10.2.19"
+"@storybook/addon-docs@npm:^10.3.4":
+  version: 10.3.5
+  resolution: "@storybook/addon-docs@npm:10.3.5"
   dependencies:
     "@mdx-js/react": "npm:^3.0.0"
-    "@storybook/csf-plugin": "npm:10.2.19"
+    "@storybook/csf-plugin": "npm:10.3.5"
     "@storybook/icons": "npm:^2.0.1"
-    "@storybook/react-dom-shim": "npm:10.2.19"
+    "@storybook/react-dom-shim": "npm:10.3.5"
     react: "npm:^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
     react-dom: "npm:^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0"
     ts-dedent: "npm:^2.0.0"
   peerDependencies:
-    storybook: ^10.2.19
-  checksum: 10/784f1c2107a680412b72f2c94d40877b48d582599c18cd76f6bd274641c035006be6136f1a4d5553b853807caf9d76ac200bf6bbc64e49342c776e93c4e3ff85
+    storybook: ^10.3.5
+  checksum: 10/a692b3d0096d7bddd88e8a86860e863d25670786b2a51de0c6d007dc46ee304bd96614e6be2b5df97fabbd0d2d3aae30cb3e087680660ae61ba2e4a4eb7a235c
   languageName: node
   linkType: hard
 
@@ -9086,6 +9086,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@storybook/csf-plugin@npm:10.3.5":
+  version: 10.3.5
+  resolution: "@storybook/csf-plugin@npm:10.3.5"
+  dependencies:
+    unplugin: "npm:^2.3.5"
+  peerDependencies:
+    esbuild: "*"
+    rollup: "*"
+    storybook: ^10.3.5
+    vite: "*"
+    webpack: "*"
+  peerDependenciesMeta:
+    esbuild:
+      optional: true
+    rollup:
+      optional: true
+    vite:
+      optional: true
+    webpack:
+      optional: true
+  checksum: 10/5ce880b0632065838c4cae96a02d05ba6531b0d670a7894f1e84fc5c144a0a474e4e77b967fd0d2efb9a760d901fbc105d38e30f343d2052178c5aaeabfc47f9
+  languageName: node
+  linkType: hard
+
 "@storybook/global@npm:^5.0.0":
   version: 5.0.0
   resolution: "@storybook/global@npm:5.0.0"
@@ -9111,6 +9135,17 @@ __metadata:
     react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
     storybook: ^10.2.19
   checksum: 10/20e59022b776f17444d95bc97c982648a5610a3731a59a0df0ad3c0bc521620ad90349e36377ade3b13327e79b2949ded5413f15e710ce3f1860cdf22fdd2fa4
+  languageName: node
+  linkType: hard
+
+"@storybook/react-dom-shim@npm:10.3.5":
+  version: 10.3.5
+  resolution: "@storybook/react-dom-shim@npm:10.3.5"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    storybook: ^10.3.5
+  checksum: 10/21ad41b60f429040603336f2d4f14286cdd20886dd2011876040c623236ef5bc78dceb5cb07fb7858a69cfae9d724507dce17869c49419e3e3c4b2f710f383e4
   languageName: node
   linkType: hard
 
