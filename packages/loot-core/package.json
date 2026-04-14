@@ -201,7 +201,7 @@
     "cross-env": "^10.1.0",
     "crypto-browserify": "^3.12.1",
     "fake-indexeddb": "^6.2.5",
-    "fast-check": "4.5.3",
+    "fast-check": "^4.6.0",
     "i18next": "^25.10.10",
     "jest-diff": "^30.3.0",
     "jsverify": "^0.8.4",

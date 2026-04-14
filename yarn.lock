@@ -124,7 +124,7 @@ __metadata:
     csv-stringify: "npm:^6.7.0"
     date-fns: "npm:^4.1.0"
     fake-indexeddb: "npm:^6.2.5"
-    fast-check: "npm:4.5.3"
+    fast-check: "npm:^4.6.0"
     google-protobuf: "npm:^3.21.4"
     handlebars: "npm:^4.7.9"
     hyperformula: "npm:^3.2.0"
@@ -16952,12 +16952,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-check@npm:4.5.3":
-  version: 4.5.3
-  resolution: "fast-check@npm:4.5.3"
+"fast-check@npm:^4.6.0":
+  version: 4.6.0
+  resolution: "fast-check@npm:4.6.0"
   dependencies:
-    pure-rand: "npm:^7.0.0"
-  checksum: 10/005117cc3fbaf8f5bbe153f8f989337d36b85953cefae1973ab0c51e9e259a7a0456155e742716f8609ab74c4e18ee9fb9dcd618c52a9014cd4bd3952a296188
+    pure-rand: "npm:^8.0.0"
+  checksum: 10/b53b88ebf6247ea0eaa7f3f6d8923035e0cfd6f78bc8c393754cc1ccbdb591756dfbff02058a136b472e011279594fa72c05a30378177d6055a08ad7ed1b823e
   languageName: node
   linkType: hard
 
@@ -24576,10 +24576,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pure-rand@npm:^7.0.0":
-  version: 7.0.1
-  resolution: "pure-rand@npm:7.0.1"
-  checksum: 10/c61a576fda5032ec9763ecb000da4a8f19263b9e2f9ae9aa2759c8fbd9dc6b192b2ce78391ebd41abb394a5fedb7bcc4b03c9e6141ac8ab20882dd5717698b80
+"pure-rand@npm:^8.0.0":
+  version: 8.4.0
+  resolution: "pure-rand@npm:8.4.0"
+  checksum: 10/baaee81b6647c89e426458fa0a6fcf51a42315db3db6a2c1c48d676813dd7cebf46dc56d352ce352c3bdfacd5a965b9c7783ba2a92f38cf2e64a9a8186469c3e
   languageName: node
   linkType: hard
 
