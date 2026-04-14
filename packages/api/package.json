@@ -42,7 +42,7 @@
     "typescript-strict-plugin": "^2.4.4",
     "vite": "^8.0.5",
     "vite-plugin-peggy-loader": "^2.0.1",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.2"
   },
   "engines": {
     "node": ">=20"

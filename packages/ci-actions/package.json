@@ -13,7 +13,7 @@
     "extensionless": "^2.0.6",
     "gray-matter": "^4.0.3",
     "listify": "^1.0.3",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.2"
   },
   "extensionless": {
     "lookFor": [

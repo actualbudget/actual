@@ -217,7 +217,7 @@
     "vite": "^8.0.5",
     "vite-plugin-node-polyfills": "^0.26.0",
     "vite-plugin-peggy-loader": "^2.0.1",
-    "vitest": "^4.1.0",
+    "vitest": "^4.1.2",
     "yargs": "^18.0.0"
   }
 }
