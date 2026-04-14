@@ -206,7 +206,11 @@ export function FatalError({ error: rawError }: FatalErrorProps) {
   const [showError, setShowError] = useState(false);
 
   const error: Error | AppError =
-    rawError instanceof Error ? rawError : new Error(String(rawError));
+    rawError instanceof Error
+      ? rawError
+      : rawError && typeof rawError === 'object'
+        ? Object.assign(new Error(String(rawError)), rawError)
+        : new Error(String(rawError));
   const showSimpleRender = 'type' in error && error.type === 'app-init-failure';
   const isLazyLoadError = error instanceof LazyLoadFailedError;
 
