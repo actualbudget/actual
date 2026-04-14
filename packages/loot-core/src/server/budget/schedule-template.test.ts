@@ -177,8 +177,8 @@ describe('runSchedule', () => {
       currency,
     );
 
-    // Then
-    expect(result.to_budget).toBe(1000);
+    // Then — fully funded for the next yearly occurrence; minimax monthly add is 0
+    expect(result.to_budget).toBe(0);
     expect(result.errors).toHaveLength(0);
     expect(result.remainder).toBe(0);
   });

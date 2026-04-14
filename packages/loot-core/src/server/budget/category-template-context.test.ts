@@ -860,7 +860,8 @@ describe('CategoryTemplateContext', () => {
 
     it('should calculate monthly amount needed for multiple targets', () => {
       const result = CategoryTemplateContext.runBy(instance);
-      expect(result).toBe(66667);
+      // Cumulative envelope: max of 1000/3 mo and 3000/6 mo to minor units
+      expect(result).toBe(50000);
     });
 
     it('should handle repeating targets', () => {
@@ -890,7 +891,7 @@ describe('CategoryTemplateContext', () => {
       );
 
       const result = CategoryTemplateContext.runBy(instance);
-      expect(result).toBe(83333);
+      expect(result).toBe(50000);
     });
 
     it('should handle existing balance', () => {
@@ -918,7 +919,7 @@ describe('CategoryTemplateContext', () => {
       );
 
       const result = CategoryTemplateContext.runBy(instance);
-      expect(result).toBe(66500); // (1000 + 2000 - 5) / 3
+      expect(result).toBe(49917);
     });
   });
 

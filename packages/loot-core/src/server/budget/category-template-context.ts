@@ -15,13 +15,18 @@ import type {
   PeriodicTemplate,
   RefillTemplate,
   RemainderTemplate,
+  ScheduleTemplate,
   SimpleTemplate,
   SpendTemplate,
   Template,
 } from '#types/models/templates';
 
 import { getSheetBoolean, getSheetValue, isTrackingBudget } from './actions';
-import { runSchedule } from './schedule-template';
+import {
+  allocateCumulativeMilestones,
+  milestonesFromByTemplates,
+} from './milestone-allocation';
+import { loadScheduleMilestones } from './schedule-template';
 import { getActiveSchedules } from './statements';
 
 export class CategoryTemplateContext {
@@ -148,9 +153,7 @@ export class CategoryTemplateContext {
     );
     let available = budgetAvail || 0;
     let toBudget = 0;
-    let byFlag = false;
-    let remainder = 0;
-    let scheduleFlag = false;
+    let milestoneFlag = false;
     // switch on template type and calculate the amount for the line
     for (const template of t) {
       let newBudget = 0;
@@ -183,35 +186,15 @@ export class CategoryTemplateContext {
           );
           break;
         }
-        case 'by': {
-          // all by's get run at once
-          if (!byFlag) {
-            newBudget = CategoryTemplateContext.runBy(this);
-          } else {
-            newBudget = 0;
-          }
-          byFlag = true;
-          break;
-        }
+        case 'by':
         case 'schedule': {
-          if (!scheduleFlag) {
-            const budgeted = this.fromLastMonth + toBudget;
-            const ret = await runSchedule(
+          if (!milestoneFlag) {
+            newBudget = await CategoryTemplateContext.runMilestoneTemplates(
+              this,
               t,
-              this.month,
-              budgeted,
-              remainder,
-              this.fromLastMonth,
               toBudget,
-              [],
-              this.category,
-              this.currency,
             );
-            // Schedules assume that its to budget value is the whole thing so this
-            // needs to remove the previous funds so they aren't double counted
-            newBudget = ret.to_budget - toBudget;
-            remainder = ret.remainder;
-            scheduleFlag = true;
+            milestoneFlag = true;
           }
           break;
         }
@@ -788,75 +771,58 @@ export class CategoryTemplateContext {
     const byTemplates: ByTemplate[] = templateContext.templates.filter(
       t => t.type === 'by',
     );
-    const savedInfo = [];
-    let totalNeeded = 0;
-    let workingShortNumMonths;
-    //find shortest time period
-    for (let i = 0; i < byTemplates.length; i++) {
-      const template = byTemplates[i];
-      let targetMonth = `${template.month}`;
-      const period = template.annual
-        ? (template.repeat || 1) * 12
-        : template.repeat != null
-          ? template.repeat
-          : null;
-      let numMonths = monthUtils.differenceInCalendarMonths(
-        targetMonth,
+    return allocateCumulativeMilestones(
+      milestonesFromByTemplates(
+        byTemplates,
         templateContext.month,
-      );
-      while (numMonths < 0 && period) {
-        targetMonth = monthUtils.addMonths(targetMonth, period);
-        numMonths = monthUtils.differenceInCalendarMonths(
-          targetMonth,
-          templateContext.month,
-        );
-      }
-      savedInfo.push({ numMonths, period });
-      if (
-        workingShortNumMonths === undefined ||
-        numMonths < workingShortNumMonths
-      ) {
-        workingShortNumMonths = numMonths;
-      }
+        templateContext.currency,
+      ),
+      templateContext.month,
+      templateContext.fromLastMonth,
+    );
+  }
+
+  private static async runMilestoneTemplates(
+    templateContext: CategoryTemplateContext,
+    templatesAtPriority: Template[],
+    accumulatedToBudget: number,
+  ): Promise<number> {
+    const byTemplates = templatesAtPriority.filter(
+      t => t.type === 'by',
+    ) as ByTemplate[];
+    const scheduleTemplates = templatesAtPriority.filter(
+      t => t.type === 'schedule',
+    ) as ScheduleTemplate[];
+
+    if (byTemplates.length === 0 && scheduleTemplates.length === 0) {
+      return 0;
     }
 
-    // calculate needed funds per template
-    const shortNumMonths = workingShortNumMonths || 0;
-    for (let i = 0; i < byTemplates.length; i++) {
-      const template = byTemplates[i];
-      const numMonths = savedInfo[i].numMonths;
-      const period = savedInfo[i].period;
-      let amount;
-      // back interpolate what is needed in the short window
-      if (numMonths > shortNumMonths && period) {
-        amount = Math.round(
-          (amountToInteger(
-            template.amount,
-            templateContext.currency.decimalPlaces,
-          ) /
-            period) *
-            (period - numMonths + shortNumMonths),
-        );
-        // fallback to this.  This matches what the prior math accomplished, just more round about
-      } else if (numMonths > shortNumMonths) {
-        amount = Math.round(
-          (amountToInteger(
-            template.amount,
-            templateContext.currency.decimalPlaces,
-          ) /
-            (numMonths + 1)) *
-            (shortNumMonths + 1),
-        );
-      } else {
-        amount = amountToInteger(
-          template.amount,
-          templateContext.currency.decimalPlaces,
-        );
+    const fromBy = milestonesFromByTemplates(
+      byTemplates,
+      templateContext.month,
+      templateContext.currency,
+    );
+    const { milestones: fromSchedules, errors } = await loadScheduleMilestones(
+      scheduleTemplates,
+      templateContext.month,
+      templateContext.category,
+      templateContext.currency,
+    );
+
+    const merged = [...fromBy, ...fromSchedules];
+    if (merged.length === 0) {
+      if (errors.length > 0) {
+        throw new Error(errors.join('\n\n'));
       }
-      totalNeeded += amount;
+      return 0;
     }
-    return Math.round(
-      (totalNeeded - templateContext.fromLastMonth) / (shortNumMonths + 1),
+
+    const balance = templateContext.fromLastMonth + accumulatedToBudget;
+    return allocateCumulativeMilestones(
+      merged,
+      templateContext.month,
+      balance,
     );
   }
 }
