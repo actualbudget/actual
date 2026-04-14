@@ -75,7 +75,7 @@ __metadata:
   dependencies:
     "@chromatic-com/storybook": "npm:^5.1.1"
     "@emotion/css": "npm:^11.13.5"
-    "@storybook/addon-a11y": "npm:^10.2.16"
+    "@storybook/addon-a11y": "npm:^10.3.4"
     "@storybook/addon-docs": "npm:^10.2.16"
     "@storybook/react-vite": "npm:^10.2.16"
     "@svgr/babel-plugin-add-jsx-attribute": "npm:^8.0.0"
@@ -9020,15 +9020,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/addon-a11y@npm:^10.2.16":
-  version: 10.2.19
-  resolution: "@storybook/addon-a11y@npm:10.2.19"
+"@storybook/addon-a11y@npm:^10.3.4":
+  version: 10.3.5
+  resolution: "@storybook/addon-a11y@npm:10.3.5"
   dependencies:
     "@storybook/global": "npm:^5.0.0"
     axe-core: "npm:^4.2.0"
   peerDependencies:
-    storybook: ^10.2.19
-  checksum: 10/8dbd0b174a054b9f87cfacacf9c2cd50d0d292267d348052b4e07969eb936e34b37605bafb9c6d734352bbd28f5a78a630c12dc88b4f1cc8a053f4590abe0af0
+    storybook: ^10.3.5
+  checksum: 10/870b9008269ffec7f07c63e344dd3d4acd42222ef35ccbff902f8d56ee04a04de970a19d7f2a9355edc4fbed0c56ec0ea77ea86610a414175b54d315348db0ab
   languageName: node
   linkType: hard
 
