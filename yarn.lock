@@ -249,7 +249,7 @@ __metadata:
     "@rolldown/plugin-babel": "npm:~0.1.8"
     "@rollup/plugin-inject": "npm:^5.0.5"
     "@swc/core": "npm:^1.15.24"
-    "@swc/helpers": "npm:^0.5.19"
+    "@swc/helpers": "npm:^0.5.21"
     "@tanstack/react-query": "npm:^5.90.21"
     "@testing-library/dom": "npm:10.4.1"
     "@testing-library/jest-dom": "npm:^6.9.1"
@@ -9550,12 +9550,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@swc/helpers@npm:^0.5.19":
-  version: 0.5.19
-  resolution: "@swc/helpers@npm:0.5.19"
+"@swc/helpers@npm:^0.5.21":
+  version: 0.5.21
+  resolution: "@swc/helpers@npm:0.5.21"
   dependencies:
     tslib: "npm:^2.8.0"
-  checksum: 10/3fd365fb3265f97e1241bcbcea9bfa5e15e03c630424e1b54597e00d30be2c271cb0c74f45e1739c6bc5ae892647302fab412de5138941aa96e66aebf4586700
+  checksum: 10/3b637f836282a0a0f2c21e27a2354f09659a4ffa6fad7fbb464a94ff235704b224a578ac04df320cc633471681c61a7316ca02079c90d39e9713ad3422aea0dc
   languageName: node
   linkType: hard
 
