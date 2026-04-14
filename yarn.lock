@@ -264,7 +264,7 @@ __metadata:
     "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"
     "@uiw/react-codemirror": "npm:^4.25.9"
     "@use-gesture/react": "npm:^10.3.1"
-    "@vitejs/plugin-basic-ssl": "npm:^2.2.0"
+    "@vitejs/plugin-basic-ssl": "npm:^2.3.0"
     "@vitejs/plugin-react": "npm:^6.0.0"
     absurd-sql: "npm:0.0.54"
     auto-text-size: "npm:^0.2.3"
@@ -11257,12 +11257,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitejs/plugin-basic-ssl@npm:^2.2.0":
-  version: 2.2.0
-  resolution: "@vitejs/plugin-basic-ssl@npm:2.2.0"
+"@vitejs/plugin-basic-ssl@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "@vitejs/plugin-basic-ssl@npm:2.3.0"
   peerDependencies:
     vite: ^6.0.0 || ^7.0.0 || ^8.0.0
-  checksum: 10/03708fb1fe5615a94b391bcd5dbb76104020180a83388b303e0148f319fe90161d59b12eb640a47089ca662ac4b643d201c3e4f012984c33b6f08c384214ca40
+  checksum: 10/7bc8e11350b87eafe6d58d2c9ae26c64e4456de88b8ed821eeea13ff640fe897e4096688b78f27bb56cca9fd43f5105e07462796a2bc9eb1c3a695dbf8a6f577
   languageName: node
   linkType: hard
 
