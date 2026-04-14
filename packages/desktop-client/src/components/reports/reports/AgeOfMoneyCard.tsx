@@ -98,7 +98,13 @@ export function AgeOfMoneyCard({
       }),
     [start, end, meta?.conditions, meta?.conditionsOp, meta?.granularity],
   );
-  const data = useReport('age_of_money', params);
+  const { data } = useReport('age_of_money', params, [
+    start,
+    end,
+    meta?.conditions,
+    meta?.conditionsOp,
+    meta?.granularity,
+  ]);
 
   return (
     <ReportCard

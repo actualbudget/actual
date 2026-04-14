@@ -106,6 +106,14 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
     setIsConcise(numDays > 31 * 3);
   }, [start, end]);
 
+  const [numberFormatPref] = useSyncedPref('numberFormat');
+  const [hideFractionPref] = useSyncedPref('hideFraction');
+  const [defaultCurrencyCodePref] = useSyncedPref('defaultCurrencyCode');
+  const [symbolPositionPref] = useSyncedPref('currencySymbolPosition');
+  const [spaceEnabledPref] = useSyncedPref(
+    'currencySpaceBetweenAmountAndSymbol',
+  );
+
   const params = useMemo(
     () =>
       cashFlowByDate(
@@ -117,9 +125,34 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
         locale,
         format,
       ),
-    [start, end, isConcise, conditions, conditionsOp, locale, format],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      start,
+      end,
+      isConcise,
+      conditions,
+      conditionsOp,
+      locale,
+      numberFormatPref,
+      hideFractionPref,
+      defaultCurrencyCodePref,
+      symbolPositionPref,
+      spaceEnabledPref,
+    ],
   );
-  const data = useReport('cash_flow', params);
+  const { data } = useReport('cash_flow', params, [
+    start,
+    end,
+    isConcise,
+    conditions,
+    conditionsOp,
+    locale,
+    numberFormatPref,
+    hideFractionPref,
+    defaultCurrencyCodePref,
+    symbolPositionPref,
+    spaceEnabledPref,
+  ]);
 
   useEffect(() => {
     async function run() {

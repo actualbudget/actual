@@ -112,7 +112,13 @@ export function CalendarCard({
     }
   });
 
-  const data = useReport('calendar', params);
+  const { data } = useReport('calendar', params, [
+    start,
+    end,
+    meta?.conditions,
+    meta?.conditionsOp,
+    firstDayOfWeekIdx,
+  ]);
 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 

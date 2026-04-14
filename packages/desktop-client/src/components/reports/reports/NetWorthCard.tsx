@@ -53,6 +53,13 @@ export function NetWorthCard({
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
   const format = useFormat();
+  const [numberFormatPref] = useSyncedPref('numberFormat');
+  const [hideFractionPref] = useSyncedPref('hideFraction');
+  const [defaultCurrencyCodePref] = useSyncedPref('defaultCurrencyCode');
+  const [symbolPositionPref] = useSyncedPref('currencySymbolPosition');
+  const [spaceEnabledPref] = useSyncedPref(
+    'currencySpaceBetweenAmountAndSymbol',
+  );
 
   const [latestTransaction, setLatestTransaction] = useState<string>('');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
@@ -92,6 +99,7 @@ export function NetWorthCard({
         firstDayOfWeekIdx,
         format,
       ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       start,
       end,
@@ -101,10 +109,28 @@ export function NetWorthCard({
       locale,
       meta?.interval,
       firstDayOfWeekIdx,
-      format,
+      numberFormatPref,
+      hideFractionPref,
+      defaultCurrencyCodePref,
+      symbolPositionPref,
+      spaceEnabledPref,
     ],
   );
-  const data = useReport('net_worth', params);
+  const { data } = useReport('net_worth', params, [
+    start,
+    end,
+    accounts,
+    meta?.conditions,
+    meta?.conditionsOp,
+    locale,
+    meta?.interval,
+    firstDayOfWeekIdx,
+    numberFormatPref,
+    hideFractionPref,
+    defaultCurrencyCodePref,
+    symbolPositionPref,
+    spaceEnabledPref,
+  ]);
 
   return (
     <ReportCard

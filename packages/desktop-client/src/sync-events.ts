@@ -90,6 +90,23 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
           queryKey: accountQueries.lists(),
         });
       }
+
+      if (
+        tables.includes('transactions') ||
+        tables.includes('categories') ||
+        tables.includes('category_groups') ||
+        tables.includes('category_mapping') ||
+        tables.includes('accounts') ||
+        tables.includes('payees') ||
+        tables.includes('payee_mapping') ||
+        tables.includes('tags') ||
+        tables.includes('tag_mapping') ||
+        tables.includes('tag_groups')
+      ) {
+        void queryClient.invalidateQueries({
+          queryKey: ['report'],
+        });
+      }
     } else if (event.type === 'error') {
       let notif: Notification | null = null;
       const learnMore = `[${t('Learn more')}](https://actualbudget.org/docs/getting-started/sync/#debugging-sync-issues)`;

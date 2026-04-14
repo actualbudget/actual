@@ -16,6 +16,9 @@ function invalidateQueries(queryClient: QueryClient, queryKey?: QueryKey) {
   void queryClient.invalidateQueries({
     queryKey: queryKey ?? tagQueries.lists(),
   });
+  void queryClient.invalidateQueries({
+    queryKey: ['report'],
+  });
 }
 
 function dispatchErrorNotification(

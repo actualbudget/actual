@@ -137,7 +137,12 @@ export function CashFlowCard({
     () => simpleCashFlow(start, end, meta?.conditions, meta?.conditionsOp),
     [start, end, meta?.conditions, meta?.conditionsOp],
   );
-  const data = useReport('cash_flow_simple', params);
+  const { data } = useReport('cash_flow_simple', params, [
+    start,
+    end,
+    meta?.conditions,
+    meta?.conditionsOp,
+  ]);
 
   const [isCardHovered, setIsCardHovered] = useState(false);
   const onCardHover = useCallback(() => setIsCardHovered(true), []);

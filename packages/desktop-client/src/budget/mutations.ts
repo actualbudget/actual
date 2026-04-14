@@ -24,6 +24,12 @@ function invalidateQueries(queryClient: QueryClient, queryKey?: QueryKey) {
   });
 }
 
+function invalidateReportQueries(queryClient: QueryClient) {
+  void queryClient.invalidateQueries({
+    queryKey: ['report'],
+  });
+}
+
 function dispatchErrorNotification(
   dispatch: AppDispatch,
   message: string,
@@ -86,7 +92,10 @@ export function useCreateCategoryMutation() {
       });
       return id;
     },
-    onSuccess: () => invalidateQueries(queryClient),
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateReportQueries(queryClient);
+    },
     onError: error => {
       console.error('Error creating category:', error);
       dispatchErrorNotification(
@@ -111,7 +120,10 @@ export function useUpdateCategoryMutation() {
     mutationFn: async ({ category }: UpdateCategoryPayload) => {
       await send('category-update', category);
     },
-    onSuccess: () => invalidateQueries(queryClient),
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateReportQueries(queryClient);
+    },
     onError: error => {
       console.error('Error updating category:', error);
       dispatchErrorNotification(
@@ -213,7 +225,10 @@ export function useDeleteCategoryMutation() {
         await deleteCategory({ id });
       }
     },
-    onSuccess: () => invalidateQueries(queryClient),
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateReportQueries(queryClient);
+    },
     onError: error => {
       console.error('Error deleting category:', error);
       dispatchErrorNotification(
@@ -240,7 +255,10 @@ export function useMoveCategoryMutation() {
     mutationFn: async ({ id, groupId, targetId }: MoveCategoryPayload) => {
       await send('category-move', { id, groupId, targetId });
     },
-    onSuccess: () => invalidateQueries(queryClient),
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateReportQueries(queryClient);
+    },
     onError: error => {
       console.error('Error moving category:', error);
       dispatchErrorNotification(
@@ -306,7 +324,10 @@ export function useCreateCategoryGroupMutation() {
       const id = await send('category-group-create', { name });
       return id;
     },
-    onSuccess: () => invalidateQueries(queryClient),
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateReportQueries(queryClient);
+    },
     onError: error => {
       console.error('Error creating category group:', error);
       dispatchErrorNotification(
@@ -353,7 +374,10 @@ export function useUpdateCategoryGroupMutation() {
       const { categories: _, ...groupNoCategories } = group;
       await send('category-group-update', groupNoCategories);
     },
-    onSuccess: () => invalidateQueries(queryClient),
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateReportQueries(queryClient);
+    },
     onError: error => {
       console.error('Error updating category group:', error);
       dispatchErrorNotification(
@@ -435,7 +459,10 @@ export function useDeleteCategoryGroupMutation() {
         await send('category-group-delete', { id });
       }
     },
-    onSuccess: () => invalidateQueries(queryClient),
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateReportQueries(queryClient);
+    },
     onError: error => {
       console.error('Error deleting category group:', error);
       dispatchErrorNotification(
@@ -461,7 +488,10 @@ export function useMoveCategoryGroupMutation() {
     mutationFn: async ({ id, targetId }: MoveCategoryGroupPayload) => {
       await send('category-group-move', { id, targetId });
     },
-    onSuccess: () => invalidateQueries(queryClient),
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateReportQueries(queryClient);
+    },
     onError: error => {
       console.error('Error moving category group:', error);
       dispatchErrorNotification(
@@ -651,6 +681,7 @@ type ApplyBudgetActionPayload =
     };
 
 export function useBudgetActions() {
+  const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
@@ -789,6 +820,8 @@ export function useBudgetActions() {
           }),
         );
       }
+      invalidateQueries(queryClient);
+      invalidateReportQueries(queryClient);
     },
     onError: error => {
       console.error('Error applying budget action:', error);

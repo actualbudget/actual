@@ -17,6 +17,9 @@ function invalidateQueries(queryClient: QueryClient, queryKey?: QueryKey) {
   void queryClient.invalidateQueries({
     queryKey: queryKey ?? payeeQueries.lists(),
   });
+  void queryClient.invalidateQueries({
+    queryKey: ['report'],
+  });
 }
 
 function dispatchErrorNotification(

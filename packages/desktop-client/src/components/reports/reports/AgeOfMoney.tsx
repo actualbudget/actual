@@ -111,7 +111,13 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
       }),
     [start, end, conditions, conditionsOp, granularity],
   );
-  const data = useReport('age_of_money', reportParams);
+  const { data } = useReport('age_of_money', reportParams, [
+    start,
+    end,
+    conditions,
+    conditionsOp,
+    granularity,
+  ]);
 
   useEffect(() => {
     async function run() {

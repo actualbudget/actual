@@ -57,6 +57,7 @@ export function CrossoverCard({
   // Calculate date range from meta or use default range
   const [start, setStart] = useState<string>('');
   const [end, setEnd] = useState<string>('');
+  const datesInitialized = !!(start && end);
 
   const format = useFormat();
 
@@ -180,7 +181,18 @@ export function CrossoverCard({
     ],
   );
 
-  const data = useReport<CrossoverData>('crossover', params);
+  const { data } = useReport<CrossoverData>('crossover', params, [
+    start,
+    end,
+    expenseCategoryIds,
+    incomeAccountIds,
+    swr,
+    estimatedReturn,
+    expectedContribution,
+    projectionType,
+    expenseAdjustmentFactor,
+    datesInitialized,
+  ]);
 
   // Get years to retire from spreadsheet data
   const yearsToRetire = data?.yearsToRetire ?? null;
@@ -259,7 +271,7 @@ export function CrossoverCard({
           )}
         </View>
 
-        {data ? (
+        {data && datesInitialized ? (
           <CrossoverGraph
             graphData={data.graphData}
             compact

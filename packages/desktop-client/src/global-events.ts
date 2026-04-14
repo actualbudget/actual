@@ -82,6 +82,22 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
       );
     }
 
+    if (
+      tables.includes('transactions') ||
+      tables.includes('categories') ||
+      tables.includes('category_groups') ||
+      tables.includes('category_mapping') ||
+      tables.includes('accounts') ||
+      tables.includes('payees') ||
+      tables.includes('payee_mapping')
+    ) {
+      promises.push(
+        queryClient.invalidateQueries({
+          queryKey: ['report'],
+        }),
+      );
+    }
+
     const tagged = undo.getTaggedState(undoTag);
 
     if (tagged) {

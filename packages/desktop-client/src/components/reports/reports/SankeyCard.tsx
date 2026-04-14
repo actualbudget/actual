@@ -68,8 +68,15 @@ export function SankeyCard({
       ),
     [start, end, groupedCategories, meta?.conditions, meta?.conditionsOp, mode],
   );
-  const data = useReport('sankey', params);
 
+  const { data } = useReport('sankey', params, [
+    start,
+    end,
+    groupedCategories,
+    meta?.conditions,
+    meta?.conditionsOp,
+    mode,
+  ]);
   const HEADER_HEIGHT = 82;
   const PX_PER_NODE = 50;
   const topN = Math.max(

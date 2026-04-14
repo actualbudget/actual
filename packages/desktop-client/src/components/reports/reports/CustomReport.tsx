@@ -592,8 +592,44 @@ function CustomReportInner({
     graphType,
     firstDayOfWeekIdx,
   ]);
-  const graphData = useReport('default', getGraphData);
-  const groupedData = useReport('grouped', getGroupData);
+  const { data: graphData } = useReport('default', getGraphData, [
+    startDate,
+    endDate,
+    interval,
+    budgetType,
+    balanceTypeOp,
+    categories,
+    payees,
+    accounts,
+    conditions,
+    conditionsOp,
+    showEmpty,
+    showOffBudget,
+    showHiddenCategories,
+    showUncategorized,
+    trimIntervals,
+    sortByOp,
+    graphType,
+    firstDayOfWeekIdx,
+    groupBy,
+  ]);
+  const { data: groupedData } = useReport('grouped', getGroupData, [
+    startDate,
+    endDate,
+    interval,
+    budgetType,
+    balanceTypeOp,
+    categories,
+    conditions,
+    conditionsOp,
+    showEmpty,
+    showOffBudget,
+    showHiddenCategories,
+    showUncategorized,
+    trimIntervals,
+    sortByOp,
+    firstDayOfWeekIdx,
+  ]);
 
   const data: DataEntity | null = graphData
     ? { ...graphData, groupedData }

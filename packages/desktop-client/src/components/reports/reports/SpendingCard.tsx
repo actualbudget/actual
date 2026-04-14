@@ -67,7 +67,13 @@ export function SpendingCard({
     });
   }, [meta?.conditions, meta?.conditionsOp, compare, compareTo, budgetType]);
 
-  const data = useReport('default', getGraphData);
+  const { data } = useReport('default', getGraphData, [
+    meta?.conditions,
+    meta?.conditionsOp,
+    compare,
+    compareTo,
+    budgetType,
+  ]);
   const todayDay =
     compare !== monthUtils.currentMonth()
       ? 27

@@ -103,7 +103,6 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   const [end, setEnd] = useState(monthUtils.currentDay());
   const [mode, setMode] = useState<TimeFrame['mode']>('full');
   const [query, setQuery] = useState<Query | undefined>(undefined);
-  const [dirty, setDirty] = useState(false);
   const [latestTransaction, setLatestTransaction] = useState('');
 
   const {
@@ -174,10 +173,6 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   }, [widget?.meta?.conditions, onApplyFilter, parameters]);
 
   const params = useMemo(() => {
-    if (dirty === true) {
-      setDirty(false);
-    }
-
     return calendarSpreadsheet(
       start,
       end,
@@ -185,7 +180,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
       conditionsOp,
       firstDayOfWeekIdx,
     );
-  }, [start, end, conditions, conditionsOp, firstDayOfWeekIdx, dirty]);
+  }, [start, end, conditions, conditionsOp, firstDayOfWeekIdx]);
 
   const [sortField, setSortField] = useState('');
   const [ascDesc, setAscDesc] = useState<'asc' | 'desc'>('desc');
@@ -238,7 +233,13 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     scrollbarContainer,
   ) as Ref<HTMLDivElement>;
 
-  const data = useReport('calendar', params);
+  const { data, refetch } = useReport('calendar', params, [
+    start,
+    end,
+    conditions,
+    conditionsOp,
+    firstDayOfWeekIdx,
+  ]);
 
   const [allMonths, setAllMonths] = useState<
     Array<{
@@ -682,7 +683,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     sortField={sortField}
                     ascDesc={ascDesc}
                     onChange={() => {}}
-                    onRefetch={() => setDirty(true)}
+                    onRefetch={refetch}
                     onCloseAddTransaction={() => {}}
                     onCreatePayee={async () => null}
                     onApplyFilter={() => {}}

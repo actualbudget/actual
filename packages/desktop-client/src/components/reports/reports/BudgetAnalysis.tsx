@@ -187,7 +187,12 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
     [conditions, conditionsOp, startDate, endDate],
   );
 
-  const data = useReport('default', getGraphData);
+  const { data } = useReport('default', getGraphData, [
+    conditions,
+    conditionsOp,
+    startDate,
+    endDate,
+  ]);
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 

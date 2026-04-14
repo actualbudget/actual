@@ -93,7 +93,14 @@ export function SummaryCard({
     [start, end, meta?.conditions, meta?.conditionsOp, content, locale],
   );
 
-  const data = useReport('summary', params);
+  const { data } = useReport('summary', params, [
+    start,
+    end,
+    meta?.conditions,
+    meta?.conditionsOp,
+    content,
+    locale,
+  ]);
 
   return (
     <ReportCard

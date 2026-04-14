@@ -30,6 +30,12 @@ import {
 } from './accountsSlice';
 import { accountQueries } from './queries';
 
+export const invalidateReportQueries = (queryClient: QueryClient) => {
+  void queryClient.invalidateQueries({
+    queryKey: ['report'],
+  });
+};
+
 const invalidateQueries = (queryClient: QueryClient, queryKey?: QueryKey) => {
   void queryClient.invalidateQueries({
     queryKey: queryKey ?? accountQueries.lists(),
@@ -73,7 +79,10 @@ export function useCreateAccountMutation() {
       });
       return id;
     },
-    onSuccess: () => invalidateQueries(queryClient),
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateReportQueries(queryClient);
+    },
     onError: error => {
       console.error('Error creating account:', error);
       dispatchErrorNotification(
@@ -111,7 +120,10 @@ export function useCloseAccountMutation() {
         forced,
       });
     },
-    onSuccess: () => invalidateQueries(queryClient),
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateReportQueries(queryClient);
+    },
     onError: error => {
       console.error('Error closing account:', error);
       dispatchErrorNotification(
@@ -136,7 +148,10 @@ export function useReopenAccountMutation() {
     mutationFn: async ({ id }: ReopenAccountPayload) => {
       await send('account-reopen', { id });
     },
-    onSuccess: () => invalidateQueries(queryClient),
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateReportQueries(queryClient);
+    },
     onError: error => {
       console.error('Error re-opening account:', error);
       dispatchErrorNotification(
@@ -162,7 +177,10 @@ export function useUpdateAccountMutation() {
       await send('account-update', account);
       return account;
     },
-    onSuccess: () => invalidateQueries(queryClient),
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateReportQueries(queryClient);
+    },
     onError: error => {
       console.error('Error updating account:', error);
       dispatchErrorNotification(
@@ -191,6 +209,7 @@ export function useMoveAccountMutation() {
     onSuccess: () => {
       invalidateQueries(queryClient);
       invalidateQueries(queryClient, payeeQueries.lists());
+      invalidateReportQueries(queryClient);
     },
     onError: error => {
       console.error('Error moving account:', error);
@@ -243,7 +262,10 @@ export function useImportPreviewTransactionsMutation() {
 
       return updatedPreview;
     },
-    onSuccess: () => invalidateQueries(queryClient),
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateReportQueries(queryClient);
+    },
     onError: error => {
       console.error('Error importing preview transactions to account:', error);
       dispatchErrorNotification(
@@ -322,7 +344,10 @@ export function useImportTransactionsMutation() {
 
       return added.length > 0 || updated.length > 0;
     },
-    onSuccess: () => invalidateQueries(queryClient),
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateReportQueries(queryClient);
+    },
     onError: error => {
       console.error('Error importing transactions to account:', error);
       dispatchErrorNotification(
@@ -403,6 +428,7 @@ export function useLinkAccountMutation() {
     onSuccess: () => {
       invalidateQueries(queryClient);
       invalidateQueries(queryClient, payeeQueries.lists());
+      invalidateReportQueries(queryClient);
     },
     onError: error => {
       console.error('Error linking account:', error);
@@ -443,6 +469,7 @@ export function useLinkAccountSimpleFinMutation() {
     onSuccess: () => {
       invalidateQueries(queryClient);
       invalidateQueries(queryClient, payeeQueries.lists());
+      invalidateReportQueries(queryClient);
     },
     onError: error => {
       console.error('Error linking account to SimpleFIN:', error);
@@ -485,6 +512,7 @@ export function useLinkAccountPluggyAiMutation() {
     onSuccess: () => {
       invalidateQueries(queryClient);
       invalidateQueries(queryClient, payeeQueries.lists());
+      invalidateReportQueries(queryClient);
     },
     onError: error => {
       console.error('Error linking account to PluggyAI:', error);
@@ -632,7 +660,10 @@ export function useSyncAccountsMutation() {
       dispatch(setAccountsSyncing({ ids: [] }));
       return isSyncSuccess;
     },
-    onSuccess: () => invalidateQueries(queryClient),
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateReportQueries(queryClient);
+    },
     onError: error => {
       console.error('Error syncing accounts:', error);
       dispatchErrorNotification(
@@ -744,7 +775,10 @@ export function useSyncAndDownloadMutation() {
       }
       return { hasUpdated: hasDownloaded };
     },
-    onSuccess: () => invalidateQueries(queryClient),
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateReportQueries(queryClient);
+    },
     onError: error => {
       console.error('Error syncing accounts:', error);
       dispatchErrorNotification(

@@ -124,6 +124,9 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 
+  const [numberFormatPref] = useSyncedPref('numberFormat');
+  const [hideFractionPref] = useSyncedPref('hideFraction');
+
   const reportParams = useMemo(
     () =>
       netWorthSpreadsheet(
@@ -137,6 +140,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         firstDayOfWeekIdx,
         format,
       ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       start,
       end,
@@ -146,10 +150,22 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
       locale,
       interval,
       firstDayOfWeekIdx,
-      format,
+      numberFormatPref,
+      hideFractionPref,
     ],
   );
-  const data = useReport('net_worth', reportParams);
+  const { data } = useReport('net_worth', reportParams, [
+    start,
+    end,
+    accounts,
+    conditions,
+    conditionsOp,
+    locale,
+    interval,
+    firstDayOfWeekIdx,
+    numberFormatPref,
+    hideFractionPref,
+  ]);
   useEffect(() => {
     async function run() {
       const earliestTransaction = await send('get-earliest-transaction');

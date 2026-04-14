@@ -68,7 +68,12 @@ export function BudgetAnalysisCard({
     });
   }, [meta?.conditions, meta?.conditionsOp, startDate, endDate]);
 
-  const data = useReport('default', getGraphData);
+  const { data } = useReport('default', getGraphData, [
+    meta?.conditions,
+    meta?.conditionsOp,
+    startDate,
+    endDate,
+  ]);
 
   const latestInterval =
     data && data.intervalData.length > 0

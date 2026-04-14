@@ -134,7 +134,14 @@ function SummaryInner({ widget }: SummaryInnerProps) {
     ],
   );
 
-  const data = useReport('summary', params);
+  const { data } = useReport('summary', params, [
+    start,
+    end,
+    dividendFilters.conditions,
+    dividendFilters.conditionsOp,
+    content,
+    locale,
+  ]);
 
   useEffect(() => {
     setContent(prev => ({

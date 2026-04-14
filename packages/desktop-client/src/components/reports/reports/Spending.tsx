@@ -149,7 +149,13 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
     [conditions, conditionsOp, compare, compareTo, budgetType],
   );
 
-  const data = useReport('default', getGraphData);
+  const { data } = useReport('default', getGraphData, [
+    conditions,
+    conditionsOp,
+    compare,
+    compareTo,
+    budgetType,
+  ]);
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
 

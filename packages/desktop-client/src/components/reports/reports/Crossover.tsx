@@ -365,7 +365,19 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     ],
   );
 
-  const data = useReport<CrossoverData>('crossover', params);
+  const { data } = useReport<CrossoverData>('crossover', params, [
+    start,
+    end,
+    swr,
+    useCustomGrowth,
+    estimatedReturn,
+    expectedContribution,
+    projectionType,
+    expenseAdjustmentFactor,
+    expenseCategoryIds,
+    selectedIncomeAccountIds,
+    selectionsInitialized,
+  ]);
 
   // Get the default estimated return from the spreadsheet data
   const historicalReturn = data?.historicalReturn ?? null;
@@ -414,7 +426,8 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     !start ||
     !end ||
     isCategoriesLoading ||
-    accounts.length === 0
+    accounts.length === 0 ||
+    !selectionsInitialized
   ) {
     return <LoadingIndicator />;
   }
