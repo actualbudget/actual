@@ -307,7 +307,7 @@ __metadata:
     recharts: "npm:^3.7.0"
     rehype-external-links: "npm:^3.0.0"
     remark-gfm: "npm:^4.0.1"
-    rolldown: "npm:^1.0.0-rc.12"
+    rolldown: "npm:^1.0.0-rc.13"
     rollup-plugin-visualizer: "npm:^6.0.11"
     sass: "npm:^1.97.3"
     typescript-strict-plugin: "npm:^2.4.4"
@@ -26173,7 +26173,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rolldown@npm:1.0.0-rc.15, rolldown@npm:^1.0.0-rc.12":
+"rolldown@npm:1.0.0-rc.15, rolldown@npm:^1.0.0-rc.13":
   version: 1.0.0-rc.15
   resolution: "rolldown@npm:1.0.0-rc.15"
   dependencies:

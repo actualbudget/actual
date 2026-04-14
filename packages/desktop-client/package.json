@@ -184,7 +184,7 @@
     "recharts": "^3.7.0",
     "rehype-external-links": "^3.0.0",
     "remark-gfm": "^4.0.1",
-    "rolldown": "^1.0.0-rc.12",
+    "rolldown": "^1.0.0-rc.13",
     "rollup-plugin-visualizer": "^6.0.11",
     "sass": "^1.97.3",
     "typescript-strict-plugin": "^2.4.4",
