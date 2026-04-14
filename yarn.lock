@@ -11455,7 +11455,7 @@ __metadata:
     husky: "npm:^9.1.7"
     lage: "npm:^2.15.5"
     lint-staged: "npm:^16.4.0"
-    minimatch: "npm:^10.2.4"
+    minimatch: "npm:^10.2.5"
     npm-run-all: "npm:^4.1.5"
     oxfmt: "npm:^0.44.0"
     oxlint: "npm:^1.59.0"
@@ -21551,7 +21551,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:^10.0.3, minimatch@npm:^10.1.1, minimatch@npm:^10.2.1":
+"minimatch@npm:^10.0.3, minimatch@npm:^10.1.1, minimatch@npm:^10.2.1, minimatch@npm:^10.2.5":
   version: 10.2.5
   resolution: "minimatch@npm:10.2.5"
   dependencies:
@@ -21560,7 +21560,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:^10.2.2, minimatch@npm:^10.2.4":
+"minimatch@npm:^10.2.2":
   version: 10.2.4
   resolution: "minimatch@npm:10.2.4"
   dependencies:
