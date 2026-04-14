@@ -168,7 +168,7 @@
     "@rschedule/core": "^1.5.0",
     "@rschedule/standard-date-adapter": "^1.5.0",
     "absurd-sql": "0.0.54",
-    "adm-zip": "^0.5.16",
+    "adm-zip": "^0.5.17",
     "better-sqlite3": "^12.8.0",
     "csv-parse": "^6.1.0",
     "csv-stringify": "^6.6.0",
@@ -189,7 +189,7 @@
   "devDependencies": {
     "@actual-app/crdt": "workspace:*",
     "@swc/core": "^1.15.24",
-    "@types/adm-zip": "^0.5.7",
+    "@types/adm-zip": "^0.5.8",
     "@types/better-sqlite3": "^7.6.13",
     "@types/emscripten": "^1.41.5",
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
