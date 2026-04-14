@@ -118,5 +118,5 @@
     "node": ">=22",
     "yarn": "^4.9.1"
   },
-  "packageManager": "yarn@4.10.3"
+  "packageManager": "yarn@4.13.0"
 }
