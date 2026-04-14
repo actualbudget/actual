@@ -112,7 +112,7 @@
     "@babel/core": "^7.29.0",
     "@codemirror/autocomplete": "^6.20.1",
     "@codemirror/lang-javascript": "^6.2.5",
-    "@codemirror/language": "^6.12.2",
+    "@codemirror/language": "^6.12.3",
     "@codemirror/state": "^6.5.4",
     "@codemirror/view": "^6.38.7",
     "@emotion/css": "^11.13.5",

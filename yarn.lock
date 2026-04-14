@@ -235,7 +235,7 @@ __metadata:
     "@babel/core": "npm:^7.29.0"
     "@codemirror/autocomplete": "npm:^6.20.1"
     "@codemirror/lang-javascript": "npm:^6.2.5"
-    "@codemirror/language": "npm:^6.12.2"
+    "@codemirror/language": "npm:^6.12.3"
     "@codemirror/state": "npm:^6.5.4"
     "@codemirror/view": "npm:^6.38.7"
     "@emotion/css": "npm:^11.13.5"
@@ -2241,9 +2241,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/language@npm:^6.12.2":
-  version: 6.12.2
-  resolution: "@codemirror/language@npm:6.12.2"
+"@codemirror/language@npm:^6.12.3":
+  version: 6.12.3
+  resolution: "@codemirror/language@npm:6.12.3"
   dependencies:
     "@codemirror/state": "npm:^6.0.0"
     "@codemirror/view": "npm:^6.23.0"
@@ -2251,7 +2251,7 @@ __metadata:
     "@lezer/highlight": "npm:^1.0.0"
     "@lezer/lr": "npm:^1.0.0"
     style-mod: "npm:^4.0.0"
-  checksum: 10/9afc704e17cad4782b68ad02869503a27103c4c3ac6927d2ffa3c6decfad627ade40b0ed78d1d6e941b2e879a7a79bda0d573e58604f3923f9e1f3311108ec36
+  checksum: 10/d33f2736138e549e1db268b6539c13bd082c3f96e24384a492db939942ca11ac1da546ef7553e6ea4ee13dcaa6593f64f42b5e5a413d00eba3e996ffe50fe8e7
   languageName: node
   linkType: hard
 
