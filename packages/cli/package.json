@@ -31,7 +31,7 @@
     "cosmiconfig": "^9.0.0"
   },
   "devDependencies": {
-    "@types/node": "^22.19.15",
+    "@types/node": "^22.19.17",
     "@typescript/native-preview": "^7.0.0-dev.20260309.1",
     "rollup-plugin-visualizer": "^6.0.11",
     "vite": "^8.0.5",

@@ -55,7 +55,7 @@ __metadata:
   resolution: "@actual-app/cli@workspace:packages/cli"
   dependencies:
     "@actual-app/api": "workspace:*"
-    "@types/node": "npm:^22.19.15"
+    "@types/node": "npm:^22.19.17"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
     cli-table3: "npm:^0.6.5"
     commander: "npm:^13.0.0"
@@ -110,7 +110,7 @@ __metadata:
     "@types/better-sqlite3": "npm:^7.6.13"
     "@types/emscripten": "npm:^1.41.5"
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
-    "@types/node": "npm:^22.19.15"
+    "@types/node": "npm:^22.19.17"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
     absurd-sql: "npm:0.0.54"
     adm-zip: "npm:^0.5.16"
@@ -198,7 +198,7 @@ __metadata:
     "@types/cors": "npm:^2.8.19"
     "@types/express": "npm:^5.0.6"
     "@types/express-actuator": "npm:^1.8.3"
-    "@types/node": "npm:^22.19.15"
+    "@types/node": "npm:^22.19.17"
     "@types/supertest": "npm:^7.2.0"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
     bcrypt: "npm:^6.0.0"
@@ -10273,12 +10273,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^22.19.15":
-  version: 22.19.15
-  resolution: "@types/node@npm:22.19.15"
+"@types/node@npm:^22.19.17":
+  version: 22.19.17
+  resolution: "@types/node@npm:22.19.17"
   dependencies:
     undici-types: "npm:~6.21.0"
-  checksum: 10/c75bc9a8dbc49a61f3e6f49304cf7b1c05e818a1071b46e9effd1a51af7a1b5c10fd2e04f314b74ce78f4ca7e3ddc1d6e61c94c2e3354c8be9f9f7ee5e79e23c
+  checksum: 10/8adcf9c2e9e7c524196efdd5ee60ebeda980b4ec9b5b8650e2341a2cabe46d368f3a4e4c0050b3bf26eb9cf383453ea2193ec5604079cdf9493a11a742f62018
   languageName: node
   linkType: hard
 
@@ -11443,7 +11443,7 @@ __metadata:
   resolution: "actual@workspace:."
   dependencies:
     "@octokit/rest": "npm:^22.0.1"
-    "@types/node": "npm:^22.19.15"
+    "@types/node": "npm:^22.19.17"
     "@types/prompts": "npm:^2.4.9"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
     "@yarnpkg/types": "npm:^4.0.1"
@@ -23148,7 +23148,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "plugins-service@workspace:packages/plugins-service"
   dependencies:
-    "@types/node": "npm:^22.19.15"
+    "@types/node": "npm:^22.19.17"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260309.1"
     cross-env: "npm:^10.1.0"
     typescript-strict-plugin: "npm:^2.4.4"

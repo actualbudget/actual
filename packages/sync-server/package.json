@@ -105,7 +105,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/express-actuator": "^1.8.3",
-    "@types/node": "^22.19.15",
+    "@types/node": "^22.19.17",
     "@types/supertest": "^7.2.0",
     "@typescript/native-preview": "^7.0.0-dev.20260309.1",
     "http-proxy-middleware": "^3.0.5",
