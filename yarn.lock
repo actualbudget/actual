@@ -58,7 +58,7 @@ __metadata:
     "@types/node": "npm:^22.19.17"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"
     cli-table3: "npm:^0.6.5"
-    commander: "npm:^13.0.0"
+    commander: "npm:^13.1.0"
     cosmiconfig: "npm:^9.0.0"
     rollup-plugin-visualizer: "npm:^6.0.11"
     vite: "npm:^8.0.5"
@@ -13726,7 +13726,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:^13.0.0":
+"commander@npm:^13.1.0":
   version: 13.1.0
   resolution: "commander@npm:13.1.0"
   checksum: 10/d3b4b79e6be8471ddadacbb8cd441fe82154d7da7393b50e76165a9e29ccdb74fa911a186437b9a211d0fc071db6051915c94fb8ef16d77511d898e9dbabc6af
