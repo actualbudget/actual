@@ -293,7 +293,7 @@ __metadata:
     react-dnd-html5-backend: "npm:^16.0.1"
     react-dom: "npm:19.2.4"
     react-error-boundary: "npm:^6.0.3"
-    react-grid-layout: "npm:^2.2.2"
+    react-grid-layout: "npm:^2.2.3"
     react-hotkeys-hook: "npm:^5.2.4"
     react-i18next: "npm:^16.5.6"
     react-markdown: "npm:^10.1.0"
@@ -24943,7 +24943,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-draggable@npm:^4.0.3, react-draggable@npm:^4.4.6":
+"react-draggable@npm:^4.4.6, react-draggable@npm:^4.5.0":
   version: 4.5.0
   resolution: "react-draggable@npm:4.5.0"
   dependencies:
@@ -24972,20 +24972,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-grid-layout@npm:^2.2.2":
-  version: 2.2.2
-  resolution: "react-grid-layout@npm:2.2.2"
+"react-grid-layout@npm:^2.2.3":
+  version: 2.2.3
+  resolution: "react-grid-layout@npm:2.2.3"
   dependencies:
     clsx: "npm:^2.1.1"
     fast-equals: "npm:^4.0.3"
     prop-types: "npm:^15.8.1"
     react-draggable: "npm:^4.4.6"
-    react-resizable: "npm:^3.0.5"
+    react-resizable: "npm:^3.1.3"
     resize-observer-polyfill: "npm:^1.5.1"
   peerDependencies:
     react: ">= 16.3.0"
     react-dom: ">= 16.3.0"
-  checksum: 10/bfaa2d821b6bbe08732c1f841af23ddec982d4aafa33412fc6fd1c1eee6d60103a92a9f73bd995cc283c673650861271ee0fb36de06f3458469759395c012531
+  checksum: 10/90b66db889fc5889e038dd1b6198eb94cb093a9669335b0f617cee3999b6d0f37bf4683aba418235c8469967fba113461d6858e8c1f6165cf58af483236cb8d4
   languageName: node
   linkType: hard
 
@@ -25200,15 +25200,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-resizable@npm:^3.0.5":
-  version: 3.0.5
-  resolution: "react-resizable@npm:3.0.5"
+"react-resizable@npm:^3.1.3":
+  version: 3.1.3
+  resolution: "react-resizable@npm:3.1.3"
   dependencies:
     prop-types: "npm:15.x"
-    react-draggable: "npm:^4.0.3"
+    react-draggable: "npm:^4.5.0"
   peerDependencies:
     react: ">= 16.3"
-  checksum: 10/745fad6ac827857b3a80d1d648b8d6723aa72fc17d5410a01707073f3d37b4adf6e0354dfe3cc33dee34d6e546a3fbd5603ef73e385dfc5218a425a39bf96275
+    react-dom: ">= 16.3"
+  checksum: 10/bc7126fabbd2f0ba422fa0da77fcfcebf2b4f28141d3faf02067632d258e345bc5f63891f9d5eca0e9ea31dc461b74ec69073a18f905b25bdd392ca6283577f9
   languageName: node
   linkType: hard
 
