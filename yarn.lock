@@ -129,7 +129,7 @@ __metadata:
     handlebars: "npm:^4.7.9"
     hyperformula: "npm:^3.2.0"
     i18next: "npm:^25.10.10"
-    jest-diff: "npm:^30.2.0"
+    jest-diff: "npm:^30.3.0"
     jsverify: "npm:^0.8.4"
     lodash: "npm:^4.18.1"
     lru-cache: "npm:^11.2.7"
@@ -5015,10 +5015,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jest/diff-sequences@npm:30.0.1":
-  version: 30.0.1
-  resolution: "@jest/diff-sequences@npm:30.0.1"
-  checksum: 10/0ddb7c7ba92d6057a2ee51a9cfc2155b77cca707fe959167466ea02dcb0687018cc3c22b9622f25f3a417d6ad370e2d4dcfedf9f1410dc9c02954a7484423cc7
+"@jest/diff-sequences@npm:30.3.0":
+  version: 30.3.0
+  resolution: "@jest/diff-sequences@npm:30.3.0"
+  checksum: 10/0d5b6e1599c5e0bb702f0804e7f93bbe4911b5929c40fd6a77c06105711eae24d709c8964e8d623cc70c34b7dc7262d76a115a6eb05f1576336cdb6c46593e7c
   languageName: node
   linkType: hard
 
@@ -19714,15 +19714,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-diff@npm:^30.2.0":
-  version: 30.2.0
-  resolution: "jest-diff@npm:30.2.0"
+"jest-diff@npm:^30.3.0":
+  version: 30.3.0
+  resolution: "jest-diff@npm:30.3.0"
   dependencies:
-    "@jest/diff-sequences": "npm:30.0.1"
+    "@jest/diff-sequences": "npm:30.3.0"
     "@jest/get-type": "npm:30.1.0"
     chalk: "npm:^4.1.2"
-    pretty-format: "npm:30.2.0"
-  checksum: 10/1fb9e4fb7dff81814b4f69eaa7db28e184d62306a3a8ea2447d02ca53d2cfa771e83ede513f67ec5239dffacfaac32ff2b49866d211e4c7516f51c1fc06ede42
+    pretty-format: "npm:30.3.0"
+  checksum: 10/9f566259085e6badd525dc48ee6de3792cfae080abd66e170ac230359cf32c4334d92f0f48b577a31ad2a6aed4aefde81f5f4366ab44a96f78bcde975e5cc26e
   languageName: node
   linkType: hard
 
@@ -24394,14 +24394,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pretty-format@npm:30.2.0":
-  version: 30.2.0
-  resolution: "pretty-format@npm:30.2.0"
+"pretty-format@npm:30.3.0":
+  version: 30.3.0
+  resolution: "pretty-format@npm:30.3.0"
   dependencies:
     "@jest/schemas": "npm:30.0.5"
     ansi-styles: "npm:^5.2.0"
     react-is: "npm:^18.3.1"
-  checksum: 10/725890d648e3400575eebc99a334a4cd1498e0d36746313913706bbeea20ada27e17c184a3cd45c50f705c16111afa829f3450233fc0fda5eed293c69757e926
+  checksum: 10/b288db630841f2464554c5cfa7d7faf519ad7b5c05c3818e764c7cb486bcf59f240ea5576c748f8ca6625623c5856a8906642255bbe89d6cfa1a9090b0fbc6b9
   languageName: node
   linkType: hard
 
