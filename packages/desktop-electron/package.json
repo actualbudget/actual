@@ -28,7 +28,7 @@
     "@playwright/test": "1.58.2",
     "@types/copyfiles": "^2",
     "@types/fs-extra": "^11",
-    "@typescript/native-preview": "^7.0.0-dev.20260309.1",
+    "@typescript/native-preview": "^7.0.0-dev.20260404.1",
     "copyfiles": "^2.4.1",
     "cross-env": "^10.1.0",
     "electron": "39.8.5",

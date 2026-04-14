@@ -58,7 +58,7 @@
     "@svgr/babel-plugin-add-jsx-attribute": "^8.0.0",
     "@svgr/cli": "^8.1.0",
     "@types/react": "^19.2.14",
-    "@typescript/native-preview": "^7.0.0-dev.20260309.1",
+    "@typescript/native-preview": "^7.0.0-dev.20260404.1",
     "@vitejs/plugin-react": "^6.0.0",
     "eslint-plugin-storybook": "^10.2.16",
     "react": "19.2.4",

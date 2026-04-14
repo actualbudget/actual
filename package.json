@@ -67,7 +67,7 @@
     "@octokit/rest": "^22.0.1",
     "@types/node": "^22.19.17",
     "@types/prompts": "^2.4.9",
-    "@typescript/native-preview": "^7.0.0-dev.20260309.1",
+    "@typescript/native-preview": "^7.0.0-dev.20260404.1",
     "@yarnpkg/types": "^4.0.1",
     "cross-env": "^10.1.0",
     "eslint": "^9.39.3",

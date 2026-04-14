@@ -37,7 +37,7 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@typescript/native-preview": "^7.0.0-dev.20260309.1",
+    "@typescript/native-preview": "^7.0.0-dev.20260404.1",
     "rollup-plugin-visualizer": "^6.0.11",
     "typescript-strict-plugin": "^2.4.4",
     "vite": "^8.0.5",
