@@ -202,7 +202,7 @@
     "crypto-browserify": "^3.12.1",
     "fake-indexeddb": "^6.2.5",
     "fast-check": "4.5.3",
-    "i18next": "^25.8.14",
+    "i18next": "^25.10.10",
     "jest-diff": "^30.2.0",
     "jsverify": "^0.8.4",
     "mockdate": "^3.0.5",

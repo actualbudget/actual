@@ -152,7 +152,7 @@
     "downshift": "9.3.2",
     "html-to-image": "^1.11.13",
     "hyperformula": "^3.2.0",
-    "i18next": "^25.8.14",
+    "i18next": "^25.10.10",
     "i18next-parser": "^9.4.0",
     "i18next-resources-to-backend": "^1.2.1",
     "jsdom": "^27.4.0",
