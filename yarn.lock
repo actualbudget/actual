@@ -11448,7 +11448,7 @@ __metadata:
     "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"
     "@yarnpkg/types": "npm:^4.0.1"
     cross-env: "npm:^10.1.0"
-    eslint: "npm:^9.39.3"
+    eslint: "npm:^9.39.4"
     eslint-plugin-perfectionist: "npm:^5.8.0"
     eslint-plugin-typescript-paths: "npm:^0.0.33"
     html-to-image: "npm:^1.11.13"
@@ -16186,7 +16186,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^9.39.3":
+"eslint@npm:^9.39.4":
   version: 9.39.4
   resolution: "eslint@npm:9.39.4"
   dependencies:
