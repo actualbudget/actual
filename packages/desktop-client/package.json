@@ -120,7 +120,7 @@
     "@fontsource/redacted-script": "^5.2.8",
     "@juggle/resize-observer": "^3.4.0",
     "@lezer/highlight": "^1.2.3",
-    "@playwright/test": "1.58.2",
+    "@playwright/test": "1.59.1",
     "@react-aria/interactions": "^3.27.1",
     "@reduxjs/toolkit": "^2.11.2",
     "@rolldown/plugin-babel": "~0.1.8",
