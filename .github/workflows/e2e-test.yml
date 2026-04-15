@@ -41,7 +41,7 @@ jobs:
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Run E2E Tests
         run: yarn e2e --shard=${{ matrix.shard }}/5
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: desktop-client-test-results-shard-${{ matrix.shard }}
@@ -71,7 +71,7 @@ jobs:
         run: |
           yarn rebuild-electron
           xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" -- yarn e2e:desktop
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: desktop-app-test-results
@@ -96,7 +96,7 @@ jobs:
           download-translations: 'false'
       - name: Run VRT Tests
         run: yarn vrt --shard=${{ matrix.shard }}/5
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
           name: vrt-blob-report-${{ matrix.shard }}
@@ -124,7 +124,7 @@ jobs:
       - name: Merge reports
         id: merge-reports
         run: yarn workspace @actual-app/web run playwright merge-reports --reporter html ./all-blob-reports
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         id: playwright-report-vrt
         with:
           name: html-report--attempt-${{ github.run_attempt }}
@@ -140,7 +140,7 @@ jobs:
           echo "${{ steps.playwright-report-vrt.outputs.artifact-url }}" > vrt-metadata/artifact-url.txt
       - name: Upload VRT metadata
         if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: vrt-comment-metadata
           path: vrt-metadata/
