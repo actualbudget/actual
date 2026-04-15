@@ -26,6 +26,7 @@ import type {
 import type { ServerHandlers } from '#types/server-handlers';
 
 import { addTransactions } from './accounts/sync';
+import { isReflectBudget } from './budget/actions';
 import {
   accountModel,
   budgetModel,
@@ -393,6 +394,23 @@ handlers['api/budget-month'] = async function ({ month }) {
 
     categoryGroups: groups.map(group => {
       if (group.is_income) {
+        if (isReflectBudget()) {
+          return {
+            ...categoryGroupModel.toExternal(group),
+            budgeted: value(`group-budget-${group.id}`),
+            received: value(`group-sum-amount-${group.id}`),
+            balance: value(`group-leftover-${group.id}`),
+
+            categories: group.categories.map(cat => ({
+              ...categoryModel.toExternal(cat),
+              budgeted: value(`budget-${cat.id}`),
+              received: value(`sum-amount-${cat.id}`),
+              balance: value(`leftover-${cat.id}`),
+              carryover: value(`carryover-${cat.id}`),
+            })),
+          };
+        }
+
         return {
           ...categoryGroupModel.toExternal(group),
           received: value('total-income'),
