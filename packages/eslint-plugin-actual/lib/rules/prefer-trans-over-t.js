@@ -126,7 +126,7 @@ module.exports = {
             },
             fix(fixer) {
               const text = node.arguments[0].value;
-              const sourceCode = context.getSourceCode();
+              const sourceCode = context.sourceCode;
               const fixes = [fixer.replaceText(node, `<Trans>${text}</Trans>`)];
 
               // Add Trans import if needed

@@ -40,7 +40,6 @@ void runClassic(
         errors: [
           {
             messageId: 'useLink',
-            type: 'JSXOpeningElement',
           },
         ],
       },
@@ -50,7 +49,6 @@ void runClassic(
         errors: [
           {
             messageId: 'useLink',
-            type: 'JSXOpeningElement',
           },
         ],
       },
@@ -60,7 +58,6 @@ void runClassic(
         errors: [
           {
             messageId: 'useLink',
-            type: 'JSXOpeningElement',
           },
         ],
       },
@@ -70,7 +67,6 @@ void runClassic(
         errors: [
           {
             messageId: 'useLink',
-            type: 'JSXOpeningElement',
           },
         ],
       },
@@ -80,7 +76,6 @@ void runClassic(
         errors: [
           {
             messageId: 'useLink',
-            type: 'JSXOpeningElement',
           },
         ],
       },

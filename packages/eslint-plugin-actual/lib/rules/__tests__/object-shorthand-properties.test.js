@@ -54,7 +54,6 @@ void runClassic(
           {
             messageId: 'useShorthand',
             data: { key: 'foo' },
-            type: 'Property',
           },
         ],
       },
@@ -65,12 +64,10 @@ void runClassic(
           {
             messageId: 'useShorthand',
             data: { key: 'foo' },
-            type: 'Property',
           },
           {
             messageId: 'useShorthand',
             data: { key: 'bar' },
-            type: 'Property',
           },
         ],
       },
@@ -81,7 +78,6 @@ void runClassic(
           {
             messageId: 'useShorthand',
             data: { key: 'foo' },
-            type: 'Property',
           },
         ],
       },
@@ -92,17 +88,14 @@ void runClassic(
           {
             messageId: 'useShorthand',
             data: { key: 'a' },
-            type: 'Property',
           },
           {
             messageId: 'useShorthand',
             data: { key: 'b' },
-            type: 'Property',
           },
           {
             messageId: 'useShorthand',
             data: { key: 'c' },
-            type: 'Property',
           },
         ],
       },
@@ -113,12 +106,10 @@ void runClassic(
           {
             messageId: 'useShorthand',
             data: { key: 'x' },
-            type: 'Property',
           },
           {
             messageId: 'useShorthand',
             data: { key: 'y' },
-            type: 'Property',
           },
         ],
       },
@@ -129,7 +120,6 @@ void runClassic(
           {
             messageId: 'useShorthand',
             data: { key: 'prop' },
-            type: 'Property',
           },
         ],
       },
@@ -140,7 +130,6 @@ void runClassic(
           {
             messageId: 'useShorthand',
             data: { key: 'bar' },
-            type: 'Property',
           },
         ],
       },
@@ -151,7 +140,6 @@ void runClassic(
           {
             messageId: 'useShorthand',
             data: { key: 'foo' },
-            type: 'Property',
           },
         ],
       },

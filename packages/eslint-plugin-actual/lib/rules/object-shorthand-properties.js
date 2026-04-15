@@ -20,7 +20,7 @@ module.exports = {
   },
 
   create(context) {
-    const sourceCode = context.getSourceCode();
+    const sourceCode = context.sourceCode;
 
     //----------------------------------------------------------------------
     // Helpers

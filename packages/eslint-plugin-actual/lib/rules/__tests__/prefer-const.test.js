@@ -60,7 +60,6 @@ void runClassic(
           {
             messageId: 'useConst',
             data: { name: 'x' },
-            type: 'Identifier',
           },
         ],
       },
@@ -71,12 +70,10 @@ void runClassic(
           {
             messageId: 'useConst',
             data: { name: 'x' },
-            type: 'Identifier',
           },
           {
             messageId: 'useConst',
             data: { name: 'y' },
-            type: 'Identifier',
           },
         ],
       },
@@ -87,7 +84,6 @@ void runClassic(
           {
             messageId: 'useConst',
             data: { name: 'x' },
-            type: 'Identifier',
           },
         ],
       },
@@ -98,12 +94,10 @@ void runClassic(
           {
             messageId: 'useConst',
             data: { name: 'x' },
-            type: 'Identifier',
           },
           {
             messageId: 'useConst',
             data: { name: 'y' },
-            type: 'Identifier',
           },
         ],
       },
@@ -114,7 +108,6 @@ void runClassic(
           {
             messageId: 'useConst',
             data: { name: 'x' },
-            type: 'Identifier',
           },
         ],
       },
@@ -125,7 +118,6 @@ void runClassic(
           {
             messageId: 'useConst',
             data: { name: 'x' },
-            type: 'Identifier',
           },
         ],
       },
@@ -136,7 +128,6 @@ void runClassic(
           {
             messageId: 'useConst',
             data: { name: 'x' },
-            type: 'Identifier',
           },
         ],
       },
@@ -147,7 +138,6 @@ void runClassic(
           {
             messageId: 'useConst',
             data: { name: 'x' },
-            type: 'Identifier',
           },
         ],
       },

@@ -17,7 +17,7 @@ module.exports = {
   },
 
   create(context) {
-    const filenameRaw = context.getFilename();
+    const filenameRaw = context.filename;
     const normalizedFilename = filenameRaw.replace(/\\/g, '/');
 
     // Only apply to files inside packages/*/src/

@@ -43,7 +43,6 @@ void runClassic(
         errors: [
           {
             messageId: 'useNamedExport',
-            type: 'MemberExpression',
           },
         ],
       },
@@ -53,7 +52,6 @@ void runClassic(
         errors: [
           {
             messageId: 'useNamedExport',
-            type: 'MemberExpression',
           },
         ],
       },
@@ -63,7 +61,6 @@ void runClassic(
         errors: [
           {
             messageId: 'useNamedExport',
-            type: 'MemberExpression',
           },
         ],
       },
@@ -73,7 +70,6 @@ void runClassic(
         errors: [
           {
             messageId: 'useNamedExport',
-            type: 'MemberExpression',
           },
         ],
       },
@@ -83,11 +79,9 @@ void runClassic(
         errors: [
           {
             messageId: 'useNamedExport',
-            type: 'JSXMemberExpression',
           },
           {
             messageId: 'useNamedExport',
-            type: 'JSXMemberExpression',
           },
         ],
       },

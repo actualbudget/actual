@@ -194,7 +194,7 @@ module.exports = {
     }
 
     function getFix(node, isJSXText = false) {
-      const sourceCode = context.getSourceCode();
+      const sourceCode = context.sourceCode;
 
       return fixer => {
         const fixes = [];

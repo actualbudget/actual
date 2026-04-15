@@ -70,7 +70,7 @@
     "@typescript/native-preview": "^7.0.0-dev.20260404.1",
     "@yarnpkg/types": "^4.0.1",
     "cross-env": "^10.1.0",
-    "eslint": "^9.39.4",
+    "eslint": "^10.2.0",
     "eslint-plugin-perfectionist": "^5.8.0",
     "eslint-plugin-typescript-paths": "^0.0.33",
     "html-to-image": "^1.11.13",

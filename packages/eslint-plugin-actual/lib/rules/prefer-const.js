@@ -18,7 +18,7 @@ module.exports = {
   },
 
   create(context) {
-    const sourceCode = context.getSourceCode();
+    const sourceCode = context.sourceCode;
     // Map of scope to Set of reassigned variable names in that scope
     const reassignedVariablesByScope = new Map();
     const letDeclarations = [];
