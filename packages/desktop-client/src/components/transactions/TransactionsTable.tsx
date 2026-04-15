@@ -2864,7 +2864,17 @@ export const TransactionTable = forwardRef(
     }
 
     if (shouldAdd.current || shouldAddAndClose.current) {
-      if (newTransactions?.[0] && newTransactions[0].account == null) {
+      if (newTransactions?.[0] && !newTransactions[0].date) {
+        dispatch(
+          addNotification({
+            notification: {
+              type: 'error',
+              message: t('Date is a required field'),
+            },
+          }),
+        );
+        newNavigator.onEdit('temp', 'date');
+      } else if (newTransactions?.[0] && newTransactions[0].account == null) {
         dispatch(
           addNotification({
             notification: {
