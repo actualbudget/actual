@@ -172,6 +172,7 @@ export function EditFieldModal({
               <LabeledCheckbox
                 id="noteRegex"
                 checked={noteFindReplace.useRegex}
+                style={{ color: theme.menuAutoCompleteText }}
                 onChange={({ currentTarget: { checked } }) =>
                   setNoteFindReplace(current => ({
                     ...current,
