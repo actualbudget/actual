@@ -3,7 +3,7 @@ const global = globalThis || this || self;
 const process = {
   env: {
     ...import.meta.env,
-    NODE_ENV: import.meta.env.MODE,
+    NODE_ENV: import.meta.env.DEV ? 'development' : 'production',
     PUBLIC_URL: import.meta.env.BASE_URL.slice(0, -1),
   },
 };
