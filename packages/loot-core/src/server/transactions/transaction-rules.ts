@@ -1045,6 +1045,14 @@ export async function prepareTransactionForRules(
   accounts: Map<string, db.DbAccount> | null = null,
 ): Promise<TransactionForRules> {
   const r: TransactionForRules = { ...trans };
+  // Normalize optional id fields so "is nothing" rules can match
+  if (r.payee === undefined) {
+    r.payee = null;
+  }
+  if (r.category === undefined) {
+    r.category = null;
+  }
+  
   if (trans.payee) {
     const payee = await getPayee(trans.payee);
     if (payee) {
