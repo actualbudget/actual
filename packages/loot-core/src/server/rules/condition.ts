@@ -239,6 +239,8 @@ export class Condition {
 
     if (type === 'string') {
       fieldValue ??= '';
+    } else if (type === 'id') {
+      fieldValue ??= null;
     }
 
     if (fieldValue === undefined) {
