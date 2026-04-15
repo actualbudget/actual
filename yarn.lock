@@ -5807,6 +5807,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@oxlint/plugins@npm:^1.60.0":
+  version: 1.60.0
+  resolution: "@oxlint/plugins@npm:1.60.0"
+  checksum: 10/282aa3373fb4533af9c8ead48716ad3a3621f110a7aa7061ce615b8373fd667189eab1515d3e324ad26fc2b0507fc4434b407100e617fe59749c3deb673e975c
+  languageName: node
+  linkType: hard
+
 "@panzoom/panzoom@npm:^4.6.1":
   version: 4.6.1
   resolution: "@panzoom/panzoom@npm:4.6.1"
@@ -15752,6 +15759,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "eslint-plugin-actual@workspace:packages/eslint-plugin-actual"
   dependencies:
+    "@oxlint/plugins": "npm:^1.60.0"
     eslint-vitest-rule-tester: "npm:^3.1.0"
     vitest: "npm:^4.1.2"
   languageName: unknown

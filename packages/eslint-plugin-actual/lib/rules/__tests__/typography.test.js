@@ -4,7 +4,8 @@
 
 import { runClassic } from 'eslint-vitest-rule-tester';
 
-import * as rule from '../typography';
+import plugin from '../../index';
+const rule = plugin.rules['typography'];
 
 //------------------------------------------------------------------------------
 // Tests

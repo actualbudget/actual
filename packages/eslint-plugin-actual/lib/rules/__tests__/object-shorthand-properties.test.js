@@ -4,7 +4,8 @@
 
 import { runClassic } from 'eslint-vitest-rule-tester';
 
-import * as rule from '../object-shorthand-properties';
+import plugin from '../../index';
+const rule = plugin.rules['object-shorthand-properties'];
 
 //------------------------------------------------------------------------------
 // Tests

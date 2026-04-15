@@ -8,6 +8,7 @@
     "test": "vitest --run"
   },
   "devDependencies": {
+    "@oxlint/plugins": "^1.60.0",
     "eslint-vitest-rule-tester": "^3.1.0",
     "vitest": "^4.1.2"
   }

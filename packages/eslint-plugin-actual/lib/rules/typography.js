@@ -17,7 +17,7 @@ module.exports = {
     },
   },
 
-  create(context) {
+  createOnce(context) {
     // variables should be defined here
 
     //----------------------------------------------------------------------

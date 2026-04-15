@@ -4,7 +4,8 @@
 
 import { runClassic } from 'eslint-vitest-rule-tester';
 
-import * as rule from '../no-anchor-tag';
+import plugin from '../../index';
+const rule = plugin.rules['no-anchor-tag'];
 
 //------------------------------------------------------------------------------
 // Tests

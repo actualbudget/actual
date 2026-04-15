@@ -15,7 +15,7 @@ module.exports = {
       useT: 'Non-translated English string. Wrap in t().',
     },
   },
-  create(context) {
+  createOnce(context) {
     const whitelist = [
       'Actual',
       'GoCardless',
