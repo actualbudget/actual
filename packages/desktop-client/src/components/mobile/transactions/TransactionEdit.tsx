@@ -879,6 +879,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                     options: {
                       categoryGroups,
                       showHiddenCategories,
+                      showNoneOption: true,
                       month: monthUtils.monthFromDate(
                         unserializedTransaction.date,
                       ),

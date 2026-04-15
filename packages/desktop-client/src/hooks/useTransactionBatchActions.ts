@@ -243,6 +243,7 @@ export function useTransactionBatchActions() {
             name: 'category-autocomplete',
             options: {
               month: transactionsHaveSameMonth ? transactionMonth : undefined,
+              showNoneOption: true,
               onSelect: categoryId => onChange(name, categoryId),
             },
           },
