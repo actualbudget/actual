@@ -231,5 +231,18 @@
     "repo": "Juulz/YNA-Theme-Dark",
     "colors": ["#121330", "#fff", "#0c0d22", "#0f1443", "#93d53e", "#191898"],
     "mode": "dark"
+  },
+  {
+    "name": "Nord",
+    "repo": "aadhithbala/actual-nord-theme",
+    "colors": [
+      "#2E3440",
+      "#3B4252",
+      "#434C5E",
+      "#88C0D0",
+      "#A3BE8C",
+      "#BF616A"
+    ],
+    "mode": "dark"
   }
 ]
