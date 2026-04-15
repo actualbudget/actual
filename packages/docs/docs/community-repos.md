@@ -16,6 +16,7 @@ The following are implementations of bank syncing using the Actual API. For inst
 - **ICS Cards Holland CVS exporter** - https://github.com/IeuanK/ICS-Exporter/
 - **Lunch Flow: Import transactions from GoCardless, MX, Finicity, Finverse, and more** - https://github.com/lunchflow/actual-flow
 - **MoneyMan an israel banks importer** - https://github.com/daniel-hauser/moneyman
+- **Plaid bank sync** - https://github.com/youngcw/actualplaid
 - **ANZ Plus bank PDF to OFX converter** - [PDFtoOFX](https://github.com/spydisec/PDFtoOFX/)
 
 ## Other Importers
