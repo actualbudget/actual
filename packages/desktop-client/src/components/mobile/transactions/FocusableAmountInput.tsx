@@ -20,11 +20,11 @@ import {
 } from '@actual-app/core/shared/util';
 import { css } from '@emotion/css';
 
-import { transferIOSKeyboardFocus } from './iosKeyboardProxy';
-
 import { makeAmountFullStyle } from '#components/budget/util';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+
+import { transferIOSKeyboardFocus } from './iosKeyboardProxy';
 
 type AmountInputProps = {
   value: number;

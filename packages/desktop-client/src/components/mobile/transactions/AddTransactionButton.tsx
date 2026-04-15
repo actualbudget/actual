@@ -5,12 +5,9 @@ import { Button } from '@actual-app/components/button';
 import { SvgAdd } from '@actual-app/components/icons/v1';
 import * as Platform from '@actual-app/core/shared/platform';
 
-import {
-  acquireIOSKeyboard,
-  scheduleSafetyRelease,
-} from './iosKeyboardProxy';
-
 import { useNavigate } from '#hooks/useNavigate';
+
+import { acquireIOSKeyboard, scheduleSafetyRelease } from './iosKeyboardProxy';
 
 type AddTransactionButtonProps = {
   to?: string;
