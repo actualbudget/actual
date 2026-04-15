@@ -1052,7 +1052,7 @@ export async function prepareTransactionForRules(
   if (r.category === undefined) {
     r.category = null;
   }
-  
+
   if (trans.payee) {
     const payee = await getPayee(trans.payee);
     if (payee) {
