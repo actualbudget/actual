@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import * as d from 'date-fns';
-import { v4 as uuidv4 } from 'uuid';
 
 import { captureBreadcrumb } from '#platform/exceptions';
 import * as connection from '#platform/server/connection';
@@ -255,7 +254,7 @@ export async function createSchedule({
   schedule = null,
   conditions = [],
 } = {}): Promise<ScheduleEntity['id']> {
-  const scheduleId = schedule?.id || uuidv4();
+  const scheduleId = schedule?.id || crypto.randomUUID();
 
   const { date: dateCond } = extractScheduleConds(conditions);
   if (dateCond == null) {

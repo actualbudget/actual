@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import SQL from 'better-sqlite3';
-import { v4 as uuidv4 } from 'uuid';
 
 import { getDataDir, readFile, removeFile } from '#platform/server/fs';
 import { logger } from '#platform/server/log';
@@ -123,7 +122,7 @@ export function closeDatabase(db: SQL.Database) {
 export async function exportDatabase(db: SQL.Database) {
   // electron does not support better-sqlite serialize since v21
   // save to file and read in the raw data.
-  const name = `${getDataDir()}/backup-for-export-${uuidv4()}.db`;
+  const name = `${getDataDir()}/backup-for-export-${crypto.randomUUID()}.db`;
 
   await db.backup(name);
 
