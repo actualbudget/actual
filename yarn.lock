@@ -10924,6 +10924,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "actual@workspace:."
   dependencies:
+    "@octokit/rest": "npm:^22.0.1"
     "@types/node": "npm:^22.19.17"
     "@types/prompts": "npm:^2.4.9"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"

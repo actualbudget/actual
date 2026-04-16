@@ -64,6 +64,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@octokit/rest": "^22.0.1",
     "@types/node": "^22.19.17",
     "@types/prompts": "^2.4.9",
     "@typescript/native-preview": "^7.0.0-dev.20260404.1",
