@@ -374,12 +374,19 @@ function InputValue({
 
   function setValue_(text) {
     if (valueIsASingleOperator(text)) {
-      // Handle minus sign specially: put it at the beginning for negative numbers
-      if (text === '-' && (defaultValue === '0' || defaultValue === '0.00' || defaultValue === '' || !defaultValue)) {
-        setValue('-');
-      } else {
-        setValue(defaultValue + text);
+      if (text === '-') {
+        // When typing '-' on a zero or empty value, replace entirely with '-'
+        // Matches zero in any locale format: 0, 0.00, 0,00, 0.000, etc.
+        const isZeroOrEmpty =
+          !defaultValue ||
+          defaultValue.trim() === '' ||
+          /^0[.,]?0*$/.test(defaultValue.trim());
+        if (isZeroOrEmpty) {
+          setValue('-');
+          return;
+        }
       }
+      setValue(defaultValue + text);
     } else {
       setValue(text);
     }

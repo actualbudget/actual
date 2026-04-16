@@ -12,6 +12,7 @@ import { EnvelopeCellValue } from '#components/budget/envelope/EnvelopeBudgetCom
 import { CellValueText } from '#components/spreadsheet/CellValue';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
+import { useMetadataPref } from '#hooks/useMetadataPref';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
 /**
@@ -48,6 +49,7 @@ type TotalsListProps = {
 
 export function TotalsList({ prevMonthName, style }: TotalsListProps) {
   const format = useFormat();
+  const [forecastMode = false] = useMetadataPref('budget.forecastMode');
   const signedFormatter = makeSignedFormatter(format);
   const invertedSignedFormatter = makeSignedFormatter(format, true);
   return (
@@ -127,6 +129,21 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
           )}
         </EnvelopeCellValue>
 
+        {forecastMode && (
+          <EnvelopeCellValue
+            binding={envelopeBudget.totalAllPlanned}
+            type="financial"
+          >
+            {props => (
+              <CellValueText
+                {...props}
+                style={{ fontWeight: 600 }}
+                formatter={signedFormatter}
+              />
+            )}
+          </EnvelopeCellValue>
+        )}
+
         <EnvelopeCellValue
           binding={envelopeBudget.forNextMonth}
           type="financial"
@@ -153,6 +170,12 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
         <Block>
           <Trans>Budgeted</Trans>
         </Block>
+
+        {forecastMode && (
+          <Block>
+            <Trans>Planned</Trans>
+          </Block>
+        )}
 
         <Block>
           <Trans>For next month</Trans>

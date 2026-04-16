@@ -168,6 +168,11 @@ export const envelopeBudget = {
 
   groupBudgeted: envelopeParametrizedField('group-budget'),
   groupBalance: envelopeParametrizedField('group-leftover'),
+  groupPlanned: envelopeParametrizedField('group-planned'),
+
+  totalPlanned: 'total-planned',
+  totalIncomePlanned: 'total-income-planned',
+  totalAllPlanned: 'total-all-planned',
 
   catBudgeted: envelopeParametrizedField('budget'),
   catSumAmount: envelopeParametrizedField('sum-amount'),

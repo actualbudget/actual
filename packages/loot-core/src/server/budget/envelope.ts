@@ -90,6 +90,12 @@ export function createCategoryGroup(group, sheetName) {
     run: sumAmounts,
   });
 
+  sheet.get().createDynamic(sheetName, 'group-planned-' + group.id, {
+    initialValue: 0,
+    dependencies: group.categories.map(cat => `planned-${cat.id}`),
+    run: sumAmounts,
+  });
+
   if (!group.is_income) {
     sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
       initialValue: 0,
@@ -129,11 +135,46 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
     run: amount => amount,
   });
 
+  // Sum of all planned amounts for expense category groups
+  sheet.get().createDynamic(sheetName, 'total-planned', {
+    initialValue: 0,
+    dependencies: groups
+      .filter(group => !group.is_income)
+      .map(group => `group-planned-${group.id}`),
+    run: sumAmounts,
+  });
+
+  // Alias the income group planned total to `total-income-planned`
+  sheet.get().createDynamic(sheetName, 'total-income-planned', {
+    initialValue: 0,
+    dependencies: [`group-planned-${incomeGroup.id}`],
+    run: amount => amount,
+  });
+
+  // Combined total of all planned amounts (expenses + income)
+  sheet.get().createDynamic(sheetName, 'total-all-planned', {
+    initialValue: 0,
+    dependencies: ['total-planned', 'total-income-planned'],
+    run: (expensePlanned, incomePlanned) =>
+      safeNumber(number(expensePlanned) + number(incomePlanned)),
+  });
+
   sheet.get().createDynamic(sheetName, 'available-funds', {
     initialValue: 0,
-    dependencies: ['total-income', 'from-last-month'],
-    run: (income, fromLastMonth) =>
-      safeNumber(number(income) + number(fromLastMonth)),
+    dependencies: [
+      'total-income',
+      'total-income-planned',
+      'total-planned',
+      'from-last-month',
+    ],
+    run: (income, incomePlanned, totalPlanned, fromLastMonth) => {
+      const forecastMode = prefs.getPrefs()['budget.forecastMode'];
+      const plannedIncome = forecastMode ? number(incomePlanned) : 0;
+      const plannedExpenses = forecastMode ? number(totalPlanned) : 0;
+      return safeNumber(
+        number(income) + plannedIncome + plannedExpenses + number(fromLastMonth),
+      );
+    },
   });
 
   sheet.get().createDynamic(sheetName, 'last-month-overspent', {
@@ -264,6 +305,11 @@ export function handleCategoryChange(months, oldValue, newValue) {
       .addDependencies(sheetName, `group-leftover-${groupId}`, [
         `leftover-${catId}`,
       ]);
+    sheet
+      .get()
+      .addDependencies(sheetName, `group-planned-${groupId}`, [
+        `planned-${catId}`,
+      ]);
   }
 
   function removeDeps(sheetName, groupId, catId) {
@@ -281,6 +327,11 @@ export function handleCategoryChange(months, oldValue, newValue) {
       .get()
       .removeDependencies(sheetName, `group-leftover-${groupId}`, [
         `leftover-${catId}`,
+      ]);
+    sheet
+      .get()
+      .removeDependencies(sheetName, `group-planned-${groupId}`, [
+        `planned-${catId}`,
       ]);
   }
 
@@ -359,6 +410,11 @@ export function handleCategoryGroupChange(months, oldValue, newValue) {
       .addDependencies(sheetName, 'total-leftover', [
         `group-leftover-${groupId}`,
       ]);
+    sheet
+      .get()
+      .addDependencies(sheetName, 'total-planned', [
+        `group-planned-${groupId}`,
+      ]);
   }
 
   function removeDeps(sheetName, groupId) {
@@ -376,6 +432,11 @@ export function handleCategoryGroupChange(months, oldValue, newValue) {
       .get()
       .removeDependencies(sheetName, 'total-leftover', [
         `group-leftover-${groupId}`,
+      ]);
+    sheet
+      .get()
+      .removeDependencies(sheetName, 'total-planned', [
+        `group-planned-${groupId}`,
       ]);
   }
 

@@ -107,7 +107,12 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           <Text style={{ color: theme.tableHeaderText }}>
             <Trans>Planned</Trans>
           </Text>
-          <CellValueText name="planned-total" value={0} style={cellStyle} />
+          <EnvelopeCellValue
+            binding={envelopeBudget.totalAllPlanned}
+            type="financial"
+          >
+            {props => <CellValueText {...props} style={cellStyle} />}
+          </EnvelopeCellValue>
         </View>
       )}
       <View style={headerLabelStyle}>
@@ -185,9 +190,16 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
         }}
       />
       {forecastMode && (
-        <Field name="planned" width="flex" style={{ textAlign: 'right' }}>
-          <CellValueText name="planned-group" value={0} style={{ fontWeight: 600, ...styles.tnum }} />
-        </Field>
+        <EnvelopeSheetCell
+          name="planned"
+          width="flex"
+          textAlign="right"
+          style={{ fontWeight: 600, ...styles.tnum }}
+          valueProps={{
+            binding: envelopeBudget.groupPlanned(id),
+            type: 'financial',
+          }}
+        />
       )}
       <EnvelopeSheetCell
         name="spent"
@@ -482,7 +494,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           onSave={(parsedIntegerAmount: number | null) => {
             onBudgetAction(month, 'planned-amount', {
               category: category.id,
-              amount: parsedIntegerAmount ?? 0,
+              amount: Math.min(0, parsedIntegerAmount ?? 0),
             });
           }}
         />
@@ -613,17 +625,19 @@ export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
   return (
     <View style={{ flex: 1, flexDirection: 'row' }}>
       {forecastMode && (
-        <Field name="planned" width="flex" style={{ textAlign: 'right' }}>
-          <CellValueText
-            name="planned-income-group"
-            value={0}
-            type="financial"
-            style={{
-              fontWeight: 600,
-              ...styles.tnum,
-            }}
-          />
-        </Field>
+        <EnvelopeSheetCell
+          name="planned"
+          width="flex"
+          textAlign="right"
+          style={{
+            fontWeight: 600,
+            ...styles.tnum,
+          }}
+          valueProps={{
+            binding: envelopeBudget.totalIncomePlanned,
+            type: 'financial',
+          }}
+        />
       )}
       <EnvelopeSheetCell
         name="received"
@@ -712,7 +726,7 @@ export function IncomeCategoryMonth({
           onSave={(parsedIntegerAmount: number | null) => {
             onBudgetAction(month, 'planned-amount', {
               category: category.id,
-              amount: parsedIntegerAmount ?? 0,
+              amount: Math.max(0, parsedIntegerAmount ?? 0),
             });
           }}
         />
