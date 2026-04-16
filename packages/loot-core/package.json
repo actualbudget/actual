@@ -188,10 +188,8 @@
   },
   "devDependencies": {
     "@actual-app/crdt": "workspace:*",
-    "@swc/core": "^1.15.24",
     "@types/adm-zip": "^0.5.8",
     "@types/better-sqlite3": "^7.6.13",
-    "@types/emscripten": "^1.41.5",
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
     "@types/node": "^22.19.17",
     "@typescript/native-preview": "^7.0.0-dev.20260404.1",
