@@ -64,7 +64,7 @@ describe('API handlers', () => {
 
       handlers['get-budget-bounds'] = vi
         .fn()
-        .mockResolvedValue({ start: '2024-01', end: '2024-12' });
+        .mockResolvedValue({ start: '2026-01', end: '2026-12' });
     });
 
     afterEach(() => {
@@ -72,18 +72,19 @@ describe('API handlers', () => {
     });
 
     it('envelope budget: income group returns only received', async () => {
-      await createBudget(['2024-05', '2024-06']);
+      await createBudget(['2026-02', '2026-03']);
       await db.insertTransaction({
         id: 'tx1',
-        date: '2024-06-15',
+        date: '2026-03-15',
         account: 'acct1',
         amount: 5000,
         category: 'income-cat',
       });
       await sheet.waitOnSpreadsheet();
 
-      const result = await handlers['api/budget-month']({ month: '2024-06' });
+      const result = await handlers['api/budget-month']({ month: '2026-03' });
       const group = result.categoryGroups.find(g => g.is_income);
+      assert(group, 'Expected income category group to exist');
 
       expect(group).toHaveProperty('received', 5000);
       expect(group).not.toHaveProperty('budgeted');
@@ -97,19 +98,20 @@ describe('API handlers', () => {
       sheet.get().meta().budgetType = 'tracking';
       await db.update('preferences', { id: 'budgetType', value: 'tracking' });
 
-      await createBudget(['2024-05', '2024-06']);
-      sheet.get().set('budget202406!budget-income-cat', 6000);
+      await createBudget(['2026-02', '2026-03']);
+      sheet.get().set('budget202603!budget-income-cat', 6000);
       await db.insertTransaction({
         id: 'tx1',
-        date: '2024-06-15',
+        date: '2026-03-15',
         account: 'acct1',
         amount: 5000,
         category: 'income-cat',
       });
       await sheet.waitOnSpreadsheet();
 
-      const result = await handlers['api/budget-month']({ month: '2024-06' });
+      const result = await handlers['api/budget-month']({ month: '2026-03' });
       const group = result.categoryGroups.find(g => g.is_income);
+      assert(group, 'Expected income category group to exist');
 
       expect(group).toHaveProperty('budgeted', 6000);
       expect(group).toHaveProperty('received', 5000);
