@@ -1,6 +1,5 @@
 import * as db from '#server/db';
 import * as sheet from '#server/sheet';
-// @ts-strict-ignore
 import { getBankSyncError } from '#shared/errors';
 import type { ServerHandlers } from '#types/server-handlers';
 
@@ -89,9 +88,9 @@ describe('API handlers', () => {
       expect(group).toHaveProperty('received', 5000);
       expect(group).not.toHaveProperty('budgeted');
       expect(group).not.toHaveProperty('balance');
-      expect(group.categories[0]).toHaveProperty('received', 5000);
-      expect(group.categories[0]).not.toHaveProperty('budgeted');
-      expect(group.categories[0]).not.toHaveProperty('balance');
+      expect(group?.categories?.[0]).toHaveProperty('received', 5000);
+      expect(group?.categories?.[0]).not.toHaveProperty('budgeted');
+      expect(group?.categories?.[0]).not.toHaveProperty('balance');
     });
 
     it('tracking budget: income group returns budgeted, received, and balance', async () => {
@@ -115,10 +114,10 @@ describe('API handlers', () => {
       expect(group).toHaveProperty('budgeted', 6000);
       expect(group).toHaveProperty('received', 5000);
       expect(group).toHaveProperty('balance', 1000);
-      expect(group.categories[0]).toHaveProperty('budgeted', 6000);
-      expect(group.categories[0]).toHaveProperty('received', 5000);
-      expect(group.categories[0]).toHaveProperty('balance', 1000);
-      expect(group.categories[0]).toHaveProperty('carryover', false);
+      expect(group?.categories?.[0]).toHaveProperty('budgeted', 6000);
+      expect(group?.categories?.[0]).toHaveProperty('received', 5000);
+      expect(group?.categories?.[0]).toHaveProperty('balance', 1000);
+      expect(group?.categories?.[0]).toHaveProperty('carryover', false);
     });
   });
 });
