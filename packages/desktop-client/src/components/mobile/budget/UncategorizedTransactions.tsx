@@ -62,6 +62,7 @@ export function UncategorizedTransactions() {
         isLoadingMore={isLoadingMoreTransactions}
         onLoadMore={fetchMoreTransactions}
         onOpenTransaction={onOpenTransaction}
+        showMakeTransfer
       />
     </SchedulesProvider>
   );

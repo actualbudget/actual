@@ -19,5 +19,12 @@
   },
   "references": [{ "path": "../crdt" }, { "path": "../loot-core" }],
   "include": ["."],
-  "exclude": ["**/node_modules/*", "dist", "@types", "*.test.ts", "*.config.ts"]
+  "exclude": [
+    "**/node_modules/*",
+    "dist",
+    "@types",
+    "*.test.ts",
+    "*.config.ts",
+    "*.config.mts"
+  ]
 }

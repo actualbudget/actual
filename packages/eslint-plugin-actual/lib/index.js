@@ -1,4 +1,6 @@
-module.exports = {
+const { eslintCompatPlugin } = require('@oxlint/plugins');
+
+module.exports = eslintCompatPlugin({
   meta: {
     name: 'eslint-plugin-actual',
   },
@@ -16,4 +18,4 @@ module.exports = {
     'enforce-boundaries': require('./rules/enforce-boundaries'),
     'no-extraneous-dependencies': require('./rules/no-extraneous-dependencies'),
   },
-};
+});

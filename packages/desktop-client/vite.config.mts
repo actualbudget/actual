@@ -152,7 +152,7 @@ export default defineConfig(async ({ mode }) => {
     },
     server: {
       host: true,
-      headers: mode === 'development' ? devHeaders : undefined,
+      headers: devHeaders,
       port: +env.PORT || 5173,
       open: env.BROWSER
         ? ['chrome', 'firefox', 'edge', 'browser', 'browserPrivate'].includes(
@@ -164,7 +164,7 @@ export default defineConfig(async ({ mode }) => {
       },
     },
     resolve: {
-      ...(!env.IS_GENERIC_BROWSER && {
+      ...(mode !== 'browser' && {
         conditions: ['electron-renderer', 'module', 'browser', 'default'],
       }),
       tsconfigPaths: true,

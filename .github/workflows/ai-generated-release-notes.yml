@@ -42,11 +42,7 @@ jobs:
           GITHUB_EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
 
       - name: Check if release notes file already exists
-        if: >-
-          steps.check-first-comment.outputs.result == 'true' &&
-          steps.pr-details.outputs.result != 'null' &&
-          fromJSON(steps.pr-details.outputs.result).baseBranch == 'master' &&
-          !startsWith(fromJSON(steps.pr-details.outputs.result).headBranch, 'release/')
+        if: steps.pr-details.outputs.eligible == 'true'
         id: check-release-notes-exists
         run: node .github/actions/ai-generated-release-notes/check-release-notes-exists.js
         env:
@@ -56,7 +52,7 @@ jobs:
           PR_DETAILS: ${{ steps.pr-details.outputs.result }}
 
       - name: Generate summary with OpenAI
-        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false'
+        if: steps.check-release-notes-exists.outputs.result == 'false'
         id: generate-summary
         run: node .github/actions/ai-generated-release-notes/generate-summary.js
         env:
@@ -65,7 +61,7 @@ jobs:
           PR_DETAILS: ${{ steps.pr-details.outputs.result }}
 
       - name: Determine category with OpenAI
-        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null'
+        if: steps.generate-summary.outputs.result != 'null' && steps.generate-summary.outputs.result != ''
         id: determine-category
         run: node .github/actions/ai-generated-release-notes/determine-category.js
         env:
@@ -75,7 +71,7 @@ jobs:
           SUMMARY_DATA: ${{ steps.generate-summary.outputs.result }}
 
       - name: Create and commit release notes file via GitHub API
-        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
+        if: steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
         run: node .github/actions/ai-generated-release-notes/create-release-notes-file.js
         env:
           GITHUB_TOKEN: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
@@ -85,7 +81,7 @@ jobs:
           CATEGORY: ${{ steps.determine-category.outputs.result }}
 
       - name: Comment on PR
-        if: steps.check-first-comment.outputs.result == 'true' && steps.check-release-notes-exists.outputs.result == 'false' && steps.generate-summary.outputs.result != 'null' && steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
+        if: steps.determine-category.outputs.result != 'null' && steps.determine-category.outputs.result != ''
         run: node .github/actions/ai-generated-release-notes/comment-on-pr.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

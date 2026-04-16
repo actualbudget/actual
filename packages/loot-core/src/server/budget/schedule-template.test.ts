@@ -20,6 +20,7 @@ vi.mock('#server/schedules/app', async () => {
 describe('runSchedule', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(db.getAccounts).mockResolvedValue([]);
   });
 
   it('should return correct budget when recurring schedule set', async () => {

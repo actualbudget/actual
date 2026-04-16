@@ -80,13 +80,13 @@
     "@actual-app/crdt": "2.1.0",
     "@actual-app/web": "workspace:*",
     "bcrypt": "^6.0.0",
-    "better-sqlite3": "^12.6.2",
+    "better-sqlite3": "^12.8.0",
     "convict": "^6.2.5",
     "cors": "^2.8.6",
     "date-fns": "^4.1.0",
     "debug": "^4.4.3",
     "express": "^5.2.1",
-    "express-rate-limit": "^8.3.0",
+    "express-rate-limit": "^8.3.2",
     "express-winston": "^4.2.0",
     "ipaddr.js": "^2.3.0",
     "migrate": "^2.1.0",
@@ -105,13 +105,13 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/express-actuator": "^1.8.3",
-    "@types/node": "^22.19.15",
+    "@types/node": "^22.19.17",
     "@types/supertest": "^7.2.0",
-    "@typescript/native-preview": "^7.0.0-dev.20260309.1",
+    "@typescript/native-preview": "^7.0.0-dev.20260404.1",
     "http-proxy-middleware": "^3.0.5",
     "nodemon": "^3.1.14",
     "supertest": "^7.2.2",
     "typescript-strict-plugin": "^2.4.4",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.2"
   }
 }

@@ -27,15 +27,15 @@
   "dependencies": {
     "@actual-app/api": "workspace:*",
     "cli-table3": "^0.6.5",
-    "commander": "^13.0.0",
-    "cosmiconfig": "^9.0.0"
+    "commander": "^14.0.3",
+    "cosmiconfig": "^9.0.1"
   },
   "devDependencies": {
-    "@types/node": "^22.19.15",
-    "@typescript/native-preview": "^7.0.0-dev.20260309.1",
-    "rollup-plugin-visualizer": "^6.0.11",
+    "@types/node": "^22.19.17",
+    "@typescript/native-preview": "^7.0.0-dev.20260404.1",
+    "rollup-plugin-visualizer": "^7.0.1",
     "vite": "^8.0.5",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.2"
   },
   "engines": {
     "node": ">=22"

@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@actual-app/sync-server": "workspace:*",
-    "better-sqlite3": "^12.6.2",
+    "better-sqlite3": "^12.8.0",
     "fs-extra": "^11.3.4",
     "promise-retry": "^2.0.1"
   },
@@ -25,13 +25,13 @@
     "@actual-app/web": "workspace:*",
     "@electron/notarize": "3.1.1",
     "@electron/rebuild": "^4.0.3",
-    "@playwright/test": "1.58.2",
+    "@playwright/test": "1.59.1",
     "@types/copyfiles": "^2",
     "@types/fs-extra": "^11",
-    "@typescript/native-preview": "^7.0.0-dev.20260309.1",
+    "@typescript/native-preview": "^7.0.0-dev.20260404.1",
     "copyfiles": "^2.4.1",
     "cross-env": "^10.1.0",
-    "electron": "39.8.4",
+    "electron": "39.8.5",
     "electron-builder": "26.8.1",
     "typescript-strict-plugin": "^2.4.4"
   },

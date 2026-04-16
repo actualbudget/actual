@@ -23,6 +23,11 @@ import {
   Rule,
   RuleIndexer,
 } from '#server/rules';
+import {
+  collectFormulasFromActions,
+  extractBalanceOfLiterals,
+  resolveAccountIdForBalanceOf,
+} from '#server/rules/balanceOfFormula';
 import { addSyncListener, batchMessages } from '#server/sync';
 import {
   addDays,
@@ -343,6 +348,15 @@ export async function runRules(
       firstcharIndexer.getApplicableRules(trans),
       payeeIndexer.getApplicableRules(trans),
     ),
+  );
+
+  const formulaStrings = rules.flatMap(rule =>
+    collectFormulasFromActions(rule.actions),
+  );
+  finalTrans._balanceOfPrefetched = await prefetchBalanceOfForTransaction(
+    finalTrans,
+    accountsMap,
+    formulaStrings,
   );
 
   for (let i = 0; i < rules.length; i++) {
@@ -708,6 +722,16 @@ export async function applyActions(
     ),
   );
 
+  const formulaStrings = collectFormulasFromActions(parsedActions);
+  const balanceOfPrefetchResults = await Promise.all(
+    transactionsForRules.map(trans =>
+      prefetchBalanceOfForTransaction(trans, accountsMap, formulaStrings),
+    ),
+  );
+  transactionsForRules.forEach((trans, i) => {
+    trans._balanceOfPrefetched = balanceOfPrefetchResults[i];
+  });
+
   const updated = transactionsForRules.flatMap(trans => {
     return ungroupTransaction(execActions(parsedActions, trans));
   });
@@ -941,7 +965,80 @@ export type TransactionForRules = TransactionEntity & {
   _category_name?: string;
   _account_name?: string;
   parent_amount?: number;
+  /** Prefetched cent balances for BALANCE_OF("…") in rule formulas; cleared in finalize */
+  _balanceOfPrefetched?: Map<string, number>;
 };
+
+/**
+ * Running balance for `accountId` before the current transaction row (same cutoff as `balance`).
+ */
+export async function getRunningBalanceBeforeTransaction(
+  trans: TransactionEntity,
+  accountId: string,
+): Promise<number> {
+  const dateBoundary = trans.date ?? currentDay();
+  let query = q('transactions')
+    .filter({ account: accountId, is_parent: false })
+    .options({ splits: 'inline' });
+
+  if (trans.id) {
+    query = query.filter({ id: { $ne: trans.id } });
+  }
+
+  const sameDayFilter =
+    trans.sort_order != null
+      ? {
+          $and: [
+            { date: dateBoundary },
+            { sort_order: { $lt: trans.sort_order } },
+          ],
+        }
+      : {
+          $and: [
+            { date: dateBoundary },
+            {
+              $or: [
+                { sort_order: { $ne: null } }, // ordered items come before null sort_order
+                ...(trans.id ? [{ id: { $lt: trans.id } }] : []), // among nulls, tie-break by id
+              ],
+            },
+          ],
+        };
+
+  const { data: balance } = await aqlQuery(
+    query
+      .filter({ $or: [{ date: { $lt: dateBoundary } }, sameDayFilter] })
+      .calculate({ $sum: '$amount' }),
+  );
+
+  return balance ?? 0;
+}
+
+export async function prefetchBalanceOfForTransaction(
+  trans: TransactionEntity,
+  accountsMap: Map<string, db.DbAccount>,
+  formulas: string[],
+): Promise<Map<string, number>> {
+  const map = new Map<string, number>();
+  const literals = new Set<string>();
+  for (const f of formulas) {
+    for (const lit of extractBalanceOfLiterals(f)) {
+      literals.add(lit);
+    }
+  }
+  for (const literal of literals) {
+    const accountId = resolveAccountIdForBalanceOf(literal, accountsMap);
+    if (accountId) {
+      map.set(
+        literal,
+        await getRunningBalanceBeforeTransaction(trans, accountId),
+      );
+    } else {
+      map.set(literal, 0);
+    }
+  }
+  return map;
+}
 
 export async function prepareTransactionForRules(
   trans: TransactionEntity,
@@ -966,42 +1063,7 @@ export async function prepareTransactionForRules(
       r._account_name = r._account?.name || '';
     }
 
-    const dateBoundary = trans.date ?? currentDay();
-    let query = q('transactions')
-      .filter({ account: trans.account, is_parent: false })
-      .options({ splits: 'inline' });
-
-    if (trans.id) {
-      query = query.filter({ id: { $ne: trans.id } });
-    }
-
-    const sameDayFilter =
-      trans.sort_order != null
-        ? {
-            $and: [
-              { date: dateBoundary },
-              { sort_order: { $lt: trans.sort_order } },
-            ],
-          }
-        : {
-            $and: [
-              { date: dateBoundary },
-              {
-                $or: [
-                  { sort_order: { $ne: null } }, // ordered items come before null sort_order
-                  ...(trans.id ? [{ id: { $lt: trans.id } }] : []), // among nulls, tie-break by id
-                ],
-              },
-            ],
-          };
-
-    const { data: balance } = await aqlQuery(
-      query
-        .filter({ $or: [{ date: { $lt: dateBoundary } }, sameDayFilter] })
-        .calculate({ $sum: '$amount' }),
-    );
-
-    r.balance = balance ?? 0;
+    r.balance = await getRunningBalanceBeforeTransaction(trans, trans.account);
   }
 
   if (trans.category) {
@@ -1038,6 +1100,10 @@ export async function finalizeTransactionForRules(
     delete trans.balance;
   }
 
+  if ('_balanceOfPrefetched' in trans) {
+    delete trans._balanceOfPrefetched;
+  }
+
   if ('parent_amount' in trans) {
     delete trans.parent_amount;
   }
@@ -1046,6 +1112,10 @@ export async function finalizeTransactionForRules(
     trans.subtransactions.forEach(stx => {
       if ('balance' in stx) {
         delete stx.balance;
+      }
+
+      if ('_balanceOfPrefetched' in stx) {
+        delete stx._balanceOfPrefetched;
       }
 
       if ('parent_amount' in stx) {
