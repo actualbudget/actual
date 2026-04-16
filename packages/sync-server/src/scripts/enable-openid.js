@@ -2,8 +2,8 @@ import {
   enableOpenID,
   getActiveLoginMethod,
   needsBootstrap,
-} from '../account-db';
-import { config } from '../load-config';
+} from '#account-db';
+import { config } from '#load-config';
 
 if (needsBootstrap()) {
   console.log(

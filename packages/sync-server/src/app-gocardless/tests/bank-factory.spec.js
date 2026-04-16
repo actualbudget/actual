@@ -1,5 +1,5 @@
-import { BankFactory, banks } from '../bank-factory';
-import IntegrationBank from '../banks/integration-bank';
+import { BankFactory, banks } from '#app-gocardless/bank-factory';
+import IntegrationBank from '#app-gocardless/banks/integration-bank';
 
 describe('BankFactory', () => {
   it.each(banks.flatMap(bank => bank.institutionIds))(

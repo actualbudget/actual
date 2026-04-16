@@ -650,7 +650,11 @@ async function uploadFileWeb({
     return null;
   }
 
-  await fs.writeFile('/uploads/' + filename, contents);
+  const safeName = filename.split(/[/\\]/).pop()?.replaceAll('\0', '');
+  if (!safeName || safeName === '.' || safeName === '..') {
+    throw new Error('Invalid upload filename');
+  }
+  await fs.writeFile(fs.join('/uploads', safeName), contents);
   return {};
 }
 

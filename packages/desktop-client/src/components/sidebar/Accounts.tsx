@@ -97,6 +97,7 @@ export function Accounts() {
           query={bindings.allAccountBalance()}
           style={{ fontWeight, marginTop: 15 }}
           isExactPathMatch
+          balanceTestId="sidebar-all-accounts-balance"
         />
 
         {onBudgetAccounts.length > 0 && (
@@ -110,6 +111,7 @@ export function Accounts() {
               marginBottom: 5,
             }}
             titleAccount
+            balanceTestId="sidebar-on-budget-balance"
           />
         )}
 
@@ -141,6 +143,7 @@ export function Accounts() {
               marginBottom: 5,
             }}
             titleAccount
+            balanceTestId="sidebar-off-budget-balance"
           />
         )}
 

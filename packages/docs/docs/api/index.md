@@ -28,6 +28,20 @@ npm install --save @actual-app/api
 yarn add @actual-app/api
 ```
 
+### TypeScript
+
+`@actual-app/api` ships TypeScript declarations. To consume them, your `tsconfig.json` must use a modern `moduleResolution`:
+
+```json
+{
+  "compilerOptions": {
+    "moduleResolution": "bundler" // or "nodenext" / "node16"
+  }
+}
+```
+
+Legacy `"node"` / `"node10"` / `"classic"` resolution is not supported in strict TypeScript mode. The published declarations rely on package.json `exports` conditions, which older resolvers don't honor.
+
 ### Connecting to a Remote Server
 
 Next, you'll need connect to your running server version of Actual to access your budget files.

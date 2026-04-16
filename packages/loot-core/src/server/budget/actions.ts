@@ -611,7 +611,7 @@ export async function setCategoryCarryover({
 }
 
 function addNewLine(notes?: string) {
-  return !notes ? '' : `${notes}${notes && '\n'}`;
+  return !notes ? '' : `${notes}\n`;
 }
 
 async function addMovementNotes({

@@ -1,4 +1,4 @@
-import KBCkredbebb from '../kbc_kredbebb';
+import KBCkredbebb from '#app-gocardless/banks/kbc_kredbebb';
 
 describe('kbc_kredbebb', () => {
   describe('#normalizeTransaction', () => {
