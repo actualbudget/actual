@@ -187,9 +187,6 @@ __metadata:
   dependencies:
     "@actual-app/crdt": "npm:2.1.0"
     "@actual-app/web": "workspace:*"
-    "@babel/core": "npm:^7.29.0"
-    "@babel/preset-typescript": "npm:^7.28.5"
-    "@types/babel__core": "npm:^7"
     "@types/bcrypt": "npm:^6.0.0"
     "@types/better-sqlite3": "npm:^7.6.13"
     "@types/convict": "npm:^6"
@@ -1865,7 +1862,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/preset-typescript@npm:^7.21.0, @babel/preset-typescript@npm:^7.25.9, @babel/preset-typescript@npm:^7.28.5":
+"@babel/preset-typescript@npm:^7.21.0, @babel/preset-typescript@npm:^7.25.9":
   version: 7.28.5
   resolution: "@babel/preset-typescript@npm:7.28.5"
   dependencies:
@@ -9139,7 +9136,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/babel__core@npm:^7, @types/babel__core@npm:^7.20.5":
+"@types/babel__core@npm:^7.20.5":
   version: 7.20.5
   resolution: "@types/babel__core@npm:7.20.5"
   dependencies:
