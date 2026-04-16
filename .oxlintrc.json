@@ -379,6 +379,12 @@
       }
     },
     {
+      "files": ["packages/eslint-plugin-actual/lib/rules/__tests__/**/*"],
+      "rules": {
+        "actual/enforce-boundaries": "off"
+      }
+    },
+    {
       "files": [
         "packages/api/migrations/*",
         "packages/loot-core/migrations/*",
