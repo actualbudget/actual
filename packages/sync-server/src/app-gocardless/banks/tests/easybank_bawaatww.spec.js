@@ -1,5 +1,5 @@
-import { mockTransactionAmount } from '../../services/tests/fixtures';
-import EasybankBawaatww from '../easybank_bawaatww';
+import EasybankBawaatww from '#app-gocardless/banks/easybank_bawaatww';
+import { mockTransactionAmount } from '#app-gocardless/services/tests/fixtures';
 
 describe('easybank', () => {
   describe('#normalizeTransaction', () => {

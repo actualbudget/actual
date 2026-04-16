@@ -39,6 +39,22 @@ async function getPRDetails() {
     console.log('- Base Branch:', pr.base.ref);
     console.log('- Head Branch:', pr.head.ref);
 
+    // Fetch all changed files to detect docs-only PRs
+    const files = await octokit.paginate(octokit.rest.pulls.listFiles, {
+      owner,
+      repo: repoName,
+      pull_number: issueNumber,
+      per_page: 100,
+    });
+
+    const changedFiles = files.map(f => f.filename);
+    const isDocsOnly =
+      changedFiles.length > 0 &&
+      changedFiles.every(file => file.startsWith('packages/docs/'));
+
+    console.log('- Changed Files:', changedFiles.length);
+    console.log('- Is Docs Only:', isDocsOnly);
+
     const result = {
       number: pr.number,
       author: pr.user.login,
@@ -47,11 +63,31 @@ async function getPRDetails() {
       headBranch: pr.head.ref,
     };
 
+    let eligible = true;
+    if (pr.base.ref !== 'master') {
+      console.log(
+        'PR does not target master branch, skipping release notes generation',
+      );
+      eligible = false;
+    } else if (pr.head.ref.startsWith('release/')) {
+      console.log(
+        'PR head branch is a release branch, skipping release notes generation',
+      );
+      eligible = false;
+    } else if (isDocsOnly) {
+      console.log(
+        'PR only changes documentation, skipping release notes generation',
+      );
+      eligible = false;
+    }
+
     setOutput('result', JSON.stringify(result));
+    setOutput('eligible', JSON.stringify(eligible));
   } catch (error) {
     console.log('Error getting PR details:', error.message);
     console.log('Stack:', error.stack);
     setOutput('result', 'null');
+    setOutput('eligible', 'false');
     process.exit(1);
   }
 }
@@ -60,5 +96,6 @@ getPRDetails().catch(error => {
   console.log('Unhandled error:', error.message);
   console.log('Stack:', error.stack);
   setOutput('result', 'null');
+  setOutput('eligible', 'false');
   process.exit(1);
 });

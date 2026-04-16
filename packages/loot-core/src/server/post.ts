@@ -1,7 +1,7 @@
 // @ts-strict-ignore
-import { fetch } from '../platform/server/fetch';
-import { logger } from '../platform/server/log';
-import * as Platform from '../shared/platform';
+import { fetch } from '#platform/server/fetch';
+import { logger } from '#platform/server/log';
+import * as Platform from '#shared/platform';
 
 import { PostError } from './errors';
 

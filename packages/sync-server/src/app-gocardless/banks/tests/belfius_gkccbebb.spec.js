@@ -1,5 +1,5 @@
-import { mockTransactionAmount } from '../../services/tests/fixtures';
-import Belfius from '../belfius_gkccbebb';
+import Belfius from '#app-gocardless/banks/belfius_gkccbebb';
+import { mockTransactionAmount } from '#app-gocardless/services/tests/fixtures';
 
 describe('Belfius', () => {
   describe('#normalizeTransaction', () => {

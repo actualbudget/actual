@@ -3,11 +3,15 @@ import React, { memo, useMemo, useState } from 'react';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
 import type {
   CategoryEntity,
   CategoryGroupEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+
+import { DropHighlightPosContext } from '#components/sort';
+import type { DragState, OnDropCallback } from '#components/sort';
+import { Row } from '#components/table';
+import { useLocalPref } from '#hooks/useLocalPref';
 
 import { ExpenseCategory } from './ExpenseCategory';
 import { ExpenseGroup } from './ExpenseGroup';
@@ -17,14 +21,6 @@ import { IncomeHeader } from './IncomeHeader';
 import { SidebarCategory } from './SidebarCategory';
 import { SidebarGroup } from './SidebarGroup';
 import { separateGroups } from './util';
-
-import { DropHighlightPosContext } from '@desktop-client/components/sort';
-import type {
-  DragState,
-  OnDropCallback,
-} from '@desktop-client/components/sort';
-import { Row } from '@desktop-client/components/table';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 
 type BudgetItem =
   | { type: 'new-group' }

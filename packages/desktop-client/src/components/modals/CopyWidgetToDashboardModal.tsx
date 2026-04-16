@@ -6,13 +6,9 @@ import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
 import { View } from '@actual-app/components/view';
 
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { useDashboardPages } from '@desktop-client/hooks/useDashboardPages';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { useDashboardPages } from '#hooks/useDashboardPages';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type CopyWidgetToDashboardModalProps = Extract<
   ModalType,

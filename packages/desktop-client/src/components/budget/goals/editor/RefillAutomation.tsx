@@ -4,7 +4,7 @@ import { Button } from '@actual-app/components/button';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
 
-import { Warning } from '@desktop-client/components/alerts';
+import { Warning } from '#components/alerts';
 
 type RefillAutomationProps = {
   hasLimitAutomation: boolean;

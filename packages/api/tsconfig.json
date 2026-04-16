@@ -7,6 +7,7 @@
     "target": "ES2021",
     "module": "es2022",
     "moduleResolution": "bundler",
+    "customConditions": ["api"],
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,
@@ -18,5 +19,12 @@
   },
   "references": [{ "path": "../crdt" }, { "path": "../loot-core" }],
   "include": ["."],
-  "exclude": ["**/node_modules/*", "dist", "@types", "*.test.ts", "*.config.ts"]
+  "exclude": [
+    "**/node_modules/*",
+    "dist",
+    "@types",
+    "*.test.ts",
+    "*.config.ts",
+    "*.config.mts"
+  ]
 }

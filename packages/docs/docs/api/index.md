@@ -28,6 +28,20 @@ npm install --save @actual-app/api
 yarn add @actual-app/api
 ```
 
+### TypeScript
+
+`@actual-app/api` ships TypeScript declarations. To consume them, your `tsconfig.json` must use a modern `moduleResolution`:
+
+```json
+{
+  "compilerOptions": {
+    "moduleResolution": "bundler" // or "nodenext" / "node16"
+  }
+}
+```
+
+Legacy `"node"` / `"node10"` / `"classic"` resolution is not supported in strict TypeScript mode. The published declarations rely on package.json `exports` conditions, which older resolvers don't honor.
+
 ### Connecting to a Remote Server
 
 Next, you'll need connect to your running server version of Actual to access your budget files.
@@ -64,7 +78,7 @@ Heads up! You probably don't want to hard-code the passwords like that, especial
 
 If the serverURL is using [self-signed or custom CA certificates](../config/https.md), additional Node.js configuration will be needed for the connections to succeed.
 
-The API communicates with the server using `node-fetch`, assigned to the `global.fetch` function. There are a few ways to get Node.js to trust the self-signed certificate.
+The API communicates with the server using Node's built-in `fetch`. There are a few ways to get Node.js to trust the self-signed certificate.
 
 - Option 1: Point environment variable [NODE_EXTRA_CA_CERTS](https://nodejs.org/api/cli.html#node_extra_ca_certsfile) to the path of a file containing the public certificate.
 - Option 2: Set environment variable [NODE_TLS_REJECT_UNAUTHORIZED](https://nodejs.org/api/cli.html#node_tls_reject_unauthorizedvalue) to `0`. Not recommended if your program reaches out to any other endpoints other than the Actual server.

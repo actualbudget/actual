@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo } from 'react';
 
-import { evalArithmetic } from 'loot-core/shared/arithmetic';
-import { getCurrency } from 'loot-core/shared/currencies';
-import type { Currency } from 'loot-core/shared/currencies';
+import { evalArithmetic } from '@actual-app/core/shared/arithmetic';
+import { getCurrency } from '@actual-app/core/shared/currencies';
+import type { Currency } from '@actual-app/core/shared/currencies';
 import {
   amountToInteger,
   currencyToAmount,
@@ -11,8 +11,8 @@ import {
   integerToCurrency,
   parseNumberFormat,
   setNumberFormat,
-} from 'loot-core/shared/util';
-import type { IntegerAmount } from 'loot-core/shared/util';
+} from '@actual-app/core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
 
 import { useSyncedPref } from './useSyncedPref';
 

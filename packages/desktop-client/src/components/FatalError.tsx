@@ -8,14 +8,13 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
+import { LazyLoadFailedError } from '@actual-app/core/shared/errors';
 
-import { LazyLoadFailedError } from 'loot-core/shared/errors';
+import { useModalState } from '#hooks/useModalState';
 
 import { Link } from './common/Link';
 import { Modal, ModalHeader } from './common/Modal';
 import { Checkbox } from './forms';
-
-import { useModalState } from '@desktop-client/hooks/useModalState';
 
 type AppError = Error & {
   type?: string;
@@ -25,10 +24,12 @@ type AppError = Error & {
 };
 
 type FatalErrorProps = {
-  error: Error | AppError;
+  error: unknown;
 };
 
-type RenderSimpleProps = FatalErrorProps;
+type RenderSimpleProps = {
+  error: Error | AppError;
+};
 
 function RenderSimple({ error }: RenderSimpleProps) {
   let msg: ReactNode;
@@ -196,7 +197,7 @@ function SharedArrayBufferOverride() {
   );
 }
 
-export function FatalError({ error }: FatalErrorProps) {
+export function FatalError({ error: rawError }: FatalErrorProps) {
   const { t } = useTranslation();
 
   const { modalStack } = useModalState();
@@ -204,6 +205,12 @@ export function FatalError({ error }: FatalErrorProps) {
 
   const [showError, setShowError] = useState(false);
 
+  const error: Error | AppError =
+    rawError instanceof Error
+      ? rawError
+      : rawError && typeof rawError === 'object'
+        ? Object.assign(new Error(String(rawError)), rawError)
+        : new Error(String(rawError));
   const showSimpleRender = 'type' in error && error.type === 'app-init-failure';
   const isLazyLoadError = error instanceof LazyLoadFailedError;
 
