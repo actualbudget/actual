@@ -5,16 +5,11 @@ import { getBankSyncError } from '#shared/errors';
 import type { ServerHandlers } from '#types/server-handlers';
 
 import { installAPI } from './api';
-import { isReflectBudget } from './budget/actions';
 import { createBudget } from './budget/base';
 import * as prefs from './prefs';
 
 vi.mock('#shared/errors', () => ({
   getBankSyncError: vi.fn(error => `Bank sync error: ${error}`),
-}));
-
-vi.mock('./budget/actions', () => ({
-  isReflectBudget: vi.fn().mockReturnValue(false),
 }));
 
 describe('API handlers', () => {
@@ -75,7 +70,6 @@ describe('API handlers', () => {
 
     afterEach(() => {
       global.currentMonth = null;
-      vi.mocked(isReflectBudget).mockReturnValue(false);
     });
 
     it('envelope budget: income group returns only received', async () => {
@@ -102,7 +96,7 @@ describe('API handlers', () => {
 
     it('tracking budget: income group returns budgeted, received, and balance', async () => {
       sheet.get().meta().budgetType = 'tracking';
-      vi.mocked(isReflectBudget).mockReturnValue(true);
+      await db.update('preferences', { id: 'budgetType', value: 'tracking' });
 
       await createBudget(['2024-05', '2024-06']);
       sheet.get().set('budget202406!budget-income-cat', 6000);

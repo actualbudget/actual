@@ -371,6 +371,7 @@ handlers['api/budget-month'] = async function ({ month }) {
     q('category_groups').select('*'),
   );
   const sheetName = monthUtils.sheetForMonth(month);
+  const isTrackingBudget = isReflectBudget();
 
   function value(name) {
     const v = sheet.get().getCellValue(sheetName, name);
@@ -394,7 +395,7 @@ handlers['api/budget-month'] = async function ({ month }) {
 
     categoryGroups: groups.map(group => {
       if (group.is_income) {
-        if (isReflectBudget()) {
+        if (isTrackingBudget) {
           return {
             ...categoryGroupModel.toExternal(group),
             budgeted: value(`group-budget-${group.id}`),
