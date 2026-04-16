@@ -35,6 +35,7 @@ import * as bindings from '#spreadsheet/bindings';
 
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
 import { AnimatedRefresh } from './AnimatedRefresh';
+import { ForecastModeButton } from './budget/ForecastModeButton';
 import { MonthCountSelector } from './budget/MonthCountSelector';
 import { Link } from './common/Link';
 import { HelpMenu } from './HelpMenu';
@@ -254,11 +255,12 @@ function BudgetTitlebar() {
   const [maxMonths, setMaxMonthsPref] = useGlobalPref('maxMonths');
 
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
       <MonthCountSelector
         maxMonths={maxMonths || 1}
         onChange={value => setMaxMonthsPref(value)}
       />
+      <ForecastModeButton />
     </View>
   );
 }

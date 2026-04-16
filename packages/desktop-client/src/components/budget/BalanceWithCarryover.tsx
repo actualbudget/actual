@@ -91,6 +91,8 @@ type BalanceWithCarryoverProps = Omit<
   goal: Binding<'envelope-budget' | 'tracking-budget', 'goal'>;
   budgeted: Binding<'envelope-budget' | 'tracking-budget', 'budget'>;
   longGoal: Binding<'envelope-budget' | 'tracking-budget', 'long-goal'>;
+  planned?: Binding<'envelope-budget' | 'tracking-budget', 'planned'>;
+  forecastMode?: boolean;
   isDisabled?: boolean;
   shouldInlineGoalStatus?: boolean;
   CarryoverIndicator?: ComponentType<CarryoverIndicatorProps>;
@@ -103,6 +105,8 @@ export function BalanceWithCarryover({
   goal,
   budgeted,
   longGoal,
+  planned,
+  forecastMode = false,
   isDisabled,
   shouldInlineGoalStatus,
   CarryoverIndicator: CarryoverIndicatorComponent = CarryoverIndicator,
@@ -116,6 +120,7 @@ export function BalanceWithCarryover({
   const goalValue = useSheetValue(goal);
   const budgetedValue = useSheetValue(budgeted);
   const longGoalValue = useSheetValue(longGoal);
+  const plannedValue = planned ? (useSheetValue(planned) ?? 0) : 0;
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const getBalanceAmountStyle = useCallback(
     (balanceValue: number) =>
@@ -147,8 +152,11 @@ export function BalanceWithCarryover({
           cursor: 'pointer',
         }),
         ':hover': { textDecoration: 'underline' },
+        ...(forecastMode && plannedValue && plannedValue !== 0 && {
+          fontStyle: 'italic',
+        }),
       }),
-    [getBalanceAmountStyle, isDisabled],
+    [getBalanceAmountStyle, isDisabled, forecastMode, plannedValue],
   );
   const GoalStatusDisplay = useCallback(
     (balanceValue, type) => {

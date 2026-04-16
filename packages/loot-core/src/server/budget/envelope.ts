@@ -1,4 +1,5 @@
 import * as db from '#server/db';
+import * as prefs from '#server/prefs';
 import * as sheet from '#server/sheet';
 import { resolveName } from '#server/spreadsheet/util';
 // @ts-strict-ignore
@@ -31,6 +32,9 @@ function createBlankMonth(categories, sheetName, months) {
 }
 
 export function createCategory(cat, sheetName, prevSheetName) {
+  // Create planned cell for all categories (both income and expense)
+  sheet.get().createStatic(sheetName, `planned-${cat.id}`, 0);
+
   if (!cat.is_income) {
     sheet.get().createStatic(sheetName, `budget-${cat.id}`, 0);
 
@@ -50,13 +54,19 @@ export function createCategory(cat, sheetName, prevSheetName) {
       dependencies: [
         `budget-${cat.id}`,
         `sum-amount-${cat.id}`,
+        `planned-${cat.id}`,
         `${prevSheetName}!carryover-${cat.id}`,
         `${prevSheetName}!leftover-${cat.id}`,
         `${prevSheetName}!leftover-pos-${cat.id}`,
       ],
-      run: (budgeted, spent, prevCarryover, prevLeftover, prevLeftoverPos) => {
+      run: (budgeted, spent, planned, prevCarryover, prevLeftover, prevLeftoverPos) => {
+        // Only include planned amount if forecast mode is enabled
+        const forecastMode = prefs.getPrefs()['budget.forecastMode'];
+        const plannedAmount = forecastMode ? number(planned) : 0;
+
         return safeNumber(
           number(budgeted) +
+            plannedAmount +
             number(spent) +
             (prevCarryover ? number(prevLeftover) : number(prevLeftoverPos)),
         );

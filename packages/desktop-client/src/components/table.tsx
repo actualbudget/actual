@@ -374,7 +374,12 @@ function InputValue({
 
   function setValue_(text) {
     if (valueIsASingleOperator(text)) {
-      setValue(defaultValue + text);
+      // Handle minus sign specially: put it at the beginning for negative numbers
+      if (text === '-' && (defaultValue === '0' || defaultValue === '0.00' || defaultValue === '' || !defaultValue)) {
+        setValue('-');
+      } else {
+        setValue(defaultValue + text);
+      }
     } else {
       setValue(text);
     }

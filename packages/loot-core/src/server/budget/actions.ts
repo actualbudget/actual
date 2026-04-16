@@ -147,6 +147,35 @@ export function setBudget({
   });
 }
 
+export function setPlanned({
+  category,
+  month,
+  amount,
+}: {
+  category: CategoryEntity['id'];
+  month: string;
+  amount: unknown;
+}): Promise<void> {
+  amount = safeNumber(typeof amount === 'number' ? amount : 0);
+  const table = getBudgetTable();
+
+  const existing = db.firstSync<
+    Pick<db.DbZeroBudget | db.DbReflectBudget, 'id'>
+  >(`SELECT id FROM ${table} WHERE month = ? AND category = ?`, [
+    dbMonth(month),
+    category,
+  ]);
+  if (existing) {
+    return db.update(table, { id: existing.id, planned: amount });
+  }
+  return db.insert(table, {
+    id: `${dbMonth(month)}-${category}`,
+    month: dbMonth(month),
+    category,
+    planned: amount,
+  });
+}
+
 export function setGoal({ month, category, goal, long_goal }): Promise<void> {
   const table = getBudgetTable();
   const existing = db.firstSync<

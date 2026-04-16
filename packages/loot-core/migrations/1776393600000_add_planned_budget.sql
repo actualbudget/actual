@@ -1,0 +1,6 @@
+BEGIN TRANSACTION;
+
+ALTER TABLE zero_budgets ADD COLUMN planned INTEGER DEFAULT null;
+ALTER TABLE reflect_budgets ADD COLUMN planned INTEGER DEFAULT null;
+
+COMMIT;

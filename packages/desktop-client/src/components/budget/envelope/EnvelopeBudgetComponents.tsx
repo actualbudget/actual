@@ -1,4 +1,4 @@
-import React, { memo, useRef } from 'react';
+import React, { memo, useRef, useState } from 'react';
 import type { ComponentProps, CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -25,13 +25,14 @@ import type { SheetCellProps } from '#components/table';
 import { useCategoryScheduleGoalTemplateIndicator } from '#hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useFormat } from '#hooks/useFormat';
+import { useMetadataPref } from '#hooks/useMetadataPref';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSheetName } from '#hooks/useSheetName';
 import { useSheetValue } from '#hooks/useSheetValue';
 import { useUndo } from '#hooks/useUndo';
 import type { Binding, SheetFields } from '#spreadsheet';
 import { envelopeBudget } from '#spreadsheet/bindings';
-import type { CategoryGroupMonthProps, CategoryMonthProps } from '..';
+import type { CategoryGroupMonthProps, CategoryMonthProps} from '..';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
@@ -75,6 +76,8 @@ const cellStyle: CSSProperties = {
 };
 
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
+  const [forecastMode = false] = useMetadataPref('budget.forecastMode');
+
   return (
     <View
       style={{
@@ -99,6 +102,14 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           )}
         </EnvelopeCellValue>
       </View>
+      {forecastMode && (
+        <View style={headerLabelStyle}>
+          <Text style={{ color: theme.tableHeaderText }}>
+            <Trans>Planned</Trans>
+          </Text>
+          <CellValueText name="planned-total" value={0} style={cellStyle} />
+        </View>
+      )}
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.tableHeaderText }}>
           <Trans>Spent</Trans>
@@ -123,6 +134,8 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
 });
 
 export function IncomeHeaderMonth() {
+  const [forecastMode = false] = useMetadataPref('budget.forecastMode');
+
   return (
     <Row
       style={{
@@ -132,6 +145,11 @@ export function IncomeHeaderMonth() {
         backgroundColor: theme.budgetCurrentMonth,
       }}
     >
+      {forecastMode && (
+        <View style={{ flex: 1, textAlign: 'right' }}>
+          <Trans>Planned</Trans>
+        </View>
+      )}
       <View style={{ flex: 1, textAlign: 'right' }}>
         <Trans>Received</Trans>
       </View>
@@ -144,6 +162,7 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
   group,
 }: CategoryGroupMonthProps) {
   const { id } = group;
+  const [forecastMode = false] = useMetadataPref('budget.forecastMode');
 
   return (
     <View
@@ -165,6 +184,11 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
           type: 'financial',
         }}
       />
+      {forecastMode && (
+        <Field name="planned" width="flex" style={{ textAlign: 'right' }}>
+          <CellValueText name="planned-group" value={0} style={{ fontWeight: 600, ...styles.tnum }} />
+        </Field>
+      )}
       <EnvelopeSheetCell
         name="spent"
         width="flex"
@@ -203,6 +227,8 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
 }: CategoryMonthProps) {
   const { t } = useTranslation();
   const format = useFormat();
+  const [forecastMode = false] = useMetadataPref('budget.forecastMode');
+  const [editingPlanned, setEditingPlanned] = useState(false);
 
   const budgetMenuTriggerRef = useRef(null);
   const balanceMenuTriggerRef = useRef(null);
@@ -377,7 +403,10 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           exposed={editing}
           focused={editing}
           width="flex"
-          onExpose={() => onEdit(category.id, month)}
+          onExpose={() => {
+            setEditingPlanned(false); // Close planned cell if open
+            onEdit(category.id, month);
+          }}
           style={{ ...(editing && { zIndex: 100 }), ...styles.tnum }}
           textAlign="right"
           valueStyle={{
@@ -413,6 +442,51 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           }}
         />
       </View>
+      {forecastMode && (
+        <EnvelopeSheetCell
+          name="planned"
+          exposed={editingPlanned}
+          focused={editingPlanned}
+          width="flex"
+          onExpose={() => {
+            onEdit(null); // Close budgeted cell if open
+            setEditingPlanned(true);
+          }}
+          textAlign="right"
+          style={{ ...(editingPlanned && { zIndex: 100 }), ...styles.tnum }}
+          valueStyle={{
+            cursor: 'default',
+            margin: 1,
+            padding: '0 4px',
+            borderRadius: 4,
+            ':hover': {
+              boxShadow: 'inset 0 0 0 1px ' + theme.pageTextSubdued,
+              backgroundColor: theme.budgetCurrentMonth,
+            },
+          }}
+          valueProps={{
+            binding: envelopeBudget.catPlanned(category.id),
+            type: 'financial',
+            getValueStyle: makeAmountGrey,
+            formatExpr: format.forEdit,
+            unformatExpr: format.fromEdit,
+          }}
+          inputProps={{
+            onBlur: () => {
+              setEditingPlanned(false);
+            },
+            style: {
+              backgroundColor: theme.budgetCurrentMonth,
+            },
+          }}
+          onSave={(parsedIntegerAmount: number | null) => {
+            onBudgetAction(month, 'planned-amount', {
+              category: category.id,
+              amount: parsedIntegerAmount ?? 0,
+            });
+          }}
+        />
+      )}
       <Field name="spent" width="flex" style={{ textAlign: 'right' }}>
         <View
           data-testid="category-month-spent"
@@ -503,6 +577,8 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             goal={envelopeBudget.catGoal(category.id)}
             budgeted={envelopeBudget.catBudgeted(category.id)}
             longGoal={envelopeBudget.catLongGoal(category.id)}
+            planned={envelopeBudget.catPlanned(category.id)}
+            forecastMode={forecastMode}
             tooltipDisabled={balanceMenuOpen}
           />
         </Button>
@@ -532,8 +608,23 @@ type IncomeGroupMonthProps = {
   month: string;
 };
 export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
+  const [forecastMode = false] = useMetadataPref('budget.forecastMode');
+
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, flexDirection: 'row' }}>
+      {forecastMode && (
+        <Field name="planned" width="flex" style={{ textAlign: 'right' }}>
+          <CellValueText
+            name="planned-income-group"
+            value={0}
+            type="financial"
+            style={{
+              fontWeight: 600,
+              ...styles.tnum,
+            }}
+          />
+        </Field>
+      )}
       <EnvelopeSheetCell
         name="received"
         width="flex"
@@ -559,9 +650,13 @@ export function IncomeCategoryMonth({
   category,
   isLast,
   month,
+  editing,
+  onEdit,
   onShowActivity,
   onBudgetAction,
 }: CategoryMonthProps) {
+  const format = useFormat();
+  const [forecastMode = false] = useMetadataPref('budget.forecastMode');
   const incomeMenuTriggerRef = useRef(null);
   const {
     setMenuOpen: setIncomeMenuOpen,
@@ -572,7 +667,56 @@ export function IncomeCategoryMonth({
   } = useContextMenu();
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, flexDirection: 'row' }}>
+      {forecastMode && (
+        <EnvelopeSheetCell
+          name="planned"
+          exposed={editing}
+          focused={editing}
+          width="flex"
+          onExpose={() => onEdit(category.id, month)}
+          textAlign="right"
+          style={{
+            ...(editing && { zIndex: 100 }),
+            ...styles.tnum,
+            ...(isLast && { borderBottomWidth: 0 }),
+            backgroundColor: monthUtils.isCurrentMonth(month)
+              ? theme.budgetCurrentMonth
+              : theme.budgetOtherMonth,
+          }}
+          valueStyle={{
+            cursor: 'default',
+            margin: 1,
+            padding: '0 4px',
+            borderRadius: 4,
+            ':hover': {
+              boxShadow: 'inset 0 0 0 1px ' + theme.pageTextSubdued,
+              backgroundColor: theme.budgetCurrentMonth,
+            },
+          }}
+          valueProps={{
+            binding: envelopeBudget.catPlanned(category.id),
+            type: 'financial',
+            getValueStyle: makeAmountGrey,
+            formatExpr: format.forEdit,
+            unformatExpr: format.fromEdit,
+          }}
+          inputProps={{
+            onBlur: () => {
+              onEdit(null);
+            },
+            style: {
+              backgroundColor: theme.budgetCurrentMonth,
+            },
+          }}
+          onSave={(parsedIntegerAmount: number | null) => {
+            onBudgetAction(month, 'planned-amount', {
+              category: category.id,
+              amount: parsedIntegerAmount ?? 0,
+            });
+          }}
+        />
+      )}
       <Field
         name="received"
         width="flex"
@@ -623,6 +767,8 @@ export function IncomeCategoryMonth({
               goal={envelopeBudget.catGoal(category.id)}
               budgeted={envelopeBudget.catBudgeted(category.id)}
               longGoal={envelopeBudget.catLongGoal(category.id)}
+              planned={envelopeBudget.catPlanned(category.id)}
+              forecastMode={forecastMode}
             />
           </Button>
           <Popover

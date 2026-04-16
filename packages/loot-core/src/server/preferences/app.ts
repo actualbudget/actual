@@ -11,6 +11,7 @@ import {
   savePrefs as _saveMetadataPrefs,
 } from '#server/prefs';
 import { getServer } from '#server/server-config';
+import * as sheet from '#server/sheet';
 import { undoable } from '#server/undo';
 import { stringToInteger } from '#shared/util';
 import type { GlobalPrefs, MetadataPrefs, SyncedPrefs } from '#types/prefs';
@@ -208,6 +209,12 @@ async function saveMetadataPrefs(prefsToSet: MetadataPrefs) {
   }
 
   await _saveMetadataPrefs(prefsToSet);
+
+  // If forecast mode changed, trigger recalculation of all leftover cells
+  if ('budget.forecastMode' in prefsToSet) {
+    sheet.recalculateForecastDependentCells();
+  }
+
   return 'ok';
 }
 

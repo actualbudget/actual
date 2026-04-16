@@ -26,6 +26,7 @@ import { Field, SheetCell } from '#components/table';
 import type { SheetCellProps } from '#components/table';
 import { useCategoryScheduleGoalTemplateIndicator } from '#hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useFormat } from '#hooks/useFormat';
+import { useMetadataPref } from '#hooks/useMetadataPref';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSheetValue } from '#hooks/useSheetValue';
 import { useUndo } from '#hooks/useUndo';
@@ -68,6 +69,8 @@ const cellStyle: CSSProperties = {
 };
 
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
+  const [forecastMode = false] = useMetadataPref('budget.forecastMode');
+
   return (
     <View
       style={{
@@ -89,6 +92,14 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           {props => <CellValueText {...props} style={cellStyle} />}
         </TrackingCellValue>
       </View>
+      {forecastMode && (
+        <View style={headerLabelStyle}>
+          <Text style={{ color: theme.tableHeaderText }}>
+            <Trans>Planned</Trans>
+          </Text>
+          <CellValueText name="planned-total" value={0} style={cellStyle} />
+        </View>
+      )}
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.tableHeaderText }}>
           <Trans>Spent</Trans>
@@ -113,6 +124,8 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
 });
 
 export function IncomeHeaderMonth() {
+  const [forecastMode = false] = useMetadataPref('budget.forecastMode');
+
   return (
     <View
       style={{
@@ -121,6 +134,13 @@ export function IncomeHeaderMonth() {
         paddingBottom: 5,
       }}
     >
+      {forecastMode && (
+        <View style={headerLabelStyle}>
+          <Text style={{ color: theme.tableHeaderText }}>
+            <Trans>Planned</Trans>
+          </Text>
+        </View>
+      )}
       <View style={headerLabelStyle}>
         <Text style={{ color: theme.tableHeaderText }}>
           <Trans>Budgeted</Trans>
@@ -140,6 +160,7 @@ export const GroupMonth = memo(function GroupMonth({
   group,
 }: CategoryGroupMonthProps) {
   const { id } = group;
+  const [forecastMode = false] = useMetadataPref('budget.forecastMode');
 
   return (
     <View
@@ -161,6 +182,11 @@ export const GroupMonth = memo(function GroupMonth({
           type: 'financial',
         }}
       />
+      {forecastMode && (
+        <Field name="planned" width="flex" style={{ textAlign: 'right' }}>
+          <CellValueText name="planned-group" value={0} style={{ fontWeight: 600, ...styles.tnum }} />
+        </Field>
+      )}
       <TrackingSheetCell
         name="spent"
         width="flex"
@@ -202,6 +228,7 @@ export const CategoryMonth = memo(function CategoryMonth({
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
   const format = useFormat();
+  const [forecastMode = false] = useMetadataPref('budget.forecastMode');
 
   const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
   const triggerBalanceMenuRef = useRef(null);
@@ -390,6 +417,48 @@ export const CategoryMonth = memo(function CategoryMonth({
           }}
         />
       </View>
+      {forecastMode && (
+        <TrackingSheetCell
+          name="planned"
+          exposed={editing}
+          focused={editing}
+          width="flex"
+          onExpose={() => onEdit(category.id, month)}
+          textAlign="right"
+          style={{ ...(editing && { zIndex: 100 }), ...styles.tnum }}
+          valueStyle={{
+            cursor: 'default',
+            margin: 1,
+            padding: '0 4px',
+            borderRadius: 4,
+            ':hover': {
+              boxShadow: 'inset 0 0 0 1px ' + theme.pageTextSubdued,
+              backgroundColor: theme.budgetCurrentMonth,
+            },
+          }}
+          valueProps={{
+            binding: trackingBudget.catPlanned(category.id),
+            type: 'financial',
+            getValueStyle: makeAmountGrey,
+            formatExpr: format.forEdit,
+            unformatExpr: format.fromEdit,
+          }}
+          inputProps={{
+            onBlur: () => {
+              onEdit(null);
+            },
+            style: {
+              backgroundColor: theme.budgetCurrentMonth,
+            },
+          }}
+          onSave={(parsedIntegerAmount: number | null) => {
+            onBudgetAction(month, 'planned-amount', {
+              category: category.id,
+              amount: parsedIntegerAmount ?? 0,
+            });
+          }}
+        />
+      )}
       <Field name="spent" width="flex" style={{ textAlign: 'right' }}>
         <View
           data-testid="category-month-spent"

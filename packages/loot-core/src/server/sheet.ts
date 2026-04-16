@@ -229,6 +229,7 @@ export async function loadUserBudgets(db: typeof DbModule): Promise<void> {
       );
       sheet.set(`${sheetName}!goal-${budget.category}`, budget.goal);
       sheet.set(`${sheetName}!long-goal-${budget.category}`, budget.long_goal);
+      sheet.set(`${sheetName}!planned-${budget.category}`, budget.planned || 0);
     }
   }
 
@@ -277,4 +278,28 @@ export function waitOnSpreadsheet(): Promise<void> {
       resolve(undefined);
     }
   });
+}
+
+export function recalculateForecastDependentCells(): void {
+  if (!globalSheet) {
+    return;
+  }
+
+  // Get all category IDs from the spreadsheet nodes
+  const categoryIds = new Set<string>();
+  for (const [nodeName] of globalSheet.nodes) {
+    const match = nodeName.match(/!leftover-(.+)$/);
+    if (match) {
+      categoryIds.add(match[1]);
+    }
+  }
+
+  // Trigger recalculation by setting each leftover cell to itself
+  globalSheet.startTransaction();
+  for (const [nodeName, node] of globalSheet.nodes) {
+    if (nodeName.includes('!leftover-')) {
+      globalSheet.set(nodeName, node.value);
+    }
+  }
+  globalSheet.endTransaction();
 }

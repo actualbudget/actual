@@ -142,6 +142,9 @@ function handleBudgetChange(budget) {
     sheet
       .get()
       .set(`${sheetName}!long-goal-${budget.category}`, budget.long_goal);
+    sheet
+      .get()
+      .set(`${sheetName}!planned-${budget.category}`, budget.planned || 0);
   }
 }
 

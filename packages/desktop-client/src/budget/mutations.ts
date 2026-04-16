@@ -501,6 +501,14 @@ type ApplyBudgetActionPayload =
       };
     }
   | {
+      type: 'planned-amount';
+      month: string;
+      args: {
+        category: CategoryEntity['id'];
+        amount: number;
+      };
+    }
+  | {
       type: 'copy-last';
       month: string;
       args?: never;
@@ -659,6 +667,13 @@ export function useBudgetActions() {
       switch (type) {
         case 'budget-amount':
           await send('budget/budget-amount', {
+            month,
+            category: args.category,
+            amount: args.amount,
+          });
+          return null;
+        case 'planned-amount':
+          await send('budget/planned-amount', {
             month,
             category: args.category,
             amount: args.amount,

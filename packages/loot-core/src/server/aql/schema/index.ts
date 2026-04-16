@@ -172,6 +172,7 @@ export const schema = {
     carryover: f('integer'),
     goal: f('integer'),
     long_goal: f('integer'),
+    planned: f('integer'),
   },
   zero_budgets: {
     id: f('id'),
@@ -181,6 +182,7 @@ export const schema = {
     carryover: f('integer'),
     goal: f('integer'),
     long_goal: f('integer'),
+    planned: f('integer'),
   },
   dashboard_pages: {
     id: f('id'),

@@ -184,6 +184,7 @@ export type DbReflectBudget = {
   carryover: number;
   goal: number;
   long_goal: number;
+  planned?: number;
 };
 
 export type DbZeroBudgetMonth = {
@@ -199,6 +200,7 @@ export type DbZeroBudget = {
   carryover: number;
   goal: number;
   long_goal: number;
+  planned?: number;
 };
 
 export type DbTransactionFilter = {
