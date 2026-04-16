@@ -1,3 +1,5 @@
+import * as db from '#server/db';
+import * as sheet from '#server/sheet';
 // @ts-strict-ignore
 import { getBankSyncError } from '#shared/errors';
 import type { ServerHandlers } from '#types/server-handlers';
@@ -5,8 +7,6 @@ import type { ServerHandlers } from '#types/server-handlers';
 import { installAPI } from './api';
 import { isReflectBudget } from './budget/actions';
 import { createBudget } from './budget/base';
-import * as db from '#server/db';
-import * as sheet from '#server/sheet';
 import * as prefs from './prefs';
 
 vi.mock('#shared/errors', () => ({
