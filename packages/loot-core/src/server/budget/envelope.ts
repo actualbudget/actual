@@ -164,15 +164,13 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
     dependencies: [
       'total-income',
       'total-income-planned',
-      'total-planned',
       'from-last-month',
     ],
-    run: (income, incomePlanned, totalPlanned, fromLastMonth) => {
+    run: (income, incomePlanned, fromLastMonth) => {
       const forecastMode = prefs.getPrefs()['budget.forecastMode'];
       const plannedIncome = forecastMode ? number(incomePlanned) : 0;
-      const plannedExpenses = forecastMode ? number(totalPlanned) : 0;
       return safeNumber(
-        number(income) + plannedIncome + plannedExpenses + number(fromLastMonth),
+        number(income) + plannedIncome + number(fromLastMonth),
       );
     },
   });
