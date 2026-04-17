@@ -15,6 +15,7 @@ type BudgetMonthCategory = {
   spent?: number;
   budgeted?: number;
   balance?: number;
+  received?: number;
 };
 
 type BudgetMonthGroup = {
@@ -29,18 +30,19 @@ type BudgetMonthResponse = {
   totalIncome: number;
   fromLastMonth: number;
   forNextMonth: number;
+  lastMonthOverspent: number;
   toBudget: number;
 };
 
 type AggregatedBudget = {
   toBudget: number;
+  fromPreviousMonth: number;
+  lastMonthOverspent: number;
   categoryGroupsMap: Map<string, BudgetMonthGroup>;
 };
 
 type SankeyNode = {
   name: string;
-  toBudget?: number;
-  isNegative?: boolean;
   percentageLabel?: string;
 };
 
@@ -48,7 +50,6 @@ type SankeyLink = {
   source: number;
   target: number;
   value: number;
-  isNegative?: boolean;
   tooltipInfo?: Array<{ name: string; value: number }>;
 };
 
@@ -58,13 +59,137 @@ type SankeyData = {
 };
 
 type CategoryEntry = {
-  mainCategory: string;
-  group: string;
+  categoryGroup: string;
+  categoryGroupId: string;
+  category?: string;
+  categoryId?: string;
   value: number;
-  isNegative?: boolean;
+  isIncome: boolean;
+  accountName: string;
+  accountId: string;
+  payeeName?: string;
+  payeeId?: string;
 };
 
 type CategoryOrder = Array<{ mainCategory: string; categories: string[] }>;
+
+// Helper functions to convert raw category data into a directed, weighted graph
+// and convert that into the nodes/links format expected by the Sankey component.
+type NodeKey = string;
+type Edge = { to: NodeKey; value: number };
+type Graph = Record<NodeKey, Edge[]>;
+type NodeData = { attributes: any };
+
+function createGraphFromCategoryData(categoryData: CategoryEntry[]): {
+  nodes: Record<NodeKey, NodeData>;
+  graph: Graph;
+} {
+  const graph: Graph = {};
+  const nodes: Record<NodeKey, NodeData> = {};
+  // Add all nodes
+  for (const entry of categoryData) {
+    if (entry.isIncome) {
+      nodes[entry.categoryId] = {
+        attributes: { type: 'income_category', name: entry.category },
+      };
+      nodes[entry.payeeId] = {
+        attributes: { type: 'payee', name: entry.payeeName },
+      };
+    } else {
+      nodes[entry.categoryId] = {
+        attributes: { type: 'category', name: entry.category },
+      };
+      nodes[entry.accountId] = {
+        attributes: { type: 'account', name: entry.accountName },
+      };
+      nodes[entry.categoryGroupId] = {
+        attributes: { type: 'category_group', name: entry.categoryGroup },
+      };
+    }
+  }
+
+  // Add edges: income payee -> income category -> account -> category group -> category
+  for (const entry of categoryData) {
+    if (entry.isIncome) {
+      // Income category -> account
+      graph[entry.categoryId] = graph[entry.categoryId] || [];
+      const existingEdge = graph[entry.categoryId].find(
+        e => e.to === entry.accountId,
+      );
+      if (existingEdge) {
+        existingEdge.value += entry.value;
+      } else {
+        graph[entry.categoryId].push({
+          to: entry.accountId,
+          value: entry.value,
+        });
+      }
+
+      // Payee -> income category
+      if (!entry.payeeId) continue; // skip if no payee
+      graph[entry.payeeId] = graph[entry.payeeId] || [];
+      const existingPayeeEdge = graph[entry.payeeId].find(
+        e => e.to === entry.categoryId,
+      );
+      if (existingPayeeEdge) {
+        existingPayeeEdge.value += entry.value;
+      } else {
+        graph[entry.payeeId].push({ to: entry.categoryId, value: entry.value });
+      }
+    } else {
+      // Account -> category group
+      graph[entry.accountId] = graph[entry.accountId] || [];
+      const existingEdge = graph[entry.accountId].find(
+        e => e.to === entry.categoryGroupId,
+      );
+      if (existingEdge) {
+        existingEdge.value += entry.value;
+      } else {
+        graph[entry.accountId].push({
+          to: entry.categoryGroupId,
+          value: entry.value,
+        });
+      }
+
+      // Category group -> category
+      graph[entry.categoryGroupId] = graph[entry.categoryGroupId] || [];
+      const existingCatEdge = graph[entry.categoryGroupId].find(
+        e => e.to === entry.categoryId,
+      );
+      if (existingCatEdge) {
+        existingCatEdge.value += entry.value;
+      } else {
+        graph[entry.categoryGroupId].push({
+          to: entry.categoryId,
+          value: entry.value,
+        });
+      }
+    }
+  }
+
+  return { nodes, graph };
+}
+
+function convertToSankeyData(
+  graph: Graph,
+  nodeData: Record<NodeKey, NodeData>,
+): SankeyData {
+  const nodes: SankeyNode[] = Object.keys(nodeData).map(key => ({
+    name: nodeData[key].attributes.name,
+    attributes: nodeData[key].attributes,
+    key,
+  }));
+
+  const links: SankeyLink[] = Object.entries(graph).flatMap(([from, edges]) =>
+    edges.map(({ to, value }) => ({
+      source: nodes.findIndex(node => node.key === from) || 0,
+      target: nodes.findIndex(node => node.key === to) || 0,
+      value,
+    })),
+  );
+
+  return { nodes, links };
+}
 
 // Filter budget category groups to only those matching the user's conditions.
 // Budget data is fetched unconditionally from api/budget-month, so we must
@@ -255,9 +380,19 @@ export function createBudgetSpreadsheet(
       ),
     );
 
+    console.log(
+      'Budget month responses:',
+      JSON.stringify(monthResponses, null, 2),
+    );
+
     const aggregated = monthResponses.reduce<AggregatedBudget>(
-      (acc, response) => {
+      (acc, response, index) => {
         acc.toBudget += response.toBudget;
+
+        if (index === 0) {
+          acc.fromPreviousMonth = response.fromLastMonth;
+        }
+        acc.lastMonthOverspent += response.lastMonthOverspent;
 
         for (const group of response.categoryGroups) {
           const existingGroup = acc.categoryGroupsMap.get(group.id);
@@ -282,6 +417,8 @@ export function createBudgetSpreadsheet(
             existingCat.spent = (existingCat.spent ?? 0) + (cat.spent ?? 0);
             existingCat.balance =
               (existingCat.balance ?? 0) + (cat.balance ?? 0);
+            existingCat.received =
+              (existingCat.received ?? 0) + (cat.received ?? 0);
           }
         }
 
@@ -289,9 +426,13 @@ export function createBudgetSpreadsheet(
       },
       {
         toBudget: 0,
+        fromPreviousMonth: 0,
+        lastMonthOverspent: 0,
         categoryGroupsMap: new Map<string, BudgetMonthGroup>(),
       },
     );
+
+    console.log('Aggregated budget:', JSON.stringify(aggregated, null, 2));
 
     const categoryGroups = Array.from(aggregated.categoryGroupsMap.values());
 
@@ -301,29 +442,101 @@ export function createBudgetSpreadsheet(
       conditionsOp,
     );
 
+    console.log(
+      'Filtered category groups:',
+      JSON.stringify(filteredCategoryGroups, null, 2),
+    );
+
     const categoryData: CategoryEntry[] = filteredCategoryGroups
-      .filter(group => !group.is_income)
       .flatMap(group =>
-        group.categories.map(cat => ({
-          mainCategory: group.name,
-          group: cat.name,
-          value: cat.budgeted ?? 0,
-        })),
-      );
+        group.categories.map(cat => {
+          const rawValue = group.is_income
+            ? (cat.received ?? 0)
+            : (cat.budgeted ?? 0);
+          return {
+            categoryGroup: group.name,
+            categoryGroupId: group.id,
+            category: cat.name,
+            categoryId: cat.id,
+            // Positive income received → inflow; positive expense budgeted → outflow.
+            // A negative value flips the direction: a negatively-budgeted expense category
+            // returns money to "Available income" (inflow), and vice-versa.
+            isIncome: group.is_income ? rawValue > 0 : rawValue < 0,
+            accountName: 'Available income',
+            accountId: 'Available income',
+            value: Math.abs(rawValue),
+          };
+        }),
+      )
+      .filter(entry => entry.value > 0);
+
+    console.log('Category Data:', JSON.stringify(categoryData, null, 2));
+
+    // Add fromLastMonth as a synthetic node leading to Budgeted, to visualize carryover from previous month
+    if (aggregated.fromPreviousMonth !== 0) {
+      categoryData.push({
+        categoryGroup: 'Previous Month',
+        categoryGroupId: 'previous_month',
+        category: 'From ' + monthUtils.prevMonth(start),
+        categoryId: 'previous_month_carryover',
+        isIncome: true,
+        accountName: 'Available income',
+        accountId: 'Available income',
+        value: Math.abs(aggregated.fromPreviousMonth),
+      });
+    }
+
+    // Get next months carryover as a synthetic node leading out of Budgeted, to visualize how much was held back for next month
+    const nextMonthResponse = (await send('api/budget-month', {
+      month: monthUtils.nextMonth(end),
+    })) as unknown as BudgetMonthResponse;
+    const forNextMonth = nextMonthResponse.fromLastMonth ?? 0;
+    if (forNextMonth !== 0) {
+      categoryData.push({
+        categoryGroup: 'For ' + monthUtils.nextMonth(end),
+        categoryGroupId: 'next_month',
+        isIncome: false,
+        accountName: 'Available income',
+        accountId: 'Available income',
+        value: Math.abs(forNextMonth),
+      });
+    }
+
+    // Add last month overspent as a synthetic node leading out of Budgeted, to visualize how much we overspent last month (if any)
+    if (aggregated.lastMonthOverspent !== 0) {
+      categoryData.push({
+        categoryGroup: 'Overspent amounts',
+        categoryGroupId: 'overspent',
+        isIncome: false,
+        accountName: 'Available income',
+        accountId: 'Available income',
+        value: Math.abs(aggregated.lastMonthOverspent),
+      });
+    }
+
+    console.log(
+      'Next month budget response:',
+      JSON.stringify(nextMonthResponse, null, 2),
+    );
 
     const { toBudget } = aggregated;
 
-    setData(
-      transformToSankeyData(
-        categoryData,
-        toBudget,
-        'Budgeted',
-        topNcategories,
-        globalOther,
-        groupSort,
-        categoryOrder,
-      ),
-    );
+    // setData(
+    //   transformToSankeyData(
+    //     categoryData,
+    //     toBudget,
+    //     'Budgeted',
+    //     topNcategories,
+    //     globalOther,
+    //     groupSort,
+    //     categoryOrder,
+    //   ),
+    // );
+
+    const { nodes, graph } = createGraphFromCategoryData(categoryData);
+    console.log('Nodes:', nodes);
+    console.log('Graph:', graph);
+    setData(convertToSankeyData(graph, nodes));
   };
 }
 
@@ -357,57 +570,84 @@ export function createTransactionsSpreadsheet(
     );
 
     // convert retrieved data into the proper sankey format
-    setData(
-      transformToSankeyData(
-        categoryData,
-        0,
-        'Spent',
-        topNcategories,
-        globalOther,
-        groupSort,
-        categoryOrder,
-      ),
-    );
+    // setData(
+    //   transformToSankeyData(
+    //     categoryData,
+    //     0,
+    //     'Spent',
+    //     topNcategories,
+    //     globalOther,
+    //     groupSort,
+    //     categoryOrder,
+    //   ),
+    // );
+    const { nodes, graph } = createGraphFromCategoryData(categoryData);
+    setData(convertToSankeyData(graph, nodes));
   };
 }
 
 // retrieve sum of group expenses
 async function fetchCategoryData(
-  categories: CategoryGroupEntity[],
+  categoryGroups: CategoryGroupEntity[],
   conditionsOpKey: string = '$and',
   filters: unknown[] = [],
   start: string,
   end: string,
 ): Promise<CategoryEntry[]> {
   const nested = await Promise.all(
-    categories.map(async (mainCategory: CategoryGroupEntity) => {
+    categoryGroups.map(async (categoryGroup: CategoryGroupEntity) => {
       const entries = await Promise.all(
-        (mainCategory.categories || [])
-          .filter(group => !group?.is_income)
-          .map(async group => {
-            const results = await aqlQuery(
-              q('transactions')
-                .filter({ [conditionsOpKey]: filters })
-                .filter({
-                  $and: [
-                    { date: { $gte: monthUtils.firstDayOfMonth(start) } },
-                    { date: { $lte: monthUtils.lastDayOfMonth(end) } },
-                  ],
-                })
-                .filter({ category: group.id })
-                .calculate({ $sum: '$amount' }),
+        (categoryGroup.categories || []).map(async category => {
+          const results = await aqlQuery(
+            q('transactions')
+              .filter({ [conditionsOpKey]: filters })
+              .filter({
+                $and: [
+                  { date: { $gte: monthUtils.firstDayOfMonth(start) } },
+                  { date: { $lte: monthUtils.lastDayOfMonth(end) } },
+                ],
+              })
+              .filter({ category: category.id })
+              .groupBy(
+                categoryGroup.is_income
+                  ? [
+                      { $id: '$category' },
+                      { $id: '$account' },
+                      { $id: '$payee' },
+                    ]
+                  : [{ $id: '$category' }, { $id: '$account' }],
+              )
+              .select([
+                { accountId: { $id: '$account.id' } },
+                { accountName: { $id: '$account.name' } },
+                { amount: { $sum: '$amount' } },
+                { payeeId: { $id: '$payee.id' } },
+                { payeeName: { $id: '$payee.name' } },
+              ]),
+          );
+          return results.data
+            .filter(row => categoryGroup.is_income || (row.amount ?? 0) < 0)
+            .map(
+              row =>
+                ({
+                  categoryGroup: categoryGroup.name,
+                  categoryGroupId: categoryGroup.id,
+                  category: category.name,
+                  categoryId: category.id,
+                  value: Math.abs(row.amount ?? 0),
+                  isIncome: categoryGroup.is_income,
+                  accountName: row.accountName ?? '',
+                  accountId: row.accountId ?? '',
+                  payeeName: row.payeeName ?? '',
+                  payeeId: row.payeeId ?? '',
+                }) satisfies CategoryEntry,
             );
-            return {
-              mainCategory: mainCategory.name,
-              group: group.name,
-              value: results.data * -1,
-            } satisfies CategoryEntry;
-          }),
+        }),
       );
-      return entries;
+      return entries.flat();
     }),
   );
-  return nested.flat();
+  return nested.flat().filter(e => e.value > 0);
 }
 
 type LeafState = {

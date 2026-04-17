@@ -83,6 +83,8 @@ function SankeyLink({
   );
 }
 
+const HIDDEN_PREFIX = '__hidden__';
+
 type SankeyNodeProps = {
   x: number;
   y: number;
@@ -105,6 +107,9 @@ function SankeyNode({
   containerHeight,
   showPercentages,
 }: SankeyNodeProps) {
+  if (payload.name?.startsWith(HIDDEN_PREFIX)) {
+    return null;
+  }
   const privacyMode = usePrivacyMode();
   const format = useFormat();
   const isOut = x + width + 6 > containerWidth;
@@ -167,7 +172,7 @@ function SankeyNode({
       {renderText(
         showPercentages && payload.percentageLabel
           ? payload.percentageLabel
-          : format(payload.value, 'financial'),
+          : format(Math.round(payload.value), 'financial'),
         height / 2 + 13,
         11,
         0.5,
@@ -239,18 +244,20 @@ export function SankeyGraph({
                 showPercentages={showPercentages}
               />
             )}
-            link={props => (
-              <SankeyLink
-                {...props}
-                isHovered={hoveredLinkIndex === props.index}
-                onMouseEnter={() => setHoveredLinkIndex(props.index)}
-                onMouseLeave={() => setHoveredLinkIndex(null)}
-                color={
-                  sourceColorMap.get(props.payload.source.name) ??
-                  theme.reportsGray
-                }
-              />
-            )}
+            link={props =>
+              props.payload?.source?.name?.startsWith(HIDDEN_PREFIX) ? null : (
+                <SankeyLink
+                  {...props}
+                  isHovered={hoveredLinkIndex === props.index}
+                  onMouseEnter={() => setHoveredLinkIndex(props.index)}
+                  onMouseLeave={() => setHoveredLinkIndex(null)}
+                  color={
+                    sourceColorMap.get(props.payload.source.name) ??
+                    theme.reportsGray
+                  }
+                />
+              )
+            }
             sort={false}
             iterations={1000}
             nodePadding={23}
@@ -300,7 +307,7 @@ export function SankeyGraph({
                               : undefined,
                           }}
                         >
-                          {format(value, 'financial')}
+                          {format(Math.round(value), 'financial')}
                         </div>
                         {tooltipInfo && tooltipInfo.length > 0 && (
                           <div
@@ -316,7 +323,7 @@ export function SankeyGraph({
                                       : undefined,
                                   }}
                                 >
-                                  {format(item.value, 'financial')}
+                                  {format(Math.round(item.value), 'financial')}
                                 </span>
                                 )
                               </div>
