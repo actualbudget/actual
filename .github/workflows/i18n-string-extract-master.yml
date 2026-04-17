@@ -60,7 +60,8 @@ jobs:
           ssh-key: ${{ secrets.STRING_IMPORT_DEPLOY_KEY }}
           repository: actualbudget/translations
           path: translations
-          persist-credentials: false
+          # Need to be able to push back extracted strings
+          persist-credentials: true
       - name: Generate i18n strings
         working-directory: actual
         run: |
