@@ -1,3 +1,5 @@
+import * as fsPromises from 'fs/promises';
+import * as os from 'os';
 import * as path from 'path';
 
 import { vi } from 'vitest';
@@ -19,3 +21,11 @@ vi.mock(
 );
 
 global.IS_TESTING = true;
+
+// Shared integration test lives in a filesystem-backed tmp dir.
+const dataDir = path.join(
+  os.tmpdir(),
+  `api-it-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+);
+await fsPromises.mkdir(dataDir, { recursive: true });
+globalThis.__API_DATA_DIR__ = dataDir;
