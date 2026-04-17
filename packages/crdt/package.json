@@ -20,9 +20,9 @@
     }
   },
   "scripts": {
-    "build:node": "tsgo",
+    "build:node": "tsgo -p tsconfig.build.json",
     "proto:generate": "./bin/generate-proto",
-    "build": "rm -rf dist && yarn run build:node",
+    "build": "rm -rf dist && yarn run build:node && cp src/proto/sync_pb.js dist/proto/sync_pb.js",
     "test": "vitest --run",
     "typecheck": "tsgo -b"
   },

@@ -416,6 +416,16 @@
       "rules": {
         "eslint/no-empty-function": "off"
       }
+    },
+    // crdt enforces the repo's "TODO: enable this" typescript rules as errors
+    {
+      "files": ["packages/crdt/**/*"],
+      "rules": {
+        "typescript/no-misused-spread": "error",
+        "typescript/no-base-to-string": "error",
+        "typescript/no-unsafe-unary-minus": "error",
+        "typescript/no-unsafe-type-assertion": "error"
+      }
     }
   ]
 }
