@@ -49,6 +49,12 @@ function copyMigrationsAndDefaultDb() {
         throw new Error(`default-db.sqlite not found at ${defaultDbPath}`);
       }
       fs.copyFileSync(defaultDbPath, path.join(distDir, 'default-db.sqlite'));
+
+      // Browser consumers need sql.js' WASM to be served at the same origin
+      // as the bundle. Ship it alongside dist/ so downstream apps just point
+      // a static handler at dist and don't have to reach into node_modules.
+      const sqlJsWasm = require.resolve('@jlongster/sql.js/dist/sql-wasm.wasm');
+      fs.copyFileSync(sqlJsWasm, path.join(distDir, 'sql-wasm.wasm'));
     },
   };
 }

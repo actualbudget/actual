@@ -1,11 +1,22 @@
 import path from 'path';
 
 import { defineConfig } from 'vite';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import peggyLoader from 'vite-plugin-peggy-loader';
 
 const distDir = path.resolve(__dirname, 'dist');
 
 export default defineConfig({
+  // loot-core's browser platform code reads process.env.PUBLIC_URL etc.
+  // directly. Inline the values we care about; anything else falls back to
+  // the `{}` inside the nodePolyfills process shim.
+  define: {
+    'process.env.PUBLIC_URL': JSON.stringify('/'),
+    'process.env.NODE_ENV': JSON.stringify('production'),
+    'process.env.ACTUAL_DATA_DIR': 'undefined',
+    'process.env.ACTUAL_SERVER_URL': 'undefined',
+    'process.env.ACTUAL_DOCUMENT_DIR': JSON.stringify('/documents'),
+  },
   build: {
     target: 'esnext',
     outDir: distDir,
@@ -22,28 +33,28 @@ export default defineConfig({
       },
     },
   },
-  plugins: [peggyLoader()],
+  plugins: [
+    peggyLoader(),
+    nodePolyfills({
+      include: [
+        'process',
+        'buffer',
+        'stream',
+        'path',
+        'crypto',
+        'timers',
+        'util',
+        'zlib',
+        'fs',
+        'assert',
+      ],
+      globals: {
+        process: true,
+        Buffer: true,
+        global: true,
+      },
+    }),
+  ],
   // Intentionally no resolve.conditions: ['api'] — omitting it causes
   // loot-core's default (browser) platform files to be selected.
-  resolve: {
-    alias: {
-      // The shared integration spec imports '../index' (Node entry). Under
-      // the browser test config we reroute it to the browser entry so the
-      // same spec runs against the browser build's init/shutdown.
-      [path.resolve(__dirname, 'index.ts')]: path.resolve(
-        __dirname,
-        'index.browser.ts',
-      ),
-    },
-  },
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./test/setup.browser.ts'],
-    include: ['test/integration.test.ts'],
-    onConsoleLog(log: string, type: 'stdout' | 'stderr'): boolean | void {
-      return type === 'stderr';
-    },
-    maxWorkers: 2,
-  },
 });
