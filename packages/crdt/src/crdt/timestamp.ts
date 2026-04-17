@@ -312,9 +312,7 @@ export class Timestamp {
 
   static ClockDriftError = class ClockDriftError extends Error {
     constructor(...args: unknown[]) {
-      super(
-        ['maximum clock drift exceeded'].concat(args as string[]).join(' '),
-      );
+      super(['maximum clock drift exceeded', ...args.map(String)].join(' '));
       this.name = 'ClockDriftError';
     }
   };

@@ -44,7 +44,8 @@ describe('Timestamp', function () {
         '9999-12-31T23:59:59.999Z-FFFF-10000000000000000',
       ];
       for (const invalidInput of invalidInputs) {
-        expect(Timestamp.parse(invalidInput as string)).toBe(null);
+        // @ts-expect-error we intentionally pass invalid inputs
+        expect(Timestamp.parse(invalidInput)).toBe(null);
       }
     });
 

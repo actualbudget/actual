@@ -1,5 +1,6 @@
 import React, { createRef, PureComponent, useEffect, useMemo } from 'react';
 import type { ReactElement, RefObject } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans } from 'react-i18next';
 import { Navigate, useLocation, useParams } from 'react-router';
 
@@ -43,6 +44,7 @@ import {
   useUpdateAccountMutation,
 } from '#accounts';
 import { markAccountRead } from '#accounts/accountsSlice';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
 import { TransactionList } from '#components/transactions/TransactionList';
 import { validateAccountName } from '#components/util/accountValidation';
@@ -1677,6 +1679,7 @@ class AccountInternal extends PureComponent<
       this.setState(state => ({
         sort: {
           ...state.sort,
+          field: headerClicked,
           ascDesc,
         },
       }));
@@ -2030,48 +2033,50 @@ export function Account() {
     createPayee.mutateAsync({ name });
 
   return (
-    <SchedulesProvider query={schedulesQuery}>
-      <SplitsExpandedProvider
-        initialMode={expandSplits ? 'collapse' : 'expand'}
-      >
-        <AccountHack
-          newTransactions={newTransactions}
-          matchedTransactions={matchedTransactions}
-          accounts={accounts}
-          failedAccounts={failedAccounts}
-          dateFormat={dateFormat}
-          hideFraction={String(hideFraction) === 'true'}
-          expandSplits={expandSplits}
-          showBalances={String(showBalances) === 'true'}
-          setShowBalances={showBalances =>
-            setShowBalances(String(showBalances))
-          }
-          showNetWorthChart={String(showNetWorthChart) === 'true'}
-          setShowNetWorthChart={val => setShowNetWorthChart(String(val))}
-          showCleared={String(hideCleared) !== 'true'}
-          setShowCleared={val => setHideCleared(String(!val))}
-          showReconciled={String(hideReconciled) !== 'true'}
-          setShowReconciled={val => setHideReconciled(String(!val))}
-          showExtraBalances={String(showExtraBalances) === 'true'}
-          setShowExtraBalances={extraBalances =>
-            setShowExtraBalances(String(extraBalances))
-          }
-          payees={payees}
-          modalShowing={modalShowing}
-          accountsSyncing={accountsSyncing}
-          filterConditions={filterConditions}
-          categoryGroups={categoryGroups}
-          accountId={params.id}
-          categoryId={location?.state?.categoryId}
-          location={location}
-          savedFilters={savedFiters}
-          onReopenAccount={onReopenAccount}
-          onUpdateAccount={onUpdateAccount}
-          onUnlinkAccount={onUnlinkAccount}
-          onSyncAndDownload={onSyncAndDownload}
-          onCreatePayee={onCreatePayee}
-        />
-      </SplitsExpandedProvider>
-    </SchedulesProvider>
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <SchedulesProvider query={schedulesQuery}>
+        <SplitsExpandedProvider
+          initialMode={expandSplits ? 'collapse' : 'expand'}
+        >
+          <AccountHack
+            newTransactions={newTransactions}
+            matchedTransactions={matchedTransactions}
+            accounts={accounts}
+            failedAccounts={failedAccounts}
+            dateFormat={dateFormat}
+            hideFraction={String(hideFraction) === 'true'}
+            expandSplits={expandSplits}
+            showBalances={String(showBalances) === 'true'}
+            setShowBalances={showBalances =>
+              setShowBalances(String(showBalances))
+            }
+            showNetWorthChart={String(showNetWorthChart) === 'true'}
+            setShowNetWorthChart={val => setShowNetWorthChart(String(val))}
+            showCleared={String(hideCleared) !== 'true'}
+            setShowCleared={val => setHideCleared(String(!val))}
+            showReconciled={String(hideReconciled) !== 'true'}
+            setShowReconciled={val => setHideReconciled(String(!val))}
+            showExtraBalances={String(showExtraBalances) === 'true'}
+            setShowExtraBalances={extraBalances =>
+              setShowExtraBalances(String(extraBalances))
+            }
+            payees={payees}
+            modalShowing={modalShowing}
+            accountsSyncing={accountsSyncing}
+            filterConditions={filterConditions}
+            categoryGroups={categoryGroups}
+            accountId={params.id}
+            categoryId={location?.state?.categoryId}
+            location={location}
+            savedFilters={savedFiters}
+            onReopenAccount={onReopenAccount}
+            onUpdateAccount={onUpdateAccount}
+            onUnlinkAccount={onUnlinkAccount}
+            onSyncAndDownload={onSyncAndDownload}
+            onCreatePayee={onCreatePayee}
+          />
+        </SplitsExpandedProvider>
+      </SchedulesProvider>
+    </ErrorBoundary>
   );
 }
