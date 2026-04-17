@@ -366,7 +366,7 @@ async function deleteCategory({
     }
 
     // Update spreadsheet values if it's an expense category
-    // TODO: We should do this for income too if it's a reflect budget
+    // TODO: We should do this for income too if it's a tracking budget
     if (row.is_income === 0) {
       if (transferId) {
         await budget.doTransfer([id], transferId);

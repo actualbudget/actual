@@ -7,7 +7,7 @@ import { q } from '#shared/query';
 import type { CategoryEntity, CategoryGroupEntity } from '#types/models';
 import type { Template } from '#types/models/templates';
 
-import { getSheetValue, isReflectBudget, setBudget, setGoal } from './actions';
+import { getSheetValue, isTrackingBudget, setBudget, setGoal } from './actions';
 import { CategoryTemplateContext } from './category-template-context';
 import { checkTemplateNotes, storeNoteTemplates } from './template-notes';
 
@@ -188,9 +188,11 @@ async function processTemplate(
   categories: CategoryEntity[] = [],
 ): Promise<Notification> {
   // setup categories
-  const isReflect = isReflectBudget();
+  const isTracking = isTrackingBudget();
   if (!categories.length) {
-    categories = (await getCategories()).filter(c => isReflect || !c.is_income);
+    categories = (await getCategories()).filter(
+      c => isTracking || !c.is_income,
+    );
   }
 
   // setup categories to process

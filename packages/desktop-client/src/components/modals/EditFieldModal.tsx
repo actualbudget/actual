@@ -99,7 +99,7 @@ export function EditFieldModal({
   });
 
   switch (name) {
-    case 'date':
+    case 'date': {
       const today = currentDay();
       label = t('Date');
       minWidth = 350;
@@ -115,6 +115,7 @@ export function EditFieldModal({
         />
       );
       break;
+    }
 
     case 'notes':
       label = t('Notes');
@@ -253,6 +254,7 @@ export function EditFieldModal({
       break;
 
     default:
+      throw new Error(`Unhandled edit field name: ${String(name)}`);
   }
 
   return (

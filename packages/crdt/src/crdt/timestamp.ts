@@ -1,5 +1,4 @@
 import murmurhash from 'murmurhash';
-import { v4 as uuidv4 } from 'uuid';
 
 import type { TrieNode } from './merkle';
 
@@ -77,7 +76,7 @@ export function deserializeClock(clock: string): Clock {
 }
 
 export function makeClientId() {
-  return uuidv4().replace(/-/g, '').slice(-16);
+  return crypto.randomUUID().replace(/-/g, '').slice(-16);
 }
 
 const config = {
@@ -313,9 +312,7 @@ export class Timestamp {
 
   static ClockDriftError = class ClockDriftError extends Error {
     constructor(...args: unknown[]) {
-      super(
-        ['maximum clock drift exceeded'].concat(args as string[]).join(' '),
-      );
+      super(['maximum clock drift exceeded', ...args.map(String)].join(' '));
       this.name = 'ClockDriftError';
     }
   };

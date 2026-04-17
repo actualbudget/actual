@@ -20,16 +20,15 @@
     }
   },
   "scripts": {
-    "build:node": "tsgo",
+    "build:node": "tsgo -p tsconfig.build.json",
     "proto:generate": "./bin/generate-proto",
-    "build": "rm -rf dist && yarn run build:node",
+    "build": "rm -rf dist && yarn run build:node && cp src/proto/sync_pb.js dist/proto/sync_pb.js",
     "test": "vitest --run",
     "typecheck": "tsgo -b"
   },
   "dependencies": {
     "google-protobuf": "^3.21.4",
-    "murmurhash": "^2.0.1",
-    "uuid": "^13.0.0"
+    "murmurhash": "^2.0.1"
   },
   "devDependencies": {
     "@types/google-protobuf": "3.15.12",

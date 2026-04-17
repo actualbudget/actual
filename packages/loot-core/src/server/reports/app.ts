@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
-
 import { createApp } from '#server/app';
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
@@ -130,7 +128,7 @@ async function reportNameExists(
 }
 
 async function createReport(report: CustomReportEntity) {
-  const reportId = uuidv4();
+  const reportId = crypto.randomUUID();
   const item: CustomReportEntity = {
     ...report,
     id: reportId,
