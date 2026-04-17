@@ -2,38 +2,18 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 
 import type { RuleEntity } from '@actual-app/core/types/models';
-import { vi } from 'vitest';
 
-import * as api from './index';
-
-// In tests we run from source; loot-core's API fs uses __dirname (for the built dist/).
-// Mock the fs so path constants point at loot-core package root where migrations live.
-vi.mock(
-  '../loot-core/src/platform/server/fs/index.api',
-  async importOriginal => {
-    const actual = (await importOriginal()) as Record<string, unknown>;
-    const pathMod = await import('path');
-    const lootCoreRoot = pathMod.join(__dirname, '..', 'loot-core');
-    return {
-      ...actual,
-      migrationsPath: pathMod.join(lootCoreRoot, 'migrations'),
-      bundledDatabasePath: pathMod.join(lootCoreRoot, 'default-db.sqlite'),
-      demoBudgetPath: pathMod.join(lootCoreRoot, 'demo-budget'),
-    };
-  },
-);
+import * as api from '../index';
 
 const budgetName = 'test-budget';
 
-global.IS_TESTING = true;
-
 beforeEach(async () => {
-  const budgetPath = path.join(__dirname, '/mocks/budgets/', budgetName);
+  const budgetPath = path.join(__dirname, '/../mocks/budgets/', budgetName);
   await fs.rm(budgetPath, { force: true, recursive: true });
 
   await createTestBudget('default-budget-template', budgetName);
   await api.init({
-    dataDir: path.join(__dirname, '/mocks/budgets/'),
+    dataDir: path.join(__dirname, '/../mocks/budgets/'),
   });
 });
 
@@ -45,10 +25,10 @@ afterEach(async () => {
 async function createTestBudget(templateName: string, name: string) {
   const templatePath = path.join(
     __dirname,
-    '/../loot-core/src/mocks/files',
+    '/../../loot-core/src/mocks/files',
     templateName,
   );
-  const budgetPath = path.join(__dirname, '/mocks/budgets/', name);
+  const budgetPath = path.join(__dirname, '/../mocks/budgets/', name);
 
   await fs.mkdir(budgetPath);
   await fs.copyFile(
