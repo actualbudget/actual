@@ -10,22 +10,23 @@ import peggyLoader from 'vite-plugin-peggy-loader';
 
 export default defineConfig({
   plugins: [peggyLoader()],
-  // No `api` resolve condition — loot-core falls back to its browser
-  // platform files (sql.js / absurd-sql / IndexedDB), matching the build.
+  // The facade test imports `../index.browser` directly and uses a mock
+  // Worker. loot-core never loads on the main thread, so no platform
+  // condition juggling is needed here. The sibling vite.browser.config.mts
+  // aliases loot-core to the stub for the bundled facade; for the test we
+  // mirror that so `methods.ts` resolves correctly.
   resolve: {
     alias: {
-      // Rewrite the shared spec's `../index` import to the browser entry.
-      [path.resolve(__dirname, 'index.ts')]: path.resolve(
+      '@actual-app/core/server/main': path.resolve(
         __dirname,
-        'index.browser.ts',
+        'browser/lib-stub.ts',
       ),
     },
   },
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./test/setup.browser.ts'],
-    include: ['test/integration.test.ts'],
+    include: ['test/browser-facade.test.ts'],
     onConsoleLog(log: string, type: 'stdout' | 'stderr'): boolean | void {
       return type === 'stderr';
     },

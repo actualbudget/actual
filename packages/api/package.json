@@ -27,9 +27,10 @@
     }
   },
   "scripts": {
-    "build": "npm-run-all -s build:node build:browser",
+    "build": "npm-run-all -s build:node build:browser-worker build:browser",
     "build:node": "vite build --config vite.config.mts && tsgo --emitDeclarationOnly",
     "build:browser": "vite build --config vite.browser.config.mts",
+    "build:browser-worker": "vite build --config vite.browser-worker.config.mts",
     "test": "npm-run-all -cp 'test:*'",
     "test:node": "vitest --run --config vite.config.mts",
     "test:browser": "vitest --run --config vitest.browser.config.mts",

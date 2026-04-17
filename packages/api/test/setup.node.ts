@@ -29,4 +29,3 @@ const dataDir = path.join(
 );
 await fsPromises.mkdir(dataDir, { recursive: true });
 globalThis.__API_DATA_DIR__ = dataDir;
-globalThis.__API_FULL_SUITE__ = true;

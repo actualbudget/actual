@@ -1,22 +1,14 @@
 import path from 'path';
 
 import { defineConfig } from 'vite';
-import { nodePolyfills } from 'vite-plugin-node-polyfills';
-import peggyLoader from 'vite-plugin-peggy-loader';
 
 const distDir = path.resolve(__dirname, 'dist');
 
+// Main-thread facade only. Tiny bundle: no loot-core, no sql.js, no absurd-sql.
+// The worker is built separately by vite.browser-worker.config.mts. The
+// consumer constructs the Worker (handling URL resolution through their own
+// bundler) and hands it to init().
 export default defineConfig({
-  // loot-core's browser platform code reads process.env.PUBLIC_URL etc.
-  // directly. Inline the values we care about; anything else falls back to
-  // the `{}` inside the nodePolyfills process shim.
-  define: {
-    'process.env.PUBLIC_URL': JSON.stringify('/'),
-    'process.env.NODE_ENV': JSON.stringify('production'),
-    'process.env.ACTUAL_DATA_DIR': 'undefined',
-    'process.env.ACTUAL_SERVER_URL': 'undefined',
-    'process.env.ACTUAL_DOCUMENT_DIR': JSON.stringify('/documents'),
-  },
   build: {
     target: 'esnext',
     outDir: distDir,
@@ -33,28 +25,15 @@ export default defineConfig({
       },
     },
   },
-  plugins: [
-    peggyLoader(),
-    nodePolyfills({
-      include: [
-        'process',
-        'buffer',
-        'stream',
-        'path',
-        'crypto',
-        'timers',
-        'util',
-        'zlib',
-        'fs',
-        'assert',
-      ],
-      globals: {
-        process: true,
-        Buffer: true,
-        global: true,
-      },
-    }),
-  ],
-  // Intentionally no resolve.conditions: ['api'] — omitting it causes
-  // loot-core's default (browser) platform files to be selected.
+  resolve: {
+    alias: {
+      // methods.ts reads `lib.send` from loot-core's server/main. Route it
+      // through the main-thread stub so loot-core is never pulled into
+      // the main bundle.
+      '@actual-app/core/server/main': path.resolve(
+        __dirname,
+        'browser/lib-stub.ts',
+      ),
+    },
+  },
 });
