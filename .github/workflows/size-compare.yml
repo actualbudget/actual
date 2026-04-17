@@ -94,7 +94,7 @@ jobs:
           exit 1
 
       - name: Download web build artifact from ${{github.base_ref}}
-        uses: dawidd6/action-download-artifact@1f8785ff7a5130826f848e7f72725c85d241860f # v18
+        uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
         id: pr-web-build
         with:
           branch: ${{github.base_ref}}
@@ -103,7 +103,7 @@ jobs:
           name: build-stats
           path: base
       - name: Download API build artifact from ${{github.base_ref}}
-        uses: dawidd6/action-download-artifact@1f8785ff7a5130826f848e7f72725c85d241860f # v18
+        uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
         id: pr-api-build
         with:
           branch: ${{github.base_ref}}
@@ -112,7 +112,7 @@ jobs:
           name: api-build-stats
           path: base
       - name: Download build stats from PR
-        uses: dawidd6/action-download-artifact@1f8785ff7a5130826f848e7f72725c85d241860f # v18
+        uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
         with:
           pr: ${{github.event.pull_request.number}}
           workflow: build.yml
@@ -121,7 +121,7 @@ jobs:
           path: head
           allow_forks: true
       - name: Download API stats from PR
-        uses: dawidd6/action-download-artifact@1f8785ff7a5130826f848e7f72725c85d241860f # v18
+        uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
         with:
           pr: ${{github.event.pull_request.number}}
           workflow: build.yml
@@ -130,7 +130,7 @@ jobs:
           path: head
           allow_forks: true
       - name: Download CLI build artifact from ${{github.base_ref}}
-        uses: dawidd6/action-download-artifact@1f8785ff7a5130826f848e7f72725c85d241860f # v18
+        uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
         with:
           branch: ${{github.base_ref}}
           workflow: build.yml
@@ -138,7 +138,7 @@ jobs:
           name: cli-build-stats
           path: base
       - name: Download CLI stats from PR
-        uses: dawidd6/action-download-artifact@1f8785ff7a5130826f848e7f72725c85d241860f # v18
+        uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
         with:
           pr: ${{github.event.pull_request.number}}
           workflow: build.yml

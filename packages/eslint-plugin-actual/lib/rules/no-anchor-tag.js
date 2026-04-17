@@ -16,7 +16,7 @@ module.exports = {
     },
   },
 
-  create(context) {
+  createOnce(context) {
     //----------------------------------------------------------------------
     // Helpers
     //----------------------------------------------------------------------
@@ -26,7 +26,7 @@ module.exports = {
      * @returns {boolean}
      */
     function isLinkComponentFile() {
-      const filename = context.getFilename();
+      const filename = context.filename;
       const normalizedFilename = filename.replace(/\\/g, '/');
       return normalizedFilename.includes(
         'packages/desktop-client/src/components/common/Link.tsx',

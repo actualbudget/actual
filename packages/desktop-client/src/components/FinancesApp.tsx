@@ -1,5 +1,6 @@
 import React, { useEffect, useEffectEvent, useRef } from 'react';
 import type { ReactElement } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 import { Navigate, Route, Routes, useHref, useLocation } from 'react-router';
 
@@ -23,6 +24,7 @@ import { useDispatch, useSelector } from '#redux';
 import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
 import { BankSyncStatus } from './BankSyncStatus';
 import { CommandBar } from './CommandBar';
+import { FeatureErrorFallback } from './FeatureErrorFallback';
 import { GlobalKeys } from './GlobalKeys';
 import { MobileBankSyncAccountEditPage } from './mobile/banksync/MobileBankSyncAccountEditPage';
 import { MobileNavTabs } from './mobile/MobileNavTabs';
@@ -86,6 +88,7 @@ export function FinancesApp() {
   const { isNarrowWidth } = useResponsive();
   useMetaThemeColor(isNarrowWidth ? theme.mobileViewTheme : undefined);
 
+  const location = useLocation();
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
@@ -286,11 +289,25 @@ export function FinancesApp() {
                 />
                 <Route
                   path="/rules"
-                  element={<NarrowAlternate name="Rules" />}
+                  element={
+                    <ErrorBoundary
+                      FallbackComponent={FeatureErrorFallback}
+                      resetKeys={[location.pathname]}
+                    >
+                      <NarrowAlternate name="Rules" />
+                    </ErrorBoundary>
+                  }
                 />
                 <Route
                   path="/rules/:id"
-                  element={<NarrowAlternate name="RuleEdit" />}
+                  element={
+                    <ErrorBoundary
+                      FallbackComponent={FeatureErrorFallback}
+                      resetKeys={[location.pathname]}
+                    >
+                      <NarrowAlternate name="RuleEdit" />
+                    </ErrorBoundary>
+                  }
                 />
                 <Route
                   path="/bank-sync"

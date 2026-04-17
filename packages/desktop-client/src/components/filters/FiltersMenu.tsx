@@ -35,8 +35,11 @@ import {
 } from 'date-fns';
 
 import { GenericInput } from '#components/util/GenericInput';
+import { useAccounts } from '#hooks/useAccounts';
+import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
+import { usePayees } from '#hooks/usePayees';
 import { useTransactionFilters } from '#hooks/useTransactionFilters';
 
 import { CompactFiltersButton } from './CompactFiltersButton';
@@ -92,6 +95,9 @@ function ConfigureField<T extends RuleConditionEntity>({
   const { t } = useTranslation();
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const accounts = useAccounts();
+  const categories = useCategories();
+  const payees = usePayees();
   const field = initialField === 'category_group' ? 'category' : initialField;
   const [subfield, setSubfield] = useState(initialSubfield);
   const inputRef = useRef<AmountInputRef>(null);
@@ -136,9 +142,183 @@ function ConfigureField<T extends RuleConditionEntity>({
     return value;
   }, [value, field, subfield, dateFormat]);
 
-  // For ops that filter based on payeeId, those use PayeeFilter, otherwise we use GenericInput
-  const isPayeeIdOp = (op: T['op']) =>
-    ['is', 'is not', 'one of', 'not one of'].includes(op);
+  // For ops that filter based on IDs
+  const isIdOp = (op: T['op']) =>
+    ['is', 'isNot', 'oneOf', 'notOneOf'].includes(op);
+  // For ops that use exact matching with a single stored ID value
+  const isSingleIdOp = (op: T['op']) => ['is', 'isNot'].includes(op);
+  // For ops that use exact matching with multiple stored ID values
+  const isMultiIdOp = (op: T['op']) => ['oneOf', 'notOneOf'].includes(op);
+  // For ops that use text matching and expect a string input
+  const isTextOp = (op: T['op']) =>
+    ['contains', 'matches', 'doesNotContain'].includes(op);
+  // For account ops that do not use an input value but should preserve the current value in state
+  const isNoValueAccountOp = (op: T['op']) =>
+    ['onBudget', 'offBudget'].includes(op);
+
+  // Convert stored ID value into text
+  const resolveIdToText = (field: string, subfield: string, value: unknown) => {
+    if (typeof value !== 'string') {
+      return '';
+    }
+    if (field === 'account') {
+      const account = accounts.data?.find(account => account.id === value);
+      return account?.name ?? '';
+    }
+    if (field === 'payee') {
+      const payee = payees.data?.find(payee => payee.id === value);
+      return payee?.name ?? '';
+    }
+    if (field === 'category' && subfield === 'category_group') {
+      const group = categories.data?.grouped.find(group => group.id === value);
+      return group?.name ?? '';
+    }
+    if (field === 'category' && subfield === 'category') {
+      for (const group of categories.data?.grouped || []) {
+        const category = group.categories?.find(
+          category => category.id === value,
+        );
+        if (category) {
+          return category.name;
+        }
+      }
+    }
+    return '';
+  };
+
+  // Convert text into stored ID value
+  const resolveTextToId = (field: string, subfield: string, value: unknown) => {
+    if (typeof value !== 'string') {
+      return null;
+    }
+    if (field === 'account') {
+      const matches =
+        accounts.data?.filter(account => account.name === value) ?? [];
+      return matches.length === 1 ? matches[0].id : null;
+    }
+    if (field === 'payee') {
+      const matches = payees.data?.filter(payee => payee.name === value) ?? [];
+      return matches.length === 1 ? matches[0].id : null;
+    }
+    if (field === 'category' && subfield === 'category_group') {
+      const matches =
+        categories.data?.grouped.filter(group => group.name === value) ?? [];
+      return matches.length === 1 ? matches[0].id : null;
+    }
+    if (field === 'category' && subfield === 'category') {
+      const matches = [];
+      for (const group of categories.data?.grouped || []) {
+        for (const category of group.categories || []) {
+          if (category.name === value) {
+            matches.push(category);
+          }
+        }
+      }
+      return matches.length === 1 ? matches[0].id : null;
+    }
+    return null;
+  };
+
+  const isIdField =
+    field === 'account' || field === 'payee' || field === 'category';
+
+  // Converting values when switching between ops is a bit tricky, so we have some specific rules:
+  const setOp = (nextOp: T['op']) => {
+    // Single ID -> Text: Convert stored ID to text with one to one mapping
+    if (isIdField && isSingleIdOp(op) && isTextOp(nextOp)) {
+      dispatch({
+        type: 'set-value',
+        value: resolveIdToText(field, subfield, value),
+      });
+    }
+    // Text -> Single ID: Only convert if there is a single exact match
+    if (isIdField && isTextOp(op) && isSingleIdOp(nextOp)) {
+      const resolvedValue = resolveTextToId(field, subfield, value);
+      if (resolvedValue) {
+        dispatch({
+          type: 'set-value',
+          value: resolvedValue,
+        });
+      }
+    }
+    // Multi ID -> Text: If there is exactly one selected ID, convert it to text; otherwise clear the value
+    if (isIdField && isMultiIdOp(op) && isTextOp(nextOp)) {
+      if (Array.isArray(value) && value.length === 1) {
+        dispatch({
+          type: 'set-value',
+          value: resolveIdToText(field, subfield, value[0]) || '',
+        });
+      } else {
+        dispatch({
+          type: 'set-value',
+          value: '',
+        });
+      }
+    }
+    // Text -> Multi ID: Only convert if there is a single exact match and wrap in array
+    if (isIdField && isTextOp(op) && isMultiIdOp(nextOp)) {
+      const resolvedValue = resolveTextToId(field, subfield, value);
+      if (resolvedValue) {
+        dispatch({
+          type: 'set-value',
+          value: resolvedValue ? [resolvedValue] : [],
+        });
+      }
+    }
+    // No-value Account -> Text: Preserve the old value while the no-value op is selected,
+    // then convert when switching back to text
+    if (field === 'account' && isNoValueAccountOp(op) && isTextOp(nextOp)) {
+      if (Array.isArray(value)) {
+        dispatch({
+          type: 'set-value',
+          value:
+            value.length === 1
+              ? resolveIdToText(field, subfield, value[0]) || ''
+              : '',
+        });
+      } else {
+        dispatch({
+          type: 'set-value',
+          value: resolveIdToText(field, subfield, value) || '',
+        });
+      }
+    }
+    // No-value Account -> Single-ID: If preserved value is text, resolve to an ID;
+    // If it is already a single ID string, keep as-is
+    if (field === 'account' && isNoValueAccountOp(op) && isSingleIdOp(nextOp)) {
+      if (typeof value === 'string') {
+        const resolvedValue = resolveTextToId(field, subfield, value);
+        dispatch({
+          type: 'set-value',
+          value: resolvedValue || value,
+        });
+      } else {
+        dispatch({
+          type: 'set-value',
+          value: '',
+        });
+      }
+    }
+    // No-value Account -> Multi-ID: If the preserved value is text, resolve to a single ID and wrap;
+    // if the preserved value is already a single ID string, wrap it directly;
+    // otherwise clear
+    if (field === 'account' && isNoValueAccountOp(op) && isMultiIdOp(nextOp)) {
+      if (typeof value === 'string') {
+        const resolvedValue = resolveTextToId(field, subfield, value);
+
+        dispatch({
+          type: 'set-value',
+          value: resolvedValue ? [resolvedValue] : [value],
+        });
+      } else {
+        dispatch({
+          type: 'set-value',
+          value: [],
+        });
+      }
+    }
+    dispatch({ type: 'set-op', op: nextOp });
+  };
 
   const subfieldSelectOptions = (
     field: 'amount' | 'date' | 'category',
@@ -241,7 +421,7 @@ function ConfigureField<T extends RuleConditionEntity>({
                 key={currOp}
                 op={currOp}
                 isSelected={currOp === op}
-                onPress={() => dispatch({ type: 'set-op', op: currOp })}
+                onPress={() => setOp(currOp)}
               />
             ))}
             {ops.slice(3, ops.length).map(currOp => (
@@ -249,7 +429,7 @@ function ConfigureField<T extends RuleConditionEntity>({
                 key={currOp}
                 op={currOp}
                 isSelected={currOp === op}
-                onPress={() => dispatch({ type: 'set-op', op: currOp })}
+                onPress={() => setOp(currOp)}
               />
             ))}
           </>
@@ -296,39 +476,44 @@ function ConfigureField<T extends RuleConditionEntity>({
           });
         }}
       >
-        {type !== 'boolean' && (field !== 'payee' || !isPayeeIdOp(op)) && (
-          <GenericInput
-            ref={inputRef}
-            // @ts-expect-error - fix me
-            field={field === 'date' || field === 'category' ? subfield : field}
-            // @ts-expect-error - fix me
-            type={
-              type === 'id' &&
-              (op === 'contains' ||
-                op === 'matches' ||
-                op === 'doesNotContain' ||
-                op === 'hasTags')
-                ? 'string'
-                : type
-            }
-            numberFormatType="currency"
-            // @ts-expect-error - fix me
-            value={
-              formattedValue ?? (op === 'oneOf' || op === 'notOneOf' ? [] : '')
-            }
-            // @ts-expect-error - fix me
-            multi={op === 'oneOf' || op === 'notOneOf'}
-            op={op}
-            options={subfieldToOptions(field, subfield)}
-            style={{ marginTop: 10 }}
-            // oxlint-disable-next-line typescript/no-explicit-any
-            onChange={(v: any) => {
-              dispatch({ type: 'set-value', value: v });
-            }}
-          />
-        )}
+        {type !== 'boolean' &&
+          (field !== 'payee' || !isIdOp(op)) &&
+          (field !== 'account' || !isNoValueAccountOp(op)) && (
+            <GenericInput
+              ref={inputRef}
+              // @ts-expect-error - fix me
+              field={
+                field === 'date' || field === 'category' ? subfield : field
+              }
+              // @ts-expect-error - fix me
+              type={
+                type === 'id' &&
+                (op === 'contains' ||
+                  op === 'matches' ||
+                  op === 'doesNotContain' ||
+                  op === 'hasTags')
+                  ? 'string'
+                  : type
+              }
+              numberFormatType="currency"
+              // @ts-expect-error - fix me
+              value={
+                formattedValue ??
+                (op === 'oneOf' || op === 'notOneOf' ? [] : '')
+              }
+              // @ts-expect-error - fix me
+              multi={op === 'oneOf' || op === 'notOneOf'}
+              op={op}
+              options={subfieldToOptions(field, subfield)}
+              style={{ marginTop: 10 }}
+              // oxlint-disable-next-line typescript/no-explicit-any
+              onChange={(v: any) => {
+                dispatch({ type: 'set-value', value: v });
+              }}
+            />
+          )}
 
-        {field === 'payee' && isPayeeIdOp(op) && (
+        {field === 'payee' && isIdOp(op) && (
           <PayeeFilter
             // @ts-expect-error - fix me
             value={formattedValue}

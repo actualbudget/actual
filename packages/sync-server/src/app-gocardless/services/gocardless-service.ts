@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
-
 import {
   BankFactory,
   isSpecialContinuousAccessBank,
@@ -289,7 +287,7 @@ export const goCardlessService = {
     const body = {
       redirectUrl: host + '/gocardless/link',
       institutionId,
-      referenceId: uuidv4(),
+      referenceId: crypto.randomUUID(),
       accessValidForDays: institution.max_access_valid_for_days,
       maxHistoricalDays: isSpecialContinuousAccessBank(institutionId)
         ? 90

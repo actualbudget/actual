@@ -15,8 +15,8 @@
     "workbox-precaching": "^7.4.0"
   },
   "devDependencies": {
-    "@types/node": "^22.19.15",
-    "@typescript/native-preview": "^7.0.0-dev.20260309.1",
+    "@types/node": "^22.19.17",
+    "@typescript/native-preview": "^7.0.0-dev.20260404.1",
     "cross-env": "^10.1.0",
     "typescript-strict-plugin": "^2.4.4",
     "vite": "^8.0.5"
