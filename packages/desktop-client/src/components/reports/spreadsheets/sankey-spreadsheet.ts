@@ -44,7 +44,7 @@ type AggregatedBudget = {
 type SankeyNode = {
   name: string;
   percentageLabel?: string;
-  key: string
+  key: string;
 };
 
 type SankeyLink = {
@@ -77,7 +77,11 @@ type CategoryOrder = Array<{ mainCategory: string; categories: string[] }>;
 // Helper functions to convert raw category data into a directed, weighted graph
 // and convert that into the nodes/links format expected by the Sankey component.
 type NodeKey = string;
-type Edge = { to: NodeKey; value: number };
+type Edge = {
+  to: NodeKey;
+  value: number;
+  tooltipInfo?: Array<{ name: string; value: number }>;
+};
 type Graph = Record<NodeKey, Edge[]>;
 type NodeData = { attributes: any };
 
@@ -205,16 +209,308 @@ function createGraphFromCategoryData(categoryData: CategoryEntry[]): {
     }
   }
 
-  addTypePercentageLabels(graph, nodes);
-  console.log('Graph with percentage labels:', { nodes, graph });
+  // Sort all edge lists by value descending so every layer renders largest-to-smallest.
+  for (const key of Object.keys(graph)) {
+    graph[key].sort((a, b) => b.value - a.value);
+  }
+
   return { nodes, graph };
+}
+
+function applyTopNCategories(
+  graph: Graph,
+  nodes: Record<NodeKey, NodeData>,
+  topN: number,
+  mode: 'per-group' | 'global' | 'budget-order',
+  categoryOrder?: CategoryOrder,
+): void {
+  if (topN <= 0) return;
+
+  // Build incoming-value map once.
+  const incoming = new Map<NodeKey, number>();
+  for (const edges of Object.values(graph)) {
+    for (const { to, value } of edges) {
+      incoming.set(to, (incoming.get(to) ?? 0) + value);
+    }
+  }
+
+  // Collect all expense-category leaf nodes with their parent group.
+  type Leaf = {
+    key: NodeKey;
+    groupKey: NodeKey;
+    name: string;
+    value: number;
+    visible: boolean;
+  };
+  const leaves: Leaf[] = [];
+  for (const [groupKey, data] of Object.entries(nodes)) {
+    if (data.attributes.type !== 'category_group') continue;
+    for (const edge of graph[groupKey] ?? []) {
+      const catKey = edge.to;
+      if (nodes[catKey]?.attributes.type !== 'category') continue;
+      leaves.push({
+        key: catKey,
+        groupKey,
+        name: nodes[catKey].attributes.name,
+        value: incoming.get(catKey) ?? 0,
+        visible: true,
+      });
+    }
+  }
+
+  // --- Greedy reduction ---
+  let visibleCount = leaves.length;
+  let otherNodeCount = 0;
+  const perGroupHasOther = new Set<NodeKey>();
+
+  while (visibleCount + otherNodeCount > topN && visibleCount > 0) {
+    const minLeaf = leaves
+      .filter(l => l.visible)
+      .reduce((min, l) => (l.value < min.value ? l : min));
+    minLeaf.visible = false;
+    visibleCount--;
+
+    if (mode === 'global') {
+      if (otherNodeCount === 0) otherNodeCount = 1;
+    } else {
+      if (!perGroupHasOther.has(minLeaf.groupKey)) {
+        otherNodeCount++;
+        perGroupHasOther.add(minLeaf.groupKey);
+      }
+    }
+  }
+
+  // Promote single-entry buckets back to visible (a 1-item "Other" wastes a slot).
+  if (mode === 'global') {
+    const allCollapsed = leaves.filter(l => !l.visible);
+    if (allCollapsed.length === 1) {
+      allCollapsed[0].visible = true;
+      otherNodeCount = 0;
+      visibleCount++;
+    }
+  } else {
+    for (const groupKey of perGroupHasOther) {
+      const collapsed = leaves.filter(
+        l => l.groupKey === groupKey && !l.visible,
+      );
+      if (collapsed.length === 1) {
+        collapsed[0].visible = true;
+        perGroupHasOther.delete(groupKey);
+        otherNodeCount--;
+        visibleCount++;
+      }
+    }
+  }
+
+  // --- Apply reduction to graph ---
+  const GLOBAL_OTHER_KEY = '__other_global__';
+  const collapsedByGroup = new Map<NodeKey, Leaf[]>();
+  for (const leaf of leaves.filter(l => !l.visible)) {
+    const list = collapsedByGroup.get(leaf.groupKey) ?? [];
+    list.push(leaf);
+    collapsedByGroup.set(leaf.groupKey, list);
+  }
+
+  for (const [groupKey, collapsed] of collapsedByGroup) {
+    const collapsedTotal = collapsed.reduce((s, l) => s + l.value, 0);
+    const tooltipInfo = [...collapsed]
+      .sort((a, b) => b.value - a.value)
+      .map(l => ({ name: l.name, value: l.value }));
+
+    // Remove collapsed category edges from the group.
+    const collapsedKeys = new Set(collapsed.map(l => l.key));
+    graph[groupKey] = (graph[groupKey] ?? []).filter(
+      e => !collapsedKeys.has(e.to),
+    );
+
+    // Remove collapsed category nodes.
+    for (const key of collapsedKeys) delete nodes[key];
+
+    if (mode === 'global') {
+      if (!nodes[GLOBAL_OTHER_KEY]) {
+        nodes[GLOBAL_OTHER_KEY] = {
+          attributes: { type: 'category', name: 'Other', isOther: true },
+        };
+      }
+      const existingEdge = graph[groupKey].find(e => e.to === GLOBAL_OTHER_KEY);
+      if (existingEdge) {
+        existingEdge.value += collapsedTotal;
+        existingEdge.tooltipInfo = [
+          ...(existingEdge.tooltipInfo ?? []),
+          ...tooltipInfo,
+        ].sort((a, b) => b.value - a.value);
+      } else {
+        graph[groupKey] = graph[groupKey] ?? [];
+        graph[groupKey].push({
+          to: GLOBAL_OTHER_KEY,
+          value: collapsedTotal,
+          tooltipInfo,
+        });
+      }
+    } else {
+      const otherKey = `__other_${groupKey}__`;
+      nodes[otherKey] = {
+        attributes: { type: 'category', name: 'Other', isOther: true },
+      };
+      graph[groupKey] = graph[groupKey] ?? [];
+      graph[groupKey].push({
+        to: otherKey,
+        value: collapsedTotal,
+        tooltipInfo,
+      });
+    }
+  }
+
+  // Sort category edges within every group: regular edges ordered by mode, Other always last.
+  for (const [groupKey, data] of Object.entries(nodes)) {
+    if (data.attributes.type !== 'category_group') continue;
+    const edges = graph[groupKey] ?? [];
+    if (edges.length === 0) continue;
+
+    const otherEdges = edges.filter(e => nodes[e.to]?.attributes.isOther);
+    const regularEdges = edges.filter(e => !nodes[e.to]?.attributes.isOther);
+
+    if (mode === 'budget-order' && categoryOrder) {
+      const order =
+        categoryOrder.find(c => c.mainCategory === data.attributes.name)
+          ?.categories ?? [];
+      regularEdges.sort((a, b) => {
+        const ai = order.indexOf(nodes[a.to]?.attributes.name ?? '');
+        const bi = order.indexOf(nodes[b.to]?.attributes.name ?? '');
+        if (ai === -1 && bi === -1) {
+          return (incoming.get(b.to) ?? 0) - (incoming.get(a.to) ?? 0);
+        }
+        if (ai === -1) return 1;
+        if (bi === -1) return -1;
+        return ai - bi;
+      });
+    } else {
+      regularEdges.sort(
+        (a, b) => (incoming.get(b.to) ?? 0) - (incoming.get(a.to) ?? 0),
+      );
+    }
+
+    graph[groupKey] = [...regularEdges, ...otherEdges];
+  }
+
+  // Determine group order: budget-order uses categoryOrder, other modes use value desc.
+  const sortedGroupKeys = Object.entries(nodes)
+    .filter(([, data]) => data.attributes.type === 'category_group')
+    .sort((a, b) => {
+      if (mode === 'budget-order' && categoryOrder) {
+        const orderNames = categoryOrder.map(c => c.mainCategory);
+        const ai = orderNames.indexOf(a[1].attributes.name);
+        const bi = orderNames.indexOf(b[1].attributes.name);
+        if (ai !== -1 || bi !== -1) {
+          if (ai === -1) return 1;
+          if (bi === -1) return -1;
+          return ai - bi;
+        }
+      }
+      // Default (or unlisted groups in budget-order): sort by total value desc.
+      const aTotal = (graph[a[0]] ?? []).reduce((s, e) => s + e.value, 0);
+      const bTotal = (graph[b[0]] ?? []).reduce((s, e) => s + e.value, 0);
+      return bTotal - aTotal;
+    })
+    .map(([key]) => key);
+
+  // Stamp category_group nodes with their position in the sorted group list.
+  sortedGroupKeys.forEach((groupKey, i) => {
+    nodes[groupKey].attributes.groupSortOrder = i;
+  });
+
+  // Stamp category nodes with a global sort index so convertToSankeyData seeds the
+  // recharts nodes array in the right order.
+  let globalOrder = 0;
+  if (mode === 'global') {
+    // Collect all visible (non-Other) category nodes across all groups, sort globally
+    // by value desc, then place the single global Other node at the very end.
+    const visibleCategoryEdges: Array<{ to: NodeKey; value: number }> = [];
+    let globalOtherKey: NodeKey | undefined;
+    for (const groupKey of sortedGroupKeys) {
+      for (const edge of graph[groupKey] ?? []) {
+        if (!nodes[edge.to]) continue;
+        if (nodes[edge.to].attributes.isOther) {
+          globalOtherKey = edge.to; // same node referenced by every group
+        } else {
+          visibleCategoryEdges.push({
+            to: edge.to,
+            value: incoming.get(edge.to) ?? 0,
+          });
+        }
+      }
+    }
+    visibleCategoryEdges.sort((a, b) => b.value - a.value);
+    for (const { to } of visibleCategoryEdges) {
+      nodes[to].attributes.groupSortOrder = globalOrder++;
+    }
+    if (globalOtherKey && nodes[globalOtherKey]) {
+      nodes[globalOtherKey].attributes.groupSortOrder = globalOrder++;
+    }
+  } else {
+    // per-group / budget-order: process group by group — the unified sort above already
+    // set edges in the correct per-group order (value desc or budget order).
+    for (const groupKey of sortedGroupKeys) {
+      for (const edge of graph[groupKey] ?? []) {
+        if (nodes[edge.to]) {
+          nodes[edge.to].attributes.groupSortOrder = globalOrder++;
+        }
+      }
+    }
+  }
 }
 
 function convertToSankeyData(
   graph: Graph,
   nodeData: Record<NodeKey, NodeData>,
 ): SankeyData {
-  const nodes: SankeyNode[] = Object.keys(nodeData).map(key => ({
+  // Compute per-node value: max(incoming, outgoing) — mirrors recharts' getValue.
+  // recharts seeds each depth column's vertical positions from the nodes array index,
+  // so we must build the array in sorted order for the layout to render correctly.
+  const incoming = new Map<NodeKey, number>();
+  for (const edges of Object.values(graph)) {
+    for (const { to, value } of edges) {
+      incoming.set(to, (incoming.get(to) ?? 0) + value);
+    }
+  }
+  const outgoing = new Map<NodeKey, number>();
+  for (const [from, edges] of Object.entries(graph)) {
+    outgoing.set(
+      from,
+      edges.reduce((s, e) => s + e.value, 0),
+    );
+  }
+  const nodeValue = (key: NodeKey) =>
+    Math.max(incoming.get(key) ?? 0, outgoing.get(key) ?? 0);
+
+  const TYPE_ORDER: Record<string, number> = {
+    payee: 0,
+    income_category: 1,
+    account: 2,
+    category_group: 3,
+    category: 4,
+  };
+
+  const sortedKeys = Object.keys(nodeData).sort((a, b) => {
+    const typeA = TYPE_ORDER[nodeData[a].attributes.type] ?? 99;
+    const typeB = TYPE_ORDER[nodeData[b].attributes.type] ?? 99;
+    if (typeA !== typeB) return typeA - typeB;
+    // Use stamped sort order if available (set by applyTopNCategories for both
+    // category_group and category nodes). Handles budget-order, value-order, and
+    // correct Other placement within each group — all via one stamp.
+    const aSortOrder = nodeData[a].attributes.groupSortOrder;
+    const bSortOrder = nodeData[b].attributes.groupSortOrder;
+    if (aSortOrder !== undefined && bSortOrder !== undefined) {
+      return aSortOrder - bSortOrder;
+    }
+    // Fallback when topN is disabled: Other at end, then largest first.
+    const aIsOther = nodeData[a].attributes.isOther ? 1 : 0;
+    const bIsOther = nodeData[b].attributes.isOther ? 1 : 0;
+    if (aIsOther !== bIsOther) return aIsOther - bIsOther;
+    return nodeValue(b) - nodeValue(a); // largest first
+  });
+
+  const nodes: SankeyNode[] = sortedKeys.map(key => ({
     name: nodeData[key].attributes.name,
     percentageLabel: nodeData[key].attributes.percentageLabel,
     attributes: nodeData[key].attributes,
@@ -222,10 +518,11 @@ function convertToSankeyData(
   }));
 
   const links: SankeyLink[] = Object.entries(graph).flatMap(([from, edges]) =>
-    edges.map(({ to, value }) => ({
-      source: nodes.findIndex(node => node.key === from) || 0,
-      target: nodes.findIndex(node => node.key === to) || 0,
+    edges.map(({ to, value, tooltipInfo }) => ({
+      source: nodes.findIndex(node => node.key === from),
+      target: nodes.findIndex(node => node.key === to),
       value,
+      tooltipInfo,
     })),
   );
 
@@ -339,15 +636,12 @@ export function createSpreadsheet(
   topNcategories: number = 15,
   categorySort: 'per-group' | 'global' | 'budget-order' = 'per-group',
 ) {
-  let globalOther: boolean;
   let groupSort: 'per-group' | 'global';
   let categoryOrder: CategoryOrder | undefined;
 
   if (categorySort === 'global') {
-    globalOther = true;
     groupSort = 'global';
   } else if (categorySort === 'budget-order') {
-    globalOther = false;
     groupSort = 'per-group';
     categoryOrder = categories
       .filter(g => !g.hidden && !g.is_income)
@@ -358,7 +652,6 @@ export function createSpreadsheet(
           .map(c => c.name),
       }));
   } else {
-    globalOther = false;
     groupSort = 'per-group';
   }
 
@@ -372,7 +665,6 @@ export function createSpreadsheet(
         end,
         conditions,
         conditionsOp,
-        globalOther,
         topNcategories,
         groupSort,
         categoryOrder,
@@ -385,7 +677,6 @@ export function createSpreadsheet(
         categories,
         conditions,
         conditionsOp,
-        globalOther,
         topNcategories,
         groupSort,
         categoryOrder,
@@ -400,7 +691,6 @@ export function createBudgetSpreadsheet(
   end: string,
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
-  globalOther: boolean = false,
   topNcategories: number = 15,
   groupSort: 'per-group' | 'global' = 'per-group',
   categoryOrder?: CategoryOrder,
@@ -476,7 +766,6 @@ export function createBudgetSpreadsheet(
       conditionsOp,
     );
 
-
     const categoryData: CategoryEntry[] = filteredCategoryGroups
       .flatMap(group =>
         group.categories.map(cat => {
@@ -542,21 +831,19 @@ export function createBudgetSpreadsheet(
       });
     }
 
-    const { toBudget } = aggregated;
-
-    // setData(
-    //   transformToSankeyData(
-    //     categoryData,
-    //     toBudget,
-    //     'Budgeted',
-    //     topNcategories,
-    //     globalOther,
-    //     groupSort,
-    //     categoryOrder,
-    //   ),
-    // );
-
     const { nodes, graph } = createGraphFromCategoryData(categoryData);
+    applyTopNCategories(
+      graph,
+      nodes,
+      topNcategories,
+      groupSort === 'global'
+        ? 'global'
+        : categoryOrder
+          ? 'budget-order'
+          : 'per-group',
+      categoryOrder,
+    );
+    addTypePercentageLabels(graph, nodes);
     setData(convertToSankeyData(graph, nodes));
   };
 }
@@ -567,7 +854,6 @@ export function createTransactionsSpreadsheet(
   categories: CategoryGroupEntity[],
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
-  globalOther: boolean = false,
   topNcategories: number = 15,
   groupSort: 'per-group' | 'global' = 'per-group',
   categoryOrder?: CategoryOrder,
@@ -590,19 +876,19 @@ export function createTransactionsSpreadsheet(
       end,
     );
 
-    // convert retrieved data into the proper sankey format
-    // setData(
-    //   transformToSankeyData(
-    //     categoryData,
-    //     0,
-    //     'Spent',
-    //     topNcategories,
-    //     globalOther,
-    //     groupSort,
-    //     categoryOrder,
-    //   ),
-    // );
     const { nodes, graph } = createGraphFromCategoryData(categoryData);
+    applyTopNCategories(
+      graph,
+      nodes,
+      topNcategories,
+      groupSort === 'global'
+        ? 'global'
+        : categoryOrder
+          ? 'budget-order'
+          : 'per-group',
+      categoryOrder,
+    );
+    addTypePercentageLabels(graph, nodes);
     setData(convertToSankeyData(graph, nodes));
   };
 }
@@ -671,322 +957,3 @@ async function fetchCategoryData(
   return nested.flat().filter(e => e.value > 0);
 }
 
-type LeafState = {
-  mainCategory: string;
-  group: string;
-  value: number;
-  isNegative: boolean;
-  visible: boolean;
-};
-
-type OtherBucket = {
-  total: number;
-  entries: Array<{ name: string; value: number }>;
-};
-
-type GreedyReductionResult = {
-  allLeaves: LeafState[];
-  perCategoryOther: Map<string, OtherBucket>;
-  globalOtherBucket: OtherBucket;
-};
-
-function greedyReduceLeaves(
-  allLeaves: LeafState[],
-  topNcategories: number,
-  globalOther: boolean,
-): GreedyReductionResult {
-  const perCategoryOther = new Map<string, OtherBucket>();
-  const globalOtherBucket: OtherBucket = { total: 0, entries: [] };
-
-  let visibleCount = allLeaves.length;
-  let otherNodeCount = 0;
-
-  // Collapse the lowest-value visible leaf into an Other bucket until the
-  // total displayed node count (individual + Other nodes) <= topNcategories.
-  while (visibleCount + otherNodeCount > topNcategories && visibleCount > 0) {
-    const minLeaf = allLeaves
-      .filter(l => l.visible)
-      .reduce((min, l) => (l.value < min.value ? l : min));
-
-    minLeaf.visible = false;
-    visibleCount -= 1;
-
-    if (globalOther) {
-      if (globalOtherBucket.total === 0) otherNodeCount += 1;
-      globalOtherBucket.total += minLeaf.value;
-      globalOtherBucket.entries.push({
-        name: minLeaf.group,
-        value: minLeaf.value,
-      });
-    } else {
-      if (!perCategoryOther.has(minLeaf.mainCategory)) otherNodeCount += 1;
-      const bucket = perCategoryOther.get(minLeaf.mainCategory) ?? {
-        total: 0,
-        entries: [],
-      };
-      bucket.total += minLeaf.value;
-      bucket.entries.push({ name: minLeaf.group, value: minLeaf.value });
-      perCategoryOther.set(minLeaf.mainCategory, bucket);
-    }
-  }
-
-  // Promote single-entry Other buckets back to visible — a 1-item "Other"
-  // node wastes a slot and hides information.
-  if (globalOther) {
-    if (globalOtherBucket.entries.length === 1) {
-      const entry = globalOtherBucket.entries[0];
-      const leaf = allLeaves.find(l => l.group === entry.name && !l.visible);
-      if (leaf) {
-        leaf.visible = true;
-        globalOtherBucket.total = 0;
-        globalOtherBucket.entries = [];
-      }
-    }
-  } else {
-    for (const [catName, bucket] of perCategoryOther) {
-      if (bucket.entries.length === 1) {
-        const entry = bucket.entries[0];
-        const leaf = allLeaves.find(
-          l =>
-            l.mainCategory === catName && l.group === entry.name && !l.visible,
-        );
-        if (leaf) {
-          leaf.visible = true;
-          perCategoryOther.delete(catName);
-        }
-      }
-    }
-  }
-
-  return { allLeaves, perCategoryOther, globalOtherBucket };
-}
-
-function transformToSankeyData(
-  categoryData: CategoryEntry[],
-  toBudgetAmount: number = 0,
-  rootNodeName: string,
-  topNcategories: number = 15,
-  globalOther: boolean = false,
-  groupSort: 'per-group' | 'global' = 'per-group',
-  categoryOrder?: CategoryOrder,
-): SankeyData {
-  // Phase 1 — Initialise leaves
-  const allLeaves: LeafState[] = categoryData
-    .filter(e => e.value > 0)
-    .map(e => ({
-      mainCategory: e.mainCategory,
-      group: e.group,
-      value: e.value,
-      isNegative: e.isNegative ?? false,
-      visible: true,
-    }));
-
-  // Phase 2 — Greedy reduction (collapse lowest-value leaves into Other buckets)
-  const { perCategoryOther, globalOtherBucket } = greedyReduceLeaves(
-    allLeaves,
-    topNcategories,
-    globalOther,
-  );
-
-  // Phase 3 — Compute category totals (sum of ALL leaves including collapsed)
-  const categoryTotals = new Map<string, number>();
-  for (const leaf of allLeaves) {
-    categoryTotals.set(
-      leaf.mainCategory,
-      (categoryTotals.get(leaf.mainCategory) ?? 0) + leaf.value,
-    );
-  }
-
-  const sortedCategories = categoryOrder
-    ? categoryOrder
-        .map(c => c.mainCategory)
-        .filter(name => categoryTotals.has(name))
-        .concat(
-          [...categoryTotals.keys()]
-            .filter(name => !categoryOrder.some(c => c.mainCategory === name))
-            .sort(
-              (a, b) =>
-                (categoryTotals.get(b) ?? 0) - (categoryTotals.get(a) ?? 0),
-            ),
-        )
-    : [...categoryTotals.keys()].sort(
-        (a, b) => (categoryTotals.get(b) ?? 0) - (categoryTotals.get(a) ?? 0),
-      );
-
-  // Phase 4 — Build nodes/links
-  const nodes: SankeyNode[] = [
-    { name: rootNodeName, toBudget: toBudgetAmount },
-  ];
-  const links: SankeyLink[] = [];
-  const catNodeIndexMap = new Map<string, number>();
-
-  // Add all category nodes first (needed for global sort so indices are known)
-  for (const catName of sortedCategories) {
-    nodes.push({ name: catName });
-    catNodeIndexMap.set(catName, nodes.length - 1);
-    links.push({
-      source: 0,
-      target: nodes.length - 1,
-      value: categoryTotals.get(catName) ?? 0,
-    });
-  }
-
-  if (groupSort === 'global') {
-    // All visible categories sorted by value globally
-    const allVisibleLeaves = allLeaves
-      .filter(l => l.visible)
-      .sort((a, b) => b.value - a.value);
-
-    for (const leaf of allVisibleLeaves) {
-      const catIdx = catNodeIndexMap.get(leaf.mainCategory) ?? 0;
-      nodes.push({ name: leaf.group, isNegative: leaf.isNegative });
-      links.push({
-        source: catIdx,
-        target: nodes.length - 1,
-        value: leaf.value,
-        isNegative: leaf.isNegative,
-      });
-    }
-
-    // per-group Other nodes (globalOther=false only)
-    if (!globalOther) {
-      for (const catName of sortedCategories) {
-        const bucket = perCategoryOther.get(catName);
-        if (bucket) {
-          const catIdx = catNodeIndexMap.get(catName) ?? 0;
-          nodes.push({ name: 'Other' });
-          links.push({
-            source: catIdx,
-            target: nodes.length - 1,
-            value: bucket.total,
-            tooltipInfo: [...bucket.entries].sort((a, b) => b.value - a.value),
-          });
-        }
-      }
-    }
-  } else {
-    // per-group sort or budget-order: each category's categories sorted independently
-    for (const catName of sortedCategories) {
-      const catIdx = catNodeIndexMap.get(catName) ?? 0;
-
-      const subcatOrder = categoryOrder?.find(
-        c => c.mainCategory === catName,
-      )?.categories;
-
-      const visibleLeaves = allLeaves
-        .filter(l => l.mainCategory === catName && l.visible)
-        .sort((a, b) => {
-          if (subcatOrder) {
-            const ai = subcatOrder.indexOf(a.group);
-            const bi = subcatOrder.indexOf(b.group);
-            if (ai === -1 && bi === -1) return b.value - a.value;
-            if (ai === -1) return 1;
-            if (bi === -1) return -1;
-            return ai - bi;
-          }
-          return b.value - a.value;
-        });
-
-      for (const leaf of visibleLeaves) {
-        nodes.push({ name: leaf.group, isNegative: leaf.isNegative });
-        links.push({
-          source: catIdx,
-          target: nodes.length - 1,
-          value: leaf.value,
-          isNegative: leaf.isNegative,
-        });
-      }
-
-      // per-group Other node (globalOther=false only)
-      if (!globalOther) {
-        const bucket = perCategoryOther.get(catName);
-        if (bucket) {
-          nodes.push({ name: 'Other' });
-          links.push({
-            source: catIdx,
-            target: nodes.length - 1,
-            value: bucket.total,
-            tooltipInfo: [...bucket.entries].sort((a, b) => b.value - a.value),
-          });
-        }
-      }
-    }
-  }
-
-  // Global Other node (globalOther=true only)
-  if (globalOther && globalOtherBucket.total > 0) {
-    nodes.push({ name: 'Other' });
-    const globalOtherIdx = nodes.length - 1;
-
-    // Group entries by main category and emit one link per group
-    const byCategory = new Map<
-      string,
-      Array<{ name: string; value: number }>
-    >();
-    for (const entry of globalOtherBucket.entries) {
-      // Find which main category this group belongs to
-      const leaf = allLeaves.find(l => l.group === entry.name && !l.visible);
-      if (!leaf) continue;
-      const group = byCategory.get(leaf.mainCategory) ?? [];
-      group.push(entry);
-      byCategory.set(leaf.mainCategory, group);
-    }
-
-    for (const [catName, entries] of byCategory) {
-      const sourceCatIdx = catNodeIndexMap.get(catName);
-      if (sourceCatIdx === undefined) continue;
-      const groupTotal = entries.reduce((sum, e) => sum + e.value, 0);
-      links.push({
-        source: sourceCatIdx,
-        target: globalOtherIdx,
-        value: groupTotal,
-        tooltipInfo: [...entries].sort((a, b) => b.value - a.value),
-      });
-    }
-  }
-
-  return { nodes, links };
-}
-
-export function compactSankeyData(
-  data: SankeyData,
-  topN: number = 5,
-): SankeyData {
-  const compactedData: SankeyData = { nodes: [], links: [] };
-  compactedData.nodes.push(data.nodes[0]); // root node
-
-  // Find all root→mainCategory links and sort by value descending
-  const rootLinks = data.links
-    .filter(link => link.source === 0)
-    .sort((a, b) => b.value - a.value);
-
-  const topLinks = rootLinks.slice(0, topN - 1);
-  const otherLinks = rootLinks.slice(topN - 1);
-  const otherTotal = otherLinks.reduce((sum, link) => sum + link.value, 0);
-
-  // Add top category nodes and their links from root
-  for (const link of topLinks) {
-    compactedData.nodes.push(data.nodes[link.target]);
-    compactedData.links.push({
-      source: 0,
-      target: compactedData.nodes.length - 1,
-      value: link.value,
-    });
-  }
-
-  // Lump remaining categories into a single "Other" node
-  if (otherTotal > 0) {
-    compactedData.nodes.push({ name: 'Other' });
-    compactedData.links.push({
-      source: 0,
-      target: compactedData.nodes.length - 1,
-      value: otherTotal,
-      tooltipInfo: otherLinks.map(link => ({
-        name: data.nodes[link.target].name,
-        value: link.value,
-      })),
-    });
-  }
-
-  return compactedData;
-}

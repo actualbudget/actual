@@ -31,9 +31,7 @@ import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ModeButton } from '#components/reports/ModeButton';
 import { calculateTimeRange } from '#components/reports/reportRanges';
-import {
-  createSpreadsheet as sankeySpreadsheet,
-} from '#components/reports/spreadsheets/sankey-spreadsheet';
+import { createSpreadsheet as sankeySpreadsheet } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
 import { useCategories } from '#hooks/useCategories';
