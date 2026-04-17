@@ -44,6 +44,7 @@ type AggregatedBudget = {
 type SankeyNode = {
   name: string;
   percentageLabel?: string;
+  key: string
 };
 
 type SankeyLink = {
@@ -79,6 +80,43 @@ type NodeKey = string;
 type Edge = { to: NodeKey; value: number };
 type Graph = Record<NodeKey, Edge[]>;
 type NodeData = { attributes: any };
+
+function addTypePercentageLabels(
+  graph: Graph,
+  nodes: Record<NodeKey, NodeData>,
+): void {
+  // Build a reverse-edge lookup: key → total incoming value.
+  const incoming = new Map<NodeKey, number>();
+  for (const edges of Object.values(graph)) {
+    for (const { to, value } of edges) {
+      incoming.set(to, (incoming.get(to) ?? 0) + value);
+    }
+  }
+
+  // Node value: sum of incoming links, or outgoing links for pure-source nodes (e.g. payees).
+  const nodeValue = (key: NodeKey): number => {
+    const inc = incoming.get(key) ?? 0;
+    if (inc > 0) return inc;
+    return (graph[key] ?? []).reduce((s, e) => s + e.value, 0);
+  };
+
+  // Sum values per type.
+  const typeTotal = new Map<string, number>();
+  for (const key of Object.keys(nodes)) {
+    const type: string | undefined = nodes[key].attributes?.type;
+    if (!type) continue;
+    typeTotal.set(type, (typeTotal.get(type) ?? 0) + nodeValue(key));
+  }
+
+  // Write percentageLabel into each node's attributes.
+  for (const key of Object.keys(nodes)) {
+    const type: string | undefined = nodes[key].attributes?.type;
+    if (!type) continue;
+    const total = typeTotal.get(type) ?? 0;
+    nodes[key].attributes.percentageLabel =
+      total === 0 ? '0%' : `${((nodeValue(key) / total) * 100).toFixed(1)}%`;
+  }
+}
 
 function createGraphFromCategoryData(categoryData: CategoryEntry[]): {
   nodes: Record<NodeKey, NodeData>;
@@ -167,6 +205,8 @@ function createGraphFromCategoryData(categoryData: CategoryEntry[]): {
     }
   }
 
+  addTypePercentageLabels(graph, nodes);
+  console.log('Graph with percentage labels:', { nodes, graph });
   return { nodes, graph };
 }
 
@@ -176,6 +216,7 @@ function convertToSankeyData(
 ): SankeyData {
   const nodes: SankeyNode[] = Object.keys(nodeData).map(key => ({
     name: nodeData[key].attributes.name,
+    percentageLabel: nodeData[key].attributes.percentageLabel,
     attributes: nodeData[key].attributes,
     key,
   }));
@@ -380,11 +421,6 @@ export function createBudgetSpreadsheet(
       ),
     );
 
-    console.log(
-      'Budget month responses:',
-      JSON.stringify(monthResponses, null, 2),
-    );
-
     const aggregated = monthResponses.reduce<AggregatedBudget>(
       (acc, response, index) => {
         acc.toBudget += response.toBudget;
@@ -432,8 +468,6 @@ export function createBudgetSpreadsheet(
       },
     );
 
-    console.log('Aggregated budget:', JSON.stringify(aggregated, null, 2));
-
     const categoryGroups = Array.from(aggregated.categoryGroupsMap.values());
 
     const filteredCategoryGroups = filterCategoryGroups(
@@ -442,10 +476,6 @@ export function createBudgetSpreadsheet(
       conditionsOp,
     );
 
-    console.log(
-      'Filtered category groups:',
-      JSON.stringify(filteredCategoryGroups, null, 2),
-    );
 
     const categoryData: CategoryEntry[] = filteredCategoryGroups
       .flatMap(group =>
@@ -469,8 +499,6 @@ export function createBudgetSpreadsheet(
         }),
       )
       .filter(entry => entry.value > 0);
-
-    console.log('Category Data:', JSON.stringify(categoryData, null, 2));
 
     // Add fromLastMonth as a synthetic node leading to Budgeted, to visualize carryover from previous month
     if (aggregated.fromPreviousMonth !== 0) {
@@ -514,11 +542,6 @@ export function createBudgetSpreadsheet(
       });
     }
 
-    console.log(
-      'Next month budget response:',
-      JSON.stringify(nextMonthResponse, null, 2),
-    );
-
     const { toBudget } = aggregated;
 
     // setData(
@@ -534,8 +557,6 @@ export function createBudgetSpreadsheet(
     // );
 
     const { nodes, graph } = createGraphFromCategoryData(categoryData);
-    console.log('Nodes:', nodes);
-    console.log('Graph:', graph);
     setData(convertToSankeyData(graph, nodes));
   };
 }
@@ -968,47 +989,4 @@ export function compactSankeyData(
   }
 
   return compactedData;
-}
-
-export function withPercentageLabels(data: SankeyData): SankeyData {
-  // Assign a layer depth to each node, starting from the root (node 0 = depth 0).
-  const depth = new Array<number>(data.nodes.length).fill(-1);
-  depth[0] = 0;
-  let changed = true;
-  while (changed) {
-    changed = false;
-    for (const link of data.links) {
-      const src = link.source;
-      const tgt = link.target;
-      if (depth[src] >= 0 && depth[tgt] < 0) {
-        depth[tgt] = depth[src] + 1;
-        changed = true;
-      }
-    }
-  }
-
-  // Each node's value is the sum of its incoming links.
-  // The root has no incoming links, so use its outgoing links instead.
-  const nodeValue = (i: number) =>
-    data.links
-      .filter(l => (depth[i] === 0 ? l.source === i : l.target === i))
-      .reduce((sum, l) => sum + l.value, 0);
-
-  // Compute the total value per layer so percentages within each layer sum to 100%.
-  const layerTotal = new Map<number, number>();
-  data.nodes.forEach((_, i) => {
-    const d = depth[i];
-    if (d >= 0) layerTotal.set(d, (layerTotal.get(d) ?? 0) + nodeValue(i));
-  });
-
-  const nodes = data.nodes.map((node, i) => {
-    const total = layerTotal.get(depth[i]) ?? 0;
-    return {
-      ...node,
-      percentageLabel:
-        total === 0 ? '0%' : `${((nodeValue(i) / total) * 100).toFixed(1)}%`,
-    };
-  });
-
-  return { ...data, nodes };
 }

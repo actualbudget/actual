@@ -33,7 +33,6 @@ import { ModeButton } from '#components/reports/ModeButton';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import {
   createSpreadsheet as sankeySpreadsheet,
-  withPercentageLabels,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
@@ -606,11 +605,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                 {data && data.links && data.links.length > 0 ? (
                   <SankeyGraph
                     style={{ flexGrow: 1 }}
-                    data={
-                      showPercentages
-                        ? withPercentageLabels(data as SankeyData)
-                        : (data as SankeyData)
-                    }
+                    data={data}
                     showPercentages={showPercentages}
                   />
                 ) : (
