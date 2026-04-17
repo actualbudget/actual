@@ -27,11 +27,11 @@
     "typecheck": "tsgo -b"
   },
   "dependencies": {
-    "@bufbuild/protobuf": "^2.9.0",
+    "@bufbuild/protobuf": "^2.11.0",
     "murmurhash": "^2.0.1"
   },
   "devDependencies": {
-    "@bufbuild/protoc-gen-es": "^2.9.0",
+    "@bufbuild/protoc-gen-es": "^2.11.0",
     "@typescript/native-preview": "^7.0.0-dev.20260404.1",
     "vitest": "^4.1.2"
   }

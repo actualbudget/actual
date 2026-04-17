@@ -167,8 +167,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/crdt@workspace:packages/crdt"
   dependencies:
-    "@bufbuild/protobuf": "npm:^2.9.0"
-    "@bufbuild/protoc-gen-es": "npm:^2.9.0"
+    "@bufbuild/protobuf": "npm:^2.11.0"
+    "@bufbuild/protoc-gen-es": "npm:^2.11.0"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"
     murmurhash: "npm:^2.0.1"
     vitest: "npm:^4.1.2"
@@ -1953,14 +1953,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bufbuild/protobuf@npm:2.11.0, @bufbuild/protobuf@npm:^2.9.0":
+"@bufbuild/protobuf@npm:2.11.0, @bufbuild/protobuf@npm:^2.11.0":
   version: 2.11.0
   resolution: "@bufbuild/protobuf@npm:2.11.0"
   checksum: 10/dddab84c2dc92f15b467449dc9d951b9aef6ea335dba448f8d4028f9b52fdb790d3b856a1dceb4dbcfe7f182072f0d1cd6ce05b2a95ff40132eea6a428e84883
   languageName: node
   linkType: hard
 
-"@bufbuild/protoc-gen-es@npm:^2.9.0":
+"@bufbuild/protoc-gen-es@npm:^2.11.0":
   version: 2.11.0
   resolution: "@bufbuild/protoc-gen-es@npm:2.11.0"
   dependencies:
