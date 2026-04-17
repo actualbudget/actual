@@ -171,6 +171,8 @@ __metadata:
     "@bufbuild/protoc-gen-es": "npm:^2.11.0"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"
     murmurhash: "npm:^2.0.1"
+    rollup-plugin-visualizer: "npm:^7.0.1"
+    vite: "npm:^8.0.5"
     vitest: "npm:^4.1.2"
   languageName: unknown
   linkType: soft
