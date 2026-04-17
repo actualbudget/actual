@@ -80,8 +80,9 @@ globalThis.fetch = (async (
   if (diskPath) {
     const buf = await fs.readFile(diskPath);
     const headers: Record<string, string> = {};
-    if (pathname.endsWith('.wasm'))
-      {headers['Content-Type'] = 'application/wasm';}
+    if (pathname.endsWith('.wasm')) {
+      headers['Content-Type'] = 'application/wasm';
+    }
     return new Response(new Uint8Array(buf), { status: 200, headers });
   }
 
