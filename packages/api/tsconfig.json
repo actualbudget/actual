@@ -23,7 +23,8 @@
     "**/node_modules/*",
     "dist",
     "@types",
-    "*.test.ts",
+    "**/*.test.ts",
+    "test/setup.*.ts",
     "*.config.ts",
     "*.config.mts"
   ]
