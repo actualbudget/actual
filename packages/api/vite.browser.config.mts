@@ -25,4 +25,25 @@ export default defineConfig({
   plugins: [peggyLoader()],
   // Intentionally no resolve.conditions: ['api'] — omitting it causes
   // loot-core's default (browser) platform files to be selected.
+  resolve: {
+    alias: {
+      // The shared integration spec imports '../index' (Node entry). Under
+      // the browser test config we reroute it to the browser entry so the
+      // same spec runs against the browser build's init/shutdown.
+      [path.resolve(__dirname, 'index.ts')]: path.resolve(
+        __dirname,
+        'index.browser.ts',
+      ),
+    },
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./test/setup.browser.ts'],
+    include: ['test/integration.test.ts'],
+    onConsoleLog(log: string, type: 'stdout' | 'stderr'): boolean | void {
+      return type === 'stderr';
+    },
+    maxWorkers: 2,
+  },
 });
