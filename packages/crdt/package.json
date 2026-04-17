@@ -22,19 +22,17 @@
   "scripts": {
     "build:node": "tsgo -p tsconfig.build.json",
     "proto:generate": "./bin/generate-proto",
-    "build": "rm -rf dist && yarn run build:node && cp src/proto/sync_pb.js dist/proto/sync_pb.js",
+    "build": "rm -rf dist && yarn run build:node",
     "test": "vitest --run",
     "typecheck": "tsgo -b"
   },
   "dependencies": {
-    "google-protobuf": "^3.21.4",
+    "@bufbuild/protobuf": "^2.9.0",
     "murmurhash": "^2.0.1"
   },
   "devDependencies": {
-    "@types/google-protobuf": "3.15.12",
+    "@bufbuild/protoc-gen-es": "^2.9.0",
     "@typescript/native-preview": "^7.0.0-dev.20260404.1",
-    "protoc-gen-js": "3.21.4-4",
-    "ts-protoc-gen": "0.15.0",
     "vitest": "^4.1.2"
   }
 }
