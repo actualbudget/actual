@@ -22,7 +22,7 @@
   "scripts": {
     "build:node": "vite build",
     "proto:generate": "./bin/generate-proto",
-    "build": "rm -rf dist && yarn run build:node && tsgo -p tsconfig.build.json --emitDeclarationOnly",
+    "build": "yarn run build:node && tsgo -p tsconfig.build.json --emitDeclarationOnly",
     "test": "vitest --run",
     "typecheck": "tsgo -b"
   },
