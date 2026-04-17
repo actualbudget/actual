@@ -122,7 +122,7 @@ jobs:
         with:
           download-translations: 'false'
       - name: Build Server
-        run: yarn workspace @actual-app/sync-server build
+        run: yarn build --to=@actual-app/sync-server
       - name: Upload Build
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
