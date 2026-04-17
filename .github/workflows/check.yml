@@ -64,6 +64,15 @@ jobs:
           download-translations: 'false'
       - name: Test
         run: yarn test
+  check-gh-actions:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: zizmorcore/zizmor-action@71321a20a9ded102f6e9ce5718a2fcec2c4f70d8 # v0.5.2
 
   migrations:
     if: github.event_name == 'pull_request'
