@@ -28,6 +28,8 @@ __metadata:
     "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"
     better-sqlite3: "npm:^12.8.0"
     compare-versions: "npm:^6.1.1"
+    fake-indexeddb: "npm:^6.2.5"
+    npm-run-all: "npm:^4.1.5"
     rollup-plugin-visualizer: "npm:^7.0.1"
     typescript-strict-plugin: "npm:^2.4.4"
     vite: "npm:^8.0.5"

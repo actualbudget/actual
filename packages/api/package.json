@@ -13,6 +13,7 @@
     ".": {
       "types": "./@types/index.d.ts",
       "development": "./index.ts",
+      "browser": "./dist/browser.js",
       "default": "./dist/index.js"
     }
   },
@@ -20,13 +21,18 @@
     "exports": {
       ".": {
         "types": "./@types/index.d.ts",
+        "browser": "./dist/browser.js",
         "default": "./dist/index.js"
       }
     }
   },
   "scripts": {
-    "build": "vite build && tsgo --emitDeclarationOnly",
-    "test": "vitest --run",
+    "build": "npm-run-all -s build:node build:browser",
+    "build:node": "vite build --config vite.config.mts && tsgo --emitDeclarationOnly",
+    "build:browser": "vite build --config vite.browser.config.mts",
+    "test": "npm-run-all -cp 'test:*'",
+    "test:node": "vitest --run --config vite.config.mts",
+    "test:browser": "vitest --run --config vite.browser.config.mts",
     "typecheck": "tsgo -b && tsc-strict"
   },
   "dependencies": {
@@ -37,6 +43,8 @@
   },
   "devDependencies": {
     "@typescript/native-preview": "^7.0.0-dev.20260404.1",
+    "fake-indexeddb": "^6.2.5",
+    "npm-run-all": "^4.1.5",
     "rollup-plugin-visualizer": "^7.0.1",
     "typescript-strict-plugin": "^2.4.4",
     "vite": "^8.0.5",
