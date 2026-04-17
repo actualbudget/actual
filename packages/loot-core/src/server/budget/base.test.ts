@@ -1,7 +1,7 @@
+import * as db from '#server/db';
+import * as sheet from '#server/sheet';
 // @ts-strict-ignore
-import * as monthUtils from '../../shared/months';
-import * as db from '../db';
-import * as sheet from '../sheet';
+import * as monthUtils from '#shared/months';
 
 import { createAllBudgets } from './base';
 
@@ -65,7 +65,7 @@ describe('Base budget', () => {
     ).toBe(-5000);
   });
 
-  it('Excludes hidden categories from group totals in Report Budget', async () => {
+  it('Excludes hidden categories from group totals in Tracking Budget', async () => {
     await sheet.loadSpreadsheet(db);
     sheet.get().meta().budgetType = 'tracking';
 
@@ -141,7 +141,7 @@ describe('Base budget', () => {
     );
   });
 
-  it('Excludes hidden category groups from budget totals in Report Budget', async () => {
+  it('Excludes hidden category groups from budget totals in Tracking Budget', async () => {
     await sheet.loadSpreadsheet(db);
     sheet.get().meta().budgetType = 'tracking';
 
@@ -228,9 +228,9 @@ describe('Base budget', () => {
     expect(sheet.getCellValue(sheetName, 'total-spent')).toBe(-3000);
   });
 
-  it('Includes hidden categories in group totals for Rollover Budget', async () => {
+  it('Includes hidden categories in group totals for Envelope Budget', async () => {
     await sheet.loadSpreadsheet(db);
-    // Rollover is the default, but explicit for clarity
+    // Envelope is the default, but explicit for clarity
     sheet.get().meta().budgetType = 'envelope';
 
     // Create a group with multiple categories
@@ -280,9 +280,9 @@ describe('Base budget', () => {
     );
   });
 
-  it('Includes hidden category groups in budget totals for Rollover Budget', async () => {
+  it('Includes hidden category groups in budget totals for Envelope Budget', async () => {
     await sheet.loadSpreadsheet(db);
-    // Rollover is the default, but explicit for clarity
+    // Envelope is the default, but explicit for clarity
     sheet.get().meta().budgetType = 'envelope';
 
     // Create two expense groups - one visible, one hidden

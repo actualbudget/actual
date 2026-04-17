@@ -2,20 +2,19 @@ import { useMemo, useReducer, useRef, useState } from 'react';
 
 import { SpaceBetween } from '@actual-app/components/space-between';
 import type { CSSProperties } from '@actual-app/components/styles';
-
-import { firstDayOfMonth } from 'loot-core/shared/months';
+import { firstDayOfMonth } from '@actual-app/core/shared/months';
 import type {
   CategoryGroupEntity,
   ScheduleEntity,
-} from 'loot-core/types/models';
-import type { Template } from 'loot-core/types/models/templates';
+} from '@actual-app/core/types/models';
+import type { Template } from '@actual-app/core/types/models/templates';
+
+import { useEffectAfterMount } from '#hooks/useEffectAfterMount';
 
 import { BudgetAutomationEditor } from './BudgetAutomationEditor';
 import { BudgetAutomationReadOnly } from './BudgetAutomationReadOnly';
 import type { DisplayTemplateType } from './constants';
 import { DEFAULT_PRIORITY, getInitialState, templateReducer } from './reducer';
-
-import { useEffectAfterMount } from '@desktop-client/hooks/useEffectAfterMount';
 
 type BudgetAutomationProps = {
   categories: CategoryGroupEntity[];

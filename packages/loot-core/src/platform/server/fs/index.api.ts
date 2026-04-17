@@ -4,7 +4,9 @@ import * as path from 'path';
 
 import promiseRetry from 'promise-retry';
 
-import { logger } from '../log';
+import { logger } from '#platform/server/log';
+
+import { getDocumentDir } from './shared';
 
 import type * as T from './index';
 
@@ -14,12 +16,7 @@ export const init: typeof T.init = async () => {
   // Nothing to do
 };
 
-export const getDataDir: typeof T.getDataDir = () => {
-  if (!process.env.ACTUAL_DATA_DIR) {
-    throw new Error('ACTUAL_DATA_DIR env variable is required');
-  }
-  return process.env.ACTUAL_DATA_DIR;
-};
+export const getDataDir: typeof T.getDataDir = () => getDocumentDir();
 
 export const bundledDatabasePath: typeof T.bundledDatabasePath = path.join(
   __dirname,

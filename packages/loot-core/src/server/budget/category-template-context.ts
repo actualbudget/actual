@@ -1,9 +1,11 @@
+import { aqlQuery } from '#server/aql';
+import * as db from '#server/db';
 import { getCurrency } from '#shared/currencies';
 import type { Currency } from '#shared/currencies';
+import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
-import * as monthUtils from '../../shared/months';
-import { amountToInteger, integerToAmount } from '../../shared/util';
-import type { CategoryEntity } from '../../types/models';
+import { amountToInteger, integerToAmount } from '#shared/util';
+import type { CategoryEntity } from '#types/models';
 import type {
   AverageTemplate,
   ByTemplate,
@@ -16,11 +18,9 @@ import type {
   SimpleTemplate,
   SpendTemplate,
   Template,
-} from '../../types/models/templates';
-import { aqlQuery } from '../aql';
-import * as db from '../db';
+} from '#types/models/templates';
 
-import { getSheetBoolean, getSheetValue, isReflectBudget } from './actions';
+import { getSheetBoolean, getSheetValue, isTrackingBudget } from './actions';
 import { runSchedule } from './schedule-template';
 import { getActiveSchedules } from './statements';
 
@@ -66,7 +66,7 @@ export class CategoryTemplateContext {
     if (
       (fromLastMonth < 0 && !carryover) || // overspend no carryover
       category.is_income || // tracking budget income categories
-      (isReflectBudget() && !carryover) // tracking budget regular categories
+      (isTrackingBudget() && !carryover) // tracking budget regular categories
     ) {
       fromLastMonth = 0;
     }
@@ -711,7 +711,7 @@ export class CategoryTemplateContext {
     const cat = template.category.toLowerCase();
     const prev = template.previous;
     let sheetName;
-    let monthlyIncome = 1;
+    let monthlyIncome;
 
     //choose the sheet to find income for
     if (prev) {

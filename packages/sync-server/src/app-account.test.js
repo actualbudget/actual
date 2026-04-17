@@ -1,9 +1,8 @@
 import request from 'supertest';
-import { v4 as uuidv4 } from 'uuid';
 
 import { getAccountDb, getLoginMethod, getServerPrefs } from './account-db';
 import { bootstrapPassword } from './accounts/password';
-import { handlers as app } from './app-account';
+import { handlers as app, authRateLimiter } from './app-account';
 
 const ADMIN_ROLE = 'ADMIN';
 const BASIC_ROLE = 'BASIC';
@@ -28,7 +27,7 @@ const createSession = (userId, sessionToken, authMethod = null) => {
   );
 };
 
-const generateSessionToken = () => `token-${uuidv4()}`;
+const generateSessionToken = () => `token-${crypto.randomUUID()}`;
 
 const clearServerPrefs = () => {
   getAccountDb().mutate('DELETE FROM server_prefs');
@@ -45,6 +44,51 @@ const clearAuth = () => {
   getAccountDb().mutate('DELETE FROM auth');
 };
 
+beforeEach(() => {
+  authRateLimiter.resetKey('127.0.0.1');
+});
+
+describe('auth rate limiting', () => {
+  it('should return 429 after exceeding the rate limit on /login', async () => {
+    for (let i = 0; i < 5; i++) {
+      await request(app).post('/login').send({ password: 'wrong' });
+    }
+
+    const res = await request(app).post('/login').send({ password: 'wrong' });
+
+    expect(res.statusCode).toEqual(429);
+    expect(res.body).toEqual({
+      status: 'error',
+      reason: 'too-many-requests',
+    });
+  });
+
+  it('should apply the same rate limit across /login and /bootstrap', async () => {
+    for (let i = 0; i < 5; i++) {
+      await request(app).post('/login').send({ password: 'wrong' });
+    }
+
+    const res = await request(app)
+      .post('/bootstrap')
+      .send({ password: 'test' });
+
+    expect(res.statusCode).toEqual(429);
+    expect(res.body).toEqual({
+      status: 'error',
+      reason: 'too-many-requests',
+    });
+  });
+
+  it('should not rate limit non-auth endpoints', async () => {
+    for (let i = 0; i < 6; i++) {
+      await request(app).post('/login').send({ password: 'wrong' });
+    }
+
+    const res = await request(app).get('/needs-bootstrap');
+    expect(res.statusCode).toEqual(200);
+  });
+});
+
 describe('/change-password', () => {
   let adminUserId,
     basicUserId,
@@ -53,8 +97,8 @@ describe('/change-password', () => {
     basicPasswordToken;
 
   beforeEach(() => {
-    adminUserId = uuidv4();
-    basicUserId = uuidv4();
+    adminUserId = crypto.randomUUID();
+    basicUserId = crypto.randomUUID();
     adminPasswordToken = generateSessionToken();
     adminOpenidToken = generateSessionToken();
     basicPasswordToken = generateSessionToken();
@@ -216,8 +260,8 @@ describe('/server-prefs', () => {
     let adminUserId, basicUserId, adminSessionToken, basicSessionToken;
 
     beforeEach(() => {
-      adminUserId = uuidv4();
-      basicUserId = uuidv4();
+      adminUserId = crypto.randomUUID();
+      basicUserId = crypto.randomUUID();
       adminSessionToken = generateSessionToken();
       basicSessionToken = generateSessionToken();
 

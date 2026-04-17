@@ -8,11 +8,20 @@ import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
-
 import type {
   CustomReportEntity,
   DashboardPageEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+
+import { FormField, FormLabel } from '#components/forms';
+import { useDashboardPages } from '#hooks/useDashboardPages';
+import { useReports } from '#hooks/useReports';
+import {
+  useAddDashboardWidgetMutation,
+  useCreateReportMutation,
+  useDeleteReportMutation,
+  useUpdateReportMutation,
+} from '#reports/mutations';
 
 import { LoadingIndicator } from './LoadingIndicator';
 import { SaveReportChoose } from './SaveReportChoose';
@@ -20,16 +29,6 @@ import { SaveReportDelete } from './SaveReportDelete';
 import { SaveReportMenu } from './SaveReportMenu';
 import type { SavedStatus } from './SaveReportMenu';
 import { SaveReportName } from './SaveReportName';
-
-import { FormField, FormLabel } from '@desktop-client/components/forms';
-import { useDashboardPages } from '@desktop-client/hooks/useDashboardPages';
-import { useReports } from '@desktop-client/hooks/useReports';
-import {
-  useAddDashboardWidgetMutation,
-  useCreateReportMutation,
-  useDeleteReportMutation,
-  useUpdateReportMutation,
-} from '@desktop-client/reports/mutations';
 
 type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
   customReportItems: T;

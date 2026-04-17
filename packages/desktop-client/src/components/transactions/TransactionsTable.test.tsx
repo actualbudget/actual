@@ -1,44 +1,45 @@
 import React, { useEffect, useState } from 'react';
 
-import { fireEvent, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { format as formatDate, parse as parseDate } from 'date-fns';
-import { v4 as uuidv4 } from 'uuid';
-
 import {
   generateAccount,
   generateCategoryGroups,
   generateTransaction,
-} from 'loot-core/mocks';
-import { initServer } from 'loot-core/platform/client/connection';
+} from '@actual-app/core/mocks';
+import { initServer } from '@actual-app/core/platform/client/connection';
 import {
   addSplitTransaction,
   realizeTempTransactions,
   splitTransaction,
   updateTransaction,
-} from 'loot-core/shared/transactions';
-import { integerToCurrency } from 'loot-core/shared/util';
+} from '@actual-app/core/shared/transactions';
+import { integerToCurrency } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   CategoryEntity,
   CategoryGroupEntity,
   PayeeEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { format as formatDate, parse as parseDate } from 'date-fns';
+
+import { AuthProvider } from '#auth/AuthProvider';
+import { SchedulesProvider } from '#hooks/useCachedSchedules';
+import { SelectedProviderWithItems } from '#hooks/useSelected';
+import { SplitsExpandedProvider } from '#hooks/useSplitsExpanded';
+import { SpreadsheetProvider } from '#hooks/useSpreadsheet';
+import { createTestQueryClient, TestProviders } from '#mocks';
+import { payeeQueries } from '#payees';
 
 import { TransactionTable } from './TransactionsTable';
 
-import { AuthProvider } from '@desktop-client/auth/AuthProvider';
-import { SchedulesProvider } from '@desktop-client/hooks/useCachedSchedules';
-import { SelectedProviderWithItems } from '@desktop-client/hooks/useSelected';
-import { SplitsExpandedProvider } from '@desktop-client/hooks/useSplitsExpanded';
-import { SpreadsheetProvider } from '@desktop-client/hooks/useSpreadsheet';
-import { createTestQueryClient, TestProviders } from '@desktop-client/mocks';
-import { payeeQueries } from '@desktop-client/payees';
-
 const queryClient = createTestQueryClient();
 
-vi.mock('loot-core/platform/client/connection');
+vi.mock(
+  '@actual-app/core/platform/client/connection',
+  () => import('../../mocks/connection'),
+);
 vi.mock('../../hooks/useSyncedPref', () => ({
   useSyncedPref: vi.fn().mockReturnValue([undefined, vi.fn()]),
 }));
@@ -1085,7 +1086,7 @@ describe('Transactions', () => {
     // Change the id to simulate a new transaction being added, and
     // work with that one. This makes sure that the transaction table
     // properly references new data.
-    transactions[0] = { ...transactions[0], id: uuidv4() };
+    transactions[0] = { ...transactions[0], id: crypto.randomUUID() };
     updateProps({ transactions });
 
     function expectErrorToNotExist(transactions: TransactionEntity[]) {
@@ -1104,7 +1105,7 @@ describe('Transactions', () => {
       });
     }
 
-    let input = await editField(container, 'category', 0);
+    await editField(container, 'category', 0);
 
     // Make it clear that we are expected a negative transaction
     expect(getTransactions()[0].amount).toBe(-2777);
@@ -1128,7 +1129,7 @@ describe('Transactions', () => {
 
     // Enter an amount for the new split transaction and make sure the
     // toolbar updates
-    input = await editField(container, 'debit', 1);
+    let input = await editField(container, 'debit', 1);
     await userEvent.clear(input);
     await userEvent.type(input, '10.00[tab]');
     expect(toolbar.innerHTML.includes('17.77')).toBeTruthy();
@@ -1221,7 +1222,7 @@ describe('Transactions', () => {
   test('transaction with splits shows 0 in correct column', async () => {
     const { container, getTransactions } = renderTransactions();
 
-    let input = await editField(container, 'category', 0);
+    await editField(container, 'category', 0);
 
     // The first transaction should always be a negative amount
     expect(getTransactions()[0].amount).toBe(-2777);
@@ -1240,7 +1241,7 @@ describe('Transactions', () => {
     expect(queryField(container, 'credit', '', 2).textContent).toBe('');
 
     // Change it to a credit transaction
-    input = await editField(container, 'credit', 0);
+    const input = await editField(container, 'credit', 0);
     await userEvent.type(input, '55.00{Tab}');
 
     // The zeros should now display in the credit column

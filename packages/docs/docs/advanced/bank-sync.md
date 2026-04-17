@@ -7,7 +7,7 @@ Here are a couple of considerations to know about before making the decision to 
 
 - The integration only works if you are using actual-server.
 
-- The Secrets and Keys are stored in your Actual installed version so it is highly recommended to turn on End to End encryption and create a strong passphrase to encrypt your files.
+- The API secrets and keys for bank sync are stored on the server and are **not** covered by [end-to-end encryption](/docs/getting-started/sync/#end-to-end-encryption). End-to-end encryption only protects your budget data. Server administrators or hosting providers with direct access to the server's database can read bank sync tokens. If this is a concern, consider self-hosting your server.
 
 - You will need to add a config file to your installation.
 

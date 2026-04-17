@@ -1,6 +1,6 @@
+import * as db from '#server/db';
 // @ts-strict-ignore
-import type { QueryState } from '../../shared/query';
-import * as db from '../db';
+import type { QueryState } from '#shared/query';
 
 import { compileQuery, defaultConstructQuery } from './compiler';
 import type {

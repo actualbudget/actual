@@ -10,6 +10,6 @@ export const SvgSend = (props: SVGProps<SVGSVGElement>) => (
       ...props.style,
     }}
   >
-    <path d="m0 0 20 10L0 20V0zm0 8v4l10-2L0 8z" fill="currentColor" />
+    <path d="m0 0 20 10L0 20zm0 8v4l10-2z" fill="currentColor" />
   </svg>
 );

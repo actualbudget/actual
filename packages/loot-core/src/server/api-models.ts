@@ -1,4 +1,4 @@
-import type { Budget } from '../types/budget';
+import type { Budget } from '#types/budget';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -6,7 +6,7 @@ import type {
   PayeeEntity,
   ScheduleEntity,
   TagEntity,
-} from '../types/models';
+} from '#types/models';
 
 import type { RemoteFile } from './cloud-storage';
 import * as models from './models';

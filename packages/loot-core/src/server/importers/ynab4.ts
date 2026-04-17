@@ -1,12 +1,10 @@
 // @ts-strict-ignore
 import AdmZip from 'adm-zip';
-import normalizePathSep from 'slash';
-import { v4 as uuidv4 } from 'uuid';
 
-import { logger } from '../../platform/server/log';
-import * as monthUtils from '../../shared/months';
-import { amountToInteger, groupBy, sortByKey } from '../../shared/util';
-import { send } from '../main-app';
+import { logger } from '#platform/server/log';
+import { send } from '#server/main-app';
+import * as monthUtils from '#shared/months';
+import { amountToInteger, groupBy, sortByKey } from '#shared/util';
 
 import type * as YNAB4 from './ynab4-types';
 
@@ -166,11 +164,11 @@ async function importTransactions(
   // Go ahead and generate ids for all of the transactions so we can
   // reliably resolve transfers
   for (const transaction of data.transactions) {
-    entityIdMap.set(transaction.entityId, uuidv4());
+    entityIdMap.set(transaction.entityId, crypto.randomUUID());
 
     if (transaction.subTransactions) {
       for (const subTransaction of transaction.subTransactions) {
-        entityIdMap.set(subTransaction.entityId, uuidv4());
+        entityIdMap.set(subTransaction.entityId, crypto.randomUUID());
       }
     }
   }
@@ -396,7 +394,7 @@ export async function doImport(data: YNAB4.YFull) {
 }
 
 export function getBudgetName(filepath) {
-  let unixFilepath = normalizePathSep(filepath);
+  let unixFilepath = filepath.replace(/\\/g, '/');
 
   if (!/\.zip/.test(unixFilepath)) {
     return null;

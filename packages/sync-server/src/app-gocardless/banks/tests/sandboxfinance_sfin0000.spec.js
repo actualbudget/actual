@@ -1,4 +1,4 @@
-import SandboxfinanceSfin0000 from '../sandboxfinance_sfin0000';
+import SandboxfinanceSfin0000 from '#app-gocardless/banks/sandboxfinance_sfin0000';
 
 describe('SandboxfinanceSfin0000', () => {
   describe('#normalizeAccount', () => {

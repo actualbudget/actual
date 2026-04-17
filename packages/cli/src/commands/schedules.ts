@@ -1,9 +1,9 @@
 import * as api from '@actual-app/api';
 import type { Command } from 'commander';
 
-import { withConnection } from '../connection';
-import { readJsonInput } from '../input';
-import { printOutput } from '../output';
+import { withConnection } from '#connection';
+import { readJsonInput } from '#input';
+import { printOutput } from '#output';
 
 export function registerSchedulesCommand(program: Command) {
   const schedules = program

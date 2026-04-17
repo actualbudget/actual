@@ -1,14 +1,13 @@
-import { queryOptions } from '@tanstack/react-query';
-
-import { send } from 'loot-core/platform/client/connection';
-import { q } from 'loot-core/shared/query';
+import { send } from '@actual-app/core/platform/client/connection';
+import { q } from '@actual-app/core/shared/query';
 import type {
   CustomReportEntity,
   DashboardPageEntity,
   DashboardWidgetEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { queryOptions } from '@tanstack/react-query';
 
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
+import { aqlQuery } from '#queries/aqlQuery';
 
 export const reportQueries = {
   all: () => ['reports'],

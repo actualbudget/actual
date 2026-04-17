@@ -1,18 +1,19 @@
 // @ts-strict-ignore
 import React, { useEffect } from 'react';
 import type { ComponentProps } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { AutoSizer } from 'react-virtualized-auto-sizer';
 
 import { View } from '@actual-app/components/view';
+import * as monthUtils from '@actual-app/core/shared/months';
 
-import * as monthUtils from 'loot-core/shared/months';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
+import { useGlobalPref } from '#hooks/useGlobalPref';
 
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
 import { BudgetPageHeader } from './BudgetPageHeader';
 import { BudgetTable } from './BudgetTable';
-
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 function getNumPossibleMonths(width: number, categoryWidth: number) {
   const estimatedTableWidth = width - categoryWidth;
@@ -132,20 +133,22 @@ const DynamicBudgetTable = ({
       }}
     >
       <View style={{ width: '100%', maxWidth }}>
-        <BudgetPageHeader
-          startMonth={prewarmStartMonth}
-          numMonths={numMonths}
-          monthBounds={monthBounds}
-          onMonthSelect={_onMonthSelect}
-        />
-        <BudgetTable
-          type={type}
-          prewarmStartMonth={prewarmStartMonth}
-          startMonth={startMonth}
-          numMonths={numMonths}
-          monthBounds={monthBounds}
-          {...props}
-        />
+        <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+          <BudgetPageHeader
+            startMonth={prewarmStartMonth}
+            numMonths={numMonths}
+            monthBounds={monthBounds}
+            onMonthSelect={_onMonthSelect}
+          />
+          <BudgetTable
+            type={type}
+            prewarmStartMonth={prewarmStartMonth}
+            startMonth={startMonth}
+            numMonths={numMonths}
+            monthBounds={monthBounds}
+            {...props}
+          />
+        </ErrorBoundary>
       </View>
     </View>
   );

@@ -1,4 +1,4 @@
-import LhvLhvbee22 from '../lhv_lhvbee22';
+import LhvLhvbee22 from '#app-gocardless/banks/lhv_lhvbee22';
 
 describe('#normalizeTransaction', () => {
   const bookedCardTransaction = {

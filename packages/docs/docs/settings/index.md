@@ -37,7 +37,7 @@ OpenID can be enabled here. [Learn more](/docs/config/oauth-auth)
 
 ### Encryption
 
-End-to-end encryption allows you to encrypt the data on your remote server with a password. If you don't trust the server's owners, enable this setting to fully encrypt the data. [Learn more](/docs/getting-started/sync/#end-to-end-encryption)
+End-to-end encryption allows you to encrypt your budget data on the remote server with a password. If you don't trust the server's owners, enable this setting to encrypt your budget data. Note that [bank sync](/docs/advanced/bank-sync) tokens are stored separately on the server and are not covered by this encryption. [Learn more](/docs/getting-started/sync/#end-to-end-encryption)
 
 ![Image of Encryption setting](/img/using-actual/settings-encryption.webp)
 

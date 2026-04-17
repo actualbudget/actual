@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { addSyncListener } from '../sync/index';
+import { addSyncListener } from '#server/sync';
 
 import * as db from './index';
 

@@ -1,3 +1,5 @@
+const BUILD_OUTPUT_GLOBS = ['lib-dist/**', 'dist/**', 'build/**', '@types/**'];
+
 /** @type {import('lage').ConfigOptions} */
 module.exports = {
   pipeline: {
@@ -20,14 +22,14 @@ module.exports = {
       dependsOn: ['^build'],
       cache: true,
       options: {
-        outputGlob: ['lib-dist/**', 'dist/**', 'build/**'],
+        outputGlob: BUILD_OUTPUT_GLOBS,
       },
     },
   },
   cacheOptions: {
     cacheStorageConfig: {
       provider: 'local',
-      outputGlob: ['lib-dist/**', 'dist/**', 'build/**'],
+      outputGlob: BUILD_OUTPUT_GLOBS,
     },
   },
   npmClient: 'yarn',

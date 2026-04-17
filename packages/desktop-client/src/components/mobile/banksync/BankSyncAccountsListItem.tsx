@@ -4,11 +4,10 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { tsToRelativeTime } from '@actual-app/core/shared/util';
+import type { AccountEntity } from '@actual-app/core/types/models';
 
-import { tsToRelativeTime } from 'loot-core/shared/util';
-import type { AccountEntity } from 'loot-core/types/models';
-
-import { useLocale } from '@desktop-client/hooks/useLocale';
+import { useLocale } from '#hooks/useLocale';
 
 type BankSyncAccountsListItemProps = {
   account: AccountEntity;
