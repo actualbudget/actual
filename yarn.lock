@@ -173,7 +173,9 @@ __metadata:
     google-protobuf: "npm:^3.21.4"
     murmurhash: "npm:^2.0.1"
     protoc-gen-js: "npm:3.21.4-4"
+    rollup-plugin-visualizer: "npm:^7.0.1"
     ts-protoc-gen: "npm:0.15.0"
+    vite: "npm:^8.0.5"
     vitest: "npm:^4.1.2"
   languageName: unknown
   linkType: soft

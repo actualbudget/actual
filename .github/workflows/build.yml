@@ -56,11 +56,18 @@ jobs:
         run: cd packages/crdt && yarn build
       - name: Create package tgz
         run: cd packages/crdt && yarn pack && mv package.tgz actual-crdt.tgz
+      - name: Prepare bundle stats artifact
+        run: cp packages/crdt/dist/stats.json crdt-stats.json
       - name: Upload Build
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: actual-crdt
           path: packages/crdt/actual-crdt.tgz
+      - name: Upload CRDT bundle stats
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: crdt-build-stats
+          path: crdt-stats.json
 
   web:
     runs-on: ubuntu-latest
