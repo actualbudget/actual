@@ -11,10 +11,16 @@ export {
 } from './crdt';
 
 export {
-  EncryptedData,
-  Message,
-  MessageEnvelope,
-  SyncProtoBuf,
-  SyncRequest,
-  SyncResponse,
-} from './proto/compat';
+  type EncryptedData,
+  type Message,
+  type MessageEnvelope,
+  type SyncRequest,
+  type SyncResponse,
+  EncryptedDataSchema,
+  MessageSchema,
+  MessageEnvelopeSchema,
+  SyncRequestSchema,
+  SyncResponseSchema,
+} from './proto/sync_pb';
+
+export { create, fromBinary, toBinary } from '@bufbuild/protobuf';

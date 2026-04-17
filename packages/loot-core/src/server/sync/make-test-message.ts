@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { SyncProtoBuf } from '@actual-app/crdt';
+import { create, MessageSchema, toBinary } from '@actual-app/crdt';
 
 import * as encryption from '#server/encryption';
 
@@ -8,12 +8,15 @@ function randomString() {
 }
 
 export async function makeTestMessage(keyId) {
-  const messagePb = new SyncProtoBuf.Message();
-  messagePb.setDataset(randomString());
-  messagePb.setRow(randomString());
-  messagePb.setColumn(randomString());
-  messagePb.setValue(randomString());
-  const binaryMsg = messagePb.serializeBinary();
+  const binaryMsg = toBinary(
+    MessageSchema,
+    create(MessageSchema, {
+      dataset: randomString(),
+      row: randomString(),
+      column: randomString(),
+      value: randomString(),
+    }),
+  );
 
   return await encryption.encrypt(binaryMsg, keyId);
 }
