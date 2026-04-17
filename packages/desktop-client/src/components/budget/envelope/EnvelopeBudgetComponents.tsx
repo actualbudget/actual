@@ -18,7 +18,7 @@ import { css } from '@emotion/css';
 
 import type { CategoryGroupMonthProps, CategoryMonthProps } from '..';
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
-import { makeAmountGrey } from '#components/budget/util';
+import { makeAmountGrey, makePlannedGroupStyle, makePlannedStyle } from '#components/budget/util';
 import { NotesButton } from '#components/NotesButton';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { Field, Row, SheetCell } from '#components/table';
@@ -200,6 +200,7 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
           valueProps={{
             binding: envelopeBudget.groupPlanned(id),
             type: 'financial',
+            getValueStyle: makePlannedGroupStyle,
           }}
         />
       )}
@@ -491,7 +492,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           valueProps={{
             binding: envelopeBudget.catPlanned(category.id),
             type: 'financial',
-            getValueStyle: makeAmountGrey,
+            getValueStyle: makePlannedStyle,
             formatExpr: format.forEdit,
             unformatExpr: format.fromEdit,
           }}
@@ -675,10 +676,14 @@ export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
           style={{
             fontWeight: 600,
             ...styles.tnum,
+            backgroundColor: monthUtils.isCurrentMonth(month)
+              ? theme.budgetHeaderCurrentMonth
+              : theme.budgetHeaderOtherMonth,
           }}
           valueProps={{
             binding: envelopeBudget.totalIncomePlanned,
             type: 'financial',
+            getValueStyle: makePlannedGroupStyle,
           }}
         />
       )}
@@ -754,7 +759,7 @@ export function IncomeCategoryMonth({
           valueProps={{
             binding: envelopeBudget.catPlanned(category.id),
             type: 'financial',
-            getValueStyle: makeAmountGrey,
+            getValueStyle: makePlannedStyle,
             formatExpr: format.forEdit,
             unformatExpr: format.fromEdit,
           }}

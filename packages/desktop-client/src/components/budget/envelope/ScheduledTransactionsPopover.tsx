@@ -72,16 +72,29 @@ export function ScheduledTransactionsPopover({
       onOpenChange={isOpen => {
         if (!isOpen) onClose();
       }}
-      style={{ padding: '8px 10px', minWidth: 240 }}
+      style={{
+        padding: '8px 10px',
+        minWidth: 240,
+        display: 'flex',
+        flexDirection: 'column',
+        maxHeight: 380,
+      }}
     >
-      {actualTransactions.length > 0 && (
-        <>
-          <View
-            style={{ marginBottom: 6, fontWeight: 600, ...styles.smallText }}
-          >
-            {t('Payments')}
-          </View>
-          <View style={{ maxHeight: 160, overflowY: 'auto', marginBottom: 6 }}>
+      <View style={{ overflowY: 'auto', flex: 1 }}>
+        {actualTransactions.length > 0 && (
+          <>
+            <View
+              style={{ marginBottom: 4, fontWeight: 600, ...styles.smallText }}
+            >
+              {t('Payments')}
+            </View>
+            <View
+              style={{
+                borderBottomWidth: 1,
+                borderBottomColor: theme.tableBorder,
+                marginBottom: 6,
+              }}
+            />
             {actualTransactions.map((tx, i) => {
               const payeeName = tx.payee
                 ? (payeesById?.[tx.payee]?.name ?? tx.notes ?? '—')
@@ -112,50 +125,62 @@ export function ScheduledTransactionsPopover({
                 </View>
               );
             })}
-          </View>
-        </>
-      )}
+          </>
+        )}
 
-      {upcomingTransactions.length > 0 && (
-        <>
-          <View
-            style={{ marginBottom: 6, fontWeight: 600, ...styles.smallText }}
-          >
-            {t('Upcoming Payments')}
-          </View>
-          {upcomingTransactions.map((tx, i) => {
-            const schedule = tx.schedule
-              ? scheduleById.get(tx.schedule)
-              : undefined;
-            const name = schedule?.name ?? tx.schedule ?? '—';
-            const date = monthUtils.format(tx.date, 'MMM d');
-            return (
-              <View
-                key={tx.id ?? i}
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: 12,
-                  ...styles.smallText,
-                  color: theme.tableText,
-                  paddingBottom: 3,
-                }}
-              >
-                <View>
-                  <View style={{ fontWeight: 500 }}>{name}</View>
-                  <View style={{ color: theme.pageTextSubdued }}>{date}</View>
-                </View>
-                <PrivacyFilter>
-                  <View style={{ ...styles.tnum, color: theme.errorText }}>
-                    {format(tx.amount, 'financial')}
+        {upcomingTransactions.length > 0 && (
+          <>
+            <View
+              style={{
+                marginTop: actualTransactions.length > 0 ? 8 : 0,
+                marginBottom: 4,
+                fontWeight: 600,
+                ...styles.smallText,
+              }}
+            >
+              {t('Upcoming Payments')}
+            </View>
+            <View
+              style={{
+                borderBottomWidth: 1,
+                borderBottomColor: theme.tableBorder,
+                marginBottom: 6,
+              }}
+            />
+            {upcomingTransactions.map((tx, i) => {
+              const schedule = tx.schedule
+                ? scheduleById.get(tx.schedule)
+                : undefined;
+              const name = schedule?.name ?? tx.schedule ?? '—';
+              const date = monthUtils.format(tx.date, 'MMM d');
+              return (
+                <View
+                  key={tx.id ?? i}
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 12,
+                    ...styles.smallText,
+                    color: theme.tableText,
+                    paddingBottom: 3,
+                  }}
+                >
+                  <View>
+                    <View style={{ fontWeight: 500 }}>{name}</View>
+                    <View style={{ color: theme.pageTextSubdued }}>{date}</View>
                   </View>
-                </PrivacyFilter>
-              </View>
-            );
-          })}
-        </>
-      )}
+                  <PrivacyFilter>
+                    <View style={{ ...styles.tnum, color: theme.errorText }}>
+                      {format(tx.amount, 'financial')}
+                    </View>
+                  </PrivacyFilter>
+                </View>
+              );
+            })}
+          </>
+        )}
+      </View>
 
       <Button
         variant="bare"
@@ -164,6 +189,7 @@ export function ScheduledTransactionsPopover({
           fontSize: 'inherit',
           color: theme.pageTextPositive,
           padding: 0,
+          flexShrink: 0,
         }}
         onPress={() => {
           onViewTransactions();

@@ -149,6 +149,7 @@ export const theme = {
   errorBorder: 'var(--color-errorBorder)',
   upcomingBackground: 'var(--color-upcomingBackground)',
   upcomingText: 'var(--color-upcomingText)',
+  upcomingTextHeader: 'var(--color-upcomingTextHeader)',
   upcomingBorder: 'var(--color-upcomingBorder)',
   formLabelText: 'var(--color-formLabelText)',
   formLabelBackground: 'var(--color-formLabelBackground)',

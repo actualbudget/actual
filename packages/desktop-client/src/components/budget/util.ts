@@ -68,6 +68,20 @@ export function makeAmountGrey(value: number | string | null): CSSProperties {
     : null;
 }
 
+export function makePlannedStyle(value: number | string | null): CSSProperties {
+  return value === 0 || value === '0' || value === '' || value == null
+    ? { color: theme.budgetNumberZero }
+    : { color: theme.upcomingText };
+}
+
+export function makePlannedGroupStyle(
+  value: number | string | null,
+): CSSProperties {
+  return value === 0 || value === '0' || value === '' || value == null
+    ? { color: theme.budgetNumberZero }
+    : { color: theme.upcomingTextHeader };
+}
+
 export function makeBalanceAmountStyle(
   value: number,
   goalValue?: number | null,
