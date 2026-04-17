@@ -59,7 +59,14 @@ export function createCategory(cat, sheetName, prevSheetName) {
         `${prevSheetName}!leftover-${cat.id}`,
         `${prevSheetName}!leftover-pos-${cat.id}`,
       ],
-      run: (budgeted, spent, planned, prevCarryover, prevLeftover, prevLeftoverPos) => {
+      run: (
+        budgeted,
+        spent,
+        planned,
+        prevCarryover,
+        prevLeftover,
+        prevLeftoverPos,
+      ) => {
         // Only include planned amount if forecast mode is enabled
         const forecastMode = prefs.getPrefs()['budget.forecastMode'];
         const plannedAmount = forecastMode ? number(planned) : 0;
@@ -161,17 +168,11 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
 
   sheet.get().createDynamic(sheetName, 'available-funds', {
     initialValue: 0,
-    dependencies: [
-      'total-income',
-      'total-income-planned',
-      'from-last-month',
-    ],
+    dependencies: ['total-income', 'total-income-planned', 'from-last-month'],
     run: (income, incomePlanned, fromLastMonth) => {
       const forecastMode = prefs.getPrefs()['budget.forecastMode'];
       const plannedIncome = forecastMode ? number(incomePlanned) : 0;
-      return safeNumber(
-        number(income) + plannedIncome + number(fromLastMonth),
-      );
+      return safeNumber(number(income) + plannedIncome + number(fromLastMonth));
     },
   });
 

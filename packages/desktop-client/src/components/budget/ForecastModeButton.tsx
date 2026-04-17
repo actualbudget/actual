@@ -1,6 +1,6 @@
 import React from 'react';
 import type { CSSProperties } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
@@ -13,8 +13,9 @@ type ForecastModeButtonProps = {
 
 export function ForecastModeButton({ style }: ForecastModeButtonProps) {
   const { t } = useTranslation();
-  const [forecastMode = false, setForecastModePref] =
-    useMetadataPref('budget.forecastMode');
+  const [forecastMode = false, setForecastModePref] = useMetadataPref(
+    'budget.forecastMode',
+  );
 
   return (
     <Button
@@ -29,7 +30,7 @@ export function ForecastModeButton({ style }: ForecastModeButtonProps) {
         fontWeight: forecastMode ? 600 : 400,
       }}
     >
-      {t('Forecast')}
+      <Trans>Forecast</Trans>
     </Button>
   );
 }

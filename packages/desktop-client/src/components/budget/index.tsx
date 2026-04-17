@@ -129,7 +129,7 @@ export function Budget() {
     });
   };
 
-  const onShowActivity = (categoryId, month) => {
+  const onShowActivity = (categoryId, month, scheduleIds?: string[]) => {
     const filterConditions = [
       { field: 'category', op: 'is', value: categoryId, type: 'id' },
       {
@@ -145,6 +145,7 @@ export function Budget() {
         goBack: true,
         filterConditions,
         categoryId,
+        scheduleIds,
       },
     });
   };
@@ -265,7 +266,7 @@ export type CategoryMonthProps = {
   isLast?: boolean;
   onEdit: (id: CategoryEntity['id'] | null, month?: string) => void;
   onBudgetAction: (month: string, action: string, arg: unknown) => void;
-  onShowActivity: (id: CategoryEntity['id'], month: string) => void;
+  onShowActivity: (id: CategoryEntity['id'], month: string, scheduleIds?: string[]) => void;
 };
 
 export type CategoryGroupMonthProps = {

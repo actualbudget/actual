@@ -99,6 +99,7 @@ type AllTransactionsProps = {
   balances: Record<TransactionEntity['id'], IntegerAmount> | null;
   showBalances?: boolean | undefined;
   filtered?: boolean | undefined;
+  scheduleIds?: string[] | undefined;
   children: (
     transactions: TransactionEntity[],
     balances: Record<TransactionEntity['id'], IntegerAmount> | null,
@@ -111,6 +112,7 @@ function AllTransactions({
   balances,
   showBalances,
   filtered,
+  scheduleIds,
   children,
 }: AllTransactionsProps) {
   const accountId = account?.id;
@@ -133,6 +135,11 @@ function AllTransactions({
 
   transactions ??= [];
 
+  const scheduleIdSet = useMemo(
+    () => new Set(scheduleIds ?? []),
+    [scheduleIds],
+  );
+
   const runningBalance = useMemo(() => {
     if (!showBalances) {
       return 0;
@@ -143,6 +150,16 @@ function AllTransactions({
       : 0;
   }, [showBalances, balances, transactions]);
 
+  const relevantPreviewTransactions = useMemo(() => {
+    if (filtered) {
+      if (scheduleIdSet.size === 0) return [];
+      return previewTransactions.filter(
+        t => t.schedule && scheduleIdSet.has(t.schedule),
+      );
+    }
+    return previewTransactions;
+  }, [filtered, scheduleIdSet, previewTransactions]);
+
   const prependBalances = useMemo(() => {
     if (!showBalances) {
       return null;
@@ -150,30 +167,28 @@ function AllTransactions({
 
     return Object.fromEntries(
       calculateRunningBalancesBottomUp(
-        previewTransactions,
+        relevantPreviewTransactions,
         'all',
         runningBalance,
       ),
     );
-  }, [showBalances, previewTransactions, runningBalance]);
+  }, [showBalances, relevantPreviewTransactions, runningBalance]);
 
   const allTransactions = useMemo(() => {
-    // Don't prepend scheduled transactions if we are filtering
-    if (!filtered && previewTransactions.length > 0) {
-      return previewTransactions.concat(transactions);
+    if (relevantPreviewTransactions.length > 0) {
+      return relevantPreviewTransactions.concat(transactions);
     }
     return transactions;
-  }, [filtered, previewTransactions, transactions]);
+  }, [relevantPreviewTransactions, transactions]);
 
   const allBalances = useMemo(() => {
-    // Don't prepend scheduled transactions if we are filtering
-    if (!filtered && prependBalances && balances) {
+    if (relevantPreviewTransactions.length > 0 && prependBalances && balances) {
       return { ...prependBalances, ...balances };
     }
     return balances;
-  }, [filtered, prependBalances, balances]);
+  }, [relevantPreviewTransactions, prependBalances, balances]);
 
-  if (!previewTransactions?.length || filtered) {
+  if (!relevantPreviewTransactions.length) {
     return children(transactions, balances);
   }
   return children(allTransactions, allBalances);
@@ -1764,6 +1779,7 @@ class AccountInternal extends PureComponent<
         balances={balances}
         showBalances={showBalances}
         filtered={transactionsFiltered}
+        scheduleIds={this.props.location?.state?.scheduleIds}
       >
         {(allTransactions, allBalances) => (
           <SelectedProviderWithItems

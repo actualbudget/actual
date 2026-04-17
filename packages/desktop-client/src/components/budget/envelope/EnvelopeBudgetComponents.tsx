@@ -16,6 +16,7 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { css } from '@emotion/css';
 
+import type { CategoryGroupMonthProps, CategoryMonthProps } from '..';
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
 import { makeAmountGrey } from '#components/budget/util';
 import { NotesButton } from '#components/NotesButton';
@@ -32,11 +33,12 @@ import { useSheetValue } from '#hooks/useSheetValue';
 import { useUndo } from '#hooks/useUndo';
 import type { Binding, SheetFields } from '#spreadsheet';
 import { envelopeBudget } from '#spreadsheet/bindings';
-import type { CategoryGroupMonthProps, CategoryMonthProps} from '..';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';
 import { BudgetMenu } from './BudgetMenu';
+import { useEnvelopeBudget } from './EnvelopeBudgetContext';
 import { IncomeMenu } from './IncomeMenu';
+import { ScheduledTransactionsPopover } from './ScheduledTransactionsPopover';
 
 export function useEnvelopeSheetName<
   FieldName extends SheetFields<'envelope-budget'>,
@@ -241,7 +243,17 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   const format = useFormat();
   const [forecastMode = false] = useMetadataPref('budget.forecastMode');
   const [editingPlanned, setEditingPlanned] = useState(false);
+  const [scheduledPopoverOpen, setScheduledPopoverOpen] = useState(false);
 
+  const { forecastTransactionsByCategoryAndMonth } = useEnvelopeBudget();
+  const scheduledTransactions =
+    forecastTransactionsByCategoryAndMonth.get(`${category.id}-${month}`) ?? [];
+  const scheduledAmount = scheduledTransactions.reduce(
+    (sum, tx) => sum + (tx.amount ?? 0),
+    0,
+  );
+
+  const spentTriggerRef = useRef(null);
   const budgetMenuTriggerRef = useRef(null);
   const balanceMenuTriggerRef = useRef(null);
   const {
@@ -501,8 +513,11 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
       )}
       <Field name="spent" width="flex" style={{ textAlign: 'right' }}>
         <View
+          ref={spentTriggerRef}
           data-testid="category-month-spent"
-          onClick={() => onShowActivity(category.id, month)}
+          onClick={() => {
+            setScheduledPopoverOpen(true);
+          }}
           style={{
             flexDirection: 'row',
             alignItems: 'center',
@@ -542,18 +557,45 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             binding={envelopeBudget.catSumAmount(category.id)}
             type="financial"
           >
-            {props => (
-              <CellValueText
-                {...props}
-                className={css({
-                  cursor: 'pointer',
-                  ':hover': { textDecoration: 'underline' },
-                  ...makeAmountGrey(props.value),
-                })}
-              />
-            )}
+            {props => {
+              const displayValue =
+                forecastMode && scheduledAmount !== 0
+                  ? props.value + scheduledAmount
+                  : props.value;
+              return (
+                <CellValueText
+                  {...props}
+                  value={displayValue}
+                  className={css({
+                    cursor: 'pointer',
+                    ':hover': { textDecoration: 'underline' },
+                    ...makeAmountGrey(displayValue),
+                    ...(forecastMode && scheduledTransactions.length > 0
+                      ? { color: theme.upcomingText }
+                      : {}),
+                  })}
+                />
+              );
+            }}
           </EnvelopeCellValue>
         </View>
+        {scheduledPopoverOpen && (
+          <ScheduledTransactionsPopover
+            triggerRef={spentTriggerRef}
+            isOpen={scheduledPopoverOpen}
+            onClose={() => setScheduledPopoverOpen(false)}
+            upcomingTransactions={scheduledTransactions}
+            categoryId={category.id}
+            month={month}
+            onViewTransactions={() => {
+              setScheduledPopoverOpen(false);
+              const scheduleIds = scheduledTransactions
+                .map(tx => tx.schedule)
+                .filter((s): s is string => Boolean(s));
+              onShowActivity(category.id, month, scheduleIds);
+            }}
+          />
+        )}
       </Field>
       <Field
         ref={balanceMenuTriggerRef}
@@ -591,6 +633,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             longGoal={envelopeBudget.catLongGoal(category.id)}
             planned={envelopeBudget.catPlanned(category.id)}
             forecastMode={forecastMode}
+            balanceOffset={forecastMode ? scheduledAmount : 0}
             tooltipDisabled={balanceMenuOpen}
           />
         </Button>

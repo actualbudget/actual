@@ -2,12 +2,16 @@ import React, { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
 
 import * as monthUtils from '@actual-app/core/shared/months';
+import type { TransactionEntity } from '@actual-app/core/types/models';
+
+import { useForecastScheduledTransactions } from '#hooks/useForecastScheduledTransactions';
 
 type EnvelopeBudgetContextDefinition = {
   summaryCollapsed: boolean;
   onBudgetAction: (month: string, action: string, arg?: unknown) => void;
   onToggleSummaryCollapse: () => void;
   currentMonth: string;
+  forecastTransactionsByCategoryAndMonth: Map<string, TransactionEntity[]>;
 };
 
 const EnvelopeBudgetContext = createContext<EnvelopeBudgetContextDefinition>({
@@ -21,11 +25,12 @@ const EnvelopeBudgetContext = createContext<EnvelopeBudgetContextDefinition>({
     );
   },
   currentMonth: 'unknown',
+  forecastTransactionsByCategoryAndMonth: new Map(),
 });
 
 type EnvelopeBudgetProviderProps = Omit<
   EnvelopeBudgetContextDefinition,
-  'currentMonth'
+  'currentMonth' | 'forecastTransactionsByCategoryAndMonth'
 > & {
   children: ReactNode;
 };
@@ -36,6 +41,8 @@ export function EnvelopeBudgetProvider({
   children,
 }: EnvelopeBudgetProviderProps) {
   const currentMonth = monthUtils.currentMonth();
+  const { forecastTransactionsByCategoryAndMonth } =
+    useForecastScheduledTransactions();
 
   return (
     <EnvelopeBudgetContext.Provider
@@ -44,6 +51,7 @@ export function EnvelopeBudgetProvider({
         summaryCollapsed,
         onBudgetAction,
         onToggleSummaryCollapse,
+        forecastTransactionsByCategoryAndMonth,
       }}
     >
       {children}
