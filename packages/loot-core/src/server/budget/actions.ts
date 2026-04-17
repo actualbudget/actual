@@ -610,7 +610,13 @@ export async function copyToFutureMonths({
 
   await batchMessages(async () => {
     for (const futureMonth of futureMonths) {
-      void setBudget({ category, month: futureMonth, amount });
+      const existing = await getSheetValue(
+        monthUtils.sheetForMonth(futureMonth),
+        'budget-' + category,
+      );
+      if (existing !== 0) {
+        void setBudget({ category, month: futureMonth, amount });
+      }
     }
   });
 }
