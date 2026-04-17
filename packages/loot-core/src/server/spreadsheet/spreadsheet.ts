@@ -189,6 +189,8 @@ export class Spreadsheet {
         // If an error happens, bail on the rest of the computations
         this.running = false;
         this.computeQueue = [];
+        // Still emit 'change' so waitOnSpreadsheet() doesn't hang forever
+        this.events.emit('change', { names: [] });
         return;
       }
 

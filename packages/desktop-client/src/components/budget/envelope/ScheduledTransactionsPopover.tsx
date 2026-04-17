@@ -7,8 +7,8 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { q } from '@actual-app/core/shared/query';
 import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
 import { PrivacyFilter } from '#components/PrivacyFilter';
@@ -86,7 +86,7 @@ export function ScheduledTransactionsPopover({
             <View
               style={{ marginBottom: 4, fontWeight: 600, ...styles.smallText }}
             >
-              {t('Payments')}
+              <Trans>Payments</Trans>
             </View>
             <View
               style={{

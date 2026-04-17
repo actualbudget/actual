@@ -16,9 +16,13 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { css } from '@emotion/css';
 
-import type { CategoryGroupMonthProps, CategoryMonthProps } from '..';
+import type { CategoryGroupMonthProps, CategoryMonthProps } from '#components';
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
-import { makeAmountGrey, makePlannedGroupStyle, makePlannedStyle } from '#components/budget/util';
+import {
+  makeAmountGrey,
+  makePlannedGroupStyle,
+  makePlannedStyle,
+} from '#components/budget/util';
 import { NotesButton } from '#components/NotesButton';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { Field, Row, SheetCell } from '#components/table';

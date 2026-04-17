@@ -266,7 +266,11 @@ export type CategoryMonthProps = {
   isLast?: boolean;
   onEdit: (id: CategoryEntity['id'] | null, month?: string) => void;
   onBudgetAction: (month: string, action: string, arg: unknown) => void;
-  onShowActivity: (id: CategoryEntity['id'], month: string, scheduleIds?: string[]) => void;
+  onShowActivity: (
+    id: CategoryEntity['id'],
+    month: string,
+    scheduleIds?: string[],
+  ) => void;
 };
 
 export type CategoryGroupMonthProps = {

@@ -68,7 +68,7 @@ export function createCategory(cat, sheetName, prevSheetName) {
         prevLeftoverPos,
       ) => {
         // Only include planned amount if forecast mode is enabled
-        const forecastMode = prefs.getPrefs()['budget.forecastMode'];
+        const forecastMode = prefs.getPrefs()?.['budget.forecastMode'];
         const plannedAmount = forecastMode ? number(planned) : 0;
 
         return safeNumber(
@@ -170,7 +170,7 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
     initialValue: 0,
     dependencies: ['total-income', 'total-income-planned', 'from-last-month'],
     run: (income, incomePlanned, fromLastMonth) => {
-      const forecastMode = prefs.getPrefs()['budget.forecastMode'];
+      const forecastMode = prefs.getPrefs()?.['budget.forecastMode'];
       const plannedIncome = forecastMode ? number(incomePlanned) : 0;
       return safeNumber(number(income) + plannedIncome + number(fromLastMonth));
     },

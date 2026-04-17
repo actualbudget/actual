@@ -285,21 +285,17 @@ export function recalculateForecastDependentCells(): void {
     return;
   }
 
-  // Get all category IDs from the spreadsheet nodes
-  const categoryIds = new Set<string>();
-  for (const [nodeName] of globalSheet.nodes) {
-    const match = nodeName.match(/!leftover-(.+)$/);
-    if (match) {
-      categoryIds.add(match[1]);
-    }
-  }
+  // Collect nodes that directly read forecastMode in their _run function:
+  // leftover- cells (but not leftover-pos- which don't read forecastMode)
+  // and available-funds cells.
+  const nodesToRecompute = Array.from(globalSheet.nodes.keys()).filter(
+    nodeName =>
+      /!leftover-(?!pos-)/.test(nodeName) || /!available-funds$/.test(nodeName),
+  );
 
-  // Trigger recalculation by setting each leftover cell to itself
   globalSheet.startTransaction();
-  for (const [nodeName, node] of globalSheet.nodes) {
-    if (nodeName.includes('!leftover-')) {
-      globalSheet.set(nodeName, node.value);
-    }
+  for (const nodeName of nodesToRecompute) {
+    globalSheet.recompute(nodeName);
   }
   globalSheet.endTransaction();
 }
