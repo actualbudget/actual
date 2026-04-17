@@ -190,11 +190,7 @@ export function SidebarGroup({
               </Button>
             </Tooltip>
 
-            <NotesButton
-              id={group.id}
-              style={dragPreview && { color: 'currentColor' }}
-              defaultColor={theme.pageTextLight}
-            />
+            <NotesButton id={group.id} defaultColor={theme.pageTextLight} />
           </View>
         </>
       )}

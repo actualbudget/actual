@@ -326,8 +326,8 @@ export function useFormulaExecution(
         // Create HyperFormula instance
         hfInstance = HyperFormula.buildEmpty({
           licenseKey: 'gpl-v3',
-          localeLang: typeof locale === 'string' ? locale : 'en-US',
           language: 'enUS',
+          localeLang: typeof locale === 'string' ? locale : 'en-US',
           dateFormats: ['DD/MM/YYYY', 'YYYY-MM-DD', 'YYYY/MM/DD'],
         });
 

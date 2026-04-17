@@ -74,9 +74,7 @@ export const init: T.Init = function (_socketName, handlers) {
         process.parentPort.postMessage({
           type: 'reply',
           id,
-          result: catchErrors
-            ? { error: unknownMethodError, data: null }
-            : null,
+          result: { error: unknownMethodError, data: null },
         });
       } else {
         process.parentPort.postMessage({

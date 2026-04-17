@@ -41,7 +41,7 @@ type NetWorthDataPoint = {
   date: string;
 } & Record<string, string | number>;
 
-type TrendTooltipProps = TooltipContentProps<number, string> & {
+type TrendTooltipProps = TooltipContentProps & {
   style?: CSSProperties;
 };
 
@@ -97,7 +97,7 @@ function TrendTooltip({ active, payload, style }: TrendTooltipProps) {
   return null;
 }
 
-type StackedTooltipProps = TooltipContentProps<number, string> & {
+type StackedTooltipProps = TooltipContentProps & {
   sortedAccounts: Array<{ id: string; name: string }>;
   accounts: Array<{ id: string; name: string }>;
   hoveredAccountId: string | null;
@@ -394,14 +394,14 @@ export function NetWorthGraph({
                 tickLine={{ stroke: theme.pageText }}
               />
               {effectiveShowTooltip && mode === 'trend' && (
-                <Tooltip<number, string>
+                <Tooltip
                   content={props => <TrendTooltip {...props} style={style} />}
                   formatter={numberFormatterTooltip}
                   isAnimationActive={false}
                 />
               )}
               {effectiveShowTooltip && mode === 'stacked' && (
-                <Tooltip<number, string>
+                <Tooltip
                   content={props => (
                     <StackedTooltip
                       {...props}

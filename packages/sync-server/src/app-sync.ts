@@ -5,7 +5,6 @@ import { resolve } from 'node:path';
 
 import { SyncProtoBuf } from '@actual-app/crdt';
 import express from 'express';
-import { v4 as uuidv4 } from 'uuid';
 
 import { getAccountDb, isAdmin } from './account-db';
 import { FileNotFound } from './app-sync/errors';
@@ -312,7 +311,7 @@ app.post('/upload-user-file', async (req, res) => {
 
   if (!currentFile) {
     // it's new
-    groupId = uuidv4();
+    groupId = crypto.randomUUID();
 
     filesService.set(
       new File({
@@ -335,7 +334,7 @@ app.post('/upload-user-file', async (req, res) => {
 
   if (!groupId) {
     // sync state was reset, create new group
-    groupId = uuidv4();
+    groupId = crypto.randomUUID();
     filesService.update(fileId, new FileUpdate({ groupId }));
   }
 

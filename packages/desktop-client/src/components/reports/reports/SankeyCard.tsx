@@ -16,6 +16,7 @@ import { calculateTimeRange } from '#components/reports/reportRanges';
 import {
   compactSankeyData,
   createSpreadsheet as sankeySpreadsheet,
+  withPercentageLabels,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '#components/reports/useReport';
@@ -153,7 +154,12 @@ export function SankeyCard({
 
         {compactData ? (
           <SankeyGraph
-            data={compactData}
+            data={
+              meta?.showPercentages
+                ? withPercentageLabels(compactData)
+                : compactData
+            }
+            showPercentages={meta?.showPercentages}
             showTooltip={!isEditing}
             style={{ height: 'auto', flex: 1 }}
           />

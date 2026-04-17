@@ -1,4 +1,6 @@
-module.exports = {
+const { eslintCompatPlugin } = require('@oxlint/plugins');
+
+module.exports = eslintCompatPlugin({
   meta: {
     name: 'eslint-plugin-actual',
   },
@@ -15,4 +17,4 @@ module.exports = {
     'prefer-subpath-imports': require('./rules/prefer-subpath-imports'),
     'no-extraneous-dependencies': require('./rules/no-extraneous-dependencies'),
   },
-};
+});

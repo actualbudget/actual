@@ -16,21 +16,9 @@ module.exports = {
     },
   },
 
-  create(context) {
-    const filenameRaw = context.getFilename();
-    const normalizedFilename = filenameRaw.replace(/\\/g, '/');
-
-    // Only apply to files inside packages/*/src/
-    const pkgMatch = normalizedFilename.match(/packages\/[^/]+\/src\//);
-    if (!pkgMatch) {
-      return {};
-    }
-
-    // Get the absolute path to the src/ directory
-    const srcDir = normalizedFilename.slice(
-      0,
-      pkgMatch.index + pkgMatch[0].length,
-    );
+  createOnce(context) {
+    let normalizedFilename;
+    let srcDir;
 
     function getSubpathImport(importSource) {
       // Only transform backtracked imports
@@ -86,6 +74,15 @@ module.exports = {
     }
 
     return {
+      before() {
+        normalizedFilename = context.filename.replace(/\\/g, '/');
+        const pkgMatch = normalizedFilename.match(/packages\/[^/]+\/src\//);
+        if (!pkgMatch) return false;
+        srcDir = normalizedFilename.slice(
+          0,
+          pkgMatch.index + pkgMatch[0].length,
+        );
+      },
       ImportDeclaration(node) {
         checkAndReport(node, node.source);
       },

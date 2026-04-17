@@ -31,7 +31,10 @@ import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ModeButton } from '#components/reports/ModeButton';
 import { calculateTimeRange } from '#components/reports/reportRanges';
-import { createSpreadsheet as sankeySpreadsheet } from '#components/reports/spreadsheets/sankey-spreadsheet';
+import {
+  createSpreadsheet as sankeySpreadsheet,
+  withPercentageLabels,
+} from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
 import { useCategories } from '#hooks/useCategories';
@@ -197,6 +200,46 @@ function GraphModeSelector({ mode, onChange }: GraphModeSelectorProps) {
   );
 }
 
+type OptionsButtonProps = {
+  showPercentages: boolean;
+  onTogglePercentages: () => void;
+};
+
+function OptionsButton({
+  showPercentages,
+  onTogglePercentages,
+}: OptionsButtonProps) {
+  const { t } = useTranslation();
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <>
+      <Button ref={triggerRef} onPress={() => setIsOpen(true)}>
+        <Trans>Options</Trans>
+      </Button>
+      <Popover
+        triggerRef={triggerRef}
+        placement="bottom end"
+        isOpen={isOpen}
+        onOpenChange={() => setIsOpen(false)}
+      >
+        <Menu
+          onMenuSelect={item => {
+            if (item === 'show-percentages') onTogglePercentages();
+          }}
+          items={[
+            {
+              name: 'show-percentages',
+              text: t('Show as percentages'),
+              toggle: showPercentages,
+            },
+          ]}
+        />
+      </Popover>
+    </>
+  );
+}
+
 type SankeyInnerProps = {
   widget?: SankeyWidget;
 };
@@ -248,6 +291,10 @@ function SankeyInner({ widget }: SankeyInnerProps) {
   const [categorySort, setCategorySort] = useState<
     'per-group' | 'global' | 'budget-order'
   >(widget?.meta?.categorySort ?? 'per-group');
+
+  const [showPercentages, setShowPercentages] = useState(
+    widget?.meta?.showPercentages ?? false,
+  );
 
   const { data: { grouped: groupedCategories = [] } = { grouped: [] } } =
     useCategories();
@@ -370,6 +417,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
             mode: graphMode,
             topNcategories,
             categorySort,
+            showPercentages,
             timeFrame: {
               start,
               end,
@@ -504,6 +552,12 @@ function SankeyInner({ widget }: SankeyInnerProps) {
           </>
         }
       >
+        <View style={{ marginRight: 4 }}>
+          <OptionsButton
+            showPercentages={showPercentages}
+            onTogglePercentages={() => setShowPercentages(v => !v)}
+          />
+        </View>
         {widget && (
           <Button variant="primary" onPress={onSaveWidget}>
             <Trans>Save widget</Trans>
@@ -552,7 +606,12 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                 {data && data.links && data.links.length > 0 ? (
                   <SankeyGraph
                     style={{ flexGrow: 1 }}
-                    data={data as SankeyData}
+                    data={
+                      showPercentages
+                        ? withPercentageLabels(data as SankeyData)
+                        : (data as SankeyData)
+                    }
+                    showPercentages={showPercentages}
                   />
                 ) : (
                   <View

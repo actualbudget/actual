@@ -4,7 +4,7 @@ import { getRuleForSchedule } from '#server/schedules/app';
 import type { Currency } from '#shared/currencies';
 import type { CategoryEntity } from '#types/models';
 
-import { isReflectBudget } from './actions';
+import { isTrackingBudget } from './actions';
 import { runSchedule } from './schedule-template';
 
 vi.mock('#server/db');
@@ -20,6 +20,7 @@ vi.mock('#server/schedules/app', async () => {
 describe('runSchedule', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(db.getAccounts).mockResolvedValue([]);
   });
 
   it('should return correct budget when recurring schedule set', async () => {
@@ -81,7 +82,7 @@ describe('runSchedule', () => {
         actions: [],
       }),
     );
-    vi.mocked(isReflectBudget).mockReturnValue(false);
+    vi.mocked(isTrackingBudget).mockReturnValue(false);
 
     // When
     const result = await runSchedule(
@@ -161,7 +162,7 @@ describe('runSchedule', () => {
         actions: [],
       }),
     );
-    vi.mocked(isReflectBudget).mockReturnValue(false);
+    vi.mocked(isTrackingBudget).mockReturnValue(false);
 
     // When
     const result = await runSchedule(
