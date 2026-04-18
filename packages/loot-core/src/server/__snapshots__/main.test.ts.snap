@@ -12,6 +12,7 @@ exports[`Accounts > Transfers are properly updated 1`] = `
     "description": "transfer-two",
     "error": null,
     "financial_id": null,
+    "fx_rate": null,
     "id": "test-transfer",
     "imported_description": null,
     "isChild": 0,
@@ -39,6 +40,7 @@ exports[`Accounts > Transfers are properly updated 1`] = `
     "description": "transfer-one",
     "error": null,
     "financial_id": null,
+    "fx_rate": null,
     "id": "id2",
     "imported_description": null,
     "isChild": 0,
@@ -75,10 +77,10 @@ exports[`Accounts > Transfers are properly updated 2`] = `
 +     "description": "transfer-three",
       "error": null,
       "financial_id": null,
+      "fx_rate": null,
       "id": "test-transfer",
       "imported_description": null,
-      "isChild": 0,
-@@ -25,16 +25,16 @@
+@@ -26,16 +26,16 @@
       "tombstone": 0,
       "transferred_id": "id2",
       "type": null,
@@ -95,15 +97,15 @@ exports[`Accounts > Transfers are properly updated 2`] = `
       "description": "transfer-one",
       "error": null,
       "financial_id": null,
-      "id": "id2",
-      "imported_description": null,"
+      "fx_rate": null,
+      "id": "id2","
 `;
 
 exports[`Accounts > Transfers are properly updated 3`] = `
 "- First value
 + Second value
 
-@@ -20,12 +20,12 @@
+@@ -21,12 +21,12 @@
       "raw_synced_data": null,
       "reconciled": 0,
       "schedule": null,
@@ -118,7 +120,7 @@ exports[`Accounts > Transfers are properly updated 3`] = `
     Object {
       "acct": "three",
       "amount": -5000,
-@@ -47,10 +47,10 @@
+@@ -49,10 +49,10 @@
       "raw_synced_data": null,
       "reconciled": 0,
       "schedule": null,

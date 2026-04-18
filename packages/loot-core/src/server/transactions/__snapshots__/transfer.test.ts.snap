@@ -10,6 +10,7 @@ exports[`Transfer > split transfers are retained on child transactions 1`] = `
     "cleared": 1,
     "date": 20170101,
     "error": null,
+    "fx_rate": null,
     "id": "id5",
     "imported_id": null,
     "imported_payee": null,
@@ -35,6 +36,7 @@ exports[`Transfer > split transfers are retained on child transactions 1`] = `
     "cleared": 0,
     "date": 20170101,
     "error": null,
+    "fx_rate": null,
     "id": "id6",
     "imported_id": null,
     "imported_payee": null,
@@ -59,8 +61,8 @@ exports[`Transfer > split transfers are retained on child transactions 2`] = `
 "- First value
 + Second value
 
-@@ -9,11 +9,11 @@
-      "error": null,
+@@ -10,11 +10,11 @@
+      "fx_rate": null,
       "id": "id5",
       "imported_id": null,
       "imported_payee": null,
@@ -78,7 +80,7 @@ exports[`Transfer > split transfers are retained on child transactions 3`] = `
 "- First value
 + Second value
 
-@@ -23,10 +23,60 @@
+@@ -24,10 +24,62 @@
       "starting_balance_flag": 0,
       "tombstone": 0,
       "transfer_id": "id6",
@@ -91,6 +93,7 @@ exports[`Transfer > split transfers are retained on child transactions 3`] = `
 +     "cleared": 1,
 +     "date": 20170101,
 +     "error": null,
++     "fx_rate": null,
 +     "id": "id7",
 +     "imported_id": null,
 +     "imported_payee": null,
@@ -116,6 +119,7 @@ exports[`Transfer > split transfers are retained on child transactions 3`] = `
 +     "cleared": 0,
 +     "date": 20170101,
 +     "error": null,
++     "fx_rate": null,
 +     "id": "id8",
 +     "imported_id": null,
 +     "imported_payee": null,
@@ -151,6 +155,7 @@ exports[`Transfer > transfers are properly de-categorized 1`] = `
     "cleared": 1,
     "date": 20170101,
     "error": null,
+    "fx_rate": null,
     "id": "id6",
     "imported_id": null,
     "imported_payee": null,
@@ -175,7 +180,7 @@ exports[`Transfer > transfers are properly de-categorized 2`] = `
 "- First value
 + Second value
 
-@@ -10,18 +10,43 @@
+@@ -11,18 +11,44 @@
       "id": "id6",
       "imported_id": null,
       "imported_payee": null,
@@ -183,15 +188,18 @@ exports[`Transfer > transfers are properly de-categorized 2`] = `
       "is_parent": 0,
 -     "notes": null,
 +     "notes": "hi",
-+     "parent_id": null,
+      "parent_id": null,
+-     "payee": "id5",
+-     "payee_name": "Non-transfer",
 +     "payee": "id4",
 +     "payee_name": "",
-+     "raw_synced_data": null,
-+     "reconciled": 0,
-+     "schedule": null,
-+     "sort_order": 123456789,
-+     "starting_balance_flag": 0,
-+     "tombstone": 0,
+      "raw_synced_data": null,
+      "reconciled": 0,
+      "schedule": null,
+      "sort_order": 123456789,
+      "starting_balance_flag": 0,
+      "tombstone": 0,
+-     "transfer_id": null,
 +     "transfer_id": "id7",
 +   },
 +   Object {
@@ -202,24 +210,22 @@ exports[`Transfer > transfers are properly de-categorized 2`] = `
 +     "cleared": 0,
 +     "date": 20170101,
 +     "error": null,
++     "fx_rate": null,
 +     "id": "id7",
 +     "imported_id": null,
 +     "imported_payee": null,
 +     "is_child": 0,
 +     "is_parent": 0,
 +     "notes": "hi",
-      "parent_id": null,
--     "payee": "id5",
--     "payee_name": "Non-transfer",
++     "parent_id": null,
 +     "payee": "id2",
 +     "payee_name": "",
-      "raw_synced_data": null,
-      "reconciled": 0,
-      "schedule": null,
-      "sort_order": 123456789,
-      "starting_balance_flag": 0,
-      "tombstone": 0,
--     "transfer_id": null,
++     "raw_synced_data": null,
++     "reconciled": 0,
++     "schedule": null,
++     "sort_order": 123456789,
++     "starting_balance_flag": 0,
++     "tombstone": 0,
 +     "transfer_id": "id6",
     },
   ]"
@@ -229,7 +235,7 @@ exports[`Transfer > transfers are properly de-categorized 3`] = `
 "- First value
 + Second value
 
-@@ -1,33 +1,33 @@
+@@ -1,11 +1,11 @@
   Array [
     Object {
       "account": "one",
@@ -240,8 +246,9 @@ exports[`Transfer > transfers are properly de-categorized 3`] = `
       "cleared": 1,
       "date": 20170101,
       "error": null,
+      "fx_rate": null,
       "id": "id6",
-      "imported_id": null,
+@@ -13,22 +13,22 @@
       "imported_payee": null,
       "is_child": 0,
       "is_parent": 0,
@@ -278,6 +285,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 1`] = `
     "cleared": 1,
     "date": 20170101,
     "error": null,
+    "fx_rate": null,
     "id": "id6",
     "imported_id": null,
     "imported_payee": null,
@@ -302,7 +310,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 2`] = `
 "- First value
 + Second value
 
-@@ -22,6 +22,56 @@
+@@ -23,6 +23,58 @@
       "sort_order": 123456789,
       "starting_balance_flag": 0,
       "tombstone": 0,
@@ -316,6 +324,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 2`] = `
 +     "cleared": 1,
 +     "date": 20170101,
 +     "error": null,
++     "fx_rate": null,
 +     "id": "id7",
 +     "imported_id": null,
 +     "imported_payee": null,
@@ -341,6 +350,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 2`] = `
 +     "cleared": 0,
 +     "date": 20170101,
 +     "error": null,
++     "fx_rate": null,
 +     "id": "id8",
 +     "imported_id": null,
 +     "imported_payee": null,
@@ -365,7 +375,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 3`] = `
 "- First value
 + Second value
 
-@@ -3,75 +3,75 @@
+@@ -3,78 +3,78 @@
       "account": "one",
       "amount": 5000,
       "base_amount": null,
@@ -374,6 +384,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 3`] = `
 -     "date": 20170101,
 +     "date": 20170105,
       "error": null,
+      "fx_rate": null,
 -     "id": "id6",
 +     "id": "id7",
       "imported_id": null,
@@ -408,6 +419,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 3`] = `
 +     "cleared": 0,
 +     "date": 20170105,
       "error": null,
+      "fx_rate": null,
 -     "id": "id7",
 +     "id": "id8",
       "imported_id": null,
@@ -440,6 +452,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 3`] = `
 +     "cleared": 1,
       "date": 20170101,
       "error": null,
+      "fx_rate": null,
 -     "id": "id8",
 +     "id": "id6",
       "imported_id": null,
@@ -468,7 +481,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 4`] = `
 "- First value
 + Second value
 
-@@ -12,22 +12,22 @@
+@@ -13,22 +13,22 @@
       "imported_payee": null,
       "is_child": 0,
       "is_parent": 0,
@@ -499,7 +512,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
 "- First value
 + Second value
 
-@@ -12,44 +12,19 @@
+@@ -13,45 +13,19 @@
       "imported_payee": null,
       "is_child": 0,
       "is_parent": 0,
@@ -507,12 +520,14 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
       "parent_id": null,
 -     "payee": "id4",
 -     "payee_name": "",
--     "raw_synced_data": null,
--     "reconciled": 0,
--     "schedule": null,
--     "sort_order": 123456789,
--     "starting_balance_flag": 0,
--     "tombstone": 0,
++     "payee": "id9",
++     "payee_name": "Not transferred anymore",
+      "raw_synced_data": null,
+      "reconciled": 0,
+      "schedule": null,
+      "sort_order": 123456789,
+      "starting_balance_flag": 0,
+      "tombstone": 0,
 -     "transfer_id": "id8",
 -   },
 -   Object {
@@ -523,6 +538,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
 -     "cleared": 0,
 -     "date": 20170105,
 -     "error": null,
+-     "fx_rate": null,
 -     "id": "id8",
 -     "imported_id": null,
 -     "imported_payee": null,
@@ -532,14 +548,12 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
 -     "parent_id": null,
 -     "payee": "id2",
 -     "payee_name": "",
-+     "payee": "id9",
-+     "payee_name": "Not transferred anymore",
-      "raw_synced_data": null,
-      "reconciled": 0,
-      "schedule": null,
-      "sort_order": 123456789,
-      "starting_balance_flag": 0,
-      "tombstone": 0,
+-     "raw_synced_data": null,
+-     "reconciled": 0,
+-     "schedule": null,
+-     "sort_order": 123456789,
+-     "starting_balance_flag": 0,
+-     "tombstone": 0,
 -     "transfer_id": "id7",
 +     "transfer_id": null,
     },
@@ -553,7 +567,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 6`] = `
 "- First value
 + Second value
 
-@@ -12,19 +12,44 @@
+@@ -13,19 +13,45 @@
       "imported_payee": null,
       "is_child": 0,
       "is_parent": 0,
@@ -563,12 +577,13 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 6`] = `
 -     "payee_name": "Not transferred anymore",
 +     "payee": "id3",
 +     "payee_name": "",
-+     "raw_synced_data": null,
-+     "reconciled": 0,
-+     "schedule": null,
-+     "sort_order": 123456789,
-+     "starting_balance_flag": 0,
-+     "tombstone": 0,
+      "raw_synced_data": null,
+      "reconciled": 0,
+      "schedule": null,
+      "sort_order": 123456789,
+      "starting_balance_flag": 0,
+      "tombstone": 0,
+-     "transfer_id": null,
 +     "transfer_id": "id10",
 +   },
 +   Object {
@@ -579,6 +594,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 6`] = `
 +     "cleared": 0,
 +     "date": 20170105,
 +     "error": null,
++     "fx_rate": null,
 +     "id": "id10",
 +     "imported_id": null,
 +     "imported_payee": null,
@@ -588,13 +604,12 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 6`] = `
 +     "parent_id": null,
 +     "payee": "id2",
 +     "payee_name": "",
-      "raw_synced_data": null,
-      "reconciled": 0,
-      "schedule": null,
-      "sort_order": 123456789,
-      "starting_balance_flag": 0,
-      "tombstone": 0,
--     "transfer_id": null,
++     "raw_synced_data": null,
++     "reconciled": 0,
++     "schedule": null,
++     "sort_order": 123456789,
++     "starting_balance_flag": 0,
++     "tombstone": 0,
 +     "transfer_id": "id7",
     },
     Object {
@@ -607,7 +622,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 7`] = `
 "- First value
 + Second value
 
-@@ -3,60 +3,10 @@
+@@ -3,62 +3,10 @@
       "account": "one",
       "amount": 5000,
       "base_amount": null,
@@ -615,6 +630,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 7`] = `
       "cleared": 1,
 -     "date": 20170105,
 -     "error": null,
+-     "fx_rate": null,
 -     "id": "id7",
 -     "imported_id": null,
 -     "imported_payee": null,
@@ -640,6 +656,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 7`] = `
 -     "cleared": 0,
 -     "date": 20170105,
 -     "error": null,
+-     "fx_rate": null,
 -     "id": "id10",
 -     "imported_id": null,
 -     "imported_payee": null,
@@ -665,7 +682,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 7`] = `
 -     "cleared": 1,
       "date": 20170101,
       "error": null,
+      "fx_rate": null,
       "id": "id6",
-      "imported_id": null,
-      "imported_payee": null,"
+      "imported_id": null,"
 `;
