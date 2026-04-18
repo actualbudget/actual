@@ -718,13 +718,13 @@ export async function resetIncomeCarryover({
   });
 }
 
-export function setScheduledAmounts({
+export async function setScheduledAmounts({
   categoryAmounts,
   incomeAmounts,
 }: {
   categoryAmounts: Array<{ categoryId: string; month: string; amount: number }>;
   incomeAmounts: Array<{ month: string; amount: number }>;
-}): void {
+}): Promise<void> {
   for (const { categoryId, month, amount } of categoryAmounts) {
     const sheetName = monthUtils.sheetForMonth(month);
     sheet.get().set(`${sheetName}!scheduled-upcoming-${categoryId}`, amount);
