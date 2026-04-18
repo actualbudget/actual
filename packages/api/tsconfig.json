@@ -8,7 +8,12 @@
     "module": "es2022",
     "moduleResolution": "bundler",
     "customConditions": ["api"],
+    // composite + declaration: true require `noEmit: false`, so use
+    // emitDeclarationOnly to keep typecheck + project refs working without
+    // clobbering the Vite build artifacts in dist/. build:node also passes
+    // --emitDeclarationOnly on the CLI (redundant but explicit).
     "noEmit": false,
+    "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true,
     "outDir": "dist",
