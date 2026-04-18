@@ -1,0 +1,11 @@
+- generic [active] [ref=e1]:
+    - heading "Actual browser API playground" [level=1] [ref=e2]
+    - paragraph [ref=e3]:
+        - text: Fill in
+        - code [ref=e4]: src/config.ts
+        - text: first.
+    - heading "Log" [level=2] [ref=e5]
+    - heading "Accounts" [level=2] [ref=e7]
+    - generic [ref=e8]: (loading…)
+    - heading "Transactions (first account)" [level=2] [ref=e9]
+    - generic [ref=e10]: (loading…)
