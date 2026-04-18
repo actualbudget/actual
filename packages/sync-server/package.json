@@ -92,13 +92,9 @@
     "migrate": "^2.1.0",
     "openid-client": "^5.7.1",
     "pluggy-sdk": "^0.83.0",
-    "uuid": "^13.0.0",
     "winston": "^3.19.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.29.0",
-    "@babel/preset-typescript": "^7.28.5",
-    "@types/babel__core": "^7",
     "@types/bcrypt": "^6.0.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/convict": "^6",

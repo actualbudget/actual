@@ -712,7 +712,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     position: 'fixed',
                     zIndex: 100,
                     bottom: 0,
-                    display: isNarrowWidth ? 'flex' : 'none',
+                    display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                   }}

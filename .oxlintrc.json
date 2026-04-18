@@ -337,11 +337,6 @@
             "message": "Don't directly reference imports from other platforms"
           },
           {
-            "group": ["uuid"],
-            "importNames": ["*"],
-            "message": "Use `import { v4 as uuidv4 } from 'uuid'` instead"
-          },
-          {
             "group": ["**/style", "**/colors"],
             "importNames": ["colors"],
             "message": "Please use themes instead of colors"
@@ -420,6 +415,16 @@
       ],
       "rules": {
         "eslint/no-empty-function": "off"
+      }
+    },
+    // crdt enforces the repo's "TODO: enable this" typescript rules as errors
+    {
+      "files": ["packages/crdt/**/*"],
+      "rules": {
+        "typescript/no-misused-spread": "error",
+        "typescript/no-base-to-string": "error",
+        "typescript/no-unsafe-unary-minus": "error",
+        "typescript/no-unsafe-type-assertion": "error"
       }
     }
   ]

@@ -15,7 +15,7 @@ import { amountToInteger } from '#shared/util';
 import type { CategoryEntity, TransactionEntity } from '#types/models';
 import type { ScheduleTemplate, Template } from '#types/models/templates';
 
-import { getSheetValue, isReflectBudget } from './actions';
+import { getSheetValue, isTrackingBudget } from './actions';
 
 type ScheduleTemplateTarget = {
   name: string;
@@ -330,7 +330,7 @@ export async function runSchedule(
       c.num_months === 0) ||
     (c.target_frequency === 'weekly' && c.target_interval <= 4) ||
     (c.target_frequency === 'daily' && c.target_interval <= 31) ||
-    isReflectBudget();
+    isTrackingBudget();
 
   const isSubMonthly = c =>
     c.target_frequency === 'weekly' || c.target_frequency === 'daily';

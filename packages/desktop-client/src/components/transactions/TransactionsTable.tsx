@@ -1688,15 +1688,13 @@ const Transaction = memo(function Transaction({
             focused={focusedField === 'category'}
             onExpose={name => onEdit(id, name)}
             value={
-              isParent
-                ? t('Split')
-                : isOffBudget
-                  ? t('Off budget')
-                  : isBudgetTransfer
-                    ? categoryId != null
-                      ? t('Needs Repair')
-                      : t('Transfer')
-                    : ''
+              isOffBudget
+                ? t('Off budget')
+                : isBudgetTransfer
+                  ? categoryId != null
+                    ? t('Needs Repair')
+                    : t('Transfer')
+                  : ''
             }
             valueStyle={valueStyle}
             style={{

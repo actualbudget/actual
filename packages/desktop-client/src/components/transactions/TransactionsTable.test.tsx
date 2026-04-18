@@ -23,7 +23,6 @@ import type {
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
-import { v4 as uuidv4 } from 'uuid';
 
 import { AuthProvider } from '#auth/AuthProvider';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
@@ -1087,7 +1086,7 @@ describe('Transactions', () => {
     // Change the id to simulate a new transaction being added, and
     // work with that one. This makes sure that the transaction table
     // properly references new data.
-    transactions[0] = { ...transactions[0], id: uuidv4() };
+    transactions[0] = { ...transactions[0], id: crypto.randomUUID() };
     updateProps({ transactions });
 
     function expectErrorToNotExist(transactions: TransactionEntity[]) {
