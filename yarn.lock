@@ -153,17 +153,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@actual-app/crdt@npm:2.1.0":
-  version: 2.1.0
-  resolution: "@actual-app/crdt@npm:2.1.0"
-  dependencies:
-    google-protobuf: "npm:^3.12.0-rc.1"
-    murmurhash: "npm:^2.0.1"
-    uuid: "npm:^9.0.0"
-  checksum: 10/1007e78eb9bdfdca8ce5c6fc72543d6a9fb34cd13ea2eefd2176abcb181100418b51774fd6217f0b62418567a51f7724b4c72f7ebc9231f0ee13b6c1bdc729ba
-  languageName: node
-  linkType: hard
-
 "@actual-app/crdt@workspace:*, @actual-app/crdt@workspace:packages/crdt":
   version: 0.0.0-use.local
   resolution: "@actual-app/crdt@workspace:packages/crdt"
@@ -184,7 +173,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/sync-server@workspace:packages/sync-server"
   dependencies:
-    "@actual-app/crdt": "npm:2.1.0"
+    "@actual-app/crdt": "workspace:*"
     "@actual-app/web": "workspace:*"
     "@types/bcrypt": "npm:^6.0.0"
     "@types/better-sqlite3": "npm:^7.6.13"
@@ -17033,7 +17022,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"google-protobuf@npm:^3.12.0-rc.1, google-protobuf@npm:^3.15.5, google-protobuf@npm:^3.21.4":
+"google-protobuf@npm:^3.15.5, google-protobuf@npm:^3.21.4":
   version: 3.21.4
   resolution: "google-protobuf@npm:3.21.4"
   checksum: 10/0d87fe8ef221d105cbaa808f4024bd577638524d8e461469e3733f2e4933391ad4da86b7fcbd11e8781bee04eacf2e8ba19aaacd5f9deb336a220485841d980f
@@ -28061,15 +28050,6 @@ __metadata:
   bin:
     uuid: dist/bin/uuid
   checksum: 10/9a5f7aa1d6f56dd1e8d5f2478f855f25c645e64e26e347a98e98d95781d5ed20062d6cca2eecb58ba7c84bc3910be95c0451ef4161906abaab44f9cb68ffbdd1
-  languageName: node
-  linkType: hard
-
-"uuid@npm:^9.0.0":
-  version: 9.0.1
-  resolution: "uuid@npm:9.0.1"
-  bin:
-    uuid: dist/bin/uuid
-  checksum: 10/9d0b6adb72b736e36f2b1b53da0d559125ba3e39d913b6072f6f033e0c87835b414f0836b45bcfaf2bdf698f92297fea1c3cc19b0b258bc182c9c43cc0fab9f2
   languageName: node
   linkType: hard
 
