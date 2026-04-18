@@ -12,7 +12,9 @@
     ".": {
       "types": "./dist/index.d.ts",
       "development": "./src/index.ts",
-      "default": "./dist/index.js"
+      "browser": "./src/index.ts",
+      "node": "./dist/index.js",
+      "default": "./src/index.ts"
     }
   },
   "publishConfig": {
