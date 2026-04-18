@@ -21,6 +21,48 @@ import * as connection from '@actual-app/core/platform/server/connection';
 import { handlers, init } from '@actual-app/core/server/main';
 import type { InitConfig } from '@actual-app/core/server/main';
 
+// Dev-server friendliness: consumer bundlers (Vite first, others too) run
+// import-analysis on every `.js` URL they serve. loot-core's JS migrations
+// use `#`-subpath imports that only resolve inside loot-core — analysis
+// fails when those files live under node_modules/@actual-app/api/dist/.
+// Our build writes those files with an extra `.data` suffix, so bundlers
+// leave them alone. Translate the URLs here so loot-core's fetch layer
+// still sees `.js` names both in the manifest and on-disk.
+//
+// The wrap has to install before connection.init() runs, and populateDefault-
+// Filesystem is kicked off lazily from the first `load-budget` / init call.
+{
+  const origFetch = globalThis.fetch;
+  const MIGRATION_JS = /\/data\/migrations\/[^/?]+\.js(\?.*)?$/;
+  globalThis.fetch = (async (
+    input: RequestInfo | URL,
+    initArg?: RequestInit,
+  ): Promise<Response> => {
+    const url =
+      typeof input === 'string' ? input : (input as URL | Request).toString();
+    if (MIGRATION_JS.test(url)) {
+      // Re-target .js → .js.data before hitting the network.
+      const patched = url.replace(/(\.js)(\?|$)/, '.js.data$2');
+      return origFetch(patched, initArg);
+    }
+    if (
+      url.endsWith('/data-file-index.txt') ||
+      url.endsWith('data-file-index.txt')
+    ) {
+      const res = await origFetch(input as RequestInfo | URL, initArg);
+      if (!res.ok) return res;
+      const text = await res.text();
+      const rewritten = text.replace(/\.js\.data(\r?\n|$)/g, '.js$1');
+      return new Response(rewritten, {
+        status: res.status,
+        statusText: res.statusText,
+        headers: res.headers,
+      });
+    }
+    return origFetch(input as RequestInfo | URL, initArg);
+  }) as typeof fetch;
+}
+
 // `api-browser/init` is a worker-local handler; it isn't part of the shared
 // Handlers type. Assign via the index-signature cast rather than extending
 // the type globally.
