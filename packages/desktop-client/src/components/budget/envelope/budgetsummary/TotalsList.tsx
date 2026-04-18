@@ -1,4 +1,4 @@
-import React, { type CSSProperties } from 'react';
+import React, { Fragment, type CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -202,7 +202,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
           }}
         >
           {currencies.map((currencyCode, index) => (
-            <React.Fragment key={currencyCode}>
+            <Fragment key={currencyCode}>
               <CurrencyTotalsRow
                 currencyCode={currencyCode}
                 prevMonthName={prevMonthName}
@@ -216,7 +216,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
                   }}
                 />
               )}
-            </React.Fragment>
+            </Fragment>
           ))}
         </View>
       </View>

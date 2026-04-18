@@ -8,16 +8,16 @@ import { Navigation } from './page-models/navigation';
 test.describe('Budget Multi-Currency', () => {
   let page: Page;
   let configurationPage: ConfigurationPage;
-  let budgetPage: BudgetPage;
-  let navigation: Navigation;
+  let _budgetPage: BudgetPage;
+  let _navigation: Navigation;
 
   test.beforeEach(async ({ browser }) => {
     page = await browser.newPage();
     configurationPage = new ConfigurationPage(page);
-    navigation = new Navigation(page);
+    _navigation = new Navigation(page);
 
     await page.goto('/');
-    budgetPage = await configurationPage.createTestFile();
+    _budgetPage = await configurationPage.createTestFile();
 
     // Wait for the budget page to fully load before modifying preferences
     await page.waitForSelector('[data-testid="budget-table"]');

@@ -342,7 +342,7 @@ export function createSummary(
       // Categories for this currency (used for non-budgeted dependencies)
       // - Default currency includes categories with null/undefined currency OR explicit default
       // - Other currencies only include categories explicitly set to that currency
-      const currencyCategories = expenseCategories.filter(cat =>
+      const _currencyCategories = expenseCategories.filter(cat =>
         isDefault
           ? !cat.currency || cat.currency === defaultCurrencyCode
           : cat.currency === currencyCode,

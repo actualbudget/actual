@@ -3,6 +3,8 @@ import React, {
   useRef,
   type ComponentProps,
   type CSSProperties,
+  type MouseEventHandler,
+  type RefObject,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -843,45 +845,15 @@ export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
   );
 }
 
-type IncomeCategoryCurrencyValueProps = {
-  categoryId: string;
-  currencyCode: string;
-};
-
-function IncomeCategoryCurrencyValue({
-  categoryId,
-  currencyCode,
-}: IncomeCategoryCurrencyValueProps) {
-  const categoryIncome = useDynamicSheetValue(
-    envelopeBudget.catSumAmountByCurrency(categoryId, currencyCode),
-    0,
-  );
-  const value = typeof categoryIncome === 'number' ? categoryIncome : 0;
-
-  return (
-    <CellValueText
-      name={`sum-amount-${categoryId}-${currencyCode}`}
-      value={value}
-      type="financial"
-      currencyCode={currencyCode}
-      className={css({
-        cursor: 'pointer',
-        ':hover': { textDecoration: 'underline' },
-        ...makeAmountGrey(value),
-      })}
-    />
-  );
-}
-
 type IncomeCategoryCurrencyRowProps = {
   categoryId: string;
   currencyCode: string;
   month: string;
   isLast?: boolean;
   isLastCurrency: boolean;
-  triggerRef?: React.RefObject<HTMLDivElement | null>;
+  triggerRef?: RefObject<HTMLDivElement | null>;
   onOpenMenu: () => void;
-  onContextMenu: (e: React.MouseEvent<HTMLElement>) => void;
+  onContextMenu: MouseEventHandler<HTMLElement>;
 };
 
 function IncomeCategoryCurrencyRow({
@@ -924,7 +896,9 @@ function IncomeCategoryCurrencyRow({
           position: 'relative',
         }}
       >
+        {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events */}
         <span
+          // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
           role="button"
           onClick={onOpenMenu}
           onContextMenu={onContextMenu}
@@ -975,7 +949,7 @@ export function IncomeCategoryMonth({
       resetIncomePosition(-6, -4);
       setIncomeMenuOpen(true);
     };
-    const handleContextMenuEvent = (e: React.MouseEvent<HTMLElement>) => {
+    const handleContextMenuEvent: MouseEventHandler<HTMLElement> = e => {
       handleIncomeContextMenu(e);
       const rect = e.currentTarget.getBoundingClientRect();
       resetIncomePosition(

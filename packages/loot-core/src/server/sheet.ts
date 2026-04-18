@@ -260,7 +260,7 @@ export async function loadUserBudgets(db: typeof DbModule): Promise<void> {
           budgetCurrency.buffered || 0,
         );
       }
-    } catch (e) {
+    } catch {
       // Table may not exist yet if migrations haven't run
     }
   }
