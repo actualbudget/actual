@@ -11,11 +11,13 @@ const distDir = path.resolve(__dirname, 'dist');
 // thread context. Consumer spawns the worker with this file as the entry.
 export default defineConfig({
   define: {
-    'process.env.PUBLIC_URL': JSON.stringify('/'),
+    // NODE_ENV is read at build time by dead-code elimination paths and
+    // must stay a literal. The others (PUBLIC_URL, DATA_DIR, SERVER_URL,
+    // DOCUMENT_DIR) are set at runtime via the `api-browser/init` handler
+    // which receives them from the main thread — so they stay as
+    // `process.env.<name>` references and the nodePolyfills-provided
+    // process shim serves as the backing store.
     'process.env.NODE_ENV': JSON.stringify('production'),
-    'process.env.ACTUAL_DATA_DIR': 'undefined',
-    'process.env.ACTUAL_SERVER_URL': 'undefined',
-    'process.env.ACTUAL_DOCUMENT_DIR': JSON.stringify('/documents'),
   },
   build: {
     target: 'esnext',

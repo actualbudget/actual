@@ -33,7 +33,16 @@ function createWorker(): Worker {
 
 export async function init(config: InitConfig = {}) {
   setWorker(createWorker());
-  await rpc('api-browser/init', config);
+  // Point loot-core's browser fs at our dist/ directory. We want the
+  // directory portion of this bundle's own URL so loot-core's fetches land
+  // on files we ship (data-file-index.txt, migrations/, default-db.sqlite,
+  // sql-wasm.wasm). Vite's asset plugin tries to pre-bundle
+  // `new URL('.', import.meta.url)` at consumer build time and picks up
+  // the `development` export condition (inlining index.ts as a data URL!).
+  // Derive the base URL via string manipulation instead so static analyzers
+  // leave it alone.
+  const assetsBaseUrl = import.meta.url.replace(/[^/]+$/, '');
+  await rpc('api-browser/init', { ...config, __assetsBaseUrl: assetsBaseUrl });
   // Return a {send} handle compatible with the Node entry so existing
   // consumer code that does `const internal = await api.init(...); internal.send(...)`
   // keeps working on the browser build too.

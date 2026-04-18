@@ -55,8 +55,49 @@ function copyMigrationsAndDefaultDb() {
       // a static handler at dist and don't have to reach into node_modules.
       const sqlJsWasm = require.resolve('@jlongster/sql.js/dist/sql-wasm.wasm');
       fs.copyFileSync(sqlJsWasm, path.join(distDir, 'sql-wasm.wasm'));
+
+      // loot-core's browser fs bootstraps by fetching:
+      //   `${PUBLIC_URL}data-file-index.txt`  - flat manifest
+      //   `${PUBLIC_URL}data/<name>`          - each file listed in the manifest
+      // We point PUBLIC_URL at the api's dist dir at runtime (see
+      // index.browser.ts), so these two shapes need to exist here.
+      //
+      // data-file-index.txt: one path per line, relative to `data/`.
+      const migrationNames = fs
+        .readdirSync(migrationsDest)
+        .sort()
+        .map(name => `migrations/${name}`);
+      const manifest =
+        ['default-db.sqlite', ...migrationNames].join('\n') + '\n';
+      fs.writeFileSync(path.join(distDir, 'data-file-index.txt'), manifest);
+
+      // data/ mirror: the browser fs fetches `data/<name>` rather than
+      // `<name>`, so materialize a `data/` subdir with hard links (fast,
+      // no duplicated bytes). Falls back to copy if the filesystem refuses
+      // hard links — shouldn't happen on unix, may on some mounted shares.
+      const dataDir = path.join(distDir, 'data');
+      fs.mkdirSync(path.join(dataDir, 'migrations'), { recursive: true });
+
+      linkOrCopy(
+        path.join(distDir, 'default-db.sqlite'),
+        path.join(dataDir, 'default-db.sqlite'),
+      );
+      for (const name of fs.readdirSync(migrationsDest)) {
+        linkOrCopy(
+          path.join(migrationsDest, name),
+          path.join(dataDir, 'migrations', name),
+        );
+      }
     },
   };
+}
+
+function linkOrCopy(src: string, dest: string) {
+  try {
+    fs.linkSync(src, dest);
+  } catch {
+    fs.copyFileSync(src, dest);
+  }
 }
 
 export default defineConfig({

@@ -27,7 +27,16 @@ import type { InitConfig } from '@actual-app/core/server/main';
 (handlers as Record<string, (args?: unknown) => Promise<unknown>>)[
   'api-browser/init'
 ] = async function (args?: unknown) {
-  await init((args ?? {}) as InitConfig);
+  const payload = (args ?? {}) as InitConfig & { __assetsBaseUrl?: string };
+  // Main thread hands us a URL pointing at the api's own dist/ dir. Setting
+  // PUBLIC_URL here is what makes loot-core's populateDefaultFilesystem
+  // fetch `data-file-index.txt` / `data/<name>` / `sql-wasm.wasm` from our
+  // package instead of the consumer's page origin — no manual copy step.
+  const { __assetsBaseUrl, ...config } = payload;
+  if (__assetsBaseUrl) {
+    process.env.PUBLIC_URL = __assetsBaseUrl;
+  }
+  await init(config);
   // Nothing to return — the resolved `lib` has functions and isn't
   // structured-cloneable anyway.
 };

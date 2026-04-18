@@ -116,11 +116,17 @@ describe('@actual-app/api browser facade', () => {
         (m as { name?: string }).name === 'api-browser/init',
     ) as { name: string; args: unknown } | undefined;
     expect(initCall).toBeTruthy();
-    expect(initCall!.args).toEqual({
+    expect(initCall!.args).toMatchObject({
       dataDir: '/documents',
       serverURL: 'https://example.test',
       password: 'pw',
     });
+    // The api also hands over its own asset base URL so loot-core's fs
+    // can fetch migrations / default-db / WASM from the api's dist/
+    // instead of the consumer's page origin.
+    expect(
+      (initCall!.args as { __assetsBaseUrl?: string }).__assetsBaseUrl,
+    ).toBeTypeOf('string');
   });
 
   test('rpc methods forward as {id, name, args} and read {type:reply, result}', async () => {
