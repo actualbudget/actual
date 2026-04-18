@@ -118,15 +118,6 @@ export function Accounts() {
               : null
           }
           isExactPathMatch
-          convertedBalanceData={
-            allAccountsConverted
-              ? {
-                  convertedBalance: allAccountsConverted.convertedBalance,
-                  balances: allAccountsConverted.balances,
-                  convertedCurrency: defaultCurrency,
-                }
-              : null
-          }
         />
 
         {onBudgetAccounts.length > 0 && (
