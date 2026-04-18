@@ -20,6 +20,9 @@ import type {
 import { enrichForecastFilterObjects } from './forecast-filters';
 import type { ForecastFilterObject } from './forecast-filters';
 
+/** Synthetic account for schedules with no account; combined forecast only when explicitly included. */
+export const FORECAST_UNASSIGNED_ACCOUNT_ID = '__unassigned_schedule__';
+
 type ScheduleDataBase = {
   id: string;
   name: string | null;
@@ -75,11 +78,14 @@ export function normalizeSchedule(
   schedule: RawScheduleData,
 ): ScheduleData | null {
   const conditions = extractScheduleConds(schedule._conditions || []);
-  const accountId = schedule._account ?? conditions.account?.value;
+  const accountId =
+    schedule._account ??
+    (conditions.account?.value as string | undefined) ??
+    FORECAST_UNASSIGNED_ACCOUNT_ID;
   const amountValue = schedule._amount ?? conditions.amount?.value;
   const dateValue = schedule._date ?? conditions.date?.value;
 
-  if (!accountId || amountValue == null || dateValue == null) {
+  if (amountValue == null || dateValue == null) {
     return null;
   }
 
@@ -211,6 +217,10 @@ export async function buildFutureScheduleOccurrences(
         scheduleId: schedule.id,
         scheduleName,
       });
+
+      if (sourceTransaction.account === FORECAST_UNASSIGNED_ACCOUNT_ID) {
+        continue;
+      }
 
       let transferPayee = null;
       if (sourceTransaction.payee != null) {

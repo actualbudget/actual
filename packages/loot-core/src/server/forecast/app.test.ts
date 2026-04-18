@@ -11,6 +11,7 @@ import { loadRules, updateRule } from '#server/transactions/transaction-rules';
 import type { RuleConditionEntity } from '#types/models';
 
 import { generateForecast } from './app';
+import { FORECAST_UNASSIGNED_ACCOUNT_ID } from './forecast-schedules';
 
 const { emptyDatabase } = global as typeof globalThis & {
   emptyDatabase: () => () => Promise<void>;
@@ -465,5 +466,83 @@ describe('forecast app', () => {
       forecastStartDate: '2024-03-01',
       forecastEndDate: '2024-03-31',
     });
+  });
+
+  it('includes account-less schedules when includeAccountlessSchedules is true', async () => {
+    const accountId = await db.insertAccount({ id: 'acct', name: 'Checking' });
+
+    await createSchedule({
+      conditions: [
+        { op: 'is', field: 'amount', value: -75 },
+        {
+          op: 'is',
+          field: 'date',
+          value: {
+            start: '2024-03-15',
+            frequency: 'monthly',
+          },
+        },
+      ] satisfies RuleConditionEntity[],
+    });
+
+    const result = await generateForecast({
+      accountIds: [accountId],
+      startDate: '2024-03-01',
+      endDate: '2024-03-31',
+      includeAccountlessSchedules: true,
+    });
+
+    const combinedBalance = (date: string) =>
+      result.dataPoints
+        .filter(dataPoint => dataPoint.date === date)
+        .reduce((sum, dataPoint) => sum + dataPoint.balance, 0);
+
+    expect(combinedBalance('2024-03-15')).toBe(-75);
+    expect(result.lowestBalance).toMatchObject({
+      date: '2024-03-15',
+      balance: -75,
+    });
+    expect(
+      result.dataPoints.some(
+        dataPoint => dataPoint.accountId === FORECAST_UNASSIGNED_ACCOUNT_ID,
+      ),
+    ).toBe(true);
+  });
+
+  it('excludes account-less schedules when includeAccountlessSchedules is false', async () => {
+    const accountId = await db.insertAccount({ id: 'acct', name: 'Checking' });
+
+    await createSchedule({
+      conditions: [
+        { op: 'is', field: 'amount', value: -75 },
+        {
+          op: 'is',
+          field: 'date',
+          value: {
+            start: '2024-03-15',
+            frequency: 'monthly',
+          },
+        },
+      ] satisfies RuleConditionEntity[],
+    });
+
+    const result = await generateForecast({
+      accountIds: [accountId],
+      startDate: '2024-03-01',
+      endDate: '2024-03-31',
+      includeAccountlessSchedules: false,
+    });
+
+    const combinedBalance = (date: string) =>
+      result.dataPoints
+        .filter(dataPoint => dataPoint.date === date)
+        .reduce((sum, dataPoint) => sum + dataPoint.balance, 0);
+
+    expect(combinedBalance('2024-03-15')).toBe(0);
+    expect(
+      result.dataPoints.every(
+        dataPoint => dataPoint.accountId !== FORECAST_UNASSIGNED_ACCOUNT_ID,
+      ),
+    ).toBe(true);
   });
 });

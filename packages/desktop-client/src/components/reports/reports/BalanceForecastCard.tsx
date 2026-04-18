@@ -89,6 +89,7 @@ export function BalanceForecastCard({
     conditionsOp: meta?.conditionsOp,
     startDate,
     endDate,
+    includeAccountlessSchedules: meta?.accounts === undefined,
   });
   const errorMessage =
     error instanceof Error

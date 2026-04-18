@@ -9,6 +9,7 @@ type UseBalanceForecastParams = {
   conditionsOp?: 'and' | 'or';
   startDate: string;
   endDate: string;
+  includeAccountlessSchedules?: boolean;
   enabled?: boolean;
 };
 
@@ -18,6 +19,7 @@ export function useBalanceForecast({
   conditionsOp,
   startDate,
   endDate,
+  includeAccountlessSchedules,
   enabled = true,
 }: UseBalanceForecastParams) {
   return useQuery({
@@ -29,6 +31,7 @@ export function useBalanceForecast({
         conditionsOp: conditionsOp ?? 'and',
         startDate,
         endDate,
+        includeAccountlessSchedules: includeAccountlessSchedules ?? false,
       },
     ],
     queryFn: async (): Promise<ForecastResult> =>
@@ -38,6 +41,7 @@ export function useBalanceForecast({
         conditionsOp,
         startDate,
         endDate,
+        includeAccountlessSchedules,
       }),
     enabled,
   });

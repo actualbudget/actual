@@ -125,6 +125,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     conditionsOp,
     startDate,
     endDate,
+    includeAccountlessSchedules: widget?.meta?.accounts === undefined,
     enabled: hasMonthOptions,
   });
   const errorMessage =

@@ -4,6 +4,10 @@ import type { RuleConditionEntity } from '#types/models';
 import type { ForecastResult } from '#types/models/forecast';
 
 import { resolveForecastAccounts } from './forecast-accounts';
+import type {
+  AccountWithComputedBalance,
+  DbAccountForRules,
+} from './forecast-accounts';
 import { buildFilterInfo, getTransactions } from './forecast-filters';
 import {
   buildForecastDateContext,
@@ -12,6 +16,7 @@ import {
 } from './forecast-projection';
 import {
   buildFutureScheduleOccurrences,
+  FORECAST_UNASSIGNED_ACCOUNT_ID,
   getNormalizedSchedules,
 } from './forecast-schedules';
 
@@ -21,7 +26,31 @@ export type ForecastRequestParams = {
   conditionsOp?: 'and' | 'or';
   startDate?: string;
   endDate?: string;
+  includeAccountlessSchedules?: boolean;
 };
+
+function createUnassignedForecastAccount(): AccountWithComputedBalance {
+  return {
+    id: FORECAST_UNASSIGNED_ACCOUNT_ID,
+    name: '',
+    closed: 0,
+    offbudget: 0,
+    balance_current: 0,
+  };
+}
+
+function createUnassignedRuleAccountStub(): DbAccountForRules {
+  return {
+    id: FORECAST_UNASSIGNED_ACCOUNT_ID,
+    name: '',
+    offbudget: 0,
+    closed: 0,
+    tombstone: 0,
+    sort_order: -1,
+    bankName: '',
+    bankId: '',
+  } as DbAccountForRules;
+}
 
 export async function generateForecast({
   accountIds,
@@ -29,13 +58,15 @@ export async function generateForecast({
   conditionsOp,
   startDate,
   endDate,
+  includeAccountlessSchedules,
 }: ForecastRequestParams): Promise<ForecastResult> {
+  const includeUnassigned = includeAccountlessSchedules ?? false;
   const dateContext = buildForecastDateContext(startDate, endDate);
   const { filterInfo, plainConditions, resolvedConditionsOp } = buildFilterInfo(
     conditions,
     conditionsOp,
   );
-  const accounts = await resolveForecastAccounts({
+  let accounts = await resolveForecastAccounts({
     accountIds,
     plainConditions,
     resolvedConditionsOp,
@@ -49,18 +80,41 @@ export async function generateForecast({
     );
   }
 
+  if (
+    includeUnassigned &&
+    !accounts.some(account => account.id === FORECAST_UNASSIGNED_ACCOUNT_ID)
+  ) {
+    accounts = [...accounts, createUnassignedForecastAccount()];
+  }
+
   const accountIdsToQuery = accounts.map(account => account.id);
   const accountsById = new Map(accounts.map(account => [account.id, account]));
-  const [schedules, transactions, ruleAccounts] = await Promise.all([
+  const [schedulesRaw, transactions, ruleAccounts] = await Promise.all([
     getNormalizedSchedules(),
     getTransactions(accountIdsToQuery, filterInfo),
     db.getAccounts(),
   ]);
+  const schedules = includeUnassigned
+    ? schedulesRaw
+    : schedulesRaw.filter(
+        schedule => schedule._account !== FORECAST_UNASSIGNED_ACCOUNT_ID,
+      );
+
+  const ruleAccountsById = new Map(
+    ruleAccounts.map(account => [account.id, account]),
+  );
+  if (includeUnassigned) {
+    ruleAccountsById.set(
+      FORECAST_UNASSIGNED_ACCOUNT_ID,
+      createUnassignedRuleAccountStub(),
+    );
+  }
+
   const futureOccurrences = await buildFutureScheduleOccurrences(
     schedules,
     dateContext.endDateObj,
     accountsById,
-    new Map(ruleAccounts.map(account => [account.id, account])),
+    ruleAccountsById,
   );
   const { dataPoints, lowestBalance } = projectForecastData({
     accounts,
@@ -85,6 +139,7 @@ export type ForecastHandlers = {
     conditionsOp?: 'and' | 'or';
     startDate?: string;
     endDate?: string;
+    includeAccountlessSchedules?: boolean;
   }) => Promise<ForecastResult>;
 };
 
