@@ -11,8 +11,6 @@ export type Currency = {
 
 // When adding a new currency with a higher decimal precision, make sure to update
 // the MAX_SAFE_NUMBER in util.ts.
-// When adding a currency, also update the translation map in
-// packages/desktop-client/src/components/select/CurrencySelect.tsx for the translation.
 // Number formats and symbol placement based on CLDR (Common Locale Data Repository) /
 // LDML (Locale Data Markup Language) locale conventions and Intl.NumberFormat standards
 // References:
@@ -66,7 +64,7 @@ export const currencies: Currency[] = [
   { code: 'CVE', name: 'Cape Verdean Escudo', symbol: 'Esc', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
   { code: 'CZK', name: 'Czech Koruna', symbol: 'Kč', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
   { code: 'DJF', name: 'Djiboutian Franc', symbol: 'Fdj', decimalPlaces: 0, numberFormat: 'comma-dot', symbolFirst: false },
-  { code: 'DKK', name: 'Danish Krone', symbol: 'kr.', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: false },
+  { code: 'DKK', name: 'Danish Krone', symbol: 'kr', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: false },
   { code: 'DOP', name: 'Dominican Peso', symbol: 'RD$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'DZD', name: 'Algerian Dinar', symbol: 'د.ج.‏', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: false },
   { code: 'EGP', name: 'Egyptian Pound', symbol: 'ج.م.‏', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
