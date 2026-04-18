@@ -4,8 +4,8 @@ import { evalArithmetic } from 'loot-core/shared/arithmetic';
 import { currentDay } from 'loot-core/shared/months';
 import {
   amountToInteger,
-  type FormattedAmount,
   integerToFormattedWithDecimal,
+  type FormattedAmount,
 } from 'loot-core/shared/util';
 import {
   type AccountEntity,

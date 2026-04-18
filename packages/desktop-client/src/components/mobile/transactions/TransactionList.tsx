@@ -37,8 +37,8 @@ import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
 import {
   groupById,
-  type IntegerAmount,
   integerToFormatted,
+  type IntegerAmount,
 } from 'loot-core/shared/util';
 import { type TransactionEntity } from 'loot-core/types/models';
 

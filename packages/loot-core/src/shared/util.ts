@@ -572,7 +572,7 @@ export function getNumberFormat({
     formatter = new SatNumberFormat(locale, currentHideFraction);
   } else {
     const intlFormatter = new Intl.NumberFormat(locale, fractionDigitsOptions);
-    
+
     // Wrapper to handle -0 edge case
     formatter = {
       format: (value: number) => {

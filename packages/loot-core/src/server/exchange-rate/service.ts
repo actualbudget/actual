@@ -2,12 +2,12 @@ import { logger } from '../../platform/server/log';
 import * as db from '../db';
 
 import {
+  getExchangeRateProvider,
   getOpenExchangeRatesAppId,
   isExternalExchangeRatesEnabled,
-  getExchangeRateProvider,
 } from './prefs';
-import { OpenExchangeRatesProvider, MempoolSpaceProvider } from './providers';
-import { type ExchangeRateProvider, type ExchangeRateData } from './types';
+import { MempoolSpaceProvider, OpenExchangeRatesProvider } from './providers';
+import { type ExchangeRateData, type ExchangeRateProvider } from './types';
 
 type CachedRate = {
   rate: number;

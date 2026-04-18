@@ -40,8 +40,8 @@ import {
 import { CellValue } from '@desktop-client/components/spreadsheet/CellValue';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
 import {
-  type ConvertedBalanceData,
   useAccountConvertedBalance,
+  type ConvertedBalanceData,
 } from '@desktop-client/hooks/useConvertedAccountBalance';
 import { useDragRef } from '@desktop-client/hooks/useDragRef';
 import { useFormat } from '@desktop-client/hooks/useFormat';

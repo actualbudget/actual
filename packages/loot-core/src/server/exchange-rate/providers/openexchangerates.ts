@@ -1,6 +1,6 @@
 import { logger } from '../../../platform/server/log';
 import { getOpenExchangeRatesAppId } from '../prefs';
-import { type ExchangeRateProvider, type ExchangeRateData } from '../types';
+import { type ExchangeRateData, type ExchangeRateProvider } from '../types';
 
 // OpenExchangeRates API response interfaces
 type OpenExchangeRatesResponse = {

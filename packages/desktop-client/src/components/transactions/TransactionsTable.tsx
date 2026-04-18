@@ -69,10 +69,10 @@ import {
   amountToFormatted,
   formattedToAmount,
   formattedToInteger,
-  type IntegerAmount,
   integerToFormatted,
   integerToFormattedWithDecimal,
   titleFirst,
+  type IntegerAmount,
 } from 'loot-core/shared/util';
 import {
   type AccountEntity,

@@ -1,6 +1,6 @@
 import { logger } from '../../../platform/server/log';
 import { getMempoolSpaceBaseUrl } from '../prefs';
-import { type ExchangeRateProvider, type ExchangeRateData } from '../types';
+import { type ExchangeRateData, type ExchangeRateProvider } from '../types';
 
 // Mempool.space API for multiple currency rates (free, no auth required)
 // Provides current rates for major fiat currencies relative to Bitcoin, which allows cross-currency calculations

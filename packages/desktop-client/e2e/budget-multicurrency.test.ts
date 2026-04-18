@@ -84,11 +84,13 @@ test.describe('Budget Multi-Currency', () => {
     // We need to look through all visible budget summaries
     const budgetSummaries = page.getByTestId('budget-summary');
     const count = await budgetSummaries.count();
-    
+
     for (let i = 0; i < count; i++) {
       const summary = budgetSummaries.nth(i);
-      const amountLocator = summary.getByTestId(`to-budget-${currencyCode}-amount`);
-      if (await amountLocator.count() > 0) {
+      const amountLocator = summary.getByTestId(
+        `to-budget-${currencyCode}-amount`,
+      );
+      if ((await amountLocator.count()) > 0) {
         const text = (await amountLocator.textContent()) ?? '';
         // Check if this value contains digits other than just zeros
         const digits = text.replace(/[^0-9]/g, '');
@@ -99,7 +101,9 @@ test.describe('Budget Multi-Currency', () => {
     }
     // Fall back to first if no positive value found
     const budgetSummary = page.getByTestId('budget-summary').first();
-    const amountLocator = budgetSummary.getByTestId(`to-budget-${currencyCode}-amount`);
+    const amountLocator = budgetSummary.getByTestId(
+      `to-budget-${currencyCode}-amount`,
+    );
     return (await amountLocator.textContent()) ?? '';
   }
 
@@ -107,11 +111,13 @@ test.describe('Budget Multi-Currency', () => {
     // Find the budget summary where this currency has a non-zero positive To Budget value
     const budgetSummaries = page.getByTestId('budget-summary');
     const count = await budgetSummaries.count();
-    
+
     for (let i = 0; i < count; i++) {
       const summary = budgetSummaries.nth(i);
-      const amountLocator = summary.getByTestId(`to-budget-${currencyCode}-amount`);
-      if (await amountLocator.count() > 0) {
+      const amountLocator = summary.getByTestId(
+        `to-budget-${currencyCode}-amount`,
+      );
+      if ((await amountLocator.count()) > 0) {
         const text = (await amountLocator.textContent()) ?? '';
         // Check if this value contains digits other than just zeros
         // Extract only digits and check if any are non-zero
@@ -124,18 +130,16 @@ test.describe('Budget Multi-Currency', () => {
     }
     // Fall back to first if no positive value found
     const budgetSummary = page.getByTestId('budget-summary').first();
-    const amountLocator = budgetSummary.getByTestId(`to-budget-${currencyCode}-amount`);
+    const amountLocator = budgetSummary.getByTestId(
+      `to-budget-${currencyCode}-amount`,
+    );
     await amountLocator.click();
   }
 
   test.describe('Hold for Next Month', () => {
     test('holds EUR funds for next month without affecting USD', async () => {
       // Create an EUR account with starting balance
-      await createAccountWithCurrency(
-        'EUR Account',
-        '1000',
-        'EUR - Euro (€)',
-      );
+      await createAccountWithCurrency('EUR Account', '1000', 'EUR - Euro (€)');
       await navigateToBudget();
 
       // Get the initial USD To Budget value
@@ -205,11 +209,7 @@ test.describe('Budget Multi-Currency', () => {
   test.describe('Currency Isolation', () => {
     test('multiple currencies can be held independently', async () => {
       // Create both EUR and GBP accounts
-      await createAccountWithCurrency(
-        'EUR Account',
-        '1000',
-        'EUR - Euro (€)',
-      );
+      await createAccountWithCurrency('EUR Account', '1000', 'EUR - Euro (€)');
       await createAccountWithCurrency(
         'GBP Account',
         '500',
@@ -249,11 +249,11 @@ test.describe('Budget Multi-Currency', () => {
       // Find the row containing the category name
       const rows = page.getByTestId('row');
       const count = await rows.count();
-      
+
       for (let i = 0; i < count; i++) {
         const row = rows.nth(i);
         const nameCell = row.getByTestId('category-name');
-        if (await nameCell.count() > 0) {
+        if ((await nameCell.count()) > 0) {
           const text = await nameCell.textContent();
           if (text?.includes(categoryName)) {
             return row;
@@ -263,17 +263,20 @@ test.describe('Budget Multi-Currency', () => {
       return null;
     }
 
-    async function changeCategoryCurrency(categoryName: string, newCurrencyCode: string) {
+    async function changeCategoryCurrency(
+      categoryName: string,
+      newCurrencyCode: string,
+    ) {
       const row = await findCategoryRow(categoryName);
       if (!row) {
         throw new Error(`Category "${categoryName}" not found`);
       }
-      
+
       // The currency dropdown is a custom Select component (Button + Popover)
       // Find the button in the row that has a currency code or "USD" text
       const buttons = row.getByRole('button');
       const buttonCount = await buttons.count();
-      
+
       for (let i = 0; i < buttonCount; i++) {
         const button = buttons.nth(i);
         const text = await button.textContent();
@@ -284,24 +287,31 @@ test.describe('Budget Multi-Currency', () => {
           await page.waitForTimeout(200);
           // Find the menu item within the popover that just opened
           const popover = page.locator('[data-popover]');
-          await popover.getByRole('button', { name: newCurrencyCode, exact: true }).click();
+          await popover
+            .getByRole('button', { name: newCurrencyCode, exact: true })
+            .click();
           await page.waitForTimeout(300);
           return;
         }
       }
-      throw new Error(`Currency dropdown not found for category "${categoryName}"`);
+      throw new Error(
+        `Currency dropdown not found for category "${categoryName}"`,
+      );
     }
 
-    async function enterBudgetAmountForCategory(categoryName: string, amount: string) {
+    async function enterBudgetAmountForCategory(
+      categoryName: string,
+      amount: string,
+    ) {
       const row = await findCategoryRow(categoryName);
       if (!row) {
         throw new Error(`Category "${categoryName}" not found`);
       }
-      
+
       // Find and click the budget cell to start editing
       const budgetCell = row.getByTestId('budget');
       await budgetCell.click();
-      
+
       // Wait for input to appear and fill it
       const input = row.getByRole('textbox');
       await input.fill(amount);
@@ -311,19 +321,15 @@ test.describe('Budget Multi-Currency', () => {
 
     test('budgeting in EUR category affects only EUR To Budget', async () => {
       // Create a EUR account with starting balance
-      await createAccountWithCurrency(
-        'EUR Account',
-        '1000',
-        'EUR - Euro (€)',
-      );
+      await createAccountWithCurrency('EUR Account', '1000', 'EUR - Euro (€)');
       await navigateToBudget();
 
       // First, clear the Food category budget to start fresh (this removes any existing USD budget)
       await enterBudgetAmountForCategory('Food', '0');
-      
+
       // Change the category's currency to EUR BEFORE taking our baseline snapshot
       await changeCategoryCurrency('Food', 'EUR');
-      
+
       // Now get initial USD To Budget value (with category already set to EUR and no budget)
       const usdBefore = await getToBudgetValueForCurrency('USD');
 
@@ -363,19 +369,15 @@ test.describe('Budget Multi-Currency', () => {
 
     test('changing category currency back to default affects correct budget', async () => {
       // Create a EUR account with starting balance
-      await createAccountWithCurrency(
-        'EUR Account',
-        '1000',
-        'EUR - Euro (€)',
-      );
+      await createAccountWithCurrency('EUR Account', '1000', 'EUR - Euro (€)');
       await navigateToBudget();
 
       // First, clear the Food category budget to start fresh
       await enterBudgetAmountForCategory('Food', '0');
-      
+
       // Change Food category to EUR FIRST (before measuring baseline)
       await changeCategoryCurrency('Food', 'EUR');
-      
+
       // Get baseline values with category in EUR and no budget
       const usdBaseline = await getToBudgetValueForCurrency('USD');
 

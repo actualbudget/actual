@@ -35,7 +35,9 @@ function splitFormattedAmount(
   currencyCode: string,
 ): [string, string, string] {
   const currency = getCurrency(currencyCode);
-  const { decimalSeparator } = getNumberFormat({ format: currency.numberFormat });
+  const { decimalSeparator } = getNumberFormat({
+    format: currency.numberFormat,
+  });
 
   // For currencies with no decimal places (like JPY), return just the whole part
   if (currency.decimalPlaces === 0) {

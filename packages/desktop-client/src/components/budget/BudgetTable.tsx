@@ -14,7 +14,7 @@ import { BudgetCategories } from './BudgetCategories';
 import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
 import { CURRENCY_COLUMN_WIDTH } from './constants';
-import { type MonthBounds, MonthsProvider } from './MonthsContext';
+import { MonthsProvider, type MonthBounds } from './MonthsContext';
 import {
   findSortDown,
   findSortUp,

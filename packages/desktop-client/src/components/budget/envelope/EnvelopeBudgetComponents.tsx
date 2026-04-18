@@ -36,9 +36,9 @@ import {
 import {
   Field,
   Row,
+  ROW_HEIGHT,
   SheetCell,
   type SheetCellProps,
-  ROW_HEIGHT,
 } from '@desktop-client/components/table';
 import { useCategoryScheduleGoalTemplateIndicator } from '@desktop-client/hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
@@ -96,7 +96,9 @@ type BudgetTotalsCurrencyRowProps = {
   currencyCode: string;
 };
 
-function BudgetTotalsCurrencyRow({ currencyCode }: BudgetTotalsCurrencyRowProps) {
+function BudgetTotalsCurrencyRow({
+  currencyCode,
+}: BudgetTotalsCurrencyRowProps) {
   const format = useFormat();
 
   const budgetedValue = useDynamicSheetValue(
@@ -113,9 +115,10 @@ function BudgetTotalsCurrencyRow({ currencyCode }: BudgetTotalsCurrencyRowProps)
   );
 
   // Negate budgeted value for display, but avoid -0
-  const displayBudgeted = typeof budgetedValue === 'number' && budgetedValue !== 0 
-    ? -budgetedValue 
-    : 0;
+  const displayBudgeted =
+    typeof budgetedValue === 'number' && budgetedValue !== 0
+      ? -budgetedValue
+      : 0;
 
   return (
     <View style={{ flex: 1, flexDirection: 'row' }}>
@@ -199,12 +202,19 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
               type="financial"
             >
               {props => (
-                <CellValueText {...props} value={-props.value} style={cellStyle} />
+                <CellValueText
+                  {...props}
+                  value={-props.value}
+                  style={cellStyle}
+                />
               )}
             </EnvelopeCellValue>
           </View>
           <View style={headerLabelStyle}>
-            <EnvelopeCellValue binding={envelopeBudget.totalSpent} type="financial">
+            <EnvelopeCellValue
+              binding={envelopeBudget.totalSpent}
+              type="financial"
+            >
               {props => <CellValueText {...props} style={cellStyle} />}
             </EnvelopeCellValue>
           </View>

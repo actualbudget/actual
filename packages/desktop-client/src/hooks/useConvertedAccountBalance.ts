@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { send, listen } from 'loot-core/platform/client/fetch';
+import { listen, send } from 'loot-core/platform/client/fetch';
 
 import { useSyncedPref } from './useSyncedPref';
 

@@ -233,9 +233,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
         ...style,
       }}
     >
-      <View
-        style={{ textAlign: 'right' }}
-      >
+      <View style={{ textAlign: 'right' }}>
         <Tooltip
           style={{ ...styles.tooltip, lineHeight: 1.5, padding: '6px 10px' }}
           content={

@@ -1,11 +1,11 @@
 import React, {
   forwardRef,
-  useEffect,
-  useState,
-  useRef,
   memo,
-  useMemo,
   useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router';
@@ -25,9 +25,9 @@ import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import {
   format as formatDate,
+  isValid as isValidDate,
   parse as parseDate,
   parseISO,
-  isValid as isValidDate,
 } from 'date-fns';
 
 import { send } from 'loot-core/platform/client/fetch';
@@ -36,22 +36,22 @@ import * as Platform from 'loot-core/shared/platform';
 import { q } from 'loot-core/shared/query';
 import { getStatusLabel } from 'loot-core/shared/schedules';
 import {
-  ungroupTransactions,
-  updateTransaction,
-  realizeTempTransactions,
-  splitTransaction,
   addSplitTransaction,
   deleteTransaction,
   makeChild,
+  realizeTempTransactions,
+  splitTransaction,
+  ungroupTransactions,
+  updateTransaction,
 } from 'loot-core/shared/transactions';
 import {
-  titleFirst,
-  integerToFormatted,
-  integerToAmount,
   amountToInteger,
-  getChangedValues,
   diffItems,
+  getChangedValues,
   groupById,
+  integerToAmount,
+  integerToFormatted,
+  titleFirst,
 } from 'loot-core/shared/util';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
@@ -59,8 +59,8 @@ import { FocusableAmountInput } from './FocusableAmountInput';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
 import {
   FieldLabel,
-  TapField,
   InputField,
+  TapField,
   ToggleField,
 } from '@desktop-client/components/mobile/MobileForms';
 import { getPrettyPayee } from '@desktop-client/components/mobile/utils';
@@ -79,7 +79,7 @@ import {
 } from '@desktop-client/hooks/useSingleActiveEditForm';
 import { pushModal } from '@desktop-client/modals/modalsSlice';
 import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import { useSelector, useDispatch } from '@desktop-client/redux';
+import { useDispatch, useSelector } from '@desktop-client/redux';
 import { setLastTransaction } from '@desktop-client/transactions/transactionsSlice';
 
 function getFieldName(transactionId, field) {

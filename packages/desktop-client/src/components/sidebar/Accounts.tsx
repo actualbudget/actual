@@ -14,8 +14,8 @@ import { useAccounts } from '@desktop-client/hooks/useAccounts';
 import { useClosedAccounts } from '@desktop-client/hooks/useClosedAccounts';
 import {
   useAllAccountBalanceConverted,
-  useOnBudgetAccountBalanceConverted,
   useOffBudgetAccountBalanceConverted,
+  useOnBudgetAccountBalanceConverted,
 } from '@desktop-client/hooks/useConvertedAccountBalance';
 import { useFailedAccounts } from '@desktop-client/hooks/useFailedAccounts';
 import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
