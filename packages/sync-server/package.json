@@ -63,7 +63,7 @@
   "scripts": {
     "start": "yarn build && node build/app",
     "start-monitor": "nodemon --exec 'yarn build && node build/app' --ignore './build/**/*' --ext 'ts,js' build/app",
-    "build": "tsgo && yarn add-import-extensions && yarn copy-static-assets",
+    "build": "tsgo -b && yarn add-import-extensions && yarn copy-static-assets",
     "typecheck": "tsgo -b && tsc-strict",
     "add-import-extensions": "node bin/add-import-extensions.mjs",
     "copy-static-assets": "rm -rf build/src/sql && cp -r src/sql build/src/sql",
@@ -77,7 +77,7 @@
     "health-check": "yarn build && node build/src/scripts/health-check.js"
   },
   "dependencies": {
-    "@actual-app/crdt": "2.1.0",
+    "@actual-app/crdt": "workspace:*",
     "@actual-app/web": "workspace:*",
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.8.0",
