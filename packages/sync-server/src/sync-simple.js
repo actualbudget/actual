@@ -88,7 +88,7 @@ export function sync(messages, since, groupId) {
     newMessages: newMessages.map(msg =>
       create(MessageEnvelopeSchema, {
         timestamp: msg.timestamp,
-        isEncrypted: msg.is_encrypted,
+        isEncrypted: msg.is_encrypted === 1,
         content: msg.content,
       }),
     ),
