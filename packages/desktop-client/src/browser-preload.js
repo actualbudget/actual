@@ -24,7 +24,7 @@ const ACTUAL_VERSION = Platform.isPlaywright
 // *** Start the backend ***
 //
 // The multi-tab coordinator (leader/follower over SharedWorker), direct
-// Worker fallback, and absurd-sql bridge now all live in loot-core
+// Worker fallback, and sqlite worker bridge now all live in loot-core
 // (packages/loot-core/src/platform/client/browser-preload). We only
 // hand it the desktop-specific inputs.
 const worker = startBrowserBackend({
