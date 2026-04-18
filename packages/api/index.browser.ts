@@ -1,57 +1,57 @@
 // Main-thread browser entry for @actual-app/api.
 //
-// Shape matches the Node entry on purpose: the same named imports work. The
-// one browser-specific requirement is that the consumer pass a Worker into
-// init(), because absurd-sql's Atomics.wait only works in a Worker context.
-// The consumer constructs the Worker themselves so their bundler handles
-// the URL resolution — we just ship dist/worker.js alongside dist/browser.js.
-//
-// Typical consumer wiring:
+// Public surface matches the Node entry. The worker is spawned internally
+// so consumers write:
 //
 //   import * as api from '@actual-app/api';
+//   await api.init({ dataDir: '/documents', serverURL, password });
+//   await api.getAccounts();
 //
-//   const worker = new Worker(
-//     new URL('@actual-app/api/dist/worker.js', import.meta.url),
-//     { type: 'module' },
-//   );
-//   await api.init({ worker, dataDir: '/documents', serverURL, password });
-
-import type { InitConfig } from '@actual-app/core/server/main';
+// worker.js must be a sibling of browser.js at runtime. Our build ships
+// them together in dist/; the consumer's bundler resolves the worker URL
+// via `new URL(..., import.meta.url)`.
 
 import { _setBrowserSend } from './browser/lib-stub';
+import type { InitConfig } from './browser/lib-stub';
 import { rpc, setWorker, terminate } from './browser/rpc';
 
 export * from './methods';
 export * as utils from './utils';
 
 // Wire methods.ts's `lib.send` through the worker.
-_setBrowserSend((name, args) => rpc('send', { name, args }));
+_setBrowserSend((name, args) => rpc(name, args));
 
-export type BrowserInitConfig = InitConfig & { worker: Worker };
+function createWorker(): Worker {
+  // Vite's `vite:worker-import-meta-url` plugin rewrites this pattern at
+  // the CONSUMER's build time (emit worker.js as an asset, substitute the
+  // hashed URL). Feeding it a non-literal first argument keeps the api's
+  // OWN lib build from trying to pre-bundle it, which would fail because
+  // ./worker.js is not a source-tree sibling of this file.
+  const rel = './worker.js';
+  return new Worker(new URL(rel, import.meta.url), { type: 'module' });
+}
 
-export async function init(config: BrowserInitConfig) {
-  if (!config || !config.worker) {
-    throw new Error(
-      '@actual-app/api: init({ worker }) requires a Worker instance. ' +
-        'Create one with `new Worker(new URL("@actual-app/api/dist/worker.js", import.meta.url), { type: "module" })`.',
-    );
-  }
-
-  setWorker(config.worker);
-
-  // Strip the worker before forwarding — it isn't structured-cloneable.
-  const { worker: _worker, ...rest } = config;
-  await rpc('init', { config: rest });
-
+export async function init(config: InitConfig = {}) {
+  setWorker(createWorker());
+  await rpc('api-browser/init', config);
+  // Return a {send} handle compatible with the Node entry so existing
+  // consumer code that does `const internal = await api.init(...); internal.send(...)`
+  // keeps working on the browser build too.
   return {
-    send: (name: string, args?: unknown) => rpc('send', { name, args }),
+    send: (name: string, args?: unknown) => rpc(name, args),
   };
 }
 
 export async function shutdown() {
   try {
-    await rpc('shutdown');
-  } finally {
-    terminate();
+    await rpc('sync');
+  } catch {
+    // most likely no budget loaded
   }
+  try {
+    await rpc('close-budget');
+  } catch {
+    // ignore
+  }
+  terminate();
 }

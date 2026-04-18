@@ -60,6 +60,7 @@
       "default": "./src/shared/platform.ts"
     },
     "#mocks": "./src/mocks/index.ts",
+    "#platform/client/backend-worker": "./src/platform/client/backend-worker/index.ts",
     "#platform/client/undo": "./src/platform/client/undo/index.ts",
     "#platform/exceptions": "./src/platform/exceptions/index.ts",
     "#platform/server/indexeddb": "./src/platform/server/indexeddb/index.ts",
@@ -104,6 +105,7 @@
     "./client/transfer": "./src/client/transfer.ts",
     "./client/undo": "./src/client/undo.ts",
     "./mocks": "./src/mocks/index.ts",
+    "./platform/client/backend-worker": "./src/platform/client/backend-worker/index.ts",
     "./platform/client/connection": {
       "electron-renderer": "./src/platform/client/connection/index.electron.ts",
       "default": "./src/platform/client/connection/index.ts"

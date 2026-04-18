@@ -1,124 +1,177 @@
-import { afterEach, describe, expect, test } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
 import * as api from '../index.browser';
 
-// A hand-rolled Worker stand-in: captures postMessage payloads and lets the
-// test script responses. jsdom doesn't ship a Worker implementation, and
-// absurd-sql requires a real Worker anyway — the facade is what we test here.
+// Swap the real Worker constructor for a mock that the tests control. Vitest
+// picks this up via vite.config resolve.alias; here we just stand in globally
+// because jsdom does not ship Worker at all.
 class MockWorker {
-  public posted: Array<{ id: number; op: string; payload?: unknown }> = [];
+  public posted: Array<unknown> = [];
   public responder: (
-    req: { id: number; op: string; payload?: unknown },
+    req: { id: string; name: string; args?: unknown },
     reply: (res: unknown) => void,
   ) => void = () => undefined;
 
+  private listeners: Array<(e: MessageEvent) => void> = [];
   onmessage: ((e: MessageEvent) => void) | null = null;
   onerror: ((e: ErrorEvent) => void) | null = null;
+  private connected = false;
 
-  postMessage(msg: { id: number; op: string; payload?: unknown }) {
+  addEventListener(type: string, handler: (e: MessageEvent) => void) {
+    if (type === 'message') this.listeners.push(handler);
+  }
+
+  removeEventListener() {
+    // no-op for tests
+  }
+
+  postMessage(msg: unknown) {
     this.posted.push(msg);
+
+    if (
+      msg &&
+      typeof msg === 'object' &&
+      (msg as { name?: string }).name === 'client-connected-to-backend'
+    ) {
+      // Handshake complete; we won't keep sending 'connect' heartbeats.
+      return;
+    }
+
+    const req = msg as { id: string; name: string; args?: unknown };
     queueMicrotask(() => {
-      const reply = (data: unknown) => {
-        this.onmessage?.({ data } as MessageEvent);
-      };
-      this.responder(msg, reply);
+      this.responder(req, (data: unknown) => {
+        const ev = { data } as MessageEvent;
+        this.onmessage?.(ev);
+        for (const l of this.listeners) l(ev);
+      });
     });
+  }
+
+  /** Simulate loot-core's connect handshake from the worker side. */
+  fireConnect() {
+    if (this.connected) return;
+    this.connected = true;
+    const ev = { data: { type: 'connect' } } as MessageEvent;
+    this.onmessage?.(ev);
+    for (const l of this.listeners) l(ev);
   }
 
   terminate() {
-    // no-op
+    this.listeners = [];
   }
 }
 
-function makeMockWorker(responder: MockWorker['responder']): MockWorker {
-  const w = new MockWorker();
-  w.responder = responder;
-  return w;
-}
+// Every Worker the api spawns inside init() comes through here.
+let lastMockWorker: MockWorker | null = null;
+const mockWorkerResponder = vi.fn<
+  (
+    req: { id: string; name: string; args?: unknown },
+    reply: (res: unknown) => void,
+  ) => void
+>(() => undefined);
+
+// Global Worker stub — the api's internal `new Worker(...)` will call this.
+// @ts-expect-error jsdom has no Worker; we override the global for the test.
+globalThis.Worker = class {
+  constructor(_url: URL | string, _opts?: WorkerOptions) {
+    const w = new MockWorker();
+    w.responder = (req, reply) => mockWorkerResponder(req, reply);
+    lastMockWorker = w;
+    // Fire the connect handshake on the next tick so init() resolves.
+    queueMicrotask(() => w.fireConnect());
+    return w as unknown as Worker;
+  }
+};
+
+// absurd-sql's main-thread bridge expects real Worker event semantics. The
+// mock above exposes addEventListener; initSQLBackend just attaches a
+// message listener, so it's safe with jsdom.
 
 afterEach(async () => {
+  // Keep whatever responder the test installed so shutdown's sync/close-budget
+  // calls resolve rather than hang.
   await api.shutdown().catch(() => undefined);
+  mockWorkerResponder.mockReset();
+  lastMockWorker = null;
 });
 
 describe('@actual-app/api browser facade', () => {
-  test('init requires a Worker', async () => {
-    // @ts-expect-error exercising the validation path
-    await expect(api.init({ dataDir: '/documents' })).rejects.toThrow(
-      /requires a Worker/,
-    );
-  });
-
-  test('forwards init to the worker with config stripped of worker', async () => {
-    const worker = makeMockWorker((req, reply) => {
-      reply({ id: req.id, result: undefined });
+  test('spawns a worker on init and forwards config via api-browser/init', async () => {
+    mockWorkerResponder.mockImplementation((req, reply) => {
+      reply({ type: 'reply', id: req.id, result: undefined });
     });
 
     await api.init({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      worker: worker as unknown as any,
       dataDir: '/documents',
       serverURL: 'https://example.test',
       password: 'pw',
     });
 
-    const initCall = worker.posted.find(m => m.op === 'init');
+    expect(lastMockWorker).toBeTruthy();
+    // First post after the handshake ack is the api-browser/init request.
+    const initCall = lastMockWorker!.posted.find(
+      m =>
+        m &&
+        typeof m === 'object' &&
+        (m as { name?: string }).name === 'api-browser/init',
+    ) as { name: string; args: unknown } | undefined;
     expect(initCall).toBeTruthy();
-    const payload = initCall!.payload as { config: Record<string, unknown> };
-    expect(payload.config).toEqual({
+    expect(initCall!.args).toEqual({
       dataDir: '/documents',
       serverURL: 'https://example.test',
       password: 'pw',
     });
-    // Worker itself must not round-trip through postMessage.
-    expect(payload.config).not.toHaveProperty('worker');
   });
 
-  test('rpc methods forward as send(name, args)', async () => {
-    const worker = makeMockWorker((req, reply) => {
-      if (req.op === 'init') return reply({ id: req.id, result: undefined });
-      if (req.op === 'send') {
-        const p = req.payload as { name: string };
-        if (p.name === 'api/accounts-get') {
-          return reply({
-            id: req.id,
-            result: [{ id: 'a1', name: 'Checking' }],
-          });
-        }
+  test('rpc methods forward as {id, name, args} and read {type:reply, result}', async () => {
+    mockWorkerResponder.mockImplementation((req, reply) => {
+      if (req.name === 'api-browser/init') {
+        reply({ type: 'reply', id: req.id, result: undefined });
+        return;
       }
-      reply({ id: req.id, error: { name: 'Error', message: 'unexpected' } });
-    });
-
-    await api.init({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      worker: worker as unknown as any,
-      dataDir: '/documents',
-    });
-    const accounts = await api.getAccounts();
-    expect(accounts).toEqual([{ id: 'a1', name: 'Checking' }]);
-
-    const sendCalls = worker.posted.filter(m => m.op === 'send');
-    expect(sendCalls).toHaveLength(1);
-    expect(sendCalls[0].payload).toEqual({
-      name: 'api/accounts-get',
-      args: undefined,
-    });
-  });
-
-  test('worker errors reject at the call site', async () => {
-    const worker = makeMockWorker((req, reply) => {
-      if (req.op === 'init') return reply({ id: req.id, result: undefined });
+      if (req.name === 'api/accounts-get') {
+        reply({
+          type: 'reply',
+          id: req.id,
+          result: [{ id: 'a1', name: 'Checking' }],
+        });
+        return;
+      }
       reply({
+        type: 'error',
         id: req.id,
-        error: { name: 'BudgetError', message: 'budget not loaded' },
+        error: { type: 'APIError', message: 'unexpected' },
       });
     });
 
-    await api.init({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      worker: worker as unknown as any,
-      dataDir: '/documents',
+    await api.init({ dataDir: '/documents' });
+    const accounts = await api.getAccounts();
+    expect(accounts).toEqual([{ id: 'a1', name: 'Checking' }]);
+
+    const sendCalls = lastMockWorker!.posted.filter(
+      m =>
+        m &&
+        typeof m === 'object' &&
+        (m as { name?: string }).name === 'api/accounts-get',
+    );
+    expect(sendCalls).toHaveLength(1);
+    expect((sendCalls[0] as { args?: unknown }).args).toBeUndefined();
+  });
+
+  test('worker errors reject at the call site', async () => {
+    mockWorkerResponder.mockImplementation((req, reply) => {
+      if (req.name === 'api-browser/init') {
+        reply({ type: 'reply', id: req.id, result: undefined });
+        return;
+      }
+      reply({
+        type: 'reply',
+        id: req.id,
+        error: { type: 'APIError', message: 'budget not loaded' },
+      });
     });
 
+    await api.init({ dataDir: '/documents' });
     await expect(api.getAccounts()).rejects.toThrow(/budget not loaded/);
   });
 });

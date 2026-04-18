@@ -1,78 +1,51 @@
 /// <reference lib="webworker" />
 
-// Worker entry for @actual-app/api's browser build. Owns the real loot-core
-// instance (sql.js + absurd-sql + IndexedDB), dispatches `send` calls, and
-// handles the init/shutdown lifecycle.
+// Worker entry for @actual-app/api's browser build.
+//
+// This owns the real loot-core instance (sql.js + absurd-sql + IndexedDB)
+// and speaks loot-core's existing backend protocol over postMessage:
+//   main → worker: {id, name, args, undoTag?, catchErrors?}
+//   worker → main: {type:'reply', id, result, mutated, undoTag}
+//                  {type:'error', id, error}
+//                  {type:'connect'}            (handshake heartbeat)
+//
+// Bootstrapping:
+//   - We register an `api-browser/init` handler that runs loot-core's public
+//     init(config), so the main-thread facade can kick off the DB + auth via
+//     a normal RPC call. The reply carries no return value (loot-core's
+//     `init(config)` resolves to `lib`, which isn't structured-cloneable).
+//   - connection.init(self, handlers) starts the message loop and the
+//     `{type:'connect'}` handshake loot-core's client connection expects.
 
-import { init as initLootCore } from '@actual-app/core/server/main';
-import type { lib as libType } from '@actual-app/core/server/main';
+import * as connection from '@actual-app/core/platform/server/connection';
+import { handlers, init } from '@actual-app/core/server/main';
+import type { InitConfig } from '@actual-app/core/server/main';
 
-type Req =
-  | {
-      id: number;
-      op: 'init';
-      payload: { config: Parameters<typeof initLootCore>[0] };
-    }
-  | { id: number; op: 'shutdown' }
-  | { id: number; op: 'send'; payload: { name: string; args?: unknown } };
-
-let lib: typeof libType | null = null;
-
-function errInfo(err: unknown) {
-  if (err instanceof Error) {
-    return {
-      name: err.name || 'Error',
-      message: err.message,
-      stack: err.stack,
-    };
-  }
-  return { name: 'Non-Error', message: String(err) };
-}
+// `api-browser/init` is a worker-local handler; it isn't part of the shared
+// Handlers type. Assign via the index-signature cast rather than extending
+// the type globally.
+(handlers as Record<string, (args?: unknown) => Promise<unknown>>)[
+  'api-browser/init'
+] = async function (args?: unknown) {
+  await init((args ?? {}) as InitConfig);
+  // Nothing to return — the resolved `lib` has functions and isn't
+  // structured-cloneable anyway.
+};
 
 self.addEventListener('error', e => {
   // eslint-disable-next-line no-console
-  console.error('[api worker] uncaught', e.error ?? e.message);
+  console.error(
+    '[api worker] uncaught',
+    (e as ErrorEvent).error ?? (e as ErrorEvent).message,
+  );
 });
+
 self.addEventListener('unhandledrejection', e => {
   // eslint-disable-next-line no-console
-  console.error('[api worker] unhandled rejection', e.reason);
+  console.error(
+    '[api worker] unhandled rejection',
+    (e as PromiseRejectionEvent).reason,
+  );
 });
 
-self.onmessage = async (e: MessageEvent<Req>) => {
-  const { id } = e.data;
-  try {
-    let result: unknown = undefined;
-
-    if (e.data.op === 'init') {
-      lib = await initLootCore(e.data.payload.config);
-      // Never return the lib handle itself — it contains functions and is
-      // not structured-cloneable.
-    } else if (e.data.op === 'shutdown') {
-      if (lib) {
-        try {
-          await lib.send('sync');
-        } catch {
-          // most likely no budget loaded
-        }
-        try {
-          await lib.send('close-budget');
-        } catch {
-          // ignore
-        }
-        lib = null;
-      }
-    } else if (e.data.op === 'send') {
-      if (!lib) throw new Error('@actual-app/api: init has not been called');
-      const { name, args } = e.data.payload;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      result = await lib.send(name as any, args as any);
-    } else {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      throw new Error('Unknown op: ' + (e.data as any).op);
-    }
-
-    (self as unknown as Worker).postMessage({ id, result });
-  } catch (err) {
-    (self as unknown as Worker).postMessage({ id, error: errInfo(err) });
-  }
-};
+connection.init(self as unknown as Window, handlers);

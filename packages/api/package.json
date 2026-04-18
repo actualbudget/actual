@@ -39,6 +39,7 @@
   "dependencies": {
     "@actual-app/core": "workspace:*",
     "@actual-app/crdt": "workspace:*",
+    "absurd-sql": "0.0.54",
     "better-sqlite3": "^12.8.0",
     "compare-versions": "^6.1.1"
   },
