@@ -1282,6 +1282,8 @@ describe('/sync', () => {
       'group-id',
       'key-id',
     );
+    // proto3 default-value semantics: '' is omitted on the wire and
+    // decoded back to '', which the handler falsy-checks as missing.
     syncRequest.since = '';
 
     const res = await sendSyncRequest(syncRequest);

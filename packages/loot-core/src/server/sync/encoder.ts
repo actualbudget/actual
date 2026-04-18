@@ -39,7 +39,7 @@ export async function encode(
   const requestPb = create(SyncRequestSchema, {
     groupId,
     fileId,
-    keyId: encryptKeyId,
+    keyId: encryptKeyId ?? '',
     since: since.toString(),
   });
 
