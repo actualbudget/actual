@@ -107,11 +107,12 @@ function SankeyNode({
   containerHeight,
   showPercentages,
 }: SankeyNodeProps) {
+  const privacyMode = usePrivacyMode();
+  const format = useFormat();
+
   if (payload.name?.startsWith(HIDDEN_PREFIX)) {
     return null;
   }
-  const privacyMode = usePrivacyMode();
-  const format = useFormat();
   const isOut = x + width + 6 > containerWidth;
 
   const fillColor = payload.isNegative ? theme.errorText : theme.reportsBlue;
@@ -172,7 +173,7 @@ function SankeyNode({
       {renderText(
         showPercentages && payload.percentageLabel
           ? payload.percentageLabel
-          : format(Math.round(payload.value), 'financial'),
+          : format(payload.value, 'financial'),
         height / 2 + 13,
         11,
         0.5,
@@ -307,7 +308,7 @@ export function SankeyGraph({
                               : undefined,
                           }}
                         >
-                          {format(Math.round(value), 'financial')}
+                          {format(value, 'financial')}
                         </div>
                         {tooltipInfo && tooltipInfo.length > 0 && (
                           <div
@@ -323,7 +324,7 @@ export function SankeyGraph({
                                       : undefined,
                                   }}
                                 >
-                                  {format(Math.round(item.value), 'financial')}
+                                  {format(item.value, 'financial')}
                                 </span>
                                 )
                               </div>

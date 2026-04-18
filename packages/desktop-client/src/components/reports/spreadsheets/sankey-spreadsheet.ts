@@ -43,6 +43,7 @@ type AggregatedBudget = {
 
 type SankeyNode = {
   name: string;
+  toBudget?: number;
   percentageLabel?: string;
   key: string;
 };
@@ -83,7 +84,16 @@ type Edge = {
   tooltipInfo?: Array<{ name: string; value: number }>;
 };
 type Graph = Record<NodeKey, Edge[]>;
-type NodeData = { attributes: any };
+type NodeData = {
+  attributes: {
+    name?: string;
+    type?: string;
+    isOther?: boolean;
+    groupSortOrder?: number;
+    percentageLabel?: string;
+    toBudget?: number;
+  };
+};
 
 function addTypePercentageLabels(
   graph: Graph,
@@ -122,7 +132,7 @@ function addTypePercentageLabels(
   }
 }
 
-function createGraphFromCategoryData(categoryData: CategoryEntry[]): {
+function createGraphFromCategoryData(categoryData: CategoryEntry[], toBudget?: number): {
   nodes: Record<NodeKey, NodeData>;
   graph: Graph;
 } {
@@ -142,7 +152,7 @@ function createGraphFromCategoryData(categoryData: CategoryEntry[]): {
         attributes: { type: 'category', name: entry.category },
       };
       nodes[entry.accountId] = {
-        attributes: { type: 'account', name: entry.accountName },
+        attributes: { type: 'account', name: entry.accountName, ...(toBudget !== undefined && { toBudget }),  },
       };
       nodes[entry.categoryGroupId] = {
         attributes: { type: 'category_group', name: entry.categoryGroup },
@@ -205,7 +215,7 @@ function createGraphFromCategoryData(categoryData: CategoryEntry[]): {
           to: entry.categoryId,
           value: entry.value,
         });
-      }
+    }
     }
   }
 
@@ -514,6 +524,7 @@ function convertToSankeyData(
     name: nodeData[key].attributes.name,
     percentageLabel: nodeData[key].attributes.percentageLabel,
     attributes: nodeData[key].attributes,
+    toBudget: nodeData[key].attributes.toBudget,
     key,
   }));
 
@@ -657,7 +668,7 @@ export function createSpreadsheet(
 
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: ReturnType<typeof transformToSankeyData>) => void,
+    setData: (data: ReturnType<typeof convertToSankeyData>) => void,
   ) => {
     if (mode === 'budgeted') {
       const data = await createBudgetSpreadsheet(
@@ -697,7 +708,7 @@ export function createBudgetSpreadsheet(
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: ReturnType<typeof transformToSankeyData>) => void,
+    setData: (data: ReturnType<typeof convertToSankeyData>) => void,
   ) => {
     const months =
       end && end !== start ? monthUtils.rangeInclusive(start, end) : [start];
@@ -829,9 +840,9 @@ export function createBudgetSpreadsheet(
         accountId: 'Available income',
         value: Math.abs(aggregated.lastMonthOverspent),
       });
-    }
+    }    
 
-    const { nodes, graph } = createGraphFromCategoryData(categoryData);
+    const { nodes, graph } = createGraphFromCategoryData(categoryData, aggregated.toBudget);
     applyTopNCategories(
       graph,
       nodes,
@@ -860,7 +871,7 @@ export function createTransactionsSpreadsheet(
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: ReturnType<typeof transformToSankeyData>) => void,
+    setData: (data: ReturnType<typeof convertToSankeyData>) => void,
   ) => {
     // gather filters user has set
     const { filters } = await send('make-filters-from-conditions', {
@@ -957,3 +968,45 @@ async function fetchCategoryData(
   return nested.flat().filter(e => e.value > 0);
 }
 
+export function compactSankeyData(
+  data: SankeyData,
+  topN: number = 5,
+): SankeyData {
+  const compactedData: SankeyData = { nodes: [], links: [] };
+  compactedData.nodes.push(data.nodes[0]); // root node
+
+  // Find all root→mainCategory links and sort by value descending
+  const rootLinks = data.links
+    .filter(link => link.source === 0)
+    .sort((a, b) => b.value - a.value);
+
+  const topLinks = rootLinks.slice(0, topN - 1);
+  const otherLinks = rootLinks.slice(topN - 1);
+  const otherTotal = otherLinks.reduce((sum, link) => sum + link.value, 0);
+
+  // Add top category nodes and their links from root
+  for (const link of topLinks) {
+    compactedData.nodes.push(data.nodes[link.target]);
+    compactedData.links.push({
+      source: 0,
+      target: compactedData.nodes.length - 1,
+      value: link.value,
+    });
+  }
+
+  // Lump remaining categories into a single "Other" node
+  if (otherTotal > 0) {
+    compactedData.nodes.push({ name: 'Other', key: 'other' });
+    compactedData.links.push({
+      source: 0,
+      target: compactedData.nodes.length - 1,
+      value: otherTotal,
+      tooltipInfo: otherLinks.map(link => ({
+        name: data.nodes[link.target].name,
+        value: link.value,
+      })),
+    });
+  }
+
+  return compactedData;
+}
