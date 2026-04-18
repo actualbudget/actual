@@ -717,3 +717,20 @@ export async function resetIncomeCarryover({
     }
   });
 }
+
+export function setScheduledAmounts({
+  categoryAmounts,
+  incomeAmounts,
+}: {
+  categoryAmounts: Array<{ categoryId: string; month: string; amount: number }>;
+  incomeAmounts: Array<{ month: string; amount: number }>;
+}): void {
+  for (const { categoryId, month, amount } of categoryAmounts) {
+    const sheetName = monthUtils.sheetForMonth(month);
+    sheet.get().set(`${sheetName}!scheduled-upcoming-${categoryId}`, amount);
+  }
+  for (const { month, amount } of incomeAmounts) {
+    const sheetName = monthUtils.sheetForMonth(month);
+    sheet.get().set(`${sheetName}!total-income-scheduled`, amount);
+  }
+}

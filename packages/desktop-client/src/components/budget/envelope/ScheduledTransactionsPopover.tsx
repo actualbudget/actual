@@ -25,6 +25,11 @@ type ScheduledTransactionsPopoverProps = {
   categoryId: string;
   month: string;
   onViewTransactions: () => void;
+  forecastMode?: boolean;
+  labels?: {
+    actual: string;
+    upcoming: string;
+  };
 };
 
 export function ScheduledTransactionsPopover({
@@ -35,12 +40,16 @@ export function ScheduledTransactionsPopover({
   categoryId,
   month,
   onViewTransactions,
+  forecastMode = true,
+  labels,
 }: ScheduledTransactionsPopoverProps) {
   const { t } = useTranslation();
   const format = useFormat();
   const { schedules } = useCachedSchedules();
   const scheduleById = new Map(schedules.map(s => [s.id, s]));
   const { data: payeesById } = usePayeesById();
+  const actualLabel = labels?.actual ?? t('Payments');
+  const upcomingLabel = labels?.upcoming ?? t('Upcoming Payments');
 
   const transactionsQuery = useMemo(
     () =>
@@ -61,8 +70,8 @@ export function ScheduledTransactionsPopover({
   );
   const actualTransactions = data ?? [];
 
-  const hasAny =
-    actualTransactions.length > 0 || upcomingTransactions.length > 0;
+  const visibleUpcoming = forecastMode ? upcomingTransactions : [];
+  const hasAny = actualTransactions.length > 0 || visibleUpcoming.length > 0;
 
   return (
     <Popover
@@ -86,7 +95,7 @@ export function ScheduledTransactionsPopover({
             <View
               style={{ marginBottom: 4, fontWeight: 600, ...styles.smallText }}
             >
-              <Trans>Payments</Trans>
+              {actualLabel}
             </View>
             <View
               style={{
@@ -128,7 +137,7 @@ export function ScheduledTransactionsPopover({
           </>
         )}
 
-        {upcomingTransactions.length > 0 && (
+        {visibleUpcoming.length > 0 && (
           <>
             <View
               style={{
@@ -138,7 +147,7 @@ export function ScheduledTransactionsPopover({
                 ...styles.smallText,
               }}
             >
-              {t('Upcoming Payments')}
+              {upcomingLabel}
             </View>
             <View
               style={{
@@ -147,7 +156,7 @@ export function ScheduledTransactionsPopover({
                 marginBottom: 6,
               }}
             />
-            {upcomingTransactions.map((tx, i) => {
+            {visibleUpcoming.map((tx, i) => {
               const schedule = tx.schedule
                 ? scheduleById.get(tx.schedule)
                 : undefined;

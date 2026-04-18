@@ -9,6 +9,7 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
 import { EnvelopeCellValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
+import { useEnvelopeBudget } from '#components/budget/envelope/EnvelopeBudgetContext';
 import { CellValueText } from '#components/spreadsheet/CellValue';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
@@ -52,6 +53,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
   const [forecastMode = false] = useMetadataPref('budget.forecastMode');
   const signedFormatter = makeSignedFormatter(format);
   const invertedSignedFormatter = makeSignedFormatter(format, true);
+  const { totalScheduledIncomeForCurrentMonth } = useEnvelopeBudget();
   return (
     <View
       style={{
@@ -82,6 +84,15 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
                   />
                 }
               />
+              {forecastMode && totalScheduledIncomeForCurrentMonth !== 0 && (
+                <AlignedText
+                  left="Upcoming Income:"
+                  right={format(
+                    totalScheduledIncomeForCurrentMonth,
+                    'financial',
+                  )}
+                />
+              )}
               <AlignedText
                 left="From Last Month:"
                 right={
@@ -131,7 +142,7 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
 
         {forecastMode && (
           <EnvelopeCellValue
-            binding={envelopeBudget.totalAllPlanned}
+            binding={envelopeBudget.totalPlanned}
             type="financial"
           >
             {props => (

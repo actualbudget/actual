@@ -60,12 +60,17 @@ export type BudgetHandlers = {
   'budget/set-category-automations': typeof goalActions.storeTemplates;
   'budget/store-note-templates': typeof goalNoteActions.storeNoteTemplates;
   'budget/render-note-templates': typeof goalNoteActions.unparse;
+  'budget/set-scheduled-amounts': typeof actions.setScheduledAmounts;
 };
 
 export const app = createApp<BudgetHandlers>();
 
 app.method('budget/budget-amount', mutator(undoable(actions.setBudget)));
 app.method('budget/planned-amount', mutator(undoable(actions.setPlanned)));
+app.method(
+  'budget/set-scheduled-amounts',
+  mutator(actions.setScheduledAmounts),
+);
 app.method(
   'budget/copy-previous-month',
   mutator(undoable(actions.copyPreviousMonth)),

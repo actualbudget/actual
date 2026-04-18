@@ -48,6 +48,7 @@ export function createCategory(cat, sheetName, prevSheetName) {
     }
 
     sheet.get().createStatic(sheetName, `carryover-${cat.id}`, false);
+    sheet.get().createStatic(sheetName, `scheduled-upcoming-${cat.id}`, 0);
 
     sheet.get().createDynamic(sheetName, `leftover-${cat.id}`, {
       initialValue: 0,
@@ -55,6 +56,7 @@ export function createCategory(cat, sheetName, prevSheetName) {
         `budget-${cat.id}`,
         `sum-amount-${cat.id}`,
         `planned-${cat.id}`,
+        `scheduled-upcoming-${cat.id}`,
         `${prevSheetName}!carryover-${cat.id}`,
         `${prevSheetName}!leftover-${cat.id}`,
         `${prevSheetName}!leftover-pos-${cat.id}`,
@@ -63,17 +65,19 @@ export function createCategory(cat, sheetName, prevSheetName) {
         budgeted,
         spent,
         planned,
+        scheduledUpcoming,
         prevCarryover,
         prevLeftover,
         prevLeftoverPos,
       ) => {
-        // Only include planned amount if forecast mode is enabled
         const forecastMode = prefs.getPrefs()?.['budget.forecastMode'];
         const plannedAmount = forecastMode ? number(planned) : 0;
+        const scheduledAmount = forecastMode ? number(scheduledUpcoming) : 0;
 
         return safeNumber(
           number(budgeted) +
             plannedAmount +
+            scheduledAmount +
             number(spent) +
             (prevCarryover ? number(prevLeftover) : number(prevLeftoverPos)),
         );
@@ -166,13 +170,26 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
       safeNumber(number(expensePlanned) + number(incomePlanned)),
   });
 
+  sheet.get().createStatic(sheetName, 'total-income-scheduled', 0);
+
   sheet.get().createDynamic(sheetName, 'available-funds', {
     initialValue: 0,
-    dependencies: ['total-income', 'total-income-planned', 'from-last-month'],
-    run: (income, incomePlanned, fromLastMonth) => {
+    dependencies: [
+      'total-income',
+      'total-income-planned',
+      'total-income-scheduled',
+      'from-last-month',
+    ],
+    run: (income, incomePlanned, incomeScheduled, fromLastMonth) => {
       const forecastMode = prefs.getPrefs()?.['budget.forecastMode'];
       const plannedIncome = forecastMode ? number(incomePlanned) : 0;
-      return safeNumber(number(income) + plannedIncome + number(fromLastMonth));
+      const scheduledIncome = forecastMode ? number(incomeScheduled) : 0;
+      return safeNumber(
+        number(income) +
+          plannedIncome +
+          scheduledIncome +
+          number(fromLastMonth),
+      );
     },
   });
 

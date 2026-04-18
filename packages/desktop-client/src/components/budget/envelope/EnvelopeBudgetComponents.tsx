@@ -14,7 +14,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
-import { css } from '@emotion/css';
+import { css, cx } from '@emotion/css';
 
 import type { CategoryGroupMonthProps, CategoryMonthProps } from '#components';
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
@@ -114,7 +114,7 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
             <Trans>Planned</Trans>
           </Text>
           <EnvelopeCellValue
-            binding={envelopeBudget.totalAllPlanned}
+            binding={envelopeBudget.totalPlanned}
             type="financial"
           >
             {props => <CellValueText {...props} style={cellStyle} />}
@@ -511,7 +511,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           onSave={(parsedIntegerAmount: number | null) => {
             onBudgetAction(month, 'planned-amount', {
               category: category.id,
-              amount: Math.min(0, parsedIntegerAmount ?? 0),
+              amount: parsedIntegerAmount ?? 0,
             });
           }}
         />
@@ -592,6 +592,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             upcomingTransactions={scheduledTransactions}
             categoryId={category.id}
             month={month}
+            forecastMode={forecastMode}
             onViewTransactions={() => {
               setScheduledPopoverOpen(false);
               const scheduleIds = scheduledTransactions
@@ -638,7 +639,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             longGoal={envelopeBudget.catLongGoal(category.id)}
             planned={envelopeBudget.catPlanned(category.id)}
             forecastMode={forecastMode}
-            balanceOffset={forecastMode ? scheduledAmount : 0}
             tooltipDisabled={balanceMenuOpen}
           />
         </Button>
@@ -721,9 +721,19 @@ export function IncomeCategoryMonth({
   onShowActivity,
   onBudgetAction,
 }: CategoryMonthProps) {
+  const { t } = useTranslation();
   const format = useFormat();
   const [forecastMode = false] = useMetadataPref('budget.forecastMode');
   const incomeMenuTriggerRef = useRef(null);
+  const incomeTriggerRef = useRef(null);
+  const [incomePopoverOpen, setIncomePopoverOpen] = useState(false);
+  const { forecastTransactionsByCategoryAndMonth } = useEnvelopeBudget();
+  const scheduledIncomeTransactions =
+    forecastTransactionsByCategoryAndMonth.get(`${category.id}-${month}`) ?? [];
+  const scheduledIncomeAmount = scheduledIncomeTransactions.reduce(
+    (sum, tx) => sum + (tx.amount ?? 0),
+    0,
+  );
   const {
     setMenuOpen: setIncomeMenuOpen,
     menuOpen: incomeMenuOpen,
@@ -806,12 +816,9 @@ export function IncomeCategoryMonth({
             position: 'relative',
           }}
         >
-          <Button
-            variant="bare"
-            onPress={() => {
-              resetIncomePosition(-6, -4);
-              setIncomeMenuOpen(true);
-            }}
+          <View
+            ref={incomeTriggerRef}
+            onClick={() => setIncomePopoverOpen(true)}
             onContextMenu={e => {
               handleIncomeContextMenu(e);
               // We need to calculate differently from the hook due to being aligned to the right
@@ -822,9 +829,8 @@ export function IncomeCategoryMonth({
               );
             }}
             style={{
-              background: 'transparent',
-              padding: 0,
               paddingRight: styles.monthRightPadding,
+              cursor: 'pointer',
             }}
           >
             <BalanceWithCarryover
@@ -835,8 +841,45 @@ export function IncomeCategoryMonth({
               longGoal={envelopeBudget.catLongGoal(category.id)}
               planned={envelopeBudget.catPlanned(category.id)}
               forecastMode={forecastMode}
+              balanceOffset={forecastMode ? scheduledIncomeAmount : 0}
+            >
+              {({ value, className, type, name }) => (
+                <CellValueText
+                  type={type}
+                  name={name}
+                  value={value}
+                  className={cx(
+                    className,
+                    forecastMode && scheduledIncomeTransactions.length > 0
+                      ? css({ color: theme.upcomingText })
+                      : '',
+                  )}
+                />
+              )}
+            </BalanceWithCarryover>
+          </View>
+          {incomePopoverOpen && (
+            <ScheduledTransactionsPopover
+              triggerRef={incomeTriggerRef}
+              isOpen={incomePopoverOpen}
+              onClose={() => setIncomePopoverOpen(false)}
+              upcomingTransactions={scheduledIncomeTransactions}
+              categoryId={category.id}
+              month={month}
+              forecastMode={forecastMode}
+              labels={{
+                actual: t('Income'),
+                upcoming: t('Upcoming Income'),
+              }}
+              onViewTransactions={() => {
+                setIncomePopoverOpen(false);
+                const scheduleIds = scheduledIncomeTransactions
+                  .map(tx => tx.schedule)
+                  .filter((s): s is string => Boolean(s));
+                onShowActivity(category.id, month, scheduleIds);
+              }}
             />
-          </Button>
+          )}
           <Popover
             triggerRef={incomeMenuTriggerRef}
             placement="bottom end"
