@@ -8,8 +8,6 @@
 // messages are handled, and a way to ignore those internal messages when
 // consuming the channel for loot-core's {id, name, args} protocol.
 
-// absurd-sql ships no types; see packages/api/typings/... for the node variant
-// if we ever need it. For now we cast on import.
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
 
 export type BackendWorker = {
