@@ -15,10 +15,14 @@ export function registerCategoriesCommand(program: Command) {
     .description('List all categories')
     .action(async () => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const result = await api.getCategories();
-        printOutput(result, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const result = await api.getCategories();
+          printOutput(result, opts.format);
+        },
+        { mutates: false },
+      );
     });
 
   categories
@@ -29,15 +33,19 @@ export function registerCategoriesCommand(program: Command) {
     .option('--is-income', 'Mark as income category', false)
     .action(async cmdOpts => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const id = await api.createCategory({
-          name: cmdOpts.name,
-          group_id: cmdOpts.groupId,
-          is_income: cmdOpts.isIncome,
-          hidden: false,
-        });
-        printOutput({ id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const id = await api.createCategory({
+            name: cmdOpts.name,
+            group_id: cmdOpts.groupId,
+            is_income: cmdOpts.isIncome,
+            hidden: false,
+          });
+          printOutput({ id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 
   categories
@@ -55,10 +63,14 @@ export function registerCategoriesCommand(program: Command) {
         throw new Error('No update fields provided. Use --name or --hidden.');
       }
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        await api.updateCategory(id, fields);
-        printOutput({ success: true, id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          await api.updateCategory(id, fields);
+          printOutput({ success: true, id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 
   categories
@@ -67,9 +79,13 @@ export function registerCategoriesCommand(program: Command) {
     .option('--transfer-to <id>', 'Transfer transactions to this category')
     .action(async (id: string, cmdOpts) => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        await api.deleteCategory(id, cmdOpts.transferTo);
-        printOutput({ success: true, id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          await api.deleteCategory(id, cmdOpts.transferTo);
+          printOutput({ success: true, id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 }
