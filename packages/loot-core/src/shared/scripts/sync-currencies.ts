@@ -11,8 +11,6 @@
  */
 
 /* eslint-disable actual/typography */
-
-import { logger } from '../../platform/server/log';
 import { currencies, type Currency } from '../currencies';
 
 declare const process: { argv: string[] };
@@ -183,23 +181,23 @@ async function main() {
   const args = process.argv.slice(2);
   const shouldUpdate = args.includes('--update');
 
-  logger.log('Fetching currencies from openexchangerates.org...');
+  console.log('Fetching currencies from openexchangerates.org...');
   const oxrCurrencies = await fetchOpenExchangeRatesCurrencies();
   const oxrCodes = new Set(Object.keys(oxrCurrencies));
 
-  logger.log(`Found ${oxrCodes.size} currencies from openexchangerates.org\n`);
+  console.log(`Found ${oxrCodes.size} currencies from openexchangerates.org\n`);
 
-  logger.log('Fetching currency metadata from localeplanet.com...');
+  console.log('Fetching currency metadata from localeplanet.com...');
   const localePlanetCurrencies = await fetchLocalePlanetCurrencies();
-  logger.log(
+  console.log(
     `Found ${Object.keys(localePlanetCurrencies).length} currencies from localeplanet.com\n`,
   );
 
-  logger.log('Loading currencies from currencies.ts...');
+  console.log('Loading currencies from currencies.ts...');
   const localCurrencies = getLocalCurrencies();
   const localCodes = new Set(localCurrencies.keys());
 
-  logger.log(`Found ${localCodes.size} currencies in currencies.ts\n`);
+  console.log(`Found ${localCodes.size} currencies in currencies.ts\n`);
 
   // Check for duplicate currency codes
   const seenCodes = new Map<string, Currency[]>();
@@ -215,21 +213,21 @@ async function main() {
   );
 
   if (duplicates.length > 0) {
-    logger.log(`❌ Duplicate currency codes found (${duplicates.length}):\n`);
+    console.log(`❌ Duplicate currency codes found (${duplicates.length}):\n`);
     for (const [code, entries] of duplicates.sort((a, b) =>
       a[0].localeCompare(b[0]),
     )) {
-      logger.log(`   ${code} appears ${entries.length} times:`);
+      console.log(`   ${code} appears ${entries.length} times:`);
       for (let i = 0; i < entries.length; i++) {
         const entry = entries[i];
-        logger.log(
+        console.log(
           `     [${i + 1}] name: "${entry.name}", symbol: "${entry.symbol}", decimalPlaces: ${entry.decimalPlaces}, numberFormat: "${entry.numberFormat}", symbolFirst: ${entry.symbolFirst}`,
         );
       }
-      logger.log();
+      console.log();
     }
   } else {
-    logger.log('✅ No duplicate currencies\n');
+    console.log('✅ No duplicate currencies\n');
   }
 
   // Find missing currencies (in OXR but not in local)
@@ -250,39 +248,39 @@ async function main() {
 
   // Report results
   if (missingCurrencies.length > 0) {
-    logger.log(
+    console.log(
       '❌ Missing currencies (in openexchangerates but not in currencies.ts):',
     );
     for (const code of missingCurrencies.sort()) {
       const name = oxrCurrencies[code];
-      logger.log(`   ${code}: ${name}`);
+      console.log(`   ${code}: ${name}`);
     }
-    logger.log();
+    console.log();
   } else {
-    logger.log('✅ No missing currencies\n');
+    console.log('✅ No missing currencies\n');
   }
 
   if (extraCurrencies.length > 0) {
-    logger.log(
+    console.log(
       '❌ Extra currencies (in currencies.ts but not in openexchangerates):',
     );
     for (const code of extraCurrencies.sort()) {
       const currency = localCurrencies.get(code);
-      logger.log(`   ${code}: ${currency?.name}`);
+      console.log(`   ${code}: ${currency?.name}`);
     }
-    logger.log();
+    console.log();
   } else {
-    logger.log('✅ No extra currencies\n');
+    console.log('✅ No extra currencies\n');
   }
 
   // Summary
   const isInSync =
     missingCurrencies.length === 0 && extraCurrencies.length === 0;
   if (isInSync) {
-    logger.log('✅ currencies.ts is in sync with openexchangerates.org!');
+    console.log('✅ currencies.ts is in sync with openexchangerates.org!');
 
     // Check for symbol mismatches with localeplanet data
-    logger.log('\nChecking symbol accuracy against localeplanet.com...');
+    console.log('\nChecking symbol accuracy against localeplanet.com...');
 
     const symbolMismatches: Array<{
       code: string;
@@ -327,56 +325,56 @@ async function main() {
     }
 
     if (symbolMismatches.length > 0) {
-      logger.log(
+      console.log(
         `\n⚠️  Symbol mismatches (${symbolMismatches.length} currencies):`,
       );
       for (const { code, current, expected } of symbolMismatches.sort((a, b) =>
         a.code.localeCompare(b.code),
       )) {
-        logger.log(
+        console.log(
           `   ${code}: current "${current}" does not end with native "${expected}"`,
         );
       }
-      logger.log(
+      console.log(
         '\n   (Add intentional mismatches to EXPECTED_SYMBOL_MISMATCHES with reasoning)',
       );
     } else {
-      logger.log('\n✅ All symbols match localeplanet native symbols');
+      console.log('\n✅ All symbols match localeplanet native symbols');
     }
 
     if (expectedMismatchDrift.length > 0) {
-      logger.log(
+      console.log(
         `\n⚠️  Expected symbol mismatches out of sync (${expectedMismatchDrift.length} currencies):`,
       );
       for (const entry of expectedMismatchDrift.sort((a, b) =>
         a.code.localeCompare(b.code),
       )) {
-        logger.log(
+        console.log(
           `   ${entry.code}: current "${entry.current}"; expected "${entry.expected}"`,
         );
-        logger.log(
+        console.log(
           `     Reasoning: ${entry.reasoning}; localeplanet has "${entry.localeplanet}"`,
         );
       }
     }
 
     if (EXPECTED_SYMBOL_MISMATCHES.length > 0) {
-      logger.log(
+      console.log(
         `\nℹ️  ${EXPECTED_SYMBOL_MISMATCHES.length} currencies have intentional symbol differences (see EXPECTED_SYMBOL_MISMATCHES)`,
       );
     }
   } else {
-    logger.log('📋 Summary:');
-    logger.log(`   Missing: ${missingCurrencies.length} currencies`);
-    logger.log(`   Extra: ${extraCurrencies.length} currencies`);
+    console.log('📋 Summary:');
+    console.log(`   Missing: ${missingCurrencies.length} currencies`);
+    console.log(`   Extra: ${extraCurrencies.length} currencies`);
 
     if (shouldUpdate) {
-      logger.log('\n🔧 Suggested changes:');
+      console.log('\n🔧 Suggested changes:');
 
       if (missingCurrencies.length > 0) {
-        logger.log('\nAdd these entries to currencies.ts:');
+        console.log('\nAdd these entries to currencies.ts:');
         for (const code of missingCurrencies.sort()) {
-          logger.log(
+          console.log(
             generateCurrencyEntry(
               code,
               oxrCurrencies[code],
@@ -387,13 +385,13 @@ async function main() {
       }
 
       if (extraCurrencies.length > 0) {
-        logger.log('\nRemove these currency codes from currencies.ts:');
+        console.log('\nRemove these currency codes from currencies.ts:');
         for (const code of extraCurrencies.sort()) {
-          logger.log(`   ${code}`);
+          console.log(`   ${code}`);
         }
       }
     } else {
-      logger.log('\nRun with --update flag to see suggested changes.');
+      console.log('\nRun with --update flag to see suggested changes.');
     }
   }
 }
