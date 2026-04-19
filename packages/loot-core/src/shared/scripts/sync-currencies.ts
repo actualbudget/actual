@@ -29,6 +29,16 @@ const OPENEXCHANGERATES_URL = (() => {
 const LOCALEPLANET_URL =
   'https://www.localeplanet.com/api/auto/currencymap.json?name=Y';
 
+// Currencies marked as deprecated in openexchangerates.
+// These are still returned today but may disappear in a future sync.
+const DEPRECATED_CURRENCIES = new Set([
+  'ANG',
+  'SLL',
+  'STD',
+  'VEF',
+  'ZWL',
+]);
+
 type LocalePlanetCurrency = {
   name: string;
   decimal_digits: number;
@@ -361,6 +371,24 @@ async function main() {
     if (EXPECTED_SYMBOL_MISMATCHES.length > 0) {
       console.log(
         `\nℹ️  ${EXPECTED_SYMBOL_MISMATCHES.length} currencies have intentional symbol differences (see EXPECTED_SYMBOL_MISMATCHES)`,
+      );
+    }
+
+    const deprecatedInUse: string[] = [];
+    for (const code of DEPRECATED_CURRENCIES) {
+      if (localCodes.has(code)) {
+        deprecatedInUse.push(code);
+      }
+    }
+
+    if (deprecatedInUse.length > 0) {
+      console.log('\n⚠️  Deprecated currencies still in currencies.ts:');
+      for (const code of deprecatedInUse.sort()) {
+        const currency = localCurrencies.get(code);
+        console.log(`   ${code}: ${currency?.name}`);
+      }
+      console.log(
+        '   (These are still in openexchangerates but may be removed in the future)\n',
       );
     }
   } else {
