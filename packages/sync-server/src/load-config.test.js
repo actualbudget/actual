@@ -138,4 +138,21 @@ describe('config schema', () => {
       authorizationEndpoint,
     );
   });
+
+  it('parses the ID token signing algorithm override from the environment', () => {
+    process.env.TEST_OPENID_ID_TOKEN_SIGNED_RESPONSE_ALG = 'ES384';
+
+    const testSchema = convict({
+      openId: {
+        id_token_signed_response_alg: {
+          doc: 'Algorithm used by the OpenID provider to sign ID tokens.',
+          format: String,
+          default: '',
+          env: 'TEST_OPENID_ID_TOKEN_SIGNED_RESPONSE_ALG',
+        },
+      },
+    });
+    expect(() => testSchema.validate()).not.toThrow();
+    expect(testSchema.get('openId.id_token_signed_response_alg')).toBe('ES384');
+  });
 });

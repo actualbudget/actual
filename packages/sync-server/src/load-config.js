@@ -255,6 +255,12 @@ const configSchema = convict({
       default: 'openid',
       env: 'ACTUAL_OPENID_AUTH_METHOD',
     },
+    id_token_signed_response_alg: {
+      doc: 'Algorithm used by the OpenID provider to sign ID tokens (e.g. RS256, ES256, ES384). Auto-detected from discovery metadata when empty.',
+      format: String,
+      default: '',
+      env: 'ACTUAL_OPENID_ID_TOKEN_SIGNED_RESPONSE_ALG',
+    },
   },
 
   token_expiration: {

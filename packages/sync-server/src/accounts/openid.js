@@ -64,6 +64,19 @@ export async function bootstrapOpenId(configParameter) {
   return {};
 }
 
+export function pickIdTokenSignedResponseAlg(issuer, configParameter) {
+  if (configParameter.id_token_signed_response_alg) {
+    return configParameter.id_token_signed_response_alg;
+  }
+
+  const supported = issuer?.metadata?.id_token_signing_alg_values_supported;
+  if (Array.isArray(supported) && supported.length > 0) {
+    return supported.includes('RS256') ? 'RS256' : supported[0];
+  }
+
+  return 'RS256';
+}
+
 async function setupOpenIdClient(configParameter) {
   const issuer =
     typeof configParameter.issuer === 'string'
@@ -73,6 +86,12 @@ async function setupOpenIdClient(configParameter) {
           authorization_endpoint: configParameter.issuer.authorization_endpoint,
           token_endpoint: configParameter.issuer.token_endpoint,
           userinfo_endpoint: configParameter.issuer.userinfo_endpoint,
+          ...(Array.isArray(
+            configParameter.issuer.id_token_signing_alg_values_supported,
+          ) && {
+            id_token_signing_alg_values_supported:
+              configParameter.issuer.id_token_signing_alg_values_supported,
+          }),
         });
 
   const client = new issuer.Client({
@@ -83,6 +102,10 @@ async function setupOpenIdClient(configParameter) {
       configParameter.server_hostname,
     ).toString(),
     validate_id_token: true,
+    id_token_signed_response_alg: pickIdTokenSignedResponseAlg(
+      issuer,
+      configParameter,
+    ),
   });
 
   return client;
