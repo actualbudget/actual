@@ -1,5 +1,6 @@
 import * as api from '@actual-app/api';
 
+import type { CacheState } from './cache';
 import {
   CACHE_VERSION,
   decideSyncAction,
@@ -7,7 +8,7 @@ import {
   readCacheState,
   writeCacheState,
 } from './cache';
-import type { CliGlobalOpts } from './config';
+import type { CliConfig, CliGlobalOpts } from './config';
 import { resolveConfig } from './config';
 import { acquireExclusive, acquireShared } from './lock';
 import type { Release } from './lock';
@@ -41,7 +42,7 @@ async function resolveBudgetIdForSyncId(syncId: string): Promise<string> {
 
 export async function withConnection<T>(
   globalOpts: CliGlobalOpts,
-  fn: () => Promise<T>,
+  fn: (config: CliConfig) => Promise<T>,
   { mutates, skipBudget = false }: ConnectionOptions,
 ): Promise<T> {
   const config = await resolveConfig(globalOpts);
@@ -69,7 +70,7 @@ export async function withConnection<T>(
   }
 
   try {
-    if (skipBudget) return await fn();
+    if (skipBudget) return await fn(config);
     if (!config.syncId) {
       throw new Error(
         'Sync ID is required for this command. Set --sync-id or ACTUAL_SYNC_ID.',
@@ -89,9 +90,9 @@ export async function withConnection<T>(
     }
 
     try {
-      let state = readCacheState(meta);
-      const action = decideSyncAction({
-        state,
+      const cachedState = readCacheState(meta);
+      const decision = decideSyncAction({
+        state: cachedState,
         config: { syncId: config.syncId, serverUrl: config.serverUrl },
         now: Date.now(),
         ttlMs: config.cacheTtl * 1000,
@@ -100,9 +101,10 @@ export async function withConnection<T>(
         encrypted: Boolean(config.encryptionPassword),
       });
 
-      if (action === 'download') {
+      let state: CacheState;
+      if (decision.action === 'download') {
         info(
-          state === null
+          cachedState === null
             ? `Downloading budget ${config.syncId} for the first time...`
             : `Re-downloading budget ${config.syncId} (cache invalidated)...`,
           globalOpts.verbose,
@@ -121,26 +123,27 @@ export async function withConnection<T>(
           lastDownloadedAt: now,
         };
         writeCacheState(meta, state);
-      } else if (action === 'skip') {
+      } else if (decision.action === 'skip') {
         const age = Math.round(
-          (Date.now() - (state?.lastSyncedAt ?? 0)) / 1000,
+          (Date.now() - decision.state.lastSyncedAt) / 1000,
         );
         info(`Using cached budget (synced ${age}s ago)...`, globalOpts.verbose);
-        await api.loadBudget(state!.budgetId);
+        await api.loadBudget(decision.state.budgetId);
+        state = decision.state;
       } else {
         info(`Syncing budget ${config.syncId}...`, globalOpts.verbose);
-        await api.loadBudget(state!.budgetId);
+        await api.loadBudget(decision.state.budgetId);
         await api.sync();
-        state = { ...state!, lastSyncedAt: Date.now() };
+        state = { ...decision.state, lastSyncedAt: Date.now() };
         writeCacheState(meta, state);
       }
 
-      const result = await fn();
+      const result = await fn(config);
 
       if (mutates) {
         info(`Pushing changes for ${config.syncId}...`, globalOpts.verbose);
         await api.sync();
-        state = { ...state!, lastSyncedAt: Date.now() };
+        state = { ...state, lastSyncedAt: Date.now() };
         writeCacheState(meta, state);
       }
 

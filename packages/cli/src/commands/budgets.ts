@@ -1,7 +1,6 @@
 import * as api from '@actual-app/api';
 import type { Command } from 'commander';
 
-import { resolveConfig } from '#config';
 import { withConnection } from '#connection';
 import { printOutput } from '#output';
 import { parseBoolFlag, parseIntFlag } from '#utils';
@@ -30,11 +29,11 @@ export function registerBudgetsCommand(program: Command) {
     .option('--encryption-password <password>', 'Encryption password')
     .action(async (syncId: string, cmdOpts) => {
       const opts = program.opts();
-      const config = await resolveConfig(opts);
-      const password = config.encryptionPassword ?? cmdOpts.encryptionPassword;
       await withConnection(
         opts,
-        async () => {
+        async config => {
+          const password =
+            config.encryptionPassword ?? cmdOpts.encryptionPassword;
           await api.downloadBudget(syncId, {
             password,
           });

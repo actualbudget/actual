@@ -97,8 +97,7 @@ export function registerSyncCommand(program: Command) {
 
       await withConnection(
         opts,
-        async () => {
-          const config = await resolveConfig(opts);
+        async config => {
           const state = config.syncId
             ? readCacheState(getMetaDir(config.dataDir, config.syncId))
             : null;
@@ -113,8 +112,6 @@ export function registerSyncCommand(program: Command) {
             opts.format,
           );
         },
-        // mutates: true makes withConnection sync before and after the
-        // callback, which is exactly what "sync now" should do.
         { mutates: true },
       );
     });

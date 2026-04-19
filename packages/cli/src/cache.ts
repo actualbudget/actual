@@ -57,7 +57,7 @@ export function writeCacheState(metaDir: string, state: CacheState): void {
     mkdirSync(metaDir, { recursive: true });
     const target = cachePath(metaDir);
     const tmp = `${target}.tmp`;
-    writeFileSync(tmp, JSON.stringify(state, null, 2));
+    writeFileSync(tmp, JSON.stringify(state));
     renameSync(tmp, target);
   } catch {
     // Cache persistence is best-effort. A read-only or unreachable dir must
@@ -65,7 +65,10 @@ export function writeCacheState(metaDir: string, state: CacheState): void {
   }
 }
 
-export type SyncAction = 'skip' | 'sync' | 'download';
+export type SyncDecision =
+  | { action: 'download' }
+  | { action: 'skip'; state: CacheState }
+  | { action: 'sync'; state: CacheState };
 
 export type DecideSyncArgs = {
   state: CacheState | null;
@@ -85,13 +88,15 @@ export function decideSyncAction({
   mutates,
   refresh,
   encrypted,
-}: DecideSyncArgs): SyncAction {
-  if (state === null) return 'download';
-  if (state.syncId !== config.syncId) return 'download';
-  if (state.serverUrl !== config.serverUrl) return 'download';
-  if (mutates || refresh || ttlMs === 0 || encrypted) return 'sync';
+}: DecideSyncArgs): SyncDecision {
+  if (state === null) return { action: 'download' };
+  if (state.syncId !== config.syncId) return { action: 'download' };
+  if (state.serverUrl !== config.serverUrl) return { action: 'download' };
+  if (mutates || refresh || ttlMs === 0 || encrypted) {
+    return { action: 'sync', state };
+  }
   const age = now - state.lastSyncedAt;
-  if (age < 0) return 'sync';
-  if (age < ttlMs) return 'skip';
-  return 'sync';
+  if (age < 0) return { action: 'sync', state };
+  if (age < ttlMs) return { action: 'skip', state };
+  return { action: 'sync', state };
 }

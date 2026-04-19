@@ -1,11 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
+import { mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import lockfile from 'proper-lockfile';
@@ -41,12 +35,16 @@ function retriesForTimeout(timeoutMs: number) {
   };
 }
 
+function errorCode(err: unknown): string | undefined {
+  if (err instanceof Error && 'code' in err) {
+    const { code } = err as { code?: unknown };
+    if (typeof code === 'string') return code;
+  }
+  return undefined;
+}
+
 function isLockedError(err: unknown): boolean {
-  return (
-    err instanceof Error &&
-    'code' in err &&
-    (err as { code?: string }).code === 'ELOCKED'
-  );
+  return errorCode(err) === 'ELOCKED';
 }
 
 function lockedMessage(timeoutMs: number): string {
@@ -61,18 +59,22 @@ function pidIsAlive(pid: number): boolean {
     process.kill(pid, 0);
     return true;
   } catch (err) {
-    return (
-      err instanceof Error &&
-      'code' in err &&
-      (err as { code?: string }).code === 'EPERM'
-    );
+    return errorCode(err) === 'EPERM';
+  }
+}
+
+function readReaderNames(readers: string): string[] {
+  try {
+    return readdirSync(readers);
+  } catch (err) {
+    if (errorCode(err) === 'ENOENT') return [];
+    throw err;
   }
 }
 
 function sweepStaleReaders(dir: string) {
   const readers = readersDir(dir);
-  if (!existsSync(readers)) return;
-  for (const name of readdirSync(readers)) {
+  for (const name of readReaderNames(readers)) {
     const pid = Number(name.split('-')[0]);
     if (!Number.isFinite(pid) || !pidIsAlive(pid)) {
       rmSync(join(readers, name), { force: true });
@@ -85,9 +87,7 @@ async function waitForReadersEmpty(dir: string, timeoutMs: number) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     sweepStaleReaders(dir);
-    if (!existsSync(readers) || readdirSync(readers).length === 0) {
-      return;
-    }
+    if (readReaderNames(readers).length === 0) return;
     await new Promise(resolve => setTimeout(resolve, READER_POLL_INTERVAL_MS));
   }
   throw new Error(lockedMessage(timeoutMs));

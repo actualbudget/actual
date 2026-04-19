@@ -146,7 +146,7 @@ describe('decideSyncAction', () => {
   };
 
   it('returns "download" when state is null', () => {
-    expect(decideSyncAction({ ...base, state: null })).toBe('download');
+    expect(decideSyncAction({ ...base, state: null }).action).toBe('download');
   });
 
   it('returns "download" when syncId changed', () => {
@@ -154,7 +154,7 @@ describe('decideSyncAction', () => {
       decideSyncAction({
         ...base,
         config: { ...base.config, syncId: 'other' },
-      }),
+      }).action,
     ).toBe('download');
   });
 
@@ -163,35 +163,44 @@ describe('decideSyncAction', () => {
       decideSyncAction({
         ...base,
         config: { ...base.config, serverUrl: 'http://other' },
-      }),
+      }).action,
     ).toBe('download');
   });
 
   it('returns "skip" for a read within the TTL', () => {
-    expect(decideSyncAction({ ...base, now: 1_000_000 + 30_000 })).toBe('skip');
+    expect(decideSyncAction({ ...base, now: 1_000_000 + 30_000 }).action).toBe(
+      'skip',
+    );
   });
 
   it('returns "sync" for a read past the TTL', () => {
-    expect(decideSyncAction({ ...base, now: 1_000_000 + 61_000 })).toBe('sync');
+    expect(decideSyncAction({ ...base, now: 1_000_000 + 61_000 }).action).toBe(
+      'sync',
+    );
   });
 
   it('returns "sync" for a write even when fresh', () => {
-    expect(decideSyncAction({ ...base, mutates: true })).toBe('sync');
+    expect(decideSyncAction({ ...base, mutates: true }).action).toBe('sync');
   });
 
   it('returns "sync" when refresh is true', () => {
-    expect(decideSyncAction({ ...base, refresh: true })).toBe('sync');
+    expect(decideSyncAction({ ...base, refresh: true }).action).toBe('sync');
   });
 
   it('returns "sync" when ttlMs is 0', () => {
-    expect(decideSyncAction({ ...base, ttlMs: 0 })).toBe('sync');
+    expect(decideSyncAction({ ...base, ttlMs: 0 }).action).toBe('sync');
   });
 
   it('returns "sync" for encrypted budgets within the TTL', () => {
-    expect(decideSyncAction({ ...base, encrypted: true })).toBe('sync');
+    expect(decideSyncAction({ ...base, encrypted: true }).action).toBe('sync');
   });
 
   it('treats clock skew (negative age) as stale', () => {
-    expect(decideSyncAction({ ...base, now: 999_999 })).toBe('sync');
+    expect(decideSyncAction({ ...base, now: 999_999 }).action).toBe('sync');
+  });
+
+  it('carries cached state on non-download actions', () => {
+    const decision = decideSyncAction({ ...base, mutates: true });
+    expect(decision).toEqual({ action: 'sync', state: base.state });
   });
 });
