@@ -1,46 +1,53 @@
 import { test as base, expect as baseExpect } from '@playwright/test';
-import type { Locator } from '@playwright/test';
+import type { Browser, Locator } from '@playwright/test';
 
 /**
  * Disable CSS transitions and animations globally in e2e (non-VRT) runs.
+ * The Modal component's 100ms opacity transition races with Playwright's
+ * click-stability check under parallel CI load ("element was detached
+ * from the DOM, retrying"); snapping to final state makes clicks
+ * deterministic.
  *
- * The Modal component applies a 100ms opacity+transform transition via
- * inline JS, and InitialFocus triggers a focus-driven re-render. Under
- * parallel CI load these race with Playwright's click-stability check,
- * causing flakes like "element was detached from the DOM, retrying"
- * when clicking buttons inside a freshly-opened modal (e.g.
- * navigation.createAccount). Forcing transition/animation duration to
- * 0 lets elements snap to their final state so click stability
- * passes deterministically.
- *
- * VRT runs intentionally keep animations enabled so screenshots remain
- * consistent with their baselines.
+ * Wraps `browser.newPage` on the worker-scoped browser fixture because
+ * every test creates its own page via `browser.newPage()` rather than
+ * using the test-scoped `page` fixture — a `page`-fixture override would
+ * be a no-op.
  */
+const disableAnimationsInitScript = () => {
+  const css = `*, *::before, *::after {
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }`;
+  const install = () => {
+    const style = document.createElement('style');
+    style.setAttribute('data-e2e-disable-animations', 'true');
+    style.textContent = css;
+    document.head.appendChild(style);
+  };
+  if (document.head) {
+    install();
+  } else {
+    document.addEventListener('DOMContentLoaded', install);
+  }
+};
+
 export const test = process.env.VRT
   ? base
-  : base.extend({
-      page: async ({ page }, runTest) => {
-        await page.addInitScript(() => {
-          const css = `*, *::before, *::after {
-            transition-duration: 0s !important;
-            transition-delay: 0s !important;
-            animation-duration: 0s !important;
-            animation-delay: 0s !important;
-          }`;
-          const install = () => {
-            const style = document.createElement('style');
-            style.setAttribute('data-e2e-disable-animations', 'true');
-            style.textContent = css;
-            document.head.appendChild(style);
+  : base.extend<object, { browser: Browser }>({
+      browser: [
+        async ({ browser }, runWithBrowser) => {
+          const originalNewPage = browser.newPage.bind(browser);
+          browser.newPage = async options => {
+            const page = await originalNewPage(options);
+            await page.addInitScript(disableAnimationsInitScript);
+            return page;
           };
-          if (document.head) {
-            install();
-          } else {
-            document.addEventListener('DOMContentLoaded', install);
-          }
-        });
-        await runTest(page);
-      },
+          await runWithBrowser(browser);
+        },
+        { scope: 'worker' },
+      ],
     });
 
 export const expect = baseExpect.extend({
