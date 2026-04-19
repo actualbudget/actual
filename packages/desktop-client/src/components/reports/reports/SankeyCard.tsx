@@ -14,7 +14,7 @@ import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import {
-  compactSankeyData,
+  // compactSankeyData,
   createSpreadsheet as sankeySpreadsheet,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
@@ -77,7 +77,7 @@ export function SankeyCard({
   );
 
   const compactData = useMemo(
-    () => (data ? compactSankeyData(data, topN) : null),
+    () => data, // () => (data ? compactSankeyData(data, topN) : null),
     [data, topN],
   );
 
