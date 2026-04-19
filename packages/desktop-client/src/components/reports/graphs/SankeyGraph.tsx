@@ -101,7 +101,6 @@ function SankeyNode({
   index: _index,
   payload,
   containerWidth,
-  containerHeight,
   showPercentages,
 }: SankeyNodeProps) {
   const privacyMode = usePrivacyMode();
