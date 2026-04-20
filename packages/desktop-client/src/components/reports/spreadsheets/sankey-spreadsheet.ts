@@ -374,7 +374,8 @@ export function createBudgetSpreadsheet(
 
     const graph = createBudgetGraph(categoryData, aggregated);
     groupOtherCategories(graph, topNcategories, categorySort);
-    setData(convertToSankeyData(graph));
+    const sortedGraph = sortGraph(graph, categorySort);
+    setData(convertToSankeyData(sortedGraph));
   };
 }
 
@@ -486,8 +487,48 @@ export function createTransactionsSpreadsheet(
 
     const graph = createTransactionsGraph(categoryData);
     groupOtherCategories(graph, topNcategories, categorySort);
-    setData(convertToSankeyData(graph));
+    const sortedGraph = sortGraph(graph, categorySort);
+    setData(convertToSankeyData(sortedGraph));
   };
+}
+
+function getNodeValue(graph: Graph, key: NodeKey): number {
+  let nodeValue: number = 0;
+
+  if (getLayer(graph, key) === 0) {
+    // Look at outgoing links for root nodes
+    graph.get(key).to.forEach(value => {
+      nodeValue += value ?? 0;
+    })
+  } else {
+    graph.forEach(data => {
+      nodeValue += data.to.get(key) ?? 0;
+    });
+  }
+  return nodeValue;
+}
+
+function sortGraph(graph: Graph, categorySort: SortMode = 'per-group'): Graph {
+  if (categorySort == "budget-order") {
+    console.log(graph)
+    return graph
+  } else if (categorySort == "global") {
+    const sortedEntries = Array.from(graph.entries()).sort(
+      ([keyA, valA], [keyB, valB]) => getNodeValue(graph, keyB) - getNodeValue(graph, keyA)
+    );
+    const otherIndex = sortedEntries.findIndex(([key]) => key === 'GLOBAL_OTHER_BUCKET');
+    if (otherIndex !== -1) {
+      const [entry] = sortedEntries.splice(otherIndex, 1);
+      sortedEntries.push(entry);
+    }  
+    return new Map(sortedEntries);
+  } else {
+    const sortedEntries = Array.from(graph.entries()).sort(
+      ([keyA, valA], [keyB, valB]) => getNodeValue(graph, keyB) - getNodeValue(graph, keyA)
+    );
+  
+    return new Map(sortedEntries);
+  }
 }
 
 function nodesInLayer(graph: Graph, layer: string): NodeKey[] {
