@@ -22,6 +22,7 @@ jobs:
     permissions:
       contents: write
     strategy:
+      fail-fast: false
       matrix:
         os:
           - ubuntu-22.04

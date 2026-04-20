@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
-
 import type { UndoState as ServerUndoState } from '#server/undo';
 
 // oxlint-disable-next-line @typescript-eslint/no-explicit-any
@@ -36,7 +34,7 @@ export const setUndoState = <K extends keyof Omit<UndoState, 'id'>>(
   value: UndoState[K],
 ) => {
   currentUndoState[name] = value;
-  currentUndoState.id = uuidv4();
+  currentUndoState.id = crypto.randomUUID();
 };
 
 export const getUndoState = <K extends keyof UndoState>(name: K) => {
@@ -48,7 +46,7 @@ export const getTaggedState = (id: string) => {
 };
 
 export const snapshot = () => {
-  const tagged = { ...currentUndoState, id: uuidv4() };
+  const tagged = { ...currentUndoState, id: crypto.randomUUID() };
   UNDO_STATE_MRU.unshift(tagged);
   UNDO_STATE_MRU = UNDO_STATE_MRU.slice(0, HISTORY_SIZE);
   return tagged.id;

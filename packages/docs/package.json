@@ -23,7 +23,6 @@
     "@easyops-cn/docusaurus-search-local": "^0.55.1",
     "@mdx-js/react": "^3.1.1",
     "@r74tech/docusaurus-plugin-panzoom": "^2.4.2",
-    "clsx": "^2.1.1",
     "prism-react-renderer": "^2.4.1",
     "react": "19.2.4",
     "react-dom": "19.2.4"

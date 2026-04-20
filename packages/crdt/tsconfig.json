@@ -1,18 +1,19 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "rootDir": "./src",
     "composite": true,
-    // Using ES2021 because that's the newest version where
-    // the latest Node 16.x release supports all of the features
     "target": "ES2021",
-    "module": "CommonJS",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "noEmit": false,
+    "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true,
     "strict": true,
     "outDir": "dist",
-    "tsBuildInfoFile": "dist/.tsbuildinfo"
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "types": ["vitest/globals"]
   },
-  "include": ["."],
-  "exclude": ["dist", "**/*.test.ts", "**/*.spec.ts"]
+  "include": ["./src/"]
 }

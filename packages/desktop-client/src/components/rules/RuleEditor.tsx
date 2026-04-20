@@ -44,7 +44,6 @@ import type {
   RuleEntity,
 } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
-import { v4 as uuid } from 'uuid';
 
 import { FinancialText } from '#components/FinancialText';
 import { StatusBadge } from '#components/schedules/StatusBadge';
@@ -783,7 +782,7 @@ function StageButton({
 }
 
 function newInput(item) {
-  return { ...item, inputKey: uuid() };
+  return { ...item, inputKey: crypto.randomUUID() };
 }
 
 function ConditionsList({
@@ -821,7 +820,7 @@ function ConditionsList({
       field,
       op: 'is',
       value: null,
-      inputKey: uuid(),
+      inputKey: crypto.randomUUID(),
     });
     onChangeConditions(copy);
   }
@@ -1007,19 +1006,27 @@ export function RuleEditor({
 }: RuleEditorProps) {
   const { t } = useTranslation();
   const [conditions, setConditions] = useState(
-    defaultRule.conditions.map(parse).map(c => ({ ...c, inputKey: uuid() })),
+    defaultRule.conditions
+      .map(parse)
+      .map(c => ({ ...c, inputKey: crypto.randomUUID() })),
   );
   const [actionSplits, setActionSplits] = useState(() => {
     const parsedActions = defaultRule.actions.map(parse);
     return parsedActions.reduce(
       (acc, action) => {
         const splitIndex = action.options?.splitIndex ?? 0;
-        acc[splitIndex] = acc[splitIndex] ?? { id: uuid(), actions: [] };
-        acc[splitIndex].actions.push({ ...action, inputKey: uuid() });
+        acc[splitIndex] = acc[splitIndex] ?? {
+          id: crypto.randomUUID(),
+          actions: [],
+        };
+        acc[splitIndex].actions.push({
+          ...action,
+          inputKey: crypto.randomUUID(),
+        });
         return acc;
       },
       // The pre-split group is always there
-      [{ id: uuid(), actions: [] }],
+      [{ id: crypto.randomUUID(), actions: [] }],
     );
   });
   const [stage, setStage] = useState(defaultRule.stage);
@@ -1079,12 +1086,12 @@ export function RuleEditor({
   function addActionToSplitAfterIndex(splitIndex, actionIndex) {
     let newAction;
     if (splitIndex && !actionSplits[splitIndex]?.actions?.length) {
-      actionSplits[splitIndex] = { id: uuid(), actions: [] };
+      actionSplits[splitIndex] = { id: crypto.randomUUID(), actions: [] };
       newAction = {
         op: 'set-split-amount',
         options: { method: 'remainder', splitIndex },
         value: null,
-        inputKey: uuid(),
+        inputKey: crypto.randomUUID(),
       };
     } else {
       const fieldsArray =
@@ -1100,7 +1107,7 @@ export function RuleEditor({
         op: 'set',
         value: '',
         options: { splitIndex },
-        inputKey: uuid(),
+        inputKey: crypto.randomUUID(),
       };
     }
 

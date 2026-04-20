@@ -57,12 +57,9 @@ let _id = 1;
 global.resetRandomId = () => {
   _id = 1;
 };
-
-vi.mock('uuid', () => ({
-  v4: () => {
-    return 'id' + _id++;
-  },
-}));
+Object.defineProperty(crypto, 'randomUUID', {
+  value: () => 'id' + _id++,
+});
 vi.mock('#server/migrate/migrations', async () => {
   const realMigrations = await vi.importActual<typeof MigrationsType>(
     '#server/migrate/migrations',

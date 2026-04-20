@@ -244,5 +244,18 @@
       "#BF616A"
     ],
     "mode": "dark"
+  },
+  {
+    "name": "Ilavenil",
+    "repo": "aadhithbala/Ilavenil",
+    "colors": [
+      "#3D4F3E",
+      "#F6F0D7",
+      "#FDFAF2",
+      "#6D8B74",
+      "#5A7560",
+      "#B8705E"
+    ],
+    "mode": "light"
   }
 ]
