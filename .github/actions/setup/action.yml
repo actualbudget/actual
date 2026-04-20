@@ -52,6 +52,7 @@ runs:
       with:
         repository: actualbudget/translations
         path: ${{ inputs.working-directory }}/packages/desktop-client/locale
+        persist-credentials: false
       if: ${{ inputs.download-translations == 'true' }}
     - name: Remove untranslated languages
       run: packages/desktop-client/bin/remove-untranslated-languages

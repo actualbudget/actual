@@ -281,6 +281,34 @@ describe('Transactions', () => {
     ]);
   });
 
+  test('unlocking a reconciled split transaction propagates to children', () => {
+    const transactions = [
+      makeTransaction({ amount: 2001 }),
+      ...makeSplitTransaction({ id: 't1', amount: 2500, reconciled: true }, [
+        { id: 't2', amount: 2000, reconciled: true },
+        { id: 't3', amount: 500, reconciled: true },
+      ]),
+      makeTransaction({ amount: 3002 }),
+    ];
+
+    const { data, diff } = updateTransaction(transactions, {
+      ...transactions.find(t => t.id === 't1')!,
+      reconciled: false,
+    });
+
+    const children = data.filter(t => t.parent_id === 't1');
+    expect(children).toHaveLength(2);
+    expect(children.every(t => t.reconciled === false)).toBe(true);
+
+    expect(diff.updated).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 't1', reconciled: false }),
+        expect.objectContaining({ id: 't2', reconciled: false }),
+        expect.objectContaining({ id: 't3', reconciled: false }),
+      ]),
+    );
+  });
+
   test('unsplitting last remaining child converts parent to regular transaction', () => {
     const [parent, child] = makeSplitTransaction(
       { id: 't1', amount: 2000, category: 'cat1' },
