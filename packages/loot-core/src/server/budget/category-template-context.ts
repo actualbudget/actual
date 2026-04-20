@@ -819,10 +819,6 @@ export class CategoryTemplateContext {
     }
 
     const balance = templateContext.fromLastMonth + accumulatedToBudget;
-    return allocateCumulativeMilestones(
-      merged,
-      templateContext.month,
-      balance,
-    );
+    return allocateCumulativeMilestones(merged, templateContext.month, balance);
   }
 }

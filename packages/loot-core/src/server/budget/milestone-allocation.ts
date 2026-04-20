@@ -9,8 +9,13 @@ export type BudgetMilestone = {
   increment: number;
 };
 
-function isMilestoneActive(deadlineMonth: string, currentMonth: string): boolean {
-  return monthUtils.differenceInCalendarMonths(deadlineMonth, currentMonth) >= 0;
+function isMilestoneActive(
+  deadlineMonth: string,
+  currentMonth: string,
+): boolean {
+  return (
+    monthUtils.differenceInCalendarMonths(deadlineMonth, currentMonth) >= 0
+  );
 }
 
 /**
@@ -90,7 +95,10 @@ export function allocateCumulativeMilestones(
 
   for (const month of sortedMonths) {
     cumulative += byMonth.get(month)!;
-    const numMonths = monthUtils.differenceInCalendarMonths(month, currentMonth);
+    const numMonths = monthUtils.differenceInCalendarMonths(
+      month,
+      currentMonth,
+    );
     if (numMonths < 0) {
       continue;
     }

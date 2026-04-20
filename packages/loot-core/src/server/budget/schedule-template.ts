@@ -15,10 +15,8 @@ import { amountToInteger } from '#shared/util';
 import type { CategoryEntity, TransactionEntity } from '#types/models';
 import type { ScheduleTemplate, Template } from '#types/models/templates';
 
-import {
-  allocateCumulativeMilestones,
-  type BudgetMilestone,
-} from './milestone-allocation';
+import { allocateCumulativeMilestones } from './milestone-allocation';
+import type { BudgetMilestone } from './milestone-allocation';
 
 type ScheduleTemplateTarget = {
   name: string;
