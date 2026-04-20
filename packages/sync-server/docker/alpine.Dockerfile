@@ -21,6 +21,11 @@ RUN cp -RL node_modules node_modules.real \
     && rm -rf node_modules \
     && mv node_modules.real node_modules
 
+# Strip dev-only content from dereferenced workspace packages to keep the final image lean.
+RUN find node_modules/@actual-app -maxdepth 2 -type d \
+    \( -name src -o -name e2e -o -name __tests__ -o -name __mocks__ -o -name tests -o -name test -o -name build-stats \) \
+    -exec rm -rf {} +
+
 FROM alpine:3.22 AS prod
 
 # Minimal runtime dependencies
