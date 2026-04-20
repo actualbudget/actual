@@ -1,36 +1,16 @@
-/**
- * Nightly validation for the custom theme catalog.
- *
- * Reads packages/desktop-client/src/data/customThemeCatalog.json, fetches the
- * `actual.css` for each entry from its GitHub repo, and runs the same
- * validation the app uses at install time. Exits 1 if any theme fails.
- *
- * Security posture: third-party CSS is treated as opaque text throughout.
- * It is never executed, never injected into a DOM, size-capped, time-capped,
- * and only fetched over HTTPS from a pinned host (raw.githubusercontent.com)
- * constructed from a schema-checked `owner/repo` string.
- */
-
-import { readFileSync } from 'node:fs';
+import { appendFileSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
+  type CatalogTheme,
   embedThemeFonts,
   validateThemeCss,
 } from '../src/style/customThemes.ts';
 
-const MAX_CSS_BYTES = 512 * 1024; // 512 KB — hard cap on actual.css size.
-const FETCH_TIMEOUT_MS = 15_000; // Per-request timeout.
-const INTER_REQUEST_DELAY_MS = 250; // Gentle rate-limit to raw.githubusercontent.com.
+const MAX_CSS_BYTES = 512 * 1024;
+const FETCH_TIMEOUT_MS = 15_000;
 const REPO_PATTERN = /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/;
-
-type CatalogEntry = {
-  name: string;
-  repo: string;
-  mode: 'light' | 'dark';
-  colors?: string[];
-};
 
 type ThemeResult = {
   name: string;
@@ -48,7 +28,7 @@ const catalogPath = resolve(
   'customThemeCatalog.json',
 );
 
-function readCatalog(): CatalogEntry[] {
+function readCatalog(): CatalogTheme[] {
   const raw = readFileSync(catalogPath, 'utf8');
   const parsed: unknown = JSON.parse(raw);
 
@@ -59,7 +39,7 @@ function readCatalog(): CatalogEntry[] {
   return parsed.map((entry, i) => validateCatalogEntry(entry, i));
 }
 
-function validateCatalogEntry(value: unknown, index: number): CatalogEntry {
+function validateCatalogEntry(value: unknown, index: number): CatalogTheme {
   if (!value || typeof value !== 'object') {
     throw new Error(`Catalog entry #${index} is not an object.`);
   }
@@ -68,6 +48,7 @@ function validateCatalogEntry(value: unknown, index: number): CatalogEntry {
   if (typeof e.name !== 'string' || !e.name.trim()) {
     throw new Error(`Catalog entry #${index} is missing a valid "name".`);
   }
+  // Schema-check the repo before it gets interpolated into a fetch URL.
   if (typeof e.repo !== 'string' || !REPO_PATTERN.test(e.repo)) {
     throw new Error(
       `Catalog entry "${String(e.name)}" has an invalid "repo" (expected "owner/repo"): ${JSON.stringify(e.repo)}`,
@@ -96,12 +77,7 @@ function validateCatalogEntry(value: unknown, index: number): CatalogEntry {
   };
 }
 
-async function fetchWithLimits(url: string): Promise<string> {
-  // Pin the URL shape defensively — even though callers construct it, re-check here.
-  if (!url.startsWith('https://raw.githubusercontent.com/')) {
-    throw new Error(`Refusing to fetch from non-pinned URL: ${url}`);
-  }
-
+async function fetchCss(url: string): Promise<string> {
   const response = await fetch(url, {
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     redirect: 'error',
@@ -148,21 +124,14 @@ async function fetchWithLimits(url: string): Promise<string> {
   return text;
 }
 
-async function validateOne(entry: CatalogEntry): Promise<ThemeResult> {
+async function validateOne(entry: CatalogTheme): Promise<ThemeResult> {
   try {
     const url = `https://raw.githubusercontent.com/${entry.repo}/refs/heads/main/actual.css`;
-    const css = await fetchWithLimits(url);
-    // Match the install-time flow in ThemeInstaller: embed referenced fonts
-    // into data: URIs first, then validate the result. Validating before
-    // embedding rejects any theme that references fonts via relative url()
-    // paths, because the validator only accepts data: URIs in @font-face.
-    // Cap the font-embedding phase with the same per-fetch timeout as the
-    // CSS fetch so a slow font host can't stall the job's 10-min budget.
-    const embedded = await embedThemeFonts(
-      css,
-      entry.repo,
-      AbortSignal.timeout(FETCH_TIMEOUT_MS),
-    );
+    const css = await fetchCss(url);
+    // Embed fonts before validation: the validator only accepts data: URIs in
+    // @font-face, and embedThemeFonts is what turns relative url() refs into
+    // data: URIs. Matches ThemeInstaller's install flow.
+    const embedded = await embedThemeFonts(css, entry.repo);
     validateThemeCss(embedded);
     return { name: entry.name, repo: entry.repo, status: 'ok' };
   } catch (err) {
@@ -176,12 +145,10 @@ async function validateOne(entry: CatalogEntry): Promise<ThemeResult> {
 }
 
 function escapeForMarkdown(s: string): string {
-  // Escape backticks and HTML-ish characters so a crafted error message
-  // cannot break out of the step summary or inject markup.
   return s.replace(/[`<>|]/g, c => `\\${c}`).replace(/\r?\n/g, ' ');
 }
 
-async function writeStepSummary(results: ThemeResult[]): Promise<void> {
+function writeStepSummary(results: ThemeResult[]): void {
   const summaryPath = process.env.GITHUB_STEP_SUMMARY;
   if (!summaryPath) return;
 
@@ -206,7 +173,6 @@ async function writeStepSummary(results: ThemeResult[]): Promise<void> {
   }
   lines.push('');
 
-  const { appendFileSync } = await import('node:fs');
   appendFileSync(summaryPath, lines.join('\n') + '\n');
 }
 
@@ -225,7 +191,6 @@ async function main(): Promise<void> {
       );
     }
     results.push(result);
-    await new Promise(r => setTimeout(r, INTER_REQUEST_DELAY_MS));
   }
 
   const failed = results.filter(r => r.status === 'error');
@@ -234,7 +199,7 @@ async function main(): Promise<void> {
     `Summary: ${results.length - failed.length}/${results.length} passing, ${failed.length} failing.`,
   );
 
-  await writeStepSummary(results);
+  writeStepSummary(results);
 
   process.exit(failed.length === 0 ? 0 : 1);
 }
