@@ -514,6 +514,7 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
 export async function embedThemeFonts(
   css: string,
   repo: string,
+  signal?: AbortSignal,
 ): Promise<string> {
   const baseUrl = `https://raw.githubusercontent.com/${repo}/refs/heads/main/`;
 
@@ -591,7 +592,7 @@ export async function embedThemeFonts(
   let totalBytes = 0;
   for (const ref of fontRefs) {
     const fontUrl = baseUrl + ref.cleanPath;
-    const response = await fetch(fontUrl);
+    const response = await fetch(fontUrl, { signal });
     if (!response.ok) {
       throw new Error(
         `Failed to fetch font file "${ref.cleanPath}" from ${fontUrl}: ${response.status} ${response.statusText}`,
