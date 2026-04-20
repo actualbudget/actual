@@ -37,7 +37,8 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.ACTIONS_UPDATE_TOKEN || github.token }}
-          persist-credentials: false
+          # Need to be able to commit release notes after generation
+          persist-credentials: true
 
       - name: Get changed files
         if: steps.bot-check.outputs.skip != 'true'
