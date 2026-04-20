@@ -2,8 +2,8 @@ import { appendFileSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import type { CatalogTheme } from '../src/style/customThemes.ts';
 import {
-  type CatalogTheme,
   embedThemeFonts,
   validateThemeCss,
 } from '../src/style/customThemes.ts';
