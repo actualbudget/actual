@@ -84,7 +84,7 @@ type NodeData = {
   type: string;
   name?: string;
   tooltipInfo?: Array<{ name: string; value: number }>;
-  perCentageLabel?: string;
+  percentageLabel?: string;
 };
 type Graph = Map<NodeKey, NodeData>;
 
@@ -269,6 +269,7 @@ function processGraphData(
   }
   groupOtherCategories(graph, topNcategories, categorySort);
   const sortedGraph = sortGraph(graph, categorySort);
+  addPercentageLabels(graph);
   setData(convertToSankeyData(sortedGraph));
 }
 
@@ -769,15 +770,44 @@ function getNodeValue(graph: Graph, key: NodeKey): number {
     graph.forEach(data => {
       nodeValue += data.to.get(key) ?? 0;
     });
+
+    // If node is in reality a root node, masked behind hidden nodes
+    if (nodeValue < 0) {
+      nodeValue = 0
+      graph.get(key).to.forEach(value => {
+        nodeValue += value;
+      })
+    }
   }
   return nodeValue;
 }
 
+function addPercentageLabels(graph) {
+  const layerSums = new Map();
+
+  // First pass: Calculate layer sums
+  graph.forEach((data, key) => {
+    const layer = getLayer(graph, key);
+    const nodeValue = getNodeValue(graph, key)
+    layerSums.set(layer, (layerSums.get(layer) ?? 0) + nodeValue);
+  });
+
+  // Second pass: Assign percentage label to each node
+  graph.forEach((data, key) => {
+    const layer = getLayer(graph, key);
+    const nodeValue = getNodeValue(graph, key)
+    const layerTotal = layerSums.get(layer) ?? 1;
+    const percentage = layerTotal ? (nodeValue / layerTotal) * 100 : 0;
+    data.percentageLabel = `${percentage.toFixed(1)}%`;
+  });
+
+}
+
 function convertToSankeyData(graph: Graph): SankeyData {
-  console.log(graph);
   const nodes = Array.from(graph, ([key, data]) => ({
     key,
     name: data.name ?? key,
+    percentageLabel: data.percentageLabel ?? '',
   }));
   const links = Array.from(graph).flatMap(([key, data]) =>
     Array.from(data.to, ([targetKey, value]) => {
