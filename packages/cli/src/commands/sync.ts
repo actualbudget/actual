@@ -57,10 +57,10 @@ export function registerSyncCommand(program: Command) {
           );
           return;
         }
-        const ageSeconds = Math.max(
-          0,
-          Math.round((Date.now() - state.lastSyncedAt) / 1000),
+        const rawAgeSeconds = Math.round(
+          (Date.now() - state.lastSyncedAt) / 1000,
         );
+        const ageSeconds = Math.max(0, rawAgeSeconds);
         printOutput(
           {
             neverSynced: false,
@@ -70,7 +70,7 @@ export function registerSyncCommand(program: Command) {
             lastDownloadedAt: new Date(state.lastDownloadedAt).toISOString(),
             ageSeconds,
             ttlSeconds: config.cacheTtl,
-            stale: ageSeconds > config.cacheTtl,
+            stale: rawAgeSeconds < 0 || rawAgeSeconds > config.cacheTtl,
           },
           opts.format,
         );

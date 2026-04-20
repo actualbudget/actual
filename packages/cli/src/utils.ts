@@ -32,9 +32,15 @@ export function parseNonNegativeIntFlag(
   return parsed;
 }
 
-export function parseBoolEnv(raw: string | undefined): boolean | undefined {
+export function parseBoolEnv(
+  raw: string | undefined,
+  source: string,
+): boolean | undefined {
   if (raw === undefined) return undefined;
-  if (raw === '1' || raw.toLowerCase() === 'true') return true;
-  if (raw === '0' || raw.toLowerCase() === 'false') return false;
-  return undefined;
+  const lower = raw.toLowerCase();
+  if (raw === '1' || lower === 'true') return true;
+  if (raw === '0' || lower === 'false') return false;
+  throw new Error(
+    `Invalid ${source}: "${raw}". Expected "true", "false", "1", or "0".`,
+  );
 }

@@ -28,8 +28,10 @@ export type CliGlobalOpts = {
   cacheTtl?: number;
   lockTimeout?: number;
   refresh?: boolean;
-  noCache?: boolean;
-  noLock?: boolean;
+  // Commander stores --no-foo flags under the positive key. Default true,
+  // false when the flag is passed.
+  cache?: boolean;
+  lock?: boolean;
   format?: 'json' | 'table' | 'csv';
   verbose?: boolean;
 };
@@ -208,11 +210,12 @@ export async function resolveConfig(
     'lockTimeout',
   );
 
-  const refresh = cliOpts.refresh ?? cliOpts.noCache ?? false;
+  const refresh = (cliOpts.refresh ?? false) || cliOpts.cache === false;
 
+  const flagNoLock = cliOpts.lock === false ? true : undefined;
   const noLock =
-    cliOpts.noLock ??
-    parseBoolEnv(process.env.ACTUAL_NO_LOCK) ??
+    flagNoLock ??
+    parseBoolEnv(process.env.ACTUAL_NO_LOCK, 'ACTUAL_NO_LOCK') ??
     fileConfig.noLock ??
     false;
 

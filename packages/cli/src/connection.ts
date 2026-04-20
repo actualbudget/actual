@@ -23,14 +23,11 @@ function info(message: string, verbose?: boolean) {
 }
 
 async function resolveBudgetIdForSyncId(syncId: string): Promise<string> {
-  const budgets = (await api.getBudgets()) as Array<{
-    id?: string;
-    groupId?: string;
-    cloudFileId?: string;
-  }>;
+  const budgets = await api.getBudgets();
   const match = budgets.find(
     b =>
-      b.id !== undefined && (b.groupId === syncId || b.cloudFileId === syncId),
+      typeof b.id === 'string' &&
+      (b.groupId === syncId || b.cloudFileId === syncId),
   );
   if (!match?.id) {
     throw new Error(

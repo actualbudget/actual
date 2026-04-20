@@ -215,13 +215,28 @@ describe('resolveConfig', () => {
       expect(config.refresh).toBe(true);
     });
 
-    it('sets refresh when noCache is true', async () => {
-      const config = await resolveConfig({ noCache: true });
+    it('sets refresh when --no-cache is passed (cliOpts.cache === false)', async () => {
+      const config = await resolveConfig({ cache: false });
       expect(config.refresh).toBe(true);
+    });
+
+    it('does not set refresh when cliOpts.cache is true (flag absent)', async () => {
+      const config = await resolveConfig({ cache: true });
+      expect(config.refresh).toBe(false);
     });
 
     it('defaults noLock to false', async () => {
       const config = await resolveConfig({});
+      expect(config.noLock).toBe(false);
+    });
+
+    it('sets noLock when --no-lock is passed (cliOpts.lock === false)', async () => {
+      const config = await resolveConfig({ lock: false });
+      expect(config.noLock).toBe(true);
+    });
+
+    it('leaves noLock false when cliOpts.lock is true (flag absent)', async () => {
+      const config = await resolveConfig({ lock: true });
       expect(config.noLock).toBe(false);
     });
 
@@ -235,6 +250,11 @@ describe('resolveConfig', () => {
       process.env.ACTUAL_NO_LOCK = 'true';
       const config = await resolveConfig({});
       expect(config.noLock).toBe(true);
+    });
+
+    it('throws on an invalid ACTUAL_NO_LOCK value', async () => {
+      process.env.ACTUAL_NO_LOCK = 'yes';
+      await expect(resolveConfig({})).rejects.toThrow(/ACTUAL_NO_LOCK/);
     });
 
     it('reads cacheTtl/lockTimeout/noLock from config file', async () => {

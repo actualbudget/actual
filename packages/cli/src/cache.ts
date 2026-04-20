@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -56,7 +57,11 @@ export function writeCacheState(metaDir: string, state: CacheState): void {
   try {
     mkdirSync(metaDir, { recursive: true });
     const target = cachePath(metaDir);
-    const tmp = `${target}.tmp`;
+    // Unique tmp name per writer: concurrent shared-lock commands (encrypted
+    // budgets, --refresh, stale TTL) can both publish, and a shared tmp path
+    // lets the second writer's truncate destroy the first writer's bytes
+    // before either renames into place.
+    const tmp = `${target}.${process.pid}-${randomBytes(4).toString('hex')}.tmp`;
     writeFileSync(tmp, JSON.stringify(state));
     renameSync(tmp, target);
   } catch {

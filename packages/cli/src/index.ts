@@ -40,7 +40,7 @@ program
     value => parseNonNegativeIntFlag(value, '--cache-ttl'),
   )
   .option('--refresh', 'Force a sync on this call, ignoring the cache', false)
-  .option('--no-cache', 'Alias for --refresh', false)
+  .option('--no-cache', 'Alias for --refresh')
   .option(
     '--lock-timeout <seconds>',
     'How long to wait for another CLI process to release the lock (env: ACTUAL_LOCK_TIMEOUT; default: 10)',
@@ -49,7 +49,6 @@ program
   .option(
     '--no-lock',
     'Disable the budget directory lock (use with care, env: ACTUAL_NO_LOCK)',
-    false,
   )
   .addOption(
     new Option('--format <format>', 'Output format: json, table, csv')

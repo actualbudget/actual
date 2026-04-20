@@ -33,7 +33,7 @@ export function registerBudgetsCommand(program: Command) {
         opts,
         async config => {
           const password =
-            config.encryptionPassword ?? cmdOpts.encryptionPassword;
+            cmdOpts.encryptionPassword ?? config.encryptionPassword;
           await api.downloadBudget(syncId, {
             password,
           });
