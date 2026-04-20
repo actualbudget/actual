@@ -120,7 +120,14 @@ export function createSpreadsheet(
         conditionsOp,
       )();
     }
-    processGraphData(data, topNcategories, categorySort, setData, aggregated);
+    processGraphData(
+      data,
+      topNcategories,
+      categories,
+      categorySort,
+      setData,
+      aggregated,
+    );
   };
 }
 
@@ -257,6 +264,7 @@ export function createTransactionsSpreadsheet(
 function processGraphData(
   categoryData: CategoryEntry[],
   topNcategories: number,
+  categories: CategoryGroupEntity[],
   categorySort: SortMode,
   setData: (data: ReturnType<typeof convertToSankeyData>) => void,
   aggregated?: AggregatedBudget,
@@ -268,7 +276,7 @@ function processGraphData(
     graph = createTransactionsGraph(categoryData);
   }
   groupOtherCategories(graph, topNcategories, categorySort);
-  const sortedGraph = sortGraph(graph, categorySort);
+  const sortedGraph = sortGraph(graph, categorySort, categories);
   addPercentageLabels(graph);
   setData(convertToSankeyData(sortedGraph));
 }
@@ -486,14 +494,14 @@ function createBudgetGraph(
   );
   addNode(
     graph,
-    'next_month',
-    'categoryGroup',
+    'for_next_month',
+    'budgeted',
     'For ' + monthUtils.nextMonth(aggregated!.endMonth),
   );
   addValueToLink(
     graph,
     'available_income',
-    'next_month',
+    'for_next_month',
     aggregated.forNextMonth,
   );
   addNode(graph, 'last_month_overspent', 'budget', 'Overspent');
@@ -507,7 +515,7 @@ function createBudgetGraph(
   // Add extra synthetic links to position nodes at the right layers.
   // If the nodes don't exist, a link will not be created, so this is not seen in the graph.
   addValueToLink(graph, 'to_budget', 'to_budget_hidden', -1);
-  addValueToLink(graph, 'next_month', 'next_month_hidden', -1);
+  addValueToLink(graph, 'for_next_month', 'next_month_hidden', -1);
   addValueToLink(graph, 'last_month_overspent', 'overspent_hidden', -1);
 
   return graph;
@@ -730,24 +738,104 @@ function promoteOtherBack(graph, deletedNodes, globalOther: boolean = false) {
   });
 }
 
-function sortGraph(graph: Graph, categorySort: SortMode = 'per-group'): Graph {
-  if (categorySort === 'budget-order') {
-    return graph;
-  } else if (categorySort === 'global') {
-    const sortedEntries = Array.from(graph.entries()).sort(
+function sortGraph(
+  graph: Graph,
+  categorySort: SortMode = 'per-group',
+  categories: CategoryGroupEntity[],
+): Graph {
+  let sortedEntries: Array<[string, NodeData]>;
+  if (categorySort === 'global') {
+    sortedEntries = Array.from(graph.entries()).sort(
       ([keyA], [keyB]) => getNodeValue(graph, keyB) - getNodeValue(graph, keyA),
     );
-
     moveNodeToEnd(sortedEntries, 'GLOBAL_OTHER_BUCKET');
-
-    return new Map(sortedEntries);
-  } else {
-    const sortedEntries = Array.from(graph.entries()).sort(
+  } else if (categorySort === 'per-group') {
+    const categoryGroups = nodesInLayer(graph, 'categoryGroup');
+    sortedEntries = Array.from(graph.entries()).sort(
       ([keyA], [keyB]) => getNodeValue(graph, keyB) - getNodeValue(graph, keyA),
     );
 
-    return new Map(sortedEntries);
+    categoryGroups.forEach(groupKey => {
+      const group = graph.get(groupKey);
+      if (!group) return;
+      const groupToKeys = Array.from(group.to.keys());
+
+      const groupOtherKey = groupToKeys.find(k => k.endsWith('_OTHER_BUCKET'));
+      const childKeys = groupToKeys.filter(k => k !== groupOtherKey);
+
+      const childEntries = childKeys
+        .map(key => sortedEntries.find(([entryKey]) => entryKey === key))
+        .filter(Boolean) as Array<[string, NodeData]>;
+      childEntries.sort(
+        ([a], [b]) => getNodeValue(graph, b) - getNodeValue(graph, a),
+      );
+
+      const otherEntry = groupOtherKey
+        ? sortedEntries.find(([entryKey]) => entryKey === groupOtherKey)
+        : undefined;
+
+      // Remove these children ("Other" too) from their current places
+      sortedEntries = sortedEntries.filter(
+        ([entryKey]) =>
+          !childKeys.includes(entryKey) && entryKey !== groupOtherKey,
+      );
+
+      // Insert after group node
+      const groupIndex = sortedEntries.findIndex(
+        ([entryKey]) => entryKey === groupKey,
+      );
+      if (groupIndex !== -1) {
+        sortedEntries.splice(groupIndex + 1, 0, ...childEntries);
+        if (otherEntry) {
+          sortedEntries.splice(
+            groupIndex + 1 + childEntries.length,
+            0,
+            otherEntry,
+          );
+        }
+      }
+    });
+  } else {
+    const used = new Set<NodeKey>();
+    sortedEntries = []
+
+    // 1. Add entries by category group and subcategory order
+    categories.forEach(group => {
+      if (graph.has(group.id)) {
+        sortedEntries.push([group.id, graph.get(group.id)!]);
+        used.add(group.id);
+      }
+
+      if (group.categories && group.categories.length) {
+        group.categories.forEach(cat => {
+          if (graph.has(cat.id)) {
+            sortedEntries.push([cat.id, graph.get(cat.id)!]);
+            used.add(cat.id);
+          }
+        });
+      }
+
+      const otherKey = `${group.id}_OTHER_BUCKET`;
+      if (graph.has(otherKey)) {
+        sortedEntries.push([otherKey, graph.get(otherKey)!]);
+        used.add(otherKey);
+      }
+    });
+
+    // 2. Add all remaining entries that weren't used (preserving graph order)
+    for (const [key, data] of graph) {
+      if (!used.has(key)) {
+        sortedEntries.push([key, data]);
+      }
+    }
   }
+
+  // We always want these nodes displayed at the bottom of their layers, so its safe to just move them to the end
+  moveNodeToEnd(sortedEntries, 'to_budget');
+  moveNodeToEnd(sortedEntries, 'last_month_overspent');
+  moveNodeToEnd(sortedEntries, 'for_next_month');
+  moveNodeToEnd(sortedEntries, 'from_previous_month');
+  return new Map(sortedEntries);
 }
 
 function moveNodeToEnd(entries: Array<[string, NodeData]>, key: NodeKey) {
@@ -773,10 +861,10 @@ function getNodeValue(graph: Graph, key: NodeKey): number {
 
     // If node is in reality a root node, masked behind hidden nodes
     if (nodeValue < 0) {
-      nodeValue = 0
+      nodeValue = 0;
       graph.get(key).to.forEach(value => {
         nodeValue += value;
-      })
+      });
     }
   }
   return nodeValue;
@@ -788,19 +876,18 @@ function addPercentageLabels(graph) {
   // First pass: Calculate layer sums
   graph.forEach((data, key) => {
     const layer = getLayer(graph, key);
-    const nodeValue = getNodeValue(graph, key)
+    const nodeValue = getNodeValue(graph, key);
     layerSums.set(layer, (layerSums.get(layer) ?? 0) + nodeValue);
   });
 
   // Second pass: Assign percentage label to each node
   graph.forEach((data, key) => {
     const layer = getLayer(graph, key);
-    const nodeValue = getNodeValue(graph, key)
+    const nodeValue = getNodeValue(graph, key);
     const layerTotal = layerSums.get(layer) ?? 1;
     const percentage = layerTotal ? (nodeValue / layerTotal) * 100 : 0;
     data.percentageLabel = `${percentage.toFixed(1)}%`;
   });
-
 }
 
 function convertToSankeyData(graph: Graph): SankeyData {
