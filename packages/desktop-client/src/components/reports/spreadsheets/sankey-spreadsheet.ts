@@ -88,6 +88,190 @@ type NodeData = {
 };
 type Graph = Map<NodeKey, NodeData>;
 
+export function createSpreadsheet(
+  start: string,
+  end: string,
+  categories: CategoryGroupEntity[],
+  conditions: RuleConditionEntity[] = [],
+  conditionsOp: 'and' | 'or' = 'and',
+  mode: 'budgeted' | 'spent' = 'spent',
+  topNcategories: number = 15,
+  categorySort: SortMode = 'per-group',
+) {
+  return async (
+    spreadsheet: ReturnType<typeof useSpreadsheet>,
+    setData: (data: ReturnType<typeof convertToSankeyData>) => void,
+  ) => {
+    let data: CategoryEntry[];
+    let aggregated: AggregatedBudget;
+    if (mode === 'budgeted') {
+      ({ data, aggregated } = await createBudgetSpreadsheet(
+        start,
+        end,
+        conditions,
+        conditionsOp,
+      )());
+    } else if (mode === 'spent') {
+      data = await createTransactionsSpreadsheet(
+        start,
+        end,
+        categories,
+        conditions,
+        conditionsOp,
+      )();
+    }
+    processGraphData(data, topNcategories, categorySort, setData, aggregated);
+  };
+}
+
+export function createBudgetSpreadsheet(
+  start: string,
+  end: string,
+  conditions: RuleConditionEntity[] = [],
+  conditionsOp: 'and' | 'or' = 'and',
+) {
+  return async () => {
+    const months =
+      end && end !== start ? monthUtils.rangeInclusive(start, end) : [start];
+
+    const monthResponses = await Promise.all(
+      months.map(
+        m =>
+          send('api/budget-month', {
+            month: m,
+          }) as unknown as Promise<BudgetMonthResponse>,
+      ),
+    );
+
+    const aggregated = monthResponses.reduce<AggregatedBudget>(
+      (acc, response, index) => {
+        acc.toBudget += response.toBudget;
+
+        if (index === 0) {
+          acc.fromPreviousMonth = response.fromLastMonth;
+        }
+        acc.lastMonthOverspent += response.lastMonthOverspent;
+
+        for (const group of response.categoryGroups) {
+          const existingGroup = acc.categoryGroupsMap.get(group.id);
+          if (!existingGroup) {
+            acc.categoryGroupsMap.set(group.id, {
+              ...group,
+              categories: group.categories.map(cat => ({ ...cat })),
+            });
+            continue;
+          }
+
+          for (const cat of group.categories) {
+            const existingCat = existingGroup.categories.find(
+              c => c.id === cat.id,
+            );
+            if (!existingCat) {
+              existingGroup.categories.push({ ...cat });
+              continue;
+            }
+            existingCat.budgeted =
+              (existingCat.budgeted ?? 0) + (cat.budgeted ?? 0);
+            existingCat.spent = (existingCat.spent ?? 0) + (cat.spent ?? 0);
+            existingCat.balance =
+              (existingCat.balance ?? 0) + (cat.balance ?? 0);
+            existingCat.received =
+              (existingCat.received ?? 0) + (cat.received ?? 0);
+          }
+        }
+
+        return acc;
+      },
+      {
+        toBudget: 0,
+        fromPreviousMonth: 0,
+        lastMonthOverspent: 0,
+        categoryGroupsMap: new Map<string, BudgetMonthGroup>(),
+      },
+    );
+
+    const categoryGroups = Array.from(aggregated.categoryGroupsMap.values());
+
+    const filteredCategoryGroups = filterCategoryGroups(
+      categoryGroups,
+      conditions,
+      conditionsOp,
+    );
+
+    const categoryData: CategoryEntry[] = filteredCategoryGroups
+      .flatMap(group =>
+        group.categories.map(cat => {
+          const rawValue = group.is_income
+            ? (cat.received ?? 0)
+            : (cat.budgeted ?? 0);
+          return {
+            categoryGroup: group.name,
+            categoryGroupId: group.id,
+            category: cat.name,
+            categoryId: cat.id,
+            isIncome: group.is_income ? rawValue > 0 : rawValue < 0,
+            value: Math.abs(rawValue),
+          };
+        }),
+      )
+      .filter(entry => entry.value > 0);
+
+    const nextMonthResponse = (await send('api/budget-month', {
+      month: monthUtils.nextMonth(end),
+    })) as unknown as BudgetMonthResponse;
+    aggregated.forNextMonth =
+      (nextMonthResponse.fromLastMonth ?? 0) - aggregated.toBudget;
+    aggregated.startMonth = start;
+    aggregated.endMonth = end;
+
+    return { data: categoryData, aggregated };
+  };
+}
+
+export function createTransactionsSpreadsheet(
+  start: string,
+  end: string,
+  categories: CategoryGroupEntity[],
+  conditions: RuleConditionEntity[] = [],
+  conditionsOp: 'and' | 'or' = 'and',
+) {
+  return async () => {
+    // gather filters user has set
+    const { filters } = await send('make-filters-from-conditions', {
+      conditions: conditions.filter(cond => !cond.customName),
+    });
+    const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
+
+    const categoryData = await fetchCategoryData(
+      categories,
+      conditionsOpKey,
+      filters,
+      start,
+      end,
+    );
+
+    return categoryData;
+  };
+}
+
+function processGraphData(
+  categoryData: CategoryEntry[],
+  topNcategories: number,
+  categorySort: SortMode,
+  setData: (data: ReturnType<typeof convertToSankeyData>) => void,
+  aggregated?: AggregatedBudget,
+) {
+  let graph: Graph;
+  if (aggregated) {
+    graph = createBudgetGraph(categoryData, aggregated);
+  } else {
+    graph = createTransactionsGraph(categoryData);
+  }
+  groupOtherCategories(graph, topNcategories, categorySort);
+  const sortedGraph = sortGraph(graph, categorySort);
+  setData(convertToSankeyData(sortedGraph));
+}
+
 // Filter budget category groups to only those matching the user's conditions.
 // Budget data is fetched unconditionally from api/budget-month, so we must
 // apply category conditions manually in JS (unlike the transaction path which
@@ -185,198 +369,68 @@ function filterCategoryGroups(
     .filter(group => group.categories.length > 0);
 }
 
-export function createSpreadsheet(
+// retrieve sum of group expenses
+async function fetchCategoryData(
+  categoryGroups: CategoryGroupEntity[],
+  conditionsOpKey: string = '$and',
+  filters: unknown[] = [],
   start: string,
   end: string,
-  categories: CategoryGroupEntity[],
-  conditions: RuleConditionEntity[] = [],
-  conditionsOp: 'and' | 'or' = 'and',
-  mode: 'budgeted' | 'spent' = 'spent',
-  topNcategories: number = 15,
-  categorySort: SortMode = 'per-group',
-) {
-  return async (
-    spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: ReturnType<typeof convertToSankeyData>) => void,
-  ) => {
-    if (mode === 'budgeted') {
-      const data = await createBudgetSpreadsheet(
-        start,
-        end,
-        conditions,
-        conditionsOp,
-        topNcategories,
-        categorySort,
-      )(spreadsheet, setData);
-      return data;
-    } else if (mode === 'spent') {
-      const data = await createTransactionsSpreadsheet(
-        start,
-        end,
-        categories,
-        conditions,
-        conditionsOp,
-        topNcategories,
-        categorySort,
-      )(spreadsheet, setData);
-      return data;
-    }
-  };
-}
-
-function addNode(graph: Graph, key: NodeKey, type: string, name?: string) {
-  if (!graph.has(key)) {
-    graph.set(key, {
-      to: new Map(),
-      type,
-      name,
-    });
-  }
-}
-
-function addValueToLink(
-  graph: Graph,
-  from: NodeKey,
-  to: NodeKey,
-  value: number,
-) {
-  const fromNode = graph.get(from)!;
-  fromNode.to.set(to, (fromNode.to.get(to) ?? 0) + value);
-}
-
-function deleteLink(graph: Graph, from: NodeKey, to: NodeKey) {
-  const fromNode = graph.get(from);
-  if (fromNode) {
-    fromNode.to.delete(to);
-  }
-}
-
-function getLayer(graph: Graph, key: NodeKey): number {
-  // Find parent nodes for the given key
-  const parents: NodeKey[] = [];
-  for (const [parentKey, data] of graph) {
-    if (data.to.has(key)) {
-      parents.push(parentKey);
-    }
-  }
-  if (parents.length === 0) {
-    // No parents: this is a root node, layer 0
-    return 0;
-  }
-  // Otherwise, 1 + max parent's layer
-  return 1 + Math.max(...parents.map(parentKey => getLayer(graph, parentKey)));
-}
-
-export function createBudgetSpreadsheet(
-  start: string,
-  end: string,
-  conditions: RuleConditionEntity[] = [],
-  conditionsOp: 'and' | 'or' = 'and',
-  topNcategories: number = 15,
-  categorySort: SortMode = 'per-group',
-) {
-  return async (
-    spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: ReturnType<typeof convertToSankeyData>) => void,
-  ) => {
-    const months =
-      end && end !== start ? monthUtils.rangeInclusive(start, end) : [start];
-
-    const monthResponses = await Promise.all(
-      months.map(
-        m =>
-          send('api/budget-month', {
-            month: m,
-          }) as unknown as Promise<BudgetMonthResponse>,
-      ),
-    );
-
-    const aggregated = monthResponses.reduce<AggregatedBudget>(
-      (acc, response, index) => {
-        acc.toBudget += response.toBudget;
-
-        if (index === 0) {
-          acc.fromPreviousMonth = response.fromLastMonth;
-        }
-        acc.lastMonthOverspent += response.lastMonthOverspent;
-
-        for (const group of response.categoryGroups) {
-          const existingGroup = acc.categoryGroupsMap.get(group.id);
-          if (!existingGroup) {
-            acc.categoryGroupsMap.set(group.id, {
-              ...group,
-              categories: group.categories.map(cat => ({ ...cat })),
-            });
-            continue;
-          }
-
-          for (const cat of group.categories) {
-            const existingCat = existingGroup.categories.find(
-              c => c.id === cat.id,
+): Promise<CategoryEntry[]> {
+  const nested = await Promise.all(
+    categoryGroups.map(async (categoryGroup: CategoryGroupEntity) => {
+      const entries = await Promise.all(
+        (categoryGroup.categories || []).map(async category => {
+          const results = await aqlQuery(
+            q('transactions')
+              .filter({ [conditionsOpKey]: filters })
+              .filter({
+                $and: [
+                  { date: { $gte: monthUtils.firstDayOfMonth(start) } },
+                  { date: { $lte: monthUtils.lastDayOfMonth(end) } },
+                ],
+              })
+              .filter({ category: category.id })
+              .groupBy(
+                categoryGroup.is_income
+                  ? [
+                      { $id: '$category' },
+                      { $id: '$account' },
+                      { $id: '$payee' },
+                    ]
+                  : [{ $id: '$category' }, { $id: '$account' }],
+              )
+              .select([
+                { accountId: { $id: '$account.id' } },
+                { accountName: { $id: '$account.name' } },
+                { amount: { $sum: '$amount' } },
+                { payeeId: { $id: '$payee.id' } },
+                { payeeName: { $id: '$payee.name' } },
+              ]),
+          );
+          return results.data
+            .filter(row => categoryGroup.is_income || (row.amount ?? 0) < 0)
+            .map(
+              row =>
+                ({
+                  categoryGroup: categoryGroup.name,
+                  categoryGroupId: categoryGroup.id,
+                  category: category.name,
+                  categoryId: category.id,
+                  value: Math.abs(row.amount ?? 0),
+                  isIncome: categoryGroup.is_income,
+                  accountName: row.accountName ?? '',
+                  accountId: row.accountId ?? '',
+                  payeeName: row.payeeName ?? '',
+                  payeeId: row.payeeId ?? '',
+                }) satisfies CategoryEntry,
             );
-            if (!existingCat) {
-              existingGroup.categories.push({ ...cat });
-              continue;
-            }
-            existingCat.budgeted =
-              (existingCat.budgeted ?? 0) + (cat.budgeted ?? 0);
-            existingCat.spent = (existingCat.spent ?? 0) + (cat.spent ?? 0);
-            existingCat.balance =
-              (existingCat.balance ?? 0) + (cat.balance ?? 0);
-            existingCat.received =
-              (existingCat.received ?? 0) + (cat.received ?? 0);
-          }
-        }
-
-        return acc;
-      },
-      {
-        toBudget: 0,
-        fromPreviousMonth: 0,
-        lastMonthOverspent: 0,
-        categoryGroupsMap: new Map<string, BudgetMonthGroup>(),
-      },
-    );
-
-    const categoryGroups = Array.from(aggregated.categoryGroupsMap.values());
-
-    const filteredCategoryGroups = filterCategoryGroups(
-      categoryGroups,
-      conditions,
-      conditionsOp,
-    );
-
-    const categoryData: CategoryEntry[] = filteredCategoryGroups
-      .flatMap(group =>
-        group.categories.map(cat => {
-          const rawValue = group.is_income
-            ? (cat.received ?? 0)
-            : (cat.budgeted ?? 0);
-          return {
-            categoryGroup: group.name,
-            categoryGroupId: group.id,
-            category: cat.name,
-            categoryId: cat.id,
-            isIncome: group.is_income ? rawValue > 0 : rawValue < 0,
-            value: Math.abs(rawValue),
-          };
         }),
-      )
-      .filter(entry => entry.value > 0);
-
-    const nextMonthResponse = (await send('api/budget-month', {
-      month: monthUtils.nextMonth(end),
-    })) as unknown as BudgetMonthResponse;
-    aggregated.forNextMonth =
-      (nextMonthResponse.fromLastMonth ?? 0) - aggregated.toBudget;
-    aggregated.startMonth = start;
-    aggregated.endMonth = end;
-
-    const graph = createBudgetGraph(categoryData, aggregated);
-    groupOtherCategories(graph, topNcategories, categorySort);
-    const sortedGraph = sortGraph(graph, categorySort);
-    setData(convertToSankeyData(sortedGraph));
-  };
+      );
+      return entries.flat();
+    }),
+  );
+  return nested.flat().filter(e => e.value > 0);
 }
 
 function createBudgetGraph(
@@ -458,142 +512,90 @@ function createBudgetGraph(
   return graph;
 }
 
-export function createTransactionsSpreadsheet(
-  start: string,
-  end: string,
-  categories: CategoryGroupEntity[],
-  conditions: RuleConditionEntity[] = [],
-  conditionsOp: 'and' | 'or' = 'and',
-  topNcategories: number = 15,
-  categorySort: SortMode = 'per-group',
-) {
-  return async (
-    spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: ReturnType<typeof convertToSankeyData>) => void,
-  ) => {
-    // gather filters user has set
-    const { filters } = await send('make-filters-from-conditions', {
-      conditions: conditions.filter(cond => !cond.customName),
-    });
-    const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
+function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
+  const graph: Graph = new Map();
 
-    const categoryData = await fetchCategoryData(
-      categories,
-      conditionsOpKey,
-      filters,
-      start,
-      end,
-    );
+  categoryData.forEach(entry => {
+    if (entry.isIncome) {
+      // Payee > Income category > Account
+      addNode(graph, entry.categoryId!, 'payee', entry.category!);
+      addNode(graph, entry.accountId!, 'account', entry.accountName!);
+      addNode(graph, entry.payeeId!, 'payee', entry.payeeName!);
+      addValueToLink(graph, entry.categoryId!, entry.accountId!, entry.value);
+      addValueToLink(graph, entry.payeeId!, entry.categoryId!, entry.value);
+    } else {
+      // Account > Category group > Category
+      addNode(graph, entry.accountId!, 'account', entry.accountName!);
+      addNode(
+        graph,
+        entry.categoryGroupId,
+        'categoryGroup',
+        entry.categoryGroup,
+      );
+      addNode(graph, entry.categoryId!, 'category', entry.category!);
+      addValueToLink(
+        graph,
+        entry.accountId!,
+        entry.categoryGroupId,
+        entry.value,
+      );
+      addValueToLink(
+        graph,
+        entry.categoryGroupId,
+        entry.categoryId!,
+        entry.value,
+      );
+    }
+  });
 
-    const graph = createTransactionsGraph(categoryData);
-    groupOtherCategories(graph, topNcategories, categorySort);
-    const sortedGraph = sortGraph(graph, categorySort);
-    setData(convertToSankeyData(sortedGraph));
-  };
+  graph.forEach((data, key) => {
+    if (data.type === 'account' && getLayer(graph, key) === 0) {
+      // If an account node has no parents (i.e. money was spent from the account, but no money added in the timeframe),
+      // connect it to a synthetic node to ensure it appears in the graph at the right layer.
+      addNode(graph, key + '_hidden_payee', 'payee', '');
+      addNode(graph, key + '_hidden_account', 'account', '');
+      addValueToLink(graph, key + '_hidden_payee', key + '_hidden_account', -1);
+      addValueToLink(graph, key + '_hidden_account', key, -1);
+    }
+  });
+
+  return graph;
 }
 
-function getNodeValue(graph: Graph, key: NodeKey): number {
-  let nodeValue: number = 0;
-
-  if (getLayer(graph, key) === 0) {
-    // Look at outgoing links for root nodes
-    graph.get(key).to.forEach(value => {
-      nodeValue += value ?? 0;
-    })
-  } else {
-    graph.forEach(data => {
-      nodeValue += data.to.get(key) ?? 0;
+function addNode(graph: Graph, key: NodeKey, type: string, name?: string) {
+  if (!graph.has(key)) {
+    graph.set(key, {
+      to: new Map(),
+      type,
+      name,
     });
-  }
-  return nodeValue;
-}
-
-function sortGraph(graph: Graph, categorySort: SortMode = 'per-group'): Graph {
-  if (categorySort == "budget-order") {
-    console.log(graph)
-    return graph
-  } else if (categorySort == "global") {
-    const sortedEntries = Array.from(graph.entries()).sort(
-      ([keyA, valA], [keyB, valB]) => getNodeValue(graph, keyB) - getNodeValue(graph, keyA)
-    );
-    const otherIndex = sortedEntries.findIndex(([key]) => key === 'GLOBAL_OTHER_BUCKET');
-    if (otherIndex !== -1) {
-      const [entry] = sortedEntries.splice(otherIndex, 1);
-      sortedEntries.push(entry);
-    }  
-    return new Map(sortedEntries);
-  } else {
-    const sortedEntries = Array.from(graph.entries()).sort(
-      ([keyA, valA], [keyB, valB]) => getNodeValue(graph, keyB) - getNodeValue(graph, keyA)
-    );
-  
-    return new Map(sortedEntries);
   }
 }
 
-function nodesInLayer(graph: Graph, layer: string): NodeKey[] {
-  return Array.from(graph)
-    .filter(([, data]) => data.type === layer)
-    .map(([key]) => key);
-}
-
-function addTooltipInfo(
+function addValueToLink(
   graph: Graph,
   from: NodeKey,
   to: NodeKey,
   value: number,
 ) {
-  const fromNode = graph.get(from);
-  if (!fromNode) return;
-  fromNode.tooltipInfo = fromNode.tooltipInfo ?? [];
-  fromNode.tooltipInfo.push({ name: graph.get(to)?.name ?? to, value });
+  const fromNode = graph.get(from)!;
+  fromNode.to.set(to, (fromNode.to.get(to) ?? 0) + value);
 }
 
-function getCategoryGroup(graph: Graph, key: NodeKey) {
-  return Array.from(graph).filter(
-    ([, data]) => data.to.has(key) && data.type === 'categoryGroup',
-  )[0];
-}
-
-function moveToOther(graph: Graph, key: NodeKey, globalOther: boolean = false) {
-  const categoryGroup = getCategoryGroup(graph, key);
-  const categoryGroupKey = categoryGroup ? categoryGroup[0] : null;
-  const categoryGroupData = categoryGroupKey ? categoryGroup[1] : null;
-  const categoryValue = categoryGroupData!.to.get(key)!;
-
-  let otherGroupKey: NodeKey;
-  if (globalOther) {
-    otherGroupKey = 'GLOBAL_OTHER_BUCKET';
-  } else {
-    otherGroupKey = categoryGroupKey ? categoryGroupKey + '_OTHER_BUCKET' : 'OTHER';
-  }
-
-  addNode(graph, otherGroupKey, 'other_category', 'Other');
-  addValueToLink(graph, categoryGroupKey, otherGroupKey, categoryValue);
-  addTooltipInfo(graph, categoryGroupKey, key, categoryValue);
-  deleteLink(graph, categoryGroupKey, key);
-}
-
-function promoteOtherBack(graph, deletedNodes, globalOther: boolean = false) {
-  // If an Other node only contains one category, we revert it to an ordinary node
-  let otherGroupKey: NodeKey;
-  deletedNodes.forEach((data, key) => {
-    if (data.length === 1) {
-      if (globalOther) {
-        otherGroupKey = 'GLOBAL_OTHER_BUCKET';
-      } else {
-        otherGroupKey = key ? key + '_OTHER_BUCKET' : 'other';
-      }
-      addNode(graph, data[0].key, 'category', data[0].data.name);
-      addValueToLink(
-        graph,
-        key,
-        data[0].key,
-        graph.get(key).to.get(otherGroupKey),
-      );
-      deleteLink(graph, key, otherGroupKey);
+function getLayer(graph: Graph, key: NodeKey): number {
+  // Find parent nodes for the given key
+  const parents: NodeKey[] = [];
+  for (const [parentKey, data] of graph) {
+    if (data.to.has(key)) {
+      parents.push(parentKey);
     }
-  });
+  }
+  if (parents.length === 0) {
+    // No parents: this is a root node, layer 0
+    return 0;
+  }
+  // Otherwise, 1 + max parent's layer
+  return 1 + Math.max(...parents.map(parentKey => getLayer(graph, parentKey)));
 }
 
 function groupOtherCategories(
@@ -653,148 +655,149 @@ function groupOtherCategories(
   promoteOtherBack(graph, deletedNodes, categorySort === 'global');
 }
 
-function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
-  const graph: Graph = new Map();
-
-  categoryData.forEach(entry => {
-    if (entry.isIncome) {
-      // Payee > Income category > Account
-      addNode(graph, entry.categoryId!, 'payee', entry.category!);
-      addNode(graph, entry.accountId!, 'account', entry.accountName!);
-      addNode(graph, entry.payeeId!, 'payee', entry.payeeName!);
-      addValueToLink(graph, entry.categoryId!, entry.accountId!, entry.value);
-      addValueToLink(graph, entry.payeeId!, entry.categoryId!, entry.value);
-    } else {
-      // Account > Category group > Category
-      addNode(graph, entry.accountId!, 'account', entry.accountName!);
-      addNode(
-        graph,
-        entry.categoryGroupId,
-        'categoryGroup',
-        entry.categoryGroup,
-      );
-      addNode(graph, entry.categoryId!, 'category', entry.category!);
-      addValueToLink(
-        graph,
-        entry.accountId!,
-        entry.categoryGroupId,
-        entry.value,
-      );
-      addValueToLink(
-        graph,
-        entry.categoryGroupId,
-        entry.categoryId!,
-        entry.value,
-      );
-    }
-  });
-
-  graph.forEach((data, key) => {
-    if (data.type === 'account' && getLayer(graph, key) === 0) {
-      // If an account node has no parents (i.e. money was spent from the account, but no money added in the timeframe),
-      // connect it to a synthetic node to ensure it appears in the graph at the right layer.
-      addNode(graph, key + '_hidden_payee', 'payee', '');
-      addNode(graph, key + '_hidden_account', 'account', '');
-      addValueToLink(graph, key + '_hidden_payee', key + '_hidden_account', -1);
-      addValueToLink(graph, key + '_hidden_account', key, -1);
-    }
-  });
-
-  return graph;
+function nodesInLayer(graph: Graph, layer: string): NodeKey[] {
+  return Array.from(graph)
+    .filter(([, data]) => data.type === layer)
+    .map(([key]) => key);
 }
 
-// retrieve sum of group expenses
-async function fetchCategoryData(
-  categoryGroups: CategoryGroupEntity[],
-  conditionsOpKey: string = '$and',
-  filters: unknown[] = [],
-  start: string,
-  end: string,
-): Promise<CategoryEntry[]> {
-  const nested = await Promise.all(
-    categoryGroups.map(async (categoryGroup: CategoryGroupEntity) => {
-      const entries = await Promise.all(
-        (categoryGroup.categories || []).map(async category => {
-          const results = await aqlQuery(
-            q('transactions')
-              .filter({ [conditionsOpKey]: filters })
-              .filter({
-                $and: [
-                  { date: { $gte: monthUtils.firstDayOfMonth(start) } },
-                  { date: { $lte: monthUtils.lastDayOfMonth(end) } },
-                ],
-              })
-              .filter({ category: category.id })
-              .groupBy(
-                categoryGroup.is_income
-                  ? [
-                      { $id: '$category' },
-                      { $id: '$account' },
-                      { $id: '$payee' },
-                    ]
-                  : [{ $id: '$category' }, { $id: '$account' }],
-              )
-              .select([
-                { accountId: { $id: '$account.id' } },
-                { accountName: { $id: '$account.name' } },
-                { amount: { $sum: '$amount' } },
-                { payeeId: { $id: '$payee.id' } },
-                { payeeName: { $id: '$payee.name' } },
-              ]),
-          );
-          return results.data
-            .filter(row => categoryGroup.is_income || (row.amount ?? 0) < 0)
-            .map(
-              row =>
-                ({
-                  categoryGroup: categoryGroup.name,
-                  categoryGroupId: categoryGroup.id,
-                  category: category.name,
-                  categoryId: category.id,
-                  value: Math.abs(row.amount ?? 0),
-                  isIncome: categoryGroup.is_income,
-                  accountName: row.accountName ?? '',
-                  accountId: row.accountId ?? '',
-                  payeeName: row.payeeName ?? '',
-                  payeeId: row.payeeId ?? '',
-                }) satisfies CategoryEntry,
-            );
-        }),
+function moveToOther(graph: Graph, key: NodeKey, globalOther: boolean = false) {
+  const categoryGroup = getCategoryGroup(graph, key);
+  const categoryGroupKey = categoryGroup ? categoryGroup[0] : null;
+  const categoryGroupData = categoryGroupKey ? categoryGroup[1] : null;
+  const categoryValue = categoryGroupData!.to.get(key)!;
+
+  let otherGroupKey: NodeKey;
+  if (globalOther) {
+    otherGroupKey = 'GLOBAL_OTHER_BUCKET';
+  } else {
+    otherGroupKey = categoryGroupKey
+      ? categoryGroupKey + '_OTHER_BUCKET'
+      : 'OTHER';
+  }
+
+  addNode(graph, otherGroupKey, 'other_category', 'Other');
+  addValueToLink(graph, categoryGroupKey, otherGroupKey, categoryValue);
+  addTooltipInfo(graph, categoryGroupKey, key, categoryValue);
+  deleteLink(graph, categoryGroupKey, key);
+}
+
+function addTooltipInfo(
+  graph: Graph,
+  from: NodeKey,
+  to: NodeKey,
+  value: number,
+) {
+  const fromNode = graph.get(from);
+  if (!fromNode) return;
+  fromNode.tooltipInfo = fromNode.tooltipInfo ?? [];
+  fromNode.tooltipInfo.push({ name: graph.get(to)?.name ?? to, value });
+}
+
+function getCategoryGroup(graph: Graph, key: NodeKey) {
+  return Array.from(graph).filter(
+    ([, data]) => data.to.has(key) && data.type === 'categoryGroup',
+  )[0];
+}
+
+function deleteLink(graph: Graph, from: NodeKey, to: NodeKey) {
+  const fromNode = graph.get(from);
+  if (fromNode) {
+    fromNode.to.delete(to);
+  }
+}
+
+function promoteOtherBack(graph, deletedNodes, globalOther: boolean = false) {
+  // If an Other node only contains one category, we revert it to an ordinary node
+  let otherGroupKey: NodeKey;
+  deletedNodes.forEach((data, key) => {
+    if (data.length === 1) {
+      if (globalOther) {
+        otherGroupKey = 'GLOBAL_OTHER_BUCKET';
+      } else {
+        otherGroupKey = key ? key + '_OTHER_BUCKET' : 'other';
+      }
+      addNode(graph, data[0].key, 'category', data[0].data.name);
+      addValueToLink(
+        graph,
+        key,
+        data[0].key,
+        graph.get(key).to.get(otherGroupKey),
       );
-      return entries.flat();
-    }),
-  );
-  return nested.flat().filter(e => e.value > 0);
+      deleteLink(graph, key, otherGroupKey);
+    }
+  });
+}
+
+function sortGraph(graph: Graph, categorySort: SortMode = 'per-group'): Graph {
+  if (categorySort === 'budget-order') {
+    return graph;
+  } else if (categorySort === 'global') {
+    const sortedEntries = Array.from(graph.entries()).sort(
+      ([keyA], [keyB]) => getNodeValue(graph, keyB) - getNodeValue(graph, keyA),
+    );
+
+    moveNodeToEnd(sortedEntries, 'GLOBAL_OTHER_BUCKET');
+
+    return new Map(sortedEntries);
+  } else {
+    const sortedEntries = Array.from(graph.entries()).sort(
+      ([keyA], [keyB]) => getNodeValue(graph, keyB) - getNodeValue(graph, keyA),
+    );
+
+    return new Map(sortedEntries);
+  }
+}
+
+function moveNodeToEnd(entries: Array<[string, NodeData]>, key: NodeKey) {
+  const nodeIndex = entries.findIndex(([nodekey]) => nodekey === key);
+  if (nodeIndex !== -1) {
+    const [entry] = entries.splice(nodeIndex, 1);
+    entries.push(entry);
+  }
+}
+
+function getNodeValue(graph: Graph, key: NodeKey): number {
+  let nodeValue: number = 0;
+
+  if (getLayer(graph, key) === 0) {
+    // Look at outgoing links for root nodes
+    graph.get(key).to.forEach(value => {
+      nodeValue += value ?? 0;
+    });
+  } else {
+    graph.forEach(data => {
+      nodeValue += data.to.get(key) ?? 0;
+    });
+  }
+  return nodeValue;
 }
 
 function convertToSankeyData(graph: Graph): SankeyData {
+  console.log(graph);
   const nodes = Array.from(graph, ([key, data]) => ({
     key,
     name: data.name ?? key,
   }));
   const links = Array.from(graph).flatMap(([key, data]) =>
-    Array.from(data.to, ([targetKey, value]) => ({
-      source: nodes.findIndex(n => n.key === key) ?? -1,
-      target: nodes.findIndex(n => n.key === targetKey) ?? -1,
-      value,
-      tooltipInfo: data.tooltipInfo,
-    })),
-  );
-
-  nodes.forEach((node, key) => {
-    if (!node.key.includes('_OTHER_BUCKET')) {
-      const linkIndex = links.findIndex(n => n.source === key)
-      if (linkIndex >= 0) {
-        links[linkIndex].tooltipInfo = []
+    Array.from(data.to, ([targetKey, value]) => {
+      let tooltipInfo = [];
+      if (data.tooltipInfo && targetKey.endsWith('_OTHER_BUCKET')) {
+        tooltipInfo = data.tooltipInfo;
+        tooltipInfo.sort((a, b) => b.value - a.value);
       }
-    }
-  });
 
+      return {
+        source: nodes.findIndex(n => n.key === key) ?? -1,
+        target: nodes.findIndex(n => n.key === targetKey) ?? -1,
+        value,
+        tooltipInfo,
+      };
+    }),
+  );
 
   return {
     nodes,
     links,
   };
 }
-
-//nodes[nodes.findIndex(n => n.key === targetKey)].name.includes('_OTHER') ?
