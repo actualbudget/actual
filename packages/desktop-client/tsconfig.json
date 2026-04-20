@@ -11,11 +11,20 @@
     "rootDir": ".",
     "tsBuildInfoFile": "build/ts/.tsbuildinfo",
     "customConditions": ["electron-renderer"],
-    "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
+    "plugins": [
+      {
+        "name": "typescript-strict-plugin",
+        "paths": ["."]
+      }
+    ]
   },
   "references": [
-    { "path": "../loot-core" },
-    { "path": "../component-library" }
+    {
+      "path": "../component-library"
+    },
+    {
+      "path": "../loot-core"
+    }
   ],
   "include": ["**/*.ts", "src/**/*.tsx", "src/**/*.js"],
   "exclude": [
