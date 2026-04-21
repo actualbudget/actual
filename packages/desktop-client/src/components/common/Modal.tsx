@@ -28,7 +28,7 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
-import { useModalState } from '@desktop-client/hooks/useModalState';
+import { useModalState } from '#hooks/useModalState';
 
 export const MODAL_Z_INDEX = 3000;
 

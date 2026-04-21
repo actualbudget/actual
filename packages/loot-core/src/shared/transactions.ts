@@ -1,7 +1,5 @@
-import { v4 as uuidv4 } from 'uuid';
-
-import { logger } from '../platform/server/log';
-import type { TransactionEntity } from '../types/models';
+import { logger } from '#platform/server/log';
+import type { TransactionEntity } from '#types/models';
 
 import { applyChanges, diffItems, last } from './util';
 
@@ -41,11 +39,11 @@ export function makeChild<T extends GenericTransactionEntity>(
     ...data,
     category: 'category' in data ? data.category : parent.category,
     payee: 'payee' in data ? data.payee : parent.payee,
-    id: 'id' in data ? data.id : prefix + uuidv4(),
+    id: 'id' in data ? data.id : prefix + crypto.randomUUID(),
     account: parent.account,
     date: parent.date,
     cleared: parent.cleared != null ? parent.cleared : null,
-    reconciled: 'reconciled' in data ? data.reconciled : parent.reconciled,
+    reconciled: parent.reconciled != null ? parent.reconciled : null,
     starting_balance_flag:
       parent.starting_balance_flag != null
         ? parent.starting_balance_flag
@@ -262,7 +260,8 @@ export function updateTransaction(
 ) {
   return replaceTransactions(transactions, transaction.id, trans => {
     if (trans.is_parent) {
-      const parent = trans.id === transaction.id ? transaction : trans;
+      const parent =
+        trans.id === transaction.id ? { ...trans, ...transaction } : trans;
       const originalSubtransactions =
         parent.subtransactions ?? trans.subtransactions;
       const sub = originalSubtransactions?.map(t => {
@@ -358,7 +357,7 @@ export function realizeTempTransactions(
 ): TransactionEntity[] {
   const parent = {
     ...transactions.find(t => !t.is_child),
-    id: uuidv4(),
+    id: crypto.randomUUID(),
     sort_order: Date.now(),
   } as TransactionEntity;
   const children = transactions.filter(t => t.is_child);
@@ -368,7 +367,7 @@ export function realizeTempTransactions(
       child =>
         ({
           ...child,
-          id: uuidv4(),
+          id: crypto.randomUUID(),
           parent_id: parent.id,
         }) satisfies TransactionEntity,
     ),

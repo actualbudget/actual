@@ -21,9 +21,9 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { useDrag } from '@use-gesture/react';
 
-import { useIsTestEnv } from '@desktop-client/hooks/useIsTestEnv';
-import { useScrollListener } from '@desktop-client/hooks/useScrollListener';
-import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
+import { useIsTestEnv } from '#hooks/useIsTestEnv';
+import { useScrollListener } from '#hooks/useScrollListener';
+import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
 const COLUMN_COUNT = 3;
 const PILL_HEIGHT = 15;

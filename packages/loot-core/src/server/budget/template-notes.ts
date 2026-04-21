@@ -1,4 +1,4 @@
-import type { Template } from '../../types/models/templates';
+import type { Template } from '#types/models/templates';
 
 import { storeTemplates } from './goal-template';
 import { parse } from './goal-template.pegjs';

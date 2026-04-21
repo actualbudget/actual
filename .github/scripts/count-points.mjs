@@ -62,77 +62,28 @@ function parseReleaseNotesCategory(content) {
 }
 
 /**
- * Get the last commit SHA on or before a given date.
- * @param {Octokit} octokit - The Octokit instance.
- * @param {string} owner - Repository owner.
- * @param {string} repo - Repository name.
- * @param {Date} beforeDate - The date to find the last commit before.
- * @returns {Promise<string|null>} The commit SHA or null if not found.
- */
-async function getLastCommitBeforeDate(octokit, owner, repo, beforeDate) {
-  try {
-    // Get the default branch from the repository
-    const { data: repoData } = await octokit.repos.get({ owner, repo });
-    const defaultBranch = repoData.default_branch;
-
-    const { data: commits } = await octokit.repos.listCommits({
-      owner,
-      repo,
-      sha: defaultBranch,
-      until: beforeDate.toISOString(),
-      per_page: 1,
-    });
-
-    if (commits.length > 0) {
-      return commits[0].sha;
-    }
-  } catch {
-    // If error occurs, return null to fall back to default branch
-  }
-
-  return null;
-}
-
-/**
  * Get the category and points for a PR by reading its release notes file.
  * @param {Octokit} octokit - The Octokit instance.
  * @param {string} owner - Repository owner.
  * @param {string} repo - Repository name.
- * @param {number} prNumber - PR number.
- * @param {Date} monthEnd - The end date of the month to use as base revision.
- * @returns {Promise<Object>} Object with category and points, or null if error.
+ * @param {string|null} releaseNoteBlobSha - The blob SHA of the release notes file, or null if not found.
+ * @returns {Promise<Object>} Object with category and points.
  */
 async function getPRCategoryAndPoints(
   octokit,
   owner,
   repo,
-  prNumber,
-  monthEnd,
+  releaseNoteBlobSha,
 ) {
-  const releaseNotesPath = `upcoming-release-notes/${prNumber}.md`;
-
   try {
-    // Get the last commit of the month to use as base revision
-    const commitSha = await getLastCommitBeforeDate(
-      octokit,
-      owner,
-      repo,
-      monthEnd,
-    );
+    if (releaseNoteBlobSha) {
+      const { data: blob } = await octokit.git.getBlob({
+        owner,
+        repo,
+        file_sha: releaseNoteBlobSha,
+      });
 
-    // Try to read the release notes file from the last commit of the month
-    const { data: fileContent } = await octokit.repos.getContent({
-      owner,
-      repo,
-      path: releaseNotesPath,
-      ref: commitSha || undefined, // Use commit SHA if available, otherwise default branch
-    });
-
-    if (fileContent.content) {
-      // Decode base64 content
-      const content = Buffer.from(fileContent.content, 'base64').toString(
-        'utf-8',
-      );
+      const content = Buffer.from(blob.content, 'base64').toString('utf-8');
       const category = parseReleaseNotesCategory(content);
       const tier = CONFIG.PR_CONTRIBUTION_POINTS.find(e =>
         e.categories.includes(category),
@@ -345,12 +296,15 @@ async function countContributorPoints() {
           // Award points to PR author if they are a core maintainer
           const prAuthor = pr.user?.login;
           if (prAuthor && orgMemberLogins.has(prAuthor)) {
+            const releaseNoteFile = modifiedFiles.find(
+              file =>
+                file.filename === `upcoming-release-notes/${pr.number}.md`,
+            );
             const categoryAndPoints = await getPRCategoryAndPoints(
               octokit,
               owner,
               repo,
-              pr.number,
-              until,
+              releaseNoteFile?.sha ?? null,
             );
 
             if (categoryAndPoints) {

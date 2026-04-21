@@ -1,4 +1,4 @@
-import SskDusseldorfDussdeddxxx from '../ssk_dusseldorf_dussdeddxxx';
+import SskDusseldorfDussdeddxxx from '#app-gocardless/banks/ssk_dusseldorf_dussdeddxxx';
 
 describe('ssk_dusseldorf_dussdeddxxx', () => {
   let consoleSpy;

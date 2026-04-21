@@ -12,24 +12,23 @@ import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { toRelaxedNumber } from '@actual-app/core/shared/util';
 
-import { toRelaxedNumber } from 'loot-core/shared/util';
-
-import { useCreateAccountMutation } from '@desktop-client/accounts';
-import { Link } from '@desktop-client/components/common/Link';
+import { useCreateAccountMutation } from '#accounts';
+import { Link } from '#components/common/Link';
 import {
   Modal,
   ModalButtons,
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '@desktop-client/components/common/Modal';
-import { Checkbox } from '@desktop-client/components/forms';
-import { validateAccountName } from '@desktop-client/components/util/accountValidation';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { closeModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+} from '#components/common/Modal';
+import { Checkbox } from '#components/forms';
+import { validateAccountName } from '#components/util/accountValidation';
+import { useAccounts } from '#hooks/useAccounts';
+import { useNavigate } from '#hooks/useNavigate';
+import { closeModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 export function CreateLocalAccountModal() {
   const { t } = useTranslation();

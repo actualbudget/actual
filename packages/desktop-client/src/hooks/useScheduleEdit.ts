@@ -1,23 +1,23 @@
 // @ts-strict-ignore
 import { useEffect, useEffectEvent, useReducer, useState } from 'react';
 
-import { send, sendCatch } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
+import { send, sendCatch } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
 import {
   extractScheduleConds,
   getScheduledAmount,
-} from 'loot-core/shared/schedules';
+} from '@actual-app/core/shared/schedules';
 import type {
   RecurConfig,
   ScheduleEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
-import { updateScheduleConditions } from '@desktop-client/components/schedules/schedule-edit-utils';
-import type { ScheduleFormFields } from '@desktop-client/components/schedules/ScheduleEditForm';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import { liveQuery } from '@desktop-client/queries/liveQuery';
+import { updateScheduleConditions } from '#components/schedules/schedule-edit-utils';
+import type { ScheduleFormFields } from '#components/schedules/ScheduleEditForm';
+import { aqlQuery } from '#queries/aqlQuery';
+import { liveQuery } from '#queries/liveQuery';
 
 export type ScheduleEditState = {
   isCustom?: boolean;

@@ -1,7 +1,7 @@
 import * as api from '@actual-app/api';
 import { Command } from 'commander';
 
-import { printOutput } from '../output';
+import { printOutput } from '#output';
 
 import { parseOrderBy, registerQueryCommand } from './query';
 
@@ -21,11 +21,11 @@ vi.mock('@actual-app/api', () => {
   };
 });
 
-vi.mock('../connection', () => ({
+vi.mock('#connection', () => ({
   withConnection: vi.fn((_opts, fn) => fn()),
 }));
 
-vi.mock('../output', () => ({
+vi.mock('#output', () => ({
   printOutput: vi.fn(),
 }));
 
@@ -143,6 +143,25 @@ describe('query commands', () => {
         { date: 'desc' },
         { amount: 'asc' },
       ]);
+    });
+
+    it('outputs unwrapped data array (not the full result envelope)', async () => {
+      const mockData = [{ id: '1', amount: -500 }];
+      vi.mocked(api.aqlQuery).mockResolvedValueOnce({
+        data: mockData,
+        dependencies: [],
+      });
+
+      await run([
+        'query',
+        'run',
+        '--table',
+        'transactions',
+        '--select',
+        'id,amount',
+      ]);
+
+      expect(printOutput).toHaveBeenCalledWith(mockData, undefined);
     });
 
     it('passes --filter as JSON', async () => {

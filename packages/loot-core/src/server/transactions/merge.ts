@@ -1,11 +1,11 @@
-import { q } from '../../shared/query';
+import { aqlQuery } from '#server/aql';
+import * as db from '#server/db';
+import { q } from '#shared/query';
 import {
   deleteTransaction as sharedDeleteTransaction,
   ungroupTransactions,
-} from '../../shared/transactions';
-import type { TransactionEntity } from '../../types/models';
-import { aqlQuery } from '../aql';
-import * as db from '../db';
+} from '#shared/transactions';
+import type { TransactionEntity } from '#types/models';
 
 import { batchUpdateTransactions } from '.';
 

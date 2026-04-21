@@ -1,10 +1,10 @@
 // @ts-strict-ignore
 import * as d from 'date-fns';
 
-import { amountToInteger } from '../../../shared/util';
-import { reconcileTransactions } from '../../accounts/sync';
-import * as db from '../../db';
-import * as prefs from '../../prefs';
+import { reconcileTransactions } from '#server/accounts/sync';
+import * as db from '#server/db';
+import * as prefs from '#server/prefs';
+import { amountToInteger } from '#shared/util';
 
 import { parseFile } from './parse-file';
 

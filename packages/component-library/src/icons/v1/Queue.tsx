@@ -10,9 +10,6 @@ export const SvgQueue = (props: SVGProps<SVGSVGElement>) => (
       ...props.style,
     }}
   >
-    <path
-      d="M0 2h20v4H0V2zm0 8h20v2H0v-2zm0 6h20v2H0v-2z"
-      fill="currentColor"
-    />
+    <path d="M0 2h20v4H0zm0 8h20v2H0zm0 6h20v2H0z" fill="currentColor" />
   </svg>
 );

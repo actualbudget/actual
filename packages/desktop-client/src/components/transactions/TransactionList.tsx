@@ -2,14 +2,14 @@
 // TODO: remove strict
 import { useCallback, useLayoutEffect, useRef } from 'react';
 import type { RefObject } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
-import { getUpcomingDays } from 'loot-core/shared/schedules';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
+import { getUpcomingDays } from '@actual-app/core/shared/schedules';
 import {
   addSplitTransaction,
   applyTransactionDiff,
@@ -17,8 +17,8 @@ import {
   realizeTempTransactions,
   splitTransaction,
   updateTransaction,
-} from 'loot-core/shared/transactions';
-import { applyChanges, getChangedValues } from 'loot-core/shared/util';
+} from '@actual-app/core/shared/transactions';
+import { applyChanges, getChangedValues } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -28,19 +28,20 @@ import type {
   ScheduleEntity,
   TransactionEntity,
   TransactionFilterEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
+import type { TableHandleRef } from '#components/table';
+import { isValidBoundaryDrop } from '#hooks/useDragDrop';
+import type { DropPosition } from '#hooks/useDragDrop';
+import { useNavigate } from '#hooks/useNavigate';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { pushModal } from '#modals/modalsSlice';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
 
 import { TransactionTable } from './TransactionsTable';
 import type { TransactionTableProps } from './TransactionsTable';
-
-import type { TableHandleRef } from '@desktop-client/components/table';
-import { isValidBoundaryDrop } from '@desktop-client/hooks/useDragDrop';
-import type { DropPosition } from '@desktop-client/hooks/useDragDrop';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
 // When data changes, there are two ways to update the UI:
 //
 // * Optimistic updates: we apply the needed updates to local data
@@ -723,53 +724,55 @@ export function TransactionList({
   );
 
   return (
-    <TransactionTable
-      ref={tableRef}
-      transactions={allTransactions}
-      loadMoreTransactions={loadMoreTransactions}
-      accounts={accounts}
-      categoryGroups={categoryGroups}
-      payees={payees}
-      balances={balances}
-      showBalances={showBalances}
-      showReconciled={showReconciled}
-      showCleared={showCleared}
-      showAccount={showAccount}
-      showCategory
-      currentAccountId={account && account.id}
-      currentCategoryId={category && category.id}
-      isAdding={isAdding}
-      isNew={isNew}
-      isMatched={isMatched}
-      dateFormat={dateFormat}
-      hideFraction={hideFraction}
-      renderEmpty={renderEmpty}
-      onSave={onSave}
-      onApplyRules={onApplyRules}
-      onSplit={onSplit}
-      onCloseAddTransaction={onCloseAddTransaction}
-      onAdd={onAdd}
-      onAddSplit={onAddSplit}
-      onManagePayees={onManagePayees}
-      onCreatePayee={onCreatePayee}
-      style={{ backgroundColor: theme.tableBackground }}
-      onNavigateToTransferAccount={onNavigateToTransferAccount}
-      onNavigateToSchedule={onNavigateToSchedule}
-      onNotesTagClick={onNotesTagClick}
-      onSort={onSort}
-      sortField={sortField}
-      ascDesc={ascDesc}
-      isFiltered={isFiltered}
-      onReorder={allowReorder ? onReorder : undefined}
-      onBatchDelete={onBatchDelete}
-      onBatchDuplicate={onBatchDuplicate}
-      onBatchLinkSchedule={onBatchLinkSchedule}
-      onBatchUnlinkSchedule={onBatchUnlinkSchedule}
-      onCreateRule={onCreateRule}
-      onScheduleAction={onScheduleAction}
-      onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
-      showSelection={showSelection}
-      allowSplitTransaction={allowSplitTransaction}
-    />
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <TransactionTable
+        ref={tableRef}
+        transactions={allTransactions}
+        loadMoreTransactions={loadMoreTransactions}
+        accounts={accounts}
+        categoryGroups={categoryGroups}
+        payees={payees}
+        balances={balances}
+        showBalances={showBalances}
+        showReconciled={showReconciled}
+        showCleared={showCleared}
+        showAccount={showAccount}
+        showCategory
+        currentAccountId={account && account.id}
+        currentCategoryId={category && category.id}
+        isAdding={isAdding}
+        isNew={isNew}
+        isMatched={isMatched}
+        dateFormat={dateFormat}
+        hideFraction={hideFraction}
+        renderEmpty={renderEmpty}
+        onSave={onSave}
+        onApplyRules={onApplyRules}
+        onSplit={onSplit}
+        onCloseAddTransaction={onCloseAddTransaction}
+        onAdd={onAdd}
+        onAddSplit={onAddSplit}
+        onManagePayees={onManagePayees}
+        onCreatePayee={onCreatePayee}
+        style={{ backgroundColor: theme.tableBackground }}
+        onNavigateToTransferAccount={onNavigateToTransferAccount}
+        onNavigateToSchedule={onNavigateToSchedule}
+        onNotesTagClick={onNotesTagClick}
+        onSort={onSort}
+        sortField={sortField}
+        ascDesc={ascDesc}
+        isFiltered={isFiltered}
+        onReorder={allowReorder ? onReorder : undefined}
+        onBatchDelete={onBatchDelete}
+        onBatchDuplicate={onBatchDuplicate}
+        onBatchLinkSchedule={onBatchLinkSchedule}
+        onBatchUnlinkSchedule={onBatchUnlinkSchedule}
+        onCreateRule={onCreateRule}
+        onScheduleAction={onScheduleAction}
+        onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
+        showSelection={showSelection}
+        allowSplitTransaction={allowSplitTransaction}
+      />
+    </ErrorBoundary>
   );
 }

@@ -6,7 +6,6 @@
     // the latest Node 16.x release supports all of the features
     "target": "ES2021",
     "module": "CommonJS",
-    "moduleResolution": "node10",
     "noEmit": false,
     "strict": false, // TODO: fix issues and remove this
     "declaration": true,
@@ -14,9 +13,24 @@
     "outDir": "build",
     "rootDir": "..",
     "tsBuildInfoFile": "build/.tsbuildinfo",
-    "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
+    "plugins": [
+      {
+        "name": "typescript-strict-plugin",
+        "paths": ["."]
+      }
+    ]
   },
-  "references": [{ "path": "../loot-core" }, { "path": "../sync-server" }],
+  "references": [
+    {
+      "path": "../sync-server"
+    },
+    {
+      "path": "../loot-core"
+    },
+    {
+      "path": "../desktop-client"
+    }
+  ],
   "include": ["."],
   "exclude": [
     "**/node_modules/*",

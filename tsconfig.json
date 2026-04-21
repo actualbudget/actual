@@ -17,7 +17,6 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
-    "downlevelIteration": true,
     // TODO: enable once every file is ts
     // "strict": true,
     "strictFunctionTypes": true,
@@ -45,7 +44,7 @@
     "**/client-build/*",
     "**/dist/*",
     "**/lib-dist/*",
-    "packages/api/@types",
+    "packages/*/@types",
     "**/test-results/*",
     "**/playwright-report/*",
     "**/service-worker/*",
@@ -53,7 +52,8 @@
   ],
   "ts-node": {
     "compilerOptions": {
-      "module": "CommonJS"
+      "module": "CommonJS",
+      "types": ["node"]
     }
   }
 }

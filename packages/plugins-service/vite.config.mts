@@ -19,16 +19,7 @@ export default defineConfig(({ mode }) => {
         fileName: () => `plugin-sw.js`,
       },
       sourcemap: true,
-      minify: isDev ? false : 'terser',
-      terserOptions: {
-        compress: {
-          drop_debugger: false,
-        },
-        mangle: false,
-      },
-    },
-    resolve: {
-      extensions: ['.js', '.ts', '.json'],
+      minify: false,
     },
     define: {
       'process.env': '{}',

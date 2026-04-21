@@ -1,0 +1,17 @@
+name: Check release notes
+description: Validate that a PR includes a properly formatted release note file
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+      with:
+        node-version: 22
+    - name: Install dependencies
+      shell: bash
+      run: yarn workspaces focus @actual-app/ci-actions
+    - name: Check release notes
+      env:
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+      shell: bash
+      run: node packages/ci-actions/bin/release-notes-check.mjs

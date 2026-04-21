@@ -11,7 +11,7 @@ export const SvgLayers = (props: SVGProps<SVGSVGElement>) => (
     }}
   >
     <path
-      d="m10 1 10 6-10 6L0 7l10-6zm6.67 10L20 13l-10 6-10-6 3.33-2L10 15l6.67-4z"
+      d="m10 1 10 6-10 6L0 7zm6.67 10L20 13l-10 6-10-6 3.33-2L10 15z"
       fill="currentColor"
     />
   </svg>

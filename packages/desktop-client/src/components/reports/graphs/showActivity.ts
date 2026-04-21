@@ -1,15 +1,15 @@
 import type { NavigateFunction } from 'react-router';
 
-import * as monthUtils from 'loot-core/shared/months';
+import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   AccountEntity,
   balanceTypeOpType,
   CategoryEntity,
   CategoryGroupEntity,
   RuleConditionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
-import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
+import { ReportOptions } from '#components/reports/ReportOptions';
 
 type showActivityProps = {
   navigate: NavigateFunction;

@@ -6,7 +6,7 @@ import type {
   PeriodicTemplate,
   RefillTemplate,
   ScheduleTemplate,
-} from 'loot-core/types/models/templates';
+} from '@actual-app/core/types/models/templates';
 
 export const displayTemplateTypes = [
   ['limit', 'Balance limit'] as const,

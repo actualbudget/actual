@@ -1,18 +1,30 @@
 import React, { useEffect, useEffectEvent, useRef } from 'react';
 import type { ReactElement } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 import { Navigate, Route, Routes, useHref, useLocation } from 'react-router';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { useQuery } from '@tanstack/react-query';
+import * as undo from '@actual-app/core/platform/client/undo';
 
-import * as undo from 'loot-core/platform/client/undo';
+import { getLatestAppVersion, sync } from '#app/appSlice';
+import { ProtectedRoute } from '#auth/ProtectedRoute';
+import { Permissions } from '#auth/types';
+import { useAccounts } from '#hooks/useAccounts';
+import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useLocalPref } from '#hooks/useLocalPref';
+import { useMetaThemeColor } from '#hooks/useMetaThemeColor';
+import { useNavigate } from '#hooks/useNavigate';
+import { ScrollProvider } from '#hooks/useScrollListener';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch, useSelector } from '#redux';
 
 import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
 import { BankSyncStatus } from './BankSyncStatus';
 import { CommandBar } from './CommandBar';
+import { FeatureErrorFallback } from './FeatureErrorFallback';
 import { GlobalKeys } from './GlobalKeys';
 import { MobileBankSyncAccountEditPage } from './mobile/banksync/MobileBankSyncAccountEditPage';
 import { MobileNavTabs } from './mobile/MobileNavTabs';
@@ -27,19 +39,6 @@ import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { ManageTagsPage } from './tags/ManageTagsPage';
 import { Titlebar } from './Titlebar';
-
-import { accountQueries } from '@desktop-client/accounts';
-import { getLatestAppVersion, sync } from '@desktop-client/app/appSlice';
-import { ProtectedRoute } from '@desktop-client/auth/ProtectedRoute';
-import { Permissions } from '@desktop-client/auth/types';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
-import { useMetaThemeColor } from '@desktop-client/hooks/useMetaThemeColor';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { ScrollProvider } from '@desktop-client/hooks/useScrollListener';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
 
 function NarrowNotSupported({
   redirectTo = '/budget',
@@ -89,6 +88,7 @@ export function FinancesApp() {
   const { isNarrowWidth } = useResponsive();
   useMetaThemeColor(isNarrowWidth ? theme.mobileViewTheme : undefined);
 
+  const location = useLocation();
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
@@ -289,11 +289,25 @@ export function FinancesApp() {
                 />
                 <Route
                   path="/rules"
-                  element={<NarrowAlternate name="Rules" />}
+                  element={
+                    <ErrorBoundary
+                      FallbackComponent={FeatureErrorFallback}
+                      resetKeys={[location.pathname]}
+                    >
+                      <NarrowAlternate name="Rules" />
+                    </ErrorBoundary>
+                  }
                 />
                 <Route
                   path="/rules/:id"
-                  element={<NarrowAlternate name="RuleEdit" />}
+                  element={
+                    <ErrorBoundary
+                      FallbackComponent={FeatureErrorFallback}
+                      resetKeys={[location.pathname]}
+                    >
+                      <NarrowAlternate name="RuleEdit" />
+                    </ErrorBoundary>
+                  }
                 />
                 <Route
                   path="/bank-sync"

@@ -4,27 +4,25 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { send, sendCatch } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
+import type {
+  RecurConfig,
+  ScheduleEntity,
+} from '@actual-app/core/types/models';
 
-import { send, sendCatch } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
-import type { RecurConfig, ScheduleEntity } from 'loot-core/types/models';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { usePayeesById } from '#hooks/usePayees';
+import { useScheduleEdit } from '#hooks/useScheduleEdit';
+import { useSelected } from '#hooks/useSelected';
+import { pushModal } from '#modals/modalsSlice';
+import type { Modal as ModalType } from '#modals/modalsSlice';
+import { aqlQuery } from '#queries/aqlQuery';
+import { useDispatch } from '#redux';
 
 import { updateScheduleConditions } from './schedule-edit-utils';
 import { ScheduleEditForm } from './ScheduleEditForm';
-
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { usePayeesById } from '@desktop-client/hooks/usePayees';
-import { useScheduleEdit } from '@desktop-client/hooks/useScheduleEdit';
-import { useSelected } from '@desktop-client/hooks/useSelected';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import { useDispatch } from '@desktop-client/redux';
 
 type ScheduleEditModalProps = Extract<
   ModalType,

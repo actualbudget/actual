@@ -4,20 +4,19 @@ import type { CSSProperties, RefObject, UIEventHandler } from 'react';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
 import type {
   balanceTypeOpType,
   GroupedEntity,
   RuleConditionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { showActivity } from '@desktop-client/components/reports/graphs/showActivity';
-import { Cell, Row } from '@desktop-client/components/table';
-import { useAccounts } from '@desktop-client/hooks/useAccounts';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
+import { FinancialText } from '#components/FinancialText';
+import { showActivity } from '#components/reports/graphs/showActivity';
+import { Cell, Row } from '#components/table';
+import { useAccounts } from '#hooks/useAccounts';
+import { useCategories } from '#hooks/useCategories';
+import { useFormat } from '#hooks/useFormat';
+import { useNavigate } from '#hooks/useNavigate';
 
 type ReportTableRowProps = {
   item: GroupedEntity;

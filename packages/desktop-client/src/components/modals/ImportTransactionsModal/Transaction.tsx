@@ -8,16 +8,15 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { amountToCurrency } from '@actual-app/core/shared/util';
+import type { CategoryEntity } from '@actual-app/core/types/models';
 
-import { amountToCurrency } from 'loot-core/shared/util';
-import type { CategoryEntity } from 'loot-core/types/models';
+import { Checkbox } from '#components/forms';
+import { Field, Row } from '#components/table';
 
 import { ParsedDate } from './ParsedDate';
 import { applyFieldMappings, formatDate, parseAmountFields } from './utils';
 import type { FieldMapping, ImportTransaction } from './utils';
-
-import { Checkbox } from '@desktop-client/components/forms';
-import { Field, Row } from '@desktop-client/components/table';
 
 type TransactionProps = {
   transaction: ImportTransaction;

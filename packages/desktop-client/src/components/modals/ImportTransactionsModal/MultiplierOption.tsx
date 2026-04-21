@@ -5,7 +5,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Input } from '@actual-app/components/input';
 import { View } from '@actual-app/components/view';
 
-import { LabeledCheckbox } from '@desktop-client/components/forms/LabeledCheckbox';
+import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 
 type MultiplierOptionProps = {
   multiplierEnabled: boolean;

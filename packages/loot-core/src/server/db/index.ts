@@ -9,29 +9,28 @@ import {
 } from '@actual-app/crdt';
 import type { Database, Statement } from '@jlongster/sql.js';
 import { LRUCache } from 'lru-cache';
-import { v4 as uuidv4 } from 'uuid';
 
-import * as fs from '../../platform/server/fs';
-import * as sqlite from '../../platform/server/sqlite';
-import * as monthUtils from '../../shared/months';
-import { groupById } from '../../shared/util';
-import type { TransactionEntity } from '../../types/models';
-import type { WithRequired } from '../../types/util';
+import * as fs from '#platform/server/fs';
+import * as sqlite from '#platform/server/sqlite';
 import {
   convertForInsert,
   convertForUpdate,
   convertFromSelect,
   schema,
   schemaConfig,
-} from '../aql';
+} from '#server/aql';
 import {
   accountModel,
   categoryGroupModel,
   categoryModel,
   payeeModel,
   toDateRepr,
-} from '../models';
-import { batchMessages, sendMessages } from '../sync';
+} from '#server/models';
+import { batchMessages, sendMessages } from '#server/sync';
+import * as monthUtils from '#shared/months';
+import { groupById } from '#shared/util';
+import type { TransactionEntity } from '#types/models';
+import type { WithRequired } from '#types/util';
 
 import {
   shoveSortOrders,
@@ -56,7 +55,7 @@ import type {
 
 export * from './types';
 
-export { toDateRepr, fromDateRepr } from '../models';
+export { toDateRepr, fromDateRepr } from '#server/models';
 
 let dbPath: string | null = null;
 let db: Database | null = null;
@@ -224,7 +223,7 @@ export async function update(table, params) {
 
 export async function insertWithUUID(table, row) {
   if (!row.id) {
-    row = { ...row, id: uuidv4() };
+    row = { ...row, id: crypto.randomUUID() };
   }
 
   await insert(table, row);
@@ -293,7 +292,7 @@ export function insertWithSchema(table, row) {
   // Even though `insertWithUUID` does this, we need to do it here so
   // the schema validation passes
   if (!row.id) {
-    row = { ...row, id: uuidv4() };
+    row = { ...row, id: crypto.randomUUID() };
   }
 
   return insertWithUUID(

@@ -14,6 +14,7 @@ import {
 import type {
   DragPreviewRenderer,
   DropPosition,
+  DropResult,
   TextDropItem,
 } from 'react-aria';
 
@@ -290,7 +291,12 @@ export function useDrop<T extends { id: string }>({
   id,
   onDrop,
   onLongHover,
-}: UseDropArgs) {
+}: UseDropArgs): {
+  dropRef: RefObject<HTMLDivElement | null>;
+  dropProps: DropResult['dropProps'];
+  dropPos: DropPosition | null;
+  isDropTarget: boolean;
+} {
   const dropRef = useRef<HTMLDivElement>(null);
   const [dropPos, setDropPos] = useState<DropPosition | null>(null);
   // Track if cursor is actually within this element's bounds (not just drag preview overlap)
@@ -309,7 +315,7 @@ export function useDrop<T extends { id: string }>({
 
   const acceptedTypes = Array.isArray(types) ? types : [types];
 
-  const { dropProps, isDropTarget } = useReactAriaDrop({
+  const { dropProps, isDropTarget }: DropResult = useReactAriaDrop({
     ref: dropRef as RefObject<HTMLDivElement | null>,
     getDropOperation(dragTypes) {
       // Check if any of our accepted types are in the drag types

@@ -1,8 +1,8 @@
+import { captureException } from '#platform/exceptions';
+import { logger } from '#platform/server/log';
 // @ts-strict-ignore
-import { APIError } from '../../../server/errors';
-import { isMutating, runHandler } from '../../../server/mutators';
-import { captureException } from '../../exceptions';
-import { logger } from '../log';
+import { APIError } from '#server/errors';
+import { isMutating, runHandler } from '#server/mutators';
 
 import type * as T from './index-types';
 
@@ -102,9 +102,7 @@ export const init: T.Init = function (serverChn, handlers) {
           serverChannel.postMessage({
             type: 'reply',
             id,
-            result: catchErrors
-              ? { error: unknownMethodError, data: null }
-              : null,
+            result: { error: unknownMethodError, data: null },
           });
         } else {
           serverChannel.postMessage({

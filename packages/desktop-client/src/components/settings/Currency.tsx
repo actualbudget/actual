@@ -5,14 +5,13 @@ import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { currencies, getCurrency } from '@actual-app/core/shared/currencies';
 import { css } from '@emotion/css';
 
-import { currencies, getCurrency } from 'loot-core/shared/currencies';
+import { Checkbox } from '#components/forms';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 import { Column, Setting } from './UI';
-
-import { Checkbox } from '@desktop-client/components/forms';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 export function CurrencySettings() {
   const { t } = useTranslation();
@@ -28,6 +27,7 @@ export function CurrencySettings() {
         ['BYN', t('Belarusian Ruble')],
         ['CAD', t('Canadian Dollar')],
         ['CHF', t('Swiss Franc')],
+        ['CLP', t('Chilean Peso')],
         ['CNY', t('Yuan Renminbi')],
         ['COP', t('Colombian Peso')],
         ['CRC', t('Costa Rican Colón')],

@@ -1,8 +1,8 @@
 // @ts-strict-ignore
 import { stringify as csvStringify } from 'csv-stringify/sync';
 
-import { integerToAmount } from '../../../shared/util';
-import { aqlQuery } from '../../aql';
+import { aqlQuery } from '#server/aql';
+import { integerToAmount } from '#shared/util';
 
 export async function exportToCSV(
   transactions,

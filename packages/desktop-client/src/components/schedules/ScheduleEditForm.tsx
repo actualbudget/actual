@@ -11,33 +11,25 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import * as monthUtils from 'loot-core/shared/months';
+import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   RecurConfig,
   ScheduleEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
-import {
-  Checkbox,
-  FormField,
-  FormLabel,
-} from '@desktop-client/components/forms';
-import { OpSelect } from '@desktop-client/components/rules/RuleEditor';
-import { DateSelect } from '@desktop-client/components/select/DateSelect';
-import { RecurringSchedulePicker } from '@desktop-client/components/select/RecurringSchedulePicker';
-import { SelectedItemsButton } from '@desktop-client/components/table';
-import { SimpleTransactionsTable } from '@desktop-client/components/transactions/SimpleTransactionsTable';
-import {
-  AmountInput,
-  BetweenAmountInput,
-} from '@desktop-client/components/util/AmountInput';
-import { GenericInput } from '@desktop-client/components/util/GenericInput';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { SelectedProvider } from '@desktop-client/hooks/useSelected';
-import type { Actions } from '@desktop-client/hooks/useSelected';
+import { Checkbox, FormField, FormLabel } from '#components/forms';
+import { OpSelect } from '#components/rules/RuleEditor';
+import { DateSelect } from '#components/select/DateSelect';
+import { RecurringSchedulePicker } from '#components/select/RecurringSchedulePicker';
+import { SelectedItemsButton } from '#components/table';
+import { SimpleTransactionsTable } from '#components/transactions/SimpleTransactionsTable';
+import { AmountInput, BetweenAmountInput } from '#components/util/AmountInput';
+import { GenericInput } from '#components/util/GenericInput';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useLocale } from '#hooks/useLocale';
+import { SelectedProvider } from '#hooks/useSelected';
+import type { Actions } from '#hooks/useSelected';
 
 export type ScheduleFormFields = {
   payee: null | string;

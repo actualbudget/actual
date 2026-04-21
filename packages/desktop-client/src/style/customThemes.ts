@@ -18,7 +18,6 @@ export type InstalledTheme = {
   repo: string;
   cssContent: string; // CSS content stored when theme is installed (required)
   baseTheme?: BaseTheme; // Which built-in theme to use as base (defaults to contextual theme)
-  overrideCss?: string; // Additional free-text CSS overrides on top of cssContent
 };
 
 /**
@@ -625,21 +624,6 @@ export async function embedThemeFonts(
 }
 
 /**
- * Validate and concatenate cssContent and overrideCss into a single CSS string.
- * Returns empty string if neither is present.
- */
-export function validateAndCombineThemeCss(
-  cssContent?: string,
-  overrideCss?: string,
-): string {
-  const parts = [
-    cssContent && validateThemeCss(cssContent),
-    overrideCss && validateThemeCss(overrideCss),
-  ].filter(Boolean);
-  return parts.join('\n');
-}
-
-/**
  * Generate a unique ID for a theme based on its repo URL or direct CSS URL.
  */
 export function generateThemeId(urlOrRepo: string): string {
@@ -685,9 +669,6 @@ export function parseInstalledTheme(
       ) {
         result.baseTheme = parsed.baseTheme as BaseTheme;
       }
-      if (typeof parsed.overrideCss === 'string' && parsed.overrideCss) {
-        result.overrideCss = parsed.overrideCss;
-      }
       return result;
     }
     return null;
@@ -701,4 +682,83 @@ export function parseInstalledTheme(
  */
 export function serializeInstalledTheme(theme: InstalledTheme | null): string {
   return JSON.stringify(theme);
+}
+
+/**
+ * Extract the legacy `overrideCss` field from an installed theme JSON string.
+ * Used by the one-time migration that moves the field out of InstalledTheme
+ * and into the standalone `customCssOverride` global pref.
+ *
+ * Returns null if the JSON is missing, malformed, not an object, or does not
+ * contain a non-whitespace string `overrideCss` field. Leading/trailing
+ * whitespace is stripped from the returned value.
+ */
+export function extractLegacyOverride(json: string | undefined): string | null {
+  if (!json) return null;
+  try {
+    const parsed = JSON.parse(json);
+    if (
+      parsed &&
+      typeof parsed === 'object' &&
+      !Array.isArray(parsed) &&
+      typeof parsed.overrideCss === 'string'
+    ) {
+      const trimmed = parsed.overrideCss.trim();
+      if (trimmed.length > 0) {
+        return trimmed;
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * One-time migration helper: moves a legacy `overrideCss` field out of the
+ * installed theme JSON blobs and into the standalone customCssOverride value.
+ *
+ * Collision rule: if both light and dark carry a legacy override, light wins.
+ * The other is silently dropped — users wrote one shared override in the UI
+ * today; two different values is a pathological case that only shows up if
+ * someone edited prefs.json by hand.
+ *
+ * Returns null when no migration is needed. Otherwise returns the migrated
+ * override plus the re-serialized installed theme JSONs (with `overrideCss`
+ * stripped). Callers write all three values back to global prefs.
+ */
+export function migrateLegacyOverride(params: {
+  existingOverride: string | undefined;
+  lightJson: string | undefined;
+  darkJson: string | undefined;
+}): {
+  override: string;
+  newLightJson: string | undefined;
+  newDarkJson: string | undefined;
+} | null {
+  const { existingOverride, lightJson, darkJson } = params;
+
+  if (existingOverride?.trim()) {
+    return null;
+  }
+
+  const lightLegacy = extractLegacyOverride(lightJson);
+  const darkLegacy = extractLegacyOverride(darkJson);
+  const legacy = lightLegacy ?? darkLegacy;
+  if (!legacy) {
+    return null;
+  }
+
+  // parseInstalledTheme strips any unknown fields (including the legacy
+  // overrideCss) by building the result from explicit field assignments.
+  const stripOverride = (json: string | undefined): string | undefined => {
+    const parsed = parseInstalledTheme(json);
+    return parsed ? serializeInstalledTheme(parsed) : json;
+  };
+
+  return {
+    override: legacy,
+    newLightJson: lightLegacy ? stripOverride(lightJson) : lightJson,
+    newDarkJson: darkLegacy ? stripOverride(darkJson) : darkJson,
+  };
 }

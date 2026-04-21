@@ -9,12 +9,9 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 
-import {
-  Modal,
-  ModalCloseButton,
-} from '@desktop-client/components/common/Modal';
-import type { ModalHeader } from '@desktop-client/components/common/Modal';
-import { InputField } from '@desktop-client/components/mobile/MobileForms';
+import { Modal, ModalCloseButton } from '#components/common/Modal';
+import type { ModalHeader } from '#components/common/Modal';
+import { InputField } from '#components/mobile/MobileForms';
 
 type SingleInputModalProps = {
   name: string;

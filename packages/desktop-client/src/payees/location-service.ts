@@ -1,9 +1,9 @@
-import { DEFAULT_MAX_DISTANCE_METERS } from 'loot-core/shared/constants';
-import type { LocationCoordinates } from 'loot-core/shared/location-utils';
+import { DEFAULT_MAX_DISTANCE_METERS } from '@actual-app/core/shared/constants';
+import type { LocationCoordinates } from '@actual-app/core/shared/location-utils';
 import type {
   NearbyPayeeEntity,
   PayeeLocationEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
 import type {
   GeolocationAdapter,
