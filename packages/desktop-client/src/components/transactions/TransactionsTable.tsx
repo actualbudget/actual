@@ -1215,10 +1215,18 @@ const Transaction = memo(function Transaction({
     ? siblingCount <= 1
     : prevRowDate !== transaction.date && nextRowDate !== transaction.date;
   const previewRef = useRef<DragPreviewRenderer>(null);
+  // Row-level drag must not compete with inline editors (notes, amounts,
+  // payee, etc.): otherwise clicks/drags inside inputs start a reorder drag
+  // instead of moving the caret or selecting text (see GH #7567).
+  const allowRowDrag =
+    canDrag &&
+    !isPreview &&
+    !isOnlyTransactionOnDate &&
+    (!editing || focusedField === 'select' || focusedField === 'cleared');
   const { dragRef, dragProps } = useDrag<TransactionEntity>({
     item: originalTransaction,
     type: 'transaction',
-    canDrag: canDrag && !isPreview && !isOnlyTransactionOnDate,
+    canDrag: allowRowDrag,
     onDragChange,
     preview: previewRef,
   });

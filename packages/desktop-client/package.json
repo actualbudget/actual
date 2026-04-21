@@ -2,6 +2,11 @@
   "name": "@actual-app/web",
   "version": "26.4.0",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/actualbudget/actual.git",
+    "directory": "packages/desktop-client"
+  },
   "files": [
     "build"
   ],

@@ -37,6 +37,8 @@ jobs:
           download-translations: 'false'
       - name: Check dependency version consistency
         run: yarn constraints
+      - name: Check tsconfig project references are in sync
+        run: yarn check:tsconfig-references
   lint:
     needs: setup
     runs-on: ubuntu-latest

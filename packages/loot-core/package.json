@@ -3,6 +3,11 @@
   "version": "26.4.0",
   "description": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/actualbudget/actual.git",
+    "directory": "packages/loot-core"
+  },
   "files": [
     "src",
     "@types",
