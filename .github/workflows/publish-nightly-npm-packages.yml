@@ -96,6 +96,9 @@ jobs:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Ensure npm 11.5.1 or later for trusted publishing
+        run: npm install -g npm@11
+
       - name: Publish Core
         run: |
           npm publish loot-core/@actual-app/core.tgz --access public --tag nightly
