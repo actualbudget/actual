@@ -6,6 +6,9 @@ import type {
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
 
+import { getColorScale } from '#components/reports/chart-theme';
+import { theme } from '@actual-app/components/theme';
+
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { aqlQuery } from '#queries/aqlQuery';
 
@@ -48,6 +51,7 @@ type SankeyNode = {
   name: string;
   percentageLabel?: string;
   key: string;
+  color?: string;
 };
 
 type SankeyLink = {
@@ -55,6 +59,7 @@ type SankeyLink = {
   target: number;
   value: number;
   tooltipInfo?: Array<{ name: string; value: number }>;
+  color?: string;
 };
 
 type SankeyData = {
@@ -85,6 +90,7 @@ type NodeData = {
   name?: string;
   tooltipInfo?: Array<{ name: string; value: number }>;
   percentageLabel?: string;
+  color?: string;
 };
 type Graph = Map<NodeKey, NodeData>;
 
@@ -278,6 +284,7 @@ function processGraphData(
   groupOtherCategories(graph, topNcategories, categorySort);
   const sortedGraph = sortGraph(graph, categorySort, categories);
   addPercentageLabels(graph);
+  addColors(graph);
   setData(convertToSankeyData(sortedGraph));
 }
 
@@ -495,7 +502,7 @@ function createBudgetGraph(
   addNode(
     graph,
     'for_next_month',
-    'budgeted',
+    'budget',
     'For ' + monthUtils.nextMonth(aggregated!.endMonth),
   );
   addValueToLink(
@@ -890,11 +897,37 @@ function addPercentageLabels(graph) {
   });
 }
 
+function addColors(graph: Graph) {
+  const colors = getColorScale('qualitative');
+  const keys = [...graph.keys()].sort();
+
+  keys.forEach((key, i) => {
+    const node = graph.get(key);
+    if (node) node.color = colors[i % colors.length];
+  });
+
+  setColor(graph, 'to_budget', theme.toBudgetPositive);
+  setColor(graph, 'last_month_overspent', theme.toBudgetNegative);
+  setColor(graph, 'from_previous_month', theme.reportsGray);
+  setColor(graph, 'for_next_month', theme.reportsGray);
+  setColor(graph, 'budgeted', theme.reportsBlue);
+  setColor(graph, 'available_income', theme.reportsBlue);
+  
+}
+
+function setColor(graph: Graph, key: NodeKey, color: string) {
+  const node = graph.get(key);
+  if (node) {
+    node.color = color;
+  }
+}
+
 function convertToSankeyData(graph: Graph): SankeyData {
   const nodes = Array.from(graph, ([key, data]) => ({
-    key,
-    name: data.name ?? key,
-    percentageLabel: data.percentageLabel ?? '',
+      key,
+      name: data.name ?? key,
+      percentageLabel: data.percentageLabel ?? '',
+      color: data.color ?? undefined,
   }));
   const links = Array.from(graph).flatMap(([key, data]) =>
     Array.from(data.to, ([targetKey, value]) => {
@@ -904,11 +937,31 @@ function convertToSankeyData(graph: Graph): SankeyData {
         tooltipInfo.sort((a, b) => b.value - a.value);
       }
 
+      let color: string
+      if (["payee", "account","categoryGroup"].includes(data.type)) {
+        color = data.color;
+      } else if (["category", "budget"].includes(data.type)) {
+        const targetNode = graph.get(targetKey)
+        color = targetNode ? targetNode.color : undefined;
+      }
+
+      // Specific color overrides
+      if (targetKey === 'last_month_overspent') {
+        color = graph.get('last_month_overspent').color
+      }
+      if (targetKey === 'to_budget') {
+        color = graph.get('to_budget').color
+      }
+      if (targetKey === 'for_next_month') {
+        color = graph.get('for_next_month').color
+      }
+
       return {
         source: nodes.findIndex(n => n.key === key) ?? -1,
         target: nodes.findIndex(n => n.key === targetKey) ?? -1,
         value,
         tooltipInfo,
+        color: color ?? undefined,
       };
     }),
   );

@@ -13,7 +13,6 @@ import {
 } from 'recharts';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 
-import { getColorScale } from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { useFormat } from '#hooks/useFormat';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
@@ -22,12 +21,14 @@ type SankeyGraphNode = SankeyData['nodes'][number] & {
   value: number;
   percentageLabel?: string;
   key: string;
+  color: string;
 };
 
 type SankeyLinkPayload = {
   source: SankeyGraphNode;
   target: SankeyGraphNode;
   value: number;
+  color?: string;
 };
 
 type SankeyLinkProps = {
@@ -43,7 +44,6 @@ type SankeyLinkProps = {
   isHovered: boolean;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
-  color: string;
 };
 
 function SankeyLink({
@@ -58,12 +58,11 @@ function SankeyLink({
   isHovered,
   onMouseEnter,
   onMouseLeave,
-  color,
 }: SankeyLinkProps) {
   if (payload.value <= 0) {
     return null;
   }
-  const linkColor = color;
+  const linkColor = payload.color ?? theme.reportsGray;
   const strokeWidth = linkWidth;
   const strokeOpacity = isHovered ? 1 : 0.6;
 
@@ -90,8 +89,8 @@ type SankeyNodeProps = {
   index: number;
   payload: SankeyGraphNode;
   containerWidth: number;
-  containerHeight: number;
   showPercentages?: boolean;
+  color?: string;
 };
 function SankeyNode({
   x,
@@ -111,7 +110,7 @@ function SankeyNode({
   }
   const isOut = x + width + 6 > containerWidth;
 
-  const fillColor = theme.reportsBlue;
+  const fillColor = payload.color ?? theme.reportsBlue;
 
   const renderText = (
     text: string,
@@ -167,13 +166,7 @@ export function SankeyGraph({
   const format = useFormat();
   const [hoveredLinkIndex, setHoveredLinkIndex] = useState<number | null>(null);
 
-  const colors = getColorScale('qualitative');
 
-  const sourceColorMap = new Map(
-    [...new Set(data.links.map(l => data.nodes[l.source as number]?.key))]
-      .filter(Boolean)
-      .map((name, i) => [name, colors[i % colors.length]]),
-  );
 
   return (
     <Container style={style}>
@@ -185,7 +178,6 @@ export function SankeyGraph({
               <SankeyNode
                 {...props}
                 containerWidth={width}
-                containerHeight={height}
                 showPercentages={showPercentages}
               />
             )}
@@ -195,11 +187,6 @@ export function SankeyGraph({
                 isHovered={hoveredLinkIndex === props.index}
                 onMouseEnter={() => setHoveredLinkIndex(props.index)}
                 onMouseLeave={() => setHoveredLinkIndex(null)}
-                color={
-                  sourceColorMap.get(
-                    (props.payload.source as unknown as { key: string }).key,
-                  ) ?? theme.reportsGray
-                }
               />
             )}
             sort={false}
