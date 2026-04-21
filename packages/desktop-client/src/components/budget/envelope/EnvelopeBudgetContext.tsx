@@ -11,6 +11,7 @@ import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
+import { useCategoriesById } from '#hooks/useCategories';
 import { useForecastScheduledTransactions } from '#hooks/useForecastScheduledTransactions';
 
 type EnvelopeBudgetContextDefinition = {
@@ -54,6 +55,8 @@ export function EnvelopeBudgetProvider({
   const currentMonth = monthUtils.currentMonth();
   const { forecastTransactionsByCategoryAndMonth } =
     useForecastScheduledTransactions();
+  const { data: categoriesData } = useCategoriesById();
+  const categoriesById = categoriesData?.list;
 
   const prevMapRef = useRef<Map<string, TransactionEntity[]>>(new Map());
 
@@ -72,34 +75,43 @@ export function EnvelopeBudgetProvider({
     for (const [key, txs] of newMap.entries()) {
       const month = key.slice(-7);
       const categoryId = key.slice(0, -8);
+      const isIncome = categoriesById?.[categoryId]?.is_income;
 
-      const expenseTotal = txs.reduce(
-        (sum, tx) => sum + Math.min(0, tx.amount ?? 0),
-        0,
-      );
-      const incomeTotal = txs.reduce(
-        (sum, tx) => sum + Math.max(0, tx.amount ?? 0),
-        0,
-      );
-
-      if (expenseTotal !== 0) {
-        categoryAmounts.push({ categoryId, month, amount: expenseTotal });
-      }
-      if (incomeTotal !== 0) {
-        incomeByMonth.set(month, (incomeByMonth.get(month) ?? 0) + incomeTotal);
+      if (isIncome) {
+        const incomeTotal = txs.reduce(
+          (sum, tx) => sum + (tx.amount ?? 0),
+          0,
+        );
+        if (incomeTotal !== 0) {
+          incomeByMonth.set(
+            month,
+            (incomeByMonth.get(month) ?? 0) + incomeTotal,
+          );
+        }
+      } else {
+        const expenseTotal = txs.reduce(
+          (sum, tx) => sum + Math.min(0, tx.amount ?? 0),
+          0,
+        );
+        if (expenseTotal !== 0) {
+          categoryAmounts.push({ categoryId, month, amount: expenseTotal });
+        }
       }
     }
 
     // Clear entries that were in the previous map but are no longer present
-    for (const [key, prevTxs] of prevMap.entries()) {
+    for (const [key] of prevMap.entries()) {
       if (!newMap.has(key)) {
         const month = key.slice(-7);
         const categoryId = key.slice(0, -8);
-        const wasExpense = prevTxs.some(tx => (tx.amount ?? 0) < 0);
-        if (wasExpense) {
+        const isIncome = categoriesById?.[categoryId]?.is_income;
+
+        if (isIncome) {
+          if (!incomeByMonth.has(month)) {
+            incomeByMonth.set(month, 0);
+          }
+        } else {
           categoryAmounts.push({ categoryId, month, amount: 0 });
-        } else if (!incomeByMonth.has(month)) {
-          incomeByMonth.set(month, 0);
         }
       }
     }
@@ -112,21 +124,21 @@ export function EnvelopeBudgetProvider({
       categoryAmounts,
       incomeAmounts,
     });
-  }, [forecastTransactionsByCategoryAndMonth]);
+  }, [forecastTransactionsByCategoryAndMonth, categoriesById]);
 
   const totalScheduledIncomeForCurrentMonth = useMemo(() => {
     const monthSuffix = `-${currentMonth}`;
     let total = 0;
     for (const [key, txs] of forecastTransactionsByCategoryAndMonth.entries()) {
       if (!key.endsWith(monthSuffix)) continue;
+      const categoryId = key.slice(0, -8);
+      if (!categoriesById?.[categoryId]?.is_income) continue;
       for (const tx of txs) {
-        if ((tx.amount ?? 0) > 0) {
-          total += tx.amount ?? 0;
-        }
+        total += tx.amount ?? 0;
       }
     }
     return total;
-  }, [forecastTransactionsByCategoryAndMonth, currentMonth]);
+  }, [forecastTransactionsByCategoryAndMonth, currentMonth, categoriesById]);
 
   return (
     <EnvelopeBudgetContext.Provider
