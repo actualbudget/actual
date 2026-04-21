@@ -93,11 +93,9 @@ jobs:
       - name: Setup node and npm registry
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
-          node-version: 22
+          node-version: 24
+          check-latest: true
           registry-url: 'https://registry.npmjs.org'
-
-      - name: Ensure npm 11.5.1 or later for trusted publishing
-        run: npm install -g npm@11
 
       - name: Publish Core
         run: |
