@@ -105,15 +105,23 @@ enum SpecialNodeKeys {
   HiddenSuffix = '__HIDDEN',
 }
 
-enum GraphLayers {
+export enum GraphLayers {
   IncomePayee = 'payee',
   IncomeCategory = 'income_category',
   Account = 'account',
+  Budget = 'budget',
   CategoryGroup = 'category_group',
   Category = 'category',
-  OtherCategory = 'other_category',
-  Budget = 'budget',
 }
+
+export const GRAPH_LAYER_ORDER = [
+  GraphLayers.IncomePayee,
+  GraphLayers.IncomeCategory,
+  GraphLayers.Account,
+  GraphLayers.Budget,
+  GraphLayers.CategoryGroup,
+  GraphLayers.Category,
+] as const;
 
 export function createSpreadsheet(
   start: string,
@@ -124,6 +132,8 @@ export function createSpreadsheet(
   mode: 'budgeted' | 'spent' = 'spent',
   topNcategories: number = 15,
   categorySort: SortMode = 'per-group',
+  layerFrom?: GraphLayers,
+  layerTo?: GraphLayers,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -154,6 +164,8 @@ export function createSpreadsheet(
       categorySort,
       setData,
       aggregated,
+      layerFrom,
+      layerTo,
     );
   };
 }
@@ -295,6 +307,8 @@ function processGraphData(
   categorySort: SortMode,
   setData: (data: ReturnType<typeof convertToSankeyData>) => void,
   aggregated?: AggregatedBudget,
+  layerFrom?: GraphLayers,
+  layerTo?: GraphLayers,
 ) {
   let graph: Graph;
   if (aggregated) {
@@ -306,7 +320,41 @@ function processGraphData(
   const sortedGraph = sortGraph(graph, categorySort, categories);
   addPercentageLabels(graph);
   addColors(graph);
+  filterGraphByLayers(sortedGraph, layerFrom, layerTo);
   setData(convertToSankeyData(sortedGraph));
+}
+
+function filterGraphByLayers(
+  graph: Graph,
+  layerFrom?: GraphLayers,
+  layerTo?: GraphLayers,
+): void {
+  if (layerFrom === undefined && layerTo === undefined) {
+    return;
+  }
+
+  const layerIndices = new Map<string, number>();
+  GRAPH_LAYER_ORDER.forEach((layer, index) => {
+    layerIndices.set(layer, index);
+  });
+
+  const fromIndex = layerFrom !== undefined ? layerIndices.get(layerFrom)! : 0;
+  const toIndex =
+    layerTo !== undefined
+      ? layerIndices.get(layerTo)!
+      : GRAPH_LAYER_ORDER.length - 1;
+
+  const keysToDelete: NodeKey[] = [];
+  graph.forEach((data, key) => {
+    const nodeLayerIndex = layerIndices.get(data.type);
+    if (nodeLayerIndex !== undefined) {
+      if (nodeLayerIndex < fromIndex || nodeLayerIndex > toIndex) {
+        keysToDelete.push(key);
+      }
+    }
+  });
+
+  keysToDelete.forEach(key => graph.delete(key));
 }
 
 // Filter budget category groups to only those matching the user's conditions.
@@ -744,14 +792,10 @@ function groupOtherCategories(
   categorySort: SortMode = 'per-group',
 ) {
   // For each category group, find the top N categories by total value and group the rest into "Other"
-  const getCategoryNodes = () => ({
-    categoryNodes: nodesInLayer(graph, GraphLayers.Category),
-    otherNodes: nodesInLayer(graph, GraphLayers.OtherCategory),
-  });
   const deletedNodes = new Map<NodeKey, { key: NodeKey; data: NodeData }[]>();
 
-  let { categoryNodes, otherNodes } = getCategoryNodes();
-  while (categoryNodes.length + otherNodes.length > topN) {
+  let categoryNodes = nodesInLayer(graph, GraphLayers.Category);
+  while (categoryNodes.length > topN) {
     const categoryNodeSet = new Set(categoryNodes);
     const values = new Map<NodeKey, number>();
     graph.forEach(data => {
@@ -788,7 +832,7 @@ function groupOtherCategories(
     moveToOther(graph, categoryToDelete, categorySort === 'global');
     graph.delete(categoryToDelete);
 
-    ({ categoryNodes, otherNodes } = getCategoryNodes());
+    categoryNodes = nodesInLayer(graph, GraphLayers.Category);
   }
 
   promoteOtherBack(graph, deletedNodes, categorySort === 'global');
@@ -815,7 +859,7 @@ function moveToOther(graph: Graph, key: NodeKey, globalOther: boolean = false) {
       : 'OTHER';
   }
 
-  addNode(graph, otherGroupKey, GraphLayers.OtherCategory, 'Other');
+  addNode(graph, otherGroupKey, GraphLayers.Category, 'Other');
   addValueToLink(graph, categoryGroupKey!, otherGroupKey, categoryValue);
   addTooltipInfo(graph, categoryGroupKey!, key, categoryValue);
   deleteLink(graph, categoryGroupKey!, key);

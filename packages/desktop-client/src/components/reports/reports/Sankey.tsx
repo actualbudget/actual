@@ -4,7 +4,13 @@ import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { SvgArrowDown, SvgList } from '@actual-app/components/icons/v1';
+import {
+  SvgArrowDown,
+  SvgCheveronRight,
+  SvgLayers,
+  SvgList,
+  SvgRefresh,
+} from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Popover } from '@actual-app/components/popover';
@@ -31,7 +37,11 @@ import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ModeButton } from '#components/reports/ModeButton';
 import { calculateTimeRange } from '#components/reports/reportRanges';
-import { createSpreadsheet as sankeySpreadsheet } from '#components/reports/spreadsheets/sankey-spreadsheet';
+import {
+  GRAPH_LAYER_ORDER,
+  GraphLayers,
+  createSpreadsheet as sankeySpreadsheet,
+} from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
 import { useCategories } from '#hooks/useCategories';
@@ -156,6 +166,75 @@ function CategorySortSelector({ value, onChange }: CategorySortSelectorProps) {
           items={options.map(({ key, label }) => ({
             name: key,
             text: label,
+          }))}
+        />
+      </Popover>
+    </>
+  );
+}
+
+const LAYER_LABELS: Record<GraphLayers, string> = {
+  [GraphLayers.IncomePayee]: 'Payee',
+  [GraphLayers.IncomeCategory]: 'Income category',
+  [GraphLayers.Account]: 'Account',
+  [GraphLayers.Budget]: 'Budget',
+  [GraphLayers.CategoryGroup]: 'Category group',
+  [GraphLayers.Category]: 'Category',
+};
+
+type LayerSelectorProps = {
+  direction: 'from' | 'to';
+  value: GraphLayers;
+  otherLayer: GraphLayers | undefined;
+  onChange: (layer: GraphLayers) => void;
+};
+
+function LayerSelector({
+  direction,
+  value,
+  otherLayer,
+  onChange,
+}: LayerSelectorProps) {
+  const { t } = useTranslation();
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const otherIndex =
+    otherLayer !== undefined
+      ? GRAPH_LAYER_ORDER.indexOf(otherLayer)
+      : direction === 'from'
+        ? GRAPH_LAYER_ORDER.length - 1
+        : 0;
+
+  const menuItems =
+    direction === 'from'
+      ? GRAPH_LAYER_ORDER.slice(0, otherIndex + 1)
+      : GRAPH_LAYER_ORDER.slice(otherIndex);
+
+  return (
+    <>
+      <Button
+        ref={triggerRef}
+        variant="bare"
+        onPress={() => setIsOpen(true)}
+        aria-label={t('Change layer {{direction}}', { direction })}
+      >
+        <span style={{ marginLeft: 5 }}>{LAYER_LABELS[value]}</span>
+      </Button>
+      <Popover
+        triggerRef={triggerRef}
+        placement="bottom start"
+        isOpen={isOpen}
+        onOpenChange={() => setIsOpen(false)}
+      >
+        <Menu
+          onMenuSelect={item => {
+            onChange(item as GraphLayers);
+            setIsOpen(false);
+          }}
+          items={menuItems.map(layer => ({
+            name: layer,
+            text: LAYER_LABELS[layer],
           }))}
         />
       </Popover>
@@ -293,6 +372,14 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     widget?.meta?.showPercentages ?? false,
   );
 
+  const [layerFrom, setLayerFrom] = useState<GraphLayers>(
+    (widget?.meta?.layerFrom as GraphLayers | undefined) ??
+      GraphLayers.IncomePayee,
+  );
+  const [layerTo, setLayerTo] = useState<GraphLayers>(
+    (widget?.meta?.layerTo as GraphLayers | undefined) ?? GraphLayers.Category,
+  );
+
   const { data: { grouped: groupedCategories = [] } = { grouped: [] } } =
     useCategories();
 
@@ -310,6 +397,8 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       graphMode,
       topNcategories,
       categorySort,
+      layerFrom,
+      layerTo,
     );
   }, [
     datesInitialized,
@@ -321,6 +410,8 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     graphMode,
     topNcategories,
     categorySort,
+    layerFrom,
+    layerTo,
   ]);
 
   const defaultGetData = async (
@@ -415,6 +506,8 @@ function SankeyInner({ widget }: SankeyInnerProps) {
             topNcategories,
             categorySort,
             showPercentages,
+            layerFrom,
+            layerTo,
             timeFrame: {
               start,
               end,
@@ -546,6 +639,39 @@ function SankeyInner({ widget }: SankeyInnerProps) {
               value={categorySort}
               onChange={setCategorySort}
             />
+            <View
+              style={{
+                width: 1,
+                height: 28,
+                backgroundColor: theme.pillBorderDark,
+                marginRight: 10,
+                marginLeft: 10,
+              }}
+            />
+            <SvgLayers style={{ width: 12, height: 12 }} />
+            <LayerSelector
+              direction="from"
+              value={layerFrom}
+              otherLayer={layerTo}
+              onChange={setLayerFrom}
+            />
+            <SvgCheveronRight style={{ width: 12, height: 12 }} />
+            <LayerSelector
+              direction="to"
+              value={layerTo}
+              otherLayer={layerFrom}
+              onChange={setLayerTo}
+            />
+            <Button
+              variant="bare"
+              onPress={() => {
+                setLayerFrom(GraphLayers.IncomePayee);
+                setLayerTo(GraphLayers.Category);
+              }}
+              aria-label={t('Reset layers')}
+            >
+              <SvgRefresh style={{ width: 12, height: 12 }} />
+            </Button>
           </>
         }
       >
