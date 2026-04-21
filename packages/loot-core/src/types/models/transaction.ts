@@ -36,4 +36,5 @@ export type TransactionEntity = {
   } | null;
   raw_synced_data?: string | undefined;
   _ruleErrors?: string[];
+  _forceApplyFields?: string[];
 };
