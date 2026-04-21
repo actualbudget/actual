@@ -325,39 +325,6 @@ function processGraphData(
   setData(convertToSankeyData(sortedGraph));
 }
 
-function filterGraphByLayers(
-  graph: Graph,
-  layerFrom?: GraphLayers,
-  layerTo?: GraphLayers,
-): void {
-  if (layerFrom === undefined && layerTo === undefined) {
-    return;
-  }
-
-  const layerIndices = new Map<string, number>();
-  GRAPH_LAYER_ORDER.forEach((layer, index) => {
-    layerIndices.set(layer, index);
-  });
-
-  const fromIndex = layerFrom !== undefined ? layerIndices.get(layerFrom)! : 0;
-  const toIndex =
-    layerTo !== undefined
-      ? layerIndices.get(layerTo)!
-      : GRAPH_LAYER_ORDER.length - 1;
-
-  const keysToDelete: NodeKey[] = [];
-  graph.forEach((data, key) => {
-    const nodeLayerIndex = layerIndices.get(data.type);
-    if (nodeLayerIndex !== undefined) {
-      if (nodeLayerIndex < fromIndex || nodeLayerIndex > toIndex) {
-        keysToDelete.push(key);
-      }
-    }
-  });
-
-  keysToDelete.forEach(key => graph.delete(key));
-}
-
 // Filter budget category groups to only those matching the user's conditions.
 // Budget data is fetched unconditionally from api/budget-month, so we must
 // apply category conditions manually in JS (unlike the transaction path which
@@ -1105,6 +1072,39 @@ function setColor(graph: Graph, key: NodeKey, color: string) {
   }
 }
 
+function filterGraphByLayers(
+  graph: Graph,
+  layerFrom?: GraphLayers,
+  layerTo?: GraphLayers,
+): void {
+  if (layerFrom === undefined && layerTo === undefined) {
+    return;
+  }
+
+  const layerIndices = new Map<string, number>();
+  GRAPH_LAYER_ORDER.forEach((layer, index) => {
+    layerIndices.set(layer, index);
+  });
+
+  const fromIndex = layerFrom !== undefined ? layerIndices.get(layerFrom)! : 0;
+  const toIndex =
+    layerTo !== undefined
+      ? layerIndices.get(layerTo)!
+      : GRAPH_LAYER_ORDER.length - 1;
+
+  const keysToDelete: NodeKey[] = [];
+  graph.forEach((data, key) => {
+    const nodeLayerIndex = layerIndices.get(data.type);
+    if (nodeLayerIndex !== undefined) {
+      if (nodeLayerIndex < fromIndex || nodeLayerIndex > toIndex) {
+        keysToDelete.push(key);
+      }
+    }
+  });
+
+  keysToDelete.forEach(key => graph.delete(key));
+}
+
 function cleanUpNodes(graph: Graph) {
   // 1. Remove all `.to` links with value === 0
   for (const [, node] of graph) {
@@ -1137,7 +1137,6 @@ function cleanUpNodes(graph: Graph) {
   for (const key of toDelete) {
     graph.delete(key);
   }
-
 }
 
 function convertToSankeyData(graph: Graph): SankeyData {

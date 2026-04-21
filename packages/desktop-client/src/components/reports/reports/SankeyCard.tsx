@@ -92,10 +92,7 @@ export function SankeyCard({
   );
   const data = useReport('sankey', params);
 
-  const compactData = useMemo(
-    () => data, 
-    [data],
-  );
+  const compactData = useMemo(() => data, [data]);
 
   const startDate = d.parseISO(start);
   const endDate = d.parseISO(end);
