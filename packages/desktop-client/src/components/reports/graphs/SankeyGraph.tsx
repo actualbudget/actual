@@ -166,8 +166,6 @@ export function SankeyGraph({
   const format = useFormat();
   const [hoveredLinkIndex, setHoveredLinkIndex] = useState<number | null>(null);
 
-
-
   return (
     <Container style={style}>
       {(width, height) => (
