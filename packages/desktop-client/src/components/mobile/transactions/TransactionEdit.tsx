@@ -1503,6 +1503,7 @@ function TransactionEditUnconnected({
           transaction: newTransaction,
         });
         const diff = getChangedValues(newTransaction, afterRules);
+        const forceApplyFields: string[] = afterRules._forceApplyFields || [];
 
         if (diff) {
           Object.keys(diff).forEach(key => {
@@ -1511,6 +1512,7 @@ function TransactionEditUnconnected({
             // Or update all fields if the payee changes (assists location-based entry by
             // applying rules to prefill category, notes, etc. based on the selected payee)
             if (
+              forceApplyFields.includes(field) ||
               newTransaction[field] == null ||
               newTransaction[field] === '' ||
               newTransaction[field] === 0 ||
