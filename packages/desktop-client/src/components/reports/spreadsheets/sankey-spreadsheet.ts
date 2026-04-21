@@ -321,6 +321,7 @@ function processGraphData(
   addPercentageLabels(graph);
   addColors(graph);
   filterGraphByLayers(sortedGraph, layerFrom, layerTo);
+  cleanUpNodes(graph);
   setData(convertToSankeyData(sortedGraph));
 }
 
@@ -1104,6 +1105,41 @@ function setColor(graph: Graph, key: NodeKey, color: string) {
   }
 }
 
+function cleanUpNodes(graph: Graph) {
+  // 1. Remove all `.to` links with value === 0
+  for (const [, node] of graph) {
+    for (const [target, value] of node.to) {
+      if (value === 0) {
+        node.to.delete(target);
+      }
+    }
+  }
+
+  // 2. Find all nodes that are targets of remaining links ("has incoming link")
+  const hasIncoming = new Set<NodeKey>();
+  for (const [, node] of graph) {
+    for (const target of node.to.keys()) {
+      hasIncoming.add(target);
+    }
+  }
+
+  // 3. Collect keys to remove (no incoming links and no outgoing links)
+  const toDelete: NodeKey[] = [];
+  for (const [key, node] of graph) {
+    const hasOutgoing = node.to.size > 0;
+    const incoming = hasIncoming.has(key);
+    if (!hasOutgoing && !incoming) {
+      toDelete.push(key);
+    }
+  }
+
+  // 4. Remove these nodes from the graph
+  for (const key of toDelete) {
+    graph.delete(key);
+  }
+
+}
+
 function convertToSankeyData(graph: Graph): SankeyData {
   const nodes = Array.from(graph, ([key, data]) => ({
     key,
@@ -1111,6 +1147,7 @@ function convertToSankeyData(graph: Graph): SankeyData {
     percentageLabel: data.percentageLabel ?? '',
     color: data.color ?? undefined,
   }));
+  console.log(graph);
   const links = Array.from(graph).flatMap(([key, data]) =>
     Array.from(data.to, ([targetKey, value]) => {
       let tooltipInfo: Array<{ name: string; value: number }> = [];
