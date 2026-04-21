@@ -155,6 +155,7 @@ export function createBudgetSpreadsheet(
           }) as unknown as Promise<BudgetMonthResponse>,
       ),
     );
+    console.log(monthResponses);
 
     const aggregated = monthResponses.reduce<AggregatedBudget>(
       (acc, response, index) => {
@@ -457,7 +458,7 @@ function createBudgetGraph(
 
   // Add initial budget nodes with no links
   addNode(graph, 'budgeted', 'budget', 'Budgeted');
-  addNode(graph, 'available_income', 'account', 'Available income');
+  addNode(graph, 'available_income', 'account', 'Available funds');
 
   categoryData.forEach(entry => {
     if (entry.isIncome) {
@@ -484,8 +485,14 @@ function createBudgetGraph(
     }
   });
 
-  addNode(graph, 'to_budget', 'budget', 'To budget');
-  addValueToLink(graph, 'available_income', 'to_budget', aggregated.toBudget);
+  console.log(aggregated)
+  if ((aggregated.toBudget) > 0) {
+    addNode(graph, 'to_budget', 'budget', 'To budget');
+    addValueToLink(graph, 'available_income', 'to_budget', aggregated.toBudget);
+  } else {
+    addNode(graph, 'to_budget', 'budget', 'Overbudgeted');
+    addValueToLink(graph, 'to_budget', 'available_income', Math.abs(aggregated.toBudget));
+  }
 
   addNode(
     graph,
@@ -906,7 +913,12 @@ function addColors(graph: Graph) {
     if (node) node.color = colors[i % colors.length];
   });
 
-  setColor(graph, 'to_budget', theme.toBudgetPositive);
+  let node = graph.get('to_budget')
+  if (node && node.name === 'Overbudgeted') {
+    setColor(graph, 'to_budget', theme.toBudgetNegative);
+  } else {
+    setColor(graph, 'to_budget', theme.toBudgetPositive);
+  }
   setColor(graph, 'last_month_overspent', theme.toBudgetNegative);
   setColor(graph, 'from_previous_month', theme.reportsGray);
   setColor(graph, 'for_next_month', theme.reportsGray);
@@ -954,6 +966,9 @@ function convertToSankeyData(graph: Graph): SankeyData {
       }
       if (targetKey === 'for_next_month') {
         color = graph.get('for_next_month').color
+      }
+      if (targetKey === 'available_income' && data.name === 'Overbudgeted') {
+        color = data.color;
       }
 
       return {
