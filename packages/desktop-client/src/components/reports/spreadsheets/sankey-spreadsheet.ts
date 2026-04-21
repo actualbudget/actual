@@ -155,7 +155,6 @@ export function createBudgetSpreadsheet(
           }) as unknown as Promise<BudgetMonthResponse>,
       ),
     );
-    console.log(monthResponses);
 
     const aggregated = monthResponses.reduce<AggregatedBudget>(
       (acc, response, index) => {
@@ -485,7 +484,6 @@ function createBudgetGraph(
     }
   });
 
-  console.log(aggregated)
   if ((aggregated.toBudget) > 0) {
     addNode(graph, 'to_budget', 'budget', 'To budget');
     addValueToLink(graph, 'available_income', 'to_budget', aggregated.toBudget);
@@ -572,7 +570,7 @@ function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
   });
 
   graph.forEach((data, key) => {
-    if (data.type === 'account' && getLayer(graph, key) === 0) {
+    if (data.type === 'account' && getLayer(graph, key) === 0 && nodesInLayer(graph, 'payee').length > 0) {
       // If an account node has no parents (i.e. money was spent from the account, but no money added in the timeframe),
       // connect it to a synthetic node to ensure it appears in the graph at the right layer.
       addNode(graph, key + '_hidden_payee', 'payee', '');
@@ -935,6 +933,7 @@ function setColor(graph: Graph, key: NodeKey, color: string) {
 }
 
 function convertToSankeyData(graph: Graph): SankeyData {
+  console.log(graph)
   const nodes = Array.from(graph, ([key, data]) => ({
       key,
       name: data.name ?? key,
