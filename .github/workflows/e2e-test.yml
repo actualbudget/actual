@@ -33,6 +33,8 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.59.1-jammy
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
@@ -56,6 +58,8 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.59.1-jammy
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
@@ -90,6 +94,8 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.59.1-jammy
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
@@ -113,6 +119,8 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.59.1-jammy
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Download all blob reports
@@ -137,7 +145,9 @@ jobs:
           mkdir -p vrt-metadata
           echo "${{ github.event.pull_request.number }}" > vrt-metadata/pr-number.txt
           echo "${{ needs.vrt.result }}" > vrt-metadata/vrt-result.txt
-          echo "${{ steps.playwright-report-vrt.outputs.artifact-url }}" > vrt-metadata/artifact-url.txt
+          echo "${STEPS_PLAYWRIGHT_REPORT_VRT_OUTPUTS_ARTIFACT_URL}" > vrt-metadata/artifact-url.txt
+        env:
+          STEPS_PLAYWRIGHT_REPORT_VRT_OUTPUTS_ARTIFACT_URL: ${{ steps.playwright-report-vrt.outputs.artifact-url }}
       - name: Upload VRT metadata
         if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
