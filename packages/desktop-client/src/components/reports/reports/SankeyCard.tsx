@@ -14,6 +14,7 @@ import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import {
+  GraphLayers,
   // compactSankeyData,
   createSpreadsheet as sankeySpreadsheet,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
@@ -55,6 +56,13 @@ export function SankeyCard({
     setCardHeight(rect.height);
   });
 
+  const HEADER_HEIGHT = 82;
+  const PX_PER_NODE = 50;
+  const topN = Math.max(
+    2,
+    Math.floor((cardHeight - HEADER_HEIGHT) / PX_PER_NODE),
+  );
+
   const params = useMemo(
     () =>
       sankeySpreadsheet(
@@ -64,21 +72,29 @@ export function SankeyCard({
         meta?.conditions ?? [],
         meta?.conditionsOp ?? 'and',
         mode,
+        topN,
+        meta?.categorySort,
+        GraphLayers.IncomePayee,
+        GraphLayers.CategoryGroup,
       ),
-    [start, end, groupedCategories, meta?.conditions, meta?.conditionsOp, mode],
+    [
+      start,
+      end,
+      groupedCategories,
+      meta?.conditions,
+      meta?.conditionsOp,
+      mode,
+      topN,
+      meta?.categorySort,
+      meta?.layerFrom,
+      meta?.layerTo,
+    ],
   );
   const data = useReport('sankey', params);
 
-  const HEADER_HEIGHT = 82;
-  const PX_PER_NODE = 50;
-  const topN = Math.max(
-    2,
-    Math.floor((cardHeight - HEADER_HEIGHT) / PX_PER_NODE),
-  );
-
   const compactData = useMemo(
-    () => data, // () => (data ? compactSankeyData(data, topN) : null),
-    [data, topN],
+    () => data, 
+    [data],
   );
 
   const startDate = d.parseISO(start);
