@@ -531,11 +531,13 @@ export function TransactionList({
       }
 
       const diff = getChangedValues(transaction, afterRules);
+      const forceApplyFields: string[] = afterRules._forceApplyFields || [];
 
       const newTransaction: TransactionEntity = { ...transaction };
       if (diff) {
         Object.keys(diff).forEach(field => {
           if (
+            forceApplyFields.includes(field) ||
             newTransaction[field] == null ||
             newTransaction[field] === '' ||
             newTransaction[field] === 0 ||
