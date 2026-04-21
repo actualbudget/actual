@@ -94,6 +94,28 @@ type NodeData = {
 };
 type Graph = Map<NodeKey, NodeData>;
 
+enum SpecialNodeKeys {
+  ToBudget = 'to_budget',
+  Budgeted = 'budgeted',
+  LastMonthOverspent = 'last_month_overspent',
+  ForNextMonth = 'for_next_month',
+  FromPrevMonth = 'from_previous_month',
+  AvailableIncome = 'available_income',
+  GlobalOther = 'GLOBAL__OTHER_BUCKET',
+  OtherSuffix = '__OTHER_BUCKET',
+  HiddenSuffix = '__HIDDEN',
+}
+
+enum GraphLayers {
+  IncomePayee = 'payee',
+  IncomeCategory = 'income_category',
+  Account = 'account',
+  CategoryGroup = 'category_group',
+  Category = 'category',
+  OtherCategory = 'other_category',
+  Budget = 'budget'
+}
+
 export function createSpreadsheet(
   start: string,
   end: string,
@@ -298,10 +320,10 @@ function filterCategoryGroups(
   conditionsOp: 'and' | 'or',
 ): BudgetMonthGroup[] {
   const categoryConditions = conditions.filter(
-    cond => cond.field === 'category',
+    cond => cond.field === GraphLayers.Category,
   );
   const categoryGroupConditions = conditions.filter(
-    cond => cond.field === 'category_group',
+    cond => cond.field === GraphLayers.CategoryGroup,
   );
 
   if (categoryConditions.length === 0 && categoryGroupConditions.length === 0) {
@@ -456,79 +478,79 @@ function createBudgetGraph(
   const graph: Graph = new Map();
 
   // Add initial budget nodes with no links
-  addNode(graph, 'budgeted', 'budget', 'Budgeted');
-  addNode(graph, 'available_income', 'account', 'Available funds');
+  addNode(graph, SpecialNodeKeys.Budgeted, GraphLayers.Budget, 'Budgeted');
+  addNode(graph, SpecialNodeKeys.AvailableIncome, GraphLayers.Account, 'Available funds');
 
   categoryData.forEach(entry => {
     if (entry.isIncome) {
       // Payee > Available income
-      addNode(graph, entry.categoryId, 'payee', entry.category);
-      addValueToLink(graph, entry.categoryId, 'available_income', entry.value);
+      addNode(graph, entry.categoryId, GraphLayers.IncomePayee, entry.category);
+      addValueToLink(graph, entry.categoryId, SpecialNodeKeys.AvailableIncome, entry.value);
     } else {
       // Budgeted > Category group > Category
       addNode(
         graph,
         entry.categoryGroupId,
-        'categoryGroup',
+        GraphLayers.CategoryGroup,
         entry.categoryGroup,
       );
-      addNode(graph, entry.categoryId, 'category', entry.category);
+      addNode(graph, entry.categoryId, GraphLayers.Category, entry.category);
       addValueToLink(
         graph,
         entry.categoryGroupId,
         entry.categoryId,
         entry.value,
       );
-      addValueToLink(graph, 'budgeted', entry.categoryGroupId, entry.value);
-      addValueToLink(graph, 'available_income', 'budgeted', entry.value);
+      addValueToLink(graph, SpecialNodeKeys.Budgeted, entry.categoryGroupId, entry.value);
+      addValueToLink(graph, SpecialNodeKeys.AvailableIncome, SpecialNodeKeys.Budgeted, entry.value);
     }
   });
 
   if ((aggregated.toBudget) > 0) {
-    addNode(graph, 'to_budget', 'budget', 'To budget');
-    addValueToLink(graph, 'available_income', 'to_budget', aggregated.toBudget);
+    addNode(graph, SpecialNodeKeys.ToBudget, GraphLayers.Budget, 'To budget');
+    addValueToLink(graph, SpecialNodeKeys.AvailableIncome, SpecialNodeKeys.ToBudget, aggregated.toBudget);
   } else {
-    addNode(graph, 'to_budget', 'budget', 'Overbudgeted');
-    addValueToLink(graph, 'to_budget', 'available_income', Math.abs(aggregated.toBudget));
+    addNode(graph, SpecialNodeKeys.ToBudget, GraphLayers.Budget, 'Overbudgeted');
+    addValueToLink(graph, SpecialNodeKeys.ToBudget, SpecialNodeKeys.AvailableIncome, Math.abs(aggregated.toBudget));
   }
 
   addNode(
     graph,
-    'from_previous_month',
-    'payee',
+    SpecialNodeKeys.FromPrevMonth,
+    GraphLayers.IncomePayee,
     'From ' + monthUtils.prevMonth(aggregated!.startMonth),
   );
   addValueToLink(
     graph,
-    'from_previous_month',
-    'available_income',
+    SpecialNodeKeys.FromPrevMonth,
+    SpecialNodeKeys.AvailableIncome,
     aggregated.fromPreviousMonth,
   );
   addNode(
     graph,
-    'for_next_month',
-    'budget',
+    SpecialNodeKeys.ForNextMonth,
+    GraphLayers.Budget,
     'For ' + monthUtils.nextMonth(aggregated!.endMonth),
   );
   addValueToLink(
     graph,
-    'available_income',
-    'for_next_month',
+    SpecialNodeKeys.AvailableIncome,
+    SpecialNodeKeys.ForNextMonth,
     aggregated.forNextMonth,
   );
-  addNode(graph, 'last_month_overspent', 'budget', 'Overspent');
+  addNode(graph, SpecialNodeKeys.LastMonthOverspent, GraphLayers.Budget, 'Overspent');
   addValueToLink(
     graph,
-    'available_income',
-    'last_month_overspent',
+    SpecialNodeKeys.AvailableIncome,
+    SpecialNodeKeys.LastMonthOverspent,
     Math.abs(aggregated.lastMonthOverspent),
   );
 
   // Add extra synthetic links to position nodes at the right layers.
   // If the nodes don't exist, a link will not be created, so this is not seen in the graph.
-  addValueToLink(graph, 'to_budget', 'to_budget_hidden', -1);
-  addValueToLink(graph, 'for_next_month', 'next_month_hidden', -1);
-  addValueToLink(graph, 'last_month_overspent', 'overspent_hidden', -1);
+  addValueToLink(graph, SpecialNodeKeys.ToBudget, 'to_budget' + SpecialNodeKeys.HiddenSuffix, -1);
+  addValueToLink(graph, SpecialNodeKeys.ForNextMonth, 'next_month' + SpecialNodeKeys.HiddenSuffix, -1);
+  addValueToLink(graph, SpecialNodeKeys.LastMonthOverspent, 'overspent' + SpecialNodeKeys.HiddenSuffix, -1);
 
   return graph;
 }
@@ -539,21 +561,21 @@ function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
   categoryData.forEach(entry => {
     if (entry.isIncome) {
       // Payee > Income category > Account
-      addNode(graph, entry.categoryId!, 'payee', entry.category!);
-      addNode(graph, entry.accountId!, 'account', entry.accountName!);
-      addNode(graph, entry.payeeId!, 'payee', entry.payeeName!);
+      addNode(graph, entry.categoryId!, GraphLayers.IncomeCategory, entry.category!);
+      addNode(graph, entry.accountId!, GraphLayers.Account, entry.accountName!);
+      addNode(graph, entry.payeeId!, GraphLayers.IncomePayee, entry.payeeName!);
       addValueToLink(graph, entry.categoryId!, entry.accountId!, entry.value);
       addValueToLink(graph, entry.payeeId!, entry.categoryId!, entry.value);
     } else {
       // Account > Category group > Category
-      addNode(graph, entry.accountId!, 'account', entry.accountName!);
+      addNode(graph, entry.accountId!, GraphLayers.Account, entry.accountName!);
       addNode(
         graph,
         entry.categoryGroupId,
-        'categoryGroup',
+        GraphLayers.CategoryGroup,
         entry.categoryGroup,
       );
-      addNode(graph, entry.categoryId!, 'category', entry.category!);
+      addNode(graph, entry.categoryId!, GraphLayers.Category, entry.category!);
       addValueToLink(
         graph,
         entry.accountId!,
@@ -570,20 +592,20 @@ function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
   });
 
   graph.forEach((data, key) => {
-    if (data.type === 'account' && getLayer(graph, key) === 0 && nodesInLayer(graph, 'payee').length > 0) {
+    if (data.type === GraphLayers.Account && getLayer(graph, key) === 0 && nodesInLayer(graph, GraphLayers.IncomePayee).length > 0) {
       // If an account node has no parents (i.e. money was spent from the account, but no money added in the timeframe),
       // connect it to a synthetic node to ensure it appears in the graph at the right layer.
-      addNode(graph, key + '_hidden_payee', 'payee', '');
-      addNode(graph, key + '_hidden_account', 'account', '');
-      addValueToLink(graph, key + '_hidden_payee', key + '_hidden_account', -1);
-      addValueToLink(graph, key + '_hidden_account', key, -1);
+      addNode(graph, key + '_payee' + SpecialNodeKeys.HiddenSuffix, GraphLayers.IncomePayee, '');
+      addNode(graph, key + '_account' + SpecialNodeKeys.HiddenSuffix, GraphLayers.Account, '');
+      addValueToLink(graph, key + '_payee' + SpecialNodeKeys.HiddenSuffix, key + '_account' + SpecialNodeKeys.HiddenSuffix, -1);
+      addValueToLink(graph, key + '_account' + SpecialNodeKeys.HiddenSuffix, key, -1);
     }
   });
 
   return graph;
 }
 
-function addNode(graph: Graph, key: NodeKey, type: string, name?: string) {
+function addNode(graph: Graph, key: NodeKey, type: GraphLayers, name?: string) {
   if (!graph.has(key)) {
     graph.set(key, {
       to: new Map(),
@@ -626,8 +648,8 @@ function groupOtherCategories(
 ) {
   // For each category group, find the top N categories by total value and group the rest into "Other"
   const getCategoryNodes = () => ({
-    categoryNodes: nodesInLayer(graph, 'category'),
-    otherNodes: nodesInLayer(graph, 'other_category'),
+    categoryNodes: nodesInLayer(graph, GraphLayers.Category),
+    otherNodes: nodesInLayer(graph, GraphLayers.OtherCategory),
   });
   const deletedNodes = new Map<NodeKey, { key: NodeKey; data: NodeData }[]>();
 
@@ -676,7 +698,7 @@ function groupOtherCategories(
   promoteOtherBack(graph, deletedNodes, categorySort === 'global');
 }
 
-function nodesInLayer(graph: Graph, layer: string): NodeKey[] {
+function nodesInLayer(graph: Graph, layer: GraphLayers): NodeKey[] {
   return Array.from(graph)
     .filter(([, data]) => data.type === layer)
     .map(([key]) => key);
@@ -690,14 +712,14 @@ function moveToOther(graph: Graph, key: NodeKey, globalOther: boolean = false) {
 
   let otherGroupKey: NodeKey;
   if (globalOther) {
-    otherGroupKey = 'GLOBAL_OTHER_BUCKET';
+    otherGroupKey = SpecialNodeKeys.GlobalOther;
   } else {
     otherGroupKey = categoryGroupKey
-      ? categoryGroupKey + '_OTHER_BUCKET'
+      ? categoryGroupKey + SpecialNodeKeys.OtherSuffix
       : 'OTHER';
   }
 
-  addNode(graph, otherGroupKey, 'other_category', 'Other');
+  addNode(graph, otherGroupKey, GraphLayers.OtherCategory, 'Other');
   addValueToLink(graph, categoryGroupKey, otherGroupKey, categoryValue);
   addTooltipInfo(graph, categoryGroupKey, key, categoryValue);
   deleteLink(graph, categoryGroupKey, key);
@@ -717,7 +739,7 @@ function addTooltipInfo(
 
 function getCategoryGroup(graph: Graph, key: NodeKey) {
   return Array.from(graph).filter(
-    ([, data]) => data.to.has(key) && data.type === 'categoryGroup',
+    ([, data]) => data.to.has(key) && data.type === GraphLayers.CategoryGroup,
   )[0];
 }
 
@@ -728,17 +750,17 @@ function deleteLink(graph: Graph, from: NodeKey, to: NodeKey) {
   }
 }
 
-function promoteOtherBack(graph, deletedNodes, globalOther: boolean = false) {
+function promoteOtherBack(graph: Graph, deletedNodes: Map<string, {key: string; data: NodeData}[]>, globalOther: boolean = false) {
   // If an Other node only contains one category, we revert it to an ordinary node
   let otherGroupKey: NodeKey;
   deletedNodes.forEach((data, key) => {
     if (data.length === 1) {
       if (globalOther) {
-        otherGroupKey = 'GLOBAL_OTHER_BUCKET';
+        otherGroupKey = SpecialNodeKeys.GlobalOther;
       } else {
-        otherGroupKey = key ? key + '_OTHER_BUCKET' : 'other';
+        otherGroupKey = key ? key + SpecialNodeKeys.OtherSuffix : 'other';
       }
-      addNode(graph, data[0].key, 'category', data[0].data.name);
+      addNode(graph, data[0].key, GraphLayers.Category, data[0].data.name);
       addValueToLink(
         graph,
         key,
@@ -760,9 +782,9 @@ function sortGraph(
     sortedEntries = Array.from(graph.entries()).sort(
       ([keyA], [keyB]) => getNodeValue(graph, keyB) - getNodeValue(graph, keyA),
     );
-    moveNodeToEnd(sortedEntries, 'GLOBAL_OTHER_BUCKET');
+    moveNodeToEnd(sortedEntries, SpecialNodeKeys.GlobalOther);
   } else if (categorySort === 'per-group') {
-    const categoryGroups = nodesInLayer(graph, 'categoryGroup');
+    const categoryGroups = nodesInLayer(graph, GraphLayers.CategoryGroup);
     sortedEntries = Array.from(graph.entries()).sort(
       ([keyA], [keyB]) => getNodeValue(graph, keyB) - getNodeValue(graph, keyA),
     );
@@ -772,7 +794,7 @@ function sortGraph(
       if (!group) return;
       const groupToKeys = Array.from(group.to.keys());
 
-      const groupOtherKey = groupToKeys.find(k => k.endsWith('_OTHER_BUCKET'));
+      const groupOtherKey = groupToKeys.find(k => k.endsWith(SpecialNodeKeys.OtherSuffix));
       const childKeys = groupToKeys.filter(k => k !== groupOtherKey);
 
       const childEntries = childKeys
@@ -843,10 +865,10 @@ function sortGraph(
   }
 
   // We always want these nodes displayed at the bottom of their layers, so its safe to just move them to the end
-  moveNodeToEnd(sortedEntries, 'to_budget');
-  moveNodeToEnd(sortedEntries, 'last_month_overspent');
-  moveNodeToEnd(sortedEntries, 'for_next_month');
-  moveNodeToEnd(sortedEntries, 'from_previous_month');
+  moveNodeToEnd(sortedEntries, SpecialNodeKeys.ToBudget);
+  moveNodeToEnd(sortedEntries, SpecialNodeKeys.LastMonthOverspent);
+  moveNodeToEnd(sortedEntries, SpecialNodeKeys.ForNextMonth);
+  moveNodeToEnd(sortedEntries, SpecialNodeKeys.FromPrevMonth);
   return new Map(sortedEntries);
 }
 
@@ -886,7 +908,7 @@ function addPercentageLabels(graph) {
   const layerSums = new Map();
 
   // First pass: Calculate layer sums
-  graph.forEach((data, key) => {
+  graph.forEach((_, key) => {
     const layer = getLayer(graph, key);
     const nodeValue = getNodeValue(graph, key);
     layerSums.set(layer, (layerSums.get(layer) ?? 0) + nodeValue);
@@ -911,17 +933,17 @@ function addColors(graph: Graph) {
     if (node) node.color = colors[i % colors.length];
   });
 
-  let node = graph.get('to_budget')
+  let node = graph.get(SpecialNodeKeys.ToBudget)
   if (node && node.name === 'Overbudgeted') {
-    setColor(graph, 'to_budget', theme.toBudgetNegative);
+    setColor(graph, SpecialNodeKeys.ToBudget, theme.toBudgetNegative);
   } else {
-    setColor(graph, 'to_budget', theme.toBudgetPositive);
+    setColor(graph, SpecialNodeKeys.ToBudget, theme.toBudgetPositive);
   }
-  setColor(graph, 'last_month_overspent', theme.toBudgetNegative);
-  setColor(graph, 'from_previous_month', theme.reportsGray);
-  setColor(graph, 'for_next_month', theme.reportsGray);
-  setColor(graph, 'budgeted', theme.reportsBlue);
-  setColor(graph, 'available_income', theme.reportsBlue);
+  setColor(graph, SpecialNodeKeys.LastMonthOverspent, theme.toBudgetNegative);
+  setColor(graph, SpecialNodeKeys.FromPrevMonth, theme.reportsGray);
+  setColor(graph, SpecialNodeKeys.ForNextMonth, theme.reportsGray);
+  setColor(graph, SpecialNodeKeys.Budgeted, theme.reportsBlue);
+  setColor(graph, SpecialNodeKeys.AvailableIncome, theme.reportsBlue);
   
 }
 
@@ -933,7 +955,6 @@ function setColor(graph: Graph, key: NodeKey, color: string) {
 }
 
 function convertToSankeyData(graph: Graph): SankeyData {
-  console.log(graph)
   const nodes = Array.from(graph, ([key, data]) => ({
       key,
       name: data.name ?? key,
@@ -943,30 +964,30 @@ function convertToSankeyData(graph: Graph): SankeyData {
   const links = Array.from(graph).flatMap(([key, data]) =>
     Array.from(data.to, ([targetKey, value]) => {
       let tooltipInfo = [];
-      if (data.tooltipInfo && targetKey.endsWith('_OTHER_BUCKET')) {
+      if (data.tooltipInfo && targetKey.endsWith(SpecialNodeKeys.OtherSuffix)) {
         tooltipInfo = data.tooltipInfo;
         tooltipInfo.sort((a, b) => b.value - a.value);
       }
 
       let color: string
-      if (["payee", "account","categoryGroup"].includes(data.type)) {
+      if ([GraphLayers.IncomePayee, GraphLayers.IncomeCategory, GraphLayers.Account, GraphLayers.CategoryGroup].includes(data.type as GraphLayers)) {
         color = data.color;
-      } else if (["category", "budget"].includes(data.type)) {
+      } else if ([GraphLayers.Category, GraphLayers.Budget].includes(data.type as GraphLayers)) {
         const targetNode = graph.get(targetKey)
         color = targetNode ? targetNode.color : undefined;
       }
 
       // Specific color overrides
-      if (targetKey === 'last_month_overspent') {
-        color = graph.get('last_month_overspent').color
+      if (targetKey === SpecialNodeKeys.LastMonthOverspent) {
+        color = graph.get(SpecialNodeKeys.LastMonthOverspent).color
       }
-      if (targetKey === 'to_budget') {
-        color = graph.get('to_budget').color
+      if (targetKey === SpecialNodeKeys.ToBudget) {
+        color = graph.get(SpecialNodeKeys.ToBudget).color
       }
-      if (targetKey === 'for_next_month') {
-        color = graph.get('for_next_month').color
+      if (targetKey === SpecialNodeKeys.ForNextMonth) {
+        color = graph.get(SpecialNodeKeys.ForNextMonth).color
       }
-      if (targetKey === 'available_income' && data.name === 'Overbudgeted') {
+      if (targetKey === SpecialNodeKeys.AvailableIncome && data.name === 'Overbudgeted') {
         color = data.color;
       }
 
