@@ -20,7 +20,6 @@ jobs:
     name: Check if publish is needed
     outputs:
       should-publish: ${{ steps.check.outputs.should-publish }}
-      version: ${{ steps.check.outputs.version }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -33,7 +32,6 @@ jobs:
 
           LOCAL_VERSION=$(node -p "require('./packages/crdt/package.json').version")
           echo "Local version: $LOCAL_VERSION"
-          echo "version=$LOCAL_VERSION" >> "$GITHUB_OUTPUT"
 
           PUBLISHED_VERSION=$(npm view @actual-app/crdt version 2>/dev/null || echo "")
           echo "Published version: ${PUBLISHED_VERSION:-<none>}"
@@ -52,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Publish @actual-app/crdt to npm
     permissions:
-      contents: write
+      contents: read
       id-token: write # Required for npm OIDC provenance
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -79,19 +77,3 @@ jobs:
 
       - name: Publish to npm
         run: npm publish packages/crdt/@actual-app/crdt.tgz --access public --provenance
-
-      - name: Create git tag
-        env:
-          VERSION: ${{ needs.check-version.outputs.version }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          TAG="crdt-v${VERSION}"
-          if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null 2>&1; then
-            echo "Tag ${TAG} already exists on origin - skipping."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "${TAG}" -m "@actual-app/crdt ${VERSION}"
-          git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "${TAG}"
