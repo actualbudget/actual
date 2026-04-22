@@ -61,9 +61,12 @@
     "install:server": "yarn workspaces focus @actual-app/sync-server --production",
     "constraints": "yarn constraints",
     "typecheck": "tsgo -p tsconfig.root.json --noEmit && lage typecheck",
+    "check:tsconfig-references": "workspaces-to-typescript-project-references --check",
+    "sync:tsconfig-references": "workspaces-to-typescript-project-references",
     "prepare": "husky"
   },
   "devDependencies": {
+    "@monorepo-utils/workspaces-to-typescript-project-references": "^2.10.3",
     "@octokit/rest": "^22.0.1",
     "@types/node": "^22.19.17",
     "@types/prompts": "^2.4.9",
@@ -98,8 +101,9 @@
     "socks": ">=2.8.3"
   },
   "lint-staged": {
-    "packages/*/package.json": [
-      "ts-node ./bin/validate-publish-imports.ts --fix"
+    "packages/*/{package.json,tsconfig.json}": [
+      "ts-node ./bin/validate-publish-imports.ts --fix",
+      "yarn sync:tsconfig-references"
     ],
     "*.{js,mjs,jsx,ts,tsx,md,json,yml,yaml}": [
       "oxfmt --no-error-on-unmatched-pattern"

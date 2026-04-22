@@ -3,6 +3,11 @@
   "version": "26.4.0",
   "description": "An API for Actual",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/actualbudget/actual.git",
+    "directory": "packages/api"
+  },
   "files": [
     "@types",
     "dist"
