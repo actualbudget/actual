@@ -12,9 +12,11 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import {
+  addMonths,
   currentMonth,
   dayFromDate,
   firstDayOfMonth,
+  monthFromDate,
 } from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type {
@@ -226,6 +228,9 @@ function BudgetAutomationMigrationWarning({
               marginTop: 6,
               padding: 8,
               borderRadius: 4,
+              // Translucent overlay rather than a theme token so the inset
+              // effect works regardless of the surrounding Warning colour
+              // (which differs between light/dark/midnight themes).
               backgroundColor: 'rgba(0, 0, 0, 0.15)',
               maxHeight: 120,
               overflowY: 'auto',
@@ -283,22 +288,21 @@ function buildPresetSeeds(t: (key: string) => string): Preset[] {
         <Trans>Save up by a target month; the engine spreads the load.</Trans>
       ),
       icon: <displayTemplateMeta.by.icon width={16} height={16} />,
-      seed: () => {
-        const today = new Date();
-        const targetMonth = `${today.getFullYear()}-12`;
-        return createAutomationEntry(
+      seed: () =>
+        createAutomationEntry(
           {
             directive: 'template',
             type: 'by',
             amount: 1200,
-            month: targetMonth,
+            // Always 12 months out so users in late-year months don't get a
+            // target that's already passed.
+            month: addMonths(monthFromDate(new Date()), 12),
             annual: true,
             repeat: 1,
             priority: DEFAULT_PRIORITY,
           },
           'by',
-        );
-      },
+        ),
     },
     {
       key: 'recurring-schedule',
@@ -1132,6 +1136,23 @@ function BudgetAutomationsBody({
   }, [categoryId, dispatch, entries]);
 
   const templates = useMemo(() => entries.map(e => e.template), [entries]);
+
+  const validPercentageSources = useMemo(() => {
+    const set = new Set<string>([
+      'total',
+      'to-budget',
+      'all income',
+      'available funds',
+    ]);
+    for (const group of categories) {
+      for (const cat of group.categories ?? []) {
+        set.add(cat.id);
+        if (cat.name) set.add(cat.name.toLowerCase());
+      }
+    }
+    return set;
+  }, [categories]);
+
   const ruleErrors = useMemo(
     () =>
       entries.map(entry =>
@@ -1141,9 +1162,10 @@ function BudgetAutomationsBody({
           templates,
           schedules,
           new Date(),
+          validPercentageSources,
         ),
       ),
-    [entries, templates, schedules],
+    [entries, templates, schedules, validPercentageSources],
   );
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -11,8 +11,29 @@ import type { Template } from '@actual-app/core/types/models/templates';
 import { Link } from '#components/common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { Notes } from '#components/Notes';
+import { useCategories } from '#hooks/useCategories';
 import { useCategory } from '#hooks/useCategory';
 import { useNotes } from '#hooks/useNotes';
+
+// The UI's CategoryAutocomplete stores the income category id on a
+// percentage template, but text-template grammar addresses categories by
+// name. Rewrite percentage templates so the un-migrated notes are readable
+// (and don't drift if the category is later renamed).
+function sanitizePercentageCategoriesForNotes(
+  templates: Template[],
+  idToName: Map<string, string>,
+): Template[] {
+  return templates.map(template => {
+    if (template.type !== 'percentage') return template;
+    const raw = template.category;
+    if (raw === 'total') return { ...template, category: 'all income' };
+    if (raw === 'to-budget')
+      {return { ...template, category: 'available funds' };}
+    const name = idToName.get(raw);
+    if (name) return { ...template, category: name };
+    return template;
+  });
+}
 
 export function UnmigrateBudgetAutomationsModal({
   categoryId,
@@ -23,11 +44,25 @@ export function UnmigrateBudgetAutomationsModal({
 }) {
   const { t } = useTranslation();
   const { data: category } = useCategory(categoryId);
+  const { data: categoryData } = useCategories();
   const existingNotes = useNotes(categoryId) || '';
   const [editedNotes, setEditedNotes] = useState<string>('');
 
   const [rendered, setRendered] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const idToName = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const cat of categoryData?.list ?? []) {
+      map.set(cat.id, cat.name);
+    }
+    return map;
+  }, [categoryData]);
+
+  const sanitizedTemplates = useMemo(
+    () => sanitizePercentageCategoriesForNotes(templates, idToName),
+    [templates, idToName],
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -35,7 +70,7 @@ export function UnmigrateBudgetAutomationsModal({
       try {
         const text: string = await send(
           'budget/render-note-templates',
-          templates,
+          sanitizedTemplates,
         );
         if (mounted) setRendered(text);
       } catch {
@@ -45,7 +80,7 @@ export function UnmigrateBudgetAutomationsModal({
     return () => {
       mounted = false;
     };
-  }, [templates]);
+  }, [sanitizedTemplates]);
 
   // Seed editable notes once templates rendered
   useEffect(() => {

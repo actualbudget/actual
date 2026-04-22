@@ -16,7 +16,6 @@ import { FormField, FormLabel, FormTextLabel } from '#components/forms';
 
 import { setType } from './actions';
 import type { Action } from './actions';
-import { displayTemplateTypes } from './constants';
 import type { ReducerState } from './constants';
 import { BySaveAutomation } from './editor/BySaveAutomation';
 import { HistoricalAutomation } from './editor/HistoricalAutomation';
@@ -189,7 +188,16 @@ export function BudgetAutomationEditor({
           <InitialFocus>
             <Select
               id="type-field"
-              options={displayTemplateTypes}
+              options={[
+                ['week', t('Fixed amount')],
+                ['schedule', t('Cover schedule')],
+                ['by', t('Save by date')],
+                ['percentage', t('% of income')],
+                ['historical', t('From history')],
+                ['limit', t('Balance cap')],
+                ['refill', t('Refill to cap')],
+                ['remainder', t('Whatever is left')],
+              ]}
               defaultLabel={t('Select an option')}
               value={state.displayType}
               onChange={type => type && dispatch(setType(type))}

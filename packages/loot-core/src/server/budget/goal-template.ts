@@ -362,28 +362,58 @@ export async function dryRunCategoryTemplate({
   categoryId: CategoryEntity['id'];
   templates: Template[];
 }): Promise<DryRunCategoryResult> {
-  const { data: categoryData }: { data: CategoryEntity[] } = await aqlQuery(
-    q('categories').filter({ id: categoryId }).select('*'),
+  // Remainder rules split whatever's left of To Budget across all categories
+  // that have a remainder template. A single-category dry-run would attribute
+  // the entire leftover to this category; widen scope so sibling categories'
+  // remainder weights compete properly. Same applies to "% of available
+  // funds" rules, which read the running availBudget that prior categories
+  // have consumed.
+  const needsWideScope = templates.some(
+    t =>
+      t.type === 'remainder' ||
+      (t.type === 'percentage' &&
+        ['available funds', 'to-budget'].includes(t.category.toLowerCase())),
   );
-  if (categoryData.length === 0) {
-    return { budgeted: 0, perTemplate: templates.map(() => 0) };
+
+  if (!needsWideScope) {
+    const { data: categoryData }: { data: CategoryEntity[] } = await aqlQuery(
+      q('categories').filter({ id: categoryId }).select('*'),
+    );
+    if (categoryData.length === 0) {
+      return { budgeted: 0, perTemplate: templates.map(() => 0) };
+    }
+    const { contexts } = await computeTemplates(
+      month,
+      true,
+      { [categoryId]: templates },
+      categoryData,
+    );
+    const ctx = contexts.find(c => c.category.id === categoryId);
+    if (!ctx) return { budgeted: 0, perTemplate: templates.map(() => 0) };
+    const values = ctx.getValues();
+    return {
+      budgeted: values.budgeted,
+      perTemplate: templates.map(
+        t => values.perTemplateContribution.get(t) ?? 0,
+      ),
+    };
   }
 
+  // Wide scope: load saved templates for all categories, override the target
+  // with the in-flight templates, run the engine over the full set.
+  const allCategoryTemplates = await getTemplates();
+  allCategoryTemplates[categoryId] = templates;
   const { contexts } = await computeTemplates(
     month,
     true,
-    { [categoryId]: templates },
-    categoryData,
+    allCategoryTemplates,
+    [],
   );
-
   const ctx = contexts.find(c => c.category.id === categoryId);
-  if (!ctx) {
-    return { budgeted: 0, perTemplate: templates.map(() => 0) };
-  }
-
+  if (!ctx) return { budgeted: 0, perTemplate: templates.map(() => 0) };
   const values = ctx.getValues();
-  const perTemplate = templates.map(
-    t => values.perTemplateContribution.get(t) ?? 0,
-  );
-  return { budgeted: values.budgeted, perTemplate };
+  return {
+    budgeted: values.budgeted,
+    perTemplate: templates.map(t => values.perTemplateContribution.get(t) ?? 0),
+  };
 }

@@ -222,6 +222,7 @@ export type RuleErrorKind =
   | { kind: 'refill-no-cap' }
   | { kind: 'percentage-out-of-range'; percent: number }
   | { kind: 'percentage-no-source' }
+  | { kind: 'percentage-source-not-found'; source: string }
   | { kind: 'by-no-month' }
   | { kind: 'by-target-past'; month: string };
 
@@ -235,6 +236,11 @@ export function validateRule(
   allTemplates: readonly Template[],
   schedules: readonly ScheduleEntity[],
   today: Date,
+  // Set of recognised percentage sources (income category ids, lower-cased
+  // category names, and special source aliases like 'all income'). When
+  // omitted the source-not-found check is skipped (the engine still validates
+  // server-side at apply time).
+  validPercentageSources?: ReadonlySet<string>,
 ): RuleErrorKind | null {
   switch (displayType) {
     case 'schedule':
@@ -260,6 +266,16 @@ export function validateRule(
         return {
           kind: 'percentage-out-of-range',
           percent: template.percent,
+        };
+      }
+      if (
+        validPercentageSources &&
+        !validPercentageSources.has(template.category) &&
+        !validPercentageSources.has(template.category.toLowerCase())
+      ) {
+        return {
+          kind: 'percentage-source-not-found',
+          source: template.category,
         };
       }
       return null;
@@ -313,6 +329,8 @@ export function RuleErrorTitle({ error }: { error: RuleErrorKind }) {
       return <Trans>Target month missing</Trans>;
     case 'by-target-past':
       return <Trans>Target is in the past</Trans>;
+    case 'percentage-source-not-found':
+      return <Trans>Source category missing</Trans>;
     default:
       return null;
   }
@@ -341,6 +359,8 @@ export function RuleErrorShort({ error }: { error: RuleErrorKind }) {
           {{ month: formatMonthLabel(error.month, locale) }} has already passed
         </Trans>
       );
+    case 'percentage-source-not-found':
+      return <Trans>Pick a valid income category</Trans>;
     default:
       return null;
   }
@@ -382,6 +402,13 @@ export function RuleErrorDetail({ error }: { error: RuleErrorKind }) {
         <Trans>
           Pick a future month, or switch to a recurring annual goal to keep
           saving.
+        </Trans>
+      );
+    case 'percentage-source-not-found':
+      return (
+        <Trans>
+          The selected source &ldquo;{{ source: error.source }}&rdquo; is not a
+          known income category.
         </Trans>
       );
     default:
