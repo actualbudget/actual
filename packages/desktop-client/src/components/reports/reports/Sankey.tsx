@@ -426,22 +426,21 @@ function SankeyInner({ widget }: SankeyInnerProps) {
 
   // Reset invalid layer selections when switching modes
   useEffect(() => {
-    if (graphMode === 'budgeted') {
-      // Budget mode doesn't support IncomePayee
-      if (layerFrom === GraphLayers.IncomePayee) {
-        setLayerFrom(GraphLayers.IncomeCategory);
-      }
-      if (layerTo === GraphLayers.IncomePayee) {
-        setLayerTo(GraphLayers.Category);
-      }
-    } else {
-      // Spent mode doesn't support Budget
-      if (layerFrom === GraphLayers.Budget) {
-        setLayerFrom(GraphLayers.IncomePayee);
-      }
-      if (layerTo === GraphLayers.Budget) {
-        setLayerTo(GraphLayers.Category);
-      }
+    const availableLayers =
+      graphMode === 'budgeted'
+        ? (GRAPH_LAYER_ORDER.filter(
+            layer => layer !== GraphLayers.IncomePayee,
+          ) as GraphLayers[])
+        : (GRAPH_LAYER_ORDER.filter(
+            layer => layer !== GraphLayers.Budget,
+          ) as GraphLayers[]);
+
+    const fromIndex = availableLayers.indexOf(layerFrom);
+    const toIndex = availableLayers.indexOf(layerTo);
+
+    if (fromIndex === -1 || toIndex === -1 || fromIndex >= toIndex) {
+      setLayerFrom(defaultLayerFrom(graphMode));
+      setLayerTo(GraphLayers.Category);
     }
   }, [graphMode, layerFrom, layerTo]);
 
