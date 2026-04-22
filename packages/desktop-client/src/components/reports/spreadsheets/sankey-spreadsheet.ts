@@ -1029,7 +1029,7 @@ function sortGraph(
         });
       }
 
-      const otherKey = `${group.id}_OTHER_BUCKET`;
+      const otherKey = `${group.id}${SpecialNodeKeys.OtherSuffix}`;
       if (graph.has(otherKey)) {
         sortedEntries.push([otherKey, graph.get(otherKey)!]);
         used.add(otherKey);
