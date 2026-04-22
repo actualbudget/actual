@@ -116,6 +116,7 @@ export function migrateTemplatesToAutomations(
   templates.forEach(template => {
     if (template.type === 'simple') {
       let hasExpandedTemplate = false;
+      const hasMonthly = template.monthly != null && template.monthly !== 0;
 
       if (template.limit) {
         hasExpandedTemplate = true;
@@ -133,16 +134,22 @@ export function migrateTemplatesToAutomations(
             'limit',
           ),
         );
-        entries.push(
-          createAutomationEntry(
-            {
-              type: 'refill',
-              directive: 'template',
-              priority: template.priority,
-            },
-            'refill',
-          ),
-        );
+        // The implicit refill only applies to a limit-only simple template
+        // (e.g. `#template up to 200`). When a monthly amount is also set
+        // (`#template 50 up to 200`), the engine just budgets the monthly
+        // amount and clamps to the cap — no top-up to the limit.
+        if (!hasMonthly) {
+          entries.push(
+            createAutomationEntry(
+              {
+                type: 'refill',
+                directive: 'template',
+                priority: template.priority,
+              },
+              'refill',
+            ),
+          );
+        }
       }
       if (template.monthly != null && template.monthly !== 0) {
         hasExpandedTemplate = true;

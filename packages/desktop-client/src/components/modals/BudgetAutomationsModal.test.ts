@@ -79,7 +79,10 @@ describe('migrateTemplatesToAutomations', () => {
     });
   });
 
-  it('expands a simple template with both limit and monthly into three entries in order', () => {
+  it('expands a simple template with both limit and monthly into limit + periodic (no implicit refill)', () => {
+    // `#template 20 up to 200 per week` budgets 20/month and caps at the
+    // limit — the engine's runSimple returns just the monthly value, so
+    // there is no implicit refill-to-cap behaviour to migrate.
     const simpleTemplate = {
       type: 'simple',
       directive: 'template',
@@ -94,13 +97,9 @@ describe('migrateTemplatesToAutomations', () => {
 
     const result = migrateTemplatesToAutomations([simpleTemplate]);
 
-    expect(result).toHaveLength(3);
-    expect(result.map(entry => entry.displayType)).toEqual([
-      'limit',
-      'refill',
-      'week',
-    ]);
-    expect(result[2].template).toMatchObject({
+    expect(result).toHaveLength(2);
+    expect(result.map(entry => entry.displayType)).toEqual(['limit', 'week']);
+    expect(result[1].template).toMatchObject({
       type: 'periodic',
       amount: 20,
       directive: 'template',
