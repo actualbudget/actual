@@ -1046,6 +1046,7 @@ function BudgetAutomationsBody({
 
   const [entries, setEntries] = useState<AutomationEntry[]>(initialEntries);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [saving, setSaving] = useState(false);
   const [dryRun, setDryRun] = useState<{
     budgeted: number;
     perTemplate: number[];
@@ -1102,12 +1103,20 @@ function BudgetAutomationsBody({
   };
 
   const onSave = async () => {
-    const templatesToSave = entries.map(({ template }) => template);
-    await send('budget/set-category-automations', {
-      categoriesWithTemplates: [{ id: categoryId, templates: templatesToSave }],
-      source: 'ui',
-    });
-    onClose();
+    if (saving) return;
+    setSaving(true);
+    try {
+      const templatesToSave = entries.map(({ template }) => template);
+      await send('budget/set-category-automations', {
+        categoriesWithTemplates: [
+          { id: categoryId, templates: templatesToSave },
+        ],
+        source: 'ui',
+      });
+      onClose();
+    } finally {
+      setSaving(false);
+    }
   };
 
   const onUnmigrate = () => {
@@ -1365,7 +1374,11 @@ function BudgetAutomationsBody({
         <Button onPress={onClose}>
           <Trans>Cancel</Trans>
         </Button>
-        <Button variant="primary" onPress={onSave} isDisabled={hasErrors}>
+        <Button
+          variant="primary"
+          onPress={onSave}
+          isDisabled={hasErrors || saving}
+        >
           <Trans>Save</Trans>
         </Button>
       </View>

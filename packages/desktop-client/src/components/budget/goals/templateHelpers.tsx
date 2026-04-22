@@ -430,7 +430,7 @@ export function GlobalConflictTitle({
     case 'percent-over-100':
       return (
         <Trans>
-          Percent rules total {{ total: conflict.total }}% of income
+          Percent rules total {{ total: Math.round(conflict.total) }}% of income
         </Trans>
       );
     default:

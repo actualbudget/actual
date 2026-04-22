@@ -17,15 +17,16 @@ type WeekAutomationProps = {
   dispatch: (action: Action) => void;
 };
 
-const PERIOD_UNITS: Array<['day' | 'week' | 'month' | 'year', string]> = [
-  ['day', 'days'],
-  ['week', 'weeks'],
-  ['month', 'months'],
-  ['year', 'years'],
-];
+type PeriodUnit = 'day' | 'week' | 'month' | 'year';
 
 export const WeekAutomation = ({ template, dispatch }: WeekAutomationProps) => {
   const { t } = useTranslation();
+  const periodUnitOptions: Array<[PeriodUnit, string]> = [
+    ['day', t('days')],
+    ['week', t('weeks')],
+    ['month', t('months')],
+    ['year', t('years')],
+  ];
   const format = useFormat();
 
   const amount = amountToInteger(
@@ -87,7 +88,7 @@ export const WeekAutomation = ({ template, dispatch }: WeekAutomationProps) => {
               }),
             )
           }
-          options={PERIOD_UNITS.map(([key, label]) => [key, t(label)])}
+          options={periodUnitOptions}
         />
       </FormField>
       <FormField style={{ flex: 1 }}>
