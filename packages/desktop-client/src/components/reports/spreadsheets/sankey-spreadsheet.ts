@@ -42,9 +42,9 @@ type AggregatedBudget = {
   fromPreviousMonth: number;
   lastMonthOverspent: number;
   categoryGroupsMap: Map<string, BudgetMonthGroup>;
-  forNextMonth?: number;
-  startMonth?: string;
-  endMonth?: string;
+  forNextMonth: number;
+  startMonth: string;
+  endMonth: string;
 };
 
 type SankeyNode = {
@@ -70,8 +70,8 @@ type SankeyData = {
 type CategoryEntry = {
   categoryGroup: string;
   categoryGroupId: string;
-  category?: string;
-  categoryId?: string;
+  category: string;
+  categoryId: string;
   value: number;
   isIncome: boolean;
   accountName?: string;
@@ -138,8 +138,8 @@ export function createSpreadsheet(
   mode: 'budgeted' | 'spent' = 'spent',
   topNcategories: number = 15,
   categorySort: SortMode = 'per-group',
-  layerFrom?: GraphLayers,
-  layerTo?: GraphLayers,
+  layerFrom: GraphLayers,
+  layerTo: GraphLayers,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -169,9 +169,9 @@ export function createSpreadsheet(
       categories,
       categorySort,
       setData,
-      aggregated,
       layerFrom,
       layerTo,
+      aggregated,
     );
   };
 }
@@ -195,7 +195,7 @@ export function createBudgetSpreadsheet(
       ),
     );
 
-    const aggregated = monthResponses.reduce<AggregatedBudget>(
+    const accumulate_months = monthResponses.reduce(
       (acc, response, index) => {
         acc.toBudget += response.toBudget;
 
@@ -242,7 +242,9 @@ export function createBudgetSpreadsheet(
       },
     );
 
-    const categoryGroups = Array.from(aggregated.categoryGroupsMap.values());
+    const categoryGroups = Array.from(
+      accumulate_months.categoryGroupsMap.values(),
+    );
 
     const filteredCategoryGroups = filterCategoryGroups(
       categoryGroups,
@@ -271,10 +273,17 @@ export function createBudgetSpreadsheet(
     const nextMonthResponse = (await send('api/budget-month', {
       month: monthUtils.nextMonth(end),
     })) as unknown as BudgetMonthResponse;
-    aggregated.forNextMonth =
-      (nextMonthResponse.fromLastMonth ?? 0) - aggregated.toBudget;
-    aggregated.startMonth = start;
-    aggregated.endMonth = end;
+
+    const aggregated: AggregatedBudget = {
+      toBudget: accumulate_months.toBudget,
+      forNextMonth:
+        (nextMonthResponse.fromLastMonth ?? 0) - accumulate_months.toBudget,
+      fromPreviousMonth: accumulate_months.fromPreviousMonth,
+      lastMonthOverspent: accumulate_months.lastMonthOverspent,
+      categoryGroupsMap: accumulate_months.categoryGroupsMap,
+      startMonth: start,
+      endMonth: end,
+    };
 
     return { data: categoryData, aggregated };
   };
@@ -312,9 +321,9 @@ function processGraphData(
   categories: CategoryGroupEntity[],
   categorySort: SortMode,
   setData: (data: ReturnType<typeof convertToSankeyData>) => void,
+  layerFrom: GraphLayers,
+  layerTo: GraphLayers,
   aggregated?: AggregatedBudget,
-  layerFrom?: GraphLayers,
-  layerTo?: GraphLayers,
 ) {
   let graph: Graph;
   if (aggregated) {
@@ -524,13 +533,13 @@ function createBudgetGraph(
       // Income category > Available income
       addNode(
         graph,
-        entry.categoryId!,
+        entry.categoryId,
         GraphLayers.IncomeCategory,
         entry.category,
       );
       addValueToLink(
         graph,
-        entry.categoryId!,
+        entry.categoryId,
         SpecialNodeKeys.AvailableIncome,
         entry.value,
       );
@@ -542,11 +551,11 @@ function createBudgetGraph(
         GraphLayers.CategoryGroup,
         entry.categoryGroup,
       );
-      addNode(graph, entry.categoryId!, GraphLayers.Category, entry.category!);
+      addNode(graph, entry.categoryId, GraphLayers.Category, entry.category);
       addValueToLink(
         graph,
         entry.categoryGroupId,
-        entry.categoryId!,
+        entry.categoryId,
         entry.value,
       );
       addValueToLink(
@@ -599,7 +608,7 @@ function createBudgetGraph(
     SpecialNodeKeys.FromPrevMonth,
     GraphLayers.IncomeCategory,
     'From {{month}}',
-    { month: monthUtils.prevMonth(aggregated.startMonth!) },
+    { month: monthUtils.prevMonth(aggregated.startMonth) },
   );
   addValueToLink(
     graph,
@@ -612,13 +621,13 @@ function createBudgetGraph(
     SpecialNodeKeys.ForNextMonth,
     GraphLayers.Budget,
     'For {{month}}',
-    { month: monthUtils.nextMonth(aggregated.endMonth!) },
+    { month: monthUtils.nextMonth(aggregated.endMonth) },
   );
   addValueToLink(
     graph,
     SpecialNodeKeys.AvailableIncome,
     SpecialNodeKeys.ForNextMonth,
-    aggregated.forNextMonth!,
+    aggregated.forNextMonth,
   );
   addNodeWithLabel(
     graph,
@@ -661,40 +670,42 @@ function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
   const graph: Graph = new Map();
 
   categoryData.forEach(entry => {
-    if (entry.isIncome) {
-      // Payee > Income category > Account
-      addNode(
-        graph,
-        entry.categoryId!,
-        GraphLayers.IncomeCategory,
-        entry.category!,
-      );
-      addNode(graph, entry.accountId!, GraphLayers.Account, entry.accountName!);
-      addNode(graph, entry.payeeId!, GraphLayers.IncomePayee, entry.payeeName!);
-      addValueToLink(graph, entry.categoryId!, entry.accountId!, entry.value);
-      addValueToLink(graph, entry.payeeId!, entry.categoryId!, entry.value);
-    } else {
-      // Account > Category group > Category
-      addNode(graph, entry.accountId!, GraphLayers.Account, entry.accountName!);
-      addNode(
-        graph,
-        entry.categoryGroupId,
-        GraphLayers.CategoryGroup,
-        entry.categoryGroup,
-      );
-      addNode(graph, entry.categoryId!, GraphLayers.Category, entry.category!);
-      addValueToLink(
-        graph,
-        entry.accountId!,
-        entry.categoryGroupId,
-        entry.value,
-      );
-      addValueToLink(
-        graph,
-        entry.categoryGroupId,
-        entry.categoryId!,
-        entry.value,
-      );
+    if (entry.accountId && entry.accountName && entry.categoryId) {
+      if (entry.isIncome && entry.payeeId) {
+        // Payee > Income category > Account
+        addNode(
+          graph,
+          entry.categoryId,
+          GraphLayers.IncomeCategory,
+          entry.category,
+        );
+        addNode(graph, entry.accountId, GraphLayers.Account, entry.accountName);
+        addNode(graph, entry.payeeId, GraphLayers.IncomePayee, entry.payeeName);
+        addValueToLink(graph, entry.categoryId, entry.accountId, entry.value);
+        addValueToLink(graph, entry.payeeId, entry.categoryId, entry.value);
+      } else {
+        // Account > Category group > Category
+        addNode(graph, entry.accountId, GraphLayers.Account, entry.accountName);
+        addNode(
+          graph,
+          entry.categoryGroupId,
+          GraphLayers.CategoryGroup,
+          entry.categoryGroup,
+        );
+        addNode(graph, entry.categoryId, GraphLayers.Category, entry.category);
+        addValueToLink(
+          graph,
+          entry.accountId,
+          entry.categoryGroupId,
+          entry.value,
+        );
+        addValueToLink(
+          graph,
+          entry.categoryGroupId,
+          entry.categoryId,
+          entry.value,
+        );
+      }
     }
   });
 
@@ -771,8 +782,10 @@ function addValueToLink(
   to: NodeKey,
   value: number,
 ) {
-  const fromNode = graph.get(from)!;
-  fromNode.to.set(to, (fromNode.to.get(to) ?? 0) + value);
+  const fromNode = graph.get(from);
+  if (fromNode) {
+    fromNode.to.set(to, (fromNode.to.get(to) ?? 0) + value);
+  }
 }
 
 function getLayer(graph: Graph, key: NodeKey): number {
@@ -1013,23 +1026,26 @@ function sortGraph(
 
     // 1. Add entries by category group and subcategory order
     categories.forEach(group => {
-      if (graph.has(group.id)) {
-        sortedEntries.push([group.id, graph.get(group.id)!]);
+      const groupNode = graph.get(group.id);
+      if (groupNode) {
+        sortedEntries.push([group.id, groupNode]);
         used.add(group.id);
       }
 
       if (group.categories && group.categories.length) {
         group.categories.forEach(cat => {
-          if (graph.has(cat.id)) {
-            sortedEntries.push([cat.id, graph.get(cat.id)!]);
+          const categoryNode = graph.get(cat.id);
+          if (categoryNode) {
+            sortedEntries.push([cat.id, categoryNode]);
             used.add(cat.id);
           }
         });
       }
 
       const otherKey = `${group.id}${SpecialNodeKeys.OtherSuffix}`;
-      if (graph.has(otherKey)) {
-        sortedEntries.push([otherKey, graph.get(otherKey)!]);
+      const otherNode = graph.get(otherKey);
+      if (otherNode) {
+        sortedEntries.push([otherKey, otherNode]);
         used.add(otherKey);
       }
     });
@@ -1139,35 +1155,30 @@ function setColor(graph: Graph, key: NodeKey, color: string) {
 
 function filterGraphByLayers(
   graph: Graph,
-  layerFrom?: GraphLayers,
-  layerTo?: GraphLayers,
+  layerFrom: GraphLayers,
+  layerTo: GraphLayers,
 ): void {
-  if (layerFrom === undefined && layerTo === undefined) {
-    return;
-  }
-
   const layerIndices = new Map<string, number>();
   GRAPH_LAYER_ORDER.forEach((layer, index) => {
     layerIndices.set(layer, index);
   });
 
-  const fromIndex = layerFrom !== undefined ? layerIndices.get(layerFrom)! : 0;
-  const toIndex =
-    layerTo !== undefined
-      ? layerIndices.get(layerTo)!
-      : GRAPH_LAYER_ORDER.length - 1;
+  const fromIndex = layerIndices.get(layerFrom);
+  const toIndex = layerIndices.get(layerTo);
 
-  const keysToDelete: NodeKey[] = [];
-  graph.forEach((data, key) => {
-    const nodeLayerIndex = layerIndices.get(data.type);
-    if (nodeLayerIndex !== undefined) {
-      if (nodeLayerIndex < fromIndex || nodeLayerIndex > toIndex) {
-        keysToDelete.push(key);
+  if (fromIndex && toIndex) {
+    const keysToDelete: NodeKey[] = [];
+    graph.forEach((data, key) => {
+      const nodeLayerIndex = layerIndices.get(data.type);
+      if (nodeLayerIndex !== undefined) {
+        if (nodeLayerIndex < fromIndex || nodeLayerIndex > toIndex) {
+          keysToDelete.push(key);
+        }
       }
-    }
-  });
+    });
 
-  keysToDelete.forEach(key => graph.delete(key));
+    keysToDelete.forEach(key => graph.delete(key));
+  }
 }
 
 function cleanUpNodes(graph: Graph) {
