@@ -208,8 +208,8 @@ function LayerSelector({
 
   const menuItems =
     direction === 'from'
-      ? GRAPH_LAYER_ORDER.slice(0, otherIndex + 1)
-      : GRAPH_LAYER_ORDER.slice(otherIndex);
+      ? GRAPH_LAYER_ORDER.slice(0, otherIndex)
+      : GRAPH_LAYER_ORDER.slice(otherIndex + 1);
 
   const translatedDirection = direction === 'from' ? t('from') : t('to');
 
