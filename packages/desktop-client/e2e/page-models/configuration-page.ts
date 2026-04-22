@@ -16,12 +16,18 @@ export class ConfigurationPage {
 
   async createTestFile() {
     await this.page.getByRole('button', { name: 'Create test file' }).click();
-    return new BudgetPage(this.page);
+    const budgetPage = new BudgetPage(this.page);
+    // Wait for the budget page to be fully mounted before returning so
+    // callers don't race the virtualized budget-table's layout step.
+    await budgetPage.waitFor();
+    return budgetPage;
   }
 
   async createDemoFile() {
     await this.page.getByRole('button', { name: 'View demo' }).click();
-    return new BudgetPage(this.page);
+    const budgetPage = new BudgetPage(this.page);
+    await budgetPage.waitFor();
+    return budgetPage;
   }
 
   async clickOnNoServer() {
@@ -37,7 +43,9 @@ export class ConfigurationPage {
   async startFresh() {
     await this.page.getByRole('button', { name: 'Start fresh' }).click();
 
-    return new AccountPage(this.page);
+    const accountPage = new AccountPage(this.page);
+    await accountPage.accountName.waitFor();
+    return accountPage;
   }
 
   async importBudget(type: 'YNAB4' | 'nYNAB' | 'Actual', file: string) {

@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import AdmZip from 'adm-zip';
-import { v4 as uuidv4 } from 'uuid';
 
 import * as asyncStorage from '#platform/server/asyncStorage';
 import { fetch } from '#platform/server/fetch';
@@ -287,7 +286,7 @@ export async function upload() {
   }
 
   if (!cloudFileId) {
-    cloudFileId = uuidv4();
+    cloudFileId = crypto.randomUUID();
   }
 
   let res;

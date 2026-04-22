@@ -4,7 +4,6 @@ import { send } from '@actual-app/core/platform/client/connection';
 import type { PayeeEntity } from '@actual-app/core/types/models';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { QueryClient, QueryKey } from '@tanstack/react-query';
-import { v4 as uuidv4 } from 'uuid';
 
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
@@ -27,7 +26,7 @@ function dispatchErrorNotification(
   dispatch(
     addNotification({
       notification: {
-        id: uuidv4(),
+        id: crypto.randomUUID(),
         type: 'error',
         message,
         pre: error ? error.message : undefined,

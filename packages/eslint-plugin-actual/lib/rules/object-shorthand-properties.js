@@ -19,9 +19,7 @@ module.exports = {
     },
   },
 
-  create(context) {
-    const sourceCode = context.getSourceCode();
-
+  createOnce(context) {
     //----------------------------------------------------------------------
     // Helpers
     //----------------------------------------------------------------------
@@ -65,7 +63,7 @@ module.exports = {
      */
     function makeFixer(node) {
       return fixer => {
-        const keyText = sourceCode.getText(node.key);
+        const keyText = context.sourceCode.getText(node.key);
         return fixer.replaceText(node, keyText);
       };
     }

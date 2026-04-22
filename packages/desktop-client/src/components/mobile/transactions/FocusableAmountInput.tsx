@@ -79,9 +79,14 @@ const AmountInput = memo(function AmountInput({
     }
   };
 
-  const applyText = () => {
-    const parsed = currencyToAmount(text) || 0;
-    const newValue = editing ? parsed : value;
+  // Read from the DOM, not React state: onChange state updates flush
+  // asynchronously, so an onBlur/onKeyUp fired by the user's next action
+  // can see stale `text=''` and save 0 instead of the typed amount.
+  const applyText = (rawInput?: string) => {
+    const domText = rawInput ?? inputRef.current?.value ?? text;
+    const parsed = currencyToAmount(domText) || 0;
+    const hasPendingInput = domText !== '' || editing;
+    const newValue = hasPendingInput ? parsed : value;
 
     setValue(Math.abs(newValue));
     setEditing(false);
@@ -96,7 +101,7 @@ const AmountInput = memo(function AmountInput({
 
   const onUpdate = (value: string) => {
     const originalAmount = Math.abs(props.value);
-    const amount = applyText();
+    const amount = applyText(value);
     if (amount !== originalAmount) {
       props.onUpdate?.(value);
       props.onUpdateAmount?.(amount);

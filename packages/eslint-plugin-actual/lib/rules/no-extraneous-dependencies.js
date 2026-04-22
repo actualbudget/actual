@@ -82,12 +82,8 @@ module.exports = {
     },
   },
 
-  create(context) {
-    const filename = context.getFilename();
-    const dir = path.dirname(filename);
-    const pkg = findPackageJson(dir);
-
-    if (!pkg) return {};
+  createOnce(context) {
+    let pkg;
 
     function check(node, source) {
       if (!source || typeof source.value !== 'string') return;
@@ -111,6 +107,10 @@ module.exports = {
     }
 
     return {
+      before() {
+        pkg = findPackageJson(path.dirname(context.filename));
+        if (!pkg) return false;
+      },
       ImportDeclaration(node) {
         check(node, node.source);
       },

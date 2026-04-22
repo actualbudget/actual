@@ -107,6 +107,9 @@ async function saveGlobalPrefs(prefs: GlobalPrefs) {
       prefs.installedCustomDarkTheme,
     );
   }
+  if (prefs.customCssOverride !== undefined) {
+    await asyncStorage.setItem('custom-css-override', prefs.customCssOverride);
+  }
   if (prefs.serverSelfSignedCert !== undefined) {
     await asyncStorage.setItem(
       'server-self-signed-cert',
@@ -137,6 +140,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     'preferred-dark-theme': preferredDarkTheme,
     'installed-custom-theme': installedCustomLightTheme,
     'installed-custom-dark-theme': installedCustomDarkTheme,
+    'custom-css-override': customCssOverride,
     'server-self-signed-cert': serverSelfSignedCert,
     syncServerConfig,
     notifyWhenUpdateIsAvailable,
@@ -151,6 +155,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     'preferred-dark-theme',
     'installed-custom-theme',
     'installed-custom-dark-theme',
+    'custom-css-override',
     'server-self-signed-cert',
     'syncServerConfig',
     'notifyWhenUpdateIsAvailable',
@@ -175,6 +180,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
         : 'dark',
     installedCustomLightTheme: installedCustomLightTheme || undefined,
     installedCustomDarkTheme: installedCustomDarkTheme || undefined,
+    customCssOverride: customCssOverride || undefined,
     serverSelfSignedCert: serverSelfSignedCert || undefined,
     syncServerConfig: syncServerConfig || undefined,
     notifyWhenUpdateIsAvailable:

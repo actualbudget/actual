@@ -122,10 +122,7 @@ export default defineConfig(async ({ mode }) => {
     base: '/',
     envPrefix: 'REACT_APP_',
     build: {
-      terserOptions: {
-        compress: false,
-        mangle: false,
-      },
+      minify: false,
       target: 'es2022',
       sourcemap: true,
       outDir: mode === 'desktop' ? 'build-electron' : 'build',
@@ -152,7 +149,7 @@ export default defineConfig(async ({ mode }) => {
     },
     server: {
       host: true,
-      headers: mode === 'development' ? devHeaders : undefined,
+      headers: devHeaders,
       port: +env.PORT || 5173,
       open: env.BROWSER
         ? ['chrome', 'firefox', 'edge', 'browser', 'browserPrivate'].includes(
@@ -164,7 +161,7 @@ export default defineConfig(async ({ mode }) => {
       },
     },
     resolve: {
-      ...(!env.IS_GENERIC_BROWSER && {
+      ...(mode !== 'browser' && {
         conditions: ['electron-renderer', 'module', 'browser', 'default'],
       }),
       tsconfigPaths: true,

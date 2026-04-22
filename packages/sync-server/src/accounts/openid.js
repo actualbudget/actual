@@ -1,5 +1,4 @@
 import { custom, generators, Issuer } from 'openid-client';
-import { v4 as uuidv4 } from 'uuid';
 
 import {
   clearExpiredSessions,
@@ -254,7 +253,7 @@ export async function loginWithOpenIdFinalize(body) {
           (countUsersWithUserName === 0 ||
             config.get('userCreationMode') === 'login')
         ) {
-          userId = uuidv4();
+          userId = crypto.randomUUID();
           accountDb.mutate(
             'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, 1, ?, ?)',
             [
@@ -303,7 +302,7 @@ export async function loginWithOpenIdFinalize(body) {
       }
     }
 
-    const token = uuidv4();
+    const token = crypto.randomUUID();
 
     let expiration;
     if (config.get('token_expiration') === 'openid-provider') {
