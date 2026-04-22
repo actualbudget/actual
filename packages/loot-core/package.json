@@ -84,6 +84,7 @@
     "#shared/*": "./src/shared/*.ts",
     "#types/*": "./src/types/*.ts",
     "#mocks/*": "./src/mocks/*.ts",
+    "#migrations/*": "./migrations/*.js",
     "#*": "./src/*.ts"
   },
   "exports": {

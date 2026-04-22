@@ -37,6 +37,7 @@
     "actual/no-anchor-tag": "error",
     "actual/no-react-default-import": "error",
     "actual/prefer-subpath-imports": "error",
+    "actual/enforce-boundaries": "error",
     "actual/no-extraneous-dependencies": "error",
 
     // JSX A11y rules
@@ -370,6 +371,12 @@
       "rules": {
         "actual/no-untranslated-strings": "off",
         "actual/prefer-logger-over-console": "off"
+      }
+    },
+    {
+      "files": ["packages/eslint-plugin-actual/lib/rules/__tests__/**/*"],
+      "rules": {
+        "actual/enforce-boundaries": "off"
       }
     },
     {
