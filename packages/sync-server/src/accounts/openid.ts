@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { custom, generators, Issuer } from 'openid-client';
 
 import {
@@ -14,7 +15,15 @@ import { TOKEN_EXPIRATION_NEVER } from '#util/validate-user';
 
 import { checkPassword } from './password';
 
-export async function bootstrapOpenId(configParameter) {
+export type ConfigParameter = {
+  issuer?: string;
+  discoveryURL?: string;
+  client_id?: string;
+  client_secret?: string;
+  server_hostname?: string;
+};
+
+export async function bootstrapOpenId(configParameter: ConfigParameter) {
   if (!('issuer' in configParameter) && !('discoveryURL' in configParameter)) {
     return { error: 'missing-issuer-or-discoveryURL' };
   }
@@ -346,7 +355,7 @@ export function getServerHostname() {
   return null;
 }
 
-export function isValidRedirectUrl(url) {
+export function isValidRedirectUrl(url: string | undefined): url is string {
   const serverHostname = getServerHostname();
 
   if (!serverHostname) {

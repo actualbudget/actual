@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { getAccountDb } from '#account-db';
 
 export function getUserByUsername(userName) {
@@ -35,7 +36,7 @@ export function validateRole(roleId) {
   return possibleRoles.some(a => a === roleId);
 }
 
-export function getOwnerCount() {
+export function getOwnerCount(): number {
   const { ownerCount } = getAccountDb().first(
     `SELECT count(*) as ownerCount FROM users WHERE users.user_name <> '' and users.owner = 1`,
   ) || { ownerCount: 0 };
