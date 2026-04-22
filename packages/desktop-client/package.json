@@ -2,6 +2,11 @@
   "name": "@actual-app/web",
   "version": "26.4.0",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/actualbudget/actual.git",
+    "directory": "packages/desktop-client"
+  },
   "files": [
     "build"
   ],
@@ -25,6 +30,7 @@
     "#gocardless": "./src/gocardless.ts",
     "#i18n": "./src/i18n.ts",
     "#mocks": "./src/mocks.tsx",
+    "#mocks/*": "./src/mocks/*.ts",
     "#polyfills": "./src/polyfills.ts",
     "#components/forms": "./src/components/forms/index.tsx",
     "#components/banksync": "./src/components/banksync/index.tsx",
@@ -101,6 +107,7 @@
     "build:browser": "cross-env ./bin/build-browser",
     "generate:i18n": "i18next",
     "test": "vitest --run",
+    "validate:theme-catalog": "node --experimental-strip-types bin/validate-theme-catalog.mts",
     "e2e": "npx playwright test --browser=chromium",
     "vrt": "cross-env VRT=true npx playwright test --browser=chromium",
     "playwright": "playwright",

@@ -25,10 +25,31 @@ export class MobileTransactionEntryPage {
     await this.transactionForm.waitFor(...options);
   }
 
+  async fillAmount(value: string) {
+    await this.amountField.fill(value);
+    await this.amountField.evaluate(el => (el as HTMLInputElement).blur());
+    // TransactionEdit.onUpdate runs an async rules-run before setTransactions,
+    // so wait for the outer display button (reads props.value) to reflect the
+    // committed amount before the next fillField snapshots the transaction.
+    await this.transactionForm
+      .getByRole('button')
+      .filter({ hasText: value })
+      .waitFor();
+  }
+
   async fillField(fieldLocator: Locator, content: string) {
     await fieldLocator.click();
-    await this.page.locator('css=[role=combobox] input').fill(content);
-    await this.page.keyboard.press('Enter');
+    const comboboxInput = this.page.getByRole('combobox').locator('input');
+    // pressSequentially + option click: fill()+Enter breaks the autocomplete
+    // highlight and selects "None"/wrong entry under CPU contention.
+    await comboboxInput.pressSequentially(content);
+    await this.page
+      .getByRole('option')
+      .filter({ hasText: content })
+      .first()
+      .click();
+    await comboboxInput.waitFor({ state: 'hidden' });
+    await fieldLocator.filter({ hasText: content }).waitFor();
   }
 
   async createTransaction() {

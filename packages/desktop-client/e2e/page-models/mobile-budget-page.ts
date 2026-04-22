@@ -312,21 +312,14 @@ export class MobileBudgetPage {
   async #getButtonForEnvelopeBudgetSummary({
     throwIfNotFound = true,
   }: { throwIfNotFound?: boolean } = {}) {
-    if (await this.toBudgetButton.isVisible()) {
-      return this.toBudgetButton;
+    const button = this.toBudgetButton.or(this.overbudgetedButton).first();
+    try {
+      await button.waitFor();
+    } catch (err) {
+      if (!throwIfNotFound) return null;
+      throw err;
     }
-
-    if (await this.overbudgetedButton.isVisible()) {
-      return this.overbudgetedButton;
-    }
-
-    if (!throwIfNotFound) {
-      return null;
-    }
-
-    throw new Error(
-      'Neither "To Budget" nor "Overbudgeted" button could be located on the page.',
-    );
+    return button;
   }
 
   async openEnvelopeBudgetSummary() {
@@ -346,25 +339,17 @@ export class MobileBudgetPage {
   async #getButtonForTrackingBudgetSummary({
     throwIfNotFound = true,
   }: { throwIfNotFound?: boolean } = {}) {
-    if (await this.savedButton.isVisible()) {
-      return this.savedButton;
+    const button = this.savedButton
+      .or(this.projectedSavingsButton)
+      .or(this.overspentButton)
+      .first();
+    try {
+      await button.waitFor();
+    } catch (err) {
+      if (!throwIfNotFound) return null;
+      throw err;
     }
-
-    if (await this.projectedSavingsButton.isVisible()) {
-      return this.projectedSavingsButton;
-    }
-
-    if (await this.overspentButton.isVisible()) {
-      return this.overspentButton;
-    }
-
-    if (!throwIfNotFound) {
-      return null;
-    }
-
-    throw new Error(
-      'None of "Saved", "Projected savings", or "Overspent" buttons could be located on the page.',
-    );
+    return button;
   }
 
   async openTrackingBudgetSummary() {

@@ -3,6 +3,11 @@
   "version": "26.4.0",
   "description": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/actualbudget/actual.git",
+    "directory": "packages/loot-core"
+  },
   "files": [
     "src",
     "@types",
@@ -79,6 +84,7 @@
     "#shared/*": "./src/shared/*.ts",
     "#types/*": "./src/types/*.ts",
     "#mocks/*": "./src/mocks/*.ts",
+    "#migrations/*": "./migrations/*.js",
     "#*": "./src/*.ts"
   },
   "exports": {

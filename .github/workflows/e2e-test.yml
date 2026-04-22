@@ -17,18 +17,17 @@ on:
 env:
   GITHUB_PR_NUMBER: ${{github.event.pull_request.number}}
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  functional:
-    name: Functional (shard ${{ matrix.shard }}/5)
+  build-web:
+    name: Build web bundle
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3, 4, 5]
     container:
       image: mcr.microsoft.com/playwright:v1.59.1-jammy
     steps:
@@ -41,10 +40,58 @@ jobs:
           download-translations: 'false'
       - name: Trust the repository directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Build browser bundle
+        # REACT_APP_NETLIFY=true flips isNonProductionEnvironment() on in the
+        # bundle so the "Create test file" button (used by every e2e beforeEach
+        # via ConfigurationPage.createTestFile()) is still rendered in a
+        # production build. Without it, e2e tests would time out waiting for
+        # a button that was tree-shaken out.
+        env:
+          REACT_APP_NETLIFY: 'true'
+        run: |
+          yarn workspace plugins-service build
+          yarn workspace @actual-app/crdt build
+          yarn workspace @actual-app/core build:browser
+          yarn workspace @actual-app/web build:browser
+      - name: Upload build artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: desktop-client-build
+          path: packages/desktop-client/build/
+          retention-days: 1
+          overwrite: true
+
+  functional:
+    name: Functional (shard ${{ matrix.shard }}/3)
+    runs-on: ubuntu-latest
+    needs: build-web
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    container:
+      image: mcr.microsoft.com/playwright:v1.59.1-jammy
+    env:
+      E2E_USE_BUILD: '1'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Trust the repository directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Download web build
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: desktop-client-build
+          path: packages/desktop-client/build/
       - name: Run E2E Tests
-        run: yarn e2e --shard=${{ matrix.shard }}/5
+        run: yarn e2e --shard=${{ matrix.shard }}/3
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: always()
+        if: failure()
         with:
           name: desktop-client-test-results-shard-${{ matrix.shard }}
           path: packages/desktop-client/test-results/
@@ -84,14 +131,17 @@ jobs:
           overwrite: true
 
   vrt:
-    name: Visual regression (shard ${{ matrix.shard }}/5)
+    name: Visual regression (shard ${{ matrix.shard }}/3)
     runs-on: ubuntu-latest
+    needs: build-web
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4, 5]
+        shard: [1, 2, 3]
     container:
       image: mcr.microsoft.com/playwright:v1.59.1-jammy
+    env:
+      E2E_USE_BUILD: '1'
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -100,8 +150,15 @@ jobs:
         uses: ./.github/actions/setup
         with:
           download-translations: 'false'
+      - name: Trust the repository directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Download web build
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: desktop-client-build
+          path: packages/desktop-client/build/
       - name: Run VRT Tests
-        run: yarn vrt --shard=${{ matrix.shard }}/5
+        run: yarn vrt --shard=${{ matrix.shard }}/3
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
