@@ -129,6 +129,13 @@ export const GRAPH_LAYER_ORDER = [
   GraphLayers.Category,
 ] as const;
 
+function isGraphLayer(value: unknown): value is GraphLayers {
+  return (
+    typeof value === 'string' &&
+    (Object.values(GraphLayers) as string[]).includes(value)
+  );
+}
+
 export function createSpreadsheet(
   start: string,
   end: string,
@@ -366,7 +373,10 @@ function filterCategoryGroups(
     cond: RuleConditionEntity,
   ): boolean => {
     const value = cond.value;
-    const op = cond.op as string;
+    if (typeof cond.op !== 'string') {
+      throw new Error('Invalid op');
+    }
+    const op = cond.op;
     if (op === 'is') return id === value;
     if (op === 'isNot') return id !== value;
     if (op === 'oneOf') return Array.isArray(value) && value.includes(id);
@@ -990,7 +1000,7 @@ function sortGraph(
 
       const childEntries = childKeys
         .map(key => sortedEntries.find(([entryKey]) => entryKey === key))
-        .filter(Boolean) as Array<[string, NodeData]>;
+        .filter((entry): entry is [string, NodeData] => entry !== undefined);
       childEntries.sort(
         ([a], [b]) => getNodeValue(graph, b) - getNodeValue(graph, a),
       );
@@ -1244,10 +1254,14 @@ function convertToSankeyData(graph: Graph): SankeyData {
         GraphLayers.Budget,
       ];
 
-      if (sourceLayersWithOwnColor.includes(data.type as GraphLayers)) {
+      if (
+        isGraphLayer(data.type) &&
+        sourceLayersWithOwnColor.includes(data.type)
+      ) {
         color = data.color;
       } else if (
-        targetLayersWithTargetColor.includes(data.type as GraphLayers)
+        isGraphLayer(data.type) &&
+        targetLayersWithTargetColor.includes(data.type)
       ) {
         const targetNode = graph.get(targetKey);
         color = targetNode ? targetNode.color : undefined;
