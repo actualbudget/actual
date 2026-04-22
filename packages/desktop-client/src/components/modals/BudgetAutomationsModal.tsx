@@ -1408,6 +1408,83 @@ function BudgetAutomationsBody({
   );
 }
 
+function UnsupportedDirectivesNotice({
+  hasGoalTemplate,
+  hasCleanupDirective,
+  onClose,
+}: {
+  hasGoalTemplate: boolean;
+  hasCleanupDirective: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <View
+      style={{
+        flex: 1,
+        padding: 32,
+        gap: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center',
+      }}
+    >
+      <SvgAlertTriangle
+        width={32}
+        height={32}
+        style={{ color: theme.errorText }}
+      />
+      <Text
+        style={{
+          fontSize: 18,
+          fontWeight: 600,
+          color: theme.pageText,
+        }}
+      >
+        <Trans>This category isn&rsquo;t supported in the UI yet</Trans>
+      </Text>
+      <Text
+        style={{
+          fontSize: 13,
+          color: theme.pageTextSubdued,
+          maxWidth: 480,
+          lineHeight: 1.5,
+        }}
+      >
+        {hasGoalTemplate && hasCleanupDirective ? (
+          <Trans>
+            This category&rsquo;s notes use <code>#goal</code> and{' '}
+            <code>#cleanup</code> directives, neither of which the budget
+            automations UI handles yet. Keep editing them as text in the
+            category&rsquo;s notes.
+          </Trans>
+        ) : hasGoalTemplate ? (
+          <Trans>
+            This category uses a <code>#goal</code> directive, which the budget
+            automations UI doesn&rsquo;t handle yet. Keep editing it as text in
+            the category&rsquo;s notes.
+          </Trans>
+        ) : (
+          <Trans>
+            This category uses a <code>#cleanup</code> directive, which the
+            budget automations UI doesn&rsquo;t handle yet. Keep editing it as
+            text in the category&rsquo;s notes.
+          </Trans>
+        )}
+      </Text>
+      <Button onPress={onClose}>
+        <Trans>Close</Trans>
+      </Button>
+    </View>
+  );
+}
+
+function hasCleanupLine(notes: string | null | undefined): boolean {
+  if (!notes) return false;
+  return notes
+    .split('\n')
+    .some(line => line.trimStart().startsWith('#cleanup'));
+}
+
 export function BudgetAutomationsModal({
   categoryId,
   month,
@@ -1415,13 +1492,14 @@ export function BudgetAutomationsModal({
   categoryId: string;
   month?: string;
 }) {
-  const [entries, setEntries] = useState<AutomationEntry[] | null>(null);
+  const [parsedTemplates, setParsedTemplates] = useState<Template[] | null>(
+    null,
+  );
   const effectiveMonth = month ?? currentMonth();
 
   const onLoaded = useCallback(
     (result: Record<string, Template[]>) => {
-      const templates = result[categoryId] ?? [];
-      setEntries(migrateTemplatesToAutomations(templates));
+      setParsedTemplates(result[categoryId] ?? []);
     },
     [categoryId],
   );
@@ -1433,8 +1511,22 @@ export function BudgetAutomationsModal({
 
   const categories = useBudgetAutomationCategories();
   const { data: currentCategory } = useCategory(categoryId);
+  const notes = useNotes(categoryId);
 
   const needsMigration = currentCategory?.template_settings?.source !== 'ui';
+
+  const hasGoalTemplate =
+    parsedTemplates?.some(t => t.type === 'goal') ?? false;
+  const hasCleanupDirective = hasCleanupLine(notes);
+  const hasUnsupportedDirective = hasGoalTemplate || hasCleanupDirective;
+
+  const initialEntries = useMemo(
+    () =>
+      parsedTemplates && !hasUnsupportedDirective
+        ? migrateTemplatesToAutomations(parsedTemplates)
+        : null,
+    [parsedTemplates, hasUnsupportedDirective],
+  );
 
   return (
     <Modal
@@ -1454,7 +1546,7 @@ export function BudgetAutomationsModal({
     >
       {({ state }) => (
         <View style={{ flex: 1, minHeight: 0 }}>
-          {loading || entries === null ? (
+          {loading || parsedTemplates === null ? (
             <View
               style={{
                 flex: 1,
@@ -1464,12 +1556,18 @@ export function BudgetAutomationsModal({
             >
               <AnimatedLoading style={{ width: 20, height: 20 }} />
             </View>
+          ) : hasUnsupportedDirective ? (
+            <UnsupportedDirectivesNotice
+              hasGoalTemplate={hasGoalTemplate}
+              hasCleanupDirective={hasCleanupDirective}
+              onClose={() => state.close()}
+            />
           ) : (
             <BudgetAutomationsBody
               categoryId={categoryId}
               categoryName={currentCategory?.name ?? ''}
               needsMigration={needsMigration}
-              initialEntries={entries}
+              initialEntries={initialEntries ?? []}
               schedules={schedules}
               categories={categories}
               month={effectiveMonth}
