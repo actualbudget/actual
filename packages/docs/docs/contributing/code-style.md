@@ -14,7 +14,6 @@ This guide outlines the coding conventions and style guidelines for contributing
 - **Avoid `any` or `unknown`**: Only use when absolutely necessary
 - **Look for existing types**: Check `packages/loot-core/src/types/` for existing type definitions
 - **Avoid type assertions**: Prefer `satisfies` over `as` or `!` for type narrowing
-- **Use inline type imports**: `import { type MyType } from '...'`
 
 ### Naming Conventions
 
@@ -85,7 +84,6 @@ Use custom hooks from `src/hooks` instead of importing directly from react-route
 
 ### Never Use
 
-- **`uuid` without destructuring**: Use `import { v4 as uuidv4 } from 'uuid'`
 - **Direct color imports**: Use theme instead of importing colors directly
 - **`@actual-app/web/*` imports in `loot-core`**: Don't import from web package in core
 

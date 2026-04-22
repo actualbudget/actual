@@ -1,8 +1,9 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render as rtlRender, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useThemeCatalog } from '#hooks/useThemeCatalog';
+import { resetTestProviders, TestProviders } from '#mocks';
 import {
   fetchThemeCss,
   generateThemeId,
@@ -10,6 +11,9 @@ import {
 } from '#style/customThemes';
 
 import { ThemeInstaller } from './ThemeInstaller';
+
+const render: typeof rtlRender = (ui, options) =>
+  rtlRender(ui, { wrapper: TestProviders, ...options });
 
 vi.mock('#style/customThemes', async () => {
   const actual = await vi.importActual('#style/customThemes');
@@ -32,6 +36,18 @@ vi.mock('#style/customThemes', async () => {
 
 vi.mock('#hooks/useThemeCatalog', () => ({
   useThemeCatalog: vi.fn(),
+}));
+
+const mockSetCustomCssOverride = vi.fn();
+let mockCustomCssOverride: string | undefined = undefined;
+
+vi.mock('#hooks/useGlobalPref', () => ({
+  useGlobalPref: (key: string) => {
+    if (key === 'customCssOverride') {
+      return [mockCustomCssOverride, mockSetCustomCssOverride];
+    }
+    return [undefined, vi.fn()];
+  },
 }));
 
 describe('ThemeInstaller', () => {
@@ -84,8 +100,11 @@ describe('ThemeInstaller', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    resetTestProviders();
     mockOnInstall.mockClear();
     mockOnClose.mockClear();
+    mockSetCustomCssOverride.mockClear();
+    mockCustomCssOverride = undefined;
     vi.mocked(fetchThemeCss).mockResolvedValue(mockValidCss);
     vi.mocked(validateThemeCss).mockImplementation(css => css.trim());
     // Reset generateThemeId mock to default behavior
@@ -324,265 +343,6 @@ describe('ThemeInstaller', () => {
     });
   });
 
-  describe('pasted CSS installation', () => {
-    it('calls onInstall when valid CSS is pasted and Apply is clicked', async () => {
-      const user = userEvent.setup();
-      render(
-        <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
-      );
-
-      const textArea = screen.getByRole('textbox', {
-        name: 'Custom Theme CSS',
-      });
-      await user.click(textArea);
-      await user.paste(mockValidCss);
-
-      const applyButton = screen.getByText('Apply');
-      await user.click(applyButton);
-
-      await waitFor(() => {
-        expect(validateThemeCss).toHaveBeenCalledWith(mockValidCss);
-        expect(mockOnInstall).toHaveBeenCalledTimes(1);
-        expect(mockOnInstall).toHaveBeenCalledWith(
-          expect.objectContaining({
-            name: 'Custom Theme',
-            repo: '',
-            overrideCss: mockValidCss,
-          }),
-        );
-      });
-    });
-
-    it('trims whitespace from pasted CSS before validation', async () => {
-      const user = userEvent.setup();
-      render(
-        <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
-      );
-
-      const textArea = screen.getByRole('textbox', {
-        name: 'Custom Theme CSS',
-      });
-      const cssWithWhitespace = `  ${mockValidCss}  `;
-      await user.click(textArea);
-      await user.paste(cssWithWhitespace);
-
-      const applyButton = screen.getByText('Apply');
-      await user.click(applyButton);
-
-      expect(validateThemeCss).toHaveBeenCalledWith(cssWithWhitespace.trim());
-    });
-
-    it('calls onInstall with empty cssContent when Apply is clicked with empty CSS', async () => {
-      const user = userEvent.setup();
-      render(
-        <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
-      );
-
-      const applyButton = screen.getByText('Apply');
-      expect(applyButton).not.toBeDisabled();
-
-      await user.click(applyButton);
-
-      await waitFor(() => {
-        expect(mockOnInstall).toHaveBeenCalledTimes(1);
-        expect(mockOnInstall).toHaveBeenCalledWith(
-          expect.objectContaining({
-            cssContent: '',
-          }),
-        );
-      });
-    });
-
-    it('calls onInstall with empty cssContent when Apply is clicked with whitespace-only CSS', async () => {
-      const user = userEvent.setup();
-      render(
-        <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
-      );
-
-      const textArea = screen.getByRole('textbox', {
-        name: 'Custom Theme CSS',
-      });
-      await user.click(textArea);
-      await user.paste('   ');
-
-      const applyButton = screen.getByText('Apply');
-      expect(applyButton).not.toBeDisabled();
-
-      await user.click(applyButton);
-
-      await waitFor(() => {
-        expect(mockOnInstall).toHaveBeenCalledTimes(1);
-        expect(mockOnInstall).toHaveBeenCalledWith(
-          expect.objectContaining({
-            cssContent: '',
-          }),
-        );
-      });
-    });
-
-    it('populates text box with installed custom theme CSS when reopening', () => {
-      const installedCustomTheme = {
-        id: 'theme-abc123',
-        name: 'Custom Theme',
-        repo: '',
-        cssContent: mockValidCss,
-      };
-
-      render(
-        <ThemeInstaller
-          onInstall={mockOnInstall}
-          onClose={mockOnClose}
-          installedTheme={installedCustomTheme}
-        />,
-      );
-
-      const textArea = screen.getByRole('textbox', {
-        name: 'Custom Theme CSS',
-      });
-      expect(textArea).toHaveValue(mockValidCss);
-    });
-
-    it('does not populate text box when installed theme has a repo', () => {
-      const installedCatalogTheme = {
-        id: 'theme-xyz789',
-        name: 'Demo Theme',
-        repo: 'https://github.com/actualbudget/demo-theme',
-        cssContent: mockValidCss,
-      };
-
-      render(
-        <ThemeInstaller
-          onInstall={mockOnInstall}
-          onClose={mockOnClose}
-          installedTheme={installedCatalogTheme}
-        />,
-      );
-
-      const textArea = screen.getByRole('textbox', {
-        name: 'Custom Theme CSS',
-      });
-      expect(textArea).toHaveValue('');
-    });
-
-    it('clears selected catalog theme when CSS is pasted', async () => {
-      const user = userEvent.setup();
-      render(
-        <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
-      );
-
-      // First select a theme (which should be selected/highlighted)
-      await user.click(screen.getByRole('button', { name: 'Demo Theme' }));
-      await waitFor(() => {
-        expect(fetchThemeCss).toHaveBeenCalled();
-      });
-
-      // Then paste CSS
-      const textArea = screen.getByRole('textbox', {
-        name: 'Custom Theme CSS',
-      });
-      await user.click(textArea);
-      await user.paste(mockValidCss);
-
-      // Selection should be cleared (we can't easily test visual state,
-      // but the handler should clear it)
-      expect(textArea).toHaveValue(mockValidCss);
-    });
-
-    it('clears error when CSS is pasted', async () => {
-      const user = userEvent.setup();
-      render(
-        <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
-      );
-
-      // First create an error
-      vi.mocked(fetchThemeCss).mockRejectedValueOnce(new Error('Test error'));
-      await user.click(screen.getByRole('button', { name: 'Demo Theme' }));
-      await waitFor(() => {
-        expect(screen.getByText('Test error')).toBeInTheDocument();
-      });
-
-      // Then paste CSS
-      const textArea = screen.getByRole('textbox', {
-        name: 'Custom Theme CSS',
-      });
-      await user.click(textArea);
-      await user.paste(mockValidCss);
-
-      // Error should be cleared
-      expect(screen.queryByText('Test error')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('error handling for pasted CSS', () => {
-    it('displays error when validateThemeCss throws for pasted CSS', async () => {
-      const user = userEvent.setup();
-      const validationError = 'Theme CSS must contain exactly :root';
-      vi.mocked(validateThemeCss).mockImplementation(() => {
-        throw new Error(validationError);
-      });
-
-      render(
-        <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
-      );
-
-      const textArea = screen.getByRole('textbox', {
-        name: 'Custom Theme CSS',
-      });
-      await user.click(textArea);
-      await user.paste('invalid css');
-
-      const applyButton = screen.getByText('Apply');
-      await user.click(applyButton);
-
-      await waitFor(() => {
-        expect(screen.getByText(validationError)).toBeInTheDocument();
-      });
-
-      expect(mockOnInstall).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('loading states', () => {
-    it('disables Apply button when loading', async () => {
-      const user = userEvent.setup();
-      vi.mocked(fetchThemeCss).mockImplementation(
-        () =>
-          new Promise(resolve => {
-            setTimeout(() => resolve(mockValidCss), 100);
-          }),
-      );
-
-      render(
-        <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
-      );
-
-      await user.click(screen.getByRole('button', { name: 'Demo Theme' }));
-
-      const applyButton = screen.getByText('Apply');
-      expect(applyButton).toBeDisabled();
-    });
-
-    it('disables Apply button when pasted CSS is empty during loading', async () => {
-      const user = userEvent.setup();
-      vi.mocked(fetchThemeCss).mockImplementation(
-        () =>
-          new Promise(resolve => {
-            setTimeout(() => resolve(mockValidCss), 100);
-          }),
-      );
-
-      render(
-        <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
-      );
-
-      // Trigger loading state
-      await user.click(screen.getByRole('button', { name: 'Demo Theme' }));
-
-      const applyButton = screen.getByText('Apply');
-      expect(applyButton).toBeDisabled();
-    });
-  });
-
   describe('close button', () => {
     it('calls onClose when close button is clicked', async () => {
       const user = userEvent.setup();
@@ -632,6 +392,97 @@ describe('ThemeInstaller', () => {
 
       const sourceLinks = screen.getAllByText('Source');
       expect(sourceLinks.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('customCssOverride pref binding', () => {
+    it('pre-fills the textarea from customCssOverride on mount', () => {
+      mockCustomCssOverride = ':root { --color-accent: #ff00aa; }';
+      render(
+        <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
+      );
+      expect(screen.getByLabelText('Custom Theme CSS')).toHaveValue(
+        ':root { --color-accent: #ff00aa; }',
+      );
+    });
+
+    it('leaves the textarea empty when customCssOverride is undefined', () => {
+      mockCustomCssOverride = undefined;
+      render(
+        <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
+      );
+      expect(screen.getByLabelText('Custom Theme CSS')).toHaveValue('');
+    });
+
+    it('writes validated CSS to customCssOverride when Apply is pressed', async () => {
+      const user = userEvent.setup();
+      mockCustomCssOverride = undefined;
+      vi.mocked(validateThemeCss).mockImplementation(css => css.trim());
+
+      render(
+        <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
+      );
+      const textarea = screen.getByLabelText('Custom Theme CSS');
+      await user.click(textarea);
+      await user.paste('  :root { --color-accent: #ff0000; }  ');
+      await user.click(screen.getByRole('button', { name: 'Apply' }));
+
+      // validateThemeCss is mocked as css => css.trim(), so the setter
+      // must receive the trimmed version — not the raw pasted string.
+      // This proves the Apply path runs validation, not a raw pass-through.
+      expect(mockSetCustomCssOverride).toHaveBeenCalledWith(
+        ':root { --color-accent: #ff0000; }',
+      );
+      // Textarea must also reflect the normalized value so the editor stays
+      // in sync with what was actually persisted.
+      expect(textarea).toHaveValue(':root { --color-accent: #ff0000; }');
+    });
+
+    it('clears customCssOverride when Apply is pressed with an empty textarea', async () => {
+      const user = userEvent.setup();
+      mockCustomCssOverride = ':root { --color-accent: #ff0000; }';
+
+      render(
+        <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
+      );
+      const textarea = screen.getByLabelText('Custom Theme CSS');
+      await user.clear(textarea);
+      await user.click(screen.getByRole('button', { name: 'Apply' }));
+
+      expect(mockSetCustomCssOverride).toHaveBeenCalledWith('');
+    });
+
+    it('shows an error and does not write when CSS is invalid', async () => {
+      const user = userEvent.setup();
+      mockCustomCssOverride = undefined;
+      vi.mocked(validateThemeCss).mockImplementation(() => {
+        throw new Error('invalid css');
+      });
+
+      render(
+        <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
+      );
+      const textarea = screen.getByLabelText('Custom Theme CSS');
+      await user.type(textarea, 'not valid css');
+      await user.click(screen.getByRole('button', { name: 'Apply' }));
+
+      expect(mockSetCustomCssOverride).not.toHaveBeenCalled();
+      expect(await screen.findByText('invalid css')).toBeInTheDocument();
+    });
+
+    it('does not touch customCssOverride when clicking a catalog theme', async () => {
+      const user = userEvent.setup();
+      mockCustomCssOverride = ':root { --color-accent: #ff0000; }';
+
+      render(
+        <ThemeInstaller onInstall={mockOnInstall} onClose={mockOnClose} />,
+      );
+      await user.click(screen.getByRole('button', { name: 'Demo Theme' }));
+
+      await waitFor(() => {
+        expect(mockOnInstall).toHaveBeenCalled();
+      });
+      expect(mockSetCustomCssOverride).not.toHaveBeenCalled();
     });
   });
 });

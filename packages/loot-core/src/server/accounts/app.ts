@@ -1,5 +1,4 @@
 import { t } from 'i18next';
-import { v4 as uuidv4 } from 'uuid';
 
 import { captureException } from '#platform/exceptions';
 import * as asyncStorage from '#platform/server/asyncStorage';
@@ -179,7 +178,7 @@ async function linkGoCardlessAccount({
       account_sync_source: 'goCardless',
     });
   } else {
-    id = uuidv4();
+    id = crypto.randomUUID();
     await db.insertWithUUID('accounts', {
       id,
       account_id: account.account_id,
@@ -254,7 +253,7 @@ async function linkSimpleFinAccount({
       account_sync_source: 'simpleFin',
     });
   } else {
-    id = uuidv4();
+    id = crypto.randomUUID();
     await db.insertWithUUID('accounts', {
       id,
       account_id: externalAccount.account_id,
@@ -328,7 +327,7 @@ async function linkPluggyAiAccount({
       account_sync_source: 'pluggyai',
     });
   } else {
-    id = uuidv4();
+    id = crypto.randomUUID();
     await db.insertWithUUID('accounts', {
       id,
       account_id: externalAccount.account_id,
@@ -502,7 +501,7 @@ async function closeAccount({
         }
 
         await mainApp.handlers['transaction-add']({
-          id: uuidv4(),
+          id: crypto.randomUUID(),
           payee: transferPayee.id,
           amount: -balance,
           account: id,

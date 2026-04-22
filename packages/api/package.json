@@ -3,6 +3,11 @@
   "version": "26.4.0",
   "description": "An API for Actual",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/actualbudget/actual.git",
+    "directory": "packages/api"
+  },
   "files": [
     "@types",
     "dist"
@@ -14,6 +19,11 @@
       "types": "./@types/index.d.ts",
       "development": "./index.ts",
       "default": "./dist/index.js"
+    },
+    "./models": {
+      "types": "./@types/models.d.ts",
+      "development": "./models.ts",
+      "default": "./dist/models.js"
     }
   },
   "publishConfig": {
@@ -21,29 +31,31 @@
       ".": {
         "types": "./@types/index.d.ts",
         "default": "./dist/index.js"
+      },
+      "./models": {
+        "types": "./@types/models.d.ts",
+        "default": "./dist/models.js"
       }
     }
   },
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && tsgo --emitDeclarationOnly",
     "test": "vitest --run",
     "typecheck": "tsgo -b && tsc-strict"
   },
   "dependencies": {
     "@actual-app/core": "workspace:*",
     "@actual-app/crdt": "workspace:*",
-    "better-sqlite3": "^12.6.2",
-    "compare-versions": "^6.1.1",
-    "uuid": "^13.0.0"
+    "better-sqlite3": "^12.8.0",
+    "compare-versions": "^6.1.1"
   },
   "devDependencies": {
-    "@typescript/native-preview": "^7.0.0-dev.20260309.1",
-    "rollup-plugin-visualizer": "^6.0.11",
+    "@typescript/native-preview": "beta",
+    "rollup-plugin-visualizer": "^7.0.1",
     "typescript-strict-plugin": "^2.4.4",
     "vite": "^8.0.5",
-    "vite-plugin-dts": "^4.5.4",
     "vite-plugin-peggy-loader": "^2.0.1",
-    "vitest": "^4.1.0"
+    "vitest": "^4.1.2"
   },
   "engines": {
     "node": ">=20"

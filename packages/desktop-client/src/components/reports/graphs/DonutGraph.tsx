@@ -12,7 +12,7 @@ import type {
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
 import { Pie, PieChart, Sector } from 'recharts';
-import type { PieSectorShapeProps } from 'recharts';
+import type { PieSectorDataItem, PieSectorShapeProps } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
@@ -30,6 +30,8 @@ import { showActivity } from './showActivity';
 const RADIAN = Math.PI / 180;
 
 const canDeviceHover = () => window.matchMedia('(hover: hover)').matches;
+
+type ClickablePieItem = PieSectorDataItem & { id?: string };
 
 // ---------------------------------------------------------------------------
 // Dimension helpers
@@ -487,7 +489,7 @@ export function DonutGraph({
                         setActiveRing('group');
                       }
                     }}
-                    onClick={(item, index) => {
+                    onClick={(item: ClickablePieItem, index) => {
                       if (!canDeviceHover()) {
                         setActiveGroupIndex(index);
                         setActiveRing('group');
@@ -574,7 +576,7 @@ export function DonutGraph({
                         setPointer('pointer');
                       }
                     }}
-                    onClick={(item, index) => {
+                    onClick={(item: ClickablePieItem, index) => {
                       if (!canDeviceHover()) {
                         setActiveCategoryIndex(index);
                         setActiveRing('category');
@@ -667,7 +669,7 @@ export function DonutGraph({
                       }
                     }
                   }}
-                  onClick={(item, index) => {
+                  onClick={(item: ClickablePieItem, index) => {
                     if (!canDeviceHover()) {
                       setActiveIndex(index);
                     }

@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import { t } from 'i18next';
-import { v4 as uuidv4 } from 'uuid';
 
 import * as undo from '#platform/client/undo';
 import { captureBreadcrumb, captureException } from '#platform/exceptions';
@@ -161,7 +160,7 @@ export const send: T.Send = function (
 ): ReturnType<T.Send> {
   const [name, args, { catchErrors = false } = {}] = params;
   return new Promise((resolve, reject) => {
-    const id = uuidv4();
+    const id = crypto.randomUUID();
 
     replyHandlers.set(id, { resolve, reject });
     const message = {

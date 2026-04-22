@@ -1,0 +1,29 @@
+name: Nightly theme catalog scan
+
+on:
+  schedule:
+    # 05:15 UTC daily — runs after the i18n extract job (04:00) and well
+    # before the nightly Electron/npm publishes (00:00 UTC the next day).
+    - cron: '15 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-theme-catalog:
+    name: Validate custom theme catalog
+    runs-on: ubuntu-latest
+    if: github.repository == 'actualbudget/actual'
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Validate themes
+        run: yarn workspace @actual-app/web validate:theme-catalog

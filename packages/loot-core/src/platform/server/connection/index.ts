@@ -102,9 +102,7 @@ export const init: T.Init = function (serverChn, handlers) {
           serverChannel.postMessage({
             type: 'reply',
             id,
-            result: catchErrors
-              ? { error: unknownMethodError, data: null }
-              : null,
+            result: { error: unknownMethodError, data: null },
           });
         } else {
           serverChannel.postMessage({

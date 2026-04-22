@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { CSSProperties } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -11,6 +12,7 @@ import * as Platform from '@actual-app/core/shared/platform';
 import { css } from '@emotion/css';
 import { Resizable } from 're-resizable';
 
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useResizeObserver } from '#hooks/useResizeObserver';
@@ -67,69 +69,75 @@ export function Sidebar() {
   });
 
   return (
-    <Resizable
-      defaultSize={{
-        width: sidebarWidth,
-        height: '100%',
-      }}
-      onResizeStop={onResizeStop}
-      maxWidth={MAX_SIDEBAR_WIDTH}
-      minWidth={MIN_SIDEBAR_WIDTH}
-      enable={{
-        top: false,
-        right: true,
-        bottom: false,
-        left: false,
-        topRight: false,
-        bottomRight: false,
-        bottomLeft: false,
-        topLeft: false,
-      }}
-    >
-      <View
-        innerRef={containerRef}
-        className={css({
-          color: theme.sidebarItemText,
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <Resizable
+        defaultSize={{
+          width: sidebarWidth,
           height: '100%',
-          backgroundColor: theme.sidebarBackground,
-          '& .float': {
-            opacity: isFloating ? 1 : 0,
-            transition: 'opacity .25s, width .25s',
-            width: hasWindowButtons || isFloating ? null : 0,
-          } as CSSProperties,
-          '&:hover .float': {
-            opacity: 1,
-            width: hasWindowButtons ? null : 'auto',
-          } as CSSProperties,
-          flex: 1,
-          ...styles.darkScrollbar,
-        })}
+        }}
+        onResizeStop={onResizeStop}
+        maxWidth={MAX_SIDEBAR_WIDTH}
+        minWidth={MIN_SIDEBAR_WIDTH}
+        enable={{
+          top: false,
+          right: true,
+          bottom: false,
+          left: false,
+          topRight: false,
+          bottomRight: false,
+          bottomLeft: false,
+          topLeft: false,
+        }}
       >
-        <BudgetName>
-          {!sidebar.alwaysFloats && (
-            <ToggleButton isFloating={isFloating} onFloat={onFloat} />
-          )}
-        </BudgetName>
-
         <View
-          style={{
-            flexGrow: 1,
-            '@media screen and (max-height: 480px)': {
-              overflowY: 'auto',
-            },
-          }}
+          innerRef={containerRef}
+          className={css({
+            color: theme.sidebarItemText,
+            height: '100%',
+            backgroundColor: theme.sidebarBackground,
+            '& .float': {
+              opacity: isFloating ? 1 : 0,
+              transition: 'opacity .25s, width .25s',
+              width: hasWindowButtons || isFloating ? null : 0,
+            } as CSSProperties,
+            '&:hover .float': {
+              opacity: 1,
+              width: hasWindowButtons ? null : 'auto',
+            } as CSSProperties,
+            flex: 1,
+            ...styles.darkScrollbar,
+          })}
         >
-          <PrimaryButtons />
+          <BudgetName>
+            {!sidebar.alwaysFloats && (
+              <ToggleButton isFloating={isFloating} onFloat={onFloat} />
+            )}
+          </BudgetName>
 
-          <Accounts />
+          <View
+            style={{
+              flexGrow: 1,
+              '@media screen and (max-height: 480px)': {
+                overflowY: 'auto',
+              },
+            }}
+          >
+            <PrimaryButtons />
 
-          <SecondaryButtons
-            buttons={[
-              { title: t('Add account'), Icon: SvgAdd, onClick: onAddAccount },
-            ]}
-          />
+            <Accounts />
+
+            <SecondaryButtons
+              buttons={[
+                {
+                  title: t('Add account'),
+                  Icon: SvgAdd,
+                  onClick: onAddAccount,
+                },
+              ]}
+            />
+          </View>
         </View>
-      </View>
-    </Resizable>
+      </Resizable>
+    </ErrorBoundary>
   );
 }

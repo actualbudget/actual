@@ -31,6 +31,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ github.event.inputs.ref || 'master' }}
+          persist-credentials: false
 
       - name: Set up environment
         uses: ./.github/actions/setup
@@ -87,7 +88,7 @@ jobs:
           fi
 
       - name: Create release branch and PR
-        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           token: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
           commit-message: '🔖 (${{ steps.bump_package_versions.outputs.version }})'
