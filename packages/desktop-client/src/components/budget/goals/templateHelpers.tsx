@@ -1,4 +1,4 @@
-import type { ComponentType, SVGProps } from 'react';
+import type { ComponentType, ReactNode, SVGProps } from 'react';
 import { Trans } from 'react-i18next';
 
 import {
@@ -13,6 +13,7 @@ import {
   SvgArrowsSynchronize,
   SvgCalendar3,
 } from '@actual-app/components/icons/v2';
+import * as monthUtils from '@actual-app/core/shared/months';
 import {
   differenceInCalendarMonths,
   monthFromDate,
@@ -22,6 +23,8 @@ import type {
   ScheduleEntity,
 } from '@actual-app/core/types/models';
 import type { Template } from '@actual-app/core/types/models/templates';
+
+import { useLocale } from '#hooks/useLocale';
 
 import type { Action } from './actions';
 import type { DisplayTemplateType, ReducerState } from './constants';
@@ -45,55 +48,67 @@ import { WeekAutomationReadOnly } from './editor/WeekAutomationReadOnly';
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
 export type DisplayTemplateMeta = {
-  label: string;
-  description: string;
+  // Rendered as ReactNode via <Trans> so the i18n extractor can pick up the
+  // source strings statically — `t(variable)` would not be extractable.
+  label: ReactNode;
+  description: ReactNode;
   icon: IconComponent;
 };
 
-// Picker tile metadata. `label` and `description` are passed through `t()` at
-// the call-site so they remain translatable.
 export const displayTemplateMeta: Record<
   DisplayTemplateType,
   DisplayTemplateMeta
 > = {
   week: {
-    label: 'Fixed amount',
-    description: 'Add a set amount every month, week, day, or year.',
+    label: <Trans>Fixed amount</Trans>,
+    description: (
+      <Trans>Add a set amount every month, week, day, or year.</Trans>
+    ),
     icon: SvgPiggyBank,
   },
   schedule: {
-    label: 'Cover schedule',
-    description: 'Save up for a recurring scheduled transaction.',
+    label: <Trans>Cover schedule</Trans>,
+    description: <Trans>Save up for a recurring scheduled transaction.</Trans>,
     icon: SvgCalendar3,
   },
   by: {
-    label: 'Save by date',
-    description: 'Spread a target amount across the months until a deadline.',
+    label: <Trans>Save by date</Trans>,
+    description: (
+      <Trans>Spread a target amount across the months until a deadline.</Trans>
+    ),
     icon: SvgMoneyBag,
   },
   percentage: {
-    label: '% of income',
-    description: "A share of this month's or last month's income.",
+    label: <Trans>% of income</Trans>,
+    description: (
+      <Trans>A share of this month&rsquo;s or last month&rsquo;s income.</Trans>
+    ),
     icon: SvgChartPie,
   },
   historical: {
-    label: 'From history',
-    description: 'Use past months: average, a specific month, or a copy.',
+    label: <Trans>From history</Trans>,
+    description: (
+      <Trans>Use past months: average, a specific month, or a copy.</Trans>
+    ),
     icon: SvgTime,
   },
   limit: {
-    label: 'Balance cap',
-    description: 'Never let the category balance exceed a cap.',
+    label: <Trans>Balance cap</Trans>,
+    description: <Trans>Never let the category balance exceed a cap.</Trans>,
     icon: SvgEquals,
   },
   refill: {
-    label: 'Refill to cap',
-    description: 'Top the category back up to the balance cap each month.',
+    label: <Trans>Refill to cap</Trans>,
+    description: (
+      <Trans>Top the category back up to the balance cap each month.</Trans>
+    ),
     icon: SvgArrowsSynchronize,
   },
   remainder: {
-    label: 'Whatever is left',
-    description: 'Split any remaining To Budget across these categories.',
+    label: <Trans>Whatever is left</Trans>,
+    description: (
+      <Trans>Split any remaining To Budget across these categories.</Trans>
+    ),
     icon: SvgShare,
   },
 };
@@ -257,7 +272,11 @@ export function validateRule(
         targetMonth + '-01',
         startOfTodayMonth + '-01',
       );
-      if (monthsRemaining < 0) {
+      // Recurring goals (annual/repeat) anchored on a past month are
+      // legitimate — the engine rolls them forward by the period. Only flag
+      // the past-target case for one-shot goals. Mirrors the server check in
+      // CategoryTemplateContext.checkByAndScheduleAndSpend.
+      if (monthsRemaining < 0 && !template.annual && !template.repeat) {
         return { kind: 'by-target-past', month: targetMonth };
       }
       return null;
@@ -267,28 +286,17 @@ export function validateRule(
   }
 }
 
-// Format a YYYY-MM string as "MMM YYYY" (e.g. "2026-04" → "Apr 2026").
-// Falls back to the input if it doesn't look like YYYY-MM, and to "—" for
-// empty/missing values so callers don't need their own guards.
-export function formatMonthLabel(month: string | undefined | null): string {
+// Format a YYYY-MM string as "MMM yyyy" using the active locale (matching
+// the convention used elsewhere in the codebase via monthUtils.format).
+// Falls back to the raw input if it doesn't look like YYYY-MM, and to "—"
+// for empty/missing values so callers don't need their own guards.
+export function formatMonthLabel(
+  month: string | undefined | null,
+  locale?: Parameters<typeof monthUtils.format>[2],
+): string {
   if (!month) return '—';
-  const match = /^(\d{4})-(\d{2})/.exec(month);
-  if (!match) return month;
-  const names = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  return `${names[Number(match[2]) - 1]} ${match[1]}`;
+  if (!/^\d{4}-\d{2}/.test(month)) return month;
+  return monthUtils.format(`${month.slice(0, 7)}-01`, 'MMM yyyy', locale);
 }
 
 export function RuleErrorTitle({ error }: { error: RuleErrorKind }) {
@@ -311,6 +319,7 @@ export function RuleErrorTitle({ error }: { error: RuleErrorKind }) {
 }
 
 export function RuleErrorShort({ error }: { error: RuleErrorKind }) {
+  const locale = useLocale();
   switch (error.kind) {
     case 'schedule-not-found':
       return error.name ? (
@@ -329,7 +338,7 @@ export function RuleErrorShort({ error }: { error: RuleErrorKind }) {
     case 'by-target-past':
       return (
         <Trans>
-          {{ month: formatMonthLabel(error.month) }} has already passed
+          {{ month: formatMonthLabel(error.month, locale) }} has already passed
         </Trans>
       );
     default:

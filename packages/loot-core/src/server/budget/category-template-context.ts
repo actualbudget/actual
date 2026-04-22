@@ -233,6 +233,17 @@ export class CategoryTemplateContext {
       );
     }
 
+    // `runBy` and `runSchedule` produce a single batch total per priority bucket
+    // and the loop above credits it to whichever sibling template ran first. For
+    // per-template UI projections we want to split that batch across all the
+    // sibling templates. The breakdown is approximate (equal split for schedule,
+    // weighted by goal amount for by); the actual budgeted total is unaffected.
+    redistributeBatch(perTemplateLocal, t, 'by', template => {
+      if (template.type !== 'by') return 0;
+      return Math.max(0, template.amount);
+    });
+    redistributeBatch(perTemplateLocal, t, 'schedule', () => 1);
+
     let scale = 1;
     //check limit
     if (this.limitCheck) {
@@ -895,4 +906,60 @@ export class CategoryTemplateContext {
       (totalNeeded - templateContext.fromLastMonth) / (shortNumMonths + 1),
     );
   }
+}
+
+// `runBy` and `runSchedule` are batched: they compute a single budget number
+// for all sibling templates of the same type at a given priority, and the
+// caller loop credits that total to whichever template was iterated first.
+// Split the batch total across all siblings using `weightOf` so the
+// per-template projection map reflects each template's share. The total
+// allocated is preserved (last sibling absorbs any rounding remainder).
+function redistributeBatch<T extends Template>(
+  perTemplateLocal: Map<Template, number>,
+  templates: Template[],
+  type: T['type'],
+  weightOf: (template: T) => number,
+) {
+  const siblings = templates.filter(
+    (template): template is T => template.type === type,
+  );
+  if (siblings.length < 2) return;
+
+  let total = 0;
+  for (const sibling of siblings) {
+    total += perTemplateLocal.get(sibling) ?? 0;
+    perTemplateLocal.set(sibling, 0);
+  }
+  if (total === 0) return;
+
+  const totalWeight = siblings.reduce((sum, s) => sum + weightOf(s), 0);
+  if (totalWeight <= 0) {
+    // Fall back to an equal split if no weights are usable.
+    let remaining = total;
+    siblings.forEach((sibling, i) => {
+      const isLast = i === siblings.length - 1;
+      const share = isLast ? remaining : Math.round(total / siblings.length);
+      const allocated = Math.max(0, Math.min(share, remaining));
+      perTemplateLocal.set(
+        sibling,
+        (perTemplateLocal.get(sibling) ?? 0) + allocated,
+      );
+      remaining -= allocated;
+    });
+    return;
+  }
+
+  let remaining = total;
+  siblings.forEach((sibling, i) => {
+    const isLast = i === siblings.length - 1;
+    const share = isLast
+      ? remaining
+      : Math.round((total * weightOf(sibling)) / totalWeight);
+    const allocated = Math.max(0, Math.min(share, remaining));
+    perTemplateLocal.set(
+      sibling,
+      (perTemplateLocal.get(sibling) ?? 0) + allocated,
+    );
+    remaining -= allocated;
+  });
 }

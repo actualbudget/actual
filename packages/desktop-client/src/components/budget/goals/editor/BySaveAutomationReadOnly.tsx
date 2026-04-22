@@ -7,6 +7,7 @@ import type { TransObjectLiteral } from '@actual-app/core/types/util';
 import { formatMonthLabel } from '#components/budget/goals/templateHelpers';
 import { FinancialText } from '#components/FinancialText';
 import { useFormat } from '#hooks/useFormat';
+import { useLocale } from '#hooks/useLocale';
 
 type BySaveAutomationReadOnlyProps = {
   template: ByTemplate;
@@ -16,11 +17,12 @@ export const BySaveAutomationReadOnly = ({
   template,
 }: BySaveAutomationReadOnlyProps) => {
   const format = useFormat();
+  const locale = useLocale();
   const amount = format(
     amountToInteger(template.amount, format.currency.decimalPlaces),
     'financial',
   );
-  const month = formatMonthLabel(template.month);
+  const month = formatMonthLabel(template.month, locale);
   const repeat = template.repeat ?? 1;
 
   if (template.annual) {

@@ -54,6 +54,7 @@ import { Modal } from '#components/common/Modal';
 import { useBudgetAutomations } from '#hooks/useBudgetAutomations';
 import { useCategory } from '#hooks/useCategory';
 import { useFormat } from '#hooks/useFormat';
+import { useLocale } from '#hooks/useLocale';
 import { useNotes } from '#hooks/useNotes';
 import { useSchedules } from '#hooks/useSchedules';
 import { pushModal } from '#modals/modalsSlice';
@@ -495,7 +496,7 @@ function RuleListRow({
   return (
     <View
       onClick={() => onSelect(index)}
-      aria-label={t('Select rule {{label}}', { label: meta.label })}
+      aria-label={t('Select rule')}
       style={{
         flexShrink: 0,
         flexDirection: 'row',
@@ -649,7 +650,6 @@ type TypePickerProps = {
 };
 
 function TypePicker({ active, disabledTypes, onPick }: TypePickerProps) {
-  const { t } = useTranslation();
   const entries = useMemo(
     () =>
       Object.entries(displayTemplateMeta) as Array<
@@ -677,7 +677,6 @@ function TypePicker({ active, disabledTypes, onPick }: TypePickerProps) {
             tabIndex={isDisabled ? -1 : 0}
             aria-pressed={isActive}
             aria-disabled={isDisabled}
-            aria-label={t(meta.label)}
             onClick={() => {
               if (!isDisabled) onPick(id);
             }}
@@ -725,7 +724,7 @@ function TypePicker({ active, disabledTypes, onPick }: TypePickerProps) {
                   lineHeight: 1.25,
                 }}
               >
-                {t(meta.label)}
+                {meta.label}
               </Text>
             </View>
             <Text
@@ -736,7 +735,7 @@ function TypePicker({ active, disabledTypes, onPick }: TypePickerProps) {
                 lineHeight: 1.35,
               }}
             >
-              {t(meta.description)}
+              {meta.description}
             </Text>
           </View>
         );
@@ -1050,6 +1049,7 @@ function BudgetAutomationsBody({
 }: BudgetAutomationsBodyProps) {
   const dispatch = useDispatch();
   const format = useFormat();
+  const locale = useLocale();
 
   const [entries, setEntries] = useState<AutomationEntry[]>(initialEntries);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -1246,7 +1246,9 @@ function BudgetAutomationsBody({
               letterSpacing: '0.04em',
             }}
           >
-            <Trans>Projected for {{ month: formatMonthLabel(month) }}</Trans>
+            <Trans>
+              Projected for {{ month: formatMonthLabel(month, locale) }}
+            </Trans>
           </Text>
           <Text
             style={{
