@@ -152,6 +152,7 @@ export class CategoryTemplateContext {
     let byFlag = false;
     let remainder = 0;
     let scheduleFlag = false;
+    let schedulePerTemplate: Map<string, number> | null = null;
     // switch on template type and calculate the amount for the line
     for (const template of t) {
       let newBudget = 0;
@@ -212,6 +213,7 @@ export class CategoryTemplateContext {
             // needs to remove the previous funds so they aren't double counted
             newBudget = ret.to_budget - toBudget;
             remainder = ret.remainder;
+            schedulePerTemplate = ret.perScheduleMonthly;
             scheduleFlag = true;
           }
           break;
@@ -242,7 +244,14 @@ export class CategoryTemplateContext {
       if (template.type !== 'by') return 0;
       return Math.max(0, template.amount);
     });
-    redistributeBatch(perTemplateLocal, t, 'schedule', () => 1);
+    // Schedules: weight by each schedule's actual monthly contribution as
+    // computed by runSchedule, so the per-row UI projection reflects the
+    // schedule's real cost rather than an equal split.
+    redistributeBatch(perTemplateLocal, t, 'schedule', template => {
+      if (template.type !== 'schedule') return 0;
+      const monthly = schedulePerTemplate?.get(template.name.trim()) ?? 0;
+      return Math.max(0, monthly);
+    });
 
     let scale = 1;
     //check limit
