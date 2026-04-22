@@ -64,7 +64,7 @@ export const WeekAutomation = ({ template, dispatch }: WeekAutomationProps) => {
                 type: 'periodic',
                 period: {
                   period: periodUnit,
-                  amount: Math.max(1, Number(value) || 1),
+                  amount: Math.max(1, Math.trunc(Number(value)) || 1),
                 },
               }),
             )

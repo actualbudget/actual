@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
@@ -32,16 +32,17 @@ export const RemainderAutomation = ({
             dispatch(
               updateTemplate({
                 type: 'remainder',
-                weight: Math.max(1, Number(value) || 1),
+                weight: Math.max(1, Math.trunc(Number(value)) || 1),
               }),
             )
           }
         />
       </FormField>
       <Text style={{ flex: 2, color: theme.pageTextSubdued, fontSize: 12 }}>
-        {t(
-          'Categories with higher weights get a bigger share of the leftover To Budget.',
-        )}
+        <Trans>
+          Categories with higher weights get a bigger share of the leftover To
+          Budget.
+        </Trans>
       </Text>
     </SpaceBetween>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -52,26 +52,19 @@ export function UnmigrateBudgetAutomationsModal({
   const [rendered, setRendered] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const idToName = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const cat of categoryData?.list ?? []) {
-      map.set(cat.id, cat.name);
-    }
-    return map;
-  }, [categoryData]);
-
-  const sanitizedTemplates = useMemo(
-    () => sanitizePercentageCategoriesForNotes(templates, idToName),
-    [templates, idToName],
-  );
-
   useEffect(() => {
+    if (!categoryData?.list) return;
+    const idToName = new Map<string, string>();
+    for (const cat of categoryData.list) {
+      idToName.set(cat.id, cat.name);
+    }
+    const sanitized = sanitizePercentageCategoriesForNotes(templates, idToName);
     let mounted = true;
     void (async () => {
       try {
         const text: string = await send(
           'budget/render-note-templates',
-          sanitizedTemplates,
+          sanitized,
         );
         if (mounted) setRendered(text);
       } catch {
@@ -81,7 +74,7 @@ export function UnmigrateBudgetAutomationsModal({
     return () => {
       mounted = false;
     };
-  }, [sanitizedTemplates]);
+  }, [templates, categoryData]);
 
   // Seed editable notes once templates rendered
   useEffect(() => {
@@ -123,18 +116,21 @@ export function UnmigrateBudgetAutomationsModal({
 
   async function onSave(close: () => void) {
     setSaving(true);
-    await send('notes-save-undoable', { id: categoryId, note: editedNotes });
-    // Hand control back to the notes parser: clear the UI-managed goal_def and
-    // mark notes as the source of truth. `storeNoteTemplates` will re-derive
-    // goal_def from the notes the next time it runs (e.g. on modal open or
-    // when applying templates).
-    await send('budget/set-category-automations', {
-      categoriesWithTemplates: [{ id: categoryId, templates: [] }],
-      source: 'notes',
-    });
-    await send('budget/store-note-templates');
-    setSaving(false);
-    close();
+    try {
+      await send('notes-save-undoable', { id: categoryId, note: editedNotes });
+      // Hand control back to the notes parser: clear the UI-managed goal_def
+      // and mark notes as the source of truth. `storeNoteTemplates` will
+      // re-derive goal_def from the notes the next time it runs (e.g. on
+      // modal open or when applying templates).
+      await send('budget/set-category-automations', {
+        categoriesWithTemplates: [{ id: categoryId, templates: [] }],
+        source: 'notes',
+      });
+      await send('budget/store-note-templates');
+      close();
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (

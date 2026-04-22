@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -193,18 +193,16 @@ function BudgetAutomationMigrationWarning({
 }) {
   const notes = useNotes(categoryId);
 
-  const templates = useMemo(() => {
-    if (!notes) return null;
-    const lines = notes.split('\n');
-    return lines
-      .flatMap(line => {
-        if (line.trim().startsWith('#template')) return line;
-        if (line.trim().startsWith('#goal')) return line;
-        if (line.trim().startsWith('#cleanup')) return line;
-        return [];
-      })
-      .join('\n');
-  }, [notes]);
+  if (!notes) return null;
+  const templates = notes
+    .split('\n')
+    .flatMap(line => {
+      if (line.trim().startsWith('#template')) return line;
+      if (line.trim().startsWith('#goal')) return line;
+      if (line.trim().startsWith('#cleanup')) return line;
+      return [];
+    })
+    .join('\n');
 
   if (!templates) return null;
 
@@ -337,7 +335,7 @@ function buildPresetSeeds(t: (key: string) => string): Preset[] {
 
 function EmptyState({ onAdd }: EmptyStateProps) {
   const { t } = useTranslation();
-  const presets = useMemo(() => buildPresetSeeds(t), [t]);
+  const presets = buildPresetSeeds(t);
 
   return (
     <View
@@ -661,13 +659,9 @@ type TypePickerProps = {
 };
 
 function TypePicker({ active, disabledTypes, onPick }: TypePickerProps) {
-  const entries = useMemo(
-    () =>
-      Object.entries(displayTemplateMeta) as Array<
-        [DisplayTemplateType, (typeof displayTemplateMeta)[DisplayTemplateType]]
-      >,
-    [],
-  );
+  const entries = Object.entries(displayTemplateMeta) as Array<
+    [DisplayTemplateType, (typeof displayTemplateMeta)[DisplayTemplateType]]
+  >;
 
   return (
     <View
@@ -781,64 +775,52 @@ function RuleEditorPane({
   const active = entries[activeIdx];
   const activeError = ruleErrors[activeIdx];
 
-  const state = useMemo(
-    () => (active ? getInitialState(active.template) : null),
-    [active],
-  );
+  const state = active ? getInitialState(active.template) : null;
 
-  const dispatch = useCallback(
-    (action: Parameters<typeof templateReducer>[1]) => {
-      setEntries(prev => {
-        return prev.map((entry, i) => {
-          if (i !== activeIdx) return entry;
-          const current = getInitialState(entry.template);
-          const next = templateReducer(current, action);
-          return {
-            id: entry.id,
-            template: next.template,
-            displayType: next.displayType,
-          };
-        });
-      });
-    },
-    [activeIdx, setEntries],
-  );
+  const dispatch = (action: Parameters<typeof templateReducer>[1]) => {
+    setEntries(prev =>
+      prev.map((entry, i) => {
+        if (i !== activeIdx) return entry;
+        const current = getInitialState(entry.template);
+        const next = templateReducer(current, action);
+        return {
+          id: entry.id,
+          template: next.template,
+          displayType: next.displayType,
+        };
+      }),
+    );
+  };
 
-  const setPriority = useCallback(
-    (priority: number) => {
-      setEntries(prev =>
-        prev.map((entry, i) => {
-          if (i !== activeIdx) return entry;
-          const t = entry.template;
-          switch (t.type) {
-            case 'percentage':
-            case 'periodic':
-            case 'by':
-            case 'spend':
-            case 'simple':
-            case 'schedule':
-            case 'average':
-            case 'copy':
-            case 'refill':
-              return { ...entry, template: { ...t, priority } };
-            default:
-              return entry;
-          }
-        }),
-      );
-    },
-    [activeIdx, setEntries],
-  );
+  const setPriority = (priority: number) => {
+    setEntries(prev =>
+      prev.map((entry, i) => {
+        if (i !== activeIdx) return entry;
+        const t = entry.template;
+        switch (t.type) {
+          case 'percentage':
+          case 'periodic':
+          case 'by':
+          case 'spend':
+          case 'simple':
+          case 'schedule':
+          case 'average':
+          case 'copy':
+          case 'refill':
+            return { ...entry, template: { ...t, priority } };
+          default:
+            return entry;
+        }
+      }),
+    );
+  };
 
-  const disabledTypes = useMemo(() => {
-    const used = new Set<DisplayTemplateType>();
-    entries.forEach((entry, i) => {
-      if (i !== activeIdx && SINGLETON_TYPES.has(entry.displayType)) {
-        used.add(entry.displayType);
-      }
-    });
-    return used;
-  }, [entries, activeIdx]);
+  const disabledTypes = new Set<DisplayTemplateType>();
+  entries.forEach((entry, i) => {
+    if (i !== activeIdx && SINGLETON_TYPES.has(entry.displayType)) {
+      disabledTypes.add(entry.displayType);
+    }
+  });
 
   if (!active || !state) {
     return (
@@ -1069,7 +1051,7 @@ function BudgetAutomationsBody({
     perTemplate: number[];
   } | null>(null);
 
-  const onAddRule = useCallback((preset?: () => AutomationEntry) => {
+  const onAddRule = (preset?: () => AutomationEntry) => {
     const entry =
       preset?.() ??
       createAutomationEntry(
@@ -1088,9 +1070,9 @@ function BudgetAutomationsBody({
       setActiveIdx(next.length - 1);
       return next;
     });
-  }, []);
+  };
 
-  const onAddLimitRule = useCallback(() => {
+  const onAddLimitRule = () => {
     const entry = createAutomationEntry(
       {
         directive: 'template',
@@ -1104,9 +1086,9 @@ function BudgetAutomationsBody({
     );
     setEntries(prev => [entry, ...prev]);
     setActiveIdx(0);
-  }, []);
+  };
 
-  const onDelete = useCallback((index: number) => {
+  const onDelete = (index: number) => {
     setEntries(prev => {
       const next = prev.filter((_, i) => i !== index);
       setActiveIdx(currentActive => {
@@ -1117,18 +1099,18 @@ function BudgetAutomationsBody({
       });
       return next;
     });
-  }, []);
+  };
 
-  const onSave = useCallback(async () => {
-    const templates = entries.map(({ template }) => template);
+  const onSave = async () => {
+    const templatesToSave = entries.map(({ template }) => template);
     await send('budget/set-category-automations', {
-      categoriesWithTemplates: [{ id: categoryId, templates }],
+      categoriesWithTemplates: [{ id: categoryId, templates: templatesToSave }],
       source: 'ui',
     });
     onClose();
-  }, [entries, categoryId, onClose]);
+  };
 
-  const onUnmigrate = useCallback(() => {
+  const onUnmigrate = () => {
     dispatch(
       pushModal({
         modal: {
@@ -1140,39 +1122,32 @@ function BudgetAutomationsBody({
         },
       }),
     );
-  }, [categoryId, dispatch, entries]);
+  };
 
-  const templates = useMemo(() => entries.map(e => e.template), [entries]);
+  const templates = entries.map(e => e.template);
 
-  const validPercentageSources = useMemo(() => {
-    const set = new Set<string>([
-      'total',
-      'to-budget',
-      'all income',
-      'available funds',
-    ]);
-    for (const group of categories) {
-      for (const cat of group.categories ?? []) {
-        set.add(cat.id);
-        if (cat.name) set.add(cat.name.toLowerCase());
-      }
+  const validPercentageSources = new Set<string>([
+    'total',
+    'to-budget',
+    'all income',
+    'available funds',
+  ]);
+  for (const group of categories) {
+    for (const cat of group.categories ?? []) {
+      validPercentageSources.add(cat.id);
+      if (cat.name) validPercentageSources.add(cat.name.toLowerCase());
     }
-    return set;
-  }, [categories]);
+  }
 
-  const ruleErrors = useMemo(
-    () =>
-      entries.map(entry =>
-        validateRule(
-          entry.template,
-          entry.displayType,
-          templates,
-          schedules,
-          new Date(),
-          validPercentageSources,
-        ),
-      ),
-    [entries, templates, schedules, validPercentageSources],
+  const ruleErrors = entries.map(entry =>
+    validateRule(
+      entry.template,
+      entry.displayType,
+      templates,
+      schedules,
+      new Date(),
+      validPercentageSources,
+    ),
   );
 
   useEffect(() => {
@@ -1200,42 +1175,25 @@ function BudgetAutomationsBody({
   }, [templates, month, categoryId]);
 
   const totalMonthly = dryRun?.budgeted ?? 0;
-  const contributions = useMemo<(number | null)[]>(
-    () =>
-      entries.map((_, i) =>
-        dryRun?.perTemplate?.[i] != null ? dryRun.perTemplate[i] : null,
-      ),
-    [entries, dryRun],
+  const contributions: (number | null)[] = entries.map((_, i) =>
+    dryRun?.perTemplate?.[i] != null ? dryRun.perTemplate[i] : null,
   );
-  const hasErrors = useMemo(
-    () => ruleErrors.some(error => error !== null),
-    [ruleErrors],
-  );
-  const conflict = useMemo<GlobalConflictKind | null>(() => {
-    const percentSum = templates.reduce<number>((sum, t) => {
-      if (t.type === 'percentage') return sum + t.percent;
-      return sum;
-    }, 0);
-    if (percentSum > 100) {
-      return { kind: 'percent-over-100', total: percentSum };
-    }
-    return null;
-  }, [templates]);
+  const hasErrors = ruleErrors.some(error => error !== null);
+  const percentSum = templates.reduce<number>((sum, t) => {
+    if (t.type === 'percentage') return sum + t.percent;
+    return sum;
+  }, 0);
+  const conflict: GlobalConflictKind | null =
+    percentSum > 100 ? { kind: 'percent-over-100', total: percentSum } : null;
 
-  const categoryNameMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    for (const group of categories) {
-      for (const cat of group.categories ?? []) {
-        map[cat.id] = cat.name;
-      }
+  const categoryNameMap: Record<string, string> = {};
+  for (const group of categories) {
+    for (const cat of group.categories ?? []) {
+      categoryNameMap[cat.id] = cat.name;
     }
-    return map;
-  }, [categories]);
+  }
 
-  const hasLimitAutomation = useMemo(
-    () => entries.some(e => e.displayType === 'limit'),
-    [entries],
-  );
+  const hasLimitAutomation = entries.some(e => e.displayType === 'limit');
 
   const safeActiveIdx = Math.min(activeIdx, Math.max(0, entries.length - 1));
 
@@ -1504,17 +1462,13 @@ export function BudgetAutomationsModal({
   );
   const effectiveMonth = month ?? currentMonth();
 
-  const onLoaded = useCallback(
-    (result: Record<string, Template[]>) => {
-      setParsedTemplates(result[categoryId] ?? []);
-    },
-    [categoryId],
-  );
+  const onLoaded = (result: Record<string, Template[]>) => {
+    setParsedTemplates(result[categoryId] ?? []);
+  };
 
   const { loading } = useBudgetAutomations({ categoryId, onLoaded });
 
-  const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
-  const { schedules } = useSchedules({ query: schedulesQuery });
+  const { schedules } = useSchedules({ query: q('schedules').select('*') });
 
   const categories = useBudgetAutomationCategories();
   const { data: currentCategory } = useCategory(categoryId);
@@ -1527,13 +1481,10 @@ export function BudgetAutomationsModal({
   const hasCleanupDirective = hasCleanupLine(notes);
   const hasUnsupportedDirective = hasGoalTemplate || hasCleanupDirective;
 
-  const initialEntries = useMemo(
-    () =>
-      parsedTemplates && !hasUnsupportedDirective
-        ? migrateTemplatesToAutomations(parsedTemplates)
-        : null,
-    [parsedTemplates, hasUnsupportedDirective],
-  );
+  const initialEntries =
+    parsedTemplates && !hasUnsupportedDirective
+      ? migrateTemplatesToAutomations(parsedTemplates)
+      : null;
 
   return (
     <Modal

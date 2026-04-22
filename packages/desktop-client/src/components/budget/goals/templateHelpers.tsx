@@ -284,9 +284,12 @@ export function validateRule(
       if (!template.month) return { kind: 'by-no-month' };
       const targetMonth = template.month;
       const startOfTodayMonth = monthFromDate(today);
+      // Pass bare YYYY-MM strings, matching the server-side check in
+      // CategoryTemplateContext.checkByAndScheduleAndSpend and avoiding the
+      // local-vs-UTC parsing footgun called out in shared/months.ts:_parse.
       const monthsRemaining = differenceInCalendarMonths(
-        targetMonth + '-01',
-        startOfTodayMonth + '-01',
+        targetMonth,
+        startOfTodayMonth,
       );
       // Recurring goals (annual/repeat) anchored on a past month are
       // legitimate — the engine rolls them forward by the period. Only flag

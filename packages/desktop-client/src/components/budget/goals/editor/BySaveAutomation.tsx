@@ -78,7 +78,7 @@ export const BySaveAutomation = ({
               dispatch(
                 updateTemplate({
                   type: 'by',
-                  repeat: Math.max(1, Number(value) || 1),
+                  repeat: Math.max(1, Math.trunc(Number(value)) || 1),
                 }),
               )
             }
