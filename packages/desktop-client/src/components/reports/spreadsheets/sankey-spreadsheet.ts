@@ -6,6 +6,7 @@ import type {
   CategoryGroupEntity,
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
+import { t } from 'i18next';
 
 import { getColorScale } from '#components/reports/chart-theme';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
@@ -137,7 +138,6 @@ export function createSpreadsheet(
   mode: 'budgeted' | 'spent' = 'spent',
   topNcategories: number = 15,
   categorySort: SortMode = 'per-group',
-  t: (key: string, params?: Record<string, string>) => string,
   layerFrom?: GraphLayers,
   layerTo?: GraphLayers,
 ) {
@@ -169,7 +169,6 @@ export function createSpreadsheet(
       categories,
       categorySort,
       setData,
-      t,
       aggregated,
       layerFrom,
       layerTo,
@@ -313,7 +312,6 @@ function processGraphData(
   categories: CategoryGroupEntity[],
   categorySort: SortMode,
   setData: (data: ReturnType<typeof convertToSankeyData>) => void,
-  t: (key: string, params?: Record<string, string>) => string,
   aggregated?: AggregatedBudget,
   layerFrom?: GraphLayers,
   layerTo?: GraphLayers,
@@ -330,7 +328,7 @@ function processGraphData(
   addColors(sortedGraph);
   filterGraphByLayers(sortedGraph, layerFrom, layerTo);
   cleanUpNodes(sortedGraph);
-  setData(convertToSankeyData(sortedGraph, t));
+  setData(convertToSankeyData(sortedGraph));
 }
 
 // Filter budget category groups to only those matching the user's conditions.
@@ -1206,10 +1204,7 @@ function cleanUpNodes(graph: Graph) {
   }
 }
 
-function convertToSankeyData(
-  graph: Graph,
-  t: (key: string, params?: Record<string, string>) => string,
-): SankeyData {
+function convertToSankeyData(graph: Graph): SankeyData {
   const nodes = Array.from(graph, ([key, data]) => ({
     key,
     name: data.labelKey

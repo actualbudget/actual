@@ -461,7 +461,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       graphMode,
       topNcategories,
       categorySort,
-      (key: string, params?: Record<string, string>) => t(key, params),
       layerFrom,
       layerTo,
     );
@@ -475,7 +474,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     graphMode,
     topNcategories,
     categorySort,
-    t,
     layerFrom,
     layerTo,
   ]);
