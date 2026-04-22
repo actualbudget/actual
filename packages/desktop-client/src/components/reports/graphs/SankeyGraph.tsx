@@ -21,7 +21,7 @@ type SankeyGraphNode = SankeyData['nodes'][number] & {
   value: number;
   percentageLabel?: string;
   key: string;
-  color: string;
+  color?: string;
 };
 
 type SankeyLinkPayload = {

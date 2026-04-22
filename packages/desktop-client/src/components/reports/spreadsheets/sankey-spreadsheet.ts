@@ -87,32 +87,37 @@ type NodeData = {
   value?: number;
   type: string;
   name?: string;
+  labelKey?: string;
+  labelParams?: Record<string, string>;
+  isOverbudgeted?: boolean;
   tooltipInfo?: Array<{ name: string; value: number }>;
   percentageLabel?: string;
   color?: string;
 };
 type Graph = Map<NodeKey, NodeData>;
 
-enum SpecialNodeKeys {
-  ToBudget = 'to_budget',
-  Budgeted = 'budgeted',
-  LastMonthOverspent = 'last_month_overspent',
-  ForNextMonth = 'for_next_month',
-  FromPrevMonth = 'from_previous_month',
-  AvailableIncome = 'available_income',
-  GlobalOther = 'GLOBAL__OTHER_BUCKET',
-  OtherSuffix = '__OTHER_BUCKET',
-  HiddenSuffix = '__HIDDEN',
-}
+const SpecialNodeKeys = {
+  ToBudget: 'to_budget',
+  Budgeted: 'budgeted',
+  LastMonthOverspent: 'last_month_overspent',
+  ForNextMonth: 'for_next_month',
+  FromPrevMonth: 'from_previous_month',
+  AvailableIncome: 'available_income',
+  GlobalOther: 'GLOBAL__OTHER_BUCKET',
+  OtherSuffix: '__OTHER_BUCKET',
+  HiddenSuffix: '__HIDDEN',
+} as const;
+type SpecialNodeKeys = (typeof SpecialNodeKeys)[keyof typeof SpecialNodeKeys];
 
-export enum GraphLayers {
-  IncomePayee = 'payee',
-  IncomeCategory = 'income_category',
-  Account = 'account',
-  Budget = 'budget',
-  CategoryGroup = 'category_group',
-  Category = 'category',
-}
+export const GraphLayers = {
+  IncomePayee: 'payee',
+  IncomeCategory: 'income_category',
+  Account: 'account',
+  Budget: 'budget',
+  CategoryGroup: 'category_group',
+  Category: 'category',
+} as const;
+export type GraphLayers = (typeof GraphLayers)[keyof typeof GraphLayers];
 
 export const GRAPH_LAYER_ORDER = [
   GraphLayers.IncomePayee,
@@ -134,6 +139,7 @@ export function createSpreadsheet(
   categorySort: SortMode = 'per-group',
   layerFrom?: GraphLayers,
   layerTo?: GraphLayers,
+  t?: (key: string, params?: Record<string, string>) => string,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -163,6 +169,7 @@ export function createSpreadsheet(
       categories,
       categorySort,
       setData,
+      t ?? ((key: string) => key),
       aggregated,
       layerFrom,
       layerTo,
@@ -306,6 +313,7 @@ function processGraphData(
   categories: CategoryGroupEntity[],
   categorySort: SortMode,
   setData: (data: ReturnType<typeof convertToSankeyData>) => void,
+  t: (key: string, params?: Record<string, string>) => string,
   aggregated?: AggregatedBudget,
   layerFrom?: GraphLayers,
   layerTo?: GraphLayers,
@@ -322,7 +330,7 @@ function processGraphData(
   addColors(graph);
   filterGraphByLayers(sortedGraph, layerFrom, layerTo);
   cleanUpNodes(graph);
-  setData(convertToSankeyData(sortedGraph));
+  setData(convertToSankeyData(sortedGraph, t));
 }
 
 // Filter budget category groups to only those matching the user's conditions.
@@ -502,8 +510,13 @@ function createBudgetGraph(
   const graph: Graph = new Map();
 
   // Add initial budget nodes with no links
-  addNode(graph, SpecialNodeKeys.Budgeted, GraphLayers.Budget, 'Budgeted');
-  addNode(
+  addNodeWithLabel(
+    graph,
+    SpecialNodeKeys.Budgeted,
+    GraphLayers.Budget,
+    'Budgeted',
+  );
+  addNodeWithLabel(
     graph,
     SpecialNodeKeys.AvailableIncome,
     GraphLayers.Account,
@@ -556,7 +569,12 @@ function createBudgetGraph(
   });
 
   if (aggregated.toBudget > 0) {
-    addNode(graph, SpecialNodeKeys.ToBudget, GraphLayers.Budget, 'To budget');
+    addNodeWithLabel(
+      graph,
+      SpecialNodeKeys.ToBudget,
+      GraphLayers.Budget,
+      'To budget',
+    );
     addValueToLink(
       graph,
       SpecialNodeKeys.AvailableIncome,
@@ -564,11 +582,13 @@ function createBudgetGraph(
       aggregated.toBudget,
     );
   } else {
-    addNode(
+    addNodeWithLabel(
       graph,
       SpecialNodeKeys.ToBudget,
       GraphLayers.Budget,
       'Overbudgeted',
+      undefined,
+      true,
     );
     addValueToLink(
       graph,
@@ -578,11 +598,12 @@ function createBudgetGraph(
     );
   }
 
-  addNode(
+  addNodeWithLabel(
     graph,
     SpecialNodeKeys.FromPrevMonth,
     GraphLayers.IncomePayee,
-    'From ' + monthUtils.prevMonth(aggregated.startMonth!),
+    'From {{month}}',
+    { month: monthUtils.prevMonth(aggregated.startMonth!) },
   );
   addValueToLink(
     graph,
@@ -590,11 +611,12 @@ function createBudgetGraph(
     SpecialNodeKeys.AvailableIncome,
     aggregated.fromPreviousMonth,
   );
-  addNode(
+  addNodeWithLabel(
     graph,
     SpecialNodeKeys.ForNextMonth,
     GraphLayers.Budget,
-    'For ' + monthUtils.nextMonth(aggregated.endMonth!),
+    'For {{month}}',
+    { month: monthUtils.nextMonth(aggregated.endMonth!) },
   );
   addValueToLink(
     graph,
@@ -602,7 +624,7 @@ function createBudgetGraph(
     SpecialNodeKeys.ForNextMonth,
     aggregated.forNextMonth!,
   );
-  addNode(
+  addNodeWithLabel(
     graph,
     SpecialNodeKeys.LastMonthOverspent,
     GraphLayers.Budget,
@@ -728,6 +750,25 @@ function addNode(graph: Graph, key: NodeKey, type: GraphLayers, name?: string) {
   }
 }
 
+function addNodeWithLabel(
+  graph: Graph,
+  key: NodeKey,
+  type: GraphLayers,
+  labelKey: string,
+  labelParams?: Record<string, string>,
+  isOverbudgeted?: boolean,
+) {
+  if (!graph.has(key)) {
+    graph.set(key, {
+      to: new Map(),
+      type,
+      labelKey,
+      labelParams,
+      isOverbudgeted,
+    });
+  }
+}
+
 function addValueToLink(
   graph: Graph,
   from: NodeKey,
@@ -783,18 +824,30 @@ function groupOtherCategories(
 
     if (categoryToDelete === undefined) break; // safety
 
-    const deletedCategoryGroupKey = getCategoryGroup(
-      graph,
-      categoryToDelete,
-    )[0];
-    const deletedCategoryGroup = deletedNodes.get(deletedCategoryGroupKey);
+    const categoryGroupResult = getCategoryGroup(graph, categoryToDelete);
+    if (!categoryGroupResult) {
+      console.error(
+        `Failed to find category group for category: ${categoryToDelete}`,
+      );
+      continue;
+    }
+
+    const deletedCategoryGroupKey = categoryGroupResult[0];
     const nodeData = graph.get(categoryToDelete);
+    if (!nodeData) {
+      console.error(
+        `Failed to find node data for category: ${categoryToDelete}`,
+      );
+      continue;
+    }
+
+    const deletedCategoryGroup = deletedNodes.get(deletedCategoryGroupKey);
     if (!deletedCategoryGroup) {
       deletedNodes.set(deletedCategoryGroupKey, [
-        { key: categoryToDelete, data: nodeData! },
+        { key: categoryToDelete, data: nodeData },
       ]);
     } else {
-      deletedCategoryGroup.push({ key: categoryToDelete, data: nodeData! });
+      deletedCategoryGroup.push({ key: categoryToDelete, data: nodeData });
     }
 
     moveToOther(graph, categoryToDelete, categorySort === 'global');
@@ -814,23 +867,39 @@ function nodesInLayer(graph: Graph, layer: GraphLayers): NodeKey[] {
 
 function moveToOther(graph: Graph, key: NodeKey, globalOther: boolean = false) {
   const categoryGroup = getCategoryGroup(graph, key);
-  const categoryGroupKey = categoryGroup ? categoryGroup[0] : null;
-  const categoryGroupData = categoryGroup ? categoryGroup[1] : null;
-  const categoryValue = categoryGroupData!.to.get(key)!;
+  if (!categoryGroup) {
+    console.error(`moveToOther: Failed to find category group for key: ${key}`);
+    return;
+  }
+
+  const categoryGroupKey = categoryGroup[0];
+  const categoryGroupData = categoryGroup[1];
+  const categoryValue = categoryGroupData.to.get(key);
+
+  if (categoryValue === undefined) {
+    console.error(
+      `moveToOther: No link value found from group ${categoryGroupKey} to ${key}`,
+    );
+    return;
+  }
 
   let otherGroupKey: NodeKey;
   if (globalOther) {
     otherGroupKey = SpecialNodeKeys.GlobalOther;
   } else {
-    otherGroupKey = categoryGroupKey
-      ? categoryGroupKey + SpecialNodeKeys.OtherSuffix
-      : 'OTHER';
+    otherGroupKey = categoryGroupKey + SpecialNodeKeys.OtherSuffix;
   }
 
-  addNode(graph, otherGroupKey, GraphLayers.Category, 'Other');
-  addValueToLink(graph, categoryGroupKey!, otherGroupKey, categoryValue);
-  addTooltipInfo(graph, categoryGroupKey!, key, categoryValue);
-  deleteLink(graph, categoryGroupKey!, key);
+  if (!graph.has(otherGroupKey)) {
+    graph.set(otherGroupKey, {
+      to: new Map(),
+      type: GraphLayers.Category,
+      labelKey: 'Other',
+    });
+  }
+  addValueToLink(graph, categoryGroupKey, otherGroupKey, categoryValue);
+  addTooltipInfo(graph, categoryGroupKey, key, categoryValue);
+  deleteLink(graph, categoryGroupKey, key);
 }
 
 function addTooltipInfo(
@@ -1053,7 +1122,7 @@ function addColors(graph: Graph) {
   });
 
   const node = graph.get(SpecialNodeKeys.ToBudget);
-  if (node && node.name === 'Overbudgeted') {
+  if (node && node.isOverbudgeted) {
     setColor(graph, SpecialNodeKeys.ToBudget, theme.toBudgetNegative);
   } else {
     setColor(graph, SpecialNodeKeys.ToBudget, theme.toBudgetPositive);
@@ -1139,14 +1208,18 @@ function cleanUpNodes(graph: Graph) {
   }
 }
 
-function convertToSankeyData(graph: Graph): SankeyData {
+function convertToSankeyData(
+  graph: Graph,
+  t: (key: string, params?: Record<string, string>) => string,
+): SankeyData {
   const nodes = Array.from(graph, ([key, data]) => ({
     key,
-    name: data.name ?? key,
+    name: data.labelKey
+      ? t(data.labelKey, data.labelParams)
+      : (data.name ?? key),
     percentageLabel: data.percentageLabel ?? '',
     color: data.color ?? undefined,
   }));
-  console.log(graph);
   const links = Array.from(graph).flatMap(([key, data]) =>
     Array.from(data.to, ([targetKey, value]) => {
       let tooltipInfo: Array<{ name: string; value: number }> = [];
@@ -1156,19 +1229,21 @@ function convertToSankeyData(graph: Graph): SankeyData {
       }
 
       let color: string | undefined;
-      if (
-        [
-          GraphLayers.IncomePayee,
-          GraphLayers.IncomeCategory,
-          GraphLayers.Account,
-          GraphLayers.CategoryGroup,
-        ].includes(data.type as GraphLayers)
-      ) {
+      const sourceLayersWithOwnColor: readonly GraphLayers[] = [
+        GraphLayers.IncomePayee,
+        GraphLayers.IncomeCategory,
+        GraphLayers.Account,
+        GraphLayers.CategoryGroup,
+      ];
+      const targetLayersWithTargetColor: readonly GraphLayers[] = [
+        GraphLayers.Category,
+        GraphLayers.Budget,
+      ];
+
+      if (sourceLayersWithOwnColor.includes(data.type as GraphLayers)) {
         color = data.color;
       } else if (
-        [GraphLayers.Category, GraphLayers.Budget].includes(
-          data.type as GraphLayers,
-        )
+        targetLayersWithTargetColor.includes(data.type as GraphLayers)
       ) {
         const targetNode = graph.get(targetKey);
         color = targetNode ? targetNode.color : undefined;
@@ -1186,7 +1261,7 @@ function convertToSankeyData(graph: Graph): SankeyData {
       }
       if (
         targetKey === SpecialNodeKeys.AvailableIncome &&
-        data.name === 'Overbudgeted'
+        data.isOverbudgeted
       ) {
         color = data.color;
       }

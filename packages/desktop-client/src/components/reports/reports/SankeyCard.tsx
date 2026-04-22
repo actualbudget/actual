@@ -76,6 +76,7 @@ export function SankeyCard({
         meta?.categorySort,
         GraphLayers.IncomePayee,
         GraphLayers.CategoryGroup,
+        (key: string, params?: Record<string, string>) => t(key, params),
       ),
     [
       start,
@@ -86,8 +87,7 @@ export function SankeyCard({
       mode,
       topN,
       meta?.categorySort,
-      meta?.layerFrom,
-      meta?.layerTo,
+      t,
     ],
   );
   const data = useReport('sankey', params);

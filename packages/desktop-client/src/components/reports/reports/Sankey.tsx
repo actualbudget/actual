@@ -173,15 +173,6 @@ function CategorySortSelector({ value, onChange }: CategorySortSelectorProps) {
   );
 }
 
-const LAYER_LABELS: Record<GraphLayers, string> = {
-  [GraphLayers.IncomePayee]: 'Payee',
-  [GraphLayers.IncomeCategory]: 'Income category',
-  [GraphLayers.Account]: 'Account',
-  [GraphLayers.Budget]: 'Budget',
-  [GraphLayers.CategoryGroup]: 'Category group',
-  [GraphLayers.Category]: 'Category',
-};
-
 type LayerSelectorProps = {
   direction: 'from' | 'to';
   value: GraphLayers;
@@ -199,6 +190,15 @@ function LayerSelector({
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
+  const LAYER_LABELS: Record<GraphLayers, string> = {
+    [GraphLayers.IncomePayee]: t('Payee'),
+    [GraphLayers.IncomeCategory]: t('Income category'),
+    [GraphLayers.Account]: t('Account'),
+    [GraphLayers.Budget]: t('Budget'),
+    [GraphLayers.CategoryGroup]: t('Category group'),
+    [GraphLayers.Category]: t('Category'),
+  };
+
   const otherIndex =
     otherLayer !== undefined
       ? GRAPH_LAYER_ORDER.indexOf(otherLayer)
@@ -211,13 +211,17 @@ function LayerSelector({
       ? GRAPH_LAYER_ORDER.slice(0, otherIndex + 1)
       : GRAPH_LAYER_ORDER.slice(otherIndex);
 
+  const translatedDirection = direction === 'from' ? t('from') : t('to');
+
   return (
     <>
       <Button
         ref={triggerRef}
         variant="bare"
         onPress={() => setIsOpen(true)}
-        aria-label={t('Change layer {{direction}}', { direction })}
+        aria-label={t('Change layer {{direction}}', {
+          direction: translatedDirection,
+        })}
       >
         <span style={{ marginLeft: 5 }}>{LAYER_LABELS[value]}</span>
       </Button>
@@ -399,6 +403,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       categorySort,
       layerFrom,
       layerTo,
+      (key: string, params?: Record<string, string>) => t(key, params),
     );
   }, [
     datesInitialized,
@@ -412,6 +417,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     categorySort,
     layerFrom,
     layerTo,
+    t,
   ]);
 
   const defaultGetData = async (
