@@ -1,0 +1,97 @@
+name: Publish @actual-app/crdt
+
+# Automatically publishes @actual-app/crdt when its package.json version
+# changes on master (typically via a merged PR that bumped the version).
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'packages/crdt/package.json'
+  workflow_dispatch:
+
+concurrency:
+  group: publish-crdt
+  cancel-in-progress: false
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    name: Check if publish is needed
+    outputs:
+      should-publish: ${{ steps.check.outputs.should-publish }}
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Compare local version against npm registry
+        id: check
+        run: |
+          set -euo pipefail
+
+          LOCAL_VERSION=$(node -p "require('./packages/crdt/package.json').version")
+          echo "Local version: $LOCAL_VERSION"
+          echo "version=$LOCAL_VERSION" >> "$GITHUB_OUTPUT"
+
+          PUBLISHED_VERSION=$(npm view @actual-app/crdt version 2>/dev/null || echo "")
+          echo "Published version: ${PUBLISHED_VERSION:-<none>}"
+
+          if [ "$LOCAL_VERSION" = "$PUBLISHED_VERSION" ]; then
+            echo "Versions match - nothing to publish."
+            echo "should-publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Version changed - publish required."
+            echo "should-publish=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  publish:
+    needs: check-version
+    if: needs.check-version.outputs.should-publish == 'true'
+    runs-on: ubuntu-latest
+    name: Publish @actual-app/crdt to npm
+    permissions:
+      contents: write
+      id-token: write # Required for npm OIDC provenance
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+
+      - name: Build @actual-app/crdt
+        run: yarn workspace @actual-app/crdt build
+
+      - name: Pack @actual-app/crdt
+        run: yarn workspace @actual-app/crdt pack --filename @actual-app/crdt.tgz
+
+      - name: Setup node and npm registry
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: 24
+          check-latest: true
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish to npm
+        run: npm publish packages/crdt/@actual-app/crdt.tgz --access public --provenance
+
+      - name: Create git tag
+        env:
+          VERSION: ${{ needs.check-version.outputs.version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="crdt-v${VERSION}"
+          if git ls-remote --exit-code --tags origin "refs/tags/${TAG}" >/dev/null 2>&1; then
+            echo "Tag ${TAG} already exists on origin - skipping."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${TAG}" -m "@actual-app/crdt ${VERSION}"
+          git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "${TAG}"
