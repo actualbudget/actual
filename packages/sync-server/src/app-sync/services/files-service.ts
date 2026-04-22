@@ -1,17 +1,29 @@
 import { getAccountDb, isAdmin } from '#account-db';
 import { FileNotFound, GenericFileError } from '#app-sync/errors';
+import type { WrappedDatabase } from '#db';
+import type { FileId, GroupId } from '#util/paths';
 
 class FileBase {
+  name: string | null | undefined;
+  groupId: GroupId | null | undefined;
+  encryptSalt: string | null | undefined;
+  encryptTest: string | null | undefined;
+  encryptKeyId: string | null | undefined;
+  encryptMeta: string | null | undefined;
+  syncVersion: string | null | undefined;
+  deleted: boolean;
+  owner: string | null | undefined;
+
   constructor(
-    name,
-    groupId,
-    encryptSalt,
-    encryptTest,
-    encryptKeyId,
-    encryptMeta,
-    syncVersion,
-    deleted,
-    owner,
+    name: string | null | undefined,
+    groupId: GroupId | null | undefined,
+    encryptSalt: string | null | undefined,
+    encryptTest: string | null | undefined,
+    encryptKeyId: string | null | undefined,
+    encryptMeta: string | null | undefined,
+    syncVersion: string | null | undefined,
+    deleted: number | boolean | undefined,
+    owner: string | null | undefined,
   ) {
     this.name = name;
     this.groupId = groupId;
@@ -25,7 +37,22 @@ class FileBase {
   }
 }
 
+type FileConstructorArgs = {
+  id: FileId;
+  name: string | null;
+  groupId: GroupId | null;
+  encryptSalt?: string | null;
+  encryptTest?: string | null;
+  encryptKeyId?: string | null;
+  encryptMeta: string | null;
+  syncVersion: string | null;
+  deleted?: number | boolean;
+  owner: string | null;
+};
+
 class File extends FileBase {
+  id: FileId;
+
   constructor({
     id,
     name = null,
@@ -37,7 +64,7 @@ class File extends FileBase {
     syncVersion = null,
     deleted = false,
     owner = null,
-  }) {
+  }: FileConstructorArgs) {
     super(
       name,
       groupId,
@@ -69,7 +96,7 @@ class FileUpdate extends FileBase {
     syncVersion = undefined,
     deleted = undefined,
     owner = undefined,
-  }) {
+  }: Partial<FileConstructorArgs>) {
     super(
       name,
       groupId,
@@ -84,16 +111,31 @@ class FileUpdate extends FileBase {
   }
 }
 
-const boolToInt = bool => {
+const boolToInt = (bool: boolean) => {
   return bool ? 1 : 0;
 };
 
+type RawFile = {
+  id: FileId;
+  group_id: GroupId;
+  sync_version: string;
+  name: string;
+  encrypt_meta: string;
+  encrypt_salt: string;
+  encrypt_test: string;
+  encrypt_keyid: string;
+  deleted: number;
+  owner: string;
+};
+
 class FilesService {
-  constructor(accountDb) {
+  accountDb: WrappedDatabase;
+
+  constructor(accountDb: WrappedDatabase) {
     this.accountDb = accountDb;
   }
 
-  get(fileId) {
+  get(fileId: FileId) {
     const rawFile = this.getRaw(fileId);
     if (!rawFile || (rawFile && rawFile.deleted)) {
       throw new FileNotFound();
@@ -102,26 +144,26 @@ class FilesService {
     return this.validate(rawFile);
   }
 
-  set(file) {
+  set(file: File) {
     const deletedInt = boolToInt(file.deleted);
     this.accountDb.mutate(
       'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta, encrypt_salt, encrypt_test, encrypt_keyid, deleted, owner) VALUES (?, ?, ?, ?, ?, ?, ?, ? ,?, ?)',
       [
         file.id,
         file.groupId,
-        file.syncVersion.toString(),
+        file.syncVersion?.toString(),
         file.name,
         file.encryptMeta,
         file.encryptSalt,
-        file.encrypt_test,
-        file.encrypt_keyid,
+        file.encryptTest,
+        file.encryptKeyId,
         deletedInt,
         file.owner,
       ],
     );
   }
 
-  find({ userId, limit = 1000 }) {
+  find({ userId, limit = 1000 }: { userId: string; limit?: number }) {
     const canSeeAll = isAdmin(userId);
 
     return (
@@ -142,10 +184,10 @@ class FilesService {
        WHERE files.deleted = 0 LIMIT ?`,
             [userId, userId, limit],
           )
-    ).map(item => this.validate(item));
+    ).map((item: RawFile) => this.validate(item));
   }
 
-  findUsersWithAccess(fileId) {
+  findUsersWithAccess(fileId: FileId) {
     const userAccess =
       this.accountDb.all(
         `SELECT UA.user_id as userId, users.display_name displayName, users.user_name userName
@@ -165,7 +207,7 @@ class FilesService {
     return userAccess;
   }
 
-  update(id, fileUpdate) {
+  update(id: FileId, fileUpdate: Partial<File>) {
     let query = 'UPDATE files SET';
     const params = [];
     const updates = [];
@@ -218,11 +260,11 @@ class FilesService {
     return this.validate(this.getRaw(id));
   }
 
-  getRaw(fileId) {
+  getRaw(fileId: FileId): RawFile {
     return this.accountDb.first(`SELECT * FROM files WHERE id = ?`, [fileId]);
   }
 
-  validate(rawFile) {
+  validate(rawFile: RawFile) {
     return new File({
       id: rawFile.id,
       name: rawFile.name,
