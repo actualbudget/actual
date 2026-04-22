@@ -63,6 +63,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ steps.pr.outputs.head_sha }}
+          persist-credentials: false
 
       - name: Set up environment
         uses: ./.github/actions/setup
@@ -129,8 +130,11 @@ jobs:
         run: |
           mkdir -p pr-metadata
           echo "${{ github.event.issue.number }}" > pr-metadata/pr-number.txt
-          echo "${{ steps.pr.outputs.head_ref }}" > pr-metadata/head-ref.txt
-          echo "${{ steps.pr.outputs.head_repo }}" > pr-metadata/head-repo.txt
+          echo "${STEPS_PR_OUTPUTS_HEAD_REF}" > pr-metadata/head-ref.txt
+          echo "${STEPS_PR_OUTPUTS_HEAD_REPO}" > pr-metadata/head-repo.txt
+        env:
+          STEPS_PR_OUTPUTS_HEAD_REF: ${{ steps.pr.outputs.head_ref }}
+          STEPS_PR_OUTPUTS_HEAD_REPO: ${{ steps.pr.outputs.head_repo }}
 
       - name: Upload PR metadata
         if: steps.create-patch.outputs.has_changes == 'true'

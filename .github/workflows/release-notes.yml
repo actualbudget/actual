@@ -37,13 +37,15 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.ACTIONS_UPDATE_TOKEN || github.token }}
+          # Need to be able to commit release notes after generation
+          persist-credentials: true
 
       - name: Get changed files
         if: steps.bot-check.outputs.skip != 'true'
         id: changed-files
         run: |
-          git fetch origin ${{ github.base_ref }}
-          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          git fetch origin ${GITHUB_BASE_REF}
+          CHANGED_FILES=$(git diff --name-only origin/${GITHUB_BASE_REF}...HEAD)
           NON_DOCS_FILES=$(echo "$CHANGED_FILES" | grep -v -e "^packages/docs/" -e "^\.github/actions/docs-spelling/" || true)
 
           if [ -z "$NON_DOCS_FILES" ] && [ -n "$CHANGED_FILES" ]; then

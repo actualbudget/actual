@@ -38,7 +38,7 @@ const queryClient = createTestQueryClient();
 
 vi.mock(
   '@actual-app/core/platform/client/connection',
-  () => import('../../mocks/connection'),
+  () => import('#mocks/connection'),
 );
 vi.mock('../../hooks/useSyncedPref', () => ({
   useSyncedPref: vi.fn().mockReturnValue([undefined, vi.fn()]),
@@ -1167,6 +1167,7 @@ describe('Transactions', () => {
         is_parent: true,
         notes: 'Notes',
         payee: 'alice-id',
+        reconciled: false,
         sort_order: 0,
       },
       {
@@ -1180,7 +1181,7 @@ describe('Transactions', () => {
         is_child: true,
         parent_id: parentId,
         payee: 'alice-id',
-        reconciled: undefined,
+        reconciled: false,
         sort_order: -1,
         starting_balance_flag: null,
       },
@@ -1195,7 +1196,7 @@ describe('Transactions', () => {
         is_child: true,
         parent_id: parentId,
         payee: 'alice-id',
-        reconciled: undefined,
+        reconciled: false,
         sort_order: -2,
         starting_balance_flag: null,
       },

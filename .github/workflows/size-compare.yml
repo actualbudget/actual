@@ -38,6 +38,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ github.base_ref }}
+          persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
@@ -104,7 +105,7 @@ jobs:
       - name: Report build failure
         if: steps.wait-for-web-build.outputs.conclusion == 'failure' || steps.wait-for-api-build.outputs.conclusion == 'failure' || steps.wait-for-cli-build.outputs.conclusion == 'failure' || steps.wait-for-crdt-build.outputs.conclusion == 'failure'
         run: |
-          echo "Build failed on PR branch or ${{github.base_ref}}"
+          echo "Build failed on PR branch or ${GITHUB_BASE_REF}"
           exit 1
 
       - name: Download web build artifact from ${{github.base_ref}}

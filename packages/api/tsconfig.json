@@ -15,9 +15,21 @@
     "rootDir": ".",
     "declarationDir": "@types",
     "tsBuildInfoFile": "dist/.tsbuildinfo",
-    "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
+    "plugins": [
+      {
+        "name": "typescript-strict-plugin",
+        "paths": ["."]
+      }
+    ]
   },
-  "references": [{ "path": "../crdt" }, { "path": "../loot-core" }],
+  "references": [
+    {
+      "path": "../loot-core"
+    },
+    {
+      "path": "../crdt"
+    }
+  ],
   "include": ["."],
   "exclude": [
     "**/node_modules/*",

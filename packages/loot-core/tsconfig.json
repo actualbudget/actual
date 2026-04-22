@@ -17,6 +17,7 @@
     },
     "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },
+  "references": [{ "path": "../crdt" }],
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
