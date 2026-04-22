@@ -1,20 +1,24 @@
 import type {
   AverageTemplate,
+  ByTemplate,
   CopyTemplate,
   LimitTemplate,
   PercentageTemplate,
   PeriodicTemplate,
   RefillTemplate,
+  RemainderTemplate,
   ScheduleTemplate,
 } from '@actual-app/core/types/models/templates';
 
 export const displayTemplateTypes = [
-  ['limit', 'Balance limit'] as const,
-  ['refill', 'Refill'] as const,
-  ['week', 'Fixed (weekly)'] as const,
-  ['schedule', 'Existing schedule'] as const,
-  ['percentage', 'Percent of category'] as const,
-  ['historical', 'Copy past budgets'] as const,
+  ['week', 'Fixed amount'] as const,
+  ['schedule', 'Cover schedule'] as const,
+  ['by', 'Save by date'] as const,
+  ['percentage', '% of income'] as const,
+  ['historical', 'From history'] as const,
+  ['limit', 'Balance cap'] as const,
+  ['refill', 'Refill to cap'] as const,
+  ['remainder', 'Whatever is left'] as const,
 ];
 
 export type DisplayTemplateType = (typeof displayTemplateTypes)[number][0];
@@ -43,4 +47,12 @@ export type ReducerState =
   | {
       template: CopyTemplate | AverageTemplate;
       displayType: 'historical';
+    }
+  | {
+      template: ByTemplate;
+      displayType: 'by';
+    }
+  | {
+      template: RemainderTemplate;
+      displayType: 'remainder';
     };

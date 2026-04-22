@@ -1,10 +1,17 @@
-import { firstDayOfMonth } from '@actual-app/core/shared/months';
+import {
+  addMonths,
+  dayFromDate,
+  firstDayOfMonth,
+  monthFromDate,
+} from '@actual-app/core/shared/months';
 import type { Template } from '@actual-app/core/types/models/templates';
 
 import type { Action } from './actions';
 import type { DisplayTemplateType, ReducerState } from './constants';
 
-export const DEFAULT_PRIORITY = 1;
+// Matches the template-notes parser's default for templates that don't
+// specify an explicit priority level (see template-notes.test.ts).
+export const DEFAULT_PRIORITY = 0;
 
 export const getInitialState = (template: Template | null): ReducerState => {
   if (!template) {
@@ -43,10 +50,17 @@ export const getInitialState = (template: Template | null): ReducerState => {
         displayType: 'week',
       };
     case 'spend':
-    case 'by':
       throw new Error('Goal is not yet supported');
+    case 'by':
+      return {
+        template,
+        displayType: 'by',
+      };
     case 'remainder':
-      throw new Error('Remainder is not yet supported');
+      return {
+        template,
+        displayType: 'remainder',
+      };
     case 'limit':
       return {
         template,
@@ -148,7 +162,7 @@ const changeType = (
             period: 'week',
             amount: 1,
           },
-          starting: '',
+          starting: dayFromDate(firstDayOfMonth(new Date())),
           priority: DEFAULT_PRIORITY,
         },
       };
@@ -166,6 +180,35 @@ const changeType = (
           type: 'average',
           numMonths: 3,
           priority: DEFAULT_PRIORITY,
+        },
+      };
+    case 'by':
+      if (prevState.template.type === 'by') {
+        return prevState;
+      }
+      return {
+        displayType: visualType,
+        template: {
+          directive: 'template',
+          type: 'by',
+          amount: 1200,
+          month: addMonths(monthFromDate(new Date()), 12),
+          annual: true,
+          repeat: 1,
+          priority: DEFAULT_PRIORITY,
+        },
+      };
+    case 'remainder':
+      if (prevState.template.type === 'remainder') {
+        return prevState;
+      }
+      return {
+        displayType: visualType,
+        template: {
+          directive: 'template',
+          type: 'remainder',
+          weight: 1,
+          priority: null,
         },
       };
     default:

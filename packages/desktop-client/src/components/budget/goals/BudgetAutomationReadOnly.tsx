@@ -14,10 +14,12 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import type { ReducerState } from './constants';
+import { BySaveAutomationReadOnly } from './editor/BySaveAutomationReadOnly';
 import { HistoricalAutomationReadOnly } from './editor/HistoricalAutomationReadOnly';
 import { LimitAutomationReadOnly } from './editor/LimitAutomationReadOnly';
 import { PercentageAutomationReadOnly } from './editor/PercentageAutomationReadOnly';
 import { RefillAutomationReadOnly } from './editor/RefillAutomationReadOnly';
+import { RemainderAutomationReadOnly } from './editor/RemainderAutomationReadOnly';
 import { ScheduleAutomationReadOnly } from './editor/ScheduleAutomationReadOnly';
 import { WeekAutomationReadOnly } from './editor/WeekAutomationReadOnly';
 
@@ -73,7 +75,18 @@ export function BudgetAutomationReadOnly({
         <HistoricalAutomationReadOnly template={state.template} />
       );
       break;
+    case 'by':
+      automationReadOnly = (
+        <BySaveAutomationReadOnly template={state.template} />
+      );
+      break;
+    case 'remainder':
+      automationReadOnly = (
+        <RemainderAutomationReadOnly template={state.template} />
+      );
+      break;
     default:
+      state satisfies never;
       automationReadOnly = (
         <Text>
           <Trans>Unrecognized automation type.</Trans>

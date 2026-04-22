@@ -143,7 +143,10 @@ async function getCategoriesWithTemplates(): Promise<
 }
 
 function prefixFromPriority(priority: number | null): string {
-  return priority === null ? TEMPLATE_PREFIX : `${TEMPLATE_PREFIX}-${priority}`;
+  // Priority 0 is the parser's "unset" default and serializes without a suffix.
+  return priority === null || priority === 0
+    ? TEMPLATE_PREFIX
+    : `${TEMPLATE_PREFIX}-${priority}`;
 }
 
 export async function unparse(templates: Template[]): Promise<string> {

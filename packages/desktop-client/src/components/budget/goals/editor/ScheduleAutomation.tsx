@@ -42,7 +42,9 @@ export const ScheduleAutomation = ({
             )
           }
           options={schedules.flatMap(schedule =>
-            schedule.name ? [[schedule.name, schedule.name]] : [],
+            schedule.name && !schedule.completed && !schedule.tombstone
+              ? [[schedule.name, schedule.name]]
+              : [],
           )}
         />
       </FormField>

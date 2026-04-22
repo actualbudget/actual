@@ -148,6 +148,7 @@ export class CategoryTemplateContext {
     );
     let available = budgetAvail || 0;
     let toBudget = 0;
+    const perTemplateLocal = new Map<Template, number>();
     let byFlag = false;
     let remainder = 0;
     let scheduleFlag = false;
@@ -226,8 +227,13 @@ export class CategoryTemplateContext {
 
       available = available - newBudget;
       toBudget += newBudget;
+      perTemplateLocal.set(
+        template,
+        (perTemplateLocal.get(template) ?? 0) + newBudget,
+      );
     }
 
+    let scale = 1;
     //check limit
     if (this.limitCheck) {
       if (
@@ -238,6 +244,7 @@ export class CategoryTemplateContext {
         toBudget = this.limitAmount - this.toBudgetAmount - this.fromLastMonth;
         this.limitMet = true;
         available = available + orig - toBudget;
+        if (orig > 0) scale *= toBudget / orig;
       }
     }
 
@@ -247,11 +254,21 @@ export class CategoryTemplateContext {
     // don't overbudget when using a priority unless income category
     if (priority > 0 && available < 0 && !this.category.is_income) {
       this.fullAmount = (this.fullAmount || 0) + toBudget;
-      toBudget = Math.max(0, toBudget + available);
+      const adjusted = Math.max(0, toBudget + available);
+      if (toBudget > 0) scale *= adjusted / toBudget;
+      toBudget = adjusted;
       this.toBudgetAmount += toBudget;
     } else {
       this.fullAmount = (this.fullAmount || 0) + toBudget;
       this.toBudgetAmount += toBudget;
+    }
+
+    // Distribute the priority's final budget across its templates so per-row
+    // projections reflect any clamping that occurred above.
+    for (const [template, value] of perTemplateLocal) {
+      const scaled = Math.round(value * scale);
+      const existing = this.perTemplateContribution.get(template) ?? 0;
+      this.perTemplateContribution.set(template, existing + scaled);
     }
     return this.category.is_income ? -toBudget : toBudget;
   }
@@ -282,6 +299,21 @@ export class CategoryTemplateContext {
       }
     }
 
+    if (toBudget > 0 && this.remainderWeight > 0) {
+      let remaining = toBudget;
+      for (let i = 0; i < this.remainder.length; i++) {
+        const template = this.remainder[i];
+        const isLast = i === this.remainder.length - 1;
+        const share = isLast
+          ? remaining
+          : Math.round(toBudget * (template.weight / this.remainderWeight));
+        const allocated = Math.max(0, Math.min(share, remaining));
+        const existing = this.perTemplateContribution.get(template) ?? 0;
+        this.perTemplateContribution.set(template, existing + allocated);
+        remaining -= allocated;
+      }
+    }
+
     this.toBudgetAmount += toBudget;
     return toBudget;
   }
@@ -292,6 +324,7 @@ export class CategoryTemplateContext {
       budgeted: this.toBudgetAmount,
       goal: this.goalAmount,
       longGoal: this.isLongGoal,
+      perTemplateContribution: this.perTemplateContribution,
     };
   }
 
@@ -306,6 +339,7 @@ export class CategoryTemplateContext {
   readonly hideDecimal: boolean = false;
   private remainderWeight: number = 0;
   private toBudgetAmount: number = 0; // amount that will be budgeted by the templates
+  private perTemplateContribution = new Map<Template, number>();
   private fullAmount: number | null = null; // the full requested amount, start null for remainder only cats
   private isLongGoal: boolean | null = null; //defaulting the goals to null so templates can be unset
   private goalAmount: number | null = null;
@@ -591,7 +625,9 @@ export class CategoryTemplateContext {
     const period = template.period.period;
     const numPeriods = template.period.amount;
     let date =
-      template.starting ?? monthUtils.firstDayOfMonth(templateContext.month);
+      template.starting && template.starting.length > 0
+        ? template.starting
+        : monthUtils.firstDayOfMonth(templateContext.month);
 
     let dateShiftFunction;
     switch (period) {

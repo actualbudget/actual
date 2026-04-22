@@ -18,10 +18,12 @@ import { setType } from './actions';
 import type { Action } from './actions';
 import { displayTemplateTypes } from './constants';
 import type { ReducerState } from './constants';
+import { BySaveAutomation } from './editor/BySaveAutomation';
 import { HistoricalAutomation } from './editor/HistoricalAutomation';
 import { LimitAutomation } from './editor/LimitAutomation';
 import { PercentageAutomation } from './editor/PercentageAutomation';
 import { RefillAutomation } from './editor/RefillAutomation';
+import { RemainderAutomation } from './editor/RemainderAutomation';
 import { ScheduleAutomation } from './editor/ScheduleAutomation';
 import { WeekAutomation } from './editor/WeekAutomation';
 
@@ -80,6 +82,18 @@ const displayTypeToDescription = {
       to account for seasonal changes.
     </Trans>
   ),
+  by: (
+    <Trans>
+      Spread a target amount across the months between now and a target date.
+      Useful for annual goals or saving toward a one-off expense.
+    </Trans>
+  ),
+  remainder: (
+    <Trans>
+      Split any remaining To Budget across categories using this rule. Higher
+      weights take a larger share of the leftover funds.
+    </Trans>
+  ),
 };
 
 export function BudgetAutomationEditor({
@@ -134,6 +148,16 @@ export function BudgetAutomationEditor({
     case 'historical':
       automationEditor = (
         <HistoricalAutomation template={state.template} dispatch={dispatch} />
+      );
+      break;
+    case 'by':
+      automationEditor = (
+        <BySaveAutomation template={state.template} dispatch={dispatch} />
+      );
+      break;
+    case 'remainder':
+      automationEditor = (
+        <RemainderAutomation template={state.template} dispatch={dispatch} />
       );
       break;
     default:
