@@ -588,12 +588,18 @@ function RuleListRow({
             fontWeight: 600,
             fontVariantNumeric: 'tabular-nums',
             color:
-              !contribution || contribution === 0
+              contribution == null ||
+              Number.isNaN(contribution) ||
+              contribution === 0
                 ? theme.pageTextSubdued
                 : theme.pageText,
           }}
         >
-          {!contribution ? '—' : '+' + format(contribution, 'financial')}
+          {contribution == null || Number.isNaN(contribution)
+            ? '—'
+            : contribution > 0
+              ? '+' + format(contribution, 'financial')
+              : format(contribution, 'financial')}
         </Text>
         {priority != null && (
           <Text

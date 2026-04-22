@@ -335,6 +335,7 @@ export function RuleErrorTitle({ error }: { error: RuleErrorKind }) {
     case 'percentage-source-not-found':
       return <Trans>Source category missing</Trans>;
     default:
+      error satisfies never;
       return null;
   }
 }
@@ -365,6 +366,7 @@ export function RuleErrorShort({ error }: { error: RuleErrorKind }) {
     case 'percentage-source-not-found':
       return <Trans>Pick a valid income category</Trans>;
     default:
+      error satisfies never;
       return null;
   }
 }
@@ -415,6 +417,7 @@ export function RuleErrorDetail({ error }: { error: RuleErrorKind }) {
         </Trans>
       );
     default:
+      error satisfies never;
       return null;
   }
 }
@@ -434,6 +437,7 @@ export function GlobalConflictTitle({
         </Trans>
       );
     default:
+      conflict satisfies never;
       return null;
   }
 }
@@ -461,6 +465,7 @@ export function GlobalConflictDetail({
         </Trans>
       );
     default:
+      conflict satisfies never;
       return null;
   }
 }
