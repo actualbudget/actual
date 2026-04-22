@@ -27,9 +27,6 @@ jobs:
           download-translations: 'false'
       - name: Validate themes
         run: yarn workspace @actual-app/web validate:theme-catalog
-      # Requires the DISCORD_WEBHOOK_URL repo secret (Settings → Secrets and
-      # variables → Actions). Fires for both theme validation failures and any
-      # earlier step failure (checkout/setup).
       - name: Notify Discord on failure
         if: failure()
         uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1.16.0
