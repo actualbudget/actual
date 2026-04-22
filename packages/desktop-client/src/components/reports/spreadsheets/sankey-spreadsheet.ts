@@ -378,14 +378,12 @@ function filterCategoryGroups(
     }
     if (op === 'matches') {
       if (typeof value !== 'string') return false;
+      if (value.length > 256) return false;
       try {
         const regex =
           value.startsWith('/') && value.lastIndexOf('/') > 0
-            ? new RegExp(
-                value.slice(1, value.lastIndexOf('/')),
-                value.slice(value.lastIndexOf('/') + 1),
-              )
-            : new RegExp(value);
+            ? new RegExp(value.slice(1, value.lastIndexOf('/')), 'i')
+            : new RegExp(value, 'i');
         return regex.test(name);
       } catch {
         return false;
