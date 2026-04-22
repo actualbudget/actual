@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Input } from '@actual-app/components/input';
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { amountToInteger, integerToAmount } from '@actual-app/core/shared/util';
@@ -28,6 +30,16 @@ export const BySaveAutomation = ({
     template.amount,
     format.currency.decimalPlaces,
   );
+
+  const committedRepeat = template.repeat ?? 1;
+  const [rawRepeat, setRawRepeat] = useState(String(committedRepeat));
+  const commitRepeat = () => {
+    const parsed = Math.max(1, Math.trunc(Number(rawRepeat)) || 1);
+    setRawRepeat(String(parsed));
+    if (parsed !== committedRepeat) {
+      dispatch(updateTemplate({ type: 'by', repeat: parsed }));
+    }
+  };
 
   return (
     <>
@@ -71,17 +83,14 @@ export const BySaveAutomation = ({
             title={t('Repeat every')}
             htmlFor="by-repeat-amount-field"
           />
-          <GenericInput
+          <Input
+            id="by-repeat-amount-field"
             type="number"
-            value={template.repeat ?? 1}
-            onChange={value =>
-              dispatch(
-                updateTemplate({
-                  type: 'by',
-                  repeat: Math.max(1, Math.trunc(Number(value)) || 1),
-                }),
-              )
-            }
+            min={1}
+            step={1}
+            value={rawRepeat}
+            onChangeValue={setRawRepeat}
+            onBlur={commitRepeat}
           />
         </FormField>
         <FormField style={{ flex: 1 }}>

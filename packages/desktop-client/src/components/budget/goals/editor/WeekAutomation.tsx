@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Input } from '@actual-app/components/input';
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { amountToInteger, integerToAmount } from '@actual-app/core/shared/util';
@@ -35,6 +37,19 @@ export const WeekAutomation = ({ template, dispatch }: WeekAutomationProps) => {
   );
   const periodUnit = template.period?.period ?? 'month';
   const periodAmount = template.period?.amount ?? 1;
+  const [rawPeriodAmount, setRawPeriodAmount] = useState(String(periodAmount));
+  const commitPeriodAmount = () => {
+    const parsed = Math.max(1, Math.trunc(Number(rawPeriodAmount)) || 1);
+    setRawPeriodAmount(String(parsed));
+    if (parsed !== periodAmount) {
+      dispatch(
+        updateTemplate({
+          type: 'periodic',
+          period: { period: periodUnit, amount: parsed },
+        }),
+      );
+    }
+  };
 
   return (
     <SpaceBetween align="center" gap={10} style={{ marginTop: 10 }}>
@@ -56,20 +71,14 @@ export const WeekAutomation = ({ template, dispatch }: WeekAutomationProps) => {
       </FormField>
       <FormField style={{ flex: 1 }}>
         <FormLabel title={t('Every')} htmlFor="period-amount-field" />
-        <GenericInput
+        <Input
+          id="period-amount-field"
           type="number"
-          value={periodAmount}
-          onChange={value =>
-            dispatch(
-              updateTemplate({
-                type: 'periodic',
-                period: {
-                  period: periodUnit,
-                  amount: Math.max(1, Math.trunc(Number(value)) || 1),
-                },
-              }),
-            )
-          }
+          min={1}
+          step={1}
+          value={rawPeriodAmount}
+          onChangeValue={setRawPeriodAmount}
+          onBlur={commitPeriodAmount}
         />
       </FormField>
       <FormField style={{ flex: 1 }}>
