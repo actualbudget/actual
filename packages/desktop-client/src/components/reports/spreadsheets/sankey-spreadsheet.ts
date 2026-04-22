@@ -326,10 +326,10 @@ function processGraphData(
   }
   groupOtherCategories(graph, topNcategories, categorySort);
   const sortedGraph = sortGraph(graph, categorySort, categories);
-  addPercentageLabels(graph);
-  addColors(graph);
+  addPercentageLabels(sortedGraph);
+  addColors(sortedGraph);
   filterGraphByLayers(sortedGraph, layerFrom, layerTo);
-  cleanUpNodes(graph);
+  cleanUpNodes(sortedGraph);
   setData(convertToSankeyData(sortedGraph, t));
 }
 
