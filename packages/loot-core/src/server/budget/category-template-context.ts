@@ -284,9 +284,13 @@ export class CategoryTemplateContext {
     }
 
     // Distribute the priority's final budget across its templates so per-row
-    // projections reflect any clamping that occurred above.
+    // projections reflect any clamping that occurred above. The limit branch
+    // can produce a negative scale when the carried-over balance already
+    // exceeds the cap; floor at 0 here so per-row UI projections never go
+    // negative (engine totals are unaffected).
+    const perRowScale = Math.max(0, scale);
     for (const [template, value] of perTemplateLocal) {
-      const scaled = Math.round(value * scale);
+      const scaled = Math.round(value * perRowScale);
       const existing = this.perTemplateContribution.get(template) ?? 0;
       this.perTemplateContribution.set(template, existing + scaled);
     }
@@ -503,7 +507,7 @@ export class CategoryTemplateContext {
 
     pt.forEach(t => {
       const raw = t.category;
-      const lowered = raw.toLowerCase();
+      const lowered = raw.toLocaleLowerCase();
       // Accept either an income category name (text templates) or an income
       // category id (UI-managed templates from CategoryAutocomplete).
       if (
@@ -782,7 +786,7 @@ export class CategoryTemplateContext {
     templateContext: CategoryTemplateContext,
   ): Promise<number> {
     const percent = template.percent;
-    const cat = template.category.toLowerCase();
+    const cat = template.category.toLocaleLowerCase();
     const prev = template.previous;
     let sheetName;
     let monthlyIncome;
@@ -812,7 +816,7 @@ export class CategoryTemplateContext {
       const incomeCat = (await db.getCategories()).find(
         c =>
           c.is_income &&
-          (c.id === template.category || c.name.toLowerCase() === cat),
+          (c.id === template.category || c.name.toLocaleLowerCase() === cat),
       );
       if (!incomeCat) {
         throw new Error(

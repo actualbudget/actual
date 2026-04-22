@@ -218,7 +218,7 @@ function getPayMonthOfTotal(t: ScheduleTemplateTarget[]) {
   return total;
 }
 
-async function getSinkingContributionBreakdown(
+function getSinkingContributionBreakdown(
   t: ScheduleTemplateTarget[],
   remainder: number,
   last_month_balance: number,
@@ -378,11 +378,7 @@ export async function runSchedule(
     }
   } else {
     const { total: totalSinkingContribution, perSchedule: sinkingPerSchedule } =
-      await getSinkingContributionBreakdown(
-        t_sinking,
-        remainder,
-        last_month_balance,
-      );
+      getSinkingContributionBreakdown(t_sinking, remainder, last_month_balance);
     if (t_sinking.length === 0) {
       to_budget +=
         Math.round(totalPayMonthOf + totalSinkingContribution) -
