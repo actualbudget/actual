@@ -42,6 +42,7 @@ jobs:
       - name: Yarn install
         if: github.event_name != 'push'
         run: |
+          # Required after nightly `npm version` updates workspace manifests.
           yarn install
 
       - name: Pack the core package
