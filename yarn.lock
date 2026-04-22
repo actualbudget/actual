@@ -184,6 +184,7 @@ __metadata:
     "@types/node": "npm:^22.19.17"
     "@types/supertest": "npm:^7.2.0"
     "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"
+    akahu: "npm:^2.2.0"
     bcrypt: "npm:^6.0.0"
     better-sqlite3: "npm:^12.8.0"
     convict: "npm:^6.2.5"
@@ -11053,6 +11054,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"akahu@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "akahu@npm:2.2.0"
+  dependencies:
+    axios: "npm:^1.8.3"
+    uuid: "npm:^8.3.2"
+  checksum: 10/e815a3d9901961f6a35796ffc32aab6ca185351d815199dd55bba1d1dc576e177178ba33033cf9bc114e9f8585c760190df9ab0a13bf75f7b8d3b6e40ee67549
+  languageName: node
+  linkType: hard
+
 "algoliasearch-helper@npm:^3.26.0":
   version: 3.26.0
   resolution: "algoliasearch-helper@npm:3.26.0"
@@ -11485,6 +11496,17 @@ __metadata:
   version: 4.11.1
   resolution: "axe-core@npm:4.11.1"
   checksum: 10/bbc8e8959258a229b92fbaa73437050825579815051cac7b0fdbb6752946fea226e403bfeeef3d60d712477bdd4c01afdc8455f27c3d85e4251df88b032b6250
+  languageName: node
+  linkType: hard
+
+"axios@npm:^1.8.3":
+  version: 1.15.0
+  resolution: "axios@npm:1.15.0"
+  dependencies:
+    follow-redirects: "npm:^1.15.11"
+    form-data: "npm:^4.0.5"
+    proxy-from-env: "npm:^2.1.0"
+  checksum: 10/d39a2c0ebc7ff4739401b282e726cc2673377949d6c46d60eb619458f8d7a2f7eadbcada7097f4dbc7d5c59abb4d3bf6fac33d474412bc3415d3f5aa7ed45530
   languageName: node
   linkType: hard
 
@@ -16503,7 +16525,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.0.0":
+"follow-redirects@npm:^1.0.0, follow-redirects@npm:^1.15.11":
   version: 1.16.0
   resolution: "follow-redirects@npm:1.16.0"
   peerDependenciesMeta:
@@ -23856,6 +23878,13 @@ __metadata:
     forwarded: "npm:0.2.0"
     ipaddr.js: "npm:1.9.1"
   checksum: 10/f24a0c80af0e75d31e3451398670d73406ec642914da11a2965b80b1898ca6f66a0e3e091a11a4327079b2b268795f6fa06691923fef91887215c3d0e8ea3f68
+  languageName: node
+  linkType: hard
+
+"proxy-from-env@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "proxy-from-env@npm:2.1.0"
+  checksum: 10/fbbaf4dab2a6231dc9e394903a5f66f20475e36b734335790b46feb9da07c37d6b32e2c02e3e2ea4d4b23774c53d8562e5b7cc73282cb43f4a597b7eacaee2ee
   languageName: node
   linkType: hard
 
