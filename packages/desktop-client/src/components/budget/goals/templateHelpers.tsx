@@ -267,7 +267,11 @@ export function validateRule(
   }
 }
 
-function formatTargetMonth(month: string): string {
+// Format a YYYY-MM string as "MMM YYYY" (e.g. "2026-04" → "Apr 2026").
+// Falls back to the input if it doesn't look like YYYY-MM, and to "—" for
+// empty/missing values so callers don't need their own guards.
+export function formatMonthLabel(month: string | undefined | null): string {
+  if (!month) return '—';
   const match = /^(\d{4})-(\d{2})/.exec(month);
   if (!match) return month;
   const names = [
@@ -325,7 +329,7 @@ export function RuleErrorShort({ error }: { error: RuleErrorKind }) {
     case 'by-target-past':
       return (
         <Trans>
-          {{ month: formatTargetMonth(error.month) }} has already passed
+          {{ month: formatMonthLabel(error.month) }} has already passed
         </Trans>
       );
     default:

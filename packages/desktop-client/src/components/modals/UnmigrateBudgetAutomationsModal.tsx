@@ -88,10 +88,15 @@ export function UnmigrateBudgetAutomationsModal({
   async function onSave(close: () => void) {
     setSaving(true);
     await send('notes-save-undoable', { id: categoryId, note: editedNotes });
+    // Hand control back to the notes parser: clear the UI-managed goal_def and
+    // mark notes as the source of truth. `storeNoteTemplates` will re-derive
+    // goal_def from the notes the next time it runs (e.g. on modal open or
+    // when applying templates).
     await send('budget/set-category-automations', {
-      categoriesWithTemplates: [{ id: categoryId, templates }],
+      categoriesWithTemplates: [{ id: categoryId, templates: [] }],
       source: 'notes',
     });
+    await send('budget/store-note-templates');
     setSaving(false);
     close();
   }

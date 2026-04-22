@@ -52,13 +52,16 @@ export async function storeTemplates({
 }): Promise<void> {
   await batchMessages(async () => {
     for (const { id, templates } of categoriesWithTemplates) {
-      const hasTemplates = templates.length > 0;
-      const goalDefs = hasTemplates ? JSON.stringify(templates) : null;
+      // An empty templates list clears `goal_def` so the sidebar icon stops
+      // signalling "this category has automations". The source marker is kept
+      // so reopening the modal doesn't re-prompt the migration warning when
+      // there are still legacy `#template` lines in the category notes.
+      const goalDefs = templates.length > 0 ? JSON.stringify(templates) : null;
 
       await db.updateWithSchema('categories', {
         id,
         goal_def: goalDefs,
-        template_settings: hasTemplates ? { source } : null,
+        template_settings: { source },
       });
     }
   });
@@ -215,6 +218,7 @@ async function computeTemplates(
   categoryTemplates: Record<CategoryEntity['id'], Template[]>,
   categories: CategoryEntity[] = [],
 ): Promise<ComputedTemplates> {
+  // setup categories
   const isTracking = isTrackingBudget();
   if (!categories.length) {
     categories = (await getCategories()).filter(
@@ -222,6 +226,7 @@ async function computeTemplates(
     );
   }
 
+  // setup categories to process
   const templateContexts: CategoryTemplateContext[] = [];
   let availBudget = await getSheetValue(
     monthUtils.sheetForMonth(month),
@@ -237,6 +242,7 @@ async function computeTemplates(
     const budgeted = await getSheetValue(sheetName, `budget-${id}`);
     const existingGoal = await getSheetValue(sheetName, `goal-${id}`);
 
+    // only run categories that are unbudgeted or if we are forcing it
     if ((budgeted === 0 || force) && templates) {
       try {
         const templateContext = await CategoryTemplateContext.init(
@@ -245,6 +251,7 @@ async function computeTemplates(
           month,
           budgeted,
         );
+        // don't use the funds that are not from templates
         if (!templateContext.isGoalOnly()) {
           availBudget += budgeted;
         }
@@ -254,6 +261,8 @@ async function computeTemplates(
       } catch (e) {
         errors.push(`${category.name}: ${e.message}`);
       }
+
+      // do a reset of the goals that are orphaned
     } else if (existingGoal !== null && !templates) {
       orphanGoals.push({
         category: id,
@@ -268,6 +277,7 @@ async function computeTemplates(
   }
 
   const priorities = new Int32Array([...prioritiesSet]).sort((a, b) => a - b);
+  // run each priority level
   for (const priority of priorities) {
     const availStart = availBudget;
     for (const templateContext of templateContexts) {

@@ -4,33 +4,13 @@ import { amountToInteger } from '@actual-app/core/shared/util';
 import type { ByTemplate } from '@actual-app/core/types/models/templates';
 import type { TransObjectLiteral } from '@actual-app/core/types/util';
 
+import { formatMonthLabel } from '#components/budget/goals/templateHelpers';
 import { FinancialText } from '#components/FinancialText';
 import { useFormat } from '#hooks/useFormat';
 
 type BySaveAutomationReadOnlyProps = {
   template: ByTemplate;
 };
-
-function formatTargetMonth(month: string | undefined): string {
-  if (!month) return '—';
-  const match = /^(\d{4})-(\d{2})/.exec(month);
-  if (!match) return month;
-  const names = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  return `${names[Number(match[2]) - 1]} ${match[1]}`;
-}
 
 export const BySaveAutomationReadOnly = ({
   template,
@@ -40,7 +20,7 @@ export const BySaveAutomationReadOnly = ({
     amountToInteger(template.amount, format.currency.decimalPlaces),
     'financial',
   );
-  const month = formatTargetMonth(template.month);
+  const month = formatMonthLabel(template.month);
   const repeat = template.repeat ?? 1;
 
   if (template.annual) {

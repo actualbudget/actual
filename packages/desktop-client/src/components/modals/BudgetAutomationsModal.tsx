@@ -35,6 +35,7 @@ import {
 import {
   ActiveEditor,
   displayTemplateMeta,
+  formatMonthLabel,
   GlobalConflictDetail,
   GlobalConflictTitle,
   RuleErrorDetail,
@@ -241,17 +242,21 @@ type EmptyStateProps = {
   onAdd: (preset: () => AutomationEntry) => void;
 };
 
-function buildPresetSeeds(): Array<{
+type Preset = {
   key: string;
   label: ReactNode;
+  ariaLabel: string;
   description: ReactNode;
   icon: ReactNode;
   seed: () => AutomationEntry;
-}> {
+};
+
+function buildPresetSeeds(t: (key: string) => string): Preset[] {
   return [
     {
       key: 'fixed-amount',
       label: <Trans>A fixed amount each month</Trans>,
+      ariaLabel: t('A fixed amount each month'),
       description: (
         <Trans>Set the same amount aside every month, no matter what.</Trans>
       ),
@@ -272,6 +277,7 @@ function buildPresetSeeds(): Array<{
     {
       key: 'annual-goal',
       label: <Trans>Save for an annual goal</Trans>,
+      ariaLabel: t('Save for an annual goal'),
       description: (
         <Trans>Save up by a target month; the engine spreads the load.</Trans>
       ),
@@ -296,6 +302,7 @@ function buildPresetSeeds(): Array<{
     {
       key: 'recurring-schedule',
       label: <Trans>Cover a scheduled transaction</Trans>,
+      ariaLabel: t('Cover a scheduled transaction'),
       description: (
         <Trans>
           Link to a schedule and this category saves enough each month.
@@ -317,7 +324,8 @@ function buildPresetSeeds(): Array<{
 }
 
 function EmptyState({ onAdd }: EmptyStateProps) {
-  const presets = useMemo(buildPresetSeeds, []);
+  const { t } = useTranslation();
+  const presets = useMemo(() => buildPresetSeeds(t), [t]);
 
   return (
     <View
@@ -379,7 +387,7 @@ function EmptyState({ onAdd }: EmptyStateProps) {
             key={preset.key}
             role="button"
             tabIndex={0}
-            aria-label={preset.key}
+            aria-label={preset.ariaLabel}
             onClick={() => onAdd(preset.seed)}
             onKeyDown={e => {
               if (e.key === 'Enter' || e.key === ' ') {
@@ -598,7 +606,7 @@ const ALWAYS_SCROLL_CLASS = css({
   scrollbarGutter: 'stable',
   '&::-webkit-scrollbar': {
     width: 11,
-    backgroundColor: 'rgba(200, 200, 200, .15)',
+    backgroundColor: 'transparent',
   },
   '&::-webkit-scrollbar-thumb': {
     width: 7,
@@ -606,7 +614,7 @@ const ALWAYS_SCROLL_CLASS = css({
     borderRadius: 30,
     backgroundClip: 'padding-box',
     border: '2px solid rgba(0, 0, 0, 0)',
-    backgroundColor: '#b0b0b0',
+    backgroundColor: theme.tableBorder,
   },
 });
 
@@ -627,26 +635,6 @@ const CONFIG_PANEL_CLASS = css({
     borderColor: theme.formInputBorder,
   },
 });
-
-function formatMonthLabel(monthStr: string): string {
-  const match = /^(\d{4})-(\d{2})/.exec(monthStr);
-  if (!match) return monthStr;
-  const names = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-  return `${names[Number(match[2]) - 1]} ${match[1]}`;
-}
 
 const SINGLETON_TYPES: ReadonlySet<DisplayTemplateType> = new Set([
   'limit',
@@ -1160,7 +1148,7 @@ function BudgetAutomationsBody({
 
   useEffect(() => {
     let cancelled = false;
-    if (entries.length === 0) {
+    if (templates.length === 0) {
       setDryRun({ budgeted: 0, perTemplate: [] });
       return;
     }
@@ -1180,7 +1168,7 @@ function BudgetAutomationsBody({
       cancelled = true;
       clearTimeout(handle);
     };
-  }, [templates, month, categoryId, entries.length]);
+  }, [templates, month, categoryId]);
 
   const totalMonthly = dryRun?.budgeted ?? 0;
   const contributions = useMemo<(number | null)[]>(
@@ -1430,7 +1418,9 @@ export function BudgetAutomationsModal({
       containerProps={{
         style: {
           width: MODAL_WIDTH,
+          maxWidth: '95vw',
           height: MODAL_HEIGHT,
+          maxHeight: '90vh',
           padding: 0,
           overflow: 'hidden',
           display: 'flex',
