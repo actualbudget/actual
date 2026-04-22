@@ -462,9 +462,9 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       graphMode,
       topNcategories,
       categorySort,
+      (key: string, params?: Record<string, string>) => t(key, params),
       layerFrom,
       layerTo,
-      (key: string, params?: Record<string, string>) => t(key, params),
     );
   }, [
     datesInitialized,
@@ -476,9 +476,9 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     graphMode,
     topNcategories,
     categorySort,
+    t,
     layerFrom,
     layerTo,
-    t,
   ]);
 
   const defaultGetData = async (

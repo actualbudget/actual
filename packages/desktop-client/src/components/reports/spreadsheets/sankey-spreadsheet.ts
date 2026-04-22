@@ -137,9 +137,9 @@ export function createSpreadsheet(
   mode: 'budgeted' | 'spent' = 'spent',
   topNcategories: number = 15,
   categorySort: SortMode = 'per-group',
+  t: (key: string, params?: Record<string, string>) => string,
   layerFrom?: GraphLayers,
   layerTo?: GraphLayers,
-  t?: (key: string, params?: Record<string, string>) => string,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -169,7 +169,7 @@ export function createSpreadsheet(
       categories,
       categorySort,
       setData,
-      t ?? ((key: string) => key),
+      t,
       aggregated,
       layerFrom,
       layerTo,
