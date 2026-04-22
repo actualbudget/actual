@@ -27,8 +27,16 @@ jobs:
           download-translations: 'false'
       - name: Validate themes
         run: yarn workspace @actual-app/web validate:theme-catalog
-      - name: Notify Discord on failure
-        if: failure()
+
+  notify-failure:
+    name: Notify Discord on failure
+    needs: validate-theme-catalog
+    if: failure() && github.repository == 'actualbudget/actual'
+    runs-on: ubuntu-latest
+    environment: nightly-alerts
+    timeout-minutes: 5
+    steps:
+      - name: Notify Discord
         uses: sarisia/actions-status-discord@eb045afee445dc055c18d3d90bd0f244fd062708 # v1.16.0
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
