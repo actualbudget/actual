@@ -523,11 +523,11 @@ function createBudgetGraph(
 
   categoryData.forEach(entry => {
     if (entry.isIncome) {
-      // Payee > Available income
+      // Income category > Available income
       addNode(
         graph,
         entry.categoryId!,
-        GraphLayers.IncomePayee,
+        GraphLayers.IncomeCategory,
         entry.category,
       );
       addValueToLink(
@@ -599,7 +599,7 @@ function createBudgetGraph(
   addNodeWithLabel(
     graph,
     SpecialNodeKeys.FromPrevMonth,
-    GraphLayers.IncomePayee,
+    GraphLayers.IncomeCategory,
     'From {{month}}',
     { month: monthUtils.prevMonth(aggregated.startMonth!) },
   );
