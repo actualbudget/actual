@@ -474,21 +474,39 @@ export class CategoryTemplateContext {
   static async checkPercentage(templates: Template[]) {
     const pt = templates.filter(t => t.type === 'percentage');
     if (pt.length === 0) return;
-    const reqCategories = pt.map(t => t.category.toLowerCase());
 
     const availCategories = await db.getCategories();
-    const availNames = availCategories
-      .filter(c => c.is_income)
-      .map(c => c.name.toLocaleLowerCase());
+    const incomeCategories = availCategories.filter(c => c.is_income);
+    const availNames = new Set(
+      incomeCategories.map(c => c.name.toLocaleLowerCase()),
+    );
+    const availIds = new Set(incomeCategories.map(c => c.id));
 
-    reqCategories.forEach(n => {
-      if (n === 'available funds' || n === 'all income') {
-        //skip the name check since these are special
-      } else if (!availNames.includes(n)) {
-        throw new Error(
-          `Category \x22${n}\x22 is not found in available income categories`,
-        );
+    // 'total' and 'to-budget' are synthetic ids the UI uses for the
+    // non-category sources; treat them as aliases of the text-template
+    // grammar's 'all income' and 'available funds'.
+    const specialSources = new Set([
+      'all income',
+      'available funds',
+      'total',
+      'to-budget',
+    ]);
+
+    pt.forEach(t => {
+      const raw = t.category;
+      const lowered = raw.toLowerCase();
+      // Accept either an income category name (text templates) or an income
+      // category id (UI-managed templates from CategoryAutocomplete).
+      if (
+        specialSources.has(lowered) ||
+        availNames.has(lowered) ||
+        availIds.has(raw)
+      ) {
+        return;
       }
+      throw new Error(
+        `Category \x22${raw}\x22 is not found in available income categories`,
+      );
     });
   }
 
@@ -768,13 +786,24 @@ export class CategoryTemplateContext {
     } else {
       sheetName = monthUtils.sheetForMonth(templateContext.month);
     }
-    if (cat === 'all income') {
+    // The UI uses synthetic category ids 'total' and 'to-budget' for the
+    // two non-category sources; treat those as synonyms of the text-template
+    // grammar's 'all income' and 'available funds'.
+    const totalIncomeAliases = new Set(['all income', 'total']);
+    const availableFundsAliases = new Set(['available funds', 'to-budget']);
+
+    if (totalIncomeAliases.has(cat)) {
       monthlyIncome = await getSheetValue(sheetName, `total-income`);
-    } else if (cat === 'available funds') {
+    } else if (availableFundsAliases.has(cat)) {
       monthlyIncome = availableFunds;
     } else {
+      // Text templates address income categories by name (e.g. `#template
+      // 10% of Salary`); the UI's CategoryAutocomplete stores the category
+      // id. Accept either form.
       const incomeCat = (await db.getCategories()).find(
-        c => c.is_income && c.name.toLowerCase() === cat,
+        c =>
+          c.is_income &&
+          (c.id === template.category || c.name.toLowerCase() === cat),
       );
       if (!incomeCat) {
         throw new Error(
