@@ -1370,10 +1370,12 @@ function BudgetAutomationsBody({
 
 function UnsupportedDirectivesNotice({
   hasGoalTemplate,
+  hasErrorTemplate,
   hasCleanupDirective,
   onClose,
 }: {
   hasGoalTemplate: boolean;
+  hasErrorTemplate: boolean;
   hasCleanupDirective: boolean;
   onClose: () => void;
 }) {
@@ -1410,7 +1412,13 @@ function UnsupportedDirectivesNotice({
           lineHeight: 1.5,
         }}
       >
-        {hasGoalTemplate && hasCleanupDirective ? (
+        {hasErrorTemplate ? (
+          <Trans>
+            One or more <code>#template</code> lines in this category&rsquo;s
+            notes couldn&rsquo;t be parsed. Fix them as text first, then re-open
+            this modal to migrate.
+          </Trans>
+        ) : hasGoalTemplate && hasCleanupDirective ? (
           <Trans>
             This category&rsquo;s notes use <code>#goal</code> and{' '}
             <code>#cleanup</code> directives, neither of which the budget
@@ -1473,8 +1481,11 @@ export function BudgetAutomationsModal({
 
   const hasGoalTemplate =
     parsedTemplates?.some(t => t.type === 'goal') ?? false;
+  const hasErrorTemplate =
+    parsedTemplates?.some(t => t.type === 'error') ?? false;
   const hasCleanupDirective = hasCleanupLine(notes);
-  const hasUnsupportedDirective = hasGoalTemplate || hasCleanupDirective;
+  const hasUnsupportedDirective =
+    hasGoalTemplate || hasErrorTemplate || hasCleanupDirective;
 
   const initialEntries =
     parsedTemplates && !hasUnsupportedDirective
@@ -1512,6 +1523,7 @@ export function BudgetAutomationsModal({
           ) : hasUnsupportedDirective ? (
             <UnsupportedDirectivesNotice
               hasGoalTemplate={hasGoalTemplate}
+              hasErrorTemplate={hasErrorTemplate}
               hasCleanupDirective={hasCleanupDirective}
               onClose={() => state.close()}
             />
