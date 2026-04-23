@@ -425,6 +425,7 @@ describe('Merging success', () => {
     const t1 = await db.insertTransaction({
       ...transaction1,
       imported_id: 'import_1',
+      imported_payee: 'payee_import_2',
     });
 
     const t2 = await db.insertTransaction({
@@ -444,5 +445,6 @@ describe('Merging success', () => {
     expect(transactions[0].id).toBe(t2);
     expect(transactions[1].id).toBe(t2Transfer);
     expect(transactions[0].imported_id).toBe('import_1');
+    expect(transactions[0].imported_payee).toBe('payee_import_2');
   });
 });

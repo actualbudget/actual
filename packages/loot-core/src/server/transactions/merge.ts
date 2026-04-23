@@ -17,7 +17,7 @@ export async function mergeTransactions(
   if (txIds.length !== 2) {
     throw new Error(
       'Merging is only possible with 2 transactions, but found ' +
-        JSON.stringify(transactions),
+      JSON.stringify(transactions),
     );
   }
 
@@ -83,6 +83,7 @@ export async function mergeTransactions(
       reconciled: keep.reconciled || drop.reconciled,
       schedule: keep.schedule || drop.schedule,
       imported_id: keep.imported_id || drop.imported_id,
+      imported_payee: keep.imported_payee || drop.imported_payee,
     } as unknown as TransactionEntity);
   } else {
     // Normal merge without subtransactions
@@ -95,6 +96,7 @@ export async function mergeTransactions(
       reconciled: keep.reconciled || drop.reconciled,
       schedule: keep.schedule || drop.schedule,
       imported_id: keep.imported_id || drop.imported_id,
+      imported_payee: keep.imported_payee || drop.imported_payee,
     } as TransactionEntity);
   }
 
