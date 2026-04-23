@@ -31,7 +31,6 @@
     "start:desktop-electron": "yarn workspace desktop-electron watch",
     "start:browser": "yarn workspace plugins-service build-dev && npm-run-all --parallel 'start:browser-*'",
     "start:service-plugins": "yarn workspace plugins-service watch",
-    "start:browser-backend": "yarn workspace @actual-app/web watch:browser",
     "start:browser-frontend": "yarn workspace @actual-app/web start:browser",
     "start:storybook": "yarn workspace @actual-app/components start:storybook",
     "build": "lage build",

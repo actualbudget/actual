@@ -14,5 +14,4 @@ git pull
 popd > /dev/null
 packages/desktop-client/bin/remove-untranslated-languages
 
-yarn build --to=@actual-app/core
-yarn workspace @actual-app/web build:browser
+lage build:browser --to=@actual-app/web
