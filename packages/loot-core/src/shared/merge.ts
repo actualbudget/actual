@@ -12,7 +12,8 @@ export function validForMerge(
     transactionA.transfer_id &&
     transactionB.transfer_id &&
     transactionA.payee !== transactionB.payee
-  )
-    {return false;}
+  ) {
+    return false;
+  }
   return true;
 }
