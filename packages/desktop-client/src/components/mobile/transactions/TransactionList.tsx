@@ -52,6 +52,7 @@ import { setNotificationInset } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 
 import { ROW_HEIGHT, TransactionListItem } from './TransactionListItem';
+import { validForMerge } from '@actual-app/core/shared/merge';
 
 const NOTIFICATION_BOTTOM_INSET = 75;
 
