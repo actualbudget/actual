@@ -13,7 +13,7 @@ describe('migrateTemplatesToAutomations', () => {
     const result = migrateTemplatesToAutomations([simpleTemplate]);
 
     expect(result).toHaveLength(1);
-    expect(result[0].displayType).toBe('week');
+    expect(result[0].displayType).toBe('fixed');
     expect(result[0].template).toEqual(simpleTemplate);
     expect(result[0].id).toMatch(/^automation-/);
   });
@@ -63,7 +63,7 @@ describe('migrateTemplatesToAutomations', () => {
     const result = migrateTemplatesToAutomations([simpleTemplate]);
 
     expect(result).toHaveLength(1);
-    expect(result[0].displayType).toBe('week');
+    expect(result[0].displayType).toBe('fixed');
     expect(result[0].template).toMatchObject({
       type: 'periodic',
       amount: 45,
@@ -98,7 +98,7 @@ describe('migrateTemplatesToAutomations', () => {
     const result = migrateTemplatesToAutomations([simpleTemplate]);
 
     expect(result).toHaveLength(2);
-    expect(result.map(entry => entry.displayType)).toEqual(['limit', 'week']);
+    expect(result.map(entry => entry.displayType)).toEqual(['limit', 'fixed']);
     expect(result[1].template).toMatchObject({
       type: 'periodic',
       amount: 20,
