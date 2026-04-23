@@ -24,6 +24,9 @@
     },
     {
       "path": "../loot-core"
+    },
+    {
+      "path": "../plugins-service"
     }
   ],
   "include": ["**/*.ts", "src/**/*.tsx", "src/**/*.js"],
