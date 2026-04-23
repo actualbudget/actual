@@ -45,8 +45,6 @@ import { WeekAutomationReadOnly } from './editor/WeekAutomationReadOnly';
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
 export type DisplayTemplateMeta = {
-  // Rendered as ReactNode via <Trans> so the i18n extractor can pick up the
-  // source strings statically — `t(variable)` would not be extractable.
   label: ReactNode;
   description: ReactNode;
   icon: IconComponent;
