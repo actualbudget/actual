@@ -17,7 +17,7 @@ export async function mergeTransactions(
   if (txIds.length !== 2) {
     throw new Error(
       'Merging is only possible with 2 transactions, but found ' +
-      JSON.stringify(transactions),
+        JSON.stringify(transactions),
     );
   }
 

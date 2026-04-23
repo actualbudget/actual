@@ -1,4 +1,4 @@
-import type { TransactionEntity } from '../types/models';
+import type { TransactionEntity } from '#types/models';
 
 export function validForMerge(
   transactionA: TransactionEntity,
@@ -13,6 +13,6 @@ export function validForMerge(
     transactionB.transfer_id &&
     transactionA.payee !== transactionB.payee
   )
-    return false;
+    {return false;}
   return true;
 }

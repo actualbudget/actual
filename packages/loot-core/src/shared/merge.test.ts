@@ -1,4 +1,4 @@
-import { TransactionEntity } from '#types/models/transaction';
+import { type TransactionEntity } from '#types/models/transaction';
 
 import { validForMerge } from './merge';
 
