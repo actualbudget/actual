@@ -52,10 +52,6 @@ export async function storeTemplates({
 }): Promise<void> {
   await batchMessages(async () => {
     for (const { id, templates } of categoriesWithTemplates) {
-      // An empty templates list clears `goal_def` so the sidebar icon stops
-      // signalling "this category has automations". The source marker is kept
-      // so reopening the modal doesn't re-prompt the migration warning when
-      // there are still legacy `#template` lines in the category notes.
       const goalDefs = templates.length > 0 ? JSON.stringify(templates) : null;
 
       await db.updateWithSchema('categories', {
