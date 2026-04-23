@@ -25,6 +25,7 @@ import type {
 } from '@actual-app/core/types/models';
 import type { Template } from '@actual-app/core/types/models/templates';
 import { css } from '@emotion/css';
+import { t } from 'i18next';
 import uniqueId from 'lodash/uniqueId';
 
 import { Warning } from '#components/alerts';
@@ -251,19 +252,19 @@ function BudgetAutomationMigrationWarning({
 }
 
 type EmptyStateProps = {
-  onAdd: (preset: () => AutomationEntry) => void;
+  onAdd: (create: () => AutomationEntry) => void;
 };
 
-type Preset = {
+type AutomationExample = {
   key: string;
   label: ReactNode;
   ariaLabel: string;
   description: ReactNode;
   icon: ReactNode;
-  seed: () => AutomationEntry;
+  create: () => AutomationEntry;
 };
 
-function buildPresetSeeds(t: (key: string) => string): Preset[] {
+function getAutomationExamples(): AutomationExample[] {
   const renderMetaIcon = (type: DisplayTemplateType) => {
     const Icon = getDisplayTemplateMeta(type).icon;
     return <Icon width={16} height={16} />;
@@ -277,7 +278,7 @@ function buildPresetSeeds(t: (key: string) => string): Preset[] {
         <Trans>Set the same amount aside every month, no matter what.</Trans>
       ),
       icon: renderMetaIcon('week'),
-      seed: () =>
+      create: () =>
         createAutomationEntry(
           {
             directive: 'template',
@@ -298,7 +299,7 @@ function buildPresetSeeds(t: (key: string) => string): Preset[] {
         <Trans>Save up by a target month; the engine spreads the load.</Trans>
       ),
       icon: renderMetaIcon('by'),
-      seed: () =>
+      create: () =>
         createAutomationEntry(
           {
             directive: 'template',
@@ -324,7 +325,7 @@ function buildPresetSeeds(t: (key: string) => string): Preset[] {
         </Trans>
       ),
       icon: renderMetaIcon('schedule'),
-      seed: () =>
+      create: () =>
         createAutomationEntry(
           {
             directive: 'template',
@@ -339,8 +340,7 @@ function buildPresetSeeds(t: (key: string) => string): Preset[] {
 }
 
 function EmptyState({ onAdd }: EmptyStateProps) {
-  const { t } = useTranslation();
-  const presets = buildPresetSeeds(t);
+  const examples = getAutomationExamples();
 
   return (
     <View
@@ -397,17 +397,17 @@ function EmptyState({ onAdd }: EmptyStateProps) {
           textAlign: 'left',
         }}
       >
-        {presets.map(preset => (
+        {examples.map(example => (
           <View
-            key={preset.key}
+            key={example.key}
             role="button"
             tabIndex={0}
-            aria-label={preset.ariaLabel}
-            onClick={() => onAdd(preset.seed)}
+            aria-label={example.ariaLabel}
+            onClick={() => onAdd(example.create)}
             onKeyDown={e => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                onAdd(preset.seed);
+                onAdd(example.create);
               }
             }}
             style={{
@@ -430,7 +430,7 @@ function EmptyState({ onAdd }: EmptyStateProps) {
                 justifyContent: 'center',
               }}
             >
-              {preset.icon}
+              {example.icon}
             </View>
             <Text
               style={{
@@ -439,7 +439,7 @@ function EmptyState({ onAdd }: EmptyStateProps) {
                 color: theme.pageText,
               }}
             >
-              {preset.label}
+              {example.label}
             </Text>
             <Text
               style={{
@@ -448,7 +448,7 @@ function EmptyState({ onAdd }: EmptyStateProps) {
                 lineHeight: 1.4,
               }}
             >
-              {preset.description}
+              {example.description}
             </Text>
           </View>
         ))}
@@ -1063,9 +1063,9 @@ function BudgetAutomationsBody({
     perTemplate: number[];
   } | null>(null);
 
-  const onAddAutomation = (preset?: () => AutomationEntry) => {
+  const onAddAutomation = (create?: () => AutomationEntry) => {
     const entry =
-      preset?.() ??
+      create?.() ??
       createAutomationEntry(
         {
           directive: 'template',
