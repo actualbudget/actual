@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode, SVGProps } from 'react';
+import type { ComponentType, SVGProps } from 'react';
 import { Trans } from 'react-i18next';
 
 import {
@@ -19,6 +19,7 @@ import type {
   ScheduleEntity,
 } from '@actual-app/core/types/models';
 import type { Template } from '@actual-app/core/types/models/templates';
+import { t } from 'i18next';
 
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
@@ -45,68 +46,76 @@ import { WeekAutomationReadOnly } from './editor/WeekAutomationReadOnly';
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
 export type DisplayTemplateMeta = {
-  label: ReactNode;
-  description: ReactNode;
+  label: string;
+  description: string;
   icon: IconComponent;
 };
 
-export const displayTemplateMeta: Record<
-  DisplayTemplateType,
-  DisplayTemplateMeta
-> = {
-  week: {
-    label: <Trans>Fixed amount</Trans>,
-    description: (
-      <Trans>Add a set amount every month, week, day, or year.</Trans>
-    ),
-    icon: SvgPiggyBank,
-  },
-  schedule: {
-    label: <Trans>Cover schedule</Trans>,
-    description: <Trans>Save up for a recurring scheduled transaction.</Trans>,
-    icon: SvgCalendar3,
-  },
-  by: {
-    label: <Trans>Save by date</Trans>,
-    description: (
-      <Trans>Spread a target amount across the months until a deadline.</Trans>
-    ),
-    icon: SvgMoneyBag,
-  },
-  percentage: {
-    label: <Trans>% of income</Trans>,
-    description: (
-      <Trans>A share of this month&rsquo;s or last month&rsquo;s income.</Trans>
-    ),
-    icon: SvgChartPie,
-  },
-  historical: {
-    label: <Trans>From history</Trans>,
-    description: (
-      <Trans>Use past months: average, a specific month, or a copy.</Trans>
-    ),
-    icon: SvgTime,
-  },
-  limit: {
-    label: <Trans>Balance cap</Trans>,
-    description: <Trans>Never let the category balance exceed a cap.</Trans>,
-    icon: SvgEquals,
-  },
-  refill: {
-    label: <Trans>Refill to cap</Trans>,
-    description: (
-      <Trans>Top the category back up to the balance cap each month.</Trans>
-    ),
-    icon: SvgArrowsSynchronize,
-  },
-  remainder: {
-    label: <Trans>Whatever is left</Trans>,
-    description: (
-      <Trans>Split any remaining To Budget across these categories.</Trans>
-    ),
-    icon: SvgShare,
-  },
-};
+export function getDisplayTemplateMeta(
+  displayType: DisplayTemplateType,
+): DisplayTemplateMeta {
+  switch (displayType) {
+    case 'week':
+      return {
+        label: t('Fixed amount'),
+        description: t('Add a set amount every month, week, day, or year.'),
+        icon: SvgPiggyBank,
+      };
+    case 'schedule':
+      return {
+        label: t('Cover schedule'),
+        description: t('Save up for a recurring scheduled transaction.'),
+        icon: SvgCalendar3,
+      };
+    case 'by':
+      return {
+        label: t('Save by date'),
+        description: t(
+          'Spread a target amount across the months until a deadline.',
+        ),
+        icon: SvgMoneyBag,
+      };
+    case 'percentage':
+      return {
+        label: t('% of income'),
+        description: t("A share of this month's or last month's income."),
+        icon: SvgChartPie,
+      };
+    case 'historical':
+      return {
+        label: t('From history'),
+        description: t(
+          'Use past months: average, a specific month, or a copy.',
+        ),
+        icon: SvgTime,
+      };
+    case 'limit':
+      return {
+        label: t('Balance cap'),
+        description: t('Never let the category balance exceed a cap.'),
+        icon: SvgEquals,
+      };
+    case 'refill':
+      return {
+        label: t('Refill to cap'),
+        description: t(
+          'Top the category back up to the balance cap each month.',
+        ),
+        icon: SvgArrowsSynchronize,
+      };
+    case 'remainder':
+      return {
+        label: t('Whatever is left'),
+        description: t(
+          'Split any remaining To Budget across these categories.',
+        ),
+        icon: SvgShare,
+      };
+    default:
+      displayType satisfies never;
+      throw new Error(`Unknown display type: ${String(displayType)}`);
+  }
+}
 
 type TemplateSentenceProps = {
   template: Template;

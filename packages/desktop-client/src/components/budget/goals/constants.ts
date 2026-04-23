@@ -11,17 +11,17 @@ import type {
 } from '@actual-app/core/types/models/templates';
 
 export const displayTemplateTypes = [
-  ['week', 'Fixed amount'] as const,
-  ['schedule', 'Cover schedule'] as const,
-  ['by', 'Save by date'] as const,
-  ['percentage', '% of income'] as const,
-  ['historical', 'From history'] as const,
-  ['limit', 'Balance cap'] as const,
-  ['refill', 'Refill to cap'] as const,
-  ['remainder', 'Whatever is left'] as const,
-];
+  'week',
+  'schedule',
+  'by',
+  'percentage',
+  'historical',
+  'limit',
+  'refill',
+  'remainder',
+] as const;
 
-export type DisplayTemplateType = (typeof displayTemplateTypes)[number][0];
+export type DisplayTemplateType = (typeof displayTemplateTypes)[number];
 
 export type ReducerState =
   | {

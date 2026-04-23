@@ -28,6 +28,7 @@ import { css } from '@emotion/css';
 import uniqueId from 'lodash/uniqueId';
 
 import { Warning } from '#components/alerts';
+import { displayTemplateTypes } from '#components/budget/goals/constants';
 import type { DisplayTemplateType } from '#components/budget/goals/constants';
 import {
   DEFAULT_PRIORITY,
@@ -39,8 +40,8 @@ import {
   AutomationErrorDetail,
   AutomationErrorShort,
   AutomationErrorTitle,
-  displayTemplateMeta,
   formatMonthLabel,
+  getDisplayTemplateMeta,
   GlobalConflictDetail,
   GlobalConflictTitle,
   TemplateSentence,
@@ -263,6 +264,10 @@ type Preset = {
 };
 
 function buildPresetSeeds(t: (key: string) => string): Preset[] {
+  const renderMetaIcon = (type: DisplayTemplateType) => {
+    const Icon = getDisplayTemplateMeta(type).icon;
+    return <Icon width={16} height={16} />;
+  };
   return [
     {
       key: 'fixed-amount',
@@ -271,7 +276,7 @@ function buildPresetSeeds(t: (key: string) => string): Preset[] {
       description: (
         <Trans>Set the same amount aside every month, no matter what.</Trans>
       ),
-      icon: <displayTemplateMeta.week.icon width={16} height={16} />,
+      icon: renderMetaIcon('week'),
       seed: () =>
         createAutomationEntry(
           {
@@ -292,7 +297,7 @@ function buildPresetSeeds(t: (key: string) => string): Preset[] {
       description: (
         <Trans>Save up by a target month; the engine spreads the load.</Trans>
       ),
-      icon: <displayTemplateMeta.by.icon width={16} height={16} />,
+      icon: renderMetaIcon('by'),
       seed: () =>
         createAutomationEntry(
           {
@@ -318,7 +323,7 @@ function buildPresetSeeds(t: (key: string) => string): Preset[] {
           Link to a schedule and this category saves enough each month.
         </Trans>
       ),
-      icon: <displayTemplateMeta.schedule.icon width={16} height={16} />,
+      icon: renderMetaIcon('schedule'),
       seed: () =>
         createAutomationEntry(
           {
@@ -473,7 +478,7 @@ function AutomationListRow({
 }: AutomationListRowProps) {
   const { t } = useTranslation();
   const format = useFormat();
-  const meta = displayTemplateMeta[entry.displayType];
+  const meta = getDisplayTemplateMeta(entry.displayType);
   const Icon = meta.icon;
 
   const subtitle = error ? (
@@ -665,9 +670,9 @@ type TypePickerProps = {
 };
 
 function TypePicker({ active, disabledTypes, onPick }: TypePickerProps) {
-  const entries = Object.entries(displayTemplateMeta) as Array<
-    [DisplayTemplateType, (typeof displayTemplateMeta)[DisplayTemplateType]]
-  >;
+  const entries = displayTemplateTypes.map(
+    id => [id, getDisplayTemplateMeta(id)] as const,
+  );
 
   return (
     <View
