@@ -1117,8 +1117,6 @@ function BudgetAutomationsBody({
   const templates = entries.map(e => e.template);
 
   const validPercentageSources = new Set<string>([
-    'total',
-    'to-budget',
     'all income',
     'available funds',
   ]);

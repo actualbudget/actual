@@ -368,7 +368,7 @@ export async function dryRunCategoryTemplate({
     t =>
       t.type === 'remainder' ||
       (t.type === 'percentage' &&
-        ['available funds', 'to-budget'].includes(t.category.toLowerCase())),
+        t.category.toLowerCase() === 'available funds'),
   );
 
   if (!needsWideScope) {

@@ -502,15 +502,7 @@ export class CategoryTemplateContext {
     );
     const availIds = new Set(incomeCategories.map(c => c.id));
 
-    // 'total' and 'to-budget' are synthetic ids the UI uses for the
-    // non-category sources; treat them as aliases of the text-template
-    // grammar's 'all income' and 'available funds'.
-    const specialSources = new Set([
-      'all income',
-      'available funds',
-      'total',
-      'to-budget',
-    ]);
+    const specialSources = new Set(['all income', 'available funds']);
 
     pt.forEach(t => {
       const raw = t.category;
@@ -806,15 +798,9 @@ export class CategoryTemplateContext {
     } else {
       sheetName = monthUtils.sheetForMonth(templateContext.month);
     }
-    // The UI uses synthetic category ids 'total' and 'to-budget' for the
-    // two non-category sources; treat those as synonyms of the text-template
-    // grammar's 'all income' and 'available funds'.
-    const totalIncomeAliases = new Set(['all income', 'total']);
-    const availableFundsAliases = new Set(['available funds', 'to-budget']);
-
-    if (totalIncomeAliases.has(cat)) {
+    if (cat === 'all income') {
       monthlyIncome = await getSheetValue(sheetName, `total-income`);
-    } else if (availableFundsAliases.has(cat)) {
+    } else if (cat === 'available funds') {
       monthlyIncome = availableFunds;
     } else {
       // Text templates address income categories by name (e.g. `#template

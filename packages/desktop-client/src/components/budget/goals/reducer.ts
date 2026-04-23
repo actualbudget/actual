@@ -129,7 +129,7 @@ const changeType = (
           type: 'percentage',
           percent: 15,
           previous: false,
-          category: 'total',
+          category: 'all income',
           priority: DEFAULT_PRIORITY,
         },
       };

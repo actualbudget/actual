@@ -25,12 +25,7 @@ function sanitizePercentageCategoriesForNotes(
 ): Template[] {
   return templates.map(template => {
     if (template.type !== 'percentage') return template;
-    const raw = template.category;
-    if (raw === 'total') return { ...template, category: 'all income' };
-    if (raw === 'to-budget') {
-      return { ...template, category: 'available funds' };
-    }
-    const name = idToName.get(raw);
+    const name = idToName.get(template.category);
     if (name) return { ...template, category: name };
     return template;
   });

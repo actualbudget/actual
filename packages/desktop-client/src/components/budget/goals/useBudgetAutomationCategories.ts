@@ -13,9 +13,9 @@ export function useBudgetAutomationCategories() {
         id: '',
         name: t('Special categories'),
         categories: [
-          { id: 'total', group: '', name: t('Total of all income') },
+          { id: 'all income', group: '', name: t('Total of all income') },
           {
-            id: 'to-budget',
+            id: 'available funds',
             group: '',
             name: t('Available funds to budget'),
           },
