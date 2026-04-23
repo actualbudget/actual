@@ -356,8 +356,8 @@ function EmptyState({ onAdd }: EmptyStateProps) {
         }}
       >
         <Trans>
-          Budget automations keep this category funded without you touching it
-          each month. Start with one of these.
+          Budget automations keep this category funded with one click each
+          month. Start with one of these.
         </Trans>
       </Text>
       <View
