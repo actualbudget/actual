@@ -48,11 +48,7 @@ jobs:
         # a button that was tree-shaken out.
         env:
           REACT_APP_NETLIFY: 'true'
-        run: |
-          yarn workspace plugins-service build
-          yarn workspace @actual-app/crdt build
-          yarn workspace @actual-app/core build:browser
-          yarn workspace @actual-app/web build:browser
+        run: yarn build:browser
       - name: Upload build artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

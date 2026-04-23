@@ -116,20 +116,30 @@ const sqlWasmSrc = path.resolve(
 );
 const publicDir = path.resolve(__dirname, 'public');
 const publicDataDir = path.resolve(publicDir, 'data');
-const publicKcab = path.resolve(publicDir, 'kcab');
+const publicKcabDir = path.resolve(publicDir, 'kcab');
 const buildStatsDir = path.resolve(__dirname, 'build-stats');
+
+const WORKER_FILENAME_RE = /^kcab\.worker\.(.+)\.js$/;
 
 async function extractWorkerHash(): Promise<string> {
   const files = await readdir(lootCoreOutDir);
-  const worker = files.find(f => /^kcab\.worker\..+\.js$/.test(f));
-  const hash = worker?.match(/^kcab\.worker\.(.+)\.js$/)?.[1];
-  if (!hash) {
-    throw new Error(
-      `loot-core worker build produced no hashed output at ${lootCoreOutDir}`,
-    );
+  for (const f of files) {
+    const match = f.match(WORKER_FILENAME_RE);
+    if (match) return match[1];
   }
-  return hash;
+  throw new Error(
+    `loot-core worker build produced no hashed output at ${lootCoreOutDir}`,
+  );
 }
+
+// Serve loot-core worker assets with correct content types so the browser can
+// stream-compile the sql.js wasm module.
+const CONTENT_TYPES: Record<string, string> = {
+  '.js': 'application/javascript',
+  '.mjs': 'application/javascript',
+  '.map': 'application/json',
+  '.wasm': 'application/wasm',
+};
 
 async function stagePublicData(): Promise<void> {
   const migrationsDest = path.resolve(publicDataDir, 'migrations');
@@ -180,12 +190,18 @@ const lootCoreBackend = (): Plugin => ({
       ],
       { cwd: lootCoreRoot, stdio: 'inherit' },
     );
+    child.on('error', err => {
+      server.config.logger.error(
+        `loot-core backend failed to spawn: ${err.message}`,
+      );
+    });
     const cleanup = () => {
       if (!child.killed) child.kill('SIGTERM');
     };
     server.httpServer?.once('close', cleanup);
     process.once('SIGINT', cleanup);
     process.once('SIGTERM', cleanup);
+    process.once('exit', cleanup);
 
     server.middlewares.use('/kcab', (req, res, next) => {
       const url = new URL(req.url ?? '/', 'http://localhost');
@@ -194,7 +210,10 @@ const lootCoreBackend = (): Plugin => ({
       const stream = createReadStream(filePath);
       stream
         .on('open', () => {
-          res.setHeader('Content-Type', 'application/javascript');
+          res.setHeader(
+            'Content-Type',
+            CONTENT_TYPES[path.extname(filePath)] ?? 'application/octet-stream',
+          );
           stream.pipe(res);
         })
         .on('error', () => next());
@@ -202,10 +221,14 @@ const lootCoreBackend = (): Plugin => ({
   },
   async closeBundle() {
     await mkdir(buildStatsDir, { recursive: true });
-    await rename(
-      path.resolve(__dirname, 'build/kcab/stats.json'),
-      path.resolve(buildStatsDir, 'loot-core-stats.json'),
-    );
+    try {
+      await rename(
+        path.resolve(__dirname, 'build/kcab/stats.json'),
+        path.resolve(buildStatsDir, 'loot-core-stats.json'),
+      );
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code !== 'ENOENT') throw err;
+    }
   },
 });
 
@@ -226,17 +249,18 @@ export default defineConfig(async ({ mode, command }) => {
   // all browser-only staging there.
   if (mode !== 'desktop') {
     if (command === 'build') {
-      await Promise.all([
-        stagePublicData(),
-        build({
-          configFile: lootCoreConfig,
-          mode: 'production',
-          root: lootCoreRoot,
-        }),
-      ]);
-      process.env.REACT_APP_BACKEND_WORKER_HASH = await extractWorkerHash();
-      await rm(publicKcab, { recursive: true, force: true });
-      await cp(lootCoreOutDir, publicKcab, { recursive: true });
+      const stageKcab = build({
+        configFile: lootCoreConfig,
+        mode: 'production',
+        root: lootCoreRoot,
+      }).then(async () => {
+        const hash = await extractWorkerHash();
+        await rm(publicKcabDir, { recursive: true, force: true });
+        await cp(lootCoreOutDir, publicKcabDir, { recursive: true });
+        return hash;
+      });
+      const [, hash] = await Promise.all([stagePublicData(), stageKcab]);
+      process.env.REACT_APP_BACKEND_WORKER_HASH = hash;
     } else {
       await stagePublicData();
       process.env.REACT_APP_BACKEND_WORKER_HASH = 'dev';
