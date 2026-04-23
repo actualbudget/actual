@@ -157,9 +157,9 @@ const changeType = (
         template: {
           directive: 'template',
           type: 'periodic',
-          amount: 5,
+          amount: 100,
           period: {
-            period: 'week',
+            period: 'month',
             amount: 1,
           },
           starting: dayFromDate(firstDayOfMonth(new Date())),

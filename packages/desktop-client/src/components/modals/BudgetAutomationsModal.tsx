@@ -1041,19 +1041,11 @@ function BudgetAutomationsBody({
   } | null>(null);
 
   const onAddAutomation = (create?: () => AutomationEntry) => {
-    const entry =
-      create?.() ??
-      createAutomationEntry(
-        {
-          directive: 'template',
-          type: 'periodic',
-          amount: 100,
-          period: { period: 'month', amount: 1 },
-          starting: dayFromDate(firstDayOfMonth(new Date())),
-          priority: DEFAULT_PRIORITY,
-        },
-        'week',
-      );
+    const fallback = getAutomationExamples().find(
+      e => e.displayType === 'week',
+    );
+    const entry = (create ?? fallback?.create)?.();
+    if (!entry) return;
     setEntries(prev => {
       const next = [...prev, entry];
       setActiveIdx(next.length - 1);
