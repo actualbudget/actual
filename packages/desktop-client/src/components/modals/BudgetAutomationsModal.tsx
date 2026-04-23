@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -25,7 +25,6 @@ import type {
 } from '@actual-app/core/types/models';
 import type { Template } from '@actual-app/core/types/models/templates';
 import { css } from '@emotion/css';
-import { t } from 'i18next';
 import uniqueId from 'lodash/uniqueId';
 
 import { Warning } from '#components/alerts';
@@ -256,28 +255,14 @@ type EmptyStateProps = {
 };
 
 type AutomationExample = {
-  key: string;
-  label: ReactNode;
-  ariaLabel: string;
-  description: ReactNode;
-  icon: ReactNode;
+  displayType: DisplayTemplateType;
   create: () => AutomationEntry;
 };
 
 function getAutomationExamples(): AutomationExample[] {
-  const renderMetaIcon = (type: DisplayTemplateType) => {
-    const Icon = getDisplayTemplateMeta(type).icon;
-    return <Icon width={16} height={16} />;
-  };
   return [
     {
-      key: 'fixed-amount',
-      label: <Trans>A fixed amount each month</Trans>,
-      ariaLabel: t('A fixed amount each month'),
-      description: (
-        <Trans>Set the same amount aside every month, no matter what.</Trans>
-      ),
-      icon: renderMetaIcon('week'),
+      displayType: 'week',
       create: () =>
         createAutomationEntry(
           {
@@ -292,13 +277,7 @@ function getAutomationExamples(): AutomationExample[] {
         ),
     },
     {
-      key: 'annual-goal',
-      label: <Trans>Save for an annual goal</Trans>,
-      ariaLabel: t('Save for an annual goal'),
-      description: (
-        <Trans>Save up by a target month; the engine spreads the load.</Trans>
-      ),
-      icon: renderMetaIcon('by'),
+      displayType: 'by',
       create: () =>
         createAutomationEntry(
           {
@@ -316,15 +295,7 @@ function getAutomationExamples(): AutomationExample[] {
         ),
     },
     {
-      key: 'recurring-schedule',
-      label: <Trans>Cover a scheduled transaction</Trans>,
-      ariaLabel: t('Cover a scheduled transaction'),
-      description: (
-        <Trans>
-          Link to a schedule and this category saves enough each month.
-        </Trans>
-      ),
-      icon: renderMetaIcon('schedule'),
+      displayType: 'schedule',
       create: () =>
         createAutomationEntry(
           {
@@ -394,64 +365,70 @@ function EmptyState({ onAdd }: EmptyStateProps) {
           display: 'grid',
           gridTemplateColumns: '1fr 1fr 1fr',
           gap: 10,
-          textAlign: 'left',
+          textAlign: 'center',
         }}
       >
-        {examples.map(example => (
-          <View
-            key={example.key}
-            role="button"
-            tabIndex={0}
-            aria-label={example.ariaLabel}
-            onClick={() => onAdd(example.create)}
-            onKeyDown={e => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                onAdd(example.create);
-              }
-            }}
-            style={{
-              padding: 14,
-              borderRadius: 8,
-              backgroundColor: theme.cardBackground,
-              border: `1px solid ${theme.tableBorder}`,
-              gap: 6,
-              cursor: 'pointer',
-            }}
-          >
+        {examples.map(example => {
+          const meta = getDisplayTemplateMeta(example.displayType);
+          const Icon = meta.icon;
+          return (
             <View
+              key={example.displayType}
+              role="button"
+              tabIndex={0}
+              aria-label={meta.label}
+              onClick={() => onAdd(example.create)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onAdd(example.create);
+                }
+              }}
               style={{
-                width: 30,
-                height: 30,
-                borderRadius: 6,
-                backgroundColor: theme.upcomingBackground,
-                color: theme.pageTextPositive,
-                alignItems: 'center',
-                justifyContent: 'center',
+                padding: 14,
+                borderRadius: 8,
+                backgroundColor: theme.cardBackground,
+                border: `1px solid ${theme.tableBorder}`,
+                gap: 6,
+                cursor: 'pointer',
               }}
             >
-              {example.icon}
+              <View
+                style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: 6,
+                  backgroundColor: theme.upcomingBackground,
+                  color: theme.pageTextPositive,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  alignSelf: 'center',
+                  marginBottom: 6,
+                }}
+              >
+                <Icon width={16} height={16} />
+              </View>
+              <Text
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: theme.pageText,
+                }}
+              >
+                {meta.label}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 11,
+                  color: theme.pageTextSubdued,
+                  lineHeight: 1.4,
+                }}
+              >
+                {meta.description}
+              </Text>
             </View>
-            <Text
-              style={{
-                fontSize: 13,
-                fontWeight: 600,
-                color: theme.pageText,
-              }}
-            >
-              {example.label}
-            </Text>
-            <Text
-              style={{
-                fontSize: 11,
-                color: theme.pageTextSubdued,
-                lineHeight: 1.4,
-              }}
-            >
-              {example.description}
-            </Text>
-          </View>
-        ))}
+          );
+        })}
       </View>
     </View>
   );
