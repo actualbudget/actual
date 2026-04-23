@@ -269,7 +269,14 @@ export class CategoryTemplateContext {
     }
 
     //round all budget values if needed
-    if (this.hideDecimal) toBudget = this.removeFraction(toBudget);
+    if (this.hideDecimal) {
+      // Capture the pre-round value so per-row contributions track the same
+      // rounding delta as toBudget; otherwise perTemplateContribution would
+      // sum to slightly more/less than the engine's actual budgeted amount.
+      const preRound = toBudget;
+      toBudget = this.removeFraction(toBudget);
+      if (preRound !== 0) scale *= toBudget / preRound;
+    }
 
     // don't overbudget when using a priority unless income category
     if (priority > 0 && available < 0 && !this.category.is_income) {

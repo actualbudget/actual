@@ -14,16 +14,13 @@ import {
   SvgCalendar3,
 } from '@actual-app/components/icons/v2';
 import * as monthUtils from '@actual-app/core/shared/months';
-import {
-  differenceInCalendarMonths,
-  monthFromDate,
-} from '@actual-app/core/shared/months';
 import type {
   CategoryGroupEntity,
   ScheduleEntity,
 } from '@actual-app/core/types/models';
 import type { Template } from '@actual-app/core/types/models/templates';
 
+import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 
 import type { Action } from './actions';
@@ -295,11 +292,11 @@ export function validateRule(
         return { kind: 'by-no-month' };
       }
       const targetMonth = template.month;
-      const startOfTodayMonth = monthFromDate(today);
+      const startOfTodayMonth = monthUtils.monthFromDate(today);
       // Pass bare YYYY-MM strings, matching the server-side check in
       // CategoryTemplateContext.checkByAndScheduleAndSpend and avoiding the
       // local-vs-UTC parsing footgun called out in shared/months.ts:_parse.
-      const monthsRemaining = differenceInCalendarMonths(
+      const monthsRemaining = monthUtils.differenceInCalendarMonths(
         targetMonth,
         startOfTodayMonth,
       );
@@ -326,8 +323,8 @@ export function formatMonthLabel(
   locale?: Parameters<typeof monthUtils.format>[2],
 ): string {
   if (!month) return '—';
-  if (!/^\d{4}-\d{2}/.test(month)) return month;
-  return monthUtils.format(`${month.slice(0, 7)}-01`, 'MMM yyyy', locale);
+  if (!isValidYearMonth(month)) return month;
+  return monthUtils.format(`${month}-01`, 'MMM yyyy', locale);
 }
 
 export function RuleErrorTitle({ error }: { error: RuleErrorKind }) {
@@ -459,14 +456,15 @@ export function GlobalConflictDetail({
 }: {
   conflict: GlobalConflictKind;
 }) {
+  const format = useFormat();
   switch (conflict.kind) {
     case 'over-income':
       return (
         <Trans>
           This month&rsquo;s rules ask for around{' '}
-          {{ total: Math.round(conflict.total) }} but only{' '}
-          {{ income: Math.round(conflict.income) }} comes in. Lower amounts or
-          switch one to &ldquo;Whatever is left&rdquo;.
+          {{ total: format(conflict.total, 'financial') }} but only{' '}
+          {{ income: format(conflict.income, 'financial') }} comes in. Lower
+          amounts or switch one to &ldquo;Whatever is left&rdquo;.
         </Trans>
       );
     case 'percent-over-100':
