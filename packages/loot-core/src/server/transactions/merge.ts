@@ -17,7 +17,7 @@ export async function mergeTransactions(
   if (txIds.length !== 2) {
     throw new Error(
       'Merging is only possible with 2 transactions, but found ' +
-        JSON.stringify(transactions),
+      JSON.stringify(transactions),
     );
   }
 
@@ -119,7 +119,6 @@ function determineKeepDrop(
   a: TransactionEntity,
   b: TransactionEntity,
 ): { keep: TransactionEntity; drop: TransactionEntity } {
-  console.log(a, b);
   // If one is a transfer and the other isn't, keep the transfer
   if (b.transfer_id && !a.transfer_id) {
     return { keep: b, drop: a };
