@@ -118,6 +118,11 @@ const publicDir = path.resolve(__dirname, 'public');
 const publicDataDir = path.resolve(publicDir, 'data');
 const publicKcabDir = path.resolve(publicDir, 'kcab');
 const buildStatsDir = path.resolve(__dirname, 'build-stats');
+const pluginsServiceDistDir = path.resolve(
+  __dirname,
+  '../plugins-service/dist',
+);
+const serviceWorkerDir = path.resolve(__dirname, 'service-worker');
 
 const WORKER_FILENAME_RE = /^kcab\.worker\.(.+)\.js$/;
 
@@ -140,6 +145,11 @@ const CONTENT_TYPES: Record<string, string> = {
   '.map': 'application/json',
   '.wasm': 'application/wasm',
 };
+
+async function stagePluginsService(): Promise<void> {
+  await rm(serviceWorkerDir, { recursive: true, force: true });
+  await cp(pluginsServiceDistDir, serviceWorkerDir, { recursive: true });
+}
 
 async function stagePublicData(): Promise<void> {
   const migrationsDest = path.resolve(publicDataDir, 'migrations');
@@ -232,6 +242,27 @@ const lootCoreBackend = (): Plugin => ({
   },
 });
 
+const pluginsServiceAssets = (): Plugin => ({
+  name: 'plugins-service-assets',
+  configureServer(server) {
+    server.middlewares.use('/service-worker', (req, res, next) => {
+      const url = new URL(req.url ?? '/', 'http://localhost');
+      const filePath = path.join(pluginsServiceDistDir, url.pathname);
+      if (!filePath.startsWith(pluginsServiceDistDir + path.sep)) return next();
+      const stream = createReadStream(filePath);
+      stream
+        .on('open', () => {
+          res.setHeader(
+            'Content-Type',
+            CONTENT_TYPES[path.extname(filePath)] ?? 'application/octet-stream',
+          );
+          stream.pipe(res);
+        })
+        .on('error', () => next());
+    });
+  },
+});
+
 export default defineConfig(async ({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const devHeaders = {
@@ -259,7 +290,11 @@ export default defineConfig(async ({ mode, command }) => {
         await cp(lootCoreOutDir, publicKcabDir, { recursive: true });
         return hash;
       });
-      const [, hash] = await Promise.all([stagePublicData(), stageKcab]);
+      const [, , hash] = await Promise.all([
+        stagePublicData(),
+        stagePluginsService(),
+        stageKcab,
+      ]);
       process.env.REACT_APP_BACKEND_WORKER_HASH = hash;
     } else {
       await stagePublicData();
@@ -365,6 +400,7 @@ export default defineConfig(async ({ mode, command }) => {
       injectShims(),
       addWatchers(),
       mode === 'desktop' ? undefined : lootCoreBackend(),
+      mode === 'desktop' ? undefined : pluginsServiceAssets(),
       react(),
       babel({
         include: [reactCompilerInclude],
