@@ -2,11 +2,10 @@ import React from 'react';
 
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
-
 import type {
   RuleConditionEntity,
   TransactionFilterEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
 import { AppliedFilters } from './AppliedFilters';
 import { SavedFilterMenuButton } from './SavedFilterMenuButton';

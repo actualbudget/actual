@@ -4,8 +4,8 @@ import * as d from 'date-fns';
 import type { Locale } from 'date-fns';
 import { t } from 'i18next';
 
+import { Condition } from '#server/rules';
 import type { PayeeEntity, RecurConfig, ScheduleEntity } from '#types/models';
-import { Condition } from '../server/rules';
 
 import * as monthUtils from './months';
 import { q } from './query';
@@ -345,7 +345,7 @@ export function getNextDate(
   dateCond,
   start = new Date(monthUtils.currentDay()),
   noSkipWeekend = false,
-) {
+): string | null {
   start = d.startOfDay(start);
 
   const cond = new Condition(dateCond.op, 'date', dateCond.value, null);
@@ -495,14 +495,16 @@ export function computeSchedulePreviewTransactions(
 
   const today = d.startOfDay(monthUtils.parseDate(monthUtils.currentDay()));
 
-  const upcomingPeriodEnd = d.startOfDay(
-    monthUtils.parseDate(
-      monthUtils.addDays(today, getUpcomingDays(upcomingLength)),
-    ),
-  );
-
   return schedulesForPreview
     .flatMap(schedule => {
+      const effectiveUpcomingLength =
+        schedule.custom_upcoming_length ?? upcomingLength;
+      const upcomingPeriodEnd = d.startOfDay(
+        monthUtils.parseDate(
+          monthUtils.addDays(today, getUpcomingDays(effectiveUpcomingLength)),
+        ),
+      );
+
       const { date: dateConditions } = extractScheduleConds(
         schedule._conditions,
       );
@@ -515,6 +517,10 @@ export function computeSchedulePreviewTransactions(
       if (isRecurring) {
         while (day <= upcomingPeriodEnd) {
           const nextDate = getNextDate(dateConditions, day);
+
+          if (nextDate === null) {
+            break;
+          }
 
           if (
             d.startOfDay(monthUtils.parseDate(nextDate)) > upcomingPeriodEnd

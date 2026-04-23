@@ -9,14 +9,10 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { importBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useDispatch } from '@desktop-client/redux';
+import { importBudget } from '#budgetfiles/budgetfilesSlice';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { useNavigate } from '#hooks/useNavigate';
+import { useDispatch } from '#redux';
 
 export function ImportActualModal() {
   const { t } = useTranslation();

@@ -1,23 +1,19 @@
-import * as asyncStorage from '../../platform/server/asyncStorage';
-import * as fs from '../../platform/server/fs';
-import { stringToInteger } from '../../shared/util';
-import type {
-  GlobalPrefs,
-  MetadataPrefs,
-  SyncedPrefs,
-} from '../../types/prefs';
-import { createApp } from '../app';
-import * as db from '../db';
-import { PostError } from '../errors';
-import { getDefaultDocumentDir } from '../main';
-import { mutator } from '../mutators';
-import { post } from '../post';
+import * as asyncStorage from '#platform/server/asyncStorage';
+import * as fs from '#platform/server/fs';
+import { createApp } from '#server/app';
+import * as db from '#server/db';
+import { PostError } from '#server/errors';
+import { getDefaultDocumentDir } from '#server/main';
+import { mutator } from '#server/mutators';
+import { post } from '#server/post';
 import {
   getPrefs as _getMetadataPrefs,
   savePrefs as _saveMetadataPrefs,
-} from '../prefs';
-import { getServer } from '../server-config';
-import { undoable } from '../undo';
+} from '#server/prefs';
+import { getServer } from '#server/server-config';
+import { undoable } from '#server/undo';
+import { stringToInteger } from '#shared/util';
+import type { GlobalPrefs, MetadataPrefs, SyncedPrefs } from '#types/prefs';
 
 export type PreferencesHandlers = {
   'preferences/save': typeof saveSyncedPrefs;
@@ -111,6 +107,9 @@ async function saveGlobalPrefs(prefs: GlobalPrefs) {
       prefs.installedCustomDarkTheme,
     );
   }
+  if (prefs.customCssOverride !== undefined) {
+    await asyncStorage.setItem('custom-css-override', prefs.customCssOverride);
+  }
   if (prefs.serverSelfSignedCert !== undefined) {
     await asyncStorage.setItem(
       'server-self-signed-cert',
@@ -141,6 +140,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     'preferred-dark-theme': preferredDarkTheme,
     'installed-custom-theme': installedCustomLightTheme,
     'installed-custom-dark-theme': installedCustomDarkTheme,
+    'custom-css-override': customCssOverride,
     'server-self-signed-cert': serverSelfSignedCert,
     syncServerConfig,
     notifyWhenUpdateIsAvailable,
@@ -155,6 +155,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     'preferred-dark-theme',
     'installed-custom-theme',
     'installed-custom-dark-theme',
+    'custom-css-override',
     'server-self-signed-cert',
     'syncServerConfig',
     'notifyWhenUpdateIsAvailable',
@@ -179,6 +180,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
         : 'dark',
     installedCustomLightTheme: installedCustomLightTheme || undefined,
     installedCustomDarkTheme: installedCustomDarkTheme || undefined,
+    customCssOverride: customCssOverride || undefined,
     serverSelfSignedCert: serverSelfSignedCert || undefined,
     syncServerConfig: syncServerConfig || undefined,
     notifyWhenUpdateIsAvailable:

@@ -68,7 +68,6 @@ ignore$
 ^\Qsrc/\E$
 ^\Qstatic/\E$
 ^\Q.github/\E$
-(?:^|/)package(?:-lock|)\.json$
 (?:^|/)yarn\.lock$
 (?:^|/)(?i)docusaurus.config.js
 (?:^|/)(?i)README.md

@@ -11,14 +11,13 @@ import { SvgCalendar } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import * as monthUtils from '@actual-app/core/shared/months';
 
-import * as monthUtils from 'loot-core/shared/months';
+import { Link } from '#components/common/Link';
+import { useLocale } from '#hooks/useLocale';
+import { useResizeObserver } from '#hooks/useResizeObserver';
 
 import type { MonthBounds } from './MonthsContext';
-
-import { Link } from '@desktop-client/components/common/Link';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
 type MonthPickerProps = {
   startMonth: string;

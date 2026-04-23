@@ -6,23 +6,25 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type {
+  AccountEntity,
+  CrossoverWidget,
+} from '@actual-app/core/types/models';
 
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import type { AccountEntity, CrossoverWidget } from 'loot-core/types/models';
-
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { CrossoverGraph } from '@desktop-client/components/reports/graphs/CrossoverGraph';
-import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { ReportCard } from '@desktop-client/components/reports/ReportCard';
-import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
-import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
-import { createCrossoverSpreadsheet } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
-import type { CrossoverData } from '@desktop-client/components/reports/spreadsheets/crossover-spreadsheet';
-import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
-import { useReport } from '@desktop-client/components/reports/useReport';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useLocale } from '@desktop-client/hooks/useLocale';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { CrossoverGraph } from '#components/reports/graphs/CrossoverGraph';
+import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportCard } from '#components/reports/ReportCard';
+import { ReportCardName } from '#components/reports/ReportCardName';
+import { calculateTimeRange } from '#components/reports/reportRanges';
+import { createCrossoverSpreadsheet } from '#components/reports/spreadsheets/crossover-spreadsheet';
+import type { CrossoverData } from '#components/reports/spreadsheets/crossover-spreadsheet';
+import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
+import { useReport } from '#components/reports/useReport';
+import { useFormat } from '#hooks/useFormat';
+import { useLocale } from '#hooks/useLocale';
 
 type CrossoverCardProps = {
   widgetId: string;

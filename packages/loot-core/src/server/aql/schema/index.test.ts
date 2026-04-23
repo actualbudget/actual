@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import * as db from '../../db';
+import * as db from '#server/db';
 
 // This file doesn't test the schema code directly, it tests that
 // views return data as expected and various constraints on the

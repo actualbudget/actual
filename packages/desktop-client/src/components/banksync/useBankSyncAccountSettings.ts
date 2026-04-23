@@ -4,18 +4,18 @@ import {
   defaultMappings,
   mappingsFromString,
   mappingsToString,
-} from 'loot-core/server/util/custom-sync-mapping';
-import type { Mappings } from 'loot-core/server/util/custom-sync-mapping';
-import { q } from 'loot-core/shared/query';
+} from '@actual-app/core/server/util/custom-sync-mapping';
+import type { Mappings } from '@actual-app/core/server/util/custom-sync-mapping';
+import { q } from '@actual-app/core/shared/query';
+
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useTransactions } from '#hooks/useTransactions';
 
 import { getFields } from './EditSyncAccount';
 import type {
   MappableFieldWithExample,
   TransactionDirection,
 } from './EditSyncAccount';
-
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useTransactions } from '@desktop-client/hooks/useTransactions';
 
 export function useBankSyncAccountSettings(accountId: string) {
   const [savedMappings = mappingsToString(defaultMappings), setSavedMappings] =

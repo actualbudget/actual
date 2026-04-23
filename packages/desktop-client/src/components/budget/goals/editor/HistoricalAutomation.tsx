@@ -2,16 +2,15 @@ import { useTranslation } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
-
 import type {
   AverageTemplate,
   CopyTemplate,
-} from 'loot-core/types/models/templates';
+} from '@actual-app/core/types/models/templates';
 
-import { updateTemplate } from '@desktop-client/components/budget/goals/actions';
-import type { Action } from '@desktop-client/components/budget/goals/actions';
-import { FormField, FormLabel } from '@desktop-client/components/forms';
-import { GenericInput } from '@desktop-client/components/util/GenericInput';
+import { updateTemplate } from '#components/budget/goals/actions';
+import type { Action } from '#components/budget/goals/actions';
+import { FormField, FormLabel } from '#components/forms';
+import { GenericInput } from '#components/util/GenericInput';
 
 type HistoricalAutomationProps = {
   template: CopyTemplate | AverageTemplate;

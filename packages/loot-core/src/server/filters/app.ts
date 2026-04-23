@@ -1,13 +1,12 @@
 // @ts-strict-ignore
-import { v4 as uuidv4 } from 'uuid';
 
-import type { TransactionFilterEntity } from '../../types/models';
-import { createApp } from '../app';
-import * as db from '../db';
-import { requiredFields } from '../models';
-import { mutator } from '../mutators';
-import { parseConditionsOrActions } from '../transactions/transaction-rules';
-import { undoable } from '../undo';
+import { createApp } from '#server/app';
+import * as db from '#server/db';
+import { requiredFields } from '#server/models';
+import { mutator } from '#server/mutators';
+import { parseConditionsOrActions } from '#server/transactions/transaction-rules';
+import { undoable } from '#server/undo';
+import type { TransactionFilterEntity } from '#types/models';
 
 const filterModel = {
   validate(filter, { update }: { update?: boolean } = {}) {
@@ -110,7 +109,7 @@ function filterOptionsMatch(options1, options2) {
 }
 
 async function createFilter(filter): Promise<TransactionFilterEntity['id']> {
-  const filterId = uuidv4();
+  const filterId = crypto.randomUUID();
   const item = {
     id: filterId,
     conditions: filter.state.conditions,

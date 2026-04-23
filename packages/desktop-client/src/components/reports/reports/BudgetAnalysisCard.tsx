@@ -5,22 +5,21 @@ import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type { BudgetAnalysisWidget } from '@actual-app/core/types/models';
 
-import * as monthUtils from 'loot-core/shared/months';
-import type { BudgetAnalysisWidget } from 'loot-core/types/models';
-
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { PrivacyFilter } from '@desktop-client/components/PrivacyFilter';
-import { DateRange } from '@desktop-client/components/reports/DateRange';
-import { BudgetAnalysisGraph } from '@desktop-client/components/reports/graphs/BudgetAnalysisGraph';
-import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { ReportCard } from '@desktop-client/components/reports/ReportCard';
-import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
-import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
-import { createBudgetAnalysisSpreadsheet } from '@desktop-client/components/reports/spreadsheets/budget-analysis-spreadsheet';
-import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
-import { useReport } from '@desktop-client/components/reports/useReport';
-import { useFormat } from '@desktop-client/hooks/useFormat';
+import { FinancialText } from '#components/FinancialText';
+import { PrivacyFilter } from '#components/PrivacyFilter';
+import { DateRange } from '#components/reports/DateRange';
+import { BudgetAnalysisGraph } from '#components/reports/graphs/BudgetAnalysisGraph';
+import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportCard } from '#components/reports/ReportCard';
+import { ReportCardName } from '#components/reports/ReportCardName';
+import { calculateTimeRange } from '#components/reports/reportRanges';
+import { createBudgetAnalysisSpreadsheet } from '#components/reports/spreadsheets/budget-analysis-spreadsheet';
+import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
+import { useReport } from '#components/reports/useReport';
+import { useFormat } from '#hooks/useFormat';
 
 type BudgetAnalysisCardProps = {
   widgetId: string;

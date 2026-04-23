@@ -1,8 +1,10 @@
 import fs from 'fs';
 import { createServer } from 'http';
 import type { Server } from 'http';
+import { cp, mkdir, rm } from 'node:fs/promises';
 import path from 'path';
 
+import type { GlobalPrefsJson } from '@actual-app/core/types/prefs';
 import {
   app,
   BrowserWindow,
@@ -22,10 +24,7 @@ import type {
   SaveDialogOptions,
   UtilityProcess,
 } from 'electron';
-import { copy, exists, mkdir, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
-
-import type { GlobalPrefsJson } from '@actual-app/core/types/prefs';
 
 import { getMenu } from './menu';
 import {
@@ -46,7 +45,7 @@ process.env.lootCoreScript = isDev
 // This allows relative URLs to be resolved to app:// which makes
 // local assets load correctly
 protocol.registerSchemesAsPrivileged([
-  { scheme: 'app', privileges: { standard: true } },
+  { scheme: 'app', privileges: { standard: true, secure: true } },
 ]);
 
 if (isPlaywrightTest) {
@@ -223,7 +222,7 @@ async function startSyncServer() {
 
     const syncServerConfig = {
       port: globalPrefs.syncServerConfig?.port || 5007,
-      hostname: 'localhost',
+      hostname: '127.0.0.1',
       ACTUAL_SERVER_DATA_DIR: path.resolve(
         process.env.ACTUAL_DATA_DIR!,
         'actual-server',
@@ -653,13 +652,14 @@ ipcMain.handle(
         );
       }
 
-      if (!(await exists(newDirectory))) {
+      if (!fs.existsSync(newDirectory)) {
         throw new Error('The destination directory does not exist');
       }
 
-      await copy(currentBudgetDirectory, newDirectory, {
-        overwrite: true,
+      await cp(currentBudgetDirectory, newDirectory, {
+        force: true,
         preserveTimestamps: true,
+        recursive: true,
       });
     } catch (error) {
       logMessage(
@@ -673,7 +673,10 @@ ipcMain.handle(
       await promiseRetry(
         async retry => {
           try {
-            return await remove(currentBudgetDirectory);
+            return await rm(currentBudgetDirectory, {
+              recursive: true,
+              force: true,
+            });
           } catch (error) {
             logMessage(
               'info',

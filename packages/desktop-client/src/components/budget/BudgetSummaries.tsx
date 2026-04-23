@@ -8,16 +8,15 @@ import React, {
 } from 'react';
 import { animated, useSpring } from 'react-spring';
 
-import { View } from '@actual-app/components/view';
+import { View, viewStyles } from '@actual-app/components/view';
+import { addMonths, subMonths } from '@actual-app/core/shared/months';
 import { css } from '@emotion/css';
 
-import { addMonths, subMonths } from 'loot-core/shared/months';
+import { useResizeObserver } from '#hooks/useResizeObserver';
 
 import { MonthsContext } from './MonthsContext';
 
 import { useBudgetComponents } from '.';
-
-import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
 
 export function BudgetSummaries() {
   const { months } = useContext(MonthsContext);
@@ -85,7 +84,7 @@ export function BudgetSummaries() {
       ref={containerRef}
     >
       <animated.div
-        className="view"
+        className={viewStyles}
         style={{
           flexDirection: 'row',
           width: widthState,

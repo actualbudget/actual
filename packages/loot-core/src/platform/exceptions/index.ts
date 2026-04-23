@@ -1,4 +1,4 @@
-import { logger } from '../server/log';
+import { logger } from '#platform/server/log';
 
 export const captureException = function (exc: Error) {
   logger.error('[Exception]', exc);

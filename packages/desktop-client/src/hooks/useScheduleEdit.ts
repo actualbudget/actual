@@ -1,23 +1,23 @@
 // @ts-strict-ignore
 import { useEffect, useEffectEvent, useReducer, useState } from 'react';
 
-import { send, sendCatch } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
+import { send, sendCatch } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
 import {
   extractScheduleConds,
   getScheduledAmount,
-} from 'loot-core/shared/schedules';
+} from '@actual-app/core/shared/schedules';
 import type {
   RecurConfig,
   ScheduleEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
-import { updateScheduleConditions } from '@desktop-client/components/schedules/schedule-edit-utils';
-import type { ScheduleFormFields } from '@desktop-client/components/schedules/ScheduleEditForm';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import { liveQuery } from '@desktop-client/queries/liveQuery';
+import { updateScheduleConditions } from '#components/schedules/schedule-edit-utils';
+import type { ScheduleFormFields } from '#components/schedules/ScheduleEditForm';
+import { aqlQuery } from '#queries/aqlQuery';
+import { liveQuery } from '#queries/liveQuery';
 
 export type ScheduleEditState = {
   isCustom?: boolean;
@@ -58,6 +58,11 @@ type ScheduleEditAction =
       type: 'set-field';
       field: 'posts_transaction';
       value: boolean;
+    }
+  | {
+      type: 'set-field';
+      field: 'custom_upcoming_length';
+      value: string | null;
     }
   | {
       type: 'set-transactions';
@@ -109,6 +114,8 @@ function createScheduleEditReducer(useGetScheduledAmount: boolean = false) {
             amountOp: schedule._amountOp || 'isapprox',
             date: schedule._date ?? null,
             posts_transaction: action.schedule.posts_transaction ?? false,
+            custom_upcoming_length:
+              action.schedule.custom_upcoming_length ?? null,
             name: schedule.name ?? null,
           },
         };
@@ -255,6 +262,7 @@ export function useScheduleEdit({
       amountOp: null,
       date: null,
       posts_transaction: false,
+      custom_upcoming_length: null,
       name: null,
     },
     transactions: [],

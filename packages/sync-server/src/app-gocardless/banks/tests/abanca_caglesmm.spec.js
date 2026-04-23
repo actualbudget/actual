@@ -1,5 +1,5 @@
-import { mockTransactionAmount } from '../../services/tests/fixtures';
-import Abanca from '../abanca_caglesmm';
+import Abanca from '#app-gocardless/banks/abanca_caglesmm';
+import { mockTransactionAmount } from '#app-gocardless/services/tests/fixtures';
 
 describe('Abanca', () => {
   describe('#normalizeTransaction', () => {

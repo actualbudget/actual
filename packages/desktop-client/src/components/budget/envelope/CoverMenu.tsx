@@ -6,18 +6,20 @@ import { Button } from '@actual-app/components/button';
 import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
+import { evalArithmetic } from '@actual-app/core/shared/arithmetic';
+import {
+  amountToInteger,
+  integerToCurrency,
+} from '@actual-app/core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
+import type { CategoryEntity } from '@actual-app/core/types/models';
 
-import { evalArithmetic } from 'loot-core/shared/arithmetic';
-import { amountToInteger, integerToCurrency } from 'loot-core/shared/util';
-import type { IntegerAmount } from 'loot-core/shared/util';
-import type { CategoryEntity } from 'loot-core/types/models';
-
-import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
+import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
 import {
   addToBeBudgetedGroup,
   removeCategoriesFromGroups,
-} from '@desktop-client/components/budget/util';
-import { useCategories } from '@desktop-client/hooks/useCategories';
+} from '#components/budget/util';
+import { useCategories } from '#hooks/useCategories';
 
 type CoverMenuProps = {
   showToBeBudgeted?: boolean;

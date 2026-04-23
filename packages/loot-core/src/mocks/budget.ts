@@ -1,22 +1,21 @@
 // @ts-strict-ignore
-import { v4 as uuidv4 } from 'uuid';
 
-import { addTransactions } from '../server/accounts/sync';
-import { aqlQuery } from '../server/aql';
-import * as budgetActions from '../server/budget/actions';
-import * as budget from '../server/budget/base';
-import * as db from '../server/db';
-import { runHandler, runMutator } from '../server/mutators';
-import * as sheet from '../server/sheet';
-import { batchMessages, setSyncingMode } from '../server/sync';
-import * as monthUtils from '../shared/months';
-import { q } from '../shared/query';
-import type { Handlers } from '../types/handlers';
+import { addTransactions } from '#server/accounts/sync';
+import { aqlQuery } from '#server/aql';
+import * as budgetActions from '#server/budget/actions';
+import * as budget from '#server/budget/base';
+import * as db from '#server/db';
+import { runHandler, runMutator } from '#server/mutators';
+import * as sheet from '#server/sheet';
+import { batchMessages, setSyncingMode } from '#server/sync';
+import * as monthUtils from '#shared/months';
+import { q } from '#shared/query';
+import type { Handlers } from '#types/handlers';
 import type {
   CategoryGroupEntity,
   PayeeEntity,
   TransactionEntity,
-} from '../types/models';
+} from '#types/models';
 
 import { random } from './random';
 
@@ -128,7 +127,7 @@ async function fillPrimaryChecking(
     );
 
     const transaction: TransactionEntity = {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       amount,
       payee: payee.id,
       account: account.id,
@@ -145,21 +144,21 @@ async function fillPrimaryChecking(
           : pickRandom(expenseCategories).id;
       transaction.subtransactions = [
         {
-          id: uuidv4(),
+          id: crypto.randomUUID(),
           date: currentDate,
           account: account.id,
           amount: a,
           category: pick(),
         },
         {
-          id: uuidv4(),
+          id: crypto.randomUUID(),
           date: currentDate,
           account: account.id,
           amount: a,
           category: pick(),
         },
         {
-          id: uuidv4(),
+          id: crypto.randomUUID(),
           date: currentDate,
           account: account.id,
           amount: transaction.amount - a * 2,
@@ -429,7 +428,7 @@ async function fillOther(handlers, account, payees, groups) {
 
   const transactions: TransactionEntity[] = [
     {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       amount: integer(3250, 3700) * 100 * 100,
       payee: payees.find(p => p.name === 'Starting Balance').id,
       account: account.id,
@@ -444,7 +443,7 @@ async function fillOther(handlers, account, payees, groups) {
     const amount = integer(4, 9) * 100 * 100;
 
     transactions.push({
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       amount,
       payee: payee.id,
       account: account.id,

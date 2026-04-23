@@ -1,13 +1,12 @@
 // @ts-strict-ignore
-import { v4 as uuidv4 } from 'uuid';
 
-import { logger } from '../../platform/server/log';
-import * as monthUtils from '../../shared/months';
-import { q } from '../../shared/query';
-import { groupBy, sortByKey } from '../../shared/util';
-import type { RecurConfig, RecurPattern, RuleEntity } from '../../types/models';
-import { send } from '../main-app';
-import { ruleModel } from '../transactions/transaction-rules';
+import { logger } from '#platform/server/log';
+import { send } from '#server/main-app';
+import { ruleModel } from '#server/transactions/transaction-rules';
+import * as monthUtils from '#shared/months';
+import { q } from '#shared/query';
+import { groupBy, sortByKey } from '#shared/util';
+import type { RecurConfig, RecurPattern, RuleEntity } from '#types/models';
 
 import type {
   Budget,
@@ -600,7 +599,7 @@ async function importTransactions(
   // reliably resolve transfers
   // Also identify orphan transfer transactions and subtransactions.
   for (const transaction of data.subtransactions) {
-    entityIdMap.set(transaction.id, uuidv4());
+    entityIdMap.set(transaction.id, crypto.randomUUID());
 
     if (transaction.transfer_account_id) {
       orphanSubtransfer.push(transaction);
@@ -609,7 +608,7 @@ async function importTransactions(
   }
 
   for (const transaction of data.transactions) {
-    entityIdMap.set(transaction.id, uuidv4());
+    entityIdMap.set(transaction.id, crypto.randomUUID());
 
     if (
       transaction.transfer_account_id &&

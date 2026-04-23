@@ -1,4 +1,4 @@
-import type { UsersWithAccess } from '../server/cloud-storage';
+import type { UsersWithAccess } from '#server/cloud-storage';
 
 import type { Budget } from './budget';
 

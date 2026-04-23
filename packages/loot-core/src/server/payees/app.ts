@@ -1,18 +1,18 @@
+import { createApp } from '#server/app';
+import * as db from '#server/db';
+import { payeeModel } from '#server/models';
+import { mutator } from '#server/mutators';
+import { batchMessages } from '#server/sync';
+import * as rules from '#server/transactions/transaction-rules';
+import { undoable } from '#server/undo';
 import { DEFAULT_MAX_DISTANCE_METERS } from '#shared/constants';
-import type { Diff } from '../../shared/util';
+import type { Diff } from '#shared/util';
 import type {
   NearbyPayeeEntity,
   PayeeEntity,
   PayeeLocationEntity,
   RuleEntity,
-} from '../../types/models';
-import { createApp } from '../app';
-import * as db from '../db';
-import { payeeModel } from '../models';
-import { mutator } from '../mutators';
-import { batchMessages } from '../sync';
-import * as rules from '../transactions/transaction-rules';
-import { undoable } from '../undo';
+} from '#types/models';
 
 export type PayeesHandlers = {
   'payee-create': typeof createPayee;

@@ -1,4 +1,4 @@
-import * as db from '../db';
+import * as db from '#server/db';
 
 export async function createPayee(description: string) {
   // Check to make sure no payee already exists with exactly the same

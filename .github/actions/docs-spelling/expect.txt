@@ -4,6 +4,7 @@ ABNANL
 Activo
 actualrc
 AESUDEF
+ajv
 ALZEY
 Anglais
 ANZ
@@ -125,6 +126,7 @@ Moldovan
 murmurhash
 NETWORKDAYS
 nginx
+nodenext
 OIDC
 Okabe
 overbudgeted
@@ -132,6 +134,8 @@ overbudgeting
 oxc
 Paribas
 passwordless
+PAYPAL
+picomatch
 pluggyai
 Poste
 PPABPLPK
@@ -175,6 +179,8 @@ THB
 TIMEFRAME
 touchscreen
 triaging
+tsgo
+TWD
 UAH
 ubuntu
 undici

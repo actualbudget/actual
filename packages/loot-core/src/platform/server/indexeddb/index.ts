@@ -1,4 +1,4 @@
-import { logger } from '../log';
+import { logger } from '#platform/server/log';
 
 let openedDb: null | ReturnType<typeof _openDatabase> = _openDatabase();
 

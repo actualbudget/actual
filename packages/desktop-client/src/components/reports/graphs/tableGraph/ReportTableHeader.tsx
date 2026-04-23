@@ -4,11 +4,13 @@ import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type {
+  balanceTypeOpType,
+  IntervalEntity,
+} from '@actual-app/core/types/models';
 
-import type { balanceTypeOpType, IntervalEntity } from 'loot-core/types/models';
-
-import { ReportOptions } from '@desktop-client/components/reports/ReportOptions';
-import { Cell, Row } from '@desktop-client/components/table';
+import { ReportOptions } from '#components/reports/ReportOptions';
+import { Cell, Row } from '#components/table';
 
 type ReportTableHeaderProps = {
   groupBy: string;

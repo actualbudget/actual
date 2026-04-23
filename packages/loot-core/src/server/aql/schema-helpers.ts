@@ -1,6 +1,6 @@
+import { fromDateRepr, toDateRepr } from '#server/models';
 // @ts-strict-ignore
-import { dayFromDate } from '../../shared/months';
-import { fromDateRepr, toDateRepr } from '../models';
+import { dayFromDate } from '#shared/months';
 
 function isRequired(name, fieldDesc) {
   return fieldDesc.required || name === 'id';
@@ -130,6 +130,11 @@ export function conform(
               obj,
             )}`,
           );
+        }
+
+        // treat undefined as missing
+        if (obj[field] === undefined) {
+          return null;
         }
 
         // This option removes null values (see `convertForInsert`)

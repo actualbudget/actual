@@ -1,8 +1,8 @@
+import IntegrationBank from '#app-gocardless/banks/integration-bank';
 import {
   mockExtendAccountsAboutInstitutions,
   mockInstitution,
-} from '../../services/tests/fixtures';
-import IntegrationBank from '../integration-bank';
+} from '#app-gocardless/services/tests/fixtures';
 
 describe('IntegrationBank', () => {
   describe('normalizeAccount', () => {

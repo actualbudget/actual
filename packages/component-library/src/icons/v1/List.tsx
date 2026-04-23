@@ -11,7 +11,7 @@ export const SvgList = (props: SVGProps<SVGSVGElement>) => (
     }}
   >
     <path
-      d="M1 4h2v2H1V4zm4 0h14v2H5V4zM1 9h2v2H1V9zm4 0h14v2H5V9zm-4 5h2v2H1v-2zm4 0h14v2H5v-2z"
+      d="M1 4h2v2H1zm4 0h14v2H5zM1 9h2v2H1zm4 0h14v2H5zm-4 5h2v2H1zm4 0h14v2H5z"
       fill="currentColor"
     />
   </svg>
