@@ -50,7 +50,6 @@ describe('Merging fails for invalid quantity', () => {
       mergeTransactions([{ id: t1 }, { id: 'missing' }]),
     ).rejects.toThrow('One of the provided transactions does not exist');
   });
-
 });
 
 async function prepareDatabase() {
@@ -425,25 +424,25 @@ describe('Merging success', () => {
   it('keeps transferred transaction, copying import id', async () => {
     const t1 = await db.insertTransaction({
       ...transaction1,
-      imported_id: 'import_1'
-    })
+      imported_id: 'import_1',
+    });
 
     const t2 = await db.insertTransaction({
       ...transaction2,
-    })
+    });
     const t2Transfer = await db.insertTransaction({
       ...transaction2,
       account: 'one',
       amount: -transaction2.amount,
       transfer_id: t2,
-    })
-    await db.updateTransaction({ id: t2, transfer_id: t2Transfer })
+    });
+    await db.updateTransaction({ id: t2, transfer_id: t2Transfer });
 
-    expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t2)
+    expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t2);
     const transactions = await getAllTransactions();
-    expect(transactions.length).toBe(2)
-    expect(transactions[0].id).toBe(t2)
-    expect(transactions[1].id).toBe(t2Transfer)
-    expect(transactions[0].imported_id).toBe('import_1')
-  })
+    expect(transactions.length).toBe(2);
+    expect(transactions[0].id).toBe(t2);
+    expect(transactions[1].id).toBe(t2Transfer);
+    expect(transactions[0].imported_id).toBe('import_1');
+  });
 });
