@@ -57,8 +57,7 @@ yarn workspace @actual-app/core build:node
 yarn workspace @actual-app/web build --mode=desktop # electron specific build
 
 # required for running the sync-server server
-yarn workspace @actual-app/core build:browser
-yarn workspace @actual-app/web build:browser
+yarn build:browser
 yarn workspace @actual-app/sync-server build
 
 # Emit @actual-app/core declarations so desktop-electron (which includes typings/window.ts) can build

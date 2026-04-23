@@ -1,7 +1,44 @@
-#!/bin/sh -ex
+#!/bin/sh -e
 
 ROOT=`dirname $0`
 cd "$ROOT/.."
+
+echo "Copying migrations..."
+mkdir -p public/data
+rm -rf public/data/migrations
+mkdir -p public/data/migrations
+cp ../loot-core/migrations/* public/data/migrations/
+cp ../loot-core/default-db.sqlite public/data
+
+echo "Creating data file index..."
+cd public/data
+find * -type f | sort > ../data-file-index.txt
+cd "../../"
+
+echo "Clean out previous build files..."
+rm -rf public/kcab
+
+if [ $NODE_ENV = 'development' ]; then
+  # In dev mode, always enable watch mode and symlink the build files.
+  # Make sure to do this before starting the build since watch mode
+  # will block
+  VITE_ARGS="$VITE_ARGS --watch"
+  if [ "$OSTYPE" == "msys" ]; then
+    # Ensure symlinks are created as native Windows symlinks.
+    export MSYS=winsymlinks:nativestrict
+  fi
+  ln -snf ../loot-core/lib-dist/browser public/kcab
+fi
+
+echo "Copying SQL WASM..."
+cp ../../node_modules/@jlongster/sql.js/dist/sql-wasm.wasm public/sql-wasm.wasm
+
+if [ $NODE_ENV = 'production' ]; then
+  echo "Copying built files..."
+  # In production, just copy the built files
+  mkdir public/kcab
+  cp -r ../loot-core/lib-dist/browser/* public/kcab
+fi
 
 echo "Building the browser..."
 
