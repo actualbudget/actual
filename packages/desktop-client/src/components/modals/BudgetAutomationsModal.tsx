@@ -592,7 +592,7 @@ function AutomationListRow({
               letterSpacing: '0.04em',
             }}
           >
-            {t('P{{priority}}', { priority })}
+            {t('Priority: {{priority}}', { priority })}
           </Text>
         )}
       </View>
