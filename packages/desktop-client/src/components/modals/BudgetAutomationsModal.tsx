@@ -36,19 +36,19 @@ import {
 } from '#components/budget/goals/reducer';
 import {
   ActiveEditor,
+  AutomationErrorDetail,
+  AutomationErrorShort,
+  AutomationErrorTitle,
   displayTemplateMeta,
   formatMonthLabel,
   GlobalConflictDetail,
   GlobalConflictTitle,
-  RuleErrorDetail,
-  RuleErrorShort,
-  RuleErrorTitle,
   TemplateSentence,
-  validateRule,
+  validateAutomation,
 } from '#components/budget/goals/templateHelpers';
 import type {
+  AutomationErrorKind,
   GlobalConflictKind,
-  RuleErrorKind,
 } from '#components/budget/goals/templateHelpers';
 import { useBudgetAutomationCategories } from '#components/budget/goals/useBudgetAutomationCategories';
 import { Link } from '#components/common/Link';
@@ -368,7 +368,7 @@ function EmptyState({ onAdd }: EmptyStateProps) {
           letterSpacing: '-0.01em',
         }}
       >
-        <Trans>No rules yet</Trans>
+        <Trans>No automations yet</Trans>
       </Text>
       <Text
         style={{
@@ -452,17 +452,17 @@ function EmptyState({ onAdd }: EmptyStateProps) {
   );
 }
 
-type RuleListRowProps = {
+type AutomationListRowProps = {
   index: number;
   entry: AutomationEntry;
   isActive: boolean;
-  error: RuleErrorKind | null;
+  error: AutomationErrorKind | null;
   contribution: number | null;
   categoryNameMap: Record<string, string>;
   onSelect: (index: number) => void;
 };
 
-function RuleListRow({
+function AutomationListRow({
   index,
   entry,
   isActive,
@@ -470,14 +470,14 @@ function RuleListRow({
   contribution,
   categoryNameMap,
   onSelect,
-}: RuleListRowProps) {
+}: AutomationListRowProps) {
   const { t } = useTranslation();
   const format = useFormat();
   const meta = displayTemplateMeta[entry.displayType];
   const Icon = meta.icon;
 
   const subtitle = error ? (
-    <RuleErrorShort error={error} />
+    <AutomationErrorShort error={error} />
   ) : (
     <TemplateSentence
       template={entry.template}
@@ -505,7 +505,7 @@ function RuleListRow({
   return (
     <View
       onClick={() => onSelect(index)}
-      aria-label={t('Select rule')}
+      aria-label={t('Select automation')}
       style={{
         flexShrink: 0,
         flexDirection: 'row',
@@ -755,31 +755,31 @@ function TypePicker({ active, disabledTypes, onPick }: TypePickerProps) {
   );
 }
 
-type RuleEditorPaneProps = {
+type AutomationEditorPaneProps = {
   entries: AutomationEntry[];
   activeIdx: number;
-  ruleErrors: (RuleErrorKind | null)[];
+  automationErrors: (AutomationErrorKind | null)[];
   schedules: readonly ScheduleEntity[];
   categories: CategoryGroupEntity[];
   hasLimitAutomation: boolean;
-  onAddLimitRule: () => void;
+  onAddLimitAutomation: () => void;
   setEntries: (fn: (prev: AutomationEntry[]) => AutomationEntry[]) => void;
   onDelete: (index: number) => void;
 };
 
-function RuleEditorPane({
+function AutomationEditorPane({
   entries,
   activeIdx,
-  ruleErrors,
+  automationErrors,
   schedules,
   categories,
   hasLimitAutomation,
-  onAddLimitRule,
+  onAddLimitAutomation,
   setEntries,
   onDelete,
-}: RuleEditorPaneProps) {
+}: AutomationEditorPaneProps) {
   const active = entries[activeIdx];
-  const activeError = ruleErrors[activeIdx];
+  const activeError = automationErrors[activeIdx];
 
   const state = active ? getInitialState(active.template) : null;
 
@@ -831,7 +831,7 @@ function RuleEditorPane({
   if (!active || !state) {
     return (
       <View style={{ padding: 20, color: theme.pageTextSubdued }}>
-        <Trans>Select a rule on the left.</Trans>
+        <Trans>Select an automation on the left.</Trans>
       </View>
     );
   }
@@ -866,7 +866,7 @@ function RuleEditorPane({
           />
           <View style={{ minWidth: 0 }}>
             <Text style={{ fontWeight: 600, color: 'inherit' }}>
-              <RuleErrorTitle error={activeError} />
+              <AutomationErrorTitle error={activeError} />
             </Text>
             <Text
               style={{
@@ -876,7 +876,7 @@ function RuleEditorPane({
                 display: 'block',
               }}
             >
-              <RuleErrorDetail error={activeError} />
+              <AutomationErrorDetail error={activeError} />
             </Text>
           </View>
         </View>
@@ -891,7 +891,7 @@ function RuleEditorPane({
           letterSpacing: '0.05em',
         }}
       >
-        <Trans>Rule type</Trans>
+        <Trans>Automation type</Trans>
       </Text>
       <TypePicker
         active={state.displayType}
@@ -927,7 +927,7 @@ function RuleEditorPane({
               schedules={schedules}
               categories={categories}
               hasLimitAutomation={hasLimitAutomation}
-              onAddLimitAutomation={onAddLimitRule}
+              onAddLimitAutomation={onAddLimitAutomation}
             />
           </View>
         </>
@@ -940,7 +940,7 @@ function RuleEditorPane({
           schedules={schedules}
           categories={categories}
           hasLimitAutomation={hasLimitAutomation}
-          onAddLimitAutomation={onAddLimitRule}
+          onAddLimitAutomation={onAddLimitAutomation}
         />
       )}
 
@@ -988,7 +988,7 @@ function RuleEditorPane({
             style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
           >
             <SvgDelete width={10} height={10} style={{ color: 'inherit' }} />
-            <Trans>Delete rule</Trans>
+            <Trans>Delete automation</Trans>
           </span>
         </Button>
       </View>
@@ -1058,7 +1058,7 @@ function BudgetAutomationsBody({
     perTemplate: number[];
   } | null>(null);
 
-  const onAddRule = (preset?: () => AutomationEntry) => {
+  const onAddAutomation = (preset?: () => AutomationEntry) => {
     const entry =
       preset?.() ??
       createAutomationEntry(
@@ -1079,7 +1079,7 @@ function BudgetAutomationsBody({
     });
   };
 
-  const onAddLimitRule = () => {
+  const onAddLimitAutomation = () => {
     const entry = createAutomationEntry(
       {
         directive: 'template',
@@ -1154,8 +1154,8 @@ function BudgetAutomationsBody({
     }
   }
 
-  const ruleErrors = entries.map(entry =>
-    validateRule(
+  const automationErrors = entries.map(entry =>
+    validateAutomation(
       entry.template,
       entry.displayType,
       templates,
@@ -1193,7 +1193,7 @@ function BudgetAutomationsBody({
   const contributions: (number | null)[] = entries.map((_, i) =>
     dryRun?.perTemplate?.[i] != null ? dryRun.perTemplate[i] : null,
   );
-  const hasErrors = ruleErrors.some(error => error !== null);
+  const hasErrors = automationErrors.some(error => error !== null);
   const percentSum = templates.reduce<number>((sum, t) => {
     if (t.type === 'percentage') return sum + t.percent;
     return sum;
@@ -1307,16 +1307,16 @@ function BudgetAutomationsBody({
             }}
           >
             <Text>
-              <Trans>Rules</Trans>
+              <Trans>Automations</Trans>
             </Text>
           </View>
           {entries.map((entry, i) => (
-            <RuleListRow
+            <AutomationListRow
               key={entry.id}
               index={i}
               entry={entry}
               isActive={i === safeActiveIdx}
-              error={ruleErrors[i]}
+              error={automationErrors[i]}
               contribution={contributions[i]}
               categoryNameMap={categoryNameMap}
               onSelect={setActiveIdx}
@@ -1324,7 +1324,7 @@ function BudgetAutomationsBody({
           ))}
           <Button
             variant="bare"
-            onPress={() => onAddRule()}
+            onPress={() => onAddAutomation()}
             style={{
               width: '100%',
               marginTop: 8,
@@ -1337,22 +1337,22 @@ function BudgetAutomationsBody({
               justifyContent: 'center',
             }}
           >
-            <Trans>+ Add a rule</Trans>
+            <Trans>+ Add an automation</Trans>
           </Button>
         </View>
 
         <View style={{ flex: 1, minWidth: 0 }}>
           {entries.length === 0 ? (
-            <EmptyState onAdd={onAddRule} />
+            <EmptyState onAdd={onAddAutomation} />
           ) : (
-            <RuleEditorPane
+            <AutomationEditorPane
               entries={entries}
               activeIdx={safeActiveIdx}
-              ruleErrors={ruleErrors}
+              automationErrors={automationErrors}
               schedules={schedules}
               categories={categories}
               hasLimitAutomation={hasLimitAutomation}
-              onAddLimitRule={onAddLimitRule}
+              onAddLimitAutomation={onAddLimitAutomation}
               setEntries={setEntries}
               onDelete={onDelete}
             />

@@ -212,7 +212,7 @@ export function ActiveEditor({
   }
 }
 
-export type RuleErrorKind =
+export type AutomationErrorKind =
   | { kind: 'schedule-not-found'; name: string }
   | { kind: 'refill-no-cap' }
   | { kind: 'percentage-out-of-range'; percent: number }
@@ -235,7 +235,7 @@ function isValidYearMonth(value: string): boolean {
   return month >= 1 && month <= 12;
 }
 
-export function validateRule(
+export function validateAutomation(
   template: Template,
   displayType: DisplayTemplateType,
   allTemplates: readonly Template[],
@@ -246,7 +246,7 @@ export function validateRule(
   // omitted the source-not-found check is skipped (the engine still validates
   // server-side at apply time).
   validPercentageSources?: ReadonlySet<string>,
-): RuleErrorKind | null {
+): AutomationErrorKind | null {
   switch (displayType) {
     case 'schedule':
       if (template.type !== 'schedule') return null;
@@ -325,7 +325,11 @@ export function formatMonthLabel(
   return monthUtils.format(`${month}-01`, 'MMM yyyy', locale);
 }
 
-export function RuleErrorTitle({ error }: { error: RuleErrorKind }) {
+export function AutomationErrorTitle({
+  error,
+}: {
+  error: AutomationErrorKind;
+}) {
   switch (error.kind) {
     case 'schedule-not-found':
       return <Trans>Schedule not found</Trans>;
@@ -347,7 +351,11 @@ export function RuleErrorTitle({ error }: { error: RuleErrorKind }) {
   }
 }
 
-export function RuleErrorShort({ error }: { error: RuleErrorKind }) {
+export function AutomationErrorShort({
+  error,
+}: {
+  error: AutomationErrorKind;
+}) {
   const locale = useLocale();
   switch (error.kind) {
     case 'schedule-not-found':
@@ -378,20 +386,25 @@ export function RuleErrorShort({ error }: { error: RuleErrorKind }) {
   }
 }
 
-export function RuleErrorDetail({ error }: { error: RuleErrorKind }) {
+export function AutomationErrorDetail({
+  error,
+}: {
+  error: AutomationErrorKind;
+}) {
   switch (error.kind) {
     case 'schedule-not-found':
       return (
         <Trans>
-          Pick an existing schedule, or create one in Schedules. This rule
+          Pick an existing schedule, or create one in Schedules. This automation
           can&rsquo;t run until it&rsquo;s linked to a schedule.
         </Trans>
       );
     case 'refill-no-cap':
       return (
         <Trans>
-          A refill rule tops the category up to a cap each month. Add a
-          &ldquo;Balance cap&rdquo; rule first so this one knows the target.
+          A refill automation tops the category up to a cap each month. Add a
+          &ldquo;Balance cap&rdquo; automation first so this one knows the
+          target.
         </Trans>
       );
     case 'percentage-out-of-range':
@@ -399,7 +412,7 @@ export function RuleErrorDetail({ error }: { error: RuleErrorKind }) {
     case 'percentage-no-source':
       return (
         <Trans>
-          Percentage rules need a source category to calculate against.
+          Percentage automations need a source category to calculate against.
         </Trans>
       );
     case 'by-no-month':
@@ -436,11 +449,12 @@ export function GlobalConflictTitle({
 }) {
   switch (conflict.kind) {
     case 'over-income':
-      return <Trans>Rules will demand more than income</Trans>;
+      return <Trans>Automations will demand more than income</Trans>;
     case 'percent-over-100':
       return (
         <Trans>
-          Percent rules total {{ total: Math.round(conflict.total) }}% of income
+          Percent automations total {{ total: Math.round(conflict.total) }}% of
+          income
         </Trans>
       );
     default:
@@ -459,7 +473,7 @@ export function GlobalConflictDetail({
     case 'over-income':
       return (
         <Trans>
-          This month&rsquo;s rules ask for around{' '}
+          This month&rsquo;s automations ask for around{' '}
           {{ total: format(conflict.total, 'financial') }} but only{' '}
           {{ income: format(conflict.income, 'financial') }} comes in. Lower
           amounts or switch one to &ldquo;Whatever is left&rdquo;.

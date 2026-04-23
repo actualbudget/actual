@@ -89,8 +89,8 @@ const displayTypeToDescription = {
   ),
   remainder: (
     <Trans>
-      Split any remaining To Budget across categories using this rule. Higher
-      weights take a larger share of the leftover funds.
+      Split any remaining To Budget across categories using this automation.
+      Higher weights take a larger share of the leftover funds.
     </Trans>
   ),
 };
