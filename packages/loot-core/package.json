@@ -3,6 +3,11 @@
   "version": "26.4.0",
   "description": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/actualbudget/actual.git",
+    "directory": "packages/loot-core"
+  },
   "files": [
     "src",
     "@types",
@@ -79,6 +84,7 @@
     "#shared/*": "./src/shared/*.ts",
     "#types/*": "./src/types/*.ts",
     "#mocks/*": "./src/mocks/*.ts",
+    "#migrations/*": "./migrations/*.js",
     "#*": "./src/*.ts"
   },
   "exports": {
@@ -189,7 +195,7 @@
     "@types/better-sqlite3": "^7.6.13",
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
     "@types/node": "^22.19.17",
-    "@typescript/native-preview": "^7.0.0-dev.20260404.1",
+    "@typescript/native-preview": "beta",
     "assert": "^2.1.0",
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",

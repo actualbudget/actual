@@ -3,6 +3,11 @@
   "version": "26.4.0",
   "description": "CLI for Actual Budget",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/actualbudget/actual.git",
+    "directory": "packages/cli"
+  },
   "bin": {
     "actual": "./dist/cli.js",
     "actual-cli": "./dist/cli.js"
@@ -32,7 +37,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.19.17",
-    "@typescript/native-preview": "^7.0.0-dev.20260404.1",
+    "@typescript/native-preview": "beta",
     "rollup-plugin-visualizer": "^7.0.1",
     "vite": "^8.0.5",
     "vitest": "^4.1.2"

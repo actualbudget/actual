@@ -131,7 +131,9 @@ export class MobileNavigation {
     }
 
     const link = this.navbar.getByRole('link', { name: pageName });
-    await link.click();
+    // Click via evaluate: the navbar uses react-spring transforms, so
+    // Playwright's viewport-stability check rejects mid-animation clicks.
+    await link.evaluate(el => (el as HTMLElement).click());
 
     await pageInstance.waitFor();
 
