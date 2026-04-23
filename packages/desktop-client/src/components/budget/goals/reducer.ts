@@ -9,9 +9,7 @@ import type { Template } from '@actual-app/core/types/models/templates';
 import type { Action } from './actions';
 import type { DisplayTemplateType, ReducerState } from './constants';
 
-// Matches the template-notes parser's default for templates that don't
-// specify an explicit priority level (see template-notes.test.ts).
-export const DEFAULT_PRIORITY = 0;
+export const DEFAULT_PRIORITY = 1;
 
 export const getInitialState = (template: Template | null): ReducerState => {
   if (!template) {
