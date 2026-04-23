@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@types/google-protobuf": "3.15.12",
-    "@typescript/native-preview": "^7.0.0-dev.20260404.1",
+    "@typescript/native-preview": "beta",
     "protoc-gen-js": "3.21.4-4",
     "rollup-plugin-visualizer": "^7.0.1",
     "ts-protoc-gen": "0.15.0",

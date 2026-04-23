@@ -1,8 +1,6 @@
-node_modules
-user-files
-server-files
-
-# Yarn
+**/node_modules
+.git
+.lage
 .pnp.*
 .yarn/*
 !.yarn/patches
