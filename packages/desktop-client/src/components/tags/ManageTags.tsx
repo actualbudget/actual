@@ -19,6 +19,7 @@ import { useDeleteTagsMutation, useDiscoverTagsMutation } from '#tags';
 import { TagCreationRow } from './TagCreationRow';
 import { TagsHeader } from './TagsHeader';
 import { TagsList } from './TagsList';
+import { Title } from '#components/Title';
 
 export function ManageTags() {
   const { t } = useTranslation();
@@ -53,6 +54,7 @@ export function ManageTags() {
 
   return (
     <SelectedProvider instance={selectedInst}>
+      <Title value={t('Tags')} />
       <View>
         <View
           style={{

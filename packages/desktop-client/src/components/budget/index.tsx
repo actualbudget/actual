@@ -34,6 +34,8 @@ import { EnvelopeBudgetProvider } from './envelope/EnvelopeBudgetContext';
 import * as trackingBudget from './tracking/TrackingBudgetComponents';
 import { TrackingBudgetProvider } from './tracking/TrackingBudgetContext';
 import { prewarmAllMonths, prewarmMonth } from './util';
+import { Title } from '#components/Title';
+import { t } from 'i18next';
 
 export function Budget() {
   const currentMonth = monthUtils.currentMonth();
@@ -234,6 +236,8 @@ export function Budget() {
 
   return (
     <SheetNameProvider name={monthUtils.sheetForMonth(startMonth)}>
+      <Title value={t('Budget')} />
+
       {/*
         In a previous iteration, the wrapper needs `overflow: hidden` for
         some reason. Without it at certain dimensions the width/height

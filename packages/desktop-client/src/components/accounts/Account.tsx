@@ -85,6 +85,7 @@ import { updateNewTransactions } from '#transactions/transactionsSlice';
 
 import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
+import { Title } from '#components/Title';
 
 type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
 
@@ -2032,8 +2033,18 @@ export function Account() {
   const onCreatePayee = (name: PayeeEntity['name']) =>
     createPayee.mutateAsync({ name });
 
+  const account: AccountEntity | undefined = accounts.find(
+    account => account.id === params.id,
+  );
+
+  const accountTitle = getAccountTitle(
+    account,
+    params.id,
+  );
+
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <Title value={`${accountTitle}`} />
       <SchedulesProvider query={schedulesQuery}>
         <SplitsExpandedProvider
           initialMode={expandSplits ? 'collapse' : 'expand'}
@@ -2079,4 +2090,21 @@ export function Account() {
       </SchedulesProvider>
     </ErrorBoundary>
   );
+}
+
+function getAccountTitle(account?: AccountEntity, id?: string) {
+  if (!account) {
+    if (id === 'onbudget') {
+      return t('On Budget Account Transactions');
+    } else if (id === 'offbudget') {
+      return t('Off Budget Account Transactions');
+    } else if (id === 'uncategorized') {
+      return t('Uncategorized Transactions');
+    } else if (!id) {
+      return t('All Account Transactions');
+    }
+    return null;
+  }
+
+  return `${account.name} \u2014 Account Transactions`;
 }

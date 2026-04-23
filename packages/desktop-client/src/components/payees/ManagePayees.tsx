@@ -27,6 +27,7 @@ import { useDispatch } from '#redux';
 
 import { PayeeMenu } from './PayeeMenu';
 import { PayeeTable } from './PayeeTable';
+import { Title } from '#components/Title';
 
 const getPayeesById = memoizeOne((payees: PayeeEntity[]) => groupById(payees));
 
@@ -38,6 +39,7 @@ function PayeeTableHeader() {
 
   return (
     <View>
+      <Title value={t('Payees')} />
       <TableHeader collapsed>
         <SelectCell
           exposed

@@ -40,6 +40,8 @@ import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
+import { Title } from '#components/Title';
+import { t } from 'i18next';
 
 function About() {
   const version = useServerVersion();
@@ -52,6 +54,7 @@ function About() {
 
   return (
     <Setting>
+      <Title value={t('Settings')} />
       <Text>
         <Trans>
           <strong>Actual</strong> is a super fast privacy-focused app for

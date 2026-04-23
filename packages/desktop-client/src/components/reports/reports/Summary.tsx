@@ -47,6 +47,7 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
+import { Title } from '#components/Title';
 
 export function Summary() {
   const params = useParams();
@@ -347,6 +348,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       }
       padding={0}
     >
+      <Title value={t(`${title} \u2014 Report Summary`)} />
       <Header
         allMonths={allMonths}
         start={start}

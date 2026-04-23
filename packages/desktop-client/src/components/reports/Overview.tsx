@@ -69,6 +69,7 @@ import { NetWorthCard } from './reports/NetWorthCard';
 import { SankeyCard } from './reports/SankeyCard';
 import { SpendingCard } from './reports/SpendingCard';
 import { SummaryCard } from './reports/SummaryCard';
+import { Title } from '#components/Title';
 
 function isCustomReportWidget(
   widget: DashboardWidgetEntity,
@@ -734,6 +735,7 @@ export function Overview({ dashboard }: OverviewProps) {
       }
       padding={10}
     >
+      <Title value={t(`${dashboard.name || 'Untitled'} \u2014 Report Dashboard`)} />
       {isImporting ? (
         <LoadingIndicator message={t('Import is running...')} />
       ) : (

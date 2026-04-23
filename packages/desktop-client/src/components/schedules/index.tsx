@@ -18,6 +18,7 @@ import { useDispatch } from '#redux';
 
 import { SchedulesTable } from './SchedulesTable';
 import type { ScheduleItemAction } from './SchedulesTable';
+import { Title } from '#components/Title';
 
 export function Schedules() {
   const { t } = useTranslation();
@@ -88,6 +89,7 @@ export function Schedules() {
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <Title value={t('Schedules')} />
       <Page header={t('Schedules')}>
         <View
           style={{

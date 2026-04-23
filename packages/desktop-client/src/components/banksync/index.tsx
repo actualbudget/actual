@@ -19,6 +19,7 @@ import { useDispatch } from '#redux';
 
 import { AccountsHeader } from './AccountsHeader';
 import { AccountsList } from './AccountsList';
+import { Title } from '#components/Title';
 
 type SyncProviders = BankSyncProviders | 'unlinked';
 
@@ -119,6 +120,7 @@ export function BankSync() {
         paddingBottom: MOBILE_NAV_HEIGHT,
       }}
     >
+      <Title value={t('Bank Sync')} />
       <View style={{ marginTop: '1em' }}>
         {accounts.length === 0 && (
           <Text style={{ fontSize: '1.1rem' }}>
