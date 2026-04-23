@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
@@ -126,7 +126,7 @@ export const LimitAutomation = ({
             }
           >
             <span style={{ marginLeft: 6, fontSize: 12, whiteSpace: 'nowrap' }}>
-              {t('Hold overflow (keep anything over the cap)')}
+              {<Trans>Retain existing funds over the cap</Trans>}
             </span>
           </LabeledCheckbox>
         </FormField>
