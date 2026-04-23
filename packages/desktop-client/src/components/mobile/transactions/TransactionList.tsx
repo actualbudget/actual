@@ -32,6 +32,7 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from 'loot-core/shared/months';
 import { isPreviewId } from 'loot-core/shared/transactions';
 import { validForTransfer } from 'loot-core/shared/transfer';
+import { validForMerge } from 'loot-core/shared/merge';
 import { groupById, integerToCurrency } from 'loot-core/shared/util';
 import type { IntegerAmount } from 'loot-core/shared/util';
 import type { CategoryEntity, TransactionEntity } from 'loot-core/types/models';
@@ -384,7 +385,7 @@ function SelectedTransactionsFloatingActionBar({
   const canMerge = useMemo(() => {
     return Boolean(
       twoTransactions &&
-      twoTransactions[0].amount === twoTransactions[1].amount,
+      validForMerge(twoTransactions[0], twoTransactions[1])
     );
   }, [twoTransactions]);
 
