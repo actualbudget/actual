@@ -10,6 +10,7 @@ import type {
   CategoryEntity,
   CategoryGroupEntity,
 } from '@actual-app/core/types/models';
+import { t } from 'i18next';
 
 import {
   useBudgetActions,
@@ -20,6 +21,7 @@ import {
   useSaveCategoryGroupMutation,
   useSaveCategoryMutation,
 } from '#budget';
+import { Title } from '#components/Title';
 import { useCategories } from '#hooks/useCategories';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
@@ -34,8 +36,6 @@ import { EnvelopeBudgetProvider } from './envelope/EnvelopeBudgetContext';
 import * as trackingBudget from './tracking/TrackingBudgetComponents';
 import { TrackingBudgetProvider } from './tracking/TrackingBudgetContext';
 import { prewarmAllMonths, prewarmMonth } from './util';
-import { Title } from '#components/Title';
-import { t } from 'i18next';
 
 export function Budget() {
   const currentMonth = monthUtils.currentMonth();

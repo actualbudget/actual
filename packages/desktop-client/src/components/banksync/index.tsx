@@ -12,6 +12,7 @@ import type {
 
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { Page } from '#components/Page';
+import { Title } from '#components/Title';
 import { useAccounts } from '#hooks/useAccounts';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { pushModal } from '#modals/modalsSlice';
@@ -19,7 +20,6 @@ import { useDispatch } from '#redux';
 
 import { AccountsHeader } from './AccountsHeader';
 import { AccountsList } from './AccountsList';
-import { Title } from '#components/Title';
 
 type SyncProviders = BankSyncProviders | 'unlinked';
 

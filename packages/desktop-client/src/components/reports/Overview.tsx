@@ -24,6 +24,7 @@ import type {
 
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { MobilePageHeader, Page } from '#components/Page';
+import { Title } from '#components/Title';
 import { useAccounts } from '#hooks/useAccounts';
 import {
   useDashboardPages,
@@ -52,8 +53,8 @@ import {
 } from '#reports/mutations';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
-import { DashboardHeader } from './DashboardHeader';
 import './overview.scss';
+import { DashboardHeader } from './DashboardHeader';
 import { DashboardSelector } from './DashboardSelector';
 import { LoadingIndicator } from './LoadingIndicator';
 import { AgeOfMoneyCard } from './reports/AgeOfMoneyCard';
@@ -69,7 +70,6 @@ import { NetWorthCard } from './reports/NetWorthCard';
 import { SankeyCard } from './reports/SankeyCard';
 import { SpendingCard } from './reports/SpendingCard';
 import { SummaryCard } from './reports/SummaryCard';
-import { Title } from '#components/Title';
 
 function isCustomReportWidget(
   widget: DashboardWidgetEntity,
@@ -735,7 +735,9 @@ export function Overview({ dashboard }: OverviewProps) {
       }
       padding={10}
     >
-      <Title value={t(`${dashboard.name || 'Untitled'} \u2014 Report Dashboard`)} />
+      <Title
+        value={t(`${dashboard.name || 'Untitled'} \u2014 Report Dashboard`)}
+      />
       {isImporting ? (
         <LoadingIndicator message={t('Import is running...')} />
       ) : (

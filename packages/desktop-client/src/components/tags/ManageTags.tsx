@@ -12,6 +12,7 @@ import { View } from '@actual-app/components/view';
 import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 
 import { Search } from '#components/common/Search';
+import { Title } from '#components/Title';
 import { SelectedProvider, useSelected } from '#hooks/useSelected';
 import { useTags } from '#hooks/useTags';
 import { useDeleteTagsMutation, useDiscoverTagsMutation } from '#tags';
@@ -19,7 +20,6 @@ import { useDeleteTagsMutation, useDiscoverTagsMutation } from '#tags';
 import { TagCreationRow } from './TagCreationRow';
 import { TagsHeader } from './TagsHeader';
 import { TagsList } from './TagsList';
-import { Title } from '#components/Title';
 
 export function ManageTags() {
   const { t } = useTranslation();

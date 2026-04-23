@@ -46,6 +46,7 @@ import {
 import { markAccountRead } from '#accounts/accountsSlice';
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
+import { Title } from '#components/Title';
 import { TransactionList } from '#components/transactions/TransactionList';
 import { validateAccountName } from '#components/util/accountValidation';
 import { useAccountPreviewTransactions } from '#hooks/useAccountPreviewTransactions';
@@ -85,7 +86,6 @@ import { updateNewTransactions } from '#transactions/transactionsSlice';
 
 import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
-import { Title } from '#components/Title';
 
 type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
 
@@ -2037,10 +2037,7 @@ export function Account() {
     account => account.id === params.id,
   );
 
-  const accountTitle = getAccountTitle(
-    account,
-    params.id,
-  );
+  const accountTitle = getAccountTitle(account, params.id);
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>

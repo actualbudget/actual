@@ -38,6 +38,7 @@ import { summarySpreadsheet } from '#components/reports/spreadsheets/summary-spr
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
 import { FieldSelect } from '#components/rules/RuleEditor';
+import { Title } from '#components/Title';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
@@ -47,7 +48,6 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
-import { Title } from '#components/Title';
 
 export function Summary() {
   const params = useParams();

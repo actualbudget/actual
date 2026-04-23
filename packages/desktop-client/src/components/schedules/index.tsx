@@ -12,13 +12,13 @@ import type { ScheduleEntity } from '@actual-app/core/types/models';
 import { Search } from '#components/common/Search';
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { Page } from '#components/Page';
+import { Title } from '#components/Title';
 import { useSchedules } from '#hooks/useSchedules';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
 import { SchedulesTable } from './SchedulesTable';
 import type { ScheduleItemAction } from './SchedulesTable';
-import { Title } from '#components/Title';
 
 export function Schedules() {
   const { t } = useTranslation();

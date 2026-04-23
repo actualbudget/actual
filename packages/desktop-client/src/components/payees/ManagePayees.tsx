@@ -16,6 +16,7 @@ import memoizeOne from 'memoize-one';
 
 import { Search } from '#components/common/Search';
 import { Cell, SelectCell, TableHeader } from '#components/table';
+import { Title } from '#components/Title';
 import {
   SelectedProvider,
   useSelected,
@@ -27,7 +28,6 @@ import { useDispatch } from '#redux';
 
 import { PayeeMenu } from './PayeeMenu';
 import { PayeeTable } from './PayeeTable';
-import { Title } from '#components/Title';
 
 const getPayeesById = memoizeOne((payees: PayeeEntity[]) => groupById(payees));
 
