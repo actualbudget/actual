@@ -19,13 +19,13 @@ import type { Action } from './actions';
 import type { ReducerState } from './constants';
 import { displayTemplateTypes } from './constants';
 import { BySaveAutomation } from './editor/BySaveAutomation';
+import { FixedAutomation } from './editor/FixedAutomation';
 import { HistoricalAutomation } from './editor/HistoricalAutomation';
 import { LimitAutomation } from './editor/LimitAutomation';
 import { PercentageAutomation } from './editor/PercentageAutomation';
 import { RefillAutomation } from './editor/RefillAutomation';
 import { RemainderAutomation } from './editor/RemainderAutomation';
 import { ScheduleAutomation } from './editor/ScheduleAutomation';
-import { WeekAutomation } from './editor/WeekAutomation';
 import { getDisplayTemplateMeta } from './templateHelpers';
 
 type BudgetAutomationEditorProps = {
@@ -53,7 +53,7 @@ const displayTypeToDescription = {
       automation.
     </Trans>
   ),
-  week: (
+  fixed: (
     <Trans>
       Add a fixed amount to this category for each week in the month. For
       example, $100 per week would be $400 per month in a 4-week month.
@@ -123,9 +123,9 @@ export function BudgetAutomationEditor({
         />
       );
       break;
-    case 'week':
+    case 'fixed':
       automationEditor = (
-        <WeekAutomation template={state.template} dispatch={dispatch} />
+        <FixedAutomation template={state.template} dispatch={dispatch} />
       );
       break;
     case 'schedule':

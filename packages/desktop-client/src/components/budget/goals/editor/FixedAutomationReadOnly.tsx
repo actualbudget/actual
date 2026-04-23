@@ -7,13 +7,13 @@ import type { TransObjectLiteral } from '@actual-app/core/types/util';
 import { FinancialText } from '#components/FinancialText';
 import { useFormat } from '#hooks/useFormat';
 
-type WeekAutomationReadOnlyProps = {
+type FixedAutomationReadOnlyProps = {
   template: PeriodicTemplate;
 };
 
-export const WeekAutomationReadOnly = ({
+export const FixedAutomationReadOnly = ({
   template,
-}: WeekAutomationReadOnlyProps) => {
+}: FixedAutomationReadOnlyProps) => {
   const format = useFormat();
   const amount = format(
     amountToInteger(template.amount, format.currency.decimalPlaces),

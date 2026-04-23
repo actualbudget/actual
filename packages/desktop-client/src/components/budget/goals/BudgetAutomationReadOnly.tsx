@@ -15,13 +15,13 @@ import { View } from '@actual-app/components/view';
 
 import type { ReducerState } from './constants';
 import { BySaveAutomationReadOnly } from './editor/BySaveAutomationReadOnly';
+import { FixedAutomationReadOnly } from './editor/FixedAutomationReadOnly';
 import { HistoricalAutomationReadOnly } from './editor/HistoricalAutomationReadOnly';
 import { LimitAutomationReadOnly } from './editor/LimitAutomationReadOnly';
 import { PercentageAutomationReadOnly } from './editor/PercentageAutomationReadOnly';
 import { RefillAutomationReadOnly } from './editor/RefillAutomationReadOnly';
 import { RemainderAutomationReadOnly } from './editor/RemainderAutomationReadOnly';
 import { ScheduleAutomationReadOnly } from './editor/ScheduleAutomationReadOnly';
-import { WeekAutomationReadOnly } from './editor/WeekAutomationReadOnly';
 
 type BudgetAutomationReadOnlyProps = {
   state: ReducerState;
@@ -54,8 +54,10 @@ export function BudgetAutomationReadOnly({
     case 'refill':
       automationReadOnly = <RefillAutomationReadOnly />;
       break;
-    case 'week':
-      automationReadOnly = <WeekAutomationReadOnly template={state.template} />;
+    case 'fixed':
+      automationReadOnly = (
+        <FixedAutomationReadOnly template={state.template} />
+      );
       break;
     case 'schedule':
       automationReadOnly = (

@@ -14,14 +14,17 @@ import { AmountInput } from '#components/util/AmountInput';
 import { GenericInput } from '#components/util/GenericInput';
 import { useFormat } from '#hooks/useFormat';
 
-type WeekAutomationProps = {
+type FixedAutomationProps = {
   template: PeriodicTemplate;
   dispatch: (action: Action) => void;
 };
 
 type PeriodUnit = 'day' | 'week' | 'month' | 'year';
 
-export const WeekAutomation = ({ template, dispatch }: WeekAutomationProps) => {
+export const FixedAutomation = ({
+  template,
+  dispatch,
+}: FixedAutomationProps) => {
   const { t } = useTranslation();
   const periodUnitOptions: Array<[PeriodUnit, string]> = [
     ['day', t('days')],

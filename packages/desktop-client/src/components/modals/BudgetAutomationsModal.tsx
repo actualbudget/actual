@@ -81,7 +81,7 @@ function getDisplayTypeFromTemplate(template: Template): DisplayTemplateType {
       return 'schedule';
     case 'periodic':
     case 'simple':
-      return 'week';
+      return 'fixed';
     case 'limit':
       return 'limit';
     case 'refill':
@@ -94,7 +94,7 @@ function getDisplayTypeFromTemplate(template: Template): DisplayTemplateType {
     case 'remainder':
       return 'remainder';
     default:
-      return 'week';
+      return 'fixed';
   }
 }
 
@@ -164,7 +164,7 @@ export function migrateTemplatesToAutomations(
               directive: 'template',
               priority: template.priority,
             },
-            'week',
+            'fixed',
           ),
         );
       }
@@ -262,7 +262,7 @@ type AutomationExample = {
 function getAutomationExamples(): AutomationExample[] {
   return [
     {
-      displayType: 'week',
+      displayType: 'fixed',
       create: () =>
         createAutomationEntry(
           {
@@ -273,7 +273,7 @@ function getAutomationExamples(): AutomationExample[] {
             starting: dayFromDate(firstDayOfMonth(new Date())),
             priority: DEFAULT_PRIORITY,
           },
-          'week',
+          'fixed',
         ),
     },
     {
@@ -1042,7 +1042,7 @@ function BudgetAutomationsBody({
 
   const onAddAutomation = (create?: () => AutomationEntry) => {
     const fallback = getAutomationExamples().find(
-      e => e.displayType === 'week',
+      e => e.displayType === 'fixed',
     );
     const entry = (create ?? fallback?.create)?.();
     if (!entry) return;

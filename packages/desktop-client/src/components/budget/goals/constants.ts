@@ -11,7 +11,7 @@ import type {
 } from '@actual-app/core/types/models/templates';
 
 export const displayTemplateTypes = [
-  'week',
+  'fixed',
   'schedule',
   'by',
   'percentage',
@@ -34,7 +34,7 @@ export type ReducerState =
     }
   | {
       template: PeriodicTemplate;
-      displayType: 'week';
+      displayType: 'fixed';
     }
   | {
       template: ScheduleTemplate;

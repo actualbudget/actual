@@ -28,6 +28,8 @@ import type { Action } from './actions';
 import type { DisplayTemplateType, ReducerState } from './constants';
 import { BySaveAutomation } from './editor/BySaveAutomation';
 import { BySaveAutomationReadOnly } from './editor/BySaveAutomationReadOnly';
+import { FixedAutomation } from './editor/FixedAutomation';
+import { FixedAutomationReadOnly } from './editor/FixedAutomationReadOnly';
 import { HistoricalAutomation } from './editor/HistoricalAutomation';
 import { HistoricalAutomationReadOnly } from './editor/HistoricalAutomationReadOnly';
 import { LimitAutomation } from './editor/LimitAutomation';
@@ -40,8 +42,6 @@ import { RemainderAutomation } from './editor/RemainderAutomation';
 import { RemainderAutomationReadOnly } from './editor/RemainderAutomationReadOnly';
 import { ScheduleAutomation } from './editor/ScheduleAutomation';
 import { ScheduleAutomationReadOnly } from './editor/ScheduleAutomationReadOnly';
-import { WeekAutomation } from './editor/WeekAutomation';
-import { WeekAutomationReadOnly } from './editor/WeekAutomationReadOnly';
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -55,7 +55,7 @@ export function getDisplayTemplateMeta(
   displayType: DisplayTemplateType,
 ): DisplayTemplateMeta {
   switch (displayType) {
-    case 'week':
+    case 'fixed':
       return {
         label: t('Fixed amount'),
         description: t('Add a set amount every month, week, day, or year.'),
@@ -132,7 +132,7 @@ export function TemplateSentence({
     case 'refill':
       return <RefillAutomationReadOnly />;
     case 'periodic':
-      return <WeekAutomationReadOnly template={template} />;
+      return <FixedAutomationReadOnly template={template} />;
     case 'schedule':
       return <ScheduleAutomationReadOnly template={template} />;
     case 'percentage':
@@ -187,8 +187,8 @@ export function ActiveEditor({
           onAddLimitAutomation={onAddLimitAutomation}
         />
       );
-    case 'week':
-      return <WeekAutomation template={state.template} dispatch={dispatch} />;
+    case 'fixed':
+      return <FixedAutomation template={state.template} dispatch={dispatch} />;
     case 'schedule':
       return (
         <ScheduleAutomation

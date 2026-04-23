@@ -32,7 +32,7 @@ export const getInitialState = (template: Template | null): ReducerState => {
           priority: template.priority,
           directive: template.directive,
         },
-        displayType: 'week',
+        displayType: 'fixed',
       };
     case 'percentage':
       return {
@@ -47,7 +47,7 @@ export const getInitialState = (template: Template | null): ReducerState => {
     case 'periodic':
       return {
         template,
-        displayType: 'week',
+        displayType: 'fixed',
       };
     case 'spend':
       throw new Error('Goal is not yet supported');
@@ -148,7 +148,7 @@ const changeType = (
           priority: DEFAULT_PRIORITY,
         },
       };
-    case 'week':
+    case 'fixed':
       if (prevState.template.type === 'periodic') {
         return prevState;
       }
