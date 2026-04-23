@@ -468,8 +468,7 @@ export function GlobalConflictDetail({
     case 'percent-over-100':
       return (
         <Trans>
-          Multiple percent-of-income rules add up to more than 100%. The engine
-          will clip; lower the percentages or combine them.
+          Your percent automations add up to more than 100% and will be capped at 100%.
         </Trans>
       );
     default:
