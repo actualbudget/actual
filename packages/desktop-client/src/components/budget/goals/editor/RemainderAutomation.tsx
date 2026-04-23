@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Input } from '@actual-app/components/input';
@@ -25,6 +25,9 @@ export const RemainderAutomation = ({
   // Track the raw input so the user can clear and retype without the field
   // snapping back. Commit (and clamp) on blur.
   const [rawWeight, setRawWeight] = useState(String(committedWeight));
+  useEffect(() => {
+    setRawWeight(String(committedWeight));
+  }, [committedWeight]);
 
   const commitWeight = () => {
     const parsed = Math.max(1, Math.trunc(Number(rawWeight)) || 1);

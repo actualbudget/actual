@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Input } from '@actual-app/components/input';
@@ -33,6 +33,9 @@ export const BySaveAutomation = ({
 
   const committedRepeat = template.repeat ?? 1;
   const [rawRepeat, setRawRepeat] = useState(String(committedRepeat));
+  useEffect(() => {
+    setRawRepeat(String(committedRepeat));
+  }, [committedRepeat]);
   const commitRepeat = () => {
     const parsed = Math.max(1, Math.trunc(Number(rawRepeat)) || 1);
     setRawRepeat(String(parsed));

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Input } from '@actual-app/components/input';
@@ -41,6 +41,11 @@ export const FixedAutomation = ({
   const periodUnit = template.period?.period ?? 'month';
   const periodAmount = template.period?.amount ?? 1;
   const [rawPeriodAmount, setRawPeriodAmount] = useState(String(periodAmount));
+  // Resync when a different automation row is selected (the component
+  // instance is reused across rows).
+  useEffect(() => {
+    setRawPeriodAmount(String(periodAmount));
+  }, [periodAmount]);
   const commitPeriodAmount = () => {
     const parsed = Math.max(1, Math.trunc(Number(rawPeriodAmount)) || 1);
     setRawPeriodAmount(String(parsed));

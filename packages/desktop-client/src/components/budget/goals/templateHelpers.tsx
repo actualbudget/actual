@@ -353,7 +353,7 @@ export function AutomationErrorTitle({
     case 'by-target-past':
       return <Trans>Target is in the past</Trans>;
     case 'percentage-source-not-found':
-      return <Trans>Source category missing</Trans>;
+      return <Trans>Source category not recognised</Trans>;
     default:
       error satisfies never;
       return null;
@@ -376,7 +376,9 @@ export function AutomationErrorShort({
     case 'refill-no-cap':
       return <Trans>Add a balance cap above</Trans>;
     case 'percentage-out-of-range':
-      return <Trans>{{ percent: error.percent }}% is outside 1–100</Trans>;
+      return (
+        <Trans>{{ percent: error.percent }}% must be between 0 and 100</Trans>
+      );
     case 'percentage-no-source':
       return <Trans>Pick a source category</Trans>;
     case 'by-no-month':
@@ -417,7 +419,7 @@ export function AutomationErrorDetail({
         </Trans>
       );
     case 'percentage-out-of-range':
-      return <Trans>Set a value between 1% and 100%.</Trans>;
+      return <Trans>Set a value greater than 0% and at most 100%.</Trans>;
     case 'percentage-no-source':
       return (
         <Trans>

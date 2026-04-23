@@ -306,7 +306,7 @@ async function processTemplate(
 
   if (contexts.length === 0 && errors.length === 0) {
     if (orphanGoals.length > 0) {
-      void setGoals(month, orphanGoals);
+      await setGoals(month, orphanGoals);
     }
     return {
       type: 'message',

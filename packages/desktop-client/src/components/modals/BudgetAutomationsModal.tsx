@@ -1369,11 +1369,13 @@ function BudgetAutomationsBody({
 function UnsupportedDirectivesNotice({
   hasGoalTemplate,
   hasErrorTemplate,
+  hasSpendTemplate,
   hasCleanupDirective,
   onClose,
 }: {
   hasGoalTemplate: boolean;
   hasErrorTemplate: boolean;
+  hasSpendTemplate: boolean;
   hasCleanupDirective: boolean;
   onClose: () => void;
 }) {
@@ -1415,6 +1417,12 @@ function UnsupportedDirectivesNotice({
             One or more <code>#template</code> lines in this category&rsquo;s
             notes couldn&rsquo;t be parsed. Fix them as text first, then re-open
             this modal to migrate.
+          </Trans>
+        ) : hasSpendTemplate ? (
+          <Trans>
+            This category uses a <code>spend from</code> template, which the
+            budget automations UI doesn&rsquo;t handle yet. Keep editing it as
+            text in the category&rsquo;s notes.
           </Trans>
         ) : hasGoalTemplate && hasCleanupDirective ? (
           <Trans>
@@ -1481,9 +1489,17 @@ export function BudgetAutomationsModal({
     parsedTemplates?.some(t => t.type === 'goal') ?? false;
   const hasErrorTemplate =
     parsedTemplates?.some(t => t.type === 'error') ?? false;
-  const hasCleanupDirective = hasCleanupLine(notes);
+  const hasSpendTemplate =
+    parsedTemplates?.some(t => t.type === 'spend') ?? false;
+  // Only surface stale `#cleanup` lines for categories that haven't been
+  // migrated to UI-managed automations; once `source === 'ui'`, the notes
+  // are no longer the source of truth.
+  const hasCleanupDirective = needsMigration && hasCleanupLine(notes);
   const hasUnsupportedDirective =
-    hasGoalTemplate || hasErrorTemplate || hasCleanupDirective;
+    hasGoalTemplate ||
+    hasErrorTemplate ||
+    hasSpendTemplate ||
+    hasCleanupDirective;
 
   const initialEntries =
     parsedTemplates && !hasUnsupportedDirective
@@ -1522,6 +1538,7 @@ export function BudgetAutomationsModal({
             <UnsupportedDirectivesNotice
               hasGoalTemplate={hasGoalTemplate}
               hasErrorTemplate={hasErrorTemplate}
+              hasSpendTemplate={hasSpendTemplate}
               hasCleanupDirective={hasCleanupDirective}
               onClose={() => state.close()}
             />
