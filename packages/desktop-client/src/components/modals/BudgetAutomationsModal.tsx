@@ -25,6 +25,7 @@ import type {
 } from '@actual-app/core/types/models';
 import type { Template } from '@actual-app/core/types/models/templates';
 import { css } from '@emotion/css';
+import debounce from 'lodash/debounce';
 import uniqueId from 'lodash/uniqueId';
 
 import { Warning } from '#components/alerts';
@@ -1140,12 +1141,12 @@ function BudgetAutomationsBody({
   );
 
   useEffect(() => {
-    let cancelled = false;
     if (templates.length === 0) {
       setDryRun({ budgeted: 0, perTemplate: [] });
       return;
     }
-    const handle = setTimeout(async () => {
+    let cancelled = false;
+    const run = debounce(async () => {
       try {
         const result = await send('budget/dry-run-category-template', {
           month,
@@ -1157,9 +1158,10 @@ function BudgetAutomationsBody({
         if (!cancelled) setDryRun(null);
       }
     }, 200);
+    void run();
     return () => {
       cancelled = true;
-      clearTimeout(handle);
+      run.cancel();
     };
   }, [templates, month, categoryId]);
 
