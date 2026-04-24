@@ -234,16 +234,6 @@ export type GlobalConflictKind =
   | { kind: 'over-income'; total: number; income: number }
   | { kind: 'percent-over-100'; total: number };
 
-// Strict YYYY-MM check: month 01-12 only. Guards downstream date math
-// (differenceInCalendarMonths, monthUtils.format) against malformed input
-// like "2026-13" or "2026-04-extra" that would otherwise produce NaN.
-function isValidYearMonth(value: string): boolean {
-  const match = /^(\d{4})-(\d{2})$/.exec(value);
-  if (!match) return false;
-  const month = Number(match[2]);
-  return month >= 1 && month <= 12;
-}
-
 export function validateAutomation(
   template: Template,
   displayType: DisplayTemplateType,
@@ -295,7 +285,7 @@ export function validateAutomation(
       return null;
     case 'by': {
       if (template.type !== 'by') return null;
-      if (!template.month || !isValidYearMonth(template.month)) {
+      if (!template.month || !monthUtils.isValidYearMonth(template.month)) {
         return { kind: 'by-no-month' };
       }
       const targetMonth = template.month;
@@ -330,7 +320,7 @@ export function formatMonthLabel(
   locale?: Parameters<typeof monthUtils.format>[2],
 ): string {
   if (!month) return '—';
-  if (!isValidYearMonth(month)) return month;
+  if (!monthUtils.isValidYearMonth(month)) return month;
   return monthUtils.format(`${month}-01`, 'MMM yyyy', locale);
 }
 
