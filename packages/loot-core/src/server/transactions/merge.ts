@@ -24,11 +24,11 @@ export async function mergeTransactions(
   const [a, b] = await mapAndValidateTransactions(txIds[0], txIds[1]);
   const aTransferId = a.transfer_id;
   const bTransferId = b.transfer_id;
-  const transferAccount = aTransferId
-    ? a.payee
-    : bTransferId
-      ? b.payee
-      : undefined;
+
+  // we don't need all the transfer logic if there are no transfers.
+  if (!aTransferId && !bTransferId) return mergeTransactionsNoTransfer(a, b);
+
+  const transferAccount = aTransferId ? a.payee : b.payee;
 
   await setTransfers([a.id, b.id, aTransferId, bTransferId], null);
   const transferId = await mergeTransfers(aTransferId, bTransferId);
@@ -38,14 +38,31 @@ export async function mergeTransactions(
       id: keptTxId,
       transfer_id: transferId,
       payee: transferAccount,
-      category: null,
     });
     await db.updateTransaction({ id: transferId, transfer_id: keptTxId });
   }
+
+  // transfers to an off-budget account have a category. Transfers to on-budget do not, so
+  // when a regular transaction is merged with a non-transfer, we need to make sure any category
+  // in the non-transfer is cleared out.
+  //
+  // However, we cannot blindly clear categories because if the transfer is to an off-budget account then
+  // we need to keep the regular merge logic that was performed in mergeTransactionsNoTransfer.
+  //
+  // We don't have to worry about the transfer transactions in the other account because
+  // either there is one transaction or there are two transfers, which does not enter this error state
+  if (transferAccount && !(aTransferId && bTransferId)) {
+    const payee = await db.getPayee(transferAccount);
+    const account = await db.getAccount(payee.transfer_acct);
+    if (!account.offbudget) {
+      await db.updateTransaction({ id: keptTxId, category: null });
+    }
+  }
+
   return keptTxId;
 }
 
-async function setTransfers(
+function setTransfers(
   txIds: (TransactionEntity['id'] | undefined)[],
   transfer_id: string | null | undefined,
 ) {
