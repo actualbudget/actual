@@ -1,6 +1,7 @@
 import { getAccountDb, isAdmin } from '#account-db';
 import { FileNotFound, GenericFileError } from '#app-sync/errors';
 import type { WrappedDatabase } from '#db';
+import { isValidFileId, isValidGroupId } from '#util/paths';
 import type { FileId, GroupId } from '#util/paths';
 
 class FileBase {
@@ -116,8 +117,8 @@ const boolToInt = (bool: boolean) => {
 };
 
 type RawFile = {
-  id: FileId;
-  group_id: GroupId | null;
+  id: string;
+  group_id: string | null;
   sync_version: string | null;
   name: string | null;
   encrypt_meta: string | null;
@@ -269,10 +270,25 @@ class FilesService {
   }
 
   validate(rawFile: RawFile) {
+    const fileId = rawFile.id;
+    if (!isValidFileId(fileId)) {
+      throw new GenericFileError('Invalid file ID', { fileId });
+    }
+
+    let groupId: GroupId | null = null;
+    if (rawFile.group_id !== null) {
+      if (!isValidGroupId(rawFile.group_id)) {
+        throw new GenericFileError('Invalid group ID', {
+          groupId: rawFile.group_id,
+        });
+      }
+      groupId = rawFile.group_id;
+    }
+
     return new File({
-      id: rawFile.id,
+      id: fileId,
       name: rawFile.name,
-      groupId: rawFile.group_id,
+      groupId,
       encryptSalt: rawFile.encrypt_salt,
       encryptTest: rawFile.encrypt_test,
       encryptKeyId: rawFile.encrypt_keyid,
