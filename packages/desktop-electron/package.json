@@ -26,7 +26,7 @@
     "@electron/rebuild": "^4.0.3",
     "@playwright/test": "1.59.1",
     "@types/copyfiles": "^2",
-    "@typescript/native-preview": "^7.0.0-dev.20260404.1",
+    "@typescript/native-preview": "beta",
     "copyfiles": "^2.4.1",
     "cross-env": "^10.1.0",
     "electron": "39.8.5",

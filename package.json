@@ -70,7 +70,7 @@
     "@octokit/rest": "^22.0.1",
     "@types/node": "^22.19.17",
     "@types/prompts": "^2.4.9",
-    "@typescript/native-preview": "^7.0.0-dev.20260404.1",
+    "@typescript/native-preview": "beta",
     "@yarnpkg/types": "^4.0.1",
     "eslint": "^10.2.0",
     "eslint-plugin-perfectionist": "^5.8.0",
