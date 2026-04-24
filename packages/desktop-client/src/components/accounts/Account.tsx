@@ -2090,10 +2090,14 @@ export function Account() {
   );
 }
 
-function getAccountTitle(account?: AccountEntity, id?: string, translate?: (key: string) => string): string {
+function getAccountTitle(
+  account?: AccountEntity,
+  id?: string,
+  translate?: (key: string) => string,
+): string {
   if (!translate) {
     translate = (key: string) => key;
-  } 
+  }
 
   if (!account) {
     if (id === 'onbudget') {
