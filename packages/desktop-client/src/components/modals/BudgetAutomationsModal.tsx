@@ -12,11 +12,9 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import {
-  addMonths,
   currentMonth,
   dayFromDate,
   firstDayOfMonth,
-  monthFromDate,
 } from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type {
@@ -26,13 +24,16 @@ import type {
 import type { Template } from '@actual-app/core/types/models/templates';
 import { css } from '@emotion/css';
 import debounce from 'lodash/debounce';
-import uniqueId from 'lodash/uniqueId';
 
 import { Warning } from '#components/alerts';
+import {
+  createAutomationEntry,
+  getAutomationExamples,
+} from '#components/budget/goals/automationExamples';
+import type { AutomationEntry } from '#components/budget/goals/automationExamples';
 import { displayTemplateTypes } from '#components/budget/goals/constants';
 import type { DisplayTemplateType } from '#components/budget/goals/constants';
 import {
-  DEFAULT_PRIORITY,
   getInitialState,
   templateReducer,
 } from '#components/budget/goals/reducer';
@@ -64,12 +65,6 @@ import { useSchedules } from '#hooks/useSchedules';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
-type AutomationEntry = {
-  id: string;
-  template: Template;
-  displayType: DisplayTemplateType;
-};
-
 const MODAL_WIDTH = 960;
 const MODAL_HEIGHT = 760;
 const RULE_LIST_WIDTH = 310;
@@ -97,17 +92,6 @@ function getDisplayTypeFromTemplate(template: Template): DisplayTemplateType {
     default:
       return 'fixed';
   }
-}
-
-function createAutomationEntry(
-  template: Template,
-  displayType: DisplayTemplateType,
-): AutomationEntry {
-  return {
-    id: uniqueId('automation-'),
-    template,
-    displayType,
-  };
 }
 
 export function migrateTemplatesToAutomations(
@@ -254,62 +238,6 @@ function BudgetAutomationMigrationWarning({
 type EmptyStateProps = {
   onAdd: (create: () => AutomationEntry) => void;
 };
-
-type AutomationExample = {
-  displayType: DisplayTemplateType;
-  create: () => AutomationEntry;
-};
-
-function getAutomationExamples(): AutomationExample[] {
-  return [
-    {
-      displayType: 'fixed',
-      create: () =>
-        createAutomationEntry(
-          {
-            directive: 'template',
-            type: 'periodic',
-            amount: 100,
-            period: { period: 'month', amount: 1 },
-            starting: dayFromDate(firstDayOfMonth(new Date())),
-            priority: DEFAULT_PRIORITY,
-          },
-          'fixed',
-        ),
-    },
-    {
-      displayType: 'by',
-      create: () =>
-        createAutomationEntry(
-          {
-            directive: 'template',
-            type: 'by',
-            amount: 1200,
-            // Always 12 months out so users in late-year months don't get a
-            // target that's already passed.
-            month: addMonths(monthFromDate(new Date()), 12),
-            annual: true,
-            repeat: 1,
-            priority: DEFAULT_PRIORITY,
-          },
-          'by',
-        ),
-    },
-    {
-      displayType: 'schedule',
-      create: () =>
-        createAutomationEntry(
-          {
-            directive: 'template',
-            type: 'schedule',
-            name: '',
-            priority: DEFAULT_PRIORITY,
-          },
-          'schedule',
-        ),
-    },
-  ];
-}
 
 function EmptyState({ onAdd }: EmptyStateProps) {
   const examples = getAutomationExamples();
