@@ -1,7 +1,7 @@
 import React, { createRef, PureComponent, useEffect, useMemo } from 'react';
 import type { ReactElement, RefObject } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { Navigate, useLocation, useParams } from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
@@ -1974,6 +1974,7 @@ function AccountHack(props: AccountHackProps) {
 export function Account() {
   const params = useParams();
   const location = useLocation();
+  const { t: translate } = useTranslation();
 
   const { data: { grouped: categoryGroups } = { grouped: [] } } =
     useCategories();
@@ -2037,7 +2038,7 @@ export function Account() {
     account => account.id === params.id,
   );
 
-  const accountTitle = getAccountTitle(account, params.id);
+  const accountTitle = getAccountTitle(account, params.id, translate);
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
@@ -2089,19 +2090,23 @@ export function Account() {
   );
 }
 
-function getAccountTitle(account?: AccountEntity, id?: string): string {
+function getAccountTitle(account?: AccountEntity, id?: string, translate?: (key: string) => string): string {
+  if (!translate) {
+    translate = (key: string) => key;
+  } 
+
   if (!account) {
     if (id === 'onbudget') {
-      return t('On Budget Account Transactions');
+      return translate('On Budget Account Transactions');
     } else if (id === 'offbudget') {
-      return t('Off Budget Account Transactions');
+      return translate('Off Budget Account Transactions');
     } else if (id === 'uncategorized') {
-      return t('Uncategorized Transactions');
+      return translate('Uncategorized Transactions');
     } else if (!id) {
-      return t('All Account Transactions');
+      return translate('All Account Transactions');
     }
-    return t('Account Transactions');
+    return translate('Account Transactions');
   }
 
-  return `${account.name} \u2014 Account Transactions`;
+  return `${account.name} \u2014 ${translate('Account Transactions')}`;
 }
