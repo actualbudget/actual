@@ -2091,9 +2091,9 @@ export function Account() {
 }
 
 function getAccountTitle(
-    account: AccountEntity | undefined,
-    id: string | undefined,
-    t: (key: string) => string
+  account: AccountEntity | undefined,
+  id: string | undefined,
+  t: (key: string) => string,
 ): string {
   if (!account) {
     if (id === 'onbudget') {
