@@ -232,11 +232,12 @@ export function AccountHeader({
     'ctrl+f, cmd+f, meta+f',
     e => {
       if (searchInput.current) {
-        if (document.activeElement !== searchInput.current) {
+        // Trigger browser-native find if user pressed search twice in a row
+        if (document.activeElement === searchInput.current) {
+          searchInput.current.blur();
+        } else {
           e.preventDefault();
           searchInput.current.focus();
-        } else {
-          searchInput.current.blur();
         }
       }
     },
