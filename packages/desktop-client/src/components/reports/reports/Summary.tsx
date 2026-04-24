@@ -348,7 +348,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       }
       padding={0}
     >
-      <Title value={t(`${title} \u2014 Report Summary`)} />
+      <Title value={`${title} \u2014 ${t('Report Summary')}`} />
       <Header
         allMonths={allMonths}
         start={start}
