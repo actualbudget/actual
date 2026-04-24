@@ -2091,26 +2091,22 @@ export function Account() {
 }
 
 function getAccountTitle(
-  account?: AccountEntity,
-  id?: string,
-  translate?: (key: string) => string,
+    account: AccountEntity | undefined,
+    id: string | undefined,
+    t: (key: string) => string
 ): string {
-  if (!translate) {
-    translate = (key: string) => key;
-  }
-
   if (!account) {
     if (id === 'onbudget') {
-      return translate('On Budget Account Transactions');
+      return t('On Budget Account Transactions');
     } else if (id === 'offbudget') {
-      return translate('Off Budget Account Transactions');
+      return t('Off Budget Account Transactions');
     } else if (id === 'uncategorized') {
-      return translate('Uncategorized Transactions');
+      return t('Uncategorized Transactions');
     } else if (!id) {
-      return translate('All Account Transactions');
+      return t('All Account Transactions');
     }
-    return translate('Account Transactions');
+    return t('Account Transactions');
   }
 
-  return `${account.name} \u2014 ${translate('Account Transactions')}`;
+  return `${account.name} \u2014 ${t('Account Transactions')}`;
 }
