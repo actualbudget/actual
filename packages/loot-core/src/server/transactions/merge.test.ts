@@ -111,7 +111,7 @@ describe('Merging success', () => {
   } as db.DbViewTransaction;
 
   const transaction2 = {
-    account: 'two',
+    account: 'one',
     date: '2025-02-02',
     payee: 'payee2',
     notes: 'notes2',
@@ -122,7 +122,7 @@ describe('Merging success', () => {
   } as TransactionEntity;
 
   const dbTransaction2 = {
-    account: 'two',
+    account: 'one',
     date: 20250202,
     payee: 'payee2',
     notes: 'notes2',
