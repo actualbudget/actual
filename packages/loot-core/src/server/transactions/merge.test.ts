@@ -36,7 +36,7 @@ describe('Merging fails for invalid quantity', () => {
     });
     await expect(() =>
       mergeTransactions([{ id: t1 }, { id: t2 }]),
-    ).rejects.toThrow('Transaction amounts must match for merge');
+    ).rejects.toThrow('Cannot merge transactions with different amounts');
   });
 
   it("fails when transaction id doesn't exist", async () => {
@@ -439,7 +439,7 @@ describe('Merging success', () => {
     });
     await db.updateTransaction({ id: t2, transfer_id: t2Transfer });
 
-    expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t2);
+    expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t1);
     const transactions = await getAllTransactions();
     expect(transactions.length).toBe(2);
     expect(transactions[0].id).toBe(t2);

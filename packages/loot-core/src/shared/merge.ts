@@ -12,7 +12,7 @@ export function validForMergeExplanation(
   transactionB: TransactionEntity | undefined,
 ): string {
   if (!transactionA || !transactionB) {
-    return 'One of the transactions does not exist';
+    return 'One of the provided transactions does not exist';
   }
   if (transactionA.account !== transactionB.account) {
     return 'Cannot merge transactions from different accounts';
