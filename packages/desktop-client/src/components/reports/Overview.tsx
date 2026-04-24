@@ -736,7 +736,7 @@ export function Overview({ dashboard }: OverviewProps) {
       padding={10}
     >
       <Title
-        value={t(`${dashboard.name || 'Untitled'} \u2014 Report Dashboard`)}
+        value={`${dashboard.name || t('Untitled')} \u2014 ${t('Report Dashboard')}`}
       />
       {isImporting ? (
         <LoadingIndicator message={t('Import is running...')} />
