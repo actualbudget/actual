@@ -53,8 +53,8 @@ export async function mergeTransactions(
   // either there is one transaction or there are two transfers, which does not enter this error state
   if (transferAccount && !(aTransferId && bTransferId)) {
     const payee = await db.getPayee(transferAccount);
-    const account = await db.getAccount(payee.transfer_acct);
-    if (!account.offbudget) {
+    const account = await db.getAccount(payee?.transfer_acct ?? '');
+    if (account && !account.offbudget) {
       await db.updateTransaction({ id: keptTxId, category: null });
     }
   }
