@@ -424,6 +424,7 @@ describe('Merging success', () => {
   it('transfer link is preserved on drop', async () => {
     const t1 = await db.insertTransaction({
       ...transaction1,
+      category: 'category_id',
       imported_id: 'import_1',
       imported_payee: 'payee_import_2',
     });
@@ -442,7 +443,8 @@ describe('Merging success', () => {
     expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t1);
     const transactions = await getAllTransactions();
     expect(transactions.length).toBe(2);
-    expect(transactions[0].id).toBe(t2);
+    expect(transactions[0].id).toBe(t1);
+    expect(transactions[0].category).toBe(null);
     expect(transactions[1].id).toBe(t2Transfer);
     expect(transactions[0].imported_id).toBe('import_1');
     expect(transactions[0].imported_payee).toBe('payee_import_2');
