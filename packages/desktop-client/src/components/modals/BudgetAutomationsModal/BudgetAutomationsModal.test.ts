@@ -1,6 +1,6 @@
 import type { Template } from '@actual-app/core/types/models/templates';
 
-import { migrateTemplatesToAutomations } from './BudgetAutomationsModal';
+import { migrateTemplatesToAutomations } from './migrateTemplatesToAutomations';
 
 describe('migrateTemplatesToAutomations', () => {
   it('preserves simple templates that have no limit and no monthly amount', () => {
