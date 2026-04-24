@@ -6,6 +6,7 @@ import { logger } from '#platform/server/log';
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { TRANSACTION_SORT_INCREMENT } from '#server/db/sort';
+import { isMLEnabled, predictCategories } from '#server/ml-categorization';
 import { runMutator } from '#server/mutators';
 import { post } from '#server/post';
 import { getServer } from '#server/server-config';
@@ -697,7 +698,9 @@ export async function matchTransactions(
   } of normalized) {
     // Run the rules
     const trans = await runRules(originalTrans, accountsMap);
-    const uncategorizedCount = normalized.filter(({ trans }) => !trans.category).length;
+    const uncategorizedCount = normalized.filter(
+      ({ trans }) => !trans.category,
+    ).length;
     logger.log('Number of uncategorized transactions:', uncategorizedCount);
 
     let match = null;

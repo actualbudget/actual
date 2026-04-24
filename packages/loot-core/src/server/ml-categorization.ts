@@ -12,15 +12,12 @@
  *   ACTUAL_ML_APPLY_PREPROCESSING - Set to 'true' to apply note cleaning before prediction (default: 'false')
  */
 
+import { load } from 'npyjs';
+import type { NpyArray } from 'npyjs';
+import { InferenceSession, Tensor } from 'onnxruntime-web';
+
+import { readFile } from '#platform/server/fs';
 import { logger } from '#platform/server/log';
-
-
-
-
- import { InferenceSession, Tensor } from "onnxruntime-web";
- import { load } from "npyjs";
- import type { NpyArray } from "npyjs";
-import { log } from 'console';
 
 /**
  * Get environment variable with fallback
@@ -78,13 +75,13 @@ export function isPreprocessingEnabled(): boolean {
  */
 export function cleanNotes(notes: string | null | undefined): string {
   if (!notes) {
-    return "";
+    return '';
   }
   const LOCATION_PATTERNS = /\b(London|GB|GBR|ENG)\b/gi;
   const WHITESPACE_PATTERN = /\s+/g;
   let cleaned = String(notes);
-  cleaned = cleaned.replace(LOCATION_PATTERNS, "");
-  cleaned = cleaned.replace(WHITESPACE_PATTERN, " ").trim();
+  cleaned = cleaned.replace(LOCATION_PATTERNS, '');
+  cleaned = cleaned.replace(WHITESPACE_PATTERN, ' ').trim();
 
   return cleaned;
 }
@@ -102,7 +99,10 @@ let labelClasses: string[] | null = null;
 let isInitialized = false;
 
 // Modified function
-export async function initializeML(modelPath?: string, classesPath?: string): Promise<InferenceSession | null> {
+export async function initializeML(
+  modelPath?: string,
+  classesPath?: string,
+): Promise<InferenceSession | null> {
   const modelFilePath = modelPath ?? getModelPath();
   const classesFilePath = classesPath ?? getClassesPath();
 
@@ -127,7 +127,9 @@ export async function initializeML(modelPath?: string, classesPath?: string): Pr
     if (classesFilePath) {
       // Load classes file using Node.js fs for file:// paths or fetch for URLs
       labelClasses = await loadClassesFile(classesFilePath);
-      logger.info(`Loaded ${labelClasses.length} label classes from: ${classesFilePath}`);
+      logger.info(
+        `Loaded ${labelClasses.length} label classes from: ${classesFilePath}`,
+      );
     } else {
       logger.warn('ML model loaded but no classes file found');
       labelClasses = null;
@@ -152,13 +154,15 @@ async function loadClassesFile(path: string): Promise<string[]> {
   let resolvedPath = path;
 
   // For local files, read with fs and pass as an ArrayBuffer to load()
-  if (!resolvedPath.startsWith('http://') && !resolvedPath.startsWith('https://')) {
+  if (
+    !resolvedPath.startsWith('http://') &&
+    !resolvedPath.startsWith('https://')
+  ) {
     // Strip file:// prefix if present
     if (resolvedPath.startsWith('file://')) {
       resolvedPath = resolvedPath.replace('file://', '');
     }
-    const fs = await import('fs/promises');
-    const buffer = await fs.readFile(resolvedPath);
+    const buffer = await readFile(resolvedPath, 'binary');
     // npyjs load() accepts an ArrayBuffer directly
     const npy = await load(buffer.buffer as ArrayBuffer);
     return extractClassesFromNpy(npy);
@@ -168,7 +172,6 @@ async function loadClassesFile(path: string): Promise<string[]> {
   const npy = await load(resolvedPath);
   return extractClassesFromNpy(npy);
 }
-
 
 /**
  * Extract string class labels from a loaded npyjs result.
@@ -183,7 +186,7 @@ function extractClassesFromNpy(npy: NpyArray<ArrayBufferView>): string[] {
   };
 
   logger.info(
-    `Loaded npy array: shape=${JSON.stringify(shape)}, dtype=${dtype}`
+    `Loaded npy array: shape=${JSON.stringify(shape)}, dtype=${dtype}`,
   );
 
   const count = shape[0];
@@ -191,9 +194,9 @@ function extractClassesFromNpy(npy: NpyArray<ArrayBufferView>): string[] {
 
   for (let i = 0; i < count; i++) {
     const value = data[i];
-    if (typeof value === "string") {
+    if (typeof value === 'string') {
       classes.push(value);
-    } else if (typeof value === "number") {
+    } else if (typeof value === 'number') {
       classes.push(String(value));
     } else if (value instanceof Uint8Array) {
       classes.push(new TextDecoder().decode(value));
@@ -204,7 +207,7 @@ function extractClassesFromNpy(npy: NpyArray<ArrayBufferView>): string[] {
 
   if (classes.length === 0) {
     throw new Error(
-      `Failed to extract classes from npy array (dtype: ${dtype}, shape: ${shape})`
+      `Failed to extract classes from npy array (dtype: ${dtype}, shape: ${JSON.stringify(shape)})`,
     );
   }
 
@@ -229,7 +232,7 @@ export function resetML(): void {
  * @returns The predicted category id, or null if prediction fails or ML is disabled
  */
 export async function predictCategories(
-  notesArray: (string | null | undefined)[]
+  notesArray: (string | null | undefined)[],
 ): Promise<(string | null)[]> {
   if (!isInitialized || !inferenceSession) {
     await initializeML();
@@ -245,8 +248,8 @@ export async function predictCategories(
   notesArray.forEach((notes, i) => {
     const processed = isPreprocessingEnabled()
       ? cleanNotes(notes)
-      : notes ?? "";
-    if (processed.trim() !== "") {
+      : (notes ?? '');
+    if (processed.trim() !== '') {
       validNotes.push(processed);
       indexMap.push(i);
     }
@@ -258,7 +261,7 @@ export async function predictCategories(
 
   try {
     // Batch input: shape [n] instead of [1]
-    const inputTensor = new Tensor("string", validNotes, [validNotes.length]);
+    const inputTensor = new Tensor('string', validNotes, [validNotes.length]);
 
     const feeds: Record<string, Tensor> = {};
     feeds[inferenceSession.inputNames[0]] = inputTensor;
@@ -270,7 +273,7 @@ export async function predictCategories(
 
     const results: (string | null)[] = new Array(notesArray.length).fill(null);
 
-    if (output.type === "string") {
+    if (output.type === 'string') {
       // Model outputs string labels directly
       indexMap.forEach((originalIndex, i) => {
         results[originalIndex] = (output.data as string[])[i] ?? null;
@@ -288,10 +291,11 @@ export async function predictCategories(
 
     return results;
   } catch (error) {
-    logger.error("ML batch prediction failed:", error);
+    logger.error('ML batch prediction failed:', error);
     return notesArray.map(() => null);
   }
 }
+
 /**
  * Apply ML categorization to a batch of transactions
  * This is the main entry point for integrating with the rules system
@@ -299,16 +303,16 @@ export async function predictCategories(
  * @param transactions - Array of transaction objects to categorize
  * @returns The transactions with potentially modified categories, or originals if ML fails/disabled
  */
-export async function applyMLCategorization<T extends { id?: string; notes?: string | null; category?: string | null }>(
-  transactions: T[],
-): Promise<T[]> {
+export async function applyMLCategorization<
+  T extends { id?: string; notes?: string | null; category?: string | null },
+>(transactions: T[]): Promise<T[]> {
   // Skip if ML is not enabled
   if (!isMLEnabled()) {
     return transactions;
   }
 
   // Extract notes from transactions (skip those that already have a category)
-  const notes = transactions.map(t => t.category != null ? null : t.notes);
+  const notes = transactions.map(t => (t.category != null ? null : t.notes));
 
   // Get batch predictions for all notes
   const predictions = await predictCategories(notes);
@@ -322,7 +326,9 @@ export async function applyMLCategorization<T extends { id?: string; notes?: str
 
     const predictedCategory = predictions[i];
     if (predictedCategory) {
-      logger.debug(`ML predicted category ${predictedCategory} for transaction ${transaction.id ?? 'unknown'}`);
+      logger.debug(
+        `ML predicted category ${predictedCategory} for transaction ${transaction.id ?? 'unknown'}`,
+      );
       return { ...transaction, category: predictedCategory };
     }
 
@@ -330,5 +336,18 @@ export async function applyMLCategorization<T extends { id?: string; notes?: str
   });
 }
 
+export async function previewMLPredictions(
+  transactions: { id: string; notes: string | null | undefined }[],
+): Promise<{ id: string; predictedCategory: string | null }[]> {
+  if (!isMLEnabled()) {
+    return transactions.map(t => ({ id: t.id, predictedCategory: null }));
+  }
 
+  const notes = transactions.map(t => t.notes);
+  const predictions = await predictCategories(notes);
 
+  return transactions.map((t, i) => ({
+    id: t.id,
+    predictedCategory: predictions[i],
+  }));
+}

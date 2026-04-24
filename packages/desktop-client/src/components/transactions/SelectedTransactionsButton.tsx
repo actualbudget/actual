@@ -352,6 +352,10 @@ export function SelectedTransactionsButton({
                       name: 'run-rules',
                       text: t('Run Rules'),
                     } as const,
+                    {
+                      name: 'predict-ml',
+                      text: t('Predict with AI'),
+                    } as const,
                   ]),
 
               ...(showMakeTransfer
@@ -441,6 +445,21 @@ export function SelectedTransactionsButton({
             break;
           case 'run-rules':
             onRunRules(selectedIds);
+            break;
+          case 'predict-ml':
+            dispatch(
+              pushModal({
+                modal: {
+                  name: 'ml-categorization',
+                  options: {
+                    transactionIds: selectedIds,
+                    onComplete: () => {
+                      // Optionally refresh or notify
+                    },
+                  },
+                },
+              }),
+            );
             break;
           case 'set-transfer':
             onSetTransfer(selectedIds);
