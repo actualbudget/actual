@@ -2042,7 +2042,7 @@ export function Account() {
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
-      <Title value={`${accountTitle}`} />
+      <Title value={accountTitle} />
       <SchedulesProvider query={schedulesQuery}>
         <SplitsExpandedProvider
           initialMode={expandSplits ? 'collapse' : 'expand'}
