@@ -73,20 +73,26 @@ export function createSpendingSpreadsheet({
             const v = cond.value;
             let hits = false;
             if (cond.field === 'category') {
-              if (cond.op === 'is') {hits = cat.id === v;}
-              else if (cond.op === 'isNot') {hits = cat.id !== v;}
-              else if (cond.op === 'oneOf')
-                {hits = Array.isArray(v) && v.includes(cat.id);}
-              else if (cond.op === 'notOneOf')
-                {hits = Array.isArray(v) && !v.includes(cat.id);}
+              if (cond.op === 'is') {
+                hits = cat.id === v;
+              } else if (cond.op === 'isNot') {
+                hits = cat.id !== v;
+              } else if (cond.op === 'oneOf') {
+                hits = Array.isArray(v) && v.includes(cat.id);
+              } else if (cond.op === 'notOneOf') {
+                hits = Array.isArray(v) && !v.includes(cat.id);
+              }
             } else {
               // category_group
-              if (cond.op === 'is') {hits = cat.group === v;}
-              else if (cond.op === 'isNot') {hits = cat.group !== v;}
-              else if (cond.op === 'oneOf')
-                {hits = Array.isArray(v) && v.includes(cat.group);}
-              else if (cond.op === 'notOneOf')
-                {hits = Array.isArray(v) && !v.includes(cat.group);}
+              if (cond.op === 'is') {
+                hits = cat.group === v;
+              } else if (cond.op === 'isNot') {
+                hits = cat.group !== v;
+              } else if (cond.op === 'oneOf') {
+                hits = Array.isArray(v) && v.includes(cat.group);
+              } else if (cond.op === 'notOneOf') {
+                hits = Array.isArray(v) && !v.includes(cat.group);
+              }
             }
             if (hits) matched.add(cat.id);
           }
