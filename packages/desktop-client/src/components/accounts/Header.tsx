@@ -230,14 +230,19 @@ export function AccountHeader({
 
   useHotkeys(
     'ctrl+f, cmd+f, meta+f',
-    () => {
+    e => {
       if (searchInput.current) {
-        searchInput.current.focus();
+        if (document.activeElement !== searchInput.current) {
+          e.preventDefault();
+          searchInput.current.focus();
+        } else {
+          searchInput.current.blur();
+        }
       }
     },
     {
       enableOnFormTags: true,
-      preventDefault: true,
+      preventDefault: false,
       scopes: ['app'],
     },
     [searchInput],
