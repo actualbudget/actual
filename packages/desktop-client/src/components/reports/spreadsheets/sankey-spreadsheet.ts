@@ -204,8 +204,9 @@ export function createBudgetSpreadsheet(
 
     const accumulate_months = monthResponses.reduce(
       (acc, response, index) => {
-        acc.toBudget += response.toBudget;
-
+        if (index === monthResponses.length - 1) {
+          acc.toBudget = response.toBudget;
+        }
         if (index === 0) {
           acc.fromPreviousMonth = response.fromLastMonth;
         }
@@ -822,7 +823,9 @@ function groupOtherCategories(
   // For each category group, find the top N categories by total value and group the rest into "Other"
   const deletedNodes = new Map<NodeKey, { key: NodeKey; data: NodeData }[]>();
 
-  let categoryNodes = nodesInLayer(graph, GraphLayers.Category);
+  let categoryNodes = nodesInLayer(graph, GraphLayers.Category).filter(
+    s => !s.endsWith(SpecialNodeKeys.OtherSuffix),
+  );
   while (categoryNodes.length > topN) {
     const categoryNodeSet = new Set(categoryNodes);
     const values = new Map<NodeKey, number>();
@@ -872,7 +875,9 @@ function groupOtherCategories(
     moveToOther(graph, categoryToDelete, categorySort === 'global');
     graph.delete(categoryToDelete);
 
-    categoryNodes = nodesInLayer(graph, GraphLayers.Category);
+    categoryNodes = nodesInLayer(graph, GraphLayers.Category).filter(
+      s => !s.endsWith(SpecialNodeKeys.OtherSuffix),
+    );
   }
 
   promoteOtherBack(graph, deletedNodes, categorySort === 'global');
@@ -909,13 +914,7 @@ function moveToOther(graph: Graph, key: NodeKey, globalOther: boolean = false) {
     otherGroupKey = categoryGroupKey + SpecialNodeKeys.OtherSuffix;
   }
 
-  if (!graph.has(otherGroupKey)) {
-    graph.set(otherGroupKey, {
-      to: new Map(),
-      type: GraphLayers.Category,
-      labelKey: 'Other',
-    });
-  }
+  addNodeWithLabel(graph, otherGroupKey, GraphLayers.Category, 'Other');
   addValueToLink(graph, categoryGroupKey, otherGroupKey, categoryValue);
   addTooltipInfo(graph, categoryGroupKey, key, categoryValue);
   deleteLink(graph, categoryGroupKey, key);
