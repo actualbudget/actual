@@ -421,7 +421,7 @@ describe('Merging success', () => {
     expect(orphanedChildren.length).toBe(0);
   });
 
-  it('keeps transferred transaction, copying import id', async () => {
+  it('transfer link is preserved on drop', async () => {
     const t1 = await db.insertTransaction({
       ...transaction1,
       imported_id: 'import_1',
@@ -446,5 +446,47 @@ describe('Merging success', () => {
     expect(transactions[1].id).toBe(t2Transfer);
     expect(transactions[0].imported_id).toBe('import_1');
     expect(transactions[0].imported_payee).toBe('payee_import_2');
+  });
+
+  it('merging two transfers selects the best transaction in each account to preserve', async () => {
+    // A -> B
+    const a = await db.insertTransaction({
+      ...transaction1,
+      amount: -10,
+      date: '2025-01-01', // A is earlier than C
+    });
+    const b = await db.insertTransaction({
+      ...transaction2,
+      amount: 10,
+      date: '2025-01-05', // B is later than D
+      transfer_id: a,
+    });
+    await db.updateTransaction({ id: a, transfer_id: b });
+
+    // C -> D
+    const c = await db.insertTransaction({
+      ...transaction1,
+      amount: -10,
+      date: '2025-01-03', // C is later than A
+    });
+    const d = await db.insertTransaction({
+      ...transaction2,
+      amount: 10,
+      date: '2025-01-02', // D is earlier than B
+      transfer_id: c,
+    });
+    await db.updateTransaction({ id: c, transfer_id: d });
+
+    // Merge A and C
+    expect(await mergeTransactions([{ id: a }, { id: c }])).toBe(a);
+
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(2);
+
+    expect(transactions[0].id).toBe(d); // 2025-01-02 is more recent than 2025-01-01
+    expect(transactions[1].id).toBe(a);
+
+    expect(transactions[0].transfer_id).toBe(a);
+    expect(transactions[1].transfer_id).toBe(d);
   });
 });

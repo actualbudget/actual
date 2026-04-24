@@ -1,5 +1,6 @@
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
+import { validForMergeExplanation } from '#shared/merge';
 import { q } from '#shared/query';
 import {
   deleteTransaction as sharedDeleteTransaction,
@@ -20,16 +21,79 @@ export async function mergeTransactions(
         JSON.stringify(transactions),
     );
   }
+  const [a, b] = await mapAndValidateTransactions(txIds[0], txIds[1]);
+  const aTransferId = a.transfer_id;
+  const bTransferId = b.transfer_id;
+  const transferAccount = aTransferId
+    ? a.payee
+    : bTransferId
+      ? b.payee
+      : undefined;
 
-  // get most recent transactions
-  const [a, b]: TransactionEntity[] = await Promise.all(
-    txIds.map(db.getTransaction),
-  );
-  if (!a || !b) {
-    throw new Error('One of the provided transactions does not exist');
-  } else if (a.amount !== b.amount) {
-    throw new Error('Transaction amounts must match for merge');
+  await setTransfers([a.id, b.id, aTransferId, bTransferId], null);
+  const transferId = await mergeTransfers(aTransferId, bTransferId);
+  const keptTxId = await mergeTransactionsNoTransfer(a, b);
+  if (transferId) {
+    await db.updateTransaction({
+      id: keptTxId,
+      transfer_id: transferId,
+      payee: transferAccount,
+      category: null,
+    });
+    await db.updateTransaction({ id: transferId, transfer_id: keptTxId });
   }
+  return keptTxId;
+}
+
+async function setTransfers(
+  txIds: (TransactionEntity['id'] | undefined)[],
+  transfer_id: string | null | undefined,
+) {
+  return Promise.all(
+    txIds
+      .filter(Boolean)
+      .map(txId =>
+        db.updateTransaction({ id: txId, transfer_id: transfer_id ?? null }),
+      ),
+  );
+}
+
+async function mergeTransfers(
+  aTransferId: TransactionEntity['id'] | undefined,
+  bTransferId: TransactionEntity['id'] | undefined,
+) {
+  // if only one is a transfer, we can skip merging
+  if (!aTransferId) return bTransferId;
+  if (!bTransferId) return aTransferId;
+
+  // clear transfers and merge
+  const [aTransfer, bTransfer] = await mapAndValidateTransactions(
+    aTransferId,
+    bTransferId,
+  );
+  await setTransfers([aTransfer.id, bTransfer.id], null);
+  return mergeTransactionsNoTransfer(aTransfer, bTransfer);
+}
+
+async function mapAndValidateTransactions(
+  aId: TransactionEntity['id'],
+  bId: TransactionEntity['id'],
+): Promise<TransactionEntity[]> {
+  // get most recent transactions
+  const a: TransactionEntity = await db.getTransaction(aId);
+  const b: TransactionEntity = await db.getTransaction(bId);
+
+  const validForMergeError = validForMergeExplanation(a, b);
+  if (validForMergeError) {
+    throw new Error(validForMergeError);
+  }
+  return [a, b];
+}
+
+export async function mergeTransactionsNoTransfer(
+  a: TransactionEntity,
+  b: TransactionEntity,
+): Promise<TransactionEntity['id']> {
   const { keep, drop } = determineKeepDrop(a, b);
 
   // Load subtransactions with a single query, then split by parent_id in memory
@@ -82,8 +146,6 @@ export async function mergeTransactions(
       cleared: keep.cleared || drop.cleared,
       reconciled: keep.reconciled || drop.reconciled,
       schedule: keep.schedule || drop.schedule,
-      imported_id: keep.imported_id || drop.imported_id,
-      imported_payee: keep.imported_payee || drop.imported_payee,
     } as unknown as TransactionEntity);
   } else {
     // Normal merge without subtransactions
@@ -95,8 +157,6 @@ export async function mergeTransactions(
       cleared: keep.cleared || drop.cleared,
       reconciled: keep.reconciled || drop.reconciled,
       schedule: keep.schedule || drop.schedule,
-      imported_id: keep.imported_id || drop.imported_id,
-      imported_payee: keep.imported_payee || drop.imported_payee,
     } as TransactionEntity);
   }
 
@@ -121,13 +181,6 @@ function determineKeepDrop(
   a: TransactionEntity,
   b: TransactionEntity,
 ): { keep: TransactionEntity; drop: TransactionEntity } {
-  // If one is a transfer and the other isn't, keep the transfer
-  if (b.transfer_id && !a.transfer_id) {
-    return { keep: b, drop: a };
-  } else if (a.transfer_id && !b.transfer_id) {
-    return { keep: a, drop: b };
-  }
-
   // if one is imported through bank sync and the other is manual,
   // keep the imported transaction
   if (b.imported_id && !a.imported_id) {
