@@ -67,6 +67,7 @@ export type SpendingWidget = AbstractWidget<
     compareTo?: string;
     isLive?: boolean;
     mode?: 'single-month' | 'budget' | 'average';
+    budgetCategoryScope?: 'all' | 'filtered';
   } | null
 >;
 export type BudgetAnalysisWidget = AbstractWidget<

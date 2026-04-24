@@ -5,6 +5,7 @@ import { send } from 'loot-core/platform/client/connection';
 import * as monthUtils from 'loot-core/shared/months';
 import { q } from 'loot-core/shared/query';
 import type {
+  CategoryEntity,
   RuleConditionEntity,
   SpendingEntity,
   SpendingMonthEntity,
@@ -21,6 +22,7 @@ type createSpendingSpreadsheetProps = {
   compare?: string;
   compareTo?: string;
   budgetType?: 'envelope' | 'tracking';
+  budgetCategoryScope?: 'all' | 'filtered';
 };
 
 export function createSpendingSpreadsheet({
@@ -29,6 +31,7 @@ export function createSpendingSpreadsheet({
   compare,
   compareTo,
   budgetType = 'envelope',
+  budgetCategoryScope = 'filtered',
 }: createSpendingSpreadsheetProps) {
   const startDate = monthUtils.subMonths(compare, 3) + '-01';
   const endDate = monthUtils.getMonthEnd(compare + '-01');
@@ -48,17 +51,51 @@ export function createSpendingSpreadsheet({
       conditions: conditions.filter(cond => !cond.customName),
     });
 
-    const { filters: budgetFilters } = await send(
-      'make-filters-from-conditions',
-      {
-        conditions: conditions.filter(
-          cond => !cond.customName && cond.field === 'category',
-        ),
-        applySpecialCases: false,
-      },
-    );
-
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
+
+    // Resolve which category IDs to filter the budget query by.
+    // We do this in JS rather than via make-filters-from-conditions because
+    // zero_budgets/reflect_budgets only have a raw `category` column — there
+    // is no join for category.group, so AQL-based group filters silently
+    // return all rows.
+    let budgetCategoryIds: string[] | null = null;
+    if (budgetCategoryScope === 'filtered') {
+      const categoryConditions = conditions.filter(
+        cond =>
+          !cond.customName &&
+          (cond.field === 'category' || cond.field === 'category_group'),
+      );
+      if (categoryConditions.length > 0) {
+        const { list: allCategories } = await send('get-categories');
+        const matched = new Set<string>();
+        for (const cond of categoryConditions) {
+          for (const cat of allCategories as CategoryEntity[]) {
+            const v = cond.value;
+            let hits = false;
+            if (cond.field === 'category') {
+              if (cond.op === 'is') {hits = cat.id === v;}
+              else if (cond.op === 'isNot') {hits = cat.id !== v;}
+              else if (cond.op === 'oneOf')
+                {hits = Array.isArray(v) && v.includes(cat.id);}
+              else if (cond.op === 'notOneOf')
+                {hits = Array.isArray(v) && !v.includes(cat.id);}
+            } else {
+              // category_group
+              if (cond.op === 'is') {hits = cat.group === v;}
+              else if (cond.op === 'isNot') {hits = cat.group !== v;}
+              else if (cond.op === 'oneOf')
+                {hits = Array.isArray(v) && v.includes(cat.group);}
+              else if (cond.op === 'notOneOf')
+                {hits = Array.isArray(v) && !v.includes(cat.group);}
+            }
+            if (hits) matched.add(cat.id);
+          }
+        }
+        if (matched.size > 0) {
+          budgetCategoryIds = [...matched];
+        }
+      }
+    }
 
     const [assets, debts] = await Promise.all([
       aqlQuery(
@@ -117,15 +154,18 @@ export function createSpendingSpreadsheet({
     const budgetMonth = parseInt(compare.replace('-', ''));
     const budgetTable =
       budgetType === 'tracking' ? 'reflect_budgets' : 'zero_budgets';
+    const budgetBaseQuery = q(budgetTable).filter({
+      $and: [{ month: { $eq: budgetMonth } }],
+    });
+    const budgetFilteredQuery =
+      budgetCategoryIds !== null
+        ? budgetBaseQuery.filter({
+            $or: budgetCategoryIds.map(id => ({ category: { $eq: id } })),
+          })
+        : budgetBaseQuery;
     const [budgets] = await Promise.all([
       aqlQuery(
-        q(budgetTable)
-          .filter({
-            $and: [{ month: { $eq: budgetMonth } }],
-          })
-          .filter({
-            [conditionsOpKey]: budgetFilters,
-          })
+        budgetFilteredQuery
           .groupBy([{ $id: '$category' }])
           .select([
             { category: { $id: '$category' } },

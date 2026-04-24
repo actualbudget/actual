@@ -51,6 +51,7 @@ type CustomTooltipProps = {
   selection: string | 'budget' | 'average';
   compare: string;
   format: (value: unknown, type?: FormatType) => string;
+  budgetLabel: string;
 };
 
 const CustomTooltip = ({
@@ -60,6 +61,7 @@ const CustomTooltip = ({
   selection,
   compare,
   format,
+  budgetLabel,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
 
@@ -113,7 +115,7 @@ const CustomTooltip = ({
                   selection === 'average'
                     ? t('Average:')
                     : selection === 'budget'
-                      ? t('Budgeted:')
+                      ? budgetLabel
                       : t('To:')
                 }
                 right={
@@ -153,6 +155,7 @@ type SpendingGraphProps = {
   mode: 'single-month' | 'budget' | 'average';
   compare: string;
   compareTo: string;
+  budgetLabel?: string;
 };
 
 export function SpendingGraph({
@@ -162,6 +165,7 @@ export function SpendingGraph({
   mode,
   compare,
   compareTo,
+  budgetLabel,
 }: SpendingGraphProps) {
   const privacyMode = usePrivacyMode();
   const animationProps = useRechartsAnimation({ isAnimationActive: false });
@@ -277,6 +281,7 @@ export function SpendingGraph({
                     selection={selection}
                     compare={compare}
                     format={format}
+                    budgetLabel={budgetLabel ?? 'Budgeted:'}
                   />
                 }
                 formatter={numberFormatterTooltip}

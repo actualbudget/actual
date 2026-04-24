@@ -100,6 +100,19 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   const [compare, setCompare] = useState(initialCompare);
   const [compareTo, setCompareTo] = useState(initialCompareTo);
   const [isLive, setIsLive] = useState(widget?.meta?.isLive ?? true);
+  const [budgetCategoryScope, setBudgetCategoryScope] = useState<
+    'all' | 'filtered'
+  >(widget?.meta?.budgetCategoryScope ?? 'filtered');
+
+  const hasCategoryConditions = conditions.some(
+    c => c.field === 'category' || c.field === 'category_group',
+  );
+
+  useEffect(() => {
+    if (!hasCategoryConditions) {
+      setBudgetCategoryScope('all');
+    }
+  }, [hasCategoryConditions]);
 
   const [reportMode, setReportMode] = useState(initialReportMode);
 
@@ -150,8 +163,16 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
         compare,
         compareTo,
         budgetType,
+        budgetCategoryScope,
       }),
-    [conditions, conditionsOp, compare, compareTo, budgetType],
+    [
+      conditions,
+      conditionsOp,
+      compare,
+      compareTo,
+      budgetType,
+      budgetCategoryScope,
+    ],
   );
 
   const data = useReport('default', getGraphData);
@@ -177,6 +198,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
             compareTo,
             isLive,
             mode: reportMode,
+            budgetCategoryScope,
           },
         },
       },
@@ -375,6 +397,34 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
               </ModeButton>
             </SpaceBetween>
 
+            {reportMode === 'budget' && hasCategoryConditions && (
+              <>
+                <View
+                  style={{
+                    width: 1,
+                    height: 28,
+                    backgroundColor: theme.pillBorderDark,
+                    marginRight: 10,
+                    marginLeft: 10,
+                  }}
+                />
+                <Button
+                  variant={
+                    budgetCategoryScope === 'filtered' ? 'primary' : 'normal'
+                  }
+                  onPress={() =>
+                    setBudgetCategoryScope(s =>
+                      s === 'all' ? 'filtered' : 'all',
+                    )
+                  }
+                >
+                  {budgetCategoryScope === 'filtered'
+                    ? t('Categories Budgeted')
+                    : t('Total Budgeted')}
+                </Button>
+              </>
+            )}
+
             <View
               style={{
                 width: 1,
@@ -497,7 +547,9 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       reportMode === 'single-month'
                         ? monthUtils.format(compareTo, 'MMM yyyy', locale)
                         : reportMode === 'budget'
-                          ? t('Budgeted')
+                          ? budgetCategoryScope === 'filtered'
+                            ? t('Categories Budgeted')
+                            : t('Total Budgeted')
                           : t('Average')
                     }
                     style={{ padding: 0, paddingBottom: 10 }}
@@ -587,9 +639,15 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       left={
                         <Block>
                           {compare === monthUtils.currentMonth() ? (
-                            <Trans>Budgeted MTD</Trans>
+                            budgetCategoryScope === 'filtered' ? (
+                              <Trans>Categories Budgeted MTD</Trans>
+                            ) : (
+                              <Trans>Total Budgeted MTD</Trans>
+                            )
+                          ) : budgetCategoryScope === 'filtered' ? (
+                            <Trans>Categories Budgeted</Trans>
                           ) : (
-                            <Trans>Budgeted</Trans>
+                            <Trans>Total Budgeted</Trans>
                           )}
                         </Block>
                       }
@@ -651,6 +709,11 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                   mode={reportMode}
                   compare={compare}
                   compareTo={compareTo}
+                  budgetLabel={
+                    budgetCategoryScope === 'filtered'
+                      ? t('Categories Budgeted:')
+                      : t('Total Budgeted:')
+                  }
                 />
               ) : (
                 <LoadingIndicator message={t('Loading report...')} />
