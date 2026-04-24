@@ -120,5 +120,9 @@
     "node": ">=22",
     "yarn": "^4.9.1"
   },
-  "packageManager": "yarn@4.13.0"
+  "packageManager": "yarn@4.13.0",
+  "dependencies": {
+    "npyjs": "^1.1.0",
+    "onnxruntime-web": "^1.24.3"
+  }
 }

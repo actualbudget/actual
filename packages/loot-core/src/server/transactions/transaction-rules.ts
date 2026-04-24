@@ -378,7 +378,7 @@ export async function runRules(
       finalTrans = rules[i].apply(finalTrans);
     }
   }
-
+  
   return await finalizeTransactionForRules(finalTrans);
 }
 
