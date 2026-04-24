@@ -68,14 +68,18 @@ function generateGroupId(): GroupId {
   return id;
 }
 
-function extractSingleHeader(req: Request, res: Response, key: string): string {
+function extractSingleHeader(
+  req: Request,
+  res: Response,
+  key: string,
+): string | null {
   const value = req.headers[key];
   if (!value) {
-    return '';
+    return null;
   }
   if (typeof value !== 'string') {
-    res.status(400).send('Duplicate headers encountered for key' + key);
-    return;
+    res.status(400).send('Duplicate headers encountered for key ' + key);
+    return null;
   }
   return value;
 }
@@ -298,10 +302,10 @@ app.post('/upload-user-file', async (req, res) => {
   }
 
   let groupId = req.headers['x-actual-group-id'] || null;
-  const encryptMeta =
-    extractSingleHeader(req, res, 'x-actual-encrypt-meta') || null;
-  const syncFormatVersion =
-    extractSingleHeader(req, res, 'x-actual-format') || null;
+  const encryptMeta = extractSingleHeader(req, res, 'x-actual-encrypt-meta');
+  if (res.headersSent) return;
+  const syncFormatVersion = extractSingleHeader(req, res, 'x-actual-format');
+  if (res.headersSent) return;
 
   if (!!groupId && (typeof groupId !== 'string' || !isValidGroupId(groupId))) {
     res.status(400).send('invalid groupId');

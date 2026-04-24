@@ -117,15 +117,15 @@ const boolToInt = (bool: boolean) => {
 
 type RawFile = {
   id: FileId;
-  group_id: GroupId;
-  sync_version: string;
-  name: string;
-  encrypt_meta: string;
-  encrypt_salt: string;
-  encrypt_test: string;
-  encrypt_keyid: string;
+  group_id: GroupId | null;
+  sync_version: string | null;
+  name: string | null;
+  encrypt_meta: string | null;
+  encrypt_salt: string | null;
+  encrypt_test: string | null;
+  encrypt_keyid: string | null;
   deleted: number;
-  owner: string;
+  owner: string | null;
 };
 
 class FilesService {
@@ -257,10 +257,14 @@ class FilesService {
     }
 
     // Return the modified object
-    return this.validate(this.getRaw(id));
+    const rawFile = this.getRaw(id);
+    if (!rawFile) {
+      throw new GenericFileError('File not found', { id });
+    }
+    return this.validate(rawFile);
   }
 
-  getRaw(fileId: FileId): RawFile {
+  getRaw(fileId: FileId): RawFile | null {
     return this.accountDb.first(`SELECT * FROM files WHERE id = ?`, [fileId]);
   }
 
