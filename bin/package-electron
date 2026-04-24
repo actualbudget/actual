@@ -9,6 +9,14 @@ cd "$ROOT/.."
 POSITIONAL=()
 SKIP_EXE_BUILD=false
 SKIP_TRANSLATIONS=false
+EXTRA_ELECTRON_BUILDER_ARGS=()
+
+if [ "$(uname)" == "Darwin" ] && [ -z "${CSC_LINK:-}" ]; then
+  EXTRA_ELECTRON_BUILDER_ARGS+=(
+    "-c.electronFuses.resetAdHocDarwinSignature=true"
+  )
+fi
+
 while [[ $# -gt 0 ]]; do
   key="$1"
 
@@ -76,11 +84,13 @@ yarn workspace desktop-electron update-client
         echo "Skipping exe build"
     else
       if [ "$RELEASE" == "production" ]; then
-          yarn build
+          yarn build:dist
+          yarn exec electron-builder "${EXTRA_ELECTRON_BUILDER_ARGS[@]}"
 
           echo "Created release"
       else
-          yarn build
+          yarn build:dist
+          yarn exec electron-builder "${EXTRA_ELECTRON_BUILDER_ARGS[@]}"
       fi
     fi
 )
