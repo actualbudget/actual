@@ -876,7 +876,7 @@ describe('CategoryTemplateContext', () => {
 
     it('should calculate monthly amount needed for multiple targets', () => {
       const result = CategoryTemplateContext.runBy(instance);
-      expect(result).toBe(66667);
+      expect(result.toBudget).toBe(66667);
     });
 
     it('should handle repeating targets', () => {
@@ -906,7 +906,7 @@ describe('CategoryTemplateContext', () => {
       );
 
       const result = CategoryTemplateContext.runBy(instance);
-      expect(result).toBe(83333);
+      expect(result.toBudget).toBe(83333);
     });
 
     it('should handle existing balance', () => {
@@ -934,7 +934,7 @@ describe('CategoryTemplateContext', () => {
       );
 
       const result = CategoryTemplateContext.runBy(instance);
-      expect(result).toBe(66500); // (1000 + 2000 - 5) / 3
+      expect(result.toBudget).toBe(66500); // (1000 + 2000 - 5) / 3
     });
   });
 

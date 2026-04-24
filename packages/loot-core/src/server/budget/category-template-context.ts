@@ -153,6 +153,7 @@ export class CategoryTemplateContext {
     let remainder = 0;
     let scheduleFlag = false;
     let schedulePerTemplate: Map<string, number> | null = null;
+    let byPerTemplate: Map<ByTemplate, number> | null = null;
     // switch on template type and calculate the amount for the line
     for (const template of t) {
       let newBudget = 0;
@@ -188,7 +189,9 @@ export class CategoryTemplateContext {
         case 'by': {
           // all by's get run at once
           if (!byFlag) {
-            newBudget = CategoryTemplateContext.runBy(this);
+            const ret = CategoryTemplateContext.runBy(this);
+            newBudget = ret.toBudget;
+            byPerTemplate = ret.perTemplateNeed;
           } else {
             newBudget = 0;
           }
@@ -240,9 +243,13 @@ export class CategoryTemplateContext {
     // per-template UI projections we want to split that batch across all the
     // sibling templates. The breakdown is approximate (equal split for schedule,
     // weighted by goal amount for by); the actual budgeted total is unaffected.
+    // Weight by each `by` template's effective per-month need (as computed
+    // inside runBy) rather than its raw target amount, so per-row UI
+    // projections reflect templates with shorter deadlines or different
+    // repeat windows correctly.
     redistributeBatch(perTemplateLocal, t, 'by', template => {
       if (template.type !== 'by') return 0;
-      return Math.max(0, template.amount);
+      return Math.max(0, byPerTemplate?.get(template) ?? 0);
     });
     // Schedules: weight by each schedule's actual monthly contribution as
     // computed by runSchedule, so the per-row UI projection reflects the
@@ -866,7 +873,10 @@ export class CategoryTemplateContext {
     return Math.round(average);
   }
 
-  static runBy(templateContext: CategoryTemplateContext): number {
+  static runBy(templateContext: CategoryTemplateContext): {
+    toBudget: number;
+    perTemplateNeed: Map<ByTemplate, number>;
+  } {
     const byTemplates: ByTemplate[] = templateContext.templates.filter(
       t => t.type === 'by',
     );
@@ -904,6 +914,7 @@ export class CategoryTemplateContext {
 
     // calculate needed funds per template
     const shortNumMonths = workingShortNumMonths || 0;
+    const perTemplateNeed = new Map<ByTemplate, number>();
     for (let i = 0; i < byTemplates.length; i++) {
       const template = byTemplates[i];
       const numMonths = savedInfo[i].numMonths;
@@ -935,11 +946,13 @@ export class CategoryTemplateContext {
           templateContext.currency.decimalPlaces,
         );
       }
+      perTemplateNeed.set(template, amount);
       totalNeeded += amount;
     }
-    return Math.round(
+    const toBudget = Math.round(
       (totalNeeded - templateContext.fromLastMonth) / (shortNumMonths + 1),
     );
+    return { toBudget, perTemplateNeed };
   }
 }
 

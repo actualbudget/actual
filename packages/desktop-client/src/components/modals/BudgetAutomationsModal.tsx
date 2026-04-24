@@ -1357,7 +1357,7 @@ function BudgetAutomationsBody({
         <Button
           variant="primary"
           onPress={onSave}
-          isDisabled={hasErrors || saving}
+          isDisabled={hasErrors || conflict !== null || saving}
         >
           <Trans>Save</Trans>
         </Button>
