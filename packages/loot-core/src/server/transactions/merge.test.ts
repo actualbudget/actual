@@ -443,11 +443,15 @@ describe('Merging success', () => {
     expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t1);
     const transactions = await getAllTransactions();
     expect(transactions.length).toBe(2);
-    expect(transactions[0].id).toBe(t1);
-    expect(transactions[0].category).toBe(null);
-    expect(transactions[1].id).toBe(t2Transfer);
-    expect(transactions[0].imported_id).toBe('import_1');
-    expect(transactions[0].imported_payee).toBe('payee_import_2');
+    const t1R = transactions.find(tx => tx.id === t1);
+    const t2TransferR = transactions.find(tx => tx.id === t2Transfer);
+    expect(t1R).toBeTruthy();
+    expect(t2TransferR).toBeTruthy();
+    expect(t2TransferR?.transfer_id).toBe(t1);
+    expect(t1R.category).toBeNull();
+    expect(t1R?.transfer_id).toBe(t2Transfer);
+    expect(t1R?.imported_id).toBe('import_1');
+    expect(t1R?.imported_payee).toBe('payee_import_2');
   });
 
   it('merging two transfers selects the best transaction in each account to preserve', async () => {
