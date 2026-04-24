@@ -2089,7 +2089,7 @@ export function Account() {
   );
 }
 
-function getAccountTitle(account?: AccountEntity, id?: string) {
+function getAccountTitle(account?: AccountEntity, id?: string): string {
   if (!account) {
     if (id === 'onbudget') {
       return t('On Budget Account Transactions');
@@ -2100,7 +2100,7 @@ function getAccountTitle(account?: AccountEntity, id?: string) {
     } else if (!id) {
       return t('All Account Transactions');
     }
-    return null;
+    return t('Account Transactions');
   }
 
   return `${account.name} \u2014 Account Transactions`;
