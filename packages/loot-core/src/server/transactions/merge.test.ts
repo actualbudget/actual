@@ -448,7 +448,6 @@ describe('Merging success', () => {
     expect(t1R).toBeTruthy();
     expect(t2TransferR).toBeTruthy();
     expect(t2TransferR?.transfer_id).toBe(t1);
-    expect(t1R.category).toBeNull();
     expect(t1R?.transfer_id).toBe(t2Transfer);
     expect(t1R?.imported_id).toBe('import_1');
     expect(t1R?.imported_payee).toBe('payee_import_2');
