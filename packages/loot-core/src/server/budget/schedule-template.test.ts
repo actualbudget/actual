@@ -169,6 +169,82 @@ describe('runSchedule', () => {
     expect(result.remainder).toBe(0);
   });
 
+  it('returns a per-template monthly attribution map keyed by trimmed template name', async () => {
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: '  Test Schedule  ',
+        directive: 'template',
+        priority: 0,
+      } as const,
+    ];
+    mockSingleSchedule({
+      start: '2024-08-01',
+      amount: -10000,
+      frequency: 'monthly',
+    });
+
+    const result = await runSchedule(
+      template_lines,
+      '2024-08-01',
+      0,
+      0,
+      0,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    expect(result.perScheduleMonthly.get('Test Schedule')).toBe(10000);
+    expect(result.to_budget).toBe(10000);
+  });
+
+  it('handles a pay-month-of monthly schedule alongside a yearly sinking schedule', async () => {
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: 'Internet',
+        directive: 'template',
+        priority: 0,
+      } as const,
+      {
+        type: 'schedule',
+        name: 'Insurance',
+        directive: 'template',
+        priority: 0,
+      } as const,
+    ];
+    mockSchedulesByName({
+      Internet: {
+        spec: { start: '2024-01-15', amount: -10000, frequency: 'monthly' },
+      },
+      Insurance: {
+        spec: { start: '2024-12-15', amount: -60000, frequency: 'yearly' },
+      },
+    });
+
+    const result = await runSchedule(
+      template_lines,
+      '2024-01-01',
+      0,
+      0,
+      0,
+      0,
+      [],
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    expect(result.errors).toHaveLength(0);
+    const internet = result.perScheduleMonthly.get('Internet') ?? 0;
+    const insurance = result.perScheduleMonthly.get('Insurance') ?? 0;
+    expect(internet).toBe(10000); // pay-month-of: full target
+    expect(insurance).toBeGreaterThan(0);
+    expect(insurance).toBeLessThan(internet);
+    expect(internet + insurance).toBeCloseTo(result.to_budget, -1);
+  });
+
   it('budgets nothing in advance for a yearly schedule with `full: true`', async () => {
     const template_lines = [
       {
