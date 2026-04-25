@@ -300,12 +300,7 @@ function periodToString(p: {
   period: 'day' | 'week' | 'month' | 'year';
   amount: number;
 }): string {
-  const { period, amount } = p;
-  if (amount === 1) {
-    return period; // singular
-  }
-  // pluralize simple
-  return `${amount} ${period}s`;
+  return `${p.amount} ${p.period}s`;
 }
 
 function repeatToString(annual?: boolean, repeat?: number): string | null {
