@@ -68,8 +68,11 @@ function setupAqlForCategoryLookup(cat: CategoryEntity) {
     if (queryStr.includes('defaultCurrencyCode')) {
       return { data: [{ value: 'USD' }], dependencies: [] };
     }
-    if (queryStr.includes('categories')) {
-      return { data: [cat], dependencies: [] };
+    if (queryStr.includes('category_groups')) {
+      return {
+        data: [{ id: cat.group, hidden: false, categories: [cat] }],
+        dependencies: [],
+      };
     }
     return { data: [], dependencies: [] };
   });

@@ -92,9 +92,9 @@ export function UnsupportedDirectivesNotice({
   );
 }
 
+const CLEANUP_DIRECTIVE = /^\s*#cleanup\b/;
+
 export function hasCleanupLine(notes: string | null | undefined): boolean {
   if (!notes) return false;
-  return notes
-    .split('\n')
-    .some(line => line.trimStart().startsWith('#cleanup'));
+  return notes.split('\n').some(line => CLEANUP_DIRECTIVE.test(line));
 }

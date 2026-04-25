@@ -19,12 +19,7 @@ export function BudgetAutomationMigrationWarning({
   if (!notes) return null;
   const templates = notes
     .split('\n')
-    .flatMap(line => {
-      if (line.trim().startsWith('#template')) return line;
-      if (line.trim().startsWith('#goal')) return line;
-      if (line.trim().startsWith('#cleanup')) return line;
-      return [];
-    })
+    .filter(line => /^\s*#(template|goal|cleanup)\b/.test(line))
     .join('\n');
 
   if (!templates) return null;

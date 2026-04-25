@@ -11,9 +11,9 @@ type FixedAutomationReadOnlyProps = {
   template: PeriodicTemplate;
 };
 
-export const FixedAutomationReadOnly = ({
+export function FixedAutomationReadOnly({
   template,
-}: FixedAutomationReadOnlyProps) => {
+}: FixedAutomationReadOnlyProps) {
   const format = useFormat();
   const amount = format(
     amountToInteger(template.amount, format.currency.decimalPlaces),
@@ -97,4 +97,4 @@ export const FixedAutomationReadOnly = ({
     default:
       return null;
   }
-};
+}

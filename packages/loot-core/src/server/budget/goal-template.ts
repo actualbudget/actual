@@ -153,6 +153,7 @@ async function getTemplates(
 
   const categoryTemplates: Record<CategoryEntity['id'], Template[]> = {};
   for (const categoryWithGoalDef of categoriesWithGoalDef.filter(filter)) {
+    if (!categoryWithGoalDef.goal_def) continue;
     categoryTemplates[categoryWithGoalDef.id] = JSON.parse(
       categoryWithGoalDef.goal_def,
     );
@@ -358,45 +359,12 @@ export async function dryRunCategoryTemplate({
   categoryId: CategoryEntity['id'];
   templates: Template[];
 }): Promise<DryRunCategoryResult> {
-  // Remainder rules split whatever's left of To Budget across all categories
-  // that have a remainder template. A single-category dry-run would attribute
-  // the entire leftover to this category; widen scope so sibling categories'
-  // remainder weights compete properly. Same applies to "% of available
-  // funds" rules, which read the running availBudget that prior categories
-  // have consumed.
-  const needsWideScope = templates.some(
-    t =>
-      t.type === 'remainder' ||
-      (t.type === 'percentage' &&
-        t.category.toLowerCase() === 'available funds'),
-  );
-
-  if (!needsWideScope) {
-    const { data: categoryData }: { data: CategoryEntity[] } = await aqlQuery(
-      q('categories').filter({ id: categoryId }).select('*'),
-    );
-    if (categoryData.length === 0) {
-      return { budgeted: 0, perTemplate: templates.map(() => 0) };
-    }
-    const { contexts } = await computeTemplates(
-      month,
-      true,
-      { [categoryId]: templates },
-      categoryData,
-    );
-    const ctx = contexts.find(c => c.category.id === categoryId);
-    if (!ctx) return { budgeted: 0, perTemplate: templates.map(() => 0) };
-    const values = ctx.getValues();
-    return {
-      budgeted: values.budgeted,
-      perTemplate: templates.map(
-        t => values.perTemplateContribution.get(t) ?? 0,
-      ),
-    };
-  }
-
-  // Wide scope: load saved templates for all categories, override the target
-  // with the in-flight templates, run the engine over the full set.
+  // Always run the full set of saved category templates and override the
+  // target's saved templates with the in-flight ones. Sibling categories
+  // consume from To Budget at each priority; running them too keeps the
+  // projection in sync with what an actual apply would produce — including
+  // the constrained-budget case where prior categories at the same priority
+  // exhaust the pool and clamp this category's amount.
   const allCategoryTemplates = await getTemplates();
   allCategoryTemplates[categoryId] = templates;
   const { contexts } = await computeTemplates(

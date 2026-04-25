@@ -165,6 +165,7 @@ export function BudgetAutomationsBody({
   ]);
   for (const group of categories) {
     for (const cat of group.categories ?? []) {
+      if (!cat.is_income) continue;
       validPercentageSources.add(cat.id);
       if (cat.name) validPercentageSources.add(cat.name.toLowerCase());
     }

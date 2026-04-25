@@ -1,6 +1,7 @@
 import { Trans } from 'react-i18next';
 
 import type { Template } from '@actual-app/core/types/models/templates';
+import type { TransObjectLiteral } from '@actual-app/core/types/util';
 
 import { BySaveAutomationReadOnly } from './editor/BySaveAutomationReadOnly';
 import { FixedAutomationReadOnly } from './editor/FixedAutomationReadOnly';
@@ -46,8 +47,14 @@ export function TemplateSentence({
     case 'simple':
     case 'spend':
     case 'goal':
-    case 'error':
-      return <Trans>Unsupported template type</Trans>;
+    case 'error': {
+      const type = template.type;
+      return (
+        <Trans>
+          Unsupported template type: {{ type } satisfies TransObjectLiteral}
+        </Trans>
+      );
+    }
     default:
       template satisfies never;
       return null;

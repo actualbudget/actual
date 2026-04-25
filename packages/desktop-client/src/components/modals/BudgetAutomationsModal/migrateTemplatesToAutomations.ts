@@ -25,8 +25,16 @@ function getDisplayTypeFromTemplate(template: Template): DisplayTemplateType {
       return 'by';
     case 'remainder':
       return 'remainder';
-    default:
-      return 'fixed';
+    case 'goal':
+    case 'error':
+    case 'spend':
+      // filtered upstream by hasUnsupportedDirective; surface if it ever isn't
+      throw new Error(`Unsupported template type reached migration`);
+    default: {
+      const _exhaustive: never = template;
+      void _exhaustive;
+      throw new Error(`Unhandled template type`);
+    }
   }
 }
 
@@ -37,11 +45,10 @@ export function migrateTemplatesToAutomations(
 
   templates.forEach(template => {
     if (template.type === 'simple') {
-      let hasExpandedTemplate = false;
-      const hasMonthly = template.monthly != null && template.monthly !== 0;
+      const monthly = template.monthly;
+      const hasMonthly = monthly != null && monthly !== 0;
 
       if (template.limit) {
-        hasExpandedTemplate = true;
         entries.push(
           createAutomationEntry(
             {
@@ -73,13 +80,12 @@ export function migrateTemplatesToAutomations(
           );
         }
       }
-      if (template.monthly != null && template.monthly !== 0) {
-        hasExpandedTemplate = true;
+      if (hasMonthly) {
         entries.push(
           createAutomationEntry(
             {
               type: 'periodic',
-              amount: template.monthly,
+              amount: monthly,
               period: { period: 'month', amount: 1 },
               starting: dayFromDate(firstDayOfMonth(new Date())),
               directive: 'template',
@@ -90,11 +96,9 @@ export function migrateTemplatesToAutomations(
         );
       }
 
-      if (!hasExpandedTemplate) {
-        entries.push(
-          createAutomationEntry(template, getDisplayTypeFromTemplate(template)),
-        );
-      }
+      // a simple template with neither monthly nor limit is a no-op; drop it
+      // rather than passing through as a phantom 'fixed' entry that would
+      // crash FixedAutomationReadOnly (no .amount, no .period)
       return;
     }
 

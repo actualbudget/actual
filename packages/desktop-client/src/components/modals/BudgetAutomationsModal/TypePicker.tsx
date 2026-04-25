@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -13,9 +15,11 @@ type TypePickerProps = {
 };
 
 export function TypePicker({ active, disabledTypes, onPick }: TypePickerProps) {
+  const { t } = useTranslation();
   const entries = displayTemplateTypes.map(
     id => [id, getDisplayTemplateMeta(id)] as const,
   );
+  const disabledHint = t('Only one of this type allowed per category');
 
   return (
     <View
@@ -36,6 +40,7 @@ export function TypePicker({ active, disabledTypes, onPick }: TypePickerProps) {
             tabIndex={isDisabled ? -1 : 0}
             aria-pressed={isActive}
             aria-disabled={isDisabled}
+            title={isDisabled ? disabledHint : undefined}
             onClick={() => {
               if (!isDisabled) onPick(id);
             }}

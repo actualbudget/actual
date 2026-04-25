@@ -301,13 +301,21 @@ export class CategoryTemplateContext {
     // projections reflect any clamping that occurred above. The limit branch
     // can produce a negative scale when the carried-over balance already
     // exceeds the cap; floor at 0 here so per-row UI projections never go
-    // negative (engine totals are unaffected).
+    // negative (engine totals are unaffected). Give the last entry the
+    // residual so the per-row sum equals toBudget exactly even when scale
+    // produces fractional cents.
     const perRowScale = Math.max(0, scale);
-    for (const [template, value] of perTemplateLocal) {
-      const scaled = Math.round(value * perRowScale);
+    const items = Array.from(perTemplateLocal);
+    let remaining = Math.max(0, toBudget);
+    items.forEach(([template, value], i) => {
+      const isLast = i === items.length - 1;
+      const share = isLast
+        ? remaining
+        : Math.max(0, Math.min(remaining, Math.round(value * perRowScale)));
       const existing = this.perTemplateContribution.get(template) ?? 0;
-      this.perTemplateContribution.set(template, existing + scaled);
-    }
+      this.perTemplateContribution.set(template, existing + share);
+      remaining -= share;
+    });
     return this.category.is_income ? -toBudget : toBudget;
   }
 
