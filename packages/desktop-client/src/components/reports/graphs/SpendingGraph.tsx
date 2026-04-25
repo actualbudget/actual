@@ -51,7 +51,7 @@ type CustomTooltipProps = {
   selection: string | 'budget' | 'average';
   compare: string;
   format: (value: unknown, type?: FormatType) => string;
-  budgetLabel: string;
+  budgetLabel?: string;
 };
 
 const CustomTooltip = ({
@@ -115,7 +115,7 @@ const CustomTooltip = ({
                   selection === 'average'
                     ? t('Average:')
                     : selection === 'budget'
-                      ? budgetLabel
+                      ? (budgetLabel ?? t('Budgeted:'))
                       : t('To:')
                 }
                 right={
@@ -281,7 +281,7 @@ export function SpendingGraph({
                     selection={selection}
                     compare={compare}
                     format={format}
-                    budgetLabel={budgetLabel ?? 'Budgeted:'}
+                    budgetLabel={budgetLabel}
                   />
                 }
                 formatter={numberFormatterTooltip}

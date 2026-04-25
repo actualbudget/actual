@@ -102,17 +102,15 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
   const [isLive, setIsLive] = useState(widget?.meta?.isLive ?? true);
   const [budgetCategoryScope, setBudgetCategoryScope] = useState<
     'all' | 'filtered'
-  >(widget?.meta?.budgetCategoryScope ?? 'filtered');
+  >(widget?.meta?.budgetCategoryScope ?? 'all');
 
   const hasCategoryConditions = conditions.some(
     c => c.field === 'category' || c.field === 'category_group',
   );
 
-  useEffect(() => {
-    if (!hasCategoryConditions) {
-      setBudgetCategoryScope('all');
-    }
-  }, [hasCategoryConditions]);
+  const effectiveBudgetCategoryScope: 'all' | 'filtered' = hasCategoryConditions
+    ? budgetCategoryScope
+    : 'all';
 
   const [reportMode, setReportMode] = useState(initialReportMode);
 
@@ -163,7 +161,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
         compare,
         compareTo,
         budgetType,
-        budgetCategoryScope,
+        budgetCategoryScope: effectiveBudgetCategoryScope,
       }),
     [
       conditions,
@@ -171,7 +169,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
       compare,
       compareTo,
       budgetType,
-      budgetCategoryScope,
+      effectiveBudgetCategoryScope,
     ],
   );
 
@@ -198,7 +196,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
             compareTo,
             isLive,
             mode: reportMode,
-            budgetCategoryScope,
+            budgetCategoryScope: effectiveBudgetCategoryScope,
           },
         },
       },
@@ -547,7 +545,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       reportMode === 'single-month'
                         ? monthUtils.format(compareTo, 'MMM yyyy', locale)
                         : reportMode === 'budget'
-                          ? budgetCategoryScope === 'filtered'
+                          ? effectiveBudgetCategoryScope === 'filtered'
                             ? t('Categories Budgeted')
                             : t('Total Budgeted')
                           : t('Average')
@@ -639,12 +637,12 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                       left={
                         <Block>
                           {compare === monthUtils.currentMonth() ? (
-                            budgetCategoryScope === 'filtered' ? (
+                            effectiveBudgetCategoryScope === 'filtered' ? (
                               <Trans>Categories Budgeted MTD</Trans>
                             ) : (
                               <Trans>Total Budgeted MTD</Trans>
                             )
-                          ) : budgetCategoryScope === 'filtered' ? (
+                          ) : effectiveBudgetCategoryScope === 'filtered' ? (
                             <Trans>Categories Budgeted</Trans>
                           ) : (
                             <Trans>Total Budgeted</Trans>
@@ -710,7 +708,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
                   compare={compare}
                   compareTo={compareTo}
                   budgetLabel={
-                    budgetCategoryScope === 'filtered'
+                    effectiveBudgetCategoryScope === 'filtered'
                       ? t('Categories Budgeted:')
                       : t('Total Budgeted:')
                   }

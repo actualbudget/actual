@@ -67,8 +67,9 @@ export function createSpendingSpreadsheet({
       );
       if (categoryConditions.length > 0) {
         const { list: allCategories } = await send('get-categories');
-        const matched = new Set<string>();
+        const perConditionSets: Array<Set<string>> = [];
         for (const cond of categoryConditions) {
+          const condSet = new Set<string>();
           for (const cat of allCategories as CategoryEntity[]) {
             const v = cond.value;
             let hits = false;
@@ -94,12 +95,25 @@ export function createSpendingSpreadsheet({
                 hits = Array.isArray(v) && !v.includes(cat.group);
               }
             }
-            if (hits) matched.add(cat.id);
+            if (hits) condSet.add(cat.id);
+          }
+          perConditionSets.push(condSet);
+        }
+        let matched: Set<string>;
+        if (conditionsOpKey === '$and' && perConditionSets.length > 0) {
+          matched = new Set(perConditionSets[0]);
+          for (let i = 1; i < perConditionSets.length; i++) {
+            for (const id of matched) {
+              if (!perConditionSets[i].has(id)) matched.delete(id);
+            }
+          }
+        } else {
+          matched = new Set<string>();
+          for (const s of perConditionSets) {
+            for (const id of s) matched.add(id);
           }
         }
-        if (matched.size > 0) {
-          budgetCategoryIds = [...matched];
-        }
+        budgetCategoryIds = [...matched];
       }
     }
 
@@ -163,22 +177,25 @@ export function createSpendingSpreadsheet({
     const budgetBaseQuery = q(budgetTable).filter({
       $and: [{ month: { $eq: budgetMonth } }],
     });
-    const budgetFilteredQuery =
-      budgetCategoryIds !== null
-        ? budgetBaseQuery.filter({
-            $or: budgetCategoryIds.map(id => ({ category: { $eq: id } })),
-          })
-        : budgetBaseQuery;
-    const [budgets] = await Promise.all([
-      aqlQuery(
+    let budgets: Array<{ category: string; amount: number }>;
+    if (budgetCategoryIds !== null && budgetCategoryIds.length === 0) {
+      budgets = [];
+    } else {
+      const budgetFilteredQuery =
+        budgetCategoryIds !== null
+          ? budgetBaseQuery.filter({
+              category: { $oneof: budgetCategoryIds },
+            })
+          : budgetBaseQuery;
+      budgets = await aqlQuery(
         budgetFilteredQuery
           .groupBy([{ $id: '$category' }])
           .select([
             { category: { $id: '$category' } },
             { amount: { $sum: '$amount' } },
           ]),
-      ).then(({ data }) => data),
-    ]);
+      ).then(({ data }) => data);
+    }
 
     const dailyBudget =
       budgets &&
