@@ -18,11 +18,9 @@ import {
   getAutomationExamples,
 } from '#components/budget/goals/automationExamples';
 import type { AutomationEntry } from '#components/budget/goals/automationExamples';
-import {
-  formatMonthLabel,
-  validateAutomation,
-} from '#components/budget/goals/templateHelpers';
-import type { GlobalConflictKind } from '#components/budget/goals/templateHelpers';
+import { formatMonthLabel } from '#components/budget/goals/formatMonthLabel';
+import { validateAutomation } from '#components/budget/goals/validateAutomation';
+import type { GlobalConflictKind } from '#components/budget/goals/validateAutomation';
 import { Link } from '#components/common/Link';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';

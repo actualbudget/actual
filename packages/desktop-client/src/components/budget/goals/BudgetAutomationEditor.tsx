@@ -18,6 +18,7 @@ import { setType } from './actions';
 import type { Action } from './actions';
 import type { ReducerState } from './constants';
 import { displayTemplateTypes } from './constants';
+import { getDisplayTemplateMeta } from './displayTemplateMeta';
 import { BySaveAutomation } from './editor/BySaveAutomation';
 import { FixedAutomation } from './editor/FixedAutomation';
 import { HistoricalAutomation } from './editor/HistoricalAutomation';
@@ -26,7 +27,6 @@ import { PercentageAutomation } from './editor/PercentageAutomation';
 import { RefillAutomation } from './editor/RefillAutomation';
 import { RemainderAutomation } from './editor/RemainderAutomation';
 import { ScheduleAutomation } from './editor/ScheduleAutomation';
-import { getDisplayTemplateMeta } from './templateHelpers';
 
 type BudgetAutomationEditorProps = {
   inline: boolean;

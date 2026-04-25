@@ -6,12 +6,10 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import type { AutomationEntry } from '#components/budget/goals/automationExamples';
-import {
-  AutomationErrorShort,
-  getDisplayTemplateMeta,
-  TemplateSentence,
-} from '#components/budget/goals/templateHelpers';
-import type { AutomationErrorKind } from '#components/budget/goals/templateHelpers';
+import { AutomationErrorShort } from '#components/budget/goals/automationMessages';
+import { getDisplayTemplateMeta } from '#components/budget/goals/displayTemplateMeta';
+import { TemplateSentence } from '#components/budget/goals/TemplateSentence';
+import type { AutomationErrorKind } from '#components/budget/goals/validateAutomation';
 import { useFormat } from '#hooks/useFormat';
 
 type AutomationListRowProps = {

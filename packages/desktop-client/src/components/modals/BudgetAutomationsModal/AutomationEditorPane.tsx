@@ -13,18 +13,18 @@ import type {
 } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 
+import { ActiveEditor } from '#components/budget/goals/ActiveEditor';
 import type { AutomationEntry } from '#components/budget/goals/automationExamples';
+import {
+  AutomationErrorDetail,
+  AutomationErrorTitle,
+} from '#components/budget/goals/automationMessages';
 import type { DisplayTemplateType } from '#components/budget/goals/constants';
 import {
   getInitialState,
   templateReducer,
 } from '#components/budget/goals/reducer';
-import {
-  ActiveEditor,
-  AutomationErrorDetail,
-  AutomationErrorTitle,
-} from '#components/budget/goals/templateHelpers';
-import type { AutomationErrorKind } from '#components/budget/goals/templateHelpers';
+import type { AutomationErrorKind } from '#components/budget/goals/validateAutomation';
 
 import { TypePicker } from './TypePicker';
 

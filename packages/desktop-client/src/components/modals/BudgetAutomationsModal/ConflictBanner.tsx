@@ -6,8 +6,8 @@ import { View } from '@actual-app/components/view';
 import {
   GlobalConflictDetail,
   GlobalConflictTitle,
-} from '#components/budget/goals/templateHelpers';
-import type { GlobalConflictKind } from '#components/budget/goals/templateHelpers';
+} from '#components/budget/goals/automationMessages';
+import type { GlobalConflictKind } from '#components/budget/goals/validateAutomation';
 
 type ConflictBannerProps = {
   conflict: GlobalConflictKind;

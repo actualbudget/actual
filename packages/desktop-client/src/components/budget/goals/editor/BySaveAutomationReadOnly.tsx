@@ -4,7 +4,7 @@ import { amountToInteger } from '@actual-app/core/shared/util';
 import type { ByTemplate } from '@actual-app/core/types/models/templates';
 import type { TransObjectLiteral } from '@actual-app/core/types/util';
 
-import { formatMonthLabel } from '#components/budget/goals/templateHelpers';
+import { formatMonthLabel } from '#components/budget/goals/formatMonthLabel';
 import { FinancialText } from '#components/FinancialText';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';

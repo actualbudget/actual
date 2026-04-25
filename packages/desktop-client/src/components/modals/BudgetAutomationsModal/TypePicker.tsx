@@ -4,7 +4,7 @@ import { View } from '@actual-app/components/view';
 
 import { displayTemplateTypes } from '#components/budget/goals/constants';
 import type { DisplayTemplateType } from '#components/budget/goals/constants';
-import { getDisplayTemplateMeta } from '#components/budget/goals/templateHelpers';
+import { getDisplayTemplateMeta } from '#components/budget/goals/displayTemplateMeta';
 
 type TypePickerProps = {
   active: DisplayTemplateType;
