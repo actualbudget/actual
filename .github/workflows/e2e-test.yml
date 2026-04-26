@@ -37,7 +37,7 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
-          download-translations: 'true'
+          download-translations: 'false'
       - name: Trust the repository directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Build browser bundle
@@ -46,9 +46,9 @@ jobs:
         # via ConfigurationPage.createTestFile()) is still rendered in a
         # production build. Without it, e2e tests would time out waiting for
         # a button that was tree-shaken out.
-        # --skip-translations: setup already staged packages/desktop-client/locale
-        # via actions/checkout, so bin/package-browser must not try to git pull
-        # again (the shallow checkout has no tracking remote).
+        # --skip-translations keeps VRT screenshots deterministic by rendering
+        # source-code English instead of upstream Weblate en.json (which can
+        # drift between snapshot capture and test runs).
         env:
           REACT_APP_NETLIFY: 'true'
         run: yarn build:browser --skip-translations
