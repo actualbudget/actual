@@ -161,7 +161,7 @@ export function GlobalConflictDetail({
         <Trans>
           This month&rsquo;s automations ask for around{' '}
           {{ total: format(conflict.total, 'financial') }} but only{' '}
-          {{ income: format(conflict.income, 'financial') }} comes in. Lower
+          {{ income: format(conflict.income, 'financial') }} is available to budget. Lower
           amounts or switch one to &ldquo;Whatever is left&rdquo;.
         </Trans>
       );
