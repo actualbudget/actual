@@ -68,7 +68,7 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
-          download-translations: 'false'
+          download-translations: 'true'
 
       # Build tools are needed to rebuild native modules like better-sqlite3 used by the Desktop app, which is required to run VRT tests on the Desktop app and generate updated snapshots.
       - name: Install build tools

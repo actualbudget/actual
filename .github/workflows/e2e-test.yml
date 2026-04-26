@@ -37,7 +37,7 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
-          download-translations: 'false'
+          download-translations: 'true'
       - name: Trust the repository directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Build browser bundle
@@ -46,9 +46,12 @@ jobs:
         # via ConfigurationPage.createTestFile()) is still rendered in a
         # production build. Without it, e2e tests would time out waiting for
         # a button that was tree-shaken out.
+        # --skip-translations: setup already staged packages/desktop-client/locale
+        # via actions/checkout, so bin/package-browser must not try to git pull
+        # again (the shallow checkout has no tracking remote).
         env:
           REACT_APP_NETLIFY: 'true'
-        run: yarn build:browser
+        run: yarn build:browser --skip-translations
       - name: Upload build artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
