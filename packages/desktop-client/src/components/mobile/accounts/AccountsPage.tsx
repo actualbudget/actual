@@ -177,23 +177,6 @@ function AccountListItem({
               flexDirection: 'row',
             }}
           >
-            {account.bankId ? (
-              <View
-                style={{
-                  backgroundColor: isPending
-                    ? theme.sidebarItemBackgroundPending
-                    : isFailed
-                      ? theme.sidebarItemBackgroundFailed
-                      : theme.sidebarItemBackgroundPositive,
-                  marginRight: '8px',
-                  width: 8,
-                  flexShrink: 0,
-                  height: 8,
-                  borderRadius: 8,
-                  opacity: isConnected ? 1 : 0,
-                }}
-              />
-            ) : null}
             <TextOneLine
               style={{
                 ...styles.text,
@@ -205,6 +188,23 @@ function AccountListItem({
             >
               {account.name}
             </TextOneLine>
+            {account.bankId ? (
+              <View
+                style={{
+                  backgroundColor: isPending
+                    ? theme.sidebarItemBackgroundPending
+                    : isFailed
+                      ? theme.sidebarItemBackgroundFailed
+                      : theme.sidebarItemBackgroundPositive,
+                  marginLeft: '8px',
+                  width: 8,
+                  flexShrink: 0,
+                  height: 8,
+                  borderRadius: 8,
+                  opacity: isConnected ? 1 : 0,
+                }}
+              />
+            ) : null}
           </View>
           <CellValue binding={getBalanceQuery(account.id)} type="financial">
             {props => (
