@@ -27,18 +27,18 @@ export const BySaveAutomationReadOnly = ({
 
   if (template.annual) {
     return (
-      <Trans>
+      <Trans count={repeat}>
         Save <FinancialText>{{ amount } as TransObjectLiteral}</FinancialText>{' '}
-        by {{ month }}, repeating every {{ years: repeat }} year(s)
+        by {{ month }}, repeating every {{ count: repeat }} years
       </Trans>
     );
   }
 
   if (template.repeat && template.repeat > 0) {
     return (
-      <Trans>
+      <Trans count={repeat}>
         Save <FinancialText>{{ amount } as TransObjectLiteral}</FinancialText>{' '}
-        by {{ month }}, repeating every {{ months: repeat }} month(s)
+        by {{ month }}, repeating every {{ count: repeat }} months
       </Trans>
     );
   }

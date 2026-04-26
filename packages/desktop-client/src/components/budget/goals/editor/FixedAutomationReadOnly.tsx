@@ -22,76 +22,37 @@ export function FixedAutomationReadOnly({
   const periodAmount = template.period?.amount ?? 1;
   const periodUnit = template.period?.period ?? 'month';
 
-  if (periodAmount === 1) {
-    switch (periodUnit) {
-      case 'day':
-        return (
-          <Trans>
-            Budget{' '}
-            <FinancialText>{{ amount } as TransObjectLiteral}</FinancialText>{' '}
-            each day
-          </Trans>
-        );
-      case 'week':
-        return (
-          <Trans>
-            Budget{' '}
-            <FinancialText>{{ amount } as TransObjectLiteral}</FinancialText>{' '}
-            each week
-          </Trans>
-        );
-      case 'month':
-        return (
-          <Trans>
-            Budget{' '}
-            <FinancialText>{{ amount } as TransObjectLiteral}</FinancialText>{' '}
-            each month
-          </Trans>
-        );
-      case 'year':
-        return (
-          <Trans>
-            Budget{' '}
-            <FinancialText>{{ amount } as TransObjectLiteral}</FinancialText>{' '}
-            each year
-          </Trans>
-        );
-      default:
-        return null;
-    }
-  }
-
   switch (periodUnit) {
     case 'day':
       return (
-        <Trans>
+        <Trans count={periodAmount}>
           Budget{' '}
           <FinancialText>{{ amount } as TransObjectLiteral}</FinancialText>{' '}
-          every {{ periodAmount }} days
+          every {{ count: periodAmount }} days
         </Trans>
       );
     case 'week':
       return (
-        <Trans>
+        <Trans count={periodAmount}>
           Budget{' '}
           <FinancialText>{{ amount } as TransObjectLiteral}</FinancialText>{' '}
-          every {{ periodAmount }} weeks
+          every {{ count: periodAmount }} weeks
         </Trans>
       );
     case 'month':
       return (
-        <Trans>
+        <Trans count={periodAmount}>
           Budget{' '}
           <FinancialText>{{ amount } as TransObjectLiteral}</FinancialText>{' '}
-          every {{ periodAmount }} months
+          every {{ count: periodAmount }} months
         </Trans>
       );
     case 'year':
       return (
-        <Trans>
+        <Trans count={periodAmount}>
           Budget{' '}
           <FinancialText>{{ amount } as TransObjectLiteral}</FinancialText>{' '}
-          every {{ periodAmount }} years
+          every {{ count: periodAmount }} years
         </Trans>
       );
     default:
