@@ -8,6 +8,7 @@ import type { Template } from '#types/models/templates';
 
 import * as actions from './actions';
 import { CategoryTemplateContext } from './category-template-context';
+import { distributeRemainder } from './goal-template';
 import * as statements from './statements';
 
 // Mock getSheetValue and getCategories
@@ -1104,6 +1105,41 @@ describe('CategoryTemplateContext', () => {
       );
       const result = instance.runRemainder(101, 100);
       expect(result).toBe(101);
+    });
+
+    it('remainder loop terminates when per-context share rounds to zero', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const makeInstance = () =>
+        new TestCategoryTemplateContext(
+          [
+            {
+              type: 'remainder',
+              weight: 1,
+              directive: 'template',
+              priority: null,
+            },
+          ],
+          category,
+          '2024-01',
+          0,
+          0,
+        );
+
+      const contexts = [
+        makeInstance(),
+        makeInstance(),
+        makeInstance(),
+        makeInstance(),
+        makeInstance(),
+      ];
+
+      const remaining = distributeRemainder(contexts, 2);
+      expect(remaining).toBe(2);
     });
 
     it('remainder wont over budget', async () => {
