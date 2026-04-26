@@ -88,7 +88,8 @@ export function AutomationErrorDetail({
     case 'refill-no-cap':
       return (
         <Trans>
-          Refill automations must have a &ldquo;Balance cap&rdquo; automation added to use as the target.
+          Refill automations must have a &ldquo;Balance cap&rdquo; automation
+          added to use as the target.
         </Trans>
       );
     case 'percentage-out-of-range':
@@ -159,8 +160,8 @@ export function GlobalConflictDetail({
         <Trans>
           This month&rsquo;s automations ask for around{' '}
           {{ total: format(conflict.total, 'financial') }} but only{' '}
-          {{ income: format(conflict.income, 'financial') }} is available to budget. Lower
-          amounts or switch one to &ldquo;Whatever is left&rdquo;.
+          {{ income: format(conflict.income, 'financial') }} is available to
+          budget. Lower amounts or switch one to &ldquo;Whatever is left&rdquo;.
         </Trans>
       );
     case 'percent-over-100':
