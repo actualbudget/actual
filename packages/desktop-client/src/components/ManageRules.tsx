@@ -34,7 +34,6 @@ import { Link } from './common/Link';
 import { Search } from './common/Search';
 import { RulesHeader } from './rules/RulesHeader';
 import { RulesList } from './rules/RulesList';
-import { Title } from './Title';
 
 export type FilterData = {
   payees?: Array<{ id: string; name: string }>;
@@ -294,7 +293,6 @@ export function ManageRules({
 
   return (
     <SelectedProvider instance={selectedInst}>
-      <Title value={t('Rules')} />
       <View>
         <View
           style={{

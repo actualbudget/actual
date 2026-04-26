@@ -46,7 +46,7 @@ import {
 import { markAccountRead } from '#accounts/accountsSlice';
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
-import { Title } from '#components/Title';
+import { useSetPageTitle } from '#components/TitleManager';
 import { TransactionList } from '#components/transactions/TransactionList';
 import { validateAccountName } from '#components/util/accountValidation';
 import { useAccountPreviewTransactions } from '#hooks/useAccountPreviewTransactions';
@@ -2039,10 +2039,10 @@ export function Account() {
   );
 
   const accountTitle = getAccountTitle(account, params.id, translate);
+  useSetPageTitle(accountTitle);
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
-      <Title value={accountTitle} />
       <SchedulesProvider query={schedulesQuery}>
         <SplitsExpandedProvider
           initialMode={expandSplits ? 'collapse' : 'expand'}

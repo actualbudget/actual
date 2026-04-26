@@ -38,7 +38,7 @@ import { summarySpreadsheet } from '#components/reports/spreadsheets/summary-spr
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
 import { FieldSelect } from '#components/rules/RuleEditor';
-import { Title } from '#components/Title';
+import { useSetPageTitle } from '#components/TitleManager';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
@@ -230,6 +230,7 @@ function SummaryInner({ widget }: SummaryInnerProps) {
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
   const title = widget?.meta?.name || t('Summary');
+  useSetPageTitle(`${title} — ${t('Report Summary')}`);
 
   const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
 
@@ -348,7 +349,6 @@ function SummaryInner({ widget }: SummaryInnerProps) {
       }
       padding={0}
     >
-      <Title value={`${title} \u2014 ${t('Report Summary')}`} />
       <Header
         allMonths={allMonths}
         start={start}

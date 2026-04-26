@@ -12,7 +12,6 @@ import type {
 
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { Page } from '#components/Page';
-import { Title } from '#components/Title';
 import { useAccounts } from '#hooks/useAccounts';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { pushModal } from '#modals/modalsSlice';
@@ -120,7 +119,6 @@ export function BankSync() {
         paddingBottom: MOBILE_NAV_HEIGHT,
       }}
     >
-      <Title value={t('Bank Sync')} />
       <View style={{ marginTop: '1em' }}>
         {accounts.length === 0 && (
           <Text style={{ fontSize: '1.1rem' }}>

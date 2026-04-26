@@ -24,7 +24,7 @@ import type {
 
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { MobilePageHeader, Page } from '#components/Page';
-import { Title } from '#components/Title';
+import { useSetPageTitle } from '#components/TitleManager';
 import { useAccounts } from '#hooks/useAccounts';
 import {
   useDashboardPages,
@@ -83,6 +83,9 @@ type OverviewProps = {
 
 export function Overview({ dashboard }: OverviewProps) {
   const { t } = useTranslation();
+  useSetPageTitle(
+    `${dashboard.name || t('Untitled')} — ${t('Report Dashboard')}`,
+  );
   const dispatch = useDispatch();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
@@ -735,9 +738,6 @@ export function Overview({ dashboard }: OverviewProps) {
       }
       padding={10}
     >
-      <Title
-        value={`${dashboard.name || t('Untitled')} \u2014 ${t('Report Dashboard')}`}
-      />
       {isImporting ? (
         <LoadingIndicator message={t('Import is running...')} />
       ) : (

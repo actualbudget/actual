@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import React, { useEffect, useEffectEvent, useMemo, useState } from 'react';
 import type { ComponentType } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
@@ -21,7 +20,6 @@ import {
   useSaveCategoryGroupMutation,
   useSaveCategoryMutation,
 } from '#budget';
-import { Title } from '#components/Title';
 import { useCategories } from '#hooks/useCategories';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
@@ -38,7 +36,6 @@ import { TrackingBudgetProvider } from './tracking/TrackingBudgetContext';
 import { prewarmAllMonths, prewarmMonth } from './util';
 
 export function Budget() {
-  const { t } = useTranslation();
   const currentMonth = monthUtils.currentMonth();
   const spreadsheet = useSpreadsheet();
   const navigate = useNavigate();
@@ -237,8 +234,6 @@ export function Budget() {
 
   return (
     <SheetNameProvider name={monthUtils.sheetForMonth(startMonth)}>
-      <Title value={t('Budget')} />
-
       {/*
         In a previous iteration, the wrapper needs `overflow: hidden` for
         some reason. Without it at certain dimensions the width/height

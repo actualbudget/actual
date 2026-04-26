@@ -16,7 +16,6 @@ import memoizeOne from 'memoize-one';
 
 import { Search } from '#components/common/Search';
 import { Cell, SelectCell, TableHeader } from '#components/table';
-import { Title } from '#components/Title';
 import {
   SelectedProvider,
   useSelected,
@@ -39,7 +38,6 @@ function PayeeTableHeader() {
 
   return (
     <View>
-      <Title value={t('Payees')} />
       <TableHeader collapsed>
         <SelectCell
           exposed

@@ -12,7 +12,6 @@ import { View } from '@actual-app/components/view';
 import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 
 import { Search } from '#components/common/Search';
-import { Title } from '#components/Title';
 import { SelectedProvider, useSelected } from '#hooks/useSelected';
 import { useTags } from '#hooks/useTags';
 import { useDeleteTagsMutation, useDiscoverTagsMutation } from '#tags';
@@ -54,7 +53,6 @@ export function ManageTags() {
 
   return (
     <SelectedProvider instance={selectedInst}>
-      <Title value={t('Tags')} />
       <View>
         <View
           style={{
