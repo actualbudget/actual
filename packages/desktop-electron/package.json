@@ -47,6 +47,12 @@
       "!build/loot-core/lib-dist/electron/{browser,bundle.mobile*}"
     ],
     "beforePack": "./build/desktop-electron/beforePackHook.js",
+    "afterSign": "./build/desktop-electron/afterSignHook.js",
+    "electronFuses": {
+      "runAsNode": false,
+      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeCliInspectArguments": false
+    },
     "mac": {
       "category": "public.app-category.finance",
       "icon": "icons/icon.icns",

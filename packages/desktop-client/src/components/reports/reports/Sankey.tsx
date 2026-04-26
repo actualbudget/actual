@@ -4,7 +4,13 @@ import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { SvgArrowDown, SvgList } from '@actual-app/components/icons/v1';
+import {
+  SvgArrowDown,
+  SvgCheveronRight,
+  SvgLayers,
+  SvgList,
+  SvgRefresh,
+} from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Popover } from '@actual-app/components/popover';
@@ -32,8 +38,9 @@ import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ModeButton } from '#components/reports/ModeButton';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import {
+  GRAPH_LAYER_ORDER,
+  GraphLayers,
   createSpreadsheet as sankeySpreadsheet,
-  withPercentageLabels,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
@@ -159,6 +166,91 @@ function CategorySortSelector({ value, onChange }: CategorySortSelectorProps) {
           items={options.map(({ key, label }) => ({
             name: key,
             text: label,
+          }))}
+        />
+      </Popover>
+    </>
+  );
+}
+
+type LayerSelectorProps = {
+  direction: 'from' | 'to';
+  value: GraphLayers;
+  otherLayer: GraphLayers | undefined;
+  onChange: (layer: GraphLayers) => void;
+  graphMode: GraphMode;
+};
+
+function LayerSelector({
+  direction,
+  value,
+  otherLayer,
+  onChange,
+  graphMode,
+}: LayerSelectorProps) {
+  const { t } = useTranslation();
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const LAYER_LABELS: Record<GraphLayers, string> = {
+    [GraphLayers.IncomePayee]: t('Payee'),
+    [GraphLayers.IncomeCategory]: t('Income category'),
+    [GraphLayers.Account]: t('Account'),
+    [GraphLayers.Budget]: t('Budget'),
+    [GraphLayers.CategoryGroup]: t('Category group'),
+    [GraphLayers.Category]: t('Category'),
+  };
+
+  // Filter available layers based on graph mode
+  const availableLayers: readonly GraphLayers[] =
+    graphMode === 'budgeted'
+      ? GRAPH_LAYER_ORDER.filter(
+          layer => layer !== GraphLayers.IncomePayee, // IncomePayee not available in budgeted
+        )
+      : GRAPH_LAYER_ORDER.filter(
+          layer => layer !== GraphLayers.Budget, // Budget not available in spent
+        );
+
+  const otherIndex =
+    otherLayer !== undefined && availableLayers.includes(otherLayer)
+      ? availableLayers.indexOf(otherLayer)
+      : direction === 'from'
+        ? availableLayers.length - 1
+        : 0;
+
+  const menuItems =
+    direction === 'from'
+      ? availableLayers.slice(0, otherIndex)
+      : availableLayers.slice(otherIndex + 1);
+
+  const translatedDirection = direction === 'from' ? t('from') : t('to');
+
+  return (
+    <>
+      <Button
+        ref={triggerRef}
+        variant="bare"
+        onPress={() => setIsOpen(true)}
+        aria-label={t('Change layer {{direction}}', {
+          direction: translatedDirection,
+        })}
+      >
+        <span style={{ marginLeft: 5 }}>{LAYER_LABELS[value]}</span>
+      </Button>
+      <Popover
+        triggerRef={triggerRef}
+        placement="bottom start"
+        isOpen={isOpen}
+        onOpenChange={() => setIsOpen(false)}
+      >
+        <Menu
+          onMenuSelect={item => {
+            onChange(item as GraphLayers);
+            setIsOpen(false);
+          }}
+          items={menuItems.map(layer => ({
+            name: layer,
+            text: LAYER_LABELS[layer],
           }))}
         />
       </Popover>
@@ -296,6 +388,62 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     widget?.meta?.showPercentages ?? false,
   );
 
+  // Determine default layer based on mode
+  const defaultLayerFrom = (mode: GraphMode) =>
+    mode === 'budgeted' ? GraphLayers.IncomeCategory : GraphLayers.IncomePayee;
+
+  const [layerFrom, setLayerFrom] = useState<GraphLayers>(() => {
+    const metaLayer = widget?.meta?.layerFrom as GraphLayers | undefined;
+    if (metaLayer) {
+      // Validate that the layer is valid for the current mode
+      const mode = widget?.meta?.mode ?? 'spent';
+      if (mode === 'budgeted' && metaLayer === GraphLayers.IncomePayee) {
+        return defaultLayerFrom('budgeted');
+      }
+      if (mode === 'spent' && metaLayer === GraphLayers.Budget) {
+        return defaultLayerFrom('spent');
+      }
+      return metaLayer;
+    }
+    return defaultLayerFrom(widget?.meta?.mode ?? 'spent');
+  });
+
+  const [layerTo, setLayerTo] = useState<GraphLayers>(() => {
+    const metaLayer = widget?.meta?.layerTo as GraphLayers | undefined;
+    if (metaLayer) {
+      // Validate that the layer is valid for the current mode
+      const mode = widget?.meta?.mode ?? 'spent';
+      if (mode === 'budgeted' && metaLayer === GraphLayers.IncomePayee) {
+        return GraphLayers.Category;
+      }
+      if (mode === 'spent' && metaLayer === GraphLayers.Budget) {
+        return GraphLayers.Category;
+      }
+      return metaLayer;
+    }
+    return GraphLayers.Category;
+  });
+
+  // Reset invalid layer selections when switching modes
+  useEffect(() => {
+    const availableLayers =
+      graphMode === 'budgeted'
+        ? (GRAPH_LAYER_ORDER.filter(
+            layer => layer !== GraphLayers.IncomePayee,
+          ) as GraphLayers[])
+        : (GRAPH_LAYER_ORDER.filter(
+            layer => layer !== GraphLayers.Budget,
+          ) as GraphLayers[]);
+
+    const fromIndex = availableLayers.indexOf(layerFrom);
+    const toIndex = availableLayers.indexOf(layerTo);
+
+    if (fromIndex === -1 || toIndex === -1 || fromIndex >= toIndex) {
+      setLayerFrom(defaultLayerFrom(graphMode));
+      setLayerTo(GraphLayers.Category);
+    }
+  }, [graphMode, layerFrom, layerTo]);
+
   const { data: { grouped: groupedCategories = [] } = { grouped: [] } } =
     useCategories();
 
@@ -313,6 +461,8 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       graphMode,
       topNcategories,
       categorySort,
+      layerFrom,
+      layerTo,
     );
   }, [
     datesInitialized,
@@ -324,6 +474,8 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     graphMode,
     topNcategories,
     categorySort,
+    layerFrom,
+    layerTo,
   ]);
 
   const defaultGetData = async (
@@ -418,6 +570,8 @@ function SankeyInner({ widget }: SankeyInnerProps) {
             topNcategories,
             categorySort,
             showPercentages,
+            layerFrom,
+            layerTo,
             timeFrame: {
               start,
               end,
@@ -549,6 +703,46 @@ function SankeyInner({ widget }: SankeyInnerProps) {
               value={categorySort}
               onChange={setCategorySort}
             />
+            <View
+              style={{
+                width: 1,
+                height: 28,
+                backgroundColor: theme.pillBorderDark,
+                marginRight: 10,
+                marginLeft: 10,
+              }}
+            />
+            <SvgLayers style={{ width: 12, height: 12 }} />
+            <LayerSelector
+              direction="from"
+              value={layerFrom}
+              otherLayer={layerTo}
+              onChange={setLayerFrom}
+              graphMode={graphMode}
+            />
+            <SvgCheveronRight style={{ width: 12, height: 12 }} />
+            <LayerSelector
+              direction="to"
+              value={layerTo}
+              otherLayer={layerFrom}
+              onChange={setLayerTo}
+              graphMode={graphMode}
+            />
+            <Button
+              variant="bare"
+              onPress={() => {
+                if (graphMode === 'budgeted') {
+                  setLayerFrom(GraphLayers.IncomeCategory);
+                  setLayerTo(GraphLayers.Category);
+                } else {
+                  setLayerFrom(GraphLayers.IncomePayee);
+                  setLayerTo(GraphLayers.Category);
+                }
+              }}
+              aria-label={t('Reset layers')}
+            >
+              <SvgRefresh style={{ width: 12, height: 12 }} />
+            </Button>
           </>
         }
       >
@@ -606,11 +800,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                 {data && data.links && data.links.length > 0 ? (
                   <SankeyGraph
                     style={{ flexGrow: 1 }}
-                    data={
-                      showPercentages
-                        ? withPercentageLabels(data as SankeyData)
-                        : (data as SankeyData)
-                    }
+                    data={data}
                     showPercentages={showPercentages}
                   />
                 ) : (

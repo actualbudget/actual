@@ -18,6 +18,7 @@
   ],
   "type": "module",
   "imports": {
+    "#db": "./src/db.js",
     "#account-db": "./src/account-db.js",
     "#load-config": "./src/load-config.js",
     "#migrations": "./src/migrations.ts",
@@ -42,6 +43,7 @@
   },
   "publishConfig": {
     "imports": {
+      "#db": "./build/src/db.js",
       "#account-db": "./build/src/account-db.js",
       "#load-config": "./build/src/load-config.js",
       "#migrations": "./build/src/migrations.js",
