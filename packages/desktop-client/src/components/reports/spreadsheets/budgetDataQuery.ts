@@ -111,10 +111,10 @@ function filterCategoriesByConditions(
     >,
   ): boolean => {
     const key =
-      condition.field === 'category_group' ? category.group : category.id;
+      condition.field === 'category_group' ? category.group ?? '' : category.id;
     const textValue =
       condition.field === 'category_group'
-        ? (groupNameById.get(key) ?? key)
+        ? (groupNameById.get(key ?? '') ?? key ?? '')
         : category.name;
     const matchesRegex =
       condition.op === 'matches' &&
