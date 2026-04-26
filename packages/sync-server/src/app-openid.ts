@@ -1,4 +1,5 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 
 import { disableOpenID, enableOpenID, isAdmin } from './account-db';
 import { isValidRedirectUrl, loginWithOpenIdFinalize } from './accounts/openid';
@@ -14,7 +15,16 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(requestLoggerMiddleware);
-export { app as handlers };
+
+const openIdConfigRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  legacyHeaders: false,
+  standardHeaders: true,
+  message: { status: 'error', reason: 'too-many-requests' },
+});
+
+export { app as handlers, openIdConfigRateLimiter };
 
 app.post('/enable', validateSessionMiddleware, async (req, res) => {
   if (!isAdmin(res.locals.user_id)) {
@@ -54,8 +64,8 @@ app.post('/disable', validateSessionMiddleware, async (req, res) => {
   res.send({ status: 'ok' });
 });
 
-app.post('/config', async (req, res) => {
-  const { cnt: ownerCount } = UserService.getOwnerCount() || {};
+app.post('/config', openIdConfigRateLimiter, async (req, res) => {
+  const ownerCount = UserService.getOwnerCount();
 
   if (ownerCount > 0) {
     res.status(400).send({ status: 'error', reason: 'already-bootstraped' });

@@ -12,10 +12,14 @@ export function registerPayeesCommand(program: Command) {
     .description('List all payees')
     .action(async () => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const result = await api.getPayees();
-        printOutput(result, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const result = await api.getPayees();
+          printOutput(result, opts.format);
+        },
+        { mutates: false },
+      );
     });
 
   payees
@@ -23,10 +27,14 @@ export function registerPayeesCommand(program: Command) {
     .description('List frequently used payees')
     .action(async () => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const result = await api.getCommonPayees();
-        printOutput(result, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const result = await api.getCommonPayees();
+          printOutput(result, opts.format);
+        },
+        { mutates: false },
+      );
     });
 
   payees
@@ -35,10 +43,14 @@ export function registerPayeesCommand(program: Command) {
     .requiredOption('--name <name>', 'Payee name')
     .action(async cmdOpts => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const id = await api.createPayee({ name: cmdOpts.name });
-        printOutput({ id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const id = await api.createPayee({ name: cmdOpts.name });
+          printOutput({ id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 
   payees
@@ -54,10 +66,14 @@ export function registerPayeesCommand(program: Command) {
         );
       }
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        await api.updatePayee(id, fields);
-        printOutput({ success: true, id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          await api.updatePayee(id, fields);
+          printOutput({ success: true, id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 
   payees
@@ -65,10 +81,14 @@ export function registerPayeesCommand(program: Command) {
     .description('Delete a payee')
     .action(async (id: string) => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        await api.deletePayee(id);
-        printOutput({ success: true, id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          await api.deletePayee(id);
+          printOutput({ success: true, id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 
   payees
@@ -87,9 +107,13 @@ export function registerPayeesCommand(program: Command) {
         );
       }
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        await api.mergePayees(cmdOpts.target, mergeIds);
-        printOutput({ success: true }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          await api.mergePayees(cmdOpts.target, mergeIds);
+          printOutput({ success: true }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 }
