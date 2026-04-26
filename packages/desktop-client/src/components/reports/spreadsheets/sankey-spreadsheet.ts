@@ -682,7 +682,7 @@ function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
 
   categoryData.forEach(entry => {
     if (entry.accountId && entry.accountName && entry.categoryId) {
-      if (entry.isIncome && entry.payeeId) {
+      if (entry.isIncome) {
         // Payee > Income category > Account
         addNode(
           graph,
@@ -691,9 +691,16 @@ function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
           entry.category,
         );
         addNode(graph, entry.accountId, GraphLayers.Account, entry.accountName);
-        addNode(graph, entry.payeeId, GraphLayers.IncomePayee, entry.payeeName);
         addValueToLink(graph, entry.categoryId, entry.accountId, entry.value);
-        addValueToLink(graph, entry.payeeId, entry.categoryId, entry.value);
+        if (entry.payeeId) {
+          addNode(
+            graph,
+            entry.payeeId,
+            GraphLayers.IncomePayee,
+            entry.payeeName,
+          );
+          addValueToLink(graph, entry.payeeId, entry.categoryId, entry.value);
+        }
       } else {
         // Account > Category group > Category
         addNode(graph, entry.accountId, GraphLayers.Account, entry.accountName);
