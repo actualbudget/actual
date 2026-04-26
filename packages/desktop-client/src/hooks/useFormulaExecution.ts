@@ -7,6 +7,7 @@ import type { Query } from '@actual-app/core/shared/query';
 import { integerToAmount } from '@actual-app/core/shared/util';
 import type {
   CategoryEntity,
+  CategoryGroupEntity,
   RuleConditionEntity,
   TimeFrame,
 } from '@actual-app/core/types/models';
@@ -564,13 +565,16 @@ function extractCategoryConditions(
   conditions: RuleConditionEntity[],
 ): RuleConditionEntity[] {
   return conditions.filter(
-    cond => !cond.customName && cond.field === 'category',
+    cond =>
+      !cond.customName &&
+      (cond.field === 'category' || cond.field === 'category_group'),
   );
 }
 
 // Helper: Evaluate category conditions to get matching categories
 async function getCategoriesFromConditions(
   allCategories: CategoryEntity[],
+  allCategoryGroups: CategoryGroupEntity[],
   conditions: RuleConditionEntity[],
   conditionsOp: 'and' | 'or',
 ): Promise<string[]> {
@@ -581,28 +585,54 @@ async function getCategoriesFromConditions(
       .map((cat: CategoryEntity) => cat.id);
   }
 
+  const groupNameById = new Map<string, string>(
+    allCategoryGroups.map((g: CategoryGroupEntity) => [g.id, g.name] as const),
+  );
+
   // Evaluate each condition to get sets of matching categories
   const conditionResults = conditions.map(cond => {
+    const getKey = (cat: CategoryEntity) =>
+      cond.field === 'category_group' ? cat.group : cat.id;
+    const matchesRegex =
+      cond.op === 'matches' &&
+      typeof cond.value === 'string' &&
+      cond.value.length <= 256
+        ? (() => {
+            try {
+              return new RegExp(cond.value, 'i');
+            } catch {
+              return null;
+            }
+          })()
+        : null;
+
     const matching = allCategories.filter((cat: CategoryEntity) => {
+      const key = getKey(cat);
+      const textValue =
+        cond.field === 'category_group'
+          ? (groupNameById.get(key) ?? key)
+          : cat.name;
+
       if (cond.op === 'is') {
-        return cond.value === cat.id;
+        return cond.value === key;
       } else if (cond.op === 'isNot') {
-        return cond.value !== cat.id;
+        return cond.value !== key;
       } else if (cond.op === 'oneOf') {
-        return cond.value.includes(cat.id);
+        return Array.isArray(cond.value) && cond.value.includes(key);
       } else if (cond.op === 'notOneOf') {
-        return !cond.value.includes(cat.id);
+        return Array.isArray(cond.value) && !cond.value.includes(key);
       } else if (cond.op === 'contains') {
-        return cat.name.includes(cond.value as string);
+        return (
+          typeof cond.value === 'string' &&
+          textValue.toLowerCase().includes(cond.value.toLowerCase())
+        );
       } else if (cond.op === 'doesNotContain') {
-        return !cat.name.includes(cond.value as string);
+        return (
+          typeof cond.value === 'string' &&
+          !textValue.toLowerCase().includes(cond.value.toLowerCase())
+        );
       } else if (cond.op === 'matches') {
-        try {
-          return new RegExp(cond.value as string).test(cat.name);
-        } catch (e) {
-          console.warn('Invalid regexp in matches condition', e);
-          return true;
-        }
+        return matchesRegex?.test(textValue) ?? false;
       }
       // Unknown operator: include category by default and log warning
       console.warn(`Unknown category condition operator: ${cond.op}`);
@@ -669,9 +699,11 @@ async function extractQueryCategories(
   const categoryConditions = extractCategoryConditions(
     queryConfig.conditions || [],
   );
-  const { list: allCategories } = await send('get-categories');
+  const { list: allCategories, grouped: allCategoryGroups } =
+    await send('get-categories');
   return getCategoriesFromConditions(
     allCategories,
+    allCategoryGroups,
     categoryConditions,
     queryConfig.conditionsOp || 'and',
   );
