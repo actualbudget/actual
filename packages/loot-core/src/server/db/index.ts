@@ -47,6 +47,7 @@ import type {
   DbClockMessage,
   DbPayee,
   DbPayeeMapping,
+  DbSavingsPlan,
   DbTag,
   DbTransaction,
   DbViewTransaction,
@@ -992,4 +993,31 @@ export function findTags() {
     `,
     ['%#%'],
   );
+}
+
+// Savings Plans
+
+export function getSavingsPlans() {
+  return all<DbSavingsPlan>(`
+    SELECT id, name, target_amount, saved_amount, months, start_month, status
+    FROM savings_plans
+    WHERE tombstone = 0
+    ORDER BY name
+  `);
+}
+
+export function insertSavingsPlan(
+  plan: Omit<DbSavingsPlan, 'id' | 'tombstone'>,
+): Promise<DbSavingsPlan['id']> {
+  return insertWithUUID('savings_plans', plan);
+}
+
+export function updateSavingsPlan(
+  plan: Partial<DbSavingsPlan> & Pick<DbSavingsPlan, 'id'>,
+) {
+  return update('savings_plans', plan);
+}
+
+export async function deleteSavingsPlan(id: DbSavingsPlan['id']) {
+  return delete_('savings_plans', id);
 }

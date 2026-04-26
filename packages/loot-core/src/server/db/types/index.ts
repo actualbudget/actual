@@ -335,6 +335,17 @@ export type DbViewSchedule = {
   _actions: JsonString;
 };
 
+export type DbSavingsPlan = {
+  id: string;
+  name: string;
+  target_amount: number;
+  saved_amount: number;
+  months: number;
+  start_month: string | null;
+  status: 'active' | 'completed';
+  tombstone: 1 | 0;
+};
+
 export type DbTag = {
   id: string;
   tag: string;

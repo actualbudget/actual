@@ -1,0 +1,14 @@
+BEGIN TRANSACTION;
+
+CREATE TABLE savings_plans(
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  target_amount INTEGER NOT NULL DEFAULT 0,
+  saved_amount INTEGER NOT NULL DEFAULT 0,
+  months INTEGER NOT NULL DEFAULT 1,
+  start_month TEXT,
+  status TEXT NOT NULL DEFAULT 'active',
+  tombstone INTEGER NOT NULL DEFAULT 0
+);
+
+COMMIT;

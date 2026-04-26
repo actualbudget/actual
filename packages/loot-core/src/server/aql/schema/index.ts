@@ -199,6 +199,16 @@ export const schema = {
     meta: f('json'),
     tombstone: f('boolean'),
   },
+  savings_plans: {
+    id: f('id'),
+    name: f('string', { required: true }),
+    target_amount: f('integer', { default: 0, required: true }),
+    saved_amount: f('integer', { default: 0, required: true }),
+    months: f('integer', { default: 1, required: true }),
+    start_month: f('string'),
+    status: f('string', { default: 'active' }),
+    tombstone: f('boolean'),
+  },
   payee_locations: {
     id: f('id'),
     payee_id: f('id', { ref: 'payees', required: true }),
