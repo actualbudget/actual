@@ -88,9 +88,7 @@ export function AutomationErrorDetail({
     case 'refill-no-cap':
       return (
         <Trans>
-          A refill automation tops the category up to a cap each month. Add a
-          &ldquo;Balance cap&rdquo; automation first so this one knows the
-          target.
+          Refill automations must have a &ldquo;Balance cap&rdquo; automation added to use as the target.
         </Trans>
       );
     case 'percentage-out-of-range':
