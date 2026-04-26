@@ -2,6 +2,8 @@ import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type {
+  CategoryEntity,
+  CategoryGroupEntity,
   RuleConditionEntity,
   SpendingEntity,
   SpendingMonthEntity,
@@ -47,17 +49,118 @@ export function createSpendingSpreadsheet({
       conditions: conditions.filter(cond => !cond.customName),
     });
 
-    const { filters: budgetFilters } = await send(
-      'make-filters-from-conditions',
-      {
-        conditions: conditions.filter(
-          cond => !cond.customName && cond.field === 'category',
-        ),
-        applySpecialCases: false,
-      },
+    const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
+
+    // Fetch categories and category groups to support client-side
+    // filtering by both `category` and `category_group` conditions for
+    // the budget query (the budget table only stores category IDs).
+    const { list: allCategories, grouped: allCategoryGroups } =
+      await send('get-categories');
+
+    const groupNameById = new Map<string, string>(
+      allCategoryGroups.map(
+        (g: CategoryGroupEntity) => [g.id, g.name] as const,
+      ),
     );
 
-    const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
+    const relevantConditions = conditions.filter(
+      cond =>
+        !cond.customName &&
+        (cond.field === 'category' || cond.field === 'category_group'),
+    );
+
+    let categoriesToInclude: CategoryEntity[];
+    if (relevantConditions.length > 0) {
+      const conditionResults = relevantConditions.map(cond => {
+        const getKey = (cat: CategoryEntity) =>
+          cond.field === 'category_group' ? cat.group : cat.id;
+        const matchesRegex =
+          cond.op === 'matches' &&
+          typeof cond.value === 'string' &&
+          cond.value.length <= 256
+            ? (() => {
+                try {
+                  return new RegExp(cond.value, 'i');
+                } catch {
+                  return null;
+                }
+              })()
+            : null;
+        return allCategories.filter((cat: CategoryEntity) => {
+          const key = getKey(cat);
+          const textValue =
+            cond.field === 'category_group'
+              ? (groupNameById.get(key) ?? key)
+              : cat.name;
+          if (cond.op === 'is') {
+            return cond.value === key;
+          } else if (cond.op === 'isNot') {
+            return cond.value !== key;
+          } else if (cond.op === 'oneOf') {
+            return (
+              Array.isArray(cond.value) && cond.value.includes(key)
+            );
+          } else if (cond.op === 'notOneOf') {
+            return (
+              Array.isArray(cond.value) && !cond.value.includes(key)
+            );
+          } else if (cond.op === 'contains') {
+            return (
+              typeof cond.value === 'string' &&
+              textValue
+                .toLowerCase()
+                .includes(cond.value.toLowerCase())
+            );
+          } else if (cond.op === 'doesNotContain') {
+            return (
+              typeof cond.value === 'string' &&
+              !textValue
+                .toLowerCase()
+                .includes(cond.value.toLowerCase())
+            );
+          } else if (cond.op === 'matches') {
+            return matchesRegex?.test(textValue) ?? false;
+          }
+          return false;
+        });
+      });
+
+      if (conditionsOp === 'or') {
+        const categoryIds = new Set(
+          conditionResults.flat().map(cat => cat.id),
+        );
+        categoriesToInclude = allCategories.filter(cat =>
+          categoryIds.has(cat.id),
+        );
+      } else {
+        if (conditionResults.length === 0) {
+          categoriesToInclude = [];
+        } else {
+          const firstSet = new Set(
+            conditionResults[0].map(cat => cat.id),
+          );
+          for (let i = 1; i < conditionResults.length; i++) {
+            const currentIds = new Set(
+              conditionResults[i].map(cat => cat.id),
+            );
+            for (const id of firstSet) {
+              if (!currentIds.has(id)) {
+                firstSet.delete(id);
+              }
+            }
+          }
+          categoriesToInclude = allCategories.filter(cat =>
+            firstSet.has(cat.id),
+          );
+        }
+      }
+    } else {
+      categoriesToInclude = allCategories;
+    }
+
+    const allowedCategoryIds = new Set(
+      categoriesToInclude.map(c => c.id),
+    );
 
     const [assets, debts] = await Promise.all([
       aqlQuery(
@@ -122,9 +225,6 @@ export function createSpendingSpreadsheet({
           .filter({
             $and: [{ month: { $eq: budgetMonth } }],
           })
-          .filter({
-            [conditionsOpKey]: budgetFilters,
-          })
           .groupBy([{ $id: '$category' }])
           .select([
             { category: { $id: '$category' } },
@@ -133,9 +233,13 @@ export function createSpendingSpreadsheet({
       ).then(({ data }) => data),
     ]);
 
+    const filteredBudgets = budgets.filter(b =>
+      allowedCategoryIds.has(b.category),
+    );
     const dailyBudget =
-      budgets &&
-      budgets.reduce((a, v) => a + v.amount, 0) / compareInterval.length;
+      filteredBudgets &&
+      filteredBudgets.reduce((a, v) => a + v.amount, 0) /
+        compareInterval.length;
 
     const intervals = monthUtils.dayRangeInclusive(startDate, endDate);
     if (endDateTo < startDate || startDateTo > endDate) {
