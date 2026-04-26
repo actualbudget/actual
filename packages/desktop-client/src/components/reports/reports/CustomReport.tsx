@@ -114,7 +114,7 @@ function useSelectedCategories(
 
 const BUDGETED_SUPPORTED_CONDITION_FIELDS = new Set<
   RuleConditionEntity['field']
->(['category']);
+>(['category', 'category_group']);
 
 export function CustomReport() {
   const params = useParams();
