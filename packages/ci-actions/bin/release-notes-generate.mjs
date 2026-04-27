@@ -81,18 +81,35 @@ await group('Prepare branch', async () => {
     });
   }
 
-  // the previous generation commit deletes source files from
-  // upcoming-release-notes, refetch them so we can regenerate from all of them
+  // recover deleted release note files from previous generation commits
   const baseRef = process.env.GITHUB_BASE_REF || 'master';
   await exec(`git fetch origin ${baseRef}`, { stdio: 'inherit' });
   const { stdout: mergeBase } = await exec(
     `git merge-base HEAD origin/${baseRef}`,
   );
   const base = mergeBase.trim();
-  console.log(`Restoring upcoming-release-notes from merge-base ${base}`);
-  await exec(`git checkout ${base} -- upcoming-release-notes`, {
-    stdio: 'inherit',
-  });
+  const { stdout: genLog } = await exec(
+    `git log --grep='${commitMessage}' --format=%H ${base}..HEAD`,
+  );
+  const genCommits = genLog.split('\n').filter(Boolean);
+  console.log(
+    `Reversing upcoming-release-notes deletions from ${genCommits.length} prior generation commit(s)`,
+  );
+  const tmpDir = process.env.RUNNER_TEMP || '/tmp';
+  for (const sha of genCommits) {
+    const patchPath = join(tmpDir, `revert-${sha}.patch`);
+    try {
+      await exec(
+        `git diff --diff-filter=D ${sha}~1..${sha} -- upcoming-release-notes > ${patchPath}`,
+      );
+      const { size } = await fs.stat(patchPath);
+      if (size > 0) {
+        await exec(`git apply -R --3way ${patchPath}`, { stdio: 'inherit' });
+      }
+    } finally {
+      await fs.unlink(patchPath).catch(() => undefined);
+    }
+  }
 });
 
 const { notesByCategory, files } = await parseReleaseNotes(
@@ -109,12 +126,13 @@ if (files.length === 0) {
 
 const highlights = '- TODO: Add release highlights';
 
-await group('Generate blog post', async () => {
-  const blogPath = join(
-    'packages/docs/blog',
-    `${releaseDate}-release-${slug}.md`,
-  );
+const blogPath = join(
+  'packages/docs/blog',
+  `${releaseDate}-release-${slug}.md`,
+);
+const releasesPath = 'packages/docs/docs/releases.md';
 
+await group('Generate blog post', async () => {
   const template = `---
 title: Release ${version}
 description: New release of Actual.
@@ -132,6 +150,7 @@ ${highlights}
 **Docker Tag: ${version}**
 
 ${AUTOGEN_MARKER}
+
 ${categorizedNotes}
 `;
 
@@ -161,7 +180,6 @@ ${categorizedNotes}
 });
 
 await group('Update releases.md', async () => {
-  const releasesPath = 'packages/docs/docs/releases.md';
   const existing = await fs.readFile(releasesPath, 'utf-8');
 
   const sectionRe = new RegExp(
@@ -193,6 +211,7 @@ ${highlights}
 **Docker Tag: ${version}**
 
 ${AUTOGEN_MARKER}
+
 ${categorizedNotes}`;
     updated = existing.replace(
       '# Release Notes\n',
@@ -208,6 +227,14 @@ await group('Remove used release notes', async () => {
   await Promise.all(
     files.map(f => fs.unlink(join('upcoming-release-notes', f))),
   );
+});
+
+await group('Lint generated files', async () => {
+  const targets = `${blogPath} ${releasesPath}`;
+  await exec(`yarn exec oxfmt ${targets}`, { stdio: 'inherit' });
+  await exec(`yarn exec oxlint --fix --type-aware --quiet ${targets}`, {
+    stdio: 'inherit',
+  });
 });
 
 await group('Commit and push', async () => {
