@@ -5,5 +5,5 @@
     "noEmit": true,
     "types": ["@playwright/test", "node"]
   },
-  "include": ["./**/*.ts", "./**/*.tsx"]
+  "include": ["./**/*.ts", "./**/*.tsx", "../../loot-core/typings/window.ts"]
 }
