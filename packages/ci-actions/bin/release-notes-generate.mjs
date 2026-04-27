@@ -98,14 +98,17 @@ await group('Prepare branch', async () => {
   const tmpDir = process.env.RUNNER_TEMP || '/tmp';
   for (const sha of genCommits) {
     const patchPath = join(tmpDir, `revert-${sha}.patch`);
-    await exec(
-      `git diff ${sha}~1..${sha} -- upcoming-release-notes > ${patchPath}`,
-    );
-    const { size } = await fs.stat(patchPath);
-    if (size > 0) {
-      await exec(`git apply -R ${patchPath}`, { stdio: 'inherit' });
+    try {
+      await exec(
+        `git diff --diff-filter=D ${sha}~1..${sha} -- upcoming-release-notes > ${patchPath}`,
+      );
+      const { size } = await fs.stat(patchPath);
+      if (size > 0) {
+        await exec(`git apply -R ${patchPath}`, { stdio: 'inherit' });
+      }
+    } finally {
+      await fs.unlink(patchPath).catch(() => undefined);
     }
-    await fs.unlink(patchPath).catch(() => undefined);
   }
 });
 
