@@ -447,6 +447,7 @@ const ChildTransactionEdit = forwardRef<
             <TapField
               icon={<SvgUser width={17} height={17} />}
               placeholder={t('Who did you pay?')}
+              rightContent={dropdownChevron}
               isDisabled={
                 !!editingField &&
                 editingField !== getFieldName(transaction.id, 'payee')
@@ -1236,7 +1237,9 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                       style={{ marginLeft: 4 }}
                     />
                   </Button>
-                ) : undefined
+                ) : (
+                  dropdownChevron
+                )
               }
             />
           </View>
