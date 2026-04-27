@@ -2,6 +2,7 @@ import { vi } from 'vitest';
 
 import * as aql from '#server/aql';
 import * as db from '#server/db';
+import type { DbCategory } from '#server/db';
 import { amountToInteger } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
 import type { Template } from '#types/models/templates';
@@ -1810,7 +1811,11 @@ describe('CategoryTemplateContext', () => {
         [] as Awaited<ReturnType<typeof statements.getActiveSchedules>>,
       );
       vi.mocked(db.getCategories).mockResolvedValue([
-        { id: 'inc-1', name: 'Salary', is_income: true } as CategoryEntity,
+        {
+          id: 'inc-1',
+          name: 'Salary',
+          is_income: true,
+        } as unknown as DbCategory,
       ]);
       const templates: Template[] = [
         {
@@ -1861,7 +1866,7 @@ describe('CategoryTemplateContext', () => {
       vi.mocked(statements.getActiveSchedules).mockResolvedValue(
         [] as Awaited<ReturnType<typeof statements.getActiveSchedules>>,
       );
-      vi.mocked(db.getCategories).mockResolvedValue([] as CategoryEntity[]);
+      vi.mocked(db.getCategories).mockResolvedValue([] as DbCategory[]);
       const templates: Template[] = [
         {
           type: 'percentage',
@@ -1972,8 +1977,8 @@ describe('CategoryTemplateContext', () => {
 
     it('throws when more than one #goal directive is defined', () => {
       const templates: Template[] = [
-        { type: 'goal', amount: 1000, directive: 'goal', priority: null },
-        { type: 'goal', amount: 2000, directive: 'goal', priority: null },
+        { type: 'goal', amount: 1000, directive: 'goal' },
+        { type: 'goal', amount: 2000, directive: 'goal' },
       ];
       expect(
         () =>

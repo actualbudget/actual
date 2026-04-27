@@ -92,8 +92,8 @@ function mockSchedulesByName(
       };
     },
   );
-  vi.mocked(getRuleForSchedule).mockImplementation(async (sid: number) => {
-    const name = names.find(n => sidByName[n] === sid) ?? names[0];
+  vi.mocked(getRuleForSchedule).mockImplementation(async id => {
+    const name = names.find(n => sidByName[n] === Number(id)) ?? names[0];
     return makeRule(specsByName[name].spec);
   });
   vi.mocked(isTrackingBudget).mockReturnValue(false);

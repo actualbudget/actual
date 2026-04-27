@@ -35,7 +35,6 @@
     "**/node_modules/*",
     "dist",
     "@types",
-    "*.test.ts",
     "*.config.ts",
     "*.config.mts"
   ]

@@ -2,6 +2,7 @@ import { vi } from 'vitest';
 
 import * as aql from '#server/aql';
 import * as db from '#server/db';
+import type { DbCategory } from '#server/db';
 import type { CategoryEntity } from '#types/models';
 import type { Template } from '#types/models/templates';
 
@@ -39,7 +40,7 @@ vi.mock('./template-notes', () => ({
   storeNoteTemplates: vi.fn(),
 }));
 
-function setupSheetMock(values: Record<string, number | boolean | null>) {
+function setupSheetMock(values: Record<string, number>) {
   vi.mocked(actions.getSheetValue).mockImplementation(
     async (_sheet: string, key: string) => values[key] ?? 0,
   );
@@ -128,7 +129,7 @@ describe('applyMultipleCategoryTemplates', () => {
     vi.mocked(statements.getActiveSchedules).mockResolvedValue(
       [] as Awaited<ReturnType<typeof statements.getActiveSchedules>>,
     );
-    vi.mocked(db.getCategories).mockResolvedValue([] as CategoryEntity[]);
+    vi.mocked(db.getCategories).mockResolvedValue([] as DbCategory[]);
   });
 
   it('writes per-category budgets and returns a success notification', async () => {
@@ -211,7 +212,9 @@ describe('applyMultipleCategoryTemplates', () => {
     const cat2Budget = budgetCalls.find(c => c.category === cat2.id);
     expect(cat1Budget?.amount).toBe(10000);
     expect(cat2Budget?.amount).toBe(5000);
-    expect((cat1Budget?.amount ?? 0) + (cat2Budget?.amount ?? 0)).toBe(15000);
+    expect(
+      Number(cat1Budget?.amount ?? 0) + Number(cat2Budget?.amount ?? 0),
+    ).toBe(15000);
   });
 
   it('returns an error notification when a template fails validation', async () => {
@@ -295,7 +298,9 @@ describe('applyMultipleCategoryTemplates', () => {
     const cat2Budget = budgetCalls.find(c => c.category === cat2.id);
     expect(cat1Budget?.amount).toBe(15000);
     expect(cat2Budget?.amount).toBe(5000);
-    expect((cat1Budget?.amount ?? 0) + (cat2Budget?.amount ?? 0)).toBe(20000);
+    expect(
+      Number(cat1Budget?.amount ?? 0) + Number(cat2Budget?.amount ?? 0),
+    ).toBe(20000);
   });
 });
 
@@ -318,7 +323,7 @@ describe('applyTemplate (force=false)', () => {
     vi.mocked(statements.getActiveSchedules).mockResolvedValue(
       [] as Awaited<ReturnType<typeof statements.getActiveSchedules>>,
     );
-    vi.mocked(db.getCategories).mockResolvedValue([] as CategoryEntity[]);
+    vi.mocked(db.getCategories).mockResolvedValue([] as DbCategory[]);
   });
 
   it('skips categories that already have a non-zero budget', async () => {
