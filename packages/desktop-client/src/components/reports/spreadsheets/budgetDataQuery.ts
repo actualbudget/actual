@@ -111,7 +111,9 @@ function filterCategoriesByConditions(
     >,
   ): boolean => {
     const key =
-      condition.field === 'category_group' ? category.group ?? '' : category.id;
+      condition.field === 'category_group'
+        ? (category.group ?? '')
+        : category.id;
     const textValue =
       condition.field === 'category_group'
         ? (groupNameById.get(key ?? '') ?? key ?? '')
@@ -142,9 +144,7 @@ function filterCategoriesByConditions(
     }
 
     if (condition.op === 'notOneOf') {
-      return (
-        Array.isArray(condition.value) && !condition.value.includes(key)
-      );
+      return Array.isArray(condition.value) && !condition.value.includes(key);
     }
 
     if (condition.op === 'contains') {
