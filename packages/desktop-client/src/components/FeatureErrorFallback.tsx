@@ -16,6 +16,8 @@ export function FeatureErrorFallback({
     console.error(error);
   }, [error]);
 
+  const message = error instanceof Error ? error.message : undefined;
+
   return (
     <View
       style={{
@@ -28,7 +30,7 @@ export function FeatureErrorFallback({
       <Text style={{ ...styles.mediumText, color: theme.errorText }}>
         <Trans>Something went wrong loading this section.</Trans>
       </Text>
-      {error?.message && (
+      {message && (
         <Text
           style={{
             ...styles.smallText,
@@ -40,7 +42,7 @@ export function FeatureErrorFallback({
             userSelect: 'text',
           }}
         >
-          {error.message}
+          {message}
         </Text>
       )}
       <Button onPress={resetErrorBoundary} style={{ marginTop: 15 }}>

@@ -3,7 +3,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
   embedThemeFonts,
+  extractLegacyOverride,
   MAX_FONT_FILE_SIZE,
+  migrateLegacyOverride,
   parseInstalledTheme,
   validateThemeCss,
 } from './customThemes';
@@ -1245,6 +1247,26 @@ describe('parseInstalledTheme', () => {
       expect(result?.cssContent).toBe(':root { --color-primary: #007bff; }');
     });
 
+    it('ignores legacy overrideCss field without rejecting the theme', () => {
+      const theme = {
+        id: 'theme-legacy',
+        name: 'Legacy Theme',
+        repo: 'owner/repo',
+        cssContent: ':root { --color-primary: #007bff; }',
+        overrideCss: ':root { --color-accent: #ff00aa; }',
+      };
+      const json = JSON.stringify(theme);
+
+      const result = parseInstalledTheme(json);
+
+      expect(result).not.toBeNull();
+      expect(result?.id).toBe('theme-legacy');
+      expect(result?.cssContent).toBe(':root { --color-primary: #007bff; }');
+      // Legacy field is stripped from the typed result. extractLegacyOverride
+      // is the helper that reads it off the raw JSON during migration.
+      expect(result).not.toHaveProperty('overrideCss');
+    });
+
     it('should parse theme with empty string fields', () => {
       const theme: InstalledTheme = {
         id: '',
@@ -1590,5 +1612,241 @@ describe('embedThemeFonts', () => {
 
     const result = await embedThemeFonts(css, 'owner/repo');
     expect(result).toBe(css);
+  });
+});
+
+describe('extractLegacyOverride', () => {
+  it('returns the overrideCss string when present and non-empty', () => {
+    const json = JSON.stringify({
+      id: 'theme-abc',
+      name: 'My Theme',
+      repo: 'owner/repo',
+      cssContent: ':root { --color-primary: #007bff; }',
+      overrideCss: ':root { --color-accent: #ff00aa; }',
+    });
+    expect(extractLegacyOverride(json)).toBe(
+      ':root { --color-accent: #ff00aa; }',
+    );
+  });
+
+  it('returns null when overrideCss is missing', () => {
+    const json = JSON.stringify({
+      id: 'theme-abc',
+      name: 'My Theme',
+      repo: 'owner/repo',
+      cssContent: ':root { --color-primary: #007bff; }',
+    });
+    expect(extractLegacyOverride(json)).toBeNull();
+  });
+
+  it('returns null when overrideCss is an empty string', () => {
+    const json = JSON.stringify({
+      id: 'theme-abc',
+      name: 'My Theme',
+      repo: 'owner/repo',
+      cssContent: ':root { --color-primary: #007bff; }',
+      overrideCss: '',
+    });
+    expect(extractLegacyOverride(json)).toBeNull();
+  });
+
+  it('returns null when overrideCss is only whitespace', () => {
+    const json = JSON.stringify({
+      id: 'theme-abc',
+      name: 'My Theme',
+      repo: 'owner/repo',
+      cssContent: ':root { --color-primary: #007bff; }',
+      overrideCss: '   \n\t  ',
+    });
+    expect(extractLegacyOverride(json)).toBeNull();
+  });
+
+  it('trims leading and trailing whitespace from overrideCss', () => {
+    const json = JSON.stringify({
+      id: 'theme-abc',
+      name: 'My Theme',
+      repo: 'owner/repo',
+      cssContent: ':root { --color-primary: #007bff; }',
+      overrideCss: '  :root { --color-accent: #ff00aa; }  ',
+    });
+    expect(extractLegacyOverride(json)).toBe(
+      ':root { --color-accent: #ff00aa; }',
+    );
+  });
+
+  it('returns null when overrideCss is not a string', () => {
+    const json = JSON.stringify({
+      id: 'theme-abc',
+      name: 'My Theme',
+      repo: 'owner/repo',
+      cssContent: ':root { --color-primary: #007bff; }',
+      overrideCss: 42,
+    });
+    expect(extractLegacyOverride(json)).toBeNull();
+  });
+
+  it('returns null for undefined input', () => {
+    expect(extractLegacyOverride(undefined)).toBeNull();
+  });
+
+  it('returns null for empty string input', () => {
+    expect(extractLegacyOverride('')).toBeNull();
+  });
+
+  it('returns null for malformed JSON', () => {
+    expect(extractLegacyOverride('{ not valid json')).toBeNull();
+  });
+
+  it('returns null when parsed value is not an object', () => {
+    expect(extractLegacyOverride(JSON.stringify('a string'))).toBeNull();
+    expect(extractLegacyOverride(JSON.stringify(null))).toBeNull();
+    expect(extractLegacyOverride(JSON.stringify([]))).toBeNull();
+  });
+});
+
+describe('migrateLegacyOverride', () => {
+  const baseTheme = {
+    id: 'theme-abc',
+    name: 'My Theme',
+    repo: 'owner/repo',
+    cssContent: ':root { --color-primary: #007bff; }',
+  };
+
+  it('returns null when existingOverride already has content', () => {
+    const lightJson = JSON.stringify({
+      ...baseTheme,
+      overrideCss: ':root { --color-accent: red; }',
+    });
+    expect(
+      migrateLegacyOverride({
+        existingOverride: ':root { --color-accent: blue; }',
+        lightJson,
+        darkJson: undefined,
+      }),
+    ).toBeNull();
+  });
+
+  it('returns null when neither installed theme has legacy overrideCss', () => {
+    const lightJson = JSON.stringify(baseTheme);
+    const darkJson = JSON.stringify(baseTheme);
+    expect(
+      migrateLegacyOverride({
+        existingOverride: undefined,
+        lightJson,
+        darkJson,
+      }),
+    ).toBeNull();
+  });
+
+  it('migrates from light when only light has legacy overrideCss', () => {
+    const lightJson = JSON.stringify({
+      ...baseTheme,
+      overrideCss: ':root { --color-accent: #ff00aa; }',
+    });
+    const darkJson = JSON.stringify(baseTheme);
+    const result = migrateLegacyOverride({
+      existingOverride: undefined,
+      lightJson,
+      darkJson,
+    });
+    expect(result).not.toBeNull();
+    expect(result?.override).toBe(':root { --color-accent: #ff00aa; }');
+    expect(result?.newLightJson).toBe(JSON.stringify(baseTheme));
+    expect(result?.newDarkJson).toBe(darkJson);
+    expect(
+      JSON.parse(result?.newLightJson ?? '{}').overrideCss,
+    ).toBeUndefined();
+  });
+
+  it('migrates from dark when only dark has legacy overrideCss', () => {
+    const lightJson = JSON.stringify(baseTheme);
+    const darkJson = JSON.stringify({
+      ...baseTheme,
+      overrideCss: ':root { --color-accent: #00ffaa; }',
+    });
+    const result = migrateLegacyOverride({
+      existingOverride: undefined,
+      lightJson,
+      darkJson,
+    });
+    expect(result).not.toBeNull();
+    expect(result?.override).toBe(':root { --color-accent: #00ffaa; }');
+    expect(result?.newLightJson).toBe(lightJson);
+    expect(result?.newDarkJson).toBe(JSON.stringify(baseTheme));
+    expect(JSON.parse(result?.newDarkJson ?? '{}').overrideCss).toBeUndefined();
+  });
+
+  it('prefers light when both have legacy overrideCss (collision rule)', () => {
+    const lightJson = JSON.stringify({
+      ...baseTheme,
+      overrideCss: ':root { --color-accent: red; }',
+    });
+    const darkJson = JSON.stringify({
+      ...baseTheme,
+      overrideCss: ':root { --color-accent: blue; }',
+    });
+    const result = migrateLegacyOverride({
+      existingOverride: undefined,
+      lightJson,
+      darkJson,
+    });
+    expect(result?.override).toBe(':root { --color-accent: red; }');
+    expect(result?.newLightJson).toBe(JSON.stringify(baseTheme));
+    expect(result?.newDarkJson).toBe(JSON.stringify(baseTheme));
+    expect(
+      JSON.parse(result?.newLightJson ?? '{}').overrideCss,
+    ).toBeUndefined();
+    expect(JSON.parse(result?.newDarkJson ?? '{}').overrideCss).toBeUndefined();
+  });
+
+  it('migrates from light when existingOverride is an empty string', () => {
+    const lightJson = JSON.stringify({
+      ...baseTheme,
+      overrideCss: ':root { --color-accent: red; }',
+    });
+    const result = migrateLegacyOverride({
+      existingOverride: '',
+      lightJson,
+      darkJson: undefined,
+    });
+    expect(result?.override).toBe(':root { --color-accent: red; }');
+  });
+
+  it('migrates when existingOverride is only whitespace', () => {
+    const lightJson = JSON.stringify({
+      ...baseTheme,
+      overrideCss: ':root { --color-accent: red; }',
+    });
+    const result = migrateLegacyOverride({
+      existingOverride: '  \n  ',
+      lightJson,
+      darkJson: undefined,
+    });
+    expect(result?.override).toBe(':root { --color-accent: red; }');
+  });
+
+  it('handles undefined installed theme JSONs', () => {
+    const result = migrateLegacyOverride({
+      existingOverride: undefined,
+      lightJson: undefined,
+      darkJson: undefined,
+    });
+    expect(result).toBeNull();
+  });
+
+  it('returns the untouched side by reference when only one side migrates', () => {
+    const lightJson = JSON.stringify({
+      ...baseTheme,
+      overrideCss: ':root { --color-accent: red; }',
+    });
+    const darkJson = JSON.stringify(baseTheme);
+    const result = migrateLegacyOverride({
+      existingOverride: undefined,
+      lightJson,
+      darkJson,
+    });
+    // The dark side had no legacy override, so it is returned unchanged
+    // (same reference, not a re-serialized copy).
+    expect(result?.newDarkJson).toBe(darkJson);
   });
 });

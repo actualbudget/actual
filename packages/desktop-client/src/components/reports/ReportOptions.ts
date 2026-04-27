@@ -127,6 +127,16 @@ const dateRangeOptions: dateRangeProps[] = [
     Yearly: false,
   },
   {
+    description: t('Last 30 days'),
+    key: 'Last 30 days',
+    name: 'last30Days',
+    type: 'Day',
+    Daily: true,
+    Weekly: true,
+    Monthly: true,
+    Yearly: false,
+  },
+  {
     description: t('Last 3 months'),
     key: 'Last 3 months',
     name: 3,

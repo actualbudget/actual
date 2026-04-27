@@ -17,11 +17,10 @@ module.exports = {
     },
   },
 
-  create(context) {
-    const sourceCode = context.getSourceCode();
-    // Map of scope to Set of reassigned variable names in that scope
-    const reassignedVariablesByScope = new Map();
-    const letDeclarations = [];
+  createOnce(context) {
+    // Per-file state, reset in the before() hook below
+    let reassignedVariablesByScope;
+    let letDeclarations;
 
     //----------------------------------------------------------------------
     // Helpers
@@ -34,7 +33,7 @@ module.exports = {
      */
     function getScope(node) {
       try {
-        return sourceCode.getScope(node);
+        return context.sourceCode.getScope(node);
       } catch {
         return null;
       }
@@ -172,7 +171,7 @@ module.exports = {
      */
     function makeFixer(node) {
       return fixer => {
-        const letToken = sourceCode.getFirstToken(node, {
+        const letToken = context.sourceCode.getFirstToken(node, {
           filter: token => token.value === 'let',
         });
         if (letToken) {
@@ -187,6 +186,11 @@ module.exports = {
     //----------------------------------------------------------------------
 
     return {
+      before() {
+        reassignedVariablesByScope = new Map();
+        letDeclarations = [];
+      },
+
       // Track assignments to variables
       AssignmentExpression(node) {
         // Handle simple assignments: x = value

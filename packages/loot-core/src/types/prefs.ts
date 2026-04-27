@@ -34,6 +34,7 @@ export type SyncedPrefs = Partial<
     | `hide-reconciled-${string}`
     // TODO: pull from src/components/modals/ImportTransactions.js
     | `parse-date-${string}-${'csv' | 'qif'}`
+    | `import-reimport-deleted-${string}`
     | `csv-mappings-${string}`
     | `csv-delimiter-${string}`
     | `csv-skip-start-lines-${string}`
@@ -119,6 +120,7 @@ export type GlobalPrefs = Partial<{
   >; // Complete plugin theme metadata
   installedCustomLightTheme?: string; // JSON of InstalledTheme for light custom theme (also used as single custom theme in non-auto mode)
   installedCustomDarkTheme?: string; // JSON of InstalledTheme for auto-mode dark custom theme
+  customCssOverride?: string; // User-pasted CSS override applied on top of any theme. Empty string or undefined means no override.
   documentDir: string; // Electron only
   serverSelfSignedCert: string; // Electron only
   syncServerConfig?: {
@@ -149,6 +151,7 @@ export type GlobalPrefsJson = Partial<{
   'preferred-dark-theme'?: GlobalPrefs['preferredDarkTheme'];
   'installed-custom-theme'?: GlobalPrefs['installedCustomLightTheme'];
   'installed-custom-dark-theme'?: GlobalPrefs['installedCustomDarkTheme'];
+  'custom-css-override'?: GlobalPrefs['customCssOverride'];
   plugins?: string; // "true" or "false"
   'plugin-theme'?: string; // JSON string of complete plugin theme (current selected plugin theme)
   'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];

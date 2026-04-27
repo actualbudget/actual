@@ -281,7 +281,6 @@ Always run `yarn typecheck` before committing.
 - Avoid `any` or `unknown` unless absolutely necessary
 - Look for existing type definitions in the codebase
 - Avoid type assertions (`as`, `!`) - prefer `satisfies`
-- Use inline type imports: `import { type MyType } from '...'`
 
 **Naming:**
 

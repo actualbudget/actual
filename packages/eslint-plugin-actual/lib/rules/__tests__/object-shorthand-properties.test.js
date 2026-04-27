@@ -4,7 +4,8 @@
 
 import { runClassic } from 'eslint-vitest-rule-tester';
 
-import * as rule from '../object-shorthand-properties';
+import plugin from '../../index';
+const rule = plugin.rules['object-shorthand-properties'];
 
 //------------------------------------------------------------------------------
 // Tests
@@ -54,7 +55,6 @@ void runClassic(
           {
             messageId: 'useShorthand',
             data: { key: 'foo' },
-            type: 'Property',
           },
         ],
       },
@@ -65,12 +65,10 @@ void runClassic(
           {
             messageId: 'useShorthand',
             data: { key: 'foo' },
-            type: 'Property',
           },
           {
             messageId: 'useShorthand',
             data: { key: 'bar' },
-            type: 'Property',
           },
         ],
       },
@@ -81,7 +79,6 @@ void runClassic(
           {
             messageId: 'useShorthand',
             data: { key: 'foo' },
-            type: 'Property',
           },
         ],
       },
@@ -92,17 +89,14 @@ void runClassic(
           {
             messageId: 'useShorthand',
             data: { key: 'a' },
-            type: 'Property',
           },
           {
             messageId: 'useShorthand',
             data: { key: 'b' },
-            type: 'Property',
           },
           {
             messageId: 'useShorthand',
             data: { key: 'c' },
-            type: 'Property',
           },
         ],
       },
@@ -113,12 +107,10 @@ void runClassic(
           {
             messageId: 'useShorthand',
             data: { key: 'x' },
-            type: 'Property',
           },
           {
             messageId: 'useShorthand',
             data: { key: 'y' },
-            type: 'Property',
           },
         ],
       },
@@ -129,7 +121,6 @@ void runClassic(
           {
             messageId: 'useShorthand',
             data: { key: 'prop' },
-            type: 'Property',
           },
         ],
       },
@@ -140,7 +131,6 @@ void runClassic(
           {
             messageId: 'useShorthand',
             data: { key: 'bar' },
-            type: 'Property',
           },
         ],
       },
@@ -151,7 +141,6 @@ void runClassic(
           {
             messageId: 'useShorthand',
             data: { key: 'foo' },
-            type: 'Property',
           },
         ],
       },

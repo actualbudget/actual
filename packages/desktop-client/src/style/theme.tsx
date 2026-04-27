@@ -6,8 +6,9 @@ import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 
 import {
+  migrateLegacyOverride,
   parseInstalledTheme,
-  validateAndCombineThemeCss,
+  validateThemeCss,
 } from './customThemes';
 import type { BaseTheme } from './customThemes';
 import * as darkTheme from './themes/dark';
@@ -41,6 +42,56 @@ export function usePreferredDarkTheme() {
   const [darkTheme = 'dark', setDarkTheme] =
     useGlobalPref('preferredDarkTheme');
   return [darkTheme, setDarkTheme] as const;
+}
+
+/**
+ * One-time migration: moves any legacy `overrideCss` field out of the
+ * installed theme JSON blobs and into the new `customCssOverride` global pref.
+ * Gated on the customThemes feature flag — users who never used the feature
+ * have nothing to migrate.
+ *
+ * TODO: remove this after v26.6.0 is released
+ */
+function useMigrateLegacyOverride() {
+  const customThemesEnabled = useFeatureFlag('customThemes');
+  const [customCssOverride, setCustomCssOverride] =
+    useGlobalPref('customCssOverride');
+  const [installedCustomLightThemeJson, setInstalledCustomLightThemeJson] =
+    useGlobalPref('installedCustomLightTheme');
+  const [installedCustomDarkThemeJson, setInstalledCustomDarkThemeJson] =
+    useGlobalPref('installedCustomDarkTheme');
+
+  useEffect(() => {
+    if (!customThemesEnabled) return;
+
+    const result = migrateLegacyOverride({
+      existingOverride: customCssOverride,
+      lightJson: installedCustomLightThemeJson,
+      darkJson: installedCustomDarkThemeJson,
+    });
+
+    if (!result) return;
+
+    setCustomCssOverride(result.override);
+    if (result.newLightJson !== installedCustomLightThemeJson) {
+      setInstalledCustomLightThemeJson(result.newLightJson);
+    }
+    if (result.newDarkJson !== installedCustomDarkThemeJson) {
+      setInstalledCustomDarkThemeJson(result.newDarkJson);
+    }
+    // Re-runs when prefs hydrate so migration isn't missed if the installed
+    // theme JSONs arrive after the first render. migrateLegacyOverride is
+    // idempotent: once customCssOverride is set (or the legacy field is
+    // stripped), subsequent invocations return null.
+  }, [
+    customThemesEnabled,
+    customCssOverride,
+    installedCustomLightThemeJson,
+    installedCustomDarkThemeJson,
+    setCustomCssOverride,
+    setInstalledCustomLightThemeJson,
+    setInstalledCustomDarkThemeJson,
+  ]);
 }
 
 function getBaseThemeColors(baseTheme: BaseTheme) {
@@ -144,6 +195,7 @@ export function ThemeStyle() {
  * injected via @media (prefers-color-scheme) rules. Otherwise, a single custom theme applies.
  */
 export function CustomThemeStyle() {
+  useMigrateLegacyOverride();
   const customThemesEnabled = useFeatureFlag('customThemes');
   const [activeTheme] = useTheme();
   const [installedCustomLightThemeJson] = useGlobalPref(
@@ -152,61 +204,57 @@ export function CustomThemeStyle() {
   const [installedCustomDarkThemeJson] = useGlobalPref(
     'installedCustomDarkTheme',
   );
+  const [customCssOverride] = useGlobalPref('customCssOverride');
 
   const validatedCss = useMemo(() => {
     if (!customThemesEnabled) return null;
 
+    const safeValidate = (css: string | undefined, errorLabel: string) => {
+      if (!css?.trim()) return '';
+      try {
+        return validateThemeCss(css);
+      } catch (error) {
+        console.error(errorLabel, { error });
+        return '';
+      }
+    };
+
+    let baseCss = '';
     if (activeTheme === 'auto') {
-      const lightTheme = parseInstalledTheme(installedCustomLightThemeJson);
-      const darkTheme = parseInstalledTheme(installedCustomDarkThemeJson);
-
-      let css = '';
-
-      try {
-        const lightCss = validateAndCombineThemeCss(
-          lightTheme?.cssContent,
-          lightTheme?.overrideCss,
-        );
-        if (lightCss) {
-          css += `@media (prefers-color-scheme: light) { ${lightCss} }\n`;
-        }
-      } catch (error) {
-        console.error('Invalid custom light theme CSS', { error });
-      }
-
-      try {
-        const darkCss = validateAndCombineThemeCss(
-          darkTheme?.cssContent,
-          darkTheme?.overrideCss,
-        );
-        if (darkCss) {
-          css += `@media (prefers-color-scheme: dark) { ${darkCss} }\n`;
-        }
-      } catch (error) {
-        console.error('Invalid custom dark theme CSS', { error });
-      }
-
-      return css || null;
-    }
-
-    const installedTheme = parseInstalledTheme(installedCustomLightThemeJson);
-
-    try {
-      return (
-        validateAndCombineThemeCss(
-          installedTheme?.cssContent,
-          installedTheme?.overrideCss,
-        ) || null
+      const lightCss = safeValidate(
+        parseInstalledTheme(installedCustomLightThemeJson)?.cssContent,
+        'Invalid custom light theme CSS',
       );
-    } catch (error) {
-      console.error('Invalid custom theme CSS', { error });
-      return null;
+      if (lightCss) {
+        baseCss += `@media (prefers-color-scheme: light) { ${lightCss} }\n`;
+      }
+      const darkCss = safeValidate(
+        parseInstalledTheme(installedCustomDarkThemeJson)?.cssContent,
+        'Invalid custom dark theme CSS',
+      );
+      if (darkCss) {
+        baseCss += `@media (prefers-color-scheme: dark) { ${darkCss} }\n`;
+      }
+    } else {
+      baseCss = safeValidate(
+        parseInstalledTheme(installedCustomLightThemeJson)?.cssContent,
+        'Invalid custom theme CSS',
+      );
     }
+
+    const overrideLayer = safeValidate(
+      customCssOverride,
+      'Invalid custom CSS override',
+    );
+
+    const combined = [baseCss, overrideLayer].filter(Boolean).join('\n');
+    return combined || null;
   }, [
     customThemesEnabled,
     activeTheme,
     installedCustomLightThemeJson,
     installedCustomDarkThemeJson,
+    customCssOverride,
   ]);
 
   if (!validatedCss) {

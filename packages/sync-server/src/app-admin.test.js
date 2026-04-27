@@ -1,5 +1,4 @@
 import request from 'supertest';
-import { v4 as uuidv4 } from 'uuid';
 
 import { getAccountDb } from './account-db';
 import { handlers as app } from './app-admin';
@@ -27,13 +26,13 @@ const createSession = (userId, sessionToken) => {
   );
 };
 
-const generateSessionToken = () => `token-${uuidv4()}`;
+const generateSessionToken = () => `token-${crypto.randomUUID()}`;
 
 describe('/admin', () => {
   describe('/owner-created', () => {
     it('should return 200 and true if an owner user is created', async () => {
       const sessionToken = generateSessionToken();
-      const adminId = uuidv4();
+      const adminId = crypto.randomUUID();
       createUser(adminId, 'admin', ADMIN_ROLE, 1);
       createSession(adminId, sessionToken);
 
@@ -51,8 +50,8 @@ describe('/admin', () => {
       let sessionUserId, testUserId, sessionToken;
 
       beforeEach(() => {
-        sessionUserId = uuidv4();
-        testUserId = uuidv4();
+        sessionUserId = crypto.randomUUID();
+        testUserId = crypto.randomUUID();
         sessionToken = generateSessionToken();
 
         createUser(sessionUserId, 'sessionUser', ADMIN_ROLE);
@@ -81,7 +80,7 @@ describe('/admin', () => {
       let duplicateUserId;
 
       beforeEach(() => {
-        sessionUserId = uuidv4();
+        sessionUserId = crypto.randomUUID();
         sessionToken = generateSessionToken();
         createUser(sessionUserId, 'sessionUser', ADMIN_ROLE);
         createSession(sessionUserId, sessionToken);
@@ -152,8 +151,8 @@ describe('/admin', () => {
       let sessionUserId, testUserId, sessionToken;
 
       beforeEach(() => {
-        sessionUserId = uuidv4();
-        testUserId = uuidv4();
+        sessionUserId = crypto.randomUUID();
+        testUserId = crypto.randomUUID();
         sessionToken = generateSessionToken();
 
         createUser(sessionUserId, 'sessionUser', ADMIN_ROLE);
@@ -209,8 +208,8 @@ describe('/admin', () => {
       let sessionUserId, testUserId, sessionToken;
 
       beforeEach(() => {
-        sessionUserId = uuidv4();
-        testUserId = uuidv4();
+        sessionUserId = crypto.randomUUID();
+        testUserId = crypto.randomUUID();
         sessionToken = generateSessionToken();
 
         createUser(sessionUserId, 'sessionUser', ADMIN_ROLE);
@@ -260,9 +259,9 @@ describe('/admin', () => {
       let sessionUserId, testUserId, fileId, sessionToken;
 
       beforeEach(() => {
-        sessionUserId = uuidv4();
-        testUserId = uuidv4();
-        fileId = uuidv4();
+        sessionUserId = crypto.randomUUID();
+        testUserId = crypto.randomUUID();
+        fileId = crypto.randomUUID();
         sessionToken = generateSessionToken();
 
         createUser(sessionUserId, 'sessionUser', ADMIN_ROLE);
@@ -321,9 +320,9 @@ describe('/admin', () => {
       let sessionUserId, testUserId, fileId, sessionToken;
 
       beforeEach(() => {
-        sessionUserId = uuidv4();
-        testUserId = uuidv4();
-        fileId = uuidv4();
+        sessionUserId = crypto.randomUUID();
+        testUserId = crypto.randomUUID();
+        fileId = crypto.randomUUID();
         sessionToken = generateSessionToken();
 
         createUser(sessionUserId, 'sessionUser', ADMIN_ROLE);

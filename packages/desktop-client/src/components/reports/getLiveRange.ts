@@ -58,6 +58,15 @@ export function getLiveRange(
       );
       break;
     }
+    case 'last30Days': {
+      [dateStart, dateEnd] = validateRange(
+        earliestTransaction,
+        latestTransaction,
+        monthUtils.subDays(monthUtils.currentDay(), 29),
+        monthUtils.currentDay(),
+      );
+      break;
+    }
     case 'allTime': {
       dateStart = earliestTransaction;
       dateEnd = latestTransaction;

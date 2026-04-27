@@ -24,10 +24,12 @@ type AppError = Error & {
 };
 
 type FatalErrorProps = {
-  error: Error | AppError;
+  error: unknown;
 };
 
-type RenderSimpleProps = FatalErrorProps;
+type RenderSimpleProps = {
+  error: Error | AppError;
+};
 
 function RenderSimple({ error }: RenderSimpleProps) {
   let msg: ReactNode;
@@ -195,7 +197,7 @@ function SharedArrayBufferOverride() {
   );
 }
 
-export function FatalError({ error }: FatalErrorProps) {
+export function FatalError({ error: rawError }: FatalErrorProps) {
   const { t } = useTranslation();
 
   const { modalStack } = useModalState();
@@ -203,6 +205,12 @@ export function FatalError({ error }: FatalErrorProps) {
 
   const [showError, setShowError] = useState(false);
 
+  const error: Error | AppError =
+    rawError instanceof Error
+      ? rawError
+      : rawError && typeof rawError === 'object'
+        ? Object.assign(new Error(String(rawError)), rawError)
+        : new Error(String(rawError));
   const showSimpleRender = 'type' in error && error.type === 'app-init-failure';
   const isLazyLoadError = error instanceof LazyLoadFailedError;
 

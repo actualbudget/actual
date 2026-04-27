@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import * as dateFns from 'date-fns';
-import { v4 as uuidv4 } from 'uuid';
 
 import * as asyncStorage from '#platform/server/asyncStorage';
 import { logger } from '#platform/server/log';
@@ -323,7 +322,7 @@ async function resolvePayee(trans, payeeName, payeesToCreate) {
       return payee.id;
     } else {
       // Otherwise we're going to create a new one
-      const newPayee = { id: uuidv4(), name: payeeName };
+      const newPayee = { id: crypto.randomUUID(), name: payeeName };
       payeesToCreate.set(payeeName.toLowerCase(), newPayee);
       return newPayee.id;
     }
@@ -617,7 +616,7 @@ export async function reconcileTransactions(
       const { forceAddTransaction: _forceAddTransaction, ...newTrans } = trans;
       const finalTransaction = {
         ...newTrans,
-        id: uuidv4(),
+        id: crypto.randomUUID(),
         category: trans.category || null,
         cleared: trans.cleared ?? defaultCleared,
       };
@@ -881,7 +880,7 @@ export async function addTransactions(
     const trans = await runRules(originalTrans, accountsMap);
 
     const finalTransaction = {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       ...trans,
       account: acctId,
       cleared: trans.cleared != null ? trans.cleared : true,
