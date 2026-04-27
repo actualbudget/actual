@@ -1,11 +1,5 @@
 // @ts-strict-ignore
-import React, {
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type {
   ComponentProps,
   HTMLProps,
