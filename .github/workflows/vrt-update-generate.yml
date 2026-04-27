@@ -147,8 +147,11 @@ jobs:
           git commit -m "Update VRT screenshots (browser shard ${{ matrix.shard }})"
           git format-patch -1 HEAD --stdout > vrt-shard.patch
 
-          # Validate patch only contains PNG files
-          if grep -E '^(\+\+\+|---) [ab]/' vrt-shard.patch | grep -v '\.png$'; then
+          # Validate patch only contains PNG files. `git format-patch` emits a
+          # `GIT binary patch` block for PNGs (no +++/--- lines), so check
+          # `diff --git` headers — those are present for both text and binary.
+          if grep -E '^diff --git ' vrt-shard.patch \
+               | grep -vE '^diff --git a/[^[:space:]]+\.png b/[^[:space:]]+\.png$'; then
             echo "ERROR: Shard patch contains non-PNG files!"
             exit 1
           fi
@@ -208,7 +211,9 @@ jobs:
           git commit -m "Update VRT screenshots (desktop)"
           git format-patch -1 HEAD --stdout > vrt-shard.patch
 
-          if grep -E '^(\+\+\+|---) [ab]/' vrt-shard.patch | grep -v '\.png$'; then
+          # See validation note in browser-vrt above.
+          if grep -E '^diff --git ' vrt-shard.patch \
+               | grep -vE '^diff --git a/[^[:space:]]+\.png b/[^[:space:]]+\.png$'; then
             echo "ERROR: Desktop shard patch contains non-PNG files!"
             exit 1
           fi
@@ -258,9 +263,12 @@ jobs:
           fi
 
           # Defense in depth: re-validate every shard patch before applying.
+          # See validation note in browser-vrt above for why we match
+          # `diff --git` headers instead of +++/--- lines.
           for patch in "${patches[@]}"; do
             echo "Validating $patch"
-            if grep -E '^(\+\+\+|---) [ab]/' "$patch" | grep -v '\.png$'; then
+            if grep -E '^diff --git ' "$patch" \
+                 | grep -vE '^diff --git a/[^[:space:]]+\.png b/[^[:space:]]+\.png$'; then
               echo "ERROR: $patch contains non-PNG files!"
               exit 1
             fi
@@ -285,7 +293,8 @@ jobs:
           git format-patch -1 HEAD --stdout > vrt-update.patch
 
           # Final guard on the combined patch.
-          if grep -E '^(\+\+\+|---) [ab]/' vrt-update.patch | grep -v '\.png$'; then
+          if grep -E '^diff --git ' vrt-update.patch \
+               | grep -vE '^diff --git a/[^[:space:]]+\.png b/[^[:space:]]+\.png$'; then
             echo "ERROR: Merged patch contains non-PNG files!"
             exit 1
           fi
