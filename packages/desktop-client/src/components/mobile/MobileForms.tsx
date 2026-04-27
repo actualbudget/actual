@@ -64,12 +64,10 @@ export function InputField({
       <View
         style={{
           ...valueStyle,
-          ...style,
           flexDirection: 'row',
           alignItems: 'center',
           paddingLeft: 8,
           gap: 8,
-          color: disabled ? theme.tableTextInactive : theme.tableText,
           backgroundColor: disabled
             ? theme.formInputTextReadOnlySelection
             : theme.tableBackground,
@@ -91,6 +89,7 @@ export function InputField({
             height: '100%',
             padding: 0,
             color: disabled ? theme.tableTextInactive : theme.tableText,
+            ...style,
           }}
           {...props}
         />
