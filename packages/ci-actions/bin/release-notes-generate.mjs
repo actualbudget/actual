@@ -104,7 +104,7 @@ await group('Prepare branch', async () => {
       );
       const { size } = await fs.stat(patchPath);
       if (size > 0) {
-        await exec(`git apply -R ${patchPath}`, { stdio: 'inherit' });
+        await exec(`git apply -R --3way ${patchPath}`, { stdio: 'inherit' });
       }
     } finally {
       await fs.unlink(patchPath).catch(() => undefined);
