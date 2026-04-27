@@ -12,40 +12,33 @@
  *   ACTUAL_ML_APPLY_PREPROCESSING - Set to 'true' to apply note cleaning before prediction (default: 'false')
  */
 
-import { load } from 'npyjs';
-import type { NpyArray } from 'npyjs';
-import { InferenceSession, Tensor } from 'onnxruntime-web';
+import { load } from "npyjs";
+import type { NpyArray } from "npyjs";
+import { InferenceSession, Tensor } from "onnxruntime-web";
 
-import { readFile } from '#platform/server/fs';
-import { logger } from '#platform/server/log';
-
-/**
- * Get environment variable with fallback
- */
-function getEnv(key: string, fallback?: string): string | undefined {
-  return process.env[key] ?? fallback;
-}
+import { readFile } from "#platform/server/fs";
+import { logger } from "#platform/server/log";
 
 /**
  * Get the ONNX model path from environment variable
  */
 export function getModelPath(): string | undefined {
-  return getEnv('ACTUAL_ML_MODEL_PATH');
+  return process.env["ACTUAL_ML_MODEL_PATH"];
 }
 
 /**
- * Get the classes file path from environment variable
- * Falls back to model path with '_classes.npy' suffix
+ * Get the classes file path from environment variable.
+ * Falls back to model path with '_classes.npy' suffix.
  */
 export function getClassesPath(): string | undefined {
-  const classesPath = getEnv('ACTUAL_ML_CLASSES_PATH');
+  const classesPath = process.env["ACTUAL_ML_CLASSES_PATH"];
   if (classesPath) {
     return classesPath;
   }
 
   const modelPath = getModelPath();
   if (modelPath) {
-    return modelPath.replace(/\.onnx$/i, '_classes.npy');
+    return modelPath.replace(/\.onnx$/i, "_classes.npy");
   }
 
   return undefined;
@@ -59,55 +52,77 @@ export function isMLEnabled(): boolean {
 }
 
 /**
- * Check if note preprocessing is enabled
- * When enabled, notes will be cleaned (removing location strings) before prediction
+ * Check if note preprocessing is enabled.
+ * When enabled, notes will be cleaned (removing location strings) before prediction.
  */
 export function isPreprocessingEnabled(): boolean {
-  return getEnv('ACTUAL_ML_APPLY_PREPROCESSING') === 'true';
+  return process.env["ACTUAL_ML_APPLY_PREPROCESSING"] === "true";
 }
 
 /**
- * Clean notes by removing location strings and normalizing whitespace.
- * This preprocessing is applied before sending notes to the ML model.
+ * Clean notes by removing UK-specific location tokens and normalising whitespace.
+ *
+ * These tokens ("London", "GB", "GBR", "ENG") appear frequently as suffixes in
+ * UK open-banking payee strings and add noise without predictive value. The model
+ * was trained on data with these tokens removed, so the same cleaning must be
+ * applied at inference time when preprocessing is enabled.
+ *
+ * ⚠️  Side-effect: payee names that legitimately contain these strings (e.g.
+ * "England Bakery") will also be affected. Keep this in mind if the model is
+ * ever retrained on non-UK data.
  *
  * @param notes - Raw notes string
- * @returns Cleaned notes with locations removed and whitespace normalized
+ * @returns Cleaned notes with location tokens removed and whitespace normalised
  */
 export function cleanNotes(notes: string | null | undefined): string {
   if (!notes) {
-    return '';
+    return "";
   }
   const LOCATION_PATTERNS = /\b(London|GB|GBR|ENG)\b/gi;
   const WHITESPACE_PATTERN = /\s+/g;
   let cleaned = String(notes);
-  cleaned = cleaned.replace(LOCATION_PATTERNS, '');
-  cleaned = cleaned.replace(WHITESPACE_PATTERN, ' ').trim();
+  cleaned = cleaned.replace(LOCATION_PATTERNS, "");
+  cleaned = cleaned.replace(WHITESPACE_PATTERN, " ").trim();
 
   return cleaned;
 }
 
-/**
- * Initialize the ONNX model and label encoder classes.
- * This must be called before using predict().
- *
- * @param modelPath - Optional override for the model path
- * @param classesPath - Optional override for the classes path
- */
-// Add these declarations at the module level (after imports, before functions)
+// ---------------------------------------------------------------------------
+// Module-level singleton state
+// ---------------------------------------------------------------------------
+
 let inferenceSession: InferenceSession | null = null;
 let labelClasses: string[] | null = null;
 let isInitialized = false;
 
-// Modified function
-export async function initializeML(
+/**
+ * A single shared promise for the in-flight initialisation.
+ * Subsequent callers while init is running will await the same promise rather
+ * than racing to load the model a second time.
+ */
+let initPromise: Promise<InferenceSession | null> | null = null;
+
+/**
+ * Set to true after a failed initialisation attempt so that callers don't
+ * repeatedly retry (and spam logs) on every prediction call.
+ */
+let initializationFailed = false;
+
+// ---------------------------------------------------------------------------
+
+/**
+ * Internal implementation of model initialisation.
+ * Always call initializeML() externally — it provides the concurrency guard.
+ */
+async function _doInitializeML(
   modelPath?: string,
-  classesPath?: string,
+  classesPath?: string
 ): Promise<InferenceSession | null> {
   const modelFilePath = modelPath ?? getModelPath();
   const classesFilePath = classesPath ?? getClassesPath();
 
   if (!modelFilePath) {
-    logger.warn('ML categorization disabled: ACTUAL_ML_MODEL_PATH not set');
+    logger.warn("ML categorization disabled: ACTUAL_ML_MODEL_PATH not set");
     isInitialized = false;
     inferenceSession = null;
     labelClasses = null;
@@ -117,34 +132,51 @@ export async function initializeML(
   try {
     logger.info(`Initializing ML model from: ${modelFilePath}`);
 
-    // Create inference session
     inferenceSession = await InferenceSession.create(modelFilePath, {
-      executionProviders: ['wasm'], // CPU execution; can add 'webgl' for GPU acceleration
-      graphOptimizationLevel: 'all',
+      executionProviders: ["wasm"], // CPU execution; can add 'webgl' for GPU acceleration
+      graphOptimizationLevel: "all",
     });
 
-    // Load label encoder classes
     if (classesFilePath) {
-      // Load classes file using Node.js fs for file:// paths or fetch for URLs
       labelClasses = await loadClassesFile(classesFilePath);
       logger.info(
-        `Loaded ${labelClasses.length} label classes from: ${classesFilePath}`,
+        `Loaded ${labelClasses.length} label classes from: ${classesFilePath}`
       );
     } else {
-      logger.warn('ML model loaded but no classes file found');
+      logger.warn("ML model loaded but no classes file found");
       labelClasses = null;
     }
 
     isInitialized = true;
-    logger.info('ML categorization initialized successfully');
+    initializationFailed = false;
+    logger.info("ML categorization initialized successfully");
     return inferenceSession;
   } catch (error) {
-    logger.error('Failed to initialize ML model:', error);
+    logger.error("Failed to initialize ML model:", error);
     inferenceSession = null;
     labelClasses = null;
     isInitialized = false;
+    initializationFailed = true;
     return null;
   }
+}
+
+/**
+ * Initialize the ONNX model and label encoder classes.
+ * Safe to call concurrently — multiple callers share a single in-flight
+ * promise so the model is never loaded more than once.
+ *
+ * @param modelPath - Optional override for the model path
+ * @param classesPath - Optional override for the classes path
+ */
+export async function initializeML(
+  modelPath?: string,
+  classesPath?: string
+): Promise<InferenceSession | null> {
+  if (!initPromise) {
+    initPromise = _doInitializeML(modelPath, classesPath);
+  }
+  return initPromise;
 }
 
 /**
@@ -153,22 +185,18 @@ export async function initializeML(
 async function loadClassesFile(path: string): Promise<string[]> {
   let resolvedPath = path;
 
-  // For local files, read with fs and pass as an ArrayBuffer to load()
   if (
-    !resolvedPath.startsWith('http://') &&
-    !resolvedPath.startsWith('https://')
+    !resolvedPath.startsWith("http://") &&
+    !resolvedPath.startsWith("https://")
   ) {
-    // Strip file:// prefix if present
-    if (resolvedPath.startsWith('file://')) {
-      resolvedPath = resolvedPath.replace('file://', '');
+    if (resolvedPath.startsWith("file://")) {
+      resolvedPath = resolvedPath.replace("file://", "");
     }
-    const buffer = await readFile(resolvedPath, 'binary');
-    // npyjs load() accepts an ArrayBuffer directly
+    const buffer = await readFile(resolvedPath, "binary");
     const npy = await load(buffer.buffer as ArrayBuffer);
     return extractClassesFromNpy(npy);
   }
 
-  // For HTTP URLs, pass directly
   const npy = await load(resolvedPath);
   return extractClassesFromNpy(npy);
 }
@@ -179,14 +207,13 @@ async function loadClassesFile(path: string): Promise<string[]> {
  */
 function extractClassesFromNpy(npy: NpyArray<ArrayBufferView>): string[] {
   const { shape, dtype } = npy;
-  // Cast data to access it by index - ArrayBufferView doesn't have indexing but typed arrays do
   const data = npy.data as unknown as {
     [index: number]: unknown;
     length: number;
   };
 
   logger.info(
-    `Loaded npy array: shape=${JSON.stringify(shape)}, dtype=${dtype}`,
+    `Loaded npy array: shape=${JSON.stringify(shape)}, dtype=${dtype}`
   );
 
   const count = shape[0];
@@ -194,20 +221,21 @@ function extractClassesFromNpy(npy: NpyArray<ArrayBufferView>): string[] {
 
   for (let i = 0; i < count; i++) {
     const value = data[i];
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       classes.push(value);
-    } else if (typeof value === 'number') {
+    } else if (typeof value === "number") {
       classes.push(String(value));
-    } else if (value instanceof Uint8Array) {
-      classes.push(new TextDecoder().decode(value));
     } else {
+      // Fallback for any unexpected type — stringify rather than silently drop
       classes.push(String(value));
     }
   }
 
   if (classes.length === 0) {
     throw new Error(
-      `Failed to extract classes from npy array (dtype: ${dtype}, shape: ${JSON.stringify(shape)})`,
+      `Failed to extract classes from npy array (dtype: ${dtype}, shape: ${JSON.stringify(
+        shape
+      )})`
     );
   }
 
@@ -215,25 +243,34 @@ function extractClassesFromNpy(npy: NpyArray<ArrayBufferView>): string[] {
 }
 
 /**
- * Reset the ML module state (useful for testing or re-initialization)
+ * Reset the ML module state (useful for testing or re-initialization).
+ * Also clears the concurrency guard so initializeML() can be called again.
  */
 export function resetML(): void {
   inferenceSession = null;
   labelClasses = null;
   isInitialized = false;
+  initializationFailed = false;
+  initPromise = null;
 }
 
 /**
- * Predict the category for a transaction based on its notes
+ * Predict the category for a batch of transaction notes.
  * Optionally applies preprocessing (cleaning) to notes before prediction.
  *
- * @param notes - The transaction notes/payee to classify
- * @param applyPreprocessing - If true, cleanNotes will be applied to the notes before prediction
- * @returns The predicted category id, or null if prediction fails or ML is disabled
+ * @param notesArray - The transaction notes/payee strings to classify
+ * @returns Predicted category ids in the same order, or null for each entry
+ *          where prediction is not possible
  */
 export async function predictCategories(
-  notesArray: (string | null | undefined)[],
+  notesArray: (string | null | undefined)[]
 ): Promise<(string | null)[]> {
+  // Bail out immediately if a previous initialisation attempt already failed —
+  // no point retrying on every call and spamming the logs.
+  if (initializationFailed) {
+    return notesArray.map(() => null);
+  }
+
   if (!isInitialized || !inferenceSession) {
     await initializeML();
     if (!isInitialized || !inferenceSession) {
@@ -241,15 +278,16 @@ export async function predictCategories(
     }
   }
 
-  // Filter and track which indices had valid notes
+  // Build a compact list of non-empty notes, remembering each one's original
+  // index so results can be mapped back correctly.
   const validNotes: string[] = [];
   const indexMap: number[] = [];
 
   notesArray.forEach((notes, i) => {
     const processed = isPreprocessingEnabled()
       ? cleanNotes(notes)
-      : (notes ?? '');
-    if (processed.trim() !== '') {
+      : notes ?? "";
+    if (processed.trim() !== "") {
       validNotes.push(processed);
       indexMap.push(i);
     }
@@ -260,8 +298,7 @@ export async function predictCategories(
   }
 
   try {
-    // Batch input: shape [n] instead of [1]
-    const inputTensor = new Tensor('string', validNotes, [validNotes.length]);
+    const inputTensor = new Tensor("string", validNotes, [validNotes.length]);
 
     const feeds: Record<string, Tensor> = {};
     feeds[inferenceSession.inputNames[0]] = inputTensor;
@@ -273,7 +310,7 @@ export async function predictCategories(
 
     const results: (string | null)[] = new Array(notesArray.length).fill(null);
 
-    if (output.type === 'string') {
+    if (output.type === "string") {
       // Model outputs string labels directly
       indexMap.forEach((originalIndex, i) => {
         results[originalIndex] = (output.data as string[])[i] ?? null;
@@ -291,43 +328,57 @@ export async function predictCategories(
 
     return results;
   } catch (error) {
-    logger.error('ML batch prediction failed:', error);
+    logger.error("ML batch prediction failed:", error);
     return notesArray.map(() => null);
   }
 }
 
 /**
- * Apply ML categorization to a batch of transactions
- * This is the main entry point for integrating with the rules system
+ * Apply ML categorization to a batch of transactions.
+ * This is the main entry point for integrating with the rules system.
+ *
+ * Transactions that already have a category are left untouched — ML predictions
+ * never override categories set by manual rules.
  *
  * @param transactions - Array of transaction objects to categorize
- * @returns The transactions with potentially modified categories, or originals if ML fails/disabled
+ * @returns The transactions with potentially modified categories, or originals
+ *          if ML is disabled or prediction fails
  */
 export async function applyMLCategorization<
-  T extends { id?: string; notes?: string | null; category?: string | null },
+  T extends { id?: string; notes?: string | null; category?: string | null }
 >(transactions: T[]): Promise<T[]> {
-  // Skip if ML is not enabled
   if (!isMLEnabled()) {
     return transactions;
   }
 
-  // Extract notes from transactions (skip those that already have a category)
-  const notes = transactions.map(t => (t.category != null ? null : t.notes));
+  // Separate transactions that need categorisation from those that already have
+  // a category. Only the former are sent to the model.
+  const uncategorised = transactions.filter((t) => t.category == null);
 
-  // Get batch predictions for all notes
+  if (uncategorised.length === 0) {
+    return transactions;
+  }
+
+  const notes = uncategorised.map((t) => t.notes);
   const predictions = await predictCategories(notes);
 
-  // Apply predictions back to transactions
-  return transactions.map((transaction, i) => {
+  // Build a lookup from transaction id → prediction for O(1) application below.
+  // Falls back to index-based matching for transactions without an id.
+  const predictionByIndex = new Map<T, string | null>(
+    uncategorised.map((t, i) => [t, predictions[i]])
+  );
+
+  return transactions.map((transaction) => {
     if (transaction.category != null) {
-      // Transaction already has a category, don't override manual rules
       return transaction;
     }
 
-    const predictedCategory = predictions[i];
+    const predictedCategory = predictionByIndex.get(transaction) ?? null;
     if (predictedCategory) {
       logger.debug(
-        `ML predicted category ${predictedCategory} for transaction ${transaction.id ?? 'unknown'}`,
+        `ML predicted category ${predictedCategory} for transaction ${
+          transaction.id ?? "unknown"
+        }`
       );
       return { ...transaction, category: predictedCategory };
     }
@@ -337,13 +388,13 @@ export async function applyMLCategorization<
 }
 
 export async function previewMLPredictions(
-  transactions: { id: string; notes: string | null | undefined }[],
+  transactions: { id: string; notes: string | null | undefined }[]
 ): Promise<{ id: string; predictedCategory: string | null }[]> {
   if (!isMLEnabled()) {
-    return transactions.map(t => ({ id: t.id, predictedCategory: null }));
+    return transactions.map((t) => ({ id: t.id, predictedCategory: null }));
   }
 
-  const notes = transactions.map(t => t.notes);
+  const notes = transactions.map((t) => t.notes);
   const predictions = await predictCategories(notes);
 
   return transactions.map((t, i) => ({
