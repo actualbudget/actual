@@ -1,5 +1,11 @@
 // @ts-strict-ignore
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type {
   ComponentProps,
   HTMLProps,
@@ -257,20 +263,20 @@ function SingleAutocomplete<T extends AutocompleteItem>({
     // dropdown, which makes a poor user experience, especially when clicking into the window.
     // You will find that the dropdown is "invisible" but reappears instantly, resulting in clicking
     // on the "ghost" dropdown's first option
-    const setAllowOpenChange = () => setTimeout(() => setAllowOpening(true))
+    const setAllowOpenChange = () => setTimeout(() => setAllowOpening(true));
     window.addEventListener('focus', setAllowOpenChange);
-    const setDontAllowOpenChange = () => setAllowOpening(false)
+    const setDontAllowOpenChange = () => setAllowOpening(false);
     window.addEventListener('blur', setDontAllowOpenChange);
     return () => {
-      window.removeEventListener('focus', setAllowOpenChange)
-      window.removeEventListener('blur', setDontAllowOpenChange)
-    }
-  }, [])
+      window.removeEventListener('focus', setAllowOpenChange);
+      window.removeEventListener('blur', setDontAllowOpenChange);
+    };
+  }, []);
   const open = () => {
     if (allowOpening) {
       setIsOpen(true);
     }
-  }
+  };
   const close = () => {
     if (document.hasFocus()) {
       setIsOpen(false);
@@ -285,8 +291,8 @@ function SingleAutocomplete<T extends AutocompleteItem>({
   const narrowInputStyle =
     embedded && isNarrowWidth
       ? {
-        ...styles.mobileMenuItem,
-      }
+          ...styles.mobileMenuItem,
+        }
       : {};
 
   inputProps = {
@@ -801,10 +807,10 @@ function MultiAutocomplete<T extends AutocompleteItem>({
             className={
               typeof inputClassName === 'function'
                 ? renderProps =>
-                  cx(
-                    defaultMultiAutocompleteInputClassName,
-                    inputClassName(renderProps),
-                  )
+                    cx(
+                      defaultMultiAutocompleteInputClassName,
+                      inputClassName(renderProps),
+                    )
                 : cx(defaultMultiAutocompleteInputClassName, inputClassName)
             }
           />
