@@ -78,6 +78,7 @@ This release introduces powerful new reporting capabilities as well as numerous 
 - [#7572](https://github.com/actualbudget/actual/pull/7572) Fix transaction row drag interfering with inline text edits. — thanks @StephenBrown2
 - [#7608](https://github.com/actualbudget/actual/pull/7608) Disallow reconfiguring OpenID after initialization — thanks @jfdoming
 - [#7619](https://github.com/actualbudget/actual/pull/7619) Sankey card should follow report settings — thanks @matt-fidd
+- [#7632](https://github.com/actualbudget/actual/pull/7632) Fix Sankey income being shown as spent money, when payee was not set — thanks @emiltb
 
 #### Maintenance
 
