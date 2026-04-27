@@ -4,7 +4,11 @@
 
 Release date: 2026-05-01
 
-- TODO: Add release highlights
+This release introduces powerful new reporting capabilities as well as numerous fixes:
+
+- Experimental: Age of Money and Sankey Diagram reports
+- Experimental: Custom themes expanded with five new community themes (Nord, Ilavenil, Gruvbox Light/Dark, You Need A Theme Light/Dark)
+- Tax-style distribution in split transactions
 
 **Docker Tag: 26.5.0**
 
