@@ -229,10 +229,8 @@ await group('Remove used release notes', async () => {
   );
 });
 
-await group('Lint generated files', async () => {
-  const targets = `${blogPath} ${releasesPath}`;
-  await exec(`yarn exec oxfmt ${targets}`, { stdio: 'inherit' });
-  await exec(`yarn exec oxlint --fix --type-aware --quiet ${targets}`, {
+await group('Format generated files', async () => {
+  await exec(`yarn exec oxfmt ${blogPath} ${releasesPath}`, {
     stdio: 'inherit',
   });
 });
