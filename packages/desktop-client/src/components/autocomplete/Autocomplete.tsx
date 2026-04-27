@@ -251,7 +251,7 @@ function SingleAutocomplete<T extends AutocompleteItem>({
   );
   const [highlightedIndex, setHighlightedIndex] = useState(null);
   const [isOpen, setIsOpen] = useState(embedded);
-  const [allowOpening, setAllowOpening] = useState(false);
+  const [allowOpening, setAllowOpening] = useState(true);
   useEffect(() => {
     // without this logic, leaving the window and returning will always reopen the
     // dropdown, which makes a poor user experience, especially when clicking into the window.
