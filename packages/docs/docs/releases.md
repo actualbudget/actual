@@ -78,6 +78,7 @@ This release introduces powerful new reporting capabilities as well as numerous 
 - [#7572](https://github.com/actualbudget/actual/pull/7572) Fix transaction row drag interfering with inline text edits. — thanks @StephenBrown2
 - [#7608](https://github.com/actualbudget/actual/pull/7608) Disallow reconfiguring OpenID after initialization — thanks @jfdoming
 - [#7619](https://github.com/actualbudget/actual/pull/7619) Sankey card should follow report settings — thanks @matt-fidd
+- [#7623](https://github.com/actualbudget/actual/pull/7623) Fix infinite loop when applying remainder templates with an amount that can not be divided — thanks @matt-fidd
 - [#7632](https://github.com/actualbudget/actual/pull/7632) Fix Sankey income being shown as spent money, when payee was not set — thanks @emiltb
 
 #### Maintenance
@@ -157,6 +158,7 @@ This release introduces powerful new reporting capabilities as well as numerous 
 - [#7606](https://github.com/actualbudget/actual/pull/7606) Migrate file service to TypeScript — thanks @jfdoming
 - [#7609](https://github.com/actualbudget/actual/pull/7609) Enable stricter electron build options — thanks @jfdoming
 - [#7613](https://github.com/actualbudget/actual/pull/7613) Bump postcss from 8.5.8 to 8.5.10 — thanks @jfdoming
+- [#7620](https://github.com/actualbudget/actual/pull/7620) Increase test coverage for budget templates — thanks @matt-fidd
 - [#7635](https://github.com/actualbudget/actual/pull/7635) Fix release note generation script failing when conflicting changes are present — thanks @matt-fidd
 - [#7640](https://github.com/actualbudget/actual/pull/7640) Make release note generation script respect cherry picked commits — thanks @matt-fidd
 
