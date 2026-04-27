@@ -1,5 +1,5 @@
 import { test as base, expect as baseExpect } from '@playwright/test';
-import type { Browser, Locator } from '@playwright/test';
+import type { Browser, Locator, Page } from '@playwright/test';
 
 /**
  * Disable CSS transitions and animations globally in e2e (non-VRT) runs.
@@ -51,7 +51,7 @@ export const test = process.env.VRT
     });
 
 export const expect = baseExpect.extend({
-  async toMatchThemeScreenshots(locator: Locator) {
+  async toMatchThemeScreenshots(locator: Locator | Page) {
     // Disable screenshot assertions in regular e2e tests;
     // only enable them when doing VRT tests
     if (!process.env.VRT) {
