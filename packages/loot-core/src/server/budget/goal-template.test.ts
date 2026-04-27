@@ -208,13 +208,15 @@ describe('applyMultipleCategoryTemplates', () => {
     const budgetCalls = vi
       .mocked(actions.setBudget)
       .mock.calls.map(call => call[0]);
-    const cat1Budget = budgetCalls.find(c => c.category === cat1.id);
-    const cat2Budget = budgetCalls.find(c => c.category === cat2.id);
-    expect(cat1Budget?.amount).toBe(10000);
-    expect(cat2Budget?.amount).toBe(5000);
-    expect(
-      Number(cat1Budget?.amount ?? 0) + Number(cat2Budget?.amount ?? 0),
-    ).toBe(15000);
+    const cat1Amount = Number(
+      budgetCalls.find(c => c.category === cat1.id)?.amount ?? 0,
+    );
+    const cat2Amount = Number(
+      budgetCalls.find(c => c.category === cat2.id)?.amount ?? 0,
+    );
+    expect(cat1Amount).toBe(10000);
+    expect(cat2Amount).toBe(5000);
+    expect(cat1Amount + cat2Amount).toBe(15000);
   });
 
   it('returns an error notification when a template fails validation', async () => {
@@ -294,13 +296,15 @@ describe('applyMultipleCategoryTemplates', () => {
     const budgetCalls = vi
       .mocked(actions.setBudget)
       .mock.calls.map(call => call[0]);
-    const cat1Budget = budgetCalls.find(c => c.category === cat1.id);
-    const cat2Budget = budgetCalls.find(c => c.category === cat2.id);
-    expect(cat1Budget?.amount).toBe(15000);
-    expect(cat2Budget?.amount).toBe(5000);
-    expect(
-      Number(cat1Budget?.amount ?? 0) + Number(cat2Budget?.amount ?? 0),
-    ).toBe(20000);
+    const cat1Amount = Number(
+      budgetCalls.find(c => c.category === cat1.id)?.amount ?? 0,
+    );
+    const cat2Amount = Number(
+      budgetCalls.find(c => c.category === cat2.id)?.amount ?? 0,
+    );
+    expect(cat1Amount).toBe(15000);
+    expect(cat2Amount).toBe(5000);
+    expect(cat1Amount + cat2Amount).toBe(20000);
   });
 });
 

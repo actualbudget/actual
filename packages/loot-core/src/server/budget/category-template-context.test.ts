@@ -1814,8 +1814,12 @@ describe('CategoryTemplateContext', () => {
         {
           id: 'inc-1',
           name: 'Salary',
-          is_income: true,
-        } as unknown as DbCategory,
+          is_income: 1,
+          cat_group: 'g-income',
+          sort_order: 0,
+          hidden: 0,
+          tombstone: 0,
+        } satisfies DbCategory,
       ]);
       const templates: Template[] = [
         {
