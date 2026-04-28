@@ -9,8 +9,10 @@ import { registerQueryCommand } from './commands/query';
 import { registerRulesCommand } from './commands/rules';
 import { registerSchedulesCommand } from './commands/schedules';
 import { registerServerCommand } from './commands/server';
+import { registerSyncCommand } from './commands/sync';
 import { registerTagsCommand } from './commands/tags';
 import { registerTransactionsCommand } from './commands/transactions';
+import { parseNonNegativeIntFlag } from './utils';
 
 declare const __CLI_VERSION__: string;
 
@@ -32,6 +34,22 @@ program
     '--encryption-password <password>',
     'E2E encryption password (env: ACTUAL_ENCRYPTION_PASSWORD)',
   )
+  .option(
+    '--cache-ttl <seconds>',
+    'Cache TTL in seconds (env: ACTUAL_CACHE_TTL; default: 60)',
+    value => parseNonNegativeIntFlag(value, '--cache-ttl'),
+  )
+  .option('--refresh', 'Force a sync on this call, ignoring the cache', false)
+  .option('--no-cache', 'Alias for --refresh')
+  .option(
+    '--lock-timeout <seconds>',
+    'How long to wait for another CLI process to release the lock (env: ACTUAL_LOCK_TIMEOUT; default: 10)',
+    value => parseNonNegativeIntFlag(value, '--lock-timeout'),
+  )
+  .option(
+    '--no-lock',
+    'Disable the budget directory lock (use with care, env: ACTUAL_NO_LOCK)',
+  )
   .addOption(
     new Option('--format <format>', 'Output format: json, table, csv')
       .choices(['json', 'table', 'csv'] as const)
@@ -50,6 +68,7 @@ registerRulesCommand(program);
 registerSchedulesCommand(program);
 registerQueryCommand(program);
 registerServerCommand(program);
+registerSyncCommand(program);
 
 function normalizeThrownMessage(err: unknown): string {
   if (err instanceof Error) return err.message;

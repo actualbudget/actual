@@ -58,10 +58,38 @@ export function SankeyCard({
 
   const HEADER_HEIGHT = 82;
   const PX_PER_NODE = 50;
-  const topN = Math.max(
+  const heightBasedTopN = Math.max(
     2,
     Math.floor((cardHeight - HEADER_HEIGHT) / PX_PER_NODE),
   );
+  const topN = meta?.topNcategories ?? heightBasedTopN;
+
+  const isGraphLayer = (value: unknown): value is GraphLayers =>
+    typeof value === 'string' &&
+    (Object.values(GraphLayers) as string[]).includes(value);
+
+  const defaultLayerFrom =
+    mode === 'budgeted' ? GraphLayers.IncomeCategory : GraphLayers.IncomePayee;
+  const defaultLayerTo = GraphLayers.CategoryGroup;
+
+  const metaLayerFrom = isGraphLayer(meta?.layerFrom)
+    ? meta.layerFrom
+    : undefined;
+  const metaLayerTo = isGraphLayer(meta?.layerTo) ? meta.layerTo : undefined;
+
+  const layerFrom =
+    metaLayerFrom &&
+    !(mode === 'budgeted' && metaLayerFrom === GraphLayers.IncomePayee) &&
+    !(mode === 'spent' && metaLayerFrom === GraphLayers.Budget)
+      ? metaLayerFrom
+      : defaultLayerFrom;
+
+  const layerTo =
+    metaLayerTo &&
+    !(mode === 'budgeted' && metaLayerTo === GraphLayers.IncomePayee) &&
+    !(mode === 'spent' && metaLayerTo === GraphLayers.Budget)
+      ? metaLayerTo
+      : defaultLayerTo;
 
   const params = useMemo(
     () =>
@@ -74,8 +102,8 @@ export function SankeyCard({
         mode,
         topN,
         meta?.categorySort,
-        GraphLayers.IncomePayee,
-        GraphLayers.CategoryGroup,
+        layerFrom,
+        layerTo,
       ),
     [
       start,
@@ -86,6 +114,8 @@ export function SankeyCard({
       mode,
       topN,
       meta?.categorySort,
+      layerFrom,
+      layerTo,
     ],
   );
   const data = useReport('sankey', params);

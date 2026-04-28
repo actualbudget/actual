@@ -230,14 +230,20 @@ export function AccountHeader({
 
   useHotkeys(
     'ctrl+f, cmd+f, meta+f',
-    () => {
+    e => {
       if (searchInput.current) {
-        searchInput.current.focus();
+        // Trigger browser-native find if user pressed search twice in a row
+        if (document.activeElement === searchInput.current) {
+          searchInput.current.blur();
+        } else {
+          e.preventDefault();
+          searchInput.current.focus();
+        }
       }
     },
     {
       enableOnFormTags: true,
-      preventDefault: true,
+      preventDefault: false,
       scopes: ['app'],
     },
     [searchInput],
