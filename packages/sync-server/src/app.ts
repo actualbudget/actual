@@ -69,9 +69,32 @@ app.use('/admin', adminApp.handlers);
 app.use('/openid', openidApp.handlers);
 
 // Serve ML model files statically
-const modelPath = resolve(process.cwd(), 'ml-models');
+// When running via yarn scripts, cwd is packages/sync-server/.
+// When running compiled output (build/src/app.js), import.meta.url points to the build dir.
+// We try cwd first (most common), then fall back to the module location.
+function findModelPath(): string {
+  const fromCwd = resolve(process.cwd(), '../../ml-models');
+  if (fs.existsSync(fromCwd)) {
+    return fromCwd;
+  }
+
+  const fromModule = resolve(
+    fileURLToPath(import.meta.url),
+    '../../../../../ml-models',
+  );
+  if (fs.existsSync(fromModule)) {
+    return fromModule;
+  }
+
+  // Last resort: just return fromCwd so the error message is clear
+  return fromCwd;
+}
+
+const modelPath = findModelPath();
 console.log(`Serving ML models from: ${modelPath}`);
-app.use('/ml-models', express.static(modelPath));
+app.use('/ml-models', express.static(modelPath), (_req, res) => {
+  res.status(404).send('Model not found');
+});
 
 app.get('/mode', (req, res) => {
   res.send(config.get('mode'));

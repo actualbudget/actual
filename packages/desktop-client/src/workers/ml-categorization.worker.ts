@@ -87,9 +87,8 @@ const ORT_VERSION = '1.24.3';
 const ORT_BASE = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ORT_VERSION}/dist/`;
 
 function configureOrt() {
-  env.wasm.wasmPaths = {
-    wasm: `${ORT_BASE}ort-wasm-simd-threaded.wasm`,
-  };
+  // Use a string prefix so ONNX resolves both .wasm and .mjs files
+  env.wasm.wasmPaths = ORT_BASE;
   env.wasm.numThreads = 1;
   env.wasm.simd = true;
 }
@@ -107,7 +106,29 @@ async function doInitialize(config: {
     configureOrt();
     preprocessingEnabled = config.preprocessingEnabled;
 
-    inferenceSession = await InferenceSession.create(config.modelUrl, {
+    // Explicitly fetch the model so we can verify the response
+    console.log('[ML Worker] Fetching model from:', config.modelUrl);
+    const modelResponse = await fetch(config.modelUrl);
+    console.log('[ML Worker] Model response status:', modelResponse.status);
+    console.log('[ML Worker] Model response content-type:', modelResponse.headers.get('content-type'));
+    
+    if (!modelResponse.ok) {
+      throw new Error(
+        `Failed to fetch model: ${modelResponse.status} ${modelResponse.statusText}`,
+      );
+    }
+    
+    const modelBuffer = await modelResponse.arrayBuffer();
+    console.log('[ML Worker] Model buffer size:', modelBuffer.byteLength, 'bytes');
+    
+    if (modelBuffer.byteLength < 1000) {
+      // Likely an error page, not a real model
+      const text = new TextDecoder().decode(modelBuffer);
+      console.error('[ML Worker] Model response body (first 500 chars):', text.slice(0, 500));
+      throw new Error('Model file is too small — likely a 404 or error page');
+    }
+
+    inferenceSession = await InferenceSession.create(modelBuffer, {
       executionProviders: ['wasm'],
       graphOptimizationLevel: 'all',
     });
@@ -162,9 +183,26 @@ async function predictCategories(
   try {
     const inputTensor = new Tensor('string', validNotes, [validNotes.length]);
     const feeds = { [inferenceSession.inputNames[0]]: inputTensor };
+    console.log("[ML Worker] outputNames:", inferenceSession.outputNames);
+    const outputData = await inferenceSession.run(feeds, [
+      inferenceSession.outputNames[0],
+    ]);
 
-    const outputData = await inferenceSession.run(feeds);
-    const output = outputData[inferenceSession.outputNames[0]];
+    for (const name of inferenceSession.outputNames) {
+      const val = outputData[name];
+      console.log('[ML Worker] output', name, 'type:', typeof val, 'isArray:', Array.isArray(val), 'constructor:', val?.constructor?.name);
+      if (val && typeof val === 'object') {
+        console.log('[ML Worker] output', name, 'keys:', Object.keys(val));
+      }
+    }
+
+    const rawOutput = outputData[inferenceSession.outputNames[0]];
+    // Some models output a sequence (array of tensors); pick the first element.
+    const output = Array.isArray(rawOutput) ? rawOutput[0] : rawOutput;
+
+    if (!output) {
+      throw new Error('Model output is undefined or empty');
+    }
 
     const results: (string | null)[] = new Array(notesArray.length).fill(null);
 
