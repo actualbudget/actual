@@ -1,15 +1,21 @@
+import type { KeyboardEvent } from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
-import type { ApiToken } from '@actual-app/core/server/auth/app';
+import type {
+  ApiToken,
+  ApiTokenCreateResult,
+} from '@actual-app/core/server/auth/app';
 
 import { useServerURL } from '#components/ServerContext';
 import { pushModal } from '#modals/modalsSlice';
+import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 
 import { Setting } from './UI';
@@ -101,11 +107,232 @@ function TokenRow({
   );
 }
 
+function CreateTokenModal({
+  onClose,
+  onCreated,
+}: {
+  onClose: () => void;
+  onCreated: (token: ApiTokenCreateResult) => void;
+}) {
+  const { t } = useTranslation();
+  const [name, setName] = useState('');
+  const [creating, setCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleCreate = async () => {
+    if (!name.trim()) {
+      setError(t('Please enter a name for the token'));
+      return;
+    }
+
+    setCreating(true);
+    setError(null);
+
+    const result = await send('api-tokens-create', { name: name.trim() });
+
+    if ('error' in result) {
+      setError(result.error);
+      setCreating(false);
+    } else {
+      onCreated(result.data);
+    }
+  };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+
+  return (
+    <View
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-token-title"
+      onKeyDown={handleKeyDown}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+      }}
+      onClick={onClose}
+    >
+      <View
+        style={{
+          backgroundColor: theme.pageBackground,
+          padding: 20,
+          borderRadius: 8,
+          minWidth: 400,
+          maxWidth: '90%',
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        <Text
+          id="create-token-title"
+          style={{ fontSize: 18, fontWeight: 600, marginBottom: 15 }}
+        >
+          <Trans>Create API Token</Trans>
+        </Text>
+
+        <View style={{ marginBottom: 15 }}>
+          <Text style={{ marginBottom: 5 }}>
+            <Trans>Token name</Trans>
+          </Text>
+          <Input
+            value={name}
+            onChange={e => setName(e.target.value)}
+            placeholder={t('My API script')}
+            style={{ width: '100%' }}
+          />
+        </View>
+
+        {error && (
+          <Text style={{ color: theme.errorText, marginBottom: 15 }}>
+            {error}
+          </Text>
+        )}
+
+        <View
+          style={{ flexDirection: 'row', gap: 10, justifyContent: 'flex-end' }}
+        >
+          <Button variant="bare" onPress={onClose}>
+            <Trans>Cancel</Trans>
+          </Button>
+          <Button
+            variant="primary"
+            onPress={handleCreate}
+            isDisabled={creating}
+          >
+            {creating ? (
+              <Trans>Creating...</Trans>
+            ) : (
+              <Trans>Create Token</Trans>
+            )}
+          </Button>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function ShowTokenModal({
+  token,
+  onClose,
+}: {
+  token: ApiTokenCreateResult;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(token.token);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: t('Failed to copy to clipboard'),
+          },
+        }),
+      );
+    }
+  };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+
+  return (
+    <View
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="show-token-title"
+      onKeyDown={handleKeyDown}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+      }}
+    >
+      <View
+        style={{
+          backgroundColor: theme.pageBackground,
+          padding: 20,
+          borderRadius: 8,
+          minWidth: 450,
+          maxWidth: '90%',
+        }}
+      >
+        <Text
+          id="show-token-title"
+          style={{ fontSize: 18, fontWeight: 600, marginBottom: 15 }}
+        >
+          <Trans>Token Created</Trans>
+        </Text>
+
+        <Text style={{ marginBottom: 10, color: theme.warningText }}>
+          <Trans>
+            Copy this token now. You won&#39;t be able to see it again!
+          </Trans>
+        </Text>
+
+        <View
+          style={{
+            backgroundColor: theme.tableBackground,
+            padding: 10,
+            borderRadius: 4,
+            marginBottom: 15,
+            fontFamily: 'monospace',
+            wordBreak: 'break-all',
+            border: `1px solid ${theme.tableBorder}`,
+          }}
+        >
+          {token.token}
+        </View>
+
+        <View
+          style={{ flexDirection: 'row', gap: 10, justifyContent: 'flex-end' }}
+        >
+          <Button variant="normal" onPress={handleCopy}>
+            {copied ? <Trans>Copied!</Trans> : <Trans>Copy to Clipboard</Trans>}
+          </Button>
+          <Button variant="primary" onPress={onClose}>
+            <Trans>Done</Trans>
+          </Button>
+        </View>
+      </View>
+    </View>
+  );
+}
+
 export function ApiTokensSettings() {
   const serverURL = useServerURL();
   const [tokens, setTokens] = useState<ApiToken[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newToken, setNewToken] = useState<ApiTokenCreateResult | null>(null);
 
   const loadTokens = useCallback(async () => {
     setLoading(true);
@@ -138,12 +365,28 @@ export function ApiTokensSettings() {
     }
   };
 
+  const handleTokenCreated = (token: ApiTokenCreateResult) => {
+    setShowCreateModal(false);
+    setNewToken(token);
+    void loadTokens();
+  };
+
   if (!serverURL) {
     return null;
   }
 
   return (
-    <Setting>
+    <Setting
+      primaryAction={
+        <Button
+          variant="normal"
+          onPress={() => setShowCreateModal(true)}
+          style={{ marginTop: 10 }}
+        >
+          <Trans>Create API Token</Trans>
+        </Button>
+      }
+    >
       <Text>
         <Trans>
           <strong>API Tokens</strong> allow you to access your budgets
@@ -168,6 +411,17 @@ export function ApiTokensSettings() {
             <TokenRow key={token.id} token={token} onRevoke={handleRevoke} />
           ))}
         </View>
+      )}
+
+      {showCreateModal && (
+        <CreateTokenModal
+          onClose={() => setShowCreateModal(false)}
+          onCreated={handleTokenCreated}
+        />
+      )}
+
+      {newToken && (
+        <ShowTokenModal token={newToken} onClose={() => setNewToken(null)} />
       )}
     </Setting>
   );
