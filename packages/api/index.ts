@@ -9,6 +9,12 @@ export * as utils from './utils';
 /** @deprecated Please use return value of `init` instead */
 export let internal: typeof lib | null = null;
 
+export {
+  AuthError,
+  TokenExpiredError,
+  InvalidTokenError,
+} from '@actual-app/core/server/errors';
+
 export async function init(config: InitConfig = {}) {
   validateNodeVersion();
 
