@@ -11,7 +11,7 @@ export function getUploadError({ reason, meta }: ErrorWithMeta) {
       return 'You are not logged in.';
     case 'encrypt-failure':
       if ((meta as { isMissingKey: boolean }).isMissingKey) {
-        return 'Encrypting your file failed because you are missing your encryption key. Create your key in the next step.'
+        return 'Encrypting your file failed because you are missing your encryption key. Create your key in the next step.';
       }
       return 'Encrypting the file failed. You have the correct key so this is an internal bug. To fix this, generate a new key in the next step.';
     case 'file-has-reset':
@@ -28,7 +28,8 @@ export function getUploadError({ reason, meta }: ErrorWithMeta) {
         'An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: {{reason}})',
         { reason },
       );
-}}
+  }
+}
 
 export function getDownloadError({
   reason,
@@ -56,20 +57,20 @@ export function getDownloadError({
       );
 
     case 'out-of-sync-migrations':
-      return 'This budget cannot be loaded with this version of the app. Make sure the app is up-to-date.'
+      return 'This budget cannot be loaded with this version of the app. Make sure the app is up-to-date.';
     case 'clock-drift':
-      return 'Failed to download the budget because your device time differs too much from the server. Please check your device time settings and ensure they are correct.'
+      return 'Failed to download the budget because your device time differs too much from the server. Please check your device time settings and ensure they are correct.';
 
     default:
       const info =
         meta && typeof meta === 'object' && 'fileId' in meta && meta.fileId
           ? `, fileId: ${String(meta.fileId)}`
           : '';
-        return t(
-          'Something went wrong trying to download that file, sorry! Visit https://actualbudget.org/contact/ for support. reason: {{reason}}{{info}}',
-          { reason, info },
+      return t(
+        'Something went wrong trying to download that file, sorry! Visit https://actualbudget.org/contact/ for support. reason: {{reason}}{{info}}',
+        { reason, info },
       );
-    }
+  }
 }
 
 export function getCreateKeyError(error: ErrorWithMeta) {
@@ -93,10 +94,10 @@ export function getSyncError(error: string, id: string) {
   if (error === 'out-of-sync-migrations' || error === 'out-of-sync-data') {
     return 'This budget cannot be loaded with this version of the app.';
   } else if (error === 'budget-not-found') {
-      return t(
-        'Budget "{{id}}" not found. Check the ID of your budget in the Advanced section of the settings page.',
+    return t(
+      'Budget "{{id}}" not found. Check the ID of your budget in the Advanced section of the settings page.',
       { id },
-      );
+    );
   } else if (error === 'clock-drift') {
     return 'Failed to sync because your device time differs too much from the server. Please check your device time settings and ensure they are correct.';
   } else {
