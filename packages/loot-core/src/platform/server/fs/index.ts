@@ -1,9 +1,9 @@
 // @ts-strict-ignore
-// @ts-ignore
+// @ts-expect-error
 // @ts-nocheck
 
 import { SQLiteFS } from 'absurd-sql';
-// @ts-ignore
+// @ts-expect-error
 import IndexedDBBackend from 'absurd-sql/dist/indexeddb-backend';
 
 import * as connection from '#platform/server/connection';

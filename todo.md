@@ -18,3 +18,5 @@ async function test() {
 }
 test();"
 ```
+
+Come back and learn about worker and then move the worker to the web directly.

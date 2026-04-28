@@ -1,7 +1,6 @@
 import { createApp } from '#server/app';
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
-import { previewMLPredictions } from '#server/ml-categorization';
 import { mutator } from '#server/mutators';
 import { undoable } from '#server/undo';
 import { q, Query } from '#shared/query';
@@ -32,7 +31,6 @@ export type TransactionHandlers = {
   'transactions-merge': typeof mergeTransactions;
   'get-earliest-transaction': typeof getEarliestTransaction;
   'get-latest-transaction': typeof getLatestTransaction;
-  'ml-preview-predictions': typeof handleMLPreviewPredictions;
 };
 
 async function handleBatchUpdateTransactions({
@@ -152,14 +150,6 @@ async function getLatestTransaction() {
   return data[0] || null;
 }
 
-async function handleMLPreviewPredictions({
-  transactions,
-}: {
-  transactions: { id: string; notes: string | null }[];
-}) {
-  return previewMLPredictions(transactions);
-}
-
 export const app = createApp<TransactionHandlers>();
 
 app.method(
@@ -177,4 +167,3 @@ app.method('transactions-export', mutator(exportTransactions));
 app.method('transactions-export-query', mutator(exportTransactionsQuery));
 app.method('get-earliest-transaction', getEarliestTransaction);
 app.method('get-latest-transaction', getLatestTransaction);
-app.method('ml-preview-predictions', handleMLPreviewPredictions);

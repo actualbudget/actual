@@ -68,6 +68,11 @@ if (config.get('corsProxy.enabled')) {
 app.use('/admin', adminApp.handlers);
 app.use('/openid', openidApp.handlers);
 
+// Serve ML model files statically
+const modelPath = resolve(process.cwd(), 'ml-models');
+console.log(`Serving ML models from: ${modelPath}`);
+app.use('/ml-models', express.static(modelPath));
+
 app.get('/mode', (req, res) => {
   res.send(config.get('mode'));
 });

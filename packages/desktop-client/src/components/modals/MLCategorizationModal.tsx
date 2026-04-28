@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { send } from '@actual-app/core/platform/client/connection';
@@ -10,6 +10,7 @@ import type { TransactionEntity } from '@actual-app/core/types/models';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { aqlQuery } from '#queries/aqlQuery';
+import { MLCategorizationWorkerClient } from '#workers/ml-categorization.client';
 
 type Props = Extract<ModalType, { name: 'ml-categorization' }>['options'];
 
@@ -21,8 +22,6 @@ type PredictionEntry = {
   predictedCategory: string | null;
 };
 
-type MLResult = { id: string; predictedCategory: string | null };
-
 export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
@@ -31,6 +30,8 @@ export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
 
   // Fetch transactions and predictions on mount
   useEffect(() => {
+    let mlClient: MLCategorizationWorkerClient | null = null;
+
     async function fetchPredictions() {
       setLoading(true);
       try {
@@ -43,25 +44,33 @@ export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
         );
         const transactions = ungroupTransactions(data as TransactionEntity[]);
 
-        // Call ML preview predictions
-        const mlResults = (await send('ml-preview-predictions', {
-          transactions: transactions.map(t => ({
-            id: t.id,
-            notes: t.notes ?? null,
-          })),
-        })) as MLResult[];
+        // Run predictions in a dedicated worker
+        mlClient = new MLCategorizationWorkerClient();
+        await mlClient.initialize({
+          modelUrl:
+            (window as unknown as Record<string, string>).ACTUAL_ML_MODEL_URL ??
+            'http://localhost:5006/ml-models/classifier.onnx',
+          classesUrl:
+            (window as unknown as Record<string, string>)
+              .ACTUAL_ML_CLASSES_URL ??
+            'http://localhost:5006/ml-models/classifier_classes.npy',
+          preprocessingEnabled:
+            (window as unknown as Record<string, string>)
+              .ACTUAL_ML_APPLY_PREPROCESSING === 'true',
+        });
+
+        const predictedCategories = await mlClient.predict(
+          transactions.map(t => t.notes),
+        );
 
         // Combine transaction data with predictions
-        const entries: PredictionEntry[] = transactions.map(t => {
-          const mlResult = mlResults.find(r => r.id === t.id);
-          return {
-            id: t.id,
-            notes: t.notes ?? null,
-            payee: t.payee ?? null,
-            currentCategory: t.category ?? null,
-            predictedCategory: mlResult?.predictedCategory ?? null,
-          };
-        });
+        const entries: PredictionEntry[] = transactions.map((t, i) => ({
+          id: t.id,
+          notes: t.notes ?? null,
+          payee: t.payee ?? null,
+          currentCategory: t.category ?? null,
+          predictedCategory: predictedCategories[i] ?? null,
+        }));
 
         setPredictions(entries);
       } catch (error) {
@@ -69,7 +78,11 @@ export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
       }
       setLoading(false);
     }
-    fetchPredictions();
+    void fetchPredictions();
+
+    return () => {
+      mlClient?.terminate();
+    };
   }, [transactionIds]);
 
   // Update a prediction's category (user can edit)
@@ -120,11 +133,13 @@ export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
             {loading ? (
               <div>{t('Loading predictions...')}</div>
             ) : predictions.length === 0 ? (
-              <div>{<Trans>No transactions to predict.</Trans>}</div>
+              <div>
+                <Trans>No transactions to predict.</Trans>
+              </div>
             ) : (
               <>
                 <div style={{ marginBottom: '10px', fontStyle: 'italic' }}>
-                  {t('Review and edit predictions before applying.')}
+                  <Trans>Review and edit predictions before applying.</Trans>
                 </div>
                 <div
                   style={{
@@ -175,7 +190,7 @@ export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
                           }
                           style={{ padding: '5px', minWidth: '150px' }}
                         >
-                          <option value="">{t('No category')}</option>
+                          <option value=""><Trans>No category</Trans></option>
                           {/* TODO: Populate with actual categories */}
                           {entry.predictedCategory && (
                             <option value={entry.predictedCategory}>
@@ -195,7 +210,9 @@ export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
                     gap: '10px',
                   }}
                 >
-                  <Button onPress={() => state.close()}>{t('Cancel')}</Button>
+                  <Button onPress={() => state.close()}>
+                    <Trans>Cancel</Trans>
+                  </Button>
                   <Button
                     variant="primary"
                     onPress={handleApply}
