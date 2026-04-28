@@ -47,6 +47,12 @@ const valueStyle = {
   height: styles.mobileMinHeight,
 };
 
+const hideNativeDateIconClassName = css({
+  '&::-webkit-calendar-picker-indicator': {
+    display: 'none',
+  },
+});
+
 type InputFieldProps = ComponentPropsWithRef<typeof Input> & {
   icon?: ReactNode;
 };
@@ -56,6 +62,7 @@ export function InputField({
   style,
   onUpdate,
   icon,
+  className,
   ref,
   ...props
 }: InputFieldProps) {
@@ -92,6 +99,14 @@ export function InputField({
             ...style,
           }}
           {...props}
+          className={renderProps =>
+            cx(
+              hideNativeDateIconClassName,
+              typeof className === 'function'
+                ? className(renderProps)
+                : className,
+            )
+          }
         />
       </View>
     );
@@ -104,6 +119,7 @@ export function InputField({
       autoCapitalize="none"
       disabled={disabled}
       onUpdate={onUpdate}
+      className={className}
       style={{
         ...valueStyle,
         ...style,
