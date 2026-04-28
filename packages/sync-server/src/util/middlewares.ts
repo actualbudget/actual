@@ -4,6 +4,42 @@ import * as winston from 'winston';
 
 import { validateSession } from './validate-user';
 
+const validateBudgetScopeMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  if (res.locals.auth_method !== 'api_token') {
+    return next();
+  }
+
+  const budgetIds = res.locals.budget_ids as string[] | undefined;
+
+  if (!budgetIds || budgetIds.length === 0) {
+    return next();
+  }
+
+  const fileId =
+    req.headers['x-actual-file-id'] ||
+    req.body?.fileId ||
+    req.query?.fileId ||
+    req.params?.fileId;
+
+  if (!fileId) {
+    return next();
+  }
+
+  if (typeof fileId === 'string' && budgetIds.includes(fileId)) {
+    return next();
+  }
+
+  res.status(403).send({
+    status: 'error',
+    reason: 'token-scope-error',
+    details: 'The API token does not have access to this budget',
+  });
+};
+
 async function errorMiddleware(
   err: Error,
   req: Request,
@@ -60,4 +96,9 @@ const requestLoggerMiddleware = expressWinston.logger({
   ),
 });
 
-export { validateSessionMiddleware, errorMiddleware, requestLoggerMiddleware };
+export {
+  validateSessionMiddleware,
+  validateBudgetScopeMiddleware,
+  errorMiddleware,
+  requestLoggerMiddleware,
+};

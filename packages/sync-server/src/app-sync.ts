@@ -24,6 +24,7 @@ import * as simpleSync from './sync-simple';
 import {
   errorMiddleware,
   requestLoggerMiddleware,
+  validateBudgetScopeMiddleware,
   validateSessionMiddleware,
 } from './util/middlewares';
 import {
@@ -35,9 +36,6 @@ import {
 import type { GroupId } from './util/paths';
 
 const app = express();
-app.use(validateSessionMiddleware);
-app.use(errorMiddleware);
-app.use(requestLoggerMiddleware);
 app.use(
   express.raw({
     type: 'application/actual-sync',
@@ -51,6 +49,10 @@ app.use(
   }),
 );
 app.use(express.json({ limit: `${config.get('upload.fileSizeLimitMB')}mb` }));
+app.use(validateSessionMiddleware);
+app.use(validateBudgetScopeMiddleware);
+app.use(errorMiddleware);
+app.use(requestLoggerMiddleware);
 
 export { app as handlers };
 

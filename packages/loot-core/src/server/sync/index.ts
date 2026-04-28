@@ -723,6 +723,7 @@ async function _fullSync(
     buffer,
     {
       'X-ACTUAL-TOKEN': userToken,
+      'X-ACTUAL-FILE-ID': cloudFileId,
     },
   );
 
