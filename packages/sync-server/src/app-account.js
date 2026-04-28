@@ -127,8 +127,8 @@ app.post('/login', authRateLimiter, async (req, res) => {
   res.send({ status: 'ok', data: { token } });
 });
 
-app.post('/change-password', (req, res) => {
-  const session = validateSession(req, res);
+app.post('/change-password', async (req, res) => {
+  const session = await validateSession(req, res);
   if (!session) return;
 
   if (!isAdmin(session.user_id)) {
@@ -159,8 +159,8 @@ app.post('/change-password', (req, res) => {
   res.send({ status: 'ok', data: {} });
 });
 
-app.post('/server-prefs', (req, res) => {
-  const session = validateSession(req, res);
+app.post('/server-prefs', async (req, res) => {
+  const session = await validateSession(req, res);
   if (!session) return;
 
   if (!isAdmin(session.user_id)) {
@@ -184,8 +184,8 @@ app.post('/server-prefs', (req, res) => {
   res.send({ status: 'ok', data: {} });
 });
 
-app.get('/validate', (req, res) => {
-  const session = validateSession(req, res);
+app.get('/validate', async (req, res) => {
+  const session = await validateSession(req, res);
   if (session) {
     const user = getUserInfo(session.user_id);
     if (!user) {
