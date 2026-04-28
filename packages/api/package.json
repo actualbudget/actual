@@ -10,7 +10,9 @@
   },
   "files": [
     "@types",
-    "dist"
+    "dist",
+    "!@types/**/*.test.d.ts",
+    "!@types/**/*.test.d.ts.map"
   ],
   "main": "dist/index.js",
   "types": "@types/index.d.ts",
@@ -39,7 +41,7 @@
     }
   },
   "scripts": {
-    "build": "vite build && tsgo -p tsconfig.build.json --emitDeclarationOnly",
+    "build": "vite build && tsgo --emitDeclarationOnly",
     "test": "vitest --run",
     "typecheck": "tsgo -b && tsc-strict"
   },
