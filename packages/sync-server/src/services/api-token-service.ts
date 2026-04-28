@@ -54,6 +54,13 @@ export type CreateTokenResult = {
   expiresAt: number;
 };
 
+/** Result returned when validating a token successfully */
+export type ValidateTokenResult = {
+  userId: string;
+  tokenId: string;
+  budgetIds: string[];
+};
+
 /** Token information returned when listing tokens */
 export type TokenListItem = {
   id: string;
@@ -74,6 +81,7 @@ export type ApiTokenService = {
     budgetIds?: string[],
     expiresAt?: number | null,
   ): Promise<CreateTokenResult>;
+  validateToken(token: string): Promise<ValidateTokenResult | null>;
   listTokens(userId: string): TokenListItem[];
   revokeToken(tokenId: string, userId: string): boolean;
   setTokenEnabled(tokenId: string, userId: string, enabled: boolean): boolean;
@@ -129,6 +137,16 @@ async function hashToken(token: string): Promise<string> {
   return bcrypt.hash(token, BCRYPT_ROUNDS);
 }
 
+/**
+ * Verify a token against a hash
+ * @param token - The token to verify
+ * @param hash - The bcrypt hash to compare against
+ * @returns True if the token matches
+ */
+async function verifyToken(token: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(token, hash);
+}
+
 // ============================================
 // Service Implementation
 // ============================================
@@ -179,6 +197,62 @@ export const apiTokenService: ApiTokenService = {
       budgetIds,
       createdAt,
       expiresAt: expiration,
+    };
+  },
+
+  /**
+   * Validate an API token and return the associated user context
+   * @param token - The full API token
+   */
+  async validateToken(token: string): Promise<ValidateTokenResult | null> {
+    if (!token || !token.startsWith(TOKEN_PREFIX)) {
+      return null;
+    }
+
+    const accountDb = getAccountDb() as WrappedDatabase;
+    const prefix = extractPrefix(token);
+
+    const tokenRow = accountDb.first<ApiTokenRow>(
+      `SELECT id, user_id, token_hash, expires_at, enabled, last_used_at
+       FROM api_tokens
+       WHERE token_prefix = ?`,
+      [prefix],
+    );
+
+    if (!tokenRow || !tokenRow.enabled) {
+      return null;
+    }
+
+    const now = Math.floor(Date.now() / 1000);
+    if (
+      tokenRow.expires_at !== TOKEN_EXPIRATION_NEVER &&
+      tokenRow.expires_at < now
+    ) {
+      return null;
+    }
+
+    if (!(await verifyToken(token, tokenRow.token_hash))) {
+      return null;
+    }
+
+    const shouldUpdateLastUsed =
+      !tokenRow.last_used_at || now - tokenRow.last_used_at > 60;
+    if (shouldUpdateLastUsed) {
+      accountDb.mutate(`UPDATE api_tokens SET last_used_at = ? WHERE id = ?`, [
+        now,
+        tokenRow.id,
+      ]);
+    }
+
+    const budgetRows = accountDb.all<ApiTokenBudgetRow>(
+      `SELECT file_id FROM api_token_budgets WHERE token_id = ?`,
+      [tokenRow.id],
+    );
+
+    return {
+      userId: tokenRow.user_id,
+      tokenId: tokenRow.id,
+      budgetIds: budgetRows.map(row => row.file_id),
     };
   },
 
