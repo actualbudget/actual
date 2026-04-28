@@ -147,6 +147,8 @@ import type {
   TransactionUpdateFunction,
 } from './table/utils';
 import { TransactionMenu } from './TransactionMenu';
+import { Autocomplete } from '#components/autocomplete/Autocomplete';
+import { useTags } from '#hooks/useTags';
 
 type TransactionHeaderProps = {
   hasSelected: boolean;
@@ -404,12 +406,12 @@ function StatusCell({
           ':focus': {
             ...(isPreview
               ? {
-                  boxShadow: 'none',
-                }
+                boxShadow: 'none',
+              }
               : {
-                  border: '1px solid ' + theme.formInputBorderSelected,
-                  boxShadow: '0 1px 2px ' + theme.formInputBorderSelected,
-                }),
+                border: '1px solid ' + theme.formInputBorderSelected,
+                boxShadow: '0 1px 2px ' + theme.formInputBorderSelected,
+              }),
           },
           cursor: isClearedField ? 'pointer' : 'default',
           ...(isChild && { visibility: 'hidden' }),
@@ -552,8 +554,8 @@ function PayeeCell({
           ':hover': isPreview
             ? {}
             : {
-                border: '1px solid ' + theme.buttonNormalBorder,
-              },
+              border: '1px solid ' + theme.buttonNormalBorder,
+            },
         }}
         disabled={isPreview}
         onSelect={() =>
@@ -1455,11 +1457,11 @@ const Transaction = memo(function Transaction({
             value={
               matched
                 ? // TODO: this will require changes in table.tsx
-                  ((
-                    <SvgHyperlink2
-                      style={{ width: 13, height: 13, color: 'inherit' }}
-                    />
-                  ) as unknown as string)
+                ((
+                  <SvgHyperlink2
+                    style={{ width: 13, height: 13, color: 'inherit' }}
+                  />
+                ) as unknown as string)
                 : undefined
             }
           />
@@ -1573,22 +1575,14 @@ const Transaction = memo(function Transaction({
           />
         ))()}
 
-        <InputCell
-          width="flex"
-          name="notes"
-          textAlign="flex"
-          exposed={focusedField === 'notes'}
+        <NotesCell
+          value={notes || ''}
           focused={focusedField === 'notes'}
-          value={notes ?? (isPreview ? schedule?.name : null) ?? ''}
-          valueStyle={valueStyle}
-          formatter={value =>
-            NotesTagFormatter({ notes: value, onNotesTagClick })
-          }
-          onExpose={name => !isPreview && onEdit(id, name)}
-          inputProps={{
-            value: notes || '',
-            onUpdate: onUpdate.bind(null, 'notes'),
+          onClickTag={onNotesTagClick}
+          onUpdate={value => {
+            onUpdate('notes', value?.trim());
           }}
+          onExpose={name => !isPreview && onEdit(id, name)}
         />
 
         {(isPreview && !isChild) || isParent ? (
@@ -1734,11 +1728,11 @@ const Transaction = memo(function Transaction({
             valueStyle={
               !categoryId
                 ? {
-                    // uncategorized transaction
-                    fontStyle: 'italic',
-                    fontWeight: 300,
-                    color: theme.formInputTextHighlight,
-                  }
+                  // uncategorized transaction
+                  fontStyle: 'italic',
+                  fontWeight: 300,
+                  color: theme.formInputTextHighlight,
+                }
                 : valueStyle
             }
             onUpdate={async value => {
@@ -1956,6 +1950,169 @@ const Transaction = memo(function Transaction({
     </View>
   );
 });
+
+type NotesCellProps = {
+  value: string;
+  focused: boolean;
+  onUpdate: (value: string) => void;
+  onClickTag: (tag: string) => void;
+  onExpose: (name: string) => void;
+}
+
+function NotesCell({
+  value,
+  focused,
+  onUpdate,
+  onClickTag,
+  onExpose,
+}: NotesCellProps) {
+  const [cursorPosition, setCursorPosition] = useState<number | null>(null);
+  const [inputValue, setInputValue] = useState(value);
+  useEffect(() => setInputValue(value), [value, setInputValue]);
+  const tagQuery = useTags()
+  const tagOptions = tagQuery.data?.map(tag => ({ id: tag.tag, name: '#' + tag.tag })) ?? []
+
+  function onSelect(optionId: string, value: string, e?: KeyboardEvent<HTMLInputElement>) {
+    console.trace('selecting', optionId)
+    const [start, end] = getCurrentWordRange(value, cursorPosition);
+    const option = tagOptions.find(o => o.id === optionId);
+    if (option && e) {
+      const newValue =
+        value.slice(0, start) + option.name + value.slice(end + 1);
+      setInputValue(newValue + ' ');
+
+      // only stop event propagation (i.e. table navigation) when we want to do
+      // autocomplete things. If we don't choose an option, then we want to treat
+      // this as a regular input field and do table navigation.
+      e?.stopPropagation();
+    } else {
+      onUpdate(value);
+    }
+  }
+
+  function onKeyUp(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.currentTarget.selectionEnd === e.currentTarget.selectionStart) {
+      setCursorPosition(e.currentTarget.selectionStart);
+    } else {
+      setCursorPosition(null);
+    }
+  }
+
+  function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Escape') {
+      // reset to initial value
+      setInputValue(value);
+    }
+    if (e.key === 'Tab') {
+      // set to current value. For some reason this is
+      // is not getting caught by the onBlur handler
+      // likely because of Autocomplete complexity
+      onUpdate(inputValue);
+    }
+    if (e.key === 'Enter') {
+      onUpdate(inputValue)
+      //e.currentTarget.blur()
+    }
+  }
+
+  return (
+    <CustomCell
+      width="flex"
+      name="notes"
+      value={value}
+      formatter={value => NotesTagFormatter({ notes: value, onNotesTagClick: onClickTag })}
+      focused={focused}
+      exposed={focused}
+      onExpose={onExpose}
+      onUpdate={onUpdate}
+      onFocus={() => setInputValue(value)}
+      onBlur={() => onUpdate(inputValue)}
+      onKeyDownCapture={onKeyDown}
+    >
+      {({ inputStyle, onKeyDown, onBlur, shouldSaveFromKey }) => (
+        <Autocomplete
+          strict={false}
+          value={value}
+          shouldSaveFromKey={shouldSaveFromKey}
+          clearOnBlur={false}
+          closeOnBlur={true}
+          openOnFocus={false}
+          onSelect={onSelect}
+          inputProps={{
+            onBlur,
+            onKeyDown,
+            onKeyUp,
+            style: inputStyle,
+            value: inputValue,
+            onChange: v => setInputValue(v.target.value),
+          }}
+          getHighlightedIndex={() => null}
+          suggestions={tagOptions}
+          filterSuggestions={(options, inputValue) => {
+            if (inputValue.trim() === '' || !cursorPosition) {
+              return [];
+            }
+            const currentWord = getCurrentWord(
+              inputValue,
+              cursorPosition,
+            )?.toLowerCase();
+            if (!currentWord || !options || currentWord.charAt(0) !== '#') {
+              return [];
+            }
+            const currentWordNoHash = currentWord.slice(1);
+            return options
+              .filter(o => o.id.toLowerCase().includes(currentWordNoHash))
+              .sort(({ id: a }, { id: b }) => {
+                const aStarts = a.toLowerCase().startsWith(currentWord);
+                const bStarts = b.toLowerCase().startsWith(currentWord);
+                if (aStarts && !bStarts) {
+                  return 1;
+                } else if (!aStarts && bStarts) {
+                  return -1;
+                }
+                const compare = a.toLowerCase().localeCompare(b.toLowerCase());
+                return compare > 0 ? 1 : compare < 0 ? -1 : 0;
+              })
+              .slice(0, 10);
+          }}
+        />
+      )}
+    </CustomCell>
+  );
+}
+
+function getCurrentWordRange(inputValue: string, cursorPosition: number | null) {
+  if (
+    cursorPosition === undefined ||
+    cursorPosition === null ||
+    inputValue.charAt(cursorPosition - 1).trim() === ''
+  ) {
+    return [0, 0];
+  }
+  cursorPosition = cursorPosition - 1;
+
+  let startIdx = cursorPosition;
+  let endIdx = cursorPosition;
+
+  while (startIdx > 0 && inputValue.charAt(startIdx - 1).trim() !== '') {
+    startIdx--;
+  }
+  while (
+    endIdx < inputValue.length &&
+    inputValue.charAt(endIdx).trim() !== ''
+  ) {
+    endIdx++;
+  }
+  if (startIdx < 0 || endIdx < 0 || startIdx === endIdx) {
+    return [0, 0];
+  }
+  return [startIdx, endIdx];
+}
+
+function getCurrentWord(inputValue: string, cursorPosition: number) {
+  const [startIdx, endIdx] = getCurrentWordRange(inputValue, cursorPosition);
+  return inputValue.slice(startIdx, endIdx);
+}
 
 type TransactionErrorProps = {
   error: NonNullable<TransactionEntity['error']>;
@@ -2953,10 +3110,10 @@ export const TransactionTable = forwardRef(
       fields = item?.is_child
         ? ['select', 'payee', 'notes', 'category', 'debit', 'credit']
         : fields.filter(
-            f =>
-              (props.showAccount || f !== 'account') &&
-              (props.showCategory || f !== 'category'),
-          );
+          f =>
+            (props.showAccount || f !== 'account') &&
+            (props.showCategory || f !== 'category'),
+        );
 
       if (item?.id && isPreviewId(item.id)) {
         fields = ['select'];
@@ -3268,9 +3425,9 @@ export const TransactionTable = forwardRef(
           t =>
             t.parent_id &&
             t.parent_id ===
-              (transaction?.is_parent
-                ? transaction?.id
-                : transaction?.parent_id),
+            (transaction?.is_parent
+              ? transaction?.id
+              : transaction?.parent_id),
         );
 
         const emptyTransactions = siblingTransactions.filter(
