@@ -149,6 +149,9 @@ import type {
 import { TransactionMenu } from './TransactionMenu';
 import { Autocomplete } from '#components/autocomplete/Autocomplete';
 import { useTags } from '#hooks/useTags';
+import { over } from 'lodash';
+import { useTheme } from '#style';
+import { css, cx } from '@emotion/css';
 
 type TransactionHeaderProps = {
   hasSelected: boolean;
@@ -1970,16 +1973,16 @@ function NotesCell({
   const [inputValue, setInputValue] = useState(value);
   useEffect(() => setInputValue(value), [value, setInputValue]);
   const tagQuery = useTags()
-  const tagOptions = tagQuery.data?.map(tag => ({ id: tag.tag, name: '#' + tag.tag })) ?? []
+  const tagOptions = tagQuery.data?.map(tag => ({ id: tag.tag, name: '#' + tag.tag, tag })) ?? []
 
   function onSelect(optionId: string, value: string, e?: KeyboardEvent<HTMLInputElement>) {
-    console.trace('selecting', optionId)
     const [start, end] = getCurrentWordRange(value, cursorPosition);
     const option = tagOptions.find(o => o.id === optionId);
-    if (option && e) {
+    if (option) {
       const newValue =
         value.slice(0, start) + option.name + value.slice(end + 1);
       setInputValue(newValue + ' ');
+      setCursorPosition(newValue.length)
 
       // only stop event propagation (i.e. table navigation) when we want to do
       // autocomplete things. If we don't choose an option, then we want to treat
@@ -1988,6 +1991,10 @@ function NotesCell({
     } else {
       onUpdate(value);
     }
+  }
+
+  function findMatches() {
+
   }
 
   function onKeyUp(e: KeyboardEvent<HTMLInputElement>) {
@@ -2011,7 +2018,22 @@ function NotesCell({
     }
     if (e.key === 'Enter') {
       onUpdate(inputValue)
-      //e.currentTarget.blur()
+    }
+
+
+    // Downshift overwrites Home and End to do its own handling
+    // (highlighting first and last entry in list). When there are no matches,
+    // we should let Home and End behave like they normally do
+    // Unfortunately, non-strict fields don't exist in our project so this is not a
+    // use case that has already been implemented. We have to do it here
+    const currentWord = getCurrentWord(inputValue, cursorPosition).slice(1)
+    const hasMatch = currentWord && tagOptions.some(o => o.id.toLowerCase().includes(currentWord))
+    const input = e.currentTarget.querySelector('input')
+    if (e.key === 'Home' && !hasMatch) {
+      input?.setSelectionRange(0, 0)
+    } else if (e.key === 'End' && !hasMatch) {
+      const curLen = input?.value.length ?? 0;
+      input?.setSelectionRange(curLen, curLen)
     }
   }
 
@@ -2048,6 +2070,30 @@ function NotesCell({
           }}
           getHighlightedIndex={() => null}
           suggestions={tagOptions}
+          renderItems={(items, getItemProps, highlightedIndex) => {
+            return <View style={{ paddingLeft: 4 }}>
+              <View style={{ overflowY: 'auto', willChange: 'transform', padding: '5px 0', maxHeight: 175 }}>
+                {items.map((item, idx) => (
+                  <div
+                    key={item.id}
+                    {...getItemProps({ item })}
+                    onClick={() => onSelect(item.id, inputValue)}
+                    role="button"
+                    className={cx(css({
+                      backgroundColor: highlightedIndex === idx ? theme.menuAutoCompleteBackgroundHover : 'transparent',
+                      color: highlightedIndex === idx ? theme.menuAutoCompleteItemTextHover : theme.menuAutoCompleteText,
+                      padding: 4,
+                      borderRadius: 4,
+                      border: 'none',
+                      font: 'inherit'
+                    }))}
+                  >
+                    <NotesTagFormatter notes={item.name} />
+                  </div>
+                ))}
+              </View>
+            </View>
+          }}
           filterSuggestions={(options, inputValue) => {
             if (inputValue.trim() === '' || !cursorPosition) {
               return [];
@@ -2109,7 +2155,8 @@ function getCurrentWordRange(inputValue: string, cursorPosition: number | null) 
   return [startIdx, endIdx];
 }
 
-function getCurrentWord(inputValue: string, cursorPosition: number) {
+function getCurrentWord(inputValue: string, cursorPosition: number | null) {
+  if (cursorPosition === null) return ''
   const [startIdx, endIdx] = getCurrentWordRange(inputValue, cursorPosition);
   return inputValue.slice(startIdx, endIdx);
 }
