@@ -167,7 +167,7 @@
     "test:node": "ENV=node vitest --run",
     "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
     "typecheck": "tsgo -b && tsc-strict",
-    "build": "tsgo -p tsconfig.build.json --emitDeclarationOnly",
+    "build": "tsgo -b",
     "prepack": "yarn build && ts-node scripts/add-types-conditions.mts",
     "postpack": "ts-node scripts/restore-package-json.mts"
   },
