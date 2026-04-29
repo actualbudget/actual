@@ -42,7 +42,7 @@ function loadStatuses(
             s.next_date,
             s.completed,
             hasTrans.has(s.id),
-            upcomingLength,
+            s.custom_upcoming_length ?? upcomingLength,
           ),
         ]),
       ) as ScheduleStatuses;

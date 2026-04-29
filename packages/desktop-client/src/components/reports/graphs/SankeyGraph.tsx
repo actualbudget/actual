@@ -13,20 +13,22 @@ import {
 } from 'recharts';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 
-import { getColorScale } from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { useFormat } from '#hooks/useFormat';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 type SankeyGraphNode = SankeyData['nodes'][number] & {
-  hasChildren?: boolean;
-  isCollapsed?: boolean;
-  toBudget?: number;
-  isNegative?: boolean;
-  actualValue?: number;
+  value: number;
   percentageLabel?: string;
-  targetLinks?: Array<Record<string, unknown>>;
-  sourceLinks?: Array<Record<string, unknown>>;
+  key: string;
+  color?: string;
+};
+
+type SankeyLinkPayload = {
+  source: SankeyGraphNode;
+  target: SankeyGraphNode;
+  value: number;
+  color?: string;
 };
 
 type SankeyLinkProps = {
@@ -38,16 +40,10 @@ type SankeyLinkProps = {
   targetControlX: number;
   linkWidth: number;
   index: number;
-  payload: {
-    source: SankeyGraphNode;
-    target: SankeyGraphNode;
-    value: number;
-    isNegative?: boolean;
-  };
+  payload: SankeyLinkPayload;
   isHovered: boolean;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
-  color: string;
 };
 
 function SankeyLink({
@@ -62,9 +58,11 @@ function SankeyLink({
   isHovered,
   onMouseEnter,
   onMouseLeave,
-  color,
 }: SankeyLinkProps) {
-  const linkColor = payload.isNegative ? theme.errorText : color;
+  if (payload.value <= 0) {
+    return null;
+  }
+  const linkColor = payload.color ?? theme.reportsGray;
   const strokeWidth = linkWidth;
   const strokeOpacity = isHovered ? 1 : 0.6;
 
@@ -91,8 +89,8 @@ type SankeyNodeProps = {
   index: number;
   payload: SankeyGraphNode;
   containerWidth: number;
-  containerHeight: number;
   showPercentages?: boolean;
+  color?: string;
 };
 function SankeyNode({
   x,
@@ -102,21 +100,17 @@ function SankeyNode({
   index: _index,
   payload,
   containerWidth,
-  containerHeight,
   showPercentages,
 }: SankeyNodeProps) {
   const privacyMode = usePrivacyMode();
   const format = useFormat();
+
+  if (payload.value <= 0) {
+    return null;
+  }
   const isOut = x + width + 6 > containerWidth;
 
-  const fillColor = payload.isNegative ? theme.errorText : theme.reportsBlue;
-
-  const toBudget = payload.toBudget ?? 0;
-  const availableBelow = Math.max(0, containerHeight - 25 - (y + height));
-  const proportionalHeight =
-    toBudget > 0 && payload.value ? height * (toBudget / payload.value) : 0;
-  const isClamped = proportionalHeight > availableBelow;
-  const toBudgetHeight = Math.min(proportionalHeight, availableBelow);
+  const fillColor = payload.color ?? theme.reportsBlue;
 
   const renderText = (
     text: string,
@@ -142,27 +136,6 @@ function SankeyNode({
   return (
     <Layer>
       <Rectangle x={x} y={y} width={width} height={height} fill={fillColor} />
-      {toBudgetHeight > 0 &&
-        (isClamped ? (
-          <polygon
-            points={`
-              ${x},${y + height}
-              ${x + width},${y + height}
-              ${x + width},${y + height + toBudgetHeight - 8}
-              ${x + width / 2},${y + height + toBudgetHeight}
-              ${x},${y + height + toBudgetHeight - 8}
-            `}
-            fill={theme.toBudgetPositive}
-          />
-        ) : (
-          <Rectangle
-            x={x}
-            y={y + height}
-            width={width}
-            height={toBudgetHeight}
-            fill={theme.toBudgetPositive}
-          />
-        ))}
       {renderText(payload.name || '', height / 2)}
       {renderText(
         showPercentages && payload.percentageLabel
@@ -173,24 +146,6 @@ function SankeyNode({
         0.5,
         privacyMode ? t('Redacted Script') : undefined,
       )}
-      {toBudgetHeight > 0 &&
-        renderText(
-          format(toBudget, 'financial'),
-          toBudgetHeight / 2 + 13,
-          11,
-          0.5,
-          privacyMode ? t('Redacted Script') : undefined,
-          y + height,
-        )}
-      {toBudgetHeight > 0 &&
-        renderText(
-          t('To budget'),
-          toBudgetHeight / 2,
-          13,
-          1,
-          undefined,
-          y + height,
-        )}
     </Layer>
   );
 }
@@ -199,7 +154,6 @@ type SankeyGraphProps = {
   style?: CSSProperties;
   data: SankeyData;
   showTooltip?: boolean;
-  collapsedNodes?: string[];
   showPercentages?: boolean;
 };
 export function SankeyGraph({
@@ -212,19 +166,6 @@ export function SankeyGraph({
   const format = useFormat();
   const [hoveredLinkIndex, setHoveredLinkIndex] = useState<number | null>(null);
 
-  const colors = getColorScale('qualitative');
-  const sourceColorMap = new Map(
-    [
-      ...new Set(
-        data.links
-          .filter(l => (l.source as number) !== 0)
-          .map(l => data.nodes[l.source as number]?.name),
-      ),
-    ]
-      .filter(Boolean)
-      .map((name, i) => [name, colors[i % colors.length]]),
-  );
-
   return (
     <Container style={style}>
       {(width, height) => (
@@ -235,7 +176,6 @@ export function SankeyGraph({
               <SankeyNode
                 {...props}
                 containerWidth={width}
-                containerHeight={height}
                 showPercentages={showPercentages}
               />
             )}
@@ -245,10 +185,6 @@ export function SankeyGraph({
                 isHovered={hoveredLinkIndex === props.index}
                 onMouseEnter={() => setHoveredLinkIndex(props.index)}
                 onMouseLeave={() => setHoveredLinkIndex(null)}
-                color={
-                  sourceColorMap.get(props.payload.source.name) ??
-                  theme.reportsGray
-                }
               />
             )}
             sort={false}

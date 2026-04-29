@@ -104,6 +104,7 @@ export const schema = {
     next_date: f('date'),
     completed: f('boolean'),
     posts_transaction: f('boolean'),
+    custom_upcoming_length: f('string'),
     tombstone: f('boolean'),
 
     // These are special fields that are actually pulled from the

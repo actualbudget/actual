@@ -66,9 +66,12 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: true,
     lib: {
-      entry: path.resolve(__dirname, 'index.ts'),
+      entry: {
+        index: path.resolve(__dirname, 'index.ts'),
+        models: path.resolve(__dirname, 'models.ts'),
+      },
       formats: ['cjs'],
-      fileName: () => 'index.js',
+      fileName: (_format, entryName) => `${entryName}.js`,
     },
   },
   plugins: [

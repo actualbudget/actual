@@ -38,6 +38,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ github.base_ref }}
+          persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
@@ -64,6 +65,13 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: cli
           ref: ${{github.base_ref}}
+      - name: Wait for ${{github.base_ref}} CRDT build to succeed
+        uses: fountainhead/action-wait-for-check@5a908a24814494009c4bb27c242ea38c93c593be # v1.2.0
+        id: master-crdt-build
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: crdt
+          ref: ${{github.base_ref}}
 
       - name: Wait for PR build to succeed
         uses: fountainhead/action-wait-for-check@5a908a24814494009c4bb27c242ea38c93c593be # v1.2.0
@@ -86,11 +94,18 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: cli
           ref: ${{github.event.pull_request.head.sha}}
+      - name: Wait for CRDT PR build to succeed
+        uses: fountainhead/action-wait-for-check@5a908a24814494009c4bb27c242ea38c93c593be # v1.2.0
+        id: wait-for-crdt-build
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: crdt
+          ref: ${{github.event.pull_request.head.sha}}
 
       - name: Report build failure
-        if: steps.wait-for-web-build.outputs.conclusion == 'failure' || steps.wait-for-api-build.outputs.conclusion == 'failure' || steps.wait-for-cli-build.outputs.conclusion == 'failure'
+        if: steps.wait-for-web-build.outputs.conclusion == 'failure' || steps.wait-for-api-build.outputs.conclusion == 'failure' || steps.wait-for-cli-build.outputs.conclusion == 'failure' || steps.wait-for-crdt-build.outputs.conclusion == 'failure'
         run: |
-          echo "Build failed on PR branch or ${{github.base_ref}}"
+          echo "Build failed on PR branch or ${GITHUB_BASE_REF}"
           exit 1
 
       - name: Download web build artifact from ${{github.base_ref}}
@@ -146,6 +161,23 @@ jobs:
           name: cli-build-stats
           path: head
           allow_forks: true
+      - name: Download CRDT build artifact from ${{github.base_ref}}
+        uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
+        with:
+          branch: ${{github.base_ref}}
+          workflow: build.yml
+          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
+          name: crdt-build-stats
+          path: base
+      - name: Download CRDT stats from PR
+        uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
+        with:
+          pr: ${{github.event.pull_request.number}}
+          workflow: build.yml
+          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
+          name: crdt-build-stats
+          path: head
+          allow_forks: true
       - name: Strip content hashes from stats files
         run: |
           if [ -f ./head/web-stats.json ]; then
@@ -168,10 +200,12 @@ jobs:
             --base loot-core=./base/loot-core-stats.json \
             --base api=./base/api-stats.json \
             --base cli=./base/cli-stats.json \
+            --base crdt=./base/crdt-stats.json \
             --head desktop-client=./head/web-stats.json \
             --head loot-core=./head/loot-core-stats.json \
             --head api=./head/api-stats.json \
             --head cli=./head/cli-stats.json \
+            --head crdt=./head/crdt-stats.json \
             --identifier combined \
             --format pr-body > bundle-stats-comment.md
       - name: Post combined bundle stats comment

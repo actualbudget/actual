@@ -1,6 +1,7 @@
 import fs from 'fs';
 import { createServer } from 'http';
 import type { Server } from 'http';
+import { cp, mkdir, rm } from 'node:fs/promises';
 import path from 'path';
 
 import type { GlobalPrefsJson } from '@actual-app/core/types/prefs';
@@ -23,7 +24,6 @@ import type {
   SaveDialogOptions,
   UtilityProcess,
 } from 'electron';
-import { copy, exists, mkdir, remove } from 'fs-extra';
 import promiseRetry from 'promise-retry';
 
 import { getMenu } from './menu';
@@ -652,13 +652,14 @@ ipcMain.handle(
         );
       }
 
-      if (!(await exists(newDirectory))) {
+      if (!fs.existsSync(newDirectory)) {
         throw new Error('The destination directory does not exist');
       }
 
-      await copy(currentBudgetDirectory, newDirectory, {
-        overwrite: true,
+      await cp(currentBudgetDirectory, newDirectory, {
+        force: true,
         preserveTimestamps: true,
+        recursive: true,
       });
     } catch (error) {
       logMessage(
@@ -672,7 +673,10 @@ ipcMain.handle(
       await promiseRetry(
         async retry => {
           try {
-            return await remove(currentBudgetDirectory);
+            return await rm(currentBudgetDirectory, {
+              recursive: true,
+              force: true,
+            });
           } catch (error) {
             logMessage(
               'info',

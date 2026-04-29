@@ -1,5 +1,6 @@
 import React, { createRef, PureComponent, useEffect, useMemo } from 'react';
 import type { ReactElement, RefObject } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans } from 'react-i18next';
 import { Navigate, useLocation, useParams } from 'react-router';
 
@@ -35,7 +36,6 @@ import type {
 import { t } from 'i18next';
 import debounce from 'lodash/debounce';
 import isEqual from 'lodash/isEqual';
-import { v4 as uuidv4 } from 'uuid';
 
 import {
   useReopenAccountMutation,
@@ -44,6 +44,7 @@ import {
   useUpdateAccountMutation,
 } from '#accounts';
 import { markAccountRead } from '#accounts/accountsSlice';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
 import { TransactionList } from '#components/transactions/TransactionList';
 import { validateAccountName } from '#components/util/accountValidation';
@@ -495,16 +496,18 @@ class AccountInternal extends PureComponent<
           }
         }
 
+        const balances = this.state.showBalances
+          ? await this.calculateBalances()
+          : null;
+        const filteredAmount = await this.getFilteredAmount();
         this.setState(
           {
             transactions: data,
             transactionsFiltered: isFiltered,
             loading: false,
             workingHard: false,
-            balances: this.state.showBalances
-              ? await this.calculateBalances()
-              : null,
-            filteredAmount: await this.getFilteredAmount(),
+            balances,
+            filteredAmount,
           },
           () => {
             if (firstLoad) {
@@ -1025,10 +1028,10 @@ class AccountInternal extends PureComponent<
     const lastReconciled = new Date().getTime().toString();
     this.props.onUpdateAccount({ ...account, last_reconciled: lastReconciled });
 
-    this.setState({
+    this.setState(state => ({
       reconcileAmount: null,
-      showCleared: this.state.prevShowCleared,
-    });
+      showCleared: state.prevShowCleared,
+    }));
   };
 
   onCreateReconciliationTransaction = async (diff: number) => {
@@ -1046,9 +1049,9 @@ class AccountInternal extends PureComponent<
     ]);
 
     // Optimistic UI: update the transaction list before sending the data to the database
-    this.setState({
-      transactions: [...reconciliationTransactions, ...this.state.transactions],
-    });
+    this.setState(state => ({
+      transactions: [...reconciliationTransactions, ...state.transactions],
+    }));
 
     // run rules on the reconciliation transaction
     const ruledTransactions = await Promise.all(
@@ -1115,7 +1118,7 @@ class AccountInternal extends PureComponent<
 
     const [firstTransaction] = transactions;
     const parentTransaction = {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       is_parent: true,
       cleared: transactions.every(t => !!t.cleared),
       date: firstTransaction.date,
@@ -1359,10 +1362,10 @@ class AccountInternal extends PureComponent<
   };
 
   onConditionsOpChange = (value: 'and' | 'or') => {
-    this.setState({ filterConditionsOp: value });
-    this.setState({
-      filterId: { ...this.state.filterId, status: 'changed' } as SavedFilter,
-    });
+    this.setState(state => ({
+      filterConditionsOp: value,
+      filterId: { ...state.filterId, status: 'changed' } as SavedFilter,
+    }));
     void this.applyFilters([...this.state.filterConditions]);
     if (this.state.search !== '') {
       this.onSearch(this.state.search);
@@ -1384,7 +1387,9 @@ class AccountInternal extends PureComponent<
         void this.applyFilters([...(savedFilter.conditions ?? [])]);
       }
     }
-    this.setState({ filterId: { ...this.state.filterId, ...savedFilter } });
+    this.setState(state => ({
+      filterId: { ...state.filterId, ...savedFilter },
+    }));
   };
 
   onClearFilters = () => {
@@ -1405,12 +1410,12 @@ class AccountInternal extends PureComponent<
         c === oldCondition ? updatedCondition : c,
       ),
     );
-    this.setState({
+    this.setState(state => ({
       filterId: {
-        ...this.state.filterId,
-        status: this.state.filterId && 'changed',
+        ...state.filterId,
+        status: state.filterId && 'changed',
       } as SavedFilter,
-    });
+    }));
     if (this.state.search !== '') {
       this.onSearch(this.state.search);
     }
@@ -1421,15 +1426,14 @@ class AccountInternal extends PureComponent<
       this.state.filterConditions.filter(c => c !== condition),
     );
     if (this.state.filterConditions.length === 1) {
-      this.setState({ filterId: undefined });
-      this.setState({ filterConditionsOp: 'and' });
+      this.setState({ filterId: undefined, filterConditionsOp: 'and' });
     } else {
-      this.setState({
+      this.setState(state => ({
         filterId: {
-          ...this.state.filterId,
-          status: this.state.filterId && 'changed',
+          ...state.filterId,
+          status: state.filterId && 'changed',
         } as SavedFilter,
-      });
+      }));
     }
     if (this.state.search !== '') {
       this.onSearch(this.state.search);
@@ -1467,12 +1471,12 @@ class AccountInternal extends PureComponent<
         return;
       }
 
-      this.setState({
+      this.setState(state => ({
         filterId: {
-          ...this.state.filterId,
-          status: this.state.filterId && 'changed',
+          ...state.filterId,
+          status: state.filterId && 'changed',
         } as SavedFilter,
-      });
+      }));
       void this.applyFilters([...filterConditions, condition]);
     }
 
@@ -1672,25 +1676,26 @@ class AccountInternal extends PureComponent<
     if (headerClicked === this.state.sort?.field) {
       prevField = this.state.sort.prevField;
       prevAscDesc = this.state.sort.prevAscDesc;
-      this.setState({
+      this.setState(state => ({
         sort: {
-          ...this.state.sort,
+          ...state.sort,
+          field: headerClicked,
           ascDesc,
         },
-      });
+      }));
     } else {
       //if switching to new column then capture state
       //of current sort column as prev
       prevField = this.state.sort?.field;
       prevAscDesc = this.state.sort?.ascDesc;
-      this.setState({
+      this.setState(state => ({
         sort: {
           field: headerClicked,
           ascDesc,
-          prevField: this.state.sort?.field,
-          prevAscDesc: this.state.sort?.ascDesc,
+          prevField: state.sort?.field,
+          prevAscDesc: state.sort?.ascDesc,
         },
-      });
+      }));
     }
 
     this.applySort(headerClicked, ascDesc, prevField, prevAscDesc);
@@ -2028,48 +2033,50 @@ export function Account() {
     createPayee.mutateAsync({ name });
 
   return (
-    <SchedulesProvider query={schedulesQuery}>
-      <SplitsExpandedProvider
-        initialMode={expandSplits ? 'collapse' : 'expand'}
-      >
-        <AccountHack
-          newTransactions={newTransactions}
-          matchedTransactions={matchedTransactions}
-          accounts={accounts}
-          failedAccounts={failedAccounts}
-          dateFormat={dateFormat}
-          hideFraction={String(hideFraction) === 'true'}
-          expandSplits={expandSplits}
-          showBalances={String(showBalances) === 'true'}
-          setShowBalances={showBalances =>
-            setShowBalances(String(showBalances))
-          }
-          showNetWorthChart={String(showNetWorthChart) === 'true'}
-          setShowNetWorthChart={val => setShowNetWorthChart(String(val))}
-          showCleared={String(hideCleared) !== 'true'}
-          setShowCleared={val => setHideCleared(String(!val))}
-          showReconciled={String(hideReconciled) !== 'true'}
-          setShowReconciled={val => setHideReconciled(String(!val))}
-          showExtraBalances={String(showExtraBalances) === 'true'}
-          setShowExtraBalances={extraBalances =>
-            setShowExtraBalances(String(extraBalances))
-          }
-          payees={payees}
-          modalShowing={modalShowing}
-          accountsSyncing={accountsSyncing}
-          filterConditions={filterConditions}
-          categoryGroups={categoryGroups}
-          accountId={params.id}
-          categoryId={location?.state?.categoryId}
-          location={location}
-          savedFilters={savedFiters}
-          onReopenAccount={onReopenAccount}
-          onUpdateAccount={onUpdateAccount}
-          onUnlinkAccount={onUnlinkAccount}
-          onSyncAndDownload={onSyncAndDownload}
-          onCreatePayee={onCreatePayee}
-        />
-      </SplitsExpandedProvider>
-    </SchedulesProvider>
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <SchedulesProvider query={schedulesQuery}>
+        <SplitsExpandedProvider
+          initialMode={expandSplits ? 'collapse' : 'expand'}
+        >
+          <AccountHack
+            newTransactions={newTransactions}
+            matchedTransactions={matchedTransactions}
+            accounts={accounts}
+            failedAccounts={failedAccounts}
+            dateFormat={dateFormat}
+            hideFraction={String(hideFraction) === 'true'}
+            expandSplits={expandSplits}
+            showBalances={String(showBalances) === 'true'}
+            setShowBalances={showBalances =>
+              setShowBalances(String(showBalances))
+            }
+            showNetWorthChart={String(showNetWorthChart) === 'true'}
+            setShowNetWorthChart={val => setShowNetWorthChart(String(val))}
+            showCleared={String(hideCleared) !== 'true'}
+            setShowCleared={val => setHideCleared(String(!val))}
+            showReconciled={String(hideReconciled) !== 'true'}
+            setShowReconciled={val => setHideReconciled(String(!val))}
+            showExtraBalances={String(showExtraBalances) === 'true'}
+            setShowExtraBalances={extraBalances =>
+              setShowExtraBalances(String(extraBalances))
+            }
+            payees={payees}
+            modalShowing={modalShowing}
+            accountsSyncing={accountsSyncing}
+            filterConditions={filterConditions}
+            categoryGroups={categoryGroups}
+            accountId={params.id}
+            categoryId={location?.state?.categoryId}
+            location={location}
+            savedFilters={savedFiters}
+            onReopenAccount={onReopenAccount}
+            onUpdateAccount={onUpdateAccount}
+            onUnlinkAccount={onUnlinkAccount}
+            onSyncAndDownload={onSyncAndDownload}
+            onCreatePayee={onCreatePayee}
+          />
+        </SplitsExpandedProvider>
+      </SchedulesProvider>
+    </ErrorBoundary>
   );
 }

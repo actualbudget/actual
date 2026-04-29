@@ -50,6 +50,8 @@ module.exports = {
         },
         blog: {
           ...defaultOptions,
+          blogSidebarTitle: 'All posts',
+          blogSidebarCount: 'ALL',
           feedOptions: {
             type: 'rss',
             title: 'Actual Budget Blog',
