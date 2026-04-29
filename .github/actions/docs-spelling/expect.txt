@@ -126,6 +126,7 @@ Moldovan
 murmurhash
 NETWORKDAYS
 nginx
+nodenext
 OIDC
 Okabe
 overbudgeted

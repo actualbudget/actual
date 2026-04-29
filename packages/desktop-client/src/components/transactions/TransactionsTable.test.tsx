@@ -23,7 +23,6 @@ import type {
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
-import { v4 as uuidv4 } from 'uuid';
 
 import { AuthProvider } from '#auth/AuthProvider';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
@@ -39,7 +38,7 @@ const queryClient = createTestQueryClient();
 
 vi.mock(
   '@actual-app/core/platform/client/connection',
-  () => import('../../mocks/connection'),
+  () => import('#mocks/connection'),
 );
 vi.mock('../../hooks/useSyncedPref', () => ({
   useSyncedPref: vi.fn().mockReturnValue([undefined, vi.fn()]),
@@ -1087,7 +1086,7 @@ describe('Transactions', () => {
     // Change the id to simulate a new transaction being added, and
     // work with that one. This makes sure that the transaction table
     // properly references new data.
-    transactions[0] = { ...transactions[0], id: uuidv4() };
+    transactions[0] = { ...transactions[0], id: crypto.randomUUID() };
     updateProps({ transactions });
 
     function expectErrorToNotExist(transactions: TransactionEntity[]) {
@@ -1168,6 +1167,7 @@ describe('Transactions', () => {
         is_parent: true,
         notes: 'Notes',
         payee: 'alice-id',
+        reconciled: false,
         sort_order: 0,
       },
       {
@@ -1181,7 +1181,7 @@ describe('Transactions', () => {
         is_child: true,
         parent_id: parentId,
         payee: 'alice-id',
-        reconciled: undefined,
+        reconciled: false,
         sort_order: -1,
         starting_balance_flag: null,
       },
@@ -1196,7 +1196,7 @@ describe('Transactions', () => {
         is_child: true,
         parent_id: parentId,
         payee: 'alice-id',
-        reconciled: undefined,
+        reconciled: false,
         sort_order: -2,
         starting_balance_flag: null,
       },

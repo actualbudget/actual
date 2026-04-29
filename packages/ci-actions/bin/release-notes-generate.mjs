@@ -34,6 +34,7 @@ const apiResult = await fetch('https://api.github.com/graphql', {
               node {
                 number
                 headRefName
+                body
               }
             }
           }
@@ -53,8 +54,63 @@ await collapsedLog('API Response', apiResult);
 const prData = apiResult.data.repository.pullRequests.edges[0].node;
 
 const version = prData.headRefName.split('/')[1].replace(/^v/, '');
-const today = new Date().toISOString().slice(0, 10);
+const slug = version.replace(/\./g, '-');
 const author = process.env.GITHUB_ACTOR || 'TODO';
+const commitMessage = `Generate release notes for v${version}`;
+
+const releaseDateMatch = (prData.body || '').match(
+  /<!-- release-date:(\d{4}-\d{2}-\d{2}) -->/,
+);
+const releaseDate = releaseDateMatch ? releaseDateMatch[1] : 'TODO';
+
+const botName = 'github-actions[bot]';
+const botEmail = '41898282+github-actions[bot]@users.noreply.github.com';
+
+await exec(`git config user.name '${botName}'`);
+await exec(`git config user.email '${botEmail}'`);
+
+const AUTOGEN_MARKER = '<!-- release-notes:auto-generated -->';
+
+await group('Prepare branch', async () => {
+  if (process.env.GITHUB_HEAD_REF) {
+    await exec(`git fetch origin ${process.env.GITHUB_HEAD_REF}`, {
+      stdio: 'inherit',
+    });
+    await exec(`git checkout ${process.env.GITHUB_HEAD_REF}`, {
+      stdio: 'inherit',
+    });
+  }
+
+  // recover deleted release note files from previous generation commits
+  const baseRef = process.env.GITHUB_BASE_REF || 'master';
+  await exec(`git fetch origin ${baseRef}`, { stdio: 'inherit' });
+  const { stdout: mergeBase } = await exec(
+    `git merge-base HEAD origin/${baseRef}`,
+  );
+  const base = mergeBase.trim();
+  const { stdout: genLog } = await exec(
+    `git log --grep='${commitMessage}' --format=%H ${base}..HEAD`,
+  );
+  const genCommits = genLog.split('\n').filter(Boolean);
+  console.log(
+    `Reversing upcoming-release-notes deletions from ${genCommits.length} prior generation commit(s)`,
+  );
+  const tmpDir = process.env.RUNNER_TEMP || '/tmp';
+  for (const sha of genCommits) {
+    const patchPath = join(tmpDir, `revert-${sha}.patch`);
+    try {
+      await exec(
+        `git diff --diff-filter=D ${sha}~1..${sha} -- upcoming-release-notes > ${patchPath}`,
+      );
+      const { size } = await fs.stat(patchPath);
+      if (size > 0) {
+        await exec(`git apply -R --3way ${patchPath}`, { stdio: 'inherit' });
+      }
+    } finally {
+      await fs.unlink(patchPath).catch(() => undefined);
+    }
+  }
+});
 
 const { notesByCategory, files } = await parseReleaseNotes(
   'upcoming-release-notes',
@@ -70,15 +126,17 @@ if (files.length === 0) {
 
 const highlights = '- TODO: Add release highlights';
 
-await group('Generate blog post', async () => {
-  const slug = version.replace(/\./g, '-');
-  const filename = `${today}-release-${slug}.md`;
-  const blogPath = join('packages/docs/blog', filename);
+const blogPath = join(
+  'packages/docs/blog',
+  `${releaseDate}-release-${slug}.md`,
+);
+const releasesPath = 'packages/docs/docs/releases.md';
 
-  const blogContent = `---
+await group('Generate blog post', async () => {
+  const template = `---
 title: Release ${version}
 description: New release of Actual.
-date: ${today}T10:00
+date: ${releaseDate}T10:00
 slug: release-${version}
 tags: [announcement, release]
 hide_table_of_contents: false
@@ -89,50 +147,92 @@ ${highlights}
 
 <!--truncate-->
 
-**Docker Tag: v${version}**
+**Docker Tag: ${version}**
+
+${AUTOGEN_MARKER}
 
 ${categorizedNotes}
 `;
+
+  let blogContent;
+  try {
+    const existing = await fs.readFile(blogPath, 'utf-8');
+    const idx = existing.indexOf(AUTOGEN_MARKER);
+    if (idx === -1) {
+      console.log(
+        `WARNING: ${blogPath} missing ${AUTOGEN_MARKER}, rewriting from template`,
+      );
+      blogContent = template;
+    } else {
+      blogContent =
+        existing.slice(0, idx + AUTOGEN_MARKER.length) +
+        '\n' +
+        categorizedNotes +
+        '\n';
+    }
+  } catch (e) {
+    if (e.code !== 'ENOENT') throw e;
+    blogContent = template;
+  }
 
   await fs.writeFile(blogPath, blogContent);
   console.log(`Wrote ${blogPath}`);
 });
 
 await group('Update releases.md', async () => {
-  const releasesPath = 'packages/docs/docs/releases.md';
   const existing = await fs.readFile(releasesPath, 'utf-8');
 
-  const newSection = `## ${version}
+  const sectionRe = new RegExp(
+    `(^|\\n)## ${escapeRegExp(version)}\\n[\\s\\S]*?(?=\\n## |$)`,
+  );
+  const match = existing.match(sectionRe);
 
-Release date: ${today}
+  let updated;
+  if (match) {
+    const section = match[0];
+    const idx = section.indexOf(AUTOGEN_MARKER);
+    if (idx === -1) {
+      console.log(
+        `WARNING: section for ${version} in ${releasesPath} missing ${AUTOGEN_MARKER}, leaving as-is`,
+      );
+      updated = existing;
+    } else {
+      const newSection =
+        section.slice(0, idx + AUTOGEN_MARKER.length) + '\n' + categorizedNotes;
+      updated = existing.replace(section, newSection);
+    }
+  } else {
+    const newSection = `## ${version}
+
+Release date: ${releaseDate}
 
 ${highlights}
 
-**Docker Tag: v${version}**
+**Docker Tag: ${version}**
+
+${AUTOGEN_MARKER}
 
 ${categorizedNotes}`;
-
-  const updated = existing.replace(
-    '# Release Notes\n',
-    `# Release Notes\n\n${newSection}\n`,
-  );
+    updated = existing.replace(
+      '# Release Notes\n',
+      `# Release Notes\n\n${newSection}\n`,
+    );
+  }
 
   await fs.writeFile(releasesPath, updated);
   console.log(`Updated ${releasesPath}`);
 });
 
 await group('Remove used release notes', async () => {
-  if (process.env.GITHUB_HEAD_REF) {
-    await exec(`git fetch origin ${process.env.GITHUB_HEAD_REF}`, {
-      stdio: 'inherit',
-    });
-    await exec(`git checkout ${process.env.GITHUB_HEAD_REF}`, {
-      stdio: 'inherit',
-    });
-  }
   await Promise.all(
     files.map(f => fs.unlink(join('upcoming-release-notes', f))),
   );
+});
+
+await group('Format generated files', async () => {
+  await exec(`yarn exec oxfmt ${blogPath} ${releasesPath}`, {
+    stdio: 'inherit',
+  });
 });
 
 await group('Commit and push', async () => {
@@ -140,18 +240,16 @@ await group('Commit and push', async () => {
     'git add upcoming-release-notes packages/docs/blog packages/docs/docs/releases.md',
     { stdio: 'inherit' },
   );
-  const name = 'github-actions[bot]';
-  const email = '41898282+github-actions[bot]@users.noreply.github.com';
-  await exec(`git commit -m 'Generate release notes for v${version}'`, {
-    stdio: 'inherit',
-    env: {
-      ...process.env,
-      GIT_AUTHOR_NAME: name,
-      GIT_COMMITTER_NAME: name,
-      GIT_AUTHOR_EMAIL: email,
-      GIT_COMMITTER_EMAIL: email,
-    },
-  });
+
+  try {
+    await exec('git diff --cached --quiet');
+    console.log('No changes to commit');
+    return;
+  } catch {
+    // there are staged changes
+  }
+
+  await exec(`git commit -m '${commitMessage}'`);
   await exec('git push origin', { stdio: 'inherit' });
 });
 
@@ -184,6 +282,10 @@ async function parseReleaseNotes(dir) {
   );
 
   return { notesByCategory, files };
+}
+
+function escapeRegExp(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function formatNotes(notes) {

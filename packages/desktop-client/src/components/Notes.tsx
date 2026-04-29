@@ -70,7 +70,7 @@ export function Notes({
       placeholder={t('Notes (markdown supported)')}
     />
   ) : (
-    <Text className={css([markdownStyles, getStyle?.(editable ?? false)])}>
+    <Text className={css([markdownStyles, getStyle?.(false)])}>
       <ReactMarkdown
         remarkPlugins={remarkPlugins}
         rehypePlugins={[

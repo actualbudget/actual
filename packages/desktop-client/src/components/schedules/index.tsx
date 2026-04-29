@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -9,6 +10,7 @@ import { q } from '@actual-app/core/shared/query';
 import type { ScheduleEntity } from '@actual-app/core/types/models';
 
 import { Search } from '#components/common/Search';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { Page } from '#components/Page';
 import { useSchedules } from '#hooks/useSchedules';
 import { pushModal } from '#modals/modalsSlice';
@@ -85,66 +87,68 @@ export function Schedules() {
   } = useSchedules({ query: schedulesQuery });
 
   return (
-    <Page header={t('Schedules')}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          padding: '0 0 15px',
-        }}
-      >
-        <View
-          style={{
-            flex: 1,
-            flexDirection: 'row',
-            justifyContent: 'flex-end',
-          }}
-        >
-          <Search
-            placeholder={t('Filter schedules…')}
-            value={filter}
-            onChange={setFilter}
-          />
-        </View>
-      </View>
-
-      <SchedulesTable
-        isLoading={isSchedulesLoading}
-        schedules={schedules}
-        filter={filter}
-        statuses={statuses}
-        allowCompleted
-        onSelect={onEdit}
-        onAction={onAction}
-        style={{ backgroundColor: theme.tableBackground }}
-      />
-
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          margin: '20px 0',
-          flexShrink: 0,
-        }}
-      >
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <Page header={t('Schedules')}>
         <View
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            gap: '1em',
+            padding: '0 0 15px',
           }}
         >
-          <Button onPress={onDiscover}>
-            <Trans>Find schedules</Trans>
-          </Button>
-          <Button onPress={onChangeUpcomingLength}>
-            <Trans>Change upcoming length</Trans>
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              justifyContent: 'flex-end',
+            }}
+          >
+            <Search
+              placeholder={t('Filter schedules…')}
+              value={filter}
+              onChange={setFilter}
+            />
+          </View>
+        </View>
+
+        <SchedulesTable
+          isLoading={isSchedulesLoading}
+          schedules={schedules}
+          filter={filter}
+          statuses={statuses}
+          allowCompleted
+          onSelect={onEdit}
+          onAction={onAction}
+          style={{ backgroundColor: theme.tableBackground }}
+        />
+
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            margin: '20px 0',
+            flexShrink: 0,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: '1em',
+            }}
+          >
+            <Button onPress={onDiscover}>
+              <Trans>Find schedules</Trans>
+            </Button>
+            <Button onPress={onChangeUpcomingLength}>
+              <Trans>Change upcoming length</Trans>
+            </Button>
+          </View>
+          <Button variant="primary" onPress={onAdd}>
+            <Trans>Add new schedule</Trans>
           </Button>
         </View>
-        <Button variant="primary" onPress={onAdd}>
-          <Trans>Add new schedule</Trans>
-        </Button>
-      </View>
-    </Page>
+      </Page>
+    </ErrorBoundary>
   );
 }

@@ -1,7 +1,6 @@
 import createDebug from 'debug';
 import type { Request, Response } from 'express';
 import express from 'express';
-import { v4 as uuidv4 } from 'uuid';
 
 import { handleError } from '#app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '#services/secrets-service';
@@ -293,7 +292,7 @@ app.post(
       return;
     }
 
-    const state = uuidv4();
+    const state = crypto.randomUUID();
 
     try {
       const authResponse = await enableBankingService.startAuth(

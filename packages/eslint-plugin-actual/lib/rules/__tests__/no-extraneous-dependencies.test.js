@@ -1,6 +1,7 @@
 import { runClassic } from 'eslint-vitest-rule-tester';
 
-import * as rule from '../no-extraneous-dependencies';
+import plugin from '../../index';
+const rule = plugin.rules['no-extraneous-dependencies'];
 
 void runClassic(
   'no-extraneous-dependencies',

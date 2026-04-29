@@ -16,6 +16,15 @@ export class BudgetPage {
     this.budgetTableTotals = this.budgetTable.getByTestId('budget-totals');
   }
 
+  /**
+   * Wait for the budget page to finish loading. The budget-table is
+   * inside AutoSizer which returns null until layout provides width/
+   * height, so it only appears after the page has fully mounted.
+   */
+  async waitFor(...options: Parameters<Locator['waitFor']>) {
+    await this.budgetTable.waitFor(...options);
+  }
+
   async getTotalBudgeted() {
     const totalBudgetedText = await this.budgetTableTotals
       .getByTestId(/total-budgeted$/)

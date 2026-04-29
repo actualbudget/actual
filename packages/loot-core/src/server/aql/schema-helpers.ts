@@ -132,6 +132,11 @@ export function conform(
           );
         }
 
+        // treat undefined as missing
+        if (obj[field] === undefined) {
+          return null;
+        }
+
         // This option removes null values (see `convertForInsert`)
         if (skipNull && obj[field] == null) {
           return null;

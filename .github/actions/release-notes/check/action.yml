@@ -9,7 +9,7 @@ runs:
         node-version: 22
     - name: Install dependencies
       shell: bash
-      run: yarn --immutable
+      run: yarn workspaces focus @actual-app/ci-actions
     - name: Check release notes
       env:
         PR_NUMBER: ${{ github.event.pull_request.number }}

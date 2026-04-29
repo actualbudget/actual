@@ -3,6 +3,10 @@ name: Release notes
 on:
   pull_request:
 
+permissions:
+  contents: write
+  pull-requests: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -11,15 +15,37 @@ jobs:
   release-notes:
     runs-on: ubuntu-latest
     steps:
+      - name: Check if triggered by bot
+        id: bot-check
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const { data: commit } = await github.rest.git.getCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.payload.pull_request.head.sha,
+            });
+            const skip = commit.author.name === 'github-actions[bot]'
+              && commit.message.startsWith('Generate release notes');
+            console.log(`Head commit by "${commit.author.name}": ${commit.message.split('\n')[0]}`);
+            console.log(`Skip: ${skip}`);
+            core.setOutput('skip', String(skip));
+
       - name: Checkout
+        if: steps.bot-check.outputs.skip != 'true'
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
+          token: ${{ secrets.ACTIONS_UPDATE_TOKEN || github.token }}
+          # Need to be able to commit release notes after generation
+          persist-credentials: true
+
       - name: Get changed files
+        if: steps.bot-check.outputs.skip != 'true'
         id: changed-files
         run: |
-          git fetch origin ${{ github.base_ref }}
-          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          git fetch origin ${GITHUB_BASE_REF}
+          CHANGED_FILES=$(git diff --name-only origin/${GITHUB_BASE_REF}...HEAD)
           NON_DOCS_FILES=$(echo "$CHANGED_FILES" | grep -v -e "^packages/docs/" -e "^\.github/actions/docs-spelling/" || true)
 
           if [ -z "$NON_DOCS_FILES" ] && [ -n "$CHANGED_FILES" ]; then
@@ -28,9 +54,17 @@ jobs:
           else
             echo "only_docs=false" >> $GITHUB_OUTPUT
           fi
+
       - name: Check release notes
-        if: startsWith(github.head_ref, 'release/') == false && steps.changed-files.outputs.only_docs != 'true'
+        if: >-
+          steps.bot-check.outputs.skip != 'true'
+          && startsWith(github.head_ref, 'release/') == false
+          && steps.changed-files.outputs.only_docs != 'true'
         uses: ./.github/actions/release-notes/check
+
       - name: Generate release notes
-        if: startsWith(github.head_ref, 'release/') == true
+        if: >-
+          steps.bot-check.outputs.skip != 'true'
+          && startsWith(github.head_ref, 'release/') == true
+          && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
         uses: ./.github/actions/release-notes/generate

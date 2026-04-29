@@ -8,6 +8,8 @@ import { theme } from '@actual-app/components/theme';
 import type {
   balanceTypeOpType,
   DataEntity,
+  GroupedEntity,
+  IntervalEntity,
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
@@ -250,7 +252,7 @@ export function BarGraph({
         data[splitData] && (
           <div>
             {!compact && <div style={{ marginTop: '15px' }} />}
-            <BarChart
+            <BarChart<GroupedEntity | IntervalEntity>
               responsive
               width={width}
               height={height}
