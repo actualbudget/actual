@@ -49,6 +49,9 @@ vi.stubGlobal('fetch', mockFetch);
 const { handlers } = await import('../app-enablebanking');
 
 const app = express();
+// Mirror the production sync-server trust-proxy setup so req.ip honors
+// X-Forwarded-For from trusted upstreams.
+app.set('trust proxy', true);
 app.use(express.json());
 app.use('/', handlers);
 
