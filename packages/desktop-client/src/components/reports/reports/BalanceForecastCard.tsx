@@ -1,5 +1,5 @@
 // oxlint-disable typescript-paths/absolute-parent-import
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
@@ -82,6 +82,8 @@ export function BalanceForecastCard({
   const {
     data: forecastData,
     error,
+    isFetching,
+    isPlaceholderData,
     isPending: isLoading,
   } = useBalanceForecast({
     accountIds: selectedAccountIds,
@@ -98,6 +100,7 @@ export function BalanceForecastCard({
         ? t('Failed to load forecast')
         : null;
   const normalizedForecastData = forecastData ?? null;
+  const committedChartRange = useRef({ start, end });
 
   const onCardHover = () => setIsCardHovered(true);
   const onCardHoverEnd = () => setIsCardHovered(false);
@@ -105,12 +108,22 @@ export function BalanceForecastCard({
   const lowestPoint = forecastData?.lowestBalance;
   const hasNegative = lowestPoint && lowestPoint.balance < 0;
 
+  const chartRange = isPlaceholderData
+    ? committedChartRange.current
+    : { start, end };
+  useEffect(() => {
+    if (normalizedForecastData && !isPlaceholderData) {
+      committedChartRange.current = { start, end };
+    }
+  }, [end, isPlaceholderData, normalizedForecastData, start]);
+
   const chartData = buildBalanceForecastChartData({
     forecastData: normalizedForecastData,
-    start,
-    end,
+    start: chartRange.start,
+    end: chartRange.end,
     granularity: 'Monthly',
   });
+  const isUpdatingForecast = isFetching && isPlaceholderData;
   const todayReferenceDate = monthUtils.currentMonth();
   const showsTodayReferenceLine = chartData.some(
     dataPoint => dataPoint.date === todayReferenceDate,
@@ -196,7 +209,7 @@ export function BalanceForecastCard({
           )}
         </View>
 
-        {isLoading ? (
+        {isLoading && !normalizedForecastData ? (
           <LoadingIndicator />
         ) : errorMessage ? (
           <View style={{ height: 120, padding: 20 }}>
@@ -266,6 +279,7 @@ export function BalanceForecastCard({
                       strokeWidth={2}
                       dot={false}
                       activeDot={{ r: 4 }}
+                      opacity={isUpdatingForecast ? 0.45 : 1}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -301,6 +315,12 @@ export function BalanceForecastCard({
                   ) : null}
                 </>
               )}
+              {isUpdatingForecast ? (
+                <>
+                  {' '}
+                  <Trans>Updating...</Trans>
+                </>
+              ) : null}
             </Block>
           </>
         ) : (

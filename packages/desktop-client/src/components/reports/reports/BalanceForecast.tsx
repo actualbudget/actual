@@ -1,5 +1,5 @@
 // oxlint-disable typescript-paths/absolute-parent-import
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -118,6 +118,8 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
   const {
     data: forecastData,
     error,
+    isFetching,
+    isPlaceholderData,
     isPending: isLoading,
   } = useBalanceForecast({
     accountIds: widget ? selectedAccountIds : undefined,
@@ -136,6 +138,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
         : null;
   const normalizedForecastData = forecastData ?? null;
   const hasFilters = conditions.length > 0;
+  const committedChartRange = useRef({ start, end });
 
   async function onSaveWidget() {
     if (!widget) {
@@ -145,7 +148,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     await send('dashboard-update-widget', {
       id: widget.id,
       meta: {
-        ...(widget.meta ?? {}),
+        ...widget.meta,
         conditions,
         conditionsOp,
         startDate: start,
@@ -246,12 +249,22 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     }
   };
 
+  const chartRange = isPlaceholderData
+    ? committedChartRange.current
+    : { start, end };
+  useEffect(() => {
+    if (normalizedForecastData && !isPlaceholderData) {
+      committedChartRange.current = { start, end };
+    }
+  }, [end, isPlaceholderData, normalizedForecastData, start]);
+
   const chartData = buildBalanceForecastChartData({
     forecastData: normalizedForecastData,
-    start,
-    end,
+    start: chartRange.start,
+    end: chartRange.end,
     granularity,
   });
+  const isUpdatingForecast = isFetching && isPlaceholderData;
 
   const scheduledOccurrenceCount = countForecastScheduledOccurrences(
     normalizedForecastData,
@@ -261,7 +274,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     return <LoadingIndicator />;
   }
 
-  if (isLoading) {
+  if (isLoading && !normalizedForecastData) {
     return <LoadingIndicator />;
   }
 
@@ -392,6 +405,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                         }}
                       />
                       <YAxis
+                        domain={['auto', 'auto']}
                         tickFormatter={value =>
                           getCustomTick(
                             format(value, 'financial-no-decimals'),
@@ -458,6 +472,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                         strokeWidth={2}
                         dot={false}
                         activeDot={{ r: 6 }}
+                        opacity={isUpdatingForecast ? 0.45 : 1}
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -481,6 +496,12 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                     included in this date range
                   </Trans>
                 )}
+                {isUpdatingForecast ? (
+                  <>
+                    {' '}
+                    <Trans>Updating...</Trans>
+                  </>
+                ) : null}
               </div>
             </>
           ) : (

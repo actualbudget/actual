@@ -1,7 +1,7 @@
 import { send } from '@actual-app/core/platform/client/connection';
 import type { RuleConditionEntity } from '@actual-app/core/types/models';
 import type { ForecastResult } from '@actual-app/core/types/models/forecast';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 type UseBalanceForecastParams = {
   accountIds?: string[];
@@ -43,6 +43,7 @@ export function useBalanceForecast({
         endDate,
         includeAccountlessSchedules,
       }),
+    placeholderData: keepPreviousData,
     enabled,
   });
 }
