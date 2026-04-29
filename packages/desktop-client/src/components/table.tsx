@@ -843,7 +843,6 @@ export function SelectedItemsButton<Name extends string>({
   const selectedItems = useSelectedItems();
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
-  console.log('SelectedItemsButton render', { items });
 
   if (selectedItems.size === 0) {
     return null;

@@ -53,14 +53,18 @@ let preprocessingEnabled = false;
 // Helpers
 // ---------------------------------------------------------------------------
 
-function cleanNotes(notes: string | null | undefined): string {
+function cleanNotes(
+  notes: string | null | undefined,
+  removeLocations: boolean,
+): string {
   if (!notes) return '';
-  const LOCATION_PATTERNS = /\b(London|GB|GBR|ENG)\b/gi;
   const WHITESPACE_PATTERN = /\s+/g;
-  return String(notes)
-    .replace(LOCATION_PATTERNS, '')
-    .replace(WHITESPACE_PATTERN, ' ')
-    .trim();
+  let cleaned = String(notes).replace(WHITESPACE_PATTERN, ' ').trim();
+  if (removeLocations) {
+    const LOCATION_PATTERNS = /\b(London|GB|GBR|ENG)\b/gi;
+    cleaned = cleaned.replace(LOCATION_PATTERNS, '').trim();
+  }
+  return cleaned;
 }
 
 function extractClassesFromNpy(npy: NpyArray<ArrayBufferView>): string[] {
@@ -106,25 +110,17 @@ async function doInitialize(config: {
     configureOrt();
     preprocessingEnabled = config.preprocessingEnabled;
 
-    // Explicitly fetch the model so we can verify the response
-    console.log('[ML Worker] Fetching model from:', config.modelUrl);
     const modelResponse = await fetch(config.modelUrl);
-    console.log('[ML Worker] Model response status:', modelResponse.status);
-    console.log('[ML Worker] Model response content-type:', modelResponse.headers.get('content-type'));
-    
+
     if (!modelResponse.ok) {
       throw new Error(
         `Failed to fetch model: ${modelResponse.status} ${modelResponse.statusText}`,
       );
     }
-    
+
     const modelBuffer = await modelResponse.arrayBuffer();
-    console.log('[ML Worker] Model buffer size:', modelBuffer.byteLength, 'bytes');
-    
+
     if (modelBuffer.byteLength < 1000) {
-      // Likely an error page, not a real model
-      const text = new TextDecoder().decode(modelBuffer);
-      console.error('[ML Worker] Model response body (first 500 chars):', text.slice(0, 500));
       throw new Error('Model file is too small — likely a 404 or error page');
     }
 
@@ -171,7 +167,9 @@ async function predictCategories(
   const indexMap: number[] = [];
 
   notesArray.forEach((notes, i) => {
-    const processed = preprocessingEnabled ? cleanNotes(notes) : (notes ?? '');
+    const processed = preprocessingEnabled
+      ? cleanNotes(notes, true)
+      : (notes ?? '');
     if (processed.trim() !== '') {
       validNotes.push(processed);
       indexMap.push(i);

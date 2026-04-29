@@ -80,7 +80,10 @@ export async function multiGet<K extends readonly (keyof GlobalPrefsJson)[]>(
   // Wait for transaction to complete
   await new Promise<void>((resolve, reject) => {
     transaction.oncomplete = () => resolve();
-    transaction.onerror = () => reject(transaction.error);
+    transaction.onabort = () =>
+      reject(transaction.error ?? new Error('Transaction aborted'));
+    transaction.onerror = () =>
+      reject(transaction.error ?? new Error('Transaction error'));
   });
 
   // Convert the array of tuples to an object with properly typed properties
@@ -118,7 +121,10 @@ export const multiSet: T.MultiSet = async function (keyValues) {
   // Wait for transaction to complete
   await new Promise<void>((resolve, reject) => {
     transaction.oncomplete = () => resolve();
-    transaction.onerror = () => reject(transaction.error);
+    transaction.onabort = () =>
+      reject(transaction.error ?? new Error('Transaction aborted'));
+    transaction.onerror = () =>
+      reject(transaction.error ?? new Error('Transaction error'));
   });
 };
 
@@ -147,6 +153,9 @@ export const multiRemove: T.MultiRemove = async function (keys) {
   // Wait for transaction to complete
   await new Promise<void>((resolve, reject) => {
     transaction.oncomplete = () => resolve();
-    transaction.onerror = () => reject(transaction.error);
+    transaction.onabort = () =>
+      reject(transaction.error ?? new Error('Transaction aborted'));
+    transaction.onerror = () =>
+      reject(transaction.error ?? new Error('Transaction error'));
   });
 };

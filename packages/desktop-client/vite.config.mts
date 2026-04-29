@@ -209,6 +209,20 @@ export default defineConfig(async ({ mode }) => {
                 /^\/kcab\/.*$/,
                 /^\/plugin-data\/.*$/,
               ],
+              runtimeCaching: [
+                {
+                  urlPattern: ({ url }) =>
+                    url.pathname.startsWith('/ml-models/'),
+                  handler: 'CacheFirst',
+                  options: {
+                    cacheName: 'ml-models',
+                    expiration: {
+                      maxEntries: 8,
+                      maxAgeSeconds: 7 * 24 * 60 * 60,
+                    },
+                  },
+                },
+              ],
             },
           }),
       injectShims(),

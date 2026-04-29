@@ -54,6 +54,13 @@ export class MLCategorizationWorkerClient {
 
     this.worker.onerror = error => {
       console.error('ML worker error:', error);
+      this.initReject?.(new Error('ML worker crashed'));
+      this.initReject = null;
+      this.initResolve = null;
+      for (const [, req] of this.pending) {
+        req.reject(new Error('ML worker crashed'));
+      }
+      this.pending.clear();
     };
   }
 
@@ -74,6 +81,11 @@ export class MLCategorizationWorkerClient {
   async predict(
     notesArray: (string | null | undefined)[],
   ): Promise<(string | null)[]> {
+    if (!this.initPromise) {
+      throw new Error('ML client not initialized. Call initialize() first.');
+    }
+    await this.initPromise;
+
     const id = `${Date.now()}-${++this.idCounter}`;
     return new Promise<(string | null)[]>((resolve, reject) => {
       this.pending.set(id, { resolve, reject });

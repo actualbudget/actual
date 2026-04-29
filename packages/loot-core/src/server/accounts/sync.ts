@@ -697,7 +697,7 @@ export async function matchTransactions(
   } of normalized) {
     // Run the rules
     const trans = await runRules(originalTrans, accountsMap);
-    const uncategorizedCount = normalized.filter(
+    const uncategorizedCount = transactionsStep1.filter(
       ({ trans }) => !trans.category,
     ).length;
     logger.log('Number of uncategorized transactions:', uncategorizedCount);

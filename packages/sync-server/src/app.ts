@@ -1,5 +1,5 @@
 import fs, { readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import cors from 'cors';
@@ -79,8 +79,8 @@ function findModelPath(): string {
   }
 
   const fromModule = resolve(
-    fileURLToPath(import.meta.url),
-    '../../../../../ml-models',
+    dirname(fileURLToPath(import.meta.url)),
+    '../../ml-models',
   );
   if (fs.existsSync(fromModule)) {
     return fromModule;

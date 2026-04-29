@@ -65,10 +65,7 @@
     "sync:tsconfig-references": "workspaces-to-typescript-project-references",
     "prepare": "husky"
   },
-  "dependencies": {
-    "npyjs": "^1.1.0",
-    "onnxruntime-web": "^1.24.3"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@monorepo-utils/workspaces-to-typescript-project-references": "^2.10.3",
     "@octokit/rest": "^22.0.1",

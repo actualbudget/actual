@@ -455,9 +455,6 @@ export function SelectedTransactionsButton({
                   name: 'ml-categorization',
                   options: {
                     transactionIds: selectedIds,
-                    onComplete: () => {
-                      // Optionally refresh or notify
-                    },
                   },
                 },
               }),

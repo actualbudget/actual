@@ -623,7 +623,7 @@ export type Modal =
       name: 'ml-categorization';
       options: {
         transactionIds: string[];
-        onComplete: (updatedTransactions: TransactionEntity[]) => void;
+        onComplete?: (updatedTransactions: TransactionEntity[]) => void;
       };
     };
 

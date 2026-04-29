@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { theme } from '@actual-app/components/theme';
 import { send } from '@actual-app/core/platform/client/connection';
 import { q } from '@actual-app/core/shared/query';
 import { ungroupTransactions } from '@actual-app/core/shared/transactions';
@@ -44,10 +45,19 @@ export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
             .select(['id', 'name'] as const)
             .orderBy({ sort_order: 'asc' }),
         );
-        const cats = (categoriesRes.data as Array<{ id: string; name: string }>).map(
-          c => ({ id: c.id, name: c.name }),
-        );
+        const cats = (
+          categoriesRes.data as Array<{ id: string; name: string }>
+        ).map(c => ({ id: c.id, name: c.name }));
         setCategories(cats);
+
+        // Fetch payees for human-readable names
+        const payeesRes = await aqlQuery(q('payees').select('*'));
+        const payeesById = new Map(
+          (payeesRes.data as Array<{ id: string; name: string }>).map(p => [
+            p.id,
+            p.name,
+          ]),
+        );
 
         // Fetch the transactions by IDs
         const { data } = await aqlQuery(
@@ -86,7 +96,7 @@ export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
           return {
             id: t.id,
             notes: t.notes ?? null,
-            payee: t.payee ?? null,
+            payee: t.payee ? (payeesById.get(t.payee) ?? null) : null,
             currentCategory: t.category ?? null,
             predictedCategory:
               predictedName != null
@@ -134,7 +144,7 @@ export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
         });
       }
 
-      onComplete(updated as TransactionEntity[]);
+      onComplete?.(updated as TransactionEntity[]);
       close();
     } catch (error) {
       console.error('Failed to apply predictions:', error);
@@ -169,7 +179,7 @@ export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
                   style={{
                     maxHeight: '400px',
                     overflowY: 'auto',
-                    border: '1px solid #ccc',
+                    border: `1px solid ${theme.tableBorder}`,
                     borderRadius: '4px',
                   }}
                 >
@@ -178,7 +188,7 @@ export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
                       key={entry.id}
                       style={{
                         padding: '10px',
-                        borderBottom: '1px solid #eee',
+                        borderBottom: `1px solid ${theme.tableBorder}`,
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
@@ -189,7 +199,12 @@ export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
                           {entry.payee || entry.notes || t('(no description)')}
                         </div>
                         {entry.notes && entry.payee && (
-                          <div style={{ fontSize: '12px', color: '#666' }}>
+                          <div
+                            style={{
+                              fontSize: '12px',
+                              color: theme.pageTextSubdued,
+                            }}
+                          >
                             {entry.notes}
                           </div>
                         )}
@@ -201,7 +216,12 @@ export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
                           gap: '10px',
                         }}
                       >
-                        <span style={{ fontSize: '12px', color: '#666' }}>
+                        <span
+                          style={{
+                            fontSize: '12px',
+                            color: theme.pageTextSubdued,
+                          }}
+                        >
                           →
                         </span>
                         <select
@@ -214,11 +234,11 @@ export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
                           }
                           style={{ padding: '5px', minWidth: '150px' }}
                         >
-                          <option value=""><Trans>No category</Trans></option>
+                          <option value="">
+                            <Trans>No category</Trans>
+                          </option>
                           {categories.map(cat => (
-                            <option value={cat.id}>
-                              {cat.name}
-                            </option>
+                            <option value={cat.id}>{cat.name}</option>
                           ))}
                         </select>
                       </div>
@@ -238,7 +258,7 @@ export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
                   </Button>
                   <Button
                     variant="primary"
-                    onPress={() => handleApply(state.close)}
+                    onPress={() => handleApply(() => state.close())}
                     isDisabled={saving}
                   >
                     {saving ? t('Applying...') : t('Apply Predictions')}
