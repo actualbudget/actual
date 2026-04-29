@@ -1,6 +1,8 @@
 import React from 'react';
-import { Route, Routes } from 'react-router';
+import { ErrorBoundary } from 'react-error-boundary';
+import { Route, Routes, useLocation } from 'react-router';
 
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 
 import { AgeOfMoney } from './reports/AgeOfMoney';
@@ -17,6 +19,7 @@ import { Summary } from './reports/Summary';
 import { ReportsDashboardRouter } from './ReportsDashboardRouter';
 
 export function ReportRouter() {
+  const location = useLocation();
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');
   const ageOfMoneyReportEnabled = useFeatureFlag('ageOfMoneyReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
@@ -26,42 +29,262 @@ export function ReportRouter() {
     <Routes>
       <Route path="/" element={<ReportsDashboardRouter />} />
       <Route path="/:dashboardId" element={<ReportsDashboardRouter />} />
-      <Route path="/net-worth" element={<NetWorth />} />
-      <Route path="/net-worth/:id" element={<NetWorth />} />
+      <Route
+        path="/net-worth"
+        element={
+          <ErrorBoundary
+            FallbackComponent={FeatureErrorFallback}
+            resetKeys={[location.pathname]}
+          >
+            <NetWorth />
+          </ErrorBoundary>
+        }
+      />
+      <Route
+        path="/net-worth/:id"
+        element={
+          <ErrorBoundary
+            FallbackComponent={FeatureErrorFallback}
+            resetKeys={[location.pathname]}
+          >
+            <NetWorth />
+          </ErrorBoundary>
+        }
+      />
       {crossoverReportEnabled && (
         <>
-          <Route path="/crossover" element={<Crossover />} />
-          <Route path="/crossover/:id" element={<Crossover />} />
+          <Route
+            path="/crossover"
+            element={
+              <ErrorBoundary
+                FallbackComponent={FeatureErrorFallback}
+                resetKeys={[location.pathname]}
+              >
+                <Crossover />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/crossover/:id"
+            element={
+              <ErrorBoundary
+                FallbackComponent={FeatureErrorFallback}
+                resetKeys={[location.pathname]}
+              >
+                <Crossover />
+              </ErrorBoundary>
+            }
+          />
         </>
       )}
       {ageOfMoneyReportEnabled && (
         <>
-          <Route path="/age-of-money" element={<AgeOfMoney />} />
-          <Route path="/age-of-money/:id" element={<AgeOfMoney />} />
+          <Route
+            path="/age-of-money"
+            element={
+              <ErrorBoundary
+                FallbackComponent={FeatureErrorFallback}
+                resetKeys={[location.pathname]}
+              >
+                <AgeOfMoney />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/age-of-money/:id"
+            element={
+              <ErrorBoundary
+                FallbackComponent={FeatureErrorFallback}
+                resetKeys={[location.pathname]}
+              >
+                <AgeOfMoney />
+              </ErrorBoundary>
+            }
+          />
         </>
       )}
-      <Route path="/cash-flow" element={<CashFlow />} />
-      <Route path="/cash-flow/:id" element={<CashFlow />} />
-      <Route path="/custom" element={<CustomReport />} />
-      <Route path="/custom/:id" element={<CustomReport />} />
-      <Route path="/spending" element={<Spending />} />
-      <Route path="/spending/:id" element={<Spending />} />
+      <Route
+        path="/cash-flow"
+        element={
+          <ErrorBoundary
+            FallbackComponent={FeatureErrorFallback}
+            resetKeys={[location.pathname]}
+          >
+            <CashFlow />
+          </ErrorBoundary>
+        }
+      />
+      <Route
+        path="/cash-flow/:id"
+        element={
+          <ErrorBoundary
+            FallbackComponent={FeatureErrorFallback}
+            resetKeys={[location.pathname]}
+          >
+            <CashFlow />
+          </ErrorBoundary>
+        }
+      />
+      <Route
+        path="/custom"
+        element={
+          <ErrorBoundary
+            FallbackComponent={FeatureErrorFallback}
+            resetKeys={[location.pathname]}
+          >
+            <CustomReport />
+          </ErrorBoundary>
+        }
+      />
+      <Route
+        path="/custom/:id"
+        element={
+          <ErrorBoundary
+            FallbackComponent={FeatureErrorFallback}
+            resetKeys={[location.pathname]}
+          >
+            <CustomReport />
+          </ErrorBoundary>
+        }
+      />
+      <Route
+        path="/spending"
+        element={
+          <ErrorBoundary
+            FallbackComponent={FeatureErrorFallback}
+            resetKeys={[location.pathname]}
+          >
+            <Spending />
+          </ErrorBoundary>
+        }
+      />
+      <Route
+        path="/spending/:id"
+        element={
+          <ErrorBoundary
+            FallbackComponent={FeatureErrorFallback}
+            resetKeys={[location.pathname]}
+          >
+            <Spending />
+          </ErrorBoundary>
+        }
+      />
       {budgetAnalysisReportEnabled && (
         <>
-          <Route path="/budget-analysis" element={<BudgetAnalysis />} />
-          <Route path="/budget-analysis/:id" element={<BudgetAnalysis />} />
+          <Route
+            path="/budget-analysis"
+            element={
+              <ErrorBoundary
+                FallbackComponent={FeatureErrorFallback}
+                resetKeys={[location.pathname]}
+              >
+                <BudgetAnalysis />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/budget-analysis/:id"
+            element={
+              <ErrorBoundary
+                FallbackComponent={FeatureErrorFallback}
+                resetKeys={[location.pathname]}
+              >
+                <BudgetAnalysis />
+              </ErrorBoundary>
+            }
+          />
         </>
       )}
-      <Route path="/summary" element={<Summary />} />
-      <Route path="/summary/:id" element={<Summary />} />
-      <Route path="/calendar" element={<Calendar />} />
-      <Route path="/calendar/:id" element={<Calendar />} />
-      <Route path="/formula" element={<Formula />} />
-      <Route path="/formula/:id" element={<Formula />} />
+      <Route
+        path="/summary"
+        element={
+          <ErrorBoundary
+            FallbackComponent={FeatureErrorFallback}
+            resetKeys={[location.pathname]}
+          >
+            <Summary />
+          </ErrorBoundary>
+        }
+      />
+      <Route
+        path="/summary/:id"
+        element={
+          <ErrorBoundary
+            FallbackComponent={FeatureErrorFallback}
+            resetKeys={[location.pathname]}
+          >
+            <Summary />
+          </ErrorBoundary>
+        }
+      />
+      <Route
+        path="/calendar"
+        element={
+          <ErrorBoundary
+            FallbackComponent={FeatureErrorFallback}
+            resetKeys={[location.pathname]}
+          >
+            <Calendar />
+          </ErrorBoundary>
+        }
+      />
+      <Route
+        path="/calendar/:id"
+        element={
+          <ErrorBoundary
+            FallbackComponent={FeatureErrorFallback}
+            resetKeys={[location.pathname]}
+          >
+            <Calendar />
+          </ErrorBoundary>
+        }
+      />
+      <Route
+        path="/formula"
+        element={
+          <ErrorBoundary
+            FallbackComponent={FeatureErrorFallback}
+            resetKeys={[location.pathname]}
+          >
+            <Formula />
+          </ErrorBoundary>
+        }
+      />
+      <Route
+        path="/formula/:id"
+        element={
+          <ErrorBoundary
+            FallbackComponent={FeatureErrorFallback}
+            resetKeys={[location.pathname]}
+          >
+            <Formula />
+          </ErrorBoundary>
+        }
+      />
       {sankeyReportEnabled && (
         <>
-          <Route path="/sankey" element={<Sankey />} />
-          <Route path="/sankey/:id" element={<Sankey />} />
+          <Route
+            path="/sankey"
+            element={
+              <ErrorBoundary
+                FallbackComponent={FeatureErrorFallback}
+                resetKeys={[location.pathname]}
+              >
+                <Sankey />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/sankey/:id"
+            element={
+              <ErrorBoundary
+                FallbackComponent={FeatureErrorFallback}
+                resetKeys={[location.pathname]}
+              >
+                <Sankey />
+              </ErrorBoundary>
+            }
+          />
         </>
       )}
     </Routes>
