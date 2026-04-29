@@ -1971,9 +1971,10 @@ function NotesCell({
   onClickTag,
   onExpose,
 }: NotesCellProps) {
-  const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   const [inputValue, setInputValue] = useState(value);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const cursorPosition = inputRef.current?.selectionStart || 0;
+
   useEffect(() => setInputValue(value), [value, setInputValue]);
   const tagQuery = useTags();
   const tagOptions =
@@ -1989,11 +1990,10 @@ function NotesCell({
     const option = tagOptions.find(o => o.id === optionId);
     if (option) {
       const newValue =
-        value.slice(0, start) + option.name + value.slice(end + 1);
-      setTimeout(() => {
-        setInputValue(newValue + ' ');
-        setCursorPosition(newValue.length + 1);
-      });
+        value.slice(0, start) + option.name + ' ' + value.slice(end + 1);
+      setInputValue(newValue);
+      const pos = start + option.name.length + 1;
+      setTimeout(() => inputRef.current?.setSelectionRange(pos, pos));
 
       // only stop event propagation (i.e. table navigation) when we want to do
       // autocomplete things. If we don't choose an option, then we want to treat
@@ -2004,23 +2004,10 @@ function NotesCell({
     }
   }
 
-  function onKeyUp(e: KeyboardEvent<HTMLInputElement>) {
-    if (e.currentTarget.selectionEnd === e.currentTarget.selectionStart) {
-      setCursorPosition(e.currentTarget.selectionStart);
-    } else {
-      setCursorPosition(null);
-    }
-  }
-
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
-    const currentWord = getCurrentWord(inputValue, cursorPosition).slice(1);
-    const hasMatch =
-      currentWord &&
-      tagOptions.some(o => o.id.toLowerCase().includes(currentWord));
     const highlightedEntries = document.querySelectorAll(
       'div[data-tag-highlighted=true]',
     );
-    const inputField = e.currentTarget.querySelector('input');
 
     if (e.key === 'Escape') {
       // reset to initial value
@@ -2032,24 +2019,11 @@ function NotesCell({
       e.preventDefault();
       e.stopPropagation();
       onSelect(selectedId, inputValue, e);
-    }
-    if (e.key === 'Enter' || e.key === 'Tab') {
+    } else if (e.key === 'Enter' || e.key === 'Tab') {
       // set to current value. For some reason this is
       // is not getting caught by the onBlur handler
       // likely because of Autocomplete complexity
       onUpdate(inputValue);
-    }
-
-    // Downshift overwrites Home and End to do its own handling
-    // (highlighting first and last entry in list). When there are no matches,
-    // we should let Home and End behave like they normally do
-    // Unfortunately, non-strict fields don't exist in our project so this is not a
-    // use case that has already been implemented. We have to do it here
-    if (e.key === 'Home' && !hasMatch) {
-      inputField?.setSelectionRange(0, 0);
-    } else if (e.key === 'End' && !hasMatch) {
-      const curLen = inputField?.value.length ?? 0;
-      inputField?.setSelectionRange(curLen, curLen);
     }
   }
 
@@ -2083,7 +2057,6 @@ function NotesCell({
             ref: inputRef,
             onBlur,
             onKeyDown,
-            onKeyUp,
             style: inputStyle,
             value: inputValue,
             onChange: v => setInputValue(v.target.value),
