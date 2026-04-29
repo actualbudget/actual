@@ -70,38 +70,48 @@ function _authorize(
               'width=600,height=700,popup=yes',
             );
 
-            const pollResp = await sendCatch('enablebanking-poll-auth', {
-              state,
-            });
+            try {
+              const pollResp = await sendCatch('enablebanking-poll-auth', {
+                state,
+              });
 
-            if (pollResp.error) {
-              if (pollResp.error.message === 'timeout') {
-                return { error: 'timeout' as const };
+              if (pollResp.error) {
+                if (pollResp.error.message === 'timeout') {
+                  return { error: 'timeout' as const };
+                }
+
+                return {
+                  error: 'unknown' as const,
+                  message: pollResp.error.message,
+                };
               }
 
-              return {
-                error: 'unknown' as const,
-                message: pollResp.error.message,
-              };
+              const pollData = pollResp.data;
+
+              // The poll response body itself may carry an error (e.g. when
+              // the bank callback failed before the poll started).
+              const pollError = pollData?.data?.error ?? pollData?.error;
+              if (pollError) {
+                return {
+                  error: 'unknown' as const,
+                  message:
+                    typeof pollError === 'string'
+                      ? pollError
+                      : String(pollError),
+                };
+              }
+
+              const accounts: SyncServerEnableBankingAccount[] =
+                pollData?.data?.accounts ?? pollData?.accounts ?? [];
+
+              return { data: { accounts } };
+            } finally {
+              // Only clear if this attempt's state is still the one stored;
+              // a concurrent retry may have overwritten it with a newer one.
+              if (localStorage.getItem('enablebanking_auth_state') === state) {
+                localStorage.removeItem('enablebanking_auth_state');
+              }
             }
-
-            const pollData = pollResp.data;
-
-            // The poll response body itself may carry an error (e.g. when
-            // the bank callback failed before the poll started).
-            const pollError = pollData?.data?.error ?? pollData?.error;
-            if (pollError) {
-              return {
-                error: 'unknown' as const,
-                message:
-                  typeof pollError === 'string' ? pollError : String(pollError),
-              };
-            }
-
-            const accounts: SyncServerEnableBankingAccount[] =
-              pollData?.data?.accounts ?? pollData?.accounts ?? [];
-
-            return { data: { accounts } };
           },
           onClose,
           onSuccess,

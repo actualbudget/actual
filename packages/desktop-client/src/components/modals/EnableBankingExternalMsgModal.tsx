@@ -40,12 +40,16 @@ function useAvailableBanks(
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function fetch() {
       setIsError(false);
 
       if (!country) {
-        setBanks([]);
-        setIsLoading(false);
+        if (!cancelled) {
+          setBanks([]);
+          setIsLoading(false);
+        }
         return;
       }
 
@@ -55,6 +59,8 @@ function useAvailableBanks(
         'enablebanking-aspsps',
         country.toUpperCase(),
       );
+
+      if (cancelled) return;
 
       if (error) {
         setIsError(true);
@@ -74,7 +80,10 @@ function useAvailableBanks(
     }
 
     void fetch();
-  }, [setBanks, setIsLoading, country, refetchKey]);
+    return () => {
+      cancelled = true;
+    };
+  }, [country, refetchKey]);
 
   return {
     data: banks,

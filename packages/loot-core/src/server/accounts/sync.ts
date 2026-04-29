@@ -1024,7 +1024,7 @@ async function processBankSyncDownload(
       ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
       const importable = importPending
         ? transactions
-        : transactions.filter(trans => trans.booked !== false);
+        : transactions.filter(trans => Boolean(trans.booked));
       const previousBalance = importable.reduce((total, trans) => {
         return total - amountToInteger(trans.transactionAmount.amount);
       }, currentBalance);
