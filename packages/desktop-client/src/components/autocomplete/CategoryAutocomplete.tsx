@@ -107,10 +107,10 @@ function CategoryList({
         groupedCategories: [],
       } as {
         splitTransaction:
-        | (CategoryAutocompleteItem & {
-          highlightedIndex: number;
-        })
-        | null;
+          | (CategoryAutocompleteItem & {
+              highlightedIndex: number;
+            })
+          | null;
         groupedCategories: Array<{
           group: CategoryGroupEntity | null;
           categories: Array<
@@ -170,8 +170,8 @@ function CategoryList({
                     style: {
                       ...(showHiddenItems &&
                         (item.hidden || group.hidden) && {
-                        color: theme.pageTextSubdued,
-                      }),
+                          color: theme.pageTextSubdued,
+                        }),
                     },
                     showBalances,
                   })}
@@ -439,10 +439,10 @@ function CategoryItem({
   const { isNarrowWidth } = useResponsive();
   const narrowStyle = isNarrowWidth
     ? {
-      ...styles.mobileMenuItem,
-      borderRadius: 0,
-      borderTop: `1px solid ${theme.pillBorder}`,
-    }
+        ...styles.mobileMenuItem,
+        borderRadius: 0,
+        borderTop: `1px solid ${theme.pillBorder}`,
+      }
     : {};
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
@@ -502,21 +502,21 @@ function CategoryItem({
         >
           {isToBudgetItem
             ? toBudget != null && (
-              <>
-                {' '}
-                <FinancialText>
-                  {integerToCurrency(toBudget || 0)}
-                </FinancialText>
-              </>
-            )
+                <>
+                  {' '}
+                  <FinancialText>
+                    {integerToCurrency(toBudget || 0)}
+                  </FinancialText>
+                </>
+              )
             : balance != null && (
-              <>
-                {' '}
-                <FinancialText>
-                  {integerToCurrency(balance || 0)}
-                </FinancialText>
-              </>
-            )}
+                <>
+                  {' '}
+                  <FinancialText>
+                    {integerToCurrency(balance || 0)}
+                  </FinancialText>
+                </>
+              )}
         </TextOneLine>
       </View>
     </button>

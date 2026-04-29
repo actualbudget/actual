@@ -207,7 +207,11 @@ function defaultItemToString<T extends AutocompleteItem>(item?: T) {
 type SingleAutocompleteProps<T extends AutocompleteItem> =
   CommonAutocompleteProps<T> & {
     type?: 'single' | never;
-    onSelect: (id: T['id'], value: string, e?: KeyboardEvent<HTMLInputElement>) => void;
+    onSelect: (
+      id: T['id'],
+      value: string,
+      e?: KeyboardEvent<HTMLInputElement>,
+    ) => void;
     value: null | T | T['id'];
   };
 
@@ -264,8 +268,8 @@ function SingleAutocomplete<T extends AutocompleteItem>({
   const narrowInputStyle =
     embedded && isNarrowWidth
       ? {
-        ...styles.mobileMenuItem,
-      }
+          ...styles.mobileMenuItem,
+        }
       : {};
 
   inputProps = {
@@ -328,7 +332,6 @@ function SingleAutocomplete<T extends AutocompleteItem>({
         if (closeOnSelect) {
           close();
         }
-
 
         if (onSelect && strict) {
           // I AM NOT PROUD OF THIS OK??
@@ -542,18 +545,19 @@ function SingleAutocomplete<T extends AutocompleteItem>({
                               // doesn't handle it
                               e.stopPropagation();
                             } else if (!strict) {
-                              const option = filteredSuggestions[highlightedIndex];
+                              const option =
+                                filteredSuggestions[highlightedIndex];
                               onSelect(
                                 option?.id,
                                 (e.target as HTMLInputElement).value,
-                                e
+                                e,
                               );
                             }
                           } else if (!strict) {
                             onSelect(
                               value,
                               (e.target as HTMLInputElement).value,
-                              e
+                              e,
                             );
                             return onSelectAfter();
                           } else {
@@ -787,10 +791,10 @@ function MultiAutocomplete<T extends AutocompleteItem>({
             className={
               typeof inputClassName === 'function'
                 ? renderProps =>
-                  cx(
-                    defaultMultiAutocompleteInputClassName,
-                    inputClassName(renderProps),
-                  )
+                    cx(
+                      defaultMultiAutocompleteInputClassName,
+                      inputClassName(renderProps),
+                    )
                 : cx(defaultMultiAutocompleteInputClassName, inputClassName)
             }
           />
