@@ -96,6 +96,80 @@ describe('normalizeTransaction', () => {
   });
 });
 
+describe('SEPA prefix stripping', () => {
+  it('strips EREF+ from a single line', () => {
+    const tx = {
+      transaction_id: 'tx-prefix-1',
+      transaction_amount: { currency: 'EUR', amount: '10.00' },
+      credit_debit_indicator: 'CRDT' as const,
+      status: 'BOOK' as const,
+      booking_date: '2026-04-01',
+      remittance_information: ['EREF+invoice-42', 'thanks'],
+    };
+    const out = normalizeTransaction(tx);
+    expect(out.payeeName).toBe('invoice-42');
+    expect(out.remittanceInformationUnstructured).toBe('invoice-42 thanks');
+  });
+
+  it('drops empty entries after stripping', () => {
+    const tx = {
+      transaction_id: 'tx-prefix-2',
+      transaction_amount: { currency: 'EUR', amount: '5.00' },
+      credit_debit_indicator: 'CRDT' as const,
+      status: 'BOOK' as const,
+      booking_date: '2026-04-02',
+      remittance_information: ['EREF+', 'paid'],
+    };
+    const out = normalizeTransaction(tx);
+    expect(out.remittanceInformationUnstructured).toBe('paid');
+  });
+
+  it('returns undefined when stripping leaves nothing', () => {
+    const tx = {
+      transaction_id: 'tx-prefix-3',
+      transaction_amount: { currency: 'EUR', amount: '5.00' },
+      credit_debit_indicator: 'CRDT' as const,
+      status: 'BOOK' as const,
+      booking_date: '2026-04-02',
+      remittance_information: ['EREF+'],
+    };
+    const out = normalizeTransaction(tx);
+    expect(out.remittanceInformationUnstructured).toBeUndefined();
+  });
+});
+
+describe('normalizeTransaction shape for bank-sync mapping', () => {
+  it('exposes notes equal to remittanceInformationUnstructured', () => {
+    const tx = {
+      transaction_id: 'tx-notes-1',
+      transaction_amount: { currency: 'EUR', amount: '12.34' },
+      credit_debit_indicator: 'CRDT' as const,
+      status: 'BOOK' as const,
+      booking_date: '2026-04-03',
+      remittance_information: ['hello world'],
+    };
+    const out = normalizeTransaction(tx);
+    expect(out.notes).toBe('hello world');
+    expect(out.notes).toBe(out.remittanceInformationUnstructured);
+  });
+
+  it('spreads the raw fields onto the normalized object', () => {
+    const tx = {
+      entry_reference: 'ref-raw-1',
+      transaction_id: 'tx-raw-1',
+      transaction_amount: { currency: 'EUR', amount: '12.34' },
+      creditor: { name: 'Acme' },
+      credit_debit_indicator: 'DBIT' as const,
+      status: 'BOOK' as const,
+      booking_date: '2026-04-03',
+    };
+    const out = normalizeTransaction(tx);
+    expect(out.entry_reference).toBe('ref-raw-1');
+    expect(out.creditor).toEqual({ name: 'Acme' });
+    expect(out.credit_debit_indicator).toBe('DBIT');
+  });
+});
+
 describe('normalizeBalance', () => {
   it('should convert string amount to integer cents', () => {
     const result = normalizeBalance(mockBalance);

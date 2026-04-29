@@ -58,13 +58,14 @@ type EnableBankingAuthResponse = {
   authorization_id: string;
 };
 
-type BankSyncTransaction = {
+type BankSyncTransaction = EnableBankingTransaction & {
   transactionId: string;
   date: string;
   bookingDate: string;
   valueDate?: string;
   transactionAmount: { amount: string; currency: string };
   payeeName: string;
+  notes?: string;
   remittanceInformationUnstructured?: string;
   booked: boolean;
 };
@@ -183,6 +184,18 @@ async function request<T>(
 
 // --- Normalization functions ---
 
+// SEPA structured remittance prefixes look like `EREF+something` or `ULTD+...`.
+// They are metadata for clearing systems, not user-facing text. Strip them.
+const SEPA_PREFIX_RE = /^[A-Z]{3,}\+/;
+
+function stripSepaPrefix(s: string): string {
+  return s.replace(SEPA_PREFIX_RE, '').trim();
+}
+
+function cleanRemittanceArray(arr: string[]): string[] {
+  return arr.map(stripSepaPrefix).filter(Boolean);
+}
+
 export function normalizeTransaction(
   tx: EnableBankingTransaction,
 ): BankSyncTransaction {
@@ -204,12 +217,17 @@ export function normalizeTransaction(
     tx.remittance_information &&
     tx.remittance_information.length > 0
   ) {
-    payeeName = tx.remittance_information[0];
+    const cleanedFallback = cleanRemittanceArray(tx.remittance_information);
+    if (cleanedFallback.length > 0) {
+      payeeName = cleanedFallback[0];
+    }
   }
 
-  const remittanceInformationUnstructured = tx.remittance_information
-    ? tx.remittance_information.join(' ')
-    : undefined;
+  const cleanedAll = tx.remittance_information
+    ? cleanRemittanceArray(tx.remittance_information)
+    : [];
+  const remittanceInformationUnstructured =
+    cleanedAll.length > 0 ? cleanedAll.join(' ') : undefined;
 
   // Normalize amount based on credit/debit indicator.
   // When indicator is present, strip existing sign and apply the correct one.
@@ -225,6 +243,7 @@ export function normalizeTransaction(
   }
 
   return {
+    ...tx,
     transactionId,
     date: bookingDate,
     bookingDate,
@@ -234,6 +253,7 @@ export function normalizeTransaction(
       currency: tx.transaction_amount.currency,
     },
     payeeName,
+    notes: remittanceInformationUnstructured,
     remittanceInformationUnstructured,
     booked: tx.status !== 'PDNG',
   };
