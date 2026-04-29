@@ -308,13 +308,6 @@ function SingleAutocomplete<T extends AutocompleteItem>({
     setIsChanged(false);
   }
 
-  function onSelectAfter() {
-    setValue('');
-    setSelectedItem(null);
-    setHighlightedIndex(null);
-    setIsChanged(false);
-  }
-
   const filtered = isChanged ? filteredSuggestions || suggestions : suggestions;
   const inputRef = useRef(null);
   useProperFocus(inputRef, focused);
@@ -527,10 +520,18 @@ function SingleAutocomplete<T extends AutocompleteItem>({
                     onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {
                       const { onKeyDown } = inputProps || {};
 
+                      // in non-strict contexts, where the field can contain content
+                      // beyond just the dropdown options, if there are no options to highlight
+                      // (highlightedIndex) this is sufficient info to consider the dropdown closed
+                      // const fakeClosed = highlightedIndex == null && !strict
+                      // if (fakeClosed) return;
+
                       // If the dropdown is open, an item is highlighted, and the user
                       // pressed enter, always capture that and handle it ourselves
                       if (isOpen) {
-                        if (e.key === 'Enter') {
+                        if (filteredSuggestions.length === 0 && !strict) {
+                          close();
+                        } else if (e.key === 'Enter') {
                           if (highlightedIndex != null) {
                             if (
                               inst.lastChangeType ===
@@ -553,13 +554,6 @@ function SingleAutocomplete<T extends AutocompleteItem>({
                                 e,
                               );
                             }
-                          } else if (!strict) {
-                            onSelect(
-                              value,
-                              (e.target as HTMLInputElement).value,
-                              e,
-                            );
-                            return onSelectAfter();
                           } else {
                             // No highlighted item, still allow the table to save the item
                             // as `null`, even though we're allowing the table to move

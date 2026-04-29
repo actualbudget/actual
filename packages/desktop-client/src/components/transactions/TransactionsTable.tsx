@@ -1973,7 +1973,10 @@ function NotesCell({
 }: NotesCellProps) {
   const [inputValue, setInputValue] = useState(value);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const cursorPosition = inputRef.current?.selectionStart || 0;
+  const [cursorPosition, setCursorPosition] = useState(0);
+  useEffect(() => {
+    inputRef.current?.setSelectionRange(cursorPosition, cursorPosition);
+  }, [cursorPosition, setCursorPosition]);
 
   useEffect(() => setInputValue(value), [value, setInputValue]);
   const tagQuery = useTags();
@@ -1990,10 +1993,9 @@ function NotesCell({
     const option = tagOptions.find(o => o.id === optionId);
     if (option) {
       const newValue =
-        value.slice(0, start) + option.name + ' ' + value.slice(end + 1);
+        value.slice(0, start) + option.name + ' ' + value.slice(end);
       setInputValue(newValue);
-      const pos = start + option.name.length + 1;
-      setTimeout(() => inputRef.current?.setSelectionRange(pos, pos));
+      setTimeout(() => setCursorPosition(start + option.name.length + 1));
 
       // only stop event propagation (i.e. table navigation) when we want to do
       // autocomplete things. If we don't choose an option, then we want to treat
@@ -2002,6 +2004,10 @@ function NotesCell({
     } else {
       onUpdate(value);
     }
+  }
+
+  function onKeyUp(e: KeyboardEvent<HTMLInputElement>) {
+    setCursorPosition(e.currentTarget.selectionStart ?? 0);
   }
 
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
@@ -2043,12 +2049,12 @@ function NotesCell({
       onBlur={() => onUpdate(inputValue)}
       onKeyDownCapture={onKeyDown}
     >
-      {({ inputStyle, onKeyDown, onBlur, shouldSaveFromKey }) => (
+      {({ inputStyle, onKeyDown, onBlur }) => (
         <Autocomplete
           strict={false}
           value={value}
-          shouldSaveFromKey={shouldSaveFromKey}
-          getHighlightedIndex={() => 0}
+          embedded={false}
+          highlightFirst
           clearOnBlur={false}
           closeOnBlur
           openOnFocus={false}
@@ -2056,6 +2062,7 @@ function NotesCell({
           inputProps={{
             ref: inputRef,
             onBlur,
+            onKeyUp,
             onKeyDown,
             style: inputStyle,
             value: inputValue,
@@ -2154,16 +2161,10 @@ function getCurrentWordRange(
   cursorPosition = cursorPosition - 1;
 
   let startIdx = cursorPosition;
-  let endIdx = cursorPosition;
+  const endIdx = cursorPosition + 1;
 
   while (startIdx > 0 && inputValue.charAt(startIdx - 1).trim() !== '') {
     startIdx--;
-  }
-  while (
-    endIdx < inputValue.length &&
-    inputValue.charAt(endIdx).trim() !== ''
-  ) {
-    endIdx++;
   }
   if (startIdx < 0 || endIdx < 0 || startIdx === endIdx) {
     return [0, 0];
