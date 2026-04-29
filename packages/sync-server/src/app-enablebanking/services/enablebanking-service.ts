@@ -184,9 +184,14 @@ async function request<T>(
 
 // --- Normalization functions ---
 
-// SEPA structured remittance prefixes look like `EREF+something` or `ULTD+...`.
-// They are metadata for clearing systems, not user-facing text. Strip them.
-const SEPA_PREFIX_RE = /^[A-Z]{3,}\+/;
+// SEPA / ISO 20022 structured remittance prefixes (e.g. `EREF+invoice-42`).
+// They are metadata for clearing systems, not user-facing text, so we strip
+// them from the front of each remittance line. The list is an allowlist of
+// known prefixes rather than a catch-all `[A-Z]{3,}\+` so we don't accidentally
+// strip merchant tokens like `BMW+` or `USB+` that legitimately start a
+// description.
+const SEPA_PREFIX_RE =
+  /^(?:EREF|KREF|MREF|CRED|DBTR|CDTR|SVWZ|SVCL|PURP|RTRN|REJT|REFE|SDVA|INDA|NTAV|ULTC|ULTD|ULTB|ABWA|ABWE|IBAN|BIC|COAM|OAMT|REMI|SQTP|ROC)\+/;
 
 function stripSepaPrefix(s: string): string {
   return s.replace(SEPA_PREFIX_RE, '').trim();

@@ -136,6 +136,26 @@ describe('SEPA prefix stripping', () => {
     const out = normalizeTransaction(tx);
     expect(out.remittanceInformationUnstructured).toBeUndefined();
   });
+
+  it('preserves merchant tokens that look like prefixes but are not on the allowlist', () => {
+    const tx = {
+      transaction_id: 'tx-prefix-4',
+      transaction_amount: { currency: 'EUR', amount: '99.00' },
+      credit_debit_indicator: 'DBIT' as const,
+      status: 'BOOK' as const,
+      booking_date: '2026-04-04',
+      remittance_information: [
+        'BMW+ Service Vertrag',
+        'USB+HDMI Kabel',
+        'COVID+ Test Apotheke',
+      ],
+    };
+    const out = normalizeTransaction(tx);
+    expect(out.remittanceInformationUnstructured).toBe(
+      'BMW+ Service Vertrag USB+HDMI Kabel COVID+ Test Apotheke',
+    );
+    expect(out.payeeName).toBe('BMW+ Service Vertrag');
+  });
 });
 
 describe('normalizeTransaction shape for bank-sync mapping', () => {
