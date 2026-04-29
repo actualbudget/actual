@@ -33,7 +33,7 @@ type EnableBankingBalance = {
   reference_date?: string;
 };
 
-type EnableBankingSessionAccount = {
+export type EnableBankingSessionAccount = {
   account_id?: { iban?: string };
   account_servicer?: { bic_fi?: string; name?: string };
   name?: string;
@@ -41,7 +41,7 @@ type EnableBankingSessionAccount = {
   uid: string;
 };
 
-type EnableBankingSession = {
+export type EnableBankingSession = {
   session_id: string;
   accounts: EnableBankingSessionAccount[];
   aspsp?: { name?: string; country?: string };

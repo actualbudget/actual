@@ -9,7 +9,10 @@ import {
   validateSessionMiddleware,
 } from '#util/middlewares';
 
-import type { PsuHeaders } from './services/enablebanking-service';
+import type {
+  EnableBankingSession,
+  PsuHeaders,
+} from './services/enablebanking-service';
 import {
   enableBankingService,
   normalizeAccount,
@@ -44,19 +47,12 @@ function extractPsuHeaders(req: Request): PsuHeaders {
 }
 
 async function buildSessionResult(
-  session: {
-    session_id: string;
-    accounts: { uid: string; [key: string]: unknown }[];
-    aspsp?: { name?: string; country?: string };
-  },
+  session: EnableBankingSession,
   psuHeaders?: PsuHeaders,
 ) {
   const accountsWithBalances = await Promise.all(
     session.accounts.map(async account => {
-      const normalized = normalizeAccount(
-        account as Parameters<typeof normalizeAccount>[0],
-        session.aspsp,
-      );
+      const normalized = normalizeAccount(account, session.aspsp);
 
       let balances: ReturnType<typeof normalizeBalance>[] = [];
       try {
@@ -126,8 +122,8 @@ app.get('/auth_callback', async (req: Request, res: Response) => {
     completedAuths.set(state, result);
     setTimeout(() => completedAuths.delete(state), COMPLETED_AUTH_TTL_MS);
 
-    if (pendingAuths.has(state)) {
-      const pending = pendingAuths.get(state)!;
+    const pending = pendingAuths.get(state);
+    if (pending) {
       pending.resolve(result);
       cleanupPendingAuth(state);
     }
@@ -144,8 +140,8 @@ app.get('/auth_callback', async (req: Request, res: Response) => {
     completedAuths.set(state, errorResult);
     setTimeout(() => completedAuths.delete(state), COMPLETED_AUTH_TTL_MS);
 
-    if (pendingAuths.has(state)) {
-      const pending = pendingAuths.get(state)!;
+    const pending = pendingAuths.get(state);
+    if (pending) {
       pending.reject(error);
       cleanupPendingAuth(state);
     }
@@ -351,8 +347,8 @@ app.post(
         completedAuths.set(state, result);
         setTimeout(() => completedAuths.delete(state), COMPLETED_AUTH_TTL_MS);
 
-        if (pendingAuths.has(state)) {
-          const pending = pendingAuths.get(state)!;
+        const pending = pendingAuths.get(state);
+        if (pending) {
           pending.resolve(result);
           cleanupPendingAuth(state);
         }
@@ -371,8 +367,8 @@ app.post(
         completedAuths.set(state, errorResult);
         setTimeout(() => completedAuths.delete(state), COMPLETED_AUTH_TTL_MS);
 
-        if (pendingAuths.has(state)) {
-          const pending = pendingAuths.get(state)!;
+        const pending = pendingAuths.get(state);
+        if (pending) {
           pending.reject(error);
           cleanupPendingAuth(state);
         }
@@ -415,8 +411,8 @@ app.post(
 
       const result = await new Promise((resolve, reject) => {
         // Clean up any existing waiter for this state
-        if (pendingAuths.has(state)) {
-          const existing = pendingAuths.get(state)!;
+        const existing = pendingAuths.get(state);
+        if (existing) {
           clearTimeout(existing.timer);
           existing.reject(new Error('Poll superseded'));
         }
