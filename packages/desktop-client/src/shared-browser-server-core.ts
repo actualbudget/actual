@@ -534,7 +534,7 @@ export function createCoordinator({
         if (msg.type === '__resume-tab') {
           resumePort(
             port,
-            typeof msg.budgetId === 'string' ? (msg.budgetId as string) : null,
+            typeof msg.budgetId === 'string' ? msg.budgetId : null,
           );
           return;
         }
