@@ -399,6 +399,7 @@ app.post(
     }
 
     const waiterId = String(++nextWaiterId);
+    let hasClientDisconnected = false;
 
     try {
       // If complete-auth already fired before poll-auth, return immediately
@@ -444,11 +445,16 @@ app.post(
         // Clean up if client disconnects before resolution
         res.on('close', () => {
           if (!res.writableFinished && !settled) {
+            hasClientDisconnected = true;
             cleanupPendingAuth(state, waiterId);
             safeReject(new Error('Client disconnected'));
           }
         });
       });
+
+      if (hasClientDisconnected || res.destroyed || res.writableEnded) {
+        return;
+      }
 
       res.send({
         status: 'ok',
@@ -456,6 +462,9 @@ app.post(
       });
     } catch (error) {
       cleanupPendingAuth(state, waiterId);
+      if (hasClientDisconnected || res.destroyed || res.writableEnded) {
+        return;
+      }
       res.send({
         status: 'ok',
         data: {

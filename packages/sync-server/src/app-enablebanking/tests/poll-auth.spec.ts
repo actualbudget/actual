@@ -320,6 +320,39 @@ describe('Enable Banking Express routes', () => {
 
       expect(res.body.data.error_code).toBe('INVALID_INPUT');
     });
+
+    it('does not write to the response after the client disconnects', async () => {
+      // The /poll-auth handler attaches `res.on('close', ...)` to clean up
+      // the pending waiter and reject its internal promise. After that, the
+      // handler must not call res.send() — that would log a "write after end"
+      // warning and (in stricter Node setups) throw.
+      const noop = () => undefined;
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(noop);
+
+      const state = 'disconnect-test-state';
+      const req = request(app).post('/poll-auth').send({ state });
+
+      // Abort once the handler has had time to register the close listener.
+      setTimeout(() => req.abort(), 50);
+
+      await req.catch(() => {
+        // supertest rejects on aborted requests; that's expected.
+      });
+
+      // Give the server a tick to process 'close' and unwind the promise.
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const writeAfterEndCalls = errorSpy.mock.calls.filter(args =>
+        args.some(
+          arg =>
+            (typeof arg === 'string' && arg.includes('write after')) ||
+            (arg instanceof Error && arg.message.includes('write after')),
+        ),
+      );
+      expect(writeAfterEndCalls).toHaveLength(0);
+
+      errorSpy.mockRestore();
+    });
   });
 
   describe('POST /transactions', () => {

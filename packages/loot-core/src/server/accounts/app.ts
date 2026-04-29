@@ -1016,8 +1016,9 @@ async function enableBankingPollAuth({ state }: { state: string }) {
   }
 }
 
-async function stopEnableBankingPollAuth() {
-  for (const [state, controller] of enableBankingPollControllers) {
+async function stopEnableBankingPollAuth({ state }: { state: string }) {
+  const controller = enableBankingPollControllers.get(state);
+  if (controller) {
     controller.abort();
     enableBankingPollControllers.delete(state);
   }

@@ -147,20 +147,36 @@ export function EnableBankingExternalMsgModal({
   } = useEnableBankingStatus();
 
   const isJumpingRef = useRef(false);
+  const stateRef = useRef<string | null>(null);
+
+  async function handleClose() {
+    if (stateRef.current !== null) {
+      await sendCatch('enablebanking-poll-auth-stop', {
+        state: stateRef.current,
+      });
+    }
+    onClose?.();
+  }
 
   async function onJump() {
     if (isJumpingRef.current) {
-      // Abort the in-flight poll so the user can retry
-      await sendCatch('enablebanking-poll-auth-stop');
-      return;
+      // Abort the in-flight poll so we can re-open the popup immediately.
+      // Only send the stop RPC if we have a state to target; if onMoveExternal
+      // hasn't set stateRef yet there is no active poll to abort.
+      if (stateRef.current !== null) {
+        await sendCatch('enablebanking-poll-auth-stop', {
+          state: stateRef.current,
+        });
+      }
+      isJumpingRef.current = false;
     }
     isJumpingRef.current = true;
 
     try {
-      if (!selectedAspsp) return;
-
       setError(null);
       setWaiting('browser');
+
+      if (!selectedAspsp) return;
 
       // Parse aspspId (name) and country from the composite id "country:name"
       const colonIndex = selectedAspsp.indexOf(':');
@@ -173,6 +189,9 @@ export function EnableBankingExternalMsgModal({
         aspspId,
         country: aspspCountry,
         maxConsentValidity: selectedBank?.maxConsentValidity,
+        onStateReady: state => {
+          stateRef.current = state;
+        },
       });
       if ('error' in res) {
         setError({
@@ -189,6 +208,7 @@ export function EnableBankingExternalMsgModal({
       setWaiting(null);
     } finally {
       isJumpingRef.current = false;
+      stateRef.current = null;
     }
   }
 
@@ -307,7 +327,7 @@ export function EnableBankingExternalMsgModal({
   return (
     <Modal
       name="enablebanking-external-msg"
-      onClose={onClose}
+      onClose={handleClose}
       containerProps={{ style: { width: '30vw' } }}
     >
       {({ state }) => (

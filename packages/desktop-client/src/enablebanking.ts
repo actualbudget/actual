@@ -22,7 +22,12 @@ function _authorize(
       modal: {
         name: 'enablebanking-external-msg',
         options: {
-          onMoveExternal: async ({ aspspId, country, maxConsentValidity }) => {
+          onMoveExternal: async ({
+            aspspId,
+            country,
+            maxConsentValidity,
+            onStateReady,
+          }) => {
             const redirectUrl = `${window.location.origin}/enablebanking/auth_callback`;
             const resp = await sendCatch('enablebanking-start-auth', {
               aspspId,
@@ -58,6 +63,7 @@ function _authorize(
             }
 
             localStorage.setItem('enablebanking_auth_state', state);
+            onStateReady?.(state);
             window.open(
               authUrl,
               'enablebanking-auth',

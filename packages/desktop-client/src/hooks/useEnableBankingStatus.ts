@@ -8,7 +8,7 @@ export function useEnableBankingStatus(enabled = true) {
   const [configuredEnableBanking, setConfiguredEnableBanking] = useState<
     boolean | null
   >(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const status = useSyncServerStatus();
 
   useEffect(() => {

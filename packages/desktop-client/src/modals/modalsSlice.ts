@@ -143,6 +143,7 @@ export type Modal =
           aspspId: string;
           country: string;
           maxConsentValidity?: number;
+          onStateReady?: (state: string) => void;
         }) => Promise<
           | { error: 'timeout' }
           | { error: 'unknown'; message?: string }
