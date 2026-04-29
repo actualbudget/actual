@@ -1017,7 +1017,15 @@ async function processBankSyncDownload(
       );
       balanceToUse = Math.round(previousBalance);
     } else if (acctRow.account_sync_source === 'enableBanking') {
-      const previousBalance = transactions.reduce((total, trans) => {
+      const importPending = await aqlQuery(
+        q('preferences')
+          .filter({ id: `sync-import-pending-${id}` })
+          .select('value'),
+      ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
+      const importable = importPending
+        ? transactions
+        : transactions.filter(trans => trans.booked !== false);
+      const previousBalance = importable.reduce((total, trans) => {
         return total - amountToInteger(trans.transactionAmount.amount);
       }, currentBalance);
       balanceToUse = previousBalance;

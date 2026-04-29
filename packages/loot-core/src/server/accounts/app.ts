@@ -430,7 +430,11 @@ async function linkEnableBankingAccount({
     });
   }
 
-  await bankSync.syncAccount(
+  if (id == null) {
+    throw new Error('id was not assigned in linkEnableBankingAccount');
+  }
+
+  const syncRes = await bankSync.syncAccount(
     undefined,
     undefined,
     id,
@@ -439,6 +443,8 @@ async function linkEnableBankingAccount({
     startingDate,
     startingBalance,
   );
+
+  await handleSyncResponse(syncRes, id);
 
   connection.send('sync-event', {
     type: 'success',
