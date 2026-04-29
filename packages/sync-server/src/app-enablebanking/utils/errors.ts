@@ -30,23 +30,15 @@ export function handleEnableBankingError(
   const errorType = typeof parsed.error === 'string' ? parsed.error : 'UNKNOWN';
 
   if (statusCode === 401 || statusCode === 403) {
-    return new EnableBankingError(
-      'INVALID_INPUT',
-      'INVALID_ACCESS_TOKEN',
-      message,
-    );
+    return new EnableBankingError(message, 'INVALID_ACCESS_TOKEN', message);
   }
 
   if (statusCode === 429) {
-    return new EnableBankingError(
-      'RATE_LIMIT_EXCEEDED',
-      'RATE_LIMIT_EXCEEDED',
-      message,
-    );
+    return new EnableBankingError(message, 'RATE_LIMIT_EXCEEDED', message);
   }
 
   if (statusCode === 404) {
-    return new EnableBankingError('INVALID_INPUT', 'NOT_FOUND', message);
+    return new EnableBankingError(message, 'NOT_FOUND', message);
   }
 
   if (statusCode >= 400 && statusCode < 500) {
@@ -59,14 +51,10 @@ export function handleEnableBankingError(
       lowerMessage.includes('session') ||
       lowerMessage.includes('expired')
     ) {
-      return new EnableBankingError(
-        'INVALID_INPUT',
-        'INVALID_ACCESS_TOKEN',
-        message,
-      );
+      return new EnableBankingError(message, 'INVALID_ACCESS_TOKEN', message);
     }
-    return new EnableBankingError('INVALID_INPUT', 'INVALID_INPUT', message);
+    return new EnableBankingError(message, 'INVALID_INPUT', message);
   }
 
-  return new EnableBankingError('INTERNAL_ERROR', 'INTERNAL_ERROR', message);
+  return new EnableBankingError(message, 'INTERNAL_ERROR', message);
 }

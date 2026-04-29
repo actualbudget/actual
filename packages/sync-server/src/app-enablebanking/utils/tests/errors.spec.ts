@@ -29,12 +29,13 @@ describe('EnableBankingError', () => {
 describe('handleEnableBankingError', () => {
   it('should return INVALID_ACCESS_TOKEN for 401', () => {
     const error = handleEnableBankingError(401, { message: 'Unauthorized' });
-    expect(error.error_type).toBe('INVALID_INPUT');
+    expect(error.error_type).toBe('Unauthorized');
     expect(error.error_code).toBe('INVALID_ACCESS_TOKEN');
   });
 
   it('should return INVALID_ACCESS_TOKEN for 403', () => {
     const error = handleEnableBankingError(403, { message: 'Forbidden' });
+    expect(error.error_type).toBe('Forbidden');
     expect(error.error_code).toBe('INVALID_ACCESS_TOKEN');
   });
 
@@ -42,12 +43,13 @@ describe('handleEnableBankingError', () => {
     const error = handleEnableBankingError(429, {
       message: 'Too many requests',
     });
-    expect(error.error_type).toBe('RATE_LIMIT_EXCEEDED');
+    expect(error.error_type).toBe('Too many requests');
     expect(error.error_code).toBe('RATE_LIMIT_EXCEEDED');
   });
 
   it('should return NOT_FOUND for 404', () => {
     const error = handleEnableBankingError(404, { message: 'Not found' });
+    expect(error.error_type).toBe('Not found');
     expect(error.error_code).toBe('NOT_FOUND');
   });
 
@@ -56,6 +58,7 @@ describe('handleEnableBankingError', () => {
       error: 'CLOSED_SESSION',
       message: 'session closed',
     });
+    expect(error.error_type).toBe('session closed');
     expect(error.error_code).toBe('INVALID_ACCESS_TOKEN');
   });
 
@@ -64,18 +67,21 @@ describe('handleEnableBankingError', () => {
       error: 'EXPIRED_SESSION',
       message: 'expired',
     });
+    expect(error.error_type).toBe('expired');
     expect(error.error_code).toBe('INVALID_ACCESS_TOKEN');
   });
 
   it('should return INTERNAL_ERROR for 500+', () => {
     const error = handleEnableBankingError(500, { message: 'Server error' });
-    expect(error.error_type).toBe('INTERNAL_ERROR');
+    expect(error.error_type).toBe('Server error');
     expect(error.error_code).toBe('INTERNAL_ERROR');
   });
 
   it('should handle string body', () => {
     const error = handleEnableBankingError(500, 'raw error text');
     expect(error.message).toBe('raw error text');
+    expect(error.error_type).toBe('raw error text');
+    expect(error.error_code).toBe('INTERNAL_ERROR');
   });
 
   it('should handle null body', () => {

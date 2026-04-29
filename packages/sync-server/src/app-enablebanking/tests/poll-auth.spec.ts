@@ -501,8 +501,20 @@ describe('Enable Banking Express routes', () => {
         .post('/transactions')
         .send({ accountId: 'uid-1', startDate: '2026-01-01' });
 
+      // error_type carries the bank-sync category (matched by AccountSyncCheck).
       expect(res.body.data.error_type).toBe('RATE_LIMIT_EXCEEDED');
       expect(res.body.data.error_code).toBe('RATE_LIMIT_EXCEEDED');
+    });
+
+    it('maps 404 to INVALID_INPUT category in error_type', async () => {
+      mockFetchResponse({ message: 'Account not found' }, false, 404);
+
+      const res = await request(app)
+        .post('/transactions')
+        .send({ accountId: 'uid-1', startDate: '2026-01-01' });
+
+      expect(res.body.data.error_type).toBe('INVALID_INPUT');
+      expect(res.body.data.error_code).toBe('NOT_FOUND');
     });
 
     it('forwards PSU headers from the incoming request to the API', async () => {

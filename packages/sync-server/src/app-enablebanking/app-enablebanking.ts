@@ -566,10 +566,16 @@ app.post(
           return;
         }
 
+        // The bank-sync wire format expects `error_type` to be a broad
+        // machine-readable category (matched by AccountSyncCheck's switch),
+        // not the human message we now keep on `EnableBankingError.error_type`.
+        const wireErrorType =
+          error.error_code === 'NOT_FOUND' ? 'INVALID_INPUT' : error.error_code;
+
         res.send({
           status: 'ok',
           data: {
-            error_type: error.error_type,
+            error_type: wireErrorType,
             error_code: error.error_code,
           },
         });
