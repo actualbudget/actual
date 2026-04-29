@@ -19,6 +19,8 @@ type BudgetGroup = {
   leaderPort: CoordinatorPort;
   followers: Set<CoordinatorPort>;
   backendConnected: boolean;
+  pendingConnect: boolean;
+  restoreBudgetId: string | null;
   requestToPort: Map<string, CoordinatorPort>;
   requestNames: Map<string, string>;
   requestBudgetIds: Map<string, string>;
@@ -89,10 +91,20 @@ export function createCoordinator({
       leaderPort,
       followers: new Set(),
       backendConnected: false,
+      pendingConnect: false,
+      restoreBudgetId: null,
       requestToPort: new Map(),
       requestNames: new Map(),
       requestBudgetIds: new Map(),
     };
+  }
+
+  function broadcastConnect(budgetId: string) {
+    const connectMsg = { type: 'connect' };
+    broadcastToAllInGroup(budgetId, connectMsg);
+    for (const port of unassignedPorts) {
+      port.postMessage(connectMsg);
+    }
   }
 
   function logState(action: string) {
@@ -298,9 +310,14 @@ export function createCoordinator({
     } else {
       group.leaderPort = port;
       group.backendConnected = false;
+      group.pendingConnect = false;
+      group.restoreBudgetId = budgetToRestore || null;
       group.requestToPort.clear();
       group.requestNames.clear();
       group.requestBudgetIds.clear();
+    }
+    if (!group.restoreBudgetId && budgetToRestore) {
+      group.restoreBudgetId = budgetToRestore;
     }
     const prevBudget = portToBudget.get(port);
     if (prevBudget && prevBudget !== budgetId) {
@@ -425,6 +442,15 @@ export function createCoordinator({
       console.log(
         `[SharedWorker] Budget loaded: "${newBudgetId}" (leader + ${oldGroup.followers.size} follower(s))`,
       );
+    }
+
+    if (oldGroup.restoreBudgetId === newBudgetId) {
+      oldGroup.restoreBudgetId = null;
+      if (oldGroup.pendingConnect) {
+        oldGroup.backendConnected = true;
+        oldGroup.pendingConnect = false;
+        broadcastConnect(newBudgetId);
+      }
     }
 
     logState(`Budget "${newBudgetId}" ready`);
@@ -580,10 +606,11 @@ export function createCoordinator({
               group.requestNames.delete(workerMsg.id as string);
             }
           } else if (workerMsg.type === 'connect') {
-            group.backendConnected = true;
-            broadcastToAllInGroup(portBudget!, workerMsg);
-            for (const p of unassignedPorts) {
-              p.postMessage(workerMsg);
+            if (group.restoreBudgetId) {
+              group.pendingConnect = true;
+            } else {
+              group.backendConnected = true;
+              broadcastConnect(portBudget!);
             }
           } else if (workerMsg.type === 'app-init-failure') {
             lastAppInitFailure = workerMsg;
@@ -598,6 +625,7 @@ export function createCoordinator({
 
         if (msg.type === '__track-restore') {
           if (group) {
+            group.restoreBudgetId = msg.budgetId as string;
             group.requestToPort.set(msg.requestId as string, port);
             group.requestNames.set(msg.requestId as string, 'load-budget');
             group.requestBudgetIds.set(

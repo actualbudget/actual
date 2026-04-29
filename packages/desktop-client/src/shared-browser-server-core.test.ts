@@ -895,6 +895,98 @@ describe('SharedWorker coordinator', () => {
       expect(group.requestNames.get('restore-1')).toBe('load-budget');
       expect(group.requestBudgetIds.get('restore-1')).toBe('budget-1');
     });
+
+    it('waits to broadcast connect until a promoted leader finishes restoring', () => {
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
+
+      const follower = connectTab(coordinator);
+      sendInit(follower);
+      sendMsg(follower, {
+        id: 'lb-f',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+      follower.postMessage.mockClear();
+
+      sendMsg(leader, { id: 'cb-leader', name: 'close-budget' });
+      sendMsg(follower, {
+        type: '__track-restore',
+        requestId: '__restore-budget',
+        budgetId: 'budget-1',
+      });
+
+      const reloaded = connectTab(coordinator);
+      sendInit(reloaded);
+      reloaded.postMessage.mockClear();
+
+      sendMsg(follower, {
+        type: '__from-worker',
+        msg: { type: 'connect' },
+      });
+
+      expect(
+        coordinator.getState().budgetGroups.get('budget-1').backendConnected,
+      ).toBe(false);
+      expect(reloaded.postMessage).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'connect' }),
+      );
+
+      sendMsg(follower, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: '__restore-budget', result: {} },
+      });
+
+      expect(
+        coordinator.getState().budgetGroups.get('budget-1').backendConnected,
+      ).toBe(true);
+      expect(reloaded.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'connect' }),
+      );
+    });
+
+    it('still broadcasts connect if restore finishes before the worker connect event', () => {
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
+
+      const follower = connectTab(coordinator);
+      sendInit(follower);
+      sendMsg(follower, {
+        id: 'lb-f',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+
+      sendMsg(leader, { id: 'cb-leader', name: 'close-budget' });
+      sendMsg(follower, {
+        type: '__track-restore',
+        requestId: '__restore-budget',
+        budgetId: 'budget-1',
+      });
+
+      const reloaded = connectTab(coordinator);
+      sendInit(reloaded);
+      reloaded.postMessage.mockClear();
+
+      sendMsg(follower, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: '__restore-budget', result: {} },
+      });
+
+      expect(reloaded.postMessage).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'connect' }),
+      );
+
+      sendMsg(follower, {
+        type: '__from-worker',
+        msg: { type: 'connect' },
+      });
+
+      expect(
+        coordinator.getState().budgetGroups.get('budget-1').backendConnected,
+      ).toBe(true);
+      expect(reloaded.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'connect' }),
+      );
+    });
   });
 
   // ── Multiple budgets ────────────────────────────────────────────────
