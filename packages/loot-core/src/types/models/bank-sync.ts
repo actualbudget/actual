@@ -20,8 +20,11 @@ export type BankSyncResponse = {
   error_code: string;
 };
 
-export type BankSyncProviders =
-  | 'goCardless'
-  | 'simpleFin'
-  | 'pluggyai'
-  | 'enableBanking';
+export const SYNC_PROVIDERS = [
+  'goCardless',
+  'simpleFin',
+  'pluggyai',
+  'enableBanking',
+] as const;
+
+export type BankSyncProviders = (typeof SYNC_PROVIDERS)[number];

@@ -381,7 +381,7 @@ async function linkEnableBankingAccount({
 }: LinkAccountBaseParams & {
   externalAccount: SyncServerEnableBankingAccount;
 }) {
-  let id;
+  let id: string | undefined;
 
   const institution = {
     name: externalAccount.institution ?? t('Unknown'),

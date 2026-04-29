@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import React, { useEffect, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -32,7 +31,10 @@ type BankOption = {
   maxConsentValidity?: number;
 };
 
-function useAvailableBanks(country: string, refetchKey?: boolean | null) {
+function useAvailableBanks(
+  country: string | undefined,
+  refetchKey?: boolean | null,
+) {
   const [banks, setBanks] = useState<BankOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -155,6 +157,8 @@ export function EnableBankingExternalMsgModal({
     isJumpingRef.current = true;
 
     try {
+      if (!selectedAspsp) return;
+
       setError(null);
       setWaiting('browser');
 

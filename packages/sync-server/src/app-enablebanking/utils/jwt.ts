@@ -3,11 +3,18 @@ import type { Algorithm } from 'jws';
 
 type Header = { typ: string; alg: Algorithm; kid: string };
 
+type JWTPayload = {
+  iss: string;
+  aud: string;
+  iat: number;
+  exp: number;
+};
+
 function getJWTHeader(applicationId: string): Header {
   return { typ: 'JWT', alg: 'RS256', kid: applicationId };
 }
 
-function getJWTBody(exp = 3600) {
+function getJWTBody(exp = 3600): JWTPayload {
   const timestamp = Math.floor(Date.now() / 1000);
   return {
     iss: 'enablebanking.com',
