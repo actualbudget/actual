@@ -2,8 +2,8 @@ import { sendCatch } from '@actual-app/core/platform/client/connection';
 import type { SyncServerEnableBankingAccount } from '@actual-app/core/types/models';
 import { t } from 'i18next';
 
-import { pushModal } from './modals/modalsSlice';
-import type { AppDispatch } from './redux/store';
+import { pushModal } from '#modals/modalsSlice';
+import type { AppDispatch } from '#redux/store';
 
 function _authorize(
   dispatch: AppDispatch,

@@ -303,18 +303,18 @@ export function CreateAccountModal({
     );
   };
 
-  const onEnableBankingReset = () => {
-    void send('secret-set', {
-      name: 'enablebanking_applicationId',
-      value: null,
-    }).then(() => {
-      void send('secret-set', {
+  const onEnableBankingReset = async () => {
+    await Promise.all([
+      send('secret-set', {
+        name: 'enablebanking_applicationId',
+        value: null,
+      }),
+      send('secret-set', {
         name: 'enablebanking_secretKey',
         value: null,
-      }).then(() => {
-        setIsEnableBankingSetupComplete(false);
-      });
-    });
+      }),
+    ]);
+    setIsEnableBankingSetupComplete(false);
   };
 
   const onGoCardlessReset = () => {
@@ -688,7 +688,7 @@ export function CreateAccountModal({
                                     <Menu
                                       onMenuSelect={item => {
                                         if (item === 'reconfigure') {
-                                          onEnableBankingReset();
+                                          void onEnableBankingReset();
                                         }
                                       }}
                                       items={[

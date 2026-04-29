@@ -13,7 +13,7 @@ const BASE_URL = 'https://api.enablebanking.com';
 
 // --- Type definitions ---
 
-type EnableBankingTransaction = {
+export type EnableBankingTransaction = {
   entry_reference?: string;
   transaction_id?: string;
   transaction_amount: { currency: string; amount: string };

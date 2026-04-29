@@ -38,6 +38,8 @@ export async function post(
   data: unknown,
   headers = {},
   timeout: number | null = null,
+  // Optional caller-provided abort signal. Used by Enable Banking poll
+  // cancellation so the user can interrupt the 5-minute long-poll.
   externalSignal?: AbortSignal | null,
 ) {
   let text: string;
