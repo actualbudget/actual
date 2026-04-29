@@ -35,6 +35,7 @@ function useAvailableBanks(
   country: string | undefined,
   refetchKey?: boolean | null,
 ) {
+  const { t } = useTranslation();
   const [banks, setBanks] = useState<BankOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -70,7 +71,7 @@ function useAvailableBanks(
         setBanks(
           aspsps.map(aspsp => ({
             id: `${aspsp.country}:${aspsp.name}`,
-            name: aspsp.beta ? `${aspsp.name} (beta)` : aspsp.name,
+            name: aspsp.beta ? `${aspsp.name} ${t('(beta)')}` : aspsp.name,
             maxConsentValidity: aspsp.maximum_consent_validity,
           })),
         );
@@ -83,7 +84,7 @@ function useAvailableBanks(
     return () => {
       cancelled = true;
     };
-  }, [country, refetchKey]);
+  }, [country, refetchKey, t]);
 
   return {
     data: banks,
@@ -157,6 +158,11 @@ export function EnableBankingExternalMsgModal({
 
   const isJumpingRef = useRef(false);
   const stateRef = useRef<string | null>(null);
+  // Each onJump call captures a token from this counter. A retry that
+  // supersedes an in-flight call increments the counter, so the older call
+  // can detect it has been superseded and skip its post-await writes
+  // instead of clobbering the newer attempt's UI state and refs.
+  const jumpIdRef = useRef(0);
 
   async function handleClose() {
     if (stateRef.current !== null) {
@@ -168,6 +174,8 @@ export function EnableBankingExternalMsgModal({
   }
 
   async function onJump() {
+    const myJumpId = ++jumpIdRef.current;
+
     if (isJumpingRef.current) {
       // Abort the in-flight poll so we can re-open the popup immediately.
       // Only send the stop RPC if we have a state to target; if onMoveExternal
@@ -199,9 +207,16 @@ export function EnableBankingExternalMsgModal({
         country: aspspCountry,
         maxConsentValidity: selectedBank?.maxConsentValidity,
         onStateReady: state => {
-          stateRef.current = state;
+          if (myJumpId === jumpIdRef.current) {
+            stateRef.current = state;
+          }
         },
       });
+
+      // A retry has superseded this call — drop the result so it can't
+      // overwrite the newer attempt's error or waiting state.
+      if (myJumpId !== jumpIdRef.current) return;
+
       if ('error' in res) {
         setError({
           code: res.error,
@@ -214,10 +229,13 @@ export function EnableBankingExternalMsgModal({
       data.current = res.data;
       setWaiting('accounts');
       await onSuccess(data.current);
+      if (myJumpId !== jumpIdRef.current) return;
       setWaiting(null);
     } finally {
-      isJumpingRef.current = false;
-      stateRef.current = null;
+      if (myJumpId === jumpIdRef.current) {
+        isJumpingRef.current = false;
+        stateRef.current = null;
+      }
     }
   }
 
