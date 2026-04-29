@@ -66,6 +66,7 @@ type ShowBudgetsEvent = undefined;
 type StartImportEvent = { budgetName: string };
 type StartLoadEvent = undefined;
 type ApiFetchRedirectedEvent = undefined;
+type IndexedDBQuotaErrorEvent = undefined;
 
 export type ServerEvents = {
   'backups-updated': BackupUpdatedEvent;
@@ -83,4 +84,5 @@ export type ServerEvents = {
   'sync-event': SyncEvent;
   'undo-event': UndoState;
   'api-fetch-redirected': ApiFetchRedirectedEvent;
+  'indexeddb-quota-error': IndexedDBQuotaErrorEvent;
 };

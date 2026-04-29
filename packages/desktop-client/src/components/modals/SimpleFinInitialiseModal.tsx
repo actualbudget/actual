@@ -50,7 +50,7 @@ export const SimpleFinInitialiseModal = ({
 
     if (error) {
       setIsValid(false);
-      setError(getSecretsError(error, reason));
+      setError(t(getSecretsError(error, reason)));
     } else {
       onSuccess();
     }

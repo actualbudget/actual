@@ -69,6 +69,7 @@ export const UserAccessRow = memo(
 
     const handleError = (error: string) => {
       if (error === 'token-expired') {
+        const e = getUserAccessErrors(error);
         dispatch(
           addNotification({
             notification: {
@@ -76,7 +77,7 @@ export const UserAccessRow = memo(
               id: 'login-expired',
               title: t('Login expired'),
               sticky: true,
-              message: getUserAccessErrors(error),
+              message: typeof e === 'string' ? t(e) : t(e.key, e.params),
               button: {
                 title: t('Go to login'),
                 action: () => {
@@ -87,13 +88,14 @@ export const UserAccessRow = memo(
           }),
         );
       } else {
+        const e = getUserAccessErrors(error);
         dispatch(
           addNotification({
             notification: {
               type: 'error',
               title: t('Something happened while editing access'),
               sticky: true,
-              message: getUserAccessErrors(error),
+              message: typeof e === 'string' ? t(e) : t(e.key, e.params),
             },
           }),
         );

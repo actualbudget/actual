@@ -51,7 +51,7 @@ export function FixEncryptionKeyModal({
         cloudFileId,
       });
       if (error) {
-        setError(getTestKeyError(error));
+        setError(t(getTestKeyError(error)));
         setLoading(false);
         return;
       }

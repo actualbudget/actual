@@ -1,9 +1,9 @@
-import { t } from 'i18next';
-
 type ErrorWithMeta = {
   reason: string;
   meta?: unknown;
 };
+
+export type ErrorResult = string | { key: string; params: Record<string, unknown> };
 
 export function getUploadError({ reason, meta }: ErrorWithMeta) {
   switch (reason) {
@@ -24,10 +24,10 @@ export function getUploadError({ reason, meta }: ErrorWithMeta) {
     case 'network':
       return 'Uploading the file failed. Check your network connection.';
     default:
-      return t(
-        'An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: {{reason}})',
-        { reason },
-      );
+      return {
+        key: 'An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: {{reason}})',
+        params: { reason },
+      };
   }
 }
 
@@ -66,10 +66,10 @@ export function getDownloadError({
         meta && typeof meta === 'object' && 'fileId' in meta && meta.fileId
           ? `, fileId: ${String(meta.fileId)}`
           : '';
-      return t(
-        'Something went wrong trying to download that file, sorry! Visit https://actualbudget.org/contact/ for support. reason: {{reason}}{{info}}',
-        { reason, info },
-      );
+      return {
+        key: 'Something went wrong trying to download that file, sorry! Visit https://actualbudget.org/contact/ for support. reason: {{reason}}{{info}}',
+        params: { reason, info },
+      };
   }
 }
 
@@ -94,14 +94,17 @@ export function getSyncError(error: string, id: string) {
   if (error === 'out-of-sync-migrations' || error === 'out-of-sync-data') {
     return 'This budget cannot be loaded with this version of the app.';
   } else if (error === 'budget-not-found') {
-    return t(
-      'Budget "{{id}}" not found. Check the ID of your budget in the Advanced section of the settings page.',
-      { id },
-    );
+    return {
+      key: 'Budget "{{id}}" not found. Check the ID of your budget in the Advanced section of the settings page.',
+      params: { id },
+    };
   } else if (error === 'clock-drift') {
     return 'Failed to sync because your device time differs too much from the server. Please check your device time settings and ensure they are correct.';
   } else {
-    return t('We had an unknown problem opening "{{id}}".', { id });
+    return {
+      key: 'We had an unknown problem opening "{{id}}".',
+      params: { id },
+    };
   }
 }
 
@@ -135,10 +138,10 @@ export function getUserAccessErrors(reason: string) {
     case 'user-already-have-access':
       return 'User already has access.';
     default:
-      return t(
-        'An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: {{reason}})',
-        { reason },
-      );
+      return {
+        key: 'An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: {{reason}})',
+        params: { reason },
+      };
   }
 }
 
@@ -162,9 +165,9 @@ export function getOpenIdErrors(reason: string) {
     case 'unable-to-change-file-config-enabled':
       return 'Unable to enable OpenID. Please update the config.json file in this case.';
     default:
-      return t(
-        'An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: {{reason}})',
-        { reason },
-      );
+      return {
+        key: 'An internal error occurred, sorry! Visit https://actualbudget.org/contact/ for support. (ref: {{reason}})',
+        params: { reason },
+      };
   }
 }

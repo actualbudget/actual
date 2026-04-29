@@ -1,3 +1,5 @@
+import { t } from 'i18next';
+
 import { send } from '@actual-app/core/platform/client/connection';
 import { getUploadError } from '@actual-app/core/shared/errors';
 import type { AtLeastOne } from '@actual-app/core/types/util';
@@ -50,7 +52,8 @@ export const resetSync = createAppAsyncThunk(
     const { error } = await send('sync-reset');
 
     if (error) {
-      alert(getUploadError(error));
+      const uploadErr = getUploadError(error);
+      alert(typeof uploadErr === 'string' ? t(uploadErr) : t(uploadErr.key, uploadErr.params));
 
       if (
         (error.reason === 'encrypt-failure' &&

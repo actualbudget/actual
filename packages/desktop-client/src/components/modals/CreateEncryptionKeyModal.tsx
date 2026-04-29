@@ -55,7 +55,9 @@ export function CreateEncryptionKeyModal({
       const res = await send('key-make', { password });
       if (res.error) {
         setLoading(null);
-        setError(getCreateKeyError(res.error));
+        const e = getCreateKeyError(res.error);
+        setError(typeof e === 'string' ? t(e) : t(e.key, e.params));
+
         return;
       }
 

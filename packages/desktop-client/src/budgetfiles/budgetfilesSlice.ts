@@ -61,7 +61,8 @@ export const loadBudget = createAppAsyncThunk(
     const { error } = await send('load-budget', { id, ...options });
 
     if (error) {
-      const message = getSyncError(error, id);
+      const syncErr = getSyncError(error, id);
+      const message = typeof syncErr === 'string' ? t(syncErr) : t(syncErr.key, syncErr.params);
       if (error === 'out-of-sync-migrations') {
         dispatch(pushModal({ modal: { name: 'out-of-sync-migrations' } }));
       } else if (error === 'out-of-sync-data') {
@@ -360,7 +361,8 @@ export const downloadBudget = createAppAsyncThunk(
         ).unwrap();
       } else {
         dispatch(setAppState({ loadingText: null }));
-        alert(getDownloadError(error));
+        const dlErr = getDownloadError(error);
+        alert(typeof dlErr === 'string' ? t(dlErr) : t(dlErr.key, dlErr.params));
       }
       return null;
     } else {

@@ -39,19 +39,19 @@ export function getStatus(
 export function getStatusLabel(status: string) {
   switch (status) {
     case 'completed':
-      return t('completed');
+      return 'completed';
     case 'paid':
-      return t('paid');
+      return 'paid';
     case 'due':
-      return t('due');
+      return 'due';
     case 'upcoming':
-      return t('upcoming');
+      return 'upcoming';
     case 'missed':
-      return t('missed');
+      return 'missed';
     case 'scheduled':
-      return t('scheduled');
+      return 'scheduled';
     default:
-      return t('unknown');
+      return 'unknown';
   }
 }
 
@@ -86,13 +86,13 @@ function makeNumberSuffix(num: number, locale: Locale) {
 
 function prettyDayName(day) {
   const days = {
-    SU: t('Sunday'),
-    MO: t('Monday'),
-    TU: t('Tuesday'),
-    WE: t('Wednesday'),
-    TH: t('Thursday'),
-    FR: t('Friday'),
-    SA: t('Saturday'),
+    SU: 'Sunday',
+    MO: 'Monday',
+    TU: 'Tuesday',
+    WE: 'Wednesday',
+    TH: 'Thursday',
+    FR: 'Friday',
+    SA: 'Saturday',
   };
   return days[day];
 }
@@ -108,7 +108,7 @@ export function getRecurringDescription(
   switch (config.endMode) {
     case 'after_n_occurrences':
       if (config.endOccurrences === 1) {
-        endModeSuffix = t('once');
+        endModeSuffix = 'once';
       } else {
         endModeSuffix = t('{{endOccurrences}} times', {
           endOccurrences: config.endOccurrences,
@@ -126,8 +126,8 @@ export function getRecurringDescription(
 
   const weekendSolveModeString = config.weekendSolveMode
     ? config.weekendSolveMode === 'after'
-      ? t('(after weekend)')
-      : t('(before weekend)')
+      ? '(after weekend)'
+      : '(before weekend)'
     : '';
 
   const weekendSolveSuffix = config.skipWeekend ? weekendSolveModeString : '';

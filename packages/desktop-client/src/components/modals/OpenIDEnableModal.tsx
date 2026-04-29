@@ -52,7 +52,8 @@ export function OpenIDEnableModal({
           );
         }
       } else {
-        setError(getOpenIdErrors(error));
+        const openIdErr = getOpenIdErrors(error);
+        setError(typeof openIdErr === 'string' ? t(openIdErr) : t(openIdErr.key, openIdErr.params));
       }
     } catch (e) {
       console.error('Failed to enable OpenID:', e);

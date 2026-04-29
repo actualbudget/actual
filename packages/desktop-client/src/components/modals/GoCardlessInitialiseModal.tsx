@@ -58,7 +58,7 @@ export const GoCardlessInitialiseModal = ({
     if (error) {
       setIsLoading(false);
       setIsValid(false);
-      setError(getSecretsError(error, reason));
+      setError(t(getSecretsError(error, reason)));
       return;
     } else {
       ({ error, reason } =
@@ -69,7 +69,7 @@ export const GoCardlessInitialiseModal = ({
       if (error) {
         setIsLoading(false);
         setIsValid(false);
-        setError(getSecretsError(error, reason));
+        setError(t(getSecretsError(error, reason)));
         return;
       }
     }

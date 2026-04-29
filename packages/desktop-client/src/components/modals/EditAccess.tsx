@@ -65,6 +65,7 @@ export function EditUserAccess({
       originalOnSave?.(userAccess);
       close();
     } else {
+      const e = getUserAccessErrors(error);
       if (error === 'token-expired') {
         dispatch(
           addNotification({
@@ -73,7 +74,7 @@ export function EditUserAccess({
               id: 'login-expired',
               title: t('Login expired'),
               sticky: true,
-              message: getUserAccessErrors(error),
+              message: typeof e === 'string' ? t(e) : t(e.key, e.params),
               button: {
                 title: t('Go to login'),
                 action: () => {
@@ -84,7 +85,7 @@ export function EditUserAccess({
           }),
         );
       } else {
-        setSetError(getUserAccessErrors(error));
+        setSetError(typeof e === 'string' ? t(e) : t(e.key, e.params));
       }
     }
   }
