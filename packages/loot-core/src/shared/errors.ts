@@ -3,7 +3,9 @@ type ErrorWithMeta = {
   meta?: unknown;
 };
 
-export type ErrorResult = string | { key: string; params: Record<string, unknown> };
+export type ErrorResult =
+  | string
+  | { key: string; params: Record<string, unknown> };
 
 export function getUploadError({ reason, meta }: ErrorWithMeta) {
   switch (reason) {

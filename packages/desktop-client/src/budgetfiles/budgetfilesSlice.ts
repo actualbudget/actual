@@ -62,7 +62,10 @@ export const loadBudget = createAppAsyncThunk(
 
     if (error) {
       const syncErr = getSyncError(error, id);
-      const message = typeof syncErr === 'string' ? t(syncErr) : t(syncErr.key, syncErr.params);
+      const message =
+        typeof syncErr === 'string'
+          ? t(syncErr)
+          : t(syncErr.key, syncErr.params);
       if (error === 'out-of-sync-migrations') {
         dispatch(pushModal({ modal: { name: 'out-of-sync-migrations' } }));
       } else if (error === 'out-of-sync-data') {
@@ -362,7 +365,9 @@ export const downloadBudget = createAppAsyncThunk(
       } else {
         dispatch(setAppState({ loadingText: null }));
         const dlErr = getDownloadError(error);
-        alert(typeof dlErr === 'string' ? t(dlErr) : t(dlErr.key, dlErr.params));
+        alert(
+          typeof dlErr === 'string' ? t(dlErr) : t(dlErr.key, dlErr.params),
+        );
       }
       return null;
     } else {

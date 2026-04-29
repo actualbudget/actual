@@ -91,7 +91,11 @@ export function TransferOwnership({
         originalOnSave?.();
       } else {
         const accessErr = getUserAccessErrors(error);
-        setError(typeof accessErr === 'string' ? t(accessErr) : t(accessErr.key, accessErr.params));
+        setError(
+          typeof accessErr === 'string'
+            ? t(accessErr)
+            : t(accessErr.key, accessErr.params),
+        );
       }
     } else {
       setError(t('Cloud file ID is missing.'));
