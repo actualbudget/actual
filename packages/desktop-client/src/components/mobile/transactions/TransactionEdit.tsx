@@ -200,9 +200,9 @@ export function Status({
     >
       {isSplit
         ? t('{{status}} (Split)', {
-            status: titleFirst(getStatusLabel(status)),
+            status: titleFirst(t(getStatusLabel(status))),
           })
-        : titleFirst(getStatusLabel(status))}
+        : titleFirst(t(getStatusLabel(status)))}
     </Text>
   );
 }

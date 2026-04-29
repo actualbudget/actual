@@ -1634,7 +1634,7 @@ const Transaction = memo(function Transaction({
                   whiteSpace: 'nowrap',
                 }}
               >
-                {titleFirst(getStatusLabel(previewStatus ?? ''))}
+                {titleFirst(t(getStatusLabel(previewStatus ?? '')))}
               </View>
             )}
             <CellButton
