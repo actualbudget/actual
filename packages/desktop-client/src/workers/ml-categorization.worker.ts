@@ -183,18 +183,9 @@ async function predictCategories(
   try {
     const inputTensor = new Tensor('string', validNotes, [validNotes.length]);
     const feeds = { [inferenceSession.inputNames[0]]: inputTensor };
-    console.log("[ML Worker] outputNames:", inferenceSession.outputNames);
     const outputData = await inferenceSession.run(feeds, [
       inferenceSession.outputNames[0],
     ]);
-
-    for (const name of inferenceSession.outputNames) {
-      const val = outputData[name];
-      console.log('[ML Worker] output', name, 'type:', typeof val, 'isArray:', Array.isArray(val), 'constructor:', val?.constructor?.name);
-      if (val && typeof val === 'object') {
-        console.log('[ML Worker] output', name, 'keys:', Object.keys(val));
-      }
-    }
 
     const rawOutput = outputData[inferenceSession.outputNames[0]];
     // Some models output a sequence (array of tensors); pick the first element.

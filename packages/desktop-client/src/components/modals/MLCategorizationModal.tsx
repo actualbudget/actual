@@ -22,11 +22,14 @@ type PredictionEntry = {
   predictedCategory: string | null;
 };
 
+type CategoryOption = { id: string; name: string };
+
 export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [predictions, setPredictions] = useState<PredictionEntry[]>([]);
   const [saving, setSaving] = useState(false);
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
 
   // Fetch transactions and predictions on mount
   useEffect(() => {
@@ -35,6 +38,17 @@ export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
     async function fetchPredictions() {
       setLoading(true);
       try {
+        // Fetch categories first (needed to map predicted names to IDs)
+        const categoriesRes = await aqlQuery(
+          q('categories')
+            .select(['id', 'name'] as const)
+            .orderBy({ sort_order: 'asc' }),
+        );
+        const cats = (categoriesRes.data as Array<{ id: string; name: string }>).map(
+          c => ({ id: c.id, name: c.name }),
+        );
+        setCategories(cats);
+
         // Fetch the transactions by IDs
         const { data } = await aqlQuery(
           q('transactions')
@@ -63,14 +77,23 @@ export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
           transactions.map(t => t.notes),
         );
 
+        // Map predicted category names to IDs
+        const categoryMap = new Map(cats.map(c => [c.name, c.id]));
+
         // Combine transaction data with predictions
-        const entries: PredictionEntry[] = transactions.map((t, i) => ({
-          id: t.id,
-          notes: t.notes ?? null,
-          payee: t.payee ?? null,
-          currentCategory: t.category ?? null,
-          predictedCategory: predictedCategories[i] ?? null,
-        }));
+        const entries: PredictionEntry[] = transactions.map((t, i) => {
+          const predictedName = predictedCategories[i];
+          return {
+            id: t.id,
+            notes: t.notes ?? null,
+            payee: t.payee ?? null,
+            currentCategory: t.category ?? null,
+            predictedCategory:
+              predictedName != null
+                ? (categoryMap.get(predictedName) ?? null)
+                : null,
+          };
+        });
 
         setPredictions(entries);
       } catch (error) {
@@ -93,7 +116,7 @@ export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
   }
 
   // Apply predictions and close
-  async function handleApply() {
+  async function handleApply(close: () => void) {
     setSaving(true);
     try {
       // Build updated transactions
@@ -112,6 +135,7 @@ export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
       }
 
       onComplete(updated as TransactionEntity[]);
+      close();
     } catch (error) {
       console.error('Failed to apply predictions:', error);
     }
@@ -191,12 +215,11 @@ export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
                           style={{ padding: '5px', minWidth: '150px' }}
                         >
                           <option value=""><Trans>No category</Trans></option>
-                          {/* TODO: Populate with actual categories */}
-                          {entry.predictedCategory && (
-                            <option value={entry.predictedCategory}>
-                              {entry.predictedCategory}
+                          {categories.map(cat => (
+                            <option value={cat.id}>
+                              {cat.name}
                             </option>
-                          )}
+                          ))}
                         </select>
                       </div>
                     </div>
@@ -215,7 +238,7 @@ export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
                   </Button>
                   <Button
                     variant="primary"
-                    onPress={handleApply}
+                    onPress={() => handleApply(state.close)}
                     isDisabled={saving}
                   >
                     {saving ? t('Applying...') : t('Apply Predictions')}
