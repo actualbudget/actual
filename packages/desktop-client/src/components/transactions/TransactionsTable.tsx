@@ -2071,7 +2071,7 @@ function NotesCell({
           getHighlightedIndex={() => null}
           suggestions={tagOptions}
           renderItems={(items, getItemProps, highlightedIndex) => {
-            return <View style={{ paddingLeft: 4 }}>
+            return <View style={{ paddingLeft: 4, paddingRight: 4 }}>
               <View style={{ overflowY: 'auto', willChange: 'transform', padding: '5px 0', maxHeight: 175 }}>
                 {items.map((item, idx) => (
                   <div
