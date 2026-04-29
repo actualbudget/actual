@@ -1682,7 +1682,7 @@ const Transaction = memo(function Transaction({
             ? (
               <InputCell
                 /* Category field for transfer and off budget transactions
-                                                                                                 (NOT preview, it is covered first) */
+                                                                                                                                   (NOT preview, it is covered first) */
                 name="category"
                 width="flex"
                 exposed={focusedField === "category"}
@@ -1959,6 +1959,7 @@ function NotesCell({
 }: NotesCellProps) {
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   const [inputValue, setInputValue] = useState(value);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   useEffect(() => setInputValue(value), [value, setInputValue]);
   const tagQuery = useTags();
   const tagOptions =
@@ -2058,11 +2059,13 @@ function NotesCell({
           strict={false}
           value={value}
           shouldSaveFromKey={shouldSaveFromKey}
+          getHighlightedIndex={() => 0}
           clearOnBlur={false}
           closeOnBlur
           openOnFocus={false}
           onSelect={onSelect}
           inputProps={{
+            ref: inputRef,
             onBlur,
             onKeyDown,
             onKeyUp,
@@ -2070,7 +2073,6 @@ function NotesCell({
             value: inputValue,
             onChange: (v) => setInputValue(v.target.value),
           }}
-          getHighlightedIndex={() => null}
           suggestions={tagOptions}
           renderItems={(items, getItemProps, highlightedIndex) => {
             return (
@@ -2107,6 +2109,7 @@ function NotesCell({
                       }))}
                     >
                       <NotesTagFormatter notes={item.name} />
+                      {highlightedIndex}
                     </div>
                   ))}
                 </View>
