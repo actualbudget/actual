@@ -78,10 +78,7 @@ export function EnvelopeBudgetProvider({
       const isIncome = categoriesById?.[categoryId]?.is_income;
 
       if (isIncome) {
-        const incomeTotal = txs.reduce(
-          (sum, tx) => sum + (tx.amount ?? 0),
-          0,
-        );
+        const incomeTotal = txs.reduce((sum, tx) => sum + (tx.amount ?? 0), 0);
         if (incomeTotal !== 0) {
           incomeByMonth.set(
             month,
