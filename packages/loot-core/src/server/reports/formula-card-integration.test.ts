@@ -32,7 +32,8 @@ try {
 }
 
 beforeEach(async () => {
-  await global.emptyDatabase()();
+  // oxlint-disable-next-line typescript/no-explicit-any
+  await (global as any).emptyDatabase()();
   await loadMappings();
 });
 
@@ -74,13 +75,16 @@ describe('Formula Card - Integration Tests with Queries', () => {
     });
   }
 
-  async function executeQuery(conditions: unknown[], timeFrame?: unknown) {
+  async function executeQuery(
+    conditions: unknown[],
+    timeFrame?: { start?: string; end?: string },
+  ) {
     // Simulate query execution like the formula card does
     const { filters } = conditionsToAQL(conditions);
 
     let transQuery = q('transactions');
 
-    if (timeFrame && timeFrame.start && timeFrame.end) {
+    if (timeFrame?.start && timeFrame?.end) {
       transQuery = transQuery.filter({
         $and: [
           { date: { $gte: timeFrame.start } },
@@ -196,7 +200,7 @@ describe('Formula Card - Integration Tests with Queries', () => {
       // Integration test: Calculate spending as percentage of income
       const accountId = await createTestAccount('Checking');
       const groupId = await createCategoryGroup('Income');
-      const incomeCategory = await createTestCategory('Salary', groupId, 1);
+      const incomeCategory = await createTestCategory('Salary', groupId, true);
       const expenseGroup = await createCategoryGroup('Expenses');
       const expenseCategory = await createTestCategory('Food', expenseGroup);
 
@@ -238,7 +242,7 @@ describe('Formula Card - Integration Tests with Queries', () => {
       // Integration test: Format large numbers from queries
       const accountId = await createTestAccount('Investment');
       const groupId = await createCategoryGroup('Income');
-      const categoryId = await createTestCategory('Dividends', groupId, 1);
+      const categoryId = await createTestCategory('Dividends', groupId, true);
 
       // Create large transactions
       await createTestTransaction({
@@ -313,7 +317,7 @@ describe('Formula Card - Integration Tests with Queries', () => {
       // Integration test: Calculate savings rate
       const accountId = await createTestAccount('Checking');
       const incomeGroup = await createCategoryGroup('Income');
-      const incomeCategory = await createTestCategory('Salary', incomeGroup, 1);
+      const incomeCategory = await createTestCategory('Salary', incomeGroup, true);
       const savingsGroup = await createCategoryGroup('Savings');
       const savingsCategory = await createTestCategory('Savings', savingsGroup);
 
@@ -355,7 +359,7 @@ describe('Formula Card - Integration Tests with Queries', () => {
       // Integration test: Complex budget analysis
       const accountId = await createTestAccount('Checking');
       const incomeGroup = await createCategoryGroup('Income');
-      const incomeCategory = await createTestCategory('Salary', incomeGroup, 1);
+      const incomeCategory = await createTestCategory('Salary', incomeGroup, true);
       const needsGroup = await createCategoryGroup('Needs');
       const needsCategory = await createTestCategory('Housing', needsGroup);
       const wantsGroup = await createCategoryGroup('Wants');
@@ -439,7 +443,7 @@ describe('Formula Card - Integration Tests with Queries', () => {
       // Integration test: Multi-line summary with CHAR(10)
       const accountId = await createTestAccount('Checking');
       const incomeGroup = await createCategoryGroup('Income');
-      const incomeCategory = await createTestCategory('Salary', incomeGroup, 1);
+      const incomeCategory = await createTestCategory('Salary', incomeGroup, true);
       const expenseGroup = await createCategoryGroup('Expenses');
       const expenseCategory = await createTestCategory('Total', expenseGroup);
 
@@ -586,7 +590,7 @@ describe('Formula Card - Integration Tests with Queries', () => {
       // Integration test: Safe division with empty query
       const accountId = await createTestAccount('Checking');
       const groupId = await createCategoryGroup('Income');
-      const incomeCategory = await createTestCategory('Salary', groupId, 1);
+      const incomeCategory = await createTestCategory('Salary', groupId, true);
       const expenseGroup = await createCategoryGroup('Expenses');
       const expenseCategory = await createTestCategory('Food', expenseGroup);
 

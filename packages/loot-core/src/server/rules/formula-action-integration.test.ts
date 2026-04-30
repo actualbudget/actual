@@ -14,7 +14,8 @@ import {
 // Note: Rules must have conditions on 'imported_payee' or 'payee' to be indexed and executed
 
 beforeEach(async () => {
-  await global.emptyDatabase()();
+  // oxlint-disable-next-line typescript/no-explicit-any
+  await (global as any).emptyDatabase()();
   resetState();
   await loadMappings();
   await loadRules();
@@ -905,12 +906,12 @@ describe('Formula Rule Actions - Integration Tests', () => {
         notes: '',
       });
 
-      const lines = transaction.notes.split('\n');
+      const lines = transaction.notes?.split('\n');
       expect(lines).toHaveLength(4);
-      expect(lines[0]).toBe('Transaction Summary');
-      expect(lines[1]).toBe('Amount: -$100.00');
-      expect(lines[2]).toBe('Tax (10%): -$10.00');
-      expect(lines[3]).toBe('Total: -$110.00');
+      expect(lines?.[0]).toBe('Transaction Summary');
+      expect(lines?.[1]).toBe('Amount: -$100.00');
+      expect(lines?.[2]).toBe('Tax (10%): -$10.00');
+      expect(lines?.[3]).toBe('Total: -$110.00');
     });
   });
 
