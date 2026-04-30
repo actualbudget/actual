@@ -16,7 +16,7 @@ jobs:
           GitHub Issues is reserved for bug reports and feature requests, so tech support tickets are automatically closed. The fastest way to get help is to ask the community on [Discord](https://discord.gg/pRYNYr4W5A) — that's where most of the community lives and can help you in real time.
 
           <!-- tech-support-auto-close-comment -->"
-          
+
           gh issue close "$ISSUE_URL"
         env:
           ISSUE_URL: https://github.com/actualbudget/actual/issues/${{ github.event.issue.number }}
