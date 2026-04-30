@@ -355,7 +355,7 @@ export function BudgetAutomationsBody({
               justifyContent: 'center',
             }}
           >
-            <Trans>+ Add an automation</Trans>
+            + <Trans>Add an automation</Trans>
           </Button>
         </View>
 
