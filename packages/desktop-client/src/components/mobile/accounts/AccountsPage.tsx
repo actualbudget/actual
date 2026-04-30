@@ -165,7 +165,7 @@ function AccountListItem({
             backgroundColor: theme.tableBackground,
             border: 'none',
             borderRadius: 0,
-            paddingLeft: 10,
+            paddingLeft: 8,
           }}
           data-testid="account-list-item"
           onPress={() => onSelect(account)}
@@ -184,7 +184,7 @@ function AccountListItem({
                   : isFailed
                     ? theme.sidebarItemBackgroundFailed
                     : theme.sidebarItemBackgroundPositive,
-                marginRight: '8px',
+                marginRight: '6px',
                 width: 8,
                 flexShrink: 0,
                 height: 8,
