@@ -381,7 +381,7 @@ describe('SharedWorker coordinator', () => {
 
   describe('tab disconnection', () => {
     it('leader disconnect promotes follower', () => {
-      setupBudgetGroup(coordinator, 'budget-1');
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
 
       const follower = connectTab(coordinator);
       sendInit(follower);
@@ -391,10 +391,6 @@ describe('SharedWorker coordinator', () => {
         args: { id: 'budget-1' },
       });
       follower.postMessage.mockClear();
-
-      // Find current leader to disconnect it
-      const group = coordinator.getState().budgetGroups.get('budget-1');
-      const leader = group.leaderPort as MockPort;
 
       // Leader closes tab
       sendMsg(leader, { type: 'tab-closing' });
@@ -479,6 +475,116 @@ describe('SharedWorker coordinator', () => {
       vi.advanceTimersByTime(10_000);
 
       expect(coordinator.getState().connectedPorts.includes(leader)).toBe(true);
+    });
+  });
+
+  describe('__resume-tab', () => {
+    it('keeps the lobby leader attached during startup resume signals', () => {
+      const leader = connectTab(coordinator);
+      sendInit(leader);
+      leader.postMessage.mockClear();
+
+      sendMsg(leader, { type: '__resume-tab', budgetId: null });
+
+      expect(coordinator.getState().portToBudget.get(leader)).toBe('__lobby');
+      expect(coordinator.getState().unassignedPorts.has(leader)).toBe(false);
+      expect(
+        coordinator.getState().budgetGroups.get('__lobby').leaderPort,
+      ).toBe(leader);
+      expect(leader.postMessage).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__role-change',
+          role: 'UNASSIGNED',
+        }),
+      );
+    });
+
+    it('does not route orphaned ports through another live budget before they resume', () => {
+      const orphanedLeader = setupBudgetGroup(coordinator, 'budget-1');
+      const liveLeader = setupBudgetGroup(coordinator, 'budget-2');
+      orphanedLeader.postMessage.mockClear();
+      liveLeader.postMessage.mockClear();
+
+      vi.advanceTimersByTime(10_000);
+      sendMsg(liveLeader, { type: '__heartbeat-pong' });
+      vi.advanceTimersByTime(10_000);
+
+      sendMsg(orphanedLeader, { id: 'req-orphan', name: 'get-budgets' });
+
+      expect(liveLeader.postMessage).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__to-worker',
+          msg: expect.objectContaining({ name: 'get-budgets' }),
+        }),
+      );
+    });
+
+    it('re-elects an orphaned solo tab as leader and restores its budget', () => {
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
+      leader.postMessage.mockClear();
+
+      vi.advanceTimersByTime(10_000);
+      vi.advanceTimersByTime(10_000);
+
+      sendMsg(leader, { type: '__resume-tab', budgetId: 'budget-1' });
+
+      expect(coordinator.getState().connectedPorts.includes(leader)).toBe(true);
+      expect(coordinator.getState().portToBudget.get(leader)).toBe('budget-1');
+      expect(
+        coordinator.getState().budgetGroups.get('budget-1').leaderPort,
+      ).toBe(leader);
+      expect(leader.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__role-change',
+          role: 'LEADER',
+          budgetId: 'budget-1',
+        }),
+      );
+      expect(leader.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__become-leader',
+          budgetToRestore: 'budget-1',
+        }),
+      );
+    });
+
+    it('reattaches an orphaned tab to an existing budget group as follower', () => {
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
+
+      const follower = connectTab(coordinator);
+      sendInit(follower);
+      sendMsg(follower, {
+        id: 'lb-f',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+      follower.postMessage.mockClear();
+
+      vi.advanceTimersByTime(10_000);
+      sendMsg(leader, { type: '__heartbeat-pong' });
+      vi.advanceTimersByTime(10_000);
+
+      sendMsg(follower, { type: '__resume-tab', budgetId: 'budget-1' });
+
+      expect(coordinator.getState().connectedPorts.includes(follower)).toBe(
+        true,
+      );
+      expect(
+        coordinator
+          .getState()
+          .budgetGroups.get('budget-1')
+          .followers.has(follower),
+      ).toBe(true);
+      expect(follower.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__role-change',
+          role: 'FOLLOWER',
+          budgetId: 'budget-1',
+        }),
+      );
+      expect(follower.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'connect' }),
+      );
     });
   });
 
@@ -789,6 +895,98 @@ describe('SharedWorker coordinator', () => {
       expect(group.requestToPort.get('restore-1')).toBe(leader);
       expect(group.requestNames.get('restore-1')).toBe('load-budget');
       expect(group.requestBudgetIds.get('restore-1')).toBe('budget-1');
+    });
+
+    it('waits to broadcast connect until a promoted leader finishes restoring', () => {
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
+
+      const follower = connectTab(coordinator);
+      sendInit(follower);
+      sendMsg(follower, {
+        id: 'lb-f',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+      follower.postMessage.mockClear();
+
+      sendMsg(leader, { id: 'cb-leader', name: 'close-budget' });
+      sendMsg(follower, {
+        type: '__track-restore',
+        requestId: '__restore-budget',
+        budgetId: 'budget-1',
+      });
+
+      const reloaded = connectTab(coordinator);
+      sendInit(reloaded);
+      reloaded.postMessage.mockClear();
+
+      sendMsg(follower, {
+        type: '__from-worker',
+        msg: { type: 'connect' },
+      });
+
+      expect(
+        coordinator.getState().budgetGroups.get('budget-1').backendConnected,
+      ).toBe(false);
+      expect(reloaded.postMessage).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'connect' }),
+      );
+
+      sendMsg(follower, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: '__restore-budget', result: {} },
+      });
+
+      expect(
+        coordinator.getState().budgetGroups.get('budget-1').backendConnected,
+      ).toBe(true);
+      expect(reloaded.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'connect' }),
+      );
+    });
+
+    it('still broadcasts connect if restore finishes before the worker connect event', () => {
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
+
+      const follower = connectTab(coordinator);
+      sendInit(follower);
+      sendMsg(follower, {
+        id: 'lb-f',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+
+      sendMsg(leader, { id: 'cb-leader', name: 'close-budget' });
+      sendMsg(follower, {
+        type: '__track-restore',
+        requestId: '__restore-budget',
+        budgetId: 'budget-1',
+      });
+
+      const reloaded = connectTab(coordinator);
+      sendInit(reloaded);
+      reloaded.postMessage.mockClear();
+
+      sendMsg(follower, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: '__restore-budget', result: {} },
+      });
+
+      expect(reloaded.postMessage).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'connect' }),
+      );
+
+      sendMsg(follower, {
+        type: '__from-worker',
+        msg: { type: 'connect' },
+      });
+
+      expect(
+        coordinator.getState().budgetGroups.get('budget-1').backendConnected,
+      ).toBe(true);
+      expect(reloaded.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'connect' }),
+      );
     });
   });
 
