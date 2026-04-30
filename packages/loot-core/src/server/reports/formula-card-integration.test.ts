@@ -317,7 +317,11 @@ describe('Formula Card - Integration Tests with Queries', () => {
       // Integration test: Calculate savings rate
       const accountId = await createTestAccount('Checking');
       const incomeGroup = await createCategoryGroup('Income');
-      const incomeCategory = await createTestCategory('Salary', incomeGroup, true);
+      const incomeCategory = await createTestCategory(
+        'Salary',
+        incomeGroup,
+        true,
+      );
       const savingsGroup = await createCategoryGroup('Savings');
       const savingsCategory = await createTestCategory('Savings', savingsGroup);
 
@@ -359,7 +363,11 @@ describe('Formula Card - Integration Tests with Queries', () => {
       // Integration test: Complex budget analysis
       const accountId = await createTestAccount('Checking');
       const incomeGroup = await createCategoryGroup('Income');
-      const incomeCategory = await createTestCategory('Salary', incomeGroup, true);
+      const incomeCategory = await createTestCategory(
+        'Salary',
+        incomeGroup,
+        true,
+      );
       const needsGroup = await createCategoryGroup('Needs');
       const needsCategory = await createTestCategory('Housing', needsGroup);
       const wantsGroup = await createCategoryGroup('Wants');
@@ -443,7 +451,11 @@ describe('Formula Card - Integration Tests with Queries', () => {
       // Integration test: Multi-line summary with CHAR(10)
       const accountId = await createTestAccount('Checking');
       const incomeGroup = await createCategoryGroup('Income');
-      const incomeCategory = await createTestCategory('Salary', incomeGroup, true);
+      const incomeCategory = await createTestCategory(
+        'Salary',
+        incomeGroup,
+        true,
+      );
       const expenseGroup = await createCategoryGroup('Expenses');
       const expenseCategory = await createTestCategory('Total', expenseGroup);
 
