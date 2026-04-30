@@ -268,8 +268,8 @@ function SingleAutocomplete<T extends AutocompleteItem>({
   const narrowInputStyle =
     embedded && isNarrowWidth
       ? {
-          ...styles.mobileMenuItem,
-        }
+        ...styles.mobileMenuItem,
+      }
       : {};
 
   inputProps = {
@@ -517,21 +517,17 @@ function SingleAutocomplete<T extends AutocompleteItem>({
                         close();
                       }
                     },
+                    onKeyUp: (e: KeyboardEvent<HTMLInputElement>) => {
+                      const { onKeyUp } = inputProps || {};
+                      onKeyUp?.(e)
+                    },
                     onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {
                       const { onKeyDown } = inputProps || {};
-
-                      // in non-strict contexts, where the field can contain content
-                      // beyond just the dropdown options, if there are no options to highlight
-                      // (highlightedIndex) this is sufficient info to consider the dropdown closed
-                      // const fakeClosed = highlightedIndex == null && !strict
-                      // if (fakeClosed) return;
 
                       // If the dropdown is open, an item is highlighted, and the user
                       // pressed enter, always capture that and handle it ourselves
                       if (isOpen) {
-                        if (filteredSuggestions.length === 0 && !strict) {
-                          close();
-                        } else if (e.key === 'Enter') {
+                        if (e.key === 'Enter') {
                           if (highlightedIndex != null) {
                             if (
                               inst.lastChangeType ===
@@ -785,10 +781,10 @@ function MultiAutocomplete<T extends AutocompleteItem>({
             className={
               typeof inputClassName === 'function'
                 ? renderProps =>
-                    cx(
-                      defaultMultiAutocompleteInputClassName,
-                      inputClassName(renderProps),
-                    )
+                  cx(
+                    defaultMultiAutocompleteInputClassName,
+                    inputClassName(renderProps),
+                  )
                 : cx(defaultMultiAutocompleteInputClassName, inputClassName)
             }
           />
