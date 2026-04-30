@@ -560,15 +560,19 @@ async function fetchQueryCount(config: QueryConfig): Promise<number> {
 }
 
 // Helper: Extract category-based conditions (ignore transaction-specific filters)
+// BUG FIX: Support both 'category' and 'category_group' fields
 function extractCategoryConditions(
   conditions: RuleConditionEntity[],
 ): RuleConditionEntity[] {
   return conditions.filter(
-    cond => !cond.customName && cond.field === 'category',
+    cond =>
+      !cond.customName &&
+      (cond.field === 'category' || cond.field === 'category_group'),
   );
 }
 
 // Helper: Evaluate category conditions to get matching categories
+// BUG FIX: Support both 'category' and 'category_group' fields by expanding groups to their member categories
 async function getCategoriesFromConditions(
   allCategories: CategoryEntity[],
   conditions: RuleConditionEntity[],
@@ -581,32 +585,55 @@ async function getCategoriesFromConditions(
       .map((cat: CategoryEntity) => cat.id);
   }
 
+  // Get category groups for resolving group IDs to names
+  const { grouped: categoryGroups } = await send('get-categories');
+  const groupNameById = new Map(
+    categoryGroups.map((g: { id: string; name: string }) => [g.id, g.name]),
+  );
+
   // Evaluate each condition to get sets of matching categories
   const conditionResults = conditions.map(cond => {
+    // For category_group conditions, we check cat.group; for category, we check cat.id
+    const getKey = (cat: CategoryEntity) =>
+      cond.field === 'category_group' ? cat.group : cat.id;
+
     const matching = allCategories.filter((cat: CategoryEntity) => {
+      const key = getKey(cat);
+
+      // For text-based operators, use the human-readable name
+      // For category_group, resolve UUID → name via the map; for category, use the category's own name
+      const textValue =
+        cond.field === 'category_group'
+          ? (groupNameById.get(key) ?? key)
+          : cat.name;
+
       if (cond.op === 'is') {
-        return cond.value === cat.id;
+        return cond.value === key;
       } else if (cond.op === 'isNot') {
-        return cond.value !== cat.id;
+        return cond.value !== key;
       } else if (cond.op === 'oneOf') {
-        return cond.value.includes(cat.id);
+        return cond.value.includes(key);
       } else if (cond.op === 'notOneOf') {
-        return !cond.value.includes(cat.id);
+        return !cond.value.includes(key);
       } else if (cond.op === 'contains') {
-        return cat.name.includes(cond.value as string);
+        return textValue
+          .toLowerCase()
+          .includes((cond.value as string).toLowerCase());
       } else if (cond.op === 'doesNotContain') {
-        return !cat.name.includes(cond.value as string);
+        return !textValue
+          .toLowerCase()
+          .includes((cond.value as string).toLowerCase());
       } else if (cond.op === 'matches') {
         try {
-          return new RegExp(cond.value as string).test(cat.name);
+          return new RegExp(cond.value as string, 'i').test(textValue);
         } catch (e) {
           console.warn('Invalid regexp in matches condition', e);
-          return true;
+          return false;
         }
       }
-      // Unknown operator: include category by default and log warning
+      // Unknown operator: exclude category by default and log warning
       console.warn(`Unknown category condition operator: ${cond.op}`);
-      return true;
+      return false;
     });
     return matching.map((cat: CategoryEntity) => cat.id);
   });
