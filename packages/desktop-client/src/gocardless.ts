@@ -1,5 +1,8 @@
-import { send } from 'loot-core/platform/client/connection';
-import type { AccountEntity, GoCardlessToken } from 'loot-core/types/models';
+import { send } from '@actual-app/core/platform/client/connection';
+import type {
+  AccountEntity,
+  GoCardlessToken,
+} from '@actual-app/core/types/models';
 
 import { pushModal } from './modals/modalsSlice';
 import type { AppDispatch } from './redux/store';

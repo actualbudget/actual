@@ -1,4 +1,7 @@
-import type { AccountEntity, BankSyncProviders } from 'loot-core/types/models';
+import type {
+  AccountEntity,
+  BankSyncProviders,
+} from '@actual-app/core/types/models';
 
 export type SyncProviders = BankSyncProviders | 'unlinked';
 export type GroupedBankSyncAccounts = Partial<

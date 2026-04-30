@@ -5,6 +5,31 @@
   "files": [
     "build"
   ],
+  "imports": {
+    "#redux": "./src/redux/index.ts",
+    "#gocardless": "./src/gocardless.ts",
+    "#auth/AuthProvider": "./src/auth/AuthProvider.tsx",
+    "#auth/types": "./src/auth/types.ts",
+    "#components/alerts": "./src/components/alerts.tsx",
+    "#components/banksync/BuiltInProviders": "./src/components/banksync/BuiltInProviders.tsx",
+    "#components/banksync/bankSyncUtils": "./src/components/banksync/bankSyncUtils.ts",
+    "#components/banksync/useBuiltInBankSyncProviders": "./src/components/banksync/useBuiltInBankSyncProviders.ts",
+    "#components/common/Link": "./src/components/common/Link.tsx",
+    "#components/common/Modal": "./src/components/common/Modal.tsx",
+    "#components/common/Search": "./src/components/common/Search.tsx",
+    "#components/mobile/MobileNavTabs": "./src/components/mobile/MobileNavTabs.tsx",
+    "#components/Page": "./src/components/Page.tsx",
+    "#components/ServerContext": "./src/components/ServerContext.tsx",
+    "#hooks/useAccounts": "./src/hooks/useAccounts.ts",
+    "#hooks/useGlobalPref": "./src/hooks/useGlobalPref.ts",
+    "#hooks/useGoCardlessStatus": "./src/hooks/useGoCardlessStatus.ts",
+    "#hooks/useNavigate": "./src/hooks/useNavigate.ts",
+    "#hooks/usePluggyAiStatus": "./src/hooks/usePluggyAiStatus.ts",
+    "#hooks/useSimpleFinStatus": "./src/hooks/useSimpleFinStatus.ts",
+    "#hooks/useSyncServerStatus": "./src/hooks/useSyncServerStatus.ts",
+    "#modals/modalsSlice": "./src/modals/modalsSlice.ts",
+    "#notifications/notificationsSlice": "./src/notifications/notificationsSlice.ts"
+  },
   "scripts": {
     "start": "cross-env PORT=3001 vite",
     "start:browser": "cross-env ./bin/watch-browser",

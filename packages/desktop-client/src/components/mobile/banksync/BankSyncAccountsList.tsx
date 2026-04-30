@@ -4,16 +4,16 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import type { AccountEntity } from 'loot-core/types/models';
+import type { AccountEntity } from '@actual-app/core/types/models';
 
-import { BankSyncAccountsListItem } from './BankSyncAccountsListItem';
-
-import { getGroupedBankSyncEntries } from '@desktop-client/components/banksync/bankSyncUtils';
 import type {
   GroupedBankSyncAccounts,
   SyncProviders,
-} from '@desktop-client/components/banksync/bankSyncUtils';
-import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
+} from '#components/banksync/bankSyncUtils';
+import { getGroupedBankSyncEntries } from '#components/banksync/bankSyncUtils';
+import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
+
+import { BankSyncAccountsListItem } from './BankSyncAccountsListItem';
 
 type BankSyncAccountsListProps = {
   groupedAccounts: GroupedBankSyncAccounts;
