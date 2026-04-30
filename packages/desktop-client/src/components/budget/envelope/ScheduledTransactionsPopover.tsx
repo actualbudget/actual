@@ -167,8 +167,8 @@ export function ScheduledTransactionsPopover({
                 : undefined;
               const displayName =
                 tx.notes ||
-                payeeName ||
                 schedule?.name ||
+                payeeName ||
                 '—';
               const date = monthUtils.format(tx.date, 'MMM d');
               const amountColor =
