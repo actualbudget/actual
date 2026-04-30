@@ -16,20 +16,20 @@
   },
   "dependencies": {
     "@actual-app/sync-server": "workspace:*",
-    "better-sqlite3": "^12.6.2",
-    "fs-extra": "^11.3.4",
+    "better-sqlite3": "^12.8.0",
     "promise-retry": "^2.0.1"
   },
   "devDependencies": {
     "@actual-app/core": "workspace:*",
+    "@actual-app/web": "workspace:*",
     "@electron/notarize": "3.1.1",
-    "@playwright/test": "1.58.2",
+    "@electron/rebuild": "^4.0.3",
+    "@playwright/test": "1.59.1",
     "@types/copyfiles": "^2",
-    "@types/fs-extra": "^11",
-    "@typescript/native-preview": "^7.0.0-dev.20260309.1",
+    "@typescript/native-preview": "beta",
     "copyfiles": "^2.4.1",
     "cross-env": "^10.1.0",
-    "electron": "39.8.4",
+    "electron": "39.8.5",
     "electron-builder": "26.8.1",
     "typescript-strict-plugin": "^2.4.4"
   },
@@ -47,6 +47,12 @@
       "!build/loot-core/lib-dist/electron/{browser,bundle.mobile*}"
     ],
     "beforePack": "./build/desktop-electron/beforePackHook.js",
+    "afterSign": "./build/desktop-electron/afterSignHook.js",
+    "electronFuses": {
+      "runAsNode": false,
+      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeCliInspectArguments": false
+    },
     "mac": {
       "category": "public.app-category.finance",
       "icon": "icons/icon.icns",

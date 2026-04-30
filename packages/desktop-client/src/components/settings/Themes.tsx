@@ -1,46 +1,53 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { SvgCode } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
 import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
 import { theme as themeStyle } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
+import type { DarkTheme, Theme } from '@actual-app/core/types/prefs';
 import { css } from '@emotion/css';
 
-import type { DarkTheme, Theme } from 'loot-core/types/prefs';
-
-import { ThemeInstaller } from './ThemeInstaller';
-import { Column, Setting } from './UI';
-
-import { useSidebar } from '@desktop-client/components/sidebar/SidebarProvider';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
+import { useSidebar } from '#components/sidebar/SidebarProvider';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useGlobalPref } from '#hooks/useGlobalPref';
 import {
   darkThemeOptions,
   themeOptions,
   usePreferredDarkTheme,
   useTheme,
-} from '@desktop-client/style';
+} from '#style';
 import {
   parseInstalledTheme,
   serializeInstalledTheme,
-} from '@desktop-client/style/customThemes';
-import type { InstalledTheme } from '@desktop-client/style/customThemes';
+} from '#style/customThemes';
+import type { InstalledTheme } from '#style/customThemes';
+
+import { ThemeInstaller } from './ThemeInstaller';
+import { Column, Setting } from './UI';
 
 const INSTALL_NEW_VALUE = '__install_new__';
 const INSTALL_CUSTOM_LIGHT = '__install_custom_light__';
 const INSTALL_CUSTOM_DARK = '__install_custom_dark__';
+
+type InstallerState = {
+  slot: 'light' | 'dark';
+  catalogMode?: 'light' | 'dark';
+  switchThemeOnSuccess?: Theme;
+} | null;
 
 export function ThemeSettings() {
   const { t } = useTranslation();
   const sidebar = useSidebar();
   const [theme, switchTheme] = useTheme();
   const [darkTheme, switchDarkTheme] = usePreferredDarkTheme();
-  const [showInstaller, setShowInstaller] = useState<
-    'single' | 'light' | 'dark' | null
-  >(null);
+  const [showInstaller, setShowInstaller] = useState<InstallerState>(null);
+  const showInstallerRef = useRef<InstallerState>(null);
+  showInstallerRef.current = showInstaller;
 
   const customThemesEnabled = useFeatureFlag('customThemes');
 
@@ -51,6 +58,8 @@ export function ThemeSettings() {
   const [installedDarkThemeJson, setInstalledDarkThemeJson] = useGlobalPref(
     'installedCustomDarkTheme',
   );
+  const [customCssOverride] = useGlobalPref('customCssOverride');
+  const hasCustomCssOverride = Boolean(customCssOverride?.trim());
 
   const installedCustomLightTheme = parseInstalledTheme(
     installedLightThemeJson,
@@ -125,7 +134,10 @@ export function ThemeSettings() {
   const handleThemeChange = useCallback(
     (value: string) => {
       if (value === INSTALL_NEW_VALUE) {
-        setShowInstaller('single');
+        setShowInstaller({
+          slot: 'light',
+          switchThemeOnSuccess: theme === 'auto' ? 'light' : undefined,
+        });
         return;
       }
 
@@ -135,14 +147,14 @@ export function ThemeSettings() {
         switchTheme(value as Theme);
       }
     },
-    [setInstalledLightThemeJson, setInstalledDarkThemeJson, switchTheme],
+    [theme, setInstalledLightThemeJson, setInstalledDarkThemeJson, switchTheme],
   );
 
   // Handle light theme selection (auto mode)
   const handleLightThemeChange = useCallback(
     (value: string) => {
       if (value === INSTALL_CUSTOM_LIGHT) {
-        setShowInstaller('light');
+        setShowInstaller({ slot: 'light', catalogMode: 'light' });
         return;
       }
       if (value === 'light') {
@@ -156,7 +168,7 @@ export function ThemeSettings() {
   const handleDarkThemeChange = useCallback(
     (value: string) => {
       if (value === INSTALL_CUSTOM_DARK) {
-        setShowInstaller('dark');
+        setShowInstaller({ slot: 'dark', catalogMode: 'dark' });
         return;
       }
       if (!value.startsWith('custom-dark:')) {
@@ -167,33 +179,36 @@ export function ThemeSettings() {
     [setInstalledDarkThemeJson, switchDarkTheme],
   );
 
-  // Handle theme installation
   const handleInstall = useCallback(
     (newTheme: InstalledTheme) => {
-      if (showInstaller === 'light') {
-        setInstalledLightThemeJson(serializeInstalledTheme(newTheme));
-      } else if (showInstaller === 'dark') {
+      // Read via ref so a late-resolving install (dialog already closed) is
+      // dropped instead of writing to a stale slot.
+      const current = showInstallerRef.current;
+      if (!current) return;
+      if (current.slot === 'dark') {
         setInstalledDarkThemeJson(serializeInstalledTheme(newTheme));
       } else {
         setInstalledLightThemeJson(serializeInstalledTheme(newTheme));
-        if (theme === 'auto') {
-          switchTheme('light');
-        }
+      }
+      if (current.switchThemeOnSuccess) {
+        switchTheme(current.switchThemeOnSuccess);
       }
     },
-    [
-      showInstaller,
-      theme,
-      setInstalledLightThemeJson,
-      setInstalledDarkThemeJson,
-      switchTheme,
-    ],
+    [setInstalledLightThemeJson, setInstalledDarkThemeJson, switchTheme],
   );
 
   // Handle installer close
   const handleInstallerClose = useCallback(() => {
     setShowInstaller(null);
   }, []);
+
+  const handleEditOverride = useCallback(() => {
+    setShowInstaller(
+      theme === 'auto'
+        ? { slot: 'light', catalogMode: 'light' }
+        : { slot: 'light' },
+    );
+  }, [theme]);
 
   return (
     <Setting
@@ -221,17 +236,41 @@ export function ThemeSettings() {
               }}
             >
               <Column title={t('Theme')}>
-                <Select<string>
-                  onChange={handleThemeChange}
-                  value={getCurrentValue()}
-                  options={buildOptions()}
-                  className={css({
-                    '&[data-hovered]': {
-                      backgroundColor: themeStyle.buttonNormalBackgroundHover,
-                    },
-                    maxWidth: '100%',
-                  })}
-                />
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <Select<string>
+                    onChange={handleThemeChange}
+                    value={getCurrentValue()}
+                    options={buildOptions()}
+                    className={css({
+                      '&[data-hovered]': {
+                        backgroundColor: themeStyle.buttonNormalBackgroundHover,
+                      },
+                      maxWidth: '100%',
+                    })}
+                  />
+                  {customThemesEnabled && hasCustomCssOverride && (
+                    <Button
+                      variant="bare"
+                      aria-label={t(
+                        'Custom CSS override active — click to edit',
+                      )}
+                      onPress={handleEditOverride}
+                      style={{
+                        color: themeStyle.pageTextPositive,
+                        gap: 6,
+                      }}
+                    >
+                      <Trans>Custom CSS is active</Trans>
+                      <SvgCode style={{ width: 14, height: 14 }} />
+                    </Button>
+                  )}
+                </View>
               </Column>
               {theme === 'auto' && (
                 <>
@@ -281,15 +320,11 @@ export function ThemeSettings() {
               onInstall={handleInstall}
               onClose={handleInstallerClose}
               installedTheme={
-                showInstaller === 'dark'
+                showInstaller.slot === 'dark'
                   ? installedCustomDarkTheme
                   : installedCustomLightTheme
               }
-              mode={
-                showInstaller === 'light' || showInstaller === 'dark'
-                  ? showInstaller
-                  : undefined
-              }
+              mode={showInstaller.catalogMode}
             />
           )}
         </View>

@@ -176,15 +176,13 @@ export async function disableOpenID(loginSettings) {
     return { error: 'invalid-password' };
   }
 
-  if (passwordHash) {
-    const confirmed = bcrypt.compareSync(loginSettings.password, passwordHash);
+  const confirmed = bcrypt.compareSync(loginSettings.password, passwordHash);
 
-    if (!confirmed) {
-      return { error: 'invalid-password' };
-    }
+  if (!confirmed) {
+    return { error: 'invalid-password' };
   }
 
-  const { error } = bootstrapPassword(loginSettings.password) || {};
+  const { error } = bootstrapPassword(loginSettings.password);
   if (error) {
     return { error };
   }

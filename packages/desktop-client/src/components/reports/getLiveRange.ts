@@ -1,6 +1,6 @@
-import * as monthUtils from 'loot-core/shared/months';
-import type { TimeFrame } from 'loot-core/types/models';
-import type { SyncedPrefs } from 'loot-core/types/prefs';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type { TimeFrame } from '@actual-app/core/types/models';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import { ReportOptions } from './ReportOptions';
 import { getSpecificRange, validateRange } from './reportRanges';
@@ -55,6 +55,15 @@ export function getLiveRange(
           monthUtils.prevYear(monthUtils.currentMonth()),
         ) + '-01',
         monthUtils.prevYear(monthUtils.currentDate(), 'yyyy-MM-dd'),
+      );
+      break;
+    }
+    case 'last30Days': {
+      [dateStart, dateEnd] = validateRange(
+        earliestTransaction,
+        latestTransaction,
+        monthUtils.subDays(monthUtils.currentDay(), 29),
+        monthUtils.currentDay(),
       );
       break;
     }

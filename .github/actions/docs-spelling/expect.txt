@@ -61,6 +61,7 @@ Dockerfiles
 Dominguez
 DUSSDEDDXXX
 DUSSELDORF
+ecf
 EDATE
 ENTERCARD
 Entra
@@ -126,6 +127,7 @@ Moldovan
 murmurhash
 NETWORKDAYS
 nginx
+nodenext
 OIDC
 Okabe
 overbudgeted
@@ -139,8 +141,6 @@ pluggyai
 Poste
 PPABPLPK
 prefs
-Primoco
-Priotecs
 proactively
 Qatari
 QNTOFRP
@@ -171,7 +171,6 @@ SWEDBANK
 SWEDNOKK
 Synology
 systemctl
-tada
 taskbar
 templating
 THB

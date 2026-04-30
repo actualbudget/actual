@@ -7,10 +7,9 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { DashboardPageEntity } from '@actual-app/core/types/models';
 
-import type { DashboardPageEntity } from 'loot-core/types/models';
-
-import { useRenameDashboardPageMutation } from '@desktop-client/reports/mutations';
+import { useRenameDashboardPageMutation } from '#reports/mutations';
 
 type DashboardHeaderProps = {
   dashboard: DashboardPageEntity;

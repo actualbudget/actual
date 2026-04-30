@@ -1,6 +1,5 @@
 // @ts-strict-ignore
 import * as d from 'date-fns';
-import { v4 as uuidv4 } from 'uuid';
 
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
@@ -360,7 +359,7 @@ export async function findSchedules() {
 
       // Convert to schedule and return it
       return {
-        id: uuidv4(),
+        id: crypto.randomUUID(),
         account: winner.account,
         payee: winner.payee,
         date: winner.date,

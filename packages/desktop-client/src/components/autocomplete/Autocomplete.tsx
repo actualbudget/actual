@@ -15,13 +15,12 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View, viewStyles } from '@actual-app/components/view';
+import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 import { css, cx } from '@emotion/css';
 import Downshift from 'downshift';
 import type { StateChangeTypes } from 'downshift';
 
-import { getNormalisedString } from 'loot-core/shared/normalisation';
-
-import { useProperFocus } from '@desktop-client/hooks/useProperFocus';
+import { useProperFocus } from '#hooks/useProperFocus';
 
 type CommonAutocompleteProps<T extends AutocompleteItem> = {
   focused?: boolean;

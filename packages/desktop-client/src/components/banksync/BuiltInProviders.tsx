@@ -10,10 +10,10 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import type { BuiltInBankSyncProviderState } from './useBuiltInBankSyncProviders';
+import { Warning } from '#components/alerts';
+import { Link } from '#components/common/Link';
 
-import { Warning } from '@desktop-client/components/alerts';
-import { Link } from '@desktop-client/components/common/Link';
+import type { BuiltInBankSyncProviderState } from './useBuiltInBankSyncProviders';
 
 type BuiltInProvidersProps = {
   providers: BuiltInBankSyncProviderState[];

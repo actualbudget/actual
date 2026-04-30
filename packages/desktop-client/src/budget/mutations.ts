@@ -1,23 +1,21 @@
 import { useTranslation } from 'react-i18next';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { QueryClient, QueryKey } from '@tanstack/react-query';
-import type { TFunction } from 'i18next';
-import { v4 as uuidv4 } from 'uuid';
-
-import { send } from 'loot-core/platform/client/connection';
-import type { IntegerAmount } from 'loot-core/shared/util';
+import { send } from '@actual-app/core/platform/client/connection';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { QueryClient, QueryKey } from '@tanstack/react-query';
+import type { TFunction } from 'i18next';
+
+import { pushModal } from '#modals/modalsSlice';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
+import type { AppDispatch } from '#redux/store';
 
 import { categoryQueries } from './queries';
-
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
-import type { AppDispatch } from '@desktop-client/redux/store';
 
 function invalidateQueries(queryClient: QueryClient, queryKey?: QueryKey) {
   void queryClient.invalidateQueries({
@@ -33,7 +31,7 @@ function dispatchErrorNotification(
   dispatch(
     addNotification({
       notification: {
-        id: uuidv4(),
+        id: crypto.randomUUID(),
         type: 'error',
         message,
         pre: error ? error.message : undefined,

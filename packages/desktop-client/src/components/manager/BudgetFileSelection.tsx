@@ -28,19 +28,18 @@ import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
-
 import {
   isElectron,
   isNonProductionEnvironment,
-} from 'loot-core/shared/environment';
+} from '@actual-app/core/shared/environment';
 import type {
   File,
   LocalFile,
   RemoteFile,
   SyncableLocalFile,
   SyncedLocalFile,
-} from 'loot-core/types/file';
+} from '@actual-app/core/types/file';
+import { css } from '@emotion/css';
 
 import {
   closeAndDownloadBudget,
@@ -49,14 +48,14 @@ import {
   downloadBudget,
   loadAllFiles,
   loadBudget,
-} from '@desktop-client/budgetfiles/budgetfilesSlice';
-import { useMultiuserEnabled } from '@desktop-client/components/ServerContext';
-import { useInitialMount } from '@desktop-client/hooks/useInitialMount';
-import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
-import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
-import { getUserData } from '@desktop-client/users/usersSlice';
+} from '#budgetfiles/budgetfilesSlice';
+import { useMultiuserEnabled } from '#components/ServerContext';
+import { useInitialMount } from '#hooks/useInitialMount';
+import { useMetadataPref } from '#hooks/useMetadataPref';
+import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch, useSelector } from '#redux';
+import { getUserData } from '#users/usersSlice';
 
 function getFileDescription(file: File, t: (key: string) => string) {
   if (file.state === 'unknown') {

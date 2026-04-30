@@ -1,12 +1,11 @@
 import React from 'react';
 
 import { theme } from '@actual-app/components/theme';
+import type { TagEntity } from '@actual-app/core/types/models';
 
-import type { TagEntity } from 'loot-core/types/models';
+import { Table, useTableNavigator } from '#components/table';
 
 import { TagRow } from './TagRow';
-
-import { Table, useTableNavigator } from '@desktop-client/components/table';
 
 type TagsListProps = {
   tags: TagEntity[];

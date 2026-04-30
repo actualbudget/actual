@@ -20,7 +20,7 @@ import type {
   Template,
 } from '#types/models/templates';
 
-import { getSheetBoolean, getSheetValue, isReflectBudget } from './actions';
+import { getSheetBoolean, getSheetValue, isTrackingBudget } from './actions';
 import { runSchedule } from './schedule-template';
 import { getActiveSchedules } from './statements';
 
@@ -66,7 +66,7 @@ export class CategoryTemplateContext {
     if (
       (fromLastMonth < 0 && !carryover) || // overspend no carryover
       category.is_income || // tracking budget income categories
-      (isReflectBudget() && !carryover) // tracking budget regular categories
+      (isTrackingBudget() && !carryover) // tracking budget regular categories
     ) {
       fromLastMonth = 0;
     }

@@ -1,5 +1,4 @@
 import request from 'supertest';
-import { v4 as uuidv4 } from 'uuid';
 
 import { getAccountDb, getLoginMethod, getServerPrefs } from './account-db';
 import { bootstrapPassword } from './accounts/password';
@@ -28,7 +27,7 @@ const createSession = (userId, sessionToken, authMethod = null) => {
   );
 };
 
-const generateSessionToken = () => `token-${uuidv4()}`;
+const generateSessionToken = () => `token-${crypto.randomUUID()}`;
 
 const clearServerPrefs = () => {
   getAccountDb().mutate('DELETE FROM server_prefs');
@@ -98,8 +97,8 @@ describe('/change-password', () => {
     basicPasswordToken;
 
   beforeEach(() => {
-    adminUserId = uuidv4();
-    basicUserId = uuidv4();
+    adminUserId = crypto.randomUUID();
+    basicUserId = crypto.randomUUID();
     adminPasswordToken = generateSessionToken();
     adminOpenidToken = generateSessionToken();
     basicPasswordToken = generateSessionToken();
@@ -261,8 +260,8 @@ describe('/server-prefs', () => {
     let adminUserId, basicUserId, adminSessionToken, basicSessionToken;
 
     beforeEach(() => {
-      adminUserId = uuidv4();
-      basicUserId = uuidv4();
+      adminUserId = crypto.randomUUID();
+      basicUserId = crypto.randomUUID();
       adminSessionToken = generateSessionToken();
       basicSessionToken = generateSessionToken();
 

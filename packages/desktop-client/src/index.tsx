@@ -1,6 +1,6 @@
 // This file will initialize the app if we are in a real browser
 // environment (not electron)
-import './browser-preload';
+import '#browser-preload';
 import './fonts.scss';
 import './i18n';
 import React from 'react';
@@ -8,11 +8,10 @@ import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import type { NavigateFunction } from 'react-router';
 
+import { send } from '@actual-app/core/platform/client/connection';
+import { q } from '@actual-app/core/shared/query';
 import { bindActionCreators } from '@reduxjs/toolkit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
-import { send } from 'loot-core/platform/client/connection';
-import { q } from 'loot-core/shared/query';
 
 import * as accountsSlice from './accounts/accountsSlice';
 import * as appSlice from './app/appSlice';

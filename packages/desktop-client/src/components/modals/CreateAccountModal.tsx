@@ -8,18 +8,14 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { BuiltInProviders } from '@desktop-client/components/banksync/BuiltInProviders';
-import { useBuiltInBankSyncProviders } from '@desktop-client/components/banksync/useBuiltInBankSyncProviders';
-import { Link } from '@desktop-client/components/common/Link';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { BuiltInProviders } from '#components/banksync/BuiltInProviders';
+import { useBuiltInBankSyncProviders } from '#components/banksync/useBuiltInBankSyncProviders';
+import { Link } from '#components/common/Link';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { useNavigate } from '#hooks/useNavigate';
+import { pushModal } from '#modals/modalsSlice';
+import type { Modal as ModalType } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 type CreateAccountModalProps = Extract<
   ModalType,

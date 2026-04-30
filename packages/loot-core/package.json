@@ -3,13 +3,26 @@
   "version": "26.4.0",
   "description": "",
   "license": "ISC",
-  "typesVersions": {
-    "*": {
-      "types/*": [
-        "./src/types/*"
-      ]
-    }
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/actualbudget/actual.git",
+    "directory": "packages/loot-core"
   },
+  "files": [
+    "src",
+    "@types",
+    "migrations",
+    "typings",
+    "default-db.sqlite",
+    "!src/**/*.test.ts",
+    "!src/**/__tests__/**",
+    "!src/**/__snapshots__/**",
+    "!src/**/__mocks__/**",
+    "!@types/**/*.test.d.ts",
+    "!@types/**/*.test.d.ts.map",
+    "!@types/**/__tests__/**",
+    "!@types/**/__mocks__/**"
+  ],
   "imports": {
     "#platform/server/asyncStorage": {
       "electron": "./src/platform/server/asyncStorage/index.electron.ts",
@@ -42,8 +55,8 @@
       "default": "./src/platform/server/sqlite/index.ts"
     },
     "#platform/client/connection": {
-      "electron": "./src/platform/client/connection/index.ts",
-      "default": "./src/platform/client/connection/index.browser.ts"
+      "electron-renderer": "./src/platform/client/connection/index.electron.ts",
+      "default": "./src/platform/client/connection/index.ts"
     },
     "#server/encryption/encryption-internals": {
       "electron": "./src/server/encryption/encryption-internals.electron.ts",
@@ -75,6 +88,7 @@
     "#shared/*": "./src/shared/*.ts",
     "#types/*": "./src/types/*.ts",
     "#mocks/*": "./src/mocks/*.ts",
+    "#migrations/*": "./migrations/*.js",
     "#*": "./src/*.ts"
   },
   "exports": {
@@ -101,8 +115,8 @@
     "./client/undo": "./src/client/undo.ts",
     "./mocks": "./src/mocks/index.ts",
     "./platform/client/connection": {
-      "electron": "./src/platform/client/connection/index.ts",
-      "default": "./src/platform/client/connection/index.browser.ts"
+      "electron-renderer": "./src/platform/client/connection/index.electron.ts",
+      "default": "./src/platform/client/connection/index.ts"
     },
     "./platform/client/undo": "./src/platform/client/undo/index.ts",
     "./platform/exceptions": "./src/platform/exceptions/index.ts",
@@ -146,61 +160,61 @@
     "./lib-dist/electron/bundle.desktop.js": "./lib-dist/electron/bundle.desktop.js"
   },
   "scripts": {
-    "build:node": "cross-env NODE_ENV=production vite build --config ./vite.desktop.config.ts",
-    "watch:node": "cross-env NODE_ENV=development vite build --config ./vite.desktop.config.ts --watch",
-    "build:browser": "cross-env NODE_ENV=production ./bin/build-browser",
-    "watch:browser": "cross-env NODE_ENV=development ./bin/build-browser",
+    "build:node": "cross-env NODE_ENV=production vite build --config ./vite.desktop.config.mts",
+    "watch:node": "cross-env NODE_ENV=development vite build --config ./vite.desktop.config.mts --watch",
     "generate:i18n": "i18next",
     "test": "npm-run-all -cp 'test:*'",
     "test:node": "ENV=node vitest --run",
     "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
-    "typecheck": "tsgo -b && tsc-strict"
+    "typecheck": "tsgo -b && tsc-strict",
+    "build": "tsgo -b",
+    "prepack": "yarn build && ts-node scripts/add-types-conditions.mts",
+    "postpack": "ts-node scripts/restore-package-json.mts"
   },
   "dependencies": {
     "@jlongster/sql.js": "^1.6.7",
-    "@reduxjs/toolkit": "^2.11.2",
     "@rschedule/core": "^1.5.0",
-    "@rschedule/json-tools": "^1.5.0",
     "@rschedule/standard-date-adapter": "^1.5.0",
     "absurd-sql": "0.0.54",
-    "adm-zip": "^0.5.16",
-    "better-sqlite3": "^12.6.2",
-    "csv-parse": "^6.1.0",
-    "csv-stringify": "^6.6.0",
+    "adm-zip": "^0.5.17",
+    "better-sqlite3": "^12.8.0",
+    "csv-parse": "^6.2.1",
+    "csv-stringify": "^6.7.0",
     "date-fns": "^4.1.0",
+    "google-protobuf": "^3.21.4",
     "handlebars": "^4.7.9",
-    "lru-cache": "^11.2.6",
+    "hyperformula": "^3.2.0",
+    "lodash": "^4.18.1",
+    "lru-cache": "^11.2.7",
     "memoize-one": "^6.0.0",
     "mitt": "^3.0.1",
     "promise-retry": "^2.0.1",
     "typescript-strict-plugin": "^2.4.4",
     "ua-parser-js": "^2.0.9",
-    "uuid": "^13.0.0"
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
     "@actual-app/crdt": "workspace:*",
-    "@swc/core": "^1.15.18",
-    "@types/adm-zip": "^0.5.7",
+    "@types/adm-zip": "^0.5.8",
     "@types/better-sqlite3": "^7.6.13",
-    "@types/emscripten": "^1.41.5",
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
-    "@types/node": "^22.19.15",
-    "@typescript/native-preview": "^7.0.0-dev.20260309.1",
+    "@types/node": "^22.19.17",
+    "@typescript/native-preview": "beta",
     "assert": "^2.1.0",
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
     "cross-env": "^10.1.0",
     "crypto-browserify": "^3.12.1",
     "fake-indexeddb": "^6.2.5",
-    "fast-check": "4.5.3",
-    "i18next": "^25.8.14",
-    "jest-diff": "^30.2.0",
+    "fast-check": "^4.6.0",
+    "i18next": "^25.10.10",
+    "jest-diff": "^30.3.0",
     "jsverify": "^0.8.4",
     "mockdate": "^3.0.5",
     "npm-run-all": "^4.1.5",
     "path-browserify": "^1.0.1",
     "peggy": "5.1.0",
-    "rollup-plugin-visualizer": "^6.0.11",
+    "rollup-plugin-visualizer": "^7.0.1",
     "stream-browserify": "^3.0.0",
     "timers-browserify": "^2.0.12",
     "ts-node": "^10.9.2",
@@ -208,7 +222,7 @@
     "vite": "^8.0.5",
     "vite-plugin-node-polyfills": "^0.26.0",
     "vite-plugin-peggy-loader": "^2.0.1",
-    "vitest": "^4.1.0",
+    "vitest": "^4.1.2",
     "yargs": "^18.0.0"
   }
 }

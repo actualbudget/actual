@@ -11,18 +11,17 @@ import type { CSSProperties as EmotionCSSProperties } from '@actual-app/componen
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
-
 import {
   amountToCurrency,
   appendDecimals,
   currencyToAmount,
   reapplyThousandSeparators,
-} from 'loot-core/shared/util';
+} from '@actual-app/core/shared/util';
+import { css } from '@emotion/css';
 
-import { makeAmountFullStyle } from '@desktop-client/components/budget/util';
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { makeAmountFullStyle } from '#components/budget/util';
+import { useMergedRefs } from '#hooks/useMergedRefs';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 type AmountInputProps = {
   value: number;
@@ -80,9 +79,14 @@ const AmountInput = memo(function AmountInput({
     }
   };
 
-  const applyText = () => {
-    const parsed = currencyToAmount(text) || 0;
-    const newValue = editing ? parsed : value;
+  // Read from the DOM, not React state: onChange state updates flush
+  // asynchronously, so an onBlur/onKeyUp fired by the user's next action
+  // can see stale `text=''` and save 0 instead of the typed amount.
+  const applyText = (rawInput?: string) => {
+    const domText = rawInput ?? inputRef.current?.value ?? text;
+    const parsed = currencyToAmount(domText) || 0;
+    const hasPendingInput = domText !== '' || editing;
+    const newValue = hasPendingInput ? parsed : value;
 
     setValue(Math.abs(newValue));
     setEditing(false);
@@ -97,7 +101,7 @@ const AmountInput = memo(function AmountInput({
 
   const onUpdate = (value: string) => {
     const originalAmount = Math.abs(props.value);
-    const amount = applyText();
+    const amount = applyText(value);
     if (amount !== originalAmount) {
       props.onUpdate?.(value);
       props.onUpdateAmount?.(amount);
@@ -156,7 +160,7 @@ const AmountInput = memo(function AmountInput({
         }}
         data-testid="amount-input-text"
       >
-        {editing ? text : amountToCurrency(value)}
+        {editing ? text || amountToCurrency(0) : amountToCurrency(value)}
       </Text>
     </View>
   );

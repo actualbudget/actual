@@ -1,23 +1,26 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { send } from 'loot-core/platform/client/connection';
-import type { AccountEntity, BankSyncProviders } from 'loot-core/types/models';
-import type { SyncServerSimpleFinAccount } from 'loot-core/types/models/simplefin';
+import { send } from '@actual-app/core/platform/client/connection';
+import type {
+  AccountEntity,
+  BankSyncProviders,
+} from '@actual-app/core/types/models';
+import type { SyncServerSimpleFinAccount } from '@actual-app/core/types/models/simplefin';
+
+import { useAuth } from '#auth/AuthProvider';
+import { Permissions } from '#auth/types';
+import { useMultiuserEnabled } from '#components/ServerContext';
+import { authorizeBank } from '#gocardless';
+import { useGoCardlessStatus } from '#hooks/useGoCardlessStatus';
+import { usePluggyAiStatus } from '#hooks/usePluggyAiStatus';
+import { useSimpleFinStatus } from '#hooks/useSimpleFinStatus';
+import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
+import { pushModal } from '#modals/modalsSlice';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
 
 import { BUILT_IN_BANK_SYNC_PROVIDERS } from './bankSyncUtils';
-
-import { useAuth } from '@desktop-client/auth/AuthProvider';
-import { Permissions } from '@desktop-client/auth/types';
-import { useMultiuserEnabled } from '@desktop-client/components/ServerContext';
-import { authorizeBank } from '@desktop-client/gocardless';
-import { useGoCardlessStatus } from '@desktop-client/hooks/useGoCardlessStatus';
-import { usePluggyAiStatus } from '@desktop-client/hooks/usePluggyAiStatus';
-import { useSimpleFinStatus } from '@desktop-client/hooks/useSimpleFinStatus';
-import { useSyncServerStatus } from '@desktop-client/hooks/useSyncServerStatus';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
 
 type ProviderAction = () => void | Promise<void>;
 

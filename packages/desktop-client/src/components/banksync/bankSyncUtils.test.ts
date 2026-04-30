@@ -1,6 +1,5 @@
+import { generateAccount } from '@actual-app/core/mocks';
 import { describe, expect, it } from 'vitest';
-
-import { generateAccount } from 'loot-core/mocks';
 
 import { getSyncSourceReadable, groupBankSyncAccounts } from './bankSyncUtils';
 

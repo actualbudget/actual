@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import { v4 as uuidv4 } from 'uuid';
 
 import { createApp } from '#server/app';
 import * as db from '#server/db';
@@ -110,7 +109,7 @@ function filterOptionsMatch(options1, options2) {
 }
 
 async function createFilter(filter): Promise<TransactionFilterEntity['id']> {
-  const filterId = uuidv4();
+  const filterId = crypto.randomUUID();
   const item = {
     id: filterId,
     conditions: filter.state.conditions,

@@ -1,17 +1,16 @@
-import { isValid as isDateValid, parseISO } from 'date-fns';
-
-import { evalArithmetic } from 'loot-core/shared/arithmetic';
-import { currentDay } from 'loot-core/shared/months';
+import { evalArithmetic } from '@actual-app/core/shared/arithmetic';
+import { currentDay } from '@actual-app/core/shared/months';
 import {
   amountToInteger,
   integerToCurrencyWithDecimal,
-} from 'loot-core/shared/util';
-import type { CurrencyAmount } from 'loot-core/shared/util';
+} from '@actual-app/core/shared/util';
+import type { CurrencyAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   CategoryEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { isValid as isDateValid, parseISO } from 'date-fns';
 
 export type SerializedTransaction = Omit<TransactionEntity, 'date'> & {
   date: string;

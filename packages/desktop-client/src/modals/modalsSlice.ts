@@ -1,9 +1,6 @@
-import { createSlice } from '@reduxjs/toolkit';
-import type { PayloadAction } from '@reduxjs/toolkit';
-
-import { send } from 'loot-core/platform/client/connection';
-import type { IntegerAmount } from 'loot-core/shared/util';
-import type { File } from 'loot-core/types/file';
+import { send } from '@actual-app/core/platform/client/connection';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
+import type { File } from '@actual-app/core/types/file';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -17,14 +14,16 @@ import type {
   TransactionEntity,
   UserAccessEntity,
   UserEntity,
-} from 'loot-core/types/models';
-import type { Template } from 'loot-core/types/models/templates';
+} from '@actual-app/core/types/models';
+import type { Template } from '@actual-app/core/types/models/templates';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
-import { accountQueries } from '@desktop-client/accounts';
-import { resetApp, setAppState } from '@desktop-client/app/appSlice';
-import type { SelectLinkedAccountsModalProps } from '@desktop-client/components/modals/SelectLinkedAccountsModal';
-import { createAppAsyncThunk } from '@desktop-client/redux';
-import { signOut } from '@desktop-client/users/usersSlice';
+import { accountQueries } from '#accounts';
+import { resetApp, setAppState } from '#app/appSlice';
+import type { SelectLinkedAccountsModalProps } from '#components/modals/SelectLinkedAccountsModal';
+import { createAppAsyncThunk } from '#redux';
+import { signOut } from '#users/usersSlice';
 
 const sliceName = 'modals';
 
