@@ -1,3 +1,4 @@
+import { createReadStream, existsSync } from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -101,6 +102,33 @@ const injectShims = (): Plugin[] => {
   ];
 };
 
+// Serves loot-core's compiled worker files at /kcab/ in dev mode.
+// This is more reliable than relying on symlinks or junctions (which require
+// elevated permissions on Windows) in the publicDir.
+const serveKcabFiles = (): Plugin => ({
+  name: 'serve-kcab-files',
+  apply: 'serve',
+  configureServer(server) {
+    const kcabDir = path.resolve(__dirname, '../loot-core/lib-dist/browser');
+    server.middlewares.use('/kcab', (req, res, next) => {
+      const filename = (req.url ?? '/').replace(/^\//, '').split('?')[0];
+      if (!filename) {
+        next();
+        return;
+      }
+      const filePath = path.join(kcabDir, filename);
+      if (!existsSync(filePath)) {
+        next();
+        return;
+      }
+      if (path.extname(filename) === '.js') {
+        res.setHeader('Content-Type', 'application/javascript');
+      }
+      createReadStream(filePath).pipe(res);
+    });
+  },
+});
+
 // https://vitejs.dev/config/
 
 export default defineConfig(async ({ mode }) => {
@@ -170,6 +198,7 @@ export default defineConfig(async ({ mode }) => {
       tsconfigPaths: true,
     },
     plugins: [
+      serveKcabFiles(),
       // electron (desktop) builds do not support PWA
       mode === 'desktop'
         ? undefined

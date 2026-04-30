@@ -23,10 +23,14 @@ if [ $NODE_ENV == 'development' ]; then
   # will block
   VITE_ARGS="$VITE_ARGS --watch"
   if [ "$OSTYPE" == "msys" ]; then
-    # Ensure symlinks are created as native Windows symlinks.
-    export MSYS=winsymlinks:nativestrict
+    # On Windows, use a directory junction instead of a symlink.
+    # Junctions don't require admin privileges or Developer Mode.
+    LINK_TARGET="$(cygpath -w "$ROOT"/../lib-dist/browser)"
+    LINK_PATH="$(cygpath -w ../../desktop-client/public/kcab)"
+    cmd //c mklink //J "$LINK_PATH" "$LINK_TARGET"
+  else
+    ln -snf "$ROOT"/../lib-dist/browser ../../desktop-client/public/kcab
   fi
-  ln -snf "$ROOT"/../lib-dist/browser ../../desktop-client/public/kcab
 fi
 
 cp ../../../node_modules/@jlongster/sql.js/dist/sql-wasm.wasm "$PUBLIC_DIR"/sql-wasm.wasm
