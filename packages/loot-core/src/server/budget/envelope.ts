@@ -49,6 +49,10 @@ export function createCategory(cat, sheetName, prevSheetName) {
 
     sheet.get().createStatic(sheetName, `carryover-${cat.id}`, false);
     sheet.get().createStatic(sheetName, `scheduled-upcoming-${cat.id}`, 0);
+    // Always reset to 0 on load; the frontend sets the real value after init.
+    // Without this, stale values from a previous session can persist because
+    // createStatic is a no-op when the cell already exists.
+    sheet.get().set(`${sheetName}!scheduled-upcoming-${cat.id}`, 0);
 
     sheet.get().createDynamic(sheetName, `leftover-${cat.id}`, {
       initialValue: 0,

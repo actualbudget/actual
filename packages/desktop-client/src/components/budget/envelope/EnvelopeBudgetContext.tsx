@@ -90,7 +90,7 @@ export function EnvelopeBudgetProvider({
         }
       } else {
         const expenseTotal = txs.reduce(
-          (sum, tx) => sum + Math.min(0, tx.amount ?? 0),
+          (sum, tx) => sum + (tx.amount ?? 0),
           0,
         );
         if (expenseTotal !== 0) {

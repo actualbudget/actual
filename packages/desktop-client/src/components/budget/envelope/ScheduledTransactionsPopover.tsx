@@ -105,10 +105,12 @@ export function ScheduledTransactionsPopover({
               }}
             />
             {actualTransactions.map((tx, i) => {
-              const payeeName = tx.payee
-                ? (payeesById?.[tx.payee]?.name ?? tx.notes ?? '—')
-                : (tx.notes ?? '—');
+              const displayName =
+                tx.notes ||
+                (tx.payee ? (payeesById?.[tx.payee]?.name ?? '—') : '—');
               const date = monthUtils.format(tx.date, 'MMM d');
+              const amountColor =
+                (tx.amount ?? 0) < 0 ? theme.errorText : theme.tableText;
               return (
                 <View
                   key={tx.id ?? i}
@@ -123,11 +125,11 @@ export function ScheduledTransactionsPopover({
                   }}
                 >
                   <View>
-                    <View style={{ fontWeight: 500 }}>{payeeName}</View>
+                    <View style={{ fontWeight: 500 }}>{displayName}</View>
                     <View style={{ color: theme.pageTextSubdued }}>{date}</View>
                   </View>
                   <PrivacyFilter>
-                    <View style={{ ...styles.tnum, color: theme.errorText }}>
+                    <View style={{ ...styles.tnum, color: amountColor }}>
                       {format(tx.amount, 'financial')}
                     </View>
                   </PrivacyFilter>
@@ -160,8 +162,17 @@ export function ScheduledTransactionsPopover({
               const schedule = tx.schedule
                 ? scheduleById.get(tx.schedule)
                 : undefined;
-              const name = schedule?.name ?? tx.schedule ?? '—';
+              const payeeName = tx.payee
+                ? (payeesById?.[tx.payee]?.name ?? undefined)
+                : undefined;
+              const displayName =
+                tx.notes ||
+                payeeName ||
+                schedule?.name ||
+                '—';
               const date = monthUtils.format(tx.date, 'MMM d');
+              const amountColor =
+                (tx.amount ?? 0) < 0 ? theme.errorText : theme.tableText;
               return (
                 <View
                   key={tx.id ?? i}
@@ -176,11 +187,11 @@ export function ScheduledTransactionsPopover({
                   }}
                 >
                   <View>
-                    <View style={{ fontWeight: 500 }}>{name}</View>
+                    <View style={{ fontWeight: 500 }}>{displayName}</View>
                     <View style={{ color: theme.pageTextSubdued }}>{date}</View>
                   </View>
                   <PrivacyFilter>
-                    <View style={{ ...styles.tnum, color: theme.errorText }}>
+                    <View style={{ ...styles.tnum, color: amountColor }}>
                       {format(tx.amount, 'financial')}
                     </View>
                   </PrivacyFilter>
