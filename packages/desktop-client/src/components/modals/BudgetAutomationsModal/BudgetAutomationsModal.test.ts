@@ -31,7 +31,6 @@ describe('migrateTemplatesToAutomations', () => {
       type: 'goal',
       amount: 1000,
       directive: 'goal',
-      priority: null,
     } satisfies Template;
 
     expect(() => migrateTemplatesToAutomations([goalTemplate])).toThrow(
