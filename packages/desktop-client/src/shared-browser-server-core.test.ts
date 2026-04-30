@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
 

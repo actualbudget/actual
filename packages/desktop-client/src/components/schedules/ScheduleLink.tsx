@@ -7,22 +7,17 @@ import { SvgAdd } from '@actual-app/components/icons/v0';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
+import { q } from '@actual-app/core/shared/query';
 
-import { send } from 'loot-core/platform/client/connection';
-import { q } from 'loot-core/shared/query';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { Search } from '#components/common/Search';
+import { useSchedules } from '#hooks/useSchedules';
+import { pushModal } from '#modals/modalsSlice';
+import type { Modal as ModalType } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';
-
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { Search } from '@desktop-client/components/common/Search';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
 
 type ScheduleLinkProps = Extract<
   ModalType,

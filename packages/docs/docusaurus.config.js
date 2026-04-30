@@ -50,6 +50,8 @@ module.exports = {
         },
         blog: {
           ...defaultOptions,
+          blogSidebarTitle: 'All posts',
+          blogSidebarCount: 'ALL',
           feedOptions: {
             type: 'rss',
             title: 'Actual Budget Blog',
@@ -70,9 +72,10 @@ module.exports = {
     ({
       image: 'img/og.webp',
       navbar: {
+        title: 'Actual Budget',
         logo: {
           alt: 'Actual Open Source',
-          src: 'img/actual.webp',
+          src: 'img/logo.webp',
         },
         items: [
           {

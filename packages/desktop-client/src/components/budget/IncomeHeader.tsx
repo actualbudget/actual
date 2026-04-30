@@ -4,11 +4,11 @@ import { Trans } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { View } from '@actual-app/components/view';
 
+import { useGlobalPref } from '#hooks/useGlobalPref';
+
 import { RenderMonths } from './RenderMonths';
 
 import { useBudgetComponents } from '.';
-
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
 
 type IncomeHeaderProps = {
   onShowNewGroup: () => void;

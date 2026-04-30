@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { send } from 'loot-core/platform/client/connection';
-import { computeSchedulePreviewTransactions } from 'loot-core/shared/schedules';
-import { ungroupTransactions } from 'loot-core/shared/transactions';
-import type { IntegerAmount } from 'loot-core/shared/util';
-import type { ScheduleEntity, TransactionEntity } from 'loot-core/types/models';
+import { send } from '@actual-app/core/platform/client/connection';
+import { computeSchedulePreviewTransactions } from '@actual-app/core/shared/schedules';
+import { ungroupTransactions } from '@actual-app/core/shared/transactions';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
+import type {
+  ScheduleEntity,
+  TransactionEntity,
+} from '@actual-app/core/types/models';
 
 import { useCachedSchedules } from './useCachedSchedules';
 import { useSyncedPref } from './useSyncedPref';

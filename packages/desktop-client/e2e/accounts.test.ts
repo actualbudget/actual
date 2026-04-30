@@ -86,7 +86,14 @@ test.describe('Accounts', () => {
         credit: '34.56',
       });
 
-      await page.waitForTimeout(100); // Give time for the previous transaction to be rendered
+      // Wait for both newly created transactions to actually be in the
+      // transaction list before selecting them. A bare waitForTimeout(100)
+      // here is not enough under parallel CI load: the second
+      // createSingleTransaction's row may still be mounting when the
+      // selection clicks land, so the selection doesn't stick and the
+      // 'Make transfer' button (rendered only when items are selected)
+      // never appears.
+      await expect(accountPage.getNthTransaction(1).payee).toBeVisible();
 
       await accountPage.selectNthTransaction(0);
       await accountPage.selectNthTransaction(1);

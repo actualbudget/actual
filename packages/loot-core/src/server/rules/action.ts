@@ -304,6 +304,9 @@ export class Action {
         licenseKey: 'gpl-v3',
         language: 'enUS',
         dateFormats: ['DD/MM/YYYY', 'YYYY-MM-DD', 'YYYY/MM/DD'],
+        context: {
+          balanceOfPrefetch: transaction['_balanceOfPrefetched'] ?? new Map(),
+        },
       });
 
       const sheetName = hfInstance.addSheet('Sheet1');
@@ -325,6 +328,9 @@ export class Action {
       };
 
       for (const key of Object.keys(fieldValues)) {
+        if (key === '_balanceOfPrefetched') {
+          continue;
+        }
         let cellValue: string | number | boolean;
         if (
           fieldValues[key] === undefined ||

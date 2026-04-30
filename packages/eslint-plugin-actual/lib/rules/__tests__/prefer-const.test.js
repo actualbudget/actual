@@ -4,7 +4,8 @@
 
 import { runClassic } from 'eslint-vitest-rule-tester';
 
-import * as rule from '../prefer-const';
+import plugin from '../../index';
+const rule = plugin.rules['prefer-const'];
 
 //------------------------------------------------------------------------------
 // Tests
@@ -60,7 +61,6 @@ void runClassic(
           {
             messageId: 'useConst',
             data: { name: 'x' },
-            type: 'Identifier',
           },
         ],
       },
@@ -71,12 +71,10 @@ void runClassic(
           {
             messageId: 'useConst',
             data: { name: 'x' },
-            type: 'Identifier',
           },
           {
             messageId: 'useConst',
             data: { name: 'y' },
-            type: 'Identifier',
           },
         ],
       },
@@ -87,7 +85,6 @@ void runClassic(
           {
             messageId: 'useConst',
             data: { name: 'x' },
-            type: 'Identifier',
           },
         ],
       },
@@ -98,12 +95,10 @@ void runClassic(
           {
             messageId: 'useConst',
             data: { name: 'x' },
-            type: 'Identifier',
           },
           {
             messageId: 'useConst',
             data: { name: 'y' },
-            type: 'Identifier',
           },
         ],
       },
@@ -114,7 +109,6 @@ void runClassic(
           {
             messageId: 'useConst',
             data: { name: 'x' },
-            type: 'Identifier',
           },
         ],
       },
@@ -125,7 +119,6 @@ void runClassic(
           {
             messageId: 'useConst',
             data: { name: 'x' },
-            type: 'Identifier',
           },
         ],
       },
@@ -136,7 +129,6 @@ void runClassic(
           {
             messageId: 'useConst',
             data: { name: 'x' },
-            type: 'Identifier',
           },
         ],
       },
@@ -147,7 +139,6 @@ void runClassic(
           {
             messageId: 'useConst',
             data: { name: 'x' },
-            type: 'Identifier',
           },
         ],
       },

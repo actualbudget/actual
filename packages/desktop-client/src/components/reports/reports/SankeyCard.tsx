@@ -5,24 +5,24 @@ import { useTranslation } from 'react-i18next';
 import { Block } from '@actual-app/components/block';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { SankeyWidget } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
 
-import type { SankeyWidget } from 'loot-core/types/models';
-
-import { SankeyGraph } from '@desktop-client/components/reports/graphs/SankeyGraph';
-import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
-import { ReportCard } from '@desktop-client/components/reports/ReportCard';
-import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
-import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
+import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
+import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { ReportCard } from '#components/reports/ReportCard';
+import { ReportCardName } from '#components/reports/ReportCardName';
+import { calculateTimeRange } from '#components/reports/reportRanges';
 import {
-  compactSankeyData,
+  GraphLayers,
+  // compactSankeyData,
   createSpreadsheet as sankeySpreadsheet,
-} from '@desktop-client/components/reports/spreadsheets/sankey-spreadsheet';
-import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
-import { useReport } from '@desktop-client/components/reports/useReport';
-import { useCategories } from '@desktop-client/hooks/useCategories';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useResizeObserver } from '@desktop-client/hooks/useResizeObserver';
+} from '#components/reports/spreadsheets/sankey-spreadsheet';
+import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
+import { useReport } from '#components/reports/useReport';
+import { useCategories } from '#hooks/useCategories';
+import { useLocale } from '#hooks/useLocale';
+import { useResizeObserver } from '#hooks/useResizeObserver';
 
 type SankeyCardProps = {
   widgetId: string;
@@ -56,6 +56,41 @@ export function SankeyCard({
     setCardHeight(rect.height);
   });
 
+  const HEADER_HEIGHT = 82;
+  const PX_PER_NODE = 50;
+  const heightBasedTopN = Math.max(
+    2,
+    Math.floor((cardHeight - HEADER_HEIGHT) / PX_PER_NODE),
+  );
+  const topN = meta?.topNcategories ?? heightBasedTopN;
+
+  const isGraphLayer = (value: unknown): value is GraphLayers =>
+    typeof value === 'string' &&
+    (Object.values(GraphLayers) as string[]).includes(value);
+
+  const defaultLayerFrom =
+    mode === 'budgeted' ? GraphLayers.IncomeCategory : GraphLayers.IncomePayee;
+  const defaultLayerTo = GraphLayers.CategoryGroup;
+
+  const metaLayerFrom = isGraphLayer(meta?.layerFrom)
+    ? meta.layerFrom
+    : undefined;
+  const metaLayerTo = isGraphLayer(meta?.layerTo) ? meta.layerTo : undefined;
+
+  const layerFrom =
+    metaLayerFrom &&
+    !(mode === 'budgeted' && metaLayerFrom === GraphLayers.IncomePayee) &&
+    !(mode === 'spent' && metaLayerFrom === GraphLayers.Budget)
+      ? metaLayerFrom
+      : defaultLayerFrom;
+
+  const layerTo =
+    metaLayerTo &&
+    !(mode === 'budgeted' && metaLayerTo === GraphLayers.IncomePayee) &&
+    !(mode === 'spent' && metaLayerTo === GraphLayers.Budget)
+      ? metaLayerTo
+      : defaultLayerTo;
+
   const params = useMemo(
     () =>
       sankeySpreadsheet(
@@ -65,22 +100,27 @@ export function SankeyCard({
         meta?.conditions ?? [],
         meta?.conditionsOp ?? 'and',
         mode,
+        topN,
+        meta?.categorySort,
+        layerFrom,
+        layerTo,
       ),
-    [start, end, groupedCategories, meta?.conditions, meta?.conditionsOp, mode],
+    [
+      start,
+      end,
+      groupedCategories,
+      meta?.conditions,
+      meta?.conditionsOp,
+      mode,
+      topN,
+      meta?.categorySort,
+      layerFrom,
+      layerTo,
+    ],
   );
   const data = useReport('sankey', params);
 
-  const HEADER_HEIGHT = 82;
-  const PX_PER_NODE = 50;
-  const topN = Math.max(
-    2,
-    Math.floor((cardHeight - HEADER_HEIGHT) / PX_PER_NODE),
-  );
-
-  const compactData = useMemo(
-    () => (data ? compactSankeyData(data, topN) : null),
-    [data, topN],
-  );
+  const compactData = useMemo(() => data, [data]);
 
   const startDate = d.parseISO(start);
   const endDate = d.parseISO(end);
@@ -155,6 +195,7 @@ export function SankeyCard({
         {compactData ? (
           <SankeyGraph
             data={compactData}
+            showPercentages={meta?.showPercentages}
             showTooltip={!isEditing}
             style={{ height: 'auto', flex: 1 }}
           />

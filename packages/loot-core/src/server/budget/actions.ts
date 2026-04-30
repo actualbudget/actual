@@ -43,10 +43,10 @@ function calcBufferedAmount(
 type BudgetTable = 'reflect_budgets' | 'zero_budgets';
 
 function getBudgetTable(): BudgetTable {
-  return isReflectBudget() ? 'reflect_budgets' : 'zero_budgets';
+  return isTrackingBudget() ? 'reflect_budgets' : 'zero_budgets';
 }
 
-export function isReflectBudget(): boolean {
+export function isTrackingBudget(): boolean {
   const budgetType = db.firstSync<Pick<db.DbPreference, 'value'>>(
     `SELECT value FROM preferences WHERE id = ?`,
     ['budgetType'],
@@ -221,7 +221,7 @@ export async function copyPreviousMonth({
 
   await batchMessages(async () => {
     budgetData.forEach(prevBudget => {
-      if (prevBudget.is_income === 1 && !isReflectBudget()) {
+      if (prevBudget.is_income === 1 && !isTrackingBudget()) {
         return;
       }
       if (prevBudget.hidden === 1 || prevBudget.group_hidden === 1) {
@@ -260,7 +260,7 @@ export async function setZero({ month }: { month: string }): Promise<void> {
 
   await batchMessages(async () => {
     categories.forEach(cat => {
-      if (cat.is_income === 1 && !isReflectBudget()) {
+      if (cat.is_income === 1 && !isTrackingBudget()) {
         return;
       }
       void setBudget({ category: cat.id, month, amount: 0 });
@@ -288,7 +288,7 @@ export async function set3MonthAvg({
 
   await batchMessages(async () => {
     for (const cat of categories) {
-      if (cat.is_income === 1 && !isReflectBudget()) {
+      if (cat.is_income === 1 && !isTrackingBudget()) {
         continue;
       }
 
@@ -332,7 +332,7 @@ export async function set12MonthAvg({
 
   await batchMessages(async () => {
     for (const cat of categories) {
-      if (cat.is_income === 1 && !isReflectBudget()) {
+      if (cat.is_income === 1 && !isTrackingBudget()) {
         continue;
       }
       void setNMonthAvg({ month, N: 12, category: cat.id });
@@ -356,7 +356,7 @@ export async function set6MonthAvg({
 
   await batchMessages(async () => {
     for (const cat of categories) {
-      if (cat.is_income === 1 && !isReflectBudget()) {
+      if (cat.is_income === 1 && !isTrackingBudget()) {
         continue;
       }
       void setNMonthAvg({ month, N: 6, category: cat.id });
@@ -611,7 +611,7 @@ export async function setCategoryCarryover({
 }
 
 function addNewLine(notes?: string) {
-  return !notes ? '' : `${notes}${notes && '\n'}`;
+  return !notes ? '' : `${notes}\n`;
 }
 
 async function addMovementNotes({

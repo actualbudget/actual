@@ -3,18 +3,17 @@ import { useTranslation } from 'react-i18next';
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
-
 import type {
   CategoryEntity,
   CategoryGroupEntity,
-} from 'loot-core/types/models';
-import type { PercentageTemplate } from 'loot-core/types/models/templates';
+} from '@actual-app/core/types/models';
+import type { PercentageTemplate } from '@actual-app/core/types/models/templates';
 
-import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
-import { updateTemplate } from '@desktop-client/components/budget/goals/actions';
-import type { Action } from '@desktop-client/components/budget/goals/actions';
-import { FormField, FormLabel } from '@desktop-client/components/forms';
-import { PercentInput } from '@desktop-client/components/util/PercentInput';
+import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
+import { updateTemplate } from '#components/budget/goals/actions';
+import type { Action } from '#components/budget/goals/actions';
+import { FormField, FormLabel } from '#components/forms';
+import { PercentInput } from '#components/util/PercentInput';
 
 type PercentageAutomationProps = {
   dispatch: (action: Action) => void;

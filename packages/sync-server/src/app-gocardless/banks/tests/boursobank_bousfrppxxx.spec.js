@@ -1,4 +1,4 @@
-import BoursoBank from '../boursobank_bousfrppxxx';
+import BoursoBank from '#app-gocardless/banks/boursobank_bousfrppxxx';
 
 describe('BoursoBank', () => {
   describe('#normalizeTransaction', () => {

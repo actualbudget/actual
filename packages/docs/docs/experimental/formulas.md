@@ -55,6 +55,7 @@ If a function isn’t listed here, it still might work. Actual uses HyperFormula
 | `AND`                           | Query, Rules | Returns TRUE if all arguments are TRUE.                                                                                                                        | `=AND(1=1, 2=2)`                                                                                                              | Accepts more than 2 conditions                    |
 | `AVERAGE`                       | Query        | Returns the average of all numbers in a range.                                                                                                                 | `=AVERAGE(1, 2, 3)`                                                                                                           | Accepts more than 2 values                        |
 | `AVERAGEA`                      | Query        | Returns the average, including text and logical values.                                                                                                        | `=AVERAGEA(1, TRUE, "2")`                                                                                                     | Accepts more than 2 values                        |
+| `BALANCE_OF`                    | Rules        | Returns running balance for another account in cents; pass a quoted account id or exact account name.                                                          | `=BALANCE_OF("550e8400-e29b-41d4-a716-446655440000"); =BALANCE_OF("Checking")`                                                | —                                                 |
 | `BUDGET_QUERY`                  | Query        | Returns a budget dimension total for a set of categories over a month range. Dimension is one of: `budgeted`, `spent`, `balance_start`, `balance_end`, `goal`. | `=BUDGET_QUERY("spent", QUERY_EXTRACT_CATEGORIES("q"), QUERY_EXTRACT_TIMEFRAME_START("q"), QUERY_EXTRACT_TIMEFRAME_END("q"))` | —                                                 |
 | `CEILING`                       | Query, Rules | Rounds up to nearest multiple of significance.                                                                                                                 | `=CEILING(10.2, 1)`                                                                                                           | —                                                 |
 | `CHAR`                          | Query, Rules | Converts number to character.                                                                                                                                  | `=CHAR(65)`                                                                                                                   | —                                                 |
@@ -304,6 +305,21 @@ Rule formulas evaluate with named variables from the transaction context, includ
 - `reconciled` — Whether transaction is reconciled (`TRUE` or `FALSE`)
 
 Tip: if you want “dollars” from `amount`, use `=amount / 100`.
+
+### Available functions
+
+**`BALANCE_OF` (other accounts):**
+
+```text
+=BALANCE_OF("550e8400-e29b-41d4-a716-446655440000")
+=BALANCE_OF("Checking")
+```
+
+- `BALANCE_OF("…")` — Running balance for another account, in **cents**, using the same cutoff as `balance` (same `date`, `sort_order`, and `id` ordering as the current transaction).
+- Pass a **quoted account id** (matches an account id in your budget) for a deterministic result, or a **quoted account name** for an exact name match. If the account name is ambiguous (duplicates), the first match is used.
+- If the account is not found, the value is **0**.
+- For the **current** transaction’s account, use the `balance` variable instead of `BALANCE_OF`.
+- Returns an integer in cents. For the amount in dollars, divide by 100 or `=INTEGER_TO_AMOUNT(BALANCE_OF("Checking"))`.
 
 ### Result types
 

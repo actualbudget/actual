@@ -10,18 +10,18 @@ import { View } from '@actual-app/components/view';
 import {
   BalanceWithCarryover,
   CarryoverIndicator,
-} from '@desktop-client/components/budget/BalanceWithCarryover';
-import { BalanceMenu } from '@desktop-client/components/budget/envelope/BalanceMenu';
+} from '#components/budget/BalanceWithCarryover';
+import { BalanceMenu } from '#components/budget/envelope/BalanceMenu';
 import {
   Modal,
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '@desktop-client/components/common/Modal';
-import { CellValueText } from '@desktop-client/components/spreadsheet/CellValue';
-import { useCategory } from '@desktop-client/hooks/useCategory';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
-import { envelopeBudget } from '@desktop-client/spreadsheet/bindings';
+} from '#components/common/Modal';
+import { CellValueText } from '#components/spreadsheet/CellValue';
+import { useCategory } from '#hooks/useCategory';
+import type { Modal as ModalType } from '#modals/modalsSlice';
+import { envelopeBudget } from '#spreadsheet/bindings';
 
 type EnvelopeBalanceMenuModalProps = Omit<
   Extract<ModalType, { name: 'envelope-balance-menu' }>['options'],

@@ -4,8 +4,7 @@ import type { CSSProperties } from 'react';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { friendlyOp, mapField } from 'loot-core/shared/rules';
+import { friendlyOp, mapField } from '@actual-app/core/shared/rules';
 
 import { Value } from './Value';
 

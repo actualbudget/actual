@@ -1,5 +1,5 @@
 class Query {
-  /** @type {import('loot-core/shared/query').QueryState} */
+  /** @type {import('@actual-app/core/shared/query').QueryState} */
   state;
 
   constructor(state) {

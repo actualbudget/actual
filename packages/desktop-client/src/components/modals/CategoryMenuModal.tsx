@@ -24,12 +24,12 @@ import {
   ModalCloseButton,
   ModalHeader,
   ModalTitle,
-} from '@desktop-client/components/common/Modal';
-import { Notes } from '@desktop-client/components/Notes';
-import { useCategory } from '@desktop-client/hooks/useCategory';
-import { useCategoryGroup } from '@desktop-client/hooks/useCategoryGroup';
-import { useNotes } from '@desktop-client/hooks/useNotes';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+} from '#components/common/Modal';
+import { Notes } from '#components/Notes';
+import { useCategory } from '#hooks/useCategory';
+import { useCategoryGroup } from '#hooks/useCategoryGroup';
+import { useNotes } from '#hooks/useNotes';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type CategoryMenuModalProps = Extract<
   ModalType,

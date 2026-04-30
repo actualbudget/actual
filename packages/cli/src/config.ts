@@ -3,7 +3,7 @@ import { join } from 'path';
 
 import { cosmiconfig } from 'cosmiconfig';
 
-import { isRecord } from './utils';
+import { isRecord, parseBoolEnv, parseNonNegativeIntFlag } from './utils';
 
 export type CliConfig = {
   serverUrl: string;
@@ -12,6 +12,10 @@ export type CliConfig = {
   syncId?: string;
   dataDir: string;
   encryptionPassword?: string;
+  cacheTtl: number;
+  lockTimeout: number;
+  refresh: boolean;
+  noLock: boolean;
 };
 
 export type CliGlobalOpts = {
@@ -21,9 +25,28 @@ export type CliGlobalOpts = {
   syncId?: string;
   dataDir?: string;
   encryptionPassword?: string;
+  cacheTtl?: number;
+  lockTimeout?: number;
+  refresh?: boolean;
+  // Commander stores --no-foo flags under the positive key. Default true,
+  // false when the flag is passed.
+  cache?: boolean;
+  lock?: boolean;
   format?: 'json' | 'table' | 'csv';
   verbose?: boolean;
 };
+
+const stringKeys = [
+  'serverUrl',
+  'password',
+  'sessionToken',
+  'syncId',
+  'dataDir',
+  'encryptionPassword',
+] as const;
+
+const numberKeys = ['cacheTtl', 'lockTimeout'] as const;
+const booleanKeys = ['noLock'] as const;
 
 type ConfigFileContent = {
   serverUrl?: string;
@@ -32,15 +55,15 @@ type ConfigFileContent = {
   syncId?: string;
   dataDir?: string;
   encryptionPassword?: string;
+  cacheTtl?: number;
+  lockTimeout?: number;
+  noLock?: boolean;
 };
 
 const configFileKeys: readonly string[] = [
-  'serverUrl',
-  'password',
-  'sessionToken',
-  'syncId',
-  'dataDir',
-  'encryptionPassword',
+  ...stringKeys,
+  ...numberKeys,
+  ...booleanKeys,
 ];
 
 function validateConfigFileContent(value: unknown): ConfigFileContent {
@@ -54,9 +77,30 @@ function validateConfigFileContent(value: unknown): ConfigFileContent {
     if (!configFileKeys.includes(key)) {
       throw new Error(`Invalid config file: unknown key "${key}"`);
     }
-    if (value[key] !== undefined && typeof value[key] !== 'string') {
+    const v = value[key];
+    if (v === undefined) continue;
+    if (
+      (stringKeys as readonly string[]).includes(key) &&
+      typeof v !== 'string'
+    ) {
       throw new Error(
-        `Invalid config file: key "${key}" must be a string, got ${typeof value[key]}`,
+        `Invalid config file: key "${key}" must be a string, got ${typeof v}`,
+      );
+    }
+    if (
+      (numberKeys as readonly string[]).includes(key) &&
+      (typeof v !== 'number' || !Number.isInteger(v) || v < 0)
+    ) {
+      throw new Error(
+        `Invalid config file: key "${key}" must be a non-negative integer`,
+      );
+    }
+    if (
+      (booleanKeys as readonly string[]).includes(key) &&
+      typeof v !== 'boolean'
+    ) {
+      throw new Error(
+        `Invalid config file: key "${key}" must be a boolean, got ${typeof v}`,
       );
     }
   }
@@ -81,6 +125,22 @@ async function loadConfigFile(): Promise<ConfigFileContent> {
     return validateConfigFileContent(result.config);
   }
   return {};
+}
+
+function parseNonNegativeIntEnv(
+  raw: string | undefined,
+  source: string,
+): number | undefined {
+  return raw === undefined ? undefined : parseNonNegativeIntFlag(raw, source);
+}
+
+function validateNonNegativeInt(value: number, name: string): number {
+  if (!Number.isInteger(value) || value < 0) {
+    throw new Error(
+      `Invalid ${name}: expected a non-negative integer, got ${value}`,
+    );
+  }
+  return value;
 }
 
 export async function resolveConfig(
@@ -128,6 +188,37 @@ export async function resolveConfig(
     );
   }
 
+  const cacheTtl = validateNonNegativeInt(
+    cliOpts.cacheTtl ??
+      parseNonNegativeIntEnv(
+        process.env.ACTUAL_CACHE_TTL,
+        'ACTUAL_CACHE_TTL',
+      ) ??
+      fileConfig.cacheTtl ??
+      60,
+    'cacheTtl',
+  );
+
+  const lockTimeout = validateNonNegativeInt(
+    cliOpts.lockTimeout ??
+      parseNonNegativeIntEnv(
+        process.env.ACTUAL_LOCK_TIMEOUT,
+        'ACTUAL_LOCK_TIMEOUT',
+      ) ??
+      fileConfig.lockTimeout ??
+      10,
+    'lockTimeout',
+  );
+
+  const refresh = (cliOpts.refresh ?? false) || cliOpts.cache === false;
+
+  const flagNoLock = cliOpts.lock === false ? true : undefined;
+  const noLock =
+    flagNoLock ??
+    parseBoolEnv(process.env.ACTUAL_NO_LOCK, 'ACTUAL_NO_LOCK') ??
+    fileConfig.noLock ??
+    false;
+
   return {
     serverUrl,
     password,
@@ -135,5 +226,9 @@ export async function resolveConfig(
     syncId,
     dataDir,
     encryptionPassword,
+    cacheTtl,
+    lockTimeout,
+    refresh,
+    noLock,
   };
 }

@@ -1,9 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { t } from 'i18next';
-import { v4 as uuidv4 } from 'uuid';
 
-import { resetApp } from '@desktop-client/app/appSlice';
+import { resetApp } from '#app/appSlice';
 
 const sliceName = 'notifications';
 
@@ -59,7 +58,7 @@ const notificationsSlice = createSlice({
     addNotification(state, action: PayloadAction<AddNotificationPayload>) {
       const notification = {
         ...action.payload.notification,
-        id: action.payload.notification.id || uuidv4(),
+        id: action.payload.notification.id || crypto.randomUUID(),
       };
 
       if (state.notifications.find(n => n.id === notification.id)) {
@@ -69,7 +68,7 @@ const notificationsSlice = createSlice({
     },
     addGenericErrorNotification(state) {
       const notification: NotificationWithId = {
-        id: uuidv4(),
+        id: crypto.randomUUID(),
         type: 'error',
         message: t(
           'Something internally went wrong. You may want to restart the app if anything looks wrong. ' +

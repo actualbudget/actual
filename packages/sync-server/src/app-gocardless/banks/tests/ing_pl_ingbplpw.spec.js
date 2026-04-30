@@ -1,5 +1,5 @@
-import { mockTransactionAmount } from '../../services/tests/fixtures';
-import IngPlIngbplpw from '../ing_pl_ingbplpw';
+import IngPlIngbplpw from '#app-gocardless/banks/ing_pl_ingbplpw';
+import { mockTransactionAmount } from '#app-gocardless/services/tests/fixtures';
 
 describe('IngPlIngbplpw', () => {
   describe('#normalizeAccount', () => {

@@ -1,5 +1,5 @@
-import { formatPayeeName } from '../../util/payee-name';
-import { title } from '../../util/title/index';
+import { formatPayeeName } from '#util/payee-name';
+import { title } from '#util/title';
 
 import Fallback from './integration-bank';
 

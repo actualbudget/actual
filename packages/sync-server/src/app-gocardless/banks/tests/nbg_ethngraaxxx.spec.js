@@ -1,4 +1,4 @@
-import NbgEthngraaxxx from '../nbg_ethngraaxxx';
+import NbgEthngraaxxx from '#app-gocardless/banks/nbg_ethngraaxxx';
 
 describe('NbgEthngraaxxx', () => {
   describe('#normalizeTransaction', () => {

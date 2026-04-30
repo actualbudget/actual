@@ -1,7 +1,7 @@
 // @ts-strict-ignore
-import * as connection from 'loot-core/platform/client/connection';
-import { q } from 'loot-core/shared/query';
-import { resetTracer, tracer } from 'loot-core/shared/test-helpers';
+import * as connection from '@actual-app/core/platform/client/connection';
+import { q } from '@actual-app/core/shared/query';
+import { resetTracer, tracer } from '@actual-app/core/shared/test-helpers';
 
 import { liveQuery } from './liveQuery';
 

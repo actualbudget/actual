@@ -225,5 +225,63 @@
     "repo": "Juulz/YNA-Theme-Light",
     "colors": ["#1c1f58", "#fff", "#192ee6", "#f5f6ff", "#93d53e", "#191898"],
     "mode": "light"
+  },
+  {
+    "name": "YNA Theme Dark",
+    "repo": "Juulz/YNA-Theme-Dark",
+    "colors": ["#121330", "#fff", "#0c0d22", "#0f1443", "#93d53e", "#191898"],
+    "mode": "dark"
+  },
+  {
+    "name": "Nord",
+    "repo": "aadhithbala/actual-nord-theme",
+    "colors": [
+      "#2E3440",
+      "#3B4252",
+      "#434C5E",
+      "#88C0D0",
+      "#A3BE8C",
+      "#BF616A"
+    ],
+    "mode": "dark"
+  },
+  {
+    "name": "Ilavenil",
+    "repo": "aadhithbala/Ilavenil",
+    "colors": [
+      "#3D4F3E",
+      "#F6F0D7",
+      "#FDFAF2",
+      "#6D8B74",
+      "#5A7560",
+      "#B8705E"
+    ],
+    "mode": "light"
+  },
+  {
+    "name": "Gruvbox Light",
+    "repo": "Dakyne/gruvbox-light-actualbudget",
+    "colors": [
+      "#fbf1c7",
+      "#3c3836",
+      "#d65d0e",
+      "#cc241d",
+      "#98971a",
+      "#458588"
+    ],
+    "mode": "light"
+  },
+  {
+    "name": "Gruvbox Dark",
+    "repo": "Dakyne/gruvbox-dark-actualbudget",
+    "colors": [
+      "#282828",
+      "#ebdbb2",
+      "#fabd2f",
+      "#fb4934",
+      "#b8bb26",
+      "#83a598"
+    ],
+    "mode": "dark"
   }
 ]

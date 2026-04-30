@@ -1,16 +1,16 @@
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import type { Handlers } from 'loot-core/types/handlers';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type { Handlers } from '@actual-app/core/types/handlers';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
   RuleConditionEntity,
-} from 'loot-core/types/models';
-import type { SyncedPrefs } from 'loot-core/types/prefs';
+} from '@actual-app/core/types/models';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
+
+import type { QueryDataEntity } from '#components/reports/ReportOptions';
 
 import type { BudgetMonthCell } from './budgetMonthCell';
-
-import type { QueryDataEntity } from '@desktop-client/components/reports/ReportOptions';
 
 type BudgetDataConditionsOp = 'and' | 'or';
 

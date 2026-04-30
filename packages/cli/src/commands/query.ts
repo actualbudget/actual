@@ -1,10 +1,10 @@
 import * as api from '@actual-app/api';
 import type { Command } from 'commander';
 
-import { withConnection } from '../connection';
-import { readJsonInput } from '../input';
-import { printOutput } from '../output';
-import { isRecord, parseIntFlag } from '../utils';
+import { withConnection } from '#connection';
+import { readJsonInput } from '#input';
+import { printOutput } from '#output';
+import { isRecord, parseIntFlag } from '#utils';
 
 /**
  * Parse order-by strings like "date:desc,amount:asc,id" into
@@ -301,27 +301,31 @@ export function registerQueryCommand(program: Command) {
     .addHelpText('after', RUN_EXAMPLES)
     .action(async cmdOpts => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const parsed = cmdOpts.file ? readJsonInput(cmdOpts) : undefined;
-        if (parsed !== undefined && !isRecord(parsed)) {
-          throw new Error('Query file must contain a JSON object');
-        }
-        const queryObj = parsed
-          ? buildQueryFromFile(parsed, cmdOpts.table)
-          : buildQueryFromFlags(cmdOpts);
+      await withConnection(
+        opts,
+        async () => {
+          const parsed = cmdOpts.file ? readJsonInput(cmdOpts) : undefined;
+          if (parsed !== undefined && !isRecord(parsed)) {
+            throw new Error('Query file must contain a JSON object');
+          }
+          const queryObj = parsed
+            ? buildQueryFromFile(parsed, cmdOpts.table)
+            : buildQueryFromFlags(cmdOpts);
 
-        const result = await api.aqlQuery(queryObj);
+          const result = await api.aqlQuery(queryObj);
 
-        if (!isRecord(result) || !('data' in result)) {
-          throw new Error('Query result missing data');
-        }
+          if (!isRecord(result) || !('data' in result)) {
+            throw new Error('Query result missing data');
+          }
 
-        if (cmdOpts.count) {
-          printOutput({ count: result.data }, opts.format);
-        } else {
-          printOutput(result.data, opts.format);
-        }
-      });
+          if (cmdOpts.count) {
+            printOutput({ count: result.data }, opts.format);
+          } else {
+            printOutput(result.data, opts.format);
+          }
+        },
+        { mutates: false },
+      );
     });
 
   query
