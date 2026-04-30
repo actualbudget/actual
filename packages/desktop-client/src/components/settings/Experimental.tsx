@@ -200,7 +200,7 @@ export function ExperimentalFeatures() {
             </FeatureToggle>
             <FeatureToggle
               flag="balanceForecastReport"
-              feedbackLink="https://github.com/actualbudget/actual/pull/7310"
+              feedbackLink="https://github.com/actualbudget/actual/issues/7669"
             >
               <Trans>Balance Forecast Report</Trans>
             </FeatureToggle>
