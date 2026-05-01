@@ -21,6 +21,8 @@ type EnvelopeBudgetContextDefinition = {
   currentMonth: string;
   forecastTransactionsByCategoryAndMonth: Map<string, TransactionEntity[]>;
   totalScheduledIncomeForCurrentMonth: number;
+  /** Total upcoming expense amount (negative) per month, keyed by "YYYY-MM". */
+  scheduledExpenseByMonth: Map<string, number>;
 };
 
 const EnvelopeBudgetContext = createContext<EnvelopeBudgetContextDefinition>({
@@ -36,6 +38,7 @@ const EnvelopeBudgetContext = createContext<EnvelopeBudgetContextDefinition>({
   currentMonth: 'unknown',
   forecastTransactionsByCategoryAndMonth: new Map(),
   totalScheduledIncomeForCurrentMonth: 0,
+  scheduledExpenseByMonth: new Map(),
 });
 
 type EnvelopeBudgetProviderProps = Omit<
@@ -43,6 +46,7 @@ type EnvelopeBudgetProviderProps = Omit<
   | 'currentMonth'
   | 'forecastTransactionsByCategoryAndMonth'
   | 'totalScheduledIncomeForCurrentMonth'
+  | 'scheduledExpenseByMonth'
 > & {
   children: ReactNode;
 };
@@ -137,6 +141,20 @@ export function EnvelopeBudgetProvider({
     return total;
   }, [forecastTransactionsByCategoryAndMonth, currentMonth, categoriesById]);
 
+  const scheduledExpenseByMonth = useMemo(() => {
+    const result = new Map<string, number>();
+    for (const [key, txs] of forecastTransactionsByCategoryAndMonth.entries()) {
+      const month = key.slice(-7);
+      const categoryId = key.slice(0, -8);
+      if (categoriesById?.[categoryId]?.is_income) continue;
+      const total = txs.reduce((sum, tx) => sum + (tx.amount ?? 0), 0);
+      if (total !== 0) {
+        result.set(month, (result.get(month) ?? 0) + total);
+      }
+    }
+    return result;
+  }, [forecastTransactionsByCategoryAndMonth, categoriesById]);
+
   return (
     <EnvelopeBudgetContext.Provider
       value={{
@@ -146,6 +164,7 @@ export function EnvelopeBudgetProvider({
         onToggleSummaryCollapse,
         forecastTransactionsByCategoryAndMonth,
         totalScheduledIncomeForCurrentMonth,
+        scheduledExpenseByMonth,
       }}
     >
       {children}

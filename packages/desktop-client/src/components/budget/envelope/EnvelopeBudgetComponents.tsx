@@ -32,7 +32,7 @@ import { useContextMenu } from '#hooks/useContextMenu';
 import { useFormat } from '#hooks/useFormat';
 import { useMetadataPref } from '#hooks/useMetadataPref';
 import { useNavigate } from '#hooks/useNavigate';
-import { useSheetName } from '#hooks/useSheetName';
+import { useCurrentSheetName, useSheetName } from '#hooks/useSheetName';
 import { useSheetValue } from '#hooks/useSheetValue';
 import { useUndo } from '#hooks/useUndo';
 import type { Binding, SheetFields } from '#spreadsheet';
@@ -83,6 +83,18 @@ const cellStyle: CSSProperties = {
 
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
   const [forecastMode = false] = useMetadataPref('budget.forecastMode');
+  const { scheduledExpenseByMonth } = useEnvelopeBudget();
+
+  // Derive the month string ("YYYY-MM") from the enclosing SheetNameProvider
+  // (e.g. "budget202501" → "2025-01") so we can look up per-month totals.
+  const sheetName = useCurrentSheetName() ?? '';
+  const month =
+    sheetName.startsWith('budget') && sheetName.length === 12
+      ? `${sheetName.slice(6, 10)}-${sheetName.slice(10)}`
+      : '';
+  const scheduledExpenseTotal = month
+    ? (scheduledExpenseByMonth.get(month) ?? 0)
+    : 0;
 
   return (
     <View
@@ -126,7 +138,24 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
           <Trans>Spent</Trans>
         </Text>
         <EnvelopeCellValue binding={envelopeBudget.totalSpent} type="financial">
-          {props => <CellValueText {...props} style={cellStyle} />}
+          {props => {
+            const displayValue =
+              forecastMode && scheduledExpenseTotal !== 0
+                ? props.value + scheduledExpenseTotal
+                : props.value;
+            return (
+              <CellValueText
+                {...props}
+                value={displayValue}
+                style={{
+                  ...cellStyle,
+                  ...(forecastMode && scheduledExpenseTotal !== 0
+                    ? { color: theme.upcomingText }
+                    : {}),
+                }}
+              />
+            );
+          }}
         </EnvelopeCellValue>
       </View>
       <View style={headerLabelStyle}>

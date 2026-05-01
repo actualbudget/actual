@@ -15,7 +15,12 @@ function unresolveName(name) {
   return { sheet: null, name };
 }
 
-const SheetNameContext = createContext<string | undefined>(undefined);
+export const SheetNameContext = createContext<string | undefined>(undefined);
+
+/** Returns the raw sheet name provided by the nearest SheetNameProvider (e.g. "budget202501"). */
+export function useCurrentSheetName(): string | undefined {
+  return useContext(SheetNameContext);
+}
 
 type SheetNameProviderProps = PropsWithChildren<{ name: string }>;
 
