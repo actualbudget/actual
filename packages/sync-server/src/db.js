@@ -1,13 +1,13 @@
 import Database from 'better-sqlite3';
 
-class WrappedDatabase {
+export class WrappedDatabase {
   constructor(db) {
     this.db = db;
   }
 
   /**
    * @param {string} sql
-   * @param {string[]} params
+   * @param {(string | number)[]} params
    */
   all(sql, params = []) {
     const stmt = this.db.prepare(sql);
@@ -32,7 +32,7 @@ class WrappedDatabase {
 
   /**
    * @param {string} sql
-   * @param {string[]} params
+   * @param {(string | number | null | undefined)[]} params
    */
   mutate(sql, params = []) {
     const stmt = this.db.prepare(sql);

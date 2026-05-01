@@ -128,7 +128,16 @@ export function SelectLinkedAccountsModal({
   const localAccounts = allAccounts.filter(a => a.closed === 0);
   const [draftLinkAccounts, setDraftLinkAccounts] = useState<
     Map<string, 'linking' | 'unlinking'>
-  >(new Map());
+  >(() => {
+    const externalAccountIds = new Set(externalAccounts.map(a => a.account_id));
+    const initial = new Map<string, 'linking' | 'unlinking'>();
+    for (const acc of localAccounts) {
+      if (acc.account_id && externalAccountIds.has(acc.account_id)) {
+        initial.set(acc.account_id, 'linking');
+      }
+    }
+    return initial;
+  });
   const [chosenAccounts, setChosenAccounts] = useState<Record<string, string>>(
     () => {
       return Object.fromEntries(

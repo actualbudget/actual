@@ -2,6 +2,11 @@
   "name": "@actual-app/web",
   "version": "26.4.0",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/actualbudget/actual.git",
+    "directory": "packages/desktop-client"
+  },
   "files": [
     "build"
   ],
@@ -25,6 +30,7 @@
     "#gocardless": "./src/gocardless.ts",
     "#i18n": "./src/i18n.ts",
     "#mocks": "./src/mocks.tsx",
+    "#mocks/*": "./src/mocks/*.ts",
     "#polyfills": "./src/polyfills.ts",
     "#components/forms": "./src/components/forms/index.tsx",
     "#components/banksync": "./src/components/banksync/index.tsx",
@@ -98,9 +104,10 @@
     "start:browser": "cross-env ./bin/watch-browser",
     "watch": "cross-env BROWSER=none yarn start",
     "build": "vite build",
-    "build:browser": "cross-env ./bin/build-browser",
+    "build:browser": "vite build --mode=browser",
     "generate:i18n": "i18next",
     "test": "vitest --run",
+    "validate:theme-catalog": "node --experimental-strip-types bin/validate-theme-catalog.mts",
     "e2e": "npx playwright test --browser=chromium",
     "vrt": "cross-env VRT=true npx playwright test --browser=chromium",
     "playwright": "playwright",
@@ -134,7 +141,7 @@
     "@types/promise-retry": "^1.1.6",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@typescript/native-preview": "^7.0.0-dev.20260404.1",
+    "@typescript/native-preview": "beta",
     "@uiw/react-codemirror": "^4.25.9",
     "@use-gesture/react": "^10.3.1",
     "@vitejs/plugin-basic-ssl": "^2.3.0",
@@ -157,6 +164,7 @@
     "mdast-util-newline-to-break": "^2.0.0",
     "memoize-one": "^6.0.0",
     "pikaday": "1.8.2",
+    "plugins-service": "workspace:*",
     "promise-retry": "^2.0.1",
     "re-resizable": "^6.11.2",
     "react": "19.2.4",

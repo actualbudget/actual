@@ -54,8 +54,9 @@ jobs:
       - name: Verify release assets exist
         env:
           GH_TOKEN: ${{ github.token }}
+          STEPS_RESOLVE_VERSION_OUTPUTS_TAG: ${{ steps.resolve_version.outputs.tag }}
         run: |
-          TAG="${{ steps.resolve_version.outputs.tag }}"
+          TAG="${STEPS_RESOLVE_VERSION_OUTPUTS_TAG}"
 
           echo "Checking release assets for tag $TAG..."
           ASSETS=$(gh api "repos/${{ github.repository }}/releases/tags/$TAG" --jq '.assets[].name')
@@ -77,7 +78,7 @@ jobs:
 
       - name: Calculate AppImage SHA256 (streamed)
         run: |
-          VERSION="${{ steps.resolve_version.outputs.version }}"
+          VERSION="${STEPS_RESOLVE_VERSION_OUTPUTS_VERSION}"
           BASE_URL="https://github.com/${{ github.repository }}/releases/download/v${VERSION}"
 
           echo "Streaming x86_64 AppImage to compute SHA256..."
@@ -90,27 +91,32 @@ jobs:
 
           echo "APPIMAGE_X64_SHA256=$APPIMAGE_X64_SHA256" >> "$GITHUB_ENV"
           echo "APPIMAGE_ARM64_SHA256=$APPIMAGE_ARM64_SHA256" >> "$GITHUB_ENV"
+        env:
+          STEPS_RESOLVE_VERSION_OUTPUTS_VERSION: ${{ steps.resolve_version.outputs.version }}
 
       - name: Checkout Flathub repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: flathub/com.actualbudget.actual
           token: ${{ secrets.FLATHUB_GITHUB_TOKEN }}
+          persist-credentials: false
 
       - name: Update manifest with new version
         run: |
-          VERSION="${{ steps.resolve_version.outputs.version }}"
+          VERSION="${STEPS_RESOLVE_VERSION_OUTPUTS_VERSION}"
 
           # Replace x86_64 entry
-          sed -i "/x86_64.AppImage/{n;s|sha256:.*|sha256: ${{ env.APPIMAGE_X64_SHA256 }}|}" com.actualbudget.actual.yml
+          sed -i "/x86_64.AppImage/{n;s|sha256:.*|sha256: ${APPIMAGE_X64_SHA256}|}" com.actualbudget.actual.yml
           sed -i "/x86_64.AppImage/s|url:.*|url: https://github.com/actualbudget/actual/releases/download/v${VERSION}/Actual-linux-x86_64.AppImage|" com.actualbudget.actual.yml
 
           # Replace arm64 entry
-          sed -i "/arm64.AppImage/{n;s|sha256:.*|sha256: ${{ env.APPIMAGE_ARM64_SHA256 }}|}" com.actualbudget.actual.yml
+          sed -i "/arm64.AppImage/{n;s|sha256:.*|sha256: ${APPIMAGE_ARM64_SHA256}|}" com.actualbudget.actual.yml
           sed -i "/arm64.AppImage/s|url:.*|url: https://github.com/actualbudget/actual/releases/download/v${VERSION}/Actual-linux-arm64.AppImage|" com.actualbudget.actual.yml
 
           echo "Updated manifest:"
           cat com.actualbudget.actual.yml
+        env:
+          STEPS_RESOLVE_VERSION_OUTPUTS_VERSION: ${{ steps.resolve_version.outputs.version }}
 
       - name: Create PR in Flathub repo
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1

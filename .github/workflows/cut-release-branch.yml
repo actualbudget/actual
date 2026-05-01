@@ -31,6 +31,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ github.event.inputs.ref || 'master' }}
+          persist-credentials: false
 
       - name: Set up environment
         uses: ./.github/actions/setup

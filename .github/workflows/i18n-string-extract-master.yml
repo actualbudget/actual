@@ -15,6 +15,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           path: actual
+          persist-credentials: false
       - name: Set up environment
         uses: ./actual/.github/actions/setup
         with:
@@ -59,6 +60,8 @@ jobs:
           ssh-key: ${{ secrets.STRING_IMPORT_DEPLOY_KEY }}
           repository: actualbudget/translations
           path: translations
+          # Need to be able to push back extracted strings
+          persist-credentials: true
       - name: Generate i18n strings
         working-directory: actual
         run: |
