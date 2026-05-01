@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        > ⚠️ **Tech support tickets opened here are automatically closed.** GitHub Issues is reserved for bug reports and feature requests. The fastest way to get help is to ask the community on [Discord](https://discord.gg/pRYNYr4W5A) — that's where most of the community lives and can help you in real time.
+        > ⚠️ **Tech support tickets opened here are automatically closed.** GitHub Issues are reserved for bug reports and feature requests. The fastest way to get help is to ask the community on [Discord](https://discord.gg/pRYNYr4W5A) — that's where most of the community lives and can help you in real time.
   - type: textarea
     id: problem
     attributes:
