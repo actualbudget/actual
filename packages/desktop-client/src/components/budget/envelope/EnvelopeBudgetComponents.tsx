@@ -693,11 +693,18 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   );
 });
 
-type IncomeGroupMonthProps = {
-  month: string;
-};
-export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
+export function IncomeGroupMonth({ month, group }: CategoryGroupMonthProps) {
   const [forecastMode = false] = useMetadataPref('budget.forecastMode');
+  const { forecastTransactionsByCategoryAndMonth } = useEnvelopeBudget();
+
+  const groupScheduledIncomeAmount = (group.categories ?? []).reduce(
+    (sum, cat) => {
+      const txs =
+        forecastTransactionsByCategoryAndMonth.get(`${cat.id}-${month}`) ?? [];
+      return sum + txs.reduce((s, tx) => s + (tx.amount ?? 0), 0);
+    },
+    0,
+  );
 
   return (
     <View style={{ flex: 1, flexDirection: 'row' }}>
@@ -720,23 +727,52 @@ export function IncomeGroupMonth({ month }: IncomeGroupMonthProps) {
           }}
         />
       )}
-      <EnvelopeSheetCell
-        name="received"
-        width="flex"
-        textAlign="right"
-        style={{
-          fontWeight: 600,
-          paddingRight: styles.monthRightPadding,
-          ...styles.tnum,
-          backgroundColor: monthUtils.isCurrentMonth(month)
-            ? theme.budgetHeaderCurrentMonth
-            : theme.budgetHeaderOtherMonth,
-        }}
-        valueProps={{
-          binding: envelopeBudget.groupIncomeReceived,
-          type: 'financial',
-        }}
-      />
+      {forecastMode && groupScheduledIncomeAmount !== 0 ? (
+        <Field
+          name="received"
+          width="flex"
+          style={{
+            textAlign: 'right',
+            fontWeight: 600,
+            paddingRight: styles.monthRightPadding,
+            ...styles.tnum,
+            backgroundColor: monthUtils.isCurrentMonth(month)
+              ? theme.budgetHeaderCurrentMonth
+              : theme.budgetHeaderOtherMonth,
+          }}
+        >
+          <EnvelopeCellValue
+            binding={envelopeBudget.groupIncomeReceived}
+            type="financial"
+          >
+            {props => (
+              <CellValueText
+                {...props}
+                value={props.value + groupScheduledIncomeAmount}
+                style={{ color: theme.upcomingText }}
+              />
+            )}
+          </EnvelopeCellValue>
+        </Field>
+      ) : (
+        <EnvelopeSheetCell
+          name="received"
+          width="flex"
+          textAlign="right"
+          style={{
+            fontWeight: 600,
+            paddingRight: styles.monthRightPadding,
+            ...styles.tnum,
+            backgroundColor: monthUtils.isCurrentMonth(month)
+              ? theme.budgetHeaderCurrentMonth
+              : theme.budgetHeaderOtherMonth,
+          }}
+          valueProps={{
+            binding: envelopeBudget.groupIncomeReceived,
+            type: 'financial',
+          }}
+        />
+      )}
     </View>
   );
 }
