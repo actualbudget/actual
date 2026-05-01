@@ -21,6 +21,7 @@ type NotesButtonProps = {
   width?: number;
   height?: number;
   defaultColor?: string;
+  hasNotesColor?: string;
   tooltipPosition?: ComponentProps<typeof Tooltip>['placement'];
   showPlaceholder?: boolean;
   style?: CSSProperties;
@@ -30,6 +31,7 @@ export function NotesButton({
   width = 12,
   height = 12,
   defaultColor = theme.buttonNormalText,
+  hasNotesColor,
   tooltipPosition = 'bottom start',
   showPlaceholder = false,
   style,
@@ -72,7 +74,10 @@ export function NotesButton({
           aria-label={t('View notes')}
           className={cx(
             css({
-              color: defaultColor,
+              color:
+                hasNotesColor && hasNotes && !isOpen
+                  ? hasNotesColor
+                  : defaultColor,
               ...style,
               padding: 4,
               ...(showPlaceholder && {

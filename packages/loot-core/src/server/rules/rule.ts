@@ -61,6 +61,18 @@ function execSplitActions(actions: Action[], transaction) {
       newTransactions[splitTransactionIndex].amount = amount;
     });
 
+  // Distribute to VAT (tax-inclusive) splits.
+  // Formula: VAT_amount = total × rate / (100 + rate), rounded to integer cents.
+  const totalAmount = transaction.amount ?? 0;
+  splitAmountActions
+    .filter(action => action.options.method === 'vat')
+    .forEach(action => {
+      const splitTransactionIndex = (action.options?.splitIndex ?? 0) + 1;
+      const rate = action.value; // e.g. 19 for 19%
+      const amount = Math.round((totalAmount * rate) / (100 + rate));
+      newTransactions[splitTransactionIndex].amount = amount;
+    });
+
   // Distribute to remainder splits.
   const remainderActions = splitAmountActions.filter(
     action => action.options.method === 'remainder',

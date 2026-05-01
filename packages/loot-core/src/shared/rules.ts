@@ -122,6 +122,7 @@ export function getAllocationMethods(hasFormulaMode = false) {
   return {
     'fixed-amount': t('a fixed amount'),
     'fixed-percent': t('a fixed percent of the remainder'),
+    vat: t('a VAT amount (tax-inclusive)'),
     ...(hasFormulaMode && { formula: t('based on a formula') }),
     remainder: t('an equal portion of the remainder'),
   };
@@ -327,6 +328,12 @@ export function unparse({ error: _error, inputKey: _inputKey, ...item }) {
       };
     }
     if (item.options.method === 'fixed-percent') {
+      return {
+        ...item,
+        value: item.value && parseFloat(item.value),
+      };
+    }
+    if (item.options.method === 'vat') {
       return {
         ...item,
         value: item.value && parseFloat(item.value),

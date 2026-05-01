@@ -174,6 +174,13 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
 }: CategoryGroupMonthProps) {
   const { id } = group;
   const [forecastMode = false] = useMetadataPref('budget.forecastMode');
+  const { forecastTransactionsByCategoryAndMonth } = useEnvelopeBudget();
+
+  const groupScheduledAmount = (group.categories ?? []).reduce((sum, cat) => {
+    const txs =
+      forecastTransactionsByCategoryAndMonth.get(`${cat.id}-${month}`) ?? [];
+    return sum + txs.reduce((s, tx) => s + (tx.amount ?? 0), 0);
+  }, 0);
 
   return (
     <View
@@ -208,16 +215,37 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
           }}
         />
       )}
-      <EnvelopeSheetCell
-        name="spent"
-        width="flex"
-        textAlign="right"
-        style={{ fontWeight: 600, ...styles.tnum }}
-        valueProps={{
-          binding: envelopeBudget.groupSumAmount(id),
-          type: 'financial',
-        }}
-      />
+      {forecastMode && groupScheduledAmount !== 0 ? (
+        <Field
+          name="spent"
+          width="flex"
+          style={{ textAlign: 'right', fontWeight: 600, ...styles.tnum }}
+        >
+          <EnvelopeCellValue
+            binding={envelopeBudget.groupSumAmount(id)}
+            type="financial"
+          >
+            {props => (
+              <CellValueText
+                {...props}
+                value={props.value + groupScheduledAmount}
+                style={{ color: theme.upcomingText }}
+              />
+            )}
+          </EnvelopeCellValue>
+        </Field>
+      ) : (
+        <EnvelopeSheetCell
+          name="spent"
+          width="flex"
+          textAlign="right"
+          style={{ fontWeight: 600, ...styles.tnum }}
+          valueProps={{
+            binding: envelopeBudget.groupSumAmount(id),
+            type: 'financial',
+          }}
+        />
+      )}
       <EnvelopeSheetCell
         name="balance"
         width="flex"
@@ -346,6 +374,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
               <NotesButton
                 id={`${category.id}-${month}`}
                 defaultColor={theme.pageTextLight}
+                hasNotesColor="#ffd93d"
               />
             </View>
             <View

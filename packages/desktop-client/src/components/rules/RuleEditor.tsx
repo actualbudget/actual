@@ -617,7 +617,11 @@ function ActionEditor({
           <View
             style={{
               flex: 1,
-              minWidth: options.method === 'fixed-percent' ? 45 : 70,
+              minWidth:
+                options.method === 'fixed-percent' ||
+                options.method === 'vat'
+                  ? 45
+                  : 70,
             }}
           >
             {options.method === 'formula' ? (
@@ -633,7 +637,9 @@ function ActionEditor({
                 op={op}
                 type="number"
                 numberFormatType={
-                  options.method === 'fixed-percent' ? 'percentage' : 'currency'
+                  options.method === 'fixed-percent' || options.method === 'vat'
+                    ? 'percentage'
+                    : 'currency'
                 }
                 value={value}
                 onChange={v => onChange('value', v)}

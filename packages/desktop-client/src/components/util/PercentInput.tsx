@@ -1,5 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import type { CSSProperties, FocusEvent, FocusEventHandler, Ref } from 'react';
+import type {
+  CSSProperties,
+  FocusEvent,
+  FocusEventHandler,
+  Ref,
+} from 'react';
 
 import { Input } from '@actual-app/components/input';
 import { evalArithmetic } from '@actual-app/core/shared/arithmetic';
@@ -36,13 +41,17 @@ export function PercentInput({
 }: PercentInputProps) {
   const format = useFormat();
 
-  const [value, setValue] = useState(() =>
-    format(clampToPercent(initialValue), 'percentage'),
+  // Internal number string (no % suffix) — avoids cursor-positioning issues
+  // that arise when keeping a suffix inside a controlled input.
+  const [numericStr, setNumericStr] = useState(() =>
+    String(clampToPercent(initialValue)),
   );
+  const [isFocused, setIsFocused] = useState(false);
+
   useEffect(() => {
     const clampedInitialValue = clampToPercent(initialValue);
     if (clampedInitialValue !== initialValue) {
-      setValue(format(clampedInitialValue, 'percentage'));
+      setNumericStr(String(clampedInitialValue));
       onUpdatePercent?.(clampedInitialValue);
     }
   }, [initialValue, onUpdatePercent, format]);
@@ -56,59 +65,49 @@ export function PercentInput({
     }
   }, [focused]);
 
-  function onSelectionChange() {
-    if (!ref.current) {
-      return;
-    }
-
-    const selectionStart = ref.current.selectionStart;
-    const selectionEnd = ref.current.selectionEnd;
-    if (
-      selectionStart === selectionEnd &&
-      selectionStart !== null &&
-      selectionStart >= ref.current.value.length
-    ) {
-      ref.current.setSelectionRange(
-        ref.current.value.length - 1,
-        ref.current.value.length - 1,
-      );
-    }
-  }
-
   function onInputTextChange(val: string) {
     const number = val.replace(/[^0-9.]/g, '');
-    setValue(number ? format(number, 'percentage') : '');
+    setNumericStr(number);
     onChangeValue?.(number);
   }
 
   function fireUpdate() {
     const clampedValue = clampToPercent(
-      evalArithmetic(value.replace('%', ''), 0) ?? 0,
+      evalArithmetic(numericStr, 0) ?? 0,
     );
     onUpdatePercent?.(clampedValue);
-    onInputTextChange(String(clampedValue));
+    setNumericStr(String(clampedValue));
+  }
+
+  function onInputFocus(e: FocusEvent<HTMLInputElement>) {
+    setIsFocused(true);
+    onFocus?.(e);
   }
 
   function onInputAmountBlur(e: FocusEvent<HTMLInputElement>) {
     if (!ref.current?.contains(e.relatedTarget)) {
       fireUpdate();
     }
+    setIsFocused(false);
     onBlur?.(e);
   }
+
+  // Show plain number while editing; append '%' suffix when blurred so the
+  // user always sees the full precision they entered.
+  const displayValue = isFocused ? numericStr : format(numericStr || '0', 'percentage');
 
   return (
     <Input
       id={id}
       ref={mergedRef}
       inputMode="decimal"
-      value={value}
+      value={displayValue}
       disabled={disabled}
       style={{ flex: 1, alignItems: 'stretch', ...style }}
       onEnter={fireUpdate}
       onChangeValue={onInputTextChange}
       onBlur={onInputAmountBlur}
-      onFocus={onFocus}
-      onSelect={onSelectionChange}
+      onFocus={onInputFocus}
     />
   );
 }
