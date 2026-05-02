@@ -620,17 +620,19 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     );
   }
 
-  const onSaveWidgetName = async (newName: string) => {
+  const onSaveWidgetName = (newName: string) => {
     if (!widget) {
       throw new Error('No widget that could be saved.');
     }
 
     const name = newName || t('Sankey');
-    await send('dashboard-update-widget', {
-      id: widget.id,
-      meta: {
-        ...(widget.meta ?? {}),
-        name,
+    updateDashboardWidgetMutation.mutate({
+      widget: {
+        id: widget.id,
+        meta: {
+          ...(widget.meta ?? {}),
+          name,
+        },
       },
     });
   };
