@@ -67,7 +67,8 @@ export function TagAutocomplete({
   const filteredItems = useMemo(() => {
     const currentWord = getCurrentWord(inputValue, inputRef.current);
     if (!currentWord.startsWith('#') || cursorPosition == null) return [];
-    return items.filter(item => contains(item.name, currentWord.slice(1)));
+    const substring = currentWord.slice(1);
+    return items.filter(item => contains(item.name, substring)).slice(0, 10);
   }, [items, inputValue, contains, cursorPosition]);
 
   const [isOpen, setIsOpen] = useState(false);
