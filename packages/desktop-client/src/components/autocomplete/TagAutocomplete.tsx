@@ -14,12 +14,12 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import { Input } from '@actual-app/components/input';
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { css } from '@emotion/css';
 
 import { useTags } from '#hooks/useTags';
 import { NotesTagFormatter } from '#notes/NotesTagFormatter';
-import { styles } from '@actual-app/components/styles';
-import { css } from '@emotion/css';
 
 export type TagAutocompleteProps = {
   inputValue: string;
@@ -148,7 +148,7 @@ export function TagAutocomplete({
           background: theme.menuAutoCompleteBackground,
           borderRadius: 6,
           boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-          width: inputRef.current?.offsetWidth ?? 100
+          width: inputRef.current?.offsetWidth ?? 100,
         }}
         offset={1}
         triggerRef={inputRef}
