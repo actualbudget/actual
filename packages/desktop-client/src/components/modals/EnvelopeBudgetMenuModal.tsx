@@ -42,7 +42,6 @@ export function EnvelopeBudgetMenuModal({
   onCopyLastMonthAverage,
   onSetMonthsAverage,
   onApplyBudgetTemplate,
-  onCopyToFutureMonths,
   onEditNotes,
   month,
 }: EnvelopeBudgetMenuModalProps) {
@@ -201,7 +200,6 @@ export function EnvelopeBudgetMenuModal({
               onCopyLastMonthAverage={onCopyLastMonthAverage}
               onSetMonthsAverage={onSetMonthsAverage}
               onApplyBudgetTemplate={onApplyBudgetTemplate}
-              onCopyToFutureMonths={onCopyToFutureMonths}
             />
           )}
         </>

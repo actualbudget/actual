@@ -39,7 +39,7 @@ export type BudgetHandlers = {
   'budget/transfer-available': typeof actions.transferAvailable;
   'budget/cover-overbudgeted': typeof actions.coverOverbudgeted;
   'budget/transfer-category': typeof actions.transferCategory;
-  'budget/copy-to-future-months': typeof actions.copyToFutureMonths;
+  'budget/copy-until-year-end': typeof actions.copyUntilYearEnd;
   'budget/set-carryover': typeof actions.setCategoryCarryover;
   'budget/reset-income-carryover': typeof actions.resetIncomeCarryover;
   'get-categories': typeof getCategories;
@@ -124,8 +124,8 @@ app.method(
   mutator(undoable(actions.transferCategory)),
 );
 app.method(
-  'budget/copy-to-future-months',
-  mutator(undoable(actions.copyToFutureMonths)),
+  'budget/copy-until-year-end',
+  mutator(undoable(actions.copyUntilYearEnd)),
 );
 app.method(
   'budget/set-carryover',

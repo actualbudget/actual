@@ -344,12 +344,12 @@ export const CategoryMonth = memo(function CategoryMonth({
                       message: t(`Budget template applied.`),
                     });
                   }}
-                  onCopyToFutureMonths={() => {
-                    onMenuAction(month, 'copy-to-future-months', {
+                  onCopyUntilYearEnd={() => {
+                    onMenuAction(month, 'copy-until-year-end', {
                       category: category.id,
                     });
                     showUndoNotification({
-                      message: t(`Budget copied to future months.`),
+                      message: t(`Budget copied until year end.`),
                     });
                   }}
                 />

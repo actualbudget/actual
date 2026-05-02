@@ -344,7 +344,6 @@ export type Modal =
         onCopyLastMonthAverage: () => void;
         onSetMonthsAverage: (numberOfMonths: number) => void;
         onApplyBudgetTemplate: () => void;
-        onCopyToFutureMonths: () => void;
         onEditNotes: (id: NoteEntity['id'], month: string) => void;
       };
     }
@@ -357,7 +356,7 @@ export type Modal =
         onCopyLastMonthAverage: () => void;
         onSetMonthsAverage: (numberOfMonths: number) => void;
         onApplyBudgetTemplate: () => void;
-        onCopyToFutureMonths: () => void;
+        onCopyUntilYearEnd: () => void;
         onEditNotes: (id: NoteEntity['id'], month: string) => void;
       };
     }

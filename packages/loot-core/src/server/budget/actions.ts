@@ -591,7 +591,7 @@ export async function transferCategory({
   });
 }
 
-export async function copyToFutureMonths({
+export async function copyUntilYearEnd({
   month,
   category,
 }: {
@@ -603,20 +603,15 @@ export async function copyToFutureMonths({
     'budget-' + category,
   );
 
+  const yearEnd = monthUtils.getYearEnd(month);
   const { createdMonths } = sheet.get().meta();
   const futureMonths = [...(createdMonths as Set<string>)]
-    .filter(m => m > month)
+    .filter(m => m > month && m <= yearEnd)
     .sort();
 
   await batchMessages(async () => {
     for (const futureMonth of futureMonths) {
-      const existing = await getSheetValue(
-        monthUtils.sheetForMonth(futureMonth),
-        'budget-' + category,
-      );
-      if (existing !== 0) {
-        void setBudget({ category, month: futureMonth, amount });
-      }
+      void setBudget({ category, month: futureMonth, amount });
     }
   });
 }

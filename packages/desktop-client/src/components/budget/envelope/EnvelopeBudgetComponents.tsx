@@ -367,14 +367,6 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
                       message: t(`Budget template applied.`),
                     });
                   }}
-                  onCopyToFutureMonths={() => {
-                    onMenuAction(month, 'copy-to-future-months', {
-                      category: category.id,
-                    });
-                    showUndoNotification({
-                      message: t(`Budget copied to future months.`),
-                    });
-                  }}
                 />
               </Popover>
             </View>

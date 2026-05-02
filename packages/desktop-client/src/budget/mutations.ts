@@ -649,7 +649,7 @@ type ApplyBudgetActionPayload =
       };
     }
   | {
-      type: 'copy-to-future-months';
+      type: 'copy-until-year-end';
       month: string;
       args: {
         category: CategoryEntity['id'];
@@ -783,8 +783,8 @@ export function useBudgetActions() {
             category: args.category,
           });
           return null;
-        case 'copy-to-future-months':
-          await send('budget/copy-to-future-months', {
+        case 'copy-until-year-end':
+          await send('budget/copy-until-year-end', {
             month,
             category: args.category,
           });
