@@ -482,9 +482,11 @@ class AccountInternal extends PureComponent<
 
     // Filter out reconciled transactions if they are hidden
     // and we're not showing balances.
+    const showRunningBalancesForQuery = this.shouldShowRunningBalances();
+
     if (
       !this.state.showReconciled &&
-      (!this.state.showBalances || !this.canCalculateBalance())
+      (!showRunningBalancesForQuery || !this.canCalculateBalance())
     ) {
       query = query.filter({ reconciled: { $eq: false } });
     }
@@ -510,7 +512,8 @@ class AccountInternal extends PureComponent<
           }
         }
 
-        const balances = this.state.showBalances
+        const showRunningBalances = this.shouldShowRunningBalances();
+        const balances = showRunningBalances
           ? await this.calculateBalances()
           : null;
         const filteredAmount = await this.getFilteredAmount();
@@ -658,7 +661,12 @@ class AccountInternal extends PureComponent<
     this.props.dispatch(updateNewTransactions({ id: updatedTransaction.id }));
   };
 
+  shouldShowRunningBalances = () =>
+    !!this.state.showBalances && this.state.groupBy === 'none';
+
   canCalculateBalance = () => {
+    if (this.state.groupBy !== 'none') return false;
+
     const accountId = this.props.accountId;
     const account = this.props.accounts.find(
       account => account.id === accountId,
@@ -677,7 +685,11 @@ class AccountInternal extends PureComponent<
   };
 
   async calculateBalances() {
-    if (!this.canCalculateBalance() || !this.paged) {
+    if (
+      !this.shouldShowRunningBalances() ||
+      !this.canCalculateBalance() ||
+      !this.paged
+    ) {
       return null;
     }
 
@@ -1777,7 +1789,7 @@ class AccountInternal extends PureComponent<
       filterId,
       reconcileAmount,
       transactionsFiltered,
-      showBalances,
+      showBalances: showBalancesPref,
       balances,
       showCleared,
       showReconciled,
@@ -1785,6 +1797,7 @@ class AccountInternal extends PureComponent<
       groupBy,
       groupToggleAll,
     } = this.state;
+    const showRunningBalances = !!showBalancesPref && groupBy === 'none';
 
     const account = accounts.find(account => account.id === accountId);
     const accountName = this.getAccountTitle(account, accountId);
@@ -1822,7 +1835,7 @@ class AccountInternal extends PureComponent<
         account={account}
         transactions={transactions}
         balances={balances}
-        showBalances={showBalances}
+        showBalances={showRunningBalances}
         filtered={transactionsFiltered}
       >
         {(allTransactions, allBalances) => (
@@ -1847,7 +1860,7 @@ class AccountInternal extends PureComponent<
                 failedAccounts={failedAccounts}
                 accounts={accounts}
                 transactions={transactions}
-                showBalances={showBalances ?? false}
+                showBalances={showRunningBalances}
                 showExtraBalances={showExtraBalances ?? false}
                 showCleared={showCleared ?? false}
                 showReconciled={showReconciled ?? false}
@@ -1914,7 +1927,7 @@ class AccountInternal extends PureComponent<
                   categoryGroups={categoryGroups}
                   payees={payees}
                   balances={allBalances}
-                  showBalances={!!allBalances && groupBy === 'none'}
+                  showBalances={!!allBalances && showRunningBalances}
                   showReconciled={showReconciled}
                   showCleared={!!showCleared}
                   showAccount={
