@@ -104,6 +104,7 @@ const SpecialNodeKeys = {
   ForNextMonth: 'for_next_month',
   FromPrevMonth: 'from_previous_month',
   AvailableIncome: 'available_income',
+  AllAccounts: 'Income',
   GlobalOther: 'GLOBAL__OTHER_BUCKET',
   OtherSuffix: '__OTHER_BUCKET',
   HiddenSuffix: '__HIDDEN',
@@ -147,6 +148,7 @@ export function createSpreadsheet(
   categorySort: SortMode = 'per-group',
   layerFrom: GraphLayers,
   layerTo: GraphLayers,
+  groupAccounts: boolean = false,
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
@@ -168,6 +170,7 @@ export function createSpreadsheet(
         categories,
         conditions,
         conditionsOp,
+        groupAccounts
       )();
     }
     processGraphData(
@@ -303,6 +306,7 @@ export function createTransactionsSpreadsheet(
   categories: CategoryGroupEntity[],
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
+  groupAccounts: boolean,
 ) {
   return async () => {
     // gather filters user has set
@@ -317,6 +321,7 @@ export function createTransactionsSpreadsheet(
       filters,
       start,
       end,
+      groupAccounts
     );
 
     return categoryData;
@@ -454,6 +459,7 @@ async function fetchCategoryData(
   filters: unknown[] = [],
   start: string,
   end: string,
+  groupAccounts: boolean,
 ): Promise<CategoryEntry[]> {
   const nested = await Promise.all(
     categoryGroups.map(async (categoryGroup: CategoryGroupEntity) => {
@@ -513,7 +519,18 @@ async function fetchCategoryData(
       return entries.flat();
     }),
   );
-  return nested.flat().filter(e => e.value > 0);
+  const allCategoryData = nested.flat();
+
+  if (groupAccounts) {
+    allCategoryData.forEach(entry => {
+      if (entry.accountName && entry.accountId) {
+        entry.accountName = SpecialNodeKeys.AllAccounts;
+        entry.accountId = SpecialNodeKeys.AllAccounts;
+      }
+    });
+  }
+
+  return allCategoryData;
 }
 
 function createBudgetGraph(

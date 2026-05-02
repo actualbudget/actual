@@ -295,11 +295,15 @@ function GraphModeSelector({ mode, onChange }: GraphModeSelectorProps) {
 type OptionsButtonProps = {
   showPercentages: boolean;
   onTogglePercentages: () => void;
+  groupAccounts: boolean;
+  onToggleGroupAccounts: () => void;
 };
 
 function OptionsButton({
   showPercentages,
   onTogglePercentages,
+  groupAccounts,
+  onToggleGroupAccounts,
 }: OptionsButtonProps) {
   const { t } = useTranslation();
   const triggerRef = useRef<HTMLButtonElement | null>(null);
@@ -318,12 +322,18 @@ function OptionsButton({
         <Menu
           onMenuSelect={item => {
             if (item === 'show-percentages') onTogglePercentages();
+            if (item === 'group-accounts') onToggleGroupAccounts();
           }}
           items={[
             {
               name: 'show-percentages',
               text: t('Show as percentages'),
               toggle: showPercentages,
+            },
+            {
+              name: 'group-accounts',
+              text: t('Group accounts in Spent view'),
+              toggle: groupAccounts,
             },
           ]}
         />
@@ -386,6 +396,9 @@ function SankeyInner({ widget }: SankeyInnerProps) {
 
   const [showPercentages, setShowPercentages] = useState(
     widget?.meta?.showPercentages ?? false,
+  );
+  const [groupAccounts, setGroupAccounts] = useState(
+    widget?.meta?.groupAccounts ?? false,
   );
 
   // Determine default layer based on mode
@@ -463,6 +476,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       categorySort,
       layerFrom,
       layerTo,
+      groupAccounts,
     );
   }, [
     datesInitialized,
@@ -476,6 +490,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     categorySort,
     layerFrom,
     layerTo,
+    groupAccounts,
   ]);
 
   const defaultGetData = async (
@@ -577,6 +592,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
               end,
               mode: timeFrameMode,
             },
+            groupAccounts,
           },
         },
       },
@@ -750,6 +766,8 @@ function SankeyInner({ widget }: SankeyInnerProps) {
           <OptionsButton
             showPercentages={showPercentages}
             onTogglePercentages={() => setShowPercentages(v => !v)}
+            groupAccounts={groupAccounts}
+            onToggleGroupAccounts={() => setGroupAccounts(v => !v)}
           />
         </View>
         {widget && (

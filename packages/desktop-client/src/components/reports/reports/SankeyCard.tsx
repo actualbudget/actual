@@ -76,6 +76,8 @@ export function SankeyCard({
     ? meta.layerFrom
     : undefined;
   const metaLayerTo = isGraphLayer(meta?.layerTo) ? meta.layerTo : undefined;
+  
+  const groupAccounts = meta.groupAccounts ?? false;
 
   const layerFrom =
     metaLayerFrom &&
@@ -104,6 +106,7 @@ export function SankeyCard({
         meta?.categorySort,
         layerFrom,
         layerTo,
+        groupAccounts,
       ),
     [
       start,
@@ -116,6 +119,7 @@ export function SankeyCard({
       meta?.categorySort,
       layerFrom,
       layerTo,
+      groupAccounts,
     ],
   );
   const data = useReport('sankey', params);
