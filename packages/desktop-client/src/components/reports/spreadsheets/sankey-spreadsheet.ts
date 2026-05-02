@@ -86,7 +86,7 @@ type NodeKey = string;
 type NodeData = {
   to: Map<NodeKey, number>;
   value?: number;
-  type: string;
+  type: GraphLayers;
   name?: string;
   labelKey?: string;
   labelParams?: Record<string, string>;
@@ -343,6 +343,7 @@ function processGraphData(
   const sortedGraph = sortGraph(graph, categorySort, categories);
   addPercentageLabels(sortedGraph);
   addColors(sortedGraph);
+  addHiddenNodes(sortedGraph);
   filterGraphByLayers(sortedGraph, layerFrom, layerTo);
   cleanUpNodes(sortedGraph);
   setData(convertToSankeyData(sortedGraph));
@@ -653,27 +654,6 @@ function createBudgetGraph(
     Math.abs(aggregated.lastMonthOverspent),
   );
 
-  // Add extra synthetic links to position nodes at the right layers.
-  // If the nodes don't exist, a link will not be created, so this is not seen in the graph.
-  addValueToLink(
-    graph,
-    SpecialNodeKeys.ToBudget,
-    'to_budget' + SpecialNodeKeys.HiddenSuffix,
-    -1,
-  );
-  addValueToLink(
-    graph,
-    SpecialNodeKeys.ForNextMonth,
-    'next_month' + SpecialNodeKeys.HiddenSuffix,
-    -1,
-  );
-  addValueToLink(
-    graph,
-    SpecialNodeKeys.LastMonthOverspent,
-    'overspent' + SpecialNodeKeys.HiddenSuffix,
-    -1,
-  );
-
   return graph;
 }
 
@@ -724,41 +704,6 @@ function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
           entry.value,
         );
       }
-    }
-  });
-
-  graph.forEach((data, key) => {
-    if (
-      data.type === GraphLayers.Account &&
-      getLayer(graph, key) === 0 &&
-      nodesInLayer(graph, GraphLayers.IncomePayee).length > 0
-    ) {
-      // If an account node has no parents (i.e. money was spent from the account, but no money added in the timeframe),
-      // connect it to a synthetic node to ensure it appears in the graph at the right layer.
-      addNode(
-        graph,
-        key + '_payee' + SpecialNodeKeys.HiddenSuffix,
-        GraphLayers.IncomePayee,
-        '',
-      );
-      addNode(
-        graph,
-        key + '_account' + SpecialNodeKeys.HiddenSuffix,
-        GraphLayers.Account,
-        '',
-      );
-      addValueToLink(
-        graph,
-        key + '_payee' + SpecialNodeKeys.HiddenSuffix,
-        key + '_account' + SpecialNodeKeys.HiddenSuffix,
-        -1,
-      );
-      addValueToLink(
-        graph,
-        key + '_account' + SpecialNodeKeys.HiddenSuffix,
-        key,
-        -1,
-      );
     }
   });
 
@@ -1075,10 +1020,13 @@ function sortGraph(
   }
 
   // We always want certain nodes to be shown at the start/end of their layers
-  if (graph.get(SpecialNodeKeys.ToBudget).isOverbudgeted) {
-    moveNodeToStart(sortedEntries, SpecialNodeKeys.ToBudget)
-  } else {
-    moveNodeToEnd(sortedEntries, SpecialNodeKeys.ToBudget);
+  const toBudgetNode = graph.get(SpecialNodeKeys.ToBudget);
+  if (toBudgetNode) {
+    if (toBudgetNode.isOverbudgeted) {
+      moveNodeToStart(sortedEntries, SpecialNodeKeys.ToBudget);
+    } else {
+      moveNodeToEnd(sortedEntries, SpecialNodeKeys.ToBudget);
+    }
   }
   moveNodeToEnd(sortedEntries, SpecialNodeKeys.LastMonthOverspent);
   moveNodeToEnd(sortedEntries, SpecialNodeKeys.ForNextMonth);
@@ -1179,6 +1127,116 @@ function setColor(graph: Graph, key: NodeKey, color: string) {
   if (node) {
     node.color = color;
   }
+}
+
+function addHiddenNodes(graph: Graph) {
+  // Nodes with parents/children different than other nodes in the same layer might end up
+  // in the wrong place in the graph. This fixes that, by adding extra, hidden nodes.
+
+  // Group nodes by type
+  const nodesByType: Partial<Record<GraphLayers, Array<[NodeKey, NodeData]>>> =
+    {};
+
+  for (const [key, node] of graph) {
+    if (!nodesByType[node.type]) nodesByType[node.type] = [];
+    nodesByType[node.type]!.push([key, node]);
+  }
+
+  const { typeHasParent, typeHasChild } = buildTypeConnectivity(
+    graph,
+    nodesByType,
+  );
+
+  // Now: find and fix "problematic" nodes
+  for (const type in nodesByType) {
+    for (const [key, node] of nodesByType[type]!) {
+      const nodeHasParent = hasParent(graph, key);
+      const nodeHasChild = hasChild(node);
+      if (!nodeHasParent && typeHasParent[type]) {
+        // This node is at a wrong layer and need hidden parents
+        addNode(
+          graph,
+          key + '_payee' + SpecialNodeKeys.HiddenSuffix,
+          GraphLayers.IncomePayee,
+          '',
+        );
+        addNode(
+          graph,
+          key + '_account' + SpecialNodeKeys.HiddenSuffix,
+          GraphLayers.Account,
+          '',
+        );
+        addValueToLink(
+          graph,
+          key + '_payee' + SpecialNodeKeys.HiddenSuffix,
+          key + '_account' + SpecialNodeKeys.HiddenSuffix,
+          -1,
+        );
+        addValueToLink(
+          graph,
+          key + '_account' + SpecialNodeKeys.HiddenSuffix,
+          key,
+          -1,
+        );
+      }
+      if (!nodeHasChild && typeHasChild[type]) {
+        // This node is at a wrong layer and need hidden children
+        addNode(
+          graph,
+          key + '_category_group' + SpecialNodeKeys.HiddenSuffix,
+          GraphLayers.CategoryGroup,
+          '',
+        );
+        addNode(
+          graph,
+          key + '_category' + SpecialNodeKeys.HiddenSuffix,
+          GraphLayers.Category,
+          '',
+        );
+        addValueToLink(
+          graph,
+          key,
+          key + '_category_group' + SpecialNodeKeys.HiddenSuffix,
+          -1,
+        );
+        addValueToLink(
+          graph,
+          key + '_category_group' + SpecialNodeKeys.HiddenSuffix,
+          key + '_category' + SpecialNodeKeys.HiddenSuffix,
+          -1,
+        );
+      }
+    }
+  }
+}
+
+function buildTypeConnectivity(
+  graph: Map<NodeKey, NodeData>,
+  nodesByType: Partial<Record<GraphLayers, Array<[NodeKey, NodeData]>>>,
+) {
+  const typeHasParent = {} as Record<GraphLayers, boolean>;
+  const typeHasChild = {} as Record<GraphLayers, boolean>;
+
+  for (const type in nodesByType) {
+    typeHasParent[type] = false;
+    typeHasChild[type] = false;
+    for (const [key, node] of nodesByType[type]!) {
+      if (hasParent(graph, key)) typeHasParent[type] = true;
+      if (hasChild(node)) typeHasChild[type] = true;
+    }
+  }
+  return { typeHasParent, typeHasChild };
+}
+
+function hasParent(graph: Map<NodeKey, NodeData>, key: NodeKey): boolean {
+  for (const [_, data] of graph) {
+    if (data.to.has(key)) return true;
+  }
+  return false;
+}
+
+function hasChild(node: NodeData): boolean {
+  return node.to.size > 0;
 }
 
 function filterGraphByLayers(
@@ -1295,10 +1353,7 @@ function convertToSankeyData(graph: Graph): SankeyData {
       if (targetKey === SpecialNodeKeys.ForNextMonth) {
         color = graph.get(SpecialNodeKeys.ForNextMonth)?.color;
       }
-      if (
-        targetKey === SpecialNodeKeys.Budgeted &&
-        data.isOverbudgeted
-      ) {
+      if (targetKey === SpecialNodeKeys.Budgeted && data.isOverbudgeted) {
         color = data.color;
       }
 
