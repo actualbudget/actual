@@ -74,13 +74,11 @@ import type {
   ScheduleEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
-import { css, cx } from '@emotion/css';
 import { format as formatDate, parseISO } from 'date-fns';
 import memoizeOne from 'memoize-one';
 
 import { getAccountsById } from '#accounts/accountsSlice';
 import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplete';
-import { Autocomplete } from '#components/autocomplete/Autocomplete';
 import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
 import { TagAutocomplete } from '#components/autocomplete/TagAutocomplete';
@@ -130,7 +128,6 @@ import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 import { SheetNameProvider } from '#hooks/useSheetName';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
 import type { SplitsExpandedContextValue } from '#hooks/useSplitsExpanded';
-import { useTags } from '#hooks/useTags';
 import { pushModal } from '#modals/modalsSlice';
 import { NotesTagFormatter } from '#notes/NotesTagFormatter';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -408,12 +405,12 @@ function StatusCell({
           ':focus': {
             ...(isPreview
               ? {
-                boxShadow: 'none',
-              }
+                  boxShadow: 'none',
+                }
               : {
-                border: '1px solid ' + theme.formInputBorderSelected,
-                boxShadow: '0 1px 2px ' + theme.formInputBorderSelected,
-              }),
+                  border: '1px solid ' + theme.formInputBorderSelected,
+                  boxShadow: '0 1px 2px ' + theme.formInputBorderSelected,
+                }),
           },
           cursor: isClearedField ? 'pointer' : 'default',
           ...(isChild && { visibility: 'hidden' }),
@@ -556,8 +553,8 @@ function PayeeCell({
           ':hover': isPreview
             ? {}
             : {
-              border: '1px solid ' + theme.buttonNormalBorder,
-            },
+                border: '1px solid ' + theme.buttonNormalBorder,
+              },
         }}
         disabled={isPreview}
         onSelect={() =>
@@ -1463,11 +1460,11 @@ const Transaction = memo(function Transaction({
             value={
               matched
                 ? // TODO: this will require changes in table.tsx
-                ((
-                  <SvgHyperlink2
-                    style={{ width: 13, height: 13, color: 'inherit' }}
-                  />
-                ) as unknown as string)
+                  ((
+                    <SvgHyperlink2
+                      style={{ width: 13, height: 13, color: 'inherit' }}
+                    />
+                  ) as unknown as string)
                 : undefined
             }
           />
@@ -1734,11 +1731,11 @@ const Transaction = memo(function Transaction({
             valueStyle={
               !categoryId
                 ? {
-                  // uncategorized transaction
-                  fontStyle: 'italic',
-                  fontWeight: 300,
-                  color: theme.formInputTextHighlight,
-                }
+                    // uncategorized transaction
+                    fontStyle: 'italic',
+                    fontWeight: 300,
+                    color: theme.formInputTextHighlight,
+                  }
                 : valueStyle
             }
             onUpdate={async value => {
@@ -1974,6 +1971,14 @@ function NotesCell({
 }: NotesCellProps) {
   const [inputValue, setInputValue] = useState(value);
 
+  function onKeyDown(e: KeyboardEvent) {
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      onUpdate(inputValue);
+    } else if (e.key === 'Escape') {
+      setInputValue(value);
+    }
+  }
+
   return (
     <CustomCell
       width="flex"
@@ -1986,52 +1991,20 @@ function NotesCell({
       exposed={focused}
       onExpose={onExpose}
       onUpdate={onUpdate}
-      onFocus={() => setInputValue(value)}
+      onKeyDown={onKeyDown}
+      onBlur={() => onUpdate(inputValue)}
     >
       {({ inputStyle, onKeyDown, onBlur }) => (
         <TagAutocomplete
-          value={value}
           inputValue={inputValue}
           setInputValue={setInputValue}
           inputStyle={inputStyle}
           onBlur={onBlur}
           onKeyDown={onKeyDown}
-          onUpdate={onUpdate}
         />
       )}
     </CustomCell>
   );
-}
-
-function getCurrentWordRange(
-  inputValue: string,
-  cursorPosition: number | null,
-) {
-  if (
-    cursorPosition === undefined ||
-    cursorPosition === null ||
-    inputValue.charAt(cursorPosition - 1).trim() === ''
-  ) {
-    return [0, 0];
-  }
-  cursorPosition = cursorPosition - 1;
-
-  let startIdx = cursorPosition;
-  const endIdx = cursorPosition + 1;
-
-  while (startIdx > 0 && inputValue.charAt(startIdx - 1).trim() !== '') {
-    startIdx--;
-  }
-  if (startIdx < 0 || endIdx < 0 || startIdx === endIdx) {
-    return [0, 0];
-  }
-  return [startIdx, endIdx];
-}
-
-function getCurrentWord(inputValue: string, cursorPosition: number | null) {
-  if (cursorPosition === null) return '';
-  const [startIdx, endIdx] = getCurrentWordRange(inputValue, cursorPosition);
-  return inputValue.slice(startIdx, endIdx);
 }
 
 type TransactionErrorProps = {
@@ -3030,10 +3003,10 @@ export const TransactionTable = forwardRef(
       fields = item?.is_child
         ? ['select', 'payee', 'notes', 'category', 'debit', 'credit']
         : fields.filter(
-          f =>
-            (props.showAccount || f !== 'account') &&
-            (props.showCategory || f !== 'category'),
-        );
+            f =>
+              (props.showAccount || f !== 'account') &&
+              (props.showCategory || f !== 'category'),
+          );
 
       if (item?.id && isPreviewId(item.id)) {
         fields = ['select'];
@@ -3345,9 +3318,9 @@ export const TransactionTable = forwardRef(
           t =>
             t.parent_id &&
             t.parent_id ===
-            (transaction?.is_parent
-              ? transaction?.id
-              : transaction?.parent_id),
+              (transaction?.is_parent
+                ? transaction?.id
+                : transaction?.parent_id),
         );
 
         const emptyTransactions = siblingTransactions.filter(

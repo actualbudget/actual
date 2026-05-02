@@ -1,223 +1,216 @@
-import {
-  type CSSProperties,
-  type FocusEventHandler,
-  type KeyboardEvent,
-  type KeyboardEventHandler,
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import type {
+  CSSProperties,
+  FocusEventHandler,
+  KeyboardEvent,
+  KeyboardEventHandler,
 } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import {
+  ListBox,
+  ListBoxItem,
+  Popover,
+  useFilter,
+} from 'react-aria-components';
+import { useTranslation } from 'react-i18next';
 
+import { Input } from '@actual-app/components/input';
 import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
-import { css, cx } from '@emotion/css';
 
 import { useTags } from '#hooks/useTags';
 import { NotesTagFormatter } from '#notes/NotesTagFormatter';
-
-import { Autocomplete } from './Autocomplete';
+import { styles } from '@actual-app/components/styles';
+import { css } from '@emotion/css';
 
 export type TagAutocompleteProps = {
-  value: string;
   inputValue: string;
   setInputValue: (v: string) => void;
-  inputStyle: CSSProperties;
-  onUpdate: (v: string) => void;
-  onBlur: FocusEventHandler;
-  onKeyDown: KeyboardEventHandler;
-};
-
-type TagOption = {
-  id: string;
-  name: string;
-  color: string | null | undefined;
+  inputStyle?: CSSProperties;
+  onBlur?: FocusEventHandler;
+  onKeyDown?: KeyboardEventHandler;
 };
 
 export function TagAutocomplete({
-  value,
   inputValue,
   setInputValue,
   onBlur,
   inputStyle,
-  onUpdate,
   onKeyDown,
 }: TagAutocompleteProps) {
+  const { t } = useTranslation();
+  const autocompleteId = useId();
+  const id = (itemId: string) => autocompleteId + '|' + itemId;
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const [cursorPosition, setCursorPosition] = useState(0);
-  useEffect(() => {
-    inputRef.current?.setSelectionRange(cursorPosition, cursorPosition);
-  }, [cursorPosition, setCursorPosition]);
 
-  const tagQuery = useTags();
-  const tagOptions: TagOption[] =
-    tagQuery.data?.map(tag => ({
-      id: tag.tag,
-      name: '#' + tag.tag,
-      color: tag.color,
-    })) ?? [];
-
-  function onSelect(
-    optionId: string,
-    value: string,
-    e?: KeyboardEvent<HTMLInputElement>,
-  ) {
-    const [start, end] = getCurrentWordRange(value, cursorPosition);
-    const option = tagOptions.find(o => o.id === optionId);
-    if (option) {
-      const newValue =
-        value.slice(0, start) + option.name + ' ' + value.slice(end);
-      setInputValue(newValue);
-      setTimeout(() => setCursorPosition(start + option.name.length + 1));
-
-      // only stop event propagation (i.e. table navigation) when we want to do
-      // autocomplete things. If we don't choose an option, then we want to treat
-      // this as a regular input field and do table navigation.
-      e?.stopPropagation();
-    } else {
-      onUpdate(value);
-    }
+  const { contains } = useFilter({ sensitivity: 'base' });
+  const { data } = useTags();
+  const items = useMemo(
+    () => data?.map(tag => ({ ...tag, name: '#' + tag.tag })) ?? [],
+    [data],
+  );
+  const [cursorPosition, _setCursorPosition] = useState(
+    inputRef.current?.selectionStart,
+  );
+  function setCursorPosition(n: number | null) {
+    _setCursorPosition(n);
+    setTimeout(() => inputRef.current?.setSelectionRange(n, n));
   }
+  const filteredItems = useMemo(() => {
+    const currentWord = getCurrentWord(inputValue, inputRef.current);
+    if (!currentWord.startsWith('#')) return [];
+    return items.filter(item => contains(item.name, currentWord.slice(1)));
+  }, [items, inputValue, cursorPosition]);
 
-  function onKeyUp(e: KeyboardEvent<HTMLInputElement>) {
-    setCursorPosition(e.currentTarget.selectionStart ?? 0);
+  const [isOpen, setIsOpen] = useState(false);
+  const showPopup = isOpen && filteredItems.length > 0;
+
+  const [highlightedIdx, setHighlightedIdx] = useState(0);
+  const highlightedId =
+    showPopup && highlightedIdx < filteredItems.length
+      ? filteredItems[highlightedIdx].id
+      : null;
+  useEffect(() => {
+    if (highlightedId) {
+      const el = document.querySelector(`[data-key="${id(highlightedId)}"]`);
+      el?.scrollIntoView({ block: 'nearest' });
+    }
+  }, [highlightedId]);
+
+  function handleSelect(id: string | null) {
+    const tagObj = filteredItems.find(tag => tag.id === id);
+    if (!tagObj) return;
+
+    const [startIdx, endIdx] = getCurrentWordRange(
+      inputValue,
+      inputRef.current,
+    );
+    const newInputValue = `${inputValue.slice(0, startIdx)}#${tagObj.tag} ${inputValue.slice(endIdx)}`;
+    setInputValue(newInputValue);
+    setHighlightedIdx(0);
+    setIsOpen(false);
+    setCursorPosition(startIdx + tagObj.tag.length + 2);
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
-    const highlightedEntries = document.querySelectorAll(
-      'div[data-tag-highlighted=true]',
-    );
-
-    if (e.key === 'Escape') {
-      // reset to initial value
-      setInputValue(value);
+    if (!showPopup) {
+      onKeyDown?.(e);
+      return;
     }
-    if (e.key === 'Tab' && highlightedEntries.length) {
-      const selectedId =
-        highlightedEntries.item(0).getAttribute('data-tag-option-id') ?? '';
+
+    if (e.key === 'ArrowUp') {
+      setHighlightedIdx(highlightedIdx - 1);
+      e.preventDefault();
+    } else if (e.key === 'ArrowDown') {
+      setHighlightedIdx(highlightedIdx + 1);
+      e.preventDefault();
+    } else if (e.key === 'Home' && filteredItems.length > 1) {
+      setHighlightedIdx(0);
+      e.preventDefault();
+    } else if (e.key === 'End' && filteredItems.length > 1) {
+      setHighlightedIdx(filteredItems.length - 1);
+      e.preventDefault();
+    } else if (highlightedId && (e.key === 'Enter' || e.key === 'Tab')) {
+      handleSelect(highlightedId);
       e.preventDefault();
       e.stopPropagation();
-      onSelect(selectedId, inputValue, e);
-    } else if (e.key === 'Enter' || e.key === 'Tab') {
-      // set to current value. For some reason this is
-      // is not getting caught by the onBlur handler
-      // likely because of Autocomplete complexity
-      onUpdate(inputValue);
+    } else if (e.key === 'Escape') {
+      setIsOpen(false);
     }
-    onKeyDown(e);
+
+    setHighlightedIdx(idx =>
+      Math.max(0, Math.min(idx, filteredItems.length - 1)),
+    );
   }
 
   return (
-    <Autocomplete
-      strict={false}
-      value={inputValue}
-      embedded={false}
-      getHighlightedIndex={() => 0}
-      clearOnBlur={false}
-      closeOnBlur
-      openOnFocus={false}
-      onSelect={onSelect}
-      inputProps={{
-        ref: inputRef,
-        onFocus: e => setTimeout(() => e.target.select()),
-        onBlur,
-        onKeyUp,
-        onKeyDownCapture: handleKeyDown,
-        style: inputStyle,
-        value: inputValue,
-        onChange: v => setInputValue(v.target.value),
-      }}
-      suggestions={tagOptions}
-      renderItems={(items, getItemProps, highlightedIndex) => {
-        return (
-          <View style={{ paddingLeft: 4, paddingRight: 4 }}>
-            <View
-              style={{
-                overflowY: 'auto',
-                willChange: 'transform',
-                padding: '5px 0',
-                maxHeight: 175,
-              }}
+    <>
+      <Input
+        ref={inputRef}
+        aria-label={t('Notes')}
+        aria-expanded={showPopup}
+        aria-controls={id('popover')}
+        role="combobox"
+        style={inputStyle}
+        value={inputValue}
+        onChange={e => {
+          setIsOpen(true);
+          setInputValue(e.currentTarget.value);
+        }}
+        onKeyDown={handleKeyDown}
+        onFocus={() => setIsOpen(true)}
+        onBlur={onBlur}
+      />
+
+      <Popover
+        isNonModal
+        placement="bottom start"
+        className={css(styles.darkScrollbar)}
+        style={{
+          background: theme.menuAutoCompleteBackground,
+          borderRadius: 6,
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+          width: inputRef.current?.offsetWidth ?? 100
+        }}
+        offset={1}
+        triggerRef={inputRef}
+        isOpen={showPopup}
+        onOpenChange={setIsOpen}
+      >
+        <ListBox
+          id={id('popover')}
+          items={filteredItems}
+          selectionMode="single"
+          dependencies={[highlightedId]}
+          onPointerDown={e => e.preventDefault()}
+          style={{ borderRadius: 4, maxHeight: '150px', overflowY: 'auto' }}
+        >
+          {(item: (typeof filteredItems)[number]) => (
+            <ListBoxItem
+              key={item.id}
+              id={id(item.id)}
+              textValue={item.name}
+              style={({ isHovered }) => ({
+                backgroundColor:
+                  highlightedId === item.id || isHovered
+                    ? theme.menuAutoCompleteBackgroundHover
+                    : 'transparent',
+                alignItems: 'center',
+                padding: 4,
+                fontWeight: 500,
+                cursor: 'pointer',
+                color:
+                  highlightedId === item.id
+                    ? theme.menuAutoCompleteItemTextHover
+                    : theme.menuAutoCompleteItemText,
+              })}
+              onPointerDown={e => e.preventDefault()}
+              onClick={() => handleSelect(item.id)}
             >
-              {items.map((item, idx) => (
-                <div
-                  key={item.id}
-                  {...getItemProps({ item })}
-                  onClick={() => onSelect(item.id, inputValue)}
-                  role="button"
-                  data-tag-option-id={item.id}
-                  data-tag-highlighted={
-                    highlightedIndex === idx ? 'true' : undefined
-                  }
-                  className={cx(
-                    css({
-                      backgroundColor:
-                        highlightedIndex === idx
-                          ? theme.menuAutoCompleteBackgroundHover
-                          : 'transparent',
-                      color:
-                        highlightedIndex === idx
-                          ? theme.menuAutoCompleteItemTextHover
-                          : theme.menuAutoCompleteText,
-                      padding: 4,
-                      borderRadius: 4,
-                      border: 'none',
-                      font: 'inherit',
-                    }),
-                  )}
-                >
-                  <NotesTagFormatter notes={item.name} />
-                </div>
-              ))}
-            </View>
-          </View>
-        );
-      }}
-      filterSuggestions={(options, inputValue) =>
-        filterSuggestions(options, inputValue, cursorPosition)
-      }
-    />
+              <NotesTagFormatter notes={item.name} />
+            </ListBoxItem>
+          )}
+        </ListBox>
+      </Popover>
+    </>
   );
 }
 
-function filterSuggestions(
-  suggestions: TagOption[],
-  inputValue: string,
-  cursorPosition: number,
-) {
-  if (inputValue.trim() === '' || !cursorPosition) {
-    return [];
-  }
-  const currentWord = getCurrentWord(inputValue, cursorPosition)?.toLowerCase();
-  if (!currentWord || !suggestions || currentWord.charAt(0) !== '#') {
-    return [];
-  }
-  const currentWordNoHash = currentWord.slice(1);
-  return suggestions
-    .filter(o => o.id.toLowerCase().includes(currentWordNoHash))
-    .sort(({ id: a }, { id: b }) => {
-      const aStarts = a.toLowerCase().startsWith(currentWord);
-      const bStarts = b.toLowerCase().startsWith(currentWord);
-      if (aStarts && !bStarts) {
-        return 1;
-      } else if (!aStarts && bStarts) {
-        return -1;
-      }
-      const compare = a.toLowerCase().localeCompare(b.toLowerCase());
-      return compare > 0 ? 1 : compare < 0 ? -1 : 0;
-    })
-    .slice(0, 10);
+function getCurrentWord(inputValue: string, input: HTMLInputElement | null) {
+  const [startIdx, endIdx] = getCurrentWordRange(inputValue, input);
+  return inputValue.slice(startIdx, endIdx);
 }
 
 function getCurrentWordRange(
   inputValue: string,
-  cursorPosition: number | null,
+  input: HTMLInputElement | null,
 ) {
   if (
-    cursorPosition === undefined ||
-    cursorPosition === null ||
-    inputValue.charAt(cursorPosition - 1).trim() === ''
+    input === null ||
+    !input.selectionStart ||
+    input.selectionStart !== input.selectionEnd
   ) {
     return [0, 0];
   }
-  cursorPosition = cursorPosition - 1;
+  const cursorPosition = input.selectionStart - 1;
 
   let startIdx = cursorPosition;
   const endIdx = cursorPosition + 1;
@@ -229,10 +222,4 @@ function getCurrentWordRange(
     return [0, 0];
   }
   return [startIdx, endIdx];
-}
-
-function getCurrentWord(inputValue: string, cursorPosition: number | null) {
-  if (cursorPosition === null) return '';
-  const [startIdx, endIdx] = getCurrentWordRange(inputValue, cursorPosition);
-  return inputValue.slice(startIdx, endIdx);
 }

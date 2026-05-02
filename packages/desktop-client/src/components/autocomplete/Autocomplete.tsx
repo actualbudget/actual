@@ -268,8 +268,8 @@ function SingleAutocomplete<T extends AutocompleteItem>({
   const narrowInputStyle =
     embedded && isNarrowWidth
       ? {
-        ...styles.mobileMenuItem,
-      }
+          ...styles.mobileMenuItem,
+        }
       : {};
 
   inputProps = {
@@ -519,7 +519,7 @@ function SingleAutocomplete<T extends AutocompleteItem>({
                     },
                     onKeyUp: (e: KeyboardEvent<HTMLInputElement>) => {
                       const { onKeyUp } = inputProps || {};
-                      onKeyUp?.(e)
+                      onKeyUp?.(e);
                     },
                     onKeyDown: (e: KeyboardEvent<HTMLInputElement>) => {
                       const { onKeyDown } = inputProps || {};
@@ -781,10 +781,10 @@ function MultiAutocomplete<T extends AutocompleteItem>({
             className={
               typeof inputClassName === 'function'
                 ? renderProps =>
-                  cx(
-                    defaultMultiAutocompleteInputClassName,
-                    inputClassName(renderProps),
-                  )
+                    cx(
+                      defaultMultiAutocompleteInputClassName,
+                      inputClassName(renderProps),
+                    )
                 : cx(defaultMultiAutocompleteInputClassName, inputClassName)
             }
           />
