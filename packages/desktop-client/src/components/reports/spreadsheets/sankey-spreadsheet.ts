@@ -271,12 +271,12 @@ export function createBudgetSpreadsheet(
             categoryGroupId: group.id,
             category: cat.name,
             categoryId: cat.id,
-            isIncome: group.is_income ? rawValue > 0 : rawValue < 0,
-            value: Math.abs(rawValue),
+            isIncome: group.is_income,
+            value: rawValue,
           };
         }),
       )
-      .filter(entry => entry.value > 0);
+      .filter(entry => entry.value !== 0);
 
     const nextMonthResponse = (await send('api/budget-month', {
       month: monthUtils.nextMonth(end),
@@ -556,32 +556,61 @@ function createBudgetGraph(
         entry.value,
       );
     } else {
-      // Budgeted > Category group > Category
-      addNode(
-        graph,
-        entry.categoryGroupId,
-        GraphLayers.CategoryGroup,
-        entry.categoryGroup,
-      );
-      addNode(graph, entry.categoryId, GraphLayers.Category, entry.category);
-      addValueToLink(
-        graph,
-        entry.categoryGroupId,
-        entry.categoryId,
-        entry.value,
-      );
-      addValueToLink(
-        graph,
-        SpecialNodeKeys.Budgeted,
-        entry.categoryGroupId,
-        entry.value,
-      );
-      addValueToLink(
-        graph,
-        SpecialNodeKeys.AvailableIncome,
-        SpecialNodeKeys.Budgeted,
-        entry.value,
-      );
+      if (entry.value >= 0) {
+        // Budgeted > Category group > Category
+        addNode(
+          graph,
+          entry.categoryGroupId,
+          GraphLayers.CategoryGroup,
+          entry.categoryGroup,
+        );
+        addNode(graph, entry.categoryId, GraphLayers.Category, entry.category);
+        addValueToLink(
+          graph,
+          entry.categoryGroupId,
+          entry.categoryId,
+          entry.value,
+        );
+        addValueToLink(
+          graph,
+          SpecialNodeKeys.Budgeted,
+          entry.categoryGroupId,
+          entry.value,
+        );
+        addValueToLink(
+          graph,
+          SpecialNodeKeys.AvailableIncome,
+          SpecialNodeKeys.Budgeted,
+          entry.value,
+        );
+      } else {
+        addNodeWithLabel(
+          graph,
+          entry.categoryId,
+          GraphLayers.Budget,
+          entry.category,
+          undefined,
+          true,
+        );
+        addValueToLink(
+          graph,
+          entry.categoryId,
+          entry.categoryGroupId,
+          Math.abs(entry.value),
+        );
+        addValueToLink(
+          graph,
+          SpecialNodeKeys.Budgeted,
+          entry.categoryGroupId,
+          entry.value,
+        );
+        addValueToLink(
+          graph,
+          SpecialNodeKeys.AvailableIncome,
+          SpecialNodeKeys.Budgeted,
+          entry.value,
+        );
+      }
     }
   });
 
@@ -589,7 +618,7 @@ function createBudgetGraph(
     addNodeWithLabel(
       graph,
       SpecialNodeKeys.ToBudget,
-      GraphLayers.Budget,
+      GraphLayers.Account,
       'To budget',
     );
     addValueToLink(
@@ -602,7 +631,7 @@ function createBudgetGraph(
     addNodeWithLabel(
       graph,
       SpecialNodeKeys.ToBudget,
-      GraphLayers.Budget,
+      GraphLayers.Account,
       'Overbudgeted',
       undefined,
       true,
@@ -617,7 +646,7 @@ function createBudgetGraph(
       graph,
       SpecialNodeKeys.AvailableIncome,
       SpecialNodeKeys.Budgeted,
-      aggregated.toBudget,
+      -Math.abs(aggregated.toBudget),
     );
   }
 
@@ -784,7 +813,10 @@ function groupOtherCategories(
   let categoryNodes = nodesInLayer(graph, GraphLayers.Category).filter(
     s => !s.endsWith(SpecialNodeKeys.OtherSuffix),
   );
-  while (categoryNodes.length > topN) {
+  let otherCategoryNodes = nodesInLayer(graph, GraphLayers.Category).filter(s =>
+    s.endsWith(SpecialNodeKeys.OtherSuffix),
+  );
+  while (categoryNodes.length + otherCategoryNodes.length > topN) {
     const categoryNodeSet = new Set(categoryNodes);
     const values = new Map<NodeKey, number>();
     graph.forEach(data => {
@@ -835,6 +867,9 @@ function groupOtherCategories(
 
     categoryNodes = nodesInLayer(graph, GraphLayers.Category).filter(
       s => !s.endsWith(SpecialNodeKeys.OtherSuffix),
+    );
+    otherCategoryNodes = nodesInLayer(graph, GraphLayers.Category).filter(s =>
+      s.endsWith(SpecialNodeKeys.OtherSuffix),
     );
   }
 
@@ -1115,12 +1150,12 @@ function addColors(graph: Graph) {
     if (node) node.color = colors[i % colors.length];
   });
 
-  const node = graph.get(SpecialNodeKeys.ToBudget);
-  if (node && node.isOverbudgeted) {
-    setColor(graph, SpecialNodeKeys.ToBudget, theme.toBudgetNegative);
-  } else {
-    setColor(graph, SpecialNodeKeys.ToBudget, theme.toBudgetPositive);
-  }
+  setColor(graph, SpecialNodeKeys.ToBudget, theme.toBudgetPositive);
+  graph.forEach((node, key) => {
+    if (node.isOverbudgeted) {
+      setColor(graph, key, theme.toBudgetNegative);
+    }
+  });
   setColor(graph, SpecialNodeKeys.LastMonthOverspent, theme.toBudgetNegative);
   setColor(graph, SpecialNodeKeys.FromPrevMonth, theme.reportsGray);
   setColor(graph, SpecialNodeKeys.ForNextMonth, theme.reportsGray);
@@ -1175,6 +1210,31 @@ function addHiddenNodes(graph: Graph) {
             graph,
             key + '_payee' + SpecialNodeKeys.HiddenSuffix,
             key,
+            -1,
+          );
+        } else if (type === GraphLayers.Budget) {
+          addNode(
+            graph,
+            key + '_account' + SpecialNodeKeys.HiddenSuffix,
+            GraphLayers.Account,
+            '',
+          );
+          addValueToLink(
+            graph,
+            key + '_account' + SpecialNodeKeys.HiddenSuffix,
+            key,
+            -1,
+          );
+          addNode(
+            graph,
+            key + '_income_category' + SpecialNodeKeys.HiddenSuffix,
+            GraphLayers.IncomeCategory,
+            '',
+          );
+          addValueToLink(
+            graph,
+            key + '_income_category' + SpecialNodeKeys.HiddenSuffix,
+            key + '_account' + SpecialNodeKeys.HiddenSuffix,
             -1,
           );
         } else {
@@ -1331,6 +1391,7 @@ function cleanUpNodes(graph: Graph) {
 }
 
 function convertToSankeyData(graph: Graph): SankeyData {
+  console.log(graph);
   const nodes = Array.from(graph, ([key, data]) => ({
     key,
     name: data.labelKey
@@ -1382,7 +1443,7 @@ function convertToSankeyData(graph: Graph): SankeyData {
       if (targetKey === SpecialNodeKeys.ForNextMonth) {
         color = graph.get(SpecialNodeKeys.ForNextMonth)?.color;
       }
-      if (targetKey === SpecialNodeKeys.Budgeted && data.isOverbudgeted) {
+      if (data.isOverbudgeted) {
         color = data.color;
       }
 
