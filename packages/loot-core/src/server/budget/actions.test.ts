@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import * as db from '#server/db';

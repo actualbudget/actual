@@ -10,7 +10,9 @@
   },
   "files": [
     "@types",
-    "dist"
+    "dist",
+    "!@types/**/*.test.d.ts",
+    "!@types/**/*.test.d.ts.map"
   ],
   "main": "dist/index.js",
   "types": "@types/index.d.ts",

@@ -611,6 +611,7 @@ export type Modal =
       name: 'category-automations-edit';
       options: {
         categoryId: CategoryEntity['id'];
+        month?: string;
       };
     }
   | {

@@ -370,7 +370,8 @@
       "files": ["**/*.test.{js,ts,jsx,tsx}", "packages/docs/**/*"],
       "rules": {
         "actual/no-untranslated-strings": "off",
-        "actual/prefer-logger-over-console": "off"
+        "actual/prefer-logger-over-console": "off",
+        "typescript/unbound-method": "off"
       }
     },
     {

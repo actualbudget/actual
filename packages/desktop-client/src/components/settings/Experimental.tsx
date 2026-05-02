@@ -151,10 +151,7 @@ export function ExperimentalFeatures() {
 
   const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
-  const showGoalTemplatesUI =
-    goalTemplatesUIEnabled ||
-    (goalTemplatesEnabled &&
-      localStorage.getItem('devEnableGoalTemplatesUI') === 'true');
+  const showGoalTemplatesUI = goalTemplatesEnabled || goalTemplatesUIEnabled;
 
   const showServerPrefs =
     localStorage.getItem('devEnableServerPrefs') === 'true';
