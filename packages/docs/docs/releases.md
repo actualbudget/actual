@@ -2,7 +2,7 @@
 
 ## 26.5.0
 
-Release date: 2026-05-01
+Release date: 2026-05-03
 
 This release introduces powerful new reporting capabilities as well as numerous fixes:
 
