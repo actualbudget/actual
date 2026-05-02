@@ -38,6 +38,7 @@ export type TagAutocompleteProps = {
 
 export function TagAutocomplete({
   inputValue,
+
   setInputValue,
   onBlur,
   inputStyle,
@@ -66,9 +67,10 @@ export function TagAutocomplete({
   }
   const filteredItems = useMemo(() => {
     const currentWord = getCurrentWord(inputValue, inputRef.current);
-    if (!currentWord.startsWith('#') || cursorPosition == null) return [];
+    if (!currentWord.startsWith('#')) return [];
     const substring = currentWord.slice(1);
     return items.filter(item => contains(item.name, substring)).slice(0, 10);
+    // eslint-disable-next-line eslint-plugin-react-hooks(exhaustive-deps)
   }, [items, inputValue, contains, cursorPosition]);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -94,7 +96,9 @@ export function TagAutocomplete({
       inputValue,
       inputRef.current,
     );
-    const newInputValue = `${inputValue.slice(0, startIdx)}#${tagObj.tag} ${inputValue.slice(endIdx)}`;
+    const newInputValue = `${inputValue.slice(0, startIdx)}#${
+      tagObj.tag
+    } ${inputValue.slice(endIdx)}`;
     setInputValue(newInputValue);
     setHighlightedIdx(0);
     setIsOpen(false);
