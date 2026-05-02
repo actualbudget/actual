@@ -613,6 +613,12 @@ function createBudgetGraph(
       SpecialNodeKeys.Budgeted,
       Math.abs(aggregated.toBudget),
     );
+    addValueToLink(
+      graph,
+      SpecialNodeKeys.AvailableIncome,
+      SpecialNodeKeys.Budgeted,
+      aggregated.toBudget,
+    );
   }
 
   addNodeWithLabel(
@@ -1148,36 +1154,55 @@ function addHiddenNodes(graph: Graph) {
   );
 
   // Now: find and fix "problematic" nodes
-  for (const type in nodesByType) {
-    for (const [key, node] of nodesByType[type]!) {
+  for (const typeStr in nodesByType) {
+    if (!isGraphLayer(typeStr)) continue;
+    const type = typeStr;
+    const nodes = nodesByType[type];
+    if (!nodes) continue;
+    for (const [key, node] of nodes) {
       const nodeHasParent = hasParent(graph, key);
       const nodeHasChild = hasChild(node);
       if (!nodeHasParent && typeHasParent[type]) {
         // This node is at a wrong layer and need hidden parents
-        addNode(
-          graph,
-          key + '_payee' + SpecialNodeKeys.HiddenSuffix,
-          GraphLayers.IncomePayee,
-          '',
-        );
-        addNode(
-          graph,
-          key + '_account' + SpecialNodeKeys.HiddenSuffix,
-          GraphLayers.Account,
-          '',
-        );
-        addValueToLink(
-          graph,
-          key + '_payee' + SpecialNodeKeys.HiddenSuffix,
-          key + '_account' + SpecialNodeKeys.HiddenSuffix,
-          -1,
-        );
-        addValueToLink(
-          graph,
-          key + '_account' + SpecialNodeKeys.HiddenSuffix,
-          key,
-          -1,
-        );
+        if (type === GraphLayers.IncomeCategory) {
+          addNode(
+            graph,
+            key + '_payee' + SpecialNodeKeys.HiddenSuffix,
+            GraphLayers.IncomePayee,
+            '',
+          );
+          addValueToLink(
+            graph,
+            key + '_payee' + SpecialNodeKeys.HiddenSuffix,
+            key,
+            -1,
+          );
+        } else {
+          addNode(
+            graph,
+            key + '_account' + SpecialNodeKeys.HiddenSuffix,
+            GraphLayers.Account,
+            '',
+          );
+          addValueToLink(
+            graph,
+            key + '_account' + SpecialNodeKeys.HiddenSuffix,
+            key,
+            -1,
+          );
+          addNode(
+            graph,
+            key + '_payee' + SpecialNodeKeys.HiddenSuffix,
+            GraphLayers.IncomePayee,
+            '',
+          );
+          addValueToLink(
+            graph,
+            key + '_payee' + SpecialNodeKeys.HiddenSuffix,
+            key + '_account' + SpecialNodeKeys.HiddenSuffix,
+            -1,
+          );
+        }
       }
       if (!nodeHasChild && typeHasChild[type]) {
         // This node is at a wrong layer and need hidden children
@@ -1217,10 +1242,14 @@ function buildTypeConnectivity(
   const typeHasParent = {} as Record<GraphLayers, boolean>;
   const typeHasChild = {} as Record<GraphLayers, boolean>;
 
-  for (const type in nodesByType) {
+  for (const typeStr in nodesByType) {
+    if (!isGraphLayer(typeStr)) continue;
+    const type = typeStr;
+    const nodes = nodesByType[type];
+    if (!nodes) continue;
     typeHasParent[type] = false;
     typeHasChild[type] = false;
-    for (const [key, node] of nodesByType[type]!) {
+    for (const [key, node] of nodes) {
       if (hasParent(graph, key)) typeHasParent[type] = true;
       if (hasChild(node)) typeHasChild[type] = true;
     }
