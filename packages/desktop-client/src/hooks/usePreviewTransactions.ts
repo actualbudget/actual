@@ -100,6 +100,13 @@ export function usePreviewTransactions({
             ),
           }));
 
+          // Re-sort after rules run, since a "set date" action can change
+          // the date that was used for the original sort in
+          // computeSchedulePreviewTransactions.
+          withDefaults.sort(
+            (a, b) => b.date.localeCompare(a.date) || a.amount - b.amount,
+          );
+
           const ungroupedTransactions = ungroupTransactions(withDefaults);
           setPreviewTransactions(ungroupedTransactions);
 
