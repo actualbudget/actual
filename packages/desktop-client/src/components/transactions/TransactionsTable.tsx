@@ -48,6 +48,7 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import { getStatusLabel } from '@actual-app/core/shared/schedules';
+import type { TransactionGroupBy } from '@actual-app/core/shared/transaction-groups';
 import {
   addSplitTransaction,
   deleteTransaction,
@@ -147,6 +148,33 @@ import type {
   TransactionUpdateFunction,
 } from './table/utils';
 import { TransactionMenu } from './TransactionMenu';
+
+type GroupToggleAll = {
+  action: 'expand' | 'collapse';
+  key: number;
+};
+
+type TransactionGroup = {
+  id: string;
+  label: string;
+  count: number;
+  amount: IntegerAmount;
+  transactions: TransactionEntity[];
+};
+
+type TransactionGroupHeaderItem = {
+  id: string;
+  type: 'group-header';
+  group: TransactionGroup;
+};
+
+type TransactionTableItem = TransactionEntity | TransactionGroupHeaderItem;
+
+function isGroupHeaderItem(
+  item: TransactionTableItem,
+): item is TransactionGroupHeaderItem {
+  return 'type' in item && item.type === 'group-header';
+}
 
 type TransactionHeaderProps = {
   hasSelected: boolean;
@@ -341,6 +369,228 @@ const TransactionHeader = memo(
 );
 
 TransactionHeader.displayName = 'TransactionHeader';
+
+function getGroupKeyAndLabel({
+  transaction,
+  groupBy,
+  accounts,
+  categoryGroups,
+  payees,
+  dateFormat,
+  t,
+}: {
+  transaction: TransactionEntity;
+  groupBy?: TransactionGroupBy;
+  accounts: AccountEntity[];
+  categoryGroups: CategoryGroupEntity[];
+  payees: PayeeEntity[];
+  dateFormat: string;
+  t: ReturnType<typeof useTranslation>['t'];
+}): { key: string; label: string } {
+  const accountsById = getAccountsById(accounts);
+  const categoriesById = getCategoriesById(categoryGroups);
+  const payeesById = getPayeesById(payees);
+  const category = transaction.category
+    ? categoriesById[transaction.category]
+    : undefined;
+  const categoryGroup = category
+    ? categoryGroups.find(group =>
+        group.categories?.some(
+          groupCategory => groupCategory.id === category.id,
+        ),
+      )
+    : undefined;
+
+  switch (groupBy) {
+    case 'date-day':
+      return {
+        key: `date-day:${monthUtils.dayFromDate(transaction.date)}`,
+        label: formatDate(parseISO(transaction.date), dateFormat),
+      };
+    case 'date-week': {
+      const week = monthUtils.weekFromDate(transaction.date, '0');
+      return {
+        key: `date-week:${week}`,
+        label: t('Week of {{date}}', {
+          date: formatDate(parseISO(week), dateFormat),
+        }),
+      };
+    }
+    case 'date-month':
+      return {
+        key: `date-month:${monthUtils.monthFromDate(transaction.date)}`,
+        label: monthUtils.format(transaction.date, 'MMMM yyyy'),
+      };
+    case 'date-year':
+      return {
+        key: `date-year:${monthUtils.yearFromDate(transaction.date)}`,
+        label: monthUtils.format(transaction.date, 'yyyy'),
+      };
+    case 'category':
+      return {
+        key: `category:${transaction.category ?? 'none'}`,
+        label: category?.name ?? t('Uncategorized'),
+      };
+    case 'category-group':
+      return {
+        key: `category-group:${categoryGroup?.id ?? 'none'}`,
+        label: categoryGroup?.name ?? t('Uncategorized'),
+      };
+    case 'payee': {
+      const payee = transaction.payee
+        ? payeesById[transaction.payee]
+        : undefined;
+      return {
+        key: `payee:${transaction.payee ?? 'none'}`,
+        label: payee?.name ?? transaction.imported_payee ?? t('No payee'),
+      };
+    }
+    case 'account': {
+      const account = transaction.account
+        ? accountsById[transaction.account]
+        : undefined;
+      return {
+        key: `account:${transaction.account ?? 'none'}`,
+        label: account?.name ?? t('No account'),
+      };
+    }
+    case 'cleared':
+      if (transaction.reconciled) {
+        return { key: 'cleared:reconciled', label: t('Reconciled') };
+      }
+      if (transaction.cleared) {
+        return { key: 'cleared:cleared', label: t('Cleared') };
+      }
+      return { key: 'cleared:uncleared', label: t('Uncleared') };
+    case 'none':
+    default:
+      return { key: 'none', label: t('None') };
+  }
+}
+
+function makeTransactionGroups({
+  transactions,
+  groupBy,
+  accounts,
+  categoryGroups,
+  payees,
+  dateFormat,
+  t,
+}: {
+  transactions: TransactionEntity[];
+  groupBy?: TransactionGroupBy;
+  accounts: AccountEntity[];
+  categoryGroups: CategoryGroupEntity[];
+  payees: PayeeEntity[];
+  dateFormat: string;
+  t: ReturnType<typeof useTranslation>['t'];
+}): TransactionGroup[] {
+  if (groupBy === 'none') {
+    return [];
+  }
+
+  const groups = new Map<string, TransactionGroup>();
+  for (const transaction of transactions) {
+    const { key, label } = getGroupKeyAndLabel({
+      transaction,
+      groupBy,
+      accounts,
+      categoryGroups,
+      payees,
+      dateFormat,
+      t,
+    });
+    const group = groups.get(key) ?? {
+      id: key,
+      label,
+      count: 0,
+      amount: 0,
+      transactions: [],
+    };
+
+    group.count += transaction.is_child ? 0 : 1;
+    group.amount += transaction.is_child ? 0 : transaction.amount;
+    group.transactions.push(transaction);
+    groups.set(key, group);
+  }
+
+  return Array.from(groups.values());
+}
+
+function flattenGroupedTransactions(
+  groups: TransactionGroup[],
+  collapsedGroupIds: Set<string>,
+): TransactionTableItem[] {
+  return groups.flatMap(group => [
+    {
+      id: `group-header:${group.id}`,
+      type: 'group-header' as const,
+      group,
+    },
+    ...(collapsedGroupIds.has(group.id) ? [] : group.transactions),
+  ]);
+}
+
+function TransactionGroupHeader({
+  group,
+  collapsed,
+  showSelection,
+  onToggle,
+}: {
+  group: TransactionGroup;
+  collapsed: boolean;
+  showSelection: boolean;
+  onToggle: (id: string) => void;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <Row
+      style={{
+        backgroundColor: theme.tableHeaderBackground,
+        color: theme.tableHeaderText,
+        fontWeight: 500,
+      }}
+      data-testid="transaction-group-header"
+    >
+      <Field width={showSelection ? 20 : 20} />
+      <Field width="flex" truncate={false}>
+        <Button
+          variant="bare"
+          aria-label={
+            collapsed
+              ? t('Expand {{group}}', { group: group.label })
+              : t('Collapse {{group}}', { group: group.label })
+          }
+          style={{
+            flex: 1,
+            justifyContent: 'flex-start',
+            padding: 0,
+            color: 'inherit',
+          }}
+          onPress={() => onToggle(group.id)}
+        >
+          <SvgCheveronDown
+            width={10}
+            height={10}
+            style={{
+              marginRight: 6,
+              transform: collapsed ? 'rotate(-90deg)' : undefined,
+            }}
+          />
+          <Text style={{ fontWeight: 500 }}>{group.label}</Text>
+          <Text style={{ marginLeft: 8, color: theme.tableHeaderText }}>
+            {t('{{count}} transactions', { count: group.count })}
+          </Text>
+          <View style={{ flex: 1 }} />
+          <Text style={{ fontWeight: 600 }}>
+            {integerToCurrency(group.amount)}
+          </Text>
+        </Button>
+      </Field>
+    </Row>
+  );
+}
 
 type StatusCellProps = {
   id: TransactionEntity['id'];
@@ -2251,6 +2501,8 @@ type TransactionTableInnerProps = {
   onNotesTagClick: (tag: string) => void;
   sortField: string;
   ascDesc: 'asc' | 'desc';
+  groupBy?: TransactionGroupBy;
+  groupToggleAll?: GroupToggleAll;
   onCreateRule: (ids: RuleEntity['id'][]) => void;
   onScheduleAction: (
     name: 'skip' | 'post-transaction' | 'post-transaction-today' | 'complete',
@@ -2294,9 +2546,13 @@ function TransactionTableInner({
   showHiddenCategories,
   ...props
 }: TransactionTableInnerProps) {
+  const { t } = useTranslation();
   const containerRef = createRef<HTMLDivElement>();
   const isAddingPrev = usePrevious(props.isAdding);
   const [scrollWidth, setScrollWidth] = useState(0);
+  const [collapsedGroupIds, setCollapsedGroupIds] = useState<Set<string>>(
+    () => new Set(),
+  );
 
   function saveScrollWidth(parent: number, child: number) {
     const width = parent > 0 && child > 0 && parent - child;
@@ -2350,11 +2606,87 @@ function TransactionTableInner({
     [props.transactions, props.showReconciled],
   );
 
-  const renderRow: TableProps<TransactionEntity>['renderItem'] = ({
+  const transactionGroups = useMemo(
+    () =>
+      makeTransactionGroups({
+        transactions: transactionsToRender,
+        groupBy: props.groupBy ?? 'none',
+        accounts: props.accounts,
+        categoryGroups: props.categoryGroups,
+        payees: props.payees,
+        dateFormat,
+        t,
+      }),
+    [
+      transactionsToRender,
+      props.groupBy,
+      props.accounts,
+      props.categoryGroups,
+      props.payees,
+      dateFormat,
+      t,
+    ],
+  );
+
+  useEffect(() => {
+    setCollapsedGroupIds(collapsedIds => {
+      const currentGroupIds = new Set(transactionGroups.map(group => group.id));
+      const nextCollapsedIds = new Set(
+        [...collapsedIds].filter(id => currentGroupIds.has(id)),
+      );
+      return nextCollapsedIds.size === collapsedIds.size
+        ? collapsedIds
+        : nextCollapsedIds;
+    });
+  }, [transactionGroups]);
+
+  useEffect(() => {
+    if (!props.groupToggleAll) {
+      return;
+    }
+
+    setCollapsedGroupIds(
+      props.groupToggleAll.action === 'collapse'
+        ? new Set(transactionGroups.map(group => group.id))
+        : new Set(),
+    );
+  }, [props.groupToggleAll, transactionGroups]);
+
+  const groupedTransactionsToRender = useMemo(
+    () =>
+      (props.groupBy ?? 'none') === 'none'
+        ? transactionsToRender
+        : flattenGroupedTransactions(transactionGroups, collapsedGroupIds),
+    [props.groupBy, transactionsToRender, transactionGroups, collapsedGroupIds],
+  );
+
+  const onToggleGroup = useCallback((id: string) => {
+    setCollapsedGroupIds(collapsedIds => {
+      const nextCollapsedIds = new Set(collapsedIds);
+      if (nextCollapsedIds.has(id)) {
+        nextCollapsedIds.delete(id);
+      } else {
+        nextCollapsedIds.add(id);
+      }
+      return nextCollapsedIds;
+    });
+  }, []);
+
+  const renderRow: TableProps<TransactionTableItem>['renderItem'] = ({
     item,
-    index,
     editing,
   }) => {
+    if (isGroupHeaderItem(item)) {
+      return (
+        <TransactionGroupHeader
+          group={item.group}
+          collapsed={collapsedGroupIds.has(item.group.id)}
+          showSelection={props.showSelection}
+          onToggle={onToggleGroup}
+        />
+      );
+    }
+
     const {
       transactions,
       selectedItems,
@@ -2374,6 +2706,9 @@ function TransactionTableInner({
     } = props;
 
     const trans = item;
+    const transactionIndex = transactionsToRender.findIndex(
+      transaction => transaction.id === trans.id,
+    );
     const selected = selectedItems.has(trans.id);
 
     const parent = trans.parent_id && props.transactionMap.get(trans.parent_id);
@@ -2389,7 +2724,7 @@ function TransactionTableInner({
 
     const hasSplitError =
       (trans.is_parent || trans.is_child) &&
-      (!expanded || isLastChild(transactions, index)) &&
+      (!expanded || isLastChild(transactions, transactionIndex)) &&
       error &&
       error.type === 'SplitTransactionError';
 
@@ -2407,7 +2742,7 @@ function TransactionTableInner({
     // Use transactionsToRender (filtered list) to match rendered row indices
     // Skip non-reorderable rows (child/preview) when finding neighbors
     const findPrevReorderableDate = (): string | null => {
-      for (let i = index - 1; i >= 0; i--) {
+      for (let i = transactionIndex - 1; i >= 0; i--) {
         const row = transactionsToRender[i];
         if (row && !row.is_child && !isPreviewId(row.id)) {
           return row.date ?? null;
@@ -2416,7 +2751,7 @@ function TransactionTableInner({
       return null;
     };
     const findNextReorderableDate = (): string | null => {
-      for (let i = index + 1; i < transactionsToRender.length; i++) {
+      for (let i = transactionIndex + 1; i < transactionsToRender.length; i++) {
         const row = transactionsToRender[i];
         if (row && !row.is_child && !isPreviewId(row.id)) {
           return row.date ?? null;
@@ -2570,14 +2905,20 @@ function TransactionTableInner({
         data-testid="transaction-table"
       >
         <Table
-          navigator={tableNavigator}
-          ref={tableRef}
+          navigator={
+            tableNavigator as unknown as TableNavigator<TransactionTableItem>
+          }
+          ref={tableRef as Ref<TableHandleRef<TransactionTableItem>>}
           listContainerRef={listContainerRef}
-          items={transactionsToRender}
+          items={groupedTransactionsToRender}
           renderItem={renderRow}
           renderEmpty={renderEmpty}
           loadMore={props.loadMoreTransactions}
-          isSelected={id => props.selectedItems.has(id)}
+          isSelected={id =>
+            typeof id === 'string' &&
+            !id.startsWith('group-header:') &&
+            props.selectedItems.has(id)
+          }
           onKeyDown={e => props.onCheckEnter(e)}
           saveScrollWidth={saveScrollWidth}
         />
@@ -2646,6 +2987,8 @@ export type TransactionTableProps = {
   onSort: (field: string, ascDesc: 'asc' | 'desc') => void;
   sortField: string;
   ascDesc: 'asc' | 'desc';
+  groupBy?: TransactionGroupBy;
+  groupToggleAll?: GroupToggleAll;
   onReorder?: (
     id: string,
     dropPos: DropPosition,
@@ -2695,13 +3038,15 @@ export const TransactionTable = forwardRef(
     // Dragging is enabled when:
     // - No sort is active (sortField is empty) OR sorted by date
     // - Not filtered (isFiltered is false)
+    // - Not grouped
     // - onReorder callback is provided
     const canDrag = useMemo(
       () =>
         (!props.sortField || props.sortField === 'date') &&
+        (props.groupBy ?? 'none') === 'none' &&
         !props.isFiltered &&
         props.onReorder != null,
-      [props.sortField, props.isFiltered, props.onReorder],
+      [props.sortField, props.groupBy, props.isFiltered, props.onReorder],
     );
 
     const onDragChange = useCallback<OnDragChangeCallback<TransactionEntity>>(

@@ -13,6 +13,7 @@ import type { UndoState } from '@actual-app/core/server/undo';
 import { currentDay } from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type { Query } from '@actual-app/core/shared/query';
+import type { TransactionGroupBy } from '@actual-app/core/shared/transaction-groups';
 import {
   makeAsNonChildTransactions,
   makeChild,
@@ -272,6 +273,11 @@ type AccountInternalState = {
   nameError: string;
   isAdding: boolean;
   modalShowing?: boolean;
+  groupBy: TransactionGroupBy;
+  groupToggleAll?: {
+    action: 'expand' | 'collapse';
+    key: number;
+  };
   sort: {
     ascDesc: 'asc' | 'desc';
     field: string;
@@ -320,6 +326,8 @@ class AccountInternal extends PureComponent<
       showReconciled: props.showReconciled,
       nameError: '',
       isAdding: false,
+      groupBy: 'none',
+      groupToggleAll: undefined,
       sort: null,
       filteredAmount: null,
     };
@@ -412,7 +420,13 @@ class AccountInternal extends PureComponent<
 
     //Resest sort/filter/search on account change
     if (this.props.accountId !== prevProps.accountId) {
-      this.setState({ sort: null, search: '', filterConditions: [] });
+      this.setState({
+        sort: null,
+        search: '',
+        filterConditions: [],
+        groupBy: 'none',
+        groupToggleAll: undefined,
+      });
     }
   }
 
@@ -780,7 +794,9 @@ class AccountInternal extends PureComponent<
       | 'remove-sorting'
       | 'toggle-cleared'
       | 'toggle-reconciled'
-      | 'toggle-net-worth-chart',
+      | 'toggle-net-worth-chart'
+      | 'expand-groups'
+      | 'collapse-groups',
   ) => {
     const accountId = this.props.accountId!;
     const account = this.props.accounts.find(
@@ -860,6 +876,16 @@ class AccountInternal extends PureComponent<
         });
         break;
       }
+      case 'expand-groups':
+        this.setState({
+          groupToggleAll: { action: 'expand', key: Date.now() },
+        });
+        break;
+      case 'collapse-groups':
+        this.setState({
+          groupToggleAll: { action: 'collapse', key: Date.now() },
+        });
+        break;
       case 'toggle-cleared':
         if (this.state.showCleared) {
           this.props.setShowCleared(false);
@@ -1364,7 +1390,11 @@ class AccountInternal extends PureComponent<
   onConditionsOpChange = (value: 'and' | 'or') => {
     this.setState(state => ({
       filterConditionsOp: value,
-      filterId: { ...state.filterId, status: 'changed' } as SavedFilter,
+      filterId: {
+        ...state.filterId,
+        groupBy: state.groupBy,
+        status: 'changed',
+      } as SavedFilter,
     }));
     void this.applyFilters([...this.state.filterConditions]);
     if (this.state.search !== '') {
@@ -1372,17 +1402,33 @@ class AccountInternal extends PureComponent<
     }
   };
 
+  onGroupByChange = (groupBy: TransactionGroupBy) => {
+    this.setState(state => ({
+      groupBy,
+      groupToggleAll: undefined,
+      filterId: state.filterId
+        ? ({ ...state.filterId, groupBy, status: 'changed' } as SavedFilter)
+        : state.filterId,
+    }));
+  };
+
   onReloadSavedFilter = (savedFilter: SavedFilter, item?: string) => {
     if (item === 'reload') {
       const [savedFilter] = this.props.savedFilters.filter(
         f => f.id === this.state.filterId?.id,
       );
-      this.setState({ filterConditionsOp: savedFilter.conditionsOp ?? 'and' });
+      this.setState({
+        filterConditionsOp: savedFilter.conditionsOp ?? 'and',
+        groupBy: savedFilter.groupBy ?? 'none',
+        groupToggleAll: undefined,
+      });
       void this.applyFilters([...savedFilter.conditions]);
     } else {
       if (savedFilter.status) {
         this.setState({
           filterConditionsOp: savedFilter.conditionsOp ?? 'and',
+          groupBy: savedFilter.groupBy ?? 'none',
+          groupToggleAll: undefined,
         });
         void this.applyFilters([...(savedFilter.conditions ?? [])]);
       }
@@ -1413,6 +1459,7 @@ class AccountInternal extends PureComponent<
     this.setState(state => ({
       filterId: {
         ...state.filterId,
+        groupBy: state.groupBy,
         status: state.filterId && 'changed',
       } as SavedFilter,
     }));
@@ -1431,6 +1478,7 @@ class AccountInternal extends PureComponent<
       this.setState(state => ({
         filterId: {
           ...state.filterId,
+          groupBy: state.groupBy,
           status: state.filterId && 'changed',
         } as SavedFilter,
       }));
@@ -1461,6 +1509,10 @@ class AccountInternal extends PureComponent<
         filterId: { ...savedFilter, status: 'saved' },
       });
       this.setState({ filterConditionsOp: savedFilter.conditionsOp });
+      this.setState({
+        groupBy: savedFilter.groupBy ?? 'none',
+        groupToggleAll: undefined,
+      });
       void this.applyFilters([...savedFilter.conditions]);
     } else {
       // A condition was passed in.
@@ -1474,6 +1526,7 @@ class AccountInternal extends PureComponent<
       this.setState(state => ({
         filterId: {
           ...state.filterId,
+          groupBy: state.groupBy,
           status: state.filterId && 'changed',
         } as SavedFilter,
       }));
@@ -1729,6 +1782,8 @@ class AccountInternal extends PureComponent<
       showCleared,
       showReconciled,
       filteredAmount,
+      groupBy,
+      groupToggleAll,
     } = this.state;
 
     const account = accounts.find(account => account.id === accountId);
@@ -1796,6 +1851,7 @@ class AccountInternal extends PureComponent<
                 showExtraBalances={showExtraBalances ?? false}
                 showCleared={showCleared ?? false}
                 showReconciled={showReconciled ?? false}
+                groupBy={groupBy}
                 showEmptyMessage={showEmptyMessage ?? false}
                 balanceQuery={balanceQuery}
                 canCalculateBalance={this?.canCalculateBalance ?? undefined}
@@ -1834,6 +1890,7 @@ class AccountInternal extends PureComponent<
                 onConditionsOpChange={this.onConditionsOpChange}
                 onDeleteFilter={this.onDeleteFilter}
                 onApplyFilter={this.onApplyFilter}
+                onGroupByChange={this.onGroupByChange}
                 onScheduleAction={this.onScheduleAction}
                 onSetTransfer={this.onSetTransfer}
                 onMakeAsSplitTransaction={this.onMakeAsSplitTransaction}
@@ -1857,7 +1914,7 @@ class AccountInternal extends PureComponent<
                   categoryGroups={categoryGroups}
                   payees={payees}
                   balances={allBalances}
-                  showBalances={!!allBalances}
+                  showBalances={!!allBalances && groupBy === 'none'}
                   showReconciled={showReconciled}
                   showCleared={!!showCleared}
                   showAccount={
@@ -1905,6 +1962,8 @@ class AccountInternal extends PureComponent<
                   onSort={this.onSort}
                   sortField={this.state.sort?.field ?? ''}
                   ascDesc={this.state.sort?.ascDesc ?? 'asc'}
+                  groupBy={groupBy}
+                  groupToggleAll={groupToggleAll}
                   onChange={this.onTransactionsChange}
                   onBatchDelete={this.onBatchDelete}
                   onBatchDuplicate={this.onBatchDuplicate}

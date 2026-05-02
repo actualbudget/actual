@@ -1,0 +1,5 @@
+BEGIN TRANSACTION;
+
+ALTER TABLE transaction_filters ADD COLUMN group_by TEXT DEFAULT NULL;
+
+COMMIT;

@@ -6,6 +6,7 @@ import {
   generateTransaction,
 } from '@actual-app/core/mocks';
 import { initServer } from '@actual-app/core/platform/client/connection';
+import type { TransactionGroupBy } from '@actual-app/core/shared/transaction-groups';
 import {
   addSplitTransaction,
   realizeTempTransactions,
@@ -20,7 +21,7 @@ import type {
   PayeeEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
 
@@ -138,6 +139,7 @@ type LiveTransactionTableProps = {
   showCategory: boolean;
   showCleared: boolean;
   isAdding: boolean;
+  groupBy?: TransactionGroupBy;
   onTransactionsChange?: (newTrans: TransactionEntity[]) => void;
   onCloseAddTransaction?: () => void;
 };
@@ -460,6 +462,32 @@ describe('Transactions', () => {
         );
       }
     });
+  });
+
+  test('transactions can be grouped by category and collapsed', async () => {
+    const { container } = renderTransactions({ groupBy: 'category' });
+
+    const groupHeaders = screen.getAllByTestId('transaction-group-header');
+    expect(groupHeaders).toHaveLength(3);
+    expect(groupHeaders[0]).toHaveTextContent('Uncategorized');
+    expect(groupHeaders[0]).toHaveTextContent('1 transactions');
+    expect(groupHeaders[0]).toHaveTextContent(integerToCurrency(-2777));
+    expect(groupHeaders[1]).toHaveTextContent('General');
+    expect(groupHeaders[2]).toHaveTextContent('Food');
+
+    expect(
+      container.querySelectorAll(
+        '[data-testid="transaction-table"] [data-testid="date"]',
+      ),
+    ).toHaveLength(5);
+
+    await userEvent.click(within(groupHeaders[0]).getByRole('button'));
+
+    expect(
+      container.querySelectorAll(
+        '[data-testid="transaction-table"] [data-testid="date"]',
+      ),
+    ).toHaveLength(4);
   });
 
   test('keybindings enter/tab/alt should move around', async () => {

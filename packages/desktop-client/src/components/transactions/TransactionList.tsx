@@ -10,6 +10,7 @@ import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import { getUpcomingDays } from '@actual-app/core/shared/schedules';
+import type { TransactionGroupBy } from '@actual-app/core/shared/transaction-groups';
 import {
   addSplitTransaction,
   applyTransactionDiff,
@@ -275,6 +276,11 @@ type TransactionListProps = Pick<
   category: CategoryEntity | undefined;
   isFiltered?: boolean;
   allowReorder?: boolean;
+  groupBy?: TransactionGroupBy;
+  groupToggleAll?: {
+    action: 'expand' | 'collapse';
+    key: number;
+  };
   onChange: (
     transaction: TransactionEntity,
     transactions: TransactionEntity[],
@@ -305,6 +311,8 @@ export function TransactionList({
   isMatched,
   isFiltered,
   allowReorder = true,
+  groupBy = 'none',
+  groupToggleAll,
   dateFormat,
   hideFraction,
   renderEmpty,
@@ -763,6 +771,8 @@ export function TransactionList({
         ascDesc={ascDesc}
         isFiltered={isFiltered}
         onReorder={allowReorder ? onReorder : undefined}
+        groupBy={groupBy}
+        groupToggleAll={groupToggleAll}
         onBatchDelete={onBatchDelete}
         onBatchDuplicate={onBatchDuplicate}
         onBatchLinkSchedule={onBatchLinkSchedule}
