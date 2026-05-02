@@ -170,7 +170,7 @@ export function createSpreadsheet(
         categories,
         conditions,
         conditionsOp,
-        groupAccounts
+        groupAccounts,
       )();
     }
     processGraphData(
@@ -321,7 +321,7 @@ export function createTransactionsSpreadsheet(
       filters,
       start,
       end,
-      groupAccounts
+      groupAccounts,
     );
 
     return categoryData;

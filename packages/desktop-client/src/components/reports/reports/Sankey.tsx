@@ -499,6 +499,15 @@ function SankeyInner({ widget }: SankeyInnerProps) {
   ) => setData({ nodes: [], links: [] });
 
   const data = useReport('sankey', reportParams ?? defaultGetData);
+  const dataRef = useRef(data);
+
+  useEffect(() => {
+    if (data) {
+      dataRef.current = data;
+    }
+  }, [data]);
+
+  const displayData = data || dataRef.current;
 
   useEffect(() => {
     async function run() {
@@ -646,7 +655,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     i18n.language,
   );
 
-  if (!datesInitialized || !data) {
+  if (!datesInitialized || !displayData) {
     return <LoadingIndicator />;
   }
 
@@ -815,10 +824,12 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                   paddingTop: 10,
                 }}
               >
-                {data && data.links && data.links.length > 0 ? (
+                {displayData &&
+                displayData.links &&
+                displayData.links.length > 0 ? (
                   <SankeyGraph
                     style={{ flexGrow: 1 }}
-                    data={data}
+                    data={displayData}
                     showPercentages={showPercentages}
                   />
                 ) : (

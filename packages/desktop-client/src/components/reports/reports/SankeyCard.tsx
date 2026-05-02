@@ -76,8 +76,8 @@ export function SankeyCard({
     ? meta.layerFrom
     : undefined;
   const metaLayerTo = isGraphLayer(meta?.layerTo) ? meta.layerTo : undefined;
-  
-  const groupAccounts = meta.groupAccounts ?? false;
+
+  const groupAccounts = meta?.groupAccounts ?? false;
 
   const layerFrom =
     metaLayerFrom &&
