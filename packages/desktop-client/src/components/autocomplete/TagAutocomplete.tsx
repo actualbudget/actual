@@ -25,8 +25,8 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 
+import { useTagCSS } from '#hooks/useTagCSS';
 import { useTags } from '#hooks/useTags';
-import { NotesTagFormatter } from '#notes/NotesTagFormatter';
 
 export type TagAutocompleteProps = {
   inputValue: string;
@@ -45,6 +45,7 @@ export function TagAutocomplete({
   onKeyDown,
 }: TagAutocompleteProps) {
   const { t } = useTranslation();
+  const getTagCSS = useTagCSS();
   const autocompleteId = useId();
   const id = useCallback(
     (itemId: string) => autocompleteId + '|' + itemId,
@@ -200,7 +201,7 @@ export function TagAutocomplete({
               onPointerDown={e => e.preventDefault()}
               onClick={() => handleSelect(item.id)}
             >
-              <NotesTagFormatter notes={item.name} />
+              <div className={getTagCSS(item.tag)}>{item.name}</div>
             </ListBoxItem>
           )}
         </ListBox>
