@@ -1,4 +1,11 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type {
   CSSProperties,
   FocusEventHandler,
@@ -38,7 +45,10 @@ export function TagAutocomplete({
 }: TagAutocompleteProps) {
   const { t } = useTranslation();
   const autocompleteId = useId();
-  const id = (itemId: string) => autocompleteId + '|' + itemId;
+  const id = useCallback(
+    (itemId: string) => autocompleteId + '|' + itemId,
+    [autocompleteId],
+  );
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const { contains } = useFilter({ sensitivity: 'base' });
@@ -56,9 +66,9 @@ export function TagAutocomplete({
   }
   const filteredItems = useMemo(() => {
     const currentWord = getCurrentWord(inputValue, inputRef.current);
-    if (!currentWord.startsWith('#')) return [];
+    if (!currentWord.startsWith('#') || cursorPosition == null) return [];
     return items.filter(item => contains(item.name, currentWord.slice(1)));
-  }, [items, inputValue, cursorPosition]);
+  }, [items, inputValue, contains, cursorPosition]);
 
   const [isOpen, setIsOpen] = useState(false);
   const showPopup = isOpen && filteredItems.length > 0;
@@ -73,7 +83,7 @@ export function TagAutocomplete({
       const el = document.querySelector(`[data-key="${id(highlightedId)}"]`);
       el?.scrollIntoView({ block: 'nearest' });
     }
-  }, [highlightedId]);
+  }, [highlightedId, id]);
 
   function handleSelect(id: string | null) {
     const tagObj = filteredItems.find(tag => tag.id === id);
