@@ -2724,7 +2724,7 @@ function TransactionTableInner({
 
     const hasSplitError =
       (trans.is_parent || trans.is_child) &&
-      (!expanded || isLastChild(transactions, transactionIndex)) &&
+      (!expanded || isLastChild(transactionsToRender, transactionIndex)) &&
       error &&
       error.type === 'SplitTransactionError';
 
