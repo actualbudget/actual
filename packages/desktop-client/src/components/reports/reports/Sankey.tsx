@@ -862,16 +862,26 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                       <Paragraph>
                         <strong>View options:</strong>
                       </Paragraph>
-                      <ul style={{ marginTop: 0, paddingLeft: 20 }}>
-                        <li style={{ marginBottom: 5 }}>
-                          <strong>Spent:</strong> Displays actual spending by
-                          category from transactions.
-                        </li>
-                        <li style={{ marginBottom: 5 }}>
-                          <strong>Budgeted:</strong> Shows how your budget is
-                          allocated across categories.
-                        </li>
-                      </ul>
+                      <Paragraph>
+                        <ul style={{ marginTop: 0, paddingLeft: 20 }}>
+                          <li style={{ marginBottom: 5 }}>
+                            <strong>Spent:</strong> Displays actual spending by
+                            category from transactions.
+                          </li>
+                          <li style={{ marginBottom: 5 }}>
+                            <strong>Budgeted:</strong> Shows how your budget is
+                            allocated across categories.
+                          </li>
+                        </ul>
+                        <strong>Disclaimer:</strong> A Sankey chart cannot
+                        directly represent negative numbers. In some cases, such
+                        as when funds are reallocated from categories with
+                        negative budgeting (e.g. using savings to cover
+                        overspending), the chart structure may differ from the
+                        main budget overview. As a result, some category totals
+                        and flows in this diagram may not exactly match the
+                        summary figures elsewhere in the app.
+                      </Paragraph>
                     </Trans>
                   </View>
                 )}
