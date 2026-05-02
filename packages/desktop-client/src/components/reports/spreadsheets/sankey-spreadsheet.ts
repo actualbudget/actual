@@ -609,7 +609,7 @@ function createBudgetGraph(
     addValueToLink(
       graph,
       SpecialNodeKeys.ToBudget,
-      SpecialNodeKeys.AvailableIncome,
+      SpecialNodeKeys.Budgeted,
       Math.abs(aggregated.toBudget),
     );
   }
@@ -1074,8 +1074,12 @@ function sortGraph(
     }
   }
 
-  // We always want these nodes displayed at the bottom of their layers, so its safe to just move them to the end
-  moveNodeToEnd(sortedEntries, SpecialNodeKeys.ToBudget);
+  // We always want certain nodes to be shown at the start/end of their layers
+  if (graph.get(SpecialNodeKeys.ToBudget).isOverbudgeted) {
+    moveNodeToStart(sortedEntries, SpecialNodeKeys.ToBudget)
+  } else {
+    moveNodeToEnd(sortedEntries, SpecialNodeKeys.ToBudget);
+  }
   moveNodeToEnd(sortedEntries, SpecialNodeKeys.LastMonthOverspent);
   moveNodeToEnd(sortedEntries, SpecialNodeKeys.ForNextMonth);
   moveNodeToEnd(sortedEntries, SpecialNodeKeys.FromPrevMonth);
@@ -1087,6 +1091,14 @@ function moveNodeToEnd(entries: Array<[string, NodeData]>, key: NodeKey) {
   if (nodeIndex !== -1) {
     const [entry] = entries.splice(nodeIndex, 1);
     entries.push(entry);
+  }
+}
+
+function moveNodeToStart(entries: Array<[string, NodeData]>, key: NodeKey) {
+  const nodeIndex = entries.findIndex(([nodekey]) => nodekey === key);
+  if (nodeIndex !== -1) {
+    const [entry] = entries.splice(nodeIndex, 1);
+    entries.unshift(entry);
   }
 }
 
@@ -1284,7 +1296,7 @@ function convertToSankeyData(graph: Graph): SankeyData {
         color = graph.get(SpecialNodeKeys.ForNextMonth)?.color;
       }
       if (
-        targetKey === SpecialNodeKeys.AvailableIncome &&
+        targetKey === SpecialNodeKeys.Budgeted &&
         data.isOverbudgeted
       ) {
         color = data.color;
