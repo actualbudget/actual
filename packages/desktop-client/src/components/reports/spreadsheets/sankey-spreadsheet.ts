@@ -486,32 +486,28 @@ async function fetchCategoryData(
                 { payeeName: { $id: '$payee.name' } },
               ]),
           );
-          return results.data
-            .filter(
-              (row: { amount?: number }) =>
-                categoryGroup.is_income || (row.amount ?? 0) < 0,
-            )
-            .map(
-              (row: {
-                amount?: number;
-                accountName?: string;
-                accountId?: string;
-                payeeName?: string;
-                payeeId?: string;
-              }) =>
-                ({
-                  categoryGroup: categoryGroup.name,
-                  categoryGroupId: categoryGroup.id,
-                  category: category.name,
-                  categoryId: category.id,
-                  value: Math.abs(row.amount ?? 0),
-                  isIncome: categoryGroup.is_income ?? false,
-                  accountName: row.accountName ?? '',
-                  accountId: row.accountId ?? '',
-                  payeeName: row.payeeName ?? '',
-                  payeeId: row.payeeId ?? '',
-                }) satisfies CategoryEntry,
-            );
+          return results.data.map(
+            (row: {
+              amount?: number;
+              accountName?: string;
+              accountId?: string;
+              payeeName?: string;
+              payeeId?: string;
+            }) =>
+              ({
+                categoryGroup: categoryGroup.name,
+                categoryGroupId: categoryGroup.id,
+                category: category.name,
+                categoryId: category.id,
+                value: Math.abs(row.amount ?? 0),
+                isIncome:
+                  (categoryGroup.is_income ?? false) || (row.amount ?? 0) > 0,
+                accountName: row.accountName ?? '',
+                accountId: row.accountId ?? '',
+                payeeName: row.payeeName ?? '',
+                payeeId: row.payeeId ?? '',
+              }) satisfies CategoryEntry,
+          );
         }),
       );
       return entries.flat();
@@ -527,13 +523,8 @@ function createBudgetGraph(
   const graph: Graph = new Map();
 
   // Add initial budget nodes with no links
-  addNodeWithLabel(
-    graph,
-    SpecialNodeKeys.Budgeted,
-    GraphLayers.Budget,
-    'Budgeted',
-  );
-  addNodeWithLabel(
+  addNode(graph, SpecialNodeKeys.Budgeted, GraphLayers.Budget, 'Budgeted');
+  addNode(
     graph,
     SpecialNodeKeys.AvailableIncome,
     GraphLayers.Account,
@@ -587,22 +578,16 @@ function createBudgetGraph(
         addNodeWithLabel(
           graph,
           entry.categoryId,
-          GraphLayers.Budget,
-          entry.category,
-          undefined,
+          GraphLayers.Account,
+          'From {{category}}',
+          { category: entry.category },
           true,
         );
         addValueToLink(
           graph,
           entry.categoryId,
-          entry.categoryGroupId,
-          Math.abs(entry.value),
-        );
-        addValueToLink(
-          graph,
           SpecialNodeKeys.Budgeted,
-          entry.categoryGroupId,
-          entry.value,
+          Math.abs(entry.value),
         );
         addValueToLink(
           graph,
@@ -615,12 +600,7 @@ function createBudgetGraph(
   });
 
   if (aggregated.toBudget > 0) {
-    addNodeWithLabel(
-      graph,
-      SpecialNodeKeys.ToBudget,
-      GraphLayers.Account,
-      'To budget',
-    );
+    addNode(graph, SpecialNodeKeys.ToBudget, GraphLayers.Account, 'To budget');
     addValueToLink(
       graph,
       SpecialNodeKeys.AvailableIncome,
@@ -676,7 +656,7 @@ function createBudgetGraph(
     SpecialNodeKeys.ForNextMonth,
     aggregated.forNextMonth,
   );
-  addNodeWithLabel(
+  addNode(
     graph,
     SpecialNodeKeys.LastMonthOverspent,
     GraphLayers.Budget,
@@ -907,7 +887,7 @@ function moveToOther(graph: Graph, key: NodeKey, globalOther: boolean = false) {
     otherGroupKey = categoryGroupKey + SpecialNodeKeys.OtherSuffix;
   }
 
-  addNodeWithLabel(graph, otherGroupKey, GraphLayers.Category, 'Other');
+  addNode(graph, otherGroupKey, GraphLayers.Category, 'Other');
   addValueToLink(graph, categoryGroupKey, otherGroupKey, categoryValue);
   addTooltipInfo(graph, categoryGroupKey, key, categoryValue);
   deleteLink(graph, categoryGroupKey, key);
@@ -1061,6 +1041,11 @@ function sortGraph(
   }
 
   // We always want certain nodes to be shown at the start/end of their layers
+  sortedEntries
+    .filter(([key, nodeData]) => nodeData.isOverbudgeted)
+    .forEach(([key, nodeData]) => {
+      moveNodeToStart(sortedEntries, key);
+    });
   const toBudgetNode = graph.get(SpecialNodeKeys.ToBudget);
   if (toBudgetNode) {
     if (toBudgetNode.isOverbudgeted) {
@@ -1210,31 +1195,6 @@ function addHiddenNodes(graph: Graph) {
             graph,
             key + '_payee' + SpecialNodeKeys.HiddenSuffix,
             key,
-            -1,
-          );
-        } else if (type === GraphLayers.Budget) {
-          addNode(
-            graph,
-            key + '_account' + SpecialNodeKeys.HiddenSuffix,
-            GraphLayers.Account,
-            '',
-          );
-          addValueToLink(
-            graph,
-            key + '_account' + SpecialNodeKeys.HiddenSuffix,
-            key,
-            -1,
-          );
-          addNode(
-            graph,
-            key + '_income_category' + SpecialNodeKeys.HiddenSuffix,
-            GraphLayers.IncomeCategory,
-            '',
-          );
-          addValueToLink(
-            graph,
-            key + '_income_category' + SpecialNodeKeys.HiddenSuffix,
-            key + '_account' + SpecialNodeKeys.HiddenSuffix,
             -1,
           );
         } else {
@@ -1391,7 +1351,6 @@ function cleanUpNodes(graph: Graph) {
 }
 
 function convertToSankeyData(graph: Graph): SankeyData {
-  console.log(graph);
   const nodes = Array.from(graph, ([key, data]) => ({
     key,
     name: data.labelKey
