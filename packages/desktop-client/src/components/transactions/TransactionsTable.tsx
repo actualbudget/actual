@@ -2688,7 +2688,6 @@ function TransactionTableInner({
     }
 
     const {
-      transactions,
       selectedItems,
       accounts,
       categoryGroups,

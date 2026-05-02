@@ -26,6 +26,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { isTransactionGroupBy } from '@actual-app/core/shared/transaction-groups';
 import type { TransactionGroupBy } from '@actual-app/core/shared/transaction-groups';
 import { tsToRelativeTime } from '@actual-app/core/shared/util';
 import type {
@@ -701,7 +702,11 @@ function GroupByButton({
           <Dialog>
             <Menu
               slot="close"
-              onMenuSelect={item => onGroupByChange(item as TransactionGroupBy)}
+              onMenuSelect={item => {
+                if (isTransactionGroupBy(item)) {
+                  onGroupByChange(item);
+                }
+              }}
               items={[
                 { name: 'none', text: t('None') },
                 Menu.line,
