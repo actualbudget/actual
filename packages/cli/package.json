@@ -1,8 +1,13 @@
 {
   "name": "@actual-app/cli",
-  "version": "26.4.0",
+  "version": "26.5.0",
   "description": "CLI for Actual Budget",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/actualbudget/actual.git",
+    "directory": "packages/cli"
+  },
   "bin": {
     "actual": "./dist/cli.js",
     "actual-cli": "./dist/cli.js"
@@ -12,10 +17,12 @@
   ],
   "type": "module",
   "imports": {
+    "#cache": "./src/cache.ts",
     "#commands/*": "./src/commands/*.ts",
     "#config": "./src/config.ts",
     "#connection": "./src/connection.ts",
     "#input": "./src/input.ts",
+    "#lock": "./src/lock.ts",
     "#output": "./src/output.ts",
     "#utils": "./src/utils.ts"
   },
@@ -28,11 +35,13 @@
     "@actual-app/api": "workspace:*",
     "cli-table3": "^0.6.5",
     "commander": "^14.0.3",
-    "cosmiconfig": "^9.0.1"
+    "cosmiconfig": "^9.0.1",
+    "proper-lockfile": "^4.1.2"
   },
   "devDependencies": {
     "@types/node": "^22.19.17",
-    "@typescript/native-preview": "^7.0.0-dev.20260404.1",
+    "@types/proper-lockfile": "^4",
+    "@typescript/native-preview": "beta",
     "rollup-plugin-visualizer": "^7.0.1",
     "vite": "^8.0.5",
     "vitest": "^4.1.2"

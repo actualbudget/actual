@@ -6,6 +6,11 @@ import { vi } from 'vitest';
 
 import * as api from './index';
 
+declare global {
+  var IS_TESTING: boolean;
+  var currentMonth: string | null;
+}
+
 // In tests we run from source; loot-core's API fs uses __dirname (for the built dist/).
 // Mock the fs so path constants point at loot-core package root where migrations live.
 vi.mock(

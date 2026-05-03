@@ -19,10 +19,26 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 jobs:
+  setup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+
   api:
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
@@ -45,9 +61,12 @@ jobs:
           path: api-stats.json
 
   crdt:
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
@@ -70,9 +89,12 @@ jobs:
           path: crdt-stats.json
 
   web:
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Web
@@ -89,9 +111,12 @@ jobs:
           path: packages/desktop-client/build-stats
 
   cli:
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
@@ -114,9 +139,12 @@ jobs:
           path: cli-stats.json
 
   server:
+    needs: setup
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
         with:

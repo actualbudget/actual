@@ -4,7 +4,11 @@
   "description": "CRDT layer of Actual",
   "license": "MIT",
   "files": [
-    "dist"
+    "dist",
+    "!dist/**/*.test.d.ts",
+    "!dist/**/*.test.d.ts.map",
+    "!dist/**/*.spec.d.ts",
+    "!dist/**/*.spec.d.ts.map"
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -26,7 +30,7 @@
   "scripts": {
     "build:node": "vite build",
     "proto:generate": "./bin/generate-proto",
-    "build": "yarn run build:node && tsgo -p tsconfig.build.json --emitDeclarationOnly",
+    "build": "yarn run build:node && tsgo -b",
     "test": "vitest --run",
     "typecheck": "tsgo -b"
   },
@@ -36,7 +40,7 @@
   },
   "devDependencies": {
     "@bufbuild/protoc-gen-es": "^2.11.0",
-    "@typescript/native-preview": "^7.0.0-dev.20260404.1",
+    "@typescript/native-preview": "beta",
     "rollup-plugin-visualizer": "^7.0.1",
     "vite": "^8.0.5",
     "vitest": "^4.1.2"

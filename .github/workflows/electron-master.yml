@@ -22,6 +22,7 @@ jobs:
     permissions:
       contents: write
     strategy:
+      fail-fast: false
       matrix:
         os:
           - ubuntu-22.04
@@ -30,6 +31,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - if: ${{ startsWith(matrix.os, 'windows') }}
         run: pip.exe install setuptools
       - if: ${{ ! startsWith(matrix.os, 'windows') }}
@@ -56,9 +59,11 @@ jobs:
 
           METAINFO_FILE="packages/desktop-electron/extra-resources/linux/com.actualbudget.actual.metainfo.xml"
           TODAY=$(date +%Y-%m-%d)
-          VERSION=${{ steps.process_version.outputs.version }}
+          VERSION=${STEPS_PROCESS_VERSION_OUTPUTS_VERSION}
           sed -i "s/%RELEASE_VERSION%/$VERSION/g; s/%RELEASE_DATE%/$TODAY/g" "$METAINFO_FILE"
           flatpak run --command=flatpak-builder-lint org.flatpak.Builder appstream "$METAINFO_FILE"
+        env:
+          STEPS_PROCESS_VERSION_OUTPUTS_VERSION: ${{ steps.process_version.outputs.version }}
       - name: Set up environment
         uses: ./.github/actions/setup
       - name: Build Electron for Mac

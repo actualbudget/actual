@@ -23,8 +23,16 @@ export const ScheduleAutomation = ({
   dispatch,
 }: ScheduleAutomationProps) => {
   const { t } = useTranslation();
+  // Match the filter applied to the Select options below — completed and
+  // tombstoned schedules aren't selectable, so a category whose only
+  // schedules are completed should fall through to the "no schedules" state
+  // instead of showing an empty picker.
+  const selectableSchedules = schedules.filter(
+    (s): s is typeof s & { name: string } =>
+      !!s.name && !s.completed && !s.tombstone,
+  );
 
-  return schedules.length ? (
+  return selectableSchedules.length ? (
     <SpaceBetween gap={50} style={{ marginTop: 10 }}>
       <FormField style={{ flex: 1 }}>
         <FormLabel title={t('Schedule')} htmlFor="schedule-field" />
@@ -41,9 +49,7 @@ export const ScheduleAutomation = ({
               }),
             )
           }
-          options={schedules.flatMap(schedule =>
-            schedule.name ? [[schedule.name, schedule.name]] : [],
-          )}
+          options={selectableSchedules.map(s => [s.name, s.name] as const)}
         />
       </FormField>
       <FormField style={{ flex: 1 }}>

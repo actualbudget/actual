@@ -139,6 +139,7 @@ function _generateTransaction(
     date: data.date || monthUtils.currentDay(),
     sort_order: data.sort_order != null ? data.sort_order : 1,
     cleared: false,
+    reconciled: false,
     ...(data.category && { category: data.category }),
   };
 }

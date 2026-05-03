@@ -46,18 +46,26 @@ export class ScheduleEditModal {
     }
 
     if (data.payee) {
-      await this.payeeInput.pressSequentially(data.payee);
-      await this.page.keyboard.press('Enter');
+      await this.#typeAndSelectOption(this.payeeInput, data.payee);
     }
 
     if (data.account) {
-      await this.accountInput.pressSequentially(data.account);
-      await this.page.keyboard.press('Enter');
+      await this.#typeAndSelectOption(this.accountInput, data.account);
     }
 
     if (data.amount) {
       await this.amountInput.fill(String(data.amount));
     }
+  }
+
+  async #typeAndSelectOption(input: Locator, content: string) {
+    await input.pressSequentially(content);
+    // Click the option: Enter on a not-yet-highlighted list saves "None".
+    await this.page
+      .getByRole('option')
+      .filter({ hasText: content })
+      .first()
+      .click();
   }
 
   async save() {

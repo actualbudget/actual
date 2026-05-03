@@ -18,14 +18,18 @@ export function registerTransactionsCommand(program: Command) {
     .requiredOption('--end <date>', 'End date (YYYY-MM-DD)')
     .action(async cmdOpts => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const result = await api.getTransactions(
-          cmdOpts.account,
-          cmdOpts.start,
-          cmdOpts.end,
-        );
-        printOutput(result, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const result = await api.getTransactions(
+            cmdOpts.account,
+            cmdOpts.start,
+            cmdOpts.end,
+          );
+          printOutput(result, opts.format);
+        },
+        { mutates: false },
+      );
     });
 
   transactions
@@ -41,20 +45,24 @@ export function registerTransactionsCommand(program: Command) {
     .option('--run-transfers', 'Process transfers', false)
     .action(async cmdOpts => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const transactions = readJsonInput(cmdOpts) as Parameters<
-          typeof api.addTransactions
-        >[1];
-        const result = await api.addTransactions(
-          cmdOpts.account,
-          transactions,
-          {
-            learnCategories: cmdOpts.learnCategories,
-            runTransfers: cmdOpts.runTransfers,
-          },
-        );
-        printOutput(result, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const transactions = readJsonInput(cmdOpts) as Parameters<
+            typeof api.addTransactions
+          >[1];
+          const result = await api.addTransactions(
+            cmdOpts.account,
+            transactions,
+            {
+              learnCategories: cmdOpts.learnCategories,
+              runTransfers: cmdOpts.runTransfers,
+            },
+          );
+          printOutput(result, opts.format);
+        },
+        { mutates: true },
+      );
     });
 
   transactions
@@ -69,20 +77,24 @@ export function registerTransactionsCommand(program: Command) {
     .option('--dry-run', 'Preview without importing', false)
     .action(async cmdOpts => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const transactions = readJsonInput(cmdOpts) as Parameters<
-          typeof api.importTransactions
-        >[1];
-        const result = await api.importTransactions(
-          cmdOpts.account,
-          transactions,
-          {
-            defaultCleared: true,
-            dryRun: cmdOpts.dryRun,
-          },
-        );
-        printOutput(result, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const transactions = readJsonInput(cmdOpts) as Parameters<
+            typeof api.importTransactions
+          >[1];
+          const result = await api.importTransactions(
+            cmdOpts.account,
+            transactions,
+            {
+              defaultCleared: true,
+              dryRun: cmdOpts.dryRun,
+            },
+          );
+          printOutput(result, opts.format);
+        },
+        { mutates: true },
+      );
     });
 
   transactions
@@ -92,13 +104,17 @@ export function registerTransactionsCommand(program: Command) {
     .option('--file <path>', 'Read fields from JSON file (use - for stdin)')
     .action(async (id: string, cmdOpts) => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const fields = readJsonInput(cmdOpts) as Parameters<
-          typeof api.updateTransaction
-        >[1];
-        await api.updateTransaction(id, fields);
-        printOutput({ success: true, id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const fields = readJsonInput(cmdOpts) as Parameters<
+            typeof api.updateTransaction
+          >[1];
+          await api.updateTransaction(id, fields);
+          printOutput({ success: true, id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 
   transactions
@@ -106,9 +122,13 @@ export function registerTransactionsCommand(program: Command) {
     .description('Delete a transaction')
     .action(async (id: string) => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        await api.deleteTransaction(id);
-        printOutput({ success: true, id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          await api.deleteTransaction(id);
+          printOutput({ success: true, id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 }

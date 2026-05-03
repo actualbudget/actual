@@ -1,8 +1,13 @@
 {
   "name": "@actual-app/sync-server",
-  "version": "26.4.0",
+  "version": "26.5.0",
   "description": "actual syncing server",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/actualbudget/actual.git",
+    "directory": "packages/sync-server"
+  },
   "bin": {
     "actual-server": "./build/bin/actual-server.js"
   },
@@ -13,6 +18,7 @@
   ],
   "type": "module",
   "imports": {
+    "#db": "./src/db.js",
     "#account-db": "./src/account-db.js",
     "#load-config": "./src/load-config.js",
     "#migrations": "./src/migrations.ts",
@@ -37,6 +43,7 @@
   },
   "publishConfig": {
     "imports": {
+      "#db": "./build/src/db.js",
       "#account-db": "./build/src/account-db.js",
       "#load-config": "./build/src/load-config.js",
       "#migrations": "./build/src/migrations.js",
@@ -103,7 +110,7 @@
     "@types/express-actuator": "^1.8.3",
     "@types/node": "^22.19.17",
     "@types/supertest": "^7.2.0",
-    "@typescript/native-preview": "^7.0.0-dev.20260404.1",
+    "@typescript/native-preview": "beta",
     "http-proxy-middleware": "^3.0.5",
     "nodemon": "^3.1.14",
     "supertest": "^7.2.2",

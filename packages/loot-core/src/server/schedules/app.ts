@@ -539,7 +539,7 @@ async function advanceSchedulesService(syncSuccess) {
       schedule.next_date,
       schedule.completed,
       hasTrans.has(schedule.id),
-      upcomingLength[0]?.value ?? '7',
+      schedule.custom_upcoming_length ?? upcomingLength[0]?.value ?? '7',
     );
 
     if (status === 'paid') {
