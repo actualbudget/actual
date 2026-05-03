@@ -15,6 +15,7 @@ function toJS(rows): TransactionFilterEntity[] {
       tombstone: row.tombstone,
       conditionsOp: row.conditions_op,
       conditions: row.conditions,
+      groupBy: row.group_by ?? 'none',
     } satisfies TransactionFilterEntity;
   });
   return filters;
