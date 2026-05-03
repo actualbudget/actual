@@ -1162,6 +1162,11 @@ const Transaction = memo(function Transaction({
     _unmatched = false,
   } = transaction;
 
+  const { schedules = [] } = useCachedSchedules();
+  const schedule = transaction.schedule
+    ? schedules.find(s => s.id === transaction.schedule)
+    : null;
+
   const previewStatus = forceUpcoming ? 'upcoming' : categoryId;
 
   // Join in some data
@@ -1579,7 +1584,7 @@ const Transaction = memo(function Transaction({
         ))()}
 
         <NotesCell
-          value={notes || ''}
+          value={notes ?? (isPreview ? schedule?.name : null) ?? ''}
           focused={focusedField === 'notes'}
           onClickTag={onNotesTagClick}
           onUpdate={value => {
@@ -1970,6 +1975,9 @@ function NotesCell({
   onExpose,
 }: NotesCellProps) {
   const [inputValue, setInputValue] = useState(value);
+  useEffect(() => {
+    setInputValue(value);
+  }, [value, setInputValue]);
 
   function onKeyDown(e: KeyboardEvent) {
     if (e.key === 'Enter' || e.key === 'Tab') {
@@ -2001,6 +2009,7 @@ function NotesCell({
           inputStyle={inputStyle}
           onBlur={onBlur}
           onKeyDown={onKeyDown}
+          onUpdate={onUpdate}
         />
       )}
     </CustomCell>

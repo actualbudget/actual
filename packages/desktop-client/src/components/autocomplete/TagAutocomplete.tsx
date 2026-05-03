@@ -36,6 +36,7 @@ export type TagAutocompleteProps = {
   inputStyle?: CSSProperties;
   onBlur?: FocusEventHandler;
   onKeyDown?: KeyboardEventHandler;
+  onUpdate?: (value: string) => void;
 };
 
 export function TagAutocomplete({
@@ -45,6 +46,7 @@ export function TagAutocomplete({
   onBlur,
   inputStyle,
   onKeyDown,
+  onUpdate,
 }: TagAutocompleteProps) {
   const { t } = useTranslation();
   const getTagCSS = useTagCSS();
@@ -152,6 +154,7 @@ export function TagAutocomplete({
         onKeyDown={handleKeyDown}
         onFocus={() => setIsOpen(true)}
         onBlur={onBlur}
+        onUpdate={onUpdate}
       />
 
       <Popover
