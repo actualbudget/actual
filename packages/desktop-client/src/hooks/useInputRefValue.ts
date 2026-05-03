@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { RefObject } from 'react';
 
 import { useRefEventListener } from './useRefEventListener';
@@ -12,6 +12,10 @@ export function useInputRefValue(
     'input',
     e => setValue((e.target as HTMLInputElement).value),
     [setValue],
+  );
+  useEffect(
+    () => setValue(inputRef.current?.value ?? ''),
+    [inputRef, setValue],
   );
 
   function _setValue(newValue: string) {
