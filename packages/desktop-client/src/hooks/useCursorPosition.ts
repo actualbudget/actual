@@ -15,8 +15,14 @@ export function useCursorPosition(
   useEffect(() => {
     if (!ref.current) return;
     const input = ref.current;
-    setCursorPosition(input.selectionStart);
-    const update = () => setCursorPosition(input.selectionStart);
+    const update = () => {
+      setCursorPosition(
+        document.activeElement === input ? input.selectionStart : null,
+      );
+    };
+    // trigger update on render
+    update();
+
     const clear = () => setCursorPosition(null);
     function updatePosition() {
       if (document.activeElement === input) {
@@ -26,10 +32,12 @@ export function useCursorPosition(
     document.addEventListener('selectionchange', updatePosition);
     input.addEventListener('focusin', update);
     input.addEventListener('focusout', clear);
+    input.addEventListener('blur', clear);
     return () => {
       document.removeEventListener('selectionchange', updatePosition);
       input.removeEventListener('focusin', update);
       input.removeEventListener('focusout', clear);
+      input.removeEventListener('blur', clear);
     };
   }, [ref]);
 

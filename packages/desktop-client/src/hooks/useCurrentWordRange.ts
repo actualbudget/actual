@@ -18,11 +18,7 @@ function getCurrentWordRange(
   if (cursorPosition > inputValue.length) {
     return [inputValue.length, inputValue.length];
   }
-  if (inputValue.charAt(cursorPosition) === ' ') {
-    return [cursorPosition, cursorPosition];
-  }
-
-  let startIdx = cursorPosition - 1;
+  let startIdx = cursorPosition;
   const endIdx = cursorPosition;
 
   while (startIdx > 0 && inputValue.charAt(startIdx - 1).trim() !== '') {
