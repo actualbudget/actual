@@ -64,6 +64,7 @@ Finally, a draft GitHub release should be automatically created [here](https://g
 - [ ] Perform the same smoke test on the desktop app corresponding to your platform (attached to the draft release).
 
 ### Finalise the release
+
 - [ ] Un-draft the GitHub release which will send announcement notifications to all apps and create a PR to the [Actual Flathub Repository](https://github.com/flathub/com.actualbudget.actual/pulls).
 - [ ] Send an announcement on Discord and Twitter.
 - [ ] Approve and merge the [Flathub Release PR](https://github.com/flathub/com.actualbudget.actual/pulls) to master. After merge, it can take anywhere from hours to a few days before the app will be available in the Flathub Store.
