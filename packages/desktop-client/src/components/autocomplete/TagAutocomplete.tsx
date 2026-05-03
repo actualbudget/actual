@@ -138,6 +138,7 @@ export function TagAutocomplete({
     <>
       <Input
         ref={inputRef}
+        name="notes"
         aria-label={t('Notes')}
         aria-expanded={showPopup}
         aria-controls={id('popover')}
