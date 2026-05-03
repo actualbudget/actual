@@ -1490,13 +1490,24 @@ function NoteTagAutocomplete({
       note.slice(0, startIdx) + '#' + tag + ' ' + note.slice(endIdx);
     const newPos = startIdx + tag.length + 2;
 
-    inputRef.current.value = newValue;
+    // If we want to honor the input's onChange prop, we have
+    // to use native value setter, then fire the 'input' event.
+    // Doing normal inputRef.current.value = 'newval' and then
+    // following that up with firing an event doesn't work, because
+    // React will intercept that and change the value internally,
+    // and when you go to fire an event, it will see that nothing has
+    // changed since it last saw a value (it just updated it itself)
+    // meaning no event will get fired. Or Something.
+    // eslint-disable-next-line typescript-eslint(unbound-method)
+    const nativeSetter = Object.getOwnPropertyDescriptor(
+      window.HTMLInputElement.prototype,
+      'value',
+    )?.set;
+    nativeSetter?.call(inputRef.current, newValue);
+    inputRef.current.dispatchEvent(new Event('input', { bubbles: true }));
+
     inputRef.current.setSelectionRange(newPos, newPos);
-
-    inputRef.current.dispatchEvent(new Event('change', { bubbles: true }));
     document.dispatchEvent(new Event('selectionchange'));
-
-    inputRef.current.focus();
   }
 
   const hideScrollbar = css({
@@ -1545,6 +1556,7 @@ function NoteTagAutocomplete({
             <div
               role="button"
               className={getTagCSS(tag.tag)}
+              onMouseDown={e => e.preventDefault()}
               onClick={() => handleSelect(tag.tag)}
             >
               #{tag.tag}
