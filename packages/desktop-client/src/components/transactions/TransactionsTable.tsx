@@ -1584,7 +1584,8 @@ const Transaction = memo(function Transaction({
         ))()}
 
         <NotesCell
-          value={notes ?? (isPreview ? schedule?.name : null) ?? ''}
+          note={notes ?? ''}
+          scheduleNote={isPreview ? schedule?.name : null}
           focused={focusedField === 'notes'}
           onClickTag={onNotesTagClick}
           onUpdate={value => {
@@ -1960,7 +1961,8 @@ const Transaction = memo(function Transaction({
 });
 
 type NotesCellProps = {
-  value: string;
+  note: string;
+  scheduleNote: string | null | undefined;
   focused: boolean;
   onUpdate: (value: string) => void;
   onClickTag: (tag: string) => void;
@@ -1968,22 +1970,23 @@ type NotesCellProps = {
 };
 
 function NotesCell({
-  value,
+  note,
+  scheduleNote,
   focused,
   onUpdate,
   onClickTag,
   onExpose,
 }: NotesCellProps) {
-  const [inputValue, setInputValue] = useState(value);
+  const [inputValue, setInputValue] = useState(note);
   useEffect(() => {
-    setInputValue(value);
-  }, [value, setInputValue]);
+    setInputValue(note);
+  }, [note, setInputValue]);
 
   function onKeyDown(e: KeyboardEvent) {
     if (e.key === 'Enter' || e.key === 'Tab') {
       onUpdate(inputValue);
     } else if (e.key === 'Escape') {
-      setInputValue(value);
+      setInputValue(note);
     }
   }
 
@@ -1991,7 +1994,7 @@ function NotesCell({
     <CustomCell
       width="flex"
       name="notes"
-      value={value}
+      value={note ?? scheduleNote ?? ''}
       formatter={value =>
         NotesTagFormatter({ notes: value, onNotesTagClick: onClickTag })
       }

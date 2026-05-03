@@ -426,6 +426,7 @@ const ChildTransactionEdit = forwardRef<
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm()!;
     const [hideFraction, _] = useSyncedPref('hideFraction');
+    const noteRef = useRef<HTMLInputElement | null>(null);
 
     const prettyPayee = getPrettyPayee({
       t,
@@ -528,6 +529,7 @@ const ChildTransactionEdit = forwardRef<
         <View>
           <FieldLabel title={t('Notes')} />
           <InputField
+            ref={noteRef}
             icon={<SvgNotesPaper width={17} height={17} />}
             placeholder={t('Add a note (optional)')}
             disabled={
@@ -539,6 +541,10 @@ const ChildTransactionEdit = forwardRef<
               onRequestActiveEdit(getFieldName(transaction.id, 'notes'))
             }
             onUpdate={value => onUpdate(transaction, 'notes', value)}
+          />
+          <NoteTagAutocomplete
+            inputRef={noteRef}
+            note={transaction.notes ?? ''}
           />
         </View>
 
@@ -1419,8 +1425,8 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               }
             />
             <NoteTagAutocomplete
-              note={transaction.notes ?? ''}
               inputRef={noteRef}
+              note={transaction.notes ?? ''}
             />
           </View>
 
@@ -1520,6 +1526,10 @@ function NoteTagAutocomplete({
 
   return (
     <>
+      {cursorPosition}
+      {note}
+      {JSON.stringify(tags)}
+      {JSON.stringify(filteredTags)}
       <div
         ref={backgroundRef}
         style={{
