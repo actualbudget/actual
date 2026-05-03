@@ -514,7 +514,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
           onOpenChange={() => setBalanceMenuOpen(false)}
           style={{
             margin: 1,
-            width: 'min(180px, calc(100vw - 16px))',
+            width: 'min(220px, calc(100vw - 16px))',
           }}
           isNonModal
           {...balancePosition}
