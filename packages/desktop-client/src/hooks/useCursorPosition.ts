@@ -23,7 +23,6 @@ export function useCursorPosition(
   const clear = () => setCursorPosition(null);
 
   useRefEventListener(ref, 'focusin', update, [ref, setCursorPosition]);
-  useRefEventListener(ref, 'input', update, [ref, setCursorPosition]);
   useRefEventListener(ref, 'keyup', update, [ref, setCursorPosition]);
   useRefEventListener(ref, 'focusout', clear, [setCursorPosition]);
 
