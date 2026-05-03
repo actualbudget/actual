@@ -18,6 +18,7 @@ This release introduces powerful new reporting capabilities as well as numerous 
 
 - [#6685](https://github.com/actualbudget/actual/pull/6685) Added Age of Money report. — thanks @sztomi
 - [#7220](https://github.com/actualbudget/actual/pull/7220) Add Sankey diagram report with two view modes (spent and budgeted) to visualize money flow through categories — thanks @emiltb & @andrewhumble
+- [#7597](https://github.com/actualbudget/actual/pull/7597) Visual overhaul of the experimental budget automation UI — thanks @matt-fidd
 
 #### Enhancements
 
@@ -39,12 +40,15 @@ This release introduces powerful new reporting capabilities as well as numerous 
 - [#7476](https://github.com/actualbudget/actual/pull/7476) Added a new Sankey Options menu with a toggle to view values as percentages. — thanks @emiltb
 - [#7495](https://github.com/actualbudget/actual/pull/7495) Custom Themes: custom CSS overrides now persist across theme changes and show a visible indicator next to the Theme dropdown when active — thanks @MatissJanis
 - [#7513](https://github.com/actualbudget/actual/pull/7513) Add nord theme to custom catalog — thanks @aadhithbala
+- [#7539](https://github.com/actualbudget/actual/pull/7539) CLI commands now cache downloaded budgets briefly, while the new `actual sync` command lets users refresh, inspect, or clear the local cache. — thanks @MatissJanis
 - [#7543](https://github.com/actualbudget/actual/pull/7543) Added theme Ilavenil to custom theme catalog — thanks @aadhithbala
 - [#7571](https://github.com/actualbudget/actual/pull/7571) Add Gruvbox Light and Gruvbox Dark custom themes to the theme catalog. — thanks @Dakyne
 - [#7581](https://github.com/actualbudget/actual/pull/7581) API: export model types via "@actual-app/api/models". — thanks @MatissJanis
 - [#7582](https://github.com/actualbudget/actual/pull/7582) Optimize Sankey chart datamodel to include income sources, allow layer filtering and better budget handling — thanks @emiltb
 - [#7605](https://github.com/actualbudget/actual/pull/7605) Make double Ctrl-f trigger browser find — thanks @jfdoming
 - [#7610](https://github.com/actualbudget/actual/pull/7610) Reimport Deleted is now on by default and persisted between imports — thanks @alecbakholdin
+- [#7638](https://github.com/actualbudget/actual/pull/7638) Ensure mobile transaction amount field maintains consistent height when empty. — thanks @MatissJanis
+- [#7639](https://github.com/actualbudget/actual/pull/7639) Add icons, placeholders, and dropdown chevrons to mobile transaction form fields for improved UI. — thanks @MatissJanis
 
 #### Bugfixes
 
@@ -61,6 +65,7 @@ This release introduces powerful new reporting capabilities as well as numerous 
 - [#7356](https://github.com/actualbudget/actual/pull/7356) Fix custom report editor retaining unsaved settings when navigating between routes. — thanks @tmchow
 - [#7368](https://github.com/actualbudget/actual/pull/7368) Allow end to end encryption of budget files in the desktop apps — thanks @pickle-and-pork
 - [#7373](https://github.com/actualbudget/actual/pull/7373) Fix date variable in rule formulas — thanks @youngcw
+- [#7375](https://github.com/actualbudget/actual/pull/7375) Disable Inter font contextual alternates to prevent unwanted x→× character substitutions. — thanks @rudra496
 - [#7381](https://github.com/actualbudget/actual/pull/7381) Fix crash when viewing account ledger with expired recurring schedules. — thanks @MatissJanis
 - [#7428](https://github.com/actualbudget/actual/pull/7428) Fix path traversal vulnerability in file upload sanitization — thanks @MatissJanis
 - [#7453](https://github.com/actualbudget/actual/pull/7453) Fixes unlocking on child split transactions — thanks @JSkinnerUK
@@ -69,6 +74,7 @@ This release introduces powerful new reporting capabilities as well as numerous 
 - [#7478](https://github.com/actualbudget/actual/pull/7478) Resolve subpath imports when running server locally — thanks @MatissJanis
 - [#7487](https://github.com/actualbudget/actual/pull/7487) Fix bank sync account linking modal being disabled when relinking existing accounts — thanks @matt-fidd
 - [#7496](https://github.com/actualbudget/actual/pull/7496) Fixes inconsistency between web UI and mobile UI where make transfer is not available on uncategorized transaction menu. — thanks @tempiz
+- [#7511](https://github.com/actualbudget/actual/pull/7511) Prevent the generic "Something internally went wrong" error when adding a transaction after clearing the date field. DateSelect now restores the previous valid date on blur instead of saving an empty string that the server rejects. — thanks @tmchow
 - [#7515](https://github.com/actualbudget/actual/pull/7515) Fix unreadable "Use Regular Expressions" checkbox label in the notes find-and-replace modal by applying the correct theme color. — thanks @JasmineLCY
 - [#7522](https://github.com/actualbudget/actual/pull/7522) Fix runImport failing when ACTUAL_DATA_DIR environment variable is not set — thanks @matt-fidd
 - [#7524](https://github.com/actualbudget/actual/pull/7524) Fix build error with typescript v6 — thanks @matt-fidd
@@ -80,6 +86,7 @@ This release introduces powerful new reporting capabilities as well as numerous 
 - [#7619](https://github.com/actualbudget/actual/pull/7619) Sankey card should follow report settings — thanks @matt-fidd
 - [#7623](https://github.com/actualbudget/actual/pull/7623) Fix infinite loop when applying remainder templates with an amount that can not be divided — thanks @matt-fidd
 - [#7632](https://github.com/actualbudget/actual/pull/7632) Fix Sankey income being shown as spent money, when payee was not set — thanks @emiltb
+- [#7656](https://github.com/actualbudget/actual/pull/7656) Fix shared worker resumption after tab suspend — thanks @jfdoming
 
 #### Maintenance
 
@@ -155,12 +162,16 @@ This release introduces powerful new reporting capabilities as well as numerous 
 - [#7583](https://github.com/actualbudget/actual/pull/7583) Consolidate release and nightly npm publishing workflow — thanks @jfdoming
 - [#7587](https://github.com/actualbudget/actual/pull/7587) Switch from tsgo development channel to beta — thanks @matt-fidd
 - [#7595](https://github.com/actualbudget/actual/pull/7595) Notify Discord when the nightly custom theme catalog scan fails. — thanks @MatissJanis
+- [#7602](https://github.com/actualbudget/actual/pull/7602) Build scripts: port browser build version to using lage — thanks @MatissJanis
 - [#7606](https://github.com/actualbudget/actual/pull/7606) Migrate file service to TypeScript — thanks @jfdoming
 - [#7609](https://github.com/actualbudget/actual/pull/7609) Enable stricter electron build options — thanks @jfdoming
 - [#7613](https://github.com/actualbudget/actual/pull/7613) Bump postcss from 8.5.8 to 8.5.10 — thanks @jfdoming
 - [#7620](https://github.com/actualbudget/actual/pull/7620) Increase test coverage for budget templates — thanks @matt-fidd
 - [#7635](https://github.com/actualbudget/actual/pull/7635) Fix release note generation script failing when conflicting changes are present — thanks @matt-fidd
 - [#7640](https://github.com/actualbudget/actual/pull/7640) Make release note generation script respect cherry picked commits — thanks @matt-fidd
+- [#7642](https://github.com/actualbudget/actual/pull/7642) TypeScript: fix running TS on test files — thanks @MatissJanis
+- [#7655](https://github.com/actualbudget/actual/pull/7655) Fix the release notes link in the pull request template. — thanks @arjunrawal1
+- [#7664](https://github.com/actualbudget/actual/pull/7664) Enable automatic issue enrichment in CodeRabbit configuration — thanks @MatissJanis
 
 ## 26.4.0
 
