@@ -13,14 +13,20 @@ export function useCursorPosition(
     if (!ref.current) return;
     const input = ref.current;
     setCursorPosition(input.selectionStart);
+    const update = () => setCursorPosition(input.selectionStart);
+    const clear = () => setCursorPosition(null);
     function updatePosition() {
       if (document.activeElement === input) {
-        setCursorPosition(input.selectionStart);
+        update();
       }
     }
     document.addEventListener('selectionchange', updatePosition);
+    input.addEventListener('focusin', update);
+    input.addEventListener('focusout', clear);
     return () => {
       document.removeEventListener('selectionchange', updatePosition);
+      input.removeEventListener('focusin', update);
+      input.removeEventListener('focusout', clear);
     };
   }, [ref]);
 
