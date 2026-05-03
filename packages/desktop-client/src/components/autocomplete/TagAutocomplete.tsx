@@ -169,7 +169,7 @@ export function TagAutocomplete({
         onOpenChange={setIsOpen}
       >
         <ListBox
-          aria-label={t("Tag List")}
+          aria-label={t('Tag List')}
           id={id('popover')}
           items={filteredItems}
           selectionMode="single"
