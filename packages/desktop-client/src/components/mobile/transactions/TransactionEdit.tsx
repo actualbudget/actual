@@ -1481,7 +1481,6 @@ function NoteTagAutocomplete({
     const wordNoHash = currentWord.slice(1);
     return tags.filter(tag => contains(tag.tag, wordNoHash)).slice(0, 10);
   }, [currentWord, tags, contains]);
-  console.log(currentWord, filteredTags, startIdx, endIdx);
 
   const getTagCSS = useTagCSS();
 
