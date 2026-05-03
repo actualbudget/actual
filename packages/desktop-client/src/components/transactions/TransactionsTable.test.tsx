@@ -1029,12 +1029,11 @@ describe('Transactions', () => {
   });
 
   test('ctrl/cmd+click on add button adds transaction and closes form', async () => {
-    const { container, getTransactions, updateProps, debug } =
-      renderTransactions({
-        onCloseAddTransaction: () => {
-          updateProps({ isAdding: false });
-        },
-      });
+    const { container, getTransactions, updateProps } = renderTransactions({
+      onCloseAddTransaction: () => {
+        updateProps({ isAdding: false });
+      },
+    });
 
     expect(getTransactions().length).toBe(5);
     updateProps({ isAdding: true });
