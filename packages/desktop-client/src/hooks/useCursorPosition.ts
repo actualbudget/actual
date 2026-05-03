@@ -6,7 +6,10 @@ export function useCursorPosition(
 ): [number | null, (n: number | null) => void] {
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   function _setCursorPosition(n: number | null) {
-    setTimeout(() => ref.current?.setSelectionRange(n, n));
+    setTimeout(() => {
+      ref.current?.setSelectionRange(n, n);
+      document.dispatchEvent(new Event('selectionchange'));
+    });
   }
 
   useEffect(() => {

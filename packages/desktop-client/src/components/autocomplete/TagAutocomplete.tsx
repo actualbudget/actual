@@ -25,6 +25,8 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 
+import { useCurrentWordRange } from '#hooks/useCurrentWordRange';
+import { useCursorPosition } from '#hooks/useCursorPosition';
 import { useTagCSS } from '#hooks/useTagCSS';
 import { useTags } from '#hooks/useTags';
 
@@ -53,26 +55,22 @@ export function TagAutocomplete({
   );
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+  const [cursorPosition, setCursorPosition] = useCursorPosition(inputRef);
+  const [startIdx, endIdx] = useCurrentWordRange(inputValue, cursorPosition);
+  const currentWord = inputValue.slice(startIdx, endIdx);
+
   const { contains } = useFilter({ sensitivity: 'base' });
   const { data } = useTags();
   const items = useMemo(
     () => data?.map(tag => ({ ...tag, name: '#' + tag.tag })) ?? [],
     [data],
   );
-  const [cursorPosition, _setCursorPosition] = useState(
-    inputRef.current?.selectionStart,
-  );
-  function setCursorPosition(n: number | null) {
-    _setCursorPosition(n);
-    setTimeout(() => inputRef.current?.setSelectionRange(n, n));
-  }
+
   const filteredItems = useMemo(() => {
-    const currentWord = getCurrentWord(inputValue, inputRef.current);
     if (!currentWord.startsWith('#')) return [];
     const substring = currentWord.slice(1);
     return items.filter(item => contains(item.name, substring)).slice(0, 10);
-    // eslint-disable-next-line eslint-plugin-react-hooks(exhaustive-deps)
-  }, [items, inputValue, contains, cursorPosition]);
+  }, [items, contains, currentWord]);
 
   const [isOpen, setIsOpen] = useState(false);
   const showPopup = isOpen && filteredItems.length > 0;
@@ -93,14 +91,13 @@ export function TagAutocomplete({
     const tagObj = filteredItems.find(tag => tag.id === id);
     if (!tagObj) return;
 
-    const [startIdx, endIdx] = getCurrentWordRange(
-      inputValue,
-      inputRef.current,
-    );
-    const newInputValue = `${inputValue.slice(0, startIdx)}#${
-      tagObj.tag
-    } ${inputValue.slice(endIdx)}`;
-    setInputValue(newInputValue);
+    const newValue =
+      inputValue.slice(0, startIdx) +
+      '#' +
+      tagObj.tag +
+      ' ' +
+      inputValue.slice(endIdx);
+    setInputValue(newValue);
     setHighlightedIdx(0);
     setIsOpen(false);
     setCursorPosition(startIdx + tagObj.tag.length + 2);
@@ -208,34 +205,4 @@ export function TagAutocomplete({
       </Popover>
     </>
   );
-}
-
-function getCurrentWord(inputValue: string, input: HTMLInputElement | null) {
-  const [startIdx, endIdx] = getCurrentWordRange(inputValue, input);
-  return inputValue.slice(startIdx, endIdx);
-}
-
-function getCurrentWordRange(
-  inputValue: string,
-  input: HTMLInputElement | null,
-) {
-  if (
-    input === null ||
-    !input.selectionStart ||
-    input.selectionStart !== input.selectionEnd
-  ) {
-    return [0, 0];
-  }
-  const cursorPosition = input.selectionStart - 1;
-
-  let startIdx = cursorPosition;
-  const endIdx = cursorPosition + 1;
-
-  while (startIdx > 0 && inputValue.charAt(startIdx - 1).trim() !== '') {
-    startIdx--;
-  }
-  if (startIdx < 0 || endIdx < 0 || startIdx === endIdx) {
-    return [0, 0];
-  }
-  return [startIdx, endIdx];
 }
