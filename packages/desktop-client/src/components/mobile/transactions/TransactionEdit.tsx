@@ -7,6 +7,8 @@ import {
   useRef,
   useState,
 } from 'react';
+import type { RefObject } from 'react';
+import { Popover, useFilter } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams, useSearchParams } from 'react-router';
 
@@ -67,6 +69,7 @@ import type {
   PayeeEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
+import { css } from '@emotion/css';
 import {
   format as formatDate,
   isValid as isValidDate,
@@ -87,6 +90,8 @@ import { createSingleTimeScheduleFromTransaction } from '#components/transaction
 import { AmountInput } from '#components/util/AmountInput';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
+import { useCurrentWordRange } from '#hooks/useCurrentWordRange';
+import { useCursorPosition } from '#hooks/useCursorPosition';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useInitialMount } from '#hooks/useInitialMount';
 import { useLocalPref } from '#hooks/useLocalPref';
@@ -99,6 +104,8 @@ import {
   useSingleActiveEditForm,
 } from '#hooks/useSingleActiveEditForm';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useTagCSS } from '#hooks/useTagCSS';
+import { useTags } from '#hooks/useTags';
 import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useSavePayeeLocationMutation } from '#payees';
@@ -627,6 +634,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     );
     const { data: { grouped: categoryGroups } = { grouped: [] } } =
       useCategories();
+    const noteRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
       if (window.history.length === 1) {
@@ -1394,6 +1402,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
           <View>
             <FieldLabel title={t('Notes')} />
             <InputField
+              ref={noteRef}
               icon={<SvgNotesPaper width={17} height={17} />}
               placeholder={t('Add a note (optional)')}
               disabled={
@@ -1408,6 +1417,10 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               onChange={event =>
                 onUpdateInner(transaction, 'notes', event.target.value)
               }
+            />
+            <NoteTagAutocomplete
+              note={transaction.notes ?? ''}
+              inputRef={noteRef}
             />
           </View>
 
@@ -1447,6 +1460,101 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     );
   },
 );
+
+function NoteTagAutocomplete({
+  note,
+  inputRef,
+}: {
+  note: string;
+  inputRef: RefObject<HTMLInputElement | null>;
+}) {
+  const backgroundRef = useRef<HTMLDivElement | null>(null);
+
+  const [cursorPosition] = useCursorPosition(inputRef);
+  const [startIdx, endIdx] = useCurrentWordRange(note, cursorPosition);
+  const currentWord = note.slice(startIdx, endIdx);
+
+  const { data: tags } = useTags();
+  const { contains } = useFilter({ sensitivity: 'base' });
+  const filteredTags = useMemo(() => {
+    if (!currentWord.startsWith('#') || !tags) return [];
+    const wordNoHash = currentWord.slice(1);
+    return tags.filter(tag => contains(tag.tag, wordNoHash)).slice(0, 10);
+  }, [currentWord, tags, contains]);
+
+  const getTagCSS = useTagCSS();
+
+  function handleSelect(tag: string) {
+    if (!inputRef.current) return;
+    const newValue =
+      note.slice(0, startIdx) + '#' + tag + ' ' + note.slice(endIdx);
+    const newPos = startIdx + tag.length + 2;
+
+    inputRef.current.value = newValue;
+    inputRef.current.setSelectionRange(newPos, newPos);
+
+    inputRef.current.dispatchEvent(new Event('change', { bubbles: true }));
+    document.dispatchEvent(new Event('selectionchange'));
+
+    inputRef.current.focus();
+  }
+
+  const hideScrollbar = css({
+    'scrollbar-width': 'none',
+    '-ms-overflow-style': 'none',
+    '&::-webkit-scrollbar': {
+      display: 'none',
+    },
+  });
+
+  return (
+    <>
+      <div
+        ref={backgroundRef}
+        style={{
+          position: 'fixed',
+          bottom: 60,
+          left: 0,
+          width: '100dvw',
+        }}
+      />
+      <Popover
+        isOpen={filteredTags.length > 0}
+        isNonModal
+        style={{
+          width: '92dvw',
+          padding: 8,
+          borderRadius: 30,
+          overflowX: 'auto',
+          backgroundColor: theme.menuAutoCompleteBackground,
+        }}
+        className={hideScrollbar}
+        triggerRef={backgroundRef}
+        placement="top start"
+      >
+        <View
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            flexWrap: 'nowrap',
+            gap: 4,
+            paddingRight: 8,
+          }}
+        >
+          {filteredTags.map(tag => (
+            <div
+              role="button"
+              className={getTagCSS(tag.tag)}
+              onClick={() => handleSelect(tag.tag)}
+            >
+              #{tag.tag}
+            </div>
+          ))}
+        </View>
+      </Popover>
+    </>
+  );
+}
 
 function isTemporary(transaction: TransactionEntity) {
   return transaction.id.indexOf('temp') === 0;
