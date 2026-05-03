@@ -1691,7 +1691,7 @@ const Transaction = memo(function Transaction({
         ) : isBudgetTransfer || isOffBudget ? (
           <InputCell
             /* Category field for transfer and off budget transactions
-                                                                                                                                               (NOT preview, it is covered first) */
+              (NOT preview, it is covered first) */
             name="category"
             width="flex"
             exposed={focusedField === 'category'}
