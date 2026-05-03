@@ -83,7 +83,7 @@ type CategoryEntry = {
 type SortMode = 'per-group' | 'global' | 'budget-order';
 
 type NodeKey = string;
-type NodeData = {
+export type NodeData = {
   to: Map<NodeKey, number>;
   value?: number;
   type: GraphLayers;
@@ -95,7 +95,7 @@ type NodeData = {
   percentageLabel?: string;
   color?: string;
 };
-type Graph = Map<NodeKey, NodeData>;
+export type Graph = Map<NodeKey, NodeData>;
 
 const SpecialNodeKeys = {
   ToBudget: 'to_budget',
@@ -130,7 +130,7 @@ export const GRAPH_LAYER_ORDER = [
   GraphLayers.Category,
 ] as const;
 
-function isGraphLayer(value: unknown): value is GraphLayers {
+export function isGraphLayer(value: unknown): value is GraphLayers {
   return (
     typeof value === 'string' &&
     (Object.values(GraphLayers) as string[]).includes(value)
@@ -358,7 +358,7 @@ function processGraphData(
 // Budget data is fetched unconditionally from api/budget-month, so we must
 // apply category conditions manually in JS (unlike the transaction path which
 // passes conditions directly into the AQL query).
-function filterCategoryGroups(
+export function filterCategoryGroups(
   categoryGroups: BudgetMonthGroup[],
   conditions: RuleConditionEntity[],
   conditionsOp: 'and' | 'or',
@@ -533,7 +533,7 @@ async function fetchCategoryData(
   return allCategoryData;
 }
 
-function createBudgetGraph(
+export function createBudgetGraph(
   categoryData: CategoryEntry[],
   aggregated: AggregatedBudget,
 ): Graph {
@@ -689,7 +689,7 @@ function createBudgetGraph(
   return graph;
 }
 
-function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
+export function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
   const graph: Graph = new Map();
 
   categoryData.forEach(entry => {
@@ -742,7 +742,12 @@ function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
   return graph;
 }
 
-function addNode(graph: Graph, key: NodeKey, type: GraphLayers, name?: string) {
+export function addNode(
+  graph: Graph,
+  key: NodeKey,
+  type: GraphLayers,
+  name?: string,
+) {
   if (!graph.has(key)) {
     graph.set(key, {
       to: new Map(),
@@ -752,7 +757,7 @@ function addNode(graph: Graph, key: NodeKey, type: GraphLayers, name?: string) {
   }
 }
 
-function addNodeWithLabel(
+export function addNodeWithLabel(
   graph: Graph,
   key: NodeKey,
   type: GraphLayers,
@@ -771,7 +776,7 @@ function addNodeWithLabel(
   }
 }
 
-function addValueToLink(
+export function addValueToLink(
   graph: Graph,
   from: NodeKey,
   to: NodeKey,
@@ -783,7 +788,7 @@ function addValueToLink(
   }
 }
 
-function getLayer(graph: Graph, key: NodeKey): number {
+export function getLayer(graph: Graph, key: NodeKey): number {
   // Find parent nodes for the given key
   const parents: NodeKey[] = [];
   for (const [parentKey, data] of graph) {
@@ -873,7 +878,7 @@ function groupOtherCategories(
   promoteOtherBack(graph, deletedNodes, categorySort === 'global');
 }
 
-function nodesInLayer(graph: Graph, layer: GraphLayers): NodeKey[] {
+export function nodesInLayer(graph: Graph, layer: GraphLayers): NodeKey[] {
   return Array.from(graph)
     .filter(([, data]) => data.type === layer)
     .map(([key]) => key);
@@ -922,13 +927,13 @@ function addTooltipInfo(
   fromNode.tooltipInfo.push({ name: graph.get(to)?.name ?? to, value });
 }
 
-function getCategoryGroup(graph: Graph, key: NodeKey) {
+export function getCategoryGroup(graph: Graph, key: NodeKey) {
   return Array.from(graph).filter(
     ([, data]) => data.to.has(key) && data.type === GraphLayers.CategoryGroup,
   )[0];
 }
 
-function deleteLink(graph: Graph, from: NodeKey, to: NodeKey) {
+export function deleteLink(graph: Graph, from: NodeKey, to: NodeKey) {
   const fromNode = graph.get(from);
   if (fromNode) {
     fromNode.to.delete(to);
@@ -960,7 +965,7 @@ function promoteOtherBack(
   });
 }
 
-function sortGraph(
+export function sortGraph(
   graph: Graph,
   categorySort: SortMode = 'per-group',
   categories: CategoryGroupEntity[],
@@ -1059,8 +1064,8 @@ function sortGraph(
 
   // We always want certain nodes to be shown at the start/end of their layers
   sortedEntries
-    .filter(([key, nodeData]) => nodeData.isOverbudgeted)
-    .forEach(([key, nodeData]) => {
+    .filter(([, nodeData]) => nodeData.isOverbudgeted)
+    .forEach(([key]) => {
       moveNodeToStart(sortedEntries, key);
     });
   const toBudgetNode = graph.get(SpecialNodeKeys.ToBudget);
@@ -1077,7 +1082,10 @@ function sortGraph(
   return new Map(sortedEntries);
 }
 
-function moveNodeToEnd(entries: Array<[string, NodeData]>, key: NodeKey) {
+export function moveNodeToEnd(
+  entries: Array<[string, NodeData]>,
+  key: NodeKey,
+) {
   const nodeIndex = entries.findIndex(([nodekey]) => nodekey === key);
   if (nodeIndex !== -1) {
     const [entry] = entries.splice(nodeIndex, 1);
@@ -1085,7 +1093,10 @@ function moveNodeToEnd(entries: Array<[string, NodeData]>, key: NodeKey) {
   }
 }
 
-function moveNodeToStart(entries: Array<[string, NodeData]>, key: NodeKey) {
+export function moveNodeToStart(
+  entries: Array<[string, NodeData]>,
+  key: NodeKey,
+) {
   const nodeIndex = entries.findIndex(([nodekey]) => nodekey === key);
   if (nodeIndex !== -1) {
     const [entry] = entries.splice(nodeIndex, 1);
@@ -1093,7 +1104,7 @@ function moveNodeToStart(entries: Array<[string, NodeData]>, key: NodeKey) {
   }
 }
 
-function getNodeValue(graph: Graph, key: NodeKey): number {
+export function getNodeValue(graph: Graph, key: NodeKey): number {
   let nodeValue: number = 0;
 
   if (getLayer(graph, key) === 0) {
@@ -1123,7 +1134,7 @@ function getNodeValue(graph: Graph, key: NodeKey): number {
   return nodeValue;
 }
 
-function addPercentageLabels(graph: Graph): void {
+export function addPercentageLabels(graph: Graph): void {
   const layerSums = new Map<number, number>();
 
   // First pass: Calculate layer sums
@@ -1294,18 +1305,21 @@ function buildTypeConnectivity(
   return { typeHasParent, typeHasChild };
 }
 
-function hasParent(graph: Map<NodeKey, NodeData>, key: NodeKey): boolean {
+export function hasParent(
+  graph: Map<NodeKey, NodeData>,
+  key: NodeKey,
+): boolean {
   for (const [_, data] of graph) {
     if (data.to.has(key)) return true;
   }
   return false;
 }
 
-function hasChild(node: NodeData): boolean {
+export function hasChild(node: NodeData): boolean {
   return node.to.size > 0;
 }
 
-function filterGraphByLayers(
+export function filterGraphByLayers(
   graph: Graph,
   layerFrom: GraphLayers,
   layerTo: GraphLayers,
@@ -1333,8 +1347,8 @@ function filterGraphByLayers(
   }
 }
 
-function cleanUpNodes(graph: Graph) {
-  // 1. Remove all `.to` links with value === 0
+export function cleanUpNodes(graph: Graph) {
+  // 1. Remove all `.to` links with value ===0
   for (const [, node] of graph) {
     for (const [target, value] of node.to) {
       if (value === 0) {
@@ -1367,7 +1381,7 @@ function cleanUpNodes(graph: Graph) {
   }
 }
 
-function convertToSankeyData(graph: Graph): SankeyData {
+export function convertToSankeyData(graph: Graph): SankeyData {
   const nodes = Array.from(graph, ([key, data]) => ({
     key,
     name: data.labelKey
