@@ -60,6 +60,13 @@ export function TagAutocomplete({
   const [cursorPosition, setCursorPosition] = useCursorPosition(inputRef);
   const [startIdx, endIdx] = useCurrentWordRange(inputValue, cursorPosition);
   const currentWord = inputValue.slice(startIdx, endIdx);
+  console.log('AUTOCOMPLETE_STATE:', {
+    currentWord,
+    cursorPosition,
+    startIdx,
+    endIdx,
+    inputValue,
+  });
 
   const { contains } = useFilter({ sensitivity: 'base' });
   const { data } = useTags();
@@ -85,7 +92,7 @@ export function TagAutocomplete({
   useEffect(() => {
     if (highlightedId) {
       const el = document.querySelector(`[data-key="${id(highlightedId)}"]`);
-      el?.scrollIntoView({ block: 'nearest' });
+      el?.scrollIntoView?.({ block: 'nearest' });
     }
   }, [highlightedId, id]);
 
@@ -93,16 +100,18 @@ export function TagAutocomplete({
     const tagObj = filteredItems.find(tag => tag.id === id);
     if (!tagObj) return;
 
+    const nextChar = inputValue.charAt(endIdx);
+    const space = nextChar === ' ' ? '' : ' ';
     const newValue =
       inputValue.slice(0, startIdx) +
       '#' +
       tagObj.tag +
-      ' ' +
+      space +
       inputValue.slice(endIdx);
     setInputValue(newValue);
     setHighlightedIdx(0);
     setIsOpen(false);
-    setCursorPosition(startIdx + tagObj.tag.length + 2);
+    setCursorPosition(startIdx + tagObj.tag.length + 1 + space.length);
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {

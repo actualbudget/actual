@@ -33,11 +33,17 @@ export function useCursorPosition(
     input.addEventListener('focusin', update);
     input.addEventListener('focusout', clear);
     input.addEventListener('blur', clear);
+    input.addEventListener('input', update);
+    input.addEventListener('keyup', update);
+    input.addEventListener('click', update);
     return () => {
       document.removeEventListener('selectionchange', updatePosition);
       input.removeEventListener('focusin', update);
       input.removeEventListener('focusout', clear);
       input.removeEventListener('blur', clear);
+      input.removeEventListener('input', update);
+      input.removeEventListener('keyup', update);
+      input.removeEventListener('click', update);
     };
   }, [ref]);
 
