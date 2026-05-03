@@ -16,7 +16,7 @@ export default defineConfig({
     sourcemap: true,
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
-      formats: ['cjs'],
+      formats: ['es'],
       fileName: () => 'index.js',
     },
   },
