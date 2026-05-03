@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
 

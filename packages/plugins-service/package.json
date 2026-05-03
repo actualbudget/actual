@@ -6,9 +6,9 @@
   "author": "",
   "main": "plugin-sw.js",
   "scripts": {
-    "build": "cross-env NODE_ENV=production ./bin/build-service-worker",
-    "build-dev": "cross-env NODE_ENV=development ./bin/build-service-worker",
-    "watch": "cross-env NODE_ENV=development ./bin/build-service-worker --watch",
+    "build": "cross-env NODE_ENV=production vite build",
+    "build-dev": "cross-env NODE_ENV=development vite build",
+    "watch": "cross-env NODE_ENV=development vite build --watch",
     "typecheck": "tsgo -b && tsc-strict"
   },
   "dependencies": {

@@ -55,10 +55,12 @@ __metadata:
   dependencies:
     "@actual-app/api": "workspace:*"
     "@types/node": "npm:^22.19.17"
+    "@types/proper-lockfile": "npm:^4"
     "@typescript/native-preview": "npm:beta"
     cli-table3: "npm:^0.6.5"
     commander: "npm:^14.0.3"
     cosmiconfig: "npm:^9.0.1"
+    proper-lockfile: "npm:^4.1.2"
     rollup-plugin-visualizer: "npm:^7.0.1"
     vite: "npm:^8.0.5"
     vitest: "npm:^4.1.2"
@@ -262,6 +264,7 @@ __metadata:
     mdast-util-newline-to-break: "npm:^2.0.0"
     memoize-one: "npm:^6.0.0"
     pikaday: "npm:1.8.2"
+    plugins-service: "workspace:*"
     promise-retry: "npm:^2.0.1"
     re-resizable: "npm:^6.11.2"
     react: "npm:19.2.4"
@@ -9998,6 +10001,15 @@ __metadata:
     "@types/node": "npm:*"
     kleur: "npm:^3.0.3"
   checksum: 10/69b8372f4c790b45fea16a46ff8d1bcc71b14579481776b67bd6263637118a7ecb1f12e1311506c29fadc81bf618dc64f1a91f903cfd5be67a0455a227b3e462
+  languageName: node
+  linkType: hard
+
+"@types/proper-lockfile@npm:^4":
+  version: 4.1.4
+  resolution: "@types/proper-lockfile@npm:4.1.4"
+  dependencies:
+    "@types/retry": "npm:*"
+  checksum: 10/b0d1b8e84a563b2c5f869f7ff7542b1d83dec03d1c9d980847cbb189865f44b4a854673cdde59767e41bcb8c31932e613ac43822d358a6f8eede6b79ccfceb1d
   languageName: node
   linkType: hard
 
@@ -22765,7 +22777,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"plugins-service@workspace:packages/plugins-service":
+"plugins-service@workspace:*, plugins-service@workspace:packages/plugins-service":
   version: 0.0.0-use.local
   resolution: "plugins-service@workspace:packages/plugins-service"
   dependencies:

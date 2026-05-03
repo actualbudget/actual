@@ -1,21 +1,41 @@
 import type { Template } from '@actual-app/core/types/models/templates';
 
-import { migrateTemplatesToAutomations } from './BudgetAutomationsModal';
+import { migrateTemplatesToAutomations } from './migrateTemplatesToAutomations';
 
 describe('migrateTemplatesToAutomations', () => {
-  it('preserves simple templates that have no limit and no monthly amount', () => {
+  it('drops simple templates that have no limit and no monthly amount', () => {
+    // these would otherwise be pushed as a phantom 'fixed' entry that
+    // crashes FixedAutomationReadOnly (no .amount, no .period)
     const simpleTemplate = {
       type: 'simple',
       directive: 'template',
       priority: 5,
     } satisfies Template;
 
-    const result = migrateTemplatesToAutomations([simpleTemplate]);
+    expect(migrateTemplatesToAutomations([simpleTemplate])).toEqual([]);
+  });
 
-    expect(result).toHaveLength(1);
-    expect(result[0].displayType).toBe('week');
-    expect(result[0].template).toEqual(simpleTemplate);
-    expect(result[0].id).toMatch(/^automation-/);
+  it('drops simple templates whose monthly amount is zero with no limit', () => {
+    const simpleTemplate = {
+      type: 'simple',
+      directive: 'template',
+      priority: 5,
+      monthly: 0,
+    } satisfies Template;
+
+    expect(migrateTemplatesToAutomations([simpleTemplate])).toEqual([]);
+  });
+
+  it('throws when a goal directive reaches migration', () => {
+    const goalTemplate = {
+      type: 'goal',
+      amount: 1000,
+      directive: 'goal',
+    } satisfies Template;
+
+    expect(() => migrateTemplatesToAutomations([goalTemplate])).toThrow(
+      /Unsupported template type/,
+    );
   });
 
   it('expands a simple template with limit into limit and refill entries', () => {
@@ -63,7 +83,7 @@ describe('migrateTemplatesToAutomations', () => {
     const result = migrateTemplatesToAutomations([simpleTemplate]);
 
     expect(result).toHaveLength(1);
-    expect(result[0].displayType).toBe('week');
+    expect(result[0].displayType).toBe('fixed');
     expect(result[0].template).toMatchObject({
       type: 'periodic',
       amount: 45,
@@ -79,7 +99,10 @@ describe('migrateTemplatesToAutomations', () => {
     });
   });
 
-  it('expands a simple template with both limit and monthly into three entries in order', () => {
+  it('expands a simple template with both limit and monthly into limit + periodic (no implicit refill)', () => {
+    // `#template 20 up to 200 per week` budgets 20/month and caps at the
+    // limit — the engine's runSimple returns just the monthly value, so
+    // there is no implicit refill-to-cap behaviour to migrate.
     const simpleTemplate = {
       type: 'simple',
       directive: 'template',
@@ -94,13 +117,9 @@ describe('migrateTemplatesToAutomations', () => {
 
     const result = migrateTemplatesToAutomations([simpleTemplate]);
 
-    expect(result).toHaveLength(3);
-    expect(result.map(entry => entry.displayType)).toEqual([
-      'limit',
-      'refill',
-      'week',
-    ]);
-    expect(result[2].template).toMatchObject({
+    expect(result).toHaveLength(2);
+    expect(result.map(entry => entry.displayType)).toEqual(['limit', 'fixed']);
+    expect(result[1].template).toMatchObject({
       type: 'periodic',
       amount: 20,
       directive: 'template',

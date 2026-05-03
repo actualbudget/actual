@@ -9,11 +9,16 @@ import {
   generateThemeId,
   validateThemeCss,
 } from '#style/customThemes';
+import type { CatalogTheme } from '#style/customThemes';
 
 import { ThemeInstaller } from './ThemeInstaller';
 
-const render: typeof rtlRender = (ui, options) =>
-  rtlRender(ui, { wrapper: TestProviders, ...options });
+function render(
+  ui: Parameters<typeof rtlRender>[0],
+  options?: Parameters<typeof rtlRender>[1],
+) {
+  return rtlRender(ui, { wrapper: TestProviders, ...options });
+}
 
 vi.mock('#style/customThemes', async () => {
   const actual = await vi.importActual('#style/customThemes');
@@ -59,10 +64,11 @@ describe('ThemeInstaller', () => {
     --color-secondary: #6c757d;
   }`;
 
-  const mockCatalog = [
+  const mockCatalog: CatalogTheme[] = [
     {
       name: 'Demo Theme',
       repo: 'actualbudget/demo-theme',
+      mode: 'dark',
       colors: [
         '#1a1a2e',
         '#16213e',
@@ -75,6 +81,7 @@ describe('ThemeInstaller', () => {
     {
       name: 'Ocean Blue',
       repo: 'actualbudget/ocean-theme',
+      mode: 'light',
       colors: [
         '#0d47a1',
         '#1565c0',
@@ -87,6 +94,7 @@ describe('ThemeInstaller', () => {
     {
       name: 'Forest Green',
       repo: 'actualbudget/forest-theme',
+      mode: 'light',
       colors: [
         '#1b5e20',
         '#2e7d32',
