@@ -50,13 +50,13 @@ Fixes that need to be included in the release should be cherry-picked onto the r
   git push {remote} vX.Y.Z
   ```
 
-All NPM packages should be automatically released and pushed to the NPM registry; confirm [here](https://www.npmjs.com/package/@actual-app/sync-server).
+All NPM packages should be automatically released and pushed to the NPM registry; confirm [on NPM](https://www.npmjs.com/package/@actual-app/sync-server).
 
-Docker images should be automatically released and pushed to Docker Hub; confirm [here](https://hub.docker.com/r/actualbudget/actual-server/tags).
+Docker images should be automatically released and pushed to Docker Hub; confirm [on the Docker tags page](https://hub.docker.com/r/actualbudget/actual-server/tags).
 
-For the Windows Store desktop app, a submission will be automatically uploaded and submitted for certification. The certification process can take up to 3 business days; once complete the app will be in the Store. You can check the update status [here](https://partner.microsoft.com/en-us/dashboard) if you have permission. Note that the Store UI will not correctly reflect the submission status for about 30 minutes after submission.
+For the Windows Store desktop app, a submission will be automatically uploaded and submitted for certification. The certification process can take up to 3 business days; once complete the app will be in the Store. You can check the update status [on the partner dashboard](https://partner.microsoft.com/en-us/dashboard) if you have permission. Note that the Store UI will not correctly reflect the submission status for about 30 minutes after submission.
 
-Finally, a draft GitHub release should be automatically created [here](https://github.com/actualbudget/actual/releases).
+Finally, a draft GitHub release should be automatically created; confirm [on the releases page](https://github.com/actualbudget/actual/releases).
 
 ### Verify the release
 
@@ -68,4 +68,3 @@ Finally, a draft GitHub release should be automatically created [here](https://g
 - [ ] Un-draft the GitHub release which will send announcement notifications to all apps and create a PR to the [Actual Flathub Repository](https://github.com/flathub/com.actualbudget.actual/pulls).
 - [ ] Send an announcement on Discord and Twitter.
 - [ ] Approve and merge the [Flathub Release PR](https://github.com/flathub/com.actualbudget.actual/pulls) to master. After merge, it can take anywhere from hours to a few days before the app will be available in the Flathub Store.
-- [ ] Wait one to two days to see if any new bugs show up that need a patch release.
