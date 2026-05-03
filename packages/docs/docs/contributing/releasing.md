@@ -34,7 +34,7 @@ Fixes that need to be included in the release should be cherry-picked onto the r
 
 ## Release process
 
-### Stabilise the release
+### Stabilize the release
 
 - [ ] Fix spelling in the generated release notes as needed.
 - [ ] Share the release PR in the release channel on Discord.
@@ -63,7 +63,7 @@ Finally, a draft GitHub release should be automatically created [here](https://g
 - [ ] Deploy the new server Docker image and do a quick smoke test to verify things still work as expected.
 - [ ] Perform the same smoke test on the desktop app corresponding to your platform (attached to the draft release).
 
-### Finalise the release
+### Finalize the release
 
 - [ ] Un-draft the GitHub release which will send announcement notifications to all apps and create a PR to the [Actual Flathub Repository](https://github.com/flathub/com.actualbudget.actual/pulls).
 - [ ] Send an announcement on Discord and Twitter.
