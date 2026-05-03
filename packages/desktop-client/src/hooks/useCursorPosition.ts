@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { RefObject } from 'react';
+
+import { useRefEventListener } from './useRefEventListener';
 
 export function useCursorPosition(
   ref: RefObject<HTMLInputElement | null>,
@@ -11,41 +13,26 @@ export function useCursorPosition(
       document.dispatchEvent(new Event('selectionchange'));
     });
   }
-
-  useEffect(() => {
-    if (!ref.current) return;
+  const update = () => {
     const input = ref.current;
-    const update = () => {
-      setCursorPosition(
-        document.activeElement === input ? input.selectionStart : null,
-      );
-    };
-    // trigger update on render
-    update();
+    if (!input) return;
+    setCursorPosition(
+      document.activeElement === input ? input.selectionStart : null,
+    );
+  };
+  const clear = () => setCursorPosition(null);
 
-    const clear = () => setCursorPosition(null);
-    function updatePosition() {
-      if (document.activeElement === input) {
-        update();
-      }
-    }
-    document.addEventListener('selectionchange', updatePosition);
-    input.addEventListener('focusin', update);
-    input.addEventListener('focusout', clear);
-    input.addEventListener('blur', clear);
-    input.addEventListener('input', update);
-    input.addEventListener('keyup', update);
-    input.addEventListener('click', update);
-    return () => {
-      document.removeEventListener('selectionchange', updatePosition);
-      input.removeEventListener('focusin', update);
-      input.removeEventListener('focusout', clear);
-      input.removeEventListener('blur', clear);
-      input.removeEventListener('input', update);
-      input.removeEventListener('keyup', update);
-      input.removeEventListener('click', update);
-    };
-  }, [ref]);
+  useRefEventListener(ref, 'focusin', update, [ref, setCursorPosition]);
+  useRefEventListener(ref, 'input', update, [ref, setCursorPosition]);
+  useRefEventListener(ref, 'keyup', update, [ref, setCursorPosition]);
+  useRefEventListener(ref, 'focusout', clear, [setCursorPosition]);
+
+  // sync on mount
+  useEffect(update, [ref, setCursorPosition]);
+
+  // listen for selectionchange which only gets fired on document
+  const doc = useRef(document);
+  useRefEventListener(doc, 'selectionchange', update, [ref, setCursorPosition]);
 
   return [cursorPosition, _setCursorPosition];
 }

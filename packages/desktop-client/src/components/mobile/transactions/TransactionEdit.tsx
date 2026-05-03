@@ -94,6 +94,7 @@ import { useCurrentWordRange } from '#hooks/useCurrentWordRange';
 import { useCursorPosition } from '#hooks/useCursorPosition';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useInitialMount } from '#hooks/useInitialMount';
+import { useInputRefValue } from '#hooks/useInputRefValue';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useLocationPermission } from '#hooks/useLocationPermission';
 import { useNavigate } from '#hooks/useNavigate';
@@ -542,10 +543,7 @@ const ChildTransactionEdit = forwardRef<
             }
             onUpdate={value => onUpdate(transaction, 'notes', value)}
           />
-          <NoteTagAutocomplete
-            inputRef={noteRef}
-            note={transaction.notes ?? ''}
-          />
+          <NoteTagAutocomplete inputRef={noteRef} />
         </View>
 
         <View style={{ alignItems: 'center' }}>
@@ -1424,10 +1422,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                 onUpdateInner(transaction, 'notes', event.target.value)
               }
             />
-            <NoteTagAutocomplete
-              inputRef={noteRef}
-              note={transaction.notes ?? ''}
-            />
+            <NoteTagAutocomplete inputRef={noteRef} />
           </View>
 
           {!isAdding && (
@@ -1468,13 +1463,18 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
 );
 
 function NoteTagAutocomplete({
-  note,
   inputRef,
 }: {
-  note: string;
   inputRef: RefObject<HTMLInputElement | null>;
 }) {
+  // Yes, there is a lot of ref usages in this component. Here's the motivation
+  // 1. This component purely modifies HTML Input state, app state is handled elsewhere
+  // 2. This component deals with cursor state, which is not easily accessible through regular React code
+  // 3. Child transaction notes (transaction.notes) does not update until blur, so we have to use input state
+  // 4. Given we are already using inputRef in multiple locations, I elected to simplify the props to just the ref and use HTML/JS events
+
   const backgroundRef = useRef<HTMLDivElement | null>(null);
+  const [note, setNote] = useInputRefValue(inputRef);
 
   const [cursorPosition] = useCursorPosition(inputRef);
   const [startIdx, endIdx] = useCurrentWordRange(note, cursorPosition);
@@ -1494,23 +1494,8 @@ function NoteTagAutocomplete({
     if (!inputRef.current) return;
     const newValue =
       note.slice(0, startIdx) + '#' + tag + ' ' + note.slice(endIdx);
+    setNote(newValue);
     const newPos = startIdx + tag.length + 2;
-
-    // If we want to honor the input's onChange prop, we have
-    // to use native value setter, then fire the 'input' event.
-    // Doing normal inputRef.current.value = 'newval' and then
-    // following that up with firing an event doesn't work, because
-    // React will intercept that and change the value internally,
-    // and when you go to fire an event, it will see that nothing has
-    // changed since it last saw a value (it just updated it itself)
-    // meaning no event will get fired. Or Something.
-    // eslint-disable-next-line typescript-eslint(unbound-method)
-    const nativeSetter = Object.getOwnPropertyDescriptor(
-      window.HTMLInputElement.prototype,
-      'value',
-    )?.set;
-    nativeSetter?.call(inputRef.current, newValue);
-    inputRef.current.dispatchEvent(new Event('input', { bubbles: true }));
 
     inputRef.current.setSelectionRange(newPos, newPos);
     document.dispatchEvent(new Event('selectionchange'));
@@ -1526,10 +1511,10 @@ function NoteTagAutocomplete({
 
   return (
     <>
-      {cursorPosition}
-      {note}
-      {JSON.stringify(tags)}
-      {JSON.stringify(filteredTags)}
+      {/* we need to anchor this element to the screen.
+        Modals are focus traps so can't use them.
+        Popovers are relative and require an element ref to anchor to.
+        This is that anchor, which itself is fixed to the bottom of the screen */}
       <div
         ref={backgroundRef}
         style={{
@@ -1563,14 +1548,15 @@ function NoteTagAutocomplete({
           }}
         >
           {filteredTags.map(tag => (
-            <div
-              role="button"
+            <button
+              key={tag.id}
+              style={{ border: 'none' }}
               className={getTagCSS(tag.tag)}
-              onMouseDown={e => e.preventDefault()}
+              onMouseDown={e => e.preventDefault()} // stops input from losing focus
               onClick={() => handleSelect(tag.tag)}
             >
               #{tag.tag}
-            </div>
+            </button>
           ))}
         </View>
       </Popover>
