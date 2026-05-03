@@ -60,13 +60,6 @@ export function TagAutocomplete({
   const [cursorPosition, setCursorPosition] = useCursorPosition(inputRef);
   const [startIdx, endIdx] = useCurrentWordRange(inputValue, cursorPosition);
   const currentWord = inputValue.slice(startIdx, endIdx);
-  console.log('AUTOCOMPLETE_STATE:', {
-    currentWord,
-    cursorPosition,
-    startIdx,
-    endIdx,
-    inputValue,
-  });
 
   const { contains } = useFilter({ sensitivity: 'base' });
   const { data } = useTags();
