@@ -27,6 +27,13 @@ let worker = null;
 // The regular Worker running the backend, created only on the leader tab
 let localBackendWorker = null;
 
+function terminateLocalBackendWorker() {
+  if (localBackendWorker) {
+    localBackendWorker.terminate();
+    localBackendWorker = null;
+  }
+}
+
 /**
  * WorkerBridge wraps a SharedWorker port and presents a Worker-like interface
  * (onmessage, postMessage, addEventListener, start) to the connection layer.
@@ -43,9 +50,22 @@ class WorkerBridge {
     this._onmessage = null;
     this._listeners = [];
     this._started = false;
+    this._isInitialized = false;
+    this._currentBudgetId = null;
+    this._wasHidden = document.visibilityState === 'hidden';
+
+    this._onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        this._wasHidden = true;
+      } else if (this._wasHidden) {
+        this._wasHidden = false;
+        this._resumeAssociation();
+      }
+    };
 
     // Listen for all messages from the SharedWorker port
     sharedPort.addEventListener('message', e => this._onSharedMessage(e));
+    document.addEventListener('visibilitychange', this._onVisibilityChange);
   }
 
   set onmessage(handler) {
@@ -109,10 +129,7 @@ class WorkerBridge {
     // show-budgets normally.
     if (msg && msg.type === '__close-and-transfer') {
       console.log('[WorkerBridge] Leadership transferred — terminating Worker');
-      if (localBackendWorker) {
-        localBackendWorker.terminate();
-        localBackendWorker = null;
-      }
+      this._applyRole('UNASSIGNED', null);
       // Only dispatch a synthetic reply if there's an actual close-budget
       // request to complete. When requestId is null the eviction was
       // triggered externally (e.g. another tab deleted this budget).
@@ -126,6 +143,7 @@ class WorkerBridge {
 
     // Role change notification
     if (msg && msg.type === '__role-change') {
+      this._applyRole(msg.role, msg.budgetId ?? null);
       console.log(
         `[WorkerBridge] Role: ${msg.role}${msg.budgetId ? ` (budget: ${msg.budgetId})` : ''}`,
       );
@@ -146,13 +164,47 @@ class WorkerBridge {
     }
 
     // Everything else goes to the connection layer
+    if (msg && msg.type === 'push' && msg.name === 'show-budgets') {
+      this._applyRole('UNASSIGNED', null);
+    }
     this._dispatch(event);
   }
 
-  _createLocalWorker(initMsg, budgetToRestore, pendingMsg) {
-    if (localBackendWorker) {
-      localBackendWorker.terminate();
+  markInitialized() {
+    this._isInitialized = true;
+  }
+
+  _normalizeBudgetId(budgetId) {
+    if (
+      typeof budgetId === 'string' &&
+      budgetId.length > 0 &&
+      !budgetId.startsWith('__')
+    ) {
+      return budgetId;
     }
+    return null;
+  }
+
+  _applyRole(role, budgetId) {
+    this._currentBudgetId = this._normalizeBudgetId(budgetId);
+
+    if (role !== 'LEADER') {
+      terminateLocalBackendWorker();
+    }
+  }
+
+  _resumeAssociation() {
+    if (!this._isInitialized) {
+      return;
+    }
+    this._sharedPort.postMessage({
+      type: '__resume-tab',
+      budgetId: this._currentBudgetId,
+    });
+  }
+
+  _createLocalWorker(initMsg, budgetToRestore, pendingMsg) {
+    terminateLocalBackendWorker();
     localBackendWorker = new Worker(backendWorkerUrl);
     initSQLBackend(localBackendWorker);
 
@@ -238,10 +290,12 @@ function createBackendWorker() {
           'SharedArrayBufferOverride',
         ),
       });
+      worker.markInitialized();
 
-      window.addEventListener('beforeunload', () => {
+      const notifyTabClosing = () => {
         sharedPort.postMessage({ type: 'tab-closing' });
-      });
+      };
+      window.addEventListener('beforeunload', notifyTabClosing);
 
       return;
     } catch (e) {

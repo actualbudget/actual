@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/core",
-  "version": "26.4.0",
+  "version": "26.5.0",
   "description": "",
   "license": "ISC",
   "repository": {
@@ -17,7 +17,11 @@
     "!src/**/*.test.ts",
     "!src/**/__tests__/**",
     "!src/**/__snapshots__/**",
-    "!src/**/__mocks__/**"
+    "!src/**/__mocks__/**",
+    "!@types/**/*.test.d.ts",
+    "!@types/**/*.test.d.ts.map",
+    "!@types/**/__tests__/**",
+    "!@types/**/__mocks__/**"
   ],
   "imports": {
     "#platform/server/asyncStorage": {

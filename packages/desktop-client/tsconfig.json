@@ -30,13 +30,5 @@
     }
   ],
   "include": ["**/*.ts", "src/**/*.tsx", "src/**/*.js"],
-  "exclude": [
-    "node_modules",
-    "build",
-    "**/service-worker/**",
-    "e2e",
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/setupTests.ts"
-  ]
+  "exclude": ["node_modules", "build", "**/service-worker/**", "e2e"]
 }

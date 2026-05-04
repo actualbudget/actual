@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/api",
-  "version": "26.4.0",
+  "version": "26.5.0",
   "description": "An API for Actual",
   "license": "MIT",
   "repository": {
@@ -10,7 +10,9 @@
   },
   "files": [
     "@types",
-    "dist"
+    "dist",
+    "!@types/**/*.test.d.ts",
+    "!@types/**/*.test.d.ts.map"
   ],
   "main": "dist/index.js",
   "types": "@types/index.d.ts",
