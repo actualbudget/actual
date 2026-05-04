@@ -11,14 +11,24 @@ export function useTags() {
 
 export function useFilteredTags(filterStr: string, includeHash?: boolean) {
   const { data: tags } = useTags();
-  const { contains } = useFilter({ sensitivity: 'base' });
+  const { contains, startsWith } = useFilter({ sensitivity: 'base' });
   const filteredTags = useMemo(() => {
     if (!filterStr || !tags) return [];
 
     if (includeHash && filterStr.charAt(0) !== '#') return [];
 
     const substr = includeHash ? filterStr.slice(1) : filterStr;
-    return tags.filter(tag => contains(tag.tag, substr)).slice(0, 10);
-  }, [filterStr, tags, contains, includeHash]);
+
+    const filteredTags = tags.filter(tag => contains(tag.tag, substr));
+    filteredTags.sort((a, b) => {
+      const aStartsWith = startsWith(a.tag, substr);
+      const bStartsWith = startsWith(b.tag, substr);
+
+      if (aStartsWith && !bStartsWith) return -1;
+      if (bStartsWith && !aStartsWith) return 1;
+      return 0;
+    });
+    return filteredTags.slice(0, 10);
+  }, [tags, filterStr, includeHash, contains, startsWith]);
   return filteredTags;
 }
