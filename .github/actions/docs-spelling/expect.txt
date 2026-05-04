@@ -61,6 +61,7 @@ Dockerfiles
 Dominguez
 DUSSDEDDXXX
 DUSSELDORF
+ecf
 EDATE
 ENTERCARD
 Entra
@@ -140,8 +141,6 @@ pluggyai
 Poste
 PPABPLPK
 prefs
-Primoco
-Priotecs
 proactively
 Qatari
 QNTOFRP
@@ -172,7 +171,6 @@ SWEDBANK
 SWEDNOKK
 Synology
 systemctl
-tada
 taskbar
 templating
 THB

@@ -14,11 +14,19 @@ import { Button } from '@actual-app/components/button';
 import { SvgSplit } from '@actual-app/components/icons/v0';
 import {
   SvgAdd,
+  SvgCalendar,
+  SvgCheveronDown,
   SvgLocation,
   SvgPiggyBank,
+  SvgTag,
   SvgTrash,
+  SvgUser,
+  SvgWallet,
 } from '@actual-app/components/icons/v1';
-import { SvgPencilWriteAlternate } from '@actual-app/components/icons/v2';
+import {
+  SvgNotesPaper,
+  SvgPencilWriteAlternate,
+} from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -162,6 +170,14 @@ export function lookupName(items: CategoryEntity[], id?: CategoryEntity['id']) {
   }
   return items.find(item => item.id === id)?.name;
 }
+
+const dropdownChevron = (
+  <SvgCheveronDown
+    width={14}
+    height={14}
+    style={{ color: theme.pageTextSubdued, marginRight: 8 }}
+  />
+);
 
 export function Status({
   status,
@@ -428,6 +444,9 @@ const ChildTransactionEdit = forwardRef<
           <View style={{ flexBasis: '75%' }}>
             <FieldLabel title={t('Payee')} />
             <TapField
+              icon={<SvgUser width={17} height={17} />}
+              placeholder={t('Who did you pay?')}
+              rightContent={dropdownChevron}
               isDisabled={
                 !!editingField &&
                 editingField !== getFieldName(transaction.id, 'payee')
@@ -476,6 +495,9 @@ const ChildTransactionEdit = forwardRef<
         <View>
           <FieldLabel title={t('Category')} />
           <TapField
+            icon={<SvgTag width={17} height={17} />}
+            placeholder={t('Select a category')}
+            rightContent={dropdownChevron}
             textStyle={{
               ...((isOffBudget || isBudgetTransfer(transaction)) && {
                 fontStyle: 'italic',
@@ -498,6 +520,8 @@ const ChildTransactionEdit = forwardRef<
         <View>
           <FieldLabel title={t('Notes')} />
           <InputField
+            icon={<SvgNotesPaper width={17} height={17} />}
+            placeholder={t('Add a note (optional)')}
             disabled={
               !!editingField &&
               editingField !== getFieldName(transaction.id, 'notes')
@@ -1145,6 +1169,8 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
           <View>
             <FieldLabel title={t('Payee')} />
             <TapField
+              icon={<SvgUser width={17} height={17} />}
+              placeholder={t('Who did you pay?')}
               textStyle={{
                 ...(transaction.is_parent && {
                   fontStyle: 'italic',
@@ -1206,7 +1232,9 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                       style={{ marginLeft: 4 }}
                     />
                   </Button>
-                ) : undefined
+                ) : (
+                  dropdownChevron
+                )
               }
             />
           </View>
@@ -1215,6 +1243,9 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             <View>
               <FieldLabel title={t('Category')} />
               <TapField
+                icon={<SvgTag width={17} height={17} />}
+                placeholder={t('Select a category')}
+                rightContent={dropdownChevron}
                 style={{
                   ...((isOffBudget || isBudgetTransfer(transaction)) && {
                     fontStyle: 'italic',
@@ -1295,6 +1326,9 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
           <View>
             <FieldLabel title={t('Account')} />
             <TapField
+              icon={<SvgWallet width={17} height={17} />}
+              placeholder={t('Select an account')}
+              rightContent={dropdownChevron}
               isDisabled={
                 !!editingField &&
                 editingField !== getFieldName(transaction.id, 'account')
@@ -1310,6 +1344,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               <FieldLabel title={t('Date')} />
               <InputField
                 type="date"
+                icon={<SvgCalendar width={17} height={17} />}
                 disabled={
                   !!editingField &&
                   editingField !== getFieldName(transaction.id, 'date')
@@ -1354,6 +1389,8 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
           <View>
             <FieldLabel title={t('Notes')} />
             <InputField
+              icon={<SvgNotesPaper width={17} height={17} />}
+              placeholder={t('Add a note (optional)')}
               disabled={
                 !!editingField &&
                 editingField !== getFieldName(transaction.id, 'notes')

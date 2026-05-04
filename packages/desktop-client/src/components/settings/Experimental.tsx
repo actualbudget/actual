@@ -151,10 +151,7 @@ export function ExperimentalFeatures() {
 
   const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
-  const showGoalTemplatesUI =
-    goalTemplatesUIEnabled ||
-    (goalTemplatesEnabled &&
-      localStorage.getItem('devEnableGoalTemplatesUI') === 'true');
+  const showGoalTemplatesUI = goalTemplatesEnabled || goalTemplatesUIEnabled;
 
   const showServerPrefs =
     localStorage.getItem('devEnableServerPrefs') === 'true';
@@ -169,7 +166,10 @@ export function ExperimentalFeatures() {
             </FeatureToggle>
             {showGoalTemplatesUI && (
               <View style={{ paddingLeft: 22 }}>
-                <FeatureToggle flag="goalTemplatesUIEnabled">
+                <FeatureToggle
+                  flag="goalTemplatesUIEnabled"
+                  feedbackLink="https://github.com/actualbudget/actual/issues/7692"
+                >
                   <Trans>Subfeature: Budget automations UI</Trans>
                 </FeatureToggle>
               </View>
