@@ -13,6 +13,9 @@
   },
   "files": [
     "build",
+    "loader.mjs",
+    "register-loader.mjs",
+    "start.mjs",
     "LICENSE",
     "README.md"
   ],
@@ -68,8 +71,8 @@
     }
   },
   "scripts": {
-    "start": "yarn build && node build/app",
-    "start-monitor": "nodemon --exec 'yarn build && node build/app' --ignore './build/**/*' --ext 'ts,js' build/app",
+    "start": "yarn build && node --import ./register-loader.mjs build/app",
+    "start-monitor": "nodemon --exec 'yarn build && node --import ./register-loader.mjs build/app' --ignore './build/**/*' --ext 'ts,js' build/app",
     "build": "tsgo -b && yarn add-import-extensions && yarn copy-static-assets",
     "typecheck": "tsgo -b && tsc-strict",
     "add-import-extensions": "node bin/add-import-extensions.mjs",

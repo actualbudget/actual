@@ -19,6 +19,14 @@ export async function resolve(specifier, context, nextResolve) {
           return nextResolve(pathToFileURL(resolvedPath).href, context);
         }
       }
+
+      // Fall back to <specifier>/index.<ext> for directory imports
+      for (const ext of extensions) {
+        const resolvedPath = nodeResolve(parentDir, specifier, `index${ext}`);
+        if (existsSync(resolvedPath)) {
+          return nextResolve(pathToFileURL(resolvedPath).href, context);
+        }
+      }
     }
   }
 

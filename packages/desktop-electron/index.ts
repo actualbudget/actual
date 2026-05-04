@@ -239,12 +239,15 @@ async function startSyncServer() {
       ),
     };
 
-    const serverPath = path.join(
-      // require.resolve will recursively search up the workspace for the module
-      path.dirname(require.resolve('@actual-app/sync-server/package.json')),
-      'build',
-      'app.js',
+    // require.resolve will recursively search up the workspace for the module
+    const syncServerRoot = path.dirname(
+      require.resolve('@actual-app/sync-server/package.json'),
     );
+    // start.mjs registers sync-server's TS-source loader before importing
+    // build/app.js. We can't use Node's --import flag here because Electron's
+    // utilityProcess.fork accepts execArgv but doesn't actually preload the
+    // module, so we register imperatively from a bootstrap entry instead.
+    const serverPath = path.join(syncServerRoot, 'start.mjs');
 
     const webRoot = path.join(
       // require.resolve will recursively search up the workspace for the module
