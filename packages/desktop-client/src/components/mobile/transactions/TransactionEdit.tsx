@@ -419,6 +419,25 @@ const ChildTransactionEdit = forwardRef<
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm()!;
     const [hideFraction, _] = useSyncedPref('hideFraction');
+    const amountFieldName = getFieldName(transaction.id, 'amount');
+    const isAmountDisabled = !!editingField && editingField !== amountFieldName;
+    const amountInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+      const input = amountInputRef.current;
+      if (!input) {
+        return;
+      }
+
+      if (amountFocused && !isAmountDisabled) {
+        const timeoutId = window.setTimeout(() => input.focus());
+        return () => window.clearTimeout(timeoutId);
+      }
+
+      if (!amountFocused && document.activeElement === input) {
+        input.blur();
+      }
+    }, [amountFocused, isAmountDisabled]);
 
     const prettyPayee = getPrettyPayee({
       t,
@@ -464,10 +483,8 @@ const ChildTransactionEdit = forwardRef<
           >
             <FieldLabel title={t('Amount')} style={{ padding: 0 }} />
             <AmountInput
-              disabled={
-                !!editingField &&
-                editingField !== getFieldName(transaction.id, 'amount')
-              }
+              disabled={isAmountDisabled}
+              ref={amountInputRef}
               focused={amountFocused}
               value={amountToInteger(transaction.amount)}
               zeroSign={amountSign}
@@ -477,9 +494,7 @@ const ChildTransactionEdit = forwardRef<
                 textAlign: 'right',
                 minWidth: 0,
               }}
-              onFocus={() =>
-                onRequestActiveEdit(getFieldName(transaction.id, 'amount'))
-              }
+              onFocus={() => onRequestActiveEdit(amountFieldName)}
               onUpdate={value => {
                 const amount = integerToAmount(value);
                 if (transaction.amount !== amount) {
