@@ -1157,7 +1157,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       >
         <View
           data-testid="transaction-form"
-          style={{ flexShrink: 0, marginTop: 20, marginBottom: 20 }}
+          style={{ flexShrink: 0, marginTop: 20, marginBottom: 50 }}
         >
           <View
             style={{
