@@ -12,12 +12,7 @@ import type {
   KeyboardEvent,
   KeyboardEventHandler,
 } from 'react';
-import {
-  ListBox,
-  ListBoxItem,
-  Popover,
-  useFilter,
-} from 'react-aria-components';
+import { ListBox, ListBoxItem, Popover } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { Input } from '@actual-app/components/input';
@@ -28,7 +23,7 @@ import { css } from '@emotion/css';
 import { useCurrentWordRange } from '#hooks/useCurrentWordRange';
 import { useCursorPosition } from '#hooks/useCursorPosition';
 import { useTagCSS } from '#hooks/useTagCSS';
-import { useTags } from '#hooks/useTags';
+import { useFilteredTags } from '#hooks/useTags';
 
 export type TagAutocompleteProps = {
   inputValue: string;
@@ -61,18 +56,11 @@ export function TagAutocomplete({
   const [startIdx, endIdx] = useCurrentWordRange(inputValue, cursorPosition);
   const currentWord = inputValue.slice(startIdx, endIdx);
 
-  const { contains } = useFilter({ sensitivity: 'base' });
-  const { data } = useTags();
-  const items = useMemo(
-    () => data?.map(tag => ({ ...tag, name: '#' + tag.tag })) ?? [],
-    [data],
+  const filteredTags = useFilteredTags(currentWord, true);
+  const filteredItems = useMemo(
+    () => filteredTags?.map(tag => ({ ...tag, name: '#' + tag.tag })) ?? [],
+    [filteredTags],
   );
-
-  const filteredItems = useMemo(() => {
-    if (!currentWord.startsWith('#')) return [];
-    const substring = currentWord.slice(1);
-    return items.filter(item => contains(item.name, substring)).slice(0, 10);
-  }, [items, contains, currentWord]);
 
   const [isOpen, setIsOpen] = useState(false);
   const showPopup = isOpen && filteredItems.length > 0;

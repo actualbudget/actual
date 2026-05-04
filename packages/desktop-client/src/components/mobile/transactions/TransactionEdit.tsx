@@ -8,7 +8,6 @@ import {
   useState,
 } from 'react';
 import type { RefObject } from 'react';
-import { Popover, useFilter } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams, useSearchParams } from 'react-router';
 
@@ -106,7 +105,7 @@ import {
 } from '#hooks/useSingleActiveEditForm';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useTagCSS } from '#hooks/useTagCSS';
-import { useTags } from '#hooks/useTags';
+import { useFilteredTags } from '#hooks/useTags';
 import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useSavePayeeLocationMutation } from '#payees';
@@ -1157,7 +1156,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       >
         <View
           data-testid="transaction-form"
-          style={{ flexShrink: 0, marginTop: 20, marginBottom: 50 }}
+          style={{ flexShrink: 0, marginTop: 20, marginBottom: 20 }}
         >
           <View
             style={{
@@ -1473,20 +1472,12 @@ function NoteTagAutocomplete({
   // 3. Child transaction notes (transaction.notes) does not update until blur, so we have to use input state
   // 4. Given we are already using inputRef in multiple locations, I elected to simplify the props to just the ref and use HTML/JS events
 
-  const backgroundRef = useRef<HTMLDivElement | null>(null);
   const [note, setNote] = useInputRefValue(inputRef);
 
   const [cursorPosition] = useCursorPosition(inputRef);
   const [startIdx, endIdx] = useCurrentWordRange(note, cursorPosition);
   const currentWord = note.slice(startIdx, endIdx);
-
-  const { data: tags } = useTags();
-  const { contains } = useFilter({ sensitivity: 'base' });
-  const filteredTags = useMemo(() => {
-    if (!currentWord.startsWith('#') || !tags) return [];
-    const wordNoHash = currentWord.slice(1);
-    return tags.filter(tag => contains(tag.tag, wordNoHash)).slice(0, 10);
-  }, [currentWord, tags, contains]);
+  const filteredTags = useFilteredTags(currentWord, true);
 
   const getTagCSS = useTagCSS();
 
@@ -1510,57 +1501,41 @@ function NoteTagAutocomplete({
   });
 
   return (
-    <>
-      {/* we need to anchor this element to the screen.
-        Modals are focus traps so can't use them.
-        Popovers are relative and require an element ref to anchor to.
-        This is that anchor, which itself is fixed to the bottom of the screen */}
-      <div
-        ref={backgroundRef}
+    <View
+      style={{
+        width: '100%',
+        padding: '4px 8px 4px 8px',
+        borderRadius: 30,
+        overflowX: 'auto',
+        height: 30,
+        opacity: filteredTags.length ? 1 : 0,
+        transitionProperty: 'opacity',
+        transitionDuration: '150ms',
+      }}
+      className={hideScrollbar}
+    >
+      <View
         style={{
-          position: 'fixed',
-          bottom: 60,
-          left: 0,
-          width: '100dvw',
+          display: 'flex',
+          flexDirection: 'row',
+          flexWrap: 'nowrap',
+          gap: 4,
+          paddingRight: 8,
         }}
-      />
-      <Popover
-        isOpen={filteredTags.length > 0}
-        isNonModal
-        style={{
-          width: '92dvw',
-          padding: 8,
-          borderRadius: 30,
-          overflowX: 'auto',
-          backgroundColor: theme.menuAutoCompleteBackground,
-        }}
-        className={hideScrollbar}
-        triggerRef={backgroundRef}
-        placement="top start"
       >
-        <View
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            flexWrap: 'nowrap',
-            gap: 4,
-            paddingRight: 8,
-          }}
-        >
-          {filteredTags.map(tag => (
-            <button
-              key={tag.id}
-              style={{ border: 'none' }}
-              className={getTagCSS(tag.tag)}
-              onMouseDown={e => e.preventDefault()} // stops input from losing focus
-              onClick={() => handleSelect(tag.tag)}
-            >
-              #{tag.tag}
-            </button>
-          ))}
-        </View>
-      </Popover>
-    </>
+        {filteredTags.map(tag => (
+          <button
+            key={tag.id}
+            style={{ border: 'none' }}
+            className={getTagCSS(tag.tag)}
+            onMouseDown={e => e.preventDefault()} // stops input from losing focus
+            onClick={() => handleSelect(tag.tag)}
+          >
+            #{tag.tag}
+          </button>
+        ))}
+      </View>
+    </View>
   );
 }
 
