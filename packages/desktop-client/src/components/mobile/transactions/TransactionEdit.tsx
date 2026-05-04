@@ -485,7 +485,6 @@ const ChildTransactionEdit = forwardRef<
             <AmountInput
               disabled={isAmountDisabled}
               ref={amountInputRef}
-              focused={amountFocused}
               value={amountToInteger(transaction.amount)}
               zeroSign={amountSign}
               style={{ marginRight: 8 }}
