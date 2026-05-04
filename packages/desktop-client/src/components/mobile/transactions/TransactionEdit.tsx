@@ -1507,10 +1507,9 @@ function NoteTagAutocomplete({
         padding: '4px 8px 4px 8px',
         borderRadius: 30,
         overflowX: 'auto',
-        height: 30,
-        opacity: filteredTags.length ? 1 : 0,
-        transitionProperty: 'opacity',
-        transitionDuration: '150ms',
+        height: filteredTags.length ? 30 : 0,
+        transitionProperty: 'height',
+        transitionDuration: '100ms',
       }}
       className={hideScrollbar}
     >
@@ -1518,21 +1517,23 @@ function NoteTagAutocomplete({
         style={{
           display: 'flex',
           flexDirection: 'row',
+          alignItems: 'end',
           flexWrap: 'nowrap',
           gap: 4,
           paddingRight: 8,
         }}
       >
         {filteredTags.map(tag => (
-          <button
-            key={tag.id}
-            style={{ border: 'none' }}
-            className={getTagCSS(tag.tag)}
-            onMouseDown={e => e.preventDefault()} // stops input from losing focus
-            onClick={() => handleSelect(tag.tag)}
-          >
-            #{tag.tag}
-          </button>
+          <div key={tag.id}>
+            <button
+              style={{ border: 'none', height: 22 }}
+              className={getTagCSS(tag.tag)}
+              onMouseDown={e => e.preventDefault()} // stops input from losing focus
+              onClick={() => handleSelect(tag.tag)}
+            >
+              #{tag.tag}
+            </button>
+          </div>
         ))}
       </View>
     </View>
