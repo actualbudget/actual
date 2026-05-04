@@ -2,6 +2,7 @@ import fs from 'fs';
 import { createServer } from 'http';
 import type { Server } from 'http';
 import { cp, mkdir, rm } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
 import path from 'path';
 
 import type { GlobalPrefsJson } from '@actual-app/core/types/prefs';
@@ -239,12 +240,17 @@ async function startSyncServer() {
       ),
     };
 
-    const serverPath = path.join(
-      // require.resolve will recursively search up the workspace for the module
-      path.dirname(require.resolve('@actual-app/sync-server/package.json')),
-      'build',
-      'app.js',
+    // require.resolve will recursively search up the workspace for the module
+    const syncServerRoot = path.dirname(
+      require.resolve('@actual-app/sync-server/package.json'),
     );
+    const serverPath = path.join(syncServerRoot, 'build', 'app.js');
+    // crdt is loaded from source (no dist), so the sync-server fork needs
+    // sync-server's loader registered to resolve extensionless and
+    // directory-index imports the same way the standalone `start` script does.
+    const loaderUrl = pathToFileURL(
+      path.join(syncServerRoot, 'register-loader.mjs'),
+    ).href;
 
     const webRoot = path.join(
       // require.resolve will recursively search up the workspace for the module
@@ -268,14 +274,14 @@ async function startSyncServer() {
       void mkdir(syncServerConfig.ACTUAL_SERVER_DATA_DIR, { recursive: true });
     }
 
-    let forkOptions: ForkOptions = {
+    const execArgv = [`--import=${loaderUrl}`];
+    if (isDev) execArgv.push('--inspect');
+
+    const forkOptions: ForkOptions = {
       stdio: 'pipe',
       env: envVariables,
+      execArgv,
     };
-
-    if (isDev) {
-      forkOptions = { ...forkOptions, execArgv: ['--inspect'] };
-    }
 
     let syncServerStarted = false;
 

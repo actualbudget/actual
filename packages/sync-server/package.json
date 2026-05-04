@@ -13,6 +13,8 @@
   },
   "files": [
     "build",
+    "loader.mjs",
+    "register-loader.mjs",
     "LICENSE",
     "README.md"
   ],
