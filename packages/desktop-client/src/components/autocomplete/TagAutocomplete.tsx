@@ -157,6 +157,7 @@ export function TagAutocomplete({
         onFocus={() => setIsOpen(true)}
         onBlur={onBlur}
         onUpdate={onUpdate}
+        autoComplete={showPopup ? 'off' : undefined}
       />
 
       <Popover
