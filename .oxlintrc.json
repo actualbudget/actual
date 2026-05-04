@@ -15,7 +15,8 @@
     "vi": "readonly",
     "backend": "readonly",
     "importScripts": "readonly",
-    "FS": "readonly"
+    "FS": "readonly",
+    "__APP_VERSION__": "readonly"
   },
   "rules": {
     // Import sorting

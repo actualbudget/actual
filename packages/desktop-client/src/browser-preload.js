@@ -335,10 +335,14 @@ const isUpdateReadyForDownloadPromise = new Promise(resolve => {
     resolve(true);
   };
 });
-const updateSW = registerSW({
-  immediate: true,
-  onNeedRefresh: markUpdateReadyForDownload,
-});
+// Skip SW registration in dev so stale cached assets don't override edits
+// between page loads. Plugin code that needs a SW can register one itself.
+const updateSW = IS_DEV
+  ? () => undefined
+  : registerSW({
+      immediate: true,
+      onNeedRefresh: markUpdateReadyForDownload,
+    });
 
 global.Actual = {
   IS_DEV,

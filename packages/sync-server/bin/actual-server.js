@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import { existsSync, readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 
 const args = process.argv;
@@ -54,11 +53,7 @@ if (values.help) {
 }
 
 if (values.version) {
-  const __dirname = dirname(fileURLToPath(import.meta.url));
-  const packageJsonPath = resolve(__dirname, '../../package.json');
-  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
-
-  console.log('v' + packageJson.version);
+  console.log('v' + __APP_VERSION__);
   process.exit();
 }
 

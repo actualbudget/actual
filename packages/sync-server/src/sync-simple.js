@@ -1,10 +1,9 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync } from 'node:fs';
 
 import { merkle, SyncProtoBuf, Timestamp } from '@actual-app/crdt';
 
 import { openDatabase } from './db';
-import { sqlDir } from './load-config';
+import messagesSql from './sql/messages.sql?raw';
 import { getPathForGroupFile } from './util/paths';
 
 function getGroupDb(groupId) {
@@ -14,8 +13,7 @@ function getGroupDb(groupId) {
   const db = openDatabase(path);
 
   if (needsInit) {
-    const sql = readFileSync(join(sqlDir, 'messages.sql'), 'utf8');
-    db.exec(sql);
+    db.exec(messagesSql);
   }
 
   return db;

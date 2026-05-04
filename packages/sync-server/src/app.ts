@@ -124,17 +124,30 @@ app.get('/metrics', (_req, res) => {
   });
 });
 
-// The web frontend
+// The web frontend.
+// Dev mode proxies to Vite, which injects inline preamble scripts and uses
+// a websocket for HMR. Loosen script-src and connect-src accordingly.
+const isDev = process.env.NODE_ENV === 'development';
+const scriptSrc = isDev
+  ? "'self' 'unsafe-inline' 'unsafe-eval' blob:"
+  : "'self' 'unsafe-eval' blob:";
+const connectSrc = isDev ? "'self' ws: wss: http: https:" : 'http: https:';
+const csp = [
+  "default-src 'self' blob:",
+  "img-src 'self' blob: data:",
+  `script-src ${scriptSrc}`,
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self' data:",
+  `connect-src ${connectSrc}`,
+].join('; ');
+
 app.use((req, res, next) => {
   res.set('Cross-Origin-Opener-Policy', 'same-origin');
   res.set('Cross-Origin-Embedder-Policy', 'require-corp');
-  res.set(
-    'Content-Security-Policy',
-    "default-src 'self' blob:; img-src 'self' blob: data:; script-src 'self' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src http: https:;",
-  );
+  res.set('Content-Security-Policy', csp);
   next();
 });
-if (process.env.NODE_ENV === 'development') {
+if (isDev) {
   console.log(
     'Running in development mode - Proxying frontend routes to React Dev Server',
   );
