@@ -28,6 +28,7 @@ const authRateLimiter = rateLimit({
   max: 5, // 5 attempts per window
   legacyHeaders: false,
   standardHeaders: true,
+  skipSuccessfulRequests: true,
   message: { status: 'error', reason: 'too-many-requests' },
 });
 
