@@ -48,7 +48,7 @@
     ],
     "beforePack": "./build/desktop-electron/beforePackHook.js",
     "afterSign": "./build/desktop-electron/afterSignHook.js",
-    "_electronFusesSecurityNote": "Intentional: enableNodeOptionsEnvironmentVariable is true so NODE_EXTRA_CA_CERTS works for self-signed cert support. Tradeoff: this also enables NODE_OPTIONS, which can be an attack vector (including bypass paths relevant to macOS hardened runtime/TCC). This risk is accepted for this app's local/post-exploitation threat model and was called out in the PR description so maintainers do not remove this accidentally.",
+    "_electronFusesSecurityNote": "Intentional: enableNodeOptionsEnvironmentVariable is true so NODE_EXTRA_CA_CERTS works for self-signed cert support. Tradeoff: this also enables NODE_OPTIONS, which can be an attack vector (including bypass paths relevant to macOS hardened runtime/TCC). This risk is accepted for this app's local/post-exploitation threat model and was called out by maintainers - do not remove this accidentally.",
     "electronFuses": {
       "runAsNode": false,
       "enableNodeOptionsEnvironmentVariable": true,
