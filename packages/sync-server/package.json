@@ -15,6 +15,7 @@
     "build",
     "loader.mjs",
     "register-loader.mjs",
+    "start.mjs",
     "LICENSE",
     "README.md"
   ],
