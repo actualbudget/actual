@@ -6,7 +6,7 @@ import { Button } from '@actual-app/components/button';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { send, sendCatch } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
-import { q } from '@actual-app/core/shared/query';
+import { q, prependEscapeChars } from '@actual-app/core/shared/query';
 import type {
   RecurConfig,
   ScheduleEntity,
@@ -100,7 +100,7 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
 
     if (state.fields.name) {
       const { data: sameName } = await aqlQuery(
-        q('schedules').filter({ name: state.fields.name }).select('id'),
+        q('schedules').filter({ name: prependEscapeChars(state.fields.name) }).select('id'),
       );
       if (sameName.length > 0 && sameName[0].id !== state.schedule.id) {
         dispatch({

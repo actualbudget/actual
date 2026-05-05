@@ -174,3 +174,7 @@ export function getPrimaryOrderBy(
 export function q(table: QueryState['table']) {
   return new Query({ table });
 }
+
+export function prependEscapeChars(value: string): string {
+  return value.startsWith('$') || value.startsWith(':') ? '\\' + value : value;
+}
