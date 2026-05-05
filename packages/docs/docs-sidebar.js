@@ -36,6 +36,7 @@ const sidebars = {
         'getting-started/roadmap-for-new-users',
         'getting-started/envelope-budgeting',
         'getting-started/tracking-budget',
+        'getting-started/onboarding-guide',
         {
           type: 'category',
           label: 'Installation and Configuration',
