@@ -32,8 +32,6 @@ export type ConfirmTransactionEditReason =
   | 'batchDeleteWithReconciledTransfer'
   | 'batchEditWithReconciled'
   | 'batchEditWithReconciledTransfer'
-  | 'batchDuplicateWithReconciled'
-  | 'batchDuplicateWithReconciledTransfer'
   | 'editReconciled'
   | 'unlockReconciled'
   | 'deleteReconciled';
