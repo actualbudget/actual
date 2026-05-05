@@ -57,7 +57,7 @@ Click the add account button. This will give you several options:
 
    Link a Brazilian bank account to automatically download transactions. Pluggy.ai provides reliable, up-to-date information from hundreds of banks.
 
-## Step Four: Create local account *(if you chose the local account option above)*
+## Step Four: Create local account _(if you chose the local account option above)_
 
 One of the great things about Actual is that you do not need to connect your bank account if you do not want to. When you press this option, a screen will pop up that lets you manually enter the amount in the account.
 
