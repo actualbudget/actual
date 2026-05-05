@@ -1,6 +1,6 @@
 issue_enrichment:
   auto_enrich:
-    enabled: false
+    enabled: true
 reviews:
   request_changes_workflow: true
   review_status: false

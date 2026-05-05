@@ -13,12 +13,12 @@ export const HistoricalAutomationReadOnly = ({
   template,
 }: HistoricalAutomationReadOnlyProps) => {
   return template.type === 'copy' ? (
-    <Trans>
-      Budget the same amount as {{ amount: template.lookBack }} months ago
+    <Trans count={template.lookBack}>
+      Budget the same amount as {{ count: template.lookBack }} months ago
     </Trans>
   ) : (
-    <Trans>
-      Budget the average of the last {{ amount: template.numMonths }} months
+    <Trans count={template.numMonths}>
+      Budget the average of the last {{ count: template.numMonths }} months
     </Trans>
   );
 };

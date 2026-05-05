@@ -91,6 +91,13 @@ export function monthFromDate(date: DateLike): string {
   return d.format(_parse(date), 'yyyy-MM');
 }
 
+export function isValidYearMonth(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const month = Number(match[2]);
+  return month >= 1 && month <= 12;
+}
+
 export function weekFromDate(
   date: DateLike,
   firstDayOfWeekIdx: SyncedPrefs['firstDayOfWeekIdx'],

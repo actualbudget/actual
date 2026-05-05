@@ -264,6 +264,7 @@ __metadata:
     mdast-util-newline-to-break: "npm:^2.0.0"
     memoize-one: "npm:^6.0.0"
     pikaday: "npm:1.8.2"
+    plugins-service: "workspace:*"
     promise-retry: "npm:^2.0.1"
     re-resizable: "npm:^6.11.2"
     react: "npm:19.2.4"
@@ -22776,7 +22777,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"plugins-service@workspace:packages/plugins-service":
+"plugins-service@workspace:*, plugins-service@workspace:packages/plugins-service":
   version: 0.0.0-use.local
   resolution: "plugins-service@workspace:packages/plugins-service"
   dependencies:

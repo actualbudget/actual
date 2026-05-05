@@ -2,9 +2,10 @@ import { vi } from 'vitest';
 
 import * as aql from '#server/aql';
 import * as db from '#server/db';
+import type { DbCategory } from '#server/db';
 import { amountToInteger } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
-import type { Template } from '#types/models/templates';
+import type { ByTemplate, Template } from '#types/models/templates';
 
 import * as actions from './actions';
 import { CategoryTemplateContext } from './category-template-context';
@@ -875,7 +876,7 @@ describe('CategoryTemplateContext', () => {
 
     it('should calculate monthly amount needed for multiple targets', () => {
       const result = CategoryTemplateContext.runBy(instance);
-      expect(result).toBe(66667);
+      expect(result.toBudget).toBe(66667);
     });
 
     it('should handle repeating targets', () => {
@@ -905,7 +906,7 @@ describe('CategoryTemplateContext', () => {
       );
 
       const result = CategoryTemplateContext.runBy(instance);
-      expect(result).toBe(83333);
+      expect(result.toBudget).toBe(83333);
     });
 
     it('should handle existing balance', () => {
@@ -933,7 +934,7 @@ describe('CategoryTemplateContext', () => {
       );
 
       const result = CategoryTemplateContext.runBy(instance);
-      expect(result).toBe(66500); // (1000 + 2000 - 5) / 3
+      expect(result.toBudget).toBe(66500); // (1000 + 2000 - 5) / 3
     });
   });
 
@@ -1599,7 +1600,15 @@ describe('CategoryTemplateContext', () => {
         [] as Awaited<ReturnType<typeof statements.getActiveSchedules>>,
       );
       vi.mocked(db.getCategories).mockResolvedValue([
-        { id: 'inc-1', name: 'Salary', is_income: true } as CategoryEntity,
+        {
+          id: 'inc-1',
+          name: 'Salary',
+          is_income: 1,
+          cat_group: 'g-income',
+          sort_order: 0,
+          hidden: 0,
+          tombstone: 0,
+        } satisfies DbCategory,
       ]);
       const templates: Template[] = [
         {
@@ -1646,11 +1655,43 @@ describe('CategoryTemplateContext', () => {
       expect(budgeted).toBeGreaterThan(0);
     });
 
+    it('accepts a percentage template that uses an income category id', async () => {
+      // CategoryAutocomplete stores the id; the case-folded name is also
+      // accepted for text-template compatibility.
+      vi.mocked(statements.getActiveSchedules).mockResolvedValue(
+        [] as Awaited<ReturnType<typeof statements.getActiveSchedules>>,
+      );
+      vi.mocked(db.getCategories).mockResolvedValue([
+        {
+          id: 'inc-1',
+          name: 'Salary',
+          is_income: 1,
+          cat_group: 'g-income',
+          sort_order: 0,
+          hidden: 0,
+          tombstone: 0,
+        } satisfies DbCategory,
+      ]);
+      const templates: Template[] = [
+        {
+          type: 'percentage',
+          percent: 10,
+          previous: false,
+          category: 'inc-1',
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      await expect(
+        CategoryTemplateContext.init(templates, category, '2024-01', 0),
+      ).resolves.toBeDefined();
+    });
+
     it('accepts the special `all income` and `available funds` source aliases', async () => {
       vi.mocked(statements.getActiveSchedules).mockResolvedValue(
         [] as Awaited<ReturnType<typeof statements.getActiveSchedules>>,
       );
-      vi.mocked(db.getCategories).mockResolvedValue([] as CategoryEntity[]);
+      vi.mocked(db.getCategories).mockResolvedValue([] as DbCategory[]);
       const templates: Template[] = [
         {
           type: 'percentage',
@@ -1761,8 +1802,8 @@ describe('CategoryTemplateContext', () => {
 
     it('throws when more than one #goal directive is defined', () => {
       const templates: Template[] = [
-        { type: 'goal', amount: 1000, directive: 'goal', priority: null },
-        { type: 'goal', amount: 2000, directive: 'goal', priority: null },
+        { type: 'goal', amount: 1000, directive: 'goal' },
+        { type: 'goal', amount: 2000, directive: 'goal' },
       ];
       expect(
         () =>

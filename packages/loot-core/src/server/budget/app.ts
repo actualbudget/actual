@@ -57,6 +57,7 @@ export type BudgetHandlers = {
   'must-category-transfer': typeof isCategoryTransferRequired;
   'budget/get-category-automations': typeof goalActions.getTemplatesForCategory;
   'budget/set-category-automations': typeof goalActions.storeTemplates;
+  'budget/dry-run-category-template': typeof goalActions.dryRunCategoryTemplate;
   'budget/store-note-templates': typeof goalNoteActions.storeNoteTemplates;
   'budget/render-note-templates': typeof goalNoteActions.unparse;
 };
@@ -152,6 +153,10 @@ app.method(
 app.method(
   'budget/set-category-automations',
   mutator(undoable(goalActions.storeTemplates)),
+);
+app.method(
+  'budget/dry-run-category-template',
+  goalActions.dryRunCategoryTemplate,
 );
 app.method(
   'budget/store-note-templates',
