@@ -12,13 +12,17 @@ export function registerCategoriesCommand(program: Command) {
 
   categories
     .command('list')
-    .description('List all categories')
-    .action(async () => {
+    .description('List categories (excludes hidden by default)')
+    .option('--include-hidden', 'Include hidden categories', false)
+    .action(async cmdOpts => {
       const opts = program.opts();
       await withConnection(
         opts,
         async () => {
-          const result = await api.getCategories();
+          const allCategories = await api.getCategories();
+          const result = allCategories.filter(
+            c => cmdOpts.includeHidden || !c.hidden,
+          );
           printOutput(result, opts.format);
         },
         { mutates: false },
