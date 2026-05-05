@@ -1,9 +1,9 @@
 import { captureException } from '#platform/exceptions';
 import { logger } from '#platform/server/log';
-import { polyfillRandomUUID } from '#shared/uuid';
 // @ts-strict-ignore
 import { APIError } from '#server/errors';
 import { isMutating, runHandler } from '#server/mutators';
+import { polyfillRandomUUID } from '#shared/uuid';
 
 import type * as T from './index-types';
 

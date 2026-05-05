@@ -1,4 +1,5 @@
 import type { RuleEntity } from '@actual-app/core/types/models';
+
 import { generateUUID } from '#util/uuid';
 
 export type ActionSplit = {
