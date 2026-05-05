@@ -1,8 +1,8 @@
 import IntegrationBank from './banks/integration-bank';
 
-// Filename convention: <name>_<bic>.{ts,js} (skips bank.interface,
-// integration-bank, and any other helper without an underscore).
-const bankLoaders = import.meta.glob('./banks/*_*.{ts,js}');
+// Filename convention: <name>_<bic>.js (skips bank.interface, integration-bank,
+// and any other helper without an underscore).
+const bankLoaders = import.meta.glob('./banks/*_*.js');
 
 async function loadBanks() {
   const imports = await Promise.all(
