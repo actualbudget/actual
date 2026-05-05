@@ -168,6 +168,7 @@ export function BudgetCell<
     showUndoNotification,
     onEditNotes,
     format,
+    t,
   ]);
 
   return (
