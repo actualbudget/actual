@@ -129,18 +129,14 @@ function filterCategoriesByConditions(
     if (condition.op === 'contains') {
       return (
         typeof condition.value === 'string' &&
-        (textValue ?? '')
-          .toLowerCase()
-          .includes(condition.value.toLowerCase())
+        (textValue ?? '').toLowerCase().includes(condition.value.toLowerCase())
       );
     }
 
     if (condition.op === 'doesNotContain') {
       return (
         typeof condition.value === 'string' &&
-        !(textValue ?? '')
-          .toLowerCase()
-          .includes(condition.value.toLowerCase())
+        !(textValue ?? '').toLowerCase().includes(condition.value.toLowerCase())
       );
     }
 
