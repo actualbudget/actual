@@ -3,8 +3,11 @@ import { t } from 'i18next';
 
 import * as undo from '#platform/client/undo';
 import { captureBreadcrumb, captureException } from '#platform/exceptions';
+import { polyfillRandomUUID } from '#shared/uuid';
 
 import type * as T from './index-types';
+
+polyfillRandomUUID();
 
 const replyHandlers = new Map();
 const listeners = new Map();

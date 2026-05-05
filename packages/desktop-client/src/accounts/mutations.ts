@@ -20,6 +20,7 @@ import { payeeQueries } from '#payees';
 import { useDispatch, useStore } from '#redux';
 import type { AppDispatch } from '#redux/store';
 import { setNewTransactions } from '#transactions/transactionsSlice';
+import { generateUUID } from '#util/uuid';
 
 import {
   markAccountFailed,
@@ -43,7 +44,7 @@ const dispatchErrorNotification = (
   dispatch(
     addNotification({
       notification: {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'error',
         message,
         pre: error ? error.message : undefined,

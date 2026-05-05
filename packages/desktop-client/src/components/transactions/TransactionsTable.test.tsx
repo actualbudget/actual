@@ -31,6 +31,7 @@ import { SplitsExpandedProvider } from '#hooks/useSplitsExpanded';
 import { SpreadsheetProvider } from '#hooks/useSpreadsheet';
 import { createTestQueryClient, TestProviders } from '#mocks';
 import { payeeQueries } from '#payees';
+import { generateUUID } from '#util/uuid';
 
 import { TransactionTable } from './TransactionsTable';
 
@@ -1086,7 +1087,7 @@ describe('Transactions', () => {
     // Change the id to simulate a new transaction being added, and
     // work with that one. This makes sure that the transaction table
     // properly references new data.
-    transactions[0] = { ...transactions[0], id: crypto.randomUUID() };
+    transactions[0] = { ...transactions[0], id: generateUUID() };
     updateProps({ transactions });
 
     function expectErrorToNotExist(transactions: TransactionEntity[]) {

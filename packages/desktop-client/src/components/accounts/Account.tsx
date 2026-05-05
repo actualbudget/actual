@@ -82,6 +82,7 @@ import type { PagedQuery } from '#queries/pagedQuery';
 import { useDispatch, useSelector } from '#redux';
 import type { AppDispatch } from '#redux/store';
 import { updateNewTransactions } from '#transactions/transactionsSlice';
+import { generateUUID } from '#util/uuid';
 
 import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
@@ -1118,7 +1119,7 @@ class AccountInternal extends PureComponent<
 
     const [firstTransaction] = transactions;
     const parentTransaction = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       is_parent: true,
       cleared: transactions.every(t => !!t.cleared),
       date: firstTransaction.date,

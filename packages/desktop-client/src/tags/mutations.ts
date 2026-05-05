@@ -8,6 +8,7 @@ import type { QueryClient, QueryKey } from '@tanstack/react-query';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import type { AppDispatch } from '#redux/store';
+import { generateUUID } from '#util/uuid';
 
 import { tagQueries } from './queries';
 
@@ -25,7 +26,7 @@ function dispatchErrorNotification(
   dispatch(
     addNotification({
       notification: {
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         type: 'error',
         message,
         pre: error ? error.message : undefined,
