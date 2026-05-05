@@ -19,8 +19,10 @@ import {
 } from '#components/budget/goals/automationExamples';
 import type { AutomationEntry } from '#components/budget/goals/automationExamples';
 import { formatMonthLabel } from '#components/budget/goals/formatMonthLabel';
-import { validateAutomation } from '#components/budget/goals/validateAutomation';
-import type { GlobalConflictKind } from '#components/budget/goals/validateAutomation';
+import {
+  validateAutomation,
+  validatePercentageAllocation,
+} from '#components/budget/goals/validateAutomation';
 import { Link } from '#components/common/Link';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
@@ -212,12 +214,7 @@ export function BudgetAutomationsBody({
     dryRun?.perTemplate?.[i] != null ? dryRun.perTemplate[i] : null,
   );
   const hasErrors = automationErrors.some(error => error !== null);
-  const percentSum = templates.reduce<number>((sum, t) => {
-    if (t.type === 'percentage') return sum + t.percent;
-    return sum;
-  }, 0);
-  const conflict: GlobalConflictKind | null =
-    percentSum > 100 ? { kind: 'percent-over-100', total: percentSum } : null;
+  const conflict = validatePercentageAllocation(templates);
 
   const categoryNameMap: Record<string, string> = {};
   for (const group of categories) {
