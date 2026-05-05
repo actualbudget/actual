@@ -127,6 +127,8 @@ app.get('/metrics', (_req, res) => {
 // The web frontend.
 // Dev mode proxies to Vite, which injects inline preamble scripts and uses
 // a websocket for HMR. Loosen script-src and connect-src accordingly.
+// `'unsafe-eval'` is required at runtime for the Electron app, so it is
+// kept in both branches.
 const isDev = process.env.NODE_ENV === 'development';
 const scriptSrc = isDev
   ? "'self' 'unsafe-inline' 'unsafe-eval' blob:"
