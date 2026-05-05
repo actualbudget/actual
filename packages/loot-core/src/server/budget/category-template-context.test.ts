@@ -5,7 +5,6 @@ import * as db from '#server/db';
 import type { DbCategory } from '#server/db';
 import { amountToInteger } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
-import type { ByTemplate, Template } from '#types/models/templates';
 
 import * as actions from './actions';
 import { CategoryTemplateContext } from './category-template-context';
