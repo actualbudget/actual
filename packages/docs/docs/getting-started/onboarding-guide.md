@@ -17,7 +17,7 @@ Actual can be used in a few different ways. Choose the option that best matches 
 - **I want to try Actual without installing anything**: Use the [demo](https://demo.actualbudget.org) if you want to explore the interface before setting anything up.
 - **I want to use Actual on one computer**: Use the [desktop app](/docs/install/desktop-app) if you only need Actual on one device.
 - **I want to use Actual on multiple devices or share a budget**: Use [PikaPods](/docs/install/pikapods) or a [self-hosted server](/docs/install/docker) if you want syncing across devices.
-- **I want to contribute to Actual**: Use the [build from source](/docs/install/build-from-source) or development setup documentation if you want to edit the code or documentation.
+- **I want to contribute to Actual**: Use the [build from source](/docs/install/build-from-source) or [development setup documentation](/docs/contributing/development-setup) if you want to edit the code or documentation.
 
 If you are unsure, start with the demo or desktop app. You can move to a server-based setup later if you decide you want syncing across devices.
 
