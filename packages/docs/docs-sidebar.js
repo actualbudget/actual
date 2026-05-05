@@ -27,6 +27,7 @@ const sidebars = {
     'index',
     'vision',
     'releases',
+    'faq',
     {
       type: 'category',
       label: 'Getting Started',
@@ -190,13 +191,20 @@ const sidebars = {
         },
         {
           type: 'category',
-          label: 'Backup & Restore',
+          label: 'Files, Sync & Settings',
           collapsed: true,
-          items: ['backup-restore/backup', 'backup-restore/restore'],
+          items: [
+            'settings/index',
+            'getting-started/sync',
+            'getting-started/manage-files',
+            {
+              type: 'category',
+              label: 'Backup & Restore',
+              collapsed: true,
+              items: ['backup-restore/backup', 'backup-restore/restore'],
+            },
+          ],
         },
-        'settings/index',
-        'getting-started/sync',
-        'getting-started/manage-files',
 
         {
           type: 'category',
@@ -246,7 +254,6 @@ const sidebars = {
       collapsible: false,
       className: 'no-indent',
       items: [
-        'faq',
         'actual-server-repo-move',
         {
           type: 'category',
