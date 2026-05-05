@@ -45,6 +45,7 @@ async function mapWithConcurrency<TItem, TResult>(
 
 function filterCategoriesByConditions(
   categories: CategoryEntity[],
+  categoryGroups: CategoryGroupEntity[],
   conditions: RuleConditionEntity[] | undefined,
   conditionsOp: BudgetDataConditionsOp | undefined,
 ) {
@@ -52,18 +53,23 @@ function filterCategoriesByConditions(
     return categories;
   }
 
-  const categoryConditions = conditions.filter(
-    (cond): cond is Extract<RuleConditionEntity, { field: 'category' }> =>
-      !cond.customName && cond.field === 'category',
+  const relevantConditions = conditions.filter(
+    cond =>
+      !cond.customName &&
+      (cond.field === 'category' || cond.field === 'category_group'),
   );
 
-  if (categoryConditions.length === 0) {
+  if (relevantConditions.length === 0) {
     return categories;
   }
 
-  const isSupportedCondition = (
-    condition: Extract<RuleConditionEntity, { field: 'category' }>,
-  ) => {
+  // Build a UUID → name map for category groups so text-based operators
+  // (contains, doesNotContain, matches) can match against the group name.
+  const groupNameById = new Map<string, string>(
+    categoryGroups.map(g => [g.id, g.name] as const),
+  );
+
+  const isSupportedCondition = (condition: RuleConditionEntity) => {
     if (condition.op === 'is' || condition.op === 'isNot') {
       return typeof condition.value === 'string';
     }
@@ -75,33 +81,78 @@ function filterCategoriesByConditions(
       );
     }
 
+    if (
+      condition.op === 'contains' ||
+      condition.op === 'doesNotContain' ||
+      condition.op === 'matches'
+    ) {
+      return typeof condition.value === 'string';
+    }
+
     return false;
   };
 
-  // If we can't safely interpret any category condition, do not attempt to
+  // If we can't safely interpret any condition, do not attempt to
   // filter categories (better to be broad than silently exclude data).
-  if (!categoryConditions.every(isSupportedCondition)) {
+  if (!relevantConditions.every(isSupportedCondition)) {
     return categories;
   }
 
   const evaluateCondition = (
     category: CategoryEntity,
-    condition: Extract<RuleConditionEntity, { field: 'category' }>,
+    condition: RuleConditionEntity,
   ): boolean => {
+    const key =
+      condition.field === 'category_group' ? category.group : category.id;
+    // For text-based operators, compare against the human-readable name
+    const textValue =
+      condition.field === 'category_group'
+        ? (groupNameById.get(key ?? '') ?? key ?? '')
+        : category.name;
+
     if (condition.op === 'is') {
-      return category.id === condition.value;
+      return condition.value === key;
     }
 
     if (condition.op === 'isNot') {
-      return category.id !== condition.value;
+      return condition.value !== key;
     }
 
     if (condition.op === 'oneOf') {
-      return condition.value.includes(category.id);
+      return Array.isArray(condition.value) && condition.value.includes(key);
     }
 
     if (condition.op === 'notOneOf') {
-      return !condition.value.includes(category.id);
+      return Array.isArray(condition.value) && !condition.value.includes(key);
+    }
+
+    if (condition.op === 'contains') {
+      return (
+        typeof condition.value === 'string' &&
+        (textValue ?? '')
+          .toLowerCase()
+          .includes(condition.value.toLowerCase())
+      );
+    }
+
+    if (condition.op === 'doesNotContain') {
+      return (
+        typeof condition.value === 'string' &&
+        !(textValue ?? '')
+          .toLowerCase()
+          .includes(condition.value.toLowerCase())
+      );
+    }
+
+    if (condition.op === 'matches') {
+      if (typeof condition.value !== 'string' || condition.value.length > 256) {
+        return false;
+      }
+      try {
+        return new RegExp(condition.value, 'i').test(textValue ?? '');
+      } catch {
+        return false;
+      }
     }
 
     return true;
@@ -111,8 +162,8 @@ function filterCategoriesByConditions(
 
   return categories.filter(cat =>
     op === 'or'
-      ? categoryConditions.some(cond => evaluateCondition(cat, cond))
-      : categoryConditions.every(cond => evaluateCondition(cat, cond)),
+      ? relevantConditions.some(cond => evaluateCondition(cat, cond))
+      : relevantConditions.every(cond => evaluateCondition(cat, cond)),
   );
 }
 
@@ -141,6 +192,7 @@ export async function fetchBudgetData({
 
   const filteredCategories = filterCategoriesByConditions(
     categories,
+    categoryGroups,
     conditions,
     conditionsOp,
   );
