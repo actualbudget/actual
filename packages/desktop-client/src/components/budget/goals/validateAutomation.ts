@@ -93,3 +93,18 @@ export function validateAutomation(
       return null;
   }
 }
+
+export function validatePercentageAllocation(
+  templates: readonly Template[],
+): GlobalConflictKind | null {
+  const percentBySource = new Map<string, number>();
+  for (const t of templates) {
+    if (t.type !== 'percentage' || !t.category) continue;
+    const key = `${t.previous}|${t.category.toLocaleLowerCase()}`;
+    percentBySource.set(key, (percentBySource.get(key) ?? 0) + t.percent);
+  }
+  const maxPercent = Math.max(0, ...percentBySource.values());
+  return maxPercent > 100
+    ? { kind: 'percent-over-100', total: maxPercent }
+    : null;
+}
