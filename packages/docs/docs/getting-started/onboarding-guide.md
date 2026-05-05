@@ -35,19 +35,19 @@ Click the add account button. This will give you several options:
 
 1. **Create local account**
 
-    Create a local account if you want to add transactions manually. You can also import QIF/OFX/QFX files into a local account.
+   Create a local account if you want to add transactions manually. You can also import QIF/OFX/QFX files into a local account.
 
 2. **Set up GoCardless for bank sync**
 
-    Link a European bank account to automatically download transactions. GoCardless provides reliable, up-to-date information from hundreds of banks.
+   Link a European bank account to automatically download transactions. GoCardless provides reliable, up-to-date information from hundreds of banks.
 
 3. **Set up SimpleFIN for bank sync**
 
-    Link a North American bank account to automatically download transactions. SimpleFIN provides reliable, up-to-date information from hundreds of banks.
+   Link a North American bank account to automatically download transactions. SimpleFIN provides reliable, up-to-date information from hundreds of banks.
 
 4. **Set up Pluggy.ai for bank sync**
 
-    Link a Brazilian bank account to automatically download transactions. Pluggy.ai provides reliable, up-to-date information from hundreds of banks.
+   Link a Brazilian bank account to automatically download transactions. Pluggy.ai provides reliable, up-to-date information from hundreds of banks.
 
 ### Step Four: Create local account
 
@@ -66,7 +66,6 @@ After adding an account, you should see a budget tab in the left sidebar. Clicki
 ### Step Six: Assign money for each category
 
 From here, you can start adding your budget for each category. Keep in mind, it does not need to be perfect at first! As time goes on, you will start to see trends and ways to more optimally shift the budget.
-
 
 ## What to read next
 
