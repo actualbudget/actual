@@ -68,9 +68,9 @@ The spending will only show up in the month that the rollover stops.
 
 ## Copy Until Year End
 
-The **Copy until year end** option in the per-category budget menu copies the current month's budgeted amount to all remaining months of the same calendar year at once.
+The **Copy until year end** option in the per-category budget menu copies the current month's budgeted amount to every later month of the same calendar year, overwriting any existing value for that category in those months.
 
-To use it, click the budget amount for a category to open the budget menu, then select **Copy until year end**. The current month's amount will be written to every future month in the same year that has already been created in the budget.
+To use it, click the budget amount for a category to open the budget menu, then select **Copy until year end**. Months in subsequent calendar years are not affected.
 
 This is useful when you add or change a recurring expense and want to update all future planned months without clicking through each one individually. For example, if you realise in March that your grocery budget should be $300 for the rest of the year, you can set it once and copy it to April through December in one click.
 

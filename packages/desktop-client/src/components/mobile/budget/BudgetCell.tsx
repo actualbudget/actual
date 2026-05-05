@@ -136,7 +136,9 @@ export function BudgetCell<
                   category: category.id,
                 });
                 showUndoNotification({
-                  message: `${category.name} budget copied until year end.`,
+                  message: t('{{categoryName}} budget copied until year end.', {
+                    categoryName: category.name,
+                  }),
                 });
               },
             }),
