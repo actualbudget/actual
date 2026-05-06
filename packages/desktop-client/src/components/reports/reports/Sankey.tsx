@@ -73,7 +73,8 @@ export function Sankey() {
 
 type GraphMode = 'budgeted' | 'spent';
 
-const TOP_N_OPTIONS = [Infinity, 10, 15, 20, 25, 30] as const;
+// 1e5 is used as a sentinel value for 'All'
+const TOP_N_OPTIONS = [1e5, 10, 15, 20, 25, 30] as const;
 
 type TopNSelectorProps = {
   value: number;
@@ -81,7 +82,7 @@ type TopNSelectorProps = {
 };
 
 function displayN(n: number, t: Function): string {
-  return n === Infinity ? t('All') : String(n);
+  return n === 1e5 ? t('All') : String(n);
 }
 
 function TopNSelector({ value, onChange }: TopNSelectorProps) {
