@@ -42,6 +42,7 @@ Cloudflare
 CMCIFRPAXXX
 COBADEFF
 CODEOWNERS
+Codespaces
 COEP
 commerzbank
 Copiar
@@ -61,7 +62,6 @@ Dockerfiles
 Dominguez
 DUSSDEDDXXX
 DUSSELDORF
-ecf
 EDATE
 ENTERCARD
 Entra
