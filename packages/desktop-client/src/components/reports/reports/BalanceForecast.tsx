@@ -180,7 +180,8 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
         conditionsOp,
         startDate: start,
         endDate: end,
-        granularity,
+        granularity: isTrackingBudgetForecast ? 'Monthly' : granularity,
+        source,
         timeFrame: {
           start,
           end,
