@@ -1,7 +1,7 @@
 import { createApp } from '#server/app';
 import * as db from '#server/db';
 import type { RuleConditionEntity } from '#types/models';
-import type { ForecastResult } from '#types/models/forecast';
+import type { ForecastResult, ForecastSource } from '#types/models/forecast';
 
 import { resolveForecastAccounts } from './forecast-accounts';
 import type {
@@ -27,6 +27,7 @@ export type ForecastRequestParams = {
   startDate?: string;
   endDate?: string;
   includeAccountlessSchedules?: boolean;
+  source?: ForecastSource;
 };
 
 function createUnassignedForecastAccount(): AccountWithComputedBalance {
@@ -140,6 +141,7 @@ export type ForecastHandlers = {
     startDate?: string;
     endDate?: string;
     includeAccountlessSchedules?: boolean;
+    source?: ForecastSource;
   }) => Promise<ForecastResult>;
 };
 
