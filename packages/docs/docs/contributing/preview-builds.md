@@ -6,9 +6,9 @@ To find a PR, browse the [open pull requests](https://github.com/actualbudget/ac
 
 Three previews are deployed per PR:
 
-- **Main app:** `https://deploy-preview-{pr-number}.demo.actualbudget.org/`
+- **Demo:** `https://deploy-preview-{pr-number}.demo.actualbudget.org/`
 - **Storybook:** `https://deploy-preview-{pr-number}--actualbudget-storybook.netlify.app/`
-- **Website (docs and marketing):** `https://deploy-preview-{pr-number}.www.actualbudget.org/`
+- **Website:** `https://deploy-preview-{pr-number}.www.actualbudget.org/`
 
 The exact URLs are also posted as a comment on each PR by the Netlify bot.
 
