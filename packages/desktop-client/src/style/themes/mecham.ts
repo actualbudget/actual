@@ -18,7 +18,6 @@ const blurple400 = '#7583ff'; // links / hover
 const blurple500 = '#545bfe'; // brand / primary action
 const blurple600 = '#464cd1'; // primary active / pressed
 const blurple700 = '#383ca3'; // tertiary / deep
-const blurple800 = '#292c6c'; // tooltip / row hover
 const blurple900 = '#1c1f58'; // sidebar item / table header
 
 const navy900 = '#121330'; // sidebar background
@@ -66,8 +65,8 @@ export const cardBorder = navy500;
 export const cardShadow = 'rgba(0, 0, 0, 0.5)';
 
 export const tableBackground = navy700;
-// Hover band slightly brighter than blurple800 so high-density table rows
-// register hover without flashing.
+// Subtle blurple-tinted hover band for high-density table rows — picked
+// to register without flashing.
 export const tableRowBackgroundHover = '#2f3380';
 export const tableText = navy50;
 export const tableTextLight = navy50;
