@@ -65,9 +65,20 @@ export function BudgetAutomationsModal({
     hasSpendTemplate ||
     hasCleanupDirective;
 
+  const incomeNameToId = new Map<string, string>();
+  for (const group of categories) {
+    for (const cat of group.categories ?? []) {
+      if (cat.name) incomeNameToId.set(cat.name.toLowerCase(), cat.id);
+    }
+  }
+  const resolved = parsedTemplates?.map(t => {
+    if (t.type !== 'percentage' || !t.category) return t;
+    const id = incomeNameToId.get(t.category.toLowerCase());
+    return id ? { ...t, category: id } : t;
+  });
   const initialEntries =
-    parsedTemplates && !hasUnsupportedDirective
-      ? migrateTemplatesToAutomations(parsedTemplates)
+    resolved && !hasUnsupportedDirective
+      ? migrateTemplatesToAutomations(resolved)
       : null;
 
   return (
