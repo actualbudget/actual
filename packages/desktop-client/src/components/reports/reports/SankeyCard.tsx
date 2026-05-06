@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -14,9 +14,11 @@ import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import {
+  buildSankeyData,
+  createBaseGraphSpreadsheet,
   GraphLayers,
-  createSpreadsheet as sankeySpreadsheet,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
+import type { Graph } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '#components/reports/useReport';
 import { useCategories } from '#hooks/useCategories';
@@ -91,19 +93,15 @@ export function SankeyCard({
       ? metaLayerTo
       : defaultLayerTo;
 
-  const params = useMemo(
+  const baseGraphParams = useMemo(
     () =>
-      sankeySpreadsheet(
+      createBaseGraphSpreadsheet(
         start,
         end,
         groupedCategories,
         meta?.conditions ?? [],
         meta?.conditionsOp ?? 'and',
         mode,
-        heightBasedTopN,
-        meta?.categorySort,
-        layerFrom,
-        layerTo,
         groupAccounts,
       ),
     [
@@ -113,16 +111,45 @@ export function SankeyCard({
       meta?.conditions,
       meta?.conditionsOp,
       mode,
-      heightBasedTopN,
-      meta?.categorySort,
-      layerFrom,
-      layerTo,
       groupAccounts,
     ],
   );
-  const data = useReport('sankey', params);
+  const defaultGetBaseGraph = async (
+    _spreadsheet: unknown,
+    setData: (data: Graph) => void,
+  ) => setData(new Map());
 
-  const compactData = useMemo(() => data, [data]);
+  const baseGraph = useReport('sankey', baseGraphParams ?? defaultGetBaseGraph);
+  const baseGraphRef = useRef(baseGraph);
+
+  useEffect(() => {
+    if (baseGraph) {
+      baseGraphRef.current = baseGraph;
+    }
+  }, [baseGraph]);
+
+  const displayBaseGraph = baseGraph || baseGraphRef.current;
+  const compactData = useMemo(() => {
+    if (!displayBaseGraph) {
+      return null;
+    }
+
+    return buildSankeyData(
+      displayBaseGraph,
+      heightBasedTopN,
+      groupedCategories,
+      meta?.categorySort ?? 'per-group',
+      layerFrom,
+      layerTo,
+    );
+  }, [
+    displayBaseGraph,
+    heightBasedTopN,
+    groupedCategories,
+    meta?.categorySort,
+    layerFrom,
+    layerTo,
+  ]);
 
   const startDate = d.parseISO(start);
   const endDate = d.parseISO(end);

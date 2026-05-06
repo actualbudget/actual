@@ -137,53 +137,88 @@ export function isGraphLayer(value: unknown): value is GraphLayers {
   );
 }
 
-export function createSpreadsheet(
+export function createBaseGraphSpreadsheet(
   start: string,
   end: string,
   categories: CategoryGroupEntity[],
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or' = 'and',
   mode: 'budgeted' | 'spent' = 'spent',
-  topNcategories: number = 15,
-  categorySort: SortMode = 'per-group',
-  layerFrom: GraphLayers,
-  layerTo: GraphLayers,
   groupAccounts: boolean = false,
 ) {
   return async (
-    spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: ReturnType<typeof convertToSankeyData>) => void,
+    _spreadsheet: ReturnType<typeof useSpreadsheet>,
+    setData: (data: Graph) => void,
   ) => {
-    let data: CategoryEntry[] = [];
-    let aggregated: AggregatedBudget | undefined;
-    if (mode === 'budgeted') {
-      ({ data, aggregated } = await createBudgetSpreadsheet(
-        start,
-        end,
-        conditions,
-        conditionsOp,
-      )());
-    } else if (mode === 'spent') {
-      data = await createTransactionsSpreadsheet(
-        start,
-        end,
-        categories,
-        conditions,
-        conditionsOp,
-        groupAccounts,
-      )();
-    }
-    processGraphData(
-      data,
-      topNcategories,
+    const baseGraph = await createBaseGraph(
+      start,
+      end,
       categories,
-      categorySort,
-      setData,
-      layerFrom,
-      layerTo,
-      aggregated,
+      conditions,
+      conditionsOp,
+      mode,
+      groupAccounts,
     );
+
+    setData(baseGraph);
   };
+}
+
+async function createBaseGraph(
+  start: string,
+  end: string,
+  categories: CategoryGroupEntity[],
+  conditions: RuleConditionEntity[] = [],
+  conditionsOp: 'and' | 'or' = 'and',
+  mode: 'budgeted' | 'spent' = 'spent',
+  groupAccounts: boolean = false,
+): Promise<Graph> {
+  let data: CategoryEntry[] = [];
+  let aggregated: AggregatedBudget | undefined;
+
+  if (mode === 'budgeted') {
+    ({ data, aggregated } = await createBudgetSpreadsheet(
+      start,
+      end,
+      conditions,
+      conditionsOp,
+    )());
+  } else if (mode === 'spent') {
+    data = await createTransactionsSpreadsheet(
+      start,
+      end,
+      categories,
+      conditions,
+      conditionsOp,
+      groupAccounts,
+    )();
+  }
+
+  return aggregated
+    ? createBudgetGraph(data, aggregated)
+    : createTransactionsGraph(data);
+}
+
+export function buildSankeyData(
+  baseGraph: Graph,
+  topNcategories: number,
+  categories: CategoryGroupEntity[],
+  categorySort: SortMode,
+  layerFrom: GraphLayers,
+  layerTo: GraphLayers,
+): SankeyData {
+  const graph = cloneGraph(baseGraph);
+
+  const processedGraph = processGraphData(
+    graph,
+    topNcategories,
+    categories,
+    categorySort,
+    layerFrom,
+    layerTo,
+  );
+
+  return convertToSankeyData(processedGraph);
 }
 
 export function createBudgetSpreadsheet(
@@ -329,29 +364,36 @@ export function createTransactionsSpreadsheet(
 }
 
 function processGraphData(
-  categoryData: CategoryEntry[],
+  graph: Graph,
   topNcategories: number,
   categories: CategoryGroupEntity[],
   categorySort: SortMode,
-  setData: (data: ReturnType<typeof convertToSankeyData>) => void,
   layerFrom: GraphLayers,
   layerTo: GraphLayers,
-  aggregated?: AggregatedBudget,
-) {
-  let graph: Graph;
-  if (aggregated) {
-    graph = createBudgetGraph(categoryData, aggregated);
-  } else {
-    graph = createTransactionsGraph(categoryData);
-  }
+): Graph {
   groupOtherCategories(graph, topNcategories, categorySort);
   const sortedGraph = sortGraph(graph, categorySort, categories);
   addPercentageLabels(sortedGraph);
   addColors(sortedGraph);
+  cleanUpNodes(sortedGraph);
   addHiddenNodes(sortedGraph);
   filterGraphByLayers(sortedGraph, layerFrom, layerTo);
-  cleanUpNodes(sortedGraph);
-  setData(convertToSankeyData(sortedGraph));
+
+  return sortedGraph;
+}
+
+function cloneGraph(graph: Graph): Graph {
+  const clonedGraph: Graph = new Map();
+
+  for (const [key, node] of graph) {
+    clonedGraph.set(key, {
+      ...node,
+      to: new Map(node.to),
+      tooltipInfo: node.tooltipInfo?.map(info => ({ ...info })),
+    });
+  }
+
+  return clonedGraph;
 }
 
 // Filter budget category groups to only those matching the user's conditions.

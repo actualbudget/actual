@@ -38,10 +38,12 @@ import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ModeButton } from '#components/reports/ModeButton';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import {
+  buildSankeyData,
+  createBaseGraphSpreadsheet,
   GRAPH_LAYER_ORDER,
   GraphLayers,
-  createSpreadsheet as sankeySpreadsheet,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
+import type { Graph } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
 import { useCategories } from '#hooks/useCategories';
@@ -51,7 +53,6 @@ import { useLocale } from '#hooks/useLocale';
 import { useNavigate } from '#hooks/useNavigate';
 import { useResizeObserver } from '#hooks/useResizeObserver';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
-import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
@@ -481,22 +482,18 @@ function SankeyInner({ widget }: SankeyInnerProps) {
   const { data: { grouped: groupedCategories = [] } = { grouped: [] } } =
     useCategories();
 
-  const reportParams = useMemo(() => {
+  const baseGraphParams = useMemo(() => {
     if (!datesInitialized) {
       return null;
     }
 
-    return sankeySpreadsheet(
+    return createBaseGraphSpreadsheet(
       start,
       end,
       groupedCategories,
       conditions,
       conditionsOp,
       graphMode,
-      topN,
-      categorySort,
-      layerFrom,
-      layerTo,
       groupAccounts,
     );
   }, [
@@ -507,28 +504,45 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     conditions,
     conditionsOp,
     graphMode,
-    topN,
-    categorySort,
-    layerFrom,
-    layerTo,
     groupAccounts,
   ]);
 
-  const defaultGetData = async (
-    spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: SankeyData) => void,
-  ) => setData({ nodes: [], links: [] });
+  const defaultGetBaseGraph = async (
+    _spreadsheet: unknown,
+    setData: (data: Graph) => void,
+  ) => setData(new Map());
 
-  const data = useReport('sankey', reportParams ?? defaultGetData);
-  const dataRef = useRef(data);
+  const baseGraph = useReport('sankey', baseGraphParams ?? defaultGetBaseGraph);
+  const baseGraphRef = useRef(baseGraph);
 
   useEffect(() => {
-    if (data) {
-      dataRef.current = data;
+    if (baseGraph) {
+      baseGraphRef.current = baseGraph;
     }
-  }, [data]);
+  }, [baseGraph]);
 
-  const displayData = data || dataRef.current;
+  const displayBaseGraph = baseGraph || baseGraphRef.current;
+  const displayData: SankeyData | null = useMemo(() => {
+    if (!displayBaseGraph) {
+      return null;
+    }
+
+    return buildSankeyData(
+      displayBaseGraph,
+      topN,
+      groupedCategories,
+      categorySort,
+      layerFrom,
+      layerTo,
+    );
+  }, [
+    displayBaseGraph,
+    topN,
+    groupedCategories,
+    categorySort,
+    layerFrom,
+    layerTo,
+  ]);
 
   useEffect(() => {
     async function run() {
@@ -857,7 +871,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                       flexGrow: 1,
                       padding: 10,
                       paddingTop: 10,
-                      minHeight: 500,
                     }}
                   >
                     <SankeyGraph
