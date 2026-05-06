@@ -7,6 +7,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { SankeyWidget } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
+import debounce from 'lodash/debounce';
 
 import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
@@ -53,8 +54,26 @@ export function SankeyCard({
   const mode = meta?.mode ?? 'spent';
 
   const [cardHeight, setCardHeight] = useState(0);
+  const throttledSetCardHeight = useMemo(
+    () =>
+      debounce(
+        (height: number) => {
+          setCardHeight(prev => (prev === height ? prev : height));
+        },
+        200,
+        { leading: true, trailing: true, maxWait: 100 },
+      ),
+    [],
+  );
+
+  useEffect(() => {
+    return () => {
+      throttledSetCardHeight.cancel();
+    };
+  }, [throttledSetCardHeight]);
+
   const containerRef = useResizeObserver<HTMLDivElement>(rect => {
-    setCardHeight(rect.height);
+    throttledSetCardHeight(rect.height);
   });
 
   const HEADER_HEIGHT = 82;

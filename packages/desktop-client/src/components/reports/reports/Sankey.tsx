@@ -27,6 +27,7 @@ import type {
   TimeFrame,
 } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
+import debounce from 'lodash/debounce';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
@@ -400,8 +401,26 @@ function SankeyInner({ widget }: SankeyInnerProps) {
   );
 
   const [cardHeight, setCardHeight] = useState(0);
+  const throttledSetCardHeight = useMemo(
+    () =>
+      debounce(
+        (height: number) => {
+          setCardHeight(prev => (prev === height ? prev : height));
+        },
+        200,
+        { leading: true, trailing: true, maxWait: 100 },
+      ),
+    [],
+  );
+
+  useEffect(() => {
+    return () => {
+      throttledSetCardHeight.cancel();
+    };
+  }, [throttledSetCardHeight]);
+
   const containerRef = useResizeObserver<HTMLDivElement>(rect => {
-    setCardHeight(rect.height);
+    throttledSetCardHeight(rect.height);
   });
 
   const HEADER_HEIGHT = 0;
