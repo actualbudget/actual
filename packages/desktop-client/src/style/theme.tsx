@@ -13,12 +13,14 @@ import {
 import type { BaseTheme } from './customThemes';
 import * as darkTheme from './themes/dark';
 import * as lightTheme from './themes/light';
+import * as mechamTheme from './themes/mecham';
 import * as midnightTheme from './themes/midnight';
 
 const themes = {
   light: { name: 'Light', colors: lightTheme },
   dark: { name: 'Dark', colors: darkTheme },
   midnight: { name: 'Midnight', colors: midnightTheme },
+  mecham: { name: 'Mecham', colors: mechamTheme },
   auto: { name: 'System default', colors: darkTheme },
 } as const;
 
@@ -109,7 +111,11 @@ export function ThemeStyle() {
     'installedCustomDarkTheme',
   );
   const [themeColors, setThemeColors] = useState<
-    typeof lightTheme | typeof darkTheme | typeof midnightTheme | undefined
+    | typeof lightTheme
+    | typeof darkTheme
+    | typeof midnightTheme
+    | typeof mechamTheme
+    | undefined
   >(undefined);
 
   useEffect(() => {
