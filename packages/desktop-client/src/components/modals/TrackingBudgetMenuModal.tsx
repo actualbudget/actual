@@ -42,6 +42,7 @@ export function TrackingBudgetMenuModal({
   onCopyLastMonthAverage,
   onSetMonthsAverage,
   onApplyBudgetTemplate,
+  onCopyUntilYearEnd,
   onEditNotes,
   month,
 }: TrackingBudgetMenuModalProps) {
@@ -200,6 +201,7 @@ export function TrackingBudgetMenuModal({
               onCopyLastMonthAverage={onCopyLastMonthAverage}
               onSetMonthsAverage={onSetMonthsAverage}
               onApplyBudgetTemplate={onApplyBudgetTemplate}
+              onCopyUntilYearEnd={onCopyUntilYearEnd}
             />
           )}
         </>
