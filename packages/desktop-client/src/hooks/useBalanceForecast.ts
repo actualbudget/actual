@@ -17,6 +17,28 @@ type UseBalanceForecastParams = {
   enabled?: boolean;
 };
 
+export function buildBalanceForecastRequest({
+  accountIds,
+  conditions,
+  conditionsOp,
+  startDate,
+  endDate,
+  includeAccountlessSchedules,
+  source = 'schedules',
+}: UseBalanceForecastParams) {
+  return Object.fromEntries(
+    Object.entries({
+      accountIds,
+      conditions,
+      conditionsOp,
+      startDate,
+      endDate,
+      includeAccountlessSchedules,
+      source,
+    }).filter(([, value]) => value !== undefined),
+  );
+}
+
 export function useBalanceForecast({
   accountIds,
   conditions,
@@ -41,15 +63,18 @@ export function useBalanceForecast({
       },
     ],
     queryFn: async (): Promise<ForecastResult> =>
-      send('forecast/generate', {
-        accountIds,
-        conditions,
-        conditionsOp,
-        startDate,
-        endDate,
-        includeAccountlessSchedules,
-        source,
-      }),
+      send(
+        'forecast/generate',
+        buildBalanceForecastRequest({
+          accountIds,
+          conditions,
+          conditionsOp,
+          startDate,
+          endDate,
+          includeAccountlessSchedules,
+          source,
+        }),
+      ),
     placeholderData: keepPreviousData,
     enabled,
   });
