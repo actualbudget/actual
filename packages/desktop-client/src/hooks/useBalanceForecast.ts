@@ -1,6 +1,9 @@
 import { send } from '@actual-app/core/platform/client/connection';
 import type { RuleConditionEntity } from '@actual-app/core/types/models';
-import type { ForecastResult } from '@actual-app/core/types/models/forecast';
+import type {
+  ForecastResult,
+  ForecastSource,
+} from '@actual-app/core/types/models/forecast';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 type UseBalanceForecastParams = {
@@ -10,6 +13,7 @@ type UseBalanceForecastParams = {
   startDate: string;
   endDate: string;
   includeAccountlessSchedules?: boolean;
+  source?: ForecastSource;
   enabled?: boolean;
 };
 
@@ -20,6 +24,7 @@ export function useBalanceForecast({
   startDate,
   endDate,
   includeAccountlessSchedules,
+  source = 'schedules',
   enabled = true,
 }: UseBalanceForecastParams) {
   return useQuery({
@@ -32,6 +37,7 @@ export function useBalanceForecast({
         startDate,
         endDate,
         includeAccountlessSchedules: includeAccountlessSchedules ?? false,
+        source,
       },
     ],
     queryFn: async (): Promise<ForecastResult> =>
@@ -42,6 +48,7 @@ export function useBalanceForecast({
         startDate,
         endDate,
         includeAccountlessSchedules,
+        source,
       }),
     placeholderData: keepPreviousData,
     enabled,
