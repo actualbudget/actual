@@ -9,7 +9,10 @@ import type {
 } from '@actual-app/core/server/api-models';
 import { lib } from '@actual-app/core/server/main';
 import type { Query } from '@actual-app/core/shared/query';
-import type { ImportTransactionsOpts } from '@actual-app/core/types/api-handlers';
+import type {
+  ExternalSyncMetadataInput,
+  ImportTransactionsOpts,
+} from '@actual-app/core/types/api-handlers';
 import type { Handlers } from '@actual-app/core/types/handlers';
 import type {
   ImportTransactionEntity,
@@ -177,6 +180,17 @@ export function updateAccount(
   fields: Partial<APIAccountEntity>,
 ) {
   return send('api/account-update', { id, fields });
+}
+
+export function linkExternalSyncAccount(
+  id: APIAccountEntity['id'],
+  metadata: ExternalSyncMetadataInput,
+) {
+  return send('api/account-external-sync-link', { id, metadata });
+}
+
+export function unlinkExternalSyncAccount(id: APIAccountEntity['id']) {
+  return send('api/account-external-sync-unlink', { id });
 }
 
 export function closeAccount(

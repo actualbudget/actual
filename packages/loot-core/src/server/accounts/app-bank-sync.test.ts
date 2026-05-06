@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import * as asyncStorage from '#platform/server/asyncStorage';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
 
@@ -12,6 +13,7 @@ vi.mock('./sync', async () => ({
 }));
 
 const simpleFinBatchSyncHandler = app.handlers['simplefin-batch-sync'];
+const accountsBankSyncHandler = app.handlers['accounts-bank-sync'];
 
 function insertBank(bank: { id: string; bank_id: string; name: string }) {
   db.runQuery(
@@ -41,6 +43,10 @@ async function setupSimpleFinAccounts(
 
 beforeEach(async () => {
   vi.resetAllMocks();
+  vi.mocked(asyncStorage.multiGet).mockResolvedValue({
+    'user-id': 'user-1',
+    'user-key': 'key-1',
+  });
   await global.emptyDatabase()();
   await loadMappings();
 });
@@ -132,6 +138,29 @@ describe('simpleFinBatchSync', () => {
       // Account 2 should have no errors
       const acct2Result = result.find(r => r.accountId === 'acct2');
       expect(acct2Result!.res.errors).toHaveLength(0);
+    });
+  });
+});
+
+describe('accountsBankSync', () => {
+  it('skips externally linked accounts', async () => {
+    insertBank({ id: 'bank1', bank_id: 'external:bank-1', name: 'External' });
+    await db.insertAccount({
+      id: 'acct-external',
+      name: 'External Checking',
+      bank: 'bank1',
+      account_id: 'external-account-1',
+      account_sync_source: 'external',
+    });
+
+    const result = await accountsBankSyncHandler({ ids: ['acct-external'] });
+
+    expect(bankSync.syncAccount).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      errors: [],
+      newTransactions: [],
+      matchedTransactions: [],
+      updatedAccounts: [],
     });
   });
 });

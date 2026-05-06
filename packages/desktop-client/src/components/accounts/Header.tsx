@@ -206,10 +206,18 @@ export function AccountHeader({
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const locale = useLocale();
 
-  let canSync = !!(account?.account_id && isUsingServer);
+  let canSync = !!(
+    account?.account_id &&
+    account.account_sync_source !== 'external' &&
+    isUsingServer
+  );
   if (!account) {
     // All accounts - check for any syncable account
-    canSync = !!accounts.find(account => !!account.account_id) && isUsingServer;
+    canSync =
+      !!accounts.find(
+        account =>
+          !!account.account_id && account.account_sync_source !== 'external',
+      ) && isUsingServer;
   }
 
   // Only show the ability to make linked transfers on multi-account views.

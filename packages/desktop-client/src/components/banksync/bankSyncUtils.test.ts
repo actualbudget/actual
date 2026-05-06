@@ -48,6 +48,7 @@ describe('bankSyncUtils', () => {
     expect(readable.goCardless).toBe('GoCardless');
     expect(readable.simpleFin).toBe('SimpleFIN');
     expect(readable.pluggyai).toBe('Pluggy.ai');
+    expect(readable.external).toBe('translated:External');
     expect(readable.unlinked).toBe('translated:Unlinked');
   });
 });
