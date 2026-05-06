@@ -65,6 +65,10 @@ jobs:
           ref: ${{ steps.pr.outputs.head_sha }}
           persist-credentials: false
 
+      - name: Trust workspace directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+        shell: bash
+
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
@@ -87,9 +91,6 @@ jobs:
       - name: Create patch with PNG changes only
         id: create-patch
         run: |
-          # Trust the repository directory (required for container environments)
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
-
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
