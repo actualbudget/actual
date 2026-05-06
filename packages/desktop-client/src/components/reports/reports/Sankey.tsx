@@ -49,6 +49,7 @@ import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormatList } from '#hooks/useFormatList';
 import { useLocale } from '#hooks/useLocale';
 import { useNavigate } from '#hooks/useNavigate';
+import { useResizeObserver } from '#hooks/useResizeObserver';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -71,12 +72,16 @@ export function Sankey() {
 
 type GraphMode = 'budgeted' | 'spent';
 
-const TOP_N_OPTIONS = [10, 15, 20, 25, 30] as const;
+const TOP_N_OPTIONS = [Infinity, 10, 15, 20, 25, 30] as const;
 
 type TopNSelectorProps = {
   value: number;
   onChange: (value: number) => void;
 };
+
+function displayN(n: number, t: Function): string {
+  return n === Infinity ? t('All') : String(n);
+}
 
 function TopNSelector({ value, onChange }: TopNSelectorProps) {
   const { t } = useTranslation();
@@ -92,7 +97,9 @@ function TopNSelector({ value, onChange }: TopNSelectorProps) {
         aria-label={t('Change category limit')}
       >
         <SvgList style={{ width: 12, height: 12 }} />
-        <span style={{ marginLeft: 5 }}>{t('Show {{n}}', { n: value })}</span>
+        <span style={{ marginLeft: 5 }}>
+          {t('Show up to {{n}}', { n: displayN(value, t) })}
+        </span>
       </Button>
       <Popover
         triggerRef={triggerRef}
@@ -107,7 +114,7 @@ function TopNSelector({ value, onChange }: TopNSelectorProps) {
           }}
           items={TOP_N_OPTIONS.map(n => ({
             name: String(n),
-            text: t('Show {{n}}', { n }),
+            text: t('Show up to {{n}}', { n: displayN(n, t) }),
           }))}
         />
       </Popover>
@@ -390,6 +397,20 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     widget?.meta?.topNcategories ?? 15,
   );
 
+  const [cardHeight, setCardHeight] = useState(0);
+  const containerRef = useResizeObserver<HTMLDivElement>(rect => {
+    setCardHeight(rect.height);
+  });
+
+  const HEADER_HEIGHT = 0;
+  const PX_PER_NODE = 35;
+  const heightBasedTopN = Math.max(
+    2,
+    Math.floor((cardHeight - HEADER_HEIGHT) / PX_PER_NODE),
+  );
+
+  const topN = Math.min(topNcategories, heightBasedTopN);
+
   const [categorySort, setCategorySort] = useState<
     'per-group' | 'global' | 'budget-order'
   >(widget?.meta?.categorySort ?? 'per-group');
@@ -472,7 +493,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       conditions,
       conditionsOp,
       graphMode,
-      topNcategories,
+      topN,
       categorySort,
       layerFrom,
       layerTo,
@@ -486,7 +507,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     conditions,
     conditionsOp,
     graphMode,
-    topNcategories,
+    topN,
     categorySort,
     layerFrom,
     layerTo,
@@ -829,11 +850,22 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                 {displayData &&
                 displayData.links &&
                 displayData.links.length > 0 ? (
-                  <SankeyGraph
-                    style={{ flexGrow: 1 }}
-                    data={displayData}
-                    showPercentages={showPercentages}
-                  />
+                  <View
+                    ref={containerRef}
+                    style={{
+                      flexDirection: 'column',
+                      flexGrow: 1,
+                      padding: 10,
+                      paddingTop: 10,
+                      minHeight: 500,
+                    }}
+                  >
+                    <SankeyGraph
+                      style={{ flexGrow: 1 }}
+                      data={displayData}
+                      showPercentages={showPercentages}
+                    />
+                  </View>
                 ) : (
                   <View
                     style={{

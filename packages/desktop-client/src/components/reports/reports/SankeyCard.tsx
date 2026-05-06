@@ -15,7 +15,6 @@ import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import {
   GraphLayers,
-  // compactSankeyData,
   createSpreadsheet as sankeySpreadsheet,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
@@ -57,12 +56,11 @@ export function SankeyCard({
   });
 
   const HEADER_HEIGHT = 82;
-  const PX_PER_NODE = 50;
+  const PX_PER_NODE = 25;
   const heightBasedTopN = Math.max(
     2,
     Math.floor((cardHeight - HEADER_HEIGHT) / PX_PER_NODE),
   );
-  const topN = meta?.topNcategories ?? heightBasedTopN;
 
   const isGraphLayer = (value: unknown): value is GraphLayers =>
     typeof value === 'string' &&
@@ -102,7 +100,7 @@ export function SankeyCard({
         meta?.conditions ?? [],
         meta?.conditionsOp ?? 'and',
         mode,
-        topN,
+        heightBasedTopN,
         meta?.categorySort,
         layerFrom,
         layerTo,
@@ -115,7 +113,7 @@ export function SankeyCard({
       meta?.conditions,
       meta?.conditionsOp,
       mode,
-      topN,
+      heightBasedTopN,
       meta?.categorySort,
       layerFrom,
       layerTo,
