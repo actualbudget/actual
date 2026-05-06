@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import React from 'react';
 import type {
   ComponentProps,
   ComponentType,
@@ -7,6 +6,7 @@ import type {
   ReactNode,
   SVGProps,
 } from 'react';
+import React from 'react';
 
 import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
@@ -27,6 +27,7 @@ type ItemProps = {
   onClick?: ComponentProps<typeof ItemContent>['onClick'];
   forceHover?: boolean;
   forceActive?: boolean;
+  buttonProps?: ComponentProps<typeof ItemContent>['buttonProps'];
 };
 
 export function Item({
@@ -39,6 +40,7 @@ export function Item({
   indent = 0,
   forceHover = false,
   forceActive = false,
+  buttonProps,
 }: ItemProps) {
   const hoverStyle = {
     backgroundColor: theme.sidebarItemBackgroundHover,
@@ -52,7 +54,7 @@ export function Item({
         height: 20,
       }}
     >
-      <Icon width={15} height={15} />
+      <Icon width={15} height={15} aria-hidden focusable={false} />
       <Block style={{ marginLeft: 8 }}>{title}</Block>
       <View style={{ flex: 1 }} />
     </View>
@@ -80,6 +82,7 @@ export function Item({
         }}
         to={to}
         onClick={onClick}
+        buttonProps={buttonProps}
       >
         {content}
       </ItemContent>

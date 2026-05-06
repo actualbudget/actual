@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
 import type { CSSProperties } from 'react';
+import React, { useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 
@@ -91,6 +91,8 @@ export function Sidebar() {
       >
         <View
           innerRef={containerRef}
+          role="navigation"
+          aria-label={t('Primary navigation')}
           className={css({
             color: theme.sidebarItemText,
             height: '100%',

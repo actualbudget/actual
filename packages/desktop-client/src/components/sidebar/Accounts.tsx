@@ -98,6 +98,7 @@ export function Accounts() {
           style={{ fontWeight, marginTop: 15 }}
           isExactPathMatch
           balanceTestId="sidebar-all-accounts-balance"
+          testId="sidebar-all-accounts"
         />
 
         {onBudgetAccounts.length > 0 && (
@@ -112,6 +113,7 @@ export function Accounts() {
             }}
             titleAccount
             balanceTestId="sidebar-on-budget-balance"
+            testId="sidebar-on-budget-accounts"
           />
         )}
 
@@ -129,6 +131,7 @@ export function Accounts() {
             onDragChange={onDragChange}
             onDrop={onReorder}
             outerStyle={makeDropPadding(i)}
+            testId={`account-${account.id}`}
           />
         ))}
 
@@ -144,6 +147,7 @@ export function Accounts() {
             }}
             titleAccount
             balanceTestId="sidebar-off-budget-balance"
+            testId="sidebar-off-budget-accounts"
           />
         )}
 
@@ -161,6 +165,7 @@ export function Accounts() {
             onDragChange={onDragChange}
             onDrop={onReorder}
             outerStyle={makeDropPadding(i)}
+            testId={`account-${account.id}`}
           />
         ))}
 
@@ -174,6 +179,7 @@ export function Accounts() {
             }
             onClick={onToggleClosedAccounts}
             bold
+            testId="sidebar-closed-accounts"
           />
         )}
 
@@ -187,6 +193,7 @@ export function Accounts() {
               query={bindings.accountBalance(account.id)}
               onDragChange={onDragChange}
               onDrop={onReorder}
+              testId={`account-${account.id}`}
             />
           ))}
       </View>
