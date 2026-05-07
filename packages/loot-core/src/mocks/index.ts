@@ -59,6 +59,11 @@ function emptySyncFields(): Pick<
   | 'balance_limit'
   | 'account_sync_source'
   | 'last_sync'
+  | 'website'
+  | 'icon'
+  | 'bankIcon'
+  | 'displayIcon'
+  | 'displayWebsite'
 > {
   return {
     account_id: null,
@@ -72,6 +77,11 @@ function emptySyncFields(): Pick<
     balance_limit: null,
     account_sync_source: null,
     last_sync: null,
+    website: null,
+    icon: null,
+    bankIcon: null,
+    displayIcon: null,
+    displayWebsite: null,
   };
 }
 
