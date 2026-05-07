@@ -1,5 +1,19 @@
 # Release Notes
 
+## 26.5.1
+
+Release date: 2026-05-08
+
+This patch release delivers bugfixes for authentication rate limiting, self-signed certificate handling, and UUID generation compatibility in insecure context (HTTP).
+
+**Docker Tag: 26.5.1**
+
+#### Bugfixes
+
+- [#7707](https://github.com/actualbudget/actual/pull/7707) Count only failed login attempts against the authentication rate limit — thanks @danielhopkins
+- [#7713](https://github.com/actualbudget/actual/pull/7713) Fix Desktop app self-signed certificates functionality — thanks @MikesGlitch
+- [#7734](https://github.com/actualbudget/actual/pull/7734) Revert UUID generation to use `uuid` library instead of `crypto.randomUUID()`. — thanks @MatissJanis
+
 ## 26.5.0
 
 Release date: 2026-05-03
@@ -80,6 +94,7 @@ This release introduces powerful new reporting capabilities as well as numerous 
 - [#7619](https://github.com/actualbudget/actual/pull/7619) Sankey card should follow report settings — thanks @matt-fidd
 - [#7623](https://github.com/actualbudget/actual/pull/7623) Fix infinite loop when applying remainder templates with an amount that can not be divided — thanks @matt-fidd
 - [#7632](https://github.com/actualbudget/actual/pull/7632) Fix Sankey income being shown as spent money, when payee was not set — thanks @emiltb
+- [#7656](https://github.com/actualbudget/actual/pull/7656) Fix shared worker resumption after tab suspend — thanks @jfdoming
 
 #### Maintenance
 
