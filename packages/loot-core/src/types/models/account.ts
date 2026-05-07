@@ -21,6 +21,11 @@ export type AccountEntity = {
   balance_limit: number | null;
   account_sync_source: AccountSyncSource | null;
   last_sync: string | null;
+  website: string | null;
+  icon: string | null;
+  bankIcon: string | null;
+  displayIcon: string | null;
+  displayWebsite: string | null;
 };
 
 export type AccountSyncSource = BankSyncProviders;
