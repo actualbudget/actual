@@ -27,7 +27,11 @@ export function getExternalBankKey(
   institutionName: string,
   institutionExternalId?: string | null,
 ) {
-  return `external:${(institutionExternalId || institutionName).trim()}`;
+  const normalizedExternalId = institutionExternalId?.trim();
+
+  return normalizedExternalId
+    ? `external:id:${normalizedExternalId}`
+    : `external:name:${institutionName.trim()}`;
 }
 
 export async function findOrCreateExternalBank(

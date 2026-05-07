@@ -390,6 +390,8 @@ async function linkExternalSyncAccount({
     throw new Error('Only the "external" sync source is supported.');
   }
 
+  await unlinkAccount({ id });
+
   const bank = await link.findOrCreateExternalBank(
     metadata.institutionName,
     metadata.institutionExternalId,
@@ -416,16 +418,6 @@ async function getExternalSyncAccount({
 }: {
   id: AccountEntity['id'];
 }): Promise<ExternalSyncAccountInfo> {
-  const prefRows = await db.all<Pick<db.DbPreference, 'id' | 'value'>>(
-    `SELECT id, value FROM preferences WHERE id IN (?, ?, ?, ?, ?)`,
-    [
-      `sync-import-pending-${id}`,
-      `sync-import-notes-${id}`,
-      `sync-reimport-deleted-${id}`,
-      `sync-import-transactions-${id}`,
-      `sync-update-dates-${id}`,
-    ],
-  );
   const accRow = await db.first<
     db.DbAccount & {
       bank_name: db.DbBank['name'] | null;
@@ -443,6 +435,17 @@ async function getExternalSyncAccount({
     throw APIError('external-account-not-found');
   }
 
+  const prefRows = await db.all<Pick<db.DbPreference, 'id' | 'value'>>(
+    `SELECT id, value FROM preferences WHERE id IN (?, ?, ?, ?, ?)`,
+    [
+      `sync-import-pending-${id}`,
+      `sync-import-notes-${id}`,
+      `sync-reimport-deleted-${id}`,
+      `sync-import-transactions-${id}`,
+      `sync-update-dates-${id}`,
+    ],
+  );
+
   const prefsById = prefRows.reduce<Record<string, string | null | undefined>>(
     (carry, row) => {
       carry[row.id] = row.value;
@@ -454,10 +457,21 @@ async function getExternalSyncAccount({
     String(prefsById[prefId] ?? String(defaultValue)) === 'true';
 
   const linked = accRow.account_sync_source === 'external';
-  const institutionExternalId =
+  const bankKey =
     linked && accRow.bank_id && accRow.bank_id.startsWith('external:')
-      ? accRow.bank_id.slice('external:'.length)
+      ? accRow.bank_id
       : null;
+  let institutionExternalId: string | null = null;
+  if (bankKey?.startsWith('external:id:')) {
+    institutionExternalId = bankKey.slice('external:id:'.length);
+  } else if (bankKey?.startsWith('external:name:')) {
+    institutionExternalId = null;
+  } else if (bankKey != null) {
+    // Backward compatibility for earlier external:<value> rows.
+    const legacySuffix = bankKey.slice('external:'.length);
+    institutionExternalId =
+      legacySuffix !== accRow.bank_name ? legacySuffix : null;
+  }
 
   return {
     id: accRow.id,
