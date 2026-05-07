@@ -48,7 +48,7 @@ export default defineConfig(({ mode }) => {
             'process/browser': 'process',
           },
         },
-        external: [],
+        external: ['sharp'],
       },
       sourcemap: true,
       minify: false,
