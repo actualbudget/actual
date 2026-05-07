@@ -7,6 +7,8 @@ export class BudgetPage {
   readonly budgetSummary: Locator;
   readonly budgetTable: Locator;
   readonly budgetTableTotals: Locator;
+  readonly selectedMonthButton: Locator;
+  readonly nextMonthButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -14,6 +16,8 @@ export class BudgetPage {
     this.budgetSummary = page.getByTestId('budget-summary');
     this.budgetTable = page.getByTestId('budget-table');
     this.budgetTableTotals = this.budgetTable.getByTestId('budget-totals');
+    this.selectedMonthButton = page.getByTestId('selected-budget-month');
+    this.nextMonthButton = page.getByTitle('Next month');
   }
 
   /**
@@ -69,8 +73,65 @@ export class BudgetPage {
     };
   }
 
-  async showMoreMonths() {
-    await this.page.getByTestId('calendar-icon').first().click();
+  async setBudgetedAmount(
+    categoryName: string,
+    amount: string,
+    monthIndex = 0,
+  ) {
+    const row = this.budgetTable
+      .getByTestId('row')
+      .filter({ hasText: categoryName })
+      .first();
+    const budgetCell = row.getByTestId('budget').nth(monthIndex);
+
+    await budgetCell.click();
+    const input = budgetCell.locator('input');
+    await input.waitFor({ state: 'visible' });
+    await input.fill(amount);
+    await input.press('Enter');
+  }
+
+  async getSelectedMonth() {
+    const selectedMonth = await this.selectedMonthButton.textContent();
+
+    if (!selectedMonth) {
+      throw new Error('Failed to get the selected month.');
+    }
+
+    return selectedMonth;
+  }
+
+  async #waitForNewMonthToLoad({
+    currentMonth,
+    errorMessage,
+    maxAttempts = 3,
+  }: {
+    currentMonth: string;
+    errorMessage: string;
+    maxAttempts: number;
+  }) {
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const newMonth = await this.getSelectedMonth();
+      if (newMonth !== currentMonth) {
+        return newMonth;
+      }
+      await this.page.waitForTimeout(500);
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  async goToNextMonth({ maxAttempts = 3 }: { maxAttempts?: number } = {}) {
+    const currentMonth = await this.getSelectedMonth();
+
+    await this.nextMonthButton.click();
+
+    return await this.#waitForNewMonthToLoad({
+      currentMonth,
+      maxAttempts,
+      errorMessage:
+        'Failed to navigate to the next month after maximum attempts.',
+    });
   }
 
   async getBalanceForRow(idx: number) {

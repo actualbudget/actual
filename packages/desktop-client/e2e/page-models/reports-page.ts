@@ -87,6 +87,18 @@ export class ReportsPage {
       .waitFor({ state: 'visible' });
   }
 
+  async selectForecastSource(source: string) {
+    await this.pageContent
+      .getByRole('button', { name: 'Scheduled transactions' })
+      .click();
+    const option = this.page.getByRole('button', { name: source });
+    await option.waitFor({ state: 'visible' });
+    await option.click();
+    await this.pageContent
+      .getByRole('button', { name: source })
+      .waitFor({ state: 'visible' });
+  }
+
   async addWidget(widgetName: string) {
     await this.pageContent
       .getByRole('button', { name: 'Add new widget' })
