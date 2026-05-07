@@ -30,6 +30,7 @@ function _authorize(
             country,
             maxConsentValidity,
             psuType = 'personal',
+            logo,
             onStateReady,
           }) => {
             const redirectUrl = `${window.location.origin}/enablebanking/auth_callback`;
@@ -106,8 +107,14 @@ function _authorize(
                 };
               }
 
-              const accounts: SyncServerEnableBankingAccount[] =
-                pollData?.data?.accounts ?? pollData?.accounts ?? [];
+              const accounts: SyncServerEnableBankingAccount[] = (
+                pollData?.data?.accounts ??
+                pollData?.accounts ??
+                []
+              ).map((acc: SyncServerEnableBankingAccount) => ({
+                ...acc,
+                logo: logo ?? undefined,
+              }));
 
               return { data: { accounts } };
             } finally {

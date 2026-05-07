@@ -23,7 +23,7 @@ const ALLOWED_CONTENT_TYPES = [
 type FaviconResult = {
   contentType: string;
   base64: string;
-  source: 'direct' | 'duckduckgo';
+  source: 'direct' | 'duckduckgo' | 'image';
 };
 
 class FaviconError extends Error {
@@ -345,20 +345,44 @@ export async function fetchFaviconForUrl(
   return tryDuckDuckGo(host);
 }
 
+/**
+ * Download a specific image URL and return it base64-encoded. Used for
+ * auto-import of curated institution logos (e.g. GoCardless's `logo` field
+ * on the institution record), where we already know the exact URL of the
+ * image and don't need to do favicon discovery on the bank's homepage.
+ *
+ * The same SSRF guards, size cap, and content-type allow-list as the
+ * favicon discovery flow apply.
+ */
+export async function fetchImageForUrl(
+  imageUrl: string,
+): Promise<FaviconResult> {
+  const url = normalizeUrl(imageUrl);
+  const dl = await downloadAsBase64(url.toString());
+  return { ...dl, source: 'image' };
+}
+
 const app = express();
 
 app.get('/', async (req: Request, res: ExpressResponse) => {
   const session = await validateSession(req, res);
   if (!session) return;
 
+  const imageTarget = req.query.image as string | undefined;
   const target = (req.query.url ?? req.query.domain) as string | undefined;
-  if (!target || typeof target !== 'string') {
-    res.status(400).json({ error: 'Missing url or domain parameter' });
+
+  if (
+    (!target || typeof target !== 'string') &&
+    (!imageTarget || typeof imageTarget !== 'string')
+  ) {
+    res.status(400).json({ error: 'Missing url, domain, or image parameter' });
     return;
   }
 
   try {
-    const result = await fetchFaviconForUrl(target);
+    const result = imageTarget
+      ? await fetchImageForUrl(imageTarget)
+      : await fetchFaviconForUrl(target!);
     res.set('Cache-Control', 'private, max-age=300');
     res.json(result);
   } catch (err) {

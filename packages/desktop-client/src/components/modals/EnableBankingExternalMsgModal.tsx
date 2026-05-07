@@ -29,6 +29,7 @@ type BankOption = {
   id: string;
   name: string;
   maxConsentValidity?: number;
+  logo?: string;
 };
 
 function useAvailableBanks(
@@ -73,6 +74,7 @@ function useAvailableBanks(
             id: `${aspsp.country}:${aspsp.name}`,
             name: aspsp.beta ? `${aspsp.name} ${t('(beta)')}` : aspsp.name,
             maxConsentValidity: aspsp.maximum_consent_validity,
+            logo: aspsp.logo,
           })),
         );
       }
@@ -208,6 +210,7 @@ export function EnableBankingExternalMsgModal({
         country: aspspCountry,
         maxConsentValidity: selectedBank?.maxConsentValidity,
         psuType,
+        logo: selectedBank?.logo,
         onStateReady: state => {
           if (myJumpId === jumpIdRef.current) {
             stateRef.current = state;
