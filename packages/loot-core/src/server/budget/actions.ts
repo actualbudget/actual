@@ -591,6 +591,31 @@ export async function transferCategory({
   });
 }
 
+export async function copyUntilYearEnd({
+  month,
+  category,
+}: {
+  month: string;
+  category: string;
+}): Promise<void> {
+  const amount = await getSheetValue(
+    monthUtils.sheetForMonth(month),
+    'budget-' + category,
+  );
+
+  const yearEnd = monthUtils.getYearEnd(month);
+  const { createdMonths } = sheet.get().meta();
+  const futureMonths = [...(createdMonths as Set<string>)]
+    .filter(m => m > month && m <= yearEnd)
+    .sort();
+
+  await batchMessages(async () => {
+    for (const futureMonth of futureMonths) {
+      void setBudget({ category, month: futureMonth, amount });
+    }
+  });
+}
+
 export async function setCategoryCarryover({
   startMonth,
   category,

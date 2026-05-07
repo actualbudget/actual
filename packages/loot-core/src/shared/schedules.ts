@@ -55,6 +55,16 @@ export function getStatusLabel(status: string) {
   }
 }
 
+/**
+ * Builds a query to check if each schedule already has a matching transaction.
+ *
+ * The date lower-bound varies:
+ * - `dateCond.op === 'is'` (one-time): exact `next_date`, no lookback.
+ * - `posts_transaction` (auto-posted recurring): exact `next_date`, since
+ *   auto-posted dates are always precise. A lookback here would cause
+ *   yesterday's transaction to falsely match today's occurrence.
+ * - Otherwise (manual recurring): 2-day lookback to catch early payments.
+ */
 export function getHasTransactionsQuery(schedules) {
   const filters = schedules.map(schedule => {
     const dateCond = schedule._conditions?.find(c => c.field === 'date');
@@ -65,7 +75,9 @@ export function getHasTransactionsQuery(schedules) {
           $gte:
             dateCond && dateCond.op === 'is'
               ? schedule.next_date
-              : monthUtils.subDays(schedule.next_date, 2),
+              : schedule.posts_transaction
+                ? schedule.next_date
+                : monthUtils.subDays(schedule.next_date, 2),
         },
       },
     };
