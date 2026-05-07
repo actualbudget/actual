@@ -605,6 +605,11 @@ handlers['api/account-external-sync-link'] = withMutation(async function ({
   await handlers['account-external-sync-link']({ id, metadata });
 });
 
+handlers['api/account-external-sync-get'] = async function ({ id }) {
+  checkFileOpen();
+  return handlers['account-external-sync-get']({ id });
+};
+
 handlers['api/account-external-sync-unlink'] = withMutation(async function ({
   id,
 }) {

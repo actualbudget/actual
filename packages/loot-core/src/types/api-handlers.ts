@@ -45,6 +45,28 @@ export type ExternalSyncMetadataInput = {
   lastSync?: string | null;
 };
 
+export type ExternalSyncAccountInfo = {
+  id: APIAccountEntity['id'];
+  linked: boolean;
+  syncSource: 'external' | null;
+  providerAccountId: string | null;
+  institutionName: string | null;
+  institutionExternalId: string | null;
+  mask: string | null;
+  officialName: string | null;
+  balanceCurrent: number | null;
+  balanceAvailable: number | null;
+  balanceLimit: number | null;
+  lastSync: string | null;
+  prefs: {
+    importPending: boolean;
+    importNotes: boolean;
+    reimportDeleted: boolean;
+    importTransactions: boolean;
+    updateDates: boolean;
+  };
+};
+
 export type ApiHandlers = {
   'api/batch-budget-start': () => Promise<void>;
 
@@ -163,6 +185,10 @@ export type ApiHandlers = {
     id: APIAccountEntity['id'];
     metadata: ExternalSyncMetadataInput;
   }) => Promise<void>;
+
+  'api/account-external-sync-get': (arg: {
+    id: APIAccountEntity['id'];
+  }) => Promise<ExternalSyncAccountInfo>;
 
   'api/account-external-sync-unlink': (arg: {
     id: APIAccountEntity['id'];

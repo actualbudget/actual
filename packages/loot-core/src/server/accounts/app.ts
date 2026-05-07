@@ -23,6 +23,7 @@ import { dayFromDate } from '#shared/months';
 import * as monthUtils from '#shared/months';
 import { amountToInteger } from '#shared/util';
 import type {
+  ExternalSyncAccountInfo,
   ExternalSyncMetadataInput,
   ImportTransactionsOpts,
 } from '#types/api-handlers';
@@ -58,6 +59,7 @@ export type AccountHandlers = {
   'simplefin-accounts-link': typeof linkSimpleFinAccount;
   'pluggyai-accounts-link': typeof linkPluggyAiAccount;
   'account-external-sync-link': typeof linkExternalSyncAccount;
+  'account-external-sync-get': typeof getExternalSyncAccount;
   'account-external-sync-unlink': typeof unlinkExternalSyncAccount;
   'account-create': typeof createAccount;
   'account-close': typeof closeAccount;
@@ -407,6 +409,77 @@ async function linkExternalSyncAccount({
   });
 
   return 'ok';
+}
+
+async function getExternalSyncAccount({
+  id,
+}: {
+  id: AccountEntity['id'];
+}): Promise<ExternalSyncAccountInfo> {
+  const prefRows = await db.all<Pick<db.DbPreference, 'id' | 'value'>>(
+    `SELECT id, value FROM preferences WHERE id IN (?, ?, ?, ?, ?)`,
+    [
+      `sync-import-pending-${id}`,
+      `sync-import-notes-${id}`,
+      `sync-reimport-deleted-${id}`,
+      `sync-import-transactions-${id}`,
+      `sync-update-dates-${id}`,
+    ],
+  );
+  const accRow = await db.first<
+    db.DbAccount & {
+      bank_name: db.DbBank['name'] | null;
+      bank_id: db.DbBank['bank_id'] | null;
+    }
+  >(
+    `SELECT accounts.*, banks.name as bank_name, banks.bank_id
+     FROM accounts
+     LEFT JOIN banks ON banks.id = accounts.bank
+     WHERE accounts.id = ?`,
+    [id],
+  );
+
+  if (!accRow) {
+    throw APIError('external-account-not-found');
+  }
+
+  const prefsById = prefRows.reduce<Record<string, string | null | undefined>>(
+    (carry, row) => {
+      carry[row.id] = row.value;
+      return carry;
+    },
+    {},
+  );
+  const getBooleanPref = (prefId: string, defaultValue: boolean) =>
+    String(prefsById[prefId] ?? String(defaultValue)) === 'true';
+
+  const linked = accRow.account_sync_source === 'external';
+  const institutionExternalId =
+    linked && accRow.bank_id && accRow.bank_id.startsWith('external:')
+      ? accRow.bank_id.slice('external:'.length)
+      : null;
+
+  return {
+    id: accRow.id,
+    linked,
+    syncSource: linked ? 'external' : null,
+    providerAccountId: linked ? (accRow.account_id ?? null) : null,
+    institutionName: linked ? (accRow.bank_name ?? null) : null,
+    institutionExternalId,
+    mask: linked ? (accRow.mask ?? null) : null,
+    officialName: linked ? (accRow.official_name ?? null) : null,
+    balanceCurrent: linked ? (accRow.balance_current ?? null) : null,
+    balanceAvailable: linked ? (accRow.balance_available ?? null) : null,
+    balanceLimit: linked ? (accRow.balance_limit ?? null) : null,
+    lastSync: linked ? (accRow.last_sync ?? null) : null,
+    prefs: {
+      importPending: getBooleanPref(`sync-import-pending-${id}`, true),
+      importNotes: getBooleanPref(`sync-import-notes-${id}`, true),
+      reimportDeleted: getBooleanPref(`sync-reimport-deleted-${id}`, true),
+      importTransactions: getBooleanPref(`sync-import-transactions-${id}`, true),
+      updateDates: getBooleanPref(`sync-update-dates-${id}`, false),
+    },
+  };
 }
 
 async function createAccount({
@@ -1351,6 +1424,7 @@ app.method('gocardless-accounts-link', linkGoCardlessAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);
 app.method('pluggyai-accounts-link', linkPluggyAiAccount);
 app.method('account-external-sync-link', linkExternalSyncAccount);
+app.method('account-external-sync-get', getExternalSyncAccount);
 app.method('account-external-sync-unlink', unlinkExternalSyncAccount);
 app.method('account-create', mutator(undoable(createAccount)));
 app.method('account-close', mutator(closeAccount));
