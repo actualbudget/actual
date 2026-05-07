@@ -1198,12 +1198,13 @@ export function addPercentageLabels(graph: Graph): void {
 
 function addColors(graph: Graph) {
   const colors = getColorScale('qualitative');
-  const keys = [...graph.keys()].sort();
 
-  keys.forEach((key, i) => {
+  for (const key of graph.keys()) {
     const node = graph.get(key);
-    if (node) node.color = colors[i % colors.length];
-  });
+    if (node) {
+      node.color = colors[colorIndexFromKey(key, colors.length)];
+    }
+  }
 
   setColor(graph, SpecialNodeKeys.ToBudget, theme.toBudgetPositive);
   graph.forEach((node, key) => {
@@ -1216,6 +1217,13 @@ function addColors(graph: Graph) {
   setColor(graph, SpecialNodeKeys.ForNextMonth, theme.reportsGray);
   setColor(graph, SpecialNodeKeys.Budgeted, theme.reportsBlue);
   setColor(graph, SpecialNodeKeys.AvailableIncome, theme.reportsBlue);
+}
+
+function colorIndexFromKey(key: string, colorCount: number): number {
+  // Use the first three chars of the key (UUID) as a stable random value
+  const hex = key.replace(/[^0-9a-f]/gi, '').slice(0, 3);
+  const val = parseInt(hex || '0', 16);
+  return val % colorCount;
 }
 
 function setColor(graph: Graph, key: NodeKey, color: string) {
