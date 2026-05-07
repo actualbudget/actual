@@ -38,7 +38,9 @@ Cetelem
 cimode
 Citi
 Citibank
+claude
 Cloudflare
+CLP
 CMCIFRPAXXX
 COBADEFF
 CODEOWNERS
@@ -53,6 +55,7 @@ crt
 CZK
 Danske
 datadir
+datamodel
 DATEDIF
 Depositos
 deselection
@@ -82,6 +85,7 @@ Globecard
 GLS
 gocardless
 Grafana
+Gruvbox
 HABAL
 Hampel
 HELADEF
@@ -89,6 +93,7 @@ HLOOKUP
 HUF
 IFERROR
 IFNA
+Ilavenil
 INDUSTRIEL
 INGBPLPW
 Ingo
@@ -127,6 +132,7 @@ murmurhash
 NETWORKDAYS
 nginx
 nodenext
+nord
 OIDC
 Okabe
 overbudgeted
@@ -148,6 +154,7 @@ QNTOFRP
 QONTO
 Raiffeisen
 REGEXREPLACE
+relinking
 revolut
 RIED
 RSchedule
@@ -180,6 +187,7 @@ TIMEFRAME
 touchscreen
 triaging
 tsgo
+tsgolint
 TWD
 UAH
 ubuntu
@@ -195,4 +203,6 @@ websecure
 WEEKNUM
 Widiba
 WOR
+worktree
 youngcw
+zizmor

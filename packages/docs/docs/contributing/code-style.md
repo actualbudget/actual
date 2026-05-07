@@ -84,6 +84,7 @@ Use custom hooks from `src/hooks` instead of importing directly from react-route
 
 ### Never Use
 
+- **`uuid` without destructuring**: Use `import { v4 as uuidv4 } from 'uuid'`
 - **Direct color imports**: Use theme instead of importing colors directly
 - **`@actual-app/web/*` imports in `loot-core`**: Don't import from web package in core
 

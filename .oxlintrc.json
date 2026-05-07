@@ -338,6 +338,11 @@
             "message": "Don't directly reference imports from other platforms"
           },
           {
+            "group": ["uuid"],
+            "importNames": ["*"],
+            "message": "Use `import { v4 as uuidv4 } from 'uuid'` instead"
+          },
+          {
             "group": ["**/style", "**/colors"],
             "importNames": ["colors"],
             "message": "Please use themes instead of colors"
