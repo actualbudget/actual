@@ -39,6 +39,8 @@ jobs:
         run: yarn constraints
       - name: Check tsconfig project references are in sync
         run: yarn check:tsconfig-references
+      - name: Check secure-context API deny list is up to date
+        run: yarn workspace eslint-plugin-actual run check:secure-context-list
   lint:
     needs: setup
     runs-on: ubuntu-latest

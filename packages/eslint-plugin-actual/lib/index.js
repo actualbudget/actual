@@ -14,6 +14,7 @@ module.exports = eslintCompatPlugin({
     'prefer-const': require('./rules/prefer-const'),
     'no-anchor-tag': require('./rules/no-anchor-tag'),
     'no-react-default-import': require('./rules/no-react-default-import'),
+    'no-secure-context-apis': require('./rules/no-secure-context-apis'),
     'prefer-subpath-imports': require('./rules/prefer-subpath-imports'),
     'enforce-boundaries': require('./rules/enforce-boundaries'),
     'no-extraneous-dependencies': require('./rules/no-extraneous-dependencies'),

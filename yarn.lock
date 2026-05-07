@@ -5029,6 +5029,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@mdn/browser-compat-data@npm:^6.0.0":
+  version: 6.1.5
+  resolution: "@mdn/browser-compat-data@npm:6.1.5"
+  checksum: 10/4fb08f12a8471d9b1b3f10aa0b674c0ab24edc2aa10abf284a4c407c2bd6d55b5ed469e21f465677ecc08eac288c360d751fb02e8147722282609943a2417959
+  languageName: node
+  linkType: hard
+
 "@mdx-js/mdx@npm:^3.0.0":
   version: 3.1.1
   resolution: "@mdx-js/mdx@npm:3.1.1"
@@ -15631,6 +15638,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "eslint-plugin-actual@workspace:packages/eslint-plugin-actual"
   dependencies:
+    "@mdn/browser-compat-data": "npm:^6.0.0"
     "@oxlint/plugins": "npm:^1.60.0"
     eslint-vitest-rule-tester: "npm:^3.1.0"
     vitest: "npm:^4.1.2"

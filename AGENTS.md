@@ -341,6 +341,7 @@ Always maintain newlines between import groups.
 - Import from `uuid` without destructuring: use `import { v4 as uuidv4 } from 'uuid'`
 - Import colors directly - use theme instead
 - Import `@actual-app/web/*` in `loot-core`
+- Use Web APIs that are only available in secure contexts (e.g. `crypto.randomUUID`, `crypto.subtle`, `navigator.clipboard`, `navigator.serviceWorker`) in browser-side code. Actual must run over plain HTTP from non-localhost hosts. The `actual/no-secure-context-apis` lint rule enforces this; the deny list is generated from `@mdn/browser-compat-data` by `packages/eslint-plugin-actual/lib/data/generate-secure-context-apis.mjs`.
 
 **Git Commands:**
 

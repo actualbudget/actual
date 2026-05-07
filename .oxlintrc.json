@@ -36,6 +36,7 @@
     "actual/prefer-const": "error",
     "actual/no-anchor-tag": "error",
     "actual/no-react-default-import": "error",
+    "actual/no-secure-context-apis": "error",
     "actual/prefer-subpath-imports": "error",
     "actual/enforce-boundaries": "error",
     "actual/no-extraneous-dependencies": "error",
@@ -371,6 +372,7 @@
       "rules": {
         "actual/no-untranslated-strings": "off",
         "actual/prefer-logger-over-console": "off",
+        "actual/no-secure-context-apis": "off",
         "typescript/unbound-method": "off"
       }
     },
@@ -433,6 +435,58 @@
         "typescript/no-base-to-string": "error",
         "typescript/no-unsafe-unary-minus": "error",
         "typescript/no-unsafe-type-assertion": "error"
+      }
+    },
+    // Server-side / Node-only code runs in environments where secure-context
+    // restrictions don't apply.
+    {
+      "files": [
+        "packages/sync-server/**/*",
+        "packages/api/**/*",
+        "packages/cli/**/*",
+        "packages/ci-actions/**/*",
+        "packages/loot-core/src/server/**/*",
+        "packages/loot-core/src/platform/server/**/*",
+        "packages/loot-core/migrations/**/*",
+        "packages/api/migrations/**/*",
+        "packages/desktop-electron/**/*",
+        "packages/eslint-plugin-actual/**/*"
+      ],
+      "rules": {
+        "actual/no-secure-context-apis": "off"
+      }
+    },
+    // Grandfathered violators of `actual/no-secure-context-apis`. These
+    // files predate the rule and use secure-context-only Web APIs directly;
+    // adding them to this list keeps existing code working while the rule
+    // prevents *new* call sites. Migrate a file off the list by replacing
+    // the offending API with a safe wrapper, then remove its entry.
+    {
+      "files": [
+        "packages/crdt/src/crdt/timestamp.ts",
+        "packages/desktop-client/src/accounts/mutations.ts",
+        "packages/desktop-client/src/budget/mutations.ts",
+        "packages/desktop-client/src/components/accounts/Account.tsx",
+        "packages/desktop-client/src/components/formula/QueryManager.tsx",
+        "packages/desktop-client/src/components/rules/RuleEditor.tsx",
+        "packages/desktop-client/src/components/settings/Encryption.tsx",
+        "packages/desktop-client/src/notes/DesktopLinkedNotes.tsx",
+        "packages/desktop-client/src/notes/MobileLinkedNotes.tsx",
+        "packages/desktop-client/src/notifications/notificationsSlice.ts",
+        "packages/desktop-client/src/payees/location-adapters.ts",
+        "packages/desktop-client/src/payees/mutations.ts",
+        "packages/desktop-client/src/reports/mutations.ts",
+        "packages/desktop-client/src/tags/mutations.ts",
+        "packages/desktop-client/src/util/ruleUtils.ts",
+        "packages/loot-core/src/mocks/budget.ts",
+        "packages/loot-core/src/mocks/index.ts",
+        "packages/loot-core/src/platform/client/connection/index.electron.ts",
+        "packages/loot-core/src/platform/client/connection/index.ts",
+        "packages/loot-core/src/platform/client/undo/index.ts",
+        "packages/loot-core/src/shared/transactions.ts"
+      ],
+      "rules": {
+        "actual/no-secure-context-apis": "off"
       }
     }
   ]
