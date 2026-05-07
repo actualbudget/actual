@@ -55,28 +55,42 @@ test.describe('Mobile Transactions', () => {
   });
 
   test('prefills a new transaction with URL search params', async () => {
-    const transactionEntryPage = await navigation.goToTransactionEntryPage();
-    await page.goto(
-      transactionEntryPage.page.url() +
-        '?category=Food&amount=23.42&account=HSBC&date=2025-10-31&cleared=true&payee=Kroger&notes=just+a+note',
+    const params =
+      'category=Food&amount=23.42&account=HSBC&date=2025-10-31&cleared=true&payee=Kroger&notes=just+a+note';
+    await page.evaluate(p => {
+      window.__navigate?.(`/transactions/new?${p}`);
+    }, params);
+    await page.waitForURL(
+      u =>
+        u.pathname === '/transactions/new' &&
+        u.searchParams.get('payee') === 'Kroger',
+      { timeout: 10_000 },
     );
     // Note: no easy way to test cleared checkbox
     await expect(page.getByTestId('transaction-form'))
       .toMatchAriaSnapshot(`- text: Amount
 - textbox
 - text: 23.42 Payee
-- button "Kroger" [disabled]
+- button "Kroger" [disabled]:
+  - img
+  - text: Kroger
 - text: Category
-- button "Food" [disabled]
+- button "Food" [disabled]:
+  - img
+  - text: Food
 - button "Split" [disabled]:
   - img
   - text: Split
 - text: Account
-- button "HSBC" [disabled]
+- button "HSBC" [disabled]:
+  - img
+  - text: HSBC
 - text: Date
+- img
 - textbox [disabled]: 2025-10-31
 - text: Cleared Notes
-- textbox [disabled]: just a note`);
+- img
+- textbox "Add a note (optional)" [disabled]: just a note`);
   });
 
   test('creates a transaction from `/accounts/:id` page', async () => {
