@@ -58,6 +58,16 @@ export const pluggyaiService = {
     }
   },
 
+  getItemById: async itemId => {
+    try {
+      const client = getPluggyClient();
+      return await client.fetchItem(itemId);
+    } catch (error) {
+      console.error(`Error fetching item: ${error.message}`);
+      throw error;
+    }
+  },
+
   getTransactionsByAccountId: async (accountId, startDate, pageSize, page) => {
     try {
       const client = getPluggyClient();

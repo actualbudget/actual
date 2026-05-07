@@ -9,7 +9,7 @@ export type GoCardlessInstitution = {
   bic?: string;
   transaction_total_days?: string;
   countries: string[];
-  logo: string;
+  logo?: string;
   identification_codes: string[];
 };
 
@@ -76,7 +76,8 @@ export type GoCardlessTransaction = {
 
 export type SyncServerGoCardlessAccount = {
   balance: number;
-  institution: string | { name: string };
+  /** Institution object from the sync-server after hydration. */
+  institution: Pick<GoCardlessInstitution, 'name' | 'logo'>;
   account_id: string;
   mask: string;
   name: string;
