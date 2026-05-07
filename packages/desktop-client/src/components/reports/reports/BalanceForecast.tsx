@@ -46,6 +46,7 @@ import { useDispatch } from '#redux';
 import {
   buildBalanceForecastChartData,
   countForecastScheduledOccurrences,
+  getZeroCrossingGradientOffset,
 } from './balanceForecastChartData';
 
 export function BalanceForecast() {
@@ -280,6 +281,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
 
   const lowestPoint = forecastData?.lowestBalance;
   const hasNegativeBalance = chartData.some(d => d.balance < 0);
+  const zeroCrossingGradientOffset = getZeroCrossingGradientOffset(chartData);
   const todayReferenceDate =
     granularity === 'Daily'
       ? monthUtils.currentDay()
@@ -384,6 +386,37 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                       data={chartData}
                       margin={{ top: 10, right: 10, left: 5, bottom: 10 }}
                     >
+                      <defs>
+                        <linearGradient
+                          id="balance-forecast-line-gradient"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          {zeroCrossingGradientOffset == null ? (
+                            <stop
+                              offset="0%"
+                              stopColor={
+                                hasNegativeBalance
+                                  ? theme.errorText
+                                  : theme.noticeText
+                              }
+                            />
+                          ) : (
+                            <>
+                              <stop
+                                offset={`${zeroCrossingGradientOffset}%`}
+                                stopColor={theme.noticeText}
+                              />
+                              <stop
+                                offset={`${zeroCrossingGradientOffset}%`}
+                                stopColor={theme.errorText}
+                              />
+                            </>
+                          )}
+                        </linearGradient>
+                      </defs>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
                         dataKey="date"
@@ -461,14 +494,13 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                           }}
                         />
                       )}
+                      {hasNegativeBalance && (
+                        <ReferenceLine y={0} stroke={theme.pageTextSubdued} />
+                      )}
                       <Line
                         type="monotone"
                         dataKey="balance"
-                        stroke={
-                          hasNegativeBalance
-                            ? theme.errorText
-                            : theme.noticeText
-                        }
+                        stroke="url(#balance-forecast-line-gradient)"
                         strokeWidth={2}
                         dot={false}
                         activeDot={{ r: 6 }}

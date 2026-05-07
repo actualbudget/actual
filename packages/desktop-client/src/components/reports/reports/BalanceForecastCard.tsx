@@ -33,6 +33,7 @@ import { useFormat } from '#hooks/useFormat';
 import {
   buildBalanceForecastChartData,
   countForecastScheduledOccurrences,
+  getZeroCrossingGradientOffset,
 } from './balanceForecastChartData';
 
 type BalanceForecastCardProps = {
@@ -123,6 +124,9 @@ export function BalanceForecastCard({
     end: chartRange.end,
     granularity: 'Monthly',
   });
+  const hasNegativeBalance = chartData.some(d => d.balance < 0);
+  const zeroCrossingGradientOffset = getZeroCrossingGradientOffset(chartData);
+  const gradientId = `balance-forecast-card-line-gradient-${widgetId}`;
   const isUpdatingForecast = isFetching && isPlaceholderData;
   const todayReferenceDate = monthUtils.currentMonth();
   const showsTodayReferenceLine = chartData.some(
@@ -234,6 +238,37 @@ export function BalanceForecastCard({
                     data={chartData}
                     margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
                   >
+                    <defs>
+                      <linearGradient
+                        id={gradientId}
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        {zeroCrossingGradientOffset == null ? (
+                          <stop
+                            offset="0%"
+                            stopColor={
+                              hasNegativeBalance
+                                ? theme.errorText
+                                : theme.noticeText
+                            }
+                          />
+                        ) : (
+                          <>
+                            <stop
+                              offset={`${zeroCrossingGradientOffset}%`}
+                              stopColor={theme.noticeText}
+                            />
+                            <stop
+                              offset={`${zeroCrossingGradientOffset}%`}
+                              stopColor={theme.errorText}
+                            />
+                          </>
+                        )}
+                      </linearGradient>
+                    </defs>
                     <Tooltip
                       isAnimationActive={false}
                       content={({ active, payload }) => {
@@ -272,10 +307,13 @@ export function BalanceForecastCard({
                         strokeDasharray="4 4"
                       />
                     )}
+                    {hasNegativeBalance && (
+                      <ReferenceLine y={0} stroke={theme.pageTextSubdued} />
+                    )}
                     <Line
                       type="monotone"
                       dataKey="balance"
-                      stroke={hasNegative ? theme.errorText : theme.noticeText}
+                      stroke={`url(#${gradientId})`}
                       strokeWidth={2}
                       dot={false}
                       activeDot={{ r: 4 }}

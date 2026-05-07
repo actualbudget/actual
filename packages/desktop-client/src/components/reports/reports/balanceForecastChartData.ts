@@ -128,3 +128,19 @@ export function countForecastScheduledOccurrences(
 
   return occurrenceKeys.size;
 }
+
+export function getZeroCrossingGradientOffset(chartData: ChartDataPoint[]) {
+  if (chartData.length === 0) {
+    return null;
+  }
+
+  const balances = chartData.map(point => point.balance);
+  const minBalance = Math.min(...balances);
+  const maxBalance = Math.max(...balances);
+
+  if (minBalance >= 0 || maxBalance <= 0) {
+    return null;
+  }
+
+  return (maxBalance / (maxBalance - minBalance)) * 100;
+}

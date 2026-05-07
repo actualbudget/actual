@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildBalanceForecastChartData,
   countForecastScheduledOccurrences,
+  getZeroCrossingGradientOffset,
 } from './balanceForecastChartData';
 
 describe('buildBalanceForecastChartData', () => {
@@ -255,5 +256,25 @@ describe('countForecastScheduledOccurrences', () => {
     });
 
     expect(count).toBe(2);
+  });
+});
+
+describe('getZeroCrossingGradientOffset', () => {
+  it('returns the zero threshold offset when balances cross zero', () => {
+    expect(
+      getZeroCrossingGradientOffset([
+        { date: '2024-03', balance: 100 },
+        { date: '2024-04', balance: -100 },
+      ]),
+    ).toBe(50);
+  });
+
+  it('returns null when balances do not cross zero', () => {
+    expect(
+      getZeroCrossingGradientOffset([
+        { date: '2024-03', balance: 100 },
+        { date: '2024-04', balance: 50 },
+      ]),
+    ).toBeNull();
   });
 });
