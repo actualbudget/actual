@@ -176,6 +176,7 @@
     "@jlongster/sql.js": "^1.6.7",
     "@rschedule/core": "^1.5.0",
     "@rschedule/standard-date-adapter": "^1.5.0",
+    "@silvia-odwyer/photon-node": "^0.3.4",
     "absurd-sql": "0.0.54",
     "adm-zip": "^0.5.17",
     "better-sqlite3": "^12.8.0",

@@ -58,7 +58,7 @@ export default defineConfig(({ mode }) => {
             'process/browser': 'process',
           },
         },
-        external: [],
+        external: ['@silvia-odwyer/photon-node'],
       },
       sourcemap: true,
       minify: isDev ? false : 'oxc',

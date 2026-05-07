@@ -107,6 +107,7 @@ __metadata:
     "@jlongster/sql.js": "npm:^1.6.7"
     "@rschedule/core": "npm:^1.5.0"
     "@rschedule/standard-date-adapter": "npm:^1.5.0"
+    "@silvia-odwyer/photon-node": "npm:^0.3.4"
     "@types/adm-zip": "npm:^0.5.8"
     "@types/better-sqlite3": "npm:^7.6.13"
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
@@ -8617,6 +8618,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@silvia-odwyer/photon-node@npm:^0.3.4":
+  version: 0.3.4
+  resolution: "@silvia-odwyer/photon-node@npm:0.3.4"
+  checksum: 10/9353e3b2ed8e89f3410bdfe390c12e269867440ceb9a6f5c8c765732efd86bf299fbb7fae68c8959241878705b0f8516016c98cd83e69770bfc05f531dc6edb7
+  languageName: node
+  linkType: hard
+
 "@sinclair/typebox@npm:^0.27.8":
   version: 0.27.8
   resolution: "@sinclair/typebox@npm:0.27.8"
@@ -10991,8 +10999,6 @@ __metadata:
       built: true
     glob-hasher-linux-arm64-gnu:
       optional: true
-    sharp:
-      built: true
   languageName: unknown
   linkType: soft
 

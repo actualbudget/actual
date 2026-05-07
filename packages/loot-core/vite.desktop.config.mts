@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
     mode,
     ssr: {
       noExternal: true,
-      external: ['better-sqlite3'],
+      external: ['better-sqlite3', '@silvia-odwyer/photon-node'],
       resolve: { conditions: ['electron'] },
     },
     build: {
