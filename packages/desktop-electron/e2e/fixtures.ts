@@ -1,4 +1,3 @@
-import { createWriteStream } from 'node:fs';
 import { mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -31,27 +30,10 @@ export const test = base.extend<ElectronFixtures>({
       },
     });
 
-    // TEMP debug: capture electron stdout+stderr to file inside test-results
-    const logPath = path.join(
-      testInfo.outputDir ?? testInfo.outputPath('.'),
-      'electron.log',
-    );
-    await mkdir(path.dirname(logPath), { recursive: true });
-    const logStream = createWriteStream(logPath, { flags: 'a' });
-    app.process().stdout?.on('data', d => {
-      logStream.write(`[stdout] ${d}`);
-      process.stderr.write(`[electron stdout] ${d}`);
-    });
-    app.process().stderr?.on('data', d => {
-      logStream.write(`[stderr] ${d}`);
-      process.stderr.write(`[electron stderr] ${d}`);
-    });
-
     await use(app);
 
     // Cleanup after tests
     await app.close();
-    logStream.end();
     await rm(testDataDir, { recursive: true, force: true });
   },
 
