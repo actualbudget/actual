@@ -6,6 +6,7 @@ import type {
   AccountEntity,
   BankSyncProviders,
 } from '@actual-app/core/types/models';
+import type { PluggyAiConnector } from '@actual-app/core/types/models/pluggyai';
 import type { SyncServerSimpleFinAccount } from '@actual-app/core/types/models/simplefin';
 
 import { useAuth } from '#auth/AuthProvider';
@@ -49,6 +50,8 @@ type PluggyAiAccount = {
     automaticallyInvestedBalance: number;
     closingBalance: number;
   };
+  /** Optional: sync-server merges Item.connector onto each account when the Item fetch succeeds. */
+  connector?: PluggyAiConnector;
 };
 
 export type BuiltInBankSyncProviderState = {
@@ -420,9 +423,10 @@ export function useBuiltInBankSyncProviders({
           name: `${oldAccount.name.trim()} - ${
             oldAccount.type === 'BANK' ? oldAccount.taxNumber : oldAccount.owner
           }`,
-          institution: oldAccount.name,
-          orgDomain: null,
+          institution: oldAccount.connector?.name ?? oldAccount.name,
           orgId: oldAccount.id,
+          connectorImageUrl: oldAccount.connector?.imageUrl,
+          connectorWebsite: oldAccount.connector?.institutionUrl,
           balance:
             oldAccount.type === 'BANK'
               ? oldAccount.bankData.automaticallyInvestedBalance +

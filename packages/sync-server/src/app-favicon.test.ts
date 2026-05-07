@@ -69,11 +69,11 @@ describe('app-favicon', () => {
     expect(mockedFetch).not.toHaveBeenCalled();
   });
 
-  it('returns 400 when no url/domain is provided', async () => {
+  it('returns 400 when no url/domain/image is provided', async () => {
     const res = await request(app).get('/');
 
     expect(res.statusCode).toBe(400);
-    expect(res.body.error).toMatch(/Missing url/);
+    expect(res.body.error).toMatch(/Missing url, domain, or image/);
   });
 
   it('returns 400 for an invalid URL', async () => {
@@ -192,6 +192,42 @@ describe('app-favicon', () => {
       .query({ url: 'https://bank.example' });
 
     expect(res.statusCode).toBe(502);
+  });
+
+  it('passes through a curated image URL when image= is provided', async () => {
+    mockedFetch.mockResolvedValueOnce(imageResponse('image/png', 256));
+
+    const res = await request(app)
+      .get('/')
+      .query({ image: 'https://cdn.example/logos/bank.png' });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.source).toBe('image');
+    expect(res.body.contentType).toBe('image/png');
+    expect(res.body.base64).toEqual(expect.any(String));
+    expect(mockedFetch.mock.calls[0][0]).toBe(
+      'https://cdn.example/logos/bank.png',
+    );
+  });
+
+  it('image mode rejects payloads larger than the size cap', async () => {
+    mockedFetch.mockResolvedValueOnce(imageResponse('image/png', 64 * 1024));
+
+    const res = await request(app)
+      .get('/')
+      .query({ image: 'https://cdn.example/big.png' });
+
+    expect(res.statusCode).toBe(502);
+    expect(res.body.error).toMatch(/too large/);
+  });
+
+  it('image mode applies the SSRF guard', async () => {
+    const res = await request(app)
+      .get('/')
+      .query({ image: 'http://10.0.0.1/logo.png' });
+
+    expect(res.statusCode).toBe(403);
+    expect(mockedFetch).not.toHaveBeenCalled();
   });
 
   it('blocks private IP hostnames (SSRF guard)', async () => {
