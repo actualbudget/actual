@@ -299,9 +299,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
         end={end}
         earliestTransaction={earliestTransaction}
         latestTransaction={
-          forecastData?.forecastEndDate
-            ? monthUtils.monthFromDate(forecastData.forecastEndDate)
-            : (allMonths[0]?.name ?? monthUtils.addMonths(currentMonth, 24))
+          allMonths[0]?.name ?? monthUtils.addMonths(currentMonth, 24)
         }
         mode={mode}
         onChangeDates={onChangeDates}
