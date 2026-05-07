@@ -164,6 +164,17 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     );
   }, [hideReconciled, setHideReconciled, dispatch]);
 
+  const onEditIcon = useCallback(() => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'account-icon-picker',
+          options: { accountId: account.id },
+        },
+      }),
+    );
+  }, [account.id, dispatch]);
+
   const onClick = useCallback(() => {
     dispatch(
       pushModal({
@@ -177,6 +188,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
             onReopenAccount,
             onToggleRunningBalance,
             onToggleReconciled,
+            onEditIcon,
           },
         },
       }),
@@ -190,6 +202,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     onSave,
     onToggleRunningBalance,
     onToggleReconciled,
+    onEditIcon,
   ]);
 
   return (
@@ -216,6 +229,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
           }}
         />
       )}
+      <AccountHeaderIcon account={account} />
       <Button variant="bare" onPress={onClick}>
         <Text
           style={{
@@ -243,5 +257,25 @@ function NameOnlyHeader({ name }: { readonly name: string }) {
     >
       <Text style={{ ...(styles.lineClamp(2) as CSSProperties) }}>{name}</Text>
     </View>
+  );
+}
+
+function AccountHeaderIcon({ account }: { account: AccountEntity }) {
+  const icon = account.displayIcon;
+  if (!icon) return null;
+  return (
+    <img
+      src={icon}
+      alt=""
+      width={20}
+      height={20}
+      style={{
+        margin: 'auto',
+        marginRight: 6,
+        objectFit: 'contain',
+        flexShrink: 0,
+        borderRadius: 4,
+      }}
+    />
   );
 }

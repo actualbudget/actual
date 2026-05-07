@@ -11,6 +11,7 @@ import { SheetNameProvider } from '#hooks/useSheetName';
 import { closeModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
+import { IconPickerModal } from './accounts/icon-picker/IconPickerModal';
 import { EditSyncAccount } from './banksync/EditSyncAccount';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
@@ -276,6 +277,9 @@ export function Modals() {
 
         case 'account-menu':
           return <AccountMenuModal key={key} {...modal.options} />;
+
+        case 'account-icon-picker':
+          return <IconPickerModal key={key} {...modal.options} />;
 
         case 'category-menu':
           return <CategoryMenuModal key={key} {...modal.options} />;

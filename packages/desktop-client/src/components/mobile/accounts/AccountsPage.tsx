@@ -177,21 +177,24 @@ function AccountListItem({
               flexDirection: 'row',
             }}
           >
-            <View
-              style={{
-                backgroundColor: isPending
-                  ? theme.sidebarItemBackgroundPending
-                  : isFailed
-                    ? theme.sidebarItemBackgroundFailed
-                    : theme.sidebarItemBackgroundPositive,
-                marginRight: '6px',
-                width: 8,
-                flexShrink: 0,
-                height: 8,
-                borderRadius: 8,
-                opacity: isConnected ? 1 : 0,
-              }}
-            />
+            {account.bankId ? (
+              <View
+                style={{
+                  backgroundColor: isPending
+                    ? theme.sidebarItemBackgroundPending
+                    : isFailed
+                      ? theme.sidebarItemBackgroundFailed
+                      : theme.sidebarItemBackgroundPositive,
+                  marginRight: '8px',
+                  width: 8,
+                  flexShrink: 0,
+                  height: 8,
+                  borderRadius: 8,
+                  opacity: isConnected ? 1 : 0,
+                }}
+              />
+            ) : null}
+            <MobileAccountIcon account={account} />
             <TextOneLine
               style={{
                 ...styles.text,
@@ -494,6 +497,27 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
 );
 
 AccountList.displayName = 'AccountList';
+
+const MOBILE_ACCOUNT_ICON_SIZE = 20;
+
+function MobileAccountIcon({ account }: { account: AccountEntity }) {
+  const icon = account.displayIcon;
+  if (!icon) return null;
+  return (
+    <img
+      src={icon}
+      alt=""
+      width={MOBILE_ACCOUNT_ICON_SIZE}
+      height={MOBILE_ACCOUNT_ICON_SIZE}
+      style={{
+        marginRight: 8,
+        objectFit: 'contain',
+        flexShrink: 0,
+        borderRadius: 4,
+      }}
+    />
+  );
+}
 
 export function AccountsPage() {
   const dispatch = useDispatch();

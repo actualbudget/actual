@@ -679,6 +679,7 @@ function AccountNameField({
             },
           }}
         >
+          {account && <AccountHeaderIcon account={account} />}
           <View
             style={{
               fontSize: 25,
@@ -827,6 +828,25 @@ function AccountMenu({
           ? [{ name: 'reopen', text: t('Reopen account') } as const]
           : [{ name: 'close', text: t('Close account') } as const]),
       ]}
+    />
+  );
+}
+
+function AccountHeaderIcon({ account }: { account: AccountEntity }) {
+  const icon = account.displayIcon;
+  if (!icon) return null;
+  return (
+    <img
+      src={icon}
+      alt=""
+      width={24}
+      height={24}
+      style={{
+        marginRight: 6,
+        objectFit: 'contain',
+        flexShrink: 0,
+        borderRadius: 4,
+      }}
     />
   );
 }
