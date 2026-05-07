@@ -12,6 +12,7 @@ import type {
 } from '@actual-app/core/types/models';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { QueryClient, QueryKey } from '@tanstack/react-query';
+import { v4 as uuidv4 } from 'uuid';
 
 import { sync } from '#app/appSlice';
 import { useAccounts } from '#hooks/useAccounts';
@@ -43,7 +44,7 @@ const dispatchErrorNotification = (
   dispatch(
     addNotification({
       notification: {
-        id: crypto.randomUUID(),
+        id: uuidv4(),
         type: 'error',
         message,
         pre: error ? error.message : undefined,

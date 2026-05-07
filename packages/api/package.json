@@ -49,7 +49,8 @@
     "@actual-app/core": "workspace:*",
     "@actual-app/crdt": "workspace:*",
     "better-sqlite3": "^12.8.0",
-    "compare-versions": "^6.1.1"
+    "compare-versions": "^6.1.1",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@typescript/native-preview": "beta",
