@@ -476,7 +476,10 @@ async function getExternalSyncAccount({
       importPending: getBooleanPref(`sync-import-pending-${id}`, true),
       importNotes: getBooleanPref(`sync-import-notes-${id}`, true),
       reimportDeleted: getBooleanPref(`sync-reimport-deleted-${id}`, true),
-      importTransactions: getBooleanPref(`sync-import-transactions-${id}`, true),
+      importTransactions: getBooleanPref(
+        `sync-import-transactions-${id}`,
+        true,
+      ),
       updateDates: getBooleanPref(`sync-update-dates-${id}`, false),
     },
   };
