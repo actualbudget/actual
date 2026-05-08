@@ -69,10 +69,17 @@ function RenderSimple({ error }: RenderSimpleProps) {
         </Trans>
       </Text>
     );
+  } else if ('BackendInitFailure' in error && error.BackendInitFailure) {
+    msg = (
+      <Text>
+        <Trans>
+          Actual couldn't load a critical backend worker. Reload the page to try
+          again; if the problem persists, do a hard refresh to clear any stale
+          cached assets.
+        </Trans>
+      </Text>
+    );
   } else {
-    // This indicates the backend failed to initialize. Show the
-    // user something at least so they aren't looking at a blank
-    // screen
     msg = (
       <Text>
         <Trans>
