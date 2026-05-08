@@ -25,11 +25,12 @@ __metadata:
   dependencies:
     "@actual-app/core": "workspace:*"
     "@actual-app/crdt": "workspace:*"
-    "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"
+    "@typescript/native-preview": "npm:beta"
     better-sqlite3: "npm:^12.8.0"
     compare-versions: "npm:^6.1.1"
     rollup-plugin-visualizer: "npm:^7.0.1"
     typescript-strict-plugin: "npm:^2.4.4"
+    uuid: "npm:^14.0.0"
     vite: "npm:^8.0.5"
     vite-plugin-peggy-loader: "npm:^2.0.1"
     vitest: "npm:^4.1.2"
@@ -41,7 +42,7 @@ __metadata:
   resolution: "@actual-app/ci-actions@workspace:packages/ci-actions"
   dependencies:
     "@octokit/rest": "npm:^22.0.1"
-    "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"
+    "@typescript/native-preview": "npm:beta"
     extensionless: "npm:^2.0.6"
     gray-matter: "npm:^4.0.3"
     listify: "npm:^1.0.3"
@@ -55,10 +56,12 @@ __metadata:
   dependencies:
     "@actual-app/api": "workspace:*"
     "@types/node": "npm:^22.19.17"
-    "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"
+    "@types/proper-lockfile": "npm:^4"
+    "@typescript/native-preview": "npm:beta"
     cli-table3: "npm:^0.6.5"
     commander: "npm:^14.0.3"
     cosmiconfig: "npm:^9.0.1"
+    proper-lockfile: "npm:^4.1.2"
     rollup-plugin-visualizer: "npm:^7.0.1"
     vite: "npm:^8.0.5"
     vitest: "npm:^4.1.2"
@@ -80,7 +83,7 @@ __metadata:
     "@svgr/babel-plugin-add-jsx-attribute": "npm:^8.0.0"
     "@svgr/cli": "npm:^8.1.0"
     "@types/react": "npm:^19.2.14"
-    "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"
+    "@typescript/native-preview": "npm:beta"
     "@vitejs/plugin-react": "npm:^6.0.1"
     eslint-plugin-storybook: "npm:^10.3.4"
     react: "npm:19.2.4"
@@ -108,7 +111,7 @@ __metadata:
     "@types/better-sqlite3": "npm:^7.6.13"
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
     "@types/node": "npm:^22.19.17"
-    "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"
+    "@typescript/native-preview": "npm:beta"
     absurd-sql: "npm:0.0.54"
     adm-zip: "npm:^0.5.17"
     assert: "npm:^2.1.0"
@@ -144,6 +147,7 @@ __metadata:
     typescript-strict-plugin: "npm:^2.4.4"
     ua-parser-js: "npm:^2.0.9"
     util: "npm:^0.12.5"
+    uuid: "npm:^14.0.0"
     vite: "npm:^8.0.5"
     vite-plugin-node-polyfills: "npm:^0.26.0"
     vite-plugin-peggy-loader: "npm:^2.0.1"
@@ -158,12 +162,13 @@ __metadata:
   resolution: "@actual-app/crdt@workspace:packages/crdt"
   dependencies:
     "@types/google-protobuf": "npm:3.15.12"
-    "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"
+    "@typescript/native-preview": "npm:beta"
     google-protobuf: "npm:^3.21.4"
     murmurhash: "npm:^2.0.1"
     protoc-gen-js: "npm:3.21.4-4"
     rollup-plugin-visualizer: "npm:^7.0.1"
     ts-protoc-gen: "npm:0.15.0"
+    uuid: "npm:^14.0.0"
     vite: "npm:^8.0.5"
     vitest: "npm:^4.1.2"
   languageName: unknown
@@ -183,7 +188,7 @@ __metadata:
     "@types/express-actuator": "npm:^1.8.3"
     "@types/node": "npm:^22.19.17"
     "@types/supertest": "npm:^7.2.0"
-    "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"
+    "@typescript/native-preview": "npm:beta"
     bcrypt: "npm:^6.0.0"
     better-sqlite3: "npm:^12.8.0"
     convict: "npm:^6.2.5"
@@ -201,6 +206,7 @@ __metadata:
     pluggy-sdk: "npm:^0.83.0"
     supertest: "npm:^7.2.2"
     typescript-strict-plugin: "npm:^2.4.4"
+    uuid: "npm:^14.0.0"
     vitest: "npm:^4.1.2"
     winston: "npm:^3.19.0"
   bin:
@@ -239,7 +245,7 @@ __metadata:
     "@types/promise-retry": "npm:^1.1.6"
     "@types/react": "npm:^19.2.14"
     "@types/react-dom": "npm:^19.2.3"
-    "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"
+    "@typescript/native-preview": "npm:beta"
     "@uiw/react-codemirror": "npm:^4.25.9"
     "@use-gesture/react": "npm:^10.3.1"
     "@vitejs/plugin-basic-ssl": "npm:^2.3.0"
@@ -262,6 +268,7 @@ __metadata:
     mdast-util-newline-to-break: "npm:^2.0.0"
     memoize-one: "npm:^6.0.0"
     pikaday: "npm:1.8.2"
+    plugins-service: "workspace:*"
     promise-retry: "npm:^2.0.1"
     re-resizable: "npm:^6.11.2"
     react: "npm:19.2.4"
@@ -289,6 +296,7 @@ __metadata:
     sass: "npm:^1.99.0"
     typescript-strict-plugin: "npm:^2.4.4"
     usehooks-ts: "npm:^3.1.1"
+    uuid: "npm:^14.0.0"
     vite: "npm:^8.0.5"
     vite-plugin-pwa: "npm:^1.2.0"
     vitest: "npm:^4.1.2"
@@ -10001,6 +10009,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/proper-lockfile@npm:^4":
+  version: 4.1.4
+  resolution: "@types/proper-lockfile@npm:4.1.4"
+  dependencies:
+    "@types/retry": "npm:*"
+  checksum: 10/b0d1b8e84a563b2c5f869f7ff7542b1d83dec03d1c9d980847cbb189865f44b4a854673cdde59767e41bcb8c31932e613ac43822d358a6f8eede6b79ccfceb1d
+  languageName: node
+  linkType: hard
+
 "@types/qs@npm:*":
   version: 6.14.0
   resolution: "@types/qs@npm:6.14.0"
@@ -10357,66 +10374,66 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript/native-preview-darwin-arm64@npm:7.0.0-dev.20260414.1":
-  version: 7.0.0-dev.20260414.1
-  resolution: "@typescript/native-preview-darwin-arm64@npm:7.0.0-dev.20260414.1"
+"@typescript/native-preview-darwin-arm64@npm:7.0.0-dev.20260421.2":
+  version: 7.0.0-dev.20260421.2
+  resolution: "@typescript/native-preview-darwin-arm64@npm:7.0.0-dev.20260421.2"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@typescript/native-preview-darwin-x64@npm:7.0.0-dev.20260414.1":
-  version: 7.0.0-dev.20260414.1
-  resolution: "@typescript/native-preview-darwin-x64@npm:7.0.0-dev.20260414.1"
+"@typescript/native-preview-darwin-x64@npm:7.0.0-dev.20260421.2":
+  version: 7.0.0-dev.20260421.2
+  resolution: "@typescript/native-preview-darwin-x64@npm:7.0.0-dev.20260421.2"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@typescript/native-preview-linux-arm64@npm:7.0.0-dev.20260414.1":
-  version: 7.0.0-dev.20260414.1
-  resolution: "@typescript/native-preview-linux-arm64@npm:7.0.0-dev.20260414.1"
+"@typescript/native-preview-linux-arm64@npm:7.0.0-dev.20260421.2":
+  version: 7.0.0-dev.20260421.2
+  resolution: "@typescript/native-preview-linux-arm64@npm:7.0.0-dev.20260421.2"
   conditions: os=linux & cpu=arm64
   languageName: node
   linkType: hard
 
-"@typescript/native-preview-linux-arm@npm:7.0.0-dev.20260414.1":
-  version: 7.0.0-dev.20260414.1
-  resolution: "@typescript/native-preview-linux-arm@npm:7.0.0-dev.20260414.1"
+"@typescript/native-preview-linux-arm@npm:7.0.0-dev.20260421.2":
+  version: 7.0.0-dev.20260421.2
+  resolution: "@typescript/native-preview-linux-arm@npm:7.0.0-dev.20260421.2"
   conditions: os=linux & cpu=arm
   languageName: node
   linkType: hard
 
-"@typescript/native-preview-linux-x64@npm:7.0.0-dev.20260414.1":
-  version: 7.0.0-dev.20260414.1
-  resolution: "@typescript/native-preview-linux-x64@npm:7.0.0-dev.20260414.1"
+"@typescript/native-preview-linux-x64@npm:7.0.0-dev.20260421.2":
+  version: 7.0.0-dev.20260421.2
+  resolution: "@typescript/native-preview-linux-x64@npm:7.0.0-dev.20260421.2"
   conditions: os=linux & cpu=x64
   languageName: node
   linkType: hard
 
-"@typescript/native-preview-win32-arm64@npm:7.0.0-dev.20260414.1":
-  version: 7.0.0-dev.20260414.1
-  resolution: "@typescript/native-preview-win32-arm64@npm:7.0.0-dev.20260414.1"
+"@typescript/native-preview-win32-arm64@npm:7.0.0-dev.20260421.2":
+  version: 7.0.0-dev.20260421.2
+  resolution: "@typescript/native-preview-win32-arm64@npm:7.0.0-dev.20260421.2"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@typescript/native-preview-win32-x64@npm:7.0.0-dev.20260414.1":
-  version: 7.0.0-dev.20260414.1
-  resolution: "@typescript/native-preview-win32-x64@npm:7.0.0-dev.20260414.1"
+"@typescript/native-preview-win32-x64@npm:7.0.0-dev.20260421.2":
+  version: 7.0.0-dev.20260421.2
+  resolution: "@typescript/native-preview-win32-x64@npm:7.0.0-dev.20260421.2"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"@typescript/native-preview@npm:^7.0.0-dev.20260404.1":
-  version: 7.0.0-dev.20260414.1
-  resolution: "@typescript/native-preview@npm:7.0.0-dev.20260414.1"
+"@typescript/native-preview@npm:beta":
+  version: 7.0.0-dev.20260421.2
+  resolution: "@typescript/native-preview@npm:7.0.0-dev.20260421.2"
   dependencies:
-    "@typescript/native-preview-darwin-arm64": "npm:7.0.0-dev.20260414.1"
-    "@typescript/native-preview-darwin-x64": "npm:7.0.0-dev.20260414.1"
-    "@typescript/native-preview-linux-arm": "npm:7.0.0-dev.20260414.1"
-    "@typescript/native-preview-linux-arm64": "npm:7.0.0-dev.20260414.1"
-    "@typescript/native-preview-linux-x64": "npm:7.0.0-dev.20260414.1"
-    "@typescript/native-preview-win32-arm64": "npm:7.0.0-dev.20260414.1"
-    "@typescript/native-preview-win32-x64": "npm:7.0.0-dev.20260414.1"
+    "@typescript/native-preview-darwin-arm64": "npm:7.0.0-dev.20260421.2"
+    "@typescript/native-preview-darwin-x64": "npm:7.0.0-dev.20260421.2"
+    "@typescript/native-preview-linux-arm": "npm:7.0.0-dev.20260421.2"
+    "@typescript/native-preview-linux-arm64": "npm:7.0.0-dev.20260421.2"
+    "@typescript/native-preview-linux-x64": "npm:7.0.0-dev.20260421.2"
+    "@typescript/native-preview-win32-arm64": "npm:7.0.0-dev.20260421.2"
+    "@typescript/native-preview-win32-x64": "npm:7.0.0-dev.20260421.2"
   dependenciesMeta:
     "@typescript/native-preview-darwin-arm64":
       optional: true
@@ -10434,7 +10451,7 @@ __metadata:
       optional: true
   bin:
     tsgo: bin/tsgo.js
-  checksum: 10/4062cc00d418ec7760c04557f44c638eef0e9f0e1c09a0b284ca6250b3af411c9d1ddb554adf9479bbb854289da3cb25f6c50c9cef54dc086178253c45011edd
+  checksum: 10/3b205eb08ac5a7e7d5c18c277e1595b2cc150975d550403d6a7714c728a7f1c6057a14731c3da291feddbbbeef8e93c81d782d7935a06f1e268261b1c6236bf3
   languageName: node
   linkType: hard
 
@@ -10818,9 +10835,9 @@ __metadata:
   linkType: hard
 
 "@xmldom/xmldom@npm:^0.8.8":
-  version: 0.8.12
-  resolution: "@xmldom/xmldom@npm:0.8.12"
-  checksum: 10/0fc20bc72a057a939ed17afc3fb35d6be2eb19e42aa9ba3c78aa8bdf471da0b4b17c2710581ce6a2cd68ce3995c2ee7d689593a70a26df1273c0c9c29dfca257
+  version: 0.8.13
+  resolution: "@xmldom/xmldom@npm:0.8.13"
+  checksum: 10/f8f3d56fa91d5026885c0c5c00b07eae47647bda0d742ecbf8e51e06bb287ab30222977b20529ee15c364031606225ebca58907a8ecc76a3add6b3f10e6ddfc6
   languageName: node
   linkType: hard
 
@@ -10936,7 +10953,7 @@ __metadata:
     "@octokit/rest": "npm:^22.0.1"
     "@types/node": "npm:^22.19.17"
     "@types/prompts": "npm:^2.4.9"
-    "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"
+    "@typescript/native-preview": "npm:beta"
     "@yarnpkg/types": "npm:^4.0.1"
     eslint: "npm:^10.2.0"
     eslint-plugin-perfectionist: "npm:^5.8.0"
@@ -14563,7 +14580,7 @@ __metadata:
     "@electron/rebuild": "npm:^4.0.3"
     "@playwright/test": "npm:1.59.1"
     "@types/copyfiles": "npm:^2"
-    "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"
+    "@typescript/native-preview": "npm:beta"
     better-sqlite3: "npm:^12.8.0"
     copyfiles: "npm:^2.4.1"
     cross-env: "npm:^10.1.0"
@@ -14850,14 +14867,14 @@ __metadata:
   linkType: hard
 
 "dompurify@npm:^3.2.5":
-  version: 3.3.2
-  resolution: "dompurify@npm:3.3.2"
+  version: 3.4.1
+  resolution: "dompurify@npm:3.4.1"
   dependencies:
     "@types/trusted-types": "npm:^2.0.7"
   dependenciesMeta:
     "@types/trusted-types":
       optional: true
-  checksum: 10/3ca02559677ce6d9583a500f21ffbb6b9e88f1af99f69fa0d0d9442cddbac98810588c869f8b435addb5115492d6e49870024bca322169b941bafedb99c7f281
+  checksum: 10/dcaf945376eff2a61841b205501b163b2c8ae9afe7251e68276b561d9fcf943cefc67e2631fdeae080b52a8b37c96e6beb7e6ae80ad8a83692ff67965dd6b4db
   languageName: node
   linkType: hard
 
@@ -22765,12 +22782,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"plugins-service@workspace:packages/plugins-service":
+"plugins-service@workspace:*, plugins-service@workspace:packages/plugins-service":
   version: 0.0.0-use.local
   resolution: "plugins-service@workspace:packages/plugins-service"
   dependencies:
     "@types/node": "npm:^22.19.17"
-    "@typescript/native-preview": "npm:^7.0.0-dev.20260404.1"
+    "@typescript/native-preview": "npm:beta"
     cross-env: "npm:^10.1.0"
     typescript-strict-plugin: "npm:^2.4.4"
     vite: "npm:^8.0.5"
@@ -23613,13 +23630,13 @@ __metadata:
   linkType: hard
 
 "postcss@npm:^8.4.21, postcss@npm:^8.4.24, postcss@npm:^8.4.33, postcss@npm:^8.5.4, postcss@npm:^8.5.8":
-  version: 8.5.8
-  resolution: "postcss@npm:8.5.8"
+  version: 8.5.10
+  resolution: "postcss@npm:8.5.10"
   dependencies:
     nanoid: "npm:^3.3.11"
     picocolors: "npm:^1.1.1"
     source-map-js: "npm:^1.2.1"
-  checksum: 10/cbacbfd7f767e2c820d4bf09a3a744834dd7d14f69ff08d1f57b1a7defce9ae5efcf31981890d9697a972a64e9965de677932ef28e4c8ba23a87aad45b82c459
+  checksum: 10/7eac6169e535b63c8412e94d4f6047fc23efa3e9dde804b541940043c831b25f1cd867d83cd2c4371ad2450c8abcb42c208aa25668c1f0f3650d7f72faf711a8
   languageName: node
   linkType: hard
 
@@ -28332,6 +28349,15 @@ __metadata:
   bin:
     uuid: dist/esm/bin/uuid
   checksum: 10/d2da43b49b154d154574891ced66d0c83fc70caaad87e043400cf644423b067542d6f3eb641b7c819224a7cd3b4c2f21906acbedd6ec9c6a05887aa9115a9cf5
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^14.0.0":
+  version: 14.0.0
+  resolution: "uuid@npm:14.0.0"
+  bin:
+    uuid: dist-node/bin/uuid
+  checksum: 10/8ee9b98f9650e25555515f7a28d3c3ae9364e72f7bb19b9e08b681bc135338beba5509b2830f6ae1cfaba4d45401da0d16d4d109b977097bc3d6ba0c5583341b
   languageName: node
   linkType: hard
 

@@ -34,6 +34,7 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       conditions: ['electron'],
+      // oxlint-disable-next-line actual/enforce-boundaries -- handlebars types only resolve from the root entry; the alias forces the pre-compiled dist bundle at build time
       alias: [
         {
           find: 'handlebars',

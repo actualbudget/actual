@@ -72,12 +72,15 @@ jobs:
         with:
           ref: ${{ needs.get-pr.outputs.head_sha }}
           persist-credentials: false
+
+      - name: Trust workspace directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+        shell: bash
+
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
           download-translations: 'false'
-      - name: Trust the repository directory
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Build browser bundle
         # REACT_APP_NETLIFY=true keeps the "Create test file" button in the
         # production bundle — every VRT test's beforeEach relies on it via

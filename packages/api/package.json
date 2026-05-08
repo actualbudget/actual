@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/api",
-  "version": "26.4.0",
+  "version": "26.5.2",
   "description": "An API for Actual",
   "license": "MIT",
   "repository": {
@@ -10,7 +10,9 @@
   },
   "files": [
     "@types",
-    "dist"
+    "dist",
+    "!@types/**/*.test.d.ts",
+    "!@types/**/*.test.d.ts.map"
   ],
   "main": "dist/index.js",
   "types": "@types/index.d.ts",
@@ -19,6 +21,11 @@
       "types": "./@types/index.d.ts",
       "development": "./index.ts",
       "default": "./dist/index.js"
+    },
+    "./models": {
+      "types": "./@types/models.d.ts",
+      "development": "./models.ts",
+      "default": "./dist/models.js"
     }
   },
   "publishConfig": {
@@ -26,6 +33,10 @@
       ".": {
         "types": "./@types/index.d.ts",
         "default": "./dist/index.js"
+      },
+      "./models": {
+        "types": "./@types/models.d.ts",
+        "default": "./dist/models.js"
       }
     }
   },
@@ -38,10 +49,11 @@
     "@actual-app/core": "workspace:*",
     "@actual-app/crdt": "workspace:*",
     "better-sqlite3": "^12.8.0",
-    "compare-versions": "^6.1.1"
+    "compare-versions": "^6.1.1",
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
-    "@typescript/native-preview": "^7.0.0-dev.20260404.1",
+    "@typescript/native-preview": "beta",
     "rollup-plugin-visualizer": "^7.0.1",
     "typescript-strict-plugin": "^2.4.4",
     "vite": "^8.0.5",

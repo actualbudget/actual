@@ -160,7 +160,7 @@ const AmountInput = memo(function AmountInput({
         }}
         data-testid="amount-input-text"
       >
-        {editing ? text : amountToCurrency(value)}
+        {editing ? text || amountToCurrency(0) : amountToCurrency(value)}
       </Text>
     </View>
   );

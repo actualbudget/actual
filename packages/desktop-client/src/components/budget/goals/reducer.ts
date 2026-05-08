@@ -1,4 +1,9 @@
-import { firstDayOfMonth } from '@actual-app/core/shared/months';
+import {
+  addMonths,
+  dayFromDate,
+  firstDayOfMonth,
+  monthFromDate,
+} from '@actual-app/core/shared/months';
 import type { Template } from '@actual-app/core/types/models/templates';
 
 import type { Action } from './actions';
@@ -25,7 +30,7 @@ export const getInitialState = (template: Template | null): ReducerState => {
           priority: template.priority,
           directive: template.directive,
         },
-        displayType: 'week',
+        displayType: 'fixed',
       };
     case 'percentage':
       return {
@@ -40,13 +45,20 @@ export const getInitialState = (template: Template | null): ReducerState => {
     case 'periodic':
       return {
         template,
-        displayType: 'week',
+        displayType: 'fixed',
       };
     case 'spend':
-    case 'by':
       throw new Error('Goal is not yet supported');
+    case 'by':
+      return {
+        template,
+        displayType: 'by',
+      };
     case 'remainder':
-      throw new Error('Remainder is not yet supported');
+      return {
+        template,
+        displayType: 'remainder',
+      };
     case 'limit':
       return {
         template,
@@ -117,7 +129,7 @@ const changeType = (
           type: 'percentage',
           percent: 15,
           previous: false,
-          category: 'total',
+          category: 'all income',
           priority: DEFAULT_PRIORITY,
         },
       };
@@ -134,7 +146,7 @@ const changeType = (
           priority: DEFAULT_PRIORITY,
         },
       };
-    case 'week':
+    case 'fixed':
       if (prevState.template.type === 'periodic') {
         return prevState;
       }
@@ -143,12 +155,12 @@ const changeType = (
         template: {
           directive: 'template',
           type: 'periodic',
-          amount: 5,
+          amount: 100,
           period: {
-            period: 'week',
+            period: 'month',
             amount: 1,
           },
-          starting: '',
+          starting: dayFromDate(firstDayOfMonth(new Date())),
           priority: DEFAULT_PRIORITY,
         },
       };
@@ -166,6 +178,35 @@ const changeType = (
           type: 'average',
           numMonths: 3,
           priority: DEFAULT_PRIORITY,
+        },
+      };
+    case 'by':
+      if (prevState.template.type === 'by') {
+        return prevState;
+      }
+      return {
+        displayType: visualType,
+        template: {
+          directive: 'template',
+          type: 'by',
+          amount: 1200,
+          month: addMonths(monthFromDate(new Date()), 12),
+          annual: true,
+          repeat: 1,
+          priority: DEFAULT_PRIORITY,
+        },
+      };
+    case 'remainder':
+      if (prevState.template.type === 'remainder') {
+        return prevState;
+      }
+      return {
+        displayType: visualType,
+        template: {
+          directive: 'template',
+          type: 'remainder',
+          weight: 1,
+          priority: null,
         },
       };
     default:

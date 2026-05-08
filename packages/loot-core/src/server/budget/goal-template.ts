@@ -11,6 +11,27 @@ import { getSheetValue, isTrackingBudget, setBudget, setGoal } from './actions';
 import { CategoryTemplateContext } from './category-template-context';
 import { checkTemplateNotes, storeNoteTemplates } from './template-notes';
 
+export function distributeRemainder(
+  templateContexts: CategoryTemplateContext[],
+  availBudget: number,
+): number {
+  let remainderContexts = templateContexts.filter(c => c.hasRemainder());
+  while (availBudget > 0 && remainderContexts.length > 0) {
+    let remainderWeight = 0;
+    remainderContexts.forEach(
+      context => (remainderWeight += context.getRemainderWeight()),
+    );
+    const perWeight = availBudget / remainderWeight;
+    const beforePass = availBudget;
+    remainderContexts.forEach(context => {
+      availBudget -= context.runRemainder(availBudget, perWeight);
+    });
+    if (availBudget === beforePass) break;
+    remainderContexts = templateContexts.filter(c => c.hasRemainder());
+  }
+  return availBudget;
+}
+
 type Notification = {
   type?: 'message' | 'error' | 'warning' | undefined;
   pre?: string | undefined;
@@ -31,7 +52,7 @@ export async function storeTemplates({
 }): Promise<void> {
   await batchMessages(async () => {
     for (const { id, templates } of categoriesWithTemplates) {
-      const goalDefs = JSON.stringify(templates);
+      const goalDefs = templates.length > 0 ? JSON.stringify(templates) : null;
 
       await db.updateWithSchema('categories', {
         id,
@@ -132,6 +153,7 @@ async function getTemplates(
 
   const categoryTemplates: Record<CategoryEntity['id'], Template[]> = {};
   for (const categoryWithGoalDef of categoriesWithGoalDef.filter(filter)) {
+    if (!categoryWithGoalDef.goal_def) continue;
     categoryTemplates[categoryWithGoalDef.id] = JSON.parse(
       categoryWithGoalDef.goal_def,
     );
@@ -181,12 +203,18 @@ async function setGoals(month: string, templateGoal: TemplateGoal[]) {
   });
 }
 
-async function processTemplate(
+type ComputedTemplates = {
+  contexts: CategoryTemplateContext[];
+  errors: string[];
+  orphanGoals: TemplateGoal[];
+};
+
+async function computeTemplates(
   month: string,
   force: boolean,
   categoryTemplates: Record<CategoryEntity['id'], Template[]>,
   categories: CategoryEntity[] = [],
-): Promise<Notification> {
+): Promise<ComputedTemplates> {
   // setup categories
   const isTracking = isTrackingBudget();
   if (!categories.length) {
@@ -203,8 +231,7 @@ async function processTemplate(
   );
   const prioritiesSet = new Set<number>();
   const errors: string[] = [];
-  const budgetList: TemplateBudget[] = [];
-  const goalList: TemplateGoal[] = [];
+  const orphanGoals: TemplateGoal[] = [];
   for (const category of categories) {
     const { id } = category;
     const sheetName = monthUtils.sheetForMonth(month);
@@ -234,7 +261,7 @@ async function processTemplate(
 
       // do a reset of the goals that are orphaned
     } else if (existingGoal !== null && !templates) {
-      goalList.push({
+      orphanGoals.push({
         category: id,
         goal: null,
         longGoal: null,
@@ -242,22 +269,8 @@ async function processTemplate(
     }
   }
 
-  //break early if nothing to do, or there are errors
-  if (templateContexts.length === 0 && errors.length === 0) {
-    if (goalList.length > 0) {
-      void setGoals(month, goalList);
-    }
-    return {
-      type: 'message',
-      message: 'Everything is up to date',
-    };
-  }
   if (errors.length > 0) {
-    return {
-      sticky: true,
-      message: 'There were errors interpreting some templates:',
-      pre: errors.join(`\n\n`),
-    };
+    return { contexts: templateContexts, errors, orphanGoals };
   }
 
   const priorities = new Int32Array([...prioritiesSet]).sort((a, b) => a - b);
@@ -274,22 +287,44 @@ async function processTemplate(
     }
   }
 
-  // run remainder
-  let remainderContexts = templateContexts.filter(c => c.hasRemainder());
-  while (availBudget > 0 && remainderContexts.length > 0) {
-    let remainderWeight = 0;
-    remainderContexts.forEach(
-      context => (remainderWeight += context.getRemainderWeight()),
-    );
-    const perWeight = availBudget / remainderWeight;
-    remainderContexts.forEach(context => {
-      availBudget -= context.runRemainder(availBudget, perWeight);
-    });
-    remainderContexts = templateContexts.filter(c => c.hasRemainder());
+  distributeRemainder(templateContexts, availBudget);
+
+  return { contexts: templateContexts, errors, orphanGoals };
+}
+
+async function processTemplate(
+  month: string,
+  force: boolean,
+  categoryTemplates: Record<CategoryEntity['id'], Template[]>,
+  categories: CategoryEntity[] = [],
+): Promise<Notification> {
+  const { contexts, errors, orphanGoals } = await computeTemplates(
+    month,
+    force,
+    categoryTemplates,
+    categories,
+  );
+
+  if (contexts.length === 0 && errors.length === 0) {
+    if (orphanGoals.length > 0) {
+      await setGoals(month, orphanGoals);
+    }
+    return {
+      type: 'message',
+      message: 'Everything is up to date',
+    };
+  }
+  if (errors.length > 0) {
+    return {
+      sticky: true,
+      message: 'There were errors interpreting some templates:',
+      pre: errors.join(`\n\n`),
+    };
   }
 
-  // finish
-  templateContexts.forEach(context => {
+  const budgetList: TemplateBudget[] = [];
+  const goalList: TemplateGoal[] = [...orphanGoals];
+  contexts.forEach(context => {
     const values = context.getValues();
     budgetList.push({
       category: context.category.id,
@@ -306,6 +341,43 @@ async function processTemplate(
 
   return {
     type: 'message',
-    message: `Successfully applied templates to ${templateContexts.length} categories`,
+    message: `Successfully applied templates to ${contexts.length} categories`,
+  };
+}
+
+export type DryRunCategoryResult = {
+  budgeted: number;
+  perTemplate: number[];
+};
+
+export async function dryRunCategoryTemplate({
+  month,
+  categoryId,
+  templates,
+}: {
+  month: string;
+  categoryId: CategoryEntity['id'];
+  templates: Template[];
+}): Promise<DryRunCategoryResult> {
+  // Always run the full set of saved category templates and override the
+  // target's saved templates with the in-flight ones. Sibling categories
+  // consume from To Budget at each priority; running them too keeps the
+  // projection in sync with what an actual apply would produce — including
+  // the constrained-budget case where prior categories at the same priority
+  // exhaust the pool and clamp this category's amount.
+  const allCategoryTemplates = await getTemplates();
+  allCategoryTemplates[categoryId] = templates;
+  const { contexts } = await computeTemplates(
+    month,
+    true,
+    allCategoryTemplates,
+    [],
+  );
+  const ctx = contexts.find(c => c.category.id === categoryId);
+  if (!ctx) return { budgeted: 0, perTemplate: templates.map(() => 0) };
+  const values = ctx.getValues();
+  return {
+    budgeted: values.budgeted,
+    perTemplate: templates.map(t => values.perTemplateContribution.get(t) ?? 0),
   };
 }

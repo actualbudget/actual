@@ -1,5 +1,5 @@
 import { test as base, expect as baseExpect } from '@playwright/test';
-import type { Browser, Locator } from '@playwright/test';
+import type { Browser, Locator, Page } from '@playwright/test';
 
 /**
  * Disable CSS transitions and animations globally in e2e (non-VRT) runs.
@@ -51,7 +51,7 @@ export const test = process.env.VRT
     });
 
 export const expect = baseExpect.extend({
-  async toMatchThemeScreenshots(locator: Locator) {
+  async toMatchThemeScreenshots(target: Locator | Page) {
     // Disable screenshot assertions in regular e2e tests;
     // only enable them when doing VRT tests
     if (!process.env.VRT) {
@@ -62,38 +62,33 @@ export const expect = baseExpect.extend({
     }
 
     const config = {
-      mask: [locator.locator('[data-vrt-mask="true"]')],
+      mask: [target.locator('[data-vrt-mask="true"]')],
       maxDiffPixels: 5,
     };
 
-    // Get the data-theme attribute from page.
-    // If there is a page() function, it means that the locator
-    // is not a page object but a locator object.
-    const dataThemeLocator =
-      typeof locator.page === 'function'
-        ? locator.page().locator('[data-theme]')
-        : locator.locator('[data-theme]');
+    const page: Page = 'page' in target ? target.page() : target;
+    const dataThemeLocator = page.locator('[data-theme]');
 
     // Check lightmode
-    await locator.evaluate(() => window.Actual.setTheme('auto'));
+    await page.evaluate(() => window.Actual.setTheme('auto'));
     await baseExpect(dataThemeLocator).toHaveAttribute('data-theme', 'auto');
-    await baseExpect(locator).toHaveScreenshot(config);
+    await baseExpect(target).toHaveScreenshot(config);
 
     // Switch to darkmode and check
-    await locator.evaluate(() => window.Actual.setTheme('dark'));
+    await page.evaluate(() => window.Actual.setTheme('dark'));
     await baseExpect(dataThemeLocator).toHaveAttribute('data-theme', 'dark');
-    await baseExpect(locator).toHaveScreenshot(config);
+    await baseExpect(target).toHaveScreenshot(config);
 
     // Switch to midnight theme and check
-    await locator.evaluate(() => window.Actual.setTheme('midnight'));
+    await page.evaluate(() => window.Actual.setTheme('midnight'));
     await baseExpect(dataThemeLocator).toHaveAttribute(
       'data-theme',
       'midnight',
     );
-    await baseExpect(locator).toHaveScreenshot(config);
+    await baseExpect(target).toHaveScreenshot(config);
 
     // Switch back to lightmode
-    await locator.evaluate(() => window.Actual.setTheme('auto'));
+    await page.evaluate(() => window.Actual.setTheme('auto'));
     return {
       message: () => 'pass',
       pass: true,

@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/core",
-  "version": "26.4.0",
+  "version": "26.5.2",
   "description": "",
   "license": "ISC",
   "repository": {
@@ -17,7 +17,11 @@
     "!src/**/*.test.ts",
     "!src/**/__tests__/**",
     "!src/**/__snapshots__/**",
-    "!src/**/__mocks__/**"
+    "!src/**/__mocks__/**",
+    "!@types/**/*.test.d.ts",
+    "!@types/**/*.test.d.ts.map",
+    "!@types/**/__tests__/**",
+    "!@types/**/__mocks__/**"
   ],
   "imports": {
     "#platform/server/asyncStorage": {
@@ -84,6 +88,7 @@
     "#shared/*": "./src/shared/*.ts",
     "#types/*": "./src/types/*.ts",
     "#mocks/*": "./src/mocks/*.ts",
+    "#migrations/*": "./migrations/*.js",
     "#*": "./src/*.ts"
   },
   "exports": {
@@ -157,8 +162,6 @@
   "scripts": {
     "build:node": "cross-env NODE_ENV=production vite build --config ./vite.desktop.config.mts",
     "watch:node": "cross-env NODE_ENV=development vite build --config ./vite.desktop.config.mts --watch",
-    "build:browser": "cross-env NODE_ENV=production ./bin/build-browser",
-    "watch:browser": "cross-env NODE_ENV=development ./bin/build-browser",
     "generate:i18n": "i18next",
     "test": "npm-run-all -cp 'test:*'",
     "test:node": "ENV=node vitest --run",
@@ -188,6 +191,7 @@
     "promise-retry": "^2.0.1",
     "typescript-strict-plugin": "^2.4.4",
     "ua-parser-js": "^2.0.9",
+    "uuid": "^14.0.0",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {
@@ -196,7 +200,7 @@
     "@types/better-sqlite3": "^7.6.13",
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
     "@types/node": "^22.19.17",
-    "@typescript/native-preview": "^7.0.0-dev.20260404.1",
+    "@typescript/native-preview": "beta",
     "assert": "^2.1.0",
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",

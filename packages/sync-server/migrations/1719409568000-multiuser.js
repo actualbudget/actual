@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import { getAccountDb } from '../src/account-db';
 
 export const up = async function () {
@@ -36,7 +38,7 @@ export const up = async function () {
         `,
     );
 
-    const userId = crypto.randomUUID();
+    const userId = uuidv4();
     accountDb.mutate(
       'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, 1, 1, ?)',
       [userId, '', '', 'ADMIN'],

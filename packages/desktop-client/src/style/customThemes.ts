@@ -216,6 +216,9 @@ export const MAX_FONT_FILE_SIZE = 2 * 1024 * 1024;
 /** Maximum total size of all embedded font data across all @font-face blocks. 10 MB. */
 export const MAX_TOTAL_FONT_SIZE = 10 * 1024 * 1024;
 
+/** Per-font-file fetch timeout so a hung font host can't stall theme install. */
+const FONT_FETCH_TIMEOUT_MS = 15_000;
+
 /**
  * Extract @font-face blocks from CSS. Returns the blocks and the remaining CSS.
  * Only matches top-level @font-face blocks (not nested inside other rules).
@@ -514,6 +517,7 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
 export async function embedThemeFonts(
   css: string,
   repo: string,
+  signal?: AbortSignal,
 ): Promise<string> {
   const baseUrl = `https://raw.githubusercontent.com/${repo}/refs/heads/main/`;
 
@@ -591,7 +595,11 @@ export async function embedThemeFonts(
   let totalBytes = 0;
   for (const ref of fontRefs) {
     const fontUrl = baseUrl + ref.cleanPath;
-    const response = await fetch(fontUrl);
+    const perFontTimeout = AbortSignal.timeout(FONT_FETCH_TIMEOUT_MS);
+    const fetchSignal = signal
+      ? AbortSignal.any([signal, perFontTimeout])
+      : perFontTimeout;
+    const response = await fetch(fontUrl, { signal: fetchSignal });
     if (!response.ok) {
       throw new Error(
         `Failed to fetch font file "${ref.cleanPath}" from ${fontUrl}: ${response.status} ${response.statusText}`,

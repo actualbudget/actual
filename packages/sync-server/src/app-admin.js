@@ -1,4 +1,5 @@
 import express from 'express';
+import { v4 as uuidv4 } from 'uuid';
 
 import { isAdmin } from './account-db';
 import * as UserService from './services/user-service';
@@ -77,7 +78,7 @@ app.post('/users', validateSessionMiddleware, async (req, res) => {
     return;
   }
 
-  const userId = crypto.randomUUID();
+  const userId = uuidv4();
   UserService.insertUser(
     userId,
     userName,
