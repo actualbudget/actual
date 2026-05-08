@@ -50,7 +50,7 @@
     "afterSign": "./build/desktop-electron/afterSignHook.js",
     "electronFuses": {
       "runAsNode": false,
-      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeOptionsEnvironmentVariable": true,
       "enableNodeCliInspectArguments": false
     },
     "mac": {

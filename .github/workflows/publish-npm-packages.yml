@@ -87,6 +87,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Publish npm packages
     needs: build-and-pack
+    environment: release
     permissions:
       contents: read
       packages: write
@@ -105,6 +106,7 @@ jobs:
           node-version: 24
           check-latest: true
           registry-url: 'https://registry.npmjs.org'
+          cache: false
 
       - name: Publish Core
         run: |
