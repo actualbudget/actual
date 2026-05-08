@@ -32,6 +32,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || !github.event.repository.fork
     name: Build Docker image
     runs-on: ubuntu-latest
+    environment: release
     strategy:
       matrix:
         os: [ubuntu, alpine]

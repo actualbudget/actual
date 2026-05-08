@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { v4 as uuidv4 } from 'uuid';
 
 import * as db from '#server/db';
 
@@ -13,7 +14,7 @@ export async function findOrCreateBank(institution, requisitionId) {
   }
 
   const bankData = {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     bank_id: requisitionId,
     name: institution.name,
   };
