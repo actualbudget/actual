@@ -191,7 +191,7 @@
     "promise-retry": "^2.0.1",
     "typescript-strict-plugin": "^2.4.4",
     "ua-parser-js": "^2.0.9",
-    "uuid": "^13.0.0",
+    "uuid": "^14.0.0",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {

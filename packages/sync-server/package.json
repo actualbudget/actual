@@ -99,7 +99,7 @@
     "migrate": "^2.1.0",
     "openid-client": "^5.7.1",
     "pluggy-sdk": "^0.83.0",
-    "uuid": "^13.0.0",
+    "uuid": "^14.0.0",
     "winston": "^3.19.0"
   },
   "devDependencies": {
@@ -117,5 +117,8 @@
     "supertest": "^7.2.2",
     "typescript-strict-plugin": "^2.4.4",
     "vitest": "^4.1.2"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }
