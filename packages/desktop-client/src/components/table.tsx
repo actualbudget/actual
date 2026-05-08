@@ -42,7 +42,7 @@ import {
   AvoidRefocusScrollProvider,
   useProperFocus,
 } from '#hooks/useProperFocus';
-import { useSelectedItems } from '#hooks/useSelected';
+import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 import { useSheetValue } from '#hooks/useSheetValue';
 import type {
   Binding,
@@ -349,9 +349,18 @@ function InputValue({
   }
 
   function onKeyDown(e) {
-    // Only enter and tab to escape (which allows the user to move
-    // around)
-    if (e.key !== 'Enter' && e.key !== 'Tab') {
+    if (e.key === 'Escape') {
+      // Revert the DOM value to defaultValue before the navigator's
+      // Escape handler unmounts this input. Without this, the
+      // unmount-induced blur would call onUpdate with the user's
+      // pending value and commit it.
+      e.currentTarget.value = defaultValue ?? '';
+      setValue(defaultValue);
+      // Don't stopPropagation: let the bubble reach useTableNavigator
+      // so it can exit edit mode.
+    } else if (e.key !== 'Enter' && e.key !== 'Tab') {
+      // Only Enter, Tab, and Escape bubble up; everything else is
+      // local to the input.
       e.stopPropagation();
     }
 
@@ -361,6 +370,9 @@ function InputValue({
   }
 
   function onEscape() {
+    // Idempotent fallback in case the keydown handler above doesn't
+    // run (e.g. when this input is rendered outside a table-navigator
+    // container).
     if (value !== defaultValue) {
       setValue(defaultValue);
     }
@@ -1252,6 +1264,13 @@ export function useTableNavigator<T extends TableItem>(
   const modalState = useModalState();
   const modalStackLength = useRef(modalState.modalStack.length);
 
+  // Used by the Escape handler to clear the multi-select set when no
+  // cell is being edited. Both contexts return null when this hook is
+  // used outside a SelectedProvider (e.g. in the budget grid), in
+  // which case the Escape branch below is a no-op.
+  const selectedItems = useSelectedItems();
+  const selectedDispatch = useSelectedDispatch();
+
   // onEdit is passed to children, so make sure it maintains identity
   const onEdit = useCallback((id: T['id'] | null, field?: string) => {
     setEditingId(id);
@@ -1395,6 +1414,34 @@ export function useTableNavigator<T extends TableItem>(
                   : 'right',
             );
             break;
+
+          case 'Escape': {
+            // Peel off one layer at a time: edit mode first, then the
+            // checkbox-selected set. Popovers (autocomplete, date
+            // picker, etc.) handle Escape themselves and stop
+            // propagation, so they're cleared before this fires.
+            //
+            // The 'select' field is the row checkbox, not a real
+            // editable cell. Clicking a checkbox sets editingId via
+            // CellButton.onFocus to keep keyboard navigation working,
+            // but visually nothing is being edited. Treat it as
+            // "not editing" so a single Escape clears the multi-select
+            // set instead of needing two presses.
+            const isCellEditing =
+              editingId != null && focusedField !== 'select';
+            if (isCellEditing) {
+              e.preventDefault();
+              onEdit(null);
+              containerRef.current?.focus();
+            } else if (selectedItems && selectedItems.size > 0) {
+              e.preventDefault();
+              if (editingId != null) {
+                onEdit(null);
+              }
+              selectedDispatch?.({ type: 'select-none' });
+            }
+            break;
+          }
           default:
         }
       },
