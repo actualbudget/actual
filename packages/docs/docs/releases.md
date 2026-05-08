@@ -1,12 +1,14 @@
 # Release Notes
 
-## 26.5.1
+## 26.5.1 & 26.5.2
 
 Release date: 2026-05-08
 
 This patch release delivers bugfixes for authentication rate limiting, self-signed certificate handling, and UUID generation compatibility in insecure context (HTTP).
 
-**Docker Tag: 26.5.1**
+**Note:** versions 26.5.1 and 26.5.2 are functionally identical. The additional release was created solely to resolve an issue with publishing on the Windows Store.
+
+**Docker Tag: 26.5.1 / 26.5.2**
 
 #### Bugfixes
 
