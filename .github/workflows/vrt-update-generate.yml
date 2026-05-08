@@ -117,12 +117,15 @@ jobs:
         with:
           ref: ${{ needs.get-pr.outputs.head_sha }}
           persist-credentials: false
+
+      - name: Trust workspace directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+        shell: bash
+
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
           download-translations: 'false'
-      - name: Trust the repository directory
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Download web build
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -178,12 +181,15 @@ jobs:
         with:
           ref: ${{ needs.get-pr.outputs.head_sha }}
           persist-credentials: false
+
+      - name: Trust workspace directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+        shell: bash
+
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
           download-translations: 'false'
-      - name: Trust the repository directory
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       # Build tools are needed to rebuild native modules like better-sqlite3 used by the Desktop app, which is required to run VRT tests on the Desktop app and generate updated snapshots.
       - name: Install build tools
