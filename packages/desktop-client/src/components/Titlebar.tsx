@@ -254,9 +254,7 @@ type SharedArrayBufferWarningProps = {
   style?: CSSProperties;
 };
 
-function SharedArrayBufferWarning({
-  style,
-}: SharedArrayBufferWarningProps) {
+function SharedArrayBufferWarning({ style }: SharedArrayBufferWarningProps) {
   const { t } = useTranslation();
   const hasSharedArrayBuffer = typeof SharedArrayBuffer !== 'undefined';
   const isOverrideEnabled = localStorage.getItem('SharedArrayBufferOverride');
