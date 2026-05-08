@@ -250,6 +250,45 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
   );
 }
 
+type SharedArrayBufferWarningProps = {
+  style?: CSSProperties;
+};
+
+function SharedArrayBufferWarning({
+  style,
+}: SharedArrayBufferWarningProps) {
+  const { t } = useTranslation();
+  const hasSharedArrayBuffer = typeof SharedArrayBuffer !== 'undefined';
+  const isOverrideEnabled = localStorage.getItem('SharedArrayBufferOverride');
+
+  // Only show warning if SharedArrayBuffer is not supported but user has overridden the warning
+  if (hasSharedArrayBuffer || !isOverrideEnabled) {
+    return null;
+  }
+
+  const warningMessage = t(
+    'Your environment does not support SharedArrayBuffer. You may experience data loss or degraded functionality. Consider using HTTPS or a supported browser.',
+  );
+
+  return (
+    <Button
+      variant="bare"
+      aria-label={warningMessage}
+      title={warningMessage}
+      style={{
+        ...style,
+        WebkitAppRegion: 'none',
+        color: theme.errorTextDark,
+      }}
+      onPress={() => {
+        // Optional: could open a help dialog or link to documentation
+      }}
+    >
+      <SvgAlertTriangle width={13} />
+    </Button>
+  );
+}
+
 function BudgetTitlebar() {
   const [maxMonths, setMaxMonthsPref] = useGlobalPref('maxMonths');
 
@@ -344,6 +383,7 @@ export function Titlebar({ style }: TitlebarProps) {
         {isDevelopmentEnvironment() && !isTestEnv && <ThemeSelector />}
         <PrivacyButton />
         {serverURL ? <ServerSyncButton /> : null}
+        <SharedArrayBufferWarning />
         <LoggedInUser />
         <HelpMenu />
       </SpaceBetween>
