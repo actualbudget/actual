@@ -99,19 +99,6 @@ function RenderSimple({ error }: RenderSimpleProps) {
       }}
     >
       <Text>{msg}</Text>
-      <Text>
-        <Trans>
-          Please get{' '}
-          <Link
-            variant="external"
-            linkColor="muted"
-            to="https://actualbudget.org/contact"
-          >
-            in touch
-          </Link>{' '}
-          for support
-        </Trans>
-      </Text>
     </SpaceBetween>
   );
 }
