@@ -288,7 +288,7 @@ export function SelectedTransactionsButton({
   );
   // make transfer
   useHotkeys(
-    't',
+    'r',
     () => showMakeTransfer && canBeTransfer && onSetTransfer(selectedIds),
     hotKeyOptions,
     [onSetTransfer, selectedIds, showMakeTransfer, canBeTransfer],
@@ -366,7 +366,7 @@ export function SelectedTransactionsButton({
                     {
                       name: 'set-transfer',
                       text: t('Make transfer'),
-                      key: 'T',
+                      key: 'R',
                       disabled: !canBeTransfer,
                     } as const,
                   ]
