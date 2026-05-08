@@ -25,14 +25,15 @@ const importScriptsWithRetry = async (script, { maxRetries = 5 } = {}) => {
     }
 
     // Attempt to retry after a small delay
-    await new Promise(resolve =>
-      setTimeout(async () => {
-        await importScriptsWithRetry(script, {
+    await new Promise((resolve, reject) => {
+      setTimeout(() => {
+        importScriptsWithRetry(script, {
           maxRetries: maxRetries - 1,
-        });
-        resolve();
-      }, 5000),
-    );
+        })
+          .then(resolve)
+          .catch(reject);
+      }, 5000);
+    });
   }
 };
 
