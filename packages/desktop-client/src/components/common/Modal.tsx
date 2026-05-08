@@ -81,7 +81,6 @@ export const Modal = ({
         inset: 0,
         zIndex: MODAL_Z_INDEX,
         fontSize: 14,
-        willChange: 'transform',
         // on mobile, we disable the blurred background for performance reasons
         ...(isNarrowWidth
           ? {
