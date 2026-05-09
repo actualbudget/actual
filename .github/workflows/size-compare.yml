@@ -47,10 +47,7 @@ jobs:
 
       # Resolve one successful `build.yml` run for each side (master and PR
       # head) up front, then pin every download below to its `run_id`. This
-      # eliminates the race where wait-for-check matched a check from one run
-      # but `dawidd6/action-download-artifact` resolved `branch:`/`pr:` to a
-      # different (often still-in-progress) run, leading to "artifact not
-      # found" failures.
+      # ensures artifact downloads are consistent and prevents race conditions.
       - name: Resolve build runs
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         id: build-runs
