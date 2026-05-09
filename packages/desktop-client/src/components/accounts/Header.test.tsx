@@ -1,8 +1,7 @@
-import { render } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
-
 import { theme } from '@actual-app/components/theme';
 import type { AccountEntity } from '@actual-app/core/types/models';
+import { render } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
 
 import { AccountSyncSidebar } from './Header';
 

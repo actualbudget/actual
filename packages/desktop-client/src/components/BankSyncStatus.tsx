@@ -8,9 +8,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { useAccounts } from '#hooks/useAccounts';
-
 import { isAccountPendingSync } from '#accounts/syncStatus';
+import { useAccounts } from '#hooks/useAccounts';
 
 import { AnimatedRefresh } from './AnimatedRefresh';
 

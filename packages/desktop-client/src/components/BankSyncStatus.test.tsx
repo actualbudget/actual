@@ -1,7 +1,6 @@
+import type { AccountEntity } from '@actual-app/core/types/models';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-
-import type { AccountEntity } from '@actual-app/core/types/models';
 
 import { TestProviders } from '#mocks';
 
@@ -13,9 +12,7 @@ vi.mock('#hooks/useAccounts', () => ({
   useAccounts: () => useAccounts(),
 }));
 
-function makeAccount(
-  overrides: Partial<AccountEntity> = {},
-): AccountEntity {
+function makeAccount(overrides: Partial<AccountEntity> = {}): AccountEntity {
   return {
     id: 'acct-1',
     name: 'Checking',

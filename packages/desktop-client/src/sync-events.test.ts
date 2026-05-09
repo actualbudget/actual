@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { markUpdatedAccounts } from './accounts/accountsSlice';
 import { listenForSyncEvent } from './sync-events';
@@ -53,10 +53,7 @@ describe('listenForSyncEvent', () => {
       type: 'applied',
       tables: ['transactions'],
       prevData: new Map([
-        [
-          'transactions',
-          new Map([['t1', { id: 't1', acct: 'acct-1' }]]),
-        ],
+        ['transactions', new Map([['t1', { id: 't1', acct: 'acct-1' }]])],
       ]),
       data: new Map([
         [
@@ -96,10 +93,7 @@ describe('listenForSyncEvent', () => {
       type: 'applied',
       tables: ['transactions'],
       prevData: new Map([
-        [
-          'transactions',
-          new Map([['t1', { id: 't1', acct: 'acct-1' }]]),
-        ],
+        ['transactions', new Map([['t1', { id: 't1', acct: 'acct-1' }]])],
       ]),
       data: new Map([
         [

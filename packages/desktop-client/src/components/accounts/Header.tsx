@@ -35,11 +35,11 @@ import type {
 } from '@actual-app/core/types/models';
 import { format as formatDate } from 'date-fns';
 
-import { AnimatedRefresh } from '#components/AnimatedRefresh';
 import {
   isAccountFailedSync,
   isAccountPendingSync,
 } from '#accounts/syncStatus';
+import { AnimatedRefresh } from '#components/AnimatedRefresh';
 import { Search } from '#components/common/Search';
 import { FilterButton } from '#components/filters/FiltersMenu';
 import { FiltersStack } from '#components/filters/FiltersStack';
@@ -303,9 +303,7 @@ export function AccountHeader({
                 gap: 3,
               }}
             >
-              {!!account?.bank && (
-                <AccountSyncSidebar account={account} />
-              )}
+              {!!account?.bank && <AccountSyncSidebar account={account} />}
               <AccountNameField
                 account={account}
                 accountName={accountName}

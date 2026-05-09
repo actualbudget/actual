@@ -40,5 +40,5 @@ export function usePendingSyncPolling({
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [enabled, intervalMs, poll]);
+  }, [enabled, intervalMs]);
 }

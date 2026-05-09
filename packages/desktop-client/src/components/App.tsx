@@ -15,8 +15,8 @@ import {
 } from '@actual-app/core/platform/client/connection';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { setAppState, sync } from '#app/appSlice';
 import { isAccountPendingSync } from '#accounts/syncStatus';
+import { setAppState, sync } from '#app/appSlice';
 import { closeBudget, loadBudget } from '#budgetfiles/budgetfilesSlice';
 import { handleGlobalEvents } from '#global-events';
 import { useAccounts } from '#hooks/useAccounts';

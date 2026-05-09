@@ -1,6 +1,5 @@
-import { describe, expect, it } from 'vitest';
-
 import type { AccountEntity } from '@actual-app/core/types/models';
+import { describe, expect, it } from 'vitest';
 
 import { isAccountFailedSync, isAccountPendingSync } from './syncStatus';
 
@@ -15,9 +14,7 @@ describe('syncStatus', () => {
     expect(isAccountPendingSync(makeAccount('pending'))).toBe(true);
     expect(isAccountPendingSync(makeAccount('sync-requested'))).toBe(true);
     expect(isAccountPendingSync(makeAccount('ok'))).toBe(false);
-    expect(isAccountPendingSync(makeAccount('attention-required'))).toBe(
-      false,
-    );
+    expect(isAccountPendingSync(makeAccount('attention-required'))).toBe(false);
     expect(isAccountPendingSync(makeAccount('reauth-required'))).toBe(false);
     expect(isAccountPendingSync(makeAccount(null))).toBe(false);
   });
