@@ -173,7 +173,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             : cx(defaultButtonClassName, className)
         }
       >
-        {children}
+        Hello! {children}
       </ReactAriaButton>
     );
   },
