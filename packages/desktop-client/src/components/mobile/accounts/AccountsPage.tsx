@@ -24,13 +24,16 @@ import type { AccountEntity } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 
 import { useMoveAccountMutation, useSyncAndDownloadMutation } from '#accounts';
+import {
+  isAccountFailedSync,
+  isAccountPendingSync,
+} from '#accounts/syncStatus';
 import { makeAmountFullStyle } from '#components/budget/util';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';
 import { MobilePageHeader, Page } from '#components/Page';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { useAccounts } from '#hooks/useAccounts';
-import { useFailedAccounts } from '#hooks/useFailedAccounts';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSyncedPref } from '#hooks/useSyncedPref';
@@ -397,10 +400,6 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
     }: AccountListProps,
     ref,
   ) => {
-    const failedAccounts = useFailedAccounts();
-    const syncingAccountIds = useSelector(
-      state => state.account.accountsSyncing,
-    );
     const updatedAccounts = useSelector(state => state.account.updatedAccounts);
 
     const moveAccount = useMoveAccountMutation();
@@ -484,8 +483,8 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
             value={account}
             isUpdated={updatedAccounts && updatedAccounts.includes(account.id)}
             isConnected={!!account.bank}
-            isPending={syncingAccountIds.includes(account.id)}
-            isFailed={failedAccounts && failedAccounts.has(account.id)}
+            isPending={isAccountPendingSync(account)}
+            isFailed={isAccountFailedSync(account)}
             getBalanceQuery={getBalanceBinding}
             onSelect={onOpenAccount}
           />

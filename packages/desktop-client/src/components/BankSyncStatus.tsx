@@ -2,19 +2,24 @@ import React from 'react';
 import { Trans } from 'react-i18next';
 import { animated, useTransition } from 'react-spring';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { useSelector } from '#redux';
+import { useAccounts } from '#hooks/useAccounts';
+
+import { isAccountPendingSync } from '#accounts/syncStatus';
 
 import { AnimatedRefresh } from './AnimatedRefresh';
 
 export function BankSyncStatus() {
-  const accountsSyncing = useSelector(state => state.account.accountsSyncing);
-  const accountsSyncingCount = accountsSyncing.length;
+  const { isNarrowWidth } = useResponsive();
+  const { data: accounts = [] } = useAccounts();
+  const accountsSyncingCount = accounts.filter(isAccountPendingSync).length;
   const count = accountsSyncingCount;
+  const contentInset = 52;
 
   const transitions = useTransition(
     accountsSyncingCount > 0 ? 'syncing' : null,
@@ -28,13 +33,27 @@ export function BankSyncStatus() {
   return (
     <View
       style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        marginTop: 5,
-        alignItems: 'center',
-        zIndex: 501,
+        ...(isNarrowWidth
+          ? {
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              marginTop: 5,
+              alignItems: 'center',
+            }
+          : {
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              marginTop: 5,
+              paddingLeft: contentInset,
+              paddingRight: contentInset,
+              alignItems: 'flex-start',
+            }),
+        zIndex: 1101,
+        pointerEvents: 'none',
       }}
     >
       {transitions(
@@ -49,6 +68,7 @@ export function BankSyncStatus() {
                   padding: '5px 13px',
                   flexDirection: 'row',
                   alignItems: 'center',
+                  pointerEvents: 'auto',
                   ...styles.shadow,
                 }}
               >

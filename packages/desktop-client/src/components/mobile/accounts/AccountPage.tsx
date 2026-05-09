@@ -12,18 +12,21 @@ import { send } from '@actual-app/core/platform/client/connection';
 import type { AccountEntity } from '@actual-app/core/types/models';
 
 import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
+import {
+  isAccountFailedSync,
+  isAccountPendingSync,
+} from '#accounts/syncStatus';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { AddTransactionButton } from '#components/mobile/transactions/AddTransactionButton';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useAccount } from '#hooks/useAccount';
-import { useFailedAccounts } from '#hooks/useFailedAccounts';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import {
   collapseModals,
   openAccountCloseModal,
   pushModal,
 } from '#modals/modalsSlice';
-import { useDispatch, useSelector } from '#redux';
+import { useDispatch } from '#redux';
 
 import { AccountTransactions } from './AccountTransactions';
 import { AllAccountTransactions } from './AllAccountTransactions';
@@ -92,17 +95,9 @@ export function AccountPage() {
 }
 
 function AccountHeader({ account }: { readonly account: AccountEntity }) {
-  const failedAccounts = useFailedAccounts();
   const { t } = useTranslation();
-  const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
-  const pending = useMemo(
-    () => syncingAccountIds.includes(account.id),
-    [syncingAccountIds, account.id],
-  );
-  const failed = useMemo(
-    () => failedAccounts.has(account.id),
-    [failedAccounts, account.id],
-  );
+  const pending = useMemo(() => isAccountPendingSync(account), [account]);
+  const failed = useMemo(() => isAccountFailedSync(account), [account]);
 
   const dispatch = useDispatch();
   const { mutate: updateAccount } = useUpdateAccountMutation();

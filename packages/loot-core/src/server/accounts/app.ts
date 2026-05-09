@@ -907,6 +907,7 @@ type SyncResponse = {
   newTransactions: Array<TransactionEntity['id']>;
   matchedTransactions: Array<TransactionEntity['id']>;
   updatedAccounts: Array<AccountEntity['id']>;
+  hasUpdates: boolean;
 };
 
 async function handleSyncResponse(
@@ -939,6 +940,7 @@ async function handleSyncResponse(
     newTransactions,
     matchedTransactions,
     updatedAccounts,
+    hasUpdates: true,
   };
 }
 
@@ -1146,7 +1148,17 @@ async function accountsBankSync({
     });
   }
 
-  return { errors, newTransactions, matchedTransactions, updatedAccounts };
+  return {
+    errors,
+    newTransactions,
+    matchedTransactions,
+    updatedAccounts,
+    hasUpdates:
+      hasAccountUpdates ||
+      newTransactions.length > 0 ||
+      matchedTransactions.length > 0 ||
+      updatedAccounts.length > 0,
+  };
 }
 
 async function simpleFinBatchSync({
@@ -1176,6 +1188,7 @@ async function simpleFinBatchSync({
       newTransactions: Array<TransactionEntity['id']>;
       matchedTransactions: Array<TransactionEntity['id']>;
       updatedAccounts: Array<AccountEntity['id']>;
+      hasUpdates: boolean;
     };
   }> = [];
 
@@ -1221,6 +1234,7 @@ async function simpleFinBatchSync({
       const newTransactions: Array<TransactionEntity['id']> = [];
       const matchedTransactions: Array<TransactionEntity['id']> = [];
       const updatedAccounts: Array<AccountEntity['id']> = [];
+      const hasUpdates = true;
 
       if (syncResponse.res?.error_code) {
         await db.update('accounts', {
@@ -1269,7 +1283,13 @@ async function simpleFinBatchSync({
 
       retVal.push({
         accountId: syncResponse.accountId,
-        res: { errors, newTransactions, matchedTransactions, updatedAccounts },
+        res: {
+          errors,
+          newTransactions,
+          matchedTransactions,
+          updatedAccounts,
+          hasUpdates,
+        },
       });
     }
   } catch (err) {
@@ -1286,6 +1306,7 @@ async function simpleFinBatchSync({
           newTransactions: [],
           matchedTransactions: [],
           updatedAccounts: [],
+          hasUpdates: true,
         },
       });
     }
@@ -1464,7 +1485,7 @@ app.method('simplefin-accounts', simpleFinAccounts);
 app.method('pluggyai-accounts', pluggyAiAccounts);
 app.method('gocardless-get-banks', getGoCardlessBanks);
 app.method('gocardless-create-web-token', createGoCardlessWebToken);
-app.method('accounts-bank-sync', accountsBankSync);
-app.method('simplefin-batch-sync', simpleFinBatchSync);
+app.method('accounts-bank-sync', mutator(accountsBankSync));
+app.method('simplefin-batch-sync', mutator(simpleFinBatchSync));
 app.method('transactions-import', mutator(undoable(importTransactions)));
 app.method('account-unlink', mutator(unlinkAccount));

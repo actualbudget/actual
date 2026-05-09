@@ -36,6 +36,10 @@ import type {
 import { format as formatDate } from 'date-fns';
 
 import { AnimatedRefresh } from '#components/AnimatedRefresh';
+import {
+  isAccountFailedSync,
+  isAccountPendingSync,
+} from '#accounts/syncStatus';
 import { Search } from '#components/common/Search';
 import { FilterButton } from '#components/filters/FiltersMenu';
 import { FiltersStack } from '#components/filters/FiltersStack';
@@ -64,7 +68,6 @@ type AccountHeaderProps = {
   filterId?: SavedFilter;
   savedFilters: TransactionFilterEntity[];
   accountsSyncing: string[];
-  failedAccounts: AccountSyncSidebarProps['failedAccounts'];
   accounts: AccountEntity[];
   transactions: TransactionEntity[];
   showBalances: boolean;
@@ -140,7 +143,6 @@ export function AccountHeader({
   filterId,
   savedFilters,
   accountsSyncing,
-  failedAccounts,
   accounts,
   transactions,
   showBalances,
@@ -207,19 +209,9 @@ export function AccountHeader({
   const locale = useLocale();
 
   let canSync = !!(account?.account_id && isUsingServer);
-  let canUnlink = !!(account?.account_id && isUsingServer);
-  let canLink = !!(
-    account &&
-    !account.closed &&
-    !account.account_id &&
-    !account.account_sync_source &&
-    syncServerStatus === 'online'
-  );
   if (!account) {
     // All accounts - check for any syncable account
     canSync = !!accounts.find(account => !!account.account_id) && isUsingServer;
-    canUnlink = false;
-    canLink = false;
   }
 
   // Only show the ability to make linked transfers on multi-account views.
@@ -312,11 +304,7 @@ export function AccountHeader({
               }}
             >
               {!!account?.bank && (
-                <AccountSyncSidebar
-                  account={account}
-                  failedAccounts={failedAccounts}
-                  accountsSyncing={accountsSyncing}
-                />
+                <AccountSyncSidebar account={account} />
               )}
               <AccountNameField
                 account={account}
@@ -519,8 +507,7 @@ export function AccountHeader({
                   <Dialog>
                     <AccountMenu
                       account={account}
-                      canUnlink={canUnlink}
-                      canLink={canLink}
+                      canSync={canSync}
                       showNetWorthChart={showNetWorthChart}
                       canShowBalances={
                         canCalculateBalance ? canCalculateBalance() : false
@@ -603,27 +590,15 @@ export function AccountHeader({
 
 type AccountSyncSidebarProps = {
   account: AccountEntity;
-  failedAccounts: Map<
-    string,
-    {
-      type: string;
-      code: string;
-    }
-  >;
-  accountsSyncing: string[];
 };
 
-function AccountSyncSidebar({
-  account,
-  failedAccounts,
-  accountsSyncing,
-}: AccountSyncSidebarProps) {
+export function AccountSyncSidebar({ account }: AccountSyncSidebarProps) {
   return (
     <View
       style={{
-        backgroundColor: accountsSyncing.includes(account.id)
+        backgroundColor: isAccountPendingSync(account)
           ? theme.sidebarItemBackgroundPending
-          : failedAccounts.has(account.id)
+          : isAccountFailedSync(account)
             ? theme.sidebarItemBackgroundFailed
             : theme.sidebarItemBackgroundPositive,
         marginRight: '4px',
@@ -746,8 +721,7 @@ function AccountNameField({
 
 type AccountMenuProps = {
   account: AccountEntity;
-  canUnlink: boolean;
-  canLink: boolean;
+  canSync: boolean;
   showNetWorthChart: boolean;
   showBalances: boolean;
   canShowBalances: boolean;
@@ -771,8 +745,7 @@ type AccountMenuProps = {
 
 function AccountMenu({
   account,
-  canUnlink,
-  canLink,
+  canSync,
   showNetWorthChart,
   showBalances,
   canShowBalances,
@@ -782,6 +755,7 @@ function AccountMenu({
   onMenuSelect,
 }: AccountMenuProps) {
   const { t } = useTranslation();
+  const syncServerStatus = useSyncServerStatus();
 
   return (
     <Menu
@@ -828,14 +802,14 @@ function AccountMenu({
         },
         { name: 'export', text: t('Export') },
         ...(account && !account.closed
-          ? canUnlink
+          ? canSync
             ? [
                 {
                   name: 'unlink',
                   text: t('Unlink account'),
                 } as const,
               ]
-            : canLink
+            : syncServerStatus === 'online'
               ? [
                   {
                     name: 'link',

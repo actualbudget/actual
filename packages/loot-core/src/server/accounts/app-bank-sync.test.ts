@@ -160,7 +160,12 @@ describe('accountsBankSync', () => {
       updatedPreview: [],
     });
 
-    await accountsBankSyncHandler({ ids: ['acct1'] });
+    const result = await accountsBankSyncHandler({ ids: ['acct1'] });
+
+    expect(result).toMatchObject({
+      errors: [],
+      hasUpdates: true,
+    });
 
     const account = await db.select('accounts', 'acct1');
     expect(accountModel.toExternal(account!)).toMatchObject({
@@ -215,6 +220,7 @@ describe('accountsBankSync', () => {
       newTransactions: [],
       matchedTransactions: [],
       updatedAccounts: [],
+      hasUpdates: true,
     });
 
     const account = await db.select('accounts', 'acct-external');
