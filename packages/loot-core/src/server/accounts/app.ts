@@ -120,20 +120,7 @@ async function updateAccount(
       bank_sync_status: null,
     });
   } else if (hasField('account_sync_source') && account_sync_source == null) {
-    const accRow = await db.first<db.DbAccount>(
-      'SELECT * FROM accounts WHERE id = ?',
-      [id],
-    );
-
-    if (!accRow) {
-      throw new Error(`Account with ID ${id} not found.`);
-    }
-
-    if (accRow.account_sync_source !== 'external') {
-      throw new Error(`Account with ID ${id} is not externally linked.`);
-    }
-
-    await unlinkAccount({ id });
+    throw new Error('Use account-unlink to unlink an account.');
   }
 
   const accountUpdate: Partial<AccountEntity> & { id: AccountEntity['id'] } = {
@@ -153,6 +140,9 @@ async function updateAccount(
   }
   if (hasField('closed')) {
     accountUpdate.closed = params.closed;
+  }
+  if (hasField('bank_sync_status')) {
+    accountUpdate.bank_sync_status = params.bank_sync_status ?? null;
   }
 
   if (Object.keys(accountUpdate).length > 1) {
@@ -1077,6 +1067,17 @@ async function accountsBankSync({
 
   for (const acct of accounts) {
     if (acct.account_sync_source === 'external') {
+      if (acct.bankId && acct.account_id) {
+        await db.update('accounts', {
+          id: acct.id,
+          bank_sync_status: 'sync-requested',
+        });
+        connection.send('sync-event', {
+          type: 'success',
+          tables: ['accounts'],
+        });
+        hasAccountUpdates = true;
+      }
       continue;
     }
 

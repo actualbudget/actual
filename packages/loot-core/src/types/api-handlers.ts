@@ -147,6 +147,8 @@ export type ApiHandlers = {
     fields: Partial<APIAccountEntity>;
   }) => Promise<void>;
 
+  'api/account-unlink': (arg: { id: APIAccountEntity['id'] }) => Promise<void>;
+
   'api/account-close': (arg: {
     id: APIAccountEntity['id'];
     transferAccountId?: APIAccountEntity['id'];

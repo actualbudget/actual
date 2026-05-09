@@ -355,6 +355,9 @@ describe('API CRUD operations', () => {
       balance_limit: 2000,
       last_sync: '1715000000000',
     });
+    await api.updateAccount(accountId, {
+      bank_sync_status: 'sync-requested',
+    });
 
     let account = (await api.getAccounts()).find(
       existingAccount => existingAccount.id === accountId,
@@ -371,9 +374,10 @@ describe('API CRUD operations', () => {
       balance_available: 900,
       balance_limit: 2000,
       last_sync: '1715000000000',
+      bank_sync_status: 'sync-requested',
     });
 
-    await api.updateAccount(accountId, { account_sync_source: null });
+    await api.unlinkAccount(accountId);
 
     account = (await api.getAccounts()).find(
       existingAccount => existingAccount.id === accountId,
@@ -387,6 +391,7 @@ describe('API CRUD operations', () => {
       balance_current: null,
       balance_available: null,
       balance_limit: null,
+      bank_sync_status: null,
     });
   });
 

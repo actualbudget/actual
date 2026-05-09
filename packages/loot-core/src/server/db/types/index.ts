@@ -32,6 +32,7 @@ export type DbAccount = {
   bank_sync_status?:
     | 'ok'
     | 'pending'
+    | 'sync-requested'
     | 'reauth-required'
     | 'attention-required'
     | null;

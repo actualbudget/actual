@@ -206,11 +206,7 @@ export function AccountHeader({
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const locale = useLocale();
 
-  let canSync = !!(
-    account?.account_id &&
-    account.account_sync_source !== 'external' &&
-    isUsingServer
-  );
+  let canSync = !!(account?.account_id && isUsingServer);
   let canUnlink = !!(account?.account_id && isUsingServer);
   let canLink = !!(
     account &&
@@ -221,11 +217,7 @@ export function AccountHeader({
   );
   if (!account) {
     // All accounts - check for any syncable account
-    canSync =
-      !!accounts.find(
-        account =>
-          !!account.account_id && account.account_sync_source !== 'external',
-      ) && isUsingServer;
+    canSync = !!accounts.find(account => !!account.account_id) && isUsingServer;
     canUnlink = false;
     canLink = false;
   }

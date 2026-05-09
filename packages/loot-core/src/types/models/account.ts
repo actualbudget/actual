@@ -31,5 +31,6 @@ export type AccountSyncSource =
 export type BankSyncStatus =
   | 'ok'
   | 'pending'
+  | 'sync-requested'
   | 'reauth-required'
   | 'attention-required';

@@ -602,6 +602,11 @@ handlers['api/account-update'] = withMutation(async function ({ id, fields }) {
   });
 });
 
+handlers['api/account-unlink'] = withMutation(async function ({ id }) {
+  checkFileOpen();
+  await handlers['account-unlink']({ id });
+});
+
 handlers['api/account-close'] = withMutation(async function ({
   id,
   transferAccountId,

@@ -185,6 +185,10 @@ export function updateAccount(
   return send('api/account-update', { id, fields });
 }
 
+export function unlinkAccount(id: APIAccountEntity['id']) {
+  return send('api/account-unlink', { id });
+}
+
 export function closeAccount(
   id: APIAccountEntity['id'],
   transferAccountId?: APIAccountEntity['id'],

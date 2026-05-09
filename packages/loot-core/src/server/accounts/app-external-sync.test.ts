@@ -107,6 +107,28 @@ describe('external account sync metadata', () => {
     });
   });
 
+  it('does not overload account-update with unlink behavior', async () => {
+    await db.insertWithUUID('banks', {
+      id: 'bank1',
+      bank_id: 'test-provider:institution-1',
+      name: 'External Credit Union',
+    });
+    await db.insertAccount({
+      id: 'acct1',
+      name: 'Checking',
+      account_id: 'provider-acct-1',
+      bank: 'bank1',
+      account_sync_source: 'external',
+    });
+
+    await expect(
+      updateAccount({
+        id: 'acct1',
+        account_sync_source: null,
+      }),
+    ).rejects.toThrow('Use account-unlink to unlink an account.');
+  });
+
   it('unlinks an existing provider before linking external metadata', async () => {
     await db.insertWithUUID('banks', {
       id: 'bank1',
@@ -239,6 +261,29 @@ describe('external account sync metadata', () => {
       bank_id: 'gc-bank',
       bank_name: 'GoCardless Bank',
       bank_sync_status: null,
+    });
+  });
+
+  it('allows updating bank_sync_status through the existing account update handler', async () => {
+    await db.insertAccount({
+      id: 'acct1',
+      name: 'Checking',
+      account_id: 'external-account-1',
+      account_sync_source: 'external',
+    });
+
+    await updateAccount({
+      id: 'acct1',
+      bank_sync_status: 'sync-requested',
+    });
+
+    const account = (await getAccounts()).find(
+      existingAccount => existingAccount.id === 'acct1',
+    );
+
+    expect(accountModel.toExternal(account!)).toMatchObject({
+      id: 'acct1',
+      bank_sync_status: 'sync-requested',
     });
   });
 

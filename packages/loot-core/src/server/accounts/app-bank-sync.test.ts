@@ -196,7 +196,7 @@ describe('accountsBankSync', () => {
     });
   });
 
-  it('skips externally linked accounts', async () => {
+  it('requests sync for externally linked accounts', async () => {
     insertBank({ id: 'bank1', bank_id: 'external:bank-1', name: 'External' });
     await db.insertAccount({
       id: 'acct-external',
@@ -215,6 +215,12 @@ describe('accountsBankSync', () => {
       newTransactions: [],
       matchedTransactions: [],
       updatedAccounts: [],
+    });
+
+    const account = await db.select('accounts', 'acct-external');
+    expect(accountModel.toExternal(account!)).toMatchObject({
+      id: 'acct-external',
+      bank_sync_status: 'sync-requested',
     });
   });
 });
