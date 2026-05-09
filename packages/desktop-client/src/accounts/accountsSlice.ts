@@ -71,7 +71,7 @@ const accountsSlice = createSlice({
       action: PayloadAction<MarkUpdatedAccountsPayload>,
     ) {
       state.updatedAccounts = action.payload.ids
-        ? [...state.updatedAccounts, ...action.payload.ids]
+        ? Array.from(new Set([...state.updatedAccounts, ...action.payload.ids]))
         : state.updatedAccounts;
     },
     markAccountRead(state, action: PayloadAction<MarkAccountReadPayload>) {

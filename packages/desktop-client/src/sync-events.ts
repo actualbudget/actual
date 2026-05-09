@@ -3,6 +3,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 
 import { accountQueries } from './accounts';
+import { markUpdatedAccounts } from './accounts/accountsSlice';
 import { resetSync, sync } from './app/appSlice';
 import { categoryQueries } from './budget';
 import {
@@ -16,6 +17,62 @@ import { payeeQueries } from './payees';
 import { loadPrefs } from './prefs/prefsSlice';
 import type { AppStore } from './redux/store';
 import { signOut } from './users/usersSlice';
+
+type RawTransaction = {
+  id: string;
+  acct?: string | null;
+  tombstone?: boolean | number | null;
+};
+
+function isRawTransaction(value: unknown): value is RawTransaction {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'id' in value &&
+    typeof value.id === 'string'
+  );
+}
+
+function getTransactionsById(value: unknown) {
+  if (!(value instanceof Map)) {
+    return new Map<string, RawTransaction>();
+  }
+
+  return new Map(
+    Array.from(value.entries()).filter(
+      (entry): entry is [string, RawTransaction] => isRawTransaction(entry[1]),
+    ),
+  );
+}
+
+function getAppliedUpdatedAccountIds(event: {
+  type: 'applied';
+  tables: string[];
+  data?: Map<string, unknown>;
+  prevData?: Map<string, unknown>;
+}) {
+  if (!event.tables.includes('transactions')) {
+    return [];
+  }
+
+  const transactions = event.data?.get('transactions');
+  const previousTransactions = event.prevData?.get('transactions');
+  const nextTransactionsById = getTransactionsById(transactions);
+  const previousTransactionsById = getTransactionsById(previousTransactions);
+
+  return Array.from(
+    new Set(
+      Array.from(nextTransactionsById.values())
+        .filter(
+          transaction =>
+            !previousTransactionsById.has(transaction.id) &&
+            !transaction.tombstone &&
+            !!transaction.acct,
+        )
+        .map(transaction => transaction.acct as string),
+    ),
+  );
+}
 
 export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
   // TODO: Should this run on mobile too?
@@ -89,6 +146,13 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
         void queryClient.invalidateQueries({
           queryKey: accountQueries.lists(),
         });
+      }
+
+      if (event.type === 'applied') {
+        const updatedAccountIds = getAppliedUpdatedAccountIds(event);
+        if (updatedAccountIds.length > 0) {
+          store.dispatch(markUpdatedAccounts({ ids: updatedAccountIds }));
+        }
       }
     } else if (event.type === 'error') {
       let notif: Notification | null = null;
