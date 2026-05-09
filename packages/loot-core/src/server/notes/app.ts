@@ -7,12 +7,18 @@ import type { NoteEntity } from '#types/models';
 export type NotesHandlers = {
   'notes-save': typeof updateNotes;
   'notes-save-undoable': typeof updateNotes;
+  'notes-get': (arg: { id: string }) => Promise<NoteEntity | null>;
 };
 
 export const app = createApp<NotesHandlers>();
 app.method('notes-save', updateNotes);
 app.method('notes-save-undoable', mutator(undoable(updateNotes)));
+app.method('notes-get', getNotes);
 
 async function updateNotes({ id, note }: NoteEntity) {
   await db.update('notes', { id, note });
+}
+
+async function getNotes({ id }: { id: string }): Promise<NoteEntity | null> {
+  return db.first<NoteEntity>('SELECT id, note FROM notes WHERE id = ?', [id]);
 }

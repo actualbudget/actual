@@ -247,6 +247,14 @@ export function deleteCategory(
   return send('api/category-delete', { id, transferCategoryId });
 }
 
+export function getNote(id: string) {
+  return send('api/note-get', { id });
+}
+
+export function updateNote(id: string, note: string) {
+  return send('api/note-update', { id, note });
+}
+
 export function getCommonPayees() {
   return send('api/common-payees-get');
 }
