@@ -415,7 +415,7 @@ async function linkEnableBankingAccount({
       account_sync_source: 'enableBanking',
     });
   } else {
-    id = crypto.randomUUID();
+    id = uuidv4();
     await db.insertWithUUID('accounts', {
       id,
       account_id: externalAccount.account_id,
