@@ -21,6 +21,7 @@ jobs:
     # this is so the assets can be added to the release
     permissions:
       contents: write
+    environment: release
     strategy:
       fail-fast: false
       matrix:
@@ -123,6 +124,7 @@ jobs:
   publish-microsoft-store:
     needs: build
     runs-on: windows-latest
+    environment: release
     if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
     steps:
       - name: Install StoreBroker
