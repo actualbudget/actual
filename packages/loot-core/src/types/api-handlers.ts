@@ -196,9 +196,9 @@ export type ApiHandlers = {
     transferCategoryId?: APICategoryEntity['id'];
   }) => Promise<void>;
 
-  'api/note-get': (arg: { id: string }) => Promise<NoteEntity | null>;
+  'api/note-get': (arg: Pick<NoteEntity, 'id'>) => Promise<NoteEntity | null>;
 
-  'api/note-update': (arg: { id: string; note: string }) => Promise<void>;
+  'api/note-update': (arg: NoteEntity) => Promise<void>;
 
   'api/payees-get': () => Promise<APIPayeeEntity[]>;
 
