@@ -20,14 +20,14 @@ export function registerCategoryGroupsCommand(program: Command) {
         opts,
         async () => {
           const allGroups = await api.getCategoryGroups();
-          const result = cmdOpts.includeHidden
-            ? allGroups
-            : allGroups
-                .filter(g => !g.hidden)
-                .map(g => ({
-                  ...g,
-                  categories: g.categories?.filter(c => !c.hidden),
-                }));
+          const result = allGroups
+            .filter(g => cmdOpts.includeHidden || !g.hidden)
+            .map(g => ({
+              ...g,
+              categories: g.categories?.filter(
+                c => cmdOpts.includeHidden || !c.hidden,
+              ),
+            }));
           printOutput(result, opts.format);
         },
         { mutates: false },
