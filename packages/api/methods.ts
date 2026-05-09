@@ -17,6 +17,7 @@ import type {
   RuleEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 export { q } from './app/query';
 
@@ -164,6 +165,10 @@ export function deleteTransaction(id: TransactionEntity['id']) {
 
 export function getAccounts() {
   return send('api/accounts-get');
+}
+
+export function getSyncedPreferences(): Promise<SyncedPrefs> {
+  return send('preferences/get');
 }
 
 export function createAccount(

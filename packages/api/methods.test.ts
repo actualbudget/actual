@@ -4,6 +4,8 @@ import * as path from 'path';
 import type { RuleEntity } from '@actual-app/core/types/models';
 import { vi } from 'vitest';
 
+import * as db from '../loot-core/src/server/db';
+
 import * as api from './index';
 
 declare global {
@@ -336,6 +338,98 @@ describe('API CRUD operations', () => {
         }),
       ]),
     );
+  });
+
+  test('Accounts: external sync metadata uses getAccounts and updateAccount', async () => {
+    const accountId = await api.createAccount({ name: 'external-account' }, 0);
+
+    await api.updateAccount(accountId, {
+      account_sync_source: 'external',
+      account_id: 'provider-acct-1',
+      bank_id: 'test-provider:institution-1',
+      bank_name: 'External Credit Union',
+      mask: '1234',
+      official_name: 'Checking Account',
+      balance_current: 1000,
+      balance_available: 900,
+      balance_limit: 2000,
+      last_sync: '1715000000000',
+    });
+
+    let account = (await api.getAccounts()).find(
+      existingAccount => existingAccount.id === accountId,
+    );
+    expect(account).toMatchObject({
+      id: accountId,
+      account_sync_source: 'external',
+      account_id: 'provider-acct-1',
+      bank_id: 'test-provider:institution-1',
+      bank_name: 'External Credit Union',
+      mask: '1234',
+      official_name: 'Checking Account',
+      balance_current: 1000,
+      balance_available: 900,
+      balance_limit: 2000,
+      last_sync: '1715000000000',
+    });
+
+    await api.updateAccount(accountId, { account_sync_source: null });
+
+    account = (await api.getAccounts()).find(
+      existingAccount => existingAccount.id === accountId,
+    );
+    expect(account).toMatchObject({
+      id: accountId,
+      account_sync_source: null,
+      account_id: null,
+      bank_id: null,
+      bank_name: null,
+      balance_current: null,
+      balance_available: null,
+      balance_limit: null,
+    });
+  });
+
+  test('Preferences: getSyncedPreferences returns saved sync preferences', async () => {
+    const accountId = await api.createAccount({ name: 'external-account' }, 0);
+
+    await api.updateAccount(accountId, {
+      account_sync_source: 'external',
+      account_id: 'provider-acct-1',
+      bank_id: 'test-provider:institution-1',
+      bank_name: 'External Credit Union',
+    });
+
+    await db.update('preferences', {
+      id: `sync-import-pending-${accountId}`,
+      value: 'false',
+    });
+    await db.update('preferences', {
+      id: `sync-import-notes-${accountId}`,
+      value: 'false',
+    });
+    await db.update('preferences', {
+      id: `sync-reimport-deleted-${accountId}`,
+      value: 'false',
+    });
+    await db.update('preferences', {
+      id: `sync-import-transactions-${accountId}`,
+      value: 'false',
+    });
+    await db.update('preferences', {
+      id: `sync-update-dates-${accountId}`,
+      value: 'true',
+    });
+
+    const preferences = await api.getSyncedPreferences();
+
+    expect(preferences).toMatchObject({
+      [`sync-import-pending-${accountId}`]: 'false',
+      [`sync-import-notes-${accountId}`]: 'false',
+      [`sync-reimport-deleted-${accountId}`]: 'false',
+      [`sync-import-transactions-${accountId}`]: 'false',
+      [`sync-update-dates-${accountId}`]: 'true',
+    });
   });
 
   // apis: createPayee, getPayees, updatePayee, deletePayee

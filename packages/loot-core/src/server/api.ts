@@ -593,8 +593,13 @@ handlers['api/account-create'] = withMutation(async function ({
 
 handlers['api/account-update'] = withMutation(async function ({ id, fields }) {
   checkFileOpen();
-  // @ts-expect-error - fix me
-  return db.updateAccount({ id, ...accountModel.fromExternal(fields) });
+  const { bank_id, bank_name, ...accountFieldsInput } = fields;
+  await handlers['account-update']({
+    id,
+    ...accountModel.fromExternal(accountFieldsInput),
+    bankName: bank_name,
+    bankId: bank_id ?? null,
+  });
 });
 
 handlers['api/account-close'] = withMutation(async function ({

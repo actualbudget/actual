@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import * as asyncStorage from '#platform/server/asyncStorage';
+import { accountModel } from '#server/api-models';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
 
@@ -12,6 +14,7 @@ vi.mock('./sync', async () => ({
 }));
 
 const simpleFinBatchSyncHandler = app.handlers['simplefin-batch-sync'];
+const accountsBankSyncHandler = app.handlers['accounts-bank-sync'];
 
 function insertBank(bank: { id: string; bank_id: string; name: string }) {
   db.runQuery(
@@ -41,6 +44,10 @@ async function setupSimpleFinAccounts(
 
 beforeEach(async () => {
   vi.resetAllMocks();
+  vi.mocked(asyncStorage.multiGet).mockResolvedValue({
+    'user-id': 'user-1',
+    'user-key': 'key-1',
+  });
   await global.emptyDatabase()();
   await loadMappings();
 });
@@ -132,6 +139,82 @@ describe('simpleFinBatchSync', () => {
       // Account 2 should have no errors
       const acct2Result = result.find(r => r.accountId === 'acct2');
       expect(acct2Result!.res.errors).toHaveLength(0);
+    });
+  });
+});
+
+describe('accountsBankSync', () => {
+  it('persists ok status after a successful sync', async () => {
+    insertBank({ id: 'bank1', bank_id: 'gc-bank', name: 'GoCardless' });
+    await db.insertAccount({
+      id: 'acct1',
+      name: 'Checking',
+      bank: 'bank1',
+      account_id: 'ext-1',
+      account_sync_source: 'goCardless',
+    });
+
+    vi.mocked(bankSync.syncAccount).mockResolvedValue({
+      added: [],
+      updated: [],
+      updatedPreview: [],
+    });
+
+    await accountsBankSyncHandler({ ids: ['acct1'] });
+
+    const account = await db.select('accounts', 'acct1');
+    expect(accountModel.toExternal(account!)).toMatchObject({
+      id: 'acct1',
+      bank_sync_status: 'ok',
+    });
+  });
+
+  it('persists reauth-required status after a reauth error', async () => {
+    insertBank({ id: 'bank1', bank_id: 'gc-bank', name: 'GoCardless' });
+    await db.insertAccount({
+      id: 'acct1',
+      name: 'Checking',
+      bank: 'bank1',
+      account_id: 'ext-1',
+      account_sync_source: 'goCardless',
+    });
+
+    vi.mocked(bankSync.syncAccount).mockRejectedValue({
+      type: 'BankSyncError',
+      reason: 'login required',
+      category: 'ITEM_ERROR',
+      code: 'ITEM_LOGIN_REQUIRED',
+      message: 'login required',
+    });
+
+    await accountsBankSyncHandler({ ids: ['acct1'] });
+
+    const account = await db.select('accounts', 'acct1');
+    expect(accountModel.toExternal(account!)).toMatchObject({
+      id: 'acct1',
+      bank_sync_status: 'reauth-required',
+    });
+  });
+
+  it('skips externally linked accounts', async () => {
+    insertBank({ id: 'bank1', bank_id: 'external:bank-1', name: 'External' });
+    await db.insertAccount({
+      id: 'acct-external',
+      name: 'External Checking',
+      bank: 'bank1',
+      account_id: 'external-account-1',
+      account_sync_source: 'external',
+      bank_sync_status: null,
+    });
+
+    const result = await accountsBankSyncHandler({ ids: ['acct-external'] });
+
+    expect(bankSync.syncAccount).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      errors: [],
+      newTransactions: [],
+      matchedTransactions: [],
+      updatedAccounts: [],
     });
   });
 });

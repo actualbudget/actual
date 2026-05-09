@@ -23,15 +23,20 @@ type AccountRowProps = {
 export const AccountRow = memo(
   ({ account, hovered, onHover, onAction, locale }: AccountRowProps) => {
     const backgroundFocus = hovered;
+    const hasLastSync = Boolean(account.last_sync);
 
-    const lastSyncString = tsToRelativeTime(account.last_sync, locale, {
-      capitalize: true,
-    });
-    const lastSyncDateTime = formatDate(
-      new Date(parseInt(account.last_sync ?? '0', 10)),
-      'MMM d, yyyy, HH:mm:ss',
-      { locale },
-    );
+    const lastSyncString = hasLastSync
+      ? tsToRelativeTime(account.last_sync, locale, {
+          capitalize: true,
+        })
+      : '-';
+    const lastSyncDateTime = hasLastSync
+      ? formatDate(
+          new Date(parseInt(account.last_sync ?? '0', 10)),
+          'MMM d, yyyy, HH:mm:ss',
+          { locale },
+        )
+      : null;
 
     const potentiallyTruncatedAccountName =
       account.name.length > 30
@@ -69,13 +74,11 @@ export const AccountRow = memo(
           {account.bankName}
         </Cell>
 
-        {account.account_sync_source ? (
+        {account.account_sync_source && hasLastSync ? (
           <Tooltip
             placement="bottom start"
             content={lastSyncDateTime}
-            style={{
-              ...styles.tooltip,
-            }}
+            style={{ ...styles.tooltip }}
           >
             <Cell
               name="lastSync"
@@ -94,6 +97,15 @@ export const AccountRow = memo(
               {lastSyncString}
             </Cell>
           </Tooltip>
+        ) : account.account_sync_source ? (
+          <Cell
+            name="lastSync"
+            width={200}
+            plain
+            style={{ color: theme.tableText, padding: '11px' }}
+          >
+            {lastSyncString}
+          </Cell>
         ) : (
           ''
         )}

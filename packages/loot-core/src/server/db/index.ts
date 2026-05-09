@@ -717,10 +717,10 @@ export function getAccounts() {
   return all<
     DbAccount & {
       bankName: DbBank['name'];
-      bankId: DbBank['id'];
+      bankId: DbBank['bank_id'];
     }
   >(
-    `SELECT a.*, b.name as bankName, b.id as bankId FROM accounts a
+    `SELECT a.*, b.name as bankName, b.bank_id as bankId FROM accounts a
        LEFT JOIN banks b ON a.bank = b.id
        WHERE a.tombstone = 0
        ORDER BY sort_order, name`,

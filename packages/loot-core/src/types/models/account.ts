@@ -19,6 +19,17 @@ export type AccountEntity = {
   balance_limit: number | null;
   account_sync_source: AccountSyncSource | null;
   last_sync: string | null;
+  bank_sync_status: BankSyncStatus | null;
 };
 
-export type AccountSyncSource = 'simpleFin' | 'goCardless' | 'pluggyai';
+export type AccountSyncSource =
+  | 'simpleFin'
+  | 'goCardless'
+  | 'pluggyai'
+  | 'external';
+
+export type BankSyncStatus =
+  | 'ok'
+  | 'pending'
+  | 'reauth-required'
+  | 'attention-required';
