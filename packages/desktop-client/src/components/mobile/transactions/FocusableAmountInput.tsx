@@ -242,7 +242,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
         onUpdateAmount={amount => onUpdateAmount(amount, isNegative)}
         focused={focused && !disabled}
         style={{
-          ...makeAmountFullStyle(liveValue, {
+          ...makeAmountFullStyle(maybeApplyNegative(liveValue, isNegative), {
             zeroColor: isNegative ? theme.numberNegative : theme.numberNeutral,
             positiveColor: theme.numberPositive,
             negativeColor: theme.numberNegative,
