@@ -337,7 +337,7 @@ export function splitTransaction(
     }
 
     const subtransactions = createSubtransactions?.(trans) || [
-      makeChild(trans),
+      makeChild(trans, { payee: null }),
     ];
 
     const { error: _error, ...rest } = trans;
