@@ -142,6 +142,18 @@ describe('Transactions', () => {
     ]);
   });
 
+  test('splitting a transaction sets parent payee to null', () => {
+    const transactions = [
+      makeTransaction({ id: 't1', amount: 5000, payee: 'payee-1' }),
+      makeTransaction({ amount: 3000 }),
+    ];
+    const { data } = splitTransaction(transactions, 't1');
+    
+    const parent = data.find(t => t.id === 't1');
+    expect(parent?.payee).toBeNull();
+    expect(parent?.is_parent).toBe(true);
+  });
+
   test('adding a split transaction works', () => {
     const transactions = [
       makeTransaction({ amount: 2001 }),
