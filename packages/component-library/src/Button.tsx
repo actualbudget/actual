@@ -12,7 +12,7 @@ import { View } from './View';
 const backgroundColor: {
   [key in ButtonVariant | `${ButtonVariant}Disabled`]?: string;
 } = {
-  normal: theme.buttonNormalBackground,
+  normal: theme.buttonNormalDisabledBackground,
   normalDisabled: theme.buttonNormalDisabledBackground,
   primary: theme.buttonPrimaryBackground,
   primaryDisabled: theme.buttonPrimaryDisabledBackground,
