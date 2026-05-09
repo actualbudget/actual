@@ -591,9 +591,6 @@ export function useSyncAccountsMutation() {
           id => !simpleFinAccounts.find(sfa => sfa.id === id),
         );
 
-        // Remove the SimpleFin accounts from the syncing list so their
-        // status indicators reflect completion before the per-account loop
-        // begins.
         dispatch(setAccountsSyncing({ ids: accountIdsToSync }));
       }
 
