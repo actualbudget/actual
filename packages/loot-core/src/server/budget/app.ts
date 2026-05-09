@@ -172,9 +172,18 @@ app.method('budget/render-note-templates', goalNoteActions.unparse);
 // Server must return AQL entities not the raw DB data
 async function getCategories({ hidden }: { hidden?: boolean } = {}) {
   const categoryGroups = await getCategoryGroups({ hidden });
+  // A hidden category can live in a visible group, so when the caller
+  // explicitly asks for hidden categories the flat list must look beyond
+  // the (already hidden-filtered) groups returned above.
+  const list =
+    hidden === true
+      ? (await getCategoryGroups())
+          .flatMap(g => g.categories ?? [])
+          .filter(c => Boolean(c.hidden))
+      : categoryGroups.flatMap(g => g.categories ?? []);
   return {
     grouped: categoryGroups,
-    list: categoryGroups.flatMap(g => g.categories ?? []),
+    list,
   };
 }
 
