@@ -201,6 +201,29 @@ describe('accountsBankSync', () => {
     });
   });
 
+  it('persists failed status after an operational sync error', async () => {
+    insertBank({ id: 'bank1', bank_id: 'gc-bank', name: 'GoCardless' });
+    await db.insertAccount({
+      id: 'acct1',
+      name: 'Checking',
+      bank: 'bank1',
+      account_id: 'ext-1',
+      account_sync_source: 'goCardless',
+    });
+
+    vi.mocked(bankSync.syncAccount).mockRejectedValue(
+      new Error('connection timeout'),
+    );
+
+    await accountsBankSyncHandler({ ids: ['acct1'] });
+
+    const account = await db.select('accounts', 'acct1');
+    expect(accountModel.toExternal(account!)).toMatchObject({
+      id: 'acct1',
+      bank_sync_status: 'failed',
+    });
+  });
+
   it('requests sync for externally linked accounts', async () => {
     insertBank({ id: 'bank1', bank_id: 'external:bank-1', name: 'External' });
     await db.insertAccount({

@@ -49,7 +49,7 @@ describe('BankSyncStatus', () => {
     const { rerender } = render(<BankSyncStatus />, { wrapper: TestProviders });
 
     expect(
-      screen.getByText(/Syncing... 1 account remaining/i),
+      screen.getByText(/Syncing\.\.\. 1 accounts? remaining/i),
     ).toBeInTheDocument();
 
     useAccounts.mockReturnValue({
@@ -62,7 +62,7 @@ describe('BankSyncStatus', () => {
     rerender(<BankSyncStatus />);
 
     expect(
-      screen.queryByText(/Syncing... 1 account remaining/i),
+      screen.queryByText(/Syncing\.\.\. 1 accounts? remaining/i),
     ).not.toBeInTheDocument();
   });
 });

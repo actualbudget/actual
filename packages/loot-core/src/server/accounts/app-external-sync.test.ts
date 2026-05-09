@@ -177,6 +177,48 @@ describe('external account sync metadata', () => {
     });
   });
 
+  it('preserves existing optional metadata when relinking externally without those fields', async () => {
+    await db.insertWithUUID('banks', {
+      id: 'bank1',
+      bank_id: 'external:old-bank',
+      name: 'Old External Credit Union',
+    });
+    await db.insertAccount({
+      id: 'acct1',
+      name: 'Checking',
+      account_id: 'provider-acct-1',
+      bank: 'bank1',
+      mask: '1234',
+      official_name: 'Checking Account',
+      balance_current: 1000,
+      balance_available: 900,
+      balance_limit: 2000,
+      account_sync_source: 'external',
+    });
+
+    await updateAccount({
+      id: 'acct1',
+      account_sync_source: 'external',
+      account_id: 'provider-acct-2',
+      bankName: 'New External Credit Union',
+      bankId: 'external:new-bank',
+    });
+
+    const account = await db.first<db.DbAccount>(
+      'SELECT * FROM accounts WHERE id = ?',
+      ['acct1'],
+    );
+
+    expect(account).toMatchObject({
+      id: 'acct1',
+      account_id: 'provider-acct-2',
+      mask: '1234',
+      official_name: 'Checking Account',
+      account_sync_source: 'external',
+      bank_sync_status: null,
+    });
+  });
+
   it('returns external sync metadata through the existing accounts shape', async () => {
     await db.insertWithUUID('banks', {
       id: 'bank1',
@@ -292,6 +334,24 @@ describe('external account sync metadata', () => {
       id: 'acct1',
       name: 'Checking',
     });
+
+    await expect(
+      updateAccount({
+        id: 'acct1',
+        account_sync_source: 'external',
+        bankName: 'External Credit Union',
+        bankId: 'test-provider:institution-1',
+      }),
+    ).rejects.toThrow('account_id is required');
+
+    await expect(
+      updateAccount({
+        id: 'acct1',
+        account_sync_source: 'external',
+        account_id: 'provider-acct-1',
+        bankId: 'test-provider:institution-1',
+      }),
+    ).rejects.toThrow('bankName is required');
 
     await expect(
       updateAccount({

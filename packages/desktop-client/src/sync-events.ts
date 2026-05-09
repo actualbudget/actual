@@ -57,6 +57,10 @@ function getAppliedUpdatedAccountIds(event: {
 
   const transactions = event.data?.get('transactions');
   const previousTransactions = event.prevData?.get('transactions');
+  if (transactions == null || previousTransactions == null) {
+    return [];
+  }
+
   const nextTransactionsById = getTransactionsById(transactions);
   const previousTransactionsById = getTransactionsById(previousTransactions);
 

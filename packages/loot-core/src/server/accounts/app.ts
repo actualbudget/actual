@@ -107,18 +107,32 @@ async function updateAccount(
 
     const bank = await link.findOrCreateBank({ name: bankName }, bankId);
 
-    await db.update('accounts', {
+    const externalUpdate: Partial<AccountEntity> & {
+      id: AccountEntity['id'];
+    } = {
       id,
       account_id: providerAccountId,
       bank: bank.id,
-      mask: params.mask ?? null,
-      official_name: params.official_name ?? null,
-      balance_current: params.balance_current ?? null,
-      balance_available: params.balance_available ?? null,
-      balance_limit: params.balance_limit ?? null,
       account_sync_source: 'external',
       bank_sync_status: null,
-    });
+    };
+    if (hasField('mask')) {
+      externalUpdate.mask = params.mask ?? null;
+    }
+    if (hasField('official_name')) {
+      externalUpdate.official_name = params.official_name ?? null;
+    }
+    if (hasField('balance_current')) {
+      externalUpdate.balance_current = params.balance_current ?? null;
+    }
+    if (hasField('balance_available')) {
+      externalUpdate.balance_available = params.balance_available ?? null;
+    }
+    if (hasField('balance_limit')) {
+      externalUpdate.balance_limit = params.balance_limit ?? null;
+    }
+
+    await db.update('accounts', externalUpdate);
   } else if (hasField('account_sync_source') && account_sync_source == null) {
     throw new Error('Use account-unlink to unlink an account.');
   }
@@ -1033,7 +1047,7 @@ function getBankSyncStatusFromError(
     }
   }
 
-  return 'attention-required';
+  return 'failed';
 }
 
 export type SyncResponseWithErrors = SyncResponse & {
@@ -1237,26 +1251,18 @@ async function simpleFinBatchSync({
       const hasUpdates = true;
 
       if (syncResponse.res?.error_code) {
+        const bankSyncError = {
+          type: 'BankSyncError',
+          reason: 'Failed syncing account "' + account.name + '."',
+          category: syncResponse.res.error_type,
+          code: syncResponse.res.error_code,
+        } as BankSyncError;
+
         await db.update('accounts', {
           id: account.id,
-          bank_sync_status: getBankSyncStatusFromError({
-            type: 'BankSyncError',
-            reason: 'Failed syncing account "' + account.name + '."',
-            category: syncResponse.res.error_type,
-            code: syncResponse.res.error_code,
-          } as BankSyncError),
+          bank_sync_status: getBankSyncStatusFromError(bankSyncError),
         });
-        errors.push(
-          handleSyncError(
-            {
-              type: 'BankSyncError',
-              reason: 'Failed syncing account "' + account.name + '."',
-              category: syncResponse.res.error_type,
-              code: syncResponse.res.error_code,
-            } as BankSyncError,
-            account,
-          ),
-        );
+        errors.push(handleSyncError(bankSyncError, account));
       } else if (syncResponse.res) {
         const syncResponseData = await handleSyncResponse(
           syncResponse.res,
@@ -1267,18 +1273,14 @@ async function simpleFinBatchSync({
         matchedTransactions.push(...syncResponseData.matchedTransactions);
         updatedAccounts.push(...syncResponseData.updatedAccounts);
       } else {
+        const emptyResponseError = new Error(
+          'Failed syncing account "' + account.name + '": empty response',
+        );
         await db.update('accounts', {
           id: account.id,
-          bank_sync_status: 'attention-required',
+          bank_sync_status: getBankSyncStatusFromError(emptyResponseError),
         });
-        errors.push(
-          handleSyncError(
-            new Error(
-              'Failed syncing account "' + account.name + '": empty response',
-            ),
-            account,
-          ),
-        );
+        errors.push(handleSyncError(emptyResponseError, account));
       }
 
       retVal.push({

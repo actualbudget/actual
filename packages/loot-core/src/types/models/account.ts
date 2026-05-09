@@ -32,5 +32,6 @@ export type BankSyncStatus =
   | 'ok'
   | 'pending'
   | 'sync-requested'
+  | 'failed'
   | 'reauth-required'
   | 'attention-required';

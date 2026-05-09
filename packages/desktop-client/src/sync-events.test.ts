@@ -110,4 +110,41 @@ describe('listenForSyncEvent', () => {
       markUpdatedAccounts({ ids: ['acct-2'] }),
     );
   });
+
+  it('does not mark accounts updated when applied events omit previous rows', () => {
+    const dispatch = vi.fn();
+    const store = {
+      dispatch,
+      getState: () => ({
+        prefs: {
+          local: {
+            id: 'budget-1',
+          },
+        },
+      }),
+    };
+    const queryClient = {
+      invalidateQueries: vi.fn(),
+    };
+
+    listenForSyncEvent(store as never, queryClient as never);
+
+    emitSyncEvent({
+      type: 'applied',
+      tables: ['transactions'],
+      data: new Map([
+        [
+          'transactions',
+          new Map([
+            ['t1', { id: 't1', acct: 'acct-1' }],
+            ['t2', { id: 't2', acct: 'acct-2' }],
+          ]),
+        ],
+      ]),
+    });
+
+    expect(dispatch).not.toHaveBeenCalledWith(
+      markUpdatedAccounts({ ids: ['acct-1', 'acct-2'] }),
+    );
+  });
 });

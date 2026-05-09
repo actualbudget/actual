@@ -8,7 +8,11 @@ function isBankSyncStatusPending(status: BankSyncStatus | null | undefined) {
 }
 
 function isBankSyncStatusFailed(status: BankSyncStatus | null | undefined) {
-  return status === 'attention-required' || status === 'reauth-required';
+  return (
+    status === 'failed' ||
+    status === 'attention-required' ||
+    status === 'reauth-required'
+  );
 }
 
 export function isAccountPendingSync(

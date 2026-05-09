@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useMemo } from 'react';
+import React, { Fragment, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -96,8 +96,8 @@ export function AccountPage() {
 
 function AccountHeader({ account }: { readonly account: AccountEntity }) {
   const { t } = useTranslation();
-  const pending = useMemo(() => isAccountPendingSync(account), [account]);
-  const failed = useMemo(() => isAccountFailedSync(account), [account]);
+  const pending = isAccountPendingSync(account);
+  const failed = isAccountFailedSync(account);
 
   const dispatch = useDispatch();
   const { mutate: updateAccount } = useUpdateAccountMutation();

@@ -32,7 +32,7 @@ export const AccountRow = memo(
       : '-';
     const lastSyncDateTime = hasLastSync
       ? formatDate(
-          new Date(parseInt(account.last_sync ?? '0', 10)),
+          new Date(parseInt(account.last_sync!, 10)),
           'MMM d, yyyy, HH:mm:ss',
           { locale },
         )
