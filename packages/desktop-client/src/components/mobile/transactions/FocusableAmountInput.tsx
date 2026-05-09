@@ -190,9 +190,11 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
   buttonProps,
   onFocus,
   onBlur,
+  onChangeValue,
   ...props
 }: FocusableAmountInputProps) {
   const [isNegative, setIsNegative] = useState(true);
+  const [liveValue, setLiveValue] = useState(Math.abs(value));
 
   const maybeApplyNegative = (amount: number, negative: boolean) => {
     const absValue = Math.abs(amount);
@@ -202,6 +204,15 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
   const onUpdateAmount = (amount: number, negative: boolean) => {
     props.onUpdateAmount?.(maybeApplyNegative(amount, negative));
   };
+
+  const handleChangeValue = (text: string) => {
+    setLiveValue(currencyToAmount(text) || 0);
+    onChangeValue?.(text);
+  };
+
+  useEffect(() => {
+    setLiveValue(Math.abs(value));
+  }, [value]);
 
   useEffect(() => {
     if (sign) {
@@ -227,10 +238,11 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
         value={value}
         onFocus={onFocus}
         onBlur={onBlur}
+        onChangeValue={handleChangeValue}
         onUpdateAmount={amount => onUpdateAmount(amount, isNegative)}
         focused={focused && !disabled}
         style={{
-          ...makeAmountFullStyle(value, {
+          ...makeAmountFullStyle(maybeApplyNegative(liveValue, isNegative), {
             zeroColor: isNegative ? theme.numberNegative : theme.numberNeutral,
             positiveColor: theme.numberPositive,
             negativeColor: theme.numberNegative,

@@ -1,6 +1,24 @@
 import { describe, expect, it } from 'vitest';
 
-import { calculateSpendingReportTimeRange } from './reportRanges';
+import {
+  calculateSpendingReportTimeRange,
+  calculateTimeRange,
+} from './reportRanges';
+
+// In test mode, monthUtils.currentMonth() returns '2017-01'
+describe('calculateTimeRange', () => {
+  it('keeps last month as a live time range when restoring a saved widget', () => {
+    const [start, end, mode] = calculateTimeRange({
+      start: '2016-11',
+      end: '2016-11',
+      mode: 'lastMonth',
+    });
+
+    expect(start).toBe('2016-12');
+    expect(end).toBe('2016-12');
+    expect(mode).toBe('lastMonth');
+  });
+});
 
 // In test mode, monthUtils.currentMonth() returns '2017-01'
 describe('calculateSpendingReportTimeRange', () => {
