@@ -12,14 +12,14 @@ import { View } from './View';
 const backgroundColor: {
   [key in ButtonVariant | `${ButtonVariant}Disabled`]?: string;
 } = {
-  normal: theme.buttonNormalDisabledBackground,
-  normalDisabled: theme.buttonNormalDisabledBackground,
+  normal: theme.buttonPrimaryBackground,
+  normalDisabled: theme.buttonPrimaryBackground,
   primary: theme.buttonPrimaryBackground,
-  primaryDisabled: theme.buttonPrimaryDisabledBackground,
-  bare: theme.buttonBareBackground,
-  bareDisabled: theme.buttonBareDisabledBackground,
-  menu: theme.buttonMenuBackground,
-  menuSelected: theme.buttonMenuSelectedBackground,
+  primaryDisabled: theme.buttonPrimaryBackground,
+  bare: theme.buttonPrimaryBackground,
+  bareDisabled: theme.buttonPrimaryBackground,
+  menu: theme.buttonPrimaryBackground,
+  menuSelected: theme.buttonPrimaryBackground,
 };
 
 const backgroundColorHover: Record<
@@ -54,14 +54,14 @@ const borderColor: {
 const textColor: {
   [key in ButtonVariant | `${ButtonVariant}Disabled`]?: CSSProperties['color'];
 } = {
-  normal: theme.buttonNormalText,
-  normalDisabled: theme.buttonNormalDisabledText,
+  normal: theme.buttonPrimaryText,
+  normalDisabled: theme.buttonPrimaryText,
   primary: theme.buttonPrimaryText,
-  primaryDisabled: theme.buttonPrimaryDisabledText,
-  bare: theme.buttonBareText,
-  bareDisabled: theme.buttonBareDisabledText,
-  menu: theme.buttonMenuText,
-  menuSelected: theme.buttonMenuSelectedText,
+  primaryDisabled: theme.buttonPrimaryText,
+  bare: theme.buttonPrimaryText,
+  bareDisabled: theme.buttonPrimaryText,
+  menu: theme.buttonPrimaryText,
+  menuSelected: theme.buttonPrimaryText,
 };
 
 const textColorHover: {
@@ -173,7 +173,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             : cx(defaultButtonClassName, className)
         }
       >
-        Hello! {children}
+        {children}
       </ReactAriaButton>
     );
   },
