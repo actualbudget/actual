@@ -445,9 +445,13 @@ let accounts = await getAccounts();
 
 #### `getCategories`
 
-<Method name="getCategories" args={[]} returns="Promise<Category[]>" />
+<Method name="getCategories" args={[{ name: 'options = {}', type: 'object?' }]} returns="Promise<Category[]>" />
 
-Get all categories.
+Get categories. By default, returns every category.
+
+The `options` object supports:
+
+- `hidden`: filter by hidden status. Pass `false` to return only visible categories, or `true` to return only hidden ones. Omit to return both.
 
 #### `createCategory`
 
@@ -500,9 +504,13 @@ There should only ever be one income category group,
 
 #### `getCategoryGroups`
 
-<Method name="getCategoryGroups" args={[]} returns="Promise<CategoryGroup[]>" />
+<Method name="getCategoryGroups" args={[{ name: 'options = {}', type: 'object?' }]} returns="Promise<CategoryGroup[]>" />
 
-Get all category groups.
+Get category groups. By default, returns every group with all of its categories nested under it.
+
+The `options` object supports:
+
+- `hidden`: filter by hidden status, applied to both groups and their nested categories. Pass `false` to return only visible groups and categories, or `true` to return only hidden ones. Omit to return both.
 
 #### `createCategoryGroup`
 
