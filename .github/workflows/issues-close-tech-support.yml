@@ -1,0 +1,23 @@
+name: Close tech support issues with automated message
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  tech-support:
+    if: ${{ github.event.label.name == 'tech-support' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create comment and close issue
+        run: |
+          gh issue comment "$ISSUE_URL" --body ":wave: Thanks for reaching out!
+
+          GitHub Issues are reserved for bug reports and feature requests, so tech support tickets are automatically closed. The fastest way to get help is to ask the community on [Discord](https://discord.gg/pRYNYr4W5A) — that's where most of the community lives and can help you in real time.
+
+          <!-- tech-support-auto-close-comment -->"
+
+          gh issue close "$ISSUE_URL"
+        env:
+          ISSUE_URL: https://github.com/actualbudget/actual/issues/${{ github.event.issue.number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

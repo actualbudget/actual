@@ -6,6 +6,7 @@ import { resolve } from 'node:path';
 import { SyncProtoBuf } from '@actual-app/crdt';
 import type { Request, Response } from 'express';
 import express from 'express';
+import { v4 as uuidv4 } from 'uuid';
 
 import { getAccountDb, isAdmin } from './account-db';
 import { FileNotFound } from './app-sync/errors';
@@ -61,7 +62,7 @@ function boolToInt(deleted: boolean) {
 }
 
 function generateGroupId(): GroupId {
-  const id = crypto.randomUUID();
+  const id = uuidv4();
   if (!isValidGroupId(id)) {
     throw new TypeError('UUID format no longer matches expected format');
   }

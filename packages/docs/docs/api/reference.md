@@ -164,17 +164,73 @@ These are types.
 
 A split transaction has several sub-transactions that split the total
 amount across them. You can create a split transaction by specifying
-an array of sub-transactions in the `subtransactions` field.
+an array of sub-transactions in the `subtransactions` field. This field is primarily used during creation and retrieval.
 
-Subtransactions can specify the following fields, and `amount` is the only required field:
+In practice, updating subtransactions individually may not work reliably. To modify split transactions, update the parent transaction and provide the full `subtransactions` array.
+
+Subtransactions are treated as full transaction records and are validated similarly to regular transactions.
+
+In practice, API creation commonly requires at least the fields below.
 
 - `amount`
+- `account`
+- `date`
+- `parent_id`
+- `is_child: true`
+
+Additionally, child transactions should explicitly set:
+
+- `is_parent`: false
+
+Optional fields include:
+
 - `category`
 - `notes`
 
 If the amounts of the sub-transactions do not equal the total amount
 of the transaction, currently the API call will succeed but an error
 will be displayed within the app.
+
+#### Parent Transaction Requirements
+
+A transaction must be marked with `is_parent: true` before subtransactions can be added.
+
+If `is_parent` is not set to `true` on the parent transaction, any provided `subtransactions` will be ignored and the transaction will be treated as a standard (non-split) transaction. No split will be created.
+
+Subtransactions are only processed when the parent transaction has `is_parent: true`.
+
+If subtransactions are provided but are invalid (e.g. missing required fields such as `account` or `date`), the API will return a validation error (HTTP 400) indicating that required transaction fields are missing.
+
+A working example of API fields:
+
+**Note:** When creating a new split transaction, you typically don't need to provide an `id` for the parent; the system will generate one. The parent transaction's `amount` should equal the sum of all subtransaction amounts.
+
+```js
+{
+  "id": "parent-id",
+  "is_parent": true,
+  "subtransactions": [
+    {
+      "amount": 142000,
+      "account": "9c1e5de4-ecf8-41c2-8a97-4a1e8bc385c9",
+      "date": "2024-08-12",
+      "parent_id": "parent-id",
+      "is_child": true,
+      "is_parent": false,
+      "category": "71376207-72f9-4b2b-ae24-0931a226f76a",
+    },
+    {
+      "amount": 150,
+      "account": "9c1e5de4-ecf8-41c2-8a97-4a1e8bc385c9",
+      "date": "2024-08-12",
+      "parent_id": "parent-id",
+      "is_child": true,
+      "is_parent": false,
+      "category": "315d3776-d2a8-4d82-8a69-648b0d80125a",
+    }
+  ]
+}
+```
 
 #### Transfers
 

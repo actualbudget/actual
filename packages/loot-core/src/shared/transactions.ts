@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import { logger } from '#platform/server/log';
 import type { TransactionEntity } from '#types/models';
 
@@ -39,7 +41,7 @@ export function makeChild<T extends GenericTransactionEntity>(
     ...data,
     category: 'category' in data ? data.category : parent.category,
     payee: 'payee' in data ? data.payee : parent.payee,
-    id: 'id' in data ? data.id : prefix + crypto.randomUUID(),
+    id: 'id' in data ? data.id : prefix + uuidv4(),
     account: parent.account,
     date: parent.date,
     cleared: parent.cleared != null ? parent.cleared : null,
@@ -357,7 +359,7 @@ export function realizeTempTransactions(
 ): TransactionEntity[] {
   const parent = {
     ...transactions.find(t => !t.is_child),
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     sort_order: Date.now(),
   } as TransactionEntity;
   const children = transactions.filter(t => t.is_child);
@@ -367,7 +369,7 @@ export function realizeTempTransactions(
       child =>
         ({
           ...child,
-          id: crypto.randomUUID(),
+          id: uuidv4(),
           parent_id: parent.id,
         }) satisfies TransactionEntity,
     ),

@@ -1,5 +1,8 @@
 import { sendCatch } from '@actual-app/core/platform/client/connection';
-import type { SyncServerEnableBankingAccount } from '@actual-app/core/types/models';
+import type {
+  AccountEntity,
+  SyncServerEnableBankingAccount,
+} from '@actual-app/core/types/models';
 import { t } from 'i18next';
 
 import { pushModal } from '#modals/modalsSlice';
@@ -121,7 +124,10 @@ function _authorize(
   );
 }
 
-export async function authorizeBank(dispatch: AppDispatch) {
+export async function authorizeBank(
+  dispatch: AppDispatch,
+  upgradingAccountId?: AccountEntity['id'],
+) {
   _authorize(dispatch, {
     onSuccess: async data => {
       dispatch(
@@ -131,6 +137,7 @@ export async function authorizeBank(dispatch: AppDispatch) {
             options: {
               externalAccounts: data.accounts,
               syncSource: 'enableBanking',
+              upgradingAccountId,
             },
           },
         }),
