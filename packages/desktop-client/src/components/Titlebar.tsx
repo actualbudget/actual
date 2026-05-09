@@ -265,8 +265,16 @@ function SharedArrayBufferWarning({ style }: SharedArrayBufferWarningProps) {
   }
 
   const warningMessage = t(
-    'Your environment does not support SharedArrayBuffer. You may experience data loss or degraded functionality. Consider using HTTPS or a supported browser.',
+    'Your environment does not support SharedArrayBuffer. You may experience data loss or degraded functionality. Click to learn more.',
   );
+
+  const handlePress = () => {
+    window.open(
+      'https://actualbudget.org/docs/troubleshooting/shared-array-buffer',
+      '_blank',
+      'noopener,noreferrer',
+    );
+  };
 
   return (
     <Button
@@ -278,9 +286,7 @@ function SharedArrayBufferWarning({ style }: SharedArrayBufferWarningProps) {
         WebkitAppRegion: 'none',
         color: theme.errorTextDark,
       }}
-      onPress={() => {
-        // Optional: could open a help dialog or link to documentation
-      }}
+      onPress={handlePress}
     >
       <SvgAlertTriangle width={13} />
     </Button>
