@@ -19,9 +19,8 @@ export function registerCategoriesCommand(program: Command) {
       await withConnection(
         opts,
         async () => {
-          const allCategories = await api.getCategories();
-          const result = allCategories.filter(
-            c => cmdOpts.includeHidden || !c.hidden,
+          const result = await api.getCategories(
+            cmdOpts.includeHidden ? {} : { hidden: false },
           );
           printOutput(result, opts.format);
         },

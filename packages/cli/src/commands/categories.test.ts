@@ -65,34 +65,30 @@ describe('categories commands', () => {
   });
 
   describe('categories list', () => {
-    it('filters out hidden categories by default', async () => {
-      vi.mocked(api.getCategories).mockResolvedValue([
-        { id: '1', name: 'Visible', group_id: 'g1', hidden: false },
-        { id: '2', name: 'Hidden', group_id: 'g1', hidden: true },
-      ]);
+    it('asks the API to exclude hidden categories by default', async () => {
+      await run(['categories', 'list']);
+
+      expect(api.getCategories).toHaveBeenCalledWith({ hidden: false });
+    });
+
+    it('asks the API for all categories when --include-hidden is passed', async () => {
+      await run(['categories', 'list', '--include-hidden']);
+
+      expect(api.getCategories).toHaveBeenCalledWith({});
+    });
+
+    it('prints whatever the API returns', async () => {
+      const visible = {
+        id: '1',
+        name: 'Visible',
+        group_id: 'g1',
+        hidden: false,
+      };
+      vi.mocked(api.getCategories).mockResolvedValue([visible]);
 
       await run(['categories', 'list']);
 
-      expect(printOutput).toHaveBeenCalledWith(
-        [{ id: '1', name: 'Visible', group_id: 'g1', hidden: false }],
-        undefined,
-      );
-    });
-
-    it('includes hidden categories when --include-hidden is passed', async () => {
-      vi.mocked(api.getCategories).mockResolvedValue([
-        { id: '1', name: 'Visible', group_id: 'g1', hidden: false },
-        { id: '2', name: 'Hidden', group_id: 'g1', hidden: true },
-      ]);
-
-      await run(['categories', 'list', '--include-hidden']);
-
-      expect(printOutput).toHaveBeenCalledWith(
-        expect.arrayContaining([
-          expect.objectContaining({ id: '2', hidden: true }),
-        ]),
-        undefined,
-      );
+      expect(printOutput).toHaveBeenCalledWith([visible], undefined);
     });
 
     it('passes format option to printOutput', async () => {
@@ -105,72 +101,31 @@ describe('categories commands', () => {
   });
 
   describe('category-groups list', () => {
-    it('filters out hidden groups and hidden child categories by default', async () => {
-      vi.mocked(api.getCategoryGroups).mockResolvedValue([
-        {
-          id: 'g1',
-          name: 'Visible Group',
-          is_income: false,
-          hidden: false,
-          categories: [
-            { id: 'c1', name: 'Visible Cat', group_id: 'g1', hidden: false },
-            { id: 'c2', name: 'Hidden Cat', group_id: 'g1', hidden: true },
-          ],
-        },
-        {
-          id: 'g2',
-          name: 'Hidden Group',
-          is_income: false,
-          hidden: true,
-          categories: [],
-        },
-      ]);
+    it('asks the API to exclude hidden groups by default', async () => {
+      await run(['category-groups', 'list']);
+
+      expect(api.getCategoryGroups).toHaveBeenCalledWith({ hidden: false });
+    });
+
+    it('asks the API for all groups when --include-hidden is passed', async () => {
+      await run(['category-groups', 'list', '--include-hidden']);
+
+      expect(api.getCategoryGroups).toHaveBeenCalledWith({});
+    });
+
+    it('prints whatever the API returns', async () => {
+      const group = {
+        id: 'g1',
+        name: 'Group',
+        is_income: false,
+        hidden: false,
+        categories: [{ id: 'c1', name: 'Cat', group_id: 'g1', hidden: false }],
+      };
+      vi.mocked(api.getCategoryGroups).mockResolvedValue([group]);
 
       await run(['category-groups', 'list']);
 
-      expect(printOutput).toHaveBeenCalledWith(
-        [
-          {
-            id: 'g1',
-            name: 'Visible Group',
-            is_income: false,
-            hidden: false,
-            categories: [
-              { id: 'c1', name: 'Visible Cat', group_id: 'g1', hidden: false },
-            ],
-          },
-        ],
-        undefined,
-      );
-    });
-
-    it('includes hidden groups and categories when --include-hidden is passed', async () => {
-      vi.mocked(api.getCategoryGroups).mockResolvedValue([
-        {
-          id: 'g1',
-          name: 'Visible Group',
-          is_income: false,
-          hidden: false,
-          categories: [
-            { id: 'c2', name: 'Hidden Cat', group_id: 'g1', hidden: true },
-          ],
-        },
-        {
-          id: 'g2',
-          name: 'Hidden Group',
-          is_income: false,
-          hidden: true,
-          categories: [],
-        },
-      ]);
-
-      await run(['category-groups', 'list', '--include-hidden']);
-
-      const output = vi.mocked(printOutput).mock.calls[0][0] as Array<{
-        id: string;
-      }>;
-      expect(output).toHaveLength(2);
-      expect(output.map(g => g.id)).toEqual(['g1', 'g2']);
+      expect(printOutput).toHaveBeenCalledWith([group], undefined);
     });
   });
 });

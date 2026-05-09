@@ -630,17 +630,20 @@ handlers['api/account-balance'] = withMutation(async function ({
 
 handlers['api/categories-get'] = async function ({
   grouped,
-}: { grouped? } = {}) {
+  hidden,
+}: { grouped?: boolean; hidden?: boolean } = {}) {
   checkFileOpen();
-  const result = await handlers['get-categories']();
+  const result = await handlers['get-categories']({ hidden });
   return grouped
     ? result.grouped.map(group => categoryGroupModel.toExternal(group))
     : result.list.map(category => categoryModel.toExternal(category));
 };
 
-handlers['api/category-groups-get'] = async function () {
+handlers['api/category-groups-get'] = async function ({
+  hidden,
+}: { hidden?: boolean } = {}) {
   checkFileOpen();
-  const groups = await handlers['get-category-groups']();
+  const groups = await handlers['get-category-groups']({ hidden });
   return groups.map(group => categoryGroupModel.toExternal(group));
 };
 

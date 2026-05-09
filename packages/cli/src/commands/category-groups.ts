@@ -19,15 +19,9 @@ export function registerCategoryGroupsCommand(program: Command) {
       await withConnection(
         opts,
         async () => {
-          const allGroups = await api.getCategoryGroups();
-          const result = allGroups
-            .filter(g => cmdOpts.includeHidden || !g.hidden)
-            .map(g => ({
-              ...g,
-              categories: g.categories?.filter(
-                c => cmdOpts.includeHidden || !c.hidden,
-              ),
-            }));
+          const result = await api.getCategoryGroups(
+            cmdOpts.includeHidden ? {} : { hidden: false },
+          );
           printOutput(result, opts.format);
         },
         { mutates: false },

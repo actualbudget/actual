@@ -204,8 +204,8 @@ export function getAccountBalance(id: APIAccountEntity['id'], cutoff?: Date) {
   return send('api/account-balance', { id, cutoff });
 }
 
-export function getCategoryGroups() {
-  return send('api/category-groups-get');
+export function getCategoryGroups(options: { hidden?: boolean } = {}) {
+  return send('api/category-groups-get', options);
 }
 
 export function createCategoryGroup(group: Omit<APICategoryGroupEntity, 'id'>) {
@@ -226,8 +226,8 @@ export function deleteCategoryGroup(
   return send('api/category-group-delete', { id, transferCategoryId });
 }
 
-export function getCategories() {
-  return send('api/categories-get', { grouped: false });
+export function getCategories(options: { hidden?: boolean } = {}) {
+  return send('api/categories-get', { grouped: false, ...options });
 }
 
 export function createCategory(category: Omit<APICategoryEntity, 'id'>) {

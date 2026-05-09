@@ -170,8 +170,8 @@ app.method(
 app.method('budget/render-note-templates', goalNoteActions.unparse);
 
 // Server must return AQL entities not the raw DB data
-async function getCategories() {
-  const categoryGroups = await getCategoryGroups();
+async function getCategories({ hidden }: { hidden?: boolean } = {}) {
+  const categoryGroups = await getCategoryGroups({ hidden });
   return {
     grouped: categoryGroups,
     list: categoryGroups.flatMap(g => g.categories ?? []),
@@ -388,10 +388,18 @@ async function deleteCategory({
 }
 
 // Server must return AQL entities not the raw DB data
-async function getCategoryGroups() {
+async function getCategoryGroups({ hidden }: { hidden?: boolean } = {}) {
+  const baseQuery = q('category_groups').select('*');
+  const query = hidden === undefined ? baseQuery : baseQuery.filter({ hidden });
   const { data: categoryGroups }: { data: CategoryGroupEntity[] } =
-    await aqlQuery(q('category_groups').select('*'));
-  return categoryGroups;
+    await aqlQuery(query);
+  if (hidden === undefined) {
+    return categoryGroups;
+  }
+  return categoryGroups.map(g => ({
+    ...g,
+    categories: g.categories?.filter(c => Boolean(c.hidden) === hidden),
+  }));
 }
 
 async function createCategoryGroup({
