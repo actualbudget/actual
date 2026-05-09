@@ -258,6 +258,7 @@ jobs:
 
       - name: Merge shard patches
         id: create-patch
+        shell: bash
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global user.name "github-actions[bot]"
