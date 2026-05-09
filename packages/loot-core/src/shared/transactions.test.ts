@@ -148,7 +148,7 @@ describe('Transactions', () => {
       makeTransaction({ amount: 3000 }),
     ];
     const { data } = splitTransaction(transactions, 't1');
-    
+
     const parent = data.find(t => t.id === 't1');
     expect(parent?.payee).toBeNull();
     expect(parent?.is_parent).toBe(true);
