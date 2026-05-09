@@ -211,12 +211,6 @@ export function ExperimentalFeatures() {
               <Trans>Age of Money Report</Trans>
             </FeatureToggle>
             <FeatureToggle
-              flag="customThemes"
-              feedbackLink="https://github.com/actualbudget/actual/issues/6607"
-            >
-              <Trans>Custom themes</Trans>
-            </FeatureToggle>
-            <FeatureToggle
               flag="budgetAnalysisReport"
               feedbackLink="https://github.com/actualbudget/actual/pull/6742"
             >

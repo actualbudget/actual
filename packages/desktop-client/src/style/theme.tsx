@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 
 import type { DarkTheme, Theme } from '@actual-app/core/types/prefs';
 
-import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 
 import {
@@ -47,13 +46,10 @@ export function usePreferredDarkTheme() {
 /**
  * One-time migration: moves any legacy `overrideCss` field out of the
  * installed theme JSON blobs and into the new `customCssOverride` global pref.
- * Gated on the customThemes feature flag — users who never used the feature
- * have nothing to migrate.
  *
  * TODO: remove this after v26.6.0 is released
  */
 function useMigrateLegacyOverride() {
-  const customThemesEnabled = useFeatureFlag('customThemes');
   const [customCssOverride, setCustomCssOverride] =
     useGlobalPref('customCssOverride');
   const [installedCustomLightThemeJson, setInstalledCustomLightThemeJson] =
@@ -62,8 +58,6 @@ function useMigrateLegacyOverride() {
     useGlobalPref('installedCustomDarkTheme');
 
   useEffect(() => {
-    if (!customThemesEnabled) return;
-
     const result = migrateLegacyOverride({
       existingOverride: customCssOverride,
       lightJson: installedCustomLightThemeJson,
@@ -84,7 +78,6 @@ function useMigrateLegacyOverride() {
     // idempotent: once customCssOverride is set (or the legacy field is
     // stripped), subsequent invocations return null.
   }, [
-    customThemesEnabled,
     customCssOverride,
     installedCustomLightThemeJson,
     installedCustomDarkThemeJson,
@@ -101,7 +94,6 @@ function getBaseThemeColors(baseTheme: BaseTheme) {
 export function ThemeStyle() {
   const [activeTheme] = useTheme();
   const [darkThemePreference] = usePreferredDarkTheme();
-  const customThemesEnabled = useFeatureFlag('customThemes');
   const [installedCustomLightThemeJson] = useGlobalPref(
     'installedCustomLightTheme',
   );
@@ -114,12 +106,8 @@ export function ThemeStyle() {
 
   useEffect(() => {
     if (activeTheme === 'auto') {
-      const installedLight = customThemesEnabled
-        ? parseInstalledTheme(installedCustomLightThemeJson)
-        : null;
-      const installedDark = customThemesEnabled
-        ? parseInstalledTheme(installedCustomDarkThemeJson)
-        : null;
+      const installedLight = parseInstalledTheme(installedCustomLightThemeJson);
+      const installedDark = parseInstalledTheme(installedCustomDarkThemeJson);
 
       const lightColors =
         (installedLight?.baseTheme &&
@@ -159,9 +147,7 @@ export function ThemeStyle() {
         );
       };
     } else {
-      const installedTheme = customThemesEnabled
-        ? parseInstalledTheme(installedCustomLightThemeJson)
-        : null;
+      const installedTheme = parseInstalledTheme(installedCustomLightThemeJson);
       if (installedTheme?.baseTheme) {
         setThemeColors(
           getBaseThemeColors(installedTheme.baseTheme) ??
@@ -174,7 +160,6 @@ export function ThemeStyle() {
   }, [
     activeTheme,
     darkThemePreference,
-    customThemesEnabled,
     installedCustomLightThemeJson,
     installedCustomDarkThemeJson,
   ]);
@@ -196,7 +181,6 @@ export function ThemeStyle() {
  */
 export function CustomThemeStyle() {
   useMigrateLegacyOverride();
-  const customThemesEnabled = useFeatureFlag('customThemes');
   const [activeTheme] = useTheme();
   const [installedCustomLightThemeJson] = useGlobalPref(
     'installedCustomLightTheme',
@@ -207,8 +191,6 @@ export function CustomThemeStyle() {
   const [customCssOverride] = useGlobalPref('customCssOverride');
 
   const validatedCss = useMemo(() => {
-    if (!customThemesEnabled) return null;
-
     const safeValidate = (css: string | undefined, errorLabel: string) => {
       if (!css?.trim()) return '';
       try {
@@ -250,7 +232,6 @@ export function CustomThemeStyle() {
     const combined = [baseCss, overrideLayer].filter(Boolean).join('\n');
     return combined || null;
   }, [
-    customThemesEnabled,
     activeTheme,
     installedCustomLightThemeJson,
     installedCustomDarkThemeJson,
