@@ -9,7 +9,13 @@ import * as mockSyncServer from '#server/tests/mockSyncServer';
 import * as encoder from './encoder';
 import { isError } from './utils';
 
-import { applyMessages, fullSync, sendMessages, setSyncingMode } from './index';
+import {
+  applyMessages,
+  fullSync,
+  getUpdatedAccountIdsForAppliedMessages,
+  sendMessages,
+  setSyncingMode,
+} from './index';
 
 beforeEach(() => {
   mockSyncServer.reset();
@@ -20,6 +26,121 @@ beforeEach(() => {
 afterEach(() => {
   global.resetTime();
   setSyncingMode('disabled');
+});
+
+describe('getUpdatedAccountIdsForAppliedMessages', () => {
+  it('marks newly added transactions while bank sync is pending', () => {
+    expect(
+      getUpdatedAccountIdsForAppliedMessages(
+        [
+          {
+            dataset: 'accounts',
+            row: 'acct-1',
+            column: 'bank_sync_status',
+            value: 'pending',
+            timestamp: Timestamp.parse(
+              '1970-01-01T00:00:01.000Z-0000-0000testinguuid1',
+            ),
+          },
+          {
+            dataset: 'transactions',
+            row: 'tx-1',
+            column: 'acct',
+            value: 'acct-1',
+            timestamp: Timestamp.parse(
+              '1970-01-01T00:00:02.000Z-0000-0000testinguuid1',
+            ),
+          },
+          {
+            dataset: 'accounts',
+            row: 'acct-1',
+            column: 'bank_sync_status',
+            value: 'ok',
+            timestamp: Timestamp.parse(
+              '1970-01-01T00:00:03.000Z-0000-0000testinguuid1',
+            ),
+          },
+        ],
+        new Map([
+          ['transactions', new Map([['tx-existing', { id: 'tx-existing' }]])],
+        ]),
+      ),
+    ).toEqual(['acct-1']);
+  });
+
+  it('marks newly added transactions while external sync is requested', () => {
+    expect(
+      getUpdatedAccountIdsForAppliedMessages(
+        [
+          {
+            dataset: 'accounts',
+            row: 'acct-1',
+            column: 'bank_sync_status',
+            value: 'sync-requested',
+            timestamp: Timestamp.parse(
+              '1970-01-01T00:00:01.000Z-0000-0000testinguuid1',
+            ),
+          },
+          {
+            dataset: 'transactions',
+            row: 'tx-1',
+            column: 'acct',
+            value: 'acct-1',
+            timestamp: Timestamp.parse(
+              '1970-01-01T00:00:02.000Z-0000-0000testinguuid1',
+            ),
+          },
+          {
+            dataset: 'accounts',
+            row: 'acct-1',
+            column: 'bank_sync_status',
+            value: 'ok',
+            timestamp: Timestamp.parse(
+              '1970-01-01T00:00:03.000Z-0000-0000testinguuid1',
+            ),
+          },
+        ],
+        new Map(),
+      ),
+    ).toEqual(['acct-1']);
+  });
+
+  it('does not mark transactions added after pending has cleared', () => {
+    expect(
+      getUpdatedAccountIdsForAppliedMessages(
+        [
+          {
+            dataset: 'accounts',
+            row: 'acct-1',
+            column: 'bank_sync_status',
+            value: 'pending',
+            timestamp: Timestamp.parse(
+              '1970-01-01T00:00:01.000Z-0000-0000testinguuid1',
+            ),
+          },
+          {
+            dataset: 'accounts',
+            row: 'acct-1',
+            column: 'bank_sync_status',
+            value: 'ok',
+            timestamp: Timestamp.parse(
+              '1970-01-01T00:00:02.000Z-0000-0000testinguuid1',
+            ),
+          },
+          {
+            dataset: 'transactions',
+            row: 'tx-1',
+            column: 'acct',
+            value: 'acct-1',
+            timestamp: Timestamp.parse(
+              '1970-01-01T00:00:03.000Z-0000-0000testinguuid1',
+            ),
+          },
+        ],
+        new Map(),
+      ),
+    ).toEqual([]);
+  });
 });
 
 describe('Sync', () => {

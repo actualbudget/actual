@@ -186,6 +186,65 @@ type DataMap = Map<string, unknown>;
 type SyncListener = (oldData: DataMap, newData: DataMap) => unknown;
 let _syncListeners: SyncListener[] = [];
 
+function getRowsById<T extends { id: string }>(value: unknown) {
+  if (!(value instanceof Map)) {
+    return new Map<string, T>();
+  }
+
+  return new Map(
+    Array.from(value.entries()).filter(
+      (entry): entry is [string, T] =>
+        typeof entry[1] === 'object' &&
+        entry[1] !== null &&
+        'id' in entry[1] &&
+        typeof entry[1].id === 'string',
+    ),
+  );
+}
+
+export function getUpdatedAccountIdsForAppliedMessages(
+  messages: Message[],
+  oldData: DataMap,
+) {
+  const previousTransactionsById = getRowsById<{ id: string }>(
+    oldData.get('transactions'),
+  );
+  const accountsSyncing = new Set<string>();
+  const updatedAccountIds = new Set<string>();
+  const isSyncWindowStatus = (value: unknown) =>
+    value === 'pending' || value === 'sync-requested';
+
+  for (const message of messages) {
+    if (message.old) {
+      continue;
+    }
+
+    if (
+      message.dataset === 'accounts' &&
+      message.column === 'bank_sync_status'
+    ) {
+      if (isSyncWindowStatus(message.value)) {
+        accountsSyncing.add(message.row);
+      } else {
+        accountsSyncing.delete(message.row);
+      }
+      continue;
+    }
+
+    if (
+      message.dataset === 'transactions' &&
+      message.column === 'acct' &&
+      typeof message.value === 'string' &&
+      !previousTransactionsById.has(message.row) &&
+      accountsSyncing.has(message.value)
+    ) {
+      updatedAccountIds.add(message.value);
+    }
+  }
+
+  return Array.from(updatedAccountIds);
+}
+
 export function addSyncListener(func: SyncListener) {
   _syncListeners.push(func);
 
@@ -434,11 +493,21 @@ export const applyMessages = sequential(async (messages: Message[]) => {
   _syncListeners.forEach(func => func(oldData, newData));
 
   const tables = getTablesFromMessages(messages.filter(msg => !msg.old));
+  const updatedAccountIds = getUpdatedAccountIdsForAppliedMessages(
+    messages,
+    oldData,
+  );
   app.events.emit('sync', {
     type: 'applied',
     tables,
     data: newData,
     prevData: oldData,
+    meta:
+      updatedAccountIds.length > 0
+        ? {
+            updatedAccountIds,
+          }
+        : undefined,
   });
 
   return messages;

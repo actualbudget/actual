@@ -31,7 +31,7 @@ describe('listenForSyncEvent', () => {
     listeners.clear();
   });
 
-  it('marks accounts updated for newly applied remote transactions', () => {
+  it('marks accounts updated from explicit applied sync metadata', () => {
     const dispatch = vi.fn();
     const store = {
       dispatch,
@@ -51,19 +51,10 @@ describe('listenForSyncEvent', () => {
 
     emitSyncEvent({
       type: 'applied',
-      tables: ['transactions'],
-      prevData: new Map([
-        ['transactions', new Map([['t1', { id: 't1', acct: 'acct-1' }]])],
-      ]),
-      data: new Map([
-        [
-          'transactions',
-          new Map([
-            ['t1', { id: 't1', acct: 'acct-1' }],
-            ['t2', { id: 't2', acct: 'acct-2' }],
-          ]),
-        ],
-      ]),
+      tables: ['accounts', 'transactions'],
+      meta: {
+        updatedAccountIds: ['acct-2'],
+      },
     });
 
     expect(dispatch).toHaveBeenCalledWith(
@@ -71,47 +62,7 @@ describe('listenForSyncEvent', () => {
     );
   });
 
-  it('does not mark accounts updated for existing or tombstoned transactions', () => {
-    const dispatch = vi.fn();
-    const store = {
-      dispatch,
-      getState: () => ({
-        prefs: {
-          local: {
-            id: 'budget-1',
-          },
-        },
-      }),
-    };
-    const queryClient = {
-      invalidateQueries: vi.fn(),
-    };
-
-    listenForSyncEvent(store as never, queryClient as never);
-
-    emitSyncEvent({
-      type: 'applied',
-      tables: ['transactions'],
-      prevData: new Map([
-        ['transactions', new Map([['t1', { id: 't1', acct: 'acct-1' }]])],
-      ]),
-      data: new Map([
-        [
-          'transactions',
-          new Map([
-            ['t1', { id: 't1', acct: 'acct-1' }],
-            ['t2', { id: 't2', acct: 'acct-2', tombstone: 1 }],
-          ]),
-        ],
-      ]),
-    });
-
-    expect(dispatch).not.toHaveBeenCalledWith(
-      markUpdatedAccounts({ ids: ['acct-2'] }),
-    );
-  });
-
-  it('does not mark accounts updated when applied events omit previous rows', () => {
+  it('does not infer updated accounts from generic applied transaction rows', () => {
     const dispatch = vi.fn();
     const store = {
       dispatch,
@@ -144,7 +95,38 @@ describe('listenForSyncEvent', () => {
     });
 
     expect(dispatch).not.toHaveBeenCalledWith(
-      markUpdatedAccounts({ ids: ['acct-1', 'acct-2'] }),
+      markUpdatedAccounts({ ids: ['acct-2'] }),
+    );
+  });
+
+  it('ignores invalid updated account metadata', () => {
+    const dispatch = vi.fn();
+    const store = {
+      dispatch,
+      getState: () => ({
+        prefs: {
+          local: {
+            id: 'budget-1',
+          },
+        },
+      }),
+    };
+    const queryClient = {
+      invalidateQueries: vi.fn(),
+    };
+
+    listenForSyncEvent(store as never, queryClient as never);
+
+    emitSyncEvent({
+      type: 'applied',
+      tables: ['accounts', 'transactions'],
+      meta: {
+        updatedAccountIds: ['acct-1', null, 123],
+      },
+    });
+
+    expect(dispatch).toHaveBeenCalledWith(
+      markUpdatedAccounts({ ids: ['acct-1'] }),
     );
   });
 });

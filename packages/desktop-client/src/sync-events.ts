@@ -18,63 +18,19 @@ import { loadPrefs } from './prefs/prefsSlice';
 import type { AppStore } from './redux/store';
 import { signOut } from './users/usersSlice';
 
-type RawTransaction = {
-  id: string;
-  acct?: string | null;
-  tombstone?: boolean | number | null;
-};
-
-function isRawTransaction(value: unknown): value is RawTransaction {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'id' in value &&
-    typeof value.id === 'string'
-  );
-}
-
-function getTransactionsById(value: unknown) {
-  if (!(value instanceof Map)) {
-    return new Map<string, RawTransaction>();
-  }
-
-  return new Map(
-    Array.from(value.entries()).filter(
-      (entry): entry is [string, RawTransaction] => isRawTransaction(entry[1]),
-    ),
-  );
-}
-
 function getAppliedUpdatedAccountIds(event: {
   type: 'applied';
   tables: string[];
-  data?: Map<string, unknown>;
-  prevData?: Map<string, unknown>;
+  meta?: {
+    updatedAccountIds?: unknown;
+  };
 }) {
-  if (!event.tables.includes('transactions')) {
+  if (!Array.isArray(event.meta?.updatedAccountIds)) {
     return [];
   }
 
-  const transactions = event.data?.get('transactions');
-  const previousTransactions = event.prevData?.get('transactions');
-  if (transactions == null || previousTransactions == null) {
-    return [];
-  }
-
-  const nextTransactionsById = getTransactionsById(transactions);
-  const previousTransactionsById = getTransactionsById(previousTransactions);
-
-  return Array.from(
-    new Set(
-      Array.from(nextTransactionsById.values())
-        .filter(
-          transaction =>
-            !previousTransactionsById.has(transaction.id) &&
-            !transaction.tombstone &&
-            !!transaction.acct,
-        )
-        .map(transaction => transaction.acct as string),
-    ),
+  return event.meta.updatedAccountIds.filter(
+    (accountId): accountId is string => typeof accountId === 'string',
   );
 }
 
