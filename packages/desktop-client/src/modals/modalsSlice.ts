@@ -262,6 +262,13 @@ export type Modal =
       };
     }
   | {
+      name: 'transaction-tags';
+      options: {
+        onSubmit: (action: 'add' | 'remove', tag: string) => void;
+        onClose?: () => void;
+      };
+    }
+  | {
       name: 'category-autocomplete';
       options: {
         title?: string;

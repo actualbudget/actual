@@ -363,6 +363,12 @@ export function KeyboardShortcutModal() {
             description: t('Set notes for selected transactions'),
           },
           {
+            id: 'manage-tags-for-selected-transactions',
+            shortcut: 'T',
+            shift: true,
+            description: t('Manage tags for selected transactions'),
+          },
+          {
             id: 'set-category-for-selected-transactions',
             shortcut: 'C',
             description: t('Set category for selected transactions'),

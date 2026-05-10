@@ -25,8 +25,25 @@ import type {
   ConfirmTransactionEditReason,
   Modal as ModalType,
 } from '#modals/modalsSlice';
+import { addTagToNotes, removeTagFromNotes } from '#notes/tagUtils';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
+
+export type BatchEditName = keyof TransactionEntity | 'tags';
+type BatchTagValue = {
+  action: 'add' | 'remove';
+  tag: string;
+};
+type BatchEditValue =
+  | Parameters<
+      Extract<ModalType, { name: 'edit-field' }>['options']['onSubmit']
+    >[1]
+  | BatchTagValue
+  | boolean
+  | null;
+type BatchEditMode = Parameters<
+  Extract<ModalType, { name: 'edit-field' }>['options']['onSubmit']
+>[2];
 
 type BatchReconciledReason = Extract<
   ConfirmTransactionEditReason,
@@ -34,20 +51,13 @@ type BatchReconciledReason = Extract<
 >;
 
 type BatchEditProps = {
-  name: keyof TransactionEntity;
+  name: BatchEditName;
   ids: Array<TransactionEntity['id']>;
   onSuccess?: (
     ids: Array<TransactionEntity['id']>,
-    name: keyof TransactionEntity,
-    value:
-      | Parameters<
-          Extract<ModalType, { name: 'edit-field' }>['options']['onSubmit']
-        >[1]
-      | boolean
-      | null,
-    mode: Parameters<
-      Extract<ModalType, { name: 'edit-field' }>['options']['onSubmit']
-    >[2],
+    name: BatchEditName,
+    value: BatchEditValue,
+    mode: BatchEditMode,
   ) => void;
 };
 
@@ -89,9 +99,9 @@ export function useTransactionBatchActions() {
     const transactions = ungroupTransactions(data as TransactionEntity[]);
 
     const onChange = async (
-      name: keyof TransactionEntity,
-      value: Parameters<NonNullable<BatchEditProps['onSuccess']>>[2],
-      mode?: Parameters<NonNullable<BatchEditProps['onSuccess']>>[3],
+      name: BatchEditName,
+      value: BatchEditValue,
+      mode?: BatchEditMode,
     ) => {
       let transactionsToChange = transactions;
 
@@ -125,7 +135,17 @@ export function useTransactionBatchActions() {
 
         let valueToSet = value;
 
-        if (name === 'notes') {
+        if (
+          name === 'tags' &&
+          value !== null &&
+          typeof value === 'object' &&
+          'tag' in value
+        ) {
+          valueToSet =
+            value.action === 'add'
+              ? addTagToNotes(trans.notes, value.tag)
+              : removeTagFromNotes(trans.notes, value.tag);
+        } else if (name === 'notes') {
           if (mode === 'prepend') {
             valueToSet =
               trans.notes === null ? value : `${String(value)}${trans.notes}`;
@@ -147,10 +167,13 @@ export function useTransactionBatchActions() {
             );
           }
         }
-        const transaction = {
-          ...trans,
-          [name]: valueToSet,
-        };
+        const transaction =
+          name === 'tags'
+            ? { ...trans, notes: valueToSet as string }
+            : {
+                ...trans,
+                [name]: valueToSet,
+              };
 
         if (name === 'account' && trans.account !== value) {
           transaction.reconciled = false;
@@ -251,11 +274,26 @@ export function useTransactionBatchActions() {
       );
     };
 
+    const pushTransactionTagsModal = () => {
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'transaction-tags',
+            options: {
+              onSubmit: (action, tag) => onChange('tags', { action, tag }),
+            },
+          },
+        }),
+      );
+    };
+
     const openFieldEditor = () => {
       if (name === 'cleared') {
         // Cleared just toggles it on/off and it depends on the data
         // loaded. Need to clean this up in the future.
         void onChange('cleared', null);
+      } else if (name === 'tags') {
+        pushTransactionTagsModal();
       } else if (name === 'category') {
         pushCategoryAutocompleteModal();
       } else if (name === 'payee') {
