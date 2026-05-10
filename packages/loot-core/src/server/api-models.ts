@@ -1,6 +1,7 @@
 import type { Budget } from '#types/budget';
 import type {
   AccountEntity,
+  AccountSyncSource,
   CategoryEntity,
   CategoryGroupEntity,
   PayeeEntity,
@@ -14,7 +15,17 @@ import * as models from './models';
 export type APIAccountEntity = Pick<AccountEntity, 'id' | 'name'> & {
   offbudget?: boolean;
   closed?: boolean;
+  account_id?: string | null;
+  bank_id?: string | null;
+  bank_name?: string | null;
+  mask?: string | null;
+  official_name?: string | null;
   balance_current?: number | null;
+  balance_available?: number | null;
+  balance_limit?: number | null;
+  account_sync_source?: AccountSyncSource | null;
+  last_sync?: string | null;
+  bank_sync_status?: AccountEntity['bank_sync_status'] | null;
 };
 
 export const accountModel = {
@@ -26,12 +37,23 @@ export const accountModel = {
       name: account.name,
       offbudget: account.offbudget ? true : false,
       closed: account.closed ? true : false,
+      account_id: account.account_id ?? null,
+      bank_id: account.bankId ?? null,
+      bank_name: account.bankName ?? null,
+      mask: account.mask ?? null,
+      official_name: account.official_name ?? null,
       balance_current: account.balance_current ?? null,
+      balance_available: account.balance_available ?? null,
+      balance_limit: account.balance_limit ?? null,
+      account_sync_source: account.account_sync_source ?? null,
+      last_sync: account.last_sync ?? null,
+      bank_sync_status: account.bank_sync_status ?? null,
     };
   },
 
-  fromExternal(account: APIAccountEntity) {
-    const result = { ...account } as unknown as AccountEntity;
+  fromExternal(account: Partial<APIAccountEntity>) {
+    const { bank_id: _bankId, bank_name: _bankName, ...apiAccount } = account;
+    const result = { ...apiAccount } as unknown as AccountEntity;
     if ('offbudget' in account) {
       result.offbudget = account.offbudget ? 1 : 0;
     }

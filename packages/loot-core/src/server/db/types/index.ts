@@ -21,9 +21,22 @@ export type DbAccount = {
   type?: string | null;
   subtype?: string | null;
   bank?: string | null;
-  account_sync_source?: 'simpleFin' | 'goCardless' | null;
+  account_sync_source?:
+    | 'simpleFin'
+    | 'goCardless'
+    | 'pluggyai'
+    | 'external'
+    | null;
   last_reconciled?: string | null;
   last_sync?: string | null;
+  bank_sync_status?:
+    | 'ok'
+    | 'pending'
+    | 'sync-requested'
+    | 'failed'
+    | 'reauth-required'
+    | 'attention-required'
+    | null;
 };
 
 export type DbBank = {

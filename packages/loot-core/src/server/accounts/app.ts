@@ -26,6 +26,7 @@ import { amountToInteger } from '#shared/util';
 import type { ImportTransactionsOpts } from '#types/api-handlers';
 import type {
   AccountEntity,
+  BankSyncStatus,
   CategoryEntity,
   GoCardlessToken,
   ImportTransactionEntity,
@@ -76,17 +77,92 @@ export type AccountHandlers = {
   'account-unlink': typeof unlinkAccount;
 };
 
-async function updateAccount({
-  id,
-  name,
-  last_reconciled,
-}: Pick<AccountEntity, 'id' | 'name'> &
-  Partial<Pick<AccountEntity, 'last_reconciled'>>) {
-  await db.update('accounts', {
+async function updateAccount(
+  params: { id: AccountEntity['id'] } & Partial<AccountEntity>,
+) {
+  const { id, bankName, bankId, account_sync_source } = params;
+  const hasField = <K extends keyof typeof params>(field: K) =>
+    Object.prototype.hasOwnProperty.call(params, field);
+
+  if (hasField('account_sync_source') && account_sync_source === 'external') {
+    const providerAccountId = params.account_id;
+
+    if (!providerAccountId) {
+      throw new Error(
+        'account_id is required when linking an external sync account.',
+      );
+    }
+    if (!bankName) {
+      throw new Error(
+        'bankName is required when linking an external sync account.',
+      );
+    }
+    if (!bankId) {
+      throw new Error(
+        'bankId is required when linking an external sync account.',
+      );
+    }
+
+    await unlinkAccount({ id });
+
+    const bank = await link.findOrCreateBank({ name: bankName }, bankId);
+
+    const externalUpdate: Partial<AccountEntity> & {
+      id: AccountEntity['id'];
+    } = {
+      id,
+      account_id: providerAccountId,
+      bank: bank.id,
+      account_sync_source: 'external',
+      bank_sync_status: null,
+    };
+    if (hasField('mask')) {
+      externalUpdate.mask = params.mask ?? null;
+    }
+    if (hasField('official_name')) {
+      externalUpdate.official_name = params.official_name ?? null;
+    }
+    if (hasField('balance_current')) {
+      externalUpdate.balance_current = params.balance_current ?? null;
+    }
+    if (hasField('balance_available')) {
+      externalUpdate.balance_available = params.balance_available ?? null;
+    }
+    if (hasField('balance_limit')) {
+      externalUpdate.balance_limit = params.balance_limit ?? null;
+    }
+
+    await db.update('accounts', externalUpdate);
+  } else if (hasField('account_sync_source') && account_sync_source == null) {
+    throw new Error('Use account-unlink to unlink an account.');
+  }
+
+  const accountUpdate: Partial<AccountEntity> & { id: AccountEntity['id'] } = {
     id,
-    name,
-    ...(last_reconciled && { last_reconciled }),
-  });
+  };
+  if (hasField('name')) {
+    accountUpdate.name = params.name;
+  }
+  if (hasField('last_reconciled')) {
+    accountUpdate.last_reconciled = params.last_reconciled ?? null;
+  }
+  if (hasField('last_sync')) {
+    accountUpdate.last_sync = params.last_sync ?? null;
+  }
+  if (hasField('offbudget')) {
+    accountUpdate.offbudget = params.offbudget;
+  }
+  if (hasField('closed')) {
+    accountUpdate.closed = params.closed;
+  }
+  if (hasField('bank_sync_status')) {
+    accountUpdate.bank_sync_status = params.bank_sync_status ?? null;
+  }
+
+  if (Object.keys(accountUpdate).length > 1) {
+    await db.update('accounts', accountUpdate);
+  }
+
   return {};
 }
 
@@ -113,6 +189,7 @@ async function getAccounts(): Promise<AccountEntity[]> {
         balance_limit: dbAccount.balance_limit ?? null,
         account_sync_source: dbAccount.account_sync_source ?? null,
         last_sync: dbAccount.last_sync ?? null,
+        bank_sync_status: dbAccount.bank_sync_status ?? null,
       }) satisfies AccountEntity,
   );
 }
@@ -844,6 +921,7 @@ type SyncResponse = {
   newTransactions: Array<TransactionEntity['id']>;
   matchedTransactions: Array<TransactionEntity['id']>;
   updatedAccounts: Array<AccountEntity['id']>;
+  hasUpdates: boolean;
 };
 
 async function handleSyncResponse(
@@ -866,12 +944,17 @@ async function handleSyncResponse(
   }
 
   const ts = new Date().getTime().toString();
-  await db.update('accounts', { id: acctId, last_sync: ts });
+  await db.update('accounts', {
+    id: acctId,
+    last_sync: ts,
+    bank_sync_status: 'ok',
+  });
 
   return {
     newTransactions,
     matchedTransactions,
     updatedAccounts,
+    hasUpdates: true,
   };
 }
 
@@ -946,6 +1029,27 @@ function handleSyncError(
   };
 }
 
+function getBankSyncStatusFromError(
+  err: Error | PostError | BankSyncError,
+): BankSyncStatus {
+  if (isBankSyncError(err)) {
+    if (
+      (err.category === 'ITEM_ERROR' && err.code === 'ITEM_LOGIN_REQUIRED') ||
+      (err.category === 'INVALID_INPUT' &&
+        err.code === 'INVALID_ACCESS_TOKEN') ||
+      err.category === 'INVALID_ACCESS_TOKEN'
+    ) {
+      return 'reauth-required';
+    }
+
+    if (err.category === 'ACCOUNT_NEEDS_ATTENTION') {
+      return 'attention-required';
+    }
+  }
+
+  return 'failed';
+}
+
 export type SyncResponseWithErrors = SyncResponse & {
   errors: SyncError[];
 };
@@ -975,10 +1079,36 @@ async function accountsBankSync({
   const newTransactions: Array<TransactionEntity['id']> = [];
   const matchedTransactions: Array<TransactionEntity['id']> = [];
   const updatedAccounts: Array<AccountEntity['id']> = [];
+  let hasAccountUpdates = false;
 
   for (const acct of accounts) {
+    if (acct.account_sync_source === 'external') {
+      if (acct.bankId && acct.account_id) {
+        await db.update('accounts', {
+          id: acct.id,
+          bank_sync_status: 'sync-requested',
+        });
+        connection.send('sync-event', {
+          type: 'success',
+          tables: ['accounts'],
+        });
+        hasAccountUpdates = true;
+      }
+      continue;
+    }
+
     if (acct.bankId && acct.account_id) {
       try {
+        await db.update('accounts', {
+          id: acct.id,
+          bank_sync_status: 'pending',
+        });
+        connection.send('sync-event', {
+          type: 'success',
+          tables: ['accounts'],
+        });
+        hasAccountUpdates = true;
+
         logger.group('Bank Sync operation for account:', acct.name);
         const syncResponse = await bankSync.syncAccount(
           userId as string,
@@ -996,27 +1126,53 @@ async function accountsBankSync({
         newTransactions.push(...syncResponseData.newTransactions);
         matchedTransactions.push(...syncResponseData.matchedTransactions);
         updatedAccounts.push(...syncResponseData.updatedAccounts);
+        connection.send('sync-event', {
+          type: 'success',
+          tables: ['accounts'],
+        });
       } catch (err) {
         const error = err as Error;
+        await db.update('accounts', {
+          id: acct.id,
+          bank_sync_status: getBankSyncStatusFromError(error),
+        });
         errors.push(handleSyncError(error, acct));
         captureException({
           ...error,
           message: 'Failed syncing account "' + acct.name + '."',
         } as Error);
+        connection.send('sync-event', {
+          type: 'success',
+          tables: ['accounts'],
+        });
+        hasAccountUpdates = true;
       } finally {
         logger.groupEnd();
       }
     }
   }
 
-  if (updatedAccounts.length > 0) {
+  if (updatedAccounts.length > 0 || hasAccountUpdates) {
     connection.send('sync-event', {
       type: 'success',
-      tables: ['transactions'],
+      tables:
+        updatedAccounts.length > 0
+          ? ['transactions', 'accounts']
+          : ['accounts'],
     });
   }
 
-  return { errors, newTransactions, matchedTransactions, updatedAccounts };
+  return {
+    errors,
+    newTransactions,
+    matchedTransactions,
+    updatedAccounts,
+    hasUpdates:
+      hasAccountUpdates ||
+      newTransactions.length > 0 ||
+      matchedTransactions.length > 0 ||
+      updatedAccounts.length > 0,
+  };
 }
 
 async function simpleFinBatchSync({
@@ -1046,11 +1202,25 @@ async function simpleFinBatchSync({
       newTransactions: Array<TransactionEntity['id']>;
       matchedTransactions: Array<TransactionEntity['id']>;
       updatedAccounts: Array<AccountEntity['id']>;
+      hasUpdates: boolean;
     };
   }> = [];
 
   logger.group('Bank Sync operation for all SimpleFin accounts');
   try {
+    for (const account of accounts) {
+      await db.update('accounts', {
+        id: account.id,
+        bank_sync_status: 'pending',
+      });
+    }
+    if (accounts.length > 0) {
+      connection.send('sync-event', {
+        type: 'success',
+        tables: ['accounts'],
+      });
+    }
+
     const syncResponses: Array<{
       accountId: AccountEntity['id'];
       res: {
@@ -1078,19 +1248,21 @@ async function simpleFinBatchSync({
       const newTransactions: Array<TransactionEntity['id']> = [];
       const matchedTransactions: Array<TransactionEntity['id']> = [];
       const updatedAccounts: Array<AccountEntity['id']> = [];
+      const hasUpdates = true;
 
       if (syncResponse.res?.error_code) {
-        errors.push(
-          handleSyncError(
-            {
-              type: 'BankSyncError',
-              reason: 'Failed syncing account "' + account.name + '."',
-              category: syncResponse.res.error_type,
-              code: syncResponse.res.error_code,
-            } as BankSyncError,
-            account,
-          ),
-        );
+        const bankSyncError = {
+          type: 'BankSyncError',
+          reason: 'Failed syncing account "' + account.name + '."',
+          category: syncResponse.res.error_type,
+          code: syncResponse.res.error_code,
+        } as BankSyncError;
+
+        await db.update('accounts', {
+          id: account.id,
+          bank_sync_status: getBankSyncStatusFromError(bankSyncError),
+        });
+        errors.push(handleSyncError(bankSyncError, account));
       } else if (syncResponse.res) {
         const syncResponseData = await handleSyncResponse(
           syncResponse.res,
@@ -1101,24 +1273,34 @@ async function simpleFinBatchSync({
         matchedTransactions.push(...syncResponseData.matchedTransactions);
         updatedAccounts.push(...syncResponseData.updatedAccounts);
       } else {
-        errors.push(
-          handleSyncError(
-            new Error(
-              'Failed syncing account "' + account.name + '": empty response',
-            ),
-            account,
-          ),
+        const emptyResponseError = new Error(
+          'Failed syncing account "' + account.name + '": empty response',
         );
+        await db.update('accounts', {
+          id: account.id,
+          bank_sync_status: getBankSyncStatusFromError(emptyResponseError),
+        });
+        errors.push(handleSyncError(emptyResponseError, account));
       }
 
       retVal.push({
         accountId: syncResponse.accountId,
-        res: { errors, newTransactions, matchedTransactions, updatedAccounts },
+        res: {
+          errors,
+          newTransactions,
+          matchedTransactions,
+          updatedAccounts,
+          hasUpdates,
+        },
       });
     }
   } catch (err) {
     for (const account of accounts) {
       const error = err as Error;
+      await db.update('accounts', {
+        id: account.id,
+        bank_sync_status: getBankSyncStatusFromError(error),
+      });
       retVal.push({
         accountId: account.id,
         res: {
@@ -1126,6 +1308,7 @@ async function simpleFinBatchSync({
           newTransactions: [],
           matchedTransactions: [],
           updatedAccounts: [],
+          hasUpdates: true,
         },
       });
     }
@@ -1134,7 +1317,12 @@ async function simpleFinBatchSync({
   if (retVal.some(a => a.res.updatedAccounts.length > 0)) {
     connection.send('sync-event', {
       type: 'success',
-      tables: ['transactions'],
+      tables: ['transactions', 'accounts'],
+    });
+  } else if (accounts.length > 0) {
+    connection.send('sync-event', {
+      type: 'success',
+      tables: ['accounts'],
     });
   }
 
@@ -1221,6 +1409,7 @@ async function unlinkAccount({ id }: { id: AccountEntity['id'] }) {
     balance_available: null,
     balance_limit: null,
     account_sync_source: null,
+    bank_sync_status: null,
   });
 
   if (isGoCardless === false) {
@@ -1298,7 +1487,7 @@ app.method('simplefin-accounts', simpleFinAccounts);
 app.method('pluggyai-accounts', pluggyAiAccounts);
 app.method('gocardless-get-banks', getGoCardlessBanks);
 app.method('gocardless-create-web-token', createGoCardlessWebToken);
-app.method('accounts-bank-sync', accountsBankSync);
-app.method('simplefin-batch-sync', simpleFinBatchSync);
+app.method('accounts-bank-sync', mutator(accountsBankSync));
+app.method('simplefin-batch-sync', mutator(simpleFinBatchSync));
 app.method('transactions-import', mutator(undoable(importTransactions)));
 app.method('account-unlink', mutator(unlinkAccount));

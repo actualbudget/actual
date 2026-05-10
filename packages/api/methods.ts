@@ -17,6 +17,7 @@ import type {
   RuleEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 export { q } from './app/query';
 
@@ -166,6 +167,10 @@ export function getAccounts() {
   return send('api/accounts-get');
 }
 
+export function getSyncedPreferences(): Promise<SyncedPrefs> {
+  return send('preferences/get');
+}
+
 export function createAccount(
   account: Omit<APIAccountEntity, 'id'>,
   initialBalance?: number,
@@ -178,6 +183,10 @@ export function updateAccount(
   fields: Partial<APIAccountEntity>,
 ) {
   return send('api/account-update', { id, fields });
+}
+
+export function unlinkAccount(id: APIAccountEntity['id']) {
+  return send('api/account-unlink', { id });
 }
 
 export function closeAccount(

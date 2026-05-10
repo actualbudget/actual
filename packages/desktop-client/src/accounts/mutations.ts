@@ -653,7 +653,13 @@ function handleSyncResponse(
   resMatchedTransactions: Array<TransactionEntity['id']>,
   resUpdatedAccounts: Array<AccountEntity['id']>,
 ) {
-  const { errors, newTransactions, matchedTransactions, updatedAccounts } = res;
+  const {
+    errors,
+    newTransactions,
+    matchedTransactions,
+    updatedAccounts,
+    hasUpdates,
+  } = res;
 
   // Mark the account as failed or succeeded (depending on sync output)
   const [error] = errors;
@@ -703,7 +709,7 @@ function handleSyncResponse(
 
   invalidateQueries(queryClient);
 
-  return newTransactions.length > 0 || matchedTransactions.length > 0;
+  return hasUpdates;
 }
 
 type SyncAndDownloadPayload = {
@@ -729,20 +735,19 @@ export function useSyncAndDownloadMutation() {
         return { error: syncState.error };
       }
 
-      const hasDownloaded = await syncAccounts.mutateAsync({ id });
+      const hasUpdates = await syncAccounts.mutateAsync({ id });
 
-      if (hasDownloaded) {
-        // Sync again afterwards if new transactions were created
+      if (hasUpdates) {
+        // Sync again afterwards if bank sync changed the local budget.
         const syncState = await dispatch(sync()).unwrap();
         if (syncState.error) {
           return { error: syncState.error };
         }
 
-        // `hasDownloaded` is already true, we know there has been
-        // updates
+        // `hasUpdates` is already true, we know there has been changes.
         return true;
       }
-      return { hasUpdated: hasDownloaded };
+      return { hasUpdated: hasUpdates };
     },
     onSuccess: () => invalidateQueries(queryClient),
     onError: error => {

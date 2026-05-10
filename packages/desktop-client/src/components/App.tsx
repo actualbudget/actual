@@ -15,13 +15,17 @@ import {
 } from '@actual-app/core/platform/client/connection';
 import { useQueryClient } from '@tanstack/react-query';
 
+import { isAccountPendingSync } from '#accounts/syncStatus';
 import { setAppState, sync } from '#app/appSlice';
 import { closeBudget, loadBudget } from '#budgetfiles/budgetfilesSlice';
 import { handleGlobalEvents } from '#global-events';
+import { useAccounts } from '#hooks/useAccounts';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useMetadataPref } from '#hooks/useMetadataPref';
 import { useOnVisible } from '#hooks/useOnVisible';
+import { usePendingSyncPolling } from '#hooks/usePendingSyncPolling';
 import { SpreadsheetProvider } from '#hooks/useSpreadsheet';
+import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 import { setI18NextLanguage } from '#i18n';
 import { addNotification } from '#notifications/notificationsSlice';
 import { installPolyfills } from '#polyfills';
@@ -45,6 +49,26 @@ import { ManagementApp } from './manager/ManagementApp';
 import { Modals } from './Modals';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { UpdateNotification } from './UpdateNotification';
+
+function PendingSyncPolling() {
+  const dispatch = useDispatch();
+  const syncServerStatus = useSyncServerStatus();
+  const { data: accounts = [] } = useAccounts();
+  const accountsSyncing = useSelector(state => state.account.accountsSyncing);
+  const hasPendingAccounts = accounts.some(isAccountPendingSync);
+
+  usePendingSyncPolling({
+    enabled:
+      syncServerStatus === 'online' &&
+      hasPendingAccounts &&
+      accountsSyncing.length === 0,
+    onPoll: async () => {
+      await dispatch(sync());
+    },
+  });
+
+  return null;
+}
 
 function AppInner() {
   const [budgetId] = useMetadataPref('id');
@@ -152,7 +176,14 @@ function AppInner() {
     }
   }, [dispatch, t, userData?.tokenExpired]);
 
-  return budgetId ? <FinancesApp /> : <ManagementApp />;
+  return budgetId ? (
+    <>
+      <PendingSyncPolling />
+      <FinancesApp />
+    </>
+  ) : (
+    <ManagementApp />
+  );
 }
 
 function ErrorFallback({ error }: FallbackProps) {

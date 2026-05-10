@@ -3,6 +3,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
 
 import { accountQueries } from './accounts';
+import { markUpdatedAccounts } from './accounts/accountsSlice';
 import { resetSync, sync } from './app/appSlice';
 import { categoryQueries } from './budget';
 import {
@@ -16,6 +17,22 @@ import { payeeQueries } from './payees';
 import { loadPrefs } from './prefs/prefsSlice';
 import type { AppStore } from './redux/store';
 import { signOut } from './users/usersSlice';
+
+function getAppliedUpdatedAccountIds(event: {
+  type: 'applied';
+  tables: string[];
+  meta?: {
+    updatedAccountIds?: unknown;
+  };
+}) {
+  if (!Array.isArray(event.meta?.updatedAccountIds)) {
+    return [];
+  }
+
+  return event.meta.updatedAccountIds.filter(
+    (accountId): accountId is string => typeof accountId === 'string',
+  );
+}
 
 export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
   // TODO: Should this run on mobile too?
@@ -89,6 +106,13 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
         void queryClient.invalidateQueries({
           queryKey: accountQueries.lists(),
         });
+      }
+
+      if (event.type === 'applied') {
+        const updatedAccountIds = getAppliedUpdatedAccountIds(event);
+        if (updatedAccountIds.length > 0) {
+          store.dispatch(markUpdatedAccounts({ ids: updatedAccountIds }));
+        }
       }
     } else if (event.type === 'error') {
       let notif: Notification | null = null;
