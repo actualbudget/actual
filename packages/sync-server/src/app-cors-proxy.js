@@ -177,15 +177,12 @@ app.use('/', async (req, res) => {
   }
 
   try {
-    // Extract method, body, and headers from the request body (sent by loot-core)
-    const {
-      method = 'GET',
-      body,
-      headers: customHeaders = {},
-    } = req.body || {};
+    const { method = 'GET', headers: customHeaders = {} } = req.body || {};
 
-    const methodNormalized =
-      typeof method === 'string' ? method.toUpperCase() : 'GET';
+    if (typeof method !== 'string') {
+      return res.status(400).json({ error: 'Invalid method parameter' });
+    }
+    const methodNormalized = method.toUpperCase();
     if (!['GET', 'HEAD'].includes(methodNormalized)) {
       return res.status(405).json({ error: 'Method not allowed' });
     }
@@ -218,13 +215,8 @@ app.use('/', async (req, res) => {
     }
 
     const response = await fetch(url.href, {
-      method,
+      method: methodNormalized,
       headers: requestHeaders,
-      body: ['GET', 'HEAD'].includes(method)
-        ? undefined
-        : typeof body === 'string'
-          ? body
-          : JSON.stringify(body),
     });
 
     const contentType =
