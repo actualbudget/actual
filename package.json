@@ -63,6 +63,7 @@
     "sync:tsconfig-references": "workspaces-to-typescript-project-references",
     "prepare": "husky"
   },
+  "dependencies": {},
   "devDependencies": {
     "@monorepo-utils/workspaces-to-typescript-project-references": "^2.10.3",
     "@octokit/rest": "^22.0.1",

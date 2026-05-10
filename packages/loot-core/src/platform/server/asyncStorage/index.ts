@@ -59,21 +59,32 @@ export async function multiGet<K extends readonly (keyof GlobalPrefsJson)[]>(
   const objectStore = transaction.objectStore('asyncStorage');
 
   const results = await Promise.all(
-    keys.map(key => {
-      return new Promise<[K[number], GlobalPrefsJson[K[number]]]>(
-        (resolve, reject) => {
-          const req = objectStore.get(key);
-          req.onerror = e => reject(e);
-          req.onsuccess = e => {
-            const target = e.target as IDBRequest<GlobalPrefsJson[K[number]]>;
-            resolve([key, target.result]);
-          };
-        },
-      );
-    }),
+    keys.map(
+      key =>
+        new Promise<[K[number], GlobalPrefsJson[K[number]]]>(
+          (resolve, reject) => {
+            try {
+              const req = objectStore.get(key);
+              req.onerror = () => reject(req.error);
+              req.onsuccess = () => {
+                resolve([key, req.result]);
+              };
+            } catch (error) {
+              reject(error);
+            }
+          },
+        ),
+    ),
   );
 
-  transaction.commit();
+  // Wait for transaction to complete
+  await new Promise<void>((resolve, reject) => {
+    transaction.oncomplete = () => resolve();
+    transaction.onabort = () =>
+      reject(transaction.error ?? new Error('Transaction aborted'));
+    transaction.onerror = () =>
+      reject(transaction.error ?? new Error('Transaction error'));
+  });
 
   // Convert the array of tuples to an object with properly typed properties
   return results.reduce(
@@ -93,16 +104,28 @@ export const multiSet: T.MultiSet = async function (keyValues) {
 
   const promise = Promise.all(
     keyValues.map(([key, value]) => {
-      return new Promise((resolve, reject) => {
-        const req = objectStore.put(value, key);
-        req.onerror = e => reject(e);
-        req.onsuccess = () => resolve(undefined);
+      return new Promise<void>((resolve, reject) => {
+        try {
+          const req = objectStore.put(value, key);
+          req.onerror = () => reject(req.error);
+          req.onsuccess = () => resolve();
+        } catch (error) {
+          reject(error);
+        }
       });
     }),
   );
 
-  transaction.commit();
   await promise;
+
+  // Wait for transaction to complete
+  await new Promise<void>((resolve, reject) => {
+    transaction.oncomplete = () => resolve();
+    transaction.onabort = () =>
+      reject(transaction.error ?? new Error('Transaction aborted'));
+    transaction.onerror = () =>
+      reject(transaction.error ?? new Error('Transaction error'));
+  });
 };
 
 export const multiRemove: T.MultiRemove = async function (keys) {
@@ -113,14 +136,26 @@ export const multiRemove: T.MultiRemove = async function (keys) {
 
   const promise = Promise.all(
     keys.map(key => {
-      return new Promise((resolve, reject) => {
-        const req = objectStore.delete(key);
-        req.onerror = e => reject(e);
-        req.onsuccess = () => resolve(undefined);
+      return new Promise<void>((resolve, reject) => {
+        try {
+          const req = objectStore.delete(key);
+          req.onerror = () => reject(req.error);
+          req.onsuccess = () => resolve();
+        } catch (error) {
+          reject(error);
+        }
       });
     }),
   );
 
-  transaction.commit();
   await promise;
+
+  // Wait for transaction to complete
+  await new Promise<void>((resolve, reject) => {
+    transaction.oncomplete = () => resolve();
+    transaction.onabort = () =>
+      reject(transaction.error ?? new Error('Transaction aborted'));
+    transaction.onerror = () =>
+      reject(transaction.error ?? new Error('Transaction error'));
+  });
 };

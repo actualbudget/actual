@@ -104,7 +104,8 @@
     "#transactions/*": "./src/transactions/*.ts",
     "#undo/*": "./src/undo/*.ts",
     "#users/*": "./src/users/*.ts",
-    "#util/*": "./src/util/*.ts"
+    "#util/*": "./src/util/*.ts",
+    "#workers/*": "./src/workers/*.ts"
   },
   "scripts": {
     "start": "cross-env PORT=3001 vite",
@@ -170,6 +171,8 @@
     "lru-cache": "^11.2.7",
     "mdast-util-newline-to-break": "^2.0.0",
     "memoize-one": "^6.0.0",
+    "npyjs": "^1.1.0",
+    "onnxruntime-web": "^1.24.3",
     "pikaday": "1.8.2",
     "plugins-service": "workspace:*",
     "promise-retry": "^2.0.1",

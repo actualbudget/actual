@@ -45,6 +45,7 @@ ENV NODE_ENV=production
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages/sync-server/package.json ./
 COPY --from=builder /app/packages/sync-server/build ./
+COPY --from=builder /app/ml-models ./ml-models
 
 ENTRYPOINT ["/usr/bin/tini","-g",  "--"]
 EXPOSE 5006

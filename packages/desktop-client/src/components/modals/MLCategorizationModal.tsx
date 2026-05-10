@@ -1,0 +1,274 @@
+import { useEffect, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+
+import { Button } from '@actual-app/components/button';
+import { theme } from '@actual-app/components/theme';
+import { send } from '@actual-app/core/platform/client/connection';
+import { q } from '@actual-app/core/shared/query';
+import { ungroupTransactions } from '@actual-app/core/shared/transactions';
+import type { TransactionEntity } from '@actual-app/core/types/models';
+
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import type { Modal as ModalType } from '#modals/modalsSlice';
+import { aqlQuery } from '#queries/aqlQuery';
+import { MLCategorizationWorkerClient } from '#workers/ml-categorization.client';
+
+type Props = Extract<ModalType, { name: 'ml-categorization' }>['options'];
+
+type PredictionEntry = {
+  id: string;
+  notes: string | null;
+  payee: string | null;
+  currentCategory: string | null;
+  predictedCategory: string | null;
+};
+
+type CategoryOption = { id: string; name: string };
+
+export function MLCategorizationModal({ transactionIds, onComplete }: Props) {
+  const { t } = useTranslation();
+  const [loading, setLoading] = useState(true);
+  const [predictions, setPredictions] = useState<PredictionEntry[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
+
+  // Fetch transactions and predictions on mount
+  useEffect(() => {
+    let mlClient: MLCategorizationWorkerClient | null = null;
+
+    async function fetchPredictions() {
+      setLoading(true);
+      try {
+        // Fetch categories first (needed to map predicted names to IDs)
+        const categoriesRes = await aqlQuery(
+          q('categories')
+            .select(['id', 'name'] as const)
+            .orderBy({ sort_order: 'asc' }),
+        );
+        const cats = (
+          categoriesRes.data as Array<{ id: string; name: string }>
+        ).map(c => ({ id: c.id, name: c.name }));
+        setCategories(cats);
+
+        // Fetch payees for human-readable names
+        const payeesRes = await aqlQuery(q('payees').select('*'));
+        const payeesById = new Map(
+          (payeesRes.data as Array<{ id: string; name: string }>).map(p => [
+            p.id,
+            p.name,
+          ]),
+        );
+
+        // Fetch the transactions by IDs
+        const { data } = await aqlQuery(
+          q('transactions')
+            .filter({ id: { $oneof: transactionIds } })
+            .select('*')
+            .options({ splits: 'grouped' }),
+        );
+        const transactions = ungroupTransactions(data as TransactionEntity[]);
+
+        // Run predictions in a dedicated worker
+        mlClient = new MLCategorizationWorkerClient();
+        await mlClient.initialize({
+          modelUrl:
+            (window as unknown as Record<string, string>).ACTUAL_ML_MODEL_URL ??
+            'http://localhost:5006/ml-models/classifier.onnx',
+          classesUrl:
+            (window as unknown as Record<string, string>)
+              .ACTUAL_ML_CLASSES_URL ??
+            'http://localhost:5006/ml-models/classifier_classes.npy',
+          preprocessingEnabled:
+            (window as unknown as Record<string, string>)
+              .ACTUAL_ML_APPLY_PREPROCESSING === 'true',
+        });
+
+        const predictedCategories = await mlClient.predict(
+          transactions.map(t => t.notes),
+        );
+
+        // Map predicted category names to IDs
+        const categoryMap = new Map(cats.map(c => [c.name, c.id]));
+
+        // Combine transaction data with predictions
+        const entries: PredictionEntry[] = transactions.map((t, i) => {
+          const predictedName = predictedCategories[i];
+          return {
+            id: t.id,
+            notes: t.notes ?? null,
+            payee: t.payee ? (payeesById.get(t.payee) ?? null) : null,
+            currentCategory: t.category ?? null,
+            predictedCategory:
+              predictedName != null
+                ? (categoryMap.get(predictedName) ?? null)
+                : null,
+          };
+        });
+
+        setPredictions(entries);
+      } catch (error) {
+        console.error('Failed to fetch ML predictions:', error);
+      }
+      setLoading(false);
+    }
+    void fetchPredictions();
+
+    return () => {
+      mlClient?.terminate();
+    };
+  }, [transactionIds]);
+
+  // Update a prediction's category (user can edit)
+  function updatePrediction(id: string, category: string | null) {
+    setPredictions(prev =>
+      prev.map(p => (p.id === id ? { ...p, predictedCategory: category } : p)),
+    );
+  }
+
+  // Apply predictions and close
+  async function handleApply(close: () => void) {
+    setSaving(true);
+    try {
+      // Build updated transactions
+      const updated = predictions
+        .filter(p => p.predictedCategory !== null)
+        .map(p => ({
+          id: p.id,
+          category: p.predictedCategory,
+        })) as Partial<TransactionEntity>[];
+
+      if (updated.length > 0) {
+        await send('transactions-batch-update', {
+          updated,
+          learnCategories: false,
+        });
+      }
+
+      onComplete?.(updated as TransactionEntity[]);
+      close();
+    } catch (error) {
+      console.error('Failed to apply predictions:', error);
+    }
+    setSaving(false);
+  }
+
+  return (
+    <Modal
+      name="ml-categorization"
+      containerProps={{ style: { width: '500px' } }}
+    >
+      {({ state }) => (
+        <>
+          <ModalHeader
+            title={t('Predict Categories with AI')}
+            rightContent={<ModalCloseButton onPress={() => state.close()} />}
+          />
+          <div style={{ padding: '20px' }}>
+            {loading ? (
+              <div>{t('Loading predictions...')}</div>
+            ) : predictions.length === 0 ? (
+              <div>
+                <Trans>No transactions to predict.</Trans>
+              </div>
+            ) : (
+              <>
+                <div style={{ marginBottom: '10px', fontStyle: 'italic' }}>
+                  <Trans>Review and edit predictions before applying.</Trans>
+                </div>
+                <div
+                  style={{
+                    maxHeight: '400px',
+                    overflowY: 'auto',
+                    border: `1px solid ${theme.tableBorder}`,
+                    borderRadius: '4px',
+                  }}
+                >
+                  {predictions.map(entry => (
+                    <div
+                      key={entry.id}
+                      style={{
+                        padding: '10px',
+                        borderBottom: `1px solid ${theme.tableBorder}`,
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 500 }}>
+                          {entry.payee || entry.notes || t('(no description)')}
+                        </div>
+                        {entry.notes && entry.payee && (
+                          <div
+                            style={{
+                              fontSize: '12px',
+                              color: theme.pageTextSubdued,
+                            }}
+                          >
+                            {entry.notes}
+                          </div>
+                        )}
+                      </div>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: '12px',
+                            color: theme.pageTextSubdued,
+                          }}
+                        >
+                          →
+                        </span>
+                        <select
+                          value={entry.predictedCategory ?? ''}
+                          onChange={e =>
+                            updatePrediction(
+                              entry.id,
+                              e.target.value === '' ? null : e.target.value,
+                            )
+                          }
+                          style={{ padding: '5px', minWidth: '150px' }}
+                        >
+                          <option value="">
+                            <Trans>No category</Trans>
+                          </option>
+                          {categories.map(cat => (
+                            <option value={cat.id}>{cat.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div
+                  style={{
+                    marginTop: '20px',
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    gap: '10px',
+                  }}
+                >
+                  <Button onPress={() => state.close()}>
+                    <Trans>Cancel</Trans>
+                  </Button>
+                  <Button
+                    variant="primary"
+                    onPress={() => handleApply(() => state.close())}
+                    isDisabled={saving}
+                  >
+                    {saving ? t('Applying...') : t('Apply Predictions')}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </>
+      )}
+    </Modal>
+  );
+}

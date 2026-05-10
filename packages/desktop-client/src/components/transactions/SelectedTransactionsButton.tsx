@@ -290,7 +290,7 @@ export function SelectedTransactionsButton({
   return (
     <SelectedItemsButton
       id="transactions"
-      name={count => t('{{count}} transactions', { count })}
+      name={count => t('{{count}} selected', { count })}
       // @ts-expect-error fix me
       items={[
         ...(!types.trans
@@ -317,6 +317,12 @@ export function SelectedTransactionsButton({
                 ({ name: 'complete', text: t('Mark as completed') } as const),
             ]
           : [
+              {
+                name: 'predict-ml',
+                text: t('Predict with ML'),
+                // Optional: add a hotkey if desired
+                // key: 'P',
+              } as const,
               { name: 'show', text: t('Show'), key: 'F' } as const,
               {
                 name: 'duplicate',
@@ -350,7 +356,7 @@ export function SelectedTransactionsButton({
                     } as const,
                     {
                       name: 'run-rules',
-                      text: t('Run Rules'),
+                      text: t('Run rules'),
                     } as const,
                   ]),
 
@@ -441,6 +447,18 @@ export function SelectedTransactionsButton({
             break;
           case 'run-rules':
             onRunRules(selectedIds);
+            break;
+          case 'predict-ml':
+            dispatch(
+              pushModal({
+                modal: {
+                  name: 'ml-categorization',
+                  options: {
+                    transactionIds: selectedIds,
+                  },
+                },
+              }),
+            );
             break;
           case 'set-transfer':
             onSetTransfer(selectedIds);

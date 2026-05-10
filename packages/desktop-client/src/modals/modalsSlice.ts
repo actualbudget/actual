@@ -618,6 +618,13 @@ export type Modal =
         categoryId: CategoryEntity['id'];
         templates: Template[];
       };
+    }
+  | {
+      name: 'ml-categorization';
+      options: {
+        transactionIds: string[];
+        onComplete?: (updatedTransactions: TransactionEntity[]) => void;
+      };
     };
 
 type OpenAccountCloseModalPayload = {

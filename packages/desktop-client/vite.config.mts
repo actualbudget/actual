@@ -385,7 +385,7 @@ export default defineConfig(async ({ mode, command }) => {
               ],
               ignoreURLParametersMatching: [/^v$/],
               navigateFallback: '/index.html',
-              maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
+              maximumFileSizeToCacheInBytes: 100 * 1024 * 1024, // 100MB
               navigateFallbackDenylist: [
                 /^\/account\/.*$/,
                 /^\/admin\/.*$/,
@@ -394,6 +394,20 @@ export default defineConfig(async ({ mode, command }) => {
                 /^\/plugins\/.*$/,
                 /^\/kcab\/.*$/,
                 /^\/plugin-data\/.*$/,
+              ],
+              runtimeCaching: [
+                {
+                  urlPattern: ({ url }) =>
+                    url.pathname.startsWith('/ml-models/'),
+                  handler: 'CacheFirst',
+                  options: {
+                    cacheName: 'ml-models',
+                    expiration: {
+                      maxEntries: 8,
+                      maxAgeSeconds: 7 * 24 * 60 * 60,
+                    },
+                  },
+                },
               ],
             },
           }),

@@ -60,6 +60,7 @@ import { ImportYNAB4Modal } from './modals/manager/ImportYNAB4Modal';
 import { ImportYNAB5Modal } from './modals/manager/ImportYNAB5Modal';
 import { ManageRulesModal } from './modals/ManageRulesModal';
 import { MergeUnusedPayeesModal } from './modals/MergeUnusedPayeesModal';
+import { MLCategorizationModal } from './modals/MLCategorizationModal';
 import { NewCategoryGroupModal } from './modals/NewCategoryGroupModal';
 import { NewCategoryModal } from './modals/NewCategoryModal';
 import { NotesModal } from './modals/NotesModal';
@@ -171,6 +172,9 @@ export function Modals() {
 
         case 'manage-rules':
           return <ManageRulesModal key={key} {...modal.options} />;
+
+        case 'ml-categorization':
+          return <MLCategorizationModal key={key} {...modal.options} />;
 
         case 'edit-rule':
           return <EditRuleModal key={key} {...modal.options} />;
