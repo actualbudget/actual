@@ -597,6 +597,26 @@ handlers['api/account-update'] = withMutation(async function ({ id, fields }) {
   return db.updateAccount({ id, ...accountModel.fromExternal(fields) });
 });
 
+handlers['api/account-external-sync-link'] = withMutation(async function ({
+  id,
+  metadata,
+}) {
+  checkFileOpen();
+  await handlers['account-external-sync-link']({ id, metadata });
+});
+
+handlers['api/account-external-sync-get'] = async function ({ id }) {
+  checkFileOpen();
+  return handlers['account-external-sync-get']({ id });
+};
+
+handlers['api/account-external-sync-unlink'] = withMutation(async function ({
+  id,
+}) {
+  checkFileOpen();
+  await handlers['account-external-sync-unlink']({ id });
+});
+
 handlers['api/account-close'] = withMutation(async function ({
   id,
   transferAccountId,

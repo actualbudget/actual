@@ -206,10 +206,28 @@ export function AccountHeader({
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const locale = useLocale();
 
-  let canSync = !!(account?.account_id && isUsingServer);
+  let canSync = !!(
+    account?.account_id &&
+    account.account_sync_source !== 'external' &&
+    isUsingServer
+  );
+  let canUnlink = !!(account?.account_id && isUsingServer);
+  let canLink = !!(
+    account &&
+    !account.closed &&
+    !account.account_id &&
+    !account.account_sync_source &&
+    syncServerStatus === 'online'
+  );
   if (!account) {
     // All accounts - check for any syncable account
-    canSync = !!accounts.find(account => !!account.account_id) && isUsingServer;
+    canSync =
+      !!accounts.find(
+        account =>
+          !!account.account_id && account.account_sync_source !== 'external',
+      ) && isUsingServer;
+    canUnlink = false;
+    canLink = false;
   }
 
   // Only show the ability to make linked transfers on multi-account views.
@@ -509,7 +527,8 @@ export function AccountHeader({
                   <Dialog>
                     <AccountMenu
                       account={account}
-                      canSync={canSync}
+                      canUnlink={canUnlink}
+                      canLink={canLink}
                       showNetWorthChart={showNetWorthChart}
                       canShowBalances={
                         canCalculateBalance ? canCalculateBalance() : false
@@ -735,7 +754,8 @@ function AccountNameField({
 
 type AccountMenuProps = {
   account: AccountEntity;
-  canSync: boolean;
+  canUnlink: boolean;
+  canLink: boolean;
   showNetWorthChart: boolean;
   showBalances: boolean;
   canShowBalances: boolean;
@@ -759,7 +779,8 @@ type AccountMenuProps = {
 
 function AccountMenu({
   account,
-  canSync,
+  canUnlink,
+  canLink,
   showNetWorthChart,
   showBalances,
   canShowBalances,
@@ -769,7 +790,6 @@ function AccountMenu({
   onMenuSelect,
 }: AccountMenuProps) {
   const { t } = useTranslation();
-  const syncServerStatus = useSyncServerStatus();
 
   return (
     <Menu
@@ -816,14 +836,14 @@ function AccountMenu({
         },
         { name: 'export', text: t('Export') },
         ...(account && !account.closed
-          ? canSync
+          ? canUnlink
             ? [
                 {
                   name: 'unlink',
                   text: t('Unlink account'),
                 } as const,
               ]
-            : syncServerStatus === 'online'
+            : canLink
               ? [
                   {
                     name: 'link',

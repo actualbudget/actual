@@ -23,7 +23,11 @@ import { isNonProductionEnvironment } from '#shared/environment';
 import { dayFromDate } from '#shared/months';
 import * as monthUtils from '#shared/months';
 import { amountToInteger } from '#shared/util';
-import type { ImportTransactionsOpts } from '#types/api-handlers';
+import type {
+  ExternalSyncAccountInfo,
+  ExternalSyncMetadataInput,
+  ImportTransactionsOpts,
+} from '#types/api-handlers';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -55,6 +59,9 @@ export type AccountHandlers = {
   'gocardless-accounts-link': typeof linkGoCardlessAccount;
   'simplefin-accounts-link': typeof linkSimpleFinAccount;
   'pluggyai-accounts-link': typeof linkPluggyAiAccount;
+  'account-external-sync-link': typeof linkExternalSyncAccount;
+  'account-external-sync-get': typeof getExternalSyncAccount;
+  'account-external-sync-unlink': typeof unlinkExternalSyncAccount;
   'account-create': typeof createAccount;
   'account-close': typeof closeAccount;
   'account-reopen': typeof reopenAccount;
@@ -362,6 +369,135 @@ async function linkPluggyAiAccount({
   });
 
   return 'ok';
+}
+
+async function linkExternalSyncAccount({
+  id,
+  metadata,
+}: {
+  id: AccountEntity['id'];
+  metadata: ExternalSyncMetadataInput;
+}) {
+  const accRow = await db.first<db.DbAccount>(
+    'SELECT * FROM accounts WHERE id = ?',
+    [id],
+  );
+
+  if (!accRow) {
+    throw new Error(`Account with ID ${id} not found.`);
+  }
+
+  if (metadata.syncSource !== 'external') {
+    throw new Error('Only the "external" sync source is supported.');
+  }
+
+  await unlinkAccount({ id });
+
+  const bank = await link.findOrCreateExternalBank(
+    metadata.institutionName,
+    metadata.institutionExternalId,
+  );
+
+  await db.update('accounts', {
+    id,
+    account_id: metadata.providerAccountId,
+    bank: bank.id,
+    mask: metadata.mask ?? null,
+    official_name: metadata.officialName ?? null,
+    balance_current: metadata.balanceCurrent ?? null,
+    balance_available: metadata.balanceAvailable ?? null,
+    balance_limit: metadata.balanceLimit ?? null,
+    account_sync_source: 'external',
+    last_sync: metadata.lastSync ?? null,
+  });
+
+  return 'ok';
+}
+
+async function getExternalSyncAccount({
+  id,
+}: {
+  id: AccountEntity['id'];
+}): Promise<ExternalSyncAccountInfo> {
+  const accRow = await db.first<
+    db.DbAccount & {
+      bank_name: db.DbBank['name'] | null;
+      bank_id: db.DbBank['bank_id'] | null;
+    }
+  >(
+    `SELECT accounts.*, banks.name as bank_name, banks.bank_id
+     FROM accounts
+     LEFT JOIN banks ON banks.id = accounts.bank
+     WHERE accounts.id = ?`,
+    [id],
+  );
+
+  if (!accRow) {
+    throw APIError('external-account-not-found');
+  }
+
+  const prefRows = await db.all<Pick<db.DbPreference, 'id' | 'value'>>(
+    `SELECT id, value FROM preferences WHERE id IN (?, ?, ?, ?, ?)`,
+    [
+      `sync-import-pending-${id}`,
+      `sync-import-notes-${id}`,
+      `sync-reimport-deleted-${id}`,
+      `sync-import-transactions-${id}`,
+      `sync-update-dates-${id}`,
+    ],
+  );
+
+  const prefsById = prefRows.reduce<Record<string, string | null | undefined>>(
+    (carry, row) => {
+      carry[row.id] = row.value;
+      return carry;
+    },
+    {},
+  );
+  const getBooleanPref = (prefId: string, defaultValue: boolean) =>
+    String(prefsById[prefId] ?? String(defaultValue)) === 'true';
+
+  const linked = accRow.account_sync_source === 'external';
+  const bankKey =
+    linked && accRow.bank_id && accRow.bank_id.startsWith('external:')
+      ? accRow.bank_id
+      : null;
+  let institutionExternalId: string | null = null;
+  if (bankKey?.startsWith('external:id:')) {
+    institutionExternalId = bankKey.slice('external:id:'.length);
+  } else if (bankKey?.startsWith('external:name:')) {
+    institutionExternalId = null;
+  } else if (bankKey != null) {
+    // Backward compatibility for earlier external:<value> rows.
+    const legacySuffix = bankKey.slice('external:'.length);
+    institutionExternalId =
+      legacySuffix !== accRow.bank_name ? legacySuffix : null;
+  }
+
+  return {
+    id: accRow.id,
+    linked,
+    syncSource: linked ? 'external' : null,
+    providerAccountId: linked ? (accRow.account_id ?? null) : null,
+    institutionName: linked ? (accRow.bank_name ?? null) : null,
+    institutionExternalId,
+    mask: linked ? (accRow.mask ?? null) : null,
+    officialName: linked ? (accRow.official_name ?? null) : null,
+    balanceCurrent: linked ? (accRow.balance_current ?? null) : null,
+    balanceAvailable: linked ? (accRow.balance_available ?? null) : null,
+    balanceLimit: linked ? (accRow.balance_limit ?? null) : null,
+    lastSync: linked ? (accRow.last_sync ?? null) : null,
+    prefs: {
+      importPending: getBooleanPref(`sync-import-pending-${id}`, true),
+      importNotes: getBooleanPref(`sync-import-notes-${id}`, true),
+      reimportDeleted: getBooleanPref(`sync-reimport-deleted-${id}`, true),
+      importTransactions: getBooleanPref(
+        `sync-import-transactions-${id}`,
+        true,
+      ),
+      updateDates: getBooleanPref(`sync-update-dates-${id}`, false),
+    },
+  };
 }
 
 async function createAccount({
@@ -977,6 +1113,10 @@ async function accountsBankSync({
   const updatedAccounts: Array<AccountEntity['id']> = [];
 
   for (const acct of accounts) {
+    if (acct.account_sync_source === 'external') {
+      continue;
+    }
+
     if (acct.bankId && acct.account_id) {
       try {
         logger.group('Bank Sync operation for account:', acct.name);
@@ -1274,6 +1414,24 @@ async function unlinkAccount({ id }: { id: AccountEntity['id'] }) {
   return 'ok';
 }
 
+async function unlinkExternalSyncAccount({ id }: { id: AccountEntity['id'] }) {
+  const accRow = await db.first<db.DbAccount>(
+    'SELECT * FROM accounts WHERE id = ?',
+    [id],
+  );
+
+  if (!accRow) {
+    throw new Error(`Account with ID ${id} not found.`);
+  }
+
+  if (accRow.account_sync_source !== 'external') {
+    throw new Error(`Account with ID ${id} is not externally linked.`);
+  }
+
+  await unlinkAccount({ id });
+  return 'ok';
+}
+
 export const app = createApp<AccountHandlers>();
 
 app.method('account-update', mutator(undoable(updateAccount)));
@@ -1283,6 +1441,9 @@ app.method('account-properties', getAccountProperties);
 app.method('gocardless-accounts-link', linkGoCardlessAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);
 app.method('pluggyai-accounts-link', linkPluggyAiAccount);
+app.method('account-external-sync-link', linkExternalSyncAccount);
+app.method('account-external-sync-get', getExternalSyncAccount);
+app.method('account-external-sync-unlink', unlinkExternalSyncAccount);
 app.method('account-create', mutator(undoable(createAccount)));
 app.method('account-close', mutator(closeAccount));
 app.method('account-reopen', mutator(undoable(reopenAccount)));

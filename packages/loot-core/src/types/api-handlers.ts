@@ -33,6 +33,41 @@ export type ImportTransactionsOpts = {
   reimportDeleted?: boolean;
 };
 
+export type ExternalSyncMetadataInput = {
+  syncSource: 'external';
+  providerAccountId: string;
+  institutionName: string;
+  institutionExternalId?: string | null;
+  mask?: string | null;
+  officialName?: string | null;
+  balanceCurrent?: number | null;
+  balanceAvailable?: number | null;
+  balanceLimit?: number | null;
+  lastSync?: string | null;
+};
+
+export type ExternalSyncAccountInfo = {
+  id: APIAccountEntity['id'];
+  linked: boolean;
+  syncSource: 'external' | null;
+  providerAccountId: string | null;
+  institutionName: string | null;
+  institutionExternalId: string | null;
+  mask: string | null;
+  officialName: string | null;
+  balanceCurrent: number | null;
+  balanceAvailable: number | null;
+  balanceLimit: number | null;
+  lastSync: string | null;
+  prefs: {
+    importPending: boolean;
+    importNotes: boolean;
+    reimportDeleted: boolean;
+    importTransactions: boolean;
+    updateDates: boolean;
+  };
+};
+
 export type ApiHandlers = {
   'api/batch-budget-start': () => Promise<void>;
 
@@ -145,6 +180,19 @@ export type ApiHandlers = {
   'api/account-update': (arg: {
     id: APIAccountEntity['id'];
     fields: Partial<APIAccountEntity>;
+  }) => Promise<void>;
+
+  'api/account-external-sync-link': (arg: {
+    id: APIAccountEntity['id'];
+    metadata: ExternalSyncMetadataInput;
+  }) => Promise<void>;
+
+  'api/account-external-sync-get': (arg: {
+    id: APIAccountEntity['id'];
+  }) => Promise<ExternalSyncAccountInfo>;
+
+  'api/account-external-sync-unlink': (arg: {
+    id: APIAccountEntity['id'];
   }) => Promise<void>;
 
   'api/account-close': (arg: {

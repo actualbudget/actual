@@ -1,9 +1,10 @@
 import type {
   AccountEntity,
+  AccountSyncSource,
   BankSyncProviders,
 } from '@actual-app/core/types/models';
 
-export type SyncProviders = BankSyncProviders | 'unlinked';
+export type SyncProviders = AccountSyncSource | 'unlinked';
 export type GroupedBankSyncAccounts = Partial<
   Record<SyncProviders, AccountEntity[]>
 >;
@@ -16,6 +17,7 @@ export const BUILT_IN_BANK_SYNC_PROVIDERS = [
 
 const SYNC_PROVIDER_KEYS = [
   ...BUILT_IN_BANK_SYNC_PROVIDERS,
+  'external',
   'unlinked',
 ] as const satisfies readonly SyncProviders[];
 
@@ -32,6 +34,7 @@ export function getSyncSourceReadable(
     goCardless: 'GoCardless',
     simpleFin: 'SimpleFIN',
     pluggyai: 'Pluggy.ai',
+    external: translate('External'),
     unlinked: translate('Unlinked'),
   };
 }
