@@ -1,7 +1,7 @@
 import React, { createRef, PureComponent, useEffect, useMemo } from 'react';
 import type { ReactElement, RefObject } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { Navigate, useLocation, useParams } from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
@@ -47,6 +47,7 @@ import {
 import { markAccountRead } from '#accounts/accountsSlice';
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
+import { useSetPageTitle } from '#components/TitleManager';
 import { TransactionList } from '#components/transactions/TransactionList';
 import { validateAccountName } from '#components/util/accountValidation';
 import { useAccountPreviewTransactions } from '#hooks/useAccountPreviewTransactions';
@@ -1974,6 +1975,7 @@ function AccountHack(props: AccountHackProps) {
 export function Account() {
   const params = useParams();
   const location = useLocation();
+  const { t: translate } = useTranslation();
 
   const { data: { grouped: categoryGroups } = { grouped: [] } } =
     useCategories();
@@ -2033,6 +2035,13 @@ export function Account() {
   const onCreatePayee = (name: PayeeEntity['name']) =>
     createPayee.mutateAsync({ name });
 
+  const account: AccountEntity | undefined = accounts.find(
+    account => account.id === params.id,
+  );
+
+  const accountTitle = getAccountTitle(account, params.id, translate);
+  useSetPageTitle(accountTitle);
+
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
       <SchedulesProvider query={schedulesQuery}>
@@ -2080,4 +2089,25 @@ export function Account() {
       </SchedulesProvider>
     </ErrorBoundary>
   );
+}
+
+function getAccountTitle(
+  account: AccountEntity | undefined,
+  id: string | undefined,
+  t: (key: string) => string,
+): string {
+  if (!account) {
+    if (id === 'onbudget') {
+      return t('On Budget Account Transactions');
+    } else if (id === 'offbudget') {
+      return t('Off Budget Account Transactions');
+    } else if (id === 'uncategorized') {
+      return t('Uncategorized Transactions');
+    } else if (!id) {
+      return t('All Account Transactions');
+    }
+    return t('Account Transactions');
+  }
+
+  return `${account.name} \u2014 ${t('Account Transactions')}`;
 }

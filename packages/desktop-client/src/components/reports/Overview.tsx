@@ -24,6 +24,7 @@ import type {
 
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { MobilePageHeader, Page } from '#components/Page';
+import { useSetPageTitle } from '#components/TitleManager';
 import { useAccounts } from '#hooks/useAccounts';
 import {
   useDashboardPages,
@@ -52,8 +53,8 @@ import {
 } from '#reports/mutations';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
-import { DashboardHeader } from './DashboardHeader';
 import './overview.scss';
+import { DashboardHeader } from './DashboardHeader';
 import { DashboardSelector } from './DashboardSelector';
 import { LoadingIndicator } from './LoadingIndicator';
 import { AgeOfMoneyCard } from './reports/AgeOfMoneyCard';
@@ -82,6 +83,9 @@ type OverviewProps = {
 
 export function Overview({ dashboard }: OverviewProps) {
   const { t } = useTranslation();
+  useSetPageTitle(
+    `${dashboard.name || t('Untitled')} — ${t('Report Dashboard')}`,
+  );
   const dispatch = useDispatch();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
