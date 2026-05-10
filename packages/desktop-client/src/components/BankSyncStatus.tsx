@@ -76,9 +76,11 @@ export function BankSyncStatus() {
                   iconStyle={{ color: theme.pillTextSelected }}
                 />
                 <Text style={{ marginLeft: 5 }}>
-                  <Trans count={accountsSyncingCount}>
-                    Syncing... {{ count }} accounts remaining
-                  </Trans>
+                  {accountsSyncingCount === 1 ? (
+                    <Trans>Syncing... {{ count }} account remaining</Trans>
+                  ) : (
+                    <Trans>Syncing... {{ count }} accounts remaining</Trans>
+                  )}
                 </Text>
               </View>
             </animated.div>
