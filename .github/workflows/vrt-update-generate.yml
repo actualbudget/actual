@@ -82,16 +82,17 @@ jobs:
         with:
           download-translations: 'false'
       - name: Build browser bundle
-        # REACT_APP_NETLIFY=true keeps the "Create test file" button in the
-        # production bundle — every VRT test's beforeEach relies on it via
-        # ConfigurationPage.createTestFile().
+        # REACT_APP_NETLIFY=true flips isNonProductionEnvironment() on in the
+        # bundle so the "Create test file" button (used by every e2e beforeEach
+        # via ConfigurationPage.createTestFile()) is still rendered in a
+        # production build. Without it, e2e tests would time out waiting for
+        # a button that was tree-shaken out.
+        # --skip-translations keeps VRT screenshots deterministic by rendering
+        # source-code English instead of upstream Weblate en.json (which can
+        # drift between snapshot capture and test runs).
         env:
           REACT_APP_NETLIFY: 'true'
-        run: |
-          yarn workspace plugins-service build
-          yarn workspace @actual-app/crdt build
-          yarn workspace @actual-app/core build:browser
-          yarn workspace @actual-app/web build:browser
+        run: yarn build:browser --skip-translations
       - name: Upload build artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
