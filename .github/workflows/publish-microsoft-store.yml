@@ -1,0 +1,113 @@
+name: Publish Microsoft Store
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v25.3.0)'
+        required: true
+        type: string
+
+concurrency:
+  group: publish-microsoft-store
+  cancel-in-progress: false
+
+jobs:
+  publish-microsoft-store:
+    runs-on: windows-latest
+    environment: release
+    steps:
+      - name: Resolve version
+        id: resolve_version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          if [[ "$EVENT_NAME" == "release" ]]; then
+            TAG="$RELEASE_TAG"
+          else
+            TAG="$INPUT_TAG"
+          fi
+
+          if [[ -z "$TAG" ]]; then
+            echo "::error::No tag provided"
+            exit 1
+          fi
+
+          # Validate tag format (v-prefixed semver, e.g. v25.3.0 or v1.2.3-beta.1)
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "::error::Invalid tag format: $TAG (expected v-prefixed semver, e.g. v25.3.0)"
+            exit 1
+          fi
+
+          VERSION="${TAG#v}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Resolved tag=$TAG version=$VERSION"
+
+      - name: Verify release assets exist
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STEPS_RESOLVE_VERSION_OUTPUTS_TAG: ${{ steps.resolve_version.outputs.tag }}
+        run: |
+          TAG="${STEPS_RESOLVE_VERSION_OUTPUTS_TAG}"
+
+          echo "Checking release assets for tag $TAG..."
+          ASSETS=$(gh api "repos/${{ github.repository }}/releases/tags/$TAG" --jq '.assets[].name')
+
+          echo "Found assets:"
+          echo "$ASSETS"
+
+          if ! echo "$ASSETS" | grep -q "\.appx$"; then
+            echo "::error::No .appx assets found in release $TAG"
+            exit 1
+          fi
+
+          echo "Required .appx assets found."
+
+      - name: Download Microsoft Store artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STEPS_RESOLVE_VERSION_OUTPUTS_TAG: ${{ steps.resolve_version.outputs.tag }}
+        run: |
+          TAG="${STEPS_RESOLVE_VERSION_OUTPUTS_TAG}"
+          gh release download "$TAG" --repo "${{ github.repository }}" --pattern "*.appx"
+
+      - name: Install StoreBroker
+        shell: powershell
+        run: |
+          Install-Module -Name StoreBroker -AcceptLicense -Force -Scope CurrentUser -Verbose
+
+      - name: Submit to Microsoft Store
+        shell: powershell
+        run: |
+          # Disable telemetry
+          $global:SBDisableTelemetry = $true
+
+          # Authenticate against the store
+          $pass = ConvertTo-SecureString -String '${{ secrets.MICROSOFT_STORE_CLIENT_SECRET }}' -AsPlainText -Force
+          $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList ${{ secrets.MICROSOFT_STORE_CLIENT_ID }},$pass
+          Set-StoreBrokerAuthentication -TenantId '${{ secrets.MICROSOFT_STORE_TENANT_ID }}' -Credential $cred
+
+          # Zip and create metadata files
+          $artifacts = Get-ChildItem -Path . -Filter *.appx | Select-Object -ExpandProperty FullName
+          New-StoreBrokerConfigFile -Path "$PWD/config.json" -AppId ${{ secrets.MICROSOFT_STORE_PRODUCT_ID }}
+          New-SubmissionPackage -ConfigPath "$PWD/config.json" -DisableAutoPackageNameFormatting -AppxPath $artifacts -OutPath "$PWD" -OutName submission
+
+          # Submit the app
+          # See https://github.com/microsoft/StoreBroker/blob/master/Documentation/USAGE.md#the-easy-way
+          Update-ApplicationSubmission `
+            -AppId ${{ secrets.MICROSOFT_STORE_PRODUCT_ID }} `
+            -SubmissionDataPath "submission.json" `
+            -PackagePath "submission.zip" `
+            -ReplacePackages `
+            -NoStatus `
+            -AutoCommit `
+            -Force

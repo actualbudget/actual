@@ -13,6 +13,7 @@ for it to be added, your project must have a proper README file.
 The following are implementations of bank syncing using the Actual API. For instructions on using them, see the respective repositories.
 
 - **Akahu and Up bank sync to Actual Budget** - https://github.com/tim-smart/actualbudget-sync
+- **Enable Actual: Import transactions from European banks using Enable Banking** - https://github.com/2manyvcos/enable-actual
 - **ICS Cards Holland CVS exporter** - https://github.com/IeuanK/ICS-Exporter/
 - **Lunch Flow: Import transactions from GoCardless, MX, Finicity, Finverse, and more** - https://github.com/lunchflow/actual-flow
 - **MoneyMan an israel banks importer** - https://github.com/daniel-hauser/moneyman

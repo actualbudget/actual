@@ -19,6 +19,7 @@ import type {
   ImportTransactionEntity,
   NearbyPayeeEntity,
   NewRuleEntity,
+  NoteEntity,
   PayeeEntity,
   PayeeLocationEntity,
   RuleEntity,
@@ -194,6 +195,10 @@ export type ApiHandlers = {
     id: APICategoryEntity['id'];
     transferCategoryId?: APICategoryEntity['id'];
   }) => Promise<void>;
+
+  'api/note-get': (arg: Pick<NoteEntity, 'id'>) => Promise<NoteEntity | null>;
+
+  'api/note-update': (arg: NoteEntity) => Promise<void>;
 
   'api/payees-get': () => Promise<APIPayeeEntity[]>;
 

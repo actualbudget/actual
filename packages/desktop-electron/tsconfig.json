@@ -32,11 +32,5 @@
     }
   ],
   "include": ["."],
-  "exclude": [
-    "**/node_modules/*",
-    "build/**/*",
-    "e2e/**/*",
-    "**/*.test.ts",
-    "**/*.spec.ts"
-  ]
+  "exclude": ["**/node_modules/*", "build/**/*", "e2e/**/*"]
 }

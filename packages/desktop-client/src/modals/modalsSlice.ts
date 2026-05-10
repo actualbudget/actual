@@ -32,8 +32,6 @@ export type ConfirmTransactionEditReason =
   | 'batchDeleteWithReconciledTransfer'
   | 'batchEditWithReconciled'
   | 'batchEditWithReconciledTransfer'
-  | 'batchDuplicateWithReconciled'
-  | 'batchDuplicateWithReconciledTransfer'
   | 'editReconciled'
   | 'unlockReconciled'
   | 'deleteReconciled';
@@ -356,6 +354,7 @@ export type Modal =
         onCopyLastMonthAverage: () => void;
         onSetMonthsAverage: (numberOfMonths: number) => void;
         onApplyBudgetTemplate: () => void;
+        onCopyUntilYearEnd: () => void;
         onEditNotes: (id: NoteEntity['id'], month: string) => void;
       };
     }
@@ -610,6 +609,7 @@ export type Modal =
       name: 'category-automations-edit';
       options: {
         categoryId: CategoryEntity['id'];
+        month?: string;
       };
     }
   | {

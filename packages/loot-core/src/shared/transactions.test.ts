@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { v4 as uuidv4 } from 'uuid';
 
 import type { TransactionEntity } from '#types/models';
 
@@ -13,7 +14,7 @@ import {
 
 function makeTransaction(data: Partial<TransactionEntity>): TransactionEntity {
   return {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     amount: 2422,
     date: '2020-01-05',
     account: 'acc-id-1',

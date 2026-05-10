@@ -44,7 +44,7 @@ export const PercentageAutomation = ({
                 ? categories.map(group => ({
                     ...group,
                     categories: group.categories?.filter(
-                      category => category.id !== 'to-budget',
+                      category => category.id !== 'available funds',
                     ),
                   }))
                 : categories
@@ -87,7 +87,7 @@ export const PercentageAutomation = ({
                 updateTemplate({
                   type: 'percentage',
                   previous,
-                  ...(previous && template.category === 'to-budget'
+                  ...(previous && template.category === 'available funds'
                     ? { category: '' }
                     : {}),
                 }),

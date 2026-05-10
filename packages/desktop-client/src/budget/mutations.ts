@@ -9,6 +9,7 @@ import type {
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { QueryClient, QueryKey } from '@tanstack/react-query';
 import type { TFunction } from 'i18next';
+import { v4 as uuidv4 } from 'uuid';
 
 import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -31,7 +32,7 @@ function dispatchErrorNotification(
   dispatch(
     addNotification({
       notification: {
-        id: crypto.randomUUID(),
+        id: uuidv4(),
         type: 'error',
         message,
         pre: error ? error.message : undefined,
@@ -647,6 +648,13 @@ type ApplyBudgetActionPayload =
       args: {
         category: CategoryEntity['id'];
       };
+    }
+  | {
+      type: 'copy-until-year-end';
+      month: string;
+      args: {
+        category: CategoryEntity['id'];
+      };
     };
 
 export function useBudgetActions() {
@@ -772,6 +780,12 @@ export function useBudgetActions() {
           return null;
         case 'copy-single-last':
           await send('budget/copy-single-month', {
+            month,
+            category: args.category,
+          });
+          return null;
+        case 'copy-until-year-end':
+          await send('budget/copy-until-year-end', {
             month,
             category: args.category,
           });
