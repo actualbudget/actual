@@ -1,4 +1,5 @@
 import type { TransactionEntity } from '@actual-app/core/types/models';
+
 import type { TransactionRowContentProps } from '../types';
 
 import { PreviewTransactionRowCells } from './PreviewTransactionRowCells';

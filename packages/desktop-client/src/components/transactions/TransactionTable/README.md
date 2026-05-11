@@ -47,7 +47,7 @@ TransactionTable/
 Each concern is separated into its own file:
 
 - **Cells**: Individual components for each column type
-- **State**: Centralized reducer-based state management  
+- **State**: Centralized reducer-based state management
 - **Keyboard**: Extracted navigation logic
 - **Types**: Comprehensive TypeScript definitions
 
@@ -64,6 +64,7 @@ dispatch({ type: 'SET_ROW_HEIGHT', id: transactionId, height: 64 });
 ```
 
 **Features:**
+
 - Chevron indicator for expand/collapse
 - Dynamic content measurement
 - Prepared for variable-height virtual scrolling (requires `VariableSizeList` integration)
@@ -83,6 +84,7 @@ type TransactionTableState = {
 ```
 
 **Actions:**
+
 - `START_EDIT`, `END_EDIT` - Editing state
 - `TOGGLE_ROW_EXPANSION`, `EXPAND_ROW`, `COLLAPSE_ROW` - Row expansion
 - `SET_ROW_HEIGHT` - Height tracking
@@ -102,6 +104,7 @@ Logic is extracted to `TransactionTableKeyboard.ts` for testability.
 ### 5. Split Transactions
 
 Split transactions work the same as the original implementation:
+
 - Selecting "Split" from the category dropdown calls `onSplit(transactionId)`
 - Parent manages split creation and child transactions
 - Child transactions displayed inline below parent
@@ -152,6 +155,7 @@ Each cell type is a focused, reusable component:
 ### TransactionRow
 
 Orchestrates all cells and handles:
+
 - Inline editing state
 - Focus management
 - Selection state
@@ -161,6 +165,7 @@ Orchestrates all cells and handles:
 ### TransactionHeader
 
 Provides:
+
 - Sortable column headers
 - Sort direction indicators
 - Select-all checkbox
@@ -187,7 +192,7 @@ Provides:
 // Old
 import { TransactionTable } from './TransactionsTable';
 
-// New  
+// New
 import { TransactionTable } from './TransactionTable';
 
 // Same props, same behavior

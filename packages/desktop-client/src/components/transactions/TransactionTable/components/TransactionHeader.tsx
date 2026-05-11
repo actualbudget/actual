@@ -15,14 +15,6 @@ import { Popover } from '@actual-app/components/popover';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import {
-  TRANSACTION_CLEARED_COLUMN_WIDTH,
-  TRANSACTION_SELECTION_COLUMN_WIDTH,
-} from '../transactionTableColumns';
-import type {
-  TransactionColumnId,
-  TransactionColumnWidths,
-} from '../types';
 
 import {
   CustomCell,
@@ -33,6 +25,11 @@ import {
 } from '#components/table';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useSelectedDispatch } from '#hooks/useSelected';
+import {
+  TRANSACTION_CLEARED_COLUMN_WIDTH,
+  TRANSACTION_SELECTION_COLUMN_WIDTH,
+} from '../transactionTableColumns';
+import type { TransactionColumnId, TransactionColumnWidths } from '../types';
 
 type TransactionHeaderProps = {
   hasSelected: boolean;

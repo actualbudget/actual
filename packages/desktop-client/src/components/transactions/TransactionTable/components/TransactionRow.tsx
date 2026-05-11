@@ -4,15 +4,15 @@ import { Trans } from 'react-i18next';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { isTemporaryId } from '@actual-app/core/shared/transactions';
+
+import { Row } from '#components/table';
+import { useCachedSchedules } from '#hooks/useCachedSchedules';
+import { useSelectedDispatch } from '#hooks/useSelected';
 import type { TransactionRowProps } from '../types';
 import {
   deserializeTransaction,
   serializeTransaction,
 } from '../utils/transactionFormatters';
-
-import { Row } from '#components/table';
-import { useCachedSchedules } from '#hooks/useCachedSchedules';
-import { useSelectedDispatch } from '#hooks/useSelected';
 
 import { TransactionRowCells } from './TransactionRowCells';
 

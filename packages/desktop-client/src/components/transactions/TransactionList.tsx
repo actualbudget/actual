@@ -16,13 +16,16 @@ import type {
 
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import type { TableHandleRef } from '#components/table';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useDispatch } from '#redux';
 
 import { useTransactionListHandlers } from './transaction-list/useTransactionListHandlers';
-import { TransactionTable } from './TransactionTable';
-import type { TransactionTableProps } from './TransactionTable';
+import { TransactionTable as OldTransactionTable } from './TransactionsTable';
+import type { TransactionTableProps as OldTransactionTableProps } from './TransactionsTable';
+import { TransactionTable as NewTransactionTable } from './TransactionTable';
+import type { TransactionTableProps as NewTransactionTableProps } from './TransactionTable';
 
 export { createSingleTimeScheduleFromTransaction } from './transaction-list/schedule';
 
@@ -47,7 +50,7 @@ export { createSingleTimeScheduleFromTransaction } from './transaction-list/sche
 // one to use when doing updates.
 
 type TransactionListProps = Pick<
-  TransactionTableProps,
+  NewTransactionTableProps & OldTransactionTableProps,
   | 'accounts'
   | 'allowSplitTransaction'
   | 'ascDesc'
@@ -137,6 +140,7 @@ export function TransactionList({
   onMakeAsNonSplitTransactions,
 }: TransactionListProps) {
   const { t } = useTranslation();
+  const useModularTable = useFeatureFlag('modularTransactionTable');
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -177,6 +181,10 @@ export function TransactionList({
     onRefetch,
     onApplyFilter,
   });
+
+  const TransactionTable = useModularTable
+    ? NewTransactionTable
+    : OldTransactionTable;
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>

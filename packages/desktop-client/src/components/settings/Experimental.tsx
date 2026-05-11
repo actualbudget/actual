@@ -228,6 +228,12 @@ export function ExperimentalFeatures() {
             >
               <Trans>Payee Locations</Trans>
             </FeatureToggle>
+            <FeatureToggle
+              flag="modularTransactionTable"
+              feedbackLink="https://github.com/actualbudget/actual/pull/7454"
+            >
+              <Trans>Modular Transaction Table (Rewrite)</Trans>
+            </FeatureToggle>
             {showServerPrefs && (
               <ServerFeatureToggle
                 prefName="flags.plugins"
