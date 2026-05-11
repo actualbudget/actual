@@ -264,8 +264,11 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          shopt -s nullglob
-          patches=(/tmp/shard-patches/*/vrt-shard.patch)
+          # actions/download-artifact puts a lone matched artifact directly in
+          # `path` but gives each of several its own `path/<name>/` subdir, so
+          # recurse instead of globbing `*/vrt-shard.patch` (which would miss
+          # the common single-shard case).
+          mapfile -t patches < <(find /tmp/shard-patches -type f -name 'vrt-shard.patch' | sort)
 
           if [ ${#patches[@]} -eq 0 ]; then
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
