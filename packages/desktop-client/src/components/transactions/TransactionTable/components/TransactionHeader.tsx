@@ -1,10 +1,8 @@
 import { memo, useRef, useState } from 'react';
 import type {
   KeyboardEvent,
-  MutableRefObject,
   MouseEvent as ReactMouseEvent,
   PointerEvent as ReactPointerEvent,
-  RefObject,
 } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
@@ -54,7 +52,6 @@ type TransactionHeaderProps = {
   };
   onResetAllColumnWidths: () => void;
   onResetColumnWidth: (columnId: TransactionColumnId) => void;
-  headerRef?: RefObject<HTMLDivElement | null>;
 };
 
 type HeaderCellProps = {
@@ -213,7 +210,6 @@ export const TransactionHeader = memo(
     getResizeHandleProps,
     onResetAllColumnWidths,
     onResetColumnWidth,
-    headerRef,
   }: TransactionHeaderProps) => {
     const dispatchSelected = useSelectedDispatch();
     const { t } = useTranslation();
@@ -231,18 +227,6 @@ export const TransactionHeader = memo(
       payment: t('Payment'),
       deposit: t('Deposit'),
       balance: t('Balance'),
-    };
-
-    // Callback ref to set both triggerRef and headerRef
-    const setRefs = (element: HTMLDivElement | null) => {
-      if (triggerRef) {
-        (triggerRef as MutableRefObject<HTMLDivElement | null>).current =
-          element;
-      }
-      if (headerRef && 'current' in headerRef) {
-        (headerRef as MutableRefObject<HTMLDivElement | null>).current =
-          element;
-      }
     };
     const renderResizableHeaderCell = ({
       columnId,
@@ -301,7 +285,7 @@ export const TransactionHeader = memo(
 
     return (
       <Row
-        ref={setRefs}
+        ref={triggerRef}
         style={{
           fontWeight: 300,
           zIndex: 200,

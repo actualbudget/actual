@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { PointerEvent as ReactPointerEvent, RefObject } from 'react';
+import type { PointerEvent as ReactPointerEvent } from 'react';
 
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
@@ -30,7 +30,6 @@ type UseTransactionTableColumnLayoutArgs = {
   showCategory: boolean;
   showCleared: boolean;
   showSelection: boolean;
-  headerRef?: RefObject<HTMLDivElement | null>;
 };
 
 type ResizeState = {
@@ -54,7 +53,6 @@ export function useTransactionTableColumnLayout({
   showCategory,
   showCleared,
   showSelection,
-  headerRef,
 }: UseTransactionTableColumnLayoutArgs) {
   const variantKey = getTransactionTableVariantKey({
     showAccount,
@@ -198,25 +196,25 @@ export function useTransactionTableColumnLayout({
       availableWidth: availableDataWidth,
     });
 
-    // Convert ALL flex columns to their computed pixel widths
-    // This is necessary because resize logic requires both active and neighbor to be numeric
+    // Snapshot: Convert ALL flex columns to their computed pixel widths
+    // Calculate how much space the flex columns should take
+    const fixedColumnsWidth = visibleColumns.reduce((total, col) => {
+      const width = startWidths[col.id];
+      return width === 'flex' ? total : total + width;
+    }, 0);
+
     const flexColumns = visibleColumns.filter(
       col => startWidths[col.id] === 'flex',
     );
 
-    if (flexColumns.length > 0 && headerRef?.current) {
+    if (flexColumns.length > 0 && availableDataWidth) {
+      const totalFlexSpace = availableDataWidth - fixedColumnsWidth;
+      // Distribute flex space equally among all flex columns
+      const flexColumnWidth = Math.floor(totalFlexSpace / flexColumns.length);
+
       const updatedWidths = { ...startWidths };
-
       flexColumns.forEach(column => {
-        // Query the header cell for this column
-        const cellElement = headerRef.current?.querySelector(
-          `[data-testid="${column.id}"]`,
-        );
-
-        if (cellElement) {
-          const rect = cellElement.getBoundingClientRect();
-          updatedWidths[column.id] = Math.round(rect.width);
-        }
+        updatedWidths[column.id] = flexColumnWidth;
       });
 
       startWidths = updatedWidths;
