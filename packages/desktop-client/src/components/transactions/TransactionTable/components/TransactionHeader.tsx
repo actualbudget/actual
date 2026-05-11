@@ -110,6 +110,7 @@ function HeaderCell({
           style={{
             display: 'flex',
             alignItems: 'stretch',
+            justifyContent: textAlign === 'right' ? 'flex-end' : 'flex-start',
             width: '100%',
             height: '100%',
             position: 'relative',
@@ -120,7 +121,14 @@ function HeaderCell({
             <Button
               variant="bare"
               onPress={onClick}
-              style={{ ...style, flex: 1, minWidth: 0 }}
+              style={{
+                ...style,
+                flex: 1,
+                minWidth: 0,
+                justifyContent:
+                  textAlign === 'right' ? 'flex-end' : 'flex-start',
+                textAlign: textAlign || 'left',
+              }}
             >
               <UnexposedCellContent value={cellValue} />
               {icon === 'asc' && (

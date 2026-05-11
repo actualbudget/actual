@@ -532,30 +532,26 @@ export const TransactionTable = forwardRef(
     }, []);
 
     return (
-      <View style={{ flex: 1, ...style }}>
+      <View
+        innerRef={tableContainerRef}
+        style={{ flex: 1, cursor: 'default', ...style }}
+      >
         <View
-          innerRef={tableContainerRef}
           style={{
-            flex: 1,
-            overflow: 'hidden',
-            position: 'relative',
+            position: 'absolute',
+            top: 2,
+            left: 2,
+            zIndex: 100,
+            fontSize: 12,
+            opacity: 0.6,
+            pointerEvents: 'none',
+            userSelect: 'none',
           }}
+          title={t('Using new modular transaction table')}
         >
-          <View
-            style={{
-              position: 'absolute',
-              top: 2,
-              left: 2,
-              zIndex: 100,
-              fontSize: 12,
-              opacity: 0.6,
-              pointerEvents: 'none',
-              userSelect: 'none',
-            }}
-            title={t('Using new modular transaction table')}
-          >
-            ⭐
-          </View>
+          ⭐
+        </View>
+        <View>
           <TransactionHeader
             hasSelected={selectedItems.size > 0}
             showAccount={showAccount}
@@ -572,6 +568,8 @@ export const TransactionTable = forwardRef(
             onResetAllColumnWidths={resetAllColumnWidths}
             onResetColumnWidth={resetColumnWidth}
           />
+        </View>
+        <View style={{ flex: 1, overflow: 'hidden' }}>
           <Table
             ref={tableRef}
             items={tableItems}
