@@ -112,23 +112,6 @@
   </head>
   <body>
     <div id="root"></div>
-    <script>
-      // HACK: Polyfill for Node.js 'process' global in browser environment.
-      // Some Node.js-only dependencies (like adm-zip, transitively included via theme system)
-      // are incorrectly bundled and attempt to access 'process' in CommonJS wrappers
-      // before Vite's inject plugin can polyfill it. This inline script ensures 'process'
-      // is defined globally before ANY module (including chunks) loads.
-      // See: https://github.com/actualbudget/actual/issues/5949
-      if (typeof process === 'undefined') {
-        window.process = {
-          env: {
-            NODE_ENV: 'production',
-          },
-          // Mock process.emit for React's error reporting to prevent further errors
-          emit: function () {},
-        };
-      }
-    </script>
     <script type="module" src="/src/index.tsx"></script>
   </body>
 </html>

@@ -2,7 +2,6 @@ import { FunctionArgumentType, FunctionPlugin } from 'hyperformula';
 import type { InterpreterState } from 'hyperformula/typings/interpreter/InterpreterState';
 import type { ProcedureAst } from 'hyperformula/typings/parser';
 
-import * as db from '#server/db';
 import { getCurrency } from '#shared/currencies';
 import type { Currency } from '#shared/currencies';
 import { getNumberFormat, integerToAmount } from '#shared/util';
@@ -86,6 +85,10 @@ function getCurrencyFromLocale(locale: string): Currency {
 // This should be called before formula execution (can be async)
 export async function loadUserPreferencesForFormulas(): Promise<void> {
   try {
+    // Dynamically import db only when needed (server-side only)
+    // This prevents bundling server code into the browser
+    const db = await import('#server/db');
+
     // Get currency code from preferences
     const currencyCodePref = await db.first<Pick<db.DbPreference, 'value'>>(
       'SELECT value FROM preferences WHERE id = ?',
