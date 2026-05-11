@@ -15,7 +15,6 @@ import { Popover } from '@actual-app/components/popover';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { debugLog } from 'packages/desktop-client/src/components/transactions/TransactionTable/debugLog';
 
 import {
   CustomCell,
@@ -34,6 +33,8 @@ import type {
 } from '#components/transactions/TransactionTable/types';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useSelectedDispatch } from '#hooks/useSelected';
+
+import { debugLog } from '../debugLog';
 
 type TransactionHeaderProps = {
   hasSelected: boolean;
