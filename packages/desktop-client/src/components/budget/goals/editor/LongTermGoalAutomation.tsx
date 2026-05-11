@@ -1,8 +1,6 @@
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import { SpaceBetween } from '@actual-app/components/space-between';
-import { Text } from '@actual-app/components/text';
-import { theme } from '@actual-app/components/theme';
 import { amountToInteger, integerToAmount } from '@actual-app/core/shared/util';
 import type { GoalTemplate } from '@actual-app/core/types/models/templates';
 
@@ -46,13 +44,6 @@ export function LongTermGoalAutomation({
           }
         />
       </FormField>
-      <Text style={{ flex: 2, color: theme.pageTextSubdued, fontSize: 12 }}>
-        <Trans>
-          Set a long-term savings target. This changes the coloring of the
-          balance on the budget page to be based on progress towards the target
-          rather than the current month funding progress.
-        </Trans>
-      </Text>
     </SpaceBetween>
   );
 }
