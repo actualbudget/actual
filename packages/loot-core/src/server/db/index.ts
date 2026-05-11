@@ -1000,7 +1000,7 @@ export function findTags() {
 
 export function getSavingsPlans() {
   return all<DbSavingsPlan>(`
-    SELECT id, name, target_amount, saved_amount, months, start_month, status
+    SELECT id, name, target_amount, saved_amount, months, start_month, status, tombstone
     FROM savings_plans
     WHERE tombstone = 0
     ORDER BY name

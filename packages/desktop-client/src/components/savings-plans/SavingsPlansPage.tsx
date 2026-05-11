@@ -9,15 +9,15 @@ import { View } from '@actual-app/components/view';
 import type { SavingsPlanEntity } from '@actual-app/core/types/models';
 import { useQuery } from '@tanstack/react-query';
 
-import { SavingsPlanCard } from './SavingsPlanCard';
-import { SavingsPlanForm } from './SavingsPlanForm';
-
 import {
   useCreateSavingsPlanMutation,
   useDeleteSavingsPlanMutation,
   useUpdateSavingsPlanMutation,
-} from '../../savings-plans/mutations';
-import { savingsPlanQueries } from '../../savings-plans/queries';
+} from '#savings-plans/mutations';
+import { savingsPlanQueries } from '#savings-plans/queries';
+
+import { SavingsPlanCard } from './SavingsPlanCard';
+import { SavingsPlanForm } from './SavingsPlanForm';
 
 export function SavingsPlansPage() {
   const { t } = useTranslation();

@@ -18,7 +18,7 @@ export function calculateProgress(
   savedAmount: number,
 ): number {
   if (targetAmount <= 0) return 0;
-  return Math.min(savedAmount / targetAmount, 1);
+  return Math.max(Math.min(savedAmount / targetAmount, 1), 0);
 }
 
 export function isCompleted(

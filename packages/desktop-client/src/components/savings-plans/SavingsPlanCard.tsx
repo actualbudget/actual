@@ -6,7 +6,6 @@ import { SvgPencilWriteAlternate } from '@actual-app/components/icons/v2';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
 import {
   calculateMonthlyContribution,
   calculateProgress,
@@ -32,7 +31,7 @@ export function SavingsPlanCard({
     plan.target_amount,
     plan.saved_amount,
   );
-  const monthly = calculateMonthlyContribution(plan.target_amount, plan.months);
+  const monthly = calculateMonthlyContribution(remaining, plan.months);
   const percentage = Math.round(progress * 100);
 
   return (
@@ -65,12 +64,20 @@ export function SavingsPlanCard({
           {plan.name}
         </Text>
         <View style={{ flexDirection: 'row', gap: 4 }}>
-          <Button variant="bare" onPress={() => onEdit(plan)}>
+          <Button
+            variant="bare"
+            aria-label={t('Edit savings plan')}
+            onPress={() => onEdit(plan)}
+          >
             <SvgPencilWriteAlternate
               style={{ width: 14, height: 14, color: theme.pageTextSubdued }}
             />
           </Button>
-          <Button variant="bare" onPress={() => onDelete(plan.id)}>
+          <Button
+            variant="bare"
+            aria-label={t('Delete savings plan')}
+            onPress={() => onDelete(plan.id)}
+          >
             <SvgTrash
               style={{ width: 14, height: 14, color: theme.errorText }}
             />

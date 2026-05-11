@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import {
   calculateMonthlyContribution,
@@ -66,6 +66,10 @@ describe('calculateProgress', () => {
 
   it('caps at 1 when over-saved', () => {
     expect(calculateProgress(200000, 300000)).toBe(1);
+  });
+
+  it('caps at 0 when saved amount is negative', () => {
+    expect(calculateProgress(200000, -50000)).toBe(0);
   });
 
   it('returns 0 when target is 0', () => {

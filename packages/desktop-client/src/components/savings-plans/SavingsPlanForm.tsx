@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -6,7 +6,6 @@ import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
 import {
   currencyToInteger,
   integerToCurrency,
@@ -37,16 +36,38 @@ export function SavingsPlanForm({
   );
   const [months, setMonths] = useState(String(plan?.months ?? ''));
   const [startMonth, setStartMonth] = useState(plan?.start_month ?? '');
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setName(plan?.name ?? '');
+    setTargetAmountStr(plan ? integerToCurrency(plan.target_amount) : '');
+    setSavedAmountStr(plan ? integerToCurrency(plan.saved_amount) : '0');
+    setMonths(String(plan?.months ?? ''));
+    setStartMonth(plan?.start_month ?? '');
+    setError(null);
+  }, [plan]);
 
   function handleSubmit() {
     const targetAmount = currencyToInteger(targetAmountStr);
     const savedAmount = currencyToInteger(savedAmountStr);
+    const monthsNum = Number(months);
 
-    if (!name.trim()) return;
-    if (targetAmount == null || targetAmount <= 0) return;
-    if (savedAmount == null) return;
-    const monthsNum = parseInt(months, 10);
-    if (isNaN(monthsNum) || monthsNum <= 0) return;
+    if (!name.trim()) {
+      setError(t('Enter a plan name.'));
+      return;
+    }
+    if (targetAmount == null || targetAmount <= 0) {
+      setError(t('Enter a target amount greater than zero.'));
+      return;
+    }
+    if (savedAmount == null || savedAmount < 0) {
+      setError(t('Enter a saved amount of zero or more.'));
+      return;
+    }
+    if (!/^\d+$/.test(months.trim()) || monthsNum <= 0) {
+      setError(t('Enter a whole number of months greater than zero.'));
+      return;
+    }
 
     onSave({
       name: name.trim(),
@@ -54,8 +75,7 @@ export function SavingsPlanForm({
       saved_amount: savedAmount,
       months: monthsNum,
       start_month: startMonth || null,
-      status:
-        savedAmount >= targetAmount ? 'completed' : (plan?.status ?? 'active'),
+      status: savedAmount >= targetAmount ? 'completed' : 'active',
     });
   }
 
@@ -79,6 +99,12 @@ export function SavingsPlanForm({
       >
         {plan ? t('Edit Savings Plan') : t('New Savings Plan')}
       </Text>
+
+      {error && (
+        <Text style={{ color: theme.errorText, marginBottom: 12 }}>
+          {error}
+        </Text>
+      )}
 
       <View style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <FormField>

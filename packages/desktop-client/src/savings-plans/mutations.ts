@@ -1,15 +1,13 @@
 import { useTranslation } from 'react-i18next';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { v4 as uuidv4 } from 'uuid';
-
 import { send } from '@actual-app/core/platform/client/connection';
 import type { SavingsPlanEntity } from '@actual-app/core/types/models';
-
-import { savingsPlanQueries } from './queries';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
+
+import { savingsPlanQueries } from './queries';
 
 export function useCreateSavingsPlanMutation() {
   const queryClient = useQueryClient();
@@ -29,7 +27,6 @@ export function useCreateSavingsPlanMutation() {
       dispatch(
         addNotification({
           notification: {
-            id: uuidv4(),
             type: 'error',
             message: t(
               'There was an error creating the savings plan. Please try again.',
@@ -62,7 +59,6 @@ export function useUpdateSavingsPlanMutation() {
       dispatch(
         addNotification({
           notification: {
-            id: uuidv4(),
             type: 'error',
             message: t(
               'There was an error updating the savings plan. Please try again.',
@@ -93,7 +89,6 @@ export function useDeleteSavingsPlanMutation() {
       dispatch(
         addNotification({
           notification: {
-            id: uuidv4(),
             type: 'error',
             message: t(
               'There was an error deleting the savings plan. Please try again.',

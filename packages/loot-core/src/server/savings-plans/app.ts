@@ -1,8 +1,8 @@
-import type { SavingsPlanEntity } from '../../types/models';
-import { createApp } from '../app';
-import * as db from '../db';
-import { mutator } from '../mutators';
-import { undoable } from '../undo';
+import { createApp } from '#server/app';
+import * as db from '#server/db';
+import { mutator } from '#server/mutators';
+import { undoable } from '#server/undo';
+import type { SavingsPlanEntity } from '#types/models';
 
 export type SavingsPlansHandlers = {
   'savings-plans-get': typeof getSavingsPlans;
@@ -24,23 +24,34 @@ async function getSavingsPlans(): Promise<SavingsPlanEntity[]> {
 async function createSavingsPlan(
   plan: Omit<SavingsPlanEntity, 'id'>,
 ): Promise<SavingsPlanEntity> {
-  const id = await db.insertSavingsPlan({
+  const savingsPlan = {
+    ...plan,
     name: plan.name.trim(),
-    target_amount: plan.target_amount,
-    saved_amount: plan.saved_amount,
-    months: plan.months,
-    start_month: plan.start_month,
     status: plan.status ?? 'active',
+  };
+
+  const id = await db.insertSavingsPlan({
+    name: savingsPlan.name,
+    target_amount: savingsPlan.target_amount,
+    saved_amount: savingsPlan.saved_amount,
+    months: savingsPlan.months,
+    start_month: savingsPlan.start_month,
+    status: savingsPlan.status,
   });
 
-  return { id, ...plan };
+  return { id, ...savingsPlan };
 }
 
 async function updateSavingsPlan(
   plan: Partial<SavingsPlanEntity> & Pick<SavingsPlanEntity, 'id'>,
 ): Promise<Partial<SavingsPlanEntity>> {
-  await db.updateSavingsPlan(plan);
-  return plan;
+  const savingsPlan = {
+    ...plan,
+    ...(plan.name != null ? { name: plan.name.trim() } : {}),
+  };
+
+  await db.updateSavingsPlan(savingsPlan);
+  return savingsPlan;
 }
 
 async function deleteSavingsPlan(
