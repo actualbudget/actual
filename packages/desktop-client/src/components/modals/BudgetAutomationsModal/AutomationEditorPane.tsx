@@ -20,6 +20,7 @@ import {
   AutomationErrorTitle,
 } from '#components/budget/goals/automationMessages';
 import type { DisplayTemplateType } from '#components/budget/goals/constants';
+import { getDisplayTemplateMeta } from '#components/budget/goals/displayTemplateMeta';
 import {
   getInitialState,
   templateReducer,
@@ -222,6 +223,18 @@ export function AutomationEditorPane({
               border: `1px solid ${theme.tableBorder}`,
             }}
           >
+            {NON_CONTRIBUTION_TYPES.has(state.displayType) && (
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: theme.pageTextSubdued,
+                  display: 'block',
+                  marginBottom: 4,
+                }}
+              >
+                {getDisplayTemplateMeta(state.displayType).description}
+              </Text>
+            )}
             <ActiveEditor
               state={state}
               dispatch={dispatch}

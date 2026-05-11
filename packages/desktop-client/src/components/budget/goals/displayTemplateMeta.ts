@@ -65,7 +65,9 @@ export function getDisplayTemplateMeta(
     case 'limit':
       return {
         label: t('Balance cap'),
-        description: t('Never let the category balance exceed a cap.'),
+        description: t(
+          'Stop budgeting to this category once the balance reaches a cap.',
+        ),
         icon: SvgEquals,
       };
     case 'refill':
