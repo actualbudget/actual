@@ -100,7 +100,7 @@ function HeaderCell({
       style={{
         borderTopWidth: 0,
         borderBottomWidth: 0,
-        paddingRight: isResizable ? 8 : undefined,
+        paddingRight: isResizable ? 12 : undefined,
       }}
       unexposedContent={({ value: cellValue }) => (
         <div

@@ -1,6 +1,6 @@
 import { theme } from '@actual-app/components/theme';
 
-import { Cell, Field, SelectCell } from '#components/table';
+import { Cell, Field } from '#components/table';
 import type { TransactionRowContentProps } from '#components/transactions/TransactionTable/types';
 
 import {
@@ -31,28 +31,17 @@ export function SplitChildTransactionRowCells({
   notesValue,
   onEdit,
   onUpdate,
-  onSelect,
+  _onSelect,
   onNavigateToTransferAccount,
   onNavigateToSchedule,
   onManagePayees,
-  showSelection,
+  _showSelection,
   columnWidths,
 }: TransactionRowContentProps) {
   return (
     <>
-      {showSelection && !isPreview ? (
-        <SelectCell
-          exposed
-          focused={focusedField === 'select'}
-          selected={selected}
-          width={20}
-          onSelect={onSelect}
-          onEdit={() => onEdit(transaction.id, 'select')}
-          style={{ borderLeftWidth: 1 }}
-        />
-      ) : (
-        <Cell width={20} />
-      )}
+      {/* Child transactions should never show SelectCell, only empty Cell */}
+      <Cell width={20} style={{ borderLeftWidth: 1 }} />
 
       <Field
         width={columnWidths.date}
