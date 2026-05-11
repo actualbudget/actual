@@ -26,6 +26,7 @@ function getDisplayTypeFromTemplate(template: Template): DisplayTemplateType {
     case 'remainder':
       return 'remainder';
     case 'goal':
+      return 'goal';
     case 'error':
     case 'spend':
       // filtered upstream by hasUnsupportedDirective; surface if it ever isn't

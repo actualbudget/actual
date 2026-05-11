@@ -3,6 +3,7 @@ import type { ComponentType, SVGProps } from 'react';
 import {
   SvgChartPie,
   SvgEquals,
+  SvgFlag,
   SvgMoneyBag,
   SvgPiggyBank,
   SvgShare,
@@ -85,6 +86,12 @@ export function getDisplayTemplateMeta(
           'Split any remaining To Budget across these categories.',
         ),
         icon: SvgShare,
+      };
+    case 'goal':
+      return {
+        label: t('Long-term goal'),
+        description: t('Track a savings target for this category.'),
+        icon: SvgFlag,
       };
     default:
       displayType satisfies never;

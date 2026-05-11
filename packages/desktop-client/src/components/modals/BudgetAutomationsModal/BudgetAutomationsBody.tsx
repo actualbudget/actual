@@ -197,6 +197,22 @@ export function BudgetAutomationsBody({
     });
   };
 
+  const onAddGoalAutomation = () => {
+    const entry = createAutomationEntry(
+      {
+        directive: 'goal',
+        type: 'goal',
+        amount: 1000,
+      },
+      'goal',
+    );
+    setEntries(prev => {
+      const next = [...prev, entry];
+      setActiveIdx(next.length - 1);
+      return next;
+    });
+  };
+
   const onDelete = (index: number) => {
     setEntries(prev => {
       const next = prev.filter((_, i) => i !== index);
@@ -306,14 +322,15 @@ export function BudgetAutomationsBody({
   }
 
   const hasLimitAutomation = entries.some(e => e.displayType === 'limit');
+  const hasGoalAutomation = entries.some(e => e.displayType === 'goal');
 
+  const isOption = (entry: AutomationEntry) =>
+    entry.displayType === 'limit' || entry.displayType === 'goal';
   const indexedEntries = entries.map((entry, idx) => ({ entry, idx }));
   const contributionEntries = indexedEntries.filter(
-    ({ entry }) => entry.displayType !== 'limit',
+    ({ entry }) => !isOption(entry),
   );
-  const constraintEntries = indexedEntries.filter(
-    ({ entry }) => entry.displayType === 'limit',
-  );
+  const optionEntries = indexedEntries.filter(({ entry }) => isOption(entry));
 
   const safeActiveIdx = Math.min(activeIdx, Math.max(0, entries.length - 1));
 
@@ -447,7 +464,7 @@ export function BudgetAutomationsBody({
           <SidebarSectionHeader style={{ marginTop: 16 }}>
             <Trans>Options</Trans>
           </SidebarSectionHeader>
-          {constraintEntries.map(({ entry, idx }) => (
+          {optionEntries.map(({ entry, idx }) => (
             <AutomationListRow
               key={entry.id}
               index={idx}
@@ -464,9 +481,11 @@ export function BudgetAutomationsBody({
               + <Trans>Add balance cap</Trans>
             </SidebarAddButton>
           )}
-          <SidebarPlaceholderRow>
-            <Trans>Long-term goal (coming soon)</Trans>
-          </SidebarPlaceholderRow>
+          {!hasGoalAutomation && (
+            <SidebarAddButton onPress={onAddGoalAutomation}>
+              + <Trans>Add long-term goal</Trans>
+            </SidebarAddButton>
+          )}
           <SidebarPlaceholderRow>
             <Trans>End of month cleanup (coming soon)</Trans>
           </SidebarPlaceholderRow>

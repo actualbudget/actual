@@ -7,16 +7,12 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 export function UnsupportedDirectivesNotice({
-  hasGoalTemplate,
   hasErrorTemplate,
   hasSpendTemplate,
-  hasCleanupDirective,
   onClose,
 }: {
-  hasGoalTemplate: boolean;
   hasErrorTemplate: boolean;
   hasSpendTemplate: boolean;
-  hasCleanupDirective: boolean;
   onClose: () => void;
 }) {
   return (
@@ -63,19 +59,6 @@ export function UnsupportedDirectivesNotice({
             This category uses a <code>spend from</code> template, which the
             budget automations UI doesn&rsquo;t handle yet. Keep editing it as
             text in the category&rsquo;s notes.
-          </Trans>
-        ) : hasGoalTemplate && hasCleanupDirective ? (
-          <Trans>
-            This category&rsquo;s notes use <code>#goal</code> and{' '}
-            <code>#cleanup</code> directives, neither of which the budget
-            automations UI handles yet. Keep editing them as text in the
-            category&rsquo;s notes.
-          </Trans>
-        ) : hasGoalTemplate ? (
-          <Trans>
-            This category uses a <code>#goal</code> directive, which the budget
-            automations UI doesn&rsquo;t handle yet. Keep editing it as text in
-            the category&rsquo;s notes.
           </Trans>
         ) : (
           <Trans>
