@@ -95,11 +95,15 @@ function toCleanupTemplate(
         groupId: resolveGroup(row.group, nameToId),
         weight: row.weight,
       };
-    case 'overspend':
-      return {
-        role: 'overspend',
-        groupId: nameToId.get(row.group.toLowerCase())!,
-      };
+    case 'overspend': {
+      const groupId = nameToId.get(row.group.toLowerCase());
+      if (groupId == null) {
+        throw new Error(
+          `Unresolved cleanup group for overspend row: ${row.group}`,
+        );
+      }
+      return { role: 'overspend', groupId };
+    }
     default:
       throw new Error(`Unknown cleanup row type: ${String(row)}`);
   }

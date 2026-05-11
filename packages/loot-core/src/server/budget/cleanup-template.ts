@@ -28,6 +28,7 @@ async function applyGroupCleanups(
   sourceGroups: GroupSourceRow[],
   sinkGroups: GroupSinkRow[],
   overspendGroups: GroupOverspendRow[],
+  groupNamesById: Map<string, string>,
 ) {
   const sheetName = monthUtils.sheetForMonth(month);
   const warnings = [];
@@ -134,8 +135,9 @@ async function applyGroupCleanups(
         });
       }
     } else {
+      const groupName = groupNamesById.get(groupId) ?? groupId;
       warnings.push(
-        `Cleanup group "${groupId}" has no matching sink categories.`,
+        `Cleanup group "${groupName}" has no matching sink categories.`,
       );
     }
     sourceGroups = sourceGroups.filter(c => c.groupId !== groupId);
@@ -155,7 +157,6 @@ async function processCleanup(month: string): Promise<Notification> {
     weight: number;
   };
   const sinkCategory: SinkCategoryRow[] = [];
-  const sourceWithRollover = [];
   const db_month = parseInt(month.replace('-', ''));
 
   const categories = await db.all<db.DbViewCategory>(
@@ -185,12 +186,18 @@ async function processCleanup(month: string): Promise<Notification> {
     }
   }
 
+  const groupRows = await db.all<{ id: string; name: string }>(
+    'SELECT id, name FROM cleanup_groups WHERE tombstone = 0',
+  );
+  const groupNamesById = new Map(groupRows.map(g => [g.id, g.name]));
+
   //run category groups
   const newWarnings = await applyGroupCleanups(
     month,
     groupSource,
     groupSink,
     groupOverspend,
+    groupNamesById,
   );
   warnings.splice(1, 0, ...newWarnings);
 
@@ -219,13 +226,6 @@ async function processCleanup(month: string): Promise<Notification> {
         num_sources += 1;
       } else {
         warnings.push(category.name + ' does not have available funds.');
-      }
-      const carryover = await db.first<Pick<db.DbZeroBudget, 'carryover'>>(
-        `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
-        [db_month, category.id],
-      );
-      if (carryover !== null && carryover.carryover === 1) {
-        sourceWithRollover.push({ cat: category, def });
       }
     }
 
