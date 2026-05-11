@@ -43,7 +43,10 @@ type TransactionTableColumnWidthsPrefKey =
 
 type ResizeHandleProps = {
   isResizable: boolean;
-  onPointerDown: (event: ReactPointerEvent<HTMLDivElement>) => void;
+  onPointerDown: (
+    event: ReactPointerEvent<HTMLDivElement>,
+    computedWidth?: number,
+  ) => void;
 };
 
 export function useTransactionTableColumnLayout({
@@ -189,12 +192,24 @@ export function useTransactionTableColumnLayout({
     };
   }, [isResizing, persistedOriginalWidths, setPersistedValue, visibleColumns]);
 
-  function beginResize(activeColumnId: TransactionColumnId, clientX: number) {
-    const startWidths = resolveTransactionColumnWidths({
+  function beginResize(
+    activeColumnId: TransactionColumnId,
+    clientX: number,
+    computedWidth?: number,
+  ) {
+    let startWidths = resolveTransactionColumnWidths({
       visibleColumns,
       savedWidths: activeWidths,
       availableWidth: availableDataWidth,
     });
+
+    // If this is a flex column, convert it to its actual computed width
+    if (startWidths[activeColumnId] === 'flex' && computedWidth) {
+      startWidths = {
+        ...startWidths,
+        [activeColumnId]: Math.round(computedWidth),
+      };
+    }
 
     resizeStateRef.current = {
       activeColumnId,
@@ -208,29 +223,18 @@ export function useTransactionTableColumnLayout({
   function getResizeHandleProps(
     columnId: TransactionColumnId,
   ): ResizeHandleProps {
-    // Don't allow resizing flex columns
-    if (columnWidths[columnId] === 'flex') {
-      return {
-        isResizable: false,
-        // Flex columns don't have resize handlers
-        onPointerDown: () => {
-          // No-op for flex columns
-        },
-      };
-    }
-
     const isResizable = !!getVisibleNeighborColumnId(visibleColumns, columnId);
 
     return {
       isResizable,
-      onPointerDown: event => {
+      onPointerDown: (event, computedWidth) => {
         if (!isResizable) {
           return;
         }
 
         event.preventDefault();
         event.stopPropagation();
-        beginResize(columnId, event.clientX);
+        beginResize(columnId, event.clientX, computedWidth);
       },
     };
   }

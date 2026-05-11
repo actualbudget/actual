@@ -48,7 +48,10 @@ type TransactionHeaderProps = {
   columnWidths: TransactionColumnWidths;
   getResizeHandleProps: (columnId: TransactionColumnId) => {
     isResizable: boolean;
-    onPointerDown: (event: ReactPointerEvent<HTMLDivElement>) => void;
+    onPointerDown: (
+      event: ReactPointerEvent<HTMLDivElement>,
+      computedWidth?: number,
+    ) => void;
   };
   onResetAllColumnWidths: () => void;
   onResetColumnWidth: (columnId: TransactionColumnId) => void;
@@ -65,7 +68,10 @@ type HeaderCellProps = {
   marginLeft?: CSSProperties['marginLeft'];
   marginRight?: CSSProperties['marginRight'];
   isResizable?: boolean;
-  onResizePointerDown?: (event: ReactPointerEvent<HTMLDivElement>) => void;
+  onResizePointerDown?: (
+    event: ReactPointerEvent<HTMLDivElement>,
+    computedWidth?: number,
+  ) => void;
   onContextMenu?: (event: ReactMouseEvent<HTMLDivElement>) => void;
 };
 
@@ -83,6 +89,8 @@ function HeaderCell({
   onResizePointerDown,
   onContextMenu,
 }: HeaderCellProps) {
+  const cellRef = useRef<HTMLDivElement>(null);
+
   const style = {
     whiteSpace: 'nowrap' as CSSProperties['whiteSpace'],
     overflow: 'hidden',
@@ -93,6 +101,16 @@ function HeaderCell({
     marginRight,
   };
 
+  const handleResizePointerDown = (
+    event: ReactPointerEvent<HTMLDivElement>,
+  ) => {
+    if (onResizePointerDown && cellRef.current) {
+      // Get the actual computed width of the cell
+      const computedWidth = cellRef.current.getBoundingClientRect().width;
+      onResizePointerDown(event, computedWidth);
+    }
+  };
+
   return (
     <CustomCell
       width={width}
@@ -100,6 +118,7 @@ function HeaderCell({
       textAlign={textAlign}
       alignItems={alignItems}
       value={value}
+      innerRef={cellRef}
       style={{
         borderTopWidth: 0,
         borderBottomWidth: 0,
@@ -150,7 +169,7 @@ function HeaderCell({
               role="separator"
               aria-orientation="vertical"
               data-testid={`transaction-header-resize-${id}`}
-              onPointerDown={onResizePointerDown}
+              onPointerDown={handleResizePointerDown}
               style={{
                 position: 'absolute',
                 top: 0,
