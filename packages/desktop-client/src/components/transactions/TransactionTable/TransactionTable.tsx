@@ -212,6 +212,7 @@ export const TransactionTable = forwardRef(
       navigatorTransactions,
       getEditableFields,
     );
+    const headerRef = useRef<HTMLDivElement>(null);
     const {
       columnWidths,
       getResizeHandleProps,
@@ -224,6 +225,7 @@ export const TransactionTable = forwardRef(
       showCategory,
       showCleared,
       showSelection,
+      headerRef,
     });
 
     useEffect(() => {
@@ -567,6 +569,7 @@ export const TransactionTable = forwardRef(
             getResizeHandleProps={getResizeHandleProps}
             onResetAllColumnWidths={resetAllColumnWidths}
             onResetColumnWidth={resetColumnWidth}
+            headerRef={headerRef}
           />
         </View>
         <View style={{ flex: 1, overflow: 'hidden' }}>

@@ -1,8 +1,10 @@
 import { memo, useRef, useState } from 'react';
 import type {
   KeyboardEvent,
+  MutableRefObject,
   MouseEvent as ReactMouseEvent,
   PointerEvent as ReactPointerEvent,
+  RefObject,
 } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
@@ -48,13 +50,11 @@ type TransactionHeaderProps = {
   columnWidths: TransactionColumnWidths;
   getResizeHandleProps: (columnId: TransactionColumnId) => {
     isResizable: boolean;
-    onPointerDown: (
-      event: ReactPointerEvent<HTMLDivElement>,
-      computedWidth?: number,
-    ) => void;
+    onPointerDown: (event: ReactPointerEvent<HTMLDivElement>) => void;
   };
   onResetAllColumnWidths: () => void;
   onResetColumnWidth: (columnId: TransactionColumnId) => void;
+  headerRef?: RefObject<HTMLDivElement | null>;
 };
 
 type HeaderCellProps = {
@@ -68,10 +68,7 @@ type HeaderCellProps = {
   marginLeft?: CSSProperties['marginLeft'];
   marginRight?: CSSProperties['marginRight'];
   isResizable?: boolean;
-  onResizePointerDown?: (
-    event: ReactPointerEvent<HTMLDivElement>,
-    computedWidth?: number,
-  ) => void;
+  onResizePointerDown?: (event: ReactPointerEvent<HTMLDivElement>) => void;
   onContextMenu?: (event: ReactMouseEvent<HTMLDivElement>) => void;
 };
 
@@ -89,8 +86,6 @@ function HeaderCell({
   onResizePointerDown,
   onContextMenu,
 }: HeaderCellProps) {
-  const cellRef = useRef<HTMLDivElement>(null);
-
   const style = {
     whiteSpace: 'nowrap' as CSSProperties['whiteSpace'],
     overflow: 'hidden',
@@ -101,16 +96,6 @@ function HeaderCell({
     marginRight,
   };
 
-  const handleResizePointerDown = (
-    event: ReactPointerEvent<HTMLDivElement>,
-  ) => {
-    if (onResizePointerDown && cellRef.current) {
-      // Get the actual computed width of the cell
-      const computedWidth = cellRef.current.getBoundingClientRect().width;
-      onResizePointerDown(event, computedWidth);
-    }
-  };
-
   return (
     <CustomCell
       width={width}
@@ -118,7 +103,6 @@ function HeaderCell({
       textAlign={textAlign}
       alignItems={alignItems}
       value={value}
-      innerRef={cellRef}
       style={{
         borderTopWidth: 0,
         borderBottomWidth: 0,
@@ -169,7 +153,7 @@ function HeaderCell({
               role="separator"
               aria-orientation="vertical"
               data-testid={`transaction-header-resize-${id}`}
-              onPointerDown={handleResizePointerDown}
+              onPointerDown={onResizePointerDown}
               style={{
                 position: 'absolute',
                 top: 0,
@@ -229,6 +213,7 @@ export const TransactionHeader = memo(
     getResizeHandleProps,
     onResetAllColumnWidths,
     onResetColumnWidth,
+    headerRef,
   }: TransactionHeaderProps) => {
     const dispatchSelected = useSelectedDispatch();
     const { t } = useTranslation();
@@ -246,6 +231,18 @@ export const TransactionHeader = memo(
       payment: t('Payment'),
       deposit: t('Deposit'),
       balance: t('Balance'),
+    };
+
+    // Callback ref to set both triggerRef and headerRef
+    const setRefs = (element: HTMLDivElement | null) => {
+      if (triggerRef) {
+        (triggerRef as MutableRefObject<HTMLDivElement | null>).current =
+          element;
+      }
+      if (headerRef && 'current' in headerRef) {
+        (headerRef as MutableRefObject<HTMLDivElement | null>).current =
+          element;
+      }
     };
     const renderResizableHeaderCell = ({
       columnId,
@@ -304,7 +301,7 @@ export const TransactionHeader = memo(
 
     return (
       <Row
-        ref={triggerRef}
+        ref={setRefs}
         style={{
           fontWeight: 300,
           zIndex: 200,

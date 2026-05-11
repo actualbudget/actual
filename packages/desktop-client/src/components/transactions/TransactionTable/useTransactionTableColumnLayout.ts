@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { PointerEvent as ReactPointerEvent } from 'react';
+import type { PointerEvent as ReactPointerEvent, RefObject } from 'react';
 
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
@@ -30,6 +30,7 @@ type UseTransactionTableColumnLayoutArgs = {
   showCategory: boolean;
   showCleared: boolean;
   showSelection: boolean;
+  headerRef?: RefObject<HTMLDivElement | null>;
 };
 
 type ResizeState = {
@@ -43,10 +44,7 @@ type TransactionTableColumnWidthsPrefKey =
 
 type ResizeHandleProps = {
   isResizable: boolean;
-  onPointerDown: (
-    event: ReactPointerEvent<HTMLDivElement>,
-    computedWidth?: number,
-  ) => void;
+  onPointerDown: (event: ReactPointerEvent<HTMLDivElement>) => void;
 };
 
 export function useTransactionTableColumnLayout({
@@ -56,6 +54,7 @@ export function useTransactionTableColumnLayout({
   showCategory,
   showCleared,
   showSelection,
+  headerRef,
 }: UseTransactionTableColumnLayoutArgs) {
   const variantKey = getTransactionTableVariantKey({
     showAccount,
@@ -192,23 +191,35 @@ export function useTransactionTableColumnLayout({
     };
   }, [isResizing, persistedOriginalWidths, setPersistedValue, visibleColumns]);
 
-  function beginResize(
-    activeColumnId: TransactionColumnId,
-    clientX: number,
-    computedWidth?: number,
-  ) {
+  function beginResize(activeColumnId: TransactionColumnId, clientX: number) {
     let startWidths = resolveTransactionColumnWidths({
       visibleColumns,
       savedWidths: activeWidths,
       availableWidth: availableDataWidth,
     });
 
-    // If this is a flex column, convert it to its actual computed width
-    if (startWidths[activeColumnId] === 'flex' && computedWidth) {
-      startWidths = {
-        ...startWidths,
-        [activeColumnId]: Math.round(computedWidth),
-      };
+    // Convert ALL flex columns to their computed pixel widths
+    // This is necessary because resize logic requires both active and neighbor to be numeric
+    const flexColumns = visibleColumns.filter(
+      col => startWidths[col.id] === 'flex',
+    );
+
+    if (flexColumns.length > 0 && headerRef?.current) {
+      const updatedWidths = { ...startWidths };
+
+      flexColumns.forEach(column => {
+        // Query the header cell for this column
+        const cellElement = headerRef.current?.querySelector(
+          `[data-testid="${column.id}"]`,
+        );
+
+        if (cellElement) {
+          const rect = cellElement.getBoundingClientRect();
+          updatedWidths[column.id] = Math.round(rect.width);
+        }
+      });
+
+      startWidths = updatedWidths;
     }
 
     resizeStateRef.current = {
@@ -227,14 +238,14 @@ export function useTransactionTableColumnLayout({
 
     return {
       isResizable,
-      onPointerDown: (event, computedWidth) => {
+      onPointerDown: event => {
         if (!isResizable) {
           return;
         }
 
         event.preventDefault();
         event.stopPropagation();
-        beginResize(columnId, event.clientX, computedWidth);
+        beginResize(columnId, event.clientX);
       },
     };
   }
