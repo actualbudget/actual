@@ -1,4 +1,4 @@
-import { memo, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import type {
   KeyboardEvent,
   MouseEvent as ReactMouseEvent,
@@ -15,6 +15,7 @@ import { Popover } from '@actual-app/components/popover';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { debugLog } from 'packages/desktop-client/src/components/transactions/TransactionTable/debugLog';
 
 import {
   CustomCell,
@@ -282,6 +283,43 @@ export const TransactionHeader = memo(
       },
       [dispatchSelected],
     );
+
+    // DEBUG: Measure actual rendered column widths
+    useEffect(() => {
+      if (triggerRef.current) {
+        const measurements: Record<string, number> = {};
+        const row = triggerRef.current;
+
+        // Measure all cells by their data-testid
+        [
+          'date',
+          'account',
+          'payee',
+          'notes',
+          'category',
+          'payment',
+          'deposit',
+          'balance',
+        ].forEach(columnId => {
+          const cell = row.querySelector(`[data-testid="${columnId}"]`);
+          if (cell) {
+            measurements[columnId] = cell.getBoundingClientRect().width;
+          }
+        });
+
+        const rowWidth = row.getBoundingClientRect().width;
+
+        debugLog('HEADER_RENDERED', {
+          columnWidths,
+          measuredWidths: measurements,
+          totalMeasured: Object.values(measurements).reduce(
+            (sum, w) => sum + w,
+            0,
+          ),
+          rowWidth,
+        });
+      }
+    }, [columnWidths]);
 
     return (
       <Row

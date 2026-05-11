@@ -3,6 +3,7 @@ import type { PointerEvent as ReactPointerEvent } from 'react';
 
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
+import { debugLog } from './debugLog';
 import {
   applyNeighborColumnResize,
   getVisibleColumnsWidth,
@@ -196,6 +197,19 @@ export function useTransactionTableColumnLayout({
       availableWidth: availableDataWidth,
     });
 
+    debugLog('RESIZE_START_INITIAL', {
+      activeColumnId,
+      containerWidth,
+      utilityWidth,
+      availableDataWidth,
+      startWidths,
+      visibleColumns: visibleColumns.map(c => ({
+        id: c.id,
+        defaultWidth: c.defaultWidth,
+        minWidth: c.minWidth,
+      })),
+    });
+
     // Snapshot: Convert ALL flex columns to their computed pixel widths
     // Calculate how much space the flex columns should take
     const fixedColumnsWidth = visibleColumns.reduce((total, col) => {
@@ -221,6 +235,23 @@ export function useTransactionTableColumnLayout({
         // Give the first 'remainder' columns an extra pixel to distribute the remainder
         updatedWidths[column.id] =
           baseFlexColumnWidth + (index < remainder ? 1 : 0);
+      });
+
+      debugLog('RESIZE_FLEX_CONVERTED', {
+        fixedColumnsWidth,
+        totalFlexSpace,
+        baseFlexColumnWidth,
+        remainder,
+        flexColumns: flexColumns.map((c, i) => ({
+          id: c.id,
+          width: baseFlexColumnWidth + (i < remainder ? 1 : 0),
+        })),
+        totalCalculated:
+          fixedColumnsWidth +
+          flexColumns.reduce(
+            (sum, _, i) => sum + baseFlexColumnWidth + (i < remainder ? 1 : 0),
+            0,
+          ),
       });
 
       startWidths = updatedWidths;
