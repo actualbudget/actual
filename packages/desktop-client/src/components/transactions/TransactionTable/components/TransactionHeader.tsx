@@ -60,6 +60,7 @@ type HeaderCellProps = {
   icon?: 'asc' | 'desc' | 'clickable';
   onClick?: () => void;
   width?: CSSProperties['width'];
+  textAlign?: CSSProperties['textAlign'];
   alignItems?: CSSProperties['alignItems'];
   marginLeft?: CSSProperties['marginLeft'];
   marginRight?: CSSProperties['marginRight'];
@@ -72,6 +73,7 @@ function HeaderCell({
   value,
   id,
   width,
+  textAlign,
   alignItems,
   marginLeft,
   marginRight,
@@ -95,6 +97,7 @@ function HeaderCell({
     <CustomCell
       width={width}
       name={id}
+      textAlign={textAlign}
       alignItems={alignItems}
       value={value}
       style={{
@@ -220,6 +223,7 @@ export const TransactionHeader = memo(
     const renderResizableHeaderCell = ({
       columnId,
       value,
+      textAlign,
       alignItems,
       marginLeft,
       marginRight,
@@ -228,6 +232,7 @@ export const TransactionHeader = memo(
     }: {
       columnId: TransactionColumnId;
       value: string;
+      textAlign?: CSSProperties['textAlign'];
       alignItems?: CSSProperties['alignItems'];
       marginLeft?: CSSProperties['marginLeft'];
       marginRight?: CSSProperties['marginRight'];
@@ -246,6 +251,7 @@ export const TransactionHeader = memo(
         <HeaderCell
           value={value}
           width={columnWidths[columnId]}
+          textAlign={textAlign}
           alignItems={alignItems}
           marginLeft={marginLeft}
           marginRight={marginRight}
@@ -352,7 +358,7 @@ export const TransactionHeader = memo(
         {renderResizableHeaderCell({
           columnId: 'date',
           value: t('Date'),
-          alignItems: 'flex',
+          textAlign: 'left',
           marginLeft: -5,
           icon: field === 'date' ? ascDesc : 'clickable',
           onClick: () =>
@@ -362,7 +368,7 @@ export const TransactionHeader = memo(
           renderResizableHeaderCell({
             columnId: 'account',
             value: t('Account'),
-            alignItems: 'flex',
+            textAlign: 'left',
             marginLeft: -5,
             icon: field === 'account' ? ascDesc : 'clickable',
             onClick: () =>
@@ -374,7 +380,7 @@ export const TransactionHeader = memo(
         {renderResizableHeaderCell({
           columnId: 'payee',
           value: t('Payee'),
-          alignItems: 'flex',
+          textAlign: 'left',
           marginLeft: -5,
           icon: field === 'payee' ? ascDesc : 'clickable',
           onClick: () =>
@@ -383,7 +389,7 @@ export const TransactionHeader = memo(
         {renderResizableHeaderCell({
           columnId: 'notes',
           value: t('Notes'),
-          alignItems: 'flex',
+          textAlign: 'left',
           marginLeft: -5,
           icon: field === 'notes' ? ascDesc : 'clickable',
           onClick: () =>
@@ -393,7 +399,7 @@ export const TransactionHeader = memo(
           renderResizableHeaderCell({
             columnId: 'category',
             value: t('Category'),
-            alignItems: 'flex',
+            textAlign: 'left',
             marginLeft: -5,
             icon: field === 'category' ? ascDesc : 'clickable',
             onClick: () =>
@@ -405,7 +411,7 @@ export const TransactionHeader = memo(
         {renderResizableHeaderCell({
           columnId: 'payment',
           value: t('Payment'),
-          alignItems: 'flex-end',
+          textAlign: 'right',
           marginRight: -5,
           icon: field === 'payment' ? ascDesc : 'clickable',
           onClick: () =>
@@ -414,7 +420,7 @@ export const TransactionHeader = memo(
         {renderResizableHeaderCell({
           columnId: 'deposit',
           value: t('Deposit'),
-          alignItems: 'flex-end',
+          textAlign: 'right',
           marginRight: -5,
           icon: field === 'deposit' ? ascDesc : 'clickable',
           onClick: () =>
@@ -424,14 +430,14 @@ export const TransactionHeader = memo(
           renderResizableHeaderCell({
             columnId: 'balance',
             value: t('Balance'),
-            alignItems: 'flex-end',
+            textAlign: 'right',
             marginRight: -5,
           })}
         {showCleared && (
           <HeaderCell
             value="✓"
             width={TRANSACTION_CLEARED_COLUMN_WIDTH}
-            alignItems="flex"
+            textAlign="left"
             id="cleared"
             icon={field === 'cleared' ? ascDesc : 'clickable'}
             onClick={() => {

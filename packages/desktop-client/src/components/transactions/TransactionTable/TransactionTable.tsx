@@ -214,7 +214,6 @@ export const TransactionTable = forwardRef(
     );
     const {
       columnWidths,
-      tableWidth,
       getResizeHandleProps,
       resetAllColumnWidths,
       resetColumnWidth,
@@ -538,8 +537,7 @@ export const TransactionTable = forwardRef(
           innerRef={tableContainerRef}
           style={{
             flex: 1,
-            overflowX: 'auto',
-            overflowY: 'hidden',
+            overflow: 'hidden',
             position: 'relative',
           }}
         >
@@ -558,44 +556,36 @@ export const TransactionTable = forwardRef(
           >
             ⭐
           </View>
-          <View
+          <TransactionHeader
+            hasSelected={selectedItems.size > 0}
+            showAccount={showAccount}
+            showCategory={showCategory}
+            showBalance={showBalances}
+            showCleared={showCleared}
+            scrollWidth={scrollWidth}
+            showSelection={showSelection}
+            onSort={onSort}
+            ascDesc={ascDesc}
+            field={sortField}
+            columnWidths={columnWidths}
+            getResizeHandleProps={getResizeHandleProps}
+            onResetAllColumnWidths={resetAllColumnWidths}
+            onResetColumnWidth={resetColumnWidth}
+          />
+          <Table
+            ref={tableRef}
+            items={tableItems}
+            navigator={tableNavigator}
+            contentHeader={renderTemporaryTransactionSection}
+            renderItem={renderRow}
+            renderEmpty={renderEmpty}
+            loadMore={loadMoreTransactions}
+            saveScrollWidth={saveScrollWidth}
+            rowHeight={ROW_HEIGHT}
             style={{
-              flex: 1,
-              width: tableWidth,
-              minWidth: containerWidth || tableWidth,
+              backgroundColor: theme.tableBackground,
             }}
-          >
-            <TransactionHeader
-              hasSelected={selectedItems.size > 0}
-              showAccount={showAccount}
-              showCategory={showCategory}
-              showBalance={showBalances}
-              showCleared={showCleared}
-              scrollWidth={scrollWidth}
-              showSelection={showSelection}
-              onSort={onSort}
-              ascDesc={ascDesc}
-              field={sortField}
-              columnWidths={columnWidths}
-              getResizeHandleProps={getResizeHandleProps}
-              onResetAllColumnWidths={resetAllColumnWidths}
-              onResetColumnWidth={resetColumnWidth}
-            />
-            <Table
-              ref={tableRef}
-              items={tableItems}
-              navigator={tableNavigator}
-              contentHeader={renderTemporaryTransactionSection}
-              renderItem={renderRow}
-              renderEmpty={renderEmpty}
-              loadMore={loadMoreTransactions}
-              saveScrollWidth={saveScrollWidth}
-              rowHeight={ROW_HEIGHT}
-              style={{
-                backgroundColor: theme.tableBackground,
-              }}
-            />
-          </View>
+          />
         </View>
       </View>
     );
