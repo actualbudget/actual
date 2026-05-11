@@ -1,3 +1,5 @@
+import type { BankSyncProviders } from './bank-sync';
+
 export type AccountEntity = {
   id: string;
   name: string;
@@ -21,4 +23,4 @@ export type AccountEntity = {
   last_sync: string | null;
 };
 
-export type AccountSyncSource = 'simpleFin' | 'goCardless' | 'pluggyai';
+export type AccountSyncSource = BankSyncProviders;

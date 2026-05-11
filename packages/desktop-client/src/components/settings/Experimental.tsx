@@ -166,7 +166,10 @@ export function ExperimentalFeatures() {
             </FeatureToggle>
             {showGoalTemplatesUI && (
               <View style={{ paddingLeft: 22 }}>
-                <FeatureToggle flag="goalTemplatesUIEnabled">
+                <FeatureToggle
+                  flag="goalTemplatesUIEnabled"
+                  feedbackLink="https://github.com/actualbudget/actual/issues/7692"
+                >
                   <Trans>Subfeature: Budget automations UI</Trans>
                 </FeatureToggle>
               </View>
@@ -224,6 +227,9 @@ export function ExperimentalFeatures() {
               feedbackLink="https://github.com/actualbudget/actual/issues/6706"
             >
               <Trans>Payee Locations</Trans>
+            </FeatureToggle>
+            <FeatureToggle flag="enableBanking">
+              <Trans>Enable Banking sync (EU banks)</Trans>
             </FeatureToggle>
             {showServerPrefs && (
               <ServerFeatureToggle

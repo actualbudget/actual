@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "26.5.0",
+  "version": "26.5.2",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -27,6 +27,7 @@
     "#transactions": "./src/transactions/index.ts",
     "#undo": "./src/undo/index.ts",
     "#global-events": "./src/global-events.ts",
+    "#enablebanking": "./src/enablebanking.ts",
     "#gocardless": "./src/gocardless.ts",
     "#i18n": "./src/i18n.ts",
     "#mocks": "./src/mocks.tsx",
@@ -34,6 +35,9 @@
     "#polyfills": "./src/polyfills.ts",
     "#components/forms": "./src/components/forms/index.tsx",
     "#components/banksync": "./src/components/banksync/index.tsx",
+    "#components/banksync/bankSyncUtils": "./src/components/banksync/bankSyncUtils.ts",
+    "#components/banksync/BuiltInProviders": "./src/components/banksync/BuiltInProviders.tsx",
+    "#components/banksync/useBuiltInBankSyncProviders": "./src/components/banksync/useBuiltInBankSyncProviders.ts",
     "#components/banksync/useBankSyncAccountSettings": "./src/components/banksync/useBankSyncAccountSettings.ts",
     "#components/budget": "./src/components/budget/index.tsx",
     "#components/budget/goals/actions": "./src/components/budget/goals/actions.ts",
@@ -196,6 +200,7 @@
     "sass": "^1.99.0",
     "typescript-strict-plugin": "^2.4.4",
     "usehooks-ts": "^3.1.1",
+    "uuid": "^14.0.0",
     "vite": "^8.0.5",
     "vite-plugin-pwa": "^1.2.0",
     "vitest": "^4.1.2"

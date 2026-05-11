@@ -35,7 +35,8 @@
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.11.0",
-    "murmurhash": "^2.0.1"
+    "murmurhash": "^2.0.1",
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@bufbuild/protoc-gen-es": "^2.11.0",

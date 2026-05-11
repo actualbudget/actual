@@ -11,6 +11,7 @@ import type {
   NoteEntity,
   RuleEntity,
   ScheduleEntity,
+  SyncServerEnableBankingAccount,
   TransactionEntity,
   UserAccessEntity,
   UserEntity,
@@ -32,8 +33,6 @@ export type ConfirmTransactionEditReason =
   | 'batchDeleteWithReconciledTransfer'
   | 'batchEditWithReconciled'
   | 'batchEditWithReconciledTransfer'
-  | 'batchDuplicateWithReconciled'
-  | 'batchDuplicateWithReconciledTransfer'
   | 'editReconciled'
   | 'unlockReconciled'
   | 'deleteReconciled';
@@ -127,6 +126,31 @@ export type Modal =
       name: 'pluggyai-init';
       options: {
         onSuccess: () => void;
+      };
+    }
+  | {
+      name: 'enablebanking-init';
+      options: {
+        onSuccess: () => void;
+      };
+    }
+  | {
+      name: 'enablebanking-external-msg';
+      options: {
+        onMoveExternal: (arg: {
+          aspspId: string;
+          country: string;
+          maxConsentValidity?: number;
+          onStateReady?: (state: string) => void;
+        }) => Promise<
+          | { error: 'timeout' }
+          | { error: 'unknown'; message?: string }
+          | { data: { accounts: SyncServerEnableBankingAccount[] } }
+        >;
+        onClose?: (() => void) | undefined;
+        onSuccess: (data: {
+          accounts: SyncServerEnableBankingAccount[];
+        }) => Promise<void>;
       };
     }
   | {
@@ -356,6 +380,7 @@ export type Modal =
         onCopyLastMonthAverage: () => void;
         onSetMonthsAverage: (numberOfMonths: number) => void;
         onApplyBudgetTemplate: () => void;
+        onCopyUntilYearEnd: () => void;
         onEditNotes: (id: NoteEntity['id'], month: string) => void;
       };
     }

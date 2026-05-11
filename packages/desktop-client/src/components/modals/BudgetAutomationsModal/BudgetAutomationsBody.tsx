@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgInformationCircle } from '@actual-app/components/icons/v2';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import type {
@@ -19,8 +21,10 @@ import {
 } from '#components/budget/goals/automationExamples';
 import type { AutomationEntry } from '#components/budget/goals/automationExamples';
 import { formatMonthLabel } from '#components/budget/goals/formatMonthLabel';
-import { validateAutomation } from '#components/budget/goals/validateAutomation';
-import type { GlobalConflictKind } from '#components/budget/goals/validateAutomation';
+import {
+  validateAutomation,
+  validatePercentageAllocation,
+} from '#components/budget/goals/validateAutomation';
 import { Link } from '#components/common/Link';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
@@ -212,12 +216,7 @@ export function BudgetAutomationsBody({
     dryRun?.perTemplate?.[i] != null ? dryRun.perTemplate[i] : null,
   );
   const hasErrors = automationErrors.some(error => error !== null);
-  const percentSum = templates.reduce<number>((sum, t) => {
-    if (t.type === 'percentage') return sum + t.percent;
-    return sum;
-  }, 0);
-  const conflict: GlobalConflictKind | null =
-    percentSum > 100 ? { kind: 'percent-over-100', total: percentSum } : null;
+  const conflict = validatePercentageAllocation(templates);
 
   const categoryNameMap: Record<string, string> = {};
   for (const group of categories) {
@@ -258,18 +257,46 @@ export function BudgetAutomationsBody({
           </Text>
         </View>
         <View style={{ textAlign: 'right', flexShrink: 0, minWidth: 220 }}>
-          <Text
+          <View
             style={{
-              fontSize: 11,
-              textTransform: 'uppercase',
-              color: theme.pageTextSubdued,
-              letterSpacing: '0.04em',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              gap: 4,
             }}
           >
-            <Trans>
-              Projected for {{ month: formatMonthLabel(month, locale) }}
-            </Trans>
-          </Text>
+            <Text
+              style={{
+                fontSize: 11,
+                textTransform: 'uppercase',
+                color: theme.pageTextSubdued,
+                letterSpacing: '0.04em',
+              }}
+            >
+              <Trans>
+                Projected for {{ month: formatMonthLabel(month, locale) }}
+              </Trans>
+            </Text>
+            <Tooltip
+              content={
+                <View style={{ maxWidth: 260 }}>
+                  <Trans>
+                    The projection shows the most that these automations could
+                    budget on their own. The actual amount may be smaller when
+                    To Budget is empty or when higher-priority categories run
+                    first.
+                  </Trans>
+                </View>
+              }
+              placement="bottom end"
+            >
+              <SvgInformationCircle
+                width={12}
+                height={12}
+                style={{ color: theme.pageTextSubdued, cursor: 'help' }}
+              />
+            </Tooltip>
+          </View>
           <Text
             style={{
               fontSize: 22,
