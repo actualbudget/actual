@@ -11,15 +11,15 @@ type TransactionTableVariantOptions = {
 const TRANSACTION_COLUMN_CONFIG: Record<
   TransactionColumnId,
   {
-    defaultWidth: number;
+    defaultWidth: number | 'flex';
     minWidth: number;
   }
 > = {
   date: { defaultWidth: 110, minWidth: 90 },
-  account: { defaultWidth: 180, minWidth: 120 },
-  payee: { defaultWidth: 220, minWidth: 140 },
-  notes: { defaultWidth: 220, minWidth: 120 },
-  category: { defaultWidth: 180, minWidth: 120 },
+  account: { defaultWidth: 'flex', minWidth: 120 },
+  payee: { defaultWidth: 'flex', minWidth: 140 },
+  notes: { defaultWidth: 'flex', minWidth: 120 },
+  category: { defaultWidth: 'flex', minWidth: 120 },
   payment: { defaultWidth: 120, minWidth: 90 },
   deposit: { defaultWidth: 120, minWidth: 90 },
   balance: { defaultWidth: 120, minWidth: 90 },

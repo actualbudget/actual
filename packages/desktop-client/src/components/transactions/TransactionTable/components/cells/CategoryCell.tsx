@@ -14,7 +14,7 @@ type CategoryCellProps = {
   id: TransactionEntity['id'];
   category: CategoryEntity | null | undefined;
   categoryGroups: CategoryGroupEntity[];
-  width: number;
+  width: number | 'flex';
   focused: boolean;
   exposed: boolean;
   isPreview?: boolean;

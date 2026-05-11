@@ -23,11 +23,14 @@ export type TransactionColumnId =
   | 'deposit'
   | 'balance';
 
-export type TransactionColumnWidths = Record<TransactionColumnId, number>;
+export type TransactionColumnWidths = Record<
+  TransactionColumnId,
+  number | 'flex'
+>;
 
 export type VisibleTransactionColumn = {
   id: TransactionColumnId;
-  defaultWidth: number;
+  defaultWidth: number | 'flex';
   minWidth: number;
 };
 

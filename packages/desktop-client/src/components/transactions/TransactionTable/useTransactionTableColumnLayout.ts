@@ -208,6 +208,17 @@ export function useTransactionTableColumnLayout({
   function getResizeHandleProps(
     columnId: TransactionColumnId,
   ): ResizeHandleProps {
+    // Don't allow resizing flex columns
+    if (columnWidths[columnId] === 'flex') {
+      return {
+        isResizable: false,
+        // Flex columns don't have resize handlers
+        onPointerDown: () => {
+          // No-op for flex columns
+        },
+      };
+    }
+
     const isResizable = !!getVisibleNeighborColumnId(visibleColumns, columnId);
 
     return {

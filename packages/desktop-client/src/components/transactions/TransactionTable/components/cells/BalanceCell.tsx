@@ -10,7 +10,7 @@ import { useFormat } from '#hooks/useFormat';
 type BalanceCellProps = {
   id: TransactionEntity['id'];
   balance: IntegerAmount | null;
-  width: number;
+  width: number | 'flex';
   hideFraction: boolean;
 };
 

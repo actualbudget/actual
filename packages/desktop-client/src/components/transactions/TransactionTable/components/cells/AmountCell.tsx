@@ -12,7 +12,7 @@ type AmountCellProps = {
   id: TransactionEntity['id'];
   amount: number;
   type: 'debit' | 'credit';
-  width: number;
+  width: number | 'flex';
   focused: boolean;
   exposed: boolean;
   hideFraction: boolean;

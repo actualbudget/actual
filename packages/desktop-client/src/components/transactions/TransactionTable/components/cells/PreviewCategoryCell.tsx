@@ -9,7 +9,7 @@ import { Cell } from '#components/table';
 type PreviewCategoryCellProps = {
   previewStatus?: string | null;
   selected: boolean;
-  width: number;
+  width: number | 'flex';
 };
 
 export function PreviewCategoryCell({

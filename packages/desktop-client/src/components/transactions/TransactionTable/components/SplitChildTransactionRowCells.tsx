@@ -44,7 +44,6 @@ export function SplitChildTransactionRowCells({
       <Field
         width={columnWidths.date}
         style={{
-          marginLeft: -5,
           backgroundColor: theme.tableRowBackgroundHover,
           border: 0,
         }}
@@ -54,7 +53,6 @@ export function SplitChildTransactionRowCells({
         <Field
           width={columnWidths.account}
           style={{
-            marginLeft: -5,
             backgroundColor: theme.tableRowBackgroundHover,
             border: 0,
           }}

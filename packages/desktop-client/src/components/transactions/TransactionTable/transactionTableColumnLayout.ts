@@ -148,68 +148,37 @@ export function getVisibleColumnsWidth(
   widths: TransactionColumnWidths,
   visibleColumns: VisibleTransactionColumn[],
 ) {
-  return visibleColumns.reduce((total, column) => total + widths[column.id], 0);
-}
-
-function distributeExtraWidth(
-  widths: TransactionColumnWidths,
-  visibleColumns: VisibleTransactionColumn[],
-  extraWidth: number,
-) {
-  if (extraWidth <= 0 || visibleColumns.length === 0) {
-    return widths;
-  }
-
-  const totalWeight = visibleColumns.reduce(
-    (sum, column) => sum + column.defaultWidth,
-    0,
-  );
-
-  let remainingExtra = extraWidth;
-  const nextWidths = { ...widths };
-
-  visibleColumns.forEach((column, index) => {
-    const share =
-      index === visibleColumns.length - 1
-        ? remainingExtra
-        : roundWidth((extraWidth * column.defaultWidth) / totalWeight);
-
-    nextWidths[column.id] += share;
-    remainingExtra -= share;
-  });
-
-  return nextWidths;
+  return visibleColumns.reduce((total, column) => {
+    const width = widths[column.id];
+    // Skip flex columns in total calculation
+    if (width === 'flex') {
+      return total;
+    }
+    return total + width;
+  }, 0);
 }
 
 export function resolveTransactionColumnWidths({
   visibleColumns,
   savedWidths,
-  availableWidth,
 }: ResolveColumnWidthsArgs): TransactionColumnWidths {
   const baseWidths = visibleColumns.reduce<TransactionColumnWidths>(
     (memo, column) => {
-      memo[column.id] = roundWidth(
-        savedWidths?.[column.id] ?? column.defaultWidth,
-      );
+      // If the column default is "flex", always return "flex"
+      if (column.defaultWidth === 'flex') {
+        memo[column.id] = 'flex';
+      } else {
+        memo[column.id] = roundWidth(
+          (savedWidths?.[column.id] as number) ?? column.defaultWidth,
+        );
+      }
       return memo;
     },
     {} as TransactionColumnWidths,
   );
 
-  if (!availableWidth || availableWidth <= 0) {
-    return baseWidths;
-  }
-
-  const baseTotal = getVisibleColumnsWidth(baseWidths, visibleColumns);
-  if (baseTotal >= availableWidth) {
-    return baseWidths;
-  }
-
-  return distributeExtraWidth(
-    baseWidths,
-    visibleColumns,
-    availableWidth - baseTotal,
-  );
+  // Flex columns will naturally fill the available space
+  return baseWidths;
 }
 
 export function applyNeighborColumnResize({
@@ -226,17 +195,22 @@ export function applyNeighborColumnResize({
   const { activeColumn, neighborColumn, deltaSign } = resizePair;
   const adjustedDelta = delta * deltaSign;
 
-  const pairWidth = widths[activeColumn.id] + widths[neighborColumn.id];
+  const activeWidth = widths[activeColumn.id];
+  const neighborWidth = widths[neighborColumn.id];
+
+  // Don't resize flex columns
+  if (activeWidth === 'flex' || neighborWidth === 'flex') {
+    return widths;
+  }
+
+  const pairWidth = activeWidth + neighborWidth;
   const minActiveWidth = activeColumn.minWidth;
   const minNeighborWidth = neighborColumn.minWidth;
   const maxActiveWidth = pairWidth - minNeighborWidth;
 
   const nextActiveWidth = Math.max(
     minActiveWidth,
-    Math.min(
-      maxActiveWidth,
-      roundWidth(widths[activeColumn.id] + adjustedDelta),
-    ),
+    Math.min(maxActiveWidth, roundWidth(activeWidth + adjustedDelta)),
   );
   const nextNeighborWidth = pairWidth - nextActiveWidth;
 
@@ -258,11 +232,19 @@ export function resetTransactionColumnWidth({
     return widths;
   }
 
+  const currentWidth = widths[columnId];
+  // Can't reset flex columns
+  if (currentWidth === 'flex' || activeColumn.defaultWidth === 'flex') {
+    return widths;
+  }
+
   const targetWidth = Math.max(
     activeColumn.minWidth,
-    roundWidth(originalWidths?.[columnId] ?? activeColumn.defaultWidth),
+    roundWidth(
+      (originalWidths?.[columnId] ?? activeColumn.defaultWidth) as number,
+    ),
   );
-  const delta = targetWidth - widths[columnId];
+  const delta = targetWidth - currentWidth;
 
   if (delta === 0) {
     return widths;

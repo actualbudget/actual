@@ -18,7 +18,7 @@ type PayeeCellProps = {
   transferAccount: AccountEntity | null | undefined;
   schedule: ScheduleEntity | null | undefined;
   payees: PayeeEntity[];
-  width: number;
+  width: number | 'flex';
   focused: boolean;
   exposed: boolean;
   isPreview?: boolean;

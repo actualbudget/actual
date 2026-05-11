@@ -12,7 +12,7 @@ type AccountCellProps = {
   id: TransactionEntity['id'];
   account: AccountEntity | null | undefined;
   accounts: AccountEntity[];
-  width: number;
+  width: number | 'flex';
   focused: boolean;
   exposed: boolean;
   isPreview?: boolean;

@@ -10,7 +10,7 @@ import { Cell, CellButton } from '#components/table';
 
 type SplitCategoryCellProps = {
   id: TransactionEntity['id'];
-  width: number;
+  width: number | 'flex';
   focused: boolean;
   isPreview: boolean;
   isExpanded: boolean;

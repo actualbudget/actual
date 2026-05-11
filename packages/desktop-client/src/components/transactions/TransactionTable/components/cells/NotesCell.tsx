@@ -5,7 +5,7 @@ import { InputCell } from '#components/table';
 type NotesCellProps = {
   id: TransactionEntity['id'];
   notes: string | null | undefined;
-  width: number;
+  width: number | 'flex';
   focused: boolean;
   exposed: boolean;
   isPreview?: boolean;

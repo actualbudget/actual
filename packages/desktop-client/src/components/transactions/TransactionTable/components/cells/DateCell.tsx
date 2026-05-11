@@ -9,7 +9,7 @@ type DateCellProps = {
   id: TransactionEntity['id'];
   date: string;
   dateFormat: string;
-  width: number;
+  width: number | 'flex';
   focused: boolean;
   exposed: boolean;
   isPreview?: boolean;
