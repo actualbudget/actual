@@ -214,6 +214,7 @@ export type DbTransactionFilter = {
   name: string;
   conditions: JsonString;
   conditions_op: string;
+  group_by: string | null;
   tombstone: 1 | 0;
 };
 

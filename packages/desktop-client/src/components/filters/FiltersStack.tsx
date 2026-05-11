@@ -2,6 +2,7 @@ import React from 'react';
 
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
+import type { TransactionGroupBy } from '@actual-app/core/shared/transaction-groups';
 import type {
   RuleConditionEntity,
   TransactionFilterEntity,
@@ -14,6 +15,7 @@ import type { SavedFilter } from './SavedFilterMenuButton';
 export function FiltersStack({
   conditions,
   conditionsOp,
+  groupBy,
   onUpdateFilter,
   onDeleteFilter,
   onClearFilters,
@@ -24,6 +26,7 @@ export function FiltersStack({
 }: {
   conditions: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
+  groupBy?: TransactionGroupBy;
   onUpdateFilter: (
     filter: RuleConditionEntity,
     newFilter: RuleConditionEntity,
@@ -53,6 +56,7 @@ export function FiltersStack({
         <SavedFilterMenuButton
           conditions={conditions}
           conditionsOp={conditionsOp}
+          groupBy={groupBy}
           filterId={filterId}
           onClearFilters={onClearFilters}
           onReloadSavedFilter={onReloadSavedFilter}

@@ -144,6 +144,7 @@ export const schema = {
     name: f('string'),
     conditions_op: f('string'),
     conditions: f('json'),
+    group_by: f('string'),
     tombstone: f('boolean'),
   },
   custom_reports: {

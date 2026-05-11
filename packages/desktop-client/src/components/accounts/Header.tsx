@@ -26,6 +26,8 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { isTransactionGroupBy } from '@actual-app/core/shared/transaction-groups';
+import type { TransactionGroupBy } from '@actual-app/core/shared/transaction-groups';
 import { tsToRelativeTime } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
@@ -71,6 +73,7 @@ type AccountHeaderProps = {
   showExtraBalances: boolean;
   showCleared: boolean;
   showReconciled: boolean;
+  groupBy: TransactionGroupBy;
   showEmptyMessage: boolean;
   balanceQuery: ComponentProps<typeof ReconcilingMessage>['balanceQuery'];
   reconcileAmount?: number | null;
@@ -112,6 +115,7 @@ type AccountHeaderProps = {
     typeof SelectedTransactionsButton
   >['onUnlinkSchedule'];
   onApplyFilter: (filter: RuleConditionEntity) => void;
+  onGroupByChange: (groupBy: TransactionGroupBy) => void;
 } & Pick<
   ComponentProps<typeof SelectedTransactionsButton>,
   | 'onCreateRule'
@@ -147,6 +151,7 @@ export function AccountHeader({
   showExtraBalances,
   showCleared,
   showReconciled,
+  groupBy,
   showEmptyMessage,
   balanceQuery,
   reconcileAmount,
@@ -176,6 +181,7 @@ export function AccountHeader({
   onBatchUnlinkSchedule,
   onCreateRule,
   onApplyFilter,
+  onGroupByChange,
   onUpdateFilter,
   onClearFilters,
   onReloadSavedFilter,
@@ -214,6 +220,7 @@ export function AccountHeader({
 
   // Only show the ability to make linked transfers on multi-account views.
   const showMakeTransfer = !account;
+  const isGrouped = groupBy !== 'none';
 
   function onToggleSplits() {
     if (tableRef.current) {
@@ -378,6 +385,11 @@ export function AccountHeader({
             {/* @ts-expect-error fix me */}
             <FilterButton onApply={onApplyFilter} />
           </View>
+          <GroupByButton
+            groupBy={groupBy}
+            showAccountGroupBy={!account}
+            onGroupByChange={onGroupByChange}
+          />
           <View style={{ flex: 1 }} />
 
           <Search
@@ -515,6 +527,7 @@ export function AccountHeader({
                         canCalculateBalance ? canCalculateBalance() : false
                       }
                       isSorted={isSorted}
+                      isGrouped={isGrouped}
                       showBalances={showBalances}
                       showCleared={showCleared}
                       showReconciled={showReconciled}
@@ -549,6 +562,18 @@ export function AccountHeader({
                               } as const,
                             ]
                           : []),
+                        ...(isGrouped
+                          ? [
+                              {
+                                name: 'expand-groups',
+                                text: t('Expand all groups'),
+                              } as const,
+                              {
+                                name: 'collapse-groups',
+                                text: t('Collapse all groups'),
+                              } as const,
+                            ]
+                          : []),
                         { name: 'export', text: t('Export') },
                         {
                           name: 'toggle-net-worth-chart',
@@ -568,6 +593,7 @@ export function AccountHeader({
           <FiltersStack
             conditions={filterConditions}
             conditionsOp={filterConditionsOp}
+            groupBy={groupBy}
             onUpdateFilter={onUpdateFilter}
             onDeleteFilter={onDeleteFilter}
             onClearFilters={onClearFilters}
@@ -621,6 +647,92 @@ function AccountSyncSidebar({
         borderRadius: 8,
       }}
     />
+  );
+}
+
+function getGroupByLabel(
+  groupBy: TransactionGroupBy,
+  t: ReturnType<typeof useTranslation>['t'],
+) {
+  switch (groupBy) {
+    case 'date-day':
+      return t('Date: Day');
+    case 'date-week':
+      return t('Date: Week');
+    case 'date-month':
+      return t('Date: Month');
+    case 'date-year':
+      return t('Date: Year');
+    case 'category':
+      return t('Category');
+    case 'category-group':
+      return t('Category group');
+    case 'payee':
+      return t('Payee');
+    case 'account':
+      return t('Account');
+    case 'cleared':
+      return t('Cleared status');
+    case 'none':
+    default:
+      return t('None');
+  }
+}
+
+function GroupByButton({
+  groupBy,
+  showAccountGroupBy,
+  onGroupByChange,
+}: {
+  groupBy: TransactionGroupBy;
+  showAccountGroupBy: boolean;
+  onGroupByChange: (groupBy: TransactionGroupBy) => void;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <View style={{ flexShrink: 0 }}>
+      <DialogTrigger>
+        <Button variant="bare">
+          {t('Group by: {{groupBy}}', {
+            groupBy: getGroupByLabel(groupBy, t),
+          })}
+        </Button>
+        <Popover style={{ minWidth: 200 }}>
+          <Dialog>
+            <Menu
+              slot="close"
+              onMenuSelect={item => {
+                if (isTransactionGroupBy(item)) {
+                  onGroupByChange(item);
+                }
+              }}
+              items={[
+                { name: 'none', text: t('None') },
+                Menu.line,
+                {
+                  type: Menu.label,
+                  name: t('Date'),
+                  text: t('Date'),
+                },
+                { name: 'date-day', text: t('Day') },
+                { name: 'date-week', text: t('Week') },
+                { name: 'date-month', text: t('Month') },
+                { name: 'date-year', text: t('Year') },
+                Menu.line,
+                { name: 'category', text: t('Category') },
+                { name: 'category-group', text: t('Category group') },
+                { name: 'payee', text: t('Payee') },
+                ...(showAccountGroupBy
+                  ? [{ name: 'account', text: t('Account') } as const]
+                  : []),
+                { name: 'cleared', text: t('Cleared status') },
+              ]}
+            />
+          </Dialog>
+        </Popover>
+      </DialogTrigger>
+    </View>
   );
 }
 
@@ -742,6 +854,7 @@ type AccountMenuProps = {
   showCleared: boolean;
   showReconciled: boolean;
   isSorted: boolean;
+  isGrouped: boolean;
   onMenuSelect: (
     item:
       | 'link'
@@ -753,7 +866,9 @@ type AccountMenuProps = {
       | 'remove-sorting'
       | 'toggle-cleared'
       | 'toggle-reconciled'
-      | 'toggle-net-worth-chart',
+      | 'toggle-net-worth-chart'
+      | 'expand-groups'
+      | 'collapse-groups',
   ) => void;
 };
 
@@ -766,6 +881,7 @@ function AccountMenu({
   showCleared,
   showReconciled,
   isSorted,
+  isGrouped,
   onMenuSelect,
 }: AccountMenuProps) {
   const { t } = useTranslation();
@@ -783,6 +899,18 @@ function AccountMenu({
               {
                 name: 'remove-sorting',
                 text: t('Remove all sorting'),
+              } as const,
+            ]
+          : []),
+        ...(isGrouped
+          ? [
+              {
+                name: 'expand-groups',
+                text: t('Expand all groups'),
+              } as const,
+              {
+                name: 'collapse-groups',
+                text: t('Collapse all groups'),
               } as const,
             ]
           : []),

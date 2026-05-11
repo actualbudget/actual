@@ -144,6 +144,7 @@ const sidebars = {
           },
           items: [
             'transactions/filters',
+            'transactions/grouping',
             'transactions/transfers',
             {
               type: 'category',

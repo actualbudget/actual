@@ -7,6 +7,7 @@ import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { send, sendCatch } from '@actual-app/core/platform/client/connection';
+import type { TransactionGroupBy } from '@actual-app/core/shared/transaction-groups';
 import type {
   RuleConditionEntity,
   TransactionFilterEntity,
@@ -18,6 +19,7 @@ import { NameFilter } from './NameFilter';
 export type SavedFilter = {
   conditions?: RuleConditionEntity[];
   conditionsOp?: 'and' | 'or';
+  groupBy?: TransactionGroupBy;
   id?: string;
   name: string;
   status?: string;
@@ -26,6 +28,7 @@ export type SavedFilter = {
 export function SavedFilterMenuButton({
   conditions,
   conditionsOp,
+  groupBy,
   filterId,
   onClearFilters,
   onReloadSavedFilter,
@@ -33,6 +36,7 @@ export function SavedFilterMenuButton({
 }: {
   conditions: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
+  groupBy?: TransactionGroupBy;
   filterId?: SavedFilter;
   onClearFilters: () => void;
   onReloadSavedFilter: (savedFilter: SavedFilter, value?: string) => void;
@@ -70,6 +74,7 @@ export function SavedFilterMenuButton({
         originalSavedFilter.current = {
           conditions,
           conditionsOp,
+          groupBy,
           id: filterId?.id,
           name: filterId?.name ?? '',
           status: 'saved',
@@ -116,6 +121,7 @@ export function SavedFilterMenuButton({
       const newSavedFilter = {
         conditions,
         conditionsOp,
+        groupBy,
         name,
         status: 'saved',
       };
@@ -142,6 +148,7 @@ export function SavedFilterMenuButton({
     const updatedFilter = {
       conditions: filterId?.conditions,
       conditionsOp: filterId?.conditionsOp,
+      groupBy: filterId?.groupBy,
       id: filterId?.id,
       name,
     };

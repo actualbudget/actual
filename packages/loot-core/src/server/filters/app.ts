@@ -7,6 +7,7 @@ import { requiredFields } from '#server/models';
 import { mutator } from '#server/mutators';
 import { parseConditionsOrActions } from '#server/transactions/transaction-rules';
 import { undoable } from '#server/undo';
+import { isTransactionGroupBy } from '#shared/transaction-groups';
 import type { TransactionFilterEntity } from '#types/models';
 
 const filterModel = {
@@ -19,22 +20,36 @@ const filterModel = {
       }
     }
 
+    if (
+      filter.groupBy != null &&
+      filter.groupBy !== '' &&
+      !isTransactionGroupBy(filter.groupBy)
+    ) {
+      throw new Error('Invalid filter groupBy: ' + filter.groupBy);
+    }
+
     return filter;
   },
 
   toJS(row) {
-    const { conditions, conditions_op, ...fields } = row;
+    const { conditions, conditions_op, group_by, ...fields } = row;
     return {
       ...fields,
       conditionsOp: conditions_op,
       conditions: parseConditionsOrActions(conditions),
+      groupBy: group_by || 'none',
     };
   },
 
   fromJS(filter) {
-    const { conditionsOp, ...row } = filter;
+    const { conditionsOp, groupBy, ...row } = filter;
     if (conditionsOp) {
       row.conditions_op = conditionsOp;
+    }
+    if (groupBy && groupBy !== 'none') {
+      row.group_by = groupBy;
+    } else {
+      row.group_by = null;
     }
     return row;
   },
@@ -56,12 +71,13 @@ async function filterNameExists(name, filterId, newItem) {
 }
 
 function conditionExists(item, filters, newItem) {
-  const { conditions, conditionsOp } = item;
+  const { conditions, conditionsOp, groupBy = 'none' } = item;
   let fConditionFound = null;
 
   filters.some(filter => {
     if (
       (conditions.length === 1 || filter.conditionsOp === conditionsOp) &&
+      (filter.groupBy ?? 'none') === groupBy &&
       !filter.tombstone &&
       filter.conditions.length === conditions.length
     ) {
@@ -115,6 +131,7 @@ async function createFilter(filter): Promise<TransactionFilterEntity['id']> {
     id: filterId,
     conditions: filter.state.conditions,
     conditionsOp: filter.state.conditionsOp,
+    groupBy: filter.state.groupBy,
     name: filter.state.name,
   };
 
@@ -149,6 +166,7 @@ async function updateFilter(filter) {
     id: filter.state.id,
     conditions: filter.state.conditions,
     conditionsOp: filter.state.conditionsOp,
+    groupBy: filter.state.groupBy,
     name: filter.state.name,
   };
   if (item.name) {
