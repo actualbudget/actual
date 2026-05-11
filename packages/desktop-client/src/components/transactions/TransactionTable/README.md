@@ -2,6 +2,16 @@
 
 A refactored transaction table component that breaks down the original monolithic implementation into a maintainable, modular architecture.
 
+## ⚠️ Experimental Feature
+
+This new transaction table is currently **disabled by default** and available behind a feature flag. To enable it:
+
+1. Go to **Settings → Experimental Features**
+2. Enable **"Modular Transaction Table (Rewrite)"**
+3. Reload the page
+
+The feature flag allows you to test the new implementation while keeping the original table as a safe fallback.
+
 ## Overview
 
 This is a drop-in replacement for the original `TransactionsTable.tsx` (3470 lines) with the same API and behavior, but organized into focused, reusable components.
@@ -186,7 +196,21 @@ Provides:
 
 ## Integration
 
+### Feature Flag
+
+The new transaction table is toggled via the `modularTransactionTable` feature flag:
+
+```typescript
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+
+const useModularTable = useFeatureFlag('modularTransactionTable');
+```
+
+The `TransactionList` component automatically switches between implementations based on this flag.
+
 ### Drop-in Replacement
+
+Both implementations share the same props interface for seamless switching:
 
 ```typescript
 // Old
