@@ -24,8 +24,6 @@ beforeEach(async () => {
 describe('Formula Rule Actions - Integration Tests', () => {
   describe('Basic Formula Operations', () => {
     it('should calculate percentage of transaction amount with FORMATCURRENCY', async () => {
-      // Integration test: Calculate 5% interest on transaction amount
-      // Feedback: Users need proper currency formatting
       await insertRule({
         stage: null,
         conditionsOp: 'and',
@@ -246,8 +244,6 @@ describe('Formula Rule Actions - Integration Tests', () => {
 
   describe('Math and Rounding Functions', () => {
     it('should calculate split amounts with ROUND and FORMATCURRENCY', async () => {
-      // Integration test: Calculate split amount with rounding
-      // Feedback: Users need proper number formatting
       await insertRule({
         stage: null,
         conditionsOp: 'and',
@@ -622,8 +618,6 @@ describe('Formula Rule Actions - Integration Tests', () => {
 
   describe('New Formatting Functions', () => {
     it('should use FORMATNUMBER for thousands separators', async () => {
-      // Integration test: Format large numbers with separators
-      // Feedback: Users requested thousands separator support
       await insertRule({
         stage: null,
         conditionsOp: 'and',
@@ -654,8 +648,6 @@ describe('Formula Rule Actions - Integration Tests', () => {
     });
 
     it('should use FORMATCURRENCY with custom symbols', async () => {
-      // Integration test: Format currency with Euro symbol
-      // Feedback: Users need currency formatting with custom symbols
       await insertRule({
         stage: null,
         conditionsOp: 'and',
@@ -844,8 +836,6 @@ describe('Formula Rule Actions - Integration Tests', () => {
 
   describe('Multi-line Output with CHAR(10)', () => {
     it('should create multi-line notes with line breaks', async () => {
-      // Integration test: Create formatted multi-line output
-      // Feedback: User @Juulz requested line break support
       const payeeId = await db.insertPayee({ name: 'Amazon' });
 
       await insertRule({

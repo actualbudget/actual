@@ -81,7 +81,6 @@ export function FormulaResult({
 
     if (width <= 0 || height <= 0) return;
 
-    // Feedback: Users requested support for line breaks (CHAR(10) or CHAR(13) in formulas).
     // Check if the display value contains line breaks and calculate font size accordingly.
     const lines = displayValue.split(/\r?\n/);
     const lineCount = lines.length;

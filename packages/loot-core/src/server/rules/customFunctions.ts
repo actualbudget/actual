@@ -7,7 +7,6 @@ import { integerToAmount } from '#shared/util';
 
 import type { UserPreferences } from './customFunctionsPreferences';
 
-// User feedback: Make formatting functions respect app settings with locale-based fallbacks
 // Global state to store user preferences for formatting functions
 // This is set before formula execution to avoid async issues in HyperFormula custom functions
 let cachedUserPreferences: UserPreferences | null = null;
@@ -69,10 +68,6 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
     );
   }
 
-  // Feedback: Users reported that TEXT() function doesn't properly format numbers with
-  // thousands separators (e.g., TEXT(value, "$#,##0.00") doesn't work as expected).
-  // This custom function provides proper number formatting with thousands separators.
-  // User feedback: Should respect app's number format settings, with locale-based fallbacks
   formatNumber(ast: ProcedureAst, state: InterpreterState) {
     return this.runFunction(
       ast.args,
@@ -116,9 +111,6 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
     );
   }
 
-  // Feedback: Users need proper currency formatting for formula cards.
-  // This function formats numbers as currency with symbol, thousands separators, and decimals.
-  // User feedback: Should respect app's currency and number format settings, with locale-based fallbacks
   formatCurrency(ast: ProcedureAst, state: InterpreterState) {
     return this.runFunction(
       ast.args,

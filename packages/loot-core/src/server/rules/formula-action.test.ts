@@ -211,8 +211,6 @@ describe('Formula-based rule actions', () => {
     expect(transaction.notes).toBe('75000');
   });
 
-  // Feedback: Users reported TEXT() function doesn't properly format numbers with thousands separators.
-  // These tests verify the new FORMATNUMBER function works correctly.
   it('should format numbers with thousands separators using FORMATNUMBER', () => {
     const action = new Action('set', 'notes', null, {
       formula: '=FORMATNUMBER(1234567.89, 2)',
@@ -246,8 +244,6 @@ describe('Formula-based rule actions', () => {
     expect(transaction.notes).toBe('1,234,567');
   });
 
-  // Feedback: Users need proper currency formatting for formula cards.
-  // These tests verify the new FORMATCURRENCY function works correctly.
   it('should format currency with default settings using FORMATCURRENCY', () => {
     const action = new Action('set', 'notes', null, {
       formula: '=FORMATCURRENCY(1234567.89)',
