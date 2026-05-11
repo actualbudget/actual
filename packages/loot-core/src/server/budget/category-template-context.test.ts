@@ -5,7 +5,7 @@ import * as db from '#server/db';
 import type { DbCategory } from '#server/db';
 import { amountToInteger } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
-import type { Template } from '#types/models/templates';
+import type { ByTemplate, Template } from '#types/models/templates';
 
 import * as actions from './actions';
 import { CategoryTemplateContext } from './category-template-context';
@@ -876,7 +876,7 @@ describe('CategoryTemplateContext', () => {
 
     it('should calculate monthly amount needed for multiple targets', () => {
       const result = CategoryTemplateContext.runBy(instance);
-      expect(result).toBe(66667);
+      expect(result.toBudget).toBe(66667);
     });
 
     it('should handle repeating targets', () => {
@@ -906,7 +906,7 @@ describe('CategoryTemplateContext', () => {
       );
 
       const result = CategoryTemplateContext.runBy(instance);
-      expect(result).toBe(83333);
+      expect(result.toBudget).toBe(83333);
     });
 
     it('should handle existing balance', () => {
@@ -934,7 +934,7 @@ describe('CategoryTemplateContext', () => {
       );
 
       const result = CategoryTemplateContext.runBy(instance);
-      expect(result).toBe(66500); // (1000 + 2000 - 5) / 3
+      expect(result.toBudget).toBe(66500); // (1000 + 2000 - 5) / 3
     });
   });
 
@@ -1707,6 +1707,201 @@ describe('CategoryTemplateContext', () => {
     });
   });
 
+  describe('per-template attribution', () => {
+    const category: CategoryEntity = {
+      id: 'attribution-cat',
+      name: 'Attribution Category',
+      group: 'g',
+      is_income: false,
+    };
+
+    it('sums per-template contributions to the engine total for sibling periodic templates', async () => {
+      const templates: Template[] = [
+        {
+          type: 'periodic',
+          amount: 100,
+          period: { period: 'month', amount: 1 },
+          starting: '2024-01-01',
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'periodic',
+          amount: 50,
+          period: { period: 'month', amount: 1 },
+          starting: '2024-01-01',
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      const instance = new TestCategoryTemplateContext(
+        templates,
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+      await instance.runTemplatesForPriority(1, 1_000_000, 1_000_000);
+      const values = instance.getValues();
+      const contributions = templates.map(
+        t => values.perTemplateContribution.get(t) ?? 0,
+      );
+      expect(contributions).toEqual([10000, 5000]);
+      expect(contributions.reduce((a, b) => a + b, 0)).toBe(values.budgeted);
+    });
+
+    it('weights `by` siblings by their effective per-month need from runBy, not raw target', async () => {
+      // The redistribute weight uses runBy's effective per-template need
+      // (back-interpolated over the shortest sibling window) rather than
+      // raw target amounts.
+      const templates: Template[] = [
+        {
+          type: 'by',
+          amount: 1200,
+          month: '2025-01',
+          annual: false,
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'by',
+          amount: 100,
+          month: '2024-02',
+          annual: false,
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      const instance = new TestCategoryTemplateContext(
+        templates,
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+      await instance.runTemplatesForPriority(1, 1_000_000, 1_000_000);
+      const values = instance.getValues();
+      const longHorizon = values.perTemplateContribution.get(templates[0]) ?? 0;
+      const urgent = values.perTemplateContribution.get(templates[1]) ?? 0;
+      expect(longHorizon + urgent).toBe(values.budgeted);
+
+      // Raw-amount weighting would give the urgent $100 template only a
+      // 100/1300 share. Need-based weighting gives it much more.
+      const rawShareUrgent = Math.round((values.budgeted * 100) / (100 + 1200));
+      expect(urgent).toBeGreaterThan(rawShareUrgent * 4);
+    });
+
+    it('scales per-template contributions when a balance cap clamps the total', async () => {
+      const templates: Template[] = [
+        {
+          type: 'periodic',
+          amount: 100,
+          period: { period: 'month', amount: 1 },
+          starting: '2024-01-01',
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'periodic',
+          amount: 50,
+          period: { period: 'month', amount: 1 },
+          starting: '2024-01-01',
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'limit',
+          amount: 120,
+          hold: false,
+          period: 'monthly',
+          directive: 'template',
+          priority: null,
+        },
+      ];
+      const instance = new TestCategoryTemplateContext(
+        templates,
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+      await instance.runTemplatesForPriority(1, 1_000_000, 1_000_000);
+      const values = instance.getValues();
+      // $150 demanded, cap $120; per-row contributions sum to the clamp.
+      const sum = templates.reduce(
+        (acc, t) => acc + (values.perTemplateContribution.get(t) ?? 0),
+        0,
+      );
+      expect(sum).toBe(values.budgeted);
+      expect(values.budgeted).toBe(12000);
+      for (const t of templates) {
+        expect(
+          values.perTemplateContribution.get(t) ?? 0,
+        ).toBeGreaterThanOrEqual(0);
+      }
+    });
+
+    it('attributes remainder rules per template by weight', async () => {
+      const templates: Template[] = [
+        {
+          type: 'remainder',
+          weight: 3,
+          directive: 'template',
+          priority: null,
+        },
+        {
+          type: 'remainder',
+          weight: 1,
+          directive: 'template',
+          priority: null,
+        },
+      ];
+      const instance = new TestCategoryTemplateContext(
+        templates,
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+      instance.runRemainder(100, 25);
+      const values = instance.getValues();
+      expect(values.perTemplateContribution.get(templates[0])).toBe(75);
+      expect(values.perTemplateContribution.get(templates[1])).toBe(25);
+    });
+
+    it('runBy returns a per-template need map keyed by template reference', () => {
+      const templates: ByTemplate[] = [
+        {
+          type: 'by',
+          amount: 1200,
+          month: '2024-12',
+          annual: false,
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'by',
+          amount: 600,
+          month: '2024-12',
+          annual: false,
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      const instance = new TestCategoryTemplateContext(
+        templates,
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+      const result = CategoryTemplateContext.runBy(instance);
+      // Same horizon for both, so per-template need == target amount.
+      expect(result.perTemplateNeed.get(templates[0])).toBe(120000);
+      expect(result.perTemplateNeed.get(templates[1])).toBe(60000);
+    });
+  });
+
   describe('validation (init checks)', () => {
     const category: CategoryEntity = {
       id: 'val-cat',
@@ -1864,6 +2059,38 @@ describe('CategoryTemplateContext', () => {
         1_000_000,
       );
       expect(budgeted).toBeGreaterThan(0);
+    });
+
+    it('accepts a percentage template that uses an income category id', async () => {
+      // CategoryAutocomplete stores the id; the case-folded name is also
+      // accepted for text-template compatibility.
+      vi.mocked(statements.getActiveSchedules).mockResolvedValue(
+        [] as Awaited<ReturnType<typeof statements.getActiveSchedules>>,
+      );
+      vi.mocked(db.getCategories).mockResolvedValue([
+        {
+          id: 'inc-1',
+          name: 'Salary',
+          is_income: 1,
+          cat_group: 'g-income',
+          sort_order: 0,
+          hidden: 0,
+          tombstone: 0,
+        } satisfies DbCategory,
+      ]);
+      const templates: Template[] = [
+        {
+          type: 'percentage',
+          percent: 10,
+          previous: false,
+          category: 'inc-1',
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      await expect(
+        CategoryTemplateContext.init(templates, category, '2024-01', 0),
+      ).resolves.toBeDefined();
     });
 
     it('accepts the special `all income` and `available funds` source aliases', async () => {

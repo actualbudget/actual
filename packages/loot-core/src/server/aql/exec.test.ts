@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { v4 as uuidv4 } from 'uuid';
 
 import * as db from '#server/db';
 import { q } from '#shared/query';
@@ -38,14 +39,14 @@ async function insertTransactions(repeatTimes = 1) {
     });
 
     const parent = {
-      id: crypto.randomUUID(),
+      id: uuidv4(),
       account: 'acct',
       date: '2020-01-04',
       amount: -100,
       is_parent: true,
     };
     const parent2 = {
-      id: crypto.randomUUID(),
+      id: uuidv4(),
       account: 'acct',
       date: '2020-01-01',
       amount: -89,
@@ -113,7 +114,7 @@ describe('compileAndRunQuery', () => {
   });
 
   it('provides named parameters and converts types', async () => {
-    const transId = crypto.randomUUID();
+    const transId = uuidv4();
     await db.insertTransaction({
       id: transId,
       account: 'acct',
@@ -242,7 +243,7 @@ describe('compileAndRunQuery', () => {
   });
 
   it('parameters have the correct order', async () => {
-    const transId = crypto.randomUUID();
+    const transId = uuidv4();
     await db.insertTransaction({
       id: transId,
       account: 'acct',

@@ -326,6 +326,7 @@ describe('unparse/parse round-trip', () => {
     '#template 200 repeat every 2 months starting 2025-06-01',
     '#template 300 repeat every week starting 2025-01-07',
     '#template 400 repeat every year starting 2025-01-01 up to 50',
+    '#template 100 repeat every 1 months starting 2026-04-01',
     // by / spend
     '#template 500 by 2025-12',
     '#template 600 by 2025-11 repeat every month',

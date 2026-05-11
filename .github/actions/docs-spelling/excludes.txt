@@ -1,13 +1,16 @@
 # See https://github.com/check-spelling/check-spelling/wiki/Configuration-Examples:-excludes
+(?:^|/)(?i).nojekyll
 (?:^|/)(?i)COPYRIGHT
+(?:^|/)(?i)docusaurus.config.js
 (?:^|/)(?i)LICEN[CS]E
+(?:^|/)(?i)README.md
 (?:^|/)3rdparty/
 (?:^|/)go\.sum$
 (?:^|/)package(?:-lock|)\.json$
 (?:^|/)pyproject.toml
 (?:^|/)requirements(?:-dev|-doc|-test|)\.txt$
 (?:^|/)vendor/
-ignore$
+(?:^|/)yarn\.lock$
 \.a$
 \.ai$
 \.avi$
@@ -53,6 +56,7 @@ ignore$
 \.svgz?$
 \.tar$
 \.tiff?$
+\.tsx$
 \.ttf$
 \.wav$
 \.webm$
@@ -62,15 +66,12 @@ ignore$
 \.zip$
 ^\.github/actions/spelling/
 ^\.github/ISSUE_TEMPLATE/
-^\Q.github/workflows/spelling.yml\E$
 ^\.yarn/
+^\Q.github/\E$
+^\Q.github/workflows/spelling.yml\E$
 ^\Qnode_modules/\E$
 ^\Qsrc/\E$
 ^\Qstatic/\E$
-^\Q.github/\E$
-(?:^|/)yarn\.lock$
-(?:^|/)(?i)docusaurus.config.js
-(?:^|/)(?i)README.md
-(?:^|/)(?i).nojekyll
 ^\static/
-\.tsx$
+^packages/docs/docs/releases\.md$
+ignore$

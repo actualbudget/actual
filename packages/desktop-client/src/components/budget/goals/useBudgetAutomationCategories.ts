@@ -7,21 +7,24 @@ export function useBudgetAutomationCategories() {
   const { t } = useTranslation();
   const { data: { grouped } = { grouped: [] } } = useCategories();
   const categories = useMemo(() => {
-    const incomeGroup = grouped.filter(group => group.name === 'Income')[0];
+    const incomeGroups = grouped.filter(group => group.is_income);
     return [
       {
         id: '',
         name: t('Special categories'),
         categories: [
-          { id: 'total', group: '', name: t('Total of all income') },
+          { id: 'all income', group: '', name: t('Total of all income') },
           {
-            id: 'to-budget',
+            id: 'available funds',
             group: '',
             name: t('Available funds to budget'),
           },
         ],
       },
-      { ...incomeGroup, name: t('Income categories') },
+      ...incomeGroups.map(group => ({
+        ...group,
+        name: t('Income categories'),
+      })),
     ];
   }, [grouped, t]);
 

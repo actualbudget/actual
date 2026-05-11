@@ -7,7 +7,11 @@ import type { CategoryEntity } from '#types/models';
 import type { Template } from '#types/models/templates';
 
 import * as actions from './actions';
-import { applyMultipleCategoryTemplates, applyTemplate } from './goal-template';
+import {
+  applyMultipleCategoryTemplates,
+  applyTemplate,
+  dryRunCategoryTemplate,
+} from './goal-template';
 import * as statements from './statements';
 
 vi.mock('./actions', () => ({
@@ -40,6 +44,13 @@ vi.mock('./template-notes', () => ({
   storeNoteTemplates: vi.fn(),
 }));
 
+const category: CategoryEntity = {
+  id: 'cat-1',
+  name: 'Groceries',
+  group: 'g1',
+  is_income: false,
+};
+
 function setupSheetMock(values: Record<string, number>) {
   vi.mocked(actions.getSheetValue).mockImplementation(
     async (_sheet: string, key: string) => values[key] ?? 0,
@@ -47,6 +58,26 @@ function setupSheetMock(values: Record<string, number>) {
   vi.mocked(actions.getSheetBoolean).mockResolvedValue(false);
   vi.mocked(actions.isTrackingBudget).mockReturnValue(false);
 }
+
+function setupAqlForCategoryLookup(cat: CategoryEntity) {
+  vi.mocked(aql.aqlQuery).mockImplementation(async (query: unknown) => {
+    const queryStr = JSON.stringify(query);
+    if (queryStr.includes('hideFraction')) {
+      return { data: [{ value: 'false' }], dependencies: [] };
+    }
+    if (queryStr.includes('defaultCurrencyCode')) {
+      return { data: [{ value: 'USD' }], dependencies: [] };
+    }
+    if (queryStr.includes('category_groups')) {
+      return {
+        data: [{ id: cat.group, hidden: false, categories: [cat] }],
+        dependencies: [],
+      };
+    }
+    return { data: [], dependencies: [] };
+  });
+}
+
 function setupAqlForWideScope(
   savedTemplatesByCategory: Array<{
     category: CategoryEntity;
@@ -80,6 +111,206 @@ function setupAqlForWideScope(
     return { data: [], dependencies: [] };
   });
 }
+
+describe('dryRunCategoryTemplate', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(statements.getActiveSchedules).mockResolvedValue(
+      [] as Awaited<ReturnType<typeof statements.getActiveSchedules>>,
+    );
+    vi.mocked(db.getCategories).mockResolvedValue([]);
+  });
+
+  it('budgets a single periodic template through the engine end-to-end', async () => {
+    setupSheetMock({ 'to-budget': 100000 });
+    setupAqlForCategoryLookup(category);
+
+    const templates: Template[] = [
+      {
+        type: 'periodic',
+        amount: 100,
+        period: { period: 'month', amount: 1 },
+        starting: '2024-01-01',
+        directive: 'template',
+        priority: 1,
+      },
+    ];
+    const result = await dryRunCategoryTemplate({
+      month: '2024-01',
+      categoryId: category.id,
+      templates,
+    });
+    expect(result.budgeted).toBe(10000);
+    expect(result.perTemplate).toEqual([10000]);
+  });
+
+  it('clamps a periodic + percentage stack at the balance cap', async () => {
+    setupSheetMock({ 'to-budget': 1_000_000, 'total-income': 100000 });
+    setupAqlForCategoryLookup(category);
+
+    const templates: Template[] = [
+      {
+        type: 'periodic',
+        amount: 100,
+        period: { period: 'month', amount: 1 },
+        starting: '2024-01-01',
+        directive: 'template',
+        priority: 1,
+      },
+      {
+        type: 'percentage',
+        percent: 50,
+        previous: false,
+        category: 'all income',
+        directive: 'template',
+        priority: 1,
+      },
+      {
+        type: 'limit',
+        amount: 200,
+        hold: false,
+        period: 'monthly',
+        directive: 'template',
+        priority: null,
+      },
+    ];
+    const result = await dryRunCategoryTemplate({
+      month: '2024-01',
+      categoryId: category.id,
+      templates,
+    });
+    // $100 + 50% of $1000 = $600 demanded, capped at $200.
+    expect(result.budgeted).toBe(20000);
+    expect(result.perTemplate.reduce((a, b) => a + b, 0)).toBe(20000);
+    expect(result.perTemplate[2]).toBe(0); // cap row contributes nothing
+  });
+
+  it('returns zeros when the category lookup yields nothing', async () => {
+    setupSheetMock({});
+    vi.mocked(aql.aqlQuery).mockImplementation(async (query: unknown) => {
+      const queryStr = JSON.stringify(query);
+      if (queryStr.includes('hideFraction')) {
+        return { data: [{ value: 'false' }], dependencies: [] };
+      }
+      if (queryStr.includes('defaultCurrencyCode')) {
+        return { data: [{ value: 'USD' }], dependencies: [] };
+      }
+      return { data: [], dependencies: [] };
+    });
+
+    const templates: Template[] = [
+      {
+        type: 'periodic',
+        amount: 100,
+        period: { period: 'month', amount: 1 },
+        starting: '2024-01-01',
+        directive: 'template',
+        priority: 1,
+      },
+    ];
+    const result = await dryRunCategoryTemplate({
+      month: '2024-01',
+      categoryId: 'missing',
+      templates,
+    });
+    expect(result).toEqual({ budgeted: 0, perTemplate: [0] });
+  });
+
+  it('competes with sibling remainder templates under wide scope', async () => {
+    // Remainder triggers wide scope: the engine must see the sibling so
+    // weights divide the leftover proportionally instead of giving it all
+    // to the target.
+    const sibling: CategoryEntity = {
+      id: 'cat-sibling',
+      name: 'Other',
+      group: 'g1',
+      is_income: false,
+    };
+    setupSheetMock({ 'to-budget': 20000 });
+    setupAqlForWideScope(
+      [
+        {
+          category: sibling,
+          templates: [
+            {
+              type: 'remainder',
+              weight: 1,
+              directive: 'template',
+              priority: null,
+            },
+          ],
+        },
+      ],
+      [category, sibling],
+    );
+
+    const templates: Template[] = [
+      {
+        type: 'remainder',
+        weight: 3,
+        directive: 'template',
+        priority: null,
+      },
+    ];
+    const result = await dryRunCategoryTemplate({
+      month: '2024-01',
+      categoryId: category.id,
+      templates,
+    });
+    expect(result.budgeted).toBe(15000);
+    expect(result.perTemplate).toEqual([15000]);
+  });
+
+  it('reads availBudget consumed by siblings for percentage of available funds', async () => {
+    // Sibling at priority 1 spends $50 of $200 first, leaving $150. The
+    // target's 50%-of-available-funds at priority 2 should then resolve to
+    // $75, not the $100 a narrow-scope run would produce.
+    const sibling: CategoryEntity = {
+      id: 'cat-sibling',
+      name: 'Other',
+      group: 'g1',
+      is_income: false,
+    };
+    setupSheetMock({ 'to-budget': 20000 });
+    setupAqlForWideScope(
+      [
+        {
+          category: sibling,
+          templates: [
+            {
+              type: 'periodic',
+              amount: 50,
+              period: { period: 'month', amount: 1 },
+              starting: '2024-01-01',
+              directive: 'template',
+              priority: 1,
+            },
+          ],
+        },
+      ],
+      [sibling, category],
+    );
+
+    const templates: Template[] = [
+      {
+        type: 'percentage',
+        percent: 50,
+        previous: false,
+        category: 'available funds',
+        directive: 'template',
+        priority: 2,
+      },
+    ];
+    const result = await dryRunCategoryTemplate({
+      month: '2024-01',
+      categoryId: category.id,
+      templates,
+    });
+    expect(result.budgeted).toBe(7500);
+    expect(result.perTemplate).toEqual([7500]);
+  });
+});
+
 describe('applyMultipleCategoryTemplates', () => {
   const cat1: CategoryEntity = {
     id: 'cat-1',

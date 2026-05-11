@@ -75,9 +75,12 @@ jobs:
 
           echo "Found patch file: $PATCH_FILE"
 
-          # Validate patch only contains PNG files
+          # Validate patch only contains PNG files. `git format-patch` emits a
+          # `GIT binary patch` block for PNGs (no +++/--- lines), so check
+          # `diff --git` headers — those are present for both text and binary.
           echo "Validating patch contains only PNG files..."
-          if grep -E '^(\+\+\+|---) [ab]/' "$PATCH_FILE" | grep -v '\.png$'; then
+          if grep -E '^diff --git ' "$PATCH_FILE" \
+               | grep -vE '^diff --git a/[^[:space:]]+\.png b/[^[:space:]]+\.png$'; then
             echo "ERROR: Patch contains non-PNG files! Rejecting for security."
             echo "applied=false" >> "$GITHUB_OUTPUT"
             echo "error=Patch validation failed: contains non-PNG files" >> "$GITHUB_OUTPUT"
@@ -85,7 +88,7 @@ jobs:
           fi
 
           # Extract file list for verification
-          FILES_CHANGED=$(grep -E '^\+\+\+ b/' "$PATCH_FILE" | sed 's/^+++ b\///' | wc -l)
+          FILES_CHANGED=$(grep -cE '^diff --git ' "$PATCH_FILE")
           echo "Patch modifies $FILES_CHANGED PNG file(s)"
 
           # Configure git

@@ -707,6 +707,16 @@ handlers['api/category-delete'] = withMutation(async function ({
   });
 });
 
+handlers['api/note-get'] = async function ({ id }) {
+  checkFileOpen();
+  return handlers['notes-get']({ id });
+};
+
+handlers['api/note-update'] = withMutation(async function ({ id, note }) {
+  checkFileOpen();
+  return handlers['notes-save']({ id, note });
+});
+
 handlers['api/common-payees-get'] = async function () {
   checkFileOpen();
   const payees = await handlers['common-payees-get']();

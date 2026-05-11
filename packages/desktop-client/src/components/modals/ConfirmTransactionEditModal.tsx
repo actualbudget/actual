@@ -73,21 +73,6 @@ export function ConfirmTransactionEditModal({
                   out of balance.
                 </Trans>
               </Block>
-            ) : confirmReason === 'batchDuplicateWithReconciledTransfer' ? (
-              <Block>
-                <Trans>
-                  This transfer has a linked transaction in another account that
-                  is reconciled. Duplicating it may bring that account's
-                  reconciliation out of balance.
-                </Trans>
-              </Block>
-            ) : confirmReason === 'batchDuplicateWithReconciled' ? (
-              <Block>
-                <Trans>
-                  Duplicating reconciled transactions may bring your
-                  reconciliation out of balance.
-                </Trans>
-              </Block>
             ) : confirmReason === 'editReconciled' ? (
               <Block>
                 <Trans>

@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { v4 as uuidv4 } from 'uuid';
 
 import { logger } from '#platform/server/log';
 import { send } from '#server/main-app';
@@ -599,7 +600,7 @@ async function importTransactions(
   // reliably resolve transfers
   // Also identify orphan transfer transactions and subtransactions.
   for (const transaction of data.subtransactions) {
-    entityIdMap.set(transaction.id, crypto.randomUUID());
+    entityIdMap.set(transaction.id, uuidv4());
 
     if (transaction.transfer_account_id) {
       orphanSubtransfer.push(transaction);
@@ -608,7 +609,7 @@ async function importTransactions(
   }
 
   for (const transaction of data.transactions) {
-    entityIdMap.set(transaction.id, crypto.randomUUID());
+    entityIdMap.set(transaction.id, uuidv4());
 
     if (
       transaction.transfer_account_id &&
