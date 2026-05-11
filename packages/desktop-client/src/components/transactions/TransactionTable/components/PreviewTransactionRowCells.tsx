@@ -1,5 +1,5 @@
 import type { StatusTypes } from '#components/schedules/StatusBadge';
-import type { TransactionRowContentProps } from '../types';
+import type { TransactionRowContentProps } from '#components/transactions/TransactionTable/types';
 
 import {
   AccountCell,

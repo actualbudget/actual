@@ -22,11 +22,11 @@ import type { TransactionEntity } from '@actual-app/core/types/models';
 
 import { Table, useTableNavigator } from '#components/table';
 import type { TableHandleRef } from '#components/table';
+import { makeTemporaryTransactions } from '#components/transactions/table/utils';
 import { useSelectedItems } from '#hooks/useSelected';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
-import { makeTemporaryTransactions } from '../table/utils';
 
 import { TransactionHeader } from './components/TransactionHeader';
 import { TransactionRow } from './components/TransactionRow';

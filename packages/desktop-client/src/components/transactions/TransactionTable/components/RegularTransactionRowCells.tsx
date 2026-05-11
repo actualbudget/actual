@@ -1,4 +1,4 @@
-import type { TransactionRowContentProps } from '../types';
+import type { TransactionRowContentProps } from '#components/transactions/TransactionTable/types';
 
 import {
   AccountCell,

@@ -6,13 +6,13 @@ import { View } from '@actual-app/components/view';
 import { isTemporaryId } from '@actual-app/core/shared/transactions';
 
 import { Row } from '#components/table';
-import { useCachedSchedules } from '#hooks/useCachedSchedules';
-import { useSelectedDispatch } from '#hooks/useSelected';
-import type { TransactionRowProps } from '../types';
+import type { TransactionRowProps } from '#components/transactions/TransactionTable/types';
 import {
   deserializeTransaction,
   serializeTransaction,
-} from '../utils/transactionFormatters';
+} from '#components/transactions/TransactionTable/utils/transactionFormatters';
+import { useCachedSchedules } from '#hooks/useCachedSchedules';
+import { useSelectedDispatch } from '#hooks/useSelected';
 
 import { TransactionRowCells } from './TransactionRowCells';
 

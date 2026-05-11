@@ -23,13 +23,16 @@ import {
   SelectCell,
   UnexposedCellContent,
 } from '#components/table';
-import { useContextMenu } from '#hooks/useContextMenu';
-import { useSelectedDispatch } from '#hooks/useSelected';
 import {
   TRANSACTION_CLEARED_COLUMN_WIDTH,
   TRANSACTION_SELECTION_COLUMN_WIDTH,
-} from '../transactionTableColumns';
-import type { TransactionColumnId, TransactionColumnWidths } from '../types';
+} from '#components/transactions/TransactionTable/transactionTableColumns';
+import type {
+  TransactionColumnId,
+  TransactionColumnWidths,
+} from '#components/transactions/TransactionTable/types';
+import { useContextMenu } from '#hooks/useContextMenu';
+import { useSelectedDispatch } from '#hooks/useSelected';
 
 type TransactionHeaderProps = {
   hasSelected: boolean;
