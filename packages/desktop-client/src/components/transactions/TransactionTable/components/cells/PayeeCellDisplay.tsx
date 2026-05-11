@@ -1,3 +1,4 @@
+import { SvgSplit } from '@actual-app/components/icons/v0';
 import {
   SvgArrowsSynchronize,
   SvgCalendar3,
@@ -5,7 +6,7 @@ import {
 } from '@actual-app/components/icons/v2';
 import { theme } from '@actual-app/components/theme';
 
-type PayeeDisplayMode = 'plain' | 'transfer' | 'schedule';
+type PayeeDisplayMode = 'plain' | 'transfer' | 'schedule' | 'split';
 
 type PayeeCellDisplayProps = {
   displayPayee: string;
@@ -21,6 +22,20 @@ function PayeeModeIcon({ mode }: { mode: PayeeDisplayMode }) {
     color: theme.pageTextSubdued,
     flexShrink: 0,
   };
+
+  if (mode === 'split') {
+    return (
+      <SvgSplit
+        style={{
+          width: 14,
+          height: 14,
+          marginRight: 5,
+          color: 'inherit',
+          flexShrink: 0,
+        }}
+      />
+    );
+  }
 
   if (mode === 'schedule') {
     return <SvgCalendar3 style={iconStyle} />;

@@ -99,6 +99,7 @@ export function SplitParentTransactionRowCells({
         focused={focusedField === 'payee'}
         exposed={focusedField === 'payee'}
         isPreview={isPreview}
+        isSplitParent
         onEdit={onEdit}
         onUpdate={onUpdate}
         onManagePayees={onManagePayees}

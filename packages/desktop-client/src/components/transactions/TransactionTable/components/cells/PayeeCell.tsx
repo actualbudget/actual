@@ -22,6 +22,7 @@ type PayeeCellProps = {
   focused: boolean;
   exposed: boolean;
   isPreview?: boolean;
+  isSplitParent?: boolean;
   onEdit: (id: TransactionEntity['id'], field: string) => void;
   onUpdate: (field: string, value: string | null) => void;
   onManagePayees: (id?: PayeeEntity['id']) => void;
@@ -39,6 +40,7 @@ export function PayeeCell({
   focused,
   exposed,
   isPreview,
+  isSplitParent,
   onEdit,
   onUpdate,
   onManagePayees,
@@ -51,6 +53,10 @@ export function PayeeCell({
   );
 
   const displayMode = useMemo(() => {
+    if (isSplitParent) {
+      return 'split' as const;
+    }
+
     if (schedule) {
       return 'schedule' as const;
     }
@@ -60,7 +66,7 @@ export function PayeeCell({
     }
 
     return 'plain' as const;
-  }, [schedule, transferAccount, payee]);
+  }, [isSplitParent, schedule, transferAccount, payee]);
 
   const handleClick = () => {
     if (transferAccount) {
