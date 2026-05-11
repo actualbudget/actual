@@ -44,7 +44,7 @@ type TransactionTableColumnWidthsPrefKey =
 
 type ResizeHandleProps = {
   isResizable: boolean;
-  onPointerDown: (event: ReactPointerEvent<HTMLDivElement>) => void;
+  onPointerDown: (event: ReactPointerEvent<HTMLDivElement>, measuredWidths?: TransactionColumnWidths) => void;
 };
 
 export function useTransactionTableColumnLayout({
@@ -190,7 +190,11 @@ export function useTransactionTableColumnLayout({
     };
   }, [isResizing, persistedOriginalWidths, setPersistedValue, visibleColumns]);
 
-  function beginResize(activeColumnId: TransactionColumnId, clientX: number) {
+  function beginResize(
+    activeColumnId: TransactionColumnId,
+    clientX: number,
+    measuredWidths?: TransactionColumnWidths,
+  ) {
     let startWidths = resolveTransactionColumnWidths({
       visibleColumns,
       savedWidths: activeWidths,
@@ -203,6 +207,7 @@ export function useTransactionTableColumnLayout({
       utilityWidth,
       availableDataWidth,
       startWidths,
+      measuredWidths,
       visibleColumns: visibleColumns.map(c => ({
         id: c.id,
         defaultWidth: c.defaultWidth,
@@ -210,51 +215,82 @@ export function useTransactionTableColumnLayout({
       })),
     });
 
-    // Snapshot: Convert ALL flex columns to their computed pixel widths
-    // Calculate how much space the flex columns should take
-    const fixedColumnsWidth = visibleColumns.reduce((total, col) => {
-      const width = startWidths[col.id];
-      return width === 'flex' ? total : total + width;
-    }, 0);
-
-    const flexColumns = visibleColumns.filter(
-      col => startWidths[col.id] === 'flex',
-    );
-
-    if (flexColumns.length > 0 && availableDataWidth) {
-      const totalFlexSpace = availableDataWidth - fixedColumnsWidth;
-      // Distribute flex space equally, with remainder pixels distributed to first columns
-      const baseFlexColumnWidth = Math.floor(
-        totalFlexSpace / flexColumns.length,
+    // If we have measured widths from the DOM, use those directly
+    // This accounts for padding, borders, and browser rendering differences
+    if (measuredWidths) {
+      const flexColumns = visibleColumns.filter(
+        col => startWidths[col.id] === 'flex',
       );
-      const remainder =
-        totalFlexSpace - baseFlexColumnWidth * flexColumns.length;
 
-      const updatedWidths = { ...startWidths };
-      flexColumns.forEach((column, index) => {
-        // Give the first 'remainder' columns an extra pixel to distribute the remainder
-        updatedWidths[column.id] =
-          baseFlexColumnWidth + (index < remainder ? 1 : 0);
-      });
+      if (flexColumns.length > 0) {
+        // Use the actual measured widths from the DOM
+        const updatedWidths = { ...startWidths };
+        visibleColumns.forEach(column => {
+          const measured = measuredWidths[column.id];
+          if (measured !== undefined && typeof measured === 'number') {
+            updatedWidths[column.id] = measured;
+          }
+        });
 
-      debugLog('RESIZE_FLEX_CONVERTED', {
-        fixedColumnsWidth,
-        totalFlexSpace,
-        baseFlexColumnWidth,
-        remainder,
-        flexColumns: flexColumns.map((c, i) => ({
-          id: c.id,
-          width: baseFlexColumnWidth + (i < remainder ? 1 : 0),
-        })),
-        totalCalculated:
-          fixedColumnsWidth +
-          flexColumns.reduce(
-            (sum, _, i) => sum + baseFlexColumnWidth + (i < remainder ? 1 : 0),
-            0,
-          ),
-      });
+        const totalCalculated = visibleColumns.reduce((sum, col) => {
+          const w = updatedWidths[col.id];
+          return sum + (typeof w === 'number' ? w : 0);
+        }, 0);
 
-      startWidths = updatedWidths;
+        debugLog('RESIZE_FLEX_CONVERTED', {
+          measuredWidths,
+          updatedWidths,
+          totalCalculated,
+          availableDataWidth,
+          difference: availableDataWidth !== null ? availableDataWidth - totalCalculated : 'N/A',
+        });
+
+        startWidths = updatedWidths;
+      }
+    } else {
+      // Fallback: Calculate flex columns mathematically (old approach)
+      const fixedColumnsWidth = visibleColumns.reduce((total, col) => {
+        const width = startWidths[col.id];
+        return width === 'flex' ? total : total + (width as number);
+      }, 0);
+
+      const flexColumns = visibleColumns.filter(
+        col => startWidths[col.id] === 'flex',
+      );
+
+      if (flexColumns.length > 0 && availableDataWidth) {
+        const totalFlexSpace = availableDataWidth - fixedColumnsWidth;
+        const baseFlexColumnWidth = Math.floor(
+          totalFlexSpace / flexColumns.length,
+        );
+        const remainder =
+          totalFlexSpace - baseFlexColumnWidth * flexColumns.length;
+
+        const updatedWidths = { ...startWidths };
+        flexColumns.forEach((column, index) => {
+          updatedWidths[column.id] =
+            baseFlexColumnWidth + (index < remainder ? 1 : 0);
+        });
+
+        debugLog('RESIZE_FLEX_CONVERTED', {
+          fixedColumnsWidth,
+          totalFlexSpace,
+          baseFlexColumnWidth,
+          remainder,
+          flexColumns: flexColumns.map((c, i) => ({
+            id: c.id,
+            width: baseFlexColumnWidth + (i < remainder ? 1 : 0),
+          })),
+          totalCalculated:
+            fixedColumnsWidth +
+            flexColumns.reduce(
+              (sum, _, i) => sum + baseFlexColumnWidth + (i < remainder ? 1 : 0),
+              0,
+            ),
+        });
+
+        startWidths = updatedWidths;
+      }
     }
 
     resizeStateRef.current = {
@@ -273,14 +309,14 @@ export function useTransactionTableColumnLayout({
 
     return {
       isResizable,
-      onPointerDown: event => {
+      onPointerDown: (event, measuredWidths) => {
         if (!isResizable) {
           return;
         }
 
         event.preventDefault();
         event.stopPropagation();
-        beginResize(columnId, event.clientX);
+        beginResize(columnId, event.clientX, measuredWidths);
       },
     };
   }

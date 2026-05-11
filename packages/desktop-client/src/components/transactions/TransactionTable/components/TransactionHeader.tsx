@@ -50,7 +50,10 @@ type TransactionHeaderProps = {
   columnWidths: TransactionColumnWidths;
   getResizeHandleProps: (columnId: TransactionColumnId) => {
     isResizable: boolean;
-    onPointerDown: (event: ReactPointerEvent<HTMLDivElement>) => void;
+    onPointerDown: (
+      event: ReactPointerEvent<HTMLDivElement>,
+      measuredWidths?: TransactionColumnWidths,
+    ) => void;
   };
   onResetAllColumnWidths: () => void;
   onResetColumnWidth: (columnId: TransactionColumnId) => void;
@@ -67,7 +70,10 @@ type HeaderCellProps = {
   marginLeft?: CSSProperties['marginLeft'];
   marginRight?: CSSProperties['marginRight'];
   isResizable?: boolean;
-  onResizePointerDown?: (event: ReactPointerEvent<HTMLDivElement>) => void;
+  onResizePointerDown?: (
+    event: ReactPointerEvent<HTMLDivElement>,
+    measuredWidths?: TransactionColumnWidths,
+  ) => void;
   onContextMenu?: (event: ReactMouseEvent<HTMLDivElement>) => void;
 };
 
@@ -257,6 +263,35 @@ export const TransactionHeader = memo(
         handleContextMenu(event);
       };
 
+      // Wrap onPointerDown to measure actual DOM widths before resizing
+      const handleResizePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+        if (triggerRef.current) {
+          const measuredWidths = {} as TransactionColumnWidths;
+          [
+            'date',
+            'account',
+            'payee',
+            'notes',
+            'category',
+            'payment',
+            'deposit',
+            'balance',
+          ].forEach(colId => {
+            const cell = triggerRef.current?.querySelector(
+              `[data-testid="${colId}"]`,
+            ) as HTMLElement;
+            if (cell) {
+              measuredWidths[colId as TransactionColumnId] = Math.round(
+                cell.getBoundingClientRect().width,
+              );
+            }
+          });
+          resizeHandle.onPointerDown(event, measuredWidths);
+        } else {
+          resizeHandle.onPointerDown(event);
+        }
+      };
+
       return (
         <HeaderCell
           value={value}
@@ -268,7 +303,7 @@ export const TransactionHeader = memo(
           id={columnId}
           icon={icon}
           isResizable={resizeHandle.isResizable}
-          onResizePointerDown={resizeHandle.onPointerDown}
+          onResizePointerDown={handleResizePointerDown}
           onClick={onClick}
           onContextMenu={handleColumnContextMenu}
         />
