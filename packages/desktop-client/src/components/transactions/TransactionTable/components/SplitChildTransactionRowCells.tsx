@@ -1,6 +1,6 @@
 import { theme } from '@actual-app/components/theme';
 
-import { Cell, Field } from '#components/table';
+import { Cell, Field, SelectCell } from '#components/table';
 import type { TransactionRowContentProps } from '#components/transactions/TransactionTable/types';
 
 import {
@@ -12,7 +12,6 @@ import {
   StatusCell,
 } from './cells';
 
-/* eslint-disable no-unused-vars */
 export function SplitChildTransactionRowCells({
   transaction,
   focusedField,
@@ -32,19 +31,16 @@ export function SplitChildTransactionRowCells({
   notesValue,
   onEdit,
   onUpdate,
-  onSelect, // unused for child rows
+  onSelect,
   onNavigateToTransferAccount,
   onNavigateToSchedule,
   onManagePayees,
-  showSelection, // unused for child rows
+  showSelection,
   columnWidths,
 }: TransactionRowContentProps) {
-  /* eslint-enable no-unused-vars */
   return (
     <>
-      {/* Child transactions should never show SelectCell, only empty Cell */}
-      <Cell width={20} style={{ borderLeftWidth: 1 }} />
-
+      {/* Empty field for date - child transactions don't have date input */}
       <Field
         width={columnWidths.date}
         style={{
@@ -63,6 +59,24 @@ export function SplitChildTransactionRowCells({
             border: 0,
           }}
         />
+      )}
+
+      {/* Checkbox for child transactions - appears after date/account, before payee */}
+      {showSelection && !isPreview ? (
+        <SelectCell
+          exposed
+          focused={focusedField === 'select'}
+          selected={selected}
+          width={20}
+          onSelect={onSelect}
+          onEdit={() => onEdit(transaction.id, 'select')}
+          style={{ borderLeftWidth: 1 }}
+          buttonProps={{
+            className: selected || focusedField ? undefined : 'hover-visible',
+          }}
+        />
+      ) : (
+        <Cell width={20} style={{ borderLeftWidth: 1 }} />
       )}
 
       <PayeeCell
