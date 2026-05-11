@@ -153,7 +153,7 @@ export type TransactionRowProps = {
     field: string | null,
   ) => Promise<TransactionEntity>;
   onManagePayees: (id?: PayeeEntity['id']) => void;
-  onOpenSplitModal: (id: TransactionEntity['id']) => void;
+  onSplit: (id: TransactionEntity['id']) => TransactionEntity['id'];
   allowSplitTransaction?: boolean;
   showSelection: boolean;
 };
@@ -189,7 +189,7 @@ export type TransactionRowContentProps = {
   onNavigateToTransferAccount: (id: AccountEntity['id']) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
   onManagePayees: (id?: PayeeEntity['id']) => void;
-  onOpenSplitModal: (id: TransactionEntity['id']) => void;
+  onSplit: (id: TransactionEntity['id']) => TransactionEntity['id'];
   allowSplitTransaction?: boolean;
   showSelection: boolean;
 };

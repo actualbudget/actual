@@ -48,7 +48,7 @@ export function TransactionRow({
   onNavigateToSchedule,
   onApplyRules,
   onManagePayees,
-  onOpenSplitModal,
+  onSplit,
   allowSplitTransaction,
   showSelection,
 }: TransactionRowProps) {
@@ -180,7 +180,7 @@ export function TransactionRow({
     onNavigateToTransferAccount,
     onNavigateToSchedule,
     onManagePayees,
-    onOpenSplitModal,
+    onSplit,
     allowSplitTransaction,
     showSelection,
   };

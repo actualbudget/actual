@@ -37,14 +37,13 @@ export function RegularTransactionRowCells({
   transferAccount,
   schedule,
   notesValue,
-  _previewStatus,
   onEdit,
   onUpdate,
   onSelect,
   onNavigateToTransferAccount,
   onNavigateToSchedule,
   onManagePayees,
-  onOpenSplitModal,
+  onSplit,
   allowSplitTransaction,
   showSelection,
   isExpanded,
@@ -125,7 +124,7 @@ export function RegularTransactionRowCells({
           showSplitOption={allowSplitTransaction}
           onEdit={onEdit}
           onUpdate={onUpdate}
-          onOpenSplitModal={() => onOpenSplitModal(transaction.id)}
+          onSplit={() => onSplit(transaction.id)}
         />
       )}
 

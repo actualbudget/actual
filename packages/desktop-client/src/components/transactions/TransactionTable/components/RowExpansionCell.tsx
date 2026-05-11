@@ -54,7 +54,7 @@ export function RowExpansionCell({
           width: '100%',
           height: '100%',
         }}
-        aria-label={isExpanded ? t('Collapse row') : t('Expand row')}
+        aria-label={isExpanded ? 'Collapse row' : 'Expand row'}
       >
         <SvgCheveronDown
           style={{

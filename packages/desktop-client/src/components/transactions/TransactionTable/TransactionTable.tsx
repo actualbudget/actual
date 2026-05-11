@@ -20,7 +20,6 @@ import {
   updateTransaction,
 } from '@actual-app/core/shared/transactions';
 import type { TransactionEntity } from '@actual-app/core/types/models';
-import { makeTemporaryTransactions } from 'packages/desktop-client/src/components/transactions/table/utils';
 
 import { Table, useTableNavigator } from '#components/table';
 import type { TableHandleRef } from '#components/table';
@@ -29,7 +28,7 @@ import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 
-import { SplitTransactionModal } from './components/modals/SplitTransactionModal';
+import { makeTemporaryTransactions } from '../table/utils';
 import { TransactionHeader } from './components/TransactionHeader';
 import { TransactionRow } from './components/TransactionRow';
 import {
@@ -71,6 +70,7 @@ export const TransactionTable = forwardRef(
       renderEmpty,
       onSave,
       onApplyRules,
+      onSplit,
       onCloseAddTransaction,
       onAdd,
       style,
@@ -89,9 +89,6 @@ export const TransactionTable = forwardRef(
     const [temporaryTransactions, setTemporaryTransactions] = useState<
       TransactionEntity[]
     >([]);
-    const [splitModalTransactionId, setSplitModalTransactionId] = useState<
-      TransactionEntity['id'] | null
-    >(null);
     const tableRef = useRef<TableHandleRef<TransactionEntity>>(null);
     const tableContainerRef = useRef<HTMLDivElement>(null);
     const previousIsAdding = useRef(isAdding);
@@ -158,33 +155,6 @@ export const TransactionTable = forwardRef(
         transaction => !isTemporaryId(transaction.id),
       );
     }, [visibleTransactions]);
-
-    const splitModalTransactionsSource = useMemo(
-      () => [...temporaryTransactions, ...transactions],
-      [temporaryTransactions, transactions],
-    );
-
-    const splitModalTransaction = useMemo(() => {
-      if (!splitModalTransactionId) {
-        return null;
-      }
-
-      return (
-        splitModalTransactionsSource.find(
-          transaction => transaction.id === splitModalTransactionId,
-        ) ?? null
-      );
-    }, [splitModalTransactionId, splitModalTransactionsSource]);
-
-    const splitModalChildTransactions = useMemo(() => {
-      if (!splitModalTransactionId) {
-        return [];
-      }
-
-      return splitModalTransactionsSource.filter(
-        transaction => transaction.parent_id === splitModalTransactionId,
-      );
-    }, [splitModalTransactionId, splitModalTransactionsSource]);
 
     const handleToggleSplit = useCallback(
       (id: TransactionEntity['id']) => {
@@ -285,27 +255,6 @@ export const TransactionTable = forwardRef(
         onSave(transaction);
       },
       [onSave],
-    );
-
-    const handleOpenSplitModal = useCallback((id: TransactionEntity['id']) => {
-      setSplitModalTransactionId(id);
-    }, []);
-
-    const handleCloseSplitModal = useCallback(() => {
-      setSplitModalTransactionId(null);
-    }, []);
-
-    const handleSaveSplitTransaction = useCallback(
-      async (parent: TransactionEntity, children: TransactionEntity[]) => {
-        handleSave(
-          recalculateSplit({
-            ...parent,
-            is_parent: true,
-            subtransactions: children,
-          }),
-        );
-      },
-      [handleSave],
     );
 
     const handleCloseAddTransaction = useCallback(() => {
@@ -423,7 +372,7 @@ export const TransactionTable = forwardRef(
               onNavigateToSchedule={onNavigateToSchedule}
               onApplyRules={onApplyRules}
               onManagePayees={onManagePayees}
-              onOpenSplitModal={handleOpenSplitModal}
+              onSplit={onSplit}
               allowSplitTransaction={allowSplitTransaction}
               showSelection={showSelection}
             />
@@ -482,7 +431,7 @@ export const TransactionTable = forwardRef(
       onNavigateToSchedule,
       onApplyRules,
       onManagePayees,
-      handleOpenSplitModal,
+      onSplit,
       allowSplitTransaction,
       showSelection,
       handleCloseAddTransaction,
@@ -497,13 +446,11 @@ export const TransactionTable = forwardRef(
     const renderRow = useCallback(
       ({
         item,
-        _index,
         editing,
         focusedField,
         onEdit,
       }: {
         item: TransactionEntity;
-        _index: number;
         editing: boolean;
         focusedField: string | null;
         onEdit: (id: TransactionEntity['id'], field: string) => void;
@@ -544,7 +491,7 @@ export const TransactionTable = forwardRef(
             onNavigateToSchedule={onNavigateToSchedule}
             onApplyRules={onApplyRules}
             onManagePayees={onManagePayees}
-            onOpenSplitModal={handleOpenSplitModal}
+            onSplit={onSplit}
             allowSplitTransaction={allowSplitTransaction}
             showSelection={showSelection}
           />
@@ -575,7 +522,7 @@ export const TransactionTable = forwardRef(
         onNavigateToSchedule,
         onApplyRules,
         onManagePayees,
-        handleOpenSplitModal,
+        onSplit,
         allowSplitTransaction,
         showSelection,
       ],
@@ -635,15 +582,6 @@ export const TransactionTable = forwardRef(
             />
           </View>
         </View>
-        {splitModalTransaction && (
-          <SplitTransactionModal
-            transaction={splitModalTransaction}
-            childTransactions={splitModalChildTransactions}
-            categoryGroups={categoryGroups}
-            onSave={handleSaveSplitTransaction}
-            onClose={handleCloseSplitModal}
-          />
-        )}
       </View>
     );
   },

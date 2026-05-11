@@ -21,7 +21,7 @@ type CategoryCellProps = {
   showSplitOption?: boolean;
   onEdit: (id: TransactionEntity['id'], field: string) => void;
   onUpdate: (field: string, value: string | null) => void;
-  onOpenSplitModal?: () => void;
+  onSplit?: () => void;
 };
 
 export function CategoryCell({
@@ -35,7 +35,7 @@ export function CategoryCell({
   showSplitOption,
   onEdit,
   onUpdate,
-  onOpenSplitModal,
+  onSplit,
 }: CategoryCellProps) {
   const categoryName = useMemo(() => {
     if (!category) {
@@ -68,7 +68,7 @@ export function CategoryCell({
       style={{ marginLeft: -5 }}
       onUpdate={value => {
         if (value === 'split') {
-          onOpenSplitModal?.();
+          onSplit?.();
           return;
         }
 
