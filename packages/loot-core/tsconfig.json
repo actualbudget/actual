@@ -26,13 +26,5 @@
     "migrations/**/*.js",
     "src/server/tests/mockData.json"
   ],
-  "exclude": [
-    "node_modules",
-    "build",
-    "lib-dist",
-    "@types",
-    "**/*.test.ts",
-    "**/__tests__/**",
-    "**/__mocks__/**"
-  ]
+  "exclude": ["node_modules", "build", "lib-dist", "@types"]
 }

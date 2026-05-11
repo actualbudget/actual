@@ -143,7 +143,10 @@ async function getCategoriesWithTemplates(): Promise<
 }
 
 function prefixFromPriority(priority: number | null): string {
-  return priority === null ? TEMPLATE_PREFIX : `${TEMPLATE_PREFIX}-${priority}`;
+  // Priority 0 is the parser's "unset" default and serializes without a suffix.
+  return priority === null || priority === 0
+    ? TEMPLATE_PREFIX
+    : `${TEMPLATE_PREFIX}-${priority}`;
 }
 
 export async function unparse(templates: Template[]): Promise<string> {
@@ -297,12 +300,7 @@ function periodToString(p: {
   period: 'day' | 'week' | 'month' | 'year';
   amount: number;
 }): string {
-  const { period, amount } = p;
-  if (amount === 1) {
-    return period; // singular
-  }
-  // pluralize simple
-  return `${amount} ${period}s`;
+  return `${p.amount} ${p.period}s`;
 }
 
 function repeatToString(annual?: boolean, repeat?: number): string | null {

@@ -44,13 +44,19 @@ function makeSchedule(
   } satisfies ScheduleEntity;
 }
 
+function mockedSchedules(schedules: ScheduleEntity[]) {
+  return {
+    isLoading: false,
+    schedules,
+    statuses: new Map(),
+    statusLabels: new Map(),
+  };
+}
+
 describe('SelectedBalance – normal transactions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useCachedSchedules).mockReturnValue({
-      isLoading: false,
-      schedules: [],
-    });
+    vi.mocked(useCachedSchedules).mockReturnValue(mockedSchedules([]));
   });
 
   test('shows balance for selected normal transactions', () => {
@@ -93,10 +99,9 @@ describe('SelectedBalance – preview (scheduled) transactions', () => {
     vi.mocked(useSelectedItems).mockReturnValue(
       new Set([`preview/${scheduleId}/2026-03-24`]),
     );
-    vi.mocked(useCachedSchedules).mockReturnValue({
-      isLoading: false,
-      schedules: [makeSchedule(scheduleId, -5000, 'account-1')],
-    });
+    vi.mocked(useCachedSchedules).mockReturnValue(
+      mockedSchedules([makeSchedule(scheduleId, -5000, 'account-1')]),
+    );
 
     render(
       <TestProviders>
@@ -116,10 +121,9 @@ describe('SelectedBalance – preview (scheduled) transactions', () => {
     const selectedItems = new Set([previewId1, previewId2]);
 
     vi.mocked(useSelectedItems).mockReturnValue(selectedItems);
-    vi.mocked(useCachedSchedules).mockReturnValue({
-      isLoading: false,
-      schedules: [makeSchedule(scheduleId, -5000, 'account-1')],
-    });
+    vi.mocked(useCachedSchedules).mockReturnValue(
+      mockedSchedules([makeSchedule(scheduleId, -5000, 'account-1')]),
+    );
 
     render(
       <TestProviders>

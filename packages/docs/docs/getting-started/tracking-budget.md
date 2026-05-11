@@ -66,6 +66,14 @@ This will affect your spent totals as if the spending didn't happen.
 The spending will only show up in the month that the rollover stops.
 :::
 
+## Copy Until Year End
+
+The **Copy until year end** option in the per-category budget menu copies the current month's budgeted amount to every later month of the same calendar year, overwriting any existing value for that category in those months.
+
+To use it, click the budget amount for a category to open the budget menu, then select **Copy until year end**. Months in subsequent calendar years are not affected.
+
+This is useful when you add or change a recurring expense and want to update all future planned months without clicking through each one individually. For example, if you realise in March that your grocery budget should be $300 for the rest of the year, you can set it once and copy it to April through December in one click.
+
 ## Working With the Budget
 
 All the non-budgeting features of Actual can be used with the **Tracking Budget** the same as the **Envelope Budget**.
