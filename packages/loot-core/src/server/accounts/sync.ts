@@ -312,6 +312,44 @@ async function downloadPluggyAiTransactions(
   return retVal;
 }
 
+async function downloadEnableBankingTransactions(
+  acctId: string,
+  since: string,
+) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return;
+
+  logger.log('Pulling transactions from Enable Banking');
+
+  const res = await post(
+    getServer().ENABLEBANKING_SERVER + '/transactions',
+    {
+      accountId: acctId,
+      startDate: since,
+    },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+    60000,
+  );
+
+  if (res.error_code) {
+    throw BankSyncError(res.error_type, res.error_code);
+  }
+
+  const {
+    transactions: { all },
+    balances,
+    startingBalance,
+  } = res;
+
+  return {
+    transactions: all,
+    accountBalance: balances,
+    startingBalance,
+  };
+}
+
 async function resolvePayee(trans, payeeName, payeesToCreate) {
   if (trans.payee == null && payeeName) {
     // First check our registry of new payees (to avoid a db access)
@@ -979,6 +1017,19 @@ async function processBankSyncDownload(
         currentBalance,
       );
       balanceToUse = Math.round(previousBalance);
+    } else if (acctRow.account_sync_source === 'enableBanking') {
+      const importPending = await aqlQuery(
+        q('preferences')
+          .filter({ id: `sync-import-pending-${id}` })
+          .select('value'),
+      ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
+      const importable = importPending
+        ? transactions
+        : transactions.filter(trans => Boolean(trans.booked));
+      const previousBalance = importable.reduce((total, trans) => {
+        return total - amountToInteger(trans.transactionAmount.amount);
+      }, currentBalance);
+      balanceToUse = previousBalance;
     }
 
     const oldestTransaction = transactions[transactions.length - 1];
@@ -1076,6 +1127,8 @@ export async function syncAccount(
       syncStartDate,
       newAccount,
     );
+  } else if (acctRow.account_sync_source === 'enableBanking') {
+    download = await downloadEnableBankingTransactions(acctId, syncStartDate);
   } else {
     throw new Error(
       `Unrecognized bank-sync provider: ${acctRow.account_sync_source}`,

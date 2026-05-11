@@ -228,6 +228,9 @@ export function ExperimentalFeatures() {
             >
               <Trans>Payee Locations</Trans>
             </FeatureToggle>
+            <FeatureToggle flag="enableBanking">
+              <Trans>Enable Banking sync (EU banks)</Trans>
+            </FeatureToggle>
             {showServerPrefs && (
               <ServerFeatureToggle
                 prefName="flags.plugins"

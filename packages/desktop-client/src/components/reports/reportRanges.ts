@@ -212,6 +212,10 @@ export function calculateTimeRange(
 
     return getLatestRange(offset);
   }
+  if (mode === 'lastMonth') {
+    const lastMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);
+    return [lastMonth, lastMonth, 'lastMonth'] as const;
+  }
   if (mode === 'lastYear') {
     return [
       monthUtils.getYearStart(monthUtils.prevYear(monthUtils.currentMonth())),

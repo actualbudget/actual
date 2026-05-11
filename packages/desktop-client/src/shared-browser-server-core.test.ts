@@ -172,6 +172,47 @@ describe('SharedWorker coordinator', () => {
         expect.objectContaining({ type: 'app-init-failure', error: 'boom' }),
       );
     });
+
+    it('clears the cached init failure when the client acknowledges it', () => {
+      const leader = connectTab(coordinator);
+      sendInit(leader);
+      simulateWorkerConnect(leader);
+
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: { type: 'app-init-failure', error: 'boom' },
+      });
+      expect(coordinator.getState().lastAppInitFailure).toEqual(
+        expect.objectContaining({ type: 'app-init-failure' }),
+      );
+
+      sendMsg(leader, { name: '__app-init-failure-acknowledged' });
+      expect(coordinator.getState().lastAppInitFailure).toBeNull();
+
+      const port2 = connectTab(coordinator);
+      sendInit(port2);
+      expect(port2.postMessage).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'app-init-failure' }),
+      );
+    });
+
+    it('clears the cached init failure when a backend later connects successfully', () => {
+      const failedLeader = connectTab(coordinator);
+      sendInit(failedLeader);
+      sendMsg(failedLeader, {
+        type: '__from-worker',
+        msg: { type: 'app-init-failure', error: 'boom' },
+      });
+      expect(coordinator.getState().lastAppInitFailure).not.toBeNull();
+
+      sendMsg(failedLeader, { type: 'tab-closing' });
+
+      const newLeader = connectTab(coordinator);
+      sendInit(newLeader);
+      simulateWorkerConnect(newLeader);
+
+      expect(coordinator.getState().lastAppInitFailure).toBeNull();
+    });
   });
 
   // ── Load budget ─────────────────────────────────────────────────────
