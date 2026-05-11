@@ -307,10 +307,6 @@ export default defineConfig(async ({ mode, command }) => {
   return {
     base: '/',
     envPrefix: 'REACT_APP_',
-    optimizeDeps: {
-      // Exclude Node.js-only packages from browser bundle
-      exclude: ['adm-zip'],
-    },
     build: {
       minify: false,
       target: 'es2022',
