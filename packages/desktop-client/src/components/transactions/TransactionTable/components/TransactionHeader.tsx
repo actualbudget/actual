@@ -431,7 +431,7 @@ export const TransactionHeader = memo(
           <HeaderCell
             value="✓"
             width={TRANSACTION_CLEARED_COLUMN_WIDTH}
-            alignItems="center"
+            alignItems="flex"
             id="cleared"
             icon={field === 'cleared' ? ascDesc : 'clickable'}
             onClick={() => {

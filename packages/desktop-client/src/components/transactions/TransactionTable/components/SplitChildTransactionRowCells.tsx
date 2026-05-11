@@ -12,6 +12,7 @@ import {
   StatusCell,
 } from './cells';
 
+/* eslint-disable no-unused-vars */
 export function SplitChildTransactionRowCells({
   transaction,
   focusedField,
@@ -31,13 +32,14 @@ export function SplitChildTransactionRowCells({
   notesValue,
   onEdit,
   onUpdate,
-  _onSelect,
+  onSelect, // unused for child rows
   onNavigateToTransferAccount,
   onNavigateToSchedule,
   onManagePayees,
-  _showSelection,
+  showSelection, // unused for child rows
   columnWidths,
 }: TransactionRowContentProps) {
+  /* eslint-enable no-unused-vars */
   return (
     <>
       {/* Child transactions should never show SelectCell, only empty Cell */}
