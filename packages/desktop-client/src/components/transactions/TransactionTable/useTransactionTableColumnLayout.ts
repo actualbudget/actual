@@ -209,12 +209,18 @@ export function useTransactionTableColumnLayout({
 
     if (flexColumns.length > 0 && availableDataWidth) {
       const totalFlexSpace = availableDataWidth - fixedColumnsWidth;
-      // Distribute flex space equally among all flex columns
-      const flexColumnWidth = Math.floor(totalFlexSpace / flexColumns.length);
+      // Distribute flex space equally, with remainder pixels distributed to first columns
+      const baseFlexColumnWidth = Math.floor(
+        totalFlexSpace / flexColumns.length,
+      );
+      const remainder =
+        totalFlexSpace - baseFlexColumnWidth * flexColumns.length;
 
       const updatedWidths = { ...startWidths };
-      flexColumns.forEach(column => {
-        updatedWidths[column.id] = flexColumnWidth;
+      flexColumns.forEach((column, index) => {
+        // Give the first 'remainder' columns an extra pixel to distribute the remainder
+        updatedWidths[column.id] =
+          baseFlexColumnWidth + (index < remainder ? 1 : 0);
       });
 
       startWidths = updatedWidths;
