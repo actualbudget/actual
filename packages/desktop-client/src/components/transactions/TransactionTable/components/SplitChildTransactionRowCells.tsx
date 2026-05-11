@@ -1,7 +1,7 @@
 import { theme } from '@actual-app/components/theme';
 
 import { Cell, Field, SelectCell } from '#components/table';
-import type { TransactionRowContentProps } from 'packages/desktop-client/src/components/transactions/TransactionTable/types';
+import type { TransactionRowContentProps } from '../types';
 
 import {
   AmountCell,

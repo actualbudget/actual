@@ -28,8 +28,8 @@ import { useSelectedDispatch } from '#hooks/useSelected';
 import {
   TRANSACTION_CLEARED_COLUMN_WIDTH,
   TRANSACTION_SELECTION_COLUMN_WIDTH,
-} from 'packages/desktop-client/src/components/transactions/TransactionTable/transactionTableColumns';
-import type { TransactionColumnId, TransactionColumnWidths } from 'packages/desktop-client/src/components/transactions/TransactionTable/types';
+} from '../transactionTableColumns';
+import type { TransactionColumnId, TransactionColumnWidths } from '../types';
 
 type TransactionHeaderProps = {
   hasSelected: boolean;

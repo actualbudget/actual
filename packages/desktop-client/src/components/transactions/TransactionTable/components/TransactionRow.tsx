@@ -8,11 +8,11 @@ import { isTemporaryId } from '@actual-app/core/shared/transactions';
 import { Row } from '#components/table';
 import { useCachedSchedules } from '#hooks/useCachedSchedules';
 import { useSelectedDispatch } from '#hooks/useSelected';
-import type { TransactionRowProps } from 'packages/desktop-client/src/components/transactions/TransactionTable/types';
+import type { TransactionRowProps } from '../types';
 import {
   deserializeTransaction,
   serializeTransaction,
-} from 'packages/desktop-client/src/components/transactions/TransactionTable/utils/transactionFormatters';
+} from '../utils/transactionFormatters';
 
 import { TransactionRowCells } from './TransactionRowCells';
 

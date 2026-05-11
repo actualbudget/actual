@@ -26,7 +26,7 @@ import { useSelectedItems } from '#hooks/useSelected';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
-import { makeTemporaryTransactions } from 'packages/desktop-client/src/components/transactions/table/utils';
+import { makeTemporaryTransactions } from '../table/utils';
 
 import { TransactionHeader } from './components/TransactionHeader';
 import { TransactionRow } from './components/TransactionRow';
