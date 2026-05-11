@@ -540,8 +540,24 @@ export const TransactionTable = forwardRef(
             flex: 1,
             overflowX: 'auto',
             overflowY: 'hidden',
+            position: 'relative',
           }}
         >
+          <View
+            style={{
+              position: 'absolute',
+              top: 2,
+              left: 2,
+              zIndex: 100,
+              fontSize: 12,
+              opacity: 0.6,
+              pointerEvents: 'none',
+              userSelect: 'none',
+            }}
+            title="Using new modular transaction table"
+          >
+            ⭐
+          </View>
           <View
             style={{
               flex: 1,
