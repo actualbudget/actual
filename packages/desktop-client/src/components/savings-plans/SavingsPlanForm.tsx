@@ -6,6 +6,7 @@ import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { isValidYearMonth } from '@actual-app/core/shared/months';
 import {
   currencyToInteger,
   integerToCurrency,
@@ -47,10 +48,20 @@ export function SavingsPlanForm({
     setError(null);
   }, [plan]);
 
+  // Wraps a setter so we clear the validation error whenever any input
+  // changes, giving the user immediate feedback that their edit was noted.
+  function withClearError<T>(setter: (value: T) => void) {
+    return (value: T) => {
+      setter(value);
+      if (error) setError(null);
+    };
+  }
+
   function handleSubmit() {
     const targetAmount = currencyToInteger(targetAmountStr);
     const savedAmount = currencyToInteger(savedAmountStr);
     const monthsNum = Number(months);
+    const trimmedStartMonth = startMonth.trim();
 
     if (!name.trim()) {
       setError(t('Enter a plan name.'));
@@ -68,13 +79,17 @@ export function SavingsPlanForm({
       setError(t('Enter a whole number of months greater than zero.'));
       return;
     }
+    if (trimmedStartMonth && !isValidYearMonth(trimmedStartMonth)) {
+      setError(t('Enter a start month in YYYY-MM format (e.g. 2026-04).'));
+      return;
+    }
 
     onSave({
       name: name.trim(),
       target_amount: targetAmount,
       saved_amount: savedAmount,
       months: monthsNum,
-      start_month: startMonth || null,
+      start_month: trimmedStartMonth || null,
       status: savedAmount >= targetAmount ? 'completed' : 'active',
     });
   }
@@ -112,7 +127,7 @@ export function SavingsPlanForm({
           <Input
             id="sp-name"
             value={name}
-            onChangeValue={setName}
+            onChangeValue={withClearError(setName)}
             placeholder={t('e.g. Vacation Fund')}
           />
         </FormField>
@@ -129,7 +144,7 @@ export function SavingsPlanForm({
             <Input
               id="sp-target"
               value={targetAmountStr}
-              onChangeValue={setTargetAmountStr}
+              onChangeValue={withClearError(setTargetAmountStr)}
               placeholder="2000"
             />
           </FormField>
@@ -139,7 +154,7 @@ export function SavingsPlanForm({
             <Input
               id="sp-saved"
               value={savedAmountStr}
-              onChangeValue={setSavedAmountStr}
+              onChangeValue={withClearError(setSavedAmountStr)}
               placeholder="0"
             />
           </FormField>
@@ -157,7 +172,7 @@ export function SavingsPlanForm({
             <Input
               id="sp-months"
               value={months}
-              onChangeValue={setMonths}
+              onChangeValue={withClearError(setMonths)}
               placeholder="12"
             />
           </FormField>
@@ -167,7 +182,7 @@ export function SavingsPlanForm({
             <Input
               id="sp-start"
               value={startMonth}
-              onChangeValue={setStartMonth}
+              onChangeValue={withClearError(setStartMonth)}
               placeholder="2026-04"
             />
           </FormField>
