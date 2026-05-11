@@ -3,157 +3,27 @@ import type { InterpreterState } from 'hyperformula/typings/interpreter/Interpre
 import type { ProcedureAst } from 'hyperformula/typings/parser';
 
 import { getCurrency } from '#shared/currencies';
-import type { Currency } from '#shared/currencies';
-import { getNumberFormat, integerToAmount } from '#shared/util';
-import type { NumberFormats } from '#shared/util';
+import { integerToAmount } from '#shared/util';
+
+import type { UserPreferences } from './customFunctionsPreferences';
 
 // User feedback: Make formatting functions respect app settings with locale-based fallbacks
 // Global state to store user preferences for formatting functions
 // This is set before formula execution to avoid async issues in HyperFormula custom functions
-let cachedUserPreferences: {
-  currency: Currency;
-  numberFormat: NumberFormats;
-  thousandsSeparator: string;
-  decimalSeparator: string;
-  locale: string;
-} | null = null;
+let cachedUserPreferences: UserPreferences | null = null;
 
-// Helper to get locale-based number format defaults
-function getLocaleDefaults(locale?: string): {
-  thousandsSeparator: string;
-  decimalSeparator: string;
-} {
-  // Default to en-US if no locale
-  const actualLocale = locale || 'en-US';
-
-  // Map common locales to their number formats
-  if (
-    actualLocale.startsWith('de') ||
-    actualLocale.startsWith('es') ||
-    actualLocale.startsWith('it')
-  ) {
-    // German, Spanish, Italian: 1.000,00
-    return { thousandsSeparator: '.', decimalSeparator: ',' };
-  } else if (
-    actualLocale.startsWith('fr') ||
-    actualLocale.startsWith('ru') ||
-    actualLocale.startsWith('cs')
-  ) {
-    // French, Russian, Czech: 1 000,00
-    return { thousandsSeparator: '\u202F', decimalSeparator: ',' };
-  } else if (actualLocale.startsWith('de-CH')) {
-    // Swiss German: 1'000.00
-    return { thousandsSeparator: '\u2019', decimalSeparator: '.' };
-  } else if (
-    actualLocale.startsWith('en-IN') ||
-    actualLocale.startsWith('hi')
-  ) {
-    // Indian: 1,00,000.00 (but we'll use standard comma for simplicity)
-    return { thousandsSeparator: ',', decimalSeparator: '.' };
-  } else {
-    // Default (en-US, en-GB, etc.): 1,000.00
-    return { thousandsSeparator: ',', decimalSeparator: '.' };
-  }
-}
-
-// Helper to determine currency from locale
-function getCurrencyFromLocale(locale: string): Currency {
-  if (locale.startsWith('en-GB')) {
-    return getCurrency('GBP');
-  } else if (
-    locale.startsWith('de') ||
-    locale.startsWith('fr') ||
-    locale.startsWith('es') ||
-    locale.startsWith('it') ||
-    locale.startsWith('nl')
-  ) {
-    return getCurrency('EUR');
-  } else if (locale.startsWith('ja')) {
-    return getCurrency('JPY');
-  } else if (locale.startsWith('en-IN') || locale.startsWith('hi')) {
-    return getCurrency('INR');
-  } else if (locale.startsWith('en-CA')) {
-    return getCurrency('CAD');
-  } else if (locale.startsWith('en-AU')) {
-    return getCurrency('AUD');
-  } else {
-    return getCurrency('USD');
-  }
-}
-
-// Function to load and cache user preferences
-// This should be called before formula execution (can be async)
-export async function loadUserPreferencesForFormulas(): Promise<void> {
-  try {
-    // Dynamically import db only when needed (server-side only)
-    // This prevents bundling server code into the browser
-    const db = await import('#server/db');
-
-    // Get currency code from preferences
-    const currencyCodePref = await db.first<Pick<db.DbPreference, 'value'>>(
-      'SELECT value FROM preferences WHERE id = ?',
-      ['defaultCurrencyCode'],
-    );
-    const currencyCode = currencyCodePref?.value || null;
-
-    // Get number format from preferences
-    const numberFormatPref = await db.first<Pick<db.DbPreference, 'value'>>(
-      'SELECT value FROM preferences WHERE id = ?',
-      ['numberFormat'],
-    );
-    const numberFormatValue =
-      (numberFormatPref?.value as NumberFormats) || null;
-
-    // Get locale from preferences
-    const localePref = await db.first<Pick<db.DbPreference, 'value'>>(
-      'SELECT value FROM preferences WHERE id = ?',
-      ['locale'],
-    );
-    const locale = localePref?.value || 'en-US';
-
-    // Determine currency
-    const currency = currencyCode
-      ? getCurrency(currencyCode)
-      : getCurrencyFromLocale(locale);
-
-    // Get number format settings
-    const numberFormatSettings = getNumberFormat({
-      format: numberFormatValue || undefined,
-    });
-
-    // Get locale-based defaults as fallback
-    const localeDefaults = getLocaleDefaults(locale);
-
-    cachedUserPreferences = {
-      currency,
-      numberFormat: numberFormatValue || 'comma-dot',
-      thousandsSeparator:
-        numberFormatSettings.thousandsSeparator ||
-        localeDefaults.thousandsSeparator,
-      decimalSeparator:
-        numberFormatSettings.decimalSeparator ||
-        localeDefaults.decimalSeparator,
-      locale,
-    };
-  } catch {
-    // Fallback to defaults if preferences can't be loaded
-    cachedUserPreferences = {
-      currency: getCurrency('USD'),
-      numberFormat: 'comma-dot',
-      thousandsSeparator: ',',
-      decimalSeparator: '.',
-      locale: 'en-US',
-    };
-  }
+// Setter for cached preferences (called from server-side code only)
+export function setCachedUserPreferences(prefs: UserPreferences): void {
+  cachedUserPreferences = prefs;
 }
 
 // Synchronous getter for cached preferences (used by custom functions)
-function getUserPreferences() {
+function getUserPreferences(): UserPreferences {
   if (!cachedUserPreferences) {
     // If not loaded, use defaults
     return {
       currency: getCurrency('USD'),
-      numberFormat: 'comma-dot' as NumberFormats,
+      numberFormat: 'comma-dot',
       thousandsSeparator: ',',
       decimalSeparator: '.',
       locale: 'en-US',
