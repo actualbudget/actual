@@ -1,12 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import {
-  getTransactionTableUtilityWidth,
-  getTransactionTableVariantKey,
-  getVisibleTransactionColumns,
-} from './transactionTableColumns';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+
 import {
   applyNeighborColumnResize,
   getVisibleColumnsWidth,
@@ -16,6 +12,11 @@ import {
   resolveTransactionColumnWidths,
   serializeTransactionColumnWidthsPref,
 } from './transactionTableColumnLayout';
+import {
+  getTransactionTableUtilityWidth,
+  getTransactionTableVariantKey,
+  getVisibleTransactionColumns,
+} from './transactionTableColumns';
 import type {
   TransactionColumnId,
   TransactionColumnWidths,
@@ -60,9 +61,11 @@ export function useTransactionTableColumnLayout({
     showCleared,
     showSelection,
   }) as TransactionTableVariantKey;
-  const prefKey = `transaction-table-column-widths-${variantKey}` as TransactionTableColumnWidthsPrefKey;
+  const prefKey =
+    `transaction-table-column-widths-${variantKey}` as TransactionTableColumnWidthsPrefKey;
   const [persistedValue, setPersistedValue] = useSyncedPref(prefKey);
-  const [draftWidths, setDraftWidths] = useState<Partial<TransactionColumnWidths> | null>(null);
+  const [draftWidths, setDraftWidths] =
+    useState<Partial<TransactionColumnWidths> | null>(null);
   const [isResizing, setIsResizing] = useState(false);
   const draftWidthsRef = useRef<Partial<TransactionColumnWidths> | null>(null);
   const resizeStateRef = useRef<ResizeState | null>(null);
@@ -202,7 +205,9 @@ export function useTransactionTableColumnLayout({
     setDraftWidths(startWidths);
   }
 
-  function getResizeHandleProps(columnId: TransactionColumnId): ResizeHandleProps {
+  function getResizeHandleProps(
+    columnId: TransactionColumnId,
+  ): ResizeHandleProps {
     const isResizable = !!getVisibleNeighborColumnId(visibleColumns, columnId);
 
     return {

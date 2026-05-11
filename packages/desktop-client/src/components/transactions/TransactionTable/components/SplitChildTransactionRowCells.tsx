@@ -1,4 +1,7 @@
+import { theme } from '@actual-app/components/theme';
 import type { TransactionRowContentProps } from '../types';
+
+import { Cell, Field, SelectCell } from '#components/table';
 
 import {
   AmountCell,
@@ -8,9 +11,6 @@ import {
   PayeeCell,
   StatusCell,
 } from './cells';
-
-import { Cell, Field, SelectCell } from '@desktop-client/components/table';
-import { theme } from '@actual-app/components/theme';
 
 export function SplitChildTransactionRowCells({
   transaction,

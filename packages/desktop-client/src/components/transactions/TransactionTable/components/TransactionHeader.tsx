@@ -10,9 +10,19 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SvgArrowDown, SvgArrowUp } from '@actual-app/components/icons/v1';
 import { SvgSubtract } from '@actual-app/components/icons/v2';
+import { Menu } from '@actual-app/components/menu';
+import { Popover } from '@actual-app/components/popover';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import {
+  TRANSACTION_CLEARED_COLUMN_WIDTH,
+  TRANSACTION_SELECTION_COLUMN_WIDTH,
+} from '../transactionTableColumns';
+import type {
+  TransactionColumnId,
+  TransactionColumnWidths,
+} from '../types';
 
 import {
   CustomCell,
@@ -20,16 +30,9 @@ import {
   Row,
   SelectCell,
   UnexposedCellContent,
-} from '@desktop-client/components/table';
-import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
-import { useContextMenu } from '@desktop-client/hooks/useContextMenu';
-import { Menu } from '@actual-app/components/menu';
-import { Popover } from '@actual-app/components/popover';
-import {
-  TRANSACTION_CLEARED_COLUMN_WIDTH,
-  TRANSACTION_SELECTION_COLUMN_WIDTH,
-} from '../transactionTableColumns';
-import type { TransactionColumnId, TransactionColumnWidths } from '../types';
+} from '#components/table';
+import { useContextMenu } from '#hooks/useContextMenu';
+import { useSelectedDispatch } from '#hooks/useSelected';
 
 type TransactionHeaderProps = {
   hasSelected: boolean;
@@ -43,9 +46,7 @@ type TransactionHeaderProps = {
   ascDesc: 'asc' | 'desc';
   field: string;
   columnWidths: TransactionColumnWidths;
-  getResizeHandleProps: (
-    columnId: TransactionColumnId,
-  ) => {
+  getResizeHandleProps: (columnId: TransactionColumnId) => {
     isResizable: boolean;
     onPointerDown: (event: ReactPointerEvent<HTMLDivElement>) => void;
   };
@@ -120,7 +121,11 @@ function HeaderCell({
             >
               <UnexposedCellContent value={cellValue} />
               {icon === 'asc' && (
-                <SvgArrowDown width={10} height={10} style={{ marginLeft: 5 }} />
+                <SvgArrowDown
+                  width={10}
+                  height={10}
+                  style={{ marginLeft: 5 }}
+                />
               )}
               {icon === 'desc' && (
                 <SvgArrowUp width={10} height={10} style={{ marginLeft: 5 }} />
@@ -230,7 +235,9 @@ export const TransactionHeader = memo(
       onClick?: () => void;
     }) => {
       const resizeHandle = getResizeHandleProps(columnId);
-      const handleColumnContextMenu = (event: ReactMouseEvent<HTMLDivElement>) => {
+      const handleColumnContextMenu = (
+        event: ReactMouseEvent<HTMLDivElement>,
+      ) => {
         setContextColumnId(columnId);
         handleContextMenu(event);
       };
@@ -286,18 +293,24 @@ export const TransactionHeader = memo(
           isNonModal
         >
           <Menu
-            items={[
-              contextColumnId && {
-                name: 'reset-column',
-                text: t('Reset {{columnName}} size', {
-                  columnName: columnLabelById[contextColumnId],
-                }),
-              },
-              {
-                name: 'reset-all',
-                text: t('Reset all'),
-              },
-            ]}
+            items={
+              [
+                ...(contextColumnId
+                  ? [
+                      {
+                        name: 'reset-column' as const,
+                        text: t('Reset {{columnName}} size', {
+                          columnName: columnLabelById[contextColumnId],
+                        }),
+                      },
+                    ]
+                  : []),
+                {
+                  name: 'reset-all' as const,
+                  text: t('Reset all'),
+                },
+              ] as const
+            }
             onMenuSelect={name => {
               if (name === 'reset-column' && contextColumnId) {
                 onResetColumnWidth(contextColumnId);
@@ -345,7 +358,7 @@ export const TransactionHeader = memo(
           onClick: () =>
             onSort('date', selectAscDesc(field, ascDesc, 'date', 'desc')),
         })}
-        {showAccount && (
+        {showAccount &&
           renderResizableHeaderCell({
             columnId: 'account',
             value: t('Account'),
@@ -357,8 +370,7 @@ export const TransactionHeader = memo(
                 'account',
                 selectAscDesc(field, ascDesc, 'account', 'asc'),
               ),
-          })
-        )}
+          })}
         {renderResizableHeaderCell({
           columnId: 'payee',
           value: t('Payee'),
@@ -377,7 +389,7 @@ export const TransactionHeader = memo(
           onClick: () =>
             onSort('notes', selectAscDesc(field, ascDesc, 'notes', 'asc')),
         })}
-        {showCategory && (
+        {showCategory &&
           renderResizableHeaderCell({
             columnId: 'category',
             value: t('Category'),
@@ -389,8 +401,7 @@ export const TransactionHeader = memo(
                 'category',
                 selectAscDesc(field, ascDesc, 'category', 'asc'),
               ),
-          })
-        )}
+          })}
         {renderResizableHeaderCell({
           columnId: 'payment',
           value: t('Payment'),
@@ -398,10 +409,7 @@ export const TransactionHeader = memo(
           marginRight: -5,
           icon: field === 'payment' ? ascDesc : 'clickable',
           onClick: () =>
-            onSort(
-              'payment',
-              selectAscDesc(field, ascDesc, 'payment', 'asc'),
-            ),
+            onSort('payment', selectAscDesc(field, ascDesc, 'payment', 'asc')),
         })}
         {renderResizableHeaderCell({
           columnId: 'deposit',
@@ -410,19 +418,15 @@ export const TransactionHeader = memo(
           marginRight: -5,
           icon: field === 'deposit' ? ascDesc : 'clickable',
           onClick: () =>
-            onSort(
-              'deposit',
-              selectAscDesc(field, ascDesc, 'deposit', 'desc'),
-            ),
+            onSort('deposit', selectAscDesc(field, ascDesc, 'deposit', 'desc')),
         })}
-        {showBalance && (
+        {showBalance &&
           renderResizableHeaderCell({
             columnId: 'balance',
             value: t('Balance'),
             alignItems: 'flex-end',
             marginRight: -5,
-          })
-        )}
+          })}
         {showCleared && (
           <HeaderCell
             value="✓"

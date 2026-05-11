@@ -1,6 +1,6 @@
-import * as monthUtils from 'loot-core/shared/months';
-import type { TimeFrame } from 'loot-core/types/models';
-import type { SyncedPrefs } from 'loot-core/types/prefs';
+import * as monthUtils from '@actual-app/core/shared/months';
+import type { TimeFrame } from '@actual-app/core/types/models';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 export function validateStart(
   earliest: string,
@@ -212,6 +212,10 @@ export function calculateTimeRange(
 
     return getLatestRange(offset);
   }
+  if (mode === 'lastMonth') {
+    const lastMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);
+    return [lastMonth, lastMonth, 'lastMonth'] as const;
+  }
   if (mode === 'lastYear') {
     return [
       monthUtils.getYearStart(monthUtils.prevYear(monthUtils.currentMonth())),
@@ -249,7 +253,12 @@ export function calculateSpendingReportTimeRange({
   mode?: 'budget' | 'average' | 'single-month';
 }): [string, string] {
   if (['budget', 'average'].includes(mode) && isLive) {
-    return [monthUtils.currentMonth(), monthUtils.currentMonth()];
+    const month = compare ?? monthUtils.currentMonth();
+    return [month, month];
+  }
+
+  if (mode === 'single-month' && isLive && compare) {
+    return [compare, compareTo ?? monthUtils.subMonths(compare, 1)];
   }
 
   const [start, end] = calculateTimeRange(

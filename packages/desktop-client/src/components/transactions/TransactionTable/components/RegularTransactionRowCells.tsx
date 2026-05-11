@@ -37,7 +37,7 @@ export function RegularTransactionRowCells({
   transferAccount,
   schedule,
   notesValue,
-  previewStatus,
+  _previewStatus,
   onEdit,
   onUpdate,
   onSelect,

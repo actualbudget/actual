@@ -49,6 +49,18 @@ export function PayeeCellDisplay({
         overflow: 'hidden',
       }}
       onClick={showLink ? onClick : undefined}
+      onKeyDown={
+        showLink
+          ? e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onClick?.();
+              }
+            }
+          : undefined
+      }
+      role={showLink ? 'button' : undefined}
+      tabIndex={showLink ? 0 : undefined}
     >
       <PayeeModeIcon mode={mode} />
       {showLink && (

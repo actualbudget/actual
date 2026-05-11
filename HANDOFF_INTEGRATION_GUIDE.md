@@ -102,10 +102,10 @@ import { useLocalPref } from '@desktop-client/hooks/useLocalPref';
 
 export function TransactionList({ ... }) {
   const [useNewTable = 'false'] = useLocalPref('feature.newTransactionTable');
-  const TransactionTable = useNewTable === 'true' 
-    ? NewTransactionTable 
+  const TransactionTable = useNewTable === 'true'
+    ? NewTransactionTable
     : OldTransactionTable;
-  
+
   return <TransactionTable ... />;
 }
 ```
@@ -131,6 +131,7 @@ The split modal needs to be triggered. Here's how:
 ### Current Behavior
 
 In the old table, clicking "Split" button calls `onSplit()` which:
+
 1. Creates split transactions in the database
 2. Expands the split inline
 3. User edits amounts inline
@@ -212,6 +213,7 @@ yarn workspace @actual-app/web run playwright test -g "creates a split test tran
 ```
 
 **Expected Results**:
+
 - All tests should pass (except VRT)
 - No visual regressions
 - Same behavior as original
@@ -219,6 +221,7 @@ yarn workspace @actual-app/web run playwright test -g "creates a split test tran
 ### Phase 3: Manual Testing (1-2 hours)
 
 Test all features:
+
 - [ ] Create transaction
 - [ ] Edit transaction (all fields)
 - [ ] Delete transaction
@@ -303,6 +306,7 @@ localStorage.setItem('feature.newTransactionTable', 'false');
 ## 📋 Integration Checklist
 
 ### Pre-Integration
+
 - [x] All components implemented
 - [x] Type errors fixed
 - [x] Documentation complete
@@ -310,12 +314,14 @@ localStorage.setItem('feature.newTransactionTable', 'false');
 - [ ] Integration plan reviewed
 
 ### During Integration
+
 - [ ] Update TransactionList.tsx import
 - [ ] Add split modal state and trigger
 - [ ] Test basic functionality
 - [ ] Fix any immediate issues
 
 ### Post-Integration
+
 - [ ] Run all E2E tests
 - [ ] Fix test failures
 - [ ] Visual comparison
@@ -338,6 +344,7 @@ Integration is successful when:
 ## 📞 Support & Questions
 
 ### Documentation
+
 - [Architecture Plan](./TRANSACTION_TABLE_REWRITE_PLAN.md)
 - [Implementation Summary](./TRANSACTION_TABLE_IMPLEMENTATION_SUMMARY.md)
 - [Migration Guide](./TRANSACTION_TABLE_MIGRATION_GUIDE.md)
@@ -345,10 +352,12 @@ Integration is successful when:
 - [Final Summary](./TRANSACTION_TABLE_FINAL_SUMMARY.md)
 
 ### PR
+
 - **PR #7454**: https://github.com/actualbudget/actual/pull/7454
 - **Branch**: `cursor/transaction-table-rewrite-f077`
 
 ### Questions?
+
 - Check documentation first
 - Review PR comments
 - Ask in GitHub discussions
@@ -401,12 +410,14 @@ yarn workspace @actual-app/web run playwright test
 ## 📊 Expected Timeline
 
 ### Integration Phase (2-3 hours)
+
 - Update imports: 15 minutes
 - Add split modal: 30 minutes
 - Test integration: 1-2 hours
 - Fix issues: 30-60 minutes
 
 ### Testing Phase (3-4 hours)
+
 - Run E2E tests: 1 hour
 - Fix test failures: 1-2 hours
 - Visual comparison: 30 minutes
@@ -414,6 +425,7 @@ yarn workspace @actual-app/web run playwright test
 - Final validation: 30 minutes
 
 ### Polish Phase (1 hour)
+
 - Code review: 30 minutes
 - Documentation updates: 15 minutes
 - Final cleanup: 15 minutes
@@ -423,18 +435,21 @@ yarn workspace @actual-app/web run playwright test
 ## 🎊 What You're Getting
 
 ### Code Quality
+
 - **Modular**: 18 focused files vs 1 god file
 - **Maintainable**: Average 144 lines per file
 - **Type-Safe**: 0 type errors
 - **Documented**: 2,000+ lines of docs
 
 ### Features
+
 - **Split Modal**: Major UX improvement
 - **Expandable Rows**: New feature (as requested)
 - **All Original Features**: Preserved
 - **Backward Compatible**: No breaking changes
 
 ### Developer Experience
+
 - **Easy to Understand**: Clear file structure
 - **Easy to Modify**: Focused components
 - **Easy to Test**: Separated concerns

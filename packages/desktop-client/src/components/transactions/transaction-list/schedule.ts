@@ -1,15 +1,15 @@
 // @ts-strict-ignore
 // TODO: remove strict
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
-import { getUpcomingDays } from 'loot-core/shared/schedules';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
+import { getUpcomingDays } from '@actual-app/core/shared/schedules';
 import type {
   RuleActionEntity,
   RuleConditionEntity,
   ScheduleEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
 function createScheduleConditions(transaction: TransactionEntity) {
   const conditions: RuleConditionEntity[] = [

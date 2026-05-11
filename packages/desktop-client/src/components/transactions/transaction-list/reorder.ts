@@ -1,8 +1,8 @@
-import { isPreviewId } from 'loot-core/shared/transactions';
-import type { TransactionEntity } from 'loot-core/types/models';
+import { isPreviewId } from '@actual-app/core/shared/transactions';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 
-import { isValidBoundaryDrop } from '@desktop-client/hooks/useDragDrop';
-import type { DropPosition } from '@desktop-client/hooks/useDragDrop';
+import { isValidBoundaryDrop } from '#hooks/useDragDrop';
+import type { DropPosition } from '#hooks/useDragDrop';
 
 type ReorderArgs = {
   allTransactions: TransactionEntity[];
@@ -35,7 +35,9 @@ export function getTransactionMovePayload({
     return;
   }
 
-  const draggedTransaction = allTransactions.find(transaction => transaction.id === id);
+  const draggedTransaction = allTransactions.find(
+    transaction => transaction.id === id,
+  );
   if (!draggedTransaction) {
     return;
   }
@@ -47,7 +49,9 @@ export function getTransactionMovePayload({
         !isPreviewId(transaction.id),
     );
 
-    const targetIndex = siblings.findIndex(transaction => transaction.id === targetId);
+    const targetIndex = siblings.findIndex(
+      transaction => transaction.id === targetId,
+    );
     if (targetIndex === -1) {
       return;
     }
@@ -88,7 +92,8 @@ export function getTransactionMovePayload({
 
   let isValidDrop = targetTransaction.date === transaction.date;
   if (!isValidDrop) {
-    const neighborIndex = dropPos === 'before' ? targetIndex - 1 : targetIndex + 1;
+    const neighborIndex =
+      dropPos === 'before' ? targetIndex - 1 : targetIndex + 1;
     const neighborTransaction =
       neighborIndex >= 0 && neighborIndex < reorderableTransactions.length
         ? reorderableTransactions[neighborIndex]
@@ -113,7 +118,8 @@ export function getTransactionMovePayload({
       return;
     }
 
-    moveTargetId = targetTransaction.date === transaction.date ? targetId : null;
+    moveTargetId =
+      targetTransaction.date === transaction.date ? targetId : null;
   } else {
     const aboveIndex = targetIndex - 1;
     const aboveTransaction =

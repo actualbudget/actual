@@ -9,10 +9,23 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
+import { listen } from '@actual-app/core/platform/client/connection';
+import { isElectron } from '@actual-app/core/shared/environment';
 import { css } from '@emotion/css';
 
-import { listen } from 'loot-core/platform/client/connection';
-import { isElectron } from 'loot-core/shared/environment';
+import { getLatestAppVersion } from '#app/appSlice';
+import { closeBudget } from '#budgetfiles/budgetfilesSlice';
+import { Link } from '#components/common/Link';
+import { Checkbox, FormField, FormLabel } from '#components/forms';
+import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
+import { Page } from '#components/Page';
+import { useServerVersion } from '#components/ServerContext';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useMetadataPref } from '#hooks/useMetadataPref';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { loadPrefs } from '#prefs/prefsSlice';
+import { useDispatch, useSelector } from '#redux';
 
 import { AuthSettings } from './AuthSettings';
 import { Backups } from './Backups';
@@ -27,24 +40,6 @@ import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
 import { AdvancedToggle, Setting } from './UI';
-
-import { getLatestAppVersion } from '@desktop-client/app/appSlice';
-import { closeBudget } from '@desktop-client/budgetfiles/budgetfilesSlice';
-import { Link } from '@desktop-client/components/common/Link';
-import {
-  Checkbox,
-  FormField,
-  FormLabel,
-} from '@desktop-client/components/forms';
-import { MOBILE_NAV_HEIGHT } from '@desktop-client/components/mobile/MobileNavTabs';
-import { Page } from '@desktop-client/components/Page';
-import { useServerVersion } from '@desktop-client/components/ServerContext';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { useMetadataPref } from '@desktop-client/hooks/useMetadataPref';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { loadPrefs } from '@desktop-client/prefs/prefsSlice';
-import { useDispatch, useSelector } from '@desktop-client/redux';
 
 function About() {
   const version = useServerVersion();

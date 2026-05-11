@@ -1,12 +1,11 @@
 import { useMemo } from 'react';
 
 import { styles } from '@actual-app/components/styles';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 
-import type { IntegerAmount } from 'loot-core/shared/util';
-import type { TransactionEntity } from 'loot-core/types/models';
-
-import { Cell } from '@desktop-client/components/table';
-import { useFormat } from '@desktop-client/hooks/useFormat';
+import { Cell } from '#components/table';
+import { useFormat } from '#hooks/useFormat';
 
 type BalanceCellProps = {
   id: TransactionEntity['id'];

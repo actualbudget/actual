@@ -1,22 +1,21 @@
 import { useEffect, useState } from 'react';
 
-import { HyperFormula } from 'hyperformula';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
-import type { Query } from 'loot-core/shared/query';
-import { integerToAmount } from 'loot-core/shared/util';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
+import type { Query } from '@actual-app/core/shared/query';
+import { integerToAmount } from '@actual-app/core/shared/util';
 import type {
   CategoryEntity,
   RuleConditionEntity,
   TimeFrame,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { HyperFormula } from 'hyperformula';
+
+import { getLiveRange } from '#components/reports/getLiveRange';
+import { calculateTimeRange } from '#components/reports/reportRanges';
 
 import { useLocale } from './useLocale';
-
-import { getLiveRange } from '@desktop-client/components/reports/getLiveRange';
-import { calculateTimeRange } from '@desktop-client/components/reports/reportRanges';
 
 type QueryConfig = {
   conditions?: RuleConditionEntity[];
@@ -327,8 +326,8 @@ export function useFormulaExecution(
         // Create HyperFormula instance
         hfInstance = HyperFormula.buildEmpty({
           licenseKey: 'gpl-v3',
-          localeLang: typeof locale === 'string' ? locale : 'en-US',
           language: 'enUS',
+          localeLang: typeof locale === 'string' ? locale : 'en-US',
           dateFormats: ['DD/MM/YYYY', 'YYYY-MM-DD', 'YYYY/MM/DD'],
         });
 

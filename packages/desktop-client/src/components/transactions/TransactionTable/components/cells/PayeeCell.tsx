@@ -5,10 +5,11 @@ import type {
   PayeeEntity,
   ScheduleEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
-import { PayeeAutocomplete } from '@desktop-client/components/autocomplete/PayeeAutocomplete';
-import { CustomCell } from '@desktop-client/components/table';
+import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
+import { CustomCell } from '#components/table';
+
 import { PayeeCellDisplay } from './PayeeCellDisplay';
 
 type PayeeCellProps = {
@@ -104,7 +105,9 @@ export function PayeeCell({
             showManagePayees
             inputProps={{ onBlur, onKeyDown, style: inputStyle }}
             onUpdate={(_, value) => setValue(value || '')}
-            onSelect={value => onSave(Array.isArray(value) ? '' : (value ?? ''))}
+            onSelect={value =>
+              onSave(Array.isArray(value) ? '' : (value ?? ''))
+            }
             onManagePayees={() => onManagePayees(payee?.id)}
           />
         ) : null

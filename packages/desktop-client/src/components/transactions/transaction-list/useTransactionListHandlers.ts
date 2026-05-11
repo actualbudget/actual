@@ -3,13 +3,13 @@
 import { useCallback } from 'react';
 import type { RefObject } from 'react';
 
-import { send } from 'loot-core/platform/client/connection';
+import { send } from '@actual-app/core/platform/client/connection';
 import {
   addSplitTransaction,
   realizeTempTransactions,
   splitTransaction,
   updateTransaction,
-} from 'loot-core/shared/transactions';
+} from '@actual-app/core/shared/transactions';
 import type {
   AccountEntity,
   PayeeEntity,
@@ -17,7 +17,10 @@ import type {
   ScheduleEntity,
   TransactionEntity,
   TransactionFilterEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+
+import { pushModal } from '#modals/modalsSlice';
+import { addNotification } from '#notifications/notificationsSlice';
 
 import {
   applyRulesToTransaction,
@@ -30,9 +33,6 @@ import {
   createSingleTimeScheduleFromTransaction,
   isFutureTransaction,
 } from './schedule';
-
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 
 type UseTransactionListHandlersProps = {
   transactionsLatest: RefObject<readonly TransactionEntity[]>;
@@ -115,7 +115,9 @@ export function useTransactionListHandlers({
     async (newTransactions: TransactionEntity[]) => {
       newTransactions = realizeTempTransactions(newTransactions);
 
-      const parentTransaction = newTransactions.find(transaction => !transaction.is_child);
+      const parentTransaction = newTransactions.find(
+        transaction => !transaction.is_child,
+      );
       const isLinkedToSchedule = !!parentTransaction?.schedule;
 
       if (
@@ -140,7 +142,10 @@ export function useTransactionListHandlers({
             );
           },
           async () => {
-            await saveDiff({ added: newTransactions }, isLearnCategoriesEnabled);
+            await saveDiff(
+              { added: newTransactions },
+              isLearnCategoriesEnabled,
+            );
           },
         );
         return;

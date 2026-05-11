@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 
-import type { TransactionEntity } from 'loot-core/types/models';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 
-import { DateSelect } from '@desktop-client/components/select/DateSelect';
-import { CustomCell } from '@desktop-client/components/table';
+import { DateSelect } from '#components/select/DateSelect';
+import { CustomCell } from '#components/table';
 
 type DateCellProps = {
   id: TransactionEntity['id'];
@@ -55,7 +55,14 @@ export function DateCell({
       style={{ marginLeft: -5 }}
       onUpdate={value => onUpdate('date', value)}
     >
-      {({ onBlur, onKeyDown, onUpdate: setValue, onSave, shouldSaveFromKey, inputStyle }) =>
+      {({
+        onBlur,
+        onKeyDown,
+        onUpdate: setValue,
+        onSave,
+        shouldSaveFromKey,
+        inputStyle,
+      }) =>
         !isPreview ? (
           <DateSelect
             value={date || ''}

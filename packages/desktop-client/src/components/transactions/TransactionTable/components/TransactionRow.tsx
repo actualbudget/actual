@@ -3,19 +3,18 @@ import { Trans } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
-import { isTemporaryId } from 'loot-core/shared/transactions';
+import { isTemporaryId } from '@actual-app/core/shared/transactions';
 import type { TransactionRowProps } from '../types';
 import {
   deserializeTransaction,
   serializeTransaction,
 } from '../utils/transactionFormatters';
 
-import { TransactionRowCells } from './TransactionRowCells';
+import { Row } from '#components/table';
+import { useCachedSchedules } from '#hooks/useCachedSchedules';
+import { useSelectedDispatch } from '#hooks/useSelected';
 
-import { Row } from '@desktop-client/components/table';
-import { useCachedSchedules } from '@desktop-client/hooks/useCachedSchedules';
-import { useSelectedDispatch } from '@desktop-client/hooks/useSelected';
+import { TransactionRowCells } from './TransactionRowCells';
 
 const ROW_HEIGHT = 32;
 const EXPANDED_MIN_HEIGHT = 64;
@@ -189,7 +188,9 @@ export function TransactionRow({
   return (
     <View
       style={{ height: currentHeight }}
-      data-testid={isTemporaryId(transaction.id) ? 'new-transaction' : undefined}
+      data-testid={
+        isTemporaryId(transaction.id) ? 'new-transaction' : undefined
+      }
     >
       <Row
         ref={rowRef}

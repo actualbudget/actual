@@ -1,4 +1,4 @@
-import { useIsTestEnv } from '@desktop-client/hooks/useIsTestEnv';
+import { useIsTestEnv } from '#hooks/useIsTestEnv';
 
 export function getColorScale(name: string): string[] {
   const scales: Record<string, string[]> = {

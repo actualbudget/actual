@@ -1,5 +1,4 @@
-import type { TransactionEntity } from 'loot-core/types/models';
-
+import type { TransactionEntity } from '@actual-app/core/types/models';
 import type { TransactionRowContentProps } from '../types';
 
 import { PreviewTransactionRowCells } from './PreviewTransactionRowCells';

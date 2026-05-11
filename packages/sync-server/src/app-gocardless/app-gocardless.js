@@ -2,11 +2,11 @@ import path from 'path';
 
 import express from 'express';
 
-import { sha256String } from '../util/hash';
+import { sha256String } from '#util/hash';
 import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
-} from '../util/middlewares';
+} from '#util/middlewares';
 
 import {
   AccountNotLinkedToRequisition,

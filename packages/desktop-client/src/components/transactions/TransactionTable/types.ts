@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 
-import type { IntegerAmount } from 'loot-core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -9,9 +9,9 @@ import type {
   RuleEntity,
   ScheduleEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
-import type { DropPosition } from '@desktop-client/hooks/useDragDrop';
+import type { DropPosition } from '#hooks/useDragDrop';
 
 export type TransactionColumnId =
   | 'date'

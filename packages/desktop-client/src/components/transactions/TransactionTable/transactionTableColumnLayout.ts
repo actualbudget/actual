@@ -1,9 +1,9 @@
+import { TRANSACTION_DATA_COLUMN_ORDER } from './transactionTableColumns';
 import type {
   TransactionColumnId,
   TransactionColumnWidths,
   VisibleTransactionColumn,
 } from './types';
-import { TRANSACTION_DATA_COLUMN_ORDER } from './transactionTableColumns';
 
 type PersistedColumnWidths = {
   version: 2;
@@ -35,9 +35,7 @@ function roundWidth(value: number) {
   return Math.round(value);
 }
 
-export function parseTransactionColumnWidthsPref(
-  value: string | undefined,
-): {
+export function parseTransactionColumnWidthsPref(value: string | undefined): {
   widths: Partial<TransactionColumnWidths>;
   originalWidths: Partial<TransactionColumnWidths>;
 } {
@@ -59,20 +57,25 @@ export function parseTransactionColumnWidthsPref(
     const parseWidthsRecord = (
       record: Partial<TransactionColumnWidths> | undefined,
     ) =>
-      Object.entries(record ?? {}).reduce<
-      Partial<TransactionColumnWidths>
-    >((memo, [columnId, width]) => {
-      if (typeof width !== 'number' || !Number.isFinite(width)) {
-        return memo;
-      }
+      Object.entries(record ?? {}).reduce<Partial<TransactionColumnWidths>>(
+        (memo, [columnId, width]) => {
+          if (typeof width !== 'number' || !Number.isFinite(width)) {
+            return memo;
+          }
 
-      if (!TRANSACTION_DATA_COLUMN_ORDER.includes(columnId as TransactionColumnId)) {
-        return memo;
-      }
+          if (
+            !TRANSACTION_DATA_COLUMN_ORDER.includes(
+              columnId as TransactionColumnId,
+            )
+          ) {
+            return memo;
+          }
 
-      memo[columnId as TransactionColumnId] = roundWidth(width);
-      return memo;
-    }, {});
+          memo[columnId as TransactionColumnId] = roundWidth(width);
+          return memo;
+        },
+        {},
+      );
 
     return {
       widths: parseWidthsRecord(parsed.widths),
@@ -99,7 +102,9 @@ export function getVisibleNeighborColumnId(
   visibleColumns: VisibleTransactionColumn[],
   activeColumnId: TransactionColumnId,
 ) {
-  const columnIndex = visibleColumns.findIndex(column => column.id === activeColumnId);
+  const columnIndex = visibleColumns.findIndex(
+    column => column.id === activeColumnId,
+  );
   if (columnIndex === -1) {
     return null;
   }
@@ -111,7 +116,9 @@ function getResizePair(
   visibleColumns: VisibleTransactionColumn[],
   activeColumnId: TransactionColumnId,
 ) {
-  const activeIndex = visibleColumns.findIndex(column => column.id === activeColumnId);
+  const activeIndex = visibleColumns.findIndex(
+    column => column.id === activeColumnId,
+  );
   if (activeIndex === -1) {
     return null;
   }
@@ -141,10 +148,7 @@ export function getVisibleColumnsWidth(
   widths: TransactionColumnWidths,
   visibleColumns: VisibleTransactionColumn[],
 ) {
-  return visibleColumns.reduce(
-    (total, column) => total + widths[column.id],
-    0,
-  );
+  return visibleColumns.reduce((total, column) => total + widths[column.id], 0);
 }
 
 function distributeExtraWidth(
@@ -184,7 +188,9 @@ export function resolveTransactionColumnWidths({
 }: ResolveColumnWidthsArgs): TransactionColumnWidths {
   const baseWidths = visibleColumns.reduce<TransactionColumnWidths>(
     (memo, column) => {
-      memo[column.id] = roundWidth(savedWidths?.[column.id] ?? column.defaultWidth);
+      memo[column.id] = roundWidth(
+        savedWidths?.[column.id] ?? column.defaultWidth,
+      );
       return memo;
     },
     {} as TransactionColumnWidths,
@@ -199,7 +205,11 @@ export function resolveTransactionColumnWidths({
     return baseWidths;
   }
 
-  return distributeExtraWidth(baseWidths, visibleColumns, availableWidth - baseTotal);
+  return distributeExtraWidth(
+    baseWidths,
+    visibleColumns,
+    availableWidth - baseTotal,
+  );
 }
 
 export function applyNeighborColumnResize({
@@ -223,7 +233,10 @@ export function applyNeighborColumnResize({
 
   const nextActiveWidth = Math.max(
     minActiveWidth,
-    Math.min(maxActiveWidth, roundWidth(widths[activeColumn.id] + adjustedDelta)),
+    Math.min(
+      maxActiveWidth,
+      roundWidth(widths[activeColumn.id] + adjustedDelta),
+    ),
   );
   const nextNeighborWidth = pairWidth - nextActiveWidth;
 

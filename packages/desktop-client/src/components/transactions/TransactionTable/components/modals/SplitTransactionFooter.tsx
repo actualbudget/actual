@@ -5,7 +5,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { useFormat } from '@desktop-client/hooks/useFormat';
+import { useFormat } from '#hooks/useFormat';
 
 type SplitTransactionFooterProps = {
   isValid: boolean;

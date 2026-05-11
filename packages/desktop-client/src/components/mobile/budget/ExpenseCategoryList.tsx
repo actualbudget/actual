@@ -3,16 +3,15 @@ import { DropIndicator, GridList, useDragAndDrop } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
-import { css } from '@emotion/css';
-
 import type {
   CategoryEntity,
   CategoryGroupEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { css } from '@emotion/css';
+
+import { useMoveCategoryMutation } from '#budget';
 
 import { ExpenseCategoryListItem } from './ExpenseCategoryListItem';
-
-import { useMoveCategoryMutation } from '@desktop-client/budget';
 
 type ExpenseCategoryListProps = {
   categoryGroup: CategoryGroupEntity;

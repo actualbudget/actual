@@ -2,12 +2,11 @@ import { useMemo } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { integerToCurrency } from '@actual-app/core/shared/util';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 
-import { integerToCurrency } from 'loot-core/shared/util';
-import type { TransactionEntity } from 'loot-core/types/models';
-
-import { InputCell } from '@desktop-client/components/table';
-import { useFormat } from '@desktop-client/hooks/useFormat';
+import { InputCell } from '#components/table';
+import { useFormat } from '#hooks/useFormat';
 
 type AmountCellProps = {
   id: TransactionEntity['id'];

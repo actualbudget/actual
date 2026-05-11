@@ -1,6 +1,6 @@
 import type { KeyboardEvent } from 'react';
 
-import type { TransactionEntity } from 'loot-core/types/models';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 
 type NavigationContext = {
   currentId: TransactionEntity['id'] | null;

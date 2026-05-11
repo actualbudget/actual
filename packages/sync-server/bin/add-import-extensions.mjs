@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, extname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,6 +8,19 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const buildDir = resolve(__dirname, '../build');
+const packageRoot = resolve(__dirname, '..');
+
+const packageJson = JSON.parse(
+  readFileSync(join(packageRoot, 'package.json'), 'utf-8'),
+);
+// publishConfig.imports already has ./build/src/ paths with .js extensions
+const importsMap = packageJson.publishConfig?.imports || {};
+
+// Sort wildcard patterns longest-prefix-first so more specific patterns
+// (e.g. #app-gocardless/services/tests/*) match before broader ones (#app-gocardless/*)
+const wildcardEntries = Object.entries(importsMap)
+  .filter(([p]) => p.includes('*'))
+  .sort(([a], [b]) => b.length - a.length);
 
 async function getAllJsFiles(dir) {
   const files = [];
@@ -50,15 +63,46 @@ function resolveImportPath(importPath, fromFile) {
   return `${importPath}.js`;
 }
 
+function toRelativePath(target, fromFile) {
+  const absoluteTarget = resolve(packageRoot, target);
+  let rel = relative(dirname(fromFile), absoluteTarget);
+  if (!rel.startsWith('.')) rel = './' + rel;
+  return rel.split('\\').join('/');
+}
+
+function resolveSubpathImport(importPath, fromFile) {
+  if (importsMap[importPath]) {
+    return toRelativePath(importsMap[importPath], fromFile);
+  }
+
+  for (const [pattern, target] of wildcardEntries) {
+    const prefix = pattern.replaceAll('*', '');
+    if (importPath.startsWith(prefix)) {
+      const wildcard = importPath.slice(prefix.length);
+      return toRelativePath(target.replaceAll('*', wildcard), fromFile);
+    }
+  }
+
+  console.warn(
+    `Warning: Could not resolve subpath import '${importPath}' from ${relative(buildDir, fromFile)}`,
+  );
+  return null;
+}
+
 function addExtensionsToImports(content, filePath) {
-  // Match relative imports: import ... from './path' or import ... from '../path'
-  // Also handle: import('./path') and require('./path')
   const importRegex =
-    /(?:import\s+(?:(?:\{[^}]*\}|\*\s+as\s+\w+|\w+)(?:\s*,\s*(?:\{[^}]*\}|\*\s+as\s+\w+|\w+))*\s+from\s+)?|import\s*\(|require\s*\()['"](\.\.?\/[^'"]+)['"]/g;
+    /(?:import\s+(?:(?:\{[^}]*\}|\*\s+as\s+\w+|\w+)(?:\s*,\s*(?:\{[^}]*\}|\*\s+as\s+\w+|\w+))*\s+from\s+)?|import\s*\(|require\s*\()['"]((\.\.?\/[^'"]+)|(#[^'"]+))['"]/g;
 
   return content.replace(importRegex, (match, importPath) => {
-    // importPath is the second capture group (the path)
     if (!importPath || typeof importPath !== 'string') {
+      return match;
+    }
+
+    if (importPath.startsWith('#')) {
+      const resolved = resolveSubpathImport(importPath, filePath);
+      if (resolved) {
+        return match.replace(importPath, resolved);
+      }
       return match;
     }
 

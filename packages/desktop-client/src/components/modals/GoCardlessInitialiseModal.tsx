@@ -7,20 +7,19 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
+import { getSecretsError } from '@actual-app/core/shared/errors';
 
-import { send } from 'loot-core/platform/client/connection';
-import { getSecretsError } from 'loot-core/shared/errors';
-
-import { Error } from '@desktop-client/components/alerts';
-import { Link } from '@desktop-client/components/common/Link';
+import { Error } from '#components/alerts';
+import { Link } from '#components/common/Link';
 import {
   Modal,
   ModalButtons,
   ModalCloseButton,
   ModalHeader,
-} from '@desktop-client/components/common/Modal';
-import { FormField, FormLabel } from '@desktop-client/components/forms';
-import type { Modal as ModalType } from '@desktop-client/modals/modalsSlice';
+} from '#components/common/Modal';
+import { FormField, FormLabel } from '#components/forms';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type GoCardlessInitialiseModalProps = Extract<
   ModalType,

@@ -14,16 +14,23 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-
 import {
   isTemporaryId,
   recalculateSplit,
   updateTransaction,
-} from 'loot-core/shared/transactions';
-import type { TransactionEntity } from 'loot-core/types/models';
+} from '@actual-app/core/shared/transactions';
+import type { TransactionEntity } from '@actual-app/core/types/models';
+import { makeTemporaryTransactions } from 'packages/desktop-client/src/components/transactions/table/utils';
 
-import { TransactionHeader } from './components/TransactionHeader';
+import { Table, useTableNavigator } from '#components/table';
+import type { TableHandleRef } from '#components/table';
+import { useSelectedItems } from '#hooks/useSelected';
+import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
+
 import { SplitTransactionModal } from './components/modals/SplitTransactionModal';
+import { TransactionHeader } from './components/TransactionHeader';
 import { TransactionRow } from './components/TransactionRow';
 import {
   createInitialState,
@@ -34,14 +41,6 @@ import {
 } from './TransactionTableState';
 import type { TransactionTableProps } from './types';
 import { useTransactionTableColumnLayout } from './useTransactionTableColumnLayout';
-import { makeTemporaryTransactions } from '../table/utils';
-
-import { Table, useTableNavigator } from '@desktop-client/components/table';
-import type { TableHandleRef } from '@desktop-client/components/table';
-import { useSelectedItems } from '@desktop-client/hooks/useSelected';
-import { useSplitsExpanded } from '@desktop-client/hooks/useSplitsExpanded';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
 
 const ROW_HEIGHT = 32;
 
@@ -96,9 +95,9 @@ export const TransactionTable = forwardRef(
     const tableRef = useRef<TableHandleRef<TransactionEntity>>(null);
     const tableContainerRef = useRef<HTMLDivElement>(null);
     const previousIsAdding = useRef(isAdding);
-    const previousTemporaryTransactionId = useRef<TransactionEntity['id'] | null>(
-      null,
-    );
+    const previousTemporaryTransactionId = useRef<
+      TransactionEntity['id'] | null
+    >(null);
     const selectedItems = useSelectedItems();
     const splitsExpanded = useSplitsExpanded();
     const dispatchRedux = useDispatch();
@@ -187,9 +186,12 @@ export const TransactionTable = forwardRef(
       );
     }, [splitModalTransactionId, splitModalTransactionsSource]);
 
-    const handleToggleSplit = useCallback((id: TransactionEntity['id']) => {
-      splitsExpanded.dispatch({ type: 'toggle-split', id });
-    }, [splitsExpanded]);
+    const handleToggleSplit = useCallback(
+      (id: TransactionEntity['id']) => {
+        splitsExpanded.dispatch({ type: 'toggle-split', id });
+      },
+      [splitsExpanded],
+    );
 
     const handleToggleRowExpansion = useCallback(
       (id: TransactionEntity['id']) => {
@@ -257,7 +259,8 @@ export const TransactionTable = forwardRef(
     });
 
     useEffect(() => {
-      const currentTemporaryTransactionId = temporaryTransactions[0]?.id ?? null;
+      const currentTemporaryTransactionId =
+        temporaryTransactions[0]?.id ?? null;
 
       if (
         currentTemporaryTransactionId &&
@@ -273,7 +276,9 @@ export const TransactionTable = forwardRef(
     const handleSave = useCallback(
       (transaction: TransactionEntity) => {
         if (isTemporaryId(transaction.id)) {
-          setTemporaryTransactions(prev => updateTransaction(prev, transaction).data);
+          setTemporaryTransactions(
+            prev => updateTransaction(prev, transaction).data,
+          );
           return;
         }
 
@@ -282,12 +287,9 @@ export const TransactionTable = forwardRef(
       [onSave],
     );
 
-    const handleOpenSplitModal = useCallback(
-      (id: TransactionEntity['id']) => {
-        setSplitModalTransactionId(id);
-      },
-      [],
-    );
+    const handleOpenSplitModal = useCallback((id: TransactionEntity['id']) => {
+      setSplitModalTransactionId(id);
+    }, []);
 
     const handleCloseSplitModal = useCallback(() => {
       setSplitModalTransactionId(null);
@@ -480,6 +482,8 @@ export const TransactionTable = forwardRef(
       onNavigateToSchedule,
       onApplyRules,
       onManagePayees,
+      handleOpenSplitModal,
+      allowSplitTransaction,
       showSelection,
       handleCloseAddTransaction,
       handleAddTemporaryTransaction,
@@ -493,13 +497,13 @@ export const TransactionTable = forwardRef(
     const renderRow = useCallback(
       ({
         item,
-        index,
+        _index,
         editing,
         focusedField,
         onEdit,
       }: {
         item: TransactionEntity;
-        index: number;
+        _index: number;
         editing: boolean;
         focusedField: string | null;
         onEdit: (id: TransactionEntity['id'], field: string) => void;

@@ -1,23 +1,26 @@
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
+import {
+  currentDate,
+  dayFromDate,
+  parseDate,
+} from '@actual-app/core/shared/months';
+import { amountToInteger, integerToAmount } from '@actual-app/core/shared/util';
+import type { LimitTemplate } from '@actual-app/core/types/models/templates';
 import { css } from '@emotion/css';
 import { getDay } from 'date-fns/getDay';
 import { setDay } from 'date-fns/setDay';
 
-import { currentDate, dayFromDate, parseDate } from 'loot-core/shared/months';
-import { amountToInteger, integerToAmount } from 'loot-core/shared/util';
-import type { LimitTemplate } from 'loot-core/types/models/templates';
-
-import { updateTemplate } from '@desktop-client/components/budget/goals/actions';
-import type { Action } from '@desktop-client/components/budget/goals/actions';
-import { FormField, FormLabel } from '@desktop-client/components/forms';
-import { AmountInput } from '@desktop-client/components/util/AmountInput';
-import { useDaysOfWeek } from '@desktop-client/hooks/useDaysOfWeek';
-import { useFormat } from '@desktop-client/hooks/useFormat';
+import { updateTemplate } from '#components/budget/goals/actions';
+import type { Action } from '#components/budget/goals/actions';
+import { FormField, FormLabel } from '#components/forms';
+import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
+import { AmountInput } from '#components/util/AmountInput';
+import { useDaysOfWeek } from '#hooks/useDaysOfWeek';
+import { useFormat } from '#hooks/useFormat';
 
 type LimitAutomationProps = {
   template: LimitTemplate;
@@ -112,26 +115,21 @@ export const LimitAutomation = ({
 
       <SpaceBetween align="center" gap={10} style={{ marginTop: 10 }}>
         {period === 'weekly' && amountField}
-        <FormField key="excess-funds-field" style={{ flex: 1 }}>
-          <FormLabel
-            title={t('Excess funds mode')}
-            htmlFor="excess-funds-field"
-          />
-
-          <Select
-            id="excess-funds-field"
-            value={hold}
-            onChange={value =>
-              dispatch(updateTemplate({ type: 'limit', hold: value }))
+        <FormField key="hold-overflow-field" style={{ flex: 1 }}>
+          <LabeledCheckbox
+            id="hold-overflow-field"
+            checked={!!hold}
+            onChange={e =>
+              dispatch(
+                updateTemplate({ type: 'limit', hold: e.target.checked }),
+              )
             }
-            options={[
-              [false, t('Remove all funds over the limit')],
-              [true, t('Retain any funds over the limit')],
-            ]}
-            className={selectButtonClassName}
-          />
+          >
+            <span style={{ marginLeft: 6, fontSize: 12, whiteSpace: 'nowrap' }}>
+              <Trans>Retain existing funds over the cap</Trans>
+            </span>
+          </LabeledCheckbox>
         </FormField>
-        {period !== 'weekly' && <View style={{ flex: 1 }} />}
       </SpaceBetween>
     </>
   );

@@ -12,11 +12,10 @@ import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme as themeStyle } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { ColorPalette } from './ColorPalette';
-
-import { Link } from '@desktop-client/components/common/Link';
-import { FixedSizeList } from '@desktop-client/components/FixedSizeList';
-import { useThemeCatalog } from '@desktop-client/hooks/useThemeCatalog';
+import { Link } from '#components/common/Link';
+import { FixedSizeList } from '#components/FixedSizeList';
+import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useThemeCatalog } from '#hooks/useThemeCatalog';
 import {
   embedThemeFonts,
   extractRepoOwner,
@@ -24,11 +23,10 @@ import {
   generateThemeId,
   normalizeGitHubRepo,
   validateThemeCss,
-} from '@desktop-client/style/customThemes';
-import type {
-  CatalogTheme,
-  InstalledTheme,
-} from '@desktop-client/style/customThemes';
+} from '#style/customThemes';
+import type { CatalogTheme, InstalledTheme } from '#style/customThemes';
+
+import { ColorPalette } from './ColorPalette';
 
 // Theme item dimensions
 const ITEMS_PER_ROW = 3;
@@ -51,11 +49,12 @@ export function ThemeInstaller({
   mode,
 }: ThemeInstallerProps) {
   const { t } = useTranslation();
+  const [customCssOverride, setCustomCssOverride] =
+    useGlobalPref('customCssOverride');
   const [selectedCatalogTheme, setSelectedCatalogTheme] =
     useState<CatalogTheme | null>(null);
   const [erroringTheme, setErroringTheme] = useState<CatalogTheme | null>(null);
   const [pastedCss, setPastedCss] = useState('');
-  const [cachedCatalogCss, setCachedCatalogCss] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -66,20 +65,14 @@ export function ThemeInstaller({
     error: catalogError,
   } = useThemeCatalog();
 
-  // Initialize state from installed theme
+  // Mount-only: pref changes while the installer is open should not clobber
+  // in-progress edits to the textarea.
   useEffect(() => {
-    if (!installedTheme) return;
-
-    if (installedTheme.repo) {
-      // Catalog theme installed — restore overrideCss into text area if present
-      if (installedTheme.overrideCss) {
-        setPastedCss(installedTheme.overrideCss);
-      }
-    } else {
-      // Custom pasted CSS — restore into text area
-      setPastedCss(installedTheme.cssContent);
+    if (customCssOverride) {
+      setPastedCss(customCssOverride);
     }
-  }, [installedTheme]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Calculate theme item width based on container width (always 3 per row)
   const getItemWidth = useCallback((containerWidth: number) => {
@@ -114,7 +107,6 @@ export function ThemeInstaller({
       errorMessage: string;
       catalogTheme?: CatalogTheme | null;
       baseTheme?: 'light' | 'dark' | 'midnight';
-      overrideCss?: string;
     }) => {
       setError(null);
       setErroringTheme(null);
@@ -136,12 +128,6 @@ export function ThemeInstaller({
               : 'light'
             : options.baseTheme,
         };
-        if (options.overrideCss) {
-          newTheme.overrideCss = validateThemeCss(options.overrideCss);
-        }
-        if (options.catalogTheme) {
-          setCachedCatalogCss(validatedCss);
-        }
         onInstall(newTheme);
         // Only set selectedCatalogTheme on success if it's a catalog theme
         if (options.catalogTheme) {
@@ -177,10 +163,9 @@ export function ThemeInstaller({
         id: generateThemeId(normalizedRepo),
         errorMessage: t('Failed to load theme'),
         catalogTheme: theme,
-        overrideCss: pastedCss.trim() || undefined,
       });
     },
-    [installTheme, pastedCss, t],
+    [installTheme, t],
   );
 
   const handlePastedCssChange = useCallback((value: string) => {
@@ -189,38 +174,19 @@ export function ThemeInstaller({
     setError(null);
   }, []);
 
-  const handleInstallPastedCss = useCallback(() => {
-    // Determine the base catalog CSS: prefer the in-session selection,
-    // fall back to the previously installed catalog theme
-    const hasCatalog = selectedCatalogTheme || installedTheme?.repo;
-    const baseCss = selectedCatalogTheme
-      ? cachedCatalogCss
-      : (installedTheme?.cssContent ?? '');
-    const repo = selectedCatalogTheme
-      ? normalizeGitHubRepo(selectedCatalogTheme.repo)
-      : (installedTheme?.repo ?? '');
-
-    void installTheme({
-      css: hasCatalog ? baseCss : '',
-      name:
-        selectedCatalogTheme?.name ?? installedTheme?.name ?? t('Custom Theme'),
-      repo,
-      id: repo
-        ? generateThemeId(repo)
-        : generateThemeId(`pasted-${Date.now()}`),
-      errorMessage: t('Failed to validate theme CSS'),
-      catalogTheme: selectedCatalogTheme,
-      baseTheme: installedTheme?.baseTheme,
-      overrideCss: pastedCss.trim() || undefined,
-    });
-  }, [
-    pastedCss,
-    selectedCatalogTheme,
-    cachedCatalogCss,
-    installedTheme,
-    installTheme,
-    t,
-  ]);
+  const handleApplyOverride = useCallback(() => {
+    setError(null);
+    setErroringTheme(null);
+    try {
+      const validated = pastedCss.trim() ? validateThemeCss(pastedCss) : '';
+      setCustomCssOverride(validated);
+      setPastedCss(validated);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : t('Failed to validate theme CSS'),
+      );
+    }
+  }, [pastedCss, setCustomCssOverride, t]);
 
   return (
     <View
@@ -472,11 +438,7 @@ export function ThemeInstaller({
             marginTop: 8,
           }}
         >
-          <Button
-            variant="normal"
-            onPress={handleInstallPastedCss}
-            isDisabled={isLoading}
-          >
+          <Button variant="normal" onPress={handleApplyOverride}>
             <Trans>Apply</Trans>
           </Button>
         </View>

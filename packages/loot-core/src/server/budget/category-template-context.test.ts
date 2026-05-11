@@ -2,18 +2,21 @@ import { vi } from 'vitest';
 
 import * as aql from '#server/aql';
 import * as db from '#server/db';
+import type { DbCategory } from '#server/db';
 import { amountToInteger } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
-import type { Template } from '#types/models/templates';
+import type { ByTemplate, Template } from '#types/models/templates';
 
 import * as actions from './actions';
 import { CategoryTemplateContext } from './category-template-context';
+import { distributeRemainder } from './goal-template';
+import * as statements from './statements';
 
 // Mock getSheetValue and getCategories
 vi.mock('./actions', () => ({
   getSheetValue: vi.fn(),
   getSheetBoolean: vi.fn(),
-  isReflectBudget: vi.fn(),
+  isTrackingBudget: vi.fn(),
 }));
 
 vi.mock('#server/db', () => ({
@@ -22,6 +25,10 @@ vi.mock('#server/db', () => ({
 
 vi.mock('#server/aql', () => ({
   aqlQuery: vi.fn(),
+}));
+
+vi.mock('./statements', () => ({
+  getActiveSchedules: vi.fn(),
 }));
 
 // Helper function to mock preferences (hideFraction and defaultCurrencyCode)
@@ -56,8 +63,17 @@ class TestCategoryTemplateContext extends CategoryTemplateContext {
     fromLastMonth: number,
     budgeted: number,
     currencyCode: string = 'USD',
+    hideDecimal: boolean = false,
   ) {
-    super(templates, category, month, fromLastMonth, budgeted, currencyCode);
+    super(
+      templates,
+      category,
+      month,
+      fromLastMonth,
+      budgeted,
+      currencyCode,
+      hideDecimal,
+    );
   }
 }
 
@@ -860,7 +876,7 @@ describe('CategoryTemplateContext', () => {
 
     it('should calculate monthly amount needed for multiple targets', () => {
       const result = CategoryTemplateContext.runBy(instance);
-      expect(result).toBe(66667);
+      expect(result.toBudget).toBe(66667);
     });
 
     it('should handle repeating targets', () => {
@@ -890,7 +906,7 @@ describe('CategoryTemplateContext', () => {
       );
 
       const result = CategoryTemplateContext.runBy(instance);
-      expect(result).toBe(83333);
+      expect(result.toBudget).toBe(83333);
     });
 
     it('should handle existing balance', () => {
@@ -918,7 +934,7 @@ describe('CategoryTemplateContext', () => {
       );
 
       const result = CategoryTemplateContext.runBy(instance);
-      expect(result).toBe(66500); // (1000 + 2000 - 5) / 3
+      expect(result.toBudget).toBe(66500); // (1000 + 2000 - 5) / 3
     });
   });
 
@@ -1092,6 +1108,41 @@ describe('CategoryTemplateContext', () => {
       expect(result).toBe(101);
     });
 
+    it('remainder loop terminates when per-context share rounds to zero', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const makeInstance = () =>
+        new TestCategoryTemplateContext(
+          [
+            {
+              type: 'remainder',
+              weight: 1,
+              directive: 'template',
+              priority: null,
+            },
+          ],
+          category,
+          '2024-01',
+          0,
+          0,
+        );
+
+      const contexts = [
+        makeInstance(),
+        makeInstance(),
+        makeInstance(),
+        makeInstance(),
+        makeInstance(),
+      ];
+
+      const remaining = distributeRemainder(contexts, 2);
+      expect(remaining).toBe(2);
+    });
+
     it('remainder wont over budget', async () => {
       const category: CategoryEntity = {
         id: 'test',
@@ -1151,7 +1202,7 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
-      vi.mocked(actions.isReflectBudget).mockResolvedValueOnce(false);
+      vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
       mockPreferences(false, 'USD');
 
       // Initialize the template
@@ -1216,7 +1267,7 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
-      vi.mocked(actions.isReflectBudget).mockResolvedValueOnce(false);
+      vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
       mockPreferences(false, 'USD');
 
       // Initialize the template
@@ -1271,7 +1322,7 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
-      vi.mocked(actions.isReflectBudget).mockResolvedValueOnce(false);
+      vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
       mockPreferences(false, 'USD');
 
       // Initialize the template
@@ -1331,7 +1382,7 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
-      vi.mocked(actions.isReflectBudget).mockResolvedValueOnce(false);
+      vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
       mockPreferences(false, 'USD');
 
       // Initialize the template
@@ -1374,7 +1425,7 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(10000); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
-      vi.mocked(actions.isReflectBudget).mockResolvedValueOnce(false);
+      vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
       mockPreferences(false, 'USD');
 
       // Initialize the template
@@ -1419,7 +1470,7 @@ describe('CategoryTemplateContext', () => {
       // Mock the sheet values needed for init
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
-      vi.mocked(actions.isReflectBudget).mockResolvedValueOnce(false);
+      vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
       mockPreferences(true, 'USD');
 
       // Initialize the template
@@ -1462,7 +1513,7 @@ describe('CategoryTemplateContext', () => {
 
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
-      vi.mocked(actions.isReflectBudget).mockResolvedValueOnce(false);
+      vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
       mockPreferences(true, 'JPY');
 
       const instance = await CategoryTemplateContext.init(
@@ -1494,7 +1545,7 @@ describe('CategoryTemplateContext', () => {
 
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
-      vi.mocked(actions.isReflectBudget).mockResolvedValueOnce(false);
+      vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
       mockPreferences(true, 'JPY');
 
       const instance = await CategoryTemplateContext.init(
@@ -1653,6 +1704,829 @@ describe('CategoryTemplateContext', () => {
 
       expect(valuesJPY.budgeted).toBe(100);
       expect(valuesUSD.budgeted).toBe(10000);
+    });
+  });
+
+  describe('per-template attribution', () => {
+    const category: CategoryEntity = {
+      id: 'attribution-cat',
+      name: 'Attribution Category',
+      group: 'g',
+      is_income: false,
+    };
+
+    it('sums per-template contributions to the engine total for sibling periodic templates', async () => {
+      const templates: Template[] = [
+        {
+          type: 'periodic',
+          amount: 100,
+          period: { period: 'month', amount: 1 },
+          starting: '2024-01-01',
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'periodic',
+          amount: 50,
+          period: { period: 'month', amount: 1 },
+          starting: '2024-01-01',
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      const instance = new TestCategoryTemplateContext(
+        templates,
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+      await instance.runTemplatesForPriority(1, 1_000_000, 1_000_000);
+      const values = instance.getValues();
+      const contributions = templates.map(
+        t => values.perTemplateContribution.get(t) ?? 0,
+      );
+      expect(contributions).toEqual([10000, 5000]);
+      expect(contributions.reduce((a, b) => a + b, 0)).toBe(values.budgeted);
+    });
+
+    it('weights `by` siblings by their effective per-month need from runBy, not raw target', async () => {
+      // The redistribute weight uses runBy's effective per-template need
+      // (back-interpolated over the shortest sibling window) rather than
+      // raw target amounts.
+      const templates: Template[] = [
+        {
+          type: 'by',
+          amount: 1200,
+          month: '2025-01',
+          annual: false,
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'by',
+          amount: 100,
+          month: '2024-02',
+          annual: false,
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      const instance = new TestCategoryTemplateContext(
+        templates,
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+      await instance.runTemplatesForPriority(1, 1_000_000, 1_000_000);
+      const values = instance.getValues();
+      const longHorizon = values.perTemplateContribution.get(templates[0]) ?? 0;
+      const urgent = values.perTemplateContribution.get(templates[1]) ?? 0;
+      expect(longHorizon + urgent).toBe(values.budgeted);
+
+      // Raw-amount weighting would give the urgent $100 template only a
+      // 100/1300 share. Need-based weighting gives it much more.
+      const rawShareUrgent = Math.round((values.budgeted * 100) / (100 + 1200));
+      expect(urgent).toBeGreaterThan(rawShareUrgent * 4);
+    });
+
+    it('scales per-template contributions when a balance cap clamps the total', async () => {
+      const templates: Template[] = [
+        {
+          type: 'periodic',
+          amount: 100,
+          period: { period: 'month', amount: 1 },
+          starting: '2024-01-01',
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'periodic',
+          amount: 50,
+          period: { period: 'month', amount: 1 },
+          starting: '2024-01-01',
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'limit',
+          amount: 120,
+          hold: false,
+          period: 'monthly',
+          directive: 'template',
+          priority: null,
+        },
+      ];
+      const instance = new TestCategoryTemplateContext(
+        templates,
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+      await instance.runTemplatesForPriority(1, 1_000_000, 1_000_000);
+      const values = instance.getValues();
+      // $150 demanded, cap $120; per-row contributions sum to the clamp.
+      const sum = templates.reduce(
+        (acc, t) => acc + (values.perTemplateContribution.get(t) ?? 0),
+        0,
+      );
+      expect(sum).toBe(values.budgeted);
+      expect(values.budgeted).toBe(12000);
+      for (const t of templates) {
+        expect(
+          values.perTemplateContribution.get(t) ?? 0,
+        ).toBeGreaterThanOrEqual(0);
+      }
+    });
+
+    it('attributes remainder rules per template by weight', async () => {
+      const templates: Template[] = [
+        {
+          type: 'remainder',
+          weight: 3,
+          directive: 'template',
+          priority: null,
+        },
+        {
+          type: 'remainder',
+          weight: 1,
+          directive: 'template',
+          priority: null,
+        },
+      ];
+      const instance = new TestCategoryTemplateContext(
+        templates,
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+      instance.runRemainder(100, 25);
+      const values = instance.getValues();
+      expect(values.perTemplateContribution.get(templates[0])).toBe(75);
+      expect(values.perTemplateContribution.get(templates[1])).toBe(25);
+    });
+
+    it('runBy returns a per-template need map keyed by template reference', () => {
+      const templates: ByTemplate[] = [
+        {
+          type: 'by',
+          amount: 1200,
+          month: '2024-12',
+          annual: false,
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'by',
+          amount: 600,
+          month: '2024-12',
+          annual: false,
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      const instance = new TestCategoryTemplateContext(
+        templates,
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+      const result = CategoryTemplateContext.runBy(instance);
+      // Same horizon for both, so per-template need == target amount.
+      expect(result.perTemplateNeed.get(templates[0])).toBe(120000);
+      expect(result.perTemplateNeed.get(templates[1])).toBe(60000);
+    });
+  });
+
+  describe('validation (init checks)', () => {
+    const category: CategoryEntity = {
+      id: 'val-cat',
+      name: 'Validation Category',
+      group: 'g',
+      is_income: false,
+    };
+
+    beforeEach(() => {
+      mockPreferences(false, 'USD');
+      vi.mocked(actions.getSheetValue).mockResolvedValue(0);
+      vi.mocked(actions.getSheetBoolean).mockResolvedValue(false);
+      vi.mocked(actions.isTrackingBudget).mockReturnValue(false);
+    });
+
+    it('throws when a schedule template references a non-existent schedule', async () => {
+      vi.mocked(statements.getActiveSchedules).mockResolvedValue([
+        { name: 'Rent', id: 's1' },
+      ] as Awaited<ReturnType<typeof statements.getActiveSchedules>>);
+      const templates: Template[] = [
+        {
+          type: 'schedule',
+          name: 'Internet',
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      await expect(
+        CategoryTemplateContext.init(templates, category, '2024-01', 0),
+      ).rejects.toThrow(/Schedule Internet does not exist/);
+    });
+
+    it('throws when schedule and by templates have mismatched priorities', async () => {
+      vi.mocked(statements.getActiveSchedules).mockResolvedValue([
+        { name: 'Rent', id: 's1' },
+      ] as Awaited<ReturnType<typeof statements.getActiveSchedules>>);
+      const templates: Template[] = [
+        {
+          type: 'schedule',
+          name: 'Rent',
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'by',
+          amount: 1200,
+          month: '2024-12',
+          annual: false,
+          directive: 'template',
+          priority: 2,
+        },
+      ];
+      await expect(
+        CategoryTemplateContext.init(templates, category, '2024-01', 0),
+      ).rejects.toThrow(
+        /Schedule and By templates must be the same priority level/,
+      );
+    });
+
+    it('throws when a non-recurring `by` target month is in the past', async () => {
+      vi.mocked(statements.getActiveSchedules).mockResolvedValue(
+        [] as Awaited<ReturnType<typeof statements.getActiveSchedules>>,
+      );
+      const templates: Template[] = [
+        {
+          type: 'by',
+          amount: 1200,
+          month: '2023-12',
+          annual: false,
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      await expect(
+        CategoryTemplateContext.init(templates, category, '2024-06', 0),
+      ).rejects.toThrow(
+        /Target month has passed, remove or update the target month/,
+      );
+    });
+
+    it('accepts a past `by` target when annual or repeat is set (engine rolls it forward)', async () => {
+      vi.mocked(statements.getActiveSchedules).mockResolvedValue(
+        [] as Awaited<ReturnType<typeof statements.getActiveSchedules>>,
+      );
+      const templates: Template[] = [
+        {
+          type: 'by',
+          amount: 1200,
+          month: '2023-12',
+          annual: true,
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      await expect(
+        CategoryTemplateContext.init(templates, category, '2024-06', 0),
+      ).resolves.toBeDefined();
+    });
+
+    it('throws when a percentage template references an unknown income category', async () => {
+      vi.mocked(statements.getActiveSchedules).mockResolvedValue(
+        [] as Awaited<ReturnType<typeof statements.getActiveSchedules>>,
+      );
+      vi.mocked(db.getCategories).mockResolvedValue([
+        {
+          id: 'inc-1',
+          name: 'Salary',
+          is_income: 1,
+          cat_group: 'g-income',
+          sort_order: 0,
+          hidden: 0,
+          tombstone: 0,
+        } satisfies DbCategory,
+      ]);
+      const templates: Template[] = [
+        {
+          type: 'percentage',
+          percent: 10,
+          previous: false,
+          category: 'Bonus',
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      await expect(
+        CategoryTemplateContext.init(templates, category, '2024-01', 0),
+      ).rejects.toThrow(/is not found in available income categories/i);
+    });
+
+    it('rolls a past `by` target forward by its annual period', async () => {
+      // Past target with annual:true is rolled forward by 12 months until
+      // the target is in the future, then budgeted normally.
+      vi.mocked(statements.getActiveSchedules).mockResolvedValue(
+        [] as Awaited<ReturnType<typeof statements.getActiveSchedules>>,
+      );
+      const templates: Template[] = [
+        {
+          type: 'by',
+          amount: 1200,
+          month: '2023-12',
+          annual: true,
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      const ctx = await CategoryTemplateContext.init(
+        templates,
+        category,
+        '2024-06',
+        0,
+      );
+      const budgeted = await ctx.runTemplatesForPriority(
+        1,
+        1_000_000,
+        1_000_000,
+      );
+      expect(budgeted).toBeGreaterThan(0);
+    });
+
+    it('accepts a percentage template that uses an income category id', async () => {
+      // CategoryAutocomplete stores the id; the case-folded name is also
+      // accepted for text-template compatibility.
+      vi.mocked(statements.getActiveSchedules).mockResolvedValue(
+        [] as Awaited<ReturnType<typeof statements.getActiveSchedules>>,
+      );
+      vi.mocked(db.getCategories).mockResolvedValue([
+        {
+          id: 'inc-1',
+          name: 'Salary',
+          is_income: 1,
+          cat_group: 'g-income',
+          sort_order: 0,
+          hidden: 0,
+          tombstone: 0,
+        } satisfies DbCategory,
+      ]);
+      const templates: Template[] = [
+        {
+          type: 'percentage',
+          percent: 10,
+          previous: false,
+          category: 'inc-1',
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      await expect(
+        CategoryTemplateContext.init(templates, category, '2024-01', 0),
+      ).resolves.toBeDefined();
+    });
+
+    it('accepts the special `all income` and `available funds` source aliases', async () => {
+      vi.mocked(statements.getActiveSchedules).mockResolvedValue(
+        [] as Awaited<ReturnType<typeof statements.getActiveSchedules>>,
+      );
+      vi.mocked(db.getCategories).mockResolvedValue([] as DbCategory[]);
+      const templates: Template[] = [
+        {
+          type: 'percentage',
+          percent: 10,
+          previous: false,
+          category: 'all income',
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'percentage',
+          percent: 5,
+          previous: false,
+          category: 'available funds',
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      await expect(
+        CategoryTemplateContext.init(templates, category, '2024-01', 0),
+      ).resolves.toBeDefined();
+    });
+
+    it('throws when more than one limit template is defined', () => {
+      const templates: Template[] = [
+        {
+          type: 'limit',
+          amount: 100,
+          hold: false,
+          period: 'monthly',
+          directive: 'template',
+          priority: null,
+        },
+        {
+          type: 'limit',
+          amount: 200,
+          hold: false,
+          period: 'monthly',
+          directive: 'template',
+          priority: null,
+        },
+      ];
+      expect(
+        () =>
+          new TestCategoryTemplateContext(templates, category, '2024-01', 0, 0),
+      ).toThrow(/Only one .up to. allowed per category/);
+    });
+
+    it('throws when a weekly limit has no start date', () => {
+      const templates: Template[] = [
+        {
+          type: 'limit',
+          amount: 50,
+          hold: false,
+          period: 'weekly',
+          directive: 'template',
+          priority: null,
+        },
+      ];
+      expect(
+        () =>
+          new TestCategoryTemplateContext(templates, category, '2024-01', 0, 0),
+      ).toThrow(/Weekly limit requires a start date/);
+    });
+
+    it('throws when a limit period is not daily/weekly/monthly', () => {
+      const templates: Template[] = [
+        {
+          type: 'limit',
+          amount: 50,
+          hold: false,
+          // @ts-expect-error deliberately invalid period value
+          period: 'fortnightly',
+          directive: 'template',
+          priority: null,
+        },
+      ];
+      expect(
+        () =>
+          new TestCategoryTemplateContext(templates, category, '2024-01', 0, 0),
+      ).toThrow(/Invalid limit period/);
+    });
+
+    it('throws when more than one spend template is defined', () => {
+      const templates: Template[] = [
+        {
+          type: 'spend',
+          amount: 100,
+          from: '2024-01',
+          month: '2024-12',
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'spend',
+          amount: 200,
+          from: '2024-01',
+          month: '2024-12',
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      expect(
+        () =>
+          new TestCategoryTemplateContext(templates, category, '2024-01', 0, 0),
+      ).toThrow(/Only one spend template is allowed per category/);
+    });
+
+    it('throws when more than one #goal directive is defined', () => {
+      const templates: Template[] = [
+        { type: 'goal', amount: 1000, directive: 'goal' },
+        { type: 'goal', amount: 2000, directive: 'goal' },
+      ];
+      expect(
+        () =>
+          new TestCategoryTemplateContext(templates, category, '2024-01', 0, 0),
+      ).toThrow(/Only one #goal is allowed per category/);
+    });
+
+    it('throws when a periodic template uses an unknown period unit', async () => {
+      vi.mocked(statements.getActiveSchedules).mockResolvedValue(
+        [] as Awaited<ReturnType<typeof statements.getActiveSchedules>>,
+      );
+      const templates: Template[] = [
+        {
+          type: 'periodic',
+          amount: 100,
+          // @ts-expect-error deliberately invalid period unit
+          period: { period: 'fortnight', amount: 1 },
+          starting: '2024-01-01',
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      const ctx = await CategoryTemplateContext.init(
+        templates,
+        category,
+        '2024-01',
+        0,
+      );
+      await expect(
+        ctx.runTemplatesForPriority(1, 1_000_000, 1_000_000),
+      ).rejects.toThrow(/Unrecognized periodic period/);
+    });
+  });
+
+  describe('further engine coverage', () => {
+    const category: CategoryEntity = {
+      id: 'engine-cat',
+      name: 'Engine Category',
+      group: 'g',
+      is_income: false,
+    };
+    const incomeCategory: CategoryEntity = {
+      id: 'income-cat',
+      name: 'Income',
+      group: 'g',
+      is_income: true,
+    };
+
+    it('clamps remainder allocation when the per-category cap is reached', () => {
+      // Cap $100, carryover $30 → remainder can only contribute up to $70
+      // to fill the gap, even though perWeight × weight would give $80.
+      const templates: Template[] = [
+        {
+          type: 'limit',
+          amount: 100,
+          hold: false,
+          period: 'monthly',
+          directive: 'template',
+          priority: null,
+        },
+        {
+          type: 'remainder',
+          weight: 1,
+          directive: 'template',
+          priority: null,
+        },
+      ];
+      const instance = new TestCategoryTemplateContext(
+        templates,
+        category,
+        '2024-01',
+        3000,
+        0,
+      );
+      expect(instance.runRemainder(10000, 8000)).toBe(7000);
+    });
+
+    it('drops sub-dollar amounts from remainder when hideDecimal is set', () => {
+      const templates: Template[] = [
+        {
+          type: 'remainder',
+          weight: 1,
+          directive: 'template',
+          priority: null,
+        },
+      ];
+      const instance = new TestCategoryTemplateContext(
+        templates,
+        category,
+        '2024-01',
+        0,
+        0,
+        'USD',
+        true,
+      );
+      const result = instance.runRemainder(20000, 12345);
+      expect(result).toBe(12300);
+    });
+
+    it('negates the budget for income categories at non-zero priority', async () => {
+      // Income categories produce funds rather than consume them.
+      const templates: Template[] = [
+        {
+          type: 'periodic',
+          amount: 100,
+          period: { period: 'month', amount: 1 },
+          starting: '2024-01-01',
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      const instance = new TestCategoryTemplateContext(
+        templates,
+        incomeCategory,
+        '2024-01',
+        0,
+        0,
+      );
+      const result = await instance.runTemplatesForPriority(
+        1,
+        1_000_000,
+        1_000_000,
+      );
+      expect(result).toBe(-10000);
+    });
+
+    it('reports limit excess when carried-over balance exceeds a weekly cap', () => {
+      // Aggregate cap = 5 week-starts in Jan 2024 × $50 = $250. Carryover
+      // $300 → excess $50.
+      const templates: Template[] = [
+        {
+          type: 'limit',
+          amount: 50,
+          hold: false,
+          period: 'weekly',
+          start: '2024-01-01',
+          directive: 'template',
+          priority: null,
+        },
+      ];
+      const instance = new TestCategoryTemplateContext(
+        templates,
+        category,
+        '2024-01',
+        30000,
+        0,
+      );
+      expect(instance.getLimitExcess()).toBe(5000);
+    });
+
+    it('runAll iterates priorities in order and budgets the high-priority template first', async () => {
+      const templates: Template[] = [
+        {
+          type: 'periodic',
+          amount: 100,
+          period: { period: 'month', amount: 1 },
+          starting: '2024-01-01',
+          directive: 'template',
+          priority: 1,
+        },
+        {
+          type: 'periodic',
+          amount: 50,
+          period: { period: 'month', amount: 1 },
+          starting: '2024-01-01',
+          directive: 'template',
+          priority: 2,
+        },
+      ];
+      const instance = new TestCategoryTemplateContext(
+        templates,
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+      const total = await instance.runAll(1_000_000);
+      expect(total).toBe(15000);
+      const values = instance.getValues();
+      expect(values.budgeted).toBe(15000);
+    });
+
+    it('partial-month coverage when a weekly limit starts mid-month', async () => {
+      // Week-starts in January from 2024-01-15: 15, 22, 29 → 3 × $50.
+      const templates: Template[] = [
+        {
+          type: 'simple',
+          monthly: 200,
+          limit: {
+            amount: 50,
+            hold: false,
+            period: 'weekly',
+            start: '2024-01-15',
+          },
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      const instance = new TestCategoryTemplateContext(
+        templates,
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+      const result = await instance.runTemplatesForPriority(
+        1,
+        1_000_000,
+        1_000_000,
+      );
+      expect(result).toBe(15000);
+    });
+
+    it('does not double-count weeks for a weekly limit starting before the month', async () => {
+      // Limit starts in Dec; only the 5 week-starts inside Jan (1, 8, 15,
+      // 22, 29) count.
+      const templates: Template[] = [
+        {
+          type: 'simple',
+          monthly: 1000,
+          limit: {
+            amount: 100,
+            hold: false,
+            period: 'weekly',
+            start: '2023-12-25',
+          },
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      const instance = new TestCategoryTemplateContext(
+        templates,
+        category,
+        '2024-01',
+        0,
+        0,
+      );
+      const result = await instance.runTemplatesForPriority(
+        1,
+        1_000_000,
+        1_000_000,
+      );
+      expect(result).toBe(50000);
+    });
+
+    it('returns zero excess when hold is set on a weekly limit, even with carryover above the cap', () => {
+      // hold=true keeps the surplus in the category rather than releasing
+      // it back to To Budget.
+      const templates: Template[] = [
+        {
+          type: 'limit',
+          amount: 50,
+          hold: true,
+          period: 'weekly',
+          start: '2024-01-01',
+          directive: 'template',
+          priority: null,
+        },
+      ];
+      const instance = new TestCategoryTemplateContext(
+        templates,
+        category,
+        '2024-01',
+        30000,
+        0,
+      );
+      expect(instance.getLimitExcess()).toBe(0);
+    });
+
+    it('uses the actual day count for a daily limit in February (28 days)', async () => {
+      const templates: Template[] = [
+        {
+          type: 'simple',
+          monthly: 10000,
+          limit: { amount: 10, hold: false, period: 'daily' },
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      const instance = new TestCategoryTemplateContext(
+        templates,
+        category,
+        '2023-02',
+        0,
+        0,
+      );
+      const result = await instance.runTemplatesForPriority(
+        1,
+        1_000_000,
+        1_000_000,
+      );
+      expect(result).toBe(28000);
+    });
+
+    it('uses the actual day count for a daily limit in February of a leap year (29 days)', async () => {
+      const templates: Template[] = [
+        {
+          type: 'simple',
+          monthly: 10000,
+          limit: { amount: 10, hold: false, period: 'daily' },
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      const instance = new TestCategoryTemplateContext(
+        templates,
+        category,
+        '2024-02',
+        0,
+        0,
+      );
+      const result = await instance.runTemplatesForPriority(
+        1,
+        1_000_000,
+        1_000_000,
+      );
+      expect(result).toBe(29000);
     });
   });
 });

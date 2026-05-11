@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 
-import { send } from 'loot-core/platform/client/connection';
+import { send } from '@actual-app/core/platform/client/connection';
 
-import { useDispatch } from '@desktop-client/redux';
-import { loggedIn } from '@desktop-client/users/usersSlice';
+import { useDispatch } from '#redux';
+import { loggedIn } from '#users/usersSlice';
 
 export function OpenIdCallback() {
   const dispatch = useDispatch();

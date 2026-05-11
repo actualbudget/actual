@@ -7,11 +7,11 @@ import type { SelectOption } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
 import type { TFunction } from 'i18next';
 
-import { Setting } from './UI';
+import { Link } from '#components/common/Link';
+import { useGlobalPref } from '#hooks/useGlobalPref';
+import { availableLanguages, setI18NextLanguage } from '#i18n';
 
-import { Link } from '@desktop-client/components/common/Link';
-import { useGlobalPref } from '@desktop-client/hooks/useGlobalPref';
-import { availableLanguages, setI18NextLanguage } from '@desktop-client/i18n';
+import { Setting } from './UI';
 
 const languageDisplayNameOverride: { [key: string]: string } = {
   'pt-BR': 'Português (Brasil)',

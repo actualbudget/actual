@@ -1,15 +1,14 @@
 import { useMemo } from 'react';
 
 import { theme } from '@actual-app/components/theme';
-
 import type {
   CategoryEntity,
   CategoryGroupEntity,
   TransactionEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
-import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
-import { CustomCell } from '@desktop-client/components/table';
+import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
+import { CustomCell } from '#components/table';
 
 type CategoryCellProps = {
   id: TransactionEntity['id'];

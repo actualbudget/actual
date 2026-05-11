@@ -6,17 +6,14 @@ import { SvgAdd, SvgDelete } from '@actual-app/components/icons/v0';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { integerToCurrency } from '@actual-app/core/shared/util';
+import type {
+  CategoryGroupEntity,
+  TransactionEntity,
+} from '@actual-app/core/types/models';
 
-import { integerToCurrency } from 'loot-core/shared/util';
-import type { CategoryGroupEntity, TransactionEntity } from 'loot-core/types/models';
-
-import { CategoryAutocomplete } from '@desktop-client/components/autocomplete/CategoryAutocomplete';
-import {
-  CustomCell,
-  Field,
-  InputCell,
-  Row,
-} from '@desktop-client/components/table';
+import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
+import { CustomCell, Field, InputCell, Row } from '#components/table';
 
 import type { SplitDraft } from './useSplitTransactionEditor';
 
@@ -149,7 +146,9 @@ export function SplitTransactionEditorList({
               name={`split-amount-${split.id}`}
               onExpose={name => setExposedCell(name)}
               value={
-                split.amount !== 0 ? integerToCurrency(Math.abs(split.amount)) : ''
+                split.amount !== 0
+                  ? integerToCurrency(Math.abs(split.amount))
+                  : ''
               }
               onUpdate={value =>
                 onUpdateSplit(split.id, 'amount', parseAmount(value))

@@ -1,6 +1,6 @@
-import type { TransactionEntity } from 'loot-core/types/models';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 
-import { InputCell } from '@desktop-client/components/table';
+import { InputCell } from '#components/table';
 
 type NotesCellProps = {
   id: TransactionEntity['id'];

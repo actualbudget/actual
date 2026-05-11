@@ -1,17 +1,18 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgChartPie } from '@actual-app/components/icons/v1';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import type { CategoryEntity } from '@actual-app/core/types/models';
 import { css, cx } from '@emotion/css';
 
-import type { CategoryEntity } from 'loot-core/types/models';
-
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { useDispatch } from '@desktop-client/redux';
+import { MonthsContext } from '#components/budget/MonthsContext';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 type CategoryAutomationButtonProps = {
   category: CategoryEntity;
@@ -31,12 +32,21 @@ export function CategoryAutomationButton({
 }: CategoryAutomationButtonProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const monthsContext = useContext(MonthsContext);
+  const month = monthsContext?.months?.[0];
 
   const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const hasAutomations = !!category.goal_def?.length;
 
   if (!goalTemplatesEnabled || !goalTemplatesUIEnabled) {
+    return null;
+  }
+
+  // Income categories don't accept templates in envelope budgets (only the
+  // tracking budget runs templates against income categories).
+  if (category.is_income && budgetType !== 'tracking') {
     return null;
   }
 
@@ -60,7 +70,7 @@ export function CategoryAutomationButton({
           pushModal({
             modal: {
               name: 'category-automations-edit',
-              options: { categoryId: category.id },
+              options: { categoryId: category.id, month },
             },
           }),
         );

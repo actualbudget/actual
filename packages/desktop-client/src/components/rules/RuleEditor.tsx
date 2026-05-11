@@ -22,12 +22,9 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
-import { v4 as uuid } from 'uuid';
-
-import { send } from 'loot-core/platform/client/connection';
-import * as monthUtils from 'loot-core/shared/months';
-import { q } from 'loot-core/shared/query';
+import { send } from '@actual-app/core/platform/client/connection';
+import * as monthUtils from '@actual-app/core/shared/months';
+import { q } from '@actual-app/core/shared/query';
 import {
   FIELD_TYPES,
   friendlyOp,
@@ -39,34 +36,33 @@ import {
   mapField,
   parse,
   unparse,
-} from 'loot-core/shared/rules';
-import type { ScheduleStatusType } from 'loot-core/shared/schedules';
+} from '@actual-app/core/shared/rules';
+import type { ScheduleStatusType } from '@actual-app/core/shared/schedules';
 import type {
   NewRuleEntity,
   RuleActionEntity,
   RuleEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { css } from '@emotion/css';
+import { v4 as uuidv4 } from 'uuid';
+
+import { FinancialText } from '#components/FinancialText';
+import { StatusBadge } from '#components/schedules/StatusBadge';
+import { SimpleTransactionsTable } from '#components/transactions/SimpleTransactionsTable';
+import { BetweenAmountInput } from '#components/util/AmountInput';
+import { DisplayId } from '#components/util/DisplayId';
+import { GenericInput } from '#components/util/GenericInput';
+import { useDateFormat } from '#hooks/useDateFormat';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useFormat } from '#hooks/useFormat';
+import { useSchedules } from '#hooks/useSchedules';
+import { SelectedProvider, useSelected } from '#hooks/useSelected';
+import { addNotification } from '#notifications/notificationsSlice';
+import { aqlQuery } from '#queries/aqlQuery';
+import { useDispatch } from '#redux';
+import { disableUndo, enableUndo } from '#undo';
 
 import { FormulaActionEditor } from './FormulaActionEditor';
-
-import { FinancialText } from '@desktop-client/components/FinancialText';
-import { StatusBadge } from '@desktop-client/components/schedules/StatusBadge';
-import { SimpleTransactionsTable } from '@desktop-client/components/transactions/SimpleTransactionsTable';
-import { BetweenAmountInput } from '@desktop-client/components/util/AmountInput';
-import { DisplayId } from '@desktop-client/components/util/DisplayId';
-import { GenericInput } from '@desktop-client/components/util/GenericInput';
-import { useDateFormat } from '@desktop-client/hooks/useDateFormat';
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useFormat } from '@desktop-client/hooks/useFormat';
-import { useSchedules } from '@desktop-client/hooks/useSchedules';
-import {
-  SelectedProvider,
-  useSelected,
-} from '@desktop-client/hooks/useSelected';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { aqlQuery } from '@desktop-client/queries/aqlQuery';
-import { useDispatch } from '@desktop-client/redux';
-import { disableUndo, enableUndo } from '@desktop-client/undo';
 
 function updateValue(array, value, update) {
   return array.map(v => (v === value ? update() : v));
@@ -787,7 +783,7 @@ function StageButton({
 }
 
 function newInput(item) {
-  return { ...item, inputKey: uuid() };
+  return { ...item, inputKey: uuidv4() };
 }
 
 function ConditionsList({
@@ -825,7 +821,7 @@ function ConditionsList({
       field,
       op: 'is',
       value: null,
-      inputKey: uuid(),
+      inputKey: uuidv4(),
     });
     onChangeConditions(copy);
   }
@@ -1011,19 +1007,25 @@ export function RuleEditor({
 }: RuleEditorProps) {
   const { t } = useTranslation();
   const [conditions, setConditions] = useState(
-    defaultRule.conditions.map(parse).map(c => ({ ...c, inputKey: uuid() })),
+    defaultRule.conditions.map(parse).map(c => ({ ...c, inputKey: uuidv4() })),
   );
   const [actionSplits, setActionSplits] = useState(() => {
     const parsedActions = defaultRule.actions.map(parse);
     return parsedActions.reduce(
       (acc, action) => {
         const splitIndex = action.options?.splitIndex ?? 0;
-        acc[splitIndex] = acc[splitIndex] ?? { id: uuid(), actions: [] };
-        acc[splitIndex].actions.push({ ...action, inputKey: uuid() });
+        acc[splitIndex] = acc[splitIndex] ?? {
+          id: uuidv4(),
+          actions: [],
+        };
+        acc[splitIndex].actions.push({
+          ...action,
+          inputKey: uuidv4(),
+        });
         return acc;
       },
       // The pre-split group is always there
-      [{ id: uuid(), actions: [] }],
+      [{ id: uuidv4(), actions: [] }],
     );
   });
   const [stage, setStage] = useState(defaultRule.stage);
@@ -1083,12 +1085,12 @@ export function RuleEditor({
   function addActionToSplitAfterIndex(splitIndex, actionIndex) {
     let newAction;
     if (splitIndex && !actionSplits[splitIndex]?.actions?.length) {
-      actionSplits[splitIndex] = { id: uuid(), actions: [] };
+      actionSplits[splitIndex] = { id: uuidv4(), actions: [] };
       newAction = {
         op: 'set-split-amount',
         options: { method: 'remainder', splitIndex },
         value: null,
-        inputKey: uuid(),
+        inputKey: uuidv4(),
       };
     } else {
       const fieldsArray =
@@ -1104,7 +1106,7 @@ export function RuleEditor({
         op: 'set',
         value: '',
         options: { splitIndex },
-        inputKey: uuid(),
+        inputKey: uuidv4(),
       };
     }
 

@@ -1,6 +1,8 @@
 import React from 'react';
 import { Route, Routes } from 'react-router';
 
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+
 import { AgeOfMoney } from './reports/AgeOfMoney';
 import { BudgetAnalysis } from './reports/BudgetAnalysis';
 import { Calendar } from './reports/Calendar';
@@ -13,8 +15,6 @@ import { Sankey } from './reports/Sankey';
 import { Spending } from './reports/Spending';
 import { Summary } from './reports/Summary';
 import { ReportsDashboardRouter } from './ReportsDashboardRouter';
-
-import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 
 export function ReportRouter() {
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');

@@ -1,4 +1,4 @@
-import { getNormalisedString } from 'loot-core/shared/normalisation';
+import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 
 /**
  * Returns a numeric rank for how well `name` matches `input`.

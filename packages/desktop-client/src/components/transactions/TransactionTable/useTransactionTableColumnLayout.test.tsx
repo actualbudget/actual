@@ -1,13 +1,13 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { useTransactionTableColumnLayout } from './useTransactionTableColumnLayout';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+
 import {
   parseTransactionColumnWidthsPref,
   serializeTransactionColumnWidthsPref,
 } from './transactionTableColumnLayout';
-
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
+import { useTransactionTableColumnLayout } from './useTransactionTableColumnLayout';
 
 vi.mock('@desktop-client/hooks/useSyncedPref', () => ({
   useSyncedPref: vi.fn(),
@@ -18,14 +18,15 @@ afterEach(() => {
 });
 
 function TestComponent() {
-  const { columnWidths, getResizeHandleProps } = useTransactionTableColumnLayout({
-    containerWidth: 0,
-    showAccount: true,
-    showBalances: false,
-    showCategory: true,
-    showCleared: true,
-    showSelection: true,
-  });
+  const { columnWidths, getResizeHandleProps } =
+    useTransactionTableColumnLayout({
+      containerWidth: 0,
+      showAccount: true,
+      showBalances: false,
+      showCategory: true,
+      showCleared: true,
+      showSelection: true,
+    });
   const payeeResizeHandle = getResizeHandleProps('payee');
 
   return (
@@ -51,9 +52,15 @@ describe('useTransactionTableColumnLayout', () => {
 
     render(<TestComponent />);
 
-    const accountWidthBefore = Number(screen.getByTestId('width-account').textContent);
-    const payeeWidthBefore = Number(screen.getByTestId('width-payee').textContent);
-    const notesWidthBefore = Number(screen.getByTestId('width-notes').textContent);
+    const accountWidthBefore = Number(
+      screen.getByTestId('width-account').textContent,
+    );
+    const payeeWidthBefore = Number(
+      screen.getByTestId('width-payee').textContent,
+    );
+    const notesWidthBefore = Number(
+      screen.getByTestId('width-notes').textContent,
+    );
 
     fireEvent.pointerDown(screen.getByTestId('resize-payee'), {
       clientX: 100,

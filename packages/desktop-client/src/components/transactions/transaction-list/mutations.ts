@@ -1,9 +1,9 @@
 // @ts-strict-ignore
 // TODO: remove strict
-import { send } from 'loot-core/platform/client/connection';
-import { applyTransactionDiff } from 'loot-core/shared/transactions';
-import { applyChanges, getChangedValues } from 'loot-core/shared/util';
-import type { TransactionEntity } from 'loot-core/types/models';
+import { send } from '@actual-app/core/platform/client/connection';
+import { applyTransactionDiff } from '@actual-app/core/shared/transactions';
+import { applyChanges, getChangedValues } from '@actual-app/core/shared/util';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 
 type SaveChanges = {
   data: TransactionEntity[];

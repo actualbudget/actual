@@ -1,12 +1,11 @@
-import { t } from 'i18next';
-
-import * as monthUtils from 'loot-core/shared/months';
+import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
   CustomReportEntity,
   sortByOpType,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+import { t } from 'i18next';
 
 const startDate = monthUtils.subMonths(monthUtils.currentMonth(), 5) + '-01';
 const endDate = monthUtils.currentDay();
@@ -122,6 +121,16 @@ const dateRangeOptions: dateRangeProps[] = [
     key: 'Last month',
     name: 1,
     type: 'Month',
+    Daily: true,
+    Weekly: true,
+    Monthly: true,
+    Yearly: false,
+  },
+  {
+    description: t('Last 30 days'),
+    key: 'Last 30 days',
+    name: 'last30Days',
+    type: 'Day',
     Daily: true,
     Weekly: true,
     Monthly: true,

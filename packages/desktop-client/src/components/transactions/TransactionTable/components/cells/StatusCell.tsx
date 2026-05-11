@@ -1,12 +1,11 @@
 import { createElement } from 'react';
 
 import { theme } from '@actual-app/components/theme';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 
-import type { TransactionEntity } from 'loot-core/types/models';
-
-import { getStatusProps } from '@desktop-client/components/schedules/StatusBadge';
-import type { StatusTypes } from '@desktop-client/components/schedules/StatusBadge';
-import { Cell, CellButton } from '@desktop-client/components/table';
+import { getStatusProps } from '#components/schedules/StatusBadge';
+import type { StatusTypes } from '#components/schedules/StatusBadge';
+import { Cell, CellButton } from '#components/table';
 
 type StatusCellProps = {
   id: TransactionEntity['id'];

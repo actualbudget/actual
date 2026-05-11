@@ -2,28 +2,30 @@
 // TODO: remove strict
 import { useLayoutEffect, useRef } from 'react';
 import type { RefObject } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
-
 import type {
   AccountEntity,
   CategoryEntity,
   RuleConditionEntity,
   TransactionEntity,
   TransactionFilterEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
 
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
+import type { TableHandleRef } from '#components/table';
+import { useNavigate } from '#hooks/useNavigate';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useDispatch } from '#redux';
+
+import { useTransactionListHandlers } from './transaction-list/useTransactionListHandlers';
 import { TransactionTable } from './TransactionTable';
 import type { TransactionTableProps } from './TransactionTable';
-import { useTransactionListHandlers } from './transaction-list/useTransactionListHandlers';
-
-import type { TableHandleRef } from '@desktop-client/components/table';
-import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
-import { useDispatch } from '@desktop-client/redux';
 
 export { createSingleTimeScheduleFromTransaction } from './transaction-list/schedule';
+
 // When data changes, there are two ways to update the UI:
 //
 // * Optimistic updates: we apply the needed updates to local data
@@ -177,53 +179,55 @@ export function TransactionList({
   });
 
   return (
-    <TransactionTable
-      ref={tableRef}
-      transactions={allTransactions}
-      loadMoreTransactions={loadMoreTransactions}
-      accounts={accounts}
-      categoryGroups={categoryGroups}
-      payees={payees}
-      balances={balances}
-      showBalances={showBalances}
-      showReconciled={showReconciled}
-      showCleared={showCleared}
-      showAccount={showAccount}
-      showCategory
-      currentAccountId={account && account.id}
-      currentCategoryId={category && category.id}
-      isAdding={isAdding}
-      isNew={isNew}
-      isMatched={isMatched}
-      dateFormat={dateFormat}
-      hideFraction={hideFraction}
-      renderEmpty={renderEmpty}
-      onSave={onSave}
-      onApplyRules={onApplyRules}
-      onSplit={onSplit}
-      onCloseAddTransaction={onCloseAddTransaction}
-      onAdd={onAdd}
-      onAddSplit={onAddSplit}
-      onManagePayees={onManagePayees}
-      onCreatePayee={onCreatePayee}
-      style={{ backgroundColor: theme.tableBackground }}
-      onNavigateToTransferAccount={onNavigateToTransferAccount}
-      onNavigateToSchedule={onNavigateToSchedule}
-      onNotesTagClick={onNotesTagClick}
-      onSort={onSort}
-      sortField={sortField}
-      ascDesc={ascDesc}
-      isFiltered={isFiltered}
-      onReorder={allowReorder ? onReorder : undefined}
-      onBatchDelete={onBatchDelete}
-      onBatchDuplicate={onBatchDuplicate}
-      onBatchLinkSchedule={onBatchLinkSchedule}
-      onBatchUnlinkSchedule={onBatchUnlinkSchedule}
-      onCreateRule={onCreateRule}
-      onScheduleAction={onScheduleAction}
-      onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
-      showSelection={showSelection}
-      allowSplitTransaction={allowSplitTransaction}
-    />
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <TransactionTable
+        ref={tableRef}
+        transactions={allTransactions}
+        loadMoreTransactions={loadMoreTransactions}
+        accounts={accounts}
+        categoryGroups={categoryGroups}
+        payees={payees}
+        balances={balances}
+        showBalances={showBalances}
+        showReconciled={showReconciled}
+        showCleared={showCleared}
+        showAccount={showAccount}
+        showCategory
+        currentAccountId={account && account.id}
+        currentCategoryId={category && category.id}
+        isAdding={isAdding}
+        isNew={isNew}
+        isMatched={isMatched}
+        dateFormat={dateFormat}
+        hideFraction={hideFraction}
+        renderEmpty={renderEmpty}
+        onSave={onSave}
+        onApplyRules={onApplyRules}
+        onSplit={onSplit}
+        onCloseAddTransaction={onCloseAddTransaction}
+        onAdd={onAdd}
+        onAddSplit={onAddSplit}
+        onManagePayees={onManagePayees}
+        onCreatePayee={onCreatePayee}
+        style={{ backgroundColor: theme.tableBackground }}
+        onNavigateToTransferAccount={onNavigateToTransferAccount}
+        onNavigateToSchedule={onNavigateToSchedule}
+        onNotesTagClick={onNotesTagClick}
+        onSort={onSort}
+        sortField={sortField}
+        ascDesc={ascDesc}
+        isFiltered={isFiltered}
+        onReorder={allowReorder ? onReorder : undefined}
+        onBatchDelete={onBatchDelete}
+        onBatchDuplicate={onBatchDuplicate}
+        onBatchLinkSchedule={onBatchLinkSchedule}
+        onBatchUnlinkSchedule={onBatchUnlinkSchedule}
+        onCreateRule={onCreateRule}
+        onScheduleAction={onScheduleAction}
+        onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
+        showSelection={showSelection}
+        allowSplitTransaction={allowSplitTransaction}
+      />
+    </ErrorBoundary>
   );
 }

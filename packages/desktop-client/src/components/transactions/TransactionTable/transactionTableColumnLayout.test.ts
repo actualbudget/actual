@@ -65,7 +65,9 @@ describe('transactionTableColumnLayout', () => {
     });
 
     expect(getVisibleNeighborColumnId(visibleColumns, 'date')).toBe('payee');
-    expect(getVisibleNeighborColumnId(visibleColumns, 'category')).toBe('payment');
+    expect(getVisibleNeighborColumnId(visibleColumns, 'category')).toBe(
+      'payment',
+    );
     expect(getVisibleNeighborColumnId(visibleColumns, 'balance')).toBeNull();
   });
 
@@ -118,12 +120,15 @@ describe('transactionTableColumnLayout', () => {
   });
 
   it('serializes and parses persisted widths safely', () => {
-    const serialized = serializeTransactionColumnWidthsPref({
-      payee: 250,
-      notes: 180,
-    }, {
-      payee: 220,
-    });
+    const serialized = serializeTransactionColumnWidthsPref(
+      {
+        payee: 250,
+        notes: 180,
+      },
+      {
+        payee: 220,
+      },
+    );
 
     expect(parseTransactionColumnWidthsPref(serialized)).toEqual({
       widths: {

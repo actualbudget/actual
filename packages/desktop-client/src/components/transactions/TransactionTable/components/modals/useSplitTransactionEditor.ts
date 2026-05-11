@@ -1,8 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 
+import type { TransactionEntity } from '@actual-app/core/types/models';
 import { v4 as uuidv4 } from 'uuid';
-
-import type { TransactionEntity } from 'loot-core/types/models';
 
 export type SplitDraft = {
   id: string;
@@ -79,12 +78,19 @@ export function useSplitTransactionEditor(
     return Math.abs((totalSplitAmount / transaction.amount) * 100);
   }, [totalSplitAmount, transaction.amount]);
 
-  const isValid = remainingAmount === 0 && splits.every(split => split.category);
+  const isValid =
+    remainingAmount === 0 && splits.every(split => split.category);
 
   const updateSplit = useCallback(
-    (id: string, field: keyof SplitDraft, value: SplitDraft[keyof SplitDraft]) => {
+    (
+      id: string,
+      field: keyof SplitDraft,
+      value: SplitDraft[keyof SplitDraft],
+    ) => {
       setSplits(prev =>
-        prev.map(split => (split.id === id ? { ...split, [field]: value } : split)),
+        prev.map(split =>
+          split.id === id ? { ...split, [field]: value } : split,
+        ),
       );
     },
     [],

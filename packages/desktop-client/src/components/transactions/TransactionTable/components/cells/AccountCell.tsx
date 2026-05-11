@@ -1,9 +1,12 @@
 import { useMemo } from 'react';
 
-import type { AccountEntity, TransactionEntity } from 'loot-core/types/models';
+import type {
+  AccountEntity,
+  TransactionEntity,
+} from '@actual-app/core/types/models';
 
-import { AccountAutocomplete } from '@desktop-client/components/autocomplete/AccountAutocomplete';
-import { CustomCell } from '@desktop-client/components/table';
+import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplete';
+import { CustomCell } from '#components/table';
 
 type AccountCellProps = {
   id: TransactionEntity['id'];

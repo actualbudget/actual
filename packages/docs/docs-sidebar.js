@@ -297,6 +297,7 @@ const sidebars = {
             'contributing/project-details/advice',
           ],
         },
+        'contributing/ai-usage-policy',
         'contributing/development-setup',
         'contributing/testing',
         'contributing/code-style',

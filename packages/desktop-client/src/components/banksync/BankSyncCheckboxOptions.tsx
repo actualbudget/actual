@@ -9,8 +9,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 
-import { LabeledCheckbox } from '@desktop-client/components/forms/LabeledCheckbox';
-import { ToggleField } from '@desktop-client/components/mobile/MobileForms';
+import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
+import { ToggleField } from '#components/mobile/MobileForms';
 
 type CheckboxOptionProps = {
   id: string;
@@ -209,6 +209,19 @@ export function BankSyncCheckboxOptions({
       </CheckboxOptionWithHelp>
 
       <CheckboxOptionWithHelp
+        id="form_update_dates"
+        checked={updateDates}
+        onChange={() => setUpdateDates(!updateDates)}
+        disabled={!importTransactions}
+        helpText={t(
+          'By enabling this, the transaction date will be overwritten by the one provided by the bank.',
+        )}
+        helpMode={helpMode}
+      >
+        <Trans>Update Dates</Trans>
+      </CheckboxOptionWithHelp>
+
+      <CheckboxOptionWithHelp
         id="form_import_transactions"
         checked={!importTransactions}
         onChange={() => setImportTransactions(!importTransactions)}
@@ -218,18 +231,6 @@ export function BankSyncCheckboxOptions({
         helpMode={helpMode}
       >
         <Trans>Investment Account</Trans>
-      </CheckboxOptionWithHelp>
-
-      <CheckboxOptionWithHelp
-        id="form_update_dates"
-        checked={updateDates}
-        onChange={() => setUpdateDates(!updateDates)}
-        helpText={t(
-          'By enabling this, the transaction date will be overwritten by the one provided by the bank.',
-        )}
-        helpMode={helpMode}
-      >
-        <Trans>Update Dates</Trans>
       </CheckboxOptionWithHelp>
     </>
   );

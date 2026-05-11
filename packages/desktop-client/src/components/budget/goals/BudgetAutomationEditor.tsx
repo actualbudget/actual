@@ -7,28 +7,26 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-
 import type {
   CategoryGroupEntity,
   ScheduleEntity,
-} from 'loot-core/types/models';
+} from '@actual-app/core/types/models';
+
+import { FormField, FormLabel, FormTextLabel } from '#components/forms';
 
 import { setType } from './actions';
 import type { Action } from './actions';
-import { displayTemplateTypes } from './constants';
 import type { ReducerState } from './constants';
+import { displayTemplateTypes } from './constants';
+import { getDisplayTemplateMeta } from './displayTemplateMeta';
+import { BySaveAutomation } from './editor/BySaveAutomation';
+import { FixedAutomation } from './editor/FixedAutomation';
 import { HistoricalAutomation } from './editor/HistoricalAutomation';
 import { LimitAutomation } from './editor/LimitAutomation';
 import { PercentageAutomation } from './editor/PercentageAutomation';
 import { RefillAutomation } from './editor/RefillAutomation';
+import { RemainderAutomation } from './editor/RemainderAutomation';
 import { ScheduleAutomation } from './editor/ScheduleAutomation';
-import { WeekAutomation } from './editor/WeekAutomation';
-
-import {
-  FormField,
-  FormLabel,
-  FormTextLabel,
-} from '@desktop-client/components/forms';
 
 type BudgetAutomationEditorProps = {
   inline: boolean;
@@ -55,7 +53,7 @@ const displayTypeToDescription = {
       automation.
     </Trans>
   ),
-  week: (
+  fixed: (
     <Trans>
       Add a fixed amount to this category for each week in the month. For
       example, $100 per week would be $400 per month in a 4-week month.
@@ -83,6 +81,18 @@ const displayTypeToDescription = {
       previous months. For example, you can copy the amount from a year ago to
       budget for an annual expense, or budget the average of the last 3 months
       to account for seasonal changes.
+    </Trans>
+  ),
+  by: (
+    <Trans>
+      Spread a target amount across the months between now and a target date.
+      Useful for annual goals or saving toward a one-off expense.
+    </Trans>
+  ),
+  remainder: (
+    <Trans>
+      Split any remaining To Budget across categories using this automation.
+      Higher weights take a larger share of the leftover funds.
     </Trans>
   ),
 };
@@ -113,9 +123,9 @@ export function BudgetAutomationEditor({
         />
       );
       break;
-    case 'week':
+    case 'fixed':
       automationEditor = (
-        <WeekAutomation template={state.template} dispatch={dispatch} />
+        <FixedAutomation template={state.template} dispatch={dispatch} />
       );
       break;
     case 'schedule':
@@ -139,6 +149,16 @@ export function BudgetAutomationEditor({
     case 'historical':
       automationEditor = (
         <HistoricalAutomation template={state.template} dispatch={dispatch} />
+      );
+      break;
+    case 'by':
+      automationEditor = (
+        <BySaveAutomation template={state.template} dispatch={dispatch} />
+      );
+      break;
+    case 'remainder':
+      automationEditor = (
+        <RemainderAutomation template={state.template} dispatch={dispatch} />
       );
       break;
     default:
@@ -170,7 +190,10 @@ export function BudgetAutomationEditor({
           <InitialFocus>
             <Select
               id="type-field"
-              options={displayTemplateTypes}
+              options={displayTemplateTypes.map(type => [
+                type,
+                getDisplayTemplateMeta(type).label,
+              ])}
               defaultLabel={t('Select an option')}
               value={state.displayType}
               onChange={type => type && dispatch(setType(type))}

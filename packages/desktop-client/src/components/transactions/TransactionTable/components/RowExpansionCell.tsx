@@ -1,10 +1,9 @@
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 
-import type { TransactionEntity } from 'loot-core/types/models';
-
-import { SelectCell } from '@desktop-client/components/table';
+import { SelectCell } from '#components/table';
 
 type RowExpansionCellProps = {
   id: TransactionEntity['id'];
@@ -55,7 +54,7 @@ export function RowExpansionCell({
           width: '100%',
           height: '100%',
         }}
-        aria-label={isExpanded ? 'Collapse row' : 'Expand row'}
+        aria-label={isExpanded ? t('Collapse row') : t('Expand row')}
       >
         <SvgCheveronDown
           style={{

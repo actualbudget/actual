@@ -4,10 +4,9 @@ import { SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 
-import type { TransactionEntity } from 'loot-core/types/models';
-
-import { Cell, CellButton } from '@desktop-client/components/table';
+import { Cell, CellButton } from '#components/table';
 
 type SplitCategoryCellProps = {
   id: TransactionEntity['id'];

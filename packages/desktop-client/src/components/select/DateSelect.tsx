@@ -23,27 +23,25 @@ import { styles } from '@actual-app/components/styles';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
-import { addDays, format, isValid, parse, parseISO, subDays } from 'date-fns';
-import type { Locale } from 'date-fns';
-import Pikaday from 'pikaday';
-
 import {
   currentDate,
   getDayMonthFormat,
   getDayMonthRegex,
   getShortYearFormat,
   getShortYearRegex,
-} from 'loot-core/shared/months';
-
+} from '@actual-app/core/shared/months';
+import { css } from '@emotion/css';
+import { addDays, format, isValid, parse, parseISO, subDays } from 'date-fns';
+import type { Locale } from 'date-fns';
+import Pikaday from 'pikaday';
 import 'pikaday/css/pikaday.css';
+import { InputField } from '#components/mobile/MobileForms';
+import { useLocale } from '#hooks/useLocale';
+import { useMergedRefs } from '#hooks/useMergedRefs';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+
 import DateSelectLeft from './DateSelect.left.png';
 import DateSelectRight from './DateSelect.right.png';
-
-import { InputField } from '@desktop-client/components/mobile/MobileForms';
-import { useLocale } from '@desktop-client/hooks/useLocale';
-import { useMergedRefs } from '@desktop-client/hooks/useMergedRefs';
-import { useSyncedPref } from '@desktop-client/hooks/useSyncedPref';
 
 const pickerStyles: CSSProperties = {
   '& .pika-single.actual-date-picker': {
@@ -417,12 +415,16 @@ function DateSelectDesktop({
           inputProps?.onBlur?.(e);
 
           if (clearOnBlur) {
-            // If value is empty, that drives what gets selected.
-            // Otherwise the input is reset to whatever is already
-            // selected
+            // If value is empty, reset to previously selected value
+            // instead of saving an empty date (which the server rejects).
             if (value === '') {
-              setSelectedValue('');
-              onSelect('');
+              if (selectedValue) {
+                setValue(selectedValue);
+                const date = parse(selectedValue, dateFormat, new Date());
+                if (date instanceof Date && !isNaN(date.valueOf())) {
+                  onSelect(format(date, 'yyyy-MM-dd'));
+                }
+              }
             } else {
               setValue(selectedValue || '');
 

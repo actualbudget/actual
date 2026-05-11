@@ -13,6 +13,7 @@ import type { ImportTransactionsOpts } from '@actual-app/core/types/api-handlers
 import type { Handlers } from '@actual-app/core/types/handlers';
 import type {
   ImportTransactionEntity,
+  NoteEntity,
   RuleEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
@@ -245,6 +246,14 @@ export function deleteCategory(
   transferCategoryId?: APICategoryEntity['id'],
 ) {
   return send('api/category-delete', { id, transferCategoryId });
+}
+
+export function getNote(id: NoteEntity['id']) {
+  return send('api/note-get', { id });
+}
+
+export function updateNote(id: NoteEntity['id'], note: NoteEntity['note']) {
+  return send('api/note-update', { id, note });
 }
 
 export function getCommonPayees() {

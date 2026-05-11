@@ -1,3 +1,5 @@
+const BUILD_OUTPUT_GLOBS = ['lib-dist/**', 'dist/**', 'build/**', '@types/**'];
+
 /** @type {import('lage').ConfigOptions} */
 module.exports = {
   pipeline: {
@@ -20,14 +22,22 @@ module.exports = {
       dependsOn: ['^build'],
       cache: true,
       options: {
-        outputGlob: ['lib-dist/**', 'dist/**', 'build/**'],
+        outputGlob: BUILD_OUTPUT_GLOBS,
       },
+    },
+    // Not cached: the script stages files into public/ and build-stats/ that
+    // fall outside BUILD_OUTPUT_GLOBS, so a cache hit would skip the side
+    // effects.
+    'build:browser': {
+      type: 'npmScript',
+      dependsOn: ['^build'],
+      cache: false,
     },
   },
   cacheOptions: {
     cacheStorageConfig: {
       provider: 'local',
-      outputGlob: ['lib-dist/**', 'dist/**', 'build/**'],
+      outputGlob: BUILD_OUTPUT_GLOBS,
     },
   },
   npmClient: 'yarn',

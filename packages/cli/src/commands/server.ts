@@ -2,8 +2,8 @@ import * as api from '@actual-app/api';
 import { Option } from 'commander';
 import type { Command } from 'commander';
 
-import { withConnection } from '../connection';
-import { printOutput } from '../output';
+import { withConnection } from '#connection';
+import { printOutput } from '#output';
 
 export function registerServerCommand(program: Command) {
   const server = program.command('server').description('Server utilities');
@@ -19,7 +19,7 @@ export function registerServerCommand(program: Command) {
           const version = await api.getServerVersion();
           printOutput({ version }, opts.format);
         },
-        { loadBudget: false },
+        { mutates: false, skipBudget: true },
       );
     });
 
@@ -34,13 +34,17 @@ export function registerServerCommand(program: Command) {
     .requiredOption('--name <name>', 'Entity name')
     .action(async cmdOpts => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const id = await api.getIDByName(cmdOpts.type, cmdOpts.name);
-        printOutput(
-          { id, type: cmdOpts.type, name: cmdOpts.name },
-          opts.format,
-        );
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const id = await api.getIDByName(cmdOpts.type, cmdOpts.name);
+          printOutput(
+            { id, type: cmdOpts.type, name: cmdOpts.name },
+            opts.format,
+          );
+        },
+        { mutates: false },
+      );
     });
 
   server
@@ -49,12 +53,16 @@ export function registerServerCommand(program: Command) {
     .option('--account <id>', 'Specific account ID to sync')
     .action(async cmdOpts => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const args = cmdOpts.account
-          ? { accountId: cmdOpts.account }
-          : undefined;
-        await api.runBankSync(args);
-        printOutput({ success: true }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const args = cmdOpts.account
+            ? { accountId: cmdOpts.account }
+            : undefined;
+          await api.runBankSync(args);
+          printOutput({ success: true }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 }

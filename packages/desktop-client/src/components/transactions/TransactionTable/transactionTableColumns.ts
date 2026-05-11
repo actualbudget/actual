@@ -39,7 +39,9 @@ export const TRANSACTION_DATA_COLUMN_ORDER: TransactionColumnId[] = [
 export const TRANSACTION_SELECTION_COLUMN_WIDTH = 20;
 export const TRANSACTION_CLEARED_COLUMN_WIDTH = 38;
 
-export function getDefaultTransactionColumnWidth(columnId: TransactionColumnId) {
+export function getDefaultTransactionColumnWidth(
+  columnId: TransactionColumnId,
+) {
   return TRANSACTION_COLUMN_CONFIG[columnId].defaultWidth;
 }
 

@@ -89,6 +89,7 @@ dispatch({ type: 'SET_ROW_HEIGHT', id: transactionId, height: 64 });
 ```
 
 **Features:**
+
 - Chevron indicator
 - Smooth expand/collapse transitions
 - Dynamic content area
@@ -96,6 +97,7 @@ dispatch({ type: 'SET_ROW_HEIGHT', id: transactionId, height: 64 });
 - Works with virtual scrolling
 
 **Use Cases:**
+
 - Show full notes
 - Display transaction metadata
 - Show related transactions
@@ -120,6 +122,7 @@ import { SplitTransactionModal } from './components/modals/SplitTransactionModal
 ```
 
 **Features:**
+
 - Visual progress bar
 - Real-time validation
 - Add/remove splits
@@ -174,6 +177,7 @@ const handled = handleKeyboardNavigation(
 ```
 
 **Supported Keys:**
+
 - Arrow keys: Navigate between cells
 - Enter: Start/confirm edit
 - Escape: Cancel edit
@@ -186,46 +190,55 @@ const handled = handleKeyboardNavigation(
 Each cell is a focused, reusable component:
 
 #### StatusCell
+
 - Displays cleared/reconciled status
 - Click to toggle cleared state
 - Icons for different statuses
 
 #### DateCell
+
 - Date picker integration
 - Formatted date display
 - Inline editing
 
 #### PayeeCell
+
 - Payee autocomplete
 - Transfer/schedule icons
 - Clickable navigation
 
 #### NotesCell
+
 - Text input
 - Inline editing
 - Truncated display
 
 #### CategoryCell
+
 - Category autocomplete
 - Split indicator
 - Hidden categories support
 
 #### AmountCell
+
 - Debit/credit display
 - Arithmetic evaluation
 - Tabular formatting
 
 #### BalanceCell
+
 - Running balance
 - Read-only display
 
 #### AccountCell
+
 - Account autocomplete
 - Account name display
 
 ### TransactionRow
 
 Main row component that:
+
 - Integrates all cells
 - Handles inline editing
 - Manages focus state
@@ -236,6 +249,7 @@ Main row component that:
 ### TransactionHeader
 
 Header component that:
+
 - Displays column headers
 - Handles sorting
 - Shows sort indicators
@@ -245,6 +259,7 @@ Header component that:
 ### TransactionTable
 
 Main table component that:
+
 - Orchestrates all components
 - Manages state
 - Handles virtual scrolling
@@ -314,7 +329,8 @@ import { TransactionTable } from './TransactionTable';
 
 ```typescript
 const [splitModalOpen, setSplitModalOpen] = useState(false);
-const [splitTransaction, setSplitTransaction] = useState<TransactionEntity | null>(null);
+const [splitTransaction, setSplitTransaction] =
+  useState<TransactionEntity | null>(null);
 ```
 
 ### Step 4: Handle Split Button Click
@@ -371,6 +387,7 @@ test('TransactionRow handles editing', () => {
 ### E2E Tests
 
 Existing Playwright tests should pass:
+
 - `e2e/transactions.test.ts`
 - `e2e/accounts.test.ts`
 
@@ -386,6 +403,7 @@ Existing Playwright tests should pass:
 ### Benchmarks
 
 Performance should be equal or better than the original implementation due to:
+
 - Cleaner code allows better optimization
 - Proper memoization boundaries
 - Reduced complexity
@@ -421,7 +439,7 @@ const [state, dispatch] = useReducer(tableReducer, createInitialState());
 Ensure keyboard handler is attached:
 
 ```typescript
-onKeyDown={handleKeyDown}
+onKeyDown = { handleKeyDown };
 ```
 
 ### Issue: Split modal not opening
@@ -489,6 +507,7 @@ When modifying this code:
 ## Questions?
 
 See:
+
 - [Architecture Plan](../../../TRANSACTION_TABLE_REWRITE_PLAN.md)
 - [Implementation Summary](../../../TRANSACTION_TABLE_IMPLEMENTATION_SUMMARY.md)
 - [PR #7454](https://github.com/actualbudget/actual/pull/7454)

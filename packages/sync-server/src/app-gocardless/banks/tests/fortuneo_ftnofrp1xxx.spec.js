@@ -1,4 +1,4 @@
-import Fortuneo from '../fortuneo_ftnofrp1xxx';
+import Fortuneo from '#app-gocardless/banks/fortuneo_ftnofrp1xxx';
 
 describe('Fortuneo', () => {
   describe('#normalizeTransaction', () => {

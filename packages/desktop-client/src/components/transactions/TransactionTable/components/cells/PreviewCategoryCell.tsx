@@ -1,11 +1,10 @@
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { getStatusLabel } from '@actual-app/core/shared/schedules';
+import { titleFirst } from '@actual-app/core/shared/util';
 
-import { getStatusLabel } from 'loot-core/shared/schedules';
-import { titleFirst } from 'loot-core/shared/util';
-
-import { Cell } from '@desktop-client/components/table';
+import { Cell } from '#components/table';
 
 type PreviewCategoryCellProps = {
   previewStatus?: string | null;

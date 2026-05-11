@@ -67,7 +67,7 @@ export function TransactionList({ ... }) {
         onSplit={handleOpenSplitModal}
         // ... other props
       />
-      
+
       {splitModalOpen && splitTransaction && (
         <SplitTransactionModal
           transaction={splitTransaction}
@@ -309,6 +309,7 @@ If you encounter issues:
 ## Timeline
 
 ### Completed (85%)
+
 - ✅ Architecture design
 - ✅ All components implemented
 - ✅ Split modal created
@@ -316,6 +317,7 @@ If you encounter issues:
 - ✅ Type safety ensured
 
 ### Remaining (15%)
+
 - ⏳ Integration (2-3 hours)
 - ⏳ Testing (3-4 hours)
 - ⏳ Polish (1 hour)
