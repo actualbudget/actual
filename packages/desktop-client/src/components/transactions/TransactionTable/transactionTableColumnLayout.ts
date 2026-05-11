@@ -164,13 +164,18 @@ export function resolveTransactionColumnWidths({
 }: ResolveColumnWidthsArgs): TransactionColumnWidths {
   const baseWidths = visibleColumns.reduce<TransactionColumnWidths>(
     (memo, column) => {
-      // If the column default is "flex", always return "flex"
-      if (column.defaultWidth === 'flex') {
+      // If there's a saved width (from a previous resize), use it
+      const savedWidth = savedWidths?.[column.id];
+      if (savedWidth !== undefined && typeof savedWidth === 'number') {
+        memo[column.id] = roundWidth(savedWidth);
+      }
+      // Otherwise, if the column default is "flex", return "flex"
+      else if (column.defaultWidth === 'flex') {
         memo[column.id] = 'flex';
-      } else {
-        memo[column.id] = roundWidth(
-          (savedWidths?.[column.id] as number) ?? column.defaultWidth,
-        );
+      }
+      // Otherwise use the default pixel width
+      else {
+        memo[column.id] = roundWidth(column.defaultWidth);
       }
       return memo;
     },
@@ -198,8 +203,11 @@ export function applyNeighborColumnResize({
   const activeWidth = widths[activeColumn.id];
   const neighborWidth = widths[neighborColumn.id];
 
-  // Don't resize flex columns
+  // If either width is still 'flex', something went wrong - can't resize
   if (activeWidth === 'flex' || neighborWidth === 'flex') {
+    console.warn(
+      'Attempted to resize flex column - widths should be converted to pixels first',
+    );
     return widths;
   }
 
