@@ -394,6 +394,7 @@ export default defineConfig(async ({ mode, command }) => {
                 /^\/plugins\/.*$/,
                 /^\/kcab\/.*$/,
                 /^\/plugin-data\/.*$/,
+                /^\/enablebanking\/.*$/,
               ],
             },
           }),

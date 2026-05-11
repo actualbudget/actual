@@ -106,7 +106,6 @@ jobs:
           node-version: 24
           check-latest: true
           registry-url: 'https://registry.npmjs.org'
-          cache: false
 
       - name: Publish Core
         run: |

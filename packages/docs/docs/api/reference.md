@@ -87,6 +87,11 @@ import APIList from './APIList';
 "deleteSchedule"
 ]} />
 
+<APIList title="Notes" sections={[
+"getNote",
+"updateNote"
+]} />
+
 <APIList title="Misc" sections={[
 "BudgetFile",
 "initConfig",
@@ -729,6 +734,22 @@ Update fields of a rule. `fields` can specify any field described in [`Schedule`
 #### `deleteSchedule`
 
 <Method name="deleteSchedule" args={[{ name: 'id', type: 'id' }]} returns="Promise<null>" />
+
+## Notes
+
+Notes can be attached to any entity (categories, budget months, etc.) by ID. They are also used to define budget templates and savings goals (e.g. `#template 250`, `#goal 1000`).
+
+#### `getNote`
+
+<Method name="getNote" args={[{ name: 'id', type: 'id' }]} returns="Promise<Note | null>" />
+
+Returns the note for the given entity ID, or `null` if no note has been set.
+
+#### `updateNote`
+
+<Method name="updateNote" args={[{ name: 'id', type: 'id' }, { name: 'note', type: 'string' }]} returns="Promise<void>" />
+
+Sets the note on the entity with the given ID. Pass an empty string to clear the note.
 
 ## Misc
 
