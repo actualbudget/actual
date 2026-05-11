@@ -1,4 +1,4 @@
-import type { TransactionRowContentProps } from '../types';
+import type { TransactionRowContentProps } from 'packages/desktop-client/src/components/transactions/TransactionTable/types';
 
 import {
   AccountCell,
@@ -55,6 +55,7 @@ export function SplitParentTransactionRowCells({
         id={transaction.id}
         focused={focusedField === 'select'}
         selected={selected}
+        editing={!!focusedField}
         showSelection={showSelection}
         isExpanded={isExpanded}
         onSelect={onSelect}

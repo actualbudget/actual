@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -9,6 +11,7 @@ type RowExpansionCellProps = {
   id: TransactionEntity['id'];
   focused: boolean;
   selected: boolean;
+  editing: boolean;
   showSelection: boolean;
   isExpanded: boolean;
   onSelect: () => void;
@@ -20,16 +23,22 @@ export function RowExpansionCell({
   id,
   focused,
   selected,
+  editing,
   showSelection,
   isExpanded,
   onSelect,
   onEdit,
   onToggleExpansion,
 }: RowExpansionCellProps) {
+  const { t } = useTranslation();
+
   if (showSelection) {
     return (
       <SelectCell
         exposed
+        buttonProps={{
+          className: selected || editing ? undefined : 'hover-visible',
+        }}
         focused={focused}
         selected={selected}
         width={20}
@@ -54,7 +63,7 @@ export function RowExpansionCell({
           width: '100%',
           height: '100%',
         }}
-        aria-label={isExpanded ? 'Collapse row' : 'Expand row'}
+        aria-label={isExpanded ? t('Collapse row') : t('Expand row')}
       >
         <SvgCheveronDown
           style={{

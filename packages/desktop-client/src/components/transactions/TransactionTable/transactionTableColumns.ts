@@ -96,7 +96,6 @@ export function getTransactionTableVariantKey({
 
 export function getTransactionTableUtilityWidth({
   showCleared,
-  showSelection,
 }: Pick<TransactionTableVariantOptions, 'showCleared' | 'showSelection'>) {
   return (
     TRANSACTION_SELECTION_COLUMN_WIDTH +

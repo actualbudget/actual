@@ -8,11 +8,11 @@ import { isTemporaryId } from '@actual-app/core/shared/transactions';
 import { Row } from '#components/table';
 import { useCachedSchedules } from '#hooks/useCachedSchedules';
 import { useSelectedDispatch } from '#hooks/useSelected';
-import type { TransactionRowProps } from '../types';
+import type { TransactionRowProps } from 'packages/desktop-client/src/components/transactions/TransactionTable/types';
 import {
   deserializeTransaction,
   serializeTransaction,
-} from '../utils/transactionFormatters';
+} from 'packages/desktop-client/src/components/transactions/TransactionTable/utils/transactionFormatters';
 
 import { TransactionRowCells } from './TransactionRowCells';
 
@@ -137,6 +137,15 @@ export function TransactionRow({
       : isNew
         ? theme.tableRowBackgroundHover
         : theme.tableBackground,
+    ':hover': !(selected || isNew) && {
+      backgroundColor: theme.tableRowBackgroundHover,
+    },
+    '& .hover-visible': {
+      opacity: 0,
+    },
+    ':hover .hover-visible': {
+      opacity: 1,
+    },
     ...(isNew && { fontWeight: 600 }),
     ...(isMatched && { color: theme.pageTextPositive }),
     ...(isPreview && {
