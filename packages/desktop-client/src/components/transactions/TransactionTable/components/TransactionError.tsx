@@ -1,4 +1,4 @@
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import type { CSSProperties } from '@actual-app/components/styles';
@@ -22,8 +22,6 @@ export function TransactionError({
   onDistributeRemainder,
   style,
 }: TransactionErrorProps) {
-  const { t } = useTranslation();
-
   if (error.type !== 'SplitTransactionError' || error.version !== 1) {
     return null;
   }

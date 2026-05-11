@@ -30,7 +30,7 @@ function PayeeModeIcon({ mode }: { mode: PayeeDisplayMode }) {
           width: 14,
           height: 14,
           marginRight: 5,
-          color: 'inherit',
+          color: theme.pageTextSubdued,
           flexShrink: 0,
         }}
       />
@@ -53,7 +53,8 @@ export function PayeeCellDisplay({
   mode,
   onClick,
 }: PayeeCellDisplayProps) {
-  const showLink = mode !== 'plain';
+  const showLink = mode === 'transfer' || mode === 'schedule';
+  const isSplit = mode === 'split';
 
   return (
     <div
@@ -93,6 +94,7 @@ export function PayeeCellDisplay({
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
+          color: isSplit ? theme.pageTextSubdued : undefined,
         }}
       >
         {displayPayee}
