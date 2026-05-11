@@ -10,9 +10,9 @@ import { getDisplayTemplateMeta } from '#components/budget/goals/displayTemplate
 
 // Types managed in the Options sidebar section, not as contribution-type
 // swaps.
-const NON_CONTRIBUTION_TYPES: ReadonlySet<DisplayTemplateType> = new Set([
-  'limit',
-]);
+export const NON_CONTRIBUTION_TYPES: ReadonlySet<DisplayTemplateType> = new Set(
+  ['limit'],
+);
 
 type TypePickerProps = {
   active: DisplayTemplateType;

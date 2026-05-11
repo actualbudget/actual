@@ -26,7 +26,7 @@ import {
 } from '#components/budget/goals/reducer';
 import type { AutomationErrorKind } from '#components/budget/goals/validateAutomation';
 
-import { TypePicker } from './TypePicker';
+import { NON_CONTRIBUTION_TYPES, TypePicker } from './TypePicker';
 
 const CONFIG_PANEL_CLASS = css({
   '& > *:first-child': {
@@ -179,22 +179,26 @@ export function AutomationEditorPane({
         </View>
       )}
 
-      <Text
-        style={{
-          fontSize: 11,
-          textTransform: 'uppercase',
-          color: theme.pageTextSubdued,
-          fontWeight: 600,
-          letterSpacing: '0.05em',
-        }}
-      >
-        <Trans>Automation type</Trans>
-      </Text>
-      <TypePicker
-        active={state.displayType}
-        disabledTypes={disabledTypes}
-        onPick={type => dispatch({ type: 'set-type', payload: type })}
-      />
+      {!NON_CONTRIBUTION_TYPES.has(state.displayType) && (
+        <>
+          <Text
+            style={{
+              fontSize: 11,
+              textTransform: 'uppercase',
+              color: theme.pageTextSubdued,
+              fontWeight: 600,
+              letterSpacing: '0.05em',
+            }}
+          >
+            <Trans>Automation type</Trans>
+          </Text>
+          <TypePicker
+            active={state.displayType}
+            disabledTypes={disabledTypes}
+            onPick={type => dispatch({ type: 'set-type', payload: type })}
+          />
+        </>
+      )}
 
       {state.displayType !== 'refill' && (
         <>
