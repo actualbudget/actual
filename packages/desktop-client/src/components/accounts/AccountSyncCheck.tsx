@@ -11,7 +11,8 @@ import type { AccountEntity } from '@actual-app/core/types/models';
 
 import { useUnlinkAccountMutation } from '#accounts';
 import { Link } from '#components/common/Link';
-import { authorizeBank } from '#gocardless';
+import { authorizeBank as authorizeEnableBanking } from '#enablebanking';
+import { authorizeBank as authorizeGoCardless } from '#gocardless';
 import { useAccounts } from '#hooks/useAccounts';
 import { useFailedAccounts } from '#hooks/useFailedAccounts';
 import { useDispatch } from '#redux';
@@ -103,7 +104,11 @@ export function AccountSyncCheck() {
       setOpen(false);
 
       if (acc.account_id) {
-        void authorizeBank(dispatch);
+        if (acc.account_sync_source === 'enableBanking') {
+          void authorizeEnableBanking(dispatch);
+        } else if (acc.account_sync_source === 'goCardless') {
+          void authorizeGoCardless(dispatch);
+        }
       }
     },
     [dispatch],

@@ -42,6 +42,9 @@ const mappableFields: MappableField[] = [
       'valueDate',
       'postedDate',
       'transactedDate',
+      'booking_date',
+      'value_date',
+      'transaction_date',
     ],
   },
   {
@@ -64,6 +67,9 @@ const mappableFields: MappableField[] = [
       'merchant.name',
       'merchant.businessName',
       'merchant.cnpj',
+      'creditor.name',
+      'debtor.name',
+      'account_servicer.name',
     ],
   },
   {
@@ -85,6 +91,8 @@ const mappableFields: MappableField[] = [
       'merchant.name',
       'merchant.businessName',
       'merchant.cnpj',
+      'entry_reference',
+      'transaction_id',
     ],
   },
 ];
