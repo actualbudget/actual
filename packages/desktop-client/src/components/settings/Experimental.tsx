@@ -199,12 +199,6 @@ export function ExperimentalFeatures() {
               <Trans>Sankey report</Trans>
             </FeatureToggle>
             <FeatureToggle
-              flag="crossoverReport"
-              feedbackLink="https://github.com/actualbudget/actual/issues/6134"
-            >
-              <Trans>Crossover Report</Trans>
-            </FeatureToggle>
-            <FeatureToggle
               flag="ageOfMoneyReport"
               feedbackLink="https://github.com/actualbudget/actual/issues/7006"
             >

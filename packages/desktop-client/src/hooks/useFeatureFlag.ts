@@ -8,7 +8,6 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   actionTemplating: false,
   formulaMode: false,
   currency: false,
-  crossoverReport: false,
   ageOfMoneyReport: false,
   budgetAnalysisReport: false,
   payeeLocations: false,
