@@ -15,33 +15,19 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Fetch base branch
-        run: git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
-
       - name: Verify version bump
         env:
           BASE_REF: ${{ github.base_ref }}
         run: |
           set -euo pipefail
 
-          CHANGED_FILES=$(git diff --name-only "origin/${BASE_REF}...HEAD" -- packages/crdt/)
-
-          if [ -z "$CHANGED_FILES" ]; then
-            echo "No changes in packages/crdt/ - skipping version bump check."
-            exit 0
-          fi
-
-          echo "Detected changes in packages/crdt/:"
-          echo "$CHANGED_FILES"
-
           if ! git cat-file -e "origin/${BASE_REF}:packages/crdt/package.json" 2>/dev/null; then
             echo "packages/crdt/package.json does not exist on the base branch; skipping."
             exit 0
           fi
 
-          BASE_VERSION=$(git show "origin/${BASE_REF}:packages/crdt/package.json" | node -p "JSON.parse(require('fs').readFileSync(0, 'utf-8')).version")
-          HEAD_VERSION=$(node -p "require('./packages/crdt/package.json').version")
-
+          BASE_VERSION=$(git show "origin/${BASE_REF}:packages/crdt/package.json" | jq -r .version)
+          HEAD_VERSION=$(jq -r .version packages/crdt/package.json)
           echo "Base version: $BASE_VERSION"
           echo "Head version: $HEAD_VERSION"
 
@@ -50,15 +36,8 @@ jobs:
             exit 1
           fi
 
-          IS_HIGHER=$(node -e "
-            const parse = v => v.split('-')[0].split('.').map(Number);
-            const [a1, a2, a3] = parse('$BASE_VERSION');
-            const [b1, b2, b3] = parse('$HEAD_VERSION');
-            const cmp = b1 - a1 || b2 - a2 || b3 - a3;
-            process.stdout.write(cmp > 0 ? 'yes' : 'no');
-          ")
-
-          if [ "$IS_HIGHER" != "yes" ]; then
+          HIGHEST=$(printf '%s\n%s\n' "$BASE_VERSION" "$HEAD_VERSION" | sort -V | tail -n1)
+          if [ "$HIGHEST" != "$HEAD_VERSION" ]; then
             echo "::error file=packages/crdt/package.json::The @actual-app/crdt version ($HEAD_VERSION) must be greater than the base version ($BASE_VERSION)."
             exit 1
           fi

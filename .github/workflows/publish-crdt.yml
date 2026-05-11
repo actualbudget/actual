@@ -30,7 +30,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          LOCAL_VERSION=$(node -p "require('./packages/crdt/package.json').version")
+          LOCAL_VERSION=$(jq -r .version packages/crdt/package.json)
           echo "Local version: $LOCAL_VERSION"
 
           PUBLISHED_VERSION=$(npm view @actual-app/crdt version 2>/dev/null || echo "")
