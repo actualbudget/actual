@@ -359,19 +359,20 @@ export async function dryRunCategoryTemplate({
   categoryId: CategoryEntity['id'];
   templates: Template[];
 }): Promise<DryRunCategoryResult> {
-  // Always run the full set of saved category templates and override the
-  // target's saved templates with the in-flight ones. Sibling categories
-  // consume from To Budget at each priority; running them too keeps the
-  // projection in sync with what an actual apply would produce — including
-  // the constrained-budget case where prior categories at the same priority
-  // exhaust the pool and clamp this category's amount.
-  const allCategoryTemplates = await getTemplates();
-  allCategoryTemplates[categoryId] = templates;
+  // Mirror applySingleCategoryTemplate: only this category competes for
+  // To Budget, so the projection isn't clamped to 0 in months without
+  // available funds.
+  const { data: categoryData }: { data: CategoryEntity[] } = await aqlQuery(
+    q('categories').filter({ id: categoryId }).select('*'),
+  );
+  if (categoryData.length === 0) {
+    return { budgeted: 0, perTemplate: templates.map(() => 0) };
+  }
   const { contexts } = await computeTemplates(
     month,
     true,
-    allCategoryTemplates,
-    [],
+    { [categoryId]: templates },
+    categoryData,
   );
   const ctx = contexts.find(c => c.category.id === categoryId);
   if (!ctx) return { budgeted: 0, perTemplate: templates.map(() => 0) };
