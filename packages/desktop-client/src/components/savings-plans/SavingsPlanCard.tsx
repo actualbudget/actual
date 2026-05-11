@@ -11,9 +11,9 @@ import {
   calculateMonthlyContribution,
   calculateProgress,
   calculateRemainingAmount,
-} from 'loot-core/shared/savings';
-import { integerToCurrency } from 'loot-core/shared/util';
-import type { SavingsPlanEntity } from 'loot-core/types/models';
+} from '@actual-app/core/shared/savings';
+import { integerToCurrency } from '@actual-app/core/shared/util';
+import type { SavingsPlanEntity } from '@actual-app/core/types/models';
 
 type SavingsPlanCardProps = {
   plan: SavingsPlanEntity;

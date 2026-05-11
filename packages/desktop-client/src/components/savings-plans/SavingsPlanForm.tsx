@@ -7,10 +7,13 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { currencyToInteger, integerToCurrency } from 'loot-core/shared/util';
-import type { SavingsPlanEntity } from 'loot-core/types/models';
+import {
+  currencyToInteger,
+  integerToCurrency,
+} from '@actual-app/core/shared/util';
+import type { SavingsPlanEntity } from '@actual-app/core/types/models';
 
-import { FormField, FormLabel } from '@desktop-client/components/forms';
+import { FormField, FormLabel } from '#components/forms';
 
 type SavingsPlanFormProps = {
   plan?: SavingsPlanEntity | null;

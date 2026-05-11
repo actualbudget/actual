@@ -1,7 +1,7 @@
 import { queryOptions } from '@tanstack/react-query';
 
-import { send } from 'loot-core/platform/client/connection';
-import type { SavingsPlanEntity } from 'loot-core/types/models';
+import { send } from '@actual-app/core/platform/client/connection';
+import type { SavingsPlanEntity } from '@actual-app/core/types/models';
 
 export const savingsPlanQueries = {
   all: () => ['savings-plans'],

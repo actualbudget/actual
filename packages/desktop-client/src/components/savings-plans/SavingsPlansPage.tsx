@@ -6,9 +6,8 @@ import { SvgAdd } from '@actual-app/components/icons/v1';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { SavingsPlanEntity } from '@actual-app/core/types/models';
 import { useQuery } from '@tanstack/react-query';
-
-import type { SavingsPlanEntity } from 'loot-core/types/models';
 
 import { SavingsPlanCard } from './SavingsPlanCard';
 import { SavingsPlanForm } from './SavingsPlanForm';
@@ -17,8 +16,8 @@ import {
   useCreateSavingsPlanMutation,
   useDeleteSavingsPlanMutation,
   useUpdateSavingsPlanMutation,
-} from '@desktop-client/savings-plans/mutations';
-import { savingsPlanQueries } from '@desktop-client/savings-plans/queries';
+} from '../../savings-plans/mutations';
+import { savingsPlanQueries } from '../../savings-plans/queries';
 
 export function SavingsPlansPage() {
   const { t } = useTranslation();
