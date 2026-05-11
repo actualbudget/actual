@@ -219,12 +219,12 @@ describe('dryRunCategoryTemplate', () => {
     expect(result).toEqual({ budgeted: 0, perTemplate: [0] });
   });
 
-  it('ignores sibling contention', async () => {
-    // The reproducer for issue #7692: a per-category dry run shouldn't have
-    // its demand clamped by other categories competing at the same priority,
-    // because applySingleCategoryTemplate (the per-category apply button)
-    // doesn't include them either.
-    setupSheetMock({ 'to-budget': 500000 });
+  it('shows full demand even when To Budget cannot cover it', async () => {
+    // With priority>0 and a constrained To Budget, the engine clamps the
+    // actual budgeted amount to fit. The dry run should still report the
+    // templates' full demand so the user sees what the rules want, not
+    // what would survive clamping.
+    setupSheetMock({ 'to-budget': 5000 });
     setupAqlForCategoryLookup(category);
 
     const templates: Template[] = [

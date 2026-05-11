@@ -214,6 +214,7 @@ async function computeTemplates(
   force: boolean,
   categoryTemplates: Record<CategoryEntity['id'], Template[]>,
   categories: CategoryEntity[] = [],
+  skipAvailableClamp: boolean = false,
 ): Promise<ComputedTemplates> {
   // setup categories
   const isTracking = isTrackingBudget();
@@ -247,6 +248,7 @@ async function computeTemplates(
           category,
           month,
           budgeted,
+          skipAvailableClamp,
         );
         // don't use the funds that are not from templates
         if (!templateContext.isGoalOnly()) {
@@ -359,9 +361,9 @@ export async function dryRunCategoryTemplate({
   categoryId: CategoryEntity['id'];
   templates: Template[];
 }): Promise<DryRunCategoryResult> {
-  // Mirror applySingleCategoryTemplate: only this category competes for
-  // To Budget, so the projection isn't clamped to 0 in months without
-  // available funds.
+  // The projection answers "how much do these templates demand" — it
+  // skips the priority clamp so future months (where To Budget is empty)
+  // still show the templates' intended amount instead of 0.
   const { data: categoryData }: { data: CategoryEntity[] } = await aqlQuery(
     q('categories').filter({ id: categoryId }).select('*'),
   );
@@ -373,6 +375,7 @@ export async function dryRunCategoryTemplate({
     true,
     { [categoryId]: templates },
     categoryData,
+    true,
   );
   const ctx = contexts.find(c => c.category.id === categoryId);
   if (!ctx) return { budgeted: 0, perTemplate: templates.map(() => 0) };
