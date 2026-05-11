@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -52,6 +53,82 @@ const ALWAYS_SCROLL_CLASS = css({
     backgroundColor: theme.tableBorder,
   },
 });
+
+function SidebarSectionHeader({
+  children,
+  style,
+}: {
+  children: ReactNode;
+  style?: CSSProperties;
+}) {
+  return (
+    <View
+      style={{
+        flexShrink: 0,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '6px 8px',
+        fontSize: 11,
+        textTransform: 'uppercase',
+        color: theme.pageTextSubdued,
+        fontWeight: 600,
+        letterSpacing: '0.05em',
+        ...style,
+      }}
+    >
+      <Text>{children}</Text>
+    </View>
+  );
+}
+
+function SidebarAddButton({
+  onPress,
+  children,
+}: {
+  onPress: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <Button
+      variant="bare"
+      onPress={onPress}
+      style={{
+        flexShrink: 0,
+        width: '100%',
+        marginTop: 8,
+        padding: 10,
+        border: `1px dashed ${theme.tableBorder}`,
+        borderRadius: 6,
+        color: theme.pageTextPositive,
+        fontWeight: 600,
+        fontSize: 12,
+        justifyContent: 'center',
+      }}
+    >
+      {children}
+    </Button>
+  );
+}
+
+function SidebarPlaceholderRow({ children }: { children: ReactNode }) {
+  return (
+    <View
+      style={{
+        flexShrink: 0,
+        padding: '8px 10px',
+        marginTop: 4,
+        borderRadius: 6,
+        border: `1px dashed ${theme.tableBorder}`,
+        color: theme.pageTextSubdued,
+        fontSize: 12,
+        opacity: 0.6,
+      }}
+    >
+      <Text>{children}</Text>
+    </View>
+  );
+}
 
 type BudgetAutomationsBodyProps = {
   categoryId: string;
@@ -111,8 +188,11 @@ export function BudgetAutomationsBody({
       },
       'limit',
     );
-    setEntries(prev => [entry, ...prev]);
-    setActiveIdx(0);
+    setEntries(prev => {
+      const next = [...prev, entry];
+      setActiveIdx(next.length - 1);
+      return next;
+    });
   };
 
   const onDelete = (index: number) => {
@@ -225,6 +305,14 @@ export function BudgetAutomationsBody({
 
   const hasLimitAutomation = entries.some(e => e.displayType === 'limit');
 
+  const indexedEntries = entries.map((entry, idx) => ({ entry, idx }));
+  const contributionEntries = indexedEntries.filter(
+    ({ entry }) => entry.displayType !== 'limit',
+  );
+  const constraintEntries = indexedEntries.filter(
+    ({ entry }) => entry.displayType === 'limit',
+  );
+
   const safeActiveIdx = Math.min(activeIdx, Math.max(0, entries.length - 1));
 
   return (
@@ -307,53 +395,51 @@ export function BudgetAutomationsBody({
             overflowY: 'scroll',
           }}
         >
-          <View
-            style={{
-              flexShrink: 0,
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '6px 8px',
-              fontSize: 11,
-              textTransform: 'uppercase',
-              color: theme.pageTextSubdued,
-              fontWeight: 600,
-              letterSpacing: '0.05em',
-            }}
-          >
-            <Text>
-              <Trans>Automations</Trans>
-            </Text>
-          </View>
-          {entries.map((entry, i) => (
+          <SidebarSectionHeader>
+            <Trans>Automations</Trans>
+          </SidebarSectionHeader>
+          {contributionEntries.map(({ entry, idx }) => (
             <AutomationListRow
               key={entry.id}
-              index={i}
+              index={idx}
               entry={entry}
-              isActive={i === safeActiveIdx}
-              error={automationErrors[i]}
-              contribution={contributions[i]}
+              isActive={idx === safeActiveIdx}
+              error={automationErrors[idx]}
+              contribution={contributions[idx]}
               categoryNameMap={categoryNameMap}
               onSelect={setActiveIdx}
             />
           ))}
-          <Button
-            variant="bare"
-            onPress={() => onAddAutomation()}
-            style={{
-              width: '100%',
-              marginTop: 8,
-              padding: 10,
-              border: `1px dashed ${theme.tableBorder}`,
-              borderRadius: 6,
-              color: theme.pageTextPositive,
-              fontWeight: 600,
-              fontSize: 12,
-              justifyContent: 'center',
-            }}
-          >
+          <SidebarAddButton onPress={() => onAddAutomation()}>
             + <Trans>Add an automation</Trans>
-          </Button>
+          </SidebarAddButton>
+
+          <SidebarSectionHeader style={{ marginTop: 16 }}>
+            <Trans>Options</Trans>
+          </SidebarSectionHeader>
+          {constraintEntries.map(({ entry, idx }) => (
+            <AutomationListRow
+              key={entry.id}
+              index={idx}
+              entry={entry}
+              isActive={idx === safeActiveIdx}
+              error={automationErrors[idx]}
+              contribution={contributions[idx]}
+              categoryNameMap={categoryNameMap}
+              onSelect={setActiveIdx}
+            />
+          ))}
+          {!hasLimitAutomation && (
+            <SidebarAddButton onPress={onAddLimitAutomation}>
+              + <Trans>Add balance cap</Trans>
+            </SidebarAddButton>
+          )}
+          <SidebarPlaceholderRow>
+            <Trans>Long-term goal (coming soon)</Trans>
+          </SidebarPlaceholderRow>
+          <SidebarPlaceholderRow>
+            <Trans>End of month cleanup (coming soon)</Trans>
+          </SidebarPlaceholderRow>
         </View>
 
         <View style={{ flex: 1, minWidth: 0 }}>

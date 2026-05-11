@@ -8,6 +8,12 @@ import { displayTemplateTypes } from '#components/budget/goals/constants';
 import type { DisplayTemplateType } from '#components/budget/goals/constants';
 import { getDisplayTemplateMeta } from '#components/budget/goals/displayTemplateMeta';
 
+// Types managed in the Options sidebar section, not as contribution-type
+// swaps.
+const NON_CONTRIBUTION_TYPES: ReadonlySet<DisplayTemplateType> = new Set([
+  'limit',
+]);
+
 type TypePickerProps = {
   active: DisplayTemplateType;
   disabledTypes: ReadonlySet<DisplayTemplateType>;
@@ -16,9 +22,9 @@ type TypePickerProps = {
 
 export function TypePicker({ active, disabledTypes, onPick }: TypePickerProps) {
   const { t } = useTranslation();
-  const entries = displayTemplateTypes.map(
-    id => [id, getDisplayTemplateMeta(id)] as const,
-  );
+  const entries = displayTemplateTypes
+    .filter(id => !NON_CONTRIBUTION_TYPES.has(id))
+    .map(id => [id, getDisplayTemplateMeta(id)] as const);
   const disabledHint = t('Only one of this type allowed per category');
 
   return (
