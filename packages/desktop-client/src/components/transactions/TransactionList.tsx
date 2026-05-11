@@ -1,47 +1,34 @@
 // @ts-strict-ignore
 // TODO: remove strict
-import { useCallback, useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import type { RefObject } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
-import { send } from '@actual-app/core/platform/client/connection';
-import * as monthUtils from '@actual-app/core/shared/months';
-import { q } from '@actual-app/core/shared/query';
-import { getUpcomingDays } from '@actual-app/core/shared/schedules';
-import {
-  addSplitTransaction,
-  applyTransactionDiff,
-  isPreviewId,
-  realizeTempTransactions,
-  splitTransaction,
-  updateTransaction,
-} from '@actual-app/core/shared/transactions';
-import { applyChanges, getChangedValues } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   CategoryEntity,
-  PayeeEntity,
-  RuleActionEntity,
   RuleConditionEntity,
-  ScheduleEntity,
   TransactionEntity,
   TransactionFilterEntity,
 } from '@actual-app/core/types/models';
 
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import type { TableHandleRef } from '#components/table';
-import { isValidBoundaryDrop } from '#hooks/useDragDrop';
-import type { DropPosition } from '#hooks/useDragDrop';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSyncedPref } from '#hooks/useSyncedPref';
-import { pushModal } from '#modals/modalsSlice';
-import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 
-import { TransactionTable } from './TransactionsTable';
-import type { TransactionTableProps } from './TransactionsTable';
+import { useTransactionListHandlers } from './transaction-list/useTransactionListHandlers';
+import { TransactionTable as OldTransactionTable } from './TransactionsTable';
+import type { TransactionTableProps as OldTransactionTableProps } from './TransactionsTable';
+import { TransactionTable as NewTransactionTable } from './TransactionTable';
+import type { TransactionTableProps as NewTransactionTableProps } from './TransactionTable';
+
+export { createSingleTimeScheduleFromTransaction } from './transaction-list/schedule';
+
 // When data changes, there are two ways to update the UI:
 //
 // * Optimistic updates: we apply the needed updates to local data
@@ -62,182 +49,8 @@ import type { TransactionTableProps } from './TransactionsTable';
 // differently than a full refresh. It's up to you to decide which
 // one to use when doing updates.
 
-async function saveDiff(diff, learnCategories) {
-  const remoteUpdates = await send('transactions-batch-update', {
-    ...diff,
-    learnCategories,
-  });
-
-  if (remoteUpdates && remoteUpdates.updated.length > 0) {
-    return { updates: remoteUpdates };
-  }
-  return {};
-}
-
-async function saveDiffAndApply(diff, changes, onChange, learnCategories) {
-  const remoteDiff = await saveDiff(diff, learnCategories);
-  onChange(
-    // TODO:
-    // @ts-expect-error - fix me
-    applyTransactionDiff(changes.newTransaction, remoteDiff),
-    // @ts-expect-error - fix me
-    applyChanges(remoteDiff, changes.data),
-  );
-}
-
-export async function createSingleTimeScheduleFromTransaction(
-  transaction: TransactionEntity,
-): Promise<ScheduleEntity['id']> {
-  const conditions: RuleConditionEntity[] = [
-    { op: 'is', field: 'date', value: transaction.date },
-  ];
-
-  const actions: RuleActionEntity[] = [];
-
-  const conditionFields = ['amount', 'payee', 'account'];
-
-  conditionFields.forEach(field => {
-    const value = transaction[field];
-    if (value != null && value !== '') {
-      conditions.push({
-        op: 'is',
-        field,
-        value,
-      } as RuleConditionEntity);
-    }
-  });
-
-  if (transaction.is_parent && transaction.subtransactions) {
-    if (transaction.notes) {
-      actions.push({
-        op: 'set',
-        field: 'notes',
-        value: transaction.notes,
-        options: {
-          splitIndex: 0,
-        },
-      } as RuleActionEntity);
-    }
-
-    transaction.subtransactions.forEach((split, index) => {
-      const splitIndex = index + 1;
-
-      if (split.amount != null) {
-        actions.push({
-          op: 'set-split-amount',
-          value: split.amount,
-          options: {
-            splitIndex,
-            method: 'fixed-amount',
-          },
-        } as RuleActionEntity);
-      }
-
-      if (split.category) {
-        actions.push({
-          op: 'set',
-          field: 'category',
-          value: split.category,
-          options: {
-            splitIndex,
-          },
-        } as RuleActionEntity);
-      }
-
-      if (split.notes) {
-        actions.push({
-          op: 'set',
-          field: 'notes',
-          value: split.notes,
-          options: {
-            splitIndex,
-          },
-        } as RuleActionEntity);
-      }
-    });
-  } else {
-    if (transaction.category) {
-      actions.push({
-        op: 'set',
-        field: 'category',
-        value: transaction.category,
-      } as RuleActionEntity);
-    }
-
-    if (transaction.notes) {
-      actions.push({
-        op: 'set',
-        field: 'notes',
-        value: transaction.notes,
-      } as RuleActionEntity);
-    }
-  }
-
-  const formattedDate = monthUtils.format(transaction.date, 'MMM dd, yyyy');
-  const timestamp = Date.now();
-  const scheduleName = `Auto-created future transaction (${formattedDate}) - ${timestamp}`;
-
-  const scheduleId = await send('schedule/create', {
-    conditions,
-    schedule: {
-      posts_transaction: true,
-      name: scheduleName,
-    },
-  });
-
-  if (actions.length > 0) {
-    const schedules = await send(
-      'query',
-      q('schedules').filter({ id: scheduleId }).select('rule').serialize(),
-    );
-
-    const ruleId = schedules?.data?.[0]?.rule;
-
-    if (ruleId) {
-      const rule = await send('rule-get', { id: ruleId });
-
-      if (rule) {
-        const linkScheduleActions = rule.actions.filter(
-          a => a.op === 'link-schedule',
-        );
-
-        await send('rule-update', {
-          ...rule,
-          actions: [...linkScheduleActions, ...actions],
-        });
-      }
-    }
-  }
-
-  return scheduleId;
-}
-
-function isFutureTransaction(transaction: TransactionEntity): boolean {
-  const today = monthUtils.currentDay();
-  return transaction.date > today;
-}
-
-function calculateFutureTransactionInfo(
-  transaction: TransactionEntity,
-  upcomingLength: string,
-) {
-  const today = monthUtils.currentDay();
-  const upcomingDays = getUpcomingDays(upcomingLength, today);
-  const daysUntilTransaction = monthUtils.differenceInCalendarDays(
-    transaction.date,
-    today,
-  );
-  const isBeyondWindow = daysUntilTransaction > upcomingDays;
-
-  return {
-    isBeyondWindow,
-    daysUntilTransaction,
-    upcomingDays,
-  };
-}
-
 type TransactionListProps = Pick<
-  TransactionTableProps,
+  NewTransactionTableProps & OldTransactionTableProps,
   | 'accounts'
   | 'allowSplitTransaction'
   | 'ascDesc'
@@ -327,6 +140,7 @@ export function TransactionList({
   onMakeAsNonSplitTransactions,
 }: TransactionListProps) {
   const { t } = useTranslation();
+  const useModularTable = useFeatureFlag('modularTransactionTable');
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -341,387 +155,36 @@ export function TransactionList({
     transactionsLatest.current = transactions;
   }, [transactions]);
 
-  const promptToConvertToSchedule = useCallback(
-    (
-      transaction: TransactionEntity,
-      onConfirm: () => Promise<void>,
-      onCancel: () => Promise<void>,
-    ) => {
-      const futureInfo = calculateFutureTransactionInfo(
-        transaction,
-        upcomingLength,
-      );
+  const {
+    onAdd,
+    onSave,
+    onAddSplit,
+    onSplit,
+    onApplyRules,
+    onManagePayees,
+    onNavigateToTransferAccount,
+    onNavigateToSchedule,
+    onNotesTagClick,
+    onReorder,
+  } = useTransactionListHandlers({
+    transactionsLatest,
+    allTransactions,
+    sortField,
+    ascDesc,
+    isFiltered,
+    isLearnCategoriesEnabled,
+    upcomingLength,
+    dispatch,
+    navigate,
+    t,
+    onChange,
+    onRefetch,
+    onApplyFilter,
+  });
 
-      dispatch(
-        pushModal({
-          modal: {
-            name: 'convert-to-schedule',
-            options: {
-              ...futureInfo,
-              onConfirm: async () => {
-                await onConfirm();
-                dispatch(
-                  addNotification({
-                    notification: {
-                      type: 'message',
-                      message: t('Schedule created successfully'),
-                    },
-                  }),
-                );
-                onRefetch();
-              },
-              onCancel: async () => {
-                await onCancel();
-                onRefetch();
-              },
-            },
-          },
-        }),
-      );
-    },
-    [dispatch, onRefetch, upcomingLength, t],
-  );
-
-  const onAdd = useCallback(
-    async (newTransactions: TransactionEntity[]) => {
-      newTransactions = realizeTempTransactions(newTransactions);
-
-      const parentTransaction = newTransactions.find(t => !t.is_child);
-      const isLinkedToSchedule = !!parentTransaction?.schedule;
-
-      if (
-        parentTransaction &&
-        isFutureTransaction(parentTransaction) &&
-        !isLinkedToSchedule
-      ) {
-        const transactionWithSubtransactions = {
-          ...parentTransaction,
-          subtransactions: newTransactions.filter(
-            t => t.is_child && t.parent_id === parentTransaction.id,
-          ),
-        };
-
-        promptToConvertToSchedule(
-          transactionWithSubtransactions,
-          async () => {
-            await createSingleTimeScheduleFromTransaction(
-              transactionWithSubtransactions,
-            );
-          },
-          async () => {
-            await saveDiff(
-              { added: newTransactions },
-              isLearnCategoriesEnabled,
-            );
-          },
-        );
-        return;
-      }
-
-      await saveDiff({ added: newTransactions }, isLearnCategoriesEnabled);
-      onRefetch();
-    },
-    [isLearnCategoriesEnabled, onRefetch, promptToConvertToSchedule],
-  );
-
-  const onSave = useCallback(
-    async (transaction: TransactionEntity) => {
-      const saveTransaction = async () => {
-        const changes = updateTransaction(
-          transactionsLatest.current,
-          transaction,
-        );
-        transactionsLatest.current = changes.data;
-
-        if (changes.diff.updated.length > 0) {
-          const dateChanged = !!changes.diff.updated[0].date;
-          if (dateChanged) {
-            changes.diff.updated[0].sort_order = Date.now();
-            await saveDiff(changes.diff, isLearnCategoriesEnabled);
-            onRefetch();
-          } else {
-            onChange(changes.newTransaction, changes.data);
-            void saveDiffAndApply(
-              changes.diff,
-              changes,
-              onChange,
-              isLearnCategoriesEnabled,
-            );
-          }
-        }
-      };
-
-      const isLinkedToSchedule = !!transaction.schedule;
-      if (isFutureTransaction(transaction) && !isLinkedToSchedule) {
-        const originalTransaction = transactionsLatest.current.find(
-          t => t.id === transaction.id,
-        );
-        const dateChanged =
-          !originalTransaction || originalTransaction.date !== transaction.date;
-
-        if (dateChanged || !originalTransaction) {
-          promptToConvertToSchedule(
-            transaction,
-            async () => {
-              if (transaction.id && !transaction.id.startsWith('temp')) {
-                await send('transaction-delete', { id: transaction.id });
-              }
-
-              await createSingleTimeScheduleFromTransaction(transaction);
-            },
-            saveTransaction,
-          );
-          return;
-        }
-      }
-
-      await saveTransaction();
-    },
-    [isLearnCategoriesEnabled, onChange, onRefetch, promptToConvertToSchedule],
-  );
-
-  const onAddSplit = useCallback(
-    (id: TransactionEntity['id']) => {
-      const changes = addSplitTransaction(transactionsLatest.current, id);
-      onChange(changes.newTransaction, changes.data);
-      void saveDiffAndApply(
-        changes.diff,
-        changes,
-        onChange,
-        isLearnCategoriesEnabled,
-      );
-      return changes.diff.added[0].id;
-    },
-    [isLearnCategoriesEnabled, onChange],
-  );
-
-  const onSplit = useCallback(
-    (id: TransactionEntity['id']) => {
-      const changes = splitTransaction(transactionsLatest.current, id);
-      onChange(changes.newTransaction, changes.data);
-      void saveDiffAndApply(
-        changes.diff,
-        changes,
-        onChange,
-        isLearnCategoriesEnabled,
-      );
-      return changes.diff.added[0].id;
-    },
-    [isLearnCategoriesEnabled, onChange],
-  );
-
-  const onApplyRules = useCallback(
-    async (
-      transaction: TransactionEntity,
-      updatedFieldName: string | null = null,
-    ) => {
-      const afterRules = await send('rules-run', { transaction });
-
-      // Show formula errors if any
-      if (afterRules._ruleErrors && afterRules._ruleErrors.length > 0) {
-        dispatch(
-          addNotification({
-            notification: {
-              type: 'error',
-              message: `Formula errors in rules:\n${afterRules._ruleErrors.join('\n')}`,
-              sticky: true,
-            },
-          }),
-        );
-      }
-
-      const diff = getChangedValues(transaction, afterRules);
-
-      const newTransaction: TransactionEntity = { ...transaction };
-      if (diff) {
-        Object.keys(diff).forEach(field => {
-          if (
-            newTransaction[field] == null ||
-            newTransaction[field] === '' ||
-            newTransaction[field] === 0 ||
-            newTransaction[field] === false
-          ) {
-            newTransaction[field] = diff[field];
-          }
-        });
-
-        // When a rule updates a parent transaction, overwrite all changes to the current field in subtransactions.
-        if (
-          transaction.is_parent &&
-          diff.subtransactions !== undefined &&
-          updatedFieldName !== null
-        ) {
-          newTransaction.subtransactions = diff.subtransactions.map(
-            (st, idx) => ({
-              ...(newTransaction.subtransactions?.[idx] || st),
-              ...(st[updatedFieldName] != null && {
-                [updatedFieldName]: st[updatedFieldName],
-              }),
-            }),
-          );
-        }
-      }
-      return newTransaction;
-    },
-    [dispatch],
-  );
-
-  const onManagePayees = useCallback(
-    (id: PayeeEntity['id']) => {
-      void navigate(
-        '/payees',
-        id ? { state: { selectedPayee: id } } : undefined,
-      );
-    },
-    [navigate],
-  );
-
-  const onNavigateToTransferAccount = useCallback(
-    (accountId: AccountEntity['id']) => {
-      void navigate(`/accounts/${accountId}`);
-    },
-    [navigate],
-  );
-
-  const onNavigateToSchedule = useCallback(
-    (scheduleId: ScheduleEntity['id']) => {
-      dispatch(
-        pushModal({
-          modal: { name: 'schedule-edit', options: { id: scheduleId } },
-        }),
-      );
-    },
-    [dispatch],
-  );
-
-  const onNotesTagClick = useCallback(
-    (tag: string) => {
-      onApplyFilter({
-        field: 'notes',
-        op: 'hasTags',
-        value: tag,
-        type: 'string',
-      });
-    },
-    [onApplyFilter],
-  );
-
-  const onReorder = useCallback(
-    async (id: string, dropPos: DropPosition, targetId: string) => {
-      // Don't support reorder while sorted by non-date field or filtered
-      if ((sortField && sortField !== 'date') || isFiltered) {
-        return;
-      }
-
-      if (id === targetId) {
-        return;
-      }
-
-      // Find the transaction being dragged to determine if it's a child
-      const draggedTrans = allTransactions.find(t => t.id === id);
-      if (!draggedTrans) {
-        return;
-      }
-
-      // Child transaction reordering: siblings only
-      if (draggedTrans.is_child && draggedTrans.parent_id) {
-        const siblings = allTransactions.filter(
-          t => t.parent_id === draggedTrans.parent_id && !isPreviewId(t.id),
-        );
-
-        const targetTransIdx = siblings.findIndex(t => t.id === targetId);
-        if (targetTransIdx === -1) {
-          return; // Target is not a sibling
-        }
-
-        // Convert dropPos to API targetId for child reordering
-        // API places transaction AFTER targetId; null means move to top of siblings
-        let apiTargetId: string | null;
-        if (dropPos === 'after') {
-          apiTargetId = targetId;
-        } else {
-          const aboveIdx = targetTransIdx - 1;
-          apiTargetId = aboveIdx >= 0 ? siblings[aboveIdx].id : null;
-        }
-
-        await send('transaction-move', {
-          id,
-          accountId: draggedTrans.account,
-          targetId: apiTargetId,
-        });
-        onRefetch();
-        return;
-      }
-
-      // Build a reorderable list that excludes child and preview/scheduled transactions
-      const reorderable = allTransactions.filter(
-        t => !t.is_child && !isPreviewId(t.id),
-      );
-
-      const transIdx = reorderable.findIndex(t => t.id === id);
-      const targetTransIdx = reorderable.findIndex(t => t.id === targetId);
-
-      if (transIdx === -1 || targetTransIdx === -1) {
-        return;
-      }
-
-      const trans = reorderable[transIdx];
-      const targetTrans = reorderable[targetTransIdx];
-      const isAscending = sortField === 'date' && ascDesc === 'asc';
-
-      // Validate drop position: same date or at a date boundary
-      let isValidDrop = targetTrans.date === trans.date;
-      if (!isValidDrop) {
-        const neighborIdx =
-          dropPos === 'before' ? targetTransIdx - 1 : targetTransIdx + 1;
-        const neighborTrans =
-          neighborIdx >= 0 && neighborIdx < reorderable.length
-            ? reorderable[neighborIdx]
-            : null;
-        isValidDrop = isValidBoundaryDrop(
-          dropPos,
-          targetTrans.date,
-          trans.date,
-          neighborTrans?.date ?? null,
-          isAscending,
-        );
-      }
-
-      if (!isValidDrop) {
-        return;
-      }
-
-      // Convert dropPos to API targetId
-      // API places transaction AFTER targetId; null means move to top
-      let apiTargetId: string | null;
-      if (dropPos === 'after') {
-        // Prevent inserting immediately after a split parent
-        if (targetTrans.is_parent) {
-          return;
-        }
-        apiTargetId = targetTrans.date === trans.date ? targetId : null;
-      } else {
-        const aboveIdx = targetTransIdx - 1;
-        const aboveTrans = aboveIdx >= 0 ? reorderable[aboveIdx] : null;
-        // For parent-level reordering, always anchor to parent transactions.
-        // Using a child id here makes the backend miss the target and append.
-        if (aboveTrans?.is_parent) {
-          apiTargetId = aboveTrans.date === trans.date ? aboveTrans.id : null;
-        } else {
-          apiTargetId =
-            aboveTrans && aboveTrans.date === trans.date ? aboveTrans.id : null;
-        }
-      }
-
-      await send('transaction-move', {
-        id,
-        accountId: trans.account,
-        targetId: apiTargetId,
-      });
-      onRefetch();
-    },
-    [sortField, ascDesc, isFiltered, allTransactions, onRefetch],
-  );
+  const TransactionTable = useModularTable
+    ? NewTransactionTable
+    : OldTransactionTable;
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>

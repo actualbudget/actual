@@ -9,7 +9,8 @@ export type FeatureFlag =
   | 'customThemes'
   | 'budgetAnalysisReport'
   | 'payeeLocations'
-  | 'sankeyReport';
+  | 'sankeyReport'
+  | 'modularTransactionTable';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
@@ -32,6 +33,7 @@ export type SyncedPrefs = Partial<
     | `show-extra-balances-${string}`
     | `hide-cleared-${string}`
     | `hide-reconciled-${string}`
+    | `transaction-table-column-widths-${string}`
     // TODO: pull from src/components/modals/ImportTransactions.js
     | `parse-date-${string}-${'csv' | 'qif'}`
     | `import-reimport-deleted-${string}`
