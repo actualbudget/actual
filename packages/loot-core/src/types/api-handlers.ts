@@ -71,7 +71,9 @@ export type ApiHandlers = {
     totalIncome: number;
     totalSpent: number;
     totalBalance: number;
-    categoryGroups: Record<string, unknown>[];
+    categoryGroups: Array<
+      Record<string, unknown> & { categories?: Record<string, unknown>[] }
+    >;
   }>;
 
   'api/budget-set-amount': (arg: {
