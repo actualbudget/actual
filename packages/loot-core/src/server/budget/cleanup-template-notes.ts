@@ -59,9 +59,8 @@ function parseCleanupNote(note: string): ParsedCleanupRow[] {
   for (const line of note.split('\n')) {
     const trimmed = line.trim();
     if (!trimmed.toLowerCase().startsWith(CLEANUP_PREFIX)) continue;
-    const expression = trimmed.slice(CLEANUP_PREFIX.length);
     try {
-      const raw = parse(expression) as {
+      const raw = parse(trimmed) as {
         type: 'source' | 'sink' | null;
         group: string | null;
         weight?: number;
