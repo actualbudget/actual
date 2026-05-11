@@ -5,6 +5,9 @@ on:
     paths:
       - 'packages/crdt/**'
 
+permissions:
+  contents: read
+
 jobs:
   check-version-bump:
     runs-on: ubuntu-latest
