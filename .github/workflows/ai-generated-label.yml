@@ -8,7 +8,8 @@ name: Add 'AI generated' label to '[AI]' PRs
 ##########################################################################################
 
 on:
-  pull_request_target:
+  # This workflow never checks out or runs PR code; it only reads the PR title and adds a label.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types: [opened, reopened, edited]
 
 permissions:
