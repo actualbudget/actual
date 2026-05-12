@@ -77,7 +77,6 @@ export function AutomationListRow({
         alignItems: 'center',
         gap: 10,
         padding: 10,
-        marginBottom: 4,
         borderRadius: 6,
         border: `1px solid ${borderColor}`,
         backgroundColor,

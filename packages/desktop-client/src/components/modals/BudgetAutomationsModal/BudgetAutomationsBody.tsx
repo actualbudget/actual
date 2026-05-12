@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgDelete } from '@actual-app/components/icons/v0';
 import { SvgInformationCircle } from '@actual-app/components/icons/v2';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -13,6 +14,7 @@ import type {
   CategoryGroupEntity,
   ScheduleEntity,
 } from '@actual-app/core/types/models';
+import type { CleanupTemplate } from '@actual-app/core/types/models/cleanup-templates';
 import { css } from '@emotion/css';
 import debounce from 'lodash/debounce';
 
@@ -21,12 +23,21 @@ import {
   getAutomationExamples,
 } from '#components/budget/goals/automationExamples';
 import type { AutomationEntry } from '#components/budget/goals/automationExamples';
+import {
+  cleanupToConfig,
+  configToCleanup,
+  emptyCleanupConfig,
+  isConfigActive,
+} from '#components/budget/goals/cleanupModel';
+import type { CleanupConfig } from '#components/budget/goals/cleanupModel';
+import { CleanupAutomation } from '#components/budget/goals/editor/CleanupAutomation';
 import { formatMonthLabel } from '#components/budget/goals/formatMonthLabel';
 import {
   validateAutomation,
   validatePercentageAllocation,
 } from '#components/budget/goals/validateAutomation';
 import { Link } from '#components/common/Link';
+import { useCleanupGroups } from '#hooks/useCleanupGroups';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { pushModal } from '#modals/modalsSlice';
@@ -35,6 +46,7 @@ import { useDispatch } from '#redux';
 import { AutomationEditorPane } from './AutomationEditorPane';
 import { AutomationListRow } from './AutomationListRow';
 import { BudgetAutomationMigrationWarning } from './BudgetAutomationMigrationWarning';
+import { CleanupListRow } from './CleanupListRow';
 import { ConflictBanner } from './ConflictBanner';
 import { EmptyState } from './EmptyState';
 import { NON_CONTRIBUTION_TYPES } from './TypePicker';
@@ -99,7 +111,6 @@ function SidebarAddButton({
       style={{
         flexShrink: 0,
         width: '100%',
-        marginTop: 8,
         padding: 10,
         border: `1px dashed ${theme.tableBorder}`,
         borderRadius: 6,
@@ -114,41 +125,26 @@ function SidebarAddButton({
   );
 }
 
-function SidebarPlaceholderRow({ children }: { children: ReactNode }) {
-  return (
-    <View
-      style={{
-        flexShrink: 0,
-        padding: '8px 10px',
-        marginTop: 4,
-        borderRadius: 6,
-        border: `1px dashed ${theme.tableBorder}`,
-        color: theme.pageTextSubdued,
-        fontSize: 12,
-        opacity: 0.6,
-      }}
-    >
-      <Text>{children}</Text>
-    </View>
-  );
-}
-
 type BudgetAutomationsBodyProps = {
   categoryId: string;
   categoryName: string;
   needsMigration: boolean;
   initialEntries: AutomationEntry[];
+  initialCleanup: CleanupTemplate[];
   schedules: readonly ScheduleEntity[];
   categories: CategoryGroupEntity[];
   month: string;
   onClose: () => void;
 };
 
+type ActiveSelection = { kind: 'entry'; idx: number } | { kind: 'cleanup' };
+
 export function BudgetAutomationsBody({
   categoryId,
   categoryName,
   needsMigration,
   initialEntries,
+  initialCleanup,
   schedules,
   categories,
   month,
@@ -157,14 +153,24 @@ export function BudgetAutomationsBody({
   const dispatch = useDispatch();
   const format = useFormat();
   const locale = useLocale();
+  const { groups: cleanupGroups, createGroup: createCleanupGroup } =
+    useCleanupGroups();
 
   const [entries, setEntries] = useState<AutomationEntry[]>(initialEntries);
-  const initialContributionIdx = initialEntries.findIndex(
-    e => !NON_CONTRIBUTION_TYPES.has(e.displayType),
+  const [cleanup, setCleanup] = useState<CleanupConfig>(() =>
+    cleanupToConfig(initialCleanup),
   );
-  const [activeIdx, setActiveIdx] = useState(
-    initialContributionIdx >= 0 ? initialContributionIdx : 0,
-  );
+  const [active, setActive] = useState<ActiveSelection>(() => {
+    if (initialEntries.length > 0) {
+      const contributionIdx = initialEntries.findIndex(
+        e => !NON_CONTRIBUTION_TYPES.has(e.displayType),
+      );
+      return { kind: 'entry', idx: contributionIdx >= 0 ? contributionIdx : 0 };
+    }
+    return isConfigActive(cleanupToConfig(initialCleanup))
+      ? { kind: 'cleanup' }
+      : { kind: 'entry', idx: 0 };
+  });
   const [saving, setSaving] = useState(false);
   const [dryRun, setDryRun] = useState<{
     budgeted: number;
@@ -179,7 +185,7 @@ export function BudgetAutomationsBody({
     if (!entry) return;
     setEntries(prev => {
       const next = [...prev, entry];
-      setActiveIdx(next.length - 1);
+      setActive({ kind: 'entry', idx: next.length - 1 });
       return next;
     });
   };
@@ -198,7 +204,7 @@ export function BudgetAutomationsBody({
     );
     setEntries(prev => {
       const next = [...prev, entry];
-      setActiveIdx(next.length - 1);
+      setActive({ kind: 'entry', idx: next.length - 1 });
       return next;
     });
   };
@@ -214,18 +220,30 @@ export function BudgetAutomationsBody({
     );
     setEntries(prev => {
       const next = [...prev, entry];
-      setActiveIdx(next.length - 1);
+      setActive({ kind: 'entry', idx: next.length - 1 });
       return next;
     });
+  };
+
+  const onAddCleanup = () => {
+    if (!isConfigActive(cleanup)) setCleanup(emptyCleanupConfig());
+    setActive({ kind: 'cleanup' });
+  };
+
+  const onDeleteCleanup = () => {
+    setCleanup(emptyCleanupConfig());
+    if (entries.length > 0) setActive({ kind: 'entry', idx: 0 });
   };
 
   const onDelete = (index: number) => {
     setEntries(prev => {
       const next = prev.filter((_, i) => i !== index);
-      setActiveIdx(currentActive => {
-        if (next.length === 0) return 0;
-        if (currentActive >= next.length) return next.length - 1;
-        if (currentActive > index) return currentActive - 1;
+      setActive(currentActive => {
+        if (currentActive.kind !== 'entry') return currentActive;
+        if (next.length === 0) return { kind: 'entry', idx: 0 };
+        const idx = currentActive.idx;
+        if (idx >= next.length) return { kind: 'entry', idx: next.length - 1 };
+        if (idx > index) return { kind: 'entry', idx: idx - 1 };
         return currentActive;
       });
       return next;
@@ -239,7 +257,11 @@ export function BudgetAutomationsBody({
       const templatesToSave = entries.map(({ template }) => template);
       await send('budget/set-category-automations', {
         categoriesWithTemplates: [
-          { id: categoryId, templates: templatesToSave },
+          {
+            id: categoryId,
+            templates: templatesToSave,
+            cleanup: configToCleanup(cleanup),
+          },
         ],
         source: 'ui',
       });
@@ -257,13 +279,14 @@ export function BudgetAutomationsBody({
           options: {
             categoryId,
             templates: entries.map(({ template }) => template),
+            cleanup: configToCleanup(cleanup),
           },
         },
       }),
     );
   };
 
-  const templates = entries.map(e => e.template);
+  const templates = useMemo(() => entries.map(e => e.template), [entries]);
 
   const validPercentageSources = new Set<string>([
     'all income',
@@ -338,7 +361,12 @@ export function BudgetAutomationsBody({
   );
   const optionEntries = indexedEntries.filter(({ entry }) => isOption(entry));
 
-  const safeActiveIdx = Math.min(activeIdx, Math.max(0, entries.length - 1));
+  const safeActiveIdx =
+    active.kind === 'entry'
+      ? Math.min(active.idx, Math.max(0, entries.length - 1))
+      : -1;
+  const cleanupActive = active.kind === 'cleanup';
+  const setActiveIdx = (idx: number) => setActive({ kind: 'entry', idx });
 
   return (
     <View style={{ flex: 1, flexDirection: 'column', minHeight: 0 }}>
@@ -446,6 +474,7 @@ export function BudgetAutomationsBody({
             borderRight: `1px solid ${theme.tableBorder}`,
             padding: 10,
             overflowY: 'scroll',
+            gap: 4,
           }}
         >
           <SidebarSectionHeader>
@@ -492,13 +521,63 @@ export function BudgetAutomationsBody({
               + <Trans>Add long-term goal</Trans>
             </SidebarAddButton>
           )}
-          <SidebarPlaceholderRow>
-            <Trans>End of month cleanup (coming soon)</Trans>
-          </SidebarPlaceholderRow>
+          {isConfigActive(cleanup) ? (
+            <CleanupListRow
+              config={cleanup}
+              groups={cleanupGroups}
+              isActive={cleanupActive}
+              onSelect={() => setActive({ kind: 'cleanup' })}
+            />
+          ) : (
+            <SidebarAddButton onPress={onAddCleanup}>
+              + <Trans>Add end of month cleanup</Trans>
+            </SidebarAddButton>
+          )}
         </View>
 
         <View style={{ flex: 1, minWidth: 0 }}>
-          {entries.length === 0 ? (
+          {cleanupActive ? (
+            <View
+              style={{
+                flex: 1,
+                padding: 20,
+                overflowY: 'auto',
+                gap: 14,
+              }}
+            >
+              <CleanupAutomation
+                config={cleanup}
+                groups={cleanupGroups}
+                onChange={setCleanup}
+                onCreateGroup={createCleanupGroup}
+              />
+              <View
+                style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}
+              >
+                <View style={{ flex: 1 }} />
+                <Button
+                  variant="bare"
+                  onPress={onDeleteCleanup}
+                  style={{ color: theme.errorText }}
+                >
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
+                    }}
+                  >
+                    <SvgDelete
+                      width={10}
+                      height={10}
+                      style={{ color: 'inherit' }}
+                    />
+                    <Trans>Remove cleanup</Trans>
+                  </span>
+                </Button>
+              </View>
+            </View>
+          ) : entries.length === 0 ? (
             <EmptyState onAdd={onAddAutomation} />
           ) : (
             <AutomationEditorPane

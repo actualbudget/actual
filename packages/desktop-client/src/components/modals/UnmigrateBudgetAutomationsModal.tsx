@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -6,13 +6,16 @@ import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
+import type { CleanupTemplate } from '@actual-app/core/types/models/cleanup-templates';
 import type { Template } from '@actual-app/core/types/models/templates';
 
+import { cleanupToNotes } from '#components/budget/goals/cleanupModel';
 import { Link } from '#components/common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { Notes } from '#components/Notes';
 import { useCategories } from '#hooks/useCategories';
 import { useCategory } from '#hooks/useCategory';
+import { useCleanupGroups } from '#hooks/useCleanupGroups';
 import { useNotes } from '#hooks/useNotes';
 
 // The UI's CategoryAutocomplete stores the income category id on a
@@ -34,13 +37,16 @@ function sanitizePercentageCategoriesForNotes(
 export function UnmigrateBudgetAutomationsModal({
   categoryId,
   templates,
+  cleanup,
 }: {
   categoryId: string;
   templates: Template[];
+  cleanup: CleanupTemplate[];
 }) {
   const { t } = useTranslation();
   const { data: category } = useCategory(categoryId);
   const { data: categoryData } = useCategories();
+  const { groups: cleanupGroups } = useCleanupGroups();
   const existingNotes = useNotes(categoryId) || '';
   const [editedNotes, setEditedNotes] = useState<string>('');
 
@@ -54,6 +60,8 @@ export function UnmigrateBudgetAutomationsModal({
       idToName.set(cat.id, cat.name);
     }
     const sanitized = sanitizePercentageCategoriesForNotes(templates, idToName);
+    const groupName = (groupId: string) =>
+      cleanupGroups.find(g => g.id === groupId)?.name ?? null;
     let mounted = true;
     void (async () => {
       try {
@@ -61,7 +69,9 @@ export function UnmigrateBudgetAutomationsModal({
           'budget/render-note-templates',
           sanitized,
         );
-        if (mounted) setRendered(text);
+        const cleanupText = cleanupToNotes(cleanup, groupName);
+        const combined = [text, cleanupText].filter(Boolean).join('\n');
+        if (mounted) setRendered(combined);
       } catch {
         if (mounted) setRendered('');
       }
@@ -69,7 +79,7 @@ export function UnmigrateBudgetAutomationsModal({
     return () => {
       mounted = false;
     };
-  }, [templates, categoryData]);
+  }, [templates, cleanup, categoryData, cleanupGroups]);
 
   // Seed editable notes once templates rendered
   useEffect(() => {
@@ -102,12 +112,14 @@ export function UnmigrateBudgetAutomationsModal({
         setEditedNotes(
           base +
             needsNewline +
-            '\nExport from automations UI:\n' +
+            '\n' +
+            t('Export from automations UI:') +
+            '\n' +
             newLines.join('\n'),
         );
       }
     }
-  }, [rendered, existingNotes]);
+  }, [rendered, existingNotes, t]);
 
   async function onSave(close: () => void) {
     setSaving(true);
@@ -118,10 +130,13 @@ export function UnmigrateBudgetAutomationsModal({
       // re-derive goal_def from the notes the next time it runs (e.g. on
       // modal open or when applying templates).
       await send('budget/set-category-automations', {
-        categoriesWithTemplates: [{ id: categoryId, templates: [] }],
+        categoriesWithTemplates: [
+          { id: categoryId, templates: [], cleanup: [] },
+        ],
         source: 'notes',
       });
       await send('budget/store-note-templates');
+      await send('budget/store-note-cleanups');
       close();
     } finally {
       setSaving(false);
