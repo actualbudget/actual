@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
@@ -136,24 +136,21 @@ export function CrossoverCard({
   }, [meta?.timeFrame, locale]);
 
   const [isCardHovered, setIsCardHovered] = useState(false);
-  const onCardHover = useCallback(() => setIsCardHovered(true), []);
-  const onCardHoverEnd = useCallback(() => setIsCardHovered(false), []);
+  const onCardHover = () => setIsCardHovered(true);
+  const onCardHoverEnd = () => setIsCardHovered(false);
 
   const showHiddenCategories = meta?.showHiddenCategories ?? false;
 
-  // Memoize these to prevent unnecessary re-renders
-  const expenseCategoryIds = useMemo(() => {
-    const storedIds = meta?.expenseCategoryIds;
-    const base = storedIds?.length
+  const storedIds = meta?.expenseCategoryIds;
+  const expenseCategoryIds = (
+    storedIds !== undefined
       ? categories.list.filter(c => storedIds.includes(c.id))
-      : categories.list.filter(c => !c.is_income);
-    return base.filter(c => showHiddenCategories || !c.hidden).map(c => c.id);
-  }, [meta?.expenseCategoryIds, categories.list, showHiddenCategories]);
+      : categories.list.filter(c => !c.is_income)
+  )
+    .filter(c => showHiddenCategories || !c.hidden)
+    .map(c => c.id);
 
-  const incomeAccountIds = useMemo(
-    () => meta?.incomeAccountIds ?? accounts.map(a => a.id),
-    [meta?.incomeAccountIds, accounts],
-  );
+  const incomeAccountIds = meta?.incomeAccountIds ?? accounts.map(a => a.id);
 
   const swr = meta?.safeWithdrawalRate ?? 0.04;
   const estimatedReturn = meta?.estimatedReturn ?? null;
@@ -162,31 +159,17 @@ export function CrossoverCard({
     meta?.projectionType ?? 'hampel';
   const expenseAdjustmentFactor = meta?.expenseAdjustmentFactor ?? 1.0;
 
-  const params = useMemo(
-    () =>
-      createCrossoverSpreadsheet({
-        start,
-        end,
-        expenseCategoryIds,
-        incomeAccountIds,
-        safeWithdrawalRate: swr,
-        estimatedReturn,
-        expectedContribution,
-        projectionType,
-        expenseAdjustmentFactor,
-      }),
-    [
-      start,
-      end,
-      expenseCategoryIds,
-      incomeAccountIds,
-      swr,
-      estimatedReturn,
-      expectedContribution,
-      projectionType,
-      expenseAdjustmentFactor,
-    ],
-  );
+  const params = createCrossoverSpreadsheet({
+    start,
+    end,
+    expenseCategoryIds,
+    incomeAccountIds,
+    safeWithdrawalRate: swr,
+    estimatedReturn,
+    expectedContribution,
+    projectionType,
+    expenseAdjustmentFactor,
+  });
 
   const data = useReport<CrossoverData>('crossover', params);
 
