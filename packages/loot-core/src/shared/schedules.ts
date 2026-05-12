@@ -101,7 +101,9 @@ export function getScheduleHasTransactionsLowerBound(
     }
   }
 
-  return lookbackDays === 0 ? nextDate : monthUtils.subDays(nextDate, lookbackDays);
+  return lookbackDays === 0
+    ? nextDate
+    : monthUtils.subDays(nextDate, lookbackDays);
 }
 
 /**
@@ -377,10 +379,7 @@ export function recurConfigToRSchedule(config) {
         // produce twice as many occurrences (each rule generates
         // its own `count`).
         const startDay = base.start.getDate();
-        if (
-          startDay >= 29 &&
-          config.endMode !== 'after_n_occurrences'
-        ) {
+        if (startDay >= 29 && config.endMode !== 'after_n_occurrences') {
           const monthsWithDay: number[] = [];
           const monthsWithoutDay: number[] = [];
           // Use a non-leap baseline year so that February with 28

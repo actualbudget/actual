@@ -735,9 +735,9 @@ describe('schedules', () => {
         field: 'date',
         value: { start: '2023-01-02', frequency: 'weekly' },
       };
-      expect(
-        getScheduleHasTransactionsLowerBound('2023-11-13', dateCond),
-      ).toBe('2023-11-07');
+      expect(getScheduleHasTransactionsLowerBound('2023-11-13', dateCond)).toBe(
+        '2023-11-07',
+      );
     });
 
     it('scales the lookback by interval', () => {
@@ -747,9 +747,9 @@ describe('schedules', () => {
         value: { start: '2023-01-01', frequency: 'monthly', interval: 2 },
       };
       // 28 * 2 - 1 = 55 days
-      expect(
-        getScheduleHasTransactionsLowerBound('2023-11-30', dateCond),
-      ).toBe('2023-10-06');
+      expect(getScheduleHasTransactionsLowerBound('2023-11-30', dateCond)).toBe(
+        '2023-10-06',
+      );
     });
 
     it('returns next_date for daily schedules to avoid cross-day false matches', () => {
@@ -758,10 +758,9 @@ describe('schedules', () => {
         field: 'date',
         value: { start: '2023-01-01', frequency: 'daily' },
       };
-      expect(
-        getScheduleHasTransactionsLowerBound('2023-11-30', dateCond),
-      ).toBe('2023-11-30');
+      expect(getScheduleHasTransactionsLowerBound('2023-11-30', dateCond)).toBe(
+        '2023-11-30',
+      );
     });
   });
-
 });
