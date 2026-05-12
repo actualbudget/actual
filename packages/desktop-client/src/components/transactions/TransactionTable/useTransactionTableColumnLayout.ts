@@ -216,8 +216,7 @@ export function useTransactionTableColumnLayout({
     });
 
     // Always ensure columns fill available space to prevent gaps
-    // This handles both flex->pixel conversion and pixel->pixel resize
-    if (measuredWidths && availableDataWidth !== null) {
+    if (measuredWidths && availableDataWidth !== null && visibleColumns.length > 0) {
       // Use measured widths as the base
       const updatedWidths = { ...startWidths };
       visibleColumns.forEach(column => {
@@ -234,25 +233,14 @@ export function useTransactionTableColumnLayout({
 
       const difference = availableDataWidth - totalCalculated;
 
-      // Find columns that can be adjusted (originally flex or currently resizable)
-      const flexibleColumns = visibleColumns.filter(col => {
-        const defaultWidth = col.defaultWidth;
-        return defaultWidth === 'flex';
-      });
-
-      if (difference !== 0 && flexibleColumns.length > 0) {
-        // Distribute the difference to flexible columns
-        const adjustPerColumn = Math.floor(difference / flexibleColumns.length);
-        const remainder = Math.abs(difference % flexibleColumns.length);
-
-        flexibleColumns.forEach((column, index) => {
-          const currentWidth = updatedWidths[column.id] as number;
-          const adjustment = adjustPerColumn + (index < remainder ? Math.sign(difference) : 0);
-          updatedWidths[column.id] = Math.max(
-            column.minWidth,
-            currentWidth + adjustment,
-          );
-        });
+      // Simply add any difference to the last visible column
+      if (difference !== 0) {
+        const lastColumn = visibleColumns[visibleColumns.length - 1];
+        const lastColumnWidth = updatedWidths[lastColumn.id] as number;
+        updatedWidths[lastColumn.id] = Math.max(
+          lastColumn.minWidth,
+          lastColumnWidth + difference,
+        );
 
         totalCalculated = visibleColumns.reduce((sum, col) => {
           const w = updatedWidths[col.id];
@@ -266,7 +254,7 @@ export function useTransactionTableColumnLayout({
         totalCalculated,
         availableDataWidth,
         difference,
-        flexibleColumns: flexibleColumns.map(c => c.id),
+        adjustedColumn: visibleColumns[visibleColumns.length - 1]?.id,
       });
 
       startWidths = updatedWidths;
