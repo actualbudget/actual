@@ -39,7 +39,7 @@ const isPlaywrightTest = process.env.EXECUTION_CONTEXT === 'playwright';
 const isDev = !isPlaywrightTest && !app.isPackaged; // dev mode if not packaged and not playwright
 
 process.env.lootCoreScript = isDev
-  ? 'loot-core/lib-dist/electron/bundle.desktop.js' // serve from local output in development (provides hot-reloading)
+  ? '@actual-app/core/lib-dist/electron/bundle.desktop.js' // serve from local output in development (provides hot-reloading)
   : path.resolve(BUILD_ROOT, 'loot-core/lib-dist/electron/bundle.desktop.js'); // serve from build in production
 
 // This allows relative URLs to be resolved to app:// which makes
@@ -239,12 +239,11 @@ async function startSyncServer() {
       ),
     };
 
-    const serverPath = path.join(
-      // require.resolve will recursively search up the workspace for the module
-      path.dirname(require.resolve('@actual-app/sync-server/package.json')),
-      'build',
-      'app.js',
+    // require.resolve will recursively search up the workspace for the module
+    const syncServerRoot = path.dirname(
+      require.resolve('@actual-app/sync-server/package.json'),
     );
+    const serverPath = path.join(syncServerRoot, 'build/app.js');
 
     const webRoot = path.join(
       // require.resolve will recursively search up the workspace for the module

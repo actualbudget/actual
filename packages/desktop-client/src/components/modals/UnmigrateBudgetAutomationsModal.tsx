@@ -11,8 +11,25 @@ import type { Template } from '@actual-app/core/types/models/templates';
 import { Link } from '#components/common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { Notes } from '#components/Notes';
+import { useCategories } from '#hooks/useCategories';
 import { useCategory } from '#hooks/useCategory';
 import { useNotes } from '#hooks/useNotes';
+
+// The UI's CategoryAutocomplete stores the income category id on a
+// percentage template, but text-template grammar addresses categories by
+// name. Rewrite percentage templates so the un-migrated notes are readable
+// (and don't drift if the category is later renamed).
+function sanitizePercentageCategoriesForNotes(
+  templates: Template[],
+  idToName: Map<string, string>,
+): Template[] {
+  return templates.map(template => {
+    if (template.type !== 'percentage') return template;
+    const name = idToName.get(template.category);
+    if (name) return { ...template, category: name };
+    return template;
+  });
+}
 
 export function UnmigrateBudgetAutomationsModal({
   categoryId,
@@ -23,6 +40,7 @@ export function UnmigrateBudgetAutomationsModal({
 }) {
   const { t } = useTranslation();
   const { data: category } = useCategory(categoryId);
+  const { data: categoryData } = useCategories();
   const existingNotes = useNotes(categoryId) || '';
   const [editedNotes, setEditedNotes] = useState<string>('');
 
@@ -30,12 +48,18 @@ export function UnmigrateBudgetAutomationsModal({
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    if (!categoryData?.list) return;
+    const idToName = new Map<string, string>();
+    for (const cat of categoryData.list) {
+      idToName.set(cat.id, cat.name);
+    }
+    const sanitized = sanitizePercentageCategoriesForNotes(templates, idToName);
     let mounted = true;
     void (async () => {
       try {
         const text: string = await send(
           'budget/render-note-templates',
-          templates,
+          sanitized,
         );
         if (mounted) setRendered(text);
       } catch {
@@ -45,7 +69,7 @@ export function UnmigrateBudgetAutomationsModal({
     return () => {
       mounted = false;
     };
-  }, [templates]);
+  }, [templates, categoryData]);
 
   // Seed editable notes once templates rendered
   useEffect(() => {
@@ -87,13 +111,21 @@ export function UnmigrateBudgetAutomationsModal({
 
   async function onSave(close: () => void) {
     setSaving(true);
-    await send('notes-save-undoable', { id: categoryId, note: editedNotes });
-    await send('budget/set-category-automations', {
-      categoriesWithTemplates: [{ id: categoryId, templates }],
-      source: 'notes',
-    });
-    setSaving(false);
-    close();
+    try {
+      await send('notes-save-undoable', { id: categoryId, note: editedNotes });
+      // Hand control back to the notes parser: clear the UI-managed goal_def
+      // and mark notes as the source of truth. `storeNoteTemplates` will
+      // re-derive goal_def from the notes the next time it runs (e.g. on
+      // modal open or when applying templates).
+      await send('budget/set-category-automations', {
+        categoriesWithTemplates: [{ id: categoryId, templates: [] }],
+        source: 'notes',
+      });
+      await send('budget/store-note-templates');
+      close();
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (

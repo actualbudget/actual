@@ -466,6 +466,7 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
       <ListBox
         aria-label={ariaLabel}
         items={accounts}
+        dependencies={[syncingAccountIds, failedAccounts, updatedAccounts]}
         dragAndDropHooks={dragAndDropHooks}
         ref={ref}
         style={{

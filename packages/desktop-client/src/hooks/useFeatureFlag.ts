@@ -10,9 +10,9 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   currency: false,
   crossoverReport: false,
   ageOfMoneyReport: false,
-  customThemes: false,
   budgetAnalysisReport: false,
   payeeLocations: false,
+  enableBanking: false,
   sankeyReport: false,
 };
 

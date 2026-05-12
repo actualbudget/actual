@@ -30,6 +30,7 @@ __metadata:
     compare-versions: "npm:^6.1.1"
     rollup-plugin-visualizer: "npm:^7.0.1"
     typescript-strict-plugin: "npm:^2.4.4"
+    uuid: "npm:^14.0.0"
     vite: "npm:^8.0.5"
     vite-plugin-peggy-loader: "npm:^2.0.1"
     vitest: "npm:^4.1.2"
@@ -146,6 +147,7 @@ __metadata:
     typescript-strict-plugin: "npm:^2.4.4"
     ua-parser-js: "npm:^2.0.9"
     util: "npm:^0.12.5"
+    uuid: "npm:^14.0.0"
     vite: "npm:^8.0.5"
     vite-plugin-node-polyfills: "npm:^0.26.0"
     vite-plugin-peggy-loader: "npm:^2.0.1"
@@ -166,6 +168,7 @@ __metadata:
     protoc-gen-js: "npm:3.21.4-4"
     rollup-plugin-visualizer: "npm:^7.0.1"
     ts-protoc-gen: "npm:0.15.0"
+    uuid: "npm:^14.0.0"
     vite: "npm:^8.0.5"
     vitest: "npm:^4.1.2"
   languageName: unknown
@@ -183,6 +186,7 @@ __metadata:
     "@types/cors": "npm:^2.8.19"
     "@types/express": "npm:^5.0.6"
     "@types/express-actuator": "npm:^1.8.3"
+    "@types/jws": "npm:^3.2.11"
     "@types/node": "npm:^22.19.17"
     "@types/supertest": "npm:^7.2.0"
     "@typescript/native-preview": "npm:beta"
@@ -197,12 +201,15 @@ __metadata:
     express-winston: "npm:^4.2.0"
     http-proxy-middleware: "npm:^3.0.5"
     ipaddr.js: "npm:^2.3.0"
+    jws: "npm:^3.2.2"
     migrate: "npm:^2.1.0"
     nodemon: "npm:^3.1.14"
     openid-client: "npm:^5.7.1"
     pluggy-sdk: "npm:^0.83.0"
     supertest: "npm:^7.2.2"
     typescript-strict-plugin: "npm:^2.4.4"
+    uuid: "npm:^14.0.0"
+    vite: "npm:^8.0.5"
     vitest: "npm:^4.1.2"
     winston: "npm:^3.19.0"
   bin:
@@ -292,6 +299,7 @@ __metadata:
     sass: "npm:^1.99.0"
     typescript-strict-plugin: "npm:^2.4.4"
     usehooks-ts: "npm:^3.1.1"
+    uuid: "npm:^14.0.0"
     vite: "npm:^8.0.5"
     vite-plugin-pwa: "npm:^1.2.0"
     vitest: "npm:^4.1.2"
@@ -786,7 +794,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/helper-module-transforms@npm:^7.27.1, @babel/helper-module-transforms@npm:^7.28.3, @babel/helper-module-transforms@npm:^7.28.6":
+"@babel/helper-module-transforms@npm:^7.27.1, @babel/helper-module-transforms@npm:^7.28.6":
   version: 7.28.6
   resolution: "@babel/helper-module-transforms@npm:7.28.6"
   dependencies:
@@ -812,6 +820,13 @@ __metadata:
   version: 7.27.1
   resolution: "@babel/helper-plugin-utils@npm:7.27.1"
   checksum: 10/96136c2428888e620e2ec493c25888f9ceb4a21099dcf3dd4508ea64b58cdedbd5a9fb6c7b352546de84d6c24edafe482318646932a22c449ebd16d16c22d864
+  languageName: node
+  linkType: hard
+
+"@babel/helper-plugin-utils@npm:^7.28.6":
+  version: 7.28.6
+  resolution: "@babel/helper-plugin-utils@npm:7.28.6"
+  checksum: 10/21c853bbc13dbdddf03309c9a0477270124ad48989e1ad6524b83e83a77524b333f92edd2caae645c5a7ecf264ec6d04a9ebe15aeb54c7f33c037b71ec521e4a
   languageName: node
   linkType: hard
 
@@ -1347,16 +1362,16 @@ __metadata:
   linkType: hard
 
 "@babel/plugin-transform-modules-systemjs@npm:^7.28.5":
-  version: 7.28.5
-  resolution: "@babel/plugin-transform-modules-systemjs@npm:7.28.5"
+  version: 7.29.4
+  resolution: "@babel/plugin-transform-modules-systemjs@npm:7.29.4"
   dependencies:
-    "@babel/helper-module-transforms": "npm:^7.28.3"
-    "@babel/helper-plugin-utils": "npm:^7.27.1"
+    "@babel/helper-module-transforms": "npm:^7.28.6"
+    "@babel/helper-plugin-utils": "npm:^7.28.6"
     "@babel/helper-validator-identifier": "npm:^7.28.5"
-    "@babel/traverse": "npm:^7.28.5"
+    "@babel/traverse": "npm:^7.29.0"
   peerDependencies:
     "@babel/core": ^7.0.0-0
-  checksum: 10/1b91b4848845eaf6e21663d97a2a6c896553b127deaf3c2e9a2a4f041249277d13ebf71fd42d0ecbc4385e9f76093eff592fe0da0dcf1401b3f38c1615d8c539
+  checksum: 10/79269e6ec8ec831bb63bf1c7cc1a980e28da785e92b36d42612f0139e4044499b99aa109fca849e1a156c092aabf6c24d145f4cabf2ac9ea84ef468852fe4c03
   languageName: node
   linkType: hard
 
@@ -9835,6 +9850,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/jws@npm:^3.2.11":
+  version: 3.2.11
+  resolution: "@types/jws@npm:3.2.11"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10/968b9069eed4ea09292c8a75692c1319220e29c990a9f952cd61751c0fb0f0062ee44c40e02f05dc4fb709c19d8d612f97ff3e48eed7adc20c605e07d285da1d
+  languageName: node
+  linkType: hard
+
 "@types/keyv@npm:^3.1.4":
   version: 3.1.4
   resolution: "@types/keyv@npm:3.1.4"
@@ -16274,9 +16298,9 @@ __metadata:
   linkType: hard
 
 "fast-uri@npm:^3.0.1":
-  version: 3.1.0
-  resolution: "fast-uri@npm:3.1.0"
-  checksum: 10/818b2c96dc913bcf8511d844c3d2420e2c70b325c0653633f51821e4e29013c2015387944435cd0ef5322c36c9beecc31e44f71b257aeb8e0b333c1d62bb17c2
+  version: 3.1.2
+  resolution: "fast-uri@npm:3.1.2"
+  checksum: 10/1dff04865b2a38d3e0659deadfbf72efdf83a776bfbf9667e4aa9e5a3ec31bc341cda9622136b32b7652a857c8ba11896794186e8f876f8b2b72731fce8622f6
   languageName: node
   linkType: hard
 
@@ -28344,6 +28368,15 @@ __metadata:
   bin:
     uuid: dist/esm/bin/uuid
   checksum: 10/d2da43b49b154d154574891ced66d0c83fc70caaad87e043400cf644423b067542d6f3eb641b7c819224a7cd3b4c2f21906acbedd6ec9c6a05887aa9115a9cf5
+  languageName: node
+  linkType: hard
+
+"uuid@npm:^14.0.0":
+  version: 14.0.0
+  resolution: "uuid@npm:14.0.0"
+  bin:
+    uuid: dist-node/bin/uuid
+  checksum: 10/8ee9b98f9650e25555515f7a28d3c3ae9364e72f7bb19b9e08b681bc135338beba5509b2830f6ae1cfaba4d45401da0d16d4d109b977097bc3d6ba0c5583341b
   languageName: node
   linkType: hard
 

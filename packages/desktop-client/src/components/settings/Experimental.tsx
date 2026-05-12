@@ -151,10 +151,7 @@ export function ExperimentalFeatures() {
 
   const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
-  const showGoalTemplatesUI =
-    goalTemplatesUIEnabled ||
-    (goalTemplatesEnabled &&
-      localStorage.getItem('devEnableGoalTemplatesUI') === 'true');
+  const showGoalTemplatesUI = goalTemplatesEnabled || goalTemplatesUIEnabled;
 
   const showServerPrefs =
     localStorage.getItem('devEnableServerPrefs') === 'true';
@@ -169,7 +166,10 @@ export function ExperimentalFeatures() {
             </FeatureToggle>
             {showGoalTemplatesUI && (
               <View style={{ paddingLeft: 22 }}>
-                <FeatureToggle flag="goalTemplatesUIEnabled">
+                <FeatureToggle
+                  flag="goalTemplatesUIEnabled"
+                  feedbackLink="https://github.com/actualbudget/actual/issues/7692"
+                >
                   <Trans>Subfeature: Budget automations UI</Trans>
                 </FeatureToggle>
               </View>
@@ -211,12 +211,6 @@ export function ExperimentalFeatures() {
               <Trans>Age of Money Report</Trans>
             </FeatureToggle>
             <FeatureToggle
-              flag="customThemes"
-              feedbackLink="https://github.com/actualbudget/actual/issues/6607"
-            >
-              <Trans>Custom themes</Trans>
-            </FeatureToggle>
-            <FeatureToggle
               flag="budgetAnalysisReport"
               feedbackLink="https://github.com/actualbudget/actual/pull/6742"
             >
@@ -227,6 +221,12 @@ export function ExperimentalFeatures() {
               feedbackLink="https://github.com/actualbudget/actual/issues/6706"
             >
               <Trans>Payee Locations</Trans>
+            </FeatureToggle>
+            <FeatureToggle
+              flag="enableBanking"
+              feedbackLink="https://github.com/actualbudget/actual/issues/7799"
+            >
+              <Trans>Enable Banking sync (EU banks)</Trans>
             </FeatureToggle>
             {showServerPrefs && (
               <ServerFeatureToggle

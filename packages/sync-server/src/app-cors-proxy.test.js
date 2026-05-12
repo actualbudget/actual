@@ -414,6 +414,55 @@ describe('app-cors-proxy', () => {
       expect(res.statusCode).toBe(405);
       expect(res.body.error).toBe('Method not allowed');
     });
+
+    it('should reject non-string method (array bypass)', async () => {
+      global.fetch.mockClear();
+
+      const res = await request(app)
+        .get('/')
+        .send({ method: ['POST'], body: { evil: true } })
+        .query({ url: 'https://api.github.com/repos/user/repo1' });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toBe('Invalid method parameter');
+
+      const proxyCalls = global.fetch.mock.calls.filter(
+        ([url]) => url === 'https://api.github.com/repos/user/repo1',
+      );
+      expect(proxyCalls).toHaveLength(0);
+    });
+
+    it('should reject non-string method (object bypass)', async () => {
+      global.fetch.mockClear();
+
+      const res = await request(app)
+        .get('/')
+        .send({ method: { toString: () => 'POST' } })
+        .query({ url: 'https://github.com/user/repo1' });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toBe('Invalid method parameter');
+
+      const proxyCalls = global.fetch.mock.calls.filter(
+        ([url]) => url === 'https://github.com/user/repo1',
+      );
+      expect(proxyCalls).toHaveLength(0);
+    });
+
+    it('should forward the validated method to fetch, not the raw input', async () => {
+      global.fetch.mockClear();
+
+      await request(app)
+        .get('/')
+        .send({ method: 'get' })
+        .query({ url: 'https://github.com/user/repo1' });
+
+      const proxyCall = global.fetch.mock.calls.find(
+        ([url]) => url === 'https://github.com/user/repo1',
+      );
+      expect(proxyCall).toBeDefined();
+      expect(proxyCall[1].method).toBe('GET');
+    });
   });
 
   describe('GitHub authentication', () => {

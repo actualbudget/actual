@@ -4,16 +4,16 @@
   "description": "CRDT layer of Actual",
   "license": "MIT",
   "files": [
-    "dist"
+    "dist",
+    "!dist/**/*.test.d.ts",
+    "!dist/**/*.test.d.ts.map",
+    "!dist/**/*.spec.d.ts",
+    "!dist/**/*.spec.d.ts.map"
   ],
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "development": "./src/index.ts",
-      "default": "./dist/index.js"
-    }
+    ".": "./src/index.ts"
   },
   "publishConfig": {
     "exports": {
@@ -21,18 +21,21 @@
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       }
-    }
+    },
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts"
   },
   "scripts": {
     "build:node": "vite build",
     "proto:generate": "./bin/generate-proto",
-    "build": "yarn run build:node && tsgo -p tsconfig.build.json --emitDeclarationOnly",
+    "build": "yarn run build:node && tsgo -b",
     "test": "vitest --run",
     "typecheck": "tsgo -b"
   },
   "dependencies": {
     "google-protobuf": "^3.21.4",
-    "murmurhash": "^2.0.1"
+    "murmurhash": "^2.0.1",
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@types/google-protobuf": "3.15.12",
