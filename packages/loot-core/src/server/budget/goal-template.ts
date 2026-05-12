@@ -49,7 +49,6 @@ export async function storeTemplates({
   categoriesWithTemplates: {
     id: string;
     templates: Template[];
-    // omitted = leave cleanup_def as-is; [] = clear; non-empty = replace
     cleanup?: CleanupTemplate[];
   }[];
   source: 'notes' | 'ui';

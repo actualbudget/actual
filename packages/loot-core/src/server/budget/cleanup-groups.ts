@@ -13,7 +13,7 @@ export async function resolveCleanupGroup(name: string): Promise<string> {
     [key],
   );
   if (existing) {
-    if (existing.tombstone === 1) {
+    if (existing.tombstone) {
       await db.update('cleanup_groups', { id: existing.id, tombstone: 0 });
     }
     return existing.id;
