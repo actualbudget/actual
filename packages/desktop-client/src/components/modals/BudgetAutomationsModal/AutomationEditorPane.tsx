@@ -36,7 +36,7 @@ const CONFIG_PANEL_CLASS = css({
   '& span > label': {
     fontSize: 11,
     fontWeight: 600,
-    color: theme.pageTextSubdued,
+    color: theme.pageTextLight,
     letterSpacing: '0.04em',
     textTransform: 'uppercase',
   },
@@ -128,7 +128,7 @@ export function AutomationEditorPane({
 
   if (!active || !state) {
     return (
-      <View style={{ padding: 20, color: theme.pageTextSubdued }}>
+      <View style={{ padding: 20, color: theme.pageTextLight }}>
         <Trans>Select an automation on the left.</Trans>
       </View>
     );
@@ -186,7 +186,7 @@ export function AutomationEditorPane({
             style={{
               fontSize: 11,
               textTransform: 'uppercase',
-              color: theme.pageTextSubdued,
+              color: theme.pageTextLight,
               fontWeight: 600,
               letterSpacing: '0.05em',
             }}
@@ -207,7 +207,7 @@ export function AutomationEditorPane({
             style={{
               fontSize: 11,
               textTransform: 'uppercase',
-              color: theme.pageTextSubdued,
+              color: theme.pageTextLight,
               fontWeight: 600,
               letterSpacing: '0.05em',
             }}
@@ -227,7 +227,7 @@ export function AutomationEditorPane({
               <Text
                 style={{
                   fontSize: 12,
-                  color: theme.pageTextSubdued,
+                  color: theme.pageTextLight,
                   display: 'block',
                   marginBottom: 4,
                 }}
@@ -272,7 +272,7 @@ export function AutomationEditorPane({
                 style={{
                   fontSize: 11,
                   fontWeight: 600,
-                  color: theme.pageTextSubdued,
+                  color: theme.pageTextLight,
                   letterSpacing: '0.04em',
                   textTransform: 'uppercase',
                 }}
