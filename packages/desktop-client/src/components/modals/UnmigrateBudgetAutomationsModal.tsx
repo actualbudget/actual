@@ -108,11 +108,10 @@ export function UnmigrateBudgetAutomationsModal({
       if (newLines.length === 0) {
         setEditedNotes(base);
       } else {
-        const needsNewline = base && !base.endsWith('\n') ? '\n' : '';
+        const separator = base ? (base.endsWith('\n') ? '\n' : '\n\n') : '';
         setEditedNotes(
           base +
-            needsNewline +
-            '\n' +
+            separator +
             t('Export from automations UI:') +
             '\n' +
             newLines.join('\n'),

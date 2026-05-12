@@ -237,7 +237,7 @@ export function BudgetAutomationsBody({
 
   const onDeleteCleanup = () => {
     setCleanup(emptyCleanupConfig());
-    if (entries.length > 0) setActive({ kind: 'entry', idx: 0 });
+    setActive({ kind: 'entry', idx: 0 });
   };
 
   const onDelete = (index: number) => {

@@ -41,7 +41,11 @@ export function BudgetAutomationsModal({
   };
 
   const { data: currentCategory } = useCategory(categoryId);
-  const needsMigration = currentCategory?.template_settings?.source !== 'ui';
+  // default to 'ui' while the category is still resolving so we don't fire a
+  // notes-mode migration on a category that may turn out to be ui-managed
+  const needsMigration =
+    currentCategory != null &&
+    currentCategory.template_settings?.source !== 'ui';
   const source = needsMigration ? 'notes' : 'ui';
 
   const { loading: templatesLoading } = useBudgetAutomations({

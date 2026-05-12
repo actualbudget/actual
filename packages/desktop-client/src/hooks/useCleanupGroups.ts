@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { send } from '@actual-app/core/platform/client/connection';
 import { q } from '@actual-app/core/shared/query';
@@ -11,7 +11,7 @@ export function useCleanupGroups() {
   const [groups, setGroups] = useState<CleanupGroup[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const reload = useCallback(async () => {
+  async function reload() {
     const result = await aqlQuery(
       q('cleanup_groups').filter({ tombstone: false }).select(['id', 'name']),
     );
@@ -24,20 +24,17 @@ export function useCleanupGroups() {
       ),
     );
     setLoading(false);
-  }, []);
+  }
 
   useEffect(() => {
     void reload();
-  }, [reload]);
+  }, []);
 
-  const createGroup = useCallback(
-    async (name: string) => {
-      const { id } = await send('budget/create-cleanup-group', { name });
-      await reload();
-      return id;
-    },
-    [reload],
-  );
+  async function createGroup(name: string) {
+    const { id } = await send('budget/create-cleanup-group', { name });
+    await reload();
+    return id;
+  }
 
   return { groups, loading, createGroup };
 }
