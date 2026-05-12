@@ -482,6 +482,7 @@ export function Overview({ dashboard }: OverviewProps) {
               style={{
                 padding: '5px',
                 borderBottom: '1px solid ' + theme.pillBorder,
+                backgroundColor: theme.mobilePageBackground,
               }}
             >
               <DashboardSelector

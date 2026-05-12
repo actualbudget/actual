@@ -1,4 +1,9 @@
-import React from 'react';
+import React, {
+  createContext,
+  useContext,
+  useLayoutEffect,
+  useState,
+} from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -107,6 +112,67 @@ export function MobilePageHeader({
   );
 }
 
+// On mobile we want the page header to stay mounted while navigating between
+// pages so only its content (title/buttons) and not the whole element
+// (including its background) is swapped out. Pages publish their header through
+// this context to a single persistent `<MobilePageHeaderSlot />` rendered by the
+// app shell. When there is no provider (e.g. in tests or storybook) pages fall
+// back to rendering the header inline.
+type RegisterMobilePageHeader = (header: ReactNode) => void;
+
+const MobilePageHeaderRegisterContext =
+  createContext<RegisterMobilePageHeader | null>(null);
+const MobilePageHeaderContentContext = createContext<ReactNode>(null);
+
+export function MobilePageHeaderProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const [header, setHeader] = useState<ReactNode>(null);
+  return (
+    <MobilePageHeaderRegisterContext.Provider value={setHeader}>
+      <MobilePageHeaderContentContext.Provider value={header}>
+        {children}
+      </MobilePageHeaderContentContext.Provider>
+    </MobilePageHeaderRegisterContext.Provider>
+  );
+}
+
+type MobilePageHeaderSlotProps = {
+  style?: CSSProperties;
+};
+
+export function MobilePageHeaderSlot({ style }: MobilePageHeaderSlotProps) {
+  const header = useContext(MobilePageHeaderContentContext);
+  return (
+    <View
+      style={{
+        flexShrink: 0,
+        minHeight: HEADER_HEIGHT,
+        backgroundColor: theme.mobileHeaderBackground,
+        ...style,
+      }}
+    >
+      {header}
+    </View>
+  );
+}
+
+function MobilePageHeaderOutlet({ children }: { children: ReactNode }) {
+  const registerHeader = useContext(MobilePageHeaderRegisterContext);
+
+  useLayoutEffect(() => {
+    if (!registerHeader) {
+      return;
+    }
+    registerHeader(children);
+    return () => registerHeader(null);
+  }, [children, registerHeader]);
+
+  return registerHeader ? null : children;
+}
+
 type PageProps = {
   header: ReactNode;
   style?: CSSProperties;
@@ -130,28 +196,46 @@ export function Page({ header, style, padding, children, footer }: PageProps) {
       header
     );
 
+  const main = (
+    <View
+      role="main"
+      style={{
+        flex: 1,
+        overflowY: isNarrowWidth ? 'auto' : undefined,
+        padding: `0 ${childrenPadding}px`,
+      }}
+    >
+      {children}
+    </View>
+  );
+
+  if (isNarrowWidth) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: theme.mobilePageBackground,
+          ...style,
+        }}
+      >
+        <MobilePageHeaderOutlet>{headerToRender}</MobilePageHeaderOutlet>
+        {main}
+        {footer}
+      </View>
+    );
+  }
+
   return (
     <View
       style={{
-        ...(!isNarrowWidth && styles.page),
+        ...styles.page,
         flex: 1,
-        backgroundColor: isNarrowWidth
-          ? theme.mobilePageBackground
-          : theme.pageBackground,
+        backgroundColor: theme.pageBackground,
         ...style,
       }}
     >
       {headerToRender}
-      <View
-        role="main"
-        style={{
-          flex: 1,
-          overflowY: isNarrowWidth ? 'auto' : undefined,
-          padding: `0 ${childrenPadding}px`,
-        }}
-      >
-        {children}
-      </View>
+      {main}
       {footer}
     </View>
   );
