@@ -18,6 +18,9 @@ concurrency:
   group: publish-microsoft-store
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
   publish-microsoft-store:
     runs-on: windows-latest
