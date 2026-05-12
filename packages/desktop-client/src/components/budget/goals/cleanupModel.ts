@@ -11,7 +11,6 @@ export type GroupCleanup = {
   send: boolean;
   take: boolean;
   weight: number;
-  // engine's `overspend` role — group-only, caps the take at the overspend amount
   overspendOnly: boolean;
 };
 
@@ -25,46 +24,12 @@ export const emptyCleanupConfig = (): CleanupConfig => ({
   groups: [],
 });
 
-const isCleared = (config: CleanupConfig): boolean =>
-  !config.global.send &&
-  !config.global.take &&
-  config.groups.every(g => !g.send && !g.take);
-
-export function cleanupToConfig(cleanup: CleanupTemplate[]): CleanupConfig {
-  const config = emptyCleanupConfig();
-  const groupScopes = new Map<string, GroupCleanup>();
-
-  for (const row of cleanup) {
-    if (row.role === 'source') {
-      if (row.groupId === null) {
-        config.global.send = true;
-      } else {
-        const g = ensureGroup(groupScopes, row.groupId);
-        g.send = true;
-      }
-    } else if (row.role === 'sink') {
-      if (row.groupId === null) {
-        config.global.take = true;
-        config.global.weight = row.weight;
-      } else {
-        const g = ensureGroup(groupScopes, row.groupId);
-        g.take = true;
-        g.weight = row.weight;
-        // a sink wins over a stray prior overspend row for the same group
-        g.overspendOnly = false;
-      }
-    } else {
-      const g = ensureGroup(groupScopes, row.groupId);
-      // don't downgrade a real sink row already recorded for this group
-      if (!g.take) {
-        g.take = true;
-        g.overspendOnly = true;
-      }
-    }
-  }
-
-  config.groups = Array.from(groupScopes.values());
-  return config;
+export function isCleanupConfigured(config: CleanupConfig): boolean {
+  return (
+    config.global.send ||
+    config.global.take ||
+    config.groups.some(group => group.send || group.take)
+  );
 }
 
 function ensureGroup(
@@ -84,8 +49,45 @@ function ensureGroup(
   return fresh;
 }
 
-export function configToCleanup(config: CleanupConfig): CleanupTemplate[] {
-  if (isCleared(config)) return [];
+export function cleanupDefToEditor(cleanup: CleanupTemplate[]): CleanupConfig {
+  const config = emptyCleanupConfig();
+  const groupScopes = new Map<string, GroupCleanup>();
+
+  for (const row of cleanup) {
+    if (row.role === 'source') {
+      if (row.groupId === null) {
+        config.global.send = true;
+      } else {
+        const group = ensureGroup(groupScopes, row.groupId);
+        group.send = true;
+      }
+    } else if (row.role === 'sink') {
+      if (row.groupId === null) {
+        config.global.take = true;
+        config.global.weight = row.weight;
+      } else {
+        const group = ensureGroup(groupScopes, row.groupId);
+        group.take = true;
+        group.weight = row.weight;
+        // a sink wins over a stray prior overspend row for the same group
+        group.overspendOnly = false;
+      }
+    } else {
+      const group = ensureGroup(groupScopes, row.groupId);
+      // don't downgrade a real sink row already recorded for this group
+      if (!group.take) {
+        group.take = true;
+        group.overspendOnly = true;
+      }
+    }
+  }
+
+  config.groups = Array.from(groupScopes.values());
+  return config;
+}
+
+export function editorToCleanupDef(config: CleanupConfig): CleanupTemplate[] {
+  if (!isCleanupConfigured(config)) return [];
 
   const rows: CleanupTemplate[] = [];
 
@@ -94,13 +96,13 @@ export function configToCleanup(config: CleanupConfig): CleanupTemplate[] {
     rows.push({ role: 'sink', groupId: null, weight: config.global.weight });
   }
 
-  for (const g of config.groups) {
-    if (g.send) rows.push({ role: 'source', groupId: g.groupId });
-    if (g.take) {
+  for (const group of config.groups) {
+    if (group.send) rows.push({ role: 'source', groupId: group.groupId });
+    if (group.take) {
       rows.push(
-        g.overspendOnly
-          ? { role: 'overspend', groupId: g.groupId }
-          : { role: 'sink', groupId: g.groupId, weight: g.weight },
+        group.overspendOnly
+          ? { role: 'overspend', groupId: group.groupId }
+          : { role: 'sink', groupId: group.groupId, weight: group.weight },
       );
     }
   }
@@ -108,12 +110,6 @@ export function configToCleanup(config: CleanupConfig): CleanupTemplate[] {
   return rows;
 }
 
-export function isConfigActive(config: CleanupConfig): boolean {
-  return !isCleared(config);
-}
-
-// Drops rows whose group can't be resolved rather than emitting a UUID that
-// the grammar would later parse as a literal group name.
 export function cleanupToNotes(
   cleanup: CleanupTemplate[],
   groupName: (groupId: string) => string | null,

@@ -41,19 +41,19 @@ export function CleanupAutomation({
   const updateGroup = (groupId: string, patch: Partial<GroupCleanup>) =>
     onChange({
       ...config,
-      groups: config.groups.map(g =>
-        g.groupId === groupId ? { ...g, ...patch } : g,
+      groups: config.groups.map(group =>
+        group.groupId === groupId ? { ...group, ...patch } : group,
       ),
     });
 
   const removeGroup = (groupId: string) =>
     onChange({
       ...config,
-      groups: config.groups.filter(g => g.groupId !== groupId),
+      groups: config.groups.filter(group => group.groupId !== groupId),
     });
 
   const addGroup = (groupId: string) => {
-    if (config.groups.some(g => g.groupId === groupId)) return;
+    if (config.groups.some(group => group.groupId === groupId)) return;
     onChange({
       ...config,
       groups: [
@@ -76,9 +76,9 @@ export function CleanupAutomation({
           End of month cleanup is a one-click rebalance you can run at the end
           of a month. Categories you mark to <strong>send leftover</strong>{' '}
           return their surplus to a pool; categories you mark to{' '}
-          <strong>take a share</strong> receive part of that pool back. By
-          default the pool is To Budget. You can also create named groups so the
-          surplus only moves between a chosen set of categories.
+          <strong>take a share</strong> receive part or all of that pool back.
+          By default the pool is To Budget. You can also create named groups so
+          the surplus only moves between a chosen set of categories.
         </Trans>
       </Text>
 
@@ -97,27 +97,27 @@ export function CleanupAutomation({
         onChangeOverspendOnly={() => undefined}
       />
 
-      {config.groups.map(g => {
+      {config.groups.map(group => {
         const groupName =
-          groups.find(gg => gg.id === g.groupId)?.name ?? t('Unknown group');
+          groups.find(g => g.id === group.groupId)?.name ?? t('Unknown group');
         return (
           <ScopeCard
-            key={g.groupId}
+            key={group.groupId}
             title={t('Group: {{groupName}}', { groupName })}
             sendLabel={t("Send any leftover here to the group's pool")}
             takeLabel={t("Take a share of the group's pool")}
-            send={g.send}
-            take={g.take}
-            weight={g.weight}
-            overspendOnly={g.overspendOnly}
+            send={group.send}
+            take={group.take}
+            weight={group.weight}
+            overspendOnly={group.overspendOnly}
             showOverspendOnly
-            onChangeSend={send => updateGroup(g.groupId, { send })}
-            onChangeTake={take => updateGroup(g.groupId, { take })}
-            onChangeWeight={weight => updateGroup(g.groupId, { weight })}
+            onChangeSend={send => updateGroup(group.groupId, { send })}
+            onChangeTake={take => updateGroup(group.groupId, { take })}
+            onChangeWeight={weight => updateGroup(group.groupId, { weight })}
             onChangeOverspendOnly={overspendOnly =>
-              updateGroup(g.groupId, { overspendOnly })
+              updateGroup(group.groupId, { overspendOnly })
             }
-            onRemove={() => removeGroup(g.groupId)}
+            onRemove={() => removeGroup(group.groupId)}
           />
         );
       })}

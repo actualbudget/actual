@@ -24,10 +24,10 @@ import {
 } from '#components/budget/goals/automationExamples';
 import type { AutomationEntry } from '#components/budget/goals/automationExamples';
 import {
-  cleanupToConfig,
-  configToCleanup,
+  cleanupDefToEditor,
+  editorToCleanupDef,
   emptyCleanupConfig,
-  isConfigActive,
+  isCleanupConfigured,
 } from '#components/budget/goals/cleanupModel';
 import type { CleanupConfig } from '#components/budget/goals/cleanupModel';
 import { CleanupAutomation } from '#components/budget/goals/editor/CleanupAutomation';
@@ -139,6 +139,20 @@ type BudgetAutomationsBodyProps = {
 
 type ActiveSelection = { kind: 'entry'; idx: number } | { kind: 'cleanup' };
 
+function pickInitialSelection(
+  entries: AutomationEntry[],
+  cleanup: CleanupConfig,
+): ActiveSelection {
+  if (entries.length > 0) {
+    const idx = entries.findIndex(
+      e => !NON_CONTRIBUTION_TYPES.has(e.displayType),
+    );
+    return { kind: 'entry', idx: idx >= 0 ? idx : 0 };
+  }
+  if (isCleanupConfigured(cleanup)) return { kind: 'cleanup' };
+  return { kind: 'entry', idx: 0 };
+}
+
 export function BudgetAutomationsBody({
   categoryId,
   categoryName,
@@ -157,20 +171,11 @@ export function BudgetAutomationsBody({
     useCleanupGroups();
 
   const [entries, setEntries] = useState<AutomationEntry[]>(initialEntries);
-  const [cleanup, setCleanup] = useState<CleanupConfig>(() =>
-    cleanupToConfig(initialCleanup),
+  const initialCleanupConfig = cleanupDefToEditor(initialCleanup);
+  const [cleanup, setCleanup] = useState<CleanupConfig>(initialCleanupConfig);
+  const [active, setActive] = useState<ActiveSelection>(() =>
+    pickInitialSelection(initialEntries, initialCleanupConfig),
   );
-  const [active, setActive] = useState<ActiveSelection>(() => {
-    if (initialEntries.length > 0) {
-      const contributionIdx = initialEntries.findIndex(
-        e => !NON_CONTRIBUTION_TYPES.has(e.displayType),
-      );
-      return { kind: 'entry', idx: contributionIdx >= 0 ? contributionIdx : 0 };
-    }
-    return isConfigActive(cleanupToConfig(initialCleanup))
-      ? { kind: 'cleanup' }
-      : { kind: 'entry', idx: 0 };
-  });
   const [saving, setSaving] = useState(false);
   const [dryRun, setDryRun] = useState<{
     budgeted: number;
@@ -226,7 +231,7 @@ export function BudgetAutomationsBody({
   };
 
   const onAddCleanup = () => {
-    if (!isConfigActive(cleanup)) setCleanup(emptyCleanupConfig());
+    if (!isCleanupConfigured(cleanup)) setCleanup(emptyCleanupConfig());
     setActive({ kind: 'cleanup' });
   };
 
@@ -260,7 +265,7 @@ export function BudgetAutomationsBody({
           {
             id: categoryId,
             templates: templatesToSave,
-            cleanup: configToCleanup(cleanup),
+            cleanup: editorToCleanupDef(cleanup),
           },
         ],
         source: 'ui',
@@ -279,13 +284,15 @@ export function BudgetAutomationsBody({
           options: {
             categoryId,
             templates: entries.map(({ template }) => template),
-            cleanup: configToCleanup(cleanup),
+            cleanup: editorToCleanupDef(cleanup),
           },
         },
       }),
     );
   };
 
+  // the react compiler wasn't memoising this properly and causing infinite
+  // re-renders
   const templates = useMemo(() => entries.map(e => e.template), [entries]);
 
   const validPercentageSources = new Set<string>([
@@ -521,7 +528,7 @@ export function BudgetAutomationsBody({
               + <Trans>Add long-term goal</Trans>
             </SidebarAddButton>
           )}
-          {isConfigActive(cleanup) ? (
+          {isCleanupConfigured(cleanup) ? (
             <CleanupListRow
               config={cleanup}
               groups={cleanupGroups}

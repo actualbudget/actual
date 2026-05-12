@@ -15,10 +15,10 @@ export function CleanupAutomationReadOnly({
   const { t } = useTranslation();
   const isGlobal = config.global.send || config.global.take;
   const groupNames: string[] = [];
-  for (const g of config.groups) {
-    if (!g.send && !g.take) continue;
+  for (const group of config.groups) {
+    if (!group.send && !group.take) continue;
     const name =
-      groups.find(x => x.id === g.groupId)?.name ?? t('Unknown group');
+      groups.find(g => g.id === group.groupId)?.name ?? t('Unknown group');
     groupNames.push(name);
   }
 

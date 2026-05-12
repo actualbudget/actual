@@ -143,7 +143,7 @@ export function CleanupGroupPicker({
               >
                 {item.kind === 'group'
                   ? item.group.name
-                  : t('+ Create "{{name}}"', { name: trimmed })}
+                  : `+ ${t('Create "{{name}}"', { name: trimmed })}`}
               </View>
             );
           })}
