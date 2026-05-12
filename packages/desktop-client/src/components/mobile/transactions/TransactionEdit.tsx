@@ -911,7 +911,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                         void onUpdateInner(
                           transactionToEdit,
                           name,
-                          categoryId ?? undefined,
+                          categoryId as TransactionEntity['category'],
                         );
                       },
                       onClose: () => {
