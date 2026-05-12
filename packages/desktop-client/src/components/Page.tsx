@@ -1,10 +1,6 @@
-import React, {
-  createContext,
-  useContext,
-  useLayoutEffect,
-  useState,
-} from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
@@ -112,30 +108,28 @@ export function MobilePageHeader({
   );
 }
 
-// On mobile we want the page header to stay mounted while navigating between
-// pages so only its content (title/buttons) and not the whole element
-// (including its background) is swapped out. Pages publish their header through
-// this context to a single persistent `<MobilePageHeaderSlot />` rendered by the
-// app shell. When there is no provider (e.g. in tests or storybook) pages fall
-// back to rendering the header inline.
-type RegisterMobilePageHeader = (header: ReactNode) => void;
-
-const MobilePageHeaderRegisterContext =
-  createContext<RegisterMobilePageHeader | null>(null);
-const MobilePageHeaderContentContext = createContext<ReactNode>(null);
+// On mobile the page header element stays mounted while navigating between
+// pages so its background doesn't flash while the next page renders. Pages
+// render their header into a single persistent `<MobilePageHeaderSlot />`
+// (rendered by the app shell) through a portal. Without a provider (e.g. in
+// tests or storybook) the header is rendered inline instead.
+const MobilePageHeaderSlotContext = createContext<HTMLElement | null>(null);
+const MobilePageHeaderSlotRefContext = createContext<
+  ((element: HTMLElement | null) => void) | null
+>(null);
 
 export function MobilePageHeaderProvider({
   children,
 }: {
   children: ReactNode;
 }) {
-  const [header, setHeader] = useState<ReactNode>(null);
+  const [slot, setSlot] = useState<HTMLElement | null>(null);
   return (
-    <MobilePageHeaderRegisterContext.Provider value={setHeader}>
-      <MobilePageHeaderContentContext.Provider value={header}>
+    <MobilePageHeaderSlotRefContext.Provider value={setSlot}>
+      <MobilePageHeaderSlotContext.Provider value={slot}>
         {children}
-      </MobilePageHeaderContentContext.Provider>
-    </MobilePageHeaderRegisterContext.Provider>
+      </MobilePageHeaderSlotContext.Provider>
+    </MobilePageHeaderSlotRefContext.Provider>
   );
 }
 
@@ -144,33 +138,18 @@ type MobilePageHeaderSlotProps = {
 };
 
 export function MobilePageHeaderSlot({ style }: MobilePageHeaderSlotProps) {
-  const header = useContext(MobilePageHeaderContentContext);
+  const slotRef = useContext(MobilePageHeaderSlotRefContext);
   return (
     <View
+      ref={slotRef ?? undefined}
       style={{
         flexShrink: 0,
         minHeight: HEADER_HEIGHT,
         backgroundColor: theme.mobileHeaderBackground,
         ...style,
       }}
-    >
-      {header}
-    </View>
+    />
   );
-}
-
-function MobilePageHeaderOutlet({ children }: { children: ReactNode }) {
-  const registerHeader = useContext(MobilePageHeaderRegisterContext);
-
-  useLayoutEffect(() => {
-    if (!registerHeader) {
-      return;
-    }
-    registerHeader(children);
-    return () => registerHeader(null);
-  }, [children, registerHeader]);
-
-  return registerHeader ? null : children;
 }
 
 type PageProps = {
@@ -183,6 +162,7 @@ type PageProps = {
 
 export function Page({ header, style, padding, children, footer }: PageProps) {
   const { isNarrowWidth } = useResponsive();
+  const mobileHeaderSlot = useContext(MobilePageHeaderSlotContext);
   const childrenPadding = padding != null ? padding : isNarrowWidth ? 10 : 20;
 
   const headerToRender =
@@ -218,7 +198,9 @@ export function Page({ header, style, padding, children, footer }: PageProps) {
           ...style,
         }}
       >
-        <MobilePageHeaderOutlet>{headerToRender}</MobilePageHeaderOutlet>
+        {mobileHeaderSlot
+          ? createPortal(headerToRender, mobileHeaderSlot)
+          : headerToRender}
         {main}
         {footer}
       </View>
