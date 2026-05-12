@@ -41,6 +41,7 @@ export type DbCategory = {
   sort_order: number;
   hidden: 1 | 0;
   goal_def?: JsonString | null;
+  cleanup_def?: JsonString | null;
   template_settings?: { source: 'notes' | 'ui' };
   tombstone: 1 | 0;
 };
@@ -51,6 +52,12 @@ export type DbCategoryGroup = {
   is_income: 1 | 0;
   sort_order: number;
   hidden: 1 | 0;
+  tombstone: 1 | 0;
+};
+
+export type DbCleanupGroup = {
+  id: string;
+  name: string;
   tombstone: 1 | 0;
 };
 
@@ -293,6 +300,7 @@ export type DbViewCategory = {
   group: DbCategoryGroup['id'];
   sort_order: DbCategory['sort_order'];
   tombstone: DbCategory['tombstone'];
+  cleanup_def?: DbCategory['cleanup_def'];
 };
 
 export type DbViewCategoryWithGroupHidden = {

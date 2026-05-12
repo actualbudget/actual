@@ -9,6 +9,7 @@ import type { Template } from '#types/models/templates';
 
 import { getSheetValue, isTrackingBudget, setBudget, setGoal } from './actions';
 import { CategoryTemplateContext } from './category-template-context';
+import { storeNoteCleanups } from './cleanup-template-notes';
 import { checkTemplateNotes, storeNoteTemplates } from './template-notes';
 
 export function distributeRemainder(
@@ -50,6 +51,7 @@ export async function storeTemplates({
   }[];
   source: 'notes' | 'ui';
 }): Promise<void> {
+  await storeNoteCleanups(categoriesWithTemplates.map(c => c.id));
   await batchMessages(async () => {
     for (const { id, templates } of categoriesWithTemplates) {
       const goalDefs = templates.length > 0 ? JSON.stringify(templates) : null;
@@ -214,6 +216,7 @@ async function computeTemplates(
   force: boolean,
   categoryTemplates: Record<CategoryEntity['id'], Template[]>,
   categories: CategoryEntity[] = [],
+  skipAvailableClamp: boolean = false,
 ): Promise<ComputedTemplates> {
   // setup categories
   const isTracking = isTrackingBudget();
@@ -247,6 +250,7 @@ async function computeTemplates(
           category,
           month,
           budgeted,
+          skipAvailableClamp,
         );
         // don't use the funds that are not from templates
         if (!templateContext.isGoalOnly()) {
@@ -359,19 +363,21 @@ export async function dryRunCategoryTemplate({
   categoryId: CategoryEntity['id'];
   templates: Template[];
 }): Promise<DryRunCategoryResult> {
-  // Always run the full set of saved category templates and override the
-  // target's saved templates with the in-flight ones. Sibling categories
-  // consume from To Budget at each priority; running them too keeps the
-  // projection in sync with what an actual apply would produce — including
-  // the constrained-budget case where prior categories at the same priority
-  // exhaust the pool and clamp this category's amount.
-  const allCategoryTemplates = await getTemplates();
-  allCategoryTemplates[categoryId] = templates;
+  // The projection answers "how much do these templates demand" — it
+  // skips the priority clamp so future months (where To Budget is empty)
+  // still show the templates' intended amount instead of 0.
+  const { data: categoryData }: { data: CategoryEntity[] } = await aqlQuery(
+    q('categories').filter({ id: categoryId }).select('*'),
+  );
+  if (categoryData.length === 0) {
+    return { budgeted: 0, perTemplate: templates.map(() => 0) };
+  }
   const { contexts } = await computeTemplates(
     month,
     true,
-    allCategoryTemplates,
-    [],
+    { [categoryId]: templates },
+    categoryData,
+    true,
   );
   const ctx = contexts.find(c => c.category.id === categoryId);
   if (!ctx) return { budgeted: 0, perTemplate: templates.map(() => 0) };

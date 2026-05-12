@@ -52,7 +52,7 @@
     "playwright": "yarn workspace @actual-app/web run playwright",
     "vrt": "yarn workspace @actual-app/web run vrt",
     "vrt:docker": "./bin/run-vrt",
-    "rebuild-electron": "./node_modules/.bin/electron-rebuild -f -m ./packages/desktop-electron -o better-sqlite3,bcrypt",
+    "rebuild-electron": "./node_modules/.bin/electron-rebuild -m ./packages/desktop-electron -o better-sqlite3,bcrypt --build-from-source -f",
     "rebuild-node": "yarn workspace @actual-app/core rebuild",
     "lint": "oxfmt --check . && oxlint --type-aware --quiet",
     "lint:fix": "oxfmt . && oxlint --fix --type-aware --quiet",

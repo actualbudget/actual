@@ -24,6 +24,7 @@ import { useDispatch, useSelector } from '#redux';
 import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
 import { BankSyncStatus } from './BankSyncStatus';
 import { CommandBar } from './CommandBar';
+import { EnableBankingCallback } from './EnableBankingCallback';
 import { FeatureErrorFallback } from './FeatureErrorFallback';
 import { GlobalKeys } from './GlobalKeys';
 import { MobileBankSyncAccountEditPage } from './mobile/banksync/MobileBankSyncAccountEditPage';
@@ -331,6 +332,11 @@ export function FinancesApp() {
                       <WideComponent name="GoCardlessLink" />
                     </NarrowNotSupported>
                   }
+                />
+
+                <Route
+                  path="/enablebanking/auth_callback"
+                  element={<EnableBankingCallback />}
                 />
 
                 <Route

@@ -11,6 +11,7 @@ import type {
   NoteEntity,
   RuleEntity,
   ScheduleEntity,
+  SyncServerEnableBankingAccount,
   TransactionEntity,
   UserAccessEntity,
   UserEntity,
@@ -128,6 +129,31 @@ export type Modal =
       };
     }
   | {
+      name: 'enablebanking-init';
+      options: {
+        onSuccess: () => void;
+      };
+    }
+  | {
+      name: 'enablebanking-external-msg';
+      options: {
+        onMoveExternal: (arg: {
+          aspspId: string;
+          country: string;
+          maxConsentValidity?: number;
+          onStateReady?: (state: string) => void;
+        }) => Promise<
+          | { error: 'timeout' }
+          | { error: 'unknown'; message?: string }
+          | { data: { accounts: SyncServerEnableBankingAccount[] } }
+        >;
+        onClose?: (() => void) | undefined;
+        onSuccess: (data: {
+          accounts: SyncServerEnableBankingAccount[];
+        }) => Promise<void>;
+      };
+    }
+  | {
       name: 'gocardless-external-msg';
       options: {
         onMoveExternal: (arg: {
@@ -239,9 +265,10 @@ export type Modal =
       options: {
         title?: string;
         categoryGroups?: CategoryGroupEntity[];
-        onSelect: (categoryId: string, categoryName: string) => void;
+        onSelect: (categoryId: string | null, categoryName: string) => void;
         month?: string | undefined;
         showHiddenCategories?: boolean;
+        showNoneOption?: boolean;
         closeOnSelect?: boolean;
         clearOnSelect?: boolean;
         onClose?: () => void;

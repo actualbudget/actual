@@ -1,23 +1,8 @@
 # Custom Themes
 
-:::warning
-This is an **experimental feature**. That means we're still working on finishing it. There may be bugs, missing functionality or incomplete documentation, and we may decide to remove the feature in a future release. If you have any feedback, please [post a comment on GitHub](https://github.com/actualbudget/actual/issues/6607) or post a message in the Discord.
-:::
-:::warning
-All functionality described here may not be available in the latest stable release. See [Experimental Features](/docs/experimental/) for instructions to enable experimental features. Use the `edge` images for the latest implementation.
-:::
-
 Custom themes allow you to personalize the appearance of Actual by installing custom color schemes. You can choose from a catalog of community-created themes or create your own by defining CSS variables that override the default theme colors.
 
 ## Using Custom Themes
-
-### Enabling the Feature
-
-Before you can use custom themes, you need to enable the experimental feature:
-
-1. Go to **Settings** → **Show advanced settings** → **Experimental features**
-2. Click "I understand the risks, show experimental features"
-3. Enable the **Custom themes** toggle
 
 ### Installing a Theme from the Catalog
 

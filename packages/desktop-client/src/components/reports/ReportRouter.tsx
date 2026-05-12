@@ -17,7 +17,6 @@ import { Summary } from './reports/Summary';
 import { ReportsDashboardRouter } from './ReportsDashboardRouter';
 
 export function ReportRouter() {
-  const crossoverReportEnabled = useFeatureFlag('crossoverReport');
   const ageOfMoneyReportEnabled = useFeatureFlag('ageOfMoneyReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
   const sankeyReportEnabled = useFeatureFlag('sankeyReport');
@@ -28,12 +27,8 @@ export function ReportRouter() {
       <Route path="/:dashboardId" element={<ReportsDashboardRouter />} />
       <Route path="/net-worth" element={<NetWorth />} />
       <Route path="/net-worth/:id" element={<NetWorth />} />
-      {crossoverReportEnabled && (
-        <>
-          <Route path="/crossover" element={<Crossover />} />
-          <Route path="/crossover/:id" element={<Crossover />} />
-        </>
-      )}
+      <Route path="/crossover" element={<Crossover />} />
+      <Route path="/crossover/:id" element={<Crossover />} />
       {ageOfMoneyReportEnabled && (
         <>
           <Route path="/age-of-money" element={<AgeOfMoney />} />
