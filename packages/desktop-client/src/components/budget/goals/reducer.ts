@@ -51,7 +51,10 @@ export const getInitialState = (template: Template | null): ReducerState => {
       throw new Error('Goal is not yet supported');
     case 'by':
       return {
-        template,
+        template:
+          template.annual !== undefined && template.repeat == null
+            ? { ...template, repeat: 1 }
+            : template,
         displayType: 'by',
       };
     case 'remainder':
