@@ -27,10 +27,18 @@ describe('note tag utilities', () => {
     expect(addTagToNotes('Coffee #meal', '#meal')).toBe('Coffee #meal');
   });
 
+  test('does not duplicate an existing inline hashtag', () => {
+    expect(addTagToNotes('memo#travel', 'travel')).toBe('memo#travel');
+  });
+
   test('removes a hashtag without disturbing other note text', () => {
     expect(removeTagFromNotes('Coffee #meal with Alex #travel', 'meal')).toBe(
       'Coffee with Alex #travel',
     );
+  });
+
+  test('removes an inline hashtag without disturbing other note text', () => {
+    expect(removeTagFromNotes('memo#travel paid', 'travel')).toBe('memo paid');
   });
 
   test('removes repeated hashtags and trims whitespace', () => {
@@ -49,6 +57,10 @@ describe('note tag utilities', () => {
     expect(removeAllTagsFromNotes('Coffee #meal with #alex #travel')).toBe(
       'Coffee with',
     );
+  });
+
+  test('removes every hashtag from notes when tags are inline', () => {
+    expect(removeAllTagsFromNotes('memo#travel paid #work')).toBe('memo paid');
   });
 
   test('adds multiple hashtags as separate note tokens', () => {

@@ -36,6 +36,7 @@ import {
   parseDate,
   subDays,
 } from '#shared/months';
+import { createNoteTagRegexSource, getNoteTags } from '#shared/note-tags';
 import { q } from '#shared/query';
 import { getApproxNumberThreshold, sortNumbers } from '#shared/rules';
 import { ungroupTransaction } from '#shared/transactions';
@@ -616,7 +617,7 @@ export function conditionsToAQL(
       case 'hasTags': {
         const tagValues = [];
         const seenTags = new Set();
-        for (const [_, tag] of value.matchAll(/(?<!#)(#[^#\s]+)/g)) {
+        for (const tag of getNoteTags(value)) {
           if (!seenTags.has(tag)) {
             seenTags.add(tag);
             tagValues.push(tag);
@@ -631,10 +632,7 @@ export function conditionsToAQL(
 
         return {
           $and: tagValues.map(v => {
-            const escapedTag = v
-              .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-              .replace(/\\\$/g, '[$]'); // Use '[$]' instead of '\$' so AQL string unescaping doesn't turn it into a bare '$' end-of-string anchor
-            const pattern = `(?<!#)${escapedTag}([\\s#]|$)`;
+            const pattern = createNoteTagRegexSource(v).replace(/\\\$/g, '[$]'); // Use '[$]' instead of '\$' so AQL string unescaping doesn't turn it into a bare '$' end-of-string anchor
             return apply(field, '$regexp', pattern);
           }),
         };

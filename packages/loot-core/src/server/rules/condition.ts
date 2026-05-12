@@ -11,6 +11,7 @@ import {
   subDays,
   yearFromDate,
 } from '#shared/months';
+import { noteHasTag } from '#shared/note-tags';
 import {
   FIELD_TYPES,
   getApproxNumberThreshold,
@@ -346,7 +347,7 @@ export class Condition {
         if (fieldValue === null) {
           return false;
         }
-        return String(fieldValue).indexOf(this.value) !== -1;
+        return noteHasTag(String(fieldValue), this.value);
 
       case 'notOneOf':
         if (fieldValue === null) {

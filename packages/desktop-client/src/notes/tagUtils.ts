@@ -1,6 +1,11 @@
-export function normalizeNoteTag(tag: string): string {
-  return tag.trim().replace(/^#+/, '').replace(/\s/g, '');
-}
+import {
+  createNoteTagRegex,
+  createNoteTagsRegex,
+  normalizeNoteTag,
+  noteHasTag,
+} from '@actual-app/core/shared/note-tags';
+
+export { normalizeNoteTag };
 
 export function addTagToNotes(
   notes: string | null | undefined,
@@ -13,7 +18,7 @@ export function addTagToNotes(
     return currentNotes;
   }
 
-  if (hasTag(currentNotes, normalizedTag)) {
+  if (noteHasTag(currentNotes, normalizedTag)) {
     return currentNotes;
   }
 
@@ -39,7 +44,7 @@ export function removeTagFromNotes(
   }
 
   return currentNotes
-    .replace(tagRegex(normalizedTag), (_match, prefix: string) => prefix || '')
+    .replace(createNoteTagRegex(normalizedTag), '')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -55,7 +60,7 @@ export function removeAllTagsFromNotes(
   notes: string | null | undefined,
 ): string {
   return (notes?.trim() ?? '')
-    .replace(/(^|\s)#[^\s#]+/g, '')
+    .replace(createNoteTagsRegex(), '')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -85,16 +90,4 @@ export function filterExistingNoteTags(
   }
 
   return tags.filter(tag => tag.toLowerCase().includes(normalizedQuery));
-}
-
-function hasTag(notes: string, tag: string): boolean {
-  return tagRegex(tag).test(notes);
-}
-
-function tagRegex(tag: string): RegExp {
-  return new RegExp(`(^|\\s)#${escapeRegExp(tag)}(?=\\s|$)`, 'g');
-}
-
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
