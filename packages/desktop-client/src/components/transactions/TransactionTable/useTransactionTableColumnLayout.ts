@@ -217,7 +217,7 @@ export function useTransactionTableColumnLayout({
 
     // If we have measured widths from the DOM, use those directly
     // This accounts for padding, borders, and browser rendering differences
-    if (measuredWidths) {
+    if (measuredWidths && availableDataWidth !== null) {
       const flexColumns = visibleColumns.filter(
         col => startWidths[col.id] === 'flex',
       );
@@ -232,17 +232,33 @@ export function useTransactionTableColumnLayout({
           }
         });
 
-        const totalCalculated = visibleColumns.reduce((sum, col) => {
+        let totalCalculated = visibleColumns.reduce((sum, col) => {
           const w = updatedWidths[col.id];
           return sum + (typeof w === 'number' ? w : 0);
         }, 0);
+
+        // Distribute any remaining space to flex columns to eliminate gaps
+        const difference = availableDataWidth - totalCalculated;
+        if (difference > 0 && flexColumns.length > 0) {
+          // Add extra pixels to flex columns to fill the available space
+          const extraPerColumn = Math.floor(difference / flexColumns.length);
+          const remainder = difference % flexColumns.length;
+
+          flexColumns.forEach((column, index) => {
+            const currentWidth = updatedWidths[column.id] as number;
+            updatedWidths[column.id] = 
+              currentWidth + extraPerColumn + (index < remainder ? 1 : 0);
+          });
+
+          totalCalculated = availableDataWidth;
+        }
 
         debugLog('RESIZE_FLEX_CONVERTED', {
           measuredWidths,
           updatedWidths,
           totalCalculated,
           availableDataWidth,
-          difference: availableDataWidth !== null ? availableDataWidth - totalCalculated : 'N/A',
+          difference,
         });
 
         startWidths = updatedWidths;
