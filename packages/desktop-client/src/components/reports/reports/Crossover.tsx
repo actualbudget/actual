@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -319,34 +319,53 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
     );
   }
 
-  const expenseCategoryIds = selectedExpenseCategories
-    .filter(c => showHiddenCategories || !c.hidden)
-    .map(c => c.id);
+  // Memoize the derived values to avoid recreating them on every render
+  const expenseCategoryIds = useMemo(
+    () =>
+      selectedExpenseCategories
+        .filter(c => showHiddenCategories || !c.hidden)
+        .map(c => c.id),
+    [selectedExpenseCategories, showHiddenCategories],
+  );
 
-  const params = async (
-    spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: CrossoverData) => void,
-  ) => {
-    // Don't run if dates are not yet initialized
-    if (!start || !end) {
-      return;
-    }
+  const params = useCallback(
+    async (
+      spreadsheet: ReturnType<typeof useSpreadsheet>,
+      setData: (data: CrossoverData) => void,
+    ) => {
+      // Don't run if dates are not yet initialized
+      if (!start || !end) {
+        return;
+      }
 
-    const crossoverSpreadsheet = createCrossoverSpreadsheet({
+      const crossoverSpreadsheet = createCrossoverSpreadsheet({
+        start,
+        end,
+        expenseCategoryIds,
+        incomeAccountIds: selectedIncomeAccountIds,
+        safeWithdrawalRate: swr,
+        estimatedReturn: useCustomGrowth ? (estimatedReturn ?? 0) : null,
+        expectedContribution: useCustomGrowth
+          ? (expectedContribution ?? 0)
+          : null,
+        projectionType,
+        expenseAdjustmentFactor,
+      });
+      await crossoverSpreadsheet(spreadsheet, setData);
+    },
+    [
       start,
       end,
-      expenseCategoryIds,
-      incomeAccountIds: selectedIncomeAccountIds,
-      safeWithdrawalRate: swr,
-      estimatedReturn: useCustomGrowth ? (estimatedReturn ?? 0) : null,
-      expectedContribution: useCustomGrowth
-        ? (expectedContribution ?? 0)
-        : null,
+      swr,
+      useCustomGrowth,
+      estimatedReturn,
+      expectedContribution,
       projectionType,
       expenseAdjustmentFactor,
-    });
-    await crossoverSpreadsheet(spreadsheet, setData);
-  };
+      expenseCategoryIds,
+      selectedIncomeAccountIds,
+    ],
+  );
 
   const data = useReport<CrossoverData>('crossover', params);
 
