@@ -51,7 +51,10 @@ export const getInitialState = (template: Template | null): ReducerState => {
       throw new Error('Goal is not yet supported');
     case 'by':
       return {
-        template,
+        template:
+          template.annual !== undefined && template.repeat == null
+            ? { ...template, repeat: 1 }
+            : template,
         displayType: 'by',
       };
     case 'remainder':
@@ -76,7 +79,10 @@ export const getInitialState = (template: Template | null): ReducerState => {
         displayType: 'historical',
       };
     case 'goal':
-      throw new Error('Goal is not yet supported');
+      return {
+        template,
+        displayType: 'goal',
+      };
     case 'error':
       throw new Error('An error occurred while parsing the template');
     default:
@@ -207,6 +213,18 @@ const changeType = (
           type: 'remainder',
           weight: 1,
           priority: null,
+        },
+      };
+    case 'goal':
+      if (prevState.template.type === 'goal') {
+        return prevState;
+      }
+      return {
+        displayType: visualType,
+        template: {
+          directive: 'goal',
+          type: 'goal',
+          amount: 1000,
         },
       };
     default:

@@ -2,6 +2,7 @@ import type {
   AverageTemplate,
   ByTemplate,
   CopyTemplate,
+  GoalTemplate,
   LimitTemplate,
   PercentageTemplate,
   PeriodicTemplate,
@@ -19,6 +20,7 @@ export const displayTemplateTypes = [
   'limit',
   'refill',
   'remainder',
+  'goal',
 ] as const;
 
 export type DisplayTemplateType = (typeof displayTemplateTypes)[number];
@@ -55,4 +57,8 @@ export type ReducerState =
   | {
       template: RemainderTemplate;
       displayType: 'remainder';
+    }
+  | {
+      template: GoalTemplate;
+      displayType: 'goal';
     };

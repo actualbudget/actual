@@ -3,6 +3,7 @@ import type { ComponentType, SVGProps } from 'react';
 import {
   SvgChartPie,
   SvgEquals,
+  SvgFlag,
   SvgMoneyBag,
   SvgPiggyBank,
   SvgShare,
@@ -85,6 +86,14 @@ export function getDisplayTemplateMeta(
           'Split any remaining To Budget across these categories.',
         ),
         icon: SvgShare,
+      };
+    case 'goal':
+      return {
+        label: t('Long-term goal'),
+        description: t(
+          'Set a long-term savings target. This changes the coloring of the balance on the budget page to be based on progress towards the target rather than the current month funding progress.',
+        ),
+        icon: SvgFlag,
       };
     default:
       displayType satisfies never;

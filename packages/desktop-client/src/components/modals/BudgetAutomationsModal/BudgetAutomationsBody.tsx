@@ -37,6 +37,7 @@ import { AutomationListRow } from './AutomationListRow';
 import { BudgetAutomationMigrationWarning } from './BudgetAutomationMigrationWarning';
 import { ConflictBanner } from './ConflictBanner';
 import { EmptyState } from './EmptyState';
+import { NON_CONTRIBUTION_TYPES } from './TypePicker';
 
 const RULE_LIST_WIDTH = 310;
 
@@ -158,7 +159,12 @@ export function BudgetAutomationsBody({
   const locale = useLocale();
 
   const [entries, setEntries] = useState<AutomationEntry[]>(initialEntries);
-  const [activeIdx, setActiveIdx] = useState(0);
+  const initialContributionIdx = initialEntries.findIndex(
+    e => !NON_CONTRIBUTION_TYPES.has(e.displayType),
+  );
+  const [activeIdx, setActiveIdx] = useState(
+    initialContributionIdx >= 0 ? initialContributionIdx : 0,
+  );
   const [saving, setSaving] = useState(false);
   const [dryRun, setDryRun] = useState<{
     budgeted: number;
@@ -189,6 +195,22 @@ export function BudgetAutomationsBody({
         priority: null,
       },
       'limit',
+    );
+    setEntries(prev => {
+      const next = [...prev, entry];
+      setActiveIdx(next.length - 1);
+      return next;
+    });
+  };
+
+  const onAddGoalAutomation = () => {
+    const entry = createAutomationEntry(
+      {
+        directive: 'goal',
+        type: 'goal',
+        amount: 1000,
+      },
+      'goal',
     );
     setEntries(prev => {
       const next = [...prev, entry];
@@ -306,14 +328,15 @@ export function BudgetAutomationsBody({
   }
 
   const hasLimitAutomation = entries.some(e => e.displayType === 'limit');
+  const hasGoalAutomation = entries.some(e => e.displayType === 'goal');
 
+  const isOption = (entry: AutomationEntry) =>
+    entry.displayType === 'limit' || entry.displayType === 'goal';
   const indexedEntries = entries.map((entry, idx) => ({ entry, idx }));
   const contributionEntries = indexedEntries.filter(
-    ({ entry }) => entry.displayType !== 'limit',
+    ({ entry }) => !isOption(entry),
   );
-  const constraintEntries = indexedEntries.filter(
-    ({ entry }) => entry.displayType === 'limit',
-  );
+  const optionEntries = indexedEntries.filter(({ entry }) => isOption(entry));
 
   const safeActiveIdx = Math.min(activeIdx, Math.max(0, entries.length - 1));
 
@@ -447,7 +470,7 @@ export function BudgetAutomationsBody({
           <SidebarSectionHeader style={{ marginTop: 16 }}>
             <Trans>Options</Trans>
           </SidebarSectionHeader>
-          {constraintEntries.map(({ entry, idx }) => (
+          {optionEntries.map(({ entry, idx }) => (
             <AutomationListRow
               key={entry.id}
               index={idx}
@@ -464,9 +487,11 @@ export function BudgetAutomationsBody({
               + <Trans>Add balance cap</Trans>
             </SidebarAddButton>
           )}
-          <SidebarPlaceholderRow>
-            <Trans>Long-term goal (coming soon)</Trans>
-          </SidebarPlaceholderRow>
+          {!hasGoalAutomation && (
+            <SidebarAddButton onPress={onAddGoalAutomation}>
+              + <Trans>Add long-term goal</Trans>
+            </SidebarAddButton>
+          )}
           <SidebarPlaceholderRow>
             <Trans>End of month cleanup (coming soon)</Trans>
           </SidebarPlaceholderRow>

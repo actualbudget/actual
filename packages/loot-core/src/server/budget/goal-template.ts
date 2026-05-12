@@ -9,6 +9,7 @@ import type { Template } from '#types/models/templates';
 
 import { getSheetValue, isTrackingBudget, setBudget, setGoal } from './actions';
 import { CategoryTemplateContext } from './category-template-context';
+import { storeNoteCleanups } from './cleanup-template-notes';
 import { checkTemplateNotes, storeNoteTemplates } from './template-notes';
 
 export function distributeRemainder(
@@ -50,6 +51,7 @@ export async function storeTemplates({
   }[];
   source: 'notes' | 'ui';
 }): Promise<void> {
+  await storeNoteCleanups(categoriesWithTemplates.map(c => c.id));
   await batchMessages(async () => {
     for (const { id, templates } of categoriesWithTemplates) {
       const goalDefs = templates.length > 0 ? JSON.stringify(templates) : null;

@@ -49,8 +49,6 @@ export function BudgetAutomationsModal({
 
   const needsMigration = currentCategory?.template_settings?.source !== 'ui';
 
-  const hasGoalTemplate =
-    parsedTemplates?.some(t => t.type === 'goal') ?? false;
   const hasErrorTemplate =
     parsedTemplates?.some(t => t.type === 'error') ?? false;
   const hasSpendTemplate =
@@ -60,10 +58,7 @@ export function BudgetAutomationsModal({
   // are no longer the source of truth.
   const hasCleanupDirective = needsMigration && hasCleanupLine(notes);
   const hasUnsupportedDirective =
-    hasGoalTemplate ||
-    hasErrorTemplate ||
-    hasSpendTemplate ||
-    hasCleanupDirective;
+    hasErrorTemplate || hasSpendTemplate || hasCleanupDirective;
 
   const incomeNameToId = new Map<string, string>();
   for (const group of categories) {
@@ -111,10 +106,8 @@ export function BudgetAutomationsModal({
             </View>
           ) : hasUnsupportedDirective ? (
             <UnsupportedDirectivesNotice
-              hasGoalTemplate={hasGoalTemplate}
               hasErrorTemplate={hasErrorTemplate}
               hasSpendTemplate={hasSpendTemplate}
-              hasCleanupDirective={hasCleanupDirective}
               onClose={() => state.close()}
             />
           ) : (
