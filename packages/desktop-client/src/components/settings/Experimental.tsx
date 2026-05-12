@@ -199,22 +199,10 @@ export function ExperimentalFeatures() {
               <Trans>Sankey report</Trans>
             </FeatureToggle>
             <FeatureToggle
-              flag="crossoverReport"
-              feedbackLink="https://github.com/actualbudget/actual/issues/6134"
-            >
-              <Trans>Crossover Report</Trans>
-            </FeatureToggle>
-            <FeatureToggle
               flag="ageOfMoneyReport"
               feedbackLink="https://github.com/actualbudget/actual/issues/7006"
             >
               <Trans>Age of Money Report</Trans>
-            </FeatureToggle>
-            <FeatureToggle
-              flag="customThemes"
-              feedbackLink="https://github.com/actualbudget/actual/issues/6607"
-            >
-              <Trans>Custom themes</Trans>
             </FeatureToggle>
             <FeatureToggle
               flag="budgetAnalysisReport"
@@ -228,7 +216,10 @@ export function ExperimentalFeatures() {
             >
               <Trans>Payee Locations</Trans>
             </FeatureToggle>
-            <FeatureToggle flag="enableBanking">
+            <FeatureToggle
+              flag="enableBanking"
+              feedbackLink="https://github.com/actualbudget/actual/issues/7799"
+            >
               <Trans>Enable Banking sync (EU banks)</Trans>
             </FeatureToggle>
             {showServerPrefs && (

@@ -502,9 +502,7 @@ describe('/upload-user-file', () => {
       ],
     );
 
-    fs.writeFile(getPathForUserFile(fileId), oldFileContent, err => {
-      if (err) throw err;
-    });
+    fs.writeFileSync(getPathForUserFile(fileId), oldFileContent);
 
     const res = await request(app)
       .post('/upload-user-file')

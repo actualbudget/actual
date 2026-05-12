@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useRef } from 'react';
+import { forwardRef, useCallback, useRef } from 'react';
 import type { ComponentPropsWithoutRef, CSSProperties } from 'react';
 import type { DragItem } from 'react-aria';
 import {
@@ -165,7 +165,7 @@ function AccountListItem({
             backgroundColor: theme.tableBackground,
             border: 'none',
             borderRadius: 0,
-            paddingLeft: 20,
+            paddingLeft: 8,
           }}
           data-testid="account-list-item"
           onPress={() => onSelect(account)}
@@ -177,23 +177,21 @@ function AccountListItem({
               flexDirection: 'row',
             }}
           >
-            {account.bankId ? (
-              <View
-                style={{
-                  backgroundColor: isPending
-                    ? theme.sidebarItemBackgroundPending
-                    : isFailed
-                      ? theme.sidebarItemBackgroundFailed
-                      : theme.sidebarItemBackgroundPositive,
-                  marginRight: '8px',
-                  width: 8,
-                  flexShrink: 0,
-                  height: 8,
-                  borderRadius: 8,
-                  opacity: isConnected ? 1 : 0,
-                }}
-              />
-            ) : null}
+            <View
+              style={{
+                backgroundColor: isPending
+                  ? theme.sidebarItemBackgroundPending
+                  : isFailed
+                    ? theme.sidebarItemBackgroundFailed
+                    : theme.sidebarItemBackgroundPositive,
+                marginRight: '6px',
+                width: 8,
+                flexShrink: 0,
+                height: 8,
+                borderRadius: 8,
+                opacity: isConnected ? 1 : 0,
+              }}
+            />
             <TextOneLine
               style={{
                 ...styles.text,

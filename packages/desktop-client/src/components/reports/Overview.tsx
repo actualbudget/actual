@@ -85,7 +85,6 @@ export function Overview({ dashboard }: OverviewProps) {
   const dispatch = useDispatch();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
-  const crossoverReportEnabled = useFeatureFlag('crossoverReport');
   const ageOfMoneyReportEnabled = useFeatureFlag('ageOfMoneyReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
 
@@ -574,14 +573,10 @@ export function Overview({ dashboard }: OverviewProps) {
                               name: 'net-worth-card' as const,
                               text: t('Net worth graph'),
                             },
-                            ...(crossoverReportEnabled
-                              ? [
-                                  {
-                                    name: 'crossover-card' as const,
-                                    text: t('Crossover point'),
-                                  },
-                                ]
-                              : []),
+                            {
+                              name: 'crossover-card' as const,
+                              text: t('Crossover point'),
+                            },
                             ...(ageOfMoneyReportEnabled
                               ? [
                                   {
@@ -795,8 +790,7 @@ export function Overview({ dashboard }: OverviewProps) {
                               onCopyWidget(item.i, targetDashboardId)
                             }
                           />
-                        ) : widget.type === 'crossover-card' &&
-                          crossoverReportEnabled ? (
+                        ) : widget.type === 'crossover-card' ? (
                           <CrossoverCard
                             widgetId={item.i}
                             isEditing={isEditing}

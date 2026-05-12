@@ -475,7 +475,7 @@ Release date: 2026-02-02
 This release contains the following notable improvements, along with numerous fixes:
 
 - Allow multiple dashboard pages
-- Experimental feature: Custom themes [docs](https://actualbudget.org/docs/experimental/custom-themes)
+- Experimental feature: Custom themes [docs](https://actualbudget.org/docs/custom-themes)
 - Experimental feature: Budget analysis report [docs](https://actualbudget.org/docs/experimental/budget-analysis-report)
 
 **Docker Tag: 26.2.0**

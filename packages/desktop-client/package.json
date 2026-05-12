@@ -161,6 +161,7 @@
     "cross-env": "^10.1.0",
     "date-fns": "^4.1.0",
     "downshift": "9.3.2",
+    "fzf": "^0.5.2",
     "html-to-image": "^1.11.13",
     "hyperformula": "^3.2.0",
     "i18next": "^25.10.10",

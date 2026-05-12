@@ -8,9 +8,12 @@ import { View } from '@actual-app/components/view';
 import type { AutomationEntry } from '#components/budget/goals/automationExamples';
 import { AutomationErrorShort } from '#components/budget/goals/automationMessages';
 import { getDisplayTemplateMeta } from '#components/budget/goals/displayTemplateMeta';
+import { LimitAutomationShort } from '#components/budget/goals/editor/LimitAutomationShort';
 import { TemplateSentence } from '#components/budget/goals/TemplateSentence';
 import type { AutomationErrorKind } from '#components/budget/goals/validateAutomation';
 import { useFormat } from '#hooks/useFormat';
+
+import { NON_CONTRIBUTION_TYPES } from './TypePicker';
 
 type AutomationListRowProps = {
   index: number;
@@ -38,6 +41,8 @@ export function AutomationListRow({
 
   const subtitle = error ? (
     <AutomationErrorShort error={error} />
+  ) : entry.template.type === 'limit' ? (
+    <LimitAutomationShort template={entry.template} />
   ) : (
     <TemplateSentence
       template={entry.template}
@@ -135,45 +140,47 @@ export function AutomationListRow({
           {subtitle}
         </Text>
       </View>
-      <View
-        style={{
-          flexShrink: 0,
-          alignItems: 'flex-end',
-          gap: 2,
-        }}
-      >
-        <Text
+      {!NON_CONTRIBUTION_TYPES.has(entry.displayType) && (
+        <View
           style={{
-            fontSize: 12,
-            fontWeight: 600,
-            fontVariantNumeric: 'tabular-nums',
-            color:
-              contribution == null ||
-              Number.isNaN(contribution) ||
-              contribution === 0
-                ? theme.pageTextSubdued
-                : theme.pageText,
+            flexShrink: 0,
+            alignItems: 'flex-end',
+            gap: 2,
           }}
         >
-          {contribution == null || Number.isNaN(contribution)
-            ? '—'
-            : contribution > 0
-              ? '+' + format(contribution, 'financial')
-              : format(contribution, 'financial')}
-        </Text>
-        {priority != null && (
           <Text
             style={{
-              fontSize: 10,
-              color: theme.pageTextSubdued,
+              fontSize: 12,
+              fontWeight: 600,
               fontVariantNumeric: 'tabular-nums',
-              letterSpacing: '0.04em',
+              color:
+                contribution == null ||
+                Number.isNaN(contribution) ||
+                contribution === 0
+                  ? theme.pageTextSubdued
+                  : theme.pageText,
             }}
           >
-            {t('Priority: {{priority}}', { priority })}
+            {contribution == null || Number.isNaN(contribution)
+              ? '—'
+              : contribution > 0
+                ? '+' + format(contribution, 'financial')
+                : format(contribution, 'financial')}
           </Text>
-        )}
-      </View>
+          {priority != null && (
+            <Text
+              style={{
+                fontSize: 10,
+                color: theme.pageTextSubdued,
+                fontVariantNumeric: 'tabular-nums',
+                letterSpacing: '0.04em',
+              }}
+            >
+              {t('Priority: {{priority}}', { priority })}
+            </Text>
+          )}
+        </View>
+      )}
     </View>
   );
 }

@@ -903,11 +903,16 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                     options: {
                       categoryGroups,
                       showHiddenCategories,
+                      showNoneOption: true,
                       month: monthUtils.monthFromDate(
                         unserializedTransaction.date,
                       ),
                       onSelect: categoryId => {
-                        void onUpdateInner(transactionToEdit, name, categoryId);
+                        void onUpdateInner(
+                          transactionToEdit,
+                          name,
+                          categoryId as TransactionEntity['category'],
+                        );
                       },
                       onClose: () => {
                         onClearActiveEdit();

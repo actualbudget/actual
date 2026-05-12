@@ -407,6 +407,13 @@ export function KeyboardShortcutModal() {
             shortcut: 'G',
             description: t('Merge the selected transactions'),
           },
+          {
+            id: 'make-transfer-from-selected-transactions',
+            shortcut: 'R',
+            description: t(
+              'Make a transfer from the two selected transactions',
+            ),
+          },
         ],
       },
     ],

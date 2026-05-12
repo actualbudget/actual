@@ -9,6 +9,7 @@ import { BySaveAutomation } from './editor/BySaveAutomation';
 import { FixedAutomation } from './editor/FixedAutomation';
 import { HistoricalAutomation } from './editor/HistoricalAutomation';
 import { LimitAutomation } from './editor/LimitAutomation';
+import { LongTermGoalAutomation } from './editor/LongTermGoalAutomation';
 import { PercentageAutomation } from './editor/PercentageAutomation';
 import { RefillAutomation } from './editor/RefillAutomation';
 import { RemainderAutomation } from './editor/RemainderAutomation';
@@ -68,6 +69,10 @@ export function ActiveEditor({
     case 'remainder':
       return (
         <RemainderAutomation template={state.template} dispatch={dispatch} />
+      );
+    case 'goal':
+      return (
+        <LongTermGoalAutomation template={state.template} dispatch={dispatch} />
       );
     default:
       state satisfies never;
