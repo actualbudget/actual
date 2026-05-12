@@ -24,7 +24,7 @@ jobs:
       matrix:
         os:
           - ubuntu-22.04
-          - windows-latest
+          - windows-2025-vs2026
           - macos-latest
     runs-on: ${{ matrix.os }}
     environment: release

@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   publish-microsoft-store:
-    runs-on: windows-latest
+    runs-on: windows-2025-vs2026
     environment: release
     steps:
       - name: Resolve version
