@@ -40,21 +40,23 @@ export function BudgetAutomationsModal({
     setParsedTemplates(result[categoryId] ?? []);
   };
 
+  const { data: currentCategory } = useCategory(categoryId);
+  const needsMigration = currentCategory?.template_settings?.source !== 'ui';
+  const source = needsMigration ? 'notes' : 'ui';
+
   const { loading: templatesLoading } = useBudgetAutomations({
     categoryId,
+    source,
     onLoaded,
   });
 
   const { schedules } = useSchedules({ query: q('schedules').select('*') });
 
   const categories = useBudgetAutomationCategories();
-  const { data: currentCategory } = useCategory(categoryId);
-
-  const needsMigration = currentCategory?.template_settings?.source !== 'ui';
 
   const { loading: cleanupLoading } = useCategoryCleanup({
     categoryId,
-    source: needsMigration ? 'notes' : 'ui',
+    source,
     onLoaded: setParsedCleanup,
   });
   const loading = templatesLoading || cleanupLoading;

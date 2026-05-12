@@ -22,8 +22,8 @@ export function useCategoryCleanup({
     let mounted = true;
     async function load() {
       setLoading(true);
-      // notes-managed categories may have edited #cleanup lines since the
-      // last migration ran, so re-parse before reading cleanup_def
+      // notes based #cleanup lines may have been edited since they were last
+      // parsed into the DB. ui-managed categories own cleanup_def directly, so skip.
       if (source !== 'ui') {
         await send('budget/store-note-cleanups', [categoryId]);
       }
