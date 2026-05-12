@@ -15,3 +15,5 @@ export { MobilePayeeEditPage as PayeeEdit } from '#components/mobile/payees/Mobi
 
 export { MobileBankSyncPage as BankSync } from '#components/mobile/banksync/MobileBankSyncPage';
 export { MobileBankSyncAccountEditPage as BankSyncAccountEdit } from '#components/mobile/banksync/MobileBankSyncAccountEditPage';
+
+export { SavingsPlansPage as SavingsPlans } from '#components/savings-plans/SavingsPlansPage';

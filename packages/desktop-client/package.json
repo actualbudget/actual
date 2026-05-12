@@ -100,6 +100,7 @@
     "#queries/*": "./src/queries/*.ts",
     "#redux/*": "./src/redux/*.ts",
     "#reports/*": "./src/reports/*.ts",
+    "#savings-plans/*": "./src/savings-plans/*.ts",
     "#spreadsheet/*": "./src/spreadsheet/*.ts",
     "#tags/*": "./src/tags/*.ts",
     "#transactions/*": "./src/transactions/*.ts",

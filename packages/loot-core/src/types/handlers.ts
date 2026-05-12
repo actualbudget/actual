@@ -11,6 +11,7 @@ import type { PayeesHandlers } from '#server/payees/app';
 import type { PreferencesHandlers } from '#server/preferences/app';
 import type { ReportsHandlers } from '#server/reports/app';
 import type { RulesHandlers } from '#server/rules/app';
+import type { SavingsPlansHandlers } from '#server/savings-plans/app';
 import type { SchedulesHandlers } from '#server/schedules/app';
 import type { SpreadsheetHandlers } from '#server/spreadsheet/app';
 import type { SyncHandlers } from '#server/sync/app';
@@ -41,6 +42,7 @@ export type Handlers = {} & ServerHandlers &
   BudgetFileHandlers &
   EncryptionHandlers &
   TagsHandlers &
+  SavingsPlansHandlers &
   AuthHandlers;
 
 export type HandlerFunctions = Handlers[keyof Handlers];

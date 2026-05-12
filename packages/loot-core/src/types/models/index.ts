@@ -21,4 +21,5 @@ export type * from './transaction';
 export type * from './transaction-filter';
 export type * from './user';
 export type * from './user-access';
+export type * from './savings-plan';
 export type * from './tags';

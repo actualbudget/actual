@@ -323,6 +323,10 @@ export function FinancesApp() {
                   }
                 />
                 <Route path="/tags" element={<ManageTagsPage />} />
+                <Route
+                  path="/savings-plans"
+                  element={<NarrowAlternate name="SavingsPlans" />}
+                />
                 <Route path="/settings" element={<Settings />} />
 
                 <Route
@@ -400,6 +404,7 @@ export function FinancesApp() {
               <Route path="/rules" element={<MobileNavTabs />} />
               <Route path="/payees" element={<MobileNavTabs />} />
               <Route path="/schedules" element={<MobileNavTabs />} />
+              <Route path="/savings-plans" element={<MobileNavTabs />} />
               <Route path="*" element={null} />
             </Routes>
           </ScrollProvider>

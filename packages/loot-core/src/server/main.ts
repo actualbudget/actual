@@ -30,6 +30,7 @@ import { app as preferencesApp } from './preferences/app';
 import * as prefs from './prefs';
 import { app as reportsApp } from './reports/app';
 import { app as rulesApp } from './rules/app';
+import { app as savingsPlansApp } from './savings-plans/app';
 import { app as schedulesApp } from './schedules/app';
 import { getServer, setServer } from './server-config';
 import { app as spreadsheetApp } from './spreadsheet/app';
@@ -146,6 +147,7 @@ app.combine(
   budgetFilesApp,
   encryptionApp,
   tagsApp,
+  savingsPlansApp,
 );
 
 export function getDefaultDocumentDir() {
