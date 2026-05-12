@@ -215,54 +215,61 @@ export function useTransactionTableColumnLayout({
       })),
     });
 
-    // If we have measured widths from the DOM, use those directly
-    // This accounts for padding, borders, and browser rendering differences
+    // Always ensure columns fill available space to prevent gaps
+    // This handles both flex->pixel conversion and pixel->pixel resize
     if (measuredWidths && availableDataWidth !== null) {
-      const flexColumns = visibleColumns.filter(
-        col => startWidths[col.id] === 'flex',
-      );
+      // Use measured widths as the base
+      const updatedWidths = { ...startWidths };
+      visibleColumns.forEach(column => {
+        const measured = measuredWidths[column.id];
+        if (measured !== undefined && typeof measured === 'number') {
+          updatedWidths[column.id] = measured;
+        }
+      });
 
-      if (flexColumns.length > 0) {
-        // Use the actual measured widths from the DOM
-        const updatedWidths = { ...startWidths };
-        visibleColumns.forEach(column => {
-          const measured = measuredWidths[column.id];
-          if (measured !== undefined && typeof measured === 'number') {
-            updatedWidths[column.id] = measured;
-          }
+      let totalCalculated = visibleColumns.reduce((sum, col) => {
+        const w = updatedWidths[col.id];
+        return sum + (typeof w === 'number' ? w : 0);
+      }, 0);
+
+      const difference = availableDataWidth - totalCalculated;
+
+      // Find columns that can be adjusted (originally flex or currently resizable)
+      const flexibleColumns = visibleColumns.filter(col => {
+        const defaultWidth = col.defaultWidth;
+        return defaultWidth === 'flex';
+      });
+
+      if (difference !== 0 && flexibleColumns.length > 0) {
+        // Distribute the difference to flexible columns
+        const adjustPerColumn = Math.floor(difference / flexibleColumns.length);
+        const remainder = Math.abs(difference % flexibleColumns.length);
+
+        flexibleColumns.forEach((column, index) => {
+          const currentWidth = updatedWidths[column.id] as number;
+          const adjustment = adjustPerColumn + (index < remainder ? Math.sign(difference) : 0);
+          updatedWidths[column.id] = Math.max(
+            column.minWidth,
+            currentWidth + adjustment,
+          );
         });
 
-        let totalCalculated = visibleColumns.reduce((sum, col) => {
+        totalCalculated = visibleColumns.reduce((sum, col) => {
           const w = updatedWidths[col.id];
           return sum + (typeof w === 'number' ? w : 0);
         }, 0);
-
-        // Distribute any remaining space to flex columns to eliminate gaps
-        const difference = availableDataWidth - totalCalculated;
-        if (difference > 0 && flexColumns.length > 0) {
-          // Add extra pixels to flex columns to fill the available space
-          const extraPerColumn = Math.floor(difference / flexColumns.length);
-          const remainder = difference % flexColumns.length;
-
-          flexColumns.forEach((column, index) => {
-            const currentWidth = updatedWidths[column.id] as number;
-            updatedWidths[column.id] = 
-              currentWidth + extraPerColumn + (index < remainder ? 1 : 0);
-          });
-
-          totalCalculated = availableDataWidth;
-        }
-
-        debugLog('RESIZE_FLEX_CONVERTED', {
-          measuredWidths,
-          updatedWidths,
-          totalCalculated,
-          availableDataWidth,
-          difference,
-        });
-
-        startWidths = updatedWidths;
       }
+
+      debugLog('RESIZE_FLEX_CONVERTED', {
+        measuredWidths,
+        updatedWidths,
+        totalCalculated,
+        availableDataWidth,
+        difference,
+        flexibleColumns: flexibleColumns.map(c => c.id),
+      });
+
+      startWidths = updatedWidths;
     } else {
       // Fallback: Calculate flex columns mathematically (old approach)
       const fixedColumnsWidth = visibleColumns.reduce((total, col) => {
