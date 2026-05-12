@@ -908,7 +908,11 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                         unserializedTransaction.date,
                       ),
                       onSelect: categoryId => {
-                        void onUpdateInner(transactionToEdit, name, categoryId);
+                        void onUpdateInner(
+                          transactionToEdit,
+                          name,
+                          categoryId ?? undefined,
+                        );
                       },
                       onClose: () => {
                         onClearActiveEdit();

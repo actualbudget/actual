@@ -113,7 +113,7 @@ export function CategoryAutocompleteModal({
                     state.close();
                   }}
                 >
-                  <Trans>Nothing</Trans>
+                  <Trans>Uncategorized</Trans>
                 </Button>
               </View>
             )}
