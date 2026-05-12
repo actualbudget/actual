@@ -37,6 +37,7 @@ import { AutomationListRow } from './AutomationListRow';
 import { BudgetAutomationMigrationWarning } from './BudgetAutomationMigrationWarning';
 import { ConflictBanner } from './ConflictBanner';
 import { EmptyState } from './EmptyState';
+import { NON_CONTRIBUTION_TYPES } from './TypePicker';
 
 const RULE_LIST_WIDTH = 310;
 
@@ -158,7 +159,12 @@ export function BudgetAutomationsBody({
   const locale = useLocale();
 
   const [entries, setEntries] = useState<AutomationEntry[]>(initialEntries);
-  const [activeIdx, setActiveIdx] = useState(0);
+  const initialContributionIdx = initialEntries.findIndex(
+    e => !NON_CONTRIBUTION_TYPES.has(e.displayType),
+  );
+  const [activeIdx, setActiveIdx] = useState(
+    initialContributionIdx >= 0 ? initialContributionIdx : 0,
+  );
   const [saving, setSaving] = useState(false);
   const [dryRun, setDryRun] = useState<{
     budgeted: number;
