@@ -228,7 +228,7 @@ describe('Base budget', () => {
     expect(sheet.getCellValue(sheetName, 'total-spent')).toBe(-3000);
   });
 
-  it('Includes hidden categories in group totals for Envelope Budget', async () => {
+  it('Excludes hidden categories from group totals in Envelope Budget', async () => {
     await sheet.loadSpreadsheet(db);
     // Envelope is the default, but explicit for clarity
     sheet.get().meta().budgetType = 'envelope';
@@ -274,13 +274,32 @@ describe('Base budget', () => {
 
     await sheet.waitOnSpreadsheet();
 
-    // Verify group total includes both visible and hidden category amounts
+    // Each per-category cell still tracks its own activity
+    expect(sheet.getCellValue(sheetName, `sum-amount-${visibleCatId}`)).toBe(
+      -1000,
+    );
+    expect(sheet.getCellValue(sheetName, `sum-amount-${hiddenCatId}`)).toBe(
+      -2000,
+    );
+    // But the group total ignores hidden categories
+    expect(sheet.getCellValue(sheetName, `group-sum-amount-group1`)).toBe(
+      -1000,
+    );
+
+    // Toggle hidden -> visible: group total should recompute live
+    await db.updateCategory({
+      id: hiddenCatId,
+      name: 'Hidden Category',
+      cat_group: 'group1',
+      hidden: 0,
+    });
+    await sheet.waitOnSpreadsheet();
     expect(sheet.getCellValue(sheetName, `group-sum-amount-group1`)).toBe(
       -3000,
     );
   });
 
-  it('Includes hidden category groups in budget totals for Envelope Budget', async () => {
+  it('Excludes hidden category groups from budget totals in Envelope Budget', async () => {
     await sheet.loadSpreadsheet(db);
     // Envelope is the default, but explicit for clarity
     sheet.get().meta().budgetType = 'envelope';
@@ -334,7 +353,20 @@ describe('Base budget', () => {
 
     await sheet.waitOnSpreadsheet();
 
-    // Verify total spent includes both visible and hidden group amounts
+    // The hidden group still tracks its own internal activity
+    expect(
+      sheet.getCellValue(sheetName, `group-sum-amount-hidden-group`),
+    ).toBe(-2000);
+    // But the top-line total ignores the hidden group
+    expect(sheet.getCellValue(sheetName, 'total-spent')).toBe(-1000);
+
+    // Toggle hidden -> visible: top-line should update live
+    await db.updateCategoryGroup({
+      id: 'hidden-group',
+      name: 'Hidden Group',
+      hidden: 0,
+    });
+    await sheet.waitOnSpreadsheet();
     expect(sheet.getCellValue(sheetName, 'total-spent')).toBe(-3000);
   });
 });

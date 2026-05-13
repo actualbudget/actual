@@ -76,20 +76,26 @@ export function createCategory(cat, sheetName, prevSheetName) {
 export function createCategoryGroup(group, sheetName) {
   sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
     initialValue: 0,
-    dependencies: group.categories.map(cat => `sum-amount-${cat.id}`),
+    dependencies: group.categories
+      .filter(cat => !cat.hidden)
+      .map(cat => `sum-amount-${cat.id}`),
     run: sumAmounts,
   });
 
   if (!group.is_income) {
     sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
       initialValue: 0,
-      dependencies: group.categories.map(cat => `budget-${cat.id}`),
+      dependencies: group.categories
+        .filter(cat => !cat.hidden)
+        .map(cat => `budget-${cat.id}`),
       run: sumAmounts,
     });
 
     sheet.get().createDynamic(sheetName, 'group-leftover-' + group.id, {
       initialValue: 0,
-      dependencies: group.categories.map(cat => `leftover-${cat.id}`),
+      dependencies: group.categories
+        .filter(cat => !cat.hidden)
+        .map(cat => `leftover-${cat.id}`),
       run: sumAmounts,
     });
   }
@@ -150,7 +156,7 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
   sheet.get().createDynamic(sheetName, 'total-budgeted', {
     initialValue: 0,
     dependencies: groups
-      .filter(group => !group.is_income)
+      .filter(group => !group.is_income && !group.hidden)
       .map(group => `group-budget-${group.id}`),
     run: (...amounts) => {
       // Negate budgeted amount
@@ -211,7 +217,7 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
   sheet.get().createDynamic(sheetName, 'total-spent', {
     initialValue: 0,
     dependencies: groups
-      .filter(group => !group.is_income)
+      .filter(group => !group.is_income && !group.hidden)
       .map(group => `group-sum-amount-${group.id}`),
     run: sumAmounts,
   });
@@ -219,7 +225,7 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
   sheet.get().createDynamic(sheetName, 'total-leftover', {
     initialValue: 0,
     dependencies: groups
-      .filter(group => !group.is_income)
+      .filter(group => !group.is_income && !group.hidden)
       .map(group => `group-leftover-${group.id}`),
     run: sumAmounts,
   });
@@ -306,18 +312,22 @@ export function handleCategoryChange(months, oldValue, newValue) {
           `${prevSheetName}!carryover-${id}`,
         ]);
 
-      addDeps(sheetName, groupId, id);
-      if (newValue.is_income) {
-        sheet
-          .get()
-          .addDependencies(
-            sheetName,
-            'buffered-auto',
-            flatten2([
-              `${sheetName}!sum-amount-${id}`,
-              `${sheetName}!carryover-${id}`,
-            ]),
-          );
+      // Do not wire hidden categories into the group sum (parity with
+      // tracking.ts; fixes #2400 for envelope/rollover budgets).
+      if (!newValue.hidden) {
+        addDeps(sheetName, groupId, id);
+        if (newValue.is_income) {
+          sheet
+            .get()
+            .addDependencies(
+              sheetName,
+              'buffered-auto',
+              flatten2([
+                `${sheetName}!sum-amount-${id}`,
+                `${sheetName}!carryover-${id}`,
+              ]),
+            );
+        }
       }
     });
   } else if (oldValue && oldValue.cat_group !== newValue.cat_group) {
@@ -328,6 +338,44 @@ export function handleCategoryChange(months, oldValue, newValue) {
       const sheetName = monthUtils.sheetForMonth(month);
       removeDeps(sheetName, oldValue.cat_group, id);
       addDeps(sheetName, newValue.cat_group, id);
+    });
+  } else if (oldValue && oldValue.hidden !== newValue.hidden) {
+    // Visibility toggled -- wire/unwire the category from the group sum
+    // dynamically so it stops contributing to group totals when hidden.
+    const id = newValue.id;
+    const groupId = newValue.cat_group;
+
+    months.forEach(month => {
+      const sheetName = monthUtils.sheetForMonth(month);
+      if (newValue.hidden) {
+        removeDeps(sheetName, groupId, id);
+        if (newValue.is_income) {
+          sheet
+            .get()
+            .removeDependencies(
+              sheetName,
+              'buffered-auto',
+              flatten2([
+                `${sheetName}!sum-amount-${id}`,
+                `${sheetName}!carryover-${id}`,
+              ]),
+            );
+        }
+      } else {
+        addDeps(sheetName, groupId, id);
+        if (newValue.is_income) {
+          sheet
+            .get()
+            .addDependencies(
+              sheetName,
+              'buffered-auto',
+              flatten2([
+                `${sheetName}!sum-amount-${id}`,
+                `${sheetName}!carryover-${id}`,
+              ]),
+            );
+        }
+      }
     });
   }
 }
@@ -396,7 +444,26 @@ export function handleCategoryGroupChange(months, oldValue, newValue) {
         );
         createCategoryGroup({ ...group, categories }, sheetName);
 
-        addDeps(sheetName, group.id);
+        // Skip hidden groups so they do not feed into the total-* aggregates
+        // (parity with tracking.ts; fixes #2400 for envelope/rollover budgets).
+        if (!group.hidden) {
+          addDeps(sheetName, group.id);
+        }
+      });
+    }
+  } else if (oldValue && oldValue.hidden !== newValue.hidden) {
+    // Visibility toggled -- wire/unwire the group from total-* aggregates
+    // dynamically so it stops contributing to top-line totals when hidden.
+    const group = newValue;
+
+    if (!group.is_income) {
+      months.forEach(month => {
+        const sheetName = monthUtils.sheetForMonth(month);
+        if (newValue.hidden) {
+          removeDeps(sheetName, group.id);
+        } else {
+          addDeps(sheetName, group.id);
+        }
       });
     }
   }
