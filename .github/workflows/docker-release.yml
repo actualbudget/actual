@@ -78,6 +78,7 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
+          # Avoid restoring potentially poisoned caches in release jobs.
           cache: 'false'
       - name: Build Web
         run: yarn build:server

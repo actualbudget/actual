@@ -25,6 +25,7 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
+          # Avoid restoring potentially poisoned caches in release jobs.
           cache: 'false'
 
       - name: Update package versions
@@ -110,6 +111,7 @@ jobs:
         with:
           node-version: 24
           check-latest: true
+          # Avoid restoring potentially poisoned caches in release jobs.
           package-manager-cache: false
           registry-url: 'https://registry.npmjs.org'
 
