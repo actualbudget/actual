@@ -72,7 +72,7 @@ export function CleanupAutomation({
 
   return (
     <View style={{ gap: 14 }}>
-      <Text style={{ fontSize: 12, color: theme.pageTextSubdued }}>
+      <Text style={{ fontSize: 12, color: theme.pageTextLight }}>
         <Trans>
           End of month cleanup is a one-click reallocation of funds. Categories
           you choose to <strong>send leftover</strong> return their surplus to a
@@ -215,7 +215,7 @@ function ScopeCard({
           style={{
             fontSize: 11,
             textTransform: 'uppercase',
-            color: theme.pageTextSubdued,
+            color: theme.pageTextLight,
             fontWeight: 600,
             letterSpacing: '0.04em',
           }}
@@ -227,7 +227,7 @@ function ScopeCard({
             variant="bare"
             onPress={onRemove}
             aria-label={t('Remove pool')}
-            style={{ color: theme.pageTextSubdued, padding: 2 }}
+            style={{ color: theme.pageTextLight, padding: 2 }}
           >
             <SvgDelete width={10} height={10} style={{ color: 'inherit' }} />
           </Button>

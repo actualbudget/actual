@@ -86,7 +86,7 @@ function SidebarSectionHeader({
         padding: '6px 8px',
         fontSize: 11,
         textTransform: 'uppercase',
-        color: theme.pageTextSubdued,
+        color: theme.pageTextLight,
         fontWeight: 600,
         letterSpacing: '0.05em',
         ...style,
@@ -388,7 +388,7 @@ export function BudgetAutomationsBody({
         }}
       >
         <View style={{ minWidth: 0 }}>
-          <Text style={{ fontSize: 12, color: theme.pageTextSubdued }}>
+          <Text style={{ fontSize: 12, color: theme.pageTextLight }}>
             <Trans>Budget automation</Trans>
           </Text>
           <Text
@@ -415,7 +415,7 @@ export function BudgetAutomationsBody({
               style={{
                 fontSize: 11,
                 textTransform: 'uppercase',
-                color: theme.pageTextSubdued,
+                color: theme.pageTextLight,
                 letterSpacing: '0.04em',
               }}
             >
@@ -439,7 +439,7 @@ export function BudgetAutomationsBody({
               <SvgInformationCircle
                 width={12}
                 height={12}
-                style={{ color: theme.pageTextSubdued, cursor: 'help' }}
+                style={{ color: theme.pageTextLight, cursor: 'help' }}
               />
             </Tooltip>
           </View>

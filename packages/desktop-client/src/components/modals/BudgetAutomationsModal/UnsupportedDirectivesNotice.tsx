@@ -41,7 +41,7 @@ export function UnsupportedDirectivesNotice({
       <Text
         style={{
           fontSize: 13,
-          color: theme.pageTextSubdued,
+          color: theme.pageTextLight,
           maxWidth: 480,
           lineHeight: 1.5,
         }}
