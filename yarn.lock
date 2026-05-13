@@ -10996,15 +10996,9 @@ __metadata:
     typescript: "npm:^6.0.2"
     vitest: "npm:^4.1.2"
   dependenciesMeta:
-    "@parcel/watcher":
-      built: true
     bcrypt:
       built: true
     better-sqlite3:
-      built: true
-    core-js:
-      built: true
-    core-js-pure:
       built: true
     electron:
       built: true

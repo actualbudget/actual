@@ -88,19 +88,10 @@
     "vitest": "^4.1.2"
   },
   "dependenciesMeta": {
-    "@parcel/watcher": {
-      "built": true
-    },
     "bcrypt": {
       "built": true
     },
     "better-sqlite3": {
-      "built": true
-    },
-    "core-js": {
-      "built": true
-    },
-    "core-js-pure": {
       "built": true
     },
     "electron": {
