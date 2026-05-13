@@ -9,6 +9,9 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build-and-pack:
     runs-on: ubuntu-latest
@@ -105,6 +108,7 @@ jobs:
         with:
           node-version: 24
           check-latest: true
+          package-manager-cache: false
           registry-url: 'https://registry.npmjs.org'
 
       - name: Publish Core
