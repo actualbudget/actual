@@ -56,7 +56,7 @@ function copyMigrationsAndDefaultDb() {
 export default defineConfig({
   ssr: {
     noExternal: true,
-    external: ['better-sqlite3'],
+    external: ['better-sqlite3', '@actual-app/crdt'],
     resolve: { conditions: ['api'] },
   },
   build: {

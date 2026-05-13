@@ -107,6 +107,27 @@ jobs:
           check-latest: true
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Check out repo for crdt version lookup
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          path: source
+
+      # sync-server and api now declare `@actual-app/crdt` as an external
+      # runtime dependency (it's no longer inlined into their bundles).
+      # `workspace:*` is replaced with the exact crdt version at pack time,
+      # so that crdt version must already be reachable on npm before we
+      # publish sync-server or api — otherwise `npm install` will fail for
+      # downstream consumers.
+      - name: Verify @actual-app/crdt is published
+        run: |
+          CRDT_VERSION=$(node -p "require('./source/packages/crdt/package.json').version")
+          echo "Looking up @actual-app/crdt@${CRDT_VERSION} on npm..."
+          if ! npm view "@actual-app/crdt@${CRDT_VERSION}" version > /dev/null 2>&1; then
+            echo "::error::@actual-app/crdt@${CRDT_VERSION} is not published on npm. Publish it (via the publish-crdt workflow) before publishing sync-server/api."
+            exit 1
+          fi
+
       - name: Publish Core
         run: |
           npm publish loot-core/@actual-app/core.tgz --access public ${NPM_DIST_TAG:+--tag "$NPM_DIST_TAG"}

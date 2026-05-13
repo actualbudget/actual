@@ -21,10 +21,10 @@ const shebangPlugin = (entryFile: string): Plugin => ({
 export default defineConfig({
   ssr: {
     target: 'node',
-    // Inline workspace deps that ship as TS source. Anything else
-    // (express, better-sqlite3, bcrypt, @actual-app/web, etc.) stays
-    // external so Node resolves it at runtime.
-    noExternal: ['@actual-app/crdt'],
+    // Vite would otherwise inline workspace-symlinked packages; mark crdt
+    // explicitly external so it's resolved at runtime against the version
+    // listed in this package's dependencies.
+    external: ['@actual-app/crdt'],
   },
   build: {
     ssr: true,
