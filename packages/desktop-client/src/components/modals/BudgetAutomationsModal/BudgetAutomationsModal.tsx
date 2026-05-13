@@ -67,9 +67,7 @@ export function BudgetAutomationsModal({
 
   const hasErrorTemplate =
     parsedTemplates?.some(t => t.type === 'error') ?? false;
-  const hasSpendTemplate =
-    parsedTemplates?.some(t => t.type === 'spend') ?? false;
-  const hasUnsupportedDirective = hasErrorTemplate || hasSpendTemplate;
+  const hasUnsupportedDirective = hasErrorTemplate;
 
   const incomeNameToId = new Map<string, string>();
   for (const group of categories) {
@@ -116,10 +114,7 @@ export function BudgetAutomationsModal({
               <AnimatedLoading style={{ width: 20, height: 20 }} />
             </View>
           ) : hasUnsupportedDirective ? (
-            <UnsupportedDirectivesNotice
-              hasErrorTemplate={hasErrorTemplate}
-              onClose={() => state.close()}
-            />
+            <UnsupportedDirectivesNotice onClose={() => state.close()} />
           ) : (
             <BudgetAutomationsBody
               categoryId={categoryId}

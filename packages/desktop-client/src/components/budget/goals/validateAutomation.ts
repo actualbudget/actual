@@ -11,7 +11,9 @@ export type AutomationErrorKind =
   | { kind: 'percentage-no-source' }
   | { kind: 'percentage-source-not-found'; source: string }
   | { kind: 'by-no-month' }
-  | { kind: 'by-target-past'; month: string };
+  | { kind: 'by-target-past'; month: string }
+  | { kind: 'spend-no-from' }
+  | { kind: 'spend-from-after-target' };
 
 export type GlobalConflictKind =
   | { kind: 'over-income'; total: number; income: number }
@@ -67,7 +69,7 @@ export function validateAutomation(
       }
       return null;
     case 'by': {
-      if (template.type !== 'by') return null;
+      if (template.type !== 'by' && template.type !== 'spend') return null;
       if (!template.month || !monthUtils.isValidYearMonth(template.month)) {
         return { kind: 'by-no-month' };
       }
@@ -86,6 +88,16 @@ export function validateAutomation(
       // CategoryTemplateContext.checkByAndScheduleAndSpend.
       if (monthsRemaining < 0 && !template.annual && !template.repeat) {
         return { kind: 'by-target-past', month: targetMonth };
+      }
+      if (template.type === 'spend') {
+        if (!template.from || !monthUtils.isValidYearMonth(template.from)) {
+          return { kind: 'spend-no-from' };
+        }
+        if (
+          monthUtils.differenceInCalendarMonths(targetMonth, template.from) < 0
+        ) {
+          return { kind: 'spend-from-after-target' };
+        }
       }
       return null;
     }
