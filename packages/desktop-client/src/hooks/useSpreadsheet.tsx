@@ -32,6 +32,7 @@ function makeSpreadsheet() {
   const cellObservers: CellObservers = {};
   const LRUValueCache = new LRUCache<string, CellCacheValue>({ max: 1200 });
   const cellCache: CellCache = {};
+  const warmedSheets = new Set<string>();
   let observersDisabled = false;
 
   class Spreadsheet {
@@ -60,6 +61,14 @@ function makeSpreadsheet() {
 
     prewarmCache(name: string, value: CellCacheValue): void {
       LRUValueCache.set(name, value);
+    }
+
+    isSheetWarmed(sheetName: string): boolean {
+      return warmedSheets.has(sheetName);
+    }
+
+    markSheetWarmed(sheetName: string): void {
+      warmedSheets.add(sheetName);
     }
 
     listen(): () => void {

@@ -11,7 +11,6 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Card } from '@actual-app/components/card';
-import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SvgLogo } from '@actual-app/components/icons/logo';
 import {
   SvgArrowThinLeft,
@@ -64,6 +63,7 @@ import { useDispatch } from '#redux';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
 import { BudgetTable, PILL_STYLE } from './BudgetTable';
+import { BudgetTableSkeleton } from './BudgetTableSkeleton';
 
 function isBudgetType(input?: string): input is 'envelope' | 'tracking' {
   return ['envelope', 'tracking'].includes(input);
@@ -90,7 +90,9 @@ export function BudgetPage() {
     end: startMonth,
   });
   // const [editMode, setEditMode] = useState(false);
-  const [initialized, setInitialized] = useState(false);
+  const [initialized, setInitialized] = useState(() =>
+    spreadsheet.isSheetWarmed(monthUtils.sheetForMonth(startMonth)),
+  );
   const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction] = useSyncedPref('hideFraction');
@@ -519,70 +521,61 @@ export function BudgetPage() {
     onToggleHiddenCategories,
   ]);
 
+  const pageHeader = (
+    <MobilePageHeader
+      title={
+        <MonthSelector
+          month={startMonth}
+          monthBounds={monthBounds}
+          onOpenMonthMenu={onOpenBudgetMonthMenu}
+          onPrevMonth={onPrevMonth}
+          onNextMonth={onNextMonth}
+        />
+      }
+      leftContent={
+        <Button
+          variant="bare"
+          style={{ margin: 10 }}
+          onPress={onOpenBudgetPageMenu}
+          aria-label={t('Budget page menu')}
+        >
+          <SvgLogo
+            style={{ color: theme.mobileHeaderText }}
+            width="20"
+            height="20"
+          />
+          <SvgCheveronRight
+            style={{ flexShrink: 0, color: theme.mobileHeaderTextSubdued }}
+            width="14"
+            height="14"
+          />
+        </Button>
+      }
+      rightContent={
+        !monthUtils.isCurrentMonth(startMonth) && (
+          <Button
+            variant="bare"
+            onPress={onCurrentMonth}
+            aria-label={t('Today')}
+            style={{ margin: 10 }}
+          >
+            <SvgCalendar width={20} height={20} />
+          </Button>
+        )
+      }
+    />
+  );
+
   if (!categoryGroups || !initialized) {
     return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: theme.mobilePageBackground,
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 25,
-        }}
-      >
-        <AnimatedLoading width={25} height={25} />
-      </View>
+      <Page padding={0} header={pageHeader}>
+        <BudgetTableSkeleton />
+      </Page>
     );
   }
 
   return (
-    <Page
-      padding={0}
-      header={
-        <MobilePageHeader
-          title={
-            <MonthSelector
-              month={startMonth}
-              monthBounds={monthBounds}
-              onOpenMonthMenu={onOpenBudgetMonthMenu}
-              onPrevMonth={onPrevMonth}
-              onNextMonth={onNextMonth}
-            />
-          }
-          leftContent={
-            <Button
-              variant="bare"
-              style={{ margin: 10 }}
-              onPress={onOpenBudgetPageMenu}
-              aria-label={t('Budget page menu')}
-            >
-              <SvgLogo
-                style={{ color: theme.mobileHeaderText }}
-                width="20"
-                height="20"
-              />
-              <SvgCheveronRight
-                style={{ flexShrink: 0, color: theme.mobileHeaderTextSubdued }}
-                width="14"
-                height="14"
-              />
-            </Button>
-          }
-          rightContent={
-            !monthUtils.isCurrentMonth(startMonth) && (
-              <Button
-                variant="bare"
-                onPress={onCurrentMonth}
-                aria-label={t('Today')}
-                style={{ margin: 10 }}
-              >
-                <SvgCalendar width={20} height={20} />
-              </Button>
-            )
-          }
-        />
-      }
-    >
+    <Page padding={0} header={pageHeader}>
       <SheetNameProvider name={monthUtils.sheetForMonth(startMonth)}>
         <SyncRefresh
           onSync={async () => {

@@ -193,6 +193,8 @@ export async function prewarmMonth(
   for (const value of values) {
     spreadsheet.prewarmCache(value.name, value);
   }
+
+  spreadsheet.markSheetWarmed(monthUtils.sheetForMonth(month));
 }
 
 export async function prewarmAllMonths(
