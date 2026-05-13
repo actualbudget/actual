@@ -93,6 +93,9 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
         if (tagged.openModal) {
           // The undo store keeps modals as an opaque structural shape; re-narrow
           // to the real Modal union now that we're back in desktop-client.
+          // TODO: drop this cast once the Modal type lives somewhere both
+          // loot-core and desktop-client can import (e.g. consolidated under
+          // @actual-app/core types).
           const openModal = tagged.openModal as Modal;
           const { modalStack } = store.getState().modals;
 
