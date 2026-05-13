@@ -1,9 +1,11 @@
 import { join, resolve } from 'node:path';
 
-import * as bcrypt from 'bcrypt';
-
 import { bootstrapOpenId } from './accounts/openid';
-import { bootstrapPassword, loginWithPassword } from './accounts/password';
+import {
+  bootstrapPassword,
+  loginWithPassword,
+  verifyPassword,
+} from './accounts/password';
 import { openDatabase } from './db';
 import { config } from './load-config';
 
@@ -113,7 +115,7 @@ export async function bootstrap(loginSettings, forced = false) {
     }
 
     if (passEnabled) {
-      const { error } = bootstrapPassword(loginSettings.password);
+      const { error } = await bootstrapPassword(loginSettings.password);
       if (error) {
         accountDb.mutate('ROLLBACK');
         return { error };
@@ -129,7 +131,7 @@ export async function bootstrap(loginSettings, forced = false) {
     }
 
     accountDb.mutate('COMMIT');
-    return passEnabled ? loginWithPassword(loginSettings.password) : {};
+    return passEnabled ? await loginWithPassword(loginSettings.password) : {};
   } catch (error) {
     accountDb.mutate('ROLLBACK');
     throw error;
@@ -176,13 +178,13 @@ export async function disableOpenID(loginSettings) {
     return { error: 'invalid-password' };
   }
 
-  const confirmed = bcrypt.compareSync(loginSettings.password, passwordHash);
+  const confirmed = await verifyPassword(loginSettings.password, passwordHash);
 
   if (!confirmed) {
     return { error: 'invalid-password' };
   }
 
-  const { error } = bootstrapPassword(loginSettings.password);
+  const { error } = await bootstrapPassword(loginSettings.password);
   if (error) {
     return { error };
   }
