@@ -87,6 +87,32 @@
     "typescript": "^6.0.2",
     "vitest": "^4.1.2"
   },
+  "dependenciesMeta": {
+    "@parcel/watcher": {
+      "built": true
+    },
+    "bcrypt": {
+      "built": true
+    },
+    "better-sqlite3": {
+      "built": true
+    },
+    "core-js": {
+      "built": true
+    },
+    "core-js-pure": {
+      "built": true
+    },
+    "electron": {
+      "built": true
+    },
+    "esbuild": {
+      "built": true
+    },
+    "sharp": {
+      "built": true
+    }
+  },
   "resolutions": {
     "adm-zip": "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch",
     "minimatch@10.2.1": "10.2.5",
