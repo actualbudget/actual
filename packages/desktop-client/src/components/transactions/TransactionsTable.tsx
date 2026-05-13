@@ -1384,7 +1384,8 @@ const Transaction = memo(function Transaction({
             isOpen
             isNonModal
             style={{
-              maxWidth: 500,
+              width: 'max-content',
+              maxWidth: 'none',
               minWidth: 375,
               padding: 5,
             }}
@@ -1978,7 +1979,6 @@ function TransactionError({
           <View
             style={{
               flexDirection: 'row',
-              flexWrap: 'wrap',
               alignItems: 'center',
               padding: '0 5px',
               gap: 5,
