@@ -18,7 +18,7 @@ export function CleanupAutomationReadOnly({
   for (const group of config.groups) {
     if (!group.send && !group.take) continue;
     const name =
-      groups.find(g => g.id === group.groupId)?.name ?? t('Unknown group');
+      groups.find(g => g.id === group.groupId)?.name ?? t('Unknown pool');
     groupNames.push(name);
   }
 

@@ -13,6 +13,7 @@ import type {
   CleanupConfig,
   GroupCleanup,
 } from '#components/budget/goals/cleanupModel';
+import { Link } from '#components/common/Link';
 import { FormLabel } from '#components/forms';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import type { CleanupGroup } from '#hooks/useCleanupGroups';
@@ -73,19 +74,25 @@ export function CleanupAutomation({
     <View style={{ gap: 14 }}>
       <Text style={{ fontSize: 12, color: theme.pageTextSubdued }}>
         <Trans>
-          End of month cleanup is a one-click rebalance you can run at the end
-          of a month. Categories you mark to <strong>send leftover</strong>{' '}
-          return their surplus to a pool; categories you mark to{' '}
-          <strong>take a share</strong> receive part or all of that pool back.
-          By default the pool is To Budget. You can also create named groups so
-          the surplus only moves between a chosen set of categories.
+          End of month cleanup is a one-click reallocation of funds. Categories
+          you choose to <strong>send leftover</strong> return their surplus to a
+          pool; categories you mark to <strong>receive leftover</strong> receive
+          part or all of that pool back. By default, the pool is To Budget. You
+          can also create named pools so the surplus only moves between
+          categories set to use that pool.{' '}
+          <Link
+            variant="external"
+            to="https://actualbudget.org/docs/experimental/monthly-cleanup#local-group-source-and-sinks"
+          >
+            Learn more
+          </Link>
         </Trans>
       </Text>
 
       <ScopeCard
         title={t('Global')}
-        sendLabel={t('Send any leftover here to To Budget')}
-        takeLabel={t('Take a share of leftover To Budget')}
+        sendLabel={t('Send leftover')}
+        takeLabel={t('Receive leftover')}
         send={config.global.send}
         take={config.global.take}
         weight={config.global.weight}
@@ -99,13 +106,13 @@ export function CleanupAutomation({
 
       {config.groups.map(group => {
         const groupName =
-          groups.find(g => g.id === group.groupId)?.name ?? t('Unknown group');
+          groups.find(g => g.id === group.groupId)?.name ?? t('Unknown pool');
         return (
           <ScopeCard
             key={group.groupId}
-            title={t('Group: {{groupName}}', { groupName })}
-            sendLabel={t("Send any leftover here to the group's pool")}
-            takeLabel={t("Take a share of the group's pool")}
+            title={t('Pool: {{groupName}}', { groupName })}
+            sendLabel={t('Send leftover to pool')}
+            takeLabel={t('Receive leftover from pool')}
             send={group.send}
             take={group.take}
             weight={group.weight}
@@ -122,13 +129,13 @@ export function CleanupAutomation({
         );
       })}
 
-      {/* The engine accepts multiple group scopes per category but the result
+      {/* The engine accepts multiple pool scopes per category but the result
           depends on category sort order, so the editor caps it at one. */}
       {config.groups.length === 0 &&
         (pickingGroup ? (
           <View style={{ gap: 6 }}>
             <FormLabel
-              title={t('Pick or create a group')}
+              title={t('Pick or create a pool')}
               htmlFor="cleanup-add-group-field"
             />
             <CleanupGroupPicker
@@ -148,7 +155,7 @@ export function CleanupAutomation({
             onPress={() => setPickingGroup(true)}
             style={{ alignSelf: 'flex-start', color: theme.pageTextPositive }}
           >
-            + <Trans>Add to a group</Trans>
+            + <Trans>Add to a pool</Trans>
           </Button>
         ))}
     </View>
@@ -219,7 +226,7 @@ function ScopeCard({
           <Button
             variant="bare"
             onPress={onRemove}
-            aria-label={t('Remove group')}
+            aria-label={t('Remove pool')}
             style={{ color: theme.pageTextSubdued, padding: 2 }}
           >
             <SvgDelete width={10} height={10} style={{ color: 'inherit' }} />
