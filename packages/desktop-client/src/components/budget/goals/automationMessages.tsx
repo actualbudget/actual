@@ -55,7 +55,7 @@ export function AutomationErrorShort({
         <Trans>Pick a schedule</Trans>
       );
     case 'refill-no-cap':
-      return <Trans>Add a balance cap above</Trans>;
+      return <Trans>Add a balance cap</Trans>;
     case 'limit-no-contributor':
       return <Trans>Add an automation that contributes funds</Trans>;
     case 'percentage-out-of-range':
