@@ -19,12 +19,14 @@ type Notification = {
 export const TEMPLATE_PREFIX = '#template';
 export const GOAL_PREFIX = '#goal';
 
-export async function storeNoteTemplates(): Promise<void> {
-  const categoriesWithTemplates = await getCategoriesWithTemplates();
+export async function storeNoteTemplates(
+  categoryIds?: string[],
+): Promise<void> {
+  const categoriesWithTemplates = await getCategoriesWithTemplates(categoryIds);
 
   await storeTemplates({ categoriesWithTemplates, source: 'notes' });
 
-  await resetCategoryGoalDefsWithNoTemplates();
+  await resetCategoryGoalDefsWithNoTemplates(categoryIds);
 }
 
 type CategoryWithTemplateNotes = {
@@ -71,11 +73,11 @@ export async function checkTemplateNotes(): Promise<Notification> {
   };
 }
 
-async function getCategoriesWithTemplates(): Promise<
-  CategoryWithTemplateNotes[]
-> {
+async function getCategoriesWithTemplates(
+  categoryIds?: string[],
+): Promise<CategoryWithTemplateNotes[]> {
   const templatesForCategory: CategoryWithTemplateNotes[] = [];
-  const templateNotes = await getCategoriesWithTemplateNotes();
+  const templateNotes = await getCategoriesWithTemplateNotes(categoryIds);
 
   templateNotes.forEach(({ id, name, note }: CategoryWithTemplateNote) => {
     if (!note) {

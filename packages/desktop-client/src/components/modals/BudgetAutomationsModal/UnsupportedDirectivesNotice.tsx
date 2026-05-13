@@ -8,11 +8,9 @@ import { View } from '@actual-app/components/view';
 
 export function UnsupportedDirectivesNotice({
   hasErrorTemplate,
-  hasSpendTemplate,
   onClose,
 }: {
   hasErrorTemplate: boolean;
-  hasSpendTemplate: boolean;
   onClose: () => void;
 }) {
   return (
@@ -54,15 +52,9 @@ export function UnsupportedDirectivesNotice({
             notes couldn&rsquo;t be parsed. Fix them as text first, then re-open
             this modal to migrate.
           </Trans>
-        ) : hasSpendTemplate ? (
-          <Trans>
-            This category uses a <code>spend from</code> template, which the
-            budget automations UI doesn&rsquo;t handle yet. Keep editing it as
-            text in the category&rsquo;s notes.
-          </Trans>
         ) : (
           <Trans>
-            This category uses a <code>#cleanup</code> directive, which the
+            This category uses a <code>spend from</code> template, which the
             budget automations UI doesn&rsquo;t handle yet. Keep editing it as
             text in the category&rsquo;s notes.
           </Trans>
@@ -73,11 +65,4 @@ export function UnsupportedDirectivesNotice({
       </Button>
     </View>
   );
-}
-
-const CLEANUP_DIRECTIVE = /^\s*#cleanup\b/;
-
-export function hasCleanupLine(notes: string | null | undefined): boolean {
-  if (!notes) return false;
-  return notes.split('\n').some(line => CLEANUP_DIRECTIVE.test(line));
 }
