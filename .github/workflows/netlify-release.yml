@@ -28,6 +28,8 @@ jobs:
 
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          cache: 'false'
 
       - name: Install Netlify
         run: npm install netlify-cli@17.10.1 -g

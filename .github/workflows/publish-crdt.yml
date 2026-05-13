@@ -63,6 +63,7 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
+          cache: 'false'
           download-translations: 'false'
 
       - name: Build @actual-app/crdt
@@ -76,6 +77,7 @@ jobs:
         with:
           node-version: 24
           check-latest: true
+          package-manager-cache: false
           registry-url: 'https://registry.npmjs.org'
 
       - name: Publish to npm

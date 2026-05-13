@@ -24,6 +24,8 @@ jobs:
 
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          cache: 'false'
 
       - name: Update package versions
         if: github.event_name != 'push'

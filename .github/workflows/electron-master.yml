@@ -67,6 +67,8 @@ jobs:
           STEPS_PROCESS_VERSION_OUTPUTS_VERSION: ${{ steps.process_version.outputs.version }}
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          cache: 'false'
       - name: Build Electron for Mac
         if: ${{ startsWith(matrix.os, 'macos') }}
         run: ./bin/package-electron

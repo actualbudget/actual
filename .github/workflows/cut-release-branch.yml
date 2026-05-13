@@ -37,6 +37,7 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
+          cache: 'false'
           download-translations: 'false'
 
       - name: Bump package versions

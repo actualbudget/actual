@@ -75,6 +75,8 @@ jobs:
       # This is faster and avoids yarn memory issues
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          cache: 'false'
       - name: Build Web
         run: yarn build:server
 
