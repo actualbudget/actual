@@ -90,6 +90,7 @@
   "dependencies": {
     "@actual-app/crdt": "workspace:*",
     "@actual-app/web": "workspace:*",
+    "argon2": "^0.44.0",
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.8.0",
     "convict": "^6.2.5",

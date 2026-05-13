@@ -1,3 +1,4 @@
+import * as argon2 from 'argon2';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -5,20 +6,47 @@ import { clearExpiredSessions, getAccountDb } from '#account-db';
 import { config } from '#load-config';
 import { TOKEN_EXPIRATION_NEVER } from '#util/validate-user';
 
+// OWASP-recommended argon2id parameters: 19 MiB memory, 2 iterations, 1 parallelism.
+// https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#argon2id
+const ARGON2_OPTIONS = {
+  type: argon2.argon2id,
+  memoryCost: 19456,
+  timeCost: 2,
+  parallelism: 1,
+};
+
 function isValidPassword(password) {
   return password != null && password !== '';
 }
 
-function hashPassword(password) {
-  return bcrypt.hashSync(password, 12);
+export function hashPassword(password) {
+  return argon2.hash(password, ARGON2_OPTIONS);
 }
 
-export function bootstrapPassword(password) {
+export async function verifyPassword(password, hash) {
+  if (typeof hash !== 'string') return false;
+
+  if (hash.startsWith('$argon2')) {
+    try {
+      return await argon2.verify(hash, password);
+    } catch {
+      return false;
+    }
+  }
+
+  return bcrypt.compareSync(password, hash);
+}
+
+function isLegacyHash(hash) {
+  return typeof hash === 'string' && !hash.startsWith('$argon2');
+}
+
+export async function bootstrapPassword(password) {
   if (!isValidPassword(password)) {
     return { error: 'invalid-password' };
   }
 
-  const hashed = hashPassword(password);
+  const hashed = await hashPassword(password);
   const accountDb = getAccountDb();
   accountDb.transaction(() => {
     accountDb.mutate('DELETE FROM auth WHERE method = ?', ['password']);
@@ -32,7 +60,7 @@ export function bootstrapPassword(password) {
   return {};
 }
 
-export function loginWithPassword(password) {
+export async function loginWithPassword(password) {
   if (!isValidPassword(password)) {
     return { error: 'invalid-password' };
   }
@@ -47,10 +75,18 @@ export function loginWithPassword(password) {
     return { error: 'invalid-password' };
   }
 
-  const confirmed = bcrypt.compareSync(password, passwordHash);
+  const confirmed = await verifyPassword(password, passwordHash);
 
   if (!confirmed) {
     return { error: 'invalid-password' };
+  }
+
+  if (isLegacyHash(passwordHash)) {
+    const rehashed = await hashPassword(password);
+    accountDb.mutate(
+      "UPDATE auth SET extra_data = ? WHERE method = 'password'",
+      [rehashed],
+    );
   }
 
   const sessionRow = accountDb.first(
@@ -110,21 +146,21 @@ export function loginWithPassword(password) {
   return { token };
 }
 
-export function changePassword(newPassword) {
+export async function changePassword(newPassword) {
   const accountDb = getAccountDb();
 
   if (!isValidPassword(newPassword)) {
     return { error: 'invalid-password' };
   }
 
-  const hashed = hashPassword(newPassword);
+  const hashed = await hashPassword(newPassword);
   accountDb.mutate("UPDATE auth SET extra_data = ? WHERE method = 'password'", [
     hashed,
   ]);
   return {};
 }
 
-export function checkPassword(password) {
+export async function checkPassword(password) {
   if (!isValidPassword(password)) {
     return false;
   }
@@ -139,11 +175,5 @@ export function checkPassword(password) {
     return false;
   }
 
-  const confirmed = bcrypt.compareSync(password, passwordHash);
-
-  if (!confirmed) {
-    return false;
-  }
-
-  return true;
+  return await verifyPassword(password, passwordHash);
 }
