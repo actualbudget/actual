@@ -12,6 +12,13 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
+import {
+  extractScheduleConds,
+  getNextDate,
+  getScheduledAmount,
+  scheduleIsRecurring,
+} from '@actual-app/core/shared/schedules';
+import { groupById } from '@actual-app/core/shared/util';
 import type {
   CashFlowWidget,
   RuleConditionEntity,
@@ -30,12 +37,16 @@ import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { cashFlowByDate } from '#components/reports/spreadsheets/cash-flow-spreadsheet';
+import type { ScheduledCashFlowEntry } from '#components/reports/spreadsheets/cash-flow-spreadsheet';
 import { useReport } from '#components/reports/useReport';
+import { useAccounts } from '#hooks/useAccounts';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { useNavigate } from '#hooks/useNavigate';
+import { usePayeesById } from '#hooks/usePayees';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
+import { getSchedulesQuery, useSchedules } from '#hooks/useSchedules';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
@@ -106,6 +117,85 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
     setIsConcise(numDays > 31 * 3);
   }, [start, end]);
 
+  // Fetch schedules and account/payee data to compute future transactions
+  const schedulesQuery = useMemo(() => getSchedulesQuery(), []);
+  const { schedules, isLoading: isSchedulesLoading } = useSchedules({
+    query: schedulesQuery,
+  });
+  const { data: accounts = [] } = useAccounts();
+  const { data: payeesById = {} } = usePayeesById();
+
+  const accountsById = useMemo(() => groupById(accounts), [accounts]);
+
+  // Compute future scheduled transactions for the date range
+  const scheduledTransactions = useMemo((): ScheduledCashFlowEntry[] => {
+    if (isSchedulesLoading) return [];
+
+    const today = monthUtils.currentDay();
+    const endDate = monthUtils.lastDayOfMonth(end);
+
+    if (endDate <= today) return [];
+
+    const result: ScheduledCashFlowEntry[] = [];
+
+    for (const schedule of schedules) {
+      if (schedule.completed) continue;
+
+      // Only include on-budget accounts
+      const account = accountsById[schedule._account];
+      if (!account || account.offbudget) continue;
+
+      // Skip transfer schedules (payee has transfer_acct set)
+      const payee = payeesById[schedule._payee];
+      if (payee?.transfer_acct) continue;
+
+      const amount = getScheduledAmount(schedule._amount);
+      if (amount === 0) continue;
+
+      const { date: dateConditions } = extractScheduleConds(
+        schedule._conditions,
+      );
+      if (!dateConditions) continue;
+
+      const isRecurring = scheduleIsRecurring(dateConditions);
+
+      if (!isRecurring) {
+        // One-time schedule: include if it's in the future portion of the range
+        const schedDate = schedule.next_date;
+        if (schedDate && schedDate > today && schedDate <= endDate) {
+          result.push({ date: schedDate, amount });
+        }
+      } else {
+        // Recurring schedule: generate all occurrences from tomorrow to end of range
+        const rangeEnd = d.parseISO(endDate);
+        const startFrom = d.parseISO(monthUtils.addDays(today, 1));
+
+        // Find first occurrence at or after startFrom
+        let current = getNextDate(dateConditions, startFrom);
+        let iterations = 0;
+        const MAX_ITERATIONS = 1000;
+
+        while (
+          current !== null &&
+          current <= endDate &&
+          iterations < MAX_ITERATIONS
+        ) {
+          if (current > today) {
+            result.push({ date: current, amount });
+          }
+
+          // Advance to next occurrence
+          const nextStart = d.addDays(d.parseISO(current), 1);
+          if (nextStart > rangeEnd) break;
+          current = getNextDate(dateConditions, nextStart);
+          iterations++;
+        }
+      }
+    }
+
+    return result;
+  }, [schedules, isSchedulesLoading, accountsById, payeesById, end]);
+
   const params = useMemo(
     () =>
       cashFlowByDate(
@@ -116,8 +206,18 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
         conditionsOp,
         locale,
         format,
+        scheduledTransactions,
       ),
-    [start, end, isConcise, conditions, conditionsOp, locale, format],
+    [
+      start,
+      end,
+      isConcise,
+      conditions,
+      conditionsOp,
+      locale,
+      format,
+      scheduledTransactions,
+    ],
   );
   const data = useReport('cash_flow', params);
 
@@ -247,7 +347,17 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
     return null;
   }
 
-  const { graphData, totalExpenses, totalIncome, totalTransfers } = data;
+  const {
+    graphData,
+    totalExpenses,
+    totalIncome,
+    totalTransfers,
+    projectedTotalIncome,
+    projectedTotalExpenses,
+  } = data;
+
+  const hasProjected =
+    projectedTotalIncome !== 0 || projectedTotalExpenses !== 0;
 
   return (
     <Page
@@ -373,6 +483,57 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
               <Change amount={totalIncome + totalExpenses + totalTransfers} />
             </PrivacyFilter>
           </Text>
+
+          {hasProjected && (
+            <>
+              <View
+                style={{
+                  borderTop: `1px solid ${theme.tableBorder}`,
+                  marginTop: 10,
+                  paddingTop: 10,
+                  width: '100%',
+                }}
+              />
+              <AlignedText
+                style={{
+                  marginBottom: 5,
+                  minWidth: 160,
+                  color: theme.pageTextLight,
+                }}
+                left={
+                  <Block>
+                    <Trans>Projected income:</Trans>
+                  </Block>
+                }
+                right={
+                  <FinancialText style={{ fontWeight: 600 }}>
+                    <PrivacyFilter>
+                      {format(projectedTotalIncome, 'financial')}
+                    </PrivacyFilter>
+                  </FinancialText>
+                }
+              />
+              <AlignedText
+                style={{
+                  marginBottom: 5,
+                  minWidth: 160,
+                  color: theme.pageTextLight,
+                }}
+                left={
+                  <Block>
+                    <Trans>Projected expenses:</Trans>
+                  </Block>
+                }
+                right={
+                  <FinancialText style={{ fontWeight: 600 }}>
+                    <PrivacyFilter>
+                      {format(projectedTotalExpenses, 'financial')}
+                    </PrivacyFilter>
+                  </FinancialText>
+                }
+              />
+            </>
+          )}
         </View>
 
         <CashFlowGraph
@@ -398,6 +559,14 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
               picture of how available money fluctuates.
             </Paragraph>
           </Trans>
+          {hasProjected && (
+            <Trans>
+              <Paragraph>
+                Future dates show projected balances based on your scheduled
+                transactions.
+              </Paragraph>
+            </Trans>
+          )}
         </View>
       </View>
     </Page>
