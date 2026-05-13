@@ -505,7 +505,7 @@ export function useSortCategoriesMutation() {
     mutationFn: async ({ groupId, direction }: SortCategoriesPayload) => {
       await send('categories-sort', { groupId, direction });
     },
-    onSettled: () => invalidateQueries(queryClient),
+    onSuccess: () => invalidateQueries(queryClient),
     onError: error => {
       console.error('Error sorting categories:', error);
       dispatchErrorNotification(

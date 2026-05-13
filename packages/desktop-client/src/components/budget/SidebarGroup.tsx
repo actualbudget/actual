@@ -68,6 +68,8 @@ export function SidebarGroup({
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
 
   const temporary = group.id === 'new';
+  const canSortCategories =
+    !!onSortCategories && (group.categories?.length ?? 0) > 1;
   const { setMenuOpen, menuOpen, handleContextMenu, resetPosition, position } =
     useContextMenu();
   const triggerRef = useRef(null);
@@ -161,12 +163,12 @@ export function SidebarGroup({
                     text: group.hidden ? t('Show') : t('Hide'),
                   },
                   onDelete && { name: 'delete', text: t('Delete') },
-                  group.categories?.length > 1 && Menu.line,
-                  group.categories?.length > 1 && {
+                  canSortCategories && Menu.line,
+                  canSortCategories && {
                     name: 'sort-asc',
                     text: t('Sort A to Z'),
                   },
-                  group.categories?.length > 1 && {
+                  canSortCategories && {
                     name: 'sort-desc',
                     text: t('Sort Z to A'),
                   },
