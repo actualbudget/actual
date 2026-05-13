@@ -354,9 +354,9 @@ describe('Base budget', () => {
     await sheet.waitOnSpreadsheet();
 
     // The hidden group still tracks its own internal activity
-    expect(
-      sheet.getCellValue(sheetName, `group-sum-amount-hidden-group`),
-    ).toBe(-2000);
+    expect(sheet.getCellValue(sheetName, `group-sum-amount-hidden-group`)).toBe(
+      -2000,
+    );
     // But the top-line total ignores the hidden group
     expect(sheet.getCellValue(sheetName, 'total-spent')).toBe(-1000);
 
