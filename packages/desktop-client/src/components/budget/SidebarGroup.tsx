@@ -37,6 +37,10 @@ type SidebarGroupProps = {
   onApplyBudgetTemplatesInGroup?: (
     categories: Array<CategoryEntity['id']>,
   ) => void;
+  onSortCategories?: (
+    groupId: CategoryGroupEntity['id'],
+    direction: 'asc' | 'desc',
+  ) => void;
   onShowNewCategory?: (groupId: CategoryGroupEntity['id']) => void;
   onHideNewGroup?: () => void;
   onToggleCollapse?: (id: CategoryGroupEntity['id']) => void;
@@ -53,6 +57,7 @@ export function SidebarGroup({
   onSave,
   onDelete,
   onApplyBudgetTemplatesInGroup,
+  onSortCategories,
   onShowNewCategory,
   onHideNewGroup,
   onToggleCollapse,
@@ -142,6 +147,10 @@ export function SidebarGroup({
                     onApplyBudgetTemplatesInGroup?.(
                       group.categories.filter(c => !c.hidden).map(c => c.id),
                     );
+                  } else if (type === 'sort-asc') {
+                    onSortCategories?.(group.id, 'asc');
+                  } else if (type === 'sort-desc') {
+                    onSortCategories?.(group.id, 'desc');
                   }
                   setMenuOpen(false);
                 }}
@@ -152,6 +161,15 @@ export function SidebarGroup({
                     text: group.hidden ? t('Show') : t('Hide'),
                   },
                   onDelete && { name: 'delete', text: t('Delete') },
+                  group.categories?.length > 1 && Menu.line,
+                  group.categories?.length > 1 && {
+                    name: 'sort-asc',
+                    text: t('Sort A to Z'),
+                  },
+                  group.categories?.length > 1 && {
+                    name: 'sort-desc',
+                    text: t('Sort Z to A'),
+                  },
                   ...(isGoalTemplatesEnabled
                     ? [
                         {
