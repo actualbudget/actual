@@ -34,7 +34,11 @@ export async function verifyPassword(password, hash) {
     }
   }
 
-  return bcrypt.compareSync(password, hash);
+  try {
+    return await bcrypt.compare(password, hash);
+  } catch {
+    return false;
+  }
 }
 
 function isLegacyHash(hash) {
