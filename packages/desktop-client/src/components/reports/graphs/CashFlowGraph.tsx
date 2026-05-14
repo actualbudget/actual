@@ -9,6 +9,7 @@ import * as d from 'date-fns';
 import {
   Bar,
   CartesianGrid,
+  Cell,
   ComposedChart,
   Line,
   ReferenceLine,
@@ -27,15 +28,20 @@ import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 const MAX_BAR_SIZE = 50;
 const ANIMATION_DURATION = 1000; // in ms
+const PROJECTED_OPACITY = 0.4;
+
+type DataItem = {
+  date: Date;
+  income: number;
+  expenses: number;
+  balance: number | null;
+  projectedBalance: number | null;
+  transfers: number;
+  projected: boolean;
+};
 
 type PayloadItem = {
-  payload: {
-    date: string;
-    income: number;
-    expenses: number;
-    balance: number;
-    transfers: number;
-  };
+  payload: DataItem;
 };
 
 type CustomTooltipProps = {
@@ -59,6 +65,7 @@ function CustomTooltip({
   }
 
   const [{ payload: data }] = payload;
+  const balance = data.projected ? data.projectedBalance : data.balance;
 
   return (
     <div
@@ -77,6 +84,11 @@ function CustomTooltip({
             {d.format(data.date, isConcise ? 'MMMM yyyy' : 'MMMM dd, yyyy', {
               locale,
             })}
+            {data.projected && (
+              <span style={{ color: theme.pageTextLight, marginLeft: 6 }}>
+                ({t('projected')})
+              </span>
+            )}
           </strong>
         </div>
         <div style={{ lineHeight: 1.5 }}>
@@ -112,12 +124,14 @@ function CustomTooltip({
               }
             />
           )}
-          <AlignedText
-            left={t('Balance:')}
-            right={
-              <FinancialText>{format(data.balance, 'financial')}</FinancialText>
-            }
-          />
+          {balance != null && (
+            <AlignedText
+              left={t('Balance:')}
+              right={
+                <FinancialText>{format(balance, 'financial')}</FinancialText>
+              }
+            />
+          )}
         </div>
       </div>
     </div>
@@ -126,10 +140,10 @@ function CustomTooltip({
 
 type CashFlowGraphProps = {
   graphData: {
-    expenses: { x: Date; y: number }[];
-    income: { x: Date; y: number }[];
-    balances: { x: Date; y: number }[];
-    transfers: { x: Date; y: number }[];
+    expenses: { x: Date; y: number; projected?: boolean }[];
+    income: { x: Date; y: number; projected?: boolean }[];
+    balances: { x: Date; y: number; projected?: boolean }[];
+    transfers: { x: Date; y: number; projected?: boolean }[];
   };
   isConcise: boolean;
   showBalance?: boolean;
@@ -149,13 +163,27 @@ export function CashFlowGraph({
     animationDuration: ANIMATION_DURATION,
   });
 
-  const data = graphData.expenses.map((row, idx) => ({
-    date: row.x,
-    expenses: row.y,
-    income: graphData.income[idx].y,
-    balance: graphData.balances[idx].y,
-    transfers: graphData.transfers[idx].y,
-  }));
+  const firstProjectedIdx = graphData.expenses.findIndex(
+    row => row.projected === true,
+  );
+  const hasProjected = firstProjectedIdx !== -1;
+
+  const data: DataItem[] = graphData.expenses.map((row, idx) => {
+    const projected = row.projected === true;
+    const isLastActual =
+      hasProjected && !projected && idx === firstProjectedIdx - 1;
+
+    return {
+      date: row.x,
+      expenses: row.y,
+      income: graphData.income[idx].y,
+      balance: projected ? null : graphData.balances[idx].y,
+      projectedBalance:
+        projected || isLastActual ? graphData.balances[idx].y : null,
+      transfers: graphData.transfers[idx].y,
+      projected,
+    };
+  });
 
   return (
     <Container style={style}>
@@ -203,17 +231,31 @@ export function CashFlowGraph({
           <Bar
             dataKey="income"
             stackId="a"
-            fill={theme.reportsNumberPositive}
             maxBarSize={MAX_BAR_SIZE}
             {...animationProps}
-          />
+          >
+            {data.map((entry, index) => (
+              <Cell
+                key={index}
+                fill={theme.reportsNumberPositive}
+                fillOpacity={entry.projected ? PROJECTED_OPACITY : 1}
+              />
+            ))}
+          </Bar>
           <Bar
             dataKey="expenses"
             stackId="a"
-            fill={theme.reportsNumberNegative}
             maxBarSize={MAX_BAR_SIZE}
             {...animationProps}
-          />
+          >
+            {data.map((entry, index) => (
+              <Cell
+                key={index}
+                fill={theme.reportsNumberNegative}
+                fillOpacity={entry.projected ? PROJECTED_OPACITY : 1}
+              />
+            ))}
+          </Bar>
           <Line
             type="monotone"
             dataKey="balance"
@@ -221,8 +263,22 @@ export function CashFlowGraph({
             hide={!showBalance}
             stroke={theme.pageTextLight}
             strokeWidth={2}
+            connectNulls={false}
             {...animationProps}
           />
+          {hasProjected && (
+            <Line
+              type="monotone"
+              dataKey="projectedBalance"
+              dot={false}
+              hide={!showBalance}
+              stroke={theme.pageTextLight}
+              strokeWidth={2}
+              strokeDasharray="6 3"
+              connectNulls={false}
+              {...animationProps}
+            />
+          )}
         </ComposedChart>
       )}
     </Container>
