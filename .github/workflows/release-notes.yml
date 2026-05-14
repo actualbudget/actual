@@ -2,6 +2,9 @@ name: Release notes
 
 on:
   pull_request:
+  push:
+    branches:
+      - 'release/*'
 
 permissions:
   contents: write
@@ -12,7 +15,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  release-notes:
+  check-release-notes:
+    if: >-
+      github.event_name == 'pull_request'
+      && startsWith(github.head_ref, 'release/') == false
+      && startsWith(github.head_ref, 'release-notes/') == false
     runs-on: ubuntu-latest
     steps:
       - name: Check if triggered by bot
@@ -36,9 +43,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
-          token: ${{ secrets.ACTIONS_UPDATE_TOKEN || github.token }}
-          # Need to be able to commit release notes after generation
-          persist-credentials: true
+          persist-credentials: false
 
       - name: Get changed files
         if: steps.bot-check.outputs.skip != 'true'
@@ -58,13 +63,34 @@ jobs:
       - name: Check release notes
         if: >-
           steps.bot-check.outputs.skip != 'true'
-          && startsWith(github.head_ref, 'release/') == false
           && steps.changed-files.outputs.only_docs != 'true'
         uses: ./.github/actions/release-notes/check
 
+  generate-release-notes:
+    if: >-
+      github.event_name == 'push'
+      && github.event.head_commit.author.name != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve branches
+        id: branches
+        run: |
+          VERSION="${GITHUB_REF_NAME#release/}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "release_branch=$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
+          echo "notes_branch=release-notes/$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout release-notes branch
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ steps.branches.outputs.notes_branch }}
+          fetch-depth: 0
+          token: ${{ secrets.ACTIONS_UPDATE_TOKEN || github.token }}
+          persist-credentials: true
+
       - name: Generate release notes
-        if: >-
-          steps.bot-check.outputs.skip != 'true'
-          && startsWith(github.head_ref, 'release/') == true
-          && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
         uses: ./.github/actions/release-notes/generate
+        with:
+          release-branch: ${{ steps.branches.outputs.release_branch }}
+          notes-branch: ${{ steps.branches.outputs.notes_branch }}
+          version: ${{ steps.branches.outputs.version }}
