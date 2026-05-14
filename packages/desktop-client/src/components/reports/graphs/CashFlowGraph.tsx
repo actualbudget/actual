@@ -215,11 +215,6 @@ export function CashFlowGraph({
             onMouseLeave={() => setYAxisIsHovered(false)}
           />
           <Tooltip
-            labelFormatter={x => {
-              return d.format(x, tickDateFormat(granularity), {
-                locale,
-              });
-            }}
             content={
               <CustomTooltip granularity={granularity} format={format} />
             }

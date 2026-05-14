@@ -248,13 +248,19 @@ export function recalculate(
   );
 
   const { balances } = graphData;
+  const lastBalance =
+    balances.length > 0
+      ? balances[balances.length - 1].amount
+      : startingBalance;
+  const firstBalance =
+    balances.length > 0 ? balances[0].amount : startingBalance;
 
   return {
     graphData,
-    balance: balances[balances.length - 1].amount,
+    balance: lastBalance,
     totalExpenses,
     totalIncome,
     totalTransfers,
-    totalChange: balances[balances.length - 1].amount - balances[0].amount,
+    totalChange: lastBalance - firstBalance,
   };
 }

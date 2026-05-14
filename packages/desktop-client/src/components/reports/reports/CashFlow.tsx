@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { Ref } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -157,12 +156,14 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
   );
 
   useEffect(() => {
+    let cancelled = false;
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
     send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
     })
-      .then((result: { filters: unknown[] }) => {
+      .then(result => {
+        if (cancelled) return;
         const query = q('transactions')
           .filter({
             [conditionsOpKey]: result.filters,
@@ -179,9 +180,13 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
 
         setTransactionsQuery(query);
       })
-      .catch((error: unknown) => {
+      .catch(error => {
         console.error('Error generating transaction filters:', error);
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, [start, end, conditions, conditionsOp]);
 
   const {
@@ -200,6 +205,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
     useCategories();
   const dateFormat = useDateFormat();
   const transactionsTableRef = useRef<TableHandleRef<TransactionEntity>>(null);
+  const transactionsContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function run() {
@@ -481,9 +487,10 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
               </Paragraph>
               <Paragraph>
                 Cash flow shows the balance of your budgeted accounts over time,
-                and the amount of expenses/income each day or month. Your
-                budgeted accounts are considered to be "cash on hand," so this
-                gives you a picture of how available money fluctuates.
+                and the amount of expenses/income for each period (day, month,
+                or year). Your budgeted accounts are considered to be "cash on
+                hand," so this gives you a picture of how available money
+                fluctuates.
               </Paragraph>
             </Trans>
           </View>
@@ -517,7 +524,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
                       flexGrow: 1,
                       overflow: 'hidden',
                     }}
-                    ref={transactionsTableRef as unknown as Ref<HTMLDivElement>}
+                    ref={transactionsContainerRef}
                   >
                     <TransactionList
                       tableRef={transactionsTableRef}
