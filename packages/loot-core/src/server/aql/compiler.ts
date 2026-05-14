@@ -341,7 +341,7 @@ function val(state, expr, type?: string) {
 
   if (castedExpr.literal) {
     if (castedExpr.type === 'id') {
-      return `'${castedExpr.value}'`;
+      return `'${String(castedExpr.value).replace(/'/g, "''")}'`;
     } else if (castedExpr.type === 'string') {
       // Escape quotes
       const value = castedExpr.value.replace(/'/g, "''");
@@ -717,7 +717,7 @@ const compileOp = saveStack('op', (state, fieldRef, opData) => {
 
       return (
         `${String(left)} IN (` +
-        ids.map(id => `'${String(id)}'`).join(',') +
+        ids.map(id => "'" + String(id).replace(/'/g, "''") + "'").join(',') +
         ')'
       );
     }
