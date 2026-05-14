@@ -83,6 +83,23 @@ jobs:
       - name: Build Web
         run: yarn build:server
 
+      - name: Build ubuntu image for testing
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
+        with:
+          context: .
+          push: false
+          load: true
+          file: packages/sync-server/docker/ubuntu.Dockerfile
+          tags: actualbudget/actual-server-testing
+
+      - name: Test that the ubuntu image boots
+        timeout-minutes: 1
+        run: |
+          docker rm -f actual-server 2>/dev/null || true
+          docker run --detach --network=host --name actual-server actualbudget/actual-server-testing
+          HEALTHCMD=$(yq -r '.services.actual_server.healthcheck.test[1]' packages/sync-server/docker-compose.yml)
+          until docker exec actual-server sh -c "$HEALTHCMD"; do sleep 1; done
+
       - name: Build and push ubuntu image
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
@@ -92,6 +109,23 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           tags: ${{ steps.meta.outputs.tags }}
 
+      - name: Build alpine image for testing
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
+        with:
+          context: .
+          push: false
+          load: true
+          file: packages/sync-server/docker/alpine.Dockerfile
+          tags: actualbudget/actual-server-testing
+
+      - name: Test that the alpine image boots
+        timeout-minutes: 1
+        run: |
+          docker rm -f actual-server 2>/dev/null || true
+          docker run --detach --network=host --name actual-server actualbudget/actual-server-testing
+          HEALTHCMD=$(yq -r '.services.actual_server.healthcheck.test[1]' packages/sync-server/docker-compose.yml)
+          until docker exec actual-server sh -c "$HEALTHCMD"; do sleep 1; done
+
       - name: Build and push alpine image
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
@@ -100,3 +134,7 @@ jobs:
           file: packages/sync-server/docker/alpine.Dockerfile
           platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
           tags: ${{ steps.alpine-meta.outputs.tags }}
+
+      - name: Dump container logs on failure
+        if: failure()
+        run: docker logs actual-server || true
