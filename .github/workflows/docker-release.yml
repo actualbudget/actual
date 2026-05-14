@@ -23,6 +23,10 @@ env:
   TAGS: |
     type=semver,pattern={{version}}
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
     name: Build Docker image
