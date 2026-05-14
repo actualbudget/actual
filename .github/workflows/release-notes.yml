@@ -71,6 +71,7 @@ jobs:
       github.event_name == 'push'
       && github.event.head_commit.author.name != 'github-actions[bot]'
     runs-on: ubuntu-latest
+    environment: release
     steps:
       - name: Resolve branches
         id: branches
