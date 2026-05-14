@@ -36,12 +36,19 @@ RUN yarn build:server
 # Focus the workspaces in production mode (including @actual-app/web you just built)
 RUN yarn workspaces focus @actual-app/sync-server --production
 
-# Remove symbolic links for @actual-app/web and @actual-app/sync-server
-RUN rm -rf ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server
+# Remove symbolic links for @actual-app/web, @actual-app/sync-server, and @actual-app/crdt.
+# crdt is a workspace dep that yarn links as `node_modules/@actual-app/crdt -> ../../packages/crdt`,
+# which becomes a dangling symlink in the prod stage since /app/packages isn't copied.
+RUN rm -rf ./node_modules/@actual-app/web ./node_modules/@actual-app/sync-server ./node_modules/@actual-app/crdt
 
 # Copy in the @actual-app/web artifacts manually, so we don't need the entire packages folder
 COPY ./packages/desktop-client/package.json ./node_modules/@actual-app/web/package.json
 RUN cp -r ./packages/desktop-client/build ./node_modules/@actual-app/web/build
+
+# Same treatment for @actual-app/crdt — copy its package.json and built dist so the
+# prod stage can resolve it without /app/packages.
+COPY ./packages/crdt/package.json ./node_modules/@actual-app/crdt/package.json
+RUN cp -r ./packages/crdt/dist ./node_modules/@actual-app/crdt/dist
 
 FROM node:22-bookworm-slim AS prod
 
