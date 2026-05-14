@@ -12,6 +12,9 @@ on:
     tags:
       - v**
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
@@ -19,6 +22,7 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: release
     steps:
       - name: Repository Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -27,6 +31,9 @@ jobs:
 
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          # Avoid restoring potentially poisoned caches in release jobs.
+          cache: 'false'
 
       - name: Install Netlify
         run: npm install netlify-cli@17.10.1 -g

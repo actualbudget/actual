@@ -10,7 +10,7 @@ There is an option to "Display a notification when updates are available" here.
 
 ### Themes
 
-Themes change the user interface colors
+Themes change the user interface colors. Pick from the built-in **Light**, **Dark**, **Midnight**, or **Auto** themes, or install a community-built theme from the catalog. See [Custom Themes](/docs/custom-themes) for the full guide.
 
 ### Formatting
 

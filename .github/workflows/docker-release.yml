@@ -23,10 +23,15 @@ env:
   TAGS: |
     type=semver,pattern={{version}}
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
     name: Build Docker image
     runs-on: ubuntu-latest
+    environment: release
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -76,6 +81,9 @@ jobs:
       # This is faster and avoids yarn memory issues
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          # Avoid restoring potentially poisoned caches in release jobs.
+          cache: 'false'
       - name: Build Web
         run: yarn build:server
 

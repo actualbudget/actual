@@ -15,7 +15,8 @@
     "vi": "readonly",
     "backend": "readonly",
     "importScripts": "readonly",
-    "FS": "readonly"
+    "FS": "readonly",
+    "__APP_VERSION__": "readonly"
   },
   "rules": {
     // Import sorting
@@ -336,6 +337,11 @@
           {
             "group": ["**/*.api", "**/*.electron"],
             "message": "Don't directly reference imports from other platforms"
+          },
+          {
+            "group": ["uuid"],
+            "importNames": ["*"],
+            "message": "Use `import { v4 as uuidv4 } from 'uuid'` instead"
           },
           {
             "group": ["**/style", "**/colors"],

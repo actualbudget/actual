@@ -87,6 +87,11 @@ import APIList from './APIList';
 "deleteSchedule"
 ]} />
 
+<APIList title="Notes" sections={[
+"getNote",
+"updateNote"
+]} />
+
 <APIList title="Misc" sections={[
 "BudgetFile",
 "initConfig",
@@ -440,9 +445,13 @@ let accounts = await getAccounts();
 
 #### `getCategories`
 
-<Method name="getCategories" args={[]} returns="Promise<Category[]>" />
+<Method name="getCategories" args={[{ name: 'options = {}', type: 'object?' }]} returns="Promise<Category[]>" />
 
-Get all categories.
+Get categories. By default, returns every category.
+
+The `options` object supports:
+
+- `hidden`: filter by hidden status. Pass `false` to return only visible categories, or `true` to return only hidden ones. Omit to return both.
 
 #### `createCategory`
 
@@ -495,9 +504,13 @@ There should only ever be one income category group,
 
 #### `getCategoryGroups`
 
-<Method name="getCategoryGroups" args={[]} returns="Promise<CategoryGroup[]>" />
+<Method name="getCategoryGroups" args={[{ name: 'options = {}', type: 'object?' }]} returns="Promise<CategoryGroup[]>" />
 
-Get all category groups.
+Get category groups. By default, returns every group with all of its categories nested under it.
+
+The `options` object supports:
+
+- `hidden`: filter by hidden status, applied to both groups and their nested categories. Pass `false` to return only visible groups and categories, or `true` to return only hidden ones. Omit to return both.
 
 #### `createCategoryGroup`
 
@@ -729,6 +742,22 @@ Update fields of a rule. `fields` can specify any field described in [`Schedule`
 #### `deleteSchedule`
 
 <Method name="deleteSchedule" args={[{ name: 'id', type: 'id' }]} returns="Promise<null>" />
+
+## Notes
+
+Notes can be attached to any entity (categories, budget months, etc.) by ID. They are also used to define budget templates and savings goals (e.g. `#template 250`, `#goal 1000`).
+
+#### `getNote`
+
+<Method name="getNote" args={[{ name: 'id', type: 'id' }]} returns="Promise<Note | null>" />
+
+Returns the note for the given entity ID, or `null` if no note has been set.
+
+#### `updateNote`
+
+<Method name="updateNote" args={[{ name: 'id', type: 'id' }, { name: 'note', type: 'string' }]} returns="Promise<void>" />
+
+Sets the note on the entity with the given ID. Pass an empty string to clear the note.
 
 ## Misc
 

@@ -26,6 +26,7 @@ permissions:
 jobs:
   cut-release-branch:
     runs-on: ubuntu-latest
+    environment: release
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -36,6 +37,8 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
+          # Avoid restoring potentially poisoned caches in release jobs.
+          cache: 'false'
           download-translations: 'false'
 
       - name: Bump package versions

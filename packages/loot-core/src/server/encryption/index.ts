@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { v4 as uuidv4 } from 'uuid';
 
 import * as internals from '#server/encryption/encryption-internals';
 
@@ -11,7 +12,7 @@ class Key {
   value;
 
   constructor({ id }) {
-    this.id = id || crypto.randomUUID();
+    this.id = id || uuidv4();
   }
 
   async createFromPassword({ password, salt }) {

@@ -1384,10 +1384,10 @@ const Transaction = memo(function Transaction({
             isOpen
             isNonModal
             style={{
-              maxWidth: 500,
+              width: 'max-content',
+              maxWidth: 'none',
               minWidth: 375,
               padding: 5,
-              maxHeight: '38px !important',
             }}
             shouldFlip={false}
             placement="bottom end"
@@ -1981,6 +1981,7 @@ function TransactionError({
               flexDirection: 'row',
               alignItems: 'center',
               padding: '0 5px',
+              gap: 5,
               ...style,
             }}
             data-testid="transaction-error"
@@ -1996,7 +1997,6 @@ function TransactionError({
             <View style={{ flex: 1 }} />
             <Button
               variant="normal"
-              style={{ marginLeft: 15 }}
               onPress={onDistributeRemainder}
               data-testid="distribute-split-button"
             >
@@ -2004,7 +2004,7 @@ function TransactionError({
             </Button>
             <Button
               variant="primary"
-              style={{ marginLeft: 10, padding: '4px 10px' }}
+              style={{ padding: '4px 10px' }}
               onPress={onAddSplit}
               data-testid="add-split-button"
             >

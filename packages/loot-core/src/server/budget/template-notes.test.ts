@@ -34,6 +34,7 @@ function mockDbUpdate() {
 describe('storeNoteTemplates', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(db.all).mockResolvedValue([]);
   });
 
   const testCases = [
