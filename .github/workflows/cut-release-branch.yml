@@ -81,7 +81,7 @@ jobs:
           if gh api "repos/${GITHUB_REPOSITORY}/branches/release" --silent >/dev/null 2>&1; then
             current_version=$(gh api "repos/${GITHUB_REPOSITORY}/contents/packages/desktop-client/package.json?ref=release" --jq '.content' | base64 -d | jq -r .version)
             latest=$(printf '%s\n%s\n' "$VERSION" "$current_version" | sort -V | tail -1)
-            if [[ "$latest" != "$VERSION" ]]; then
+            if [[ "$latest" != "$VERSION" || "$current_version" == "$VERSION" ]]; then
               echo "::error::Target version $VERSION is not newer than current release version $current_version"
               exit 1
             fi

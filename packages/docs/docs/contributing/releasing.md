@@ -86,6 +86,6 @@ Run the [Cut release workflow](https://github.com/actualbudget/actual/actions/wo
 - `version`: the patch version (e.g. `26.6.1`).
 - `release-date`: when the patch is expected to ship (optional).
 
-This creates `release-notes/26.6.1`. It's worth noting that the release branch after a prior releases have no `upcoming-release-notes/*.md` files in them, so the initial release-notes run generates an empty blog, content will fill in once changes are cherry picked in to the `release` branch.
+This creates `release-notes/26.6.1`. It's worth noting that the release branch after a prior releases have no `upcoming-release-notes/*.md` files in them, so the initial release-notes run generates an empty blog, content will fill in once changes are cherry-picked in to the `release` branch.
 
-The rest of the release process remains the same as a major release. Cherry pick the appropriate changes into the `release/X.Y.Z` branch. Follow the steps to get the `release-notes/X.Y.Z` branch ready, then follow the merging and tagging steps outlined above.
+The rest of the release process remains the same as a major release. Cherry-pick the appropriate changes into the `release` branch. Follow the steps to get the `release-notes/X.Y.Z` branch ready, then follow the merging and tagging steps outlined above.

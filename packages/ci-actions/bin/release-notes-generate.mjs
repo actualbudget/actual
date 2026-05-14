@@ -62,15 +62,30 @@ const apiResult = await fetch('https://api.github.com/graphql', {
 await collapsedLog('API Response', apiResult);
 
 const prData = apiResult.data.repository.pullRequests.edges[0]?.node;
+if (!prData) {
+  console.error(`No PR found for branch ${notesBranch}`);
+  process.exit(1);
+}
 
-const slug = version.replace(/\./g, '-');
-const author = process.env.GITHUB_ACTOR || 'TODO';
-const commitMessage = `Generate release notes for v${version}`;
-
-const releaseDateMatch = (prData?.body || '').match(
+const releaseDateMatch = (prData.body || '').match(
   /<!-- release-date:(\d{4}-\d{2}-\d{2}) -->/,
 );
-const releaseDate = releaseDateMatch ? releaseDateMatch[1] : 'TODO';
+if (!releaseDateMatch) {
+  console.error(
+    `PR for ${notesBranch} body missing <!-- release-date:YYYY-MM-DD --> marker`,
+  );
+  process.exit(1);
+}
+const releaseDate = releaseDateMatch[1];
+
+const author = process.env.GITHUB_ACTOR;
+if (!author) {
+  console.error('::error::GITHUB_ACTOR env var is not set');
+  process.exit(1);
+}
+
+const slug = version.replace(/\./g, '-');
+const commitMessage = `Generate release notes for v${version}`;
 
 const botName = 'github-actions[bot]';
 const botEmail = '41898282+github-actions[bot]@users.noreply.github.com';
