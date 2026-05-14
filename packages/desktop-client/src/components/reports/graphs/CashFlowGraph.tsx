@@ -20,6 +20,7 @@ import {
 import { FinancialText } from '#components/FinancialText';
 import { useRechartsAnimation } from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
+import type { CashFlowGranularity } from '#components/reports/spreadsheets/cash-flow-spreadsheet';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
@@ -41,14 +42,38 @@ type PayloadItem = {
 type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
-  isConcise: boolean;
+  granularity: CashFlowGranularity;
   format: (value: unknown, type?: FormatType) => string;
 };
+
+function tooltipDateFormat(granularity: CashFlowGranularity): string {
+  switch (granularity) {
+    case 'Yearly':
+      return 'yyyy';
+    case 'Monthly':
+      return 'MMMM yyyy';
+    case 'Daily':
+    default:
+      return 'MMMM dd, yyyy';
+  }
+}
+
+function tickDateFormat(granularity: CashFlowGranularity): string {
+  switch (granularity) {
+    case 'Yearly':
+      return 'yyyy';
+    case 'Monthly':
+      return "MMM ''yy";
+    case 'Daily':
+    default:
+      return 'MMM d';
+  }
+}
 
 function CustomTooltip({
   active,
   payload,
-  isConcise,
+  granularity,
   format,
 }: CustomTooltipProps) {
   const locale = useLocale();
@@ -74,7 +99,7 @@ function CustomTooltip({
       <div>
         <div style={{ marginBottom: 10 }}>
           <strong>
-            {d.format(data.date, isConcise ? 'MMMM yyyy' : 'MMMM dd, yyyy', {
+            {d.format(data.date, tooltipDateFormat(granularity), {
               locale,
             })}
           </strong>
@@ -131,13 +156,13 @@ type CashFlowGraphProps = {
     balances: { x: Date; y: number }[];
     transfers: { x: Date; y: number }[];
   };
-  isConcise: boolean;
+  granularity: CashFlowGranularity;
   showBalance?: boolean;
   style?: CSSProperties;
 };
 export function CashFlowGraph({
   graphData,
-  isConcise,
+  granularity,
   showBalance = true,
   style,
 }: CashFlowGraphProps) {
@@ -172,7 +197,7 @@ export function CashFlowGraph({
             dataKey="date"
             tick={{ fill: theme.reportsLabel }}
             tickFormatter={x => {
-              return d.format(x, isConcise ? "MMM ''yy" : 'MMM d', {
+              return d.format(x, tickDateFormat(granularity), {
                 locale,
               });
             }}
@@ -191,11 +216,13 @@ export function CashFlowGraph({
           />
           <Tooltip
             labelFormatter={x => {
-              return d.format(x, isConcise ? "MMM ''yy" : 'MMM d', {
+              return d.format(x, tickDateFormat(granularity), {
                 locale,
               });
             }}
-            content={<CustomTooltip isConcise={isConcise} format={format} />}
+            content={
+              <CustomTooltip granularity={granularity} format={format} />
+            }
             isAnimationActive={false}
           />
 
