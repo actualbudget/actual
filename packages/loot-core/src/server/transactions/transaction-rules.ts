@@ -616,10 +616,11 @@ export function conditionsToAQL(
       case 'hasTags': {
         const tagValues = [];
         const seenTags = new Set();
-        for (const [_, tag] of value.matchAll(/(?<!#)(#[^#\s]+)/g)) {
-          if (!seenTags.has(tag)) {
-            seenTags.add(tag);
-            tagValues.push(tag);
+        for (const [_, tag] of value.matchAll(/(?<!#)(#?[^#\s]+)/g)) {
+          const tagWithHash = (tag as string).startsWith('#') ? tag : '#' + tag;
+          if (!seenTags.has(tagWithHash)) {
+            seenTags.add(tagWithHash);
+            tagValues.push(tagWithHash);
           }
         }
 
