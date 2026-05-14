@@ -591,6 +591,8 @@ type TransactionEditInnerProps = {
   onSaveLocation?: () => void;
   onSelectNearestPayee?: () => void;
   nearestPayee?: PayeeEntity | null;
+  canEnableNearbyPayees?: boolean;
+  onEnableNearbyPayees?: () => void;
 };
 
 const TransactionEditInner = memo<TransactionEditInnerProps>(
@@ -610,6 +612,8 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     onSaveLocation,
     onSelectNearestPayee,
     nearestPayee,
+    canEnableNearbyPayees,
+    onEnableNearbyPayees,
   }) {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -1195,7 +1199,9 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               onPress={() => onEditFieldInner(transaction.id, 'payee')}
               data-testid="payee-field"
               alwaysShowRightContent={
-                !!nearestPayee && !transaction.payee && !shouldShowSaveLocation
+                (!!nearestPayee || !!canEnableNearbyPayees) &&
+                !transaction.payee &&
+                !shouldShowSaveLocation
               }
               rightContent={
                 shouldShowSaveLocation ? (
@@ -1236,6 +1242,28 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                     }}
                   >
                     <Trans>Nearby</Trans>
+                    <SvgLocation
+                      width={10}
+                      height={10}
+                      style={{ marginLeft: 4 }}
+                    />
+                  </Button>
+                ) : canEnableNearbyPayees && !transaction.payee ? (
+                  <Button
+                    variant="bare"
+                    onPress={onEnableNearbyPayees}
+                    style={{
+                      backgroundColor: theme.buttonNormalBackground,
+                      border: `1px solid ${theme.buttonNormalBorder}`,
+                      color: theme.buttonNormalText,
+                      fontSize: '11px',
+                      padding: '4px 8px',
+                      borderRadius: 3,
+                      height: 'auto',
+                      minHeight: 'auto',
+                    }}
+                  >
+                    <Trans>Enable nearby</Trans>
                     <SvgLocation
                       width={10}
                       height={10}
@@ -1499,7 +1527,11 @@ function TransactionEditUnconnected({
     [payees, searchParams],
   );
 
-  const locationAccess = useLocationPermission();
+  const {
+    granted: locationAccess,
+    state: locationPermissionState,
+    request: requestLocationPermission,
+  } = useLocationPermission();
   const [shouldShowSaveLocation, setShouldShowSaveLocation] = useState(false);
   const { data: nearbyPayees = [] } = useNearbyPayees();
   const nearestPayee = nearbyPayees[0]?.payee ?? null;
@@ -1912,6 +1944,8 @@ function TransactionEditUnconnected({
         onSaveLocation={onSaveLocation}
         onSelectNearestPayee={onSelectNearestPayee}
         nearestPayee={locationAccess ? nearestPayee : null}
+        canEnableNearbyPayees={locationPermissionState === 'prompt'}
+        onEnableNearbyPayees={requestLocationPermission}
       />
     </View>
   );

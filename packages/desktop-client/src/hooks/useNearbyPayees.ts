@@ -5,10 +5,10 @@ import { payeeQueries } from '#payees';
 import { useLocationPermission } from './useLocationPermission';
 
 export function useNearbyPayees() {
-  const locationAccess = useLocationPermission();
+  const { granted } = useLocationPermission();
 
   return useQuery({
     ...payeeQueries.listNearby(),
-    enabled: !!locationAccess,
+    enabled: granted,
   });
 }

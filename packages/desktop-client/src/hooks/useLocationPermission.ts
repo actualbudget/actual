@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 
@@ -6,20 +6,37 @@ import { locationService } from '#payees/location';
 
 import { useFeatureFlag } from './useFeatureFlag';
 
+export type LocationPermissionState =
+  | 'granted'
+  | 'prompt'
+  | 'denied'
+  | 'unavailable';
+
+export type UseLocationPermissionResult = {
+  state: LocationPermissionState;
+  granted: boolean;
+  request: () => Promise<boolean>;
+};
+
 /**
- * Custom hook to manage geolocation permission status
- * Currently behind the payeeLocations feature flag
+ * Custom hook to manage geolocation permission status.
+ * Behind the payeeLocations feature flag.
  *
- * @returns boolean indicating whether geolocation access is granted
+ * This hook does NOT trigger a geolocation prompt on mount. Browsers like
+ * iOS Safari don't always persist the grant across sessions, so prompting
+ * eagerly causes the dialog to appear on every page open even after the
+ * user has tapped "Allow". Callers should invoke `request()` in response
+ * to a user gesture (e.g. tapping an "Enable nearby payees" button) so the
+ * OS dialog appears at a moment the user expects it.
  */
-export function useLocationPermission(): boolean {
+export function useLocationPermission(): UseLocationPermissionResult {
   const payeeLocationsEnabled = useFeatureFlag('payeeLocations');
   const { isNarrowWidth } = useResponsive();
-  const [locationAccess, setLocationAccess] = useState(false);
+  const [state, setState] = useState<LocationPermissionState>('unavailable');
 
   useEffect(() => {
     if (!payeeLocationsEnabled || !isNarrowWidth) {
-      setLocationAccess(false);
+      setState('unavailable');
       return;
     }
 
@@ -27,12 +44,11 @@ export function useLocationPermission(): boolean {
     let handleChange: (() => void) | null = null;
     let isMounted = true;
 
-    // Check if Permissions API is available
     if (
       !navigator.permissions ||
       typeof navigator.permissions.query !== 'function'
     ) {
-      setLocationAccess(false);
+      setState('unavailable');
       return;
     }
 
@@ -45,48 +61,25 @@ export function useLocationPermission(): boolean {
           }
 
           permissionStatus = status;
+          setState(status.state);
 
-          // Set initial state
-          setLocationAccess(status.state === 'granted');
-
-          // Listen for permission changes
           handleChange = () => {
-            setLocationAccess(status.state === 'granted');
+            setState(status.state);
           };
 
           status.addEventListener('change', handleChange);
-
-          if (status.state === 'prompt') {
-            locationService
-              .getCurrentPosition()
-              .then(() => {
-                if (isMounted) {
-                  setLocationAccess(true);
-                }
-              })
-              .catch(() => {
-                if (isMounted) {
-                  setLocationAccess(false);
-                }
-              });
-          }
         })
         .catch(() => {
-          if (!isMounted) {
-            return;
+          if (isMounted) {
+            setState('unavailable');
           }
-          // Permission API not supported, assume no access
-          setLocationAccess(false);
         });
     } catch {
-      if (!isMounted) {
-        return;
+      if (isMounted) {
+        setState('unavailable');
       }
-      // Synchronous error (e.g., TypeError), assume no access
-      setLocationAccess(false);
     }
 
-    // Cleanup function
     return () => {
       isMounted = false;
       if (permissionStatus && handleChange) {
@@ -95,5 +88,27 @@ export function useLocationPermission(): boolean {
     };
   }, [payeeLocationsEnabled, isNarrowWidth]);
 
-  return locationAccess;
+  const request = useCallback(async () => {
+    if (!payeeLocationsEnabled || !isNarrowWidth) {
+      return false;
+    }
+    try {
+      await locationService.getCurrentPosition();
+      setState('granted');
+      return true;
+    } catch {
+      // The Permissions API change listener will reconcile to the real
+      // state (denied, or back to prompt if the user dismissed). Default
+      // to denied so we don't keep showing an "Enable" affordance after
+      // a failed attempt in this session.
+      setState('denied');
+      return false;
+    }
+  }, [payeeLocationsEnabled, isNarrowWidth]);
+
+  return {
+    state,
+    granted: state === 'granted',
+    request,
+  };
 }
