@@ -61,7 +61,7 @@ export function AutomationListRow({
       ? theme.errorBackground
       : 'transparent';
   const titleColor = error ? theme.errorText : theme.pageText;
-  const subtitleColor = error ? theme.errorText : theme.pageTextSubdued;
+  const subtitleColor = error ? theme.errorText : theme.pageTextLight;
   const priority =
     'priority' in entry.template && typeof entry.template.priority === 'number'
       ? entry.template.priority
@@ -77,7 +77,6 @@ export function AutomationListRow({
         alignItems: 'center',
         gap: 10,
         padding: 10,
-        marginBottom: 4,
         borderRadius: 6,
         border: `1px solid ${borderColor}`,
         backgroundColor,
@@ -99,7 +98,7 @@ export function AutomationListRow({
             ? theme.errorText
             : isActive
               ? theme.pageTextPositive
-              : theme.pageTextSubdued,
+              : theme.pageTextLight,
           alignItems: 'center',
           justifyContent: 'center',
           flexShrink: 0,
@@ -157,7 +156,7 @@ export function AutomationListRow({
                 contribution == null ||
                 Number.isNaN(contribution) ||
                 contribution === 0
-                  ? theme.pageTextSubdued
+                  ? theme.pageTextLight
                   : theme.pageText,
             }}
           >
@@ -171,7 +170,7 @@ export function AutomationListRow({
             <Text
               style={{
                 fontSize: 10,
-                color: theme.pageTextSubdued,
+                color: theme.pageTextLight,
                 fontVariantNumeric: 'tabular-nums',
                 letterSpacing: '0.04em',
               }}

@@ -3,7 +3,13 @@ import { Buffer } from 'node:buffer';
 import fs from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-import { SyncProtoBuf } from '@actual-app/crdt';
+import {
+  create,
+  fromBinary,
+  SyncRequestSchema,
+  SyncResponseSchema,
+  toBinary,
+} from '@actual-app/crdt';
 import type { Request, Response } from 'express';
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
@@ -125,7 +131,7 @@ function requireFileAccess(file: File, userId: string) {
 app.post('/sync', async (req, res): Promise<void> => {
   let requestPb;
   try {
-    requestPb = SyncProtoBuf.SyncRequest.deserializeBinary(req.body);
+    requestPb = fromBinary(SyncRequestSchema, req.body);
   } catch (e) {
     console.log('Error parsing sync request', e);
     res.status(500);
@@ -133,11 +139,11 @@ app.post('/sync', async (req, res): Promise<void> => {
     return;
   }
 
-  const fileId = requestPb.getFileid() || null;
-  const groupId = requestPb.getGroupid() || null;
-  const keyId = requestPb.getKeyid() || null;
-  const since = requestPb.getSince() || null;
-  const messages = requestPb.getMessagesList();
+  const fileId = requestPb.fileId || null;
+  const groupId = requestPb.groupId || null;
+  const keyId = requestPb.keyId || null;
+  const since = requestPb.since || null;
+  const messages = requestPb.messages;
 
   if (!since) {
     res.status(422).send({
@@ -177,14 +183,14 @@ app.post('/sync', async (req, res): Promise<void> => {
 
   const { trie, newMessages } = simpleSync.sync(messages, since, groupId);
 
-  // encode it back...
-  const responsePb = new SyncProtoBuf.SyncResponse();
-  responsePb.setMerkle(JSON.stringify(trie));
-  newMessages.forEach(msg => responsePb.addMessages(msg));
+  const responsePb = create(SyncResponseSchema, {
+    merkle: JSON.stringify(trie),
+    messages: newMessages,
+  });
 
   res.set('Content-Type', 'application/actual-sync');
   res.set('X-ACTUAL-SYNC-METHOD', 'simple');
-  res.send(Buffer.from(responsePb.serializeBinary()));
+  res.send(Buffer.from(toBinary(SyncResponseSchema, responsePb)));
 });
 
 app.post('/user-get-key', (req, res) => {

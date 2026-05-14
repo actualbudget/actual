@@ -42,13 +42,13 @@ export function TemplateSentence({
     case 'copy':
       return <HistoricalAutomationReadOnly template={template} />;
     case 'by':
+    case 'spend':
       return <BySaveAutomationReadOnly template={template} />;
     case 'remainder':
       return <RemainderAutomationReadOnly template={template} />;
     case 'goal':
       return <LongTermGoalAutomationReadOnly template={template} />;
     case 'simple':
-    case 'spend':
     case 'error': {
       const type = template.type;
       return (

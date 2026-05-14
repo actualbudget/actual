@@ -22,13 +22,13 @@ function getDisplayTypeFromTemplate(template: Template): DisplayTemplateType {
     case 'copy':
       return 'historical';
     case 'by':
+    case 'spend':
       return 'by';
     case 'remainder':
       return 'remainder';
     case 'goal':
       return 'goal';
     case 'error':
-    case 'spend':
       // filtered upstream by hasUnsupportedDirective; surface if it ever isn't
       throw new Error(`Unsupported template type reached migration`);
     default: {
