@@ -38,6 +38,7 @@ import {
 } from '#shared/months';
 import { q } from '#shared/query';
 import { getApproxNumberThreshold, sortNumbers } from '#shared/rules';
+import { extractTags, extractTagsForFilter } from '#shared/tags';
 import { ungroupTransaction } from '#shared/transactions';
 import { fastSetMerge, partitionByField } from '#shared/util';
 import type {
@@ -614,18 +615,24 @@ export function conditionsToAQL(
         return { $or: values.map(v => apply(field, '$eq', v)) };
 
       case 'hasTags': {
-        const tagValues = [];
-        const seenTags = new Set();
-        for (const [_, tag] of value.matchAll(/(?<!#)(#?[^#\s]+)/g)) {
-          const tagWithHash = (tag as string).startsWith('#') ? tag : '#' + tag;
-          if (!seenTags.has(tagWithHash)) {
-            seenTags.add(tagWithHash);
-            tagValues.push(tagWithHash);
-          }
-        }
+        const tagValues = extractTagsForFilter(value);
 
         return {
           $and: tagValues.map(v => {
+            const escapedTag = v
+              .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+              .replace(/\\\$/g, '[$]'); // Use '[$]' instead of '\$' so AQL string unescaping doesn't turn it into a bare '$' end-of-string anchor
+            const pattern = `(?<!#)${escapedTag}([\\s#]|$)`;
+            return apply(field, '$regexp', pattern);
+          }),
+        };
+      }
+
+      case 'hasAnyTag': {
+        const tagValues = extractTagsForFilter(value);
+
+        return {
+          $or: tagValues.map(v => {
             const escapedTag = v
               .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
               .replace(/\\\$/g, '[$]'); // Use '[$]' instead of '\$' so AQL string unescaping doesn't turn it into a bare '$' end-of-string anchor
@@ -783,7 +790,6 @@ function* getIsSetterRules(
 
   return null;
 }
-
 function* getOneOfSetterRules(
   stage,
   condField,
