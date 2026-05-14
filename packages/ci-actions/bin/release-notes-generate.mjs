@@ -258,32 +258,6 @@ await group('Commit and push', async () => {
   await exec('git push origin', { stdio: 'inherit' });
 });
 
-await group('Clean release branch', async () => {
-  await exec(`git fetch origin ${releaseBranch}`, { stdio: 'inherit' });
-  await exec(`git checkout -B ${releaseBranch} origin/${releaseBranch}`, {
-    stdio: 'inherit',
-  });
-
-  const dir = 'upcoming-release-notes';
-  const releaseFiles = (await fs.readdir(dir)).filter(f =>
-    f.match(/^\d+\.md$/),
-  );
-  await Promise.all(releaseFiles.map(f => fs.unlink(join(dir, f))));
-
-  await exec(`git add ${dir}`, { stdio: 'inherit' });
-
-  try {
-    await exec('git diff --cached --quiet');
-    console.log('No release notes to clean on release branch');
-    return;
-  } catch {
-    // there are staged changes
-  }
-
-  await exec(`git commit -m '${commitMessage}'`);
-  await exec(`git push origin ${releaseBranch}`, { stdio: 'inherit' });
-});
-
 async function parseReleaseNotes(dir) {
   const files = (await fs.readdir(dir)).filter(f => f.match(/^\d+\.md$/));
   const notes = files.map(async name => {

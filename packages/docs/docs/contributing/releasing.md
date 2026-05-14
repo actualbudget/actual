@@ -27,18 +27,16 @@ For example:
 
 ### Release branches
 
-Cutting a release creates two branches at the same commit:
+There are two branches involved in every release:
 
-- `release/X.Y.Z`: the branch that will be tagged and built. Cherry-picked fixes for the release land here.
-- `release-notes/X.Y.Z`: the branch that opens a PR into `master`. It holds the version bumps, generated blog post, and `docs/releases.md` updates that need to land on `master`.
+- `release`: the single long-lived branch where release tags live. This is the branch we actually base the release on, and where commits are cherry-picked to if we want them included.
+- `release-notes/X.Y.Z`: the branch that is used for the release PR. It holds the generated docs pages. It is deleted once a version ships.
 
 Splitting them avoids merge conflicts between cherry-picks on the release branch and the version-bump/docs commits that need to be merged back to `master`.
 
-Both branches are automatically cut at 17:00 UTC on the 25th of each month. To cut them manually, run [this GitHub Action](https://github.com/actualbudget/actual/actions/workflows/cut-release-branch.yml).
+Monthly cuts run automatically at 17:00 UTC on the 25th of each month. To cut a release manually (monthly or patch), run the [Cut release workflow](https://github.com/actualbudget/actual/actions/workflows/cut-release-branch.yml).
 
-The release notes workflow runs each time `release/X.Y.Z` is pushed (including the initial cut and any cherry-picks). It reads `upcoming-release-notes/*.md` from `release/X.Y.Z`, generates the blog post and updates `docs/releases.md`, and pushes those changes onto `release-notes/X.Y.Z`. Human edits to frontmatter (release highlights, etc.) are preserved across regenerations as long as they are above the autogen marker.
-
-Fixes that need to be included in the release should be cherry-picked onto `release/X.Y.Z`. Each cherry-pick triggers regeneration of the release notes on `release-notes/X.Y.Z`.
+Changes that need to be included in the release after the cut has been made should be cherry-picked onto `release`. Each cherry-pick triggers regeneration of the release notes on `release-notes/X.Y.Z`. Human edits to frontmatter (release highlights, author, etc.) on `release-notes/X.Y.Z` are preserved across regenerations as long as they are above the autogen marker.
 
 ## Release process
 
@@ -51,9 +49,9 @@ Fixes that need to be included in the release should be cherry-picked onto `rele
 ### Merge and tag the release
 
 - [ ] Merge the `release-notes/X.Y.Z` PR to master.
-- [ ] Create the tag on the **`release/X.Y.Z` branch** and push it. When the tag is pushed, it triggers the Docker stable image, all NPM packages and the Desktop app to be built and published.
+- [ ] Create the tag on the **`release` branch** and push it. When the tag is pushed, it triggers the Docker stable image, all NPM packages and the Desktop app to be built and published.
   ```bash
-  git checkout release/X.Y.Z
+  git checkout release
   git tag vX.Y.Z
   git push {remote} vX.Y.Z
   ```
@@ -79,16 +77,15 @@ Finally, a draft GitHub release should be automatically created; confirm [on the
 
 ## Cutting a patch release
 
-Patch releases (e.g. `26.6.1`) ship a small, targeted set of fixes on top of an existing release. The release branch is cut from the previous release tag rather than `master`, so unrelated in-progress work on `master` is not pulled in. The rest of the automation is the same as for monthly releases.
+Patch releases (e.g. `26.6.1`) ship a small, targeted set of fixes on top of the latest release. Because `release` is a single long-lived branch, a patch is just a version bump and cherry-picks on top of the previous release, with no new branch to create.
 
-### Cut the release branches
+### Cut the patch
 
-Run [Cut release branches](https://github.com/actualbudget/actual/actions/workflows/cut-release-branch.yml) manually with:
+Run the [Cut release workflow](https://github.com/actualbudget/actual/actions/workflows/cut-release-branch.yml) manually with:
 
-- `ref`: the previous release tag (e.g. `v26.6.0`).
 - `version`: the patch version (e.g. `26.6.1`).
 - `release-date`: when the patch is expected to ship (optional).
 
-This creates `release/26.6.1` and `release-notes/26.6.1` at the previous tag plus version bumps, and opens a PR from `release-notes/26.6.1` to `master`. Tags from prior releases have no `upcoming-release-notes/*.md` files in them, so the initial release-notes run generates an empty blog — content will fill in once cherry-picks land.
+This creates `release-notes/26.6.1`. It's worth noting that the release branch after a prior releases have no `upcoming-release-notes/*.md` files in them, so the initial release-notes run generates an empty blog, content will fill in once changes are cherry picked in to the `release` branch.
 
 The rest of the release process remains the same as a major release. Cherry pick the appropriate changes into the `release/X.Y.Z` branch. Follow the steps to get the `release-notes/X.Y.Z` branch ready, then follow the merging and tagging steps outlined above.
