@@ -10,15 +10,16 @@ import {
   validateThemeCss,
 } from './customThemes';
 import type { BaseTheme } from './customThemes';
-import * as darkTheme from './themes/dark';
-import * as lightTheme from './themes/light';
-import * as midnightTheme from './themes/midnight';
+import paletteCss from './palette.css?inline';
+import darkThemeCss from './themes/dark.css?inline';
+import lightThemeCss from './themes/light.css?inline';
+import midnightThemeCss from './themes/midnight.css?inline';
 
 const themes = {
-  light: { name: 'Light', colors: lightTheme },
-  dark: { name: 'Dark', colors: darkTheme },
-  midnight: { name: 'Midnight', colors: midnightTheme },
-  auto: { name: 'System default', colors: darkTheme },
+  light: { name: 'Light', css: lightThemeCss },
+  dark: { name: 'Dark', css: darkThemeCss },
+  midnight: { name: 'Midnight', css: midnightThemeCss },
+  auto: { name: 'System default', css: darkThemeCss },
 } as const;
 
 type ThemeKey = keyof typeof themes;
@@ -87,8 +88,8 @@ function useMigrateLegacyOverride() {
   ]);
 }
 
-function getBaseThemeColors(baseTheme: BaseTheme) {
-  return themes[baseTheme]?.colors;
+function getBaseThemeCss(baseTheme: BaseTheme) {
+  return themes[baseTheme]?.css;
 }
 
 export function ThemeStyle() {
@@ -100,29 +101,27 @@ export function ThemeStyle() {
   const [installedCustomDarkThemeJson] = useGlobalPref(
     'installedCustomDarkTheme',
   );
-  const [themeColors, setThemeColors] = useState<
-    typeof lightTheme | typeof darkTheme | typeof midnightTheme | undefined
-  >(undefined);
+  const [activeCss, setActiveCss] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (activeTheme === 'auto') {
       const installedLight = parseInstalledTheme(installedCustomLightThemeJson);
       const installedDark = parseInstalledTheme(installedCustomDarkThemeJson);
 
-      const lightColors =
+      const lightCss =
         (installedLight?.baseTheme &&
-          getBaseThemeColors(installedLight.baseTheme)) ||
-        themes['light'].colors;
-      const darkColors =
+          getBaseThemeCss(installedLight.baseTheme)) ||
+        themes['light'].css;
+      const darkCss =
         (installedDark?.baseTheme &&
-          getBaseThemeColors(installedDark.baseTheme)) ||
-        themes[darkThemePreference].colors;
+          getBaseThemeCss(installedDark.baseTheme)) ||
+        themes[darkThemePreference].css;
 
       function darkThemeMediaQueryListener(event: MediaQueryListEvent) {
         if (event.matches) {
-          setThemeColors(darkColors);
+          setActiveCss(darkCss);
         } else {
-          setThemeColors(lightColors);
+          setActiveCss(lightCss);
         }
       }
       const darkThemeMediaQuery = window.matchMedia(
@@ -135,9 +134,9 @@ export function ThemeStyle() {
       );
 
       if (darkThemeMediaQuery.matches) {
-        setThemeColors(darkColors);
+        setActiveCss(darkCss);
       } else {
-        setThemeColors(lightColors);
+        setActiveCss(lightCss);
       }
 
       return () => {
@@ -149,12 +148,12 @@ export function ThemeStyle() {
     } else {
       const installedTheme = parseInstalledTheme(installedCustomLightThemeJson);
       if (installedTheme?.baseTheme) {
-        setThemeColors(
-          getBaseThemeColors(installedTheme.baseTheme) ??
-            themes[activeTheme as ThemeKey]?.colors,
+        setActiveCss(
+          getBaseThemeCss(installedTheme.baseTheme) ??
+            themes[activeTheme as ThemeKey]?.css,
         );
       } else {
-        setThemeColors(themes[activeTheme as ThemeKey]?.colors);
+        setActiveCss(themes[activeTheme as ThemeKey]?.css);
       }
     }
   }, [
@@ -164,12 +163,14 @@ export function ThemeStyle() {
     installedCustomDarkThemeJson,
   ]);
 
-  if (!themeColors) return null;
+  if (!activeCss) return null;
 
-  const css = Object.entries(themeColors)
-    .map(([key, value]) => `  --color-${key}: ${value};`)
-    .join('\n');
-  return <style>{`:root {\n${css}}`}</style>;
+  return (
+    <>
+      <style data-theme-palette>{paletteCss}</style>
+      <style data-theme-active>{activeCss}</style>
+    </>
+  );
 }
 
 /**

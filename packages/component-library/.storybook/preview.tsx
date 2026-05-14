@@ -5,16 +5,18 @@ import type { Preview } from '@storybook/react-vite';
 // Not ideal to import from desktop-client, but we need a source of truth for theme variables
 // TODO: this needs refactoring
 // oxlint-disable-next-line actual/enforce-boundaries
-import * as darkTheme from '../../desktop-client/src/style/themes/dark';
+import paletteCss from '../../desktop-client/src/style/palette.css?inline';
 // oxlint-disable-next-line actual/enforce-boundaries
-import * as lightTheme from '../../desktop-client/src/style/themes/light';
+import darkThemeCss from '../../desktop-client/src/style/themes/dark.css?inline';
 // oxlint-disable-next-line actual/enforce-boundaries
-import * as midnightTheme from '../../desktop-client/src/style/themes/midnight';
+import lightThemeCss from '../../desktop-client/src/style/themes/light.css?inline';
+// oxlint-disable-next-line actual/enforce-boundaries
+import midnightThemeCss from '../../desktop-client/src/style/themes/midnight.css?inline';
 
 const THEMES = {
-  light: lightTheme,
-  dark: darkTheme,
-  midnight: midnightTheme,
+  light: lightThemeCss,
+  dark: darkThemeCss,
+  midnight: midnightThemeCss,
 } as const;
 
 type ThemeName = keyof typeof THEMES;
@@ -30,13 +32,10 @@ const ThemedStory = ({
     throw new Error(`No theme specified`);
   }
 
-  const css = Object.entries(THEMES[themeName])
-    .map(([key, value]) => `--color-${key}: ${value};`)
-    .join('\n');
-
   return (
     <div>
-      <style>{`:root {\n${css}}`}</style>
+      <style>{paletteCss}</style>
+      <style>{THEMES[themeName]}</style>
       {children}
     </div>
   );
