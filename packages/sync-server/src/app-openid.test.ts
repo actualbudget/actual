@@ -7,8 +7,9 @@ import { bootstrapPassword } from './accounts/password';
 import { handlers as app, openIdConfigRateLimiter } from './app-openid';
 
 function insertOpenIdAuth(extraData: ConfigParameter) {
+  // OR REPLACE: parallel-worker test files share auth.sqlite and `method` is a PK.
   getAccountDb().mutate(
-    'INSERT INTO auth (method, display_name, extra_data, active) VALUES (?, ?, ?, ?)',
+    'INSERT OR REPLACE INTO auth (method, display_name, extra_data, active) VALUES (?, ?, ?, ?)',
     ['openid', 'OpenID', JSON.stringify(extraData), 1],
   );
 }
@@ -16,6 +17,7 @@ function insertOpenIdAuth(extraData: ConfigParameter) {
 describe('/config', () => {
   beforeEach(() => {
     openIdConfigRateLimiter.resetKey('127.0.0.1');
+    getAccountDb().mutate('DELETE FROM auth');
   });
 
   afterEach(() => {
