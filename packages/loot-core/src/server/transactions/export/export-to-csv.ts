@@ -4,6 +4,20 @@ import { stringify as csvStringify } from 'csv-stringify/sync';
 import { aqlQuery } from '#server/aql';
 import { integerToAmount } from '#shared/util';
 
+// Characters that trigger formula evaluation in Excel / LibreOffice Calc /
+// Google Sheets when they appear at the start of a cell. Prefixing such a
+// value with a single quote neutralizes the formula (OWASP-recommended;
+// CWE-1236).
+const FORMULA_TRIGGERS = /^[=+\-@\t\r]/;
+
+const csvStringifyOptions = {
+  header: true,
+  cast: {
+    string: (value: string) =>
+      FORMULA_TRIGGERS.test(value) ? "'" + value : value,
+  },
+};
+
 export async function exportToCSV(
   transactions,
   accounts,
@@ -53,7 +67,7 @@ export async function exportToCSV(
     }),
   );
 
-  return csvStringify(transactionsForExport, { header: true });
+  return csvStringify(transactionsForExport, csvStringifyOptions);
 }
 
 export async function exportQueryToCSV(query) {
@@ -128,5 +142,5 @@ export async function exportQueryToCSV(query) {
     };
   });
 
-  return csvStringify(transactionsForExport, { header: true });
+  return csvStringify(transactionsForExport, csvStringifyOptions);
 }

