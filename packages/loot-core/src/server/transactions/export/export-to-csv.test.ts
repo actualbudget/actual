@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { parse as csvParse } from 'csv-parse/sync';
 
 import { exportToCSV } from './export-to-csv';
