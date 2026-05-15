@@ -174,6 +174,27 @@ export function getLatestRange(offset: number) {
   return [start, end, 'sliding-window'] as const;
 }
 
+export function getNextRange(offset: number) {
+  const start = monthUtils.currentMonth();
+  const end = monthUtils.addMonths(start, offset);
+
+  return [start, end, 'static'] as const;
+}
+
+export function getFullFutureRange(latestMonth?: string) {
+  const start = monthUtils.currentMonth();
+  const defaultEnd = monthUtils.addMonths(start, 24);
+  const latestMonthValue = latestMonth
+    ? monthUtils.monthFromDate(latestMonth)
+    : undefined;
+  const end =
+    latestMonthValue && monthUtils.isAfter(latestMonthValue, start)
+      ? latestMonthValue
+      : defaultEnd;
+
+  return [start, end, 'static'] as const;
+}
+
 export function calculateTimeRange(
   timeFrame?: Partial<TimeFrame>,
   defaultTimeFrame?: TimeFrame,
