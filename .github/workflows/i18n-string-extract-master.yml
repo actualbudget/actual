@@ -12,6 +12,7 @@ permissions:
 jobs:
   extract-and-upload-i18n-strings:
     runs-on: ubuntu-latest
+    environment: i18n
     if: github.repository == 'actualbudget/actual'
     steps:
       - name: Check out main repository
