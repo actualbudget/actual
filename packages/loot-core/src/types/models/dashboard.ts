@@ -130,7 +130,8 @@ type SpecializedWidget =
   | CalendarWidget
   | FormulaWidget
   | SankeyWidget
-  | AgeOfMoneyWidget;
+  | AgeOfMoneyWidget
+  | BalanceForecastWidget;
 export type DashboardWidgetEntity = SpecializedWidget | CustomReportWidget;
 export type NewDashboardWidgetEntity = Omit<
   DashboardWidgetEntity,
@@ -226,5 +227,19 @@ export type SankeyWidget = AbstractWidget<
     showPercentages?: boolean;
     layerFrom?: string;
     layerTo?: string;
+  } | null
+>;
+
+export type BalanceForecastWidget = AbstractWidget<
+  'balance-forecast-card',
+  {
+    name?: string;
+    startDate?: string;
+    endDate?: string;
+    accounts?: string[];
+    conditions?: RuleConditionEntity[];
+    conditionsOp?: 'and' | 'or';
+    timeFrame?: TimeFrame;
+    granularity?: 'Daily' | 'Monthly';
   } | null
 >;

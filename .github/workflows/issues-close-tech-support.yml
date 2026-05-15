@@ -4,6 +4,9 @@ on:
   issues:
     types: [labeled]
 
+permissions:
+  issues: write
+
 jobs:
   tech-support:
     if: ${{ github.event.label.name == 'tech-support' }}
