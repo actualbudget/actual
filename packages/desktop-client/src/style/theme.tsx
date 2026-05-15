@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 
+import darkThemeCss from '@actual-app/components/themes/dark.css?inline';
+import lightThemeCss from '@actual-app/components/themes/light.css?inline';
+import midnightThemeCss from '@actual-app/components/themes/midnight.css?inline';
+import paletteCss from '@actual-app/components/themes/palette.css?inline';
 import type { DarkTheme, Theme } from '@actual-app/core/types/prefs';
 
 import { useGlobalPref } from '#hooks/useGlobalPref';
@@ -10,10 +14,6 @@ import {
   validateThemeCss,
 } from './customThemes';
 import type { BaseTheme } from './customThemes';
-import paletteCss from './palette.css?inline';
-import darkThemeCss from './themes/dark.css?inline';
-import lightThemeCss from './themes/light.css?inline';
-import midnightThemeCss from './themes/midnight.css?inline';
 
 const themes = {
   light: { name: 'Light', css: lightThemeCss },

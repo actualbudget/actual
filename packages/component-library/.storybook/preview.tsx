@@ -2,16 +2,10 @@ import { type ReactNode } from 'react';
 
 import type { Preview } from '@storybook/react-vite';
 
-// Not ideal to import from desktop-client, but we need a source of truth for theme variables
-// TODO: this needs refactoring
-// oxlint-disable-next-line actual/enforce-boundaries
-import paletteCss from '../../desktop-client/src/style/palette.css?inline';
-// oxlint-disable-next-line actual/enforce-boundaries
-import darkThemeCss from '../../desktop-client/src/style/themes/dark.css?inline';
-// oxlint-disable-next-line actual/enforce-boundaries
-import lightThemeCss from '../../desktop-client/src/style/themes/light.css?inline';
-// oxlint-disable-next-line actual/enforce-boundaries
-import midnightThemeCss from '../../desktop-client/src/style/themes/midnight.css?inline';
+import darkThemeCss from '../src/themes/dark.css?inline';
+import lightThemeCss from '../src/themes/light.css?inline';
+import midnightThemeCss from '../src/themes/midnight.css?inline';
+import paletteCss from '../src/themes/palette.css?inline';
 
 const THEMES = {
   light: lightThemeCss,
