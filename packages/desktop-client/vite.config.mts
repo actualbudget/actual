@@ -376,7 +376,9 @@ export default defineConfig(async ({ mode, command }) => {
             //   swSrc: `service-worker/plugin-sw.js`,
             // },
             devOptions: {
-              enabled: true, // We need service worker in dev mode to work with plugins
+              // Disabled: caches stale assets across reloads in dev. Plugin
+              // code that explicitly needs a SW can register one itself.
+              enabled: false,
               type: 'module',
             },
             workbox: {
@@ -394,6 +396,7 @@ export default defineConfig(async ({ mode, command }) => {
                 /^\/plugins\/.*$/,
                 /^\/kcab\/.*$/,
                 /^\/plugin-data\/.*$/,
+                /^\/enablebanking\/.*$/,
               ],
             },
           }),

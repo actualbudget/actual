@@ -68,3 +68,46 @@ Finally, a draft GitHub release should be automatically created; confirm [on the
 - [ ] Un-draft the GitHub release which will send announcement notifications to all apps and create a PR to the [Actual Flathub Repository](https://github.com/flathub/com.actualbudget.actual/pulls).
 - [ ] Send an announcement on Discord and Twitter.
 - [ ] Approve and merge the [Flathub Release PR](https://github.com/flathub/com.actualbudget.actual/pulls) to master. After merge, it can take anywhere from hours to a few days before the app will be available in the Flathub Store.
+
+## Cutting a patch release
+
+Patch releases (e.g. `v26.5.1`) ship a small, targeted set of fixes on top of an existing release. Unlike monthly releases, the release branch is built by cherry-picking specific commits from `master` onto the previous release tag, so unrelated in-progress work on `master` is not pulled in.
+
+### Build the release branch
+
+- [ ] Identify the commits on `master` that should be included in the patch release and note their commit hashes.
+- [ ] Check out the previous release tag and create a new release branch from it:
+  ```bash
+  git checkout v26.5.0
+  git checkout -b release/v26.5.1
+  ```
+- [ ] Cherry-pick each commit onto the new branch, in the same order they were merged to `master`:
+  ```bash
+  git cherry-pick <commit-sha>
+  ```
+- [ ] Push the release branch. This is the branch that will be tagged later — **do not tag it yet**:
+  ```bash
+  git push -u {remote} release/v26.5.1
+  ```
+
+### Open the release PR against master
+
+The release branch is what gets tagged, but the version bump, release notes cleanup, and blog post still need to land on `master` so future releases pick them up.
+
+- [ ] Check out `master` and create a new branch from it (e.g. `release-notes/v26.5.1`).
+- [ ] In this branch:
+  - Bump the version in the relevant `package.json` files.
+  - Delete the `upcoming-release-notes/*.md` files that correspond to the cherry-picked commits.
+  - Add a new blog post under `packages/docs/blog/` (see [`2026-02-22-release-26-2-1.md`](https://github.com/actualbudget/actual/blob/master/packages/docs/blog/2026-02-22-release-26-2-1.md) for an example).
+- [ ] Commit the changes and open a PR against `master`. Include a link to the previously pushed release branch (e.g. `release/v26.5.1`) in the PR description so reviewers can see exactly what is shipping.
+
+### Tag the release
+
+- [ ] Once the PR has been approved and merged, tag the **release branch** (not `master`) and push the tag:
+  ```bash
+  git checkout release/v26.5.1
+  git tag v26.5.1
+  git push {remote} v26.5.1
+  ```
+
+From here the rest of the release pipeline (NPM, Docker, Desktop, GitHub draft release) runs automatically. Follow the [Verify the release](#verify-the-release) and [Finalize the release](#finalize-the-release) steps above to complete the rollout.

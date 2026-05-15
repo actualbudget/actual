@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import './polyfills';
 import * as asyncStorage from '#platform/server/asyncStorage';
 import * as connection from '#platform/server/connection';
 import * as fs from '#platform/server/fs';

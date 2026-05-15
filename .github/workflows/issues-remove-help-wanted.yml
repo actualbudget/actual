@@ -4,6 +4,9 @@ on:
   issues:
     types: [closed]
 
+permissions:
+  issues: write
+
 jobs:
   remove-help-wanted:
     if: ${{ !contains(github.event.issue.labels.*.name, 'feature') && contains(github.event.issue.labels.*.name, 'help wanted') }}

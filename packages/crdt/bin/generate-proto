@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 cd "$(dirname "$(dirname "$0")")"
 
@@ -7,20 +8,10 @@ if ! [ -x "$(command -v protoc)" ]; then
   exit 1
 fi
 
-export PATH="$PWD/bin:$PATH"
-
-protoc --plugin="protoc-gen-ts=../../node_modules/.bin/protoc-gen-ts" \
-  --ts_opt=esModuleInterop=true \
-  --ts_out="src/proto" \
-  --js_out=import_style=commonjs,binary:src/proto \
+protoc --plugin="protoc-gen-es=../../node_modules/.bin/protoc-gen-es" \
+  --es_opt=target=ts \
+  --es_out="src/proto" \
   --proto_path=src/proto \
   sync.proto
 
-../../node_modules/.bin/oxfmt src/proto/*.d.ts
-
-for file in src/proto/*.d.ts; do
-  { echo "/* oxlint-disable typescript/no-namespace */"; sed 's/export class/export declare class/g' "$file"; } > "${file%.d.ts}.ts"
-  rm "$file"
-done
-
-echo 'One more step! Find the `var global = ...` declaration in src/proto/sync_pb.js and change it to `var global = globalThis;`'
+../../node_modules/.bin/oxfmt src/proto/*.ts

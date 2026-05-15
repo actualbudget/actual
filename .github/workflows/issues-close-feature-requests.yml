@@ -4,6 +4,9 @@ on:
   issues:
     types: [labeled]
 
+permissions:
+  issues: write
+
 jobs:
   needs-votes:
     if: ${{ github.event.label.name == 'feature' }}

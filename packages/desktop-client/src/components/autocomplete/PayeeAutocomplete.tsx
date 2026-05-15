@@ -30,6 +30,7 @@ import type {
   PayeeEntity,
 } from '@actual-app/core/types/models';
 import { css, cx } from '@emotion/css';
+import { Fzf } from 'fzf';
 
 import { useAccounts } from '#hooks/useAccounts';
 import { useCommonPayees } from '#hooks/useCommonPayees';
@@ -41,12 +42,7 @@ import {
   useDeletePayeeLocationMutation,
 } from '#payees';
 
-import {
-  Autocomplete,
-  AutocompleteFooter,
-  defaultFilterSuggestion,
-} from './Autocomplete';
-import { rankAutocompleteMatch } from './autocompleteRanking';
+import { Autocomplete, AutocompleteFooter } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
 
 type PayeeAutocompleteItem = PayeeEntity &
@@ -342,13 +338,6 @@ function PayeeList({
   );
 }
 
-function customSort(obj: PayeeAutocompleteItem, value: string): number {
-  if (obj.id === 'new') {
-    return -5;
-  }
-  return rankAutocompleteMatch(obj.name, value);
-}
-
 export type PayeeAutocompleteProps = ComponentProps<
   typeof Autocomplete<PayeeAutocompleteItem>
 > & {
@@ -464,9 +453,12 @@ export function PayeeAutocomplete({
       return nearbyPayeesWithType;
     }
 
-    return nearbyPayeesWithType.filter(payee => {
-      return defaultFilterSuggestion(payee, rawPayee);
-    });
+    return new Fzf(nearbyPayeesWithType, {
+      selector: item => item.name ?? '',
+      limit: 100,
+    })
+      .find(rawPayee)
+      .map(result => result.item);
   }, [nearbyPayeesWithType, rawPayee]);
 
   const handleForgetLocation = useCallback(
@@ -506,34 +498,38 @@ export function PayeeAutocomplete({
     suggestions: PayeeAutocompleteItem[],
     value: string,
   ) => {
-    const normalizedValue = getNormalisedString(value);
-    const filtered = suggestions
-      .filter(suggestion => {
-        if (suggestion.id === 'new') {
-          return !value || value === '' || focusTransferPayees ? false : true;
-        }
+    // Separate the 'new' sentinel from real payees
+    const newItem = suggestions.find(s => s.id === 'new');
+    const realSuggestions = suggestions.filter(s => s.id !== 'new');
 
-        return defaultFilterSuggestion(suggestion, value);
+    let filtered: PayeeAutocompleteItem[];
+    if (!value) {
+      filtered = realSuggestions.slice(0, 100);
+    } else {
+      filtered = new Fzf(realSuggestions, {
+        selector: item => item.name ?? '',
+        limit: 100,
       })
-      .sort(
-        (a, b) =>
-          customSort(a, normalizedValue) - customSort(b, normalizedValue),
-      )
-      // Only show the first 100 results, users can search to find more.
-      // If user want to view all payees, it can be done via the manage payees page.
-      .slice(0, 100);
+        .find(value)
+        .map(result => result.item);
+    }
 
-    if (filtered.length >= 2 && filtered[0].id === 'new') {
-      const firstFiltered = filtered[1];
+    // Re-prepend 'new' when the user has typed something
+    const showNew = newItem && value && value !== '' && !focusTransferPayees;
+    const results = showNew ? [newItem, ...filtered] : filtered;
+
+    if (results.length >= 2 && results[0].id === 'new') {
+      const firstFiltered = results[1];
       if (
-        getNormalisedString(firstFiltered.name) === normalizedValue &&
+        getNormalisedString(firstFiltered.name) ===
+          getNormalisedString(value) &&
         !firstFiltered.transfer_acct
       ) {
-        // Exact match found, remove the 'Create payee` option.
-        return filtered.slice(1);
+        // Exact match found, remove the 'Create payee' option.
+        return results.slice(1);
       }
     }
-    return filtered;
+    return results;
   };
 
   return (

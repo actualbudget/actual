@@ -516,6 +516,29 @@ describe('API CRUD operations', () => {
     );
   });
 
+  // apis: getNote, updateNote
+  test('Notes: successfully get and update note', async () => {
+    const categories = await api.getCategories();
+    const categoryId = categories[0].id;
+
+    // No note exists initially
+    const initial = await api.getNote(categoryId);
+    expect(initial).toBeNull();
+
+    // Set a note
+    await api.updateNote(categoryId, 'Test note content');
+    const afterSet = await api.getNote(categoryId);
+    expect(afterSet).toEqual({ id: categoryId, note: 'Test note content' });
+
+    // Update the note
+    await api.updateNote(categoryId, 'Updated note content');
+    const afterUpdate = await api.getNote(categoryId);
+    expect(afterUpdate).toEqual({
+      id: categoryId,
+      note: 'Updated note content',
+    });
+  });
+
   // apis: getRules, getPayeeRules, createRule, updateRule, deleteRule
   test('Rules: successfully update rules', async () => {
     await api.createPayee({ name: 'test-payee' });
