@@ -14,6 +14,19 @@ import { logger } from '#platform/server/log';
 import * as sqlite from '#platform/server/sqlite';
 import * as prefs from '#server/prefs';
 
+// Inline SQL migrations into the worker chunk so they cannot desync with the
+// AQL schema across a service-worker cache boundary. `import.meta.glob` is
+// statically analyzed, so the path must be a literal relative to this file.
+const bundledSqlByName: Record<string, string> = Object.fromEntries(
+  Object.entries(
+    import.meta.glob<string>('../../../migrations/*.sql', {
+      query: '?raw',
+      import: 'default',
+      eager: true,
+    }),
+  ).map(([p, sql]) => [p.slice(p.lastIndexOf('/') + 1), sql]),
+);
+
 let MIGRATIONS_DIR = fs.migrationsPath;
 
 const javascriptMigrations = {
@@ -24,21 +37,36 @@ const javascriptMigrations = {
   1765518577215: m1765518577215,
 };
 
+// JS migrations are looked up by id, so the on-disk filename is irrelevant
+// once bundled — `${id}.js` is enough to round-trip through the sort/filter
+// path in `getMigrationList`.
+const bundledMigrationNames: string[] = [
+  ...Object.keys(bundledSqlByName),
+  ...Object.keys(javascriptMigrations).map(id => `${id}.js`),
+];
+
+function isDefaultMigrationsDir(dir: string): boolean {
+  return dir === fs.migrationsPath;
+}
+
 export async function withMigrationsDir(
   dir: string,
   func: () => Promise<void>,
 ): Promise<void> {
   const oldDir = MIGRATIONS_DIR;
   MIGRATIONS_DIR = dir;
-  await func();
-  MIGRATIONS_DIR = oldDir;
+  try {
+    await func();
+  } finally {
+    MIGRATIONS_DIR = oldDir;
+  }
 }
 
 export function getMigrationsDir(): string {
   return MIGRATIONS_DIR;
 }
 
-function getMigrationId(name: string): number {
+export function getMigrationId(name: string): number {
   return parseInt(name.match(/^(\d)+/)[0]);
 }
 
@@ -77,7 +105,9 @@ export async function getAppliedMigrations(db: Database): Promise<number[]> {
 export async function getMigrationList(
   migrationsDir: string,
 ): Promise<string[]> {
-  const files = await fs.listDir(migrationsDir);
+  const files = isDefaultMigrationsDir(migrationsDir)
+    ? bundledMigrationNames
+    : await fs.listDir(migrationsDir);
   return files
     .filter(name => name.match(/(\.sql|\.js)$/))
     .sort((m1, m2) => {
@@ -132,11 +162,13 @@ export async function applyMigration(
   name: string,
   migrationsDir: string,
 ): Promise<void> {
-  const code = await fs.readFile(fs.join(migrationsDir, name));
   if (name.match(/\.js$/)) {
     await applyJavaScript(db, getMigrationId(name));
   } else {
-    await applySql(db, code);
+    const sql = isDefaultMigrationsDir(migrationsDir)
+      ? bundledSqlByName[name]
+      : await fs.readFile(fs.join(migrationsDir, name));
+    await applySql(db, sql);
   }
   sqlite.runQuery(db, 'INSERT INTO __migrations__ (id) VALUES (?)', [
     getMigrationId(name),

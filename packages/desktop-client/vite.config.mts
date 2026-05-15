@@ -152,13 +152,12 @@ async function stagePluginsService(): Promise<void> {
 }
 
 async function stagePublicData(): Promise<void> {
+  // Migrations are bundled into the loot-core worker chunk; purge stale
+  // staged copies from previous builds.
   const migrationsDest = path.resolve(publicDataDir, 'migrations');
   await mkdir(publicDataDir, { recursive: true });
   await rm(migrationsDest, { recursive: true, force: true });
   await Promise.all([
-    cp(path.resolve(lootCoreRoot, 'migrations'), migrationsDest, {
-      recursive: true,
-    }),
     cp(
       path.resolve(lootCoreRoot, 'default-db.sqlite'),
       path.resolve(publicDataDir, 'default-db.sqlite'),

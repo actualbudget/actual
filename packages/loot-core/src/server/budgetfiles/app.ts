@@ -43,6 +43,7 @@ import {
   startBackupService,
   stopBackupService,
 } from './backups';
+import { classifyUpdateVersionError } from './classify-error';
 
 const DEMO_BUDGET_ID = '_demo-budget';
 const TEST_BUDGET_ID = '_test-budget';
@@ -551,20 +552,17 @@ async function _loadBudget(id: Budget['id']): Promise<{
     await updateVersion();
   } catch (e) {
     logger.warn('Error updating', e);
-    let result;
-    if (e.message.includes('out-of-sync-migrations')) {
-      result = { error: 'out-of-sync-migrations' };
-    } else if (e.message.includes('out-of-sync-data')) {
-      result = { error: 'out-of-sync-data' };
-    } else {
+    const { error, report } = classifyUpdateVersionError(e.message);
+    if (report) {
       captureException(e);
+    }
+    if (error === 'loading-budget') {
       logger.info('Error updating budget ' + id, e);
       logger.log('Error updating budget', e);
-      result = { error: 'loading-budget' };
     }
 
     await closeBudget();
-    return result;
+    return { error };
   }
 
   await db.loadClock();

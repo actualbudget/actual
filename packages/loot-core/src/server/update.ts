@@ -1,6 +1,8 @@
 // @ts-strict-ignore
 import { createHash } from 'node:crypto';
 
+import { logger } from '#platform/server/log';
+
 import { makeViews, schema, schemaConfig } from './aql';
 import * as db from './db';
 import * as migrations from './migrate/migrations';
@@ -9,6 +11,29 @@ import * as migrations from './migrate/migrations';
 
 async function runMigrations() {
   await migrations.migrate(db.getDatabase());
+}
+
+// `'fields'` is a non-view entry inside each table's view map, shared with
+// `makeViews` — skip it.
+function getConfiguredViewNames(): string[] {
+  return Object.values(schemaConfig.views).flatMap(tableViews =>
+    Object.keys(tableViews).filter(name => name !== 'fields'),
+  );
+}
+
+// Fail fast when the newly-created views reference columns the migrations
+// didn't add, so the user hits the recovery dialog once at startup instead of
+// a cryptic error on every UI query.
+function probeViews(): void {
+  for (const viewName of getConfiguredViewNames()) {
+    try {
+      db.execQuery(`SELECT * FROM ${viewName} LIMIT 0`);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      logger.error(`View ${viewName} failed schema probe`, e);
+      throw new Error(`schema-out-of-sync: ${viewName}: ${message}`);
+    }
+  }
 }
 
 async function updateViews() {
@@ -28,6 +53,7 @@ async function updateViews() {
       hashKey,
       currentHash,
     ]);
+    probeViews();
   }
 }
 

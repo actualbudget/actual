@@ -243,13 +243,12 @@ async function populateDefaultFilesystem() {
   const files = index
     .split('\n')
     .map(name => name.trim())
-    .filter(name => name !== '');
+    .filter(name => name !== '')
+    // Migrations are bundled into the worker chunk; ignore any stale
+    // `migrations/…` entries a service-worker precache might still serve.
+    .filter(name => !name.startsWith('migrations/'));
   const fetchFile = url => fetch(url).then(res => res.arrayBuffer());
 
-  // This is hardcoded. We know we must create the migrations
-  // directory, it's not worth complicating the index to support
-  // creating arbitrary folders.
-  await mkdir('/migrations');
   await mkdir('/demo-budget');
 
   await Promise.all(
