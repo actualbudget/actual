@@ -38,7 +38,7 @@ import {
 } from '#shared/months';
 import { q } from '#shared/query';
 import { getApproxNumberThreshold, sortNumbers } from '#shared/rules';
-import { extractTags, extractTagsForFilter } from '#shared/tags';
+import { extractTagsForFilter } from '#shared/tags';
 import { ungroupTransaction } from '#shared/transactions';
 import { fastSetMerge, partitionByField } from '#shared/util';
 import type {
@@ -491,7 +491,9 @@ export function conditionsToAQL(
       } else if (type === 'string') {
         return {
           [field]: {
-            $transform: op !== 'hasTags' ? '$lower' : undefined,
+            $transform: !['hasTags', 'hasAnyTag'].includes(op)
+              ? '$lower'
+              : undefined,
             [aqlOp]: value,
           },
         };
