@@ -351,12 +351,13 @@ export class Condition {
         }
         return String(fieldValue).indexOf(this.value) !== -1;
 
-      case 'hasAnyTag':
+      case 'hasAnyTag': {
         if (fieldValue === null) {
           return false;
         }
         const tags = extractTagsForFilter(this.value);
         return tags.some(tag => String(fieldValue).includes(tag.toLowerCase()));
+      }
 
       case 'notOneOf':
         if (fieldValue === null) {
