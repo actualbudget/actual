@@ -30,7 +30,9 @@ describe('exportToCSV', () => {
       categoryGroups,
       [{ id: 'p1', name: payeeName }],
     );
-    const rows = csvParse(csv, { columns: true });
+    const rows = csvParse(csv, { columns: true }) as Array<
+      Record<string, string>
+    >;
     return { row: rows[0], csv };
   }
 

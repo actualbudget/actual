@@ -4,10 +4,6 @@ import { stringify as csvStringify } from 'csv-stringify/sync';
 import { aqlQuery } from '#server/aql';
 import { integerToAmount } from '#shared/util';
 
-// Characters that trigger formula evaluation in Excel / LibreOffice Calc /
-// Google Sheets when they appear at the start of a cell. Prefixing such a
-// value with a single quote neutralizes the formula (OWASP-recommended;
-// CWE-1236).
 const FORMULA_TRIGGERS = /^[=+\-@\t\r]/;
 
 const csvStringifyOptions = {
