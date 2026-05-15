@@ -17,6 +17,7 @@ import {
   isValidOp,
   sortNumbers,
 } from '#shared/rules';
+import { extractTagsForFilter } from '#shared/tags';
 
 import {
   assert,
@@ -354,7 +355,8 @@ export class Condition {
         if (fieldValue === null) {
           return false;
         }
-        return String(fieldValue).indexOf(this.value) !== -1;
+        const tags = extractTagsForFilter(this.value);
+        return tags.some(tag => String(fieldValue).includes(tag));
 
       case 'notOneOf':
         if (fieldValue === null) {
