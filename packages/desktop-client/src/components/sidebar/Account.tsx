@@ -1,6 +1,6 @@
 // @ts-strict-ignore
-import React, { useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
+import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -26,8 +26,8 @@ import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
 import { BalanceHistoryGraph } from '#components/accounts/BalanceHistoryGraph';
 import { Link } from '#components/common/Link';
 import { Notes } from '#components/Notes';
-import { DropHighlight, useDraggable, useDroppable } from '#components/sort';
 import type { OnDragChangeCallback, OnDropCallback } from '#components/sort';
+import { DropHighlight, useDraggable, useDroppable } from '#components/sort';
 import { CellValue } from '#components/spreadsheet/CellValue';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useDragRef } from '#hooks/useDragRef';
@@ -67,6 +67,7 @@ type AccountProps<FieldName extends SheetFields<'account'>> = {
   titleAccount?: boolean;
   isExactPathMatch?: boolean;
   balanceTestId?: string;
+  testId?: string;
 };
 
 export function Account<FieldName extends SheetFields<'account'>>({
@@ -85,6 +86,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
   titleAccount,
   isExactPathMatch,
   balanceTestId,
+  testId,
 }: AccountProps<FieldName>) {
   const isTestEnv = useIsTestEnv();
   const { t } = useTranslation();
@@ -137,6 +139,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
       innerRef={dropRef}
       style={{ flexShrink: 0, ...outerStyle }}
       onContextMenu={needsTooltip ? handleContextMenu : undefined}
+      data-testid={!needsTooltip && testId}
     >
       <View innerRef={triggerRef}>
         <DropHighlight pos={dropPos} />
@@ -297,80 +300,82 @@ export function Account<FieldName extends SheetFields<'account'>>({
   }
 
   return (
-    <Tooltip
-      content={
-        <View
-          style={{
-            padding: 10,
-          }}
-        >
-          <SpaceBetween
-            gap={5}
+    <View data-testid={testId}>
+      <Tooltip
+        content={
+          <View
             style={{
-              justifyContent: 'space-between',
-              '& .hover-visible': {
-                opacity: 0,
-                transition: 'opacity .25s',
-              },
-              '&:hover .hover-visible': {
-                opacity: 1,
-              },
+              padding: 10,
             }}
           >
-            <Text
+            <SpaceBetween
+              gap={5}
               style={{
-                fontWeight: 'bold',
+                justifyContent: 'space-between',
+                '& .hover-visible': {
+                  opacity: 0,
+                  transition: 'opacity .25s',
+                },
+                '&:hover .hover-visible': {
+                  opacity: 1,
+                },
               }}
             >
-              {name}
-            </Text>
-            <Button
-              aria-label={t('Toggle balance history')}
-              variant="bare"
-              onClick={() =>
-                setShowBalanceHistory(
-                  showBalanceHistory === 'true' ? 'false' : 'true',
-                )
-              }
-              className="hover-visible"
-            >
-              <SpaceBetween gap={3}>
-                {showBalanceHistory === 'true' ? (
-                  <SvgArrowButtonUp1 width={10} height={10} />
-                ) : (
-                  <SvgArrowButtonDown1 width={10} height={10} />
-                )}
-              </SpaceBetween>
-            </Button>
-          </SpaceBetween>
-          {showBalanceHistory === 'true' && account && (
-            <BalanceHistoryGraph
-              accountId={account.id}
-              style={{ minWidth: 350, minHeight: 70 }}
-            />
-          )}
-          {accountNote && (
-            <Notes
-              getStyle={() => ({
-                borderTop: `1px solid ${theme.tableBorder}`,
-                padding: 0,
-                paddingTop: '0.5rem',
-                marginTop: '0.5rem',
-              })}
-              notes={accountNote}
-            />
-          )}
-        </View>
-      }
-      style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
-      placement="right top"
-      triggerProps={{
-        delay: 1000,
-        closeDelay: 250,
-        isDisabled: menuOpen,
-      }}
-    >
-      {accountRow}
-    </Tooltip>
+              <Text
+                style={{
+                  fontWeight: 'bold',
+                }}
+              >
+                {name}
+              </Text>
+              <Button
+                aria-label={t('Toggle balance history')}
+                variant="bare"
+                onClick={() =>
+                  setShowBalanceHistory(
+                    showBalanceHistory === 'true' ? 'false' : 'true',
+                  )
+                }
+                className="hover-visible"
+              >
+                <SpaceBetween gap={3}>
+                  {showBalanceHistory === 'true' ? (
+                    <SvgArrowButtonUp1 width={10} height={10} />
+                  ) : (
+                    <SvgArrowButtonDown1 width={10} height={10} />
+                  )}
+                </SpaceBetween>
+              </Button>
+            </SpaceBetween>
+            {showBalanceHistory === 'true' && account && (
+              <BalanceHistoryGraph
+                accountId={account.id}
+                style={{ minWidth: 350, minHeight: 70 }}
+              />
+            )}
+            {accountNote && (
+              <Notes
+                getStyle={() => ({
+                  borderTop: `1px solid ${theme.tableBorder}`,
+                  padding: 0,
+                  paddingTop: '0.5rem',
+                  marginTop: '0.5rem',
+                })}
+                notes={accountNote}
+              />
+            )}
+          </View>
+        }
+        style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
+        placement="right top"
+        triggerProps={{
+          delay: 1000,
+          closeDelay: 250,
+          isDisabled: menuOpen,
+        }}
+      >
+        {accountRow}
+      </Tooltip>
+    </View>
   );
 }

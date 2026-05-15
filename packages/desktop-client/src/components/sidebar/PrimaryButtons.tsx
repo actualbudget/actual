@@ -55,11 +55,15 @@ export function PrimaryButtons() {
         title={t('More')}
         Icon={isOpen ? SvgCheveronDown : SvgCheveronRight}
         onClick={onToggle}
+        buttonProps={{
+          'aria-expanded': isOpen,
+          'aria-controls': 'sidebar-more-section',
+        }}
         style={{ marginBottom: isOpen ? 8 : 0 }}
         forceActive={!isOpen && isActive}
       />
       {isOpen && (
-        <>
+        <View id="sidebar-more-section">
           <SecondaryItem
             title={t('Payees')}
             Icon={SvgStoreFront}
@@ -92,7 +96,7 @@ export function PrimaryButtons() {
             to="/settings"
             indent={15}
           />
-        </>
+        </View>
       )}
     </View>
   );

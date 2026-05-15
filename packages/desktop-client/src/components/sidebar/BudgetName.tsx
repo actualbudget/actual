@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -125,6 +125,8 @@ function EditableBudgetName() {
       <Button
         ref={triggerRef}
         variant="bare"
+        aria-haspopup="menu"
+        aria-expanded={menuOpen}
         style={{
           color: theme.sidebarBudgetName,
           fontSize: 16,
@@ -143,6 +145,8 @@ function EditableBudgetName() {
         <SvgExpandArrow
           width={7}
           height={7}
+          aria-hidden
+          focusable={false}
           style={{ flexShrink: 0, marginLeft: 5 }}
         />
       </Button>

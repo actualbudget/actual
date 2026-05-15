@@ -1,11 +1,11 @@
 // @ts-strict-ignore
-import React from 'react';
 import type {
   ComponentProps,
   ComponentType,
   CSSProperties,
   SVGProps,
 } from 'react';
+import React from 'react';
 
 import { Block } from '@actual-app/components/block';
 import { theme } from '@actual-app/components/theme';
@@ -26,6 +26,7 @@ type SecondaryItemProps = {
   onClick?: ComponentProps<typeof ItemContent>['onClick'];
   bold?: boolean;
   indent?: number;
+  testId?: string;
 };
 
 export function SecondaryItem({
@@ -36,6 +37,7 @@ export function SecondaryItem({
   onClick,
   bold,
   indent = 0,
+  testId,
 }: SecondaryItemProps) {
   const content = (
     <View
@@ -45,7 +47,7 @@ export function SecondaryItem({
         height: 16,
       }}
     >
-      {Icon && <Icon width={12} height={12} />}
+      {Icon && <Icon width={12} height={12} aria-hidden focusable={false} />}
       <Block style={{ marginLeft: Icon ? 8 : 0, color: 'inherit' }}>
         {title}
       </Block>
@@ -53,7 +55,7 @@ export function SecondaryItem({
   );
 
   return (
-    <View style={{ flexShrink: 0, ...style }}>
+    <View style={{ flexShrink: 0, ...style }} data-testid={testId}>
       <ItemContent
         style={{
           ...accountNameStyle,

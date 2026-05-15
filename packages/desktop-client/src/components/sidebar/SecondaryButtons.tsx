@@ -1,5 +1,5 @@
-import React from 'react';
 import type { ComponentType, SVGProps } from 'react';
+import React from 'react';
 
 import { View } from '@actual-app/components/view';
 

@@ -1,5 +1,5 @@
-import React from 'react';
 import type { ComponentPropsWithoutRef, CSSProperties } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -25,6 +25,7 @@ export function ToggleButton({
       <Button
         variant="bare"
         aria-label={isFloating ? t('Pin sidebar') : t('Unpin sidebar')}
+        aria-pressed={isFloating}
         onPress={onFloat}
         style={{ color: theme.buttonMenuBorder }}
       >

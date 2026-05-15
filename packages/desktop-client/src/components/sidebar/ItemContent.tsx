@@ -1,5 +1,5 @@
-import React from 'react';
 import type { ComponentProps, ReactNode } from 'react';
+import React from 'react';
 
 import { Button } from '@actual-app/components/button';
 import type { CSSProperties } from '@actual-app/components/styles';
@@ -14,6 +14,10 @@ type ItemContentProps = {
   activeStyle: CSSProperties;
   children: ReactNode;
   forceActive?: boolean;
+  buttonProps?: Pick<
+    ComponentProps<typeof Button>,
+    'aria-expanded' | 'aria-controls'
+  >;
 };
 
 export function ItemContent({
@@ -23,10 +27,12 @@ export function ItemContent({
   activeStyle,
   forceActive,
   children,
+  buttonProps,
 }: ItemContentProps) {
   return onClick ? (
     <Button
       variant="bare"
+      {...buttonProps}
       style={{
         justifyContent: 'flex-start',
         ...style,
