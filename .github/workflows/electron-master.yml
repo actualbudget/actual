@@ -116,9 +116,14 @@ jobs:
               <a href="https://flathub.org/apps/com.actualbudget.actual"><img width="165" style="margin-left:12px;" alt="Get it on Flathub" src="https://flathub.org/api/badge?locale=en" /></a>
             </p>
         run: |
-          # The matrix runs three OS jobs in parallel against one release, so
-          # ignore the "already exists" error that the race losers will hit.
-          gh release create "$TAG" --draft --title "$TAG" --notes "$RELEASE_NOTES" 2>/dev/null || true
+          # The matrix runs three OS jobs in parallel against one release;
+          # only ignore the "already exists" error that the race losers hit.
+          if ! create_output=$(gh release create "$TAG" --draft --title "$TAG" --notes "$RELEASE_NOTES" 2>&1); then
+            if [[ "$create_output" != *already_exists* ]]; then
+              echo "$create_output" >&2
+              exit 1
+            fi
+          fi
 
           shopt -s extglob nullglob
           files=(
