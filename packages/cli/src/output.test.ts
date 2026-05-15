@@ -156,17 +156,14 @@ describe('formatOutput', () => {
     });
 
     describe('formula-injection neutralization', () => {
-      it.each([
-        ['=1+1'],
-        ['+1+1'],
-        ['-2+3'],
-        ['@SUM(1+1)'],
-        ['\tHELLO'],
-      ])('prefixes a leading %j with a single quote', payload => {
-        const data = [{ val: payload }];
-        const result = formatOutput(data, 'csv');
-        expect(result).toBe(`val\n'${payload}`);
-      });
+      it.each([['=1+1'], ['+1+1'], ['-2+3'], ['@SUM(1+1)'], ['\tHELLO']])(
+        'prefixes a leading %j with a single quote',
+        payload => {
+          const data = [{ val: payload }];
+          const result = formatOutput(data, 'csv');
+          expect(result).toBe(`val\n'${payload}`);
+        },
+      );
 
       it('prefixes and quotes a leading carriage return', () => {
         const data = [{ val: '\rHELLO' }];
