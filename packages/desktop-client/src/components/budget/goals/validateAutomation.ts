@@ -7,6 +7,7 @@ import type { DisplayTemplateType } from './constants';
 export type AutomationErrorKind =
   | { kind: 'schedule-not-found'; name: string }
   | { kind: 'refill-no-cap' }
+  | { kind: 'limit-no-contributor' }
   | { kind: 'percentage-out-of-range'; percent: number }
   | { kind: 'percentage-no-source' }
   | { kind: 'percentage-source-not-found'; source: string }
@@ -46,6 +47,15 @@ export function validateAutomation(
     case 'refill':
       if (!allTemplates.some(t => t.type === 'limit')) {
         return { kind: 'refill-no-cap' };
+      }
+      return null;
+    case 'limit':
+      if (
+        !allTemplates.some(
+          t => t.type !== 'limit' && t.type !== 'goal' && t.type !== 'error',
+        )
+      ) {
+        return { kind: 'limit-no-contributor' };
       }
       return null;
     case 'percentage':
