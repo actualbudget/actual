@@ -356,7 +356,7 @@ export class Condition {
           return false;
         }
         const tags = extractTagsForFilter(this.value);
-        return tags.some(tag => String(fieldValue).includes(tag));
+        return tags.some(tag => String(fieldValue).includes(tag.toLowerCase()));
 
       case 'notOneOf':
         if (fieldValue === null) {
