@@ -162,11 +162,22 @@ describe('formatOutput', () => {
         ['-2+3'],
         ['@SUM(1+1)'],
         ['\tHELLO'],
-        ['\rHELLO'],
       ])('prefixes a leading %j with a single quote', payload => {
         const data = [{ val: payload }];
         const result = formatOutput(data, 'csv');
         expect(result).toBe(`val\n'${payload}`);
+      });
+
+      it('prefixes and quotes a leading carriage return', () => {
+        const data = [{ val: '\rHELLO' }];
+        const result = formatOutput(data, 'csv');
+        expect(result).toBe('val\n"\'\rHELLO"');
+      });
+
+      it('quotes values containing a carriage return mid-string', () => {
+        const data = [{ val: 'line1\rline2' }];
+        const result = formatOutput(data, 'csv');
+        expect(result).toBe('val\n"line1\rline2"');
       });
 
       it('neutralizes formula triggers even when the value also needs quoting', () => {
