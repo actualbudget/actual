@@ -71,8 +71,11 @@ vi.mock('#server/migrate/migrations', async () => {
     ...realMigrations,
     migrate: async db => {
       _id = 100_000_000;
-      await realMigrations.migrate(db);
-      _id = 1;
+      try {
+        return await realMigrations.migrate(db);
+      } finally {
+        _id = 1;
+      }
     },
   };
 });
