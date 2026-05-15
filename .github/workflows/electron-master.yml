@@ -116,25 +116,18 @@ jobs:
               <a href="https://flathub.org/apps/com.actualbudget.actual"><img width="165" style="margin-left:12px;" alt="Get it on Flathub" src="https://flathub.org/api/badge?locale=en" /></a>
             </p>
         run: |
-          # Create the draft release if it doesn't exist yet. Matrix jobs run
-          # in parallel against the same tag, so ignore the "already exists"
-          # error that the losers of the race will hit.
-          if ! gh release view "$TAG" >/dev/null 2>&1; then
-            gh release create "$TAG" --draft --title "$TAG" --notes "$RELEASE_NOTES" || true
-          fi
+          # The matrix runs three OS jobs in parallel against one release, so
+          # ignore the "already exists" error that the race losers will hit.
+          gh release create "$TAG" --draft --title "$TAG" --notes "$RELEASE_NOTES" 2>/dev/null || true
 
-          shopt -s nullglob
+          shopt -s extglob nullglob
           files=(
             packages/desktop-electron/dist/*.dmg
+            packages/desktop-electron/dist/!(Actual-windows).exe
             packages/desktop-electron/dist/*.AppImage
             packages/desktop-electron/dist/*.flatpak
             packages/desktop-electron/dist/*.appx
           )
-          for f in packages/desktop-electron/dist/*.exe; do
-            [[ "$(basename "$f")" == "Actual-windows.exe" ]] && continue
-            files+=("$f")
-          done
-
           if [ ${#files[@]} -gt 0 ]; then
             gh release upload "$TAG" --clobber "${files[@]}"
           fi
