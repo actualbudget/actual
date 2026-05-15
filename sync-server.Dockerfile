@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Copy only the files needed for installing dependencies
 COPY .yarn ./.yarn
-COPY yarn.lock package.json .yarnrc.yml tsconfig.json ./
+COPY yarn.lock package.json .yarnrc.yml tsconfig.json lage.config.js ./
 COPY packages/api/package.json packages/api/package.json
 COPY packages/component-library/package.json packages/component-library/package.json
 COPY packages/crdt/package.json packages/crdt/package.json
