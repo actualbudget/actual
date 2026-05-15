@@ -16,10 +16,10 @@ import {
 import type { BaseTheme } from './customThemes';
 
 const themes = {
-  light: { name: 'Light', css: lightThemeCss },
-  dark: { name: 'Dark', css: darkThemeCss },
-  midnight: { name: 'Midnight', css: midnightThemeCss },
-  auto: { name: 'System default', css: darkThemeCss },
+  light: { name: 'Light', colors: lightThemeCss },
+  dark: { name: 'Dark', colors: darkThemeCss },
+  midnight: { name: 'Midnight', colors: midnightThemeCss },
+  auto: { name: 'System default', colors: darkThemeCss },
 } as const;
 
 type ThemeKey = keyof typeof themes;
@@ -88,8 +88,8 @@ function useMigrateLegacyOverride() {
   ]);
 }
 
-function getBaseThemeCss(baseTheme: BaseTheme) {
-  return themes[baseTheme]?.css;
+function getBaseThemeColors(baseTheme: BaseTheme) {
+  return themes[baseTheme]?.colors;
 }
 
 export function ThemeStyle() {
@@ -101,27 +101,27 @@ export function ThemeStyle() {
   const [installedCustomDarkThemeJson] = useGlobalPref(
     'installedCustomDarkTheme',
   );
-  const [activeCss, setActiveCss] = useState<string | undefined>(undefined);
+  const [themeColors, setThemeColors] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (activeTheme === 'auto') {
       const installedLight = parseInstalledTheme(installedCustomLightThemeJson);
       const installedDark = parseInstalledTheme(installedCustomDarkThemeJson);
 
-      const lightCss =
+      const lightColors =
         (installedLight?.baseTheme &&
-          getBaseThemeCss(installedLight.baseTheme)) ||
-        themes['light'].css;
-      const darkCss =
+          getBaseThemeColors(installedLight.baseTheme)) ||
+        themes['light'].colors;
+      const darkColors =
         (installedDark?.baseTheme &&
-          getBaseThemeCss(installedDark.baseTheme)) ||
-        themes[darkThemePreference].css;
+          getBaseThemeColors(installedDark.baseTheme)) ||
+        themes[darkThemePreference].colors;
 
       function darkThemeMediaQueryListener(event: MediaQueryListEvent) {
         if (event.matches) {
-          setActiveCss(darkCss);
+          setThemeColors(darkColors);
         } else {
-          setActiveCss(lightCss);
+          setThemeColors(lightColors);
         }
       }
       const darkThemeMediaQuery = window.matchMedia(
@@ -134,9 +134,9 @@ export function ThemeStyle() {
       );
 
       if (darkThemeMediaQuery.matches) {
-        setActiveCss(darkCss);
+        setThemeColors(darkColors);
       } else {
-        setActiveCss(lightCss);
+        setThemeColors(lightColors);
       }
 
       return () => {
@@ -148,12 +148,12 @@ export function ThemeStyle() {
     } else {
       const installedTheme = parseInstalledTheme(installedCustomLightThemeJson);
       if (installedTheme?.baseTheme) {
-        setActiveCss(
-          getBaseThemeCss(installedTheme.baseTheme) ??
-            themes[activeTheme as ThemeKey]?.css,
+        setThemeColors(
+          getBaseThemeColors(installedTheme.baseTheme) ??
+            themes[activeTheme as ThemeKey]?.colors,
         );
       } else {
-        setActiveCss(themes[activeTheme as ThemeKey]?.css);
+        setThemeColors(themes[activeTheme as ThemeKey]?.colors);
       }
     }
   }, [
@@ -163,12 +163,12 @@ export function ThemeStyle() {
     installedCustomDarkThemeJson,
   ]);
 
-  if (!activeCss) return null;
+  if (!themeColors) return null;
 
   return (
     <>
-      <style data-theme-palette>{paletteCss}</style>
-      <style data-theme-active>{activeCss}</style>
+      <style>{paletteCss}</style>
+      <style>{themeColors}</style>
     </>
   );
 }
