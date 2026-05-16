@@ -26,12 +26,13 @@ export default defineConfig({
     // until layout provides width/height, and that can take >5s. Bumping
     // to 10s lets those assertions settle without per-test overrides.
     timeout: 10_000,
-    // `threshold` is pixelmatch's per-pixel YIQ-delta cutoff — a pixel
-    // counts toward `maxDiffPixels` only if its delta exceeds
-    // 35215 * threshold². Playwright's 0.2 default lets faint color
-    // overlays (e.g. rgba(…, .15) row striping) slip through with 0
-    // reported diff pixels; 0.05 catches them while staying above
-    // anti-aliasing noise.
+    // `threshold` is pixelmatch's per-pixel YIQ-delta cutoff: a pixel only
+    // counts toward `maxDiffPixels` if its delta exceeds 35215 * threshold².
+    // Playwright's default (0.2 → cutoff 1408) silently swallows faint
+    // overlays — e.g. striping the transactions table with rgba(…, .15)
+    // produces deltas of ~270–320, so VRT reported 0 diff pixels and passed
+    // (PR #7841). Drop to 0.05 (cutoff ~88) so low-alpha tints are flagged
+    // while still leaving headroom for anti-aliasing noise.
     toHaveScreenshot: { maxDiffPixels: 5, threshold: 0.05 },
   },
   webServer: process.env.E2E_START_URL

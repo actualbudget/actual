@@ -63,6 +63,7 @@ export const expect = baseExpect.extend({
 
     const config = {
       mask: [target.locator('[data-vrt-mask="true"]')],
+      maxDiffPixels: 5,
     };
 
     const page: Page = 'page' in target ? target.page() : target;
