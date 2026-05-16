@@ -3,6 +3,7 @@
 :::warning
 This is an **experimental feature**. That means we're still working on finishing it. There may be bugs, missing functionality or incomplete documentation, and we may decide to remove the feature in a future release. If you have any feedback, please [use the feedback issue on github](https://github.com/actualbudget/actual/issues/7692) or post a message in the Discord.
 :::
+
 :::warning
 All functionality described here may not be available in the latest stable release. See [Experimental Features](/docs/experimental/) for instructions to enable experimental features. Use the `edge` images for the latest implementation.
 :::
@@ -40,23 +41,32 @@ Click on the clock icon that appears when you hover over a category name.
 ![alt-text-here](/img/goal-template/new-automation.webp)
 
 From this opening view, you can
-A.   Add a new budget automation
-B.	Add a long-term goal
-C.	Add month-end cleanup to the category
+
+  A. Add a new budget automation  
+
+  B. Add a long-term goal  
+
+  C. Add month-end cleanup to the category
+
 :::info
 Balance caps can only be added to existing budget automations
 :::
+
 You can have multiple automations!
+
 ![alt-text-here](/img/goal-template/multiple-automations.webp)
+
 :::tip
 The projected amount to be budgeted will be shown in the top right of the automation form. This will update with the category’s automations.
 :::
 
 ### Priorities {/* #priorities */}
+
 Most of the budget automations will have a priority field that you can use to set the order in which the automations are run, from lowest to highest. 
 -	Negative priorities are not allowed.
 -	All priority 0 are run first, then 1, 2, 30, 36, etc. So the automation that has the highest priority in importance actually has the lowest priority **number**.
--	All priorities with the same number will run in database order. To ensure the budget fills in the exact order you wish, give each automation a different priority number. 
+-	All priorities with the same number will run in database order. To ensure the budget fills in the exact order you wish, give each automation a different priority number.
+
 :::warning 
 Priority 0 automations will budget funds even if they are not available in **To Budget**. Priorities other than 0 will **not** budget more funds than are available.
 If you have multiple _Cover schedule_ or _Save by date_ automations in a single category, their priorities **must** match.
@@ -82,14 +92,16 @@ You can give different priorities to multiple _Fixed amount_ automations in the 
 :::
 
 ### Save by Date {/* #save-by-date */}
+
 ![alt-text-here](/img/goal-template/save-by-date-automation.webp)
+
 Use this automation to save up the desired amount (A) by a specific month (B). 
 
 The automation determines how much to budget each month to meet your savings goal. If you add or remove funds along the way, it recalculates the remaining monthly amounts so you still reach your target on time.
 
 Options:
--	Repeat (C). You can repeat the automation if your target is cyclical, such as bills due quarterly or yearly. If you need to repeat based on a number of days or weeks, use the _Fixed amount_ automation.
--	Allow early spending (D). This option allows you to spend funds along the way. Starting in the month you choose, you can spend from the category without the automation recalculating the remaining monthly amounts. By the target date, the remaining balance will be the amount you did not spend earlier. This option is handy for times when spending happens months before the event, like travel savings, wedding plans or the birthday gifts in our example.
+-	**Repeat** (C). You can repeat the automation if your target is cyclical, such as bills due quarterly or yearly. If you need to repeat based on a number of days or weeks, use the _Fixed amount_ automation.
+-	**Allow early spending** (D). This option allows you to spend funds along the way. Starting in the month you choose, you can spend from the category without the automation recalculating the remaining monthly amounts. By the target date, the remaining balance will be the amount you did not spend earlier. This option is handy for times when spending happens months before the event, like travel savings, wedding plans or the birthday gifts in our example.
 
 :::warning
 All _Save by date_ automations in the same category must have the same priority.
@@ -97,13 +109,15 @@ All _Save by date_ automations in the same category must have the same priority.
 
 
 ### Cover Schedule {/* #cover-schedule */}
+
 ![alt-text-here](/img/goal-template/schedule-automation.webp)
+
 This automation budgets based on a schedule previously added to actual. 
 Pick a schedule (A) and a mode (B).
 
 There are two modes:
--	Save for the next occurrence. The automation budgets a portion of the scheduled amount each month so the full amount is ready when needed.
--	Cover each occurrence when it occurs. The automation budgets for the schedule only in the month it occurs. It will budget the full scheduled amount.
+-	**Save for the next occurrence.** The automation budgets a portion of the scheduled amount each month so the full amount is ready when needed.
+-	**Cover each occurrence when it occurs.** The automation budgets for the schedule only in the month it occurs. It will budget the full scheduled amount.
 
 You can adjust the schedule in the schedule editor and the automation will stay up to date automatically.
 
@@ -112,28 +126,35 @@ All _Cover schedule_ automations in the same category must have the same priorit
 :::
 
 ### % of Income {/* #percentage */}
+
 ![alt-text-here](/img/goal-template/percentage-automation.webp)
+
 This automation budgets a percentage of income from this month or last month, or a percentage of available funds from this month.
 
 When you click in the Category field, you will be presented with current choices to base the percentage on.
+
 ![alt-text-here](/img/goal-template/percentage-category.webp)
 
--	Total of all income. This month or Last month. The _Inflow to Budget, Received_ column in the budget will be used.
--	Available funds to budget. This month only. The available amount after Priority 0 and other automations with lower or equal priorities have run will be used. 
--	Specific income categories. This month or Last month. The percentage will be based on the single income category you choose.
+-	**Total of all income.** This month or Last month. The _Inflow to Budget, Received_ column in the budget will be used.
+-	**Available funds to budget.** This month only. The available amount after Priority 0 and other automations with lower or equal priorities have run will be used. 
+-	**Specific income categories.** This month or Last month. The percentage will be based on the single income category you choose.
 
 ### From History {/* #from-history */}
+
 ![alt-text-here](/img/goal-template/historical-automation.webp)
+
 For this automation, you can choose to budget based on historical data.
 Choose a mode (A) and the number of months back (B).
 
 Modes:
--	Copy a previous month. This will copy the **budget** from a previous month.
--	Average of previous months. This will average the **spending** from the previous number of months you choose. 
+-	**Copy a previous month.** This will copy the **budget** from a previous month.
+-	**Average of previous months.** This will average the **spending** from the previous number of months you choose. 
 
 ### Refill to Cap
+
 ![alt-text-here](/img/goal-template/refill-automation.webp)
-This automation requires a [Balance cap](link to section) and will refill the category to the cap.
+
+This automation requires a [Balance cap](#balance-cap) and will refill the category to the cap.
 
 Click on _Add balance limit_ and you will be taken to the Balance cap automation. After you add a balance cap, the refill automation will be active.
 
@@ -155,21 +176,24 @@ If a category has a balance cap, the automation will fill to the cap, subtract t
 
 Example:
 
-With $100 leftover in **To Budget** and all of our three categories have a balance of 0.00.
+Starting with $100 leftover in **To Budget** and 0.00 in all of our three categories below.
 **Snack Fund** has a balance cap of 40.00.
 
-Pass 1: Snacks, 100 / 6 * 3 = 50 (exceeds the cap, so Snack Fund receives 40.00, To Budget is now 60) 
-Pass 2: Vacation, 60 / 3 * 1 = 20 (Vacation Fund receives 20.00)
-	Investment, 60 / 3 * 2 = 40 (Investment Fund receives 40.00)
+Pass 1: Snacks, 100 / 6 * 3 = 50 (exceeds the cap, so Snack Fund receives 40.00, To Budget is now 60)
 
-| Category        | Weight                    | Amount applied |
-| --------------- | -------------------------------- | :------------: |
-| Snack Fund      | 3 |     40.00      |
-| Vacation Fund   | 1            |     20.00      |
-| Investment Fund | 2          |     40.00      |
+Pass 2: Vacation, 60 / 3 * 1 = 20 (Vacation Fund receives 20.00)
+	      Investment, 60 / 3 * 2 = 40 (Investment Fund receives 40.00)
+
+| Category        | Weight                    | Balance cap? | Amount applied |
+| --------------- | :-----------------------: | :--------------: | :-------------: |
+| Snack Fund      | 3 | Yes, 40.00 |      40.00      |
+| Vacation Fund   | 1  | No          |     20.00      |
+| Investment Fund | 2  | No        |     40.00      |
 
 ## Balance cap {/* #balance-cap */}
-Screenshot
+
+![alt-text-here](/img/goal-template/balance-cap.webp)
+
 Budget automations will not add funds above the cap you set. If the category balance exceeds the cap, the next budgeting pass will remove the excess. To keep any extra funds in the category, enable Retain existing funds over the cap. When this option is turned on, the next budgeting pass will leave the excess in place.
 
 All automations in the category will be subject to the cap.
@@ -177,32 +201,39 @@ All automations in the category will be subject to the cap.
 Examples:
 
 Here’s an interesting example of budgeting money for a meal out every Saturday night and weekday work lunches in the same category.
-The Saturday night meals are budgeted at 50.00/week starting on a Saturday.
-The weekday lunches are budgeted at 35.00/week starting on a Monday.
-The Balance cap is set at 85.00 week based on Mondays.
+- The Saturday night meals are budgeted at 50.00/week starting on a Saturday.
+- The weekday lunches are budgeted at 35.00/week starting on a Monday.
+- The Balance cap is set at 85.00 week based on Mondays.
 
 June, 4 Saturdays and 5 Mondays:
+
 ![alt-text-here](/img/goal-template/june-restaurants.webp)
 
 July, 4 Saturdays and 4 Mondays:
+
 ![alt-text-here](/img/goal-template/july-restaurants.webp)
 
 August, 5 Saturdays and 5 Mondays:
+
 ![alt-text-here](/img/goal-template/august-restaurants.webp)
 
 October, 5 Saturdays and 4 Mondays. Our budget looks different as the Balance cap is based on the 4 Mondays! So, the budget covers 4 Saturday meals and 4 work weeks.
+
 ![alt-text-here](/img/goal-template/october-restaurants.webp)
 
 Here’s another example. We get our paycheck on Friday, every other week. We want to budget $300 from each paycheck to groceries, but not in months with 3 paychecks, so we place a 600.00 balance cap on our category and start the _Fixed amount_ automation on a payday.
+
 There are 3 paydays in July, but the Balance cap holds our grocery budget at 600.00:
+
 ![alt-text-here](/img/goal-template/july-food.webp)
-
-
 
 ## Long-term Goals and Budget Indicators {/* #long-term-indicators */}
 
 ### Budget Indicator {/* #budget-indicator */}
-After automations run, each category’s budget indicator appears as the color of its balance text. Hover over a balance to see the matching tooltip. The example below shows these states: normal (no automation), empty (no automation), projected budget met (green), projected budget not met (orange), and negative balance (red).
+
+After automations run, each category’s budget indicator appears as the color of its balance text. Hover over a balance to see the matching tooltip. 
+
+The example below shows these states: normal (no automation), empty (no automation), projected budget met (green), projected budget not met (orange), and negative balance (red).
 
 ![alt-text-here](/img/goal-template/budget-indicators.webp)
 
@@ -215,6 +246,7 @@ The tooltip will give you more information about your budget and balance:
 ### Long-term Goal {/* #long-term-goal */}
 
 ![alt-text-here](/img/goal-template/long-term-automation.webp )
+
 Long-term goals change how the budget indicator works. Instead of being based on the budgeted amount, the long-term goal will indicate how much progress you have made toward a desired target. Importantly, if you have met your projected budget for the month but are shy of your long-term goal the balance will remain orange.
 
 Once you hit your goal, the balance will turn green. Note that if you remove funds and fall short, it will turn orange again.
@@ -227,7 +259,9 @@ Once you hit your goal, the balance will turn green. Note that if you remove fun
 The tooltip will give you information regarding your progress:
 
 ![alt-text-here](/img/goal-template/long-term-underfunded.webp)
+
 ![alt-text-here](/img/goal-template/long-term-fully-funded.webp)
+
 ![alt-text-here](/img/goal-template/long-term-overfunded.webp)
 
 ## Running automations {/* #run-automations */}
