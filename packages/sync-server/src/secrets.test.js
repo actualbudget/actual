@@ -4,9 +4,6 @@ import { getAccountDb } from './account-db';
 import { handlers as app } from './app-secrets';
 import { SecretName, secretsService } from './services/secrets-service';
 
-const validSecretName = SecretName.simplefin_token;
-const validSecretValue = 'testValue';
-
 const enableOpenIdAuth = () => {
   const db = getAccountDb();
   db.mutate('DELETE FROM auth');
@@ -16,7 +13,7 @@ const enableOpenIdAuth = () => {
 };
 
 describe('secretsService', () => {
-  const testSecretName = 'testSecret';
+  const testSecretName = SecretName.simplefin_token;
   const testSecretValue = 'testValue';
 
   it('should set a secret', () => {
@@ -56,8 +53,8 @@ describe('secretsService', () => {
     });
 
     it('returns 401 if the user is not authenticated', async () => {
-      secretsService.set(validSecretName, validSecretValue);
-      const res = await request(app).get(`/${validSecretName}`);
+      secretsService.set(testSecretName, testSecretValue);
+      const res = await request(app).get(`/${testSecretName}`);
 
       expect(res.statusCode).toEqual(401);
       expect(res.body).toEqual({
@@ -84,9 +81,9 @@ describe('secretsService', () => {
     });
 
     it('returns 204 if secret exists', async () => {
-      secretsService.set(validSecretName, validSecretValue);
+      secretsService.set(testSecretName, testSecretValue);
       const res = await request(app)
-        .get(`/${validSecretName}`)
+        .get(`/${testSecretName}`)
         .set('x-actual-token', 'valid-token');
 
       expect(res.statusCode).toEqual(204);
@@ -96,7 +93,7 @@ describe('secretsService', () => {
       const res = await request(app)
         .post(`/`)
         .set('x-actual-token', 'valid-token')
-        .send({ name: validSecretName, value: validSecretValue });
+        .send({ name: testSecretName, value: testSecretValue });
 
       expect(res.statusCode).toEqual(200);
       expect(res.body).toEqual({
@@ -107,12 +104,12 @@ describe('secretsService', () => {
     describe('when OpenID is the active auth method', () => {
       beforeEach(() => {
         enableOpenIdAuth();
-        secretsService.set(validSecretName, validSecretValue);
+        secretsService.set(testSecretName, testSecretValue);
       });
 
       it('GET returns 403 for non-admin users', async () => {
         const res = await request(app)
-          .get(`/${validSecretName}`)
+          .get(`/${testSecretName}`)
           .set('x-actual-token', 'valid-token-user');
 
         expect(res.statusCode).toEqual(403);
@@ -125,7 +122,7 @@ describe('secretsService', () => {
 
       it('GET returns 204 for admin users when secret exists', async () => {
         const res = await request(app)
-          .get(`/${validSecretName}`)
+          .get(`/${testSecretName}`)
           .set('x-actual-token', 'valid-token-admin');
 
         expect(res.statusCode).toEqual(204);
@@ -135,7 +132,7 @@ describe('secretsService', () => {
         const res = await request(app)
           .post('/')
           .set('x-actual-token', 'valid-token-user')
-          .send({ name: validSecretName, value: validSecretValue });
+          .send({ name: testSecretName, value: testSecretValue });
 
         expect(res.statusCode).toEqual(403);
         expect(res.body).toEqual({
