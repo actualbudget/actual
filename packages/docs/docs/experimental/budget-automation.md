@@ -68,10 +68,11 @@ Most of the budget automations will have a priority field that you can use to se
 - All priorities with the same number will run in database order. To ensure the budget fills in the exact order you wish, give each automation a different priority number.
 
 :::warning
+
 - Priority 0 automations will budget funds even if they are not available in **To Budget**.
 - Priorities other than 0 will **not** budget more funds than are available.
 - If you have multiple _Cover schedule_ or _Save by date_ automations in a single category, their priorities **must** match.
-:::
+  :::
 
 :::tip
 When you first start using priorities, space them 10 numbers apart so you have room to insert additional priorities later.
@@ -186,11 +187,11 @@ Starting with $100 leftover in **To Budget** and 0.00 in all of our three catego
 **Snack Fund** has a balance cap of 40.00.
 
 Pass 1:</br>
-  Snacks, 100 / 6 \* 3 = 50 (exceeds the cap, so Snack Fund receives 40.00, To Budget is now 60)
+Snacks, 100 / 6 \* 3 = 50 (exceeds the cap, so Snack Fund receives 40.00, To Budget is now 60)
 
 Pass 2:</br>
-  Vacation, 60 / 3 _ 1 = 20 (Vacation Fund receives 20.00)</br>
-  Investment, 60 / 3 _ 2 = 40 (Investment Fund receives 40.00)
+Vacation, 60 / 3 _ 1 = 20 (Vacation Fund receives 20.00)</br>
+Investment, 60 / 3 _ 2 = 40 (Investment Fund receives 40.00)
 
 | Category        | Weight | Balance cap? | Amount applied |
 | --------------- | :----: | :----------: | :------------: |
