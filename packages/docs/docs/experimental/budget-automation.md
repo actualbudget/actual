@@ -43,10 +43,8 @@ Click on the clock icon that appears when you hover over a category name.
 
 From this opening view, you can
 
-A. Add a new budget automation
-
-B. Add a long-term goal
-
+A. Add a new budget automation</br>
+B. Add a long-term goal</br>
 C. Add month-end cleanup to the category
 
 :::info
@@ -70,8 +68,9 @@ Most of the budget automations will have a priority field that you can use to se
 - All priorities with the same number will run in database order. To ensure the budget fills in the exact order you wish, give each automation a different priority number.
 
 :::warning
-Priority 0 automations will budget funds even if they are not available in **To Budget**. Priorities other than 0 will **not** budget more funds than are available.
-If you have multiple _Cover schedule_ or _Save by date_ automations in a single category, their priorities **must** match.
+- Priority 0 automations will budget funds even if they are not available in **To Budget**.
+- Priorities other than 0 will **not** budget more funds than are available.
+- If you have multiple _Cover schedule_ or _Save by date_ automations in a single category, their priorities **must** match.
 :::
 
 :::tip
@@ -86,11 +85,12 @@ This is the simplest type of automation. The amount (A) will be budgeted at the 
 
 :::info
 For weeks or days, the entire month will be budgeted based on the number of weeks/days in that month.
+
 For weeks, the number of weeks in a month is based on the weekday of your start date. Our start date above is on a Saturday. There are 5 Saturdays in May 2026, so the automation projects a budget of 250.00.
 :::
 
 :::tip
-You can give different priorities to multiple _Fixed amount_ automations in the same category and they will be respected when the budget fills. For example, if you want only half of your $500 food budget to fill at month start, create two $250 automations in the **Food** category, one with a low priority and one with a priority higher than the last priority that available funds will fill at month start. When you have more funds later in the month, run automations again for that category and the automation will fill it.
+You can give different priorities to multiple _Fixed amount_ automations in the same category and they will be respected when the budget fills. For example, if you want only half of your $500 food budget to fill at month start, create two $250 automations in the **Food** category, one with a low priority and one with a priority higher than the last priority that available funds will fill at month start. When you have more funds later in the month, run automations again for that category and the automation will fill it (with overwrite).
 :::
 
 ### Save by Date {#save-by-date}
@@ -101,7 +101,7 @@ Use this automation to save up the desired amount (A) by a specific month (B).
 
 The automation determines how much to budget each month to meet your savings goal. If you add or remove funds along the way, it recalculates the remaining monthly amounts so you still reach your target on time.
 
-Options:
+**Options:**
 
 - **Repeat** (C). You can repeat the automation if your target is cyclical, such as bills due quarterly or yearly. If you need to repeat based on a number of days or weeks, use the _Fixed amount_ automation.
 - **Allow early spending** (D). This option allows you to spend funds along the way. Starting in the month you choose, you can spend from the category without the automation recalculating the remaining monthly amounts. By the target date, the remaining balance will be the amount you did not spend earlier. This option is handy for times when spending happens months before the event, like travel savings, wedding plans or the birthday gifts in our example.
@@ -117,7 +117,7 @@ All _Save by date_ automations in the same category must have the same priority.
 This automation budgets based on a schedule previously added to actual.
 Pick a schedule (A) and a mode (B).
 
-There are two modes:
+**There are two modes:**
 
 - **Save for the next occurrence.** The automation budgets a portion of the scheduled amount each month so the full amount is ready when needed.
 - **Cover each occurrence when it occurs.** The automation budgets for the schedule only in the month it occurs. It will budget the full scheduled amount.
@@ -149,7 +149,7 @@ When you click in the Category field, you will be presented with current choices
 For this automation, you can choose to budget based on historical data.
 Choose a mode (A) and the number of months back (B).
 
-Modes:
+**Modes:**
 
 - **Copy a previous month.** This will copy the **budget** from a previous month.
 - **Average of previous months.** This will average the **spending** from the previous number of months you choose.
@@ -176,19 +176,21 @@ After all of the other automations have run, the leftover of **To Budget** will 
 
 #### Weights {#remainder-weights}
 
-The sum of the weights of all remainder automations is used to determine the split amounts:
-`budgeted_amount = available_funds / sum_of_weights * category_weight`
+The sum of the weights of all remainder automations is used to determine the split amounts:</br>
+`budgeted_amount = available_funds / sum_of_weights * category_weight`</br>
 If a category has a balance cap, the automation will fill to the cap, subtract that amount from the available funds, then make another pass.
 
-Example:
+#### Examples:
 
 Starting with $100 leftover in **To Budget** and 0.00 in all of our three categories below.
 **Snack Fund** has a balance cap of 40.00.
 
-Pass 1: Snacks, 100 / 6 \* 3 = 50 (exceeds the cap, so Snack Fund receives 40.00, To Budget is now 60)
+Pass 1:</br>
+  Snacks, 100 / 6 \* 3 = 50 (exceeds the cap, so Snack Fund receives 40.00, To Budget is now 60)
 
-Pass 2: Vacation, 60 / 3 _ 1 = 20 (Vacation Fund receives 20.00)
-Investment, 60 / 3 _ 2 = 40 (Investment Fund receives 40.00)
+Pass 2:</br>
+  Vacation, 60 / 3 _ 1 = 20 (Vacation Fund receives 20.00)</br>
+  Investment, 60 / 3 _ 2 = 40 (Investment Fund receives 40.00)
 
 | Category        | Weight | Balance cap? | Amount applied |
 | --------------- | :----: | :----------: | :------------: |
@@ -200,11 +202,11 @@ Investment, 60 / 3 _ 2 = 40 (Investment Fund receives 40.00)
 
 ![alt-text-here](/img/goal-template/balance-cap.webp)
 
-Budget automations will not add funds above the cap you set. If the category balance exceeds the cap, the next budgeting pass will remove the excess. To keep any extra funds in the category, enable Retain existing funds over the cap. When this option is turned on, the next budgeting pass will leave the excess in place.
+Budget automations will not add funds above the cap you set. If the category balance exceeds the cap, the next budgeting pass will remove the excess. To keep any extra funds in the category, enable _Retain existing funds over the cap_. When this option is turned on, the next budgeting pass will leave the excess in place.
 
 All automations in the category will be subject to the cap.
 
-Examples:
+### Examples:
 
 Here’s an interesting example of budgeting money for a meal out every Saturday night and weekday work lunches in the same category.
 
@@ -212,19 +214,19 @@ Here’s an interesting example of budgeting money for a meal out every Saturday
 - The weekday lunches are budgeted at 35.00/week starting on a Monday.
 - The Balance cap is set at 85.00 week based on Mondays.
 
-June, 4 Saturdays and 5 Mondays:
+June: 4 Saturdays and 5 Mondays:
 
 ![alt-text-here](/img/goal-template/june-restaurants.webp)
 
-July, 4 Saturdays and 4 Mondays:
+July: 4 Saturdays and 4 Mondays:
 
 ![alt-text-here](/img/goal-template/july-restaurants.webp)
 
-August, 5 Saturdays and 5 Mondays:
+August: 5 Saturdays and 5 Mondays:
 
 ![alt-text-here](/img/goal-template/august-restaurants.webp)
 
-October, 5 Saturdays and 4 Mondays. Our budget looks different as the Balance cap is based on the 4 Mondays! So, the budget covers 4 Saturday meals and 4 work weeks.
+October: 5 Saturdays and 4 Mondays. Our budget looks different as the Balance cap is based on the 4 Mondays! So, the budget covers 4 Saturday meals and 4 work weeks.
 
 ![alt-text-here](/img/goal-template/october-restaurants.webp)
 
@@ -301,6 +303,8 @@ In the budget header menu you will see the following options:
 ---
 
 ## Adjustments {#adjustments}
+
+**TBD when UI is completed**
 
 Yearly expenses (e.g. insurance, property rates, etc.) increase year on year. Often the amount is unknown until close to the due date. This creates a budget crunch - if your $ 1,000 insurance jumps 20% ($ 1,200), you need to make up that extra $ 200 in just a month or two.
 
