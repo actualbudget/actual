@@ -43,8 +43,8 @@ Click on the clock icon that appears when you hover over a category name.
 
 From this opening view, you can
 
-A. Add a new budget automation</br>
-B. Add a long-term goal</br>
+A. Add a new budget automation<br>
+B. Add a long-term goal<br>
 C. Add month-end cleanup to the category
 
 :::info
@@ -115,7 +115,7 @@ All _Save by date_ automations in the same category must have the same priority.
 
 ![alt-text-here](/img/goal-template/schedule-automation.webp)
 
-This automation budgets based on a schedule previously added to actual.
+This automation budgets based on a schedule previously added to actual.<br>
 Pick a schedule (A) and a mode (B).
 
 **There are two modes:**
@@ -147,7 +147,7 @@ When you click in the Category field, you will be presented with current choices
 
 ![alt-text-here](/img/goal-template/historical-automation.webp)
 
-For this automation, you can choose to budget based on historical data.
+For this automation, you can choose to budget based on historical data.<br>
 Choose a mode (A) and the number of months back (B).
 
 **Modes:**
@@ -177,8 +177,8 @@ After all of the other automations have run, the leftover of **To Budget** will 
 
 #### Weights {#remainder-weights}
 
-The sum of the weights of all remainder automations is used to determine the split amounts:</br>
-`budgeted_amount = available_funds / sum_of_weights * category_weight`</br>
+The sum of the weights of all remainder automations is used to determine the split amounts:<br>
+`budgeted_amount = available_funds / sum_of_weights * category_weight`<br>
 If a category has a balance cap, the automation will fill to the cap, subtract that amount from the available funds, then make another pass.
 
 #### Examples:
@@ -186,11 +186,11 @@ If a category has a balance cap, the automation will fill to the cap, subtract t
 Starting with $100 leftover in **To Budget** and 0.00 in all of our three categories below.
 **Snack Fund** has a balance cap of 40.00.
 
-Pass 1:</br>
+Pass 1:<br>
 Snacks, 100 / 6 \* 3 = 50 (exceeds the cap, so Snack Fund receives 40.00, To Budget is now 60)
 
-Pass 2:</br>
-Vacation, 60 / 3 _ 1 = 20 (Vacation Fund receives 20.00)</br>
+Pass 2:<br>
+Vacation, 60 / 3 _ 1 = 20 (Vacation Fund receives 20.00)<br>
 Investment, 60 / 3 _ 2 = 40 (Investment Fund receives 40.00)
 
 | Category        | Weight | Balance cap? | Amount applied |
