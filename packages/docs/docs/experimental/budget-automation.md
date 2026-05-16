@@ -181,7 +181,7 @@ The sum of the weights of all remainder automations is used to determine the spl
 `budgeted_amount = available_funds / sum_of_weights * category_weight`<br />
 If a category has a balance cap, the automation will fill to the cap, subtract that amount from the available funds, then make another pass.
 
-#### Examples:
+#### Examples
 
 Starting with $100 leftover in **To Budget** and 0.00 in all of our three categories below.<br />
 **Snack Fund** has a balance cap of 40.00.
@@ -207,13 +207,13 @@ Budget automations will not add funds above the cap you set. If the category bal
 
 All automations in the category will be subject to the cap.
 
-### Examples:
+### Examples
 
 Here’s an interesting example of budgeting money for a meal out every Saturday night and weekday work lunches in the same category.
 
 - The Saturday night meals are budgeted at 50.00/week starting on a Saturday.
 - The weekday lunches are budgeted at 35.00/week starting on a Monday.
-- The Balance cap is set at 85.00 week based on Mondays.
+- The Balance cap is set at 85.00/week based on Mondays.
 
 June: 4 Saturdays and 5 Mondays:
 
@@ -227,7 +227,8 @@ August: 5 Saturdays and 5 Mondays:
 
 ![alt-text-here](/img/goal-template/august-restaurants.webp)
 
-October: 5 Saturdays and 4 Mondays. Our budget looks different as the Balance cap is based on the 4 Mondays! So, the budget covers 4 Saturday meals and 4 work weeks.
+October: 5 Saturdays and 4 Mondays. Our budget looks different as the Balance cap is based on the 4 Mondays! <br />
+So, the budget covers 4 Saturday meals and 4 work weeks.
 
 ![alt-text-here](/img/goal-template/october-restaurants.webp)
 
