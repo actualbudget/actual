@@ -33,7 +33,7 @@ If you have a notes template, the first time you open the UI (clock icon) you wi
 
 Make any changes you feel are needed, then _Save_ the form to complete the migration. The notes can now be deleted.
 
-## Creating Automations {/_ #create-automations _/}
+## Creating Automations {#create-automations}
 
 Click on the clock icon that appears when you hover over a category name.
 
@@ -61,7 +61,7 @@ You can have multiple automations!
 The projected amount to be budgeted will be shown in the top right of the automation form. This will update with the category’s automations.
 :::
 
-### Priorities {/_ #priorities _/}
+### Priorities {#priorities}
 
 Most of the budget automations will have a priority field that you can use to set the order in which the automations are run, from lowest to highest.
 
@@ -78,7 +78,7 @@ If you have multiple _Cover schedule_ or _Save by date_ automations in a single 
 When you first start using priorities, space them 10 numbers apart so you have room to insert additional priorities later.
 :::
 
-### Fixed Amount {/_ #fixed-amount _/}
+### Fixed Amount {#fixed-amount}
 
 ![alt-text-here](/img/goal-template/fixed-amount-automation.webp)
 
@@ -93,7 +93,7 @@ For weeks, the number of weeks in a month is based on the weekday of your start 
 You can give different priorities to multiple _Fixed amount_ automations in the same category and they will be respected when the budget fills. For example, if you want only half of your $500 food budget to fill at month start, create two $250 automations in the **Food** category, one with a low priority and one with a priority higher than the last priority that available funds will fill at month start. When you have more funds later in the month, run automations again for that category and the automation will fill it.
 :::
 
-### Save by Date {/_ #save-by-date _/}
+### Save by Date {#save-by-date}
 
 ![alt-text-here](/img/goal-template/save-by-date-automation.webp)
 
@@ -110,7 +110,7 @@ Options:
 All _Save by date_ automations in the same category must have the same priority.
 :::
 
-### Cover Schedule {/_ #cover-schedule _/}
+### Cover Schedule {#cover-schedule}
 
 ![alt-text-here](/img/goal-template/schedule-automation.webp)
 
@@ -128,7 +128,7 @@ You can adjust the schedule in the schedule editor and the automation will stay 
 All _Cover schedule_ automations in the same category must have the same priority.
 :::
 
-### % of Income {/_ #percentage _/}
+### % of Income {#percentage}
 
 ![alt-text-here](/img/goal-template/percentage-automation.webp)
 
@@ -142,7 +142,7 @@ When you click in the Category field, you will be presented with current choices
 - **Available funds to budget.** This month only. The available amount after Priority 0 and other automations with lower or equal priorities have run will be used.
 - **Specific income categories.** This month or Last month. The percentage will be based on the single income category you choose.
 
-### From History {/_ #from-history _/}
+### From History {#from-history}
 
 ![alt-text-here](/img/goal-template/historical-automation.webp)
 
@@ -154,7 +154,7 @@ Modes:
 - **Copy a previous month.** This will copy the **budget** from a previous month.
 - **Average of previous months.** This will average the **spending** from the previous number of months you choose.
 
-### Refill to Cap
+### Refill to Cap {#refill}
 
 ![alt-text-here](/img/goal-template/refill-automation.webp)
 
@@ -164,7 +164,7 @@ Click on _Add balance limit_ and you will be taken to the Balance cap automation
 
 ![alt-text-here](/img/goal-template/refill-active.webp)
 
-### Whatever is Left {/_ #remainder _/}
+### Whatever is Left {#remainder}
 
 ![alt-text-here](/img/goal-template/remainder-automation.webp)
 
@@ -174,7 +174,7 @@ After all of the other automations have run, the leftover of **To Budget** will 
 - Remainder automations will respect any balance caps in place.
 - If you want **To Budget** = 0.00 after these run, make sure at least one of them is in a category without a balance cap.
 
-#### Weights {/_ #remainder-weights _/}
+#### Weights {#remainder-weights}
 
 The sum of the weights of all remainder automations is used to determine the split amounts:
 `budgeted_amount = available_funds / sum_of_weights * category_weight`
@@ -196,7 +196,7 @@ Investment, 60 / 3 _ 2 = 40 (Investment Fund receives 40.00)
 | Vacation Fund   |   1    |      No      |     20.00      |
 | Investment Fund |   2    |      No      |     40.00      |
 
-## Balance cap {/_ #balance-cap _/}
+## Balance cap {#balance-cap}
 
 ![alt-text-here](/img/goal-template/balance-cap.webp)
 
@@ -234,9 +234,9 @@ There are 3 paydays in July, but the Balance cap holds our grocery budget at 600
 
 ![alt-text-here](/img/goal-template/july-food.webp)
 
-## Long-term Goals and Budget Indicators {/_ #long-term-indicators _/}
+## Long-term Goals and Budget Indicators {#indicators}
 
-### Budget Indicator {/_ #budget-indicator _/}
+### Budget Indicator {#budget-indicator}
 
 After automations run, each category’s budget indicator appears as the color of its balance text. Hover over a balance to see the matching tooltip.
 
@@ -250,7 +250,7 @@ The tooltip will give you more information about your budget and balance:
 
 ![alt-text-here](/img/goal-template/underfunded-automation.webp)
 
-### Long-term Goal {/_ #long-term-goal _/}
+### Long-term Goal {#long-term-goal}
 
 ![alt-text-here](/img/goal-template/long-term-automation.webp)
 
@@ -272,11 +272,11 @@ The tooltip will give you information regarding your progress:
 
 ![alt-text-here](/img/goal-template/long-term-overfunded.webp)
 
-## Running automations {/_ #run-automations _/}
+## Running automations {#run-automations}
 
-### How to apply the automations {/_ #applying-automations _/}
+### How to apply the automations {#applying-automations}
 
-#### Apply all automations {/_ #apply-all-automations _/}
+#### Apply all automations {#apply-all-automations}
 
 In the budget header menu you will see the following options:
 
@@ -288,7 +288,7 @@ In the budget header menu you will see the following options:
 
 - **Overwrite with budget template** will fill in all budget cells using automations and overwrite any already existing budget amounts. This is the recommended method if you are using priorities greater than 0.
 
-#### Apply automations selectively {/_ #apply-selective-automations _/}
+#### Apply automations selectively {#apply-selective-automations}
 
 - **Single Category**: Use the "Overwrite with template" option shown below from the budget field drop-down menu to apply automations to just that category. This will overwrite any existing budgeted amount.
 
@@ -300,7 +300,7 @@ In the budget header menu you will see the following options:
 
 ---
 
-## Adjustments {/_ #adjustments _/}
+## Adjustments {#adjustments}
 
 Yearly expenses (e.g. insurance, property rates, etc.) increase year on year. Often the amount is unknown until close to the due date. This creates a budget crunch - if your $ 1,000 insurance jumps 20% ($ 1,200), you need to make up that extra $ 200 in just a month or two.
 
@@ -319,7 +319,7 @@ As an example, assume the amount scheduled for 'Insurance' the prior year was $ 
 
 When "Insurance" comes due at the end of the year, $1200 will be available for the first example, or $1500 for the second example.
 
-#### Available Variations
+### Available Variations
 
 Below is a table of the variations of the Schedule template.
 
@@ -352,4 +352,6 @@ As an example, assume the spend for the category was [\$40, \$50, \$60] for the 
 | `#template average 3 months [increase 11]`  |      \$ 61      |
 | `#template average 3 months [decrease 1]`   |      \$ 49      |
 
-## Month-end Cleanup {/_ #month-end-cleanup _/}
+## Month-end Cleanup {#month-end-cleanup}
+
+To be continued...
