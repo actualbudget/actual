@@ -540,6 +540,38 @@ describe('Transaction rules', () => {
     expect(transactions.map(t => t.id)).toEqual(['1']);
   });
 
+  test('hasTags matches nothing when input contains no `#` tag pattern', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+    const payeeId = await db.insertPayee({ name: 'payee' });
+
+    await db.insertTransaction({
+      id: '1',
+      date: '2020-10-01',
+      account,
+      payee: payeeId,
+      notes: 'Follow up #foo issue',
+      amount: 123,
+    });
+
+    await db.insertTransaction({
+      id: '2',
+      date: '2020-10-01',
+      account,
+      payee: payeeId,
+      notes: 'unrelated note',
+      amount: 123,
+    });
+
+    // Input is missing the leading `#` — previously this returned every
+    // transaction; now it should match nothing.
+    const transactions = await getMatchingTransactions([
+      { field: 'notes', op: 'hasTags', value: 'foo' },
+    ]);
+
+    expect(transactions).toEqual([]);
+  });
+
   test('and sub expression builds $and condition', async () => {
     const conds = [{ field: 'category', op: 'is', value: null }];
     const { filters } = conditionsToAQL(conds);

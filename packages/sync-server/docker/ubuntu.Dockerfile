@@ -46,6 +46,9 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages/sync-server/package.json ./
 COPY --from=builder /app/packages/sync-server/build ./
 
+# script dir changed when we swapped build method, add the legacy dir in for compatibility
+RUN mkdir -p src && ln -s ../scripts src/scripts
+
 ENTRYPOINT ["/usr/bin/tini","-g",  "--"]
 EXPOSE 5006
 CMD ["node", "app.js"]

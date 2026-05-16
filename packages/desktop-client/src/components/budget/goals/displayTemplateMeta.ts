@@ -38,7 +38,7 @@ export function getDisplayTemplateMeta(
     case 'schedule':
       return {
         label: t('Cover schedule'),
-        description: t('Save up for a recurring scheduled transaction.'),
+        description: t('Save up for a scheduled transaction.'),
         icon: SvgCalendar3,
       };
     case 'by':

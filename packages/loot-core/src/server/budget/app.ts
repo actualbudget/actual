@@ -14,7 +14,9 @@ import type { CategoryEntity, CategoryGroupEntity } from '#types/models';
 
 import * as actions from './actions';
 import * as budget from './base';
+import * as cleanupGroupActions from './cleanup-groups';
 import * as cleanupActions from './cleanup-template';
+import { storeNoteCleanups } from './cleanup-template-notes';
 import * as goalActions from './goal-template';
 import * as goalNoteActions from './template-notes';
 
@@ -60,7 +62,9 @@ export type BudgetHandlers = {
   'budget/set-category-automations': typeof goalActions.storeTemplates;
   'budget/dry-run-category-template': typeof goalActions.dryRunCategoryTemplate;
   'budget/store-note-templates': typeof goalNoteActions.storeNoteTemplates;
+  'budget/store-note-cleanups': typeof storeNoteCleanups;
   'budget/render-note-templates': typeof goalNoteActions.unparse;
+  'budget/create-cleanup-group': typeof cleanupGroupActions.createCleanupGroup;
 };
 
 export const app = createApp<BudgetHandlers>();
@@ -167,7 +171,12 @@ app.method(
   'budget/store-note-templates',
   mutator(goalNoteActions.storeNoteTemplates),
 );
+app.method('budget/store-note-cleanups', mutator(storeNoteCleanups));
 app.method('budget/render-note-templates', goalNoteActions.unparse);
+app.method(
+  'budget/create-cleanup-group',
+  mutator(undoable(cleanupGroupActions.createCleanupGroup)),
+);
 
 // Server must return AQL entities not the raw DB data
 async function getCategories({ hidden }: { hidden?: boolean } = {}) {

@@ -26,6 +26,7 @@ The following are available as experimental features:
 
 - [Crossover Point report](/docs/experimental/crossover-point-report)
 - [Budget Analysis report](/docs/experimental/budget-analysis-report)
+- [Balance Forecast report](/docs/experimental/balance-forecast-report)
 
 ## Cash Flow Graph
 
