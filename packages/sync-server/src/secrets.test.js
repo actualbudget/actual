@@ -7,18 +7,12 @@ import { SecretName, secretsService } from './services/secrets-service';
 const validSecretName = SecretName.simplefin_token;
 const validSecretValue = 'testValue';
 
-const setOpenIdActive = isActive => {
+const enableOpenIdAuth = () => {
   const db = getAccountDb();
   db.mutate('DELETE FROM auth');
-  if (isActive) {
-    db.mutate(
-      "INSERT INTO auth (method, active, extra_data, display_name) VALUES ('openid', 1, '', 'OpenID')",
-    );
-  } else {
-    db.mutate(
-      "INSERT INTO auth (method, active, extra_data, display_name) VALUES ('password', 1, '', 'Password')",
-    );
-  }
+  db.mutate(
+    "INSERT INTO auth (method, active, extra_data, display_name) VALUES ('openid', 1, '', 'OpenID')",
+  );
 };
 
 describe('secretsService', () => {
@@ -112,7 +106,7 @@ describe('secretsService', () => {
 
     describe('when OpenID is the active auth method', () => {
       beforeEach(() => {
-        setOpenIdActive(true);
+        enableOpenIdAuth();
         secretsService.set(validSecretName, validSecretValue);
       });
 

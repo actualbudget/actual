@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { getAccountDb, isAdmin } from './account-db';
+import { getActiveLoginMethod, isAdmin } from './account-db';
 import { SecretName, secretsService } from './services/secrets-service';
 import {
   requestLoggerMiddleware,
@@ -14,28 +14,10 @@ app.use(express.json());
 app.use(requestLoggerMiddleware);
 app.use(validateSessionMiddleware);
 
-// Both reads and writes against the secrets store touch admin-managed
-// integration credentials. When OpenID multi-user mode is active, only
-// admins may interact with this store - otherwise non-admin users could
-// at minimum enumerate which integrations are configured.
+// Gate reads and writes alike: in OpenID mode, non-admins could otherwise
+// enumerate which admin-managed integrations are configured.
 function requireAdminWhenOpenId(res, action) {
-  let method;
-  try {
-    const result = getAccountDb().first(
-      'SELECT method FROM auth WHERE active = 1',
-    );
-    method = result?.method;
-  } catch (error) {
-    console.error('Failed to fetch auth method:', error);
-    res.status(500).send({
-      status: 'error',
-      reason: 'database-error',
-      details: 'Failed to validate authentication method',
-    });
-    return false;
-  }
-
-  if (method === 'openid' && !isAdmin(res.locals.user_id)) {
+  if (getActiveLoginMethod() === 'openid' && !isAdmin(res.locals.user_id)) {
     res.status(403).send({
       status: 'error',
       reason: 'not-admin',
@@ -60,18 +42,17 @@ app.post('/', async (req, res) => {
 });
 
 app.get('/:name', async (req, res) => {
-  if (!requireAdminWhenOpenId(res, 'read')) {
-    return;
-  }
-
   const name = req.params.name;
-  if (!Object.prototype.hasOwnProperty.call(SecretName, name)) {
+  if (!(name in SecretName)) {
     res.status(404).send('key not found');
     return;
   }
 
-  const keyExists = secretsService.exists(name);
-  if (keyExists) {
+  if (!requireAdminWhenOpenId(res, 'read')) {
+    return;
+  }
+
+  if (secretsService.exists(name)) {
     res.sendStatus(204);
   } else {
     res.status(404).send('key not found');
