@@ -199,6 +199,12 @@ export function ExperimentalFeatures() {
               <Trans>Sankey report</Trans>
             </FeatureToggle>
             <FeatureToggle
+              flag="balanceForecastReport"
+              feedbackLink="https://github.com/actualbudget/actual/issues/7669"
+            >
+              <Trans>Balance Forecast Report</Trans>
+            </FeatureToggle>
+            <FeatureToggle
               flag="ageOfMoneyReport"
               feedbackLink="https://github.com/actualbudget/actual/issues/7006"
             >

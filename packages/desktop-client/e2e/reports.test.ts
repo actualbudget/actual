@@ -55,6 +55,28 @@ test.describe.parallel('Reports', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test.describe('balance forecast', () => {
+    test.beforeEach(async () => {
+      const settingsPage = await navigation.goToSettingsPage();
+      await settingsPage.enableExperimentalFeature('Balance Forecast Report');
+
+      reportsPage = await navigation.goToReportsPage();
+      await reportsPage.waitToLoad();
+      await reportsPage.addWidget('Balance forecast');
+      await reportsPage.goToBalanceForecastPage();
+    });
+
+    test('loads balance forecast report with monthly granularity', async () => {
+      await expect(page).toMatchThemeScreenshots();
+    });
+
+    test('switches to daily granularity', async () => {
+      await reportsPage.selectForecastGranularity('Daily');
+
+      await expect(page).toMatchThemeScreenshots();
+    });
+  });
+
   test.describe.parallel('custom reports', () => {
     let customReportPage: CustomReportPage;
 

@@ -43,8 +43,9 @@ async function mapWithConcurrency<TItem, TResult>(
   return results;
 }
 
-function filterCategoriesByConditions(
+export function filterCategoriesByConditions(
   categories: CategoryEntity[],
+  categoryGroups: CategoryGroupEntity[],
   conditions: RuleConditionEntity[] | undefined,
   conditionsOp: BudgetDataConditionsOp | undefined,
 ) {
@@ -53,16 +54,29 @@ function filterCategoriesByConditions(
   }
 
   const categoryConditions = conditions.filter(
-    (cond): cond is Extract<RuleConditionEntity, { field: 'category' }> =>
-      !cond.customName && cond.field === 'category',
+    (
+      cond,
+    ): cond is Extract<
+      RuleConditionEntity,
+      { field: 'category' | 'category_group' }
+    > =>
+      !cond.customName &&
+      (cond.field === 'category' || cond.field === 'category_group'),
   );
 
   if (categoryConditions.length === 0) {
     return categories;
   }
 
+  const categoryGroupNameById = new Map(
+    categoryGroups.map(group => [group.id, group.name] as const),
+  );
+
   const isSupportedCondition = (
-    condition: Extract<RuleConditionEntity, { field: 'category' }>,
+    condition: Extract<
+      RuleConditionEntity,
+      { field: 'category' | 'category_group' }
+    >,
   ) => {
     if (condition.op === 'is' || condition.op === 'isNot') {
       return typeof condition.value === 'string';
@@ -73,6 +87,14 @@ function filterCategoriesByConditions(
         Array.isArray(condition.value) &&
         condition.value.every(id => typeof id === 'string')
       );
+    }
+
+    if (
+      condition.op === 'contains' ||
+      condition.op === 'doesNotContain' ||
+      condition.op === 'matches'
+    ) {
+      return typeof condition.value === 'string';
     }
 
     return false;
@@ -86,22 +108,60 @@ function filterCategoriesByConditions(
 
   const evaluateCondition = (
     category: CategoryEntity,
-    condition: Extract<RuleConditionEntity, { field: 'category' }>,
+    condition: Extract<
+      RuleConditionEntity,
+      { field: 'category' | 'category_group' }
+    >,
   ): boolean => {
+    const key =
+      condition.field === 'category_group'
+        ? (category.group ?? '')
+        : category.id;
+    const textValue =
+      condition.field === 'category_group'
+        ? (categoryGroupNameById.get(key) ?? key)
+        : category.name;
+
     if (condition.op === 'is') {
-      return category.id === condition.value;
+      return key === condition.value;
     }
 
     if (condition.op === 'isNot') {
-      return category.id !== condition.value;
+      return key !== condition.value;
     }
 
     if (condition.op === 'oneOf') {
-      return condition.value.includes(category.id);
+      return condition.value.includes(key);
     }
 
     if (condition.op === 'notOneOf') {
-      return !condition.value.includes(category.id);
+      return !condition.value.includes(key);
+    }
+
+    if (condition.op === 'contains') {
+      return (
+        typeof condition.value === 'string' &&
+        textValue.toLowerCase().includes(condition.value.toLowerCase())
+      );
+    }
+
+    if (condition.op === 'doesNotContain') {
+      return (
+        typeof condition.value === 'string' &&
+        !textValue.toLowerCase().includes(condition.value.toLowerCase())
+      );
+    }
+
+    if (
+      condition.op === 'matches' &&
+      typeof condition.value === 'string' &&
+      condition.value.length <= 256
+    ) {
+      try {
+        return new RegExp(condition.value, 'i').test(textValue);
+      } catch {
+        return false;
+      }
     }
 
     return true;
@@ -141,6 +201,7 @@ export async function fetchBudgetData({
 
   const filteredCategories = filterCategoriesByConditions(
     categories,
+    categoryGroups,
     conditions,
     conditionsOp,
   );

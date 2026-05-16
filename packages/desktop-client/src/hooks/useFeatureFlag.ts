@@ -9,6 +9,8 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   formulaMode: false,
   currency: false,
   ageOfMoneyReport: false,
+  balanceForecastReport: false,
+  customThemes: false,
   budgetAnalysisReport: false,
   payeeLocations: false,
   enableBanking: false,

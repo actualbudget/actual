@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { SvgAlertTriangle } from '@actual-app/components/icons/v2';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
 import type { AutomationEntry } from '#components/budget/goals/automationExamples';
@@ -61,7 +62,7 @@ export function AutomationListRow({
       ? theme.errorBackground
       : 'transparent';
   const titleColor = error ? theme.errorText : theme.pageText;
-  const subtitleColor = error ? theme.errorText : theme.pageTextSubdued;
+  const subtitleColor = error ? theme.errorText : theme.pageTextLight;
   const priority =
     'priority' in entry.template && typeof entry.template.priority === 'number'
       ? entry.template.priority
@@ -77,7 +78,6 @@ export function AutomationListRow({
         alignItems: 'center',
         gap: 10,
         padding: 10,
-        marginBottom: 4,
         borderRadius: 6,
         border: `1px solid ${borderColor}`,
         backgroundColor,
@@ -99,7 +99,7 @@ export function AutomationListRow({
             ? theme.errorText
             : isActive
               ? theme.pageTextPositive
-              : theme.pageTextSubdued,
+              : theme.pageTextLight,
           alignItems: 'center',
           justifyContent: 'center',
           flexShrink: 0,
@@ -127,18 +127,24 @@ export function AutomationListRow({
             />
           )}
         </View>
-        <Text
-          style={{
-            fontSize: 11,
-            color: subtitleColor,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            display: 'block',
-          }}
+        <Tooltip
+          content={
+            <Text style={{ display: 'block', maxWidth: 320 }}>{subtitle}</Text>
+          }
         >
-          {subtitle}
-        </Text>
+          <Text
+            style={{
+              fontSize: 11,
+              color: subtitleColor,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              display: 'block',
+            }}
+          >
+            {subtitle}
+          </Text>
+        </Tooltip>
       </View>
       {!NON_CONTRIBUTION_TYPES.has(entry.displayType) && (
         <View
@@ -157,7 +163,7 @@ export function AutomationListRow({
                 contribution == null ||
                 Number.isNaN(contribution) ||
                 contribution === 0
-                  ? theme.pageTextSubdued
+                  ? theme.pageTextLight
                   : theme.pageText,
             }}
           >
@@ -171,7 +177,7 @@ export function AutomationListRow({
             <Text
               style={{
                 fontSize: 10,
-                color: theme.pageTextSubdued,
+                color: theme.pageTextLight,
                 fontVariantNumeric: 'tabular-nums',
                 letterSpacing: '0.04em',
               }}

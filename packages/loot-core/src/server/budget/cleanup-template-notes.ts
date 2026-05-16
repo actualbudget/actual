@@ -1,8 +1,10 @@
-import { v4 as uuidv4 } from 'uuid';
-
 import * as db from '#server/db';
 import type { CleanupTemplate } from '#types/models/cleanup-templates';
 
+import {
+  resolveCleanupGroup,
+  tombstoneOrphanCleanupGroups,
+} from './cleanup-groups';
 import { parse } from './cleanup-template.pegjs';
 
 export const CLEANUP_PREFIX = '#cleanup ';
@@ -121,41 +123,10 @@ async function resolveCleanupGroups(
 ): Promise<Map<string, string>> {
   const map = new Map<string, string>();
   for (const name of names) {
-    const key = name.toLowerCase();
-    const existing = await db.first<{ id: string; tombstone: 0 | 1 }>(
-      `SELECT id, tombstone FROM cleanup_groups WHERE lower(name) = ? LIMIT 1`,
-      [key],
-    );
-    if (existing) {
-      // Resurrect a tombstoned row so the id stays stable across edits.
-      if (existing.tombstone === 1) {
-        await db.update('cleanup_groups', { id: existing.id, tombstone: 0 });
-      }
-      map.set(key, existing.id);
-      continue;
-    }
-    const id = uuidv4();
-    await db.insertWithSchema('cleanup_groups', { id, name, tombstone: 0 });
-    map.set(key, id);
+    const id = await resolveCleanupGroup(name);
+    map.set(name.toLowerCase(), id);
   }
   return map;
-}
-
-async function tombstoneOrphanCleanupGroups(): Promise<void> {
-  await db.run(
-    `
-      UPDATE cleanup_groups
-      SET tombstone = 1
-      WHERE tombstone = 0
-        AND id NOT IN (
-          SELECT json_extract(je.value, '$.groupId') AS group_id
-          FROM categories c, json_each(c.cleanup_def) je
-          WHERE c.tombstone = 0
-            AND c.cleanup_def IS NOT NULL
-            AND json_extract(je.value, '$.groupId') IS NOT NULL
-        )
-    `,
-  );
 }
 
 // Scoped to non-ui-managed categories so a migrated category is not

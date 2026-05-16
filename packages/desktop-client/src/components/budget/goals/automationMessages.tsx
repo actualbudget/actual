@@ -19,6 +19,8 @@ export function AutomationErrorTitle({
       return <Trans>Schedule not found</Trans>;
     case 'refill-no-cap':
       return <Trans>Refill needs a balance cap</Trans>;
+    case 'limit-no-contributor':
+      return <Trans>Balance cap needs a contributing automation</Trans>;
     case 'percentage-out-of-range':
       return <Trans>Percentage out of range</Trans>;
     case 'percentage-no-source':
@@ -27,6 +29,10 @@ export function AutomationErrorTitle({
       return <Trans>Target month missing</Trans>;
     case 'by-target-past':
       return <Trans>Target is in the past</Trans>;
+    case 'spend-no-from':
+      return <Trans>Early-spending month missing</Trans>;
+    case 'spend-from-after-target':
+      return <Trans>Early spending starts after target</Trans>;
     case 'percentage-source-not-found':
       return <Trans>Source category not recognised</Trans>;
     default:
@@ -49,7 +55,9 @@ export function AutomationErrorShort({
         <Trans>Pick a schedule</Trans>
       );
     case 'refill-no-cap':
-      return <Trans>Add a balance cap above</Trans>;
+      return <Trans>Add a balance cap</Trans>;
+    case 'limit-no-contributor':
+      return <Trans>Add an automation that contributes funds</Trans>;
     case 'percentage-out-of-range':
       return (
         <Trans>{{ percent: error.percent }}% must be between 0 and 100</Trans>
@@ -64,6 +72,10 @@ export function AutomationErrorShort({
           {{ month: formatMonthLabel(error.month, locale) }} has already passed
         </Trans>
       );
+    case 'spend-no-from':
+      return <Trans>Pick an early-spending start month</Trans>;
+    case 'spend-from-after-target':
+      return <Trans>Early spending must start before the target</Trans>;
     case 'percentage-source-not-found':
       return <Trans>Pick a valid income category</Trans>;
     default:
@@ -92,6 +104,14 @@ export function AutomationErrorDetail({
           added to use as the target.
         </Trans>
       );
+    case 'limit-no-contributor':
+      return (
+        <Trans>
+          A balance cap on its own does nothing. Add a contributing automation
+          (such as a fixed amount, save by date, or whatever is left) so the cap
+          has something to clamp.
+        </Trans>
+      );
     case 'percentage-out-of-range':
       return <Trans>Set a value greater than 0% and at most 100%.</Trans>;
     case 'percentage-no-source':
@@ -112,6 +132,20 @@ export function AutomationErrorDetail({
         <Trans>
           Pick a future month, or switch to a recurring annual goal to keep
           saving.
+        </Trans>
+      );
+    case 'spend-no-from':
+      return (
+        <Trans>
+          Early-spending templates need a start month. Pick when you want
+          spending to begin.
+        </Trans>
+      );
+    case 'spend-from-after-target':
+      return (
+        <Trans>
+          The early-spending month must be the same as or earlier than the
+          target month, since it marks when spending begins.
         </Trans>
       );
     case 'percentage-source-not-found':

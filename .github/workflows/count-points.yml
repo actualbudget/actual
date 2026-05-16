@@ -11,6 +11,11 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
 jobs:
   count-points:
     runs-on: ubuntu-latest

@@ -5,11 +5,12 @@ import { batchMessages } from '#server/sync';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
 import type { CategoryEntity, CategoryGroupEntity } from '#types/models';
+import type { CleanupTemplate } from '#types/models/cleanup-templates';
 import type { Template } from '#types/models/templates';
 
 import { getSheetValue, isTrackingBudget, setBudget, setGoal } from './actions';
 import { CategoryTemplateContext } from './category-template-context';
-import { storeNoteCleanups } from './cleanup-template-notes';
+import { tombstoneOrphanCleanupGroups } from './cleanup-groups';
 import { checkTemplateNotes, storeNoteTemplates } from './template-notes';
 
 export function distributeRemainder(
@@ -48,21 +49,30 @@ export async function storeTemplates({
   categoriesWithTemplates: {
     id: string;
     templates: Template[];
+    cleanup?: CleanupTemplate[];
   }[];
   source: 'notes' | 'ui';
 }): Promise<void> {
-  await storeNoteCleanups(categoriesWithTemplates.map(c => c.id));
+  let touchedCleanup = false;
   await batchMessages(async () => {
-    for (const { id, templates } of categoriesWithTemplates) {
+    for (const { id, templates, cleanup } of categoriesWithTemplates) {
       const goalDefs = templates.length > 0 ? JSON.stringify(templates) : null;
-
-      await db.updateWithSchema('categories', {
+      const update: Record<string, unknown> = {
         id,
         goal_def: goalDefs,
         template_settings: { source },
-      });
+      };
+      if (cleanup !== undefined) {
+        update.cleanup_def =
+          cleanup.length > 0 ? JSON.stringify(cleanup) : null;
+        touchedCleanup = true;
+      }
+      await db.updateWithSchema('categories', update);
     }
   });
+  if (touchedCleanup) {
+    await tombstoneOrphanCleanupGroups();
+  }
 }
 
 export async function applyTemplate({

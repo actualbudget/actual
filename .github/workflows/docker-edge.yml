@@ -75,6 +75,9 @@ jobs:
       # This is faster and avoids yarn memory issues
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          # Avoid restoring potentially poisoned caches in release jobs.
+          cache: 'false'
       - name: Build Web
         run: yarn build:server
 
@@ -88,10 +91,15 @@ jobs:
           tags: actualbudget/actual-server-testing
 
       - name: Test that the docker image boots
+        timeout-minutes: 1
         run: |
-          docker run --detach --network=host actualbudget/actual-server-testing
-          sleep 10
-          curl --fail -sS -LI -w '%{http_code}\n' --retry 20 --retry-delay 1 --retry-connrefused localhost:5006
+          docker run --detach --network=host --name actual-server actualbudget/actual-server-testing
+          HEALTHCMD=$(yq -r '.services.actual_server.healthcheck.test[1]' packages/sync-server/docker-compose.yml)
+          until docker exec actual-server sh -c "$HEALTHCMD"; do sleep 1; done
+
+      - name: Dump container logs on failure
+        if: failure()
+        run: docker logs actual-server || true
 
       # This will use the cache from the earlier build step and not rebuild the image
       # https://docs.docker.com/build/ci/github-actions/test-before-push/

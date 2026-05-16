@@ -181,7 +181,6 @@
     "csv-parse": "^6.2.1",
     "csv-stringify": "^6.7.0",
     "date-fns": "^4.1.0",
-    "google-protobuf": "^3.21.4",
     "handlebars": "^4.7.9",
     "hyperformula": "^3.2.0",
     "lodash": "^4.18.1",
