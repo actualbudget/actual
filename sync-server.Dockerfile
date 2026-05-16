@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Copy only the files needed for installing dependencies
 COPY .yarn ./.yarn
-COPY yarn.lock package.json .yarnrc.yml tsconfig.json ./
+COPY yarn.lock package.json .yarnrc.yml tsconfig.json lage.config.js ./
 COPY packages/api/package.json packages/api/package.json
 COPY packages/component-library/package.json packages/component-library/package.json
 COPY packages/crdt/package.json packages/crdt/package.json
@@ -30,6 +30,13 @@ COPY packages/ ./packages/
 
 # Increase memory limit for the build process to 8GB
 ENV NODE_OPTIONS=--max_old_space_size=8192
+
+# lage's task hasher invokes `git ls-tree HEAD` during initialization, so it
+# needs a git repo even when individual targets disable caching. .dockerignore
+# omits the real .git, so seed a throwaway repo with a single commit here.
+RUN git -c init.defaultBranch=master init -q \
+    && git -c user.email=build@docker -c user.name=docker-build add -A \
+    && git -c user.email=build@docker -c user.name=docker-build commit -qm build
 
 RUN yarn build:server
 
