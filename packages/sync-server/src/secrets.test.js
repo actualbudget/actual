@@ -101,6 +101,20 @@ describe('secretsService', () => {
       });
     });
 
+    it('POST returns 400 for unknown secret names', async () => {
+      const res = await request(app)
+        .post('/')
+        .set('x-actual-token', 'valid-token')
+        .send({ name: 'thiskeydoesnotexist', value: 'whatever' });
+
+      expect(res.statusCode).toEqual(400);
+      expect(res.body).toEqual({
+        status: 'error',
+        reason: 'invalid-secret-name',
+        details: 'Unknown secret name',
+      });
+    });
+
     describe('when OpenID is the active auth method', () => {
       beforeEach(() => {
         enableOpenIdAuth();
@@ -140,6 +154,16 @@ describe('secretsService', () => {
           reason: 'not-admin',
           details: 'You have to be admin to set secrets',
         });
+      });
+
+      it('POST returns 200 for admin users', async () => {
+        const res = await request(app)
+          .post('/')
+          .set('x-actual-token', 'valid-token-admin')
+          .send({ name: testSecretName, value: 'newValue' });
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toEqual({ status: 'ok' });
       });
     });
   });

@@ -33,24 +33,33 @@ app.post('/', async (req, res) => {
 
   const { name, value } = req.body || {};
 
+  if (!(name in SecretName)) {
+    res.status(400).send({
+      status: 'error',
+      reason: 'invalid-secret-name',
+      details: 'Unknown secret name',
+    });
+    return;
+  }
+
   secretsService.set(name, value);
 
   res.status(200).send({ status: 'ok' });
 });
 
 app.get('/:name', async (req, res) => {
-  const name = req.params.name;
-  if (!(name in SecretName)) {
-    res.status(404).send('key not found');
-    return;
-  }
-
   if (!canManageSecrets(res.locals.user_id)) {
     res.status(403).send({
       status: 'error',
       reason: 'not-admin',
       details: 'You have to be admin to read secrets',
     });
+    return;
+  }
+
+  const name = req.params.name;
+  if (!(name in SecretName)) {
+    res.status(404).send('key not found');
     return;
   }
 
