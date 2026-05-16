@@ -13,7 +13,9 @@ import { amountToInteger } from '#shared/util';
 import {
   CustomFunctionsPlugin,
   customFunctionsTranslations,
+  setCachedUserPreferences,
 } from './customFunctions';
+import { loadUserPreferencesForFormulas } from './customFunctionsPreferences';
 import { assert } from './rule-utils';
 
 HyperFormula.registerLanguage('enUS', enUS);
@@ -21,6 +23,12 @@ HyperFormula.registerFunctionPlugin(
   CustomFunctionsPlugin,
   customFunctionsTranslations,
 );
+
+// Load user preferences on module initialization for formatting functions
+// This is async but happens once when the module loads
+void loadUserPreferencesForFormulas().then(prefs => {
+  setCachedUserPreferences(prefs);
+});
 
 const ACTION_OPS = [
   'set',

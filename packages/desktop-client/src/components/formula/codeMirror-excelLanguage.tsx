@@ -71,19 +71,15 @@ function FieldTooltip({ label, info }: { label: string; info: string }) {
 type FormulaMode = 'query' | 'transaction';
 
 // Function categories for different syntax highlighting
+// Cleanup: Removed range-based functions that don't work with Actual's named expressions
+// Removed: AVERAGEA, COUNT, COUNTA, COUNTBLANK, COUNTIF, COUNTIFS, MAXA, MINA,
+//          SUMIF, SUMIFS, SUMPRODUCT, SUMSQ, MEDIAN, MODE, STDEV, STDEVP, VAR, VARP,
+//          PERCENTILE, QUARTILE, RANK
 const MATH_FUNCTIONS = new Set([
   'SUM',
   'AVERAGE',
-  'AVERAGEA',
-  'COUNT',
-  'COUNTA',
-  'COUNTBLANK',
-  'COUNTIF',
-  'COUNTIFS',
   'MAX',
-  'MAXA',
   'MIN',
-  'MINA',
   'ABS',
   'ROUND',
   'ROUNDUP',
@@ -105,19 +101,6 @@ const MATH_FUNCTIONS = new Set([
   'LOG10',
   'EXP',
   'PRODUCT',
-  'SUMIF',
-  'SUMIFS',
-  'SUMPRODUCT',
-  'SUMSQ',
-  'MEDIAN',
-  'MODE',
-  'STDEV',
-  'STDEVP',
-  'VAR',
-  'VARP',
-  'PERCENTILE',
-  'QUARTILE',
-  'RANK',
   'PMT',
   'FV',
   'PV',
@@ -143,6 +126,8 @@ const LOGICAL_FUNCTIONS = new Set([
 const TEXT_FUNCTIONS = new Set([
   'TEXT',
   'FIXED',
+  'FORMATNUMBER',
+  'FORMATCURRENCY',
   'CONCATENATE',
   'LEFT',
   'RIGHT',
@@ -185,6 +170,8 @@ const DATE_FUNCTIONS = new Set([
   'ISOWEEKNUM',
 ]);
 
+// Cleanup: Removed lookup functions that require arrays/ranges
+// Removed: LOOKUP, VLOOKUP, HLOOKUP, INDEX, MATCH, ISREF
 const QUERY_FUNCTIONS = new Set([
   'QUERY',
   'QUERY_COUNT',
@@ -192,11 +179,6 @@ const QUERY_FUNCTIONS = new Set([
   'QUERY_EXTRACT_CATEGORIES',
   'QUERY_EXTRACT_TIMEFRAME_START',
   'QUERY_EXTRACT_TIMEFRAME_END',
-  'LOOKUP',
-  'VLOOKUP',
-  'HLOOKUP',
-  'INDEX',
-  'MATCH',
   'CHOOSE',
   'ISBLANK',
   'ISERROR',
@@ -204,7 +186,6 @@ const QUERY_FUNCTIONS = new Set([
   'ISNUMBER',
   'ISTEXT',
   'ISLOGICAL',
-  'ISREF',
   'ISEVEN',
   'ISODD',
 ]);
@@ -296,7 +277,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Transaction amount in cents. Use for calculations and comparisons.\n\nExample: `=amount / 100` to get dollar value',
+      'Transaction amount in cents. Use for calculations and comparisons.\n\nExample: =amount / 100 to get dollar value',
     ),
   },
   {
@@ -305,7 +286,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Transaction date in YYYY-MM-DD format. Use with date functions.\n\nExample: `=TEXT(date, "MMMM")` to get month name',
+      'Transaction date in YYYY-MM-DD format. Use with date functions.\n\nExample: =TEXT(date, "MMMM") to get month name',
     ),
   },
   {
@@ -314,7 +295,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Transaction notes/memo text. Use for string operations.\n\nExample: `=UPPER(notes)` to convert to uppercase',
+      'Transaction notes/memo text. Use for string operations.\n\nExample: =UPPER(notes) to convert to uppercase',
     ),
   },
   {
@@ -323,7 +304,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Original imported payee name from bank import. Contains the raw text before matching.\n\nExample: `=LEFT(imported_payee, 10)` to get first 10 characters',
+      'Original imported payee name from bank import. Contains the raw text before matching.\n\nExample: =LEFT(imported_payee, 10) to get first 10 characters',
     ),
   },
   {
@@ -332,7 +313,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Payee ID (string). The ID of the payee.\n\nExample: `=CONCATENATE("Payment to ", payee)`',
+      'Payee ID (string). The ID of the payee.\n\nExample: =CONCATENATE("Payment to ", payee)',
     ),
   },
   {
@@ -341,7 +322,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Payee name (string). The human-readable name of the payee.\n\nExample: `=UPPER(payee_name)` or `=CONCATENATE("Payment to ", payee_name)`',
+      'Payee name (string). The human-readable name of the payee.\n\nExample: =UPPER(payee_name) or =CONCATENATE("Payment to ", payee_name)',
     ),
   },
   {
@@ -350,7 +331,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Account ID (string). The ID of the account.\n\nExample: `=CONCATENATE("Paid from ", account)`',
+      'Account ID (string). The ID of the account.\n\nExample: =CONCATENATE("Paid from ", account)',
     ),
   },
   {
@@ -359,7 +340,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Account name (string). The human-readable name of the account.\n\nExample: `=CONCATENATE("Paid from ", account_name)`',
+      'Account name (string). The human-readable name of the account.\n\nExample: =CONCATENATE("Paid from ", account_name)',
     ),
   },
   {
@@ -368,7 +349,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Category ID (string). The ID of the category.\n\nExample: `=IF(category="Groceries", "Food", "Other")`',
+      'Category ID (string). The ID of the category.\n\nExample: =IF(category="Groceries", "Food", "Other")',
     ),
   },
   {
@@ -377,7 +358,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Category Name (string). The human-readable name of the category.\n\nExample: `=IF(category_name="Groceries", "Food", "Other")`',
+      'Category Name (string). The human-readable name of the category.\n\nExample: =IF(category_name="Groceries", "Food", "Other")',
     ),
   },
   {
@@ -386,7 +367,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Boolean cleared status. TRUE if transaction is cleared, FALSE otherwise.\n\nExample: `=IF(cleared, "Cleared", "Pending")`',
+      'Boolean cleared status. TRUE if transaction is cleared, FALSE otherwise.\n\nExample: =IF(cleared, "Cleared", "Pending")',
     ),
   },
   {
@@ -404,7 +385,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Account balance as of the date of the transaction, excluding the transaction amount. Use for calculations and comparisons.\n\nExample: `=IF(balance < 0, "Negative Balance", "Positive Balance")`',
+      'Account balance as of the date of the transaction, excluding the transaction amount. Use for calculations and comparisons.\n\nExample: =IF(balance < 0, "Negative Balance", "Positive Balance")',
     ),
   },
   {
@@ -413,7 +394,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'The amount of the parent transaction in cents in split transactions.\n\nExample: `=(parent_amount / 100) * .05`',
+      'The amount of the parent transaction in cents in split transactions.\n\nExample: =(parent_amount / 100) * .05',
     ),
   },
 ];

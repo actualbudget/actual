@@ -210,4 +210,81 @@ describe('Formula-based rule actions', () => {
     // Should convert number to string
     expect(transaction.notes).toBe('75000');
   });
+
+  it('should format numbers with thousands separators using FORMATNUMBER', () => {
+    const action = new Action('set', 'notes', null, {
+      formula: '=FORMATNUMBER(1234567.89, 2)',
+    });
+
+    const transaction = { notes: 'original' };
+    action.exec(transaction);
+
+    expect(transaction.notes).toBe('1,234,567.89');
+  });
+
+  it('should format numbers with custom separators using FORMATNUMBER', () => {
+    const action = new Action('set', 'notes', null, {
+      formula: '=FORMATNUMBER(1234567.89, 2, ".", ",")',
+    });
+
+    const transaction = { notes: 'original' };
+    action.exec(transaction);
+
+    expect(transaction.notes).toBe('1.234.567,89');
+  });
+
+  it('should format numbers without decimals using FORMATNUMBER', () => {
+    const action = new Action('set', 'notes', null, {
+      formula: '=FORMATNUMBER(1234567, 0)',
+    });
+
+    const transaction = { notes: 'original' };
+    action.exec(transaction);
+
+    expect(transaction.notes).toBe('1,234,567');
+  });
+
+  it('should format currency with default settings using FORMATCURRENCY', () => {
+    const action = new Action('set', 'notes', null, {
+      formula: '=FORMATCURRENCY(1234567.89)',
+    });
+
+    const transaction = { notes: 'original' };
+    action.exec(transaction);
+
+    expect(transaction.notes).toBe('$1,234,567.89');
+  });
+
+  it('should format currency with custom symbol using FORMATCURRENCY', () => {
+    const action = new Action('set', 'notes', null, {
+      formula: '=FORMATCURRENCY(1234567.89, "€")',
+    });
+
+    const transaction = { notes: 'original' };
+    action.exec(transaction);
+
+    expect(transaction.notes).toBe('€1,234,567.89');
+  });
+
+  it('should format negative currency correctly using FORMATCURRENCY', () => {
+    const action = new Action('set', 'notes', null, {
+      formula: '=FORMATCURRENCY(-1234567.89)',
+    });
+
+    const transaction = { notes: 'original' };
+    action.exec(transaction);
+
+    expect(transaction.notes).toBe('-$1,234,567.89');
+  });
+
+  it('should format currency with custom separators using FORMATCURRENCY', () => {
+    const action = new Action('set', 'notes', null, {
+      formula: '=FORMATCURRENCY(1234567.89, "€", 2, ".", ",")',
+    });
+
+    const transaction = { notes: 'original' };
+    action.exec(transaction);
+
+    expect(transaction.notes).toBe('€1.234.567,89');
+  });
 });
