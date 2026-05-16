@@ -14,23 +14,20 @@ app.use(express.json());
 app.use(requestLoggerMiddleware);
 app.use(validateSessionMiddleware);
 
-// Gate reads and writes alike: in OpenID mode, non-admins could otherwise
-// enumerate which admin-managed integrations are configured.
-function requireAdminWhenOpenId(res, action) {
-  if (getActiveLoginMethod() === 'openid' && !isAdmin(res.locals.user_id)) {
-    res.status(403).send({
-      status: 'error',
-      reason: 'not-admin',
-      details: `You have to be admin to ${action} secrets`,
-    });
-    return false;
-  }
-
-  return true;
+// In OpenID mode the secrets store is admin-managed; non-admins must be
+// blocked from both reads and writes, otherwise they can enumerate which
+// integrations are configured.
+function canManageSecrets(userId) {
+  return getActiveLoginMethod() !== 'openid' || isAdmin(userId);
 }
 
 app.post('/', async (req, res) => {
-  if (!requireAdminWhenOpenId(res, 'set')) {
+  if (!canManageSecrets(res.locals.user_id)) {
+    res.status(403).send({
+      status: 'error',
+      reason: 'not-admin',
+      details: 'You have to be admin to set secrets',
+    });
     return;
   }
 
@@ -48,7 +45,12 @@ app.get('/:name', async (req, res) => {
     return;
   }
 
-  if (!requireAdminWhenOpenId(res, 'read')) {
+  if (!canManageSecrets(res.locals.user_id)) {
+    res.status(403).send({
+      status: 'error',
+      reason: 'not-admin',
+      details: 'You have to be admin to read secrets',
+    });
     return;
   }
 
