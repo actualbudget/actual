@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 
@@ -6,20 +6,26 @@ import { locationService } from '#payees/location';
 
 import { useFeatureFlag } from './useFeatureFlag';
 
+type LocationPermission = {
+  isGranted: boolean;
+  isPending: boolean;
+  requestPermission: () => Promise<void>;
+};
+
 /**
  * Custom hook to manage geolocation permission status
  * Currently behind the payeeLocations feature flag
  *
- * @returns boolean indicating whether geolocation access is granted
+ * @returns a LocationPermissions object
  */
-export function useLocationPermission(): boolean {
+export function useLocationPermission(): LocationPermission {
   const payeeLocationsEnabled = useFeatureFlag('payeeLocations');
   const { isNarrowWidth } = useResponsive();
-  const [locationAccess, setLocationAccess] = useState(false);
+  const [state, setState] = useState<PermissionState | null>(null);
 
   useEffect(() => {
     if (!payeeLocationsEnabled || !isNarrowWidth) {
-      setLocationAccess(false);
+      setState(null);
       return;
     }
 
@@ -32,7 +38,7 @@ export function useLocationPermission(): boolean {
       !navigator.permissions ||
       typeof navigator.permissions.query !== 'function'
     ) {
-      setLocationAccess(false);
+      setState(null);
       return;
     }
 
@@ -45,45 +51,29 @@ export function useLocationPermission(): boolean {
           }
 
           permissionStatus = status;
-
           // Set initial state
-          setLocationAccess(status.state === 'granted');
+          setState(status.state);
 
           // Listen for permission changes
           handleChange = () => {
-            setLocationAccess(status.state === 'granted');
+            setState(status.state);
           };
 
           status.addEventListener('change', handleChange);
-
-          if (status.state === 'prompt') {
-            locationService
-              .getCurrentPosition()
-              .then(() => {
-                if (isMounted) {
-                  setLocationAccess(true);
-                }
-              })
-              .catch(() => {
-                if (isMounted) {
-                  setLocationAccess(false);
-                }
-              });
-          }
         })
         .catch(() => {
           if (!isMounted) {
             return;
           }
           // Permission API not supported, assume no access
-          setLocationAccess(false);
+          setState(null);
         });
     } catch {
       if (!isMounted) {
         return;
       }
       // Synchronous error (e.g., TypeError), assume no access
-      setLocationAccess(false);
+      setState(null);
     }
 
     // Cleanup function
@@ -95,5 +85,18 @@ export function useLocationPermission(): boolean {
     };
   }, [payeeLocationsEnabled, isNarrowWidth]);
 
-  return locationAccess;
+  const requestPermission = useCallback(async () => {
+    try {
+      await locationService.getCurrentPosition();
+      setState('granted');
+    } catch {
+      setState('denied');
+    }
+  }, []);
+
+  return {
+    isGranted: state === 'granted',
+    isPending: state === 'prompt',
+    requestPermission,
+  };
 }
