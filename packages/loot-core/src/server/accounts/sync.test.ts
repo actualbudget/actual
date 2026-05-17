@@ -225,6 +225,41 @@ describe('Account sync', () => {
     expect(transactions2.length).toBe(2);
   });
 
+  test('reconcile does not fuzzy match split child transactions', async () => {
+    const { id: acctId } = await prepareDatabase();
+
+    const parentId = await db.insertTransaction({
+      id: 'split-parent',
+      account: acctId,
+      amount: -5000,
+      date: '2020-01-01',
+      is_parent: true,
+    });
+    await db.insertTransaction({
+      id: 'split-child',
+      account: acctId,
+      amount: -2948,
+      date: '2020-01-01',
+      is_child: true,
+      parent_id: parentId,
+    });
+
+    const result = await reconcileTransactions(acctId, [
+      { date: '2020-01-01', amount: -2948, imported_id: 'finid-split' },
+    ]);
+
+    expect(result.updated).toEqual([]);
+    expect(result.added).toHaveLength(1);
+
+    const transactions = await getAllTransactions();
+    expect(transactions.find(t => t.id === 'split-child')?.imported_id).toBe(
+      null,
+    );
+    expect(transactions.find(t => t.id === result.added[0])?.imported_id).toBe(
+      'finid-split',
+    );
+  });
+
   test('reimportDeleted override takes precedence over stored preference', async () => {
     const { id: acctId } = await prepareDatabase();
     const reimportKey =
