@@ -19,7 +19,7 @@ import { makeQuery } from './makeQuery';
 
 type createSpendingSpreadsheetProps = {
   conditions?: RuleConditionEntity[];
-  conditionsOp?: string;
+  conditionsOp?: 'and' | 'or';
   compare?: string;
   compareTo?: string;
   budgetType?: 'envelope' | 'tracking';
@@ -34,7 +34,7 @@ export function getSpendingBudgetFilters({
   categories: CategoryEntity[];
   categoryGroups: CategoryGroupEntity[];
   conditions: RuleConditionEntity[];
-  conditionsOp?: string;
+  conditionsOp?: 'and' | 'or';
 }) {
   const budgetConditions = conditions.filter(
     cond =>
@@ -50,7 +50,7 @@ export function getSpendingBudgetFilters({
     categories,
     categoryGroups,
     budgetConditions,
-    conditionsOp === 'or' ? 'or' : 'and',
+    conditionsOp ?? 'and',
   ).map(category => category.id);
 
   return [{ category: { $oneof: matchingCategoryIds } }];

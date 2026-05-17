@@ -10,13 +10,13 @@ import { getSpendingBudgetFilters } from './spending-spreadsheet';
 const categoryGroups = [
   { id: 'group-bills', name: 'Bills' },
   { id: 'group-fun', name: 'Fun Money' },
-] as CategoryGroupEntity[];
+] satisfies CategoryGroupEntity[];
 
 const categories = [
   { id: 'cat-rent', name: 'Rent', group: 'group-bills' },
   { id: 'cat-electric', name: 'Electric', group: 'group-bills' },
   { id: 'cat-dining', name: 'Dining Out', group: 'group-fun' },
-] as CategoryEntity[];
+] satisfies CategoryEntity[];
 
 describe('getSpendingBudgetFilters', () => {
   it('filters budget categories by category group', () => {
@@ -28,8 +28,8 @@ describe('getSpendingBudgetFilters', () => {
           field: 'category_group',
           op: 'is',
           value: 'group-bills',
-        } as RuleConditionEntity,
-      ],
+        },
+      ] satisfies RuleConditionEntity[],
     });
 
     expect(result).toEqual([
@@ -46,8 +46,8 @@ describe('getSpendingBudgetFilters', () => {
           field: 'account',
           op: 'is',
           value: 'account-checking',
-        } as RuleConditionEntity,
-      ],
+        },
+      ] satisfies RuleConditionEntity[],
     });
 
     expect(result).toEqual([]);
