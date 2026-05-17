@@ -1217,6 +1217,7 @@ function addColors(graph: Graph) {
   setColor(graph, SpecialNodeKeys.ForNextMonth, theme.reportsGray);
   setColor(graph, SpecialNodeKeys.Budgeted, theme.reportsBlue);
   setColor(graph, SpecialNodeKeys.AvailableIncome, theme.reportsBlue);
+  setColor(graph, SpecialNodeKeys.AllAccounts, theme.reportsBlue);
 }
 
 function colorIndexFromKey(key: string, colorCount: number): number {
