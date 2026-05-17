@@ -520,7 +520,8 @@ Another way to accomplish this is to budget what you think you will spend for ea
 In the first category, create a named pool and use both _Send leftover to pool_ and _Receive leftover from pool_, weight 1. <br />
 In the rest of the categories, choose the same named pool and again use both _Send leftover to pool_ and _Receive leftover from pool_, weight 1.
 
-When cleanup runs: 
+When cleanup runs:
+
 - Any remaining funds from each utility category will be pooled.
 - The pool will be used to fund any overspent utility categories.
 - Leftover pool funds will be evenly distributed to carry over to the next month.
