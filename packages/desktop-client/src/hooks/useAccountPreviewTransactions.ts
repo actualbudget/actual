@@ -5,6 +5,7 @@ import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   PayeeEntity,
+  RuleActionEntity,
   ScheduleEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
@@ -69,18 +70,14 @@ export function useAccountPreviewTransactions({
       }
       // A split-child action may set a transfer payee pointing to this account
       // even when the parent payee does not. Check each split set-payee action.
-      const actions = schedule._actions as Array<{
-        op: string;
-        field?: string;
-        value?: string;
-        options?: { splitIndex?: number };
-      }>;
+      const actions = schedule._actions as RuleActionEntity[];
       return actions.some(
         action =>
           action.op === 'set' &&
           action.field === 'payee' &&
           action.options?.splitIndex != null &&
-          getTransferAccountByPayee(action.value)?.id === accountId,
+          getTransferAccountByPayee(action.value as PayeeEntity['id'])?.id ===
+            accountId,
       );
     },
     [accountId, getTransferAccountByPayee],

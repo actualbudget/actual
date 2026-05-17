@@ -2,7 +2,11 @@ import { enUS } from 'date-fns/locale';
 import i18next from 'i18next';
 import MockDate from 'mockdate';
 
-import type { ScheduleEntity } from '#types/models';
+import type {
+  RuleActionEntity,
+  ScheduleEntity,
+  SetRuleActionEntity,
+} from '#types/models';
 
 import * as monthUtils from './months';
 import {
@@ -657,18 +661,13 @@ describe('schedules', () => {
       return (schedule: ScheduleEntity) => {
         if (schedule._account === accountId) return true;
         if (getTransferAccountId(schedule._payee) === accountId) return true;
-        const actions = schedule._actions as Array<{
-          op: string;
-          field?: string;
-          value?: string;
-          options?: { splitIndex?: number };
-        }>;
+        const actions = schedule._actions as RuleActionEntity[];
         return actions.some(
           action =>
             action.op === 'set' &&
             action.field === 'payee' &&
             action.options?.splitIndex != null &&
-            getTransferAccountId(action.value) === accountId,
+            getTransferAccountId(action.value as string) === accountId,
         );
       };
     }
@@ -685,8 +684,8 @@ describe('schedules', () => {
             field: 'payee',
             value: 'payee-transfer-to-savings',
             options: { splitIndex: 1 },
-          } as unknown,
-        ] as ScheduleEntity['_actions'],
+          } satisfies SetRuleActionEntity,
+        ] as unknown as ScheduleEntity['_actions'],
       });
 
       const statuses: ScheduleStatuses = new Map([
@@ -723,8 +722,8 @@ describe('schedules', () => {
             field: 'payee',
             value: 'payee-transfer-to-savings',
             options: { splitIndex: 1 },
-          } as unknown,
-        ] as ScheduleEntity['_actions'],
+          } satisfies SetRuleActionEntity,
+        ] as unknown as ScheduleEntity['_actions'],
       });
 
       const statuses: ScheduleStatuses = new Map([
@@ -738,6 +737,35 @@ describe('schedules', () => {
         makeFilter('acct-unrelated'),
       );
       expect(result).toHaveLength(0);
+    });
+
+    it('includes a split schedule when the transfer is at splitIndex 0', () => {
+      const schedule = makeSchedule({
+        id: 'sched-paycheck',
+        next_date: '2017-01-03',
+        _conditions: [{ field: 'date', op: 'is', value: '2017-01-03' }],
+        _actions: [
+          {
+            op: 'set',
+            field: 'payee',
+            value: 'payee-transfer-to-savings',
+            options: { splitIndex: 0 },
+          } satisfies SetRuleActionEntity,
+        ] as unknown as ScheduleEntity['_actions'],
+      });
+
+      const statuses: ScheduleStatuses = new Map([
+        ['sched-paycheck', 'upcoming'],
+      ]);
+
+      // splitIndex 0 is falsy; a regression to a truthy check would drop it.
+      const fromDest = computeSchedulePreviewTransactions(
+        [schedule],
+        statuses,
+        '7',
+        makeFilter('acct-savings'),
+      );
+      expect(fromDest).toHaveLength(1);
     });
   });
 
