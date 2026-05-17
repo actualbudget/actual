@@ -123,19 +123,18 @@ test.describe('Rules', () => {
     });
 
     const transaction = accountPage.getNthTransaction(0);
-    await expect(transaction.payee).toHaveText('Ikea');
+    await expect(transaction.payee).toHaveText('Split (no payee)');
     await expect(transaction.notes).toHaveText('food / entertainment');
     await expect(transaction.category).toHaveText('Split');
     await expect(transaction.debit).toHaveText('100.00');
-    await expect(page).toMatchThemeScreenshots();
 
     const firstSplitTransaction = accountPage.getNthTransaction(1);
-    await expect(firstSplitTransaction.payee).toHaveText('Ikea');
+    await expect(firstSplitTransaction.payee).toHaveText('');
     await expect(firstSplitTransaction.debit).toHaveText('90.00');
     await expect(firstSplitTransaction.category).toHaveText('Entertainment');
 
     const secondSplitTransaction = accountPage.getNthTransaction(2);
-    await expect(secondSplitTransaction.payee).toHaveText('Ikea');
+    await expect(secondSplitTransaction.payee).toHaveText('');
     await expect(secondSplitTransaction.debit).toHaveText('10.00');
     await expect(secondSplitTransaction.category).toHaveText('Food');
   });

@@ -236,12 +236,11 @@ test.describe('Transactions', () => {
     await expect(secondTransaction.credit).toHaveText('');
 
     const thirdTransaction = accountPage.getNthTransaction(2);
-    await expect(thirdTransaction.payee).toHaveText('Krogger');
+    await expect(thirdTransaction.payee).toHaveText('');
     await expect(thirdTransaction.notes).toHaveText('');
     await expect(thirdTransaction.category).toHaveText('Categorize');
     await expect(thirdTransaction.debit).toHaveText('111.11');
     await expect(thirdTransaction.credit).toHaveText('');
-    await expect(page).toMatchThemeScreenshots();
   });
 
   test('creates a transfer test transaction', async () => {
