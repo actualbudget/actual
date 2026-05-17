@@ -61,10 +61,27 @@ export function useAccountPreviewTransactions({
   );
 
   const accountSchedulesFilter = useCallback(
-    (schedule: ScheduleEntity) =>
-      !accountId ||
-      schedule._account === accountId ||
-      getTransferAccountByPayee(schedule._payee)?.id === accountId,
+    (schedule: ScheduleEntity) => {
+      if (!accountId) return true;
+      if (schedule._account === accountId) return true;
+      if (getTransferAccountByPayee(schedule._payee)?.id === accountId)
+        {return true;}
+      // A split-child action may set a transfer payee pointing to this account
+      // even when the parent payee does not. Check each split set-payee action.
+      const actions = schedule._actions as Array<{
+        op: string;
+        field?: string;
+        value?: string;
+        options?: { splitIndex?: number };
+      }>;
+      return actions.some(
+        action =>
+          action.op === 'set' &&
+          action.field === 'payee' &&
+          action.options?.splitIndex != null &&
+          getTransferAccountByPayee(action.value)?.id === accountId,
+      );
+    },
     [accountId, getTransferAccountByPayee],
   );
 

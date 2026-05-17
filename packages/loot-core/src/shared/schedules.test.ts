@@ -619,6 +619,128 @@ describe('schedules', () => {
     });
   });
 
+  describe('split-child transfer filter', () => {
+    function makeSchedule(
+      overrides: Partial<ScheduleEntity> &
+        Pick<ScheduleEntity, 'id' | 'next_date' | '_conditions'>,
+    ): ScheduleEntity {
+      return {
+        rule: 'rule-1',
+        completed: false,
+        posts_transaction: false,
+        tombstone: false,
+        _payee: 'payee-employer',
+        _account: 'acct-checking',
+        _amount: 500000,
+        _amountOp: 'is',
+        _date: overrides.next_date,
+        _actions: [],
+        ...overrides,
+      };
+    }
+
+    // Maps a payee id to the account it transfers to, simulating the payeesById
+    // lookup used by getTransferAccountByPayee in useAccountPreviewTransactions.
+    const transferPayees: Record<string, string> = {
+      'payee-transfer-to-savings': 'acct-savings',
+    };
+
+    function getTransferAccountId(payeeId?: string | null): string | null {
+      if (!payeeId) return null;
+      return transferPayees[payeeId] ?? null;
+    }
+
+    // This filter mirrors the fixed accountSchedulesFilter in
+    // useAccountPreviewTransactions: it includes a schedule when any split-child
+    // set-payee action points to a transfer payee for the viewed account.
+    function makeFilter(accountId: string) {
+      return (schedule: ScheduleEntity) => {
+        if (schedule._account === accountId) return true;
+        if (getTransferAccountId(schedule._payee) === accountId) return true;
+        const actions = schedule._actions as Array<{
+          op: string;
+          field?: string;
+          value?: string;
+          options?: { splitIndex?: number };
+        }>;
+        return actions.some(
+          action =>
+            action.op === 'set' &&
+            action.field === 'payee' &&
+            action.options?.splitIndex != null &&
+            getTransferAccountId(action.value) === accountId,
+        );
+      };
+    }
+
+    it('includes a split schedule when viewing the split-child transfer destination', () => {
+      const schedule = makeSchedule({
+        id: 'sched-paycheck',
+        next_date: '2017-01-03',
+        _conditions: [{ field: 'date', op: 'is', value: '2017-01-03' }],
+        _actions: [
+          // split child 1: transfer to savings
+          {
+            op: 'set',
+            field: 'payee',
+            value: 'payee-transfer-to-savings',
+            options: { splitIndex: 1 },
+          } as unknown,
+        ] as ScheduleEntity['_actions'],
+      });
+
+      const statuses: ScheduleStatuses = new Map([
+        ['sched-paycheck', 'upcoming'],
+      ]);
+
+      // Viewed from the source account - schedule is included
+      const fromSource = computeSchedulePreviewTransactions(
+        [schedule],
+        statuses,
+        '7',
+        makeFilter('acct-checking'),
+      );
+      expect(fromSource).toHaveLength(1);
+
+      // Viewed from the transfer destination - schedule must also be included
+      const fromDest = computeSchedulePreviewTransactions(
+        [schedule],
+        statuses,
+        '7',
+        makeFilter('acct-savings'),
+      );
+      expect(fromDest).toHaveLength(1);
+    });
+
+    it('excludes a split schedule when viewing an unrelated account', () => {
+      const schedule = makeSchedule({
+        id: 'sched-paycheck',
+        next_date: '2017-01-03',
+        _conditions: [{ field: 'date', op: 'is', value: '2017-01-03' }],
+        _actions: [
+          {
+            op: 'set',
+            field: 'payee',
+            value: 'payee-transfer-to-savings',
+            options: { splitIndex: 1 },
+          } as unknown,
+        ] as ScheduleEntity['_actions'],
+      });
+
+      const statuses: ScheduleStatuses = new Map([
+        ['sched-paycheck', 'upcoming'],
+      ]);
+
+      const result = computeSchedulePreviewTransactions(
+        [schedule],
+        statuses,
+        '7',
+        makeFilter('acct-unrelated'),
+      );
+      expect(result).toHaveLength(0);
+    });
+  });
+
   describe('getNextDate', () => {
     it('returns last occurrence for a recurring schedule with an end date in the past', () => {
       const dateCond = {
