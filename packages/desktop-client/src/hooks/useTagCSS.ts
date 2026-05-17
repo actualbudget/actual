@@ -24,7 +24,10 @@ export function useTagCSS() {
       );
 
       return css({
-        display: 'inline-flex',
+        display: 'inline-block',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        maxWidth: '100%',
         padding: options.compact ? '0px 7px' : '3px 7px',
         borderRadius: 16,
         userSelect: 'none',

@@ -237,17 +237,7 @@ export function TagAutocomplete({
                   </span>
                 </div>
               ) : (
-                <div
-                  className={getTagCSS(item.tag)}
-                  style={{
-                    maxWidth: '100%',
-                    textOverflow: 'ellipsis',
-                    overflow: 'hidden',
-                    display: 'inline-block',
-                  }}
-                >
-                  {item.name}
-                </div>
+                <div className={getTagCSS(item.tag)}>{item.name}</div>
               )}
             </ListBoxItem>
           )}

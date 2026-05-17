@@ -1550,9 +1550,6 @@ function NoteTagAutocomplete({
                 border: 'none',
                 height: 22,
                 maxWidth: '50dvw',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: 'inline-block',
               }}
               className={getTagCSS(tag.tag)}
               onMouseDown={e => e.preventDefault()} // stops input from losing focus
