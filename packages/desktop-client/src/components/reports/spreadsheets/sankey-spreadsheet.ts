@@ -1002,6 +1002,73 @@ export function sortGraph(
   categorySort: SortMode = 'per-group',
   categories: CategoryGroupEntity[],
 ): Graph {
+  function sortRelatedNodesAroundAnchors(
+    entries: Array<[string, NodeData]>,
+    anchorLayer: GraphLayers,
+    relatedLayer: GraphLayers,
+    placement: 'before' | 'after',
+  ) {
+    const anchorKeys = nodesInLayer(graph, anchorLayer);
+
+    anchorKeys.forEach(anchorKey => {
+      const anchor = graph.get(anchorKey);
+      if (!anchor) return;
+
+      const relatedKeys =
+        placement === 'after'
+          ? Array.from(anchor.to.keys()).filter(
+              key => graph.get(key)?.type === relatedLayer,
+            )
+          : Array.from(graph)
+              .filter(
+                ([, data]) =>
+                  data.type === relatedLayer && data.to.has(anchorKey),
+              )
+              .map(([key]) => key);
+
+      const otherKey = `${anchorKey}${SpecialNodeKeys.OtherSuffix}`;
+      const relatedOtherKey =
+        graph.get(otherKey)?.type === relatedLayer ? otherKey : undefined;
+      const orderedRelatedKeys = relatedKeys.filter(key => key !== otherKey);
+
+      const relatedEntries = orderedRelatedKeys
+        .map(key => entries.find(([entryKey]) => entryKey === key))
+        .filter((entry): entry is [string, NodeData] => entry !== undefined);
+      relatedEntries.sort(
+        ([keyA], [keyB]) =>
+          getNodeValue(graph, keyB) - getNodeValue(graph, keyA),
+      );
+
+      const otherEntry = relatedOtherKey
+        ? entries.find(([entryKey]) => entryKey === relatedOtherKey)
+        : undefined;
+
+      const relatedKeysToMove = new Set(orderedRelatedKeys);
+      if (relatedOtherKey) {
+        relatedKeysToMove.add(relatedOtherKey);
+      }
+      const entriesWithoutRelated = entries.filter(
+        ([entryKey]) => !relatedKeysToMove.has(entryKey),
+      );
+      const anchorIndex = entriesWithoutRelated.findIndex(
+        ([entryKey]) => entryKey === anchorKey,
+      );
+      if (anchorIndex === -1) {
+        return;
+      }
+
+      const insertionIndex =
+        placement === 'before' ? anchorIndex : anchorIndex + 1;
+      const nodesToInsert = otherEntry
+        ? [...relatedEntries, otherEntry]
+        : relatedEntries;
+
+      entriesWithoutRelated.splice(insertionIndex, 0, ...nodesToInsert);
+      entries.length = 0;
+      entries.push(...entriesWithoutRelated);
+    });
+  }
+
   let sortedEntries: Array<[string, NodeData]>;
   if (categorySort === 'global') {
     sortedEntries = Array.from(graph.entries()).sort(
@@ -1013,53 +1080,22 @@ export function sortGraph(
       }
     });
   } else if (categorySort === 'per-group') {
-    const categoryGroups = nodesInLayer(graph, GraphLayers.CategoryGroup);
     sortedEntries = Array.from(graph.entries()).sort(
       ([keyA], [keyB]) => getNodeValue(graph, keyB) - getNodeValue(graph, keyA),
     );
 
-    categoryGroups.forEach(groupKey => {
-      const group = graph.get(groupKey);
-      if (!group) return;
-      const groupToKeys = Array.from(group.to.keys());
-
-      const groupOtherKey = groupToKeys.find(k =>
-        k.endsWith(SpecialNodeKeys.OtherSuffix),
-      );
-      const childKeys = groupToKeys.filter(k => k !== groupOtherKey);
-
-      const childEntries = childKeys
-        .map(key => sortedEntries.find(([entryKey]) => entryKey === key))
-        .filter((entry): entry is [string, NodeData] => entry !== undefined);
-      childEntries.sort(
-        ([a], [b]) => getNodeValue(graph, b) - getNodeValue(graph, a),
-      );
-
-      const otherEntry = groupOtherKey
-        ? sortedEntries.find(([entryKey]) => entryKey === groupOtherKey)
-        : undefined;
-
-      // Remove these children ("Other" too) from their current places
-      sortedEntries = sortedEntries.filter(
-        ([entryKey]) =>
-          !childKeys.includes(entryKey) && entryKey !== groupOtherKey,
-      );
-
-      // Insert after group node
-      const groupIndex = sortedEntries.findIndex(
-        ([entryKey]) => entryKey === groupKey,
-      );
-      if (groupIndex !== -1) {
-        sortedEntries.splice(groupIndex + 1, 0, ...childEntries);
-        if (otherEntry) {
-          sortedEntries.splice(
-            groupIndex + 1 + childEntries.length,
-            0,
-            otherEntry,
-          );
-        }
-      }
-    });
+    sortRelatedNodesAroundAnchors(
+      sortedEntries,
+      GraphLayers.CategoryGroup,
+      GraphLayers.Category,
+      'after',
+    );
+    sortRelatedNodesAroundAnchors(
+      sortedEntries,
+      GraphLayers.IncomeCategory,
+      GraphLayers.IncomePayee,
+      'before',
+    );
   } else {
     const used = new Set<NodeKey>();
     sortedEntries = [];

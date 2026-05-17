@@ -600,6 +600,32 @@ describe('sankey-spreadsheet', () => {
       expect(keys.indexOf('g1')).toBeLessThan(keys.indexOf('c1'));
       expect(keys.indexOf('g2')).toBeLessThan(keys.indexOf('c2'));
     });
+
+    it('sorts payees according to income categories in per-group mode', () => {
+      const graph: Graph = new Map();
+      addNode(graph, 'payee1', GraphLayers.IncomePayee, 'Payee 1');
+      addNode(graph, 'payee2', GraphLayers.IncomePayee, 'Payee 2');
+      addNode(graph, 'payee3', GraphLayers.IncomePayee, 'Payee 3');
+      addNode(graph, 'income1', GraphLayers.IncomeCategory, 'Income 1');
+      addNode(graph, 'income2', GraphLayers.IncomeCategory, 'Income 2');
+      addNode(graph, 'account1', GraphLayers.Account, 'Account 1');
+
+      addValueToLink(graph, 'payee1', 'income1', 300);
+      addValueToLink(graph, 'payee2', 'income2', 200);
+      addValueToLink(graph, 'payee3', 'income2', 200);
+      addValueToLink(graph, 'income1', 'account1', 300);
+      addValueToLink(graph, 'income2', 'account1', 400);
+
+      const sorted = sortGraph(graph, 'per-group', []);
+      const keys = Array.from(sorted.keys());
+
+      const payee1Index = keys.indexOf('payee1');
+      const payee2Index = keys.indexOf('payee2');
+      const payee3Index = keys.indexOf('payee3');
+
+      expect(payee2Index).toBeLessThan(payee1Index);
+      expect(payee3Index).toBeLessThan(payee1Index);
+    });
   });
 
   describe('addPercentageLabels', () => {
