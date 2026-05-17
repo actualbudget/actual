@@ -14,6 +14,7 @@ concurrency:
 jobs:
   release-notes:
     runs-on: ubuntu-latest
+    environment: pr-automation
     steps:
       - name: Check if triggered by bot
         id: bot-check
