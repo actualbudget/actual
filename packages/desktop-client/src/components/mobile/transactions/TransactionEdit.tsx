@@ -1482,7 +1482,14 @@ function NoteTagAutocomplete({
   const [cursorPosition] = useCursorPosition(inputRef);
   const [startIdx, endIdx] = useCurrentWordRange(note, cursorPosition);
   const currentWord = note.slice(startIdx, endIdx);
-  const filteredTags = useFilteredTags(currentWord, true);
+  const currentWordNoHash = useMemo(
+    () => currentWord.replace(/^#+/, ''),
+    [currentWord],
+  );
+  const { data: filteredTags, refetch } = useFilteredTags(currentWord, true);
+  const showNewTag =
+    currentWord.startsWith('#') &&
+    !filteredTags.some(tag => tag.tag === currentWordNoHash);
 
   const getTagCSS = useTagCSS();
 
@@ -1495,6 +1502,13 @@ function NoteTagAutocomplete({
 
     inputRef.current.setSelectionRange(newPos, newPos);
     document.dispatchEvent(new Event('selectionchange'));
+  }
+
+  async function handleCreate(tag: string) {
+    if (!inputRef.current) return;
+    await send('tags-create', { tag });
+    refetch();
+    handleSelect(tag);
   }
 
   const hideScrollbar = css({
@@ -1512,7 +1526,7 @@ function NoteTagAutocomplete({
         padding: '4px 8px 4px 8px',
         borderRadius: 30,
         overflowX: 'auto',
-        height: filteredTags.length ? 30 : 0,
+        height: filteredTags.length || showNewTag ? 30 : 0,
         transitionProperty: 'height',
         transitionDuration: '100ms',
       }}
@@ -1541,6 +1555,36 @@ function NoteTagAutocomplete({
             </button>
           </div>
         ))}
+        {showNewTag && (
+          <div style={{ position: 'relative' }}>
+            <button
+              type="button"
+              style={{
+                border: `1px solid ${theme.noticeBackground}`,
+                height: 22,
+              }}
+              className={getTagCSS('')}
+              onMouseDown={e => e.preventDefault()} // stops input from losing focus
+              onClick={() => handleCreate(currentWordNoHash)}
+            >
+              #{currentWordNoHash}
+            </button>
+            <span
+              style={{
+                position: 'absolute',
+                backgroundColor: theme.noticeBackground,
+                color: theme.noticeText,
+                fontSize: 8,
+                right: 0,
+                transform: 'translate(50%, -2px)',
+                borderRadius: 5,
+                padding: '1px 2px 1px 2px',
+              }}
+            >
+              <Trans>New</Trans>
+            </span>
+          </div>
+        )}
       </View>
     </View>
   );
