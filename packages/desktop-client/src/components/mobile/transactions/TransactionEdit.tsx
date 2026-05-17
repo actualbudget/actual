@@ -1507,7 +1507,7 @@ function NoteTagAutocomplete({
   async function handleCreate(tag: string) {
     if (!inputRef.current) return;
     await send('tags-create', { tag });
-    refetch();
+    void refetch();
     handleSelect(tag);
   }
 

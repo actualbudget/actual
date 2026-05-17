@@ -97,7 +97,7 @@ export function TagAutocomplete({
 
     if (id === 'create_tag') {
       await send('tags-create', { tag: tagObj.tag });
-      refetch({ cancelRefetch: true });
+      void refetch({ cancelRefetch: true });
     }
 
     const nextChar = inputValue.charAt(endIdx);
@@ -114,7 +114,7 @@ export function TagAutocomplete({
     setCursorPosition(startIdx + tagObj.tag.length + 1 + space.length);
   }
 
-  function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+  async function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (!showPopup) {
       onKeyDown?.(e);
       return;
@@ -133,7 +133,7 @@ export function TagAutocomplete({
       setHighlightedIdx(filteredItems.length - 1);
       e.preventDefault();
     } else if (highlightedId && (e.key === 'Enter' || e.key === 'Tab')) {
-      handleSelect(highlightedId);
+      await handleSelect(highlightedId);
       e.preventDefault();
       e.stopPropagation();
     } else if (e.key === 'Escape') {

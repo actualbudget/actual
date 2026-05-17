@@ -252,7 +252,10 @@ function initBasicServer() {
       list: categories,
     }),
     'tags-get': async () => tags,
-    'tags-create': async (tag: Omit<TagEntity, 'id'>) => ({ id: 'new-tag', ...tag }),
+    'tags-create': async (tag: Omit<TagEntity, 'id'>) => ({
+      id: 'new-tag',
+      ...tag,
+    }),
   });
 }
 
