@@ -1491,7 +1491,7 @@ function NoteTagAutocomplete({
     currentWord.startsWith('#') &&
     !filteredTags.some(tag => tag.tag === currentWordNoHash);
 
-  const getTagCSS = useTagCSS();
+  const getTagCSS = useTagCSS({ ellipsis: true });
 
   function handleSelect(tag: string) {
     if (!inputRef.current) return;

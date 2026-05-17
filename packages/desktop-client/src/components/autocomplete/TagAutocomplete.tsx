@@ -45,7 +45,7 @@ export function TagAutocomplete({
   onUpdate,
 }: TagAutocompleteProps) {
   const { t } = useTranslation();
-  const getTagCSS = useTagCSS();
+  const getTagCSS = useTagCSS({ ellipsis: true });
   const autocompleteId = useId();
   const id = useCallback(
     (itemId: string) => autocompleteId + '|' + itemId,
