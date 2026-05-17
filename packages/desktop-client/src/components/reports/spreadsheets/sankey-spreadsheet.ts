@@ -536,8 +536,7 @@ async function fetchCategoryData(
                 category: category.name,
                 categoryId: category.id,
                 value: Math.abs(row.amount ?? 0),
-                isIncome:
-                  (categoryGroup.is_income ?? false) || (row.amount ?? 0) > 0,
+                isIncome: categoryGroup.is_income ?? false,
                 accountName: row.accountName ?? '',
                 accountId: row.accountId ?? '',
                 payeeName: row.payeeName ?? '',
