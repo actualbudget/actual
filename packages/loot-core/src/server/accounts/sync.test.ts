@@ -633,6 +633,60 @@ describe('Account sync', () => {
       expect(transactions[0].amount).toBe(-1239);
     },
   );
+
+  test('reconcile does not fuzzy match imported transactions to split children', async () => {
+    const { id: acctId } = await prepareDatabase();
+    const splitPayeeId = await db.insertPayee({ name: 'Split' });
+
+    await db.insertTransaction({
+      id: 'parent',
+      account: acctId,
+      amount: -80000,
+      date: '2026-05-08',
+      payee: splitPayeeId,
+      is_parent: true,
+    });
+    await db.insertTransaction({
+      id: 'child-matching-amount',
+      account: acctId,
+      amount: -60000,
+      date: '2026-05-08',
+      payee: splitPayeeId,
+      is_child: true,
+      parent_id: 'parent',
+    });
+    await db.insertTransaction({
+      id: 'child-other-amount',
+      account: acctId,
+      amount: -20000,
+      date: '2026-05-08',
+      payee: splitPayeeId,
+      is_child: true,
+      parent_id: 'parent',
+    });
+
+    await reconcileTransactions(acctId, [
+      {
+        date: '2026-05-15',
+        amount: -60000,
+        payee_name: 'Sender',
+        imported_id: 'incoming-transfer',
+      },
+    ]);
+
+    const transactions = await getAllTransactions();
+    expect(transactions).toHaveLength(4);
+    expect(
+      transactions.find(t => t.id === 'child-matching-amount').imported_id,
+    ).toBeNull();
+    expect(
+      transactions.find(t => t.imported_id === 'incoming-transfer'),
+    ).toMatchObject({
+      amount: -60000,
+      date: 20260515,
+      parent_id: null,
+    });
+  });
 });
 
 describe('SimpleFin batch sync', () => {
