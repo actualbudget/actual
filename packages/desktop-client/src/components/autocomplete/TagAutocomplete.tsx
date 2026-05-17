@@ -234,7 +234,7 @@ export function TagAutocomplete({
                     padding: 4,
                   }}
                 >
-                  <span>
+                  <span style={{ textWrap: 'nowrap' }}>
                     <Trans>Create Tag</Trans>
                   </span>
                   <span className={getTagCSS('')}>
