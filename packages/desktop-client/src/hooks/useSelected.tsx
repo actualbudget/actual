@@ -94,7 +94,11 @@ export function useSelected<T extends Item>(
               }
             }
 
-            iterateRange(range, i => selectedItems.add(items[i].id));
+            iterateRange(range, i => {
+              if (!selectAllFilter || selectAllFilter(items[i])) {
+                selectedItems.add(items[i].id);
+              }
+            });
 
             if (deleteUntil) {
               iterateRange(deleteUntil, i => selectedItems.delete(items[i].id));
