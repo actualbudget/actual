@@ -97,6 +97,11 @@ export type NodeData = {
 };
 export type Graph = Map<NodeKey, NodeData>;
 
+type TooltipInfoMap = Map<
+  NodeKey,
+  Map<NodeKey, Array<{ name: string; value: number }>>
+>;
+
 const SpecialNodeKeys = {
   ToBudget: 'to_budget',
   Budgeted: 'budgeted',
@@ -105,7 +110,6 @@ const SpecialNodeKeys = {
   FromPrevMonth: 'from_previous_month',
   AvailableIncome: 'available_income',
   AllAccounts: 'Income',
-  GlobalOther: 'GLOBAL__OTHER_BUCKET',
   OtherSuffix: '__OTHER_BUCKET',
   HiddenSuffix: '__HIDDEN',
 } as const;
@@ -209,16 +213,19 @@ export function buildSankeyData(
 ): SankeyData {
   const graph = cloneGraph(baseGraph);
 
-  const processedGraph = processGraphData(
+  const toolTipInfoMap = groupOtherCategories(
     graph,
     topNcategories,
-    categories,
     categorySort,
-    layerFrom,
-    layerTo,
   );
+  const sortedGraph = sortGraph(graph, categorySort, categories);
+  addPercentageLabels(sortedGraph);
+  addColors(sortedGraph);
+  cleanUpNodes(sortedGraph);
+  addHiddenNodes(sortedGraph);
+  filterGraphByLayers(sortedGraph, layerFrom, layerTo);
 
-  return convertToSankeyData(processedGraph);
+  return convertToSankeyData(sortedGraph, toolTipInfoMap);
 }
 
 export function createBudgetSpreadsheet(
@@ -361,25 +368,6 @@ export function createTransactionsSpreadsheet(
 
     return categoryData;
   };
-}
-
-function processGraphData(
-  graph: Graph,
-  topNcategories: number,
-  categories: CategoryGroupEntity[],
-  categorySort: SortMode,
-  layerFrom: GraphLayers,
-  layerTo: GraphLayers,
-): Graph {
-  groupOtherCategories(graph, topNcategories, categorySort);
-  const sortedGraph = sortGraph(graph, categorySort, categories);
-  addPercentageLabels(sortedGraph);
-  addColors(sortedGraph);
-  cleanUpNodes(sortedGraph);
-  addHiddenNodes(sortedGraph);
-  filterGraphByLayers(sortedGraph, layerFrom, layerTo);
-
-  return sortedGraph;
 }
 
 function cloneGraph(graph: Graph): Graph {
@@ -850,74 +838,49 @@ function groupOtherCategories(
   graph: Graph,
   topN: number,
   categorySort: SortMode = 'per-group',
-) {
-  // For each category group, find the top N categories by total value and group the rest into "Other"
-  const deletedNodes = new Map<NodeKey, { key: NodeKey; data: NodeData }[]>();
+): TooltipInfoMap {
+  const toolTipInfoMap: TooltipInfoMap = new Map();
 
-  let categoryNodes = nodesInLayer(graph, GraphLayers.Category).filter(
-    s => !s.endsWith(SpecialNodeKeys.OtherSuffix),
-  );
-  let otherCategoryNodes = nodesInLayer(graph, GraphLayers.Category).filter(s =>
-    s.endsWith(SpecialNodeKeys.OtherSuffix),
-  );
-  while (categoryNodes.length + otherCategoryNodes.length > topN) {
-    const categoryNodeSet = new Set(categoryNodes);
-    const values = new Map<NodeKey, number>();
-    graph.forEach(data => {
-      data.to.forEach((v, k) => {
-        if (categoryNodeSet.has(k)) values.set(k, (values.get(k) ?? 0) + v);
-      });
-    });
-    let categoryToDelete: NodeKey | undefined;
-    let min = Infinity;
-    for (const k of categoryNodes) {
-      const val = values.get(k) ?? 0;
-      if (val < min) {
-        min = val;
-        categoryToDelete = k;
-      }
-    }
-
-    if (categoryToDelete === undefined) break; // safety
-
-    const categoryGroupResult = getCategoryGroup(graph, categoryToDelete);
-    if (!categoryGroupResult) {
-      console.error(
-        `Failed to find category group for category: ${categoryToDelete}`,
-      );
-      continue;
-    }
-
-    const deletedCategoryGroupKey = categoryGroupResult[0];
-    const nodeData = graph.get(categoryToDelete);
-    if (!nodeData) {
-      console.error(
-        `Failed to find node data for category: ${categoryToDelete}`,
-      );
-      continue;
-    }
-
-    const deletedCategoryGroup = deletedNodes.get(deletedCategoryGroupKey);
-    if (!deletedCategoryGroup) {
-      deletedNodes.set(deletedCategoryGroupKey, [
-        { key: categoryToDelete, data: nodeData },
-      ]);
-    } else {
-      deletedCategoryGroup.push({ key: categoryToDelete, data: nodeData });
-    }
-
-    moveToOther(graph, categoryToDelete, categorySort === 'global');
-    graph.delete(categoryToDelete);
-
-    categoryNodes = nodesInLayer(graph, GraphLayers.Category).filter(
+  Object.entries(GraphLayers).forEach(([_, layer]) => {
+    let ordinaryNodes = nodesInLayer(graph, layer).filter(
       s => !s.endsWith(SpecialNodeKeys.OtherSuffix),
     );
-    otherCategoryNodes = nodesInLayer(graph, GraphLayers.Category).filter(s =>
+    let otherNodes = nodesInLayer(graph, layer).filter(s =>
       s.endsWith(SpecialNodeKeys.OtherSuffix),
     );
-  }
 
-  promoteOtherBack(graph, deletedNodes, categorySort === 'global');
+    while (ordinaryNodes.length + otherNodes.length > topN) {
+      let minValue = Infinity;
+      let nodeToDelete: NodeKey | undefined;
+      for (const nodeKey of ordinaryNodes) {
+        const nodeValue = getNodeValue(graph, nodeKey);
+        if (nodeValue < minValue) {
+          minValue = nodeValue;
+          nodeToDelete = nodeKey;
+        }
+      }
+
+      if (nodeToDelete === undefined) break; // safety
+
+      moveToOther(
+        graph,
+        nodeToDelete,
+        toolTipInfoMap,
+        categorySort === 'global',
+      );
+
+      ordinaryNodes = nodesInLayer(graph, layer).filter(
+        s => !s.endsWith(SpecialNodeKeys.OtherSuffix),
+      );
+      otherNodes = nodesInLayer(graph, layer).filter(s =>
+        s.endsWith(SpecialNodeKeys.OtherSuffix),
+      );
+    }
+  });
+
+  console.log(graph);
+
+  return toolTipInfoMap;
 }
 
 export function nodesInLayer(graph: Graph, layer: GraphLayers): NodeKey[] {
@@ -926,47 +889,99 @@ export function nodesInLayer(graph: Graph, layer: GraphLayers): NodeKey[] {
     .map(([key]) => key);
 }
 
-function moveToOther(graph: Graph, key: NodeKey, globalOther: boolean = false) {
-  const categoryGroup = getCategoryGroup(graph, key);
-  if (!categoryGroup) {
-    console.error(`moveToOther: Failed to find category group for key: ${key}`);
+function moveToOther(
+  graph: Graph,
+  key: NodeKey,
+  toolTipInfoMap: TooltipInfoMap,
+  globalOther: boolean = false,
+) {
+  const nodeData = graph.get(key);
+  if (!nodeData) {
     return;
   }
 
-  const categoryGroupKey = categoryGroup[0];
-  const categoryGroupData = categoryGroup[1];
-  const categoryValue = categoryGroupData.to.get(key);
+  // Get nodes connected to this node
+  const toNodes = Array.from(graph.get(key)?.to.keys() ?? []);
+  const fromNodes = Array.from(graph).filter(([, data]) => data.to.has(key));
 
-  if (categoryValue === undefined) {
-    console.error(
-      `moveToOther: No link value found from group ${categoryGroupKey} to ${key}`,
-    );
-    return;
-  }
-
-  let otherGroupKey: NodeKey;
+  let otherKey: NodeKey;
   if (globalOther) {
-    otherGroupKey = SpecialNodeKeys.GlobalOther;
+    otherKey = nodeData.type + SpecialNodeKeys.OtherSuffix;
   } else {
-    otherGroupKey = categoryGroupKey + SpecialNodeKeys.OtherSuffix;
+    otherKey = nodeData.type + SpecialNodeKeys.OtherSuffix;
+
+    if (nodeData.type === GraphLayers.Category) {
+      const categoryGroupResult = getCategoryGroup(graph, key);
+      if (categoryGroupResult) {
+        const categoryGroupKey = categoryGroupResult[0];
+        otherKey = categoryGroupKey + SpecialNodeKeys.OtherSuffix;
+      }
+    } else if (nodeData.type === GraphLayers.IncomePayee) {
+      const incomeCategoryKey = Array.from(
+        graph.get(key)?.to.keys() ?? [],
+      ).find(k => graph.get(k)?.type === GraphLayers.IncomeCategory);
+      if (incomeCategoryKey) {
+        otherKey = incomeCategoryKey + SpecialNodeKeys.OtherSuffix;
+      }
+    }
   }
 
-  addNode(graph, otherGroupKey, GraphLayers.Category, 'Other');
-  addValueToLink(graph, categoryGroupKey, otherGroupKey, categoryValue);
-  addTooltipInfo(graph, categoryGroupKey, key, categoryValue);
-  deleteLink(graph, categoryGroupKey, key);
+  // Make sure the Other node exists
+  addNode(graph, otherKey, nodeData.type, 'Other');
+
+  fromNodes.forEach(([fromKey, fromData]) => {
+    const linkValue = fromData.to.get(key);
+    if (linkValue !== undefined) {
+      addValueToLink(graph, fromKey, otherKey, linkValue);
+      newAddTooltipInfo(
+        toolTipInfoMap,
+        fromKey,
+        otherKey,
+        graph.get(key)?.name ?? key,
+        linkValue,
+      );
+    }
+  });
+  toNodes.forEach(toKey => {
+    const fromData = graph.get(key);
+    const linkValue = fromData?.to.get(toKey);
+    if (linkValue !== undefined) {
+      addValueToLink(graph, otherKey, toKey, linkValue);
+      newAddTooltipInfo(
+        toolTipInfoMap,
+        otherKey,
+        toKey,
+        graph.get(key)?.name ?? key,
+        linkValue,
+      );
+    }
+  });
+
+  toNodes.forEach(toKey => {
+    deleteLink(graph, key, toKey);
+  });
+  fromNodes.forEach(([fromKey]) => {
+    deleteLink(graph, fromKey, key);
+  });
+
+  graph.delete(key);
 }
 
-function addTooltipInfo(
-  graph: Graph,
+function newAddTooltipInfo(
+  toolTipInfoMap: TooltipInfoMap,
   from: NodeKey,
   to: NodeKey,
+  name: string,
   value: number,
 ) {
-  const fromNode = graph.get(from);
-  if (!fromNode) return;
-  fromNode.tooltipInfo = fromNode.tooltipInfo ?? [];
-  fromNode.tooltipInfo.push({ name: graph.get(to)?.name ?? to, value });
+  if (!toolTipInfoMap.has(from)) {
+    toolTipInfoMap.set(from, new Map());
+  }
+  const innerMap = toolTipInfoMap.get(from)!;
+  const existingInfo = innerMap.get(to) ?? [];
+  if (!existingInfo.find(info => info.name === name)) {
+    innerMap.set(to, [...existingInfo, { name, value }]);
+  }
 }
 
 export function getCategoryGroup(graph: Graph, key: NodeKey) {
@@ -982,31 +997,6 @@ export function deleteLink(graph: Graph, from: NodeKey, to: NodeKey) {
   }
 }
 
-function promoteOtherBack(
-  graph: Graph,
-  deletedNodes: Map<string, { key: string; data: NodeData }[]>,
-  globalOther: boolean = false,
-) {
-  // If an Other node only contains one category, we revert it to an ordinary node
-  let otherGroupKey: NodeKey;
-  deletedNodes.forEach((data, key) => {
-    if (data.length === 1) {
-      if (globalOther) {
-        otherGroupKey = SpecialNodeKeys.GlobalOther;
-      } else {
-        otherGroupKey = key ? key + SpecialNodeKeys.OtherSuffix : 'other';
-      }
-      addNode(graph, data[0].key, GraphLayers.Category, data[0].data.name);
-      const fromNode = graph.get(key);
-      const linkValue = fromNode?.to.get(otherGroupKey);
-      if (linkValue !== undefined) {
-        addValueToLink(graph, key, data[0].key, linkValue);
-      }
-      deleteLink(graph, key, otherGroupKey);
-    }
-  });
-}
-
 export function sortGraph(
   graph: Graph,
   categorySort: SortMode = 'per-group',
@@ -1017,7 +1007,11 @@ export function sortGraph(
     sortedEntries = Array.from(graph.entries()).sort(
       ([keyA], [keyB]) => getNodeValue(graph, keyB) - getNodeValue(graph, keyA),
     );
-    moveNodeToEnd(sortedEntries, SpecialNodeKeys.GlobalOther);
+    sortedEntries.forEach(([key]) => {
+      if (key.endsWith(SpecialNodeKeys.OtherSuffix)) {
+        moveNodeToEnd(sortedEntries, key);
+      }
+    });
   } else if (categorySort === 'per-group') {
     const categoryGroups = nodesInLayer(graph, GraphLayers.CategoryGroup);
     sortedEntries = Array.from(graph.entries()).sort(
@@ -1432,7 +1426,10 @@ export function cleanUpNodes(graph: Graph) {
   }
 }
 
-export function convertToSankeyData(graph: Graph): SankeyData {
+export function convertToSankeyData(
+  graph: Graph,
+  toolTipInfoMap: TooltipInfoMap,
+): SankeyData {
   const nodes = Array.from(graph, ([key, data]) => ({
     key,
     name: data.labelKey
@@ -1443,9 +1440,9 @@ export function convertToSankeyData(graph: Graph): SankeyData {
   }));
   const links = Array.from(graph).flatMap(([key, data]) =>
     Array.from(data.to, ([targetKey, value]) => {
-      let tooltipInfo: Array<{ name: string; value: number }> = [];
-      if (data.tooltipInfo && targetKey.endsWith(SpecialNodeKeys.OtherSuffix)) {
-        tooltipInfo = data.tooltipInfo;
+      const tooltipInfo = toolTipInfoMap.get(key)?.get(targetKey) ?? [];
+
+      if (tooltipInfo) {
         tooltipInfo.sort((a, b) => b.value - a.value);
       }
 

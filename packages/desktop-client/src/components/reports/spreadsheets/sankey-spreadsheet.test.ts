@@ -681,7 +681,7 @@ describe('sankey-spreadsheet', () => {
       addNode(graph, 'node2', GraphLayers.Category, 'Node 2');
       addValueToLink(graph, 'node1', 'node2', 100);
 
-      const result = convertToSankeyData(graph);
+      const result = convertToSankeyData(graph, new Map());
 
       expect(result.nodes).toHaveLength(2);
       expect(result.links).toHaveLength(1);
@@ -699,7 +699,7 @@ describe('sankey-spreadsheet', () => {
       const node1 = graph.get('node1');
       if (node1) node1.percentageLabel = '100.0%';
 
-      const result = convertToSankeyData(graph);
+      const result = convertToSankeyData(graph, new Map());
 
       expect(result.nodes[0].percentageLabel).toBe('100.0%');
     });
@@ -709,7 +709,7 @@ describe('sankey-spreadsheet', () => {
       addNode(graph, 'node1', GraphLayers.Budget, 'Node 1');
       graph.get('node1')!.labelKey = 'Budgeted';
 
-      const result = convertToSankeyData(graph);
+      const result = convertToSankeyData(graph, new Map());
 
       expect(result.nodes[0].name).toBe('translated: Budgeted');
     });
