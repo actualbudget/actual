@@ -39,8 +39,6 @@ Click on the clock icon that appears when you hover over a category name.
 
 ![alt-text-here](/img/goal-template/automation-icon.webp)
 
-![alt-text-here](/img/goal-template/new-automation.webp)
-
 From this opening view, you can
 
 A. Add a new budget automation<br />
@@ -51,13 +49,15 @@ C. Add month-end cleanup to the category
 Balance caps can only be added to existing budget automations
 :::
 
-You can have multiple automations!
+![alt-text-here](/img/goal-template/new-automation.webp)
 
-![alt-text-here](/img/goal-template/multiple-automations.webp)
+You can have multiple automations!
 
 :::tip
 The projected amount to be budgeted will be shown in the top right of the automation form. This will update with the category’s automations.
 :::
+
+![alt-text-here](/img/goal-template/multiple-automations.webp)
 
 ### Priorities {#priorities}
 
@@ -80,9 +80,9 @@ When you first start using priorities, space them 10 numbers apart so you have r
 
 ### Fixed Amount {#fixed-amount}
 
-![alt-text-here](/img/goal-template/fixed-amount-automation.webp)
-
 This is the simplest type of automation. The amount (A) will be budgeted at the cadence you choose (B & C) with the starting date you set (D).
+
+![alt-text-here](/img/goal-template/fixed-amount-automation.webp)
 
 :::info
 For weeks or days, the entire month will be budgeted based on the number of weeks/days in that month.
@@ -98,11 +98,11 @@ This [blog post using note templates](/blog/2024-03-25-goal-templates-with-a-twi
 
 ### Save by Date {#save-by-date}
 
-![alt-text-here](/img/goal-template/save-by-date-automation.webp)
-
 Use this automation to save up the desired amount (A) by a specific month (B).
 
 The automation determines how much to budget each month to meet your savings goal. If you add or remove funds along the way, it recalculates the remaining monthly amounts so you still reach your target on time.
+
+![alt-text-here](/img/goal-template/save-by-date-automation.webp)
 
 **Options:**
 
@@ -115,10 +115,10 @@ All _Save by date_ automations in the same category must have the same priority.
 
 ### Cover Schedule {#cover-schedule}
 
-![alt-text-here](/img/goal-template/schedule-automation.webp)
-
 This automation budgets based on a schedule previously added to actual.<br />
 Pick a schedule (A) and a mode (B).
+
+![alt-text-here](/img/goal-template/schedule-automation.webp)
 
 **There are two modes:**
 
@@ -133,9 +133,9 @@ All _Cover schedule_ automations in the same category must have the same priorit
 
 ### % of Income {#percentage}
 
-![alt-text-here](/img/goal-template/percentage-automation.webp)
-
 This automation budgets a percentage of income from this month or last month, or a percentage of available funds from this month.
+
+![alt-text-here](/img/goal-template/percentage-automation.webp)
 
 When you click in the Category field, you will be presented with current choices to base the percentage on.
 
@@ -147,10 +147,10 @@ When you click in the Category field, you will be presented with current choices
 
 ### From History {#from-history}
 
-![alt-text-here](/img/goal-template/historical-automation.webp)
-
 For this automation, you can choose to budget based on historical data.<br />
 Choose a mode (A) and the number of months back (B).
+
+![alt-text-here](/img/goal-template/historical-automation.webp)
 
 **Modes:**
 
@@ -159,9 +159,9 @@ Choose a mode (A) and the number of months back (B).
 
 ### Refill to Cap {#refill}
 
-![alt-text-here](/img/goal-template/refill-automation.webp)
-
 This automation requires a [Balance cap](#balance-cap) and will refill the category to the cap.
+
+![alt-text-here](/img/goal-template/refill-automation.webp)
 
 Click on _Add balance limit_ and you will be taken to the Balance cap automation. After you add a balance cap, the refill automation will be active.
 
@@ -169,9 +169,9 @@ Click on _Add balance limit_ and you will be taken to the Balance cap automation
 
 ### Whatever is Left {#remainder}
 
-![alt-text-here](/img/goal-template/remainder-automation.webp)
-
 After all of the other automations have run, the leftover of **To Budget** will be doled out by these remainder automations based on the weights you choose. They run last, in a separate pass.
+
+![alt-text-here](/img/goal-template/remainder-automation.webp)
 
 - You can have as many remainder automations as you like.
 - Remainder automations will respect any balance caps in place.
@@ -203,9 +203,12 @@ Investment, 60 / 3 _ 2 = 40 (Investment Fund receives 40.00)
 
 ## Balance cap {#balance-cap}
 
+Set a maximum amount over which the budget automations will not add funds.
+
 ![alt-text-here](/img/goal-template/balance-cap.webp)
 
-Budget automations will not add funds above the cap you set. If the category balance exceeds the cap, the next budgeting pass will remove the excess. To keep any extra funds in the category, enable _Retain existing funds over the cap_. When this option is turned on, the next budgeting pass will leave the excess in place.
+- If the category balance exceeds the cap, the next budgeting pass will remove the excess.
+- To keep any extra funds in the category, enable _Retain existing funds over the cap_. When this option is turned on, the next budgeting pass will leave the excess in place.
 
 All automations in the category will be subject to the cap.
 
@@ -217,26 +220,26 @@ Here’s an interesting example of budgeting money for a meal out every Saturday
 - The weekday lunches are budgeted at 35.00/week starting on a Monday.
 - The Balance cap is set at 85.00/week based on Mondays.
 
-June: 4 Saturdays and 5 Mondays:
+June has 4 Saturdays and 5 Mondays:
 
 ![alt-text-here](/img/goal-template/june-restaurants.webp)
 
-July: 4 Saturdays and 4 Mondays:
+July has 4 Saturdays and 4 Mondays:
 
 ![alt-text-here](/img/goal-template/july-restaurants.webp)
 
-August: 5 Saturdays and 5 Mondays:
+August has 5 Saturdays and 5 Mondays:
 
 ![alt-text-here](/img/goal-template/august-restaurants.webp)
 
-October: 5 Saturdays and 4 Mondays. Our budget looks different as the Balance cap is based on the 4 Mondays! <br />
+October has 5 Saturdays and 4 Mondays. Our budget looks different as the Balance cap is based on the 4 Mondays! <br />
 So, the budget covers 4 Saturday meals and 4 work weeks.
 
 ![alt-text-here](/img/goal-template/october-restaurants.webp)
 
-Here’s another example. We get our paycheck on Friday, every other week. We want to budget $300 from each paycheck to groceries, but not in months with 3 paychecks, so we place a 600.00 balance cap on our category and start the _Fixed amount_ automation on a payday.
+Here’s another example. We want to budget $300 every 2 weeks, but not in months with 3 Fridays. We place a 600.00 balance cap on our category and start a _Fixed amount_ (300.00 every 2 weeks) automation on a Friday.
 
-There are 3 paydays in July, but the Balance cap holds our grocery budget at 600.00:
+There are 3 Fridays in July, but the Balance cap holds our grocery budget at 600.00:
 
 ![alt-text-here](/img/goal-template/july-food.webp)
 
@@ -258,11 +261,11 @@ The tooltip will give you more information about your budget and balance:
 
 ### Long-term Goal {#long-term-goal}
 
-![alt-text-here](/img/goal-template/long-term-automation.webp)
-
 Long-term goals change how the budget indicator works. Instead of being based on the budgeted amount, the long-term goal will indicate how much progress you have made toward a desired target. Importantly, if you have met your projected budget for the month but are shy of your long-term goal the balance will remain orange.
 
 Once you hit your goal, the balance will turn green. Note that if you remove funds and fall short, it will turn orange again.
+
+![alt-text-here](/img/goal-template/long-term-automation.webp)
 
 :::tip
 
@@ -366,7 +369,11 @@ As an example, assume the spend for the category was [\$40, \$50, \$60] for the 
 | `#template average 3 months [increase 11]`  |      \$ 61      |
 | `#template average 3 months [decrease 1]`   |      \$ 49      |
 
-## Month-end Cleanup {#month-end-cleanup}
+## End of Month Cleanup {#month-end-cleanup}
+
+At month end, you can use cleanup automations to sweep up the surplus from categories that you overfunded and automatically distribute them to overspent categories and then, other categories, such as savings, vacation, or debt payoff.
+
+[Examples](#cleanup-examples) below will help demonstrate the power of _End of month cleanup_.
 
 ![alt-text-here](/img/goal-template/cleanup-global.webp)
 
@@ -390,9 +397,9 @@ Pick from a list of previously named pools or type in the field to get an option
 
 ![alt-text-here](/img/goal-template/create-named-pool.webp)
 
-**Send leftover to pool** (source). This sends funds leftover category funds to the named pool to be distributed.
+**Send leftover to pool** (source). This sends surplus category funds to the named pool to be distributed.
 
-**Receive leftover from pool** (sink). After overspent categories in the pool are covered, leftover funds in the named pool are distributed by weight to the categories in the pool.
+**Receive leftover from pool** (sink). After overspent categories in this named pool are covered, leftover funds in the pool are distributed by weight to the categories in the pool.
 
 ![alt-text-here](/img/goal-template/named-pool-leftovers.webp)
 
@@ -445,7 +452,7 @@ The result will be:
 - Categories c and d will receive `2 / 10` or 20% of the pool
 - Category e will receive `4 / 10` or 40% of the pool
 
-### Examples
+### Examples {#cleanup-examples}
 
 **I leave money in my To Budget balance all month, can this help cover my overspending?**
 
