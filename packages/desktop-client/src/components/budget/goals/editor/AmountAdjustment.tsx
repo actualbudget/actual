@@ -92,7 +92,8 @@ export const AmountAdjustment = ({
   };
 
   const commitMagnitude = () => {
-    const size = Math.max(0, Number(rawMagnitude) || 0);
+    const parsed = Number(rawMagnitude);
+    const size = Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
     setRawMagnitude(String(size));
     apply(increasing ? size : -size, 'percent');
   };
