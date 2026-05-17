@@ -19,6 +19,8 @@ export function AutomationErrorTitle({
       return <Trans>Schedule not found</Trans>;
     case 'refill-no-cap':
       return <Trans>Refill needs a balance cap</Trans>;
+    case 'limit-no-contributor':
+      return <Trans>Balance cap needs a contributing automation</Trans>;
     case 'percentage-out-of-range':
       return <Trans>Percentage out of range</Trans>;
     case 'percentage-no-source':
@@ -53,7 +55,9 @@ export function AutomationErrorShort({
         <Trans>Pick a schedule</Trans>
       );
     case 'refill-no-cap':
-      return <Trans>Add a balance cap above</Trans>;
+      return <Trans>Add a balance cap</Trans>;
+    case 'limit-no-contributor':
+      return <Trans>Add an automation that contributes funds</Trans>;
     case 'percentage-out-of-range':
       return (
         <Trans>{{ percent: error.percent }}% must be between 0 and 100</Trans>
@@ -98,6 +102,14 @@ export function AutomationErrorDetail({
         <Trans>
           Refill automations must have a &ldquo;Balance cap&rdquo; automation
           added to use as the target.
+        </Trans>
+      );
+    case 'limit-no-contributor':
+      return (
+        <Trans>
+          A balance cap on its own does nothing. Add a contributing automation
+          (such as a fixed amount, save by date, or whatever is left) so the cap
+          has something to clamp.
         </Trans>
       );
     case 'percentage-out-of-range':
