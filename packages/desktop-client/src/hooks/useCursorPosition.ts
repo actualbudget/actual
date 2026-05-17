@@ -6,32 +6,45 @@ import { useRefEventListener } from './useRefEventListener';
 export function useCursorPosition(
   ref: RefObject<HTMLInputElement | null>,
 ): [number | null, (n: number | null) => void] {
+  // this section serves to prevent losing cursor position from being
+  // when alt tabbing to/from the application. Similar functionality exists
+  // in the regular Autocomplete
+  const win = useRef(window);
+  const allowChangeRef = useRef(true);
+  const enableChange = () => setTimeout(() => (allowChangeRef.current = true));
+  const disableChange = () => (allowChangeRef.current = false);
+  useRefEventListener(win, 'focus', enableChange, []);
+  useRefEventListener(win, 'blur', disableChange, [], { capture: true }); // capture to get as early as possible in the focus chain
+
+  const doc = useRef(document);
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
-  function _setCursorPosition(n: number | null) {
-    setTimeout(() => {
-      ref.current?.setSelectionRange(n, n);
-      document.dispatchEvent(new Event('selectionchange'));
-    });
-  }
+
   const update = () => {
-    const input = ref.current;
-    if (!input) return;
+    if (!ref.current || !allowChangeRef.current) return;
     setCursorPosition(
-      document.activeElement === input ? input.selectionStart : null,
+      document.activeElement === ref.current
+        ? ref.current.selectionStart
+        : null,
     );
   };
-  const clear = () => setCursorPosition(null);
+  const deps = [ref, allowChangeRef, setCursorPosition];
+  useRefEventListener(ref, 'focusin', update, deps);
+  useRefEventListener(ref, 'keyup', update, deps);
+  useRefEventListener(doc, 'selectionchange', update, deps);
+  useEffect(update, [ref, allowChangeRef, setCursorPosition]); // sync on mount
 
-  useRefEventListener(ref, 'focusin', update, [ref, setCursorPosition]);
-  useRefEventListener(ref, 'keyup', update, [ref, setCursorPosition]);
+  const clear = () => {
+    if (!allowChangeRef.current) return;
+    setCursorPosition(null);
+  };
   useRefEventListener(ref, 'focusout', clear, [setCursorPosition]);
 
-  // sync on mount
-  useEffect(update, [ref, setCursorPosition]);
-
-  // listen for selectionchange which only gets fired on document
-  const doc = useRef(document);
-  useRefEventListener(doc, 'selectionchange', update, [ref, setCursorPosition]);
-
-  return [cursorPosition, _setCursorPosition];
+  return [
+    cursorPosition,
+    (n: number | null) =>
+      setTimeout(() => {
+        ref.current?.setSelectionRange(n, n);
+        document.dispatchEvent(new Event('selectionchange'));
+      }),
+  ];
 }

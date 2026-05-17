@@ -11,6 +11,7 @@ export function useRefEventListener<
   callback: (this: ElementType, ev: HTMLElementEventMap[EventType]) => any,
   // oxlint-disable-next-line typescript/no-explicit-any
   deps: any[],
+  opts?: { capture?: boolean },
 ) {
   // oxlint-disable-next-line eslint-plugin-react-hooks/exhaustive-deps
   const _callback = useCallback(callback, deps);
@@ -19,9 +20,9 @@ export function useRefEventListener<
     if (!el) return;
 
     const callbackRef = _callback as EventListener; // closure?
-    el.addEventListener(event, callbackRef);
+    el.addEventListener(event, callbackRef, opts);
     return () => {
-      el.removeEventListener(event, callbackRef);
+      el.removeEventListener(event, callbackRef, opts);
     };
-  }, [ref, event, _callback]);
+  }, [ref, event, _callback, opts]);
 }
