@@ -1417,6 +1417,39 @@ export type ImportTransactionsResult = bankSync.ReconcileTransactionsResult & {
   }>;
 };
 
+function validateImportTransactionAmounts(
+  transactions: ImportTransactionEntity[],
+): ImportTransactionsResult['errors'] {
+  return transactions.flatMap((transaction, index) => {
+    const errors: ImportTransactionsResult['errors'] = [];
+
+    if (
+      transaction.amount != null &&
+      (!Number.isFinite(transaction.amount) ||
+        !Number.isInteger(transaction.amount))
+    ) {
+      errors.push({
+        message: `Transaction ${index + 1} amount must be an integer`,
+      });
+    }
+
+    for (const [subtransactionIndex, subtransaction] of (
+      transaction.subtransactions ?? []
+    ).entries()) {
+      if (
+        !Number.isFinite(subtransaction.amount) ||
+        !Number.isInteger(subtransaction.amount)
+      ) {
+        errors.push({
+          message: `Transaction ${index + 1} subtransaction ${subtransactionIndex + 1} amount must be an integer`,
+        });
+      }
+    }
+
+    return errors;
+  });
+}
+
 async function importTransactions({
   accountId,
   transactions,
@@ -1430,6 +1463,16 @@ async function importTransactions({
 }): Promise<ImportTransactionsResult> {
   if (typeof accountId !== 'string') {
     throw APIError('transactions-import: accountId must be an id');
+  }
+
+  const amountErrors = validateImportTransactionAmounts(transactions);
+  if (amountErrors.length > 0) {
+    return {
+      errors: amountErrors,
+      added: [],
+      updated: [],
+      updatedPreview: [],
+    };
   }
 
   try {

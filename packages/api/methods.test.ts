@@ -990,6 +990,33 @@ describe('API CRUD operations', () => {
     // Should create a new transaction since deleted ones are ignored
     expect(result2.added).toHaveLength(1);
   });
+
+  test('Transactions: import rejects decimal amount values', async () => {
+    const accountId = await api.createAccount({ name: 'test-account' }, 0);
+
+    const result = await api.importTransactions(accountId, [
+      {
+        account: accountId,
+        date: '2023-11-03',
+        imported_id: 'decimal-amount',
+        amount: 12.3,
+        payee_name: 'Test',
+      },
+    ]);
+
+    expect(result.added).toHaveLength(0);
+    expect(result.updated).toHaveLength(0);
+    expect(result.errors).toEqual([
+      { message: 'Transaction 1 amount must be an integer' },
+    ]);
+
+    const transactions = await api.getTransactions(
+      accountId,
+      '2023-11-01',
+      '2023-11-30',
+    );
+    expect(transactions).toHaveLength(0);
+  });
 });
 
 //apis: createSchedule, getSchedules, updateSchedule, deleteSchedule
