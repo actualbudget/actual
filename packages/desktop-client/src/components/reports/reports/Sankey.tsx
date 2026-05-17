@@ -96,7 +96,7 @@ function getAvailableLayers(mode: GraphMode): GraphLayers[] {
   }) as GraphLayers[];
 }
 
-function getDefaultLayerRange(mode: GraphMode): LayerRange {
+export function getDefaultLayerRange(mode: GraphMode): LayerRange {
   return {
     from:
       mode === 'budgeted'

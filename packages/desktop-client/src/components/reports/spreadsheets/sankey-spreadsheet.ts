@@ -840,11 +840,20 @@ function groupOtherCategories(
   categorySort: SortMode = 'per-group',
 ): TooltipInfoMap {
   const toolTipInfoMap: TooltipInfoMap = new Map();
+  const structuralKeys = new Set<string>(Object.values(SpecialNodeKeys));
+
+  function isGroupableNode(key: NodeKey): boolean {
+    const node = graph.get(key);
+    return Boolean(
+      node &&
+      !key.endsWith(SpecialNodeKeys.OtherSuffix) &&
+      !structuralKeys.has(key) &&
+      !node.isOverbudgeted,
+    );
+  }
 
   Object.entries(GraphLayers).forEach(([_, layer]) => {
-    let ordinaryNodes = nodesInLayer(graph, layer).filter(
-      s => !s.endsWith(SpecialNodeKeys.OtherSuffix),
-    );
+    let ordinaryNodes = nodesInLayer(graph, layer).filter(isGroupableNode);
     let otherNodes = nodesInLayer(graph, layer).filter(s =>
       s.endsWith(SpecialNodeKeys.OtherSuffix),
     );
@@ -869,9 +878,7 @@ function groupOtherCategories(
         categorySort === 'global',
       );
 
-      ordinaryNodes = nodesInLayer(graph, layer).filter(
-        s => !s.endsWith(SpecialNodeKeys.OtherSuffix),
-      );
+      ordinaryNodes = nodesInLayer(graph, layer).filter(isGroupableNode);
       otherNodes = nodesInLayer(graph, layer).filter(s =>
         s.endsWith(SpecialNodeKeys.OtherSuffix),
       );

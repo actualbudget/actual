@@ -14,13 +14,19 @@ import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
-import { topNNodes } from '#components/reports/reports/Sankey';
+import {
+  getDefaultLayerRange,
+  topNNodes,
+} from '#components/reports/reports/Sankey';
 import {
   buildSankeyData,
   createBaseGraphSpreadsheet,
+  isGraphLayer,
+} from '#components/reports/spreadsheets/sankey-spreadsheet';
+import type {
+  Graph,
   GraphLayers,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
-import type { Graph } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '#components/reports/useReport';
 import { useCategories } from '#hooks/useCategories';
@@ -78,35 +84,21 @@ export function SankeyCard({
   });
 
   const heightBasedTopN = topNNodes(cardHeight);
+  const configuredTopN = meta?.topNcategories ?? 15;
+  const topN = Math.min(configuredTopN, heightBasedTopN);
 
-  const isGraphLayer = (value: unknown): value is GraphLayers =>
-    typeof value === 'string' &&
-    (Object.values(GraphLayers) as string[]).includes(value);
-
-  const defaultLayerFrom =
-    mode === 'budgeted' ? GraphLayers.IncomeCategory : GraphLayers.IncomePayee;
-  const defaultLayerTo = GraphLayers.CategoryGroup;
-
-  const metaLayerFrom = isGraphLayer(meta?.layerFrom)
-    ? meta.layerFrom
-    : undefined;
-  const metaLayerTo = isGraphLayer(meta?.layerTo) ? meta.layerTo : undefined;
+  const defaultLayerRange = getDefaultLayerRange(mode);
+  let layerFrom: GraphLayers;
+  let layerTo: GraphLayers;
+  if (isGraphLayer(meta?.layerFrom) && isGraphLayer(meta?.layerTo)) {
+    layerFrom = meta.layerFrom as GraphLayers;
+    layerTo = meta.layerTo as GraphLayers;
+  } else {
+    layerFrom = defaultLayerRange.from;
+    layerTo = defaultLayerRange.to;
+  }
 
   const groupAccounts = meta?.groupAccounts ?? false;
-
-  const layerFrom =
-    metaLayerFrom &&
-    !(mode === 'budgeted' && metaLayerFrom === GraphLayers.IncomePayee) &&
-    !(mode === 'spent' && metaLayerFrom === GraphLayers.Budget)
-      ? metaLayerFrom
-      : defaultLayerFrom;
-
-  const layerTo =
-    metaLayerTo &&
-    !(mode === 'budgeted' && metaLayerTo === GraphLayers.IncomePayee) &&
-    !(mode === 'spent' && metaLayerTo === GraphLayers.Budget)
-      ? metaLayerTo
-      : defaultLayerTo;
 
   const baseGraphParams = useMemo(
     () =>
@@ -151,7 +143,7 @@ export function SankeyCard({
 
     return buildSankeyData(
       displayBaseGraph,
-      heightBasedTopN,
+      topN,
       groupedCategories,
       meta?.categorySort ?? 'per-group',
       layerFrom,
@@ -159,7 +151,7 @@ export function SankeyCard({
     );
   }, [
     displayBaseGraph,
-    heightBasedTopN,
+    topN,
     groupedCategories,
     meta?.categorySort,
     layerFrom,
