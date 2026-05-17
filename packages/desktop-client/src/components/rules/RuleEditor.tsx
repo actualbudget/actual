@@ -541,6 +541,20 @@ function ActionEditor({
                 />
               )}
             </View>
+            {templated && (
+              <Text
+                style={{
+                  ...styles.smallText,
+                  color: theme.warningText,
+                  marginTop: 3,
+                }}
+              >
+                <Trans>
+                  Templating is deprecated and will be removed in a future
+                  release. Switch this action to a formula instead.
+                </Trans>
+              </Text>
+            )}
           </View>
           {/*Due to that these fields have id's as value it is not helpful to have templating here*/}
           {isFormulaEnabled &&
