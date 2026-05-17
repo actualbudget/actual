@@ -13,11 +13,12 @@ import type {
   KeyboardEventHandler,
 } from 'react';
 import { ListBox, ListBoxItem, Popover } from 'react-aria-components';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { send } from '@actual-app/core/platform/client/connection';
 import { css } from '@emotion/css';
 
 import { useCurrentWordRange } from '#hooks/useCurrentWordRange';
@@ -56,11 +57,24 @@ export function TagAutocomplete({
   const [startIdx, endIdx] = useCurrentWordRange(inputValue, cursorPosition);
   const currentWord = inputValue.slice(startIdx, endIdx);
 
-  const filteredTags = useFilteredTags(currentWord, true);
-  const filteredItems = useMemo(
-    () => filteredTags?.map(tag => ({ ...tag, name: '#' + tag.tag })) ?? [],
-    [filteredTags],
-  );
+  const { data: filteredTags, refetch } = useFilteredTags(currentWord, true);
+  const filteredItems = useMemo(() => {
+    const tagArr =
+      filteredTags?.map(tag => ({ ...tag, name: '#' + tag.tag })) ?? [];
+
+    const isValidTag = currentWord.startsWith('#') && currentWord.length > 1;
+    const exactMatchExists =
+      tagArr.length && '#' + tagArr[0].tag === currentWord;
+    if (isValidTag && !exactMatchExists) {
+      const currentWordSingleHash = currentWord.replace(/^#+/, '#');
+      tagArr.push({
+        id: 'create_tag',
+        name: `${currentWordSingleHash}`,
+        tag: currentWordSingleHash.slice(1),
+      });
+    }
+    return tagArr;
+  }, [filteredTags, currentWord]);
 
   const [isOpen, setIsOpen] = useState(false);
   const showPopup = isOpen && filteredItems.length > 0;
@@ -77,9 +91,14 @@ export function TagAutocomplete({
     }
   }, [highlightedId, id]);
 
-  function handleSelect(id: string | null) {
+  async function handleSelect(id: string | null) {
     const tagObj = filteredItems.find(tag => tag.id === id);
     if (!tagObj) return;
+
+    if (id === 'create_tag') {
+      await send('tags-create', { tag: tagObj.tag });
+      refetch({ cancelRefetch: true });
+    }
 
     const nextChar = inputValue.charAt(endIdx);
     const space = nextChar === ' ' ? '' : ' ';
@@ -145,7 +164,7 @@ export function TagAutocomplete({
         onFocus={() => setIsOpen(true)}
         onBlur={onBlur}
         onUpdate={onUpdate}
-        autoComplete={showPopup ? 'off' : undefined}
+        autoComplete="off"
       />
 
       <Popover
@@ -202,7 +221,29 @@ export function TagAutocomplete({
               onPointerDown={e => e.preventDefault()}
               onClick={() => handleSelect(item.id)}
             >
-              <div className={getTagCSS(item.tag)}>{item.name}</div>
+              {item.id === 'create_tag' ? (
+                <div
+                  style={{
+                    color:
+                      highlightedId === item.id
+                        ? theme.menuAutoCompleteTextHover
+                        : theme.noticeTextMenu,
+                    padding: 4,
+                  }}
+                >
+                  <Trans>Create Tag</Trans>
+                  <span className={getTagCSS('')} style={{ marginLeft: 3 }}>
+                    <Trans>{item.name}</Trans>
+                  </span>
+                </div>
+              ) : (
+                <span
+                  className={getTagCSS(item.tag)}
+                  style={{ maxWidth: '100%', textOverflow: 'ellipsis' }}
+                >
+                  {item.name}
+                </span>
+              )}
             </ListBoxItem>
           )}
         </ListBox>

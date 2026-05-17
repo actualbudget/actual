@@ -13,8 +13,8 @@ export function useFilteredTags(
   filterStr: string,
   requireHashInFilter?: boolean,
 ) {
-  const { data: tags } = useTags();
-  return useMemo(() => {
+  const { data: tags, ...rest } = useTags();
+  const filteredTags = useMemo(() => {
     if (!filterStr || !tags) return [];
     if (requireHashInFilter && !filterStr.startsWith('#')) return [];
 
@@ -25,4 +25,8 @@ export function useFilteredTags(
       .find(filterStr.replace(/^#/, ''))
       .map(item => item.item);
   }, [tags, filterStr, requireHashInFilter]);
+  return {
+    data: filteredTags,
+    ...rest,
+  };
 }
