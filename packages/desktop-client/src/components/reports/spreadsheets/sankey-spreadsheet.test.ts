@@ -670,6 +670,27 @@ describe('sankey-spreadsheet', () => {
       expect(graph.has('group1')).toBe(true);
       expect(graph.has('cat2')).toBe(false);
     });
+
+    it('filters correctly when the from layer is the first layer', () => {
+      const graph: Graph = new Map();
+      addNode(graph, 'payee1', GraphLayers.IncomePayee, 'Payee 1');
+      addNode(graph, 'cat1', GraphLayers.IncomeCategory, 'Income Cat 1');
+      addNode(graph, 'acc1', GraphLayers.Account, 'Account 1');
+      addNode(graph, 'group1', GraphLayers.CategoryGroup, 'Group 1');
+      addNode(graph, 'cat2', GraphLayers.Category, 'Category 2');
+
+      filterGraphByLayers(
+        graph,
+        GraphLayers.IncomePayee,
+        GraphLayers.CategoryGroup,
+      );
+
+      expect(graph.has('payee1')).toBe(true);
+      expect(graph.has('cat1')).toBe(true);
+      expect(graph.has('acc1')).toBe(true);
+      expect(graph.has('group1')).toBe(true);
+      expect(graph.has('cat2')).toBe(false);
+    });
   });
 
   describe('cleanUpNodes', () => {

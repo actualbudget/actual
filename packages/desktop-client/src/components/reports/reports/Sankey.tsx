@@ -80,6 +80,98 @@ export function topNNodes(cardHeight: number): number {
 
 type GraphMode = 'budgeted' | 'spent';
 
+type LayerDirection = 'from' | 'to';
+type LayerRange = {
+  from: GraphLayers;
+  to: GraphLayers;
+};
+
+function getAvailableLayers(mode: GraphMode): GraphLayers[] {
+  return GRAPH_LAYER_ORDER.filter(layer => {
+    if (mode === 'budgeted') {
+      return layer !== GraphLayers.IncomePayee;
+    }
+
+    return layer !== GraphLayers.Budget;
+  }) as GraphLayers[];
+}
+
+function getDefaultLayerRange(mode: GraphMode): LayerRange {
+  return {
+    from:
+      mode === 'budgeted'
+        ? GraphLayers.IncomeCategory
+        : GraphLayers.IncomePayee,
+    to: GraphLayers.Category,
+  };
+}
+
+function normalizeLayerRange(
+  mode: GraphMode,
+  candidate: LayerRange,
+  changedDirection?: LayerDirection,
+): LayerRange {
+  const availableLayers = getAvailableLayers(mode);
+  const fallback = getDefaultLayerRange(mode);
+  const defaultFromIndex = availableLayers.indexOf(fallback.from);
+  const defaultToIndex = availableLayers.indexOf(fallback.to);
+
+  let from = availableLayers.includes(candidate.from)
+    ? candidate.from
+    : fallback.from;
+  let to = availableLayers.includes(candidate.to) ? candidate.to : fallback.to;
+
+  let fromIndex = availableLayers.indexOf(from);
+  let toIndex = availableLayers.indexOf(to);
+
+  if (fromIndex >= toIndex) {
+    if (changedDirection === 'from') {
+      const adjustedToIndex = Math.min(
+        availableLayers.length - 1,
+        Math.max(fromIndex + 1, defaultToIndex),
+      );
+      to = availableLayers[adjustedToIndex] ?? fallback.to;
+    } else if (changedDirection === 'to') {
+      const adjustedFromIndex = Math.max(
+        0,
+        Math.min(toIndex - 1, defaultFromIndex),
+      );
+      from = availableLayers[adjustedFromIndex] ?? fallback.from;
+    } else {
+      from = fallback.from;
+      to = fallback.to;
+    }
+
+    fromIndex = availableLayers.indexOf(from);
+    toIndex = availableLayers.indexOf(to);
+  }
+
+  if (fromIndex >= toIndex) {
+    return fallback;
+  }
+
+  return { from, to };
+}
+
+function getLayerMenuItems(
+  mode: GraphMode,
+  direction: LayerDirection,
+  otherLayer: GraphLayers,
+): GraphLayers[] {
+  const availableLayers = getAvailableLayers(mode);
+  const otherIndex = availableLayers.indexOf(otherLayer);
+
+  if (otherIndex === -1) {
+    return [];
+  }
+
+  if (direction === 'from') {
+    return availableLayers.slice(0, otherIndex);
+  }
+
+  return availableLayers.slice(otherIndex + 1);
+}
+
 // 1e5 is used as a sentinel value for 'All'
 const TOP_N_OPTIONS = [1e5, 10, 15, 20, 25, 30] as const;
 
@@ -190,54 +282,23 @@ function CategorySortSelector({ value, onChange }: CategorySortSelectorProps) {
 }
 
 type LayerSelectorProps = {
-  direction: 'from' | 'to';
+  direction: LayerDirection;
   value: GraphLayers;
-  otherLayer: GraphLayers | undefined;
+  layerLabels: Record<GraphLayers, string>;
+  menuItems: GraphLayers[];
   onChange: (layer: GraphLayers) => void;
-  graphMode: GraphMode;
 };
 
 function LayerSelector({
   direction,
   value,
-  otherLayer,
+  layerLabels,
+  menuItems,
   onChange,
-  graphMode,
 }: LayerSelectorProps) {
   const { t } = useTranslation();
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-
-  const LAYER_LABELS: Record<GraphLayers, string> = {
-    [GraphLayers.IncomePayee]: t('Payee'),
-    [GraphLayers.IncomeCategory]: t('Income category'),
-    [GraphLayers.Account]: t('Account'),
-    [GraphLayers.Budget]: t('Budget'),
-    [GraphLayers.CategoryGroup]: t('Category group'),
-    [GraphLayers.Category]: t('Category'),
-  };
-
-  // Filter available layers based on graph mode
-  const availableLayers: readonly GraphLayers[] =
-    graphMode === 'budgeted'
-      ? GRAPH_LAYER_ORDER.filter(
-          layer => layer !== GraphLayers.IncomePayee, // IncomePayee not available in budgeted
-        )
-      : GRAPH_LAYER_ORDER.filter(
-          layer => layer !== GraphLayers.Budget, // Budget not available in spent
-        );
-
-  const otherIndex =
-    otherLayer !== undefined && availableLayers.includes(otherLayer)
-      ? availableLayers.indexOf(otherLayer)
-      : direction === 'from'
-        ? availableLayers.length - 1
-        : 0;
-
-  const menuItems =
-    direction === 'from'
-      ? availableLayers.slice(0, otherIndex)
-      : availableLayers.slice(otherIndex + 1);
 
   const translatedDirection = direction === 'from' ? t('from') : t('to');
 
@@ -251,7 +312,7 @@ function LayerSelector({
           direction: translatedDirection,
         })}
       >
-        <span style={{ marginLeft: 5 }}>{LAYER_LABELS[value]}</span>
+        <span style={{ marginLeft: 5 }}>{layerLabels[value]}</span>
       </Button>
       <Popover
         triggerRef={triggerRef}
@@ -266,7 +327,7 @@ function LayerSelector({
           }}
           items={menuItems.map(layer => ({
             name: layer,
-            text: LAYER_LABELS[layer],
+            text: layerLabels[layer],
           }))}
         />
       </Popover>
@@ -444,61 +505,59 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     widget?.meta?.groupAccounts ?? false,
   );
 
-  // Determine default layer based on mode
-  const defaultLayerFrom = (mode: GraphMode) =>
-    mode === 'budgeted' ? GraphLayers.IncomeCategory : GraphLayers.IncomePayee;
+  const [layerRange, setLayerRange] = useState<LayerRange>(() =>
+    normalizeLayerRange(widget?.meta?.mode ?? 'spent', {
+      from:
+        (widget?.meta?.layerFrom as GraphLayers) ??
+        getDefaultLayerRange(widget?.meta?.mode ?? 'spent').from,
+      to:
+        (widget?.meta?.layerTo as GraphLayers) ??
+        getDefaultLayerRange(widget?.meta?.mode ?? 'spent').to,
+    }),
+  );
 
-  const [layerFrom, setLayerFrom] = useState<GraphLayers>(() => {
-    const metaLayer = widget?.meta?.layerFrom as GraphLayers | undefined;
-    if (metaLayer) {
-      // Validate that the layer is valid for the current mode
-      const mode = widget?.meta?.mode ?? 'spent';
-      if (mode === 'budgeted' && metaLayer === GraphLayers.IncomePayee) {
-        return defaultLayerFrom('budgeted');
-      }
-      if (mode === 'spent' && metaLayer === GraphLayers.Budget) {
-        return defaultLayerFrom('spent');
-      }
-      return metaLayer;
-    }
-    return defaultLayerFrom(widget?.meta?.mode ?? 'spent');
-  });
+  const layerFrom = layerRange.from;
+  const layerTo = layerRange.to;
 
-  const [layerTo, setLayerTo] = useState<GraphLayers>(() => {
-    const metaLayer = widget?.meta?.layerTo as GraphLayers | undefined;
-    if (metaLayer) {
-      // Validate that the layer is valid for the current mode
-      const mode = widget?.meta?.mode ?? 'spent';
-      if (mode === 'budgeted' && metaLayer === GraphLayers.IncomePayee) {
-        return GraphLayers.Category;
-      }
-      if (mode === 'spent' && metaLayer === GraphLayers.Budget) {
-        return GraphLayers.Category;
-      }
-      return metaLayer;
-    }
-    return GraphLayers.Category;
-  });
-
-  // Reset invalid layer selections when switching modes
   useEffect(() => {
-    const availableLayers =
-      graphMode === 'budgeted'
-        ? (GRAPH_LAYER_ORDER.filter(
-            layer => layer !== GraphLayers.IncomePayee,
-          ) as GraphLayers[])
-        : (GRAPH_LAYER_ORDER.filter(
-            layer => layer !== GraphLayers.Budget,
-          ) as GraphLayers[]);
+    setLayerRange(prev => normalizeLayerRange(graphMode, prev));
+  }, [graphMode]);
 
-    const fromIndex = availableLayers.indexOf(layerFrom);
-    const toIndex = availableLayers.indexOf(layerTo);
+  const layerLabels = useMemo<Record<GraphLayers, string>>(
+    () => ({
+      [GraphLayers.IncomePayee]: t('Payee'),
+      [GraphLayers.IncomeCategory]: t('Income category'),
+      [GraphLayers.Account]: t('Account'),
+      [GraphLayers.Budget]: t('Budget'),
+      [GraphLayers.CategoryGroup]: t('Category group'),
+      [GraphLayers.Category]: t('Category'),
+    }),
+    [t],
+  );
 
-    if (fromIndex === -1 || toIndex === -1 || fromIndex >= toIndex) {
-      setLayerFrom(defaultLayerFrom(graphMode));
-      setLayerTo(GraphLayers.Category);
-    }
-  }, [graphMode, layerFrom, layerTo]);
+  const fromLayerMenuItems = useMemo(
+    () => getLayerMenuItems(graphMode, 'from', layerTo),
+    [graphMode, layerTo],
+  );
+  const toLayerMenuItems = useMemo(
+    () => getLayerMenuItems(graphMode, 'to', layerFrom),
+    [graphMode, layerFrom],
+  );
+
+  function onChangeLayer(direction: LayerDirection, layer: GraphLayers) {
+    setLayerRange(prev => {
+      const next =
+        direction === 'from'
+          ? { ...prev, from: layer }
+          : { ...prev, to: layer };
+
+      return normalizeLayerRange(graphMode, next, direction);
+    });
+  }
+
+  function onResetLayers() {
+    setLayerRange(getDefaultLayerRange(graphMode));
+  }
 
   const { data: { grouped: groupedCategories = [] } = { grouped: [] } } =
     useCategories();
@@ -799,29 +858,21 @@ function SankeyInner({ widget }: SankeyInnerProps) {
             <LayerSelector
               direction="from"
               value={layerFrom}
-              otherLayer={layerTo}
-              onChange={setLayerFrom}
-              graphMode={graphMode}
+              layerLabels={layerLabels}
+              menuItems={fromLayerMenuItems}
+              onChange={layer => onChangeLayer('from', layer)}
             />
             <SvgCheveronRight style={{ width: 12, height: 12 }} />
             <LayerSelector
               direction="to"
               value={layerTo}
-              otherLayer={layerFrom}
-              onChange={setLayerTo}
-              graphMode={graphMode}
+              layerLabels={layerLabels}
+              menuItems={toLayerMenuItems}
+              onChange={layer => onChangeLayer('to', layer)}
             />
             <Button
               variant="bare"
-              onPress={() => {
-                if (graphMode === 'budgeted') {
-                  setLayerFrom(GraphLayers.IncomeCategory);
-                  setLayerTo(GraphLayers.Category);
-                } else {
-                  setLayerFrom(GraphLayers.IncomePayee);
-                  setLayerTo(GraphLayers.Category);
-                }
-              }}
+              onPress={onResetLayers}
               aria-label={t('Reset layers')}
             >
               <SvgRefresh style={{ width: 12, height: 12 }} />

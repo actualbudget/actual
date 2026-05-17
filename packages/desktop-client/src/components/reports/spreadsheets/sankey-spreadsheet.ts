@@ -878,8 +878,6 @@ function groupOtherCategories(
     }
   });
 
-  console.log(graph);
-
   return toolTipInfoMap;
 }
 
@@ -1413,7 +1411,7 @@ export function filterGraphByLayers(
   const fromIndex = layerIndices.get(layerFrom);
   const toIndex = layerIndices.get(layerTo);
 
-  if (fromIndex && toIndex) {
+  if (fromIndex !== undefined && toIndex !== undefined) {
     const keysToDelete: NodeKey[] = [];
     graph.forEach((data, key) => {
       const nodeLayerIndex = layerIndices.get(data.type);
