@@ -14,10 +14,13 @@ describe('utility functions', () => {
     //  of amounts without decimal amounts included.
     expect(looselyParseAmount('3')).toBe(3);
     expect(looselyParseAmount('3.4')).toBe(3.4);
+    expect(looselyParseAmount('3.4 €')).toBe(3.4);
     expect(looselyParseAmount('3.45')).toBe(3.45);
+    expect(looselyParseAmount('3.45 USD')).toBe(3.45);
     // cant tell if this next case should be decimal or different format
     // so we set as full numbers
     expect(looselyParseAmount('3.456')).toBe(3456); // the expected failing case
+    expect(looselyParseAmount('3.456 €')).toBe(3456);
     expect(looselyParseAmount('3.4500')).toBe(3.45);
     expect(looselyParseAmount('3.45000')).toBe(3.45);
     expect(looselyParseAmount('3.450000')).toBe(3.45);
@@ -49,6 +52,7 @@ describe('utility functions', () => {
   test('looseParseAmount works with negative numbers', () => {
     expect(looselyParseAmount('-3')).toBe(-3);
     expect(looselyParseAmount('-3.45')).toBe(-3.45);
+    expect(looselyParseAmount('-110.7 €')).toBe(-110.7);
     expect(looselyParseAmount('-3,45')).toBe(-3.45);
     // Unicode minus
     expect(looselyParseAmount('−3')).toBe(-3);
