@@ -72,6 +72,12 @@ export function Sankey() {
   return <SankeyInner widget={widget} />;
 }
 
+export function topNNodes(cardHeight: number): number {
+  const PX_PER_NODE = 35;
+  const heightBasedTopN = Math.max(2, Math.floor(cardHeight / PX_PER_NODE));
+  return heightBasedTopN;
+}
+
 type GraphMode = 'budgeted' | 'spent';
 
 // 1e5 is used as a sentinel value for 'All'
@@ -423,12 +429,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     throttledSetCardHeight(rect.height);
   });
 
-  const HEADER_HEIGHT = 0;
-  const PX_PER_NODE = 35;
-  const heightBasedTopN = Math.max(
-    2,
-    Math.floor((cardHeight - HEADER_HEIGHT) / PX_PER_NODE),
-  );
+  const heightBasedTopN = topNNodes(cardHeight);
 
   const topN = Math.min(topNcategories, heightBasedTopN);
 
@@ -889,8 +890,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                     style={{
                       flexDirection: 'column',
                       flexGrow: 1,
-                      padding: 10,
-                      paddingTop: 10,
                     }}
                   >
                     <SankeyGraph

@@ -14,6 +14,7 @@ import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
+import { topNNodes } from '#components/reports/reports/Sankey';
 import {
   buildSankeyData,
   createBaseGraphSpreadsheet,
@@ -76,12 +77,7 @@ export function SankeyCard({
     throttledSetCardHeight(rect.height);
   });
 
-  const HEADER_HEIGHT = 82;
-  const PX_PER_NODE = 25;
-  const heightBasedTopN = Math.max(
-    2,
-    Math.floor((cardHeight - HEADER_HEIGHT) / PX_PER_NODE),
-  );
+  const heightBasedTopN = topNNodes(cardHeight);
 
   const isGraphLayer = (value: unknown): value is GraphLayers =>
     typeof value === 'string' &&
@@ -219,7 +215,7 @@ export function SankeyCard({
         }
       }}
     >
-      <View ref={containerRef} style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <ReportCardName
@@ -241,12 +237,14 @@ export function SankeyCard({
         </View>
 
         {compactData ? (
-          <SankeyGraph
-            data={compactData}
-            showPercentages={meta?.showPercentages}
-            showTooltip={!isEditing}
-            style={{ height: 'auto', flex: 1 }}
-          />
+          <View ref={containerRef} style={{ flexGrow: 1 }}>
+            <SankeyGraph
+              data={compactData}
+              showPercentages={meta?.showPercentages}
+              showTooltip={!isEditing}
+              style={{ flex: 1 }}
+            />
+          </View>
         ) : (
           <LoadingIndicator />
         )}
