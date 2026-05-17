@@ -224,6 +224,9 @@ export function TagAutocomplete({
               {item.id === 'create_tag' ? (
                 <div
                   style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 3,
                     color:
                       highlightedId === item.id
                         ? theme.menuAutoCompleteTextHover
@@ -231,8 +234,10 @@ export function TagAutocomplete({
                     padding: 4,
                   }}
                 >
-                  <Trans>Create Tag</Trans>
-                  <span className={getTagCSS('')} style={{ marginLeft: 3 }}>
+                  <span>
+                    <Trans>Create Tag</Trans>
+                  </span>
+                  <span className={getTagCSS('')}>
                     <Trans>{item.name}</Trans>
                   </span>
                 </div>
