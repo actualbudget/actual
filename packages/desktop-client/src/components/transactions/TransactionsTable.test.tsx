@@ -252,6 +252,7 @@ function initBasicServer() {
       list: categories,
     }),
     'tags-get': async () => tags,
+    'tags-create': async (tag: Omit<TagEntity, 'id'>) => ({ id: 'new-tag', ...tag }),
   });
 }
 
@@ -1330,6 +1331,24 @@ describe('Transactions', () => {
       fireEvent.blur(input);
 
       expect(getTransactions()[3].notes).toBe('#taxes');
+    });
+
+    test('creating a new tag via the autocomplete', async () => {
+      const { container, getTransactions } = renderTransactions();
+      const input = await editField(container, 'notes', 2);
+      await userEvent.clear(input);
+      await userEvent.type(input, 'spending on #coffee');
+
+      // The "Create Tag #coffee" option should appear
+      const createOption = await screen.findByText('Create Tag');
+      expect(createOption).toBeTruthy();
+
+      await userEvent.click(createOption);
+      await waitForAutocomplete();
+      fireEvent.blur(input);
+
+      // Verify the tag was added to the note correctly
+      expect(getTransactions()[2].notes).toBe('spending on #coffee');
     });
   });
 });

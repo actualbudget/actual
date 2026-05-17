@@ -1546,7 +1546,14 @@ function NoteTagAutocomplete({
           <div key={tag.id}>
             <button
               type="button"
-              style={{ border: 'none', height: 22 }}
+              style={{
+                border: 'none',
+                height: 22,
+                maxWidth: '50dvw',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: 'inline-block',
+              }}
               className={getTagCSS(tag.tag)}
               onMouseDown={e => e.preventDefault()} // stops input from losing focus
               onClick={() => handleSelect(tag.tag)}
@@ -1562,6 +1569,10 @@ function NoteTagAutocomplete({
               style={{
                 border: `1px solid ${theme.noticeBackground}`,
                 height: 22,
+                maxWidth: '50dvw',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: 'inline-block',
               }}
               className={getTagCSS('')}
               onMouseDown={e => e.preventDefault()} // stops input from losing focus
