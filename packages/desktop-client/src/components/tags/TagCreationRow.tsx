@@ -70,6 +70,15 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
     createTag({ tag: { tag, color, description } });
     resetInputs();
   };
+  function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    console.log(e);
+    if (e.key === 'Escape') {
+      onClose();
+    }
+    if (e.key === 'Enter' && tag) {
+      onAddTag();
+    }
+  }
 
   const isInitialMount = useInitialMount();
 
@@ -86,16 +95,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
         backgroundColor: theme.tableBackground,
       }}
       data-testid="new-tag"
-      {...tableNavigator.getNavigatorProps({
-        onKeyUp: (e: KeyboardEvent<HTMLDivElement>) => {
-          if (e.key === 'Escape') {
-            onClose();
-          }
-          if (e.key === 'Enter' && tag) {
-            onAddTag();
-          }
-        },
-      })}
+      {...tableNavigator.getNavigatorProps({})}
     >
       <Row
         height={34}
@@ -120,6 +120,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
           inputProps={{
             value: tag || '',
             onChange: e => setTag(e.target.value.replace(/\s/g, '')),
+            onKeyDownCapture: onKeyDown,
             placeholder: t('New tag'),
             ref: tagInput,
           }}
@@ -140,6 +141,7 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
           inputProps={{
             value: description || '',
             onUpdate: setDescription,
+            onKeyDownCapture: onKeyDown,
             placeholder: t('Tag description'),
           }}
         />
