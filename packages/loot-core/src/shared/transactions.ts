@@ -345,6 +345,7 @@ export function splitTransaction(
     return {
       ...rest,
       is_parent: true,
+      payee: null,
       error: num(trans.amount) === 0 ? null : SplitTransactionError(0, trans),
       subtransactions: subtransactions.map(t => ({
         ...t,
