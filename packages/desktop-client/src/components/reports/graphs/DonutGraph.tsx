@@ -72,19 +72,104 @@ const resolveCSSVariable = (color: string): string => {
     .trim();
 };
 
-const hexToRgb = (hex: string) => {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+type RGBColor = { r: number; g: number; b: number };
+
+const parseHexColor = (hex: string): RGBColor | null => {
+  const normalizedHex = hex.replace(/^#/, '');
+
+  if (/^[a-f\d]{3}$/i.test(normalizedHex)) {
+    return {
+      r: parseInt(normalizedHex[0] + normalizedHex[0], 16),
+      g: parseInt(normalizedHex[1] + normalizedHex[1], 16),
+      b: parseInt(normalizedHex[2] + normalizedHex[2], 16),
+    };
+  }
+
+  const result = /^([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(
+    normalizedHex,
+  );
   return result
     ? {
         r: parseInt(result[1], 16),
         g: parseInt(result[2], 16),
         b: parseInt(result[3], 16),
       }
-    : { r: 0, g: 0, b: 0 };
+    : null;
 };
 
-const shadeColor = (resolvedHex: string, percent: number): string => {
-  const { r, g, b } = hexToRgb(resolvedHex);
+const parseRgbComponent = (value: string): number => {
+  const trimmed = value.trim();
+  if (trimmed.endsWith('%')) {
+    return Math.round((parseFloat(trimmed) / 100) * 255);
+  }
+  return parseFloat(trimmed);
+};
+
+const parseRgbColor = (color: string): RGBColor | null => {
+  const match = /^rgba?\((.+)\)$/i.exec(color);
+  if (!match) return null;
+
+  const [r, g, b] = match[1]
+    .replace(/\s*\/\s*.+$/, '')
+    .split(/[,\s]+/)
+    .filter(Boolean)
+    .map(parseRgbComponent);
+
+  return [r, g, b].every(Number.isFinite) ? { r, g, b } : null;
+};
+
+const parseHslColor = (color: string): RGBColor | null => {
+  const match = /^hsla?\((.+)\)$/i.exec(color);
+  if (!match) return null;
+
+  const [hRaw, sRaw, lRaw] = match[1]
+    .replace(/\s*\/\s*.+$/, '')
+    .split(/[,\s]+/)
+    .filter(Boolean);
+  const h = parseFloat(hRaw);
+  const s = parseFloat(sRaw) / 100;
+  const l = parseFloat(lRaw) / 100;
+
+  if (![h, s, l].every(Number.isFinite)) return null;
+
+  const chroma = (1 - Math.abs(2 * l - 1)) * s;
+  const huePrime = (((h % 360) + 360) % 360) / 60;
+  const x = chroma * (1 - Math.abs((huePrime % 2) - 1));
+  const [r1, g1, b1] =
+    huePrime < 1
+      ? [chroma, x, 0]
+      : huePrime < 2
+        ? [x, chroma, 0]
+        : huePrime < 3
+          ? [0, chroma, x]
+          : huePrime < 4
+            ? [0, x, chroma]
+            : huePrime < 5
+              ? [x, 0, chroma]
+              : [chroma, 0, x];
+  const m = l - chroma / 2;
+
+  return {
+    r: Math.round((r1 + m) * 255),
+    g: Math.round((g1 + m) * 255),
+    b: Math.round((b1 + m) * 255),
+  };
+};
+
+const parseColor = (color: string): RGBColor | null => {
+  const normalizedColor = color.trim();
+  return (
+    parseHexColor(normalizedColor) ??
+    parseRgbColor(normalizedColor) ??
+    parseHslColor(normalizedColor)
+  );
+};
+
+export const shadeColor = (color: string, percent: number): string => {
+  const parsedColor = parseColor(color);
+  if (!parsedColor) return color;
+
+  const { r, g, b } = parsedColor;
   const adjust = (c: number) =>
     Math.min(255, Math.max(0, Math.round(c + (255 - c) * percent)));
   return `rgb(${adjust(r)}, ${adjust(g)}, ${adjust(b)})`;
