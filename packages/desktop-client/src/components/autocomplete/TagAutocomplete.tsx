@@ -114,7 +114,7 @@ export function TagAutocomplete({
     setCursorPosition(startIdx + tagObj.tag.length + 1 + space.length);
   }
 
-  async function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+  function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (!showPopup) {
       onKeyDown?.(e);
       return;
@@ -133,7 +133,7 @@ export function TagAutocomplete({
       setHighlightedIdx(filteredItems.length - 1);
       e.preventDefault();
     } else if (highlightedId && (e.key === 'Enter' || e.key === 'Tab')) {
-      await handleSelect(highlightedId);
+      void handleSelect(highlightedId);
       e.preventDefault();
       e.stopPropagation();
     } else if (e.key === 'Escape') {
