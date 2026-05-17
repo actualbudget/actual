@@ -306,7 +306,13 @@ In the budget header menu you will see the following options:
 
 ## Adjustments {#adjustments}
 
-**TBD when UI is completed**
+**Use notes templates until UI is completed**
+
+:::warning
+
+If you attempt to migrate a note template with an adjustment, the migration will ignore the adjustment.
+
+:::
 
 Yearly expenses (e.g. insurance, property rates, etc.) increase year on year. Often the amount is unknown until close to the due date. This creates a budget crunch - if your $ 1,000 insurance jumps 20% ($ 1,200), you need to make up that extra $ 200 in just a month or two.
 
@@ -360,4 +366,138 @@ As an example, assume the spend for the category was [\$40, \$50, \$60] for the 
 
 ## Month-end Cleanup {#month-end-cleanup}
 
-To be continued...
+# End of Month Cleanup
+
+## Creating a category cleanup
+
+![alt-text-here](/img/goal-template/cleanup-global.webp)
+
+### Global cleanup
+
+Global cleanup automations use **To Budget** as the pool.
+
+**Send leftover.** These are source funds. Cleanup sweeps up the category's leftover funds and send them to **To Budget**. 
+
+**Receive leftover.** These are sink funds. Cleanup distributes a share of the leftover **To Budget** funds when they are doled out by [weight](#cleanup-weights).
+
+![alt-text-here](/img/goal-template/cleanup-global-weight.webp)
+
+### Named pools
+
+Named pools can be defined to target certain categories for more refined control. Create as many named pools as you need by using different pool names.
+
+**_+ Add to a pool_**
+
+Pick from a list of previously named pools or type in the field to get an option to create a new named pool.
+
+![alt-text-here](/img/goal-template/create-named-pool.webp)
+
+**Send leftover to pool** (source). This sends the leftover category funds to the named pool to be distributed.
+
+**Receive leftover from pool** (sink). Leftover funds in the named pool are distributed by weight to the categories in the pool. 
+
+:::note
+
+Enable _Only enough to cover any overspending_ to restrict the category from receiving leftover pool funds.
+
+![alt-text-here](/img/goal-template/named-pool-leftovers.webp)
+
+:::
+
+## Running end of month cleanup
+
+End of month cleanup is run from the main menu in the Budget Header.
+
+![alt-text-here](/img/goal-template/cleanup-01.webp)
+
+The feature works sequentially in the following manner after pressing the **End of month cleanup** button.
+
+1. All named pools are run first.
+   - Funds in pool source categories are swept up into the pool.
+   - Overspent categories in the pool are filled with pool funds, if possible, then
+   - Leftover pool funds are distributed by weight within the pool.
+   - If no categories in the pool are set to receive funds from the pool, leftover funds go to **To Budget**.
+     
+2. Global cleanup runs next.
+   - Funds in _Send leftover_ categories will be found and swept into **To Budget**. A source category that has a negative balance will be ignored.
+   - **Overspent** categories are found and cleanup attempts to cover the overspending from **To Budget**. Categories using **Rollover Overspending** will be ignored.
+   - _Receive leftover_ categories are found and cleanup distributes the remaining **To Budget** funds by weight. 
+
+:::info
+Cleanup does not respect [_Balance cap_](#balance-cap). Funds will be distributed based on weight and a category may be filled above the cap. To keep the excess, use _Retain existing funds over the cap_.
+:::
+
+## Calculating Weights {#cleanup-weights}
+
+Cleanup uses the sum of the weights of the sink categories to determine how much to distribute to each sink category.
+`distributed_amount = available_funds / sum_of_weights * category_weight`
+
+Suppose there are 5 categories that are identified to receive leftovers with the following weights:
+- Category a: 1
+- Category b: 1
+- Category c: 2
+- Category d: 2
+- Category e: 4
+
+The sum of the weights is `1 + 1 + 2 + 2 + 4 = 10`
+
+The result will be:
+- Categories a and b will receive `1 / 10` or 10% of the pool
+- Categories c and d will receive `2 / 10` or 20% of the pool
+- Category e will receive `4 / 10` or 40% of the pool
+
+## Examples
+
+**I leave money in my To Budget balance all month, can this help cover my overspending?**
+
+- If you don't use any cleanup automations, you can still run _End of month cleanup_ and the script will try to cover overspending using the available **To Budget** amount. This doesn't pull funds from any category and only covers overspending with **To Budget**.
+
+**I want to recover money from my Dining Out category because I always over budget and use that money to cover my overspent categories.**
+
+- Use _Send leftover_ in the **Dining Out** category. When clicking the _End of month cleanup_ button, the extra money will be returned to **To Budget** and be used to cover the overspent categories. If there is any leftover, it will remain in **To Budget**.
+
+**I'm behind on saving for our big Holiday celebration and would like to catch up faster. I would also like to save a little extra for vacation. Of any extra money I can find, I would like to put 1/3 in savings for the Holiday and 2/3 for vacation.**
+
+- Use _Send leftover_ in the categories where you can find some extra money.
+- Use _Receive leftover_ with a weight of 1 in your **Holiday Celebration** category.
+- Use _Receive leftover_ with a weight of 2 in your **Vacation** category.
+
+:::note
+The weights could be 34 and 66 to give a closer approximation of 1/3 and 2/3 where 34 + 66 = 100.
+:::
+
+**I want to pay down my debt as quickly as possible. I have a large Debt category where I rollover my overspending and budget an additional payment each month. I want to additionally add all extra money I can find.**
+
+- Use _Send leftover_ in the categories where you can find some extra money.
+- Use _Receive leftover_ in your debt category and in no other.
+
+All source funds will be used to cover your overspent categories first and then the remaining money will go to the **Debt** category to add to your extra payment.
+
+**I have a category specifically meant to cover overspending for the month. Can I use this tool with that category?**
+
+YES!
+
+- Use both _Send leftover_  and _Receive leftover_ in your buffer category.
+
+The script will remove all of your buffer funds, cover your overspending, and put your buffer funds back into the buffer for next time. You can also add a [_Refill to cap_](#refill) automation to this category so you can fill it back up next month!
+
+**My utility bills fluctuate from month to month, but are always less than $500. Can I shift that $500 around in just the utility categories?**
+
+Yes.
+
+Method 1:
+
+One way to do this is to have a Utilities Holding category with $500 budgeted. Use _+ Add to a pool_ and create a named pool for this category and use both _Send leftover to pool_  and _Receive leftover from pool_, weight 1.
+
+Have separate categories for your various utilities, but don’t budget for them (power, gas, water, etc). For each, use _+ Add to a pool_. Choose the same named pool you added to the Utilities category and use _Receive leftover from pool_ and check the box _Only enough to cover any overspending_. The cleanup script will cover the overspending from the holding category and return any remaining funds back to the holding category.
+
+Method 2: 
+
+Another way to accomplish this is to budget what you think you will spend for each of the utilities in each category. For example:
+
+- Power - $200
+- Water - $150
+- Gas - $150
+
+In the first category, create a named pool and use both _Send leftover to pool_  and _Receive leftover from pool_, weight 1. In the rest of the categories, choose the same named pool and again use both _Send leftover to pool_  and _Receive leftover from pool_, weight 1. When the script is run, the remaining funds from each utility category will be pooled and used to fund any overspent utility categories within the Named pool and the leftover money will be evenly distributed to carry over for the next month. Add a different weight to any of the categories if you would like to fund more.
+
