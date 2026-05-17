@@ -13,6 +13,9 @@ defaults:
 env:
   CI: true
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
@@ -45,6 +48,9 @@ jobs:
 
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          # Avoid restoring potentially poisoned caches in release jobs.
+          cache: 'false'
 
       - if: ${{ startsWith(matrix.os, 'ubuntu') }}
         name: Setup Flatpak dependencies

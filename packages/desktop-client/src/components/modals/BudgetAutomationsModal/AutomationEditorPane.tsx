@@ -20,13 +20,14 @@ import {
   AutomationErrorTitle,
 } from '#components/budget/goals/automationMessages';
 import type { DisplayTemplateType } from '#components/budget/goals/constants';
+import { getDisplayTemplateMeta } from '#components/budget/goals/displayTemplateMeta';
 import {
   getInitialState,
   templateReducer,
 } from '#components/budget/goals/reducer';
 import type { AutomationErrorKind } from '#components/budget/goals/validateAutomation';
 
-import { TypePicker } from './TypePicker';
+import { NON_CONTRIBUTION_TYPES, TypePicker } from './TypePicker';
 
 const CONFIG_PANEL_CLASS = css({
   '& > *:first-child': {
@@ -35,7 +36,7 @@ const CONFIG_PANEL_CLASS = css({
   '& span > label': {
     fontSize: 11,
     fontWeight: 600,
-    color: theme.pageTextSubdued,
+    color: theme.pageTextLight,
     letterSpacing: '0.04em',
     textTransform: 'uppercase',
   },
@@ -127,7 +128,7 @@ export function AutomationEditorPane({
 
   if (!active || !state) {
     return (
-      <View style={{ padding: 20, color: theme.pageTextSubdued }}>
+      <View style={{ padding: 20, color: theme.pageTextLight }}>
         <Trans>Select an automation on the left.</Trans>
       </View>
     );
@@ -179,22 +180,26 @@ export function AutomationEditorPane({
         </View>
       )}
 
-      <Text
-        style={{
-          fontSize: 11,
-          textTransform: 'uppercase',
-          color: theme.pageTextSubdued,
-          fontWeight: 600,
-          letterSpacing: '0.05em',
-        }}
-      >
-        <Trans>Automation type</Trans>
-      </Text>
-      <TypePicker
-        active={state.displayType}
-        disabledTypes={disabledTypes}
-        onPick={type => dispatch({ type: 'set-type', payload: type })}
-      />
+      {!NON_CONTRIBUTION_TYPES.has(state.displayType) && (
+        <>
+          <Text
+            style={{
+              fontSize: 11,
+              textTransform: 'uppercase',
+              color: theme.pageTextLight,
+              fontWeight: 600,
+              letterSpacing: '0.05em',
+            }}
+          >
+            <Trans>Automation type</Trans>
+          </Text>
+          <TypePicker
+            active={state.displayType}
+            disabledTypes={disabledTypes}
+            onPick={type => dispatch({ type: 'set-type', payload: type })}
+          />
+        </>
+      )}
 
       {state.displayType !== 'refill' && (
         <>
@@ -202,7 +207,7 @@ export function AutomationEditorPane({
             style={{
               fontSize: 11,
               textTransform: 'uppercase',
-              color: theme.pageTextSubdued,
+              color: theme.pageTextLight,
               fontWeight: 600,
               letterSpacing: '0.05em',
             }}
@@ -218,6 +223,18 @@ export function AutomationEditorPane({
               border: `1px solid ${theme.tableBorder}`,
             }}
           >
+            {NON_CONTRIBUTION_TYPES.has(state.displayType) && (
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: theme.pageTextLight,
+                  display: 'block',
+                  marginBottom: 4,
+                }}
+              >
+                {getDisplayTemplateMeta(state.displayType).description}
+              </Text>
+            )}
             <ActiveEditor
               state={state}
               dispatch={dispatch}
@@ -255,7 +272,7 @@ export function AutomationEditorPane({
                 style={{
                   fontSize: 11,
                   fontWeight: 600,
-                  color: theme.pageTextSubdued,
+                  color: theme.pageTextLight,
                   letterSpacing: '0.04em',
                   textTransform: 'uppercase',
                 }}

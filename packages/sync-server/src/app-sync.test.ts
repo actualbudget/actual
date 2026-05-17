@@ -2,7 +2,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 
-import { SyncProtoBuf } from '@actual-app/crdt';
+import { create, SyncRequestSchema, toBinary } from '@actual-app/crdt';
 import request from 'supertest';
 
 import { getAccountDb } from './account-db';
@@ -502,9 +502,7 @@ describe('/upload-user-file', () => {
       ],
     );
 
-    fs.writeFile(getPathForUserFile(fileId), oldFileContent, err => {
-      if (err) throw err;
-    });
+    fs.writeFileSync(getPathForUserFile(fileId), oldFileContent);
 
     const res = await request(app)
       .post('/upload-user-file')
@@ -1342,7 +1340,9 @@ describe('/sync', () => {
       'group-id',
       'key-id',
     );
-    syncRequest.setSince(undefined);
+    // proto3 default-value semantics: '' is omitted on the wire and
+    // decoded back to '', which the handler falsy-checks as missing.
+    syncRequest.since = '';
 
     const res = await sendSyncRequest(syncRequest);
 
@@ -1487,17 +1487,16 @@ function addMockFile(
 }
 
 function createMinimalSyncRequest(fileId, groupId, keyId) {
-  const syncRequest = new SyncProtoBuf.SyncRequest();
-  syncRequest.setFileid(fileId);
-  syncRequest.setGroupid(groupId);
-  syncRequest.setKeyid(keyId);
-  syncRequest.setSince('2024-01-01T00:00:00.000Z');
-  syncRequest.setMessagesList([]);
-  return syncRequest;
+  return create(SyncRequestSchema, {
+    fileId,
+    groupId,
+    keyId,
+    since: '2024-01-01T00:00:00.000Z',
+  });
 }
 
 async function sendSyncRequest(syncRequest, token = 'valid-token') {
-  const serializedRequest = syncRequest.serializeBinary();
+  const serializedRequest = toBinary(SyncRequestSchema, syncRequest);
   // Convert Uint8Array to Buffer
   const bufferRequest = Buffer.from(serializedRequest);
 

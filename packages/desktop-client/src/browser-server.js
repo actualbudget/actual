@@ -25,14 +25,15 @@ const importScriptsWithRetry = async (script, { maxRetries = 5 } = {}) => {
     }
 
     // Attempt to retry after a small delay
-    await new Promise(resolve =>
-      setTimeout(async () => {
-        await importScriptsWithRetry(script, {
+    await new Promise((resolve, reject) => {
+      setTimeout(() => {
+        importScriptsWithRetry(script, {
           maxRetries: maxRetries - 1,
-        });
-        resolve();
-      }, 5000),
-    );
+        })
+          .then(resolve)
+          .catch(reject);
+      }, 5000);
+    });
   }
 };
 
@@ -76,9 +77,11 @@ self.addEventListener('message', async event => {
           return;
         }
 
+        // A single failed importScripts bricks the SharedWorker until
+        // it's evicted, so retry in production too.
         await importScriptsWithRetry(
           `${msg.publicUrl}/kcab/kcab.worker.${hash}.js`,
-          { maxRetries: isDev ? 5 : 0 },
+          { maxRetries: isDev ? 5 : 3 },
         );
 
         backend.initApp(isDev, self).catch(err => {

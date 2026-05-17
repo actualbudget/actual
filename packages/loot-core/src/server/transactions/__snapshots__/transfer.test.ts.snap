@@ -355,7 +355,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 3`] = `
 "- First value
 + Second value
 
-@@ -2,73 +2,73 @@
+@@ -2,52 +2,52 @@
     Object {
       "account": "one",
       "amount": 5000,
@@ -387,48 +387,13 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 3`] = `
 +     "transfer_id": "id8",
     },
     Object {
--     "account": "one",
--     "amount": 5000,
-+     "account": "two",
-+     "amount": -5000,
+      "account": "one",
+      "amount": 5000,
       "category": null,
--     "cleared": 1,
--     "date": 20170101,
-+     "cleared": 0,
-+     "date": 20170105,
-      "error": null,
--     "id": "id7",
-+     "id": "id8",
-      "imported_id": null,
-      "imported_payee": null,
-      "is_child": 0,
-      "is_parent": 0,
--     "notes": null,
-+     "notes": "This is a note",
-      "parent_id": null,
--     "payee": "id3",
-+     "payee": "id2",
-      "payee_name": "",
-      "raw_synced_data": null,
-      "reconciled": 0,
-      "schedule": null,
-      "sort_order": 123456789,
-      "starting_balance_flag": 0,
-      "tombstone": 0,
--     "transfer_id": "id8",
-+     "transfer_id": "id7",
-    },
-    Object {
--     "account": "two",
--     "amount": -5000,
-+     "account": "one",
-+     "amount": 5000,
-      "category": null,
--     "cleared": 0,
-+     "cleared": 1,
+      "cleared": 1,
       "date": 20170101,
       "error": null,
--     "id": "id8",
+-     "id": "id7",
 +     "id": "id6",
       "imported_id": null,
       "imported_payee": null,
@@ -436,7 +401,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 3`] = `
       "is_parent": 0,
       "notes": null,
       "parent_id": null,
--     "payee": "id2",
+-     "payee": "id3",
 -     "payee_name": "",
 +     "payee": "id5",
 +     "payee_name": "Non-transfer",
@@ -446,17 +411,33 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 3`] = `
       "sort_order": 123456789,
       "starting_balance_flag": 0,
       "tombstone": 0,
--     "transfer_id": "id7",
+-     "transfer_id": "id8",
 +     "transfer_id": null,
     },
-  ]"
+    Object {
+      "account": "two",
+      "amount": -5000,
+      "category": null,
+@@ -57,11 +57,11 @@
+      "id": "id8",
+      "imported_id": null,
+      "imported_payee": null,
+      "is_child": 0,
+      "is_parent": 0,
+-     "notes": null,
++     "notes": "This is a note",
+      "parent_id": null,
+      "payee": "id2",
+      "payee_name": "",
+      "raw_synced_data": null,
+      "reconciled": 0,"
 `;
 
 exports[`Transfer > transfers are properly inserted/updated/deleted 4`] = `
 "- First value
 + Second value
 
-@@ -11,22 +11,22 @@
+@@ -11,11 +11,11 @@
       "imported_payee": null,
       "is_child": 0,
       "is_parent": 0,
@@ -469,9 +450,10 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 4`] = `
       "reconciled": 0,
       "schedule": null,
       "sort_order": 123456789,
+@@ -46,11 +46,11 @@
       "starting_balance_flag": 0,
       "tombstone": 0,
-      "transfer_id": "id8",
+      "transfer_id": null,
     },
     Object {
 -     "account": "two",
@@ -479,7 +461,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 4`] = `
       "amount": -5000,
       "category": null,
       "cleared": 0,
-      "date": 20170105,
+      "date": 20170101,
       "error": null,"
 `;
 
@@ -487,7 +469,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
 "- First value
 + Second value
 
-@@ -11,43 +11,19 @@
+@@ -11,19 +11,19 @@
       "imported_payee": null,
       "is_child": 0,
       "is_parent": 0,
@@ -504,13 +486,25 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
       "starting_balance_flag": 0,
       "tombstone": 0,
 -     "transfer_id": "id8",
++     "transfer_id": null,
+    },
+    Object {
+      "account": "one",
+      "amount": 5000,
+      "category": null,
+@@ -44,31 +44,7 @@
+      "schedule": null,
+      "sort_order": 123456789,
+      "starting_balance_flag": 0,
+      "tombstone": 0,
+      "transfer_id": null,
 -   },
 -   Object {
 -     "account": "three",
 -     "amount": -5000,
 -     "category": null,
 -     "cleared": 0,
--     "date": 20170105,
+-     "date": 20170101,
 -     "error": null,
 -     "id": "id8",
 -     "imported_id": null,
@@ -528,12 +522,8 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
 -     "starting_balance_flag": 0,
 -     "tombstone": 0,
 -     "transfer_id": "id7",
-+     "transfer_id": null,
     },
-    Object {
-      "account": "one",
-      "amount": 5000,
-      "category": null,"
+  ]"
 `;
 
 exports[`Transfer > transfers are properly inserted/updated/deleted 6`] = `

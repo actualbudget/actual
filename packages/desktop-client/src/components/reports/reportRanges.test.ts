@@ -1,6 +1,26 @@
+import * as monthUtils from '@actual-app/core/shared/months';
 import { describe, expect, it } from 'vitest';
 
-import { calculateSpendingReportTimeRange } from './reportRanges';
+import {
+  calculateSpendingReportTimeRange,
+  calculateTimeRange,
+  getFullFutureRange,
+} from './reportRanges';
+
+// In test mode, monthUtils.currentMonth() returns '2017-01'
+describe('calculateTimeRange', () => {
+  it('keeps last month as a live time range when restoring a saved widget', () => {
+    const [start, end, mode] = calculateTimeRange({
+      start: '2016-11',
+      end: '2016-11',
+      mode: 'lastMonth',
+    });
+
+    expect(start).toBe('2016-12');
+    expect(end).toBe('2016-12');
+    expect(mode).toBe('lastMonth');
+  });
+});
 
 // In test mode, monthUtils.currentMonth() returns '2017-01'
 describe('calculateSpendingReportTimeRange', () => {
@@ -46,5 +66,28 @@ describe('calculateSpendingReportTimeRange', () => {
 
     expect(compare).toBe('2017-01');
     expect(compareTo).toBe('2017-01');
+  });
+});
+
+describe('getFullFutureRange', () => {
+  it('uses a future month as the end of the range', () => {
+    const start = monthUtils.currentMonth();
+    const futureMonth = monthUtils.addMonths(start, 36);
+
+    expect(getFullFutureRange(futureMonth)).toEqual([
+      start,
+      futureMonth,
+      'static',
+    ]);
+  });
+
+  it('falls back to a default future horizon without a future month', () => {
+    const start = monthUtils.currentMonth();
+
+    expect(getFullFutureRange()).toEqual([
+      start,
+      monthUtils.addMonths(start, 24),
+      'static',
+    ]);
   });
 });

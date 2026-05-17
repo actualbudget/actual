@@ -17,13 +17,13 @@ import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 import { integerToCurrency } from '@actual-app/core/shared/util';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
 } from '@actual-app/core/types/models';
 import { css, cx } from '@emotion/css';
+import { Fzf } from 'fzf';
 
 import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
 import { makeAmountFullStyle } from '#components/budget/util';
@@ -33,8 +33,7 @@ import { useSheetValue } from '#hooks/useSheetValue';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
 
-import { Autocomplete, defaultFilterSuggestion } from './Autocomplete';
-import { rankAutocompleteMatch } from './autocompleteRanking';
+import { Autocomplete } from './Autocomplete';
 import { ItemHeader } from './ItemHeader';
 
 type CategoryAutocompleteItem = Omit<CategoryEntity, 'group'> & {
@@ -186,22 +185,6 @@ function CategoryList({
   );
 }
 
-function customSort(obj: CategoryAutocompleteItem, value: string): number {
-  if (obj.id === 'split') {
-    return -6;
-  }
-  const nameRank = rankAutocompleteMatch(obj.name, value);
-  if (nameRank < 0) {
-    return nameRank;
-  }
-  // Group name matching: ranks above no-match but below all name tiers.
-  const groupName = obj.group ? getNormalisedString(obj.group.name) : '';
-  if (groupName.includes(getNormalisedString(value))) {
-    return -0.5;
-  }
-  return 0;
-}
-
 type CategoryAutocompleteProps = ComponentProps<
   typeof Autocomplete<CategoryAutocompleteItem>
 > & {
@@ -271,30 +254,22 @@ export function CategoryAutocomplete({
       suggestions: CategoryAutocompleteItem[],
       value: string,
     ): CategoryAutocompleteItem[] => {
-      const normalizedValue = getNormalisedString(value);
-      return suggestions
-        .filter(suggestion => {
-          if (suggestion.id === 'split') {
-            return true;
-          }
+      const splitItem = suggestions.find(s => s.id === 'split');
+      const realSuggestions = suggestions.filter(s => s.id !== 'split');
 
-          if (suggestion.group) {
-            return (
-              getNormalisedString(suggestion.group.name).includes(
-                normalizedValue,
-              ) ||
-              getNormalisedString(
-                suggestion.group.name + ' ' + suggestion.name,
-              ).includes(normalizedValue)
-            );
-          }
+      if (!value) {
+        return suggestions;
+      }
 
-          return defaultFilterSuggestion(suggestion, value);
-        })
-        .sort(
-          (a, b) =>
-            customSort(a, normalizedValue) - customSort(b, normalizedValue),
-        );
+      const filtered = new Fzf(realSuggestions, {
+        selector: item =>
+          item.group ? item.group.name + ' ' + item.name : item.name,
+        limit: 100,
+      })
+        .find(value)
+        .map(result => result.item);
+
+      return splitItem ? [splitItem, ...filtered] : filtered;
     },
     [],
   );

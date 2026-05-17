@@ -49,6 +49,7 @@ export class CategoryTemplateContext {
     category: CategoryEntity,
     month: string,
     budgeted: number,
+    skipAvailableClamp: boolean = false,
   ) {
     // get all the needed setup values
     const lastMonthSheet = monthUtils.sheetForMonth(
@@ -96,6 +97,7 @@ export class CategoryTemplateContext {
       hideDecimal.data.length > 0
         ? hideDecimal.data[0].value === 'true'
         : false,
+      skipAvailableClamp,
     );
   }
 
@@ -286,7 +288,12 @@ export class CategoryTemplateContext {
     }
 
     // don't overbudget when using a priority unless income category
-    if (priority > 0 && available < 0 && !this.category.is_income) {
+    if (
+      priority > 0 &&
+      available < 0 &&
+      !this.category.is_income &&
+      !this.skipAvailableClamp
+    ) {
       this.fullAmount = (this.fullAmount || 0) + toBudget;
       const adjusted = Math.max(0, toBudget + available);
       if (toBudget > 0) scale *= adjusted / toBudget;
@@ -383,6 +390,7 @@ export class CategoryTemplateContext {
   private goals: GoalTemplate[] = [];
   private priorities: Set<number> = new Set();
   readonly hideDecimal: boolean = false;
+  readonly skipAvailableClamp: boolean = false;
   private remainderWeight: number = 0;
   private toBudgetAmount: number = 0; // amount that will be budgeted by the templates
   private perTemplateContribution = new Map<Template, number>();
@@ -406,6 +414,7 @@ export class CategoryTemplateContext {
     budgeted: number,
     currencyCode: string,
     hideDecimal: boolean = false,
+    skipAvailableClamp: boolean = false,
   ) {
     this.category = category;
     this.month = month;
@@ -413,6 +422,7 @@ export class CategoryTemplateContext {
     this.previouslyBudgeted = budgeted;
     this.currency = getCurrency(currencyCode);
     this.hideDecimal = hideDecimal;
+    this.skipAvailableClamp = skipAvailableClamp;
     // sort the template lines into regular template, goals, and remainder templates
     if (templates) {
       templates.forEach(t => {
