@@ -39,7 +39,7 @@ Click on the clock icon that appears when you hover over a category name.
 
 ![alt-text-here](/img/goal-template/automation-icon.webp)
 
-From this opening view, you can
+From the opening view, you can
 
 A. Add a new budget automation<br />
 B. Add a long-term goal<br />
@@ -58,6 +58,12 @@ The projected amount to be budgeted will be shown in the top right of the automa
 :::
 
 ![alt-text-here](/img/goal-template/multiple-automations.webp)
+
+:::tip
+
+Don't forget to **Save** your work when you are through adding and editing automations.
+
+:::
 
 ### Priorities {#priorities}
 
@@ -454,7 +460,7 @@ The result will be:
 
 ### Examples {#cleanup-examples}
 
-**I leave money in my To Budget balance all month, can this help cover my overspending?**
+**I leave money in my To Budget balance all month, can this help cover my overspending?** Yes!
 
 - If you don't use any cleanup automations, you can still run _End of month cleanup_ and the script will try to cover overspending using the available **To Budget** amount. This doesn't pull funds from any category and only covers overspending with **To Budget**.
 
@@ -479,17 +485,13 @@ The weights could be 34 and 66 to give a closer approximation of 1/3 and 2/3 whe
 
 All source funds will be used to cover your overspent categories first and then the remaining money will go to the **Debt** category to add extra to your payment.
 
-**I have a buffer category specifically meant to cover overspending for the month. Can I use this tool with that category?**
-
-YES!
+**I have a buffer category specifically meant to cover overspending for the month. Can I use this tool with that category?** YES!
 
 - Use both _Send leftover_ and _Receive leftover_ in your buffer category.
 
 Cleanup will remove all of your buffer funds, cover your overspending, and put your buffer funds back into the buffer for next time. You can also add a [_Refill to cap_](#refill) automation to this category so you can fill it back up next month!
 
-**My utility bills fluctuate from month to month, but are always less than $500. Can I shift that $500 around in just the utility categories?**
-
-Yes.
+**My utility bills fluctuate from month to month, but are always less than $500. Can I shift that $500 around in just the utility categories?** Yes!
 
 **Method 1:**
 
