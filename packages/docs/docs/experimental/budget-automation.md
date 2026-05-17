@@ -21,7 +21,7 @@ Here are a few examples of what you can do, all with a single click!
 - Budget 10% of your income for savings or charity
 - Budget the average you spend over the last 6 months
 - Save up for a big purchase many months or years in the future, and let Actual dynamically figure out how much to budget every month
-- And much more!
+- And much more! Check out this [blog entry from 2023!](/docs/blog/2023-12-15-automate-your-budget-with-goal-templates) Although it was written back in the days of note templates, it's still pertinent today!
 
 ## Notes Templates & UI Migration
 
@@ -91,7 +91,9 @@ For weeks, the number of weeks in a month is based on the weekday of your start 
 :::
 
 :::tip
-You can give different priorities to multiple _Fixed amount_ automations in the same category and they will be respected when the budget fills. For example, if you want only half of your $500 food budget to fill at month start, create two $250 automations in the **Food** category, one with a low priority and one with a priority higher than the last priority that available funds will fill at month start. When you have more funds later in the month, run automations again for that category and the automation will fill it (with overwrite).
+You can give different priorities to multiple _Fixed amount_ automations in the same category and they will be respected when the budget fills.
+
+This [blog post using note templates](/docs/blog/2024-03-25-goal-templates-with-a-twist) from 2024 goes into this in more detail.
 :::
 
 ### Save by Date {#save-by-date}
@@ -364,9 +366,7 @@ As an example, assume the spend for the category was [\$40, \$50, \$60] for the 
 | `#template average 3 months [increase 11]`  |      \$ 61      |
 | `#template average 3 months [decrease 1]`   |      \$ 49      |
 
-# Month-end Cleanup {#month-end-cleanup}
-
-## Creating category cleanups
+## Month-end Cleanup {#month-end-cleanup}
 
 ![alt-text-here](/img/goal-template/cleanup-global.webp)
 
@@ -402,7 +402,7 @@ Enable _Only enough to cover any overspending_ to restrict the category from rec
 
 :::
 
-## Running end of month cleanup
+### Running end of month cleanup
 
 End of month cleanup is run from the main menu in the Budget Header.
 
@@ -416,7 +416,7 @@ After clicking _End of month cleanup_, cleanup works sequentially as follows:
    - Leftover pool funds are distributed by weight within the pool.
    - If no categories in the pool are set to receive funds from the pool, leftover funds go to **To Budget**.<br /><br />
 2. **Global cleanup runs next.**
-   - Funds in _Send leftover_ categories are swept into **To Budget**. Source categories with a negative balanceare ignored.
+   - Funds in _Send leftover_ categories are swept into **To Budget**. Source categories with a negative balance are ignored.
    - Overspent categories are found and cleanup attempts to cover the overspending from **To Budget**. Categories using _Rollover Overspending_ are ignored.
    - _Receive leftover_ categories are found and cleanup distributes the leftover **To Budget** funds by weight.
 
@@ -424,7 +424,7 @@ After clicking _End of month cleanup_, cleanup works sequentially as follows:
 Cleanup does not respect [_Balance cap_](#balance-cap). Funds will be distributed based on weight and a category may be filled above the cap. To keep the excess, use _Retain existing funds over the cap_ or it will be removed the next time budgeting automation is run.
 :::
 
-## Calculating Weights {#cleanup-weights}
+### Calculating Weights {#cleanup-weights}
 
 Cleanup uses the sum of the weights of the sink categories to determine how much to distribute to each sink category.
 `distributed_amount = available_funds / sum_of_weights * category_weight`
@@ -445,7 +445,7 @@ The result will be:
 - Categories c and d will receive `2 / 10` or 20% of the pool
 - Category e will receive `4 / 10` or 40% of the pool
 
-## Examples
+### Examples
 
 **I leave money in my To Budget balance all month, can this help cover my overspending?**
 
@@ -484,7 +484,7 @@ Cleanup will remove all of your buffer funds, cover your overspending, and put y
 
 Yes.
 
-Method 1:
+**Method 1:**
 
 One way to do this is to have a Utilities Holding category with $500 budgeted.
 
@@ -499,7 +499,7 @@ Have separate categories for your various utilities, but don’t budget for them
 
 Cleanup will cover the overspending from the Utilities Holding category and return any remaining funds back to the holding category.
 
-Method 2:
+**Method 2:**
 
 Another way to accomplish this is to budget what you think you will spend for each of the utilities in each category. For example:
 
