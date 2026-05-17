@@ -1,6 +1,10 @@
 import 'fake-indexeddb/auto';
+import { readFileSync } from 'fs';
+import path from 'path';
+
 import { IDBFactory } from 'fake-indexeddb';
 
+import defaultDbBytes from '#default-db.sqlite?bytes';
 import { patchFetchForSqlJS } from '#mocks/util';
 import * as idb from '#platform/server/indexeddb';
 import * as sqlite from '#platform/server/sqlite';
@@ -113,5 +117,20 @@ describe('join', () => {
     expect(join('foo', 'bar')).toBe('foo/bar');
     expect(join('/foo', 'bar')).toBe('/foo/bar');
     expect(join('/foo', '../bar')).toBe('/bar');
+  });
+});
+
+describe('bundled default-db.sqlite', () => {
+  const onDiskPath = path.resolve(__dirname, '../../../../default-db.sqlite');
+
+  test('matches the on-disk file byte-for-byte', () => {
+    expect(defaultDbBytes).toBeInstanceOf(Uint8Array);
+    // SQLite file header `SQLite format 3\0` — readable failure if a future
+    // loader change accidentally decodes the asset as text.
+    expect(Array.from(defaultDbBytes.slice(0, 16))).toEqual([
+      0x53, 0x51, 0x4c, 0x69, 0x74, 0x65, 0x20, 0x66, 0x6f, 0x72, 0x6d, 0x61,
+      0x74, 0x20, 0x33, 0x00,
+    ]);
+    expect(defaultDbBytes).toEqual(new Uint8Array(readFileSync(onDiskPath)));
   });
 });

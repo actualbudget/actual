@@ -1,6 +1,8 @@
 import peggyLoader from 'vite-plugin-peggy-loader';
 import { defineConfig } from 'vitest/config';
 
+import { bytesLoader } from './scripts/bytes-loader.mts';
+
 export default defineConfig({
   test: {
     environment: 'jsdom',
@@ -11,5 +13,5 @@ export default defineConfig({
     ],
     maxWorkers: 2,
   },
-  plugins: [peggyLoader()],
+  plugins: [bytesLoader(), peggyLoader()],
 });

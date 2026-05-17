@@ -152,8 +152,10 @@ async function stagePluginsService(): Promise<void> {
 }
 
 async function stagePublicData(): Promise<void> {
-  // Migrations are bundled into the loot-core worker chunk; purge stale
-  // staged copies from previous builds.
+  // The current loot-core worker inlines everything it reads at init, so
+  // new clients never touch `data/`. `default-db.sqlite` is still staged
+  // here for one release so older clients pinned by a stale service-worker
+  // cache can finish populating their in-memory FS after upgrade.
   const migrationsDest = path.resolve(publicDataDir, 'migrations');
   await mkdir(publicDataDir, { recursive: true });
   await rm(migrationsDest, { recursive: true, force: true });

@@ -2,6 +2,10 @@
 import { SQLiteFS } from 'absurd-sql';
 import IndexedDBBackend from 'absurd-sql/dist/indexeddb-backend';
 
+// Inlined so backend init does not require network: SharedWorker fetches
+// bypass the service-worker cache in some browser/PWA contexts, so any
+// init-path fetch breaks offline app load.
+import defaultDbBytes from '#default-db.sqlite?bytes';
 import * as connection from '#platform/server/connection';
 import { join } from '#platform/server/fs/path-join';
 import * as idb from '#platform/server/indexeddb';
@@ -235,28 +239,8 @@ async function _removeFile(filepath: string) {
   FS.unlink(filepath);
 }
 
-// Load files from the server that should exist by default
 async function populateDefaultFilesystem() {
-  const index = await (
-    await fetch(process.env.PUBLIC_URL + 'data-file-index.txt')
-  ).text();
-  const files = index
-    .split('\n')
-    .map(name => name.trim())
-    .filter(name => name !== '')
-    // Migrations are bundled into the worker chunk; ignore any stale
-    // `migrations/…` entries a service-worker precache might still serve.
-    .filter(name => !name.startsWith('migrations/'));
-  const fetchFile = url => fetch(url).then(res => res.arrayBuffer());
-
-  await mkdir('/demo-budget');
-
-  await Promise.all(
-    files.map(async file => {
-      const contents = await fetchFile(process.env.PUBLIC_URL + 'data/' + file);
-      await _writeFile('/' + file, contents);
-    }),
-  );
+  await _writeFile(bundledDatabasePath, defaultDbBytes);
 }
 
 const populateFileHierarchy = async function () {

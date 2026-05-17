@@ -5,6 +5,8 @@ import { defineConfig } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import peggyLoader from 'vite-plugin-peggy-loader';
 
+import { bytesLoader } from './scripts/bytes-loader.mts';
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const isDev = mode === 'development';
@@ -61,6 +63,7 @@ export default defineConfig(({ mode }) => {
       'process.env.ACTUAL_DOCUMENT_DIR': JSON.stringify('/documents'),
     },
     plugins: [
+      bytesLoader(),
       peggyLoader(),
       // https://github.com/davidmyersdev/vite-plugin-node-polyfills/issues/142
       nodePolyfills({

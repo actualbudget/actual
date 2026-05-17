@@ -89,6 +89,7 @@
     "#types/*": "./src/types/*.ts",
     "#mocks/*": "./src/mocks/*.ts",
     "#migrations/*": "./migrations/*.js",
+    "#default-db.sqlite": "./default-db.sqlite",
     "#*": "./src/*.ts"
   },
   "exports": {
