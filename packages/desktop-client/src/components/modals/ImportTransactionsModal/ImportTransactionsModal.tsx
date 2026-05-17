@@ -46,6 +46,7 @@ import {
   filterByStartDate,
   isDateFormat,
   parseAmountFields,
+  parseCategoryFields,
   parseDate,
   stripCsvImportTransaction,
 } from './utils';
@@ -158,19 +159,6 @@ function getInitialMappings(transactions) {
     inOut: inOutField,
     category: categoryField,
   };
-}
-
-function parseCategoryFields(trans, categories) {
-  let match = null;
-  categories.forEach(category => {
-    if (category.id === trans.category) {
-      return null;
-    }
-    if (category.name === trans.category) {
-      match = category.id;
-    }
-  });
-  return match;
 }
 
 export function ImportTransactionsModal({
@@ -317,9 +305,7 @@ export function ImportTransactionsModal({
         }
 
         const category_id = parseCategoryFields(trans, categories);
-        if (category_id != null) {
-          trans.category = category_id;
-        }
+        trans.category = category_id;
 
         const {
           inflow: _inflow,

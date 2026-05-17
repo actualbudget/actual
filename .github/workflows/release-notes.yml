@@ -21,6 +21,7 @@ jobs:
       && github.head_ref != 'release'
       && startsWith(github.head_ref, 'release-notes/') == false
     runs-on: ubuntu-latest
+    environment: pr-automation
     steps:
       - name: Check if triggered by bot
         id: bot-check

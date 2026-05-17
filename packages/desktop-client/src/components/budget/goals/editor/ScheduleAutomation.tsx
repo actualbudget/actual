@@ -8,6 +8,7 @@ import type { ScheduleTemplate } from '@actual-app/core/types/models/templates';
 
 import { updateTemplate } from '#components/budget/goals/actions';
 import type { Action } from '#components/budget/goals/actions';
+import { AmountAdjustment } from '#components/budget/goals/editor/AmountAdjustment';
 import { Link } from '#components/common/Link';
 import { FormField, FormLabel } from '#components/forms';
 
@@ -33,46 +34,49 @@ export const ScheduleAutomation = ({
   );
 
   return selectableSchedules.length ? (
-    <SpaceBetween gap={50} style={{ marginTop: 10 }}>
-      <FormField style={{ flex: 1 }}>
-        <FormLabel title={t('Schedule')} htmlFor="schedule-field" />
-        <Select
-          id="schedule-field"
-          key="schedule-picker"
-          defaultLabel={t('Select a schedule')}
-          value={template.name}
-          onChange={schedule =>
-            dispatch(
-              updateTemplate({
-                type: 'schedule',
-                name: schedule,
-              }),
-            )
-          }
-          options={selectableSchedules.map(s => [s.name, s.name] as const)}
-        />
-      </FormField>
-      <FormField style={{ flex: 1 }}>
-        <FormLabel title={t('Savings mode')} htmlFor="schedule-full-field" />
-        <Select
-          id="schedule-full-field"
-          key="schedule-full"
-          options={[
-            ['false', t('Save up for the next occurrence')],
-            ['true', t('Cover each occurrence when it occurs')],
-          ]}
-          value={String(!!template.full)}
-          onChange={full =>
-            dispatch(
-              updateTemplate({
-                type: 'schedule',
-                full: full === 'true',
-              }),
-            )
-          }
-        />
-      </FormField>
-    </SpaceBetween>
+    <>
+      <SpaceBetween gap={50} style={{ marginTop: 10 }}>
+        <FormField style={{ flex: 1 }}>
+          <FormLabel title={t('Schedule')} htmlFor="schedule-field" />
+          <Select
+            id="schedule-field"
+            key="schedule-picker"
+            defaultLabel={t('Select a schedule')}
+            value={template.name}
+            onChange={schedule =>
+              dispatch(
+                updateTemplate({
+                  type: 'schedule',
+                  name: schedule,
+                }),
+              )
+            }
+            options={selectableSchedules.map(s => [s.name, s.name] as const)}
+          />
+        </FormField>
+        <FormField style={{ flex: 1 }}>
+          <FormLabel title={t('Savings mode')} htmlFor="schedule-full-field" />
+          <Select
+            id="schedule-full-field"
+            key="schedule-full"
+            options={[
+              ['false', t('Save up for the next occurrence')],
+              ['true', t('Cover each occurrence when it occurs')],
+            ]}
+            value={String(!!template.full)}
+            onChange={full =>
+              dispatch(
+                updateTemplate({
+                  type: 'schedule',
+                  full: full === 'true',
+                }),
+              )
+            }
+          />
+        </FormField>
+      </SpaceBetween>
+      <AmountAdjustment template={template} dispatch={dispatch} />
+    </>
   ) : (
     <Text style={{ marginTop: 10 }}>
       <Trans>
