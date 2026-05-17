@@ -85,9 +85,7 @@ const parseHexColor = (hex: string): RGBColor | null => {
     };
   }
 
-  const result = /^([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(
-    normalizedHex,
-  );
+  const result = /^([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(normalizedHex);
   return result
     ? {
         r: parseInt(result[1], 16),
