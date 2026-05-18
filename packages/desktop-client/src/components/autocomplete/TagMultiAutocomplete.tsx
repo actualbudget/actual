@@ -78,7 +78,7 @@ function TagList<T extends AutocompleteItem>({
             role="button"
             className={css({
               unset: 'all',
-              cursor: 'default',
+              cursor: 'pointer',
               padding: '4px 6px 1px 6px',
               backgroundColor:
                 highlightedIndex === index
