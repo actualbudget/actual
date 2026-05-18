@@ -29,7 +29,7 @@ jobs:
         with:
           ref: master
           fetch-depth: 0
-          persist-credentials: false
+          token: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
 
       - name: Set up environment
         uses: ./.github/actions/setup
@@ -132,13 +132,11 @@ jobs:
 
             if [[ "$TYPE" == "monthly" ]]; then
               git fetch origin master
-              if ! git merge --no-edit origin/master; then
-                echo "::error::Merge of master into release failed. Resolve conflicts manually and re-run."
-                exit 1
-              fi
+              git merge --no-edit -X theirs origin/master
+              git diff --exit-code origin/master
             fi
           fi
 
           git fetch origin "release-notes/$VERSION"
           git cherry-pick FETCH_HEAD
-          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:refs/heads/release
+          git push origin HEAD:refs/heads/release
