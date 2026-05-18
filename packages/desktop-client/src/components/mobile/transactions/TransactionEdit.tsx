@@ -1489,6 +1489,7 @@ function NoteTagAutocomplete({
   const { data: filteredTags, refetch } = useFilteredTags(currentWord, true);
   const showNewTag =
     currentWord.startsWith('#') &&
+    currentWordNoHash &&
     !filteredTags.some(tag => tag.tag === currentWordNoHash);
 
   const getTagCSS = useTagCSS({ ellipsis: true });
