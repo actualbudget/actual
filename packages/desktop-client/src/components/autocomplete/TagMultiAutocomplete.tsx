@@ -79,7 +79,7 @@ function TagList<T extends AutocompleteItem>({
             className={css({
               unset: 'all',
               cursor: 'default',
-              padding: 2,
+              padding: '4px 6px 1px 6px',
               backgroundColor:
                 highlightedIndex === index
                   ? theme.menuAutoCompleteBackgroundHover
