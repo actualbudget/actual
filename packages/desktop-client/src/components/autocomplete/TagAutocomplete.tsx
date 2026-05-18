@@ -213,7 +213,7 @@ export function TagAutocomplete({
                     ? theme.menuAutoCompleteBackgroundHover
                     : 'transparent',
                 alignItems: 'center',
-                padding: 4,
+                padding: '4px 4px 1px 4px',
                 fontWeight: 500,
                 cursor: 'pointer',
                 color:
@@ -240,10 +240,7 @@ export function TagAutocomplete({
                     display: 'flex',
                     alignItems: 'center',
                     gap: 3,
-                    color:
-                      highlightedId === item.id
-                        ? theme.menuAutoCompleteTextHover
-                        : theme.noticeTextMenu,
+                    color: theme.noticeTextMenu,
                     padding: 4,
                   }}
                 >
