@@ -14,7 +14,14 @@ COPY packages ./packages
 RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
 
 # Focus the workspaces in production mode
-RUN if [ "$(uname -m)" = "armv7l" ]; then npm_config_build_from_source=true yarn workspaces focus @actual-app/sync-server @actual-app/api --production; else yarn workspaces focus @actual-app/sync-server @actual-app/api --production; fi
+RUN if [ "$(uname -m)" = "armv7l" ]; then npm_config_build_from_source=true yarn workspaces focus @actual-app/sync-server --production; else yarn workspaces focus @actual-app/sync-server --production; fi
+
+# API dist is self-contained (already bundles @actual-app/core). Only better-sqlite3
+# is needed at runtime, which sync-server already provides. Manually place it in
+# node_modules to avoid pulling in all of loot-core's deps via yarn focus.
+RUN mkdir -p node_modules/@actual-app/api \
+    && cp -r packages/api/dist node_modules/@actual-app/api/ \
+    && cp packages/api/package.json node_modules/@actual-app/api/
 
 # Dereference yarn's workspace:* symlinks so the prod stage can copy just node_modules.
 RUN cp -RL node_modules node_modules.real \
