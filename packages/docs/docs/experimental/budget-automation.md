@@ -23,6 +23,8 @@ Here are a few examples of what you can do, all with a single click!
 - Save up for a big purchase many months or years in the future, and let Actual dynamically figure out how much to budget every month
 - And much more! Check out this [blog entry from 2023!](/blog/2023-12-15-automate-your-budget-with-goal-templates) Although it was written back in the days of note templates, it's still pertinent today!
 
+---
+
 ## Notes Templates & UI Migration
 
 For any given category, there is one source of truth for Budget automations, either the UI or the notes, not both.
@@ -32,6 +34,8 @@ If you have a notes template, the first time you open the UI (clock icon) you wi
 ![alt-text-here](/img/goal-template/migration.webp)
 
 Make any changes you feel are needed, then _Save_ the form to complete the migration. The notes can now be deleted.
+
+---
 
 ## Creating Automations {#create-automations}
 
@@ -122,7 +126,7 @@ All _Save by date_ automations in the same category must have the same priority.
 ### Cover Schedule {#cover-schedule}
 
 This automation budgets based on a schedule previously added to actual.<br />
-Pick a schedule (A) and a mode (B).
+Pick a schedule (A) and a mode (B). See below for a discussion on [adjustments (C)](#adjustments).
 
 ![alt-text-here](/img/goal-template/schedule-automation.webp)
 
@@ -131,11 +135,23 @@ Pick a schedule (A) and a mode (B).
 - **Save for the next occurrence.** The automation budgets a portion of the scheduled amount each month so the full amount is ready when needed.
 - **Cover each occurrence when it occurs.** The automation budgets for the schedule only in the month it occurs. It will budget the full scheduled amount.
 
-You can adjust the schedule in the schedule editor and the automation will stay up to date automatically.
+You can edit the schedule in the schedule editor and the automation will stay up to date automatically.
 
 :::warning
 All _Cover schedule_ automations in the same category must have the same priority.
 :::
+
+### From History {#from-history}
+
+For this automation, you can choose to budget based on historical data.<br />
+Choose a mode (A) and the number of months back (B). This is another automation that allows for [adjustments (C)](#adjustments).
+
+![alt-text-here](/img/goal-template/historical-automation.webp)
+
+**Modes:**
+
+- **Copy a previous month.** This will copy the **budget** from a previous month.
+- **Average of previous months.** This will average the **spending** from the previous number of months you choose.
 
 ### % of Income {#percentage}
 
@@ -150,18 +166,6 @@ When you click in the Category field, you will be presented with current choices
 - **Total of all income.** This month or Last month. The _Inflow to Budget, Received_ column in the budget will be used.
 - **Available funds to budget.** This month only. The available amount after Priority 0 and other automations with lower or equal priorities have run will be used.
 - **Specific income categories.** This month or Last month. The percentage will be based on the single income category you choose.
-
-### From History {#from-history}
-
-For this automation, you can choose to budget based on historical data.<br />
-Choose a mode (A) and the number of months back (B).
-
-![alt-text-here](/img/goal-template/historical-automation.webp)
-
-**Modes:**
-
-- **Copy a previous month.** This will copy the **budget** from a previous month.
-- **Average of previous months.** This will average the **spending** from the previous number of months you choose.
 
 ### Refill to Cap {#refill}
 
@@ -207,6 +211,28 @@ Investment, 60 / 3 _ 2 = 40 (Investment Fund receives 40.00)
 | Vacation Fund   |   1    |      No      |     20.00      |
 | Investment Fund |   2    |      No      |     40.00      |
 
+---
+
+## Adjustments {#adjustments}
+
+Scheduled expenses (e.g. insurance, property rates, etc.) often increase year on year. Often the amount is unknown until close to the due date. This creates a budget crunch - if your $ 1,000 insurance jumps 20% ($ 1,200), you need to make up that extra $ 200 in just a month or two. Even for day-to-day costs, inflationary pressures can put a dent in your budget plan if not accounted for. Or, perhaps you'd like to slowly bring down a category you spend too much on, a historical automation with a decrease adjustment can help you do just that.
+
+This feature adds adjustments to either [_Cover schedule_](#cover-schedule) or [_From history_](#from-history) automations.
+
+You can adjust your automation by either a _Fixed amount_ or by _Percentage_.
+
+![alt-text-here](/img/goal-template/adjustment-type.webp)
+
+The _Fixed amount_ type can either increase or decrease the amount budgeted. The default is to increase the amount. Click the **+** to switch.
+
+![alt-text-here](/img/goal-template/adjustment-fixed.webp)
+
+The _Percentage_ type can also either increase or decrease the budgeted amount by a percentage.
+
+![alt-text-here](/img/goal-template/adjustment-percentage.webp)
+
+---
+
 ## Balance cap {#balance-cap}
 
 Set a maximum amount over which the budget automations will not add funds.
@@ -249,6 +275,8 @@ There are 3 Fridays in July, but the Balance cap holds our grocery budget at 600
 
 ![alt-text-here](/img/goal-template/july-food.webp)
 
+---
+
 ## Long-term Goals and Budget Indicators {#indicators}
 
 ### Budget Indicator {#budget-indicator}
@@ -287,6 +315,8 @@ The tooltip will give you information regarding your progress:
 
 ![alt-text-here](/img/goal-template/long-term-overfunded.webp)
 
+---
+
 ## Running automations {#run-automations}
 
 ### How to apply the automations {#applying-automations}
@@ -314,66 +344,6 @@ In the budget header menu you will see the following options:
 ![Apply templates to a group of categories](/img/goal-template/apply-template-group.png)
 
 ---
-
-## Adjustments {#adjustments}
-
-**Use notes templates until UI is completed**
-
-:::warning
-
-If you attempt to migrate a note template with an adjustment, the migration will ignore the adjustment.
-
-:::
-
-Yearly expenses (e.g. insurance, property rates, etc.) increase year on year. Often the amount is unknown until close to the due date. This creates a budget crunch - if your $ 1,000 insurance jumps 20% ($ 1,200), you need to make up that extra $ 200 in just a month or two.
-
-This feature adds adjustments to the template (either percentage or fixed), letting you gradually save the expected increase throughout the year. By proactively budgeting a percentage/fixed change for these yearly increases, you avoid last-minute scrambling when renewal notices arrive with higher amounts.
-
-| Syntax                                                                       | Description                                                                                               |
-| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `#template schedule {SCHEDULE NAME} [{increase/decrease} {number\|number%}]` | Fund the upcoming scheduled transaction over time, increasing or decreasing the amount by the given value |
-
-As an example, assume the amount scheduled for 'Insurance' the prior year was $ 1000 and $ 83.33 was budgeted monthly; the below will apply.
-
-| Category  | Template line                                 | Monthly Budget | Annual Budget |
-| --------- | --------------------------------------------- | :------------: | :-----------: |
-| Insurance | `#template schedule Insurance [increase 20%]` |     $ 100      |    $ 1200     |
-| Insurance | `#template schedule Insurance [increase 500]` |     $ 125      |    $ 1500     |
-
-When "Insurance" comes due at the end of the year, $1200 will be available for the first example, or $1500 for the second example.
-
-### Available Variations
-
-Below is a table of the variations of the Schedule template.
-
-| Syntax                                                                       | Description                                                                                           | Example Application                                             |
-| ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `#template schedule {SCHEDULE NAME}`                                         | Fund upcoming scheduled transactions over time                                                        | Monthly schedules, or larger non-monthly scheduled transactions |
-| `#template schedule full {SCHEDULE NAME}`                                    | Fund upcoming scheduled transaction only on needed month                                              | Small schedules that are non-monthly                            |
-| `#template schedule {SCHEDULE NAME} [{increase/decrease} {number\|number%}]` | Fund upcoming scheduled transaction over time, increasing or decreasing the amount by the given value | Yearly renewals where the amount changes                        |
-
-### Average Type
-
-This template allows you to budget based on the average amount spent over a number of months, adding flexibility beyond the menu built-ins (3 months, 6 months).
-
-You can also adjust the budgeted amount from the average by a percentage or by a fixed whole number. This functionality may be useful when you want to budget an average, but bump it up or down a bit to account for inflation or to slowly wean off a category you'd like to spend less on. (See also [adjustments](#adjustments))
-
-| Syntax                                                                      | Description                                                                                                                                                                          |
-| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `#template average {number} months`                                         | Budget the average amount spent over the last `{number}` months. Can set the number to any number > 0. Matches the existing option on the budget page but with flexible month ranges |
-| `#template average {number} months [{increase/decrease} {number\|number%}]` | Budget the average amount spent over a period, with an adjustment                                                                                                                    |
-
-#### Examples
-
-As an example, assume the spend for the category was [\$40, \$50, \$60] for the past 3 months; here are some example usages.
-
-| Template line                               | Budgeted Amount |
-| ------------------------------------------- | :-------------: |
-| `#template average 3 months`                |      \$ 50      |
-| `#template average 3 months [increase 20%]` |      \$ 60      |
-| `#template average 3 months [decrease 10%]` |      \$ 45      |
-| `#template average 3 months [increase 11]`  |      \$ 61      |
-| `#template average 3 months [decrease 1]`   |      \$ 49      |
 
 ## End of Month Cleanup {#month-end-cleanup}
 
