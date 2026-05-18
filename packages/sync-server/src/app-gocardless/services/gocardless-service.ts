@@ -1,9 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import {
-  BankFactory,
-  isSpecialContinuousAccessBank,
-} from '#app-gocardless/bank-factory';
+import { BankFactory } from '#app-gocardless/bank-factory';
 import type { IBank } from '#app-gocardless/banks/bank.interface';
 import {
   AccessDeniedError,
@@ -138,6 +135,13 @@ export const goCardlessService = {
   }> => {
     const requisition =
       await goCardlessService.getLinkedRequisition(requisitionId);
+
+    console.log('GoCardless requisition linked:', {
+      institutionId: requisition.institution_id,
+      requisitionId,
+      agreementId: requisition.agreement,
+      accountIds: requisition.accounts,
+    });
 
     const institutionIdSet = new Set<GoCardlessInstitutionId>();
     const detailedAccounts = await Promise.all(
@@ -285,13 +289,17 @@ export const goCardlessService = {
     const institution = await goCardlessService.getInstitution(institutionId);
     const accountSelection =
       institution.supported_features?.includes('account_selection') ?? false;
+    const separateContinuousHistoryConsent =
+      institution.supported_features?.includes(
+        'separate_continuous_history_consent',
+      ) ?? false;
 
     const body = {
       redirectUrl: host + '/gocardless/link',
       institutionId,
       referenceId: uuidv4(),
       accessValidForDays: institution.max_access_valid_for_days,
-      maxHistoricalDays: isSpecialContinuousAccessBank(institutionId)
+      maxHistoricalDays: separateContinuousHistoryConsent
         ? 90
         : institution.transaction_total_days,
       userLanguage: 'en',
@@ -299,6 +307,16 @@ export const goCardlessService = {
       redirectImmediate: false,
       accountSelection,
     };
+
+    console.log('GoCardless requisition request:', {
+      institutionId,
+      accessValidForDays: body.accessValidForDays,
+      maxHistoricalDays: body.maxHistoricalDays,
+      transactionTotalDays: institution.transaction_total_days,
+      separateContinuousHistoryConsent,
+      accountSelection,
+      supportedFeatures: institution.supported_features,
+    });
 
     const response = await client.initSession(body).catch(async () => {
       console.log('Failed to link using:');
@@ -318,6 +336,12 @@ export const goCardlessService = {
     });
 
     const { link, id: requisitionId } = response;
+
+    console.log('GoCardless requisition created:', {
+      institutionId,
+      requisitionId,
+      agreementId: response.agreement,
+    });
 
     return {
       link,
