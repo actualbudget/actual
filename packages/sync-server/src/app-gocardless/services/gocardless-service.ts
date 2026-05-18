@@ -136,6 +136,13 @@ export const goCardlessService = {
     const requisition =
       await goCardlessService.getLinkedRequisition(requisitionId);
 
+    console.log('GoCardless requisition linked:', {
+      institutionId: requisition.institution_id,
+      requisitionId,
+      agreementId: requisition.agreement,
+      accountIds: requisition.accounts,
+    });
+
     const institutionIdSet = new Set<GoCardlessInstitutionId>();
     const detailedAccounts = await Promise.all(
       requisition.accounts.map(async (accountId: GoCardlessAccountId) => {
@@ -301,6 +308,16 @@ export const goCardlessService = {
       accountSelection,
     };
 
+    console.log('GoCardless requisition request:', {
+      institutionId,
+      accessValidForDays: body.accessValidForDays,
+      maxHistoricalDays: body.maxHistoricalDays,
+      transactionTotalDays: institution.transaction_total_days,
+      separateContinuousHistoryConsent,
+      accountSelection,
+      supportedFeatures: institution.supported_features,
+    });
+
     const response = await client.initSession(body).catch(async () => {
       console.log('Failed to link using:');
       console.log(body);
@@ -319,6 +336,12 @@ export const goCardlessService = {
     });
 
     const { link, id: requisitionId } = response;
+
+    console.log('GoCardless requisition created:', {
+      institutionId,
+      requisitionId,
+      agreementId: response.agreement,
+    });
 
     return {
       link,
