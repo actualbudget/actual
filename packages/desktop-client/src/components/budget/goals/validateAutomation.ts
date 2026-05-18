@@ -14,7 +14,19 @@ export type AutomationErrorKind =
   | { kind: 'by-no-month' }
   | { kind: 'by-target-past'; month: string }
   | { kind: 'spend-no-from' }
-  | { kind: 'spend-from-after-target' };
+  | { kind: 'spend-from-after-target' }
+  | { kind: 'adjustment-out-of-range' };
+
+function isAdjustmentOutOfRange(template: Template): boolean {
+  if (
+    (template.type === 'schedule' || template.type === 'average') &&
+    template.adjustment !== undefined &&
+    template.adjustmentType === 'percent'
+  ) {
+    return template.adjustment <= -100 || template.adjustment > 1000;
+  }
+  return false;
+}
 
 export type GlobalConflictKind =
   | { kind: 'over-income'; total: number; income: number }
@@ -42,6 +54,14 @@ export function validateAutomation(
         )
       ) {
         return { kind: 'schedule-not-found', name: template.name };
+      }
+      if (isAdjustmentOutOfRange(template)) {
+        return { kind: 'adjustment-out-of-range' };
+      }
+      return null;
+    case 'historical':
+      if (isAdjustmentOutOfRange(template)) {
+        return { kind: 'adjustment-out-of-range' };
       }
       return null;
     case 'refill':
