@@ -72,7 +72,6 @@ export function TagAutocomplete({
   const [isOpen, setIsOpen] = useState(false);
   const showPopup = isOpen && filteredItems.length > 0;
 
-  const allowMouseHighlight = useRef(true);
   const [highlightedIdx, setHighlightedIdx] = useState(0);
   const highlightedId =
     showPopup && highlightedIdx >= 0 && highlightedIdx < filteredItems.length
@@ -87,14 +86,7 @@ export function TagAutocomplete({
         filteredItems[idx].id;
       if (targetId) {
         const el = document.querySelector(`[data-key="${id(targetId)}"]`);
-
-        // when scrolling with keyboard while hovering over the menu with your mouse,
-        // the scrolling causes the mouseover listener for list items to trigger unless
-        // we disable it during the scroll. setState does not apply immediately so this
-        // is the better option
-        allowMouseHighlight.current = false;
         el?.scrollIntoView?.({ block: 'nearest' });
-        setTimeout(() => (allowMouseHighlight.current = true));
       }
     },
     [id, filteredItems, showPopup],
@@ -221,16 +213,14 @@ export function TagAutocomplete({
                     ? theme.menuAutoCompleteItemTextHover
                     : theme.menuAutoCompleteItemText,
               })}
-              onMouseOver={() => {
-                if (allowMouseHighlight.current) {
-                  setHighlightedIdx(
-                    Math.max(
-                      0,
-                      filteredItems.findIndex(_item => _item.id === item.id),
-                    ),
-                  );
-                }
-              }}
+              onMouseMove={() =>
+                setHighlightedIdx(
+                  Math.max(
+                    0,
+                    filteredItems.findIndex(_item => _item.id === item.id),
+                  ),
+                )
+              }
               onPointerDown={e => e.preventDefault()}
               onClick={() => handleSelect(item.id)}
             >
