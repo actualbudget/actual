@@ -1471,6 +1471,7 @@ function NoteTagAutocomplete({
 }: {
   inputRef: RefObject<HTMLInputElement | null>;
 }) {
+  const dispatch = useDispatch();
   // Yes, there is a lot of ref usages in this component. Here's the motivation
   // 1. This component purely modifies HTML Input state, app state is handled elsewhere
   // 2. This component deals with cursor state, which is not easily accessible through regular React code
@@ -1482,10 +1483,7 @@ function NoteTagAutocomplete({
   const [cursorPosition] = useCursorPosition(inputRef);
   const [startIdx, endIdx] = useCurrentWordRange(note, cursorPosition);
   const currentWord = note.slice(startIdx, endIdx);
-  const currentWordNoHash = useMemo(
-    () => currentWord.replace(/^#+/, ''),
-    [currentWord],
-  );
+  const currentWordNoHash = currentWord.replace(/^#+/, '');
   const { data: filteredTags, refetch } = useFilteredTags(currentWord, true);
   const showNewTag =
     currentWord.startsWith('#') &&
@@ -1507,9 +1505,21 @@ function NoteTagAutocomplete({
 
   async function handleCreate(tag: string) {
     if (!inputRef.current) return;
-    await send('tags-create', { tag });
-    void refetch();
-    handleSelect(tag);
+    try {
+      await send('tags-create', { tag });
+      void refetch();
+      handleSelect(tag);
+    } catch (e) {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: 'Failed to add tag, check logs',
+          },
+        }),
+      );
+      console.trace(e);
+    }
   }
 
   const hideScrollbar = css({

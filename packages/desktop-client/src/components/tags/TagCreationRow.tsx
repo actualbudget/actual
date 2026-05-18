@@ -94,7 +94,9 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
         backgroundColor: theme.tableBackground,
       }}
       data-testid="new-tag"
-      {...tableNavigator.getNavigatorProps({})}
+      {...tableNavigator.getNavigatorProps({
+        onKeyUp: onKeyDown,
+      })}
     >
       <Row
         height={34}

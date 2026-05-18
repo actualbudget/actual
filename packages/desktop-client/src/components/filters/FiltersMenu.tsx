@@ -477,6 +477,7 @@ function ConfigureField<T extends RuleConditionEntity>({
         }}
       >
         {type !== 'boolean' &&
+          (field !== 'notes' || !isTagOp(op)) &&
           (field !== 'payee' || !isIdOp(op)) &&
           (field !== 'account' || !isNoValueAccountOp(op)) && (
             <GenericInput
