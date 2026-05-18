@@ -1,4 +1,5 @@
-import { useMemo, type ComponentProps } from 'react';
+import { useMemo } from 'react';
+import type { ComponentProps } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 import type { View } from '@actual-app/components/view';
