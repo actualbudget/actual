@@ -13,7 +13,7 @@ COPY packages ./packages
 RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
 
 # Focus the workspaces in production mode
-RUN yarn workspaces focus @actual-app/sync-server --production
+RUN yarn workspaces focus @actual-app/sync-server @actual-app/api --production
 
 # Dereference yarn's workspace:* symlinks so the prod stage can copy just node_modules.
 RUN cp -RL node_modules node_modules.real \
@@ -48,6 +48,10 @@ COPY --from=builder /app/packages/sync-server/build ./
 
 # script dir changed when we swapped build method, add the legacy dir in for compatibility
 RUN mkdir -p src && ln -s ../scripts src/scripts
+
+# CLI binary with symlink into PATH (Node module resolution requires /app/ path)
+COPY --from=builder /app/packages/cli/dist/cli.js /app/actual.js
+RUN chmod +x /app/actual.js && ln -s /app/actual.js /usr/local/bin/actual
 
 ENTRYPOINT ["/usr/bin/tini","-g",  "--"]
 EXPOSE 5006
