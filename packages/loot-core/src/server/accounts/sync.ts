@@ -6,6 +6,7 @@ import * as asyncStorage from '#platform/server/asyncStorage';
 import { logger } from '#platform/server/log';
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
+import { TransactionError } from '#server/errors';
 import { TRANSACTION_SORT_INCREMENT } from '#server/db/sort';
 import { runMutator } from '#server/mutators';
 import { post } from '#server/post';
@@ -388,6 +389,22 @@ async function normalizeTransactions(
     // Strip off the irregular properties
     const { payee_name: originalPayeeName, subtransactions, ...rest } = trans;
     trans = rest;
+
+    if (trans.amount != null && !Number.isInteger(trans.amount)) {
+      throw new TransactionError(
+        `Amount is invalid, must be an integer: ${trans.amount}`,
+      );
+    }
+
+    if (subtransactions) {
+      for (const sub of subtransactions) {
+        if (sub.amount != null && !Number.isInteger(sub.amount)) {
+          throw new TransactionError(
+            `Subtransaction amount is invalid, must be an integer: ${sub.amount}`,
+          );
+        }
+      }
+    }
 
     let payee_name = originalPayeeName;
     if (payee_name) {
