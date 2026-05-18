@@ -86,10 +86,7 @@ export function validateEnd(
   );
 }
 
-export function validateRange(
-  start: string,
-  end: string,
-): [string, string] {
+export function validateRange(start: string, end: string): [string, string] {
   return [start, end];
 }
 
