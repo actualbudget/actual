@@ -213,14 +213,14 @@ export function TagAutocomplete({
                     ? theme.menuAutoCompleteItemTextHover
                     : theme.menuAutoCompleteItemText,
               })}
-              onMouseMove={() =>
-                setHighlightedIdx(
-                  Math.max(
-                    0,
-                    filteredItems.findIndex(_item => _item.id === item.id),
-                  ),
-                )
-              }
+              onMouseMove={() => {
+                const idx = filteredItems.findIndex(
+                  _item => _item.id === item.id,
+                );
+                if (idx >= 0 && highlightedIdx !== idx) {
+                  setHighlightedIdx(idx);
+                }
+              }}
               onPointerDown={e => e.preventDefault()}
               onClick={() => handleSelect(item.id)}
             >
