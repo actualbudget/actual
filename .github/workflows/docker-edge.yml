@@ -99,6 +99,7 @@ jobs:
           docker run --detach --network=host --name actual-server actualbudget/actual-server-testing
           HEALTHCMD=$(yq -r '.services.actual_server.healthcheck.test[1]' packages/sync-server/docker-compose.yml)
           until docker exec actual-server sh -c "$HEALTHCMD"; do sleep 1; done
+          docker exec actual-server /usr/local/bin/actual --help >/dev/null
 
       - name: Dump container logs on failure
         if: failure()
