@@ -71,7 +71,6 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
     resetInputs();
   };
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
-    console.log(e);
     if (e.key === 'Escape') {
       onClose();
     }
