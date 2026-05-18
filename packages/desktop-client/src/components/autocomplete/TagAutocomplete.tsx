@@ -1,30 +1,23 @@
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useId, useMemo, useRef, useState } from 'react';
 import type {
   CSSProperties,
   FocusEventHandler,
   KeyboardEvent,
   KeyboardEventHandler,
-} from "react";
-import { ListBox, ListBoxItem, Popover } from "react-aria-components";
-import { Trans, useTranslation } from "react-i18next";
+} from 'react';
+import { ListBox, ListBoxItem, Popover } from 'react-aria-components';
+import { Trans, useTranslation } from 'react-i18next';
 
-import { Input } from "@actual-app/components/input";
-import { styles } from "@actual-app/components/styles";
-import { theme } from "@actual-app/components/theme";
-import { send } from "@actual-app/core/platform/client/connection";
-import { css } from "@emotion/css";
+import { Input } from '@actual-app/components/input';
+import { styles } from '@actual-app/components/styles';
+import { theme } from '@actual-app/components/theme';
+import { send } from '@actual-app/core/platform/client/connection';
+import { css } from '@emotion/css';
 
-import { useCurrentWordRange } from "#hooks/useCurrentWordRange";
-import { useCursorPosition } from "#hooks/useCursorPosition";
-import { useTagCSS } from "#hooks/useTagCSS";
-import { useFilteredTags } from "#hooks/useTags";
+import { useCurrentWordRange } from '#hooks/useCurrentWordRange';
+import { useCursorPosition } from '#hooks/useCursorPosition';
+import { useTagCSS } from '#hooks/useTagCSS';
+import { useFilteredTags } from '#hooks/useTags';
 
 export type TagAutocompleteProps = {
   inputValue: string;
@@ -48,8 +41,8 @@ export function TagAutocomplete({
   const getTagCSS = useTagCSS({ ellipsis: true });
   const autocompleteId = useId();
   const id = useCallback(
-    (itemId: string) => autocompleteId + "|" + itemId,
-    [autocompleteId]
+    (itemId: string) => autocompleteId + '|' + itemId,
+    [autocompleteId],
   );
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -60,15 +53,15 @@ export function TagAutocomplete({
   const { data: filteredTags, refetch } = useFilteredTags(currentWord, true);
   const filteredItems = useMemo(() => {
     const tagArr =
-      filteredTags?.map((tag) => ({ ...tag, name: "#" + tag.tag })) ?? [];
+      filteredTags?.map(tag => ({ ...tag, name: '#' + tag.tag })) ?? [];
 
-    const isValidTag = currentWord.startsWith("#") && currentWord.length > 1;
+    const isValidTag = currentWord.startsWith('#') && currentWord.length > 1;
     const exactMatchExists =
-      tagArr.length && "#" + tagArr[0].tag === currentWord;
+      tagArr.length && '#' + tagArr[0].tag === currentWord;
     if (isValidTag && !exactMatchExists) {
-      const currentWordSingleHash = currentWord.replace(/^#+/, "#");
+      const currentWordSingleHash = currentWord.replace(/^#+/, '#');
       tagArr.push({
-        id: "create_tag",
+        id: 'create_tag',
         name: `${currentWordSingleHash}`,
         tag: currentWordSingleHash.slice(1),
       });
@@ -100,27 +93,27 @@ export function TagAutocomplete({
         // we disable it during the scroll. setState does not apply immediately so this
         // is the better option
         allowMouseHighlight.current = false;
-        el?.scrollIntoView?.({ block: "nearest" });
+        el?.scrollIntoView?.({ block: 'nearest' });
         setTimeout(() => (allowMouseHighlight.current = true));
       }
     },
-    [id, filteredItems, showPopup]
+    [id, filteredItems, showPopup],
   );
 
   async function handleSelect(id: string | null) {
-    const tagObj = filteredItems.find((tag) => tag.id === id);
+    const tagObj = filteredItems.find(tag => tag.id === id);
     if (!tagObj) return;
 
-    if (id === "create_tag") {
-      await send("tags-create", { tag: tagObj.tag });
+    if (id === 'create_tag') {
+      await send('tags-create', { tag: tagObj.tag });
       void refetch({ cancelRefetch: true });
     }
 
     const nextChar = inputValue.charAt(endIdx);
-    const space = nextChar === " " ? "" : " ";
+    const space = nextChar === ' ' ? '' : ' ';
     const newValue =
       inputValue.slice(0, startIdx) +
-      "#" +
+      '#' +
       tagObj.tag +
       space +
       inputValue.slice(endIdx);
@@ -136,30 +129,30 @@ export function TagAutocomplete({
       return;
     }
 
-    if (e.key === "ArrowUp") {
+    if (e.key === 'ArrowUp') {
       e.preventDefault();
       setHighlightedIdx(highlightedIdx - 1);
       scrollItemIntoView(highlightedIdx - 1);
-    } else if (e.key === "ArrowDown") {
+    } else if (e.key === 'ArrowDown') {
       e.preventDefault();
       setHighlightedIdx(highlightedIdx + 1);
       scrollItemIntoView(highlightedIdx + 1);
-    } else if (e.key === "Home" && filteredItems.length > 1) {
+    } else if (e.key === 'Home' && filteredItems.length > 1) {
       e.preventDefault();
       setHighlightedIdx(0);
-    } else if (e.key === "End" && filteredItems.length > 1) {
+    } else if (e.key === 'End' && filteredItems.length > 1) {
       setHighlightedIdx(filteredItems.length - 1);
       e.preventDefault();
-    } else if (highlightedId && (e.key === "Enter" || e.key === "Tab")) {
+    } else if (highlightedId && (e.key === 'Enter' || e.key === 'Tab')) {
       e.preventDefault();
       e.stopPropagation();
       void handleSelect(highlightedId);
-    } else if (e.key === "Escape") {
+    } else if (e.key === 'Escape') {
       setIsOpen(false);
     }
 
-    setHighlightedIdx((idx) =>
-      Math.max(0, Math.min(idx, filteredItems.length - 1))
+    setHighlightedIdx(idx =>
+      Math.max(0, Math.min(idx, filteredItems.length - 1)),
     );
   }
 
@@ -168,13 +161,13 @@ export function TagAutocomplete({
       <Input
         ref={inputRef}
         name="notes"
-        aria-label={t("Notes")}
+        aria-label={t('Notes')}
         aria-expanded={showPopup}
-        aria-controls={id("popover")}
+        aria-controls={id('popover')}
         role="combobox"
         style={inputStyle}
         value={inputValue}
-        onChange={(e) => {
+        onChange={e => {
           setIsOpen(true);
           setInputValue(e.currentTarget.value);
         }}
@@ -192,7 +185,7 @@ export function TagAutocomplete({
         style={{
           background: theme.menuAutoCompleteBackground,
           borderRadius: 6,
-          boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
           width: inputRef.current?.offsetWidth ?? 100,
         }}
         offset={1}
@@ -201,13 +194,13 @@ export function TagAutocomplete({
         onOpenChange={setIsOpen}
       >
         <ListBox
-          aria-label={t("Tag List")}
-          id={id("popover")}
+          aria-label={t('Tag List')}
+          id={id('popover')}
           items={filteredItems}
           selectionMode="single"
           dependencies={[highlightedId]}
-          onPointerDown={(e) => e.preventDefault()}
-          style={{ borderRadius: 4, maxHeight: "150px", overflowY: "auto" }}
+          onPointerDown={e => e.preventDefault()}
+          style={{ borderRadius: 4, maxHeight: '150px', overflowY: 'auto' }}
         >
           {(item: (typeof filteredItems)[number]) => (
             <ListBoxItem
@@ -218,11 +211,11 @@ export function TagAutocomplete({
                 backgroundColor:
                   highlightedId === item.id
                     ? theme.menuAutoCompleteBackgroundHover
-                    : "transparent",
-                alignItems: "center",
+                    : 'transparent',
+                alignItems: 'center',
                 padding: 4,
                 fontWeight: 500,
-                cursor: "pointer",
+                cursor: 'pointer',
                 color:
                   highlightedId === item.id
                     ? theme.menuAutoCompleteItemTextHover
@@ -233,19 +226,19 @@ export function TagAutocomplete({
                   setHighlightedIdx(
                     Math.max(
                       0,
-                      filteredItems.findIndex((_item) => _item.id === item.id)
-                    )
+                      filteredItems.findIndex(_item => _item.id === item.id),
+                    ),
                   );
                 }
               }}
-              onPointerDown={(e) => e.preventDefault()}
+              onPointerDown={e => e.preventDefault()}
               onClick={() => handleSelect(item.id)}
             >
-              {item.id === "create_tag" ? (
+              {item.id === 'create_tag' ? (
                 <div
                   style={{
-                    display: "flex",
-                    alignItems: "center",
+                    display: 'flex',
+                    alignItems: 'center',
                     gap: 3,
                     color:
                       highlightedId === item.id
@@ -254,10 +247,10 @@ export function TagAutocomplete({
                     padding: 4,
                   }}
                 >
-                  <span style={{ textWrap: "nowrap" }}>
+                  <span style={{ textWrap: 'nowrap' }}>
                     <Trans>Create Tag</Trans>
                   </span>
-                  <span className={getTagCSS("")}>{item.name}</span>
+                  <span className={getTagCSS('')}>{item.name}</span>
                 </div>
               ) : (
                 <div className={getTagCSS(item.tag)}>{item.name}</div>
