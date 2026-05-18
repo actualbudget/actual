@@ -34,8 +34,7 @@ import {
   parse as parseDate,
 } from 'date-fns';
 
-import { Autocomplete } from '#components/autocomplete/Autocomplete';
-import { TagMultiSelect } from '#components/autocomplete/TagMultiSelect';
+import { TagMultiAutocomplete } from '#components/autocomplete/TagMultiAutocomplete';
 import { GenericInput } from '#components/util/GenericInput';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
@@ -524,10 +523,10 @@ function ConfigureField<T extends RuleConditionEntity>({
           />
         )}
         {field === 'notes' && isTagOp(op) && (
-          <TagMultiSelect
+          <TagMultiAutocomplete
             // @ts-expect-error - fix me
             value={formattedValue}
-            onChange={(v: string) => dispatch({ type: 'set-value', value: v })}
+            setValue={(v: string) => dispatch({ type: 'set-value', value: v })}
           />
         )}
         <SpaceBetween

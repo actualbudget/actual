@@ -14,13 +14,13 @@ export function filterTags<T extends TagEntity>(
   tags: T[],
   filterStr: string,
 ): T[] {
-  return new Fzf<T[]>(tags, {
+  return new Fzf(tags as TagEntity[], {
     selector: tag => tag.tag,
     limit: 100,
     tiebreakers: [byLengthAsc, byStartAsc],
   })
     .find(filterStr.replace(/^#/, ''))
-    .map(item => item.item);
+    .map(item => item.item as T);
 }
 
 export function useFilteredTags(

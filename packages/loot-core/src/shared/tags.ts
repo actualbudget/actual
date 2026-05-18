@@ -3,6 +3,7 @@
 // so "one #one ##one ##two three" becomes
 // ["#one", "#two", "#three"]
 export function extractTagsForFilter(value: string) {
+  if (!value) return [];
   const tagValues = [];
   const seenTags = new Set();
   for (const [_, tag] of value.matchAll(/#*([^#\s]+)/g)) {
