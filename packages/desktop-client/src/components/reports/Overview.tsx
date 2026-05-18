@@ -77,6 +77,26 @@ function isCustomReportWidget(
   return widget.type === 'custom-report';
 }
 
+function getWidgetMinHeight(widget: DashboardWidgetEntity) {
+  if (isCustomReportWidget(widget) || widget.type === 'markdown-card') {
+    return 1;
+  }
+
+  if (widget.type === 'sankey-card') {
+    return 3;
+  }
+
+  return 2;
+}
+
+function getWidgetMinWidth(widget: DashboardWidgetEntity) {
+  if (isCustomReportWidget(widget) || widget.type === 'markdown-card') {
+    return 2;
+  }
+
+  return 3;
+}
+
 type OverviewProps = {
   dashboard: DashboardPageEntity;
 };
@@ -168,10 +188,8 @@ export function Overview({ dashboard }: OverviewProps) {
       y: widget.y,
       w: widget.width,
       h: widget.height,
-      minW:
-        isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 2 : 3,
-      minH:
-        isCustomReportWidget(widget) || widget.type === 'markdown-card' ? 1 : 2,
+      minW: getWidgetMinWidth(widget),
+      minH: getWidgetMinHeight(widget),
     }));
   }, [widgets]);
 
@@ -273,7 +291,7 @@ export function Overview({ dashboard }: OverviewProps) {
       widget: {
         type,
         width: 4,
-        height: 2,
+        height: type === 'sankey-card' ? 3 : 2,
         meta,
         dashboard_page_id: dashboard.id,
       },

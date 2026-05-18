@@ -188,7 +188,7 @@ export function SankeyGraph({
               />
             )}
             sort={false}
-            iterations={1000}
+            iterations={128}
             nodePadding={23}
             width={width}
             height={height}
