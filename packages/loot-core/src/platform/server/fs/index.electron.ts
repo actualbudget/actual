@@ -55,7 +55,14 @@ export const listDir: typeof T.listDir = filepath =>
   new Promise((resolve, reject) => {
     fs.readdir(filepath, (err, files) => {
       if (err) {
-        reject(err);
+        // EPERM/EPERM: Operation not permitted - usually means no read permission
+        // Return empty array instead of crashing so the UI can handle it gracefully
+        if (err.code === 'EPERM' || err.code === 'EACCES') {
+          logger.warn(`No permission to read directory: ${filepath}`);
+          resolve([]);
+        } else {
+          reject(err);
+        }
       } else {
         resolve(files);
       }
