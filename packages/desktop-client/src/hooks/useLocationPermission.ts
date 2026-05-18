@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 
@@ -6,7 +6,7 @@ import { locationService } from '#payees/location';
 
 import { useFeatureFlag } from './useFeatureFlag';
 
-type LocationPermission = {
+export type LocationPermission = {
   isGranted: boolean;
   isPending: boolean;
   requestPermission: () => Promise<void>;
@@ -85,14 +85,22 @@ export function useLocationPermission(): LocationPermission {
     };
   }, [payeeLocationsEnabled, isNarrowWidth]);
 
-  const requestPermission = useCallback(async () => {
+  const requestPermission = async () => {
     try {
       await locationService.getCurrentPosition();
       setState('granted');
     } catch {
-      setState('denied');
+      // Re-query permissions state just in case
+      try {
+        const status = await navigator.permissions.query({
+          name: 'geolocation',
+        });
+        setState(status.state);
+      } catch {
+        setState('denied');
+      }
     }
-  }, []);
+  };
 
   return {
     isGranted: state === 'granted',
