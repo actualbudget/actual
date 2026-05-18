@@ -72,7 +72,7 @@ export function TagAutocomplete({
   const [isOpen, setIsOpen] = useState(false);
   const showPopup = isOpen && filteredItems.length > 0;
 
-  const allowMouseHighlight = useRef(false);
+  const allowMouseHighlight = useRef(true);
   const [highlightedIdx, setHighlightedIdx] = useState(0);
   const highlightedId =
     showPopup && highlightedIdx >= 0 && highlightedIdx < filteredItems.length
