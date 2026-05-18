@@ -1,9 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import {
-  BankFactory,
-  isSpecialContinuousAccessBank,
-} from '#app-gocardless/bank-factory';
+import { BankFactory } from '#app-gocardless/bank-factory';
 import type { IBank } from '#app-gocardless/banks/bank.interface';
 import {
   AccessDeniedError,
@@ -285,13 +282,17 @@ export const goCardlessService = {
     const institution = await goCardlessService.getInstitution(institutionId);
     const accountSelection =
       institution.supported_features?.includes('account_selection') ?? false;
+    const separateContinuousHistoryConsent =
+      institution.supported_features?.includes(
+        'separate_continuous_history_consent',
+      ) ?? false;
 
     const body = {
       redirectUrl: host + '/gocardless/link',
       institutionId,
       referenceId: uuidv4(),
       accessValidForDays: institution.max_access_valid_for_days,
-      maxHistoricalDays: isSpecialContinuousAccessBank(institutionId)
+      maxHistoricalDays: separateContinuousHistoryConsent
         ? 90
         : institution.transaction_total_days,
       userLanguage: 'en',
