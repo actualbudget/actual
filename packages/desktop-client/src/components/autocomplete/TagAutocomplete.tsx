@@ -82,13 +82,16 @@ export function TagAutocomplete({
   const allowMouseHighlight = useRef(false);
   const [highlightedIdx, setHighlightedIdx] = useState(0);
   const highlightedId =
-    showPopup && highlightedIdx < filteredItems.length
+    showPopup && highlightedIdx >= 0 && highlightedIdx < filteredItems.length
       ? filteredItems[highlightedIdx].id
       : null;
   const scrollItemIntoView = useCallback(
     (idx: number) => {
       const targetId =
-        showPopup && idx < filteredItems?.length && filteredItems[idx].id;
+        showPopup &&
+        idx >= 0 &&
+        idx < filteredItems?.length &&
+        filteredItems[idx].id;
       if (targetId) {
         const el = document.querySelector(`[data-key="${id(targetId)}"]`);
 
