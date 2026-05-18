@@ -46,6 +46,7 @@ import type {
 import { css } from '@emotion/css';
 import { v4 as uuidv4 } from 'uuid';
 
+import { TagMultiAutocomplete } from '#components/autocomplete/TagMultiAutocomplete';
 import { FinancialText } from '#components/FinancialText';
 import { StatusBadge } from '#components/schedules/StatusBadge';
 import { SimpleTransactionsTable } from '#components/transactions/SimpleTransactionsTable';
@@ -311,6 +312,14 @@ function ConditionEditor({
         key={inputKey}
         defaultValue={value}
         onChange={v => onChange('value', v)}
+      />
+    );
+  } else if (type === 'string' && (op === 'hasTags' || op === 'hasAnyTag')) {
+    valueEditor = (
+      <TagMultiAutocomplete
+        key={inputKey}
+        value={value ?? ''}
+        setValue={(value: string) => onChange('value', value)}
       />
     );
   } else {
