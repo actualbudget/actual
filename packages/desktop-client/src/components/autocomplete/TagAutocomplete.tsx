@@ -133,9 +133,9 @@ export function TagAutocomplete({
       setHighlightedIdx(filteredItems.length - 1);
       e.preventDefault();
     } else if (highlightedId && (e.key === 'Enter' || e.key === 'Tab')) {
-      void handleSelect(highlightedId);
       e.preventDefault();
       e.stopPropagation();
+      void handleSelect(highlightedId);
     } else if (e.key === 'Escape') {
       setIsOpen(false);
     }
