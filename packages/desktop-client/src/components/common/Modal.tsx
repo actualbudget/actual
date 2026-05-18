@@ -10,6 +10,7 @@ import {
   Modal as ReactAriaModal,
   ModalOverlay as ReactAriaModalOverlay,
 } from 'react-aria-components';
+import { ErrorBoundary } from 'react-error-boundary';
 import { useHotkeysContext } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 
@@ -28,6 +29,7 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { useModalState } from '#hooks/useModalState';
 
 export const MODAL_Z_INDEX = 3000;
@@ -71,103 +73,107 @@ export const Modal = ({
   };
 
   return (
-    <ReactAriaModalOverlay
-      data-testid={`${name}-modal`}
-      isDismissable
-      defaultOpen
-      onOpenChange={isOpen => !isOpen && handleOnClose?.()}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: MODAL_Z_INDEX,
-        fontSize: 14,
-        // on mobile, we disable the blurred background for performance reasons
-        ...(isNarrowWidth
-          ? {
-              backgroundColor: 'rgba(0, 0, 0, 0.4)',
-            }
-          : {
-              backdropFilter: 'blur(1px) brightness(0.9)',
-            }),
-        ...style,
-      }}
-      {...props}
-    >
-      {/* A container for positioning the modal relative to the visual viewport */}
-      <View
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <ReactAriaModalOverlay
+        data-testid={`${name}-modal`}
+        isDismissable
+        defaultOpen
+        onOpenChange={isOpen => !isOpen && handleOnClose?.()}
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: 'var(--visual-viewport-height)',
-          overflowY: 'auto',
+          position: 'fixed',
+          inset: 0,
+          zIndex: MODAL_Z_INDEX,
+          fontSize: 14,
+          // on mobile, we disable the blurred background for performance reasons
+          ...(isNarrowWidth
+            ? {
+                backgroundColor: 'rgba(0, 0, 0, 0.4)',
+              }
+            : {
+                backdropFilter: 'blur(1px) brightness(0.9)',
+              }),
+          ...style,
         }}
+        {...props}
       >
-        <ReactAriaModal>
-          {modalProps => (
-            <Dialog
-              aria-label={t('Modal dialog')}
-              className={css(styles.lightScrollbar)}
-              style={{
-                outline: 'none', // remove focus outline
-              }}
-            >
-              <ModalContentContainer
-                noAnimation={noAnimation}
-                isActive={isActive(name)}
-                {...containerProps}
+        {/* A container for positioning the modal relative to the visual viewport */}
+        <View
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: 'var(--visual-viewport-height)',
+            overflowY: 'auto',
+          }}
+        >
+          <ReactAriaModal>
+            {modalProps => (
+              <Dialog
+                aria-label={t('Modal dialog')}
+                className={css(styles.lightScrollbar)}
                 style={{
-                  flex: 1,
-                  padding: 10,
-                  willChange: 'opacity, transform',
-                  maxWidth: '90vw',
-                  minWidth: '90vw',
-                  maxHeight: 'calc(var(--visual-viewport-height) * 0.9)',
-                  minHeight: 0,
-                  borderRadius: 6,
-                  //border: '1px solid ' + theme.modalBorder,
-                  color: theme.pageText,
-                  backgroundColor: theme.modalBackground,
-                  opacity: isHidden ? 0 : 1,
-                  [`@media (min-width: ${tokens.breakpoint_small})`]: {
-                    minWidth: tokens.breakpoint_small,
-                  },
-                  overflowY: 'auto',
-                  ...styles.shadowLarge,
-                  ...containerProps?.style,
+                  outline: 'none', // remove focus outline
                 }}
               >
-                <View style={{ paddingTop: 0, flex: 1, flexShrink: 0 }}>
-                  {typeof children === 'function'
-                    ? children(modalProps)
-                    : children}
-                </View>
-                {isLoading && (
-                  <View
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      backgroundColor: theme.pageBackground,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      zIndex: 1000,
-                    }}
-                  >
-                    <AnimatedLoading
-                      style={{ width: 20, height: 20 }}
-                      color={theme.pageText}
-                    />
+                <ModalContentContainer
+                  noAnimation={noAnimation}
+                  isActive={isActive(name)}
+                  {...containerProps}
+                  style={{
+                    flex: 1,
+                    padding: 10,
+                    willChange: 'opacity, transform',
+                    maxWidth: '90vw',
+                    minWidth: '90vw',
+                    maxHeight: 'calc(var(--visual-viewport-height) * 0.9)',
+                    minHeight: 0,
+                    borderRadius: 6,
+                    //border: '1px solid ' + theme.modalBorder,
+                    color: theme.pageText,
+                    backgroundColor: theme.modalBackground,
+                    opacity: isHidden ? 0 : 1,
+                    [`@media (min-width: ${tokens.breakpoint_small})`]: {
+                      minWidth: tokens.breakpoint_small,
+                    },
+                    overflowY: 'auto',
+                    ...styles.shadowLarge,
+                    ...containerProps?.style,
+                  }}
+                >
+                  <View style={{ paddingTop: 0, flex: 1, flexShrink: 0 }}>
+                    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+                      {typeof children === 'function'
+                        ? children(modalProps)
+                        : children}
+                    </ErrorBoundary>
                   </View>
-                )}
-              </ModalContentContainer>
-            </Dialog>
-          )}
-        </ReactAriaModal>
-      </View>
-    </ReactAriaModalOverlay>
+                  {isLoading && (
+                    <View
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: theme.pageBackground,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 1000,
+                      }}
+                    >
+                      <AnimatedLoading
+                        style={{ width: 20, height: 20 }}
+                        color={theme.pageText}
+                      />
+                    </View>
+                  )}
+                </ModalContentContainer>
+              </Dialog>
+            )}
+          </ReactAriaModal>
+        </View>
+      </ReactAriaModalOverlay>
+    </ErrorBoundary>
   );
 };
 

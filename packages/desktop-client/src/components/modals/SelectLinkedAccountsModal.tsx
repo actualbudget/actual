@@ -13,6 +13,7 @@ import { View } from '@actual-app/components/view';
 import { currentDay, subDays } from '@actual-app/core/shared/months';
 import type {
   AccountEntity,
+  SyncServerEnableBankingAccount,
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
@@ -20,6 +21,7 @@ import type {
 import { format as formatDate, parseISO } from 'date-fns';
 
 import {
+  useLinkAccountEnableBankingMutation,
   useLinkAccountMutation,
   useLinkAccountPluggyAiMutation,
   useLinkAccountSimpleFinMutation,
@@ -87,6 +89,12 @@ export type SelectLinkedAccountsModalProps =
       externalAccounts: SyncServerPluggyAiAccount[];
       syncSource: 'pluggyai';
       upgradingAccountId?: string;
+    }
+  | {
+      requisitionId?: undefined;
+      externalAccounts: SyncServerEnableBankingAccount[];
+      syncSource: 'enableBanking';
+      upgradingAccountId?: string;
     };
 
 export function SelectLinkedAccountsModal({
@@ -121,6 +129,12 @@ export function SelectLinkedAccountsModal({
             syncSource: 'goCardless',
             requisitionId: requisitionId!,
             externalAccounts: toSort as SyncServerGoCardlessAccount[],
+            upgradingAccountId,
+          };
+        case 'enableBanking':
+          return {
+            syncSource: 'enableBanking',
+            externalAccounts: toSort as SyncServerEnableBankingAccount[],
             upgradingAccountId,
           };
         default:
@@ -180,6 +194,7 @@ export function SelectLinkedAccountsModal({
   const unlinkAccount = useUnlinkAccountMutation();
   const linkAccountSimpleFin = useLinkAccountSimpleFinMutation();
   const linkAccountPluggyAi = useLinkAccountPluggyAiMutation();
+  const linkAccountEnableBanking = useLinkAccountEnableBankingMutation();
 
   async function onNext() {
     const chosenLocalAccountIds = Object.values(chosenAccounts);
@@ -232,6 +247,23 @@ export function SelectLinkedAccountsModal({
           });
         } else if (propsWithSortedExternalAccounts.syncSource === 'pluggyai') {
           linkAccountPluggyAi.mutate({
+            externalAccount:
+              propsWithSortedExternalAccounts.externalAccounts[
+                externalAccountIndex
+              ],
+            upgradingId:
+              chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+              chosenLocalAccountId !== addOffBudgetAccountOption.id
+                ? chosenLocalAccountId
+                : undefined,
+            offBudget,
+            startingDate,
+            startingBalance,
+          });
+        } else if (
+          propsWithSortedExternalAccounts.syncSource === 'enableBanking'
+        ) {
+          linkAccountEnableBanking.mutate({
             externalAccount:
               propsWithSortedExternalAccounts.externalAccounts[
                 externalAccountIndex
@@ -500,7 +532,8 @@ export function SelectLinkedAccountsModal({
 type ExternalAccount =
   | SyncServerGoCardlessAccount
   | SyncServerSimpleFinAccount
-  | SyncServerPluggyAiAccount;
+  | SyncServerPluggyAiAccount
+  | SyncServerEnableBankingAccount;
 
 type StartingBalanceInfo = {
   date: string;
@@ -738,7 +771,8 @@ function getInstitutionName(
   externalAccount:
     | SyncServerGoCardlessAccount
     | SyncServerSimpleFinAccount
-    | SyncServerPluggyAiAccount,
+    | SyncServerPluggyAiAccount
+    | SyncServerEnableBankingAccount,
 ) {
   if (typeof externalAccount?.institution === 'string') {
     return externalAccount?.institution ?? '';

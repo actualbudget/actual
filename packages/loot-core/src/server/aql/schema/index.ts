@@ -85,6 +85,7 @@ export const schema = {
     hidden: f('boolean'),
     group: f('id', { ref: 'category_groups' }),
     goal_def: f('string'),
+    cleanup_def: f('string'),
     template_settings: f('json', { default: { source: 'notes' } }),
     sort_order: f('float'),
     tombstone: f('boolean'),
@@ -95,6 +96,11 @@ export const schema = {
     is_income: f('boolean'),
     hidden: f('boolean'),
     sort_order: f('float'),
+    tombstone: f('boolean'),
+  },
+  cleanup_groups: {
+    id: f('id'),
+    name: f('string'),
     tombstone: f('boolean'),
   },
   schedules: {

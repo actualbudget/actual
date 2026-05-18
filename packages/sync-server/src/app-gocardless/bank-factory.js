@@ -1,28 +1,10 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-
 import IntegrationBank from './banks/integration-bank';
 
-const dirname = path.resolve(fileURLToPath(import.meta.url), '..');
-const banksDir = path.resolve(dirname, 'banks');
+// Filename convention: <name>_<bic>.{ts,js} (skips bank.interface,
+// integration-bank, and any other helper without an underscore).
+const bankModules = import.meta.glob('./banks/*_*.{ts,js}', { eager: true });
 
-async function loadBanks() {
-  const bankHandlers = fs
-    .readdirSync(banksDir)
-    .filter(filename => filename.includes('_') && filename.endsWith('.js'));
-
-  const imports = await Promise.all(
-    bankHandlers.map(file => {
-      const fileUrlToBank = pathToFileURL(path.resolve(banksDir, file)); // pathToFileURL for ESM compatibility
-      return import(fileUrlToBank.toString()).then(handler => handler.default);
-    }),
-  );
-
-  return imports;
-}
-
-export const banks = await loadBanks();
+export const banks = Object.values(bankModules).map(m => m.default);
 
 export function BankFactory(institutionId) {
   return (

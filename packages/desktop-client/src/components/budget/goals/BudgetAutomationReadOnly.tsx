@@ -18,6 +18,7 @@ import { BySaveAutomationReadOnly } from './editor/BySaveAutomationReadOnly';
 import { FixedAutomationReadOnly } from './editor/FixedAutomationReadOnly';
 import { HistoricalAutomationReadOnly } from './editor/HistoricalAutomationReadOnly';
 import { LimitAutomationReadOnly } from './editor/LimitAutomationReadOnly';
+import { LongTermGoalAutomationReadOnly } from './editor/LongTermGoalAutomationReadOnly';
 import { PercentageAutomationReadOnly } from './editor/PercentageAutomationReadOnly';
 import { RefillAutomationReadOnly } from './editor/RefillAutomationReadOnly';
 import { RemainderAutomationReadOnly } from './editor/RemainderAutomationReadOnly';
@@ -85,6 +86,11 @@ export function BudgetAutomationReadOnly({
     case 'remainder':
       automationReadOnly = (
         <RemainderAutomationReadOnly template={state.template} />
+      );
+      break;
+    case 'goal':
+      automationReadOnly = (
+        <LongTermGoalAutomationReadOnly template={state.template} />
       );
       break;
     default:

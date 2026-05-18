@@ -623,6 +623,12 @@ export function conditionsToAQL(
           }
         }
 
+        if (tagValues.length === 0) {
+          // No `#tag` patterns in the input — match nothing rather than
+          // returning an empty `$and` (which would match every row).
+          return { id: null };
+        }
+
         return {
           $and: tagValues.map(v => {
             const escapedTag = v

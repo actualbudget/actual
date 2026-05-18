@@ -81,6 +81,7 @@ import { getAccountsById } from '#accounts/accountsSlice';
 import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
+import { TagAutocomplete } from '#components/autocomplete/TagAutocomplete';
 import { getStatusProps } from '#components/schedules/StatusBadge';
 import type { StatusTypes } from '#components/schedules/StatusBadge';
 import { DateSelect } from '#components/select/DateSelect';
@@ -623,7 +624,10 @@ function PayeeCell({
                     </Text>
                   </View>
                 }
-                style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
+                style={{
+                  ...styles.tooltip,
+                  borderRadius: '0px 5px 5px 0px',
+                }}
                 placement="bottom"
                 triggerProps={{ delay: 750 }}
               >
@@ -701,7 +705,10 @@ function PayeeCell({
                       </Text>
                     </View>
                   }
-                  style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
+                  style={{
+                    ...styles.tooltip,
+                    borderRadius: '0px 5px 5px 0px',
+                  }}
                   placement="bottom"
                   triggerProps={{ delay: 750 }}
                 >
@@ -1384,10 +1391,10 @@ const Transaction = memo(function Transaction({
             isOpen
             isNonModal
             style={{
-              maxWidth: 500,
+              width: 'max-content',
+              maxWidth: 'none',
               minWidth: 375,
               padding: 5,
-              maxHeight: '38px !important',
             }}
             shouldFlip={false}
             placement="bottom end"
@@ -1427,7 +1434,10 @@ const Transaction = memo(function Transaction({
             <DeleteCell
               onDelete={() => onDelete && onDelete(transaction.id)}
               exposed={editing}
-              style={{ ...(isChild && { borderLeftWidth: 1 }), lineHeight: 0 }}
+              style={{
+                ...(isChild && { borderLeftWidth: 1 }),
+                lineHeight: 0,
+              }}
             />
           ) : (
             <Cell width={20} />
@@ -1573,22 +1583,15 @@ const Transaction = memo(function Transaction({
           />
         ))()}
 
-        <InputCell
-          width="flex"
-          name="notes"
-          textAlign="flex"
-          exposed={focusedField === 'notes'}
+        <NotesCell
+          note={notes ?? ''}
+          scheduleNote={isPreview ? schedule?.name : null}
           focused={focusedField === 'notes'}
-          value={notes ?? (isPreview ? schedule?.name : null) ?? ''}
-          valueStyle={valueStyle}
-          formatter={value =>
-            NotesTagFormatter({ notes: value, onNotesTagClick })
-          }
-          onExpose={name => !isPreview && onEdit(id, name)}
-          inputProps={{
-            value: notes || '',
-            onUpdate: onUpdate.bind(null, 'notes'),
+          onClickTag={onNotesTagClick}
+          onUpdate={value => {
+            onUpdate('notes', value?.trim());
           }}
+          onExpose={name => !isPreview && onEdit(id, name)}
         />
 
         {(isPreview && !isChild) || isParent ? (
@@ -1689,7 +1692,7 @@ const Transaction = memo(function Transaction({
         ) : isBudgetTransfer || isOffBudget ? (
           <InputCell
             /* Category field for transfer and off budget transactions
-     (NOT preview, it is covered first) */
+              (NOT preview, it is covered first) */
             name="category"
             width="flex"
             exposed={focusedField === 'category'}
@@ -1957,6 +1960,65 @@ const Transaction = memo(function Transaction({
   );
 });
 
+type NotesCellProps = {
+  note: string;
+  scheduleNote: string | null | undefined;
+  focused: boolean;
+  onUpdate: (value: string) => void;
+  onClickTag: (tag: string) => void;
+  onExpose: (name: string) => void;
+};
+
+function NotesCell({
+  note,
+  scheduleNote,
+  focused,
+  onUpdate,
+  onClickTag,
+  onExpose,
+}: NotesCellProps) {
+  const [inputValue, setInputValue] = useState(note);
+  useEffect(() => {
+    setInputValue(note);
+  }, [note, setInputValue]);
+
+  function onKeyDown(e: KeyboardEvent) {
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      onUpdate(inputValue);
+    } else if (e.key === 'Escape') {
+      setInputValue(note);
+    }
+  }
+
+  return (
+    <CustomCell
+      width="flex"
+      name="notes"
+      value={note ?? scheduleNote ?? ''}
+      formatter={value =>
+        NotesTagFormatter({ notes: value, onNotesTagClick: onClickTag })
+      }
+      focused={focused}
+      exposed={focused}
+      onExpose={onExpose}
+      onUpdate={onUpdate}
+      onKeyDown={onKeyDown}
+      onBlur={() => onUpdate(inputValue)}
+    >
+      {({ inputStyle, onKeyDown, onBlur }) => (
+        <TagAutocomplete
+          inputValue={inputValue}
+          setInputValue={setInputValue}
+          inputStyle={inputStyle}
+          onBlur={onBlur}
+          onKeyDown={onKeyDown}
+          onUpdate={onUpdate}
+        />
+      )}
+    </CustomCell>
+  );
+}
+
 type TransactionErrorProps = {
   error: NonNullable<TransactionEntity['error']>;
   isDeposit: boolean;
@@ -1981,6 +2043,7 @@ function TransactionError({
               flexDirection: 'row',
               alignItems: 'center',
               padding: '0 5px',
+              gap: 5,
               ...style,
             }}
             data-testid="transaction-error"
@@ -1996,7 +2059,6 @@ function TransactionError({
             <View style={{ flex: 1 }} />
             <Button
               variant="normal"
-              style={{ marginLeft: 15 }}
               onPress={onDistributeRemainder}
               data-testid="distribute-split-button"
             >
@@ -2004,7 +2066,7 @@ function TransactionError({
             </Button>
             <Button
               variant="primary"
-              style={{ marginLeft: 10, padding: '4px 10px' }}
+              style={{ padding: '4px 10px' }}
               onPress={onAddSplit}
               data-testid="add-split-button"
             >

@@ -67,6 +67,9 @@ jobs:
           STEPS_PROCESS_VERSION_OUTPUTS_VERSION: ${{ steps.process_version.outputs.version }}
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          # Avoid restoring potentially poisoned caches in release jobs.
+          cache: 'false'
       - name: Build Electron for Mac
         if: ${{ startsWith(matrix.os, 'macos') }}
         run: ./bin/package-electron
@@ -97,10 +100,11 @@ jobs:
           path: |
             packages/desktop-electron/dist/*.appx
       - name: Add to new release
-        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
-        with:
-          draft: true
-          body: |
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+          RELEASE_NOTES: |
             :link: [View release notes](https://actualbudget.org/blog/release-${{ steps.process_version.outputs.version }})
 
             ## Desktop releases
@@ -111,13 +115,27 @@ jobs:
               <img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" width="12" height="1" alt="" />
               <a href="https://flathub.org/apps/com.actualbudget.actual"><img width="165" style="margin-left:12px;" alt="Get it on Flathub" src="https://flathub.org/api/badge?locale=en" /></a>
             </p>
-          files: |
+        run: |
+          # The matrix runs three OS jobs in parallel against one release;
+          # only ignore the "already exists" error that the race losers hit.
+          if ! create_output=$(gh release create "$TAG" --draft --title "$TAG" --notes "$RELEASE_NOTES" 2>&1); then
+            if [[ "$create_output" != *already_exists* ]]; then
+              echo "$create_output" >&2
+              exit 1
+            fi
+          fi
+
+          shopt -s extglob nullglob
+          files=(
             packages/desktop-electron/dist/*.dmg
-            packages/desktop-electron/dist/*.exe
-            !packages/desktop-electron/dist/Actual-windows.exe
+            packages/desktop-electron/dist/!(Actual-windows).exe
             packages/desktop-electron/dist/*.AppImage
             packages/desktop-electron/dist/*.flatpak
             packages/desktop-electron/dist/*.appx
+          )
+          if [ ${#files[@]} -gt 0 ]; then
+            gh release upload "$TAG" --clobber "${files[@]}"
+          fi
 
     outputs:
       version: ${{ steps.process_version.outputs.version }}

@@ -195,6 +195,7 @@ const sidebars = {
           items: ['backup-restore/backup', 'backup-restore/restore'],
         },
         'settings/index',
+        'custom-themes',
         'getting-started/sync',
         'getting-started/manage-files',
 
@@ -211,8 +212,8 @@ const sidebars = {
             'experimental/monthly-cleanup',
             'experimental/rule-templating',
             'experimental/formulas',
+            'experimental/balance-forecast-report',
             'experimental/crossover-point-report',
-            'experimental/custom-themes',
             'experimental/budget-analysis-report',
           ],
         },

@@ -87,6 +87,7 @@ See [Bulk Actions](/docs/transactions/bulk-editing.md) for guidance on working w
 - <Key k="d" /> Delete selected transactions.
 - <Key k="u" /> Duplicate selected transactions.
 - <Key k="g" /> Merge selected transactions. Only _two_ transactions with equal amounts can be selected. [Learn more.](/docs/transactions/merging.md)
+- <Key k="r" /> Make transfer from selected transactions. Only _two_ valid conjugate transactions can be selected. [Learn more.](/docs/transactions/transfers.md)
 
 ## How to View Multiple Months at Once
 

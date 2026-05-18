@@ -11,10 +11,12 @@ import type {
   NoteEntity,
   RuleEntity,
   ScheduleEntity,
+  SyncServerEnableBankingAccount,
   TransactionEntity,
   UserAccessEntity,
   UserEntity,
 } from '@actual-app/core/types/models';
+import type { CleanupTemplate } from '@actual-app/core/types/models/cleanup-templates';
 import type { Template } from '@actual-app/core/types/models/templates';
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
@@ -125,6 +127,31 @@ export type Modal =
       name: 'pluggyai-init';
       options: {
         onSuccess: () => void;
+      };
+    }
+  | {
+      name: 'enablebanking-init';
+      options: {
+        onSuccess: () => void;
+      };
+    }
+  | {
+      name: 'enablebanking-external-msg';
+      options: {
+        onMoveExternal: (arg: {
+          aspspId: string;
+          country: string;
+          maxConsentValidity?: number;
+          onStateReady?: (state: string) => void;
+        }) => Promise<
+          | { error: 'timeout' }
+          | { error: 'unknown'; message?: string }
+          | { data: { accounts: SyncServerEnableBankingAccount[] } }
+        >;
+        onClose?: (() => void) | undefined;
+        onSuccess: (data: {
+          accounts: SyncServerEnableBankingAccount[];
+        }) => Promise<void>;
       };
     }
   | {
@@ -239,9 +266,10 @@ export type Modal =
       options: {
         title?: string;
         categoryGroups?: CategoryGroupEntity[];
-        onSelect: (categoryId: string, categoryName: string) => void;
+        onSelect: (categoryId: string | null, categoryName: string) => void;
         month?: string | undefined;
         showHiddenCategories?: boolean;
+        showNoneOption?: boolean;
         closeOnSelect?: boolean;
         clearOnSelect?: boolean;
         onClose?: () => void;
@@ -617,6 +645,7 @@ export type Modal =
       options: {
         categoryId: CategoryEntity['id'];
         templates: Template[];
+        cleanup: CleanupTemplate[];
       };
     };
 

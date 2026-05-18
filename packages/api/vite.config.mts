@@ -85,6 +85,12 @@ export default defineConfig({
   },
   test: {
     globals: true,
+    // Each test loads a budget file and runs all DB migrations, which can be
+    // slow on busy CI runners; the default 5s timeout is too tight and causes
+    // flaky timeouts (and a cascade of unhandled rejections from in-flight work
+    // continuing after teardown).
+    testTimeout: 20_000,
+    hookTimeout: 20_000,
     onConsoleLog(log: string, type: 'stdout' | 'stderr'): boolean | void {
       // print only console.error
       return type === 'stderr';
