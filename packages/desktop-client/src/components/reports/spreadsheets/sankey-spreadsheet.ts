@@ -109,7 +109,7 @@ const SpecialNodeKeys = {
   ForNextMonth: 'for_next_month',
   FromPrevMonth: 'from_previous_month',
   AvailableIncome: 'available_income',
-  AllAccounts: 'Income',
+  AllAccounts: 'all_income',
   OtherSuffix: '__OTHER_BUCKET',
   HiddenSuffix: '__HIDDEN',
 } as const;
@@ -719,6 +719,20 @@ export function createBudgetGraph(
 }
 
 export function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
+  function addAccountNode(accountId: string, accountName: string): void {
+    if (accountId === SpecialNodeKeys.AllAccounts) {
+      addNodeWithLabel(
+        graph,
+        accountId,
+        GraphLayers.Account,
+        'Income',
+        undefined,
+      );
+    } else {
+      addNode(graph, accountId, GraphLayers.Account, accountName);
+    }
+  }
+
   const graph: Graph = new Map();
 
   categoryData.forEach(entry => {
@@ -731,7 +745,7 @@ export function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
           GraphLayers.IncomeCategory,
           entry.category,
         );
-        addNode(graph, entry.accountId, GraphLayers.Account, entry.accountName);
+        addAccountNode(entry.accountId, entry.accountName);
         addValueToLink(graph, entry.categoryId, entry.accountId, entry.value);
         if (entry.payeeId) {
           addNode(
@@ -744,7 +758,7 @@ export function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
         }
       } else {
         // Account > Category group > Category
-        addNode(graph, entry.accountId, GraphLayers.Account, entry.accountName);
+        addAccountNode(entry.accountId, entry.accountName);
         addNode(
           graph,
           entry.categoryGroupId,
@@ -1482,9 +1496,7 @@ export function convertToSankeyData(
     Array.from(data.to, ([targetKey, value]) => {
       const tooltipInfo = toolTipInfoMap.get(key)?.get(targetKey) ?? [];
 
-      if (tooltipInfo) {
-        tooltipInfo.sort((a, b) => b.value - a.value);
-      }
+      tooltipInfo.sort((a, b) => b.value - a.value);
 
       let color: string | undefined;
       const sourceLayersWithOwnColor: readonly GraphLayers[] = [

@@ -27,6 +27,7 @@ import type {
   TimeFrame,
 } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
+import type { TFunction } from 'i18next';
 import debounce from 'lodash/debounce';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 
@@ -180,7 +181,7 @@ type TopNSelectorProps = {
   onChange: (value: number) => void;
 };
 
-function displayN(n: number, t: Function): string {
+function displayN(n: number, t: TFunction): string {
   return n === 1e5 ? t('All') : String(n);
 }
 
@@ -475,7 +476,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
           setCardHeight(prev => (prev === height ? prev : height));
         },
         200,
-        { leading: true, trailing: true, maxWait: 100 },
+        { leading: true, trailing: true, maxWait: 200 },
       ),
     [],
   );
