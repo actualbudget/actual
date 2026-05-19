@@ -6,32 +6,35 @@ import { useRefEventListener } from './useRefEventListener';
 export function useCursorPosition(
   ref: RefObject<HTMLInputElement | null>,
 ): [number | null, (n: number | null) => void] {
+  const doc = useRef(document);
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
-  function _setCursorPosition(n: number | null) {
-    setTimeout(() => {
-      ref.current?.setSelectionRange(n, n);
-      document.dispatchEvent(new Event('selectionchange'));
-    });
-  }
+
   const update = () => {
-    const input = ref.current;
-    if (!input) return;
+    if (!ref.current || !document.hasFocus()) return;
     setCursorPosition(
-      document.activeElement === input ? input.selectionStart : null,
+      document.activeElement === ref.current
+        ? ref.current.selectionStart
+        : null,
     );
   };
-  const clear = () => setCursorPosition(null);
-
   useRefEventListener(ref, 'focusin', update, [ref, setCursorPosition]);
   useRefEventListener(ref, 'keyup', update, [ref, setCursorPosition]);
+  useRefEventListener(doc, 'selectionchange', update, [ref, setCursorPosition]);
+  useEffect(update, [ref, setCursorPosition]); // sync on mount
+
+  const clear = () => {
+    if (document.hasFocus()) {
+      setCursorPosition(null);
+    }
+  };
   useRefEventListener(ref, 'focusout', clear, [setCursorPosition]);
 
-  // sync on mount
-  useEffect(update, [ref, setCursorPosition]);
-
-  // listen for selectionchange which only gets fired on document
-  const doc = useRef(document);
-  useRefEventListener(doc, 'selectionchange', update, [ref, setCursorPosition]);
-
-  return [cursorPosition, _setCursorPosition];
+  return [
+    cursorPosition,
+    (n: number | null) =>
+      setTimeout(() => {
+        ref.current?.setSelectionRange(n, n);
+        document.dispatchEvent(new Event('selectionchange'));
+      }),
+  ];
 }
