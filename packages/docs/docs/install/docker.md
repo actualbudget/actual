@@ -92,3 +92,14 @@ $ docker stop my_actual_budget && docker container rm my_actual_budget && docker
 ## Test connection within local network
 
 On another PC within the local network connect to http://_serverIP_:_chosenPort_
+
+## Using the CLI
+
+The Docker image includes the `actual` command-line tool for managing your budgets. You can run it from the host with `docker exec`:
+
+```bash
+docker exec <container-name> actual --help
+docker exec <container-name> actual accounts list --server-url http://localhost:5006
+```
+
+See the full [CLI documentation](/docs/api/cli) for available commands.

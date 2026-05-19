@@ -28,6 +28,14 @@ Or install globally:
 npm install --location=global @actual-app/cli
 ```
 
+### Docker
+
+If you're running Actual via Docker, the CLI is included in the `actualbudget/actual-server` image (both Alpine and Ubuntu variants). No separate installation is needed — use `docker exec` to invoke it:
+
+```bash
+docker exec <container-name> actual --help
+```
+
 ## Configuration
 
 The CLI requires a connection to a running Actual sync server. Configuration can be provided via environment variables, CLI flags, or a config file.
