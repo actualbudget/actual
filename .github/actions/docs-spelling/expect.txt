@@ -192,6 +192,7 @@ TWD
 UAH
 ubuntu
 undici
+unmigrate
 userinfo
 Userscripts
 UZS
