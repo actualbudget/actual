@@ -164,6 +164,7 @@ export function TagAutocomplete({
           setIsOpen(true);
           setInputValue(e.currentTarget.value);
         }}
+        tabIndex={-1}
         onKeyDown={handleKeyDown}
         onFocus={() => setIsOpen(true)}
         onBlur={onBlur}
@@ -174,13 +175,12 @@ export function TagAutocomplete({
       <Popover
         isNonModal
         placement="bottom start"
-        className={css(styles.darkScrollbar)}
-        style={{
+        className={css(styles.darkScrollbar, {
           background: theme.menuAutoCompleteBackground,
           borderRadius: 6,
           boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
           width: inputRef.current?.offsetWidth ?? 100,
-        }}
+        })}
         offset={1}
         triggerRef={inputRef}
         isOpen={showPopup}
@@ -193,7 +193,11 @@ export function TagAutocomplete({
           selectionMode="single"
           dependencies={[highlightedId]}
           onPointerDown={e => e.preventDefault()}
-          style={{ borderRadius: 4, maxHeight: '150px', overflowY: 'auto' }}
+          style={{
+            borderRadius: 4,
+            maxHeight: '150px',
+            overflowY: 'auto',
+          }}
         >
           {(item: (typeof filteredItems)[number]) => (
             <ListBoxItem
@@ -206,13 +210,13 @@ export function TagAutocomplete({
                     ? theme.menuAutoCompleteBackgroundHover
                     : 'transparent',
                 alignItems: 'center',
-                padding: '4px 4px 1px 4px',
                 fontWeight: 500,
                 cursor: 'pointer',
                 color:
                   highlightedId === item.id
                     ? theme.menuAutoCompleteItemTextHover
                     : theme.menuAutoCompleteItemText,
+                padding: '4px 6px 1px 6px',
               })}
               onMouseMove={() => {
                 const idx = filteredItems.findIndex(
@@ -232,11 +236,17 @@ export function TagAutocomplete({
                     alignItems: 'center',
                     gap: 3,
                     color: theme.noticeTextMenu,
-                    padding: 4,
+                    paddingBottom: 3,
                   }}
                 >
-                  <SvgAdd height={10} width={10} />
-                  <span style={{ textWrap: 'nowrap', marginRight: 2 }}>
+                  <SvgAdd height={8} width={8} />
+                  <span
+                    style={{
+                      textWrap: 'nowrap',
+                      marginRight: 2,
+                      fontSize: 11,
+                    }}
+                  >
                     <Trans>Create Tag</Trans>
                   </span>
                   <span className={getTagCSS('')}>{item.name}</span>
