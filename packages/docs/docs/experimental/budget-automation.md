@@ -98,9 +98,9 @@ When you hover over a category automation icon (clock), you will see all of the 
 
 Here are two examples:
 
-Grocery budget automations:
+General budget automations:
 
-![grocery budget toolyip](/img/goal-template/automation-tooltip-1.webp)
+![general budget toolyip](/img/goal-template/automation-tooltip-1.webp)
 
 Dining out budget automations:
 
