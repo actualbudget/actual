@@ -43,6 +43,26 @@ describe('getNextVersion (lib)', () => {
     ).toBe('25.9.0-nightly.20250822');
   });
 
+  it('rc appends date stamp to the current version', () => {
+    expect(
+      getNextVersion({
+        currentVersion: '26.6.0',
+        type: 'rc',
+        currentDate: new Date('2026-05-19'),
+      }),
+    ).toBe('26.6.0-rc.20260519');
+  });
+
+  it('rc keeps the hotfix component', () => {
+    expect(
+      getNextVersion({
+        currentVersion: '26.6.2',
+        type: 'rc',
+        currentDate: new Date('2026-05-19'),
+      }),
+    ).toBe('26.6.2-rc.20260519');
+  });
+
   it('auto before 25th -> hotfix', () => {
     expect(
       getNextVersion({
