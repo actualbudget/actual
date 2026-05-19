@@ -3,6 +3,7 @@ export const versionTypeArray = [
   'hotfix',
   'monthly',
   'nightly',
+  'rc',
 ] as const;
 export type VersionType = (typeof versionTypeArray)[number];
 
@@ -93,13 +94,15 @@ export function getNextVersion({
   switch (resolvedType) {
     case 'nightly':
       return `${nextVersionYear}.${nextVersionMonth}.0-nightly.${currentDateString}`;
+    case 'rc':
+      return `${versionYear}.${versionMonth}.${versionHotfix}-rc.${currentDateString}`;
     case 'hotfix':
       return `${versionYear}.${versionMonth}.${versionHotfix + 1}`;
     case 'monthly':
       return `${nextVersionYear}.${nextVersionMonth}.0`;
     default:
       throw new Error(
-        `Invalid type ${String(resolvedType satisfies never)} specified. Use "auto", "nightly", "hotfix", or "monthly".`,
+        `Invalid type ${String(resolvedType satisfies never)} specified. Use "auto", "nightly", "rc", "hotfix", or "monthly".`,
       );
   }
 }

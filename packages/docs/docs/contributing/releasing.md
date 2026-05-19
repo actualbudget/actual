@@ -38,11 +38,22 @@ Monthly cuts run automatically at 17:00 UTC on the 25th of each month. To cut a 
 
 Changes that need to be included in the release after the cut has been made should be cherry-picked onto `release`. Each cherry-pick triggers regeneration of the release notes on `release-notes/X.Y.Z`. Human edits to frontmatter (release highlights, author, etc.) on `release-notes/X.Y.Z` are preserved across regenerations as long as they are above the autogen marker.
 
+### Release candidate builds
+
+While a release is in progress (i.e. while the `release-notes/X.Y.Z` branch exists), release candidate builds are published automatically every day from the `release` branch so the upcoming release can be tested before it ships. They are versioned `X.Y.Z-rc.<date>`.
+
+- **Docker:** the `rc` and `rc-alpine` tags, built by [publish-release-candidate.yml](https://github.com/actualbudget/actual/actions/workflows/publish-release-candidate.yml).
+- **npm:** all five packages under the `rc` dist-tag, published by [publish-npm-packages.yml](https://github.com/actualbudget/actual/actions/workflows/publish-npm-packages.yml) on its nightly schedule.
+- **Desktop:** a rolling `Release candidate` pre-release on the [releases page](https://github.com/actualbudget/actual/releases), tagged `vX.Y.Z-rc`, with macOS, Windows, and Linux installers refreshed daily.
+
+Publishing stops once the `release-notes/X.Y.Z` branch is deleted. The rolling `vX.Y.Z-rc` pre-release and tag are not removed automatically, so delete them by hand after the release ships.
+
 ## Release process
 
 ### Stabilize the release
 
 - [ ] Fix spelling and add highlights in the generated release notes as needed (edit `release-notes/X.Y.Z` directly).
+- [ ] Smoke test the [release candidate builds](#release-candidate-builds) (server and desktop) to catch problems before the release ships.
 - [ ] Share the release PR in the release channel on Discord.
 - [ ] Wait until at least 2 other maintainers have approved the release.
 

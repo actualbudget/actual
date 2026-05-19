@@ -25,6 +25,13 @@ The `nightly` tag is updated every time a commit is pushed to the `master` branc
 - `nightly`
 - `nightly-alpine` - Based on Alpine Linux, which is tiny so it's great for low-powered devices.
 
+### `rc` Tag
+
+The `rc` tag holds release candidate builds. It is published daily from the `release` branch while a new release is being prepared, so it lets you try the next release before it ships. This tag only exists during the run-up to a release, and like `nightly` it may contain bugs, so make sure you keep backups of your budget.
+
+- `rc`
+- `rc-alpine` - Based on Alpine Linux, which is tiny so great for low powered devices.
+
 ## Launch container using Docker Compose
 
 Pre-requisites: Docker
