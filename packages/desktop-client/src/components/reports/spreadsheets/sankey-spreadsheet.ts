@@ -74,6 +74,7 @@ type CategoryEntry = {
   categoryId: string;
   value: number;
   isIncome: boolean;
+  isNegative: boolean;
   accountName?: string;
   accountId?: string;
   payeeName?: string;
@@ -90,7 +91,7 @@ export type NodeData = {
   name?: string;
   labelKey?: string;
   labelParams?: Record<string, string>;
-  isOverbudgeted?: boolean;
+  isNegative?: boolean;
   tooltipInfo?: Array<{ name: string; value: number }>;
   percentageLabel?: string;
   color?: string;
@@ -112,6 +113,7 @@ const SpecialNodeKeys = {
   AllAccounts: 'all_income',
   OtherSuffix: '__OTHER_BUCKET',
   HiddenSuffix: '__HIDDEN',
+  NegativeSuffix: '__NEGATIVE',
 } as const;
 type SpecialNodeKeys = (typeof SpecialNodeKeys)[keyof typeof SpecialNodeKeys];
 
@@ -317,6 +319,7 @@ export function createBudgetSpreadsheet(
             category: cat.name,
             categoryId: cat.id,
             isIncome: group.is_income,
+            isNegative: rawValue < 0,
             value: rawValue,
           };
         }),
@@ -537,6 +540,7 @@ async function fetchCategoryData(
                 categoryId: category.id,
                 value: Math.abs(row.amount ?? 0),
                 isIncome: categoryGroup.is_income ?? false,
+                isNegative: row.amount !== undefined && row.amount < 0,
                 accountName: row.accountName ?? '',
                 accountId: row.accountId ?? '',
                 payeeName: row.payeeName ?? '',
@@ -738,50 +742,90 @@ export function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
   categoryData.forEach(entry => {
     if (entry.accountId && entry.accountName && entry.categoryId) {
       if (entry.isIncome) {
-        // Payee > Income category > Account
-        addNode(
-          graph,
-          entry.categoryId,
-          GraphLayers.IncomeCategory,
-          entry.category,
-        );
-        addAccountNode(entry.accountId, entry.accountName);
-        addValueToLink(graph, entry.categoryId, entry.accountId, entry.value);
-        if (entry.payeeId) {
+        if (entry.isNegative) {
+          // Account > Income category
+          addAccountNode(entry.accountId, entry.accountName);
+          addNodeWithLabel(
+            graph,
+            entry.categoryId + SpecialNodeKeys.NegativeSuffix,
+            GraphLayers.CategoryGroup,
+            entry.payeeName ?? entry.category,
+            undefined,
+            true,
+          );
+          addValueToLink(
+            graph,
+            entry.accountId,
+            entry.categoryId + SpecialNodeKeys.NegativeSuffix,
+            entry.value,
+          );
+        } else {
+          // Payee > Income category > Account
           addNode(
             graph,
-            entry.payeeId,
-            GraphLayers.IncomePayee,
-            entry.payeeName,
+            entry.categoryId,
+            GraphLayers.IncomeCategory,
+            entry.category,
           );
-          addValueToLink(graph, entry.payeeId, entry.categoryId, entry.value);
+          addAccountNode(entry.accountId, entry.accountName);
+          addValueToLink(graph, entry.categoryId, entry.accountId, entry.value);
+          if (entry.payeeId) {
+            addNode(
+              graph,
+              entry.payeeId,
+              GraphLayers.IncomePayee,
+              entry.payeeName,
+            );
+            addValueToLink(graph, entry.payeeId, entry.categoryId, entry.value);
+          }
         }
       } else {
-        // Account > Category group > Category
-        addAccountNode(entry.accountId, entry.accountName);
-        addNode(
-          graph,
-          entry.categoryGroupId,
-          GraphLayers.CategoryGroup,
-          entry.categoryGroup,
-        );
-        addNode(graph, entry.categoryId, GraphLayers.Category, entry.category);
-        addValueToLink(
-          graph,
-          entry.accountId,
-          entry.categoryGroupId,
-          entry.value,
-        );
-        addValueToLink(
-          graph,
-          entry.categoryGroupId,
-          entry.categoryId,
-          entry.value,
-        );
+        if (entry.isNegative) {
+          // Account > Category group > Category
+          addAccountNode(entry.accountId, entry.accountName);
+          addNode(
+            graph,
+            entry.categoryGroupId,
+            GraphLayers.CategoryGroup,
+            entry.categoryGroup,
+          );
+          addNode(
+            graph,
+            entry.categoryId,
+            GraphLayers.Category,
+            entry.category,
+          );
+          addValueToLink(
+            graph,
+            entry.accountId,
+            entry.categoryGroupId,
+            entry.value,
+          );
+          addValueToLink(
+            graph,
+            entry.categoryGroupId,
+            entry.categoryId,
+            entry.value,
+          );
+        } else {
+          // Category > Account
+          addNode(
+            graph,
+            entry.categoryId + SpecialNodeKeys.NegativeSuffix,
+            GraphLayers.IncomeCategory,
+            entry.payeeName ?? entry.category,
+          );
+          addAccountNode(entry.accountId, entry.accountName);
+          addValueToLink(
+            graph,
+            entry.categoryId + SpecialNodeKeys.NegativeSuffix,
+            entry.accountId,
+            entry.value,
+          );
+        }
       }
     }
   });
-
   return graph;
 }
 
@@ -806,7 +850,7 @@ export function addNodeWithLabel(
   type: GraphLayers,
   labelKey: string,
   labelParams?: Record<string, string>,
-  isOverbudgeted?: boolean,
+  isNegative?: boolean,
 ) {
   if (!graph.has(key)) {
     graph.set(key, {
@@ -814,7 +858,7 @@ export function addNodeWithLabel(
       type,
       labelKey,
       labelParams,
-      isOverbudgeted,
+      isNegative,
     });
   }
 }
@@ -861,7 +905,7 @@ function groupOtherCategories(
       node &&
       !key.endsWith(SpecialNodeKeys.OtherSuffix) &&
       !structuralKeys.has(key) &&
-      !node.isOverbudgeted,
+      !node.isNegative,
     );
   }
 
@@ -1154,13 +1198,13 @@ export function sortGraph(
 
   // We always want certain nodes to be shown at the start/end of their layers
   sortedEntries
-    .filter(([, nodeData]) => nodeData.isOverbudgeted)
+    .filter(([, nodeData]) => nodeData.isNegative)
     .forEach(([key]) => {
       moveNodeToStart(sortedEntries, key);
     });
   const toBudgetNode = graph.get(SpecialNodeKeys.ToBudget);
   if (toBudgetNode) {
-    if (toBudgetNode.isOverbudgeted) {
+    if (toBudgetNode.isNegative) {
       moveNodeToStart(sortedEntries, SpecialNodeKeys.ToBudget);
     } else {
       moveNodeToEnd(sortedEntries, SpecialNodeKeys.ToBudget);
@@ -1225,18 +1269,21 @@ export function getNodeValue(graph: Graph, key: NodeKey): number {
 }
 
 export function addPercentageLabels(graph: Graph): void {
-  const layerSums = new Map<number, number>();
+  const layerSums = new Map<GraphLayers, number>();
 
-  // First pass: Calculate layer sums
+  // First pass: calculate GraphLayer sums
   graph.forEach((_: NodeData, key: NodeKey) => {
-    const layer = getLayer(graph, key);
+    const layer = graph.get(key)?.type;
+    if (!layer) {
+      return;
+    }
     const nodeValue = getNodeValue(graph, key);
     layerSums.set(layer, (layerSums.get(layer) ?? 0) + nodeValue);
   });
 
-  // Second pass: Assign percentage label to each node
+  // Second pass: assign percentage label to each node
   graph.forEach((data: NodeData, key: NodeKey) => {
-    const layer = getLayer(graph, key);
+    const layer = data.type;
     const nodeValue = getNodeValue(graph, key);
     const layerTotal = layerSums.get(layer) ?? 1;
     const percentage = layerTotal ? (nodeValue / layerTotal) * 100 : 0;
@@ -1256,7 +1303,7 @@ function addColors(graph: Graph) {
 
   setColor(graph, SpecialNodeKeys.ToBudget, theme.toBudgetPositive);
   graph.forEach((node, key) => {
-    if (node.isOverbudgeted) {
+    if (node.isNegative) {
       setColor(graph, key, theme.toBudgetNegative);
     }
   });
@@ -1300,6 +1347,56 @@ function addHiddenNodes(graph: Graph) {
     nodesByType,
   );
 
+  const activeLayerOrder = GRAPH_LAYER_ORDER.filter(
+    layer => (nodesByType[layer]?.length ?? 0) > 0,
+  );
+  const layerIndex = new Map<GraphLayers, number>();
+  activeLayerOrder.forEach((layer, index) => {
+    layerIndex.set(layer, index);
+  });
+
+  function addHiddenParentChain(key: NodeKey, type: GraphLayers) {
+    const typeIndex = layerIndex.get(type);
+    if (typeIndex === undefined || typeIndex <= 0) {
+      return;
+    }
+
+    let childKey = key;
+    for (let i = typeIndex - 1; i >= 0; i--) {
+      const parentType = activeLayerOrder[i];
+      if (!parentType) {
+        continue;
+      }
+      const parentKey = `${key}_${parentType}${SpecialNodeKeys.HiddenSuffix}`;
+      addNode(graph, parentKey, parentType, '');
+      addValueToLink(graph, parentKey, childKey, -1);
+      childKey = parentKey;
+    }
+  }
+
+  function addHiddenChildChain(key: NodeKey, type: GraphLayers) {
+    const typeIndex = layerIndex.get(type);
+    if (
+      typeIndex === undefined ||
+      typeIndex < 0 ||
+      typeIndex >= activeLayerOrder.length - 1
+    ) {
+      return;
+    }
+
+    let parentKey = key;
+    for (let i = typeIndex + 1; i < activeLayerOrder.length; i++) {
+      const childType = activeLayerOrder[i];
+      if (!childType) {
+        continue;
+      }
+      const childKey = `${key}_${childType}${SpecialNodeKeys.HiddenSuffix}`;
+      addNode(graph, childKey, childType, '');
+      addValueToLink(graph, parentKey, childKey, -1);
+      parentKey = childKey;
+    }
+  }
+
   // Now: find and fix "problematic" nodes
   for (const typeStr in nodesByType) {
     if (!isGraphLayer(typeStr)) continue;
@@ -1310,73 +1407,12 @@ function addHiddenNodes(graph: Graph) {
       const nodeHasParent = hasParent(graph, key);
       const nodeHasChild = hasChild(node);
       if (!nodeHasParent && typeHasParent[type]) {
-        // This node is at a wrong layer and need hidden parents
-        if (type === GraphLayers.IncomeCategory) {
-          addNode(
-            graph,
-            key + '_payee' + SpecialNodeKeys.HiddenSuffix,
-            GraphLayers.IncomePayee,
-            '',
-          );
-          addValueToLink(
-            graph,
-            key + '_payee' + SpecialNodeKeys.HiddenSuffix,
-            key,
-            -1,
-          );
-        } else {
-          addNode(
-            graph,
-            key + '_account' + SpecialNodeKeys.HiddenSuffix,
-            GraphLayers.Account,
-            '',
-          );
-          addValueToLink(
-            graph,
-            key + '_account' + SpecialNodeKeys.HiddenSuffix,
-            key,
-            -1,
-          );
-          addNode(
-            graph,
-            key + '_payee' + SpecialNodeKeys.HiddenSuffix,
-            GraphLayers.IncomePayee,
-            '',
-          );
-          addValueToLink(
-            graph,
-            key + '_payee' + SpecialNodeKeys.HiddenSuffix,
-            key + '_account' + SpecialNodeKeys.HiddenSuffix,
-            -1,
-          );
-        }
+        // This node is at the wrong layer and needs hidden parents.
+        addHiddenParentChain(key, type);
       }
       if (!nodeHasChild && typeHasChild[type]) {
-        // This node is at a wrong layer and need hidden children
-        addNode(
-          graph,
-          key + '_category_group' + SpecialNodeKeys.HiddenSuffix,
-          GraphLayers.CategoryGroup,
-          '',
-        );
-        addNode(
-          graph,
-          key + '_category' + SpecialNodeKeys.HiddenSuffix,
-          GraphLayers.Category,
-          '',
-        );
-        addValueToLink(
-          graph,
-          key,
-          key + '_category_group' + SpecialNodeKeys.HiddenSuffix,
-          -1,
-        );
-        addValueToLink(
-          graph,
-          key + '_category_group' + SpecialNodeKeys.HiddenSuffix,
-          key + '_category' + SpecialNodeKeys.HiddenSuffix,
-          -1,
-        );
+        // This node is at the wrong layer and needs hidden children.
+        addHiddenChildChain(key, type);
       }
     }
   }
@@ -1527,13 +1563,16 @@ export function convertToSankeyData(
       if (targetKey === SpecialNodeKeys.LastMonthOverspent) {
         color = graph.get(SpecialNodeKeys.LastMonthOverspent)?.color;
       }
+      if (targetKey.endsWith(SpecialNodeKeys.NegativeSuffix)) {
+        color = graph.get(targetKey)?.color;
+      }
       if (targetKey === SpecialNodeKeys.ToBudget) {
         color = graph.get(SpecialNodeKeys.ToBudget)?.color;
       }
       if (targetKey === SpecialNodeKeys.ForNextMonth) {
         color = graph.get(SpecialNodeKeys.ForNextMonth)?.color;
       }
-      if (data.isOverbudgeted) {
+      if (data.isNegative) {
         color = data.color;
       }
 
