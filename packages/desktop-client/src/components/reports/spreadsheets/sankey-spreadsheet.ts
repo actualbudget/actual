@@ -1264,18 +1264,21 @@ export function getNodeValue(graph: Graph, key: NodeKey): number {
 }
 
 export function addPercentageLabels(graph: Graph): void {
-  const layerSums = new Map<number, number>();
+  const layerSums = new Map<GraphLayers, number>();
 
-  // First pass: Calculate layer sums
+  // First pass: calculate GraphLayer sums
   graph.forEach((_: NodeData, key: NodeKey) => {
-    const layer = getLayer(graph, key);
+    const layer = graph.get(key)?.type;
+    if (!layer) {
+      return;
+    }
     const nodeValue = getNodeValue(graph, key);
     layerSums.set(layer, (layerSums.get(layer) ?? 0) + nodeValue);
   });
 
-  // Second pass: Assign percentage label to each node
+  // Second pass: assign percentage label to each node
   graph.forEach((data: NodeData, key: NodeKey) => {
-    const layer = getLayer(graph, key);
+    const layer = data.type;
     const nodeValue = getNodeValue(graph, key);
     const layerTotal = layerSums.get(layer) ?? 1;
     const percentage = layerTotal ? (nodeValue / layerTotal) * 100 : 0;

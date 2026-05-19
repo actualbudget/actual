@@ -651,6 +651,26 @@ describe('sankey-spreadsheet', () => {
       expect(node1?.percentageLabel).toBe('25.0%');
       expect(node2?.percentageLabel).toBe('75.0%');
     });
+
+    it('normalizes percentages per GraphLayer, not computed depth', () => {
+      const graph: Graph = new Map();
+
+      addNode(graph, 'payee', GraphLayers.IncomePayee, 'Payee');
+      addNode(graph, 'income-cat', GraphLayers.IncomeCategory, 'Income Cat');
+      addNode(graph, 'account-incoming', GraphLayers.Account, 'Account A');
+
+      addNode(graph, 'account-root', GraphLayers.Account, 'Account B');
+      addNode(graph, 'group', GraphLayers.CategoryGroup, 'Group');
+
+      addValueToLink(graph, 'payee', 'income-cat', 300);
+      addValueToLink(graph, 'income-cat', 'account-incoming', 300);
+      addValueToLink(graph, 'account-root', 'group', 100);
+
+      addPercentageLabels(graph);
+
+      expect(graph.get('account-root')?.percentageLabel).toBe('25.0%');
+      expect(graph.get('account-incoming')?.percentageLabel).toBe('75.0%');
+    });
   });
 
   describe('filterGraphByLayers', () => {
