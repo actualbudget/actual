@@ -5,7 +5,7 @@ This is an **experimental feature**. That means we're still working on finishing
 :::
 
 :::warning
-All functionality described here may not be available in the latest stable release. See [Experimental Features](/docs/experimental/) for instructions to enable experimental features. Use the `edge` images for the latest implementation.
+All functionality described here may not be available in the latest stable release. See [Experimental Features](/docs/experimental/) for instructions to enable experimental features. Use the `nightly` images for the latest implementation.
 :::
 
 Budget automations allow you to automate your budgeting step every month.
@@ -29,19 +29,19 @@ Here are a few examples of what you can do, all with a single click!
 
 For any given category, there is one source of truth for Budget automations, either the UI or the notes, not both.
 
-If you have a notes template, the first time you open the UI (clock icon) you will be presented with migration automation(s). Click to show the original notes templates at the top of the form for comparison.
+If you have a notes template, the first time you open the UI (pie chart icon) you will be presented with migration automation(s). Click to show the original notes templates at the top of the form for comparison.
 
 ![goal migration form](/img/goal-template/migration.webp)
 
-Make any changes you feel are needed, then _Save_ the form to complete the migration. The notes can now be deleted.
+Make any changes you feel are needed, then _Save_ the form to complete the migration. The notes can now be deleted. Once you have migrated to UI based automations, adding new ones to the notes will no longer work. To revert back to using notes, you'll need to "Unmigrate" from the bottom left of the UI modal.
 
 ---
 
 ## Creating Automations {#create-automations}
 
-Click on the clock icon that appears when you hover over a category name.
+Click on the pie chart icon that appears when you hover over a category name.
 
-![clock icon to open automation form](/img/goal-template/automation-icon.webp)
+![pie chart icon to open automation form](/img/goal-template/automation-icon.webp)
 
 From the opening view, you can
 
@@ -65,7 +65,7 @@ The projected amount to be budgeted will be shown in the top right of the automa
 
 :::tip
 
-Don't forget to **Save** your work when you are through adding and editing automations.
+Don't forget to **Save** your work when you are finished adding and editing automations.
 
 :::
 
@@ -94,13 +94,13 @@ Automations, Balance caps and Long-term goals can each have their own note. This
 
 ![automation with note](/img/goal-template/automation-note.webp)
 
-When you hover over a category automation icon (clock), you will see all of the automations present and the notes associated with them.
+When you hover over a category automation icon (pie chart), you will see all of the automations present and the notes associated with them.
 
 Here are two examples:
 
 General budget automations:
 
-![general budget toolyip](/img/goal-template/automation-tooltip-1.webp)
+![general budget tooltip](/img/goal-template/automation-tooltip-1.webp)
 
 Dining out budget automations:
 
@@ -161,7 +161,7 @@ All _Cover schedule_ automations in the same category must have the same priorit
 
 ### From History {#from-history}
 
-For this automation, you can choose to budget based on historical data.<br />
+With this automation, you can budget based on historical data.<br />
 Choose a mode (A) and the number of months back (B). This is another automation that allows for [adjustments (C)](#adjustments).
 
 ![historical automation](/img/goal-template/historical-automation.webp)
@@ -197,13 +197,12 @@ Click on _Add balance limit_ and you will be taken to the Balance cap automation
 
 ### Whatever is Left {#remainder}
 
-After all of the other automations have run, the leftover of **To Budget** will be doled out by these remainder automations based on the weights you choose. They run last, in a separate pass.
+After all of the other automations have run, the leftover of **To Budget** will be doled out by these remainder automations based on the weights you choose.
 
 ![remainder automation](/img/goal-template/remainder-automation.webp)
 
 - You can have as many remainder automations as you like.
 - Remainder automations will respect any balance caps in place.
-- If you want **To Budget** = 0.00 after these run, make sure at least one of them is in a category without a balance cap.
 
 #### Weights {#remainder-weights}
 
@@ -270,24 +269,24 @@ Here’s an interesting example of budgeting money for a meal out every Saturday
 - The weekday lunches are budgeted at 35.00/week starting on a Monday.
 - The Balance cap is set at 85.00/week based on Mondays.
 
-June has 4 Saturdays and 5 Mondays. The projected budget is $375:
+June has 4 Saturdays and 5 Mondays. The projected budget is 375:
 
 ![balance cap example showing June](/img/goal-template/june-restaurants.webp)
 
-July has 4 Saturdays and 4 Mondays. The projected budget is #340:
+July has 4 Saturdays and 4 Mondays. The projected budget is 340:
 
 ![balance cap example showing July](/img/goal-template/july-restaurants.webp)
 
-August has 5 Saturdays and 5 Mondays. The projected budget is $425:
+August has 5 Saturdays and 5 Mondays. The projected budget is 425:
 
 ![balance cap example showing August](/img/goal-template/august-restaurants.webp)
 
 October has 5 Saturdays and 4 Mondays. Our budget looks different as the Balance cap is based on the 4 Mondays! <br />
-So, the budget covers 4 Saturday meals and 4 work weeks. The projected budget is $340.
+So, the budget covers 4 Saturday meals and 4 work weeks. The projected budget is 340.
 
 ![balance cap example showing October](/img/goal-template/october-restaurants.webp)
 
-Here’s another example. We want to budget $300 every 2 weeks, but not in months with 3 Fridays. We place a 600.00 balance cap on our category and start a _Fixed amount_ automation at 300.00 every 2 weeks on a Friday.
+Here’s another example. We want to budget 300 every 2 weeks, but not in months with 3 Fridays. We place a 600 balance cap on our category and start a _Fixed amount_ automation at 300 every 2 weeks on a Friday.
 
 There are 3 Fridays in July, but the Balance cap holds our grocery budget at 600.00:
 
@@ -313,7 +312,7 @@ The tooltip will give you more information about your budget and balance:
 
 ### Long-term Goal {#long-term-goal}
 
-Long-term goals change how the budget indicator works. Instead of being based on the budgeted amount, the long-term goal will indicate how much progress you have made toward a desired target. Importantly, if you have met your projected budget for the month but are shy of your long-term goal the balance will remain orange.
+Long-term goals change how the budget indicator works. Instead of being based on the budgeted amount, the balance coloring will indicate how much progress you have made toward a desired target. Importantly, if you have met your projected budget for the month but are shy of your long-term goal the balance will remain orange.
 
 Once you hit your goal, the balance will turn green. Note that if you remove funds and fall short, it will turn orange again.
 
@@ -365,7 +364,7 @@ In the budget header menu you will see the following options:
 
 ## End of Month Cleanup {#month-end-cleanup}
 
-At month end, you can use cleanup automations to sweep up the surplus from categories that you overfunded and automatically distribute them to overspent categories and then, other categories, such as savings, vacation, or debt payoff.
+At month end, you can use cleanup automations to sweep up the surplus from categories that you overfunded and automatically cover any overspent categories and then distribute any leftovers to other categories, such as savings, vacation, or debt payoff.
 
 [Examples](#cleanup-examples) below will help demonstrate the power of _End of month cleanup_.
 
@@ -417,9 +416,9 @@ After clicking _End of month cleanup_, cleanup works sequentially as follows:
    - Leftover pool funds are distributed by weight within the pool.
    - If no categories in the pool are set to receive funds from the pool, leftover funds go to **To Budget**.<br /><br />
 2. **Global cleanup runs next.**
-   - Funds in _Send leftover_ categories are swept into **To Budget**. Source categories with a negative balance are ignored.
-   - Overspent categories are found and cleanup attempts to cover the overspending from **To Budget**. Categories using _Rollover Overspending_ are ignored.
-   - _Receive leftover_ categories are found and cleanup distributes the leftover **To Budget** funds by weight.
+   - Funds in _Send leftover_ categories are swept into **To Budget**.
+   - Overspent categories are covered with funds from **To Budget**. If there are insufficient funds to do this, cleanup covers as much as it can. Categories using _Rollover Overspending_ are ignored.
+   - Categories set to _Receive leftover_ are found and cleanup distributes the leftover **To Budget** funds by weight.
 
 :::info
 Cleanup does not respect [_Balance cap_](#balance-cap). Funds will be distributed based on weight and a category may be filled above the cap. To keep the excess, use _Retain existing funds over the cap_ or it will be removed the next time budgeting automation is run.
