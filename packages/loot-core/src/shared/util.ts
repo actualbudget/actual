@@ -570,14 +570,20 @@ export function looselyParseAmount(amount: string) {
   }
 
   // Look for a decimal marker, then look for either 1-2 or 4-9 decimal places.
-  // This avoids matching against 3 places which may not actually be decimal
-  const m = amount.match(/[.,]([^.,]{4,9}|[^.,]{1,2})$/);
+  // This avoids matching against 3 places which may not actually be decimal.
+  // Ignore trailing non-numeric currency symbols when counting decimal places.
+  const m = amount.match(/[.,]([^.,]*)$/);
   if (!m || m.index === undefined) {
     return safeNumber(parseFloat(extractNumbers(amount)));
   }
 
   const left = extractNumbers(amount.slice(0, m.index));
   const right = extractNumbers(amount.slice(m.index + 1));
+  if (
+    !([1, 2].includes(right.length) || (right.length >= 4 && right.length <= 9))
+  ) {
+    return safeNumber(parseFloat(extractNumbers(amount)));
+  }
 
   return safeNumber(parseFloat(left + '.' + right));
 }
