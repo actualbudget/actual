@@ -1571,38 +1571,40 @@ function NoteTagAutocomplete({
           </div>
         ))}
         {showNewTag && (
-          <div style={{ position: 'relative' }}>
-            <button
-              type="button"
+          <button
+            type="button"
+            style={{
+              padding: '1px 1px 1px 9px',
+              borderRadius: 12,
+              borderWidth: 0,
+              backgroundColor: theme.noticeBackground,
+              color: theme.noticeTextDark,
+              display: 'flex',
+              alignItems: 'center',
+              flexWrap: 'nowrap',
+              gap: 4,
+            }}
+            onMouseDown={e => e.preventDefault()} // stops input from losing focus
+            onClick={() => handleCreate(currentWordNoHash)}
+          >
+            <SvgAdd height={8} width={8} />
+            <span style={{ whiteSpace: 'nowrap' }}>
+              <Trans>Create Tag</Trans>
+            </span>
+            <div
               style={{
-                border: `1px solid ${theme.noticeBackground}`,
-                height: 22,
+                borderWidth: 0,
+                height: 20,
                 maxWidth: '50dvw',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 display: 'inline-block',
               }}
               className={getTagCSS('')}
-              onMouseDown={e => e.preventDefault()} // stops input from losing focus
-              onClick={() => handleCreate(currentWordNoHash)}
             >
               #{currentWordNoHash}
-            </button>
-            <span
-              style={{
-                position: 'absolute',
-                backgroundColor: theme.noticeBackground,
-                color: theme.noticeText,
-                fontSize: 8,
-                right: 0,
-                transform: 'translate(50%, -2px)',
-                borderRadius: 5,
-                padding: '1px 2px 1px 2px',
-              }}
-            >
-              <Trans>New</Trans>
-            </span>
-          </div>
+            </div>
+          </button>
         )}
       </View>
     </View>
