@@ -1,5 +1,17 @@
-/** @type {{balances: import('../../gocardless-node.types').Balance[]}} */
-export const mockedBalances = {
+import type {
+  Balance,
+  GoCardlessAccountDetails,
+  GoCardlessAccountMetadata,
+  Institution,
+  Requisition,
+  Transactions,
+} from '#app-gocardless/gocardless-node.types';
+import type {
+  DetailedAccount,
+  DetailedAccountWithInstitution,
+} from '#app-gocardless/gocardless.types';
+
+export const mockedBalances: { balances: Balance[] } = {
   balances: [
     {
       balanceAmount: {
@@ -20,8 +32,7 @@ export const mockedBalances = {
   ],
 };
 
-/** @type {{transactions: import('../../gocardless-node.types').Transactions}} */
-export const mockTransactions = {
+export const mockTransactions: { transactions: Transactions } = {
   transactions: {
     booked: [
       {
@@ -68,8 +79,7 @@ export const mockUnknownError = {
   status_code: 500,
 };
 
-/** @type {{account: import('../../gocardless-node.types').GoCardlessAccountDetails}} */
-export const mockAccountDetails = {
+export const mockAccountDetails: { account: GoCardlessAccountDetails } = {
   account: {
     resourceId: 'PL00000000000000000987654321',
     iban: 'PL00000000000000000987654321',
@@ -81,7 +91,6 @@ export const mockAccountDetails = {
   },
 };
 
-/** @type {import('../../gocardless-node.types').GoCardlessAccountMetadata} */
 export const mockAccountMetaData = {
   id: 'f0e49aa6-f6db-48fc-94ca-4a62372fadf4',
   created: '2022-07-24T20:45:47.847062Z',
@@ -90,15 +99,13 @@ export const mockAccountMetaData = {
   institution_id: 'SANDBOXFINANCE_SFIN0000',
   status: 'READY',
   owner_name: 'JOHN EXAMPLE',
-};
+} as GoCardlessAccountMetadata;
 
-/** @type {import('../../gocardless.types').DetailedAccount} */
 export const mockDetailedAccount = {
   ...mockAccountDetails.account,
   ...mockAccountMetaData,
-};
+} as DetailedAccount;
 
-/** @type {import('../../gocardless-node.types').Institution} */
 export const mockInstitution = {
   id: 'N26_NTSBDEB1',
   name: 'N26 Bank',
@@ -107,9 +114,8 @@ export const mockInstitution = {
   max_access_valid_for_days: '90',
   countries: ['GB', 'NO', 'SE'],
   logo: 'https://cdn.nordigen.com/ais/N26_SANDBOX_NTSBDEB1.png',
-};
+} as Institution;
 
-/** @type {import('../../gocardless-node.types').Requisition} */
 export const mockRequisition = {
   id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
   created: '2023-01-31T18:15:50.172Z',
@@ -124,7 +130,7 @@ export const mockRequisition = {
   ssn: 'string',
   account_selection: false,
   redirect_immediate: false,
-};
+} as unknown as Requisition;
 
 export const mockDeleteRequisition = {
   summary: 'Requisition deleted',
@@ -146,31 +152,29 @@ export const mockCreateRequisition = {
   ssn: 'string',
   account_selection: false,
   redirect_immediate: false,
-};
+} as unknown as Requisition;
 
-/** @type {import('../../gocardless.types').DetailedAccount} */
 export const mockDetailedAccountExample1 = {
   ...mockDetailedAccount,
   name: 'account-example-one',
-};
+} as DetailedAccount;
 
-/** @type {import('../../gocardless.types').DetailedAccount} */
 export const mockDetailedAccountExample2 = {
   ...mockDetailedAccount,
   name: 'account-example-two',
-};
+} as DetailedAccount;
 
-/** @type {import('../../gocardless.types').DetailedAccountWithInstitution[]} */
-export const mockExtendAccountsAboutInstitutions = [
-  {
-    ...mockDetailedAccountExample1,
-    institution: mockInstitution,
-  },
-  {
-    ...mockDetailedAccountExample2,
-    institution: mockInstitution,
-  },
-];
+export const mockExtendAccountsAboutInstitutions: DetailedAccountWithInstitution[] =
+  [
+    {
+      ...mockDetailedAccountExample1,
+      institution: mockInstitution,
+    },
+    {
+      ...mockDetailedAccountExample2,
+      institution: mockInstitution,
+    },
+  ];
 
 export const mockRequisitionWithExampleAccounts = {
   ...mockRequisition,

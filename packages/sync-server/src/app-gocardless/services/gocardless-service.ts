@@ -177,8 +177,8 @@ export const goCardlessService = {
   getTransactionsWithBalance: async (
     requisitionId: GoCardlessRequisitionId,
     accountId: GoCardlessAccountId,
-    startDate: string,
-    endDate: string,
+    startDate: string | undefined,
+    endDate: string | undefined,
   ): Promise<{
     balances: Balance[];
     institutionId: GoCardlessInstitutionId;
@@ -226,8 +226,8 @@ export const goCardlessService = {
   getNormalizedTransactions: async (
     requisitionId: GoCardlessRequisitionId,
     accountId: GoCardlessAccountId,
-    startDate: string,
-    endDate: string,
+    startDate: string | undefined,
+    endDate: string | undefined,
   ): Promise<{
     institutionId: GoCardlessInstitutionId;
     transactions: {

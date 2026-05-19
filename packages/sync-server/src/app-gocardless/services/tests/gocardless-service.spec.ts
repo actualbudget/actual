@@ -1,3 +1,5 @@
+import type { MockInstance } from 'vitest';
+
 import {
   AccessDeniedError,
   AccountNotLinkedToRequisition,
@@ -11,6 +13,11 @@ import {
   ServiceError,
   UnknownError,
 } from '#app-gocardless/errors';
+import type {
+  GoCardlessAccountId,
+  GoCardlessInstitutionId,
+  GoCardlessRequisitionId,
+} from '#app-gocardless/gocardless-node.types';
 import { GoCardlessApiError } from '#app-gocardless/services/gocardless-api';
 import {
   client,
@@ -38,16 +45,16 @@ describe('goCardlessService', () => {
   const accountId = mockAccountMetaData.id;
   const requisitionId = mockRequisition.id;
 
-  let getBalancesSpy;
-  let getTransactionsSpy;
-  let getDetailsSpy;
-  let getMetadataSpy;
-  let getInstitutionsSpy;
-  let getInstitutionSpy;
-  let getRequisitionsSpy;
-  let deleteRequisitionsSpy;
-  let createRequisitionSpy;
-  let setTokenSpy;
+  let getBalancesSpy: MockInstance;
+  let getTransactionsSpy: MockInstance;
+  let getDetailsSpy: MockInstance;
+  let getMetadataSpy: MockInstance;
+  let getInstitutionsSpy: MockInstance;
+  let getInstitutionSpy: MockInstance;
+  let getRequisitionsSpy: MockInstance;
+  let deleteRequisitionsSpy: MockInstance;
+  let createRequisitionSpy: MockInstance;
+  let setTokenSpy: MockInstance;
 
   beforeEach(() => {
     getInstitutionsSpy = vi.spyOn(client, 'getInstitutions');
@@ -68,7 +75,7 @@ describe('goCardlessService', () => {
 
   describe('#getLinkedRequisition', () => {
     it('returns requisition', async () => {
-      setTokenSpy.mockResolvedValue();
+      setTokenSpy.mockResolvedValue(undefined);
 
       vi.spyOn(goCardlessService, 'getRequisition').mockResolvedValue(
         mockRequisition,
@@ -80,7 +87,7 @@ describe('goCardlessService', () => {
     });
 
     it('throws RequisitionNotLinked error if requisition status is different than LN', async () => {
-      setTokenSpy.mockResolvedValue();
+      setTokenSpy.mockResolvedValue(undefined);
 
       vi.spyOn(goCardlessService, 'getRequisition').mockResolvedValue({
         ...mockRequisition,
@@ -113,11 +120,11 @@ describe('goCardlessService', () => {
       ).mockResolvedValue([
         {
           ...mockExtendAccountsAboutInstitutions[0],
-          institution_id: 'NEWONE',
+          institution_id: 'NEWONE' as GoCardlessInstitutionId,
         },
         {
           ...mockExtendAccountsAboutInstitutions[1],
-          institution_id: 'NEWONE',
+          institution_id: 'NEWONE' as GoCardlessInstitutionId,
         },
       ]);
 
@@ -222,18 +229,18 @@ describe('goCardlessService', () => {
       );
 
       await expect(() =>
-        goCardlessService.getTransactionsWithBalance({
+        goCardlessService.getTransactionsWithBalance(
           requisitionId,
-          accountId: 'some-unknown-account-id',
-          startDate: undefined,
-          endDate: undefined,
-        }),
+          'some-unknown-account-id' as GoCardlessAccountId,
+          undefined,
+          undefined,
+        ),
       ).rejects.toThrow(AccountNotLinkedToRequisition);
     });
   });
 
   describe('#createRequisition', () => {
-    const institutionId = 'some-institution-id';
+    const institutionId = 'some-institution-id' as GoCardlessInstitutionId;
     const params = {
       host: 'https://exemple.com',
       institutionId,
@@ -241,7 +248,7 @@ describe('goCardlessService', () => {
     };
 
     it('calls goCardlessClient and delete requisition', async () => {
-      setTokenSpy.mockResolvedValue();
+      setTokenSpy.mockResolvedValue(undefined);
       getInstitutionSpy.mockResolvedValue(mockInstitution);
 
       createRequisitionSpy.mockResolvedValue(mockCreateRequisition);
@@ -255,7 +262,7 @@ describe('goCardlessService', () => {
     });
 
     it('uses institution transaction_total_days for maxHistoricalDays by default', async () => {
-      setTokenSpy.mockResolvedValue();
+      setTokenSpy.mockResolvedValue(undefined);
       getInstitutionSpy.mockResolvedValue({
         ...mockInstitution,
         transaction_total_days: '730',
@@ -270,7 +277,7 @@ describe('goCardlessService', () => {
     });
 
     it('caps maxHistoricalDays at 90 for banks with separate_continuous_history_consent', async () => {
-      setTokenSpy.mockResolvedValue();
+      setTokenSpy.mockResolvedValue(undefined);
       getInstitutionSpy.mockResolvedValue({
         ...mockInstitution,
         transaction_total_days: '730',
@@ -287,10 +294,10 @@ describe('goCardlessService', () => {
   });
 
   describe('#deleteRequisition', () => {
-    const requisitionId = 'some-requisition-id';
+    const requisitionId = 'some-requisition-id' as GoCardlessRequisitionId;
 
     it('calls goCardlessClient and delete requisition', async () => {
-      setTokenSpy.mockResolvedValue();
+      setTokenSpy.mockResolvedValue(undefined);
 
       getRequisitionsSpy.mockResolvedValue(mockRequisition);
       deleteRequisitionsSpy.mockResolvedValue(mockDeleteRequisition);
@@ -305,10 +312,10 @@ describe('goCardlessService', () => {
   });
 
   describe('#getRequisition', () => {
-    const requisitionId = 'some-requisition-id';
+    const requisitionId = 'some-requisition-id' as GoCardlessRequisitionId;
 
     it('calls goCardlessClient and fetch requisition', async () => {
-      setTokenSpy.mockResolvedValue();
+      setTokenSpy.mockResolvedValue(undefined);
       getRequisitionsSpy.mockResolvedValue(mockRequisition);
 
       expect(await goCardlessService.getRequisition(requisitionId)).toEqual(
@@ -360,7 +367,7 @@ describe('goCardlessService', () => {
     it('calls goCardlessClient and fetch institution details', async () => {
       getInstitutionsSpy.mockResolvedValue([mockInstitution]);
 
-      expect(await goCardlessService.getInstitutions({ country })).toEqual([
+      expect(await goCardlessService.getInstitutions(country)).toEqual([
         mockInstitution,
       ]);
       expect(getInstitutionsSpy).toBeCalledTimes(1);
@@ -368,7 +375,7 @@ describe('goCardlessService', () => {
   });
 
   describe('#getInstitution', () => {
-    const institutionId = 'fake-institution-id';
+    const institutionId = 'fake-institution-id' as GoCardlessInstitutionId;
     it('calls goCardlessClient and fetch institution details', async () => {
       getInstitutionSpy.mockResolvedValue(mockInstitution);
 
@@ -381,17 +388,23 @@ describe('goCardlessService', () => {
 
   describe('#extendAccountsAboutInstitutions', () => {
     it('extends accounts with the corresponding institution', async () => {
-      const institutionA = { ...mockInstitution, id: 'INSTITUTION_A' };
-      const institutionB = { ...mockInstitution, id: 'INSTITUTION_B' };
+      const institutionA = {
+        ...mockInstitution,
+        id: 'INSTITUTION_A' as GoCardlessInstitutionId,
+      };
+      const institutionB = {
+        ...mockInstitution,
+        id: 'INSTITUTION_B' as GoCardlessInstitutionId,
+      };
       const accountAA = {
         ...mockDetailedAccount,
-        id: 'AA',
-        institution_id: 'INSTITUTION_A',
+        id: 'AA' as GoCardlessAccountId,
+        institution_id: 'INSTITUTION_A' as GoCardlessInstitutionId,
       };
       const accountBB = {
         ...mockDetailedAccount,
-        id: 'BB',
-        institution_id: 'INSTITUTION_B',
+        id: 'BB' as GoCardlessAccountId,
+        institution_id: 'INSTITUTION_B' as GoCardlessInstitutionId,
       };
 
       const accounts = [accountAA, accountBB];
@@ -419,18 +432,21 @@ describe('goCardlessService', () => {
     it('returns accounts with missing institutions as null', async () => {
       const accountAA = {
         ...mockDetailedAccount,
-        id: 'AA',
-        institution_id: 'INSTITUTION_A',
+        id: 'AA' as GoCardlessAccountId,
+        institution_id: 'INSTITUTION_A' as GoCardlessInstitutionId,
       };
       const accountBB = {
         ...mockDetailedAccount,
-        id: 'BB',
-        institution_id: 'INSTITUTION_B',
+        id: 'BB' as GoCardlessAccountId,
+        institution_id: 'INSTITUTION_B' as GoCardlessInstitutionId,
       };
 
       const accounts = [accountAA, accountBB];
 
-      const institutionA = { ...mockInstitution, id: 'INSTITUTION_A' };
+      const institutionA = {
+        ...mockInstitution,
+        id: 'INSTITUTION_A' as GoCardlessInstitutionId,
+      };
       const institutions = [institutionA];
 
       const expected = [
@@ -459,7 +475,7 @@ describe('goCardlessService', () => {
 
       expect(
         await goCardlessService.getTransactions({
-          institutionId: 'SANDBOXFINANCE_SFIN0000',
+          institutionId: 'SANDBOXFINANCE_SFIN0000' as GoCardlessInstitutionId,
           accountId,
           startDate: '',
           endDate: '',
@@ -537,7 +553,7 @@ describe('goCardlessService', () => {
 });
 
 describe('#handleGoCardlessError', () => {
-  const apiError = status =>
+  const apiError = (status: number) =>
     new GoCardlessApiError(`error: ${status}`, status, {});
 
   it('throws InvalidInputDataError for status code 400', () => {

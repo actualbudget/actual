@@ -11,16 +11,26 @@ import {
 import {
   AccountNotLinkedToRequisition,
   GenericGoCardlessError,
+  GoCardlessClientError,
   RateLimitError,
   RequisitionNotLinked,
 } from './errors';
+import type {
+  GoCardlessAccountId,
+  GoCardlessInstitutionId,
+  GoCardlessRequisitionId,
+} from './gocardless-node.types';
 import { goCardlessService } from './services/gocardless-service';
 import { handleError } from './util/handle-error';
 
-function validateOrigin(origin) {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function validateOrigin(origin: string | undefined) {
   let url;
   try {
-    url = new URL(origin);
+    url = new URL(origin ?? '');
   } catch {
     throw new Error('Invalid Origin header');
   }
@@ -31,11 +41,11 @@ function validateOrigin(origin) {
 }
 
 const SAFE_ID = /^[a-zA-Z0-9_-]+$/;
-function sanitizeId(id) {
+function sanitizeId<T extends string = string>(id: unknown): T {
   if (typeof id !== 'string' || !SAFE_ID.test(id)) {
     throw new Error(`Invalid GoCardless identifier: ${String(id)}`);
   }
-  return id;
+  return id as T;
 }
 
 const app = express();
@@ -62,7 +72,7 @@ app.post(
   '/create-web-token',
   handleError(async (req, res) => {
     const { institutionId: rawInstitutionId } = req.body || {};
-    const institutionId = sanitizeId(rawInstitutionId);
+    const institutionId = sanitizeId<GoCardlessInstitutionId>(rawInstitutionId);
     const host = validateOrigin(req.headers.origin);
 
     const { link, requisitionId } = await goCardlessService.createRequisition({
@@ -83,7 +93,9 @@ app.post(
 app.post(
   '/get-accounts',
   handleError(async (req, res) => {
-    const requisitionId = sanitizeId((req.body || {}).requisitionId);
+    const requisitionId = sanitizeId<GoCardlessRequisitionId>(
+      (req.body || {}).requisitionId,
+    );
 
     try {
       const { requisition, accounts } =
@@ -106,7 +118,9 @@ app.post(
       if (error instanceof RequisitionNotLinked) {
         res.send({
           status: 'ok',
-          requisitionStatus: error.details.requisitionStatus,
+          requisitionStatus: isRecord(error.details)
+            ? error.details.requisitionStatus
+            : undefined,
         });
       } else {
         throw error;
@@ -142,7 +156,9 @@ app.post(
 app.post(
   '/remove-account',
   handleError(async (req, res) => {
-    const requisitionId = sanitizeId((req.body || {}).requisitionId);
+    const requisitionId = sanitizeId<GoCardlessRequisitionId>(
+      (req.body || {}).requisitionId,
+    );
 
     const data = await goCardlessService.deleteRequisition(requisitionId);
     if (data.summary === 'Requisition deleted') {
@@ -172,8 +188,8 @@ app.post(
       accountId: rawAccountId,
       includeBalance = true,
     } = req.body || {};
-    const requisitionId = sanitizeId(rawRequisitionId);
-    const accountId = sanitizeId(rawAccountId);
+    const requisitionId = sanitizeId<GoCardlessRequisitionId>(rawRequisitionId);
+    const accountId = sanitizeId<GoCardlessAccountId>(rawAccountId);
 
     try {
       if (includeBalance) {
@@ -226,18 +242,34 @@ app.post(
         });
       }
     } catch (error) {
-      const headers = error.details?.response?.headers ?? {};
+      const errorDetails =
+        error instanceof RequisitionNotLinked ||
+        error instanceof GenericGoCardlessError ||
+        error instanceof GoCardlessClientError ||
+        error instanceof AccountNotLinkedToRequisition
+          ? error.details
+          : undefined;
 
-      const rateLimitHeaders = Object.fromEntries(
-        Object.entries(headers).filter(([key]) =>
-          key.startsWith('x-ratelimit-'),
-        ),
-      );
+      const responseHeaders =
+        isRecord(errorDetails) && isRecord(errorDetails.response)
+          ? errorDetails.response.headers
+          : undefined;
 
-      const sendErrorResponse = data =>
+      const rateLimitHeaders = isRecord(responseHeaders)
+        ? Object.fromEntries(
+            Object.entries(responseHeaders).filter(([key]) =>
+              key.startsWith('x-ratelimit-'),
+            ),
+          )
+        : {};
+
+      const errorMessage =
+        error instanceof Error && error.message ? error.message : String(error);
+
+      const sendErrorResponse = (data: Record<string, unknown>) =>
         res.send({
           status: 'ok',
-          data: { ...data, details: error.details, rateLimitHeaders },
+          data: { ...data, details: errorDetails, rateLimitHeaders },
         });
 
       switch (true) {
@@ -267,14 +299,14 @@ app.post(
           });
           break;
         case error instanceof GenericGoCardlessError:
-          console.log('Something went wrong', error.message);
+          console.log('Something went wrong', errorMessage);
           sendErrorResponse({
             error_type: 'SYNC_ERROR',
             error_code: 'NORDIGEN_ERROR',
           });
           break;
         default:
-          console.log('Something went wrong', error.message || String(error));
+          console.log('Something went wrong', errorMessage);
           sendErrorResponse({
             error_type: 'UNKNOWN',
             error_code: 'UNKNOWN',
