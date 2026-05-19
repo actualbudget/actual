@@ -544,7 +544,7 @@ describe('sankey-spreadsheet', () => {
           categoryId: 'c_groceries',
           value: 100,
           isIncome: false,
-          isNegative: false,
+          isNegative: true,
           accountName: 'Checking',
           accountId: 'a_checking',
         },
