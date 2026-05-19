@@ -1994,11 +1994,13 @@ function NotesCell({
     }
   }
 
+  const displayedNote = note || scheduleNote || '';
+
   return (
     <CustomCell
       width="flex"
       name="notes"
-      value={note ?? scheduleNote ?? ''}
+      value={displayedNote}
       formatter={value =>
         NotesTagFormatter({ notes: value, onNotesTagClick: onClickTag })
       }

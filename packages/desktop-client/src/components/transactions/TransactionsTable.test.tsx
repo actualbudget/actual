@@ -18,10 +18,11 @@ import type {
   CategoryEntity,
   CategoryGroupEntity,
   PayeeEntity,
+  ScheduleEntity,
   TagEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
@@ -103,6 +104,7 @@ vi.mock('../../hooks/useCategories', () => ({
 }));
 
 const usualGroup = categoryGroups[1];
+let schedules: ScheduleEntity[] = [];
 
 function generateTransactions(
   count: number,
@@ -239,6 +241,8 @@ function initBasicServer() {
             data: generateTransactions(5, [6]),
             dependencies: [],
           };
+        case 'schedules':
+          return { data: schedules, dependencies: [] };
         default:
           throw new Error(`queried unknown table: ${query.table}`);
       }
@@ -260,6 +264,7 @@ function initBasicServer() {
 }
 
 beforeEach(() => {
+  schedules = [];
   initBasicServer();
 });
 
@@ -447,6 +452,50 @@ function expectToBeEditingField(
 }
 
 describe('Transactions', () => {
+  test('preview transactions show schedule name in notes', async () => {
+    const scheduleName = 'Monthly rent';
+    schedules = [
+      {
+        id: 'schedule-1',
+        name: scheduleName,
+        rule: 'rule-1',
+        next_date: '2017-01-01',
+        completed: false,
+        posts_transaction: false,
+        tombstone: false,
+        _payee: 'alice-id',
+        _account: accounts[0].id,
+        _amount: -1000,
+        _amountOp: 'is',
+        _date: '2017-01-01',
+        _conditions: [],
+        _actions: [],
+      },
+    ];
+
+    const previewTransaction: TransactionEntity = {
+      id: 'preview/schedule-1/2017-01-01',
+      account: accounts[0].id,
+      amount: -1000,
+      date: '2017-01-01',
+      payee: 'alice-id',
+      schedule: 'schedule-1',
+      cleared: false,
+      reconciled: false,
+    };
+
+    const { container } = renderTransactions({
+      transactions: [previewTransaction],
+      isAdding: false,
+    });
+
+    await waitFor(() => {
+      expect(queryField(container, 'notes', 'div', 0).textContent).toBe(
+        scheduleName,
+      );
+    });
+  });
+
   test('transactions table shows the correct data', () => {
     const { container, getTransactions } = renderTransactions();
 
