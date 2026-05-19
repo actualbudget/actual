@@ -8,6 +8,7 @@ import type {
 import { ListBox, ListBoxItem, Popover } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { SvgAdd } from '@actual-app/components/icons/v0';
 import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -234,7 +235,8 @@ export function TagAutocomplete({
                     padding: 4,
                   }}
                 >
-                  <span style={{ textWrap: 'nowrap' }}>
+                  <SvgAdd height={10} width={10} />
+                  <span style={{ textWrap: 'nowrap', marginRight: 2 }}>
                     <Trans>Create Tag</Trans>
                   </span>
                   <span className={getTagCSS('')}>{item.name}</span>
