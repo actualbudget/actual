@@ -149,6 +149,7 @@ export function CategoryAutomationButton({
 
   return (
     <Tooltip
+      placement="bottom start"
       content={
         <View style={{ maxWidth: 320, gap: 8 }}>
           {automations.map(entry => (
