@@ -250,6 +250,49 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
   );
 }
 
+type SharedArrayBufferWarningProps = {
+  style?: CSSProperties;
+};
+
+function SharedArrayBufferWarning({ style }: SharedArrayBufferWarningProps) {
+  const { t } = useTranslation();
+  const hasSharedArrayBuffer = typeof SharedArrayBuffer !== 'undefined';
+  const isOverrideEnabled = localStorage.getItem('SharedArrayBufferOverride');
+
+  // Only show warning if SharedArrayBuffer is not supported but user has overridden the warning
+  if (hasSharedArrayBuffer || !isOverrideEnabled) {
+    return null;
+  }
+
+  const warningMessage = t(
+    'Your environment does not support SharedArrayBuffer. You may experience data loss or degraded functionality. Click to learn more.',
+  );
+
+  const handlePress = () => {
+    window.open(
+      'https://actualbudget.org/docs/troubleshooting/shared-array-buffer',
+      '_blank',
+      'noopener,noreferrer',
+    );
+  };
+
+  return (
+    <Button
+      variant="bare"
+      aria-label={warningMessage}
+      title={warningMessage}
+      style={{
+        ...style,
+        WebkitAppRegion: 'none',
+        color: theme.errorTextDark,
+      }}
+      onPress={handlePress}
+    >
+      <SvgAlertTriangle width={13} />
+    </Button>
+  );
+}
+
 function BudgetTitlebar() {
   const [maxMonths, setMaxMonthsPref] = useGlobalPref('maxMonths');
 
@@ -344,6 +387,7 @@ export function Titlebar({ style }: TitlebarProps) {
         {isDevelopmentEnvironment() && !isTestEnv && <ThemeSelector />}
         <PrivacyButton />
         {serverURL ? <ServerSyncButton /> : null}
+        <SharedArrayBufferWarning />
         <LoggedInUser />
         <HelpMenu />
       </SpaceBetween>

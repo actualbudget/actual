@@ -337,13 +337,14 @@ export function splitTransaction(
     }
 
     const subtransactions = createSubtransactions?.(trans) || [
-      makeChild(trans),
+      makeChild(trans, { payee: null }),
     ];
 
     const { error: _error, ...rest } = trans;
 
     return {
       ...rest,
+      payee: null,
       is_parent: true,
       error: num(trans.amount) === 0 ? null : SplitTransactionError(0, trans),
       subtransactions: subtransactions.map(t => ({
