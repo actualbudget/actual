@@ -35,6 +35,8 @@ export function AutomationErrorTitle({
       return <Trans>Early spending starts after target</Trans>;
     case 'percentage-source-not-found':
       return <Trans>Source category not recognised</Trans>;
+    case 'adjustment-out-of-range':
+      return <Trans>Adjustment out of range</Trans>;
     default:
       error satisfies never;
       return null;
@@ -78,6 +80,8 @@ export function AutomationErrorShort({
       return <Trans>Early spending must start before the target</Trans>;
     case 'percentage-source-not-found':
       return <Trans>Pick a valid income category</Trans>;
+    case 'adjustment-out-of-range':
+      return <Trans>Adjustment out of range</Trans>;
     default:
       error satisfies never;
       return null;
@@ -153,6 +157,13 @@ export function AutomationErrorDetail({
         <Trans>
           The selected source &ldquo;{{ source: error.source }}&rdquo; is not a
           known income category.
+        </Trans>
+      );
+    case 'adjustment-out-of-range':
+      return (
+        <Trans>
+          A percentage decrease must be under 100% and an increase at most
+          1000%.
         </Trans>
       );
     default:

@@ -245,7 +245,7 @@ export class AccountPage {
     if (transaction.notes) {
       const notesCell = transactionRow.getByTestId('notes');
       await notesCell.click();
-      const notesInput = notesCell.getByRole('textbox');
+      const notesInput = notesCell.getByRole('combobox');
       await this.selectInputText(notesInput);
       await notesInput.pressSequentially(transaction.notes);
       await this.page.keyboard.press('Tab');
