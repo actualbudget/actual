@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { amountToInteger } from '#app-gocardless/utils';
 
 import type { IBank } from './bank.interface';
@@ -12,27 +11,29 @@ export default {
   normalizeTransaction(transaction, booked) {
     const editedTrans = { ...transaction };
 
+    const infoArray = transaction.remittanceInformationUnstructuredArray ?? [];
+
     // There is no remittanceInformationUnstructured, so we'll make it
-    editedTrans.remittanceInformationUnstructured =
-      transaction.remittanceInformationUnstructuredArray.join(', ');
+    editedTrans.remittanceInformationUnstructured = infoArray.join(', ');
 
     // Remove clutter to extract the payee from remittanceInformationUnstructured ...
     // ... when not otherwise provided.
-    const payeeName = transaction.remittanceInformationUnstructuredArray
+    const payeeName = infoArray
       .map(el => el.match(/^(?:.*\*)?(.+),PAS\d+$/))
       .find(match => match)?.[1];
 
     editedTrans.debtorName = transaction.debtorName || payeeName;
     editedTrans.creditorName = transaction.creditorName || payeeName;
 
-    editedTrans.date = transaction.valueDateTime.slice(0, 10);
+    editedTrans.date = (transaction.valueDateTime ?? '').slice(0, 10);
 
     return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
 
   sortTransactions(transactions = []) {
     return transactions.sort(
-      (a, b) => +new Date(b.valueDateTime) - +new Date(a.valueDateTime),
+      (a, b) =>
+        +new Date(b.valueDateTime ?? '') - +new Date(a.valueDateTime ?? ''),
     );
   },
 
@@ -41,7 +42,7 @@ export default {
       const oldestTransaction =
         sortedTransactions[sortedTransactions.length - 1];
       const oldestKnownBalance = amountToInteger(
-        oldestTransaction.balanceAfterTransaction.balanceAmount.amount,
+        oldestTransaction.balanceAfterTransaction?.balanceAmount.amount || 0,
       );
       const oldestTransactionAmount = amountToInteger(
         oldestTransaction.transactionAmount.amount,
@@ -51,7 +52,7 @@ export default {
     } else {
       return amountToInteger(
         balances.find(balance => 'interimBooked' === balance.balanceType)
-          .balanceAmount.amount,
+          ?.balanceAmount.amount || 0,
       );
     }
   },

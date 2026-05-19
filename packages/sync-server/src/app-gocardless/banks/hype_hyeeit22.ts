@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { IBank } from './bank.interface';
 import Fallback from './integration-bank';
 
@@ -31,12 +30,10 @@ export default {
     ) {
       // keep only {payment_info} portion of remittance info
       // NOTE: if {payee_name} contains dashes (unlikely / impossible?), this probably gets bugged!
-      const infoIdx =
-        transaction.remittanceInformationUnstructured.indexOf(' - ') + 3;
+      const remittance = transaction.remittanceInformationUnstructured ?? '';
+      const infoIdx = remittance.indexOf(' - ') + 3;
       editedTrans.remittanceInformationUnstructured =
-        infoIdx === -1
-          ? transaction.remittanceInformationUnstructured
-          : transaction.remittanceInformationUnstructured.slice(infoIdx).trim();
+        infoIdx === -1 ? remittance : remittance.slice(infoIdx).trim();
     }
     /**
      * CONVERT ESCAPED UNICODE TO CODEPOINTS
@@ -46,7 +43,7 @@ export default {
      * the code below assumes this is always the case
      */
     if (transaction.proprietaryBankTransactionCode === 'p2p') {
-      let str = transaction.remittanceInformationUnstructured;
+      let str = transaction.remittanceInformationUnstructured ?? '';
       let idx = str.indexOf('\\U');
       let start_idx = idx;
       let codepoints = [];

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import * as d from 'date-fns';
 
 import type { IBank } from './bank.interface';

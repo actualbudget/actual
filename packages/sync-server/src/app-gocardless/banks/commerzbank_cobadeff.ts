@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { IBank } from './bank.interface';
 import Fallback from './integration-bank';
 import { escapeRegExp } from './util/escape-regexp';
@@ -14,8 +13,9 @@ export default {
     // remittanceInformationUnstructured is limited to 140 chars thus ...
     // ... missing information form remittanceInformationUnstructuredArray ...
     // ... so we recreate it.
-    editedTrans.remittanceInformationUnstructured =
-      transaction.remittanceInformationUnstructuredArray.join(' ');
+    editedTrans.remittanceInformationUnstructured = (
+      transaction.remittanceInformationUnstructuredArray ?? []
+    ).join(' ');
 
     // The limitations of remittanceInformationUnstructuredArray ...
     // ... can result in split keywords. We fix these. Other ...
@@ -29,12 +29,13 @@ export default {
       'Dauerauftrag',
     ];
     keywords.forEach(keyword => {
-      editedTrans.remittanceInformationUnstructured =
-        editedTrans.remittanceInformationUnstructured.replace(
-          // There can be spaces in keywords
-          RegExp(keyword.split('').join('\\s*'), 'gi'),
-          ', ' + keyword + ' ',
-        );
+      editedTrans.remittanceInformationUnstructured = (
+        editedTrans.remittanceInformationUnstructured ?? ''
+      ).replace(
+        // There can be spaces in keywords
+        RegExp(keyword.split('').join('\\s*'), 'gi'),
+        ', ' + keyword + ' ',
+      );
     });
 
     // Clean up remittanceInformation, deduplicate payee (removing slashes ...

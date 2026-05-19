@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { IBank } from './bank.interface';
 import Fallback from './integration-bank';
 
@@ -18,7 +17,7 @@ export default {
     if (!booked) {
       const useDate = new Date(
         Math.min(
-          new Date(transaction.bookingDate).getTime(),
+          new Date(transaction.bookingDate ?? '').getTime(),
           new Date().getTime(),
         ),
       );
@@ -37,9 +36,9 @@ export default {
 
     if (
       transaction.transactionId?.match(debitCreditRegex) ||
-      !validLengths.includes(transaction.transactionId?.length)
+      !validLengths.includes(transaction.transactionId?.length ?? -1)
     ) {
-      transaction.transactionId = null;
+      transaction.transactionId = undefined;
     }
 
     return Fallback.normalizeTransaction(transaction, booked, editedTrans);

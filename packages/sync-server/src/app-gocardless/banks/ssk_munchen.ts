@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 /**
  *  Credit for this code goes to Nebukadneza at https://github.com/Nebukadneza
  */
@@ -19,7 +18,9 @@ export default {
     } else if (transaction.remittanceInformationStructured) {
       remittanceInformationUnstructured =
         transaction.remittanceInformationStructured;
-    } else if (transaction.remittanceInformationStructuredArray?.length > 0) {
+    } else if (
+      (transaction.remittanceInformationStructuredArray?.length ?? 0) > 0
+    ) {
       remittanceInformationUnstructured =
         transaction.remittanceInformationStructuredArray?.join(' ');
     }
@@ -48,8 +49,11 @@ export default {
     const currentBalance = balances.find(
       balance => 'interimAvailable' === balance.balanceType,
     );
-    return sortedTransactions.reduce((total, trans) => {
-      return total - amountToInteger(trans.transactionAmount.amount);
-    }, amountToInteger(currentBalance.balanceAmount.amount));
+    return sortedTransactions.reduce(
+      (total, trans) => {
+        return total - amountToInteger(trans.transactionAmount.amount);
+      },
+      amountToInteger(currentBalance?.balanceAmount.amount || 0),
+    );
   },
 } satisfies IBank;

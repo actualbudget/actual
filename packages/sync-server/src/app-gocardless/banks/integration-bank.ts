@@ -92,7 +92,7 @@ export default {
       (total, trans) => {
         return total - amountToInteger(trans.transactionAmount.amount);
       },
-      amountToInteger(currentBalance?.balanceAmount?.amount || 0),
+      amountToInteger(currentBalance?.balanceAmount.amount || 0),
     );
   },
 } satisfies IBank;

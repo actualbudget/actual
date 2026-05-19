@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { IBank } from './bank.interface';
 import Fallback from './integration-bank';
 
@@ -11,7 +10,7 @@ export default {
     const editedTrans = { ...transaction };
 
     editedTrans.remittanceInformationUnstructured = fixupPayee(
-      transaction.remittanceInformationUnstructured,
+      transaction.remittanceInformationUnstructured ?? '',
     );
 
     return Fallback.normalizeTransaction(transaction, booked, editedTrans);

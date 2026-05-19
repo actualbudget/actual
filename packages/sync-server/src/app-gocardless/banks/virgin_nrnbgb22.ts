@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { IBank } from './bank.interface';
 import Fallback from './integration-bank';
 
@@ -13,7 +12,9 @@ export default {
     const transferPrefixes = ['MOB', 'FPS'];
     const methodRegex = /^(Card|WLT)\s\d+/;
 
-    const parts = transaction.remittanceInformationUnstructured.split(', ');
+    const parts = (transaction.remittanceInformationUnstructured ?? '').split(
+      ', ',
+    );
 
     if (transferPrefixes.includes(parts[0])) {
       // Transfer remittance information begins with either "MOB" or "FPS"

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { IBank } from './bank.interface';
 import Fallback from './integration-bank';
 
@@ -10,27 +9,15 @@ export default {
   normalizeTransaction(transaction, booked) {
     const editedTrans = { ...transaction };
 
-    if (
-      transaction.remittanceInformationUnstructuredArray[0].startsWith(
-        'Bizum payment from: ',
-      )
-    ) {
-      editedTrans.payeeName =
-        transaction.remittanceInformationUnstructuredArray[0].replace(
-          'Bizum payment from: ',
-          '',
-        );
-      editedTrans.remittanceInformationUnstructured =
-        transaction.remittanceInformationUnstructuredArray[1];
+    const infoArray = transaction.remittanceInformationUnstructuredArray ?? [];
+
+    if (infoArray[0]?.startsWith('Bizum payment from: ')) {
+      editedTrans.payeeName = infoArray[0].replace('Bizum payment from: ', '');
+      editedTrans.remittanceInformationUnstructured = infoArray[1];
     }
 
-    if (
-      transaction.remittanceInformationUnstructuredArray[0].startsWith(
-        'Bizum payment to: ',
-      )
-    ) {
-      editedTrans.remittanceInformationUnstructured =
-        transaction.remittanceInformationUnstructuredArray[1];
+    if (infoArray[0]?.startsWith('Bizum payment to: ')) {
+      editedTrans.remittanceInformationUnstructured = infoArray[1];
     }
 
     return Fallback.normalizeTransaction(transaction, booked, editedTrans);

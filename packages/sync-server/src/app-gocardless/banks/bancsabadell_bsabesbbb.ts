@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { IBank } from './bank.interface';
 import Fallback from './integration-bank';
 
@@ -16,16 +15,13 @@ export default {
     // The amount is negative for outgoing transactions, positive for incoming transactions.
     const isCreditorPayee = Number.parseFloat(amount) < 0;
 
-    const payeeName = transaction.remittanceInformationUnstructuredArray
+    const payeeName = (transaction.remittanceInformationUnstructuredArray ?? [])
       .join(' ')
       .trim();
 
     // The payee name is the creditor name for outgoing transactions and the debtor name for incoming transactions.
-    const creditorName = isCreditorPayee ? payeeName : null;
-    const debtorName = isCreditorPayee ? null : payeeName;
-
-    editedTrans.creditorName = creditorName;
-    editedTrans.debtorName = debtorName;
+    editedTrans.creditorName = isCreditorPayee ? payeeName : undefined;
+    editedTrans.debtorName = isCreditorPayee ? undefined : payeeName;
 
     return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },

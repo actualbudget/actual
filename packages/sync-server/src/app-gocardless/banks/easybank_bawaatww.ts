@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { Transaction } from '#app-gocardless/gocardless-node.types';
 import { formatPayeeName } from '#util/payee-name';
 import { title } from '#util/title';
@@ -15,10 +14,10 @@ export default {
   sortTransactions: (transactions = []) =>
     transactions.sort((a, b) => {
       const diff =
-        +new Date(b.valueDate || b.bookingDate) -
-        +new Date(a.valueDate || a.bookingDate);
+        +new Date(b.valueDate || b.bookingDate || '') -
+        +new Date(a.valueDate || a.bookingDate || '');
       if (diff !== 0) return diff;
-      return parseInt(b.transactionId) - parseInt(a.transactionId);
+      return parseInt(b.transactionId ?? '') - parseInt(a.transactionId ?? '');
     }),
 
   normalizeTransaction(transaction, booked) {
@@ -34,7 +33,7 @@ export default {
 
 // extracts the payee name from the remittanceInformationStructured
 function extractPayeeName(transaction: Transaction) {
-  const structured = transaction.remittanceInformationStructured;
+  const structured = transaction.remittanceInformationStructured ?? '';
   // The payee name is betweeen the transaction timestamp (11.07. 11:36) and the location, that starts with \\
   const regex = /\d{2}\.\d{2}\. \d{2}:\d{2}(.*)\\\\/;
   const matches = structured.match(regex);

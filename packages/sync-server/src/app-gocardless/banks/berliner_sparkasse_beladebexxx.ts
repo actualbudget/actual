@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { amountToInteger } from '#app-gocardless/utils';
 
 import type { IBank } from './bank.interface';
@@ -20,7 +19,9 @@ export default {
     } else if (transaction.remittanceInformationStructured) {
       remittanceInformationUnstructured =
         transaction.remittanceInformationStructured;
-    } else if (transaction.remittanceInformationStructuredArray?.length > 0) {
+    } else if (
+      (transaction.remittanceInformationStructuredArray?.length ?? 0) > 0
+    ) {
       remittanceInformationUnstructured =
         transaction.remittanceInformationStructuredArray?.join(' ');
     }
@@ -55,8 +56,11 @@ export default {
       balance => 'interimAvailable' === balance.balanceType,
     );
 
-    return sortedTransactions.reduce((total, trans) => {
-      return total - amountToInteger(trans.transactionAmount.amount);
-    }, amountToInteger(currentBalance.balanceAmount.amount));
+    return sortedTransactions.reduce(
+      (total, trans) => {
+        return total - amountToInteger(trans.transactionAmount.amount);
+      },
+      amountToInteger(currentBalance?.balanceAmount.amount || 0),
+    );
   },
 } satisfies IBank;

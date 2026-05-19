@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { title } from '#util/title';
 
 import type { IBank } from './bank.interface';
@@ -23,24 +22,25 @@ export default {
   normalizeTransaction(transaction, booked) {
     const editedTrans = { ...transaction };
 
-    editedTrans.remittanceInformationUnstructuredArray =
+    editedTrans.remittanceInformationUnstructuredArray = (
+      transaction.remittanceInformationUnstructuredArray ?? []
+    )
       // Remove the localisation with backslashes that are sometimes present
-      transaction.remittanceInformationUnstructuredArray
-        .map(line => line.replace(/\\.+/g, ''))
-        // Remove an unwanted line that pollutes the remittance information
-        .filter(line => line.startsWith('Réf : ') === false);
+      .map(line => line.replace(/\\.+/g, ''))
+      // Remove an unwanted line that pollutes the remittance information
+      .filter(line => line.startsWith('Réf : ') === false);
 
     const infoArray = editedTrans.remittanceInformationUnstructuredArray;
 
-    let match;
+    let match: string | undefined;
 
     // Transactions can have their identifier in any line, as the order of lines is not guaranteed.
     // This is why we check all lines for specific patterns.
     if ((match = infoArray.find(line => regexCard.test(line)))) {
       // Card transaction
       const cardMatch = match.match(regexCard);
-      editedTrans.payeeName = title(cardMatch.groups.payeeName);
-      editedTrans.notes = `Carte ${cardMatch.groups.date}`;
+      editedTrans.payeeName = title(cardMatch?.groups?.payeeName ?? '');
+      editedTrans.notes = `Carte ${cardMatch?.groups?.date}`;
       if (infoArray.length > 1) {
         editedTrans.notes += ' ' + infoArray.filter(l => l !== match).join(' ');
       }
@@ -54,15 +54,15 @@ export default {
       // ATM withdrawal
       const atmMatch = match.match(regexAtmWithdrawal);
       editedTrans.payeeName = 'Retrait DAB';
-      editedTrans.notes = `Retrait ${atmMatch.groups.date} ${atmMatch.groups.locationName}`;
+      editedTrans.notes = `Retrait ${atmMatch?.groups?.date} ${atmMatch?.groups?.locationName}`;
       if (infoArray.length > 1) {
         editedTrans.notes += ' ' + infoArray.filter(l => l !== match).join(' ');
       }
     } else if ((match = infoArray.find(line => regexCreditNote.test(line)))) {
       // Credit note (refund)
       const creditMatch = match.match(regexCreditNote);
-      editedTrans.payeeName = title(creditMatch.groups.payeeName);
-      editedTrans.notes = `Avoir ${creditMatch.groups.date}`;
+      editedTrans.payeeName = title(creditMatch?.groups?.payeeName ?? '');
+      editedTrans.notes = `Avoir ${creditMatch?.groups?.date}`;
       if (infoArray.length > 1) {
         editedTrans.notes += ' ' + infoArray.filter(l => l !== match).join(' ');
       }

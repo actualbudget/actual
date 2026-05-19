@@ -69,7 +69,7 @@ describe('Nationwide', () => {
         false,
       );
 
-      expect(normalizedTransaction?.transactionId).toBeNull();
+      expect(normalizedTransaction?.transactionId).toBeUndefined();
     });
 
     it('unsets transactionId if debit placeholder found', () => {
@@ -84,7 +84,7 @@ describe('Nationwide', () => {
         false,
       );
 
-      expect(normalizedTransaction?.transactionId).toBeNull();
+      expect(normalizedTransaction?.transactionId).toBeUndefined();
     });
 
     it('unsets transactionId if credit placeholder found', () => {
@@ -99,7 +99,7 @@ describe('Nationwide', () => {
         false,
       );
 
-      expect(normalizedTransaction?.transactionId).toBeNull();
+      expect(normalizedTransaction?.transactionId).toBeUndefined();
     });
   });
 });

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { IBank } from './bank.interface';
 import Fallback from './integration-bank';
 
@@ -42,7 +41,7 @@ export default {
             transaction.remittanceInformationUnstructured;
         }
       } else {
-        transaction.transactionId = null;
+        transaction.transactionId = undefined;
 
         if (
           transaction.remittanceInformationUnstructured &&
@@ -62,7 +61,7 @@ export default {
         }
         //Remove remittanceInformationUnstructured from pending transactions, so the `notes` field remains empty (there is no merchant information)
         //Once booked, the right `notes` (containing the merchant) will be populated
-        editedTrans.remittanceInformationUnstructured = null;
+        editedTrans.remittanceInformationUnstructured = undefined;
       }
     }
 

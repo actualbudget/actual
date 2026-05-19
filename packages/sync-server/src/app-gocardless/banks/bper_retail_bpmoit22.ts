@@ -1,8 +1,9 @@
-// @ts-strict-ignore
 /**
  * Normalize BPER Retail BPMOIT22 transactions by extracting a friendly payee
  * while keeping the raw description in the notes field.
  */
+
+import type { Transaction } from '#app-gocardless/gocardless-node.types';
 
 import type { IBank } from './bank.interface';
 import Fallback from './integration-bank';
@@ -20,34 +21,34 @@ const SDD_PAYEE_REGEX = /ADDEBITO SDD\s+([A-Z0-9\s.'/&-]+?)(?:N:|ID:|$)/i;
 const BOLLETTINO_PAYEE_REGEX = /CREDITORE:\s*([A-Z0-9\s.'/&-]+)/i;
 
 // Extract payee for card transactions
-function parseCardPayee(description) {
+function parseCardPayee(description: string) {
   const [beforeSuffix] = description.split(CARD_PAYMENT_SUFFIX);
 
   return beforeSuffix.replace(CARD_PAYMENT_PREFIX, '').trim();
 }
 
 // Extract originator for bonifico (domestic/foreign transfers)
-function parseBonificoOriginator(description) {
+function parseBonificoOriginator(description: string) {
   const match = description.match(BONIFICO_ORIGINATOR_REGEX);
 
   return match ? match[1].trim() : '';
 }
 
 // Extract creditor for SDD direct debits
-function parseSddPayee(description) {
+function parseSddPayee(description: string) {
   const match = description.match(SDD_PAYEE_REGEX);
 
   return match ? match[1].trim() : '';
 }
 
 // Extract creditor for bollettini / utilities
-function parseBollettinoPayee(description) {
+function parseBollettinoPayee(description: string) {
   const match = description.match(BOLLETTINO_PAYEE_REGEX);
 
   return match ? match[1].trim() : '';
 }
 
-function setPayee(editedTransaction, payee) {
+function setPayee(editedTransaction: Transaction, payee: string) {
   if (!payee) {
     return;
   }

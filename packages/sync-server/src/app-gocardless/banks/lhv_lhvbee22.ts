@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import * as d from 'date-fns';
 
 import type { IBank } from './bank.interface';
@@ -19,7 +18,7 @@ export default {
     const cardTxRegex =
       /^\(\.\.(\d{4})\) (\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}) (.+)$/g;
     const cardTxMatch = cardTxRegex.exec(
-      transaction?.remittanceInformationUnstructured,
+      transaction?.remittanceInformationUnstructured ?? '',
     );
 
     if (cardTxMatch) {

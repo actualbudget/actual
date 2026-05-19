@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { IBank } from './bank.interface';
 import Fallback from './integration-bank';
 import { extractPayeeNameFromRemittanceInfo } from './util/extract-payeeName-from-remittanceInfo';
@@ -24,7 +23,7 @@ export default {
       editedTrans.payeeName =
         transaction.creditorName ||
         extractPayeeNameFromRemittanceInfo(
-          transaction.remittanceInformationUnstructured,
+          transaction.remittanceInformationUnstructured ?? '',
           ['Paiement', 'Domiciliation', 'Transfert', 'Ordre permanent'],
         ) ||
         'undefined';

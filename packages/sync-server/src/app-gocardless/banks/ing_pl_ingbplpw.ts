@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { amountToInteger } from '#app-gocardless/utils';
 
 import type { IBank } from './bank.interface';
@@ -20,7 +19,8 @@ export default {
   sortTransactions(transactions = []) {
     return transactions.sort((a, b) => {
       return (
-        Number(b.transactionId.substr(2)) - Number(a.transactionId.substr(2))
+        Number((b.transactionId ?? '').substr(2)) -
+        Number((a.transactionId ?? '').substr(2))
       );
     });
   },
@@ -30,7 +30,7 @@ export default {
       const oldestTransaction =
         sortedTransactions[sortedTransactions.length - 1];
       const oldestKnownBalance = amountToInteger(
-        oldestTransaction.balanceAfterTransaction.balanceAmount.amount,
+        oldestTransaction.balanceAfterTransaction?.balanceAmount.amount || 0,
       );
       const oldestTransactionAmount = amountToInteger(
         oldestTransaction.transactionAmount.amount,
@@ -40,7 +40,7 @@ export default {
     } else {
       return amountToInteger(
         balances.find(balance => 'interimBooked' === balance.balanceType)
-          .balanceAmount.amount,
+          ?.balanceAmount.amount || 0,
       );
     }
   },

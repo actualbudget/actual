@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { amountToInteger } from '#app-gocardless/utils';
 
 import type { IBank } from './bank.interface';
@@ -21,11 +20,9 @@ export default {
      * We clean thais up by removing any instances of this string from all transactions.
      *
      */
-    editedTrans.remittanceInformationUnstructured =
-      transaction.remittanceInformationUnstructured.replace(
-        '\nEndToEndID: NOTPROVIDED',
-        '',
-      );
+    editedTrans.remittanceInformationUnstructured = (
+      transaction.remittanceInformationUnstructured ?? ''
+    ).replace('\nEndToEndID: NOTPROVIDED', '');
 
     return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
@@ -35,8 +32,11 @@ export default {
       balance => balance.balanceType === 'interimAvailable',
     );
 
-    return sortedTransactions.reduce((total, trans) => {
-      return total - amountToInteger(trans.transactionAmount.amount);
-    }, amountToInteger(currentBalance.balanceAmount.amount));
+    return sortedTransactions.reduce(
+      (total, trans) => {
+        return total - amountToInteger(trans.transactionAmount.amount);
+      },
+      amountToInteger(currentBalance?.balanceAmount.amount || 0),
+    );
   },
 } satisfies IBank;

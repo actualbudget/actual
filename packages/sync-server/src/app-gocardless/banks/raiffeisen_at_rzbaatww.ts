@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { Transaction } from '#app-gocardless/gocardless-node.types';
 import { formatPayeeName } from '#util/payee-name';
 import { title } from '#util/title';
@@ -33,7 +32,7 @@ export default {
 
 // extracts the payee name from the remittanceInformationStructured
 function extractPayeeName(transaction: Transaction) {
-  const structured = transaction.remittanceInformationStructured;
+  const structured = transaction.remittanceInformationStructured ?? '';
   // The payee name is at the beginning and has a max length of 12 characters
   // (if structured information is actually structured ...).
   const regex = /(.{12}) \d{4} .* \d{2}\.\d{2}\. \d{2}:\d{2}/;

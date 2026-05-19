@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { amountToInteger } from '#app-gocardless/utils';
 
 import type { IBank } from './bank.interface';
@@ -13,7 +12,7 @@ export default {
     const editedTrans = { ...transaction };
 
     const remittanceInformationMatch = /remittanceinformation:(.*)$/.exec(
-      transaction.remittanceInformationUnstructured,
+      transaction.remittanceInformationUnstructured ?? '',
     );
 
     editedTrans.remittanceInformationUnstructured = remittanceInformationMatch
@@ -26,11 +25,11 @@ export default {
   sortTransactions(transactions = []) {
     return transactions.sort((a, b) => {
       const diff =
-        +new Date(b.valueDate || b.bookingDate) -
-        +new Date(a.valueDate || a.bookingDate);
+        +new Date(b.valueDate || b.bookingDate || '') -
+        +new Date(a.valueDate || a.bookingDate || '');
       if (diff) return diff;
-      const idA = parseInt(a.transactionId);
-      const idB = parseInt(b.transactionId);
+      const idA = parseInt(a.transactionId ?? '');
+      const idB = parseInt(b.transactionId ?? '');
       if (!isNaN(idA) && !isNaN(idB)) return idB - idA;
       return 0;
     });
@@ -41,8 +40,11 @@ export default {
       balance => 'interimBooked' === balance.balanceType,
     );
 
-    return sortedTransactions.reduce((total, trans) => {
-      return total - amountToInteger(trans.transactionAmount.amount);
-    }, amountToInteger(currentBalance.balanceAmount.amount));
+    return sortedTransactions.reduce(
+      (total, trans) => {
+        return total - amountToInteger(trans.transactionAmount.amount);
+      },
+      amountToInteger(currentBalance?.balanceAmount.amount || 0),
+    );
   },
 } satisfies IBank;

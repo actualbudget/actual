@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { amountToInteger } from '#app-gocardless/utils';
 
 import type { IBank } from './bank.interface';
@@ -17,7 +16,7 @@ export default {
     // billed to the account is now available in
     // `remittanceInformationUnstructured`.
     const remittanceInformationUnstructured =
-      transaction.remittanceInformationUnstructured;
+      transaction.remittanceInformationUnstructured ?? '';
     if (remittanceInformationUnstructured.startsWith('billingAmount: ')) {
       transaction.transactionAmount = {
         amount: remittanceInformationUnstructured.substring(15),
@@ -35,7 +34,7 @@ export default {
       (total, trans) => {
         return total - amountToInteger(trans.transactionAmount.amount);
       },
-      amountToInteger(balances[0]?.balanceAmount?.amount || 0),
+      amountToInteger(balances[0]?.balanceAmount.amount || 0),
     );
   },
 } satisfies IBank;

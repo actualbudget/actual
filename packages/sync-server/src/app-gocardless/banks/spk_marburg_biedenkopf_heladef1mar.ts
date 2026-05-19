@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { IBank } from './bank.interface';
 import Fallback from './integration-bank';
 
@@ -18,7 +17,9 @@ export default {
     } else if (transaction.remittanceInformationStructured) {
       remittanceInformationUnstructured =
         transaction.remittanceInformationStructured;
-    } else if (transaction.remittanceInformationStructuredArray?.length > 0) {
+    } else if (
+      (transaction.remittanceInformationStructuredArray?.length ?? 0) > 0
+    ) {
       remittanceInformationUnstructured =
         transaction.remittanceInformationStructuredArray?.join(' ');
     }

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import type { IBank } from './bank.interface';
 import Fallback from './integration-bank';
 
@@ -10,10 +9,11 @@ export default {
   normalizeTransaction(transaction, booked) {
     const editedTrans = { ...transaction };
 
-    editedTrans.remittanceInformationUnstructured =
-      transaction.remittanceInformationUnstructured
-        .replaceAll(/\/Txt\/(\w\|)?/gi, '')
-        .replaceAll(';', ' ');
+    editedTrans.remittanceInformationUnstructured = (
+      transaction.remittanceInformationUnstructured ?? ''
+    )
+      .replaceAll(/\/Txt\/(\w\|)?/gi, '')
+      .replaceAll(';', ' ');
 
     editedTrans.debtorName = transaction.debtorName?.replaceAll(';', ' ');
     editedTrans.creditorName =

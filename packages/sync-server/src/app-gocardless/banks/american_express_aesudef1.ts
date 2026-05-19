@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { amountToInteger } from '#app-gocardless/utils';
 
 import type { IBank } from './bank.interface';
@@ -17,7 +16,7 @@ export default {
       mask: account.iban.slice(-5),
       iban: null,
       name: [account.details, `(${account.iban.slice(-5)})`].join(' '),
-      official_name: account.details,
+      official_name: account.details ?? '',
     };
   },
 
@@ -34,8 +33,11 @@ export default {
       balance => 'information' === balance.balanceType.toString(),
     );
 
-    return sortedTransactions.reduce((total, trans) => {
-      return total - amountToInteger(trans.transactionAmount.amount);
-    }, amountToInteger(currentBalance.balanceAmount.amount));
+    return sortedTransactions.reduce(
+      (total, trans) => {
+        return total - amountToInteger(trans.transactionAmount.amount);
+      },
+      amountToInteger(currentBalance?.balanceAmount.amount || 0),
+    );
   },
 } satisfies IBank;

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { amountToInteger } from '#app-gocardless/utils';
 
 import type { IBank } from './bank.interface';
@@ -73,8 +72,8 @@ export default {
       (total, trans) => {
         return total - amountToInteger(trans.transactionAmount.amount);
       },
-      -amountToInteger(currentBalance.balanceAmount.amount) +
-        amountToInteger(nonInvoiced.balanceAmount.amount),
+      -amountToInteger(currentBalance?.balanceAmount.amount || 0) +
+        amountToInteger(nonInvoiced?.balanceAmount.amount || 0),
     );
   },
 } satisfies IBank;
