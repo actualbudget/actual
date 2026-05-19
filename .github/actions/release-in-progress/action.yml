@@ -1,0 +1,38 @@
+name: Release in progress
+description: >-
+  Detects whether a release is currently being prepared. A release is "in
+  progress" while the matching release-notes/X.Y.Z branch still exists.
+
+outputs:
+  should-run:
+    description: '"true" when a release is in progress, otherwise "false"'
+    value: ${{ steps.gate.outputs.should-run }}
+  version:
+    description: 'The version currently on the `release` branch'
+    value: ${{ steps.gate.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve release version and gate
+      id: gate
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        if ! gh api "repos/${GITHUB_REPOSITORY}/branches/release" --silent >/dev/null 2>&1; then
+          echo "No \`release\` branch found; no release in progress."
+          echo "should-run=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        version=$(gh api "repos/${GITHUB_REPOSITORY}/contents/packages/desktop-client/package.json?ref=release" --jq '.content' | base64 -d | jq -r .version)
+        echo "version=$version" >> "$GITHUB_OUTPUT"
+
+        if gh api "repos/${GITHUB_REPOSITORY}/branches/release-notes/${version}" --silent >/dev/null 2>&1; then
+          echo "Release $version is in progress."
+          echo "should-run=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "No \`release-notes/${version}\` branch; no release in progress."
+          echo "should-run=false" >> "$GITHUB_OUTPUT"
+        fi
