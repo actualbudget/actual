@@ -90,7 +90,7 @@ When you first start using priorities, space them 10 numbers apart so you have r
 
 ### Automation Notes {#automation-notes}
 
-Automations, Balance caps and Long-term goals can each have their own note. This is handy; you can jot down what you are trying to accomplish with the automation. For example, with a long-term goal, you could note when you are hoping to reach it and what you are hoping to purchase.
+Every automation can have their own note. This is handy; you can jot down what you are trying to accomplish with the automation. For example, with a long-term goal, you could note when you are hoping to reach it and what you are hoping to purchase.
 
 ![automation with note](/img/goal-template/automation-note.webp)
 
