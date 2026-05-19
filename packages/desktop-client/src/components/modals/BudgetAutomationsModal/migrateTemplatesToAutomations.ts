@@ -49,6 +49,7 @@ export function migrateTemplatesToAutomations(
       const monthly = template.monthly;
       const hasMonthly =
         monthly != null && (monthly !== 0 || template.limit != null);
+      const { description } = template;
 
       if (template.limit) {
         entries.push(
@@ -61,6 +62,9 @@ export function migrateTemplatesToAutomations(
               start: template.limit.start,
               directive: 'template',
               priority: null,
+              // a description on a limit-only simple template belongs to the
+              // limit; with a monthly amount it goes on that instead
+              ...(description && !hasMonthly ? { description } : {}),
             },
             'limit',
           ),
@@ -90,6 +94,7 @@ export function migrateTemplatesToAutomations(
               starting: dayFromDate(firstDayOfMonth(new Date())),
               directive: 'template',
               priority: template.priority,
+              ...(description ? { description } : {}),
             },
             'fixed',
           ),
