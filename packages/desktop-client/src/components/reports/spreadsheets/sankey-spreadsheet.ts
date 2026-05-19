@@ -553,8 +553,6 @@ async function fetchCategoryData(
     }),
   );
   const allCategoryData = nested.flat();
-  
-  console.log('allCategoryData', allCategoryData);
 
   if (groupAccounts) {
     allCategoryData.forEach(entry => {
@@ -747,8 +745,20 @@ export function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
         if (entry.isNegative) {
           // Account > Income category
           addAccountNode(entry.accountId, entry.accountName);
-          addNodeWithLabel(graph, entry.categoryId + SpecialNodeKeys.NegativeSuffix, GraphLayers.CategoryGroup, entry.category, undefined, true);
-          addValueToLink(graph, entry.accountId, entry.categoryId + SpecialNodeKeys.NegativeSuffix, entry.value);
+          addNodeWithLabel(
+            graph,
+            entry.categoryId + SpecialNodeKeys.NegativeSuffix,
+            GraphLayers.CategoryGroup,
+            entry.payeeName ?? entry.category,
+            undefined,
+            true,
+          );
+          addValueToLink(
+            graph,
+            entry.accountId,
+            entry.categoryId + SpecialNodeKeys.NegativeSuffix,
+            entry.value,
+          );
         } else {
           // Payee > Income category > Account
           addNode(
@@ -779,7 +789,12 @@ export function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
             GraphLayers.CategoryGroup,
             entry.categoryGroup,
           );
-          addNode(graph, entry.categoryId, GraphLayers.Category, entry.category);
+          addNode(
+            graph,
+            entry.categoryId,
+            GraphLayers.Category,
+            entry.category,
+          );
           addValueToLink(
             graph,
             entry.accountId,
@@ -798,7 +813,7 @@ export function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
             graph,
             entry.categoryId,
             GraphLayers.IncomeCategory,
-            entry.category,
+            entry.payeeName ?? entry.category,
           );
           addAccountNode(entry.accountId, entry.accountName);
           addValueToLink(graph, entry.categoryId, entry.accountId, entry.value);
@@ -806,8 +821,6 @@ export function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
       }
     }
   });
-
-  console.log(graph)
   return graph;
 }
 
@@ -1326,6 +1339,56 @@ function addHiddenNodes(graph: Graph) {
     nodesByType,
   );
 
+  const activeLayerOrder = GRAPH_LAYER_ORDER.filter(
+    layer => (nodesByType[layer]?.length ?? 0) > 0,
+  );
+  const layerIndex = new Map<GraphLayers, number>();
+  activeLayerOrder.forEach((layer, index) => {
+    layerIndex.set(layer, index);
+  });
+
+  function addHiddenParentChain(key: NodeKey, type: GraphLayers) {
+    const typeIndex = layerIndex.get(type);
+    if (typeIndex === undefined || typeIndex <= 0) {
+      return;
+    }
+
+    let childKey = key;
+    for (let i = typeIndex - 1; i >= 0; i--) {
+      const parentType = activeLayerOrder[i];
+      if (!parentType) {
+        continue;
+      }
+      const parentKey = `${key}_${parentType}${SpecialNodeKeys.HiddenSuffix}`;
+      addNode(graph, parentKey, parentType, '');
+      addValueToLink(graph, parentKey, childKey, -1);
+      childKey = parentKey;
+    }
+  }
+
+  function addHiddenChildChain(key: NodeKey, type: GraphLayers) {
+    const typeIndex = layerIndex.get(type);
+    if (
+      typeIndex === undefined ||
+      typeIndex < 0 ||
+      typeIndex >= activeLayerOrder.length - 1
+    ) {
+      return;
+    }
+
+    let parentKey = key;
+    for (let i = typeIndex + 1; i < activeLayerOrder.length; i++) {
+      const childType = activeLayerOrder[i];
+      if (!childType) {
+        continue;
+      }
+      const childKey = `${key}_${childType}${SpecialNodeKeys.HiddenSuffix}`;
+      addNode(graph, childKey, childType, '');
+      addValueToLink(graph, parentKey, childKey, -1);
+      parentKey = childKey;
+    }
+  }
+
   // Now: find and fix "problematic" nodes
   for (const typeStr in nodesByType) {
     if (!isGraphLayer(typeStr)) continue;
@@ -1336,73 +1399,12 @@ function addHiddenNodes(graph: Graph) {
       const nodeHasParent = hasParent(graph, key);
       const nodeHasChild = hasChild(node);
       if (!nodeHasParent && typeHasParent[type]) {
-        // This node is at a wrong layer and need hidden parents
-        if (type === GraphLayers.IncomeCategory) {
-          addNode(
-            graph,
-            key + '_payee' + SpecialNodeKeys.HiddenSuffix,
-            GraphLayers.IncomePayee,
-            '',
-          );
-          addValueToLink(
-            graph,
-            key + '_payee' + SpecialNodeKeys.HiddenSuffix,
-            key,
-            -1,
-          );
-        } else {
-          addNode(
-            graph,
-            key + '_account' + SpecialNodeKeys.HiddenSuffix,
-            GraphLayers.Account,
-            '',
-          );
-          addValueToLink(
-            graph,
-            key + '_account' + SpecialNodeKeys.HiddenSuffix,
-            key,
-            -1,
-          );
-          addNode(
-            graph,
-            key + '_payee' + SpecialNodeKeys.HiddenSuffix,
-            GraphLayers.IncomePayee,
-            '',
-          );
-          addValueToLink(
-            graph,
-            key + '_payee' + SpecialNodeKeys.HiddenSuffix,
-            key + '_account' + SpecialNodeKeys.HiddenSuffix,
-            -1,
-          );
-        }
+        // This node is at the wrong layer and needs hidden parents.
+        addHiddenParentChain(key, type);
       }
       if (!nodeHasChild && typeHasChild[type]) {
-        // This node is at a wrong layer and need hidden children
-        addNode(
-          graph,
-          key + '_category_group' + SpecialNodeKeys.HiddenSuffix,
-          GraphLayers.CategoryGroup,
-          '',
-        );
-        addNode(
-          graph,
-          key + '_category' + SpecialNodeKeys.HiddenSuffix,
-          GraphLayers.Category,
-          '',
-        );
-        addValueToLink(
-          graph,
-          key,
-          key + '_category_group' + SpecialNodeKeys.HiddenSuffix,
-          -1,
-        );
-        addValueToLink(
-          graph,
-          key + '_category_group' + SpecialNodeKeys.HiddenSuffix,
-          key + '_category' + SpecialNodeKeys.HiddenSuffix,
-          -1,
-        );
+        // This node is at the wrong layer and needs hidden children.
+        addHiddenChildChain(key, type);
       }
     }
   }
