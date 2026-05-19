@@ -88,6 +88,24 @@ Most of the budget automations will have a priority field that you can use to se
 When you first start using priorities, space them 10 numbers apart so you have room to insert additional priorities later.
 :::
 
+### Automation Notes {#automation-notes}
+
+Automations, Balance caps and Long-term goals can each have their own note. This is handy; you can jot down what you are trying to accomplish with the automation. For example, with a long-term goal, you could note when you are hoping to reach it and what you are hoping to purchase.
+
+![automation with note](/img/goal-template/automation-note.webp)
+
+When you hover over a category automation icon (clock), you will see all of the automations present and the notes associated with them.
+
+Here are two examples:
+
+Grocery budget automations:
+
+![grocery budget toolyip](/img/goal-template/automation-tooltip-1.webp)
+
+Dining out budget automations:
+
+![restaurant budget tooltip](/img/goal-template/automation-tooltip-2.webp)
+
 ### Fixed Amount {#fixed-amount}
 
 This is the simplest type of automation. The amount (A) will be budgeted at the cadence you choose (B & C) with the starting date you set (D).
