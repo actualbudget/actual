@@ -234,7 +234,7 @@ export function TagAutocomplete({
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 3,
+                    gap: 5,
                     color: theme.noticeTextMenu,
                     paddingBottom: 3,
                   }}
@@ -243,11 +243,10 @@ export function TagAutocomplete({
                   <span
                     style={{
                       textWrap: 'nowrap',
-                      marginRight: 2,
                       fontSize: 11,
                     }}
                   >
-                    <Trans>Create Tag</Trans>
+                    <Trans>Create tag</Trans>
                   </span>
                   <span className={getTagCSS('')}>{item.name}</span>
                 </div>
