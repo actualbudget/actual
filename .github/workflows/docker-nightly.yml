@@ -25,8 +25,8 @@ env:
   # - actual-server:nightly
   # - actual-server:edge (kept for backwards compatibility)
   TAGS: |
-    type=edge,value=nightly
-    type=edge,value=edge
+    type=raw,value=nightly,enable={{is_default_branch}}
+    type=raw,value=edge,enable={{is_default_branch}}
     type=sha
 
 jobs:
