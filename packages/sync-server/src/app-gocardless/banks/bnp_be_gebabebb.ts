@@ -50,9 +50,9 @@ export default {
         }
         // Keep existing unstructuredArray and add atmPosName and narrative
         editedTrans.remittanceInformationUnstructuredArray = [
-          transaction.remittanceInformationUnstructuredArray ?? '',
-          additionalInformationObject?.atmPosName ?? '',
-          additionalInformationObject?.narrative ?? '',
+          ...(transaction.remittanceInformationUnstructuredArray ?? []),
+          additionalInformationObject?.atmPosName,
+          additionalInformationObject?.narrative,
         ].filter(Boolean) as string[];
 
         // If the creditor name doesn't exist in the original transactions,

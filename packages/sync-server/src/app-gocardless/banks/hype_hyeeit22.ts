@@ -31,9 +31,9 @@ export default {
       // keep only {payment_info} portion of remittance info
       // NOTE: if {payee_name} contains dashes (unlikely / impossible?), this probably gets bugged!
       const remittance = transaction.remittanceInformationUnstructured ?? '';
-      const infoIdx = remittance.indexOf(' - ') + 3;
+      const idx = remittance.indexOf(' - ');
       editedTrans.remittanceInformationUnstructured =
-        infoIdx === -1 ? remittance : remittance.slice(infoIdx).trim();
+        idx === -1 ? remittance : remittance.slice(idx + 3).trim();
     }
     /**
      * CONVERT ESCAPED UNICODE TO CODEPOINTS
