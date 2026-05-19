@@ -18,6 +18,7 @@ export function getLiveRange(
   switch (rangeName) {
     case 'yearToDate': {
       [dateStart, dateEnd] = validateRange(
+        earliestTransaction,
         monthUtils.getYearStart(monthUtils.currentMonth()) + '-01',
         monthUtils.currentDay(),
       );
@@ -26,6 +27,7 @@ export function getLiveRange(
     case 'lastMonth': {
       const prevMonth = monthUtils.subMonths(monthUtils.currentMonth(), 1);
       [dateStart, dateEnd] = validateRange(
+        earliestTransaction,
         monthUtils.firstDayOfMonth(prevMonth),
         monthUtils.lastDayOfMonth(prevMonth),
       );
@@ -33,6 +35,7 @@ export function getLiveRange(
     }
     case 'lastYear': {
       [dateStart, dateEnd] = validateRange(
+        earliestTransaction,
         monthUtils.getYearStart(
           monthUtils.prevYear(monthUtils.currentMonth()),
         ) + '-01',
@@ -43,6 +46,7 @@ export function getLiveRange(
     }
     case 'priorYearToDate': {
       [dateStart, dateEnd] = validateRange(
+        earliestTransaction,
         monthUtils.getYearStart(
           monthUtils.prevYear(monthUtils.currentMonth()),
         ) + '-01',
@@ -52,6 +56,7 @@ export function getLiveRange(
     }
     case 'last30Days': {
       [dateStart, dateEnd] = validateRange(
+        earliestTransaction,
         monthUtils.subDays(monthUtils.currentDay(), 29),
         monthUtils.currentDay(),
       );

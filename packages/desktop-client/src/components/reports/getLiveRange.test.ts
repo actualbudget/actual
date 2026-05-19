@@ -35,14 +35,14 @@ describe('getLiveRange', () => {
       expect(endExclude).toBe(endInclude);
     });
 
-    it('returns the live range even when data starts later', () => {
+    it('clamps start date to earliestTransaction when data starts later', () => {
       const [start, end] = getLiveRange(
         'Last 30 days',
         '2016-12-20',
         LATEST,
         false,
       );
-      expect(start).toBe('2016-12-03');
+      expect(start).toBe('2016-12-20');
       expect(end).toBe('2017-01-01');
     });
 
