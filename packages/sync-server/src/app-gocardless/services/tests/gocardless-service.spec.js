@@ -253,6 +253,37 @@ describe('goCardlessService', () => {
 
       expect(createRequisitionSpy).toBeCalledTimes(1);
     });
+
+    it('uses institution transaction_total_days for maxHistoricalDays by default', async () => {
+      setTokenSpy.mockResolvedValue();
+      getInstitutionSpy.mockResolvedValue({
+        ...mockInstitution,
+        transaction_total_days: '730',
+      });
+      createRequisitionSpy.mockResolvedValue(mockCreateRequisition);
+
+      await goCardlessService.createRequisition(params);
+
+      expect(createRequisitionSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ maxHistoricalDays: '730' }),
+      );
+    });
+
+    it('caps maxHistoricalDays at 90 for banks with separate_continuous_history_consent', async () => {
+      setTokenSpy.mockResolvedValue();
+      getInstitutionSpy.mockResolvedValue({
+        ...mockInstitution,
+        transaction_total_days: '730',
+        supported_features: ['separate_continuous_history_consent'],
+      });
+      createRequisitionSpy.mockResolvedValue(mockCreateRequisition);
+
+      await goCardlessService.createRequisition(params);
+
+      expect(createRequisitionSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ maxHistoricalDays: 90 }),
+      );
+    });
   });
 
   describe('#deleteRequisition', () => {
