@@ -359,7 +359,7 @@ export function AutomationEditorPane({
         })}
         value={active.template.description ?? ''}
         onChange={e => setDescription(e.target.value)}
-        placeholder={t('Optional note for this automation')}
+        placeholder={t('Note')}
         rows={3}
       />
     </View>
