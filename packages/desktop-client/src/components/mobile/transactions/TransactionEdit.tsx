@@ -1589,7 +1589,7 @@ function NoteTagAutocomplete({
           >
             <SvgAdd height={8} width={8} />
             <span style={{ whiteSpace: 'nowrap' }}>
-              <Trans>Create Tag</Trans>
+              <Trans>Create tag</Trans>
             </span>
             <div
               style={{

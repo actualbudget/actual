@@ -406,14 +406,22 @@ expect.extend({
     ) {
       return {
         message: () =>
-          `Expected ${validPayeeListWithFavorite.join(', ')} to have favorite stars.` +
-          `Received ${foundStarList.length} items with favorite stars. Incorrect: ${incorrectStarList.join(', ')}`,
+          `Expected ${validPayeeListWithFavorite.join(
+            ', ',
+          )} to have favorite stars.` +
+          `Received ${
+            foundStarList.length
+          } items with favorite stars. Incorrect: ${incorrectStarList.join(
+            ', ',
+          )}`,
         pass: false,
       };
     } else {
       return {
         message: () =>
-          `Expected ${String(validPayeeListWithFavorite)} to have favorite stars`,
+          `Expected ${String(
+            validPayeeListWithFavorite,
+          )} to have favorite stars`,
         pass: true,
       };
     }
@@ -1342,8 +1350,8 @@ describe('Transactions', () => {
       await userEvent.clear(input);
       await userEvent.type(input, 'spending on #coffee');
 
-      // The "Create Tag #coffee" option should appear
-      const createOption = await screen.findByText('Create Tag');
+      // The "Create tag #coffee" option should appear
+      const createOption = await screen.findByText('Create tag');
       expect(createOption).toBeTruthy();
 
       await userEvent.click(createOption);
