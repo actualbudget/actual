@@ -50,7 +50,7 @@ B. Add a long-term goal<br />
 C. Add month-end cleanup to the category
 
 :::info
-Balance caps can only be added to existing budget automations
+Balance caps only take effect once another automation is contributing funds to the category.
 :::
 
 ![new automation form](/img/goal-template/new-automation.webp)
@@ -79,7 +79,7 @@ Most of the budget automations will have a priority field that you can use to se
 
 :::warning
 
-- Priority 0 automations will budget funds even if they are not available in **To Budget**.
+- Priority 0 automations will budget funds even if they are not available in **To Budget**, this can lead to a negative **To Budget**.
 - Priorities other than 0 will **not** budget more funds than are available.
 - If you have multiple _Cover schedule_ or _Save by date_ automations in a single category, their priorities **must** match.
   :::
@@ -150,6 +150,8 @@ Pick a schedule (A) and a mode (B). See below for a discussion on [adjustments (
 
 **There are two modes:**
 
+For schedules repeating monthly or more often. they are equivalent.
+
 - **Save for the next occurrence.** The automation budgets a portion of the scheduled amount each month so the full amount is ready when needed.
 - **Cover each occurrence when it occurs.** The automation budgets for the schedule only in the month it occurs. It will budget the full scheduled amount.
 
@@ -181,7 +183,7 @@ When you click in the Category field, you will be presented with current choices
 
 ![percentage automation category](/img/goal-template/percentage-category.webp)
 
-- **Total of all income.** This month or Last month. The _Inflow to Budget, Received_ column in the budget will be used.
+- **Total of all income.** This month or Last month. The sum of all income categories in the budget will be used.
 - **Available funds to budget.** This month only. The available amount after Priority 0 and other automations with lower or equal priorities have run will be used.
 - **Specific income categories.** This month or Last month. The percentage will be based on the single income category you choose.
 
@@ -256,7 +258,7 @@ Set a maximum amount over which the budget automations will not add funds.
 
 ![balance cap](/img/goal-template/balance-cap.webp)
 
-- If the category balance exceeds the cap, the next budgeting pass will remove the excess.
+- If the category balance exceeds the cap, the next time you run the budgeting automations the excess will be removed.
 - To keep any extra funds in the category, enable _Retain existing funds over the cap_. When this option is turned on, the next budgeting pass will leave the excess in place.
 
 All automations in the category will be subject to the cap.
@@ -460,10 +462,6 @@ The result will be:
 - Use _Send leftover_ in the categories where you can find some extra money.
 - Use _Receive leftover_ with a weight of 1 in your **Holiday Celebration** category.
 - Use _Receive leftover_ with a weight of 2 in your **Vacation** category.
-
-:::note
-The weights could be 34 and 66 to give a closer approximation of 1/3 and 2/3 where 34 + 66 = 100.
-:::
 
 **I want to pay down my debt as quickly as possible. I have a large Debt category with rollover overspending set. I already budget for more than the minimum payment, but I want to additionally add all extra money I can find.**
 
