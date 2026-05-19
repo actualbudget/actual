@@ -19,6 +19,7 @@
   --color-cardShadow: var(--palette-navy700);
 
   --color-tableBackground: var(--palette-navy800);
+  --color-tableRowBackgroundAlternate: var(--color-tableBackground);
   --color-tableRowBackgroundHover: var(--palette-navy700);
   --color-tableText: var(--palette-navy150);
   --color-tableTextLight: var(--color-tableText);

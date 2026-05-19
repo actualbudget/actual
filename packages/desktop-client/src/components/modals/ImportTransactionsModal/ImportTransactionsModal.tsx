@@ -913,10 +913,11 @@ export function ImportTransactionsModal({
                     </View>
                   );
                 }}
-                renderItem={({ item }) => (
+                renderItem={({ item, index }) => (
                   <View>
                     <Transaction
                       transaction={item}
+                      index={index}
                       showParsed={filetype === 'csv' || filetype === 'qif'}
                       parseDateFormat={parseDateFormat}
                       dateFormat={dateFormat}

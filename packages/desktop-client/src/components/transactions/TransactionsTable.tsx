@@ -908,6 +908,7 @@ type TransactionProps = {
   ascDesc?: 'asc' | 'desc';
   onDragChange?: OnDragChangeCallback<TransactionEntity>;
   onDrop?: OnDropCallback;
+  index: number;
 };
 
 const Transaction = memo(function Transaction({
@@ -966,6 +967,7 @@ const Transaction = memo(function Transaction({
   ascDesc,
   onDragChange,
   onDrop,
+  index,
 }: TransactionProps) {
   const { t } = useTranslation();
 
@@ -1335,7 +1337,9 @@ const Transaction = memo(function Transaction({
             ? theme.tableRowBackgroundHighlight
             : backgroundFocus
               ? theme.tableRowBackgroundHover
-              : theme.tableBackground,
+              : index % 2 === 0
+                ? theme.tableBackground
+                : theme.tableRowBackgroundAlternate,
           ':hover': !(backgroundFocus || selected) && {
             backgroundColor: theme.tableRowBackgroundHover,
           },
@@ -2183,9 +2187,10 @@ function NewTransaction({
         }
       }}
     >
-      {transactions.map(transaction => (
+      {transactions.map((transaction, index) => (
         <Transaction
           key={transaction.id}
+          index={index}
           editing={editingTransaction === transaction.id}
           transaction={transaction}
           subtransactions={transaction.is_parent ? childTransactions : null}
@@ -2556,6 +2561,7 @@ function TransactionTableInner({
         ascDesc={props.ascDesc}
         onDragChange={props.onDragChange}
         onDrop={props.onDrop}
+        index={index}
       />
     );
   };
