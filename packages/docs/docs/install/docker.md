@@ -23,7 +23,7 @@ The `latest` tag points to the most recent official release of Actual. This is t
 The `nightly` tag is updated every time a commit is pushed to the `master` branch. While we welcome people to try it out, there may be more bugs than the official release (please report any you find!). If you choose to give this tag a try, make sure you keep backups of your budget in case something goes wrong.
 
 - `nightly`
-- `nightly-alpine` - Based on Alpine Linux, which is tiny so great for low powered devices.
+- `nightly-alpine` - Based on Alpine Linux, which is tiny so it's great for low-powered devices.
 
 ## Launch container using Docker Compose
 
