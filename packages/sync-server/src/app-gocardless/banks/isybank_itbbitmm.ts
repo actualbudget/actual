@@ -1,0 +1,19 @@
+// @ts-strict-ignore
+import type { IBank } from './bank.interface';
+import Fallback from './integration-bank';
+
+export default {
+  ...Fallback,
+
+  institutionIds: ['ISYBANK_ITBBITMM'],
+
+  // It has been reported that valueDate is more accurate than booking date
+  // when it is provided
+  normalizeTransaction(transaction, booked) {
+    const editedTrans = { ...transaction };
+
+    editedTrans.date = transaction.valueDate ?? transaction.bookingDate;
+
+    return Fallback.normalizeTransaction(transaction, booked, editedTrans);
+  },
+} satisfies IBank;
