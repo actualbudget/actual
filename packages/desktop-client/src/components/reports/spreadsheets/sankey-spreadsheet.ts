@@ -811,12 +811,17 @@ export function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
           // Category > Account
           addNode(
             graph,
-            entry.categoryId,
+            entry.categoryId + SpecialNodeKeys.NegativeSuffix,
             GraphLayers.IncomeCategory,
             entry.payeeName ?? entry.category,
           );
           addAccountNode(entry.accountId, entry.accountName);
-          addValueToLink(graph, entry.categoryId, entry.accountId, entry.value);
+          addValueToLink(
+            graph,
+            entry.categoryId + SpecialNodeKeys.NegativeSuffix,
+            entry.accountId,
+            entry.value,
+          );
         }
       }
     }
