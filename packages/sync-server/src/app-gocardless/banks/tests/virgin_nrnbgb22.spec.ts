@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import Virgin from '#app-gocardless/banks/virgin_nrnbgb22';
 import { mockTransactionAmount } from '#app-gocardless/services/tests/fixtures';
 
@@ -16,8 +15,8 @@ describe('Virgin', () => {
         true,
       );
 
-      expect(normalizedTransaction.payeeName).toEqual('Direct Debit Payment');
-      expect(normalizedTransaction.notes).toEqual('DIRECT DEBIT PAYMENT');
+      expect(normalizedTransaction?.payeeName).toEqual('Direct Debit Payment');
+      expect(normalizedTransaction?.notes).toEqual('DIRECT DEBIT PAYMENT');
     });
 
     it('formats bank transfer payee and references', () => {
@@ -32,8 +31,8 @@ describe('Virgin', () => {
         true,
       );
 
-      expect(normalizedTransaction.payeeName).toEqual('Joe Bloggs');
-      expect(normalizedTransaction.notes).toEqual('Food');
+      expect(normalizedTransaction?.payeeName).toEqual('Joe Bloggs');
+      expect(normalizedTransaction?.notes).toEqual('Food');
     });
 
     it('removes method information from payee name', () => {
@@ -48,8 +47,8 @@ describe('Virgin', () => {
         true,
       );
 
-      expect(normalizedTransaction.payeeName).toEqual('Tesco Express');
-      expect(normalizedTransaction.notes).toEqual('Card 99, Tesco Express');
+      expect(normalizedTransaction?.payeeName).toEqual('Tesco Express');
+      expect(normalizedTransaction?.notes).toEqual('Card 99, Tesco Express');
     });
   });
 });

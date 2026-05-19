@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import Fortuneo from '#app-gocardless/banks/fortuneo_ftnofrp1xxx';
 
 describe('Fortuneo', () => {
@@ -141,14 +140,16 @@ describe('Fortuneo', () => {
         true,
       );
 
-      expect(normalizedCreditorTransaction.payeeName).toBeDefined();
+      expect(normalizedCreditorTransaction?.payeeName).toBeDefined();
       expect(
-        parseFloat(normalizedCreditorTransaction.transactionAmount.amount),
+        parseFloat(
+          normalizedCreditorTransaction?.transactionAmount.amount ?? '',
+        ),
       ).toBeLessThan(0);
 
-      expect(normalizedDebtorTransaction.payeeName).toBeDefined();
+      expect(normalizedDebtorTransaction?.payeeName).toBeDefined();
       expect(
-        parseFloat(normalizedDebtorTransaction.transactionAmount.amount),
+        parseFloat(normalizedDebtorTransaction?.transactionAmount.amount ?? ''),
       ).toBeGreaterThan(0);
     });
 
@@ -159,7 +160,7 @@ describe('Fortuneo', () => {
         true,
       );
 
-      expect(normalizedTransaction.payeeName).toBe('Ong');
+      expect(normalizedTransaction?.payeeName).toBe('Ong');
 
       const transaction2 = transactionsRaw[2];
       const normalizedTransaction2 = Fortuneo.normalizeTransaction(
@@ -167,7 +168,7 @@ describe('Fortuneo', () => {
         true,
       );
 
-      expect(normalizedTransaction2.payeeName).toBe('Xxxyyyyzzz');
+      expect(normalizedTransaction2?.payeeName).toBe('Xxxyyyyzzz');
 
       const transaction3 = transactionsRaw[3];
       const normalizedTransaction3 = Fortuneo.normalizeTransaction(
@@ -175,7 +176,7 @@ describe('Fortuneo', () => {
         true,
       );
 
-      expect(normalizedTransaction3.payeeName).toBe('Google Payment I Dublin');
+      expect(normalizedTransaction3?.payeeName).toBe('Google Payment I Dublin');
 
       const transaction4 = transactionsRaw[4];
       const normalizedTransaction4 = Fortuneo.normalizeTransaction(
@@ -183,7 +184,7 @@ describe('Fortuneo', () => {
         true,
       );
 
-      expect(normalizedTransaction4.payeeName).toBe('Sport Market');
+      expect(normalizedTransaction4?.payeeName).toBe('Sport Market');
 
       const transaction5 = transactionsRaw[5];
       const normalizedTransaction5 = Fortuneo.normalizeTransaction(
@@ -191,7 +192,7 @@ describe('Fortuneo', () => {
         true,
       );
 
-      expect(normalizedTransaction5.payeeName).toBe('Weezevent Someplace');
+      expect(normalizedTransaction5?.payeeName).toBe('Weezevent Someplace');
 
       const transaction7 = transactionsRaw[7];
       const normalizedTransaction7 = Fortuneo.normalizeTransaction(
@@ -199,7 +200,7 @@ describe('Fortuneo', () => {
         true,
       );
 
-      expect(normalizedTransaction7.payeeName).toBe(
+      expect(normalizedTransaction7?.payeeName).toBe(
         'Leclerc Xxxx  Leclerc Xxxx  44321ixcrt211141232',
       );
     });

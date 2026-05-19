@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import RevolutRevolt21 from '#app-gocardless/banks/revolut_revolt21';
 
 describe('RevolutRevolt21', () => {
@@ -18,7 +17,7 @@ describe('RevolutRevolt21', () => {
         true,
       );
 
-      expect(normalizedTransaction.notes).toEqual('Bizum description');
+      expect(normalizedTransaction?.notes).toEqual('Bizum description');
     });
   });
 
@@ -37,7 +36,7 @@ describe('RevolutRevolt21', () => {
       true,
     );
 
-    expect(normalizedTransaction.payeeName).toEqual('DEBTOR NAME');
-    expect(normalizedTransaction.notes).toEqual('Bizum description');
+    expect(normalizedTransaction?.payeeName).toEqual('DEBTOR NAME');
+    expect(normalizedTransaction?.notes).toEqual('Bizum description');
   });
 });

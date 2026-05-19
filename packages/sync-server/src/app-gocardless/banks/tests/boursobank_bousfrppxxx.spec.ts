@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import BoursoBank from '#app-gocardless/banks/boursobank_bousfrppxxx';
 
 describe('BoursoBank', () => {
@@ -182,8 +181,8 @@ describe('BoursoBank', () => {
           true,
         );
 
-        expect(normalizedTransaction.payeeName).toEqual(expectedPayeeName);
-        expect(normalizedTransaction.notes).toEqual(expectedNotes);
+        expect(normalizedTransaction?.payeeName).toEqual(expectedPayeeName);
+        expect(normalizedTransaction?.notes).toEqual(expectedNotes);
       },
     );
   });

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import BperRetail from '#app-gocardless/banks/bper_retail_bpmoit22';
 
 const bookingDate = '2025-09-17';
@@ -18,10 +17,10 @@ describe('BPER Retail BPMOIT22', () => {
         true,
       );
 
-      expect(normalizedTransaction.payeeName).toEqual(
+      expect(normalizedTransaction?.payeeName).toEqual(
         'Healthcare District Zx042 Metropolis Ita',
       );
-      expect(normalizedTransaction.notes).toEqual(
+      expect(normalizedTransaction?.notes).toEqual(
         'PAGAMENTO SU CIRCUITO INTERNAZIONALE HEALTHCARE DISTRICT ZX042 METROPOLIS ITA Operazione carta ****8005 del 15.09.2025',
       );
     });
@@ -39,8 +38,8 @@ describe('BPER Retail BPMOIT22', () => {
         true,
       );
 
-      expect(normalizedTransaction.payeeName).toEqual('Acme Consulting Srl');
-      expect(normalizedTransaction.notes).toEqual(
+      expect(normalizedTransaction?.payeeName).toEqual('Acme Consulting Srl');
+      expect(normalizedTransaction?.notes).toEqual(
         'BONIFICO o/c: ACME CONSULTING SRL ABI-CAB: 03015-03200 a favore di Example Recipient Num. Bon.Sepa 252531000195141 Note di cortesia',
       );
     });
@@ -58,8 +57,8 @@ describe('BPER Retail BPMOIT22', () => {
         true,
       );
 
-      expect(normalizedTransaction.payeeName).toEqual('Global Partners Ltd');
-      expect(normalizedTransaction.notes).toEqual(
+      expect(normalizedTransaction?.payeeName).toEqual('Global Partners Ltd');
+      expect(normalizedTransaction?.notes).toEqual(
         'BONIFICI ESTERI o/c: GLOBAL PARTNERS LTD BIC: EXAMPGB2L a favore di Example Recipient (BPER) Num. Bon.Sepa 252131000238275BE Memo casuale 1.000,00 EUR',
       );
     });
@@ -77,8 +76,8 @@ describe('BPER Retail BPMOIT22', () => {
         true,
       );
 
-      expect(normalizedTransaction.payeeName).toEqual('Cloud Hosting Ltd');
-      expect(normalizedTransaction.notes).toEqual(
+      expect(normalizedTransaction?.payeeName).toEqual('Cloud Hosting Ltd');
+      expect(normalizedTransaction?.notes).toEqual(
         'ADDEBITO SDD CLOUD HOSTING LTD N: 1057087621/48 ID:0210000049513 Cod.Cl. K309846700/ Fatt. 109993626070 Deb: Example Account Owner',
       );
     });
@@ -96,8 +95,10 @@ describe('BPER Retail BPMOIT22', () => {
         true,
       );
 
-      expect(normalizedTransaction.payeeName).toEqual('Utility Company S.P.A.');
-      expect(normalizedTransaction.notes).toEqual(
+      expect(normalizedTransaction?.payeeName).toEqual(
+        'Utility Company S.P.A.',
+      );
+      expect(normalizedTransaction?.notes).toEqual(
         'PAGAMENTI DIVERSI DA INTERNET BANKING E CSA PAGAMENTO BOLLETTINO POSTALE 420251388002409360 DEL 22/06/2025 TRAMITE I.B. / CSA TIPO : 896 CCPOST : 000000000000 CREDITORE: UTILITY COMPANY S.P.A.',
       );
     });
@@ -114,10 +115,10 @@ describe('BPER Retail BPMOIT22', () => {
         true,
       );
 
-      expect(normalizedTransaction.payeeName).toEqual(
+      expect(normalizedTransaction?.payeeName).toEqual(
         'Competenze Spese Ed Oneri',
       );
-      expect(normalizedTransaction.notes).toEqual('COMPETENZE SPESE ED ONERI');
+      expect(normalizedTransaction?.notes).toEqual('COMPETENZE SPESE ED ONERI');
     });
   });
 });

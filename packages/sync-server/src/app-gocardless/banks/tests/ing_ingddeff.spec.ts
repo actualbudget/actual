@@ -1,6 +1,8 @@
-// @ts-strict-ignore
 import IngIngddeff from '#app-gocardless/banks/ing_ingddeff';
-import type { Balance } from '#app-gocardless/gocardless-node.types';
+import type {
+  Balance,
+  Transaction,
+} from '#app-gocardless/gocardless-node.types';
 import type { DetailedAccountWithInstitution } from '#app-gocardless/gocardless.types';
 
 describe('IngIngddeff', () => {
@@ -237,7 +239,7 @@ describe('IngIngddeff', () => {
 
   describe('#sortTransactions', () => {
     it('handles empty arrays', () => {
-      const transactions = [];
+      const transactions: Transaction[] = [];
       const sortedTransactions = IngIngddeff.sortTransactions(transactions);
       expect(sortedTransactions).toEqual([]);
     });
@@ -252,7 +254,7 @@ describe('IngIngddeff', () => {
         IngIngddeff.normalizeTransaction(tx, true),
       );
       const originalOrder = Array.from(normalizeTransactions);
-      const swap = (a, b) => {
+      const swap = (a: number, b: number) => {
         const swap = normalizeTransactions[a];
         normalizeTransactions[a] = normalizeTransactions[b];
         normalizeTransactions[b] = swap;
@@ -261,7 +263,7 @@ describe('IngIngddeff', () => {
       swap(3, 6);
       swap(0, 7);
       const sortedTransactions = IngIngddeff.sortTransactions(
-        normalizeTransactions,
+        normalizeTransactions.filter(tx => tx != null),
       );
       expect(sortedTransactions).toEqual(originalOrder);
     });
@@ -281,7 +283,7 @@ describe('IngIngddeff', () => {
         IngIngddeff.normalizeTransaction(tx, true),
       );
       const sortedTransactions = IngIngddeff.sortTransactions(
-        normalizeTransactions,
+        normalizeTransactions.filter(tx => tx != null),
       );
 
       const startingBalance = IngIngddeff.calculateStartingBalance(
@@ -293,7 +295,7 @@ describe('IngIngddeff', () => {
     });
 
     it('returns the same balance amount when no transactions', () => {
-      const transactions = [];
+      const transactions: Transaction[] = [];
 
       expect(
         IngIngddeff.calculateStartingBalance(transactions, balances),

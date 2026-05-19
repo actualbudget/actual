@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import RaiffeisenAtRzbaatww from '#app-gocardless/banks/raiffeisen_at_rzbaatww';
 import { mockTransactionAmount } from '#app-gocardless/services/tests/fixtures';
 
@@ -19,7 +18,7 @@ describe('raiffeisen_at', () => {
         true,
       );
 
-      expect(normalizedTransaction.payeeName).toEqual('NOTHING STRUCTURED');
+      expect(normalizedTransaction?.payeeName).toEqual('NOTHING STRUCTURED');
     });
 
     it('returns the expected payeeName from a transaction with payee name inside structuredInformation', () => {
@@ -37,7 +36,7 @@ describe('raiffeisen_at', () => {
         true,
       );
 
-      expect(normalizedTransaction.payeeName).toEqual('Company Abcd');
+      expect(normalizedTransaction?.payeeName).toEqual('Company Abcd');
     });
 
     it('returns the creditorName for transactions containing one', () => {
@@ -58,7 +57,7 @@ describe('raiffeisen_at', () => {
         transaction,
         true,
       );
-      expect(normalizedTransaction.payeeName).toEqual(
+      expect(normalizedTransaction?.payeeName).toEqual(
         'Reci Pient (AT20 XXX 8935)',
       );
     });
@@ -78,7 +77,9 @@ describe('raiffeisen_at', () => {
         transaction,
         true,
       );
-      expect(normalizedTransaction.payeeName).toEqual('Company Name City 1010');
+      expect(normalizedTransaction?.payeeName).toEqual(
+        'Company Name City 1010',
+      );
     });
 
     it('returns the endToEndId in notes if no structured or unstructured remittance information is present', () => {
@@ -95,7 +96,7 @@ describe('raiffeisen_at', () => {
         transaction,
         true,
       );
-      expect(normalizedTransaction.notes).toEqual('Transaction 1234');
+      expect(normalizedTransaction?.notes).toEqual('Transaction 1234');
     });
   });
 });

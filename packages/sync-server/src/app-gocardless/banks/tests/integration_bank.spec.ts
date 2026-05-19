@@ -1,9 +1,9 @@
-// @ts-strict-ignore
 import IntegrationBank from '#app-gocardless/banks/integration-bank';
 import type {
   Balance,
   Transaction,
 } from '#app-gocardless/gocardless-node.types';
+import type { DetailedAccountWithInstitution } from '#app-gocardless/gocardless.types';
 import {
   mockExtendAccountsAboutInstitutions,
   mockInstitution,
@@ -30,7 +30,7 @@ describe('IntegrationBank', () => {
       const normalizedAccount = IntegrationBank.normalizeAccount({
         ...account,
         iban: undefined,
-      });
+      } as unknown as DetailedAccountWithInstitution);
       expect(normalizedAccount).toEqual({
         account_id: account.id,
         institution: mockInstitution,

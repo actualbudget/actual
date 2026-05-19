@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import IngPlIngbplpw from '#app-gocardless/banks/ing_pl_ingbplpw';
 import type {
   Balance,
@@ -131,7 +130,7 @@ describe('IngPlIngbplpw', () => {
     });
 
     it('handles empty arrays', () => {
-      const transactions = [];
+      const transactions: Transaction[] = [];
       const sortedTransactions = IngPlIngbplpw.sortTransactions(transactions);
       expect(sortedTransactions).toEqual([]);
     });
@@ -188,7 +187,7 @@ describe('IngPlIngbplpw', () => {
     });
 
     it('returns the same balance amount when no transactions', () => {
-      const transactions = [];
+      const transactions: Transaction[] = [];
 
       const balances: Balance[] = [
         {

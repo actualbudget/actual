@@ -1,6 +1,8 @@
-// @ts-strict-ignore
 import MbankRetailBrexplpw from '#app-gocardless/banks/mbank_retail_brexplpw';
-import type { Balance } from '#app-gocardless/gocardless-node.types';
+import type {
+  Balance,
+  Transaction,
+} from '#app-gocardless/gocardless-node.types';
 import type { DetailedAccountWithInstitution } from '#app-gocardless/gocardless.types';
 
 describe('MbankRetailBrexplpw', () => {
@@ -41,7 +43,7 @@ describe('MbankRetailBrexplpw', () => {
           'private_accounts',
         ],
       },
-    } as DetailedAccountWithInstitution;
+    } as unknown as DetailedAccountWithInstitution;
     it('returns normalized account data returned to Frontend', () => {
       expect(MbankRetailBrexplpw.normalizeAccount(accountRaw))
         .toMatchInlineSnapshot(`
@@ -147,7 +149,7 @@ describe('MbankRetailBrexplpw', () => {
     ];
 
     it('returns the same balance amount when no transactions', () => {
-      const transactions = [];
+      const transactions: Transaction[] = [];
 
       expect(
         MbankRetailBrexplpw.calculateStartingBalance(transactions, balances),

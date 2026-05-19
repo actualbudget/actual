@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import CommerzbankCobadeff from '#app-gocardless/banks/commerzbank_cobadeff';
 
 describe('CommerzbankCobadeff', () => {
@@ -29,7 +28,7 @@ describe('CommerzbankCobadeff', () => {
         transaction,
         false,
       );
-      expect(normalizedTransaction.notes).toEqual(
+      expect(normalizedTransaction?.notes).toEqual(
         '2024-12-19T15:34:31 KFN 1 AB 1234, Kartenzahlung',
       );
     });
@@ -67,7 +66,7 @@ describe('CommerzbankCobadeff', () => {
         transaction,
         false,
       );
-      expect(normalizedTransaction.notes).toEqual(
+      expect(normalizedTransaction?.notes).toEqual(
         '901234567890/. Long description tha t gets cut and is very long, did I mention it is long, End-to-End-Ref.: 901234567890, Mandatsref: ABC123DEF456, Gläubiger-ID: AB12CDE0000000000000000012, SEPA-BASISLASTSCHRIFT wiederholend',
       );
     });
@@ -103,7 +102,7 @@ describe('CommerzbankCobadeff', () => {
         transaction,
         false,
       );
-      expect(normalizedTransaction.notes).toEqual(
+      expect(normalizedTransaction?.notes).toEqual(
         'CREDITOR00BIC CREDITOR000IBAN DESCRIPTION, Dauerauftrag',
       );
     });
@@ -128,7 +127,7 @@ describe('CommerzbankCobadeff', () => {
         transaction,
         false,
       );
-      expect(normalizedTransaction.notes).toEqual('Example');
+      expect(normalizedTransaction?.notes).toEqual('Example');
     });
   });
 });

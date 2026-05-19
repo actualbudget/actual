@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import * as d from 'date-fns';
 
 import {
@@ -41,7 +40,7 @@ export default {
     };
   },
 
-  normalizeTransaction(transaction, _booked, editedTransaction = null) {
+  normalizeTransaction(transaction, _booked, editedTransaction?) {
     const trans = editedTransaction ?? transaction;
 
     const date =
@@ -61,7 +60,8 @@ export default {
     const notes =
       trans.notes ??
       trans.remittanceInformationUnstructured ??
-      trans.remittanceInformationUnstructuredArray?.join(' ');
+      trans.remittanceInformationUnstructuredArray?.join(' ') ??
+      '';
 
     transaction.remittanceInformationUnstructuredArrayString =
       transaction.remittanceInformationUnstructuredArray?.join(',');

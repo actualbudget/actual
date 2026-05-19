@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import Nationwide from '#app-gocardless/banks/nationwide_naiagb21';
 import { mockTransactionAmount } from '#app-gocardless/services/tests/fixtures';
 
@@ -20,7 +19,7 @@ describe('Nationwide', () => {
         true,
       );
 
-      expect(normalizedTransaction.date).toEqual(date);
+      expect(normalizedTransaction?.date).toEqual(date);
     });
 
     it('fixes date for pending transactions', () => {
@@ -37,9 +36,9 @@ describe('Nationwide', () => {
         false,
       );
 
-      expect(new Date(normalizedTransaction.date).getTime()).toBeLessThan(
-        d.getTime(),
-      );
+      expect(
+        new Date(normalizedTransaction?.date ?? '').getTime(),
+      ).toBeLessThan(d.getTime());
     });
 
     it('keeps transactionId if in the correct format', () => {
@@ -55,7 +54,7 @@ describe('Nationwide', () => {
         false,
       );
 
-      expect(normalizedTransaction.transactionId).toBe(transactionId);
+      expect(normalizedTransaction?.transactionId).toBe(transactionId);
     });
 
     it('unsets transactionId if not valid length', () => {
@@ -70,7 +69,7 @@ describe('Nationwide', () => {
         false,
       );
 
-      expect(normalizedTransaction.transactionId).toBeNull();
+      expect(normalizedTransaction?.transactionId).toBeNull();
     });
 
     it('unsets transactionId if debit placeholder found', () => {
@@ -85,7 +84,7 @@ describe('Nationwide', () => {
         false,
       );
 
-      expect(normalizedTransaction.transactionId).toBeNull();
+      expect(normalizedTransaction?.transactionId).toBeNull();
     });
 
     it('unsets transactionId if credit placeholder found', () => {
@@ -100,7 +99,7 @@ describe('Nationwide', () => {
         false,
       );
 
-      expect(normalizedTransaction.transactionId).toBeNull();
+      expect(normalizedTransaction?.transactionId).toBeNull();
     });
   });
 });

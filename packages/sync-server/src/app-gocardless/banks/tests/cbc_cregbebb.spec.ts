@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import CBCcregbebb from '#app-gocardless/banks/cbc_cregbebb';
 
 describe('cbc_cregbebb', () => {
@@ -14,7 +13,7 @@ describe('cbc_cregbebb', () => {
         transaction,
         true,
       );
-      expect(normalizedTransaction.payeeName).toEqual('ONKART FR Viry');
+      expect(normalizedTransaction?.payeeName).toEqual('ONKART FR Viry');
     });
 
     it('returns the debtorName as payeeName when the amount is positive', () => {
@@ -29,7 +28,7 @@ describe('cbc_cregbebb', () => {
         transaction,
         true,
       );
-      expect(normalizedTransaction.payeeName).toEqual('ONKART FR Viry');
+      expect(normalizedTransaction?.payeeName).toEqual('ONKART FR Viry');
     });
   });
 });

@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import KBCkredbebb from '#app-gocardless/banks/kbc_kredbebb';
 
 describe('kbc_kredbebb', () => {
@@ -14,7 +13,7 @@ describe('kbc_kredbebb', () => {
         transaction,
         true,
       );
-      expect(normalizedTransaction.payeeName).toEqual(
+      expect(normalizedTransaction?.payeeName).toEqual(
         'CARREFOUR ST GIL BE1060 BRUXELLES',
       );
     });
@@ -31,7 +30,7 @@ describe('kbc_kredbebb', () => {
         transaction,
         true,
       );
-      expect(normalizedTransaction.payeeName).toEqual(
+      expect(normalizedTransaction?.payeeName).toEqual(
         'CARREFOUR ST GIL BE1060 BRUXELLES',
       );
     });

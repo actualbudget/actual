@@ -1,5 +1,5 @@
-// @ts-strict-ignore
 import LhvLhvbee22 from '#app-gocardless/banks/lhv_lhvbee22';
+import type { Transaction } from '#app-gocardless/gocardless-node.types';
 
 describe('#normalizeTransaction', () => {
   const bookedCardTransaction = {
@@ -15,17 +15,17 @@ describe('#normalizeTransaction', () => {
       '(..1234) 2025-01-02 09:32 CrustumOU\\Poordi 3\\Tallinn\\10156     ESTEST',
     bankTransactionCode: 'PMNT-CCRD-POSD',
     internalTransactionId: 'fa000f86afb2cc7678bcff0000000000',
-  };
+  } as unknown as Transaction;
 
   it('extracts booked card transaction creditor name', () => {
     expect(
-      LhvLhvbee22.normalizeTransaction(bookedCardTransaction, true).payeeName,
+      LhvLhvbee22.normalizeTransaction(bookedCardTransaction, true)?.payeeName,
     ).toEqual('CrustumOU');
   });
 
   it('extracts booked card transaction date', () => {
     expect(
-      LhvLhvbee22.normalizeTransaction(bookedCardTransaction, true).date,
+      LhvLhvbee22.normalizeTransaction(bookedCardTransaction, true)?.date,
     ).toEqual('2025-01-02');
   });
 
@@ -38,10 +38,10 @@ describe('#normalizeTransaction', () => {
     const transaction = {
       ...bookedCardTransaction,
       remittanceInformationUnstructured: remittanceInfo,
-    };
+    } as Transaction;
     const normalized = LhvLhvbee22.normalizeTransaction(transaction, true);
 
-    expect(normalized.date).toEqual('2025-01-03');
+    expect(normalized?.date).toEqual('2025-01-03');
   });
 
   const pendingCardTransaction = {
@@ -57,13 +57,14 @@ describe('#normalizeTransaction', () => {
 
   it('extracts pending card transaction creditor name', () => {
     expect(
-      LhvLhvbee22.normalizeTransaction(pendingCardTransaction, false).payeeName,
+      LhvLhvbee22.normalizeTransaction(pendingCardTransaction, false)
+        ?.payeeName,
     ).toEqual('CrustumOU');
   });
 
   it('extracts pending card transaction date', () => {
     expect(
-      LhvLhvbee22.normalizeTransaction(pendingCardTransaction, false).date,
+      LhvLhvbee22.normalizeTransaction(pendingCardTransaction, false)?.date,
     ).toEqual('2025-01-03');
   });
 });

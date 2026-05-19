@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import EasybankBawaatww from '#app-gocardless/banks/easybank_bawaatww';
 import { mockTransactionAmount } from '#app-gocardless/services/tests/fixtures';
 
@@ -17,7 +16,7 @@ describe('easybank', () => {
         true,
       );
 
-      expect(normalizedTransaction.payeeName).toEqual('Some Payee Name');
+      expect(normalizedTransaction?.payeeName).toEqual('Some Payee Name');
     });
 
     it('returns the expected payeeName from a transaction with payee name inside structuredInformation', () => {
@@ -32,7 +31,7 @@ describe('easybank', () => {
         transaction,
         true,
       );
-      expect(normalizedTransaction.payeeName).toEqual('Some Payee Name');
+      expect(normalizedTransaction?.payeeName).toEqual('Some Payee Name');
     });
 
     it('returns the full structured information as payeeName from a transaction with no payee name', () => {
@@ -47,7 +46,7 @@ describe('easybank', () => {
         transaction,
         true,
       );
-      expect(normalizedTransaction.payeeName).toEqual(
+      expect(normalizedTransaction?.payeeName).toEqual(
         'Auszahlung Karte MC/000001234AUTOMAT 00012345 K001 31.12. 23:59',
       );
     });

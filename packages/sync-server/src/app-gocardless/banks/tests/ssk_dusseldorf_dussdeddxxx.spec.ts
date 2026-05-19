@@ -1,8 +1,9 @@
-// @ts-strict-ignore
+import type { MockInstance } from 'vitest';
+
 import SskDusseldorfDussdeddxxx from '#app-gocardless/banks/ssk_dusseldorf_dussdeddxxx';
 
 describe('ssk_dusseldorf_dussdeddxxx', () => {
-  let consoleSpy;
+  let consoleSpy: MockInstance;
 
   beforeEach(() => {
     consoleSpy = vi.spyOn(console, 'debug');
@@ -46,14 +47,14 @@ describe('ssk_dusseldorf_dussdeddxxx', () => {
         SskDusseldorfDussdeddxxx.normalizeTransaction(
           bookedTransactionOne,
           true,
-        ).notes,
+        )?.notes,
       ).toEqual('unstructured information some additional information');
 
       expect(
         SskDusseldorfDussdeddxxx.normalizeTransaction(
           bookedTransactionTwo,
           true,
-        ).notes,
+        )?.notes,
       ).toEqual('structured information some additional information');
     });
 
@@ -62,14 +63,14 @@ describe('ssk_dusseldorf_dussdeddxxx', () => {
         SskDusseldorfDussdeddxxx.normalizeTransaction(
           bookedTransactionOne,
           true,
-        ).payeeName,
+        )?.payeeName,
       ).toEqual('A Useful Creditor Name');
 
       expect(
         SskDusseldorfDussdeddxxx.normalizeTransaction(
           bookedTransactionTwo,
           true,
-        ).payeeName,
+        )?.payeeName,
       ).toEqual('Ultimate Creditor');
     });
 

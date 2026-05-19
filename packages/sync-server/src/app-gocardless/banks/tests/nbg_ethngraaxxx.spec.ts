@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import NbgEthngraaxxx from '#app-gocardless/banks/nbg_ethngraaxxx';
 
 describe('NbgEthngraaxxx', () => {
@@ -20,8 +19,10 @@ describe('NbgEthngraaxxx', () => {
         false,
       );
 
-      expect(normalizedTransaction.transactionAmount.amount).toEqual('-100.00');
-      expect(normalizedTransaction.payeeName).toEqual('Testingson');
+      expect(normalizedTransaction?.transactionAmount.amount).toEqual(
+        '-100.00',
+      );
+      expect(normalizedTransaction?.payeeName).toEqual('Testingson');
     });
   });
 
@@ -43,7 +44,7 @@ describe('NbgEthngraaxxx', () => {
       true,
     );
 
-    expect(normalizedTransaction.transactionAmount.amount).toEqual('-100.00');
-    expect(normalizedTransaction.payeeName).toEqual('Testingson');
+    expect(normalizedTransaction?.transactionAmount.amount).toEqual('-100.00');
+    expect(normalizedTransaction?.payeeName).toEqual('Testingson');
   });
 });

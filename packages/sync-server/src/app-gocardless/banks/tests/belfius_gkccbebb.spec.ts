@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import Belfius from '#app-gocardless/banks/belfius_gkccbebb';
 import { mockTransactionAmount } from '#app-gocardless/services/tests/fixtures';
 
@@ -15,7 +14,7 @@ describe('Belfius', () => {
         transaction,
         true,
       );
-      expect(normalizedTransaction.transactionId).toEqual(
+      expect(normalizedTransaction?.transactionId).toEqual(
         transaction.internalTransactionId,
       );
     });

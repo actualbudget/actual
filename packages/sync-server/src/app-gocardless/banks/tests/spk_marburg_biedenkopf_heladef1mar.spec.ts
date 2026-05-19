@@ -1,6 +1,8 @@
-// @ts-strict-ignore
 import SpkMarburgBiedenkopfHeladef1mar from '#app-gocardless/banks/spk_marburg_biedenkopf_heladef1mar';
-import type { Balance } from '#app-gocardless/gocardless-node.types';
+import type {
+  Balance,
+  Transaction,
+} from '#app-gocardless/gocardless-node.types';
 import type { DetailedAccountWithInstitution } from '#app-gocardless/gocardless.types';
 
 describe('SpkMarburgBiedenkopfHeladef1mar', () => {
@@ -150,7 +152,7 @@ describe('SpkMarburgBiedenkopfHeladef1mar', () => {
 
       expect(
         SpkMarburgBiedenkopfHeladef1mar.normalizeTransaction(transaction, true)
-          .notes,
+          ?.notes,
       ).toEqual('AUTORISATION  28.12. 18:30');
     });
 
@@ -174,14 +176,14 @@ describe('SpkMarburgBiedenkopfHeladef1mar', () => {
 
       expect(
         SpkMarburgBiedenkopfHeladef1mar.normalizeTransaction(transaction, true)
-          .notes,
+          ?.notes,
       ).toEqual('Entgeltabrechnung siehe Anlage');
     });
   });
 
   describe('#sortTransactions', () => {
     it('handles empty arrays', () => {
-      const transactions = [];
+      const transactions: Transaction[] = [];
       const sortedTransactions =
         SpkMarburgBiedenkopfHeladef1mar.sortTransactions(transactions);
       expect(sortedTransactions).toEqual([]);
@@ -198,7 +200,7 @@ describe('SpkMarburgBiedenkopfHeladef1mar', () => {
         SpkMarburgBiedenkopfHeladef1mar.normalizeTransaction(tx, true),
       );
       const originalOrder = Array.from(normalizeTransactions);
-      const swap = (a, b) => {
+      const swap = (a: number, b: number) => {
         const swap = normalizeTransactions[a];
         normalizeTransactions[a] = normalizeTransactions[b];
         normalizeTransactions[b] = swap;
@@ -206,7 +208,9 @@ describe('SpkMarburgBiedenkopfHeladef1mar', () => {
       swap(1, 3);
       swap(0, 2);
       const sortedTransactions =
-        SpkMarburgBiedenkopfHeladef1mar.sortTransactions(normalizeTransactions);
+        SpkMarburgBiedenkopfHeladef1mar.sortTransactions(
+          normalizeTransactions.filter(tx => tx != null),
+        );
       expect(sortedTransactions).toEqual(originalOrder);
     });
   });
@@ -231,7 +235,9 @@ describe('SpkMarburgBiedenkopfHeladef1mar', () => {
         SpkMarburgBiedenkopfHeladef1mar.normalizeTransaction(tx, true),
       );
       const sortedTransactions =
-        SpkMarburgBiedenkopfHeladef1mar.sortTransactions(normalizeTransactions);
+        SpkMarburgBiedenkopfHeladef1mar.sortTransactions(
+          normalizeTransactions.filter(tx => tx != null),
+        );
 
       const startingBalance =
         SpkMarburgBiedenkopfHeladef1mar.calculateStartingBalance(
@@ -243,7 +249,7 @@ describe('SpkMarburgBiedenkopfHeladef1mar', () => {
     });
 
     it('returns the same balance amount when no transactions', () => {
-      const transactions = [];
+      const transactions: Transaction[] = [];
 
       expect(
         SpkMarburgBiedenkopfHeladef1mar.calculateStartingBalance(

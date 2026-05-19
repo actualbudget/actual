@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import Abanca from '#app-gocardless/banks/abanca_caglesmm';
 import { mockTransactionAmount } from '#app-gocardless/services/tests/fixtures';
 
@@ -16,7 +15,7 @@ describe('Abanca', () => {
         transaction,
         true,
       );
-      expect(normalizedTransaction.payeeName).toEqual('Some-Creditor-Name');
+      expect(normalizedTransaction?.payeeName).toEqual('Some-Creditor-Name');
     });
   });
 });

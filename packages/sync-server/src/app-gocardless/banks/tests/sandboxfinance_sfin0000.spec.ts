@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import SandboxfinanceSfin0000 from '#app-gocardless/banks/sandboxfinance_sfin0000';
 import type {
   Balance,
@@ -33,7 +32,7 @@ describe('SandboxfinanceSfin0000', () => {
         supported_payments: {},
         supported_features: [],
       },
-    } as DetailedAccountWithInstitution;
+    } as unknown as DetailedAccountWithInstitution;
 
     it('returns normalized account data returned to Frontend', () => {
       expect(SandboxfinanceSfin0000.normalizeAccount(accountRaw))
@@ -65,7 +64,7 @@ describe('SandboxfinanceSfin0000', () => {
 
   describe('#sortTransactions', () => {
     it('handles empty arrays', () => {
-      const transactions = [];
+      const transactions: Transaction[] = [];
       const sortedTransactions =
         SandboxfinanceSfin0000.sortTransactions(transactions);
       expect(sortedTransactions).toEqual([]);
@@ -111,7 +110,7 @@ describe('SandboxfinanceSfin0000', () => {
     });
 
     it('returns the same balance amount when no transactions', () => {
-      const transactions = [];
+      const transactions: Transaction[] = [];
 
       expect(
         SandboxfinanceSfin0000.calculateStartingBalance(transactions, balances),

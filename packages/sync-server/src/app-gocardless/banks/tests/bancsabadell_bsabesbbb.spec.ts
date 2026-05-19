@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import Sabadell from '#app-gocardless/banks/bancsabadell_bsabesbbb';
 
 describe('BancSabadell', () => {
@@ -16,7 +15,7 @@ describe('BancSabadell', () => {
           transaction,
           true,
         );
-        expect(normalizedTransaction.payeeName).toEqual('Some-Creditor-Name');
+        expect(normalizedTransaction?.payeeName).toEqual('Some-Creditor-Name');
       });
 
       it('creditor role - amount > 0', () => {
@@ -31,7 +30,7 @@ describe('BancSabadell', () => {
           transaction,
           true,
         );
-        expect(normalizedTransaction.payeeName).toEqual('Some-Debtor-Name');
+        expect(normalizedTransaction?.payeeName).toEqual('Some-Debtor-Name');
       });
     });
 
@@ -48,7 +47,7 @@ describe('BancSabadell', () => {
         transaction,
         true,
       );
-      expect(normalizedTransaction.date).toEqual('2024-10-02');
+      expect(normalizedTransaction?.date).toEqual('2024-10-02');
     });
   });
 });

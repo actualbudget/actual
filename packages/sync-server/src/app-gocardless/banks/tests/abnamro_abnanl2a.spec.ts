@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import AbnamroAbnanl2a from '#app-gocardless/banks/abnamro_abnanl2a';
 
 describe('AbnamroAbnanl2a', () => {
@@ -25,10 +24,10 @@ describe('AbnamroAbnanl2a', () => {
         false,
       );
 
-      expect(normalizedTransaction.notes).toEqual(
+      expect(normalizedTransaction?.notes).toEqual(
         'BEA, Betaalpas, My Payee Name,PAS123, NR:123A4B, 09.12.23/15:43, CITY',
       );
-      expect(normalizedTransaction.payeeName).toEqual('My Payee Name');
+      expect(normalizedTransaction?.payeeName).toEqual('My Payee Name');
     });
 
     it('correctly extracts the payee for google pay', () => {
@@ -53,10 +52,10 @@ describe('AbnamroAbnanl2a', () => {
         false,
       );
 
-      expect(normalizedTransaction.notes).toEqual(
+      expect(normalizedTransaction?.notes).toEqual(
         'BEA, Google Pay, CCV*Other payee name,PAS123, NR:123A4B, 09.12.23/15:43, CITY',
       );
-      expect(normalizedTransaction.payeeName).toEqual('Other Payee Name');
+      expect(normalizedTransaction?.payeeName).toEqual('Other Payee Name');
     });
   });
 });

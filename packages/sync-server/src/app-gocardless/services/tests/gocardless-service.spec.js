@@ -476,7 +476,7 @@ describe('goCardlessService', () => {
                   "iban": "string",
                 },
                 "debtorName": "string",
-                "notes": undefined,
+                "notes": "",
                 "payeeName": "String (stri XXX ring)",
                 "remittanceInformationStructuredArrayString": undefined,
                 "remittanceInformationUnstructuredArrayString": undefined,
@@ -491,7 +491,7 @@ describe('goCardlessService', () => {
                 "bankTransactionCode": "string",
                 "bookingDate": "2000-01-01",
                 "date": "2000-01-01",
-                "notes": undefined,
+                "notes": "",
                 "payeeName": "",
                 "remittanceInformationStructuredArrayString": undefined,
                 "remittanceInformationUnstructuredArrayString": undefined,
@@ -506,7 +506,7 @@ describe('goCardlessService', () => {
             "pending": [
               {
                 "date": "2000-01-01",
-                "notes": undefined,
+                "notes": "",
                 "payeeName": "",
                 "remittanceInformationStructuredArrayString": undefined,
                 "remittanceInformationUnstructuredArrayString": undefined,
