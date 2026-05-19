@@ -71,10 +71,14 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
     resetInputs();
   };
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+    if (e.nativeEvent.isComposing) {
+      return;
+    }
     if (e.key === 'Escape') {
       onClose();
     }
     if (e.key === 'Enter' && tag) {
+      e.preventDefault();
       onAddTag();
     }
   }
