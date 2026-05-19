@@ -30,6 +30,7 @@ jobs:
           ref: master
           fetch-depth: 0
           token: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
+          persist-credentials: true
 
       - name: Set up environment
         uses: ./.github/actions/setup

@@ -6,9 +6,7 @@ on:
     branches:
       - release
 
-permissions:
-  contents: write
-  pull-requests: read
+permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -22,6 +20,8 @@ jobs:
       && startsWith(github.head_ref, 'release-notes/') == false
     runs-on: ubuntu-latest
     environment: pr-automation
+    permissions:
+      contents: read
     steps:
       - name: Check if triggered by bot
         id: bot-check
@@ -71,6 +71,9 @@ jobs:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     environment: release
+    permissions:
+      contents: write
+      pull-requests: read
     steps:
       - name: Resolve version
         id: version
