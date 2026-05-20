@@ -11,6 +11,15 @@ function coerceError(error) {
     return error;
   }
 
+  if (error.type && error.type === 'PostError') {
+    return {
+      type: 'PostError',
+      message: error.message,
+      reason: error.reason,
+      meta: error.meta,
+    };
+  }
+
   return { type: 'ServerError', message: error.message, cause: error };
 }
 

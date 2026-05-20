@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { captureException } from '#platform/exceptions';
 import * as asyncStorage from '#platform/server/asyncStorage';
 import * as connection from '#platform/server/connection';
+import { fetch } from '#platform/server/fetch';
 import { logger } from '#platform/server/log';
 import { createApp } from '#server/app';
 import * as db from '#server/db';
@@ -19,6 +20,7 @@ import { get, post } from '#server/post';
 import { getServer } from '#server/server-config';
 import { batchMessages } from '#server/sync';
 import { undoable, withUndo } from '#server/undo';
+import { MAX_ICON_INPUT_DECODE_BYTES } from '#shared/accountIconLimits';
 import { isNonProductionEnvironment } from '#shared/environment';
 import { dayFromDate } from '#shared/months';
 import * as monthUtils from '#shared/months';
@@ -37,6 +39,10 @@ import type {
 } from '#types/models';
 
 import * as link from './link';
+import {
+  normalizeIconDataUrlForDbIfRaster,
+  normalizeRasterIconBufferForDb,
+} from './normalizeStoredIcon';
 import { getStartingBalancePayee } from './payees';
 import * as bankSync from './sync';
 
@@ -50,6 +56,9 @@ type LinkAccountBaseParams = {
 
 export type AccountHandlers = {
   'account-update': typeof updateAccount;
+  'account-set-icon': typeof setAccountIcon;
+  'bank-update': typeof updateBank;
+  'favicon-fetch': typeof fetchFaviconHandler;
   'accounts-get': typeof getAccounts;
   'account-balance': typeof getAccountBalance;
   'account-properties': typeof getAccountProperties;
@@ -99,6 +108,169 @@ async function updateAccount({
   return {};
 }
 
+// Icon/website updates are isolated from `updateAccount` so rename flows cannot overwrite them.
+async function setAccountIcon({
+  id,
+  icon,
+  website,
+}: {
+  id: AccountEntity['id'];
+  icon?: string | null;
+  website?: string | null;
+}) {
+  await db.update('accounts', {
+    id,
+    ...(icon !== undefined && {
+      icon:
+        icon === null ? null : await normalizeIconDataUrlForDbIfRaster(icon),
+    }),
+    ...(website !== undefined && { website }),
+  });
+  return {};
+}
+
+async function updateBank({
+  id,
+  website,
+  icon,
+}: {
+  id: string;
+  website?: string | null;
+  icon?: string | null;
+}) {
+  await db.update('banks', {
+    id,
+    ...(website !== undefined && { website }),
+    ...(icon !== undefined && {
+      icon:
+        icon === null ? null : await normalizeIconDataUrlForDbIfRaster(icon),
+    }),
+  });
+  return {};
+}
+
+export type FaviconFetchResult = {
+  contentType: string;
+  base64: string;
+  source: 'direct' | 'duckduckgo' | 'image';
+};
+
+/** Thrown when no sync server is configured (client shows Upload/Emoji instead of auto-favicon). */
+export const FAVICON_NO_SYNC_SERVER = 'no-sync-server';
+
+type ProxyMode =
+  | { kind: 'website'; url: string }
+  | { kind: 'image'; url: string };
+
+async function fetchFaviconViaProxy(
+  baseUrl: string,
+  mode: ProxyMode,
+): Promise<FaviconFetchResult> {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) {
+    throw new Error('Sign in required to fetch favicons');
+  }
+
+  const param = mode.kind === 'image' ? 'image' : 'url';
+  const target = `${baseUrl}/favicon?${param}=${encodeURIComponent(mode.url)}`;
+  let res: Response;
+  try {
+    res = await fetch(target, {
+      headers: { 'X-ACTUAL-TOKEN': userToken },
+    });
+  } catch (err) {
+    logger.warn('Favicon proxy unreachable:', err);
+    throw new Error('Favicon proxy unreachable');
+  }
+
+  const text = await res.text();
+  let payload:
+    | { contentType?: string; base64?: string; source?: string; error?: string }
+    | undefined;
+  try {
+    payload = JSON.parse(text);
+  } catch {
+    throw new Error(
+      `Favicon proxy returned non-JSON (HTTP ${res.status}); is the /favicon endpoint deployed on this server?`,
+    );
+  }
+
+  if (!res.ok) {
+    throw new Error(
+      payload?.error ?? `Favicon proxy returned HTTP ${res.status}`,
+    );
+  }
+
+  if (!payload?.contentType || !payload?.base64) {
+    throw new Error('Favicon proxy returned no image data');
+  }
+
+  return {
+    contentType: payload.contentType,
+    base64: payload.base64,
+    source:
+      payload.source === 'duckduckgo'
+        ? 'duckduckgo'
+        : payload.source === 'image'
+          ? 'image'
+          : 'direct',
+  };
+}
+
+async function fetchFaviconHandler({
+  url,
+}: {
+  url: string;
+}): Promise<FaviconFetchResult> {
+  const server = getServer();
+  if (!server?.BASE_SERVER) {
+    const err = new Error(FAVICON_NO_SYNC_SERVER);
+    err.name = FAVICON_NO_SYNC_SERVER;
+    throw err;
+  }
+
+  return fetchFaviconViaProxy(server.BASE_SERVER, { kind: 'website', url });
+}
+
+/** Best-effort bank icon fetch after link; errors are logged, never thrown. */
+export async function tryAutoFetchBankIcon(
+  bankId: string,
+  source:
+    | { kind: 'website'; website: string }
+    | { kind: 'image'; imageUrl: string },
+): Promise<void> {
+  try {
+    const server = getServer();
+    if (!server?.BASE_SERVER) return;
+
+    const bank = await db.first<Pick<db.DbBank, 'id' | 'icon'>>(
+      'SELECT id, icon FROM banks WHERE id = ?',
+      [bankId],
+    );
+    if (!bank || bank.icon) return;
+
+    const result = await fetchFaviconViaProxy(
+      server.BASE_SERVER,
+      source.kind === 'image'
+        ? { kind: 'image', url: source.imageUrl }
+        : { kind: 'website', url: source.website },
+    );
+
+    const raw = Buffer.from(result.base64, 'base64');
+    if (raw.byteLength > MAX_ICON_INPUT_DECODE_BYTES) {
+      logger.warn(
+        `Auto-fetch bank icon skipped: decoded payload ${raw.byteLength} bytes exceeds input limit ${MAX_ICON_INPUT_DECODE_BYTES}`,
+      );
+      return;
+    }
+
+    const dataUrl = await normalizeRasterIconBufferForDb(raw);
+    await db.update('banks', { id: bankId, icon: dataUrl });
+  } catch (err) {
+    logger.warn('Auto-fetch of bank icon failed (non-fatal):', err);
+  }
+}
+
 async function getAccounts(): Promise<AccountEntity[]> {
   const dbAccounts = await db.getAccounts();
   return dbAccounts.map(
@@ -122,6 +294,11 @@ async function getAccounts(): Promise<AccountEntity[]> {
         balance_limit: dbAccount.balance_limit ?? null,
         account_sync_source: dbAccount.account_sync_source ?? null,
         last_sync: dbAccount.last_sync ?? null,
+        website: dbAccount.website ?? null,
+        icon: dbAccount.icon ?? null,
+        bankIcon: dbAccount.bankIcon ?? null,
+        displayIcon: dbAccount.displayIcon ?? null,
+        displayWebsite: dbAccount.displayWebsite ?? null,
       }) satisfies AccountEntity,
   );
 }
@@ -169,6 +346,13 @@ async function linkGoCardlessAccount({
 }) {
   let id;
   const bank = await link.findOrCreateBank(account.institution, requisitionId);
+
+  if (account.institution.logo) {
+    void tryAutoFetchBankIcon(bank.id, {
+      kind: 'image',
+      imageUrl: account.institution.logo,
+    });
+  }
 
   if (upgradingId) {
     const accRow = await db.first<db.DbAccount>(
@@ -243,7 +427,15 @@ async function linkSimpleFinAccount({
   const bank = await link.findOrCreateBank(
     institution,
     externalAccount.orgDomain ?? externalAccount.orgId,
+    externalAccount.orgDomain ?? null,
   );
+
+  if (externalAccount.orgDomain) {
+    void tryAutoFetchBankIcon(bank.id, {
+      kind: 'website',
+      website: externalAccount.orgDomain,
+    });
+  }
 
   if (upgradingId) {
     const accRow = await db.first<db.DbAccount>(
@@ -316,8 +508,21 @@ async function linkPluggyAiAccount({
 
   const bank = await link.findOrCreateBank(
     institution,
-    externalAccount.orgDomain ?? externalAccount.orgId,
+    externalAccount.orgId,
+    externalAccount.connectorWebsite ?? null,
   );
+
+  if (externalAccount.connectorImageUrl) {
+    void tryAutoFetchBankIcon(bank.id, {
+      kind: 'image',
+      imageUrl: externalAccount.connectorImageUrl,
+    });
+  } else if (externalAccount.connectorWebsite) {
+    void tryAutoFetchBankIcon(bank.id, {
+      kind: 'website',
+      website: externalAccount.connectorWebsite,
+    });
+  }
 
   if (upgradingId) {
     const accRow = await db.first<db.DbAccount>(
@@ -1545,6 +1750,9 @@ async function unlinkAccount({ id }: { id: AccountEntity['id'] }) {
 export const app = createApp<AccountHandlers>();
 
 app.method('account-update', mutator(undoable(updateAccount)));
+app.method('account-set-icon', mutator(undoable(setAccountIcon)));
+app.method('bank-update', mutator(undoable(updateBank)));
+app.method('favicon-fetch', fetchFaviconHandler);
 app.method('accounts-get', getAccounts);
 app.method('account-balance', getAccountBalance);
 app.method('account-properties', getAccountProperties);

@@ -616,7 +616,7 @@ async function _loadBudget(id: Budget['id']): Promise<{
 
   // Ensure that syncing is enabled
   if (process.env.NODE_ENV !== 'test') {
-    if (id === DEMO_BUDGET_ID) {
+    if (id === DEMO_BUDGET_ID || id === TEST_BUDGET_ID) {
       setSyncingMode('disabled');
     } else {
       if (getServer()) {
