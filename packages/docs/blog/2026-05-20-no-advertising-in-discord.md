@@ -20,7 +20,7 @@ We do not want this. Actual has been privacy-oriented since day one, and that is
 
 ## Our Policy
 
-From now on, **advertising is not allowed in the Actual Discord**. This covers paid products, closed-source apps, and services built on top of Actual.
+From now on, **advertising is not allowed in the Actual Discord**. This applies to paid products, closed-source apps, and services built on top of Actual, regardless of who is doing the promoting.
 
 The reasoning is simple. We cannot verify what these products do with your data, so we are not going to let them be promoted in a space the community trusts.
 
