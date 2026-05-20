@@ -55,6 +55,7 @@ export type CashFlowWidget = AbstractWidget<
     conditionsOp?: 'and' | 'or';
     timeFrame?: TimeFrame;
     showBalance?: boolean;
+    interval?: 'Daily' | 'Monthly' | 'Yearly';
   } | null
 >;
 export type SpendingWidget = AbstractWidget<
