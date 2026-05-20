@@ -114,7 +114,7 @@ describe('Transactions', () => {
 
   test('splitting a transaction works', () => {
     const transactions = [
-      makeTransaction({ id: 't1', amount: 5000 }),
+      makeTransaction({ id: 't1', amount: 5000, payee: 'payee-1' }),
       makeTransaction({ amount: 3000 }),
     ];
     const { data, diff } = splitTransaction(transactions, 't1');
@@ -127,6 +127,7 @@ describe('Transactions', () => {
         {
           id: 't1',
           is_parent: true,
+          payee: null,
           error: splitError(5000),
         },
       ],
@@ -135,9 +136,10 @@ describe('Transactions', () => {
       expect.objectContaining({
         id: 't1',
         amount: 5000,
+        payee: null,
         error: splitError(5000),
       }),
-      expect.objectContaining({ parent_id: 't1', amount: 0 }),
+      expect.objectContaining({ parent_id: 't1', amount: 0, payee: 'payee-1' }),
       expect.objectContaining({ amount: 3000 }),
     ]);
   });
