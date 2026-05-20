@@ -193,6 +193,9 @@ export function BudgetTable(props: BudgetTableProps) {
     if (e.key === 'Enter' || e.key === 'Tab') {
       e.preventDefault();
       moveVertically(e.shiftKey ? -1 : 1);
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      setEditing(null);
     }
   };
 
