@@ -17,6 +17,7 @@ import {
   isValidOp,
   sortNumbers,
 } from '#shared/rules';
+import { extractTagsForFilter } from '#shared/tags';
 
 import {
   assert,
@@ -98,6 +99,7 @@ export const CONDITION_TYPES = {
       'doesNotContain',
       'notOneOf',
       'hasTags',
+      'hasAnyTag',
     ],
     nullable: true,
     parse(op, value, fieldName) {
@@ -122,7 +124,8 @@ export const CONDITION_TYPES = {
         op === 'contains' ||
         op === 'matches' ||
         op === 'doesNotContain' ||
-        op === 'hasTags'
+        op === 'hasTags' ||
+        op === 'hasAnyTag'
       ) {
         assert(
           value.length > 0,
@@ -131,7 +134,7 @@ export const CONDITION_TYPES = {
         );
       }
 
-      if (op === 'hasTags') {
+      if (op === 'hasTags' || op === 'hasAnyTag') {
         return value;
       }
 
@@ -347,6 +350,14 @@ export class Condition {
           return false;
         }
         return String(fieldValue).indexOf(this.value) !== -1;
+
+      case 'hasAnyTag': {
+        if (fieldValue === null) {
+          return false;
+        }
+        const tags = extractTagsForFilter(this.value);
+        return tags.some(tag => String(fieldValue).includes(tag.toLowerCase()));
+      }
 
       case 'notOneOf':
         if (fieldValue === null) {
