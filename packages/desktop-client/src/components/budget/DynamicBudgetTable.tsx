@@ -9,6 +9,7 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
@@ -47,10 +48,12 @@ const DynamicBudgetTable = ({
   maxMonths = 3,
   monthBounds,
   onMonthSelect,
+  onBudgetAction,
   ...props
 }: DynamicBudgetTableProps) => {
   const { setDisplayMax } = useBudgetMonthCount();
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
 
   const numPossible = getNumPossibleMonths(
@@ -122,6 +125,18 @@ const DynamicBudgetTable = ({
     },
     [_onMonthSelect, startMonth, numMonths],
   );
+  useHotkeys(
+    't',
+    () => {
+      onBudgetAction(startMonth, 'overwrite-goal-template', null);
+    },
+    {
+      preventDefault: true,
+      scopes: ['app'],
+      enabled: isGoalTemplatesEnabled,
+    },
+    [onBudgetAction, startMonth, isGoalTemplatesEnabled],
+  );
 
   return (
     <View
@@ -146,6 +161,7 @@ const DynamicBudgetTable = ({
             startMonth={startMonth}
             numMonths={numMonths}
             monthBounds={monthBounds}
+            onBudgetAction={onBudgetAction}
             {...props}
           />
         </ErrorBoundary>
