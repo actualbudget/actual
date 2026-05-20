@@ -126,7 +126,7 @@ const DynamicBudgetTable = ({
     [_onMonthSelect, startMonth, numMonths],
   );
   useHotkeys(
-    'ctrl+t, meta+t',
+    'shift+t',
     () => {
       onBudgetAction(startMonth, 'overwrite-goal-template', null);
     },

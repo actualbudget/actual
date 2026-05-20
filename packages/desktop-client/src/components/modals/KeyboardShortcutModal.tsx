@@ -239,7 +239,7 @@ export function KeyboardShortcutModal() {
                 {
                   id: 'overwrite-with-templates',
                   shortcut: 'T',
-                  meta: ctrl,
+                  shift: true,
                   description: t('Overwrite with budget templates'),
                 },
               ]
