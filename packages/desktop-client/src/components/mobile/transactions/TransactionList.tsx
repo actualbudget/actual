@@ -28,6 +28,7 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { validForMerge } from '@actual-app/core/shared/merge';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { isPreviewId } from '@actual-app/core/shared/transactions';
 import { validForTransfer } from '@actual-app/core/shared/transfer';
@@ -382,8 +383,7 @@ function SelectedTransactionsFloatingActionBar({
 
   const canMerge = useMemo(() => {
     return Boolean(
-      twoTransactions &&
-      twoTransactions[0].amount === twoTransactions[1].amount,
+      twoTransactions && validForMerge(twoTransactions[0], twoTransactions[1]),
     );
   }, [twoTransactions]);
 
