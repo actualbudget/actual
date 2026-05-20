@@ -56,14 +56,63 @@ export function getStatusLabel(status: string) {
 }
 
 /**
+ * Computes the lower-bound date used when checking whether a schedule
+ * already has a matching transaction for the current cycle.
+ *
+ * For one-time schedules the lower-bound is the exact `next_date`.
+ *
+ * For recurring schedules we look back by roughly one cycle (minus a
+ * day) so that a transaction posted ahead of the due date is still
+ * counted toward the current cycle (see issue #1957), while a
+ * transaction from the previous cycle is not. The lookback is derived
+ * from `frequency`/`interval` instead of being a fixed number of days.
+ */
+export function getScheduleHasTransactionsLowerBound(
+  nextDate: string,
+  dateCond,
+): string {
+  if (!dateCond || dateCond.op === 'is') {
+    return nextDate;
+  }
+
+  const config = dateCond.value;
+  const interval =
+    config && typeof config === 'object' && config.interval
+      ? config.interval
+      : 1;
+
+  let lookbackDays = 2;
+  if (config && typeof config === 'object' && config.frequency) {
+    switch (config.frequency) {
+      case 'daily':
+        lookbackDays = 0;
+        break;
+      case 'weekly':
+        lookbackDays = Math.max(0, 7 * interval - 1);
+        break;
+      case 'monthly':
+        lookbackDays = Math.max(0, 28 * interval - 1);
+        break;
+      case 'yearly':
+        lookbackDays = Math.max(0, 365 * interval - 1);
+        break;
+      default:
+        lookbackDays = 2;
+    }
+  }
+
+  return lookbackDays === 0
+    ? nextDate
+    : monthUtils.subDays(nextDate, lookbackDays);
+}
+
+/**
  * Builds a query to check if each schedule already has a matching transaction.
  *
- * The date lower-bound varies:
- * - `dateCond.op === 'is'` (one-time): exact `next_date`, no lookback.
- * - `posts_transaction` (auto-posted recurring): exact `next_date`, since
- *   auto-posted dates are always precise. A lookback here would cause
- *   yesterday's transaction to falsely match today's occurrence.
- * - Otherwise (manual recurring): 2-day lookback to catch early payments.
+ * The date lower-bound is computed per-schedule via
+ * `getScheduleHasTransactionsLowerBound` so that transactions posted
+ * early (e.g. a monthly bill paid 10 days ahead) are still counted
+ * toward the current cycle.
  */
 export function getHasTransactionsQuery(schedules) {
   const filters = schedules.map(schedule => {
@@ -72,12 +121,10 @@ export function getHasTransactionsQuery(schedules) {
       $and: {
         schedule: schedule.id,
         date: {
-          $gte:
-            dateCond && dateCond.op === 'is'
-              ? schedule.next_date
-              : schedule.posts_transaction
-                ? schedule.next_date
-                : monthUtils.subDays(schedule.next_date, 2),
+          $gte: getScheduleHasTransactionsLowerBound(
+            schedule.next_date,
+            dateCond,
+          ),
         },
       },
     };
@@ -269,6 +316,9 @@ type ScheduleRuleOptions = IRuleOptions & {
   frequency: string;
   interval?: number;
   byHourOfDay?: number[];
+  byMonthOfYear?: number[];
+  byDayOfMonth?: number[];
+  byDayOfWeek?: Array<string | [string, number]>;
 };
 
 export function recurConfigToRSchedule(config) {
@@ -315,6 +365,53 @@ export function recurConfigToRSchedule(config) {
           },
         ].filter(Boolean);
       } else {
+        // Issue #1062: When the start day is the 29th, 30th, or 31st,
+        // the default RFC-5545 monthly recurrence skips months that
+        // don't have that day (e.g. a monthly schedule starting on
+        // May 31 produces no occurrence in June). Fall back to the
+        // last day of the month for those months by splitting the
+        // recurrence into two rules: one for months that contain
+        // the start day, and one for the remaining months using
+        // `byDayOfMonth: [-1]` (last day).
+        //
+        // The `after_n_occurrences` end-mode uses the existing
+        // single-rule behaviour because splitting would otherwise
+        // produce twice as many occurrences (each rule generates
+        // its own `count`).
+        const startDay = base.start.getDate();
+        if (startDay >= 29 && config.endMode !== 'after_n_occurrences') {
+          const monthsWithDay: number[] = [];
+          const monthsWithoutDay: number[] = [];
+          // Use a non-leap baseline year so that February with 28
+          // days is treated as not containing day 29. Leap-year
+          // February will still match through `byDayOfMonth: [-1]`.
+          for (let m = 1; m <= 12; m++) {
+            const daysInMonth = new Date(2023, m, 0).getDate();
+            if (daysInMonth >= startDay) {
+              monthsWithDay.push(m);
+            } else {
+              monthsWithoutDay.push(m);
+            }
+          }
+
+          const rules: ScheduleRuleOptions[] = [];
+          if (monthsWithDay.length > 0) {
+            rules.push({
+              ...base,
+              byMonthOfYear: monthsWithDay,
+              byDayOfMonth: [startDay],
+            });
+          }
+          if (monthsWithoutDay.length > 0) {
+            rules.push({
+              ...base,
+              byMonthOfYear: monthsWithoutDay,
+              byDayOfMonth: [-1],
+            });
+          }
+          return rules;
+        }
+
         // Nothing to do
         return [base];
       }
