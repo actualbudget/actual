@@ -16,7 +16,7 @@ Actual has grown a lot over the past few years, and our community has grown righ
 
 Actual is built by volunteers. People give their time, their knowledge, and their care to make this software better, and they do it for free. Lately we have seen some bad actors try to use all of that hard work to make a quick buck off the community. In some cases it goes further than that, with attempts to collect the personal data of our users.
 
-We do not want this. Actual has been privacy oriented since day one, and that is not going to change.
+We do not want this. Actual has been privacy-oriented since day one, and that is not going to change.
 
 ## Our Policy
 
