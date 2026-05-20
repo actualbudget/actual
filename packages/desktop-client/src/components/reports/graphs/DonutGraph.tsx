@@ -72,7 +72,13 @@ const resolveCSSVariable = (color: string): string => {
     .trim();
 };
 
-const hexToRgb = (hex: string) => {
+type RgbColor = {
+  r: number;
+  g: number;
+  b: number;
+};
+
+const hexToRgb = (hex: string): RgbColor | null => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
     ? {
@@ -80,11 +86,46 @@ const hexToRgb = (hex: string) => {
         g: parseInt(result[2], 16),
         b: parseInt(result[3], 16),
       }
-    : { r: 0, g: 0, b: 0 };
+    : null;
 };
 
-const shadeColor = (resolvedHex: string, percent: number): string => {
-  const { r, g, b } = hexToRgb(resolvedHex);
+const hslToRgb = (color: string): RgbColor | null => {
+  const result =
+    /^hsla?\(\s*([\d.]+)(?:deg)?[\s,]+([\d.]+)%[\s,]+([\d.]+)%(?:\s*[,/]\s*[\d.]+%?)?\s*\)$/i.exec(
+      color,
+    );
+
+  if (!result) return null;
+
+  const hue = (Number(result[1]) % 360) / 360;
+  const saturation = Number(result[2]) / 100;
+  const lightness = Number(result[3]) / 100;
+
+  const toRgb = (offset: number) => {
+    const factor = (offset + hue * 12) % 12;
+    const chroma = saturation * Math.min(lightness, 1 - lightness);
+    return Math.round(
+      255 *
+        (lightness -
+          chroma * Math.max(-1, Math.min(factor - 3, 9 - factor, 1))),
+    );
+  };
+
+  return {
+    r: toRgb(0),
+    g: toRgb(8),
+    b: toRgb(4),
+  };
+};
+
+const parseColor = (color: string): RgbColor | null =>
+  hexToRgb(color) ?? hslToRgb(color);
+
+export const shadeColor = (color: string, percent: number): string => {
+  const parsed = parseColor(color);
+  if (!parsed) return color;
+
+  const { r, g, b } = parsed;
   const adjust = (c: number) =>
     Math.min(255, Math.max(0, Math.round(c + (255 - c) * percent)));
   return `rgb(${adjust(r)}, ${adjust(g)}, ${adjust(b)})`;
