@@ -31,7 +31,13 @@ export function useFilteredTags(
   const filteredTags = useMemo(() => {
     if (!filterStr || !tags) return [];
     if (requireHashInFilter && !filterStr.startsWith('#')) return [];
-    return filterTags(tags, filterStr);
+    return new Fzf(tags, {
+      selector: tag => tag.tag,
+      limit: 100,
+      tiebreakers: [byLengthAsc, byStartAsc],
+    })
+      .find(filterStr.replace(/^#/, ''))
+      .map(item => item.item);
   }, [tags, filterStr, requireHashInFilter]);
   return {
     data: filteredTags,

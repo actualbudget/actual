@@ -71,11 +71,14 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
     resetInputs();
   };
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
-    console.log(e);
+    if (e.nativeEvent.isComposing) {
+      return;
+    }
     if (e.key === 'Escape') {
       onClose();
     }
     if (e.key === 'Enter' && tag) {
+      e.preventDefault();
       onAddTag();
     }
   }
@@ -95,7 +98,9 @@ export const TagCreationRow = ({ onClose, tags }: TagCreationRowProps) => {
         backgroundColor: theme.tableBackground,
       }}
       data-testid="new-tag"
-      {...tableNavigator.getNavigatorProps({})}
+      {...tableNavigator.getNavigatorProps({
+        onKeyUp: onKeyDown,
+      })}
     >
       <Row
         height={34}

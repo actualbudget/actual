@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useId, useMemo, useRef, useState } from 'react';
 import type {
   CSSProperties,
   FocusEventHandler,
@@ -15,6 +8,7 @@ import type {
 import { ListBox, ListBoxItem, Popover } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { SvgAdd } from '@actual-app/components/icons/v0';
 import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -81,15 +75,23 @@ export function TagAutocomplete({
 
   const [highlightedIdx, setHighlightedIdx] = useState(0);
   const highlightedId =
-    showPopup && highlightedIdx < filteredItems.length
+    showPopup && highlightedIdx >= 0 && highlightedIdx < filteredItems.length
       ? filteredItems[highlightedIdx].id
       : null;
-  useEffect(() => {
-    if (highlightedId) {
-      const el = document.querySelector(`[data-key="${id(highlightedId)}"]`);
-      el?.scrollIntoView?.({ block: 'nearest' });
-    }
-  }, [highlightedId, id]);
+  const scrollItemIntoView = useCallback(
+    (idx: number) => {
+      const targetId =
+        showPopup &&
+        idx >= 0 &&
+        idx < filteredItems?.length &&
+        filteredItems[idx].id;
+      if (targetId) {
+        const el = document.querySelector(`[data-key="${id(targetId)}"]`);
+        el?.scrollIntoView?.({ block: 'nearest' });
+      }
+    },
+    [id, filteredItems, showPopup],
+  );
 
   async function handleSelect(id: string | null) {
     const tagObj = filteredItems.find(tag => tag.id === id);
@@ -121,21 +123,23 @@ export function TagAutocomplete({
     }
 
     if (e.key === 'ArrowUp') {
+      e.preventDefault();
       setHighlightedIdx(highlightedIdx - 1);
-      e.preventDefault();
+      scrollItemIntoView(highlightedIdx - 1);
     } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
       setHighlightedIdx(highlightedIdx + 1);
-      e.preventDefault();
+      scrollItemIntoView(highlightedIdx + 1);
     } else if (e.key === 'Home' && filteredItems.length > 1) {
-      setHighlightedIdx(0);
       e.preventDefault();
+      setHighlightedIdx(0);
     } else if (e.key === 'End' && filteredItems.length > 1) {
       setHighlightedIdx(filteredItems.length - 1);
       e.preventDefault();
     } else if (highlightedId && (e.key === 'Enter' || e.key === 'Tab')) {
-      void handleSelect(highlightedId);
       e.preventDefault();
       e.stopPropagation();
+      void handleSelect(highlightedId);
     } else if (e.key === 'Escape') {
       setIsOpen(false);
     }
@@ -160,6 +164,7 @@ export function TagAutocomplete({
           setIsOpen(true);
           setInputValue(e.currentTarget.value);
         }}
+        tabIndex={-1}
         onKeyDown={handleKeyDown}
         onFocus={() => setIsOpen(true)}
         onBlur={onBlur}
@@ -170,13 +175,12 @@ export function TagAutocomplete({
       <Popover
         isNonModal
         placement="bottom start"
-        className={css(styles.darkScrollbar)}
-        style={{
+        className={css(styles.darkScrollbar, {
           background: theme.menuAutoCompleteBackground,
           borderRadius: 6,
           boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
           width: inputRef.current?.offsetWidth ?? 100,
-        }}
+        })}
         offset={1}
         triggerRef={inputRef}
         isOpen={showPopup}
@@ -189,7 +193,11 @@ export function TagAutocomplete({
           selectionMode="single"
           dependencies={[highlightedId]}
           onPointerDown={e => e.preventDefault()}
-          style={{ borderRadius: 4, maxHeight: '150px', overflowY: 'auto' }}
+          style={{
+            borderRadius: 4,
+            maxHeight: '150px',
+            overflowY: 'auto',
+          }}
         >
           {(item: (typeof filteredItems)[number]) => (
             <ListBoxItem
@@ -202,22 +210,22 @@ export function TagAutocomplete({
                     ? theme.menuAutoCompleteBackgroundHover
                     : 'transparent',
                 alignItems: 'center',
-                padding: 4,
                 fontWeight: 500,
                 cursor: 'pointer',
                 color:
                   highlightedId === item.id
                     ? theme.menuAutoCompleteItemTextHover
                     : theme.menuAutoCompleteItemText,
+                padding: '4px 6px 1px 6px',
               })}
-              onMouseOver={() =>
-                setHighlightedIdx(
-                  Math.max(
-                    0,
-                    filteredItems.findIndex(_item => _item.id === item.id),
-                  ),
-                )
-              }
+              onMouseMove={() => {
+                const idx = filteredItems.findIndex(
+                  _item => _item.id === item.id,
+                );
+                if (idx >= 0 && highlightedIdx !== idx) {
+                  setHighlightedIdx(idx);
+                }
+              }}
               onPointerDown={e => e.preventDefault()}
               onClick={() => handleSelect(item.id)}
             >
@@ -226,16 +234,19 @@ export function TagAutocomplete({
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 3,
-                    color:
-                      highlightedId === item.id
-                        ? theme.menuAutoCompleteTextHover
-                        : theme.noticeTextMenu,
-                    padding: 4,
+                    gap: 5,
+                    color: theme.noticeTextMenu,
+                    paddingBottom: 3,
                   }}
                 >
-                  <span style={{ textWrap: 'nowrap' }}>
-                    <Trans>Create Tag</Trans>
+                  <SvgAdd height={8} width={8} />
+                  <span
+                    style={{
+                      textWrap: 'nowrap',
+                      fontSize: 11,
+                    }}
+                  >
+                    <Trans>Create tag</Trans>
                   </span>
                   <span className={getTagCSS('')}>{item.name}</span>
                 </div>

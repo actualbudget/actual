@@ -1,7 +1,5 @@
-import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Input } from '@actual-app/components/input';
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { amountToInteger, integerToAmount } from '@actual-app/core/shared/util';
@@ -14,6 +12,7 @@ import { updateTemplate } from '#components/budget/goals/actions';
 import type { Action } from '#components/budget/goals/actions';
 import { FormField, FormLabel } from '#components/forms';
 import { AmountInput } from '#components/util/AmountInput';
+import { PercentInput } from '#components/util/PercentInput';
 import { useFormat } from '#hooks/useFormat';
 
 type AdjustableTemplate = ScheduleTemplate | AverageTemplate;
@@ -23,6 +22,8 @@ type Direction = 'increase' | 'decrease';
 
 // Seeded when an adjustment is first switched on.
 const DEFAULT_MAGNITUDE = 10;
+
+const MAX_PERCENT = 1000;
 
 type AmountAdjustmentProps = {
   template: AdjustableTemplate;
@@ -46,13 +47,6 @@ export const AmountAdjustment = ({
   const adjustment = template.adjustment ?? 0;
   const increasing = adjustment >= 0;
   const magnitude = Math.abs(adjustment);
-
-  const [rawMagnitude, setRawMagnitude] = useState(String(magnitude));
-  // Resync when a different automation row is selected (the component
-  // instance is reused across rows).
-  useEffect(() => {
-    setRawMagnitude(String(magnitude));
-  }, [magnitude]);
 
   const apply = (
     next: number | undefined,
@@ -89,13 +83,6 @@ export const AmountAdjustment = ({
 
   const changeDirection = (direction: Direction) => {
     apply(direction === 'decrease' ? -magnitude : magnitude, 'percent');
-  };
-
-  const commitMagnitude = () => {
-    const parsed = Number(rawMagnitude);
-    const size = Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
-    setRawMagnitude(String(size));
-    apply(increasing ? size : -size, 'percent');
   };
 
   return (
@@ -143,13 +130,14 @@ export const AmountAdjustment = ({
                   ]}
                   style={{ width: 150 }}
                 />
-                <Input
+                <PercentInput
                   id="adjustment-amount-field"
-                  inputMode="decimal"
-                  style={{ width: 120 }}
-                  value={rawMagnitude}
-                  onChangeValue={setRawMagnitude}
-                  onBlur={commitMagnitude}
+                  max={MAX_PERCENT}
+                  value={magnitude}
+                  onUpdatePercent={percent =>
+                    apply(increasing ? percent : -percent, 'percent')
+                  }
+                  style={{ flex: 'none', width: 120 }}
                 />
               </>
             ))}

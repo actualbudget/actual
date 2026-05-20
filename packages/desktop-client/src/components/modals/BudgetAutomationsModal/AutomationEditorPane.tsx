@@ -236,6 +236,7 @@ export function AutomationEditorPane({
               </Text>
             )}
             <ActiveEditor
+              key={active.id}
               state={state}
               dispatch={dispatch}
               schedules={schedules}
@@ -249,6 +250,7 @@ export function AutomationEditorPane({
 
       {state.displayType === 'refill' && (
         <ActiveEditor
+          key={active.id}
           state={state}
           dispatch={dispatch}
           schedules={schedules}
