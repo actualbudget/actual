@@ -40,6 +40,7 @@ import {
   useDeleteCategoryMutation,
   useSaveCategoryGroupMutation,
   useSaveCategoryMutation,
+  useSortCategoriesMutation,
 } from '#budget';
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
 import { prewarmMonth } from '#components/budget/util';
@@ -102,6 +103,7 @@ export function BudgetPage() {
   const createCategoryGroup = useCreateCategoryGroupMutation();
   const saveCategoryGroup = useSaveCategoryGroupMutation();
   const deleteCategoryGroup = useDeleteCategoryGroupMutation();
+  const sortCategories = useSortCategoriesMutation();
 
   useEffect(() => {
     async function init() {
@@ -405,6 +407,9 @@ export function BudgetPage() {
               onDelete: onDeleteGroup,
               onToggleVisibility: onToggleGroupVisibility,
               onApplyBudgetTemplatesInGroup,
+              onSortCategories: (groupId, direction) => {
+                sortCategories.mutate({ groupId, direction });
+              },
             },
           },
         }),
@@ -419,6 +424,7 @@ export function BudgetPage() {
       onSaveGroup,
       onToggleGroupVisibility,
       onApplyBudgetTemplatesInGroup,
+      sortCategories,
     ],
   );
 
