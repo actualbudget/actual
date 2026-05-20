@@ -1,12 +1,14 @@
 import MockDate from 'mockdate';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { createAllBudgets } from '#server/budget/base';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
 import {
   createSchedule as createScheduleBase,
   getRuleForSchedule,
 } from '#server/schedules/app';
+import * as sheet from '#server/sheet';
 import { loadRules, updateRule } from '#server/transactions/transaction-rules';
 import type { RuleConditionEntity } from '#types/models';
 
@@ -95,6 +97,52 @@ describe('forecast app', () => {
       accountId: '',
       accountName: '',
     });
+  });
+
+  it('generates tracking budget forecasts only for tracking budget files', async () => {
+    await expect(
+      generateForecast({
+        source: 'tracking-budget',
+        startDate: '2024-03-01',
+        endDate: '2024-03-31',
+      }),
+    ).rejects.toThrow(
+      'Tracking budget forecasts require a Tracking Budget file.',
+    );
+
+    await sheet.loadSpreadsheet(db);
+    sheet.get().meta().budgetType = 'tracking';
+    await db.update('preferences', { id: 'budgetType', value: 'tracking' });
+    await db.insertCategoryGroup({ id: 'expenses', name: 'Expenses' });
+    await db.insertCategoryGroup({
+      id: 'income',
+      name: 'Income',
+      is_income: 1,
+    });
+    await createAllBudgets();
+    await db.insertAccount({ id: 'acct', name: 'Checking' });
+    await db.insertTransaction({
+      id: 'starting-deposit',
+      account: 'acct',
+      amount: 1000,
+      date: '2024-01-05',
+    });
+
+    const result = await generateForecast({
+      source: 'tracking-budget',
+      startDate: '2024-03-01',
+      endDate: '2024-03-31',
+    });
+
+    expect(result.dataPoints).toMatchObject([
+      {
+        date: '2024-03-31',
+        balance: 1000,
+        accountId: 'tracking-budget',
+        accountName: 'Tracking Budget',
+        transactions: [],
+      },
+    ]);
   });
 
   it('ignores reconstructed schedule occurrences before today', async () => {

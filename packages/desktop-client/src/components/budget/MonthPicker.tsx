@@ -151,6 +151,7 @@ export const MonthPicker = ({
           return (
             <View
               key={month}
+              data-testid={selected ? 'selected-budget-month' : undefined}
               style={{
                 alignItems: 'center',
                 padding: '3px 3px',
