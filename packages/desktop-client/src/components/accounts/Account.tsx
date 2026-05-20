@@ -1760,7 +1760,7 @@ class AccountInternal extends PureComponent<
         const children = transactions.filter(t => t.parent_id === item.id);
         return children.every(t => selectAllFilter(t));
       }
-      return !item._unmatched;
+      return !item._unmatched && (showReconciled || !item.reconciled);
     };
 
     return (
