@@ -30,6 +30,26 @@ test.describe('Transactions', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('selects running balance text', async () => {
+    await accountPage.accountMenuButton.click();
+    await page.getByRole('button', { name: 'Show running balance' }).click();
+
+    const balance = accountPage.getNthTransaction(0).balance;
+    await expect(balance).not.toHaveText('');
+
+    const box = await balance.boundingBox();
+    expect(box).not.toBeNull();
+
+    await page.mouse.move(box!.x + box!.width - 4, box!.y + box!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box!.x + 4, box!.y + box!.height / 2, { steps: 10 });
+    await page.mouse.up();
+
+    await expect
+      .poll(() => page.evaluate(() => window.getSelection()?.toString() ?? ''))
+      .not.toBe('');
+  });
+
   test.describe('filters transactions', () => {
     // Reset filters
     test.afterEach(async () => {

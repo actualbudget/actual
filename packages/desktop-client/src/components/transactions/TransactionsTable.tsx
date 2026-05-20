@@ -1868,6 +1868,7 @@ const Transaction = memo(function Transaction({
             style={{ ...styles.tnum, ...amountStyle }}
             width={103}
             textAlign="right"
+            onMouseDown={e => e.stopPropagation()}
             privacyFilter
           />
         )}
