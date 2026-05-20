@@ -4,11 +4,12 @@ export type FeatureFlag =
   | 'actionTemplating'
   | 'formulaMode'
   | 'currency'
-  | 'crossoverReport'
   | 'ageOfMoneyReport'
+  | 'balanceForecastReport'
   | 'customThemes'
   | 'budgetAnalysisReport'
   | 'payeeLocations'
+  | 'enableBanking'
   | 'sankeyReport';
 
 /**
@@ -34,6 +35,7 @@ export type SyncedPrefs = Partial<
     | `hide-reconciled-${string}`
     // TODO: pull from src/components/modals/ImportTransactions.js
     | `parse-date-${string}-${'csv' | 'qif'}`
+    | `import-reimport-deleted-${string}`
     | `csv-mappings-${string}`
     | `csv-delimiter-${string}`
     | `csv-skip-start-lines-${string}`

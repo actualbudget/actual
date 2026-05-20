@@ -1,3 +1,4 @@
+import { theme } from '@actual-app/components/theme';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
@@ -5,7 +6,9 @@ import type {
   CategoryGroupEntity,
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
+import { t } from 'i18next';
 
+import { getColorScale } from '#components/reports/chart-theme';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { aqlQuery } from '#queries/aqlQuery';
 
@@ -15,6 +18,7 @@ type BudgetMonthCategory = {
   spent?: number;
   budgeted?: number;
   balance?: number;
+  received?: number;
 };
 
 type BudgetMonthGroup = {
@@ -29,27 +33,33 @@ type BudgetMonthResponse = {
   totalIncome: number;
   fromLastMonth: number;
   forNextMonth: number;
+  lastMonthOverspent: number;
   toBudget: number;
 };
 
 type AggregatedBudget = {
   toBudget: number;
+  fromPreviousMonth: number;
+  lastMonthOverspent: number;
   categoryGroupsMap: Map<string, BudgetMonthGroup>;
+  forNextMonth: number;
+  startMonth: string;
+  endMonth: string;
 };
 
 type SankeyNode = {
   name: string;
-  toBudget?: number;
-  isNegative?: boolean;
   percentageLabel?: string;
+  key: string;
+  color?: string;
 };
 
 type SankeyLink = {
   source: number;
   target: number;
   value: number;
-  isNegative?: boolean;
   tooltipInfo?: Array<{ name: string; value: number }>;
+  color?: string;
 };
 
 type SankeyData = {
@@ -58,28 +68,339 @@ type SankeyData = {
 };
 
 type CategoryEntry = {
-  mainCategory: string;
-  group: string;
+  categoryGroup: string;
+  categoryGroupId: string;
+  category: string;
+  categoryId: string;
   value: number;
-  isNegative?: boolean;
+  isIncome: boolean;
+  isNegative: boolean;
+  accountName?: string;
+  accountId?: string;
+  payeeName?: string;
+  payeeId?: string;
 };
 
-type CategoryOrder = Array<{ mainCategory: string; categories: string[] }>;
+type SortMode = 'per-group' | 'global' | 'budget-order';
+
+type NodeKey = string;
+export type NodeData = {
+  to: Map<NodeKey, number>;
+  value?: number;
+  type: GraphLayers;
+  name?: string;
+  labelKey?: string;
+  labelParams?: Record<string, string>;
+  isNegative?: boolean;
+  tooltipInfo?: Array<{ name: string; value: number }>;
+  percentageLabel?: string;
+  color?: string;
+};
+export type Graph = Map<NodeKey, NodeData>;
+
+type TooltipInfoMap = Map<
+  NodeKey,
+  Map<NodeKey, Array<{ name: string; value: number }>>
+>;
+
+const SpecialNodeKeys = {
+  ToBudget: 'to_budget',
+  Budgeted: 'budgeted',
+  LastMonthOverspent: 'last_month_overspent',
+  ForNextMonth: 'for_next_month',
+  FromPrevMonth: 'from_previous_month',
+  AvailableIncome: 'available_income',
+  AllAccounts: 'all_income',
+  OtherSuffix: '__OTHER_BUCKET',
+  HiddenSuffix: '__HIDDEN',
+  NegativeSuffix: '__NEGATIVE',
+} as const;
+type SpecialNodeKeys = (typeof SpecialNodeKeys)[keyof typeof SpecialNodeKeys];
+
+export const GraphLayers = {
+  IncomePayee: 'payee',
+  IncomeCategory: 'income_category',
+  Account: 'account',
+  Budget: 'budget',
+  CategoryGroup: 'category_group',
+  Category: 'category',
+} as const;
+export type GraphLayers = (typeof GraphLayers)[keyof typeof GraphLayers];
+
+export const GRAPH_LAYER_ORDER = [
+  GraphLayers.IncomePayee,
+  GraphLayers.IncomeCategory,
+  GraphLayers.Account,
+  GraphLayers.Budget,
+  GraphLayers.CategoryGroup,
+  GraphLayers.Category,
+] as const;
+
+export function isGraphLayer(value: unknown): value is GraphLayers {
+  return (
+    typeof value === 'string' &&
+    (Object.values(GraphLayers) as string[]).includes(value)
+  );
+}
+
+export function createBaseGraphSpreadsheet(
+  start: string,
+  end: string,
+  categories: CategoryGroupEntity[],
+  conditions: RuleConditionEntity[] = [],
+  conditionsOp: 'and' | 'or' = 'and',
+  mode: 'budgeted' | 'spent' = 'spent',
+  groupAccounts: boolean = false,
+) {
+  return async (
+    _spreadsheet: ReturnType<typeof useSpreadsheet>,
+    setData: (data: Graph) => void,
+  ) => {
+    const baseGraph = await createBaseGraph(
+      start,
+      end,
+      categories,
+      conditions,
+      conditionsOp,
+      mode,
+      groupAccounts,
+    );
+
+    setData(baseGraph);
+  };
+}
+
+async function createBaseGraph(
+  start: string,
+  end: string,
+  categories: CategoryGroupEntity[],
+  conditions: RuleConditionEntity[] = [],
+  conditionsOp: 'and' | 'or' = 'and',
+  mode: 'budgeted' | 'spent' = 'spent',
+  groupAccounts: boolean = false,
+): Promise<Graph> {
+  let data: CategoryEntry[] = [];
+  let aggregated: AggregatedBudget | undefined;
+
+  if (mode === 'budgeted') {
+    ({ data, aggregated } = await createBudgetSpreadsheet(
+      start,
+      end,
+      conditions,
+      conditionsOp,
+    )());
+  } else if (mode === 'spent') {
+    data = await createTransactionsSpreadsheet(
+      start,
+      end,
+      categories,
+      conditions,
+      conditionsOp,
+      groupAccounts,
+    )();
+  }
+
+  return aggregated
+    ? createBudgetGraph(data, aggregated)
+    : createTransactionsGraph(data);
+}
+
+export function buildSankeyData(
+  baseGraph: Graph,
+  topNcategories: number,
+  categories: CategoryGroupEntity[],
+  categorySort: SortMode,
+  layerFrom: GraphLayers,
+  layerTo: GraphLayers,
+): SankeyData {
+  const graph = cloneGraph(baseGraph);
+
+  const toolTipInfoMap = groupOtherCategories(
+    graph,
+    topNcategories,
+    categorySort,
+  );
+  const sortedGraph = sortGraph(graph, categorySort, categories);
+  addPercentageLabels(sortedGraph);
+  addColors(sortedGraph);
+  cleanUpNodes(sortedGraph);
+  addHiddenNodes(sortedGraph);
+  filterGraphByLayers(sortedGraph, layerFrom, layerTo);
+
+  return convertToSankeyData(sortedGraph, toolTipInfoMap);
+}
+
+export function createBudgetSpreadsheet(
+  start: string,
+  end: string,
+  conditions: RuleConditionEntity[] = [],
+  conditionsOp: 'and' | 'or' = 'and',
+) {
+  return async () => {
+    const months =
+      end && end !== start ? monthUtils.rangeInclusive(start, end) : [start];
+
+    const monthResponses = await Promise.all(
+      months.map(
+        m =>
+          send('api/budget-month', {
+            month: m,
+          }) as unknown as Promise<BudgetMonthResponse>,
+      ),
+    );
+
+    const accumulate_months = monthResponses.reduce(
+      (acc, response, index) => {
+        if (index === monthResponses.length - 1) {
+          acc.toBudget = response.toBudget;
+        }
+        if (index === 0) {
+          acc.fromPreviousMonth = response.fromLastMonth;
+        }
+        acc.lastMonthOverspent += response.lastMonthOverspent;
+
+        for (const group of response.categoryGroups) {
+          const existingGroup = acc.categoryGroupsMap.get(group.id);
+          if (!existingGroup) {
+            acc.categoryGroupsMap.set(group.id, {
+              ...group,
+              categories: group.categories.map(cat => ({ ...cat })),
+            });
+            continue;
+          }
+
+          for (const cat of group.categories) {
+            const existingCat = existingGroup.categories.find(
+              c => c.id === cat.id,
+            );
+            if (!existingCat) {
+              existingGroup.categories.push({ ...cat });
+              continue;
+            }
+            existingCat.budgeted =
+              (existingCat.budgeted ?? 0) + (cat.budgeted ?? 0);
+            existingCat.spent = (existingCat.spent ?? 0) + (cat.spent ?? 0);
+            existingCat.balance =
+              (existingCat.balance ?? 0) + (cat.balance ?? 0);
+            existingCat.received =
+              (existingCat.received ?? 0) + (cat.received ?? 0);
+          }
+        }
+
+        return acc;
+      },
+      {
+        toBudget: 0,
+        fromPreviousMonth: 0,
+        lastMonthOverspent: 0,
+        categoryGroupsMap: new Map<string, BudgetMonthGroup>(),
+      },
+    );
+
+    const categoryGroups = Array.from(
+      accumulate_months.categoryGroupsMap.values(),
+    );
+
+    const filteredCategoryGroups = filterCategoryGroups(
+      categoryGroups,
+      conditions,
+      conditionsOp,
+    );
+
+    const categoryData: CategoryEntry[] = filteredCategoryGroups
+      .flatMap(group =>
+        group.categories.map(cat => {
+          const rawValue = group.is_income
+            ? (cat.received ?? 0)
+            : (cat.budgeted ?? 0);
+          return {
+            categoryGroup: group.name,
+            categoryGroupId: group.id,
+            category: cat.name,
+            categoryId: cat.id,
+            isIncome: group.is_income,
+            isNegative: rawValue < 0,
+            value: rawValue,
+          };
+        }),
+      )
+      .filter(entry => entry.value !== 0);
+
+    const nextMonthResponse = (await send('api/budget-month', {
+      month: monthUtils.nextMonth(end),
+    })) as unknown as BudgetMonthResponse;
+
+    const aggregated: AggregatedBudget = {
+      toBudget: accumulate_months.toBudget,
+      forNextMonth:
+        (nextMonthResponse.fromLastMonth ?? 0) - accumulate_months.toBudget,
+      fromPreviousMonth: accumulate_months.fromPreviousMonth,
+      lastMonthOverspent: accumulate_months.lastMonthOverspent,
+      categoryGroupsMap: accumulate_months.categoryGroupsMap,
+      startMonth: start,
+      endMonth: end,
+    };
+
+    return { data: categoryData, aggregated };
+  };
+}
+
+export function createTransactionsSpreadsheet(
+  start: string,
+  end: string,
+  categories: CategoryGroupEntity[],
+  conditions: RuleConditionEntity[] = [],
+  conditionsOp: 'and' | 'or' = 'and',
+  groupAccounts: boolean,
+) {
+  return async () => {
+    // gather filters user has set
+    const { filters } = await send('make-filters-from-conditions', {
+      conditions: conditions.filter(cond => !cond.customName),
+    });
+    const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
+
+    const categoryData = await fetchCategoryData(
+      categories,
+      conditionsOpKey,
+      filters,
+      start,
+      end,
+      groupAccounts,
+    );
+
+    return categoryData;
+  };
+}
+
+function cloneGraph(graph: Graph): Graph {
+  const clonedGraph: Graph = new Map();
+
+  for (const [key, node] of graph) {
+    clonedGraph.set(key, {
+      ...node,
+      to: new Map(node.to),
+      tooltipInfo: node.tooltipInfo?.map(info => ({ ...info })),
+    });
+  }
+
+  return clonedGraph;
+}
 
 // Filter budget category groups to only those matching the user's conditions.
 // Budget data is fetched unconditionally from api/budget-month, so we must
 // apply category conditions manually in JS (unlike the transaction path which
 // passes conditions directly into the AQL query).
-function filterCategoryGroups(
+export function filterCategoryGroups(
   categoryGroups: BudgetMonthGroup[],
   conditions: RuleConditionEntity[],
   conditionsOp: 'and' | 'or',
 ): BudgetMonthGroup[] {
   const categoryConditions = conditions.filter(
-    cond => cond.field === 'category',
+    cond => cond.field === GraphLayers.Category,
   );
   const categoryGroupConditions = conditions.filter(
-    cond => cond.field === 'category_group',
+    cond => cond.field === GraphLayers.CategoryGroup,
   );
 
   if (categoryConditions.length === 0 && categoryGroupConditions.length === 0) {
@@ -92,7 +413,10 @@ function filterCategoryGroups(
     cond: RuleConditionEntity,
   ): boolean => {
     const value = cond.value;
-    const op = cond.op as string;
+    if (typeof cond.op !== 'string') {
+      throw new Error('Invalid op');
+    }
+    const op = cond.op;
     if (op === 'is') return id === value;
     if (op === 'isNot') return id !== value;
     if (op === 'oneOf') return Array.isArray(value) && value.includes(id);
@@ -111,14 +435,12 @@ function filterCategoryGroups(
     }
     if (op === 'matches') {
       if (typeof value !== 'string') return false;
+      if (value.length > 256) return false;
       try {
         const regex =
           value.startsWith('/') && value.lastIndexOf('/') > 0
-            ? new RegExp(
-                value.slice(1, value.lastIndexOf('/')),
-                value.slice(value.lastIndexOf('/') + 1),
-              )
-            : new RegExp(value);
+            ? new RegExp(value.slice(1, value.lastIndexOf('/')), 'i')
+            : new RegExp(value, 'i');
         return regex.test(name);
       } catch {
         return false;
@@ -163,612 +485,1109 @@ function filterCategoryGroups(
     .filter(group => group.categories.length > 0);
 }
 
-export function createSpreadsheet(
-  start: string,
-  end: string,
-  categories: CategoryGroupEntity[],
-  conditions: RuleConditionEntity[] = [],
-  conditionsOp: 'and' | 'or' = 'and',
-  mode: 'budgeted' | 'spent' = 'spent',
-  topNcategories: number = 15,
-  categorySort: 'per-group' | 'global' | 'budget-order' = 'per-group',
-) {
-  let globalOther: boolean;
-  let groupSort: 'per-group' | 'global';
-  let categoryOrder: CategoryOrder | undefined;
-
-  if (categorySort === 'global') {
-    globalOther = true;
-    groupSort = 'global';
-  } else if (categorySort === 'budget-order') {
-    globalOther = false;
-    groupSort = 'per-group';
-    categoryOrder = categories
-      .filter(g => !g.hidden && !g.is_income)
-      .map(g => ({
-        mainCategory: g.name,
-        categories: (g.categories ?? [])
-          .filter(c => !c.hidden)
-          .map(c => c.name),
-      }));
-  } else {
-    globalOther = false;
-    groupSort = 'per-group';
-  }
-
-  return async (
-    spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: ReturnType<typeof transformToSankeyData>) => void,
-  ) => {
-    if (mode === 'budgeted') {
-      const data = await createBudgetSpreadsheet(
-        start,
-        end,
-        conditions,
-        conditionsOp,
-        globalOther,
-        topNcategories,
-        groupSort,
-        categoryOrder,
-      )(spreadsheet, setData);
-      return data;
-    } else if (mode === 'spent') {
-      const data = await createTransactionsSpreadsheet(
-        start,
-        end,
-        categories,
-        conditions,
-        conditionsOp,
-        globalOther,
-        topNcategories,
-        groupSort,
-        categoryOrder,
-      )(spreadsheet, setData);
-      return data;
-    }
-  };
-}
-
-export function createBudgetSpreadsheet(
-  start: string,
-  end: string,
-  conditions: RuleConditionEntity[] = [],
-  conditionsOp: 'and' | 'or' = 'and',
-  globalOther: boolean = false,
-  topNcategories: number = 15,
-  groupSort: 'per-group' | 'global' = 'per-group',
-  categoryOrder?: CategoryOrder,
-) {
-  return async (
-    spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: ReturnType<typeof transformToSankeyData>) => void,
-  ) => {
-    const months =
-      end && end !== start ? monthUtils.rangeInclusive(start, end) : [start];
-
-    const monthResponses = await Promise.all(
-      months.map(
-        m =>
-          send('api/budget-month', {
-            month: m,
-          }) as unknown as Promise<BudgetMonthResponse>,
-      ),
-    );
-
-    const aggregated = monthResponses.reduce<AggregatedBudget>(
-      (acc, response) => {
-        acc.toBudget += response.toBudget;
-
-        for (const group of response.categoryGroups) {
-          const existingGroup = acc.categoryGroupsMap.get(group.id);
-          if (!existingGroup) {
-            acc.categoryGroupsMap.set(group.id, {
-              ...group,
-              categories: group.categories.map(cat => ({ ...cat })),
-            });
-            continue;
-          }
-
-          for (const cat of group.categories) {
-            const existingCat = existingGroup.categories.find(
-              c => c.id === cat.id,
-            );
-            if (!existingCat) {
-              existingGroup.categories.push({ ...cat });
-              continue;
-            }
-            existingCat.budgeted =
-              (existingCat.budgeted ?? 0) + (cat.budgeted ?? 0);
-            existingCat.spent = (existingCat.spent ?? 0) + (cat.spent ?? 0);
-            existingCat.balance =
-              (existingCat.balance ?? 0) + (cat.balance ?? 0);
-          }
-        }
-
-        return acc;
-      },
-      {
-        toBudget: 0,
-        categoryGroupsMap: new Map<string, BudgetMonthGroup>(),
-      },
-    );
-
-    const categoryGroups = Array.from(aggregated.categoryGroupsMap.values());
-
-    const filteredCategoryGroups = filterCategoryGroups(
-      categoryGroups,
-      conditions,
-      conditionsOp,
-    );
-
-    const categoryData: CategoryEntry[] = filteredCategoryGroups
-      .filter(group => !group.is_income)
-      .flatMap(group =>
-        group.categories.map(cat => ({
-          mainCategory: group.name,
-          group: cat.name,
-          value: cat.budgeted ?? 0,
-        })),
-      );
-
-    const { toBudget } = aggregated;
-
-    setData(
-      transformToSankeyData(
-        categoryData,
-        toBudget,
-        'Budgeted',
-        topNcategories,
-        globalOther,
-        groupSort,
-        categoryOrder,
-      ),
-    );
-  };
-}
-
-export function createTransactionsSpreadsheet(
-  start: string,
-  end: string,
-  categories: CategoryGroupEntity[],
-  conditions: RuleConditionEntity[] = [],
-  conditionsOp: 'and' | 'or' = 'and',
-  globalOther: boolean = false,
-  topNcategories: number = 15,
-  groupSort: 'per-group' | 'global' = 'per-group',
-  categoryOrder?: CategoryOrder,
-) {
-  return async (
-    spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: ReturnType<typeof transformToSankeyData>) => void,
-  ) => {
-    // gather filters user has set
-    const { filters } = await send('make-filters-from-conditions', {
-      conditions: conditions.filter(cond => !cond.customName),
-    });
-    const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
-
-    const categoryData = await fetchCategoryData(
-      categories,
-      conditionsOpKey,
-      filters,
-      start,
-      end,
-    );
-
-    // convert retrieved data into the proper sankey format
-    setData(
-      transformToSankeyData(
-        categoryData,
-        0,
-        'Spent',
-        topNcategories,
-        globalOther,
-        groupSort,
-        categoryOrder,
-      ),
-    );
-  };
-}
-
 // retrieve sum of group expenses
 async function fetchCategoryData(
-  categories: CategoryGroupEntity[],
+  categoryGroups: CategoryGroupEntity[],
   conditionsOpKey: string = '$and',
   filters: unknown[] = [],
   start: string,
   end: string,
+  groupAccounts: boolean,
 ): Promise<CategoryEntry[]> {
   const nested = await Promise.all(
-    categories.map(async (mainCategory: CategoryGroupEntity) => {
+    categoryGroups.map(async (categoryGroup: CategoryGroupEntity) => {
       const entries = await Promise.all(
-        (mainCategory.categories || [])
-          .filter(group => !group?.is_income)
-          .map(async group => {
-            const results = await aqlQuery(
-              q('transactions')
-                .filter({ [conditionsOpKey]: filters })
-                .filter({
-                  $and: [
-                    { date: { $gte: monthUtils.firstDayOfMonth(start) } },
-                    { date: { $lte: monthUtils.lastDayOfMonth(end) } },
-                  ],
-                })
-                .filter({ category: group.id })
-                .calculate({ $sum: '$amount' }),
-            );
-            return {
-              mainCategory: mainCategory.name,
-              group: group.name,
-              value: results.data * -1,
-            } satisfies CategoryEntry;
-          }),
+        (categoryGroup.categories || []).map(async category => {
+          const results = await aqlQuery(
+            q('transactions')
+              .filter({ [conditionsOpKey]: filters })
+              .filter({
+                $and: [
+                  { date: { $gte: monthUtils.firstDayOfMonth(start) } },
+                  { date: { $lte: monthUtils.lastDayOfMonth(end) } },
+                ],
+              })
+              .filter({ category: category.id })
+              .groupBy(
+                categoryGroup.is_income
+                  ? [
+                      { $id: '$category' },
+                      { $id: '$account' },
+                      { $id: '$payee' },
+                    ]
+                  : [{ $id: '$category' }, { $id: '$account' }],
+              )
+              .select([
+                { accountId: { $id: '$account.id' } },
+                { accountName: { $id: '$account.name' } },
+                { amount: { $sum: '$amount' } },
+                { payeeId: { $id: '$payee.id' } },
+                { payeeName: { $id: '$payee.name' } },
+              ]),
+          );
+          return results.data.map(
+            (row: {
+              amount?: number;
+              accountName?: string;
+              accountId?: string;
+              payeeName?: string;
+              payeeId?: string;
+            }) =>
+              ({
+                categoryGroup: categoryGroup.name,
+                categoryGroupId: categoryGroup.id,
+                category: category.name,
+                categoryId: category.id,
+                value: Math.abs(row.amount ?? 0),
+                isIncome: categoryGroup.is_income ?? false,
+                isNegative: row.amount !== undefined && row.amount < 0,
+                accountName: row.accountName ?? '',
+                accountId: row.accountId ?? '',
+                payeeName: row.payeeName ?? '',
+                payeeId: row.payeeId ?? '',
+              }) satisfies CategoryEntry,
+          );
+        }),
       );
-      return entries;
+      return entries.flat();
     }),
   );
-  return nested.flat();
-}
+  const allCategoryData = nested.flat();
 
-type LeafState = {
-  mainCategory: string;
-  group: string;
-  value: number;
-  isNegative: boolean;
-  visible: boolean;
-};
-
-type OtherBucket = {
-  total: number;
-  entries: Array<{ name: string; value: number }>;
-};
-
-type GreedyReductionResult = {
-  allLeaves: LeafState[];
-  perCategoryOther: Map<string, OtherBucket>;
-  globalOtherBucket: OtherBucket;
-};
-
-function greedyReduceLeaves(
-  allLeaves: LeafState[],
-  topNcategories: number,
-  globalOther: boolean,
-): GreedyReductionResult {
-  const perCategoryOther = new Map<string, OtherBucket>();
-  const globalOtherBucket: OtherBucket = { total: 0, entries: [] };
-
-  let visibleCount = allLeaves.length;
-  let otherNodeCount = 0;
-
-  // Collapse the lowest-value visible leaf into an Other bucket until the
-  // total displayed node count (individual + Other nodes) <= topNcategories.
-  while (visibleCount + otherNodeCount > topNcategories && visibleCount > 0) {
-    const minLeaf = allLeaves
-      .filter(l => l.visible)
-      .reduce((min, l) => (l.value < min.value ? l : min));
-
-    minLeaf.visible = false;
-    visibleCount -= 1;
-
-    if (globalOther) {
-      if (globalOtherBucket.total === 0) otherNodeCount += 1;
-      globalOtherBucket.total += minLeaf.value;
-      globalOtherBucket.entries.push({
-        name: minLeaf.group,
-        value: minLeaf.value,
-      });
-    } else {
-      if (!perCategoryOther.has(minLeaf.mainCategory)) otherNodeCount += 1;
-      const bucket = perCategoryOther.get(minLeaf.mainCategory) ?? {
-        total: 0,
-        entries: [],
-      };
-      bucket.total += minLeaf.value;
-      bucket.entries.push({ name: minLeaf.group, value: minLeaf.value });
-      perCategoryOther.set(minLeaf.mainCategory, bucket);
-    }
+  if (groupAccounts) {
+    allCategoryData.forEach(entry => {
+      if (entry.accountName && entry.accountId) {
+        entry.accountName = SpecialNodeKeys.AllAccounts;
+        entry.accountId = SpecialNodeKeys.AllAccounts;
+      }
+    });
   }
 
-  // Promote single-entry Other buckets back to visible — a 1-item "Other"
-  // node wastes a slot and hides information.
-  if (globalOther) {
-    if (globalOtherBucket.entries.length === 1) {
-      const entry = globalOtherBucket.entries[0];
-      const leaf = allLeaves.find(l => l.group === entry.name && !l.visible);
-      if (leaf) {
-        leaf.visible = true;
-        globalOtherBucket.total = 0;
-        globalOtherBucket.entries = [];
-      }
-    }
-  } else {
-    for (const [catName, bucket] of perCategoryOther) {
-      if (bucket.entries.length === 1) {
-        const entry = bucket.entries[0];
-        const leaf = allLeaves.find(
-          l =>
-            l.mainCategory === catName && l.group === entry.name && !l.visible,
-        );
-        if (leaf) {
-          leaf.visible = true;
-          perCategoryOther.delete(catName);
-        }
-      }
-    }
-  }
-
-  return { allLeaves, perCategoryOther, globalOtherBucket };
+  return allCategoryData;
 }
 
-function transformToSankeyData(
+export function createBudgetGraph(
   categoryData: CategoryEntry[],
-  toBudgetAmount: number = 0,
-  rootNodeName: string,
-  topNcategories: number = 15,
-  globalOther: boolean = false,
-  groupSort: 'per-group' | 'global' = 'per-group',
-  categoryOrder?: CategoryOrder,
-): SankeyData {
-  // Phase 1 — Initialise leaves
-  const allLeaves: LeafState[] = categoryData
-    .filter(e => e.value > 0)
-    .map(e => ({
-      mainCategory: e.mainCategory,
-      group: e.group,
-      value: e.value,
-      isNegative: e.isNegative ?? false,
-      visible: true,
-    }));
+  aggregated: AggregatedBudget,
+): Graph {
+  const graph: Graph = new Map();
 
-  // Phase 2 — Greedy reduction (collapse lowest-value leaves into Other buckets)
-  const { perCategoryOther, globalOtherBucket } = greedyReduceLeaves(
-    allLeaves,
-    topNcategories,
-    globalOther,
+  // Add initial budget nodes with no links
+  addNode(graph, SpecialNodeKeys.Budgeted, GraphLayers.Budget, 'Budgeted');
+  addNode(
+    graph,
+    SpecialNodeKeys.AvailableIncome,
+    GraphLayers.Account,
+    'Available funds',
   );
 
-  // Phase 3 — Compute category totals (sum of ALL leaves including collapsed)
-  const categoryTotals = new Map<string, number>();
-  for (const leaf of allLeaves) {
-    categoryTotals.set(
-      leaf.mainCategory,
-      (categoryTotals.get(leaf.mainCategory) ?? 0) + leaf.value,
+  categoryData.forEach(entry => {
+    if (entry.isIncome) {
+      // Income category > Available income
+      addNode(
+        graph,
+        entry.categoryId,
+        GraphLayers.IncomeCategory,
+        entry.category,
+      );
+      addValueToLink(
+        graph,
+        entry.categoryId,
+        SpecialNodeKeys.AvailableIncome,
+        entry.value,
+      );
+    } else {
+      if (entry.value >= 0) {
+        // Budgeted > Category group > Category
+        addNode(
+          graph,
+          entry.categoryGroupId,
+          GraphLayers.CategoryGroup,
+          entry.categoryGroup,
+        );
+        addNode(graph, entry.categoryId, GraphLayers.Category, entry.category);
+        addValueToLink(
+          graph,
+          entry.categoryGroupId,
+          entry.categoryId,
+          entry.value,
+        );
+        addValueToLink(
+          graph,
+          SpecialNodeKeys.Budgeted,
+          entry.categoryGroupId,
+          entry.value,
+        );
+        addValueToLink(
+          graph,
+          SpecialNodeKeys.AvailableIncome,
+          SpecialNodeKeys.Budgeted,
+          entry.value,
+        );
+      } else {
+        addNodeWithLabel(
+          graph,
+          entry.categoryId,
+          GraphLayers.Account,
+          'From {{category}}',
+          { category: entry.category },
+          true,
+        );
+        addValueToLink(
+          graph,
+          entry.categoryId,
+          SpecialNodeKeys.Budgeted,
+          Math.abs(entry.value),
+        );
+        addValueToLink(
+          graph,
+          SpecialNodeKeys.AvailableIncome,
+          SpecialNodeKeys.Budgeted,
+          entry.value,
+        );
+      }
+    }
+  });
+
+  if (aggregated.toBudget > 0) {
+    addNode(graph, SpecialNodeKeys.ToBudget, GraphLayers.Account, 'To budget');
+    addValueToLink(
+      graph,
+      SpecialNodeKeys.AvailableIncome,
+      SpecialNodeKeys.ToBudget,
+      aggregated.toBudget,
+    );
+  } else {
+    addNodeWithLabel(
+      graph,
+      SpecialNodeKeys.ToBudget,
+      GraphLayers.Account,
+      'Overbudgeted',
+      undefined,
+      true,
+    );
+    addValueToLink(
+      graph,
+      SpecialNodeKeys.ToBudget,
+      SpecialNodeKeys.Budgeted,
+      Math.abs(aggregated.toBudget),
+    );
+    addValueToLink(
+      graph,
+      SpecialNodeKeys.AvailableIncome,
+      SpecialNodeKeys.Budgeted,
+      -Math.abs(aggregated.toBudget),
     );
   }
 
-  const sortedCategories = categoryOrder
-    ? categoryOrder
-        .map(c => c.mainCategory)
-        .filter(name => categoryTotals.has(name))
-        .concat(
-          [...categoryTotals.keys()]
-            .filter(name => !categoryOrder.some(c => c.mainCategory === name))
-            .sort(
-              (a, b) =>
-                (categoryTotals.get(b) ?? 0) - (categoryTotals.get(a) ?? 0),
-            ),
-        )
-    : [...categoryTotals.keys()].sort(
-        (a, b) => (categoryTotals.get(b) ?? 0) - (categoryTotals.get(a) ?? 0),
+  addNodeWithLabel(
+    graph,
+    SpecialNodeKeys.FromPrevMonth,
+    GraphLayers.IncomeCategory,
+    'From {{month}}',
+    { month: monthUtils.prevMonth(aggregated.startMonth) },
+  );
+  addValueToLink(
+    graph,
+    SpecialNodeKeys.FromPrevMonth,
+    SpecialNodeKeys.AvailableIncome,
+    aggregated.fromPreviousMonth,
+  );
+  addNodeWithLabel(
+    graph,
+    SpecialNodeKeys.ForNextMonth,
+    GraphLayers.Budget,
+    'For {{month}}',
+    { month: monthUtils.nextMonth(aggregated.endMonth) },
+  );
+  addValueToLink(
+    graph,
+    SpecialNodeKeys.AvailableIncome,
+    SpecialNodeKeys.ForNextMonth,
+    aggregated.forNextMonth,
+  );
+  addNode(
+    graph,
+    SpecialNodeKeys.LastMonthOverspent,
+    GraphLayers.Budget,
+    'Overspent',
+  );
+  addValueToLink(
+    graph,
+    SpecialNodeKeys.AvailableIncome,
+    SpecialNodeKeys.LastMonthOverspent,
+    Math.abs(aggregated.lastMonthOverspent),
+  );
+
+  return graph;
+}
+
+export function createTransactionsGraph(categoryData: CategoryEntry[]): Graph {
+  function addAccountNode(accountId: string, accountName: string): void {
+    if (accountId === SpecialNodeKeys.AllAccounts) {
+      addNodeWithLabel(
+        graph,
+        accountId,
+        GraphLayers.Account,
+        'Income',
+        undefined,
+      );
+    } else {
+      addNode(graph, accountId, GraphLayers.Account, accountName);
+    }
+  }
+
+  const graph: Graph = new Map();
+
+  categoryData.forEach(entry => {
+    if (entry.accountId && entry.accountName && entry.categoryId) {
+      if (entry.isIncome) {
+        if (entry.isNegative) {
+          // Account > Income category
+          addAccountNode(entry.accountId, entry.accountName);
+          addNodeWithLabel(
+            graph,
+            entry.categoryId + SpecialNodeKeys.NegativeSuffix,
+            GraphLayers.CategoryGroup,
+            entry.payeeName ?? entry.category,
+            undefined,
+            true,
+          );
+          addValueToLink(
+            graph,
+            entry.accountId,
+            entry.categoryId + SpecialNodeKeys.NegativeSuffix,
+            entry.value,
+          );
+        } else {
+          // Payee > Income category > Account
+          addNode(
+            graph,
+            entry.categoryId,
+            GraphLayers.IncomeCategory,
+            entry.category,
+          );
+          addAccountNode(entry.accountId, entry.accountName);
+          addValueToLink(graph, entry.categoryId, entry.accountId, entry.value);
+          if (entry.payeeId) {
+            addNode(
+              graph,
+              entry.payeeId,
+              GraphLayers.IncomePayee,
+              entry.payeeName,
+            );
+            addValueToLink(graph, entry.payeeId, entry.categoryId, entry.value);
+          }
+        }
+      } else {
+        if (entry.isNegative) {
+          // Account > Category group > Category
+          addAccountNode(entry.accountId, entry.accountName);
+          addNode(
+            graph,
+            entry.categoryGroupId,
+            GraphLayers.CategoryGroup,
+            entry.categoryGroup,
+          );
+          addNode(
+            graph,
+            entry.categoryId,
+            GraphLayers.Category,
+            entry.category,
+          );
+          addValueToLink(
+            graph,
+            entry.accountId,
+            entry.categoryGroupId,
+            entry.value,
+          );
+          addValueToLink(
+            graph,
+            entry.categoryGroupId,
+            entry.categoryId,
+            entry.value,
+          );
+        } else {
+          // Category > Account
+          addNode(
+            graph,
+            entry.categoryId + SpecialNodeKeys.NegativeSuffix,
+            GraphLayers.IncomeCategory,
+            entry.payeeName ?? entry.category,
+          );
+          addAccountNode(entry.accountId, entry.accountName);
+          addValueToLink(
+            graph,
+            entry.categoryId + SpecialNodeKeys.NegativeSuffix,
+            entry.accountId,
+            entry.value,
+          );
+        }
+      }
+    }
+  });
+  return graph;
+}
+
+export function addNode(
+  graph: Graph,
+  key: NodeKey,
+  type: GraphLayers,
+  name?: string,
+) {
+  if (!graph.has(key)) {
+    graph.set(key, {
+      to: new Map(),
+      type,
+      name,
+    });
+  }
+}
+
+export function addNodeWithLabel(
+  graph: Graph,
+  key: NodeKey,
+  type: GraphLayers,
+  labelKey: string,
+  labelParams?: Record<string, string>,
+  isNegative?: boolean,
+) {
+  if (!graph.has(key)) {
+    graph.set(key, {
+      to: new Map(),
+      type,
+      labelKey,
+      labelParams,
+      isNegative,
+    });
+  }
+}
+
+export function addValueToLink(
+  graph: Graph,
+  from: NodeKey,
+  to: NodeKey,
+  value: number,
+) {
+  const fromNode = graph.get(from);
+  if (fromNode) {
+    fromNode.to.set(to, (fromNode.to.get(to) ?? 0) + value);
+  }
+}
+
+export function getLayer(graph: Graph, key: NodeKey): number {
+  // Find parent nodes for the given key
+  const parents: NodeKey[] = [];
+  for (const [parentKey, data] of graph) {
+    if (data.to.has(key)) {
+      parents.push(parentKey);
+    }
+  }
+  if (parents.length === 0) {
+    // No parents: this is a root node, layer 0
+    return 0;
+  }
+  // Otherwise, 1 + max parent's layer
+  return 1 + Math.max(...parents.map(parentKey => getLayer(graph, parentKey)));
+}
+
+function groupOtherCategories(
+  graph: Graph,
+  topN: number,
+  categorySort: SortMode = 'per-group',
+): TooltipInfoMap {
+  const toolTipInfoMap: TooltipInfoMap = new Map();
+  const structuralKeys = new Set<string>(Object.values(SpecialNodeKeys));
+
+  function isGroupableNode(key: NodeKey): boolean {
+    const node = graph.get(key);
+    return Boolean(
+      node &&
+      !key.endsWith(SpecialNodeKeys.OtherSuffix) &&
+      !structuralKeys.has(key) &&
+      !node.isNegative,
+    );
+  }
+
+  Object.entries(GraphLayers).forEach(([_, layer]) => {
+    let ordinaryNodes = nodesInLayer(graph, layer).filter(isGroupableNode);
+    let otherNodes = nodesInLayer(graph, layer).filter(s =>
+      s.endsWith(SpecialNodeKeys.OtherSuffix),
+    );
+
+    while (ordinaryNodes.length + otherNodes.length > topN) {
+      let minValue = Infinity;
+      let nodeToDelete: NodeKey | undefined;
+      for (const nodeKey of ordinaryNodes) {
+        const nodeValue = getNodeValue(graph, nodeKey);
+        if (nodeValue < minValue) {
+          minValue = nodeValue;
+          nodeToDelete = nodeKey;
+        }
+      }
+
+      if (nodeToDelete === undefined) break; // safety
+
+      moveToOther(
+        graph,
+        nodeToDelete,
+        toolTipInfoMap,
+        categorySort === 'global',
       );
 
-  // Phase 4 — Build nodes/links
-  const nodes: SankeyNode[] = [
-    { name: rootNodeName, toBudget: toBudgetAmount },
-  ];
-  const links: SankeyLink[] = [];
-  const catNodeIndexMap = new Map<string, number>();
+      ordinaryNodes = nodesInLayer(graph, layer).filter(isGroupableNode);
+      otherNodes = nodesInLayer(graph, layer).filter(s =>
+        s.endsWith(SpecialNodeKeys.OtherSuffix),
+      );
+    }
+  });
 
-  // Add all category nodes first (needed for global sort so indices are known)
-  for (const catName of sortedCategories) {
-    nodes.push({ name: catName });
-    catNodeIndexMap.set(catName, nodes.length - 1);
-    links.push({
-      source: 0,
-      target: nodes.length - 1,
-      value: categoryTotals.get(catName) ?? 0,
+  return toolTipInfoMap;
+}
+
+export function nodesInLayer(graph: Graph, layer: GraphLayers): NodeKey[] {
+  return Array.from(graph)
+    .filter(([, data]) => data.type === layer)
+    .map(([key]) => key);
+}
+
+function moveToOther(
+  graph: Graph,
+  key: NodeKey,
+  toolTipInfoMap: TooltipInfoMap,
+  globalOther: boolean = false,
+) {
+  const nodeData = graph.get(key);
+  if (!nodeData) {
+    return;
+  }
+
+  // Get nodes connected to this node
+  const toNodes = Array.from(graph.get(key)?.to.keys() ?? []);
+  const fromNodes = Array.from(graph).filter(([, data]) => data.to.has(key));
+
+  let otherKey: NodeKey;
+  if (globalOther) {
+    otherKey = nodeData.type + SpecialNodeKeys.OtherSuffix;
+  } else {
+    otherKey = nodeData.type + SpecialNodeKeys.OtherSuffix;
+
+    if (nodeData.type === GraphLayers.Category) {
+      const categoryGroupResult = getCategoryGroup(graph, key);
+      if (categoryGroupResult) {
+        const categoryGroupKey = categoryGroupResult[0];
+        otherKey = categoryGroupKey + SpecialNodeKeys.OtherSuffix;
+      }
+    } else if (nodeData.type === GraphLayers.IncomePayee) {
+      const incomeCategoryKey = Array.from(
+        graph.get(key)?.to.keys() ?? [],
+      ).find(k => graph.get(k)?.type === GraphLayers.IncomeCategory);
+      if (incomeCategoryKey) {
+        otherKey = incomeCategoryKey + SpecialNodeKeys.OtherSuffix;
+      }
+    }
+  }
+
+  // Make sure the Other node exists
+  addNode(graph, otherKey, nodeData.type, 'Other');
+
+  fromNodes.forEach(([fromKey, fromData]) => {
+    const linkValue = fromData.to.get(key);
+    if (linkValue !== undefined) {
+      addValueToLink(graph, fromKey, otherKey, linkValue);
+      newAddTooltipInfo(
+        toolTipInfoMap,
+        fromKey,
+        otherKey,
+        graph.get(key)?.name ?? key,
+        linkValue,
+      );
+    }
+  });
+  toNodes.forEach(toKey => {
+    const fromData = graph.get(key);
+    const linkValue = fromData?.to.get(toKey);
+    if (linkValue !== undefined) {
+      addValueToLink(graph, otherKey, toKey, linkValue);
+      newAddTooltipInfo(
+        toolTipInfoMap,
+        otherKey,
+        toKey,
+        graph.get(key)?.name ?? key,
+        linkValue,
+      );
+    }
+  });
+
+  toNodes.forEach(toKey => {
+    deleteLink(graph, key, toKey);
+  });
+  fromNodes.forEach(([fromKey]) => {
+    deleteLink(graph, fromKey, key);
+  });
+
+  graph.delete(key);
+}
+
+function newAddTooltipInfo(
+  toolTipInfoMap: TooltipInfoMap,
+  from: NodeKey,
+  to: NodeKey,
+  name: string,
+  value: number,
+) {
+  if (!toolTipInfoMap.has(from)) {
+    toolTipInfoMap.set(from, new Map());
+  }
+  const innerMap = toolTipInfoMap.get(from)!;
+  const existingInfo = innerMap.get(to) ?? [];
+  if (!existingInfo.find(info => info.name === name)) {
+    innerMap.set(to, [...existingInfo, { name, value }]);
+  }
+}
+
+export function getCategoryGroup(graph: Graph, key: NodeKey) {
+  return Array.from(graph).filter(
+    ([, data]) => data.to.has(key) && data.type === GraphLayers.CategoryGroup,
+  )[0];
+}
+
+export function deleteLink(graph: Graph, from: NodeKey, to: NodeKey) {
+  const fromNode = graph.get(from);
+  if (fromNode) {
+    fromNode.to.delete(to);
+  }
+}
+
+export function sortGraph(
+  graph: Graph,
+  categorySort: SortMode = 'per-group',
+  categories: CategoryGroupEntity[],
+): Graph {
+  function sortRelatedNodesAroundAnchors(
+    entries: Array<[string, NodeData]>,
+    anchorLayer: GraphLayers,
+    relatedLayer: GraphLayers,
+    placement: 'before' | 'after',
+  ) {
+    const anchorKeys = nodesInLayer(graph, anchorLayer);
+
+    anchorKeys.forEach(anchorKey => {
+      const anchor = graph.get(anchorKey);
+      if (!anchor) return;
+
+      const relatedKeys =
+        placement === 'after'
+          ? Array.from(anchor.to.keys()).filter(
+              key => graph.get(key)?.type === relatedLayer,
+            )
+          : Array.from(graph)
+              .filter(
+                ([, data]) =>
+                  data.type === relatedLayer && data.to.has(anchorKey),
+              )
+              .map(([key]) => key);
+
+      const otherKey = `${anchorKey}${SpecialNodeKeys.OtherSuffix}`;
+      const relatedOtherKey =
+        graph.get(otherKey)?.type === relatedLayer ? otherKey : undefined;
+      const orderedRelatedKeys = relatedKeys.filter(key => key !== otherKey);
+
+      const relatedEntries = orderedRelatedKeys
+        .map(key => entries.find(([entryKey]) => entryKey === key))
+        .filter((entry): entry is [string, NodeData] => entry !== undefined);
+      relatedEntries.sort(
+        ([keyA], [keyB]) =>
+          getNodeValue(graph, keyB) - getNodeValue(graph, keyA),
+      );
+
+      const otherEntry = relatedOtherKey
+        ? entries.find(([entryKey]) => entryKey === relatedOtherKey)
+        : undefined;
+
+      const relatedKeysToMove = new Set(orderedRelatedKeys);
+      if (relatedOtherKey) {
+        relatedKeysToMove.add(relatedOtherKey);
+      }
+      const entriesWithoutRelated = entries.filter(
+        ([entryKey]) => !relatedKeysToMove.has(entryKey),
+      );
+      const anchorIndex = entriesWithoutRelated.findIndex(
+        ([entryKey]) => entryKey === anchorKey,
+      );
+      if (anchorIndex === -1) {
+        return;
+      }
+
+      const insertionIndex =
+        placement === 'before' ? anchorIndex : anchorIndex + 1;
+      const nodesToInsert = otherEntry
+        ? [...relatedEntries, otherEntry]
+        : relatedEntries;
+
+      entriesWithoutRelated.splice(insertionIndex, 0, ...nodesToInsert);
+      entries.length = 0;
+      entries.push(...entriesWithoutRelated);
     });
   }
 
-  if (groupSort === 'global') {
-    // All visible categories sorted by value globally
-    const allVisibleLeaves = allLeaves
-      .filter(l => l.visible)
-      .sort((a, b) => b.value - a.value);
-
-    for (const leaf of allVisibleLeaves) {
-      const catIdx = catNodeIndexMap.get(leaf.mainCategory) ?? 0;
-      nodes.push({ name: leaf.group, isNegative: leaf.isNegative });
-      links.push({
-        source: catIdx,
-        target: nodes.length - 1,
-        value: leaf.value,
-        isNegative: leaf.isNegative,
-      });
-    }
-
-    // per-group Other nodes (globalOther=false only)
-    if (!globalOther) {
-      for (const catName of sortedCategories) {
-        const bucket = perCategoryOther.get(catName);
-        if (bucket) {
-          const catIdx = catNodeIndexMap.get(catName) ?? 0;
-          nodes.push({ name: 'Other' });
-          links.push({
-            source: catIdx,
-            target: nodes.length - 1,
-            value: bucket.total,
-            tooltipInfo: [...bucket.entries].sort((a, b) => b.value - a.value),
-          });
-        }
+  let sortedEntries: Array<[string, NodeData]>;
+  if (categorySort === 'global') {
+    sortedEntries = Array.from(graph.entries()).sort(
+      ([keyA], [keyB]) => getNodeValue(graph, keyB) - getNodeValue(graph, keyA),
+    );
+    sortedEntries.forEach(([key]) => {
+      if (key.endsWith(SpecialNodeKeys.OtherSuffix)) {
+        moveNodeToEnd(sortedEntries, key);
       }
+    });
+  } else if (categorySort === 'per-group') {
+    sortedEntries = Array.from(graph.entries()).sort(
+      ([keyA], [keyB]) => getNodeValue(graph, keyB) - getNodeValue(graph, keyA),
+    );
+
+    sortRelatedNodesAroundAnchors(
+      sortedEntries,
+      GraphLayers.CategoryGroup,
+      GraphLayers.Category,
+      'after',
+    );
+    sortRelatedNodesAroundAnchors(
+      sortedEntries,
+      GraphLayers.IncomeCategory,
+      GraphLayers.IncomePayee,
+      'before',
+    );
+  } else {
+    const used = new Set<NodeKey>();
+    sortedEntries = [];
+
+    // 1. Add entries by category group and subcategory order
+    categories.forEach(group => {
+      const groupNode = graph.get(group.id);
+      if (groupNode) {
+        sortedEntries.push([group.id, groupNode]);
+        used.add(group.id);
+      }
+
+      if (group.categories && group.categories.length) {
+        group.categories.forEach(cat => {
+          const categoryNode = graph.get(cat.id);
+          if (categoryNode) {
+            sortedEntries.push([cat.id, categoryNode]);
+            used.add(cat.id);
+          }
+        });
+      }
+
+      const otherKey = `${group.id}${SpecialNodeKeys.OtherSuffix}`;
+      const otherNode = graph.get(otherKey);
+      if (otherNode) {
+        sortedEntries.push([otherKey, otherNode]);
+        used.add(otherKey);
+      }
+    });
+
+    // 2. Add all remaining entries that weren't used (preserving graph order)
+    for (const [key, data] of graph) {
+      if (!used.has(key)) {
+        sortedEntries.push([key, data]);
+      }
+    }
+  }
+
+  // We always want certain nodes to be shown at the start/end of their layers
+  sortedEntries
+    .filter(([, nodeData]) => nodeData.isNegative)
+    .forEach(([key]) => {
+      moveNodeToStart(sortedEntries, key);
+    });
+  const toBudgetNode = graph.get(SpecialNodeKeys.ToBudget);
+  if (toBudgetNode) {
+    if (toBudgetNode.isNegative) {
+      moveNodeToStart(sortedEntries, SpecialNodeKeys.ToBudget);
+    } else {
+      moveNodeToEnd(sortedEntries, SpecialNodeKeys.ToBudget);
+    }
+  }
+  moveNodeToEnd(sortedEntries, SpecialNodeKeys.LastMonthOverspent);
+  moveNodeToEnd(sortedEntries, SpecialNodeKeys.ForNextMonth);
+  moveNodeToEnd(sortedEntries, SpecialNodeKeys.FromPrevMonth);
+  return new Map(sortedEntries);
+}
+
+export function moveNodeToEnd(
+  entries: Array<[string, NodeData]>,
+  key: NodeKey,
+) {
+  const nodeIndex = entries.findIndex(([nodekey]) => nodekey === key);
+  if (nodeIndex !== -1) {
+    const [entry] = entries.splice(nodeIndex, 1);
+    entries.push(entry);
+  }
+}
+
+export function moveNodeToStart(
+  entries: Array<[string, NodeData]>,
+  key: NodeKey,
+) {
+  const nodeIndex = entries.findIndex(([nodekey]) => nodekey === key);
+  if (nodeIndex !== -1) {
+    const [entry] = entries.splice(nodeIndex, 1);
+    entries.unshift(entry);
+  }
+}
+
+export function getNodeValue(graph: Graph, key: NodeKey): number {
+  let nodeValue: number = 0;
+
+  if (getLayer(graph, key) === 0) {
+    // Look at outgoing links for root nodes
+    const node = graph.get(key);
+    if (node) {
+      node.to.forEach(value => {
+        nodeValue += value ?? 0;
+      });
     }
   } else {
-    // per-group sort or budget-order: each category's categories sorted independently
-    for (const catName of sortedCategories) {
-      const catIdx = catNodeIndexMap.get(catName) ?? 0;
+    graph.forEach(data => {
+      nodeValue += data.to.get(key) ?? 0;
+    });
 
-      const subcatOrder = categoryOrder?.find(
-        c => c.mainCategory === catName,
-      )?.categories;
-
-      const visibleLeaves = allLeaves
-        .filter(l => l.mainCategory === catName && l.visible)
-        .sort((a, b) => {
-          if (subcatOrder) {
-            const ai = subcatOrder.indexOf(a.group);
-            const bi = subcatOrder.indexOf(b.group);
-            if (ai === -1 && bi === -1) return b.value - a.value;
-            if (ai === -1) return 1;
-            if (bi === -1) return -1;
-            return ai - bi;
-          }
-          return b.value - a.value;
-        });
-
-      for (const leaf of visibleLeaves) {
-        nodes.push({ name: leaf.group, isNegative: leaf.isNegative });
-        links.push({
-          source: catIdx,
-          target: nodes.length - 1,
-          value: leaf.value,
-          isNegative: leaf.isNegative,
+    // If node is in reality a root node, masked behind hidden nodes
+    if (nodeValue < 0) {
+      nodeValue = 0;
+      const node = graph.get(key);
+      if (node) {
+        node.to.forEach(value => {
+          nodeValue += value;
         });
       }
+    }
+  }
+  return nodeValue;
+}
 
-      // per-group Other node (globalOther=false only)
-      if (!globalOther) {
-        const bucket = perCategoryOther.get(catName);
-        if (bucket) {
-          nodes.push({ name: 'Other' });
-          links.push({
-            source: catIdx,
-            target: nodes.length - 1,
-            value: bucket.total,
-            tooltipInfo: [...bucket.entries].sort((a, b) => b.value - a.value),
-          });
+export function addPercentageLabels(graph: Graph): void {
+  const layerSums = new Map<GraphLayers, number>();
+
+  // First pass: calculate GraphLayer sums
+  graph.forEach((_: NodeData, key: NodeKey) => {
+    const layer = graph.get(key)?.type;
+    if (!layer) {
+      return;
+    }
+    const nodeValue = getNodeValue(graph, key);
+    layerSums.set(layer, (layerSums.get(layer) ?? 0) + nodeValue);
+  });
+
+  // Second pass: assign percentage label to each node
+  graph.forEach((data: NodeData, key: NodeKey) => {
+    const layer = data.type;
+    const nodeValue = getNodeValue(graph, key);
+    const layerTotal = layerSums.get(layer) ?? 1;
+    const percentage = layerTotal ? (nodeValue / layerTotal) * 100 : 0;
+    data.percentageLabel = `${percentage.toFixed(1)}%`;
+  });
+}
+
+function addColors(graph: Graph) {
+  const colors = getColorScale('qualitative');
+
+  for (const key of graph.keys()) {
+    const node = graph.get(key);
+    if (node) {
+      node.color = colors[colorIndexFromKey(key, colors.length)];
+    }
+  }
+
+  setColor(graph, SpecialNodeKeys.ToBudget, theme.toBudgetPositive);
+  graph.forEach((node, key) => {
+    if (node.isNegative) {
+      setColor(graph, key, theme.toBudgetNegative);
+    }
+  });
+  setColor(graph, SpecialNodeKeys.LastMonthOverspent, theme.toBudgetNegative);
+  setColor(graph, SpecialNodeKeys.FromPrevMonth, theme.reportsGray);
+  setColor(graph, SpecialNodeKeys.ForNextMonth, theme.reportsGray);
+  setColor(graph, SpecialNodeKeys.Budgeted, theme.reportsBlue);
+  setColor(graph, SpecialNodeKeys.AvailableIncome, theme.reportsBlue);
+  setColor(graph, SpecialNodeKeys.AllAccounts, theme.reportsBlue);
+}
+
+function colorIndexFromKey(key: string, colorCount: number): number {
+  // Use the first three chars of the key (UUID) as a stable random value
+  const hex = key.replace(/[^0-9a-f]/gi, '').slice(0, 3);
+  const val = parseInt(hex || '0', 16);
+  return val % colorCount;
+}
+
+function setColor(graph: Graph, key: NodeKey, color: string) {
+  const node = graph.get(key);
+  if (node) {
+    node.color = color;
+  }
+}
+
+function addHiddenNodes(graph: Graph) {
+  // Nodes with parents/children different than other nodes in the same layer might end up
+  // in the wrong place in the graph. This fixes that, by adding extra, hidden nodes.
+
+  // Group nodes by type
+  const nodesByType: Partial<Record<GraphLayers, Array<[NodeKey, NodeData]>>> =
+    {};
+
+  for (const [key, node] of graph) {
+    if (!nodesByType[node.type]) nodesByType[node.type] = [];
+    nodesByType[node.type]!.push([key, node]);
+  }
+
+  const { typeHasParent, typeHasChild } = buildTypeConnectivity(
+    graph,
+    nodesByType,
+  );
+
+  const activeLayerOrder = GRAPH_LAYER_ORDER.filter(
+    layer => (nodesByType[layer]?.length ?? 0) > 0,
+  );
+  const layerIndex = new Map<GraphLayers, number>();
+  activeLayerOrder.forEach((layer, index) => {
+    layerIndex.set(layer, index);
+  });
+
+  function addHiddenParentChain(key: NodeKey, type: GraphLayers) {
+    const typeIndex = layerIndex.get(type);
+    if (typeIndex === undefined || typeIndex <= 0) {
+      return;
+    }
+
+    let childKey = key;
+    for (let i = typeIndex - 1; i >= 0; i--) {
+      const parentType = activeLayerOrder[i];
+      if (!parentType) {
+        continue;
+      }
+      const parentKey = `${key}_${parentType}${SpecialNodeKeys.HiddenSuffix}`;
+      addNode(graph, parentKey, parentType, '');
+      addValueToLink(graph, parentKey, childKey, -1);
+      childKey = parentKey;
+    }
+  }
+
+  function addHiddenChildChain(key: NodeKey, type: GraphLayers) {
+    const typeIndex = layerIndex.get(type);
+    if (
+      typeIndex === undefined ||
+      typeIndex < 0 ||
+      typeIndex >= activeLayerOrder.length - 1
+    ) {
+      return;
+    }
+
+    let parentKey = key;
+    for (let i = typeIndex + 1; i < activeLayerOrder.length; i++) {
+      const childType = activeLayerOrder[i];
+      if (!childType) {
+        continue;
+      }
+      const childKey = `${key}_${childType}${SpecialNodeKeys.HiddenSuffix}`;
+      addNode(graph, childKey, childType, '');
+      addValueToLink(graph, parentKey, childKey, -1);
+      parentKey = childKey;
+    }
+  }
+
+  // Now: find and fix "problematic" nodes
+  for (const typeStr in nodesByType) {
+    if (!isGraphLayer(typeStr)) continue;
+    const type = typeStr;
+    const nodes = nodesByType[type];
+    if (!nodes) continue;
+    for (const [key, node] of nodes) {
+      const nodeHasParent = hasParent(graph, key);
+      const nodeHasChild = hasChild(node);
+      if (!nodeHasParent && typeHasParent[type]) {
+        // This node is at the wrong layer and needs hidden parents.
+        addHiddenParentChain(key, type);
+      }
+      if (!nodeHasChild && typeHasChild[type]) {
+        // This node is at the wrong layer and needs hidden children.
+        addHiddenChildChain(key, type);
+      }
+    }
+  }
+}
+
+function buildTypeConnectivity(
+  graph: Map<NodeKey, NodeData>,
+  nodesByType: Partial<Record<GraphLayers, Array<[NodeKey, NodeData]>>>,
+) {
+  const typeHasParent = {} as Record<GraphLayers, boolean>;
+  const typeHasChild = {} as Record<GraphLayers, boolean>;
+
+  for (const typeStr in nodesByType) {
+    if (!isGraphLayer(typeStr)) continue;
+    const type = typeStr;
+    const nodes = nodesByType[type];
+    if (!nodes) continue;
+    typeHasParent[type] = false;
+    typeHasChild[type] = false;
+    for (const [key, node] of nodes) {
+      if (hasParent(graph, key)) typeHasParent[type] = true;
+      if (hasChild(node)) typeHasChild[type] = true;
+    }
+  }
+  return { typeHasParent, typeHasChild };
+}
+
+export function hasParent(
+  graph: Map<NodeKey, NodeData>,
+  key: NodeKey,
+): boolean {
+  for (const [_, data] of graph) {
+    if (data.to.has(key)) return true;
+  }
+  return false;
+}
+
+export function hasChild(node: NodeData): boolean {
+  return node.to.size > 0;
+}
+
+export function filterGraphByLayers(
+  graph: Graph,
+  layerFrom: GraphLayers,
+  layerTo: GraphLayers,
+): void {
+  const layerIndices = new Map<string, number>();
+  GRAPH_LAYER_ORDER.forEach((layer, index) => {
+    layerIndices.set(layer, index);
+  });
+
+  const fromIndex = layerIndices.get(layerFrom);
+  const toIndex = layerIndices.get(layerTo);
+
+  if (fromIndex !== undefined && toIndex !== undefined) {
+    const keysToDelete: NodeKey[] = [];
+    graph.forEach((data, key) => {
+      const nodeLayerIndex = layerIndices.get(data.type);
+      if (nodeLayerIndex !== undefined) {
+        if (nodeLayerIndex < fromIndex || nodeLayerIndex > toIndex) {
+          keysToDelete.push(key);
         }
       }
-    }
+    });
+
+    keysToDelete.forEach(key => graph.delete(key));
   }
-
-  // Global Other node (globalOther=true only)
-  if (globalOther && globalOtherBucket.total > 0) {
-    nodes.push({ name: 'Other' });
-    const globalOtherIdx = nodes.length - 1;
-
-    // Group entries by main category and emit one link per group
-    const byCategory = new Map<
-      string,
-      Array<{ name: string; value: number }>
-    >();
-    for (const entry of globalOtherBucket.entries) {
-      // Find which main category this group belongs to
-      const leaf = allLeaves.find(l => l.group === entry.name && !l.visible);
-      if (!leaf) continue;
-      const group = byCategory.get(leaf.mainCategory) ?? [];
-      group.push(entry);
-      byCategory.set(leaf.mainCategory, group);
-    }
-
-    for (const [catName, entries] of byCategory) {
-      const sourceCatIdx = catNodeIndexMap.get(catName);
-      if (sourceCatIdx === undefined) continue;
-      const groupTotal = entries.reduce((sum, e) => sum + e.value, 0);
-      links.push({
-        source: sourceCatIdx,
-        target: globalOtherIdx,
-        value: groupTotal,
-        tooltipInfo: [...entries].sort((a, b) => b.value - a.value),
-      });
-    }
-  }
-
-  return { nodes, links };
 }
 
-export function compactSankeyData(
-  data: SankeyData,
-  topN: number = 5,
-): SankeyData {
-  const compactedData: SankeyData = { nodes: [], links: [] };
-  compactedData.nodes.push(data.nodes[0]); // root node
-
-  // Find all root→mainCategory links and sort by value descending
-  const rootLinks = data.links
-    .filter(link => link.source === 0)
-    .sort((a, b) => b.value - a.value);
-
-  const topLinks = rootLinks.slice(0, topN - 1);
-  const otherLinks = rootLinks.slice(topN - 1);
-  const otherTotal = otherLinks.reduce((sum, link) => sum + link.value, 0);
-
-  // Add top category nodes and their links from root
-  for (const link of topLinks) {
-    compactedData.nodes.push(data.nodes[link.target]);
-    compactedData.links.push({
-      source: 0,
-      target: compactedData.nodes.length - 1,
-      value: link.value,
-    });
-  }
-
-  // Lump remaining categories into a single "Other" node
-  if (otherTotal > 0) {
-    compactedData.nodes.push({ name: 'Other' });
-    compactedData.links.push({
-      source: 0,
-      target: compactedData.nodes.length - 1,
-      value: otherTotal,
-      tooltipInfo: otherLinks.map(link => ({
-        name: data.nodes[link.target].name,
-        value: link.value,
-      })),
-    });
-  }
-
-  return compactedData;
-}
-
-export function withPercentageLabels(data: SankeyData): SankeyData {
-  // Assign a layer depth to each node, starting from the root (node 0 = depth 0).
-  const depth = new Array<number>(data.nodes.length).fill(-1);
-  depth[0] = 0;
-  let changed = true;
-  while (changed) {
-    changed = false;
-    for (const link of data.links) {
-      const src = link.source;
-      const tgt = link.target;
-      if (depth[src] >= 0 && depth[tgt] < 0) {
-        depth[tgt] = depth[src] + 1;
-        changed = true;
+export function cleanUpNodes(graph: Graph) {
+  // 1. Remove all `.to` links with value ===0
+  for (const [, node] of graph) {
+    for (const [target, value] of node.to) {
+      if (value === 0) {
+        node.to.delete(target);
       }
     }
   }
 
-  // Each node's value is the sum of its incoming links.
-  // The root has no incoming links, so use its outgoing links instead.
-  const nodeValue = (i: number) =>
-    data.links
-      .filter(l => (depth[i] === 0 ? l.source === i : l.target === i))
-      .reduce((sum, l) => sum + l.value, 0);
+  // 2. Find all nodes that are targets of remaining links ("has incoming link")
+  const hasIncoming = new Set<NodeKey>();
+  for (const [, node] of graph) {
+    for (const target of node.to.keys()) {
+      hasIncoming.add(target);
+    }
+  }
 
-  // Compute the total value per layer so percentages within each layer sum to 100%.
-  const layerTotal = new Map<number, number>();
-  data.nodes.forEach((_, i) => {
-    const d = depth[i];
-    if (d >= 0) layerTotal.set(d, (layerTotal.get(d) ?? 0) + nodeValue(i));
-  });
+  // 3. Collect keys to remove (no incoming links and no outgoing links)
+  const toDelete: NodeKey[] = [];
+  for (const [key, node] of graph) {
+    const hasOutgoing = node.to.size > 0;
+    const incoming = hasIncoming.has(key);
+    if (!hasOutgoing && !incoming) {
+      toDelete.push(key);
+    }
+  }
 
-  const nodes = data.nodes.map((node, i) => {
-    const total = layerTotal.get(depth[i]) ?? 0;
-    return {
-      ...node,
-      percentageLabel:
-        total === 0 ? '0%' : `${((nodeValue(i) / total) * 100).toFixed(1)}%`,
-    };
-  });
+  // 4. Remove these nodes from the graph
+  for (const key of toDelete) {
+    graph.delete(key);
+  }
+}
 
-  return { ...data, nodes };
+export function convertToSankeyData(
+  graph: Graph,
+  toolTipInfoMap: TooltipInfoMap,
+): SankeyData {
+  const nodes = Array.from(graph, ([key, data]) => ({
+    key,
+    name: data.labelKey
+      ? t(data.labelKey, data.labelParams)
+      : (data.name ?? key),
+    percentageLabel: data.percentageLabel ?? '',
+    color: data.color ?? undefined,
+  }));
+  const links = Array.from(graph).flatMap(([key, data]) =>
+    Array.from(data.to, ([targetKey, value]) => {
+      const tooltipInfo = toolTipInfoMap.get(key)?.get(targetKey) ?? [];
+
+      tooltipInfo.sort((a, b) => b.value - a.value);
+
+      let color: string | undefined;
+      const sourceLayersWithOwnColor: readonly GraphLayers[] = [
+        GraphLayers.IncomePayee,
+        GraphLayers.IncomeCategory,
+        GraphLayers.Account,
+        GraphLayers.CategoryGroup,
+      ];
+      const targetLayersWithTargetColor: readonly GraphLayers[] = [
+        GraphLayers.Category,
+        GraphLayers.Budget,
+      ];
+
+      if (
+        isGraphLayer(data.type) &&
+        sourceLayersWithOwnColor.includes(data.type)
+      ) {
+        color = data.color;
+      } else if (
+        isGraphLayer(data.type) &&
+        targetLayersWithTargetColor.includes(data.type)
+      ) {
+        const targetNode = graph.get(targetKey);
+        color = targetNode ? targetNode.color : undefined;
+      }
+
+      // Specific color overrides
+      if (targetKey === SpecialNodeKeys.LastMonthOverspent) {
+        color = graph.get(SpecialNodeKeys.LastMonthOverspent)?.color;
+      }
+      if (targetKey.endsWith(SpecialNodeKeys.NegativeSuffix)) {
+        color = graph.get(targetKey)?.color;
+      }
+      if (targetKey === SpecialNodeKeys.ToBudget) {
+        color = graph.get(SpecialNodeKeys.ToBudget)?.color;
+      }
+      if (targetKey === SpecialNodeKeys.ForNextMonth) {
+        color = graph.get(SpecialNodeKeys.ForNextMonth)?.color;
+      }
+      if (data.isNegative) {
+        color = data.color;
+      }
+
+      return {
+        source: nodes.findIndex(n => n.key === key) ?? -1,
+        target: nodes.findIndex(n => n.key === targetKey) ?? -1,
+        value,
+        tooltipInfo,
+        color: color ?? undefined,
+      };
+    }),
+  );
+
+  return {
+    nodes,
+    links,
+  };
 }

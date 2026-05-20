@@ -1,11 +1,11 @@
 // @ts-strict-ignore
-import React, { useCallback, useEffect, useEffectEvent, useState } from 'react';
 import type {
   ComponentProps,
   Dispatch,
   ReactNode,
   SetStateAction,
 } from 'react';
+import { useCallback, useEffect, useEffectEvent, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
@@ -39,16 +39,17 @@ import { FieldMappings } from './FieldMappings';
 import { InOutOption } from './InOutOption';
 import { MultiplierOption } from './MultiplierOption';
 import { Transaction } from './Transaction';
+import type { DateFormat, FieldMapping, ImportTransaction } from './utils';
 import {
   applyFieldMappings,
   dateFormats,
   filterByStartDate,
   isDateFormat,
   parseAmountFields,
+  parseCategoryFields,
   parseDate,
   stripCsvImportTransaction,
 } from './utils';
-import type { DateFormat, FieldMapping, ImportTransaction } from './utils';
 
 function CheckboxToggle({
   id,
@@ -160,19 +161,6 @@ function getInitialMappings(transactions) {
   };
 }
 
-function parseCategoryFields(trans, categories) {
-  let match = null;
-  categories.forEach(category => {
-    if (category.id === trans.category) {
-      return null;
-    }
-    if (category.name === trans.category) {
-      match = category.id;
-    }
-  });
-  return match;
-}
-
 export function ImportTransactionsModal({
   filename: originalFileName,
   accountId,
@@ -203,7 +191,6 @@ export function ImportTransactionsModal({
   const [flipAmount, setFlipAmount] = useState(false);
   const [multiplierEnabled, setMultiplierEnabled] = useState(false);
   const [reconcile, setReconcile] = useState(true);
-  const [reimportDeleted, setReimportDeleted] = useState(false);
   const [importNotes, setImportNotes] = useState(true);
 
   // This cannot be set after parsing the file, because changing it
@@ -241,6 +228,9 @@ export function ImportTransactionsModal({
   );
   const [camtSwapPayeeAndMemo, setCamtSwapPayeeAndMemo] = useState(
     String(prefs[`camt-swap-payee-memo-${accountId}`]) === 'true',
+  );
+  const [reimportDeleted, setReimportDeleted] = useState(
+    String(prefs[`import-reimport-deleted-${accountId}`] || 'true') === 'true',
   );
 
   const [parseDateFormat, setParseDateFormat] = useState<DateFormat | null>(
@@ -315,9 +305,7 @@ export function ImportTransactionsModal({
         }
 
         const category_id = parseCategoryFields(trans, categories);
-        if (category_id != null) {
-          trans.category = category_id;
-        }
+        trans.category = category_id;
 
         const {
           inflow: _inflow,
@@ -706,6 +694,10 @@ export function ImportTransactionsModal({
       });
     }
 
+    savePrefs({
+      [`import-reimport-deleted-${accountId}`]: String(reimportDeleted),
+    });
+
     importTransactions.mutate(
       {
         accountId,
@@ -921,10 +913,11 @@ export function ImportTransactionsModal({
                     </View>
                   );
                 }}
-                renderItem={({ item }) => (
+                renderItem={({ item, index }) => (
                   <View>
                     <Transaction
                       transaction={item}
+                      index={index}
                       showParsed={filetype === 'csv' || filetype === 'qif'}
                       parseDateFormat={parseDateFormat}
                       dateFormat={dateFormat}

@@ -98,7 +98,7 @@ export function GetCardData({
       firstDayOfWeekIdx,
     );
     startDate = dateStart || report.startDate;
-    endDate = dateEnd || report.startDate;
+    endDate = dateEnd || report.endDate;
   }
 
   const fromDate = convertFromDate(report.interval);

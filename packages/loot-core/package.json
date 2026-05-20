@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/core",
-  "version": "26.4.0",
+  "version": "26.5.2",
   "description": "",
   "license": "ISC",
   "repository": {
@@ -17,7 +17,11 @@
     "!src/**/*.test.ts",
     "!src/**/__tests__/**",
     "!src/**/__snapshots__/**",
-    "!src/**/__mocks__/**"
+    "!src/**/__mocks__/**",
+    "!@types/**/*.test.d.ts",
+    "!@types/**/*.test.d.ts.map",
+    "!@types/**/__tests__/**",
+    "!@types/**/__mocks__/**"
   ],
   "imports": {
     "#platform/server/asyncStorage": {
@@ -158,8 +162,6 @@
   "scripts": {
     "build:node": "cross-env NODE_ENV=production vite build --config ./vite.desktop.config.mts",
     "watch:node": "cross-env NODE_ENV=development vite build --config ./vite.desktop.config.mts --watch",
-    "build:browser": "cross-env NODE_ENV=production ./bin/build-browser",
-    "watch:browser": "cross-env NODE_ENV=development ./bin/build-browser",
     "generate:i18n": "i18next",
     "test": "npm-run-all -cp 'test:*'",
     "test:node": "ENV=node vitest --run",
@@ -179,7 +181,6 @@
     "csv-parse": "^6.2.1",
     "csv-stringify": "^6.7.0",
     "date-fns": "^4.1.0",
-    "google-protobuf": "^3.21.4",
     "handlebars": "^4.7.9",
     "hyperformula": "^3.2.0",
     "lodash": "^4.18.1",
@@ -189,6 +190,7 @@
     "promise-retry": "^2.0.1",
     "typescript-strict-plugin": "^2.4.4",
     "ua-parser-js": "^2.0.9",
+    "uuid": "^14.0.0",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {
@@ -218,7 +220,7 @@
     "ts-node": "^10.9.2",
     "util": "^0.12.5",
     "vite": "^8.0.5",
-    "vite-plugin-node-polyfills": "^0.26.0",
+    "vite-plugin-node-polyfills": "^0.27.0",
     "vite-plugin-peggy-loader": "^2.0.1",
     "vitest": "^4.1.2",
     "yargs": "^18.0.0"

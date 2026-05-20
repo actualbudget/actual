@@ -3,8 +3,16 @@ import { Buffer } from 'node:buffer';
 import fs from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-import { SyncProtoBuf } from '@actual-app/crdt';
+import {
+  create,
+  fromBinary,
+  SyncRequestSchema,
+  SyncResponseSchema,
+  toBinary,
+} from '@actual-app/crdt';
+import type { Request, Response } from 'express';
 import express from 'express';
+import { v4 as uuidv4 } from 'uuid';
 
 import { getAccountDb, isAdmin } from './account-db';
 import { FileNotFound } from './app-sync/errors';
@@ -29,7 +37,9 @@ import {
   getPathForGroupFile,
   getPathForUserFile,
   isValidFileId,
+  isValidGroupId,
 } from './util/paths';
+import type { GroupId } from './util/paths';
 
 const app = express();
 app.use(validateSessionMiddleware);
@@ -53,11 +63,45 @@ export { app as handlers };
 
 const OK_RESPONSE = { status: 'ok' };
 
-function boolToInt(deleted) {
+function boolToInt(deleted: boolean) {
   return deleted ? 1 : 0;
 }
 
-const verifyFileExists = (fileId, filesService, res, errorObject) => {
+function generateGroupId(): GroupId {
+  const id = uuidv4();
+  if (!isValidGroupId(id)) {
+    throw new TypeError('UUID format no longer matches expected format');
+  }
+  return id;
+}
+
+function extractSingleHeader(
+  req: Request,
+  res: Response,
+  key: string,
+): string | null {
+  const value = req.headers[key];
+  if (!value) {
+    return null;
+  }
+  if (typeof value !== 'string') {
+    res.status(400).send('Duplicate headers encountered for key ' + key);
+    return null;
+  }
+  return value;
+}
+
+const verifyFileExists = (
+  fileId: unknown,
+  filesService: FilesService,
+  res: Response,
+  errorObject: string | Record<string, unknown>,
+) => {
+  if (typeof fileId !== 'string' || !isValidFileId(fileId)) {
+    res.status(400).send('invalid fileId');
+    return;
+  }
+
   try {
     return filesService.get(fileId);
   } catch (e) {
@@ -87,7 +131,7 @@ function requireFileAccess(file: File, userId: string) {
 app.post('/sync', async (req, res): Promise<void> => {
   let requestPb;
   try {
-    requestPb = SyncProtoBuf.SyncRequest.deserializeBinary(req.body);
+    requestPb = fromBinary(SyncRequestSchema, req.body);
   } catch (e) {
     console.log('Error parsing sync request', e);
     res.status(500);
@@ -95,11 +139,11 @@ app.post('/sync', async (req, res): Promise<void> => {
     return;
   }
 
-  const fileId = requestPb.getFileid() || null;
-  const groupId = requestPb.getGroupid() || null;
-  const keyId = requestPb.getKeyid() || null;
-  const since = requestPb.getSince() || null;
-  const messages = requestPb.getMessagesList();
+  const fileId = requestPb.fileId || null;
+  const groupId = requestPb.groupId || null;
+  const keyId = requestPb.keyId || null;
+  const since = requestPb.since || null;
+  const messages = requestPb.messages;
 
   if (!since) {
     res.status(422).send({
@@ -139,14 +183,14 @@ app.post('/sync', async (req, res): Promise<void> => {
 
   const { trie, newMessages } = simpleSync.sync(messages, since, groupId);
 
-  // encode it back...
-  const responsePb = new SyncProtoBuf.SyncResponse();
-  responsePb.setMerkle(JSON.stringify(trie));
-  newMessages.forEach(msg => responsePb.addMessages(msg));
+  const responsePb = create(SyncResponseSchema, {
+    merkle: JSON.stringify(trie),
+    messages: newMessages,
+  });
 
   res.set('Content-Type', 'application/actual-sync');
   res.set('X-ACTUAL-SYNC-METHOD', 'simple');
-  res.send(Buffer.from(responsePb.serializeBinary()));
+  res.send(Buffer.from(toBinary(SyncResponseSchema, responsePb)));
 });
 
 app.post('/user-get-key', (req, res) => {
@@ -196,7 +240,7 @@ app.post('/user-create-key', (req, res) => {
   }
 
   filesService.update(
-    fileId,
+    file.id,
     new FileUpdate({
       encryptSalt: keySalt,
       encryptKeyId: keyId,
@@ -231,7 +275,7 @@ app.post('/reset-user-file', async (req, res) => {
 
   const groupId = file.groupId;
 
-  filesService.update(fileId, new FileUpdate({ groupId: null }));
+  filesService.update(file.id, new FileUpdate({ groupId: null }));
 
   if (groupId) {
     try {
@@ -265,8 +309,15 @@ app.post('/upload-user-file', async (req, res) => {
   }
 
   let groupId = req.headers['x-actual-group-id'] || null;
-  const encryptMeta = req.headers['x-actual-encrypt-meta'] || null;
-  const syncFormatVersion = req.headers['x-actual-format'] || null;
+  const encryptMeta = extractSingleHeader(req, res, 'x-actual-encrypt-meta');
+  if (res.headersSent) return;
+  const syncFormatVersion = extractSingleHeader(req, res, 'x-actual-format');
+  if (res.headersSent) return;
+
+  if (!!groupId && (typeof groupId !== 'string' || !isValidGroupId(groupId))) {
+    res.status(400).send('invalid groupId');
+    return;
+  }
 
   const keyId =
     encryptMeta && typeof encryptMeta === 'string'
@@ -311,12 +362,12 @@ app.post('/upload-user-file', async (req, res) => {
 
   if (!currentFile) {
     // it's new
-    groupId = crypto.randomUUID();
-
+    const newGroupId = generateGroupId();
+    groupId = newGroupId;
     filesService.set(
       new File({
         id: fileId,
-        groupId,
+        groupId: newGroupId,
         syncVersion: syncFormatVersion,
         name,
         encryptMeta,
@@ -334,8 +385,9 @@ app.post('/upload-user-file', async (req, res) => {
 
   if (!groupId) {
     // sync state was reset, create new group
-    groupId = crypto.randomUUID();
-    filesService.update(fileId, new FileUpdate({ groupId }));
+    const newGroupId = generateGroupId();
+    groupId = newGroupId;
+    filesService.update(fileId, new FileUpdate({ groupId: newGroupId }));
   }
 
   // Regardless, update some properties
@@ -412,7 +464,7 @@ app.post('/update-user-filename', (req, res) => {
     return;
   }
 
-  filesService.update(fileId, new FileUpdate({ name }));
+  filesService.update(file.id, new FileUpdate({ name }));
   res.send(OK_RESPONSE);
 });
 
@@ -507,7 +559,7 @@ app.post('/delete-user-file', (req, res) => {
     return;
   }
 
-  filesService.update(fileId, new FileUpdate({ deleted: true }));
+  filesService.update(file.id, new FileUpdate({ deleted: true }));
 
   res.send(OK_RESPONSE);
 });

@@ -8,7 +8,7 @@ import { useTheme } from '#style';
 
 import { useTags } from './useTags';
 
-export function useTagCSS() {
+export function useTagCSS(opts?: { ellipsis?: boolean }) {
   const { data: tags = [] } = useTags();
   const [theme] = useTheme();
 
@@ -24,7 +24,14 @@ export function useTagCSS() {
       );
 
       return css({
-        display: 'inline-flex',
+        ...(opts?.ellipsis
+          ? {
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              maxWidth: '100%',
+              display: 'inline-block',
+            }
+          : { display: 'inline-flex' }),
         padding: options.compact ? '0px 7px' : '3px 7px',
         borderRadius: 16,
         userSelect: 'none',
@@ -39,7 +46,7 @@ export function useTagCSS() {
         },
       });
     },
-    [theme, tags],
+    [theme, tags, opts],
   );
 }
 

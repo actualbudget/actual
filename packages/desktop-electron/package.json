@@ -1,6 +1,6 @@
 {
   "name": "desktop-electron",
-  "version": "26.4.0",
+  "version": "26.5.2",
   "description": "A simple and powerful personal finance system",
   "author": "Actual",
   "main": "build/desktop-electron/index.js",
@@ -47,6 +47,12 @@
       "!build/loot-core/lib-dist/electron/{browser,bundle.mobile*}"
     ],
     "beforePack": "./build/desktop-electron/beforePackHook.js",
+    "afterSign": "./build/desktop-electron/afterSignHook.js",
+    "electronFuses": {
+      "runAsNode": false,
+      "enableNodeOptionsEnvironmentVariable": true,
+      "enableNodeCliInspectArguments": false
+    },
     "mac": {
       "category": "public.app-category.finance",
       "icon": "icons/icon.icns",

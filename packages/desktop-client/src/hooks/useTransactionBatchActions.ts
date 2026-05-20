@@ -243,6 +243,7 @@ export function useTransactionBatchActions() {
             name: 'category-autocomplete',
             options: {
               month: transactionsHaveSameMonth ? transactionMonth : undefined,
+              showNoneOption: true,
               onSelect: categoryId => onChange(name, categoryId),
             },
           },
@@ -297,7 +298,11 @@ export function useTransactionBatchActions() {
         added: transactions.reduce(
           (newTransactions: TransactionEntity[], trans: TransactionEntity) => {
             return newTransactions.concat(
-              realizeTempTransactions(ungroupTransaction(trans)),
+              realizeTempTransactions(ungroupTransaction(trans)).map(t => ({
+                ...t,
+                cleared: false,
+                reconciled: false,
+              })),
             );
           },
           [],
@@ -309,11 +314,7 @@ export function useTransactionBatchActions() {
       onSuccess?.(ids);
     };
 
-    await checkForReconciledTransactions(
-      ids,
-      'batchDuplicateWithReconciled',
-      onConfirmDuplicate,
-    );
+    await onConfirmDuplicate(ids);
   };
 
   const onBatchDelete = async ({ ids, onSuccess }: BatchDeleteProps) => {
@@ -445,7 +446,6 @@ export function useTransactionBatchActions() {
   > = {
     batchDeleteWithReconciled: 'batchDeleteWithReconciledTransfer',
     batchEditWithReconciled: 'batchEditWithReconciledTransfer',
-    batchDuplicateWithReconciled: 'batchDuplicateWithReconciledTransfer',
   };
 
   const checkForReconciledTransactions = async (
