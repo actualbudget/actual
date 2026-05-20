@@ -208,6 +208,7 @@ const sidebars = {
             id: 'experimental/index',
           },
           items: [
+            'experimental/budget-automation',
             'experimental/goal-templates',
             'experimental/monthly-cleanup',
             'experimental/rule-templating',
