@@ -964,7 +964,6 @@ export function getTags() {
     SELECT id, tag, color, description
     FROM tags
     WHERE tombstone = 0
-    ORDER BY tag COLLATE NOCASE
   `);
 }
 
@@ -972,7 +971,6 @@ export function getAllTags() {
   return all<DbTag>(`
     SELECT id, tag, color, description
     FROM tags
-    ORDER BY tag COLLATE NOCASE
   `);
 }
 

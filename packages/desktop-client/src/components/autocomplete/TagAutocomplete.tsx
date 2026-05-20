@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useId, useMemo, useRef, useState } from 'react';
 import type {
   CSSProperties,
   FocusEventHandler,
@@ -13,11 +6,13 @@ import type {
   KeyboardEventHandler,
 } from 'react';
 import { ListBox, ListBoxItem, Popover } from 'react-aria-components';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
+import { SvgAdd } from '@actual-app/components/icons/v0';
 import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { send } from '@actual-app/core/platform/client/connection';
 import { css } from '@emotion/css';
 
 import { useCurrentWordRange } from '#hooks/useCurrentWordRange';
@@ -44,7 +39,7 @@ export function TagAutocomplete({
   onUpdate,
 }: TagAutocompleteProps) {
   const { t } = useTranslation();
-  const getTagCSS = useTagCSS();
+  const getTagCSS = useTagCSS({ ellipsis: true });
   const autocompleteId = useId();
   const id = useCallback(
     (itemId: string) => autocompleteId + '|' + itemId,
@@ -56,30 +51,56 @@ export function TagAutocomplete({
   const [startIdx, endIdx] = useCurrentWordRange(inputValue, cursorPosition);
   const currentWord = inputValue.slice(startIdx, endIdx);
 
-  const filteredTags = useFilteredTags(currentWord, true);
-  const filteredItems = useMemo(
-    () => filteredTags?.map(tag => ({ ...tag, name: '#' + tag.tag })) ?? [],
-    [filteredTags],
-  );
+  const { data: filteredTags, refetch } = useFilteredTags(currentWord, true);
+  const filteredItems = useMemo(() => {
+    const tagArr =
+      filteredTags?.map(tag => ({ ...tag, name: '#' + tag.tag })) ?? [];
+
+    const isValidTag = currentWord.startsWith('#') && currentWord.length > 1;
+    const exactMatchExists =
+      tagArr.length && '#' + tagArr[0].tag === currentWord;
+    if (isValidTag && !exactMatchExists) {
+      const currentWordSingleHash = currentWord.replace(/^#+/, '#');
+      tagArr.push({
+        id: 'create_tag',
+        name: `${currentWordSingleHash}`,
+        tag: currentWordSingleHash.slice(1),
+      });
+    }
+    return tagArr;
+  }, [filteredTags, currentWord]);
 
   const [isOpen, setIsOpen] = useState(false);
   const showPopup = isOpen && filteredItems.length > 0;
 
   const [highlightedIdx, setHighlightedIdx] = useState(0);
   const highlightedId =
-    showPopup && highlightedIdx < filteredItems.length
+    showPopup && highlightedIdx >= 0 && highlightedIdx < filteredItems.length
       ? filteredItems[highlightedIdx].id
       : null;
-  useEffect(() => {
-    if (highlightedId) {
-      const el = document.querySelector(`[data-key="${id(highlightedId)}"]`);
-      el?.scrollIntoView?.({ block: 'nearest' });
-    }
-  }, [highlightedId, id]);
+  const scrollItemIntoView = useCallback(
+    (idx: number) => {
+      const targetId =
+        showPopup &&
+        idx >= 0 &&
+        idx < filteredItems?.length &&
+        filteredItems[idx].id;
+      if (targetId) {
+        const el = document.querySelector(`[data-key="${id(targetId)}"]`);
+        el?.scrollIntoView?.({ block: 'nearest' });
+      }
+    },
+    [id, filteredItems, showPopup],
+  );
 
-  function handleSelect(id: string | null) {
+  async function handleSelect(id: string | null) {
     const tagObj = filteredItems.find(tag => tag.id === id);
     if (!tagObj) return;
+
+    if (id === 'create_tag') {
+      await send('tags-create', { tag: tagObj.tag });
+      void refetch({ cancelRefetch: true });
+    }
 
     const nextChar = inputValue.charAt(endIdx);
     const space = nextChar === ' ' ? '' : ' ';
@@ -102,21 +123,23 @@ export function TagAutocomplete({
     }
 
     if (e.key === 'ArrowUp') {
+      e.preventDefault();
       setHighlightedIdx(highlightedIdx - 1);
-      e.preventDefault();
+      scrollItemIntoView(highlightedIdx - 1);
     } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
       setHighlightedIdx(highlightedIdx + 1);
-      e.preventDefault();
+      scrollItemIntoView(highlightedIdx + 1);
     } else if (e.key === 'Home' && filteredItems.length > 1) {
-      setHighlightedIdx(0);
       e.preventDefault();
+      setHighlightedIdx(0);
     } else if (e.key === 'End' && filteredItems.length > 1) {
       setHighlightedIdx(filteredItems.length - 1);
       e.preventDefault();
     } else if (highlightedId && (e.key === 'Enter' || e.key === 'Tab')) {
-      handleSelect(highlightedId);
       e.preventDefault();
       e.stopPropagation();
+      void handleSelect(highlightedId);
     } else if (e.key === 'Escape') {
       setIsOpen(false);
     }
@@ -141,23 +164,23 @@ export function TagAutocomplete({
           setIsOpen(true);
           setInputValue(e.currentTarget.value);
         }}
+        tabIndex={-1}
         onKeyDown={handleKeyDown}
         onFocus={() => setIsOpen(true)}
         onBlur={onBlur}
         onUpdate={onUpdate}
-        autoComplete={showPopup ? 'off' : undefined}
+        autoComplete="off"
       />
 
       <Popover
         isNonModal
         placement="bottom start"
-        className={css(styles.darkScrollbar)}
-        style={{
+        className={css(styles.darkScrollbar, {
           background: theme.menuAutoCompleteBackground,
           borderRadius: 6,
           boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
           width: inputRef.current?.offsetWidth ?? 100,
-        }}
+        })}
         offset={1}
         triggerRef={inputRef}
         isOpen={showPopup}
@@ -170,7 +193,11 @@ export function TagAutocomplete({
           selectionMode="single"
           dependencies={[highlightedId]}
           onPointerDown={e => e.preventDefault()}
-          style={{ borderRadius: 4, maxHeight: '150px', overflowY: 'auto' }}
+          style={{
+            borderRadius: 4,
+            maxHeight: '150px',
+            overflowY: 'auto',
+          }}
         >
           {(item: (typeof filteredItems)[number]) => (
             <ListBoxItem
@@ -183,26 +210,49 @@ export function TagAutocomplete({
                     ? theme.menuAutoCompleteBackgroundHover
                     : 'transparent',
                 alignItems: 'center',
-                padding: 4,
                 fontWeight: 500,
                 cursor: 'pointer',
                 color:
                   highlightedId === item.id
                     ? theme.menuAutoCompleteItemTextHover
                     : theme.menuAutoCompleteItemText,
+                padding: '4px 6px 1px 6px',
               })}
-              onMouseOver={() =>
-                setHighlightedIdx(
-                  Math.max(
-                    0,
-                    filteredItems.findIndex(_item => _item.id === item.id),
-                  ),
-                )
-              }
+              onMouseMove={() => {
+                const idx = filteredItems.findIndex(
+                  _item => _item.id === item.id,
+                );
+                if (idx >= 0 && highlightedIdx !== idx) {
+                  setHighlightedIdx(idx);
+                }
+              }}
               onPointerDown={e => e.preventDefault()}
               onClick={() => handleSelect(item.id)}
             >
-              <div className={getTagCSS(item.tag)}>{item.name}</div>
+              {item.id === 'create_tag' ? (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    color: theme.noticeTextMenu,
+                    paddingBottom: 3,
+                  }}
+                >
+                  <SvgAdd height={8} width={8} />
+                  <span
+                    style={{
+                      textWrap: 'nowrap',
+                      fontSize: 11,
+                    }}
+                  >
+                    <Trans>Create tag</Trans>
+                  </span>
+                  <span className={getTagCSS('')}>{item.name}</span>
+                </div>
+              ) : (
+                <div className={getTagCSS(item.tag)}>{item.name}</div>
+              )}
             </ListBoxItem>
           )}
         </ListBox>

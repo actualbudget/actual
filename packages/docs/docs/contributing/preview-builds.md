@@ -16,13 +16,13 @@ The exact URLs are also posted as a comment on each PR by the Netlify bot.
 There is no sync server on preview builds so when asked "Where's the server" select "Don't use a server." Alternatively, you can use your own self-hosted server. You should exercise caution when using a server with preview builds because they are much more likely to have bugs that could damage your budget. Consider running a separate local server for preview builds.
 :::
 
-## Edge Builds
+## Nightly Builds
 
-Edge builds, also known as nightly builds, serve as a testing ground for upcoming features before they are included in official monthly releases.
-Explore edge builds to access the latest features, but be aware that new features are added and removed regularly, which means that these builds are not always stable.
+Nightly builds serve as a testing ground for upcoming features before they are included in official monthly releases.
+Explore nightly builds to access the latest features, but be aware that new features are added and removed regularly, which means that these builds are not always stable.
 
-If you want to try out the edge builds, simply head over to [edge.actualbudget.org](https://edge.actualbudget.org/).
+If you want to try out the nightly builds, simply head over to [nightly.actualbudget.org](https://nightly.actualbudget.org/).
 
 :::info
-There is no sync server on the edge build, so when asked, "Where's the server?" select "Don't use a server." Alternatively, you can use your own self-hosted server. You should exercise caution when using a server with edge builds because they are much more likely to have bugs that could damage your budget. Consider running a separate local server for edge builds.
+There is no sync server on the nightly build, so when asked, "Where's the server?" select "Don't use a server." Alternatively, you can use your own self-hosted server. You should exercise caution when using a server with nightly builds because they are much more likely to have bugs that could damage your budget. Consider running a separate local server for nightly builds.
 :::

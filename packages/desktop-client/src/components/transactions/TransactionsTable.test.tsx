@@ -18,10 +18,11 @@ import type {
   CategoryEntity,
   CategoryGroupEntity,
   PayeeEntity,
+  ScheduleEntity,
   TagEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
@@ -103,6 +104,7 @@ vi.mock('../../hooks/useCategories', () => ({
 }));
 
 const usualGroup = categoryGroups[1];
+let schedules: ScheduleEntity[] = [];
 
 function generateTransactions(
   count: number,
@@ -239,6 +241,8 @@ function initBasicServer() {
             data: generateTransactions(5, [6]),
             dependencies: [],
           };
+        case 'schedules':
+          return { data: schedules, dependencies: [] };
         default:
           throw new Error(`queried unknown table: ${query.table}`);
       }
@@ -252,10 +256,15 @@ function initBasicServer() {
       list: categories,
     }),
     'tags-get': async () => tags,
+    'tags-create': async (tag: Omit<TagEntity, 'id'>) => ({
+      id: 'new-tag',
+      ...tag,
+    }),
   });
 }
 
 beforeEach(() => {
+  schedules = [];
   initBasicServer();
 });
 
@@ -402,14 +411,22 @@ expect.extend({
     ) {
       return {
         message: () =>
-          `Expected ${validPayeeListWithFavorite.join(', ')} to have favorite stars.` +
-          `Received ${foundStarList.length} items with favorite stars. Incorrect: ${incorrectStarList.join(', ')}`,
+          `Expected ${validPayeeListWithFavorite.join(
+            ', ',
+          )} to have favorite stars.` +
+          `Received ${
+            foundStarList.length
+          } items with favorite stars. Incorrect: ${incorrectStarList.join(
+            ', ',
+          )}`,
         pass: false,
       };
     } else {
       return {
         message: () =>
-          `Expected ${String(validPayeeListWithFavorite)} to have favorite stars`,
+          `Expected ${String(
+            validPayeeListWithFavorite,
+          )} to have favorite stars`,
         pass: true,
       };
     }
@@ -435,6 +452,50 @@ function expectToBeEditingField(
 }
 
 describe('Transactions', () => {
+  test('preview transactions show schedule name in notes', async () => {
+    const scheduleName = 'Monthly rent';
+    schedules = [
+      {
+        id: 'schedule-1',
+        name: scheduleName,
+        rule: 'rule-1',
+        next_date: '2017-01-01',
+        completed: false,
+        posts_transaction: false,
+        tombstone: false,
+        _payee: 'alice-id',
+        _account: accounts[0].id,
+        _amount: -1000,
+        _amountOp: 'is',
+        _date: '2017-01-01',
+        _conditions: [],
+        _actions: [],
+      },
+    ];
+
+    const previewTransaction: TransactionEntity = {
+      id: 'preview/schedule-1/2017-01-01',
+      account: accounts[0].id,
+      amount: -1000,
+      date: '2017-01-01',
+      payee: 'alice-id',
+      schedule: 'schedule-1',
+      cleared: false,
+      reconciled: false,
+    };
+
+    const { container } = renderTransactions({
+      transactions: [previewTransaction],
+      isAdding: false,
+    });
+
+    await waitFor(() => {
+      expect(queryField(container, 'notes', 'div', 0).textContent).toBe(
+        scheduleName,
+      );
+    });
+  });
+
   test('transactions table shows the correct data', () => {
     const { container, getTransactions } = renderTransactions();
 
@@ -1330,6 +1391,24 @@ describe('Transactions', () => {
       fireEvent.blur(input);
 
       expect(getTransactions()[3].notes).toBe('#taxes');
+    });
+
+    test('creating a new tag via the autocomplete', async () => {
+      const { container, getTransactions } = renderTransactions();
+      const input = await editField(container, 'notes', 2);
+      await userEvent.clear(input);
+      await userEvent.type(input, 'spending on #coffee');
+
+      // The "Create tag #coffee" option should appear
+      const createOption = await screen.findByText('Create tag');
+      expect(createOption).toBeTruthy();
+
+      await userEvent.click(createOption);
+      await waitForAutocomplete();
+      fireEvent.blur(input);
+
+      // Verify the tag was added to the note correctly
+      expect(getTransactions()[2].notes).toBe('spending on #coffee');
     });
   });
 });

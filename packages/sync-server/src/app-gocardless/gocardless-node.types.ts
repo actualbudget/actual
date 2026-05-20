@@ -227,6 +227,21 @@ export type GoCardlessAccountMetadata = {
 };
 
 /**
+ * A feature an institution may support, as returned in `supported_features`.
+ * Potentially not exhaustive.
+ */
+export type InstitutionFeature =
+  | 'account_selection'
+  | 'business_accounts'
+  | 'card_accounts'
+  | 'corporate_accounts'
+  | 'private_accounts'
+  | 'pending_transactions'
+  | 'access_scopes'
+  | 'submit_payment'
+  | 'separate_continuous_history_consent';
+
+/**
  * Information about the Institution
  */
 export type Institution = {
@@ -267,7 +282,8 @@ export type Institution = {
   max_access_valid_for_days: string;
 
   supported_payments?: object;
-  supported_features?: string[];
+
+  supported_features?: InstitutionFeature[];
 };
 
 /**

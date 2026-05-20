@@ -5,6 +5,7 @@ import {
   addNode,
   addPercentageLabels,
   addValueToLink,
+  buildSankeyData,
   cleanUpNodes,
   convertToSankeyData,
   createBudgetGraph,
@@ -472,6 +473,7 @@ describe('sankey-spreadsheet', () => {
           categoryId: 'c_salary',
           value: 5000,
           isIncome: true,
+          isNegative: false,
         },
         {
           categoryGroup: 'Food',
@@ -480,6 +482,7 @@ describe('sankey-spreadsheet', () => {
           categoryId: 'c_groceries',
           value: 500,
           isIncome: false,
+          isNegative: false,
         },
       ];
 
@@ -510,6 +513,7 @@ describe('sankey-spreadsheet', () => {
         categoryId: string;
         value: number;
         isIncome: boolean;
+        isNegative: false;
       }> = [];
 
       const aggregated = {
@@ -525,7 +529,7 @@ describe('sankey-spreadsheet', () => {
       const graph = createBudgetGraph(categoryData, aggregated);
       const toBudgetNode = graph.get('to_budget');
 
-      expect(toBudgetNode?.isOverbudgeted).toBe(true);
+      expect(toBudgetNode?.isNegative).toBe(true);
       expect(toBudgetNode?.labelKey).toBe('Overbudgeted');
     });
   });
@@ -540,6 +544,7 @@ describe('sankey-spreadsheet', () => {
           categoryId: 'c_groceries',
           value: 100,
           isIncome: false,
+          isNegative: true,
           accountName: 'Checking',
           accountId: 'a_checking',
         },
@@ -550,6 +555,7 @@ describe('sankey-spreadsheet', () => {
           categoryId: 'c_salary',
           value: 5000,
           isIncome: true,
+          isNegative: false,
           accountName: 'Checking',
           accountId: 'a_checking',
           payeeName: 'Employer',
@@ -645,6 +651,26 @@ describe('sankey-spreadsheet', () => {
       expect(node1?.percentageLabel).toBe('25.0%');
       expect(node2?.percentageLabel).toBe('75.0%');
     });
+
+    it('normalizes percentages per GraphLayer, not computed depth', () => {
+      const graph: Graph = new Map();
+
+      addNode(graph, 'payee', GraphLayers.IncomePayee, 'Payee');
+      addNode(graph, 'income-cat', GraphLayers.IncomeCategory, 'Income Cat');
+      addNode(graph, 'account-incoming', GraphLayers.Account, 'Account A');
+
+      addNode(graph, 'account-root', GraphLayers.Account, 'Account B');
+      addNode(graph, 'group', GraphLayers.CategoryGroup, 'Group');
+
+      addValueToLink(graph, 'payee', 'income-cat', 300);
+      addValueToLink(graph, 'income-cat', 'account-incoming', 300);
+      addValueToLink(graph, 'account-root', 'group', 100);
+
+      addPercentageLabels(graph);
+
+      expect(graph.get('account-root')?.percentageLabel).toBe('25.0%');
+      expect(graph.get('account-incoming')?.percentageLabel).toBe('75.0%');
+    });
   });
 
   describe('filterGraphByLayers', () => {
@@ -718,6 +744,34 @@ describe('sankey-spreadsheet', () => {
 
       expect(graph.has('node1')).toBe(false);
       expect(graph.has('node2')).toBe(false);
+    });
+  });
+
+  describe('addHiddenNodes via buildSankeyData', () => {
+    it('adds one hidden child layer for category groups without children', () => {
+      const graph: Graph = new Map();
+
+      addNode(graph, 'account', GraphLayers.Account, 'Account');
+      addNode(graph, 'group-with-child', GraphLayers.CategoryGroup, 'Group A');
+      addNode(graph, 'category', GraphLayers.Category, 'Category A');
+      addValueToLink(graph, 'account', 'group-with-child', 100);
+      addValueToLink(graph, 'group-with-child', 'category', 100);
+
+      addNode(graph, 'group-no-child', GraphLayers.CategoryGroup, 'Group B');
+      addValueToLink(graph, 'account', 'group-no-child', 50);
+
+      const sankeyData = buildSankeyData(
+        graph,
+        100,
+        [],
+        'global',
+        GraphLayers.Account,
+        GraphLayers.Category,
+      );
+
+      const nodeKeys = sankeyData.nodes.map(node => node.key);
+      expect(nodeKeys).toContain('group-no-child_category__HIDDEN');
+      expect(nodeKeys).not.toContain('group-no-child_category_group__HIDDEN');
     });
   });
 
