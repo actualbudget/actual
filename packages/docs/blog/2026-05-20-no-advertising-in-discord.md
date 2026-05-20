@@ -1,6 +1,6 @@
 ---
 title: No Advertising in Our Discord
-description: Actual has grown, and so has its community. To protect the privacy of our users from bad actors, we are introducing a new rule for our Discord server: no advertising.
+description: 'Actual has grown, and so has its community. To protect the privacy of our users from bad actors, we are introducing a new rule for our Discord server: no advertising.'
 date: 2026-05-20T10:00
 slug: no-advertising-in-discord
 tags: [announcement]
