@@ -71,9 +71,16 @@ export function TransactionTagsModal({
         selectedTag => !existingTagNamesSet.has(selectedTag),
       );
 
-      await Promise.all(
-        missingTags.map(tag => createTagMutation.mutateAsync({ tag: { tag } })),
-      );
+      try {
+        await Promise.all(
+          missingTags.map(tag =>
+            createTagMutation.mutateAsync({ tag: { tag } }),
+          ),
+        );
+      } catch {
+        // useCreateTagMutation surfaces the error notification.
+        return;
+      }
     }
 
     onSubmit(action, selectedTags);
