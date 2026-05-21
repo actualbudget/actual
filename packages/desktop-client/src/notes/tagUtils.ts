@@ -7,6 +7,12 @@ import {
 
 export { normalizeNoteTag };
 
+/**
+ * Adds one note tag to transaction notes if it is not already present.
+ *
+ * Existing note text is preserved and empty user input leaves the notes
+ * unchanged.
+ */
 export function addTagToNotes(
   notes: string | null | undefined,
   tag: string,
@@ -25,6 +31,9 @@ export function addTagToNotes(
   return `${currentNotes} #${normalizedTag}`.trim();
 }
 
+/**
+ * Adds multiple note tags to transaction notes.
+ */
 export function addTagsToNotes(
   notes: string | null | undefined,
   tags: string[],
@@ -32,6 +41,12 @@ export function addTagsToNotes(
   return tags.reduce(addTagToNotes, notes?.trim() ?? '');
 }
 
+/**
+ * Removes one exact note tag from transaction notes.
+ *
+ * Inline tags are removed without matching partial tags, so removing `car`
+ * leaves `#cart` untouched.
+ */
 export function removeTagFromNotes(
   notes: string | null | undefined,
   tag: string,
@@ -49,6 +64,9 @@ export function removeTagFromNotes(
     .trim();
 }
 
+/**
+ * Removes multiple exact note tags from transaction notes.
+ */
 export function removeTagsFromNotes(
   notes: string | null | undefined,
   tags: string[],
@@ -56,6 +74,9 @@ export function removeTagsFromNotes(
   return tags.reduce(removeTagFromNotes, notes?.trim() ?? '');
 }
 
+/**
+ * Removes every hashtag-style note tag from transaction notes.
+ */
 export function removeAllTagsFromNotes(
   notes: string | null | undefined,
 ): string {
@@ -65,6 +86,9 @@ export function removeAllTagsFromNotes(
     .trim();
 }
 
+/**
+ * Adds or removes a normalized tag from the current modal selection.
+ */
 export function toggleSelectedNoteTag(tags: string[], tag: string): string[] {
   const normalizedTag = normalizeNoteTag(tag);
 
@@ -79,6 +103,9 @@ export function toggleSelectedNoteTag(tags: string[], tag: string): string[] {
   return [...tags, normalizedTag];
 }
 
+/**
+ * Filters existing note tags by normalized user input.
+ */
 export function filterExistingNoteTags(
   tags: string[],
   query: string,
