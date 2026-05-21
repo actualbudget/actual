@@ -177,8 +177,8 @@ export const goCardlessService = {
   getTransactionsWithBalance: async (
     requisitionId: GoCardlessRequisitionId,
     accountId: GoCardlessAccountId,
-    startDate: string,
-    endDate: string,
+    startDate: string | undefined,
+    endDate: string | undefined,
   ): Promise<{
     balances: Balance[];
     institutionId: GoCardlessInstitutionId;
@@ -226,8 +226,8 @@ export const goCardlessService = {
   getNormalizedTransactions: async (
     requisitionId: GoCardlessRequisitionId,
     accountId: GoCardlessAccountId,
-    startDate: string,
-    endDate: string,
+    startDate: string | undefined,
+    endDate: string | undefined,
   ): Promise<{
     institutionId: GoCardlessInstitutionId;
     transactions: {
@@ -252,10 +252,10 @@ export const goCardlessService = {
 
     const bank: IBank = BankFactory(institution_id);
     const sortedBookedTransactions = bank.sortTransactions(
-      transactions.transactions?.booked,
+      transactions.transactions.booked,
     );
     const sortedPendingTransactions = bank.sortTransactions(
-      transactions.transactions?.pending,
+      transactions.transactions.pending,
     );
     const allTransactions: TransactionWithBookedStatus[] =
       sortedBookedTransactions.map(t => ({
@@ -442,10 +442,10 @@ export const goCardlessService = {
     const bank: IBank = BankFactory(institutionId);
     response.transactions.booked = response.transactions.booked
       .map(transaction => bank.normalizeTransaction(transaction, true))
-      .filter((t): t is Transaction => t != null);
+      .filter(t => t != null);
     response.transactions.pending = response.transactions.pending
       .map(transaction => bank.normalizeTransaction(transaction, false))
-      .filter((t): t is Transaction => t != null);
+      .filter(t => t != null);
 
     return response;
   },
