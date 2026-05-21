@@ -16,8 +16,8 @@ import type { SankeyData } from 'recharts/types/chart/Sankey';
 import { Container } from '#components/reports/Container';
 import { useFormat } from '#hooks/useFormat';
 import { useIsInViewport } from '#hooks/useIsInViewport';
-import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
+import { useReducedMotion } from '#hooks/useReducedMotion';
 
 const fadeIn = keyframes({
   from: { opacity: 0 },
@@ -80,7 +80,7 @@ function SankeyLink({
   onMouseEnter,
   onMouseLeave,
 }: SankeyLinkProps) {
-  const isTestEnv = useIsTestEnv();
+  const reducedMotion = useReducedMotion();
 
   if (payload.value <= 0) {
     return null;
@@ -94,7 +94,11 @@ function SankeyLink({
   return (
     <path
       className={
-        isTestEnv ? undefined : started ? fadeInClass(fraction) : hiddenClass
+        reducedMotion
+          ? undefined
+          : started
+            ? fadeInClass(fraction)
+            : hiddenClass
       }
       d={`M${sourceX},${sourceY} C${sourceControlX},${sourceY} ${targetControlX},${targetY} ${targetX},${targetY}`}
       fill="none"
@@ -132,7 +136,7 @@ function SankeyNode({
 }: SankeyNodeProps) {
   const privacyMode = usePrivacyMode();
   const format = useFormat();
-  const isTestEnv = useIsTestEnv();
+  const reducedMotion = useReducedMotion();
 
   if (payload.value <= 0) {
     return null;
@@ -165,7 +169,7 @@ function SankeyNode({
   return (
     <Layer
       className={
-        isTestEnv
+        reducedMotion
           ? undefined
           : started
             ? fadeInClass(x / containerWidth)

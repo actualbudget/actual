@@ -4,14 +4,21 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css, keyframes } from '@emotion/css';
 
+import { useReducedMotion } from '#hooks/useReducedMotion';
+
 const pulse = keyframes({
   '0%, 100%': { opacity: 0.4 },
   '50%': { opacity: 1 },
 });
 
-const cell = css({
+const cellBase = {
   borderRadius: 4,
   backgroundColor: theme.calendarCellBackground,
+};
+
+const staticCell = css({ ...cellBase, opacity: 0.7 });
+const pulsingCell = css({
+  ...cellBase,
   animationName: pulse,
   animationDuration: '1.6s',
   animationTimingFunction: 'ease-in-out',
@@ -19,6 +26,8 @@ const cell = css({
 });
 
 export function CalendarCardSkeleton() {
+  const reducedMotion = useReducedMotion();
+  const cell = reducedMotion ? staticCell : pulsingCell;
   return (
     <View style={{ flex: 1, gap: 4 }} aria-hidden="true">
       <View
