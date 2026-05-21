@@ -24,10 +24,10 @@ const beforePackHook = async (context: AfterPackContext) => {
       electronVersion,
       force: true,
       projectRootPath,
-      onlyModules: ['better-sqlite3', 'bcrypt'],
+      onlyModules: ['better-sqlite3', 'bcrypt', 'argon2'],
     });
 
-    console.info(`Rebuilt better-sqlite3 and bcrypt with ${arch}!`);
+    console.info(`Rebuilt better-sqlite3, bcrypt, and argon2 with ${arch}!`);
 
     if (context.packager.platform.name === 'windows') {
       console.info(`Windows build - copying appx files...`);

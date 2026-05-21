@@ -23,7 +23,7 @@ describe('/config', () => {
   });
 
   it('rejects config access after an owner has already been created', async () => {
-    bootstrapPassword('bootstrap-password');
+    await bootstrapPassword('bootstrap-password');
     insertOpenIdAuth({
       client_id: 'client-id',
       client_secret: 'client-secret',
