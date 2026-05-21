@@ -34,10 +34,14 @@ import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
 
 export type BatchEditName = keyof TransactionEntity | 'tags';
-type BatchTagValue = {
-  action: 'add' | 'remove' | 'remove-all';
-  tags?: string[];
-};
+type BatchTagValue =
+  | {
+      action: 'add' | 'remove';
+      tags: string[];
+    }
+  | {
+      action: 'remove-all';
+    };
 type BatchEditValue =
   | Parameters<
       Extract<ModalType, { name: 'edit-field' }>['options']['onSubmit']
@@ -143,15 +147,15 @@ export function useTransactionBatchActions() {
           name === 'tags' &&
           value !== null &&
           typeof value === 'object' &&
-          'tags' in value
+          'action' in value
         ) {
           if (value.action === 'remove-all') {
             valueToSet = removeAllTagsFromNotes(trans.notes);
-          } else {
+          } else if (value.action === 'add' || value.action === 'remove') {
             valueToSet =
               value.action === 'add'
-                ? addTagsToNotes(trans.notes, value.tags ?? [])
-                : removeTagsFromNotes(trans.notes, value.tags ?? []);
+                ? addTagsToNotes(trans.notes, value.tags)
+                : removeTagsFromNotes(trans.notes, value.tags);
           }
         } else if (name === 'notes') {
           if (mode === 'prepend') {
@@ -288,7 +292,15 @@ export function useTransactionBatchActions() {
           modal: {
             name: 'transaction-tags',
             options: {
-              onSubmit: (action, tags) => onChange('tags', { action, tags }),
+              onSubmit: (...args) => {
+                const [action, tags] = args;
+
+                if (action === 'remove-all') {
+                  return onChange('tags', { action });
+                }
+
+                return onChange('tags', { action, tags });
+              },
             },
           },
         }),

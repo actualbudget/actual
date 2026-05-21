@@ -265,8 +265,7 @@ export type Modal =
       name: 'transaction-tags';
       options: {
         onSubmit: (
-          action: 'add' | 'remove' | 'remove-all',
-          tags?: string[],
+          ...args: ['add' | 'remove', string[]] | ['remove-all']
         ) => void;
         onClose?: () => void;
       };
