@@ -18,7 +18,7 @@ import {
   splitTransaction,
   updateTransaction,
 } from '@actual-app/core/shared/transactions';
-import { applyChanges, getChangedValues } from '@actual-app/core/shared/util';
+import { applyChanges } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -40,6 +40,7 @@ import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 
+import { applyRulesToTransaction } from './applyRulesToTransaction';
 import { TransactionTable } from './TransactionsTable';
 import type { TransactionTableProps } from './TransactionsTable';
 // When data changes, there are two ways to update the UI:
@@ -530,38 +531,7 @@ export function TransactionList({
         );
       }
 
-      const diff = getChangedValues(transaction, afterRules);
-
-      const newTransaction: TransactionEntity = { ...transaction };
-      if (diff) {
-        Object.keys(diff).forEach(field => {
-          if (
-            newTransaction[field] == null ||
-            newTransaction[field] === '' ||
-            newTransaction[field] === 0 ||
-            newTransaction[field] === false
-          ) {
-            newTransaction[field] = diff[field];
-          }
-        });
-
-        // When a rule updates a parent transaction, overwrite all changes to the current field in subtransactions.
-        if (
-          transaction.is_parent &&
-          diff.subtransactions !== undefined &&
-          updatedFieldName !== null
-        ) {
-          newTransaction.subtransactions = diff.subtransactions.map(
-            (st, idx) => ({
-              ...(newTransaction.subtransactions?.[idx] || st),
-              ...(st[updatedFieldName] != null && {
-                [updatedFieldName]: st[updatedFieldName],
-              }),
-            }),
-          );
-        }
-      }
-      return newTransaction;
+      return applyRulesToTransaction(transaction, afterRules, updatedFieldName);
     },
     [dispatch],
   );
