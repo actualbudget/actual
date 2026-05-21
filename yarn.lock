@@ -11134,6 +11134,7 @@ __metadata:
     eslint: "npm:^10.2.0"
     eslint-plugin-perfectionist: "npm:^5.8.0"
     eslint-plugin-typescript-paths: "npm:^0.0.33"
+    glob-hasher-linux-arm64-gnu: "npm:1.4.2"
     husky: "npm:^9.1.7"
     lage: "npm:^2.15.5"
     lint-staged: "npm:^16.4.0"
@@ -11156,6 +11157,8 @@ __metadata:
       built: true
     esbuild:
       built: true
+    glob-hasher-linux-arm64-gnu:
+      optional: true
     sharp:
       built: true
   languageName: unknown
@@ -17074,6 +17077,13 @@ __metadata:
   version: 1.4.2
   resolution: "glob-hasher-darwin-x64@npm:1.4.2"
   conditions: os=darwin & cpu=x64
+  languageName: node
+  linkType: hard
+
+"glob-hasher-linux-arm64-gnu@npm:1.4.2":
+  version: 1.4.2
+  resolution: "glob-hasher-linux-arm64-gnu@npm:1.4.2"
+  conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 

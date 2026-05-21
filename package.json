@@ -135,5 +135,8 @@
     "node": ">=22",
     "yarn": "^4.9.1"
   },
-  "packageManager": "yarn@4.13.0"
+  "packageManager": "yarn@4.13.0",
+  "optionalDependencies": {
+    "glob-hasher-linux-arm64-gnu": "1.4.2"
+  }
 }
