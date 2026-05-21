@@ -1,4 +1,4 @@
-import { useIsTestEnv } from '#hooks/useIsTestEnv';
+import { useReducedMotion } from '#hooks/useReducedMotion';
 
 export function getColorScale(name: string): string[] {
   const scales: Record<string, string[]> = {
@@ -21,9 +21,9 @@ export function useRechartsAnimation(defaults?: {
   animationDuration?: number;
   isAnimationActive?: boolean;
 }) {
-  const isTestEnv = useIsTestEnv();
+  const reducedMotion = useReducedMotion();
 
-  if (isTestEnv) {
+  if (reducedMotion) {
     return {
       isAnimationActive: false,
       animationDuration: 0,
