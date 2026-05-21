@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -9,6 +9,7 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { listen } from '@actual-app/core/platform/client/connection';
 import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 
 import { Search } from '#components/common/Search';
@@ -16,6 +17,7 @@ import { SelectedProvider, useSelected } from '#hooks/useSelected';
 import { useTags } from '#hooks/useTags';
 import { useDeleteTagsMutation, useDiscoverTagsMutation } from '#tags';
 
+import { SelectedTagsButton } from './SelectedTagsButton';
 import { TagCreationRow } from './TagCreationRow';
 import { TagsHeader } from './TagsHeader';
 import { TagsList } from './TagsList';
@@ -25,7 +27,9 @@ export function ManageTags() {
   const [filter, setFilter] = useState('');
   const [hoveredTag, setHoveredTag] = useState<string>();
   const [create, setCreate] = useState(false);
-  const { data: tags = [] } = useTags();
+  const { data: tags = [], refetch } = useTags();
+
+  useEffect(() => listen('undo-event', () => refetch({ cancelRefetch: true })));
 
   const filteredTags = useMemo(() => {
     return filter === ''
@@ -87,6 +91,7 @@ export function ManageTags() {
             <Trans>Find Existing Tags</Trans>
           </Button>
           <View style={{ flex: 1 }} />
+          <SelectedTagsButton />
           <Search
             placeholder={t('Filter tags...')}
             value={filter}
