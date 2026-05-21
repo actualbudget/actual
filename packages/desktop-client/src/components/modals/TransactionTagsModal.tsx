@@ -27,6 +27,7 @@ import {
   toggleSelectedNoteTag,
 } from '#notes/tagUtils';
 import { useDispatch } from '#redux';
+import { useCreateTagMutation } from '#tags';
 
 type TransactionTagsModalProps = Extract<
   ModalType,
@@ -42,9 +43,11 @@ export function TransactionTagsModal({
   const { isNarrowWidth } = useResponsive();
   const getTagCSS = useTagCSS();
   const { data: existingTags = [] } = useTags();
+  const createTagMutation = useCreateTagMutation();
   const [tag, setTag] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const existingTagNames = existingTags.map(({ tag }) => tag);
+  const existingTagNamesSet = new Set(existingTagNames);
   const tagMap = new Map(
     existingTags.map(tagEntity => [tagEntity.tag, tagEntity]),
   );
@@ -54,13 +57,23 @@ export function TransactionTagsModal({
   );
   const canCreateTag =
     normalizedTag &&
-    !existingTagNames.includes(normalizedTag) &&
+    !existingTagNamesSet.has(normalizedTag) &&
     !selectedTags.includes(normalizedTag);
   const hasExistingTags = existingTags.length > 0;
 
-  const submit = (action: 'add' | 'remove', close: () => void) => {
+  const submit = async (action: 'add' | 'remove', close: () => void) => {
     if (selectedTags.length === 0) {
       return;
+    }
+
+    if (action === 'add') {
+      const missingTags = selectedTags.filter(
+        selectedTag => !existingTagNamesSet.has(selectedTag),
+      );
+
+      await Promise.all(
+        missingTags.map(tag => createTagMutation.mutateAsync({ tag: { tag } })),
+      );
     }
 
     onSubmit(action, selectedTags);
@@ -210,14 +223,16 @@ export function TransactionTagsModal({
               <View style={{ flexDirection: 'row', gap: 10 }}>
                 <Button
                   isDisabled={selectedTags.length === 0}
-                  onPress={() => submit('remove', () => state.close())}
+                  onPress={() => void submit('remove', () => state.close())}
                 >
                   <Trans>Remove tags</Trans>
                 </Button>
                 <Button
                   variant="primary"
-                  isDisabled={selectedTags.length === 0}
-                  onPress={() => submit('add', () => state.close())}
+                  isDisabled={
+                    selectedTags.length === 0 || createTagMutation.isPending
+                  }
+                  onPress={() => void submit('add', () => state.close())}
                 >
                   <Trans>Add tags</Trans>
                 </Button>
