@@ -45,6 +45,9 @@ export function TransactionTagsModal({
   const [tag, setTag] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const existingTagNames = existingTags.map(({ tag }) => tag);
+  const tagMap = new Map(
+    existingTags.map(tagEntity => [tagEntity.tag, tagEntity]),
+  );
   const normalizedTag = normalizeNoteTag(tag);
   const filteredTags = filterExistingNoteTags(existingTagNames, tag).filter(
     currentTag => !selectedTags.includes(currentTag),
@@ -154,9 +157,7 @@ export function TransactionTagsModal({
                   <TagChip
                     key={selectedTag}
                     tag={selectedTag}
-                    tagEntity={existingTags.find(
-                      existingTag => existingTag.tag === selectedTag,
-                    )}
+                    tagEntity={tagMap.get(selectedTag)}
                     getTagCSS={getTagCSS}
                     onPress={() => selectTag(selectedTag)}
                   />
@@ -177,9 +178,7 @@ export function TransactionTagsModal({
                   <TagOption
                     key={existingTag}
                     tag={existingTag}
-                    tagEntity={existingTags.find(
-                      tagEntity => tagEntity.tag === existingTag,
-                    )}
+                    tagEntity={tagMap.get(existingTag)}
                     getTagCSS={getTagCSS}
                     onPress={() => selectTag(existingTag)}
                   />
