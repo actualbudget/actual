@@ -151,10 +151,10 @@ export function CategoryAutomationButton({
     <Tooltip
       placement="bottom start"
       content={
-        <View style={{ maxWidth: 320, gap: 8 }}>
+        <View style={{ maxWidth: 320, padding: 10, gap: 10 }}>
           {automations.map(entry => (
-            <View key={entry.id} style={{ gap: 2 }}>
-              <Text style={{ display: 'block', fontSize: 12 }}>
+            <View key={entry.id} style={{ gap: 4 }}>
+              <Text style={{ display: 'block' }}>
                 <TemplateSentence
                   template={entry.template}
                   categoryNameMap={categoryNameMap}
@@ -164,7 +164,6 @@ export function CategoryAutomationButton({
                 <Text
                   style={{
                     display: 'block',
-                    fontSize: 11,
                     color: theme.pageTextLight,
                     whiteSpace: 'pre-wrap',
                   }}
@@ -175,7 +174,7 @@ export function CategoryAutomationButton({
             </View>
           ))}
           {cleanupScopeCount > 0 && (
-            <Text style={{ display: 'block', fontSize: 12 }}>
+            <Text style={{ display: 'block' }}>
               <Trans>End of month cleanup</Trans>,{' '}
               {cleanupScopeCount > 1 ? (
                 <Trans count={cleanupScopeCount}>
