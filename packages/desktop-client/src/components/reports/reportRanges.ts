@@ -88,16 +88,13 @@ export function validateEnd(
 
 export function validateRange(
   earliest: string,
-  latest: string,
   start: string,
   end: string,
-) {
-  if (end > latest) {
-    end = latest;
-  }
+): [string, string] {
   if (start < earliest) {
     start = earliest;
   }
+
   return [start, end];
 }
 

@@ -1,6 +1,6 @@
-name: Build Edge Docker Image
+name: Build Nightly Docker Image
 
-# Edge Docker images are built for every push to master
+# Nightly Docker images are built for every push to master
 on:
   push:
     branches:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: docker-edge-build
+  group: docker-nightly-build
   cancel-in-progress: true
 
 permissions:
@@ -22,9 +22,11 @@ env:
     ghcr.io/${{ github.repository_owner }}/actual
 
   # Creates the following tags:
-  # - actual-server:edge
+  # - actual-server:nightly
+  # - actual-server:edge (kept for backwards compatibility)
   TAGS: |
-    type=edge,value=edge
+    type=raw,value=nightly,enable={{is_default_branch}}
+    type=raw,value=edge,enable={{is_default_branch}}
     type=sha
 
 jobs:

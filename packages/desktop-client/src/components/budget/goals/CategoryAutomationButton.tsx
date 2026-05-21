@@ -39,7 +39,8 @@ export function CategoryAutomationButton({
   const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const hasAutomations =
-    !!category.goal_def?.length || !!category.cleanup_def?.length;
+    category.template_settings?.source === 'ui' &&
+    (!!category.goal_def?.length || !!category.cleanup_def?.length);
 
   if (!goalTemplatesEnabled || !goalTemplatesUIEnabled) {
     return null;

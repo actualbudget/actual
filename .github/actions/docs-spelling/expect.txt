@@ -11,6 +11,7 @@ ANZ
 aql
 AUR
 Authentik
+autogen
 AVERAGEA
 BANKA
 BANKINTER

@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -43,13 +43,15 @@ type TransactionRowProps = {
   fields: string[];
   selected: boolean;
   format: (value: unknown, type: FormatType) => string;
+  index: number;
 };
 
-const TransactionRow = memo(function TransactionRow({
+function TransactionRow({
   transaction,
   fields,
   selected,
   format,
+  index,
 }: TransactionRowProps) {
   const { t } = useTranslation();
 
@@ -59,7 +61,16 @@ const TransactionRow = memo(function TransactionRow({
   const dispatchSelected = useSelectedDispatch();
 
   return (
-    <Row style={{ color: theme.tableText }}>
+    <Row
+      style={{
+        color: theme.tableText,
+        backgroundColor: selected
+          ? theme.tableRowBackgroundHighlight
+          : index % 2 === 0
+            ? theme.tableBackground
+            : theme.tableRowBackgroundAlternate,
+      }}
+    >
       <SelectCell
         exposed
         focused={false}
@@ -152,7 +163,7 @@ const TransactionRow = memo(function TransactionRow({
       })}
     </Row>
   );
-});
+}
 
 type SimpleTransactionsTableProps = {
   transactions: readonly TransactionEntity[];
@@ -178,13 +189,14 @@ export function SimpleTransactionsTable({
   }, [transactions, dateFormat]);
 
   const renderItem = useCallback(
-    ({ item }: { item: TransactionEntity }) => {
+    ({ item, index }: { item: TransactionEntity; index: number }) => {
       return (
         <TransactionRow
           transaction={item}
           fields={memoFields}
           selected={selectedItems && selectedItems.has(item.id)}
           format={format}
+          index={index}
         />
       );
     },
