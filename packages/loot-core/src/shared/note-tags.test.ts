@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   createNoteTagRegex,
+  createNoteTagRegexGlobal,
   createNoteTagsRegex,
   getNoteTags,
   normalizeNoteTag,
@@ -27,6 +28,13 @@ describe('note tags', () => {
     expect(noteHasTag('memo#traveling paid', 'travel')).toBe(false);
   });
 
+  it('creates a reusable regex for testing one exact note tag', () => {
+    const regex = createNoteTagRegex('travel');
+
+    expect(regex.test('memo#travel paid')).toBe(true);
+    expect(regex.test('memo#travel paid')).toBe(true);
+  });
+
   it('creates a regex for matching every note tag', () => {
     expect('memo#travel paid #work'.replace(createNoteTagsRegex(), '')).toBe(
       'memo paid ',
@@ -37,5 +45,14 @@ describe('note tags', () => {
     expect(
       'memo#travel paid #work'.replace(createNoteTagRegex('travel'), ''),
     ).toBe('memo paid #work');
+  });
+
+  it('creates a global regex for replacing one exact note tag', () => {
+    expect(
+      'memo#travel paid #travel'.replace(
+        createNoteTagRegexGlobal('travel'),
+        '',
+      ),
+    ).toBe('memo paid ');
   });
 });

@@ -1,5 +1,5 @@
 import {
-  createNoteTagRegex,
+  createNoteTagRegexGlobal,
   createNoteTagsRegex,
   normalizeNoteTag,
   noteHasTag,
@@ -44,7 +44,7 @@ export function removeTagFromNotes(
   }
 
   return currentNotes
-    .replace(createNoteTagRegex(normalizedTag), '')
+    .replace(createNoteTagRegexGlobal(normalizedTag), '')
     .replace(/\s+/g, ' ')
     .trim();
 }

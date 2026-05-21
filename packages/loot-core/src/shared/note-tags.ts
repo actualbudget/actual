@@ -27,6 +27,10 @@ export function createNoteTagsRegex(): RegExp {
 }
 
 export function createNoteTagRegex(tag: string): RegExp {
+  return new RegExp(createNoteTagRegexSource(tag));
+}
+
+export function createNoteTagRegexGlobal(tag: string): RegExp {
   return new RegExp(createNoteTagRegexSource(tag), 'g');
 }
 
