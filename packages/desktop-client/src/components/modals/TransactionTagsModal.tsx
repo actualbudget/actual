@@ -3,6 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { SvgClose } from '@actual-app/components/icons/v1';
 import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -238,13 +239,17 @@ type TagChipProps = {
 };
 
 function TagChip({ tag, tagEntity, getTagCSS, onPress }: TagChipProps) {
+  const { t } = useTranslation();
+
   return (
     <Button
       variant="bare"
       className={getTagCSS(tag, { color: tagEntity?.color, compact: true })}
+      aria-label={t('Remove {{tag}} tag', { tag })}
       onPress={onPress}
     >
-      #{tag} x
+      #{tag}
+      <SvgClose width={8} height={8} style={{ marginLeft: 4 }} />
     </Button>
   );
 }
