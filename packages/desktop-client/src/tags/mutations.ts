@@ -35,28 +35,34 @@ function dispatchErrorNotification(
   );
 }
 
+function useOnError(verb: string) {
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return (error: Error) => {
+    console.error(`Error ${verb} tag:`, error);
+    dispatchErrorNotification(
+      dispatch,
+      t(`There was an error ${verb} the tag. Please try again.`),
+      error,
+    );
+  };
+}
+
 type CreateTagPayload = {
   tag: Omit<TagEntity, 'id'>;
 };
 
 export function useCreateTagMutation() {
   const queryClient = useQueryClient();
-  const dispatch = useDispatch();
-  const { t } = useTranslation();
+  const onError = useOnError('creating');
 
   return useMutation({
     mutationFn: async ({ tag }: CreateTagPayload) => {
       return await send('tags-create', tag);
     },
     onSuccess: () => invalidateQueries(queryClient),
-    onError: error => {
-      console.error('Error creating tag:', error);
-      dispatchErrorNotification(
-        dispatch,
-        t('There was an error creating the tag. Please try again.'),
-        error,
-      );
-    },
+    onError,
   });
 }
 
@@ -66,22 +72,14 @@ type UpdateTagPayload = {
 
 export function useUpdateTagMutation() {
   const queryClient = useQueryClient();
-  const dispatch = useDispatch();
-  const { t } = useTranslation();
+  const onError = useOnError('updating');
 
   return useMutation({
     mutationFn: async ({ tag }: UpdateTagPayload) => {
       return await send('tags-update', tag);
     },
     onSuccess: () => invalidateQueries(queryClient),
-    onError: error => {
-      console.error('Error updating tag:', error);
-      dispatchErrorNotification(
-        dispatch,
-        t('There was an error updating the tag. Please try again.'),
-        error,
-      );
-    },
+    onError,
   });
 }
 
@@ -91,22 +89,14 @@ type DeleteTagPayload = {
 
 export function useDeleteTagMutation() {
   const queryClient = useQueryClient();
-  const dispatch = useDispatch();
-  const { t } = useTranslation();
+  const onError = useOnError('deleting');
 
   return useMutation({
     mutationFn: async ({ id }: DeleteTagPayload) => {
       return await send('tags-delete', { id });
     },
     onSuccess: () => invalidateQueries(queryClient),
-    onError: error => {
-      console.error('Error deleting tag:', error);
-      dispatchErrorNotification(
-        dispatch,
-        t('There was an error deleting the tag. Please try again.'),
-        error,
-      );
-    },
+    onError,
   });
 }
 
@@ -116,42 +106,60 @@ type DeleteTagsPayload = {
 
 export function useDeleteTagsMutation() {
   const queryClient = useQueryClient();
-  const dispatch = useDispatch();
-  const { t } = useTranslation();
+  const onError = useOnError('deleting');
 
   return useMutation({
     mutationFn: async ({ ids }: DeleteTagsPayload) => {
       return await send('tags-delete-all', ids);
     },
     onSuccess: () => invalidateQueries(queryClient),
-    onError: error => {
-      console.error('Error deleting tags:', error);
-      dispatchErrorNotification(
-        dispatch,
-        t('There was an error deleting the tags. Please try again.'),
-        error,
-      );
+    onError,
+  });
+}
+
+type HideTagsPayload = {
+  ids: Array<TagEntity['id']>;
+};
+
+export function useHideTagsMutation() {
+  const queryClient = useQueryClient();
+  const onError = useOnError('hiding');
+
+  return useMutation({
+    mutationFn: async ({ ids }: HideTagsPayload) => {
+      return await send('tags-hide-all', ids);
     },
+    onSuccess: () => invalidateQueries(queryClient),
+    onError,
+  });
+}
+
+type UnhideTagsPayload = {
+  ids: Array<TagEntity['id']>;
+};
+
+export function useUnhideTagsMutation() {
+  const queryClient = useQueryClient();
+  const onError = useOnError('hiding');
+
+  return useMutation({
+    mutationFn: async ({ ids }: UnhideTagsPayload) => {
+      return await send('tags-unhide-all', ids);
+    },
+    onSuccess: () => invalidateQueries(queryClient),
+    onError,
   });
 }
 
 export function useDiscoverTagsMutation() {
   const queryClient = useQueryClient();
-  const dispatch = useDispatch();
-  const { t } = useTranslation();
+  const onError = useOnError('discovering');
 
   return useMutation({
     mutationFn: async () => {
       return await send('tags-discover');
     },
     onSuccess: () => invalidateQueries(queryClient),
-    onError: error => {
-      console.error('Error discovering tags:', error);
-      dispatchErrorNotification(
-        dispatch,
-        t('There was an error discovering the tags. Please try again.'),
-        error,
-      );
-    },
+    onError,
   });
 }
