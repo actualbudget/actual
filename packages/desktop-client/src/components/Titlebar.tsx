@@ -13,10 +13,11 @@ import {
   SvgViewShow,
 } from '@actual-app/components/icons/v2';
 import { SpaceBetween } from '@actual-app/components/space-between';
-import { styles } from '@actual-app/components/styles';
 import type { CSSProperties } from '@actual-app/components/styles';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { listen } from '@actual-app/core/platform/client/connection';
 import { isDevelopmentEnvironment } from '@actual-app/core/shared/environment';
@@ -250,6 +251,50 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
   );
 }
 
+type SharedArrayBufferWarningProps = {
+  style?: CSSProperties;
+};
+
+function SharedArrayBufferWarning({ style }: SharedArrayBufferWarningProps) {
+  const { t } = useTranslation();
+  const hasSharedArrayBuffer = typeof SharedArrayBuffer !== 'undefined';
+  const isOverrideEnabled = localStorage.getItem('SharedArrayBufferOverride');
+
+  // Only show warning if SharedArrayBuffer is not supported but user has overridden the warning
+  if (hasSharedArrayBuffer || !isOverrideEnabled) {
+    return null;
+  }
+
+  const warningMessage = t(
+    'Your environment does not support SharedArrayBuffer. You may experience data loss or degraded functionality. Click to learn more.',
+  );
+
+  const handlePress = () => {
+    window.open(
+      'https://actualbudget.org/docs/troubleshooting/shared-array-buffer',
+      '_blank',
+      'noopener,noreferrer',
+    );
+  };
+
+  return (
+    <Tooltip
+      placement="bottom start"
+      content={<Text>{warningMessage}</Text>}
+      style={{ ...styles.tooltip, lineHeight: 1.5, padding: '6px 10px' }}
+    >
+      <Button
+        variant="bare"
+        aria-label={warningMessage}
+        style={{ ...style, color: theme.errorTextDark }}
+        onPress={handlePress}
+      >
+        <SvgAlertTriangle width={13} />
+      </Button>
+    </Tooltip>
+  );
+}
+
 function BudgetTitlebar() {
   const [maxMonths, setMaxMonthsPref] = useGlobalPref('maxMonths');
 
@@ -344,6 +389,7 @@ export function Titlebar({ style }: TitlebarProps) {
         {isDevelopmentEnvironment() && !isTestEnv && <ThemeSelector />}
         <PrivacyButton />
         {serverURL ? <ServerSyncButton /> : null}
+        <SharedArrayBufferWarning />
         <LoggedInUser />
         <HelpMenu />
       </SpaceBetween>
