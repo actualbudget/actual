@@ -961,7 +961,7 @@ function toSqlQueryParameters(params: unknown[]) {
 
 export function getTags() {
   return all<DbTag>(`
-    SELECT id, tag, color, description
+    SELECT id, tag, color, description, hidden
     FROM tags
     WHERE tombstone = 0
   `);
@@ -969,7 +969,7 @@ export function getTags() {
 
 export function getAllTags() {
   return all<DbTag>(`
-    SELECT id, tag, color, description
+    SELECT id, tag, color, description, hidden
     FROM tags
   `);
 }

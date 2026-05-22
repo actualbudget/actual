@@ -26,7 +26,7 @@ export function SelectedTagsButton() {
 
   function handleSelect(name: Actions, tagIds: string[]) {
     if (name === 'delete-tags') {
-      handleDelete(tagIds);
+      void handleDelete(tagIds);
     } else if (name === 'hide-tags') {
       hideTags({ ids: [...tagIds] });
     } else if (name === 'unhide-tags') {

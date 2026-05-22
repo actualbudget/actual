@@ -3,7 +3,6 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgAdd } from '@actual-app/components/icons/v1';
-import { SvgSearchAlternate } from '@actual-app/components/icons/v2';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -15,12 +14,13 @@ import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 import { Search } from '#components/common/Search';
 import { SelectedProvider, useSelected } from '#hooks/useSelected';
 import { useTags } from '#hooks/useTags';
-import { useDeleteTagsMutation, useDiscoverTagsMutation } from '#tags';
+import { useDeleteTagsMutation } from '#tags';
 
 import { SelectedTagsButton } from './SelectedTagsButton';
 import { TagCreationRow } from './TagCreationRow';
 import { TagsHeader } from './TagsHeader';
 import { TagsList } from './TagsList';
+import { TagsMenuButton } from './TagsMenuButton';
 
 export function ManageTags() {
   const { t } = useTranslation();
@@ -41,7 +41,6 @@ export function ManageTags() {
 
   const selectedInst = useSelected('manage-tags', filteredTags, []);
 
-  const { mutate: discoverTags } = useDiscoverTagsMutation();
   const { mutate: deleteTags } = useDeleteTagsMutation();
 
   const onDeleteSelected = useCallback(async () => {
@@ -82,14 +81,6 @@ export function ManageTags() {
             <SvgAdd width={10} height={10} style={{ marginRight: 3 }} />
             <Trans>Add New</Trans>
           </Button>
-          <Button variant="bare" onPress={() => discoverTags()}>
-            <SvgSearchAlternate
-              width={10}
-              height={10}
-              style={{ marginRight: 3 }}
-            />
-            <Trans>Find Existing Tags</Trans>
-          </Button>
           <View style={{ flex: 1 }} />
           <SelectedTagsButton />
           <Search
@@ -97,6 +88,7 @@ export function ManageTags() {
             value={filter}
             onChange={setFilter}
           />
+          <TagsMenuButton />
         </SpaceBetween>
         <View style={{ marginTop: 12, ...styles.tableContainer }}>
           <TagsHeader />
