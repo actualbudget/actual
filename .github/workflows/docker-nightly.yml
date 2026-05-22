@@ -13,7 +13,6 @@ concurrency:
 
 permissions:
   contents: read
-  packages: write # push images to ghcr.io
 
 jobs:
   build:
@@ -21,6 +20,9 @@ jobs:
     name: Build Docker image
     runs-on: ubuntu-latest
     environment: release
+    permissions:
+      contents: read
+      packages: write # push images to ghcr.io
     strategy:
       matrix:
         os: [ubuntu, alpine]

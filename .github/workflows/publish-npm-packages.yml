@@ -12,6 +12,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: publish-npm-packages
+  cancel-in-progress: false
+
 jobs:
   build-and-pack:
     runs-on: ubuntu-latest
@@ -62,8 +66,7 @@ jobs:
     needs: build-and-pack
     environment: release
     permissions:
-      contents: read
-      packages: write
+      contents: read # check out the repository
       id-token: write # Required for OIDC
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -135,8 +138,7 @@ jobs:
     if: needs.check-release.outputs.should-run == 'true'
     environment: release
     permissions:
-      contents: read
-      packages: write
+      contents: read # check out the repository
       id-token: write # Required for OIDC
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
