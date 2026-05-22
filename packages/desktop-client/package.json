@@ -62,6 +62,7 @@
     "#components/reports/ReportOptions": "./src/components/reports/ReportOptions.ts",
     "#components/reports/reportRanges": "./src/components/reports/reportRanges.ts",
     "#components/reports/setSessionReport": "./src/components/reports/setSessionReport.ts",
+    "#components/reports/spendingAverageRange": "./src/components/reports/spendingAverageRange.ts",
     "#components/reports/spreadsheets/cash-flow-spreadsheet": "./src/components/reports/spreadsheets/cash-flow-spreadsheet.tsx",
     "#components/reports/spreadsheets/*": "./src/components/reports/spreadsheets/*.ts",
     "#components/reports/useDashboardWidgetCopyMenu": "./src/components/reports/useDashboardWidgetCopyMenu.ts",
