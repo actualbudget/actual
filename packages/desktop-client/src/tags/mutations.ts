@@ -140,7 +140,7 @@ type UnhideTagsPayload = {
 
 export function useUnhideTagsMutation() {
   const queryClient = useQueryClient();
-  const onError = useOnError('hiding');
+  const onError = useOnError('unhiding');
 
   return useMutation({
     mutationFn: async ({ ids }: UnhideTagsPayload) => {

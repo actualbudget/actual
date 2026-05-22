@@ -97,7 +97,6 @@ function apply(msg: Message, prev?: boolean) {
         };
       }
 
-      logger.log(query);
       db.runQuery(db.cache(query.sql), query.params);
     } catch (error) {
       throw new SyncError('invalid-schema', {
