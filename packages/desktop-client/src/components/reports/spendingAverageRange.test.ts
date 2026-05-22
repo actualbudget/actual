@@ -1,4 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import {
+  DEFAULT_SPENDING_AVERAGE_RANGE,
+  getSpendingAverageSummaryLabel,
 
 import {
   DEFAULT_SPENDING_AVERAGE_RANGE,
