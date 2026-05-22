@@ -1,10 +1,6 @@
 import {
   DEFAULT_SPENDING_AVERAGE_RANGE,
   getSpendingAverageSummaryLabel,
-
-import {
-  DEFAULT_SPENDING_AVERAGE_RANGE,
-  getSpendingAverageSummaryLabel,
   resolveSpendingAverageRange,
   spendingAverageRangeFromKey,
   spendingAverageRangeToKey,
