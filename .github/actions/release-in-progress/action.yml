@@ -20,7 +20,24 @@ runs:
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
-        if ! gh api "repos/${GITHUB_REPOSITORY}/branches/release" --silent >/dev/null 2>&1; then
+        # Returns 0 if the branch exists, 1 if it genuinely does not (HTTP 404).
+        # Any other failure (auth, rate limit, network) is fatal, so a transient
+        # error fails the workflow visibly instead of silently skipping the
+        # release candidate.
+        branch_exists() {
+          local branch=$1 output
+          if output=$(gh api "repos/${GITHUB_REPOSITORY}/branches/${branch}" --silent 2>&1); then
+            return 0
+          fi
+          if [[ "$output" == *"HTTP 404"* ]]; then
+            return 1
+          fi
+          echo "Failed to check branch '${branch}':" >&2
+          echo "$output" >&2
+          exit 1
+        }
+
+        if ! branch_exists release; then
           echo "No \`release\` branch found; no release in progress."
           echo "should-run=false" >> "$GITHUB_OUTPUT"
           exit 0
@@ -29,7 +46,7 @@ runs:
         version=$(gh api "repos/${GITHUB_REPOSITORY}/contents/packages/desktop-client/package.json?ref=release" --jq '.content' | base64 -d | jq -r .version)
         echo "version=$version" >> "$GITHUB_OUTPUT"
 
-        if gh api "repos/${GITHUB_REPOSITORY}/branches/release-notes/${version}" --silent >/dev/null 2>&1; then
+        if branch_exists "release-notes/${version}"; then
           echo "Release $version is in progress."
           echo "should-run=true" >> "$GITHUB_OUTPUT"
         else
