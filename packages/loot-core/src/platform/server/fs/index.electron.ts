@@ -57,7 +57,8 @@ export const listDir: typeof T.listDir = filepath =>
       if (accessErr && (accessErr as NodeJS.ErrnoException).code === 'EPERM') {
         reject(
           new Error(
-            'Permission denied: unable to access "' + filepath +
+            'Permission denied: unable to access "' +
+              filepath +
               '". Please grant Actual permission to access this folder in System Settings > Privacy & Security > Files and Folders.',
           ),
         );
