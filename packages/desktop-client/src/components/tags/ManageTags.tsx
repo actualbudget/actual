@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -14,7 +14,6 @@ import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 import { Search } from '#components/common/Search';
 import { SelectedProvider, useSelected } from '#hooks/useSelected';
 import { useTags } from '#hooks/useTags';
-import { useDeleteTagsMutation } from '#tags';
 
 import { SelectedTagsButton } from './SelectedTagsButton';
 import { TagCreationRow } from './TagCreationRow';
@@ -40,19 +39,6 @@ export function ManageTags() {
   }, [filter, tags]);
 
   const selectedInst = useSelected('manage-tags', filteredTags, []);
-
-  const { mutate: deleteTags } = useDeleteTagsMutation();
-
-  const onDeleteSelected = useCallback(async () => {
-    deleteTags(
-      { ids: [...selectedInst.items] },
-      {
-        onSuccess: () => {
-          selectedInst.dispatch({ type: 'select-none' });
-        },
-      },
-    );
-  }, [deleteTags, selectedInst]);
 
   return (
     <SelectedProvider instance={selectedInst}>
@@ -114,27 +100,6 @@ export function ManageTags() {
               </Text>
             </View>
           )}
-        </View>
-        <View
-          style={{
-            paddingBlock: 15,
-            paddingInline: 0,
-            borderTop: theme.pillBorder,
-            flexShrink: 0,
-          }}
-        >
-          <SpaceBetween
-            gap={10}
-            style={{ alignItems: 'center', justifyContent: 'flex-end' }}
-          >
-            {selectedInst.items.size > 0 && (
-              <Button onPress={onDeleteSelected}>
-                <Trans count={selectedInst.items.size}>
-                  Delete {selectedInst.items.size} tags
-                </Trans>
-              </Button>
-            )}
-          </SpaceBetween>
         </View>
       </View>
     </SelectedProvider>
