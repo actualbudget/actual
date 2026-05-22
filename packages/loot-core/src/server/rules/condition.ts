@@ -349,14 +349,29 @@ export class Condition {
         if (fieldValue === null) {
           return false;
         }
-        return String(fieldValue).indexOf(this.value) !== -1;
+        const normalizedFieldValue = String(fieldValue);
+        const tags = extractTagsForFilter(this.value);
+        return !tags.some(tag => {
+          const escapedTag = tag
+            .toLowerCase()
+            .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const pattern = new RegExp(`(?<!#)${escapedTag}([\\s#]|$)`);
+          return !pattern.test(normalizedFieldValue);
+        });
 
       case 'hasAnyTag': {
         if (fieldValue === null) {
           return false;
         }
+        const normalizedFieldValue = String(fieldValue);
         const tags = extractTagsForFilter(this.value);
-        return tags.some(tag => String(fieldValue).includes(tag.toLowerCase()));
+        return tags.some(tag => {
+          const escapedTag = tag
+            .toLowerCase()
+            .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const pattern = new RegExp(`(?<!#)${escapedTag}([\\s#]|$)`);
+          return pattern.test(normalizedFieldValue);
+        });
       }
 
       case 'notOneOf':
