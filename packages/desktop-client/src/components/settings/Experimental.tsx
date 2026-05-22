@@ -25,6 +25,7 @@ type FeatureToggleProps = {
   error?: ReactNode;
   children: ReactNode;
   feedbackLink?: string;
+  note?: ReactNode;
 };
 
 function FeatureToggle({
@@ -33,6 +34,7 @@ function FeatureToggle({
   feedbackLink,
   error,
   children,
+  note,
 }: FeatureToggleProps) {
   const enabled = useFeatureFlag(flagName);
   const [_, setFlagPref] = useSyncedPref(`flags.${flagName}`);
@@ -68,6 +70,8 @@ function FeatureToggle({
             {error}
           </Text>
         )}
+
+        {note && <Text style={{ color: theme.warningText }}>{note}</Text>}
       </View>
     </label>
   );
@@ -177,6 +181,12 @@ export function ExperimentalFeatures() {
             <FeatureToggle
               flag="actionTemplating"
               feedbackLink="https://github.com/actualbudget/actual/issues/3606"
+              note={
+                <Trans>
+                  Deprecated: this feature will be removed in a future release.
+                  Use Excel formula mode (Rule formulae) instead.
+                </Trans>
+              }
             >
               <Trans>Rule action templating</Trans>
             </FeatureToggle>

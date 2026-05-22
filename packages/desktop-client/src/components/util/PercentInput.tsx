@@ -18,9 +18,11 @@ type PercentInputProps = {
   style?: CSSProperties;
   focused?: boolean;
   disabled?: boolean;
+  max?: number;
 };
 
-const clampToPercent = (value: number) => Math.max(Math.min(value, 100), 0);
+const clampToPercent = (value: number, max: number) =>
+  Math.max(Math.min(value, max), 0);
 
 export function PercentInput({
   id,
@@ -33,19 +35,20 @@ export function PercentInput({
   style,
   focused,
   disabled = false,
+  max = 100,
 }: PercentInputProps) {
   const format = useFormat();
 
   const [value, setValue] = useState(() =>
-    format(clampToPercent(initialValue), 'percentage'),
+    format(clampToPercent(initialValue, max), 'percentage'),
   );
   useEffect(() => {
-    const clampedInitialValue = clampToPercent(initialValue);
+    const clampedInitialValue = clampToPercent(initialValue, max);
     if (clampedInitialValue !== initialValue) {
       setValue(format(clampedInitialValue, 'percentage'));
       onUpdatePercent?.(clampedInitialValue);
     }
-  }, [initialValue, onUpdatePercent, format]);
+  }, [initialValue, max, onUpdatePercent, format]);
 
   const ref = useRef<HTMLInputElement>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
@@ -84,6 +87,7 @@ export function PercentInput({
   function fireUpdate() {
     const clampedValue = clampToPercent(
       evalArithmetic(value.replace('%', ''), 0) ?? 0,
+      max,
     );
     onUpdatePercent?.(clampedValue);
     onInputTextChange(String(clampedValue));

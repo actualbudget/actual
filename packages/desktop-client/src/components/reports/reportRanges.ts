@@ -88,16 +88,13 @@ export function validateEnd(
 
 export function validateRange(
   earliest: string,
-  latest: string,
   start: string,
   end: string,
-) {
-  if (end > latest) {
-    end = latest;
-  }
+): [string, string] {
   if (start < earliest) {
     start = earliest;
   }
+
   return [start, end];
 }
 
@@ -184,12 +181,9 @@ export function getNextRange(offset: number) {
 export function getFullFutureRange(latestMonth?: string) {
   const start = monthUtils.currentMonth();
   const defaultEnd = monthUtils.addMonths(start, 24);
-  const latestMonthValue = latestMonth
-    ? monthUtils.monthFromDate(latestMonth)
-    : undefined;
   const end =
-    latestMonthValue && monthUtils.isAfter(latestMonthValue, start)
-      ? latestMonthValue
+    latestMonth && monthUtils.isAfter(latestMonth, start)
+      ? latestMonth
       : defaultEnd;
 
   return [start, end, 'static'] as const;
