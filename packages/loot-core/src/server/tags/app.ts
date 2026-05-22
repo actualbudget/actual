@@ -101,9 +101,10 @@ async function unhideAllTags(ids: Array<TagEntity['id']>) {
 async function updateTag(
   tag: Partial<TagEntity> & Pick<TagEntity, 'id'>,
 ): Promise<Partial<TagEntity>> {
+  const { hidden, ...rest } = tag;
   await db.updateTag({
-    ...tag,
-    hidden: tag.hidden ? 1 : tag.hidden === false ? 0 : undefined,
+    ...rest,
+    ...(hidden !== undefined ? { hidden: hidden ? 1 : 0 } : {}),
   });
   return tag;
 }
