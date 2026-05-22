@@ -3,6 +3,11 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
+import {
+  SvgSearchAlternate,
+  SvgViewHide,
+  SvgViewShow,
+} from '@actual-app/components/icons/v2';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { View } from '@actual-app/components/view';
@@ -39,9 +44,18 @@ export function TagsMenuButton() {
               ? {
                   name: 'set-dont-show-hidden',
                   text: t("Don't show hidden tags"),
+                  icon: SvgViewHide,
                 }
-              : { name: 'set-show-hidden', text: t('Show hidden tags') },
-            { name: 'discover-tags', text: t('Discover new tags') },
+              : {
+                  name: 'set-show-hidden',
+                  text: t('Show hidden tags'),
+                  icon: SvgViewShow,
+                },
+            {
+              name: 'discover-tags',
+              text: t('Discover new tags'),
+              icon: SvgSearchAlternate,
+            },
           ]}
           onMenuSelect={name => {
             switch (name) {
