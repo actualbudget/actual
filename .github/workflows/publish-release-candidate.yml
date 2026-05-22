@@ -49,93 +49,25 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu, alpine]
-    env:
-      IMAGES: |
-        actualbudget/actual-server
-        ghcr.io/${{ github.repository_owner }}/actual-server
-        ghcr.io/${{ github.repository_owner }}/actual
-
-      # Creates the following tags:
-      # - actual-server:rc
-      TAGS: |
-        type=raw,value=rc
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: release
           persist-credentials: false
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4.0.0
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
-
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6.0.0
+      - name: Build and push
+        uses: ./.github/actions/docker-build-and-push
         with:
-          # Push to both Docker Hub and Github Container Registry
-          images: ${{ env.IMAGES }}
-          flavor: ${{ matrix.os != 'ubuntu' && format('suffix=-{0}', matrix.os) || '' }}
-          tags: ${{ env.TAGS }}
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      # Building outside of the docker image allows us to build once and push to multiple platforms
-      # This is faster and avoids yarn memory issues
-      - name: Set up environment
-        uses: ./.github/actions/setup
-        with:
-          # Avoid restoring potentially poisoned caches in release jobs.
-          cache: 'false'
-
-      - name: Build Web
-        run: yarn build:server
-
-      - name: Build image for testing
-        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
-        with:
-          context: .
-          push: false
-          load: true
-          file: packages/sync-server/docker/${{ matrix.os }}.Dockerfile
-          tags: actualbudget/actual-server-testing
-
-      - name: Test that the docker image boots
-        timeout-minutes: 1
-        run: |
-          docker run --detach --network=host --name actual-server actualbudget/actual-server-testing
-          HEALTHCMD=$(yq -r '.services.actual_server.healthcheck.test[1]' packages/sync-server/docker-compose.yml)
-          until docker exec actual-server sh -c "$HEALTHCMD"; do sleep 1; done
-
-      - name: Dump container logs on failure
-        if: failure()
-        run: docker logs actual-server || true
-
-      # This will use the cache from the earlier build step and not rebuild the image
-      # https://docs.docker.com/build/ci/github-actions/test-before-push/
-      - name: Build and push images
-        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
-        with:
-          context: .
-          push: true
-          file: packages/sync-server/docker/${{ matrix.os }}.Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/arm/v7${{ matrix.os == 'alpine' && ',linux/arm/v6' || '' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          build-args: |
-            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          # Creates `actual-server:rc`
+          tags: type=raw,value=rc
+          images: |
+            actualbudget/actual-server
+            ghcr.io/${{ github.repository_owner }}/actual-server
+            ghcr.io/${{ github.repository_owner }}/actual
+          os: ${{ matrix.os }}
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
   build-desktop:
     name: Build desktop app
