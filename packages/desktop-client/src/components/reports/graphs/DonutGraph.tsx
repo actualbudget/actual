@@ -356,7 +356,7 @@ export function DonutGraph({
   showOffBudget,
   showTooltip = true,
 }: DonutGraphProps) {
-  const animationProps = useRechartsAnimation({ isAnimationActive: false });
+  const animationProps = useRechartsAnimation({ animationDuration: 500 });
 
   const yAxis = groupBy === 'Interval' ? 'date' : 'name';
   const splitData = groupBy === 'Interval' ? 'intervalData' : 'data';
@@ -447,6 +447,7 @@ export function DonutGraph({
                     dataKey={val => getVal(val)}
                     nameKey="name"
                     {...animationProps}
+                    animationBegin={100}
                     data={adjustedGroupData}
                     innerRadius={chartInnerRadius}
                     outerRadius={chartMidRadius}
@@ -528,6 +529,7 @@ export function DonutGraph({
                     dataKey={val => getVal(val)}
                     nameKey="name"
                     {...animationProps}
+                    animationBegin={100}
                     data={flatCategories}
                     innerRadius={chartMidRadius}
                     outerRadius={chartOuterRadius}
@@ -625,6 +627,7 @@ export function DonutGraph({
                   dataKey={val => getVal(val)}
                   nameKey={yAxis}
                   {...animationProps}
+                  animationBegin={100}
                   data={data[splitData]?.map(item => ({ ...item })) ?? []}
                   innerRadius={chartInnerRadius}
                   labelLine={false}
