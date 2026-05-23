@@ -30,7 +30,6 @@ type SelectedTransactionsButtonProps = {
       | 'account'
       | 'payee'
       | 'notes'
-      | 'tags'
       | 'category'
       | 'cleared',
     selectedIds: string[],
@@ -256,10 +255,7 @@ export function SelectedTransactionsButton({
     onEdit,
     selectedIds,
   ]);
-  useHotkeys('shift+t', () => onEdit('tags', selectedIds), hotKeyOptions, [
-    onEdit,
-    selectedIds,
-  ]);
+
   useHotkeys('c', () => onEdit('category', selectedIds), hotKeyOptions, [
     onEdit,
     selectedIds,
@@ -409,7 +405,6 @@ export function SelectedTransactionsButton({
               { name: 'account', text: t('Account'), key: 'A' } as const,
               { name: 'payee', text: t('Payee'), key: 'P' } as const,
               { name: 'notes', text: t('Notes'), key: 'N' } as const,
-              { name: 'tags', text: t('Tags'), key: 'Shift+T' } as const,
               { name: 'category', text: t('Category'), key: 'C' } as const,
               { name: 'amount', text: t('Amount'), key: 'M' } as const,
               { name: 'cleared', text: t('Cleared'), key: 'L' } as const,

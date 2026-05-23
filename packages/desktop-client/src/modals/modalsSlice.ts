@@ -262,15 +262,6 @@ export type Modal =
       };
     }
   | {
-      name: 'transaction-tags';
-      options: {
-        onSubmit: (
-          ...args: ['add' | 'remove', string[]] | ['remove-all']
-        ) => void;
-        onClose?: () => void;
-      };
-    }
-  | {
       name: 'category-autocomplete';
       options: {
         title?: string;

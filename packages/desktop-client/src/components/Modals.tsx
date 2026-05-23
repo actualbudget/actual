@@ -77,7 +77,6 @@ import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
 import { TrackingBudgetMenuModal } from './modals/TrackingBudgetMenuModal';
 import { TrackingBudgetMonthMenuModal } from './modals/TrackingBudgetMonthMenuModal';
 import { TrackingBudgetSummaryModal } from './modals/TrackingBudgetSummaryModal';
-import { TransactionTagsModal } from './modals/TransactionTagsModal';
 import { TransferModal } from './modals/TransferModal';
 import { TransferOwnership } from './modals/TransferOwnership';
 import { UnmigrateBudgetAutomationsModal } from './modals/UnmigrateBudgetAutomationsModal';
@@ -216,9 +215,6 @@ export function Modals() {
 
         case 'edit-field':
           return <EditFieldModal key={key} {...modal.options} />;
-
-        case 'transaction-tags':
-          return <TransactionTagsModal key={key} {...modal.options} />;
 
         case 'category-autocomplete':
           return <CategoryAutocompleteModal key={key} {...modal.options} />;

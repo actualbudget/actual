@@ -4,6 +4,8 @@ import type {
   FocusEventHandler,
   KeyboardEvent,
   KeyboardEventHandler,
+  MutableRefObject,
+  RefObject,
 } from 'react';
 import { ListBox, ListBoxItem, Popover } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
@@ -23,6 +25,9 @@ import { useFilteredTags } from '#hooks/useTags';
 export type TagAutocompleteProps = {
   inputValue: string;
   setInputValue: (v: string) => void;
+  inputRef?:
+    | RefObject<HTMLInputElement | null>
+    | MutableRefObject<HTMLInputElement | null>;
   inputStyle?: CSSProperties;
   onBlur?: FocusEventHandler;
   onKeyDown?: KeyboardEventHandler;
@@ -31,8 +36,8 @@ export type TagAutocompleteProps = {
 
 export function TagAutocomplete({
   inputValue,
-
   setInputValue,
+  inputRef: externalInputRef,
   onBlur,
   inputStyle,
   onKeyDown,
@@ -45,7 +50,8 @@ export function TagAutocomplete({
     (itemId: string) => autocompleteId + '|' + itemId,
     [autocompleteId],
   );
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const localInputRef = useRef<HTMLInputElement | null>(null);
+  const inputRef = externalInputRef || localInputRef;
 
   const [cursorPosition, setCursorPosition] = useCursorPosition(inputRef);
   const [startIdx, endIdx] = useCurrentWordRange(inputValue, cursorPosition);

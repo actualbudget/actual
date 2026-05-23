@@ -66,7 +66,6 @@ import {
 } from '#hooks/useSplitsExpanded';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useTransactionBatchActions } from '#hooks/useTransactionBatchActions';
-import type { BatchEditName } from '#hooks/useTransactionBatchActions';
 import { useTransactionFilters } from '#hooks/useTransactionFilters';
 import { calculateRunningBalancesBottomUp } from '#hooks/useTransactions';
 import {
@@ -1077,7 +1076,7 @@ class AccountInternal extends PureComponent<
     });
   };
 
-  onBatchEdit = (name: BatchEditName, ids: string[]) => {
+  onBatchEdit = (name: keyof TransactionEntity, ids: string[]) => {
     void this.props.onBatchEdit({
       name,
       ids,

@@ -25,28 +25,14 @@ import type {
   ConfirmTransactionEditReason,
   Modal as ModalType,
 } from '#modals/modalsSlice';
-import {
-  addTagsToNotes,
-  removeAllTagsFromNotes,
-  removeTagsFromNotes,
-} from '#notes/tagUtils';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
 
-export type BatchEditName = keyof TransactionEntity | 'tags';
-type BatchTagValue =
-  | {
-      action: 'add' | 'remove';
-      tags: string[];
-    }
-  | {
-      action: 'remove-all';
-    };
+export type BatchEditName = keyof TransactionEntity;
 type BatchEditValue =
   | Parameters<
       Extract<ModalType, { name: 'edit-field' }>['options']['onSubmit']
     >[1]
-  | BatchTagValue
   | boolean
   | null;
 type BatchEditMode = Parameters<
@@ -59,11 +45,11 @@ type BatchReconciledReason = Extract<
 >;
 
 type BatchEditProps = {
-  name: BatchEditName;
+  name: keyof TransactionEntity;
   ids: Array<TransactionEntity['id']>;
   onSuccess?: (
     ids: Array<TransactionEntity['id']>,
-    name: BatchEditName,
+    name: keyof TransactionEntity,
     value: BatchEditValue,
     mode: BatchEditMode,
   ) => void;
@@ -107,7 +93,7 @@ export function useTransactionBatchActions() {
     const transactions = ungroupTransactions(data as TransactionEntity[]);
 
     const onChange = async (
-      name: BatchEditName,
+      name: keyof TransactionEntity,
       value: BatchEditValue,
       mode?: BatchEditMode,
     ) => {
@@ -143,21 +129,7 @@ export function useTransactionBatchActions() {
 
         let valueToSet = value;
 
-        if (
-          name === 'tags' &&
-          value !== null &&
-          typeof value === 'object' &&
-          'action' in value
-        ) {
-          if (value.action === 'remove-all') {
-            valueToSet = removeAllTagsFromNotes(trans.notes);
-          } else if (value.action === 'add' || value.action === 'remove') {
-            valueToSet =
-              value.action === 'add'
-                ? addTagsToNotes(trans.notes, value.tags)
-                : removeTagsFromNotes(trans.notes, value.tags);
-          }
-        } else if (name === 'notes') {
+        if (name === 'notes') {
           if (mode === 'prepend') {
             valueToSet =
               trans.notes === null ? value : `${String(value)}${trans.notes}`;
@@ -179,13 +151,10 @@ export function useTransactionBatchActions() {
             );
           }
         }
-        const transaction =
-          name === 'tags'
-            ? { ...trans, notes: valueToSet as string }
-            : {
-                ...trans,
-                [name]: valueToSet,
-              };
+        const transaction = {
+          ...trans,
+          [name]: valueToSet,
+        };
 
         if (name === 'account' && trans.account !== value) {
           transaction.reconciled = false;
@@ -286,34 +255,11 @@ export function useTransactionBatchActions() {
       );
     };
 
-    const pushTransactionTagsModal = () => {
-      dispatch(
-        pushModal({
-          modal: {
-            name: 'transaction-tags',
-            options: {
-              onSubmit: (...args) => {
-                const [action, tags] = args;
-
-                if (action === 'remove-all') {
-                  return onChange('tags', { action });
-                }
-
-                return onChange('tags', { action, tags });
-              },
-            },
-          },
-        }),
-      );
-    };
-
     const openFieldEditor = () => {
       if (name === 'cleared') {
         // Cleared just toggles it on/off and it depends on the data
         // loaded. Need to clean this up in the future.
         void onChange('cleared', null);
-      } else if (name === 'tags') {
-        pushTransactionTagsModal();
       } else if (name === 'category') {
         pushCategoryAutocompleteModal();
       } else if (name === 'payee') {

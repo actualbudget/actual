@@ -1,25 +1,32 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { SvgClose } from '@actual-app/components/icons/v1';
 import { Input } from '@actual-app/components/input';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { currentDay, dayFromDate } from '@actual-app/core/shared/months';
+import { getNoteTags } from '@actual-app/core/shared/note-tags';
 import {
   amountToInteger,
   currencyToInteger,
 } from '@actual-app/core/shared/util';
 import { format as formatDate, parse as parseDate, parseISO } from 'date-fns';
 
+import { TagAutocomplete } from '#components/autocomplete/TagAutocomplete';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { SectionLabel } from '#components/forms';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { DateSelect } from '#components/select/DateSelect';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useTagCSS } from '#hooks/useTagCSS';
+import { useTags } from '#hooks/useTags';
 import type { Modal as ModalType } from '#modals/modalsSlice';
+import { removeTagFromNotes } from '#notes/tagUtils';
+import { useCreateTagMutation } from '#tags';
 
 const itemStyle: CSSProperties = {
   fontSize: 17,
@@ -53,6 +60,45 @@ export function EditFieldModal({
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const noteInputRef = useRef<HTMLInputElement | null>(null);
   const noteReplaceInputRef = useRef<HTMLInputElement | null>(null);
+
+  const createTagMutation = useCreateTagMutation();
+  const { data: existingTags = [] } = useTags();
+  const getTagCSS = useTagCSS({ ellipsis: true });
+
+  const existingTagNamesSet = useMemo(
+    () => new Set(existingTags.map(({ tag }) => tag)),
+    [existingTags],
+  );
+  const tagMap = useMemo(
+    () => new Map(existingTags.map(tagEntity => [tagEntity.tag, tagEntity])),
+    [existingTags],
+  );
+
+  const [noteText, setNoteText] = useState('');
+
+  const handleSubmitNote = async (closeModal: () => void) => {
+    const trimmedNote = noteText.trim();
+    const detectedTags = getNoteTags(trimmedNote);
+    const missingTags = detectedTags.filter(
+      tag => !existingTagNamesSet.has(tag),
+    );
+
+    if (missingTags.length > 0) {
+      try {
+        await Promise.all(
+          missingTags.map(tag =>
+            createTagMutation.mutateAsync({ tag: { tag } }),
+          ),
+        );
+      } catch {
+        // useCreateTagMutation surfaces the error notification.
+        return;
+      }
+    }
+
+    onSelectNote(trimmedNote, noteAmend);
+    closeModal();
+  };
 
   function onSelectNote(value: NoteAmendValue, mode?: NoteAmendMode) {
     if (value != null) {
@@ -119,125 +165,217 @@ export function EditFieldModal({
 
     case 'notes':
       label = t('Notes');
-      editor = ({ close }) => (
-        <>
-          <View
-            style={{
-              flexDirection: 'row',
-              marginTop: 5,
-              marginBottom: 5,
-              marginLeft: 8,
-              marginRight: 4,
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 5,
-            }}
-          >
-            {Object.keys(noteAmendStrings).map((mode, _, arr) => (
-              <Button
-                key={mode}
-                style={{
-                  padding: '5px 10px',
-                  height: '100%',
-                  width: `${100 / arr.length}%`,
-                  backgroundColor: theme.menuBackground,
-                  fontSize: 'inherit',
-                  ...(noteAmend === mode && {
-                    backgroundColor: theme.buttonPrimaryBackground,
-                    color: theme.buttonPrimaryText,
-                    ':hover': {
-                      backgroundColor: theme.buttonPrimaryBackgroundHover,
-                      color: theme.buttonPrimaryTextHover,
-                    },
-                  }),
-                  ...(noteAmend !== mode && {
-                    backgroundColor: theme.buttonNormalBackground,
-                    color: theme.buttonNormalText,
-                    ':hover': {
-                      backgroundColor: theme.buttonNormalBackgroundHover,
-                      color: theme.buttonNormalTextHover,
-                    },
-                  }),
-                }}
-                onPress={() => {
-                  onChangeMode(mode as NoteAmendMode);
-                  noteInputRef.current?.focus();
-                }}
-              >
-                {t(noteAmendStrings[mode as NoteAmendMode])}
-              </Button>
-            ))}
-          </View>
-          {noteAmend === 'findAndReplace' ? (
-            <View style={{ gap: 10 }}>
-              <LabeledCheckbox
-                id="noteRegex"
-                checked={noteFindReplace.useRegex}
-                style={{ color: theme.menuAutoCompleteText }}
-                onChange={({ currentTarget: { checked } }) =>
-                  setNoteFindReplace(current => ({
-                    ...current,
-                    useRegex: checked,
-                  }))
-                }
-              >
-                {t('Use Regular Expressions')}
-              </LabeledCheckbox>
-              <Input
-                ref={noteInputRef}
-                autoFocus
-                placeholder={t('Find')}
-                value={noteFindReplace.find}
-                onChange={({ currentTarget: { value } }) =>
-                  setNoteFindReplace(current => ({ ...current, find: value }))
-                }
-                onEnter={() => {
-                  noteReplaceInputRef.current?.focus();
-                }}
-                style={inputStyle}
-              />
-              <Input
-                ref={noteReplaceInputRef}
-                placeholder={t('Replace')}
-                value={noteFindReplace.replace}
-                onChange={({ currentTarget: { value } }) =>
-                  setNoteFindReplace(current => ({
-                    ...current,
-                    replace: value,
-                  }))
-                }
-                onEnter={() => {
-                  if (noteFindReplace.find === '') {
-                    alert(t('Find value required'));
-                    return;
+      editor = ({ close }) => {
+        const detectedTags = getNoteTags(noteText);
+        return (
+          <>
+            <View
+              style={{
+                flexDirection: 'row',
+                marginTop: 5,
+                marginBottom: 5,
+                marginLeft: 8,
+                marginRight: 4,
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 5,
+              }}
+            >
+              {Object.keys(noteAmendStrings).map((mode, _, arr) => (
+                <Button
+                  key={mode}
+                  style={{
+                    padding: '5px 10px',
+                    height: '100%',
+                    width: `${100 / arr.length}%`,
+                    backgroundColor: theme.menuBackground,
+                    fontSize: 'inherit',
+                    ...(noteAmend === mode && {
+                      backgroundColor: theme.buttonPrimaryBackground,
+                      color: theme.buttonPrimaryText,
+                      ':hover': {
+                        backgroundColor: theme.buttonPrimaryBackgroundHover,
+                        color: theme.buttonPrimaryTextHover,
+                      },
+                    }),
+                    ...(noteAmend !== mode && {
+                      backgroundColor: theme.buttonNormalBackground,
+                      color: theme.buttonNormalText,
+                      ':hover': {
+                        backgroundColor: theme.buttonNormalBackgroundHover,
+                        color: theme.buttonNormalTextHover,
+                      },
+                    }),
+                  }}
+                  onPress={() => {
+                    onChangeMode(mode as NoteAmendMode);
+                    noteInputRef.current?.focus();
+                  }}
+                >
+                  {t(noteAmendStrings[mode as NoteAmendMode])}
+                </Button>
+              ))}
+            </View>
+            {noteAmend === 'findAndReplace' ? (
+              <View style={{ gap: 10 }}>
+                <LabeledCheckbox
+                  id="noteRegex"
+                  checked={noteFindReplace.useRegex}
+                  style={{ color: theme.menuAutoCompleteText }}
+                  onChange={({ currentTarget: { checked } }) =>
+                    setNoteFindReplace(current => ({
+                      ...current,
+                      useRegex: checked,
+                    }))
                   }
-                  if (noteFindReplace.useRegex) {
-                    try {
-                      new RegExp(noteFindReplace.find, 'g');
-                    } catch {
-                      alert(t('Invalid regular expression'));
+                >
+                  {t('Use Regular Expressions')}
+                </LabeledCheckbox>
+                <Input
+                  ref={noteInputRef}
+                  autoFocus
+                  placeholder={t('Find')}
+                  value={noteFindReplace.find}
+                  onChange={({ currentTarget: { value } }) =>
+                    setNoteFindReplace(current => ({ ...current, find: value }))
+                  }
+                  onEnter={() => {
+                    noteReplaceInputRef.current?.focus();
+                  }}
+                  style={inputStyle}
+                />
+                <Input
+                  ref={noteReplaceInputRef}
+                  placeholder={t('Replace')}
+                  value={noteFindReplace.replace}
+                  onChange={({ currentTarget: { value } }) =>
+                    setNoteFindReplace(current => ({
+                      ...current,
+                      replace: value,
+                    }))
+                  }
+                  onEnter={() => {
+                    if (noteFindReplace.find === '') {
+                      alert(t('Find value required'));
                       return;
                     }
-                  }
-                  onSelectNote(noteFindReplace, noteAmend);
-                  close();
-                }}
-                style={inputStyle}
-              />
-            </View>
-          ) : (
-            <Input
-              ref={noteInputRef}
-              autoFocus
-              onEnter={value => {
-                onSelectNote(value, noteAmend);
-                close();
-              }}
-              style={inputStyle}
-            />
-          )}
-        </>
-      );
+                    if (noteFindReplace.useRegex) {
+                      try {
+                        new RegExp(noteFindReplace.find, 'g');
+                      } catch {
+                        alert(t('Invalid regular expression'));
+                        return;
+                      }
+                    }
+                    onSelectNote(noteFindReplace, noteAmend);
+                    close();
+                  }}
+                  style={inputStyle}
+                />
+              </View>
+            ) : (
+              <View style={{ gap: 10 }}>
+                <TagAutocomplete
+                  inputValue={noteText}
+                  setInputValue={setNoteText}
+                  inputRef={noteInputRef}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      void handleSubmitNote(close);
+                    }
+                  }}
+                  inputStyle={inputStyle}
+                />
+                {detectedTags.length > 0 && (
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      flexWrap: 'wrap',
+                      gap: 6,
+                      marginTop: 4,
+                    }}
+                  >
+                    {detectedTags.map(detectedTag => {
+                      const tagEntity = tagMap.get(detectedTag);
+                      return (
+                        <View
+                          key={detectedTag}
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            padding: '2px 8px',
+                            borderRadius: 4,
+                            backgroundColor: theme.menuBackground,
+                            border: `1px solid ${theme.buttonNormalBorder}`,
+                            color: theme.menuItemText,
+                            gap: 6,
+                            transition: 'background-color 0.1s',
+                            ':hover': {
+                              backgroundColor: theme.menuItemBackgroundHover,
+                            },
+                          }}
+                        >
+                          <span
+                            className={getTagCSS(detectedTag, {
+                              color: tagEntity?.color,
+                              compact: true,
+                            })}
+                          >
+                            #{detectedTag}
+                          </span>
+                          <Button
+                            variant="bare"
+                            aria-label={t('Remove {{tag}} tag', {
+                              tag: detectedTag,
+                            })}
+                            onPress={() => {
+                              setNoteText(current =>
+                                removeTagFromNotes(current, detectedTag),
+                              );
+                            }}
+                            style={({ isHovered }) => ({
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              padding: 2,
+                              borderRadius: 2,
+                              color: isHovered
+                                ? theme.errorText
+                                : theme.pageTextSubdued,
+                              backgroundColor: isHovered
+                                ? theme.errorBackground
+                                : 'transparent',
+                            })}
+                          >
+                            <SvgClose width={8} height={8} />
+                          </Button>
+                        </View>
+                      );
+                    })}
+                  </View>
+                )}
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'flex-end',
+                    marginTop: 10,
+                  }}
+                >
+                  <Button
+                    variant="primary"
+                    style={{
+                      padding: '6px 16px',
+                    }}
+                    onPress={() => void handleSubmitNote(close)}
+                  >
+                    <Trans>Save notes</Trans>
+                  </Button>
+                </View>
+              </View>
+            )}
+          </>
+        );
+      };
       break;
 
     case 'amount':
@@ -266,7 +404,10 @@ export function EditFieldModal({
         style: {
           height: isNarrowWidth
             ? 'calc(var(--visual-viewport-height) * 0.85)'
-            : 275,
+            : name === 'notes'
+              ? 'auto'
+              : 275,
+          ...(!isNarrowWidth && name === 'notes' && { minHeight: 275 }),
           padding: '15px 10px',
           ...(minWidth && { minWidth }),
           backgroundColor: theme.menuAutoCompleteBackground,
