@@ -41,6 +41,7 @@ export type DbCategory = {
   sort_order: number;
   hidden: 1 | 0;
   goal_def?: JsonString | null;
+  cleanup_def?: JsonString | null;
   template_settings?: { source: 'notes' | 'ui' };
   tombstone: 1 | 0;
 };
@@ -51,6 +52,12 @@ export type DbCategoryGroup = {
   is_income: 1 | 0;
   sort_order: number;
   hidden: 1 | 0;
+  tombstone: 1 | 0;
+};
+
+export type DbCleanupGroup = {
+  id: string;
+  name: string;
   tombstone: 1 | 0;
 };
 
@@ -120,6 +127,7 @@ export type DbSchedule = {
   active: 1 | 0;
   completed: 1 | 0;
   posts_transaction: 1 | 0;
+  custom_upcoming_length: string | null;
   tombstone: 1 | 0;
 };
 
@@ -292,6 +300,7 @@ export type DbViewCategory = {
   group: DbCategoryGroup['id'];
   sort_order: DbCategory['sort_order'];
   tombstone: DbCategory['tombstone'];
+  cleanup_def?: DbCategory['cleanup_def'];
 };
 
 export type DbViewCategoryWithGroupHidden = {
@@ -323,6 +332,7 @@ export type DbViewSchedule = {
   active: DbSchedule['active'];
   completed: DbSchedule['completed'];
   posts_transaction: DbSchedule['posts_transaction'];
+  custom_upcoming_length: DbSchedule['custom_upcoming_length'];
   tombstone: DbSchedule['tombstone'];
   _payee: DbPayeeMapping['targetId'];
   _account: DbAccount['id'];

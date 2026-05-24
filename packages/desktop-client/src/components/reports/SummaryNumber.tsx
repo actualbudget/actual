@@ -12,7 +12,7 @@ import { useFormat } from '#hooks/useFormat';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { useResizeObserver } from '#hooks/useResizeObserver';
 
-import { LoadingIndicator } from './LoadingIndicator';
+import { ReportCardValueSkeleton } from './ReportCardValueSkeleton';
 
 const FONT_SIZE_SCALE_FACTOR = 1.6;
 const CONTAINER_MARGIN = 8;
@@ -77,7 +77,7 @@ export function SummaryNumber({
 
   return (
     <>
-      {loading && <LoadingIndicator />}
+      {loading && <ReportCardValueSkeleton />}
       {!loading && (
         <View
           ref={mergedRef as Ref<HTMLDivElement>}
@@ -112,7 +112,7 @@ export function SummaryNumber({
           }}
         >
           {!hasSized ? (
-            <LoadingIndicator />
+            <ReportCardValueSkeleton />
           ) : (
             <FinancialText aria-hidden="true">
               <PrivacyFilter>{displayAmount}</PrivacyFilter>

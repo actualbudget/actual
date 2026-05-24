@@ -33,150 +33,132 @@ jobs:
     permissions:
       pull-requests: write
       contents: read
+      actions: read
     steps:
       - name: Checkout base branch
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ github.base_ref }}
+          persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
         with:
           download-translations: 'false'
 
-      - name: Wait for ${{github.base_ref}} web build to succeed
-        uses: fountainhead/action-wait-for-check@5a908a24814494009c4bb27c242ea38c93c593be # v1.2.0
-        id: master-web-build
+      # Resolve one successful `build.yml` run for each side (master and PR
+      # head) up front, then pin every download below to its `run_id`. This
+      # ensures artifact downloads are consistent and prevents race conditions.
+      - name: Resolve build runs
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        id: build-runs
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: web
-          ref: ${{github.base_ref}}
-      - name: Wait for ${{github.base_ref}} API build to succeed
-        uses: fountainhead/action-wait-for-check@5a908a24814494009c4bb27c242ea38c93c593be # v1.2.0
-        id: master-api-build
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: api
-          ref: ${{github.base_ref}}
-      - name: Wait for ${{github.base_ref}} CLI build to succeed
-        uses: fountainhead/action-wait-for-check@5a908a24814494009c4bb27c242ea38c93c593be # v1.2.0
-        id: master-cli-build
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: cli
-          ref: ${{github.base_ref}}
-      - name: Wait for ${{github.base_ref}} CRDT build to succeed
-        uses: fountainhead/action-wait-for-check@5a908a24814494009c4bb27c242ea38c93c593be # v1.2.0
-        id: master-crdt-build
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: crdt
-          ref: ${{github.base_ref}}
+          script: |
+            const TIMEOUT_MS = 30 * 60 * 1000;
+            const SLEEP_MS = 15000;
 
-      - name: Wait for PR build to succeed
-        uses: fountainhead/action-wait-for-check@5a908a24814494009c4bb27c242ea38c93c593be # v1.2.0
-        id: wait-for-web-build
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: web
-          ref: ${{github.event.pull_request.head.sha}}
-      - name: Wait for API PR build to succeed
-        uses: fountainhead/action-wait-for-check@5a908a24814494009c4bb27c242ea38c93c593be # v1.2.0
-        id: wait-for-api-build
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: api
-          ref: ${{github.event.pull_request.head.sha}}
-      - name: Wait for CLI PR build to succeed
-        uses: fountainhead/action-wait-for-check@5a908a24814494009c4bb27c242ea38c93c593be # v1.2.0
-        id: wait-for-cli-build
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: cli
-          ref: ${{github.event.pull_request.head.sha}}
-      - name: Wait for CRDT PR build to succeed
-        uses: fountainhead/action-wait-for-check@5a908a24814494009c4bb27c242ea38c93c593be # v1.2.0
-        id: wait-for-crdt-build
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: crdt
-          ref: ${{github.event.pull_request.head.sha}}
+            async function resolveRun({ label, filter, notFoundHint }) {
+              const deadline = Date.now() + TIMEOUT_MS;
+              while (true) {
+                const { data } = await github.rest.actions.listWorkflowRuns({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  workflow_id: 'build.yml',
+                  ...filter,
+                  status: 'success',
+                  per_page: 1,
+                });
+                if (data.workflow_runs.length > 0) {
+                  const run = data.workflow_runs[0];
+                  core.info(`Found ${label} build run ${run.id} (${run.html_url})`);
+                  return run.id;
+                }
+                if (Date.now() > deadline) {
+                  throw new Error(
+                    `No successful build.yml run found for ${label} within 30 min — ${notFoundHint}.`,
+                  );
+                }
+                core.info(`No successful ${label} build run yet — sleeping 15s.`);
+                await new Promise(r => setTimeout(r, SLEEP_MS));
+              }
+            }
 
-      - name: Report build failure
-        if: steps.wait-for-web-build.outputs.conclusion == 'failure' || steps.wait-for-api-build.outputs.conclusion == 'failure' || steps.wait-for-cli-build.outputs.conclusion == 'failure' || steps.wait-for-crdt-build.outputs.conclusion == 'failure'
-        run: |
-          echo "Build failed on PR branch or ${{github.base_ref}}"
-          exit 1
+            const baseRef = process.env.BASE_REF;
+            const headSha = process.env.HEAD_SHA;
+            const [masterRunId, headRunId] = await Promise.all([
+              resolveRun({
+                label: baseRef,
+                filter: { branch: baseRef },
+                notFoundHint: `${baseRef} may be broken`,
+              }),
+              resolveRun({
+                label: `PR head ${headSha}`,
+                filter: { head_sha: headSha },
+                notFoundHint:
+                  'build may still be running, have failed, or the branch may have been force-pushed',
+              }),
+            ]);
+            core.setOutput('master_run_id', masterRunId);
+            core.setOutput('head_run_id', headRunId);
 
       - name: Download web build artifact from ${{github.base_ref}}
         uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
-        id: pr-web-build
         with:
-          branch: ${{github.base_ref}}
+          run_id: ${{ steps.build-runs.outputs.master_run_id }}
           workflow: build.yml
-          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
           name: build-stats
           path: base
       - name: Download API build artifact from ${{github.base_ref}}
         uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
-        id: pr-api-build
         with:
-          branch: ${{github.base_ref}}
+          run_id: ${{ steps.build-runs.outputs.master_run_id }}
           workflow: build.yml
-          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
           name: api-build-stats
           path: base
       - name: Download build stats from PR
         uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
         with:
-          pr: ${{github.event.pull_request.number}}
+          run_id: ${{ steps.build-runs.outputs.head_run_id }}
           workflow: build.yml
-          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
           name: build-stats
           path: head
-          allow_forks: true
       - name: Download API stats from PR
         uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
         with:
-          pr: ${{github.event.pull_request.number}}
+          run_id: ${{ steps.build-runs.outputs.head_run_id }}
           workflow: build.yml
-          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
           name: api-build-stats
           path: head
-          allow_forks: true
       - name: Download CLI build artifact from ${{github.base_ref}}
         uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
         with:
-          branch: ${{github.base_ref}}
+          run_id: ${{ steps.build-runs.outputs.master_run_id }}
           workflow: build.yml
-          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
           name: cli-build-stats
           path: base
       - name: Download CLI stats from PR
         uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
         with:
-          pr: ${{github.event.pull_request.number}}
+          run_id: ${{ steps.build-runs.outputs.head_run_id }}
           workflow: build.yml
-          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
           name: cli-build-stats
           path: head
-          allow_forks: true
       - name: Download CRDT build artifact from ${{github.base_ref}}
         uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
         with:
-          branch: ${{github.base_ref}}
+          run_id: ${{ steps.build-runs.outputs.master_run_id }}
           workflow: build.yml
-          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
           name: crdt-build-stats
           path: base
       - name: Download CRDT stats from PR
         uses: dawidd6/action-download-artifact@8305c0f1062bb0d184d09ef4493ecb9288447732 # v20
         with:
-          pr: ${{github.event.pull_request.number}}
+          run_id: ${{ steps.build-runs.outputs.head_run_id }}
           workflow: build.yml
-          workflow_conclusion: '' # ignore the conclusion of the workflow, since we already checked it
           name: crdt-build-stats
           path: head
-          allow_forks: true
       - name: Strip content hashes from stats files
         run: |
           if [ -f ./head/web-stats.json ]; then

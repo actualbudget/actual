@@ -13,18 +13,6 @@ const ACCOUNT_TYPES = Object.freeze({
   LOAN: 'LOAN',
 });
 
-const TRANSFER_PATTERNS = Object.freeze({
-  TO: / TFR TO /,
-  FROM: / TFR FROM /,
-});
-
-const TRANSFER_REGEX = Object.freeze({
-  TO_DESCRIPTION: /(.+) TFR TO .+/,
-  FROM_DESCRIPTION: /(.+) TFR FROM .+/,
-  TO_PAYEE: /.+ TFR TO (.+)/,
-  FROM_PAYEE: /.+ TFR FROM (.+)/,
-});
-
 const app = express();
 export { app as handlers };
 app.use(express.json());
@@ -219,11 +207,6 @@ function convertToCents(amount) {
   return parseInt(Math.round(amount * 100).toString());
 }
 
-function extractRegexMatch(text, regex) {
-  const matches = text.match(regex);
-  return matches && matches.length > 1 ? matches[1] : null;
-}
-
 function flattenObject(obj, prefix = '') {
   const result = {};
 
@@ -244,26 +227,6 @@ function flattenObject(obj, prefix = '') {
   return result;
 }
 
-function normalizeNotes(trans) {
-  if (trans.description.match(TRANSFER_PATTERNS.TO)) {
-    const note = extractRegexMatch(
-      trans.description,
-      TRANSFER_REGEX.TO_DESCRIPTION,
-    );
-    if (note) return note;
-  }
-
-  if (trans.description.match(TRANSFER_PATTERNS.FROM)) {
-    const note = extractRegexMatch(
-      trans.description,
-      TRANSFER_REGEX.FROM_DESCRIPTION,
-    );
-    if (note) return note;
-  }
-
-  return trans.description;
-}
-
 function getPayeeName(trans) {
   if (trans.merchant?.name) {
     return trans.merchant.name;
@@ -271,19 +234,6 @@ function getPayeeName(trans) {
 
   if (trans.meta?.other_account) {
     return trans.meta.other_account;
-  }
-
-  if (trans.description.match(TRANSFER_PATTERNS.TO)) {
-    const payee = extractRegexMatch(trans.description, TRANSFER_REGEX.TO_PAYEE);
-    if (payee) return payee;
-  }
-
-  if (trans.description.match(TRANSFER_PATTERNS.FROM)) {
-    const payee = extractRegexMatch(
-      trans.description,
-      TRANSFER_REGEX.FROM_PAYEE,
-    );
-    if (payee) return payee;
   }
 
   return '';
@@ -296,7 +246,7 @@ function processTransaction(trans, account, isBooked = true) {
     booked: isBooked,
     date: getDate(transactionDate),
     payeeName: getPayeeName(trans),
-    notes: normalizeNotes(trans),
+    notes: trans.description,
     transactionId: trans._id,
     sortOrder: transactionDate.getTime(),
   };

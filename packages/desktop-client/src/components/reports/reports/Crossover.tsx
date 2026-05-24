@@ -129,15 +129,17 @@ function CrossoverInner({ widget }: CrossoverInnerProps) {
       return;
     }
 
-    const initialExpenseCategories = widget?.meta?.expenseCategoryIds?.length
-      ? categories.list.filter(c =>
-          widget.meta!.expenseCategoryIds!.includes(c.id),
-        )
-      : categories.list.filter(c => !c.is_income);
+    const initialExpenseCategories =
+      widget?.meta?.expenseCategoryIds !== undefined
+        ? categories.list.filter(c =>
+            widget.meta!.expenseCategoryIds!.includes(c.id),
+          )
+        : categories.list.filter(c => !c.is_income);
 
-    const initialIncomeAccountIds = widget?.meta?.incomeAccountIds?.length
-      ? widget.meta!.incomeAccountIds!
-      : accounts.map(a => a.id);
+    const initialIncomeAccountIds =
+      widget?.meta?.incomeAccountIds !== undefined
+        ? widget.meta!.incomeAccountIds!
+        : accounts.map(a => a.id);
 
     setSelectedExpenseCategories(initialExpenseCategories);
     setSelectedIncomeAccountIds(initialIncomeAccountIds);

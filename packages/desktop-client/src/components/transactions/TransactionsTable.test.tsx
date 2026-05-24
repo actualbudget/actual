@@ -18,11 +18,14 @@ import type {
   CategoryEntity,
   CategoryGroupEntity,
   PayeeEntity,
+  ScheduleEntity,
+  TagEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { format as formatDate, parse as parseDate } from 'date-fns';
+import { v4 as uuidv4 } from 'uuid';
 
 import { AuthProvider } from '#auth/AuthProvider';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
@@ -31,6 +34,7 @@ import { SplitsExpandedProvider } from '#hooks/useSplitsExpanded';
 import { SpreadsheetProvider } from '#hooks/useSpreadsheet';
 import { createTestQueryClient, TestProviders } from '#mocks';
 import { payeeQueries } from '#payees';
+import { tagQueries } from '#tags/queries';
 
 import { TransactionTable } from './TransactionsTable';
 
@@ -38,7 +42,7 @@ const queryClient = createTestQueryClient();
 
 vi.mock(
   '@actual-app/core/platform/client/connection',
-  () => import('../../mocks/connection'),
+  () => import('#mocks/connection'),
 );
 vi.mock('../../hooks/useSyncedPref', () => ({
   useSyncedPref: vi.fn().mockReturnValue([undefined, vi.fn()]),
@@ -71,6 +75,13 @@ const payees: PayeeEntity[] = [
 ];
 queryClient.setQueryData(payeeQueries.list().queryKey, payees);
 
+const tags: TagEntity[] = [
+  { id: 'tag1', tag: 'vacation' },
+  { id: 'tag2', tag: 'taxes' },
+  { id: 'tag3', tag: 'groceries' },
+];
+queryClient.setQueryData(tagQueries.list().queryKey, tags);
+
 const categoryGroups = generateCategoryGroups([
   {
     name: 'Investments and Savings',
@@ -93,6 +104,7 @@ vi.mock('../../hooks/useCategories', () => ({
 }));
 
 const usualGroup = categoryGroups[1];
+let schedules: ScheduleEntity[] = [];
 
 function generateTransactions(
   count: number,
@@ -229,6 +241,8 @@ function initBasicServer() {
             data: generateTransactions(5, [6]),
             dependencies: [],
           };
+        case 'schedules':
+          return { data: schedules, dependencies: [] };
         default:
           throw new Error(`queried unknown table: ${query.table}`);
       }
@@ -241,10 +255,16 @@ function initBasicServer() {
       grouped: categoryGroups,
       list: categories,
     }),
+    'tags-get': async () => tags,
+    'tags-create': async (tag: Omit<TagEntity, 'id'>) => ({
+      id: 'new-tag',
+      ...tag,
+    }),
   });
 }
 
 beforeEach(() => {
+  schedules = [];
   initBasicServer();
 });
 
@@ -391,14 +411,22 @@ expect.extend({
     ) {
       return {
         message: () =>
-          `Expected ${validPayeeListWithFavorite.join(', ')} to have favorite stars.` +
-          `Received ${foundStarList.length} items with favorite stars. Incorrect: ${incorrectStarList.join(', ')}`,
+          `Expected ${validPayeeListWithFavorite.join(
+            ', ',
+          )} to have favorite stars.` +
+          `Received ${
+            foundStarList.length
+          } items with favorite stars. Incorrect: ${incorrectStarList.join(
+            ', ',
+          )}`,
         pass: false,
       };
     } else {
       return {
         message: () =>
-          `Expected ${String(validPayeeListWithFavorite)} to have favorite stars`,
+          `Expected ${String(
+            validPayeeListWithFavorite,
+          )} to have favorite stars`,
         pass: true,
       };
     }
@@ -424,6 +452,50 @@ function expectToBeEditingField(
 }
 
 describe('Transactions', () => {
+  test('preview transactions show schedule name in notes', async () => {
+    const scheduleName = 'Monthly rent';
+    schedules = [
+      {
+        id: 'schedule-1',
+        name: scheduleName,
+        rule: 'rule-1',
+        next_date: '2017-01-01',
+        completed: false,
+        posts_transaction: false,
+        tombstone: false,
+        _payee: 'alice-id',
+        _account: accounts[0].id,
+        _amount: -1000,
+        _amountOp: 'is',
+        _date: '2017-01-01',
+        _conditions: [],
+        _actions: [],
+      },
+    ];
+
+    const previewTransaction: TransactionEntity = {
+      id: 'preview/schedule-1/2017-01-01',
+      account: accounts[0].id,
+      amount: -1000,
+      date: '2017-01-01',
+      payee: 'alice-id',
+      schedule: 'schedule-1',
+      cleared: false,
+      reconciled: false,
+    };
+
+    const { container } = renderTransactions({
+      transactions: [previewTransaction],
+      isAdding: false,
+    });
+
+    await waitFor(() => {
+      expect(queryField(container, 'notes', 'div', 0).textContent).toBe(
+        scheduleName,
+      );
+    });
+  });
+
   test('transactions table shows the correct data', () => {
     const { container, getTransactions } = renderTransactions();
 
@@ -1086,7 +1158,7 @@ describe('Transactions', () => {
     // Change the id to simulate a new transaction being added, and
     // work with that one. This makes sure that the transaction table
     // properly references new data.
-    transactions[0] = { ...transactions[0], id: crypto.randomUUID() };
+    transactions[0] = { ...transactions[0], id: uuidv4() };
     updateProps({ transactions });
 
     function expectErrorToNotExist(transactions: TransactionEntity[]) {
@@ -1167,6 +1239,7 @@ describe('Transactions', () => {
         is_parent: true,
         notes: 'Notes',
         payee: 'alice-id',
+        reconciled: false,
         sort_order: 0,
       },
       {
@@ -1180,7 +1253,7 @@ describe('Transactions', () => {
         is_child: true,
         parent_id: parentId,
         payee: 'alice-id',
-        reconciled: undefined,
+        reconciled: false,
         sort_order: -1,
         starting_balance_flag: null,
       },
@@ -1195,7 +1268,7 @@ describe('Transactions', () => {
         is_child: true,
         parent_id: parentId,
         payee: 'alice-id',
-        reconciled: undefined,
+        reconciled: false,
         sort_order: -2,
         starting_balance_flag: null,
       },
@@ -1249,5 +1322,93 @@ describe('Transactions', () => {
     expect(queryField(container, 'credit', '', 1).textContent).toBe('0.00');
     expect(queryField(container, 'debit', '', 2).textContent).toBe('');
     expect(queryField(container, 'credit', '', 2).textContent).toBe('0.00');
+  });
+
+  describe('Tag Autocomplete', () => {
+    test('adding a tag at the end of the note', async () => {
+      const { container, getTransactions } = renderTransactions();
+      const input = await editField(container, 'notes', 2);
+      await userEvent.clear(input);
+      await userEvent.type(input, 'going on #vac');
+      await screen.findByText('#vacation');
+      await userEvent.keyboard('[Enter]');
+      fireEvent.blur(input);
+
+      expect(getTransactions()[2].notes).toBe('going on #vacation');
+    });
+
+    test('adding a tag at the start of the note', async () => {
+      const { container, getTransactions } = renderTransactions();
+      const input = await editField(container, 'notes', 2);
+      await userEvent.clear(input);
+      await userEvent.type(input, ' is fun');
+      await userEvent.type(input, '#vac', {
+        initialSelectionStart: 0,
+        initialSelectionEnd: 0,
+      });
+      await screen.findByText('#vacation');
+      await userEvent.keyboard('[Enter]');
+      fireEvent.blur(input);
+
+      expect(getTransactions()[2].notes).toBe('#vacation is fun');
+    });
+
+    test('adding a tag in the middle of the note', async () => {
+      const { container, getTransactions } = renderTransactions();
+      const input = await editField(container, 'notes', 2);
+      await userEvent.clear(input);
+      await userEvent.type(input, 'going on  is fun');
+      await userEvent.type(input, '#vac', {
+        initialSelectionStart: 9,
+        initialSelectionEnd: 9,
+      });
+      await screen.findByText('#vacation');
+      await userEvent.keyboard('[Enter]');
+      fireEvent.blur(input);
+
+      expect(getTransactions()[2].notes).toBe('going on #vacation is fun');
+    });
+
+    test('select a tag with both Tab and Enter', async () => {
+      const { container, getTransactions } = renderTransactions();
+
+      // Test Tab
+      let input = await editField(container, 'notes', 2);
+      await userEvent.clear(input);
+      await userEvent.type(input, '#vac');
+      await screen.findByText('#vacation');
+      await userEvent.keyboard('[Tab]');
+      fireEvent.blur(input);
+
+      expect(getTransactions()[2].notes).toBe('#vacation');
+
+      // Test Enter
+      input = await editField(container, 'notes', 3);
+      await userEvent.clear(input);
+      await userEvent.type(input, '#tax');
+      await screen.findByText('#taxes');
+      await userEvent.keyboard('[Enter]');
+      fireEvent.blur(input);
+
+      expect(getTransactions()[3].notes).toBe('#taxes');
+    });
+
+    test('creating a new tag via the autocomplete', async () => {
+      const { container, getTransactions } = renderTransactions();
+      const input = await editField(container, 'notes', 2);
+      await userEvent.clear(input);
+      await userEvent.type(input, 'spending on #coffee');
+
+      // The "Create tag #coffee" option should appear
+      const createOption = await screen.findByText('Create tag');
+      expect(createOption).toBeTruthy();
+
+      await userEvent.click(createOption);
+      await waitForAutocomplete();
+      fireEvent.blur(input);
+
+      // Verify the tag was added to the note correctly
+      expect(getTransactions()[2].notes).toBe('spending on #coffee');
+    });
   });
 });

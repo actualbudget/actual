@@ -85,6 +85,7 @@ export const schema = {
     hidden: f('boolean'),
     group: f('id', { ref: 'category_groups' }),
     goal_def: f('string'),
+    cleanup_def: f('string'),
     template_settings: f('json', { default: { source: 'notes' } }),
     sort_order: f('float'),
     tombstone: f('boolean'),
@@ -97,6 +98,11 @@ export const schema = {
     sort_order: f('float'),
     tombstone: f('boolean'),
   },
+  cleanup_groups: {
+    id: f('id'),
+    name: f('string'),
+    tombstone: f('boolean'),
+  },
   schedules: {
     id: f('id'),
     name: f('string'),
@@ -104,6 +110,7 @@ export const schema = {
     next_date: f('date'),
     completed: f('boolean'),
     posts_transaction: f('boolean'),
+    custom_upcoming_length: f('string'),
     tombstone: f('boolean'),
 
     // These are special fields that are actually pulled from the

@@ -11,6 +11,7 @@ import * as accountApp from './app-account';
 import * as adminApp from './app-admin';
 import * as akahuApp from './app-akahu/app-akahu.js';
 import * as corsApp from './app-cors-proxy';
+import * as enableBankingApp from './app-enablebanking/app-enablebanking';
 import * as goCardlessApp from './app-gocardless/app-gocardless';
 import * as openidApp from './app-openid';
 import * as pluggai from './app-pluggyai/app-pluggyai';
@@ -61,6 +62,7 @@ app.use('/gocardless', goCardlessApp.handlers);
 app.use('/simplefin', simpleFinApp.handlers);
 app.use('/pluggyai', pluggai.handlers);
 app.use('/akahu', akahuApp.handlers);
+app.use('/enablebanking', enableBankingApp.handlers);
 app.use('/secret', secretApp.handlers);
 
 if (config.get('corsProxy.enabled')) {
@@ -126,17 +128,32 @@ app.get('/metrics', (_req, res) => {
   });
 });
 
-// The web frontend
+// The web frontend.
+// Dev mode proxies to Vite, which injects inline preamble scripts and uses
+// a websocket for HMR. Loosen script-src and connect-src accordingly.
+// `'unsafe-eval'` is required at runtime for the Electron app, so it is
+// kept in both branches.
+const isDev = process.env.NODE_ENV === 'development';
+const scriptSrc = isDev
+  ? "'self' 'unsafe-inline' 'unsafe-eval' blob:"
+  : "'self' 'unsafe-eval' blob:";
+const connectSrc = isDev ? "'self' ws: wss: http: https:" : 'http: https:';
+const csp = [
+  "default-src 'self' blob:",
+  "img-src 'self' blob: data:",
+  `script-src ${scriptSrc}`,
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self' data:",
+  `connect-src ${connectSrc}`,
+].join('; ');
+
 app.use((req, res, next) => {
   res.set('Cross-Origin-Opener-Policy', 'same-origin');
   res.set('Cross-Origin-Embedder-Policy', 'require-corp');
-  res.set(
-    'Content-Security-Policy',
-    "default-src 'self' blob:; img-src 'self' blob: data:; script-src 'self' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src http: https:;",
-  );
+  res.set('Content-Security-Policy', csp);
   next();
 });
-if (process.env.NODE_ENV === 'development') {
+if (isDev) {
   console.log(
     'Running in development mode - Proxying frontend routes to React Dev Server',
   );

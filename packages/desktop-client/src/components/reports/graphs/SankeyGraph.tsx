@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { CSSProperties } from 'react';
 
 import { theme } from '@actual-app/components/theme';
-import { css } from '@emotion/css';
+import { css, keyframes } from '@emotion/css';
 import { t } from 'i18next';
 import {
   Layer,
@@ -13,20 +13,39 @@ import {
 } from 'recharts';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 
-import { getColorScale } from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { useFormat } from '#hooks/useFormat';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
+import { useReducedMotion } from '#hooks/useReducedMotion';
+
+const fadeIn = keyframes({
+  from: { opacity: 0 },
+  to: { opacity: 1 },
+});
+
+// kept invisible until the card scrolls into view
+const hiddenClass = css({ opacity: 0 });
+
+// stagger the load fade-in left-to-right, keyed off horizontal position
+function fadeInClass(fraction: number) {
+  const delay = Math.max(0, Math.min(1, fraction)) * 0.3;
+  return css({
+    animation: `${fadeIn} 0.3s ease-out ${delay}s both`,
+  });
+}
 
 type SankeyGraphNode = SankeyData['nodes'][number] & {
-  hasChildren?: boolean;
-  isCollapsed?: boolean;
-  toBudget?: number;
-  isNegative?: boolean;
-  actualValue?: number;
+  value: number;
   percentageLabel?: string;
-  targetLinks?: Array<Record<string, unknown>>;
-  sourceLinks?: Array<Record<string, unknown>>;
+  key: string;
+  color?: string;
+};
+
+type SankeyLinkPayload = {
+  source: SankeyGraphNode;
+  target: SankeyGraphNode;
+  value: number;
+  color?: string;
 };
 
 type SankeyLinkProps = {
@@ -37,17 +56,12 @@ type SankeyLinkProps = {
   targetY: number;
   targetControlX: number;
   linkWidth: number;
-  index: number;
-  payload: {
-    source: SankeyGraphNode;
-    target: SankeyGraphNode;
-    value: number;
-    isNegative?: boolean;
-  };
+  containerWidth: number;
+  phase: 'waiting' | 'animating' | 'done';
+  payload: SankeyLinkPayload;
   isHovered: boolean;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
-  color: string;
 };
 
 function SankeyLink({
@@ -58,18 +72,33 @@ function SankeyLink({
   targetY,
   targetControlX,
   linkWidth,
+  containerWidth,
+  phase,
   payload,
   isHovered,
   onMouseEnter,
   onMouseLeave,
-  color,
 }: SankeyLinkProps) {
-  const linkColor = payload.isNegative ? theme.errorText : color;
+  const reducedMotion = useReducedMotion();
+
+  if (payload.value <= 0) {
+    return null;
+  }
+  const linkColor = payload.color ?? theme.reportsGray;
   const strokeWidth = linkWidth;
   const strokeOpacity = isHovered ? 1 : 0.6;
+  // use the link's midpoint so it eases in with the columns it spans
+  const fraction = (sourceX + targetX) / 2 / containerWidth;
 
   return (
     <path
+      className={
+        reducedMotion || phase === 'done'
+          ? undefined
+          : phase === 'animating'
+            ? fadeInClass(fraction)
+            : hiddenClass
+      }
       d={`M${sourceX},${sourceY} C${sourceControlX},${sourceY} ${targetControlX},${targetY} ${targetX},${targetY}`}
       fill="none"
       stroke={linkColor}
@@ -88,35 +117,32 @@ type SankeyNodeProps = {
   y: number;
   width: number;
   height: number;
-  index: number;
   payload: SankeyGraphNode;
   containerWidth: number;
-  containerHeight: number;
+  phase: 'waiting' | 'animating' | 'done';
   showPercentages?: boolean;
+  color?: string;
 };
 function SankeyNode({
   x,
   y,
   width,
   height,
-  index: _index,
   payload,
   containerWidth,
-  containerHeight,
+  phase,
   showPercentages,
 }: SankeyNodeProps) {
   const privacyMode = usePrivacyMode();
   const format = useFormat();
+  const reducedMotion = useReducedMotion();
+
+  if (payload.value <= 0) {
+    return null;
+  }
   const isOut = x + width + 6 > containerWidth;
 
-  const fillColor = payload.isNegative ? theme.errorText : theme.reportsBlue;
-
-  const toBudget = payload.toBudget ?? 0;
-  const availableBelow = Math.max(0, containerHeight - 25 - (y + height));
-  const proportionalHeight =
-    toBudget > 0 && payload.value ? height * (toBudget / payload.value) : 0;
-  const isClamped = proportionalHeight > availableBelow;
-  const toBudgetHeight = Math.min(proportionalHeight, availableBelow);
+  const fillColor = payload.color ?? theme.reportsBlue;
 
   const renderText = (
     text: string,
@@ -140,29 +166,16 @@ function SankeyNode({
   );
 
   return (
-    <Layer>
+    <Layer
+      className={
+        reducedMotion || phase === 'done'
+          ? undefined
+          : phase === 'animating'
+            ? fadeInClass(x / containerWidth)
+            : hiddenClass
+      }
+    >
       <Rectangle x={x} y={y} width={width} height={height} fill={fillColor} />
-      {toBudgetHeight > 0 &&
-        (isClamped ? (
-          <polygon
-            points={`
-              ${x},${y + height}
-              ${x + width},${y + height}
-              ${x + width},${y + height + toBudgetHeight - 8}
-              ${x + width / 2},${y + height + toBudgetHeight}
-              ${x},${y + height + toBudgetHeight - 8}
-            `}
-            fill={theme.toBudgetPositive}
-          />
-        ) : (
-          <Rectangle
-            x={x}
-            y={y + height}
-            width={width}
-            height={toBudgetHeight}
-            fill={theme.toBudgetPositive}
-          />
-        ))}
       {renderText(payload.name || '', height / 2)}
       {renderText(
         showPercentages && payload.percentageLabel
@@ -173,24 +186,6 @@ function SankeyNode({
         0.5,
         privacyMode ? t('Redacted Script') : undefined,
       )}
-      {toBudgetHeight > 0 &&
-        renderText(
-          format(toBudget, 'financial'),
-          toBudgetHeight / 2 + 13,
-          11,
-          0.5,
-          privacyMode ? t('Redacted Script') : undefined,
-          y + height,
-        )}
-      {toBudgetHeight > 0 &&
-        renderText(
-          t('To budget'),
-          toBudgetHeight / 2,
-          13,
-          1,
-          undefined,
-          y + height,
-        )}
     </Layer>
   );
 }
@@ -199,7 +194,6 @@ type SankeyGraphProps = {
   style?: CSSProperties;
   data: SankeyData;
   showTooltip?: boolean;
-  collapsedNodes?: string[];
   showPercentages?: boolean;
 };
 export function SankeyGraph({
@@ -212,126 +206,148 @@ export function SankeyGraph({
   const format = useFormat();
   const [hoveredLinkIndex, setHoveredLinkIndex] = useState<number | null>(null);
 
-  const colors = getColorScale('qualitative');
-  const sourceColorMap = new Map(
-    [
-      ...new Set(
-        data.links
-          .filter(l => (l.source as number) !== 0)
-          .map(l => data.nodes[l.source as number]?.name),
-      ),
-    ]
-      .filter(Boolean)
-      .map((name, i) => [name, colors[i % colors.length]]),
+  // play the load animation once: wait until the card scrolls into view,
+  // run the fade-in, then stay in 'done' so later data changes (filters,
+  // date range) don't re-animate the chart in place. the viewport element
+  // is tracked as state because AutoSizer renders it on a later tick, so a
+  // useRef-based observer would attach before the element exists.
+  const [viewportEl, setViewportEl] = useState<HTMLDivElement | null>(null);
+  const [phase, setPhase] = useState<'waiting' | 'animating' | 'done'>(
+    'waiting',
   );
+
+  useEffect(() => {
+    if (!viewportEl || phase !== 'waiting') return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setPhase('animating');
+        observer.disconnect();
+      }
+    });
+    observer.observe(viewportEl);
+    return () => observer.disconnect();
+  }, [viewportEl, phase]);
+
+  useEffect(() => {
+    if (phase !== 'animating') return;
+    // 0.3s duration + 0.3s max stagger, plus buffer
+    const timer = setTimeout(() => setPhase('done'), 700);
+    return () => clearTimeout(timer);
+  }, [phase]);
 
   return (
     <Container style={style}>
       {(width, height) => (
-        <ResponsiveContainer>
-          <Sankey
-            data={data}
-            node={props => (
-              <SankeyNode
-                {...props}
-                containerWidth={width}
-                containerHeight={height}
-                showPercentages={showPercentages}
-              />
-            )}
-            link={props => (
-              <SankeyLink
-                {...props}
-                isHovered={hoveredLinkIndex === props.index}
-                onMouseEnter={() => setHoveredLinkIndex(props.index)}
-                onMouseLeave={() => setHoveredLinkIndex(null)}
-                color={
-                  sourceColorMap.get(props.payload.source.name) ??
-                  theme.reportsGray
-                }
-              />
-            )}
-            sort={false}
-            iterations={1000}
-            nodePadding={23}
-            width={width}
-            height={height}
-            margin={{
-              left: 0,
-              right: 0,
-              top: 10,
-              bottom: 25,
-            }}
-          >
-            {showTooltip && (
-              <Tooltip
-                content={({ active, payload }) => {
-                  if (!active || !payload?.length) return null;
-                  const { value = 0, name = '' } = payload[0];
-                  const tooltipInfo =
-                    hoveredLinkIndex !== null
-                      ? (
-                          data.links[hoveredLinkIndex] as {
-                            tooltipInfo?: Array<{
-                              name: string;
-                              value: number;
-                            }>;
-                          }
-                        )?.tooltipInfo
-                      : undefined;
-                  return (
-                    <div
-                      className={css({
-                        zIndex: 1000,
-                        pointerEvents: 'none',
-                        borderRadius: 2,
-                        boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-                        backgroundColor: theme.menuBackground,
-                        color: theme.menuItemText,
-                        padding: 10,
-                      })}
-                    >
-                      <div style={{ lineHeight: 1.4 }}>
-                        {name && <div style={{ marginBottom: 5 }}>{name}</div>}
-                        <div
-                          style={{
-                            fontFamily: privacyMode
-                              ? t('Redacted Script')
-                              : undefined,
-                          }}
-                        >
-                          {format(value, 'financial')}
-                        </div>
-                        {tooltipInfo && tooltipInfo.length > 0 && (
+        <div ref={setViewportEl} style={{ width: '100%', height: '100%' }}>
+          <ResponsiveContainer>
+            <Sankey
+              data={data}
+              node={props => (
+                <SankeyNode
+                  {...props}
+                  containerWidth={width}
+                  phase={phase}
+                  showPercentages={showPercentages}
+                />
+              )}
+              link={props => (
+                <SankeyLink
+                  {...props}
+                  containerWidth={width}
+                  phase={phase}
+                  isHovered={hoveredLinkIndex === props.index}
+                  onMouseEnter={() => setHoveredLinkIndex(props.index)}
+                  onMouseLeave={() => setHoveredLinkIndex(null)}
+                />
+              )}
+              sort={false}
+              iterations={128}
+              nodePadding={23}
+              width={width}
+              height={height}
+              margin={{
+                left: 0,
+                right: 0,
+                top: 10,
+                bottom: 25,
+              }}
+            >
+              {showTooltip && (
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (!active || !payload?.length) return null;
+                    const { value = 0, name = '' } = payload[0];
+                    const tooltipInfo =
+                      hoveredLinkIndex !== null
+                        ? (
+                            data.links[hoveredLinkIndex] as {
+                              tooltipInfo?: Array<{
+                                name: string;
+                                value: number;
+                              }>;
+                            }
+                          )?.tooltipInfo
+                        : undefined;
+                    return (
+                      <div
+                        className={css({
+                          zIndex: 1000,
+                          pointerEvents: 'none',
+                          borderRadius: 2,
+                          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+                          backgroundColor: theme.menuBackground,
+                          color: theme.menuItemText,
+                          padding: 10,
+                        })}
+                      >
+                        <div style={{ lineHeight: 1.4 }}>
+                          {name && (
+                            <div style={{ marginBottom: 5 }}>{name}</div>
+                          )}
                           <div
-                            style={{ marginTop: 6, fontSize: 11, opacity: 0.7 }}
+                            style={{
+                              fontFamily: privacyMode
+                                ? t('Redacted Script')
+                                : undefined,
+                            }}
                           >
-                            {tooltipInfo.map(item => (
-                              <div key={item.name}>
-                                {item.name} (
-                                <span
-                                  style={{
-                                    fontFamily: privacyMode
-                                      ? t('Redacted Script')
-                                      : undefined,
-                                  }}
-                                >
-                                  {format(item.value, 'financial')}
-                                </span>
-                                )
-                              </div>
-                            ))}
+                            {format(value, 'financial')}
                           </div>
-                        )}
+                          {tooltipInfo && tooltipInfo.length > 0 && (
+                            <div
+                              style={{
+                                marginTop: 6,
+                                fontSize: 11,
+                                opacity: 0.7,
+                              }}
+                            >
+                              {tooltipInfo.map(item => (
+                                <div key={item.name}>
+                                  {item.name} (
+                                  <span
+                                    style={{
+                                      fontFamily: privacyMode
+                                        ? t('Redacted Script')
+                                        : undefined,
+                                    }}
+                                  >
+                                    {format(item.value, 'financial')}
+                                  </span>
+                                  )
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                }}
-                isAnimationActive={false}
-              />
-            )}
-          </Sankey>
-        </ResponsiveContainer>
+                    );
+                  }}
+                  isAnimationActive={false}
+                />
+              )}
+            </Sankey>
+          </ResponsiveContainer>
+        </div>
       )}
     </Container>
   );

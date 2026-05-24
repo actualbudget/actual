@@ -87,6 +87,11 @@ import APIList from './APIList';
 "deleteSchedule"
 ]} />
 
+<APIList title="Notes" sections={[
+"getNote",
+"updateNote"
+]} />
+
 <APIList title="Misc" sections={[
 "BudgetFile",
 "initConfig",
@@ -164,17 +169,73 @@ These are types.
 
 A split transaction has several sub-transactions that split the total
 amount across them. You can create a split transaction by specifying
-an array of sub-transactions in the `subtransactions` field.
+an array of sub-transactions in the `subtransactions` field. This field is primarily used during creation and retrieval.
 
-Subtransactions can specify the following fields, and `amount` is the only required field:
+In practice, updating subtransactions individually may not work reliably. To modify split transactions, update the parent transaction and provide the full `subtransactions` array.
+
+Subtransactions are treated as full transaction records and are validated similarly to regular transactions.
+
+In practice, API creation commonly requires at least the fields below.
 
 - `amount`
+- `account`
+- `date`
+- `parent_id`
+- `is_child: true`
+
+Additionally, child transactions should explicitly set:
+
+- `is_parent`: false
+
+Optional fields include:
+
 - `category`
 - `notes`
 
 If the amounts of the sub-transactions do not equal the total amount
 of the transaction, currently the API call will succeed but an error
 will be displayed within the app.
+
+#### Parent Transaction Requirements
+
+A transaction must be marked with `is_parent: true` before subtransactions can be added.
+
+If `is_parent` is not set to `true` on the parent transaction, any provided `subtransactions` will be ignored and the transaction will be treated as a standard (non-split) transaction. No split will be created.
+
+Subtransactions are only processed when the parent transaction has `is_parent: true`.
+
+If subtransactions are provided but are invalid (e.g. missing required fields such as `account` or `date`), the API will return a validation error (HTTP 400) indicating that required transaction fields are missing.
+
+A working example of API fields:
+
+**Note:** When creating a new split transaction, you typically don't need to provide an `id` for the parent; the system will generate one. The parent transaction's `amount` should equal the sum of all subtransaction amounts.
+
+```js
+{
+  "id": "parent-id",
+  "is_parent": true,
+  "subtransactions": [
+    {
+      "amount": 142000,
+      "account": "9c1e5de4-ecf8-41c2-8a97-4a1e8bc385c9",
+      "date": "2024-08-12",
+      "parent_id": "parent-id",
+      "is_child": true,
+      "is_parent": false,
+      "category": "71376207-72f9-4b2b-ae24-0931a226f76a",
+    },
+    {
+      "amount": 150,
+      "account": "9c1e5de4-ecf8-41c2-8a97-4a1e8bc385c9",
+      "date": "2024-08-12",
+      "parent_id": "parent-id",
+      "is_child": true,
+      "is_parent": false,
+      "category": "315d3776-d2a8-4d82-8a69-648b0d80125a",
+    }
+  ]
+}
+```
 
 #### Transfers
 
@@ -384,9 +445,13 @@ let accounts = await getAccounts();
 
 #### `getCategories`
 
-<Method name="getCategories" args={[]} returns="Promise<Category[]>" />
+<Method name="getCategories" args={[{ name: 'options = {}', type: 'object?' }]} returns="Promise<Category[]>" />
 
-Get all categories.
+Get categories. By default, returns every category.
+
+The `options` object supports:
+
+- `hidden`: filter by hidden status. Pass `false` to return only visible categories, or `true` to return only hidden ones. Omit to return both.
 
 #### `createCategory`
 
@@ -439,9 +504,13 @@ There should only ever be one income category group,
 
 #### `getCategoryGroups`
 
-<Method name="getCategoryGroups" args={[]} returns="Promise<CategoryGroup[]>" />
+<Method name="getCategoryGroups" args={[{ name: 'options = {}', type: 'object?' }]} returns="Promise<CategoryGroup[]>" />
 
-Get all category groups.
+Get category groups. By default, returns every group with all of its categories nested under it.
+
+The `options` object supports:
+
+- `hidden`: filter by hidden status, applied to both groups and their nested categories. Pass `false` to return only visible groups and categories, or `true` to return only hidden ones. Omit to return both.
 
 #### `createCategoryGroup`
 
@@ -673,6 +742,22 @@ Update fields of a rule. `fields` can specify any field described in [`Schedule`
 #### `deleteSchedule`
 
 <Method name="deleteSchedule" args={[{ name: 'id', type: 'id' }]} returns="Promise<null>" />
+
+## Notes
+
+Notes can be attached to any entity (categories, budget months, etc.) by ID. They are also used to define budget templates and savings goals (e.g. `#template 250`, `#goal 1000`).
+
+#### `getNote`
+
+<Method name="getNote" args={[{ name: 'id', type: 'id' }]} returns="Promise<Note | null>" />
+
+Returns the note for the given entity ID, or `null` if no note has been set.
+
+#### `updateNote`
+
+<Method name="updateNote" args={[{ name: 'id', type: 'id' }, { name: 'note', type: 'string' }]} returns="Promise<void>" />
+
+Sets the note on the entity with the given ID. Pass an empty string to clear the note.
 
 ## Misc
 

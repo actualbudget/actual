@@ -2,7 +2,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 
-import { SyncProtoBuf } from '@actual-app/crdt';
+import { create, SyncRequestSchema, toBinary } from '@actual-app/crdt';
 import request from 'supertest';
 
 import { getAccountDb } from './account-db';
@@ -80,6 +80,16 @@ describe('/user-get-key', () => {
     expect(res.text).toBe('file-not-found');
   });
 
+  it('returns 400 for invalid fileId format', async () => {
+    const res = await request(app)
+      .post('/user-get-key')
+      .set('x-actual-token', 'valid-token')
+      .send({ fileId: 'budget@2026' });
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.text).toBe('invalid fileId');
+  });
+
   it('returns 403 when non-owner gets encryption key', async () => {
     const fileId = crypto.randomBytes(16).toString('hex');
     getAccountDb().mutate(
@@ -143,6 +153,16 @@ describe('/user-create-key', () => {
 
     expect(res.statusCode).toEqual(400);
     expect(res.text).toBe('file-not-found');
+  });
+
+  it('returns 400 for invalid fileId format', async () => {
+    const res = await request(app)
+      .post('/user-create-key')
+      .set('x-actual-token', 'valid-token')
+      .send({ fileId: 'budget@2026' });
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.text).toBe('invalid fileId');
   });
 
   it('returns 403 when non-owner creates encryption key', async () => {
@@ -297,6 +317,16 @@ describe('/reset-user-file', () => {
 
     expect(res.statusCode).toEqual(400);
     expect(res.text).toBe('User or file not found');
+  });
+
+  it('returns 400 for invalid fileId format', async () => {
+    const res = await request(app)
+      .post('/reset-user-file')
+      .set('x-actual-token', 'valid-token')
+      .send({ fileId: 'budget@2026' });
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.text).toBe('invalid fileId');
   });
 
   it('returns 403 when non-owner resets another user file', async () => {
@@ -472,9 +502,7 @@ describe('/upload-user-file', () => {
       ],
     );
 
-    fs.writeFile(getPathForUserFile(fileId), oldFileContent, err => {
-      if (err) throw err;
-    });
+    fs.writeFileSync(getPathForUserFile(fileId), oldFileContent);
 
     const res = await request(app)
       .post('/upload-user-file')
@@ -850,6 +878,16 @@ describe('/update-user-filename', () => {
     expect(res.text).toBe('file-not-found');
   });
 
+  it('returns 400 for invalid fileId format', async () => {
+    const res = await request(app)
+      .post('/update-user-filename')
+      .set('x-actual-token', 'valid-token')
+      .send({ fileId: 'budget@2026', name: 'new-filename' });
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.text).toBe('invalid fileId');
+  });
+
   it('successfully updates the filename', async () => {
     const fileId = crypto.randomBytes(16).toString('hex');
     const oldName = 'old-filename';
@@ -1033,6 +1071,16 @@ describe('/get-user-file-info', () => {
     expect(res.body).toEqual({ status: 'error', reason: 'file-not-found' });
   });
 
+  it('returns 400 for invalid fileId format', async () => {
+    const res = await request(app)
+      .get('/get-user-file-info')
+      .set('x-actual-token', 'valid-token')
+      .set('x-actual-file-id', 'budget@2026');
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.text).toEqual('invalid fileId');
+  });
+
   it('returns error if the user is not authenticated', async () => {
     // Simulate an unauthenticated request by not setting the necessary headers
     const res = await request(app).get('/get-user-file-info');
@@ -1125,6 +1173,16 @@ describe('/delete-user-file', () => {
 
     expect(res.statusCode).toEqual(400);
     expect(res.text).toEqual('file-not-found');
+  });
+
+  it('returns 400 for invalid fileId format', async () => {
+    const res = await request(app)
+      .post('/delete-user-file')
+      .set('x-actual-token', 'valid-token')
+      .send({ fileId: 'budget@2026' });
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.text).toEqual('invalid fileId');
   });
 
   it('marks the file as deleted', async () => {
@@ -1282,7 +1340,9 @@ describe('/sync', () => {
       'group-id',
       'key-id',
     );
-    syncRequest.setSince(undefined);
+    // proto3 default-value semantics: '' is omitted on the wire and
+    // decoded back to '', which the handler falsy-checks as missing.
+    syncRequest.since = '';
 
     const res = await sendSyncRequest(syncRequest);
 
@@ -1427,17 +1487,16 @@ function addMockFile(
 }
 
 function createMinimalSyncRequest(fileId, groupId, keyId) {
-  const syncRequest = new SyncProtoBuf.SyncRequest();
-  syncRequest.setFileid(fileId);
-  syncRequest.setGroupid(groupId);
-  syncRequest.setKeyid(keyId);
-  syncRequest.setSince('2024-01-01T00:00:00.000Z');
-  syncRequest.setMessagesList([]);
-  return syncRequest;
+  return create(SyncRequestSchema, {
+    fileId,
+    groupId,
+    keyId,
+    since: '2024-01-01T00:00:00.000Z',
+  });
 }
 
 async function sendSyncRequest(syncRequest, token = 'valid-token') {
-  const serializedRequest = syncRequest.serializeBinary();
+  const serializedRequest = toBinary(SyncRequestSchema, syncRequest);
   // Convert Uint8Array to Buffer
   const bufferRequest = Buffer.from(serializedRequest);
 

@@ -250,7 +250,7 @@ export function NetWorthGraph({
   const privacyMode = usePrivacyMode();
   const id = useId();
   const format = useFormat();
-  const animationProps = useRechartsAnimation({ isAnimationActive: false });
+  const animationProps = useRechartsAnimation({ animationDuration: 1000 });
   const [isTooltipActive, setIsTooltipActive] = useState(false);
   const [hoveredAccountId, setHoveredAccountId] = useState<string | null>(null);
 

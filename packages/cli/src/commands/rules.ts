@@ -15,10 +15,14 @@ export function registerRulesCommand(program: Command) {
     .description('List all rules')
     .action(async () => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const result = await api.getRules();
-        printOutput(result, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const result = await api.getRules();
+          printOutput(result, opts.format);
+        },
+        { mutates: false },
+      );
     });
 
   rules
@@ -26,10 +30,14 @@ export function registerRulesCommand(program: Command) {
     .description('List rules for a specific payee')
     .action(async (payeeId: string) => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const result = await api.getPayeeRules(payeeId);
-        printOutput(result, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const result = await api.getPayeeRules(payeeId);
+          printOutput(result, opts.format);
+        },
+        { mutates: false },
+      );
     });
 
   rules
@@ -39,13 +47,17 @@ export function registerRulesCommand(program: Command) {
     .option('--file <path>', 'Read rule from JSON file (use - for stdin)')
     .action(async cmdOpts => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const rule = readJsonInput(cmdOpts) as Parameters<
-          typeof api.createRule
-        >[0];
-        const id = await api.createRule(rule);
-        printOutput({ id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const rule = readJsonInput(cmdOpts) as Parameters<
+            typeof api.createRule
+          >[0];
+          const id = await api.createRule(rule);
+          printOutput({ id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 
   rules
@@ -55,13 +67,17 @@ export function registerRulesCommand(program: Command) {
     .option('--file <path>', 'Read rule from JSON file (use - for stdin)')
     .action(async cmdOpts => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        const rule = readJsonInput(cmdOpts) as Parameters<
-          typeof api.updateRule
-        >[0];
-        await api.updateRule(rule);
-        printOutput({ success: true }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          const rule = readJsonInput(cmdOpts) as Parameters<
+            typeof api.updateRule
+          >[0];
+          await api.updateRule(rule);
+          printOutput({ success: true }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 
   rules
@@ -69,9 +85,13 @@ export function registerRulesCommand(program: Command) {
     .description('Delete a rule')
     .action(async (id: string) => {
       const opts = program.opts();
-      await withConnection(opts, async () => {
-        await api.deleteRule(id);
-        printOutput({ success: true, id }, opts.format);
-      });
+      await withConnection(
+        opts,
+        async () => {
+          await api.deleteRule(id);
+          printOutput({ success: true, id }, opts.format);
+        },
+        { mutates: true },
+      );
     });
 }

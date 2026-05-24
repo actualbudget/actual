@@ -43,13 +43,16 @@ Configuration is resolved in this order (highest priority first):
 
 ### Environment Variables
 
-| Variable               | Description                                   |
-| ---------------------- | --------------------------------------------- |
-| `ACTUAL_SERVER_URL`    | URL of the Actual sync server (required)      |
-| `ACTUAL_PASSWORD`      | Server password (required unless using token) |
-| `ACTUAL_SESSION_TOKEN` | Session token (alternative to password)       |
-| `ACTUAL_SYNC_ID`       | Budget Sync ID (required for most commands)   |
-| `ACTUAL_DATA_DIR`      | Local directory for cached budget data        |
+| Variable               | Description                                           |
+| ---------------------- | ----------------------------------------------------- |
+| `ACTUAL_SERVER_URL`    | URL of the Actual sync server (required)              |
+| `ACTUAL_PASSWORD`      | Server password (required unless using token)         |
+| `ACTUAL_SESSION_TOKEN` | Session token (alternative to password)               |
+| `ACTUAL_SYNC_ID`       | Budget Sync ID (required for most commands)           |
+| `ACTUAL_DATA_DIR`      | Local directory for cached budget data                |
+| `ACTUAL_CACHE_TTL`     | Cache TTL in seconds (default: 60)                    |
+| `ACTUAL_LOCK_TIMEOUT`  | Budget-dir lock wait timeout in seconds (default: 10) |
+| `ACTUAL_NO_LOCK`       | Set to `1` to disable budget-dir locking              |
 
 ### Config File
 
@@ -59,7 +62,10 @@ Create an `.actualrc.json` (or `.actualrc`, `.actualrc.yaml`, `actual.config.js`
 {
   "serverUrl": "http://localhost:5006",
   "password": "your-password",
-  "syncId": "1cfdbb80-6274-49bf-b0c2-737235a4c81f"
+  "syncId": "1cfdbb80-6274-49bf-b0c2-737235a4c81f",
+  "cacheTtl": 60,
+  "lockTimeout": 10,
+  "noLock": false
 }
 ```
 
@@ -74,6 +80,11 @@ Create an `.actualrc.json` (or `.actualrc`, `.actualrc.yaml`, `actual.config.js`
 | `--session-token <token>` | Session token                                   |
 | `--sync-id <id>`          | Budget Sync ID                                  |
 | `--data-dir <path>`       | Data directory                                  |
+| `--cache-ttl <seconds>`   | Cache TTL; `0` disables caching (default: 60)   |
+| `--refresh`               | Force a sync on this call, ignoring the cache   |
+| `--no-cache`              | Alias for `--refresh`                           |
+| `--lock-timeout <secs>`   | Lock wait timeout (default: 10)                 |
+| `--no-lock`               | Disable budget-dir locking (use with care)      |
 | `--format <format>`       | Output format: `json` (default), `table`, `csv` |
 | `--verbose`               | Show informational messages                     |
 
@@ -92,6 +103,7 @@ Create an `.actualrc.json` (or `.actualrc`, `.actualrc.yaml`, `actual.config.js`
 | `schedules`       | Manage scheduled transactions  |
 | `query`           | Run an ActualQL query          |
 | `server`          | Server utilities and lookups   |
+| `sync`            | Refresh or inspect local cache |
 
 Run `actual <command> --help` for subcommands and options.
 
@@ -135,21 +147,31 @@ All monetary amounts are **integer cents** when passed as input (flags, JSON):
 
 - **Split transactions:** When summing or counting transactions, filter `"is_parent": false` to avoid double-counting. A split parent holds the total amount, and its children hold the individual parts — including both would count the total twice.
 
-- **Avoid rapid sequential requests:** Each CLI invocation opens a new server connection. Running queries in a tight loop (e.g. one per month) may trigger rate limiting or authentication failures. Instead, fetch all data in a single query with a date range filter and process locally:
+- **Rapid sequential requests:** The CLI caches the budget locally (see [Caching](#caching)), so read-heavy scripts no longer need a single-query workaround by default. For very chatty scripts, run `actual sync` once and then use a long `--cache-ttl` for reads:
 
   ```bash
-  # Good: single query for the full year
-  actual query run --table transactions \
-    --filter '{"$and":[{"date":{"$gte":"2025-01-01"}},{"date":{"$lte":"2025-12-31"}}]}' \
-    --limit 5000
-
-  # Bad: one query per month in a loop (may fail with auth errors)
-  for month in 01 02 03 ...; do actual query run ...; done
+  actual sync
+  actual --cache-ttl 3600 query run ...
+  actual --cache-ttl 3600 accounts list
   ```
 
 - **Uncategorized transactions:** `category.name` is `null` for transactions without a category. Account for this when filtering or grouping by category.
 
 - **No date sub-fields in AQL:** `date.month`, `date.year`, etc. are not supported as query fields. To group by month, fetch raw transactions with a date range filter and aggregate locally in a script.
+
+## Caching
+
+The CLI keeps a local copy of your budget so repeated commands don't hit the sync server on every call. Within the TTL (default `60` seconds), read commands (`list`, `balance`, `query run`, …) reuse the cached budget without a network round-trip. Write commands (`add`, `update`, `set-amount`, …) always sync with the server before and after the write.
+
+- `actual sync` — refresh the cache now.
+- `actual sync --status` — show how stale the local cache is.
+- `actual sync --clear` — delete the local cache; the next command re-downloads.
+- `--refresh` (or `--no-cache`) — force a sync on a single call.
+- `--cache-ttl <seconds>` — override the TTL for a single call (use `0` to disable caching).
+
+### Concurrency
+
+The CLI takes a shared lock for reads and an exclusive lock for writes on the per-budget cache directory. Many parallel reads are safe; writes serialize. If another CLI process is holding the lock, subsequent invocations wait up to `--lock-timeout` seconds (default `10`) before failing with an error. Pass `--no-lock` to opt out in trusted single-process setups.
 
 ## Running Locally (Development)
 

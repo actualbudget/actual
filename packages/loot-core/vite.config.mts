@@ -51,13 +51,7 @@ export default defineConfig(({ mode }) => {
         external: [],
       },
       sourcemap: true,
-      minify: isDev ? false : 'terser',
-      terserOptions: {
-        compress: {
-          drop_debugger: false,
-        },
-        mangle: false,
-      },
+      minify: false,
     },
     define: {
       'process.env': '{}',
@@ -68,7 +62,6 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       peggyLoader(),
-      // https://github.com/davidmyersdev/vite-plugin-node-polyfills/issues/142
       nodePolyfills({
         include: [
           'process',

@@ -19,6 +19,8 @@ type BudgetGroup = {
   leaderPort: CoordinatorPort;
   followers: Set<CoordinatorPort>;
   backendConnected: boolean;
+  pendingConnect: boolean;
+  restoreBudgetId: string | null;
   requestToPort: Map<string, CoordinatorPort>;
   requestNames: Map<string, string>;
   requestBudgetIds: Map<string, string>;
@@ -89,10 +91,21 @@ export function createCoordinator({
       leaderPort,
       followers: new Set(),
       backendConnected: false,
+      pendingConnect: false,
+      restoreBudgetId: null,
       requestToPort: new Map(),
       requestNames: new Map(),
       requestBudgetIds: new Map(),
     };
+  }
+
+  function broadcastConnect(budgetId: string) {
+    lastAppInitFailure = null;
+    const connectMsg = { type: 'connect' };
+    broadcastToAllInGroup(budgetId, connectMsg);
+    for (const port of unassignedPorts) {
+      port.postMessage(connectMsg);
+    }
   }
 
   function logState(action: string) {
@@ -103,6 +116,110 @@ export function createCoordinator({
     console.log(
       `[SharedWorker] ${action} — ${connectedPorts.length} tab(s), ${unassignedPorts.size} unassigned, groups: [${groups.join(', ') || 'none'}]`,
     );
+  }
+
+  function isTrackedPort(port: CoordinatorPort) {
+    return connectedPorts.includes(port);
+  }
+
+  function ensureTrackedPort(port: CoordinatorPort) {
+    if (!isTrackedPort(port)) {
+      connectedPorts.push(port);
+    }
+  }
+
+  function hasConnectedBackend() {
+    for (const [, group] of budgetGroups) {
+      if (group.backendConnected) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function isGroupMember(group: BudgetGroup, port: CoordinatorPort) {
+    return group.leaderPort === port || group.followers.has(port);
+  }
+
+  function movePortToUnassigned(port: CoordinatorPort) {
+    const prevBudget = portToBudget.get(port);
+    if (prevBudget) {
+      removePortFromGroup(port, prevBudget);
+    }
+
+    portToBudget.delete(port);
+    unassignedPorts.add(port);
+  }
+
+  function restoreUnassignedPort(port: CoordinatorPort) {
+    movePortToUnassigned(port);
+    port.postMessage({ type: '__role-change', role: 'UNASSIGNED' });
+
+    if (hasConnectedBackend()) {
+      port.postMessage({ type: 'connect' });
+    }
+  }
+
+  function resumePort(port: CoordinatorPort, budgetId?: string | null) {
+    const normalizedBudgetId = budgetId || null;
+    const wasTracked = isTrackedPort(port);
+    const currentBudget = portToBudget.get(port);
+    const currentGroup = currentBudget ? budgetGroups.get(currentBudget) : null;
+    const alreadyAttached =
+      !!normalizedBudgetId &&
+      currentBudget === normalizedBudgetId &&
+      !!currentGroup &&
+      isGroupMember(currentGroup, port);
+    const alreadyUnassigned =
+      !normalizedBudgetId &&
+      !currentBudget &&
+      wasTracked &&
+      unassignedPorts.has(port);
+    const alreadyOnTemporaryGroup =
+      !normalizedBudgetId &&
+      !!currentBudget &&
+      !!currentGroup &&
+      currentBudget.startsWith('__') &&
+      isGroupMember(currentGroup, port);
+
+    ensureTrackedPort(port);
+    pendingPongs.delete(port);
+
+    if (alreadyAttached) {
+      logState(`Tab resumed on budget "${normalizedBudgetId}"`);
+      return;
+    }
+
+    if (alreadyUnassigned) {
+      logState('Tab resume confirmed while unassigned');
+      return;
+    }
+
+    if (alreadyOnTemporaryGroup) {
+      logState(`Tab resumed on coordinator group "${currentBudget}"`);
+      return;
+    }
+
+    if (!normalizedBudgetId) {
+      if (budgetGroups.size === 0) {
+        electLeader('__lobby', port);
+        logState('Tab resumed into lobby');
+      } else {
+        restoreUnassignedPort(port);
+        logState('Tab resumed as unassigned');
+      }
+      return;
+    }
+
+    const existingGroup = budgetGroups.get(normalizedBudgetId);
+    if (existingGroup) {
+      addFollower(normalizedBudgetId, port);
+      logState(`Tab resumed on budget "${normalizedBudgetId}" as follower`);
+      return;
+    }
+
+    electLeader(normalizedBudgetId, port, normalizedBudgetId);
+    logState(`Tab resumed on budget "${normalizedBudgetId}" as leader`);
   }
 
   function broadcastToGroup(
@@ -194,9 +311,14 @@ export function createCoordinator({
     } else {
       group.leaderPort = port;
       group.backendConnected = false;
+      group.pendingConnect = false;
+      group.restoreBudgetId = budgetToRestore || null;
       group.requestToPort.clear();
       group.requestNames.clear();
       group.requestBudgetIds.clear();
+    }
+    if (!group.restoreBudgetId && budgetToRestore) {
+      group.restoreBudgetId = budgetToRestore;
     }
     const prevBudget = portToBudget.get(port);
     if (prevBudget && prevBudget !== budgetId) {
@@ -323,6 +445,15 @@ export function createCoordinator({
       );
     }
 
+    if (oldGroup.restoreBudgetId === newBudgetId) {
+      oldGroup.restoreBudgetId = null;
+      if (oldGroup.pendingConnect) {
+        oldGroup.backendConnected = true;
+        oldGroup.pendingConnect = false;
+        broadcastConnect(newBudgetId);
+      }
+    }
+
     logState(`Budget "${newBudgetId}" ready`);
   }
 
@@ -401,26 +532,39 @@ export function createCoordinator({
           return;
         }
 
+        if (msg.type === '__resume-tab') {
+          resumePort(
+            port,
+            typeof msg.budgetId === 'string' ? msg.budgetId : null,
+          );
+          return;
+        }
+
         if (msg.type === '__heartbeat-pong') {
           pendingPongs.delete(port);
           return;
+        }
+
+        // Drop the cache once the client has surfaced the failure, so a
+        // subsequent init can re-attempt. Falls through to the leader so
+        // the Worker still stops its retry interval.
+        if (msg.name === '__app-init-failure-acknowledged') {
+          lastAppInitFailure = null;
         }
 
         // ── Initialization ─────────────────────────────────────────
 
         if (msg.type === 'init') {
           cachedInitMsg = msg;
+          // The leader that produced the failure is gone, so the cache
+          // can't recover — drop it and let this tab attempt a fresh init.
+          if (lastAppInitFailure && budgetGroups.size === 0) {
+            lastAppInitFailure = null;
+          }
           if (lastAppInitFailure) {
             port.postMessage(lastAppInitFailure);
           } else {
-            let anyConnected = false;
-            for (const [, g] of budgetGroups) {
-              if (g.backendConnected) {
-                anyConnected = true;
-                break;
-              }
-            }
-            if (anyConnected) {
+            if (hasConnectedBackend()) {
               port.postMessage({ type: '__role-change', role: 'UNASSIGNED' });
               port.postMessage({ type: 'connect' });
             } else if (budgetGroups.size > 0) {
@@ -475,10 +619,11 @@ export function createCoordinator({
               group.requestNames.delete(workerMsg.id as string);
             }
           } else if (workerMsg.type === 'connect') {
-            group.backendConnected = true;
-            broadcastToAllInGroup(portBudget!, workerMsg);
-            for (const p of unassignedPorts) {
-              p.postMessage(workerMsg);
+            if (group.restoreBudgetId) {
+              group.pendingConnect = true;
+            } else {
+              group.backendConnected = true;
+              broadcastConnect(portBudget!);
             }
           } else if (workerMsg.type === 'app-init-failure') {
             lastAppInitFailure = workerMsg;
@@ -493,6 +638,7 @@ export function createCoordinator({
 
         if (msg.type === '__track-restore') {
           if (group) {
+            group.restoreBudgetId = msg.budgetId as string;
             group.requestToPort.set(msg.requestId as string, port);
             group.requestNames.set(msg.requestId as string, 'load-budget');
             group.requestBudgetIds.set(
@@ -689,7 +835,7 @@ export function createCoordinator({
         // ── Default: track and forward to leader ───────────────────
 
         let targetGroup = group;
-        if (!targetGroup) {
+        if (!targetGroup && unassignedPorts.has(port) && isTrackedPort(port)) {
           for (const [, g] of budgetGroups) {
             if (g.backendConnected) {
               targetGroup = g;

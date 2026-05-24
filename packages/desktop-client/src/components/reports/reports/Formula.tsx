@@ -27,7 +27,7 @@ import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 
 const FormulaEditor = lazy(() =>
-  import('../../formula/FormulaEditor').then(module => ({
+  import('#components/formula/FormulaEditor').then(module => ({
     default: module.FormulaEditor,
   })),
 );

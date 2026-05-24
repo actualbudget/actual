@@ -1,0 +1,48 @@
+name: CRDT version bump check
+
+on:
+  pull_request:
+    paths:
+      - 'packages/crdt/**'
+
+permissions:
+  contents: read
+
+jobs:
+  check-version-bump:
+    runs-on: ubuntu-latest
+    name: Ensure @actual-app/crdt version is bumped
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify version bump
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+
+          if ! git cat-file -e "origin/${BASE_REF}:packages/crdt/package.json" 2>/dev/null; then
+            echo "packages/crdt/package.json does not exist on the base branch; skipping."
+            exit 0
+          fi
+
+          BASE_VERSION=$(git show "origin/${BASE_REF}:packages/crdt/package.json" | jq -r .version)
+          HEAD_VERSION=$(jq -r .version packages/crdt/package.json)
+          echo "Base version: $BASE_VERSION"
+          echo "Head version: $HEAD_VERSION"
+
+          if [ "$BASE_VERSION" = "$HEAD_VERSION" ]; then
+            echo "::error file=packages/crdt/package.json::Files in packages/crdt/ were modified but the @actual-app/crdt version was not bumped. Please update the \"version\" field in packages/crdt/package.json."
+            exit 1
+          fi
+
+          HIGHEST=$(printf '%s\n%s\n' "$BASE_VERSION" "$HEAD_VERSION" | sort -V | tail -n1)
+          if [ "$HIGHEST" != "$HEAD_VERSION" ]; then
+            echo "::error file=packages/crdt/package.json::The @actual-app/crdt version ($HEAD_VERSION) must be greater than the base version ($BASE_VERSION)."
+            exit 1
+          fi
+
+          echo "Version bumped from $BASE_VERSION to $HEAD_VERSION."

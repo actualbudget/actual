@@ -10,9 +10,21 @@
     "declarationMap": true,
     "outDir": "build",
     "tsBuildInfoFile": "build/.tsbuildinfo",
-    "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
+    "plugins": [
+      {
+        "name": "typescript-strict-plugin",
+        "paths": ["."]
+      }
+    ]
   },
-  "references": [{ "path": "../crdt" }],
+  "references": [
+    {
+      "path": "../crdt"
+    },
+    {
+      "path": "../desktop-client"
+    }
+  ],
   "include": [
     "src/**/*",
     "migrations/**/*",

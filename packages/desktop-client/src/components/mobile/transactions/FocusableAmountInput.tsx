@@ -79,9 +79,14 @@ const AmountInput = memo(function AmountInput({
     }
   };
 
-  const applyText = () => {
-    const parsed = currencyToAmount(text) || 0;
-    const newValue = editing ? parsed : value;
+  // Read from the DOM, not React state: onChange state updates flush
+  // asynchronously, so an onBlur/onKeyUp fired by the user's next action
+  // can see stale `text=''` and save 0 instead of the typed amount.
+  const applyText = (rawInput?: string) => {
+    const domText = rawInput ?? inputRef.current?.value ?? text;
+    const parsed = currencyToAmount(domText) || 0;
+    const hasPendingInput = domText !== '' || editing;
+    const newValue = hasPendingInput ? parsed : value;
 
     setValue(Math.abs(newValue));
     setEditing(false);
@@ -96,7 +101,7 @@ const AmountInput = memo(function AmountInput({
 
   const onUpdate = (value: string) => {
     const originalAmount = Math.abs(props.value);
-    const amount = applyText();
+    const amount = applyText(value);
     if (amount !== originalAmount) {
       props.onUpdate?.(value);
       props.onUpdateAmount?.(amount);
@@ -155,7 +160,7 @@ const AmountInput = memo(function AmountInput({
         }}
         data-testid="amount-input-text"
       >
-        {editing ? text : amountToCurrency(value)}
+        {editing ? text || amountToCurrency(0) : amountToCurrency(value)}
       </Text>
     </View>
   );
@@ -185,9 +190,11 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
   buttonProps,
   onFocus,
   onBlur,
+  onChangeValue,
   ...props
 }: FocusableAmountInputProps) {
   const [isNegative, setIsNegative] = useState(true);
+  const [liveValue, setLiveValue] = useState(Math.abs(value));
 
   const maybeApplyNegative = (amount: number, negative: boolean) => {
     const absValue = Math.abs(amount);
@@ -197,6 +204,15 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
   const onUpdateAmount = (amount: number, negative: boolean) => {
     props.onUpdateAmount?.(maybeApplyNegative(amount, negative));
   };
+
+  const handleChangeValue = (text: string) => {
+    setLiveValue(currencyToAmount(text) || 0);
+    onChangeValue?.(text);
+  };
+
+  useEffect(() => {
+    setLiveValue(Math.abs(value));
+  }, [value]);
 
   useEffect(() => {
     if (sign) {
@@ -222,10 +238,11 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
         value={value}
         onFocus={onFocus}
         onBlur={onBlur}
+        onChangeValue={handleChangeValue}
         onUpdateAmount={amount => onUpdateAmount(amount, isNegative)}
         focused={focused && !disabled}
         style={{
-          ...makeAmountFullStyle(value, {
+          ...makeAmountFullStyle(maybeApplyNegative(liveValue, isNegative), {
             zeroColor: isNegative ? theme.numberNegative : theme.numberNeutral,
             positiveColor: theme.numberPositive,
             negativeColor: theme.numberNegative,

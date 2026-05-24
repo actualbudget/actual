@@ -13,7 +13,7 @@ export const PercentageAutomationReadOnly = ({
 }: PercentageAutomationReadOnlyProps) => {
   const { t } = useTranslation();
 
-  if (template.category === 'total') {
+  if (template.category === 'all income') {
     return template.previous ? (
       <Trans>
         Budget {{ percent: template.percent }}% of total income last month
@@ -25,7 +25,7 @@ export const PercentageAutomationReadOnly = ({
     );
   }
 
-  if (template.category === 'to-budget') {
+  if (template.category === 'available funds') {
     return template.previous ? (
       <Trans>
         Budget {{ percent: template.percent }}% of available funds to budget

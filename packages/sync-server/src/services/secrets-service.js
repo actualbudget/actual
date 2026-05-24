@@ -17,6 +17,8 @@ export const SecretName = {
   pluggyai_itemIds: 'pluggyai_itemIds',
   akahu_userToken: 'akahu_userToken',
   akahu_appToken: 'akahu_appToken',
+  enablebanking_applicationId: 'enablebanking_applicationId',
+  enablebanking_secretKey: 'enablebanking_secretKey',
 };
 
 class SecretsDb {

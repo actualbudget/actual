@@ -42,6 +42,9 @@ bundle.desktop.js.map
 bundle.mobile.js
 bundle.mobile.js.map
 
+# Python virtualenv (Electron CI provisions one at the repo root for setuptools)
+.venv/
+
 # Yarn
 .pnp.*
 .yarn/*

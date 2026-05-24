@@ -19,12 +19,14 @@ type Notification = {
 export const TEMPLATE_PREFIX = '#template';
 export const GOAL_PREFIX = '#goal';
 
-export async function storeNoteTemplates(): Promise<void> {
-  const categoriesWithTemplates = await getCategoriesWithTemplates();
+export async function storeNoteTemplates(
+  categoryIds?: string[],
+): Promise<void> {
+  const categoriesWithTemplates = await getCategoriesWithTemplates(categoryIds);
 
   await storeTemplates({ categoriesWithTemplates, source: 'notes' });
 
-  await resetCategoryGoalDefsWithNoTemplates();
+  await resetCategoryGoalDefsWithNoTemplates(categoryIds);
 }
 
 type CategoryWithTemplateNotes = {
@@ -71,11 +73,11 @@ export async function checkTemplateNotes(): Promise<Notification> {
   };
 }
 
-async function getCategoriesWithTemplates(): Promise<
-  CategoryWithTemplateNotes[]
-> {
+async function getCategoriesWithTemplates(
+  categoryIds?: string[],
+): Promise<CategoryWithTemplateNotes[]> {
   const templatesForCategory: CategoryWithTemplateNotes[] = [];
-  const templateNotes = await getCategoriesWithTemplateNotes();
+  const templateNotes = await getCategoriesWithTemplateNotes(categoryIds);
 
   templateNotes.forEach(({ id, name, note }: CategoryWithTemplateNote) => {
     if (!note) {
@@ -143,7 +145,10 @@ async function getCategoriesWithTemplates(): Promise<
 }
 
 function prefixFromPriority(priority: number | null): string {
-  return priority === null ? TEMPLATE_PREFIX : `${TEMPLATE_PREFIX}-${priority}`;
+  // Priority 0 is the parser's "unset" default and serializes without a suffix.
+  return priority === null || priority === 0
+    ? TEMPLATE_PREFIX
+    : `${TEMPLATE_PREFIX}-${priority}`;
 }
 
 export async function unparse(templates: Template[]): Promise<string> {
@@ -297,12 +302,7 @@ function periodToString(p: {
   period: 'day' | 'week' | 'month' | 'year';
   amount: number;
 }): string {
-  const { period, amount } = p;
-  if (amount === 1) {
-    return period; // singular
-  }
-  // pluralize simple
-  return `${amount} ${period}s`;
+  return `${p.amount} ${p.period}s`;
 }
 
 function repeatToString(annual?: boolean, repeat?: number): string | null {

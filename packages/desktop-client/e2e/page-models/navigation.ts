@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 import { AccountPage } from './account-page';
 import { BankSyncPage } from './bank-sync-page';
@@ -13,6 +13,55 @@ type AccountEntry = {
   balance: number;
   offBudget: boolean;
 };
+
+/**
+ * Click a React Aria <Button> via a programmatic browser-side click.
+ *
+ * React Aria components re-render on focus state changes (`data-focused`,
+ * `data-focus-visible`). Under parallel CI load, Playwright's `.click()`
+ * stability check often sees the DOM node get detached and re-mounted
+ * mid-action, leading to "element was detached from the DOM, retrying"
+ * loops that exhaust the test timeout.
+ *
+ * `dispatchEvent('click')` is documented to skip stability checks but
+ * dispatches a generic `Event` that React Aria's pointer-based onPress
+ * does not respond to, so it doesn't actually activate the button.
+ *
+ * Calling `.click()` inside `page.evaluate` runs synchronously in the
+ * browser: querySelector + click happen in one JS task with no CDP
+ * roundtrip in between, so React has no chance to re-render between
+ * resolution and click. HTMLElement.click() dispatches a real MouseEvent
+ * that React Aria handles correctly.
+ */
+async function clickReactAriaButton(locator: Locator): Promise<void> {
+  await locator.evaluate((el: HTMLElement) => el.click());
+}
+
+/**
+ * Fill a React-controlled input via the native value setter + input event.
+ *
+ * React's controlled inputs respond to `input` events to update state.
+ * Playwright's `.fill()` clears + types, dispatching multiple events that
+ * each cause React Aria's input wrappers to re-render. Under load this
+ * loops indefinitely as `.fill()`'s editability check keeps seeing
+ * detached nodes.
+ *
+ * The native value setter pattern (https://stackoverflow.com/q/23892547)
+ * sets the value once and dispatches a single input event. React
+ * processes one state update and one re-render, then the input is stable.
+ */
+async function fillReactInput(locator: Locator, value: string): Promise<void> {
+  await locator.evaluate((el, val) => {
+    const input = el as HTMLInputElement;
+    // oxlint-disable-next-line typescript/unbound-method -- documented React-controlled-input pattern
+    const setter = Object.getOwnPropertyDescriptor(
+      HTMLInputElement.prototype,
+      'value',
+    )?.set;
+    setter?.call(input, val);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  }, value);
+}
 
 export class Navigation {
   readonly page: Page;
@@ -95,22 +144,34 @@ export class Navigation {
 
   async createAccount(data: AccountEntry) {
     await this.page.getByRole('button', { name: 'Add account' }).click();
-    await this.page
-      .getByRole('button', { name: 'Create a local account' })
-      .click();
 
-    // Fill the form
-    await this.page.getByLabel('Name:').fill(data.name);
-    await this.page.getByLabel('Balance:').fill(String(data.balance));
+    // Clicking "Create a local account" pushes a second modal whose
+    // heading is "Create Local Account". Wait for that heading to
+    // confirm the form is fully mounted before touching any fields.
+    await clickReactAriaButton(
+      this.page.getByRole('button', { name: 'Create a local account' }),
+    );
+    await this.page
+      .getByRole('heading', { name: 'Create Local Account' })
+      .waitFor({ state: 'visible' });
+
+    await fillReactInput(this.page.getByLabel('Name'), data.name);
+    await fillReactInput(this.page.getByLabel('Balance'), String(data.balance));
 
     if (data.offBudget) {
       await this.page.getByLabel('Off budget').click();
     }
 
-    await this.page
-      .getByRole('button', { name: 'Create', exact: true })
-      .click();
-    return new AccountPage(this.page);
+    await clickReactAriaButton(
+      this.page.getByRole('button', { name: 'Create', exact: true }),
+    );
+
+    const accountPage = new AccountPage(this.page);
+    await accountPage.waitFor();
+    if (data.balance !== 0) {
+      await accountPage.transactionTableRow.first().waitFor();
+    }
+    return accountPage;
   }
 
   async clickOnNoServer() {
