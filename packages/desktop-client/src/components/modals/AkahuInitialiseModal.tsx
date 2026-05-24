@@ -104,26 +104,26 @@ export const AkahuInitialiseModal = ({
             </Text>
 
             <FormField>
-              <FormLabel title={t('User Token:')} htmlFor="userToken-field" />
-              <Input
-                id="userToken-field"
-                type="password"
-                value={userToken}
-                onChangeValue={value => {
-                  setUserToken(value);
-                  setIsValid(true);
-                }}
-              />
-            </FormField>
-
-            <FormField>
-              <FormLabel title={t('App Token:')} htmlFor="appToken-field" />
+              <FormLabel title={t('App ID Token:')} htmlFor="appToken-field" />
               <Input
                 id="appToken-field"
                 type="password"
                 value={appToken}
                 onChangeValue={value => {
                   setAppToken(value);
+                  setIsValid(true);
+                }}
+              />
+            </FormField>
+
+            <FormField>
+              <FormLabel title={t('User Access Token:')} htmlFor="userToken-field" />
+              <Input
+                id="userToken-field"
+                type="password"
+                value={userToken}
+                onChangeValue={value => {
+                  setUserToken(value);
                   setIsValid(true);
                 }}
               />
