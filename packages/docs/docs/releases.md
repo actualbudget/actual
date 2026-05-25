@@ -4,7 +4,27 @@
 
 Release date: 2026-06-01
 
-- TODO: Add release highlights
+This release adds new reports, a new bank sync provider, a UI for budget automations (goal templates) and releases custom themes as stable, as well as numerous other fixes.
+
+- Crossover report released as a first-party feature
+- Custom themes released as a first-party feature
+- Redesigned bank sync configuration and account linking process
+- Add Tag autocomplete when editing transaction notes
+- Experimental: Add a UI for budget automations (goal templates)
+- Experimental: Add Enable Banking integration as a bank sync provider
+- Experimental: Add Balance Forecast report
+
+:::warning Deprecation
+
+Starting this release, rule action templating is deprecated in favour of formulae and will be removed in a future release. For more information, see [Rule Action Templating](/docs/experimental/rule-templating).
+
+:::
+
+:::warning Docker
+
+The `edge` tag has been renamed to `nightly`. If you follow pre-release images, please update your Docker configuration to pull `:nightly` or `:nightly-alpine`.
+
+:::
 
 **Docker Tag: 26.6.0**
 
