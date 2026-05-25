@@ -66,4 +66,21 @@ test.describe('Budget', () => {
     expect(await accountPage.accountName.textContent()).toMatch('All Accounts');
     await page.getByRole('button', { name: 'Back' }).click();
   });
+
+  test('scroll position is restored when navigating back from spent transactions page', async () => {
+    await budgetPage.scrollToBottom();
+    const scrollTopBeforeViewingSpent = await budgetPage.getScrollTop();
+    expect(scrollTopBeforeViewingSpent).toBeGreaterThan(0);
+
+    // Click a spent-amount cell that is already visible at the current scroll position so the scroll does not change
+    // before the handler captures it.
+    await budgetPage.clickOnSpentAmountForLastVisibleRow();
+    expect(page.url()).toContain('/accounts');
+
+    await page.getByRole('button', { name: 'Back' }).click();
+    await budgetPage.waitFor();
+
+    const scrollTopAfterReturningFromSpent = await budgetPage.getScrollTop();
+    expect(scrollTopAfterReturningFromSpent).toBe(scrollTopBeforeViewingSpent);
+  });
 });

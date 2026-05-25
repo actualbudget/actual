@@ -70,6 +70,24 @@ function extractCommonThings(
         'General',
         'Gift',
         'Medical',
+        'Transportation',
+        'Gas',
+        'Parking & Tolls',
+        'Personal Care',
+        'Hair & Grooming',
+        'Subscriptions',
+        'Streaming Services',
+        'Software & Apps',
+        'Home Maintenance',
+        'Furniture & Decor',
+        'Fitness',
+        'Gym Membership',
+        'Education',
+        'Books',
+        'Pets',
+        'Vet & Pet Care',
+        'Travel',
+        'Hobbies',
       ].indexOf(c.name) !== -1,
   );
 
@@ -517,6 +535,24 @@ async function createBudget(accounts, payees, groups) {
           void setBudget(month, category('General'), 50000);
           void setBudget(month, category('Gift'), 7500);
           void setBudget(month, category('Medical'), 10000);
+          void setBudget(month, category('Transportation'), 25000);
+          void setBudget(month, category('Gas'), 15000);
+          void setBudget(month, category('Parking & Tolls'), 5000);
+          void setBudget(month, category('Personal Care'), 8000);
+          void setBudget(month, category('Hair & Grooming'), 6000);
+          void setBudget(month, category('Subscriptions'), 5000);
+          void setBudget(month, category('Streaming Services'), 4000);
+          void setBudget(month, category('Software & Apps'), 2000);
+          void setBudget(month, category('Home Maintenance'), 15000);
+          void setBudget(month, category('Furniture & Decor'), 10000);
+          void setBudget(month, category('Fitness'), 6000);
+          void setBudget(month, category('Gym Membership'), 4500);
+          void setBudget(month, category('Education'), 10000);
+          void setBudget(month, category('Books'), 3000);
+          void setBudget(month, category('Pets'), 8000);
+          void setBudget(month, category('Vet & Pet Care'), 5000);
+          void setBudget(month, category('Travel'), 20000);
+          void setBudget(month, category('Hobbies'), 7500);
 
           void setBudget(month, category('Cell'), 7500);
           void setBudget(month, category('Internet'), 6000);
@@ -531,6 +567,24 @@ async function createBudget(accounts, payees, groups) {
           setBudgetIfSpent(month, category('General'));
           setBudgetIfSpent(month, category('Gift'));
           setBudgetIfSpent(month, category('Medical'));
+          setBudgetIfSpent(month, category('Transportation'));
+          setBudgetIfSpent(month, category('Gas'));
+          setBudgetIfSpent(month, category('Parking & Tolls'));
+          setBudgetIfSpent(month, category('Personal Care'));
+          setBudgetIfSpent(month, category('Hair & Grooming'));
+          setBudgetIfSpent(month, category('Subscriptions'));
+          setBudgetIfSpent(month, category('Streaming Services'));
+          setBudgetIfSpent(month, category('Software & Apps'));
+          setBudgetIfSpent(month, category('Home Maintenance'));
+          setBudgetIfSpent(month, category('Furniture & Decor'));
+          setBudgetIfSpent(month, category('Fitness'));
+          setBudgetIfSpent(month, category('Gym Membership'));
+          setBudgetIfSpent(month, category('Education'));
+          setBudgetIfSpent(month, category('Books'));
+          setBudgetIfSpent(month, category('Pets'));
+          setBudgetIfSpent(month, category('Vet & Pet Care'));
+          setBudgetIfSpent(month, category('Travel'));
+          setBudgetIfSpent(month, category('Hobbies'));
 
           setBudgetIfSpent(month, category('Cell'));
           setBudgetIfSpent(month, category('Internet'));
@@ -656,6 +710,24 @@ export async function createTestBudget(handlers: Handlers) {
     {
       name: 'Usual Expenses',
       categories: [
+        { name: 'Transportation' },
+        { name: 'Gas' },
+        { name: 'Parking & Tolls' },
+        { name: 'Personal Care' },
+        { name: 'Hair & Grooming' },
+        { name: 'Subscriptions' },
+        { name: 'Streaming Services' },
+        { name: 'Software & Apps' },
+        { name: 'Home Maintenance' },
+        { name: 'Furniture & Decor' },
+        { name: 'Fitness' },
+        { name: 'Gym Membership' },
+        { name: 'Education' },
+        { name: 'Books' },
+        { name: 'Pets' },
+        { name: 'Vet & Pet Care' },
+        { name: 'Travel' },
+        { name: 'Hobbies' },
         { name: 'Savings' },
         { name: 'Medical' },
         { name: 'Gift' },
