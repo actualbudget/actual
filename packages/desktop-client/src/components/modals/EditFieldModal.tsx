@@ -279,6 +279,7 @@ export function EditFieldModal({
                   inputValue={noteText}
                   setInputValue={setNoteText}
                   inputRef={noteInputRef}
+                  embedded
                   onKeyDown={e => {
                     if (e.key === 'Enter') {
                       void handleSubmitNote(close);
@@ -298,58 +299,29 @@ export function EditFieldModal({
                     {detectedTags.map(detectedTag => {
                       const tagEntity = tagMap.get(detectedTag);
                       return (
-                        <View
+                        <Button
+                          variant="bare"
                           key={detectedTag}
-                          style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            padding: '2px 8px',
-                            borderRadius: 4,
-                            backgroundColor: theme.menuBackground,
-                            border: `1px solid ${theme.buttonNormalBorder}`,
-                            color: theme.menuItemText,
-                            gap: 6,
-                            transition: 'background-color 0.1s',
-                            ':hover': {
-                              backgroundColor: theme.menuItemBackgroundHover,
-                            },
+                          className={getTagCSS(detectedTag, {
+                            color: tagEntity?.color,
+                            compact: true,
+                          })}
+                          aria-label={t('Remove {{tag}} tag', {
+                            tag: detectedTag,
+                          })}
+                          onPress={() => {
+                            setNoteText(current =>
+                              removeTagFromNotes(current, detectedTag),
+                            );
                           }}
                         >
-                          <span
-                            className={getTagCSS(detectedTag, {
-                              color: tagEntity?.color,
-                              compact: true,
-                            })}
-                          >
-                            #{detectedTag}
-                          </span>
-                          <Button
-                            variant="bare"
-                            aria-label={t('Remove {{tag}} tag', {
-                              tag: detectedTag,
-                            })}
-                            onPress={() => {
-                              setNoteText(current =>
-                                removeTagFromNotes(current, detectedTag),
-                              );
-                            }}
-                            style={({ isHovered }) => ({
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              padding: 2,
-                              borderRadius: 2,
-                              color: isHovered
-                                ? theme.errorText
-                                : theme.pageTextSubdued,
-                              backgroundColor: isHovered
-                                ? theme.errorBackground
-                                : 'transparent',
-                            })}
-                          >
-                            <SvgClose width={8} height={8} />
-                          </Button>
-                        </View>
+                          #{detectedTag}
+                          <SvgClose
+                            width={8}
+                            height={8}
+                            style={{ marginLeft: 4 }}
+                          />
+                        </Button>
                       );
                     })}
                   </View>

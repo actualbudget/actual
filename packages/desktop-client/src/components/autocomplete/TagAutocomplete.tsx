@@ -32,6 +32,13 @@ export type TagAutocompleteProps = {
   onBlur?: FocusEventHandler;
   onKeyDown?: KeyboardEventHandler;
   onUpdate?: (value: string) => void;
+  embedded?: boolean;
+};
+
+type TagAutocompleteItem = {
+  id: string;
+  name: string;
+  tag: string;
 };
 
 export function TagAutocomplete({
@@ -42,6 +49,7 @@ export function TagAutocomplete({
   inputStyle,
   onKeyDown,
   onUpdate,
+  embedded = false,
 }: TagAutocompleteProps) {
   const { t } = useTranslation();
   const getTagCSS = useTagCSS({ ellipsis: true });
@@ -58,7 +66,7 @@ export function TagAutocomplete({
   const currentWord = inputValue.slice(startIdx, endIdx);
 
   const { data: filteredTags, refetch } = useFilteredTags(currentWord, true);
-  const filteredItems = useMemo(() => {
+  const filteredItems: TagAutocompleteItem[] = useMemo(() => {
     const tagArr =
       filteredTags?.map(tag => ({ ...tag, name: '#' + tag.tag })) ?? [];
 
@@ -155,6 +163,19 @@ export function TagAutocomplete({
     );
   }
 
+  const options = (
+    <TagAutocompleteOptions
+      filteredItems={filteredItems}
+      getItemId={id}
+      getTagCSS={getTagCSS}
+      highlightedId={highlightedId}
+      highlightedIdx={highlightedIdx}
+      embedded={embedded}
+      setHighlightedIdx={setHighlightedIdx}
+      onSelect={handleSelect}
+    />
+  );
+
   return (
     <>
       <Input
@@ -178,91 +199,135 @@ export function TagAutocomplete({
         autoComplete="off"
       />
 
-      <Popover
-        isNonModal
-        placement="bottom start"
-        className={css(styles.darkScrollbar, {
-          background: theme.menuAutoCompleteBackground,
-          borderRadius: 6,
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-          width: inputRef.current?.offsetWidth ?? 100,
-        })}
-        offset={1}
-        triggerRef={inputRef}
-        isOpen={showPopup}
-        onOpenChange={setIsOpen}
-      >
-        <ListBox
-          aria-label={t('Tag List')}
-          id={id('popover')}
-          items={filteredItems}
-          selectionMode="single"
-          dependencies={[highlightedId]}
-          onPointerDown={e => e.preventDefault()}
-          style={{
-            borderRadius: 4,
-            maxHeight: '150px',
-            overflowY: 'auto',
-          }}
+      {embedded ? (
+        showPopup && (
+          <div
+            data-testid="tag-autocomplete-embedded-options"
+            className={css(styles.darkScrollbar, {
+              background: theme.tableBackground,
+              border: `1px solid ${theme.formInputBorder}`,
+              borderRadius: 4,
+              marginTop: 8,
+              maxHeight: 160,
+              overflowY: 'auto',
+            })}
+          >
+            {options}
+          </div>
+        )
+      ) : (
+        <Popover
+          isNonModal
+          placement="bottom start"
+          className={css(styles.darkScrollbar, {
+            background: theme.menuAutoCompleteBackground,
+            borderRadius: 6,
+            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+            width: inputRef.current?.offsetWidth ?? 100,
+          })}
+          offset={1}
+          triggerRef={inputRef}
+          isOpen={showPopup}
+          onOpenChange={setIsOpen}
         >
-          {(item: (typeof filteredItems)[number]) => (
-            <ListBoxItem
-              key={item.id}
-              id={id(item.id)}
-              textValue={item.name}
-              style={() => ({
-                backgroundColor:
-                  highlightedId === item.id
-                    ? theme.menuAutoCompleteBackgroundHover
-                    : 'transparent',
-                alignItems: 'center',
-                fontWeight: 500,
-                cursor: 'pointer',
-                color:
-                  highlightedId === item.id
-                    ? theme.menuAutoCompleteItemTextHover
-                    : theme.menuAutoCompleteItemText,
-                padding: '4px 6px 1px 6px',
-              })}
-              onMouseMove={() => {
-                const idx = filteredItems.findIndex(
-                  _item => _item.id === item.id,
-                );
-                if (idx >= 0 && highlightedIdx !== idx) {
-                  setHighlightedIdx(idx);
-                }
-              }}
-              onPointerDown={e => e.preventDefault()}
-              onClick={() => handleSelect(item.id)}
-            >
-              {item.id === 'create_tag' ? (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 5,
-                    color: theme.noticeTextMenu,
-                    paddingBottom: 3,
-                  }}
-                >
-                  <SvgAdd height={8} width={8} />
-                  <span
-                    style={{
-                      textWrap: 'nowrap',
-                      fontSize: 11,
-                    }}
-                  >
-                    <Trans>Create tag</Trans>
-                  </span>
-                  <span className={getTagCSS('')}>{item.name}</span>
-                </div>
-              ) : (
-                <div className={getTagCSS(item.tag)}>{item.name}</div>
-              )}
-            </ListBoxItem>
-          )}
-        </ListBox>
-      </Popover>
+          {options}
+        </Popover>
+      )}
     </>
+  );
+}
+
+type TagAutocompleteOptionsProps = {
+  filteredItems: TagAutocompleteItem[];
+  getItemId: (itemId: string) => string;
+  getTagCSS: ReturnType<typeof useTagCSS>;
+  highlightedId: string | null;
+  highlightedIdx: number;
+  embedded: boolean;
+  setHighlightedIdx: (idx: number) => void;
+  onSelect: (id: string | null) => Promise<void>;
+};
+
+function TagAutocompleteOptions({
+  filteredItems,
+  getItemId,
+  getTagCSS,
+  highlightedId,
+  highlightedIdx,
+  embedded,
+  setHighlightedIdx,
+  onSelect,
+}: TagAutocompleteOptionsProps) {
+  const { t } = useTranslation();
+
+  return (
+    <ListBox
+      aria-label={t('Tag List')}
+      id={getItemId('popover')}
+      items={filteredItems}
+      selectionMode="single"
+      dependencies={[highlightedId]}
+      onPointerDown={e => e.preventDefault()}
+      style={{
+        borderRadius: 4,
+        maxHeight: embedded ? 160 : 150,
+        overflowY: 'auto',
+      }}
+    >
+      {item => (
+        <ListBoxItem
+          key={item.id}
+          id={getItemId(item.id)}
+          textValue={item.name}
+          style={() => ({
+            backgroundColor:
+              highlightedId === item.id
+                ? theme.menuAutoCompleteBackgroundHover
+                : 'transparent',
+            alignItems: 'center',
+            fontWeight: 500,
+            cursor: 'pointer',
+            color:
+              highlightedId === item.id
+                ? theme.menuAutoCompleteItemTextHover
+                : theme.menuAutoCompleteItemText,
+            padding: '4px 6px 1px 6px',
+          })}
+          onMouseMove={() => {
+            const idx = filteredItems.findIndex(_item => _item.id === item.id);
+            if (idx >= 0 && highlightedIdx !== idx) {
+              setHighlightedIdx(idx);
+            }
+          }}
+          onPointerDown={e => e.preventDefault()}
+          onClick={() => void onSelect(item.id)}
+        >
+          {item.id === 'create_tag' ? (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
+                color: theme.noticeTextMenu,
+                paddingBottom: 3,
+              }}
+            >
+              <SvgAdd height={8} width={8} />
+              <span
+                style={{
+                  textWrap: 'nowrap',
+                  fontSize: 11,
+                }}
+              >
+                <Trans>Create tag</Trans>
+              </span>
+              <span className={getTagCSS('')}>{item.name}</span>
+            </div>
+          ) : (
+            <div className={getTagCSS(item.tag)}>{item.name}</div>
+          )}
+        </ListBoxItem>
+      )}
+    </ListBox>
   );
 }
