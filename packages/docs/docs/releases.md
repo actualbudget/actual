@@ -50,7 +50,6 @@ Release date: 2026-06-01
 - [#7906](https://github.com/actualbudget/actual/pull/7906) Automation UI: Add per-automation notes and a tooltip for budget page — thanks @matt-fidd
 - [#7907](https://github.com/actualbudget/actual/pull/7907) Add animations to more reports cards — thanks @matt-fidd
 - [#7913](https://github.com/actualbudget/actual/pull/7913) Schedules are now sorted alphabetically in the Automations UI. — thanks @mnil
-- [#7947](https://github.com/actualbudget/actual/pull/7947) Introduce version 26.6.0 with updates and improvements for enhanced user experience. — thanks @MatissJanis
 
 #### Bugfixes
 
