@@ -616,12 +616,26 @@ class AccountInternal extends PureComponent<
   };
 
   onExport = async (accountName: string) => {
+    const exportQuery = this.state.search
+      ? queries.transactionsSearch(
+          this.currentQuery,
+          this.state.search,
+          this.props.dateFormat,
+        )
+      : this.currentQuery;
     const exportedTransactions = await send('transactions-export-query', {
-      query: this.currentQuery.serialize(),
+      query: exportQuery.serialize(),
     });
     const normalizedName =
       accountName && accountName.replace(/[()]/g, '').replace(/\s+/g, '-');
-    const filename = `${normalizedName || 'transactions'}.csv`;
+    const searchSuffix = this.state.search
+      ? `-${this.state.search.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')}`
+      : '';
+    const filterSuffix =
+      !this.state.search && this.state.filterConditions.length > 0
+        ? '-filtered'
+        : '';
+    const filename = `${normalizedName || 'transactions'}${searchSuffix}${filterSuffix}.csv`;
 
     void window.Actual.saveFile(
       exportedTransactions,
@@ -1822,6 +1836,11 @@ class AccountInternal extends PureComponent<
                 }
                 onSync={this.onSync}
                 onImport={this.onImport}
+                onExport={() =>
+                  void this.onExport(
+                    this.getAccountTitle(account, accountId),
+                  )
+                }
                 onBatchDelete={this.onBatchDelete}
                 onBatchDuplicate={this.onBatchDuplicate}
                 onRunRules={this.onRunRules}
