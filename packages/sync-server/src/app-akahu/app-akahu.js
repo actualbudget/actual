@@ -94,12 +94,6 @@ app.post(
       let currentBalance = convertToCents(account.balance.current);
       const availableBalance = convertToCents(account.balance.available);
 
-      if (
-        [ACCOUNT_TYPES.CREDIT_CARD, ACCOUNT_TYPES.LOAN].includes(account.type)
-      ) {
-        currentBalance = -currentBalance;
-      }
-
       const now = new Date();
       const endDate = new Date(
         now.getFullYear(),
@@ -251,13 +245,8 @@ function processTransaction(trans, account, isBooked = true) {
     sortOrder: transactionDate.getTime(),
   };
 
-  let amount = trans.amount;
-  if ([ACCOUNT_TYPES.CREDIT_CARD, ACCOUNT_TYPES.LOAN].includes(account.type)) {
-    amount *= -1;
-  }
-
   newTrans.transactionAmount = {
-    amount: Math.round(amount * 100) / 100,
+    amount: Math.round(trans.amount * 100) / 100,
     currency: account.balance.currency,
   };
 
