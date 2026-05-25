@@ -628,12 +628,13 @@ class AccountInternal extends PureComponent<
     });
     const normalizedName =
       accountName && accountName.replace(/[()]/g, '').replace(/\s+/g, '-');
-    const searchSuffix = this.state.search
-      ? `-${this.state.search
+    const normalizedSearch = this.state.search
+      ? this.state.search
           .replace(/[^a-zA-Z0-9]/g, '-')
           .replace(/-+/g, '-')
-          .replace(/^-|-$/g, '')}`
+          .replace(/^-|-$/g, '')
       : '';
+    const searchSuffix = normalizedSearch ? `-${normalizedSearch}` : '';
     const filterSuffix =
       !this.state.search && this.state.filterConditions.length > 0
         ? '-filtered'
