@@ -3,6 +3,7 @@ ABNAMRO
 ABNANL
 Activo
 actualrc
+admins
 AESUDEF
 ajv
 ALZEY
@@ -90,6 +91,7 @@ Grafana
 Gruvbox
 HABAL
 Hampel
+healthcheck
 HELADEF
 HLOOKUP
 HUF
@@ -124,6 +126,7 @@ lage
 LHV
 LHVBEE
 LKR
+lookback
 MAXA
 mbank
 mdc
@@ -160,6 +163,7 @@ RIED
 RSchedule
 RSD
 SEK
+shopt
 simplefin
 SKHSFI
 Sparkasse
