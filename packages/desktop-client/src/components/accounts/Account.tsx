@@ -629,7 +629,10 @@ class AccountInternal extends PureComponent<
     const normalizedName =
       accountName && accountName.replace(/[()]/g, '').replace(/\s+/g, '-');
     const searchSuffix = this.state.search
-      ? `-${this.state.search.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')}`
+      ? `-${this.state.search
+          .replace(/[^a-zA-Z0-9]/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '')}`
       : '';
     const filterSuffix =
       !this.state.search && this.state.filterConditions.length > 0
@@ -1837,9 +1840,7 @@ class AccountInternal extends PureComponent<
                 onSync={this.onSync}
                 onImport={this.onImport}
                 onExport={() =>
-                  void this.onExport(
-                    this.getAccountTitle(account, accountId),
-                  )
+                  void this.onExport(this.getAccountTitle(account, accountId))
                 }
                 onBatchDelete={this.onBatchDelete}
                 onBatchDuplicate={this.onBatchDuplicate}
