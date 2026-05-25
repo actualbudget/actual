@@ -21,6 +21,7 @@ permissions:
 
 jobs:
   cut-release-branch:
+    if: github.repository_owner == 'actualbudget'
     runs-on: ubuntu-latest
     environment: release
     steps:

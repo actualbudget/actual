@@ -1,4 +1,4 @@
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgDelete } from '@actual-app/components/icons/v0';
@@ -76,6 +76,7 @@ export function AutomationEditorPane({
   setEntries,
   onDelete,
 }: AutomationEditorPaneProps) {
+  const { t } = useTranslation();
   const active = entries[activeIdx];
   const activeError = automationErrors[activeIdx];
 
@@ -89,10 +90,30 @@ export function AutomationEditorPane({
         const next = templateReducer(current, action);
         return {
           id: entry.id,
-          template: next.template,
+          template: {
+            ...next.template,
+            description: entry.template.description,
+          },
           displayType: next.displayType,
         };
       }),
+    );
+  };
+
+  const setDescription = (description: string) => {
+    setEntries(prev =>
+      prev.map((entry, i) =>
+        i === activeIdx
+          ? {
+              ...entry,
+              template: {
+                ...entry.template,
+                description:
+                  description.trim() === '' ? undefined : description,
+              },
+            }
+          : entry,
+      ),
     );
   };
 
@@ -308,6 +329,39 @@ export function AutomationEditorPane({
           </span>
         </Button>
       </View>
+
+      <Text
+        style={{
+          fontSize: 11,
+          textTransform: 'uppercase',
+          color: theme.pageTextLight,
+          fontWeight: 600,
+          letterSpacing: '0.05em',
+        }}
+      >
+        <Trans>Note</Trans>
+      </Text>
+      <textarea
+        aria-label={t('Automation note')}
+        className={css({
+          width: '100%',
+          minHeight: 60,
+          resize: 'vertical',
+          fontFamily: 'inherit',
+          fontSize: 13,
+          lineHeight: 1.4,
+          padding: '8px 10px',
+          borderRadius: 6,
+          border: `1px solid ${theme.formInputBorder}`,
+          backgroundColor: theme.tableBackground,
+          color: theme.tableText,
+          '::placeholder': { color: theme.pageTextLight },
+        })}
+        value={active.template.description ?? ''}
+        onChange={e => setDescription(e.target.value)}
+        placeholder={t('Note')}
+        rows={3}
+      />
     </View>
   );
 }
