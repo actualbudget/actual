@@ -16,6 +16,7 @@ import {
   CartesianGrid,
   Line,
   LineChart,
+  ReferenceLine,
   Tooltip,
   XAxis,
   YAxis,
@@ -181,6 +182,39 @@ export function LineGraph({
 
   const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 5;
 
+  const n = data.intervalData.length;
+  const trendLines =
+    n < 2
+      ? []
+      : data.legend
+          .map(entry => {
+            let sumX = 0,
+              sumY = 0,
+              sumXY = 0,
+              sumX2 = 0;
+            for (let x = 0; x < n; x++) {
+              const y = Number(data.intervalData[x][entry.dataKey]) || 0;
+              sumX += x;
+              sumY += y;
+              sumXY += x * y;
+              sumX2 += x * x;
+            }
+            const denom = n * sumX2 - sumX * sumX;
+            if (denom === 0) return null;
+            const slope = (n * sumXY - sumX * sumY) / denom;
+            const intercept = (sumY - slope * sumX) / n;
+            return {
+              id: entry.id ?? entry.dataKey,
+              color: entry.color,
+              start: { x: data.intervalData[0].date, y: intercept },
+              end: {
+                x: data.intervalData[n - 1].date,
+                y: intercept + slope * (n - 1),
+              },
+            };
+          })
+          .filter(Boolean);
+
   const onShowActivity = (item, id, payload) => {
     showActivity({
       navigate,
@@ -253,6 +287,16 @@ export function LineGraph({
                   tickSize={0}
                 />
               )}
+              {trendLines.map(t => (
+                <ReferenceLine
+                  key={`trend-${t.id}`}
+                  segment={[t.start, t.end]}
+                  stroke={t.color}
+                  strokeDasharray="4 4"
+                  strokeOpacity={0.6}
+                  ifOverflow="extendDomain"
+                />
+              ))}
               {data.legend.map((entry, index) => {
                 return (
                   <Line
