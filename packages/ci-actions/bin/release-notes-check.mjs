@@ -1,4 +1,6 @@
+import * as childProcess from 'node:child_process';
 import * as fs from 'node:fs';
+import { promisify } from 'node:util';
 
 import matter from 'gray-matter';
 
@@ -7,62 +9,92 @@ import {
   categoryOrder,
 } from '../src/release-notes/util.mjs';
 
-console.log('Looking in ' + fs.realpathSync('upcoming-release-notes'));
+const exec = promisify(childProcess.exec);
 
-const expectedPath = `upcoming-release-notes/${process.env.PR_NUMBER}.md`;
+const NOTES_DIR = 'upcoming-release-notes';
+
+console.log('Looking in ' + fs.realpathSync(NOTES_DIR));
+
+const baseRef = process.env.BASE_REF;
+if (!baseRef) {
+  console.log('::error::BASE_REF env var is not set');
+  process.exit(1);
+}
 
 function reportError(message) {
   console.log(`::error::${message}`);
 
   process.stdout.write('::notice::');
-  fs.createReadStream('upcoming-release-notes/README.md').pipe(process.stdout);
+  fs.createReadStream(`${NOTES_DIR}/README.md`).pipe(process.stdout);
 
-  fs.createReadStream('upcoming-release-notes/README.md')
+  fs.createReadStream(`${NOTES_DIR}/README.md`)
     .pipe(fs.createWriteStream(process.env.GITHUB_STEP_SUMMARY))
     .on('close', () => {
       process.exit(1);
     });
 }
 
-(() => {
-  if (!fs.existsSync(expectedPath)) {
-    reportError(`Release note file ${expectedPath} not found`);
-    return;
-  }
-
-  const { data, content } = matter(fs.readFileSync(expectedPath, 'utf-8'));
+function validateFile(path) {
+  const { data, content } = matter(fs.readFileSync(path, 'utf-8'));
 
   if (!data.category) {
-    reportError(`Release note is missing a category.`);
-    return;
+    reportError(`Release note ${path} is missing a category.`);
+    return false;
   }
-  if (categoryAutocorrections[data.category]) {
-    data.category = categoryAutocorrections[data.category];
-  }
-  if (!categoryOrder.includes(data.category)) {
+  const category = categoryAutocorrections[data.category] ?? data.category;
+  if (!categoryOrder.includes(category)) {
     reportError(
-      `Release note category "${data.category}" is not one of ${categoryOrder
+      `Release note ${path} category "${data.category}" is not one of ${categoryOrder
         .map(JSON.stringify)
         .join(', ')}`,
     );
-    return;
+    return false;
   }
 
   if (!data.authors) {
-    reportError(`Release note is missing authors.`);
-    return;
+    reportError(`Release note ${path} is missing authors.`);
+    return false;
   }
   if (!Array.isArray(data.authors)) {
-    reportError(`Release note authors should be a list.`);
-    return;
+    reportError(`Release note ${path} authors should be a list.`);
+    return false;
   }
 
   if (content.trim().split('\n').length !== 1) {
+    reportError(`Release note ${path} body should contain exactly one line`);
+    return false;
+  }
+
+  return true;
+}
+
+void (async () => {
+  await exec(`git fetch origin ${baseRef}`);
+  const { stdout } = await exec(
+    `git diff --name-only --diff-filter=A origin/${baseRef}...HEAD -- ${NOTES_DIR}/`,
+  );
+  const added = stdout
+    .split('\n')
+    .map(s => s.trim())
+    .filter(Boolean)
+    .filter(p => p.endsWith('.md') && p !== `${NOTES_DIR}/README.md`);
+
+  if (added.length === 0) {
     reportError(
-      `Release note file ${expectedPath} body should contain exactly one line`,
+      `No release note added under ${NOTES_DIR}/. Add a *.md file describing your change.`,
     );
     return;
   }
 
-  console.log('Everything looks good! \u{1f389}');
+  for (const path of added) {
+    if (!fs.existsSync(path)) {
+      reportError(`Release note ${path} was added but does not exist on HEAD.`);
+      return;
+    }
+    if (!validateFile(path)) {
+      return;
+    }
+  }
+
+  console.log(`Validated ${added.length} release note(s). \u{1f389}`);
 })();
