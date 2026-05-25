@@ -6,11 +6,20 @@ A password reset feature is available from version 23.4.2.
 
 ## If `actual-server` is installed on the host
 
+The deployed server environment may not have Yarn available, so the existing npm script
+is still the simplest reset path there:
+
+```sh
+npm run reset-password
+```
+
+The newer `actual-server` CLI command does the same reset with a friendlier prompt:
+
 ```sh
 actual-server --reset-password
 ```
 
-If you are running the sync server from a source checkout instead of the installed CLI,
+If you are running the sync server from a source checkout instead of the deployed server,
 run the workspace script from the repository root:
 
 ```sh
