@@ -8,11 +8,6 @@ import {
   validateSessionMiddleware,
 } from '#util/middlewares';
 
-const ACCOUNT_TYPES = Object.freeze({
-  CREDIT_CARD: 'CREDITCARD',
-  LOAN: 'LOAN',
-});
-
 const app = express();
 export { app as handlers };
 app.use(express.json());
@@ -91,7 +86,7 @@ app.post(
         });
       }
 
-      let currentBalance = convertToCents(account.balance.current);
+      const currentBalance = convertToCents(account.balance.current);
       const availableBalance = convertToCents(account.balance.available);
 
       const now = new Date();

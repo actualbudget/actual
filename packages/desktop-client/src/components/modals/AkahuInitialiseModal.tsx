@@ -117,7 +117,10 @@ export const AkahuInitialiseModal = ({
             </FormField>
 
             <FormField>
-              <FormLabel title={t('User Access Token:')} htmlFor="userToken-field" />
+              <FormLabel
+                title={t('User Access Token:')}
+                htmlFor="userToken-field"
+              />
               <Input
                 id="userToken-field"
                 type="password"

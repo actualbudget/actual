@@ -13,12 +13,12 @@ import { Permissions } from '#auth/types';
 import { useMultiuserEnabled } from '#components/ServerContext';
 import { authorizeBank as authorizeEnableBanking } from '#enablebanking';
 import { authorizeBank } from '#gocardless';
+import { useAkahuStatus } from '#hooks/useAkahuStatus';
 import { useEnableBankingStatus } from '#hooks/useEnableBankingStatus';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGoCardlessStatus } from '#hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '#hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '#hooks/useSimpleFinStatus';
-import { useAkahuStatus } from '#hooks/useAkahuStatus';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -196,7 +196,7 @@ export function useBuiltInBankSyncProviders({
     );
   }, [dispatch]);
 
-  const onAkahuInit = () => {
+  const onAkahuInit = useCallback(() => {
     dispatch(
       pushModal({
         modal: {
@@ -207,7 +207,7 @@ export function useBuiltInBankSyncProviders({
         },
       }),
     );
-  };
+  }, [dispatch]);
 
   const notifyResetFailure = useCallback(
     (providerName: string, error: unknown) => {
@@ -340,7 +340,7 @@ export function useBuiltInBankSyncProviders({
       );
       setIsAkahuSetupComplete(false);
     } catch (error) {
-      console.log(error)
+      console.log(error);
       notifyResetFailure('Akahu', error);
     }
   }, [notifyResetFailure]);
@@ -510,8 +510,7 @@ export function useBuiltInBankSyncProviders({
     upgradingAccountId,
   ]);
 
-
-  const onConnectAkahu = async () => {
+  const onConnectAkahu = useCallback(async () => {
     if (!isAkahuSetupComplete) {
       onAkahuInit();
       return;
@@ -583,7 +582,14 @@ export function useBuiltInBankSyncProviders({
     }
 
     setLoadingAkahuAccounts(false);
-  };
+  }, [
+    dispatch,
+    isAkahuSetupComplete,
+    loadingAkahuAccounts,
+    onAkahuInit,
+    upgradingAccountId,
+    t,
+  ]);
 
   const configuredProviders = {
     goCardless: Boolean(isGoCardlessSetupComplete),
@@ -653,7 +659,7 @@ export function useBuiltInBankSyncProviders({
       onConfigure: onAkahuInit,
       onLink: onConnectAkahu,
       onReset: onAkahuReset,
-    })
+    });
 
     if (enableBankingEnabled) {
       baseProviders.push({
