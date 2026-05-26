@@ -32,9 +32,9 @@ async function run() {
       type: 'text',
       initial: initialSlug,
       validate: value =>
-        /^[a-z0-9][a-z0-9-]*$/.test(value)
+        /^[a-z0-9]+(-[a-z0-9]+)*$/.test(value)
           ? true
-          : 'Use lowercase letters, digits, and dashes only',
+          : 'Use lowercase letters, digits, and single dashes between words',
     },
     {
       name: 'releaseNoteType',
@@ -95,11 +95,12 @@ async function run() {
 }
 
 function slugify(input: string): string {
-  return input
+  const slug = input
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 80);
+  return slug || 'untitled';
 }
 
 // makes an attempt to find an existing open PR from <username>:<branch>

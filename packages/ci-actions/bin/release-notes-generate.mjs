@@ -14,6 +14,9 @@ import {
 const exec = promisify(childProcess.exec);
 const execFile = promisify(childProcess.execFile);
 
+if (!process.env.GITHUB_REPOSITORY) {
+  throw new Error('GITHUB_REPOSITORY env var is not set');
+}
 const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 
 const releaseBranch = process.env.RELEASE_BRANCH;

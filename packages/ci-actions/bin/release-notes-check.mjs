@@ -9,7 +9,7 @@ import {
   categoryOrder,
 } from '../src/release-notes/util.mjs';
 
-const exec = promisify(childProcess.exec);
+const execFile = promisify(childProcess.execFile);
 
 const NOTES_DIR = 'upcoming-release-notes';
 
@@ -69,10 +69,15 @@ function validateFile(path) {
 }
 
 void (async () => {
-  await exec(`git fetch origin ${baseRef}`);
-  const { stdout } = await exec(
-    `git diff --name-only --diff-filter=A origin/${baseRef}...HEAD -- ${NOTES_DIR}/`,
-  );
+  await execFile('git', ['fetch', 'origin', baseRef]);
+  const { stdout } = await execFile('git', [
+    'diff',
+    '--name-only',
+    '--diff-filter=A',
+    `origin/${baseRef}...HEAD`,
+    '--',
+    `${NOTES_DIR}/`,
+  ]);
   const added = stdout
     .split('\n')
     .map(s => s.trim())
