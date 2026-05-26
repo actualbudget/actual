@@ -533,7 +533,7 @@ export type GetBootstrapDataPayload = {
 
 ipcMain.on('get-bootstrap-data', event => {
   const payload: GetBootstrapDataPayload = {
-    version: app.getVersion(),
+    version: isPlaywrightTest ? '99.9.9' : app.getVersion(),
     isDev,
   };
 
