@@ -59,8 +59,7 @@ These come from `CODE_REVIEW_GUIDELINES.md` and are non-negotiable unless the PR
 These are mandatory for AI-authored PRs. Verify and flag misses as Important.
 
 - Commit messages prefixed with `[AI]`.
-- PR title prefixed with `[AI]`.
-- "AI generated" label present.
+- PR title prefixed with `[AI]` (the `"AI generated"` label is auto-applied based on this prefix, so no need to verify it separately).
 - PR template **not** filled in (unless a human explicitly asked for it, in which case it must be in Chinese — yes, really).
 - No `--no-verify`, `--no-gpg-sign`, force-pushes to main, or destructive git ops.
 

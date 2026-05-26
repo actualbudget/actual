@@ -1,6 +1,6 @@
 ---
 name: committing-actual-changes
-description: Use whenever creating, drafting, finalizing, or amending a git commit or a pull request in the Actual Budget repo (actualbudget/actual) — including phrases like "commit this", "make a commit", "stage and commit", "open a PR", "create a pull request", "send this for review", "push these changes", "ship it", "submit a PR", "raise a PR", or any time finishing implementation work in this repo where committing or opening a PR is the natural next step. Also trigger when the user mentions the `[AI]` prefix, the "AI generated" label, the PR template, git hooks, or `--no-verify` in this repo. The repo enforces strict, non-obvious rules for AI-generated contributions (mandatory `[AI]` prefix on every commit message and PR title, mandatory "AI generated" label, leaving the PR template blank, never skipping hooks, specific git-safety constraints, a pre-commit quality checklist) and not following them produces commits and PRs that have to be redone or manually fixed by a maintainer.
+description: Use whenever creating, drafting, finalizing, or amending a git commit or a pull request in the Actual Budget repo (actualbudget/actual) — including phrases like "commit this", "make a commit", "stage and commit", "open a PR", "create a pull request", "send this for review", "push these changes", "ship it", "submit a PR", "raise a PR", or any time finishing implementation work in this repo where committing or opening a PR is the natural next step. Also trigger when the user mentions the `[AI]` prefix, the PR template, git hooks, or `--no-verify` in this repo. The repo enforces strict, non-obvious rules for AI-generated contributions (mandatory `[AI]` prefix on every commit message and PR title, leaving the PR template blank, never skipping hooks, specific git-safety constraints, a pre-commit quality checklist) and not following them produces commits and PRs that have to be redone or manually fixed by a maintainer.
 ---
 
 # Committing Changes in actualbudget/actual
@@ -9,7 +9,7 @@ Before creating any git commit or pull request in this repo, read:
 
 **`.github/agents/pr-and-commit-rules.md`**
 
-It is the authoritative source for the `[AI]` prefix requirement, the git-safety rules, the pre-commit quality checklist (`yarn typecheck`, `yarn lint:fix`, relevant tests, translated strings), the "AI generated" PR label, the rule about leaving the PR template blank, and the quick-reference workflow. Read it on every commit/PR session so any updates to those rules are picked up automatically.
+It is the authoritative source for the `[AI]` prefix requirement, the git-safety rules, the pre-commit quality checklist (`yarn typecheck`, `yarn lint:fix`, relevant tests, translated strings), the rule about leaving the PR template blank, and the quick-reference workflow. Read it on every commit/PR session so any updates to those rules are picked up automatically.
 
 ## The one rule worth restating
 
@@ -22,6 +22,6 @@ Everything else (git safety, hooks, label, PR template, pre-commit checklist) li
 
 ## Why this matters
 
-Maintainers triage AI-authored contributions separately, and the `[AI]` prefix plus the "AI generated" label are what make that triage fast. Without them the PR looks like a normal human contribution and the wrong review process gets applied. The "do not fill in the PR template" rule exists because the human is the one who actually tested the change and can write the Description / Testing / Checklist sections honestly — an AI-filled template misrepresents who did what. The hook-skipping prohibition (`--no-verify`, `--no-gpg-sign`) exists because this codebase enforces formatting and lint at commit time deliberately; bypassing the hook is how broken code lands on a branch.
+Maintainers triage AI-authored contributions separately, and the `[AI]` prefix is what makes that triage fast — it also drives the automatic `"AI generated"` PR label, so getting the prefix right is the one action that gates the whole triage path. Without it the PR looks like a normal human contribution and the wrong review process gets applied. The "do not fill in the PR template" rule exists because the human is the one who actually tested the change and can write the Description / Testing / Checklist sections honestly — an AI-filled template misrepresents who did what. The hook-skipping prohibition (`--no-verify`, `--no-gpg-sign`) exists because this codebase enforces formatting and lint at commit time deliberately; bypassing the hook is how broken code lands on a branch.
 
 The rules file is short. Read it.
