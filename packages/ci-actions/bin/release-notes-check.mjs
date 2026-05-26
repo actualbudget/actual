@@ -60,7 +60,8 @@ function validateFile(path) {
     return false;
   }
 
-  if (content.trim().split('\n').length !== 1) {
+  const trimmedContent = content.trim();
+  if (!trimmedContent || trimmedContent.includes('\n')) {
     reportError(`Release note ${path} body should contain exactly one line`);
     return false;
   }
