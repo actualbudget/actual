@@ -51,6 +51,9 @@ const hideNativeDateIconClassName = css({
   '&::-webkit-calendar-picker-indicator': {
     display: 'none',
   },
+  '&::-webkit-date-and-time-value': {
+    textAlign: 'left',
+  },
 });
 
 const iconFieldWrapperClassName = (disabled?: boolean) =>
