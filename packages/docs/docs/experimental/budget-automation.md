@@ -150,7 +150,7 @@ Pick a schedule (A) and a mode (B). See below for a discussion on [adjustments (
 
 **There are two modes:**
 
-For schedules repeating monthly or more often. they are equivalent.
+For schedules repeating monthly or more often the modes are equivalent.
 
 - **Save for the next occurrence.** The automation budgets a portion of the scheduled amount each month so the full amount is ready when needed.
 - **Cover each occurrence when it occurs.** The automation budgets for the schedule only in the month it occurs. It will budget the full scheduled amount.
@@ -310,7 +310,7 @@ The tooltip will give you more information about your budget and balance:
 
 ![budget balance tooltip fully funded](/img/goal-template/fully-funded-automation.webp)
 
-![budget balance tooptip underfunded](/img/goal-template/underfunded-automation.webp)
+![budget balance tooltip underfunded](/img/goal-template/underfunded-automation.webp)
 
 ### Long-term Goal {#long-term-goal}
 
