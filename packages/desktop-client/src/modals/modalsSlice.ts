@@ -256,7 +256,13 @@ export type Modal =
                 find: string;
                 replace: string;
               },
-          mode?: 'prepend' | 'append' | 'replace' | 'findAndReplace' | null,
+          mode?:
+            | 'prepend'
+            | 'append'
+            | 'replace'
+            | 'findAndReplace'
+            | 'removeAllTags'
+            | null,
         ) => void;
         onClose?: () => void;
       };

@@ -25,6 +25,7 @@ import type {
   ConfirmTransactionEditReason,
   Modal as ModalType,
 } from '#modals/modalsSlice';
+import { removeAllTagsFromNotes } from '#notes/tagUtils';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
 
@@ -130,7 +131,9 @@ export function useTransactionBatchActions() {
         let valueToSet = value;
 
         if (name === 'notes') {
-          if (mode === 'prepend') {
+          if (mode === 'removeAllTags') {
+            valueToSet = removeAllTagsFromNotes(trans.notes);
+          } else if (mode === 'prepend') {
             valueToSet =
               trans.notes === null ? value : `${String(value)}${trans.notes}`;
           } else if (mode === 'append') {

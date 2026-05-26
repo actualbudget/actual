@@ -24,8 +24,10 @@ import { DateSelect } from '#components/select/DateSelect';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useTagCSS } from '#hooks/useTagCSS';
 import { useTags } from '#hooks/useTags';
+import { pushModal } from '#modals/modalsSlice';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { removeTagFromNotes } from '#notes/tagUtils';
+import { useDispatch } from '#redux';
 import { useCreateTagMutation } from '#tags';
 
 const itemStyle: CSSProperties = {
@@ -36,9 +38,10 @@ const itemStyle: CSSProperties = {
 };
 
 type NoteAmendValue = Parameters<EditFieldModalProps['onSubmit']>[1];
-type NoteAmendMode = NonNullable<
+type NoteSubmitMode = NonNullable<
   Parameters<EditFieldModalProps['onSubmit']>[2]
 >;
+type NoteAmendMode = Exclude<NoteSubmitMode, 'removeAllTags'>;
 const noteAmendStrings: Record<NoteAmendMode, string> = {
   prepend: 'Prepend',
   replace: 'Replace',
@@ -57,6 +60,7 @@ export function EditFieldModal({
   onClose,
 }: EditFieldModalProps) {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const noteInputRef = useRef<HTMLInputElement | null>(null);
   const noteReplaceInputRef = useRef<HTMLInputElement | null>(null);
@@ -100,10 +104,29 @@ export function EditFieldModal({
     closeModal();
   };
 
-  function onSelectNote(value: NoteAmendValue, mode?: NoteAmendMode) {
+  function onSelectNote(value: NoteAmendValue, mode?: NoteSubmitMode) {
     if (value != null) {
       onSubmit(name, value, mode);
     }
+  }
+
+  function confirmRemoveAllTags(closeModal: () => void) {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'confirm-delete',
+          options: {
+            message: t(
+              'This will remove every tag from the selected transactions.',
+            ),
+            onConfirm: () => {
+              onSelectNote('', 'removeAllTags');
+              closeModal();
+            },
+          },
+        },
+      }),
+    );
   }
 
   function onSelect(value: string | number) {
@@ -329,10 +352,14 @@ export function EditFieldModal({
                 <View
                   style={{
                     flexDirection: 'row',
-                    justifyContent: 'flex-end',
+                    justifyContent: 'space-between',
                     marginTop: 10,
+                    gap: 10,
                   }}
                 >
+                  <Button onPress={() => confirmRemoveAllTags(close)}>
+                    <Trans>Remove all tags</Trans>
+                  </Button>
                   <Button
                     variant="primary"
                     style={{
