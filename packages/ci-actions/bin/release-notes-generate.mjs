@@ -12,6 +12,7 @@ import {
 } from '../src/release-notes/util.mjs';
 
 const exec = promisify(childProcess.exec);
+const execFile = promisify(childProcess.execFile);
 
 const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 
@@ -318,9 +319,14 @@ async function resolvePrNumber(dir, name, shaToPr) {
 
   let sha;
   try {
-    const { stdout } = await exec(
-      `git log --diff-filter=A --follow --format=%H -- ${join(dir, name)}`,
-    );
+    const { stdout } = await execFile('git', [
+      'log',
+      '--diff-filter=A',
+      '--follow',
+      '--format=%H',
+      '--',
+      join(dir, name),
+    ]);
     const lines = stdout.split('\n').filter(Boolean);
     sha = lines[lines.length - 1];
   } catch (e) {
