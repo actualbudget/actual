@@ -287,8 +287,10 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
         >
           <View
             style={{
+              borderTopWidth: 1,
               borderBottomWidth: 1,
               borderColor: '#e0e0e0',
+              borderTopColor: 'transparent',
               justifyContent: 'center',
               ...style,
             }}

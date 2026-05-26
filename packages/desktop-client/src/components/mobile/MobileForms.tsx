@@ -53,6 +53,21 @@ const hideNativeDateIconClassName = css({
   },
 });
 
+const iconFieldWrapperClassName = (disabled?: boolean) =>
+  css({
+    ...valueStyle,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: 8,
+    gap: 8,
+    backgroundColor: disabled
+      ? theme.formInputTextReadOnlySelection
+      : theme.tableBackground,
+    '&:focus-within': {
+      borderColor: theme.formInputBorderSelected,
+    },
+  });
+
 type InputFieldProps = ComponentPropsWithRef<typeof Input> & {
   icon?: ReactNode;
 };
@@ -68,18 +83,7 @@ export function InputField({
 }: InputFieldProps) {
   if (icon) {
     return (
-      <View
-        style={{
-          ...valueStyle,
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingLeft: 8,
-          gap: 8,
-          backgroundColor: disabled
-            ? theme.formInputTextReadOnlySelection
-            : theme.tableBackground,
-        }}
-      >
+      <View className={iconFieldWrapperClassName(disabled)}>
         <View style={{ color: theme.pageTextSubdued, flexShrink: 0 }}>
           {icon}
         </View>
@@ -95,8 +99,11 @@ export function InputField({
             backgroundColor: 'transparent',
             height: '100%',
             padding: 0,
+            textAlign: 'left',
             color: disabled ? theme.tableTextInactive : theme.tableText,
             ...style,
+            borderRadius: 0,
+            boxShadow: 'none',
           }}
           {...props}
           className={renderProps =>
