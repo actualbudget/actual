@@ -356,6 +356,14 @@ async function createWindow() {
 
   win.setBackgroundColor('#E8ECF0');
 
+  if (isPlaywrightTest) {
+    // Match the userAgent that `playwright.config.ts` sets for direct chromium
+    // launches so `Platform.isPlaywright` (which reads navigator.userAgent)
+    // is true in the renderer too. Without this, Playwright-only code paths
+    // (e.g. pinned versions in ServerContext) don't activate for Electron VRT.
+    win.webContents.setUserAgent('playwright');
+  }
+
   if (isDev) {
     win.webContents.openDevTools();
   }
