@@ -43,10 +43,11 @@ For each meaningful step in the plan:
 
 1. Navigate / click / fill as needed (use refs from `playwright-cli snapshot`).
 2. Take a snapshot to find a stable selector for the _new_ UI element introduced by the PR. Prefer `data-testid` if present, then a role + accessible name, then a CSS selector. Avoid brittle nth-child chains.
-3. Inject the highlight overlay:
+3. Inject the highlight overlay (resolve the script path via `git rev-parse` so it works for any contributor):
    ```bash
+   SKILL_DIR="$(git rev-parse --show-toplevel)/.claude/skills/review-actual-pr"
    SELECTOR='<your selector>' LABEL='<short label, e.g. "New filter chip">' \
-     playwright-cli run-code --filename=$HOME/.claude/skills/review-actual-pr/references/highlight-element.js
+     playwright-cli run-code --filename="$SKILL_DIR/references/highlight-element.js"
    ```
 4. Screenshot:
    ```bash
