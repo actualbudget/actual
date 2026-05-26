@@ -353,23 +353,32 @@ async function resolvePrNumber(dir, name, shaToPr) {
 }
 
 async function fetchPrForCommit(sha) {
-  const res = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/commits/${sha}/pulls`,
-    {
-      headers: {
-        Authorization: `bearer ${process.env.GITHUB_TOKEN}`,
-        Accept: 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/commits/${sha}/pulls`,
+      {
+        headers: {
+          Authorization: `bearer ${process.env.GITHUB_TOKEN}`,
+          Accept: 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28',
+        },
       },
-    },
-  );
-  if (!res.ok) {
-    console.log(`WARNING: GitHub API returned ${res.status} for commit ${sha}`);
+    );
+    if (!res.ok) {
+      console.log(
+        `WARNING: GitHub API returned ${res.status} for commit ${sha}`,
+      );
+      return null;
+    }
+    const prs = await res.json();
+    const merged = prs.find(p => p.merged_at);
+    return merged ? String(merged.number) : null;
+  } catch (e) {
+    console.log(
+      `WARNING: failed to resolve PR for commit ${sha}: ${e.message}`,
+    );
     return null;
   }
-  const prs = await res.json();
-  const merged = prs.find(p => p.merged_at);
-  return merged ? String(merged.number) : null;
 }
 
 function escapeRegExp(str) {
