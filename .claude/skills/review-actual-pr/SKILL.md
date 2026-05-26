@@ -1,7 +1,7 @@
 ---
 name: review-actual-pr
 description: Comprehensive review of a pull request in the actualbudget/actual repo. Performs an offline code review against the repo's CODE_REVIEW_GUIDELINES.md and AGENTS.md (no GitHub comments are ever posted), then browser-tests the change with playwright-cli. For bug PRs, reproduces the issue on edge.actualbudget.org first and verifies the fix on the Netlify preview; for feature/enhancement PRs, exercises the change on the preview and captures annotated screenshots highlighting the new functionality. Use whenever the user asks to review, test, validate, vet, sanity-check, QA, or otherwise look at a PR / pull request in the Actual Budget repo — including phrases like "review #1234", "check this PR", "test the fix in 1234", "does PR 1234 work", "validate PR 1234", or when given a github.com/actualbudget/actual/pull/N URL. Trigger even when the user doesn't explicitly say "review".
-allowed-tools: Bash(gh:*) Bash(playwright-cli:*) Bash(npx:*) Bash(mkdir:*) Bash(ls:*) Bash(git:*) Read Edit Write
+allowed-tools: Bash(gh:*) Bash(playwright-cli:*) Bash(npx:*) Bash(mkdir:*) Bash(ls:*) Bash(git:*) Bash(cat:*) Bash(mv:*) Read Edit Write
 ---
 
 # Review an Actual Budget PR
