@@ -341,6 +341,50 @@ describe('forecast app', () => {
     expect(balanceByDate['2024-03-31']).toBe(-25);
   });
 
+  it('does not double-count split parents in posted transaction balances', async () => {
+    const accountId = await db.insertAccount({ id: 'acct', name: 'Checking' });
+
+    const parentId = await db.insertTransaction({
+      id: 'split-parent',
+      account: accountId,
+      amount: 100,
+      date: '2024-03-10',
+      is_parent: true,
+      category: null,
+    });
+
+    await db.insertTransaction({
+      id: 'split-child-1',
+      account: accountId,
+      amount: 60,
+      date: '2024-03-10',
+      is_child: true,
+      parent_id: parentId,
+    });
+    await db.insertTransaction({
+      id: 'split-child-2',
+      account: accountId,
+      amount: 40,
+      date: '2024-03-10',
+      is_child: true,
+      parent_id: parentId,
+    });
+
+    const result = await generateForecast({
+      accountIds: [accountId],
+      startDate: '2024-03-01',
+      endDate: '2024-03-31',
+    });
+
+    const balanceByDate = Object.fromEntries(
+      result.dataPoints.map(({ date, balance }) => [date, balance]),
+    );
+
+    expect(balanceByDate['2024-03-09']).toBe(0);
+    expect(balanceByDate['2024-03-10']).toBe(100);
+    expect(balanceByDate['2024-03-31']).toBe(100);
+  });
+
   it('filters future schedule occurrences using rule-derived fields like category', async () => {
     const accountId = await db.insertAccount({ id: 'acct', name: 'Checking' });
     const groupId = await db.insertCategoryGroup({ name: 'Bills' });
