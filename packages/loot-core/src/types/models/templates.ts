@@ -1,6 +1,7 @@
 type BaseTemplate = {
   type: string;
   directive: 'template' | 'goal' | 'error';
+  description?: string;
 };
 type BaseTemplateWithPriority = {
   priority: number;
