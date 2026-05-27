@@ -60,7 +60,6 @@ self.addEventListener('message', async event => {
     const msg = event.data;
     if (!hasInitialized) {
       if (msg.type === 'init') {
-        hasInitialized = true;
         const isDev = !!msg.isDev;
         // let version = msg.version;
         const hash = msg.hash;
@@ -96,6 +95,8 @@ self.addEventListener('message', async event => {
           `${publicUrl}/kcab/kcab.worker.${hash}.js`,
           { maxRetries: isDev ? 5 : 3 },
         );
+
+        hasInitialized = true;
 
         backend.initApp(isDev, self).catch(err => {
           console.log(err);
