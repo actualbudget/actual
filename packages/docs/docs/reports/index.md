@@ -40,6 +40,13 @@ Cash flow shows your spending over time. It only looks at budgeted accounts and 
 
 Net worth shows the balance of all accounts over time. Your net worth is all of your cash and assets minus any debts you owe. This includes all of your off budget accounts. Your "net worth" is considered to be the amount you would have left if you sold all your assets and paid off as much debt as possible.
 
+The Net Worth graph has two modes: **Trend** and **Stacked**.
+Use **Trend** for the overall net-worth line over time.
+Use **Stacked** to separate balances by account over time (for example, savings and investment accounts).
+Stacked mode is harder to interpret when mixing positive-balance and negative-balance accounts.
+
+![Stacked Net Worth Graph](/img/reports/net-worth-stacked.webp)
+
 ## Spending Analysis
 
 ![Spending Analysis Report](/img/reports/spending-analysis.webp)
