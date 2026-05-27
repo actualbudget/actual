@@ -64,6 +64,7 @@ self.addEventListener('message', async event => {
         const isDev = !!msg.isDev;
         // let version = msg.version;
         const hash = msg.hash;
+        const publicUrl = msg.publicUrl;
 
         if (
           !self.SharedArrayBuffer &&
@@ -77,10 +78,22 @@ self.addEventListener('message', async event => {
           return;
         }
 
+        if (
+          typeof publicUrl !== 'string' ||
+          !publicUrl.startsWith('/') ||
+          publicUrl.includes('://')
+        ) {
+          throw new Error('Invalid publicUrl');
+        }
+
+        if (typeof hash !== 'string' || !/^[A-Za-z0-9_-]+$/.test(hash)) {
+          throw new Error('Invalid hash');
+        }
+
         // A single failed importScripts bricks the SharedWorker until
         // it's evicted, so retry in production too.
         await importScriptsWithRetry(
-          `${msg.publicUrl}/kcab/kcab.worker.${hash}.js`,
+          `${publicUrl}/kcab/kcab.worker.${hash}.js`,
           { maxRetries: isDev ? 5 : 3 },
         );
 
