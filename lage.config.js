@@ -33,6 +33,13 @@ module.exports = {
       dependsOn: ['^build'],
       cache: false,
     },
+    // Capacitor (iOS) flavour of the browser build. Same dependency graph and
+    // uncached side effects as build:browser.
+    'build:browser:capacitor': {
+      type: 'npmScript',
+      dependsOn: ['^build'],
+      cache: false,
+    },
   },
   cacheOptions: {
     cacheStorageConfig: {

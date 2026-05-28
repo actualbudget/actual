@@ -347,9 +347,13 @@ export default defineConfig(async ({ mode, command }) => {
       },
     },
     resolve: {
-      ...(mode !== 'browser' && {
-        conditions: ['electron-renderer', 'module', 'browser', 'default'],
-      }),
+      // The Capacitor (iOS) build is a browser bundle wrapped in a WKWebView,
+      // so it must use the same browser resolution as `mode === 'browser'` and
+      // never pull in the electron-renderer platform variants.
+      ...(mode !== 'browser' &&
+        mode !== 'capacitor' && {
+          conditions: ['electron-renderer', 'module', 'browser', 'default'],
+        }),
       tsconfigPaths: true,
     },
     plugins: [
@@ -357,6 +361,12 @@ export default defineConfig(async ({ mode, command }) => {
       mode === 'desktop'
         ? undefined
         : VitePWA({
+            // The Capacitor (iOS) build ships its assets inside the app bundle
+            // and is served from a custom WKWebView scheme, so a service worker
+            // is redundant and can break scheme-relative asset resolution.
+            // `disable: true` still provides the `virtual:pwa-register` stub
+            // imported by browser-preload.js, so the bundle keeps building.
+            disable: mode === 'capacitor',
             registerType: 'prompt',
             // TODO:  The plugin worker build is currently disabled due to issues with offline support. Fix this
             // strategies: 'injectManifest',

@@ -325,6 +325,17 @@ function createBackendWorker() {
   });
 }
 
+// Under Capacitor (the native iOS/Android wrapper) the WKWebView is made
+// cross-origin isolated by a native scheme handler that stamps the COOP/COEP
+// response headers, so SharedArrayBuffer is normally available. If isolation is
+// ever unavailable (e.g. an OS regression), automatically fall back to the
+// slower no-SharedArrayBuffer mode so the app still boots instead of showing a
+// fatal error that only makes sense on the web.
+const isCapacitor = !!window.Capacitor?.isNativePlatform?.();
+if (isCapacitor && !self.crossOriginIsolated && !window.SharedArrayBuffer) {
+  localStorage.setItem('SharedArrayBufferOverride', 'true');
+}
+
 createBackendWorker();
 
 let isUpdateReadyForDownload = false;

@@ -6,5 +6,7 @@
 /packages/component-library/                      @MatissJanis
 /packages/desktop-client/src/components/mobile    @joel-jeremy 
 /packages/desktop-electron/                       @MikesGlitch
+/packages/desktop-ios/                            @MatissJanis
+/.github/workflows/ios.yml                         @MatissJanis
 /packages/loot-core/src/server/budget             @youngcw
 /packages/sync-server/                            @matt-fidd

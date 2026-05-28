@@ -1,0 +1,70 @@
+name: iOS TestFlight
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CI: true
+
+# Manual-only to start. Once the first TestFlight build is green, this can be
+# extended with `push: tags: v**` to mirror electron-master.yml.
+on:
+  workflow_dispatch:
+    inputs:
+      lane:
+        description: 'Fastlane lane to run'
+        required: true
+        default: 'beta'
+        type: choice
+        options:
+          - beta
+          - release
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: macos-latest
+    environment: release
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          # Avoid restoring potentially poisoned caches in release jobs.
+          cache: 'false'
+
+      - name: Build web app (capacitor mode) and sync into the iOS project
+        run: ./bin/package-ios --skip-translations
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@afeafc3d1ab54a631816aba4c914a0081c12ff2f # v1.310.0
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: packages/desktop-ios/ios/App
+
+      - name: Install CocoaPods
+        working-directory: packages/desktop-ios/ios/App
+        run: bundle exec pod install
+
+      - name: Build and upload via Fastlane
+        working-directory: packages/desktop-ios/ios/App
+        env:
+          APP_IDENTIFIER: org.actualbudget.app
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          ASC_TEAM_ID: ${{ secrets.ASC_TEAM_ID }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_CONTENT: ${{ secrets.ASC_KEY_CONTENT }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: bundle exec fastlane ${{ inputs.lane }}

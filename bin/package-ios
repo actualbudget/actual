@@ -1,0 +1,44 @@
+#!/bin/bash -e
+
+# Builds the web app in "capacitor" mode and syncs it into the native iOS
+# project (packages/desktop-ios/ios). Mirrors bin/package-browser, but targets
+# the Capacitor wrapper instead of the standalone web build.
+#
+# Requires (not installed by yarn): Xcode + CocoaPods on a macOS machine.
+
+ROOT=`dirname $0`
+
+cd "$ROOT/.."
+
+SKIP_TRANSLATIONS=false
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --skip-translations)
+      SKIP_TRANSLATIONS=true
+      shift
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [ "$SKIP_TRANSLATIONS" = false ]; then
+  echo "Updating translations..."
+  if ! [ -d packages/desktop-client/locale ]; then
+      git clone https://github.com/actualbudget/translations packages/desktop-client/locale
+  fi
+  pushd packages/desktop-client/locale > /dev/null
+  git checkout .
+  git pull
+  popd > /dev/null
+  packages/desktop-client/bin/remove-untranslated-languages
+fi
+
+# Build the capacitor-flavoured web bundle (browser bundle, no service worker,
+# served from the native custom scheme root).
+lage build:browser:capacitor --to=@actual-app/web
+
+# Stage the build into the capacitor webDir and sync into the native project.
+yarn workspace @actual-app/ios sync

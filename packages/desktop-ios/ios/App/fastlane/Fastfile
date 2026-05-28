@@ -1,0 +1,79 @@
+default_platform(:ios)
+
+# Reads the marketing version from the @actual-app/ios package.json so the App
+# Store version stays in lockstep with the rest of the monorepo.
+def package_version
+  require "json"
+  pkg = File.expand_path("../../../package.json", __dir__)
+  JSON.parse(File.read(pkg))["version"]
+end
+
+def app_store_api_key
+  app_store_connect_api_key(
+    key_id: ENV["ASC_KEY_ID"],
+    issuer_id: ENV["ASC_ISSUER_ID"],
+    key_content: ENV["ASC_KEY_CONTENT"], # base64-encoded .p8
+    is_key_content_base64: true,
+    in_house: false
+  )
+end
+
+platform :ios do
+  desc "Sync signing assets, build the app and upload it to TestFlight"
+  lane :beta do
+    api_key = app_store_api_key
+
+    match(type: "appstore", readonly: true, api_key: api_key)
+
+    increment_version_number(
+      version_number: package_version,
+      xcodeproj: "App.xcodeproj"
+    )
+    increment_build_number(
+      build_number: ENV["BUILD_NUMBER"] || Time.now.strftime("%Y%m%d%H%M"),
+      xcodeproj: "App.xcodeproj"
+    )
+
+    build_app(
+      workspace: "App.xcworkspace",
+      scheme: "App",
+      export_method: "app-store"
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "Build and upload to App Store Connect (does not auto-submit for review)"
+  lane :release do
+    api_key = app_store_api_key
+
+    match(type: "appstore", readonly: true, api_key: api_key)
+
+    increment_version_number(
+      version_number: package_version,
+      xcodeproj: "App.xcodeproj"
+    )
+    increment_build_number(
+      build_number: ENV["BUILD_NUMBER"] || Time.now.strftime("%Y%m%d%H%M"),
+      xcodeproj: "App.xcodeproj"
+    )
+
+    build_app(
+      workspace: "App.xcworkspace",
+      scheme: "App",
+      export_method: "app-store"
+    )
+
+    upload_to_app_store(
+      api_key: api_key,
+      submit_for_review: false,
+      precheck_include_in_app_purchases: false,
+      force: true,
+      skip_screenshots: true,
+      skip_metadata: false
+    )
+  end
+end

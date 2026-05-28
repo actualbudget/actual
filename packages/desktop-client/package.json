@@ -115,6 +115,7 @@
     "watch": "cross-env BROWSER=none yarn start",
     "build": "vite build",
     "build:browser": "vite build --mode=browser",
+    "build:browser:capacitor": "vite build --mode=capacitor",
     "generate:i18n": "i18next",
     "test": "vitest --run",
     "validate:theme-catalog": "node --experimental-strip-types bin/validate-theme-catalog.mts",

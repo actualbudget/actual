@@ -1,0 +1,6 @@
+app_identifier(ENV["APP_IDENTIFIER"] || "org.actualbudget.app")
+
+# Authentication uses an App Store Connect API key (see Fastfile), so an
+# apple_id is not required. team_id is still used for code signing.
+team_id(ENV["APPLE_TEAM_ID"])
+itc_team_id(ENV["ASC_TEAM_ID"]) if ENV["ASC_TEAM_ID"]

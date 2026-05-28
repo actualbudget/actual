@@ -37,6 +37,8 @@
     "build:server": "yarn build:browser && yarn workspace @actual-app/sync-server build",
     "build:browser": "./bin/package-browser",
     "build:desktop": "./bin/package-electron",
+    "build:ios": "./bin/package-ios",
+    "start:ios": "yarn workspace @actual-app/ios open",
     "build:plugins-service": "yarn workspace plugins-service build",
     "build:api": "yarn build --scope=@actual-app/api",
     "build:cli": "yarn build --scope=@actual-app/cli",

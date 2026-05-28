@@ -1,0 +1,10 @@
+git_url(ENV["MATCH_GIT_URL"])
+storage_mode("git")
+
+type("appstore")
+
+app_identifier([ENV["APP_IDENTIFIER"] || "org.actualbudget.app"])
+
+# CI must never regenerate certificates/profiles — they are seeded once by a
+# human running `fastlane match appstore` locally.
+readonly(true)
