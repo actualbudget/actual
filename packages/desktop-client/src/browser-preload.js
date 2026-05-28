@@ -53,6 +53,10 @@ class WorkerBridge {
     this._isInitialized = false;
     this._currentBudgetId = null;
     this._wasHidden = document.visibilityState === 'hidden';
+    // Messages that arrive via __to-worker while localBackendWorker is not yet
+    // ready (e.g. during the UNASSIGNED→LEADER transition on a fresh iOS
+    // session) are buffered here and flushed once the new backend connects.
+    this._pendingToWorkerMsgs = [];
 
     this._onVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
@@ -119,6 +123,11 @@ class WorkerBridge {
     if (msg && msg.type === '__to-worker') {
       if (localBackendWorker) {
         localBackendWorker.postMessage(msg.msg);
+      } else {
+        // localBackendWorker is not yet created — this tab is transitioning from
+        // follower/unassigned to leader.  Buffer the message so it isn't lost;
+        // it will be replayed once the new backend Worker sends 'connect'.
+        this._pendingToWorkerMsgs.push(msg.msg);
       }
       return;
     }
@@ -190,6 +199,9 @@ class WorkerBridge {
 
     if (role !== 'LEADER') {
       terminateLocalBackendWorker();
+      // Discard any buffered __to-worker messages that arrived while we were
+      // transitioning to leader; they belong to a context we no longer own.
+      this._pendingToWorkerMsgs.splice(0);
     }
   }
 
@@ -246,6 +258,14 @@ class WorkerBridge {
           const toSend = pendingMsg;
           pendingMsg = null;
           localBackendWorker.postMessage(toSend);
+        }
+        // Flush any messages that were buffered while this tab was waiting
+        // to become leader (e.g. during the UNASSIGNED→LEADER transition).
+        if (this._pendingToWorkerMsgs.length > 0) {
+          const buffered = this._pendingToWorkerMsgs.splice(0);
+          for (const bufferedMsg of buffered) {
+            localBackendWorker.postMessage(bufferedMsg);
+          }
         }
       }
       sharedPort.postMessage({ type: '__from-worker', msg: workerMsg });
