@@ -1134,4 +1134,116 @@ describe('SharedWorker coordinator', () => {
       expect(coordinator.getState().budgetGroups.has('budget-1')).toBe(false);
     });
   });
+
+  // ── iOS Safari / stale-leader race condition ────────────────────────
+  // On iOS, beforeunload is unreliable so the old leader tab may stay
+  // connected to the SharedWorker while the new OIDC-callback tab connects.
+  // The new tab becomes UNASSIGNED (a lobby group already exists).  When the
+  // stale leader is eventually cleaned up (heartbeat or explicit tab-closing),
+  // the coordinator must promote the waiting UNASSIGNED tab to lobby leader so
+  // that it can connect a backend and complete the token write.
+
+  describe('iOS Safari stale-leader promotion', () => {
+    it('promotes an unassigned tab to lobby leader when the stale lobby leader closes', () => {
+      // Stale leader from previous navigation
+      const staleLeader = connectTab(coordinator);
+      sendInit(staleLeader);
+      // staleLeader is elected lobby leader
+
+      // New tab (OIDC callback page) connects while stale lobby is still alive
+      const callbackTab = connectTab(coordinator);
+      sendInit(callbackTab);
+      // callbackTab should be UNASSIGNED because __lobby already exists
+      expect(callbackTab.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: '__role-change', role: 'UNASSIGNED' }),
+      );
+      callbackTab.postMessage.mockClear();
+
+      // Stale leader closes (without beforeunload on iOS this happens via
+      // heartbeat timeout, but can also happen via explicit tab-closing)
+      sendMsg(staleLeader, { type: 'tab-closing' });
+
+      // callbackTab must be promoted to lobby leader so it can boot a backend
+      expect(callbackTab.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__role-change',
+          role: 'LEADER',
+          budgetId: '__lobby',
+        }),
+      );
+      const state = coordinator.getState();
+      expect(state.budgetGroups.has('__lobby')).toBe(true);
+      expect(state.budgetGroups.get('__lobby')!.leaderPort).toBe(callbackTab);
+      expect(state.unassignedPorts.has(callbackTab)).toBe(false);
+    });
+
+    it('promotes an unassigned tab via heartbeat when the stale leader stops responding', () => {
+      const staleLeader = connectTab(coordinator);
+      sendInit(staleLeader);
+
+      const callbackTab = connectTab(coordinator);
+      sendInit(callbackTab);
+      callbackTab.postMessage.mockClear();
+
+      // First heartbeat: both ports are pinged
+      vi.advanceTimersByTime(10_000);
+      // Only callbackTab responds
+      sendMsg(callbackTab, { type: '__heartbeat-pong' });
+      // Second heartbeat: staleLeader has not ponged, so it is evicted
+      vi.advanceTimersByTime(10_000);
+
+      expect(callbackTab.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__role-change',
+          role: 'LEADER',
+          budgetId: '__lobby',
+        }),
+      );
+      expect(
+        coordinator.getState().budgetGroups.get('__lobby')!.leaderPort,
+      ).toBe(callbackTab);
+    });
+
+    it('promotes an unassigned tab to lobby leader when it resumes with no groups remaining', () => {
+      const staleLeader = connectTab(coordinator);
+      sendInit(staleLeader);
+
+      const callbackTab = connectTab(coordinator);
+      sendInit(callbackTab);
+      // callbackTab is UNASSIGNED
+      callbackTab.postMessage.mockClear();
+
+      // Stale leader closes
+      sendMsg(staleLeader, { type: 'tab-closing' });
+      // At this point callbackTab is promoted via removePort — reset mock
+      callbackTab.postMessage.mockClear();
+
+      // Simulate the tab becoming visible again (triggers __resume-tab).
+      // Even though it was already promoted by removePort, the resume path
+      // must not regress: if somehow the tab is still UNASSIGNED and there
+      // are no groups (e.g. a slightly different ordering), resume should
+      // also trigger promotion.
+      //
+      // To test the resumePort path specifically, put the tab back to
+      // unassigned and remove all groups manually, then send __resume-tab.
+      const state = coordinator.getState();
+      // Manually remove the group to simulate the edge-case ordering
+      state.budgetGroups.delete('__lobby');
+      state.portToBudget.delete(callbackTab);
+      state.unassignedPorts.add(callbackTab);
+
+      sendMsg(callbackTab, { type: '__resume-tab', budgetId: null });
+
+      expect(callbackTab.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__role-change',
+          role: 'LEADER',
+          budgetId: '__lobby',
+        }),
+      );
+      expect(
+        coordinator.getState().budgetGroups.get('__lobby')!.leaderPort,
+      ).toBe(callbackTab);
+    });
+  });
 });

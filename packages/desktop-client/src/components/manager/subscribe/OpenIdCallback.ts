@@ -12,6 +12,6 @@ export function OpenIdCallback() {
     void send('subscribe-set-token', { token: token as string }).then(() => {
       void dispatch(loggedIn());
     });
-  });
+  }, [dispatch]);
   return null;
 }

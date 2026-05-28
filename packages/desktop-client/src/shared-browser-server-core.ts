@@ -191,7 +191,15 @@ export function createCoordinator({
     }
 
     if (alreadyUnassigned) {
-      logState('Tab resume confirmed while unassigned');
+      // If no groups remain the tab needs to become the lobby leader so it can
+      // connect a backend.  Without this, an UNASSIGNED tab that was promoted
+      // after the old leader left would never receive a 'connect' event.
+      if (budgetGroups.size === 0) {
+        electLeader('__lobby', port);
+        logState('Promoted unassigned tab to lobby leader on resume');
+      } else {
+        logState('Tab resume confirmed while unassigned');
+      }
       return;
     }
 
@@ -284,6 +292,17 @@ export function createCoordinator({
           `[SharedWorker] Last tab left budget "${budgetId}" — removing group`,
         );
         budgetGroups.delete(budgetId);
+        // If no groups remain and unassigned tabs are waiting, promote one to
+        // lobby leader so they can connect a backend.  This covers the iOS
+        // Safari case where the old leader navigates away without firing
+        // beforeunload, leaving the new OIDC-callback tab stranded as
+        // UNASSIGNED with no group to route messages through.
+        if (budgetGroups.size === 0 && unassignedPorts.size > 0) {
+          const candidate = unassignedPorts.values().next()
+            .value as CoordinatorPort;
+          electLeader('__lobby', candidate);
+          logState('Promoted unassigned tab to lobby leader after last group removed');
+        }
       }
     } else {
       group.followers.delete(port);
