@@ -27,7 +27,7 @@ jobs:
       matrix:
         os:
           - ubuntu-22.04
-          - windows-latest
+          - blacksmith-4vcpu-windows-2025
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:

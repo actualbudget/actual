@@ -10,7 +10,7 @@ permissions:
 jobs:
   tech-support:
     if: ${{ github.event.label.name == 'tech-support' }}
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - name: Create comment and close issue
         run: |

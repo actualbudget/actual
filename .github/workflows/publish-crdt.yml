@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   check-version:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     name: Check if publish is needed
     outputs:
       should-publish: ${{ steps.check.outputs.should-publish }}
@@ -50,7 +50,7 @@ jobs:
   publish:
     needs: check-version
     if: needs.check-version.outputs.should-publish == 'true'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     name: Publish @actual-app/crdt to npm
     permissions:
       contents: read

@@ -27,7 +27,7 @@ concurrency:
 jobs:
   build-web:
     name: Build web bundle
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     container:
       image: mcr.microsoft.com/playwright:v1.59.1-jammy
     steps:
@@ -62,7 +62,7 @@ jobs:
 
   functional:
     name: Functional (shard ${{ matrix.shard }}/3)
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: build-web
     strategy:
       fail-fast: false
@@ -99,7 +99,7 @@ jobs:
 
   functional-desktop-app:
     name: Functional Desktop App
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     container:
       image: mcr.microsoft.com/playwright:v1.59.1-jammy
     steps:
@@ -131,7 +131,7 @@ jobs:
 
   vrt:
     name: Visual regression (shard ${{ matrix.shard }}/3)
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     needs: build-web
     strategy:
       fail-fast: false
@@ -169,7 +169,7 @@ jobs:
   merge-vrt:
     name: Merge VRT Reports
     needs: vrt
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     if: ${{ !cancelled() }}
     container:
       image: mcr.microsoft.com/playwright:v1.59.1-jammy
