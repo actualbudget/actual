@@ -17,7 +17,7 @@ permissions:
 jobs:
   apply-vrt-updates:
     name: Apply VRT Updates
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     environment: pr-automation
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:

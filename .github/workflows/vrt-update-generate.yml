@@ -17,7 +17,7 @@ concurrency:
 jobs:
   add-reaction:
     name: Add 👀 Reaction
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     # Only run on PR comments containing /update-vrt
     if: >
       github.event.issue.pull_request &&
@@ -38,7 +38,7 @@ jobs:
 
   get-pr:
     name: Resolve PR details
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     if: >
       github.event.issue.pull_request &&
       startsWith(github.event.comment.body, '/update-vrt')
@@ -63,7 +63,7 @@ jobs:
 
   build-web:
     name: Build web bundle
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     needs: get-pr
     container:
       image: mcr.microsoft.com/playwright:v1.59.1-jammy
@@ -103,7 +103,7 @@ jobs:
 
   browser-vrt:
     name: Browser VRT (shard ${{ matrix.shard }}/3)
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     needs: [get-pr, build-web]
     strategy:
       fail-fast: false
@@ -173,7 +173,7 @@ jobs:
 
   desktop-vrt:
     name: Desktop VRT
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     needs: get-pr
     container:
       image: mcr.microsoft.com/playwright:v1.59.1-jammy
@@ -239,7 +239,7 @@ jobs:
 
   merge-patch:
     name: Merge VRT Patches
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     needs: [get-pr, browser-vrt, desktop-vrt]
     if: ${{ !cancelled() && needs.get-pr.result == 'success' }}
     container:
