@@ -117,6 +117,7 @@ export function useBuiltInBankSyncProviders({
   const [loadingAkahuAccounts, setLoadingAkahuAccounts] = useState(false);
 
   const enableBankingEnabled = useFeatureFlag('enableBanking');
+  const akahuEnabled = useFeatureFlag('akahuBankSync');
   const { configuredGoCardless } = useGoCardlessStatus();
   const { configuredSimpleFin } = useSimpleFinStatus();
   const { configuredPluggyAi } = usePluggyAiStatus();
@@ -647,19 +648,21 @@ export function useBuiltInBankSyncProviders({
         };
       });
 
-    baseProviders.push({
-      id: 'akahu',
-      displayName: 'Akahu',
-      description: t(
-        'Link a New Zealand bank account to automatically download transactions.',
-      ),
-      isConfigured: configuredProviders.akahu,
-      canConfigure: canConfigureProviders,
-      isLoading: loadingAkahuAccounts,
-      onConfigure: onAkahuInit,
-      onLink: onConnectAkahu,
-      onReset: onAkahuReset,
-    });
+    if (akahuEnabled) {
+      baseProviders.push({
+        id: 'akahu',
+        displayName: 'Akahu',
+        description: t(
+          'Link a New Zealand bank account to automatically download transactions.',
+        ),
+        isConfigured: configuredProviders.akahu,
+        canConfigure: canConfigureProviders,
+        isLoading: loadingAkahuAccounts,
+        onConfigure: onAkahuInit,
+        onLink: onConnectAkahu,
+        onReset: onAkahuReset,
+      });
+    }
 
     if (enableBankingEnabled) {
       baseProviders.push({
@@ -686,6 +689,7 @@ export function useBuiltInBankSyncProviders({
     configuredProviders.simpleFin,
     configuredProviders.akahu,
     enableBankingEnabled,
+    akahuEnabled,
     isEnableBankingLoading,
     loadingSimpleFinAccounts,
     loadingAkahuAccounts,
