@@ -1,0 +1,54 @@
+default_platform(:android)
+
+# Reads the version name from the @actual-app/mobile package.json so the Play
+# Store version stays in lockstep with the rest of the monorepo.
+def package_version
+  require "json"
+  pkg = File.expand_path("../../package.json", __dir__)
+  JSON.parse(File.read(pkg))["version"]
+end
+
+platform :android do
+  desc "Build a signed AAB and upload it to the Play Store internal track"
+  lane :beta do
+    build_and_upload(track: "internal")
+  end
+
+  desc "Build a signed AAB and upload it to the Play Store production track (no auto-rollout)"
+  lane :release do
+    build_and_upload(track: "production", rollout: "0")
+  end
+
+  private_lane :build_and_upload do |options|
+    version_code = (ENV["BUILD_NUMBER"] || Time.now.strftime("%s")).to_i
+
+    gradle(
+      task: "bundle",
+      build_type: "Release",
+      project_dir: File.expand_path("..", __dir__),
+      properties: {
+        "versionName" => package_version,
+        "versionCode" => version_code,
+        # Keystore signing config — read by app/build.gradle (see README).
+        "android.injected.signing.store.file" => ENV["ANDROID_KEYSTORE_PATH"],
+        "android.injected.signing.store.password" => ENV["ANDROID_KEYSTORE_PASSWORD"],
+        "android.injected.signing.key.alias" => ENV["ANDROID_KEY_ALIAS"],
+        "android.injected.signing.key.password" => ENV["ANDROID_KEY_PASSWORD"],
+      }.compact,
+    )
+
+    upload_to_play_store(
+      track: options[:track],
+      rollout: options[:rollout],
+      release_status: options[:track] == "production" ? "draft" : "completed",
+      json_key: ENV["PLAY_STORE_JSON_KEY_PATH"],
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      aab: File.expand_path(
+        "../app/build/outputs/bundle/release/app-release.aab",
+        __dir__,
+      ),
+    )
+  end
+end

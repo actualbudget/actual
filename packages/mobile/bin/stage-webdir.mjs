@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Stages the web build (packages/desktop-client/build) into the Capacitor
-// webDir (packages/desktop-ios/webdir) so `cap sync ios` can copy it into the
+// webDir (packages/mobile/webdir) so `cap sync <platform>` can copy it into the
 // native project. Kept as a separate step so the webDir is a clean, disposable
 // copy rather than a symlink into another workspace's build output.
 
@@ -18,7 +18,7 @@ try {
 } catch {
   console.error(
     `Web build not found at ${webBuildDir}.\n` +
-      'Run `yarn workspace @actual-app/ios build:web` (or `yarn build:ios`) first.',
+      'Run `yarn workspace @actual-app/mobile build:web` (or `yarn build:ios` / `yarn build:android`) first.',
   );
   process.exit(1);
 }

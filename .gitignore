@@ -89,14 +89,24 @@ build/
 *storybook.log
 storybook-static
 
-# Capacitor / iOS (packages/desktop-ios)
-packages/desktop-ios/webdir/
-packages/desktop-ios/ios/App/App/public/
-packages/desktop-ios/ios/App/Pods/
-packages/desktop-ios/ios/App/output/
-packages/desktop-ios/ios/App/App.xcworkspace/xcuserdata/
-packages/desktop-ios/ios/DerivedData/
+# Capacitor / native mobile (packages/mobile)
+packages/mobile/webdir/
+# iOS
+packages/mobile/ios/App/App/public/
+packages/mobile/ios/App/Pods/
+packages/mobile/ios/App/output/
+packages/mobile/ios/App/App.xcworkspace/xcuserdata/
+packages/mobile/ios/DerivedData/
 *.xcuserstate
+# Android
+packages/mobile/android/app/src/main/assets/public/
+packages/mobile/android/.gradle/
+packages/mobile/android/build/
+packages/mobile/android/app/build/
+packages/mobile/android/local.properties
+*.keystore
+*.jks
+# Fastlane
 fastlane/report.xml
 fastlane/Preview.html
 fastlane/test_output

@@ -13,11 +13,19 @@ const config: CapacitorConfig = {
     // restricting navigation to app-bound domains is both safe and necessary.
     limitsNavigationsToAppBoundDomains: true,
   },
+  android: {
+    // Cross-origin isolation (for SharedArrayBuffer) is added by the custom
+    // WebViewClient in COEPWebViewClient.kt; without it the app falls back to
+    // the slower no-SharedArrayBuffer path automatically.
+    allowMixedContent: false,
+  },
   server: {
-    // Serve the bundled web assets from capacitor://localhost (the default).
-    // The custom WKURLSchemeHandler in COEPSchemeHandler.swift stamps the
-    // COOP/COEP headers on these responses so `crossOriginIsolated` is true.
+    // iOS serves bundled assets from capacitor://localhost; Android from
+    // https://localhost. The native COOP/COEP injectors
+    // (COEPSchemeHandler.swift / COEPWebViewClient.kt) stamp the headers so
+    // `crossOriginIsolated` is true on each platform.
     iosScheme: 'capacitor',
+    androidScheme: 'https',
   },
   plugins: {
     // Auto-hide after the web layer has had time to paint. Driven entirely by

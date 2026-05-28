@@ -1,24 +1,28 @@
 {
-  "name": "@actual-app/ios",
+  "name": "@actual-app/mobile",
   "version": "26.5.2",
   "private": true,
-  "description": "Native iOS app for Actual Budget (Capacitor wrapper around the web build)",
+  "description": "Native mobile apps (iOS + Android) for Actual Budget, built with Capacitor around the web build",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/actualbudget/actual.git",
-    "directory": "packages/desktop-ios"
+    "directory": "packages/mobile"
   },
   "scripts": {
     "build:web": "yarn workspace @actual-app/web build:browser:capacitor",
     "copy-web": "node ./bin/stage-webdir.mjs",
-    "sync": "yarn copy-web && cap sync ios",
-    "build": "yarn build:web && yarn sync",
+    "sync:ios": "yarn copy-web && cap sync ios",
+    "sync:android": "yarn copy-web && cap sync android",
     "add:ios": "cap add ios",
-    "open": "cap open ios",
-    "run:ios": "yarn sync && cap run ios"
+    "add:android": "cap add android",
+    "open:ios": "cap open ios",
+    "open:android": "cap open android",
+    "run:ios": "yarn sync:ios && cap run ios",
+    "run:android": "yarn sync:android && cap run android"
   },
   "dependencies": {
+    "@capacitor/android": "^7.0.0",
     "@capacitor/app": "^7.0.0",
     "@capacitor/browser": "^7.0.0",
     "@capacitor/core": "^7.0.0",

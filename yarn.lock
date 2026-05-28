@@ -171,10 +171,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@actual-app/ios@workspace:packages/desktop-ios":
+"@actual-app/mobile@workspace:packages/mobile":
   version: 0.0.0-use.local
-  resolution: "@actual-app/ios@workspace:packages/desktop-ios"
+  resolution: "@actual-app/mobile@workspace:packages/mobile"
   dependencies:
+    "@capacitor/android": "npm:^7.0.0"
     "@capacitor/app": "npm:^7.0.0"
     "@capacitor/assets": "npm:^3.0.5"
     "@capacitor/browser": "npm:^7.0.0"
@@ -2004,6 +2005,15 @@ __metadata:
     "@typescript/vfs": "npm:^1.6.2"
     typescript: "npm:5.4.5"
   checksum: 10/ad59fe9f4d805bab3d3c260315020259d9fc8a27bbbfbd74d16502e2e60cf15eaa8527435eb45da1ecc0d0b223d5f5a0f9ebd72dd3f0fec605f39d9a92dda752
+  languageName: node
+  linkType: hard
+
+"@capacitor/android@npm:^7.0.0":
+  version: 7.6.5
+  resolution: "@capacitor/android@npm:7.6.5"
+  peerDependencies:
+    "@capacitor/core": ^7.6.0
+  checksum: 10/7944fa0d0ada8e2237b884b2b1b3e92ce7d28a30e4e13ead234b24b50b6768295ccecc2e92245b2e4aa7ec54584407b11b76246c9c5af332b17fa49cbd54974a
   languageName: node
   linkType: hard
 

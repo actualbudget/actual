@@ -41,21 +41,21 @@ jobs:
           cache: 'false'
 
       - name: Build web app (capacitor mode) and sync into the iOS project
-        run: ./bin/package-ios --skip-translations
+        run: ./bin/package-mobile ios --skip-translations
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@afeafc3d1ab54a631816aba4c914a0081c12ff2f # v1.310.0
         with:
           ruby-version: '3.3'
           bundler-cache: true
-          working-directory: packages/desktop-ios/ios/App
+          working-directory: packages/mobile/ios/App
 
       - name: Install CocoaPods
-        working-directory: packages/desktop-ios/ios/App
+        working-directory: packages/mobile/ios/App
         run: bundle exec pod install
 
       - name: Build and upload via Fastlane
-        working-directory: packages/desktop-ios/ios/App
+        working-directory: packages/mobile/ios/App
         env:
           APP_IDENTIFIER: org.actualbudget.app
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}

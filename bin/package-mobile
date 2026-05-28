@@ -1,18 +1,27 @@
 #!/bin/bash -e
 
-# Builds the web app in "capacitor" mode and syncs it into the native iOS
-# project (packages/desktop-ios/ios). Mirrors bin/package-browser, but targets
-# the Capacitor wrapper instead of the standalone web build.
+# Builds the web app in "capacitor" mode and syncs it into a native mobile
+# project (packages/mobile/{ios,android}). Mirrors bin/package-browser, but
+# targets the Capacitor wrapper instead of the standalone web build.
 #
-# Requires (not installed by yarn): Xcode + CocoaPods on a macOS machine.
+# Usage: bin/package-mobile <ios|android> [--skip-translations]
+#
+# Requires (not installed by yarn):
+#   - ios:     Xcode + CocoaPods (macOS only)
+#   - android: JDK 17 + the Android SDK
 
 ROOT=`dirname $0`
 
 cd "$ROOT/.."
 
+PLATFORM=""
 SKIP_TRANSLATIONS=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    ios|android)
+      PLATFORM="$1"
+      shift
+      ;;
     --skip-translations)
       SKIP_TRANSLATIONS=true
       shift
@@ -23,6 +32,11 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+if [ -z "$PLATFORM" ]; then
+  echo "Usage: bin/package-mobile <ios|android> [--skip-translations]" >&2
+  exit 1
+fi
 
 if [ "$SKIP_TRANSLATIONS" = false ]; then
   echo "Updating translations..."
@@ -41,4 +55,4 @@ fi
 lage build:browser:capacitor --to=@actual-app/web
 
 # Stage the build into the capacitor webDir and sync into the native project.
-yarn workspace @actual-app/ios sync
+yarn workspace @actual-app/mobile "sync:$PLATFORM"
