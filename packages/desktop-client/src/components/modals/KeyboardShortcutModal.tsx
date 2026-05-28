@@ -362,6 +362,7 @@ export function KeyboardShortcutModal() {
             shortcut: 'N',
             description: t('Set notes for selected transactions'),
           },
+
           {
             id: 'set-category-for-selected-transactions',
             shortcut: 'C',

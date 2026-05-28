@@ -255,6 +255,7 @@ export function SelectedTransactionsButton({
     onEdit,
     selectedIds,
   ]);
+
   useHotkeys('c', () => onEdit('category', selectedIds), hotKeyOptions, [
     onEdit,
     selectedIds,

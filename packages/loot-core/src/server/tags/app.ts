@@ -3,6 +3,7 @@ import * as db from '#server/db';
 import { mutator } from '#server/mutators';
 import { batchMessages } from '#server/sync';
 import { undoable } from '#server/undo';
+import { getNoteTags } from '#shared/note-tags';
 import type { TagEntity } from '#types/models';
 
 export type TagsHandlers = {
@@ -88,7 +89,7 @@ async function discoverTags(): Promise<TagEntity[]> {
 
   const tags = await getTags();
   for (const { notes } of taggedNotes) {
-    for (const [_, tag] of notes.matchAll(/(?<!#)#([^#\s]+)/g)) {
+    for (const tag of getNoteTags(notes)) {
       if (!tags.find(t => t.tag === tag)) {
         tags.push(await createTag({ tag }));
       }

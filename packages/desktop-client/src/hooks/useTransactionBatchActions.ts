@@ -25,8 +25,20 @@ import type {
   ConfirmTransactionEditReason,
   Modal as ModalType,
 } from '#modals/modalsSlice';
+import { removeAllTagsFromNotes } from '#notes/tagUtils';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
+
+export type BatchEditName = keyof TransactionEntity;
+type BatchEditValue =
+  | Parameters<
+      Extract<ModalType, { name: 'edit-field' }>['options']['onSubmit']
+    >[1]
+  | boolean
+  | null;
+type BatchEditMode = Parameters<
+  Extract<ModalType, { name: 'edit-field' }>['options']['onSubmit']
+>[2];
 
 type BatchReconciledReason = Extract<
   ConfirmTransactionEditReason,
@@ -39,15 +51,8 @@ type BatchEditProps = {
   onSuccess?: (
     ids: Array<TransactionEntity['id']>,
     name: keyof TransactionEntity,
-    value:
-      | Parameters<
-          Extract<ModalType, { name: 'edit-field' }>['options']['onSubmit']
-        >[1]
-      | boolean
-      | null,
-    mode: Parameters<
-      Extract<ModalType, { name: 'edit-field' }>['options']['onSubmit']
-    >[2],
+    value: BatchEditValue,
+    mode: BatchEditMode,
   ) => void;
 };
 
@@ -90,8 +95,8 @@ export function useTransactionBatchActions() {
 
     const onChange = async (
       name: keyof TransactionEntity,
-      value: Parameters<NonNullable<BatchEditProps['onSuccess']>>[2],
-      mode?: Parameters<NonNullable<BatchEditProps['onSuccess']>>[3],
+      value: BatchEditValue,
+      mode?: BatchEditMode,
     ) => {
       let transactionsToChange = transactions;
 
@@ -126,7 +131,9 @@ export function useTransactionBatchActions() {
         let valueToSet = value;
 
         if (name === 'notes') {
-          if (mode === 'prepend') {
+          if (mode === 'removeAllTags') {
+            valueToSet = removeAllTagsFromNotes(trans.notes);
+          } else if (mode === 'prepend') {
             valueToSet =
               trans.notes === null ? value : `${String(value)}${trans.notes}`;
           } else if (mode === 'append') {

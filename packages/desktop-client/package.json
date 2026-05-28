@@ -90,6 +90,7 @@
     "#auth/*": "./src/auth/*.ts",
     "#style/theme": "./src/style/theme.tsx",
     "#style/*": "./src/style/*.ts",
+    "#notes/tagUtils": "./src/notes/tagUtils.ts",
     "#notes/*": "./src/notes/*.tsx",
     "#accounts/*": "./src/accounts/*.ts",
     "#app/*": "./src/app/*.ts",
