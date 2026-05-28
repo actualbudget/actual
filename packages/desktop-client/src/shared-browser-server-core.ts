@@ -24,6 +24,13 @@ type BudgetGroup = {
   requestToPort: Map<string, CoordinatorPort>;
   requestNames: Map<string, string>;
   requestBudgetIds: Map<string, string>;
+  /** Original messages stored for request recovery when a leader dies. */
+  requestMessages: Map<string, Record<string, unknown>>;
+  /**
+   * Requests that were in-flight against the old leader when this tab was
+   * promoted.  Flushed as __to-worker once the new backend sends connect.
+   */
+  pendingRequests: Array<Record<string, unknown>>;
 };
 
 type CoordinatorOptions = {
@@ -96,6 +103,8 @@ export function createCoordinator({
       requestToPort: new Map(),
       requestNames: new Map(),
       requestBudgetIds: new Map(),
+      requestMessages: new Map(),
+      pendingRequests: [],
     };
   }
 
@@ -291,6 +300,23 @@ export function createCoordinator({
         console.log(
           `[SharedWorker] Last tab left budget "${budgetId}" — removing group`,
         );
+
+        // Before deleting the group, collect any in-flight requests that came
+        // from unassigned ports (e.g. load-global-prefs from the iOS OIDC
+        // callback tab).  We'll re-enqueue them for the new leader so they
+        // aren't silently dropped.
+        const survivingRequests: Array<{
+          id: string;
+          requester: CoordinatorPort;
+          msg: Record<string, unknown>;
+        }> = [];
+        for (const [id, requester] of group.requestToPort) {
+          const origMsg = group.requestMessages.get(id);
+          if (origMsg && requester !== port && unassignedPorts.has(requester)) {
+            survivingRequests.push({ id, requester, msg: origMsg });
+          }
+        }
+
         budgetGroups.delete(budgetId);
         // If no groups remain and unassigned tabs are waiting, promote one to
         // lobby leader so they can connect a backend.  This covers the iOS
@@ -301,6 +327,23 @@ export function createCoordinator({
           const candidate = unassignedPorts.values().next()
             .value as CoordinatorPort;
           electLeader('__lobby', candidate);
+
+          // Re-enqueue the surviving in-flight requests in the new leader's
+          // group so they are sent to the new backend once it connects.
+          if (survivingRequests.length > 0) {
+            const newGroup = budgetGroups.get('__lobby');
+            if (newGroup) {
+              for (const { id, requester, msg } of survivingRequests) {
+                newGroup.requestToPort.set(id, requester);
+                if (msg.name) {
+                  newGroup.requestNames.set(id, msg.name as string);
+                }
+                newGroup.requestMessages.set(id, msg);
+                newGroup.pendingRequests.push(msg);
+              }
+            }
+          }
+
           logState(
             'Promoted unassigned tab to lobby leader after last group removed',
           );
@@ -312,6 +355,7 @@ export function createCoordinator({
         if (p === port) {
           group.requestToPort.delete(id);
           group.requestNames.delete(id);
+          group.requestMessages.delete(id);
         }
       }
     }
@@ -337,6 +381,8 @@ export function createCoordinator({
       group.requestToPort.clear();
       group.requestNames.clear();
       group.requestBudgetIds.clear();
+      group.requestMessages.clear();
+      group.pendingRequests = [];
     }
     if (!group.restoreBudgetId && budgetToRestore) {
       group.restoreBudgetId = budgetToRestore;
@@ -397,6 +443,7 @@ export function createCoordinator({
       if (p === port) {
         group.requestToPort.delete(id);
         group.requestNames.delete(id);
+        group.requestMessages.delete(id);
       }
     }
   }
@@ -638,6 +685,7 @@ export function createCoordinator({
 
               group.requestToPort.delete(workerMsg.id as string);
               group.requestNames.delete(workerMsg.id as string);
+              group.requestMessages.delete(workerMsg.id as string);
             }
           } else if (workerMsg.type === 'connect') {
             if (group.restoreBudgetId) {
@@ -645,6 +693,18 @@ export function createCoordinator({
             } else {
               group.backendConnected = true;
               broadcastConnect(portBudget!);
+              // Flush any requests that were in-flight against the old leader
+              // when this tab was promoted (e.g. load-global-prefs from the
+              // iOS OIDC callback flow).
+              if (group.pendingRequests.length > 0) {
+                const toReplay = group.pendingRequests.splice(0);
+                for (const pendingMsg of toReplay) {
+                  group.leaderPort.postMessage({
+                    type: '__to-worker',
+                    msg: pendingMsg,
+                  });
+                }
+              }
             }
           } else if (workerMsg.type === 'app-init-failure') {
             lastAppInitFailure = workerMsg;
@@ -874,6 +934,9 @@ export function createCoordinator({
                 msg.name as string,
               );
             }
+            // Store the original message so it can be re-routed to a new
+            // leader if this group's leader dies before replying.
+            targetGroup.requestMessages.set(msg.id as string, msg);
             if (
               msg.name === 'load-budget' &&
               msg.args &&

@@ -1245,5 +1245,83 @@ describe('SharedWorker coordinator', () => {
         coordinator.getState().budgetGroups.get('__lobby')!.leaderPort,
       ).toBe(callbackTab);
     });
+    it('replays in-flight requests to the new backend when the stale leader dies mid-request', () => {
+      // Stale leader from a previous navigation still holds the __lobby group
+      // with a connected backend.
+      const staleLeader = connectTab(coordinator);
+      sendInit(staleLeader);
+      simulateWorkerConnect(staleLeader);
+      // staleLeader is now LEADER with backendConnected = true
+
+      // OIDC callback page connects while the stale leader is still alive.
+      // It is assigned UNASSIGNED + connect (existing backend).
+      const callbackTab = connectTab(coordinator);
+      sendInit(callbackTab);
+      expect(callbackTab.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: '__role-change', role: 'UNASSIGNED' }),
+      );
+      expect(callbackTab.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'connect' }),
+      );
+      callbackTab.postMessage.mockClear();
+
+      // The app on callbackTab has resolved initConnection() and now sends
+      // load-global-prefs.  The SharedWorker routes it as __to-worker to
+      // staleLeader (the only group with backendConnected = true).
+      sendMsg(callbackTab, {
+        type: 'load-global-prefs',
+        id: 'req-1',
+        name: 'load-global-prefs',
+        args: {},
+      });
+
+      // Confirm the request was forwarded to staleLeader
+      expect(staleLeader.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__to-worker',
+          msg: expect.objectContaining({ id: 'req-1' }),
+        }),
+      );
+      staleLeader.postMessage.mockClear();
+
+      // Stale leader closes before the Worker replies — the in-flight request
+      // is lost unless we recover it.
+      sendMsg(staleLeader, { type: 'tab-closing' });
+
+      // callbackTab must be promoted to lobby leader.
+      expect(callbackTab.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__role-change',
+          role: 'LEADER',
+          budgetId: '__lobby',
+        }),
+      );
+      expect(callbackTab.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: '__become-leader' }),
+      );
+      callbackTab.postMessage.mockClear();
+
+      // New backend on callbackTab boots up and sends connect.
+      simulateWorkerConnect(callbackTab);
+
+      // The SharedWorker must re-route the recovered request as __to-worker
+      // so the new backend can process it.
+      expect(callbackTab.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__to-worker',
+          msg: expect.objectContaining({ id: 'req-1', name: 'load-global-prefs' }),
+        }),
+      );
+
+      // When the new backend replies, the SharedWorker must route the reply
+      // back to callbackTab (the original requester).
+      sendMsg(callbackTab, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: 'req-1', result: { darkMode: false } },
+      });
+      expect(callbackTab.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'reply', id: 'req-1' }),
+      );
+    });
   });
 });
