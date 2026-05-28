@@ -8,6 +8,7 @@ import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
+import { assertUrlAllowed } from '#util/ssrf';
 
 const app = express();
 export { app as handlers };
@@ -314,6 +315,7 @@ function parseAccessKey(accessKey) {
 
 async function getAccessKey(base64Token) {
   const token = Buffer.from(base64Token, 'base64').toString();
+  await assertUrlAllowed(token);
   const options = {
     method: 'POST',
     port: 443,
@@ -384,6 +386,8 @@ async function getAccounts(
 
   const url = new URL(`${sfin.baseUrl}/accounts`);
   url.search = params.toString();
+
+  await assertUrlAllowed(url.toString());
 
   const response = await fetch(url.toString(), {
     method: 'GET',
