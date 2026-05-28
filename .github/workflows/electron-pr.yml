@@ -40,9 +40,9 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-      - if: ${{ startsWith(matrix.os, 'windows') }}
+      - if: ${{ contains(matrix.os, 'windows') }}
         run: pip.exe install setuptools
-      - if: ${{ ! startsWith(matrix.os, 'windows') }}
+      - if: ${{ ! contains(matrix.os, 'windows') }}
         run: |
           mkdir .venv
           python3 -m venv .venv
@@ -127,7 +127,7 @@ jobs:
           path: packages/desktop-electron/dist/Actual-mac-arm64.dmg
 
       - name: Upload Windows Store Build
-        if: ${{ startsWith(matrix.os, 'windows') }}
+        if: ${{ contains(matrix.os, 'windows') }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: actual-electron-${{ matrix.os }}-appx
