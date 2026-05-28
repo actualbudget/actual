@@ -1,6 +1,9 @@
 import { useMemo } from 'react';
 import type { ComponentProps } from 'react';
 
+import { Button } from '@actual-app/components/button';
+import { SvgRemove } from '@actual-app/components/icons/v2';
+import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
 import type { View } from '@actual-app/components/view';
 import { extractTagsForFilter } from '@actual-app/core/shared/tags';
@@ -52,6 +55,7 @@ export function TagMultiAutocomplete({
           highlightedIndex={highlightedIndex}
         />
       )}
+      renderMultiItem={TagMultiItem}
       inputProps={{ placeholder: 'Choose tags' }}
     />
   );
@@ -91,5 +95,28 @@ function TagList<T extends AutocompleteItem>({
         );
       })}
     </div>
+  );
+}
+
+function TagMultiItem({
+  name,
+  onRemove,
+}: {
+  name: string;
+  onRemove: () => unknown;
+}) {
+  const getTagCSS = useTagCSS({ ellipsis: true });
+  return (
+    <Button
+      variant="bare"
+      onClick={onRemove}
+      className={getTagCSS(name.replace(/^#/, ''))}
+      style={{ margin: '0px 2px 1px 2px', maxWidth: 'calc(100% - 4px)' }}
+    >
+      <SpaceBetween direction="horizontal" gap={3} wrap={false} align="center">
+        <span>{name}</span>
+        <SvgRemove height={8} width={8} color={theme.buttonPrimaryText} />
+      </SpaceBetween>
+    </Button>
   );
 }
