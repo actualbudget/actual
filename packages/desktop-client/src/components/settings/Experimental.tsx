@@ -240,7 +240,6 @@ export function ExperimentalFeatures() {
             </FeatureToggle>
             <FeatureToggle
               flag="akahuBankSync"
-              feedbackLink="https://github.com/actualbudget/actual/issues/7799"
             >
               <Trans>Akahu Bank Sync (NZ banks)</Trans>
             </FeatureToggle>
