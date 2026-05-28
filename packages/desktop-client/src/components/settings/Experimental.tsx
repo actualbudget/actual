@@ -238,9 +238,7 @@ export function ExperimentalFeatures() {
             >
               <Trans>Enable Banking sync (EU banks)</Trans>
             </FeatureToggle>
-            <FeatureToggle
-              flag="akahuBankSync"
-            >
+            <FeatureToggle flag="akahuBankSync">
               <Trans>Akahu Bank Sync (NZ banks)</Trans>
             </FeatureToggle>
             {showServerPrefs && (
