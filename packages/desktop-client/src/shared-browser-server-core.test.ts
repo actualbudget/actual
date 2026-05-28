@@ -1309,7 +1309,10 @@ describe('SharedWorker coordinator', () => {
       expect(callbackTab.postMessage).toHaveBeenCalledWith(
         expect.objectContaining({
           type: '__to-worker',
-          msg: expect.objectContaining({ id: 'req-1', name: 'load-global-prefs' }),
+          msg: expect.objectContaining({
+            id: 'req-1',
+            name: 'load-global-prefs',
+          }),
         }),
       );
 
