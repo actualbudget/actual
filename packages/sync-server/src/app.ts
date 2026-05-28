@@ -1,4 +1,5 @@
 import fs, { readFileSync } from 'node:fs';
+import type { Server } from 'node:http';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -182,14 +183,39 @@ function parseHTTPSConfig(value: string) {
   return fs.readFileSync(value);
 }
 
-function sendServerStartedMessage() {
+function sendServerStartedMessage(hostname: string = config.get('hostname')) {
   // Signify to any parent process that the server has started. Used in electron desktop app
   // oxlint-disable-next-line typescript/ban-ts-comment
   // @ts-ignore-error electron types
   process.parentPort?.postMessage({ type: 'server-started' });
-  console.log(
-    'Listening on ' + config.get('hostname') + ':' + config.get('port') + '...',
-  );
+  console.log('Listening on ' + hostname + ':' + config.get('port') + '...');
+}
+
+function listenWithIPv4Fallback(
+  createServer: () => Server,
+  port: number,
+  hostname: string,
+) {
+  const server = createServer();
+  server.once('listening', () => sendServerStartedMessage(hostname));
+  server.once('error', err => {
+    const code = 'code' in err ? err.code : undefined;
+    // Hosts with IPv6 disabled (e.g. some CI runners and IPv6-disabled
+    // kernels) cannot bind the dual-stack `::` wildcard. Without a fallback
+    // the process exits and the container stops. Retry on all IPv4 interfaces
+    // so the server still comes up.
+    if (
+      hostname === '::' &&
+      (code === 'EAFNOSUPPORT' || code === 'EADDRNOTAVAIL')
+    ) {
+      const fallback = createServer();
+      fallback.once('listening', () => sendServerStartedMessage('0.0.0.0'));
+      fallback.listen(port, '0.0.0.0');
+    } else {
+      throw err;
+    }
+  });
+  server.listen(port, hostname);
 }
 
 export async function run() {
@@ -214,6 +240,7 @@ export async function run() {
     }
   }
 
+  let createServer: () => Server;
   if (config.get('https.key') && config.get('https.cert')) {
     const https = await import('node:https');
     const httpsOptions = {
@@ -221,12 +248,11 @@ export async function run() {
       key: parseHTTPSConfig(config.get('https.key')),
       cert: parseHTTPSConfig(config.get('https.cert')),
     };
-    https.createServer(httpsOptions, app).listen(port, hostname, () => {
-      sendServerStartedMessage();
-    });
+    createServer = () => https.createServer(httpsOptions, app);
   } else {
-    app.listen(port, hostname, () => {
-      sendServerStartedMessage();
-    });
+    const http = await import('node:http');
+    createServer = () => http.createServer(app);
   }
+
+  listenWithIPv4Fallback(createServer, port, hostname);
 }
