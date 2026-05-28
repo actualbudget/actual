@@ -301,7 +301,9 @@ export function createCoordinator({
           const candidate = unassignedPorts.values().next()
             .value as CoordinatorPort;
           electLeader('__lobby', candidate);
-          logState('Promoted unassigned tab to lobby leader after last group removed');
+          logState(
+            'Promoted unassigned tab to lobby leader after last group removed',
+          );
         }
       }
     } else {
