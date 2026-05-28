@@ -6,11 +6,11 @@ Release date: 2026-06-01
 
 This release adds new reports, a new bank sync provider, a UI for budget automations (goal templates) and releases custom themes as stable, as well as numerous other fixes.
 
-- [Crossover report](/docs/experimental/crossover-point-report) released as a first-party feature
+- [Crossover report](/docs/reports/#crossover-point) released as a first-party feature
 - [Custom themes](/docs/custom-themes) released as a first-party feature
 - Redesigned bank sync configuration and account linking process
 - Add Tag autocomplete when editing transaction notes
-- Experimental: Add a UI for budget automations (goal templates)
+- Experimental: Add a [UI for budget automations](/docs/experimental/budget-automation) (goal templates)
 - Experimental: Add Enable Banking integration as a bank sync provider
 - Experimental: Add [Balance Forecast report](/docs/experimental/balance-forecast-report)
 
