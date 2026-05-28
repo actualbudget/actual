@@ -41,7 +41,7 @@ jobs:
         uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4.0.0
 
       - name: Setup Blacksmith Builder
-        uses: useblacksmith/setup-docker-builder@v1
+        uses: useblacksmith/setup-docker-builder@722e97d12b1d06a961800dd6c05d79d951ad3c80 # v1
 
       - name: Docker meta
         id: meta
@@ -88,7 +88,7 @@ jobs:
         run: yarn build:server
 
       - name: Build ubuntu image for testing
-        uses: useblacksmith/build-push-action@v2
+        uses: useblacksmith/build-push-action@fb9e3e6a9299c78462bfadd0d93352c316adc9b8 # v2
         with:
           context: .
           push: false
@@ -105,7 +105,7 @@ jobs:
           until docker exec actual-server sh -c "$HEALTHCMD"; do sleep 1; done
 
       - name: Build and push ubuntu image
-        uses: useblacksmith/build-push-action@v2
+        uses: useblacksmith/build-push-action@fb9e3e6a9299c78462bfadd0d93352c316adc9b8 # v2
         with:
           context: .
           push: true
@@ -114,7 +114,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
 
       - name: Build alpine image for testing
-        uses: useblacksmith/build-push-action@v2
+        uses: useblacksmith/build-push-action@fb9e3e6a9299c78462bfadd0d93352c316adc9b8 # v2
         with:
           context: .
           push: false
@@ -131,7 +131,7 @@ jobs:
           until docker exec actual-server sh -c "$HEALTHCMD"; do sleep 1; done
 
       - name: Build and push alpine image
-        uses: useblacksmith/build-push-action@v2
+        uses: useblacksmith/build-push-action@fb9e3e6a9299c78462bfadd0d93352c316adc9b8 # v2
         with:
           context: .
           push: true
