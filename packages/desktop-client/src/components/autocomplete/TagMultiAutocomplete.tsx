@@ -111,7 +111,7 @@ function TagMultiItem({
       variant="bare"
       onClick={onRemove}
       className={getTagCSS(name.replace(/^#/, ''))}
-      style={{ margin: '0px 2px 1px 2px', maxWidth: 'calc(100% - 4px)' }}
+      style={{ margin: 1, maxWidth: 'calc(100% - 2px)' }}
     >
       <SpaceBetween direction="horizontal" gap={3} wrap={false} align="center">
         <span>{name}</span>
