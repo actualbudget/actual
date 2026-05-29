@@ -843,8 +843,8 @@ const autocompletePopoverTheme = EditorView.baseTheme({
   },
 });
 
-//hack: this is a workaround to forward the pointer events to the completion item. 
-//isPointInsideRect / findAutocompleteElementAtPoint / autocompletePopoverPointerHandler are needed to forward the pointer events to the completion item. 
+//hack: this is a workaround to forward the pointer events to the completion item.
+//isPointInsideRect / findAutocompleteElementAtPoint / autocompletePopoverPointerHandler are needed to forward the pointer events to the completion item.
 //Otherwise the mouse interactions will not work as expected.
 function isPointInsideRect(x: number, y: number, rect: DOMRect) {
   return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
