@@ -712,13 +712,10 @@ const autocompletePopoverTheme = EditorView.baseTheme({
     borderRadius: '6px',
     overflow: 'hidden',
     overflowY: 'auto',
-    // Mirror styles.darkScrollbar so the popover uses the app's custom
-    // scrollbar instead of the default browser one.
     scrollbarWidth: 'thin',
     scrollbarColor: 'rgba(200, 200, 200, .5) transparent',
   },
 
-  // Custom scrollbar for the suggestion list (WebKit/Blink)
   '.cm-tooltip.cm-tooltip-autocomplete > ul::-webkit-scrollbar': {
     width: '11px',
     backgroundColor: 'rgba(0, 0, 0, 0)',
