@@ -291,10 +291,11 @@ function SharedArrayBufferWarning({ style }: SharedArrayBufferWarningProps) {
       <Button
         variant="bare"
         aria-label={warningMessage}
-        style={{ ...style, color: theme.warningTextDark }}
+        style={{ ...style, color: theme.warningText }}
         onPress={handlePress}
       >
-        <SvgAlertTriangle width={13} />
+        <Trans>Warning</Trans>
+        <SvgAlertTriangle width={13} style={{ marginLeft: '6 px' }} />
       </Button>
     </Tooltip>
   );
