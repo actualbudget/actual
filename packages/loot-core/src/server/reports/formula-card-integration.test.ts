@@ -5,11 +5,11 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
+import { conditionsToAQL } from '#server/transactions/transaction-rules';
 import {
   CustomFunctionsPlugin,
   customFunctionsTranslations,
-} from '#server/rules/customFunctions';
-import { conditionsToAQL } from '#server/transactions/transaction-rules';
+} from '#shared/formulas/customFunctions';
 import { q } from '#shared/query';
 
 // Integration tests for formula cards with real database queries

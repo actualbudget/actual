@@ -6,14 +6,14 @@ import enUS from 'hyperformula/i18n/languages/enUS';
 
 import { logger } from '#platform/server/log';
 import type { TransactionForRules } from '#server/transactions/transaction-rules';
+import {
+  CustomFunctionsPlugin,
+  customFunctionsTranslations,
+} from '#shared/formulas/customFunctions';
 import { currentDay, format, parseDate } from '#shared/months';
 import { FIELD_TYPES } from '#shared/rules';
 import { amountToInteger } from '#shared/util';
 
-import {
-  CustomFunctionsPlugin,
-  customFunctionsTranslations,
-} from './customFunctions';
 import { assert } from './rule-utils';
 
 HyperFormula.registerLanguage('enUS', enUS);
