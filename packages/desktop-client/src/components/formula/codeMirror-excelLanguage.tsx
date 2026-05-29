@@ -13,7 +13,7 @@ import {
 } from '@codemirror/language';
 import type { StreamParser } from '@codemirror/language';
 import type { Extension } from '@codemirror/state';
-import { EditorView, hoverTooltip, tooltips } from '@codemirror/view';
+import { EditorView, hoverTooltip, tooltips, ViewPlugin } from '@codemirror/view';
 import type { Tooltip } from '@codemirror/view';
 import { tags } from '@lezer/highlight';
 import { t } from 'i18next';
@@ -705,17 +705,34 @@ const autocompletePopoverTheme = EditorView.baseTheme({
   '.cm-tooltip.cm-tooltip-autocomplete > ul': {
     ...styles.shadowLarge,
     margin: 0,
-    // Outer inset gutter for the whole list (so content never hugs the edges)
-    padding: '12px',
+    padding: '5px 0',
     maxHeight: '260px',
     minWidth: '280px',
     listStyle: 'none',
-    backgroundColor: theme.menuBackground,
-    color: theme.menuItemText,
+    backgroundColor: theme.menuAutoCompleteBackground,
+    color: theme.menuAutoCompleteText,
     borderRadius: '6px',
     overflow: 'hidden',
     overflowY: 'auto',
+    // Mirror styles.darkScrollbar so the popover uses the app's custom
+    // scrollbar instead of the default browser one.
+    scrollbarWidth: 'thin',
+    scrollbarColor: 'rgba(200, 200, 200, .5) transparent',
   },
+
+  // Custom scrollbar for the suggestion list (WebKit/Blink)
+  '.cm-tooltip.cm-tooltip-autocomplete > ul::-webkit-scrollbar': {
+    width: '11px',
+    backgroundColor: 'rgba(0, 0, 0, 0)',
+  },
+  '.cm-tooltip.cm-tooltip-autocomplete > ul::-webkit-scrollbar-thumb:vertical':
+    {
+      width: '7px',
+      borderRadius: '30px',
+      backgroundClip: 'padding-box',
+      backgroundColor: 'rgba(200, 200, 200, .5)',
+      border: '2px solid rgba(0, 0, 0, 0)',
+    },
 
   // Hide CodeMirror's leading icons (gear / f / etc.)
   '.cm-tooltip.cm-tooltip-autocomplete .cm-completionIcon': {
@@ -729,44 +746,64 @@ const autocompletePopoverTheme = EditorView.baseTheme({
   },
 
   // Section headers
-  '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionSection': {
-    padding: '6px 10px 4px',
-    fontSize: '11px',
-    lineHeight: '1em',
-    textTransform: 'uppercase',
-    letterSpacing: '0.03em',
-    color: theme.menuItemTextHeader,
-    opacity: 0.9,
-    marginTop: '8px',
-  },
-  '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionSection:first-child': {
-    marginTop: 0,
-  },
-
+  '.cm-tooltip.cm-tooltip-autocomplete > ul > completion-section, .cm-tooltip.cm-tooltip-autocomplete li.cm-completionSection':
+    {
+      padding: '7px 12px 3px !important',
+      paddingLeft: '12px !important',
+      paddingRight: '12px !important',
+      fontSize: '11px',
+      lineHeight: '1em',
+      textTransform: 'uppercase',
+      letterSpacing: '0.03em',
+      color: theme.menuItemTextHeader,
+      opacity: '1 !important',
+      marginTop: '8px',
+      position: 'sticky',
+      top: 0,
+      backgroundColor: theme.menuAutoCompleteBackground,
+      borderTop: 'none !important',
+      borderBottom: 'none !important',
+      zIndex: 1,
+    },
+  '.cm-tooltip.cm-tooltip-autocomplete > ul > completion-section:first-child, .cm-tooltip.cm-tooltip-autocomplete li.cm-completionSection:first-child':
+    {
+      marginTop: 0,
+    },
+  '.cm-tooltip.cm-tooltip-autocomplete > ul > completion-section::before, .cm-tooltip.cm-tooltip-autocomplete > ul > completion-section::after, .cm-tooltip.cm-tooltip-autocomplete li.cm-completionSection::before, .cm-tooltip.cm-tooltip-autocomplete li.cm-completionSection::after':
+    {
+      display: 'none !important',
+    },
   // Completion rows
+  '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem, .cm-tooltip.cm-tooltip-autocomplete li[role="option"]':
+    {
+      padding: '5px 14px !important',
+      paddingLeft: '14px !important',
+      paddingRight: '14px !important',
+      lineHeight: '1.2',
+      cursor: 'default',
+      display: 'flex',
+      alignItems: 'baseline',
+      gap: '8px',
+      borderRadius: 0,
+    },
+
   '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem': {
-    padding: '8px 10px',
     lineHeight: '1.2',
     cursor: 'default',
     display: 'flex',
     alignItems: 'baseline',
     gap: '8px',
-    borderRadius: '4px',
+    borderRadius: 0,
   },
 
-  '.cm-tooltip.cm-tooltip-autocomplete > ul > completion-section, .cm-tooltip.cm-tooltip-autocomplete li.cm-completionSection':
+  '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem[aria-selected], .cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem:hover, .cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem-hover':
     {
-      padding: '0 !important',
-      position: 'sticky',
-      top: 0,
-      backgroundColor: theme.menuBackground,
-      opacity: '1 !important',
-      zIndex: 1,
+      backgroundColor: theme.menuAutoCompleteBackgroundHover,
+      color: theme.menuAutoCompleteItemTextHover,
     },
-
-  '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem[aria-selected]': {
-    backgroundColor: theme.menuItemBackgroundHover,
-    color: theme.menuItemTextHover,
+  '.cm-tooltip.cm-tooltip-autocomplete li[role="option"]:hover': {
+    backgroundColor: theme.menuAutoCompleteBackgroundHover,
+    color: theme.menuAutoCompleteItemTextHover,
   },
 
   // Matched text within a label
@@ -792,7 +829,7 @@ const autocompletePopoverTheme = EditorView.baseTheme({
   },
   '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem[aria-selected] .cm-completionDetail':
     {
-      color: theme.menuItemTextHover,
+      color: theme.menuAutoCompleteItemTextHover,
     },
 
   // Docs panel for selected completion
@@ -809,6 +846,197 @@ const autocompletePopoverTheme = EditorView.baseTheme({
     borderRadius: '6px',
     marginLeft: '8px',
   },
+});
+
+function isPointInsideRect(x: number, y: number, rect: DOMRect) {
+  return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+}
+
+function findAutocompleteElementAtPoint(
+  document: Document,
+  selector: string,
+  x: number,
+  y: number,
+) {
+  return Array.from(document.querySelectorAll(selector)).find(element =>
+    isPointInsideRect(x, y, element.getBoundingClientRect()),
+  );
+}
+
+const autocompletePopoverPointerHandler = ViewPlugin.define(view => {
+  let hoveredCompletionItem: HTMLElement | null = null;
+
+  function setHoveredCompletionItem(completionItem: HTMLElement | null) {
+    if (hoveredCompletionItem === completionItem) {
+      return;
+    }
+
+    hoveredCompletionItem?.classList.remove('cm-completionItem-hover');
+    hoveredCompletionItem = completionItem;
+    hoveredCompletionItem?.classList.add('cm-completionItem-hover');
+  }
+
+  const handleWheel = (event: WheelEvent) => {
+    if (!(event.target instanceof Element)) {
+      return;
+    }
+
+    let scrollContainer: Element | null | undefined = event.target.closest(
+      '.cm-tooltip.cm-tooltip-autocomplete > ul',
+    );
+    if (!(scrollContainer instanceof HTMLElement)) {
+      // React Aria modals use the browser top layer, so wheel events can target
+      // modal content even when the autocomplete list is visually under the pointer.
+      scrollContainer = findAutocompleteElementAtPoint(
+        view.dom.ownerDocument,
+        '.cm-tooltip.cm-tooltip-autocomplete > ul',
+        event.clientX,
+        event.clientY,
+      );
+    }
+
+    if (!(scrollContainer instanceof HTMLElement)) {
+      return;
+    }
+
+    const canScrollY = scrollContainer.scrollHeight > scrollContainer.clientHeight;
+    const canScrollX = scrollContainer.scrollWidth > scrollContainer.clientWidth;
+    if (!canScrollY && !canScrollX) {
+      return;
+    }
+
+    const deltaMultiplier =
+      event.deltaMode === WheelEvent.DOM_DELTA_LINE
+        ? 16
+        : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
+          ? scrollContainer.clientHeight
+          : 1;
+
+    const previousScrollTop = scrollContainer.scrollTop;
+    const previousScrollLeft = scrollContainer.scrollLeft;
+
+    scrollContainer.scrollTop += event.deltaY * deltaMultiplier;
+    scrollContainer.scrollLeft += event.deltaX * deltaMultiplier;
+
+    if (
+      scrollContainer.scrollTop !== previousScrollTop ||
+      scrollContainer.scrollLeft !== previousScrollLeft
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
+
+  const handleMouseDown = (event: MouseEvent) => {
+    if (!(event.target instanceof Element)) {
+      return;
+    }
+
+    if (event.target.closest('.cm-tooltip.cm-tooltip-autocomplete')) {
+      return;
+    }
+
+    const completionItem = findAutocompleteElementAtPoint(
+      view.dom.ownerDocument,
+      '.cm-tooltip.cm-tooltip-autocomplete li[role="option"], .cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem',
+      event.clientX,
+      event.clientY,
+    );
+
+    if (!(completionItem instanceof HTMLElement)) {
+      setHoveredCompletionItem(null);
+      return;
+    }
+
+    setHoveredCompletionItem(completionItem);
+
+    completionItem.dispatchEvent(
+      new MouseEvent(event.type, {
+        bubbles: true,
+        cancelable: true,
+        view: view.dom.ownerDocument.defaultView,
+        clientX: event.clientX,
+        clientY: event.clientY,
+        screenX: event.screenX,
+        screenY: event.screenY,
+        button: event.button,
+        buttons: event.buttons,
+        ctrlKey: event.ctrlKey,
+        shiftKey: event.shiftKey,
+        altKey: event.altKey,
+        metaKey: event.metaKey,
+      }),
+    );
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  const handleMouseMove = (event: MouseEvent) => {
+    if (!(event.target instanceof Element)) {
+      return;
+    }
+
+    if (event.target.closest('.cm-tooltip.cm-tooltip-autocomplete')) {
+      return;
+    }
+
+    const completionItem = findAutocompleteElementAtPoint(
+      view.dom.ownerDocument,
+      '.cm-tooltip.cm-tooltip-autocomplete li[role="option"], .cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem',
+      event.clientX,
+      event.clientY,
+    );
+
+    if (!(completionItem instanceof HTMLElement)) {
+      return;
+    }
+
+    completionItem.dispatchEvent(
+      new MouseEvent(event.type, {
+        bubbles: true,
+        cancelable: true,
+        view: view.dom.ownerDocument.defaultView,
+        clientX: event.clientX,
+        clientY: event.clientY,
+        screenX: event.screenX,
+        screenY: event.screenY,
+        button: event.button,
+        buttons: event.buttons,
+        ctrlKey: event.ctrlKey,
+        shiftKey: event.shiftKey,
+        altKey: event.altKey,
+        metaKey: event.metaKey,
+      }),
+    );
+  };
+
+  view.dom.ownerDocument.addEventListener('wheel', handleWheel, {
+    capture: true,
+    passive: false,
+  });
+  view.dom.ownerDocument.addEventListener('mousedown', handleMouseDown, {
+    capture: true,
+    passive: false,
+  });
+  view.dom.ownerDocument.addEventListener('mousemove', handleMouseMove, {
+    capture: true,
+    passive: true,
+  });
+
+  return {
+    destroy() {
+      view.dom.ownerDocument.removeEventListener('wheel', handleWheel, {
+        capture: true,
+      });
+      view.dom.ownerDocument.removeEventListener('mousedown', handleMouseDown, {
+        capture: true,
+      });
+      view.dom.ownerDocument.removeEventListener('mousemove', handleMouseMove, {
+        capture: true,
+      });
+      setHoveredCompletionItem(null);
+    },
+  };
 });
 
 // Custom theme for categorized function highlighting (light)
@@ -871,5 +1099,6 @@ export function excelFormulaExtension(
     tooltipZIndexTheme,
     tooltipPortalConfig,
     autocompletePopoverTheme,
+    autocompletePopoverPointerHandler,
   ];
 }
