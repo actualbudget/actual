@@ -20,6 +20,7 @@ export function updateFilterReducer<T extends RuleConditionEntity>(
           action.op === 'doesNotContain' ||
           action.op === 'isNot' ||
           action.op === 'hasTags' ||
+          action.op === 'hasAnyTag' ||
           action.op === 'onBudget' ||
           action.op === 'offBudget')
       ) {

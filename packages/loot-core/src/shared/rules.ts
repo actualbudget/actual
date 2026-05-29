@@ -38,6 +38,7 @@ const TYPE_INFO = {
       'doesNotContain',
       'notOneOf',
       'hasTags',
+      'hasAnyTag',
     ],
     nullable: true,
   },
@@ -63,7 +64,7 @@ type FieldInfoConstraint = Record<
 const FIELD_INFO = {
   imported_payee: {
     type: 'string',
-    disallowedOps: new Set(['hasTags']),
+    disallowedOps: new Set(['hasTags', 'hasAnyTag']),
   },
   payee: { type: 'id', disallowedOps: new Set(['onBudget', 'offBudget']) },
   payee_name: { type: 'string' },
@@ -188,7 +189,9 @@ export function friendlyOp(op, type?) {
     case 'contains':
       return t('contains');
     case 'hasTags':
-      return t('has tags');
+      return t('has all tags');
+    case 'hasAnyTag':
+      return t('has any tag');
     case 'matches':
       return t('matches');
     case 'doesNotContain':
