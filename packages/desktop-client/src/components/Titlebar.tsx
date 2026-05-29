@@ -295,7 +295,7 @@ function SharedArrayBufferWarning({ style }: SharedArrayBufferWarningProps) {
         onPress={handlePress}
       >
         <Trans>Warning</Trans>
-        <SvgAlertTriangle width={13} style={{ marginLeft: '6 px' }} />
+        <SvgAlertTriangle width={13} style={{ marginLeft: '6px' }} />
       </Button>
     </Tooltip>
   );
