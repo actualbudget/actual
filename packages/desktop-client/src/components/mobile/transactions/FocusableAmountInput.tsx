@@ -96,6 +96,13 @@ const AmountInput = memo(function AmountInput({
   };
 
   const onFocus: HTMLProps<HTMLInputElement>['onFocus'] = e => {
+    // Move the current amount into the input so the field behaves like a
+    // regular HTML input: the value can be selected, copied and replaced
+    // by typing or pasting. Select it all (deferred so the value is in the
+    // DOM first), matching the desktop AmountInput behaviour.
+    setEditing(true);
+    setText(amountToCurrency(value));
+    requestAnimationFrame(() => inputRef.current?.select());
     props.onFocus?.(e);
   };
 
@@ -123,11 +130,18 @@ const AmountInput = memo(function AmountInput({
     props.onChangeValue?.(text);
   };
 
+  // The input holds the displayed amount so it acts like a real input
+  // (selectable/copyable/pasteable). It overlays an invisible Text sizer
+  // that keeps the box width matched to the formatted amount.
+  const displayText = editing
+    ? text || amountToCurrency(0)
+    : amountToCurrency(value);
+
   const input = (
     <input
       type="text"
       ref={mergedInputRef}
-      value={text}
+      value={editing ? text : amountToCurrency(value)}
       inputMode="decimal"
       autoCapitalize="none"
       onChange={e => onChangeText(e.target.value)}
@@ -135,7 +149,21 @@ const AmountInput = memo(function AmountInput({
       onBlur={onBlur}
       onKeyUp={onKeyUp}
       data-testid="amount-input"
-      style={{ flex: 1, textAlign: 'center', position: 'absolute' }}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        border: 0,
+        margin: 0,
+        padding: 0,
+        backgroundColor: 'transparent',
+        color: 'inherit',
+        font: 'inherit',
+        textAlign: 'center',
+        ...textStyle,
+      }}
     />
   );
 
@@ -152,15 +180,17 @@ const AmountInput = memo(function AmountInput({
         ...style,
       }}
     >
-      <View style={{ overflowY: 'auto', overflowX: 'hidden' }}>{input}</View>
+      {input}
       <Text
+        aria-hidden
         style={{
+          visibility: 'hidden',
           pointerEvents: 'none',
           ...textStyle,
         }}
         data-testid="amount-input-text"
       >
-        {editing ? text || amountToCurrency(0) : amountToCurrency(value)}
+        {displayText}
       </Text>
     </View>
   );
