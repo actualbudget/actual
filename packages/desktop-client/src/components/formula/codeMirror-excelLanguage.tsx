@@ -13,7 +13,12 @@ import {
 } from '@codemirror/language';
 import type { StreamParser } from '@codemirror/language';
 import type { Extension } from '@codemirror/state';
-import { EditorView, hoverTooltip, tooltips, ViewPlugin } from '@codemirror/view';
+import {
+  EditorView,
+  hoverTooltip,
+  tooltips,
+  ViewPlugin,
+} from '@codemirror/view';
 import type { Tooltip } from '@codemirror/view';
 import { tags } from '@lezer/highlight';
 import { t } from 'i18next';
@@ -899,8 +904,10 @@ const autocompletePopoverPointerHandler = ViewPlugin.define(view => {
       return;
     }
 
-    const canScrollY = scrollContainer.scrollHeight > scrollContainer.clientHeight;
-    const canScrollX = scrollContainer.scrollWidth > scrollContainer.clientWidth;
+    const canScrollY =
+      scrollContainer.scrollHeight > scrollContainer.clientHeight;
+    const canScrollX =
+      scrollContainer.scrollWidth > scrollContainer.clientWidth;
     if (!canScrollY && !canScrollX) {
       return;
     }
