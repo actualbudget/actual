@@ -46,9 +46,7 @@ Before committing, ensure all of the following:
 - `[AI] Add support for new transaction categories`
 - `Fix type error in account validation` (MISSING PREFIX - NOT ALLOWED)
 
-### Labels
-
-Add the **"AI generated"** label to all AI-created pull requests. This helps maintainers understand the nature of the contribution.
+The `"AI generated"` label is applied automatically to any PR whose title starts with `[AI]`, so there is nothing extra to do — and outside contributors cannot apply labels anyway.
 
 ### PR Template: Do Not Fill In
 
@@ -65,6 +63,5 @@ Follow these steps when committing and creating PRs:
 4. Run relevant tests (`yarn test` for all, or workspace-specific)
 5. Stage files and commit with `[AI]` prefix — do not skip hooks
 6. When creating a PR:
-   - Use `[AI]` prefix in the title
-   - Add the `"AI generated"` label
+   - Use `[AI]` prefix in the title (the `"AI generated"` label is auto-applied based on this prefix)
    - Leave the PR template blank (do not fill it in)

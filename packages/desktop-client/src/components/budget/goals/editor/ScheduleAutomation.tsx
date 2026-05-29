@@ -28,10 +28,16 @@ export const ScheduleAutomation = ({
   // tombstoned schedules aren't selectable, so a category whose only
   // schedules are completed should fall through to the "no schedules" state
   // instead of showing an empty picker.
-  const selectableSchedules = schedules.filter(
-    (s): s is typeof s & { name: string } =>
-      !!s.name && !s.completed && !s.tombstone,
-  );
+  const selectableSchedules = schedules
+    .filter(
+      (s): s is typeof s & { name: string } =>
+        !!s.name && !s.completed && !s.tombstone,
+    )
+    .sort((a, b) =>
+      a.name.trim().localeCompare(b.name.trim(), undefined, {
+        ignorePunctuation: true,
+      }),
+    );
 
   return selectableSchedules.length ? (
     <>

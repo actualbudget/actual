@@ -210,7 +210,13 @@ export async function disableOpenID(loginSettings) {
 
 export function getSession(token) {
   const accountDb = getAccountDb();
-  return accountDb.first('SELECT * FROM sessions WHERE token = ?', [token]);
+  return accountDb.first(
+    `SELECT sessions.*
+     FROM sessions
+     JOIN users ON users.id = sessions.user_id
+     WHERE sessions.token = ? AND users.enabled = 1`,
+    [token],
+  );
 }
 
 export function getUserInfo(userId) {

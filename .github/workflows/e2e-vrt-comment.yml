@@ -2,7 +2,10 @@ name: VRT Comment
 # This workflow posts VRT failure comments on PRs, including fork PRs.
 # It runs with elevated permissions via workflow_run trigger.
 on:
-  workflow_run:
+  # workflow_run is needed to get a token that can comment on fork PRs.
+  # This job only downloads a metadata artifact and posts a comment;
+  # it never checks out or executes PR-supplied code.
+  workflow_run: # zizmor: ignore[dangerous-triggers]
     workflows: ['E2E Tests']
     types:
       - completed
