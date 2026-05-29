@@ -1,5 +1,7 @@
 import {
+  ArraySize,
   CellError,
+  EmptyValue,
   ErrorType,
   FunctionArgumentType,
   FunctionPlugin,
@@ -55,7 +57,13 @@ export function createBudgetQueryPrefetchKey({
 function categoryRangeToIds(categories: SimpleRangeValue): string[] {
   return categories
     .valuesFromTopLeftCorner()
-    .map(value => String(value))
+    .filter(
+      value =>
+        value !== EmptyValue &&
+        !(value instanceof CellError) &&
+        (typeof value === 'string' || typeof value === 'number'),
+    )
+    .map(value => String(value).trim())
     .filter(value => value.length > 0);
 }
 
@@ -149,6 +157,23 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
         );
       },
     );
+  }
+
+  queryExtractCategoriesSize(ast: ProcedureAst): ArraySize {
+    if (ast.args.length !== 1) {
+      return ArraySize.error();
+    }
+
+    const [queryNameAst] = ast.args;
+    const queryName =
+      queryNameAst.type === 'STRING' ? queryNameAst.value : undefined;
+    const categoryCount = queryName
+      ? this.getFormulaQueryContext()?.queryExtractCategoriesPrefetch?.get(
+          queryName,
+        )?.length
+      : undefined;
+
+    return new ArraySize(1, Math.max(categoryCount ?? 1, 1));
   }
 
   queryExtractTimeframeStart(ast: ProcedureAst, state: InterpreterState) {
@@ -253,6 +278,7 @@ CustomFunctionsPlugin.implementedFunctions = {
   },
   QUERY_EXTRACT_CATEGORIES: {
     method: 'queryExtractCategories',
+    sizeOfResultArrayMethod: 'queryExtractCategoriesSize',
     parameters: [{ argumentType: FunctionArgumentType.STRING }],
   },
   QUERY_EXTRACT_TIMEFRAME_END: {

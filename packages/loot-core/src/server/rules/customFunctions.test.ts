@@ -31,6 +31,14 @@ function evaluateFormula(
   formula: string,
   formulaQueryContext: FormulaQueryContext,
 ) {
+  const { cellValue } = evaluateFormulaSheet(formula, formulaQueryContext);
+  return cellValue;
+}
+
+function evaluateFormulaSheet(
+  formula: string,
+  formulaQueryContext: FormulaQueryContext,
+) {
   const hf = HyperFormula.buildEmpty({
     licenseKey: 'gpl-v3',
     language: 'enUS',
@@ -49,7 +57,10 @@ function evaluateFormula(
 
     hf.setCellContents({ sheet: sheetId, col: 0, row: 0 }, [[formula]]);
 
-    return hf.getCellValue({ sheet: sheetId, col: 0, row: 0 });
+    return {
+      cellValue: hf.getCellValue({ sheet: sheetId, col: 0, row: 0 }),
+      sheetValues: hf.getSheetValues(sheetId),
+    };
   } finally {
     hf.destroy();
   }
@@ -129,6 +140,19 @@ describe('CustomFunctionsPlugin formula query functions', () => {
     expect(context.budgetQueryRequests.get(budgetKey)).toEqual(request);
   });
 
+  it('spills QUERY_EXTRACT_CATEGORIES as a standalone array result', () => {
+    const context = createFormulaQueryContext();
+    context.queryExtractCategoriesPrefetch.set('expenses', ['cat-a', 'cat-b']);
+
+    const result = evaluateFormulaSheet(
+      '=QUERY_EXTRACT_CATEGORIES("expenses")',
+      context,
+    );
+
+    expect(result.sheetValues).toEqual([['cat-a'], ['cat-b']]);
+    expect(context.queryExtractCategoryNames).toEqual(new Set(['expenses']));
+  });
+
   it('surfaces BUDGET_QUERY prefetch failures as formula errors', () => {
     const context = createFormulaQueryContext();
     const request = {
@@ -159,5 +183,26 @@ describe('CustomFunctionsPlugin formula query functions', () => {
       type: 'VALUE',
       message: 'Invalid BUDGET_QUERY dimension: spnt',
     });
+  });
+
+  it('ignores empty and non-id values in direct BUDGET_QUERY category ranges', () => {
+    const context = createFormulaQueryContext();
+    const request = {
+      dimension: 'spent',
+      categoryIds: ['cat-a', '123'],
+      startMonth: '2026-01',
+      endMonth: '2026-03',
+    };
+    const budgetKey = createBudgetQueryPrefetchKey(request);
+
+    context.budgetQueryPrefetch.set(budgetKey, 10);
+
+    const result = evaluateFormula(
+      '=BUDGET_QUERY("spent", {"cat-a"; ""; TRUE(); 123}, "2026-01", "2026-03")',
+      context,
+    );
+
+    expect(result).toBe(10);
+    expect(context.budgetQueryRequests.get(budgetKey)).toEqual(request);
   });
 });
