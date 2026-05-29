@@ -23,6 +23,7 @@ function createFormulaQueryContext(): Required<FormulaQueryContext> {
     queryExtractTimeframeStartPrefetch: new Map(),
     queryExtractTimeframeEndPrefetch: new Map(),
     budgetQueryPrefetch: new Map(),
+    budgetQueryErrors: new Map(),
   };
 }
 
@@ -126,5 +127,37 @@ describe('CustomFunctionsPlugin formula query functions', () => {
       new Set(['expenses']),
     );
     expect(context.budgetQueryRequests.get(budgetKey)).toEqual(request);
+  });
+
+  it('surfaces BUDGET_QUERY prefetch failures as formula errors', () => {
+    const context = createFormulaQueryContext();
+    const request = {
+      dimension: 'spnt',
+      categoryIds: ['cat-a'],
+      startMonth: '2026-01',
+      endMonth: '2026-03',
+    };
+    const budgetKey = createBudgetQueryPrefetchKey(request);
+
+    context.queryExtractCategoriesPrefetch.set('expenses', request.categoryIds);
+    context.queryExtractTimeframeStartPrefetch.set(
+      'expenses',
+      request.startMonth,
+    );
+    context.queryExtractTimeframeEndPrefetch.set('expenses', request.endMonth);
+    context.budgetQueryErrors.set(
+      budgetKey,
+      'Invalid BUDGET_QUERY dimension: spnt',
+    );
+
+    const result = evaluateFormula(
+      '=BUDGET_QUERY("spnt", QUERY_EXTRACT_CATEGORIES("expenses"), QUERY_EXTRACT_TIMEFRAME_START("expenses"), QUERY_EXTRACT_TIMEFRAME_END("expenses"))',
+      context,
+    );
+
+    expect(result).toMatchObject({
+      type: 'VALUE',
+      message: 'Invalid BUDGET_QUERY dimension: spnt',
+    });
   });
 });

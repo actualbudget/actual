@@ -57,6 +57,7 @@ function createFormulaQueryContext(): Required<FormulaQueryContext> {
     queryExtractTimeframeStartPrefetch: new Map(),
     queryExtractTimeframeEndPrefetch: new Map(),
     budgetQueryPrefetch: new Map(),
+    budgetQueryErrors: new Map(),
   };
 }
 
@@ -285,9 +286,14 @@ async function prefetchBudgetQueries(
           request.endMonth,
         ),
       );
+      formulaQueryContext.budgetQueryErrors.delete(key);
     } catch (err) {
       console.error('Error evaluating BUDGET_QUERY', err);
-      formulaQueryContext.budgetQueryPrefetch.set(key, 0);
+      formulaQueryContext.budgetQueryPrefetch.delete(key);
+      formulaQueryContext.budgetQueryErrors.set(
+        key,
+        err instanceof Error ? err.message : String(err),
+      );
     }
   }
 }

@@ -1,4 +1,6 @@
 import {
+  CellError,
+  ErrorType,
   FunctionArgumentType,
   FunctionPlugin,
   SimpleRangeValue,
@@ -28,6 +30,7 @@ export type FormulaQueryContext = {
   queryExtractTimeframeStartPrefetch?: Map<string, string>;
   queryExtractTimeframeEndPrefetch?: Map<string, string>;
   budgetQueryPrefetch?: Map<string, number>;
+  budgetQueryErrors?: Map<string, string>;
 };
 
 type CustomFunctionsContext = {
@@ -194,6 +197,10 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
         };
         const key = createBudgetQueryPrefetchKey(request);
         ctx?.budgetQueryRequests?.set(key, request);
+        const error = ctx?.budgetQueryErrors?.get(key);
+        if (error) {
+          return new CellError(ErrorType.VALUE, error);
+        }
         return ctx?.budgetQueryPrefetch?.get(key) ?? 0;
       },
     );
