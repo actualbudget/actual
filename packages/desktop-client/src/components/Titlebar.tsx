@@ -281,12 +281,17 @@ function SharedArrayBufferWarning({ style }: SharedArrayBufferWarningProps) {
     <Tooltip
       placement="bottom start"
       content={<Text>{warningMessage}</Text>}
-      style={{ ...styles.tooltip, lineHeight: 1.5, padding: '6px 10px' }}
+      style={{
+        ...styles.tooltip,
+        lineHeight: 1.5,
+        padding: '6px 10px',
+        width: '300px',
+      }}
     >
       <Button
         variant="bare"
         aria-label={warningMessage}
-        style={{ ...style, color: theme.errorTextDark }}
+        style={{ ...style, color: theme.warningTextDark }}
         onPress={handlePress}
       >
         <SvgAlertTriangle width={13} />
