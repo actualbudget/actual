@@ -203,7 +203,13 @@ function CustomReportInner({
     !!conditions.find(
       ({ field, op }) =>
         field === 'category' &&
-        ['contains', 'doesNotContain', 'matches', 'hasTags'].includes(op),
+        [
+          'contains',
+          'doesNotContain',
+          'matches',
+          'hasTags',
+          'hasAnyTag',
+        ].includes(op),
     ) ||
     conditions.filter(({ field }) => field === 'category').length >= 2 ||
     conditions.filter(({ field }) => field === 'category_group').length >= 1;

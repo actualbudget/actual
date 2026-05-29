@@ -34,6 +34,7 @@ import {
   parse as parseDate,
 } from 'date-fns';
 
+import { TagMultiAutocomplete } from '#components/autocomplete/TagMultiAutocomplete';
 import { GenericInput } from '#components/util/GenericInput';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
@@ -155,6 +156,7 @@ function ConfigureField<T extends RuleConditionEntity>({
   // For account ops that do not use an input value but should preserve the current value in state
   const isNoValueAccountOp = (op: T['op']) =>
     ['onBudget', 'offBudget'].includes(op);
+  const isTagOp = (op: T['op']) => ['hasAnyTag', 'hasTags'].includes(op);
 
   // Convert stored ID value into text
   const resolveIdToText = (field: string, subfield: string, value: unknown) => {
@@ -477,6 +479,7 @@ function ConfigureField<T extends RuleConditionEntity>({
         }}
       >
         {type !== 'boolean' &&
+          (field !== 'notes' || !isTagOp(op)) &&
           (field !== 'payee' || !isIdOp(op)) &&
           (field !== 'account' || !isNoValueAccountOp(op)) && (
             <GenericInput
@@ -490,8 +493,7 @@ function ConfigureField<T extends RuleConditionEntity>({
                 type === 'id' &&
                 (op === 'contains' ||
                   op === 'matches' ||
-                  op === 'doesNotContain' ||
-                  op === 'hasTags')
+                  op === 'doesNotContain')
                   ? 'string'
                   : type
               }
@@ -512,7 +514,6 @@ function ConfigureField<T extends RuleConditionEntity>({
               }}
             />
           )}
-
         {field === 'payee' && isIdOp(op) && (
           <PayeeFilter
             // @ts-expect-error - fix me
@@ -522,7 +523,13 @@ function ConfigureField<T extends RuleConditionEntity>({
             onChange={v => dispatch({ type: 'set-value', value: v })}
           />
         )}
-
+        {field === 'notes' && isTagOp(op) && (
+          <TagMultiAutocomplete
+            // @ts-expect-error - fix me
+            value={formattedValue}
+            setValue={(v: string) => dispatch({ type: 'set-value', value: v })}
+          />
+        )}
         <SpaceBetween
           style={{
             marginTop: 15,
