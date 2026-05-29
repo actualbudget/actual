@@ -116,6 +116,7 @@ The `edge` tag has been renamed to `nightly`. If you follow pre-release images, 
 - [#7930](https://github.com/actualbudget/actual/pull/7930) Fix off-by-one error with Enable Banking trying to sync 91 days instead of the max 90 days. — thanks @mnil
 - [#7940](https://github.com/actualbudget/actual/pull/7940) Invalidate disabled user sessions when using OpenID. — thanks @MatissJanis
 - [#7955](https://github.com/actualbudget/actual/pull/7955) Fix Balance Forecast double-counting posted split transactions. — thanks @samaluk
+- [#7978](https://github.com/actualbudget/actual/pull/7978) Fix fatal error preventing PWA launch when offline on iOS devices. — thanks @MatissJanis
 
 #### Maintenance
 
