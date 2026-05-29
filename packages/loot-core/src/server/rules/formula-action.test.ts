@@ -236,13 +236,13 @@ describe('Formula-based rule actions', () => {
     expect(transaction.notes).toBe('1,234,567.89');
   });
 
-  it('should format numbers using the selected locale with FORMATNUMBER', () => {
+  it('should format numbers using number-format preferences with FORMATNUMBER', () => {
     setCachedUserPreferences({
       currency: getCurrency('USD'),
-      numberFormat: 'comma-dot',
-      thousandsSeparator: ',',
-      decimalSeparator: '.',
-      locale: 'pt-BR',
+      numberFormat: 'dot-comma',
+      thousandsSeparator: '.',
+      decimalSeparator: ',',
+      locale: 'en-US',
       currencySymbolPosition: 'before',
       currencySpaceBetweenAmountAndSymbol: false,
     });

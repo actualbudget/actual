@@ -14,75 +14,51 @@ type FormulaPreferencesOptions = {
 
 type CurrencySymbolPosition = 'before' | 'after';
 
+const DEFAULT_CURRENCY = getCurrency('USD');
+const LOCALE_NUMBER_FORMAT_SAMPLE = 1_000_000.23;
+
 function normalizeLocale(locale?: string | null): string | null {
   const normalized = locale?.trim();
   return normalized ? normalized : null;
 }
 
-// Helper to get locale-based number format defaults
 function getLocaleDefaults(locale?: string): {
   thousandsSeparator: string;
   decimalSeparator: string;
 } {
-  // Default to en-US if no locale
-  const actualLocale = locale || 'en-US';
+  const parts = new Intl.NumberFormat(locale || 'en-US').formatToParts(
+    LOCALE_NUMBER_FORMAT_SAMPLE,
+  );
 
-  // Map common locales to their number formats
-  if (
-    actualLocale.startsWith('de') ||
-    actualLocale.startsWith('es') ||
-    actualLocale.startsWith('it') ||
-    actualLocale.startsWith('pt-BR')
-  ) {
-    // German, Spanish, Italian, Brazilian Portuguese: 1.000,00
-    return { thousandsSeparator: '.', decimalSeparator: ',' };
-  } else if (
-    actualLocale.startsWith('fr') ||
-    actualLocale.startsWith('ru') ||
-    actualLocale.startsWith('cs')
-  ) {
-    // French, Russian, Czech: 1 000,00
-    return { thousandsSeparator: '\u202F', decimalSeparator: ',' };
-  } else if (actualLocale.startsWith('de-CH')) {
-    // Swiss German: 1'000.00
-    return { thousandsSeparator: '\u2019', decimalSeparator: '.' };
-  } else if (
-    actualLocale.startsWith('en-IN') ||
-    actualLocale.startsWith('hi')
-  ) {
-    // Indian: 1,00,000.00 (but we'll use standard comma for simplicity)
-    return { thousandsSeparator: ',', decimalSeparator: '.' };
-  } else {
-    // Default (en-US, en-GB, etc.): 1,000.00
-    return { thousandsSeparator: ',', decimalSeparator: '.' };
-  }
+  return {
+    thousandsSeparator: parts.find(part => part.type === 'group')?.value ?? ',',
+    decimalSeparator: parts.find(part => part.type === 'decimal')?.value ?? '.',
+  };
 }
 
-// Helper to determine currency from locale
-function getCurrencyFromLocale(locale: string): Currency {
-  if (locale.startsWith('pt-BR')) {
-    return getCurrency('BRL');
-  } else if (locale.startsWith('en-GB')) {
-    return getCurrency('GBP');
-  } else if (
-    locale.startsWith('de') ||
-    locale.startsWith('fr') ||
-    locale.startsWith('es') ||
-    locale.startsWith('it') ||
-    locale.startsWith('nl')
-  ) {
-    return getCurrency('EUR');
-  } else if (locale.startsWith('ja')) {
-    return getCurrency('JPY');
-  } else if (locale.startsWith('en-IN') || locale.startsWith('hi')) {
-    return getCurrency('INR');
-  } else if (locale.startsWith('en-CA')) {
-    return getCurrency('CAD');
-  } else if (locale.startsWith('en-AU')) {
-    return getCurrency('AUD');
-  } else {
-    return getCurrency('USD');
+function getNumberFormatFromLocale(locale: string): NumberFormats {
+  const { thousandsSeparator, decimalSeparator } = getLocaleDefaults(locale);
+
+  if (decimalSeparator === '.' && thousandsSeparator === ',') {
+    return 'comma-dot';
   }
+
+  if (decimalSeparator === ',' && thousandsSeparator === '.') {
+    return 'dot-comma';
+  }
+
+  if (decimalSeparator === ',' && thousandsSeparator.trim() === '') {
+    return 'space-comma';
+  }
+
+  if (
+    decimalSeparator === '.' &&
+    (thousandsSeparator === "'" || thousandsSeparator === '\u2019')
+  ) {
+    return 'apostrophe-dot';
+  }
+
+  return 'comma-dot';
 }
 
 function getCurrencyFromPreference(
@@ -146,7 +122,7 @@ export async function loadUserPreferencesForFormulas({
       normalizeLocale(browserLocale) ??
       'en-US';
 
-    const currency = currencyFromPreference ?? getCurrencyFromLocale(locale);
+    const currency = currencyFromPreference ?? DEFAULT_CURRENCY;
 
     const symbolPositionPref = await aqlQuery(
       q('preferences').filter({ id: 'currencySymbolPosition' }).select('*'),
@@ -167,7 +143,8 @@ export async function loadUserPreferencesForFormulas({
 
     const numberFormat = numberFormatValue
       ? numberFormatValue
-      : currency.numberFormat || getCurrencyFromLocale(locale).numberFormat;
+      : currencyFromPreference?.numberFormat ||
+        getNumberFormatFromLocale(locale);
 
     // Get number format settings
     const numberFormatSettings = getNumberFormat({
@@ -199,8 +176,8 @@ export async function loadUserPreferencesForFormulas({
       normalizeLocale(selectedLocale) ??
       normalizeLocale(browserLocale) ??
       'en-US';
-    const currency = getCurrencyFromLocale(locale);
-    const numberFormat = currency.numberFormat || 'comma-dot';
+    const currency = DEFAULT_CURRENCY;
+    const numberFormat = getNumberFormatFromLocale(locale);
     const numberFormatSettings = getNumberFormat({
       format: numberFormat,
     });

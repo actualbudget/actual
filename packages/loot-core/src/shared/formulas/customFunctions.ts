@@ -25,6 +25,10 @@ export function setCachedUserPreferences(prefs: UserPreferences): void {
   cachedUserPreferences = prefs;
 }
 
+export function clearCachedUserPreferences(): void {
+  cachedUserPreferences = null;
+}
+
 function getUserPreferences(): UserPreferences {
   if (!cachedUserPreferences) {
     // If not loaded, use defaults
@@ -39,26 +43,6 @@ function getUserPreferences(): UserPreferences {
     };
   }
   return cachedUserPreferences;
-}
-
-function getLocaleNumberSeparators(locale: string): {
-  thousandsSeparator: string;
-  decimalSeparator: string;
-} {
-  try {
-    const parts = new Intl.NumberFormat(locale).formatToParts(1000.1);
-    return {
-      thousandsSeparator:
-        parts.find(part => part.type === 'group')?.value ?? ',',
-      decimalSeparator:
-        parts.find(part => part.type === 'decimal')?.value ?? '.',
-    };
-  } catch {
-    return {
-      thousandsSeparator: ',',
-      decimalSeparator: '.',
-    };
-  }
 }
 
 function formatCurrencyValue({
@@ -159,16 +143,15 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
         }
 
         const prefs = getUserPreferences();
-        const localeSeparators = getLocaleNumberSeparators(prefs.locale);
 
         const actualThousandsSeparator =
           hasThousandsSeparatorArg && thousandsSeparator !== undefined
             ? thousandsSeparator
-            : localeSeparators.thousandsSeparator;
+            : prefs.thousandsSeparator;
         const actualDecimalSeparator =
           hasDecimalSeparatorArg && decimalSeparator !== undefined
             ? decimalSeparator
-            : localeSeparators.decimalSeparator;
+            : prefs.decimalSeparator;
         const actualDecimals = decimals ?? 2;
 
         const fixedNum = num.toFixed(actualDecimals);
