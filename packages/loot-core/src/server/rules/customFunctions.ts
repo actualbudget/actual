@@ -7,16 +7,13 @@ import { integerToAmount } from '#shared/util';
 
 import type { UserPreferences } from './customFunctionsPreferences';
 
-// Global state to store user preferences for formatting functions
-// This is set before formula execution to avoid async issues in HyperFormula custom functions
 let cachedUserPreferences: UserPreferences | null = null;
 
-// Setter for cached preferences (called from server-side code only)
 export function setCachedUserPreferences(prefs: UserPreferences): void {
   cachedUserPreferences = prefs;
 }
 
-// Synchronous getter for cached preferences (used by custom functions)
+
 function getUserPreferences(): UserPreferences {
   if (!cachedUserPreferences) {
     // If not loaded, use defaults

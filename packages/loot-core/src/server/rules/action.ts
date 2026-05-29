@@ -24,8 +24,6 @@ HyperFormula.registerFunctionPlugin(
   customFunctionsTranslations,
 );
 
-// Load user preferences on module initialization for formatting functions
-// This is async but happens once when the module loads
 void loadUserPreferencesForFormulas().then(prefs => {
   setCachedUserPreferences(prefs);
 });

@@ -560,7 +560,6 @@ async function fetchQueryCount(config: QueryConfig): Promise<number> {
 }
 
 // Helper: Extract category-based conditions (ignore transaction-specific filters)
-// BUG FIX: Support both 'category' and 'category_group' fields
 function extractCategoryConditions(
   conditions: RuleConditionEntity[],
 ): RuleConditionEntity[] {
@@ -572,7 +571,6 @@ function extractCategoryConditions(
 }
 
 // Helper: Evaluate category conditions to get matching categories
-// BUG FIX: Support both 'category' and 'category_group' fields by expanding groups to their member categories
 async function getCategoriesFromConditions(
   allCategories: CategoryEntity[],
   conditions: RuleConditionEntity[],
@@ -600,8 +598,6 @@ async function getCategoriesFromConditions(
     const matching = allCategories.filter((cat: CategoryEntity) => {
       const key = getKey(cat);
 
-      // For text-based operators, use the human-readable name
-      // For category_group, resolve UUID → name via the map; for category, use the category's own name
       const textValue =
         cond.field === 'category_group'
           ? (groupNameById.get(key) ?? key)

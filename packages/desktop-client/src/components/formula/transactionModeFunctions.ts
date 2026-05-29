@@ -542,7 +542,6 @@ export const transactionModeFunctions: Record<string, FunctionDef> = {
     description: t('Returns TRUE if value is logical (TRUE/FALSE).'),
     parameters: [{ name: 'value', description: 'Value' }],
   },
-  // Note: ISREF removed - it checks for cell references which don't exist in Actual
   ISEVEN: {
     name: 'ISEVEN',
     description: t('Returns TRUE if number is even.'),

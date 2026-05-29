@@ -1,6 +1,3 @@
-// Server-only file for loading user preferences for custom functions
-// This file should NEVER be imported by client code
-
 import { aqlQuery } from '#server/aql';
 import { getCurrency } from '#shared/currencies';
 import type { Currency } from '#shared/currencies';
@@ -80,10 +77,9 @@ export type UserPreferences = {
 };
 
 // Function to load user preferences from the database
-// This should be called before formula execution (server-side only)
+// This should be called before formula execution
 export async function loadUserPreferencesForFormulas(): Promise<UserPreferences> {
   try {
-    // Use aqlQuery to fetch preferences (Actual's custom SQL language)
     const currencyPref = await aqlQuery(
       q('preferences').filter({ id: 'defaultCurrencyCode' }).select('*'),
     );

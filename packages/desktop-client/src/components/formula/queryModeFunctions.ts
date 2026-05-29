@@ -23,10 +23,6 @@ export const queryModeFunctions: Record<string, FunctionDef> = {
       { name: 'numbers', description: 'Number1, Number2, ...NumberN' },
     ],
   },
-  // Note: AVERAGEA, COUNT, COUNTA, COUNTBLANK, COUNTIF, COUNTIFS removed
-  // Reason: These functions require cell ranges which don't exist in Actual's named expression context.
-  // Use QUERY_COUNT() for counting query results instead.
-
   MAX: {
     name: 'MAX',
     description: t('Returns the maximum value from numbers.'),
@@ -205,13 +201,6 @@ export const queryModeFunctions: Record<string, FunctionDef> = {
       { name: 'numbers', description: 'Number1, Number2, ...NumberN' },
     ],
   },
-  // Note: SUMIF, SUMIFS, SUMPRODUCT, SUMSQ removed
-  // Reason: These functions require cell ranges. Use QUERY() for conditional sums instead.
-
-  // Note: Statistical functions (MEDIAN, MODE, STDEV, STDEVP, VAR, VARP, PERCENTILE, QUARTILE, RANK) removed
-  // Reason: These functions require arrays/ranges of data which don't exist in Actual's context.
-  // Users work with single query results, not ranges of cells.
-
   // Logical Functions
   IF: {
     name: 'IF',
@@ -594,11 +583,6 @@ export const queryModeFunctions: Record<string, FunctionDef> = {
       { name: 'type', description: 'Type' },
     ],
   },
-
-  // Note: Lookup and Reference functions (VLOOKUP, HLOOKUP, INDEX, MATCH, LOOKUP) removed
-  // Reason: These functions require table arrays and cell ranges which don't exist in Actual.
-  // Actual uses named queries and expressions, not spreadsheet-style cell references.
-
   CHOOSE: {
     name: 'CHOOSE',
     description: t('Returns value from list based on index.'),
