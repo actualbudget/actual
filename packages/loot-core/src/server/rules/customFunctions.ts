@@ -13,7 +13,6 @@ export function setCachedUserPreferences(prefs: UserPreferences): void {
   cachedUserPreferences = prefs;
 }
 
-
 function getUserPreferences(): UserPreferences {
   if (!cachedUserPreferences) {
     // If not loaded, use defaults
