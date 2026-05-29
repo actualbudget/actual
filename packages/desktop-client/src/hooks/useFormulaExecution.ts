@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { send } from '@actual-app/core/platform/client/connection';
+import { setCachedUserPreferences } from '@actual-app/core/shared/formulas/customFunctions';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type { Query } from '@actual-app/core/shared/query';
@@ -15,7 +16,11 @@ import { HyperFormula } from 'hyperformula';
 import { getLiveRange } from '#components/reports/getLiveRange';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 
+import { bootstrapHyperFormula } from './bootstrapHyperFormula';
+import { useGlobalPref } from './useGlobalPref';
 import { useLocale } from './useLocale';
+
+bootstrapHyperFormula();
 
 type QueryConfig = {
   conditions?: RuleConditionEntity[];
@@ -88,6 +93,7 @@ export function useFormulaExecution(
   namedExpressions?: Record<string, number | string>,
 ) {
   const locale = useLocale();
+  const [language] = useGlobalPref('language');
   const [result, setResult] = useState<number | string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -108,6 +114,21 @@ export function useFormulaExecution(
       setError(null);
 
       try {
+        const browserLocale =
+          typeof navigator === 'undefined' ? undefined : navigator.language;
+        const formulaLocale = language || browserLocale || 'en-US';
+
+        try {
+          setCachedUserPreferences(
+            await send('formula-load-user-preferences', {
+              selectedLocale: language,
+              browserLocale,
+            }),
+          );
+        } catch (err) {
+          console.error('Error loading formula preferences:', err);
+        }
+
         // Extract QUERY() and QUERY_COUNT() function calls
         const queryMatches = Array.from(
           formula.matchAll(/QUERY\s*\(\s*["']([^"']+)["']\s*\)/gi),
@@ -327,7 +348,7 @@ export function useFormulaExecution(
         hfInstance = HyperFormula.buildEmpty({
           licenseKey: 'gpl-v3',
           language: 'enUS',
-          localeLang: typeof locale === 'string' ? locale : 'en-US',
+          localeLang: formulaLocale,
           dateFormats: ['DD/MM/YYYY', 'YYYY-MM-DD', 'YYYY/MM/DD'],
         });
 
@@ -396,7 +417,7 @@ export function useFormulaExecution(
     return () => {
       cancelled = true;
     };
-  }, [formula, queriesVersion, locale, queries, namedExpressions]);
+  }, [formula, queriesVersion, locale, language, queries, namedExpressions]);
 
   return { result, isLoading, error };
 }

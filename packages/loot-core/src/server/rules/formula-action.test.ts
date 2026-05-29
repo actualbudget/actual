@@ -1,10 +1,24 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { TransactionForRules } from '#server/transactions/transaction-rules';
+import { getCurrency } from '#shared/currencies';
+import { setCachedUserPreferences } from '#shared/formulas/customFunctions';
 
 import { Action } from './action';
 
 describe('Formula-based rule actions', () => {
+  beforeEach(() => {
+    setCachedUserPreferences({
+      currency: getCurrency('USD'),
+      numberFormat: 'comma-dot',
+      thousandsSeparator: ',',
+      decimalSeparator: '.',
+      locale: 'en-US',
+      currencySymbolPosition: 'before',
+      currencySpaceBetweenAmountAndSymbol: false,
+    });
+  });
+
   it('should execute a simple math formula', () => {
     const action = new Action('set', 'amount', null, {});
     const transaction: Partial<TransactionForRules> = { amount: 500 };
@@ -222,6 +236,27 @@ describe('Formula-based rule actions', () => {
     expect(transaction.notes).toBe('1,234,567.89');
   });
 
+  it('should format numbers using the selected locale with FORMATNUMBER', () => {
+    setCachedUserPreferences({
+      currency: getCurrency('USD'),
+      numberFormat: 'comma-dot',
+      thousandsSeparator: ',',
+      decimalSeparator: '.',
+      locale: 'pt-BR',
+      currencySymbolPosition: 'before',
+      currencySpaceBetweenAmountAndSymbol: false,
+    });
+
+    const action = new Action('set', 'notes', null, {
+      formula: '=FORMATNUMBER(1234567.89, 2)',
+    });
+
+    const transaction = { notes: 'original' };
+    action.exec(transaction);
+
+    expect(transaction.notes).toBe('1.234.567,89');
+  });
+
   it('should format numbers with custom separators using FORMATNUMBER', () => {
     const action = new Action('set', 'notes', null, {
       formula: '=FORMATNUMBER(1234567.89, 2, ".", ",")',
@@ -253,6 +288,48 @@ describe('Formula-based rule actions', () => {
     action.exec(transaction);
 
     expect(transaction.notes).toBe('$1,234,567.89');
+  });
+
+  it('should use cached currency preferences when FORMATCURRENCY arguments are omitted', () => {
+    setCachedUserPreferences({
+      currency: getCurrency('BRL'),
+      numberFormat: 'dot-comma',
+      thousandsSeparator: '.',
+      decimalSeparator: ',',
+      locale: 'pt-BR',
+      currencySymbolPosition: 'before',
+      currencySpaceBetweenAmountAndSymbol: false,
+    });
+
+    const action = new Action('set', 'notes', null, {
+      formula: '=FORMATCURRENCY(SUM(1, 2, 3))',
+    });
+
+    const transaction = { notes: 'original' };
+    action.exec(transaction);
+
+    expect(transaction.notes).toBe('R$6,00');
+  });
+
+  it('should use cached currency symbol position and spacing preferences', () => {
+    setCachedUserPreferences({
+      currency: getCurrency('BRL'),
+      numberFormat: 'dot-comma',
+      thousandsSeparator: '.',
+      decimalSeparator: ',',
+      locale: 'pt-BR',
+      currencySymbolPosition: 'after',
+      currencySpaceBetweenAmountAndSymbol: true,
+    });
+
+    const action = new Action('set', 'notes', null, {
+      formula: '=FORMATCURRENCY(SUM(1, 2, 3))',
+    });
+
+    const transaction = { notes: 'original' };
+    action.exec(transaction);
+
+    expect(transaction.notes).toBe('6,00\u202FR$');
   });
 
   it('should format currency with custom symbol using FORMATCURRENCY', () => {

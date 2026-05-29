@@ -5,6 +5,7 @@ import { HyperFormula } from 'hyperformula';
 import enUS from 'hyperformula/i18n/languages/enUS';
 
 import { logger } from '#platform/server/log';
+import { loadUserPreferencesForFormulas } from '#server/formulas/customFunctionsPreferences';
 import type { TransactionForRules } from '#server/transactions/transaction-rules';
 import { currentDay, format, parseDate } from '#shared/months';
 import { FIELD_TYPES } from '#shared/rules';
@@ -15,7 +16,6 @@ import {
   customFunctionsTranslations,
   setCachedUserPreferences,
 } from './customFunctions';
-import { loadUserPreferencesForFormulas } from './customFunctionsPreferences';
 import { assert } from './rule-utils';
 
 HyperFormula.registerLanguage('enUS', enUS);
