@@ -36,6 +36,8 @@ export const theme = {
   tableRowBackgroundHighlight: 'var(--color-tableRowBackgroundHighlight)',
   tableRowBackgroundHighlightText:
     'var(--color-tableRowBackgroundHighlightText)',
+  tableRowBackgroundAlternate:
+    'var(--color-tableRowBackgroundAlternate, var(--color-tableBackground))',
   tableRowHeaderBackground: 'var(--color-tableRowHeaderBackground)',
   tableRowHeaderText: 'var(--color-tableRowHeaderText)',
   sidebarBackground: 'var(--color-sidebarBackground)',

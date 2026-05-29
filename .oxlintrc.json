@@ -15,7 +15,8 @@
     "vi": "readonly",
     "backend": "readonly",
     "importScripts": "readonly",
-    "FS": "readonly"
+    "FS": "readonly",
+    "__APP_VERSION__": "readonly"
   },
   "rules": {
     // Import sorting
@@ -389,7 +390,7 @@
       "files": [
         "packages/api/migrations/*",
         "packages/loot-core/migrations/*",
-        "packages/sync-server/src/app-gocardless/banks/*.js",
+        "packages/sync-server/src/app-gocardless/banks/*.ts",
         "*.config.{ts,mts,mjs}"
       ],
       "rules": {

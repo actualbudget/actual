@@ -195,7 +195,7 @@ async function countContributorPoints() {
   };
 
   // Get all PRs using search
-  const searchQuery = `repo:${owner}/${repo} is:pr is:merged merged:${since.toISOString()}..${until.toISOString()}`;
+  const searchQuery = `repo:${owner}/${repo} is:pr is:merged base:master merged:${since.toISOString()}..${until.toISOString()}`;
   const recentPRs = await octokit.paginate(
     'GET /search/issues',
     {

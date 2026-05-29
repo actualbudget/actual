@@ -4,11 +4,17 @@ on:
   issues:
     types: [closed]
 
+permissions:
+  issues: write
+
 jobs:
   remove-help-wanted:
     if: ${{ !contains(github.event.issue.labels.*.name, 'feature') && contains(github.event.issue.labels.*.name, 'help wanted') }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions-ecosystem/action-remove-labels@2ce5d41b4b6aa8503e285553f75ed56e0a40bae0 # v1.3.0
-        with:
-          labels: help wanted
+      - name: Remove 'help wanted' label
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: gh issue edit "$ISSUE_NUMBER" --remove-label "help wanted"

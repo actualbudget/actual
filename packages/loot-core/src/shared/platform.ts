@@ -18,3 +18,5 @@ export const isBrowser: boolean = true;
 
 const agent = UAParser(navigator.userAgent);
 export const isIOSAgent = agent.browser.name === 'Mobile Safari';
+// True for all browsers on iOS (iPhone/iPad/iPod) — not macOS.
+export const isIOS = agent.os.name === 'iOS';

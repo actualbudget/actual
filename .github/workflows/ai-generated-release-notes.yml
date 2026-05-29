@@ -9,6 +9,7 @@ jobs:
     # Only run on PR comments from CodeRabbit bot
     if: github.event.issue.pull_request && github.event.comment.user.login == 'coderabbitai[bot]'
     runs-on: ubuntu-latest
+    environment: ai-release-notes
     timeout-minutes: 10
     permissions:
       contents: write

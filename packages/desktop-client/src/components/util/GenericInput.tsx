@@ -253,6 +253,9 @@ export const GenericInput = ({
                         name: 'category-autocomplete',
                         options: {
                           onSelect: newValue => {
+                            if (newValue === null) {
+                              return;
+                            }
                             if (props.multi === true) {
                               props.onChange([...props.value, newValue]);
                               return;

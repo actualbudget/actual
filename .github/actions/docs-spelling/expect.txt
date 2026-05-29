@@ -11,6 +11,7 @@ ANZ
 aql
 AUR
 Authentik
+autogen
 AVERAGEA
 BANKA
 BANKINTER
@@ -138,6 +139,7 @@ OIDC
 Okabe
 overbudgeted
 overbudgeting
+overfunded
 oxc
 Paribas
 passwordless
@@ -190,6 +192,7 @@ TWD
 UAH
 ubuntu
 undici
+Unmigrate
 userinfo
 Userscripts
 UZS

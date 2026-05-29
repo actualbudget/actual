@@ -26,7 +26,13 @@ export default defineConfig({
     // until layout provides width/height, and that can take >5s. Bumping
     // to 10s lets those assertions settle without per-test overrides.
     timeout: 10_000,
-    toHaveScreenshot: { maxDiffPixels: 5 },
+    // `threshold` is pixelmatch's per-pixel YIQ-delta cutoff — a pixel
+    // counts toward `maxDiffPixels` only if its delta exceeds
+    // 35215 * threshold². Playwright's 0.2 default lets faint color
+    // overlays (e.g. rgba(…, .15) row striping) slip through with 0
+    // reported diff pixels; 0.05 catches them while staying above
+    // anti-aliasing noise.
+    toHaveScreenshot: { maxDiffPixels: 5, threshold: 0.05 },
   },
   webServer: process.env.E2E_START_URL
     ? undefined

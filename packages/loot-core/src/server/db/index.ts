@@ -56,7 +56,7 @@ import type {
 
 export * from './types';
 
-export { toDateRepr, fromDateRepr } from '#server/models';
+export { fromDateRepr, toDateRepr } from '#server/models';
 
 let dbPath: string | null = null;
 let db: Database | null = null;
@@ -366,7 +366,9 @@ export async function insertCategoryGroup(
   );
   if (existingGroup) {
     throw new Error(
-      `A ${existingGroup.hidden ? 'hidden ' : ''}'${existingGroup.name}' category group already exists.`,
+      `A ${
+        existingGroup.hidden ? 'hidden ' : ''
+      }'${existingGroup.name}' category group already exists.`,
     );
   }
 
@@ -397,7 +399,9 @@ export async function updateCategoryGroup(
   );
   if (existingGroup) {
     throw new Error(
-      `A ${existingGroup.hidden ? 'hidden ' : ''}'${existingGroup.name}' category group already exists.`,
+      `A ${
+        existingGroup.hidden ? 'hidden ' : ''
+      }'${existingGroup.name}' category group already exists.`,
     );
   }
   group = categoryGroupModel.validate(group, { update: true });
@@ -960,7 +964,6 @@ export function getTags() {
     SELECT id, tag, color, description
     FROM tags
     WHERE tombstone = 0
-    ORDER BY tag
   `);
 }
 
@@ -968,7 +971,6 @@ export function getAllTags() {
   return all<DbTag>(`
     SELECT id, tag, color, description
     FROM tags
-    ORDER BY tag
   `);
 }
 

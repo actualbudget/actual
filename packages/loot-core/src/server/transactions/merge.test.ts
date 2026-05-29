@@ -36,7 +36,7 @@ describe('Merging fails for invalid quantity', () => {
     });
     await expect(() =>
       mergeTransactions([{ id: t1 }, { id: t2 }]),
-    ).rejects.toThrow('Transaction amounts must match for merge');
+    ).rejects.toThrow('Cannot merge transactions with different amounts');
   });
 
   it("fails when transaction id doesn't exist", async () => {
@@ -111,7 +111,7 @@ describe('Merging success', () => {
   } as db.DbViewTransaction;
 
   const transaction2 = {
-    account: 'two',
+    account: 'one',
     date: '2025-02-02',
     payee: 'payee2',
     notes: 'notes2',
@@ -122,7 +122,7 @@ describe('Merging success', () => {
   } as TransactionEntity;
 
   const dbTransaction2 = {
-    account: 'two',
+    account: 'one',
     date: 20250202,
     payee: 'payee2',
     notes: 'notes2',
@@ -419,5 +419,79 @@ describe('Merging success', () => {
       t => t.parent_id === manualParent,
     );
     expect(orphanedChildren.length).toBe(0);
+  });
+
+  it('transfer link is preserved on drop', async () => {
+    const t1 = await db.insertTransaction({
+      ...transaction1,
+      category: 'category_id',
+      imported_id: 'import_1',
+      imported_payee: 'payee_import_2',
+    });
+
+    const t2 = await db.insertTransaction({
+      ...transaction2,
+    });
+    const t2Transfer = await db.insertTransaction({
+      ...transaction2,
+      account: 'one',
+      amount: -transaction2.amount,
+      transfer_id: t2,
+    });
+    await db.updateTransaction({ id: t2, transfer_id: t2Transfer });
+
+    expect(await mergeTransactions([{ id: t1 }, { id: t2 }])).toBe(t1);
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(2);
+    const t1R = transactions.find(tx => tx.id === t1);
+    const t2TransferR = transactions.find(tx => tx.id === t2Transfer);
+    expect(t1R).toBeTruthy();
+    expect(t2TransferR).toBeTruthy();
+    expect(t2TransferR?.transfer_id).toBe(t1);
+    expect(t1R?.transfer_id).toBe(t2Transfer);
+    expect(t1R?.imported_id).toBe('import_1');
+    expect(t1R?.imported_payee).toBe('payee_import_2');
+  });
+
+  it('merging two transfers selects the best transaction in each account to preserve', async () => {
+    // A -> B
+    const a = await db.insertTransaction({
+      ...transaction1,
+      amount: -10,
+      date: '2025-01-01', // A is earlier than C
+    });
+    const b = await db.insertTransaction({
+      ...transaction2,
+      amount: 10,
+      date: '2025-01-05', // B is later than D
+      transfer_id: a,
+    });
+    await db.updateTransaction({ id: a, transfer_id: b });
+
+    // C -> D
+    const c = await db.insertTransaction({
+      ...transaction1,
+      amount: -10,
+      date: '2025-01-03', // C is later than A
+    });
+    const d = await db.insertTransaction({
+      ...transaction2,
+      amount: 10,
+      date: '2025-01-02', // D is earlier than B
+      transfer_id: c,
+    });
+    await db.updateTransaction({ id: c, transfer_id: d });
+
+    // Merge A and C
+    expect(await mergeTransactions([{ id: a }, { id: c }])).toBe(a);
+
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(2);
+
+    expect(transactions[0].id).toBe(d); // 2025-01-02 is more recent than 2025-01-01
+    expect(transactions[1].id).toBe(a);
+
+    expect(transactions[0].transfer_id).toBe(a);
+    expect(transactions[1].transfer_id).toBe(d);
   });
 });

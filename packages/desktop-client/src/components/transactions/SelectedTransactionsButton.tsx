@@ -3,6 +3,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
+import { validForMerge } from '@actual-app/core/shared/merge';
 import { q } from '@actual-app/core/shared/query';
 import {
   extractScheduleConds,
@@ -136,8 +137,7 @@ export function SelectedTransactionsButton({
 
   const canMerge = useMemo(() => {
     return Boolean(
-      twoTransactions &&
-      twoTransactions[0].amount === twoTransactions[1].amount,
+      twoTransactions && validForMerge(twoTransactions[0], twoTransactions[1]),
     );
   }, [twoTransactions]);
 
@@ -286,6 +286,13 @@ export function SelectedTransactionsButton({
     hotKeyOptions,
     [onMergeTransactions, selectedIds],
   );
+  // make transfer
+  useHotkeys(
+    'r',
+    () => showMakeTransfer && canBeTransfer && onSetTransfer(selectedIds),
+    hotKeyOptions,
+    [onSetTransfer, selectedIds, showMakeTransfer, canBeTransfer],
+  );
 
   return (
     <SelectedItemsButton
@@ -359,6 +366,7 @@ export function SelectedTransactionsButton({
                     {
                       name: 'set-transfer',
                       text: t('Make transfer'),
+                      key: 'R',
                       disabled: !canBeTransfer,
                     } as const,
                   ]
