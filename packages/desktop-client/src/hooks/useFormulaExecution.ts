@@ -110,9 +110,7 @@ function evaluateFormulaWithContext({
       }
     }
 
-    hfInstance.setCellContents({ sheet: sheetId, col: 0, row: 0 }, [
-      [formula],
-    ]);
+    hfInstance.setCellContents({ sheet: sheetId, col: 0, row: 0 }, [[formula]]);
 
     const cellValue = hfInstance.getCellValue({
       sheet: sheetId,
@@ -228,7 +226,10 @@ async function prefetchFormulaQueries(
     }
 
     const data = await fetchQuerySum(queryConfig);
-    formulaQueryContext.querySumPrefetch.set(queryName, integerToAmount(data, 2));
+    formulaQueryContext.querySumPrefetch.set(
+      queryName,
+      integerToAmount(data, 2),
+    );
   }
 
   for (const queryName of formulaQueryContext.queryCountNames) {
