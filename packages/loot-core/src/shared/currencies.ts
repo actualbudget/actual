@@ -43,6 +43,7 @@ export const currencies: Currency[] = [
   { code: 'HUF', name: 'Hungarian Forint', symbol: 'Ft', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
   { code: 'IDR', name: 'Indonesian Rupiah', symbol: 'Rp', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: true },
   { code: 'INR', name: 'Indian Rupee', symbol: '₹', decimalPlaces: 2, numberFormat: 'comma-dot-in', symbolFirst: true },
+  { code: 'IRR', name: 'Iranian Rial', symbol: '﷼', decimalPlaces: 0, numberFormat: 'comma-dot', symbolFirst: false },
   { code: 'JMD', name: 'Jamaican Dollar', symbol: 'J$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'JPY', name: 'Japanese Yen', symbol: '¥', decimalPlaces: 0, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'KRW', name: 'South Korean Won', symbol: '₩', decimalPlaces: 0, numberFormat: 'comma-dot', symbolFirst: true },
