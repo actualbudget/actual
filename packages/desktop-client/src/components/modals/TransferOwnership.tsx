@@ -19,9 +19,9 @@ import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { FormField, FormLabel } from '#components/forms';
 import { useMetadataPref } from '#hooks/useMetadataPref';
 import { popModal } from '#modals/modalsSlice';
-import type { Modal as ModalType } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch, useSelector } from '#redux';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type TransferOwnershipProps = Extract<
   ModalType,

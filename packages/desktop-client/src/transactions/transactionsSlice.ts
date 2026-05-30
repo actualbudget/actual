@@ -1,5 +1,5 @@
-import type { TransactionEntity } from '@actual-app/core/types/models';
 import { createSlice } from '@reduxjs/toolkit';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { resetApp } from '#app/appSlice';

@@ -1,10 +1,10 @@
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { getCurrency } from '#shared/currencies';
-import type { Currency } from '#shared/currencies';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
 import { amountToInteger, integerToAmount } from '#shared/util';
+import type { Currency } from '#shared/currencies';
 import type { CategoryEntity } from '#types/models';
 import type {
   AverageTemplate,

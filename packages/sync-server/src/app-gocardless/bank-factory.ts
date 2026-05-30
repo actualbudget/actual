@@ -1,5 +1,5 @@
-import type { IBank } from './banks/bank.interface';
 import IntegrationBank from './banks/integration-bank';
+import type { IBank } from './banks/bank.interface';
 
 // Filename convention: <name>_<bic>.{ts,js} (skips bank.interface,
 // integration-bank, and any other helper without an underscore).

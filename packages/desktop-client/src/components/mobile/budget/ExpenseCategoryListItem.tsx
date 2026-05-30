@@ -6,12 +6,12 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SvgCheveronRight } from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
-import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import type { BudgetType } from '@actual-app/core/server/prefs';
 import * as monthUtils from '@actual-app/core/shared/months';
+import type { CSSProperties } from '@actual-app/components/styles';
+import type { BudgetType } from '@actual-app/core/server/prefs';
 import type { CategoryEntity } from '@actual-app/core/types/models';
 
 import { useCategoriesById } from '#hooks/useCategories';

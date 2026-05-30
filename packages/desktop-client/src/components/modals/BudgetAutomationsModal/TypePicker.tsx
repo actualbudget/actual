@@ -5,8 +5,8 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { displayTemplateTypes } from '#components/budget/goals/constants';
-import type { DisplayTemplateType } from '#components/budget/goals/constants';
 import { getDisplayTemplateMeta } from '#components/budget/goals/displayTemplateMeta';
+import type { DisplayTemplateType } from '#components/budget/goals/constants';
 
 // Types managed in the Options sidebar section, not as contribution-type
 // swaps.

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo } from 'react';
 
 import { evalArithmetic } from '@actual-app/core/shared/arithmetic';
 import { getCurrency } from '@actual-app/core/shared/currencies';
-import type { Currency } from '@actual-app/core/shared/currencies';
 import {
   amountToInteger,
   currencyToAmount,
@@ -12,6 +11,7 @@ import {
   parseNumberFormat,
   setNumberFormat,
 } from '@actual-app/core/shared/util';
+import type { Currency } from '@actual-app/core/shared/currencies';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 
 import { useSyncedPref } from './useSyncedPref';

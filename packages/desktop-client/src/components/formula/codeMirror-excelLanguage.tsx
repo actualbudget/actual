@@ -5,22 +5,22 @@ import { Trans } from 'react-i18next';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { autocompletion } from '@codemirror/autocomplete';
-import type { Completion, CompletionContext } from '@codemirror/autocomplete';
 import {
   HighlightStyle,
   StreamLanguage,
   syntaxHighlighting,
 } from '@codemirror/language';
-import type { StreamParser } from '@codemirror/language';
-import type { Extension } from '@codemirror/state';
 import { EditorView, hoverTooltip, tooltips } from '@codemirror/view';
-import type { Tooltip } from '@codemirror/view';
 import { tags } from '@lezer/highlight';
 import { t } from 'i18next';
+import type { Completion, CompletionContext } from '@codemirror/autocomplete';
+import type { StreamParser } from '@codemirror/language';
+import type { Extension } from '@codemirror/state';
+import type { Tooltip } from '@codemirror/view';
 
 import { queryModeFunctions } from './queryModeFunctions';
-import type { FunctionDef } from './queryModeFunctions';
 import { transactionModeFunctions } from './transactionModeFunctions';
+import type { FunctionDef } from './queryModeFunctions';
 
 // Tooltip components using the same styles as Tooltip.tsx
 function FunctionTooltip({

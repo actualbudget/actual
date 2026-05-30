@@ -20,8 +20,8 @@ import {
 } from '#components/common/Modal';
 import { CellValueText } from '#components/spreadsheet/CellValue';
 import { useCategory } from '#hooks/useCategory';
-import type { Modal as ModalType } from '#modals/modalsSlice';
 import { envelopeBudget } from '#spreadsheet/bindings';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type EnvelopeBalanceMenuModalProps = Omit<
   Extract<ModalType, { name: 'envelope-balance-menu' }>['options'],

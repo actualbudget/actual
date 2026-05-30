@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
-import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { css } from '@emotion/css';
@@ -16,13 +15,14 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import type { CSSProperties } from '@actual-app/components/styles';
 
 import { FinancialText } from '#components/FinancialText';
 import { Container } from '#components/reports/Container';
 import { useFormat } from '#hooks/useFormat';
-import type { FormatType } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
+import type { FormatType } from '#hooks/useFormat';
 
 import { computePadding } from './util/computePadding';
 

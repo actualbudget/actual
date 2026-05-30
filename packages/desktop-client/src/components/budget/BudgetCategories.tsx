@@ -9,9 +9,9 @@ import type {
 } from '@actual-app/core/types/models';
 
 import { DropHighlightPosContext } from '#components/sort';
-import type { DragState, OnDropCallback } from '#components/sort';
 import { Row } from '#components/table';
 import { useLocalPref } from '#hooks/useLocalPref';
+import type { DragState, OnDropCallback } from '#components/sort';
 
 import { ExpenseCategory } from './ExpenseCategory';
 import { ExpenseGroup } from './ExpenseGroup';

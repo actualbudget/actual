@@ -16,12 +16,12 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
+import { parseISO } from 'date-fns';
 import type {
   SummaryContent,
   SummaryWidget,
   TimeFrame,
 } from '@actual-app/core/types/models';
-import { parseISO } from 'date-fns';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { AppliedFilters } from '#components/filters/AppliedFilters';

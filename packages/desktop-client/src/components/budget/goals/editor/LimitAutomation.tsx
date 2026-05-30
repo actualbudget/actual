@@ -9,18 +9,18 @@ import {
   parseDate,
 } from '@actual-app/core/shared/months';
 import { amountToInteger, integerToAmount } from '@actual-app/core/shared/util';
-import type { LimitTemplate } from '@actual-app/core/types/models/templates';
 import { css } from '@emotion/css';
 import { getDay } from 'date-fns/getDay';
 import { setDay } from 'date-fns/setDay';
+import type { LimitTemplate } from '@actual-app/core/types/models/templates';
 
 import { updateTemplate } from '#components/budget/goals/actions';
-import type { Action } from '#components/budget/goals/actions';
 import { FormField, FormLabel } from '#components/forms';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { AmountInput } from '#components/util/AmountInput';
 import { useDaysOfWeek } from '#hooks/useDaysOfWeek';
 import { useFormat } from '#hooks/useFormat';
+import type { Action } from '#components/budget/goals/actions';
 
 type LimitAutomationProps = {
   template: LimitTemplate;

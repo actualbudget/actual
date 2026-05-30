@@ -7,7 +7,6 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import {
   addDays,
   format as formatDate,
@@ -16,6 +15,7 @@ import {
   startOfMonth,
   startOfWeek,
 } from 'date-fns';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';

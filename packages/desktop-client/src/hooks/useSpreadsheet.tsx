@@ -2,8 +2,8 @@ import { createContext, useContext, useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 
 import { listen, send } from '@actual-app/core/platform/client/connection';
-import type { Query } from '@actual-app/core/shared/query';
 import { LRUCache } from 'lru-cache';
+import type { Query } from '@actual-app/core/shared/query';
 
 type SpreadsheetContextValue = ReturnType<typeof makeSpreadsheet>;
 const SpreadsheetContext = createContext<SpreadsheetContextValue | undefined>(

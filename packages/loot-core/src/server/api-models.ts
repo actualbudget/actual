@@ -8,8 +8,8 @@ import type {
   TagEntity,
 } from '#types/models';
 
-import type { RemoteFile } from './cloud-storage';
 import * as models from './models';
+import type { RemoteFile } from './cloud-storage';
 
 export type APIAccountEntity = Pick<AccountEntity, 'id' | 'name'> & {
   offbudget?: boolean;

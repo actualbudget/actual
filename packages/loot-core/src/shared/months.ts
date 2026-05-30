@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 import * as d from 'date-fns';
-import type { Locale } from 'date-fns';
 import memoizeOne from 'memoize-one';
+import type { Locale } from 'date-fns';
 
 import type { SyncedPrefs } from '#types/prefs';
 

@@ -4,11 +4,11 @@ import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
-import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
+import type { CSSProperties } from '@actual-app/components/styles';
 import type { AccountEntity } from '@actual-app/core/types/models';
 
 import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';

@@ -32,6 +32,7 @@ import {
   isElectron,
   isNonProductionEnvironment,
 } from '@actual-app/core/shared/environment';
+import { css } from '@emotion/css';
 import type {
   File,
   LocalFile,
@@ -39,7 +40,6 @@ import type {
   SyncableLocalFile,
   SyncedLocalFile,
 } from '@actual-app/core/types/file';
-import { css } from '@emotion/css';
 
 import {
   closeAndDownloadBudget,

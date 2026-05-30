@@ -12,11 +12,11 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import { css, cx } from '@emotion/css';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
 } from '@actual-app/core/types/models';
-import { css, cx } from '@emotion/css';
 
 import { NotesButton } from '#components/NotesButton';
 import { InputCell } from '#components/table';

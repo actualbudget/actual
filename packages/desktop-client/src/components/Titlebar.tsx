@@ -14,7 +14,6 @@ import {
 } from '@actual-app/components/icons/v2';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
-import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -22,6 +21,7 @@ import { listen } from '@actual-app/core/platform/client/connection';
 import { isDevelopmentEnvironment } from '@actual-app/core/shared/environment';
 import * as Platform from '@actual-app/core/shared/platform';
 import { css } from '@emotion/css';
+import type { CSSProperties } from '@actual-app/components/styles';
 
 import { sync } from '#app/appSlice';
 import { useGlobalPref } from '#hooks/useGlobalPref';

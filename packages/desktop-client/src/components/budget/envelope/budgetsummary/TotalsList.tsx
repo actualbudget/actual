@@ -11,8 +11,8 @@ import { View } from '@actual-app/components/view';
 import { EnvelopeCellValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
 import { CellValueText } from '#components/spreadsheet/CellValue';
 import { useFormat } from '#hooks/useFormat';
-import type { FormatType } from '#hooks/useFormat';
 import { envelopeBudget } from '#spreadsheet/bindings';
+import type { FormatType } from '#hooks/useFormat';
 
 /**
  * Creates a formatter that displays values with explicit +/- signs.

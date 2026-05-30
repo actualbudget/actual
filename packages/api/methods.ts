@@ -1,3 +1,4 @@
+import { lib } from '@actual-app/core/server/main';
 import type {
   APIAccountEntity,
   APICategoryEntity,
@@ -7,7 +8,6 @@ import type {
   APIScheduleEntity,
   APITagEntity,
 } from '@actual-app/core/server/api-models';
-import { lib } from '@actual-app/core/server/main';
 import type { Query } from '@actual-app/core/shared/query';
 import type { ImportTransactionsOpts } from '@actual-app/core/types/api-handlers';
 import type { Handlers } from '@actual-app/core/types/handlers';

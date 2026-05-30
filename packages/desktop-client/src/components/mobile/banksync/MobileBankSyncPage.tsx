@@ -12,13 +12,13 @@ import {
   getSyncSourceReadable,
   groupBankSyncAccounts,
 } from '#components/banksync/bankSyncUtils';
-import type { GroupedBankSyncAccounts } from '#components/banksync/bankSyncUtils';
 import { Search } from '#components/common/Search';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useAccounts } from '#hooks/useAccounts';
 import { useNavigate } from '#hooks/useNavigate';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
+import type { GroupedBankSyncAccounts } from '#components/banksync/bankSyncUtils';
 
 import { BankSyncAccountsList } from './BankSyncAccountsList';
 

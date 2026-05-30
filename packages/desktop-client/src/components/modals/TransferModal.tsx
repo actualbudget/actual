@@ -17,8 +17,8 @@ import { AmountInput } from '#components/util/AmountInput';
 import { useCategories } from '#hooks/useCategories';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
-import type { Modal as ModalType } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type TransferModalProps = Extract<ModalType, { name: 'transfer' }>['options'];
 

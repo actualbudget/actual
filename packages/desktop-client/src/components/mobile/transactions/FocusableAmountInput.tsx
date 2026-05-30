@@ -7,7 +7,6 @@ import type {
 } from 'react';
 
 import { Button } from '@actual-app/components/button';
-import type { CSSProperties as EmotionCSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -18,6 +17,7 @@ import {
   reapplyThousandSeparators,
 } from '@actual-app/core/shared/util';
 import { css } from '@emotion/css';
+import type { CSSProperties as EmotionCSSProperties } from '@actual-app/components/styles';
 
 import { makeAmountFullStyle } from '#components/budget/util';
 import { useMergedRefs } from '#hooks/useMergedRefs';

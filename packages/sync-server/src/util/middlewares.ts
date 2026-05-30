@@ -1,6 +1,6 @@
-import type { NextFunction, Request, Response } from 'express';
 import * as expressWinston from 'express-winston';
 import * as winston from 'winston';
+import type { NextFunction, Request, Response } from 'express';
 
 import { validateSession } from './validate-user';
 

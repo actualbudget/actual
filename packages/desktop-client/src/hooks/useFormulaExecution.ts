@@ -3,14 +3,14 @@ import { useEffect, useState } from 'react';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
-import type { Query } from '@actual-app/core/shared/query';
 import { integerToAmount } from '@actual-app/core/shared/util';
+import { HyperFormula } from 'hyperformula';
+import type { Query } from '@actual-app/core/shared/query';
 import type {
   CategoryEntity,
   RuleConditionEntity,
   TimeFrame,
 } from '@actual-app/core/types/models';
-import { HyperFormula } from 'hyperformula';
 
 import { getLiveRange } from '#components/reports/getLiveRange';
 import { calculateTimeRange } from '#components/reports/reportRanges';

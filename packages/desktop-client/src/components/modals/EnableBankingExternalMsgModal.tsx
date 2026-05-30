@@ -22,8 +22,8 @@ import { getCountryFromBrowser } from '#components/util/localeToCountry';
 import { useEnableBankingStatus } from '#hooks/useEnableBankingStatus';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { pushModal } from '#modals/modalsSlice';
-import type { Modal as ModalType } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type BankOption = {
   id: string;

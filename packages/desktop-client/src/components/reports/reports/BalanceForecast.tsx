@@ -10,11 +10,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
-import type {
-  BalanceForecastWidget,
-  RuleConditionEntity,
-  TimeFrame,
-} from '@actual-app/core/types/models';
 import * as d from 'date-fns';
 import {
   CartesianGrid,
@@ -26,6 +21,11 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import type {
+  BalanceForecastWidget,
+  RuleConditionEntity,
+  TimeFrame,
+} from '@actual-app/core/types/models';
 
 import { Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';

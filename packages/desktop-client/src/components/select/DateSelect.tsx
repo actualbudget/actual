@@ -20,7 +20,6 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
-import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import {
@@ -32,8 +31,9 @@ import {
 } from '@actual-app/core/shared/months';
 import { css } from '@emotion/css';
 import { addDays, format, isValid, parse, parseISO, subDays } from 'date-fns';
-import type { Locale } from 'date-fns';
 import Pikaday from 'pikaday';
+import type { CSSProperties } from '@actual-app/components/styles';
+import type { Locale } from 'date-fns';
 import 'pikaday/css/pikaday.css';
 import { InputField } from '#components/mobile/MobileForms';
 import { useLocale } from '#hooks/useLocale';

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { ColorSwatch } from 'react-aria-components';
 
-import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import { Button } from './Button';
 import { ColorPicker } from './ColorPicker';

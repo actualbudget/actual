@@ -8,10 +8,10 @@ import type {
 } from '@actual-app/core/types/models/templates';
 
 import { updateTemplate } from '#components/budget/goals/actions';
-import type { Action } from '#components/budget/goals/actions';
 import { AmountAdjustment } from '#components/budget/goals/editor/AmountAdjustment';
 import { FormField, FormLabel } from '#components/forms';
 import { GenericInput } from '#components/util/GenericInput';
+import type { Action } from '#components/budget/goals/actions';
 
 type HistoricalAutomationProps = {
   template: CopyTemplate | AverageTemplate;

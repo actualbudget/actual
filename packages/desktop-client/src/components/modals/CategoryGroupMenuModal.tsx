@@ -19,10 +19,10 @@ import {
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
-import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
+import type { CSSProperties } from '@actual-app/components/styles';
 
 import {
   Modal,

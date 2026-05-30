@@ -5,10 +5,10 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SvgRemove, SvgSearchAlternate } from '@actual-app/components/icons/v2';
 import { baseInputStyle, Input } from '@actual-app/components/input';
-import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
+import type { CSSProperties } from '@actual-app/components/styles';
 
 type SearchProps = {
   ref?: Ref<HTMLInputElement>;

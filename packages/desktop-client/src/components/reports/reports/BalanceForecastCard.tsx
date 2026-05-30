@@ -7,10 +7,6 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
-import type {
-  AccountEntity,
-  BalanceForecastWidget,
-} from '@actual-app/core/types/models';
 import {
   Line,
   LineChart,
@@ -18,6 +14,10 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from 'recharts';
+import type {
+  AccountEntity,
+  BalanceForecastWidget,
+} from '@actual-app/core/types/models';
 
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { Container } from '#components/reports/Container';

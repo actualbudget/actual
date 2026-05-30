@@ -10,9 +10,9 @@ import {
   SyncResponseSchema,
   toBinary,
 } from '@actual-app/crdt';
-import type { Request, Response } from 'express';
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
+import type { Request, Response } from 'express';
 
 import { getAccountDb, isAdmin } from './account-db';
 import { FileNotFound } from './app-sync/errors';

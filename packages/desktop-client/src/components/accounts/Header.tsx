@@ -27,19 +27,18 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { tsToRelativeTime } from '@actual-app/core/shared/util';
+import { format as formatDate } from 'date-fns';
 import type {
   AccountEntity,
   RuleConditionEntity,
   TransactionEntity,
   TransactionFilterEntity,
 } from '@actual-app/core/types/models';
-import { format as formatDate } from 'date-fns';
 
 import { AnimatedRefresh } from '#components/AnimatedRefresh';
 import { Search } from '#components/common/Search';
 import { FilterButton } from '#components/filters/FiltersMenu';
 import { FiltersStack } from '#components/filters/FiltersStack';
-import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
 import { NotesButton } from '#components/NotesButton';
 import { SelectedTransactionsButton } from '#components/transactions/SelectedTransactionsButton';
 import { useDateFormat } from '#hooks/useDateFormat';
@@ -48,11 +47,12 @@ import { useLocalPref } from '#hooks/useLocalPref';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
+import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
 
-import type { TableRef } from './Account';
 import { Balances } from './Balance';
 import { BalanceHistoryGraph } from './BalanceHistoryGraph';
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
+import type { TableRef } from './Account';
 
 type AccountHeaderProps = {
   tableRef: TableRef;

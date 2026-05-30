@@ -15,13 +15,13 @@ import {
   RateLimitError,
   RequisitionNotLinked,
 } from './errors';
+import { goCardlessService } from './services/gocardless-service';
+import { handleError } from './util/handle-error';
 import type {
   GoCardlessAccountId,
   GoCardlessInstitutionId,
   GoCardlessRequisitionId,
 } from './gocardless-node.types';
-import { goCardlessService } from './services/gocardless-service';
-import { handleError } from './util/handle-error';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;

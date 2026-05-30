@@ -7,16 +7,16 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import type { CategoryEntity } from '@actual-app/core/types/models';
 import { css, cx } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
+import type { CategoryEntity } from '@actual-app/core/types/models';
 
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useFormat } from '#hooks/useFormat';
 import { useSyncedPref } from '#hooks/useSyncedPref';
-import type { Binding } from '#spreadsheet';
 import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
+import type { Binding } from '#spreadsheet';
 
 import { getColumnWidth, PILL_STYLE } from './BudgetTable';
 

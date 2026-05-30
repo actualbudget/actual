@@ -14,8 +14,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { getStatusLabel } from '@actual-app/core/shared/schedules';
-import type { ScheduleStatusType } from '@actual-app/core/shared/schedules';
 import { titleFirst } from '@actual-app/core/shared/util';
+import type { ScheduleStatusType } from '@actual-app/core/shared/schedules';
 
 // Consists of Schedule Statuses + Transaction statuses
 export type StatusTypes =

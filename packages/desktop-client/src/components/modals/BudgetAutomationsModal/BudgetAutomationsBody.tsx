@@ -10,26 +10,24 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
+import { css } from '@emotion/css';
+import debounce from 'lodash/debounce';
 import type {
   CategoryGroupEntity,
   ScheduleEntity,
 } from '@actual-app/core/types/models';
 import type { CleanupTemplate } from '@actual-app/core/types/models/cleanup-templates';
-import { css } from '@emotion/css';
-import debounce from 'lodash/debounce';
 
 import {
   createAutomationEntry,
   getAutomationExamples,
 } from '#components/budget/goals/automationExamples';
-import type { AutomationEntry } from '#components/budget/goals/automationExamples';
 import {
   cleanupDefToEditor,
   editorToCleanupDef,
   emptyCleanupConfig,
   isCleanupConfigured,
 } from '#components/budget/goals/cleanupModel';
-import type { CleanupConfig } from '#components/budget/goals/cleanupModel';
 import { CleanupAutomation } from '#components/budget/goals/editor/CleanupAutomation';
 import { formatMonthLabel } from '#components/budget/goals/formatMonthLabel';
 import {
@@ -42,6 +40,8 @@ import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
+import type { AutomationEntry } from '#components/budget/goals/automationExamples';
+import type { CleanupConfig } from '#components/budget/goals/cleanupModel';
 
 import { AutomationEditorPane } from './AutomationEditorPane';
 import { AutomationListRow } from './AutomationListRow';

@@ -4,8 +4,8 @@ import path from 'node:path';
 
 import { ConfigurationPage } from '@actual-app/web/e2e/page-models/configuration-page';
 import { Navigation } from '@actual-app/web/e2e/page-models/navigation';
-import type { SettingsPage } from '@actual-app/web/e2e/page-models/settings-page';
 import { expect } from '@playwright/test';
+import type { SettingsPage } from '@actual-app/web/e2e/page-models/settings-page';
 
 import { test } from './fixtures';
 

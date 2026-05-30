@@ -9,8 +9,8 @@ import { View } from '@actual-app/components/view';
 import { deleteBudget } from '#budgetfiles/budgetfilesSlice';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
-import type { Modal as ModalType } from '#modals/modalsSlice';
 import { useDispatch, useSelector } from '#redux';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type DeleteFileModalProps = Extract<
   ModalType,

@@ -1,9 +1,9 @@
 import type { Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
-import type { BankSyncPage } from './page-models/bank-sync-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
+import type { BankSyncPage } from './page-models/bank-sync-page';
 
 test.describe('Bank Sync', () => {
   let page: Page;

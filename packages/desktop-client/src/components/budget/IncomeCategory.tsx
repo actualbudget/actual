@@ -5,9 +5,9 @@ import type { ComponentProps } from 'react';
 import type { CategoryEntity } from '@actual-app/core/types/models';
 
 import { DropHighlight, useDraggable, useDroppable } from '#components/sort';
-import type { OnDragChangeCallback, OnDropCallback } from '#components/sort';
 import { Row } from '#components/table';
 import { useDragRef } from '#hooks/useDragRef';
+import type { OnDragChangeCallback, OnDropCallback } from '#components/sort';
 
 import { RenderMonths } from './RenderMonths';
 import { SidebarCategory } from './SidebarCategory';

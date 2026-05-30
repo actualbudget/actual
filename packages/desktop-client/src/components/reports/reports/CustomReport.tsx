@@ -11,6 +11,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
+import * as d from 'date-fns';
 import type {
   balanceTypeOpType,
   CategoryEntity,
@@ -22,7 +23,6 @@ import type {
 } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import type { TransObjectLiteral } from '@actual-app/core/types/util';
-import * as d from 'date-fns';
 
 import { Warning } from '#components/alerts';
 import { AppliedFilters } from '#components/filters/AppliedFilters';
@@ -45,11 +45,9 @@ import {
   defaultReport,
   ReportOptions,
 } from '#components/reports/ReportOptions';
-import type { dateRangeProps } from '#components/reports/ReportOptions';
 import { ReportSidebar } from '#components/reports/ReportSidebar';
 import { ReportSummary } from '#components/reports/ReportSummary';
 import { ReportTopbar } from '#components/reports/ReportTopbar';
-import type { SavedStatus } from '#components/reports/SaveReportMenu';
 import { setSessionReport } from '#components/reports/setSessionReport';
 import { createCustomSpreadsheet } from '#components/reports/spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '#components/reports/spreadsheets/grouped-spreadsheet';
@@ -65,6 +63,8 @@ import { usePayees } from '#hooks/usePayees';
 import { useReport as useCustomReport } from '#hooks/useReport';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+import type { dateRangeProps } from '#components/reports/ReportOptions';
+import type { SavedStatus } from '#components/reports/SaveReportMenu';
 
 /**
  * Transform `selectedCategories` into `conditions`.

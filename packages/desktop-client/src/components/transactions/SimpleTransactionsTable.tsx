@@ -5,12 +5,12 @@ import { Trans, useTranslation } from 'react-i18next';
 import { SvgArrowsSynchronize } from '@actual-app/components/icons/v2';
 import { theme } from '@actual-app/components/theme';
 import * as monthUtils from '@actual-app/core/shared/months';
-import type { TransactionEntity } from '@actual-app/core/types/models';
 import {
   format as formatDate,
   isValid as isDateValid,
   parseISO,
 } from 'date-fns';
+import type { TransactionEntity } from '@actual-app/core/types/models';
 
 import { FinancialText } from '#components/FinancialText';
 import { Cell, Field, Row, SelectCell, Table } from '#components/table';
@@ -19,8 +19,8 @@ import { useAccount } from '#hooks/useAccount';
 import { useCategory } from '#hooks/useCategory';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
-import type { FormatType } from '#hooks/useFormat';
 import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
+import type { FormatType } from '#hooks/useFormat';
 
 function serializeTransaction(
   transaction: TransactionEntity,

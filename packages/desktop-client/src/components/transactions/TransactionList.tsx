@@ -31,14 +31,14 @@ import type {
 } from '@actual-app/core/types/models';
 
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
-import type { TableHandleRef } from '#components/table';
 import { isValidBoundaryDrop } from '#hooks/useDragDrop';
-import type { DropPosition } from '#hooks/useDragDrop';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
+import type { TableHandleRef } from '#components/table';
+import type { DropPosition } from '#hooks/useDragDrop';
 
 import { TransactionTable } from './TransactionsTable';
 import type { TransactionTableProps } from './TransactionsTable';

@@ -7,9 +7,9 @@ import {
   setClock,
   Timestamp,
 } from '@actual-app/crdt';
-import type { Database, Statement } from '@jlongster/sql.js';
 import { LRUCache } from 'lru-cache';
 import { v4 as uuidv4 } from 'uuid';
+import type { Database, Statement } from '@jlongster/sql.js';
 
 import * as fs from '#platform/server/fs';
 import * as sqlite from '#platform/server/sqlite';

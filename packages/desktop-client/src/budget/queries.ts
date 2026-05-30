@@ -1,10 +1,10 @@
 import { send } from '@actual-app/core/platform/client/connection';
+import { queryOptions } from '@tanstack/react-query';
+import i18n from 'i18next';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
 } from '@actual-app/core/types/models';
-import { queryOptions } from '@tanstack/react-query';
-import i18n from 'i18next';
 
 type CategoryViews = {
   grouped: CategoryGroupEntity[];

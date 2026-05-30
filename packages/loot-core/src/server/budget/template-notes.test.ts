@@ -7,12 +7,12 @@ import {
   getCategoriesWithTemplateNotes,
   resetCategoryGoalDefsWithNoTemplates,
 } from './statements';
-import type { CategoryWithTemplateNote } from './statements';
 import {
   checkTemplateNotes,
   storeNoteTemplates,
   unparse,
 } from './template-notes';
+import type { CategoryWithTemplateNote } from './statements';
 
 vi.mock('#server/db');
 vi.mock('./statements');

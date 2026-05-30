@@ -1,5 +1,5 @@
-import type { RuleConditionEntity } from '@actual-app/core/types/models';
 import { describe, expect, it, vi } from 'vitest';
+import type { RuleConditionEntity } from '@actual-app/core/types/models';
 
 import {
   addNode,

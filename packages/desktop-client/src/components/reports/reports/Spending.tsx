@@ -16,11 +16,11 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
+import * as d from 'date-fns';
 import type {
   RuleConditionEntity,
   SpendingWidget,
 } from '@actual-app/core/types/models';
-import * as d from 'date-fns';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { AppliedFilters } from '#components/filters/AppliedFilters';

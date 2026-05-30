@@ -6,8 +6,8 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
-import type { CashFlowWidget } from '@actual-app/core/types/models';
 import { Bar, BarChart, LabelList } from 'recharts';
+import type { CashFlowWidget } from '@actual-app/core/types/models';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';

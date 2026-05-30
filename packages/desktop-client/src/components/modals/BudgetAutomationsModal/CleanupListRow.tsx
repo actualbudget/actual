@@ -5,8 +5,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import type { CleanupConfig } from '#components/budget/goals/cleanupModel';
 import { CleanupAutomationReadOnly } from '#components/budget/goals/editor/CleanupAutomationReadOnly';
+import type { CleanupConfig } from '#components/budget/goals/cleanupModel';
 import type { CleanupGroup } from '#hooks/useCleanupGroups';
 
 type CleanupListRowProps = {

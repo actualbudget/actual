@@ -1,8 +1,8 @@
 import type { Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
-import type { BudgetPage } from './page-models/budget-page';
 import { ConfigurationPage } from './page-models/configuration-page';
+import type { BudgetPage } from './page-models/budget-page';
 
 test.describe('Budget', () => {
   let page: Page;

@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
-import type { CSSProperties } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 import { getMonthYearFormat } from '@actual-app/core/shared/months';
+import type { CSSProperties } from '@actual-app/components/styles';
 import type {
   RecurConfig,
   RuleConditionOp,

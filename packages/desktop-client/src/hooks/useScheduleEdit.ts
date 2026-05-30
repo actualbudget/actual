@@ -15,9 +15,9 @@ import type {
 } from '@actual-app/core/types/models';
 
 import { updateScheduleConditions } from '#components/schedules/schedule-edit-utils';
-import type { ScheduleFormFields } from '#components/schedules/ScheduleEditForm';
 import { aqlQuery } from '#queries/aqlQuery';
 import { liveQuery } from '#queries/liveQuery';
+import type { ScheduleFormFields } from '#components/schedules/ScheduleEditForm';
 
 export type ScheduleEditState = {
   isCustom?: boolean;

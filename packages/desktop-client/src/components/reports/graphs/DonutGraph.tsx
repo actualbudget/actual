@@ -3,6 +3,7 @@ import React, { useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 
 import { theme } from '@actual-app/components/theme';
+import { Pie, PieChart, Sector } from 'recharts';
 import type {
   balanceTypeOpType,
   DataEntity,
@@ -11,7 +12,6 @@ import type {
   LegendEntity,
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
-import { Pie, PieChart, Sector } from 'recharts';
 import type { PieSectorDataItem, PieSectorShapeProps } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';

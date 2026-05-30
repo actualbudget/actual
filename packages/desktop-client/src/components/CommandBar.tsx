@@ -28,13 +28,13 @@ import { useMetadataPref } from '#hooks/useMetadataPref';
 import { useModalState } from '#hooks/useModalState';
 import { useNavigate } from '#hooks/useNavigate';
 import { useReports } from '#hooks/useReports';
-import type { Binding, SheetFields, SheetNames } from '#spreadsheet';
 import {
   accountBalance,
   allAccountBalance,
   offBudgetAccountBalance,
   onBudgetAccountBalance,
 } from '#spreadsheet/bindings';
+import type { Binding, SheetFields, SheetNames } from '#spreadsheet';
 
 import { CellValue, CellValueText } from './spreadsheet/CellValue';
 

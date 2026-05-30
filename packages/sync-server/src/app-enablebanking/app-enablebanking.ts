@@ -1,7 +1,7 @@
 import createDebug from 'debug';
-import type { Request, Response } from 'express';
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
+import type { Request, Response } from 'express';
 
 import { handleError } from '#app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '#services/secrets-service';
@@ -10,10 +10,6 @@ import {
   validateSessionMiddleware,
 } from '#util/middlewares';
 
-import type {
-  EnableBankingSession,
-  PsuHeaders,
-} from './services/enablebanking-service';
 import {
   enableBankingService,
   normalizeAccount,
@@ -21,6 +17,10 @@ import {
   normalizeTransaction,
 } from './services/enablebanking-service';
 import { EnableBankingError } from './utils/errors';
+import type {
+  EnableBankingSession,
+  PsuHeaders,
+} from './services/enablebanking-service';
 
 const debug = createDebug('actual:enable-banking:app');
 

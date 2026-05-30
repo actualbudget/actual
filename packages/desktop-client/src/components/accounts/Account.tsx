@@ -9,10 +9,8 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { listen, send } from '@actual-app/core/platform/client/connection';
 import * as undo from '@actual-app/core/platform/client/undo';
-import type { UndoState } from '@actual-app/core/server/undo';
 import { currentDay } from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
-import type { Query } from '@actual-app/core/shared/query';
 import {
   makeAsNonChildTransactions,
   makeChild,
@@ -22,6 +20,12 @@ import {
   updateTransaction,
 } from '@actual-app/core/shared/transactions';
 import { applyChanges } from '@actual-app/core/shared/util';
+import { t } from 'i18next';
+import debounce from 'lodash/debounce';
+import isEqual from 'lodash/isEqual';
+import { v4 as uuidv4 } from 'uuid';
+import type { UndoState } from '@actual-app/core/server/undo';
+import type { Query } from '@actual-app/core/shared/query';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
@@ -33,10 +37,6 @@ import type {
   TransactionEntity,
   TransactionFilterEntity,
 } from '@actual-app/core/types/models';
-import { t } from 'i18next';
-import debounce from 'lodash/debounce';
-import isEqual from 'lodash/isEqual';
-import { v4 as uuidv4 } from 'uuid';
 
 import {
   useReopenAccountMutation,
@@ -46,7 +46,6 @@ import {
 } from '#accounts';
 import { markAccountRead } from '#accounts/accountsSlice';
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
-import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
 import { TransactionList } from '#components/transactions/TransactionList';
 import { validateAccountName } from '#components/util/accountValidation';
 import { useAccountPreviewTransactions } from '#hooks/useAccountPreviewTransactions';
@@ -59,7 +58,6 @@ import { useLocalPref } from '#hooks/useLocalPref';
 import { usePayees } from '#hooks/usePayees';
 import { getSchedulesQuery } from '#hooks/useSchedules';
 import { SelectedProviderWithItems } from '#hooks/useSelected';
-import type { Actions } from '#hooks/useSelected';
 import {
   SplitsExpandedProvider,
   useSplitsExpanded,
@@ -73,16 +71,18 @@ import {
   pushModal,
   replaceModal,
 } from '#modals/modalsSlice';
-import type { ConfirmTransactionEditReason } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useCreatePayeeMutation } from '#payees';
 import * as queries from '#queries';
 import { aqlQuery } from '#queries/aqlQuery';
 import { pagedQuery } from '#queries/pagedQuery';
-import type { PagedQuery } from '#queries/pagedQuery';
 import { useDispatch, useSelector } from '#redux';
-import type { AppDispatch } from '#redux/store';
 import { updateNewTransactions } from '#transactions/transactionsSlice';
+import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
+import type { Actions } from '#hooks/useSelected';
+import type { ConfirmTransactionEditReason } from '#modals/modalsSlice';
+import type { PagedQuery } from '#queries/pagedQuery';
+import type { AppDispatch } from '#redux/store';
 
 import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';

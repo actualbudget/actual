@@ -3,13 +3,13 @@ import {
   parseNumberFormat,
   setNumberFormat,
 } from '@actual-app/core/shared/util';
+import { createSlice } from '@reduxjs/toolkit';
 import type {
   GlobalPrefs,
   MetadataPrefs,
   ServerPrefs,
   SyncedPrefs,
 } from '@actual-app/core/types/prefs';
-import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { resetApp } from '#app/appSlice';

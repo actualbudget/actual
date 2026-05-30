@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import type { FocusEvent } from 'react';
 
 import { Input } from '@actual-app/components/input';
-import type { InputProps } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
+import type { InputProps } from '@actual-app/components/input';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 
 import { useFormat } from '#hooks/useFormat';

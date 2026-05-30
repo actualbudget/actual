@@ -18,17 +18,17 @@ import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
-import type { Query } from '@actual-app/core/shared/query';
 import { ungroupTransactions } from '@actual-app/core/shared/transactions';
+import { css } from '@emotion/css';
+import { useDrag } from '@use-gesture/react';
+import { format as formatDate, parseISO } from 'date-fns';
+import type { Query } from '@actual-app/core/shared/query';
 import type {
   CalendarWidget,
   RuleConditionEntity,
   TimeFrame,
   TransactionEntity,
 } from '@actual-app/core/types/models';
-import { css } from '@emotion/css';
-import { useDrag } from '@use-gesture/react';
-import { format as formatDate, parseISO } from 'date-fns';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { FinancialText } from '#components/FinancialText';
@@ -42,10 +42,8 @@ import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { calendarSpreadsheet } from '#components/reports/spreadsheets/calendar-spreadsheet';
-import type { CalendarDataType } from '#components/reports/spreadsheets/calendar-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
-import type { TableHandleRef } from '#components/table';
 import { TransactionList } from '#components/transactions/TransactionList';
 import { useAccounts } from '#hooks/useAccounts';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
@@ -54,7 +52,6 @@ import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { DisplayPayeeProvider } from '#hooks/useDisplayPayee';
 import { useFormat } from '#hooks/useFormat';
-import type { FormatType } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { useNavigate } from '#hooks/useNavigate';
@@ -68,6 +65,9 @@ import { useTransactions } from '#hooks/useTransactions';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
+import type { CalendarDataType } from '#components/reports/spreadsheets/calendar-spreadsheet';
+import type { TableHandleRef } from '#components/table';
+import type { FormatType } from '#hooks/useFormat';
 
 const CHEVRON_HEIGHT = 42;
 const SUMMARY_HEIGHT = 140;

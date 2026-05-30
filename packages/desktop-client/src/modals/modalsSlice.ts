@@ -1,4 +1,5 @@
 import { send } from '@actual-app/core/platform/client/connection';
+import { createSlice } from '@reduxjs/toolkit';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type { File } from '@actual-app/core/types/file';
 import type {
@@ -18,14 +19,13 @@ import type {
 } from '@actual-app/core/types/models';
 import type { CleanupTemplate } from '@actual-app/core/types/models/cleanup-templates';
 import type { Template } from '@actual-app/core/types/models/templates';
-import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { accountQueries } from '#accounts';
 import { resetApp, setAppState } from '#app/appSlice';
-import type { SelectLinkedAccountsModalProps } from '#components/modals/SelectLinkedAccountsModal';
 import { createAppAsyncThunk } from '#redux';
 import { signOut } from '#users/usersSlice';
+import type { SelectLinkedAccountsModalProps } from '#components/modals/SelectLinkedAccountsModal';
 
 const sliceName = 'modals';
 

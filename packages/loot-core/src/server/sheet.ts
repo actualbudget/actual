@@ -7,6 +7,8 @@ import * as sqlite from '#platform/server/sqlite';
 import { sheetForMonth } from '#shared/months';
 import * as Platform from '#shared/platform';
 
+import { Spreadsheet } from './spreadsheet/spreadsheet';
+import { resolveName } from './spreadsheet/util';
 import type * as DbModule from './db';
 import type {
   DbPreference,
@@ -14,8 +16,6 @@ import type {
   DbZeroBudget,
   DbZeroBudgetMonth,
 } from './db';
-import { Spreadsheet } from './spreadsheet/spreadsheet';
-import { resolveName } from './spreadsheet/util';
 
 let globalSheet: Spreadsheet;
 let globalOnChange;

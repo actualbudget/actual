@@ -5,10 +5,10 @@ import { HyperFormula } from 'hyperformula';
 import enUS from 'hyperformula/i18n/languages/enUS';
 
 import { logger } from '#platform/server/log';
-import type { TransactionForRules } from '#server/transactions/transaction-rules';
 import { currentDay, format, parseDate } from '#shared/months';
 import { FIELD_TYPES } from '#shared/rules';
 import { amountToInteger } from '#shared/util';
+import type { TransactionForRules } from '#server/transactions/transaction-rules';
 
 import {
   CustomFunctionsPlugin,

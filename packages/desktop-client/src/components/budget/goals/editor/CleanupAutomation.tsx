@@ -9,13 +9,13 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { Link } from '#components/common/Link';
+import { FormLabel } from '#components/forms';
+import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import type {
   CleanupConfig,
   GroupCleanup,
 } from '#components/budget/goals/cleanupModel';
-import { Link } from '#components/common/Link';
-import { FormLabel } from '#components/forms';
-import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import type { CleanupGroup } from '#hooks/useCleanupGroups';
 
 import { CleanupGroupPicker } from './CleanupGroupPicker';

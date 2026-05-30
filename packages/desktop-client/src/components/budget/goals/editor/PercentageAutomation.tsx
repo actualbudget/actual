@@ -11,9 +11,9 @@ import type { PercentageTemplate } from '@actual-app/core/types/models/templates
 
 import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
 import { updateTemplate } from '#components/budget/goals/actions';
-import type { Action } from '#components/budget/goals/actions';
 import { FormField, FormLabel } from '#components/forms';
 import { PercentInput } from '#components/util/PercentInput';
+import type { Action } from '#components/budget/goals/actions';
 
 type PercentageAutomationProps = {
   dispatch: (action: Action) => void;

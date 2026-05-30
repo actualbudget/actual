@@ -1,10 +1,10 @@
 import IngPlIngbplpw from '#app-gocardless/banks/ing_pl_ingbplpw';
+import { mockTransactionAmount } from '#app-gocardless/services/tests/fixtures';
 import type {
   Balance,
   Transaction,
 } from '#app-gocardless/gocardless-node.types';
 import type { DetailedAccountWithInstitution } from '#app-gocardless/gocardless.types';
-import { mockTransactionAmount } from '#app-gocardless/services/tests/fixtures';
 
 describe('IngPlIngbplpw', () => {
   describe('#normalizeAccount', () => {

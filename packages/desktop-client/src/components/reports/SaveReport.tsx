@@ -27,8 +27,8 @@ import { LoadingIndicator } from './LoadingIndicator';
 import { SaveReportChoose } from './SaveReportChoose';
 import { SaveReportDelete } from './SaveReportDelete';
 import { SaveReportMenu } from './SaveReportMenu';
-import type { SavedStatus } from './SaveReportMenu';
 import { SaveReportName } from './SaveReportName';
+import type { SavedStatus } from './SaveReportMenu';
 
 type SaveReportProps<T extends CustomReportEntity = CustomReportEntity> = {
   customReportItems: T;

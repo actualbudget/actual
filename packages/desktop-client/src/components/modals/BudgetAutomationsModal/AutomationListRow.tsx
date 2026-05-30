@@ -6,13 +6,13 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import type { AutomationEntry } from '#components/budget/goals/automationExamples';
 import { AutomationErrorShort } from '#components/budget/goals/automationMessages';
 import { getDisplayTemplateMeta } from '#components/budget/goals/displayTemplateMeta';
 import { LimitAutomationShort } from '#components/budget/goals/editor/LimitAutomationShort';
 import { TemplateSentence } from '#components/budget/goals/TemplateSentence';
-import type { AutomationErrorKind } from '#components/budget/goals/validateAutomation';
 import { useFormat } from '#hooks/useFormat';
+import type { AutomationEntry } from '#components/budget/goals/automationExamples';
+import type { AutomationErrorKind } from '#components/budget/goals/validateAutomation';
 
 import { NON_CONTRIBUTION_TYPES } from './TypePicker';
 

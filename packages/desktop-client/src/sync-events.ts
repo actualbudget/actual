@@ -1,6 +1,6 @@
 import { listen, send } from '@actual-app/core/platform/client/connection';
-import type { QueryClient } from '@tanstack/react-query';
 import { t } from 'i18next';
+import type { QueryClient } from '@tanstack/react-query';
 
 import { accountQueries } from './accounts';
 import { resetSync, sync } from './app/appSlice';
@@ -11,11 +11,11 @@ import {
 } from './budgetfiles/budgetfilesSlice';
 import { pushModal } from './modals/modalsSlice';
 import { addNotification } from './notifications/notificationsSlice';
-import type { Notification } from './notifications/notificationsSlice';
 import { payeeQueries } from './payees';
 import { loadPrefs } from './prefs/prefsSlice';
-import type { AppStore } from './redux/store';
 import { signOut } from './users/usersSlice';
+import type { Notification } from './notifications/notificationsSlice';
+import type { AppStore } from './redux/store';
 
 export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
   // TODO: Should this run on mobile too?

@@ -10,23 +10,23 @@ import type {
   CategoryGroupEntity,
 } from '@actual-app/core/types/models';
 
-import type { DropPosition } from '#components/sort';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useCategories } from '#hooks/useCategories';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
+import type { DropPosition } from '#components/sort';
 
 import { BudgetCategories } from './BudgetCategories';
 import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
 import { MonthsProvider } from './MonthsContext';
-import type { MonthBounds } from './MonthsContext';
 import {
   findSortDown,
   findSortUp,
   getScrollbarWidth,
   separateGroups,
 } from './util';
+import type { MonthBounds } from './MonthsContext';
 
 type BudgetTableProps = {
   type: string;

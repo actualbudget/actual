@@ -2,8 +2,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { send } from '@actual-app/core/platform/client/connection';
-import type { Query } from '@actual-app/core/shared/query';
 import { isPreviewId } from '@actual-app/core/shared/transactions';
+import type { Query } from '@actual-app/core/shared/query';
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
 import { TransactionListWithBalances } from '#components/mobile/transactions/TransactionListWithBalances';

@@ -20,8 +20,8 @@ import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import type { AccountEntity } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
+import type { AccountEntity } from '@actual-app/core/types/models';
 
 import { useMoveAccountMutation, useSyncAndDownloadMutation } from '#accounts';
 import { makeAmountFullStyle } from '#components/budget/util';
@@ -36,8 +36,8 @@ import { useNavigate } from '#hooks/useNavigate';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { replaceModal } from '#modals/modalsSlice';
 import { useDispatch, useSelector } from '#redux';
-import type { Binding, SheetFields } from '#spreadsheet';
 import * as bindings from '#spreadsheet/bindings';
+import type { Binding, SheetFields } from '#spreadsheet';
 
 const ROW_HEIGHT = 60;
 

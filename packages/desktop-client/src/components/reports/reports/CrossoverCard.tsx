@@ -21,12 +21,12 @@ import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { defaultTimeFrame } from '#components/reports/reports/Crossover';
 import { createCrossoverSpreadsheet } from '#components/reports/spreadsheets/crossover-spreadsheet';
-import type { CrossoverData } from '#components/reports/spreadsheets/crossover-spreadsheet';
 import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '#components/reports/useReport';
 import { useCategories } from '#hooks/useCategories';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
+import type { CrossoverData } from '#components/reports/spreadsheets/crossover-spreadsheet';
 
 type CrossoverCardProps = {
   widgetId: string;

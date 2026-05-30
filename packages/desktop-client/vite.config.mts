@@ -1,20 +1,20 @@
 import { spawn } from 'node:child_process';
-import type { ChildProcess } from 'node:child_process';
 import { createReadStream } from 'node:fs';
 import { cp, mkdir, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
+import type { ChildProcess } from 'node:child_process';
 
 import babel from '@rolldown/plugin-babel';
 import inject from '@rollup/plugin-inject';
 import basicSsl from '@vitejs/plugin-basic-ssl';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
-import type { PreRenderedAsset } from 'rolldown';
 import { visualizer } from 'rollup-plugin-visualizer';
 /// <reference types="vitest" />
 import { build, defineConfig, loadEnv } from 'vite';
-import type { Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import type { PreRenderedAsset } from 'rolldown';
+import type { Plugin } from 'vite';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const reactCompilerInclude = new RegExp(

@@ -14,10 +14,10 @@ import { getUserAccessErrors } from '@actual-app/core/shared/errors';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { FormField, FormLabel } from '#components/forms';
 import { popModal } from '#modals/modalsSlice';
-import type { Modal as ModalType } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { signOut } from '#users/usersSlice';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type EditUserAccessProps = Extract<
   ModalType,

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import type { Query } from '@actual-app/core/shared/query';
 import debounce from 'lodash/debounce';
+import type { Query } from '@actual-app/core/shared/query';
 
 import * as queries from '#queries';
 

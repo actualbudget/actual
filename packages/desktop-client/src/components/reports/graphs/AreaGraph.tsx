@@ -4,10 +4,6 @@ import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
-import type {
-  balanceTypeOpType,
-  DataEntity,
-} from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 import {
   Area,
@@ -18,14 +14,18 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import type {
+  balanceTypeOpType,
+  DataEntity,
+} from '@actual-app/core/types/models';
 import type { LabelProps } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
 import { useRechartsAnimation } from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { useFormat } from '#hooks/useFormat';
-import type { FormatType } from '#hooks/useFormat';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
+import type { FormatType } from '#hooks/useFormat';
 
 import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';

@@ -4,8 +4,8 @@ import * as monthUtils from '#shared/months';
 import type { TransactionEntity } from '#types/models';
 import type { ForecastDataPoint, ForecastResult } from '#types/models/forecast';
 
-import type { AccountWithComputedBalance } from './forecast-accounts';
 import { matchesForecastFilters } from './forecast-filters';
+import type { AccountWithComputedBalance } from './forecast-accounts';
 import type { ForecastFilterInfo } from './forecast-filters';
 import type { ForecastScheduleOccurrence } from './forecast-schedules';
 

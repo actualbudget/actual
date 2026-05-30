@@ -21,12 +21,12 @@ import type {
 } from '@actual-app/core/types/models';
 
 import { pushModal } from '#modals/modalsSlice';
+import { aqlQuery } from '#queries/aqlQuery';
+import { useDispatch } from '#redux';
 import type {
   ConfirmTransactionEditReason,
   Modal as ModalType,
 } from '#modals/modalsSlice';
-import { aqlQuery } from '#queries/aqlQuery';
-import { useDispatch } from '#redux';
 
 type BatchReconciledReason = Extract<
   ConfirmTransactionEditReason,

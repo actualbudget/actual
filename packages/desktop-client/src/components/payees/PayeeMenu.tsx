@@ -3,9 +3,9 @@ import { Trans, useTranslation } from 'react-i18next';
 import { SvgDelete, SvgMerge } from '@actual-app/components/icons/v0';
 import { SvgBookmark, SvgLightBulb } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
-import type { MenuItem } from '@actual-app/components/menu';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { MenuItem } from '@actual-app/components/menu';
 import type { PayeeEntity } from '@actual-app/core/types/models';
 
 import { useSyncedPref } from '#hooks/useSyncedPref';

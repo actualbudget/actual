@@ -62,12 +62,6 @@ import {
   integerToCurrency,
   titleFirst,
 } from '@actual-app/core/shared/util';
-import type {
-  AccountEntity,
-  CategoryEntity,
-  PayeeEntity,
-  TransactionEntity,
-} from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 import {
   format as formatDate,
@@ -75,6 +69,12 @@ import {
   parse as parseDate,
   parseISO,
 } from 'date-fns';
+import type {
+  AccountEntity,
+  CategoryEntity,
+  PayeeEntity,
+  TransactionEntity,
+} from '@actual-app/core/types/models';
 
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import {

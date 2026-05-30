@@ -21,7 +21,6 @@ import { makeAmountGrey } from '#components/budget/util';
 import { NotesButton } from '#components/NotesButton';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { Field, Row, SheetCell } from '#components/table';
-import type { SheetCellProps } from '#components/table';
 import { useCategoryScheduleGoalTemplateIndicator } from '#hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useFormat } from '#hooks/useFormat';
@@ -29,8 +28,9 @@ import { useNavigate } from '#hooks/useNavigate';
 import { useSheetName } from '#hooks/useSheetName';
 import { useSheetValue } from '#hooks/useSheetValue';
 import { useUndo } from '#hooks/useUndo';
-import type { Binding, SheetFields } from '#spreadsheet';
 import { envelopeBudget } from '#spreadsheet/bindings';
+import type { SheetCellProps } from '#components/table';
+import type { Binding, SheetFields } from '#spreadsheet';
 import type { CategoryGroupMonthProps, CategoryMonthProps } from '..';
 
 import { BalanceMovementMenu } from './BalanceMovementMenu';

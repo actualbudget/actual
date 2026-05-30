@@ -1,5 +1,5 @@
-import type { Request, Response } from 'express';
 import ipaddr from 'ipaddr.js';
+import type { Request, Response } from 'express';
 
 import { getSession } from '#account-db';
 import { config } from '#load-config';

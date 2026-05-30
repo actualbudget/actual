@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
 
-import type {
-  Transaction,
-  TransactionWithCategory,
-} from './age-of-money-spreadsheet';
 import {
   calculateAgeOfMoney,
   calculateAverageAge,
@@ -11,6 +7,10 @@ import {
   calculateTrend,
   classifyTransactions,
   formatPeriodLabel,
+} from './age-of-money-spreadsheet';
+import type {
+  Transaction,
+  TransactionWithCategory,
 } from './age-of-money-spreadsheet';
 
 describe('Age of Money calculations', () => {

@@ -25,9 +25,9 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '#components/common/Modal';
-import type { Modal as ModalType } from '#modals/modalsSlice';
 import { loadGlobalPrefs } from '#prefs/prefsSlice';
 import { useDispatch } from '#redux';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type CreateEncryptionKeyModalProps = Extract<
   ModalType,

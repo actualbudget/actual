@@ -5,12 +5,6 @@ import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
-import type {
-  balanceTypeOpType,
-  DataEntity,
-  LegendEntity,
-  RuleConditionEntity,
-} from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 import {
   Bar,
@@ -21,6 +15,12 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import type {
+  balanceTypeOpType,
+  DataEntity,
+  LegendEntity,
+  RuleConditionEntity,
+} from '@actual-app/core/types/models';
 
 import { FinancialText } from '#components/FinancialText';
 import { useRechartsAnimation } from '#components/reports/chart-theme';
@@ -30,9 +30,9 @@ import { numberFormatterTooltip } from '#components/reports/numberFormatter';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useFormat } from '#hooks/useFormat';
-import type { FormatType } from '#hooks/useFormat';
 import { useNavigate } from '#hooks/useNavigate';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
+import type { FormatType } from '#hooks/useFormat';
 
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';

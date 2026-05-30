@@ -24,8 +24,8 @@ import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { pushModal } from '#modals/modalsSlice';
-import type { Modal as ModalType } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 function needsCategory(
   account: AccountEntity,

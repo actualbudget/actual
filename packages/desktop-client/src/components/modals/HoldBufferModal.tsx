@@ -11,8 +11,8 @@ import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { FieldLabel } from '#components/mobile/MobileForms';
 import { AmountInput } from '#components/util/AmountInput';
 import { useSyncedPref } from '#hooks/useSyncedPref';
-import type { Modal as ModalType } from '#modals/modalsSlice';
 import { envelopeBudget } from '#spreadsheet/bindings';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type HoldBufferModalProps = Extract<
   ModalType,

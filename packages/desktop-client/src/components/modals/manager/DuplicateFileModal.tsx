@@ -18,9 +18,9 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '#components/common/Modal';
-import type { Modal as ModalType } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type DuplicateFileModalProps = Extract<
   ModalType,

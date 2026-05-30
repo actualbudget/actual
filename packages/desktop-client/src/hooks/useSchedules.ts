@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { q } from '@actual-app/core/shared/query';
-import type { Query } from '@actual-app/core/shared/query';
 import {
   getHasTransactionsQuery,
   getStatus,
   getStatusLabel,
 } from '@actual-app/core/shared/schedules';
+import type { Query } from '@actual-app/core/shared/query';
 import type { ScheduleStatuses } from '@actual-app/core/shared/schedules';
 import type {
   AccountEntity,

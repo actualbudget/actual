@@ -19,9 +19,9 @@ import { useLocale } from '#hooks/useLocale';
 import { SheetNameProvider } from '#hooks/useSheetName';
 import { useUndo } from '#hooks/useUndo';
 import { collapseModals, pushModal } from '#modals/modalsSlice';
-import type { Modal as ModalType } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 import { envelopeBudget } from '#spreadsheet/bindings';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type EnvelopeBudgetSummaryModalProps = Extract<
   ModalType,

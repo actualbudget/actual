@@ -26,13 +26,13 @@ import {
   unparse,
 } from '@actual-app/core/shared/rules';
 import { titleFirst } from '@actual-app/core/shared/util';
-import type { IntegerAmount } from '@actual-app/core/shared/util';
-import type { RuleConditionEntity } from '@actual-app/core/types/models';
 import {
   format as formatDate,
   isValid as isDateValid,
   parse as parseDate,
 } from 'date-fns';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
+import type { RuleConditionEntity } from '@actual-app/core/types/models';
 
 import { TagMultiAutocomplete } from '#components/autocomplete/TagMultiAutocomplete';
 import { GenericInput } from '#components/util/GenericInput';

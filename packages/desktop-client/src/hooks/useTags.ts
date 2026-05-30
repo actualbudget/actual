@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 
-import type { TagEntity } from '@actual-app/core/types/models';
 import { useQuery } from '@tanstack/react-query';
 import { byLengthAsc, byStartAsc, Fzf } from 'fzf';
+import type { TagEntity } from '@actual-app/core/types/models';
 
 import { tagQueries } from '#tags/queries';
 

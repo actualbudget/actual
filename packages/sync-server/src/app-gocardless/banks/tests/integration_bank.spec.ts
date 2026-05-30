@@ -1,13 +1,13 @@
 import IntegrationBank from '#app-gocardless/banks/integration-bank';
+import {
+  mockExtendAccountsAboutInstitutions,
+  mockInstitution,
+} from '#app-gocardless/services/tests/fixtures';
 import type {
   Balance,
   Transaction,
 } from '#app-gocardless/gocardless-node.types';
 import type { DetailedAccountWithInstitution } from '#app-gocardless/gocardless.types';
-import {
-  mockExtendAccountsAboutInstitutions,
-  mockInstitution,
-} from '#app-gocardless/services/tests/fixtures';
 
 describe('IntegrationBank', () => {
   describe('normalizeAccount', () => {

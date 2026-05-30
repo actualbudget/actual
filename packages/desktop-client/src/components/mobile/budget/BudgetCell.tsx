@@ -7,8 +7,8 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
-import type { CategoryEntity } from '@actual-app/core/types/models';
 import { AutoTextSize } from 'auto-text-size';
+import type { CategoryEntity } from '@actual-app/core/types/models';
 
 import { makeAmountGrey } from '#components/budget/util';
 import { PrivacyFilter } from '#components/PrivacyFilter';

@@ -2,9 +2,9 @@
 // @generated from file sync.proto (syntax proto3)
 /* eslint-disable */
 
+import { fileDesc, messageDesc } from '@bufbuild/protobuf/codegenv2';
 import type { Message as Message$1 } from '@bufbuild/protobuf';
 import type { GenFile, GenMessage } from '@bufbuild/protobuf/codegenv2';
-import { fileDesc, messageDesc } from '@bufbuild/protobuf/codegenv2';
 
 /**
  * Describes the file sync.proto.

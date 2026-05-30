@@ -1,7 +1,7 @@
 import { getAccountDb, isAdmin } from '#account-db';
 import { FileNotFound, GenericFileError } from '#app-sync/errors';
-import type { WrappedDatabase } from '#db';
 import { isValidFileId, isValidGroupId } from '#util/paths';
+import type { WrappedDatabase } from '#db';
 import type { FileId, GroupId } from '#util/paths';
 
 class FileBase {

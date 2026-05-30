@@ -36,17 +36,17 @@ import {
   scheduleModel,
   tagModel,
 } from './api-models';
-import type { AmountOPType, APIScheduleEntity } from './api-models';
 import { aqlQuery } from './aql';
 import { isTrackingBudget } from './budget/actions';
 import * as cloudStorage from './cloud-storage';
-import type { RemoteFile } from './cloud-storage';
 import * as db from './db';
 import { APIError } from './errors';
 import { runMutator } from './mutators';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
 import { batchMessages, setSyncingMode } from './sync';
+import type { AmountOPType, APIScheduleEntity } from './api-models';
+import type { RemoteFile } from './cloud-storage';
 
 let IMPORT_MODE = false;
 

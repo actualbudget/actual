@@ -1,7 +1,6 @@
 import { useId } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 import {
@@ -13,6 +12,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import type { CSSProperties } from '@actual-app/components/styles';
 
 import { useRechartsAnimation } from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';

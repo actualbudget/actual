@@ -6,8 +6,8 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { tsToRelativeTime } from '@actual-app/core/shared/util';
-import type { AccountEntity } from '@actual-app/core/types/models';
 import { format as formatDate } from 'date-fns';
+import type { AccountEntity } from '@actual-app/core/types/models';
 import type { Locale } from 'date-fns';
 
 import { Cell, Row } from '#components/table';
