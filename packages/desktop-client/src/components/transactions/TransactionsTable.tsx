@@ -1593,6 +1593,7 @@ const Transaction = memo(function Transaction({
           note={notes ?? ''}
           scheduleNote={isPreview ? schedule?.name : null}
           focused={focusedField === 'notes'}
+          valueStyle={valueStyle}
           onClickTag={onNotesTagClick}
           onUpdate={value => {
             onUpdate('notes', value?.trim());
@@ -1970,6 +1971,7 @@ type NotesCellProps = {
   note: string;
   scheduleNote: string | null | undefined;
   focused: boolean;
+  valueStyle: CSSProperties | null;
   onUpdate: (value: string) => void;
   onClickTag: (tag: string) => void;
   onExpose: (name: string) => void;
@@ -1979,6 +1981,7 @@ function NotesCell({
   note,
   scheduleNote,
   focused,
+  valueStyle,
   onUpdate,
   onClickTag,
   onExpose,
@@ -2003,6 +2006,7 @@ function NotesCell({
       width="flex"
       name="notes"
       value={displayedNote}
+      valueStyle={valueStyle}
       formatter={value =>
         NotesTagFormatter({ notes: value, onNotesTagClick: onClickTag })
       }
