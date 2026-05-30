@@ -203,7 +203,13 @@ function CustomReportInner({
     !!conditions.find(
       ({ field, op }) =>
         field === 'category' &&
-        ['contains', 'doesNotContain', 'matches', 'hasTags'].includes(op),
+        [
+          'contains',
+          'doesNotContain',
+          'matches',
+          'hasTags',
+          'hasAnyTag',
+        ].includes(op),
     ) ||
     conditions.filter(({ field }) => field === 'category').length >= 2 ||
     conditions.filter(({ field }) => field === 'category_group').length >= 1;
@@ -278,6 +284,9 @@ function CustomReportInner({
     loadReport.showUncategorized,
   );
   const [trimIntervals, setTrimIntervals] = useState(loadReport.trimIntervals);
+  const [showTrendLines, setShowTrendLines] = useState(
+    loadReport.showTrendLines,
+  );
   const [graphType, setGraphType] = useState(loadReport.graphType);
 
   const [dateRange, setDateRange] = useState(loadReport.dateRange);
@@ -617,6 +626,7 @@ function CustomReportInner({
     includeCurrentInterval,
     showUncategorized,
     trimIntervals,
+    showTrendLines,
     graphType,
     conditions,
     conditionsOp,
@@ -763,6 +773,7 @@ function CustomReportInner({
     setIncludeCurrentInterval(input.includeCurrentInterval);
     setShowUncategorized(input.showUncategorized);
     setTrimIntervals(input.trimIntervals);
+    setShowTrendLines(input.showTrendLines);
     setGraphType(input.graphType);
     onApplyFilter(null);
     (input.conditions || []).forEach(condition => {
@@ -907,6 +918,7 @@ function CustomReportInner({
             setIncludeCurrentInterval={setIncludeCurrentInterval}
             setShowUncategorized={setShowUncategorized}
             setTrimIntervals={setTrimIntervals}
+            setShowTrendLines={setShowTrendLines}
             setSelectedCategories={setSelectedCategories}
             onChangeDates={onChangeDates}
             onReportChange={onReportChange}
@@ -1049,6 +1061,7 @@ function CustomReportInner({
                     compact={false}
                     showHiddenCategories={showHiddenCategories}
                     showOffBudget={showOffBudget}
+                    showTrendLines={showTrendLines}
                     intervalsCount={intervals.length}
                   />
                 ) : (

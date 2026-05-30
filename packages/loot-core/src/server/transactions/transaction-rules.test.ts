@@ -510,6 +510,96 @@ describe('Transaction rules', () => {
     // todo: isapprox
   });
 
+  test('transactions can be queried by hasTags', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+    const payeeId = await db.insertPayee({ name: 'payee' });
+
+    await db.insertTransaction({
+      id: '1',
+      date: '2020-10-01',
+      account,
+      payee: payeeId,
+      notes: 'Follow up #tagContent',
+      amount: 123,
+    });
+
+    await db.insertTransaction({
+      id: '2',
+      date: '2020-10-01',
+      account,
+      payee: payeeId,
+      notes: 'Follow up #Tag_1 issue',
+      amount: 123,
+    });
+
+    const transactions = await getMatchingTransactions([
+      { field: 'notes', op: 'hasTags', value: '#Tag_1' },
+    ]);
+
+    expect(transactions.map(t => t.id)).toEqual(['2']);
+  });
+
+  test('transactions can be queried by hasTags if no "#" is included', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+    const payeeId = await db.insertPayee({ name: 'payee' });
+
+    await db.insertTransaction({
+      id: '1',
+      date: '2020-10-01',
+      account,
+      payee: payeeId,
+      notes: 'Follow up #tagContent',
+      amount: 123,
+    });
+
+    await db.insertTransaction({
+      id: '2',
+      date: '2020-10-01',
+      account,
+      payee: payeeId,
+      notes: 'Follow up #Tag_1 issue',
+      amount: 123,
+    });
+
+    const transactions = await getMatchingTransactions([
+      { field: 'notes', op: 'hasTags', value: 'Tag_1' },
+    ]);
+
+    expect(transactions.map(t => t.id)).toEqual(['2']);
+  });
+
+  test('transactions can be queried by hasTags with multiple tags present', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+    const payeeId = await db.insertPayee({ name: 'payee' });
+
+    await db.insertTransaction({
+      id: '1',
+      date: '2020-10-01',
+      account,
+      payee: payeeId,
+      notes: 'Follow up #Tag_1',
+      amount: 123,
+    });
+
+    await db.insertTransaction({
+      id: '2',
+      date: '2020-10-01',
+      account,
+      payee: payeeId,
+      notes: 'Follow up #Tag_1 #Tag_2 issue',
+      amount: 123,
+    });
+
+    const transactions = await getMatchingTransactions([
+      { field: 'notes', op: 'hasTags', value: '#Tag_1 #Tag_2' },
+    ]);
+
+    expect(transactions.map(t => t.id)).toEqual(['2']);
+  });
+
   test('transactions can be queried by hasTags when tag starts with dollar', async () => {
     await loadRules();
     const account = await db.insertAccount({ name: 'bank' });
@@ -540,7 +630,7 @@ describe('Transaction rules', () => {
     expect(transactions.map(t => t.id)).toEqual(['1']);
   });
 
-  test('hasTags matches nothing when input contains no `#` tag pattern', async () => {
+  test('transactions can be queried by hasAnyTag with two tags returns everything', async () => {
     await loadRules();
     const account = await db.insertAccount({ name: 'bank' });
     const payeeId = await db.insertPayee({ name: 'payee' });
@@ -550,7 +640,7 @@ describe('Transaction rules', () => {
       date: '2020-10-01',
       account,
       payee: payeeId,
-      notes: 'Follow up #foo issue',
+      notes: 'Follow up #Tag_2 issue',
       amount: 123,
     });
 
@@ -559,17 +649,54 @@ describe('Transaction rules', () => {
       date: '2020-10-01',
       account,
       payee: payeeId,
-      notes: 'unrelated note',
+      notes: 'Follow up #Tag_1 issue',
       amount: 123,
     });
 
-    // Input is missing the leading `#` — previously this returned every
-    // transaction; now it should match nothing.
+    await db.insertTransaction({
+      id: '3',
+      date: '2020-10-01',
+      account,
+      payee: payeeId,
+      notes: 'Follow up #Tag_3 issue',
+      amount: 123,
+    });
+
     const transactions = await getMatchingTransactions([
-      { field: 'notes', op: 'hasTags', value: 'foo' },
+      { field: 'notes', op: 'hasAnyTag', value: '#Tag_1 Tag_2' },
     ]);
 
-    expect(transactions).toEqual([]);
+    expect(transactions.map(t => t.id)).toEqual(['1', '2']);
+  });
+
+  test('transactions can be queried by hasAnyTag with one tag', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+    const payeeId = await db.insertPayee({ name: 'payee' });
+
+    await db.insertTransaction({
+      id: '1',
+      date: '2020-10-01',
+      account,
+      payee: payeeId,
+      notes: 'Follow up #Tag_2 issue',
+      amount: 123,
+    });
+
+    await db.insertTransaction({
+      id: '2',
+      date: '2020-10-01',
+      account,
+      payee: payeeId,
+      notes: 'Follow up #Tag_1 issue',
+      amount: 123,
+    });
+
+    const transactions = await getMatchingTransactions([
+      { field: 'notes', op: 'hasAnyTag', value: '##Tag_1' },
+    ]);
+
+    expect(transactions.map(t => t.id)).toEqual(['2']);
   });
 
   test('and sub expression builds $and condition', async () => {

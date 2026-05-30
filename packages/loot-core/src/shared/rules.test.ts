@@ -19,6 +19,7 @@ describe('rules', () => {
       expect(isValidOp('notes', 'doesNotContain')).toBe(true);
       expect(isValidOp('notes', 'matches')).toBe(true);
       expect(isValidOp('notes', 'hasTags')).toBe(true);
+      expect(isValidOp('notes', 'hasAnyTag')).toBe(true);
     });
 
     it('should return true for oneOf operation on payee field', () => {
@@ -45,6 +46,7 @@ describe('rules', () => {
       expect(validOps).toContain('doesNotContain');
       expect(validOps).toContain('matches');
       expect(validOps).toContain('hasTags');
+      expect(validOps).toContain('hasAnyTag');
     });
 
     it('should include oneOf and notOneOf for payee field', () => {

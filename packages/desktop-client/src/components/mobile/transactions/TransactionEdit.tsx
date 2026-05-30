@@ -600,6 +600,7 @@ type TransactionEditInnerProps = {
   shouldShowSaveLocation?: boolean;
   onSaveLocation?: () => void;
   onSelectNearestPayee?: () => void;
+  onRequestLocation?: () => void;
   nearestPayee?: PayeeEntity | null;
 };
 
@@ -619,6 +620,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     shouldShowSaveLocation,
     onSaveLocation,
     onSelectNearestPayee,
+    onRequestLocation,
     nearestPayee,
   }) {
     const { t } = useTranslation();
@@ -1206,7 +1208,9 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               onPress={() => onEditFieldInner(transaction.id, 'payee')}
               data-testid="payee-field"
               alwaysShowRightContent={
-                !!nearestPayee && !transaction.payee && !shouldShowSaveLocation
+                (!!nearestPayee || !!onRequestLocation) &&
+                !transaction.payee &&
+                !shouldShowSaveLocation
               }
               rightContent={
                 shouldShowSaveLocation ? (
@@ -1247,6 +1251,28 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                     }}
                   >
                     <Trans>Nearby</Trans>
+                    <SvgLocation
+                      width={10}
+                      height={10}
+                      style={{ marginLeft: 4 }}
+                    />
+                  </Button>
+                ) : onRequestLocation && !transaction.payee ? (
+                  <Button
+                    variant="bare"
+                    onPress={onRequestLocation}
+                    style={{
+                      backgroundColor: theme.buttonNormalBackground,
+                      border: `1px solid ${theme.buttonNormalBorder}`,
+                      color: theme.buttonNormalText,
+                      fontSize: '11px',
+                      padding: '4px 8px',
+                      borderRadius: 3,
+                      height: 'auto',
+                      minHeight: 'auto',
+                    }}
+                  >
+                    <Trans>Request Location</Trans>
                     <SvgLocation
                       width={10}
                       height={10}
@@ -1657,9 +1683,15 @@ function TransactionEditUnconnected({
     [payees, searchParams],
   );
 
-  const locationAccess = useLocationPermission();
+  const {
+    isGranted: isLocationGranted,
+    isPending: shouldPromptLocation,
+    requestPermission,
+  } = useLocationPermission();
+  const { data: nearbyPayees = [] } = useNearbyPayees({
+    enabled: isLocationGranted,
+  });
   const [shouldShowSaveLocation, setShouldShowSaveLocation] = useState(false);
-  const { data: nearbyPayees = [] } = useNearbyPayees();
   const nearestPayee = nearbyPayees[0]?.payee ?? null;
 
   useEffect(() => {
@@ -1700,10 +1732,10 @@ function TransactionEditUnconnected({
   }, [transactionId]);
 
   useEffect(() => {
-    if (!locationAccess) {
+    if (!isLocationGranted) {
       setShouldShowSaveLocation(false);
     }
-  }, [locationAccess]);
+  }, [isLocationGranted]);
 
   useEffect(() => {
     if (isAdding.current) {
@@ -1806,7 +1838,7 @@ function TransactionEditUnconnected({
       if (updatedField === 'payee') {
         setShouldShowSaveLocation(false);
 
-        if (newTransaction.payee && locationAccess) {
+        if (newTransaction.payee && isLocationGranted) {
           const payeeLocations = await locationService.getPayeeLocations(
             newTransaction.payee,
           );
@@ -1828,7 +1860,7 @@ function TransactionEditUnconnected({
         }
       }
     },
-    [dateFormat, transactions, locationAccess],
+    [dateFormat, transactions, isLocationGranted],
   );
 
   const onSave = useCallback(
@@ -2069,7 +2101,8 @@ function TransactionEditUnconnected({
         shouldShowSaveLocation={shouldShowSaveLocation}
         onSaveLocation={onSaveLocation}
         onSelectNearestPayee={onSelectNearestPayee}
-        nearestPayee={locationAccess ? nearestPayee : null}
+        nearestPayee={isLocationGranted ? nearestPayee : null}
+        onRequestLocation={shouldPromptLocation ? requestPermission : undefined}
       />
     </View>
   );

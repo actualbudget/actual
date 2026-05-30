@@ -1,7 +1,6 @@
 import { aqlQuery } from '#server/aql';
 import { conditionsToAQL } from '#server/transactions/transaction-rules';
 import { q } from '#shared/query';
-import { ungroupTransactions } from '#shared/transactions';
 import type { RuleConditionEntity, TransactionEntity } from '#types/models';
 
 import { getAccountRestrictionMode } from './forecast-accounts';
@@ -81,7 +80,7 @@ export async function getTransactions(
   let query = q('transactions')
     .filter({ tombstone: false })
     .select('*')
-    .options({ splits: 'grouped' });
+    .options({ splits: 'inline' });
 
   if (accountIds !== undefined) {
     if (accountIds.length === 0) {
@@ -96,7 +95,7 @@ export async function getTransactions(
   }
 
   const { data } = await aqlQuery(query);
-  return ungroupTransactions(data);
+  return data;
 }
 
 function escapeRegex(value: string) {
