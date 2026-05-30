@@ -348,6 +348,14 @@ export type Modal =
         onClose?: () => void;
         onToggleRunningBalance?: () => void;
         onToggleReconciled?: () => void;
+        onEditIcon?: () => void;
+      };
+    }
+  | {
+      name: 'account-icon-picker';
+      options: {
+        accountId: AccountEntity['id'];
+        onClose?: () => void;
       };
     }
   | {

@@ -7,6 +7,7 @@ import {
   SvgClose,
   SvgDotsHorizontalTriple,
   SvgLockOpen,
+  SvgPhoto,
 } from '@actual-app/components/icons/v1';
 import { SvgNotesPaper } from '@actual-app/components/icons/v2';
 import { Menu } from '@actual-app/components/menu';
@@ -44,6 +45,7 @@ export function AccountMenuModal({
   onClose,
   onToggleRunningBalance,
   onToggleReconciled,
+  onEditIcon,
 }: AccountMenuModalProps) {
   const { t } = useTranslation();
   const account = useAccount(accountId);
@@ -89,6 +91,13 @@ export function AccountMenuModal({
     }
 
     onEditNotes?.(account.id);
+  };
+
+  const _onEditIcon = () => {
+    if (!account) {
+      return;
+    }
+    onEditIcon?.();
   };
 
   const buttonStyle: CSSProperties = {
@@ -187,6 +196,10 @@ export function AccountMenuModal({
                   style={{ paddingRight: 5 }}
                 />
                 <Trans>Edit notes</Trans>
+              </Button>
+              <Button style={buttonStyle} onPress={_onEditIcon}>
+                <SvgPhoto width={20} height={20} style={{ paddingRight: 5 }} />
+                <Trans>Edit icon</Trans>
               </Button>
             </View>
           </View>

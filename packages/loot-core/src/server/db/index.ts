@@ -722,9 +722,18 @@ export function getAccounts() {
     DbAccount & {
       bankName: DbBank['name'];
       bankId: DbBank['id'];
+      bankIcon: DbBank['icon'] | null;
+      displayIcon: string | null;
+      displayWebsite: string | null;
     }
   >(
-    `SELECT a.*, b.name as bankName, b.id as bankId FROM accounts a
+    `SELECT a.*,
+            b.name as bankName,
+            b.id as bankId,
+            b.icon as bankIcon,
+            COALESCE(a.icon, b.icon) as displayIcon,
+            COALESCE(a.website, b.website) as displayWebsite
+       FROM accounts a
        LEFT JOIN banks b ON a.bank = b.id
        WHERE a.tombstone = 0
        ORDER BY sort_order, name`,

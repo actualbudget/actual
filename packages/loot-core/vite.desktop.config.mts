@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
     mode,
     ssr: {
       noExternal: true,
-      external: ['better-sqlite3'],
+      external: ['better-sqlite3', 'sharp'],
       resolve: { conditions: ['electron'] },
     },
     build: {

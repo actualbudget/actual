@@ -39,11 +39,31 @@ app.post(
         .split(',')
         .map(item => item.trim());
 
-      let accounts = [];
+      const accounts = [];
 
-      for (const item of itemIds) {
-        const partial = await pluggyaiService.getAccountsByItemId(item);
-        accounts = accounts.concat(partial.results);
+      for (const itemId of itemIds) {
+        const [partial, item] = await Promise.all([
+          pluggyaiService.getAccountsByItemId(itemId),
+          pluggyaiService.getItemById(itemId).catch(err => {
+            console.warn(
+              `Failed to fetch Pluggy item ${itemId} (connector decoration will be skipped):`,
+              err.message,
+            );
+            return null;
+          }),
+        ]);
+
+        const connector = item?.connector
+          ? {
+              name: item.connector.name,
+              imageUrl: item.connector.imageUrl,
+              institutionUrl: item.connector.institutionUrl,
+            }
+          : null;
+
+        for (const account of partial.results) {
+          accounts.push(connector ? { ...account, connector } : account);
+        }
       }
 
       res.send({

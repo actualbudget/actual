@@ -3,7 +3,12 @@ import { v4 as uuidv4 } from 'uuid';
 
 import * as db from '#server/db';
 
-export async function findOrCreateBank(institution, requisitionId) {
+/** `website` is only stored on insert; existing banks are left unchanged. */
+export async function findOrCreateBank(
+  institution,
+  requisitionId,
+  website?: string | null,
+) {
   const bank = await db.first<Pick<db.DbBank, 'id' | 'bank_id'>>(
     'SELECT id, bank_id FROM banks WHERE bank_id = ?',
     [requisitionId],
@@ -17,6 +22,7 @@ export async function findOrCreateBank(institution, requisitionId) {
     id: uuidv4(),
     bank_id: requisitionId,
     name: institution.name,
+    ...(website ? { website } : {}),
   };
 
   await db.insertWithUUID('banks', bankData);

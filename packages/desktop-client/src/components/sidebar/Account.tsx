@@ -34,7 +34,7 @@ import { useDragRef } from '#hooks/useDragRef';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useNotes } from '#hooks/useNotes';
 import { useSyncedPref } from '#hooks/useSyncedPref';
-import { openAccountCloseModal } from '#modals/modalsSlice';
+import { openAccountCloseModal, pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 import type { Binding, SheetFields } from '#spreadsheet';
 
@@ -234,7 +234,24 @@ export function Account<FieldName extends SheetFields<'account'>>({
                     />
                   </InitialFocus>
                 ) : (
-                  name
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      minWidth: 0,
+                    }}
+                  >
+                    <AccountIcon account={account} />
+                    <Text
+                      style={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {name}
+                    </Text>
+                  </View>
                 )
               }
               right={
@@ -273,6 +290,17 @@ export function Account<FieldName extends SheetFields<'account'>>({
                       setIsEditing(true);
                       break;
                     }
+                    case 'edit-icon': {
+                      dispatch(
+                        pushModal({
+                          modal: {
+                            name: 'account-icon-picker',
+                            options: { accountId: account.id },
+                          },
+                        }),
+                      );
+                      break;
+                    }
                     default: {
                       throw new Error(
                         `Unrecognized menu option: ${String(type)}`,
@@ -283,6 +311,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
                 }}
                 items={[
                   { name: 'rename', text: t('Rename') },
+                  { name: 'edit-icon', text: t('Edit icon') },
                   account.closed
                     ? { name: 'reopen', text: t('Reopen') }
                     : { name: 'close', text: t('Close') },
@@ -375,5 +404,31 @@ export function Account<FieldName extends SheetFields<'account'>>({
     >
       {accountRow}
     </Tooltip>
+  );
+}
+
+const SIDEBAR_ICON_SIZE = 16;
+const SIDEBAR_ICON_GUTTER = 6;
+
+function AccountIcon({ account }: { account: AccountEntity | undefined }) {
+  const icon = account?.displayIcon ?? null;
+
+  if (!account || !icon) {
+    return null;
+  }
+
+  return (
+    <img
+      src={icon}
+      alt=""
+      width={SIDEBAR_ICON_SIZE}
+      height={SIDEBAR_ICON_SIZE}
+      style={{
+        marginRight: SIDEBAR_ICON_GUTTER,
+        objectFit: 'contain',
+        flexShrink: 0,
+        borderRadius: 3,
+      }}
+    />
   );
 }
