@@ -2,7 +2,11 @@ import { enUS } from 'date-fns/locale';
 import i18next from 'i18next';
 import MockDate from 'mockdate';
 
-import type { ScheduleEntity } from '#types/models';
+import type {
+  RuleActionEntity,
+  ScheduleEntity,
+  SetRuleActionEntity,
+} from '#types/models';
 
 import * as monthUtils from './months';
 import {
@@ -616,6 +620,152 @@ describe('schedules', () => {
 
       // Should not crash; schedule with past end date produces its next_date entry only
       expect(result).toBeDefined();
+    });
+  });
+
+  describe('split-child transfer filter', () => {
+    function makeSchedule(
+      overrides: Partial<ScheduleEntity> &
+        Pick<ScheduleEntity, 'id' | 'next_date' | '_conditions'>,
+    ): ScheduleEntity {
+      return {
+        rule: 'rule-1',
+        completed: false,
+        posts_transaction: false,
+        tombstone: false,
+        _payee: 'payee-employer',
+        _account: 'acct-checking',
+        _amount: 500000,
+        _amountOp: 'is',
+        _date: overrides.next_date,
+        _actions: [],
+        ...overrides,
+      };
+    }
+
+    // Maps a payee id to the account it transfers to, simulating the payeesById
+    // lookup used by getTransferAccountByPayee in useAccountPreviewTransactions.
+    const transferPayees: Record<string, string> = {
+      'payee-transfer-to-savings': 'acct-savings',
+    };
+
+    function getTransferAccountId(payeeId?: string | null): string | null {
+      if (!payeeId) return null;
+      return transferPayees[payeeId] ?? null;
+    }
+
+    // This filter mirrors the fixed accountSchedulesFilter in
+    // useAccountPreviewTransactions: it includes a schedule when any split-child
+    // set-payee action points to a transfer payee for the viewed account.
+    function makeFilter(accountId: string) {
+      return (schedule: ScheduleEntity) => {
+        if (schedule._account === accountId) return true;
+        if (getTransferAccountId(schedule._payee) === accountId) return true;
+        const actions = schedule._actions as RuleActionEntity[];
+        return actions.some(
+          action =>
+            action.op === 'set' &&
+            action.field === 'payee' &&
+            action.options?.splitIndex != null &&
+            getTransferAccountId(action.value as string) === accountId,
+        );
+      };
+    }
+
+    it('includes a split schedule when viewing the split-child transfer destination', () => {
+      const schedule = makeSchedule({
+        id: 'sched-paycheck',
+        next_date: '2017-01-03',
+        _conditions: [{ field: 'date', op: 'is', value: '2017-01-03' }],
+        _actions: [
+          // split child 1: transfer to savings
+          {
+            op: 'set',
+            field: 'payee',
+            value: 'payee-transfer-to-savings',
+            options: { splitIndex: 1 },
+          } satisfies SetRuleActionEntity,
+        ] as unknown as ScheduleEntity['_actions'],
+      });
+
+      const statuses: ScheduleStatuses = new Map([
+        ['sched-paycheck', 'upcoming'],
+      ]);
+
+      // Viewed from the source account - schedule is included
+      const fromSource = computeSchedulePreviewTransactions(
+        [schedule],
+        statuses,
+        '7',
+        makeFilter('acct-checking'),
+      );
+      expect(fromSource).toHaveLength(1);
+
+      // Viewed from the transfer destination - schedule must also be included
+      const fromDest = computeSchedulePreviewTransactions(
+        [schedule],
+        statuses,
+        '7',
+        makeFilter('acct-savings'),
+      );
+      expect(fromDest).toHaveLength(1);
+    });
+
+    it('excludes a split schedule when viewing an unrelated account', () => {
+      const schedule = makeSchedule({
+        id: 'sched-paycheck',
+        next_date: '2017-01-03',
+        _conditions: [{ field: 'date', op: 'is', value: '2017-01-03' }],
+        _actions: [
+          {
+            op: 'set',
+            field: 'payee',
+            value: 'payee-transfer-to-savings',
+            options: { splitIndex: 1 },
+          } satisfies SetRuleActionEntity,
+        ] as unknown as ScheduleEntity['_actions'],
+      });
+
+      const statuses: ScheduleStatuses = new Map([
+        ['sched-paycheck', 'upcoming'],
+      ]);
+
+      const result = computeSchedulePreviewTransactions(
+        [schedule],
+        statuses,
+        '7',
+        makeFilter('acct-unrelated'),
+      );
+      expect(result).toHaveLength(0);
+    });
+
+    it('includes a split schedule when the transfer is at splitIndex 0', () => {
+      const schedule = makeSchedule({
+        id: 'sched-paycheck',
+        next_date: '2017-01-03',
+        _conditions: [{ field: 'date', op: 'is', value: '2017-01-03' }],
+        _actions: [
+          {
+            op: 'set',
+            field: 'payee',
+            value: 'payee-transfer-to-savings',
+            options: { splitIndex: 0 },
+          } satisfies SetRuleActionEntity,
+        ] as unknown as ScheduleEntity['_actions'],
+      });
+
+      const statuses: ScheduleStatuses = new Map([
+        ['sched-paycheck', 'upcoming'],
+      ]);
+
+      // splitIndex 0 is falsy; a regression to a truthy check would drop it.
+      const fromDest = computeSchedulePreviewTransactions(
+        [schedule],
+        statuses,
+        '7',
+        makeFilter('acct-savings'),
+      );
+      expect(fromDest).toHaveLength(1);
     });
   });
 
