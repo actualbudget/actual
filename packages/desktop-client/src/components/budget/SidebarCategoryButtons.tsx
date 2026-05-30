@@ -20,33 +20,54 @@ export const SidebarCategoryButtons = ({
   goalsShown,
 }: SidebarCategoryButtonsProps) => {
   const isGoalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
-  const notes = useNotes(category.id) || '';
+  const showAutomationButton = !goalsShown && isGoalTemplatesUIEnabled;
+
+  const hasAutomations =
+    !!category.goal_def?.length || !!category.cleanup_def?.length;
+  const hasNotes = !!useNotes(category.id);
+
+  const slotStyle = { flexShrink: 0, width: 24, alignItems: 'center' } as const;
+
+  const automationSlot = showAutomationButton ? (
+    <View key="automation" style={slotStyle}>
+      <CategoryAutomationButton
+        category={category}
+        style={dragging ? { color: 'currentColor' } : undefined}
+        defaultColor={theme.pageTextLight}
+      />
+    </View>
+  ) : null;
+
+  const notesSlot = (
+    <View key="notes" style={slotStyle}>
+      <NotesButton
+        id={category.id}
+        style={dragging ? { color: 'currentColor' } : undefined}
+        defaultColor={theme.pageTextLight}
+      />
+    </View>
+  );
+
+  // anchor whichever icon has persistent content on the right; the
+  // hover-revealed one slides in on its left so the persistent one
+  // doesn't shift position when hover starts
+  const reverseOrder =
+    showAutomationButton && hasAutomations !== hasNotes && hasAutomations;
 
   return (
     <>
       <View style={{ flex: 1 }} />
-      {!goalsShown && isGoalTemplatesUIEnabled && (
-        <View style={{ flexShrink: 0 }}>
-          <CategoryAutomationButton
-            category={category}
-            style={dragging ? { color: 'currentColor' } : undefined}
-            defaultColor={theme.pageTextLight}
-            showPlaceholder={!!notes}
-          />
-        </View>
+      {reverseOrder ? (
+        <>
+          {notesSlot}
+          {automationSlot}
+        </>
+      ) : (
+        <>
+          {automationSlot}
+          {notesSlot}
+        </>
       )}
-      <View style={{ flexShrink: 0 }}>
-        <NotesButton
-          id={category.id}
-          style={dragging ? { color: 'currentColor' } : undefined}
-          defaultColor={theme.pageTextLight}
-          showPlaceholder={
-            !goalsShown &&
-            isGoalTemplatesUIEnabled &&
-            (!!category.goal_def?.length || !!category.cleanup_def?.length)
-          }
-        />
-      </View>
     </>
   );
 };
