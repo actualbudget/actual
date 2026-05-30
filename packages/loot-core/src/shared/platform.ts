@@ -6,7 +6,7 @@ const isWindows =
 const isMac =
   navigator.platform && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 
-export const isPlaywright = navigator.userAgent === 'playwright';
+export const isPlaywright = navigator.userAgent.includes('playwright');
 
 export const OS: 'windows' | 'mac' | 'linux' | 'unknown' = isWindows
   ? 'windows'
