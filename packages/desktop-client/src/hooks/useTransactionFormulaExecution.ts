@@ -1,19 +1,14 @@
 import { useEffect, useState } from 'react';
 
-import {
-  CustomFunctionsPlugin,
-  customFunctionsTranslations,
-} from '@actual-app/core/server/rules/customFunctions';
+import { send } from '@actual-app/core/platform/client/connection';
+import { setCachedUserPreferences } from '@actual-app/core/shared/formulas/customFunctions';
 import { HyperFormula } from 'hyperformula';
-import enUS from 'hyperformula/i18n/languages/enUS';
 
+import { bootstrapHyperFormula } from './bootstrapHyperFormula';
+import { useGlobalPref } from './useGlobalPref';
 import { useLocale } from './useLocale';
 
-HyperFormula.registerLanguage('enUS', enUS);
-HyperFormula.registerFunctionPlugin(
-  CustomFunctionsPlugin,
-  customFunctionsTranslations,
-);
+bootstrapHyperFormula();
 
 type TransactionContext = {
   amount?: number;
@@ -33,13 +28,14 @@ export function useTransactionFormulaExecution(
   transaction: TransactionContext,
 ) {
   const locale = useLocale();
+  const [language] = useGlobalPref('language');
   const [result, setResult] = useState<number | string | boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    function executeFormula() {
+    async function executeFormula() {
       let hfInstance: ReturnType<typeof HyperFormula.buildEmpty> | null = null;
 
       if (!formula || !formula.startsWith('=')) {
@@ -49,11 +45,26 @@ export function useTransactionFormulaExecution(
       }
 
       try {
+        const browserLocale =
+          typeof navigator === 'undefined' ? undefined : navigator.language;
+        const formulaLocale = language || browserLocale || 'en-US';
+
+        try {
+          setCachedUserPreferences(
+            await send('formula-load-user-preferences', {
+              selectedLocale: language,
+              browserLocale,
+            }),
+          );
+        } catch (err) {
+          console.error('Error loading formula preferences:', err);
+        }
+
         // Create HyperFormula instance
         hfInstance = HyperFormula.buildEmpty({
           licenseKey: 'gpl-v3',
           language: 'enUS',
-          localeLang: typeof locale === 'string' ? locale : 'en-US',
+          localeLang: formulaLocale,
           dateFormats: ['DD/MM/YYYY', 'YYYY-MM-DD', 'YYYY/MM/DD'],
           context: {
             // No server prefetch in preview
@@ -136,12 +147,12 @@ export function useTransactionFormulaExecution(
       }
     }
 
-    executeFormula();
+    void executeFormula();
 
     return () => {
       cancelled = true;
     };
-  }, [formula, transaction, locale]);
+  }, [formula, transaction, locale, language]);
 
   return { result, error };
 }

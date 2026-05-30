@@ -142,6 +142,52 @@ export const transactionModeFunctions: Record<string, FunctionDef> = {
       { name: 'decimals', description: 'Decimals' },
     ],
   },
+  FORMATNUMBER: {
+    name: 'FORMATNUMBER',
+    description: t(
+      'Formats a number with thousands separators. Uses your app number format settings by default.',
+    ),
+    parameters: [
+      { name: 'value', description: 'Number to format' },
+      {
+        name: 'decimals',
+        description: 'Decimal places (optional, uses app settings)',
+      },
+      {
+        name: 'thousandsSeparator',
+        description: 'Thousands separator (optional, uses app settings)',
+      },
+      {
+        name: 'decimalSeparator',
+        description: 'Decimal separator (optional, uses app settings)',
+      },
+    ],
+  },
+  FORMATCURRENCY: {
+    name: 'FORMATCURRENCY',
+    description: t(
+      'Formats a number as currency. Uses your app currency and number format settings by default.',
+    ),
+    parameters: [
+      { name: 'value', description: 'Number to format' },
+      {
+        name: 'currencySymbol',
+        description: 'Currency symbol (optional, uses app settings)',
+      },
+      {
+        name: 'decimals',
+        description: 'Decimal places (optional, uses app settings)',
+      },
+      {
+        name: 'thousandsSeparator',
+        description: 'Thousands separator (optional, uses app settings)',
+      },
+      {
+        name: 'decimalSeparator',
+        description: 'Decimal separator (optional, uses app settings)',
+      },
+    ],
+  },
   REPT: {
     name: 'REPT',
     description: t('Repeats text specified number of times.'),
@@ -494,11 +540,6 @@ export const transactionModeFunctions: Record<string, FunctionDef> = {
   ISLOGICAL: {
     name: 'ISLOGICAL',
     description: t('Returns TRUE if value is logical (TRUE/FALSE).'),
-    parameters: [{ name: 'value', description: 'Value' }],
-  },
-  ISREF: {
-    name: 'ISREF',
-    description: t('Returns TRUE if value is a reference.'),
     parameters: [{ name: 'value', description: 'Value' }],
   },
   ISEVEN: {

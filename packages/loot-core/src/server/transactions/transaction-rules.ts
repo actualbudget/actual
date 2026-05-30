@@ -12,6 +12,7 @@ import {
 } from '#server/db';
 import { getMappings } from '#server/db/mappings';
 import { RuleError } from '#server/errors';
+import { ensureFormulaPreferencesLoaded } from '#server/formulas/bootstrap';
 import { requiredFields, toDateRepr } from '#server/models';
 import {
   Action,
@@ -321,6 +322,8 @@ export async function runRules(
   trans,
   accounts: Map<string, db.DbAccount> | null = null,
 ) {
+  await ensureFormulaPreferencesLoaded();
+
   let accountsMap: Map<string, db.DbAccount> = null;
   if (accounts === null) {
     accountsMap = new Map(
@@ -692,6 +695,8 @@ export async function applyActions(
   transactions: TransactionEntity[],
   actions: Array<Action | RuleActionEntity>,
 ) {
+  await ensureFormulaPreferencesLoaded();
+
   const parsedActions = actions
     .map(action => {
       if (action instanceof Action) {
