@@ -1117,6 +1117,72 @@ describe('Learning categories', () => {
     expect(rules[1].actions[0].value).toBe('unknown1');
   });
 
+  test('does not create redundant `is` rule when a `oneOf` rule already covers the payee with the same category (#3759)', async () => {
+    await loadData();
+
+    // User has a rule: payee oneOf [foo, bar] -> category food
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'oneOf', field: 'payee', value: ['foo', 'bar'] }],
+      actions: [{ op: 'set', field: 'category', value: 'food' }],
+    });
+    expect(getRules().length).toBe(1);
+
+    const trans = {
+      date: '2016-12-01',
+      account: 'acct',
+      payee: 'foo',
+      category: 'food',
+    };
+    await db.insertTransaction({ ...trans, id: 'one' });
+    await db.insertTransaction({ ...trans, id: 'two' });
+    await db.insertTransaction({ ...trans, id: 'three' });
+    await updateCategoryRules([{ ...trans, id: 'three' }]);
+
+    // No new auto-generated `is` rule should appear, because the
+    // existing `oneOf` rule already covers this payee with the same
+    // category.
+    const rules = getRules();
+    expect(rules.length).toBe(1);
+    expect(rules[0].conditions[0].op).toBe('oneOf');
+    expect(rules[0].actions[0].value).toBe('food');
+  });
+
+  test('still creates an `is` rule when the existing `oneOf` rule covers the payee but with a different category', async () => {
+    await loadData();
+
+    // User has a rule: payee oneOf [foo, bar] -> category coffee
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'oneOf', field: 'payee', value: ['foo', 'bar'] }],
+      actions: [{ op: 'set', field: 'category', value: 'coffee' }],
+    });
+    expect(getRules().length).toBe(1);
+
+    // The user repeatedly assigns `food` to transactions from `foo`,
+    // overriding what the `oneOf` rule would set. The system should
+    // still learn this and add a more specific `is` rule.
+    const trans = {
+      date: '2016-12-01',
+      account: 'acct',
+      payee: 'foo',
+      category: 'food',
+    };
+    await db.insertTransaction({ ...trans, id: 'one' });
+    await db.insertTransaction({ ...trans, id: 'two' });
+    await db.insertTransaction({ ...trans, id: 'three' });
+    await updateCategoryRules([{ ...trans, id: 'three' }]);
+
+    const rules = getRules();
+    expect(rules.length).toBe(2);
+    const isRule = rules.find(r => r.conditions[0].op === 'is');
+    expect(isRule).toBeDefined();
+    expect(isRule.conditions[0].value).toBe('foo');
+    expect(isRule.actions[0].value).toBe('food');
+  });
+
   test('rules are saved with internal field names', async () => {
     await insertRule({
       stage: null,

@@ -960,14 +960,25 @@ export async function updateCategoryRules(transactions) {
           }
         }
       } else {
-        // No existing rules, so create one
-        const newRule = new Rule({
-          stage: null,
-          conditionsOp: 'and',
-          conditions: [{ op: 'is', field: 'payee', value: payeeId }],
-          actions: [{ op: 'set', field: 'category', value: category }],
-        });
-        await insertRule(newRule.serialize());
+        // Before creating a new `is` rule, check whether the user
+        // already has a `oneOf` rule that covers this payee with the
+        // same category. If so, the auto-generated rule would just be
+        // a redundant duplicate (see issue #3759).
+        const oneOfCovering = getOneOfSetterRules(null, 'payee', 'category', {
+          condValue: payeeId,
+          actionValue: category,
+        }).next().value;
+
+        if (!oneOfCovering) {
+          // No existing rules, so create one
+          const newRule = new Rule({
+            stage: null,
+            conditionsOp: 'and',
+            conditions: [{ op: 'is', field: 'payee', value: payeeId }],
+            actions: [{ op: 'set', field: 'category', value: category }],
+          });
+          await insertRule(newRule.serialize());
+        }
       }
     }
   });

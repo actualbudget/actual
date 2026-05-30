@@ -9,6 +9,7 @@ import {
   computeSchedulePreviewTransactions,
   getNextDate,
   getRecurringDescription,
+  getScheduleHasTransactionsLowerBound,
   getStatus,
   getUpcomingDays,
 } from './schedules';
@@ -638,6 +639,51 @@ describe('schedules', () => {
       expect(result).toBe('2016-08-25');
     });
 
+    it('falls back to the last day of the month for monthly schedules starting on the 31st (#1062)', () => {
+      const dateCond = {
+        op: 'isapprox',
+        value: { start: '2023-05-31', frequency: 'monthly' },
+      };
+
+      // Inside May: next occurrence is May 31
+      expect(getNextDate(dateCond, new Date(2023, 4, 1))).toBe('2023-05-31');
+      // June has no 31st: should fall back to June 30 (not July 31)
+      expect(getNextDate(dateCond, new Date(2023, 5, 1))).toBe('2023-06-30');
+      // July has 31st again
+      expect(getNextDate(dateCond, new Date(2023, 6, 1))).toBe('2023-07-31');
+      // February 2024 (leap): last day = Feb 29
+      expect(getNextDate(dateCond, new Date(2024, 1, 1))).toBe('2024-02-29');
+      // February 2025 (non-leap): last day = Feb 28
+      expect(getNextDate(dateCond, new Date(2025, 1, 1))).toBe('2025-02-28');
+    });
+
+    it('falls back to the last day of the month for monthly schedules starting on the 30th (#1062)', () => {
+      const dateCond = {
+        op: 'isapprox',
+        value: { start: '2023-01-30', frequency: 'monthly' },
+      };
+
+      // February 2023 (non-leap): last day = Feb 28
+      expect(getNextDate(dateCond, new Date(2023, 1, 1))).toBe('2023-02-28');
+      // February 2024 (leap): last day = Feb 29
+      expect(getNextDate(dateCond, new Date(2024, 1, 1))).toBe('2024-02-29');
+      // March: 30 exists
+      expect(getNextDate(dateCond, new Date(2023, 2, 1))).toBe('2023-03-30');
+      // April: 30 exists
+      expect(getNextDate(dateCond, new Date(2023, 3, 1))).toBe('2023-04-30');
+    });
+
+    it('still produces 28th-day schedules without month-end fallback', () => {
+      const dateCond = {
+        op: 'isapprox',
+        value: { start: '2023-01-28', frequency: 'monthly' },
+      };
+
+      // 28th is valid every month, so no fallback should kick in
+      expect(getNextDate(dateCond, new Date(2023, 1, 1))).toBe('2023-02-28');
+      expect(getNextDate(dateCond, new Date(2023, 3, 1))).toBe('2023-04-28');
+    });
+
     it('returns null when the end date is before the start date', () => {
       const dateCond = {
         op: 'isapprox',
@@ -651,6 +697,70 @@ describe('schedules', () => {
 
       const result = getNextDate(dateCond, new Date(2017, 0, 1));
       expect(result).toBeNull();
+    });
+  });
+
+  describe('getScheduleHasTransactionsLowerBound (#1957)', () => {
+    it('returns the exact next_date for one-time schedules', () => {
+      expect(
+        getScheduleHasTransactionsLowerBound('2023-11-30', {
+          op: 'is',
+          field: 'date',
+          value: '2023-11-30',
+        }),
+      ).toBe('2023-11-30');
+    });
+
+    it('looks back ~one cycle for monthly recurring schedules (catches early payments)', () => {
+      const dateCond = {
+        op: 'isapprox',
+        field: 'date',
+        value: { start: '2023-01-30', frequency: 'monthly' },
+      };
+      // next_date Nov 30 -> lower-bound Nov 30 - 27 days = Nov 3.
+      // A transaction posted on Nov 20 (10 days early) must still
+      // match, but one from Oct 30 (the previous cycle) must not.
+      const bound = getScheduleHasTransactionsLowerBound(
+        '2023-11-30',
+        dateCond,
+      );
+      expect(bound).toBe('2023-11-03');
+      expect('2023-11-20' >= bound).toBe(true);
+      expect('2023-10-30' >= bound).toBe(false);
+    });
+
+    it('looks back ~one cycle minus a day for weekly recurring schedules', () => {
+      const dateCond = {
+        op: 'isapprox',
+        field: 'date',
+        value: { start: '2023-01-02', frequency: 'weekly' },
+      };
+      expect(getScheduleHasTransactionsLowerBound('2023-11-13', dateCond)).toBe(
+        '2023-11-07',
+      );
+    });
+
+    it('scales the lookback by interval', () => {
+      const dateCond = {
+        op: 'isapprox',
+        field: 'date',
+        value: { start: '2023-01-01', frequency: 'monthly', interval: 2 },
+      };
+      // 28 * 2 - 1 = 55 days
+      expect(getScheduleHasTransactionsLowerBound('2023-11-30', dateCond)).toBe(
+        '2023-10-06',
+      );
+    });
+
+    it('returns next_date for daily schedules to avoid cross-day false matches', () => {
+      const dateCond = {
+        op: 'isapprox',
+        field: 'date',
+        value: { start: '2023-01-01', frequency: 'daily' },
+      };
+      expect(getScheduleHasTransactionsLowerBound('2023-11-30', dateCond)).toBe(
+        '2023-11-30',
+      );
     });
   });
 });
