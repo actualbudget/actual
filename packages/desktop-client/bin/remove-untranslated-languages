@@ -2,8 +2,10 @@
 const fs = require('fs');
 const path = require('path');
 
-// Local path to the cloned translations repository
-const localRepoPath = './packages/desktop-client/locale';
+// Local path to the cloned translations repository. Resolved relative to this
+// file so it works regardless of the current working directory (e.g. when run
+// from the repo root, a workspace under lage, or CI).
+const localRepoPath = path.join(__dirname, '..', 'locale');
 
 // Compare JSON files and delete incomplete ones
 const processTranslations = () => {

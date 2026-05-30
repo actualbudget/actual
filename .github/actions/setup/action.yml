@@ -57,13 +57,7 @@ runs:
       shell: bash
       if: steps.cache.outputs.cache-hit != 'true'
     - name: Download translations
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      with:
-        repository: actualbudget/translations
-        path: ${{ inputs.working-directory }}/packages/desktop-client/locale
-        persist-credentials: false
-      if: ${{ inputs.download-translations == 'true' && !env.ACT }}
-    - name: Remove untranslated languages
-      run: packages/desktop-client/bin/remove-untranslated-languages
+      working-directory: ${{ inputs.working-directory }}
+      run: yarn workspace @actual-app/web sync:translations
       shell: bash
       if: ${{ inputs.download-translations == 'true' && !env.ACT }}

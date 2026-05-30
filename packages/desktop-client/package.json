@@ -116,6 +116,7 @@
     "build": "vite build",
     "build:browser": "vite build --mode=browser",
     "generate:i18n": "i18next",
+    "sync:translations": "bin/sync-translations",
     "test": "vitest --run",
     "validate:theme-catalog": "node --experimental-strip-types bin/validate-theme-catalog.mts",
     "e2e": "npx playwright test --browser=chromium",

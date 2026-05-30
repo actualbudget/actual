@@ -1,0 +1,35 @@
+#!/usr/bin/env node
+// Single source of truth for fetching and filtering bundled translations.
+//
+// Clones (or updates) the actualbudget/translations repo into the
+// desktop-client `locale/` directory and then removes languages that are not
+// translated enough to ship. This is invoked everywhere translations are
+// needed for a build: the `bin/package-*` scripts (via the `sync:translations`
+// lage target) and CI's setup action.
+//
+// Paths are resolved relative to this file rather than the current working
+// directory so it behaves identically whether run from the repo root, from a
+// workspace (e.g. under lage), or from CI.
+const { execFileSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+
+const TRANSLATIONS_REPO = 'https://github.com/actualbudget/translations';
+const localeDir = path.join(__dirname, '..', 'locale');
+const filterScript = path.join(__dirname, 'remove-untranslated-languages');
+
+function git(args, opts = {}) {
+  execFileSync('git', args, { stdio: 'inherit', ...opts });
+}
+
+console.log('Updating translations...');
+
+if (fs.existsSync(path.join(localeDir, '.git'))) {
+  // Existing checkout: discard any local edits and pull the latest.
+  git(['checkout', '.'], { cwd: localeDir });
+  git(['pull'], { cwd: localeDir });
+} else {
+  git(['clone', TRANSLATIONS_REPO, localeDir]);
+}
+
+execFileSync(process.execPath, [filterScript], { stdio: 'inherit' });

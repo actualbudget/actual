@@ -33,6 +33,16 @@ module.exports = {
       dependsOn: ['^build'],
       cache: false,
     },
+    // Fetches and filters bundled translations into the desktop-client
+    // `locale/` directory. Deliberately standalone (no `dependsOn`, and not a
+    // dependency of `build`) so dev and test builds never hit the network —
+    // release/CI builds invoke it explicitly alongside the build target. Never
+    // cached: its output depends on the remote translations repo, which lage
+    // can't see, so a cache hit would ship stale translations.
+    'sync:translations': {
+      type: 'npmScript',
+      cache: false,
+    },
   },
   cacheOptions: {
     cacheStorageConfig: {
