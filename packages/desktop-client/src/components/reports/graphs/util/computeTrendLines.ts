@@ -14,10 +14,6 @@ export function computeTrendLines(
   const n = intervalData.length;
   if (n < 2) return [];
 
-  const firstDate = intervalData[0].date;
-  const lastDate = intervalData[n - 1].date;
-  if (firstDate == null || lastDate == null) return [];
-
   const sumX = sumRange(n);
   const denom = n * sumSquares(n) - sumX ** 2;
   if (denom === 0) return [];
@@ -39,8 +35,8 @@ export function computeTrendLines(
     return {
       id: entry.id ?? entry.dataKey,
       color: entry.color,
-      start: { x: firstDate, y: intercept },
-      end: { x: lastDate, y: intercept + slope * (n - 1) },
+      start: { x: intervalData[0].date, y: intercept },
+      end: { x: intervalData[n - 1].date, y: intercept + slope * (n - 1) },
     };
   });
 }

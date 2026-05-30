@@ -93,7 +93,7 @@ export type LegendEntity = {
 };
 
 export type IntervalEntity = {
-  date?: string;
+  date: string;
   change?: number;
   intervalStartDate?: string;
   intervalEndDate?: string;
