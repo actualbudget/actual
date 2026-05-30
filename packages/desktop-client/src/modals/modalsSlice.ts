@@ -130,6 +130,12 @@ export type Modal =
       };
     }
   | {
+      name: 'akahu-init';
+      options: {
+        onSuccess: () => void;
+      };
+    }
+  | {
       name: 'enablebanking-init';
       options: {
         onSuccess: () => void;
