@@ -85,7 +85,7 @@ export function BudgetAutomationsModal({
   });
   const initialEntries =
     resolved && !hasUnsupportedDirective
-      ? migrateTemplatesToAutomations(resolved)
+      ? migrateTemplatesToAutomations(resolved, schedules)
       : null;
 
   return (
