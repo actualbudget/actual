@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useState } from 'react';
+import { useEffect, useEffectEvent, useMemo } from 'react';
 
 import { listen } from '@actual-app/core/platform/client/connection';
 import type { Query } from '@actual-app/core/shared/query';
@@ -99,10 +99,6 @@ export function useTransactions({
     refetchOnSync = true,
   } = options ?? {};
 
-  const [runningBalances, setRunningBalances] = useState<
-    Map<TransactionEntity['id'], IntegerAmount>
-  >(new Map());
-
   const queryResult = useInfiniteQuery(
     transactionQueries.aql({ query, pageSize }),
   );
@@ -133,28 +129,29 @@ export function useTransactions({
   const splitsOption = query?.state.tableOptions
     ?.splits as TransactionSplitsOption;
 
-  // Recalculate running balances whenever the transactions change or the
-  // calculation options change (for example, when toggling show/hide
-  // running balances). We intentionally keep the main data subscription
-  // dependent only on `query` above, but this effect ensures running
-  // balances are updated in-place when the caller changes options.
-  useEffect(() => {
-    if (calculateRunningBalancesOptionFn) {
-      if (queryResult.isSuccess) {
-        const transactions = flattenPages(queryResult.data);
-        setRunningBalances(
-          calculateRunningBalancesOptionFn(
-            transactions,
-            splitsOption,
-            startingBalance,
-          ),
-        );
-      }
-    } else {
-      setRunningBalances(new Map());
+  // Flatten the paginated pages a single time per data change. This value is
+  // also reused for the running balance calculation below.
+  const transactions = useMemo(
+    () => flattenPages(queryResult.data),
+    [queryResult.data],
+  );
+
+  // Derive running balances from the flattened transactions. We memoize here
+  // (rather than computing in an effect + setState) to avoid an extra render
+  // pass on every data change and to keep a stable Map identity for consumers
+  // that pass `runningBalances` into dependency arrays (e.g. virtualized
+  // lists). The O(n) recalculation only runs when its inputs actually change.
+  const runningBalances = useMemo(() => {
+    if (!calculateRunningBalancesOptionFn || !queryResult.isSuccess) {
+      return EMPTY_RUNNING_BALANCES;
     }
+    return calculateRunningBalancesOptionFn(
+      transactions,
+      splitsOption,
+      startingBalance,
+    );
   }, [
-    queryResult.data,
+    transactions,
     queryResult.isSuccess,
     calculateRunningBalancesOptionFn,
     startingBalance,
@@ -163,10 +160,15 @@ export function useTransactions({
 
   return {
     ...queryResult,
-    transactions: flattenPages(queryResult.data),
+    transactions,
     runningBalances,
   };
 }
+
+// Shared empty result so the "no running balances" case keeps a stable
+// reference across renders for consumers using it in dependency arrays.
+const EMPTY_RUNNING_BALANCES: Map<TransactionEntity['id'], IntegerAmount> =
+  new Map();
 
 function getCalculateRunningBalancesFn(
   calculateRunningBalances: CalculateRunningBalancesOption = false,

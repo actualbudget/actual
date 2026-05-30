@@ -200,7 +200,6 @@ export function BudgetCell<
           >
             <PrivacyFilter>
               <AutoTextSize
-                key={value}
                 as={Text}
                 minFontSizePx={6}
                 maxFontSizePx={12}

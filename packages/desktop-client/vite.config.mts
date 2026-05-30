@@ -312,16 +312,24 @@ export default defineConfig(async ({ mode, command }) => {
     base: '/',
     envPrefix: 'REACT_APP_',
     build: {
-      minify: false,
+      // Minify with the oxc minifier for a much smaller bundle (important on
+      // mobile/slow networks). `keepNames` below preserves function and class
+      // names so bug-report stack traces stay readable even without source
+      // maps. Source maps are kept too — browsers only fetch them when
+      // DevTools is open, so they don't cost normal (mobile) users anything.
+      minify: 'oxc',
       target: 'es2022',
       sourcemap: true,
       outDir: mode === 'desktop' ? 'build-electron' : 'build',
       assetsDir: 'static',
       manifest: true,
       assetsInlineLimit: 0,
-      chunkSizeWarningLimit: 1500,
+      chunkSizeWarningLimit: 500,
       rolldownOptions: {
         output: {
+          // Preserve original function/class names through minification so
+          // minified stack traces remain actionable in bug reports.
+          keepNames: true,
           assetFileNames: (assetInfo: PreRenderedAsset) => {
             const info = assetInfo.name?.split('.') ?? [];
             let extType = info[info.length - 1];

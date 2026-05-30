@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import type { ComponentProps, ComponentType, CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
@@ -44,6 +44,10 @@ export function MobileNavTabs() {
   const [navbarState, setNavbarState] = useState<'default' | 'open' | 'hidden'>(
     'default',
   );
+  // Mirrors `navbarState` for synchronous reads inside the scroll listener so
+  // we can skip restarting the spring animation when we're already in the
+  // target state (the listener fires on every debounced scroll tick).
+  const navbarStateRef = useRef<'default' | 'open' | 'hidden'>('default');
 
   const navTabStyle = {
     flex: `1 1 ${100 / COLUMN_COUNT}%`,
@@ -59,6 +63,7 @@ export function MobileNavTabs() {
       // when cancel is true, it means that the user passed the upwards threshold
       // so we change the spring config to create a nice wobbly effect
       setNavbarState('open');
+      navbarStateRef.current = 'open';
       void api.start({
         to: { y: OPEN_FULL_Y },
         immediate: isTestEnv,
@@ -71,6 +76,7 @@ export function MobileNavTabs() {
   const openDefault = useCallback(
     (velocity = 0) => {
       setNavbarState('default');
+      navbarStateRef.current = 'default';
       void api.start({
         to: { y: OPEN_DEFAULT_Y },
         immediate: isTestEnv,
@@ -83,6 +89,7 @@ export function MobileNavTabs() {
   const hide = useCallback(
     (velocity = 0) => {
       setNavbarState('hidden');
+      navbarStateRef.current = 'hidden';
       void api.start({
         to: { y: HIDDEN_Y },
         immediate: isTestEnv,
@@ -163,9 +170,17 @@ export function MobileNavTabs() {
   useScrollListener(
     useCallback(
       ({ isScrolling, hasScrolledToEnd }) => {
-        if (isScrolling('down') && !hasScrolledToEnd('up')) {
+        if (
+          isScrolling('down') &&
+          !hasScrolledToEnd('up') &&
+          navbarStateRef.current !== 'hidden'
+        ) {
           hide();
-        } else if (isScrolling('up') && !hasScrolledToEnd('down')) {
+        } else if (
+          isScrolling('up') &&
+          !hasScrolledToEnd('down') &&
+          navbarStateRef.current !== 'default'
+        ) {
           openDefault();
         }
       },
