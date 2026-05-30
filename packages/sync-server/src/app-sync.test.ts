@@ -227,6 +227,39 @@ describe('/user-create-key', () => {
     expect(rows[0].encrypt_test).toEqual(encrypt_test);
   });
 
+  it('returns 403 when a shared user (user_access only) tries to create a key on a file owned by someone else', async () => {
+    const fileId = crypto.randomBytes(16).toString('hex');
+    getAccountDb().mutate(
+      'INSERT INTO files (id, encrypt_salt, encrypt_keyid, encrypt_test, owner) VALUES (?, ?, ?, ?, ?)',
+      [fileId, 'old-salt', 'old-key', 'old-test', OTHER_USER_ID],
+    );
+    getAccountDb().mutate(
+      'INSERT INTO user_access (file_id, user_id) VALUES (?, ?)',
+      [fileId, 'genericUser'],
+    );
+
+    const res = await request(app)
+      .post('/user-create-key')
+      .set('x-actual-token', 'valid-token-user')
+      .send({
+        fileId,
+        keyId: 'attacker-key',
+        keySalt: 'attacker-salt',
+        testContent: 'attacker-test',
+      });
+
+    expect(res.statusCode).toEqual(403);
+    expect(res.text).toEqual('file-access-not-allowed');
+
+    const rows = getAccountDb().all(
+      'SELECT encrypt_salt, encrypt_keyid, encrypt_test FROM files WHERE id = ?',
+      [fileId],
+    );
+    expect(rows[0].encrypt_salt).toEqual('old-salt');
+    expect(rows[0].encrypt_keyid).toEqual('old-key');
+    expect(rows[0].encrypt_test).toEqual('old-test');
+  });
+
   it('creates a new encryption key for the file', async () => {
     const fileId = crypto.randomBytes(16).toString('hex');
 
@@ -365,6 +398,32 @@ describe('/reset-user-file', () => {
       fileId,
     ]);
     expect(rows[0].group_id).toBeNull();
+  });
+
+  it('returns 403 when a shared user (user_access only) tries to reset a file owned by someone else', async () => {
+    const fileId = crypto.randomBytes(16).toString('hex');
+    const groupId = 'shared-user-reset-group-id';
+    getAccountDb().mutate(
+      'INSERT INTO files (id, group_id, deleted, owner) VALUES (?, ?, FALSE, ?)',
+      [fileId, groupId, OTHER_USER_ID],
+    );
+    getAccountDb().mutate(
+      'INSERT INTO user_access (file_id, user_id) VALUES (?, ?)',
+      [fileId, 'genericUser'],
+    );
+
+    const res = await request(app)
+      .post('/reset-user-file')
+      .set('x-actual-token', 'valid-token-user')
+      .send({ fileId });
+
+    expect(res.statusCode).toEqual(403);
+    expect(res.text).toEqual('file-access-not-allowed');
+
+    const rows = getAccountDb().all('SELECT group_id FROM files WHERE id = ?', [
+      fileId,
+    ]);
+    expect(rows[0].group_id).toEqual(groupId);
   });
 });
 
@@ -1286,6 +1345,34 @@ describe('/delete-user-file', () => {
       fileId,
     ]);
     expect(rows[0].deleted).toBe(1);
+  });
+
+  it('returns 403 when a shared user (user_access only) tries to delete a file owned by someone else', async () => {
+    const accountDb = getAccountDb();
+    const fileId = crypto.randomBytes(16).toString('hex');
+
+    // File owned by another user; genericUser only has shared user_access.
+    accountDb.mutate(
+      'INSERT OR IGNORE INTO files (id, deleted, owner) VALUES (?, FALSE, ?)',
+      [fileId, OTHER_USER_ID],
+    );
+    accountDb.mutate(
+      'INSERT INTO user_access (file_id, user_id) VALUES (?, ?)',
+      [fileId, 'genericUser'],
+    );
+
+    const res = await request(app)
+      .post('/delete-user-file')
+      .set('x-actual-token', 'valid-token-user')
+      .send({ fileId });
+
+    expect(res.statusCode).toEqual(403);
+    expect(res.text).toEqual('file-access-not-allowed');
+
+    const rows = accountDb.all('SELECT deleted FROM files WHERE id = ?', [
+      fileId,
+    ]);
+    expect(rows[0].deleted).toBe(0);
   });
 });
 

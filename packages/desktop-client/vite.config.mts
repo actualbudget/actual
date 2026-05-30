@@ -177,6 +177,10 @@ async function stagePublicData(): Promise<void> {
         .relative(publicDataDir, path.join(e.parentPath, e.name))
         .replaceAll(path.sep, '/'),
     )
+    // Skip dotfiles (e.g. legacy `.force-copy-windows` marker). They have no
+    // matching extension in the workbox precache globs, so a PWA opened
+    // offline would fail to fetch them and break startup (issue #7886).
+    .filter(file => !file.split('/').some(part => part.startsWith('.')))
     .sort();
   await writeFile(
     path.resolve(publicDir, 'data-file-index.txt'),
