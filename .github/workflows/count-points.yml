@@ -26,8 +26,6 @@ jobs:
           persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
-        with:
-          download-translations: 'false'
       - name: Count points
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

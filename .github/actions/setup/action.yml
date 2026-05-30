@@ -6,10 +6,6 @@ inputs:
     description: 'Working directory to run in, default .'
     required: false
     default: '.'
-  download-translations:
-    description: 'Whether to download translations as part of setup, default true'
-    required: false
-    default: 'true'
   cache:
     description: 'Whether to restore and save dependency and Lage caches, default true'
     required: false
@@ -56,8 +52,3 @@ runs:
       run: yarn --immutable
       shell: bash
       if: steps.cache.outputs.cache-hit != 'true'
-    - name: Download translations
-      working-directory: ${{ inputs.working-directory }}
-      run: yarn workspace @actual-app/web sync:translations
-      shell: bash
-      if: ${{ inputs.download-translations == 'true' && !env.ACT }}

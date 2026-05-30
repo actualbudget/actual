@@ -38,7 +38,6 @@ jobs:
         with:
           # Avoid restoring potentially poisoned caches in release jobs.
           cache: 'false'
-          download-translations: 'false'
 
       - name: Determine target version
         id: version

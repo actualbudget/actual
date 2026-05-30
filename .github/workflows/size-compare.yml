@@ -44,8 +44,6 @@ jobs:
           persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
-        with:
-          download-translations: 'false'
 
       # Resolve one successful `build.yml` run for each side (master and PR
       # head) up front, then pin every download below to its `run_id`. This

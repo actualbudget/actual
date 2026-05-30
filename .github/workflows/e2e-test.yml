@@ -36,8 +36,6 @@ jobs:
           persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
-        with:
-          download-translations: 'false'
       - name: Trust the repository directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Build browser bundle
@@ -46,12 +44,14 @@ jobs:
         # via ConfigurationPage.createTestFile()) is still rendered in a
         # production build. Without it, e2e tests would time out waiting for
         # a button that was tree-shaken out.
-        # --skip-translations keeps VRT screenshots deterministic by rendering
-        # source-code English instead of upstream Weblate en.json (which can
-        # drift between snapshot capture and test runs).
+        # Build the lage `build:browser` target directly (rather than the
+        # `package:browser` aggregator that `yarn build:browser` runs) so
+        # translations are NOT fetched. This keeps VRT screenshots deterministic
+        # by rendering source-code English instead of upstream Weblate en.json
+        # (which can drift between snapshot capture and test runs).
         env:
           REACT_APP_NETLIFY: 'true'
-        run: yarn build:browser --skip-translations
+        run: yarn lage build:browser --to=@actual-app/web
       - name: Upload build artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -78,8 +78,6 @@ jobs:
           persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
-        with:
-          download-translations: 'false'
       - name: Trust the repository directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Download web build
@@ -108,8 +106,6 @@ jobs:
           persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
-        with:
-          download-translations: 'false'
       - name: Trust the repository directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
@@ -147,8 +143,6 @@ jobs:
           persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
-        with:
-          download-translations: 'false'
       - name: Trust the repository directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Download web build

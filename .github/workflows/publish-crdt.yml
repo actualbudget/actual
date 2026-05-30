@@ -65,7 +65,6 @@ jobs:
         with:
           # Avoid restoring potentially poisoned caches in release jobs.
           cache: 'false'
-          download-translations: 'false'
 
       - name: Build @actual-app/crdt
         run: yarn workspace @actual-app/crdt build

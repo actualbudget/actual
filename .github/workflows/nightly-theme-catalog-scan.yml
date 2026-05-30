@@ -23,8 +23,6 @@ jobs:
           persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
-        with:
-          download-translations: 'false'
       - name: Validate themes
         run: yarn workspace @actual-app/web validate:theme-catalog
 

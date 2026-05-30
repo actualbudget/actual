@@ -32,8 +32,6 @@ jobs:
           persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
-        with:
-          download-translations: 'false'
 
   api:
     needs: setup
@@ -44,8 +42,6 @@ jobs:
           persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
-        with:
-          download-translations: 'false'
       - name: Build API
         run: yarn build:api
       - name: Create package tgz
@@ -72,8 +68,6 @@ jobs:
           persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
-        with:
-          download-translations: 'false'
       - name: Build CRDT
         run: cd packages/crdt && yarn build
       - name: Create package tgz
@@ -122,8 +116,6 @@ jobs:
           persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
-        with:
-          download-translations: 'false'
       - name: Build CLI
         run: yarn build:cli
       - name: Create package tgz
@@ -150,8 +142,6 @@ jobs:
           persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
-        with:
-          download-translations: 'false'
       - name: Build Server
         run: yarn workspace @actual-app/sync-server build
       - name: Upload Build

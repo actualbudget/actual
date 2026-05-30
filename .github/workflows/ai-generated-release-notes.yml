@@ -23,8 +23,6 @@ jobs:
           persist-credentials: false
       - name: Set up environment
         uses: ./.github/actions/setup
-        with:
-          download-translations: 'false'
 
       - name: Check if this is CodeRabbit's first comment
         id: check-first-comment
