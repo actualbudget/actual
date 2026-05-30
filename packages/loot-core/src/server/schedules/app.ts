@@ -611,29 +611,10 @@ export async function advanceSchedulesService(syncSuccess) {
       schedule.custom_upcoming_length ?? upcomingLength[0]?.value ?? '7',
     );
 
-    if (status === 'paid') {
-      if (schedule._date) {
-        // Move forward recurring schedules
-        if (schedule._date.frequency) {
-          try {
-            await setNextDate({ id: schedule.id });
-          } catch {
-            // This might error if the rule is corrupted and it can't
-            // find the rule
-          }
-        } else {
-          if (schedule._date < currentDay()) {
-            // Complete any single schedules
-            await updateSchedule({
-              schedule: { id: schedule.id, completed: true },
-            });
-          }
-        }
-      }
-    } else if (
-      (status === 'due' || status === 'missed') &&
+    if (
       schedule.posts_transaction &&
-      schedule._account
+      schedule._account &&
+      (status === 'paid' || status === 'due' || status === 'missed')
     ) {
       let currentSchedule = schedule;
       let currentStatus = status;
@@ -691,6 +672,25 @@ export async function advanceSchedulesService(syncSuccess) {
             upcomingLength[0]?.value ??
             '7',
         );
+      }
+    } else if (status === 'paid') {
+      if (schedule._date) {
+        // Move forward recurring schedules
+        if (schedule._date.frequency) {
+          try {
+            await setNextDate({ id: schedule.id });
+          } catch {
+            // This might error if the rule is corrupted and it can't
+            // find the rule
+          }
+        } else {
+          if (schedule._date < currentDay()) {
+            // Complete any single schedules
+            await updateSchedule({
+              schedule: { id: schedule.id, completed: true },
+            });
+          }
+        }
       }
     }
   }
