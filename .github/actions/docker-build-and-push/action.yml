@@ -1,0 +1,107 @@
+name: Build and push Docker image
+description: >-
+  Builds, smoke-tests, and pushes the Actual server Docker image for a single
+  OS variant (ubuntu or alpine) to Docker Hub and the GitHub Container Registry.
+
+inputs:
+  images:
+    description: 'Image list (multiline; passed to docker/metadata-action `images`)'
+    required: true
+  tags:
+    description: 'Tag rules (multiline; passed to docker/metadata-action `tags`)'
+    required: true
+  os:
+    description: 'Dockerfile variant: `ubuntu` or `alpine`'
+    required: true
+  push:
+    description: 'Whether to push the built image (set to false for dry runs / pull-request builds)'
+    required: false
+    default: 'true'
+  dockerhub-username:
+    description: 'Docker Hub username (leave empty to skip Docker Hub login)'
+    required: false
+    default: ''
+  dockerhub-token:
+    description: 'Docker Hub access token'
+    required: false
+    default: ''
+  github-token:
+    description: 'GitHub token used to log in to ghcr.io and as a Docker build arg'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a # v4.0.0
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf # v6.0.0
+      with:
+        images: ${{ inputs.images }}
+        flavor: ${{ inputs.os != 'ubuntu' && format('suffix=-{0}', inputs.os) || '' }}
+        tags: ${{ inputs.tags }}
+
+    - name: Login to Docker Hub
+      if: inputs.dockerhub-username != ''
+      uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+      with:
+        username: ${{ inputs.dockerhub-username }}
+        password: ${{ inputs.dockerhub-token }}
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ inputs.github-token }}
+
+    # Building outside of the docker image allows us to build once and push to
+    # multiple platforms. This is faster and avoids yarn memory issues.
+    - name: Set up environment
+      uses: ./.github/actions/setup
+      with:
+        # Avoid restoring potentially poisoned caches in release jobs.
+        cache: 'false'
+
+    - name: Build Web
+      shell: bash
+      run: yarn build:server
+
+    - name: Build image for testing
+      uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
+      with:
+        context: .
+        push: false
+        load: true
+        file: packages/sync-server/docker/${{ inputs.os }}.Dockerfile
+        tags: actualbudget/actual-server-testing
+
+    - name: Test that the docker image boots
+      shell: bash
+      run: |
+        docker run --detach --network=host --name actual-server actualbudget/actual-server-testing
+        HEALTHCMD=$(yq -r '.services.actual_server.healthcheck.test[1]' packages/sync-server/docker-compose.yml)
+        timeout 60 bash -c "until docker exec actual-server sh -c '$HEALTHCMD'; do sleep 1; done"
+
+    - name: Dump container logs on failure
+      if: failure()
+      shell: bash
+      run: docker logs actual-server || true
+
+    # This will use the cache from the earlier build step and not rebuild the image.
+    # https://docs.docker.com/build/ci/github-actions/test-before-push/
+    - name: Build and push images
+      uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
+      with:
+        context: .
+        push: ${{ inputs.push }}
+        file: packages/sync-server/docker/${{ inputs.os }}.Dockerfile
+        platforms: linux/amd64,linux/arm64,linux/arm/v7${{ inputs.os == 'alpine' && ',linux/arm/v6' || '' }}
+        tags: ${{ steps.meta.outputs.tags }}
+        build-args: |
+          GITHUB_TOKEN=${{ inputs.github-token }}

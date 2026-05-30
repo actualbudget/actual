@@ -1,0 +1,55 @@
+name: Pack npm packages
+description: >-
+  Builds and packs the Actual npm packages (core, web, sync-server, api, cli)
+  into tarballs and uploads them as a workflow artifact for a downstream
+  publish job to consume.
+
+inputs:
+  artifact-name:
+    description: 'Name of the workflow artifact to upload the packed tarballs to'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Pack the core package
+      shell: bash
+      run: yarn workspace @actual-app/core pack --filename @actual-app/core.tgz
+
+    - name: Build Server & Web
+      shell: bash
+      run: yarn build:server
+
+    - name: Pack the web and server packages
+      shell: bash
+      run: |
+        yarn workspace @actual-app/web pack --filename @actual-app/web.tgz
+        yarn workspace @actual-app/sync-server pack --filename @actual-app/sync-server.tgz
+
+    - name: Build API
+      shell: bash
+      run: yarn build:api
+
+    - name: Pack the api package
+      shell: bash
+      run: yarn workspace @actual-app/api pack --filename @actual-app/api.tgz
+
+    - name: Build CLI
+      shell: bash
+      run: yarn workspace @actual-app/cli build
+
+    - name: Pack the cli package
+      shell: bash
+      run: yarn workspace @actual-app/cli pack --filename @actual-app/cli.tgz
+
+    - name: Upload package artifacts
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      if: ${{ !env.ACT }}
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: |
+          packages/loot-core/@actual-app/core.tgz
+          packages/desktop-client/@actual-app/web.tgz
+          packages/sync-server/@actual-app/sync-server.tgz
+          packages/api/@actual-app/api.tgz
+          packages/cli/@actual-app/cli.tgz

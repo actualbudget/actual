@@ -12,6 +12,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: publish-npm-packages
+  cancel-in-progress: false
+
 jobs:
   build-and-pack:
     runs-on: ubuntu-latest
@@ -51,43 +55,10 @@ jobs:
           # Required after nightly `npm version` updates workspace manifests.
           yarn install
 
-      - name: Pack the core package
-        run: |
-          yarn workspace @actual-app/core pack --filename @actual-app/core.tgz
-
-      - name: Build Server & Web
-        run: yarn build:server
-
-      - name: Pack the web and server packages
-        run: |
-          yarn workspace @actual-app/web pack --filename @actual-app/web.tgz
-          yarn workspace @actual-app/sync-server pack --filename @actual-app/sync-server.tgz
-
-      - name: Build API
-        run: yarn build:api
-
-      - name: Pack the api package
-        run: |
-          yarn workspace @actual-app/api pack --filename @actual-app/api.tgz
-
-      - name: Build CLI
-        run: yarn workspace @actual-app/cli build
-
-      - name: Pack the cli package
-        run: |
-          yarn workspace @actual-app/cli pack --filename @actual-app/cli.tgz
-
-      - name: Upload package artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: ${{ !env.ACT }}
+      - name: Pack npm packages
+        uses: ./.github/actions/npm-pack
         with:
-          name: npm-packages
-          path: |
-            packages/loot-core/@actual-app/core.tgz
-            packages/desktop-client/@actual-app/web.tgz
-            packages/sync-server/@actual-app/sync-server.tgz
-            packages/api/@actual-app/api.tgz
-            packages/cli/@actual-app/cli.tgz
+          artifact-name: npm-packages
 
   publish:
     runs-on: ubuntu-latest
@@ -95,42 +66,87 @@ jobs:
     needs: build-and-pack
     environment: release
     permissions:
-      contents: read
-      packages: write
+      contents: read # check out the repository
       id-token: write # Required for OIDC
-    env:
-      NPM_DIST_TAG: ${{ github.event_name != 'push' && 'nightly' || '' }}
     steps:
-      - name: Download the artifacts
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          name: npm-packages
+          persist-credentials: false
 
-      - name: Setup node and npm registry
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+      - name: Publish npm packages
+        uses: ./.github/actions/npm-publish
         with:
-          node-version: 24
-          check-latest: true
+          artifact-name: npm-packages
+          dist-tag: ${{ github.event_name != 'push' && 'nightly' || '' }}
+
+  check-release:
+    runs-on: ubuntu-latest
+    name: Check for a release in progress
+    if: github.event_name != 'push' && github.event.repository.fork == false
+    outputs:
+      should-run: ${{ steps.gate.outputs.should-run }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Resolve release version and gate
+        id: gate
+        uses: ./.github/actions/release-in-progress
+
+  build-and-pack-rc:
+    runs-on: ubuntu-latest
+    name: Build and pack release candidate npm packages
+    needs: check-release
+    if: needs.check-release.outputs.should-run == 'true'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: release
+          persist-credentials: false
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
           # Avoid restoring potentially poisoned caches in release jobs.
-          package-manager-cache: false
-          registry-url: 'https://registry.npmjs.org'
+          cache: 'false'
 
-      - name: Publish Core
+      - name: Update package versions
         run: |
-          npm publish loot-core/@actual-app/core.tgz --access public ${NPM_DIST_TAG:+--tag "$NPM_DIST_TAG"}
+          # Get the release candidate version for the in-progress release
+          RC_VERSION=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts --package-json ./packages/desktop-client/package.json --type rc)
+          npm version "$RC_VERSION" --no-git-tag-version --workspace=@actual-app/core --no-workspaces-update
+          npm version "$RC_VERSION" --no-git-tag-version --workspace=@actual-app/web --no-workspaces-update
+          npm version "$RC_VERSION" --no-git-tag-version --workspace=@actual-app/sync-server --no-workspaces-update
+          npm version "$RC_VERSION" --no-git-tag-version --workspace=@actual-app/api --no-workspaces-update
+          npm version "$RC_VERSION" --no-git-tag-version --workspace=@actual-app/cli --no-workspaces-update
 
-      - name: Publish Web
+      - name: Yarn install
         run: |
-          npm publish desktop-client/@actual-app/web.tgz --access public ${NPM_DIST_TAG:+--tag "$NPM_DIST_TAG"}
+          # Required after `npm version` updates workspace manifests.
+          yarn install
 
-      - name: Publish Sync-Server
-        run: |
-          npm publish sync-server/@actual-app/sync-server.tgz --access public ${NPM_DIST_TAG:+--tag "$NPM_DIST_TAG"}
+      - name: Pack npm packages
+        uses: ./.github/actions/npm-pack
+        with:
+          artifact-name: rc-npm-packages
 
-      - name: Publish API
-        run: |
-          npm publish api/@actual-app/api.tgz --access public ${NPM_DIST_TAG:+--tag "$NPM_DIST_TAG"}
+  publish-rc:
+    runs-on: ubuntu-latest
+    name: Publish release candidate npm packages
+    needs: [check-release, build-and-pack-rc]
+    if: needs.check-release.outputs.should-run == 'true'
+    environment: release
+    permissions:
+      contents: read # check out the repository
+      id-token: write # Required for OIDC
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
 
-      - name: Publish CLI
-        run: |
-          npm publish cli/@actual-app/cli.tgz --access public ${NPM_DIST_TAG:+--tag "$NPM_DIST_TAG"}
+      - name: Publish npm packages
+        uses: ./.github/actions/npm-publish
+        with:
+          artifact-name: rc-npm-packages
+          dist-tag: rc
