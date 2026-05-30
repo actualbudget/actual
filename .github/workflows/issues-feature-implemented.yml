@@ -23,7 +23,7 @@ permissions:
 jobs:
   handle-feature-requests:
     if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       # This is not a security concern because we have approved & merged the PR
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2

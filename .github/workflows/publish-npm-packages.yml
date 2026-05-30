@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   build-and-pack:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     name: Build and pack npm packages
     if: github.event_name == 'push' || (github.event.repository.fork == false)
     steps:
@@ -90,7 +90,7 @@ jobs:
             packages/cli/@actual-app/cli.tgz
 
   publish:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     name: Publish npm packages
     needs: build-and-pack
     environment: release

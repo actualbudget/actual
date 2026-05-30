@@ -23,7 +23,7 @@ permissions:
 
 jobs:
   publish-microsoft-store:
-    runs-on: windows-latest
+    runs-on: blacksmith-4vcpu-windows-2025
     environment: release
     steps:
       - name: Resolve version

@@ -18,7 +18,7 @@ jobs:
       github.event_name == 'pull_request'
       && github.head_ref != 'release'
       && startsWith(github.head_ref, 'release-notes/') == false
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     environment: pr-automation
     permissions:
       contents: read
@@ -69,7 +69,7 @@ jobs:
 
   generate-release-notes:
     if: github.event_name == 'push'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     environment: release
     permissions:
       contents: write

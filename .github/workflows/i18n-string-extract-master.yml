@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   extract-and-upload-i18n-strings:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     environment: i18n
     if: github.repository == 'actualbudget/actual'
     steps:

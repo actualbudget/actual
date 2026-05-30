@@ -8,7 +8,7 @@ jobs:
   generate-release-notes:
     # Only run on PR comments from CodeRabbit bot
     if: github.event.issue.pull_request && github.event.comment.user.login == 'coderabbitai[bot]'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     environment: ai-release-notes
     timeout-minutes: 10
     permissions:

@@ -10,7 +10,7 @@ permissions:
 jobs:
   remove-help-wanted:
     if: ${{ !contains(github.event.issue.labels.*.name, 'feature') && contains(github.event.issue.labels.*.name, 'help wanted') }}
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       - name: Remove 'help wanted' label
         env:

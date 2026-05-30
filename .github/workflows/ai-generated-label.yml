@@ -18,7 +18,7 @@ permissions:
 jobs:
   add-ai-generated-label:
     name: Add 'AI generated' label
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     if: startsWith(github.event.pull_request.title, '[AI]')
     steps:
       - name: Add 'AI generated' label

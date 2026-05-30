@@ -13,7 +13,7 @@ permissions:
 jobs:
   validate-theme-catalog:
     name: Validate custom theme catalog
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     if: github.repository == 'actualbudget/actual'
     timeout-minutes: 10
     steps:
@@ -32,7 +32,7 @@ jobs:
     name: Notify Discord on failure
     needs: validate-theme-catalog
     if: failure() && github.repository == 'actualbudget/actual'
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     environment: nightly-alerts
     timeout-minutes: 5
     steps:
