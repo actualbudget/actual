@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useMemo } from 'react';
+import { useEffect, useEffectEvent, useMemo, useRef } from 'react';
 
 import { listen } from '@actual-app/core/platform/client/connection';
 import type { Query } from '@actual-app/core/shared/query';
@@ -10,6 +10,7 @@ import type {
   InfiniteData,
   UseInfiniteQueryResult,
 } from '@tanstack/react-query';
+import debounce from 'lodash/debounce';
 
 import { transactionQueries } from '#transactions';
 
@@ -103,6 +104,29 @@ export function useTransactions({
     transactionQueries.aql({ query, pageSize }),
   );
 
+  // `refetch` reloads every page currently loaded by the infinite query, so
+  // firing it on every applied sync event is wasteful when many events arrive
+  // in quick succession (bulk edits, reconciliation, the initial sync).
+  // Coalesce them: fire immediately on the first event so single edits still
+  // feel instant (leading), then at most once more at the end of a burst
+  // (trailing). `refetch` keeps a stable identity, but we read it through a ref
+  // so the debounced wrapper never calls a stale closure.
+  const refetchRef = useRef(queryResult.refetch);
+  useEffect(() => {
+    refetchRef.current = queryResult.refetch;
+  }, [queryResult.refetch]);
+
+  const debouncedRefetch = useMemo(
+    () =>
+      debounce(() => void refetchRef.current(), SYNC_REFETCH_DEBOUNCE_MS, {
+        leading: true,
+        trailing: true,
+      }),
+    [],
+  );
+
+  useEffect(() => () => debouncedRefetch.cancel(), [debouncedRefetch]);
+
   const onSyncEvent = useEffectEvent((event: ServerEvents['sync-event']) => {
     if (event.type === 'applied') {
       const tables = event.tables;
@@ -111,7 +135,7 @@ export function useTransactions({
         tables.includes('category_mapping') ||
         tables.includes('payee_mapping')
       ) {
-        void queryResult.refetch();
+        debouncedRefetch();
       }
     }
   });
@@ -164,6 +188,11 @@ export function useTransactions({
     runningBalances,
   };
 }
+
+// How long to coalesce bursts of sync events before refetching. Short enough
+// that a single edit still updates near-instantly (the leading edge fires
+// immediately), long enough to collapse a flood of events into one refetch.
+const SYNC_REFETCH_DEBOUNCE_MS = 200;
 
 // Shared empty result so the "no running balances" case keeps a stable
 // reference across renders for consumers using it in dependency arrays.
