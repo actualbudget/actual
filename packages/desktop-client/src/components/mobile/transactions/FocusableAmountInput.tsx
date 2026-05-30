@@ -11,6 +11,7 @@ import type { CSSProperties as EmotionCSSProperties } from '@actual-app/componen
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import * as Platform from '@actual-app/core/shared/platform';
 import {
   amountToCurrency,
   appendDecimals,
@@ -22,6 +23,8 @@ import { css } from '@emotion/css';
 import { makeAmountFullStyle } from '#components/budget/util';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+
+import { transferIOSKeyboardFocus } from './iosKeyboardProxy';
 
 type AmountInputProps = {
   value: number;
@@ -57,8 +60,14 @@ const AmountInput = memo(function AmountInput({
   const initialValue = Math.abs(props.value);
 
   useEffect(() => {
-    if (focused) {
-      inputRef.current?.focus();
+    if (focused && inputRef.current) {
+      if (Platform.isIOSAgent) {
+        // Transfer focus (and the already-open keyboard) from the proxy
+        // input that was focused during the user's tap gesture.
+        transferIOSKeyboardFocus(inputRef.current);
+      } else {
+        inputRef.current.focus();
+      }
     }
   }, [focused]);
 

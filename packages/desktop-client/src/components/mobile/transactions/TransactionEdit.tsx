@@ -37,7 +37,6 @@ import { send } from '@actual-app/core/platform/client/connection';
 import { DEFAULT_MAX_DISTANCE_METERS } from '@actual-app/core/shared/constants';
 import { calculateDistance } from '@actual-app/core/shared/location-utils';
 import * as monthUtils from '@actual-app/core/shared/months';
-import * as Platform from '@actual-app/core/shared/platform';
 import { q } from '@actual-app/core/shared/query';
 import {
   getStatusLabel,
@@ -652,11 +651,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
 
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm()!;
-    const [totalAmountFocused, setTotalAmountFocused] = useState(
-      // iOS does not support automatically opening up the keyboard for the
-      // total amount field. Hence we should not focus on it on page render.
-      !Platform.isIOSAgent,
-    );
+    const [totalAmountFocused, setTotalAmountFocused] = useState(false);
     const childTransactionElementRefMap = useRef<
       Record<TransactionEntity['id'], HTMLDivElement | null>
     >({});
@@ -675,7 +670,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     const isInitialMount = useInitialMount();
 
     useEffect(() => {
-      if (isInitialMount && isAdding && !Platform.isIOSAgent) {
+      if (isInitialMount && isAdding) {
         onTotalAmountEdit();
       }
     }, [isAdding, isInitialMount, onTotalAmountEdit]);
