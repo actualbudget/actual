@@ -1,8 +1,8 @@
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
-import react from '@vitejs/plugin-react';
 import type { StorybookConfig } from '@storybook/react-vite';
+import react from '@vitejs/plugin-react';
 
 /**
  * This function is used to resolve the absolute path of a package.

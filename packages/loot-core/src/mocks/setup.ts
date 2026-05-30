@@ -4,6 +4,7 @@ import * as nativeFs from 'fs';
 import * as fetchClient from '#platform/client/connection';
 import * as sqlite from '#platform/server/sqlite';
 import * as db from '#server/db';
+import type * as MigrationsType from '#server/migrate/migrations';
 import {
   disableGlobalMutations,
   enableGlobalMutations,
@@ -14,7 +15,6 @@ import { setSyncingMode } from '#server/sync';
 import * as rules from '#server/transactions/transaction-rules';
 import { updateVersion } from '#server/update';
 import { resetTracer, tracer } from '#shared/test-helpers';
-import type * as MigrationsType from '#server/migrate/migrations';
 
 vi.mock('#platform/client/connection');
 vi.mock('#platform/exceptions');

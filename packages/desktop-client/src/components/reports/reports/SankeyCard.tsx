@@ -5,9 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { Block } from '@actual-app/components/block';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { SankeyWidget } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
 import debounce from 'lodash/debounce';
-import type { SankeyWidget } from '@actual-app/core/types/models';
 
 import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
@@ -23,15 +23,15 @@ import {
   createBaseGraphSpreadsheet,
   isGraphLayer,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
+import type {
+  Graph,
+  GraphLayers,
+} from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '#components/reports/useReport';
 import { useCategories } from '#hooks/useCategories';
 import { useLocale } from '#hooks/useLocale';
 import { useResizeObserver } from '#hooks/useResizeObserver';
-import type {
-  Graph,
-  GraphLayers,
-} from '#components/reports/spreadsheets/sankey-spreadsheet';
 
 type SankeyCardProps = {
   widgetId: string;

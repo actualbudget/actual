@@ -2,8 +2,8 @@ import React, { useLayoutEffect, useRef } from 'react';
 import type { RefObject, UIEventHandler } from 'react';
 
 import { Block } from '@actual-app/components/block';
-import { View } from '@actual-app/components/view';
 import type { CSSProperties } from '@actual-app/components/styles';
+import { View } from '@actual-app/components/view';
 import type {
   balanceTypeOpType,
   DataEntity,

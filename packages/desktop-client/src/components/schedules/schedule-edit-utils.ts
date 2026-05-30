@@ -1,9 +1,9 @@
 import { extractScheduleConds } from '@actual-app/core/shared/schedules';
-import { t } from 'i18next';
 import type {
   RuleConditionOp,
   ScheduleEntity,
 } from '@actual-app/core/types/models';
+import { t } from 'i18next';
 
 import type { ScheduleFormFields } from './ScheduleEditForm';
 

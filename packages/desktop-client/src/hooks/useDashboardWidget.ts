@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
 import type { DashboardWidgetEntity } from '@actual-app/core/types/models';
+import { useQuery } from '@tanstack/react-query';
 
 import { dashboardQueries } from '#reports';
 

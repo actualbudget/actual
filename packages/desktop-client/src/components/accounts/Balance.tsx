@@ -8,11 +8,11 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { q } from '@actual-app/core/shared/query';
+import type { Query } from '@actual-app/core/shared/query';
 import { getScheduledAmount } from '@actual-app/core/shared/schedules';
 import { isPreviewId } from '@actual-app/core/shared/transactions';
-import { useHover } from 'usehooks-ts';
-import type { Query } from '@actual-app/core/shared/query';
 import type { AccountEntity } from '@actual-app/core/types/models';
+import { useHover } from 'usehooks-ts';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';

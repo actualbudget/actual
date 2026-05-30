@@ -5,8 +5,8 @@ import {
   mappingsFromString,
   mappingsToString,
 } from '@actual-app/core/server/util/custom-sync-mapping';
-import { q } from '@actual-app/core/shared/query';
 import type { Mappings } from '@actual-app/core/server/util/custom-sync-mapping';
+import { q } from '@actual-app/core/shared/query';
 
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useTransactions } from '#hooks/useTransactions';

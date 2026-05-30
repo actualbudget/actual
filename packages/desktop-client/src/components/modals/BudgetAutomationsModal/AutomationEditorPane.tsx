@@ -7,24 +7,24 @@ import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
 import type {
   CategoryGroupEntity,
   ScheduleEntity,
 } from '@actual-app/core/types/models';
+import { css } from '@emotion/css';
 
 import { ActiveEditor } from '#components/budget/goals/ActiveEditor';
+import type { AutomationEntry } from '#components/budget/goals/automationExamples';
 import {
   AutomationErrorDetail,
   AutomationErrorTitle,
 } from '#components/budget/goals/automationMessages';
+import type { DisplayTemplateType } from '#components/budget/goals/constants';
 import { getDisplayTemplateMeta } from '#components/budget/goals/displayTemplateMeta';
 import {
   getInitialState,
   templateReducer,
 } from '#components/budget/goals/reducer';
-import type { AutomationEntry } from '#components/budget/goals/automationExamples';
-import type { DisplayTemplateType } from '#components/budget/goals/constants';
 import type { AutomationErrorKind } from '#components/budget/goals/validateAutomation';
 
 import { NON_CONTRIBUTION_TYPES, TypePicker } from './TypePicker';

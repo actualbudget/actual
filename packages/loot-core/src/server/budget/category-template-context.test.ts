@@ -2,8 +2,8 @@ import { vi } from 'vitest';
 
 import * as aql from '#server/aql';
 import * as db from '#server/db';
-import { amountToInteger } from '#shared/util';
 import type { DbCategory } from '#server/db';
+import { amountToInteger } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
 import type { ByTemplate, Template } from '#types/models/templates';
 

@@ -23,8 +23,8 @@ import {
   useRefreshLoginMethods,
 } from '#components/ServerContext';
 import { popModal } from '#modals/modalsSlice';
-import { useDispatch } from '#redux';
 import type { Modal as ModalType } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 type PasswordEnableModalProps = Extract<
   ModalType,

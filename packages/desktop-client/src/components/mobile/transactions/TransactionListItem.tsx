@@ -23,16 +23,16 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { isPreviewId } from '@actual-app/core/shared/transactions';
 import { integerToCurrency } from '@actual-app/core/shared/util';
-import {
-  PressResponder,
-  useLongPress,
-  usePress,
-} from '@react-aria/interactions';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
+import {
+  PressResponder,
+  useLongPress,
+  usePress,
+} from '@react-aria/interactions';
 
 import { makeAmountFullStyle } from '#components/budget/util';
 import { useAccount } from '#hooks/useAccount';

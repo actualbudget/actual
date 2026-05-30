@@ -10,13 +10,13 @@ import type {
 } from '@actual-app/core/types/models';
 
 import { DropHighlight, useDraggable, useDroppable } from '#components/sort';
-import { Row, ROW_HEIGHT } from '#components/table';
-import { useDragRef } from '#hooks/useDragRef';
 import type {
   DragState,
   OnDragChangeCallback,
   OnDropCallback,
 } from '#components/sort';
+import { Row, ROW_HEIGHT } from '#components/table';
+import { useDragRef } from '#hooks/useDragRef';
 
 import { RenderMonths } from './RenderMonths';
 import { SidebarGroup } from './SidebarGroup';

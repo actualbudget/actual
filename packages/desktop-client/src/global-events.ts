@@ -8,15 +8,15 @@ import { setAppState } from './app/appSlice';
 import { categoryQueries } from './budget';
 import { closeBudgetUI } from './budgetfiles/budgetfilesSlice';
 import { closeModal, pushModal, replaceModal } from './modals/modalsSlice';
+import type { Modal } from './modals/modalsSlice';
 import {
   addGenericErrorNotification,
   addNotification,
 } from './notifications/notificationsSlice';
 import { payeeQueries } from './payees';
 import { loadPrefs } from './prefs/prefsSlice';
-import * as syncEvents from './sync-events';
-import type { Modal } from './modals/modalsSlice';
 import type { AppStore } from './redux/store';
+import * as syncEvents from './sync-events';
 
 export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
   const unlistenServerError = listen('server-error', () => {

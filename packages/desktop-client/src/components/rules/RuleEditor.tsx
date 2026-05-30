@@ -37,14 +37,14 @@ import {
   parse,
   unparse,
 } from '@actual-app/core/shared/rules';
-import { css } from '@emotion/css';
-import { v4 as uuidv4 } from 'uuid';
 import type { ScheduleStatusType } from '@actual-app/core/shared/schedules';
 import type {
   NewRuleEntity,
   RuleActionEntity,
   RuleEntity,
 } from '@actual-app/core/types/models';
+import { css } from '@emotion/css';
+import { v4 as uuidv4 } from 'uuid';
 
 import { TagMultiAutocomplete } from '#components/autocomplete/TagMultiAutocomplete';
 import { FinancialText } from '#components/FinancialText';

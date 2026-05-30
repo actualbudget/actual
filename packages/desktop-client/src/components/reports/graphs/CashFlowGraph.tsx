@@ -21,9 +21,9 @@ import { FinancialText } from '#components/FinancialText';
 import { useRechartsAnimation } from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { useFormat } from '#hooks/useFormat';
+import type { FormatType } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
-import type { FormatType } from '#hooks/useFormat';
 
 const MAX_BAR_SIZE = 50;
 const ANIMATION_DURATION = 1000; // in ms

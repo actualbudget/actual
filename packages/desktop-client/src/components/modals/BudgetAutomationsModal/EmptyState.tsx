@@ -6,8 +6,8 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { getAutomationExamples } from '#components/budget/goals/automationExamples';
-import { getDisplayTemplateMeta } from '#components/budget/goals/displayTemplateMeta';
 import type { AutomationEntry } from '#components/budget/goals/automationExamples';
+import { getDisplayTemplateMeta } from '#components/budget/goals/displayTemplateMeta';
 
 type EmptyStateProps = {
   onAdd: (create: () => AutomationEntry) => void;

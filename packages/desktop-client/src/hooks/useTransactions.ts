@@ -1,11 +1,11 @@
 import { useEffect, useEffectEvent, useState } from 'react';
 
 import { listen } from '@actual-app/core/platform/client/connection';
-import { useInfiniteQuery } from '@tanstack/react-query';
 import type { Query } from '@actual-app/core/shared/query';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type { TransactionEntity } from '@actual-app/core/types/models';
 import type { ServerEvents } from '@actual-app/core/types/server-events';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import type {
   InfiniteData,
   UseInfiniteQueryResult,

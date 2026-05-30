@@ -1,16 +1,16 @@
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
-// @ts-strict-ignore
-import keyBy from 'lodash/keyBy';
 import type {
   RuleConditionEntity,
   SpendingEntity,
   SpendingMonthEntity,
 } from '@actual-app/core/types/models';
+// @ts-strict-ignore
+import keyBy from 'lodash/keyBy';
 
-import { aqlQuery } from '#queries/aqlQuery';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
+import { aqlQuery } from '#queries/aqlQuery';
 
 import { makeQuery } from './makeQuery';
 

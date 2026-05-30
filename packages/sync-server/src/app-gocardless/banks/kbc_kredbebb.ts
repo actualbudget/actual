@@ -1,6 +1,6 @@
+import type { IBank } from './bank.interface';
 import Fallback from './integration-bank';
 import { extractPayeeNameFromRemittanceInfo } from './util/extract-payeeName-from-remittanceInfo';
-import type { IBank } from './bank.interface';
 
 export default {
   ...Fallback,

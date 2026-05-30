@@ -11,7 +11,6 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { currentDay, subDays } from '@actual-app/core/shared/months';
-import { format as formatDate, parseISO } from 'date-fns';
 import type {
   AccountEntity,
   SyncServerEnableBankingAccount,
@@ -19,6 +18,7 @@ import type {
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
 } from '@actual-app/core/types/models';
+import { format as formatDate, parseISO } from 'date-fns';
 
 import {
   useLinkAccountEnableBankingMutation,
@@ -28,6 +28,7 @@ import {
   useUnlinkAccountMutation,
 } from '#accounts';
 import { Autocomplete } from '#components/autocomplete/Autocomplete';
+import type { AutocompleteItem } from '#components/autocomplete/Autocomplete';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
@@ -40,7 +41,6 @@ import { closeModal } from '#modals/modalsSlice';
 import { transactions } from '#queries';
 import { liveQuery } from '#queries/liveQuery';
 import { useDispatch } from '#redux';
-import type { AutocompleteItem } from '#components/autocomplete/Autocomplete';
 
 function useAddBudgetAccountOptions() {
   const { t } = useTranslation();

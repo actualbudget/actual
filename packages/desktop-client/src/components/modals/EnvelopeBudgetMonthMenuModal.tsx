@@ -9,11 +9,11 @@ import {
 } from '@actual-app/components/icons/v1';
 import { SvgNotesPaper } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { css } from '@emotion/css';
-import type { CSSProperties } from '@actual-app/components/styles';
 
 import { BudgetMonthMenu } from '#components/budget/envelope/budgetsummary/BudgetMonthMenu';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';

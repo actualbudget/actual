@@ -18,8 +18,8 @@ import { useCategories } from '#hooks/useCategories';
 import { useInitialMount } from '#hooks/useInitialMount';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
-import { useDispatch } from '#redux';
 import type { Modal as ModalType } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 type CoverModalProps = Extract<ModalType, { name: 'cover' }>['options'];
 

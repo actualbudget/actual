@@ -2,8 +2,8 @@ import React from 'react';
 import type { ComponentProps } from 'react';
 import BasePullToRefresh from 'react-simple-pull-to-refresh';
 
-import { css } from '@emotion/css';
 import type { CSSProperties } from '@actual-app/components/styles';
+import { css } from '@emotion/css';
 
 type PullToRefreshProps = ComponentProps<typeof BasePullToRefresh> & {
   style?: CSSProperties;

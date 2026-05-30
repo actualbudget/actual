@@ -1,9 +1,9 @@
 import { sendCatch } from '@actual-app/core/platform/client/connection';
-import { t } from 'i18next';
 import type {
   AccountEntity,
   SyncServerEnableBankingAccount,
 } from '@actual-app/core/types/models';
+import { t } from 'i18next';
 
 import { pushModal } from '#modals/modalsSlice';
 import type { AppDispatch } from '#redux/store';

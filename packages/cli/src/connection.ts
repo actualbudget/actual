@@ -1,5 +1,6 @@
 import * as api from '@actual-app/api';
 
+import type { CacheState } from './cache';
 import {
   CACHE_VERSION,
   decideSyncAction,
@@ -7,10 +8,9 @@ import {
   readCacheState,
   writeCacheState,
 } from './cache';
+import type { CliConfig, CliGlobalOpts } from './config';
 import { resolveConfig } from './config';
 import { acquireExclusive, acquireShared } from './lock';
-import type { CacheState } from './cache';
-import type { CliConfig, CliGlobalOpts } from './config';
 import type { Release } from './lock';
 
 type ConnectionOptions = {

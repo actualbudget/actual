@@ -6,8 +6,8 @@ import type {
 } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
-import { aqlQuery } from '#queries/aqlQuery';
 import type { QueryDataEntity } from '#components/reports/ReportOptions';
+import { aqlQuery } from '#queries/aqlQuery';
 
 import { fetchBudgetData } from './budgetDataQuery';
 import { makeQuery } from './makeQuery';

@@ -5,8 +5,8 @@
 
 import type { Transaction } from '#app-gocardless/gocardless-node.types';
 
-import Fallback from './integration-bank';
 import type { IBank } from './bank.interface';
+import Fallback from './integration-bank';
 
 const CARD_PAYMENT_PREFIX = 'PAGAMENTO SU CIRCUITO INTERNAZIONALE';
 const CARD_PAYMENT_SUFFIX = 'Operazione carta';

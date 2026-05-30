@@ -3,8 +3,8 @@ import { DropIndicator, GridList, useDragAndDrop } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
-import { css } from '@emotion/css';
 import type { CategoryEntity } from '@actual-app/core/types/models';
+import { css } from '@emotion/css';
 
 import { useMoveCategoryMutation } from '#budget';
 

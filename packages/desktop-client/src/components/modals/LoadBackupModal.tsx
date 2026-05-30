@@ -13,8 +13,8 @@ import { loadBackup, makeBackup } from '#budgetfiles/budgetfilesSlice';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { Cell, Row } from '#components/table';
 import { useMetadataPref } from '#hooks/useMetadataPref';
-import { useDispatch } from '#redux';
 import type { Modal as ModalType } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 type BackupTableProps = {
   backups: Backup[];

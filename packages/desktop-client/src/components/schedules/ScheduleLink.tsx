@@ -14,8 +14,8 @@ import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { Search } from '#components/common/Search';
 import { useSchedules } from '#hooks/useSchedules';
 import { pushModal } from '#modals/modalsSlice';
-import { useDispatch } from '#redux';
 import type { Modal as ModalType } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 import { ROW_HEIGHT, SchedulesTable } from './SchedulesTable';
 

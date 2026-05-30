@@ -18,12 +18,12 @@ import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { integerToCurrency } from '@actual-app/core/shared/util';
-import { css, cx } from '@emotion/css';
-import { Fzf } from 'fzf';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
 } from '@actual-app/core/types/models';
+import { css, cx } from '@emotion/css';
+import { Fzf } from 'fzf';
 
 import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
 import { makeAmountFullStyle } from '#components/budget/util';

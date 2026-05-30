@@ -17,9 +17,9 @@ import { usePayeesById } from '#hooks/usePayees';
 import { useScheduleEdit } from '#hooks/useScheduleEdit';
 import { useSelected } from '#hooks/useSelected';
 import { pushModal } from '#modals/modalsSlice';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
-import type { Modal as ModalType } from '#modals/modalsSlice';
 
 import { updateScheduleConditions } from './schedule-edit-utils';
 import { ScheduleEditForm } from './ScheduleEditForm';

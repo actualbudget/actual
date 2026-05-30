@@ -7,21 +7,11 @@
   "experimentalSortImports": {
     "groups": [
       "react",
-      "value-builtin",
-      { "newlinesBetween": false },
-      "type-builtin",
-      "value-external",
-      { "newlinesBetween": false },
-      "type-external",
-      ["value-parent", "value-subpath"],
-      { "newlinesBetween": false },
-      ["type-parent", "type-subpath"],
-      "value-sibling",
-      { "newlinesBetween": false },
-      "type-sibling",
-      "value-index",
-      { "newlinesBetween": false },
-      "type-index"
+      "builtin",
+      "external",
+      ["parent", "subpath"],
+      "sibling",
+      "index"
     ],
     "customGroups": [
       {

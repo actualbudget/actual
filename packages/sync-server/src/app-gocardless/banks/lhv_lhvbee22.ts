@@ -1,7 +1,7 @@
 import * as d from 'date-fns';
 
-import Fallback from './integration-bank';
 import type { IBank } from './bank.interface';
+import Fallback from './integration-bank';
 
 export default {
   ...Fallback,

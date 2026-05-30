@@ -7,8 +7,8 @@ import type { Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
-import { MobileNavigation } from './page-models/mobile-navigation';
 import type { MobileBudgetPage } from './page-models/mobile-budget-page';
+import { MobileNavigation } from './page-models/mobile-navigation';
 
 const copyLastMonthBudget = async (
   budgetPage: MobileBudgetPage,

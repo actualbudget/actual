@@ -14,8 +14,8 @@ import { Information } from '#components/alerts';
 import { Modal, ModalButtons } from '#components/common/Modal';
 import { usePayees } from '#hooks/usePayees';
 import { replaceModal } from '#modals/modalsSlice';
-import { useDispatch, useSelector } from '#redux';
 import type { Modal as ModalType } from '#modals/modalsSlice';
+import { useDispatch, useSelector } from '#redux';
 
 const highlightStyle = { color: theme.pageTextPositive };
 

@@ -1,5 +1,5 @@
-import { t } from 'i18next';
 import type { AccountEntity } from '@actual-app/core/types/models';
+import { t } from 'i18next';
 
 export function validateAccountName(
   newAccountName: string,

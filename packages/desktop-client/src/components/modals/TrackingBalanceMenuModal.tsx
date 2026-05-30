@@ -20,8 +20,8 @@ import {
 } from '#components/common/Modal';
 import { CellValueText } from '#components/spreadsheet/CellValue';
 import { useCategory } from '#hooks/useCategory';
-import { trackingBudget } from '#spreadsheet/bindings';
 import type { Modal as ModalType } from '#modals/modalsSlice';
+import { trackingBudget } from '#spreadsheet/bindings';
 
 type TrackingBalanceMenuModalProps = Omit<
   Extract<ModalType, { name: 'tracking-balance-menu' }>['options'],

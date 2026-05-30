@@ -8,11 +8,12 @@ import {
   SvgCheveronUp,
 } from '@actual-app/components/icons/v1';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import type { CSSProperties } from '@actual-app/components/styles';
 
+import type { ReducerState } from './constants';
 import { BySaveAutomationReadOnly } from './editor/BySaveAutomationReadOnly';
 import { FixedAutomationReadOnly } from './editor/FixedAutomationReadOnly';
 import { HistoricalAutomationReadOnly } from './editor/HistoricalAutomationReadOnly';
@@ -22,7 +23,6 @@ import { PercentageAutomationReadOnly } from './editor/PercentageAutomationReadO
 import { RefillAutomationReadOnly } from './editor/RefillAutomationReadOnly';
 import { RemainderAutomationReadOnly } from './editor/RemainderAutomationReadOnly';
 import { ScheduleAutomationReadOnly } from './editor/ScheduleAutomationReadOnly';
-import type { ReducerState } from './constants';
 
 type BudgetAutomationReadOnlyProps = {
   state: ReducerState;

@@ -5,9 +5,9 @@ import { Button } from '@actual-app/components/button';
 import { SvgRemove } from '@actual-app/components/icons/v2';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { theme } from '@actual-app/components/theme';
+import type { View } from '@actual-app/components/view';
 import { extractTagsForFilter } from '@actual-app/core/shared/tags';
 import { css } from '@emotion/css';
-import type { View } from '@actual-app/components/view';
 
 import { useTagCSS } from '#hooks/useTagCSS';
 import { filterTags, useTags } from '#hooks/useTags';

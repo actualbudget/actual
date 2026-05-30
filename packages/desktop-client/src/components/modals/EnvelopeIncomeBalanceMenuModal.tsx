@@ -21,8 +21,8 @@ import {
 } from '#components/common/Modal';
 import { CellValueText } from '#components/spreadsheet/CellValue';
 import { useCategory } from '#hooks/useCategory';
-import { envelopeBudget } from '#spreadsheet/bindings';
 import type { Modal as ModalType } from '#modals/modalsSlice';
+import { envelopeBudget } from '#spreadsheet/bindings';
 
 type EnvelopeIncomeBalanceMenuModalProps = Omit<
   Extract<ModalType, { name: 'envelope-income-balance-menu' }>['options'],

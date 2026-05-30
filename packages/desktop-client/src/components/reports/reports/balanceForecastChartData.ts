@@ -1,6 +1,6 @@
 import * as monthUtils from '@actual-app/core/shared/months';
-import * as d from 'date-fns';
 import type { ForecastResult } from '@actual-app/core/types/models/forecast';
+import * as d from 'date-fns';
 
 type Granularity = 'Daily' | 'Monthly';
 type ChartDataPoint = { date: string; balance: number };

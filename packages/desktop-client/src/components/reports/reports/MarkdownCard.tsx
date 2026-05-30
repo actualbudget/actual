@@ -7,10 +7,10 @@ import { Menu } from '@actual-app/components/menu';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { MarkdownWidget } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 import rehypeExternalLinks from 'rehype-external-links';
 import remarkGfm from 'remark-gfm';
-import type { MarkdownWidget } from '@actual-app/core/types/models';
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from '#components/reports/constants';
 import { ReportCard } from '#components/reports/ReportCard';

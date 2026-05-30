@@ -10,9 +10,9 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 import { groupById } from '@actual-app/core/shared/util';
-import memoizeOne from 'memoize-one';
 import type { Diff } from '@actual-app/core/shared/util';
 import type { PayeeEntity } from '@actual-app/core/types/models';
+import memoizeOne from 'memoize-one';
 
 import { Search } from '#components/common/Search';
 import { Cell, SelectCell, TableHeader } from '#components/table';

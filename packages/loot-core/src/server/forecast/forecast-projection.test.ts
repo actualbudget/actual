@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 import type { TransactionEntity } from '#types/models';
 
-import { projectForecastData } from './forecast-projection';
 import type { AccountWithComputedBalance } from './forecast-accounts';
 import type { ForecastFilterInfo } from './forecast-filters';
+import { projectForecastData } from './forecast-projection';
 import type { ForecastDateContext } from './forecast-projection';
 import type { ForecastScheduleOccurrence } from './forecast-schedules';
 

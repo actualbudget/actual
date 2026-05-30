@@ -28,8 +28,8 @@ import { FocusableAmountInput } from '#components/mobile/transactions/FocusableA
 import { Notes } from '#components/Notes';
 import { useCategory } from '#hooks/useCategory';
 import { useNotes } from '#hooks/useNotes';
-import { trackingBudget } from '#spreadsheet/bindings';
 import type { Modal as ModalType } from '#modals/modalsSlice';
+import { trackingBudget } from '#spreadsheet/bindings';
 
 type TrackingBudgetMenuModalProps = Extract<
   ModalType,

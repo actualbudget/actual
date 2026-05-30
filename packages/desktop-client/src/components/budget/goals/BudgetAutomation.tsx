@@ -1,8 +1,8 @@
 import { useMemo, useReducer, useRef, useState } from 'react';
 
 import { SpaceBetween } from '@actual-app/components/space-between';
-import { firstDayOfMonth } from '@actual-app/core/shared/months';
 import type { CSSProperties } from '@actual-app/components/styles';
+import { firstDayOfMonth } from '@actual-app/core/shared/months';
 import type {
   CategoryGroupEntity,
   ScheduleEntity,
@@ -13,8 +13,8 @@ import { useEffectAfterMount } from '#hooks/useEffectAfterMount';
 
 import { BudgetAutomationEditor } from './BudgetAutomationEditor';
 import { BudgetAutomationReadOnly } from './BudgetAutomationReadOnly';
-import { DEFAULT_PRIORITY, getInitialState, templateReducer } from './reducer';
 import type { DisplayTemplateType } from './constants';
+import { DEFAULT_PRIORITY, getInitialState, templateReducer } from './reducer';
 
 type BudgetAutomationProps = {
   categories: CategoryGroupEntity[];

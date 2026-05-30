@@ -1,15 +1,15 @@
-import { beforeEach, describe, expect, it } from 'vitest';
 import type { LocationCoordinates } from '@actual-app/core/shared/location-utils';
 import type {
   NearbyPayeeEntity,
   PayeeLocationEntity,
 } from '@actual-app/core/types/models';
+import { beforeEach, describe, expect, it } from 'vitest';
 
-import { LocationService } from './location-service';
 import type {
   GeolocationAdapter,
   LocationApiClient,
 } from './location-adapters';
+import { LocationService } from './location-service';
 
 // Clean test implementations - no complex mocking needed
 class TestGeolocationAdapter implements GeolocationAdapter {

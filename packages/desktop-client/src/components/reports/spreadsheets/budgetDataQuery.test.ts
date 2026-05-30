@@ -1,9 +1,9 @@
-import { describe, expect, it } from 'vitest';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
+import { describe, expect, it } from 'vitest';
 
 import { filterCategoriesByConditions } from './budgetDataQuery';
 

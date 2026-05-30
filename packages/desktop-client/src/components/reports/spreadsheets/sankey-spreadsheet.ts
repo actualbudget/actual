@@ -2,15 +2,15 @@ import { theme } from '@actual-app/components/theme';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
-import { t } from 'i18next';
 import type {
   CategoryGroupEntity,
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
+import { t } from 'i18next';
 
 import { getColorScale } from '#components/reports/chart-theme';
-import { aqlQuery } from '#queries/aqlQuery';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
+import { aqlQuery } from '#queries/aqlQuery';
 
 type BudgetMonthCategory = {
   id: string;

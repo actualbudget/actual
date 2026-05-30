@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { render, screen } from '@testing-library/react';
 import type { ScheduleEntity } from '@actual-app/core/types/models';
+import { render, screen } from '@testing-library/react';
 
 import { useCachedSchedules } from '#hooks/useCachedSchedules';
 import { useSelectedItems } from '#hooks/useSelected';

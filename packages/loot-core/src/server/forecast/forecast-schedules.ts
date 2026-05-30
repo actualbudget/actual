@@ -13,11 +13,11 @@ import {
 import type { RuleConditionEntity, TransactionEntity } from '#types/models';
 import type { RecurConfig } from '#types/models/schedule';
 
-import { enrichForecastFilterObjects } from './forecast-filters';
 import type {
   AccountWithComputedBalance,
   DbAccountForRules,
 } from './forecast-accounts';
+import { enrichForecastFilterObjects } from './forecast-filters';
 import type { ForecastFilterObject } from './forecast-filters';
 
 /** Synthetic account for schedules with no account; combined forecast only when explicitly included. */

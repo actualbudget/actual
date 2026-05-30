@@ -5,12 +5,12 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
 
-import { getGroupedBankSyncEntries } from '#components/banksync/bankSyncUtils';
-import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import type {
   GroupedBankSyncAccounts,
   SyncProviders,
 } from '#components/banksync/bankSyncUtils';
+import { getGroupedBankSyncEntries } from '#components/banksync/bankSyncUtils';
+import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 
 import { BankSyncAccountsListItem } from './BankSyncAccountsListItem';
 

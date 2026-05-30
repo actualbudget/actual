@@ -1,6 +1,6 @@
 import { send } from '@actual-app/core/platform/client/connection';
-import { createSlice } from '@reduxjs/toolkit';
 import type { Handlers } from '@actual-app/core/types/handlers';
+import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { resetApp } from '#app/appSlice';

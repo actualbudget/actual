@@ -4,6 +4,7 @@ import * as db from '#server/db';
 import { collectFormulasFromActions } from '#server/rules/balanceOfFormula';
 import { getRuleForSchedule } from '#server/schedules/app';
 import { prefetchBalanceOfForTransaction } from '#server/transactions/transaction-rules';
+import type { Currency } from '#shared/currencies';
 import * as monthUtils from '#shared/months';
 import {
   extractScheduleConds,
@@ -11,7 +12,6 @@ import {
   getNextDate,
 } from '#shared/schedules';
 import { amountToInteger } from '#shared/util';
-import type { Currency } from '#shared/currencies';
 import type { CategoryEntity, TransactionEntity } from '#types/models';
 import type { ScheduleTemplate, Template } from '#types/models/templates';
 

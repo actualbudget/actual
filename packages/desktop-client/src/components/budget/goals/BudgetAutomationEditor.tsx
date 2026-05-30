@@ -15,6 +15,8 @@ import type {
 import { FormField, FormLabel, FormTextLabel } from '#components/forms';
 
 import { setType } from './actions';
+import type { Action } from './actions';
+import type { ReducerState } from './constants';
 import { displayTemplateTypes } from './constants';
 import { getDisplayTemplateMeta } from './displayTemplateMeta';
 import { BySaveAutomation } from './editor/BySaveAutomation';
@@ -26,8 +28,6 @@ import { PercentageAutomation } from './editor/PercentageAutomation';
 import { RefillAutomation } from './editor/RefillAutomation';
 import { RemainderAutomation } from './editor/RemainderAutomation';
 import { ScheduleAutomation } from './editor/ScheduleAutomation';
-import type { Action } from './actions';
-import type { ReducerState } from './constants';
 
 type BudgetAutomationEditorProps = {
   inline: boolean;

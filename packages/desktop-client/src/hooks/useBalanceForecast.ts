@@ -1,7 +1,7 @@
 import { send } from '@actual-app/core/platform/client/connection';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import type { RuleConditionEntity } from '@actual-app/core/types/models';
 import type { ForecastResult } from '@actual-app/core/types/models/forecast';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 type UseBalanceForecastParams = {
   accountIds?: string[];

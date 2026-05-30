@@ -13,10 +13,6 @@ import {
   updateTransaction,
 } from '@actual-app/core/shared/transactions';
 import { integerToCurrency } from '@actual-app/core/shared/util';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { format as formatDate, parse as parseDate } from 'date-fns';
-import { v4 as uuidv4 } from 'uuid';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -26,6 +22,10 @@ import type {
   TagEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { format as formatDate, parse as parseDate } from 'date-fns';
+import { v4 as uuidv4 } from 'uuid';
 
 import { AuthProvider } from '#auth/AuthProvider';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';

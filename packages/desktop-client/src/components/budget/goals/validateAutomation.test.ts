@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
 import type { ScheduleEntity } from '@actual-app/core/types/models';
 import type { Template } from '@actual-app/core/types/models/templates';
+import { describe, expect, it } from 'vitest';
 
 import {
   validateAutomation,

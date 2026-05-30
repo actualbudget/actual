@@ -9,8 +9,8 @@ import { Text } from '@actual-app/components/text';
 import { theme as themeStyle } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
 import type { DarkTheme, Theme } from '@actual-app/core/types/prefs';
+import { css } from '@emotion/css';
 
 import { useSidebar } from '#components/sidebar/SidebarProvider';
 import { useGlobalPref } from '#hooks/useGlobalPref';

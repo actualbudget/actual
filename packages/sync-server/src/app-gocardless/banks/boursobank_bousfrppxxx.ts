@@ -1,7 +1,7 @@
 import { title } from '#util/title';
 
-import Fallback from './integration-bank';
 import type { IBank } from './bank.interface';
+import Fallback from './integration-bank';
 
 const regexCard =
   /^CARTE (?<date>\d{2}\/\d{2}\/\d{2}) (?<payeeName>.+?)( \d+)?( CB\*\d{4})?$/;

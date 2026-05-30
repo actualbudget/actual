@@ -1,5 +1,5 @@
-import { useLocalStorage } from 'usehooks-ts';
 import type { LocalPrefs } from '@actual-app/core/types/prefs';
+import { useLocalStorage } from 'usehooks-ts';
 
 import { useMetadataPref } from './useMetadataPref';
 

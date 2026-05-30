@@ -1,9 +1,10 @@
 import fs from 'fs';
 import { createServer } from 'http';
+import type { Server } from 'http';
 import { cp, mkdir, rm } from 'node:fs/promises';
 import path from 'path';
-import type { Server } from 'http';
 
+import type { GlobalPrefsJson } from '@actual-app/core/types/prefs';
 import {
   app,
   BrowserWindow,
@@ -16,8 +17,6 @@ import {
   shell,
   utilityProcess,
 } from 'electron';
-import promiseRetry from 'promise-retry';
-import type { GlobalPrefsJson } from '@actual-app/core/types/prefs';
 import type {
   Env,
   ForkOptions,
@@ -25,6 +24,7 @@ import type {
   SaveDialogOptions,
   UtilityProcess,
 } from 'electron';
+import promiseRetry from 'promise-retry';
 
 import { getMenu } from './menu';
 import {

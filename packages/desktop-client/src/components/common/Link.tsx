@@ -4,10 +4,10 @@ import { NavLink, useMatch } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
-import type { CSSProperties } from '@actual-app/components/styles';
 
 import { useNavigate } from '#hooks/useNavigate';
 

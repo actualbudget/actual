@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 
 import { addNotification } from '#notifications/notificationsSlice';
+import type { Notification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { redo, undo } from '#undo';
-import type { Notification } from '#notifications/notificationsSlice';
 
 type UndoActions = {
   undo: () => void;

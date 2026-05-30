@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { View } from '@actual-app/components/view';
 import type { CSSProperties } from '@actual-app/components/styles';
+import { View } from '@actual-app/components/view';
 import type { RuleConditionEntity } from '@actual-app/core/types/models';
 
 import { ConditionsOpMenu } from './ConditionsOpMenu';

@@ -1,8 +1,8 @@
 import React from 'react';
 
+import type { PayeeEntity } from '@actual-app/core/types/models';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { PayeeEntity } from '@actual-app/core/types/models';
 
 import { useNavigate } from '#hooks/useNavigate';
 import { createTestQueryClient, TestProviders } from '#mocks';

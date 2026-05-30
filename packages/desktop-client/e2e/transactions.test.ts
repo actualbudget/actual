@@ -1,9 +1,9 @@
 import type { Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
+import type { AccountPage } from './page-models/account-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
-import type { AccountPage } from './page-models/account-page';
 
 test.describe('Transactions', () => {
   let page: Page;

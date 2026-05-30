@@ -16,8 +16,8 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { removeNotification } from '#notifications/notificationsSlice';
-import { useDispatch, useSelector } from '#redux';
 import type { NotificationWithId } from '#notifications/notificationsSlice';
+import { useDispatch, useSelector } from '#redux';
 
 import { Link } from './common/Link';
 import { MODAL_Z_INDEX } from './common/Modal';

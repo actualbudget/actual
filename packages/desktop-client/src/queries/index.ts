@@ -6,15 +6,15 @@ import {
   getShortYearRegex,
 } from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
+import type { Query } from '@actual-app/core/shared/query';
 import {
   amountToInteger,
   currencyToAmount,
 } from '@actual-app/core/shared/util';
-// @ts-strict-ignore
-import { isValid as isDateValid, parse as parseDate } from 'date-fns';
-import type { Query } from '@actual-app/core/shared/query';
 import type { AccountEntity } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
+// @ts-strict-ignore
+import { isValid as isDateValid, parse as parseDate } from 'date-fns';
 
 export function accountFilter(
   accountId?:

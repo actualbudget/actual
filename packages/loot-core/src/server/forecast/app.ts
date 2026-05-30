@@ -4,6 +4,10 @@ import type { RuleConditionEntity } from '#types/models';
 import type { ForecastResult } from '#types/models/forecast';
 
 import { resolveForecastAccounts } from './forecast-accounts';
+import type {
+  AccountWithComputedBalance,
+  DbAccountForRules,
+} from './forecast-accounts';
 import { buildFilterInfo, getTransactions } from './forecast-filters';
 import {
   buildForecastDateContext,
@@ -15,10 +19,6 @@ import {
   FORECAST_UNASSIGNED_ACCOUNT_ID,
   getNormalizedSchedules,
 } from './forecast-schedules';
-import type {
-  AccountWithComputedBalance,
-  DbAccountForRules,
-} from './forecast-accounts';
 
 export type ForecastRequestParams = {
   accountIds?: string[];

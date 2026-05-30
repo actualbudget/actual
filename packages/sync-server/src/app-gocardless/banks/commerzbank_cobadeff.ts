@@ -1,6 +1,6 @@
+import type { IBank } from './bank.interface';
 import Fallback from './integration-bank';
 import { escapeRegExp } from './util/escape-regexp';
-import type { IBank } from './bank.interface';
 
 export default {
   ...Fallback,

@@ -1,5 +1,5 @@
-import { v4 as uuidv4 } from 'uuid';
 import type { RuleEntity } from '@actual-app/core/types/models';
+import { v4 as uuidv4 } from 'uuid';
 
 export type ActionSplit = {
   id: string;

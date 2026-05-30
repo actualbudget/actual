@@ -5,6 +5,7 @@ import { Button } from '@actual-app/components/button';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { Select } from '@actual-app/components/select';
+import type { SelectOption } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -12,7 +13,6 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
-import type { SelectOption } from '@actual-app/components/select';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
@@ -31,9 +31,9 @@ import { defaultsList, disabledList } from './disabledList';
 import { getLiveRange } from './getLiveRange';
 import { ModeButton } from './ModeButton';
 import { ReportOptions } from './ReportOptions';
+import type { dateRangeProps } from './ReportOptions';
 import { validateEnd, validateStart } from './reportRanges';
 import { setSessionReport } from './setSessionReport';
-import type { dateRangeProps } from './ReportOptions';
 
 type ReportSidebarProps = {
   customReportItems: CustomReportEntity;

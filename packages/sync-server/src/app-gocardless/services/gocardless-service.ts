@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { BankFactory } from '#app-gocardless/bank-factory';
+import type { IBank } from '#app-gocardless/banks/bank.interface';
 import {
   AccessDeniedError,
   AccountNotLinkedToRequisition,
@@ -14,8 +15,6 @@ import {
   ServiceError,
   UnknownError,
 } from '#app-gocardless/errors';
-import { SecretName, secretsService } from '#services/secrets-service';
-import type { IBank } from '#app-gocardless/banks/bank.interface';
 import type {
   Balance,
   GoCardlessAccountId,
@@ -36,9 +35,10 @@ import type {
   NormalizedAccountDetails,
   TransactionWithBookedStatus,
 } from '#app-gocardless/gocardless.types';
+import { SecretName, secretsService } from '#services/secrets-service';
 
-import { GoCardlessApi, GoCardlessApiError } from './gocardless-api';
 import type { AccountDetailsResponse, TokenResponse } from './gocardless-api';
+import { GoCardlessApi, GoCardlessApiError } from './gocardless-api';
 
 const clients = new Map<string, GoCardlessApi>();
 

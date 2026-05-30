@@ -1,6 +1,6 @@
 import { send } from '@actual-app/core/platform/client/connection';
-import { queryOptions } from '@tanstack/react-query';
 import type { TagEntity } from '@actual-app/core/types/models';
+import { queryOptions } from '@tanstack/react-query';
 
 export const tagQueries = {
   all: () => ['tags'],

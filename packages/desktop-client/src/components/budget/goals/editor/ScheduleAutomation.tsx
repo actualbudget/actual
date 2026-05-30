@@ -7,10 +7,10 @@ import type { ScheduleEntity } from '@actual-app/core/types/models';
 import type { ScheduleTemplate } from '@actual-app/core/types/models/templates';
 
 import { updateTemplate } from '#components/budget/goals/actions';
+import type { Action } from '#components/budget/goals/actions';
 import { AmountAdjustment } from '#components/budget/goals/editor/AmountAdjustment';
 import { Link } from '#components/common/Link';
 import { FormField, FormLabel } from '#components/forms';
-import type { Action } from '#components/budget/goals/actions';
 
 type ScheduleAutomationProps = {
   schedules: readonly ScheduleEntity[];

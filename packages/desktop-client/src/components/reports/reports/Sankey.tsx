@@ -21,14 +21,14 @@ import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { mapField } from '@actual-app/core/shared/rules';
-import * as d from 'date-fns';
-import debounce from 'lodash/debounce';
 import type {
   RuleConditionEntity,
   SankeyWidget,
   TimeFrame,
 } from '@actual-app/core/types/models';
+import * as d from 'date-fns';
 import type { TFunction } from 'i18next';
+import debounce from 'lodash/debounce';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
@@ -45,6 +45,7 @@ import {
   GRAPH_LAYER_ORDER,
   GraphLayers,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
+import type { Graph } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
 import { useCategories } from '#hooks/useCategories';
@@ -57,7 +58,6 @@ import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
-import type { Graph } from '#components/reports/spreadsheets/sankey-spreadsheet';
 
 export function Sankey() {
   const params = useParams();

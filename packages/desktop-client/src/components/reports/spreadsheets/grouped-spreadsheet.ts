@@ -9,6 +9,7 @@ import {
 import type { QueryDataEntity } from '#components/reports/ReportOptions';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 
+import type { createCustomSpreadsheetProps } from './custom-spreadsheet';
 import { fetchSpreadsheetQueryData } from './fetchSpreadsheetQueryData';
 import { filterEmptyRows } from './filterEmptyRows';
 import { recalculate } from './recalculate';
@@ -17,7 +18,6 @@ import {
   determineIntervalRange,
   trimGroupedDataIntervals,
 } from './trimIntervals';
-import type { createCustomSpreadsheetProps } from './custom-spreadsheet';
 
 export function createGroupedSpreadsheet({
   startDate,

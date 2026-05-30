@@ -64,8 +64,6 @@ import {
   integerToCurrency,
   titleFirst,
 } from '@actual-app/core/shared/util';
-import { format as formatDate, parseISO } from 'date-fns';
-import memoizeOne from 'memoize-one';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
@@ -76,6 +74,8 @@ import type {
   ScheduleEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
+import { format as formatDate, parseISO } from 'date-fns';
+import memoizeOne from 'memoize-one';
 
 import { getAccountsById } from '#accounts/accountsSlice';
 import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplete';
@@ -83,6 +83,7 @@ import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocompl
 import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
 import { TagAutocomplete } from '#components/autocomplete/TagAutocomplete';
 import { getStatusProps } from '#components/schedules/StatusBadge';
+import type { StatusTypes } from '#components/schedules/StatusBadge';
 import { DateSelect } from '#components/select/DateSelect';
 import {
   Cell,
@@ -97,6 +98,11 @@ import {
   UnexposedCellContent,
   useTableNavigator,
 } from '#components/table';
+import type {
+  TableHandleRef,
+  TableNavigator,
+  TableProps,
+} from '#components/table';
 import {
   SchedulesProvider,
   useCachedSchedules,
@@ -109,6 +115,11 @@ import {
   useDrag,
   useDrop,
 } from '#hooks/useDragDrop';
+import type {
+  DropPosition,
+  OnDragChangeCallback,
+  OnDropCallback,
+} from '#hooks/useDragDrop';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { usePrevious } from '#hooks/usePrevious';
@@ -116,24 +127,13 @@ import { useProperFocus } from '#hooks/useProperFocus';
 import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 import { SheetNameProvider } from '#hooks/useSheetName';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
+import type { SplitsExpandedContextValue } from '#hooks/useSplitsExpanded';
 import { pushModal } from '#modals/modalsSlice';
 import { NotesTagFormatter } from '#notes/NotesTagFormatter';
 import { addNotification } from '#notifications/notificationsSlice';
 import { getPayeesById } from '#payees';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
-import type { StatusTypes } from '#components/schedules/StatusBadge';
-import type {
-  TableHandleRef,
-  TableNavigator,
-  TableProps,
-} from '#components/table';
-import type {
-  DropPosition,
-  OnDragChangeCallback,
-  OnDropCallback,
-} from '#hooks/useDragDrop';
-import type { SplitsExpandedContextValue } from '#hooks/useSplitsExpanded';
 
 import {
   deserializeTransaction,
@@ -142,12 +142,12 @@ import {
   selectAscDesc,
   serializeTransaction,
 } from './table/utils';
-import { TransactionMenu } from './TransactionMenu';
 import type {
   SerializedTransaction,
   TransactionEditFunction,
   TransactionUpdateFunction,
 } from './table/utils';
+import { TransactionMenu } from './TransactionMenu';
 
 type TransactionHeaderProps = {
   hasSelected: boolean;

@@ -4,11 +4,11 @@ import {
   firstDayOfMonth,
   monthFromDate,
 } from '@actual-app/core/shared/months';
-import uniqueId from 'lodash/uniqueId';
 import type { Template } from '@actual-app/core/types/models/templates';
+import uniqueId from 'lodash/uniqueId';
 
-import { DEFAULT_PRIORITY } from './reducer';
 import type { DisplayTemplateType } from './constants';
+import { DEFAULT_PRIORITY } from './reducer';
 
 export type AutomationEntry = {
   id: string;

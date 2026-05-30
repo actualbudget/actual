@@ -22,6 +22,7 @@ import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SvgDelete } from '@actual-app/components/icons/v0';
 import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
+import type { MenuItem, MenuItemObject } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -32,7 +33,6 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import { isPreviewId } from '@actual-app/core/shared/transactions';
 import { validForTransfer } from '@actual-app/core/shared/transfer';
 import { groupById, integerToCurrency } from '@actual-app/core/shared/util';
-import type { MenuItem, MenuItemObject } from '@actual-app/components/menu';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   CategoryEntity,

@@ -2,8 +2,8 @@ import type { Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
-import { MobileNavigation } from './page-models/mobile-navigation';
 import type { MobileBankSyncPage } from './page-models/mobile-bank-sync-page';
+import { MobileNavigation } from './page-models/mobile-navigation';
 
 test.describe('Mobile Bank Sync', () => {
   let page: Page;

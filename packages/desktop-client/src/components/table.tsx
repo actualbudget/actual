@@ -27,15 +27,16 @@ import { SvgDelete, SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { SvgCheckmark } from '@actual-app/components/icons/v1';
 import { Input } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
+import type { MenuItem } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import type { MenuItem } from '@actual-app/components/menu';
-import type { CSSProperties } from '@actual-app/components/styles';
 
 import { useFormat } from '#hooks/useFormat';
+import type { FormatType } from '#hooks/useFormat';
 import { useModalState } from '#hooks/useModalState';
 import {
   AvoidRefocusScrollProvider,
@@ -43,7 +44,6 @@ import {
 } from '#hooks/useProperFocus';
 import { useSelectedItems } from '#hooks/useSelected';
 import { useSheetValue } from '#hooks/useSheetValue';
-import type { FormatType } from '#hooks/useFormat';
 import type {
   Binding,
   SheetFields,

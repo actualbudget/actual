@@ -1,11 +1,11 @@
 import { send } from '@actual-app/core/platform/client/connection';
 import { q } from '@actual-app/core/shared/query';
-import { queryOptions } from '@tanstack/react-query';
 import type {
   CustomReportEntity,
   DashboardPageEntity,
   DashboardWidgetEntity,
 } from '@actual-app/core/types/models';
+import { queryOptions } from '@tanstack/react-query';
 
 import { aqlQuery } from '#queries/aqlQuery';
 

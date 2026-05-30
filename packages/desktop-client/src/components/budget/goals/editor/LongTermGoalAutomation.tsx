@@ -5,10 +5,10 @@ import { amountToInteger, integerToAmount } from '@actual-app/core/shared/util';
 import type { GoalTemplate } from '@actual-app/core/types/models/templates';
 
 import { updateTemplate } from '#components/budget/goals/actions';
+import type { Action } from '#components/budget/goals/actions';
 import { FormField, FormLabel } from '#components/forms';
 import { AmountInput } from '#components/util/AmountInput';
 import { useFormat } from '#hooks/useFormat';
-import type { Action } from '#components/budget/goals/actions';
 
 type LongTermGoalAutomationProps = {
   template: GoalTemplate;

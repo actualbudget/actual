@@ -3,8 +3,8 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
 import { Select } from '@actual-app/components/select';
-import { Text } from '@actual-app/components/text';
 import type { SelectOption } from '@actual-app/components/select';
+import { Text } from '@actual-app/components/text';
 import type { TFunction } from 'i18next';
 
 import { Link } from '#components/common/Link';

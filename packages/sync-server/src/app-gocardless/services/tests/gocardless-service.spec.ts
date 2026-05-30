@@ -13,17 +13,17 @@ import {
   ServiceError,
   UnknownError,
 } from '#app-gocardless/errors';
+import type {
+  GoCardlessAccountId,
+  GoCardlessInstitutionId,
+  GoCardlessRequisitionId,
+} from '#app-gocardless/gocardless-node.types';
 import { GoCardlessApiError } from '#app-gocardless/services/gocardless-api';
 import {
   client,
   goCardlessService,
   handleGoCardlessError,
 } from '#app-gocardless/services/gocardless-service';
-import type {
-  GoCardlessAccountId,
-  GoCardlessInstitutionId,
-  GoCardlessRequisitionId,
-} from '#app-gocardless/gocardless-node.types';
 
 import {
   mockAccountDetails,

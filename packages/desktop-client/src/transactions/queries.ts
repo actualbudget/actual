@@ -1,6 +1,6 @@
-import { infiniteQueryOptions, keepPreviousData } from '@tanstack/react-query';
 import type { Query } from '@actual-app/core/shared/query';
 import type { TransactionEntity } from '@actual-app/core/types/models';
+import { infiniteQueryOptions, keepPreviousData } from '@tanstack/react-query';
 
 import { aqlQuery } from '#queries/aqlQuery';
 

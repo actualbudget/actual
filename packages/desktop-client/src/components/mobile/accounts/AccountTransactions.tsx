@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { send } from '@actual-app/core/platform/client/connection';
-import { isPreviewId } from '@actual-app/core/shared/transactions';
 import type { Query } from '@actual-app/core/shared/query';
+import { isPreviewId } from '@actual-app/core/shared/transactions';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,

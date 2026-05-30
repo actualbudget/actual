@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { css } from '@emotion/css';
 import { getDay, parse } from 'date-fns';
@@ -15,7 +16,6 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import type { CSSProperties } from '@actual-app/components/styles';
 import type { TooltipContentProps } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
@@ -26,8 +26,8 @@ import {
 import { Container } from '#components/reports/Container';
 import { numberFormatterTooltip } from '#components/reports/numberFormatter';
 import { useFormat } from '#hooks/useFormat';
-import { usePrivacyMode } from '#hooks/usePrivacyMode';
 import type { UseFormatResult } from '#hooks/useFormat';
+import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 import { computePadding } from './util/computePadding';
 

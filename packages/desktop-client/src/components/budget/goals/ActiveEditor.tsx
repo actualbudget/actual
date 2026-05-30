@@ -3,6 +3,8 @@ import type {
   ScheduleEntity,
 } from '@actual-app/core/types/models';
 
+import type { Action } from './actions';
+import type { ReducerState } from './constants';
 import { BySaveAutomation } from './editor/BySaveAutomation';
 import { FixedAutomation } from './editor/FixedAutomation';
 import { HistoricalAutomation } from './editor/HistoricalAutomation';
@@ -12,8 +14,6 @@ import { PercentageAutomation } from './editor/PercentageAutomation';
 import { RefillAutomation } from './editor/RefillAutomation';
 import { RemainderAutomation } from './editor/RemainderAutomation';
 import { ScheduleAutomation } from './editor/ScheduleAutomation';
-import type { Action } from './actions';
-import type { ReducerState } from './constants';
 
 type ActiveEditorProps = {
   state: ReducerState;

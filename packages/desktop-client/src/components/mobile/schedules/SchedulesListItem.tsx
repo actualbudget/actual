@@ -9,8 +9,8 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { format as monthUtilFormat } from '@actual-app/core/shared/months';
-import { getScheduledAmount } from '@actual-app/core/shared/schedules';
 import type { ScheduleStatusType } from '@actual-app/core/shared/schedules';
+import { getScheduledAmount } from '@actual-app/core/shared/schedules';
 import type { ScheduleEntity } from '@actual-app/core/types/models';
 import type { WithRequired } from '@actual-app/core/types/util';
 

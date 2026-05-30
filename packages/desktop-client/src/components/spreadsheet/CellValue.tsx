@@ -7,9 +7,9 @@ import { Text } from '@actual-app/components/text';
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useFormat } from '#hooks/useFormat';
+import type { FormatType } from '#hooks/useFormat';
 import { useSheetName } from '#hooks/useSheetName';
 import { useSheetValue } from '#hooks/useSheetValue';
-import type { FormatType } from '#hooks/useFormat';
 import type {
   Binding,
   SheetFields,

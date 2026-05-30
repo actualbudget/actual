@@ -1,9 +1,9 @@
+import type { Transaction } from '#app-gocardless/gocardless-node.types';
 import { formatPayeeName } from '#util/payee-name';
 import { title } from '#util/title';
-import type { Transaction } from '#app-gocardless/gocardless-node.types';
 
-import Fallback from './integration-bank';
 import type { IBank } from './bank.interface';
+import Fallback from './integration-bank';
 
 export default {
   ...Fallback,

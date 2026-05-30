@@ -14,8 +14,8 @@ import type {
 
 import { exportQueryToCSV, exportToCSV } from './export/export-to-csv';
 import { parseFile } from './import/parse-file';
-import { mergeTransactions } from './merge';
 import type { ParseFileOptions } from './import/parse-file';
+import { mergeTransactions } from './merge';
 
 import { batchUpdateTransactions } from '.';
 

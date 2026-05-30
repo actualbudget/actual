@@ -11,8 +11,8 @@ import {
   schema,
   schemaConfig,
 } from './aql';
-import { ValidationError } from './errors';
 import type { DbAccount, DbCategory, DbCategoryGroup, DbPayee } from './db';
+import { ValidationError } from './errors';
 
 export function requiredFields<T extends object, K extends keyof T>(
   name: string,

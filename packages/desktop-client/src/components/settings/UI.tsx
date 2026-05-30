@@ -3,12 +3,12 @@ import type { ReactNode } from 'react';
 import { Trans } from 'react-i18next';
 import { useLocation } from 'react-router';
 
+import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
-import type { CSSProperties } from '@actual-app/components/styles';
 
 import { Link } from '#components/common/Link';
 

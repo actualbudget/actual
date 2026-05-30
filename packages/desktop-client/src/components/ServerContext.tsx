@@ -9,8 +9,8 @@ import type { ReactNode } from 'react';
 
 import { send } from '@actual-app/core/platform/client/connection';
 import * as Platform from '@actual-app/core/shared/platform';
-import { t } from 'i18next';
 import type { Handlers } from '@actual-app/core/types/handlers';
+import { t } from 'i18next';
 
 import { useOnVisible } from '#hooks/useOnVisible';
 import { addNotification } from '#notifications/notificationsSlice';
