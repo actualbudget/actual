@@ -36,6 +36,7 @@
     "build": "lage build",
     "build:server": "yarn build:browser && yarn workspace @actual-app/sync-server build",
     "build:browser": "lage package:browser --to=@actual-app/web",
+    "build:browser:no-translations": "lage build:browser --to=@actual-app/web",
     "build:desktop": "./bin/package-electron",
     "build:plugins-service": "yarn workspace plugins-service build",
     "build:api": "yarn build --scope=@actual-app/api",

@@ -85,14 +85,12 @@ jobs:
         # via ConfigurationPage.createTestFile()) is still rendered in a
         # production build. Without it, e2e tests would time out waiting for
         # a button that was tree-shaken out.
-        # Build the lage `build:browser` target directly (rather than the
-        # `package:browser` aggregator that `yarn build:browser` runs) so
-        # translations are NOT fetched. This keeps VRT screenshots deterministic
-        # by rendering source-code English instead of upstream Weblate en.json
-        # (which can drift between snapshot capture and test runs).
+        # Skip the translation fetch so screenshots render deterministic
+        # source-code English instead of upstream Weblate en.json (which can
+        # drift between snapshot capture and test runs).
         env:
           REACT_APP_NETLIFY: 'true'
-        run: yarn lage build:browser --to=@actual-app/web
+        run: yarn build:browser:no-translations
       - name: Upload build artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

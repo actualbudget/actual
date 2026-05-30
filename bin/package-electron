@@ -46,8 +46,8 @@ yarn workspace @actual-app/core build:node
 yarn workspace @actual-app/web build --mode=desktop # electron specific build
 
 # required for running the sync-server server
-# Translations were already synced above, so build directly (no re-sync).
-yarn lage build:browser --to=@actual-app/web
+# Translations were already synced above, so build without re-syncing.
+yarn build:browser:no-translations
 yarn workspace @actual-app/sync-server build
 
 # Emit @actual-app/core declarations so desktop-electron (which includes typings/window.ts) can build

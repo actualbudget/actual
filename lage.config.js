@@ -47,7 +47,7 @@ module.exports = {
     // Single entry point for a translated browser bundle: fetch translations,
     // then build. `noop` runs no script itself — it only orders its deps. Kept
     // separate from `build:browser` so VRT/e2e can still build without
-    // translations via `lage build:browser` directly.
+    // translations (the `build:browser:no-translations` root script).
     'package:browser': {
       type: 'noop',
       dependsOn: ['sync:translations', 'build:browser'],
