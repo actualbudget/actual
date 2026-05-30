@@ -24,12 +24,14 @@ function git(args, opts = {}) {
 
 console.log('Updating translations...');
 
+// Only the latest tip is ever used, so keep the checkout shallow to avoid
+// downloading the repo's full history on every build/CI run.
 if (fs.existsSync(path.join(localeDir, '.git'))) {
   // Existing checkout: discard any local edits and pull the latest.
   git(['checkout', '.'], { cwd: localeDir });
-  git(['pull'], { cwd: localeDir });
+  git(['pull', '--depth', '1'], { cwd: localeDir });
 } else {
-  git(['clone', TRANSLATIONS_REPO, localeDir]);
+  git(['clone', '--depth', '1', '--single-branch', TRANSLATIONS_REPO, localeDir]);
 }
 
 execFileSync(process.execPath, [filterScript], { stdio: 'inherit' });
