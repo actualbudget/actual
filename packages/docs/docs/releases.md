@@ -1,5 +1,180 @@
 # Release Notes
 
+## 26.6.0
+
+Release date: 2026-06-01
+
+This release adds new reports, a new bank sync provider, a UI for budget automations (goal templates) and releases custom themes as stable, as well as numerous other fixes.
+
+- [Crossover report](/docs/reports/#crossover-point) released as a first-party feature
+- [Custom themes](/docs/custom-themes) released as a first-party feature
+- Redesigned bank sync configuration and account linking process
+- Add Tag autocomplete when editing transaction notes
+- Experimental: Add a [UI for budget automations](/docs/experimental/budget-automation) (goal templates)
+- Experimental: Add Enable Banking integration as a bank sync provider
+- Experimental: Add [Balance Forecast report](/docs/experimental/balance-forecast-report)
+
+:::warning Deprecation
+
+Starting this release, rule action templating is deprecated in favour of formulae and will be removed in a future release. For more information, see [Rule Action Templating](/docs/experimental/rule-templating).
+
+:::
+
+:::warning Docker
+
+The `edge` tag has been renamed to `nightly`. If you follow pre-release images, please update your Docker configuration to pull `:nightly` or `:nightly-alpine`.
+
+:::
+
+**Docker Tag: 26.6.0**
+
+<!-- release-notes:auto-generated -->
+
+#### Features
+
+- [#7310](https://github.com/actualbudget/actual/pull/7310) New Balance Forecast Report — thanks @samaluk
+- [#7345](https://github.com/actualbudget/actual/pull/7345) Integrate Enable Banking as a bank sync provider — thanks @AurelDemiri
+- [#7420](https://github.com/actualbudget/actual/pull/7420) Add 'Copy until year end' option to the per-category budget menu in tracking budget mode, which copies the current month's budgeted amount to all remaining months of the same calendar year. — thanks @nikhilweee
+- [#7597](https://github.com/actualbudget/actual/pull/7597) Visual overhaul of the experimental budget automation UI — thanks @matt-fidd
+- [#7654](https://github.com/actualbudget/actual/pull/7654) Added dropdown for tags when entering '#' on desktop and mobile — thanks @alecbakholdin
+- [#7750](https://github.com/actualbudget/actual/pull/7750) Added an `R` keyboard shortcut for the "Make transfer" action when two conjugate transactions are selected. — thanks @nikhilweee
+- [#7775](https://github.com/actualbudget/actual/pull/7775) Release custom themes as a stable feature. — thanks @MatissJanis
+- [#7804](https://github.com/actualbudget/actual/pull/7804) Release Crossover report — thanks @youngcw
+
+#### Enhancements
+
+- [#7261](https://github.com/actualbudget/actual/pull/7261) Improve the search algorithm when selecting a payee or category — thanks @riid
+- [#7449](https://github.com/actualbudget/actual/pull/7449) Redesign bank sync and add account flows around the new Bank Sync page. — thanks @lelemm
+- [#7539](https://github.com/actualbudget/actual/pull/7539) CLI commands now cache downloaded budgets briefly, while the new `actual sync` command lets users refresh, inspect, or clear the local cache. — thanks @MatissJanis
+- [#7600](https://github.com/actualbudget/actual/pull/7600) Merge now prioritizes transfers and is only allowed for same-account transactions — thanks @alecbakholdin
+- [#7611](https://github.com/actualbudget/actual/pull/7611) Moved the bank sync indicator on mobile to the right side of the text — thanks @alecbakholdin
+- [#7638](https://github.com/actualbudget/actual/pull/7638) Ensure mobile transaction amount field maintains consistent height when empty. — thanks @MatissJanis
+- [#7639](https://github.com/actualbudget/actual/pull/7639) Add icons, placeholders, and dropdown chevrons to mobile transaction form fields for improved UI. — thanks @MatissJanis
+- [#7682](https://github.com/actualbudget/actual/pull/7682) Improved Sankey chart handling of large datasets, better color mapping and many bug fixes. — thanks @emiltb
+- [#7722](https://github.com/actualbudget/actual/pull/7722) No longer require transfers to have the same date — thanks @StephenBrown2
+- [#7761](https://github.com/actualbudget/actual/pull/7761) Surface the backend init failures with a custom error screen and message. — thanks @MatissJanis
+- [#7769](https://github.com/actualbudget/actual/pull/7769) Add `getNote` and `updateNote` to the public `@actual-app/api`, enabling programmatic read/write of category notes (templates, goals, etc.) without internal API access. — thanks @whlapinel
+- [#7786](https://github.com/actualbudget/actual/pull/7786) CLI: hide hidden categories by default in list commands. — thanks @Matissjanis
+- [#7790](https://github.com/actualbudget/actual/pull/7790) Automation UI: change dry run logic to only run on a single category — thanks @matt-fidd
+- [#7791](https://github.com/actualbudget/actual/pull/7791) Automation UI: Add options section for one-off settings — thanks @matt-fidd
+- [#7792](https://github.com/actualbudget/actual/pull/7792) Automation UI: Add long-term goal functionality — thanks @matt-fidd
+- [#7810](https://github.com/actualbudget/actual/pull/7810) Automation UI: Allow "save by date" automations not to repeat — thanks @matt-fidd
+- [#7811](https://github.com/actualbudget/actual/pull/7811) Automation UI: select the first automation when the modal opens — thanks @matt-fidd
+- [#7815](https://github.com/actualbudget/actual/pull/7815) Automation UI: add end-of-month cleanup functionality — thanks @matt-fidd
+- [#7823](https://github.com/actualbudget/actual/pull/7823) Automation UI: add spend from functionality — thanks @matt-fidd
+- [#7841](https://github.com/actualbudget/actual/pull/7841) Add alternating row colors for the transaction table. — thanks @mnil
+- [#7842](https://github.com/actualbudget/actual/pull/7842) Keep mobile page header mounted during navigation to eliminate flashing effects. — thanks @MatissJanis
+- [#7864](https://github.com/actualbudget/actual/pull/7864) Tighten VRT per-pixel threshold to improve detection of faint overlays in screenshots. — thanks @MatissJanis
+- [#7881](https://github.com/actualbudget/actual/pull/7881) Automation UI: add ability to increase/decrease historical and schedule templates — thanks @matt-fidd
+- [#7882](https://github.com/actualbudget/actual/pull/7882) Added ability to create tags using the new tag autocomplete on mobile and desktop — thanks @alecbakholdin & @PuddleOfFat
+- [#7906](https://github.com/actualbudget/actual/pull/7906) Automation UI: Add per-automation notes and a tooltip for budget page — thanks @matt-fidd
+- [#7907](https://github.com/actualbudget/actual/pull/7907) Add animations to more reports cards — thanks @matt-fidd
+- [#7913](https://github.com/actualbudget/actual/pull/7913) Schedules are now sorted alphabetically in the Automations UI. — thanks @mnil
+
+#### Bugfixes
+
+- [#7299](https://github.com/actualbudget/actual/pull/7299) Ensure automatic daily schedules are performed each day; deactivate 2-day lookback for payments — thanks @anoff
+- [#7375](https://github.com/actualbudget/actual/pull/7375) Disable Inter font contextual alternates to prevent unwanted x→× character substitutions. — thanks @rudra496
+- [#7511](https://github.com/actualbudget/actual/pull/7511) Prevent the generic "Something internally went wrong" error when adding a transaction after clearing the date field. DateSelect now restores the previous valid date on blur instead of saving an empty string that the server rejects. — thanks @tmchow
+- [#7521](https://github.com/actualbudget/actual/pull/7521) Fix clearing pre-assigned category on new transactions in the category autocomplete modal. — thanks @yosofbadr & @youngcw
+- [#7526](https://github.com/actualbudget/actual/pull/7526) Adds budgeted, received, balance and carryover to api for tracking budget — thanks @JSkinnerUK
+- [#7623](https://github.com/actualbudget/actual/pull/7623) Fix infinite loop when applying remainder templates with an amount that can not be divided — thanks @matt-fidd
+- [#7629](https://github.com/actualbudget/actual/pull/7629) Fix Category Group filtering for Budgeted custom reports. — thanks @Kelpy2004
+- [#7632](https://github.com/actualbudget/actual/pull/7632) Fix Sankey income being shown as spent money, when payee was not set — thanks @emiltb
+- [#7637](https://github.com/actualbudget/actual/pull/7637) Added logic to improve dropdown behavior when switching window focus — thanks @alecbakholdin
+- [#7672](https://github.com/actualbudget/actual/pull/7672) Fixed Spending reports not preserving saved date range selections. — thanks @Aurora-Flipped
+- [#7674](https://github.com/actualbudget/actual/pull/7674) Fix refresh (sync) icon centering in Titlebar. — thanks @Juulz
+- [#7687](https://github.com/actualbudget/actual/pull/7687) Fix Cover Overspending dropdown closing when window is too narrow — thanks @emiltb
+- [#7691](https://github.com/actualbudget/actual/pull/7691) Fix schedules not appearing on the mobile view when the date is changed by rules — thanks @matt-fidd
+- [#7694](https://github.com/actualbudget/actual/pull/7694) Fix percentage calculation in automation UI error message — thanks @matt-fidd
+- [#7704](https://github.com/actualbudget/actual/pull/7704) Fixed cannot read properties of null in throwIfNot200 (reading 'toLowerCase') — thanks @alecbakholdin
+- [#7723](https://github.com/actualbudget/actual/pull/7723) Duplicated transactions are marked as uncleared and unlocked — thanks @youngcw
+- [#7760](https://github.com/actualbudget/actual/pull/7760) Fix sporadic text blur in modals by removing unnecessary `will-change: transform` on the modal overlay. — thanks @totallynotjon
+- [#7768](https://github.com/actualbudget/actual/pull/7768) Fix dashboard report widgets saved with the "Last month" live range restoring as static. — thanks @ADGJSD
+- [#7774](https://github.com/actualbudget/actual/pull/7774) Mobile: add live value tracking for user input in mobile transactions. — thanks @MatissJanis
+- [#7784](https://github.com/actualbudget/actual/pull/7784) Fix mobile bank sync indicators not updating live during sync. — thanks @MatissJanis
+- [#7788](https://github.com/actualbudget/actual/pull/7788) Fix an issue where the CORS proxy could be bypassed. — thanks @MatissJanis
+- [#7803](https://github.com/actualbudget/actual/pull/7803) Fix crossover report bugs — thanks @youngcw
+- [#7808](https://github.com/actualbudget/actual/pull/7808) Fix the "Notes > has tags" transaction filter returning every transaction when the input is missing a `#` — it now matches nothing instead. — thanks @MaksZhukov
+- [#7814](https://github.com/actualbudget/actual/pull/7814) Fix split transaction popover layout so translated buttons remain visible. — thanks @impetus82
+- [#7840](https://github.com/actualbudget/actual/pull/7840) Fix docker healthcheck script and add backwards compatibility — thanks @matt-fidd
+- [#7849](https://github.com/actualbudget/actual/pull/7849) Fix the Balance Forecast report's All future range. — thanks @samaluk
+- [#7850](https://github.com/actualbudget/actual/pull/7850) Color the Balance Forecast line by zero-balance crossing. — thanks @samaluk
+- [#7859](https://github.com/actualbudget/actual/pull/7859) Prevent exported CSV files from being interpreted as spreadsheet formulas when opened in Excel, LibreOffice Calc, or Google Sheets. — thanks @MatissJanis
+- [#7861](https://github.com/actualbudget/actual/pull/7861) Update Dockerfile to ensure `yarn build:server` works after lage migration. — thanks @MatissJanis
+- [#7862](https://github.com/actualbudget/actual/pull/7862) Restrict the sync-server secrets API to admins in OpenID mode so non-admin users can no longer enumerate configured bank-sync integrations. — thanks @MatissJanis
+- [#7869](https://github.com/actualbudget/actual/pull/7869) Preserve categories from QIF transaction imports so they can appear in the import review modal. — thanks @mturac
+- [#7878](https://github.com/actualbudget/actual/pull/7878) Fix CSV import previews showing false updates when a mapped category does not exist. — thanks @mturac
+- [#7889](https://github.com/actualbudget/actual/pull/7889) Fix live custom report date ranges when opening filtered transactions. — thanks @Haldoctor
+- [#7890](https://github.com/actualbudget/actual/pull/7890) Use flags provided by GoCardless to detect banks with special continuous access requirements — thanks @matt-fidd
+- [#7891](https://github.com/actualbudget/actual/pull/7891) Validate transaction amounts as integers during import to prevent data entry errors. — thanks @KarelTestSpecial
+- [#7902](https://github.com/actualbudget/actual/pull/7902) Show schedule names in upcoming transaction notes again. — thanks @GHX5T-SOL
+- [#7903](https://github.com/actualbudget/actual/pull/7903) Fix handling of negative budgeting and "positive" spending in Sankey chart — thanks @emiltb
+- [#7905](https://github.com/actualbudget/actual/pull/7905) Make percentage inputs in budget automations more consistent — thanks @matt-fidd
+- [#7909](https://github.com/actualbudget/actual/pull/7909) Automations UI: gray out the icon when the UI isn't the active source — thanks @matt-fidd
+- [#7917](https://github.com/actualbudget/actual/pull/7917) Fix `yarn typecheck` MODULE_NOT_FOUND error on Apple Silicon — thanks @clintharris
+- [#7930](https://github.com/actualbudget/actual/pull/7930) Fix off-by-one error with Enable Banking trying to sync 91 days instead of the max 90 days. — thanks @mnil
+- [#7940](https://github.com/actualbudget/actual/pull/7940) Invalidate disabled user sessions when using OpenID. — thanks @MatissJanis
+- [#7955](https://github.com/actualbudget/actual/pull/7955) Fix Balance Forecast double-counting posted split transactions. — thanks @samaluk
+- [#7971](https://github.com/actualbudget/actual/pull/7971) Fix OIDC login on iOS — thanks @MikesGlitch
+- [#7978](https://github.com/actualbudget/actual/pull/7978) Fix fatal error preventing PWA launch when offline on iOS devices. — thanks @MatissJanis
+
+#### Maintenance
+
+- [#7535](https://github.com/actualbudget/actual/pull/7535) crdt: move from 'google-protobuf' to '@bufbuild/protobuf' — thanks @MatissJanis
+- [#7560](https://github.com/actualbudget/actual/pull/7560) Added ErrorBoundary wrapping to the Modal component to gracefully handle runtime errors in modal dialogs. — thanks @diodijon
+- [#7602](https://github.com/actualbudget/actual/pull/7602) Build scripts: port browser build version to using lage — thanks @MatissJanis
+- [#7620](https://github.com/actualbudget/actual/pull/7620) Increase test coverage for budget templates — thanks @matt-fidd
+- [#7635](https://github.com/actualbudget/actual/pull/7635) Fix release note generation script failing when conflicting changes are present — thanks @matt-fidd
+- [#7640](https://github.com/actualbudget/actual/pull/7640) Make release note generation script respect cherry picked commits — thanks @matt-fidd
+- [#7641](https://github.com/actualbudget/actual/pull/7641) Refactor VRT workflow to enable parallel execution of browser and desktop tests. — thanks @MatissJanis
+- [#7642](https://github.com/actualbudget/actual/pull/7642) TypeScript: fix running TS on test files — thanks @MatissJanis
+- [#7655](https://github.com/actualbudget/actual/pull/7655) Fix the release notes link in the pull request template. — thanks @arjunrawal1
+- [#7664](https://github.com/actualbudget/actual/pull/7664) Enable automatic issue enrichment in CodeRabbit configuration — thanks @MatissJanis
+- [#7670](https://github.com/actualbudget/actual/pull/7670) Replace support contact link with auto-closing tech support issue template. — thanks @MatissJanis
+- [#7693](https://github.com/actualbudget/actual/pull/7693) Link budget automation UI experimental feature to a feedback issue — thanks @matt-fidd
+- [#7699](https://github.com/actualbudget/actual/pull/7699) Fix VRT update workflow failing — thanks @matt-fidd
+- [#7702](https://github.com/actualbudget/actual/pull/7702) Refactor module resolution to load `@actual-app/crdt` from source during development. — thanks @MatissJanis
+- [#7712](https://github.com/actualbudget/actual/pull/7712) Fix the desktop app dev mode not starting successfully — thanks @MikesGlitch
+- [#7728](https://github.com/actualbudget/actual/pull/7728) Update the preview-builds contributing doc to reflect the current `deploy-preview-{pr-number}.demo.actualbudget.org` URL pattern and mention the Storybook and website previews. — thanks @nikhilweee
+- [#7729](https://github.com/actualbudget/actual/pull/7729) Document the Dev Container and Docker Compose options as alternatives to local Node and Yarn setup in the contributor development-setup guide. — thanks @nikhilweee
+- [#7740](https://github.com/actualbudget/actual/pull/7740) Improve Github workflows with suggestions from the code scan. — thanks @MikesGlitch
+- [#7742](https://github.com/actualbudget/actual/pull/7742) Fix disabled settings of the bank sync options — thanks @youngcw
+- [#7755](https://github.com/actualbudget/actual/pull/7755) Fix npm dependency caching in publish-npm-packages workflow by removing cache disabling setting. — thanks @MatissJanis
+- [#7757](https://github.com/actualbudget/actual/pull/7757) Alter desktop app publish workflow to publish to Microsoft store after release is published — thanks @MikesGlitch
+- [#7780](https://github.com/actualbudget/actual/pull/7780) Stabilize size comparison workflow by pinning artifact downloads to specific run IDs. — thanks @MatissJanis
+- [#7781](https://github.com/actualbudget/actual/pull/7781) Fix update-vrt workflow — thanks @MatissJanis
+- [#7783](https://github.com/actualbudget/actual/pull/7783) Fix /update-vrt merge step failing on Playwright container with `shopt: not found` — thanks @MatissJanis
+- [#7794](https://github.com/actualbudget/actual/pull/7794) Persist end-of-month cleanup templates in the database — thanks @matt-fidd
+- [#7800](https://github.com/actualbudget/actual/pull/7800) Link feedback issue to the Enable Banking experimental feature — thanks @matt-fidd
+- [#7802](https://github.com/actualbudget/actual/pull/7802) Fix `/update-vrt` screenshot merge operation when exactly one patch is generated — thanks @MatissJanis
+- [#7805](https://github.com/actualbudget/actual/pull/7805) Require an `@actual-app/crdt` version bump when files in `packages/crdt` change, and automatically publish the new version to npm once merged. — thanks @MatissJanis
+- [#7806](https://github.com/actualbudget/actual/pull/7806) Fix flaky API test timeouts and use a synchronous file write in the sync-server upload test — thanks @MatissJanis
+- [#7809](https://github.com/actualbudget/actual/pull/7809) Clean up GoCardless bank factory loading process — thanks @matt-fidd
+- [#7813](https://github.com/actualbudget/actual/pull/7813) Replace any-typed Modal in undo state with a defined structural type. — thanks @MatissJanis
+- [#7817](https://github.com/actualbudget/actual/pull/7817) Add a GitHub Actions workflow that labels `[AI]`-prefixed pull requests as "AI generated". — thanks @MatissJanis
+- [#7818](https://github.com/actualbudget/actual/pull/7818) CRDT: release v3.0.0 — thanks @MatissJanis
+- [#7819](https://github.com/actualbudget/actual/pull/7819) Automation UI: tweak font colors to be more readable — thanks @matt-fidd
+- [#7825](https://github.com/actualbudget/actual/pull/7825) Disable postinstall scripts except for an allowlist — thanks @jfdoming
+- [#7826](https://github.com/actualbudget/actual/pull/7826) Fix some issues with GitHub actions caught by zizmor — thanks @jfdoming
+- [#7832](https://github.com/actualbudget/actual/pull/7832) Automation UI: various tweaks and fixes — thanks @matt-fidd
+- [#7844](https://github.com/actualbudget/actual/pull/7844) Split the release process into two branches — thanks @matt-fidd
+- [#7845](https://github.com/actualbudget/actual/pull/7845) Update package.json for @actual-app/crdt with missing metadata. — thanks @MatissJanis
+- [#7846](https://github.com/actualbudget/actual/pull/7846) Add explicit permissions to GitHub Actions workflows for enhanced security and token scope control. — thanks @MatissJanis
+- [#7847](https://github.com/actualbudget/actual/pull/7847) Run sync-server test files sequentially to avoid races on the shared account.sqlite database. — thanks @MatissJanis
+- [#7851](https://github.com/actualbudget/actual/pull/7851) Convert built-in themes from TypeScript modules to plain CSS files. — thanks @MatissJanis
+- [#7852](https://github.com/actualbudget/actual/pull/7852) Refactor workflows to utilize native `gh` CLI commands instead of third-party GitHub Actions. — thanks @MatissJanis
+- [#7856](https://github.com/actualbudget/actual/pull/7856) Reference dedicated environments for workflows that consume secrets, satisfying zizmor's `secrets-without-environment` audit. — thanks @MatissJanis
+- [#7858](https://github.com/actualbudget/actual/pull/7858) Fix template injection in setup action's Lage cache step. — thanks @MatissJanis
+- [#7860](https://github.com/actualbudget/actual/pull/7860) Upgrade `vite-plugin-node-polyfills` to 0.27.0. — thanks @MatissJanis
+- [#7865](https://github.com/actualbudget/actual/pull/7865) Deprecate rule action templating in favour of formulae — thanks @matt-fidd
+- [#7898](https://github.com/actualbudget/actual/pull/7898) Swap Docker naming from edge to nightly. — thanks @matt-fidd
+- [#7901](https://github.com/actualbudget/actual/pull/7901) Fix Docker nightly tag naming — thanks @matt-fidd
+- [#7904](https://github.com/actualbudget/actual/pull/7904) Convert GoCardless sync-server code to Typescript — thanks @matt-fidd
+- [#7908](https://github.com/actualbudget/actual/pull/7908) Fix zizmor issues with release workflows — thanks @matt-fidd
+- [#7939](https://github.com/actualbudget/actual/pull/7939) Update Alpine base image for sync-server Docker image to version 3.23.4. — thanks @camcast3
+- [#7965](https://github.com/actualbudget/actual/pull/7965) Update Playwright tests to use fixed version strings for consistent test behavior. — thanks @MatissJanis
+
 ## 26.5.1 & 26.5.2
 
 Release date: 2026-05-08
