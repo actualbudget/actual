@@ -53,12 +53,24 @@ export const basename: typeof T.basename = filepath => path.basename(filepath);
 
 export const listDir: typeof T.listDir = filepath =>
   new Promise((resolve, reject) => {
-    fs.readdir(filepath, (err, files) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(files);
+    fs.access(filepath, fs.constants.F_OK | fs.constants.R_OK, accessErr => {
+      if (accessErr && (accessErr as NodeJS.ErrnoException).code === 'EPERM') {
+        reject(
+          new Error(
+            'Permission denied: unable to access "' +
+              filepath +
+              '". Please grant Actual permission to access this folder in System Settings > Privacy & Security > Files and Folders.',
+          ),
+        );
+        return;
       }
+      fs.readdir(filepath, (err, files) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(files);
+        }
+      });
     });
   });
 
