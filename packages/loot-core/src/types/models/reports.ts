@@ -18,6 +18,7 @@ export type CustomReportEntity = {
   includeCurrentInterval: boolean;
   showUncategorized: boolean;
   trimIntervals: boolean;
+  showTrendLines: boolean;
   graphType: string;
   conditions?: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
@@ -139,6 +140,7 @@ export type CustomReportData = {
   include_current: number;
   show_uncategorized: number;
   trim_intervals: number;
+  show_trend_lines: number;
   graph_type: string;
   conditions?: RuleConditionEntity[];
   conditions_op: 'and' | 'or';

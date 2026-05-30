@@ -150,6 +150,7 @@ type LineGraphProps = {
   balanceTypeOp: balanceTypeOpType;
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+  showTrendLines?: boolean;
   showTooltip?: boolean;
   interval?: string;
 };
@@ -163,6 +164,7 @@ export function LineGraph({
   balanceTypeOp,
   showHiddenCategories,
   showOffBudget,
+  showTrendLines = false,
   showTooltip = true,
   interval,
 }: LineGraphProps) {
@@ -184,7 +186,7 @@ export function LineGraph({
 
   const n = data.intervalData.length;
   const trendLines =
-    n < 2
+    !showTrendLines || n < 2
       ? []
       : data.legend
           .map(entry => {
