@@ -526,9 +526,64 @@ async function postTransactionForSchedule({
   }
 }
 
+async function getSchedule(id: string): Promise<ScheduleEntity | null> {
+  const {
+    data: [schedule],
+  } = await aqlQuery(q('schedules').filter({ id }).select('*'));
+
+  return schedule ?? null;
+}
+
+async function hasTransactionForSchedule(
+  schedule: ScheduleEntity,
+): Promise<boolean> {
+  const { data } = await aqlQuery(getHasTransactionsQuery([schedule]));
+
+  return data.filter(Boolean).some(row => row.schedule === schedule.id);
+}
+
+function isRecurringSchedule(schedule: ScheduleEntity): boolean {
+  return (
+    schedule._date != null &&
+    typeof schedule._date === 'object' &&
+    'frequency' in schedule._date
+  );
+}
+
+async function advanceRecurringScheduleFromNextDate(
+  schedule: ScheduleEntity,
+): Promise<ScheduleEntity | null> {
+  if (!isRecurringSchedule(schedule)) {
+    return null;
+  }
+
+  const previousNextDate = schedule.next_date;
+
+  try {
+    await setNextDate({
+      id: schedule.id,
+      start: nextDate => d.addDays(parseDate(nextDate), 1),
+    });
+  } catch {
+    // This might error if the rule is corrupted and it can't find the rule.
+    return null;
+  }
+
+  const updatedSchedule = await getSchedule(schedule.id);
+
+  if (
+    updatedSchedule == null ||
+    updatedSchedule.next_date === previousNextDate
+  ) {
+    return null;
+  }
+
+  return updatedSchedule;
+}
+
 // TODO: make this sequential
 
-async function advanceSchedulesService(syncSuccess) {
+export async function advanceSchedulesService(syncSuccess) {
   // Move all paid schedules
   const { data: schedules } = await aqlQuery(
     q('schedules')
@@ -560,7 +615,71 @@ async function advanceSchedulesService(syncSuccess) {
       schedule.custom_upcoming_length ?? upcomingLength[0]?.value ?? '7',
     );
 
-    if (status === 'paid') {
+    if (
+      schedule.posts_transaction &&
+      schedule._account &&
+      isRecurringSchedule(schedule) &&
+      (status === 'paid' || status === 'due' || status === 'missed')
+    ) {
+      let currentSchedule = schedule;
+      let currentStatus = status;
+
+      while (
+        currentSchedule.posts_transaction &&
+        currentSchedule._account &&
+        isRecurringSchedule(currentSchedule) &&
+        (currentStatus === 'paid' ||
+          currentStatus === 'due' ||
+          currentStatus === 'missed')
+      ) {
+        if (currentStatus === 'paid') {
+          const updatedSchedule =
+            await advanceRecurringScheduleFromNextDate(currentSchedule);
+
+          if (updatedSchedule == null) {
+            break;
+          }
+
+          currentSchedule = updatedSchedule;
+          currentStatus = getStatus(
+            currentSchedule.next_date,
+            currentSchedule.completed,
+            await hasTransactionForSchedule(currentSchedule),
+            currentSchedule.custom_upcoming_length ??
+              upcomingLength[0]?.value ??
+              '7',
+          );
+          continue;
+        }
+
+        // Automatically create a transaction for due schedules.
+        if (syncSuccess) {
+          await postTransactionForSchedule({ id: currentSchedule.id });
+
+          didPost = true;
+        } else {
+          failedToPost.push(currentSchedule._payee);
+          break;
+        }
+
+        const updatedSchedule =
+          await advanceRecurringScheduleFromNextDate(currentSchedule);
+
+        if (updatedSchedule == null) {
+          break;
+        }
+
+        currentSchedule = updatedSchedule;
+        currentStatus = getStatus(
+          currentSchedule.next_date,
+          currentSchedule.completed,
+          await hasTransactionForSchedule(currentSchedule),
+          currentSchedule.custom_upcoming_length ??
+            upcomingLength[0]?.value ??
+            '7',
+        );
+      }
+    } else if (status === 'paid') {
       if (schedule._date) {
         // Move forward recurring schedules
         if (schedule._date.frequency) {
@@ -578,19 +697,6 @@ async function advanceSchedulesService(syncSuccess) {
             });
           }
         }
-      }
-    } else if (
-      (status === 'due' || status === 'missed') &&
-      schedule.posts_transaction &&
-      schedule._account
-    ) {
-      // Automatically create a transaction for due schedules
-      if (syncSuccess) {
-        await postTransactionForSchedule({ id: schedule.id });
-
-        didPost = true;
-      } else {
-        failedToPost.push(schedule._payee);
       }
     }
   }
