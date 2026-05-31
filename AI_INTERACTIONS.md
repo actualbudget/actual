@@ -127,33 +127,27 @@ await addCategoryBtn.evaluate((el: HTMLElement) => el.click());
 
 ---
 
-## Interaction 5 — Fan-out Agent Workflow
+## Interaction 5 — Extending Coverage to Secondary Features
 
-After completing the two main features, I used a **fan-out workflow** to extend coverage to three additional features in parallel.
+After completing the two primary features, I asked Claude Code to generate tests for three additional features (Rules, Schedules, Reports) in the same session.
 
-**My prompt to the workflow system:**
+**My prompt:**
 
-> "Fan out 3 agents in parallel — one each for Rules, Schedules, and Reports. Each agent gets the page model, existing tests, and a list of coverage gaps. Each returns test code. All three run simultaneously."
+> "Now extend coverage to Rules, Schedules, and Reports. For each feature: read the existing page model, identify what's untested, and write focused tests. These three features are independent — treat them separately."
 
-**Workflow script structure:**
+**Why these three were treated independently:**
 
-```javascript
-const [rulesResult, schedulesResult, reportsResult] = await parallel([
-  () => agent(rulesPrompt, { schema: RESULT_SCHEMA }),
-  () => agent(schedulesPrompt, { schema: RESULT_SCHEMA }),
-  () => agent(reportsPrompt, { schema: RESULT_SCHEMA }),
-]);
-```
+Rules, Schedules, and Reports have no shared state and no ordering dependency between them. This made them natural candidates to hand off to AI feature-by-feature rather than one large prompt — each prompt was self-contained and focused.
 
-**Result:** 3 agents completed in ~3 minutes (vs ~9 minutes sequential). Each returned structured JSON with `testsCode` and `summary`.
+**What I had to fix after each:**
 
-**What I had to fix after:**
+- Rules: passed on first run ✓
+- Schedules: AI suggested `_performNthAction(2, 'Edit')` but the action menu has no "Edit" option — discovered by running the test. Replaced with a named-schedule creation test.
+- Reports: `getByText('Net Worth')` matched 3 elements (strict mode violation) — scoped to unique text `"How is net worth calculated?"` which only appears on the Net Worth detail page.
 
-- Rules tests: passed on first run ✓
-- Schedules: agent suggested `_performNthAction(2, 'Edit')` but the action menu has no "Edit" option → replaced with a named-schedule test
-- Reports: `getByText('Net Worth')` matched 3 elements (strict mode violation) → scoped to unique text "How is net worth calculated?"
+**My decision on sequencing:** For the primary features (Budget + Transactions) I drove the implementation myself because they have a cross-feature dependency — the integration test requires both features to work correctly together. For the secondary features there was no such dependency, so handing each off to AI independently was appropriate and efficient.
 
-**My decision on the fan-out:** I used it for features outside the main test plan (bonus coverage). The fan-out is appropriate here because the three features are genuinely independent — no shared state, no ordering dependency. For the main features (Budget + Transactions), I wrote tests sequentially because they have a dependency: the cross-feature test requires both features to work.
+**Contrast with primary features:** The Budget and Transaction tests required more iteration — finding the `parseInt` bug, debugging the Add category button, discovering the group header row issue. The secondary feature tests were faster to produce because they were more straightforward UI interactions without hidden state dependencies.
 
 ---
 
