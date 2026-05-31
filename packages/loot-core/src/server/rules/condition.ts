@@ -26,6 +26,18 @@ import {
   parseRecurDate,
 } from './rule-utils';
 
+function assertValidRegex(value, fieldName) {
+  try {
+    new RegExp(value);
+  } catch {
+    assert(
+      false,
+      'invalid-regex',
+      `Invalid regular expression (field: ${fieldName})`,
+    );
+  }
+}
+
 export const CONDITION_TYPES = {
   date: {
     ops: ['is', 'isapprox', 'gt', 'gte', 'lt', 'lte'],
@@ -86,6 +98,19 @@ export const CONDITION_TYPES = {
         );
         return value;
       }
+      if (op === 'matches') {
+        assert(
+          typeof value === 'string',
+          'not-string',
+          `Invalid string value (field: ${fieldName})`,
+        );
+        assert(
+          value.length > 0,
+          'no-empty-string',
+          `${op} must have non-empty string (field: ${fieldName})`,
+        );
+        assertValidRegex(value, fieldName);
+      }
       return value;
     },
   },
@@ -138,7 +163,13 @@ export const CONDITION_TYPES = {
         return value;
       }
 
-      return value.toLowerCase();
+      const normalizedValue = value.toLowerCase();
+
+      if (op === 'matches') {
+        assertValidRegex(normalizedValue, fieldName);
+      }
+
+      return normalizedValue;
     },
   },
   number: {
