@@ -19,12 +19,9 @@ export default defineConfig({
     trace: 'on-first-retry',
     ignoreHTTPSErrors: true,
     video: 'retain-on-failure',
-    // Slow down interactions so UI is visible during demo / review.
-    // Override with PLAYWRIGHT_SLOW_MO=0 to disable, or set CI=true.
+    // Set PLAYWRIGHT_SLOW_MO=500 (ms) to slow down interactions for demos.
     launchOptions: {
-      slowMo: process.env.CI
-        ? 0
-        : parseInt(process.env.PLAYWRIGHT_SLOW_MO ?? '500'),
+      slowMo: parseInt(process.env.PLAYWRIGHT_SLOW_MO ?? '0'),
     },
   },
   expect: {
