@@ -121,20 +121,26 @@ describe('/admin', () => {
   describe('/users', () => {
     describe('GET /users', () => {
       let sessionUserId, testUserId, sessionToken;
+      let basicUserId, basicSessionToken;
 
       beforeEach(() => {
         sessionUserId = uuidv4();
         testUserId = uuidv4();
         sessionToken = generateSessionToken();
+        basicUserId = uuidv4();
+        basicSessionToken = generateSessionToken();
 
         createUser(sessionUserId, 'sessionUser', ADMIN_ROLE);
         createSession(sessionUserId, sessionToken);
         createUser(testUserId, 'testUser', ADMIN_ROLE);
+        createUser(basicUserId, 'basicUser', BASIC_ROLE);
+        createSession(basicUserId, basicSessionToken);
       });
 
       afterEach(() => {
         deleteUser(sessionUserId);
         deleteUser(testUserId);
+        deleteUser(basicUserId);
       });
 
       it('should return 200 and a list of users', async () => {
@@ -147,19 +153,12 @@ describe('/admin', () => {
       });
 
       it('should return 403 when the user is not an admin', async () => {
-        const basicUserId = uuidv4();
-        const basicSessionToken = generateSessionToken();
-        createUser(basicUserId, 'basicUser', BASIC_ROLE);
-        createSession(basicUserId, basicSessionToken);
-
         const res = await request(app)
           .get('/users')
           .set('x-actual-token', basicSessionToken);
 
         expect(res.statusCode).toEqual(403);
         expect(res.body).toHaveProperty('reason', 'forbidden');
-
-        deleteUser(basicUserId);
       });
     });
 
