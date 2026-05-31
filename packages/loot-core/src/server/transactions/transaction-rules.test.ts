@@ -712,6 +712,15 @@ describe('Transaction rules', () => {
       },
     ]);
   });
+
+  test('invalid matches regex returns a condition error instead of an AQL filter', () => {
+    const { errors, filters } = conditionsToAQL([
+      { field: 'notes', op: 'matches', value: 'asdf\\' },
+    ]);
+
+    expect(errors).toEqual(['invalid-regex']);
+    expect(filters).toEqual([]);
+  });
 });
 
 describe('Learning categories', () => {
