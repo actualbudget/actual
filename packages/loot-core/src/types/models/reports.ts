@@ -90,6 +90,7 @@ export type LegendEntity = {
   id: string | null;
   color: string;
   dataKey: string; // Uses id for unique data lookup when categories have same name
+  uncategorizedId?: 'off_budget' | 'transfer' | 'other' | 'all';
 };
 
 export type IntervalEntity = {
@@ -108,6 +109,7 @@ export type IntervalEntity = {
 export type GroupedEntity = {
   id: string;
   name: string;
+  uncategorizedId?: 'off_budget' | 'transfer' | 'other' | 'all';
   date?: string;
   intervalData: IntervalEntity[];
   totalAssets: number;
