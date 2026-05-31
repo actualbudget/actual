@@ -396,7 +396,7 @@ yarn playwright test budget.test.ts transactions.test.ts payees.test.ts \
 yarn playwright test budget.test.ts transactions.test.ts --browser=chromium
 ```
 
-**Result at submission:** 63 tests pass, 0 fail.
+**Result at submission:** 64 tests pass, 0 fail.
 
 ---
 
