@@ -314,6 +314,9 @@ test.describe('Transactions', () => {
     let balanceAfterCreate: string | null;
 
     await test.step('record account balance before any changes', async () => {
+      // Wait for the balance to show a real value — on slower CI machines
+      // the account page may still show '0.00' while the data loads.
+      await expect(accountPage.accountBalance).not.toHaveText('0.00');
       balanceBeforeCreate = await accountPage.accountBalance.textContent();
       console.log(`[delete-tx] balance before create: ${balanceBeforeCreate}`);
     });

@@ -89,6 +89,9 @@ test.describe('Rules', () => {
 
   test('rule count increases by one after creating a new rule', async () => {
     const allRows = page.getByTestId('table').getByTestId('row');
+    // Wait for the table to render before reading the count — on slower CI
+    // machines the table may still be empty when count() is first called.
+    await expect(allRows.first()).toBeVisible();
     const initialCount = await allRows.count();
     console.log(`[rules] initial rule count: ${initialCount}`);
 
