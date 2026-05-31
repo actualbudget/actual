@@ -1,6 +1,5 @@
-import type { Locator, Page } from '@playwright/test';
-
 import { currencyToInteger } from '@actual-app/core/shared/util';
+import type { Locator, Page } from '@playwright/test';
 
 import { AccountPage } from './account-page';
 
