@@ -402,3 +402,5 @@ Let's track the expenses in Week 4 and calculate the available amounts for next 
   deficit and need to cover it from other categories.
 
 The rest we put into our Savings category.
+
+[^1]: Another name for this type of budgeting is Zero-Based Budgeting.

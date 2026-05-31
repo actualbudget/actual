@@ -151,7 +151,10 @@ export function Account<FieldName extends SheetFields<'account'>>({
               ...style,
               position: 'relative',
               borderLeft: '4px solid transparent',
-              ...(updated && { fontWeight: 700 }),
+              ...(updated && {
+                fontWeight: 700,
+                color: theme.sidebarItemTextUpdated,
+              }),
             }}
             activeStyle={{
               borderColor: theme.sidebarItemAccentSelected,

@@ -12,7 +12,9 @@ name: Handle completed feature requests
 ##########################################################################################
 
 on:
-  pull_request_target:
+  # See banner above: gated on pull_request.merged == true, runs a
+  # script from the trusted base ref only.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types: [closed]
 
 permissions:

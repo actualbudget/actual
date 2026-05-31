@@ -208,12 +208,12 @@ const sidebars = {
             id: 'experimental/index',
           },
           items: [
+            'experimental/budget-automation',
             'experimental/goal-templates',
             'experimental/monthly-cleanup',
             'experimental/rule-templating',
             'experimental/formulas',
             'experimental/balance-forecast-report',
-            'experimental/crossover-point-report',
             'experimental/budget-analysis-report',
           ],
         },

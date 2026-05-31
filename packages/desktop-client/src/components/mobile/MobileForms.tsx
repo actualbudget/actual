@@ -51,6 +51,20 @@ const hideNativeDateIconClassName = css({
   '&::-webkit-calendar-picker-indicator': {
     display: 'none',
   },
+  '&::-webkit-date-and-time-value': {
+    textAlign: 'left',
+  },
+});
+
+const iconFieldWrapperClassName = css({
+  ...valueStyle,
+  flexDirection: 'row',
+  alignItems: 'center',
+  paddingLeft: 8,
+  gap: 8,
+  '&:focus-within': {
+    borderColor: theme.formInputBorderSelected,
+  },
 });
 
 type InputFieldProps = ComponentPropsWithRef<typeof Input> & {
@@ -69,18 +83,23 @@ export function InputField({
   if (icon) {
     return (
       <View
-        style={{
-          ...valueStyle,
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingLeft: 8,
-          gap: 8,
+        className={iconFieldWrapperClassName}
+        nativeStyle={{
           backgroundColor: disabled
             ? theme.formInputTextReadOnlySelection
             : theme.tableBackground,
         }}
       >
-        <View style={{ color: theme.pageTextSubdued, flexShrink: 0 }}>
+        <View
+          style={{
+            color: theme.pageTextSubdued,
+            flexShrink: 0,
+            alignSelf: 'stretch',
+            alignItems: 'center',
+            justifyContent: 'center',
+            lineHeight: 0,
+          }}
+        >
           {icon}
         </View>
         <Input
@@ -95,8 +114,11 @@ export function InputField({
             backgroundColor: 'transparent',
             height: '100%',
             padding: 0,
+            textAlign: 'left',
             color: disabled ? theme.tableTextInactive : theme.tableText,
             ...style,
+            borderRadius: 0,
+            boxShadow: 'none',
           }}
           {...props}
           className={renderProps =>
