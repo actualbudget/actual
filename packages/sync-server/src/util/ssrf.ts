@@ -18,7 +18,12 @@ const BLOCKED_IP_RANGES = [
   'broadcast',
 ];
 
-function isBlockedIp(address: string): boolean {
+/**
+ * Return true if the given address is a literal IP in one of the blocked
+ * ranges (private/local/link-local/etc). Non-IP strings (e.g. hostnames)
+ * return false, so callers can pass a URL hostname directly.
+ */
+export function isBlockedIp(address: string): boolean {
   if (!ipaddr.isValid(address)) {
     return false;
   }
