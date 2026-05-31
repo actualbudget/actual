@@ -354,7 +354,7 @@ A **silent data-corruption bug** was discovered in the existing page model durin
 
 ## 6. Running the Tests
 
-### Run only the newly added tests (30 total)
+### Run only the newly added tests (30 total: 8+3+8+2+3+3+3)
 
 ```bash
 # Budget — 8 new tests
@@ -369,6 +369,10 @@ yarn playwright test transactions.test.ts --browser=chromium --headed --reporter
 yarn playwright test payees.test.ts --browser=chromium --headed --reporter=list \
   --grep "case-insensitive search|empty state when no payees|special-character|opens the rule dialog|expected sample payees|functional search box|create rule action|selecting multiple payees"
 
+# Bank Sync — 2 new tests
+yarn playwright test bank-sync.test.ts --browser=chromium --headed --reporter=list \
+  --grep "disabled state when no server|accounts available to link"
+
 # Rules — 3 new tests
 yarn playwright test rules.test.ts --browser=chromium --headed --reporter=list \
   --grep "search filters rules|rule count increases|search is case-insensitive"
@@ -382,7 +386,7 @@ yarn playwright test reports.test.ts --browser=chromium --headed --reporter=list
   --grep "navigates to Net Worth|switching between Total|selecting Line Graph"
 ```
 
-### Run the full modified suite (63 tests)
+### Run the full modified suite (64 tests)
 
 ```bash
 yarn playwright test budget.test.ts transactions.test.ts payees.test.ts \
