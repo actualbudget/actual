@@ -85,6 +85,7 @@ import {
 } from '#components/mobile/MobileForms';
 import { getPrettyPayee } from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
+import { applyRuleDiffToTransaction } from '#components/transactions/applyRuleDiff';
 import { createSingleTimeScheduleFromTransaction } from '#components/transactions/TransactionList';
 import { AmountInput } from '#components/util/AmountInput';
 import { useAccounts } from '#hooks/useAccounts';
@@ -1787,7 +1788,7 @@ function TransactionEditUnconnected({
 
       // Run the rules to auto-fill in any data. Right now we only do
       // this on new transactions because that's how desktop works.
-      const newTransaction = { ...transaction };
+      let newTransaction = { ...transaction };
       if (isTemporary(newTransaction)) {
         const afterRules = await send('rules-run', {
           transaction: newTransaction,
@@ -1795,21 +1796,11 @@ function TransactionEditUnconnected({
         const diff = getChangedValues(newTransaction, afterRules);
 
         if (diff) {
-          Object.keys(diff).forEach(key => {
-            const field = key as keyof TransactionEntity;
-            // Update "empty" fields in general
-            // Or update all fields if the payee changes (assists location-based entry by
-            // applying rules to prefill category, notes, etc. based on the selected payee)
-            if (
-              newTransaction[field] == null ||
-              newTransaction[field] === '' ||
-              newTransaction[field] === 0 ||
-              newTransaction[field] === false ||
-              updatedField === 'payee'
-            ) {
-              (newTransaction as Record<string, unknown>)[field] = diff[field];
-            }
-          });
+          newTransaction = applyRuleDiffToTransaction(
+            newTransaction,
+            diff,
+            updatedField,
+          );
 
           // When a rule updates a parent transaction, overwrite all changes to the current field in subtransactions.
           if (

@@ -40,6 +40,7 @@ import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 
+import { applyRuleDiffToTransaction } from './applyRuleDiff';
 import { TransactionTable } from './TransactionsTable';
 import type { TransactionTableProps } from './TransactionsTable';
 // When data changes, there are two ways to update the UI:
@@ -532,19 +533,10 @@ export function TransactionList({
 
       const diff = getChangedValues(transaction, afterRules);
 
-      const newTransaction: TransactionEntity = { ...transaction };
+      const newTransaction: TransactionEntity = diff
+        ? applyRuleDiffToTransaction(transaction, diff, updatedFieldName)
+        : { ...transaction };
       if (diff) {
-        Object.keys(diff).forEach(field => {
-          if (
-            newTransaction[field] == null ||
-            newTransaction[field] === '' ||
-            newTransaction[field] === 0 ||
-            newTransaction[field] === false
-          ) {
-            newTransaction[field] = diff[field];
-          }
-        });
-
         // When a rule updates a parent transaction, overwrite all changes to the current field in subtransactions.
         if (
           transaction.is_parent &&
