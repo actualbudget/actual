@@ -146,11 +146,15 @@ test.describe.parallel('Reports', () => {
     await expect(
       reportsPage.pageContent.getByText('How is net worth calculated?'),
     ).toBeVisible();
-    console.log('[reports] Net Worth page loaded — "How is net worth calculated?" section visible');
+    console.log(
+      '[reports] Net Worth page loaded — "How is net worth calculated?" section visible',
+    );
 
     await navigation.goToReportsPage();
     await reportsPage.waitToLoad();
-    console.log('[reports] navigated back to reports dashboard — page content visible');
+    console.log(
+      '[reports] navigated back to reports dashboard — page content visible',
+    );
 
     await expect(reportsPage.pageContent).toBeVisible();
   });
@@ -164,7 +168,9 @@ test.describe.parallel('Reports', () => {
 
     test('switching between Total and Time mode changes available viz options', async () => {
       await localCustomReportPage.selectMode('total');
-      console.log('[reports] switched to Total mode — Bar Graph option should be visible');
+      console.log(
+        '[reports] switched to Total mode — Bar Graph option should be visible',
+      );
       await expect(
         localCustomReportPage.pageContent.getByRole('button', {
           name: 'Bar Graph',
@@ -172,7 +178,9 @@ test.describe.parallel('Reports', () => {
       ).toBeVisible();
 
       await localCustomReportPage.selectMode('time');
-      console.log('[reports] switched to Time mode — Stacked Bar Graph option should now appear');
+      console.log(
+        '[reports] switched to Time mode — Stacked Bar Graph option should now appear',
+      );
       await expect(
         localCustomReportPage.pageContent.getByRole('button', {
           name: 'Stacked Bar Graph',
@@ -183,7 +191,9 @@ test.describe.parallel('Reports', () => {
     test('selecting Line Graph keeps the report page and controls visible', async () => {
       await localCustomReportPage.selectMode('time');
       await localCustomReportPage.selectViz('Line Graph');
-      console.log('[reports] selected Time mode + Line Graph — verifying page and controls remain visible');
+      console.log(
+        '[reports] selected Time mode + Line Graph — verifying page and controls remain visible',
+      );
 
       await expect(localCustomReportPage.pageContent).toBeVisible();
       await expect(
@@ -193,7 +203,9 @@ test.describe.parallel('Reports', () => {
       ).toBeVisible();
       await expect(localCustomReportPage.showLegendButton).toBeVisible();
       await expect(localCustomReportPage.showSummaryButton).toBeVisible();
-      console.log('[reports] page content, Line Graph button, legend and summary controls all visible');
+      console.log(
+        '[reports] page content, Line Graph button, legend and summary controls all visible',
+      );
     });
   });
 });

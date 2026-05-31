@@ -261,12 +261,16 @@ test.describe('Transactions', () => {
       expect(filteredCount).toBeLessThan(totalBefore);
     }).toPass();
     const krogerCount = await accountPage.getTransactionCount();
-    console.log(`[search] after "Kroger" — ${krogerCount} rows shown (down from ${totalBefore})`);
+    console.log(
+      `[search] after "Kroger" — ${krogerCount} rows shown (down from ${totalBefore})`,
+    );
     await expect(accountPage.getNthTransaction(0).payee).toHaveText('Kroger');
 
     await accountPage.searchTransactions('ZZZZZ_NONEXISTENT_XYZ');
     await expect(accountPage.transactionTable).toContainText('No transactions');
-    console.log(`[search] after "ZZZZZ_NONEXISTENT_XYZ" — "No transactions" shown`);
+    console.log(
+      `[search] after "ZZZZZ_NONEXISTENT_XYZ" — "No transactions" shown`,
+    );
 
     await accountPage.clearSearch();
     await expect(async () => {
@@ -300,7 +304,9 @@ test.describe('Transactions', () => {
     // Payee and amount must be unchanged
     await expect(firstTx.payee).toHaveText('Kroger');
     await expect(firstTx.debit).toHaveText('25.00');
-    console.log(`[edit-inline] payee: "Kroger" unchanged, debit: "$25.00" unchanged`);
+    console.log(
+      `[edit-inline] payee: "Kroger" unchanged, debit: "$25.00" unchanged`,
+    );
   });
 
   test('deletes a transaction and reverts the account balance', async () => {
@@ -328,7 +334,9 @@ test.describe('Transactions', () => {
         expect(b).not.toBe(balanceBeforeCreate);
       }).toPass();
       balanceAfterCreate = await accountPage.accountBalance.textContent();
-      console.log(`[delete-tx] balance after  create: ${balanceAfterCreate} (decreased by $99.99)`);
+      console.log(
+        `[delete-tx] balance after  create: ${balanceAfterCreate} (decreased by $99.99)`,
+      );
     });
 
     await test.step('select transaction → Delete → confirm dialog', async () => {
@@ -344,7 +352,9 @@ test.describe('Transactions', () => {
         expect(b).toBe(balanceBeforeCreate);
       }).toPass();
       const finalBalance = await accountPage.accountBalance.textContent();
-      console.log(`[delete-tx] balance after  delete: ${finalBalance} — reverted: ${finalBalance === balanceBeforeCreate}`);
+      console.log(
+        `[delete-tx] balance after  delete: ${finalBalance} — reverted: ${finalBalance === balanceBeforeCreate}`,
+      );
       expect(balanceAfterCreate).not.toBe(balanceBeforeCreate);
     });
   });

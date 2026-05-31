@@ -38,27 +38,35 @@ test.describe.serial('Payees', () => {
 
   test('supports case-insensitive search', async () => {
     await payeesPage.searchFor('fast internet');
-    console.log('[payees] searched "fast internet" (lowercase) — Fast Internet row visible');
+    console.log(
+      '[payees] searched "fast internet" (lowercase) — Fast Internet row visible',
+    );
     await expect(payeesPage.getPayeeRow('Fast Internet')).toBeVisible();
     await expect(payeesPage.getPayeeRow('Deposit')).not.toBeVisible();
 
     await payeesPage.clearSearch();
     await payeesPage.searchFor('FAST INTERNET');
-    console.log('[payees] searched "FAST INTERNET" (uppercase) — Fast Internet row still visible');
+    console.log(
+      '[payees] searched "FAST INTERNET" (uppercase) — Fast Internet row still visible',
+    );
     await expect(payeesPage.getPayeeRow('Fast Internet')).toBeVisible();
     await expect(payeesPage.getPayeeRow('Deposit')).not.toBeVisible();
   });
 
   test('shows an empty state when no payees match', async () => {
     await payeesPage.searchFor('ZZZZZ_NONEXISTENT_12345');
-    console.log('[payees] searched "ZZZZZ_NONEXISTENT_12345" — empty state shown, no rows visible');
+    console.log(
+      '[payees] searched "ZZZZZ_NONEXISTENT_12345" — empty state shown, no rows visible',
+    );
     await expect(payeesPage.emptyMessage).toBeVisible();
     await expect(payeesPage.getPayeeRow('Deposit')).not.toBeVisible();
   });
 
   test('handles special-character search input', async () => {
     await payeesPage.searchFor('-');
-    console.log('[payees] searched "-" (special char) — search box accepted input, no crash');
+    console.log(
+      '[payees] searched "-" (special char) — search box accepted input, no crash',
+    );
     await expect(payeesPage.searchBox).toHaveValue('-');
     await expect(payeesPage.getPayeeRow('Deposit')).not.toBeVisible();
   });
@@ -71,14 +79,18 @@ test.describe.serial('Payees', () => {
     console.log('[payees] "Deposit" payee found, Create Rule button visible');
 
     await payeesPage.getCreateRuleButton('Deposit').click();
-    console.log('[payees] clicked Create Rule — rule dialog opened with stage and actions sections');
+    console.log(
+      '[payees] clicked Create Rule — rule dialog opened with stage and actions sections',
+    );
 
     await expect(page.getByText('Stage of rule:')).toBeVisible();
     await expect(page.getByText('Then apply these actions:')).toBeVisible();
   });
 
   test('shows expected sample payees on initial load', async () => {
-    console.log('[payees] verifying 4 demo payees visible on initial load: Deposit, Fast Internet, Home Depot, Kroger');
+    console.log(
+      '[payees] verifying 4 demo payees visible on initial load: Deposit, Fast Internet, Home Depot, Kroger',
+    );
     await expect(payeesPage.getPayeeRow('Deposit')).toBeVisible();
     await expect(payeesPage.getPayeeRow('Fast Internet')).toBeVisible();
     await expect(payeesPage.getPayeeRow('Home Depot')).toBeVisible();
@@ -96,12 +108,16 @@ test.describe.serial('Payees', () => {
 
   test('shows a create rule action for matching payees', async () => {
     await payeesPage.searchFor('Deposit');
-    console.log('[payees] searched "Deposit" — verifying Create Rule button is visible with correct label');
+    console.log(
+      '[payees] searched "Deposit" — verifying Create Rule button is visible with correct label',
+    );
     await expect(payeesPage.getCreateRuleButton('Deposit')).toBeVisible();
     await expect(payeesPage.getCreateRuleButton('Deposit')).toContainText(
       'Create rule',
     );
-    console.log('[payees] Create Rule button confirmed visible with text "Create rule"');
+    console.log(
+      '[payees] Create Rule button confirmed visible with text "Create rule"',
+    );
   });
 
   test('supports selecting multiple payees', async () => {
@@ -117,11 +133,15 @@ test.describe.serial('Payees', () => {
 
     await depositSelect.click();
     await internetSelect.click();
-    console.log('[payees] selected 2 payees: Deposit and Fast Internet — expecting "2 payees" action button');
+    console.log(
+      '[payees] selected 2 payees: Deposit and Fast Internet — expecting "2 payees" action button',
+    );
 
     await expect(page.getByRole('button', { name: '2 payees' })).toBeVisible();
     await expect(page.getByText('Deposit')).toBeVisible();
     await expect(page.getByText('Fast Internet')).toBeVisible();
-    console.log('[payees] "2 payees" button visible, both selected payees confirmed in view');
+    console.log(
+      '[payees] "2 payees" button visible, both selected payees confirmed in view',
+    );
   });
 });

@@ -75,7 +75,9 @@ test.describe('Budget', () => {
 
     const initialBalanceRow1 = await budgetPage.getBalanceForRow(1);
     const initialBalanceRow2 = await budgetPage.getBalanceForRow(2);
-    console.log(`[fund-transfer] before — row1: $${(initialBalanceRow1 / 100).toFixed(2)}, row2: $${(initialBalanceRow2 / 100).toFixed(2)}`);
+    console.log(
+      `[fund-transfer] before — row1: $${(initialBalanceRow1 / 100).toFixed(2)}, row2: $${(initialBalanceRow2 / 100).toFixed(2)}`,
+    );
 
     await budgetPage.transferAllBalance(1, 2);
     await page.waitForTimeout(1000);
@@ -83,7 +85,9 @@ test.describe('Budget', () => {
     const finalBalanceRow1 = await budgetPage.getBalanceForRow(1);
     const finalBalanceRow2 = await budgetPage.getBalanceForRow(2);
     const expectedBalance = initialBalanceRow1 + initialBalanceRow2;
-    console.log(`[fund-transfer] after  — row1: $${(finalBalanceRow1 / 100).toFixed(2)}, row2: $${(finalBalanceRow2 / 100).toFixed(2)}, expected row2: $${(expectedBalance / 100).toFixed(2)}`);
+    console.log(
+      `[fund-transfer] after  — row1: $${(finalBalanceRow1 / 100).toFixed(2)}, row2: $${(finalBalanceRow2 / 100).toFixed(2)}, expected row2: $${(expectedBalance / 100).toFixed(2)}`,
+    );
 
     expect(Math.abs(finalBalanceRow1)).toBeLessThan(100); // Within $1.00
     expect(Math.abs(finalBalanceRow2 - expectedBalance)).toBeLessThan(100); // Within $1.00
@@ -105,7 +109,9 @@ test.describe('Budget', () => {
         parseFloat((rowBudgetedText ?? '0').replace(/,/g, '')) * 100,
       );
       totalsBefore = await budgetPage.getTableTotals();
-      console.log(`[allocation-update] before — row budget: $${(rowBudgetedBefore / 100).toFixed(2)}, table total budgeted: $${(totalsBefore.budgeted / 100).toFixed(2)}`);
+      console.log(
+        `[allocation-update] before — row budget: $${(rowBudgetedBefore / 100).toFixed(2)}, table total budgeted: $${(totalsBefore.budgeted / 100).toFixed(2)}`,
+      );
     });
 
     await test.step(`set category budget to $${newAmount}`, async () => {
@@ -121,7 +127,9 @@ test.describe('Budget', () => {
       totalsAfter = await budgetPage.getTableTotals();
       const expectedDelta = newAmount * 100 - rowBudgetedBefore!;
       const actualDelta = totalsAfter.budgeted - totalsBefore!.budgeted;
-      console.log(`[allocation-update] after  — table total budgeted: $${(totalsAfter.budgeted / 100).toFixed(2)}, expected delta: $${(expectedDelta / 100).toFixed(2)}, actual delta: $${(actualDelta / 100).toFixed(2)}`);
+      console.log(
+        `[allocation-update] after  — table total budgeted: $${(totalsAfter.budgeted / 100).toFixed(2)}, expected delta: $${(expectedDelta / 100).toFixed(2)}, actual delta: $${(actualDelta / 100).toFixed(2)}`,
+      );
       expect(actualDelta).toBe(expectedDelta);
       expect(totalsAfter.spent).toBe(totalsBefore!.spent);
     });
@@ -139,13 +147,17 @@ test.describe('Budget', () => {
     await page.waitForTimeout(1000);
 
     const beforeReload = await budgetPage.getBalanceForRow(1);
-    console.log(`[persist-reload] balance before reload: $${(beforeReload / 100).toFixed(2)}`);
+    console.log(
+      `[persist-reload] balance before reload: $${(beforeReload / 100).toFixed(2)}`,
+    );
 
     await page.reload({ waitUntil: 'networkidle' });
     await budgetPage.waitFor();
 
     const afterReload = await budgetPage.getBalanceForRow(1);
-    console.log(`[persist-reload] balance after  reload: $${(afterReload / 100).toFixed(2)} — match: ${afterReload === beforeReload}`);
+    console.log(
+      `[persist-reload] balance after  reload: $${(afterReload / 100).toFixed(2)} — match: ${afterReload === beforeReload}`,
+    );
     expect(afterReload).toBe(beforeReload);
   });
 
@@ -153,7 +165,9 @@ test.describe('Budget', () => {
     await budgetPage.waitFor();
 
     const initialBalance = await budgetPage.getBalanceForRow(1);
-    console.log(`[escape-cancel] balance before edit: $${(initialBalance / 100).toFixed(2)}`);
+    console.log(
+      `[escape-cancel] balance before edit: $${(initialBalance / 100).toFixed(2)}`,
+    );
 
     const categoryRow = budgetPage.budgetTable.getByTestId('row').nth(1);
     const budgetCell = categoryRow.getByTestId('budget');
@@ -164,7 +178,9 @@ test.describe('Budget', () => {
     await page.waitForTimeout(500);
 
     const finalBalance = await budgetPage.getBalanceForRow(1);
-    console.log(`[escape-cancel] balance after  Escape: $${(finalBalance / 100).toFixed(2)} — unchanged: ${finalBalance === initialBalance}`);
+    console.log(
+      `[escape-cancel] balance after  Escape: $${(finalBalance / 100).toFixed(2)} — unchanged: ${finalBalance === initialBalance}`,
+    );
     expect(finalBalance).toBe(initialBalance);
   });
 
@@ -182,7 +198,9 @@ test.describe('Budget', () => {
     await page.waitForTimeout(500);
 
     const totalsAfter500 = await budgetPage.getTableTotals();
-    console.log(`[zero-out] after $500 — table total budgeted: $${(totalsAfter500.budgeted / 100).toFixed(2)}`);
+    console.log(
+      `[zero-out] after $500 — table total budgeted: $${(totalsAfter500.budgeted / 100).toFixed(2)}`,
+    );
 
     await budgetCell.click();
     await budgetCell.getByRole('textbox').fill('0');
@@ -190,7 +208,9 @@ test.describe('Budget', () => {
     await page.waitForTimeout(500);
 
     const totalsAfterZero = await budgetPage.getTableTotals();
-    console.log(`[zero-out] after $0   — table total budgeted: $${(totalsAfterZero.budgeted / 100).toFixed(2)}, delta: $${((totalsAfter500.budgeted - totalsAfterZero.budgeted) / 100).toFixed(2)} (expected $500.00)`);
+    console.log(
+      `[zero-out] after $0   — table total budgeted: $${(totalsAfterZero.budgeted / 100).toFixed(2)}, delta: $${((totalsAfter500.budgeted - totalsAfterZero.budgeted) / 100).toFixed(2)} (expected $500.00)`,
+    );
     expect(totalsAfterZero.budgeted).toBe(totalsAfter500.budgeted - 50000);
   });
 
@@ -201,13 +221,17 @@ test.describe('Budget', () => {
 
     // The summary header shows the current month name — capture it before navigating.
     const initialSummaryText = await summary.textContent();
-    console.log(`[month-nav] current month summary: "${initialSummaryText?.slice(0, 60)}"`);
+    console.log(
+      `[month-nav] current month summary: "${initialSummaryText?.slice(0, 60)}"`,
+    );
 
     await budgetPage.goToPreviousMonth();
     await page.waitForTimeout(300);
 
     const prevMonthSummaryText = await summary.textContent();
-    console.log(`[month-nav] prev month summary:    "${prevMonthSummaryText?.slice(0, 60)}"`);
+    console.log(
+      `[month-nav] prev month summary:    "${prevMonthSummaryText?.slice(0, 60)}"`,
+    );
     expect(prevMonthSummaryText).not.toBe(initialSummaryText);
 
     await budgetPage.goToNextMonth();
@@ -215,7 +239,9 @@ test.describe('Budget', () => {
     await page.waitForTimeout(300);
 
     const nextMonthSummaryText = await summary.textContent();
-    console.log(`[month-nav] next month summary:    "${nextMonthSummaryText?.slice(0, 60)}"`);
+    console.log(
+      `[month-nav] next month summary:    "${nextMonthSummaryText?.slice(0, 60)}"`,
+    );
     expect(nextMonthSummaryText).not.toBe(prevMonthSummaryText);
   });
 
@@ -232,7 +258,9 @@ test.describe('Budget', () => {
     await test.step('hover group ancestor to reveal hidden Add category button, then click', async () => {
       // The button uses CSS display:none (hover-visible pattern). Hovering the
       // 5th ancestor makes it display:flex; dispatchEvent fires the React Aria handler.
-      const addCategoryBtn = page.locator('[aria-label="Add category"]').first();
+      const addCategoryBtn = page
+        .locator('[aria-label="Add category"]')
+        .first();
       await addCategoryBtn.locator('xpath=ancestor::*[5]').hover();
       await addCategoryBtn.dispatchEvent('click');
     });
@@ -252,7 +280,9 @@ test.describe('Budget', () => {
           .first(),
       ).toBeVisible();
       const rowsAfter = await budgetPage.budgetTable.getByTestId('row').count();
-      console.log(`[new-category] row count after:  ${rowsAfter} (expected ${rowsBefore! + 1})`);
+      console.log(
+        `[new-category] row count after:  ${rowsAfter} (expected ${rowsBefore! + 1})`,
+      );
       expect(rowsAfter).toBe(rowsBefore! + 1);
     });
   });
@@ -272,7 +302,9 @@ test.describe('Budget', () => {
       await page.keyboard.press('Enter');
       await page.waitForTimeout(500);
       balanceAfterAllocation = await budgetPage.getBalanceForRow(1);
-      console.log(`[cross-feature] category: "${categoryName!}", balance after $300 allocation: $${(balanceAfterAllocation / 100).toFixed(2)}`);
+      console.log(
+        `[cross-feature] category: "${categoryName!}", balance after $300 allocation: $${(balanceAfterAllocation / 100).toFixed(2)}`,
+      );
     });
 
     await test.step(`navigate to Ally Savings and create $100 transaction in "${categoryName!}"`, async () => {
@@ -290,7 +322,9 @@ test.describe('Budget', () => {
       await page.mouse.move(0, 0);
       balanceAfterSpend = await budgetPage.getBalanceForRow(1);
       const drop = balanceAfterAllocation! - balanceAfterSpend;
-      console.log(`[cross-feature] balance after $100 spend: $${(balanceAfterSpend / 100).toFixed(2)}, drop: $${(drop / 100).toFixed(2)} (expected $100.00)`);
+      console.log(
+        `[cross-feature] balance after $100 spend: $${(balanceAfterSpend / 100).toFixed(2)}, drop: $${(drop / 100).toFixed(2)} (expected $100.00)`,
+      );
       // $100 = 10 000 cents
       expect(drop).toBe(10000);
     });

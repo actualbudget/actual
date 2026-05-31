@@ -170,7 +170,9 @@ test.describe('Schedules', () => {
   });
 
   test('creates a named schedule and displays the custom name in the list', async () => {
-    console.log('[schedules] creating schedule with custom name "My Test Schedule", payee: Home Depot, amount: $50');
+    console.log(
+      '[schedules] creating schedule with custom name "My Test Schedule", payee: Home Depot, amount: $50',
+    );
     const scheduleEditModal = await schedulesPage.addNewSchedule();
     await scheduleEditModal.fill({
       scheduleName: 'My Test Schedule',
@@ -180,7 +182,9 @@ test.describe('Schedules', () => {
     });
     await scheduleEditModal.add();
 
-    console.log('[schedules] schedule added — verifying "My Test Schedule" appears in list with correct payee and amount');
+    console.log(
+      '[schedules] schedule added — verifying "My Test Schedule" appears in list with correct payee and amount',
+    );
     await expect(
       schedulesPage.schedulesTableRow
         .filter({ hasText: 'My Test Schedule' })
@@ -190,7 +194,9 @@ test.describe('Schedules', () => {
     const schedule = schedulesPage.getNthSchedule(2);
     await expect(schedule.payee).toHaveText('Home Depot');
     await expect(schedule.amount).toHaveText('~50.00');
-    console.log('[schedules] custom name, payee "Home Depot", and amount "~50.00" all confirmed');
+    console.log(
+      '[schedules] custom name, payee "Home Depot", and amount "~50.00" all confirmed',
+    );
   });
 
   test('skips a due schedule and verifies the status changes to upcoming', async () => {
@@ -204,10 +210,14 @@ test.describe('Schedules', () => {
 
     const schedule = schedulesPage.getNthSchedule(2);
     await expect(schedule.status).toHaveText('Due');
-    console.log('[schedules] schedule created with status "Due" — skipping next scheduled date');
+    console.log(
+      '[schedules] schedule created with status "Due" — skipping next scheduled date',
+    );
 
     await schedulesPage._performNthAction(2, 'Skip next scheduled date');
-    console.log('[schedules] skip action performed — status should now be "Upcoming"');
+    console.log(
+      '[schedules] skip action performed — status should now be "Upcoming"',
+    );
 
     await expect(schedulesPage.getNthSchedule(2).status).toHaveText('Upcoming');
   });
@@ -222,11 +232,15 @@ test.describe('Schedules', () => {
     await scheduleEditModal.add();
 
     const rowCountBefore = await schedulesPage.schedulesTableRow.count();
-    console.log(`[schedules] row count after adding: ${rowCountBefore} — deleting schedule`);
+    console.log(
+      `[schedules] row count after adding: ${rowCountBefore} — deleting schedule`,
+    );
     expect(rowCountBefore).toBeGreaterThanOrEqual(3);
 
     await schedulesPage._performNthAction(2, 'Delete');
-    console.log(`[schedules] delete performed — expected count: ${rowCountBefore - 1}`);
+    console.log(
+      `[schedules] delete performed — expected count: ${rowCountBefore - 1}`,
+    );
 
     await expect(schedulesPage.schedulesTableRow).toHaveCount(
       rowCountBefore - 1,

@@ -32,7 +32,9 @@ test.describe('Bank Sync', () => {
   });
 
   test('shows provider setup in disabled state when no server is configured', async () => {
-    console.log('[bank-sync] verifying provider setup UI is visible but disabled when no server is connected');
+    console.log(
+      '[bank-sync] verifying provider setup UI is visible but disabled when no server is connected',
+    );
     await expect(bankSyncPage.providersHeading).toBeVisible();
     await expect(bankSyncPage.disabledSetupButton).toBeDisabled();
     await expect(bankSyncPage.disabledSetupButton).toContainText(
@@ -41,7 +43,9 @@ test.describe('Bank Sync', () => {
     await expect(
       page.getByText('Connect to an Actual server to set up', { exact: false }),
     ).toBeVisible();
-    console.log('[bank-sync] providers heading visible, "Set up bank sync" button disabled, server warning shown');
+    console.log(
+      '[bank-sync] providers heading visible, "Set up bank sync" button disabled, server warning shown',
+    );
   });
 
   test('shows accounts available to link when no server is configured', async () => {
@@ -51,7 +55,9 @@ test.describe('Bank Sync', () => {
     ).toBeVisible();
     const linkButtons = page.getByRole('button', { name: 'Link account' });
     const linkButtonCount = await linkButtons.count();
-    console.log(`[bank-sync] ${linkButtonCount} "Link account" buttons visible — accounts are listed even without a server`);
+    console.log(
+      `[bank-sync] ${linkButtonCount} "Link account" buttons visible — accounts are listed even without a server`,
+    );
     expect(linkButtonCount).toBeGreaterThan(1);
   });
 });
