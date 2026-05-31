@@ -3,6 +3,7 @@ import express from 'express';
 import { handleError } from '#app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '#services/secrets-service';
 import {
+  rejectApiTokenMiddleware,
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
@@ -14,6 +15,7 @@ export { app as handlers };
 app.use(requestLoggerMiddleware);
 app.use(express.json());
 app.use(validateSessionMiddleware);
+app.use(rejectApiTokenMiddleware);
 
 app.post(
   '/status',

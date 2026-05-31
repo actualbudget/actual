@@ -4,6 +4,7 @@ import express from 'express';
 
 import { sha256String } from '#util/hash';
 import {
+  rejectApiTokenMiddleware,
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
@@ -58,6 +59,7 @@ app.get('/link', function (req, res) {
 export { app as handlers };
 app.use(express.json());
 app.use(validateSessionMiddleware);
+app.use(rejectApiTokenMiddleware);
 
 app.post('/status', async (req, res) => {
   res.send({

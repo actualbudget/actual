@@ -3,6 +3,7 @@ import express from 'express';
 import { getActiveLoginMethod, isAdmin } from './account-db';
 import { SecretName, secretsService } from './services/secrets-service';
 import {
+  rejectApiTokenMiddleware,
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from './util/middlewares';
@@ -13,6 +14,7 @@ export { app as handlers };
 app.use(express.json());
 app.use(requestLoggerMiddleware);
 app.use(validateSessionMiddleware);
+app.use(rejectApiTokenMiddleware);
 
 // In OpenID mode the secrets store is admin-managed; non-admins must be
 // blocked from both reads and writes, otherwise they can enumerate which

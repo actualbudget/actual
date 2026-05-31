@@ -164,6 +164,15 @@ app.post('/server-prefs', async (req, res) => {
   const session = await validateSession(req, res);
   if (!session) return;
 
+  if (session.auth_method === 'api_token') {
+    res.status(403).send({
+      status: 'error',
+      reason: 'forbidden-auth-method',
+      details: 'API tokens cannot access this endpoint',
+    });
+    return;
+  }
+
   if (!isAdmin(session.user_id)) {
     res.status(403).send({
       status: 'error',

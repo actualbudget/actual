@@ -1,6 +1,5 @@
-import { validateBudgetScopeMiddleware } from './middlewares';
+import { enforceBudgetScope, rejectApiTokenMiddleware } from './middlewares';
 
-// Mock request/response/next helpers
 const createMockReq = (overrides = {}) => ({
   headers: {},
   body: {},
@@ -26,183 +25,128 @@ const createMockRes = (locals = {}) => {
   return res;
 };
 
-describe('validateBudgetScopeMiddleware', () => {
+describe('enforceBudgetScope', () => {
   describe('non-API token auth', () => {
-    it('should pass through for session auth', () => {
-      const req = createMockReq();
+    it('allows session auth', () => {
       const res = createMockRes({ auth_method: 'password', user_id: 'user1' });
-      const next = vi.fn();
 
-      validateBudgetScopeMiddleware(req, res, next);
-
-      expect(next).toHaveBeenCalled();
+      expect(enforceBudgetScope(res, 'any-budget-id')).toBe(true);
       expect(res.statusCode).toBeNull();
     });
 
-    it('should pass through when auth_method is undefined', () => {
-      const req = createMockReq();
+    it('allows when auth_method is undefined', () => {
       const res = createMockRes({ user_id: 'user1' });
-      const next = vi.fn();
 
-      validateBudgetScopeMiddleware(req, res, next);
-
-      expect(next).toHaveBeenCalled();
+      expect(enforceBudgetScope(res, 'any-budget-id')).toBe(true);
       expect(res.statusCode).toBeNull();
     });
   });
 
   describe('API token with no scopes (empty array)', () => {
-    it('should allow access to any budget', () => {
-      const req = createMockReq({
-        headers: { 'x-actual-file-id': 'any-budget-id' },
-      });
+    it('allows access to any budget', () => {
       const res = createMockRes({
         auth_method: 'api_token',
         user_id: 'user1',
         budget_ids: [],
       });
-      const next = vi.fn();
 
-      validateBudgetScopeMiddleware(req, res, next);
-
-      expect(next).toHaveBeenCalled();
+      expect(enforceBudgetScope(res, 'any-budget-id')).toBe(true);
       expect(res.statusCode).toBeNull();
     });
 
-    it('should allow access when budget_ids is undefined', () => {
-      const req = createMockReq({
-        headers: { 'x-actual-file-id': 'any-budget-id' },
-      });
+    it('allows access when budget_ids is undefined', () => {
       const res = createMockRes({
         auth_method: 'api_token',
         user_id: 'user1',
         budget_ids: undefined,
       });
-      const next = vi.fn();
 
-      validateBudgetScopeMiddleware(req, res, next);
-
-      expect(next).toHaveBeenCalled();
+      expect(enforceBudgetScope(res, 'any-budget-id')).toBe(true);
       expect(res.statusCode).toBeNull();
     });
   });
 
   describe('API token with scopes', () => {
-    it('should allow access to budget in scopes', () => {
-      const req = createMockReq({
-        headers: { 'x-actual-file-id': 'budget-1' },
-      });
+    it('allows access to budget in scopes', () => {
       const res = createMockRes({
         auth_method: 'api_token',
         user_id: 'user1',
         budget_ids: ['budget-1', 'budget-2'],
       });
-      const next = vi.fn();
 
-      validateBudgetScopeMiddleware(req, res, next);
-
-      expect(next).toHaveBeenCalled();
+      expect(enforceBudgetScope(res, 'budget-1')).toBe(true);
       expect(res.statusCode).toBeNull();
     });
 
-    it('should block access to budget not in scopes', () => {
-      const req = createMockReq({
-        headers: { 'x-actual-file-id': 'budget-3' },
-      });
+    it('blocks access to budget not in scopes', () => {
       const res = createMockRes({
         auth_method: 'api_token',
         user_id: 'user1',
         budget_ids: ['budget-1', 'budget-2'],
       });
-      const next = vi.fn();
 
-      validateBudgetScopeMiddleware(req, res, next);
-
-      expect(next).not.toHaveBeenCalled();
+      expect(enforceBudgetScope(res, 'budget-3')).toBe(false);
       expect(res.statusCode).toBe(403);
       expect(res.body.reason).toBe('token-scope-error');
     });
 
-    it('should allow access when no file ID in request', () => {
-      const req = createMockReq();
+    it('blocks a scoped token when no file id is provided', () => {
       const res = createMockRes({
         auth_method: 'api_token',
         user_id: 'user1',
         budget_ids: ['budget-1'],
       });
-      const next = vi.fn();
 
-      validateBudgetScopeMiddleware(req, res, next);
-
-      expect(next).toHaveBeenCalled();
-      expect(res.statusCode).toBeNull();
-    });
-  });
-
-  describe('file ID from different sources', () => {
-    const testCases = [
-      {
-        name: 'x-actual-file-id header',
-        reqOverride: { headers: { 'x-actual-file-id': 'budget-1' } },
-      },
-      { name: 'body.fileId', reqOverride: { body: { fileId: 'budget-1' } } },
-      { name: 'query.fileId', reqOverride: { query: { fileId: 'budget-1' } } },
-      {
-        name: 'params.fileId',
-        reqOverride: { params: { fileId: 'budget-1' } },
-      },
-    ];
-
-    testCases.forEach(({ name, reqOverride }) => {
-      it(`should extract file ID from ${name} and allow if in scopes`, () => {
-        const req = createMockReq(reqOverride);
-        const res = createMockRes({
-          auth_method: 'api_token',
-          user_id: 'user1',
-          budget_ids: ['budget-1'],
-        });
-        const next = vi.fn();
-
-        validateBudgetScopeMiddleware(req, res, next);
-
-        expect(next).toHaveBeenCalled();
-        expect(res.statusCode).toBeNull();
-      });
-
-      it(`should extract file ID from ${name} and block if not in scopes`, () => {
-        const req = createMockReq(reqOverride);
-        const res = createMockRes({
-          auth_method: 'api_token',
-          user_id: 'user1',
-          budget_ids: ['budget-2'],
-        });
-        const next = vi.fn();
-
-        validateBudgetScopeMiddleware(req, res, next);
-
-        expect(next).not.toHaveBeenCalled();
-        expect(res.statusCode).toBe(403);
-      });
+      expect(enforceBudgetScope(res, null)).toBe(false);
+      expect(res.statusCode).toBe(403);
+      expect(res.body.reason).toBe('token-scope-error');
     });
 
-    it('should prioritize header over body/query/params', () => {
-      const req = createMockReq({
-        headers: { 'x-actual-file-id': 'budget-header' },
-        body: { fileId: 'budget-body' },
-        query: { fileId: 'budget-query' },
-        params: { fileId: 'budget-params' },
-      });
+    it('blocks a scoped token when file id is empty string', () => {
       const res = createMockRes({
         auth_method: 'api_token',
         user_id: 'user1',
-        budget_ids: ['budget-header'],
+        budget_ids: ['budget-1'],
       });
-      const next = vi.fn();
 
-      validateBudgetScopeMiddleware(req, res, next);
-
-      // Should allow because header value is in scopes
-      expect(next).toHaveBeenCalled();
+      expect(enforceBudgetScope(res, '')).toBe(false);
+      expect(res.statusCode).toBe(403);
     });
+  });
+});
+
+describe('rejectApiTokenMiddleware', () => {
+  it('rejects API token auth with 403', () => {
+    const req = createMockReq();
+    const res = createMockRes({ auth_method: 'api_token', user_id: 'user1' });
+    const next = vi.fn();
+
+    rejectApiTokenMiddleware(req, res, next);
+
+    expect(next).not.toHaveBeenCalled();
+    expect(res.statusCode).toBe(403);
+    expect(res.body.reason).toBe('forbidden-auth-method');
+  });
+
+  it('passes through password auth', () => {
+    const req = createMockReq();
+    const res = createMockRes({ auth_method: 'password', user_id: 'user1' });
+    const next = vi.fn();
+
+    rejectApiTokenMiddleware(req, res, next);
+
+    expect(next).toHaveBeenCalled();
+    expect(res.statusCode).toBeNull();
+  });
+
+  it('passes through when auth_method is undefined', () => {
+    const req = createMockReq();
+    const res = createMockRes({ user_id: 'user1' });
+    const next = vi.fn();
+
+    rejectApiTokenMiddleware(req, res, next);
+
+    expect(next).toHaveBeenCalled();
+    expect(res.statusCode).toBeNull();
   });
 });

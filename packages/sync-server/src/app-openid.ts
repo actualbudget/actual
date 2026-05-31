@@ -7,6 +7,7 @@ import { checkPassword } from './accounts/password';
 import * as UserService from './services/user-service';
 import {
   errorMiddleware,
+  rejectApiTokenMiddleware,
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from './util/middlewares';
@@ -26,43 +27,53 @@ const openIdConfigRateLimiter = rateLimit({
 
 export { app as handlers, openIdConfigRateLimiter };
 
-app.post('/enable', validateSessionMiddleware, async (req, res) => {
-  if (!isAdmin(res.locals.user_id)) {
-    res.status(403).send({
-      status: 'error',
-      reason: 'forbidden',
-      details: 'permission-not-found',
-    });
-    return;
-  }
+app.post(
+  '/enable',
+  validateSessionMiddleware,
+  rejectApiTokenMiddleware,
+  async (req, res) => {
+    if (!isAdmin(res.locals.user_id)) {
+      res.status(403).send({
+        status: 'error',
+        reason: 'forbidden',
+        details: 'permission-not-found',
+      });
+      return;
+    }
 
-  const { error } = (await enableOpenID(req.body)) || {};
+    const { error } = (await enableOpenID(req.body)) || {};
 
-  if (error) {
-    res.status(500).send({ status: 'error', reason: error });
-    return;
-  }
-  res.send({ status: 'ok' });
-});
+    if (error) {
+      res.status(500).send({ status: 'error', reason: error });
+      return;
+    }
+    res.send({ status: 'ok' });
+  },
+);
 
-app.post('/disable', validateSessionMiddleware, async (req, res) => {
-  if (!isAdmin(res.locals.user_id)) {
-    res.status(403).send({
-      status: 'error',
-      reason: 'forbidden',
-      details: 'permission-not-found',
-    });
-    return;
-  }
+app.post(
+  '/disable',
+  validateSessionMiddleware,
+  rejectApiTokenMiddleware,
+  async (req, res) => {
+    if (!isAdmin(res.locals.user_id)) {
+      res.status(403).send({
+        status: 'error',
+        reason: 'forbidden',
+        details: 'permission-not-found',
+      });
+      return;
+    }
 
-  const { error } = (await disableOpenID(req.body)) || {};
+    const { error } = (await disableOpenID(req.body)) || {};
 
-  if (error) {
-    res.status(401).send({ status: 'error', reason: error });
-    return;
-  }
-  res.send({ status: 'ok' });
-});
+    if (error) {
+      res.status(401).send({ status: 'error', reason: error });
+      return;
+    }
+    res.send({ status: 'ok' });
+  },
+);
 
 app.post('/config', openIdConfigRateLimiter, async (req, res) => {
   const ownerCount = UserService.getOwnerCount();

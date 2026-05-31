@@ -29,9 +29,9 @@ import { config } from './load-config';
 import * as UserService from './services/user-service';
 import * as simpleSync from './sync-simple';
 import {
+  enforceBudgetScope,
   errorMiddleware,
   requestLoggerMiddleware,
-  validateBudgetScopeMiddleware,
   validateSessionMiddleware,
 } from './util/middlewares';
 import {
@@ -44,7 +44,6 @@ import type { GroupId } from './util/paths';
 
 const app = express();
 app.use(validateSessionMiddleware);
-app.use(validateBudgetScopeMiddleware);
 app.use(errorMiddleware);
 app.use(requestLoggerMiddleware);
 app.use(
@@ -149,6 +148,11 @@ app.post('/sync', async (req, res): Promise<void> => {
   }
 
   const fileId = requestPb.fileId || null;
+
+  if (!enforceBudgetScope(res, fileId)) {
+    return;
+  }
+
   const groupId = requestPb.groupId || null;
   const keyId = requestPb.keyId || null;
   const since = requestPb.since || null;
@@ -207,6 +211,10 @@ app.post('/user-get-key', (req, res) => {
 
   const { fileId } = req.body || {};
 
+  if (!enforceBudgetScope(res, fileId)) {
+    return;
+  }
+
   const filesService = new FilesService(getAccountDb());
   const file = verifyFileExists(fileId, filesService, res, 'file-not-found');
 
@@ -233,6 +241,10 @@ app.post('/user-get-key', (req, res) => {
 
 app.post('/user-create-key', (req, res) => {
   const { fileId, keyId, keySalt, testContent } = req.body || {};
+
+  if (!enforceBudgetScope(res, fileId)) {
+    return;
+  }
 
   const filesService = new FilesService(getAccountDb());
   const file = verifyFileExists(fileId, filesService, res, 'file-not-found');
@@ -262,6 +274,10 @@ app.post('/user-create-key', (req, res) => {
 
 app.post('/reset-user-file', async (req, res) => {
   const { fileId } = req.body || {};
+
+  if (!enforceBudgetScope(res, fileId)) {
+    return;
+  }
 
   const filesService = new FilesService(getAccountDb());
   const file = verifyFileExists(
@@ -314,6 +330,10 @@ app.post('/upload-user-file', async (req, res) => {
   }
   if (!isValidFileId(fileId)) {
     res.status(400).send('invalid fileId');
+    return;
+  }
+
+  if (!enforceBudgetScope(res, fileId)) {
     return;
   }
 
@@ -425,6 +445,10 @@ app.get('/download-user-file', async (req, res) => {
     return;
   }
 
+  if (!enforceBudgetScope(res, fileId)) {
+    return;
+  }
+
   const filesService = new FilesService(getAccountDb());
   const file = verifyFileExists(
     fileId,
@@ -459,6 +483,10 @@ app.get('/download-user-file', async (req, res) => {
 app.post('/update-user-filename', (req, res) => {
   const { fileId, name } = req.body || {};
 
+  if (!enforceBudgetScope(res, fileId)) {
+    return;
+  }
+
   const filesService = new FilesService(getAccountDb());
   const file = verifyFileExists(fileId, filesService, res, 'file-not-found');
 
@@ -479,7 +507,18 @@ app.post('/update-user-filename', (req, res) => {
 
 app.get('/list-user-files', (req, res) => {
   const fileService = new FilesService(getAccountDb());
-  const rows = fileService.find({ userId: res.locals.user_id });
+  let rows = fileService.find({ userId: res.locals.user_id });
+
+  // Scoped API tokens may only see budgets within their scope
+  if (
+    res.locals.auth_method === 'api_token' &&
+    Array.isArray(res.locals.budget_ids) &&
+    res.locals.budget_ids.length > 0
+  ) {
+    const allowed = new Set(res.locals.budget_ids);
+    rows = rows.filter(row => allowed.has(row.id));
+  }
+
   res.send({
     status: 'ok',
     data: rows.map(row => ({
@@ -508,6 +547,10 @@ app.get('/get-user-file-info', (req, res) => {
   //     status: 'error',
   //   });
   // }
+
+  if (!enforceBudgetScope(res, fileId)) {
+    return;
+  }
 
   const fileService = new FilesService(getAccountDb());
 
@@ -552,6 +595,10 @@ app.post('/delete-user-file', (req, res) => {
       reason: 'unprocessable-entity',
       status: 'error',
     });
+    return;
+  }
+
+  if (!enforceBudgetScope(res, fileId)) {
     return;
   }
 
