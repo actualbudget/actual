@@ -12,6 +12,7 @@ export {
   TokenExpiredError,
   InvalidTokenError,
   TokenScopeError,
+  MultipleAuthMethodsError,
 } from '@actual-app/core/server/errors';
 
 /** @deprecated Please use return value of `init` instead */

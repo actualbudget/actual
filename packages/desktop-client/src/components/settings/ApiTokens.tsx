@@ -1,5 +1,5 @@
 import type { KeyboardEvent } from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -19,6 +19,42 @@ import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 
 import { Setting } from './UI';
+
+function mapApiTokenError(code: string, t: (key: string) => string): string {
+  switch (code) {
+    case 'not-logged-in':
+      return t('You are not logged in. Please sign in and try again.');
+    case 'network-failure':
+      return t('Could not reach the server. Please try again.');
+    case 'forbidden-auth-method':
+      return t(
+        'API tokens can only be managed when signed in with a password.',
+      );
+    case 'invalid-name':
+      return t('Please enter a valid name for the token.');
+    case 'invalid-budget-ids':
+    case 'invalid-budget-id':
+      return t('One or more selected budgets are invalid.');
+    case 'forbidden-budget':
+      return t('You do not have access to one or more selected budgets.');
+    case 'invalid-expires-at':
+      return t('The expiration date is invalid.');
+    case 'invalid-token-id':
+      return t('The token could not be found.');
+    case 'invalid-enabled':
+      return t('The requested token state is invalid.');
+    case 'not-found':
+      return t('The token could not be found.');
+    case 'token-expired':
+      return t('Your session has expired. Please sign in again.');
+    case 'token-scope-error':
+      return t('You do not have access to perform this action.');
+    case 'internal-error':
+      return t('The server encountered an error. Please try again.');
+    default:
+      return t('An unexpected error occurred. Please try again.');
+  }
+}
 
 function formatDate(
   timestamp: number | null | undefined,
@@ -131,7 +167,7 @@ function CreateTokenModal({
     const result = await send('api-tokens-create', { name: name.trim() });
 
     if ('error' in result) {
-      setError(result.error);
+      setError(mapApiTokenError(result.error, t));
       setCreating(false);
     } else {
       onCreated(result.data);
@@ -327,6 +363,7 @@ function ShowTokenModal({
 }
 
 export function ApiTokensSettings() {
+  const { t } = useTranslation();
   const serverURL = useServerURL();
   const [tokens, setTokens] = useState<ApiToken[]>([]);
   const [loading, setLoading] = useState(true);
@@ -334,32 +371,33 @@ export function ApiTokensSettings() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newToken, setNewToken] = useState<ApiTokenCreateResult | null>(null);
 
-  const loadTokens = useCallback(async () => {
+  const loadTokens = async () => {
     setLoading(true);
     setError(null);
 
     const result = await send('api-tokens-list');
 
     if ('error' in result) {
-      setError(result.error);
+      setError(mapApiTokenError(result.error, t));
       setTokens([]);
     } else {
       setTokens(result.data);
     }
 
     setLoading(false);
-  }, []);
+  };
 
   useEffect(() => {
     if (serverURL) {
       void loadTokens();
     }
-  }, [serverURL, loadTokens]);
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [serverURL]);
 
   const handleRevoke = async (tokenId: string) => {
     const result = await send('api-tokens-revoke', { tokenId });
     if ('error' in result) {
-      setError(result.error);
+      setError(mapApiTokenError(result.error, t));
     } else {
       await loadTokens();
     }

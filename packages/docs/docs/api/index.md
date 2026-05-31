@@ -44,7 +44,7 @@ Legacy `"node"` / `"node10"` / `"classic"` resolution is not supported in strict
 
 ### Connecting to a Remote Server
 
-Next, you'll need connect to your running server version of Actual to access your budget files. You can authenticate using either a password or an [API token](./api-tokens.md) (recommended for scripts). API tokens can be created in [Settings](/docs/settings/#api-tokens).
+Next, you'll need to connect to your running server version of Actual to access your budget files. You can authenticate using either a password or an [API token](./api-tokens.md) (recommended for scripts). API tokens can be created in [Settings](/docs/settings/#api-tokens).
 
 ```js
 let api = require('@actual-app/api');

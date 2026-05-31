@@ -111,7 +111,7 @@ export function FileUploadError(
 
 // Authentication errors for API token support
 export class AuthError extends Error {
-  type = 'AuthError' as const;
+  type = 'AuthError';
   reason: string;
 
   constructor(reason: string, message?: string) {
@@ -122,6 +122,8 @@ export class AuthError extends Error {
 }
 
 export class TokenExpiredError extends AuthError {
+  type = 'token-expired';
+
   constructor() {
     super(
       'token-expired',
@@ -132,6 +134,8 @@ export class TokenExpiredError extends AuthError {
 }
 
 export class InvalidTokenError extends AuthError {
+  type = 'invalid-token';
+
   constructor() {
     super('invalid-token', 'The API token is invalid or has been revoked.');
     this.name = 'InvalidTokenError';
@@ -139,6 +143,8 @@ export class InvalidTokenError extends AuthError {
 }
 
 export class TokenScopeError extends AuthError {
+  type = 'token-scope';
+
   constructor() {
     super('scope-error', 'The API token does not have access to this budget.');
     this.name = 'TokenScopeError';
@@ -146,6 +152,8 @@ export class TokenScopeError extends AuthError {
 }
 
 export class MultipleAuthMethodsError extends AuthError {
+  type = 'multiple-auth-methods';
+
   constructor() {
     super(
       'multiple-auth-methods',
