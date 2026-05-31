@@ -31,10 +31,7 @@ export class BankSyncPage {
     );
   }
 
-  async waitFor(options?: {
-    state?: 'visible' | 'hidden';
-    timeout?: number;
-  }) {
+  async waitFor(options?: { state?: 'visible' | 'hidden'; timeout?: number }) {
     await this.page.waitForURL('**/bank-sync', { timeout: options?.timeout });
     await this.heading.waitFor({
       state: options?.state ?? 'visible',

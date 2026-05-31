@@ -38,10 +38,7 @@ export class PayeesPage {
     return await this.getAllRows().count();
   }
 
-  async waitFor(options?: {
-    state?: 'visible' | 'hidden';
-    timeout?: number;
-  }) {
+  async waitFor(options?: { state?: 'visible' | 'hidden'; timeout?: number }) {
     await this.page.waitForURL('**/payees', { timeout: options?.timeout });
     await this.searchBox.waitFor({
       state: options?.state ?? 'visible',
