@@ -1,5 +1,7 @@
 import type { Locator, Page } from '@playwright/test';
 
+import { currencyToInteger } from '@actual-app/core/shared/util';
+
 import { AccountPage } from './account-page';
 
 export class BudgetPage {
@@ -26,11 +28,9 @@ export class BudgetPage {
   }
 
   private parseCurrencyText(text: string): number {
-    // Normalize Unicode minus (U+2212) to ASCII minus, then strip thousands
-    // separators (comma or narrow-space). Does not handle European decimal
-    // comma (1.234,56) — Actual's demo data uses US formatting throughout.
-    const normalized = text.replace(/−/g, '-').replace(/[, ]/g, '');
-    return Math.round(parseFloat(normalized) * 100);
+    const amount = currencyToInteger(text);
+    if (amount == null) throw new Error(`Failed to parse currency: "${text}"`);
+    return amount;
   }
 
   async getTotalBudgeted() {
