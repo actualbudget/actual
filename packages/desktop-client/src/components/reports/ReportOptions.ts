@@ -307,7 +307,7 @@ const uncategorizedCategory: UncategorizedEntity = {
   hidden: false,
 };
 const transferCategory: UncategorizedEntity = {
-  id: '',
+  id: 'transfer',
   name: t('Transfers'),
   uncategorized_id: 'transfer',
   hidden: false,

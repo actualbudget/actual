@@ -52,16 +52,25 @@ export function showActivity({
       : (((ReportOptions.intervalMap.get(interval) || 'Day').toLowerCase() +
           'FromDate') as 'dayFromDate' | 'monthFromDate' | 'yearFromDate');
   const isDateOp = interval === 'Weekly' || type !== 'time';
+  const idFilter =
+    id &&
+    (field === 'category' && id === 'transfer'
+      ? {
+          field: 'transfer',
+          op: 'is',
+          value: true,
+          type: 'boolean',
+        }
+      : {
+          field,
+          op: Array.isArray(id) ? 'oneOf' : 'is',
+          value: id,
+          type: 'id',
+        });
 
   const filterConditions = [
     ...filters,
-    id && {
-      // changed: use oneOf when id is an array, is when it's a string
-      field,
-      op: Array.isArray(id) ? 'oneOf' : 'is',
-      value: id,
-      type: 'id',
-    },
+    idFilter,
     {
       field: 'date',
       op: isDateOp ? 'gte' : 'is',
