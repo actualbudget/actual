@@ -117,13 +117,13 @@ console.log('display:', style); // → "none"
 const addCategoryBtn = page.locator('[aria-label="Add category"]').first();
 await addCategoryBtn.locator('xpath=ancestor::*[5]').hover();
 // display is now 'flex'
-await addCategoryBtn.dispatchEvent('click');
+await addCategoryBtn.evaluate((el: HTMLElement) => el.click());
 // input appears ✓
 ```
 
-**Why `dispatchEvent` not `click()`:** React Aria's `onPress` responds to pointer events. After the ancestor hover makes the button `display:flex`, `dispatchEvent('click')` fires the DOM event directly without Playwright re-checking visibility (which could race with CSS hover state leaving).
+**Why `el.evaluate()` not `dispatchEvent('click')`:** React Aria's `onPress` responds to the browser's native click event chain. `HTMLElement.click()` via `evaluate` triggers the full event sequence that React Aria listens to, whereas `dispatchEvent('click')` was later flagged in code review as not reliably activating the `onPress` handler. `el.evaluate()` is consistent with how the existing navigation page model handles similar React Aria buttons.
 
-**Lesson:** When a button is hidden via `display:none` controlled by ancestor hover CSS, the ancestor must be hovered first, and `dispatchEvent` is more reliable than Playwright's `click()` because it bypasses the final visibility re-check.
+**Lesson:** When a button is hidden via `display:none` controlled by ancestor hover CSS, hover the ancestor first, then use `el.evaluate((el: HTMLElement) => el.click())` to activate React Aria components reliably.
 
 ---
 
@@ -166,6 +166,31 @@ const [rulesResult, schedulesResult, reportsResult] = await parallel([
 **Fix:** Use `nth(1)` (first actual category row) instead of `.first()` or `.nth(0)`.
 
 **The broader pattern:** This is an example of a test that passes for the wrong reason — a common E2E pitfall. The fix required understanding the difference between group rows and category rows in the virtualized budget table.
+
+---
+
+## Interaction 7 — Addressing Code Review Feedback
+
+After the PR was opened, a code reviewer flagged several issues. I used AI to systematically work through each one.
+
+**Review issues and fixes:**
+
+| Issue | Fix applied |
+| --- | --- |
+| `disabledSetupButton` aliased the enabled button | Narrowed to `button[disabled], button[aria-disabled="true"]` selector |
+| `waitFor` advertised `'attached'`/`'detached'` states it never honored | Constrained type to `'visible' \| 'hidden'` in bank-sync and payees page models |
+| `getAllRows()` was page-wide and could match unrelated rows | Anchored to `page.getByTestId('table')` container |
+| `parseCurrencyText` missed Unicode minus sign (U+2212) | Added `.replace(/−/g, '-')` normalization before parsing |
+| `dispatchEvent('click')` unreliable for React Aria `onPress` | Replaced with `el.evaluate((el: HTMLElement) => el.click())` |
+| `waitForTimeout` fixed sleeps are flaky under CI load | Replaced with state-based waits: `not.toHaveValue`, `not.toBeVisible`, `toPass` |
+| Parallel tests sharing mutable `let localCustomReportPage` | Moved page model instantiation inside each test to eliminate shared state |
+
+**What required iteration:**
+
+- The escape-cancel test: replacing `waitForTimeout(500)` with `expect(...).not.toBeVisible()` failed because the SheetCell keeps the textbox mounted after Escape — it resets the value but doesn't hide the input. Correct wait: `expect(budgetCell.getByRole('textbox')).not.toHaveValue('999999')`.
+- The payees container testid: `payees-list` didn't exist in the DOM. Discovered the correct container is `table` (consistent with the rules page model pattern) by checking the failure message.
+
+**Key insight:** Code review surfaced issues that passing tests can't catch — type contract mismatches, selector scope bugs, and shared state under parallel execution. AI was effective at implementing the fixes once the root cause was identified; the iteration happened in diagnosing the two failures above.
 
 ---
 

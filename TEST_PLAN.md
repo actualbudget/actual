@@ -81,7 +81,7 @@ These two features were chosen because they are tightly coupled: every transacti
 
 **Implemented by:** `Budget › creates a new budget category inside an existing group`
 
-**Implementation note:** The "Add category" button uses a CSS `display:none → display:flex` on `:hover` pattern (React Aria component). Playwright requires hovering the 5th DOM ancestor and using `dispatchEvent('click')` to bypass the visibility constraint — a real-world complexity that required DOM inspection to solve.
+**Implementation note:** The "Add category" button uses a CSS `display:none → display:flex` on `:hover` pattern (React Aria component). Playwright requires hovering the 5th DOM ancestor to trigger the CSS transition, then using `el.evaluate((el: HTMLElement) => el.click())` to fire the React Aria `onPress` handler — a real-world complexity that required DOM inspection to solve.
 
 ---
 
@@ -409,7 +409,7 @@ yarn playwright test budget.test.ts transactions.test.ts --browser=chromium
 | Decision                                                        | Reason                                                                                                                                                                                                        |
 | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Use `nth(1)` not `.first()` for editable category rows          | Row index 0 is always a group header — clicking its budget cell has no effect. This was only discovered by running tests and observing the DOM.                                                               |
-| Hover 5th ancestor before dispatching `click` on "Add category" | The button is `display:none` (not just `opacity:0`) until a specific ancestor is hovered. Standard Playwright `click()` and `force:true` both fail; ancestor hover + `dispatchEvent` is the correct approach. |
+| Hover 5th ancestor + `el.evaluate()` for "Add category" | The button is `display:none` (not just `opacity:0`) until a specific ancestor is hovered. Standard Playwright `click()` and `force:true` both fail. After hover, `el.evaluate((el: HTMLElement) => el.click())` fires the React Aria `onPress` handler reliably. |
 | Use existing payees (Kroger, Home Depot) in tests               | Creating a new payee name triggers a "Merge unused payees?" modal that blocks the test. Using existing payees avoids this dialog.                                                                             |
 | Delete test clicks "Delete" twice                               | The select-action menu opens a confirmation dialog after the first "Delete" click. Both must be handled.                                                                                                      |
 | `fill()` instead of `Control+A` + `type()` for budget cells     | `SheetCell` enters edit mode asynchronously via `onExpose`. Typing before focus settles causes incorrect values. `fill()` waits for the textbox to be interactive.                                            |
