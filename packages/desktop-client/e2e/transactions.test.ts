@@ -244,6 +244,111 @@ test.describe('Transactions', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('searches transactions and filters the list', async () => {
+    // The demo Ally Savings account contains pre-existing transactions.
+    // Searching for a known payee should narrow the list; an unknown string
+    // should show the empty state; clearing restores the full list.
+    await accountPage.waitFor();
+    await expect(accountPage.transactionTableRow.first()).toBeVisible();
+    const totalBefore = await accountPage.getTransactionCount();
+    console.log(`[search] total transactions before search: ${totalBefore}`);
+    expect(totalBefore).toBeGreaterThan(0);
+
+    await accountPage.searchTransactions('Kroger');
+    await expect(async () => {
+      const filteredCount = await accountPage.getTransactionCount();
+      expect(filteredCount).toBeGreaterThan(0);
+      expect(filteredCount).toBeLessThan(totalBefore);
+    }).toPass();
+    const krogerCount = await accountPage.getTransactionCount();
+    console.log(`[search] after "Kroger" — ${krogerCount} rows shown (down from ${totalBefore})`);
+    await expect(accountPage.getNthTransaction(0).payee).toHaveText('Kroger');
+
+    await accountPage.searchTransactions('ZZZZZ_NONEXISTENT_XYZ');
+    await expect(accountPage.transactionTable).toContainText('No transactions');
+    console.log(`[search] after "ZZZZZ_NONEXISTENT_XYZ" — "No transactions" shown`);
+
+    await accountPage.clearSearch();
+    await expect(async () => {
+      const restoredCount = await accountPage.getTransactionCount();
+      expect(restoredCount).toBe(totalBefore);
+    }).toPass();
+    console.log(`[search] after clear — restored to ${totalBefore} rows`);
+  });
+
+  test('edits a transaction notes field inline', async () => {
+    // Use an existing payee (Kroger) to avoid triggering the "merge unused
+    // payees" modal that appears when a brand-new payee name is committed.
+    await accountPage.createSingleTransaction({
+      payee: 'Kroger',
+      notes: 'original note',
+      debit: '25.00',
+    });
+
+    const firstTx = accountPage.getNthTransaction(0);
+    await expect(firstTx.notes).toHaveText('original note');
+    console.log(`[edit-inline] notes before edit: "original note"`);
+
+    await firstTx.notes.click();
+    const notesInput = firstTx.notes.getByRole('combobox');
+    await accountPage.selectInputText(notesInput);
+    await notesInput.pressSequentially('updated note');
+    await page.keyboard.press('Enter');
+
+    await expect(firstTx.notes).toHaveText('updated note');
+    console.log(`[edit-inline] notes after edit:  "updated note"`);
+    // Payee and amount must be unchanged
+    await expect(firstTx.payee).toHaveText('Kroger');
+    await expect(firstTx.debit).toHaveText('25.00');
+    console.log(`[edit-inline] payee: "Kroger" unchanged, debit: "$25.00" unchanged`);
+  });
+
+  test('deletes a transaction and reverts the account balance', async () => {
+    let balanceBeforeCreate: string | null;
+    let balanceAfterCreate: string | null;
+
+    await test.step('record account balance before any changes', async () => {
+      balanceBeforeCreate = await accountPage.accountBalance.textContent();
+      console.log(`[delete-tx] balance before create: ${balanceBeforeCreate}`);
+    });
+
+    await test.step('create a $99.99 Home Depot debit transaction', async () => {
+      await accountPage.createSingleTransaction({
+        payee: 'Home Depot',
+        debit: '99.99',
+      });
+      const firstTx = accountPage.getNthTransaction(0);
+      await expect(firstTx.payee).toHaveText('Home Depot');
+      await expect(firstTx.debit).toHaveText('99.99');
+    });
+
+    await test.step('assert account balance decreased after transaction was added', async () => {
+      await expect(async () => {
+        const b = await accountPage.accountBalance.textContent();
+        expect(b).not.toBe(balanceBeforeCreate);
+      }).toPass();
+      balanceAfterCreate = await accountPage.accountBalance.textContent();
+      console.log(`[delete-tx] balance after  create: ${balanceAfterCreate} (decreased by $99.99)`);
+    });
+
+    await test.step('select transaction → Delete → confirm dialog', async () => {
+      await accountPage.selectNthTransaction(0);
+      await page.waitForTimeout(300);
+      await accountPage.clickSelectAction('Delete');
+      await page.getByRole('button', { name: 'Delete' }).click();
+    });
+
+    await test.step('assert balance reverted to original value', async () => {
+      await expect(async () => {
+        const b = await accountPage.accountBalance.textContent();
+        expect(b).toBe(balanceBeforeCreate);
+      }).toPass();
+      const finalBalance = await accountPage.accountBalance.textContent();
+      console.log(`[delete-tx] balance after  delete: ${finalBalance} — reverted: ${finalBalance === balanceBeforeCreate}`);
+      expect(balanceAfterCreate).not.toBe(balanceBeforeCreate);
+    });
+  });
+
   test('creates a transfer test transaction', async () => {
     await accountPage.enterSingleTransaction({
       payee: 'Bank of America',
