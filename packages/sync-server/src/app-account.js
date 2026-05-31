@@ -128,8 +128,8 @@ app.post('/login', authRateLimiter, async (req, res) => {
   res.send({ status: 'ok', data: { token } });
 });
 
-app.post('/change-password', (req, res) => {
-  const session = validateSession(req, res);
+app.post('/change-password', async (req, res) => {
+  const session = await validateSession(req, res);
   if (!session) return;
 
   if (!isAdmin(session.user_id)) {
@@ -160,9 +160,18 @@ app.post('/change-password', (req, res) => {
   res.send({ status: 'ok', data: {} });
 });
 
-app.post('/server-prefs', (req, res) => {
-  const session = validateSession(req, res);
+app.post('/server-prefs', async (req, res) => {
+  const session = await validateSession(req, res);
   if (!session) return;
+
+  if (session.auth_method === 'api_token') {
+    res.status(403).send({
+      status: 'error',
+      reason: 'forbidden-auth-method',
+      details: 'API tokens cannot access this endpoint',
+    });
+    return;
+  }
 
   if (!isAdmin(session.user_id)) {
     res.status(403).send({
@@ -185,8 +194,8 @@ app.post('/server-prefs', (req, res) => {
   res.send({ status: 'ok', data: {} });
 });
 
-app.get('/validate', (req, res) => {
-  const session = validateSession(req, res);
+app.get('/validate', async (req, res) => {
+  const session = await validateSession(req, res);
   if (session) {
     const user = getUserInfo(session.user_id);
     if (!user) {
@@ -203,7 +212,10 @@ app.get('/validate', (req, res) => {
         userId: session?.user_id,
         displayName: user?.display_name,
         loginMethod: session?.auth_method,
-        prefs: getServerPrefs(),
+        // Server prefs are not exposed to API token sessions
+        ...(session.auth_method === 'api_token'
+          ? {}
+          : { prefs: getServerPrefs() }),
       },
     });
   }

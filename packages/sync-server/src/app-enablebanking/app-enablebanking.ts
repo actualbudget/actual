@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { handleError } from '#app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '#services/secrets-service';
 import {
+  rejectApiTokenMiddleware,
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
@@ -154,6 +155,7 @@ app.get('/auth_callback', async (req: Request, res: Response) => {
 });
 
 app.use(validateSessionMiddleware);
+app.use(rejectApiTokenMiddleware);
 
 // --- Poll/complete-auth coordination ---
 

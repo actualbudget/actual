@@ -5,6 +5,7 @@ import { isAdmin } from './account-db';
 import * as UserService from './services/user-service';
 import {
   errorMiddleware,
+  rejectApiTokenMiddleware,
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from './util/middlewares';
@@ -26,200 +27,253 @@ app.get('/owner-created/', (req, res) => {
   }
 });
 
-app.get('/users/', validateSessionMiddleware, (req, res) => {
-  const users = UserService.getAllUsers();
-  res.json(
-    users.map(u => ({
-      ...u,
-      owner: u.owner === 1,
-      enabled: u.enabled === 1,
-    })),
-  );
-});
+app.get(
+  '/users/',
+  validateSessionMiddleware,
+  rejectApiTokenMiddleware,
+  (req, res) => {
+    if (!isAdmin(res.locals.user_id)) {
+      res.status(403).send({
+        status: 'error',
+        reason: 'forbidden',
+        details: 'permission-not-found',
+      });
+      return;
+    }
 
-app.post('/users', validateSessionMiddleware, async (req, res) => {
-  if (!isAdmin(res.locals.user_id)) {
-    res.status(403).send({
-      status: 'error',
-      reason: 'forbidden',
-      details: 'permission-not-found',
+    const users = UserService.getAllUsers();
+    res.json(
+      users.map(u => ({
+        ...u,
+        owner: u.owner === 1,
+        enabled: u.enabled === 1,
+      })),
+    );
+  },
+);
+
+app.post(
+  '/users',
+  validateSessionMiddleware,
+  rejectApiTokenMiddleware,
+  async (req, res) => {
+    if (!isAdmin(res.locals.user_id)) {
+      res.status(403).send({
+        status: 'error',
+        reason: 'forbidden',
+        details: 'permission-not-found',
+      });
+      return;
+    }
+
+    const { userName, role, displayName, enabled } = req.body || {};
+
+    if (!userName || !role) {
+      res.status(400).send({
+        status: 'error',
+        reason: `${!userName ? 'user-cant-be-empty' : 'role-cant-be-empty'}`,
+        details: `${!userName ? 'Username' : 'Role'} cannot be empty`,
+      });
+      return;
+    }
+
+    const roleIdFromDb = UserService.validateRole(role);
+    if (!roleIdFromDb) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'role-does-not-exists',
+        details: 'Selected role does not exist',
+      });
+      return;
+    }
+
+    const userIdInDb = UserService.getUserByUsername(userName);
+    if (userIdInDb) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'user-already-exists',
+        details: `User ${userName} already exists`,
+      });
+      return;
+    }
+
+    const userId = uuidv4();
+    UserService.insertUser(
+      userId,
+      userName,
+      displayName || null,
+      enabled ? 1 : 0,
+    );
+
+    res.status(200).send({ status: 'ok', data: { id: userId } });
+  },
+);
+
+app.patch(
+  '/users',
+  validateSessionMiddleware,
+  rejectApiTokenMiddleware,
+  async (req, res) => {
+    if (!isAdmin(res.locals.user_id)) {
+      res.status(403).send({
+        status: 'error',
+        reason: 'forbidden',
+        details: 'permission-not-found',
+      });
+      return;
+    }
+
+    const { id, userName, role, displayName, enabled } = req.body || {};
+
+    if (!userName || !role) {
+      res.status(400).send({
+        status: 'error',
+        reason: `${!userName ? 'user-cant-be-empty' : 'role-cant-be-empty'}`,
+        details: `${!userName ? 'Username' : 'Role'} cannot be empty`,
+      });
+      return;
+    }
+
+    const roleIdFromDb = UserService.validateRole(role);
+    if (!roleIdFromDb) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'role-does-not-exists',
+        details: 'Selected role does not exist',
+      });
+      return;
+    }
+
+    const userIdInDb = UserService.getUserById(id);
+    if (!userIdInDb) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'cannot-find-user-to-update',
+        details: `Cannot find user ${userName} to update`,
+      });
+      return;
+    }
+
+    UserService.updateUserWithRole(
+      userIdInDb,
+      userName,
+      displayName || null,
+      enabled ? 1 : 0,
+      role,
+    );
+
+    res.status(200).send({ status: 'ok', data: { id: userIdInDb } });
+  },
+);
+
+app.delete(
+  '/users',
+  validateSessionMiddleware,
+  rejectApiTokenMiddleware,
+  async (req, res) => {
+    if (!isAdmin(res.locals.user_id)) {
+      res.status(403).send({
+        status: 'error',
+        reason: 'forbidden',
+        details: 'permission-not-found',
+      });
+      return;
+    }
+
+    const { ids } = req.body || {};
+
+    if (!Array.isArray(ids)) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'invalid-ids',
+        details: 'ids must be an array',
+      });
+      return;
+    }
+
+    let totalDeleted = 0;
+    ids.forEach(item => {
+      const ownerId = UserService.getOwnerId();
+
+      if (item === ownerId) return;
+
+      UserService.deleteUserAccess(item);
+      UserService.transferAllFilesFromUser(ownerId, item);
+      const usersDeleted = UserService.deleteUser(item);
+      totalDeleted += usersDeleted;
     });
-    return;
-  }
 
-  const { userName, role, displayName, enabled } = req.body || {};
+    if (ids.length === totalDeleted) {
+      res
+        .status(200)
+        .send({ status: 'ok', data: { someDeletionsFailed: false } });
+    } else {
+      res.status(400).send({
+        status: 'error',
+        reason: 'not-all-deleted',
+        details: '',
+      });
+    }
+  },
+);
 
-  if (!userName || !role) {
-    res.status(400).send({
-      status: 'error',
-      reason: `${!userName ? 'user-cant-be-empty' : 'role-cant-be-empty'}`,
-      details: `${!userName ? 'Username' : 'Role'} cannot be empty`,
-    });
-    return;
-  }
+app.get(
+  '/access',
+  validateSessionMiddleware,
+  rejectApiTokenMiddleware,
+  (req, res) => {
+    const fileId = req.query.fileId;
 
-  const roleIdFromDb = UserService.validateRole(role);
-  if (!roleIdFromDb) {
-    res.status(400).send({
-      status: 'error',
-      reason: 'role-does-not-exists',
-      details: 'Selected role does not exist',
-    });
-    return;
-  }
+    const { granted } = UserService.checkFilePermission(
+      fileId,
+      res.locals.user_id,
+    ) || {
+      granted: 0,
+    };
 
-  const userIdInDb = UserService.getUserByUsername(userName);
-  if (userIdInDb) {
-    res.status(400).send({
-      status: 'error',
-      reason: 'user-already-exists',
-      details: `User ${userName} already exists`,
-    });
-    return;
-  }
+    if (granted === 0 && !isAdmin(res.locals.user_id)) {
+      res.status(403).send({
+        status: 'error',
+        reason: 'forbidden',
+        details: 'permission-not-found',
+      });
+      return false;
+    }
 
-  const userId = uuidv4();
-  UserService.insertUser(
-    userId,
-    userName,
-    displayName || null,
-    enabled ? 1 : 0,
-  );
+    const fileIdInDb = UserService.getFileById(fileId);
+    if (!fileIdInDb) {
+      res.status(404).send({
+        status: 'error',
+        reason: 'invalid-file-id',
+        details: 'File not found at server',
+      });
+      return false;
+    }
 
-  res.status(200).send({ status: 'ok', data: { id: userId } });
-});
+    const accesses = UserService.getUserAccess(
+      fileId,
+      res.locals.user_id,
+      isAdmin(res.locals.user_id),
+    );
 
-app.patch('/users', validateSessionMiddleware, async (req, res) => {
-  if (!isAdmin(res.locals.user_id)) {
-    res.status(403).send({
-      status: 'error',
-      reason: 'forbidden',
-      details: 'permission-not-found',
-    });
-    return;
-  }
+    res.json(accesses);
+  },
+);
 
-  const { id, userName, role, displayName, enabled } = req.body || {};
-
-  if (!userName || !role) {
-    res.status(400).send({
-      status: 'error',
-      reason: `${!userName ? 'user-cant-be-empty' : 'role-cant-be-empty'}`,
-      details: `${!userName ? 'Username' : 'Role'} cannot be empty`,
-    });
-    return;
-  }
-
-  const roleIdFromDb = UserService.validateRole(role);
-  if (!roleIdFromDb) {
-    res.status(400).send({
-      status: 'error',
-      reason: 'role-does-not-exists',
-      details: 'Selected role does not exist',
-    });
-    return;
-  }
-
-  const userIdInDb = UserService.getUserById(id);
-  if (!userIdInDb) {
-    res.status(400).send({
-      status: 'error',
-      reason: 'cannot-find-user-to-update',
-      details: `Cannot find user ${userName} to update`,
-    });
-    return;
-  }
-
-  UserService.updateUserWithRole(
-    userIdInDb,
-    userName,
-    displayName || null,
-    enabled ? 1 : 0,
-    role,
-  );
-
-  res.status(200).send({ status: 'ok', data: { id: userIdInDb } });
-});
-
-app.delete('/users', validateSessionMiddleware, async (req, res) => {
-  if (!isAdmin(res.locals.user_id)) {
-    res.status(403).send({
-      status: 'error',
-      reason: 'forbidden',
-      details: 'permission-not-found',
-    });
-    return;
-  }
-
-  const { ids } = req.body || {};
-  let totalDeleted = 0;
-  ids.forEach(item => {
-    const ownerId = UserService.getOwnerId();
-
-    if (item === ownerId) return;
-
-    UserService.deleteUserAccess(item);
-    UserService.transferAllFilesFromUser(ownerId, item);
-    const usersDeleted = UserService.deleteUser(item);
-    totalDeleted += usersDeleted;
-  });
-
-  if (ids.length === totalDeleted) {
-    res
-      .status(200)
-      .send({ status: 'ok', data: { someDeletionsFailed: false } });
-  } else {
-    res.status(400).send({
-      status: 'error',
-      reason: 'not-all-deleted',
-      details: '',
-    });
-  }
-});
-
-app.get('/access', validateSessionMiddleware, (req, res) => {
-  const fileId = req.query.fileId;
-
-  const { granted } = UserService.checkFilePermission(
-    fileId,
-    res.locals.user_id,
-  ) || {
-    granted: 0,
-  };
-
-  if (granted === 0 && !isAdmin(res.locals.user_id)) {
-    res.status(403).send({
-      status: 'error',
-      reason: 'forbidden',
-      details: 'permission-not-found',
-    });
-    return false;
-  }
-
-  const fileIdInDb = UserService.getFileById(fileId);
-  if (!fileIdInDb) {
-    res.status(404).send({
-      status: 'error',
-      reason: 'invalid-file-id',
-      details: 'File not found at server',
-    });
-    return false;
-  }
-
-  const accesses = UserService.getUserAccess(
-    fileId,
-    res.locals.user_id,
-    isAdmin(res.locals.user_id),
-  );
-
-  res.json(accesses);
-});
-
-app.post('/access', (req, res) => {
+app.post('/access', async (req, res) => {
   const userAccess = req.body || {};
-  const session = validateSession(req, res);
+  const session = await validateSession(req, res);
 
   if (!session) return;
+
+  if (session.auth_method === 'api_token') {
+    res.status(403).send({
+      status: 'error',
+      reason: 'forbidden-auth-method',
+      details: 'API tokens cannot access this endpoint',
+    });
+    return;
+  }
 
   const { granted } = UserService.checkFilePermission(
     userAccess.fileId,
@@ -270,10 +324,19 @@ app.post('/access', (req, res) => {
   res.status(200).send({ status: 'ok', data: {} });
 });
 
-app.delete('/access', (req, res) => {
+app.delete('/access', async (req, res) => {
   const fileId = req.query.fileId;
-  const session = validateSession(req, res);
+  const session = await validateSession(req, res);
   if (!session) return;
+
+  if (session.auth_method === 'api_token') {
+    res.status(403).send({
+      status: 'error',
+      reason: 'forbidden-auth-method',
+      details: 'API tokens cannot access this endpoint',
+    });
+    return;
+  }
 
   const { granted } = UserService.checkFilePermission(
     fileId,
@@ -317,42 +380,48 @@ app.delete('/access', (req, res) => {
   }
 });
 
-app.get('/access/users', validateSessionMiddleware, async (req, res) => {
-  const fileId = req.query.fileId;
+app.get(
+  '/access/users',
+  validateSessionMiddleware,
+  rejectApiTokenMiddleware,
+  async (req, res) => {
+    const fileId = req.query.fileId;
 
-  const { granted } = UserService.checkFilePermission(
-    fileId,
-    res.locals.user_id,
-  ) || {
-    granted: 0,
-  };
+    const { granted } = UserService.checkFilePermission(
+      fileId,
+      res.locals.user_id,
+    ) || {
+      granted: 0,
+    };
 
-  if (granted === 0 && !isAdmin(res.locals.user_id)) {
-    res.status(400).send({
-      status: 'error',
-      reason: 'file-denied',
-      details: "You don't have permissions over this file",
-    });
-    return;
-  }
+    if (granted === 0 && !isAdmin(res.locals.user_id)) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'file-denied',
+        details: "You don't have permissions over this file",
+      });
+      return;
+    }
 
-  const fileIdInDb = UserService.getFileById(fileId);
-  if (!fileIdInDb) {
-    res.status(404).send({
-      status: 'error',
-      reason: 'invalid-file-id',
-      details: 'File not found at server',
-    });
-    return;
-  }
+    const fileIdInDb = UserService.getFileById(fileId);
+    if (!fileIdInDb) {
+      res.status(404).send({
+        status: 'error',
+        reason: 'invalid-file-id',
+        details: 'File not found at server',
+      });
+      return;
+    }
 
-  const users = UserService.getAllUserAccess(fileId);
-  res.json(users);
-});
+    const users = UserService.getAllUserAccess(fileId);
+    res.json(users);
+  },
+);
 
 app.post(
   '/access/transfer-ownership/',
   validateSessionMiddleware,
+  rejectApiTokenMiddleware,
   (req, res) => {
     const newUserOwner = req.body || {};
 
