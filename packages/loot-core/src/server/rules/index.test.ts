@@ -525,6 +525,66 @@ describe('Action', () => {
       spy.mockRestore();
     });
   });
+
+  describe('append-notes', () => {
+    test('appends text when notes is empty', () => {
+      const action = new Action('append-notes', null, ' Appended', null);
+      const item = { notes: '' };
+      action.exec(item);
+      expect(item.notes).toBe(' Appended');
+    });
+
+    test('appends text when notes is null', () => {
+      const action = new Action('append-notes', null, 'Appended', null);
+      const item = { notes: null };
+      action.exec(item);
+      expect(item.notes).toBe('Appended');
+    });
+
+    test('appends text to existing notes', () => {
+      const action = new Action('append-notes', null, ' Appended', null);
+      const item = { notes: 'Existing note' };
+      action.exec(item);
+      expect(item.notes).toBe('Existing note Appended');
+    });
+
+    test('sets _forceApplyFields when appending', () => {
+      const action = new Action('append-notes', null, ' Appended', null);
+      const item: Record<string, unknown> = { notes: 'Existing note' };
+      action.exec(item);
+      expect(item._forceApplyFields).toContain('notes');
+    });
+  });
+
+  describe('prepend-notes', () => {
+    test('prepends text when notes is empty', () => {
+      const action = new Action('prepend-notes', null, 'Prepended ', null);
+      const item = { notes: '' };
+      action.exec(item);
+      expect(item.notes).toBe('Prepended ');
+    });
+
+    test('prepends text when notes is null', () => {
+      const action = new Action('prepend-notes', null, 'Prepended', null);
+      const item = { notes: null };
+      action.exec(item);
+      expect(item.notes).toBe('Prepended');
+    });
+
+    test('prepends text to existing notes', () => {
+      const action = new Action('prepend-notes', null, 'Prepended ', null);
+      const item = { notes: 'Existing note' };
+      action.exec(item);
+      expect(item.notes).toBe('Prepended Existing note');
+    });
+
+    test('sets _forceApplyFields when prepending', () => {
+      const action = new Action('prepend-notes', null, 'Prepended ', null);
+      const item: Record<string, unknown> = { notes: 'Existing note' };
+      action.exec(item);
+      expect(item._forceApplyFields).toContain('notes');
+    });
+  });
 });
 
 describe('Rule', () => {
