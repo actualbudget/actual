@@ -70,6 +70,12 @@ export class Navigation {
     this.page = page;
   }
 
+  async goToBudgetPage() {
+    await this.page.getByRole('link', { name: 'Budget' }).first().click();
+    const { BudgetPage } = await import('./budget-page');
+    return new BudgetPage(this.page);
+  }
+
   async goToAccountPage(accountName: string) {
     await this.page
       .getByRole('link', { name: new RegExp(`^${accountName}`) })

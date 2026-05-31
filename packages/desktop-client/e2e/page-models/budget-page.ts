@@ -1,3 +1,4 @@
+import { currencyToInteger } from '@actual-app/core/shared/util';
 import type { Locator, Page } from '@playwright/test';
 
 import { AccountPage } from './account-page';
@@ -25,40 +26,37 @@ export class BudgetPage {
     await this.budgetTable.waitFor(...options);
   }
 
+  private parseCurrencyText(text: string): number {
+    const amount = currencyToInteger(text);
+    if (amount == null) throw new Error(`Failed to parse currency: "${text}"`);
+    return amount;
+  }
+
   async getTotalBudgeted() {
-    const totalBudgetedText = await this.budgetTableTotals
+    const text = await this.budgetTableTotals
       .getByTestId(/total-budgeted$/)
       .textContent();
 
-    if (!totalBudgetedText) {
-      throw new Error('Failed to get total budgeted.');
-    }
-
-    return parseInt(totalBudgetedText, 10);
+    if (!text) throw new Error('Failed to get total budgeted.');
+    return this.parseCurrencyText(text);
   }
 
   async getTotalSpent() {
-    const totalSpentText = await this.budgetTableTotals
+    const text = await this.budgetTableTotals
       .getByTestId(/total-spent$/)
       .textContent();
 
-    if (!totalSpentText) {
-      throw new Error('Failed to get total spent.');
-    }
-
-    return parseInt(totalSpentText, 10);
+    if (!text) throw new Error('Failed to get total spent.');
+    return this.parseCurrencyText(text);
   }
 
   async getTotalLeftover() {
-    const totalLeftoverText = await this.budgetTableTotals
+    const text = await this.budgetTableTotals
       .getByTestId(/total-leftover$/)
       .textContent();
 
-    if (!totalLeftoverText) {
-      throw new Error('Failed to get total leftover.');
-    }
-
-    return parseInt(totalLeftoverText, 10);
+    if (!text) throw new Error('Failed to get total leftover.');
+    return this.parseCurrencyText(text);
   }
 
   async getTableTotals() {
@@ -71,6 +69,18 @@ export class BudgetPage {
 
   async showMoreMonths() {
     await this.page.getByTestId('calendar-icon').first().click();
+  }
+
+  async goToPreviousMonth() {
+    await this.page.getByTitle('Previous month').click();
+  }
+
+  async goToNextMonth() {
+    await this.page.getByTitle('Next month').click();
+  }
+
+  async getCurrentMonthSummary() {
+    return this.budgetSummary.first();
   }
 
   async getBalanceForRow(idx: number) {
@@ -88,7 +98,7 @@ export class BudgetPage {
   }
 
   async getCategoryNameForRow(idx: number) {
-    const categoryNameText = this.budgetTable
+    const categoryNameText = await this.budgetTable
       .getByTestId('row')
       .nth(idx)
       .getByTestId('category-name')

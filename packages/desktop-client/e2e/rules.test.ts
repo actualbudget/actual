@@ -70,6 +70,56 @@ test.describe('Rules', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('search filters rules by payee name', async () => {
+    const allRows = page.getByTestId('table').getByTestId('row');
+
+    await rulesPage.searchFor('Fast Internet');
+    console.log(
+      '[rules] searched "Fast Internet" — matching rule row should be visible',
+    );
+    await expect(allRows.first()).toBeVisible();
+    await expect(
+      allRows.filter({ hasText: 'Fast Internet' }).first(),
+    ).toBeVisible();
+
+    await rulesPage.searchFor('zzznonexistentpayeexxx');
+    console.log('[rules] searched "zzznonexistentpayeexxx" — expect 0 rows');
+    await expect(allRows).toHaveCount(0);
+  });
+
+  test('rule count increases by one after creating a new rule', async () => {
+    const allRows = page.getByTestId('table').getByTestId('row');
+    // Wait for the table to render before reading the count — on slower CI
+    // machines the table may still be empty when count() is first called.
+    await expect(allRows.first()).toBeVisible();
+    const initialCount = await allRows.count();
+    console.log(`[rules] initial rule count: ${initialCount}`);
+
+    const editRuleModal = await rulesPage.createNewRule();
+    await editRuleModal.fill({
+      conditions: [{ field: 'payee', op: 'is', value: 'Kroger' }],
+      actions: [{ field: 'category', value: 'Food' }],
+    });
+    await editRuleModal.save();
+    console.log(
+      `[rules] created rule: payee is "Kroger" → set category to "Food", expected count: ${initialCount + 1}`,
+    );
+
+    await expect(allRows).toHaveCount(initialCount + 1);
+  });
+
+  test('search is case-insensitive', async () => {
+    const allRows = page.getByTestId('table').getByTestId('row');
+
+    await rulesPage.searchFor('fast internet');
+    console.log(
+      '[rules] searched "fast internet" (lowercase) — matching rule should appear (case-insensitive)',
+    );
+    await expect(
+      allRows.filter({ hasText: /fast internet/i }).first(),
+    ).toBeVisible();
+  });
+
   test('creates a split transaction rule and makes sure it is applied when creating a transaction', async () => {
     rulesPage = await navigation.goToRulesPage();
 

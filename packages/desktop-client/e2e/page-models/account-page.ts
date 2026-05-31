@@ -272,6 +272,18 @@ export class AccountPage {
       await input.selectText();
     }
   }
+
+  async searchTransactions(query: string) {
+    await this.page.getByPlaceholder('Search').fill(query);
+  }
+
+  async clearSearch() {
+    await this.page.getByPlaceholder('Search').clear();
+  }
+
+  async getTransactionCount() {
+    return this.transactionTableRow.count();
+  }
 }
 
 class FilterTooltip {

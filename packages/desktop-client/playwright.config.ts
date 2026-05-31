@@ -18,6 +18,11 @@ export default defineConfig({
     baseURL: process.env.E2E_START_URL ?? 'http://localhost:3001',
     trace: 'on-first-retry',
     ignoreHTTPSErrors: true,
+    video: 'retain-on-failure',
+    // Set PLAYWRIGHT_SLOW_MO=500 (ms) to slow down interactions for demos.
+    launchOptions: {
+      slowMo: parseInt(process.env.PLAYWRIGHT_SLOW_MO ?? '0'),
+    },
   },
   expect: {
     // Default expect timeout (5s) is too tight for initial render of the
