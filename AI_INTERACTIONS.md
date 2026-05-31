@@ -175,15 +175,15 @@ After the PR was opened, a code reviewer flagged several issues. I used AI to sy
 
 **Review issues and fixes:**
 
-| Issue | Fix applied |
-| --- | --- |
-| `disabledSetupButton` aliased the enabled button | Narrowed to `button[disabled], button[aria-disabled="true"]` selector |
+| Issue                                                                  | Fix applied                                                                     |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `disabledSetupButton` aliased the enabled button                       | Narrowed to `button[disabled], button[aria-disabled="true"]` selector           |
 | `waitFor` advertised `'attached'`/`'detached'` states it never honored | Constrained type to `'visible' \| 'hidden'` in bank-sync and payees page models |
-| `getAllRows()` was page-wide and could match unrelated rows | Anchored to `page.getByTestId('table')` container |
-| `parseCurrencyText` missed Unicode minus sign (U+2212) | Added `.replace(/−/g, '-')` normalization before parsing |
-| `dispatchEvent('click')` unreliable for React Aria `onPress` | Replaced with `el.evaluate((el: HTMLElement) => el.click())` |
-| `waitForTimeout` fixed sleeps are flaky under CI load | Replaced with state-based waits: `not.toHaveValue`, `not.toBeVisible`, `toPass` |
-| Parallel tests sharing mutable `let localCustomReportPage` | Moved page model instantiation inside each test to eliminate shared state |
+| `getAllRows()` was page-wide and could match unrelated rows            | Anchored to `page.getByTestId('table')` container                               |
+| `parseCurrencyText` missed Unicode minus sign (U+2212)                 | Added `.replace(/−/g, '-')` normalization before parsing                        |
+| `dispatchEvent('click')` unreliable for React Aria `onPress`           | Replaced with `el.evaluate((el: HTMLElement) => el.click())`                    |
+| `waitForTimeout` fixed sleeps are flaky under CI load                  | Replaced with state-based waits: `not.toHaveValue`, `not.toBeVisible`, `toPass` |
+| Parallel tests sharing mutable `let localCustomReportPage`             | Moved page model instantiation inside each test to eliminate shared state       |
 
 **What required iteration:**
 
