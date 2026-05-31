@@ -24,6 +24,7 @@ type showActivityProps = {
   endDate?: string;
   field?: string;
   id?: string | string[]; // changed: supports array for oneOf
+  uncategorizedId?: 'off_budget' | 'transfer' | 'other' | 'all';
   interval?: string;
 };
 
@@ -40,6 +41,7 @@ export function showActivity({
   endDate,
   field,
   id,
+  uncategorizedId,
   interval = 'Day',
 }: showActivityProps) {
   const isOutFlow =
@@ -52,16 +54,25 @@ export function showActivity({
       : (((ReportOptions.intervalMap.get(interval) || 'Day').toLowerCase() +
           'FromDate') as 'dayFromDate' | 'monthFromDate' | 'yearFromDate');
   const isDateOp = interval === 'Weekly' || type !== 'time';
+  const drilldownFilter =
+    field === 'category' && uncategorizedId === 'transfer'
+      ? {
+          field: 'transfer',
+          op: 'is',
+          value: true,
+          type: 'boolean',
+        }
+      : id && {
+          // changed: use oneOf when id is an array, is when it's a string
+          field,
+          op: Array.isArray(id) ? 'oneOf' : 'is',
+          value: id,
+          type: 'id',
+        };
 
   const filterConditions = [
     ...filters,
-    id && {
-      // changed: use oneOf when id is an array, is when it's a string
-      field,
-      op: Array.isArray(id) ? 'oneOf' : 'is',
-      value: id,
-      type: 'id',
-    },
+    drilldownFilter,
     {
       field: 'date',
       op: isDateOp ? 'gte' : 'is',
