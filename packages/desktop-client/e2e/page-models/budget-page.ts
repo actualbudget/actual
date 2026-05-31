@@ -26,7 +26,11 @@ export class BudgetPage {
   }
 
   private parseCurrencyText(text: string): number {
-    return Math.round(parseFloat(text.replace(/,/g, '')) * 100);
+    // Normalize Unicode minus (U+2212) to ASCII minus, then strip thousands
+    // separators (comma or narrow-space). Does not handle European decimal
+    // comma (1.234,56) — Actual's demo data uses US formatting throughout.
+    const normalized = text.replace(/−/g, '-').replace(/[, ]/g, '');
+    return Math.round(parseFloat(normalized) * 100);
   }
 
   async getTotalBudgeted() {

@@ -21,7 +21,7 @@ export class PayeesPage {
   }
 
   getAllRows() {
-    return this.page.getByTestId('row');
+    return this.page.getByTestId('table').getByTestId('row');
   }
 
   getPayeeRow(payeeName: string) {
@@ -39,12 +39,12 @@ export class PayeesPage {
   }
 
   async waitFor(options?: {
-    state?: 'attached' | 'detached' | 'visible' | 'hidden';
+    state?: 'visible' | 'hidden';
     timeout?: number;
   }) {
     await this.page.waitForURL('**/payees', { timeout: options?.timeout });
     await this.searchBox.waitFor({
-      state: options?.state === 'hidden' ? 'hidden' : 'visible',
+      state: options?.state ?? 'visible',
       timeout: options?.timeout,
     });
   }

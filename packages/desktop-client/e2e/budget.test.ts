@@ -80,7 +80,9 @@ test.describe('Budget', () => {
     );
 
     await budgetPage.transferAllBalance(1, 2);
-    await page.waitForTimeout(1000);
+    await expect(async () => {
+      expect(Math.abs(await budgetPage.getBalanceForRow(1))).toBeLessThan(100);
+    }).toPass();
 
     const finalBalanceRow1 = await budgetPage.getBalanceForRow(1);
     const finalBalanceRow2 = await budgetPage.getBalanceForRow(2);
@@ -120,7 +122,7 @@ test.describe('Budget', () => {
       await budgetCell.click();
       await budgetCell.getByRole('textbox').fill(String(newAmount));
       await page.keyboard.press('Enter');
-      await page.waitForTimeout(500);
+      await expect(budgetCell.getByRole('textbox')).not.toBeVisible();
     });
 
     await test.step('assert table total changed by the exact delta, spent unchanged', async () => {
@@ -144,7 +146,7 @@ test.describe('Budget', () => {
     await budgetCell.click();
     await budgetCell.getByRole('textbox').fill('450');
     await page.keyboard.press('Enter');
-    await page.waitForTimeout(1000);
+    await expect(budgetCell.getByRole('textbox')).not.toBeVisible();
 
     const beforeReload = await budgetPage.getBalanceForRow(1);
     console.log(
@@ -175,7 +177,9 @@ test.describe('Budget', () => {
     await budgetCell.click();
     await budgetCell.getByRole('textbox').fill('999999');
     await page.keyboard.press('Escape');
-    await page.waitForTimeout(500);
+    // SheetCell resets the value on Escape but keeps the input mounted.
+    // Wait for the value to revert (not '999999') before reading the balance.
+    await expect(budgetCell.getByRole('textbox')).not.toHaveValue('999999');
 
     const finalBalance = await budgetPage.getBalanceForRow(1);
     console.log(
@@ -195,7 +199,7 @@ test.describe('Budget', () => {
     await budgetCell.click();
     await budgetCell.getByRole('textbox').fill('500');
     await page.keyboard.press('Enter');
-    await page.waitForTimeout(500);
+    await expect(budgetCell.getByRole('textbox')).not.toBeVisible();
 
     const totalsAfter500 = await budgetPage.getTableTotals();
     console.log(
@@ -205,7 +209,7 @@ test.describe('Budget', () => {
     await budgetCell.click();
     await budgetCell.getByRole('textbox').fill('0');
     await page.keyboard.press('Enter');
-    await page.waitForTimeout(500);
+    await expect(budgetCell.getByRole('textbox')).not.toBeVisible();
 
     const totalsAfterZero = await budgetPage.getTableTotals();
     console.log(
@@ -226,7 +230,9 @@ test.describe('Budget', () => {
     );
 
     await budgetPage.goToPreviousMonth();
-    await page.waitForTimeout(300);
+    await expect(async () => {
+      expect(await summary.textContent()).not.toBe(initialSummaryText);
+    }).toPass();
 
     const prevMonthSummaryText = await summary.textContent();
     console.log(
@@ -236,7 +242,9 @@ test.describe('Budget', () => {
 
     await budgetPage.goToNextMonth();
     await budgetPage.goToNextMonth();
-    await page.waitForTimeout(300);
+    await expect(async () => {
+      expect(await summary.textContent()).not.toBe(prevMonthSummaryText);
+    }).toPass();
 
     const nextMonthSummaryText = await summary.textContent();
     console.log(
@@ -257,12 +265,13 @@ test.describe('Budget', () => {
 
     await test.step('hover group ancestor to reveal hidden Add category button, then click', async () => {
       // The button uses CSS display:none (hover-visible pattern). Hovering the
-      // 5th ancestor makes it display:flex; dispatchEvent fires the React Aria handler.
+      // 5th ancestor makes it display:flex; el.click() fires the React Aria
+      // onPress handler reliably without Playwright re-checking visibility.
       const addCategoryBtn = page
         .locator('[aria-label="Add category"]')
         .first();
       await addCategoryBtn.locator('xpath=ancestor::*[5]').hover();
-      await addCategoryBtn.dispatchEvent('click');
+      await addCategoryBtn.evaluate((el: HTMLElement) => el.click());
     });
 
     await test.step('type new category name and confirm with Enter', async () => {

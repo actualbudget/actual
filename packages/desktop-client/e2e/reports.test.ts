@@ -160,13 +160,9 @@ test.describe.parallel('Reports', () => {
   });
 
   test.describe.parallel('custom reports – mode and viz', () => {
-    let localCustomReportPage: CustomReportPage;
-
-    test.beforeEach(async () => {
-      localCustomReportPage = await reportsPage.goToCustomReportPage();
-    });
-
     test('switching between Total and Time mode changes available viz options', async () => {
+      const localCustomReportPage = await reportsPage.goToCustomReportPage();
+
       await localCustomReportPage.selectMode('total');
       console.log(
         '[reports] switched to Total mode — Bar Graph option should be visible',
@@ -189,6 +185,8 @@ test.describe.parallel('Reports', () => {
     });
 
     test('selecting Line Graph keeps the report page and controls visible', async () => {
+      const localCustomReportPage = await reportsPage.goToCustomReportPage();
+
       await localCustomReportPage.selectMode('time');
       await localCustomReportPage.selectViz('Line Graph');
       console.log(

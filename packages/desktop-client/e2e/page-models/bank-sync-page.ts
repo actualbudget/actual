@@ -17,7 +17,10 @@ export class BankSyncPage {
     this.heading = page.getByText('Bank Sync', { exact: true }).first();
     this.providersHeading = page.getByText('Providers', { exact: true });
     this.setupButton = page.getByRole('button', { name: 'Set up bank sync' });
-    this.disabledSetupButton = this.setupButton;
+    this.disabledSetupButton = page.locator(
+      'button[disabled], button[aria-disabled="true"]',
+      { hasText: 'Set up bank sync' },
+    );
     this.providerCards = page.locator('[data-testid^="bank-sync-provider-"]');
     this.goCardlessProvider = page.getByTestId('bank-sync-provider-goCardless');
     this.simpleFinProvider = page.getByTestId('bank-sync-provider-simpleFin');
@@ -29,12 +32,12 @@ export class BankSyncPage {
   }
 
   async waitFor(options?: {
-    state?: 'attached' | 'detached' | 'visible' | 'hidden';
+    state?: 'visible' | 'hidden';
     timeout?: number;
   }) {
     await this.page.waitForURL('**/bank-sync', { timeout: options?.timeout });
     await this.heading.waitFor({
-      state: options?.state === 'hidden' ? 'hidden' : 'visible',
+      state: options?.state ?? 'visible',
       timeout: options?.timeout,
     });
   }
