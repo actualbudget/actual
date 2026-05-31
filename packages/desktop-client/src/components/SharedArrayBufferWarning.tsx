@@ -1,9 +1,10 @@
 import { Trans } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
 import { SvgAlertTriangle } from '@actual-app/components/icons/v2';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
+
+import { Link } from '#components/common/Link';
 
 export function SharedArrayBufferWarning() {
   const hasSharedArrayBuffer = typeof SharedArrayBuffer !== 'undefined';
@@ -12,14 +13,6 @@ export function SharedArrayBufferWarning() {
   if (hasSharedArrayBuffer) {
     return null;
   }
-
-  const handlePress = () => {
-    window.open(
-      'https://actualbudget.org/docs/troubleshooting/shared-array-buffer',
-      '_blank',
-      'noopener,noreferrer',
-    );
-  };
 
   return (
     <Tooltip
@@ -36,14 +29,14 @@ export function SharedArrayBufferWarning() {
         width: '300px',
       }}
     >
-      <Button
-        variant="bare"
-        style={{ color: theme.warningText }}
-        onPress={handlePress}
+      <Link
+        variant="external"
+        to="https://actualbudget.org/docs/troubleshooting/shared-array-buffer"
+        styles={{ color: theme.warningText, textDecoration: 'none' }}
       >
         <Trans>Warning</Trans>
         <SvgAlertTriangle width={13} style={{ marginLeft: '6px' }} />
-      </Button>
+      </Link>
     </Tooltip>
   );
 }
