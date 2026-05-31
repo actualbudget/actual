@@ -145,6 +145,22 @@ describe('/admin', () => {
         expect(res.statusCode).toEqual(200);
         expect(res.body.length).toBeGreaterThan(0);
       });
+
+      it('should return 403 when the user is not an admin', async () => {
+        const basicUserId = uuidv4();
+        const basicSessionToken = generateSessionToken();
+        createUser(basicUserId, 'basicUser', BASIC_ROLE);
+        createSession(basicUserId, basicSessionToken);
+
+        const res = await request(app)
+          .get('/users')
+          .set('x-actual-token', basicSessionToken);
+
+        expect(res.statusCode).toEqual(403);
+        expect(res.body).toHaveProperty('reason', 'forbidden');
+
+        deleteUser(basicUserId);
+      });
     });
 
     describe('POST /users', () => {
@@ -323,6 +339,17 @@ describe('/admin', () => {
         expect(res.statusCode).toEqual(400);
         expect(res.body.status).toBe('error');
         expect(res.body.reason).toBe('not-all-deleted');
+      });
+
+      it('should return 400 when ids is not an array', async () => {
+        const res = await request(app)
+          .delete('/users')
+          .send({})
+          .set('x-actual-token', sessionToken);
+
+        expect(res.statusCode).toEqual(400);
+        expect(res.body.status).toBe('error');
+        expect(res.body.reason).toBe('invalid-ids');
       });
     });
   });

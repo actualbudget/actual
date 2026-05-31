@@ -212,7 +212,10 @@ app.get('/validate', async (req, res) => {
         userId: session?.user_id,
         displayName: user?.display_name,
         loginMethod: session?.auth_method,
-        prefs: getServerPrefs(),
+        // Server prefs are not exposed to API token sessions
+        ...(session.auth_method === 'api_token'
+          ? {}
+          : { prefs: getServerPrefs() }),
       },
     });
   }

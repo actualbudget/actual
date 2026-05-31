@@ -32,6 +32,15 @@ app.get(
   validateSessionMiddleware,
   rejectApiTokenMiddleware,
   (req, res) => {
+    if (!isAdmin(res.locals.user_id)) {
+      res.status(403).send({
+        status: 'error',
+        reason: 'forbidden',
+        details: 'permission-not-found',
+      });
+      return;
+    }
+
     const users = UserService.getAllUsers();
     res.json(
       users.map(u => ({
@@ -172,6 +181,16 @@ app.delete(
     }
 
     const { ids } = req.body || {};
+
+    if (!Array.isArray(ids)) {
+      res.status(400).send({
+        status: 'error',
+        reason: 'invalid-ids',
+        details: 'ids must be an array',
+      });
+      return;
+    }
+
     let totalDeleted = 0;
     ids.forEach(item => {
       const ownerId = UserService.getOwnerId();
