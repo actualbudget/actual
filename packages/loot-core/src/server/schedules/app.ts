@@ -542,14 +542,18 @@ async function hasTransactionForSchedule(
   return data.filter(Boolean).some(row => row.schedule === schedule.id);
 }
 
+function isRecurringSchedule(schedule: ScheduleEntity): boolean {
+  return (
+    schedule._date != null &&
+    typeof schedule._date === 'object' &&
+    'frequency' in schedule._date
+  );
+}
+
 async function advanceRecurringScheduleFromNextDate(
   schedule: ScheduleEntity,
 ): Promise<ScheduleEntity | null> {
-  if (
-    schedule._date == null ||
-    typeof schedule._date !== 'object' ||
-    !('frequency' in schedule._date)
-  ) {
+  if (!isRecurringSchedule(schedule)) {
     return null;
   }
 
@@ -614,6 +618,7 @@ export async function advanceSchedulesService(syncSuccess) {
     if (
       schedule.posts_transaction &&
       schedule._account &&
+      isRecurringSchedule(schedule) &&
       (status === 'paid' || status === 'due' || status === 'missed')
     ) {
       let currentSchedule = schedule;
@@ -622,6 +627,7 @@ export async function advanceSchedulesService(syncSuccess) {
       while (
         currentSchedule.posts_transaction &&
         currentSchedule._account &&
+        isRecurringSchedule(currentSchedule) &&
         (currentStatus === 'paid' ||
           currentStatus === 'due' ||
           currentStatus === 'missed')
