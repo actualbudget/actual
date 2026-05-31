@@ -1,6 +1,7 @@
 import { Trans } from 'react-i18next';
 
 import { SvgAlertTriangle } from '@actual-app/components/icons/v2';
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 
@@ -24,8 +25,10 @@ export function SharedArrayBufferWarning() {
         </Trans>
       }
       style={{
+        ...styles.tooltip,
         lineHeight: 1.5,
         padding: '6px 10px',
+        marginTop: '10px',
         width: '300px',
       }}
     >
