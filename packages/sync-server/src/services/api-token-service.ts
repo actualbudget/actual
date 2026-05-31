@@ -3,8 +3,8 @@ import crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 
-import { getAccountDb } from '../account-db';
-import { TOKEN_EXPIRATION_NEVER } from '../util/validate-user';
+import { getAccountDb } from '#account-db';
+import { TOKEN_EXPIRATION_NEVER } from '#util/validate-user';
 
 // ============================================
 // Database Row Types (internal use)

@@ -12,7 +12,7 @@ export {
   TokenExpiredError,
   InvalidTokenError,
   TokenScopeError,
-} from 'loot-core/server/errors';
+} from '@actual-app/core/server/errors';
 
 /** @deprecated Please use return value of `init` instead */
 export let internal: typeof lib | null = null;

@@ -7,16 +7,18 @@ import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { send } from '@actual-app/core/platform/client/connection';
+import type {
+  ApiToken,
+  ApiTokenCreateResult,
+} from '@actual-app/core/server/auth/app';
 
-import { send } from 'loot-core/platform/client/connection';
-import type { ApiToken, ApiTokenCreateResult } from 'loot-core/server/auth/app';
+import { useServerURL } from '#components/ServerContext';
+import { pushModal } from '#modals/modalsSlice';
+import { addNotification } from '#notifications/notificationsSlice';
+import { useDispatch } from '#redux';
 
 import { Setting } from './UI';
-
-import { useServerURL } from '@desktop-client/components/ServerContext';
-import { pushModal } from '@desktop-client/modals/modalsSlice';
-import { addNotification } from '@desktop-client/notifications/notificationsSlice';
-import { useDispatch } from '@desktop-client/redux';
 
 function formatDate(
   timestamp: number | null | undefined,
@@ -33,7 +35,7 @@ function TokenRow({
   onRevoke,
 }: {
   token: ApiToken;
-  onRevoke: (id: string) => void;
+  onRevoke: (id: string) => Promise<void>;
 }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -350,7 +352,7 @@ export function ApiTokensSettings() {
 
   useEffect(() => {
     if (serverURL) {
-      loadTokens();
+      void loadTokens();
     }
   }, [serverURL, loadTokens]);
 
@@ -366,7 +368,7 @@ export function ApiTokensSettings() {
   const handleTokenCreated = (token: ApiTokenCreateResult) => {
     setShowCreateModal(false);
     setNewToken(token);
-    loadTokens();
+    void loadTokens();
   };
 
   if (!serverURL) {
