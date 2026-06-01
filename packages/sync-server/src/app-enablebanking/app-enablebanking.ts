@@ -30,6 +30,21 @@ export { app as handlers };
 app.use(requestLoggerMiddleware);
 app.use(express.json());
 
+function getFileIdFromRequest(req: Request): string {
+  const rawFileId =
+    req.body?.fileId || req.query?.fileId || req.headers['x-actual-file-id'];
+  if (typeof rawFileId !== 'string') {
+    throw new Error('missing-file-id');
+  }
+
+  const fileId = rawFileId.trim();
+  if (!fileId) {
+    throw new Error('missing-file-id');
+  }
+
+  return fileId;
+}
+
 // --- Shared helpers ---
 
 function extractPsuHeaders(req: Request): PsuHeaders {
@@ -47,6 +62,7 @@ function extractPsuHeaders(req: Request): PsuHeaders {
 
 async function buildSessionResult(
   session: EnableBankingSession,
+  options: { fileId: string },
   psuHeaders?: PsuHeaders,
 ) {
   const accountsWithBalances = await Promise.all(
@@ -58,6 +74,7 @@ async function buildSessionResult(
         const balanceResult = await enableBankingService.getBalances(
           account.uid,
           psuHeaders,
+          options,
         );
         balances = balanceResult.balances.map(normalizeBalance);
       } catch (err) {
@@ -108,14 +125,24 @@ app.get('/auth_callback', async (req: Request, res: Response) => {
   }
 
   try {
-    const session = await enableBankingService.createSession(code);
+    const fileId = stateFileIds.get(state);
+    if (!fileId) {
+      throw new Error('missing-file-id');
+    }
+
+    const options = { fileId };
+    const session = await enableBankingService.createSession(code, options);
     debug(
       'Callback session created: %s with %d accounts',
       session.session_id,
       session.accounts.length,
     );
 
-    const result = await buildSessionResult(session, extractPsuHeaders(req));
+    const result = await buildSessionResult(
+      session,
+      options,
+      extractPsuHeaders(req),
+    );
 
     // Always cache the result so retries within TTL can read it
     completedAuths.set(state, result);
@@ -126,6 +153,7 @@ app.get('/auth_callback', async (req: Request, res: Response) => {
       pending.resolve(result);
       cleanupPendingAuth(state);
     }
+    stateFileIds.delete(state);
 
     res.send(
       '<html><body><p>Authorization successful. This window will close.</p>' +
@@ -144,6 +172,7 @@ app.get('/auth_callback', async (req: Request, res: Response) => {
       pending.reject(error);
       cleanupPendingAuth(state);
     }
+    stateFileIds.delete(state);
 
     debug('Callback auth error: %s', error);
     res
@@ -170,6 +199,7 @@ type PendingAuth = {
 // handles both the callback and client poll for a given state.
 const pendingAuths = new Map<string, PendingAuth>();
 const completedAuths = new Map<string, unknown>();
+const stateFileIds = new Map<string, string>();
 let nextWaiterId = 0;
 
 const POLL_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
@@ -188,7 +218,9 @@ function cleanupPendingAuth(state: string, waiterId?: string) {
 app.post(
   '/status',
   handleError(async (req: Request, res: Response) => {
-    const configured = enableBankingService.isConfigured();
+    const fileId = getFileIdFromRequest(req);
+    const options = { fileId };
+    const configured = enableBankingService.isConfigured(options);
 
     res.send({
       status: 'ok',
@@ -202,6 +234,8 @@ app.post(
 app.post(
   '/configure',
   handleError(async (req: Request, res: Response) => {
+    const fileId = getFileIdFromRequest(req);
+    const options = { fileId };
     const { applicationId, secretKey } = req.body || {};
 
     if (!applicationId || !secretKey) {
@@ -236,8 +270,12 @@ app.post(
     }
 
     // Only persist after successful validation
-    secretsService.set(SecretName.enablebanking_applicationId, applicationId);
-    secretsService.set(SecretName.enablebanking_secretKey, secretKey);
+    secretsService.set(
+      SecretName.enablebanking_applicationId,
+      applicationId,
+      options,
+    );
+    secretsService.set(SecretName.enablebanking_secretKey, secretKey, options);
 
     res.send({
       status: 'ok',
@@ -251,10 +289,12 @@ app.post(
 app.post(
   '/aspsps',
   handleError(async (req: Request, res: Response) => {
+    const fileId = getFileIdFromRequest(req);
+    const options = { fileId };
     const { country } = req.body || {};
 
     try {
-      const aspsps = await enableBankingService.getAspsps(country);
+      const aspsps = await enableBankingService.getAspsps(country, options);
 
       res.send({
         status: 'ok',
@@ -274,6 +314,8 @@ app.post(
 app.post(
   '/start-auth',
   handleError(async (req: Request, res: Response) => {
+    const fileId = getFileIdFromRequest(req);
+    const options = { fileId };
     const { aspsp, redirectUrl, maxConsentValidity, psuType } = req.body || {};
 
     if (!aspsp || !redirectUrl) {
@@ -296,7 +338,10 @@ app.post(
         state,
         typeof maxConsentValidity === 'number' ? maxConsentValidity : undefined,
         psuType === 'business' ? 'business' : 'personal',
+        options,
       );
+      stateFileIds.set(state, fileId);
+      setTimeout(() => stateFileIds.delete(state), POLL_TIMEOUT_MS);
 
       res.send({
         status: 'ok',
@@ -333,14 +378,21 @@ app.post(
     }
 
     try {
-      const session = await enableBankingService.createSession(code);
+      const fileId = stateFileIds.get(state) ?? getFileIdFromRequest(req);
+
+      const options = { fileId };
+      const session = await enableBankingService.createSession(code, options);
       debug(
         'Session created: %s with %d accounts',
         session.session_id,
         session.accounts.length,
       );
 
-      const result = await buildSessionResult(session, extractPsuHeaders(req));
+      const result = await buildSessionResult(
+        session,
+        options,
+        extractPsuHeaders(req),
+      );
 
       // Always cache so retries within TTL can read the result
       if (state) {
@@ -352,6 +404,7 @@ app.post(
           pending.resolve(result);
           cleanupPendingAuth(state);
         }
+        stateFileIds.delete(state);
       }
 
       res.send({
@@ -372,6 +425,7 @@ app.post(
           pending.reject(error);
           cleanupPendingAuth(state);
         }
+        stateFileIds.delete(state);
       }
 
       res.send({
@@ -478,6 +532,8 @@ app.post(
 app.post(
   '/transactions',
   handleError(async (req: Request, res: Response) => {
+    const fileId = getFileIdFromRequest(req);
+    const options = { fileId };
     const { accountId, startDate } = req.body || {};
 
     if (!accountId || !startDate) {
@@ -504,6 +560,7 @@ app.post(
       const balanceResult = await enableBankingService.getBalances(
         accountId,
         psuHeaders,
+        options,
       );
       const balances = balanceResult.balances.map(normalizeBalance);
 
@@ -521,6 +578,7 @@ app.post(
         dateFrom,
         dateTo,
         psuHeaders,
+        options,
       );
 
       const all: ReturnType<typeof normalizeTransaction>[] = [];

@@ -11,9 +11,11 @@ import type { AppDispatch } from '#redux/store';
 function _authorize(
   dispatch: AppDispatch,
   {
+    fileId,
     onSuccess,
     onClose,
   }: {
+    fileId: string;
     onSuccess: (data: {
       accounts: SyncServerEnableBankingAccount[];
     }) => Promise<void>;
@@ -25,6 +27,7 @@ function _authorize(
       modal: {
         name: 'enablebanking-external-msg',
         options: {
+          fileId,
           onMoveExternal: async ({
             aspspId,
             country,
@@ -39,6 +42,7 @@ function _authorize(
               redirectUrl,
               maxConsentValidity,
               psuType,
+              fileId,
             });
 
             if (resp.error) {
@@ -128,9 +132,11 @@ function _authorize(
 
 export async function authorizeBank(
   dispatch: AppDispatch,
+  fileId: string,
   upgradingAccountId?: AccountEntity['id'],
 ) {
   _authorize(dispatch, {
+    fileId,
     onSuccess: async data => {
       dispatch(
         pushModal({

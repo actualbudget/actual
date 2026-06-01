@@ -142,11 +142,13 @@ export type Modal =
       name: 'enablebanking-init';
       options: {
         onSuccess: () => void;
+        fileId: string;
       };
     }
   | {
       name: 'enablebanking-external-msg';
       options: {
+        fileId: string;
         onMoveExternal: (arg: {
           aspspId: string;
           country: string;
