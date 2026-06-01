@@ -16,6 +16,7 @@ import { authorizeBank as authorizeGoCardless } from '#gocardless';
 import { useAccounts } from '#hooks/useAccounts';
 import { useFailedAccounts } from '#hooks/useFailedAccounts';
 import { useMetadataPref } from '#hooks/useMetadataPref';
+import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 
 function useErrorMessage() {
@@ -92,6 +93,7 @@ function useErrorMessage() {
 }
 
 export function AccountSyncCheck() {
+  const { t } = useTranslation();
   const { data: accounts = [] } = useAccounts();
   const failedAccounts = useFailedAccounts();
   const dispatch = useDispatch();
@@ -108,12 +110,24 @@ export function AccountSyncCheck() {
       if (acc.account_id) {
         if (acc.account_sync_source === 'enableBanking') {
           void authorizeEnableBanking(dispatch);
-        } else if (acc.account_sync_source === 'goCardless' && cloudFileId) {
+        } else if (acc.account_sync_source === 'goCardless') {
+          if (!cloudFileId) {
+            dispatch(
+              addNotification({
+                notification: {
+                  type: 'error',
+                  message: t('Unable to reauthorize without a budget file ID.'),
+                },
+              }),
+            );
+            return;
+          }
+
           void authorizeGoCardless(dispatch, cloudFileId);
         }
       }
     },
-    [cloudFileId, dispatch],
+    [cloudFileId, dispatch, t],
   );
 
   const unlinkAccount = useUnlinkAccountMutation();

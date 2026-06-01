@@ -40,7 +40,10 @@ import { SecretName, secretsService } from '#services/secrets-service';
 import type { AccountDetailsResponse, TokenResponse } from './gocardless-api';
 import { GoCardlessApi, GoCardlessApiError } from './gocardless-api';
 
-const clients = new Map<string, GoCardlessApi>();
+const clients = new Map<
+  string,
+  { client: GoCardlessApi; credentialsKey: string }
+>();
 
 type BankSyncFileOptions = {
   fileId: string;
@@ -60,12 +63,14 @@ const getGocardlessClient = (options: BankSyncFileOptions): GoCardlessApi => {
     secretKey: secretsService.get(SecretName.gocardless_secretKey, { fileId }),
   };
 
-  let client = clients.get(fileId);
-  if (!client) {
-    client = new GoCardlessApi(secrets);
-    clients.set(fileId, client);
+  const credentialsKey = JSON.stringify(secrets);
+  const cachedClient = clients.get(fileId);
+  if (cachedClient?.credentialsKey === credentialsKey) {
+    return cachedClient.client;
   }
 
+  const client = new GoCardlessApi(secrets);
+  clients.set(fileId, { client, credentialsKey });
   return client;
 };
 

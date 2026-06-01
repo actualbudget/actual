@@ -42,7 +42,7 @@ class SecretsDb {
     }
 
     const fileId = this._requireFileId(options);
-    this.debug(`setting secret '${name}' for file '${fileId}' to '${value}'`);
+    this.debug(`setting secret '${name}' for file '${fileId}'`);
     const result = this.db.mutate(
       `INSERT OR REPLACE INTO secrets (file_id, name, value) VALUES (?,?,?)`,
       [fileId, name, value],

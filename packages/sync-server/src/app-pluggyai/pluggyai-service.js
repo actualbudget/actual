@@ -13,23 +13,21 @@ function getFileId(options = {}) {
 
 function getPluggyClient(options = {}) {
   const fileId = getFileId(options);
-  if (!pluggyClientCache.has(fileId)) {
-    const clientId = secretsService.get(SecretName.pluggyai_clientId, options);
-    const clientSecret = secretsService.get(
-      SecretName.pluggyai_clientSecret,
-      options,
-    );
+  const credentials = {
+    clientId: secretsService.get(SecretName.pluggyai_clientId, options),
+    clientSecret: secretsService.get(SecretName.pluggyai_clientSecret, options),
+  };
+  const credentialsKey = JSON.stringify(credentials);
+  const cachedClient = pluggyClientCache.get(fileId);
 
-    pluggyClientCache.set(
-      fileId,
-      new PluggyClient({
-        clientId,
-        clientSecret,
-      }),
-    );
+  if (cachedClient?.credentialsKey === credentialsKey) {
+    return cachedClient.client;
   }
 
-  return pluggyClientCache.get(fileId);
+  const client = new PluggyClient(credentials);
+  pluggyClientCache.set(fileId, { client, credentialsKey });
+
+  return client;
 }
 
 export const pluggyaiService = {
