@@ -176,7 +176,7 @@ export const PayeeTableRow = memo(
                 text: t('Create rule'),
               },
               isLearnCategoriesEnabled &&
-                (payee.learn_categories
+                (payee.learn_categories !== 0
                   ? {
                       name: 'learn',
                       text: t('Disable learning'),
@@ -242,7 +242,7 @@ export const PayeeTableRow = memo(
             return (
               <>
                 {payee.favorite ? <SvgBookmark style={{ width: 10 }} /> : null}
-                {isLearnCategoriesEnabled && !payee.learn_categories && (
+                {isLearnCategoriesEnabled && payee.learn_categories === 0 && (
                   <Tooltip content={t('Category learning disabled')}>
                     <SvgLightBulb style={{ color: 'red', width: 10 }} />
                   </Tooltip>
