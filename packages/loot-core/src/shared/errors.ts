@@ -26,9 +26,10 @@ function isDatabaseSchemaMismatch(meta?: unknown): boolean {
 }
 
 function getSchemaMismatchError() {
-  return t(
-    'This budget could not be loaded because it uses a newer database schema than this version of Actual supports. Make sure you are using the latest version, then try again.',
-  );
+  // Surfaced through the programmatic API (and shown verbatim there), so this
+  // intentionally stays a plain, non-translated string — loot-core does not
+  // depend on i18n.
+  return 'This budget could not be loaded because it uses a newer database schema than this version of Actual supports. Make sure you are using the latest version, then try again.';
 }
 
 export function getUploadError({ reason, meta }: ErrorWithMeta) {
