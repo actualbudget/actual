@@ -35,10 +35,7 @@ import type {
 } from '@actual-app/core/types/models';
 import { format as formatDate } from 'date-fns';
 
-import {
-  isAccountFailedSync,
-  isAccountPendingSync,
-} from '#accounts/syncStatus';
+import { isAccountFailedSync } from '#accounts/syncStatus';
 import { AnimatedRefresh } from '#components/AnimatedRefresh';
 import { Search } from '#components/common/Search';
 import { FilterButton } from '#components/filters/FiltersMenu';
@@ -303,7 +300,12 @@ export function AccountHeader({
                 gap: 3,
               }}
             >
-              {!!account?.bank && <AccountSyncSidebar account={account} />}
+              {!!account?.bank && (
+                <AccountSyncSidebar
+                  account={account}
+                  accountsSyncing={accountsSyncing}
+                />
+              )}
               <AccountNameField
                 account={account}
                 accountName={accountName}
@@ -588,13 +590,17 @@ export function AccountHeader({
 
 type AccountSyncSidebarProps = {
   account: AccountEntity;
+  accountsSyncing: string[];
 };
 
-export function AccountSyncSidebar({ account }: AccountSyncSidebarProps) {
+export function AccountSyncSidebar({
+  account,
+  accountsSyncing,
+}: AccountSyncSidebarProps) {
   return (
     <View
       style={{
-        backgroundColor: isAccountPendingSync(account)
+        backgroundColor: accountsSyncing.includes(account.id)
           ? theme.sidebarItemBackgroundPending
           : isAccountFailedSync(account)
             ? theme.sidebarItemBackgroundFailed

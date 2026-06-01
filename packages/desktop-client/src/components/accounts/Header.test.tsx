@@ -32,16 +32,13 @@ function makeAccount(
 }
 
 describe('AccountSyncSidebar', () => {
-  it('renders pending styles for pending and sync-requested accounts', () => {
-    const { rerender, container } = render(
-      <AccountSyncSidebar account={makeAccount('pending')} />,
+  it('renders pending styles while the account is actively syncing', () => {
+    const { container } = render(
+      <AccountSyncSidebar
+        account={makeAccount(null)}
+        accountsSyncing={['acct-1']}
+      />,
     );
-
-    expect(container.firstChild).toHaveStyle({
-      backgroundColor: theme.sidebarItemBackgroundPending,
-    });
-
-    rerender(<AccountSyncSidebar account={makeAccount('sync-requested')} />);
 
     expect(container.firstChild).toHaveStyle({
       backgroundColor: theme.sidebarItemBackgroundPending,
@@ -50,14 +47,19 @@ describe('AccountSyncSidebar', () => {
 
   it('renders failed styles for failed accounts and positive styles for ok accounts', () => {
     const { rerender, container } = render(
-      <AccountSyncSidebar account={makeAccount('attention-required')} />,
+      <AccountSyncSidebar
+        account={makeAccount('attention-required')}
+        accountsSyncing={[]}
+      />,
     );
 
     expect(container.firstChild).toHaveStyle({
       backgroundColor: theme.sidebarItemBackgroundFailed,
     });
 
-    rerender(<AccountSyncSidebar account={makeAccount('ok')} />);
+    rerender(
+      <AccountSyncSidebar account={makeAccount('ok')} accountsSyncing={[]} />,
+    );
 
     expect(container.firstChild).toHaveStyle({
       backgroundColor: theme.sidebarItemBackgroundPositive,

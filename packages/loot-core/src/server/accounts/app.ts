@@ -1241,6 +1241,16 @@ function getBankSyncStatusFromError(
   return 'failed';
 }
 
+function persistBankSyncError(
+  accountId: AccountEntity['id'],
+  err: Error | PostError | BankSyncError,
+) {
+  return db.update('accounts', {
+    id: accountId,
+    bank_sync_status: getBankSyncStatusFromError(err),
+  });
+}
+
 export type SyncResponseWithErrors = SyncResponse & {
   errors: SyncError[];
 };
@@ -1270,21 +1280,10 @@ async function accountsBankSync({
   const newTransactions: Array<TransactionEntity['id']> = [];
   const matchedTransactions: Array<TransactionEntity['id']> = [];
   const updatedAccounts: Array<AccountEntity['id']> = [];
-  let hasStatusChange = false;
 
   for (const acct of accounts) {
     if (acct.bankId && acct.account_id) {
-      hasStatusChange = true;
       try {
-        await db.update('accounts', {
-          id: acct.id,
-          bank_sync_status: 'pending',
-        });
-        connection.send('sync-event', {
-          type: 'success',
-          tables: ['accounts'],
-        });
-
         logger.group('Bank Sync operation for account:', acct.name);
         const syncResponse = await bankSync.syncAccount(
           userId as string,
@@ -1304,10 +1303,7 @@ async function accountsBankSync({
         updatedAccounts.push(...syncResponseData.updatedAccounts);
       } catch (err) {
         const error = err as Error;
-        await db.update('accounts', {
-          id: acct.id,
-          bank_sync_status: getBankSyncStatusFromError(error),
-        });
+        await persistBankSyncError(acct.id, error);
         errors.push(handleSyncError(error, acct));
         captureException({
           ...error,
@@ -1319,13 +1315,10 @@ async function accountsBankSync({
     }
   }
 
-  if (updatedAccounts.length > 0 || hasStatusChange) {
+  if (updatedAccounts.length > 0) {
     connection.send('sync-event', {
       type: 'success',
-      tables:
-        updatedAccounts.length > 0
-          ? ['transactions', 'accounts']
-          : ['accounts'],
+      tables: ['transactions'],
     });
   }
 
@@ -1364,19 +1357,6 @@ async function simpleFinBatchSync({
 
   logger.group('Bank Sync operation for all SimpleFin accounts');
   try {
-    for (const account of accounts) {
-      await db.update('accounts', {
-        id: account.id,
-        bank_sync_status: 'pending',
-      });
-    }
-    if (accounts.length > 0) {
-      connection.send('sync-event', {
-        type: 'success',
-        tables: ['accounts'],
-      });
-    }
-
     const syncResponses: Array<{
       accountId: AccountEntity['id'];
       res: {
@@ -1413,10 +1393,7 @@ async function simpleFinBatchSync({
           code: syncResponse.res.error_code,
         } as BankSyncError;
 
-        await db.update('accounts', {
-          id: account.id,
-          bank_sync_status: getBankSyncStatusFromError(bankSyncError),
-        });
+        await persistBankSyncError(account.id, bankSyncError);
         errors.push(handleSyncError(bankSyncError, account));
       } else if (syncResponse.res) {
         const syncResponseData = await handleSyncResponse(
@@ -1431,10 +1408,7 @@ async function simpleFinBatchSync({
         const emptyResponseError = new Error(
           'Failed syncing account "' + account.name + '": empty response',
         );
-        await db.update('accounts', {
-          id: account.id,
-          bank_sync_status: getBankSyncStatusFromError(emptyResponseError),
-        });
+        await persistBankSyncError(account.id, emptyResponseError);
         errors.push(handleSyncError(emptyResponseError, account));
       }
 
@@ -1446,10 +1420,7 @@ async function simpleFinBatchSync({
   } catch (err) {
     for (const account of accounts) {
       const error = err as Error;
-      await db.update('accounts', {
-        id: account.id,
-        bank_sync_status: getBankSyncStatusFromError(error),
-      });
+      await persistBankSyncError(account.id, error);
       retVal.push({
         accountId: account.id,
         res: {
@@ -1465,12 +1436,7 @@ async function simpleFinBatchSync({
   if (retVal.some(a => a.res.updatedAccounts.length > 0)) {
     connection.send('sync-event', {
       type: 'success',
-      tables: ['transactions', 'accounts'],
-    });
-  } else if (accounts.length > 0) {
-    connection.send('sync-event', {
-      type: 'success',
-      tables: ['accounts'],
+      tables: ['transactions'],
     });
   }
 
