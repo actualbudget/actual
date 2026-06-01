@@ -34,7 +34,7 @@ export function BuiltInProviders({
     <View style={{ gap: 12 }}>
       <View style={{ gap: 4 }}>
         <Text style={{ fontSize: 20, fontWeight: 600 }}>
-          <Trans>Providers</Trans>
+          <Trans>Built-in providers</Trans>
         </Text>
         <Paragraph style={{ fontSize: 15, color: theme.pageTextSubdued }}>
           <Trans>
@@ -74,7 +74,8 @@ export function BuiltInProviders({
         <View
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 320px))',
+            justifyContent: 'start',
             gap: 12,
           }}
         >
@@ -88,6 +89,7 @@ export function BuiltInProviders({
                 padding: 16,
                 backgroundColor: theme.tableBackground,
                 gap: 16,
+                minHeight: 150,
               }}
             >
               <View

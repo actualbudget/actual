@@ -252,6 +252,9 @@ export function BankSync() {
                   providerDisplayName: provider.displayName,
                 })
               }
+              onLink={({ provider }) =>
+                openPluginAccounts({ providerSlug: provider.slug })
+              }
             />
             {!canManageProviders && (
               <Warning>
@@ -261,20 +264,6 @@ export function BankSync() {
                 </Trans>
               </Warning>
             )}
-          </View>
-        )}
-
-        {pluginProviders.length > 0 && (
-          <View style={{ alignItems: 'flex-start' }}>
-            <ProviderSelectButton
-              label={t('Add plugin bank sync account')}
-              providers={pluginProviders}
-              statusMap={statusMap}
-              isDisabled={!fileId}
-              onSelect={({ providerSlug }) =>
-                openPluginAccounts({ providerSlug })
-              }
-            />
           </View>
         )}
 
