@@ -315,7 +315,10 @@ function parseAccessKey(accessKey) {
 
 async function getAccessKey(base64Token) {
   const token = Buffer.from(base64Token, 'base64').toString();
-  await assertUrlAllowed(token);
+  // Self-hosters may run their own SimpleFIN bridge on the local network, so
+  // private addresses are allowed here; cloud metadata and other always-blocked
+  // ranges are still rejected.
+  await assertUrlAllowed(token, { allowPrivateNetwork: true });
   const options = {
     method: 'POST',
     port: 443,
@@ -387,7 +390,7 @@ async function getAccounts(
   const url = new URL(`${sfin.baseUrl}/accounts`);
   url.search = params.toString();
 
-  await assertUrlAllowed(url.toString());
+  await assertUrlAllowed(url.toString(), { allowPrivateNetwork: true });
 
   const response = await fetch(url.toString(), {
     method: 'GET',

@@ -5,32 +5,57 @@ import ipaddr from 'ipaddr.js';
 
 const dnsLookup = promisify(dns.lookup);
 
-// IP ranges (as classified by ipaddr.js) that must never be reachable from
-// server-side requests to user-controlled URLs. linkLocal covers the cloud
-// metadata endpoint (169.254.169.254).
-const BLOCKED_IP_RANGES = [
-  'private',
-  'loopback',
+// IP ranges (as classified by ipaddr.js) that are never a legitimate
+// destination and are the highest-risk SSRF targets, so they are blocked
+// unconditionally. linkLocal covers the cloud metadata endpoint
+// (169.254.169.254) — the credential-theft vector this protection primarily
+// guards against — and no real service is hosted on the reserved, broadcast or
+// unspecified ranges.
+const ALWAYS_BLOCKED_IP_RANGES = [
   'linkLocal',
-  'uniqueLocal',
   'unspecified',
   'reserved',
   'broadcast',
 ];
 
+// Private-network ranges (LAN, loopback, IPv6 unique-local). These are blocked
+// by default, but self-hosters legitimately run services such as their own
+// SimpleFIN bridge on them, so callers that expect to reach private
+// infrastructure can opt in with { allowPrivateNetwork: true }. Trusting the
+// local network by default keeps self-hosting working out of the box; the
+// always-blocked ranges above still close the worst-case (metadata) attack.
+const PRIVATE_IP_RANGES = ['private', 'loopback', 'uniqueLocal'];
+
+type SsrfOptions = {
+  // Allow requests to private/loopback/unique-local addresses. Defaults to
+  // false (strict). Set by callers like the SimpleFIN integration whose
+  // upstream may be a self-hosted server on the local network.
+  allowPrivateNetwork?: boolean;
+};
+
 /**
  * Return true if the given address is a literal IP in one of the blocked
- * ranges (private/local/link-local/etc). Non-IP strings (e.g. hostnames)
- * return false, so callers can pass a URL hostname directly.
+ * ranges (link-local/reserved/etc, plus private ranges unless
+ * allowPrivateNetwork is set). Non-IP strings (e.g. hostnames) return false,
+ * so callers can pass a URL hostname directly.
  */
-export function isBlockedIp(address: string): boolean {
+export function isBlockedIp(
+  address: string,
+  { allowPrivateNetwork = false }: SsrfOptions = {},
+): boolean {
   if (!ipaddr.isValid(address)) {
     return false;
   }
 
   // process() normalizes IPv4-mapped IPv6 addresses (e.g. ::ffff:127.0.0.1)
   // back to their IPv4 form so their range is classified correctly.
-  return BLOCKED_IP_RANGES.includes(ipaddr.process(address).range());
+  const range = ipaddr.process(address).range();
+
+  if (ALWAYS_BLOCKED_IP_RANGES.includes(range)) {
+    return true;
+  }
+
+  return !allowPrivateNetwork && PRIVATE_IP_RANGES.includes(range);
 }
 
 /**
@@ -38,8 +63,16 @@ export function isBlockedIp(address: string): boolean {
  * against SSRF. Only http(s) URLs are permitted, and the hostname is resolved
  * via DNS so that hostnames pointing at private/local/link-local addresses are
  * rejected as well as literal IPs. Throws if the URL is not allowed.
+ *
+ * Pass { allowPrivateNetwork: true } for callers (e.g. SimpleFIN) whose
+ * upstream may legitimately be a self-hosted server on the local network; the
+ * always-blocked ranges (cloud metadata, reserved, broadcast) remain blocked
+ * regardless.
  */
-export async function assertUrlAllowed(targetUrl: string): Promise<void> {
+export async function assertUrlAllowed(
+  targetUrl: string,
+  options: SsrfOptions = {},
+): Promise<void> {
   let url: URL;
   try {
     url = new URL(targetUrl);
@@ -57,7 +90,7 @@ export async function assertUrlAllowed(targetUrl: string): Promise<void> {
 
   // Literal IP address: check it directly without a DNS lookup.
   if (ipaddr.isValid(hostname)) {
-    if (isBlockedIp(hostname)) {
+    if (isBlockedIp(hostname, options)) {
       throw new Error(`Blocked request to private/local IP: ${hostname}`);
     }
     return;
@@ -76,7 +109,7 @@ export async function assertUrlAllowed(targetUrl: string): Promise<void> {
   }
 
   for (const { address } of addresses) {
-    if (isBlockedIp(address)) {
+    if (isBlockedIp(address, options)) {
       throw new Error(
         `Blocked request to host resolving to private/local IP: ${hostname} (${address})`,
       );

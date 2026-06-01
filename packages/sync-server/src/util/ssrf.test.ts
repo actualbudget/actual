@@ -59,6 +59,25 @@ describe('assertUrlAllowed', () => {
     ).rejects.toThrow(/private\/local IP/);
   });
 
+  it('blocks the cloud metadata endpoint even when private networks are allowed', async () => {
+    await expect(
+      assertUrlAllowed('http://169.254.169.254/latest/meta-data/', {
+        allowPrivateNetwork: true,
+      }),
+    ).rejects.toThrow(/private\/local IP/);
+  });
+
+  it('blocks reserved and broadcast ranges even when private networks are allowed', async () => {
+    await expect(
+      assertUrlAllowed('http://240.0.0.1/', { allowPrivateNetwork: true }),
+    ).rejects.toThrow();
+    await expect(
+      assertUrlAllowed('http://255.255.255.255/', {
+        allowPrivateNetwork: true,
+      }),
+    ).rejects.toThrow();
+  });
+
   it('blocks loopback literal IPs', async () => {
     await expect(assertUrlAllowed('https://127.0.0.1/claim')).rejects.toThrow();
   });
@@ -68,6 +87,36 @@ describe('assertUrlAllowed', () => {
     await expect(
       assertUrlAllowed('https://192.168.1.1/claim'),
     ).rejects.toThrow();
+  });
+
+  it('allows private literal IPs when private networks are allowed', async () => {
+    await expect(
+      assertUrlAllowed('https://192.168.1.50/accounts', {
+        allowPrivateNetwork: true,
+      }),
+    ).resolves.toBeUndefined();
+    await expect(
+      assertUrlAllowed('https://10.0.0.5/accounts', {
+        allowPrivateNetwork: true,
+      }),
+    ).resolves.toBeUndefined();
+  });
+
+  it('allows loopback when private networks are allowed', async () => {
+    await expect(
+      assertUrlAllowed('https://127.0.0.1/accounts', {
+        allowPrivateNetwork: true,
+      }),
+    ).resolves.toBeUndefined();
+  });
+
+  it('allows a hostname resolving to a private IP when private networks are allowed', async () => {
+    mockDnsLookup(['10.1.2.3']);
+    await expect(
+      assertUrlAllowed('https://my-simplefin.local/accounts', {
+        allowPrivateNetwork: true,
+      }),
+    ).resolves.toBeUndefined();
   });
 
   it('blocks IPv6 loopback', async () => {
