@@ -27,7 +27,7 @@ export function useSimpleFinStatus(fileId: string) {
       setIsLoading(false);
     }
 
-    if (status === 'online') {
+    if (status === 'online' && budgetFileId) {
       void fetch();
     }
   }, [status, fileId]);

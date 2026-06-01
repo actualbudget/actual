@@ -119,7 +119,7 @@ export function useCloseAccountMutation() {
         transferAccountId: transferAccountId || undefined,
         categoryId: categoryId || undefined,
         forced,
-        fileId: requireCloudFileId(cloudFileId),
+        fileId: cloudFileId || undefined,
       });
     },
     onSuccess: () => invalidateQueries(queryClient),

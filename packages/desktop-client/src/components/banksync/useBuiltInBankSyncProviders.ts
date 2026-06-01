@@ -91,13 +91,6 @@ async function ensureSuccessResponse(
   }
 }
 
-function requireBudgetFileId(fileId: string | null | undefined): string {
-  if (!fileId) {
-    throw new Error('missing-file-id');
-  }
-  return fileId;
-}
-
 export function useBuiltInBankSyncProviders({
   upgradingAccountId,
 }: UseBuiltInBankSyncProvidersOptions = {}) {
@@ -105,11 +98,12 @@ export function useBuiltInBankSyncProviders({
   const dispatch = useDispatch();
   const syncServerStatus = useSyncServerStatus();
   const [metadataFileId] = useMetadataPref('cloudFileId');
-  const budgetFileId = requireBudgetFileId(metadataFileId);
+  const budgetFileId = metadataFileId ?? '';
   const { hasPermission } = useAuth();
   const multiuserEnabled = useMultiuserEnabled();
   const canConfigureProviders =
-    !multiuserEnabled || hasPermission(Permissions.ADMINISTRATOR);
+    Boolean(budgetFileId) &&
+    (!multiuserEnabled || hasPermission(Permissions.ADMINISTRATOR));
 
   const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
     boolean | null
