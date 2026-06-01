@@ -111,7 +111,8 @@
     "adm-zip": "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch",
     "minimatch@3.1.2": "3.1.5",
     "serialize-javascript": "^7.0.5",
-    "socks": ">=2.8.3"
+    "socks": ">=2.8.3",
+    "webpackbar": "^7.0.0"
   },
   "lint-staged": {
     "packages/*/{package.json,tsconfig.json}": [
