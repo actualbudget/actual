@@ -3,6 +3,7 @@ ABNAMRO
 ABNANL
 Activo
 actualrc
+admins
 AESUDEF
 ajv
 ALZEY
@@ -11,6 +12,7 @@ ANZ
 aql
 AUR
 Authentik
+autogen
 AVERAGEA
 BANKA
 BANKINTER
@@ -38,10 +40,13 @@ Cetelem
 cimode
 Citi
 Citibank
+claude
 Cloudflare
+CLP
 CMCIFRPAXXX
 COBADEFF
 CODEOWNERS
+Codespaces
 COEP
 commerzbank
 Copiar
@@ -53,6 +58,7 @@ crt
 CZK
 Danske
 datadir
+datamodel
 DATEDIF
 Depositos
 deselection
@@ -61,7 +67,6 @@ Dockerfiles
 Dominguez
 DUSSDEDDXXX
 DUSSELDORF
-ecf
 EDATE
 ENTERCARD
 Entra
@@ -83,13 +88,16 @@ Globecard
 GLS
 gocardless
 Grafana
+Gruvbox
 HABAL
 Hampel
+healthcheck
 HELADEF
 HLOOKUP
 HUF
 IFERROR
 IFNA
+Ilavenil
 INDUSTRIEL
 INGBPLPW
 Ingo
@@ -118,6 +126,7 @@ lage
 LHV
 LHVBEE
 LKR
+lookback
 MAXA
 mbank
 mdc
@@ -128,10 +137,12 @@ murmurhash
 NETWORKDAYS
 nginx
 nodenext
+nord
 OIDC
 Okabe
 overbudgeted
 overbudgeting
+overfunded
 oxc
 Paribas
 passwordless
@@ -147,11 +158,13 @@ QNTOFRP
 QONTO
 Raiffeisen
 REGEXREPLACE
+relinking
 revolut
 RIED
 RSchedule
 RSD
 SEK
+shopt
 simplefin
 SKHSFI
 Sparkasse
@@ -178,10 +191,12 @@ TIMEFRAME
 touchscreen
 triaging
 tsgo
+tsgolint
 TWD
 UAH
 ubuntu
 undici
+Unmigrate
 userinfo
 Userscripts
 UZS
@@ -193,4 +208,6 @@ websecure
 WEEKNUM
 Widiba
 WOR
+worktree
 youngcw
+zizmor

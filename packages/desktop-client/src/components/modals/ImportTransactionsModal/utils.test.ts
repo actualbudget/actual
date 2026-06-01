@@ -1,4 +1,4 @@
-import { filterByStartDate, parseDate } from './utils';
+import { filterByStartDate, parseCategoryFields, parseDate } from './utils';
 import type { ImportTransaction } from './utils';
 
 describe('Import transactions', () => {
@@ -280,6 +280,25 @@ describe('Import transactions', () => {
       );
       expect(result).toHaveLength(1);
       expect(result[0].trx_id).toBe('1');
+    });
+  });
+
+  describe('parseCategoryFields', () => {
+    const categories = [
+      { id: 'cat-income', name: 'Income' },
+      { id: 'cat-deposits', name: 'Deposits' },
+    ];
+
+    it('returns the category id when CSV category text matches a category name', () => {
+      expect(parseCategoryFields({ category: 'Deposits' }, categories)).toBe(
+        'cat-deposits',
+      );
+    });
+
+    it('returns null for unresolved CSV category text', () => {
+      expect(
+        parseCategoryFields({ category: 'Missing category' }, categories),
+      ).toBeNull();
     });
   });
 });

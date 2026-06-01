@@ -18,9 +18,13 @@ concurrency:
   group: publish-flathub
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
   publish-flathub:
     runs-on: ubuntu-22.04
+    environment: release
     steps:
       - name: Resolve version
         id: resolve_version

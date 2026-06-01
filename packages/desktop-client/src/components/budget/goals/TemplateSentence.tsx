@@ -7,6 +7,7 @@ import { BySaveAutomationReadOnly } from './editor/BySaveAutomationReadOnly';
 import { FixedAutomationReadOnly } from './editor/FixedAutomationReadOnly';
 import { HistoricalAutomationReadOnly } from './editor/HistoricalAutomationReadOnly';
 import { LimitAutomationReadOnly } from './editor/LimitAutomationReadOnly';
+import { LongTermGoalAutomationReadOnly } from './editor/LongTermGoalAutomationReadOnly';
 import { PercentageAutomationReadOnly } from './editor/PercentageAutomationReadOnly';
 import { RefillAutomationReadOnly } from './editor/RefillAutomationReadOnly';
 import { RemainderAutomationReadOnly } from './editor/RemainderAutomationReadOnly';
@@ -41,12 +42,13 @@ export function TemplateSentence({
     case 'copy':
       return <HistoricalAutomationReadOnly template={template} />;
     case 'by':
+    case 'spend':
       return <BySaveAutomationReadOnly template={template} />;
     case 'remainder':
       return <RemainderAutomationReadOnly template={template} />;
-    case 'simple':
-    case 'spend':
     case 'goal':
+      return <LongTermGoalAutomationReadOnly template={template} />;
+    case 'simple':
     case 'error': {
       const type = template.type;
       return (

@@ -13,6 +13,7 @@ import type { ImportTransactionsOpts } from '@actual-app/core/types/api-handlers
 import type { Handlers } from '@actual-app/core/types/handlers';
 import type {
   ImportTransactionEntity,
+  NoteEntity,
   RuleEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
@@ -203,8 +204,8 @@ export function getAccountBalance(id: APIAccountEntity['id'], cutoff?: Date) {
   return send('api/account-balance', { id, cutoff });
 }
 
-export function getCategoryGroups() {
-  return send('api/category-groups-get');
+export function getCategoryGroups(options: { hidden?: boolean } = {}) {
+  return send('api/category-groups-get', options);
 }
 
 export function createCategoryGroup(group: Omit<APICategoryGroupEntity, 'id'>) {
@@ -225,8 +226,8 @@ export function deleteCategoryGroup(
   return send('api/category-group-delete', { id, transferCategoryId });
 }
 
-export function getCategories() {
-  return send('api/categories-get', { grouped: false });
+export function getCategories(options: { hidden?: boolean } = {}) {
+  return send('api/categories-get', { grouped: false, ...options });
 }
 
 export function createCategory(category: Omit<APICategoryEntity, 'id'>) {
@@ -245,6 +246,14 @@ export function deleteCategory(
   transferCategoryId?: APICategoryEntity['id'],
 ) {
   return send('api/category-delete', { id, transferCategoryId });
+}
+
+export function getNote(id: NoteEntity['id']) {
+  return send('api/note-get', { id });
+}
+
+export function updateNote(id: NoteEntity['id'], note: NoteEntity['note']) {
+  return send('api/note-update', { id, note });
 }
 
 export function getCommonPayees() {

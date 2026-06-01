@@ -98,7 +98,7 @@ export function GetCardData({
       firstDayOfWeekIdx,
     );
     startDate = dateStart || report.startDate;
-    endDate = dateEnd || report.startDate;
+    endDate = dateEnd || report.endDate;
   }
 
   const fromDate = convertFromDate(report.interval);
@@ -190,6 +190,7 @@ export function GetCardData({
         compact
         style={{ height: 'auto', flex: 1 }}
         intervalsCount={intervals.length}
+        showTrendLines={report.showTrendLines}
         showTooltip={!isNarrowWidth && showTooltip}
       />
     </ErrorBoundary>

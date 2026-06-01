@@ -22,8 +22,14 @@ app.method('tags-delete-all', mutator(deleteAllTags));
 app.method('tags-update', mutator(undoable(updateTag)));
 app.method('tags-discover', mutator(discoverTags));
 
+const collator = new Intl.Collator(undefined, {
+  numeric: true,
+  sensitivity: 'base',
+});
 async function getTags(): Promise<TagEntity[]> {
-  return await db.getTags();
+  const tags = await db.getTags();
+  tags.sort((a, b) => collator.compare(a.tag, b.tag));
+  return tags;
 }
 
 async function createTag({
