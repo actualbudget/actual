@@ -50,6 +50,7 @@ export function CurrencySettings() {
         ['MDL', t('Moldovan Leu')],
         ['MYR', t('Malaysian Ringgit')],
         ['PHP', t('Philippine Peso')],
+        ['PKR', t('Pakistani Rupee')],
         ['PLN', t('Polish Złoty')],
         ['QAR', t('Qatari Riyal')],
         ['RON', t('Romanian Leu')],
