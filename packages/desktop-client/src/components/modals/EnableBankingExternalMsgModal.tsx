@@ -57,13 +57,10 @@ function useAvailableBanks(
 
       setIsLoading(true);
 
-      const { data, error } = await sendCatch(
-        'enablebanking-aspsps',
-        {
-          country: country.toUpperCase(),
-          fileId,
-        },
-      );
+      const { data, error } = await sendCatch('enablebanking-aspsps', {
+        country: country.toUpperCase(),
+        fileId,
+      });
 
       if (cancelled) return;
 
