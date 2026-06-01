@@ -34,6 +34,12 @@ describe('getDownloadError', () => {
       getDownloadError({ reason: 'invalid-schema', meta: unrelatedMeta }),
     ).not.toBe(SCHEMA_MISMATCH_MESSAGE);
   });
+
+  it('does not report a schema mismatch when meta is missing', () => {
+    expect(getDownloadError({ reason: 'invalid-schema' })).not.toBe(
+      SCHEMA_MISMATCH_MESSAGE,
+    );
+  });
 });
 
 describe('getSyncError', () => {
