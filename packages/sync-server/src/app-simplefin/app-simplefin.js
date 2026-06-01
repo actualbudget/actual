@@ -390,13 +390,37 @@ async function getAccounts(
   const url = new URL(`${sfin.baseUrl}/accounts`);
   url.search = params.toString();
 
-  await assertUrlAllowed(url.toString(), { allowPrivateNetwork: true });
+  // Follow redirects manually so every hop is re-validated against the SSRF
+  // rules; fetch's automatic 'follow' would let a 3xx response redirect to a
+  // blocked address after only the initial URL was checked. Authorization is
+  // dropped once a redirect leaves the original origin (matching fetch's
+  // default cross-origin stripping) so the bridge credentials aren't leaked.
+  const MAX_REDIRECTS = 5;
+  let currentUrl = url.toString();
+  let response;
+  for (let hop = 0; ; hop++) {
+    await assertUrlAllowed(currentUrl, { allowPrivateNetwork: true });
 
-  const response = await fetch(url.toString(), {
-    method: 'GET',
-    headers,
-    redirect: 'follow',
-  });
+    response = await fetch(currentUrl, {
+      method: 'GET',
+      headers,
+      redirect: 'manual',
+    });
+
+    const location = response.headers.get('location');
+    if (response.status < 300 || response.status >= 400 || !location) {
+      break;
+    }
+    if (hop >= MAX_REDIRECTS) {
+      throw new Error('Too many redirects');
+    }
+
+    const nextUrl = new URL(location, currentUrl);
+    if (nextUrl.origin !== new URL(currentUrl).origin) {
+      delete headers.Authorization;
+    }
+    currentUrl = nextUrl.toString();
+  }
 
   if (response.status === 403) {
     throw new Error('Forbidden');
