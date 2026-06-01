@@ -5,11 +5,6 @@ type ErrorWithMeta = {
   meta?: unknown;
 };
 
-// A sync/apply failure is only a true version mismatch when the database is
-// missing a column or table that the incoming data expects. Any other
-// `invalid-schema` failure should keep its generic messaging so we don't
-// wrongly tell people to upgrade when an otherwise-compatible API version is
-// being used.
 function isDatabaseSchemaMismatch(meta?: unknown): boolean {
   if (
     meta &&
@@ -26,9 +21,6 @@ function isDatabaseSchemaMismatch(meta?: unknown): boolean {
 }
 
 function getSchemaMismatchError() {
-  // Surfaced through the programmatic API (and shown verbatim there), so this
-  // intentionally stays a plain, non-translated string — loot-core does not
-  // depend on i18n.
   return 'This budget could not be loaded because it uses a newer database schema than this version of Actual supports. Make sure you are using the latest version, then try again.';
 }
 
@@ -75,10 +67,6 @@ export function getDownloadError({
   meta?: unknown;
   fileName?: string;
 }) {
-  // Only surface a version-mismatch message when the data genuinely needs a
-  // schema this client doesn't have. Other `invalid-schema` failures fall
-  // through to the generic message so incompatible-but-working API versions
-  // are still usable.
   if (reason === 'invalid-schema' && isDatabaseSchemaMismatch(meta)) {
     return getSchemaMismatchError();
   }

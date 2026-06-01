@@ -1,7 +1,5 @@
 import { getDownloadError, getSyncError } from './errors';
 
-// Exact text returned by the schema-mismatch branch. Asserting against it
-// keeps these tests free of any i18n setup (loot-core does not use i18n).
 const SCHEMA_MISMATCH_MESSAGE =
   'This budget could not be loaded because it uses a newer database schema than this version of Actual supports. Make sure you are using the latest version, then try again.';
 
