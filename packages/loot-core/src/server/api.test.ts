@@ -32,7 +32,7 @@ describe('API handlers', () => {
   });
 
   describe('api/bank-sync', () => {
-    let getPrefsSpy: ReturnType<typeof vi.spyOn<typeof prefs, 'getPrefs'>>;
+    let getPrefsSpy: ReturnType<typeof vi.fn>;
 
     beforeEach(() => {
       getPrefsSpy = vi.spyOn(prefs, 'getPrefs').mockReturnValue({

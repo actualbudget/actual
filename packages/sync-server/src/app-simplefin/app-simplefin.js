@@ -11,9 +11,13 @@ import {
 import { assertUrlAllowed } from '#util/ssrf';
 
 function getFileIdFromRequest(req) {
-  const fileId =
+  const rawFileId =
     req.body?.fileId || req.query?.fileId || req.headers['x-actual-file-id'];
-  if (!fileId || typeof fileId !== 'string') {
+  if (typeof rawFileId !== 'string') {
+    throw new Error('missing-file-id');
+  }
+  const fileId = rawFileId.trim();
+  if (!fileId) {
     throw new Error('missing-file-id');
   }
   return fileId;
