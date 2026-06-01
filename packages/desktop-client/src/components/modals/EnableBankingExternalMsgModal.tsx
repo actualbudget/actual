@@ -300,7 +300,10 @@ export function EnableBankingExternalMsgModal({
           ) : (
             <>
               <FormField>
-                <FormLabel title={t('Choose your bank:')} htmlFor="bank-field" />
+                <FormLabel
+                  title={t('Choose your bank:')}
+                  htmlFor="bank-field"
+                />
                 <Autocomplete
                   focused
                   strict
@@ -316,7 +319,10 @@ export function EnableBankingExternalMsgModal({
               </FormField>
 
               <FormField>
-                <FormLabel title={t('Usage type:')} htmlFor="usage-type-field" />
+                <FormLabel
+                  title={t('Usage type:')}
+                  htmlFor="usage-type-field"
+                />
                 <Autocomplete
                   strict
                   highlightFirst
