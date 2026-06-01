@@ -160,6 +160,7 @@ describe('Enable Banking Express routes', () => {
     it('returns error when aspsp is missing', async () => {
       const res = await request(app)
         .post('/start-auth')
+        .set('X-Actual-File-Id', TEST_FILE_ID)
         .send({ redirectUrl: 'https://app.example.com/callback' });
 
       expect(res.body.data.error_code).toBe('INVALID_INPUT');
@@ -168,6 +169,7 @@ describe('Enable Banking Express routes', () => {
     it('returns error when redirectUrl is missing', async () => {
       const res = await request(app)
         .post('/start-auth')
+        .set('X-Actual-File-Id', TEST_FILE_ID)
         .send({ aspsp: { name: 'Nordea', country: 'FI' } });
 
       expect(res.body.data.error_code).toBe('INVALID_INPUT');
@@ -181,6 +183,7 @@ describe('Enable Banking Express routes', () => {
 
       const res = await request(app)
         .post('/start-auth')
+        .set('X-Actual-File-Id', TEST_FILE_ID)
         .send({
           aspsp: { name: 'Nordea', country: 'FI' },
           redirectUrl: 'https://app.example.com/callback',
@@ -226,6 +229,7 @@ describe('Enable Banking Express routes', () => {
 
       const res = await request(app)
         .post('/complete-auth')
+        .set('X-Actual-File-Id', TEST_FILE_ID)
         .send({ code: 'auth-code-123' });
 
       expect(res.body.data.session_id).toBe('session-123');
@@ -264,6 +268,7 @@ describe('Enable Banking Express routes', () => {
 
       const res = await request(app)
         .post('/complete-auth')
+        .set('X-Actual-File-Id', TEST_FILE_ID)
         .send({ code: 'auth-code' });
 
       // Both accounts should be returned, second with empty balances
@@ -283,6 +288,7 @@ describe('Enable Banking Express routes', () => {
 
       const startRes = await request(app)
         .post('/start-auth')
+        .set('X-Actual-File-Id', TEST_FILE_ID)
         .send({
           aspsp: { name: 'Nordea', country: 'FI' },
           redirectUrl: 'https://app.example.com/callback',
@@ -314,6 +320,7 @@ describe('Enable Banking Express routes', () => {
 
           await request(app)
             .post('/complete-auth')
+            .set('X-Actual-File-Id', TEST_FILE_ID)
             .send({ code: 'the-auth-code', state });
 
           resolve();
@@ -372,6 +379,7 @@ describe('Enable Banking Express routes', () => {
     it('returns error when accountId is missing', async () => {
       const res = await request(app)
         .post('/transactions')
+        .set('X-Actual-File-Id', TEST_FILE_ID)
         .send({ startDate: '2026-01-01' });
 
       expect(res.body.data.error_code).toBe('INVALID_INPUT');
@@ -380,6 +388,7 @@ describe('Enable Banking Express routes', () => {
     it('returns error when startDate is missing', async () => {
       const res = await request(app)
         .post('/transactions')
+        .set('X-Actual-File-Id', TEST_FILE_ID)
         .send({ accountId: 'uid-1' });
 
       expect(res.body.data.error_code).toBe('INVALID_INPUT');
@@ -423,6 +432,7 @@ describe('Enable Banking Express routes', () => {
 
       const res = await request(app)
         .post('/transactions')
+        .set('X-Actual-File-Id', TEST_FILE_ID)
         .send({ accountId: 'uid-1', startDate: '2026-01-01' });
 
       expect(res.body.status).toBe('ok');
@@ -477,6 +487,7 @@ describe('Enable Banking Express routes', () => {
 
       const res = await request(app)
         .post('/transactions')
+        .set('X-Actual-File-Id', TEST_FILE_ID)
         .send({ accountId: 'uid-1', startDate: '2026-01-01' });
 
       expect(res.body.data.transactions.all).toHaveLength(2);
@@ -490,6 +501,7 @@ describe('Enable Banking Express routes', () => {
 
       const res = await request(app)
         .post('/transactions')
+        .set('X-Actual-File-Id', TEST_FILE_ID)
         .send({ accountId: 'uid-1', startDate: '2026-01-01' });
 
       expect(res.body.data.startingBalance).toBe(0);
@@ -500,6 +512,7 @@ describe('Enable Banking Express routes', () => {
 
       const res = await request(app)
         .post('/transactions')
+        .set('X-Actual-File-Id', TEST_FILE_ID)
         .send({ accountId: 'uid-1', startDate: '2026-01-01' });
 
       // 401 maps to ITEM_ERROR / ITEM_LOGIN_REQUIRED (expired session)
@@ -512,6 +525,7 @@ describe('Enable Banking Express routes', () => {
 
       const res = await request(app)
         .post('/transactions')
+        .set('X-Actual-File-Id', TEST_FILE_ID)
         .send({ accountId: 'uid-1', startDate: '2026-01-01' });
 
       // error_type carries the bank-sync category (matched by AccountSyncCheck).
@@ -524,6 +538,7 @@ describe('Enable Banking Express routes', () => {
 
       const res = await request(app)
         .post('/transactions')
+        .set('X-Actual-File-Id', TEST_FILE_ID)
         .send({ accountId: 'uid-1', startDate: '2026-01-01' });
 
       expect(res.body.data.error_type).toBe('INVALID_INPUT');
@@ -538,6 +553,7 @@ describe('Enable Banking Express routes', () => {
 
       await request(app)
         .post('/transactions')
+        .set('X-Actual-File-Id', TEST_FILE_ID)
         .set('X-Forwarded-For', '203.0.113.42, 10.0.0.1')
         .set('User-Agent', 'TestBrowser/1.0')
         .send({ accountId: 'uid-1', startDate: '2026-01-01' });
