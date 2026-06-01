@@ -4,6 +4,8 @@ import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
 import { resetApp } from '#app/appSlice';
+import { pushModal } from '#modals/modalsSlice';
+import type { AppDispatch } from '#redux/store';
 
 const sliceName = 'notifications';
 
@@ -67,17 +69,6 @@ const notificationsSlice = createSlice({
       }
       state.notifications = [...state.notifications, notification];
     },
-    addGenericErrorNotification(state) {
-      const notification: NotificationWithId = {
-        id: uuidv4(),
-        type: 'error',
-        message: t(
-          'Something internally went wrong. You may want to restart the app if anything looks wrong. ' +
-            'Please report this as a new issue on GitHub.',
-        ),
-      };
-      state.notifications = [...state.notifications, notification];
-    },
     removeNotification(
       state,
       action: PayloadAction<RemoveNotificationPayload>,
@@ -104,9 +95,25 @@ export const actions = {
   ...notificationsSlice.actions,
 };
 
-export const {
-  addGenericErrorNotification,
-  addNotification,
-  removeNotification,
-  setNotificationInset,
-} = actions;
+export const { addNotification, removeNotification, setNotificationInset } =
+  actions;
+
+export function addGenericErrorNotification() {
+  return (dispatch: AppDispatch) => {
+    dispatch(
+      addNotification({
+        notification: {
+          type: 'error',
+          message: t(
+            'Something internally went wrong. You may want to restart the app if anything looks wrong. ' +
+              '[View debug logs](#viewLogs)',
+          ),
+          messageActions: {
+            viewLogs: () =>
+              dispatch(pushModal({ modal: { name: 'debug-logs' } })),
+          },
+        },
+      }),
+    );
+  };
+}

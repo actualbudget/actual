@@ -67,6 +67,14 @@ type StartImportEvent = { budgetName: string };
 type StartLoadEvent = undefined;
 type ApiFetchRedirectedEvent = undefined;
 
+export type LogLevel = 'log' | 'info' | 'warn' | 'error' | 'debug';
+
+type LogEvent = {
+  level: LogLevel;
+  message: string;
+  stack?: string | undefined;
+};
+
 export type ServerEvents = {
   'backups-updated': BackupUpdatedEvent;
   'cells-changed': CellsChangedEvent;
@@ -83,4 +91,5 @@ export type ServerEvents = {
   'sync-event': SyncEvent;
   'undo-event': UndoState;
   'api-fetch-redirected': ApiFetchRedirectedEvent;
+  'log-event': LogEvent;
 };

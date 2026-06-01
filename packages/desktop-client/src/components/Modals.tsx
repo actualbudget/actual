@@ -32,6 +32,7 @@ import { CoverModal } from './modals/CoverModal';
 import { CreateAccountModal } from './modals/CreateAccountModal';
 import { CreateEncryptionKeyModal } from './modals/CreateEncryptionKeyModal';
 import { CreateLocalAccountModal } from './modals/CreateLocalAccountModal';
+import { DebugLogsModal } from './modals/DebugLogsModal';
 import { EditUserAccess } from './modals/EditAccess';
 import { EditFieldModal } from './modals/EditFieldModal';
 import { EditRuleModal } from './modals/EditRuleModal';
@@ -124,6 +125,9 @@ export function Modals() {
         case 'keyboard-shortcuts':
           // don't show the hotkey help modal when a budget is not open
           return budgetId ? <KeyboardShortcutModal key={key} /> : null;
+
+        case 'debug-logs':
+          return <DebugLogsModal key={key} />;
 
         case 'import-transactions':
           return <ImportTransactionsModal key={key} {...modal.options} />;

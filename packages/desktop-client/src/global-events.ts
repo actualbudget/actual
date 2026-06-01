@@ -7,6 +7,7 @@ import { accountQueries } from './accounts';
 import { setAppState } from './app/appSlice';
 import { categoryQueries } from './budget';
 import { closeBudgetUI } from './budgetfiles/budgetfilesSlice';
+import { addBackendLogEntry } from './debug/logStore';
 import { closeModal, pushModal, replaceModal } from './modals/modalsSlice';
 import type { Modal } from './modals/modalsSlice';
 import {
@@ -21,6 +22,10 @@ import * as syncEvents from './sync-events';
 export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
   const unlistenServerError = listen('server-error', () => {
     store.dispatch(addGenericErrorNotification());
+  });
+
+  const unlistenLogEvent = listen('log-event', ({ level, message, stack }) => {
+    addBackendLogEntry({ level, message, stack });
   });
 
   const unlistenOrphanedPayees = listen(
@@ -171,6 +176,7 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
 
   return () => {
     unlistenServerError();
+    unlistenLogEvent();
     unlistenOrphanedPayees();
     unlistenSchedulesOffline();
     unlistenSync();

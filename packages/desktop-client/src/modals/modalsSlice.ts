@@ -628,6 +628,9 @@ export type Modal =
       name: 'goal-templates';
     }
   | {
+      name: 'debug-logs';
+    }
+  | {
       name: 'schedules-upcoming-length';
     }
   | {

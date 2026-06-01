@@ -42,7 +42,8 @@ type HelpMenuItem =
   | 'docs'
   | 'discord'
   | 'keyboard-shortcuts'
-  | 'goal-templates';
+  | 'goal-templates'
+  | 'debug-logs';
 
 type HelpButtonProps = {
   onPress?: () => void;
@@ -94,6 +95,9 @@ export const HelpMenu = () => {
       case 'goal-templates':
         dispatch(pushModal({ modal: { name: 'goal-templates' } }));
         break;
+      case 'debug-logs':
+        dispatch(pushModal({ modal: { name: 'debug-logs' } }));
+        break;
       default:
         throw new Error(`Unrecognized menu option: ${String(item)}`);
     }
@@ -127,6 +131,7 @@ export const HelpMenu = () => {
               text: t('Community support (Discord)'),
             },
             { name: 'keyboard-shortcuts', text: t('Keyboard shortcuts') },
+            { name: 'debug-logs', text: t('Debug logs') },
             ...(showGoalTemplates && page === '/budget'
               ? [{ name: 'goal-templates', text: t('Goal templates') }]
               : []),

@@ -107,7 +107,8 @@
     "#transactions/*": "./src/transactions/*.ts",
     "#undo/*": "./src/undo/*.ts",
     "#users/*": "./src/users/*.ts",
-    "#util/*": "./src/util/*.ts"
+    "#util/*": "./src/util/*.ts",
+    "#debug/*": "./src/debug/*.ts"
   },
   "scripts": {
     "start": "cross-env PORT=3001 vite",
