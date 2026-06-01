@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
 
 import * as undo from '#platform/client/undo';
@@ -128,9 +127,7 @@ function connectWorker(worker, onOpen, onError) {
 
       if (msg.message && msg.message.includes('indexeddb-quota-error')) {
         alert(
-          t(
-            'We hit a limit on the local storage available. Edits may not be saved. Please get in touch https://actualbudget.org/contact/ so we can help debug this.',
-          ),
+          'We hit a limit on the local storage available. Edits may not be saved. Please get in touch https://actualbudget.org/contact/ so we can help debug this.',
         );
       }
     } else if (msg.type === 'capture-breadcrumb') {
