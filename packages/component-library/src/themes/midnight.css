@@ -22,6 +22,7 @@
   --color-tableRowBackgroundAlternate: var(--color-tableBackground);
   --color-tableRowBackgroundHover: var(--palette-gray500);
   --color-tableText: var(--palette-gray150);
+  --color-tableTextItemAdded: var(--color-tableText);
   --color-tableTextLight: var(--color-tableText);
   --color-tableTextSubdued: var(--palette-gray500);
   --color-tableTextSelected: var(--palette-gray800);
@@ -58,6 +59,7 @@
   --color-sidebarItemAccentSelected: var(--palette-purple200);
   --color-sidebarItemBackgroundHover: var(--palette-gray700);
   --color-sidebarItemText: var(--palette-gray100);
+  --color-sidebarItemTextUpdated: var(--color-sidebarItemText);
   --color-sidebarItemTextSelected: var(--palette-purple200);
   --color-sidebarBudgetName: var(--palette-gray300);
 
