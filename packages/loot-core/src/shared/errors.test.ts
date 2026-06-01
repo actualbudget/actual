@@ -1,5 +1,4 @@
 import i18next from 'i18next';
-import { beforeAll, describe, expect, it } from 'vitest';
 
 import { getDownloadError, getSyncError } from './errors';
 
