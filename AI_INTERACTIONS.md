@@ -207,6 +207,7 @@ launchOptions: {
 **Why 0 as default (not 500):** The original implementation defaulted to 500ms in non-CI environments. A code reviewer correctly flagged this — adding a fixed 500ms delay to every local Playwright action by default slows down all developers who clone this repo. The right default is 0 (no slowdown); slowMo is opt-in via the environment variable.
 
 **How to use for demo:**
+
 ```bash
 PLAYWRIGHT_SLOW_MO=500 yarn playwright test budget.test.ts --browser=chromium --headed
 ```
