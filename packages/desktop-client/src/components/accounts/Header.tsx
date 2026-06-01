@@ -593,7 +593,7 @@ type AccountSyncSidebarProps = {
   accountsSyncing: string[];
 };
 
-export function AccountSyncSidebar({
+function AccountSyncSidebar({
   account,
   accountsSyncing,
 }: AccountSyncSidebarProps) {
