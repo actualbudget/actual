@@ -51,22 +51,7 @@ These two features were chosen because they are tightly coupled: every transacti
 
 ### Feature 1: Envelope Budgeting
 
-#### TC-B01 — Budget summary displays all required financial fields
-
-**Priority:** High | **Type:** Smoke
-
-**Steps:**
-
-1. Load the budget page for the current month.
-2. Locate the budget summary card.
-
-**Expected result:** Summary shows Available funds, Overspent (previous month), Budgeted, For next month, and To Budget — all with numeric values.
-
-**Implemented by:** `Budget › renders the summary information: available funds, overspent, budgeted and for next month`
-
----
-
-#### TC-B02 — Create a new budget category inside an existing group
+#### TC-B01 — Create a new budget category inside an existing group
 
 **Priority:** High | **Type:** Functional
 
@@ -85,7 +70,7 @@ These two features were chosen because they are tightly coupled: every transacti
 
 ---
 
-#### TC-B03 — Allocating funds to a category updates the table total
+#### TC-B02 — Allocating funds to a category updates the table total
 
 **Priority:** High | **Type:** Functional
 
@@ -101,7 +86,7 @@ These two features were chosen because they are tightly coupled: every transacti
 
 ---
 
-#### TC-B04 — Transferring all balance from one category to another
+#### TC-B03 — Transferring all balance from one category to another
 
 **Priority:** High | **Type:** Functional
 
@@ -113,11 +98,11 @@ These two features were chosen because they are tightly coupled: every transacti
 
 **Expected result:** Row 2's balance equals the sum of both original balances. Balance for row 1 is 0. Table-level totals are unchanged (money moved internally, not added).
 
-**Implemented by:** `Budget › transfer funds to another category` and `Budget › verifies balance calculation after fund transfer`
+**Implemented by:** `Budget › verifies balance calculation after fund transfer`
 
 ---
 
-#### TC-B05 — Zero-out a category allocation returns funds to the budget pool
+#### TC-B04 — Zero-out a category allocation returns funds to the budget pool
 
 **Priority:** Medium | **Type:** Functional
 
@@ -132,7 +117,7 @@ These two features were chosen because they are tightly coupled: every transacti
 
 ---
 
-#### TC-B06 — Budget allocation persists after a full page reload
+#### TC-B05 — Budget allocation persists after a full page reload
 
 **Priority:** High | **Type:** Data Integrity
 
@@ -148,7 +133,7 @@ These two features were chosen because they are tightly coupled: every transacti
 
 ---
 
-#### TC-B07 — Escape key cancels a budget edit without saving
+#### TC-B06 — Escape key cancels a budget edit without saving
 
 **Priority:** Medium | **Type:** UX / Negative
 
@@ -163,21 +148,7 @@ These two features were chosen because they are tightly coupled: every transacti
 
 ---
 
-#### TC-B08 — Clicking the spent amount navigates to the account transactions page
-
-**Priority:** Medium | **Type:** Navigation
-
-**Steps:**
-
-1. Click the spent-amount cell for category row 1.
-
-**Expected result:** Browser navigates to `/accounts`. The account page header shows "All Accounts".
-
-**Implemented by:** `Budget › clicking on spent amounts opens a transaction page`
-
----
-
-#### TC-B09 — Month navigation updates the budget summary content
+#### TC-B07 — Month navigation updates the budget summary content
 
 **Priority:** Medium | **Type:** Functional
 
@@ -195,7 +166,7 @@ These two features were chosen because they are tightly coupled: every transacti
 
 ---
 
-#### TC-B10 — Spending transaction reduces the correct envelope balance (cross-feature)
+#### TC-B08 — Spending transaction reduces the correct envelope balance (cross-feature)
 
 **Priority:** High | **Type:** Integration / Data Integrity
 
@@ -215,52 +186,7 @@ These two features were chosen because they are tightly coupled: every transacti
 
 ### Feature 2: Transaction Management
 
-#### TC-T01 — Create a basic debit transaction
-
-**Priority:** High | **Type:** Functional (Create)
-
-**Steps:**
-
-1. Navigate to Ally Savings. Click Add New.
-2. Fill in payee "Home Depot", notes "Notes field", category "Food", debit $12.34.
-3. Confirm.
-
-**Expected result:** Transaction appears at the top of the list with all fields matching input. Credit column is empty.
-
-**Implemented by:** `Transactions › creates a test transaction`
-
----
-
-#### TC-T02 — Create a split transaction across multiple categories
-
-**Priority:** High | **Type:** Functional (Create)
-
-**Steps:**
-
-1. Add a $333.33 debit with category "Split".
-2. Add two child lines: $222.22 to "General", $111.11 uncategorised.
-
-**Expected result:** Parent row shows "Split". Two child rows appear with the correct amounts and categories.
-
-**Implemented by:** `Transactions › creates a split test transaction`
-
----
-
-#### TC-T03 — Create a transfer transaction between accounts
-
-**Priority:** High | **Type:** Functional (Create)
-
-**Steps:**
-
-1. Enter payee "Bank of America" (an existing account) with debit $12.34.
-
-**Expected result:** Category auto-fills as "Transfer". After confirming, the individual account balance changes, but the All Accounts and On Budget totals are unchanged (internal transfer — no net change to total wealth).
-
-**Implemented by:** `Transactions › creates a transfer test transaction`
-
----
-
-#### TC-T04 — Real-time search filters the transaction list
+#### TC-T01 — Real-time search filters the transaction list
 
 **Priority:** High | **Type:** Functional (Read)
 
@@ -277,35 +203,7 @@ These two features were chosen because they are tightly coupled: every transacti
 
 ---
 
-#### TC-T05 — Filter by category narrows the list to matching rows
-
-**Priority:** Medium | **Type:** Functional (Read)
-
-**Steps:**
-
-1. Click Filter → Category → select "Clothing". Apply.
-
-**Expected result:** Every visible transaction row has category "Clothing".
-
-**Implemented by:** `Transactions › filters transactions › by category`
-
----
-
-#### TC-T06 — Filter by payee narrows the list to matching rows
-
-**Priority:** Medium | **Type:** Functional (Read)
-
-**Steps:**
-
-1. Click Filter → Payee → enter a payee name. Apply.
-
-**Expected result:** Only transactions for that payee are shown.
-
-**Implemented by:** `Transactions › filters transactions › by payee`
-
----
-
-#### TC-T07 — Edit a transaction field inline without a separate save step
+#### TC-T02 — Edit a transaction field inline without a separate save step
 
 **Priority:** High | **Type:** Functional (Update)
 
@@ -320,7 +218,7 @@ These two features were chosen because they are tightly coupled: every transacti
 
 ---
 
-#### TC-T08 — Delete a transaction and verify the account balance reverts
+#### TC-T03 — Delete a transaction and verify the account balance reverts
 
 **Priority:** High | **Type:** Functional (Delete)
 
