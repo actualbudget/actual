@@ -188,6 +188,33 @@ After the PR was opened, a code reviewer flagged several issues. I used AI to sy
 
 ---
 
+## Interaction 8 — Configuring slowMo for Demo Visibility
+
+**The problem:** When running tests at full Playwright speed, every interaction completes in milliseconds — clicks, fills, navigations all flash by too fast to follow visually. For a submission that would be reviewed and demoed, this makes the tests look like a black box.
+
+**My prompt:**
+
+> "Can we add a slow down so the interviewer will know UI interactions?"
+
+**What AI did:** Added `launchOptions.slowMo` to `playwright.config.ts`:
+
+```typescript
+launchOptions: {
+  slowMo: parseInt(process.env.PLAYWRIGHT_SLOW_MO ?? '0'),
+},
+```
+
+**Why 0 as default (not 500):** The original implementation defaulted to 500ms in non-CI environments. A code reviewer correctly flagged this — adding a fixed 500ms delay to every local Playwright action by default slows down all developers who clone this repo. The right default is 0 (no slowdown); slowMo is opt-in via the environment variable.
+
+**How to use for demo:**
+```bash
+PLAYWRIGHT_SLOW_MO=500 yarn playwright test budget.test.ts --browser=chromium --headed
+```
+
+**Decision:** This is a presentation concern, not a test correctness concern. The tests pass at any speed — slowMo only affects how visible the interactions are to a human watching the browser. Keeping it opt-in means it doesn't affect CI or other developers.
+
+---
+
 ## Summary: What AI Was Good At
 
 | Task                                                     | AI Effectiveness                     |
