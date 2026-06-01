@@ -12,7 +12,9 @@ name: Compare Sizes
 ##########################################################################################
 
 on:
-  pull_request_target:
+  # See banner above: checks out base ref only; PR-side artifacts are
+  # treated as data (JSON stats) and never executed.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     paths:
       - 'packages/**'
       - 'package.json'

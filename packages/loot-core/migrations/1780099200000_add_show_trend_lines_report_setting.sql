@@ -1,0 +1,5 @@
+BEGIN TRANSACTION;
+
+ALTER TABLE custom_reports ADD COLUMN show_trend_lines INTEGER DEFAULT 0;
+
+COMMIT;

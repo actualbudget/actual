@@ -83,6 +83,7 @@ export function recalculate({
       const change = last ? intervalTotals - last.totalTotals : 0;
 
       arr.push({
+        date: intervalItem,
         totalAssets: intervalAssets,
         totalDebts: intervalDebts,
         netAssets: intervalTotals > 0 ? intervalTotals : 0,

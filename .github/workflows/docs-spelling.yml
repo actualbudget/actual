@@ -43,7 +43,11 @@ on:
       - 'packages/docs/**'
       - '.github/workflows/docs-spelling.yml'
       - '.github/actions/docs-spelling/**'
-  pull_request_target:
+  # Required by the upstream check-spelling action's documented
+  # restricted-permissions pattern. Comment work is split into
+  # separately permissioned jobs (see header) so the spelling job
+  # itself does not write anything PR-controlled.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     branches:
       - '**'
     tags-ignore:
