@@ -80,6 +80,18 @@ try {
 
   process.stdout.write(newVersion);
 
+  if (process.env.GITHUB_OUTPUT) {
+    const resolvedType = newVersion.includes('-nightly.')
+      ? 'nightly'
+      : newVersion.split('.')[2] === '0'
+        ? 'monthly'
+        : 'hotfix';
+    fs.appendFileSync(
+      process.env.GITHUB_OUTPUT,
+      `version=${newVersion}\ntype=${resolvedType}\n`,
+    );
+  }
+
   if (values.update) {
     packageJson.version = newVersion;
     fs.writeFileSync(

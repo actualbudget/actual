@@ -347,7 +347,7 @@ export function SelectLinkedAccountsModal({
   // Memoize default starting settings to avoid repeated calculations
   const defaultStartingSettings = useMemo<StartingBalanceInfo>(
     () => ({
-      date: subDays(currentDay(), 90),
+      date: subDays(currentDay(), 89),
       amount: 0,
     }),
     [],
@@ -357,7 +357,7 @@ export function SelectLinkedAccountsModal({
     if (customStartingDates[accountId]) {
       return customStartingDates[accountId];
     }
-    // Default to 90 days ago (matches server default)
+    // Default to 89 days ago (90 days inclusive, matches server default)
     return defaultStartingSettings;
   };
 

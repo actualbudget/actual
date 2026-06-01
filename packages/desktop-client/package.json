@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "26.5.2",
+  "version": "26.6.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -52,6 +52,7 @@
     "#components/budget/util": "./src/components/budget/util.ts",
     "#components/codemirror/autocompleteTabAccept": "./src/components/codemirror/autocompleteTabAccept.ts",
     "#components/mobile/utils": "./src/components/mobile/utils.ts",
+    "#components/modals/BudgetAutomationsModal/migrateTemplatesToAutomations": "./src/components/modals/BudgetAutomationsModal/migrateTemplatesToAutomations.ts",
     "#components/reports/chart-theme": "./src/components/reports/chart-theme.ts",
     "#components/reports/constants": "./src/components/reports/constants.ts",
     "#components/reports/disabledList": "./src/components/reports/disabledList.ts",

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { SvgAlertTriangle } from '@actual-app/components/icons/v2';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
 import type { AutomationEntry } from '#components/budget/goals/automationExamples';
@@ -126,18 +127,38 @@ export function AutomationListRow({
             />
           )}
         </View>
-        <Text
-          style={{
-            fontSize: 11,
-            color: subtitleColor,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            display: 'block',
-          }}
+        <Tooltip
+          content={
+            <View style={{ maxWidth: 320, gap: 4 }}>
+              <Text style={{ display: 'block' }}>{subtitle}</Text>
+              {entry.template.description && (
+                <Text
+                  style={{
+                    display: 'block',
+                    fontSize: 11,
+                    color: theme.pageTextLight,
+                    whiteSpace: 'pre-wrap',
+                  }}
+                >
+                  {entry.template.description}
+                </Text>
+              )}
+            </View>
+          }
         >
-          {subtitle}
-        </Text>
+          <Text
+            style={{
+              fontSize: 11,
+              color: subtitleColor,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              display: 'block',
+            }}
+          >
+            {subtitle}
+          </Text>
+        </Tooltip>
       </View>
       {!NON_CONTRIBUTION_TYPES.has(entry.displayType) && (
         <View

@@ -88,16 +88,13 @@ export function validateEnd(
 
 export function validateRange(
   earliest: string,
-  latest: string,
   start: string,
   end: string,
-) {
-  if (end > latest) {
-    end = latest;
-  }
+): [string, string] {
   if (start < earliest) {
     start = earliest;
   }
+
   return [start, end];
 }
 
@@ -172,6 +169,24 @@ export function getLatestRange(offset: number) {
   const start = monthUtils.subMonths(end, offset);
 
   return [start, end, 'sliding-window'] as const;
+}
+
+export function getNextRange(offset: number) {
+  const start = monthUtils.currentMonth();
+  const end = monthUtils.addMonths(start, offset);
+
+  return [start, end, 'static'] as const;
+}
+
+export function getFullFutureRange(latestMonth?: string) {
+  const start = monthUtils.currentMonth();
+  const defaultEnd = monthUtils.addMonths(start, 24);
+  const end =
+    latestMonth && monthUtils.isAfter(latestMonth, start)
+      ? latestMonth
+      : defaultEnd;
+
+  return [start, end, 'static'] as const;
 }
 
 export function calculateTimeRange(

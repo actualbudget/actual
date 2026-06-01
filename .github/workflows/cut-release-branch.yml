@@ -6,10 +6,6 @@ on:
     - cron: '0 17 25 * *'
   workflow_dispatch:
     inputs:
-      ref:
-        description: 'Commit or branch to release'
-        required: true
-        default: 'master'
       version:
         description: 'Version number for the release (optional)'
         required: false
@@ -25,14 +21,17 @@ permissions:
 
 jobs:
   cut-release-branch:
+    if: github.repository_owner == 'actualbudget'
     runs-on: ubuntu-latest
     environment: release
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ github.event.inputs.ref || 'master' }}
-          persist-credentials: false
+          ref: master
+          fetch-depth: 0
+          token: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
+          persist-credentials: true
 
       - name: Set up environment
         uses: ./.github/actions/setup
@@ -41,41 +40,25 @@ jobs:
           cache: 'false'
           download-translations: 'false'
 
-      - name: Bump package versions
-        id: bump_package_versions
+      - name: Determine target version
+        id: version
         shell: bash
         env:
           INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
-          declare -A packages=(
-            [web]="desktop-client"
-            [electron]="desktop-electron"
-            [sync]="sync-server"
-            [api]="api"
-            [cli]="cli"
-            [core]="loot-core"
-          )
-          declare -A new_versions
+          args=(--package-json ./packages/desktop-client/package.json --type auto)
+          if [[ -n "$INPUT_VERSION" ]]; then
+            args+=(--version "$INPUT_VERSION")
+          fi
+          yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts "${args[@]}"
 
-          for key in "${!packages[@]}"; do
-            pkg="${packages[$key]}"
-
-            if [[ -n "$INPUT_VERSION" ]]; then
-              version=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts \
-                --package-json "./packages/$pkg/package.json" \
-                --version "$INPUT_VERSION" \
-                --update)
-            else
-              version=$(yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts \
-                --package-json "./packages/$pkg/package.json" \
-                --type auto \
-                --update)
-            fi
-
-            new_versions[$key]="$version"
-          done
-
-          echo "version=${new_versions[web]}" >> "$GITHUB_OUTPUT"
+      - name: Determine previous tag
+        id: prev_tag
+        env:
+          GH_TOKEN: ${{ secrets.ACTIONS_UPDATE_TOKEN || github.token }}
+        run: |
+          prev_tag=$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" --jq '.tag_name' 2>/dev/null) || prev_tag=""
+          echo "tag=${prev_tag:-master}" >> "$GITHUB_OUTPUT"
 
       - name: Compute release date
         id: release_date
@@ -90,15 +73,72 @@ jobs:
             echo "date=$(date -d '+1 month' '+%Y-%m-01')" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Create release branch and PR
+      - name: Validate target version
+        env:
+          GH_TOKEN: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+          TYPE: ${{ steps.version.outputs.type }}
+        shell: bash
+        run: |
+          if gh api "repos/${GITHUB_REPOSITORY}/branches/release" --silent >/dev/null 2>&1; then
+            current_version=$(gh api "repos/${GITHUB_REPOSITORY}/contents/packages/desktop-client/package.json?ref=release" --jq '.content' | base64 -d | jq -r .version)
+            latest=$(printf '%s\n%s\n' "$VERSION" "$current_version" | sort -V | tail -1)
+            if [[ "$latest" != "$VERSION" || "$current_version" == "$VERSION" ]]; then
+              echo "::error::Target version $VERSION is not newer than current release version $current_version"
+              exit 1
+            fi
+          fi
+
+          echo "Type: $TYPE (target=$VERSION, current=${current_version:-none})"
+
+      - name: Apply version bumps
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          for pkg in desktop-client desktop-electron sync-server api cli loot-core; do
+            yarn workspace @actual-app/ci-actions tsx bin/get-next-package-version.ts \
+              --package-json "./packages/$pkg/package.json" \
+              --version "$VERSION" \
+              --update
+          done
+
+      - name: Open release-notes branch and PR
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           token: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
-          commit-message: '🔖 (${{ steps.bump_package_versions.outputs.version }})'
-          title: '🔖 (${{ steps.bump_package_versions.outputs.version }})'
+          commit-message: '🔖 (${{ steps.version.outputs.version }})'
+          title: '🔖 (${{ steps.version.outputs.version }})'
           body: |
             Generated by [cut-release-branch.yml](../tree/master/.github/workflows/cut-release-branch.yml)
 
+            Release branch: [`release`](../compare/${{ steps.prev_tag.outputs.tag }}...release)
+
             <!-- release-date:${{ steps.release_date.outputs.date }} -->
-          branch: 'release/${{ steps.bump_package_versions.outputs.version }}'
+          branch: 'release-notes/${{ steps.version.outputs.version }}'
           base: master
+
+      - name: Update release branch
+        env:
+          GH_TOKEN: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+          TYPE: ${{ steps.version.outputs.type }}
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          if gh api "repos/${GITHUB_REPOSITORY}/branches/release" --silent >/dev/null 2>&1; then
+            git fetch origin release
+            git checkout release
+
+            if [[ "$TYPE" == "monthly" ]]; then
+              git fetch origin master
+              git merge --no-edit -X theirs origin/master
+              git diff --exit-code origin/master
+            fi
+          fi
+
+          git fetch origin "release-notes/$VERSION"
+          git cherry-pick FETCH_HEAD
+          git push origin HEAD:refs/heads/release

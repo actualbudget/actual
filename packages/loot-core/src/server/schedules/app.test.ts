@@ -159,6 +159,55 @@ describe('schedule app', () => {
       ).rejects.toThrow(/date condition is required/);
     });
 
+    it('trims schedule names when creating and updating schedules', async () => {
+      const id = await createSchedule({
+        schedule: { name: '  Rent  ' },
+        conditions: [
+          {
+            op: 'is',
+            field: 'date',
+            value: '2020-12-20',
+          },
+        ],
+      });
+
+      let res = await aqlQuery(q('schedules').filter({ id }).select(['name']));
+      expect(res.data[0].name).toBe('Rent');
+
+      await updateSchedule({
+        schedule: { id, name: '  Mortgage  ' },
+      });
+
+      res = await aqlQuery(q('schedules').filter({ id }).select(['name']));
+      expect(res.data[0].name).toBe('Mortgage');
+    });
+
+    it('treats names as duplicates after trimming whitespace', async () => {
+      await createSchedule({
+        schedule: { name: 'Rent' },
+        conditions: [
+          {
+            op: 'is',
+            field: 'date',
+            value: '2020-12-20',
+          },
+        ],
+      });
+
+      await expect(
+        createSchedule({
+          schedule: { name: '  Rent  ' },
+          conditions: [
+            {
+              op: 'is',
+              field: 'date',
+              value: '2020-12-20',
+            },
+          ],
+        }),
+      ).rejects.toThrow(/same name/);
+    });
+
     it('updateSchedule updates a schedule', async () => {
       const id = await createSchedule({
         conditions: [
