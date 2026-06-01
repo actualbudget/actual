@@ -188,7 +188,47 @@ After the PR was opened, a code reviewer flagged several issues. I used AI to sy
 
 ---
 
-## Interaction 8 — Configuring slowMo for Demo Visibility
+## Interaction 8 — Fixing CI Race Conditions
+
+After the PR was opened, CI reported two failures that passed locally. Both were timing-related — the CI machine is slower than local, exposing state that was read before the UI had finished loading.
+
+**Failure 1 — `rule count increases by one after creating a new rule`**
+
+```
+Expected: 1  (initialCount=0 + 1)
+Received: 5  (4 existing rules + 1 new)
+```
+
+`const initialCount = await allRows.count()` returned `0` because the rules table hadn't rendered yet. The test then asserted `expect(allRows).toHaveCount(0 + 1)` which failed when the table eventually showed all 5 rows.
+
+**Fix:** Wait for the table to have at least one row before reading the count:
+
+```typescript
+await expect(allRows.first()).toBeVisible();
+const initialCount = await allRows.count();
+```
+
+**Failure 2 — `deletes a transaction and reverts the account balance`**
+
+```
+Expected: "0.00"   ← balanceBeforeCreate read during loading state
+Received: "7,653.00"
+```
+
+`balanceBeforeCreate` was captured as `"0.00"` — the loading state shown while the account page was still fetching data. The deletion then correctly restored the real balance `"7,653.00"`, but the test compared against `"0.00"` and failed.
+
+**Fix:** Wait for the balance to show a real non-zero value before recording it:
+
+```typescript
+await expect(accountPage.accountBalance).not.toHaveText('0.00');
+balanceBeforeCreate = await accountPage.accountBalance.textContent();
+```
+
+**Key insight:** Both failures share the same root cause — reading UI state before it settled. The fix in both cases is a state-based wait (wait for a specific DOM condition) rather than a fixed sleep. Fixed sleeps are flaky by nature; state-based waits are deterministic.
+
+---
+
+## Interaction 9 — Configuring slowMo for Demo Visibility
 
 **The problem:** When running tests at full Playwright speed, every interaction completes in milliseconds — clicks, fills, navigations all flash by too fast to follow visually. For a submission that would be reviewed and demoed, this makes the tests look like a black box.
 
