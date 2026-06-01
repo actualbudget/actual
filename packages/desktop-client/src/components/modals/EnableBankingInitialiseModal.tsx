@@ -30,6 +30,7 @@ type EnableBankingInitialiseProps = Extract<
 
 export function EnableBankingInitialiseModal({
   onSuccess,
+  fileId,
 }: EnableBankingInitialiseProps) {
   const { t } = useTranslation();
   const [applicationId, setApplicationId] = useState('');
@@ -75,6 +76,7 @@ export function EnableBankingInitialiseModal({
       const result = await send('enablebanking-configure', {
         applicationId,
         secretKey,
+        fileId,
       });
 
       if (result?.error) {

@@ -101,9 +101,9 @@ export function useBuiltInBankSyncProviders({
   const budgetFileId = metadataFileId ?? '';
   const { hasPermission } = useAuth();
   const multiuserEnabled = useMultiuserEnabled();
-  const canConfigureProviders =
-    Boolean(budgetFileId) &&
-    (!multiuserEnabled || hasPermission(Permissions.ADMINISTRATOR));
+  const canManageProviders =
+    !multiuserEnabled || hasPermission(Permissions.ADMINISTRATOR);
+  const canConfigureProviders = Boolean(budgetFileId) && canManageProviders;
 
   const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
     boolean | null
@@ -124,7 +124,7 @@ export function useBuiltInBankSyncProviders({
   const { configuredSimpleFin } = useSimpleFinStatus(budgetFileId);
   const { configuredPluggyAi } = usePluggyAiStatus(budgetFileId);
   const { configuredEnableBanking, isLoading: isEnableBankingLoading } =
-    useEnableBankingStatus(enableBankingEnabled);
+    useEnableBankingStatus(budgetFileId, enableBankingEnabled);
 
   useEffect(() => {
     setIsGoCardlessSetupComplete(configuredGoCardless);
@@ -191,11 +191,12 @@ export function useBuiltInBankSyncProviders({
           name: 'enablebanking-init',
           options: {
             onSuccess: () => setIsEnableBankingSetupComplete(true),
+            fileId: budgetFileId,
           },
         },
       }),
     );
-  }, [dispatch]);
+  }, [budgetFileId, dispatch]);
 
   const notifyResetFailure = useCallback(
     (providerName: string, error: unknown) => {
@@ -401,7 +402,7 @@ export function useBuiltInBankSyncProviders({
     }
 
     try {
-      await authorizeEnableBanking(dispatch, upgradingAccountId);
+      await authorizeEnableBanking(dispatch, budgetFileId, upgradingAccountId);
     } catch (error) {
       dispatch(
         addNotification({
@@ -417,6 +418,7 @@ export function useBuiltInBankSyncProviders({
     }
   }, [
     dispatch,
+    budgetFileId,
     isEnableBankingSetupComplete,
     onEnableBankingInit,
     t,
@@ -594,7 +596,7 @@ export function useBuiltInBankSyncProviders({
     syncServerStatus,
     canConfigureProviders,
     showPermissionWarning:
-      providersNeedingConfiguration.length > 0 && !canConfigureProviders,
+      providersNeedingConfiguration.length > 0 && !canManageProviders,
     providersNeedingConfiguration,
   };
 }

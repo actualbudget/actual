@@ -55,6 +55,12 @@ app.set('trust proxy', true);
 app.use(express.json());
 app.use('/', handlers);
 
+const TEST_FILE_ID = 'test-file-id';
+
+function postWithFileId(path: string) {
+  return request(app).post(path).set('X-Actual-File-Id', TEST_FILE_ID);
+}
+
 function mockFetchResponse(data: unknown, ok = true, status = 200) {
   mockFetch.mockResolvedValueOnce({
     ok,
@@ -75,7 +81,7 @@ describe('Enable Banking Express routes', () => {
 
   describe('POST /status', () => {
     it('returns configured: true when secrets are set', async () => {
-      const res = await request(app).post('/status').send({});
+      const res = await postWithFileId('/status').send({});
 
       expect(res.body.status).toBe('ok');
       expect(res.body.data.configured).toBe(true);
@@ -86,6 +92,7 @@ describe('Enable Banking Express routes', () => {
     it('returns error when applicationId is missing', async () => {
       const res = await request(app)
         .post('/configure')
+        .set('X-Actual-File-Id', TEST_FILE_ID)
         .send({ secretKey: 'key' });
 
       expect(res.body.data.error_code).toBe('INVALID_INPUT');
@@ -94,6 +101,7 @@ describe('Enable Banking Express routes', () => {
     it('returns error when secretKey is missing', async () => {
       const res = await request(app)
         .post('/configure')
+        .set('X-Actual-File-Id', TEST_FILE_ID)
         .send({ applicationId: 'id' });
 
       expect(res.body.data.error_code).toBe('INVALID_INPUT');
@@ -104,6 +112,7 @@ describe('Enable Banking Express routes', () => {
 
       const res = await request(app)
         .post('/configure')
+        .set('X-Actual-File-Id', TEST_FILE_ID)
         .send({ applicationId: 'test-id', secretKey: 'test-key' });
 
       expect(res.body.data.configured).toBe(true);
@@ -118,6 +127,7 @@ describe('Enable Banking Express routes', () => {
 
       const res = await request(app)
         .post('/configure')
+        .set('X-Actual-File-Id', TEST_FILE_ID)
         .send({ applicationId: 'bad-id', secretKey: 'bad-key' });
 
       expect(res.body.data.error_code).toBe('CONFIGURATION_FAILED');
@@ -131,7 +141,7 @@ describe('Enable Banking Express routes', () => {
         { name: 'OP', country: 'FI' },
       ]);
 
-      const res = await request(app).post('/aspsps').send({ country: 'FI' });
+      const res = await postWithFileId('/aspsps').send({ country: 'FI' });
 
       expect(res.body.status).toBe('ok');
       expect(res.body.data).toHaveLength(2);
@@ -140,7 +150,7 @@ describe('Enable Banking Express routes', () => {
     it('handles API errors gracefully', async () => {
       mockFetchResponse({ message: 'Server error' }, false, 500);
 
-      const res = await request(app).post('/aspsps').send({ country: 'XX' });
+      const res = await postWithFileId('/aspsps').send({ country: 'XX' });
 
       expect(res.body.data.error).toBeDefined();
     });

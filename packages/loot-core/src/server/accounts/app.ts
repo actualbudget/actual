@@ -921,7 +921,7 @@ async function pluggyAiAccounts({ fileId }: { fileId: string }) {
   }
 }
 
-async function enableBankingStatus() {
+async function enableBankingStatus({ fileId }: { fileId: string }) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -933,16 +933,22 @@ async function enableBankingStatus() {
     throw new Error('Failed to get server config.');
   }
 
-  return post(
-    serverConfig.ENABLEBANKING_SERVER + '/status',
-    {},
-    {
-      'X-ACTUAL-TOKEN': userToken,
-    },
-  );
+  const body = { fileId };
+  const headers: Record<string, string> = {
+    'X-ACTUAL-TOKEN': userToken,
+    'X-Actual-File-Id': fileId,
+  };
+
+  return post(serverConfig.ENABLEBANKING_SERVER + '/status', body, headers);
 }
 
-async function enableBankingAspsps(country: string) {
+async function enableBankingAspsps({
+  country,
+  fileId,
+}: {
+  country: string;
+  fileId: string;
+}) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -956,9 +962,10 @@ async function enableBankingAspsps(country: string) {
 
   return post(
     serverConfig.ENABLEBANKING_SERVER + '/aspsps',
-    { country },
+    { country, fileId },
     {
       'X-ACTUAL-TOKEN': userToken,
+      'X-Actual-File-Id': fileId,
     },
   );
 }
@@ -968,16 +975,23 @@ async function enableBankingStartAuth({
   country,
   redirectUrl,
   maxConsentValidity,
+  fileId,
 }: {
   aspspId: string;
   country: string;
   redirectUrl: string;
   maxConsentValidity?: number;
+  fileId: string;
 }) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
     return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
   }
 
   if (
@@ -990,16 +1004,17 @@ async function enableBankingStartAuth({
     return { error: 'invalid_max_consent_validity' };
   }
 
-  const serverConfig = getServer();
-  if (!serverConfig) {
-    throw new Error('Failed to get server config.');
-  }
-
   return post(
     serverConfig.ENABLEBANKING_SERVER + '/start-auth',
-    { aspsp: { name: aspspId, country }, redirectUrl, maxConsentValidity },
+    {
+      aspsp: { name: aspspId, country },
+      redirectUrl,
+      maxConsentValidity,
+      fileId,
+    },
     {
       'X-ACTUAL-TOKEN': userToken,
+      'X-Actual-File-Id': fileId,
     },
   );
 }
@@ -1081,6 +1096,7 @@ async function stopEnableBankingPollAuth({ state }: { state: string }) {
 async function enableBankingConfigure(config: {
   applicationId: string;
   secretKey: string;
+  fileId: string;
 }) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -1093,8 +1109,11 @@ async function enableBankingConfigure(config: {
     throw new Error('Failed to get server config.');
   }
 
+  const { fileId } = config;
+
   return post(serverConfig.ENABLEBANKING_SERVER + '/configure', config, {
     'X-ACTUAL-TOKEN': userToken,
+    'X-Actual-File-Id': fileId,
   });
 }
 

@@ -109,7 +109,19 @@ export function AccountSyncCheck() {
 
       if (acc.account_id) {
         if (acc.account_sync_source === 'enableBanking') {
-          void authorizeEnableBanking(dispatch);
+          if (!cloudFileId) {
+            dispatch(
+              addNotification({
+                notification: {
+                  type: 'error',
+                  message: t('Unable to reauthorize without a budget file ID.'),
+                },
+              }),
+            );
+            return;
+          }
+
+          void authorizeEnableBanking(dispatch, cloudFileId);
         } else if (acc.account_sync_source === 'goCardless') {
           if (!cloudFileId) {
             dispatch(
