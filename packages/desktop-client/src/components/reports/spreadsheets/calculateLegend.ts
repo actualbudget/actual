@@ -25,7 +25,7 @@ export function calculateLegend(
           return { name: c.name, id: c.id, data: c };
         });
 
-  function getColor(data: IntervalEntity, index: number) {
+  function getColor(data: IntervalEntity | GroupedEntity, index: number) {
     if (graphType === 'DonutGraph') {
       return colorScale[index % colorScale.length];
     }

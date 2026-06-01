@@ -30,6 +30,7 @@ type ChooseGraphProps = {
   style?: CSSProperties;
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+  showTrendLines?: boolean;
   showTooltip?: boolean;
   intervalsCount: number;
 };
@@ -48,6 +49,7 @@ export function ChooseGraph({
   style,
   showHiddenCategories = false,
   showOffBudget = false,
+  showTrendLines = false,
   showTooltip = true,
   intervalsCount,
 }: ChooseGraphProps) {
@@ -161,6 +163,7 @@ export function ChooseGraph({
         balanceTypeOp={balanceTypeOp}
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
+        showTrendLines={showTrendLines}
         showTooltip={showTooltip}
         interval={interval}
       />
