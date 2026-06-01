@@ -254,33 +254,35 @@ A **silent data-corruption bug** was discovered in the existing page model durin
 
 ### Run only the newly added tests (30 total: 8+3+8+2+3+3+3)
 
+Set `PLAYWRIGHT_SLOW_MO=500` to slow down interactions for demo visibility (default is 0 — no slowdown).
+
 ```bash
 # Budget — 8 new tests
-yarn playwright test budget.test.ts --browser=chromium --headed --reporter=list \
+PLAYWRIGHT_SLOW_MO=500 yarn playwright test budget.test.ts --browser=chromium --headed --reporter=list \
   --grep "verifies|navigates between months|creates a new budget category|budget spending transaction"
 
 # Transactions — 3 new tests
-yarn playwright test transactions.test.ts --browser=chromium --headed --reporter=list \
+PLAYWRIGHT_SLOW_MO=500 yarn playwright test transactions.test.ts --browser=chromium --headed --reporter=list \
   --grep "searches transactions|edits a transaction notes|deletes a transaction"
 
 # Payees — 8 new tests
-yarn playwright test payees.test.ts --browser=chromium --headed --reporter=list \
+PLAYWRIGHT_SLOW_MO=500 yarn playwright test payees.test.ts --browser=chromium --headed --reporter=list \
   --grep "case-insensitive search|empty state when no payees|special-character|opens the rule dialog|expected sample payees|functional search box|create rule action|selecting multiple payees"
 
 # Bank Sync — 2 new tests
-yarn playwright test bank-sync.test.ts --browser=chromium --headed --reporter=list \
+PLAYWRIGHT_SLOW_MO=500 yarn playwright test bank-sync.test.ts --browser=chromium --headed --reporter=list \
   --grep "disabled state when no server|accounts available to link"
 
 # Rules — 3 new tests
-yarn playwright test rules.test.ts --browser=chromium --headed --reporter=list \
+PLAYWRIGHT_SLOW_MO=500 yarn playwright test rules.test.ts --browser=chromium --headed --reporter=list \
   --grep "search filters rules|rule count increases|search is case-insensitive"
 
 # Schedules — 3 new tests
-yarn playwright test schedules.test.ts --browser=chromium --headed --reporter=list \
+PLAYWRIGHT_SLOW_MO=500 yarn playwright test schedules.test.ts --browser=chromium --headed --reporter=list \
   --grep "creates a named schedule|skips a due schedule|deletes a schedule"
 
 # Reports — 3 new tests
-yarn playwright test reports.test.ts --browser=chromium --headed --reporter=list \
+PLAYWRIGHT_SLOW_MO=500 yarn playwright test reports.test.ts --browser=chromium --headed --reporter=list \
   --grep "navigates to Net Worth|switching between Total|selecting Line Graph"
 ```
 
