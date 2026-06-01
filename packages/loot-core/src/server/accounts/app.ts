@@ -221,7 +221,7 @@ async function linkGoCardlessAccount({
 
   connection.send('sync-event', {
     type: 'success',
-    tables: ['transactions'],
+    tables: ['transactions', 'accounts'],
   });
 
   return 'ok';
@@ -295,7 +295,7 @@ async function linkSimpleFinAccount({
 
   connection.send('sync-event', {
     type: 'success',
-    tables: ['transactions'],
+    tables: ['transactions', 'accounts'],
   });
 
   return 'ok';
@@ -369,7 +369,7 @@ async function linkPluggyAiAccount({
 
   connection.send('sync-event', {
     type: 'success',
-    tables: ['transactions'],
+    tables: ['transactions', 'accounts'],
   });
 
   return 'ok';
@@ -451,7 +451,7 @@ async function linkEnableBankingAccount({
 
   connection.send('sync-event', {
     type: 'success',
-    tables: ['transactions'],
+    tables: ['transactions', 'accounts'],
   });
 
   return 'ok';
@@ -1318,7 +1318,7 @@ async function accountsBankSync({
   if (updatedAccounts.length > 0) {
     connection.send('sync-event', {
       type: 'success',
-      tables: ['transactions'],
+      tables: ['transactions', 'accounts'],
     });
   }
 
@@ -1436,7 +1436,7 @@ async function simpleFinBatchSync({
   if (retVal.some(a => a.res.updatedAccounts.length > 0)) {
     connection.send('sync-event', {
       type: 'success',
-      tables: ['transactions'],
+      tables: ['transactions', 'accounts'],
     });
   }
 
