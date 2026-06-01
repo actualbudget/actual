@@ -367,14 +367,9 @@ export function isValidRedirectUrl(url: string | undefined): url is string {
     const redirectUrl = new URL(url);
     const serverUrl = new URL(serverHostname);
 
-    if (
-      redirectUrl.hostname === serverUrl.hostname ||
-      redirectUrl.hostname === 'localhost'
-    ) {
-      return true;
-    } else {
-      return false;
-    }
+    // Compare the full origin (protocol + hostname + port) so a redirect to a
+    // different port on the same host is rejected.
+    return redirectUrl.origin === serverUrl.origin;
   } catch {
     return false;
   }
