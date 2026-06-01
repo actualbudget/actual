@@ -763,5 +763,52 @@ describe('schedule app', () => {
         await schedulesApp.stopServices();
       }
     });
+
+    it('auto-posts one-time schedules that are due', async () => {
+      MockDate.set(new Date(2016, 11, 31, 12));
+      schedulesApp.startServices();
+
+      try {
+        const accountId = await db.insertAccount({
+          name: 'Checking',
+          offbudget: 0,
+          closed: 0,
+        });
+
+        const id = await createSchedule({
+          schedule: { posts_transaction: true },
+          conditions: [
+            {
+              op: 'is',
+              field: 'account',
+              value: accountId,
+            },
+            {
+              op: 'is',
+              field: 'amount',
+              value: -10000,
+            },
+            {
+              op: 'is',
+              field: 'date',
+              value: '2016-12-31',
+            },
+          ],
+        });
+
+        await advanceSchedulesService(true);
+
+        const { data: transactions } = await aqlQuery(
+          q('transactions').filter({ schedule: id }).select(['date', 'amount']),
+        );
+
+        expect(
+          transactions.map(({ date, amount }) => ({ date, amount })),
+        ).toEqual([{ date: '2016-12-31', amount: -10000 }]);
+      } finally {
+        MockDate.reset();
+        await schedulesApp.stopServices();
+      }
+    });
   });
 });

@@ -618,7 +618,7 @@ export async function advanceSchedulesService(syncSuccess) {
     if (
       schedule.posts_transaction &&
       schedule._account &&
-      isRecurringSchedule(schedule) &&
+      (status !== 'paid' || isRecurringSchedule(schedule)) &&
       (status === 'paid' || status === 'due' || status === 'missed')
     ) {
       let currentSchedule = schedule;
@@ -627,7 +627,6 @@ export async function advanceSchedulesService(syncSuccess) {
       while (
         currentSchedule.posts_transaction &&
         currentSchedule._account &&
-        isRecurringSchedule(currentSchedule) &&
         (currentStatus === 'paid' ||
           currentStatus === 'due' ||
           currentStatus === 'missed')
@@ -662,6 +661,10 @@ export async function advanceSchedulesService(syncSuccess) {
           break;
         }
 
+        if (!isRecurringSchedule(currentSchedule)) {
+          break;
+        }
+
         const updatedSchedule =
           await advanceRecurringScheduleFromNextDate(currentSchedule);
 
@@ -682,7 +685,7 @@ export async function advanceSchedulesService(syncSuccess) {
     } else if (status === 'paid') {
       if (schedule._date) {
         // Move forward recurring schedules
-        if (schedule._date.frequency) {
+        if (isRecurringSchedule(schedule)) {
           try {
             await setNextDate({ id: schedule.id });
           } catch {
