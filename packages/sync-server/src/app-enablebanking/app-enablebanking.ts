@@ -273,7 +273,7 @@ app.post(
 app.post(
   '/start-auth',
   handleError(async (req: Request, res: Response) => {
-    const { aspsp, redirectUrl, maxConsentValidity } = req.body || {};
+    const { aspsp, redirectUrl, maxConsentValidity, psuType } = req.body || {};
 
     if (!aspsp || !redirectUrl) {
       res.send({
@@ -294,6 +294,7 @@ app.post(
         redirectUrl,
         state,
         typeof maxConsentValidity === 'number' ? maxConsentValidity : undefined,
+        psuType === 'business' ? 'business' : 'personal',
       );
 
       res.send({

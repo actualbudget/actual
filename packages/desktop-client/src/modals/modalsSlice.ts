@@ -142,6 +142,7 @@ export type Modal =
           aspspId: string;
           country: string;
           maxConsentValidity?: number;
+          psuType?: 'personal' | 'business';
           onStateReady?: (state: string) => void;
         }) => Promise<
           | { error: 'timeout' }
