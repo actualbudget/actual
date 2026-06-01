@@ -39,6 +39,7 @@ export function FormulaCard({
   const fontSize = meta?.fontSize;
   const fontSizeMode = meta?.fontSizeMode || 'dynamic';
   const staticFontSize = meta?.staticFontSize || 32;
+  const showTitle = meta?.showTitle ?? true;
   const colorFormula = meta?.colorFormula || '';
 
   const { result, isLoading, error } = useFormulaExecution(
@@ -102,20 +103,22 @@ export function FormulaCard({
       }}
     >
       <View style={{ flex: 1, overflow: 'hidden' }}>
-        <View style={{ flexGrow: 0, flexShrink: 0, padding: 20 }}>
-          <ReportCardName
-            name={meta?.name || t('Formula')}
-            isEditing={nameMenuOpen}
-            onChange={newName => {
-              onMetaChange({
-                ...meta,
-                name: newName,
-              });
-              setNameMenuOpen(false);
-            }}
-            onClose={() => setNameMenuOpen(false)}
-          />
-        </View>
+        {showTitle && (
+          <View style={{ flexGrow: 0, flexShrink: 0, padding: 20 }}>
+            <ReportCardName
+              name={meta?.name || t('Formula')}
+              isEditing={nameMenuOpen}
+              onChange={newName => {
+                onMetaChange({
+                  ...meta,
+                  name: newName,
+                });
+                setNameMenuOpen(false);
+              }}
+              onClose={() => setNameMenuOpen(false)}
+            />
+          </View>
+        )}
         <View
           ref={containerRef}
           style={{
