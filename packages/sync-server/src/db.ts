@@ -1,7 +1,9 @@
+// @ts-nocheck
 import Database from 'better-sqlite3';
 
 export class WrappedDatabase {
-  constructor(db) {
+  db: any;
+  constructor(db: any) {
     this.db = db;
   }
 

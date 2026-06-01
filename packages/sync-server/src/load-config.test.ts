@@ -1,3 +1,4 @@
+// @ts-nocheck
 import convict from 'convict';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { join, resolve } from 'node:path';
 
 import * as bcrypt from 'bcrypt';

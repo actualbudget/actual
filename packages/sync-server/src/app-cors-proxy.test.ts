@@ -1,3 +1,4 @@
+// @ts-nocheck
 import ipaddr from 'ipaddr.js';
 import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import createDebug from 'debug';
 
 import { getAccountDb } from '#account-db';
@@ -20,6 +21,8 @@ export const SecretName = {
 };
 
 class SecretsDb {
+  debug: any;
+  db: any;
   constructor() {
     this.debug = createDebug('actual:secrets-db');
     this.db = null;

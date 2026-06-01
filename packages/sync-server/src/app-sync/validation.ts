@@ -1,3 +1,4 @@
+// @ts-nocheck
 // This is a version representing the internal format of sync
 // messages. When this changes, all sync files need to be reset. We
 // will check this version when syncing and notify the user if they

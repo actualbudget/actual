@@ -9,7 +9,7 @@ if (needsBootstrap()) {
 
   try {
     const password = await promptPassword();
-    const { error } = await bootstrap({ password });
+    const { error } = (await bootstrap({ password })) as any;
     if (error) {
       console.log('Error setting password:', error);
       console.log(
@@ -29,7 +29,7 @@ if (needsBootstrap()) {
   console.log("It looks like you already have a password set. Let's reset it!");
   try {
     const password = await promptPassword();
-    const { error } = changePassword(password);
+    const { error } = changePassword(password) as any;
     if (error) {
       console.log('Error changing password:', error);
       console.log(

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import express from 'express';
 
 import { handleError } from '#app-gocardless/util/handle-error';

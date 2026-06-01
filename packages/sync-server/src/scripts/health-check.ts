@@ -7,7 +7,7 @@ const hostname =
 
 fetch(`${protocol}://${hostname}:${config.get('port')}/health`)
   .then(res => res.json())
-  .then(res => {
+  .then((res: any) => {
     if (res.status !== 'UP') {
       throw new Error(
         'Health check failed: Server responded to health check with status ' +

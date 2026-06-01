@@ -9,10 +9,10 @@ const regex = new RegExp(
   'g',
 );
 
-const convertToRegExp = specials =>
-  specials.map(s => [new RegExp(`\\b${s}\\b`, 'gi'), s]);
+const convertToRegExp = (specials: string[]) =>
+  specials.map((s: string) => [new RegExp(`\\b${s}\\b`, 'gi'), s]);
 
-function parseMatch(match) {
+function parseMatch(match: string) {
   const firstCharacter = match[0];
 
   // test first character
@@ -28,10 +28,10 @@ function parseMatch(match) {
   return match;
 }
 
-export function title(str, options = { special: undefined }) {
+export function title(str: string, options: { special?: string[] } = { special: undefined }) {
   str = str
     .toLowerCase()
-    .replace(regex, (m, lead = '', forced, lower, rest) => {
+    .replace(regex, (m: string, lead: string = '', forced: string, lower: string, rest: string) => {
       const parsedMatch = parseMatch(m);
       if (!parsedMatch) {
         return m;
@@ -51,7 +51,7 @@ export function title(str, options = { special: undefined }) {
   const replace = [...specials, ...customSpecials];
   const replaceRegExp = convertToRegExp(replace);
 
-  replaceRegExp.forEach(([pattern, s]) => {
+  replaceRegExp.forEach(([pattern, s]: any) => {
     str = str.replace(pattern, s);
   });
 
