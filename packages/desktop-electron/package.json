@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@actual-app/sync-server": "workspace:*",
-    "better-sqlite3": "^12.8.0",
+    "better-sqlite3": "patch:better-sqlite3@npm%3A12.9.0#~/.yarn/patches/better-sqlite3-npm-12.9.0-cdfce1d9a2.patch",
     "promise-retry": "^2.0.1"
   },
   "devDependencies": {

@@ -177,7 +177,7 @@
     "@rschedule/standard-date-adapter": "^1.5.0",
     "absurd-sql": "0.0.54",
     "adm-zip": "^0.5.17",
-    "better-sqlite3": "^12.8.0",
+    "better-sqlite3": "patch:better-sqlite3@npm%3A12.9.0#~/.yarn/patches/better-sqlite3-npm-12.9.0-cdfce1d9a2.patch",
     "csv-parse": "^6.2.1",
     "csv-stringify": "^6.7.0",
     "date-fns": "^4.1.0",
