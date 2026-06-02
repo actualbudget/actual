@@ -1,12 +1,17 @@
 import { createContext, useContext, useRef, useState } from 'react';
-import type { ReactNode, RefObject } from 'react';
+import type { ReactNode, Ref, RefObject } from 'react';
 import { Popover } from 'react-aria-components';
 
 import { Menu } from '@actual-app/components/menu';
+import { theme } from '@actual-app/components/theme';
 
 import { useRefEventListener } from '#hooks/useRefEventListener';
 
-type Action = string;
+type Action = {
+  name: string;
+  text: string;
+  onClick: () => void;
+};
 
 type ContextMenuContextData = {
   addAction: (s: Action) => void;
@@ -77,6 +82,15 @@ export function ContextMenuContextProvider({
     },
     [open], // Re-bind when open state changes
   );
+
+  function handleMenuSelect(actionName: string) {
+    const action = actions.find(action => action.name === actionName);
+    if (action) {
+      action.onClick();
+    }
+    handleOpenChange(false);
+  }
+
   return (
     <ContextMenuContext.Provider value={{ addAction }}>
       {/* THE INVISIBLE ANCHOR:
@@ -104,8 +118,9 @@ export function ContextMenuContextProvider({
         style={{ width: 200, margin: 1 }}
       >
         <Menu
-          onMenuSelect={() => handleOpenChange(false)}
-          items={actions.map(action => ({ name: action, text: action }))}
+          onMenuSelect={handleMenuSelect}
+          items={actions}
+          style={{ backgroundColor: theme.menuBackground }}
         />
       </Popover>
       {children}

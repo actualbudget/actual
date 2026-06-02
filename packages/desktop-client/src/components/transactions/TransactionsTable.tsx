@@ -81,6 +81,7 @@ import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplet
 import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
 import { TagAutocomplete } from '#components/autocomplete/TagAutocomplete';
+import { useContextMenuAction } from '#components/ContextMenu';
 import { getStatusProps } from '#components/schedules/StatusBadge';
 import type { StatusTypes } from '#components/schedules/StatusBadge';
 import { DateSelect } from '#components/select/DateSelect';
@@ -127,6 +128,7 @@ import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 import { SheetNameProvider } from '#hooks/useSheetName';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
 import type { SplitsExpandedContextValue } from '#hooks/useSplitsExpanded';
+import { useTransactionFilters } from '#hooks/useTransactionFilters';
 import { pushModal } from '#modals/modalsSlice';
 import { NotesTagFormatter } from '#notes/NotesTagFormatter';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -1322,6 +1324,21 @@ const Transaction = memo(function Transaction({
     dropPos && isValidDropTarget && !isBeingDragged,
   );
 
+  useContextMenuAction(triggerRef, {
+    name: 'name',
+    text: 'Name',
+    onClick: () => {
+      console.log('testing');
+    },
+  });
+  useContextMenuAction(triggerRef, {
+    name: 'name2',
+    text: 'Name2',
+    onClick: () => {
+      console.log('testing2');
+    },
+  });
+
   return (
     <View
       innerRef={dropRef}
@@ -1364,33 +1381,6 @@ const Transaction = memo(function Transaction({
         }}
         onContextMenu={handleContextMenu}
       >
-        <Popover
-          triggerRef={triggerRef}
-          placement="bottom start"
-          isOpen={menuOpen}
-          onOpenChange={isOpen => {
-            if (!isOpen) setMenuOpen(false);
-          }}
-          {...position}
-          style={{ width: 200, margin: 1 }}
-          isNonModal={false}
-        >
-          <TransactionMenu
-            transaction={transaction}
-            getTransaction={id => allTransactions?.find(t => t.id === id)}
-            onDelete={ids => onBatchDelete?.(ids)}
-            onDuplicate={ids => onBatchDuplicate?.(ids)}
-            onLinkSchedule={ids => onBatchLinkSchedule?.(ids)}
-            onUnlinkSchedule={ids => onBatchUnlinkSchedule?.(ids)}
-            onCreateRule={ids => onCreateRule?.(ids)}
-            onScheduleAction={(name, ids) => onScheduleAction?.(name, ids)}
-            onMakeAsNonSplitTransactions={ids =>
-              onMakeAsNonSplitTransactions?.(ids)
-            }
-            closeMenu={() => setMenuOpen(false)}
-          />
-        </Popover>
-
         {splitError && listContainerRef?.current && (
           <Popover
             triggerRef={triggerRef}
@@ -1986,6 +1976,7 @@ function NotesCell({
   onClickTag,
   onExpose,
 }: NotesCellProps) {
+  const cellRef = useRef<HTMLDivElement | null>(null);
   const [inputValue, setInputValue] = useState(note);
   useEffect(() => {
     setInputValue(note);
@@ -2001,8 +1992,17 @@ function NotesCell({
 
   const displayedNote = note || scheduleNote || '';
 
+  useContextMenuAction(cellRef, {
+    name: 'transaction-note',
+    text: 'Filter by note',
+    onClick: () => {
+      console.log('notes');
+    },
+  });
+
   return (
     <CustomCell
+      innerRef={cellRef}
       width="flex"
       name="notes"
       value={displayedNote}
