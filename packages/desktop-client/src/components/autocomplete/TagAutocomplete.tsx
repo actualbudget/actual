@@ -142,6 +142,9 @@ export function TagAutocomplete({
       void handleSelect(highlightedId);
     } else if (e.key === 'Escape') {
       setIsOpen(false);
+      onKeyDown?.(e);
+    } else {
+      onKeyDown?.(e);
     }
 
     setHighlightedIdx(idx =>
@@ -168,7 +171,6 @@ export function TagAutocomplete({
         onKeyDown={handleKeyDown}
         onFocus={() => setIsOpen(true)}
         onBlur={onBlur}
-        onUpdate={onUpdate}
         autoComplete="off"
       />
 

@@ -1987,6 +1987,8 @@ function NotesCell({
   onExpose,
 }: NotesCellProps) {
   const [inputValue, setInputValue] = useState(note);
+  const escapePressed = useRef(false);
+
   useEffect(() => {
     setInputValue(note);
   }, [note, setInputValue]);
@@ -1995,6 +1997,7 @@ function NotesCell({
     if (e.key === 'Enter' || e.key === 'Tab') {
       onUpdate(inputValue);
     } else if (e.key === 'Escape') {
+      escapePressed.current = true;
       setInputValue(note);
     }
   }
@@ -2015,7 +2018,11 @@ function NotesCell({
       onExpose={onExpose}
       onUpdate={onUpdate}
       onKeyDown={onKeyDown}
-      onBlur={() => onUpdate(inputValue)}
+      onBlur={() => {
+        if (!escapePressed.current) {
+          onUpdate(inputValue);
+        }
+      }}
     >
       {({ inputStyle, onKeyDown, onBlur }) => (
         <TagAutocomplete
