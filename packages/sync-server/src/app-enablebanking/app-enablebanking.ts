@@ -31,16 +31,61 @@ app.use(express.json());
 
 // --- Shared helpers ---
 
+function firstHeaderValue(value: string | string[] | undefined) {
+  if (Array.isArray(value)) {
+    return value[0];
+  }
+
+  return value;
+}
+
+function firstForwardedIp(value: string | string[] | undefined) {
+  const header = firstHeaderValue(value);
+  return header?.split(',')[0]?.trim();
+}
+
+function isPrivateOrLocalIp(ip: string) {
+  const normalized = ip.replace(/^::ffff:/, '').toLowerCase();
+
+  return (
+    normalized === '::1' ||
+    normalized === '127.0.0.1' ||
+    normalized.startsWith('10.') ||
+    normalized.startsWith('192.168.') ||
+    /^172\.(1[6-9]|2\d|3[0-1])\./.test(normalized) ||
+    normalized.startsWith('fc') ||
+    normalized.startsWith('fd') ||
+    normalized.startsWith('fe80:')
+  );
+}
+
 function extractPsuHeaders(req: Request): PsuHeaders {
-  const ip = req.ip;
+  const ip =
+    firstForwardedIp(req.headers['cf-connecting-ip']) ??
+    firstForwardedIp(req.headers['x-real-ip']) ??
+    firstForwardedIp(req.headers['x-forwarded-for']) ??
+    req.ip;
+
   const ua =
     typeof req.headers['user-agent'] === 'string'
       ? req.headers['user-agent']
       : undefined;
 
-  const headers: PsuHeaders = {};
-  if (ip) headers['Psu-Ip-Address'] = ip;
-  if (ua) headers['Psu-User-Agent'] = ua;
+  if (!ip || isPrivateOrLocalIp(ip)) {
+    debug('Skipping PSU headers because PSU IP is local/private: %s', ip);
+    return {};
+  }
+
+  const headers: PsuHeaders = {
+    'Psu-Ip-Address': ip,
+  };
+
+  if (ua) {
+    headers['Psu-User-Agent'] = ua;
+  }
+
+  debug('Using PSU headers: %O', headers);
+
   return headers;
 }
 
