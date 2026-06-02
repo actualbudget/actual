@@ -56,7 +56,7 @@ function extractPsuHeaders(req: Request): PsuHeaders {
       : undefined;
 
   if (!ip || isPrivateOrLocalIp(ip)) {
-    debug('Skipping PSU headers because PSU IP is local/private: %s', ip);
+    debug('Skipping PSU headers because PSU IP is local/private');
     return {};
   }
 
@@ -68,7 +68,7 @@ function extractPsuHeaders(req: Request): PsuHeaders {
     headers['Psu-User-Agent'] = ua;
   }
 
-  debug('Using PSU headers: %O', headers);
+  debug('Using PSU headers for public PSU IP');
 
   return headers;
 }
