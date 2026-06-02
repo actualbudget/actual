@@ -415,7 +415,7 @@ async function linkAkahuAccount({
       account_sync_source: 'akahu',
     });
   } else {
-    id = crypto.randomUUID();
+    id = uuidv4();
     await db.insertWithUUID('accounts', {
       id,
       account_id: externalAccount.account_id,
