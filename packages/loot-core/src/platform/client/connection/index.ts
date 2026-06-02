@@ -126,9 +126,9 @@ function connectWorker(worker, onOpen, onError) {
       );
 
       if (msg.message && msg.message.includes('indexeddb-quota-error')) {
-        alert(
-          'We hit a limit on the local storage available. Edits may not be saved. Please get in touch https://actualbudget.org/contact/ so we can help debug this.',
-        );
+        // Surface this as a typed event so the desktop-client can present a
+        // localized message - i18n must not live in loot-core.
+        handleMessage({ type: 'push', name: 'indexeddb-quota-error' });
       }
     } else if (msg.type === 'capture-breadcrumb') {
       captureBreadcrumb(msg.data);

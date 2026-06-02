@@ -236,7 +236,10 @@ async function linkSimpleFinAccount({
   let id;
 
   const institution = {
-    name: externalAccount.institution ?? 'Unknown',
+    // Persist a null name when the provider doesn't report an institution, so
+    // the desktop-client can render a localized fallback instead of baking an
+    // English string into shared bank data.
+    name: externalAccount.institution ?? null,
   };
 
   const bank = await link.findOrCreateBank(
@@ -310,7 +313,10 @@ async function linkPluggyAiAccount({
   let id;
 
   const institution = {
-    name: externalAccount.institution ?? 'Unknown',
+    // Persist a null name when the provider doesn't report an institution, so
+    // the desktop-client can render a localized fallback instead of baking an
+    // English string into shared bank data.
+    name: externalAccount.institution ?? null,
   };
 
   const bank = await link.findOrCreateBank(
@@ -384,7 +390,10 @@ async function linkEnableBankingAccount({
   let id: string | undefined;
 
   const institution = {
-    name: externalAccount.institution ?? 'Unknown',
+    // Persist a null name when the provider doesn't report an institution, so
+    // the desktop-client can render a localized fallback instead of baking an
+    // English string into shared bank data.
+    name: externalAccount.institution ?? null,
   };
 
   // Enable Banking uses a session-per-account model, so we use the

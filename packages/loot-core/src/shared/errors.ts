@@ -39,12 +39,13 @@ export function getDownloadError({
     case 'clock-drift':
       return 'Failed to download the budget because your device time differs too much from the server. Please check your device time settings and ensure they are correct.';
 
-    default:
+    default: {
       const info =
         meta && typeof meta === 'object' && 'fileId' in meta && meta.fileId
           ? `, fileId: ${String(meta.fileId)}`
           : '';
       return `Something went wrong trying to download that file, sorry! Visit https://actualbudget.org/contact/ for support. reason: ${reason}${info}`;
+    }
   }
 }
 

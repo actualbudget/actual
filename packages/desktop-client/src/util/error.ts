@@ -79,7 +79,7 @@ export function getDownloadError({
         'Failed to download the budget because your device time differs too much from the server. Please check your device time settings and ensure they are correct.',
       );
 
-    default:
+    default: {
       const info =
         meta && typeof meta === 'object' && 'fileId' in meta && meta.fileId
           ? `, fileId: ${String(meta.fileId)}`
@@ -88,6 +88,7 @@ export function getDownloadError({
         'Something went wrong trying to download that file, sorry! Visit https://actualbudget.org/contact/ for support. reason: {{reason}}{{info}}',
         { reason, info },
       );
+    }
   }
 }
 
@@ -160,7 +161,10 @@ export function getSecretsError(error: string, reason: string) {
     case 'not-admin':
       return t('You have to be admin to set secrets');
     default:
-      return error;
+      return t(
+        'An error occurred while setting the secret. Please try again. (ref: {{error}})',
+        { error },
+      );
   }
 }
 

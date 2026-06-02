@@ -313,4 +313,38 @@ describe('getRecurringDescription', () => {
       ),
     ).toBe('Every 2 months on the 17th, until 2021-06-01');
   });
+
+  it('separates the weekend annotation when there is no end mode', () => {
+    expect(
+      getRecurringDescription(
+        {
+          start: '2021-05-17',
+          frequency: 'weekly',
+          interval: 1,
+          skipWeekend: true,
+          weekendSolveMode: 'after',
+        },
+        'MM/dd/yyyy',
+        enUS,
+      ),
+    ).toBe('Every week on Monday (after weekend)');
+  });
+
+  it('combines the end mode and weekend annotations', () => {
+    expect(
+      getRecurringDescription(
+        {
+          start: '2021-05-17',
+          frequency: 'weekly',
+          interval: 2,
+          endMode: 'after_n_occurrences',
+          endOccurrences: 2,
+          skipWeekend: true,
+          weekendSolveMode: 'before',
+        },
+        'MM/dd/yyyy',
+        enUS,
+      ),
+    ).toBe('Every 2 weeks on Monday, 2 times (before weekend)');
+  });
 });

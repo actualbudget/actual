@@ -80,9 +80,14 @@ export function getRecurringDescription(
     : '';
 
   const weekendSolveSuffix = config.skipWeekend ? weekendSolveModeString : '';
-  const suffix = endModeSuffix
-    ? `, ${endModeSuffix} ${weekendSolveSuffix}`
-    : `${weekendSolveSuffix}`;
+
+  let suffix = '';
+  if (endModeSuffix) {
+    suffix += `, ${endModeSuffix}`;
+  }
+  if (weekendSolveSuffix) {
+    suffix += ` ${weekendSolveSuffix}`;
+  }
 
   let desc = null;
 
