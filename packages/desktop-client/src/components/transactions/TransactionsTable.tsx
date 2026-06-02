@@ -1997,7 +1997,9 @@ function NotesCell({
     if (e.key === 'Enter' || e.key === 'Tab') {
       onUpdate(inputValue);
     } else if (e.key === 'Escape') {
-      escapePressed.current = true;
+      if (!e.isPropagationStopped()) {
+        escapePressed.current = true;
+      }
       setInputValue(note);
     }
   }

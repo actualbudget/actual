@@ -138,6 +138,9 @@ export function TagAutocomplete({
       e.stopPropagation();
       void handleSelect(highlightedId);
     } else if (e.key === 'Escape') {
+      if (showPopup) {
+        e.stopPropagation();
+      }
       setIsOpen(false);
       onKeyDown?.(e);
     } else {

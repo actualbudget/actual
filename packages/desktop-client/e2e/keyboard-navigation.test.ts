@@ -176,6 +176,86 @@ test.describe('Keyboard navigation', () => {
       await page.keyboard.press('Escape');
       await expect(accountPage.selectButton).toBeHidden();
     });
+
+    test('escape peels off 3 layers for popovers: popup first, then edit mode, then selection', async () => {
+      const accountPage = await navigation.createAccount({
+        name: 'Test Popover Layered',
+        offBudget: false,
+        balance: 100,
+      });
+
+      await accountPage.createSingleTransaction({
+        payee: 'Snack',
+        notes: 'x',
+        debit: '3.00',
+      });
+
+      await accountPage.selectNthTransaction(0);
+      await expect(accountPage.selectButton).toBeVisible();
+
+      const transaction = accountPage.getNthTransaction(1);
+      await transaction.category.click();
+      const input = transaction.category.locator('input');
+      await expect(input).toBeVisible();
+
+      await page.keyboard.type('typed but not saved');
+      await page.keyboard.press('Escape');
+
+      // First Escape: popup closed, input remains visible.
+      await expect(input).toBeVisible();
+      await expect(accountPage.selectButton).toBeVisible();
+
+      // Second Escape: edit mode closed.
+      await page.keyboard.press('Escape');
+      await expect(input).toBeHidden();
+      await expect(accountPage.selectButton).toBeVisible();
+      await expect(transaction.category).toHaveText('Starting Balances');
+
+      // Third Escape: selection cleared.
+      await page.keyboard.press('Escape');
+      await expect(accountPage.selectButton).toBeHidden();
+    });
+
+    test('escape peels off 3 layers for tag popovers: popup first, then edit mode, then selection', async () => {
+      const accountPage = await navigation.createAccount({
+        name: 'Test Tag Popover Layered',
+        offBudget: false,
+        balance: 100,
+      });
+
+      await accountPage.createSingleTransaction({
+        payee: 'Snack',
+        notes: '#my_existing_tag',
+        debit: '3.00',
+      });
+
+      await accountPage.selectNthTransaction(0);
+      await expect(accountPage.selectButton).toBeVisible();
+
+      // Click the first transaction's notes
+      const transaction = accountPage.getNthTransaction(1);
+      await transaction.notes.click();
+      const input = transaction.notes.locator('input');
+      await expect(input).toBeVisible();
+
+      // Type `#my` to trigger the popup
+      await page.keyboard.type('#my');
+      await page.keyboard.press('Escape');
+
+      // First Escape: popup closed, input remains visible in edit mode.
+      await expect(input).toBeVisible();
+      await expect(accountPage.selectButton).toBeVisible();
+
+      // Second Escape: edit mode closed, text reverted.
+      await page.keyboard.press('Escape');
+      await expect(input).toBeHidden();
+      await expect(accountPage.selectButton).toBeVisible();
+      await expect(transaction.notes).toHaveText('');
+
+      // Third Escape: selection cleared.
+      await page.keyboard.press('Escape');
+      await expect(accountPage.selectButton).toBeHidden();
+    });
   });
 
   test.describe('Demo budget', () => {
