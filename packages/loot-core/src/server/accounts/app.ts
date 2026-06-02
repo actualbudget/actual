@@ -394,7 +394,7 @@ async function linkAkahuAccount({
   let id;
 
   const institution = {
-    name: externalAccount.institution ?? t('Unknown'),
+    name: externalAccount.institution ?? null,
   };
 
   const bank = await link.findOrCreateBank(

@@ -6,7 +6,7 @@ import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
-import { getSecretsError } from '@actual-app/core/shared/errors';
+import { getSecretsError } from '#util/error';
 
 import { Error as ErrorAlert } from '#components/alerts';
 import { Link } from '#components/common/Link';
