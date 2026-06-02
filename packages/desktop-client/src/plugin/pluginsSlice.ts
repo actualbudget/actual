@@ -1,5 +1,4 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { type Query, type AQLQueryOptions } from '@actual-app/plugins-core';
 
 import { send } from '@actual-app/core/platform/client/connection';
 
@@ -16,6 +15,8 @@ export const getPluginFiles = createAppAsyncThunk(
   },
 );
 
+//. This is part of the full plugin support system that was removed from the initial bank sync MVP
+/*
 export const createPluginDatabase = createAppAsyncThunk(
   `${sliceName}/createPluginDatabase`,
   async (args: { pluginId: string }) => {
@@ -107,6 +108,7 @@ export const queryPluginAql = createAppAsyncThunk(
     return result;
   },
 );
+*/
 
 type PluginFile = {
   name: string;
@@ -117,35 +119,53 @@ type PluginFile = {
 
 type PluginsState = {
   files: Record<string, PluginFile[]>; // keyed by pluginUrl
+  //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+  /*
   databases: Record<string, boolean>; // keyed by pluginId, value indicates if database exists
   metadata: Record<string, Record<string, string>>; // keyed by pluginId, then by metadata key
   migrations: Record<string, string[]>; // keyed by pluginId
+  */
   loading: {
     files: Record<string, boolean>; // keyed by pluginUrl
+    //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+    /*
     databases: Record<string, boolean>; // keyed by pluginId
     queries: Record<string, boolean>; // keyed by operation identifier
+    */
   };
   errors: {
     files: Record<string, string | null>; // keyed by pluginUrl
+    //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+    /*
     databases: Record<string, string | null>; // keyed by pluginId
     queries: Record<string, string | null>; // keyed by operation identifier
+    */
   };
 };
 
 const initialState: PluginsState = {
   files: {},
+  //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+  /*
   databases: {},
   metadata: {},
   migrations: {},
+  */
   loading: {
     files: {},
+    //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+    /*
     databases: {},
     queries: {},
+    */
   },
   errors: {
     files: {},
+    //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+    /*
     databases: {},
     queries: {},
+    */
   },
 };
 
@@ -159,6 +179,8 @@ const pluginsSlice = createSlice({
       delete state.loading.files[pluginUrl];
       delete state.errors.files[pluginUrl];
     },
+    //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+    /*
     clearPluginDatabase(state, action: PayloadAction<{ pluginId: string }>) {
       const { pluginId } = action.payload;
       delete state.databases[pluginId];
@@ -174,6 +196,7 @@ const pluginsSlice = createSlice({
         queries: {},
       };
     },
+    */
   },
   extraReducers: builder => {
     builder
@@ -194,7 +217,9 @@ const pluginsSlice = createSlice({
         state.loading.files[pluginUrl] = false;
         state.errors.files[pluginUrl] =
           action.error.message || 'Failed to load plugin files';
-      })
+      });
+      //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+      /*
       // Plugin database creation
       .addCase(createPluginDatabase.pending, (state, action) => {
         const pluginId = action.meta.arg.pluginId;
@@ -237,6 +262,7 @@ const pluginsSlice = createSlice({
         }
         state.metadata[pluginId][key] = value;
       });
+      */
   },
 });
 
@@ -245,6 +271,8 @@ export const { name, reducer, getInitialState } = pluginsSlice;
 export const actions = {
   ...pluginsSlice.actions,
   getPluginFiles,
+  //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+  /*
   createPluginDatabase,
   queryPluginDatabase,
   execPluginDatabase,
@@ -254,7 +282,12 @@ export const actions = {
   setPluginMetadata,
   getPluginMetadata,
   queryPluginAql,
+  */
 };
 
-export const { clearPluginFiles, clearPluginDatabase, clearPluginErrors } =
-  actions;
+export const { clearPluginFiles } = actions;
+
+//. This is part of the full plugin support system that was removed from the initial bank sync MVP
+/*
+export const { clearPluginDatabase, clearPluginErrors } = actions;
+*/

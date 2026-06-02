@@ -19,7 +19,6 @@ import { useMetaThemeColor } from '#hooks/useMetaThemeColor';
 import { useNavigate } from '#hooks/useNavigate';
 import { ScrollProvider } from '#hooks/useScrollListener';
 import { addNotification } from '#notifications/notificationsSlice';
-import { useActualPlugins } from '#plugin/ActualPluginsProvider';
 import { useDispatch, useSelector } from '#redux';
 
 import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
@@ -34,7 +33,6 @@ import { MobileNavTabs } from './mobile/MobileNavTabs';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
 import { Notifications } from './Notifications';
 import { MobilePageHeaderProvider, MobilePageHeaderSlot } from './Page';
-import { PluginCustomPage } from './plugins/PluginCustomPage';
 import { Plugins } from './plugins/Plugins';
 import { Reports } from './reports';
 import { LoadingIndicator } from './reports/LoadingIndicator';
@@ -107,7 +105,8 @@ export function FinancesApp() {
     'flags.updateNotificationShownForVersion',
   );
   const [pluginsEnabled] = useGlobalPref('plugins');
-  const { pluginsRoutes } = useActualPlugins();
+  //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+  // const { pluginsRoutes } = useActualPlugins();
 
   const multiuserEnabled = useMultiuserEnabled();
 
@@ -396,7 +395,8 @@ export function FinancesApp() {
                       }
                     />
                   )}
-                  {Array.from(pluginsRoutes.values()).map((plugin, index) => (
+                  {/* //. This is part of the full plugin support system that was removed from the initial bank sync MVP */}
+                  {/* {Array.from(pluginsRoutes.values()).map((plugin, index) => (
                     <Route
                       key={`plugin-id-${index}`}
                       path={plugin.path}
@@ -404,7 +404,7 @@ export function FinancesApp() {
                         <PluginCustomPage parameter={plugin.parameter} />
                       }
                     />
-                  ))}
+                  ))} */}
                   {/* redirect all other traffic to the budget page */}
                   <Route
                     path="/*"

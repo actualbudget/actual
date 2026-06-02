@@ -19,12 +19,10 @@ import { Permissions } from '#auth/types';
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
 import { useMetadataPref } from '#hooks/useMetadataPref';
 import { useNavigate } from '#hooks/useNavigate';
-import { useActualPlugins } from '#plugin/ActualPluginsProvider';
 import { useDispatch, useSelector } from '#redux';
 import { getUserData, signOut } from '#users/usersSlice';
 
 import { PrivacyFilter } from './PrivacyFilter';
-import { RenderPluginsComponent } from './plugins/RenderPluginsComponent';
 import { useMultiuserEnabled, useServerURL } from './ServerContext';
 
 type LoggedInUserProps = {
@@ -57,7 +55,8 @@ export function LoggedInUser({
   ) as (SyncedLocalFile | RemoteFile)[];
   const currentFile = remoteFiles.find(f => f.cloudFileId === cloudFileId);
   const hasSyncedPrefs = useSelector(state => state.prefs.synced);
-  const { slotItems } = useActualPlugins();
+  //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+  // const { slotItems } = useActualPlugins();
 
   const initializeUserData = useCallback(async () => {
     try {
@@ -225,7 +224,8 @@ export function LoggedInUser({
 
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', ...style }}>
-      <RenderPluginsComponent toRender={slotItems.topbar} />
+      {/* //. This is part of the full plugin support system that was removed from the initial bank sync MVP */}
+      {/* <RenderPluginsComponent toRender={slotItems.topbar} /> */}
       <Button
         ref={triggerRef}
         variant="bare"

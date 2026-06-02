@@ -22,7 +22,10 @@ async function bundle() {
       target: 'node20',
       format: 'esm',
       outfile: outFile,
-      external: [],
+      banner: {
+        js: "import { createRequire } from 'module'; const require = createRequire(import.meta.url);",
+      },
+      external: ['express'],
       minify: false,
       sourcemap: false,
       treeShaking: true,

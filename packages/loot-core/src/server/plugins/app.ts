@@ -1,30 +1,14 @@
 // @ts-strict-ignore
 import type {
   ActualPluginManifest,
-  AQLQueryOptions,
-  DatabaseOperation,
-  DatabaseQueryResult,
-  DatabaseResult,
-  DatabaseSelectResult,
   PluginFileCollection,
-  PluginMigration,
-  Query,
-  SqlParameter,
 } from '@actual-app/plugins-core/server';
 
 import * as asyncStorage from '#platform/server/asyncStorage';
 import { fetch } from '#platform/server/fetch';
-import * as fs from '#platform/server/fs';
 import * as idb from '#platform/server/indexeddb';
 import { logger } from '#platform/server/log';
-import * as sqlite from '#platform/server/sqlite';
 import { createApp } from '#server/app';
-import { aqlQuery, compileQuery } from '#server/aql';
-import { defaultConstructQuery } from '#server/aql/compiler';
-import {
-  convertInputType,
-  convertOutputType,
-} from '#server/aql/schema-helpers';
 import { getServer } from '#server/server-config';
 import { type ActualPluginStored } from '#types/models';
 
@@ -35,6 +19,8 @@ export interface PluginsHandlers {
   'plugin-sync-server-install': typeof installSyncServerPlugin;
   'plugin-sync-server-list': typeof listSyncServerPlugins;
   'plugin-sync-server-register-dev': typeof registerSyncServerDevPlugin;
+  //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+  /*
   'plugin-create-database': typeof createPluginDatabase;
   'plugin-database-query': typeof queryPluginDatabase;
   'plugin-database-exec': typeof execPluginDatabase;
@@ -44,6 +30,7 @@ export interface PluginsHandlers {
   'plugin-database-set-metadata': typeof setPluginMetadata;
   'plugin-database-get-metadata': typeof getPluginMetadata;
   'plugin-aql-query': typeof queryPluginAql;
+  */
   'cors-proxy': typeof corsProxy;
 }
 
@@ -53,6 +40,8 @@ app.method('plugin-files', getPluginFiles);
 app.method('plugin-sync-server-install', installSyncServerPlugin);
 app.method('plugin-sync-server-list', listSyncServerPlugins);
 app.method('plugin-sync-server-register-dev', registerSyncServerDevPlugin);
+//. This is part of the full plugin support system that was removed from the initial bank sync MVP
+/*
 app.method('plugin-create-database', createPluginDatabase);
 app.method('plugin-database-query', queryPluginDatabase);
 app.method('plugin-database-exec', execPluginDatabase);
@@ -62,6 +51,7 @@ app.method('plugin-database-get-migrations', getPluginMigrations);
 app.method('plugin-database-set-metadata', setPluginMetadata);
 app.method('plugin-database-get-metadata', getPluginMetadata);
 app.method('plugin-aql-query', queryPluginAql);
+*/
 app.method('cors-proxy', corsProxy);
 
 async function getPluginFiles({
@@ -199,6 +189,8 @@ async function unwrapPluginServerResponse<T>(response: Response): Promise<T> {
   return parsed.data as T;
 }
 
+//. This is part of the full plugin support system that was removed from the initial bank sync MVP
+/*
 type PluginDb = Awaited<ReturnType<typeof sqlite.openDatabase>>;
 
 const pluginDatabases = new Map<string, PluginDb>();
@@ -577,6 +569,7 @@ async function queryPluginAql({
 
   return { data, dependencies: state.dependencies };
 }
+*/
 
 async function corsProxy({
   url,

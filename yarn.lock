@@ -37,22 +37,63 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@actual-app/bank-sync-plugin-enablebanking@workspace:packages/bank-sync-plugin-enablebanking":
+  version: 0.0.0-use.local
+  resolution: "@actual-app/bank-sync-plugin-enablebanking@workspace:packages/bank-sync-plugin-enablebanking"
+  dependencies:
+    "@actual-app/components": "workspace:*"
+    "@actual-app/plugins-core": "workspace:*"
+    "@actual-app/plugins-core-sync-server": "workspace:*"
+    "@module-federation/vite": "npm:^1.4.1"
+    "@types/debug": "npm:^4.1.12"
+    "@types/express": "npm:^4.17.21"
+    "@types/jws": "npm:^3.2.0"
+    "@types/node": "npm:^20.0.0"
+    "@types/react": "npm:19.2.14"
+    "@types/react-dom": "npm:19.2.3"
+    "@vitejs/plugin-react-swc": "npm:^3.10.2"
+    archiver: "npm:^7.0.0"
+    debug: "npm:^4.3.7"
+    esbuild: "npm:^0.24.0"
+    express: "npm:^4.18.0"
+    i18next: "npm:^25.2.1"
+    jws: "npm:^4.0.0"
+    react: "npm:19.2.4"
+    react-dom: "npm:19.2.4"
+    react-i18next: "npm:^16.0.0"
+    typescript: "npm:^5.0.0"
+    uuid: "npm:^9.0.0"
+    vite: "npm:^6.2.0"
+  languageName: unknown
+  linkType: soft
+
 "@actual-app/bank-sync-plugin-gocardless@workspace:packages/bank-sync-plugin-gocardless":
   version: 0.0.0-use.local
   resolution: "@actual-app/bank-sync-plugin-gocardless@workspace:packages/bank-sync-plugin-gocardless"
   dependencies:
+    "@actual-app/components": "workspace:*"
+    "@actual-app/plugins-core": "workspace:*"
     "@actual-app/plugins-core-sync-server": "workspace:*"
+    "@module-federation/vite": "npm:^1.4.1"
     "@types/express": "npm:^4.17.21"
     "@types/jws": "npm:^3.2.0"
     "@types/node": "npm:^20.0.0"
+    "@types/react": "npm:19.2.14"
+    "@types/react-dom": "npm:19.2.3"
+    "@vitejs/plugin-react-swc": "npm:^3.10.2"
     archiver: "npm:^7.0.0"
     date-fns: "npm:^3.6.0"
     esbuild: "npm:^0.24.0"
     express: "npm:^4.18.0"
+    i18next: "npm:^25.2.1"
     jws: "npm:^4.0.0"
     nordigen-node: "npm:^1.3.0"
+    react: "npm:19.2.4"
+    react-dom: "npm:19.2.4"
+    react-i18next: "npm:^16.0.0"
     typescript: "npm:^5.0.0"
     uuid: "npm:^9.0.0"
+    vite: "npm:^6.2.0"
   languageName: unknown
   linkType: soft
 
@@ -60,14 +101,25 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/bank-sync-plugin-pluggy.ai@workspace:packages/bank-sync-plugin-pluggy.ai"
   dependencies:
+    "@actual-app/components": "workspace:*"
+    "@actual-app/plugins-core": "workspace:*"
     "@actual-app/plugins-core-sync-server": "workspace:*"
+    "@module-federation/vite": "npm:^1.4.1"
     "@types/express": "npm:^4.17.21"
     "@types/node": "npm:^20.0.0"
+    "@types/react": "npm:19.2.14"
+    "@types/react-dom": "npm:19.2.3"
+    "@vitejs/plugin-react-swc": "npm:^3.10.2"
     archiver: "npm:^7.0.0"
     esbuild: "npm:^0.24.0"
     express: "npm:^4.18.0"
+    i18next: "npm:^25.2.1"
     pluggy-sdk: "npm:^0.77.0"
+    react: "npm:19.2.4"
+    react-dom: "npm:19.2.4"
+    react-i18next: "npm:^16.0.0"
     typescript: "npm:^5.0.0"
+    vite: "npm:^6.2.0"
   languageName: unknown
   linkType: soft
 
@@ -10789,6 +10841,15 @@ __metadata:
   dependencies:
     "@types/ms": "npm:*"
   checksum: 10/47876a852de8240bfdaf7481357af2b88cb660d30c72e73789abf00c499d6bc7cd5e52f41c915d1b9cd8ec9fef5b05688d7b7aef17f7f272c2d04679508d1053
+  languageName: node
+  linkType: hard
+
+"@types/debug@npm:^4.1.12":
+  version: 4.1.13
+  resolution: "@types/debug@npm:4.1.13"
+  dependencies:
+    "@types/ms": "npm:*"
+  checksum: 10/5091d4ebda85236e6f4a6ecea552860e521e11d1d388d3f6255b40726f5a4a7cf1baa0d09f60853838e4cac6c12a13b14114d5f422ccecaee4d1d07dab349900
   languageName: node
   linkType: hard
 

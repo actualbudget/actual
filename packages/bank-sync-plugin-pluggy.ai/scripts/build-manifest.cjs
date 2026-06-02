@@ -41,7 +41,9 @@ async function buildManifest() {
     console.log('manifest.json created successfully');
     console.log(`Package: ${manifest.name}@${manifest.version}`);
     console.log(`Description: ${manifest.description}`);
-    console.log(`Entry point: ${manifest.entry}`);
+    console.log(
+      `Entry point: ${manifest.syncserver?.entry || manifest.entry || 'n/a'}`,
+    );
   } catch (error) {
     console.error('❌ Failed to build manifest:', error.message);
     process.exit(1);

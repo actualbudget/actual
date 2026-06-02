@@ -108,6 +108,7 @@ export type SelectLinkedAccountsModalProps =
       }>;
       syncSource: 'plugin';
       providerSlug: string;
+      bankId?: string;
       upgradingAccountId?: string;
     };
 
@@ -120,6 +121,7 @@ export function SelectLinkedAccountsModal(props: SelectLinkedAccountsModalProps)
   } = props;
   const providerSlug =
     syncSource === 'plugin' ? props.providerSlug : undefined;
+  const pluginBankId = syncSource === 'plugin' ? props.bankId : undefined;
   const propsWithSortedExternalAccounts =
     useMemo<SelectLinkedAccountsModalProps>(() => {
       const toSort = externalAccounts ? [...externalAccounts] : [];
@@ -158,6 +160,7 @@ export function SelectLinkedAccountsModal(props: SelectLinkedAccountsModalProps)
           return {
             syncSource: 'plugin',
             providerSlug: providerSlug!,
+            bankId: pluginBankId,
             externalAccounts: toSort as Array<{
               account_id: string;
               name: string;
@@ -176,6 +179,7 @@ export function SelectLinkedAccountsModal(props: SelectLinkedAccountsModalProps)
       requisitionId,
       upgradingAccountId,
       providerSlug,
+      pluginBankId,
     ]);
 
   const { t } = useTranslation();
@@ -321,6 +325,7 @@ export function SelectLinkedAccountsModal(props: SelectLinkedAccountsModalProps)
               propsWithSortedExternalAccounts.externalAccounts[
                 externalAccountIndex
               ],
+            bankId: propsWithSortedExternalAccounts.bankId,
             upgradingId:
               chosenLocalAccountId !== addOnBudgetAccountOption.id &&
               chosenLocalAccountId !== addOffBudgetAccountOption.id

@@ -6,6 +6,8 @@
  */
 
 // Database types
+//. This is part of the full plugin support system that was removed from the initial bank sync MVP
+/*
 export type {
   SqlParameter,
   DatabaseQueryResult,
@@ -15,14 +17,20 @@ export type {
   DatabaseOperation,
   PluginMetadata,
 } from './types/database';
+*/
 
 // Plugin file types
 export type { PluginFile, PluginFileCollection } from './types/plugin-files';
 
 // AQL query result types
+//. This is part of the full plugin support system that was removed from the initial bank sync MVP
+/*
 export type { AQLQueryResult, AQLQueryOptions } from './types/aql-result';
+*/
 
 // Model types (server-safe)
+//. This is part of the full plugin support system that was removed from the initial bank sync MVP
+/*
 export type {
   AccountEntity,
   CategoryEntity,
@@ -30,8 +38,15 @@ export type {
   PayeeEntity,
   ScheduleEntity,
 } from './types/models';
+*/
 
 // Plugin types (server-safe ones)
+export type {
+  PluginContext,
+} from './types/actualPlugin';
+
+//. This is part of the full plugin support system that was removed from the initial bank sync MVP
+/*
 export type {
   PluginDatabase,
   PluginSpreadsheet,
@@ -41,9 +56,9 @@ export type {
   PluginFilterResult,
   PluginConditionValue,
   PluginMigration,
-  PluginContext,
   ContextEvent,
 } from './types/actualPlugin';
+*/
 
 export type { ActualPluginEntry } from './types/actualPluginEntry';
 export {
@@ -59,6 +74,8 @@ export type {
 } from './types/actualPluginManifest';
 
 // Query System (server-safe)
+//. This is part of the full plugin support system that was removed from the initial bank sync MVP
+/*
 export {
   Query,
   q,
@@ -67,3 +84,4 @@ export {
   type QueryBuilder,
   type ObjectExpression,
 } from './query';
+*/

@@ -1,4 +1,3 @@
-import React, { ReactElement } from 'react';
 import ReactDOM from 'react-dom/client';
 import { initReactI18next } from 'react-i18next';
 
@@ -7,8 +6,8 @@ import type { BasicModalProps } from '@actual-app/components';
 import {
   ActualPlugin,
   ActualPluginInitialized,
+  BankSyncProviderLinkRenderer,
   BankSyncProviderSetupRenderer,
-  SlotLocations,
 } from './types/actualPlugin';
 
 const containerRoots = new WeakMap<HTMLElement, ReactDOM.Root>();
@@ -44,6 +43,8 @@ export function initializePlugin(
       const wrappedContext = {
         ...context,
 
+        //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+        /*
         // Database provided by host
         db: context.db,
 
@@ -73,6 +74,7 @@ export function initializePlugin(
             return () => unmountRoot(container);
           });
         },
+        */
 
         registerBankSyncProviderSetup(
           providerSlug: string,
@@ -114,6 +116,38 @@ export function initializePlugin(
           );
         },
 
+        registerBankSyncProviderLink(
+          providerSlug: string,
+          renderLink: BankSyncProviderLinkRenderer,
+          modalProps?: BasicModalProps,
+        ) {
+          return context.registerBankSyncProviderLink(
+            providerSlug,
+            (props, container) => {
+              console.debug('[plugins-core] mounting bank-sync link UI', {
+                providerSlug,
+                container,
+              });
+
+              try {
+                const root = getOrCreateRoot(container);
+                const element = renderLink(props);
+                root.render(element);
+                return () => unmountRoot(container);
+              } catch (error) {
+                console.error('[plugins-core] failed to mount bank-sync link UI', {
+                  providerSlug,
+                  error,
+                });
+                throw error;
+              }
+            },
+            modalProps,
+          );
+        },
+
+        //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+        /*
         registerDashboardWidget(
           widgetType: string,
           displayName: string,
@@ -143,6 +177,7 @@ export function initializePlugin(
         // Report and spreadsheet utilities - passed through from host context
         createSpreadsheet: context.createSpreadsheet,
         makeFilters: context.makeFilters,
+        */
       };
 
       originalActivate(wrappedContext);

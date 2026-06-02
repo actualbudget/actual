@@ -6,7 +6,6 @@ import React, {
   useRef,
   useState,
   useEffect,
-  useMemo,
   type MutableRefObject,
 } from 'react';
 
@@ -16,46 +15,38 @@ import {
   type ActualPluginEntry,
   type ActualPluginInitialized,
   type ActualPluginManifest,
-  type PayeeEntity,
-  type CategoryEntity,
-  type CategoryGroupEntity,
-  type AccountEntity,
   isFrontendPlugin,
   isSyncServerPlugin,
   validateActualPluginManifest,
 } from '@actual-app/plugins-core';
-import {
-  type ThemeColorTypes,
-  type ContextEvent,
-  type SlotLocations,
-} from '@actual-app/plugins-core/types/actualPlugin';
 import { createInstance } from '@module-federation/enhanced/runtime';
 
 import { useGlobalPref } from '#hooks/useGlobalPref';
-import { useNavigate } from '#hooks/useNavigate';
-import { useDispatch, useSelector } from '#redux';
-import { type RootState } from '#redux/store';
 
 import {
   loadPlugins,
   loadPluginsScript,
+  type BankSyncProviderLinkRegistration,
   type BankSyncProviderSetupRegistration,
-  type PluginRouteFn,
   type PluginModalModel,
-  type PluginSlotRegistrationFn,
 } from './core/pluginLoader';
 import { getAllPlugins } from './core/pluginStore';
 
 // Move stable refs to module scope to prevent recreation
 const modalMap = new Map<string, PluginModalModel>();
 let mfInstance: ReturnType<typeof createInstance> | null = null;
+//. This is part of the full plugin support system that was removed from the initial bank sync MVP
+/*
 const emptyPayeesEvent = { payees: [] as PayeeEntity[] };
 const emptyCategoriesEvent = {
   categories: [] as CategoryEntity[],
   groups: [] as CategoryGroupEntity[],
 };
 const emptyAccountsEvent = { accounts: [] as AccountEntity[] };
+*/
 
+//. This is part of the full plugin support system that was removed from the initial bank sync MVP
+/*
 export type PluginDashboardWidget = {
   pluginId: string;
   widgetType: string;
@@ -66,6 +57,7 @@ export type PluginDashboardWidget = {
   minWidth?: number;
   minHeight?: number;
 };
+*/
 
 export type ActualPluginsContextType = {
   plugins: ActualPluginInitialized[];
@@ -75,10 +67,16 @@ export type ActualPluginsContextType = {
     forceInitialize?: boolean,
   ) => Promise<void>;
   modalMap: MutableRefObject<Map<string, PluginModalModel>>;
+  bankSyncProviderSetups: Map<string, BankSyncProviderSetupRegistration>;
+  bankSyncProviderLinks: Map<string, BankSyncProviderLinkRegistration>;
+  //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+  /*
   pluginsRoutes: Map<string, PluginRouteFn>;
   slotItems: Record<SlotLocations, Map<string, PluginSlotRegistrationFn>>;
   pluginRegisteredWidgets: Map<string, PluginDashboardWidget>;
-  bankSyncProviderSetups: Map<string, BankSyncProviderSetupRegistration>;
+  */
+  //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+  /*
   // Theme management
   themes: Map<
     string,
@@ -106,6 +104,7 @@ export type ActualPluginsContextType = {
     themeId: string,
     baseColors: Record<string, string>,
   ) => Record<string, string>;
+  */
 };
 
 // Create default context value with sensible defaults
@@ -114,6 +113,10 @@ const defaultContextValue: ActualPluginsContextType = {
   pluginStore: [],
   refreshPluginStore: () => Promise.resolve(),
   modalMap: { current: new Map() },
+  bankSyncProviderSetups: new Map(),
+  bankSyncProviderLinks: new Map(),
+  //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+  /*
   pluginsRoutes: new Map(),
   slotItems: {
     'main-menu': new Map(),
@@ -129,6 +132,7 @@ const defaultContextValue: ActualPluginsContextType = {
   getThemes: () => [],
   getThemeColors: (_themeId: string, baseColors: Record<string, string>) =>
     baseColors,
+  */
 };
 
 // Create the context with meaningful defaults
@@ -144,6 +148,8 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
 
   const [plugins, setPlugins] = useState<ActualPluginInitialized[]>([]);
   const [pluginStore, setPluginStore] = useState<ActualPluginStored[]>([]);
+  //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+  /*
   const [events, setEvents] = useState<{
     [K in keyof ContextEvent]?: Array<(data: ContextEvent[K]) => void>;
   }>({});
@@ -185,6 +191,7 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
   useEventDispatcher('payees', payeesSelector, events);
   useEventDispatcher('categories', categoriesSelector, events);
   useEventDispatcher('accounts', accountsSelector, events);
+  */
 
   // We store modules in memory if needed (original code had it, but not used outside loadPlugins)
   // If you want to keep that, do so:
@@ -195,8 +202,11 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
   initializedRef.current = initialized;
   const pluginStoreLengthRef = useRef(pluginStore.length);
   pluginStoreLengthRef.current = pluginStore.length;
+  //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+  /*
   const eventsRef = useRef(events);
   eventsRef.current = events;
+  */
 
   // Reset initialization state on unhandled runtime errors in development
   useEffect(() => {
@@ -253,6 +263,8 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
       }
     }
   }, []);
+  //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+  /*
   const [pluginsRoutes, setPluginsRoutes] = useState<
     Map<string, PluginRouteFn>
   >(new Map());
@@ -268,10 +280,16 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
   const [pluginRegisteredWidgets, setPluginRegisteredWidgets] = useState<
     Map<string, PluginDashboardWidget>
   >(new Map());
+  */
   const [bankSyncProviderSetups, setBankSyncProviderSetups] = useState<
     Map<string, BankSyncProviderSetupRegistration>
   >(new Map());
+  const [bankSyncProviderLinks, setBankSyncProviderLinks] = useState<
+    Map<string, BankSyncProviderLinkRegistration>
+  >(new Map());
 
+  //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+  /*
   const dispatch = useDispatch();
   const navigateBase = useNavigate();
 
@@ -407,27 +425,23 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
     },
     [savedPluginThemes],
   );
+  */
 
   // The function that actually registers and activates plugin code
   const handleLoadPlugins = useCallback(
     async (pluginsEntries: Map<string, ActualPluginEntry>) => {
       setBankSyncProviderSetups(new Map());
+      setBankSyncProviderLinks(new Map());
       // We pass these references so plugin activation can call them.
       await loadPlugins({
         pluginsEntries,
-        dispatch,
         setPlugins,
-        modalMap: { current: modalMap },
-        setPluginsRoutes,
-        setSlotItems,
-        setPluginRegisteredWidgets,
         setBankSyncProviderSetups,
-        navigateBase,
-        setEvents,
-        registerTheme,
-        removePluginThemes,
+        setBankSyncProviderLinks,
       });
 
+      //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+      /*
       const currentEvents = eventsRef.current;
 
       dispatchEvent('payees', currentEvents, {
@@ -440,8 +454,9 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
       dispatchEvent('accounts', currentEvents, {
         accounts: [],
       });
+      */
     },
-    [dispatch, navigateBase, removePluginThemes, registerTheme],
+    [],
   );
 
   const isLoadingRef = useRef(false);
@@ -510,14 +525,18 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
     pluginStore,
     refreshPluginStore,
     modalMap: { current: modalMap },
+    bankSyncProviderSetups,
+    bankSyncProviderLinks,
+    //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+    /*
     pluginsRoutes,
     slotItems,
     pluginRegisteredWidgets,
-    bankSyncProviderSetups,
     themes: runtimeThemes,
     registerTheme,
     getThemes,
     getThemeColors,
+    */
   };
 
   return (
@@ -532,6 +551,8 @@ export function useActualPlugins() {
   return useContext(ActualPluginsContext);
 }
 
+//. This is part of the full plugin support system that was removed from the initial bank sync MVP
+/*
 function dispatchEvent<K extends keyof ContextEvent>(
   key: K,
   events: {
@@ -559,6 +580,7 @@ function useEventDispatcher<K extends keyof ContextEvent>(
     dispatchEvent(key, events, value);
   }, [events, key, value, eventHandlers]);
 }
+*/
 
 async function getSyncServerPlugins(): Promise<ActualPluginStored[]> {
   const serverUrl = await send('get-server-url');

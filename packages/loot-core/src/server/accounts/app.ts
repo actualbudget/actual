@@ -475,6 +475,8 @@ type PluginExternalAccount = {
   name: string;
   institution: string;
   balance: number;
+  bank_id?: string;
+  bankId?: string;
   [key: string]: unknown;
 };
 
@@ -497,7 +499,13 @@ async function linkPluginAccount({
     typeof externalAccount.institution === 'string'
       ? externalAccount.institution
       : providerSlug;
-  const bankIdentifier = bankId || providerSlug;
+  const accountBankIdentifier =
+    typeof externalAccount.bank_id === 'string'
+      ? externalAccount.bank_id
+      : typeof externalAccount.bankId === 'string'
+        ? externalAccount.bankId
+        : undefined;
+  const bankIdentifier = bankId || accountBankIdentifier || providerSlug;
   const bank = await link.findOrCreateBank(
     { name: providerName },
     bankIdentifier,

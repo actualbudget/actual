@@ -1,0 +1,89 @@
+import { PluginManifest } from '@actual-app/plugins-core-sync-server';
+
+export const manifest: PluginManifest = {
+  name: 'enablebanking-bank-sync',
+  version: '0.0.1',
+  description: 'Enable Banking bank synchronization plugin for Actual Budget',
+  type: 'mixed',
+  frontend: {
+    entry: 'frontend/mf-manifest.json',
+  },
+  author: 'Actual Budget Team',
+  license: 'MIT',
+  syncserver: {
+    entry: 'syncserver/index.js',
+    routes: [
+      {
+        path: '/status',
+        methods: ['POST', 'GET'],
+        auth: 'authenticated',
+        description: 'Check Enable Banking configuration status',
+      },
+      {
+        path: '/configure',
+        methods: ['POST'],
+        auth: 'authenticated',
+        description: 'Configure Enable Banking credentials',
+      },
+      {
+        path: '/aspsps',
+        methods: ['POST'],
+        auth: 'authenticated',
+        description: 'Get Enable Banking ASPSPs by country',
+      },
+      {
+        path: '/start-auth',
+        methods: ['POST'],
+        auth: 'authenticated',
+        description: 'Start Enable Banking authorization',
+      },
+      {
+        path: '/complete-auth',
+        methods: ['POST'],
+        auth: 'authenticated',
+        description: 'Complete Enable Banking authorization',
+      },
+      {
+        path: '/poll-auth',
+        methods: ['POST'],
+        auth: 'authenticated',
+        description: 'Poll Enable Banking authorization',
+      },
+      {
+        path: '/poll-auth-stop',
+        methods: ['POST'],
+        auth: 'authenticated',
+        description: 'Stop Enable Banking authorization polling',
+      },
+      {
+        path: '/accounts',
+        methods: ['POST'],
+        auth: 'authenticated',
+        description: 'Fetch accounts from Enable Banking',
+      },
+      {
+        path: '/transactions',
+        methods: ['POST'],
+        auth: 'authenticated',
+        description: 'Fetch transactions from Enable Banking',
+      },
+    ],
+    bankSync: {
+      enabled: true,
+      displayName: 'Enable Banking',
+      description:
+        'Link a European bank account via Enable Banking, a free alternative to GoCardless for PSD2-supported banks.',
+      requiresAuth: true,
+      setup: {
+        type: 'plugin',
+      },
+      endpoints: {
+        status: '/status',
+        accounts: '/accounts',
+        transactions: '/transactions',
+      },
+    },
+  },
+};
+
+export default manifest;

@@ -1,4 +1,5 @@
 dist/
+frontend-build/
 node_modules/
 *.zip
 *.log

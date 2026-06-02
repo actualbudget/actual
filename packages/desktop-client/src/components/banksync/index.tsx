@@ -58,7 +58,7 @@ export function BankSync() {
     providersNeedingConfiguration,
   } = useBuiltInBankSyncProviders();
   const { providers: pluginProviders } = useBankSyncProviders();
-  const { bankSyncProviderSetups } = useActualPlugins();
+  const { bankSyncProviderLinks, bankSyncProviderSetups } = useActualPlugins();
   const { statusMap, refetch: refetchProviderStatuses } = useProviderStatusMap({
     providers: pluginProviders,
     fileId,
@@ -242,12 +242,86 @@ export function BankSync() {
 
   async function openPluginAccounts({
     providerSlug,
+    providerDisplayName,
     upgradingAccountId,
   }: {
     providerSlug: string;
+    providerDisplayName?: string;
     upgradingAccountId?: AccountEntity['id'];
   }) {
     if (!fileId) {
+      return;
+    }
+
+    const pluginLink = bankSyncProviderLinks.get(providerSlug);
+    if (pluginLink) {
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'plugin-modal',
+            options: {
+              modalProps: pluginLink.modalProps,
+              parameter: container => {
+                return pluginLink.renderLink(
+                  {
+                    providerSlug,
+                    providerDisplayName: providerDisplayName ?? providerSlug,
+                    fileId,
+                    upgradingAccountId,
+                    callProvider: ({ path, method = 'POST', body }) =>
+                      send('bank-sync-plugin-call', {
+                        providerSlug,
+                        path,
+                        method,
+                        body,
+                        fileId,
+                      }),
+                    openExternalUrl: url => window.Actual.openURLInBrowser(url),
+                    selectExternalAccounts: ({ externalAccounts, bankId }) => {
+                      dispatch(popModal());
+                      dispatch(
+                        pushModal({
+                          modal: {
+                            name: 'select-linked-accounts',
+                            options: {
+                              externalAccounts,
+                              syncSource: 'plugin' as const,
+                              providerSlug,
+                              bankId,
+                              upgradingAccountId,
+                            },
+                          },
+                        }),
+                      );
+                    },
+                    onSuccess: () => {
+                      dispatch(popModal());
+                      refetchProviderStatuses();
+                    },
+                    onError: error => {
+                      dispatch(
+                        addNotification({
+                          notification: {
+                            type: 'error',
+                            title: t('Error fetching accounts'),
+                            message:
+                              error instanceof Error
+                                ? error.message
+                                : String(error),
+                            timeout: 5000,
+                          },
+                        }),
+                      );
+                    },
+                    close: () => dispatch(popModal()),
+                  },
+                  container,
+                );
+              },
+            },
+          },
+        }),
+      );
       return;
     }
 
@@ -321,7 +395,10 @@ export function BankSync() {
                 })
               }
               onLink={({ provider }) =>
-                openPluginAccounts({ providerSlug: provider.slug })
+                openPluginAccounts({
+                  providerSlug: provider.slug,
+                  providerDisplayName: provider.displayName,
+                })
               }
             />
             {!canManageProviders && (
@@ -375,6 +452,9 @@ export function BankSync() {
                         onSelect={({ providerSlug }) =>
                           openPluginAccounts({
                             providerSlug,
+                            providerDisplayName:
+                              pluginProviders.find(p => p.slug === providerSlug)
+                                ?.displayName,
                             upgradingAccountId: account.id,
                           })
                         }

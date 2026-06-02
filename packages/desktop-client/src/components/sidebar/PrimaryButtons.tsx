@@ -20,10 +20,8 @@ import { View } from '@actual-app/components/view';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
-import { useActualPlugins } from '#plugin/ActualPluginsProvider';
 
 import { Item } from './Item';
-import { RenderPluginsComponent } from '#components/plugins/RenderPluginsComponent';
 import { SecondaryItem } from './SecondaryItem';
 
 export function PrimaryButtons() {
@@ -36,7 +34,8 @@ export function PrimaryButtons() {
   const syncServerStatus = useSyncServerStatus();
   const isTestEnv = useIsTestEnv();
   const isUsingServer = syncServerStatus !== 'no-server' || isTestEnv;
-  const { slotItems } = useActualPlugins();
+  //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+  // const { slotItems } = useActualPlugins();
 
   const isActive = [
     '/payees',
@@ -64,7 +63,8 @@ export function PrimaryButtons() {
         style={{ marginBottom: isOpen ? 8 : 0 }}
         forceActive={!isOpen && isActive}
       />
-      <RenderPluginsComponent toRender={slotItems['main-menu']} />
+      {/* //. This is part of the full plugin support system that was removed from the initial bank sync MVP */}
+      {/* <RenderPluginsComponent toRender={slotItems['main-menu']} /> */}
       {isOpen && (
         <>
           <SecondaryItem
@@ -101,7 +101,8 @@ export function PrimaryButtons() {
               indent={15}
             />
           )}
-          <RenderPluginsComponent toRender={slotItems['more-menu']} />
+          {/* //. This is part of the full plugin support system that was removed from the initial bank sync MVP */}
+          {/* <RenderPluginsComponent toRender={slotItems['more-menu']} /> */}
           <SecondaryItem
             title={t('Settings')}
             Icon={SvgCog}

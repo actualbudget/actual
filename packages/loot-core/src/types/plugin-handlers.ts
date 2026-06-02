@@ -1,14 +1,20 @@
 import {
   type ActualPluginManifest,
   type PluginFileCollection,
-  type SqlParameter,
-  type DatabaseResult,
-  type DatabaseOperation,
-  type AQLQueryResult,
-  type AQLQueryOptions,
-  type Query,
-  type PluginMigration,
 } from '@actual-app/plugins-core/server';
+
+//. This is part of the full plugin support system that was removed from the initial bank sync MVP
+/*
+import type {
+  SqlParameter,
+  DatabaseResult,
+  DatabaseOperation,
+  AQLQueryResult,
+  AQLQueryOptions,
+  Query,
+  PluginMigration,
+} from '@actual-app/plugins-core/server';
+*/
 
 export interface PluginHandlers {
   'plugin-files': (args: {
@@ -21,6 +27,8 @@ export interface PluginHandlers {
   'plugin-sync-server-register-dev': (args: {
     manifestUrl: string;
   }) => Promise<{ manifest: ActualPluginManifest }>;
+  //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+  /*
   'plugin-create-database': (args: {
     pluginId: string;
   }) => Promise<{ success: boolean }>;
@@ -62,6 +70,7 @@ export interface PluginHandlers {
     query: Query;
     options?: AQLQueryOptions;
   }) => Promise<AQLQueryResult>;
+  */
   'cors-proxy': (args: {
     url: string;
     method?: string;

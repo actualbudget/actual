@@ -1,5 +1,6 @@
 node_modules/
 dist/
+frontend-build/
 *.log
 .DS_Store
 .env
@@ -8,4 +9,3 @@ dist/
 # Generated build artifacts
 manifest.json
 *.zip
-

@@ -1,42 +1,22 @@
-import {
-  type MutableRefObject,
-  type Dispatch as ReactDispatch,
-  type SetStateAction,
-} from 'react';
+import { type Dispatch as ReactDispatch, type SetStateAction } from 'react';
 
 import { type BasicModalProps } from '@actual-app/components/props/modalProps';
-import { send } from '@actual-app/core/platform/client/connection';
-import { q } from '@actual-app/core/shared/query';
 import { type ActualPluginStored } from '@actual-app/core/types/models/actual-plugin-stored';
 import {
   type ActualPluginEntry,
   type ActualPluginInitialized,
-  type Query,
-  type QueryBuilder,
-  type PluginDatabase,
-  type PluginFilterCondition,
-  type PluginFilterResult,
-  type PluginCellValue,
-  type AQLQueryResult,
-  type AQLQueryOptions,
 } from '@actual-app/plugins-core';
 import {
-  type ContextEvent,
+  type BankSyncProviderLinkRenderProps,
   type BankSyncProviderSetupRenderProps,
-  type SlotLocations,
-  type ThemeColorTypes,
   type HostContext,
 } from '@actual-app/plugins-core/types/actualPlugin';
 import {
   createInstance,
   getInstance,
 } from '@module-federation/enhanced/runtime';
-import type { Dispatch } from 'redux';
-import { v4 as uuidv4 } from 'uuid';
 
 import { i18nInstance } from '#i18n';
-import { pushModal as basePushModal, popModal } from '#modals/modalsSlice';
-import { type PluginDashboardWidget } from '#plugin/ActualPluginsProvider';
 
 // Import send function to communicate with backend
 
@@ -62,58 +42,38 @@ export type BankSyncProviderSetupRegistration = {
   modalProps?: BasicModalProps;
 };
 
+export type BankSyncProviderLinkRegistration = {
+  renderLink: (
+    props: BankSyncProviderLinkRenderProps,
+    container: HTMLDivElement,
+  ) => void | (() => void);
+  modalProps?: BasicModalProps;
+};
+
 export async function loadPlugins({
   pluginsEntries,
-  dispatch,
   setPlugins,
-  modalMap,
-  setPluginsRoutes,
-  setSlotItems,
-  setPluginRegisteredWidgets,
   setBankSyncProviderSetups,
-  navigateBase,
-  setEvents,
-  registerTheme,
-  removePluginThemes,
+  setBankSyncProviderLinks,
 }: {
   pluginsEntries: Map<string, ActualPluginEntry>;
-  dispatch: Dispatch;
   setPlugins: ReactDispatch<SetStateAction<ActualPluginInitialized[]>>;
-  modalMap: MutableRefObject<Map<string, PluginModalModel>>;
-  setPluginsRoutes: ReactDispatch<SetStateAction<Map<string, PluginRouteFn>>>;
-  setSlotItems: ReactDispatch<
-    SetStateAction<Record<SlotLocations, Map<string, PluginSlotRegistrationFn>>>
-  >;
-  setPluginRegisteredWidgets: ReactDispatch<
-    SetStateAction<Map<string, PluginDashboardWidget>>
-  >;
   setBankSyncProviderSetups: ReactDispatch<
     SetStateAction<Map<string, BankSyncProviderSetupRegistration>>
   >;
-  navigateBase: (path: string) => void;
-  setEvents: ReactDispatch<
-    SetStateAction<{
-      [K in keyof ContextEvent]?: Array<(data: ContextEvent[K]) => void>;
-    }>
+  setBankSyncProviderLinks: ReactDispatch<
+    SetStateAction<Map<string, BankSyncProviderLinkRegistration>>
   >;
-  registerTheme: (
-    pluginName: string,
-    themeId: string,
-    displayName: string,
-    colorOverrides: ThemeColorTypes,
-    options?: {
-      baseTheme?: 'light' | 'dark' | 'midnight';
-      description?: string;
-    },
-  ) => () => void;
-  removePluginThemes: (pluginName: string) => void;
 }) {
   const loadedList: ActualPluginInitialized[] = [];
 
   for (const [pluginId, entryModule] of pluginsEntries.entries()) {
     try {
+      //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+      /*
       // Clean up any existing themes from this plugin
       removePluginThemes(pluginId);
+      */
 
       // the entry module is actually a function that returns an object with name, version, activate.
       const pluginEntry =
@@ -127,18 +87,12 @@ export async function loadPlugins({
 
       // The host context is how the plugin interacts with the app.
       const hostContext = generateContext(
-        modalMap,
-        setPluginsRoutes,
-        setSlotItems,
-        setPluginRegisteredWidgets,
         setBankSyncProviderSetups,
-        dispatch,
-        pluginId,
-        navigateBase,
-        setEvents,
-        registerTheme,
+        setBankSyncProviderLinks,
       );
 
+      //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+      /*
       // Create database for the plugin
       let db: PluginDatabase;
       try {
@@ -168,23 +122,20 @@ export async function loadPlugins({
           // Continue with activation even if migrations fail for now
         }
       }
+      */
+
+      const rawPlugin = pluginEntry();
 
       await rawPlugin.activate({
         ...hostContext,
-        db,
-        q,
         i18nInstance,
-      } as HostContext & {
-        db: PluginDatabase;
-      });
+      } as HostContext);
 
       // Mark plugin as initialized and push to list
       const initializedPlugin: ActualPluginInitialized = {
         ...rawPlugin,
         initialized: true,
-        activate: rawPlugin.activate as (
-          context: HostContext & { db: PluginDatabase },
-        ) => void,
+        activate: rawPlugin.activate as (context: HostContext) => void,
       };
       loadedList.push(initializedPlugin);
     } catch (error) {
@@ -201,37 +152,16 @@ export async function loadPlugins({
 }
 
 function generateContext(
-  modalMap: MutableRefObject<Map<string, PluginModalModel>>,
-  setPluginsRoutes: ReactDispatch<SetStateAction<Map<string, PluginRouteFn>>>,
-  setSlotItems: ReactDispatch<
-    SetStateAction<Record<SlotLocations, Map<string, PluginSlotRegistrationFn>>>
-  >,
-  setPluginRegisteredWidgets: ReactDispatch<
-    SetStateAction<Map<string, PluginDashboardWidget>>
-  >,
   setBankSyncProviderSetups: ReactDispatch<
     SetStateAction<Map<string, BankSyncProviderSetupRegistration>>
   >,
-  dispatch: Dispatch,
-  pluginId: string,
-  navigateBase: (path: string) => void,
-  setEvents: ReactDispatch<
-    SetStateAction<{
-      [K in keyof ContextEvent]?: Array<(data: ContextEvent[K]) => void>;
-    }>
+  setBankSyncProviderLinks: ReactDispatch<
+    SetStateAction<Map<string, BankSyncProviderLinkRegistration>>
   >,
-  registerTheme: (
-    pluginName: string,
-    themeId: string,
-    displayName: string,
-    colorOverrides: ThemeColorTypes,
-    options?: {
-      baseTheme?: 'light' | 'dark' | 'midnight';
-      description?: string;
-    },
-  ) => () => void,
 ) {
   return {
+    //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+    /*
     registerRoute: (
       path: string,
       routeElement: (container: HTMLDivElement) => void | (() => void),
@@ -261,6 +191,7 @@ function generateContext(
         return newMap;
       });
     },
+    */
     registerBankSyncProviderSetup: (
       providerSlug: string,
       renderSetup: (
@@ -283,6 +214,30 @@ function generateContext(
         });
       };
     },
+    registerBankSyncProviderLink: (
+      providerSlug: string,
+      renderLink: (
+        props: BankSyncProviderLinkRenderProps,
+        container: HTMLDivElement,
+      ) => void | (() => void),
+      modalProps?: BasicModalProps,
+    ) => {
+      setBankSyncProviderLinks(prev => {
+        const next = new Map(prev);
+        next.set(providerSlug, { renderLink, modalProps });
+        return next;
+      });
+
+      return () => {
+        setBankSyncProviderLinks(prev => {
+          const next = new Map(prev);
+          next.delete(providerSlug);
+          return next;
+        });
+      };
+    },
+    //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+    /*
     registerSlotContent: (
       position: SlotLocations,
       param: PluginSlotRegistrationFn,
@@ -407,9 +362,12 @@ function generateContext(
     createSpreadsheet: () => {
       return createPluginSpreadsheetInterface();
     },
+    */
   };
 }
 
+//. This is part of the full plugin support system that was removed from the initial bank sync MVP
+/*
 function createPluginSpreadsheetInterface() {
   return {
     bind: () => {
@@ -438,6 +396,7 @@ function createPluginSpreadsheetInterface() {
     },
   };
 }
+*/
 
 /**
  * loadPluginsScript - sets up module federation for all plugin scripts,
@@ -691,6 +650,8 @@ async function injectIntoGlobalHook(pluginName: string, pluginEntry: string) {
   }
 }
 
+//. This is part of the full plugin support system that was removed from the initial bank sync MVP
+/*
 function joinRelativePaths(...parts: string[]) {
   return parts
     .map(p => p.replace(/(^\/+|\/+$)/g, ''))
@@ -822,3 +783,4 @@ async function createPluginDatabase(pluginId: string): Promise<PluginDatabase> {
 
   return dbInterface;
 }
+*/

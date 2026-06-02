@@ -17,13 +17,11 @@ import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useResizeObserver } from '#hooks/useResizeObserver';
 import { replaceModal } from '#modals/modalsSlice';
-import { useActualPlugins } from '#plugin/ActualPluginsProvider';
 import { useDispatch } from '#redux';
 
 import { Accounts } from './Accounts';
 import { BudgetName } from './BudgetName';
 import { PrimaryButtons } from './PrimaryButtons';
-import { RenderPluginsComponent } from '#components/plugins/RenderPluginsComponent';
 import { SecondaryButtons } from './SecondaryButtons';
 import { useSidebar } from './SidebarProvider';
 import { ToggleButton } from './ToggleButton';
@@ -33,7 +31,8 @@ export function Sidebar() {
 
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { slotItems } = useActualPlugins();
+  //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+  // const { slotItems } = useActualPlugins();
   const sidebar = useSidebar();
   const { width } = useResponsive();
   const [isFloating = false, setFloatingSidebarPref] =
@@ -127,7 +126,8 @@ export function Sidebar() {
           >
             <PrimaryButtons />
 
-            <RenderPluginsComponent toRender={slotItems['before-accounts']} />
+            {/* //. This is part of the full plugin support system that was removed from the initial bank sync MVP */}
+            {/* <RenderPluginsComponent toRender={slotItems['before-accounts']} /> */}
 
             <Accounts />
 
@@ -141,7 +141,8 @@ export function Sidebar() {
               ]}
             />
 
-            <RenderPluginsComponent toRender={slotItems['after-accounts']} />
+            {/* //. This is part of the full plugin support system that was removed from the initial bank sync MVP */}
+            {/* <RenderPluginsComponent toRender={slotItems['after-accounts']} /> */}
           </View>
         </View>
       </Resizable>

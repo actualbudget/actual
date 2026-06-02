@@ -378,6 +378,25 @@ app.post('/bank-sync/:providerSlug/transactions', async (req, res) => {
   }
 });
 
+app.all(/^\/bank-sync\/([^/]+)\/(.+)$/, async (req, res) => {
+  try {
+    const [, providerSlug, route] = req.params;
+    const routePath = `/${route || ''}`;
+
+    return forwardToBankSyncPluginEndpoint(
+      req,
+      res,
+      providerSlug,
+      routePath,
+    );
+  } catch (error) {
+    res.status(500).json({
+      error_code: 'INTERNAL_ERROR',
+      reason: error.message,
+    });
+  }
+});
+
 // Add plugin middleware to handle all plugin routes
 app.use(createPluginMiddleware(pluginManager));
 

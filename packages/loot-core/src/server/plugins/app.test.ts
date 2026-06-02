@@ -71,7 +71,7 @@ describe('plugins app', () => {
     });
 
     it('does not proxy without a user token', async () => {
-      vi.mocked(asyncStorage.getItem).mockResolvedValue(null);
+      vi.mocked(asyncStorage.getItem).mockResolvedValue(undefined);
 
       await expect(
         app.handlers['cors-proxy']({

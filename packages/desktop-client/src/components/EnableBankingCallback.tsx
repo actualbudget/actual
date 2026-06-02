@@ -14,6 +14,10 @@ export function EnableBankingCallback() {
   const [stateParam] = useUrlParam('state');
   const [errorParam] = useUrlParam('error');
   const storedState = localStorage.getItem('enablebanking_auth_state');
+  const storedProviderSlug = localStorage.getItem(
+    'enablebanking_auth_provider_slug',
+  );
+  const storedFileId = localStorage.getItem('enablebanking_auth_file_id');
   const stateValid =
     typeof stateParam === 'string' &&
     typeof storedState === 'string' &&
@@ -53,21 +57,38 @@ export function EnableBankingCallback() {
       }
 
       try {
-        const result = await send('enablebanking-complete-auth', {
-          code,
-          state: stateParam,
-        });
+        const result =
+          storedProviderSlug && storedFileId
+            ? await send('bank-sync-plugin-call', {
+                providerSlug: storedProviderSlug,
+                path: 'complete-auth',
+                method: 'POST',
+                body: {
+                  code,
+                  state: stateParam,
+                },
+                fileId: storedFileId,
+              })
+            : await send('enablebanking-complete-auth', {
+                code,
+                state: stateParam,
+              });
 
-        if (result.error) {
+        if ((result as { error?: unknown }).error) {
           setStatus('error');
           setErrorMessage(
-            result.error.message || t('Failed to complete authorization.'),
+            String(
+              (result as { error?: { message?: string } }).error?.message ||
+                t('Failed to complete authorization.'),
+            ),
           );
           return;
         }
 
         setStatus('success');
         localStorage.removeItem('enablebanking_auth_state');
+        localStorage.removeItem('enablebanking_auth_provider_slug');
+        localStorage.removeItem('enablebanking_auth_file_id');
 
         // Auto-close after a short delay
         setTimeout(() => {
