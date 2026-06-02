@@ -26,17 +26,14 @@ export type TagAutocompleteProps = {
   inputStyle?: CSSProperties;
   onBlur?: FocusEventHandler;
   onKeyDown?: KeyboardEventHandler;
-  onUpdate?: (value: string) => void;
 };
 
 export function TagAutocomplete({
   inputValue,
-
   setInputValue,
   onBlur,
   inputStyle,
   onKeyDown,
-  onUpdate,
 }: TagAutocompleteProps) {
   const { t } = useTranslation();
   const getTagCSS = useTagCSS({ ellipsis: true });

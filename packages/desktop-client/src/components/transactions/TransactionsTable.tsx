@@ -2031,7 +2031,6 @@ function NotesCell({
           inputStyle={inputStyle}
           onBlur={onBlur}
           onKeyDown={onKeyDown}
-          onUpdate={onUpdate}
         />
       )}
     </CustomCell>
