@@ -2000,6 +2000,9 @@ function NotesCell({
       if (!e.isPropagationStopped()) {
         escapePressed.current = true;
       }
+      if (e.target && 'value' in e.target) {
+        (e.target as HTMLInputElement).value = note;
+      }
       setInputValue(note);
     }
   }
@@ -2033,6 +2036,7 @@ function NotesCell({
           inputStyle={inputStyle}
           onBlur={onBlur}
           onKeyDown={onKeyDown}
+          onUpdate={onUpdate}
         />
       )}
     </CustomCell>
