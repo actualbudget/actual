@@ -26,7 +26,7 @@ __metadata:
     "@actual-app/core": "workspace:*"
     "@actual-app/crdt": "workspace:*"
     "@typescript/native-preview": "npm:beta"
-    better-sqlite3: "npm:^12.8.0"
+    better-sqlite3: "patch:better-sqlite3@npm%3A12.9.0#~/.yarn/patches/better-sqlite3-npm-12.9.0-cdfce1d9a2.patch"
     compare-versions: "npm:^6.1.1"
     rollup-plugin-visualizer: "npm:^7.0.1"
     typescript-strict-plugin: "npm:^2.4.4"
@@ -115,7 +115,7 @@ __metadata:
     absurd-sql: "npm:0.0.54"
     adm-zip: "npm:^0.5.17"
     assert: "npm:^2.1.0"
-    better-sqlite3: "npm:^12.8.0"
+    better-sqlite3: "patch:better-sqlite3@npm%3A12.9.0#~/.yarn/patches/better-sqlite3-npm-12.9.0-cdfce1d9a2.patch"
     browserify-zlib: "npm:^0.2.0"
     buffer: "npm:^6.0.3"
     cross-env: "npm:^10.1.0"
@@ -188,7 +188,7 @@ __metadata:
     "@types/supertest": "npm:^7.2.0"
     "@typescript/native-preview": "npm:beta"
     bcrypt: "npm:^6.0.0"
-    better-sqlite3: "npm:^12.8.0"
+    better-sqlite3: "patch:better-sqlite3@npm%3A12.9.0#~/.yarn/patches/better-sqlite3-npm-12.9.0-cdfce1d9a2.patch"
     convict: "npm:^6.2.5"
     cors: "npm:^2.8.6"
     date-fns: "npm:^4.1.0"
@@ -11769,7 +11769,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"better-sqlite3@npm:^12.8.0":
+"better-sqlite3@npm:12.9.0":
   version: 12.9.0
   resolution: "better-sqlite3@npm:12.9.0"
   dependencies:
@@ -11777,6 +11777,17 @@ __metadata:
     node-gyp: "npm:latest"
     prebuild-install: "npm:^7.1.1"
   checksum: 10/0b32b06140f2a98ce7fbcf7d30b56b46e16d0b6fbfb63157a7bb61dea7265e176ab362d439785e852716a03a130db5f0ab356b6a68cbcb23d59a362c1a8b01d4
+  languageName: node
+  linkType: hard
+
+"better-sqlite3@patch:better-sqlite3@npm%3A12.9.0#~/.yarn/patches/better-sqlite3-npm-12.9.0-cdfce1d9a2.patch":
+  version: 12.9.0
+  resolution: "better-sqlite3@patch:better-sqlite3@npm%3A12.9.0#~/.yarn/patches/better-sqlite3-npm-12.9.0-cdfce1d9a2.patch::version=12.9.0&hash=f20a1d"
+  dependencies:
+    bindings: "npm:^1.5.0"
+    node-gyp: "npm:latest"
+    prebuild-install: "npm:^7.1.1"
+  checksum: 10/fc2b53eef90b88bbd2adbf767e6aea832d20ceef98b0af9ef440ae1ebef248a10cd328afdc1bf90b438870166a01625c2dc59db0a67b910ed703395f4854fe26
   languageName: node
   linkType: hard
 
@@ -14604,7 +14615,7 @@ __metadata:
     "@playwright/test": "npm:1.59.1"
     "@types/copyfiles": "npm:^2"
     "@typescript/native-preview": "npm:beta"
-    better-sqlite3: "npm:^12.8.0"
+    better-sqlite3: "patch:better-sqlite3@npm%3A12.9.0#~/.yarn/patches/better-sqlite3-npm-12.9.0-cdfce1d9a2.patch"
     copyfiles: "npm:^2.4.1"
     cross-env: "npm:^10.1.0"
     electron: "npm:42.3.0"
