@@ -1,9 +1,14 @@
 /// <reference lib="WebWorker" />
-import { precacheAndRoute } from 'workbox-precaching';
+import { CacheableResponsePlugin } from 'workbox-cacheable-response';
+import { ExpirationPlugin } from 'workbox-expiration';
+import { matchPrecache, precacheAndRoute } from 'workbox-precaching';
+import { NavigationRoute, registerRoute } from 'workbox-routing';
+import { CacheFirst, NetworkFirst } from 'workbox-strategies';
 
 // Service Worker Global Types
 declare const self: ServiceWorkerGlobalScope & {
   __WB_DISABLE_DEV_LOGS: boolean;
+  __WB_MANIFEST: Array<{ url: string; revision: string | null }>;
 };
 
 type PluginFile = {
@@ -21,11 +26,105 @@ type PluginMessage = {
 self.__WB_DISABLE_DEV_LOGS = true;
 
 // Injected by VitePWA
-precacheAndRoute(self.__WB_MANIFEST);
+precacheAndRoute(self.__WB_MANIFEST ?? [], {
+  ignoreURLParametersMatching: [/^v$/],
+});
+
+registerRoute(
+  new NavigationRoute(
+    async () =>
+      (await matchPrecache('/index.html')) ??
+      (await matchPrecache('/')) ??
+      fetch('/index.html'),
+    {
+      denylist: [
+        /^\/(?:account|admin|secret|openid|sync|gocardless|simplefin|pluggyai|enablebanking|cors-proxy|plugins-api)(?:\/.*)?$/,
+        /^\/(?:mode|info|health|metrics)$/,
+      ],
+    },
+  ),
+);
+
+registerRoute(
+  ({ request }) => request.destination === 'font',
+  new CacheFirst({
+    cacheName: 'fonts-cache',
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({
+        maxAgeSeconds: 60 * 60 * 24 * 365,
+        maxEntries: 30,
+      }),
+    ],
+  }),
+);
+
+registerRoute(
+  ({ request, url }) =>
+    request.destination === 'image' ||
+    url.pathname.endsWith('.webmanifest') ||
+    url.pathname.endsWith('.ico') ||
+    url.pathname.endsWith('.png'),
+  new CacheFirst({
+    cacheName: 'static-assets-cache',
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({
+        maxAgeSeconds: 60 * 60 * 24 * 30,
+        maxEntries: 60,
+      }),
+    ],
+  }),
+);
+
+registerRoute(
+  ({ url }) =>
+    url.pathname.includes('/data/') ||
+    url.pathname.endsWith('/data-file-index.txt'),
+  new NetworkFirst({
+    cacheName: 'data-files-cache',
+    plugins: [
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({
+        maxAgeSeconds: 60 * 60 * 24 * 7,
+        maxEntries: 100,
+      }),
+    ],
+  }),
+);
 
 const fileList = new Map<string, string>();
 
-// Log installation event
+type PluginDataPath = {
+  slug: string;
+  fileName: string;
+};
+
+function parsePluginDataPath(pathname: string): PluginDataPath | null {
+  const match = pathname.match(/^\/plugin-data\/([^/]+)(?:\/([^?]+))?/);
+  if (!match) return null;
+
+  return {
+    slug: match[1],
+    fileName: match[2] ?? '',
+  };
+}
+
+registerRoute(
+  ({ url }) => parsePluginDataPath(url.pathname) !== null,
+  async ({ url }) => {
+    const pluginDataPath = parsePluginDataPath(url.pathname);
+    if (!pluginDataPath) {
+      return new Response('Invalid plugin-data path', { status: 400 });
+    }
+
+    return handlePlugin(
+      pluginDataPath.slug,
+      pluginDataPath.fileName.replace('?import', ''),
+    );
+  },
+);
+
 self.addEventListener('install', (_event: ExtendableEvent) => {
   console.log('Plugins Worker installing...');
 });
@@ -47,24 +146,6 @@ self.addEventListener('activate', (_event: ExtendableEvent) => {
 self.addEventListener('message', (event: ExtendableMessageEvent) => {
   if (event.data && (event.data as PluginMessage).type === 'SKIP_WAITING') {
     void self.skipWaiting();
-  }
-});
-
-self.addEventListener('fetch', (event: FetchEvent) => {
-  const url = new URL(event.request.url);
-  const pathSegments = url.pathname.split('/').filter(Boolean); // Split and remove empty segments
-
-  const pluginsIndex = pathSegments.indexOf('plugin-data');
-  const slugIndex = pluginsIndex + 1;
-  if (pluginsIndex !== -1 && pathSegments[slugIndex]) {
-    const slug = pathSegments[slugIndex];
-    const fileName =
-      pathSegments.length > slugIndex + 1
-        ? pathSegments[slugIndex + 1].split('?')[0]
-        : '';
-    event.respondWith(handlePlugin(slug, fileName.replace('?import', '')));
-  } else {
-    event.respondWith(fetch(event.request));
   }
 });
 

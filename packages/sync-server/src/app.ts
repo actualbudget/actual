@@ -13,8 +13,8 @@ import * as corsApp from './app-cors-proxy';
 import * as enableBankingApp from './app-enablebanking/app-enablebanking';
 import * as goCardlessApp from './app-gocardless/app-gocardless';
 import * as openidApp from './app-openid';
-import * as pluginsApp from './app-plugins';
 import * as pluggai from './app-pluggyai/app-pluggyai';
+import * as pluginsApp from './app-plugins';
 import * as secretApp from './app-secrets';
 import * as simpleFinApp from './app-simplefin/app-simplefin';
 import * as syncApp from './app-sync';
@@ -135,7 +135,7 @@ app.get('/metrics', (_req, res) => {
 // kept in both branches.
 const isDev = process.env.NODE_ENV === 'development';
 const scriptSrc = isDev
-  ? "'self' 'unsafe-inline' 'unsafe-eval' blob:"
+  ? "'self' 'unsafe-inline' 'unsafe-eval' blob: http: https:"
   : "'self' 'unsafe-eval' blob:";
 const connectSrc = isDev ? "'self' ws: wss: http: https:" : 'http: https:';
 const csp = [

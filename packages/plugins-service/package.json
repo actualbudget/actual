@@ -12,7 +12,11 @@
     "typecheck": "tsgo -b && tsc-strict"
   },
   "dependencies": {
-    "workbox-precaching": "^7.4.0"
+    "workbox-cacheable-response": "^7.4.0",
+    "workbox-expiration": "^7.4.0",
+    "workbox-precaching": "^7.4.0",
+    "workbox-routing": "^7.4.0",
+    "workbox-strategies": "^7.4.0"
   },
   "devDependencies": {
     "@types/node": "^22.19.17",

@@ -5,10 +5,9 @@ import {
 } from 'react';
 
 import { type BasicModalProps } from '@actual-app/components/props/modalProps';
-import {
-  createInstance,
-  getInstance,
-} from '@module-federation/enhanced/runtime';
+import { send } from '@actual-app/core/platform/client/connection';
+import { q } from '@actual-app/core/shared/query';
+import { type ActualPluginStored } from '@actual-app/core/types/models/actual-plugin-stored';
 import {
   type ActualPluginEntry,
   type ActualPluginInitialized,
@@ -27,18 +26,15 @@ import {
   type ThemeColorTypes,
   type HostContext,
 } from '@actual-app/plugins-core/types/actualPlugin';
+import {
+  createInstance,
+  getInstance,
+} from '@module-federation/enhanced/runtime';
 import type { Dispatch } from 'redux';
 import { v4 as uuidv4 } from 'uuid';
 
-import { send } from '@actual-app/core/platform/client/connection';
-import { q } from '@actual-app/core/shared/query';
-import { type ActualPluginStored } from '@actual-app/core/types/models/actual-plugin-stored';
-
 import { i18nInstance } from '#i18n';
-import {
-  pushModal as basePushModal,
-  popModal,
-} from '#modals/modalsSlice';
+import { pushModal as basePushModal, popModal } from '#modals/modalsSlice';
 import { type PluginDashboardWidget } from '#plugin/ActualPluginsProvider';
 
 // Import send function to communicate with backend
@@ -472,7 +468,10 @@ export async function loadPluginsScript({
         remotes.map(plugin => ({
           name: plugin.name,
           alias: plugin.name,
-          entry: `plugin-data/${encodeURIComponent(plugin.url ?? '')}/mf-manifest.json?t=${Date.now()}`,
+          entry:
+            plugin.name === 'dev-plugin' && 'entry' in plugin
+              ? plugin.entry
+              : `plugin-data/${encodeURIComponent(plugin.url ?? '')}/mf-manifest.json?t=${Date.now()}`,
         })),
       );
     }

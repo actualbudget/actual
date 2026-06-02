@@ -1,10 +1,11 @@
-import { defineConfig } from 'vite';
-import path from 'path';
-import { federation } from '@module-federation/vite';
-import { fileURLToPath } from 'url';
 import { createWriteStream, rmSync, writeFileSync, mkdirSync } from 'fs';
-import archiver from 'archiver';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+import { federation } from '@module-federation/vite';
 import react from '@vitejs/plugin-react-swc';
+import archiver from 'archiver';
+import { defineConfig } from 'vite';
 import topLevelAwait from 'vite-plugin-top-level-await';
 
 import { manifest } from './src/manifest';
@@ -58,6 +59,10 @@ export default defineConfig({
       name: manifest.name, // Use the same name as in manifest.ts
       ignoreOrigin: true,
       manifest: true,
+      dev: {
+        disableDynamicRemoteTypeHints: true,
+        remoteHmr: true,
+      },
       exposes: {
         '.': './src/index.tsx',
       },

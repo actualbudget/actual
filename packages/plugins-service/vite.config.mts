@@ -15,11 +15,16 @@ export default defineConfig(({ mode }) => {
       lib: {
         entry: path.resolve(__dirname, 'src/plugin-service-worker.ts'),
         name: 'plugin_sw',
-        formats: ['iife'],
+        formats: ['es'],
         fileName: () => `plugin-sw.js`,
       },
       sourcemap: true,
       minify: false,
+      rollupOptions: {
+        output: {
+          codeSplitting: false,
+        },
+      },
     },
     define: {
       'process.env': '{}',
