@@ -50,7 +50,7 @@ function RuleButton({ ruleCount, focused, onEdit, onClick }: RuleButtonProps) {
           padding: '3px 6px',
           backgroundColor: theme.noticeBackground,
           border: '1px solid ' + theme.noticeBackground,
-          color: theme.noticeTextDark,
+          color: theme.noticeText,
           fontSize: 12,
           cursor: 'pointer',
           ':hover': { backgroundColor: theme.noticeBackgroundLight },

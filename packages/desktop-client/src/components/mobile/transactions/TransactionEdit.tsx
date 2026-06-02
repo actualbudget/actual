@@ -1604,7 +1604,7 @@ function NoteTagAutocomplete({
               borderRadius: 12,
               borderWidth: 0,
               backgroundColor: theme.noticeBackground,
-              color: theme.noticeTextDark,
+              color: theme.noticeText,
               display: 'flex',
               alignItems: 'center',
               flexWrap: 'nowrap',

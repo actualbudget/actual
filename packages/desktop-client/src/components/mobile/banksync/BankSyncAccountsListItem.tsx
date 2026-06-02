@@ -86,7 +86,7 @@ export function BankSyncAccountsListItem({
             padding: '5px 10px',
             backgroundColor: theme.noticeBackground,
             border: '1px solid ' + theme.noticeBackground,
-            color: theme.noticeTextDark,
+            color: theme.noticeText,
             fontSize: 13,
             fontWeight: 500,
             flexShrink: 0,
