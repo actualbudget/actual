@@ -26,7 +26,7 @@ __metadata:
     "@actual-app/core": "workspace:*"
     "@actual-app/crdt": "workspace:*"
     "@typescript/native-preview": "npm:beta"
-    better-sqlite3: "npm:12.9.0"
+    better-sqlite3: "npm:^12.8.0"
     compare-versions: "npm:^6.1.1"
     rollup-plugin-visualizer: "npm:^7.0.1"
     typescript-strict-plugin: "npm:^2.4.4"
@@ -115,7 +115,7 @@ __metadata:
     absurd-sql: "npm:0.0.54"
     adm-zip: "npm:^0.5.17"
     assert: "npm:^2.1.0"
-    better-sqlite3: "npm:12.9.0"
+    better-sqlite3: "npm:^12.8.0"
     browserify-zlib: "npm:^0.2.0"
     buffer: "npm:^6.0.3"
     cross-env: "npm:^10.1.0"
@@ -188,7 +188,7 @@ __metadata:
     "@types/supertest": "npm:^7.2.0"
     "@typescript/native-preview": "npm:beta"
     bcrypt: "npm:^6.0.0"
-    better-sqlite3: "npm:12.9.0"
+    better-sqlite3: "npm:^12.8.0"
     convict: "npm:^6.2.5"
     cors: "npm:^2.8.6"
     date-fns: "npm:^4.1.0"
@@ -11770,7 +11770,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"better-sqlite3@npm:12.9.0":
+"better-sqlite3@npm:^12.8.0":
   version: 12.9.0
   resolution: "better-sqlite3@npm:12.9.0"
   dependencies:
@@ -14605,7 +14605,7 @@ __metadata:
     "@playwright/test": "npm:1.59.1"
     "@types/copyfiles": "npm:^2"
     "@typescript/native-preview": "npm:beta"
-    better-sqlite3: "npm:12.9.0"
+    better-sqlite3: "npm:^12.8.0"
     copyfiles: "npm:^2.4.1"
     cross-env: "npm:^10.1.0"
     electron: "npm:41.7.1"
