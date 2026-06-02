@@ -31,19 +31,6 @@ app.use(express.json());
 
 // --- Shared helpers ---
 
-function firstHeaderValue(value: string | string[] | undefined) {
-  if (Array.isArray(value)) {
-    return value[0];
-  }
-
-  return value;
-}
-
-function firstForwardedIp(value: string | string[] | undefined) {
-  const header = firstHeaderValue(value);
-  return header?.split(',')[0]?.trim();
-}
-
 function isPrivateOrLocalIp(ip: string) {
   const normalized = ip.replace(/^::ffff:/, '').toLowerCase();
 
@@ -61,11 +48,7 @@ function isPrivateOrLocalIp(ip: string) {
 }
 
 function extractPsuHeaders(req: Request): PsuHeaders {
-  const ip =
-    firstForwardedIp(req.headers['cf-connecting-ip']) ??
-    firstForwardedIp(req.headers['x-real-ip']) ??
-    firstForwardedIp(req.headers['x-forwarded-for']) ??
-    req.ip;
+  const ip = req.ip;
 
   const ua =
     typeof req.headers['user-agent'] === 'string'
