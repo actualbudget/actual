@@ -6,7 +6,6 @@ import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
-import { getSecretsError } from '#util/error';
 
 import { Error as ErrorAlert } from '#components/alerts';
 import { Link } from '#components/common/Link';
@@ -18,6 +17,7 @@ import {
 } from '#components/common/Modal';
 import { FormField, FormLabel } from '#components/forms';
 import type { Modal as ModalType } from '#modals/modalsSlice';
+import { getSecretsError } from '#util/error';
 
 type AkahuInitialiseModalProps = Extract<
   ModalType,
