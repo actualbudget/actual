@@ -1259,6 +1259,7 @@ export function useTableNavigator<T extends TableItem>(
   const [editingId, setEditingId] = useState<T['id']>(null);
   const [focusedField, setFocusedField] = useState<string>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const lastEditingIdRef = useRef<T['id'] | null>(null);
 
   // See `onBlur` for why we need this
   const modalState = useModalState();
@@ -1273,6 +1274,9 @@ export function useTableNavigator<T extends TableItem>(
 
   // onEdit is passed to children, so make sure it maintains identity
   const onEdit = useCallback((id: T['id'] | null, field?: string) => {
+    if (id != null) {
+      lastEditingIdRef.current = id;
+    }
     setEditingId(id);
     setFocusedField(id ? field : null);
   }, []);
@@ -1347,6 +1351,24 @@ export function useTableNavigator<T extends TableItem>(
           flashInput();
           break;
         }
+      }
+    } else if (data.length > 0) {
+      // Resume cursor from last known position, or jump to top/bottom
+      let nextIdx = dir < 0 ? data.length - 1 : 0;
+
+      if (lastEditingIdRef.current != null) {
+        const idx = data.findIndex(
+          item => item.id === lastEditingIdRef.current,
+        );
+        if (idx !== -1) {
+          nextIdx = idx;
+        }
+      }
+
+      const next = data[nextIdx];
+      const availableFields = getFields(next);
+      if (availableFields.length > 0) {
+        onEdit(next.id, availableFields[0]);
       }
     }
   }
