@@ -29,7 +29,7 @@
     "@typescript/native-preview": "beta",
     "copyfiles": "^2.4.1",
     "cross-env": "^10.1.0",
-    "electron": "39.8.5",
+    "electron": "42.3.0",
     "electron-builder": "26.8.1",
     "typescript-strict-plugin": "^2.4.4"
   },
