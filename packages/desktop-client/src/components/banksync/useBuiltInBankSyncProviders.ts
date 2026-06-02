@@ -121,7 +121,7 @@ export function useBuiltInBankSyncProviders({
   const { configuredGoCardless } = useGoCardlessStatus();
   const { configuredSimpleFin } = useSimpleFinStatus();
   const { configuredPluggyAi } = usePluggyAiStatus();
-  const { configuredAkahu } = useAkahuStatus();
+  const { configuredAkahu } = useAkahuStatus(akahuEnabled);
   const { configuredEnableBanking, isLoading: isEnableBankingLoading } =
     useEnableBankingStatus(enableBankingEnabled);
 
