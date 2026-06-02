@@ -1,7 +1,6 @@
-import { type ActualPluginManifest } from '@actual-app/plugins-core';
-
 import { getDatabase } from '@actual-app/core/platform/server/indexeddb';
 import { type ActualPluginStored } from '@actual-app/core/types/models/actual-plugin-stored';
+import { type ActualPluginManifest } from '@actual-app/plugins-core';
 
 /** Retrieve all plugins from the IndexedDB store */
 export async function getAllPlugins(): Promise<ActualPluginStored[]> {
@@ -35,7 +34,7 @@ export async function getStoredPlugin(
   const objectStore = transaction.objectStore('plugins');
 
   return new Promise((resolve, reject) => {
-    const req = objectStore.get(manifest.url);
+    const req = objectStore.get(manifest.url ?? manifest.name);
     req.onsuccess = () => {
       resolve(req.result || null);
     };
@@ -60,6 +59,8 @@ export async function persistPlugin(
   const storedPlugin: ActualPluginStored = {
     enabled: true,
     ...manifest,
+    url: manifest.url ?? manifest.name,
+    source: 'indexeddb',
     plugin: scriptBlob,
   };
 
@@ -78,7 +79,7 @@ export async function removePlugin(
   const objectStore = transaction.objectStore('plugins');
 
   return new Promise((resolve, reject) => {
-    const req = objectStore.delete(manifest.url);
+    const req = objectStore.delete(manifest.url ?? manifest.name);
     req.onsuccess = () => {
       resolve();
     };

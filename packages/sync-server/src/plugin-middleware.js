@@ -52,7 +52,7 @@ function createPluginMiddleware(pluginManager) {
     );
 
     // Extract user information from request
-    const user = extractUserFromHeaders(req.headers);
+    const user = await extractUserFromHeaders(req.headers);
 
     // Check if user meets auth requirements
     const authCheck = checkAuth(user, authLevel);

@@ -1,4 +1,4 @@
-import { fork, execSync } from 'child_process';
+import { execSync, fork } from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -10,11 +10,75 @@ import { secretsService } from './services/secrets-service.js';
 
 const debug = createDebug('actual:config');
 
+function sanitizePluginSlug(pluginName) {
+  return pluginName.replace(/[^a-zA-Z0-9._-]/g, '-');
+}
+
+function isFrontendPlugin(manifest) {
+  return manifest.type === 'frontend' || manifest.type === 'mixed';
+}
+
+function isSyncServerPlugin(manifest) {
+  return manifest.type === 'syncserver' || manifest.type === 'mixed';
+}
+
+function validateUnifiedManifest(manifest) {
+  if (!manifest || typeof manifest !== 'object') {
+    throw new Error('Plugin manifest must be an object');
+  }
+
+  if (!manifest.name || typeof manifest.name !== 'string') {
+    throw new Error('Plugin manifest must specify a name');
+  }
+
+  if (!manifest.version || typeof manifest.version !== 'string') {
+    throw new Error('Plugin manifest must specify a version');
+  }
+
+  if (
+    manifest.type !== 'frontend' &&
+    manifest.type !== 'syncserver' &&
+    manifest.type !== 'mixed'
+  ) {
+    throw new Error(
+      "Plugin manifest type must be 'frontend', 'syncserver', or 'mixed'",
+    );
+  }
+
+  if (isFrontendPlugin(manifest) && !manifest.frontend?.entry) {
+    throw new Error('Frontend plugins must specify frontend.entry');
+  }
+
+  if (isSyncServerPlugin(manifest) && !manifest.syncserver?.entry) {
+    throw new Error('Sync-server plugins must specify syncserver.entry');
+  }
+
+  if (manifest.type === 'frontend' && manifest.syncserver) {
+    throw new Error('Frontend-only plugins cannot specify syncserver config');
+  }
+
+  if (manifest.type === 'syncserver' && manifest.frontend) {
+    throw new Error('Sync-server-only plugins cannot specify frontend config');
+  }
+
+  return manifest;
+}
+
+function toRuntimeManifest(manifest) {
+  return {
+    ...manifest,
+    entry: manifest.syncserver?.entry ?? manifest.entry,
+    routes: manifest.syncserver?.routes ?? manifest.routes,
+    bankSync: manifest.syncserver?.bankSync ?? manifest.bankSync,
+  };
+}
+
 class PluginManager {
   constructor(pluginsDir) {
     this.pluginsDir = pluginsDir;
     this.onlinePlugins = new Map();
     this.extractedPlugins = new Map(); // Track extracted zip plugins for cleanup
+    this.pluginSources = new Map();
   }
 
   /**
@@ -40,7 +104,10 @@ class PluginManager {
           const packageJson = JSON.parse(
             fs.readFileSync(packageJsonPath, 'utf8'),
           );
-          if (packageJson.dependencies && Object.keys(packageJson.dependencies).length > 0) {
+          if (
+            packageJson.dependencies &&
+            Object.keys(packageJson.dependencies).length > 0
+          ) {
             console.log(`Installing dependencies for plugin ${pluginSlug}...`);
             execSync('npm install --production --no-audit --no-fund', {
               cwd: extractPath,
@@ -76,7 +143,7 @@ class PluginManager {
       try {
         const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
         return manifest.name || null;
-      } catch (error) {
+      } catch {
         return null;
       }
     }
@@ -164,7 +231,12 @@ class PluginManager {
           continue;
         }
 
-        await this.loadPlugin(plugin.slug, plugin.path, plugin.type === 'zip');
+        await this.loadPlugin(
+          plugin.slug,
+          plugin.path,
+          plugin.type === 'zip',
+          plugin.zipPath,
+        );
         loadedSlugs.add(plugin.slug);
         console.log(`✅ Loaded plugin: ${plugin.slug} (from ${plugin.name})`);
 
@@ -191,22 +263,41 @@ class PluginManager {
    * @param {string} pluginPath - Path to the plugin directory
    * @param {boolean} _isExtracted - Whether this plugin was extracted from a zip
    */
-  async loadPlugin(pluginSlug, pluginPath, _isExtracted = false) {
+  async loadPlugin(
+    pluginSlug,
+    pluginPath,
+    _isExtracted = false,
+    zipPath = null,
+  ) {
     const manifestPath = path.join(pluginPath, 'manifest.json');
 
     if (!fs.existsSync(manifestPath)) {
       throw new Error(`Plugin ${pluginSlug} does not have a manifest.json`);
     }
 
-    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    const manifest = validateUnifiedManifest(
+      JSON.parse(fs.readFileSync(manifestPath, 'utf8')),
+    );
 
-    if (!manifest.entry) {
+    if (!isSyncServerPlugin(manifest)) {
+      this.pluginSources.set(pluginSlug, {
+        slug: pluginSlug,
+        manifest,
+        path: pluginPath,
+        zipPath,
+      });
+      return;
+    }
+
+    const runtimeManifest = toRuntimeManifest(manifest);
+
+    if (!runtimeManifest.entry) {
       throw new Error(
         `Plugin ${pluginSlug} manifest does not specify an entry point`,
       );
     }
 
-    const entryPath = path.join(pluginPath, manifest.entry);
+    const entryPath = path.join(pluginPath, runtimeManifest.entry);
 
     if (!fs.existsSync(entryPath)) {
       throw new Error(
@@ -228,10 +319,17 @@ class PluginManager {
     // Store plugin information
     this.onlinePlugins.set(pluginSlug, {
       slug: pluginSlug,
-      manifest,
+      manifest: runtimeManifest,
+      originalManifest: manifest,
       process: childProcess,
       ready: false,
       pendingRequests: new Map(),
+    });
+    this.pluginSources.set(pluginSlug, {
+      slug: pluginSlug,
+      manifest,
+      path: pluginPath,
+      zipPath,
     });
 
     // Setup IPC message handler
@@ -297,7 +395,7 @@ class PluginManager {
       }
     } else if (message.type === 'secret-set' || message.type === 'secret-get') {
       // Handle secret operations from plugin
-      this.handleSecretOperation(pluginSlug, message);
+      void this.handleSecretOperation(pluginSlug, message);
     }
   }
 
@@ -327,7 +425,9 @@ class PluginManager {
       } else if (type === 'secret-get') {
         // Get secret from the secrets service
         const exists = secretsService.exists(name, options);
-        const secretValue = exists ? secretsService.get(name, options) : undefined;
+        const secretValue = exists
+          ? secretsService.get(name, options)
+          : undefined;
 
         plugin.process.send({
           type: 'secret-response',
@@ -414,6 +514,149 @@ class PluginManager {
    */
   getOnlinePlugins() {
     return Array.from(this.onlinePlugins.keys());
+  }
+
+  getInstalledPluginManifests() {
+    return Array.from(this.pluginSources.values()).map(source => ({
+      ...source.manifest,
+      source: 'sync-server',
+    }));
+  }
+
+  getFrontendPluginFiles(pluginSlug) {
+    const source = this.pluginSources.get(pluginSlug);
+    if (!source) {
+      throw new Error(`Plugin '${pluginSlug}' is not installed`);
+    }
+
+    if (!isFrontendPlugin(source.manifest)) {
+      throw new Error(`Plugin '${pluginSlug}' has no frontend capability`);
+    }
+
+    const frontendDir = path.join(source.path, 'frontend');
+    if (!fs.existsSync(frontendDir)) {
+      throw new Error(`Plugin '${pluginSlug}' has no frontend directory`);
+    }
+
+    const files = [];
+    const walk = dir => {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const entryPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          walk(entryPath);
+        } else {
+          const relativePath = path.relative(frontendDir, entryPath);
+          files.push({
+            name: relativePath,
+            content: fs.readFileSync(entryPath, 'utf8'),
+          });
+        }
+      }
+    };
+
+    walk(frontendDir);
+    return files;
+  }
+
+  async installPluginZip(zipBuffer) {
+    fs.mkdirSync(this.pluginsDir, { recursive: true });
+
+    const tempSlug = `upload-${Date.now()}`;
+    const tempZipPath = path.join(os.tmpdir(), `${tempSlug}.zip`);
+    fs.writeFileSync(tempZipPath, zipBuffer);
+
+    const extractedPath = this.extractZipPlugin(tempZipPath, tempSlug);
+    const manifest = validateUnifiedManifest(
+      JSON.parse(
+        fs.readFileSync(path.join(extractedPath, 'manifest.json'), 'utf8'),
+      ),
+    );
+    const pluginSlug = sanitizePluginSlug(manifest.name);
+
+    if (isFrontendPlugin(manifest)) {
+      const frontendDir = path.join(extractedPath, 'frontend');
+      const frontendEntry = path.join(extractedPath, manifest.frontend.entry);
+      if (!fs.existsSync(frontendDir) || !fs.existsSync(frontendEntry)) {
+        throw new Error(
+          `Plugin ${manifest.name} frontend files must live under frontend/`,
+        );
+      }
+    }
+
+    if (isSyncServerPlugin(manifest)) {
+      const syncserverEntry = path.join(
+        extractedPath,
+        manifest.syncserver.entry,
+      );
+      if (
+        !manifest.syncserver.entry.startsWith('syncserver/') ||
+        !fs.existsSync(syncserverEntry)
+      ) {
+        throw new Error(
+          `Plugin ${manifest.name} sync-server files must live under syncserver/`,
+        );
+      }
+    }
+
+    const zipPath = path.join(
+      this.pluginsDir,
+      `${pluginSlug}-${manifest.version}.zip`,
+    );
+    fs.writeFileSync(zipPath, zipBuffer);
+    fs.rmSync(extractedPath, { recursive: true, force: true });
+    fs.rmSync(tempZipPath, { force: true });
+    this.extractedPlugins.delete(tempSlug);
+
+    await this.reloadPlugins();
+    return manifest;
+  }
+
+  async registerDevPlugin(manifestUrl) {
+    const manifestResponse = await fetch(manifestUrl);
+    if (!manifestResponse.ok) {
+      throw new Error(`Failed to fetch dev plugin manifest: ${manifestUrl}`);
+    }
+
+    const manifest = validateUnifiedManifest(await manifestResponse.json());
+
+    if (!isSyncServerPlugin(manifest)) {
+      return manifest;
+    }
+
+    const pluginSlug = sanitizePluginSlug(manifest.name);
+    const devPath = path.join(os.tmpdir(), 'actual-dev-plugins', pluginSlug);
+    fs.rmSync(devPath, { recursive: true, force: true });
+    fs.mkdirSync(path.join(devPath, 'syncserver'), { recursive: true });
+    fs.writeFileSync(
+      path.join(devPath, 'manifest.json'),
+      JSON.stringify(manifest, null, 2),
+    );
+
+    const entryUrl = new URL(manifest.syncserver.entry, manifestUrl);
+    const entryResponse = await fetch(entryUrl);
+    if (!entryResponse.ok) {
+      throw new Error(
+        `Failed to fetch dev plugin entry: ${entryUrl.toString()}`,
+      );
+    }
+
+    const devEntryPath = path.join(devPath, manifest.syncserver.entry);
+    fs.mkdirSync(path.dirname(devEntryPath), { recursive: true });
+    fs.writeFileSync(devEntryPath, await entryResponse.text(), 'utf8');
+
+    if (this.onlinePlugins.has(pluginSlug)) {
+      const plugin = this.onlinePlugins.get(pluginSlug);
+      plugin.process.kill();
+      this.onlinePlugins.delete(pluginSlug);
+    }
+
+    await this.loadPlugin(pluginSlug, devPath, false);
+    return manifest;
+  }
+
+  async reloadPlugins() {
+    await this.shutdown();
+    await this.loadPlugins();
   }
 
   /**
@@ -514,6 +757,7 @@ class PluginManager {
 
     await Promise.all(shutdownPromises);
     this.onlinePlugins.clear();
+    this.pluginSources.clear();
 
     // Clean up extracted zip plugins
     for (const [pluginSlug, extractPath] of this.extractedPlugins) {

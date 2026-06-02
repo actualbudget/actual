@@ -1,6 +1,7 @@
-import { ActualPluginManifest } from '../../../../plugins-core/src';
+import type { ActualPluginManifest } from '@actual-app/plugins-core/server';
 
 export type ActualPluginStored = {
-  plugin: Blob;
+  plugin?: Blob;
   enabled: boolean;
+  source?: 'indexeddb' | 'sync-server';
 } & ActualPluginManifest;

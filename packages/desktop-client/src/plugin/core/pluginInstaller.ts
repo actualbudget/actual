@@ -1,8 +1,11 @@
-import JSZip from 'jszip';
+import { send } from '@actual-app/core/platform/client/connection';
 import {
   type ActualPluginInitialized,
   type ActualPluginManifest,
+  isSyncServerPlugin,
+  validateActualPluginManifest,
 } from '@actual-app/plugins-core';
+import JSZip from 'jszip';
 
 import {
   fetchRelease,
@@ -23,8 +26,10 @@ export async function installPluginFromManifest(
     if (foundPlugin) return;
 
     console.log(
-      `Downloading plugin “${manifest.name}” v${manifest.version}...`,
+      `Downloading plugin "${manifest.name}" v${manifest.version}...`,
     );
+
+    if (!manifest.url) throw new Error(`Plugin ${manifest.name} has no URL`);
 
     const parsedRepo = parseGitHubRepoUrl(manifest.url);
     if (!parsedRepo) throw new Error(`Invalid repo ${manifest.url}`);
@@ -52,7 +57,7 @@ export async function installPluginFromManifest(
         type: 'application/zip',
       });
 
-      console.log(`Plugin ‘${manifest.name}’ loaded successfully.`);
+      console.log(`Plugin '${manifest.name}' loaded successfully.`);
       await persistPlugin(blob, manifest);
     } else {
       throw new Error(
@@ -60,7 +65,7 @@ export async function installPluginFromManifest(
       );
     }
   } catch (error) {
-    console.error(`Error saving plugin “${manifest.name}”:`, error);
+    console.error(`Error saving plugin "${manifest.name}":`, error);
     return;
   }
 }
@@ -68,7 +73,7 @@ export async function installPluginFromManifest(
 export async function installPluginFromZipFile(
   loadedPlugins: ActualPluginInitialized[],
   file: File,
-): Promise<void> {
+): Promise<ActualPluginManifest> {
   const zipData = await file.arrayBuffer();
   const zip = await JSZip.loadAsync(zipData);
 
@@ -78,7 +83,27 @@ export async function installPluginFromZipFile(
   }
 
   const manifestText = await manifestFile.async('string');
-  const manifest: ActualPluginManifest = JSON.parse(manifestText);
+  const manifest = validateActualPluginManifest(JSON.parse(manifestText));
+
+  if (
+    manifest.frontend &&
+    (!manifest.frontend.entry.startsWith('frontend/') ||
+      !zip.file(manifest.frontend.entry))
+  ) {
+    throw new Error(
+      `Plugin '${manifest.name}' frontend files must live under frontend/.`,
+    );
+  }
+
+  if (
+    manifest.syncserver &&
+    (!manifest.syncserver.entry.startsWith('syncserver/') ||
+      !zip.file(manifest.syncserver.entry))
+  ) {
+    throw new Error(
+      `Plugin '${manifest.name}' sync-server files must live under syncserver/.`,
+    );
+  }
 
   const alreadyInstalled = loadedPlugins.some(
     plugin =>
@@ -86,16 +111,33 @@ export async function installPluginFromZipFile(
   );
   if (alreadyInstalled) {
     console.log(
-      `Plugin ‘${manifest.name}’ v${manifest.version} is already installed.`,
+      `Plugin '${manifest.name}' v${manifest.version} is already installed.`,
     );
-    return;
+    return manifest;
   }
 
-  console.log(`Persisting plugin ‘${manifest.name}’ from zip file...`);
   const zipBytes = new Uint8Array(zipData);
+
+  if (isSyncServerPlugin(manifest)) {
+    const serverUrl = await send('get-server-url');
+    if (!serverUrl) {
+      throw new Error(
+        `Plugin '${manifest.name}' requires a sync server before it can be installed.`,
+      );
+    }
+
+    const result = await send('plugin-sync-server-install', {
+      zipBytes: Array.from(zipBytes),
+    });
+    console.log(`Plugin '${manifest.name}' installed on sync server.`);
+    return result.manifest;
+  }
+
+  console.log(`Persisting plugin '${manifest.name}' from zip file...`);
 
   const blob = new Blob([zipBytes], { type: 'application/zip' });
 
   await persistPlugin(blob, manifest);
-  console.log(`Plugin ‘${manifest.name}’ persisted successfully.`);
+  console.log(`Plugin '${manifest.name}' persisted successfully.`);
+  return manifest;
 }

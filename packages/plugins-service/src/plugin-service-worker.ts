@@ -181,7 +181,7 @@ async function handlePlugin(slug: string, fileName: string): Promise<Response> {
 
       if (responseData && Array.isArray(responseData)) {
         responseData.forEach(({ name, content }) => {
-          fileList.set(`${slug}/${encodeURIComponent(name)}`, content);
+          fileList.set(`${slug}/${name}`, content);
         });
       }
 

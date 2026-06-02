@@ -425,7 +425,7 @@ export async function loadPluginsScript({
             name: 'dev-plugin',
             alias: 'dev-plugin',
             url: null,
-            entry: devUrl,
+            entry: devUrl || '',
           },
         ]
       : []),
@@ -468,10 +468,7 @@ export async function loadPluginsScript({
         remotes.map(plugin => ({
           name: plugin.name,
           alias: plugin.name,
-          entry:
-            plugin.name === 'dev-plugin' && 'entry' in plugin
-              ? plugin.entry
-              : `plugin-data/${encodeURIComponent(plugin.url ?? '')}/mf-manifest.json?t=${Date.now()}`,
+          entry: getRemoteEntry(plugin),
         })),
       );
     }
@@ -493,6 +490,24 @@ export async function loadPluginsScript({
     // Return early if setup failed
     return false;
   }
+}
+
+function getRemoteEntry(
+  plugin: ActualPluginStored | { name: string; entry: string },
+) {
+  if (plugin.name === 'dev-plugin' && 'entry' in plugin) {
+    return plugin.entry || '';
+  }
+
+  const storedPlugin = plugin as ActualPluginStored;
+  return `plugin-data/${encodeURIComponent(storedPlugin.url ?? storedPlugin.name)}/${getFrontendEntry(storedPlugin)}?t=${Date.now()}`;
+}
+
+function getFrontendEntry(plugin: ActualPluginStored) {
+  const entry = plugin.frontend?.entry ?? 'frontend/mf-manifest.json';
+  return entry.startsWith('frontend/')
+    ? entry.slice('frontend/'.length)
+    : entry;
 }
 
 // Helper function to load all plugins with a given MF instance

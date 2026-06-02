@@ -10,22 +10,31 @@ import React, {
   type MutableRefObject,
 } from 'react';
 
-import { createInstance } from '@module-federation/enhanced/runtime';
+import { send } from '@actual-app/core/platform/client/connection';
+import { type ActualPluginStored } from '@actual-app/core/types/models/actual-plugin-stored';
 import {
   type ActualPluginEntry,
   type ActualPluginInitialized,
+  type ActualPluginManifest,
   type PayeeEntity,
   type CategoryEntity,
   type CategoryGroupEntity,
   type AccountEntity,
+  isFrontendPlugin,
+  isSyncServerPlugin,
+  validateActualPluginManifest,
 } from '@actual-app/plugins-core';
 import {
   type ThemeColorTypes,
   type ContextEvent,
   type SlotLocations,
 } from '@actual-app/plugins-core/types/actualPlugin';
+import { createInstance } from '@module-federation/enhanced/runtime';
 
-import { type ActualPluginStored } from '@actual-app/core/types/models/actual-plugin-stored';
+import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useNavigate } from '#hooks/useNavigate';
+import { useDispatch, useSelector } from '#redux';
+import { type RootState } from '#redux/store';
 
 import {
   loadPlugins,
@@ -35,11 +44,6 @@ import {
   type PluginSlotRegistrationFn,
 } from './core/pluginLoader';
 import { getAllPlugins } from './core/pluginStore';
-
-import { useGlobalPref } from '#hooks/useGlobalPref';
-import { useNavigate } from '#hooks/useNavigate';
-import { useDispatch, useSelector } from '#redux';
-import { type RootState } from '#redux/store';
 
 // Move stable refs to module scope to prevent recreation
 const modalMap = new Map<string, PluginModalModel>();
@@ -432,11 +436,15 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
       isLoadingRef.current = true;
 
       try {
+        const devPlugin = devUrl ? await prepareDevPlugin(devUrl) : undefined;
+        const frontendPlugins = pluginsData.filter(
+          plugin => plugin.enabled !== false && isFrontendPlugin(plugin),
+        );
         setinitialized(
           await loadPluginsScript({
-            pluginsData,
+            pluginsData: frontendPlugins,
             handleLoadPlugins,
-            devUrl,
+            devUrl: devPlugin?.frontendEntry,
             mfInstance,
           }),
         );
@@ -452,15 +460,25 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
       if (!pluginsEnabled && !forceInitialize) return;
 
       const pluginsFromDB = (await getAllPlugins()) as ActualPluginStored[];
+      const syncServerPlugins = await getSyncServerPlugins();
+      const syncServerPluginNames = new Set(
+        syncServerPlugins.map(plugin => plugin.name),
+      );
+      const mergedPlugins = [
+        ...syncServerPlugins,
+        ...pluginsFromDB.filter(
+          plugin => !syncServerPluginNames.has(plugin.name),
+        ),
+      ];
 
       if (
-        pluginsFromDB.length !== pluginStore.length ||
+        mergedPlugins.length !== pluginStore.length ||
         (devUrl && devUrl !== '') ||
         forceInitialize
       ) {
-        await handleLoadPluginsScript(pluginsFromDB, devUrl);
+        await handleLoadPluginsScript(mergedPlugins, devUrl);
       }
-      setPluginStore(pluginsFromDB);
+      setPluginStore(mergedPlugins);
     },
     [pluginStore.length, handleLoadPluginsScript, pluginsEnabled],
   );
@@ -518,4 +536,75 @@ function useEventDispatcher<K extends keyof ContextEvent>(
   useEffect(() => {
     dispatchEvent(key, events, value);
   }, [events, key, value, eventHandlers]);
+}
+
+async function getSyncServerPlugins(): Promise<ActualPluginStored[]> {
+  const serverUrl = await send('get-server-url');
+  if (!serverUrl) {
+    return [];
+  }
+
+  try {
+    const manifests = (await send(
+      'plugin-sync-server-list',
+    )) as ActualPluginManifest[];
+
+    return manifests.map(manifest => ({
+      ...manifest,
+      enabled: true,
+      url: `sync-server:${manifest.name}`,
+      source: 'sync-server',
+    }));
+  } catch (error) {
+    console.warn('Failed to load sync-server plugins:', error);
+    return [];
+  }
+}
+
+async function prepareDevPlugin(
+  devUrl: string,
+): Promise<{ frontendEntry?: string }> {
+  const manifestUrl = normalizeDevManifestUrl(devUrl);
+  const response = await fetch(manifestUrl);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch dev plugin manifest: ${manifestUrl}`);
+  }
+
+  const manifest = validateActualPluginManifest(await response.json());
+
+  if (isSyncServerPlugin(manifest)) {
+    const serverUrl = await send('get-server-url');
+    if (!serverUrl) {
+      throw new Error(
+        `Dev plugin '${manifest.name}' requires a sync server before it can be enabled.`,
+      );
+    }
+
+    await send('plugin-sync-server-register-dev', { manifestUrl });
+  }
+
+  if (!isFrontendPlugin(manifest)) {
+    return {};
+  }
+
+  return {
+    frontendEntry: new URL(
+      getDevFrontendEntry(manifest.frontend!.entry),
+      manifestUrl,
+    ).toString(),
+  };
+}
+
+function getDevFrontendEntry(entry: string) {
+  return entry.startsWith('frontend/')
+    ? entry.slice('frontend/'.length)
+    : entry;
+}
+
+function normalizeDevManifestUrl(devUrl: string): string {
+  if (devUrl.endsWith('/')) {
+    return new URL('manifest.json', devUrl).toString();
+  }
+
+  return devUrl;
 }

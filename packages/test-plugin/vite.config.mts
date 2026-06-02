@@ -117,13 +117,20 @@ export default defineConfig({
 
         console.log(`📦 Creating ${zipName}...`);
 
-        archive.glob('**/*', {
-          cwd: distPath,
-          ignore: [zipName],
+        archive.file(path.resolve(distPath, 'manifest.json'), {
+          name: 'manifest.json',
         });
+        archive.glob(
+          '**/*',
+          {
+            cwd: distPath,
+            ignore: [zipName, 'manifest.json'],
+          },
+          { prefix: 'frontend' },
+        );
 
         archive.pipe(output);
-        archive.finalize();
+        void archive.finalize();
 
         archive.on('close', () => {
           console.log(

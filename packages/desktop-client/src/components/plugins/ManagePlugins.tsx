@@ -1,5 +1,5 @@
 import { type ChangeEvent, type RefObject, useRef, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgPause, SvgPlay, SvgTrash } from '@actual-app/components/icons/v1';
@@ -9,41 +9,23 @@ import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { t } from 'i18next';
-
 import { type ActualPluginStored } from '@actual-app/core/types/models/actual-plugin-stored';
-
-import { PluginsHeader } from './PluginsHeader';
+import { t } from 'i18next';
 
 import { InfiniteScrollWrapper } from '#components/common/InfiniteScrollWrapper';
 import { Link } from '#components/common/Link';
 import { Cell, Row } from '#components/table';
-import { pushModal } from '#modals/modalsSlice';
-import {
-  addNotification,
-} from '#notifications/notificationsSlice';
+import { addNotification } from '#notifications/notificationsSlice';
 import { useActualPlugins } from '#plugin/ActualPluginsProvider';
-import {
-  checkForNewPluginRelease,
-  fetchRelease,
-  fetchWithHeader,
-  parseGitHubRepoUrl,
-} from '#plugin/core/githubUtils';
-import {
-  installPluginFromManifest,
-  installPluginFromZipFile,
-} from '#plugin/core/pluginInstaller';
-import {
-  persistPlugin,
-  removePlugin,
-} from '#plugin/core/pluginStore';
+import { installPluginFromZipFile } from '#plugin/core/pluginInstaller';
+import { persistPlugin, removePlugin } from '#plugin/core/pluginStore';
 import { useDispatch } from '#redux';
+
+import { PluginsHeader } from './PluginsHeader';
 
 export function ManagePlugins() {
   const devPlugin = useRef<HTMLInputElement>(null);
-  const dispatch = useDispatch();
-  const { t } = useTranslation();
-  const { pluginStore, plugins, refreshPluginStore } = useActualPlugins();
+  const { refreshPluginStore } = useActualPlugins();
   return (
     <View>
       <View
@@ -86,142 +68,16 @@ export function ManagePlugins() {
           marginTop: 8,
         }}
       >
-        <Button
-          variant="normal"
-          onPress={async () => {
-            for (const plugin of pluginStore) {
-              const result = await checkForNewPluginRelease(
-                plugin.url,
-                plugin.version,
-              );
-              if (result.hasNewVersion) {
-                dispatch(
-                  addNotification({
-                    notification: {
-                      message: `New version found for ${plugin.name}: ${result.latestVersion} (Current installed version: ${plugin.version})`,
-                      sticky: true,
-                      type: 'message',
-                      button: {
-                        title: t(
-                          'Update {{pluginName}} to version {{latestVersion}}',
-                          {
-                            pluginName: plugin.name,
-                            latestVersion: result.latestVersion,
-                          },
-                        ),
-                        action: async () => {
-                          try {
-                            const parsedRepo = parseGitHubRepoUrl(plugin.url);
-                            if (parsedRepo == null) {
-                              throw new Error(
-                                `Plugin url ‘${plugin.url}’ could not be parsed`,
-                              );
-                            } else {
-                              const { manifestUrl } = await fetchRelease(
-                                parsedRepo.owner,
-                                parsedRepo.repo,
-                                `tags/${result.latestVersion}`,
-                              );
-                              const manifestResponse =
-                                await fetchWithHeader(manifestUrl);
-
-                              // Handle error responses
-                              if (
-                                typeof manifestResponse === 'object' &&
-                                'error' in manifestResponse
-                              ) {
-                                throw new Error(
-                                  `Failed to fetch plugin manifest: ${manifestResponse.error}`,
-                                );
-                              }
-
-                              // Handle binary responses (shouldn't happen for JSON)
-                              if (
-                                typeof manifestResponse === 'object' &&
-                                'isBinary' in manifestResponse &&
-                                manifestResponse.isBinary
-                              ) {
-                                throw new Error(
-                                  'Unexpected binary response for plugin manifest',
-                                );
-                              }
-
-                              // Handle string responses (JSON)
-                              if (typeof manifestResponse === 'string') {
-                                try {
-                                  const manifest = JSON.parse(manifestResponse);
-                                  await installPluginFromManifest(
-                                    plugins,
-                                    manifest,
-                                  );
-                                  await refreshPluginStore();
-                                  window.location.reload();
-                                } catch (parseError) {
-                                  throw new Error(
-                                    `Plugin manifest response was ‘${manifestResponse}’`,
-                                  );
-                                }
-                              } else {
-                                throw new Error(
-                                  'Unexpected response type for plugin manifest',
-                                );
-                              }
-                            }
-                          } catch (error) {
-                            dispatch(
-                              addNotification({
-                                notification: {
-                                  type: 'error',
-                                  message:
-                                    error instanceof Error
-                                      ? error.message
-                                      : String(error),
-                                },
-                              }),
-                            );
-                          }
-                        },
-                      },
-                    },
-                  }),
-                );
-              } else {
-                dispatch(
-                  addNotification({
-                    notification: {
-                      message: `${plugin.name} is already in latest version`,
-                      sticky: false,
-                      type: 'message',
-                    },
-                  }),
-                );
-              }
-            }
-          }}
-        >
+        <PluginUploader />
+        {/* Store plugin controls are intentionally disabled while unified
+            plugin install supports only ZIP upload and dev plugins.
+        <Button variant="normal" onPress={async () => {}}>
           <Trans>Check for updates</Trans>
         </Button>
-        <PluginUploader />
-        {/* <Button variant="normal" isDisabled onPress={() => {}}>
-          <Trans>Upload plugin manually</Trans>
-        </Button> */}
-        <Button
-          variant="primary"
-          onPress={() =>
-            dispatch(
-              pushModal({
-                modal: {
-                  name: 'select-new-plugin',
-                  options: {
-                    onSave: async () => {},
-                  },
-                },
-              }),
-            )
-          }
-        >
+        <Button variant="primary" onPress={() => {}}>
           <Trans>Add new plugin</Trans>
         </Button>
+        */}
       </View>
       <View style={{ flex: 1, paddingTop: 16 }}>
         <PluginsHeader />
@@ -261,14 +117,14 @@ export function ManagePlugins() {
           <Input
             style={{ flex: 1 }}
             ref={devPlugin}
-            value="http://localhost:2000/mf-manifest.json"
+            value="http://localhost:2000/manifest.json"
           />{' '}
           <Button
             variant="primary"
             onPress={async () => {
               if (devPlugin.current) {
                 // Wait for service worker ready event
-                refreshPluginStore(devPlugin.current.value);
+                await refreshPluginStore(devPlugin.current.value);
               }
             }}
           >
@@ -446,6 +302,7 @@ function PluginRow({ plugin, enabled }: PluginRowProps) {
   const pauseTriggerRef = useRef<HTMLButtonElement>(null);
 
   const { refreshPluginStore, plugins, pluginStore } = useActualPlugins();
+  const isSyncServerPlugin = plugin.source === 'sync-server';
 
   return (
     <Row
@@ -535,69 +392,79 @@ function PluginRow({ plugin, enabled }: PluginRowProps) {
             gap: 8,
           }}
         >
-          <Button
-            ref={pauseTriggerRef}
-            variant="bare"
-            onPress={() => setPauseConfirmationOpen(true)}
-          >
-            {plugin.enabled ? (
-              <SvgPause style={{ width: 16, height: 16 }} />
-            ) : (
-              <SvgPlay style={{ width: 16, height: 16 }} />
-            )}
-          </Button>
-          <SmallConfirmationWindow
-            question={t(
-              'Are you sure you want to {{newstate}} the plugin ‘{{plugin}}‘',
-              {
-                newstate: plugin.enabled ? 'disable' : 'enable',
-                plugin: plugin.name,
-              },
-            )}
-            popoverRef={pauseTriggerRef as RefObject<HTMLElement>}
-            isOpen={pauseConfirmationOpen}
-            onYes={async () => {
-              const loadedPlugin = pluginStore.find(
-                p => p.name === plugin.name,
-              );
-              if (loadedPlugin) {
-                persistPlugin(loadedPlugin.plugin, {
-                  ...loadedPlugin,
-                  enabled: plugin.enabled ? false : true,
-                });
-                await refreshPluginStore();
-                window.location.reload();
-              }
-              setPauseConfirmationOpen(false);
-            }}
-            onNo={() => setPauseConfirmationOpen(false)}
-          />
+          {isSyncServerPlugin ? (
+            <span style={{ color: theme.pageTextSubdued, fontSize: 11 }}>
+              <Trans>Server managed</Trans>
+            </span>
+          ) : (
+            <>
+              <Button
+                ref={pauseTriggerRef}
+                variant="bare"
+                onPress={() => setPauseConfirmationOpen(true)}
+              >
+                {plugin.enabled ? (
+                  <SvgPause style={{ width: 16, height: 16 }} />
+                ) : (
+                  <SvgPlay style={{ width: 16, height: 16 }} />
+                )}
+              </Button>
+              <SmallConfirmationWindow
+                question={t(
+                  "Are you sure you want to {{newstate}} the plugin '{{plugin}}'",
+                  {
+                    newstate: plugin.enabled ? 'disable' : 'enable',
+                    plugin: plugin.name,
+                  },
+                )}
+                popoverRef={pauseTriggerRef as RefObject<HTMLElement>}
+                isOpen={pauseConfirmationOpen}
+                onYes={async () => {
+                  const loadedPlugin = pluginStore.find(
+                    p => p.name === plugin.name,
+                  );
+                  if (loadedPlugin?.plugin) {
+                    await persistPlugin(loadedPlugin.plugin, {
+                      ...loadedPlugin,
+                      enabled: plugin.enabled ? false : true,
+                    });
+                    await refreshPluginStore();
+                    window.location.reload();
+                  }
+                  setPauseConfirmationOpen(false);
+                }}
+                onNo={() => setPauseConfirmationOpen(false)}
+              />
 
-          <Button
-            ref={removeTriggerRef}
-            variant="bare"
-            style={{ color: theme.errorText }}
-            onPress={() => setRemoveConfirmationOpen(true)}
-          >
-            <SvgTrash style={{ width: 16, height: 16 }} />
-          </Button>
-          <SmallConfirmationWindow
-            question={t(
-              'Are you sure you want to delete the plugin ‘{{name}}‘',
-              { name: plugin.name },
-            )}
-            popoverRef={removeTriggerRef as RefObject<HTMLElement>}
-            isOpen={removeConfirmationOpen}
-            onYes={async () => {
-              const loadedPlugin = plugins.find(p => p.name === plugin.name);
-              if (loadedPlugin) {
-                removePlugin(plugin);
-                await refreshPluginStore();
-                window.location.reload();
-              }
-            }}
-            onNo={() => setRemoveConfirmationOpen(false)}
-          />
+              <Button
+                ref={removeTriggerRef}
+                variant="bare"
+                style={{ color: theme.errorText }}
+                onPress={() => setRemoveConfirmationOpen(true)}
+              >
+                <SvgTrash style={{ width: 16, height: 16 }} />
+              </Button>
+              <SmallConfirmationWindow
+                question={t(
+                  "Are you sure you want to delete the plugin '{{name}}'",
+                  { name: plugin.name },
+                )}
+                popoverRef={removeTriggerRef as RefObject<HTMLElement>}
+                isOpen={removeConfirmationOpen}
+                onYes={async () => {
+                  const loadedPlugin = plugins.find(
+                    p => p.name === plugin.name,
+                  );
+                  if (loadedPlugin) {
+                    await removePlugin(plugin);
+                    await refreshPluginStore();
+                    window.location.reload();
+                  }
+                }}
+                onNo={() => setRemoveConfirmationOpen(false)}
+              />
+            </>
+          )}
         </View>
       </Cell>
     </Row>

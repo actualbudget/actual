@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import type {
+  ActualPluginManifest,
   AQLQueryOptions,
   DatabaseOperation,
   DatabaseQueryResult,
@@ -20,7 +21,10 @@ import * as sqlite from '#platform/server/sqlite';
 import { createApp } from '#server/app';
 import { aqlQuery, compileQuery } from '#server/aql';
 import { defaultConstructQuery } from '#server/aql/compiler';
-import { convertInputType, convertOutputType } from '#server/aql/schema-helpers';
+import {
+  convertInputType,
+  convertOutputType,
+} from '#server/aql/schema-helpers';
 import { getServer } from '#server/server-config';
 import { type ActualPluginStored } from '#types/models';
 
@@ -28,6 +32,9 @@ import { extractZipToMap } from './pluginUtil';
 
 export interface PluginsHandlers {
   'plugin-files': typeof getPluginFiles;
+  'plugin-sync-server-install': typeof installSyncServerPlugin;
+  'plugin-sync-server-list': typeof listSyncServerPlugins;
+  'plugin-sync-server-register-dev': typeof registerSyncServerDevPlugin;
   'plugin-create-database': typeof createPluginDatabase;
   'plugin-database-query': typeof queryPluginDatabase;
   'plugin-database-exec': typeof execPluginDatabase;
@@ -43,6 +50,9 @@ export interface PluginsHandlers {
 export const app = createApp<PluginsHandlers>();
 
 app.method('plugin-files', getPluginFiles);
+app.method('plugin-sync-server-install', installSyncServerPlugin);
+app.method('plugin-sync-server-list', listSyncServerPlugins);
+app.method('plugin-sync-server-register-dev', registerSyncServerDevPlugin);
 app.method('plugin-create-database', createPluginDatabase);
 app.method('plugin-database-query', queryPluginDatabase);
 app.method('plugin-database-exec', execPluginDatabase);
@@ -59,22 +69,134 @@ async function getPluginFiles({
 }: {
   pluginUrl: string;
 }): Promise<PluginFileCollection> {
+  const decodedPluginUrl = decodeURIComponent(pluginUrl);
+
+  if (decodedPluginUrl.startsWith('sync-server:')) {
+    return getSyncServerPluginFiles(
+      decodedPluginUrl.slice('sync-server:'.length),
+    );
+  }
+
   const { store } = idb.getStore(await idb.getDatabase(), 'plugins');
-  const item = (await idb.get(
-    store,
-    decodeURIComponent(pluginUrl),
-  )) as unknown as ActualPluginStored;
+  const item = (await idb.get(store, decodedPluginUrl)) as unknown as
+    | ActualPluginStored
+    | undefined;
 
   if (item == null) {
-    throw new Error('Plugin does not exist: ' + decodeURIComponent(pluginUrl));
+    throw new Error('Plugin does not exist: ' + decodedPluginUrl);
+  }
+
+  if (item.plugin == null) {
+    throw new Error('Plugin does not have local files: ' + item.name);
   }
 
   const filesMap = await extractZipToMap(item.plugin);
 
   return [...filesMap.entries()].map(([name, content]) => ({
-    name: name.toString(),
+    name: normalizeFrontendFileName(name.toString()),
     content: content.toString(),
   })) as PluginFileCollection;
+}
+
+function normalizeFrontendFileName(fileName: string) {
+  return fileName.startsWith('frontend/')
+    ? fileName.slice('frontend/'.length)
+    : fileName;
+}
+
+async function getPluginServerHeaders() {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    throw new Error('unauthorized');
+  }
+
+  return {
+    'X-ACTUAL-TOKEN': userToken,
+  };
+}
+
+function getPluginServerBaseUrl() {
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('no-server-configured');
+  }
+
+  return `${serverConfig.BASE_SERVER}/plugins-api`;
+}
+
+async function installSyncServerPlugin({
+  zipBytes,
+}: {
+  zipBytes: number[];
+}): Promise<{ manifest: ActualPluginManifest }> {
+  const response = await fetch(`${getPluginServerBaseUrl()}/install`, {
+    method: 'POST',
+    headers: {
+      ...(await getPluginServerHeaders()),
+      'Content-Type': 'application/zip',
+    },
+    body: new Uint8Array(zipBytes),
+  });
+
+  return unwrapPluginServerResponse(response);
+}
+
+async function listSyncServerPlugins(): Promise<ActualPluginManifest[]> {
+  const response = await fetch(`${getPluginServerBaseUrl()}/list`, {
+    headers: await getPluginServerHeaders(),
+  });
+  const result = await unwrapPluginServerResponse<{
+    plugins: ActualPluginManifest[];
+  }>(response);
+  return result.plugins;
+}
+
+async function registerSyncServerDevPlugin({
+  manifestUrl,
+}: {
+  manifestUrl: string;
+}): Promise<{ manifest: ActualPluginManifest }> {
+  const response = await fetch(`${getPluginServerBaseUrl()}/dev/register`, {
+    method: 'POST',
+    headers: {
+      ...(await getPluginServerHeaders()),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ manifestUrl }),
+  });
+
+  return unwrapPluginServerResponse(response);
+}
+
+async function getSyncServerPluginFiles(
+  pluginName: string,
+): Promise<PluginFileCollection> {
+  const response = await fetch(
+    `${getPluginServerBaseUrl()}/files/${encodeURIComponent(pluginName)}`,
+    {
+      headers: await getPluginServerHeaders(),
+    },
+  );
+  const result = await unwrapPluginServerResponse<{
+    files: PluginFileCollection;
+  }>(response);
+  return result.files;
+}
+
+async function unwrapPluginServerResponse<T>(response: Response): Promise<T> {
+  const text = await response.text();
+
+  if (!response.ok) {
+    throw new Error(text || `Plugin server request failed: ${response.status}`);
+  }
+
+  const parsed = JSON.parse(text);
+  if (parsed.status !== 'ok') {
+    throw new Error(parsed.reason || parsed.error || 'Plugin request failed');
+  }
+
+  return parsed.data as T;
 }
 
 type PluginDb = Awaited<ReturnType<typeof sqlite.openDatabase>>;
@@ -236,7 +358,10 @@ async function runPluginMigrations({
 
       results.push({ migrationId, status: 'applied' });
     } catch (error) {
-      logger.error(`Plugin ${pluginId} migration ${migrationId} failed:`, error);
+      logger.error(
+        `Plugin ${pluginId} migration ${migrationId} failed:`,
+        error,
+      );
       results.push({
         migrationId,
         status: 'failed',
@@ -326,12 +451,7 @@ async function introspectPluginSchema(pluginId: string): Promise<PluginSchema> {
       type: string;
       notnull: number;
       dflt_value: unknown;
-    }>(
-      db,
-      `PRAGMA table_info(${table.name})`,
-      [],
-      true,
-    );
+    }>(db, `PRAGMA table_info(${table.name})`, [], true);
 
     schema[table.name] = {};
     for (const column of tableInfo) {
@@ -425,15 +545,21 @@ async function queryPluginAql({
     return convertInputType(params[name], param.paramType);
   });
   const sql = defaultConstructQuery(normalizedQuery, state, sqlPieces);
-  let data = sqlite.runQuery(db, sql, paramArray, true) as unknown as
-    | DatabaseSelectResult
-    | null;
+  let data = sqlite.runQuery(
+    db,
+    sql,
+    paramArray,
+    true,
+  ) as unknown as DatabaseSelectResult | null;
 
   if (Array.isArray(data)) {
     for (const item of data) {
       Object.keys(item).forEach(name => {
         if (state.outputTypes.has(name)) {
-          item[name] = convertOutputType(item[name], state.outputTypes.get(name));
+          item[name] = convertOutputType(
+            item[name],
+            state.outputTypes.get(name),
+          );
         }
       });
     }

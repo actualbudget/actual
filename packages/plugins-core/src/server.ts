@@ -20,10 +20,7 @@ export type {
 export type { PluginFile, PluginFileCollection } from './types/plugin-files';
 
 // AQL query result types
-export type {
-  AQLQueryResult,
-  AQLQueryOptions,
-} from './types/aql-result';
+export type { AQLQueryResult, AQLQueryOptions } from './types/aql-result';
 
 // Model types (server-safe)
 export type {
@@ -49,7 +46,17 @@ export type {
 } from './types/actualPlugin';
 
 export type { ActualPluginEntry } from './types/actualPluginEntry';
-export type { ActualPluginManifest } from './types/actualPluginManifest';
+export {
+  isFrontendPlugin,
+  isSyncServerPlugin,
+  validateActualPluginManifest,
+} from './types/actualPluginManifest';
+export type {
+  ActualPluginManifest,
+  ActualPluginType,
+  ActualPluginFrontendManifest,
+  ActualPluginSyncServerManifest,
+} from './types/actualPluginManifest';
 
 // Query System (server-safe)
 export {

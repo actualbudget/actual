@@ -1,4 +1,5 @@
 import {
+  type ActualPluginManifest,
   type PluginFileCollection,
   type SqlParameter,
   type DatabaseResult,
@@ -13,6 +14,13 @@ export interface PluginHandlers {
   'plugin-files': (args: {
     pluginUrl: string;
   }) => Promise<PluginFileCollection>;
+  'plugin-sync-server-install': (args: {
+    zipBytes: number[];
+  }) => Promise<{ manifest: ActualPluginManifest }>;
+  'plugin-sync-server-list': () => Promise<ActualPluginManifest[]>;
+  'plugin-sync-server-register-dev': (args: {
+    manifestUrl: string;
+  }) => Promise<{ manifest: ActualPluginManifest }>;
   'plugin-create-database': (args: {
     pluginId: string;
   }) => Promise<{ success: boolean }>;

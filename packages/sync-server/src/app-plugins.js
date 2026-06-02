@@ -2,6 +2,7 @@ import path from 'path';
 
 import express from 'express';
 
+import { checkAuth, extractUserFromHeaders } from './auth-checker.js';
 import { config } from './load-config.js';
 import { PluginManager } from './plugin-manager.js';
 import { createPluginMiddleware } from './plugin-middleware.js';
@@ -20,6 +21,92 @@ export { app as handlers };
 // Initialize plugin manager
 const pluginsDir = path.join(config.get('serverFiles'), 'plugins');
 const pluginManager = new PluginManager(pluginsDir);
+
+async function requirePluginAuth(req, res, authLevel = 'authenticated') {
+  const user = await extractUserFromHeaders(req.headers);
+  const authCheck = checkAuth(user, authLevel);
+  if (!authCheck.allowed) {
+    res.status(authCheck.status).json({
+      status: 'error',
+      error: authCheck.error,
+      reason: authCheck.message,
+    });
+    return false;
+  }
+
+  return true;
+}
+
+function sendPluginError(res, error) {
+  res.status(500).json({
+    status: 'error',
+    reason: error.message,
+  });
+}
+
+app.get('/list', async (req, res) => {
+  if (!(await requirePluginAuth(req, res))) return;
+
+  try {
+    res.json({
+      status: 'ok',
+      data: {
+        plugins: pluginManager.getInstalledPluginManifests(),
+      },
+    });
+  } catch (error) {
+    sendPluginError(res, error);
+  }
+});
+
+app.get('/files/:pluginName', async (req, res) => {
+  if (!(await requirePluginAuth(req, res))) return;
+
+  try {
+    res.json({
+      status: 'ok',
+      data: {
+        files: pluginManager.getFrontendPluginFiles(req.params.pluginName),
+      },
+    });
+  } catch (error) {
+    sendPluginError(res, error);
+  }
+});
+
+app.post(
+  '/install',
+  express.raw({ type: 'application/zip', limit: '100mb' }),
+  async (req, res) => {
+    if (!(await requirePluginAuth(req, res, 'admin'))) return;
+
+    try {
+      const manifest = await pluginManager.installPluginZip(req.body);
+      res.json({
+        status: 'ok',
+        data: { manifest },
+      });
+    } catch (error) {
+      sendPluginError(res, error);
+    }
+  },
+);
+
+app.post('/dev/register', async (req, res) => {
+  if (!(await requirePluginAuth(req, res, 'admin'))) return;
+
+  try {
+    const manifest = await pluginManager.registerDevPlugin(
+      req.body.manifestUrl,
+    );
+    res.json({
+      status: 'ok',
+      data: { manifest },
+    });
+  } catch (error) {
+    sendPluginError(res, error);
+  }
+});
 
 app.get('/bank-sync/list', (_req, res) => {
   try {
@@ -169,7 +256,7 @@ async function loadPlugins() {
 }
 
 // Start loading plugins
-loadPlugins();
+void loadPlugins();
 
 // Export plugin manager for potential external use
 export { pluginManager };
