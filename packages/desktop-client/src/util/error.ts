@@ -44,6 +44,27 @@ export function getUploadError({ reason, meta }: ErrorWithMeta) {
   }
 }
 
+function isDatabaseSchemaMismatch(meta?: unknown): boolean {
+  if (
+    meta &&
+    typeof meta === 'object' &&
+    'error' in meta &&
+    meta.error &&
+    typeof meta.error === 'object' &&
+    'message' in meta.error &&
+    typeof meta.error.message === 'string'
+  ) {
+    return /no such (column|table)/i.test(meta.error.message);
+  }
+  return false;
+}
+
+function getSchemaMismatchError() {
+  return t(
+    'This budget could not be loaded because it uses a newer database schema than this version of Actual supports. Make sure you are using the latest version, then try again.',
+  );
+}
+
 export function getDownloadError({
   reason,
   meta,
@@ -53,6 +74,10 @@ export function getDownloadError({
   meta?: unknown;
   fileName?: string;
 }) {
+  if (reason === 'invalid-schema' && isDatabaseSchemaMismatch(meta)) {
+    return getSchemaMismatchError();
+  }
+
   switch (reason) {
     case 'network':
     case 'download-failure':

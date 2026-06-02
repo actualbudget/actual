@@ -8,6 +8,25 @@ type ErrorWithMeta = {
 // plain English strings. User-facing, translated equivalents live in the
 // desktop-client (`src/util/error.ts`).
 
+function isDatabaseSchemaMismatch(meta?: unknown): boolean {
+  if (
+    meta &&
+    typeof meta === 'object' &&
+    'error' in meta &&
+    meta.error &&
+    typeof meta.error === 'object' &&
+    'message' in meta.error &&
+    typeof meta.error.message === 'string'
+  ) {
+    return /no such (column|table)/i.test(meta.error.message);
+  }
+  return false;
+}
+
+function getSchemaMismatchError() {
+  return 'This budget could not be loaded because it uses a newer database schema than this version of Actual supports. Make sure you are using the latest version, then try again.';
+}
+
 export function getDownloadError({
   reason,
   meta,
@@ -17,6 +36,10 @@ export function getDownloadError({
   meta?: unknown;
   fileName?: string;
 }) {
+  if (reason === 'invalid-schema' && isDatabaseSchemaMismatch(meta)) {
+    return getSchemaMismatchError();
+  }
+
   switch (reason) {
     case 'network':
     case 'download-failure':
@@ -62,9 +85,11 @@ export function getTestKeyError({ reason }: ErrorWithMeta) {
   }
 }
 
-export function getSyncError(error: string, id: string) {
+export function getSyncError(error: string, id: string, meta?: unknown) {
   if (error === 'out-of-sync-migrations' || error === 'out-of-sync-data') {
     return 'This budget cannot be loaded with this version of the app.';
+  } else if (error === 'invalid-schema' && isDatabaseSchemaMismatch(meta)) {
+    return getSchemaMismatchError();
   } else if (error === 'budget-not-found') {
     return `Budget "${id}" not found. Check the ID of your budget in the Advanced section of the settings page.`;
   } else if (error === 'clock-drift') {
