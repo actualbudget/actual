@@ -1,4 +1,10 @@
 import { AkahuClient } from 'akahu';
+import type {
+  Account,
+  EnrichedTransaction,
+  PendingTransaction,
+  Transaction,
+} from 'akahu';
 import express from 'express';
 
 import { handleError } from '#app-gocardless/util/handle-error';
@@ -7,6 +13,16 @@ import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
+
+type AkahuTransaction = {
+  booked: boolean;
+  date: string;
+  payeeName: string;
+  notes?: string;
+  transactionId?: string;
+  sortOrder: number;
+  transactionAmount: { amount: number; currency: string };
+};
 
 const app = express();
 export { app as handlers };
@@ -97,7 +113,7 @@ app.post(
       ).toISOString();
 
       // Fetch all transactions using pagination
-      const transactions = [];
+      const transactions: Transaction[] = [];
       let cursor = undefined;
       do {
         const { items, cursor: nextCursor } =
@@ -145,7 +161,7 @@ app.post(
       // Process booked transactions
       for (const trans of transactions) {
         if (new Date(trans.date) >= startDateObj) {
-          const processedTrans = processTransaction(trans, account, true);
+          const processedTrans = processTransaction(trans, account);
           booked.push(processedTrans);
           all.push(processedTrans);
         }
@@ -154,7 +170,7 @@ app.post(
       // Process pending transactions
       for (const trans of pendingTransactions) {
         if (new Date(trans.date) >= startDateObj) {
-          const processedTrans = processTransaction(trans, account, false);
+          const processedTrans = processPendingTransaction(trans, account);
           pending.push(processedTrans);
           all.push(processedTrans);
         }
@@ -188,63 +204,61 @@ app.post(
   }),
 );
 
-function getDate(date) {
+function isEnriched(
+  trans: Transaction | EnrichedTransaction,
+): trans is EnrichedTransaction {
+  return 'merchant' in trans || 'meta' in trans;
+}
+
+function getDate(date): string {
   return date.toISOString().split('T')[0];
 }
 
-function convertToCents(amount) {
-  return parseInt(Math.round(amount * 100).toString());
+function convertToCents(amount): number {
+  return Math.round(amount * 100);
 }
 
-function flattenObject(obj, prefix = '') {
-  const result = {};
-
-  for (const [key, value] of Object.entries(obj)) {
-    const newKey = prefix ? `${prefix}.${key}` : key;
-
-    if (value === null) {
-      continue;
+function getPayeeName(trans: Transaction | EnrichedTransaction): string {
+  if (isEnriched(trans)) {
+    if (trans.merchant?.name) {
+      return trans.merchant.name;
     }
 
-    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      Object.assign(result, flattenObject(value, newKey));
-    } else {
-      result[newKey] = value;
+    if (trans.meta?.other_account) {
+      return trans.meta.other_account;
     }
-  }
-
-  return result;
-}
-
-function getPayeeName(trans) {
-  if (trans.merchant?.name) {
-    return trans.merchant.name;
-  }
-
-  if (trans.meta?.other_account) {
-    return trans.meta.other_account;
   }
 
   return '';
 }
 
-function processTransaction(trans, account, isBooked = true) {
+function processPendingTransaction(
+  trans: PendingTransaction,
+  account: Account,
+): AkahuTransaction {
   const transactionDate = new Date(trans.date);
 
-  const newTrans = {
-    booked: isBooked,
+  return {
+    booked: false,
     date: getDate(transactionDate),
-    payeeName: getPayeeName(trans),
+    payeeName: '',
     notes: trans.description,
-    transactionId: trans._id,
     sortOrder: transactionDate.getTime(),
+    transactionAmount: {
+      amount: Math.round(trans.amount * 100) / 100,
+      currency: account.balance.currency,
+    },
   };
+}
 
-  newTrans.transactionAmount = {
-    amount: Math.round(trans.amount * 100) / 100,
-    currency: account.balance.currency,
+function processTransaction(
+  trans: Transaction | EnrichedTransaction,
+  account: Account,
+): AkahuTransaction {
+  return {
+    ...processPendingTransaction(trans, account),
+    booked: true,
+    payeeName: getPayeeName(trans),
+    transactionId: trans._id,
   };
-
-  delete trans.amount;
-  return { ...flattenObject(trans), ...newTrans };
 }
