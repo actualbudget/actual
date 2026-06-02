@@ -1,4 +1,3 @@
-// @ts-nocheck
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import ipaddr from 'ipaddr.js';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import express from 'express';
 
 import { getActiveLoginMethod, isAdmin } from './account-db';

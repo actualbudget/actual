@@ -1,7 +1,8 @@
-// @ts-nocheck
 import createDebug from 'debug';
+import type { Debugger } from 'debug';
 
 import { getAccountDb } from '#account-db';
+import type { WrappedDatabase } from '#db';
 
 /**
  * An enum of valid secret names.
@@ -21,18 +22,18 @@ export const SecretName = {
 };
 
 class SecretsDb {
-  debug: any;
-  db: any;
+  debug: Debugger;
+  db: WrappedDatabase | null;
   constructor() {
     this.debug = createDebug('actual:secrets-db');
     this.db = null;
   }
 
-  open() {
+  open(): WrappedDatabase {
     return getAccountDb();
   }
 
-  set(name, value) {
+  set(name: string, value: string) {
     if (!this.db) {
       this.db = this.open();
     }
@@ -45,7 +46,7 @@ class SecretsDb {
     return result;
   }
 
-  get(name) {
+  get(name: string): { value: string } | null {
     if (!this.db) {
       this.db = this.open();
     }
@@ -69,7 +70,7 @@ export const secretsService = {
    * @param {SecretName} name - The name of the secret to retrieve.
    * @returns {string|null} The value of the secret, or null if the secret does not exist.
    */
-  get: name => {
+  get: (name: string) => {
     return _cachedSecrets.get(name) ?? secretsDb.get(name)?.value ?? null;
   },
 
@@ -79,7 +80,7 @@ export const secretsService = {
    * @param {string} value - The value to set for the secret.
    * @returns {Object}
    */
-  set: (name, value) => {
+  set: (name: string, value: string) => {
     const result = secretsDb.set(name, value);
 
     if (result.changes === 1) {
@@ -93,7 +94,7 @@ export const secretsService = {
    * @param {SecretName} name - The name of the secret to check for existence.
    * @returns {boolean} True if a secret with the given name exists, false otherwise.
    */
-  exists: name => {
+  exists: (name: string) => {
     return Boolean(secretsService.get(name));
   },
 };

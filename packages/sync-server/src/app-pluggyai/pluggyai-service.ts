@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { PluggyClient } from 'pluggy-sdk';
 
 import { SecretName, secretsService } from '#services/secrets-service';

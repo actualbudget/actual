@@ -1,14 +1,19 @@
-// @ts-nocheck
+import type { File } from './services/files-service';
+
 // This is a version representing the internal format of sync
 // messages. When this changes, all sync files need to be reset. We
 // will check this version when syncing and notify the user if they
 // need to reset.
 const SYNC_FORMAT_VERSION = 2;
 
-const validateSyncedFile = (groupId, keyId, currentFile) => {
+const validateSyncedFile = (
+  groupId: string,
+  keyId: string,
+  currentFile: File,
+) => {
   if (
     currentFile.syncVersion == null ||
-    currentFile.syncVersion < SYNC_FORMAT_VERSION
+    Number(currentFile.syncVersion) < SYNC_FORMAT_VERSION
   ) {
     return 'file-old-version';
   }
@@ -47,7 +52,11 @@ const validateSyncedFile = (groupId, keyId, currentFile) => {
   return null;
 };
 
-const validateUploadedFile = (groupId, keyId, currentFile) => {
+const validateUploadedFile = (
+  groupId: string,
+  keyId: string,
+  currentFile: File | null,
+) => {
   if (!currentFile) {
     // File is new, so no need to validate
     return null;

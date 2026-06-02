@@ -303,8 +303,8 @@ app.post('/upload-user-file', async (req, res) => {
     return;
   }
 
-  const name = decodeURIComponent(req.headers['x-actual-name']);
-  const fileId = req.headers['x-actual-file-id'];
+  const name = decodeURIComponent(req.headers['x-actual-name'] as string);
+  const fileId = req.headers['x-actual-file-id'] as string;
 
   if (!fileId || typeof fileId !== 'string') {
     res.status(400).send('fileId is required');
@@ -315,7 +315,7 @@ app.post('/upload-user-file', async (req, res) => {
     return;
   }
 
-  let groupId = req.headers['x-actual-group-id'] || null;
+  let groupId = (req.headers['x-actual-group-id'] as string) || null;
   const encryptMeta = extractSingleHeader(req, res, 'x-actual-encrypt-meta');
   if (res.headersSent) return;
   const syncFormatVersion = extractSingleHeader(req, res, 'x-actual-format');
@@ -411,7 +411,7 @@ app.post('/upload-user-file', async (req, res) => {
 });
 
 app.get('/download-user-file', async (req, res) => {
-  const fileId = req.headers['x-actual-file-id'];
+  const fileId = req.headers['x-actual-file-id'] as string;
   if (typeof fileId !== 'string') {
     // FIXME: Not sure how this cannot be a string when the header is
     // set.
@@ -496,7 +496,7 @@ app.get('/list-user-files', (req, res) => {
 });
 
 app.get('/get-user-file-info', (req, res) => {
-  const fileId = req.headers['x-actual-file-id'];
+  const fileId = req.headers['x-actual-file-id'] as string;
 
   // TODO: Return 422 if fileId is not provided. Need to make sure frontend can handle it
   // if (!fileId) {

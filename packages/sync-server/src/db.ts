@@ -1,51 +1,37 @@
-// @ts-nocheck
 import Database from 'better-sqlite3';
+import type { Database as SqliteDatabase } from 'better-sqlite3';
 
 export class WrappedDatabase {
-  db: any;
-  constructor(db: any) {
+  db: SqliteDatabase;
+  constructor(db: SqliteDatabase) {
     this.db = db;
   }
 
-  /**
-   * @param {string} sql
-   * @param {(string | number)[]} params
-   */
-  all(sql, params = []) {
+  all<T = any>(sql: string, params: (string | number)[] = []): T[] {
     const stmt = this.db.prepare(sql);
-    return stmt.all(...params);
+    return stmt.all(...params) as T[];
   }
 
-  /**
-   * @param {string} sql
-   * @param {string[]} params
-   */
-  first(sql, params = []) {
+  first<T = any>(sql: string, params: (string | number)[] = []): T | null {
     const rows = this.all(sql, params);
     return rows.length === 0 ? null : rows[0];
   }
 
-  /**
-   * @param {string} sql
-   */
-  exec(sql) {
-    return this.db.exec(sql);
+  exec(sql: string): this {
+    this.db.exec(sql);
+    return this;
   }
 
-  /**
-   * @param {string} sql
-   * @param {(string | number | null | undefined)[]} params
-   */
-  mutate(sql, params = []) {
+  mutate(
+    sql: string,
+    params: (string | number | null | undefined)[] = [],
+  ): { changes: number; insertId: number | bigint } {
     const stmt = this.db.prepare(sql);
     const info = stmt.run(...params);
     return { changes: info.changes, insertId: info.lastInsertRowid };
   }
 
-  /**
-   * @param {() => void} fn
-   */
-  transaction(fn) {
+  transaction<T>(fn: () => T): T {
     return this.db.transaction(fn)();
   }
 
@@ -54,7 +40,6 @@ export class WrappedDatabase {
   }
 }
 
-/** @param {string} filename */
-export function openDatabase(filename) {
+export function openDatabase(filename: string) {
   return new WrappedDatabase(new Database(filename));
 }

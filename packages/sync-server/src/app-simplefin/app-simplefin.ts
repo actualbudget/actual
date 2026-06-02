@@ -1,4 +1,3 @@
-// @ts-nocheck
 import https from 'https';
 
 import express from 'express';
@@ -102,6 +101,7 @@ app.post(
         accessKey,
         Array.isArray(accountId) ? accountId : [accountId],
         new Date(earliestStartDate),
+        undefined,
       );
     } catch (e) {
       if (e.message === 'Forbidden') {
@@ -206,7 +206,7 @@ function getAccountResponse(results, accountId, startDate) {
   const pending = [];
 
   for (const trans of account.transactions) {
-    const newTrans = {};
+    const newTrans: Record<string, any> = {};
 
     let dateToUse = 0;
 
@@ -367,10 +367,10 @@ async function getAccounts(
   const params = new URLSearchParams();
   if (!noTransactions) {
     if (startDate) {
-      params.append('start-date', normalizeDate(startDate));
+      params.append('start-date', normalizeDate(startDate).toString());
     }
     if (endDate) {
-      params.append('end-date', normalizeDate(endDate));
+      params.append('end-date', normalizeDate(endDate).toString());
     }
     params.append('pending', '1');
   } else {

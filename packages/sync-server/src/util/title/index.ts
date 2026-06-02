@@ -9,7 +9,7 @@ const regex = new RegExp(
   'g',
 );
 
-const convertToRegExp = (specials: string[]) =>
+const convertToRegExp = (specials: string[]): [RegExp, string][] =>
   specials.map((s: string) => [new RegExp(`\\b${s}\\b`, 'gi'), s]);
 
 function parseMatch(match: string) {
@@ -28,30 +28,42 @@ function parseMatch(match: string) {
   return match;
 }
 
-export function title(str: string, options: { special?: string[] } = { special: undefined }) {
+export function title(
+  str: string,
+  options: { special?: string[] } = { special: undefined },
+) {
   str = str
     .toLowerCase()
-    .replace(regex, (m: string, lead: string = '', forced: string, lower: string, rest: string) => {
-      const parsedMatch = parseMatch(m);
-      if (!parsedMatch) {
-        return m;
-      }
-      if (!forced) {
-        const fullLower = lower + rest;
-
-        if (lowerCaseSet.has(fullLower)) {
-          return parsedMatch;
+    .replace(
+      regex,
+      (
+        m: string,
+        lead: string = '',
+        forced: string,
+        lower: string,
+        rest: string,
+      ) => {
+        const parsedMatch = parseMatch(m);
+        if (!parsedMatch) {
+          return m;
         }
-      }
+        if (!forced) {
+          const fullLower = lower + rest;
 
-      return lead + (lower || forced).toUpperCase() + rest;
-    });
+          if (lowerCaseSet.has(fullLower)) {
+            return parsedMatch;
+          }
+        }
+
+        return lead + (lower || forced).toUpperCase() + rest;
+      },
+    );
 
   const customSpecials = options.special || [];
   const replace = [...specials, ...customSpecials];
   const replaceRegExp = convertToRegExp(replace);
 
-  replaceRegExp.forEach(([pattern, s]: any) => {
+  replaceRegExp.forEach(([pattern, s]: [RegExp, string]) => {
     str = str.replace(pattern, s);
   });
 

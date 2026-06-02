@@ -1,4 +1,3 @@
-// @ts-nocheck
 import express from 'express';
 
 import { handleError } from '#app-gocardless/util/handle-error';
@@ -101,7 +100,7 @@ app.post(
       const pending = [];
 
       for (const trans of transactions) {
-        const newTrans = {};
+        const newTrans: Record<string, any> = {};
 
         newTrans.booked = !(trans.status === 'PENDING');
 

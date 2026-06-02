@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -6,15 +5,15 @@ import { clearExpiredSessions, getAccountDb } from '#account-db';
 import { config } from '#load-config';
 import { TOKEN_EXPIRATION_NEVER } from '#util/validate-user';
 
-function isValidPassword(password) {
+function isValidPassword(password: string | undefined | null) {
   return password != null && password !== '';
 }
 
-function hashPassword(password) {
+function hashPassword(password: string) {
   return bcrypt.hashSync(password, 12);
 }
 
-export function bootstrapPassword(password) {
+export function bootstrapPassword(password: string) {
   if (!isValidPassword(password)) {
     return { error: 'invalid-password' };
   }
@@ -33,7 +32,7 @@ export function bootstrapPassword(password) {
   return {};
 }
 
-export function loginWithPassword(password) {
+export function loginWithPassword(password: string) {
   if (!isValidPassword(password)) {
     return { error: 'invalid-password' };
   }
@@ -91,7 +90,8 @@ export function loginWithPassword(password) {
     typeof config.get('token_expiration') === 'number'
   ) {
     expiration =
-      Math.floor(Date.now() / 1000) + config.get('token_expiration') * 60;
+      Math.floor(Date.now() / 1000) +
+      Number(config.get('token_expiration')) * 60;
   }
 
   if (!sessionRow) {
@@ -111,7 +111,7 @@ export function loginWithPassword(password) {
   return { token };
 }
 
-export function changePassword(newPassword) {
+export function changePassword(newPassword: string) {
   const accountDb = getAccountDb();
 
   if (!isValidPassword(newPassword)) {
@@ -125,7 +125,7 @@ export function changePassword(newPassword) {
   return {};
 }
 
-export function checkPassword(password) {
+export function checkPassword(password: string) {
   if (!isValidPassword(password)) {
     return false;
   }

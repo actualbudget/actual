@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { getAccountDb, isAdmin } from '#account-db';
 import { FileNotFound, GenericFileError } from '#app-sync/errors';
 import type { WrappedDatabase } from '#db';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { existsSync } from 'node:fs';
 
 import {
@@ -9,10 +8,12 @@ import {
 } from '@actual-app/crdt';
 
 import { openDatabase } from './db';
+import type { WrappedDatabase } from './db';
 import messagesSql from './sql/messages.sql?raw';
 import { getPathForGroupFile } from './util/paths';
+import type { GroupId } from './util/paths';
 
-function getGroupDb(groupId) {
+function getGroupDb(groupId: GroupId): WrappedDatabase {
   const path = getPathForGroupFile(groupId);
   const needsInit = !existsSync(path);
 
@@ -25,7 +26,7 @@ function getGroupDb(groupId) {
   return db;
 }
 
-function addMessages(db, messages) {
+function addMessages(db: WrappedDatabase, messages: any[]) {
   let returnValue;
   db.transaction(() => {
     let trie = getMerkle(db);
@@ -57,7 +58,7 @@ function addMessages(db, messages) {
   return returnValue;
 }
 
-function getMerkle(db) {
+function getMerkle(db: WrappedDatabase) {
   const rows = db.all('SELECT * FROM messages_merkles');
 
   if (rows.length > 0) {
@@ -69,7 +70,7 @@ function getMerkle(db) {
   }
 }
 
-export function sync(messages, since, groupId) {
+export function sync(messages: any[], since: string, groupId: GroupId) {
   const db = getGroupDb(groupId);
   const newMessages = db.all(
     `SELECT * FROM messages_binary
