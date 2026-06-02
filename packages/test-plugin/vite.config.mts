@@ -1,4 +1,4 @@
-import { createWriteStream, rmSync, writeFileSync, mkdirSync } from 'fs';
+import { createWriteStream, mkdirSync, rmSync, writeFileSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
