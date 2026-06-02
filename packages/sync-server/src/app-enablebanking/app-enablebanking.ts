@@ -52,6 +52,7 @@ function isPrivateOrLocalIp(ip: string) {
     normalized === '127.0.0.1' ||
     normalized.startsWith('10.') ||
     normalized.startsWith('192.168.') ||
+    normalized.startsWith('169.254.') ||
     /^172\.(1[6-9]|2\d|3[0-1])\./.test(normalized) ||
     normalized.startsWith('fc') ||
     normalized.startsWith('fd') ||
