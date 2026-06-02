@@ -413,19 +413,19 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                               offset="0%"
                               stopColor={
                                 hasNegativeBalance
-                                  ? theme.errorText
-                                  : theme.noticeText
+                                  ? theme.reportsNumberNegative
+                                  : theme.reportsChartFill
                               }
                             />
                           ) : (
                             <>
                               <stop
                                 offset={`${zeroCrossingGradientOffset}%`}
-                                stopColor={theme.noticeText}
+                                stopColor={theme.reportsChartFill}
                               />
                               <stop
                                 offset={`${zeroCrossingGradientOffset}%`}
-                                stopColor={theme.errorText}
+                                stopColor={theme.reportsNumberNegative}
                               />
                             </>
                           )}
@@ -497,11 +497,11 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                       {showsTodayReferenceLine && (
                         <ReferenceLine
                           x={todayReferenceDate}
-                          stroke={theme.noticeText}
+                          stroke={theme.reportsBlue}
                           strokeDasharray="4 4"
                           label={{
                             value: t('Today'),
-                            fill: theme.noticeText,
+                            fill: theme.reportsBlue,
                             fontSize: 12,
                             position: 'insideTop',
                             offset: 8,
