@@ -39,10 +39,7 @@ import { calculateDistance } from '@actual-app/core/shared/location-utils';
 import * as monthUtils from '@actual-app/core/shared/months';
 import * as Platform from '@actual-app/core/shared/platform';
 import { q } from '@actual-app/core/shared/query';
-import {
-  getStatusLabel,
-  getUpcomingDays,
-} from '@actual-app/core/shared/schedules';
+import { getUpcomingDays } from '@actual-app/core/shared/schedules';
 import {
   addSplitTransaction,
   deleteTransaction,
@@ -113,6 +110,7 @@ import { locationService } from '#payees/location';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch, useSelector } from '#redux';
 import { setLastTransaction } from '#transactions/transactionsSlice';
+import { getStatusLabel } from '#util/schedule';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
 
