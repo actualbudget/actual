@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/sync-server",
-  "version": "26.5.2",
+  "version": "26.6.0",
   "description": "actual syncing server",
   "license": "MIT",
   "repository": {
@@ -98,7 +98,7 @@
     "date-fns": "^4.1.0",
     "debug": "^4.4.3",
     "express": "^5.2.1",
-    "express-rate-limit": "^8.3.2",
+    "express-rate-limit": "^8.5.2",
     "express-winston": "^4.2.0",
     "ipaddr.js": "^2.3.0",
     "jws": "^3.2.2",

@@ -129,7 +129,21 @@ export function AutomationListRow({
         </View>
         <Tooltip
           content={
-            <Text style={{ display: 'block', maxWidth: 320 }}>{subtitle}</Text>
+            <View style={{ maxWidth: 320, gap: 4 }}>
+              <Text style={{ display: 'block' }}>{subtitle}</Text>
+              {entry.template.description && (
+                <Text
+                  style={{
+                    display: 'block',
+                    fontSize: 11,
+                    color: theme.pageTextLight,
+                    whiteSpace: 'pre-wrap',
+                  }}
+                >
+                  {entry.template.description}
+                </Text>
+              )}
+            </View>
           }
         >
           <Text

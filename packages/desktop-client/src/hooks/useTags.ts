@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 
+import type { TagEntity } from '@actual-app/core/types/models';
 import { useQuery } from '@tanstack/react-query';
 import { byLengthAsc, byStartAsc, Fzf } from 'fzf';
 
@@ -7,6 +8,19 @@ import { tagQueries } from '#tags/queries';
 
 export function useTags() {
   return useQuery(tagQueries.list());
+}
+
+export function filterTags<T extends TagEntity>(
+  tags: T[],
+  filterStr: string,
+): T[] {
+  return new Fzf(tags as TagEntity[], {
+    selector: tag => tag.tag,
+    limit: 100,
+    tiebreakers: [byLengthAsc, byStartAsc],
+  })
+    .find(filterStr.replace(/^#/, ''))
+    .map(item => item.item as T);
 }
 
 export function useFilteredTags(

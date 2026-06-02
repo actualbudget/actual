@@ -1,5 +1,6 @@
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
+import { validForMergeExplanation } from '#shared/merge';
 import { q } from '#shared/query';
 import {
   deleteTransaction as sharedDeleteTransaction,
@@ -20,16 +21,96 @@ export async function mergeTransactions(
         JSON.stringify(transactions),
     );
   }
+  const [a, b] = await mapAndValidateTransactions(txIds[0], txIds[1]);
+  const aTransferId = a.transfer_id;
+  const bTransferId = b.transfer_id;
 
-  // get most recent transactions
-  const [a, b]: TransactionEntity[] = await Promise.all(
-    txIds.map(db.getTransaction),
-  );
-  if (!a || !b) {
-    throw new Error('One of the provided transactions does not exist');
-  } else if (a.amount !== b.amount) {
-    throw new Error('Transaction amounts must match for merge');
+  // we don't need all the transfer logic if there are no transfers.
+  if (!aTransferId && !bTransferId) return mergeTransactionsNoTransfer(a, b);
+
+  const transferAccount = aTransferId ? a.payee : b.payee;
+
+  await setTransfers([a.id, b.id, aTransferId, bTransferId], null);
+  const transferId = await mergeTransfers(aTransferId, bTransferId);
+  const keptTxId = await mergeTransactionsNoTransfer(a, b);
+  if (transferId) {
+    await db.updateTransaction({
+      id: keptTxId,
+      transfer_id: transferId,
+      payee: transferAccount,
+    });
+    await db.updateTransaction({ id: transferId, transfer_id: keptTxId });
   }
+
+  // transfers to an off-budget account have a category. Transfers to on-budget do not, so
+  // when a regular transaction is merged with a non-transfer, we need to make sure any category
+  // in the non-transfer is cleared out.
+  //
+  // However, we cannot blindly clear categories because if the transfer is to an off-budget account then
+  // we need to keep the regular merge logic that was performed in mergeTransactionsNoTransfer.
+  //
+  // We don't have to worry about the transfer transactions in the other account because
+  // either there is one transaction or there are two transfers, which does not enter this error state
+  if (transferAccount && !(aTransferId && bTransferId)) {
+    const payee = await db.getPayee(transferAccount);
+    const account = await db.getAccount(payee?.transfer_acct ?? '');
+    if (account && !account.offbudget) {
+      await db.updateTransaction({ id: keptTxId, category: null });
+    }
+  }
+
+  return keptTxId;
+}
+
+function setTransfers(
+  txIds: (TransactionEntity['id'] | undefined)[],
+  transfer_id: string | null | undefined,
+) {
+  return Promise.all(
+    txIds
+      .filter(Boolean)
+      .map(txId =>
+        db.updateTransaction({ id: txId, transfer_id: transfer_id ?? null }),
+      ),
+  );
+}
+
+async function mergeTransfers(
+  aTransferId: TransactionEntity['id'] | undefined,
+  bTransferId: TransactionEntity['id'] | undefined,
+) {
+  // if only one is a transfer, we can skip merging
+  if (!aTransferId) return bTransferId;
+  if (!bTransferId) return aTransferId;
+
+  // clear transfers and merge
+  const [aTransfer, bTransfer] = await mapAndValidateTransactions(
+    aTransferId,
+    bTransferId,
+  );
+  await setTransfers([aTransfer.id, bTransfer.id], null);
+  return mergeTransactionsNoTransfer(aTransfer, bTransfer);
+}
+
+async function mapAndValidateTransactions(
+  aId: TransactionEntity['id'],
+  bId: TransactionEntity['id'],
+): Promise<TransactionEntity[]> {
+  // get most recent transactions
+  const a: TransactionEntity = await db.getTransaction(aId);
+  const b: TransactionEntity = await db.getTransaction(bId);
+
+  const validForMergeError = validForMergeExplanation(a, b);
+  if (validForMergeError) {
+    throw new Error(validForMergeError);
+  }
+  return [a, b];
+}
+
+export async function mergeTransactionsNoTransfer(
+  a: TransactionEntity,
+  b: TransactionEntity,
+): Promise<TransactionEntity['id']> {
   const { keep, drop } = determineKeepDrop(a, b);
 
   // Load subtransactions with a single query, then split by parent_id in memory
