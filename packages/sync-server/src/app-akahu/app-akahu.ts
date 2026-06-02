@@ -163,7 +163,11 @@ app.post(
         accountId,
       );
 
-      const date = getDate(account.refreshed?.balance ? new Date(account.refreshed.balance) : new Date());
+      const date = getDate(
+        account.refreshed?.balance
+          ? new Date(account.refreshed.balance)
+          : new Date(),
+      );
       const currentBalance = convertToCents(account.balance.current);
 
       const balances = [
@@ -174,7 +178,7 @@ app.post(
           },
           balanceType: 'expected',
           referenceDate: date,
-        }
+        },
       ];
 
       if (account.balance.available) {
@@ -211,7 +215,8 @@ app.post(
         }
       }
 
-      const sortFunction = (a: AkahuTransaction, b: AkahuTransaction) => b.sortOrder - a.sortOrder;
+      const sortFunction = (a: AkahuTransaction, b: AkahuTransaction) =>
+        b.sortOrder - a.sortOrder;
       const bookedSorted = booked.sort(sortFunction);
       const pendingSorted = pending.sort(sortFunction);
       const allSorted = all.sort(sortFunction);
