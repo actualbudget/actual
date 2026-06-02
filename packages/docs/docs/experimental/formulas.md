@@ -5,7 +5,7 @@ This is an **experimental feature**. That means we’re still working on finishi
 ::::
 
 ::::warning
-All functionality described here may not be available in the latest stable release. See [Experimental Features](/docs/experimental/) for instructions to enable experimental features. Use the `edge` images for the latest implementation.
+All functionality described here may not be available in the latest stable release. See [Experimental Features](/docs/experimental/) for instructions to enable experimental features. Use the `nightly` images for the latest implementation.
 ::::
 
 Excel formula mode adds two related features:

@@ -87,16 +87,32 @@
     "typescript": "^6.0.2",
     "vitest": "^4.1.2"
   },
+  "dependenciesMeta": {
+    "bcrypt": {
+      "built": true
+    },
+    "better-sqlite3": {
+      "built": true
+    },
+    "electron": {
+      "built": true
+    },
+    "esbuild": {
+      "built": true
+    },
+    "sharp": {
+      "built": true
+    }
+  },
+  "optionalDependencies": {
+    "glob-hasher-linux-arm64-gnu": "1.4.2"
+  },
   "resolutions": {
     "adm-zip": "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch",
-    "minimatch@10.2.1": "10.2.5",
     "minimatch@3.1.2": "3.1.5",
-    "minimatch@>=10.0.0 <11.0.0": "10.2.5",
-    "minimatch@>=3.0.0 <4.0.0": "3.1.5",
-    "minimatch@>=5.0.0 <6.0.0": "5.1.9",
-    "minimatch@>=9.0.0 <10.0.0": "9.0.9",
-    "rollup": "4.40.1",
-    "socks": ">=2.8.3"
+    "serialize-javascript": "^7.0.5",
+    "socks": ">=2.8.3",
+    "webpackbar": "^7.0.0"
   },
   "lint-staged": {
     "packages/*/{package.json,tsconfig.json}": [

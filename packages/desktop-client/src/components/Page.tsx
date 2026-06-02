@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
@@ -107,6 +108,50 @@ export function MobilePageHeader({
   );
 }
 
+// On mobile the page header element stays mounted while navigating between
+// pages so its background doesn't flash while the next page renders. Pages
+// render their header into a single persistent `<MobilePageHeaderSlot />`
+// (rendered by the app shell) through a portal. Without a provider (e.g. in
+// tests or storybook) the header is rendered inline instead.
+const MobilePageHeaderSlotContext = createContext<HTMLElement | null>(null);
+const MobilePageHeaderSlotRefContext = createContext<
+  ((element: HTMLElement | null) => void) | null
+>(null);
+
+export function MobilePageHeaderProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const [slot, setSlot] = useState<HTMLElement | null>(null);
+  return (
+    <MobilePageHeaderSlotRefContext.Provider value={setSlot}>
+      <MobilePageHeaderSlotContext.Provider value={slot}>
+        {children}
+      </MobilePageHeaderSlotContext.Provider>
+    </MobilePageHeaderSlotRefContext.Provider>
+  );
+}
+
+type MobilePageHeaderSlotProps = {
+  style?: CSSProperties;
+};
+
+export function MobilePageHeaderSlot({ style }: MobilePageHeaderSlotProps) {
+  const slotRef = useContext(MobilePageHeaderSlotRefContext);
+  return (
+    <View
+      ref={slotRef ?? undefined}
+      style={{
+        flexShrink: 0,
+        minHeight: HEADER_HEIGHT,
+        backgroundColor: theme.mobileHeaderBackground,
+        ...style,
+      }}
+    />
+  );
+}
+
 type PageProps = {
   header: ReactNode;
   style?: CSSProperties;
@@ -117,6 +162,7 @@ type PageProps = {
 
 export function Page({ header, style, padding, children, footer }: PageProps) {
   const { isNarrowWidth } = useResponsive();
+  const mobileHeaderSlot = useContext(MobilePageHeaderSlotContext);
   const childrenPadding = padding != null ? padding : isNarrowWidth ? 10 : 20;
 
   const headerToRender =
@@ -130,28 +176,48 @@ export function Page({ header, style, padding, children, footer }: PageProps) {
       header
     );
 
+  const main = (
+    <View
+      role="main"
+      style={{
+        flex: 1,
+        overflowY: isNarrowWidth ? 'auto' : undefined,
+        padding: `0 ${childrenPadding}px`,
+      }}
+    >
+      {children}
+    </View>
+  );
+
+  if (isNarrowWidth) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: theme.mobilePageBackground,
+          ...style,
+        }}
+      >
+        {mobileHeaderSlot
+          ? createPortal(headerToRender, mobileHeaderSlot)
+          : headerToRender}
+        {main}
+        {footer}
+      </View>
+    );
+  }
+
   return (
     <View
       style={{
-        ...(!isNarrowWidth && styles.page),
+        ...styles.page,
         flex: 1,
-        backgroundColor: isNarrowWidth
-          ? theme.mobilePageBackground
-          : theme.pageBackground,
+        backgroundColor: theme.pageBackground,
         ...style,
       }}
     >
       {headerToRender}
-      <View
-        role="main"
-        style={{
-          flex: 1,
-          overflowY: isNarrowWidth ? 'auto' : undefined,
-          padding: `0 ${childrenPadding}px`,
-        }}
-      >
-        {children}
-      </View>
+      {main}
       {footer}
     </View>
   );

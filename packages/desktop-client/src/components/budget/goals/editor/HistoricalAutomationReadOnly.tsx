@@ -5,6 +5,8 @@ import type {
   CopyTemplate,
 } from '@actual-app/core/types/models/templates';
 
+import { AmountAdjustmentSummary } from './AmountAdjustmentSummary';
+
 type HistoricalAutomationReadOnlyProps = {
   template: CopyTemplate | AverageTemplate;
 };
@@ -12,13 +14,27 @@ type HistoricalAutomationReadOnlyProps = {
 export const HistoricalAutomationReadOnly = ({
   template,
 }: HistoricalAutomationReadOnlyProps) => {
-  return template.type === 'copy' ? (
-    <Trans count={template.lookBack}>
-      Budget the same amount as {{ count: template.lookBack }} months ago
-    </Trans>
-  ) : (
+  if (template.type === 'copy') {
+    return (
+      <Trans count={template.lookBack}>
+        Budget the same amount as {{ count: template.lookBack }} months ago
+      </Trans>
+    );
+  }
+
+  const base = (
     <Trans count={template.numMonths}>
       Budget the average of the last {{ count: template.numMonths }} months
     </Trans>
+  );
+
+  if (template.adjustment === undefined) {
+    return base;
+  }
+
+  return (
+    <>
+      {base} <AmountAdjustmentSummary template={template} />
+    </>
   );
 };

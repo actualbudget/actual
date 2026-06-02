@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "26.5.2",
+  "version": "26.6.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -42,6 +42,7 @@
     "#components/budget": "./src/components/budget/index.tsx",
     "#components/budget/goals/actions": "./src/components/budget/goals/actions.ts",
     "#components/budget/goals/automationExamples": "./src/components/budget/goals/automationExamples.ts",
+    "#components/budget/goals/cleanupModel": "./src/components/budget/goals/cleanupModel.ts",
     "#components/budget/goals/constants": "./src/components/budget/goals/constants.ts",
     "#components/budget/goals/displayTemplateMeta": "./src/components/budget/goals/displayTemplateMeta.ts",
     "#components/budget/goals/formatMonthLabel": "./src/components/budget/goals/formatMonthLabel.ts",
@@ -51,6 +52,7 @@
     "#components/budget/util": "./src/components/budget/util.ts",
     "#components/codemirror/autocompleteTabAccept": "./src/components/codemirror/autocompleteTabAccept.ts",
     "#components/mobile/utils": "./src/components/mobile/utils.ts",
+    "#components/modals/BudgetAutomationsModal/migrateTemplatesToAutomations": "./src/components/modals/BudgetAutomationsModal/migrateTemplatesToAutomations.ts",
     "#components/reports/chart-theme": "./src/components/reports/chart-theme.ts",
     "#components/reports/constants": "./src/components/reports/constants.ts",
     "#components/reports/disabledList": "./src/components/reports/disabledList.ts",

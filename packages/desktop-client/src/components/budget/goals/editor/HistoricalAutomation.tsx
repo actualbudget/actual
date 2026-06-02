@@ -9,6 +9,7 @@ import type {
 
 import { updateTemplate } from '#components/budget/goals/actions';
 import type { Action } from '#components/budget/goals/actions';
+import { AmountAdjustment } from '#components/budget/goals/editor/AmountAdjustment';
 import { FormField, FormLabel } from '#components/forms';
 import { GenericInput } from '#components/util/GenericInput';
 
@@ -24,42 +25,49 @@ export const HistoricalAutomation = ({
   const { t } = useTranslation();
 
   return (
-    <SpaceBetween gap={50} style={{ marginTop: 10 }}>
-      <FormField style={{ flex: 1 }}>
-        <FormLabel title={t('Mode')} htmlFor="mode-field" />
-        <Select
-          id="mode-field"
-          key="mode-picker"
-          options={[
-            ['copy', t('Copy a previous month')],
-            ['average', t('Average of previous months')],
-          ]}
-          value={template.type}
-          onChange={type => dispatch(updateTemplate({ type }))}
-        />
-      </FormField>
-      <FormField style={{ flex: 1 }}>
-        <FormLabel
-          title={t('Number of months back')}
-          htmlFor="look-back-field"
-        />
-        <GenericInput
-          key="look-back-input"
-          type="number"
-          value={
-            template.type === 'average' ? template.numMonths : template.lookBack
-          }
-          onChange={value =>
-            dispatch(
-              updateTemplate(
-                template.type === 'average'
-                  ? { type: 'average', numMonths: value }
-                  : { type: 'copy', lookBack: value },
-              ),
-            )
-          }
-        />
-      </FormField>
-    </SpaceBetween>
+    <>
+      <SpaceBetween gap={50} style={{ marginTop: 10 }}>
+        <FormField style={{ flex: 1 }}>
+          <FormLabel title={t('Mode')} htmlFor="mode-field" />
+          <Select
+            id="mode-field"
+            key="mode-picker"
+            options={[
+              ['copy', t('Copy a previous month')],
+              ['average', t('Average of previous months')],
+            ]}
+            value={template.type}
+            onChange={type => dispatch(updateTemplate({ type }))}
+          />
+        </FormField>
+        <FormField style={{ flex: 1 }}>
+          <FormLabel
+            title={t('Number of months back')}
+            htmlFor="look-back-field"
+          />
+          <GenericInput
+            key="look-back-input"
+            type="number"
+            value={
+              template.type === 'average'
+                ? template.numMonths
+                : template.lookBack
+            }
+            onChange={value =>
+              dispatch(
+                updateTemplate(
+                  template.type === 'average'
+                    ? { type: 'average', numMonths: value }
+                    : { type: 'copy', lookBack: value },
+                ),
+              )
+            }
+          />
+        </FormField>
+      </SpaceBetween>
+      {template.type === 'average' && (
+        <AmountAdjustment template={template} dispatch={dispatch} />
+      )}
+    </>
   );
 };

@@ -3,6 +3,7 @@ ABNAMRO
 ABNANL
 Activo
 actualrc
+admins
 AESUDEF
 ajv
 ALZEY
@@ -11,6 +12,7 @@ ANZ
 aql
 AUR
 Authentik
+autogen
 AVERAGEA
 BANKA
 BANKINTER
@@ -89,6 +91,7 @@ Grafana
 Gruvbox
 HABAL
 Hampel
+healthcheck
 HELADEF
 HLOOKUP
 HUF
@@ -123,6 +126,7 @@ lage
 LHV
 LHVBEE
 LKR
+lookback
 MAXA
 mbank
 mdc
@@ -138,6 +142,7 @@ OIDC
 Okabe
 overbudgeted
 overbudgeting
+overfunded
 oxc
 Paribas
 passwordless
@@ -159,6 +164,7 @@ RIED
 RSchedule
 RSD
 SEK
+shopt
 simplefin
 SKHSFI
 Sparkasse
@@ -190,6 +196,7 @@ TWD
 UAH
 ubuntu
 undici
+Unmigrate
 userinfo
 Userscripts
 UZS

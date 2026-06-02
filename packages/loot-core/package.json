@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/core",
-  "version": "26.5.2",
+  "version": "26.6.0",
   "description": "",
   "license": "ISC",
   "repository": {
@@ -220,7 +220,7 @@
     "ts-node": "^10.9.2",
     "util": "^0.12.5",
     "vite": "^8.0.5",
-    "vite-plugin-node-polyfills": "^0.26.0",
+    "vite-plugin-node-polyfills": "^0.27.0",
     "vite-plugin-peggy-loader": "^2.0.1",
     "vitest": "^4.1.2",
     "yargs": "^18.0.0"

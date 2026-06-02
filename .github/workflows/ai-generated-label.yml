@@ -1,0 +1,29 @@
+name: Add 'AI generated' label to '[AI]' PRs
+
+##########################################################################################
+# This workflow uses the 'pull_request_target' event so it has a token that can add a    #
+# label to PRs from forks. It does NOT check out or execute any code from the PR, so it   #
+# is not vulnerable to the usual 'pull_request_target' code-injection concerns. Keep it   #
+# that way - do not add a checkout step or run any PR-provided scripts here.              #
+##########################################################################################
+
+on:
+  # This workflow never checks out or runs PR code; it only reads the PR title and adds a label.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
+    types: [opened, reopened, edited]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  add-ai-generated-label:
+    name: Add 'AI generated' label
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.pull_request.title, '[AI]')
+    steps:
+      - name: Add 'AI generated' label
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: gh pr edit "$PR_NUMBER" --add-label "AI generated"

@@ -52,6 +52,7 @@ import {
   filterByStartDate,
   isDateFormat,
   parseAmountFields,
+  parseCategoryFields,
   parseDate,
   stripCsvImportTransaction,
 } from './utils';
@@ -164,19 +165,6 @@ function getInitialMappings(transactions) {
     inOut: inOutField,
     category: categoryField,
   };
-}
-
-function parseCategoryFields(trans, categories) {
-  let match = null;
-  categories.forEach(category => {
-    if (category.id === trans.category) {
-      return null;
-    }
-    if (category.name === trans.category) {
-      match = category.id;
-    }
-  });
-  return match;
 }
 
 type LastParse = {
@@ -358,9 +346,7 @@ export function ImportTransactionsModal({
         }
 
         const category_id = parseCategoryFields(trans, categories);
-        if (category_id != null) {
-          trans.category = category_id;
-        }
+        trans.category = category_id;
 
         const {
           inflow: _inflow,
@@ -994,10 +980,11 @@ export function ImportTransactionsModal({
                     </View>
                   );
                 }}
-                renderItem={({ item }) => (
+                renderItem={({ item, index }) => (
                   <View>
                     <Transaction
                       transaction={item}
+                      index={index}
                       showParsed={filetype === 'csv' || filetype === 'qif'}
                       parseDateFormat={parseDateFormat}
                       dateFormat={dateFormat}

@@ -52,7 +52,7 @@ export function EmptyState({ onAdd }: EmptyStateProps) {
       <Text
         style={{
           fontSize: 13,
-          color: theme.pageTextSubdued,
+          color: theme.pageTextLight,
           marginTop: 4,
           marginBottom: 22,
           display: 'block',
@@ -123,7 +123,7 @@ export function EmptyState({ onAdd }: EmptyStateProps) {
               <Text
                 style={{
                   fontSize: 11,
-                  color: theme.pageTextSubdued,
+                  color: theme.pageTextLight,
                   lineHeight: 1.4,
                 }}
               >

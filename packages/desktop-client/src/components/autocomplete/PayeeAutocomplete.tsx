@@ -34,6 +34,7 @@ import { Fzf } from 'fzf';
 
 import { useAccounts } from '#hooks/useAccounts';
 import { useCommonPayees } from '#hooks/useCommonPayees';
+import { useLocationPermission } from '#hooks/useLocationPermission';
 import { useNearbyPayees } from '#hooks/useNearbyPayees';
 import { usePayees } from '#hooks/usePayees';
 import {
@@ -383,7 +384,10 @@ export function PayeeAutocomplete({
   const { t } = useTranslation();
   const { data: commonPayees } = useCommonPayees();
   const { data: retrievedPayees = [] } = usePayees();
-  const { data: retrievedNearbyPayees = [] } = useNearbyPayees();
+  const { isGranted } = useLocationPermission();
+  const { data: retrievedNearbyPayees = [] } = useNearbyPayees({
+    enabled: isGranted,
+  });
   if (!payees) {
     payees = retrievedPayees;
   }

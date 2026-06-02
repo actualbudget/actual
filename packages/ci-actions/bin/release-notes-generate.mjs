@@ -15,6 +15,16 @@ const exec = promisify(childProcess.exec);
 
 const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 
+const releaseBranch = process.env.RELEASE_BRANCH;
+const notesBranch = process.env.NOTES_BRANCH;
+const version = process.env.VERSION;
+
+if (!releaseBranch || !notesBranch || !version) {
+  throw new Error(
+    'RELEASE_BRANCH, NOTES_BRANCH, and VERSION env vars are required',
+  );
+}
+
 const apiResult = await fetch('https://api.github.com/graphql', {
   method: 'POST',
   headers: {
@@ -44,24 +54,38 @@ const apiResult = await fetch('https://api.github.com/graphql', {
     variables: {
       name: repo,
       owner,
-      headRefName: process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME,
+      headRefName: notesBranch,
     },
   }),
 }).then(res => res.json());
 
 await collapsedLog('API Response', apiResult);
 
-const prData = apiResult.data.repository.pullRequests.edges[0].node;
-
-const version = prData.headRefName.split('/')[1].replace(/^v/, '');
-const slug = version.replace(/\./g, '-');
-const author = process.env.GITHUB_ACTOR || 'TODO';
-const commitMessage = `Generate release notes for v${version}`;
+const prData = apiResult.data.repository.pullRequests.edges[0]?.node;
+if (!prData) {
+  console.error(`No PR found for branch ${notesBranch}`);
+  process.exit(1);
+}
 
 const releaseDateMatch = (prData.body || '').match(
   /<!-- release-date:(\d{4}-\d{2}-\d{2}) -->/,
 );
-const releaseDate = releaseDateMatch ? releaseDateMatch[1] : 'TODO';
+if (!releaseDateMatch) {
+  console.error(
+    `PR for ${notesBranch} body missing <!-- release-date:YYYY-MM-DD --> marker`,
+  );
+  process.exit(1);
+}
+const releaseDate = releaseDateMatch[1];
+
+const author = process.env.GITHUB_ACTOR;
+if (!author) {
+  console.error('::error::GITHUB_ACTOR env var is not set');
+  process.exit(1);
+}
+
+const slug = version.replace(/\./g, '-');
+const commitMessage = `Generate release notes for v${version}`;
 
 const botName = 'github-actions[bot]';
 const botEmail = '41898282+github-actions[bot]@users.noreply.github.com';
@@ -72,17 +96,8 @@ await exec(`git config user.email '${botEmail}'`);
 const AUTOGEN_MARKER = '<!-- release-notes:auto-generated -->';
 
 await group('Prepare branch', async () => {
-  if (process.env.GITHUB_HEAD_REF) {
-    await exec(`git fetch origin ${process.env.GITHUB_HEAD_REF}`, {
-      stdio: 'inherit',
-    });
-    await exec(`git checkout ${process.env.GITHUB_HEAD_REF}`, {
-      stdio: 'inherit',
-    });
-  }
-
   // recover deleted release note files from previous generation commits
-  const baseRef = process.env.GITHUB_BASE_REF || 'master';
+  const baseRef = 'master';
   await exec(`git fetch origin ${baseRef}`, { stdio: 'inherit' });
   const { stdout: mergeBase } = await exec(
     `git merge-base HEAD origin/${baseRef}`,
@@ -110,6 +125,11 @@ await group('Prepare branch', async () => {
       await fs.unlink(patchPath).catch(() => undefined);
     }
   }
+
+  await exec(`git fetch origin ${releaseBranch}`, { stdio: 'inherit' });
+  await exec(`git checkout origin/${releaseBranch} -- upcoming-release-notes`, {
+    stdio: 'inherit',
+  });
 });
 
 const { notesByCategory, files } = await parseReleaseNotes(

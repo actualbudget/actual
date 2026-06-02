@@ -7,6 +7,7 @@ import { logger } from '#platform/server/log';
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { TRANSACTION_SORT_INCREMENT } from '#server/db/sort';
+import { TransactionError } from '#server/errors';
 import { runMutator } from '#server/mutators';
 import { post } from '#server/post';
 import { getServer } from '#server/server-config';
@@ -89,7 +90,8 @@ async function getAccountOldestTransaction(id): Promise<TransactionEntity> {
 async function getAccountSyncStartDate(id) {
   // Many GoCardless integrations do not support getting more than 90 days
   // worth of data, so make that the earliest possible limit.
-  const dates = [monthUtils.subDays(monthUtils.currentDay(), 90)];
+  // 89 days ago until today inclusive is 90 days.
+  const dates = [monthUtils.subDays(monthUtils.currentDay(), 89)];
 
   const oldestTransaction = await getAccountOldestTransaction(id);
 
@@ -388,6 +390,22 @@ async function normalizeTransactions(
     // Strip off the irregular properties
     const { payee_name: originalPayeeName, subtransactions, ...rest } = trans;
     trans = rest;
+
+    if (trans.amount != null && !Number.isInteger(trans.amount)) {
+      throw new TransactionError(
+        `Amount is invalid, must be an integer: ${trans.amount}`,
+      );
+    }
+
+    if (subtransactions) {
+      for (const sub of subtransactions) {
+        if (sub.amount != null && !Number.isInteger(sub.amount)) {
+          throw new TransactionError(
+            `Subtransaction amount is invalid, must be an integer: ${sub.amount}`,
+          );
+        }
+      }
+    }
 
     let payee_name = originalPayeeName;
     if (payee_name) {
