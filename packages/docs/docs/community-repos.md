@@ -57,7 +57,8 @@ Actual currently has official support for migrating budgets from YNAB4 and nYNAB
   - _A collection of JavaScript/CSS Userscripts for Actual Budget._
 - **Actual Budget iOS Widget** - https://github.com/TaylorJns/Actual-Budget-iOS-Widget
   - _An iOS widget to display your Actual Budget category balances for the current month. Requires your Actual server to be accessible via HTTPS, and the **Local REST API** community project to be installed._
-
+- **Actual Bench** - <https://github.com/x-rous/actual-bench>
+  * *Admin and workbench companion for Actual Budget. Bulk-edit data, manage, merge and diagnose rules, 12-month budget view, snapshot inspection, and ActualQL queries - all changes staged until you save.*
 ## Others
 
 - **Amazon orders CSV exporter user script** - https://github.com/IeuanK/AmazonExporter/
