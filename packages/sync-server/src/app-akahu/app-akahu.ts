@@ -34,8 +34,9 @@ app.post(
   '/status',
   handleError(async (req, res) => {
     const userToken = secretsService.get(SecretName.akahu_userToken);
-    const token = secretsService.get(SecretName.akahu_appToken);
-    const configured = userToken != null && token != null;
+    const appToken = secretsService.get(SecretName.akahu_appToken);
+
+    const configured = userToken != null && appToken != null;
 
     res.send({
       status: 'ok',
@@ -52,6 +53,16 @@ app.post(
     const userToken = secretsService.get(SecretName.akahu_userToken);
     const appToken = secretsService.get(SecretName.akahu_appToken);
 
+    if (!userToken || !appToken) {
+      res.send({
+        status: 'ok',
+        data: {
+          error: 'Missing user or app token',
+        },
+      });
+      return;
+    }
+
     try {
       const akahu = new AkahuClient({ appToken });
       const accounts = await akahu.accounts.list(userToken);
@@ -63,10 +74,13 @@ app.post(
         },
       });
     } catch (error) {
+      const errorMessage =
+        error instanceof Error && error.message ? error.message : String(error);
+
       res.send({
         status: 'error',
         data: {
-          error: error.message,
+          error: errorMessage,
         },
       });
     }
@@ -87,9 +101,20 @@ app.post(
       });
     }
 
+    const userToken = secretsService.get(SecretName.akahu_userToken);
+    const appToken = secretsService.get(SecretName.akahu_appToken);
+
+    if (!userToken || !appToken) {
+      res.send({
+        status: 'ok',
+        data: {
+          error: 'Missing user or app token',
+        },
+      });
+      return;
+    }
+
     try {
-      const userToken = secretsService.get(SecretName.akahu_userToken);
-      const appToken = secretsService.get(SecretName.akahu_appToken);
       const akahu = new AkahuClient({ appToken });
 
       const account = await akahu.accounts.get(userToken, accountId);
@@ -102,8 +127,14 @@ app.post(
         });
       }
 
-      const currentBalance = convertToCents(account.balance.current);
-      const availableBalance = convertToCents(account.balance.available);
+      if (!account.balance) {
+        return res.send({
+          status: 'error',
+          data: {
+            error: 'Account balance unavailable',
+          },
+        });
+      }
 
       const now = new Date();
       const endDate = new Date(
@@ -132,7 +163,8 @@ app.post(
         accountId,
       );
 
-      const date = getDate(new Date(account.refreshed.balance));
+      const date = getDate(account.refreshed?.balance ? new Date(account.refreshed.balance) : new Date());
+      const currentBalance = convertToCents(account.balance.current);
 
       const balances = [
         {
@@ -142,16 +174,19 @@ app.post(
           },
           balanceType: 'expected',
           referenceDate: date,
-        },
-        {
+        }
+      ];
+
+      if (account.balance.available) {
+        balances.push({
           balanceAmount: {
-            amount: availableBalance,
+            amount: convertToCents(account.balance.available),
             currency: account.balance.currency,
           },
           balanceType: 'interimAvailable',
           referenceDate: date,
-        },
-      ];
+        });
+      }
 
       const startDateObj = new Date(startDate);
       const all = [];
@@ -176,7 +211,7 @@ app.post(
         }
       }
 
-      const sortFunction = (a, b) => b.sortOrder - a.sortOrder;
+      const sortFunction = (a: AkahuTransaction, b: AkahuTransaction) => b.sortOrder - a.sortOrder;
       const bookedSorted = booked.sort(sortFunction);
       const pendingSorted = pending.sort(sortFunction);
       const allSorted = all.sort(sortFunction);
@@ -194,10 +229,13 @@ app.post(
         },
       });
     } catch (error) {
+      const errorMessage =
+        error instanceof Error && error.message ? error.message : String(error);
+
       res.send({
         status: 'error',
         data: {
-          error: 'Failed to fetch transactions: ' + error.message,
+          error: 'Failed to fetch transactions: ' + errorMessage,
         },
       });
     }
@@ -210,11 +248,11 @@ function isEnriched(
   return 'merchant' in trans || 'meta' in trans;
 }
 
-function getDate(date): string {
+function getDate(date: Date): string {
   return date.toISOString().split('T')[0];
 }
 
-function convertToCents(amount): number {
+function convertToCents(amount: number): number {
   return Math.round(amount * 100);
 }
 
@@ -246,7 +284,7 @@ function processPendingTransaction(
     sortOrder: transactionDate.getTime(),
     transactionAmount: {
       amount: Math.round(trans.amount * 100) / 100,
-      currency: account.balance.currency,
+      currency: account.balance?.currency ?? 'NZD',
     },
   };
 }
