@@ -63,6 +63,7 @@ export type AccountHandlers = {
   'bank-sync-accounts': typeof getPluginAccounts;
   'bank-sync-accounts-link': typeof linkPluginAccount;
   'bank-sync-plugin-call': typeof callPluginRoute;
+  'bank-sync-plugin-secret-set': typeof setPluginSecret;
   'account-create': typeof createAccount;
   'account-close': typeof closeAccount;
   'account-reopen': typeof reopenAccount;
@@ -583,7 +584,7 @@ async function getPluginAccounts({
 
     return await post(
       `${server.BASE_SERVER}/plugins-api/bank-sync/${providerSlug}/accounts`,
-      credentials,
+      credentials ?? {},
       {
         'X-ACTUAL-TOKEN': userToken,
         'x-actual-file-id': fileId,
@@ -716,6 +717,42 @@ async function callPluginRoute({
   }
 
   return post(pluginUrl, body, headers, 60000);
+}
+
+async function setPluginSecret({
+  providerSlug,
+  key,
+  value,
+  fileId,
+}: {
+  providerSlug: string;
+  key: string;
+  value: string | null;
+  fileId: string;
+}) {
+  const server = getServer();
+  if (!server) {
+    throw new Error('No server configured');
+  }
+
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) {
+    throw new Error('User not authenticated');
+  }
+
+  return post(
+    `${server.BASE_SERVER}/plugins-api/bank-sync/${providerSlug}/secret`,
+    {
+      key,
+      value,
+      fileId,
+    },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+      'x-actual-file-id': fileId,
+    },
+    60000,
+  );
 }
 
 async function createAccount({
@@ -1913,6 +1950,7 @@ app.method('bank-sync-status', getPluginStatus);
 app.method('bank-sync-accounts', getPluginAccounts);
 app.method('bank-sync-accounts-link', linkPluginAccount);
 app.method('bank-sync-plugin-call', callPluginRoute);
+app.method('bank-sync-plugin-secret-set', setPluginSecret);
 app.method('account-create', mutator(undoable(createAccount)));
 app.method('account-close', mutator(closeAccount));
 app.method('account-reopen', mutator(undoable(reopenAccount)));

@@ -2,7 +2,7 @@
 
 /**
  * Build script to create a plugin distribution zip file
- * Creates: {packageName}.{version}.zip containing dist/index.js, manifest.json, and package.json
+ * Creates: {packageName}.{version}.zip using the unified plugin layout.
  */
 
 const { createWriteStream, existsSync } = require('fs');
@@ -38,6 +38,7 @@ async function createZip() {
 
     // Check if required files exist
     const bundlePath = join(__dirname, '..', 'dist', 'bundle.js');
+    const frontendBuildPath = join(__dirname, '..', 'frontend-build');
     const manifestPath = join(__dirname, '..', 'manifest.json');
 
     if (!existsSync(bundlePath)) {
@@ -47,6 +48,11 @@ async function createZip() {
 
     if (!existsSync(manifestPath)) {
       console.error('manifest.json not found. Run: npm run build:manifest');
+      process.exit(1);
+    }
+
+    if (!existsSync(frontendBuildPath)) {
+      console.error('frontend-build not found. Run: npm run build:frontend');
       process.exit(1);
     }
 
@@ -67,7 +73,7 @@ async function createZip() {
       console.log(`${zipFilename} created successfully`);
       console.log(`Size: ${(stats / 1024).toFixed(2)} KB`);
       console.log(
-        `📁 Contents: index.js (bundled with dependencies), manifest.json`,
+        `📁 Contents: manifest.json, syncserver/index.js, frontend/*`,
       );
     });
 
@@ -82,16 +88,13 @@ async function createZip() {
         axios: packageJson.dependencies.axios,
       },
     };
-    const pluginPackageJsonContent = JSON.stringify(
-      pluginPackageJson,
-      null,
-      2,
-    );
+    const pluginPackageJsonContent = JSON.stringify(pluginPackageJson, null, 2);
 
     // Add files to archive
-    archive.file(bundlePath, { name: 'index.js' });
     archive.file(manifestPath, { name: 'manifest.json' });
+    archive.file(bundlePath, { name: 'syncserver/index.js' });
     archive.append(pluginPackageJsonContent, { name: 'package.json' });
+    archive.directory(frontendBuildPath, 'frontend');
 
     // Finalize the archive
     await archive.finalize();

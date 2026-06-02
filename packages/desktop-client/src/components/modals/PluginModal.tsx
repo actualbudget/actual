@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import { type BasicModalProps } from '@actual-app/components/props/modalProps';
 
 import { Modal } from '#components/common/Modal';
@@ -9,6 +11,8 @@ type PluginModalProps = {
 };
 
 export function PluginModal({ parameter, modalProps }: PluginModalProps) {
+  const toRender = useMemo(() => new Map([['dummy', parameter]]), [parameter]);
+
   return (
     <Modal
       name="plugin-modal"
@@ -18,7 +22,7 @@ export function PluginModal({ parameter, modalProps }: PluginModalProps) {
       onClose={modalProps?.onClose}
       containerProps={modalProps?.containerProps}
     >
-      <RenderPluginsComponent toRender={new Map([['dummy', parameter]])} />
+      <RenderPluginsComponent toRender={toRender} />
     </Modal>
   );
 }

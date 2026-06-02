@@ -246,6 +246,8 @@ class WorkerBridge {
           const toSend = pendingMsg;
           pendingMsg = null;
           localBackendWorker.postMessage(toSend);
+        } else {
+          this._dispatch({ data: workerMsg });
         }
       }
       sharedPort.postMessage({ type: '__from-worker', msg: workerMsg });

@@ -5,8 +5,8 @@ import {
   BankSyncErrorCode,
   BankSyncError,
 } from '@actual-app/plugins-core-sync-server';
-import express, { Request, Response } from 'express';
 import axios from 'axios';
+import express, { Request, Response } from 'express';
 
 // Import manifest (used during build)
 import './manifest';
@@ -68,11 +68,19 @@ async function statusHandler(req: Request, res: Response): Promise<void> {
 
     // Allow configuration via POST by supplying token
     if (token) {
-      await saveSecret(req, 'simplefin_token', token);
+      const saveResult = await saveSecret(req, 'simplefin_token', token);
+      if (!saveResult.success) {
+        res.json({
+          status: 'error',
+          error: saveResult.error || 'Failed to save SimpleFIN token',
+        });
+        return;
+      }
     }
 
     const tokenResult = await getSecret(req, 'simplefin_token');
-    const configured = tokenResult.value != null && tokenResult.value !== 'Forbidden';
+    const configured =
+      tokenResult.value != null && tokenResult.value !== 'Forbidden';
 
     res.json({
       status: 'ok',
@@ -104,7 +112,14 @@ app.post('/accounts', async (req: Request, res: Response): Promise<void> => {
 
     // If token is provided in request, save it
     if (token) {
-      await saveSecret(req, 'simplefin_token', token);
+      const saveResult = await saveSecret(req, 'simplefin_token', token);
+      if (!saveResult.success) {
+        res.json({
+          status: 'error',
+          error: saveResult.error || 'Failed to save SimpleFIN token',
+        });
+        return;
+      }
     }
 
     let accessKey: string | null = null;
@@ -140,16 +155,18 @@ app.post('/accounts', async (req: Request, res: Response): Promise<void> => {
       const accounts = await getAccounts(accessKey, null, null, null, true);
 
       // Transform SimpleFIN accounts to GenericBankSyncAccount format
-      const transformedAccounts = accounts.accounts.map((account: SimpleFINAccount) => ({
-        account_id: account.id,
-        name: account.name,
-        institution: account.org.name,
-        balance: parseFloat(account.balance.replace('.', '')) / 100,
-        mask: account.id.substring(account.id.length - 4),
-        official_name: account.name,
-        orgDomain: account.org.domain || null,
-        orgId: account.org.name,
-      }));
+      const transformedAccounts = accounts.accounts.map(
+        (account: SimpleFINAccount) => ({
+          account_id: account.id,
+          name: account.name,
+          institution: account.org.name,
+          balance: parseFloat(account.balance.replace('.', '')) / 100,
+          mask: account.id.substring(account.id.length - 4),
+          official_name: account.name,
+          orgDomain: account.org.domain || null,
+          orgId: account.org.name,
+        }),
+      );
 
       res.json({
         status: 'ok',
@@ -159,7 +176,7 @@ app.post('/accounts', async (req: Request, res: Response): Promise<void> => {
       });
     } catch (e) {
       console.error('[SIMPLEFIN ACCOUNTS] Error:', e);
-      
+
       const errorResponse: BankSyncError = {
         error_type: BankSyncErrorCode.SERVER_ERROR,
         error_code: BankSyncErrorCode.SERVER_ERROR,
@@ -169,21 +186,34 @@ app.post('/accounts', async (req: Request, res: Response): Promise<void> => {
 
       if (e instanceof Error) {
         const errorMessage = e.message.toLowerCase();
-        
-        if (errorMessage.includes('forbidden') || errorMessage.includes('403')) {
+
+        if (
+          errorMessage.includes('forbidden') ||
+          errorMessage.includes('403')
+        ) {
           errorResponse.error_type = BankSyncErrorCode.INVALID_ACCESS_TOKEN;
           errorResponse.error_code = BankSyncErrorCode.INVALID_ACCESS_TOKEN;
-          errorResponse.reason = 'Invalid SimpleFIN access token. Please reconfigure your connection.';
-        } else if (errorMessage.includes('401') || errorMessage.includes('unauthorized')) {
+          errorResponse.reason =
+            'Invalid SimpleFIN access token. Please reconfigure your connection.';
+        } else if (
+          errorMessage.includes('401') ||
+          errorMessage.includes('unauthorized')
+        ) {
           errorResponse.error_type = BankSyncErrorCode.UNAUTHORIZED;
           errorResponse.error_code = BankSyncErrorCode.UNAUTHORIZED;
-          errorResponse.reason = 'Unauthorized access to SimpleFIN. Please check your credentials.';
-        } else if (errorMessage.includes('network') || errorMessage.includes('econnrefused') || errorMessage.includes('enotfound')) {
+          errorResponse.reason =
+            'Unauthorized access to SimpleFIN. Please check your credentials.';
+        } else if (
+          errorMessage.includes('network') ||
+          errorMessage.includes('econnrefused') ||
+          errorMessage.includes('enotfound')
+        ) {
           errorResponse.error_type = BankSyncErrorCode.NETWORK_ERROR;
           errorResponse.error_code = BankSyncErrorCode.NETWORK_ERROR;
-          errorResponse.reason = 'Network error communicating with SimpleFIN. Please check your connection.';
+          errorResponse.reason =
+            'Network error communicating with SimpleFIN. Please check your connection.';
         }
-        
+
         errorResponse.details = { originalError: e.message };
       }
 
@@ -206,142 +236,174 @@ app.post('/accounts', async (req: Request, res: Response): Promise<void> => {
  * Fetch transactions from SimpleFIN
  * Body: { accountId: string, startDate: string, token?: string }
  */
-app.post('/transactions', async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { accountId, startDate } = req.body || {};
+app.post(
+  '/transactions',
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { accountId, startDate } = req.body || {};
 
-    if (!accountId) {
+      if (!accountId) {
+        res.json({
+          status: 'error',
+          error: 'accountId is required',
+        });
+        return;
+      }
+
+      const accessKeyResult = await getSecret(req, 'simplefin_accessKey');
+
+      if (
+        accessKeyResult.value == null ||
+        accessKeyResult.value === 'Forbidden'
+      ) {
+        res.json({
+          status: 'ok',
+          data: {
+            error_type: 'INVALID_ACCESS_TOKEN',
+            error_code: 'INVALID_ACCESS_TOKEN',
+            status: 'rejected',
+            reason:
+              'Invalid SimpleFIN access token. Reset the token and re-link any broken accounts.',
+          },
+        });
+        return;
+      }
+
+      if (Array.isArray(accountId) !== Array.isArray(startDate)) {
+        console.log({ accountId, startDate });
+        res.json({
+          status: 'error',
+          error:
+            'accountId and startDate must either both be arrays or both be strings',
+        });
+        return;
+      }
+      if (Array.isArray(accountId) && accountId.length !== startDate.length) {
+        console.log({ accountId, startDate });
+        res.json({
+          status: 'error',
+          error: 'accountId and startDate arrays must be the same length',
+        });
+        return;
+      }
+
+      const earliestStartDate = Array.isArray(startDate)
+        ? startDate.reduce((a, b) => (a < b ? a : b))
+        : startDate;
+
+      let results: SimpleFINResponse;
+      try {
+        results = await getTransactions(
+          accessKeyResult.value,
+          Array.isArray(accountId) ? accountId : [accountId],
+          new Date(earliestStartDate),
+        );
+      } catch (e) {
+        console.error('[SIMPLEFIN TRANSACTIONS] Error:', e);
+
+        const errorResponse: BankSyncError = {
+          error_type: BankSyncErrorCode.SERVER_ERROR,
+          error_code: BankSyncErrorCode.SERVER_ERROR,
+          status: 'error',
+          reason: 'There was an error communicating with SimpleFIN.',
+        };
+
+        if (e instanceof Error) {
+          const errorMessage = e.message.toLowerCase();
+
+          if (
+            errorMessage.includes('forbidden') ||
+            errorMessage.includes('403')
+          ) {
+            errorResponse.error_type = BankSyncErrorCode.INVALID_ACCESS_TOKEN;
+            errorResponse.error_code = BankSyncErrorCode.INVALID_ACCESS_TOKEN;
+            errorResponse.reason =
+              'Invalid SimpleFIN access token. Please reconfigure your connection.';
+          } else if (
+            errorMessage.includes('401') ||
+            errorMessage.includes('unauthorized')
+          ) {
+            errorResponse.error_type = BankSyncErrorCode.UNAUTHORIZED;
+            errorResponse.error_code = BankSyncErrorCode.UNAUTHORIZED;
+            errorResponse.reason =
+              'Unauthorized access to SimpleFIN. Please check your credentials.';
+          } else if (
+            errorMessage.includes('404') ||
+            errorMessage.includes('not found')
+          ) {
+            errorResponse.error_type = BankSyncErrorCode.ACCOUNT_NOT_FOUND;
+            errorResponse.error_code = BankSyncErrorCode.ACCOUNT_NOT_FOUND;
+            errorResponse.reason =
+              'Account not found in SimpleFIN. Please check your account configuration.';
+          } else if (
+            errorMessage.includes('network') ||
+            errorMessage.includes('econnrefused') ||
+            errorMessage.includes('enotfound')
+          ) {
+            errorResponse.error_type = BankSyncErrorCode.NETWORK_ERROR;
+            errorResponse.error_code = BankSyncErrorCode.NETWORK_ERROR;
+            errorResponse.reason =
+              'Network error communicating with SimpleFIN. Please check your connection.';
+          }
+
+          errorResponse.details = { originalError: e.message };
+        }
+
+        res.json({
+          status: 'ok',
+          data: errorResponse,
+        });
+        return;
+      }
+
+      let response: any = {};
+      if (Array.isArray(accountId)) {
+        for (let i = 0; i < accountId.length; i++) {
+          const id = accountId[i];
+          response[id] = getAccountResponse(
+            results,
+            id,
+            new Date(startDate[i]),
+          );
+        }
+      } else {
+        response = getAccountResponse(results, accountId, new Date(startDate));
+      }
+
+      if (results.hasError) {
+        res.json({
+          status: 'ok',
+          data: !Array.isArray(accountId)
+            ? results.accountErrors?.[accountId]?.[0] || results.errors[0]
+            : {
+                ...response,
+                errors: results.accountErrors || results.errors,
+              },
+        });
+        return;
+      }
+
       res.json({
-        status: 'error',
-        error: 'accountId is required',
+        status: 'ok',
+        data: response,
       });
-      return;
-    }
-
-    const accessKeyResult = await getSecret(req, 'simplefin_accessKey');
-
-    if (accessKeyResult.value == null || accessKeyResult.value === 'Forbidden') {
+    } catch (error) {
       res.json({
         status: 'ok',
         data: {
-          error_type: 'INVALID_ACCESS_TOKEN',
-          error_code: 'INVALID_ACCESS_TOKEN',
-          status: 'rejected',
-          reason:
-            'Invalid SimpleFIN access token. Reset the token and re-link any broken accounts.',
+          error: error instanceof Error ? error.message : 'Unknown error',
         },
       });
-      return;
     }
-
-    if (Array.isArray(accountId) !== Array.isArray(startDate)) {
-      console.log({ accountId, startDate });
-      res.json({
-        status: 'error',
-        error: 'accountId and startDate must either both be arrays or both be strings',
-      });
-      return;
-    }
-    if (Array.isArray(accountId) && accountId.length !== startDate.length) {
-      console.log({ accountId, startDate });
-      res.json({
-        status: 'error',
-        error: 'accountId and startDate arrays must be the same length',
-      });
-      return;
-    }
-
-    const earliestStartDate = Array.isArray(startDate)
-      ? startDate.reduce((a, b) => (a < b ? a : b))
-      : startDate;
-
-    let results: SimpleFINResponse;
-    try {
-      results = await getTransactions(
-        accessKeyResult.value,
-        Array.isArray(accountId) ? accountId : [accountId],
-        new Date(earliestStartDate),
-      );
-    } catch (e) {
-      console.error('[SIMPLEFIN TRANSACTIONS] Error:', e);
-      
-      const errorResponse: BankSyncError = {
-        error_type: BankSyncErrorCode.SERVER_ERROR,
-        error_code: BankSyncErrorCode.SERVER_ERROR,
-        status: 'error',
-        reason: 'There was an error communicating with SimpleFIN.',
-      };
-
-      if (e instanceof Error) {
-        const errorMessage = e.message.toLowerCase();
-        
-        if (errorMessage.includes('forbidden') || errorMessage.includes('403')) {
-          errorResponse.error_type = BankSyncErrorCode.INVALID_ACCESS_TOKEN;
-          errorResponse.error_code = BankSyncErrorCode.INVALID_ACCESS_TOKEN;
-          errorResponse.reason = 'Invalid SimpleFIN access token. Please reconfigure your connection.';
-        } else if (errorMessage.includes('401') || errorMessage.includes('unauthorized')) {
-          errorResponse.error_type = BankSyncErrorCode.UNAUTHORIZED;
-          errorResponse.error_code = BankSyncErrorCode.UNAUTHORIZED;
-          errorResponse.reason = 'Unauthorized access to SimpleFIN. Please check your credentials.';
-        } else if (errorMessage.includes('404') || errorMessage.includes('not found')) {
-          errorResponse.error_type = BankSyncErrorCode.ACCOUNT_NOT_FOUND;
-          errorResponse.error_code = BankSyncErrorCode.ACCOUNT_NOT_FOUND;
-          errorResponse.reason = 'Account not found in SimpleFIN. Please check your account configuration.';
-        } else if (errorMessage.includes('network') || errorMessage.includes('econnrefused') || errorMessage.includes('enotfound')) {
-          errorResponse.error_type = BankSyncErrorCode.NETWORK_ERROR;
-          errorResponse.error_code = BankSyncErrorCode.NETWORK_ERROR;
-          errorResponse.reason = 'Network error communicating with SimpleFIN. Please check your connection.';
-        }
-        
-        errorResponse.details = { originalError: e.message };
-      }
-
-      res.json({
-        status: 'ok',
-        data: errorResponse,
-      });
-      return;
-    }
-
-    let response: any = {};
-    if (Array.isArray(accountId)) {
-      for (let i = 0; i < accountId.length; i++) {
-        const id = accountId[i];
-        response[id] = getAccountResponse(results, id, new Date(startDate[i]));
-      }
-    } else {
-      response = getAccountResponse(results, accountId, new Date(startDate));
-    }
-
-    if (results.hasError) {
-      res.json({
-        status: 'ok',
-        data: !Array.isArray(accountId)
-          ? (results.accountErrors?.[accountId]?.[0] || results.errors[0])
-          : {
-              ...response,
-              errors: results.accountErrors || results.errors,
-            },
-      });
-      return;
-    }
-
-    res.json({
-      status: 'ok',
-      data: response,
-    });
-  } catch (error) {
-    res.json({
-      status: 'ok',
-      data: {
-        error: error instanceof Error ? error.message : 'Unknown error',
-      },
-    });
-  }
-});
+  },
+);
 
 // Helper functions
-function logAccountError(results: SimpleFINResponse, accountId: string, data: any) {
+function logAccountError(
+  results: SimpleFINResponse,
+  accountId: string,
+  data: any,
+) {
   // For account-specific errors, we store them in the results object for later retrieval
   if (!results.accountErrors) {
     results.accountErrors = {};
@@ -352,8 +414,14 @@ function logAccountError(results: SimpleFINResponse, accountId: string, data: an
   results.hasError = true;
 }
 
-function getAccountResponse(results: SimpleFINResponse, accountId: string, startDate: Date): any {
-  const account = !results?.accounts ? undefined : results.accounts.find(a => a.id === accountId);
+function getAccountResponse(
+  results: SimpleFINResponse,
+  accountId: string,
+  startDate: Date,
+): any {
+  const account = !results?.accounts
+    ? undefined
+    : results.accounts.find(a => a.id === accountId);
   if (!account) {
     console.log(
       `The account "${accountId}" was not found. Here were the accounts returned:`,

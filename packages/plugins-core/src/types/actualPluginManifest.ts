@@ -21,6 +21,9 @@ export type ActualPluginBankSyncConfig = {
   };
   description?: string;
   requiresAuth?: boolean;
+  setup?: {
+    type: 'plugin' | 'json';
+  };
 };
 
 export type ActualPluginSyncServerManifest = {
@@ -110,6 +113,15 @@ export function validateActualPluginManifest(
 
   if (candidate.type === 'syncserver' && candidate.frontend != null) {
     throw new Error('Sync-server-only plugins cannot specify frontend config');
+  }
+
+  if (
+    candidate.syncserver?.bankSync?.setup?.type === 'plugin' &&
+    (candidate.type !== 'mixed' || candidate.frontend == null)
+  ) {
+    throw new Error(
+      "Bank sync setup.type 'plugin' requires a mixed plugin with frontend config",
+    );
   }
 
   return candidate as ActualPluginManifest;

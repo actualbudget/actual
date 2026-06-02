@@ -39,6 +39,7 @@ import { type RootState } from '#redux/store';
 import {
   loadPlugins,
   loadPluginsScript,
+  type BankSyncProviderSetupRegistration,
   type PluginRouteFn,
   type PluginModalModel,
   type PluginSlotRegistrationFn,
@@ -48,6 +49,12 @@ import { getAllPlugins } from './core/pluginStore';
 // Move stable refs to module scope to prevent recreation
 const modalMap = new Map<string, PluginModalModel>();
 let mfInstance: ReturnType<typeof createInstance> | null = null;
+const emptyPayeesEvent = { payees: [] as PayeeEntity[] };
+const emptyCategoriesEvent = {
+  categories: [] as CategoryEntity[],
+  groups: [] as CategoryGroupEntity[],
+};
+const emptyAccountsEvent = { accounts: [] as AccountEntity[] };
 
 export type PluginDashboardWidget = {
   pluginId: string;
@@ -71,6 +78,7 @@ export type ActualPluginsContextType = {
   pluginsRoutes: Map<string, PluginRouteFn>;
   slotItems: Record<SlotLocations, Map<string, PluginSlotRegistrationFn>>;
   pluginRegisteredWidgets: Map<string, PluginDashboardWidget>;
+  bankSyncProviderSetups: Map<string, BankSyncProviderSetupRegistration>;
   // Theme management
   themes: Map<
     string,
@@ -115,6 +123,7 @@ const defaultContextValue: ActualPluginsContextType = {
     topbar: new Map(),
   },
   pluginRegisteredWidgets: new Map(),
+  bankSyncProviderSetups: new Map(),
   themes: new Map(),
   registerTheme: () => {},
   getThemes: () => [],
@@ -160,20 +169,17 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
 
   // Create memoized selectors that return stable references
   const payeesSelector = useMemo(
-    () => (_state: RootState) => ({ payees: [] as PayeeEntity[] }),
+    () => (_state: RootState) => emptyPayeesEvent,
     [],
   );
 
   const categoriesSelector = useMemo(
-    () => (_state: RootState) => ({
-      categories: [] as CategoryEntity[],
-      groups: [] as CategoryGroupEntity[],
-    }),
+    () => (_state: RootState) => emptyCategoriesEvent,
     [],
   );
 
   const accountsSelector = useMemo(() => {
-    return (_state: RootState) => ({ accounts: [] as AccountEntity[] });
+    return (_state: RootState) => emptyAccountsEvent;
   }, []);
 
   useEventDispatcher('payees', payeesSelector, events);
@@ -185,6 +191,12 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
   // const [pluginsModules, setPluginsModules] = useState<Map<string, ActualPluginEntry>>(new Map());
 
   const [initialized, setinitialized] = useState(false);
+  const initializedRef = useRef(initialized);
+  initializedRef.current = initialized;
+  const pluginStoreLengthRef = useRef(pluginStore.length);
+  pluginStoreLengthRef.current = pluginStore.length;
+  const eventsRef = useRef(events);
+  eventsRef.current = events;
 
   // Reset initialization state on unhandled runtime errors in development
   useEffect(() => {
@@ -255,6 +267,9 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
   });
   const [pluginRegisteredWidgets, setPluginRegisteredWidgets] = useState<
     Map<string, PluginDashboardWidget>
+  >(new Map());
+  const [bankSyncProviderSetups, setBankSyncProviderSetups] = useState<
+    Map<string, BankSyncProviderSetupRegistration>
   >(new Map());
 
   const dispatch = useDispatch();
@@ -396,6 +411,7 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
   // The function that actually registers and activates plugin code
   const handleLoadPlugins = useCallback(
     async (pluginsEntries: Map<string, ActualPluginEntry>) => {
+      setBankSyncProviderSetups(new Map());
       // We pass these references so plugin activation can call them.
       await loadPlugins({
         pluginsEntries,
@@ -405,37 +421,42 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
         setPluginsRoutes,
         setSlotItems,
         setPluginRegisteredWidgets,
+        setBankSyncProviderSetups,
         navigateBase,
         setEvents,
         registerTheme,
         removePluginThemes,
       });
 
-      dispatchEvent('payees', events, {
+      const currentEvents = eventsRef.current;
+
+      dispatchEvent('payees', currentEvents, {
         payees: [],
       });
-      dispatchEvent('categories', events, {
+      dispatchEvent('categories', currentEvents, {
         categories: [],
         groups: [],
       });
-      dispatchEvent('accounts', events, {
+      dispatchEvent('accounts', currentEvents, {
         accounts: [],
       });
     },
-    [dispatch, navigateBase, events, removePluginThemes, registerTheme],
+    [dispatch, navigateBase, removePluginThemes, registerTheme],
   );
 
   const isLoadingRef = useRef(false);
 
   const handleLoadPluginsScript = useCallback(
     async (pluginsData: ActualPluginStored[], devUrl?: string) => {
-      if (initialized && !devUrl) return;
+      if (initializedRef.current && !devUrl) return;
 
       if (isLoadingRef.current) return;
 
       isLoadingRef.current = true;
 
       try {
+        await waitForPluginServiceWorker();
+
         const devPlugin = devUrl ? await prepareDevPlugin(devUrl) : undefined;
         const frontendPlugins = pluginsData.filter(
           plugin => plugin.enabled !== false && isFrontendPlugin(plugin),
@@ -452,7 +473,7 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
         isLoadingRef.current = false;
       }
     },
-    [handleLoadPlugins, initialized],
+    [handleLoadPlugins],
   );
 
   const refreshPluginStore = useCallback(
@@ -472,7 +493,7 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
       ];
 
       if (
-        mergedPlugins.length !== pluginStore.length ||
+        mergedPlugins.length !== pluginStoreLengthRef.current ||
         (devUrl && devUrl !== '') ||
         forceInitialize
       ) {
@@ -480,7 +501,7 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
       }
       setPluginStore(mergedPlugins);
     },
-    [pluginStore.length, handleLoadPluginsScript, pluginsEnabled],
+    [handleLoadPluginsScript, pluginsEnabled],
   );
 
   // Provide everything
@@ -492,6 +513,7 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
     pluginsRoutes,
     slotItems,
     pluginRegisteredWidgets,
+    bankSyncProviderSetups,
     themes: runtimeThemes,
     registerTheme,
     getThemes,
@@ -559,6 +581,53 @@ async function getSyncServerPlugins(): Promise<ActualPluginStored[]> {
     console.warn('Failed to load sync-server plugins:', error);
     return [];
   }
+}
+
+async function waitForPluginServiceWorker() {
+  if (!('serviceWorker' in navigator)) {
+    console.warn('[plugins] service workers are unavailable');
+    return;
+  }
+
+  const registration = await navigator.serviceWorker.ready;
+  if (navigator.serviceWorker.controller) {
+    console.debug('[plugins] service worker is controlling the page', {
+      scope: registration.scope,
+    });
+    return;
+  }
+
+  console.debug('[plugins] waiting for service worker controller', {
+    scope: registration.scope,
+  });
+
+  await new Promise<void>(resolve => {
+    const timeout = window.setTimeout(() => {
+      navigator.serviceWorker.removeEventListener(
+        'controllerchange',
+        handleControllerChange,
+      );
+      console.warn(
+        '[plugins] timed out waiting for service worker controller; plugin-data requests may fall through',
+      );
+      resolve();
+    }, 5000);
+
+    function handleControllerChange() {
+      window.clearTimeout(timeout);
+      navigator.serviceWorker.removeEventListener(
+        'controllerchange',
+        handleControllerChange,
+      );
+      console.debug('[plugins] service worker controller is now active');
+      resolve();
+    }
+
+    navigator.serviceWorker.addEventListener(
+      'controllerchange',
+      handleControllerChange,
+    );
+  });
 }
 
 async function prepareDevPlugin(

@@ -25,6 +25,10 @@ export * from './spreadsheet';
 export type {
   ActualPlugin,
   ActualPluginInitialized,
+  BankSyncProviderSetupCallProvider,
+  BankSyncProviderSetupRenderer,
+  BankSyncProviderSetupRenderProps,
+  BankSyncProviderSetupSetSecret,
   ThemeColorTypes,
   HostContext,
 } from './types/actualPlugin';

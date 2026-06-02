@@ -89,6 +89,7 @@ export function ProviderSetupGrid({
             >
               <Button
                 variant="bare"
+                type="button"
                 isDisabled={!canConfigure}
                 onPress={() => onConfigure({ provider })}
               >
@@ -96,6 +97,7 @@ export function ProviderSetupGrid({
               </Button>
               <Button
                 variant="primary"
+                type="button"
                 isDisabled={!configured}
                 onPress={() => onLink({ provider })}
               >

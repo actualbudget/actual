@@ -1,12 +1,13 @@
 import React, { ReactElement } from 'react';
+import ReactDOM from 'react-dom/client';
 import { initReactI18next } from 'react-i18next';
 
 import type { BasicModalProps } from '@actual-app/components';
-import ReactDOM from 'react-dom/client';
 
 import {
   ActualPlugin,
   ActualPluginInitialized,
+  BankSyncProviderSetupRenderer,
   SlotLocations,
 } from './types/actualPlugin';
 
@@ -19,6 +20,14 @@ function getOrCreateRoot(container: HTMLElement) {
     containerRoots.set(container, root);
   }
   return root;
+}
+
+function unmountRoot(container: HTMLElement) {
+  const root = containerRoots.get(container);
+  if (root) {
+    root.unmount();
+    containerRoots.delete(container);
+  }
 }
 
 export function initializePlugin(
@@ -45,7 +54,7 @@ export function initializePlugin(
           return context.registerSlotContent(position, container => {
             const root = getOrCreateRoot(container);
             root.render(element);
-            return () => root.unmount();
+            return () => unmountRoot(container);
           });
         },
 
@@ -53,7 +62,7 @@ export function initializePlugin(
           context.pushModal(container => {
             const root = getOrCreateRoot(container);
             root.render(element);
-            return () => root.unmount();
+            return () => unmountRoot(container);
           }, modalProps);
         },
 
@@ -61,8 +70,48 @@ export function initializePlugin(
           return context.registerRoute(path, container => {
             const root = getOrCreateRoot(container);
             root.render(element);
-            return () => root.unmount();
+            return () => unmountRoot(container);
           });
+        },
+
+        registerBankSyncProviderSetup(
+          providerSlug: string,
+          renderSetup: BankSyncProviderSetupRenderer,
+          modalProps?: BasicModalProps,
+        ) {
+          return context.registerBankSyncProviderSetup(
+            providerSlug,
+            (props, container) => {
+              console.debug('[plugins-core] mounting bank-sync setup UI', {
+                providerSlug,
+                container,
+              });
+
+              try {
+                const root = getOrCreateRoot(container);
+                const element = renderSetup(props);
+                console.debug('[plugins-core] bank-sync setup element', {
+                  providerSlug,
+                  elementType:
+                    typeof element.type === 'string'
+                      ? element.type
+                      : (element.type as { name?: string })?.name,
+                });
+                root.render(element);
+                return () => unmountRoot(container);
+              } catch (error) {
+                console.error(
+                  '[plugins-core] failed to mount bank-sync setup UI',
+                  {
+                    providerSlug,
+                    error,
+                  },
+                );
+                throw error;
+              }
+            },
+            modalProps,
+          );
         },
 
         registerDashboardWidget(
@@ -82,7 +131,7 @@ export function initializePlugin(
             container => {
               const root = getOrCreateRoot(container);
               root.render(element);
-              return () => root.unmount();
+              return () => unmountRoot(container);
             },
             options,
           );

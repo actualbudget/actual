@@ -112,15 +112,28 @@ function parsePluginDataPath(pathname: string): PluginDataPath | null {
 
 registerRoute(
   ({ url }) => parsePluginDataPath(url.pathname) !== null,
-  async ({ url }) => {
+  async ({ event, url }) => {
     const pluginDataPath = parsePluginDataPath(url.pathname);
     if (!pluginDataPath) {
       return new Response('Invalid plugin-data path', { status: 400 });
     }
 
+    const clientId =
+      event instanceof FetchEvent && event.clientId.length > 0
+        ? event.clientId
+        : undefined;
+
+    console.debug('[plugin-sw] plugin-data request', {
+      pathname: url.pathname,
+      slug: pluginDataPath.slug,
+      fileName: pluginDataPath.fileName,
+      clientId,
+    });
+
     return handlePlugin(
       pluginDataPath.slug,
       pluginDataPath.fileName.replace('?import', ''),
+      clientId,
     );
   },
 );
@@ -131,9 +144,14 @@ self.addEventListener('install', (_event: ExtendableEvent) => {
 
 // Log activation event
 self.addEventListener('activate', (_event: ExtendableEvent) => {
+  console.log('Plugins Worker activating...');
   void self.clients.claim();
 
   void self.clients.matchAll().then(clients => {
+    console.debug('[plugin-sw] notifying clients that worker is ready', {
+      clientCount: clients.length,
+    });
+
     clients.forEach(client => {
       client.postMessage({
         type: 'service-worker-ready',
@@ -149,12 +167,42 @@ self.addEventListener('message', (event: ExtendableMessageEvent) => {
   }
 });
 
-async function handlePlugin(slug: string, fileName: string): Promise<Response> {
+async function getClientForPluginRequest(
+  clientId?: string,
+): Promise<Client | undefined> {
+  if (clientId) {
+    const client = await self.clients.get(clientId);
+    if (client) {
+      return client;
+    }
+
+    console.warn('[plugin-sw] requesting client was not found', { clientId });
+  }
+
+  const clientsList = await self.clients.matchAll({
+    includeUncontrolled: true,
+    type: 'window',
+  });
+
+  return clientsList[0];
+}
+
+async function handlePlugin(
+  slug: string,
+  fileName: string,
+  clientId?: string,
+): Promise<Response> {
   for (const key of fileList.keys()) {
     if (key.startsWith(`${slug}/`)) {
       if (key.endsWith(`/${fileName}`)) {
         const content = fileList.get(key);
         const contentType = getContentType(fileName);
+        console.debug('[plugin-sw] cache hit', {
+          slug,
+          fileName,
+          key,
+          contentType,
+        });
         return new Response(content, {
           headers: { 'Content-Type': contentType },
         });
@@ -162,8 +210,14 @@ async function handlePlugin(slug: string, fileName: string): Promise<Response> {
     }
   }
 
-  const clientsList = await self.clients.matchAll();
-  if (clientsList.length === 0) {
+  const client = await getClientForPluginRequest(clientId);
+  if (!client) {
+    console.warn('[plugin-sw] no active clients for plugin-data request', {
+      slug,
+      fileName,
+      clientId,
+    });
+
     return new Response(
       JSON.stringify({ error: 'No active clients to process' }),
       {
@@ -173,11 +227,39 @@ async function handlePlugin(slug: string, fileName: string): Promise<Response> {
     );
   }
 
-  const client = clientsList[0];
   return new Promise<Response>(resolve => {
     const channel = new MessageChannel();
+    const timeout = setTimeout(() => {
+      console.warn('[plugin-sw] timed out waiting for plugin files response', {
+        slug,
+        fileName,
+        clientId: client.id,
+      });
+      resolve(
+        new Response(
+          JSON.stringify({
+            error: 'Timed out waiting for plugin files response',
+          }),
+          {
+            status: 504,
+            headers: { 'Content-Type': 'application/json' },
+          },
+        ),
+      );
+    }, 5000);
+
     channel.port1.onmessage = (messageEvent: MessageEvent<PluginFile[]>) => {
+      clearTimeout(timeout);
+
       const responseData = messageEvent.data as PluginFile[];
+      console.debug('[plugin-sw] received plugin files from client', {
+        slug,
+        requestedFileName: fileName,
+        fileCount: Array.isArray(responseData) ? responseData.length : 0,
+        fileNames: Array.isArray(responseData)
+          ? responseData.map(file => file.name)
+          : [],
+      });
 
       if (responseData && Array.isArray(responseData)) {
         responseData.forEach(({ name, content }) => {
@@ -191,6 +273,12 @@ async function handlePlugin(slug: string, fileName: string): Promise<Response> {
         let content = fileList.get(`${slug}/${fileToCheck}`)!;
         const contentType = getContentType(fileToCheck);
         const headers: Record<string, string> = { 'Content-Type': contentType };
+        console.debug('[plugin-sw] serving plugin file', {
+          slug,
+          fileToCheck,
+          contentType,
+          size: content.length,
+        });
 
         if (fileToCheck === 'mf-manifest.json') {
           try {
@@ -213,9 +301,25 @@ async function handlePlugin(slug: string, fileName: string): Promise<Response> {
 
         resolve(new Response(content, { headers }));
       } else {
+        console.warn(
+          '[plugin-sw] plugin file not found after client response',
+          {
+            slug,
+            fileToCheck,
+            availableFiles: [...fileList.keys()].filter(key =>
+              key.startsWith(`${slug}/`),
+            ),
+          },
+        );
         resolve(new Response('File not found', { status: 404 }));
       }
     };
+
+    console.debug('[plugin-sw] requesting plugin files from client', {
+      slug,
+      fileName,
+      clientId: client.id,
+    });
 
     client.postMessage(
       { type: 'plugin-files', eventData: { pluginUrl: slug } },

@@ -13,6 +13,9 @@ export type BankSyncProvider = {
     transactions: string;
   };
   requiresAuth: boolean;
+  setup?: {
+    type: 'plugin' | 'json';
+  };
 };
 
 export function useBankSyncProviders() {

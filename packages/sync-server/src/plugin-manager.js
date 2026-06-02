@@ -61,6 +61,15 @@ function validateUnifiedManifest(manifest) {
     throw new Error('Sync-server-only plugins cannot specify frontend config');
   }
 
+  if (
+    manifest.syncserver?.bankSync?.setup?.type === 'plugin' &&
+    (manifest.type !== 'mixed' || !manifest.frontend)
+  ) {
+    throw new Error(
+      "Bank sync setup.type 'plugin' requires a mixed plugin with frontend config",
+    );
+  }
+
   return manifest;
 }
 
@@ -677,6 +686,7 @@ class PluginManager {
           version: plugin.manifest.version,
           endpoints: plugin.manifest.bankSync.endpoints,
           requiresAuth: plugin.manifest.bankSync.requiresAuth ?? true,
+          setup: plugin.manifest.bankSync.setup ?? { type: 'json' },
         });
       }
     }

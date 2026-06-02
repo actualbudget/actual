@@ -1,7 +1,10 @@
 import type { ReactElement } from 'react';
 
 import type { BasicModalProps } from '@actual-app/components';
+import type { i18n } from 'i18next';
+
 import type { Query, QueryBuilder } from '../query';
+
 import type {
   AccountEntity,
   CategoryEntity,
@@ -9,7 +12,6 @@ import type {
   PayeeEntity,
   ScheduleEntity,
 } from './models';
-import type { i18n } from 'i18next';
 
 export type SlotLocations =
   | 'main-menu'
@@ -376,12 +378,39 @@ export type PluginMigration = [
   downCommand: string,
 ];
 
+export type BankSyncProviderSetupCallProvider = (args: {
+  path: string;
+  method?: 'GET' | 'POST';
+  body?: Record<string, unknown>;
+}) => Promise<unknown>;
+
+export type BankSyncProviderSetupSetSecret = (args: {
+  key: string;
+  value: string | null;
+}) => Promise<unknown>;
+
+export type BankSyncProviderSetupRenderProps = {
+  providerSlug: string;
+  providerDisplayName: string;
+  fileId: string;
+  callProvider: BankSyncProviderSetupCallProvider;
+  setSecret: BankSyncProviderSetupSetSecret;
+  onSuccess: () => void;
+  onError: (error: unknown) => void;
+  close: () => void;
+};
+
+export type BankSyncProviderSetupRenderer = (
+  props: BankSyncProviderSetupRenderProps,
+) => ReactElement;
+
 // Plugin context type for easier reuse
 export type PluginContext = Omit<
   HostContext,
   | 'registerSlotContent'
   | 'pushModal'
   | 'registerRoute'
+  | 'registerBankSyncProviderSetup'
   | 'registerDashboardWidget'
 > & {
   registerSlotContent: (
@@ -390,6 +419,11 @@ export type PluginContext = Omit<
   ) => () => void;
   pushModal: (element: ReactElement, modalProps?: BasicModalProps) => void;
   registerRoute: (path: string, routeElement: ReactElement) => () => void;
+  registerBankSyncProviderSetup: (
+    providerSlug: string,
+    renderSetup: BankSyncProviderSetupRenderer,
+    modalProps?: BasicModalProps,
+  ) => () => void;
 
   // Dashboard widget registration - wrapped for JSX elements
   registerDashboardWidget: (
@@ -466,6 +500,14 @@ export interface HostContext {
     routeElement: (container: HTMLDivElement) => void,
   ) => () => void;
   unregisterRoute: (id: string) => void;
+  registerBankSyncProviderSetup: (
+    providerSlug: string,
+    renderSetup: (
+      props: BankSyncProviderSetupRenderProps,
+      container: HTMLDivElement,
+    ) => void | (() => void),
+    modalProps?: BasicModalProps,
+  ) => () => void;
 
   registerSlotContent: (
     location: SlotLocations,

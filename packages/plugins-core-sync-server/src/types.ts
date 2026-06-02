@@ -80,6 +80,9 @@ export interface BankSyncConfig {
   endpoints: BankSyncEndpoints; // Mapping of standard endpoints to plugin routes
   description?: string;
   requiresAuth?: boolean; // Whether this bank sync requires authentication
+  setup?: {
+    type: 'plugin' | 'json';
+  };
 }
 
 /**
@@ -117,7 +120,16 @@ export interface PluginManifest {
   name: string;
   version: string;
   description?: string;
-  entry: string;
+  type?: 'frontend' | 'syncserver' | 'mixed';
+  frontend?: {
+    entry: string;
+  };
+  syncserver?: {
+    entry: string;
+    routes?: PluginRoute[];
+    bankSync?: BankSyncConfig;
+  };
+  entry?: string;
   author?: string;
   license?: string;
   routes?: PluginRoute[];

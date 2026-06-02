@@ -22,6 +22,7 @@ import {
 } from '@actual-app/plugins-core';
 import {
   type ContextEvent,
+  type BankSyncProviderSetupRenderProps,
   type SlotLocations,
   type ThemeColorTypes,
   type HostContext,
@@ -53,6 +54,14 @@ export type PluginRouteFn = {
   parameter: (container: HTMLDivElement) => void | (() => void);
 };
 
+export type BankSyncProviderSetupRegistration = {
+  renderSetup: (
+    props: BankSyncProviderSetupRenderProps,
+    container: HTMLDivElement,
+  ) => void | (() => void);
+  modalProps?: BasicModalProps;
+};
+
 export async function loadPlugins({
   pluginsEntries,
   dispatch,
@@ -61,6 +70,7 @@ export async function loadPlugins({
   setPluginsRoutes,
   setSlotItems,
   setPluginRegisteredWidgets,
+  setBankSyncProviderSetups,
   navigateBase,
   setEvents,
   registerTheme,
@@ -76,6 +86,9 @@ export async function loadPlugins({
   >;
   setPluginRegisteredWidgets: ReactDispatch<
     SetStateAction<Map<string, PluginDashboardWidget>>
+  >;
+  setBankSyncProviderSetups: ReactDispatch<
+    SetStateAction<Map<string, BankSyncProviderSetupRegistration>>
   >;
   navigateBase: (path: string) => void;
   setEvents: ReactDispatch<
@@ -118,6 +131,7 @@ export async function loadPlugins({
         setPluginsRoutes,
         setSlotItems,
         setPluginRegisteredWidgets,
+        setBankSyncProviderSetups,
         dispatch,
         pluginId,
         navigateBase,
@@ -195,6 +209,9 @@ function generateContext(
   setPluginRegisteredWidgets: ReactDispatch<
     SetStateAction<Map<string, PluginDashboardWidget>>
   >,
+  setBankSyncProviderSetups: ReactDispatch<
+    SetStateAction<Map<string, BankSyncProviderSetupRegistration>>
+  >,
   dispatch: Dispatch,
   pluginId: string,
   navigateBase: (path: string) => void,
@@ -243,6 +260,28 @@ function generateContext(
         newMap.delete(id);
         return newMap;
       });
+    },
+    registerBankSyncProviderSetup: (
+      providerSlug: string,
+      renderSetup: (
+        props: BankSyncProviderSetupRenderProps,
+        container: HTMLDivElement,
+      ) => void | (() => void),
+      modalProps?: BasicModalProps,
+    ) => {
+      setBankSyncProviderSetups(prev => {
+        const next = new Map(prev);
+        next.set(providerSlug, { renderSetup, modalProps });
+        return next;
+      });
+
+      return () => {
+        setBankSyncProviderSetups(prev => {
+          const next = new Map(prev);
+          next.delete(providerSlug);
+          return next;
+        });
+      };
     },
     registerSlotContent: (
       position: SlotLocations,
@@ -293,7 +332,7 @@ function generateContext(
     },
     pushModal(
       parameter: (container: HTMLDivElement) => void | (() => void),
-      modalProps: BasicModalProps,
+      modalProps?: BasicModalProps,
     ) {
       dispatch(
         basePushModal({

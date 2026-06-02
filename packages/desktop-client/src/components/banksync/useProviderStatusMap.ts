@@ -22,7 +22,11 @@ export function useProviderStatusMap({
   const syncServerStatus = useSyncServerStatus();
 
   const providerSlugsKey = useMemo(
-    () => providers.map(p => p.slug).sort().join('|'),
+    () =>
+      providers
+        .map(p => p.slug)
+        .sort()
+        .join('|'),
     [providers],
   );
 
@@ -40,6 +44,7 @@ export function useProviderStatusMap({
       return;
     }
 
+    const syncFileId = fileId;
     let didCancel = false;
 
     async function load() {
@@ -51,7 +56,7 @@ export function useProviderStatusMap({
           providers.map(async provider => {
             const result = await send('bank-sync-status', {
               providerSlug: provider.slug,
-              fileId,
+              fileId: syncFileId,
             }).catch(err => ({
               configured: false,
               error: err instanceof Error ? err.message : String(err),
@@ -68,7 +73,11 @@ export function useProviderStatusMap({
         );
 
         if (!didCancel) {
-          setStatusMap(Object.fromEntries(entries));
+          const nextStatusMap: ProviderStatusMap = {};
+          for (const [providerSlug, status] of entries) {
+            nextStatusMap[providerSlug] = status;
+          }
+          setStatusMap(nextStatusMap);
         }
       } catch (err) {
         if (!didCancel) {

@@ -8,18 +8,19 @@ import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import type { AccountEntity } from '@actual-app/core/types/models';
 
-import { Permissions } from '#auth/types';
 import { useAuth } from '#auth/AuthProvider';
+import { Permissions } from '#auth/types';
 import { Warning } from '#components/alerts';
-import { useMultiuserEnabled } from '#components/ServerContext';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { Page } from '#components/Page';
+import { useMultiuserEnabled } from '#components/ServerContext';
 import { useAccounts } from '#hooks/useAccounts';
 import { useBankSyncProviders } from '#hooks/useBankSyncProviders';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useMetadataPref } from '#hooks/useMetadataPref';
-import { pushModal } from '#modals/modalsSlice';
+import { popModal, pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
+import { useActualPlugins } from '#plugin/ActualPluginsProvider';
 import { useDispatch } from '#redux';
 
 import { AccountsHeader } from './AccountsHeader';
@@ -57,6 +58,7 @@ export function BankSync() {
     providersNeedingConfiguration,
   } = useBuiltInBankSyncProviders();
   const { providers: pluginProviders } = useBankSyncProviders();
+  const { bankSyncProviderSetups } = useActualPlugins();
   const { statusMap, refetch: refetchProviderStatuses } = useProviderStatusMap({
     providers: pluginProviders,
     fileId,
@@ -121,6 +123,72 @@ export function BankSync() {
     providerDisplayName: string;
   }) {
     if (!fileId) {
+      return;
+    }
+
+    const pluginSetup = bankSyncProviderSetups.get(providerSlug);
+    if (pluginSetup) {
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'plugin-modal',
+            options: {
+              modalProps: pluginSetup.modalProps,
+              parameter: container => {
+                console.debug('[bank-sync] rendering plugin setup modal', {
+                  providerSlug,
+                  providerDisplayName,
+                  container,
+                });
+
+                return pluginSetup.renderSetup(
+                  {
+                    providerSlug,
+                    providerDisplayName,
+                    fileId,
+                    callProvider: ({ path, method = 'POST', body }) =>
+                      send('bank-sync-plugin-call', {
+                        providerSlug,
+                        path,
+                        method,
+                        body,
+                        fileId,
+                      }),
+                    setSecret: ({ key, value }) =>
+                      send('bank-sync-plugin-secret-set', {
+                        providerSlug,
+                        key,
+                        value,
+                        fileId,
+                      }),
+                    onSuccess: () => {
+                      dispatch(popModal());
+                      refetchProviderStatuses();
+                    },
+                    onError: error => {
+                      dispatch(
+                        addNotification({
+                          notification: {
+                            type: 'error',
+                            title: t('Failed to configure provider'),
+                            message:
+                              error instanceof Error
+                                ? error.message
+                                : String(error),
+                            timeout: 5000,
+                          },
+                        }),
+                      );
+                    },
+                    close: () => dispatch(popModal()),
+                  },
+                  container,
+                );
+              },
+            },
+          },
+        }),
+      );
       return;
     }
 
