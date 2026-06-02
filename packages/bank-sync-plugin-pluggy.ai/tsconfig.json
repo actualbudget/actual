@@ -23,6 +23,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true
   },
+  "references": [{ "path": "../plugins-core-sync-server" }],
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

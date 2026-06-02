@@ -9,6 +9,7 @@ type ServerConfig = {
   SIMPLEFIN_SERVER: string;
   PLUGGYAI_SERVER: string;
   ENABLEBANKING_SERVER: string;
+  CORS_PROXY: string;
 };
 
 let config: ServerConfig | null = null;
@@ -47,6 +48,7 @@ export function getServer(url?: string): ServerConfig | null {
         SIMPLEFIN_SERVER: joinURL(url, '/simplefin'),
         PLUGGYAI_SERVER: joinURL(url, '/pluggyai'),
         ENABLEBANKING_SERVER: joinURL(url, '/enablebanking'),
+        CORS_PROXY: joinURL(url, '/cors-proxy'),
       };
     } catch (error) {
       logger.warn(

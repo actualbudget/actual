@@ -5,17 +5,13 @@ import { Trans } from 'react-i18next';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import type { FeatureFlag, ServerPrefs } from '@actual-app/core/types/prefs';
+import type { FeatureFlag, GlobalPrefs } from '@actual-app/core/types/prefs';
 
-import { useAuth } from '#auth/AuthProvider';
-import { Permissions } from '#auth/types';
 import { Link } from '#components/common/Link';
 import { Checkbox } from '#components/forms';
-import { useLoginMethod, useMultiuserEnabled } from '#components/ServerContext';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
-import { useServerPref } from '#hooks/useServerPref';
+import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useSyncedPref } from '#hooks/useSyncedPref';
-import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
 import { Setting } from './UI';
 
@@ -77,49 +73,29 @@ function FeatureToggle({
   );
 }
 
-type ServerFeatureToggleProps = {
-  prefName: keyof ServerPrefs;
+type GlobalFeatureToggleProps = {
+  prefName: keyof GlobalPrefs;
   disableToggle?: boolean;
   error?: ReactNode;
   children: ReactNode;
   feedbackLink?: string;
 };
 
-function ServerFeatureToggle({
+function GlobalFeatureToggle({
   prefName,
   disableToggle = false,
   feedbackLink,
   error,
   children,
-}: ServerFeatureToggleProps) {
-  const [enabled, setEnabled] = useServerPref(prefName);
-
-  const syncServerStatus = useSyncServerStatus();
-  const isUsingServer = syncServerStatus !== 'no-server';
-  const isServerOffline = syncServerStatus === 'offline';
-  const { hasPermission } = useAuth();
-  const loginMethod = useLoginMethod();
-  const multiuserEnabled = useMultiuserEnabled();
-
-  if (!isUsingServer || isServerOffline) {
-    return null;
-  }
-
-  // Show to admins if OIDC is enabled, or to everyone if multi-user is not enabled
-  const isAdmin = hasPermission(Permissions.ADMINISTRATOR);
-  const oidcEnabled = loginMethod === 'openid';
-  const shouldShow = (oidcEnabled && isAdmin) || !multiuserEnabled;
-
-  if (!shouldShow) {
-    return null;
-  }
+}: GlobalFeatureToggleProps) {
+  const [enabled, setEnabled] = useGlobalPref(prefName);
 
   return (
     <label style={{ display: 'flex' }}>
       <Checkbox
-        checked={enabled === 'true'}
+        checked={Boolean(enabled)}
         onChange={() => {
-          setEnabled(enabled === 'true' ? 'false' : 'true');
+          setEnabled(!enabled);
         }}
         disabled={disableToggle}
       />
@@ -156,9 +132,6 @@ export function ExperimentalFeatures() {
   const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
   const showGoalTemplatesUI = goalTemplatesEnabled || goalTemplatesUIEnabled;
-
-  const showServerPrefs =
-    localStorage.getItem('devEnableServerPrefs') === 'true';
 
   return (
     <Setting
@@ -238,15 +211,12 @@ export function ExperimentalFeatures() {
             >
               <Trans>Enable Banking sync (EU banks)</Trans>
             </FeatureToggle>
-            {showServerPrefs && (
-              <ServerFeatureToggle
-                prefName="flags.plugins"
-                disableToggle
-                feedbackLink="https://github.com/actualbudget/actual/issues/5950"
-              >
-                <Trans>Client-Side plugins (soon)</Trans>
-              </ServerFeatureToggle>
-            )}
+            <GlobalFeatureToggle
+              prefName="plugins"
+              feedbackLink="https://github.com/actualbudget/actual/issues/5950"
+            >
+              <Trans>Client-side plugins</Trans>
+            </GlobalFeatureToggle>
           </View>
         ) : (
           <Link

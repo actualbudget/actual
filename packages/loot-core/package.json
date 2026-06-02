@@ -140,6 +140,7 @@
       "api": "./src/platform/server/fs/index.api.ts",
       "default": "./src/platform/server/fs/index.ts"
     },
+    "./platform/server/indexeddb": "./src/platform/server/indexeddb/index.ts",
     "./platform/server/log": "./src/platform/server/log/index.ts",
     "./platform/server/sqlite": {
       "electron": "./src/platform/server/sqlite/index.electron.ts",
@@ -183,6 +184,7 @@
     "date-fns": "^4.1.0",
     "handlebars": "^4.7.9",
     "hyperformula": "^3.2.0",
+    "jszip": "^3.10.1",
     "lodash": "^4.18.1",
     "lru-cache": "^11.2.7",
     "memoize-one": "^6.0.0",
@@ -195,6 +197,7 @@
   },
   "devDependencies": {
     "@actual-app/crdt": "workspace:*",
+    "@actual-app/plugins-core": "workspace:*",
     "@types/adm-zip": "^0.5.8",
     "@types/better-sqlite3": "^7.6.13",
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest",

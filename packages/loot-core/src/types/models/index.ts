@@ -1,4 +1,5 @@
 export type * from './account';
+export type * from './actual-plugin-stored';
 export type * from './bank';
 export type * from './bank-sync';
 export type * from './category';
@@ -13,6 +14,7 @@ export type * from './note';
 export type * from './openid';
 export type * from './payee';
 export type * from './payee-location';
+export type * from './plugin-file';
 export type * from './pluggyai';
 export type * from './reports';
 export type * from './rule';

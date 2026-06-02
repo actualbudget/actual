@@ -6,6 +6,8 @@ import resourcesToBackend from 'i18next-resources-to-backend';
 
 import { languages } from './languages';
 
+export const i18nInstance = i18n;
+
 export const availableLanguages = Platform.isPlaywright
   ? []
   : Object.keys(languages).map(path => path.split('/')[2].split('.')[0]);

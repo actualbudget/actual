@@ -356,33 +356,33 @@ export default defineConfig(async ({ mode, command }) => {
       }),
       tsconfigPaths: true,
     },
+    optimizeDeps: {
+      exclude: ['@module-federation/enhanced/runtime', 'workbox-window'],
+    },
     plugins: [
       // electron (desktop) builds do not support PWA
       mode === 'desktop'
         ? undefined
         : VitePWA({
             registerType: 'prompt',
-            // TODO:  The plugin worker build is currently disabled due to issues with offline support. Fix this
-            // strategies: 'injectManifest',
-            // srcDir: 'service-worker',
-            // filename: 'plugin-sw.js',
-            // manifest: {
-            //   name: 'Actual',
-            //   short_name: 'Actual',
-            //   description: 'A local-first personal finance tool',
-            //   theme_color: '#5c3dbb',
-            //   background_color: '#5c3dbb',
-            //   display: 'standalone',
-            //   start_url: './',
-            // },
-            // injectManifest: {
-            //   maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10MB
-            //   swSrc: `service-worker/plugin-sw.js`,
-            // },
+            strategies: 'injectManifest',
+            srcDir: 'service-worker',
+            filename: 'plugin-sw.js',
+            manifest: {
+              name: 'Actual',
+              short_name: 'Actual',
+              description: 'A local-first personal finance tool',
+              theme_color: '#5c3dbb',
+              background_color: '#5c3dbb',
+              display: 'standalone',
+              start_url: './',
+            },
+            injectManifest: {
+              maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+              swSrc: `service-worker/plugin-sw.js`,
+            },
             devOptions: {
-              // Disabled: caches stale assets across reloads in dev. Plugin
-              // code that explicitly needs a SW can register one itself.
-              enabled: false,
+              enabled: true,
               type: 'module',
             },
             workbox: {

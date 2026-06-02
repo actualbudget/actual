@@ -5,7 +5,7 @@ let openedDb: null | ReturnType<typeof _openDatabase> = _openDatabase();
 // The web version uses IndexedDB to store data
 function _openDatabase() {
   return new Promise<IDBDatabase>((resolve, reject) => {
-    const dbVersion = 9;
+    const dbVersion = 10;
     const openRequest = indexedDB.open('actual', dbVersion);
 
     openRequest.onupgradeneeded = function (e) {
@@ -25,6 +25,9 @@ function _openDatabase() {
       }
       if (!db.objectStoreNames.contains('files')) {
         db.createObjectStore('files', { keyPath: 'filepath' });
+      }
+      if (!db.objectStoreNames.contains('plugins')) {
+        db.createObjectStore('plugins', { keyPath: 'url' });
       }
     };
 

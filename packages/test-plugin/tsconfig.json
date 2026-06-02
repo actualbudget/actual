@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "references": [{ "path": "../plugins-core" }],
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "build", "**/*.test.*"],
+  "compilerOptions": {
+    "composite": true,
+    "declaration": true,
+    "outDir": "build",
+    "skipLibCheck": true,
+    "types": ["node", "vite/client"],
+    "noEmit": true
+  }
+}

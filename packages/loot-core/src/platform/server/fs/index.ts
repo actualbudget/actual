@@ -17,7 +17,12 @@ export const bundledDatabasePath: string = '/default-db.sqlite';
 export const migrationsPath: string = '/migrations';
 export const demoBudgetPath: string = '/demo-budget';
 export { join };
-export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';
+export {
+  getDocumentDir,
+  getBudgetDir,
+  getPluginDir,
+  _setDocumentDir,
+} from './shared';
 export const getDataDir = () => process.env.ACTUAL_DATA_DIR;
 
 export const pathToId = function (filepath: string): string {

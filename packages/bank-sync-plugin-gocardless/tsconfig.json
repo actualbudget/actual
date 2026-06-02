@@ -25,6 +25,7 @@
     "noImplicitReturns": false,
     "noFallthroughCasesInSwitch": true
   },
+  "references": [{ "path": "../plugins-core-sync-server" }],
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "src/banks/tests", "**/*.spec.js"]
 }

@@ -1,0 +1,66 @@
+# Sample Data
+/data/*
+!data/.gitkeep
+/data2
+Actual-*
+**/xcuserdata/*
+export-2020-01-10.csv
+
+# Secrets
+.secret-tokens
+
+# MacOS
+.DS_Store
+
+# Logs
+**/*.log
+
+# JavaScript
+node_modules
+packages/api/dist
+packages/api/@types
+packages/crdt/dist
+packages/desktop-electron/client-build
+packages/desktop-electron/build
+packages/desktop-electron/.electron-symbols
+packages/desktop-electron/dist
+packages/desktop-electron/loot-core
+bundle.desktop.js
+bundle.desktop.js.map
+bundle.mobile.js
+bundle.mobile.js.map
+
+# Yarn
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# VSCode
+.vscode
+
+# IntelliJ IDEA
+.idea
+
+# Misc
+.#*
+
+# Local Netlify folder
+.netlify
+
+# build output
+package.tgz
+
+# Fly.io configuration
+fly.toml
+
+# Production
+build
+build-electron
+build-stats
+stats.json
+
+.__mf__temp

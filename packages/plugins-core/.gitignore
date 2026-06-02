@@ -1,0 +1,59 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# dependencies
+node_modules
+
+# testing
+coverage
+test-results
+playwright-report
+
+# production
+build
+build-electron
+build-stats
+stats.json
+
+# misc
+.DS_Store
+.env
+npm-debug.log
+.swc
+
+*kcab.*
+public/kcab
+public/data
+public/data-file-index.txt
+public/*.wasm
+
+# translations
+locale/
+
+.__mf__temp
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+build

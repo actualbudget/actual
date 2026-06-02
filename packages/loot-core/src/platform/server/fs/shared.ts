@@ -31,3 +31,15 @@ export const getBudgetDir = id => {
 
   return join(getDocumentDir(), id);
 };
+
+export const getPluginDir = id => {
+  if (!id) {
+    throw new Error('getPluginDir: id is falsy: ' + id);
+  }
+
+  if (id.match(/[^A-Za-z0-9\-_]/)) {
+    throw new Error(`Invalid plugin id "${id}".`);
+  }
+
+  return join(getDocumentDir(), 'plugins', id);
+};

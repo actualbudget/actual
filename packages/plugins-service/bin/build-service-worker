@@ -1,0 +1,25 @@
+#!/bin/bash -e
+
+cd "$(dirname "$0")"
+ROOT="$(pwd -P)"
+VITE_ARGS="$*"
+
+DESKTOP_DIR="$ROOT/../../desktop-client"
+SERVICE_WORKER_DIR="$DESKTOP_DIR/service-worker"
+
+rm -f ../dist/*
+rm -rf "$SERVICE_WORKER_DIR"
+
+if [ "$NODE_ENV" = 'development' ]; then
+  if [ "$OSTYPE" = "msys" ]; then
+    export MSYS=winsymlinks:nativestrict
+  fi
+  ln -snf "$ROOT/../dist/" "$SERVICE_WORKER_DIR"
+fi
+
+yarn vite build --config ../vite.config.mts --mode "$NODE_ENV" $VITE_ARGS
+
+if [ "$NODE_ENV" = 'production' ]; then
+  mkdir -p "$SERVICE_WORKER_DIR"
+  cp -r ../dist/* "$SERVICE_WORKER_DIR"
+fi

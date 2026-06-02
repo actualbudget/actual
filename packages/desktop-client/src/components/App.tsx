@@ -26,6 +26,10 @@ import { setI18NextLanguage } from '#i18n';
 import { addNotification } from '#notifications/notificationsSlice';
 import { installPolyfills } from '#polyfills';
 import { loadGlobalPrefs } from '#prefs/prefsSlice';
+import {
+  ActualPluginsProvider,
+  useActualPlugins,
+} from '#plugin/ActualPluginsProvider';
 import { useDispatch, useSelector, useStore } from '#redux';
 import {
   CustomThemeStyle,
@@ -53,6 +57,7 @@ function AppInner() {
   const { showBoundary: showErrorBoundary } = useErrorBoundary();
   const dispatch = useDispatch();
   const userData = useSelector(state => state.user.data);
+  const { refreshPluginStore } = useActualPlugins();
 
   useEffect(() => {
     setI18NextLanguage(null);
@@ -117,6 +122,13 @@ function AppInner() {
         }
 
         await maybeUpdate();
+
+        dispatch(
+          setAppState({
+            loadingText: t('Loading plugins...'),
+          }),
+        );
+        await refreshPluginStore();
       }
     }
 
@@ -128,7 +140,35 @@ function AppInner() {
     initAll().catch(showErrorBoundary);
     // Removed cloudFileId & t from dependencies to prevent hard crash when closing budget in Electron
     // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, showErrorBoundary]);
+  }, [dispatch, refreshPluginStore, showErrorBoundary]);
+
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      const isServiceWorkerMessage =
+        typeof ServiceWorker !== 'undefined' &&
+        event.source instanceof ServiceWorker;
+
+      if (!isServiceWorkerMessage && !event.ports?.length) {
+        return;
+      }
+
+      if (event.data?.type !== 'plugin-files') {
+        return;
+      }
+
+      const { pluginUrl } = event.data.eventData;
+      try {
+        const files = await send('plugin-files', { pluginUrl });
+        event.ports?.[0]?.postMessage(files || []);
+      } catch (error) {
+        console.error('Error handling plugin-files request:', error);
+        event.ports?.[0]?.postMessage([]);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
 
   useEffect(() => {
     if (userData?.tokenExpired) {
@@ -196,47 +236,51 @@ export function App() {
 
   return (
     <BrowserRouter>
-      <ExposeNavigate />
-      <HotkeysProvider initiallyActiveScopes={['app']}>
-        <SpreadsheetProvider>
-          <SidebarProvider>
-            <BudgetMonthCountProvider>
-              <DndProvider backend={HTML5Backend}>
-                <View
-                  data-theme={theme}
-                  style={{
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}
-                >
+      <ActualPluginsProvider>
+        <ExposeNavigate />
+        <HotkeysProvider initiallyActiveScopes={['app']}>
+          <SpreadsheetProvider>
+            <SidebarProvider>
+              <BudgetMonthCountProvider>
+                <DndProvider backend={HTML5Backend}>
                   <View
-                    key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
+                    data-theme={theme}
                     style={{
-                      flexGrow: 1,
-                      overflow: 'hidden',
-                      ...styles.lightScrollbar,
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
                     }}
                   >
-                    <ErrorBoundary FallbackComponent={ErrorFallback}>
-                      {process.env.REACT_APP_REVIEW_ID && !isTestEnv && (
-                        <DevelopmentTopBar />
-                      )}
-                      <AppInner />
-                    </ErrorBoundary>
-                    <ThemeStyle />
-                    <CustomThemeStyle />
-                    <ErrorBoundary FallbackComponent={FatalError}>
-                      <Modals />
-                    </ErrorBoundary>
-                    <UpdateNotification />
+                    <View
+                      key={
+                        hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'
+                      }
+                      style={{
+                        flexGrow: 1,
+                        overflow: 'hidden',
+                        ...styles.lightScrollbar,
+                      }}
+                    >
+                      <ErrorBoundary FallbackComponent={ErrorFallback}>
+                        {process.env.REACT_APP_REVIEW_ID && !isTestEnv && (
+                          <DevelopmentTopBar />
+                        )}
+                        <AppInner />
+                      </ErrorBoundary>
+                      <ThemeStyle />
+                      <CustomThemeStyle />
+                      <ErrorBoundary FallbackComponent={FatalError}>
+                        <Modals />
+                      </ErrorBoundary>
+                      <UpdateNotification />
+                    </View>
                   </View>
-                </View>
-              </DndProvider>
-            </BudgetMonthCountProvider>
-          </SidebarProvider>
-        </SpreadsheetProvider>
-      </HotkeysProvider>
+                </DndProvider>
+              </BudgetMonthCountProvider>
+            </SidebarProvider>
+          </SpreadsheetProvider>
+        </HotkeysProvider>
+      </ActualPluginsProvider>
     </BrowserRouter>
   );
 }

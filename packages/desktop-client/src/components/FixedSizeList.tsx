@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { createRef, PureComponent } from 'react';
+import React, { createRef, PureComponent } from 'react';
 import type { CSSProperties, ReactNode, Ref, RefObject, UIEvent } from 'react';
 
 import { View } from '@actual-app/components/view';

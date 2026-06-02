@@ -8,7 +8,12 @@ import { logger } from '#platform/server/log';
 
 import type * as T from './index';
 
-export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';
+export {
+  getDocumentDir,
+  getBudgetDir,
+  getPluginDir,
+  _setDocumentDir,
+} from './shared';
 
 let rootPath = path.join(__dirname, '..', '..', '..', '..');
 

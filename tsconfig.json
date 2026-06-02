@@ -2,6 +2,8 @@
   "references": [
     { "path": "./packages/crdt" },
     { "path": "./packages/component-library" },
+    { "path": "./packages/plugins-core" },
+    { "path": "./packages/test-plugin" },
     { "path": "./packages/plugins-service" },
     { "path": "./packages/loot-core" },
     { "path": "./packages/api" },

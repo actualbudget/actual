@@ -1,6 +1,7 @@
 import { send } from '@actual-app/core/platform/client/connection';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type { File } from '@actual-app/core/types/file';
+import type { BasicModalProps } from '@actual-app/components/props/modalProps';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -660,6 +661,19 @@ export type Modal =
         categoryId: CategoryEntity['id'];
         templates: Template[];
         cleanup: CleanupTemplate[];
+      };
+    }
+  | {
+      name: 'select-new-plugin';
+      options: {
+        onSave: () => void | Promise<void>;
+      };
+    }
+  | {
+      name: 'plugin-modal';
+      options: {
+        parameter: (container: HTMLDivElement) => void | (() => void);
+        modalProps?: BasicModalProps;
       };
     };
 

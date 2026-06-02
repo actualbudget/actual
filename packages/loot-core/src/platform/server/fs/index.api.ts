@@ -10,7 +10,12 @@ import { getDocumentDir } from './shared';
 
 import type * as T from './index';
 
-export { getDocumentDir, getBudgetDir, _setDocumentDir } from './shared';
+export {
+  getDocumentDir,
+  getBudgetDir,
+  getPluginDir,
+  _setDocumentDir,
+} from './shared';
 
 export const init: typeof T.init = async () => {
   // Nothing to do

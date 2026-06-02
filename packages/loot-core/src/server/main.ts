@@ -25,6 +25,7 @@ import { app } from './main-app';
 import { mutator, runHandler } from './mutators';
 import { app as notesApp } from './notes/app';
 import { app as payeesApp } from './payees/app';
+import { app as pluginsApp } from './plugins/app';
 import { get } from './post';
 import { app as preferencesApp } from './preferences/app';
 import * as prefs from './prefs';
@@ -147,6 +148,7 @@ app.combine(
   budgetFilesApp,
   encryptionApp,
   tagsApp,
+  pluginsApp,
 );
 
 export function getDefaultDocumentDir() {

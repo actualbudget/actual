@@ -9,6 +9,7 @@ import type { FiltersHandlers } from '#server/filters/app';
 import type { ForecastHandlers } from '#server/forecast/app';
 import type { NotesHandlers } from '#server/notes/app';
 import type { PayeesHandlers } from '#server/payees/app';
+import type { PluginsHandlers } from '#server/plugins/app';
 import type { PreferencesHandlers } from '#server/preferences/app';
 import type { ReportsHandlers } from '#server/reports/app';
 import type { RulesHandlers } from '#server/rules/app';
@@ -43,6 +44,7 @@ export type Handlers = {} & ServerHandlers &
   BudgetFileHandlers &
   EncryptionHandlers &
   TagsHandlers &
+  PluginsHandlers &
   AuthHandlers;
 
 export type HandlerFunctions = Handlers[keyof Handlers];
