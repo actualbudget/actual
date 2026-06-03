@@ -14,7 +14,10 @@ import keyBy from 'lodash/keyBy';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { aqlQuery } from '#queries/aqlQuery';
 
-import { filterCategoriesByConditions } from './budgetDataQuery';
+import {
+  filterCategoriesByConditions,
+  isSupportedCategoryCondition,
+} from './budgetDataQuery';
 import { makeQuery } from './makeQuery';
 
 type createSpendingSpreadsheetProps = {
@@ -43,6 +46,10 @@ export function getSpendingBudgetFilters({
   );
 
   if (budgetConditions.length === 0) {
+    return [];
+  }
+
+  if (!budgetConditions.every(isSupportedCategoryCondition)) {
     return [];
   }
 

@@ -43,6 +43,35 @@ async function mapWithConcurrency<TItem, TResult>(
   return results;
 }
 
+export function isSupportedCategoryCondition(
+  condition: RuleConditionEntity,
+): boolean {
+  if (condition.field !== 'category' && condition.field !== 'category_group') {
+    return false;
+  }
+
+  if (condition.op === 'is' || condition.op === 'isNot') {
+    return typeof condition.value === 'string';
+  }
+
+  if (condition.op === 'oneOf' || condition.op === 'notOneOf') {
+    return (
+      Array.isArray(condition.value) &&
+      condition.value.every(id => typeof id === 'string')
+    );
+  }
+
+  if (
+    condition.op === 'contains' ||
+    condition.op === 'doesNotContain' ||
+    condition.op === 'matches'
+  ) {
+    return typeof condition.value === 'string';
+  }
+
+  return false;
+}
+
 export function filterCategoriesByConditions(
   categories: CategoryEntity[],
   categoryGroups: CategoryGroupEntity[],
@@ -72,37 +101,9 @@ export function filterCategoriesByConditions(
     categoryGroups.map(group => [group.id, group.name] as const),
   );
 
-  const isSupportedCondition = (
-    condition: Extract<
-      RuleConditionEntity,
-      { field: 'category' | 'category_group' }
-    >,
-  ) => {
-    if (condition.op === 'is' || condition.op === 'isNot') {
-      return typeof condition.value === 'string';
-    }
-
-    if (condition.op === 'oneOf' || condition.op === 'notOneOf') {
-      return (
-        Array.isArray(condition.value) &&
-        condition.value.every(id => typeof id === 'string')
-      );
-    }
-
-    if (
-      condition.op === 'contains' ||
-      condition.op === 'doesNotContain' ||
-      condition.op === 'matches'
-    ) {
-      return typeof condition.value === 'string';
-    }
-
-    return false;
-  };
-
   // If we can't safely interpret any category condition, do not attempt to
   // filter categories (better to be broad than silently exclude data).
-  if (!categoryConditions.every(isSupportedCondition)) {
+  if (!categoryConditions.every(isSupportedCategoryCondition)) {
     return categories;
   }
 
