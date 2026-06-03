@@ -61,6 +61,56 @@ export function getScheduleOccurrenceMatchStartDate(
   return monthUtils.subDays(occurrenceDate, 2);
 }
 
+export type PostedScheduleTransaction = {
+  schedule?: string | null;
+  date: string;
+};
+
+export function indexPostedScheduleTransactions(
+  transactions: PostedScheduleTransaction[],
+): Map<string, PostedScheduleTransaction[]> {
+  const byScheduleId = new Map<string, PostedScheduleTransaction[]>();
+
+  for (const transaction of transactions) {
+    if (!transaction.schedule) {
+      continue;
+    }
+
+    const existing = byScheduleId.get(transaction.schedule);
+    if (existing) {
+      existing.push(transaction);
+    } else {
+      byScheduleId.set(transaction.schedule, [transaction]);
+    }
+  }
+
+  return byScheduleId;
+}
+
+export function isScheduleOccurrencePosted({
+  schedule,
+  scheduleId,
+  occurrenceDate,
+  postedTransactions,
+}: {
+  schedule: ScheduleOccurrenceMatchInput;
+  scheduleId: string;
+  occurrenceDate: string;
+  postedTransactions: PostedScheduleTransaction[];
+}): boolean {
+  const matchStartDate = getScheduleOccurrenceMatchStartDate(
+    schedule,
+    occurrenceDate,
+  );
+
+  return postedTransactions.some(
+    tx =>
+      tx.schedule === scheduleId &&
+      tx.date >= matchStartDate &&
+      tx.date <= occurrenceDate,
+  );
+}
+
 /**
  * Builds a query to check if each schedule already has a matching transaction.
  *

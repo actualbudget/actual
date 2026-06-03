@@ -1,6 +1,6 @@
 import MockDate from 'mockdate';
 
-import type { ScheduleEntity } from '#types/models';
+import type { RuleConditionEntity, ScheduleEntity } from '#types/models';
 
 import * as monthUtils from './months';
 import {
@@ -9,6 +9,8 @@ import {
   getScheduleOccurrenceMatchStartDate,
   getStatus,
   getUpcomingDays,
+  indexPostedScheduleTransactions,
+  isScheduleOccurrencePosted,
 } from './schedules';
 import type { ScheduleStatuses } from './schedules';
 
@@ -315,6 +317,97 @@ describe('schedules', () => {
           occurrenceDate,
         ),
       ).toBe('2024-03-08');
+    });
+  });
+
+  describe('indexPostedScheduleTransactions', () => {
+    it('groups schedule-linked transactions by schedule id', () => {
+      const indexed = indexPostedScheduleTransactions([
+        { schedule: 'sched-1', date: '2024-03-09' },
+        { schedule: 'sched-2', date: '2024-03-10' },
+        { schedule: 'sched-1', date: '2024-04-10' },
+        { date: '2024-03-11' },
+      ]);
+
+      expect(indexed.get('sched-1')).toEqual([
+        { schedule: 'sched-1', date: '2024-03-09' },
+        { schedule: 'sched-1', date: '2024-04-10' },
+      ]);
+      expect(indexed.get('sched-2')).toEqual([
+        { schedule: 'sched-2', date: '2024-03-10' },
+      ]);
+      expect(indexed.has('missing')).toBe(false);
+    });
+  });
+
+  describe('isScheduleOccurrencePosted', () => {
+    const scheduleId = 'sched-1';
+    const occurrenceDate = '2024-03-10';
+    const manualRecurringSchedule = { posts_transaction: false };
+    const autoPostSchedule = { posts_transaction: true };
+    const oneTimeSchedule = {
+      _conditions: [
+        { op: 'is', field: 'date', value: occurrenceDate } as const,
+      ],
+    };
+    const manualRecurringWithIsOp = {
+      posts_transaction: false,
+      _conditions: [
+        {
+          op: 'is',
+          field: 'date',
+          value: { start: occurrenceDate, frequency: 'monthly' },
+        },
+      ] satisfies RuleConditionEntity[],
+    };
+
+    function expectPosted(
+      schedule: Parameters<typeof getScheduleOccurrenceMatchStartDate>[0],
+      txDate: string,
+      expected: boolean,
+    ) {
+      expect(
+        isScheduleOccurrencePosted({
+          schedule,
+          scheduleId,
+          occurrenceDate,
+          postedTransactions: [{ schedule: scheduleId, date: txDate }],
+        }),
+      ).toBe(expected);
+    }
+
+    it.each([
+      [
+        'same-day manual recurring',
+        manualRecurringSchedule,
+        occurrenceDate,
+        true,
+      ],
+      [
+        'early pay within 2 days for recurring date cond',
+        manualRecurringWithIsOp,
+        '2024-03-09',
+        true,
+      ],
+      ['early pay within 2 days', manualRecurringSchedule, '2024-03-09', true],
+      [
+        'early pay outside window',
+        manualRecurringSchedule,
+        '2024-03-07',
+        false,
+      ],
+      ['auto-post day before due', autoPostSchedule, '2024-03-09', false],
+      ['auto-post on due date', autoPostSchedule, occurrenceDate, true],
+      ['one-time on due date', oneTimeSchedule, occurrenceDate, true],
+      ['one-time day before due', oneTimeSchedule, '2024-03-09', false],
+      [
+        'later month tx does not satisfy earlier occurrence',
+        manualRecurringSchedule,
+        '2024-04-10',
+        false,
+      ],
+    ] as const)('%s', (_label, schedule, txDate, expected) => {
+      expectPosted(schedule, txDate, expected);
     });
   });
 
