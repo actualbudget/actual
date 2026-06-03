@@ -211,3 +211,7 @@ WOR
 worktree
 youngcw
 zizmor
+enablebanking
+installable
+syncserver
+topbar
