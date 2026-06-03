@@ -4,6 +4,7 @@
     { "path": "./packages/shared-types" },
     { "path": "./packages/query" },
     { "path": "./packages/component-library" },
+    { "path": "./packages/plugins-core" },
     { "path": "./packages/plugins-service" },
     { "path": "./packages/loot-core" },
     { "path": "./packages/api" },

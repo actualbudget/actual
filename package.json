@@ -29,7 +29,7 @@
     "start:desktop-client": "yarn workspace @actual-app/web watch",
     "start:desktop-server-client": "yarn workspace @actual-app/web build:browser",
     "start:desktop-electron": "yarn workspace desktop-electron watch",
-    "start:browser": "yarn workspace plugins-service build-dev && npm-run-all --parallel 'start:browser-*'",
+    "start:browser": "yarn workspace plugins-service build-dev && npm-run-all --parallel 'start:browser-*' 'start:service-plugins'",
     "start:service-plugins": "yarn workspace plugins-service watch",
     "start:browser-frontend": "yarn workspace @actual-app/web start:browser",
     "start:storybook": "yarn workspace @actual-app/components start:storybook",

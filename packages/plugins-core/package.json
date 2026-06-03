@@ -1,0 +1,65 @@
+{
+  "name": "@actual-app/plugins-core",
+  "version": "0.1.0",
+  "description": "Core plugin system for Actual Budget",
+  "exports": {
+    "./server": {
+      "types": "./src/server.ts",
+      "development": "./src/server.ts",
+      "import": "./build/server.js",
+      "require": "./build/server.cjs"
+    },
+    "./client": {
+      "types": "./src/client.ts",
+      "development": "./src/client.ts",
+      "import": "./build/client.js",
+      "require": "./build/client.cjs"
+    },
+    "./BasicModalComponents": {
+      "types": "./src/BasicModalComponents.tsx",
+      "import": "./build/BasicModalComponents.js",
+      "require": "./build/BasicModalComponents.cjs",
+      "development": "./src/BasicModalComponents.tsx"
+    },
+    "./types/*": {
+      "types": "./src/types/*.ts",
+      "development": "./src/types/*.ts"
+    },
+    "./src/*": "./src/*"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint src/ tests/ --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@actual-app/components": "workspace:*",
+    "@actual-app/query": "workspace:*",
+    "@actual-app/shared-types": "workspace:*",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "i18next": "^25.10.10",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-i18next": "^16.6.6",
+    "typescript": "^6.0.2",
+    "typescript-eslint": "^8.18.1",
+    "typescript-strict-plugin": "^2.4.4",
+    "vite": "^8.0.5",
+    "vite-plugin-dts": "^4.5.3",
+    "vitest": "^4.1.2"
+  },
+  "peerDependencies": {
+    "@emotion/css": "^11.13.5",
+    "i18next": "^25.10.10",
+    "react": ">=19.2",
+    "react-aria-components": "^1.7.1",
+    "react-dom": ">=19.2",
+    "react-i18next": "^16.6.6",
+    "usehooks-ts": "^3.1.1"
+  }
+}

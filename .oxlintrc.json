@@ -404,6 +404,32 @@
       }
     },
     {
+      "files": [
+        "packages/bank-sync-plugin-*/**/*",
+        "packages/sync-server-plugin-example/**/*"
+      ],
+      "rules": {
+        "actual/enforce-boundaries": "off",
+        "actual/no-anchor-tag": "off",
+        "actual/no-extraneous-dependencies": "off",
+        "actual/no-react-default-import": "off",
+        "actual/no-untranslated-strings": "off",
+        "actual/prefer-logger-over-console": "off",
+        "eslint/default-case": "off",
+        "eslint/no-empty-function": "off",
+        "eslint/no-undef": "off",
+        "eslint/no-throw-literal": "off",
+        "eslint/no-unused-vars": "off",
+        "import/consistent-type-specifier-style": "off",
+        "import/no-default-export": "off",
+        "perfectionist/sort-named-imports": "off",
+        "react/exhaustive-deps": "off",
+        "typescript/no-explicit-any": "off",
+        "typescript/no-floating-promises": "off",
+        "typescript/unbound-method": "off"
+      }
+    },
+    {
       "files": ["packages/desktop-client/**/*.{js,ts,jsx,tsx}"],
       "rules": {
         "typescript-paths/absolute-parent-import": [

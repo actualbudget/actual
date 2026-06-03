@@ -1,0 +1,31 @@
+{
+  "name": "@actual-app/plugins-core-sync-server",
+  "version": "0.0.1",
+  "description": "Core plugin utilities for Actual sync-server plugin authors",
+  "keywords": [
+    "actual",
+    "plugin",
+    "sync-server"
+  ],
+  "license": "MIT",
+  "author": "Actual Budget",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.19.17",
+    "@types/node-fetch": "^2.6.11",
+    "typescript": "^6.0.2"
+  },
+  "peerDependencies": {
+    "express": "^5.2.1"
+  }
+}
