@@ -265,8 +265,8 @@ function getAccountResponse(results, accountId, startDate) {
 }
 
 function invalidToken(res) {
-  res.status(401).send({
-    status: 'unauthorized',
+  res.send({
+    status: 'ok',
     data: {
       error_type: 'INVALID_ACCESS_TOKEN',
       error_code: 'INVALID_ACCESS_TOKEN',
@@ -279,8 +279,8 @@ function invalidToken(res) {
 
 function serverDown(e, res) {
   console.log(e);
-  res.status(503).send({
-    status: 'service_unavailable',
+  res.send({
+    status: 'ok',
     data: {
       error_type: 'SERVER_DOWN',
       error_code: 'SERVER_DOWN',

@@ -64,7 +64,6 @@ export type BuiltInBankSyncProviderState = {
 };
 
 type SecretSetResponse = {
-  status: number;
   error?: string;
   error_code?: string;
   reason?: string;
@@ -78,14 +77,6 @@ async function ensureSuccessResponse(
   response: SecretSetResponse,
   fallbackMessage: string,
 ) {
-  if (response === null || response === undefined) {
-    throw new Error(fallbackMessage);
-  }
-
-  if (response.status >= 200 && response.status < 300) {
-    return;
-  }
-
   if (response?.error_code) {
     throw new Error(response.reason || response.error_code);
   }
