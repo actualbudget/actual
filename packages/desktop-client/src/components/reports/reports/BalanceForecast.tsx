@@ -31,6 +31,7 @@ import { Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { Container } from '#components/reports/Container';
 import { getCustomTick } from '#components/reports/getCustomTick';
+import { computePadding } from '#components/reports/graphs/util/computePadding';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { useAccounts } from '#hooks/useAccounts';
@@ -266,6 +267,12 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     end: chartRange.end,
     granularity,
   });
+  const formatYTick = (value: number) =>
+    getCustomTick(format(value, 'financial-no-decimals'), privacyMode);
+  const yAxisLeftPadding = computePadding(
+    chartData.map(point => point.balance),
+    formatYTick,
+  );
   const isUpdatingForecast = isFetching && isPlaceholderData;
 
   const scheduledOccurrenceCount = countForecastScheduledOccurrences(
@@ -398,7 +405,12 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                       width={width}
                       height={height}
                       data={chartData}
-                      margin={{ top: 10, right: 10, left: 5, bottom: 10 }}
+                      margin={{
+                        top: 10,
+                        right: 10,
+                        left: 5 + yAxisLeftPadding,
+                        bottom: 10,
+                      }}
                     >
                       <defs>
                         <linearGradient
@@ -453,12 +465,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                       />
                       <YAxis
                         domain={['auto', 'auto']}
-                        tickFormatter={value =>
-                          getCustomTick(
-                            format(value, 'financial-no-decimals'),
-                            privacyMode,
-                          )
-                        }
+                        tickFormatter={formatYTick}
                         tick={{ fill: theme.pageText }}
                         tickLine={{ stroke: theme.pageText }}
                         tickSize={0}
