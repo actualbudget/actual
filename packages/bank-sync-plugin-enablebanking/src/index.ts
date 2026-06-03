@@ -4,6 +4,7 @@ import {
 } from '@actual-app/plugins-core-sync-server';
 import express from 'express';
 import type { Request, Response } from 'express';
+import rateLimit from 'express-rate-limit';
 import { v4 as uuidv4 } from 'uuid';
 
 import './manifest';
@@ -37,6 +38,19 @@ let nextWaiterId = 0;
 
 const POLL_TIMEOUT_MS = 5 * 60 * 1000;
 const COMPLETED_AUTH_TTL_MS = 30 * 1000;
+const authRateLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 20,
+  legacyHeaders: false,
+  standardHeaders: true,
+  message: {
+    status: 'ok',
+    data: {
+      error_code: 'RATE_LIMITED',
+      error_type: 'Too many authorization requests',
+    },
+  },
+});
 
 function getFileIdFromRequest(req: Request): string {
   const rawFileId =
@@ -195,97 +209,105 @@ app.post('/aspsps', async (req: Request, res: Response) => {
   }
 });
 
-app.post('/start-auth', async (req: Request, res: Response) => {
-  try {
-    const options = getSecretOptions(req);
-    const { aspsp, redirectUrl, maxConsentValidity } = req.body || {};
+app.post(
+  '/start-auth',
+  authRateLimiter,
+  async (req: Request, res: Response) => {
+    try {
+      const options = getSecretOptions(req);
+      const { aspsp, redirectUrl, maxConsentValidity } = req.body || {};
 
-    if (!aspsp || !redirectUrl) {
+      if (!aspsp || !redirectUrl) {
+        sendOk(res, {
+          error_code: 'INVALID_INPUT',
+          error_type: 'Missing aspsp or redirectUrl',
+        });
+        return;
+      }
+
+      const state = uuidv4();
+      const authResponse = await enableBankingService.startAuth(
+        aspsp,
+        redirectUrl,
+        state,
+        typeof maxConsentValidity === 'number' ? maxConsentValidity : undefined,
+        options,
+      );
+      stateFileIds.set(state, options.fileId);
+      setTimeout(() => stateFileIds.delete(state), POLL_TIMEOUT_MS);
+
+      sendOk(res, {
+        url: authResponse.url,
+        state,
+      });
+    } catch (error) {
+      sendOk(res, {
+        error: error instanceof Error ? error.message : 'unknown error',
+      });
+    }
+  },
+);
+
+app.post(
+  '/complete-auth',
+  authRateLimiter,
+  async (req: Request, res: Response) => {
+    const { code, state } = req.body || {};
+
+    if (!code) {
       sendOk(res, {
         error_code: 'INVALID_INPUT',
-        error_type: 'Missing aspsp or redirectUrl',
+        error_type: 'Missing code',
       });
       return;
     }
 
-    const state = uuidv4();
-    const authResponse = await enableBankingService.startAuth(
-      aspsp,
-      redirectUrl,
-      state,
-      typeof maxConsentValidity === 'number' ? maxConsentValidity : undefined,
-      options,
-    );
-    stateFileIds.set(state, options.fileId);
-    setTimeout(() => stateFileIds.delete(state), POLL_TIMEOUT_MS);
+    try {
+      const fileId = stateFileIds.get(state) ?? getFileIdFromRequest(req);
+      const options = { fileId, req };
+      const session = await enableBankingService.createSession(code, options);
+      const result = await buildSessionResult(
+        session,
+        options,
+        extractPsuHeaders(req),
+      );
 
-    sendOk(res, {
-      url: authResponse.url,
-      state,
-    });
-  } catch (error) {
-    sendOk(res, {
-      error: error instanceof Error ? error.message : 'unknown error',
-    });
-  }
-});
+      if (state) {
+        completedAuths.set(state, result);
+        setTimeout(() => completedAuths.delete(state), COMPLETED_AUTH_TTL_MS);
 
-app.post('/complete-auth', async (req: Request, res: Response) => {
-  const { code, state } = req.body || {};
-
-  if (!code) {
-    sendOk(res, {
-      error_code: 'INVALID_INPUT',
-      error_type: 'Missing code',
-    });
-    return;
-  }
-
-  try {
-    const fileId = stateFileIds.get(state) ?? getFileIdFromRequest(req);
-    const options = { fileId, req };
-    const session = await enableBankingService.createSession(code, options);
-    const result = await buildSessionResult(
-      session,
-      options,
-      extractPsuHeaders(req),
-    );
-
-    if (state) {
-      completedAuths.set(state, result);
-      setTimeout(() => completedAuths.delete(state), COMPLETED_AUTH_TTL_MS);
-
-      const pending = pendingAuths.get(state);
-      if (pending) {
-        pending.resolve(result);
-        cleanupPendingAuth(state);
+        const pending = pendingAuths.get(state);
+        if (pending) {
+          pending.resolve(result);
+          cleanupPendingAuth(state);
+        }
+        stateFileIds.delete(state);
       }
-      stateFileIds.delete(state);
-    }
 
-    sendOk(res, result);
-  } catch (error) {
-    const errorResult = {
-      error: error instanceof Error ? error.message : 'unknown error',
-    };
+      sendOk(res, result);
+    } catch (error) {
+      const errorResult = {
+        error: error instanceof Error ? error.message : 'unknown error',
+      };
 
-    if (state) {
-      completedAuths.set(state, errorResult);
-      setTimeout(() => completedAuths.delete(state), COMPLETED_AUTH_TTL_MS);
+      if (state) {
+        completedAuths.set(state, errorResult);
+        setTimeout(() => completedAuths.delete(state), COMPLETED_AUTH_TTL_MS);
 
-      const pending = pendingAuths.get(state);
-      if (pending) {
-        pending.reject(error);
-        cleanupPendingAuth(state);
+        const pending = pendingAuths.get(state);
+        if (pending) {
+          pending.reject(error);
+          cleanupPendingAuth(state);
+        }
+        stateFileIds.delete(state);
       }
-      stateFileIds.delete(state);
+
+      sendOk(res, errorResult);
     }
+  },
+);
 
-    sendOk(res, errorResult);
-  }
-});
-
-app.post('/poll-auth', async (req: Request, res: Response) => {
+app.post('/poll-auth', authRateLimiter, async (req: Request, res: Response) => {
   const { state } = req.body || {};
 
   if (!state) {
@@ -361,13 +383,17 @@ app.post('/poll-auth', async (req: Request, res: Response) => {
   }
 });
 
-app.post('/poll-auth-stop', async (req: Request, res: Response) => {
-  const { state } = req.body || {};
-  if (typeof state === 'string') {
-    cleanupPendingAuth(state);
-  }
-  sendOk(res, {});
-});
+app.post(
+  '/poll-auth-stop',
+  authRateLimiter,
+  async (req: Request, res: Response) => {
+    const { state } = req.body || {};
+    if (typeof state === 'string') {
+      cleanupPendingAuth(state);
+    }
+    sendOk(res, {});
+  },
+);
 
 app.post('/accounts', (_req: Request, res: Response) => {
   sendOk(res, {

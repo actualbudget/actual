@@ -3,6 +3,7 @@ import { inspect } from 'util';
 
 import { isAxiosError } from 'axios';
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 
 import { sha256String } from '../util/hash.js';
 import {
@@ -22,7 +23,14 @@ import { handleError } from './util/handle-error.js';
 const app = express();
 app.use(requestLoggerMiddleware);
 
-app.get('/link', function (req, res) {
+const linkRateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  legacyHeaders: false,
+  standardHeaders: true,
+});
+
+app.get('/link', linkRateLimiter, function (req, res) {
   res.sendFile('link.html', { root: path.resolve('./src/app-gocardless') });
 });
 

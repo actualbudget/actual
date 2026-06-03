@@ -95,7 +95,7 @@ function createPluginMiddleware(pluginManager) {
         res.json(response.body);
       }
     } catch (error) {
-      console.error(`Error forwarding request to plugin ${pluginSlug}:`, error);
+      console.error('Error forwarding request to plugin:', pluginSlug, error);
       res.status(500).json({
         error: 'internal_error',
         message: 'Failed to process plugin request',

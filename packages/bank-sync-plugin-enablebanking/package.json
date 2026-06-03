@@ -34,6 +34,7 @@
     "@actual-app/plugins-core-sync-server": "workspace:*",
     "debug": "^4.4.3",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
     "i18next": "^25.10.10",
     "jws": "^3.2.2",
     "react": "19.2.4",

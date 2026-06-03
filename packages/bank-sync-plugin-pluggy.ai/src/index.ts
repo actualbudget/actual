@@ -187,7 +187,8 @@ app.post('/accounts', async (req: Request, res: Response): Promise<void> => {
           (account as PluggyAccount).itemData = item;
         } catch (error) {
           console.error(
-            `[PLUGGY ACCOUNTS] Error fetching item ${itemId}:`,
+            '[PLUGGY ACCOUNTS] Error fetching item:',
+            itemId,
             error,
           );
         }

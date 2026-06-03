@@ -1,10 +1,11 @@
-import { execSync, fork } from 'child_process';
+import { execFileSync, fork } from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
 import AdmZip from 'adm-zip';
 import createDebug from 'debug';
+import ipaddr from 'ipaddr.js';
 
 import { secretsService } from './services/secrets-service.js';
 
@@ -12,6 +13,76 @@ const debug = createDebug('actual:config');
 
 function sanitizePluginSlug(pluginName) {
   return pluginName.replace(/[^a-zA-Z0-9._-]/g, '-');
+}
+
+function isPathInside(parentPath, childPath) {
+  const relativePath = path.relative(parentPath, childPath);
+  return (
+    relativePath === '' ||
+    (!relativePath.startsWith('..') && !path.isAbsolute(relativePath))
+  );
+}
+
+function resolvePluginPath(pluginPath, relativeEntry) {
+  if (typeof relativeEntry !== 'string' || path.isAbsolute(relativeEntry)) {
+    throw new Error('Plugin entry must be a relative path');
+  }
+
+  const resolvedPluginPath = path.resolve(pluginPath);
+  const resolvedEntryPath = path.resolve(resolvedPluginPath, relativeEntry);
+  if (!isPathInside(resolvedPluginPath, resolvedEntryPath)) {
+    throw new Error('Plugin entry must stay inside the plugin directory');
+  }
+  return resolvedEntryPath;
+}
+
+function isPluginPathInsideDir(pluginPath, relativeDir, relativeEntry) {
+  const resolvedDir = resolvePluginPath(pluginPath, relativeDir);
+  const resolvedEntry = resolvePluginPath(pluginPath, relativeEntry);
+  return isPathInside(resolvedDir, resolvedEntry);
+}
+
+function assertSafeZipEntries(zip) {
+  for (const entry of zip.getEntries()) {
+    const normalizedEntryName = path.posix.normalize(
+      entry.entryName.replace(/\\/g, '/'),
+    );
+    if (
+      normalizedEntryName === '..' ||
+      normalizedEntryName.startsWith('../') ||
+      path.posix.isAbsolute(normalizedEntryName)
+    ) {
+      throw new Error('Plugin zip contains an unsafe path');
+    }
+  }
+}
+
+function isLocalDevPluginUrl(url) {
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    return false;
+  }
+
+  if (url.hostname === 'localhost') {
+    return true;
+  }
+
+  if (!ipaddr.isValid(url.hostname)) {
+    return false;
+  }
+
+  return ipaddr.parse(url.hostname).range() === 'loopback';
+}
+
+function parseDevPluginUrl(rawUrl) {
+  if (typeof rawUrl !== 'string') {
+    throw new Error('Dev plugin manifest URL must be a string');
+  }
+
+  const url = new URL(rawUrl);
+  if (!isLocalDevPluginUrl(url)) {
+    throw new Error('Dev plugin URLs must use localhost or a loopback address');
+  }
+  return url;
 }
 
 function isFrontendPlugin(manifest) {
@@ -96,6 +167,7 @@ class PluginManager {
   extractZipPlugin(zipPath, pluginSlug) {
     try {
       const zip = new AdmZip(zipPath);
+      assertSafeZipEntries(zip);
       const extractPath = path.join(os.tmpdir(), 'actual-plugins', pluginSlug);
 
       // Clean up existing extraction if it exists
@@ -118,10 +190,14 @@ class PluginManager {
             Object.keys(packageJson.dependencies).length > 0
           ) {
             console.log(`Installing dependencies for plugin ${pluginSlug}...`);
-            execSync('npm install --production --no-audit --no-fund', {
-              cwd: extractPath,
-              stdio: 'inherit',
-            });
+            execFileSync(
+              'npm',
+              ['install', '--production', '--no-audit', '--no-fund'],
+              {
+                cwd: extractPath,
+                stdio: 'inherit',
+              },
+            );
             console.log(`Dependencies installed for plugin ${pluginSlug}`);
           }
         } catch (error) {
@@ -306,7 +382,7 @@ class PluginManager {
       );
     }
 
-    const entryPath = path.join(pluginPath, runtimeManifest.entry);
+    const entryPath = resolvePluginPath(pluginPath, runtimeManifest.entry);
 
     if (!fs.existsSync(entryPath)) {
       throw new Error(
@@ -583,9 +659,20 @@ class PluginManager {
     const pluginSlug = sanitizePluginSlug(manifest.name);
 
     if (isFrontendPlugin(manifest)) {
-      const frontendDir = path.join(extractedPath, 'frontend');
-      const frontendEntry = path.join(extractedPath, manifest.frontend.entry);
-      if (!fs.existsSync(frontendDir) || !fs.existsSync(frontendEntry)) {
+      const frontendDir = resolvePluginPath(extractedPath, 'frontend');
+      const frontendEntry = resolvePluginPath(
+        extractedPath,
+        manifest.frontend.entry,
+      );
+      if (
+        !isPluginPathInsideDir(
+          extractedPath,
+          'frontend',
+          manifest.frontend.entry,
+        ) ||
+        !fs.existsSync(frontendDir) ||
+        !fs.existsSync(frontendEntry)
+      ) {
         throw new Error(
           `Plugin ${manifest.name} frontend files must live under frontend/`,
         );
@@ -593,12 +680,16 @@ class PluginManager {
     }
 
     if (isSyncServerPlugin(manifest)) {
-      const syncserverEntry = path.join(
+      const syncserverEntry = resolvePluginPath(
         extractedPath,
         manifest.syncserver.entry,
       );
       if (
-        !manifest.syncserver.entry.startsWith('syncserver/') ||
+        !isPluginPathInsideDir(
+          extractedPath,
+          'syncserver',
+          manifest.syncserver.entry,
+        ) ||
         !fs.existsSync(syncserverEntry)
       ) {
         throw new Error(
@@ -621,9 +712,12 @@ class PluginManager {
   }
 
   async registerDevPlugin(manifestUrl) {
-    const manifestResponse = await fetch(manifestUrl);
+    const parsedManifestUrl = parseDevPluginUrl(manifestUrl);
+    const manifestResponse = await fetch(parsedManifestUrl);
     if (!manifestResponse.ok) {
-      throw new Error(`Failed to fetch dev plugin manifest: ${manifestUrl}`);
+      throw new Error(
+        `Failed to fetch dev plugin manifest: ${parsedManifestUrl.toString()}`,
+      );
     }
 
     const manifest = validateUnifiedManifest(await manifestResponse.json());
@@ -634,6 +728,13 @@ class PluginManager {
 
     const pluginSlug = sanitizePluginSlug(manifest.name);
     const devPath = path.join(os.tmpdir(), 'actual-dev-plugins', pluginSlug);
+    if (
+      !isPluginPathInsideDir(devPath, 'syncserver', manifest.syncserver.entry)
+    ) {
+      throw new Error(
+        `Plugin ${manifest.name} sync-server files must live under syncserver/`,
+      );
+    }
     fs.rmSync(devPath, { recursive: true, force: true });
     fs.mkdirSync(path.join(devPath, 'syncserver'), { recursive: true });
     fs.writeFileSync(
@@ -641,7 +742,16 @@ class PluginManager {
       JSON.stringify(manifest, null, 2),
     );
 
-    const entryUrl = new URL(manifest.syncserver.entry, manifestUrl);
+    const entryUrl = new URL(
+      manifest.syncserver.entry,
+      parsedManifestUrl.toString(),
+    );
+    if (
+      !isLocalDevPluginUrl(entryUrl) ||
+      entryUrl.origin !== parsedManifestUrl.origin
+    ) {
+      throw new Error('Dev plugin entry URL must use the manifest URL origin');
+    }
     const entryResponse = await fetch(entryUrl);
     if (!entryResponse.ok) {
       throw new Error(

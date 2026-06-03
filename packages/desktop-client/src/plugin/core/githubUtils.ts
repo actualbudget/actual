@@ -67,7 +67,7 @@ export function parseGitHubRepoUrl(
   try {
     const parsedUrl = new URL(url);
 
-    if (!parsedUrl.hostname.includes('github.com')) {
+    if (parsedUrl.hostname !== 'github.com') {
       throw new Error('Not a valid GitHub URL');
     }
 
@@ -75,11 +75,15 @@ export function parseGitHubRepoUrl(
     if (pathParts.length >= 2) {
       const owner = pathParts[0];
       const repo = pathParts[1];
+      const validRepoPart = /^[A-Za-z0-9_.-]+$/;
+      if (!validRepoPart.test(owner) || !validRepoPart.test(repo)) {
+        throw new Error('URL contains invalid owner or repository name');
+      }
       return { owner, repo };
     }
     throw new Error('URL does not contain owner and repository name');
   } catch (error) {
-    console.error(`Error parsing GitHub URL: ${url}`, error);
+    console.error('Error parsing GitHub URL:', error);
     return null;
   }
 }

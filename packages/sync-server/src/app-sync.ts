@@ -449,6 +449,18 @@ app.get('/download-user-file', async (req, res) => {
     return;
   }
 
+  try {
+    await fs.access(path);
+  } catch (error) {
+    if (error && typeof error === 'object' && 'code' in error) {
+      if (error.code === 'ENOENT') {
+        res.status(404).send('File not found');
+        return;
+      }
+    }
+    throw error;
+  }
+
   res.setHeader('Content-Disposition', `attachment;filename=${fileId}`);
   res.sendFile(path, { dotfiles: 'allow' });
 });
