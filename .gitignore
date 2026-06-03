@@ -17,6 +17,9 @@ export-2020-01-10.csv
 node_modules
 packages/api/app/bundle.api.js
 packages/api/app/stats.json
+packages/*/dist
+packages/*/build
+packages/*/lib-dist
 packages/api/dist
 packages/api/@types
 packages/crdt/dist

@@ -12,6 +12,7 @@
     "./database": "./src/database.ts"
   },
   "scripts": {
+    "build": "tsgo -b",
     "typecheck": "tsgo -b"
   },
   "dependencies": {

@@ -15,6 +15,7 @@
     "./util": "./src/util.ts"
   },
   "scripts": {
+    "build": "tsgo -b",
     "typecheck": "tsgo -b"
   },
   "devDependencies": {
