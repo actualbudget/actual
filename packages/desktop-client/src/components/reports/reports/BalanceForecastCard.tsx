@@ -33,6 +33,7 @@ import { useFormat } from '#hooks/useFormat';
 import {
   buildBalanceForecastChartData,
   countForecastScheduledOccurrences,
+  getLowestChartDataPoint,
   getZeroCrossingGradientOffset,
 } from './balanceForecastChartData';
 
@@ -106,9 +107,6 @@ export function BalanceForecastCard({
   const onCardHover = () => setIsCardHovered(true);
   const onCardHoverEnd = () => setIsCardHovered(false);
 
-  const lowestPoint = forecastData?.lowestBalance;
-  const hasNegative = lowestPoint && lowestPoint.balance < 0;
-
   const chartRange = isPlaceholderData
     ? committedChartRange.current
     : { start, end };
@@ -124,6 +122,9 @@ export function BalanceForecastCard({
     end: chartRange.end,
     granularity: 'Monthly',
   });
+  const endingPoint = chartData.at(-1);
+  const lowestPoint = getLowestChartDataPoint(chartData);
+  const hasNegativeEndingBalance = endingPoint && endingPoint.balance < 0;
   const hasNegativeBalance = chartData.some(d => d.balance < 0);
   const zeroCrossingGradientOffset = getZeroCrossingGradientOffset(chartData);
   const gradientId = `balance-forecast-card-line-gradient-${widgetId}`;
@@ -189,26 +190,42 @@ export function BalanceForecastCard({
             />
             <DateRange start={start} end={end} />
           </View>
-          {lowestPoint && (
+          {endingPoint && (
             <View style={{ textAlign: 'right' }}>
               <Block
                 style={{
                   ...styles.mediumText,
                   fontWeight: 500,
                   marginBottom: 5,
-                  color: hasNegative ? theme.errorText : theme.pageText,
+                  color: hasNegativeEndingBalance
+                    ? theme.errorText
+                    : theme.pageText,
                 }}
               >
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  <Trans>Lowest</Trans>:{' '}
-                  {format(lowestPoint.balance, 'financial')}
+                  <Trans>Ending</Trans>:{' '}
+                  {format(endingPoint.balance, 'financial')}
                 </PrivacyFilter>
               </Block>
               <PrivacyFilter activationFilters={[!isCardHovered]}>
                 <Block style={{ fontSize: 12, color: theme.pageTextLight }}>
-                  {lowestPoint.date}
+                  {endingPoint.date}
                 </Block>
               </PrivacyFilter>
+              {lowestPoint && lowestPoint.date !== endingPoint.date ? (
+                <PrivacyFilter activationFilters={[!isCardHovered]}>
+                  <Block
+                    style={{
+                      fontSize: 12,
+                      color: theme.pageTextLight,
+                      marginTop: 4,
+                    }}
+                  >
+                    <Trans>Low</Trans>:{' '}
+                    {format(lowestPoint.balance, 'financial')}
+                  </Block>
+                </PrivacyFilter>
+              ) : null}
             </View>
           )}
         </View>
@@ -251,19 +268,19 @@ export function BalanceForecastCard({
                             offset="0%"
                             stopColor={
                               hasNegativeBalance
-                                ? theme.errorText
-                                : theme.noticeText
+                                ? theme.reportsNumberNegative
+                                : theme.reportsChartFill
                             }
                           />
                         ) : (
                           <>
                             <stop
                               offset={`${zeroCrossingGradientOffset}%`}
-                              stopColor={theme.noticeText}
+                              stopColor={theme.reportsChartFill}
                             />
                             <stop
                               offset={`${zeroCrossingGradientOffset}%`}
-                              stopColor={theme.errorText}
+                              stopColor={theme.reportsNumberNegative}
                             />
                           </>
                         )}
@@ -303,7 +320,7 @@ export function BalanceForecastCard({
                     {showsTodayReferenceLine && (
                       <ReferenceLine
                         x={todayReferenceDate}
-                        stroke={theme.noticeText}
+                        stroke={theme.reportsBlue}
                         strokeDasharray="4 4"
                       />
                     )}

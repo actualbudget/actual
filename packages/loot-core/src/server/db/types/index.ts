@@ -29,7 +29,7 @@ export type DbAccount = {
 export type DbBank = {
   id: string;
   bank_id: string;
-  name: string;
+  name: string | null;
   tombstone: 1 | 0;
 };
 

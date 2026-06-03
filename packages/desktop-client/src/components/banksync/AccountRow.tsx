@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import type { ReactNode } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { styles } from '@actual-app/components/styles';
@@ -31,7 +31,13 @@ export const AccountRow = memo(
     locale,
     renderLinkButton,
   }: AccountRowProps) => {
+    const { t } = useTranslation();
     const backgroundFocus = hovered;
+
+    // The bank name is stored as null when the sync provider doesn't report an
+    // institution; show a localized fallback for linked accounts.
+    const bankName =
+      account.bank && !account.bankName ? t('Unknown') : account.bankName;
 
     const lastSyncString = tsToRelativeTime(account.last_sync, locale, {
       capitalize: true,
@@ -75,7 +81,7 @@ export const AccountRow = memo(
           plain
           style={{ color: theme.tableText, padding: '10px' }}
         >
-          {account.bankName}
+          {bankName}
         </Cell>
 
         {account.account_sync_source ? (

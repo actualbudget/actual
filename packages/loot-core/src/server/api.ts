@@ -225,7 +225,9 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
     await handlers['load-budget']({ id: localBudget.id });
     const result = await handlers['sync-budget']();
     if (result.error) {
-      throw new Error(getSyncError(result.error.reason, localBudget.id));
+      throw new Error(
+        getSyncError(result.error.reason, localBudget.id, result.error.meta),
+      );
     }
     return;
   }
@@ -254,7 +256,7 @@ handlers['api/sync'] = async function () {
   const { id } = prefs.getPrefs();
   const result = await handlers['sync-budget']();
   if (result.error) {
-    throw new Error(getSyncError(result.error.reason, id));
+    throw new Error(getSyncError(result.error.reason, id, result.error.meta));
   }
 };
 
@@ -282,7 +284,7 @@ handlers['api/bank-sync'] = async function (args) {
     );
     const simpleFinAccountIds = simpleFinAccounts.map(a => a.id);
 
-    if (simpleFinAccounts.length > 1) {
+    if (simpleFinAccounts.length >= 1) {
       const res = await handlers['simplefin-batch-sync']({
         ids: simpleFinAccountIds,
         fileId: cloudFileId,

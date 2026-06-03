@@ -17,12 +17,8 @@ import type { Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const reactCompilerInclude = new RegExp(
-  `^${path
-    .resolve(__dirname, 'src')
-    .replaceAll(path.sep, '/')
-    .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}/.*\\.[jt]sx$`,
-);
+const reactCompilerInclude =
+  /[\\/]desktop-client[\\/]src[\\/].*\.[jt]sx(?:$|\?)/;
 
 const addWatchers = (): Plugin => ({
   name: 'add-watchers',

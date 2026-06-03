@@ -417,6 +417,10 @@ export type Modal =
         onApplyBudgetTemplatesInGroup?: (
           categories: Array<CategoryEntity['id']>,
         ) => void;
+        onSortCategories?: (
+          groupId: CategoryGroupEntity['id'],
+          direction: 'asc' | 'desc',
+        ) => void;
       };
     }
   | {
