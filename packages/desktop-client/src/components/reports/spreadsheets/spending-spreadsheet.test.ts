@@ -52,4 +52,22 @@ describe('getSpendingBudgetFilters', () => {
 
     expect(result).toEqual([]);
   });
+
+  it('filters budget categories by direct category IDs', () => {
+    const result = getSpendingBudgetFilters({
+      categories,
+      categoryGroups,
+      conditions: [
+        {
+          field: 'category',
+          op: 'oneOf',
+          value: ['cat-rent', 'cat-dining'],
+        },
+      ] satisfies RuleConditionEntity[],
+    });
+
+    expect(result).toEqual([
+      { category: { $oneof: ['cat-rent', 'cat-dining'] } },
+    ]);
+  });
 });
