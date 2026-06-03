@@ -27,7 +27,7 @@ const intro = `:::info
 
 These changes have been merged but are **not yet part of a stable release**. They
 ship in the nightly builds — try them via the \`nightly\` Docker image tag, or the
-hosted demo at [edge.actualbudget.org](https://edge.actualbudget.org).
+hosted demo at [nightly.actualbudget.org](https://nightly.actualbudget.org).
 For changes in stable releases, see the [Release Notes](/docs/releases).
 
 :::`;
