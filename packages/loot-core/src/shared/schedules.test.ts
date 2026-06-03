@@ -6,6 +6,7 @@ import * as monthUtils from './months';
 import {
   computeSchedulePreviewTransactions,
   getNextDate,
+  getScheduleOccurrenceMatchStartDate,
   getStatus,
   getUpcomingDays,
 } from './schedules';
@@ -263,6 +264,57 @@ describe('schedules', () => {
 
       // Should not crash; schedule with past end date produces its next_date entry only
       expect(result).toBeDefined();
+    });
+  });
+
+  describe('getScheduleOccurrenceMatchStartDate', () => {
+    const occurrenceDate = '2024-03-10';
+
+    it('uses exact date for one-time schedules', () => {
+      expect(
+        getScheduleOccurrenceMatchStartDate(
+          {
+            _conditions: [{ op: 'is', field: 'date', value: occurrenceDate }],
+          },
+          occurrenceDate,
+        ),
+      ).toBe(occurrenceDate);
+    });
+
+    it('uses exact date for auto-posted recurring schedules', () => {
+      expect(
+        getScheduleOccurrenceMatchStartDate(
+          { posts_transaction: true },
+          occurrenceDate,
+        ),
+      ).toBe(occurrenceDate);
+    });
+
+    it('uses a 2-day lookback for manual recurring schedules', () => {
+      expect(
+        getScheduleOccurrenceMatchStartDate(
+          { posts_transaction: false },
+          occurrenceDate,
+        ),
+      ).toBe('2024-03-08');
+    });
+
+    it('uses a 2-day lookback for recurring schedules with op is', () => {
+      expect(
+        getScheduleOccurrenceMatchStartDate(
+          {
+            posts_transaction: false,
+            _conditions: [
+              {
+                op: 'is',
+                field: 'date',
+                value: { start: occurrenceDate, frequency: 'monthly' },
+              },
+            ],
+          },
+          occurrenceDate,
+        ),
+      ).toBe('2024-03-08');
     });
   });
 
