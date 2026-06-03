@@ -72,3 +72,11 @@ export const currencies: Currency[] = [
 export function getCurrency(code: string): Currency {
   return currencies.find(c => c.code === code) || currencies[0];
 }
+
+export function getDecimalPlaces(currencyCode: string): number {
+  return getCurrency(currencyCode)?.decimalPlaces ?? 2;
+}
+
+export function getCurrencyPrecisionMultiplier(currencyCode: string): number {
+  return Math.pow(10, getDecimalPlaces(currencyCode));
+}

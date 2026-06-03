@@ -2,6 +2,8 @@
 import { formatDistanceToNow } from 'date-fns';
 import type { Locale } from 'date-fns';
 
+import { getCurrencyPrecisionMultiplier, getDecimalPlaces } from './currencies';
+
 export function last<T>(arr: Array<T>) {
   return arr[arr.length - 1];
 }
@@ -453,7 +455,19 @@ export function integerToCurrency(
   return formatter.format(amount);
 }
 
-export function integerToCurrencyWithDecimal(integerAmount: IntegerAmount) {
+export function integerToCurrencyWithDecimal(
+  integerAmount: IntegerAmount,
+  currencyCode?: string,
+) {
+  if (currencyCode !== undefined) {
+    const dp = getDecimalPlaces(currencyCode);
+    return integerToCurrency(
+      integerAmount,
+      getNumberFormat({ ...numberFormatConfig, decimalPlaces: dp }).formatter,
+      dp,
+    );
+  }
+
   // If decimal digits exist, keep them. Otherwise format them as usual.
   if (integerAmount % 100 !== 0) {
     return integerToCurrency(
@@ -466,6 +480,10 @@ export function integerToCurrencyWithDecimal(integerAmount: IntegerAmount) {
   }
 
   return integerToCurrency(integerAmount);
+}
+
+export function encodeAmount(amount: number, code: string): number {
+  return Math.round(amount * getCurrencyPrecisionMultiplier(code));
 }
 
 export function amountToCurrency(amount: Amount): CurrencyAmount {
