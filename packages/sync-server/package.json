@@ -20,6 +20,7 @@
   "imports": {
     "#db": "./src/db.js",
     "#account-db": "./src/account-db.js",
+    "#server-prefs": "./src/server-prefs.js",
     "#load-config": "./src/load-config.js",
     "#migrations": "./src/migrations.ts",
     "#accounts/*": "./src/accounts/*.js",
@@ -48,6 +49,7 @@
     "imports": {
       "#db": "./build/src/db.js",
       "#account-db": "./build/src/account-db.js",
+      "#server-prefs": "./build/src/server-prefs.js",
       "#load-config": "./build/src/load-config.js",
       "#migrations": "./build/src/migrations.js",
       "#accounts/*": "./build/src/accounts/*.js",
@@ -92,7 +94,7 @@
   "dependencies": {
     "@actual-app/crdt": "workspace:*",
     "@actual-app/web": "workspace:*",
-    "adm-zip": "^0.5.16",
+    "adm-zip": "^0.5.17",
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.8.0",
     "convict": "^6.2.5",

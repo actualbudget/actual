@@ -484,11 +484,7 @@ export function ProviderSetup({
         },
       });
 
-      if (
-        response &&
-        typeof response === 'object' &&
-        'error' in response
-      ) {
+      if (response && typeof response === 'object' && 'error' in response) {
         throw new Error(String(response.error));
       }
 

@@ -51,26 +51,26 @@
     "@actual-app/query": "workspace:*",
     "@actual-app/shared-types": "workspace:*",
     "@types/node": "^22.19.17",
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "i18next": "^25.10.10",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-i18next": "^16.6.6",
-    "typescript": "^5.5.4",
+    "typescript": "^6.0.2",
     "typescript-eslint": "^8.18.1",
     "typescript-strict-plugin": "^2.4.4",
-    "vite": "^6.2.0",
+    "vite": "^8.0.5",
     "vite-plugin-dts": "^4.5.3",
     "vitest": "^4.1.2"
   },
   "peerDependencies": {
     "@emotion/css": "^11.13.5",
-    "i18next": "^25.2.1",
+    "i18next": "^25.10.10",
     "react": ">=19.2",
     "react-aria-components": "^1.7.1",
     "react-dom": ">=19.2",
-    "react-i18next": "^16.0.0",
+    "react-i18next": "^16.6.6",
     "usehooks-ts": "^3.1.1"
   }
 }
