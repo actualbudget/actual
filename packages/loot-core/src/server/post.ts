@@ -111,7 +111,7 @@ export async function post(
     );
   }
 
-  return responseData.data;
+  return { status: res.status, ...responseData.data };
 }
 
 export async function del(url, data, headers = {}, timeout = null) {
