@@ -62,7 +62,7 @@ const sidebars = {
               label: 'In the Cloud',
               collapsible: false,
               className: 'no-indent',
-              items: ['install/pikapods', 'install/fly'],
+              items: ['install/pikapods', 'install/fly', 'install/hostim'],
             },
             {
               type: 'category',

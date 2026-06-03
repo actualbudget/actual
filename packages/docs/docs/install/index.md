@@ -46,6 +46,7 @@ The server provides a web-based version of Actual. This web app can be used in a
 While running a server can be a complicated endeavor, we've tried to make it fairly easy to set up and hands-off to maintain. Choose one of the following options to get started:
 
 - If you're not comfortable with the command line and are willing to pay a small amount of money to have your version of Actual hosted on the cloud for you, we recommend [PikaPods](pikapods.md).[^2]
+- [Hostim](hostim.md) also offers one-click managed hosting with Docker and free SSL, no command line required.
 - If you're willing to run a few commands in the terminal:
   - You can run the server with a simple command using the [Server CLI](cli-tool.md)
   - [Fly.io](fly.md) also offers cloud hosting for a similar amount of money.
