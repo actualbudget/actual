@@ -18,6 +18,7 @@ import * as cleanupGroupActions from './cleanup-groups';
 import * as cleanupActions from './cleanup-template';
 import { storeNoteCleanups } from './cleanup-template-notes';
 import * as goalActions from './goal-template';
+import { sortCategories } from './sort-categories';
 import * as goalNoteActions from './template-notes';
 
 export type BudgetHandlers = {
@@ -51,6 +52,7 @@ export type BudgetHandlers = {
   'category-create': typeof createCategory;
   'category-update': typeof updateCategory;
   'category-move': typeof moveCategory;
+  'categories-sort': typeof sortCategories;
   'category-delete': typeof deleteCategory;
   'get-category-groups': typeof getCategoryGroups;
   'category-group-create': typeof createCategoryGroup;
@@ -147,6 +149,7 @@ app.method('tracking-budget-month', trackingBudgetMonth);
 app.method('category-create', mutator(undoable(createCategory)));
 app.method('category-update', mutator(undoable(updateCategory)));
 app.method('category-move', mutator(undoable(moveCategory)));
+app.method('categories-sort', mutator(undoable(sortCategories)));
 app.method('category-delete', mutator(undoable(deleteCategory)));
 app.method('get-category-groups', getCategoryGroups);
 app.method('category-group-create', mutator(undoable(createCategoryGroup)));
