@@ -1103,7 +1103,7 @@ async function processBankSyncDownload(
     } else if (acctRow.account_sync_source === 'akahu') {
       const currentBalance = download.startingBalance;
       const previousBalance = transactions.reduce(
-        (total, trans) => total - trans.transactionAmount.amount * 100,
+        (total, trans) => total - amountToInteger(trans.transactionAmount.amount),
         currentBalance,
       );
       balanceToUse = Math.round(previousBalance);
