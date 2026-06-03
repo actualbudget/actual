@@ -334,11 +334,19 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
           console.trace('invalid-schema', event.meta);
           notif = {
             title: t('Update required'),
-            message: t(
-              "We couldn't apply changes from the server. This probably means you " +
-                'need to update the app to support the latest database.',
-            ),
+            message:
+              t(
+                'Another device on this budget is running a newer version of ' +
+                  'Actual and made changes this device is too old to understand. ' +
+                  'Syncing has been paused to avoid problems. Update this device ' +
+                  '(or reload, if using the browser) to the latest version to ' +
+                  'resume syncing.',
+              ) +
+              '\n\n' +
+              learnMore,
             type: 'warning',
+            sticky: true,
+            id: 'sync-schema-skew',
           };
           break;
         case 'apply-failure':

@@ -9,11 +9,18 @@ import * as mockSyncServer from '#server/tests/mockSyncServer';
 import * as encoder from './encoder';
 import { isError } from './utils';
 
-import { applyMessages, fullSync, sendMessages, setSyncingMode } from './index';
+import {
+  applyMessages,
+  fullSync,
+  sendMessages,
+  setSchemaSkewPaused,
+  setSyncingMode,
+} from './index';
 
 beforeEach(() => {
   mockSyncServer.reset();
   setSyncingMode('enabled');
+  setSchemaSkewPaused(false);
   return global.emptyDatabase()();
 });
 
@@ -98,6 +105,57 @@ describe('Sync', () => {
     if (isError(result)) throw result.error;
     expect(result.messages.length).toBe(0);
     expect(mockSyncServer.getMessages().length).toBe(2);
+  });
+
+  it('pauses syncing when an incoming message targets an unknown column', async () => {
+    void prefs.loadPrefs();
+    void prefs.savePrefs({
+      groupId: 'group',
+      lastSyncedTimestamp: Timestamp.zero.toString(),
+    });
+
+    // Simulate a device running a newer version of Actual sending a change for
+    // a column this (older) device's schema doesn't have yet.
+    await mockSyncServer.handlers['/sync/sync'](
+      await encoder.encode(
+        'group',
+        'client',
+        Timestamp.parse('1970-01-01T01:17:37.000Z-0000-0000testinguuid2'),
+        [
+          {
+            dataset: 'transactions',
+            row: 'foo',
+            column: 'column_from_the_future',
+            value: 'S:hello',
+            timestamp: Timestamp.parse(
+              '1970-01-02T05:17:36.789Z-0000-0000testinguuid2',
+            ),
+          },
+        ],
+      ),
+    );
+
+    // The message can't be applied, so the sync fails with `invalid-schema`.
+    const result = await fullSync();
+    expect(isError(result)).toBe(true);
+    if (isError(result)) {
+      expect(result.error.reason).toBe('invalid-schema');
+    }
+
+    // Syncing is now paused: a subsequent sync short-circuits instead of
+    // re-downloading and re-failing on the same un-appliable message.
+    const pausedResult = await fullSync();
+    if (isError(pausedResult)) throw pausedResult.error;
+    expect(pausedResult.messages.length).toBe(0);
+
+    // Clearing the pause (e.g. reopening the budget or updating the app) lets
+    // syncing resume.
+    setSchemaSkewPaused(false);
+    const resumedResult = await fullSync();
+    expect(isError(resumedResult)).toBe(true);
+    if (isError(resumedResult)) {
+      expect(resumedResult.error.reason).toBe('invalid-schema');
+    }
   });
 
   it('should sync multiple clients', async () => {

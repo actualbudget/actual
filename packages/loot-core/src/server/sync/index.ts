@@ -77,6 +77,19 @@ export function checkSyncingMode(mode: SyncingMode): boolean {
   }
 }
 
+// Set when an incoming message can't be applied because this device's
+// database schema is older than the one that produced the message (i.e.
+// another device is running a newer version of Actual). While paused, all
+// automatic syncing short-circuits so we don't keep choking on the same
+// un-appliable messages on every focus/schedule. The flag lives in memory, so
+// it resets when the app reloads (e.g. after an update) and is cleared when a
+// budget is (re)opened or sync is reset/repaired.
+let SCHEMA_SKEW_PAUSED = false;
+
+export function setSchemaSkewPaused(paused: boolean): void {
+  SCHEMA_SKEW_PAUSED = paused;
+}
+
 function apply(msg: Message, prev?: boolean) {
   const { dataset, row, column, value } = msg;
 
@@ -552,7 +565,11 @@ export function scheduleFullSync(): Promise<
 > {
   clearFullSyncTimeout();
 
-  if (checkSyncingMode('enabled') && !checkSyncingMode('offline')) {
+  if (
+    checkSyncingMode('enabled') &&
+    !checkSyncingMode('offline') &&
+    !SCHEMA_SKEW_PAUSED
+  ) {
     if (process.env.NODE_ENV === 'test') {
       return fullSync().then(res => {
         if (isError(res)) {
@@ -616,6 +633,12 @@ export const fullSync = once(async function (): Promise<
           meta: e.meta,
         });
       } else if (e.reason === 'invalid-schema') {
+        // Another device is running a newer version of Actual and produced a
+        // message this (older) device's schema can't hold. Pause syncing so we
+        // stop re-applying the same un-appliable messages until the user
+        // updates this device (which reloads the app and clears this flag).
+        SCHEMA_SKEW_PAUSED = true;
+
         app.events.emit('sync', {
           type: 'error',
           subtype: 'invalid-schema',
@@ -687,6 +710,7 @@ async function _fullSync(
   if (
     checkSyncingMode('disabled') ||
     checkSyncingMode('offline') ||
+    SCHEMA_SKEW_PAUSED ||
     !currentId
   ) {
     return [];

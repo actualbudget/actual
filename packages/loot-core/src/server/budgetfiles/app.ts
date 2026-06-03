@@ -22,6 +22,7 @@ import * as sheet from '#server/sheet';
 import {
   clearFullSyncTimeout,
   initialFullSync,
+  setSchemaSkewPaused,
   setSyncingMode,
 } from '#server/sync';
 import * as syncMigrations from '#server/sync/migrate';
@@ -218,6 +219,10 @@ async function downloadBudget({
 // open and sync, but don't close
 async function syncBudget() {
   setSyncingMode('enabled');
+  // A schema-skew pause is scoped to a single budget session; opening a budget
+  // always starts unpaused so a previously-skewed budget doesn't keep this one
+  // (potentially compatible) from syncing.
+  setSchemaSkewPaused(false);
   const result = await initialFullSync();
 
   return result;
