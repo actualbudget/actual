@@ -53,6 +53,7 @@
     "@types/node": "^22.19.17",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
     "i18next": "^25.10.10",
     "react": "19.2.4",
     "react-dom": "19.2.4",

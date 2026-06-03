@@ -311,6 +311,7 @@ __metadata:
     "@types/node": "npm:^22.19.17"
     "@types/react": "npm:^19.2.14"
     "@types/react-dom": "npm:^19.2.3"
+    "@vitejs/plugin-react": "npm:^6.0.1"
     i18next: "npm:^25.10.10"
     react: "npm:19.2.4"
     react-dom: "npm:19.2.4"
