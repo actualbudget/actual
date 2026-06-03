@@ -43,6 +43,17 @@ export type {
   BankSyncProviderSetupSetSecret,
   HostContext,
 } from './types/actualPlugin';
+export {
+  isFrontendPlugin,
+  isSyncServerPlugin,
+  validateActualPluginManifest,
+} from './types/actualPluginManifest';
+export type {
+  ActualPluginManifest,
+  ActualPluginType,
+  ActualPluginFrontendManifest,
+  ActualPluginSyncServerManifest,
+} from './types/actualPluginManifest';
 
 //. This is part of the full plugin support system that was removed from the initial bank sync MVP
 /*
