@@ -93,13 +93,71 @@ Then restart the sync server. On startup, the plugin manager scans the plugins d
 
 If two plugins have the same slug, Actual loads the first one found and skips the duplicate. The slug is the manifest `name` with unsupported characters replaced by `-`.
 
-## How plugins are implemented
+## Architecture
 
-The plugin system has three main parts.
+The plugin system has four main components:
 
-The client-side provider loads frontend plugins only when the `plugins` feature flag is enabled. It reads locally stored plugins from IndexedDB, fetches sync-server plugin manifests from `/plugins-api/list`, and merges both lists. Frontend plugin files are served through the plugin service worker under `/plugin-data/<plugin>/<file>`. The plugin frontend entry is loaded with Module Federation.
+- **Plugin manager**: discovers plugins, validates manifests, starts sync-server plugins, tracks loaded plugin processes, and shuts them down.
+- **Plugin middleware**: routes HTTP requests under `/plugins-api` to the correct plugin process.
+- **Plugin core libraries**: expose plugin author utilities such as frontend registration, IPC middleware, and secret helpers.
+- **Plugin process**: sync-server plugin code running as a separate Node.js child process.
 
-The sync server exposes `/plugins-api`. When server plugins are enabled, the sync server scans `<ACTUAL_SERVER_FILES>/plugins`, validates plugin manifests, and forks each sync-server plugin entry as a child process. Requests to plugin routes are forwarded to the child process over IPC. Plugin responses are forwarded back as HTTP responses.
+Frontend plugin code is loaded by the Actual client when the `plugins` feature flag is enabled. The client reads locally stored plugins from IndexedDB, fetches sync-server plugin manifests from `/plugins-api/list`, and merges both lists. Frontend plugin files are served through the plugin service worker under `/plugin-data/<plugin>/<file>`. The plugin frontend entry is loaded with Module Federation.
+
+Sync-server plugin code is loaded by the sync server when the server `flags.plugins` preference is enabled. The sync server scans `<ACTUAL_SERVER_FILES>/plugins`, validates plugin manifests, and forks each sync-server plugin entry as a child process. Requests to plugin routes are forwarded to the child process over IPC. Plugin responses are forwarded back as HTTP responses.
+
+```mermaid
+flowchart TB
+    Client[Actual client] -->|HTTP request| Server[Sync server]
+    Server --> Auth[Authentication]
+    Auth --> PluginMiddleware[Plugin middleware]
+    PluginMiddleware --> PluginManager[Plugin manager]
+    PluginManager <-->|IPC messages| PluginProcess[Plugin child process]
+    PluginProcess --> ExpressApp[Plugin Express app]
+    ExpressApp --> RouteHandlers[Plugin route handlers]
+    RouteHandlers -.->|secret requests| PluginManager
+    PluginManager -.-> Secrets[Secrets store]
+```
+
+## Plugin loading flow
+
+On startup, the sync server loads plugins in this order:
+
+1. Initialize the plugin manager with `<ACTUAL_SERVER_FILES>/plugins`.
+2. Scan the directory for plugin folders and `.zip` files.
+3. Read and validate each `manifest.json`.
+4. Skip invalid plugins and duplicate slugs.
+5. Extract zip plugins to a temporary directory.
+6. Install plugin runtime dependencies from `package.json` when present.
+7. Fork each sync-server plugin entry point.
+8. Wait for the plugin to call `attachPluginMiddleware(app)` and send a `ready` IPC message.
+9. Mark the plugin as online.
+
+Plugins that do not send the `ready` message within the startup timeout are rejected.
+
+## Request flow
+
+Requests to plugin routes use HTTP at the sync-server boundary and IPC inside the sync server:
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Sync server
+    participant M as Plugin middleware
+    participant P as Plugin process
+
+    C->>S: POST /plugins-api/example/hello
+    S->>M: Match plugin route
+    M->>M: Check auth requirement
+    M->>P: IPC request message
+    P->>P: Simulate Express request
+    P-->>M: IPC response message
+    M-->>C: HTTP response
+```
+
+The sync server sends request messages containing the HTTP method, route path, headers, query, body, user information, and plugin slug. The plugin responds with status, headers, and body.
+
+## Bank sync bridge
 
 The bank sync bridge exposes standard routes for plugin bank sync providers:
 
@@ -119,6 +177,55 @@ Additional provider-specific routes can be called through:
 ```
 
 Plugin routes can require `anonymous`, `authenticated`, or `admin` access. If a route omits `auth`, it defaults to authenticated access.
+
+Bank sync plugins should expose these endpoint contracts through the paths declared in `syncserver.bankSync.endpoints`:
+
+- `status`: returns whether the provider is configured.
+- `accounts`: returns external accounts that can be linked.
+- `transactions`: returns transactions for a linked external account.
+
+Example status response:
+
+```json
+{
+  "status": "ok",
+  "data": {
+    "configured": true
+  }
+}
+```
+
+Example accounts response:
+
+```json
+{
+  "status": "ok",
+  "data": {
+    "accounts": [
+      {
+        "account_id": "external-account-1",
+        "name": "Checking",
+        "institution": "Example Bank",
+        "balance": 1000
+      }
+    ]
+  }
+}
+```
+
+Example transactions response:
+
+```json
+{
+  "status": "ok",
+  "data": {
+    "transactions": {
+      "booked": [],
+      "pending": []
+    }
+  }
+}
+```
 
 ## Manifest format
 
@@ -201,6 +308,30 @@ app.post('/configure', async (req, res) => {
 
 Secrets are namespaced by plugin slug automatically. If the request includes `x-actual-file-id` or a `fileId` query/body value, secrets are scoped to that budget file.
 
+Secret helpers use IPC to ask the sync server to read or write values through the server secrets service. Plugins should use these helpers instead of storing provider credentials in their own files.
+
+```mermaid
+sequenceDiagram
+    participant Plugin as Plugin route
+    participant Core as Plugin core helper
+    participant Manager as Plugin manager
+    participant Store as Secrets store
+
+    Plugin->>Core: saveSecret(req, "apiKey", value)
+    Core->>Manager: IPC secret-set
+    Manager->>Store: Save namespaced secret
+    Store-->>Manager: Success
+    Manager-->>Core: IPC secret-response
+    Core-->>Plugin: { success: true }
+
+    Plugin->>Core: getSecret(req, "apiKey")
+    Core->>Manager: IPC secret-get
+    Manager->>Store: Read namespaced secret
+    Store-->>Manager: Secret value
+    Manager-->>Core: IPC secret-response
+    Core-->>Plugin: { value }
+```
+
 A frontend plugin exports an `ActualPluginEntry` and registers bank sync setup and link UI:
 
 ```tsx
@@ -240,6 +371,229 @@ export default pluginEntry;
 
 The setup renderer receives `callProvider`, `setSecret`, `fileId`, `onSuccess`, `onError`, and `close`. The link renderer receives `callProvider`, `openExternalUrl`, `selectExternalAccounts`, `fileId`, and account-linking callbacks.
 
+## Register a bank provider setup modal
+
+For bank sync providers with `"setup": { "type": "plugin" }`, the frontend plugin is responsible for rendering the setup UI. Actual opens that UI from the Bank Sync page when the user chooses to configure the plugin provider.
+
+Register the setup modal during plugin activation:
+
+```tsx
+import { I18nextProvider } from 'react-i18next';
+
+import { initializePlugin } from '@actual-app/plugins-core';
+import type {
+  ActualPlugin,
+  ActualPluginEntry,
+  BankSyncProviderSetupRenderProps,
+  PluginContext,
+} from '@actual-app/plugins-core';
+
+import { manifest } from '../src/manifest';
+
+function ProviderSetup(props: BankSyncProviderSetupRenderProps) {
+  // Render provider-specific inputs here.
+}
+
+const pluginEntry: ActualPluginEntry = () => {
+  const plugin: ActualPlugin = {
+    name: manifest.name,
+    version: manifest.version,
+    install() {},
+    uninstall() {},
+    activate(context: PluginContext) {
+      const I18nWrapper = ({ children }: { children: React.ReactNode }) => (
+        <I18nextProvider i18n={context.i18nInstance}>
+          {children}
+        </I18nextProvider>
+      );
+
+      const unregisterSetup = context.registerBankSyncProviderSetup(
+        manifest.name,
+        props => (
+          <I18nWrapper>
+            <ProviderSetup {...props} />
+          </I18nWrapper>
+        ),
+        {
+          containerProps: {
+            style: { width: 420 },
+          },
+        },
+      );
+
+      return () => {
+        unregisterSetup();
+      };
+    },
+    deactivate() {},
+  };
+
+  return initializePlugin(plugin);
+};
+
+export default pluginEntry;
+```
+
+The provider slug passed to `registerBankSyncProviderSetup` should match the manifest `name`. That same slug is used in `/plugins-api/bank-sync/:providerSlug/...` routes.
+
+The optional third argument is modal configuration. It uses Actual's basic modal props, so plugins can set modal container width, loading state, close behavior, and related modal options.
+
+Inside the setup component, use the props supplied by Actual instead of calling sync-server URLs directly:
+
+```tsx
+import { useState } from 'react';
+
+import {
+  ButtonWithLoading,
+  FormError,
+  Input,
+  ModalButtons,
+  ModalCloseButton,
+  ModalHeader,
+  Text,
+  View,
+} from '@actual-app/plugins-core';
+import type { BankSyncProviderSetupRenderProps } from '@actual-app/plugins-core';
+
+export function ProviderSetup({
+  callProvider,
+  close,
+  fileId,
+  onError,
+  onSuccess,
+}: BankSyncProviderSetupRenderProps) {
+  const [apiKey, setApiKey] = useState('');
+  const [error, setError] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  async function save() {
+    if (!apiKey) {
+      setError('API key is required.');
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const response = await callProvider({
+        path: 'configure',
+        method: 'POST',
+        body: {
+          fileId,
+          apiKey,
+        },
+      });
+
+      if (
+        response &&
+        typeof response === 'object' &&
+        'error' in response
+      ) {
+        throw new Error(String(response.error));
+      }
+
+      setError('');
+      onSuccess();
+      close();
+    } catch (error) {
+      setError(error instanceof Error ? error.message : String(error));
+      onError(error);
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  return (
+    <>
+      <ModalHeader
+        title="Set up Example Bank"
+        rightContent={<ModalCloseButton onPress={close} />}
+      />
+      <View style={{ display: 'flex', gap: 10, padding: 20, minWidth: 360 }}>
+        <Text>Enter your provider API key.</Text>
+        <Input
+          type="password"
+          value={apiKey}
+          onChangeValue={value => {
+            setApiKey(value);
+            setError('');
+          }}
+        />
+        {error && <FormError>{error}</FormError>}
+      </View>
+      <ModalButtons>
+        <ButtonWithLoading
+          variant="primary"
+          type="button"
+          autoFocus
+          isDisabled={isSaving}
+          isLoading={isSaving}
+          onPress={() => {
+            void save();
+          }}
+        >
+          Save and continue
+        </ButtonWithLoading>
+      </ModalButtons>
+    </>
+  );
+}
+```
+
+`callProvider` sends the request through Actual's bank sync plugin bridge. For a setup component, it automatically includes the current provider slug and budget file context. The `path` value is appended to `/plugins-api/bank-sync/:providerSlug/`, so `path: 'configure'` calls the plugin's `/configure` route.
+
+Use `setSecret` only when the setup UI needs to store a simple key/value secret directly. For provider-specific validation, prefer a plugin route such as `/configure`; the sync-server plugin can validate credentials and then call `saveSecret`.
+
+## Best practices
+
+Wrap plugin route handlers in explicit error handling and return structured responses:
+
+```ts
+app.post('/endpoint', async (req, res) => {
+  try {
+    const result = await doSomething(req.body);
+    res.json({ status: 'ok', data: result });
+  } catch (error) {
+    res.json({
+      status: 'error',
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+```
+
+Validate request bodies before calling external APIs or saving secrets:
+
+```ts
+app.post('/configure', async (req, res) => {
+  const { apiKey } = req.body ?? {};
+
+  if (!apiKey || typeof apiKey !== 'string') {
+    res.json({
+      status: 'error',
+      error: 'apiKey is required',
+    });
+    return;
+  }
+
+  await saveSecret(req, 'apiKey', apiKey);
+  res.json({ status: 'ok', data: { configured: true } });
+});
+```
+
+Do not call `app.listen()`. The sync server forks the plugin process and communicates with the Express app through IPC.
+
+Plugin stdout and stderr are visible in sync-server logs. Prefix logs with the plugin name to make troubleshooting easier.
+
+Handle shutdown signals if the plugin owns resources that need cleanup:
+
+```ts
+process.on('SIGTERM', () => {
+  console.log('[example-bank-sync] Shutting down...');
+  process.exit(0);
+});
+```
+
 ## Build a plugin zip
 
 A distribution zip should use this layout:
@@ -278,6 +632,47 @@ The current implementation supports:
 - Plugin bank sync providers with setup, account-linking, account-list, status, and transaction endpoints.
 - A CORS proxy for plugin store and GitHub release access, guarded by an allowlist.
 - Development plugin loading from a local manifest URL.
+
+## Troubleshooting
+
+If a plugin does not load:
+
+- Check that server plugins are enabled and the sync server was restarted.
+- Check that `manifest.json` exists and is valid JSON.
+- Check that the manifest `type`, `frontend.entry`, and `syncserver.entry` are valid.
+- For zip installs, check that frontend files live under `frontend/` and sync-server files live under `syncserver/`.
+- Check the sync-server logs for validation errors, dependency install errors, startup timeout errors, or duplicate slug warnings.
+
+If IPC communication fails:
+
+- Ensure the sync-server plugin calls `attachPluginMiddleware(app)`.
+- Ensure the plugin process is forked by the sync server; direct `node syncserver/index.js` execution will not have `process.send`.
+- Ensure the plugin sends its `ready` message within the startup timeout.
+
+If a route returns 404:
+
+- Confirm the plugin is online.
+- Confirm the route path starts with `/` and matches the manifest exactly.
+- Confirm the request method is listed in the route's `methods`.
+- Confirm the caller satisfies the route's auth level.
+
+If secrets do not persist:
+
+- Use `saveSecret`, `getSecret`, `saveSecrets`, and `getSecrets` from `@actual-app/plugins-core-sync-server`.
+- Confirm the request includes the plugin context. Requests forwarded through `/plugins-api` include the plugin slug automatically.
+- For budget-scoped provider secrets, confirm the request includes `x-actual-file-id` or `fileId`.
+
+## Security considerations
+
+Plugins are powerful and should be treated like server-side code:
+
+- Each sync-server plugin runs in its own child process, but it is not a complete security sandbox.
+- Plugin routes should declare the narrowest useful auth level.
+- Secrets should be stored through the sync-server secrets helpers, not plugin-local files.
+- Secrets are namespaced by plugin slug.
+- Current plugins do not have direct access to the Actual database through the public plugin API.
+- IPC only supports specific message types handled by the plugin manager.
+- Only install plugins from sources you trust.
 
 ## Planned future capabilities
 
