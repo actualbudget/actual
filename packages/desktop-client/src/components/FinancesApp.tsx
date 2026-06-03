@@ -13,6 +13,7 @@ import { getLatestAppVersion, sync } from '#app/appSlice';
 import { ProtectedRoute } from '#auth/ProtectedRoute';
 import { Permissions } from '#auth/types';
 import { useAccounts } from '#hooks/useAccounts';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useMetaThemeColor } from '#hooks/useMetaThemeColor';
@@ -104,7 +105,7 @@ export function FinancesApp() {
   const [lastUsedVersion, setLastUsedVersion] = useLocalPref(
     'flags.updateNotificationShownForVersion',
   );
-  const [pluginsEnabled] = useGlobalPref('plugins');
+  const pluginsEnabled = useFeatureFlag('plugins');
   //. This is part of the full plugin support system that was removed from the initial bank sync MVP
   // const { pluginsRoutes } = useActualPlugins();
 

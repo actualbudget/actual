@@ -71,11 +71,25 @@ export default defineConfig({
         '.': './frontend/src/index.tsx',
       },
       shared: {
+        react: {
+          singleton: true,
+          requiredVersion: '19.2.4',
+        },
+        'react-dom': {
+          singleton: true,
+          requiredVersion: '19.2.4',
+        },
+        'react-dom/client': {
+          singleton: true,
+          requiredVersion: '19.2.4',
+        },
         'react-i18next': {
           singleton: true,
+          requiredVersion: '^16.6.6',
         },
         i18next: {
           singleton: true,
+          requiredVersion: '^25.10.10',
         },
       },
     }),

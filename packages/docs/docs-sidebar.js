@@ -214,6 +214,7 @@ const sidebars = {
             'experimental/monthly-cleanup',
             'experimental/rule-templating',
             'experimental/formulas',
+            'experimental/plugins',
             'experimental/balance-forecast-report',
             'experimental/budget-analysis-report',
           ],

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import type { PluginSlotRegistrationFn } from '#plugin/core/pluginLoader';
 
 type RenderPluginsComponentProps = {
@@ -11,7 +11,7 @@ export function RenderPluginsComponent({
   toRender,
 }: RenderPluginsComponentProps) {
   const pluginRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const [pluginsEnabled] = useGlobalPref('plugins');
+  const pluginsEnabled = useFeatureFlag('plugins');
 
   useEffect(() => {
     if (!pluginsEnabled) return;

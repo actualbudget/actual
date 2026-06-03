@@ -95,9 +95,6 @@ async function saveGlobalPrefs(prefs: GlobalPrefs) {
       prefs.preferredDarkTheme,
     );
   }
-  if (prefs.plugins !== undefined) {
-    await asyncStorage.setItem('plugins', '' + prefs.plugins);
-  }
   if (prefs.installedCustomLightTheme !== undefined) {
     await asyncStorage.setItem(
       'installed-custom-theme',
@@ -141,7 +138,6 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     language,
     theme,
     'preferred-dark-theme': preferredDarkTheme,
-    plugins,
     'installed-custom-theme': installedCustomLightTheme,
     'installed-custom-dark-theme': installedCustomDarkTheme,
     'custom-css-override': customCssOverride,
@@ -157,7 +153,6 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     'language',
     'theme',
     'preferred-dark-theme',
-    'plugins',
     'installed-custom-theme',
     'installed-custom-dark-theme',
     'custom-css-override',
@@ -183,7 +178,6 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
       preferredDarkTheme === 'dark' || preferredDarkTheme === 'midnight'
         ? preferredDarkTheme
         : 'dark',
-    plugins: plugins === 'true',
     installedCustomLightTheme: installedCustomLightTheme || undefined,
     installedCustomDarkTheme: installedCustomDarkTheme || undefined,
     customCssOverride: customCssOverride || undefined,

@@ -5,12 +5,11 @@ import { Trans } from 'react-i18next';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import type { FeatureFlag, GlobalPrefs } from '@actual-app/core/types/prefs';
+import type { FeatureFlag } from '@actual-app/core/types/prefs';
 
 import { Link } from '#components/common/Link';
 import { Checkbox } from '#components/forms';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
-import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
 import { Setting } from './UI';
@@ -68,59 +67,6 @@ function FeatureToggle({
         )}
 
         {note && <Text style={{ color: theme.warningText }}>{note}</Text>}
-      </View>
-    </label>
-  );
-}
-
-type GlobalFeatureToggleProps = {
-  prefName: keyof GlobalPrefs;
-  disableToggle?: boolean;
-  error?: ReactNode;
-  children: ReactNode;
-  feedbackLink?: string;
-};
-
-function GlobalFeatureToggle({
-  prefName,
-  disableToggle = false,
-  feedbackLink,
-  error,
-  children,
-}: GlobalFeatureToggleProps) {
-  const [enabled, setEnabled] = useGlobalPref(prefName);
-
-  return (
-    <label style={{ display: 'flex' }}>
-      <Checkbox
-        checked={Boolean(enabled)}
-        onChange={() => {
-          setEnabled(!enabled);
-        }}
-        disabled={disableToggle}
-      />
-      <View
-        style={{ color: disableToggle ? theme.pageTextSubdued : 'inherit' }}
-      >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-          {children}
-          {feedbackLink && (
-            <Link variant="external" to={feedbackLink}>
-              <Trans>(give feedback)</Trans>
-            </Link>
-          )}
-        </View>
-
-        {disableToggle && (
-          <Text
-            style={{
-              color: theme.errorText,
-              fontWeight: 500,
-            }}
-          >
-            {error}
-          </Text>
-        )}
       </View>
     </label>
   );
@@ -211,12 +157,12 @@ export function ExperimentalFeatures() {
             >
               <Trans>Enable Banking sync (EU banks)</Trans>
             </FeatureToggle>
-            <GlobalFeatureToggle
-              prefName="plugins"
+            <FeatureToggle
+              flag="plugins"
               feedbackLink="https://github.com/actualbudget/actual/issues/5950"
             >
-              <Trans>Client-side plugins</Trans>
-            </GlobalFeatureToggle>
+              <Trans>Plugins</Trans>
+            </FeatureToggle>
           </View>
         ) : (
           <Link

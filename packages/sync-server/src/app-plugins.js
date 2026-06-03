@@ -10,6 +10,7 @@ import {
 import { config } from './load-config.js';
 import { PluginManager } from './plugin-manager.js';
 import { createPluginMiddleware } from './plugin-middleware.js';
+import { arePluginsEnabled } from './server-prefs.js';
 import { secretsService } from './services/secrets-service.js';
 import {
   errorMiddleware,
@@ -401,6 +402,11 @@ app.use(errorMiddleware);
 // Load plugins on startup
 async function loadPlugins() {
   try {
+    if (!arePluginsEnabled()) {
+      console.log('Plugins are disabled. Skipping plugin loading.');
+      return;
+    }
+
     await pluginManager.loadPlugins();
     const loadedPlugins = pluginManager.getOnlinePlugins();
     console.log(`Loaded ${loadedPlugins.length} plugin(s):`, loadedPlugins);

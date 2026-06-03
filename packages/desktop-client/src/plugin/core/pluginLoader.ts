@@ -17,6 +17,7 @@ import {
 } from '@module-federation/enhanced/runtime';
 
 import { i18nInstance } from '#i18n';
+import { getPluginSharedDependencies } from '#plugin/pluginSharedDependencies';
 
 // Import send function to communicate with backend
 
@@ -443,20 +444,7 @@ export async function loadPluginsScript({
       workingMfInstance = createInstance({
         name: '@actual/host-app',
         remotes: [],
-        shared: {
-          'react-i18next': {
-            shareConfig: {
-              singleton: true,
-              requiredVersion: '^15.5.3',
-            },
-          },
-          i18next: {
-            shareConfig: {
-              singleton: true,
-              requiredVersion: '^25.2.1',
-            },
-          },
-        },
+        shared: getPluginSharedDependencies(),
       });
     }
 

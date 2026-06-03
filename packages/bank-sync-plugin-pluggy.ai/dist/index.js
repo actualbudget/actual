@@ -1,4 +1,4 @@
-import { attachPluginMiddleware, saveSecret, getSecret, BankSyncErrorCode, } from '@actual-app/plugins-core-sync-server';
+import { attachPluginMiddleware, BankSyncErrorCode, getSecret, saveSecret, } from '@actual-app/plugins-core-sync-server';
 import express from 'express';
 import { PluggyClient } from 'pluggy-sdk';
 // Import manifest (used during build)
@@ -199,37 +199,53 @@ app.post('/accounts', async (req, res) => {
         };
         // Map HTTP status codes to error types
         const errorMessageLower = pluggyMessage.toLowerCase();
-        if (pluggyCode === 401 || errorMessageLower.includes('401') || errorMessageLower.includes('unauthorized') || errorMessageLower.includes('invalid credentials')) {
+        if (pluggyCode === 401 ||
+            errorMessageLower.includes('401') ||
+            errorMessageLower.includes('unauthorized') ||
+            errorMessageLower.includes('invalid credentials')) {
             errorResponse.error_type = BankSyncErrorCode.INVALID_CREDENTIALS;
             errorResponse.error_code = BankSyncErrorCode.INVALID_CREDENTIALS;
         }
-        else if (pluggyCode === 403 || errorMessageLower.includes('403') || errorMessageLower.includes('forbidden')) {
+        else if (pluggyCode === 403 ||
+            errorMessageLower.includes('403') ||
+            errorMessageLower.includes('forbidden')) {
             errorResponse.error_type = BankSyncErrorCode.UNAUTHORIZED;
             errorResponse.error_code = BankSyncErrorCode.UNAUTHORIZED;
         }
-        else if (pluggyCode === 429 || errorMessageLower.includes('429') || errorMessageLower.includes('rate limit')) {
+        else if (pluggyCode === 429 ||
+            errorMessageLower.includes('429') ||
+            errorMessageLower.includes('rate limit')) {
             errorResponse.error_type = BankSyncErrorCode.RATE_LIMIT;
             errorResponse.error_code = BankSyncErrorCode.RATE_LIMIT;
         }
-        else if (pluggyCode === 400 || errorMessageLower.includes('400') || errorMessageLower.includes('bad request')) {
+        else if (pluggyCode === 400 ||
+            errorMessageLower.includes('400') ||
+            errorMessageLower.includes('bad request')) {
             errorResponse.error_type = BankSyncErrorCode.INVALID_REQUEST;
             errorResponse.error_code = BankSyncErrorCode.INVALID_REQUEST;
         }
-        else if (pluggyCode === 404 || errorMessageLower.includes('404') || errorMessageLower.includes('not found')) {
+        else if (pluggyCode === 404 ||
+            errorMessageLower.includes('404') ||
+            errorMessageLower.includes('not found')) {
             errorResponse.error_type = BankSyncErrorCode.ACCOUNT_NOT_FOUND;
             errorResponse.error_code = BankSyncErrorCode.ACCOUNT_NOT_FOUND;
         }
-        else if (errorMessageLower.includes('network') || errorMessageLower.includes('connect') || errorMessageLower.includes('econnrefused')) {
+        else if (errorMessageLower.includes('network') ||
+            errorMessageLower.includes('connect') ||
+            errorMessageLower.includes('econnrefused')) {
             errorResponse.error_type = BankSyncErrorCode.NETWORK_ERROR;
             errorResponse.error_code = BankSyncErrorCode.NETWORK_ERROR;
         }
-        else if ((pluggyCode && typeof pluggyCode === 'number' && pluggyCode >= 500) || errorMessageLower.includes('500') || errorMessageLower.includes('502') || errorMessageLower.includes('503')) {
+        else if ((pluggyCode && typeof pluggyCode === 'number' && pluggyCode >= 500) ||
+            errorMessageLower.includes('500') ||
+            errorMessageLower.includes('502') ||
+            errorMessageLower.includes('503')) {
             errorResponse.error_type = BankSyncErrorCode.SERVER_ERROR;
             errorResponse.error_code = BankSyncErrorCode.SERVER_ERROR;
         }
         errorResponse.details = {
             originalError: pluggyMessage,
-            pluggyCode: pluggyCode,
+            pluggyCode,
         };
         res.json({
             status: 'ok',
@@ -360,37 +376,53 @@ app.post('/transactions', async (req, res) => {
         };
         // Map HTTP status codes to error types
         const errorMessageLower = pluggyMessage.toLowerCase();
-        if (pluggyCode === 401 || errorMessageLower.includes('401') || errorMessageLower.includes('unauthorized') || errorMessageLower.includes('invalid credentials')) {
+        if (pluggyCode === 401 ||
+            errorMessageLower.includes('401') ||
+            errorMessageLower.includes('unauthorized') ||
+            errorMessageLower.includes('invalid credentials')) {
             errorResponse.error_type = BankSyncErrorCode.INVALID_CREDENTIALS;
             errorResponse.error_code = BankSyncErrorCode.INVALID_CREDENTIALS;
         }
-        else if (pluggyCode === 403 || errorMessageLower.includes('403') || errorMessageLower.includes('forbidden')) {
+        else if (pluggyCode === 403 ||
+            errorMessageLower.includes('403') ||
+            errorMessageLower.includes('forbidden')) {
             errorResponse.error_type = BankSyncErrorCode.UNAUTHORIZED;
             errorResponse.error_code = BankSyncErrorCode.UNAUTHORIZED;
         }
-        else if (pluggyCode === 404 || errorMessageLower.includes('404') || errorMessageLower.includes('not found')) {
+        else if (pluggyCode === 404 ||
+            errorMessageLower.includes('404') ||
+            errorMessageLower.includes('not found')) {
             errorResponse.error_type = BankSyncErrorCode.ACCOUNT_NOT_FOUND;
             errorResponse.error_code = BankSyncErrorCode.ACCOUNT_NOT_FOUND;
         }
-        else if (pluggyCode === 429 || errorMessageLower.includes('429') || errorMessageLower.includes('rate limit')) {
+        else if (pluggyCode === 429 ||
+            errorMessageLower.includes('429') ||
+            errorMessageLower.includes('rate limit')) {
             errorResponse.error_type = BankSyncErrorCode.RATE_LIMIT;
             errorResponse.error_code = BankSyncErrorCode.RATE_LIMIT;
         }
-        else if (pluggyCode === 400 || errorMessageLower.includes('400') || errorMessageLower.includes('bad request')) {
+        else if (pluggyCode === 400 ||
+            errorMessageLower.includes('400') ||
+            errorMessageLower.includes('bad request')) {
             errorResponse.error_type = BankSyncErrorCode.INVALID_REQUEST;
             errorResponse.error_code = BankSyncErrorCode.INVALID_REQUEST;
         }
-        else if (errorMessageLower.includes('network') || errorMessageLower.includes('connect') || errorMessageLower.includes('econnrefused')) {
+        else if (errorMessageLower.includes('network') ||
+            errorMessageLower.includes('connect') ||
+            errorMessageLower.includes('econnrefused')) {
             errorResponse.error_type = BankSyncErrorCode.NETWORK_ERROR;
             errorResponse.error_code = BankSyncErrorCode.NETWORK_ERROR;
         }
-        else if ((pluggyCode && typeof pluggyCode === 'number' && pluggyCode >= 500) || errorMessageLower.includes('500') || errorMessageLower.includes('502') || errorMessageLower.includes('503')) {
+        else if ((pluggyCode && typeof pluggyCode === 'number' && pluggyCode >= 500) ||
+            errorMessageLower.includes('500') ||
+            errorMessageLower.includes('502') ||
+            errorMessageLower.includes('503')) {
             errorResponse.error_type = BankSyncErrorCode.SERVER_ERROR;
             errorResponse.error_code = BankSyncErrorCode.SERVER_ERROR;
         }
         errorResponse.details = {
             originalError: pluggyMessage,
-            pluggyCode: pluggyCode,
+            pluggyCode,
         };
         res.json({
             status: 'ok',

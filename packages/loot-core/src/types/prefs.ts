@@ -10,6 +10,7 @@ export type FeatureFlag =
   | 'budgetAnalysisReport'
   | 'payeeLocations'
   | 'enableBanking'
+  | 'plugins'
   | 'sankeyReport';
 
 /**
@@ -108,7 +109,6 @@ export type GlobalPrefs = Partial<{
   language: string;
   theme: Theme;
   preferredDarkTheme: DarkTheme;
-  plugins: boolean;
   pluginThemes: Record<
     string,
     {
@@ -153,7 +153,6 @@ export type GlobalPrefsJson = Partial<{
   'installed-custom-theme'?: GlobalPrefs['installedCustomLightTheme'];
   'installed-custom-dark-theme'?: GlobalPrefs['installedCustomDarkTheme'];
   'custom-css-override'?: GlobalPrefs['customCssOverride'];
-  plugins?: string; // "true" or "false"
   'plugin-theme'?: string; // JSON string of complete plugin theme (current selected plugin theme)
   'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
   syncServerConfig?: GlobalPrefs['syncServerConfig'];

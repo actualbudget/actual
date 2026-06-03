@@ -12,6 +12,13 @@
   "author": "Actual Budget",
   "type": "module",
   "main": "dist/index.js",
+  "imports": {
+    "#gocardless-node.types": "./src/gocardless-node.types.ts",
+    "#gocardless.types": "./src/gocardless.types.ts",
+    "#util/payee-name": "./src/util/payee-name.js",
+    "#util/title": "./src/util/title/index.js",
+    "#utils": "./src/utils.js"
+  },
   "scripts": {
     "build": "npm run build:compile && npm run build:bundle && npm run build:frontend && npm run build:manifest && npm run build:zip",
     "build:compile": "tsc",

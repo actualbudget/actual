@@ -12,6 +12,9 @@
   "author": "Actual Budget",
   "type": "module",
   "main": "dist/index.js",
+  "imports": {
+    "#utils/*": "./src/utils/*.ts"
+  },
   "scripts": {
     "build": "npm run build:compile && npm run build:bundle && npm run build:frontend && npm run build:manifest && npm run build:zip",
     "build:compile": "tsc",

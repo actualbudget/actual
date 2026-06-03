@@ -22,7 +22,7 @@ import type {
 } from '@actual-app/plugins-core';
 import { createInstance } from '@module-federation/enhanced/runtime';
 
-import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 
 import { loadPlugins, loadPluginsScript } from './core/pluginLoader';
 import type {
@@ -31,6 +31,7 @@ import type {
   PluginModalModel,
 } from './core/pluginLoader';
 import { getAllPlugins } from './core/pluginStore';
+import { getPluginSharedDependencies } from './pluginSharedDependencies';
 
 // Move stable refs to module scope to prevent recreation
 const modalMap = new Map<string, PluginModalModel>();
@@ -144,7 +145,7 @@ export { ActualPluginsContext };
 
 // The Provider
 export function ActualPluginsProvider({ children }: { children: ReactNode }) {
-  const [pluginsEnabled] = useGlobalPref('plugins');
+  const pluginsEnabled = useFeatureFlag('plugins');
 
   const [plugins, setPlugins] = useState<ActualPluginInitialized[]>([]);
   const [pluginStore, setPluginStore] = useState<ActualPluginStored[]>([]);
@@ -238,20 +239,7 @@ export function ActualPluginsProvider({ children }: { children: ReactNode }) {
         const newInstance = createInstance({
           name: '@actual/host-app',
           remotes: [],
-          shared: {
-            'react-i18next': {
-              shareConfig: {
-                singleton: true,
-                requiredVersion: '^15.5.3',
-              },
-            },
-            i18next: {
-              shareConfig: {
-                singleton: true,
-                requiredVersion: '^25.2.1',
-              },
-            },
-          },
+          shared: getPluginSharedDependencies(),
         });
 
         mfInstance = newInstance;

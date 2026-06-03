@@ -199,15 +199,19 @@ async function handlePlugin(
       if (key.endsWith(`/${fileName}`)) {
         const content = fileList.get(key);
         const contentType = getContentType(fileName);
+        const response = createPluginFileResponse({
+          slug,
+          fileName,
+          content: content ?? '',
+          contentType,
+        });
         console.debug('[plugin-sw] cache hit', {
           slug,
           fileName,
           key,
           contentType,
         });
-        return new Response(content, {
-          headers: { 'Content-Type': contentType },
-        });
+        return response;
       }
     }
   }
@@ -272,9 +276,8 @@ async function handlePlugin(
       const fileToCheck = fileName.length > 0 ? fileName : 'mf-manifest.json';
 
       if (fileList.has(`${slug}/${fileToCheck}`)) {
-        let content = fileList.get(`${slug}/${fileToCheck}`)!;
+        const content = fileList.get(`${slug}/${fileToCheck}`)!;
         const contentType = getContentType(fileToCheck);
-        const headers: Record<string, string> = { 'Content-Type': contentType };
         console.debug('[plugin-sw] serving plugin file', {
           slug,
           fileToCheck,
@@ -282,26 +285,14 @@ async function handlePlugin(
           size: content.length,
         });
 
-        if (fileToCheck === 'mf-manifest.json') {
-          try {
-            const manifest = JSON.parse(content);
-            if (manifest.metaData?.publicPath) {
-              manifest.metaData.publicPath = `/plugin-data/${slug}/`;
-              content = JSON.stringify(manifest);
-            }
-          } catch (error) {
-            console.error(
-              'Failed to parse manifest for publicPath rewrite:',
-              error,
-            );
-          }
-
-          headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
-          headers['Pragma'] = 'no-cache';
-          headers['Expires'] = '0';
-        }
-
-        resolve(new Response(content, { headers }));
+        resolve(
+          createPluginFileResponse({
+            slug,
+            fileName: fileToCheck,
+            content,
+            contentType,
+          }),
+        );
       } else {
         console.warn(
           '[plugin-sw] plugin file not found after client response',
@@ -328,6 +319,48 @@ async function handlePlugin(
       [channel.port2],
     );
   });
+}
+
+function createPluginFileResponse({
+  slug,
+  fileName,
+  content,
+  contentType,
+}: {
+  slug: string;
+  fileName: string;
+  content: string;
+  contentType: string;
+}) {
+  const headers: Record<string, string> = { 'Content-Type': contentType };
+  const body =
+    fileName === 'mf-manifest.json'
+      ? rewriteManifestPublicPath(content, slug)
+      : content;
+
+  if (fileName === 'mf-manifest.json') {
+    headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+    headers.Pragma = 'no-cache';
+    headers.Expires = '0';
+  }
+
+  return new Response(body, { headers });
+}
+
+function rewriteManifestPublicPath(content: string, slug: string) {
+  try {
+    const manifest = JSON.parse(content) as {
+      metaData?: { publicPath?: string };
+    };
+    if (manifest.metaData?.publicPath) {
+      manifest.metaData.publicPath = `/plugin-data/${slug}/`;
+      return JSON.stringify(manifest);
+    }
+  } catch (error) {
+    console.error('Failed to parse manifest for publicPath rewrite:', error);
+  }
+
+  return content;
 }
 
 function getContentType(fileName: string): string {

@@ -43,6 +43,7 @@ function _openDatabase() {
 
       db.onversionchange = () => {
         // TODO: Notify the user somehow
+        openedDb = null;
         db.close();
       };
 
@@ -98,7 +99,7 @@ export const del = async function (store: IDBObjectStore, key: string) {
 };
 
 export const getDatabase = function () {
-  return openedDb;
+  return openDatabase();
 };
 
 export const openDatabase = function () {
