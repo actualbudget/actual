@@ -183,6 +183,7 @@ With these settings, Fly.io will automatically stop your instance after a few mi
 - **Q.** _How can I try out a beta/unstable version of Actual?_
 
   **A.** We publish unstable releases of Actual every day. These versions may have known or unknown issues that could corrupt your budget. If you'd like to try them out, re-deploy with the nightly version. For example, if your app is at `https://fly-actual-rushing-waters-9999.fly.dev`:
-```  
+
+```
 fly deploy --image actualbudget/actual-server:nightly --app fly-actual-rushing-waters-9999 --remote-only --no-cache
 ```
