@@ -6,7 +6,6 @@ import path from 'path';
 
 import AdmZip from 'adm-zip';
 import createDebug from 'debug';
-import ipaddr from 'ipaddr.js';
 
 import { secretsService } from './services/secrets-service.js';
 
@@ -60,45 +59,76 @@ function assertSafeZipEntries(zip) {
   }
 }
 
-function isLocalDevPluginUrl(url) {
-  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-    return false;
+function assertDevPluginRegistrationAllowed() {
+  if (process.env.NODE_ENV !== 'development') {
+    throw new Error('Dev plugins can only be registered in development mode');
   }
-
-  if (url.hostname === 'localhost') {
-    return true;
-  }
-
-  if (!ipaddr.isValid(url.hostname)) {
-    return false;
-  }
-
-  return ipaddr.parse(url.hostname).range() === 'loopback';
 }
 
-function parseDevPluginUrl(rawUrl) {
-  if (typeof rawUrl !== 'string') {
-    throw new Error('Dev plugin manifest URL must be a string');
-  }
+function normalizeDevPluginPath(rawPath) {
+  const pathname = path.posix.normalize(
+    typeof rawPath === 'string' && rawPath !== '' ? rawPath : '/',
+  );
 
-  const url = new URL(rawUrl);
-  if (!isLocalDevPluginUrl(url)) {
-    throw new Error('Dev plugin URLs must use localhost or a loopback address');
-  }
-  return url;
-}
-
-function toLocalDevPluginUrl(url) {
-  const protocol = url.protocol === 'https:' ? 'https:' : 'http:';
-  const hostname = url.hostname === 'localhost' ? 'localhost' : '127.0.0.1';
-  const port = url.port ? `:${url.port}` : '';
-  const pathname = path.posix.normalize(url.pathname);
-
-  if (pathname === '..' || pathname.startsWith('../')) {
+  if (
+    !pathname.startsWith('/') ||
+    pathname === '/..' ||
+    pathname.startsWith('/../') ||
+    pathname.includes('/../')
+  ) {
     throw new Error('Dev plugin URL path must stay inside the origin');
   }
 
-  return `${protocol}//${hostname}${port}${pathname}${url.search}`;
+  return pathname;
+}
+
+function normalizeDevPluginPort(rawPort) {
+  const port = Number(rawPort);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error('Dev plugin port must be a valid TCP port');
+  }
+
+  return String(port);
+}
+
+function normalizeDevPluginLocator(rawLocator) {
+  if (
+    typeof rawLocator === 'number' ||
+    (typeof rawLocator === 'string' && /^\d+$/.test(rawLocator))
+  ) {
+    return {
+      port: normalizeDevPluginPort(rawLocator),
+      path: '/manifest.json',
+      search: '',
+    };
+  }
+
+  if (typeof rawLocator === 'object' && rawLocator != null) {
+    return {
+      port: normalizeDevPluginPort(rawLocator.port),
+      path: normalizeDevPluginPath(rawLocator.path ?? '/manifest.json'),
+      search:
+        typeof rawLocator.search === 'string' &&
+        rawLocator.search.startsWith('?')
+          ? rawLocator.search
+          : '',
+    };
+  }
+
+  if (typeof rawLocator !== 'string') {
+    throw new Error('Dev plugin manifest location must be a string or object');
+  }
+
+  const url = new URL(rawLocator);
+  return {
+    port: normalizeDevPluginPort(url.port),
+    path: normalizeDevPluginPath(url.pathname),
+    search: url.search,
+  };
+}
+
+function buildDevPluginUrl(locator) {
+  return `http://127.0.0.1:${locator.port}${locator.path}${locator.search}`;
 }
 
 function isFrontendPlugin(manifest) {
@@ -728,15 +758,14 @@ class PluginManager {
     return manifest;
   }
 
-  async registerDevPlugin(manifestUrl) {
-    const parsedManifestUrl = parseDevPluginUrl(manifestUrl);
-    // codeql[js/request-forgery]: Dev plugin URLs are reconstructed by toLocalDevPluginUrl after localhost/loopback validation.
-    const manifestResponse = await fetch(
-      toLocalDevPluginUrl(parsedManifestUrl),
-    );
+  async registerDevPlugin(devPluginLocator) {
+    assertDevPluginRegistrationAllowed();
+    const manifestLocator = normalizeDevPluginLocator(devPluginLocator);
+    const manifestUrlForFetch = buildDevPluginUrl(manifestLocator);
+    const manifestResponse = await fetch(manifestUrlForFetch);
     if (!manifestResponse.ok) {
       throw new Error(
-        `Failed to fetch dev plugin manifest: ${parsedManifestUrl.toString()}`,
+        `Failed to fetch dev plugin manifest: ${manifestUrlForFetch}`,
       );
     }
 
@@ -762,22 +791,19 @@ class PluginManager {
       JSON.stringify(manifest, null, 2),
     );
 
-    const entryUrl = new URL(
+    const parsedEntryUrl = new URL(
       manifest.syncserver.entry,
-      parsedManifestUrl.toString(),
+      manifestUrlForFetch,
     );
-    if (
-      !isLocalDevPluginUrl(entryUrl) ||
-      entryUrl.origin !== parsedManifestUrl.origin
-    ) {
-      throw new Error('Dev plugin entry URL must use the manifest URL origin');
-    }
-    // codeql[js/request-forgery]: Dev plugin entry URLs must use the already validated manifest origin.
-    const entryResponse = await fetch(toLocalDevPluginUrl(entryUrl));
+    const entryLocator = {
+      ...manifestLocator,
+      path: normalizeDevPluginPath(parsedEntryUrl.pathname),
+      search: parsedEntryUrl.search,
+    };
+    const entryUrlForFetch = buildDevPluginUrl(entryLocator);
+    const entryResponse = await fetch(entryUrlForFetch);
     if (!entryResponse.ok) {
-      throw new Error(
-        `Failed to fetch dev plugin entry: ${entryUrl.toString()}`,
-      );
+      throw new Error(`Failed to fetch dev plugin entry: ${entryUrlForFetch}`);
     }
 
     const devEntryPath = path.join(devPath, manifest.syncserver.entry);
