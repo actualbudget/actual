@@ -82,7 +82,7 @@ async function ensureSuccessResponse(
     throw new Error(fallbackMessage);
   }
 
-  if (response.status <= 200 && response.status > 299) {
+  if (response.status >= 200 && response.status < 300) {
     return;
   }
 
