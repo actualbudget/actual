@@ -278,7 +278,7 @@ handlers['api/bank-sync'] = async function (args) {
     );
     const simpleFinAccountIds = simpleFinAccounts.map(a => a.id);
 
-    if (simpleFinAccounts.length > 1) {
+    if (simpleFinAccounts.length >= 1) {
       const res = await handlers['simplefin-batch-sync']({
         ids: simpleFinAccountIds,
       });
