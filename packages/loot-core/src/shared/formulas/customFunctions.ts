@@ -1,4 +1,12 @@
-import { FunctionArgumentType, FunctionPlugin } from 'hyperformula';
+import {
+  ArraySize,
+  CellError,
+  EmptyValue,
+  ErrorType,
+  FunctionArgumentType,
+  FunctionPlugin,
+  SimpleRangeValue,
+} from 'hyperformula';
 import type { InterpreterState } from 'hyperformula/typings/interpreter/InterpreterState';
 import type { ProcedureAst } from 'hyperformula/typings/parser';
 
@@ -8,6 +16,34 @@ import { integerToAmount } from '#shared/util';
 import type { NumberFormats } from '#shared/util';
 
 type CurrencySymbolPosition = 'before' | 'after';
+
+export type BudgetQueryRequest = {
+  dimension: string;
+  categoryIds: string[];
+  startMonth: string;
+  endMonth: string;
+};
+
+export type FormulaQueryContext = {
+  queryNames?: Set<string>;
+  queryCountNames?: Set<string>;
+  queryExtractCategoryNames?: Set<string>;
+  queryExtractTimeframeStartNames?: Set<string>;
+  queryExtractTimeframeEndNames?: Set<string>;
+  budgetQueryRequests?: Map<string, BudgetQueryRequest>;
+  querySumPrefetch?: Map<string, number>;
+  queryCountPrefetch?: Map<string, number>;
+  queryExtractCategoriesPrefetch?: Map<string, string[]>;
+  queryExtractTimeframeStartPrefetch?: Map<string, string>;
+  queryExtractTimeframeEndPrefetch?: Map<string, string>;
+  budgetQueryPrefetch?: Map<string, number>;
+  budgetQueryErrors?: Map<string, string>;
+};
+
+type CustomFunctionsContext = {
+  balanceOfPrefetch?: Map<string, number>;
+  formulaQuery?: FormulaQueryContext;
+};
 
 export type UserPreferences = {
   currency: Currency;
@@ -43,6 +79,41 @@ function getUserPreferences(): UserPreferences {
     };
   }
   return cachedUserPreferences;
+}
+
+export function createBudgetQueryPrefetchKey({
+  dimension,
+  categoryIds,
+  startMonth,
+  endMonth,
+}: BudgetQueryRequest): string {
+  return JSON.stringify({
+    dimension: dimension.toLowerCase(),
+    categoryIds,
+    startMonth,
+    endMonth,
+  });
+}
+
+function categoryRangeToIds(categories: SimpleRangeValue): string[] {
+  return categories
+    .valuesFromTopLeftCorner()
+    .filter(
+      value =>
+        value !== EmptyValue &&
+        !(value instanceof CellError) &&
+        (typeof value === 'string' || typeof value === 'number'),
+    )
+    .map(value => String(value).trim())
+    .filter(value => value.length > 0);
+}
+
+function categoryIdsToRange(categoryIds: string[]): SimpleRangeValue {
+  return SimpleRangeValue.onlyValues(
+    categoryIds.length > 0
+      ? categoryIds.map(categoryId => [categoryId])
+      : [['']],
+  );
 }
 
 function formatCurrencyValue({
@@ -87,6 +158,14 @@ function formatCurrencyValue({
 }
 
 export class CustomFunctionsPlugin extends FunctionPlugin {
+  private getCustomFunctionsContext(): CustomFunctionsContext | undefined {
+    return this.config.context as CustomFunctionsContext | undefined;
+  }
+
+  private getFormulaQueryContext(): FormulaQueryContext | undefined {
+    return this.getCustomFunctionsContext()?.formulaQuery;
+  }
+
   integerToAmount(ast: ProcedureAst, state: InterpreterState) {
     return this.runFunction(
       ast.args,
@@ -115,10 +194,121 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
       state,
       this.metadata('BALANCE_OF'),
       (accountKey: string) => {
-        const ctx = this.config.context as
-          | { balanceOfPrefetch?: Map<string, number> }
-          | undefined;
+        const ctx = this.getCustomFunctionsContext();
         return ctx?.balanceOfPrefetch?.get(accountKey) ?? 0;
+      },
+    );
+  }
+
+  query(ast: ProcedureAst, state: InterpreterState) {
+    return this.runFunction(
+      ast.args,
+      state,
+      this.metadata('QUERY'),
+      (queryName: string) => {
+        const ctx = this.getFormulaQueryContext();
+        ctx?.queryNames?.add(queryName);
+        return ctx?.querySumPrefetch?.get(queryName) ?? 0;
+      },
+    );
+  }
+
+  queryCount(ast: ProcedureAst, state: InterpreterState) {
+    return this.runFunction(
+      ast.args,
+      state,
+      this.metadata('QUERY_COUNT'),
+      (queryName: string) => {
+        const ctx = this.getFormulaQueryContext();
+        ctx?.queryCountNames?.add(queryName);
+        return ctx?.queryCountPrefetch?.get(queryName) ?? 0;
+      },
+    );
+  }
+
+  queryExtractCategories(ast: ProcedureAst, state: InterpreterState) {
+    return this.runFunction(
+      ast.args,
+      state,
+      this.metadata('QUERY_EXTRACT_CATEGORIES'),
+      (queryName: string) => {
+        const ctx = this.getFormulaQueryContext();
+        ctx?.queryExtractCategoryNames?.add(queryName);
+        return categoryIdsToRange(
+          ctx?.queryExtractCategoriesPrefetch?.get(queryName) ?? [],
+        );
+      },
+    );
+  }
+
+  queryExtractCategoriesSize(ast: ProcedureAst): ArraySize {
+    if (ast.args.length !== 1) {
+      return ArraySize.error();
+    }
+
+    const [queryNameAst] = ast.args;
+    const queryName =
+      queryNameAst.type === 'STRING' ? queryNameAst.value : undefined;
+    const categoryCount = queryName
+      ? this.getFormulaQueryContext()?.queryExtractCategoriesPrefetch?.get(
+          queryName,
+        )?.length
+      : undefined;
+
+    return new ArraySize(1, Math.max(categoryCount ?? 1, 1));
+  }
+
+  queryExtractTimeframeStart(ast: ProcedureAst, state: InterpreterState) {
+    return this.runFunction(
+      ast.args,
+      state,
+      this.metadata('QUERY_EXTRACT_TIMEFRAME_START'),
+      (queryName: string) => {
+        const ctx = this.getFormulaQueryContext();
+        ctx?.queryExtractTimeframeStartNames?.add(queryName);
+        return ctx?.queryExtractTimeframeStartPrefetch?.get(queryName) ?? '';
+      },
+    );
+  }
+
+  queryExtractTimeframeEnd(ast: ProcedureAst, state: InterpreterState) {
+    return this.runFunction(
+      ast.args,
+      state,
+      this.metadata('QUERY_EXTRACT_TIMEFRAME_END'),
+      (queryName: string) => {
+        const ctx = this.getFormulaQueryContext();
+        ctx?.queryExtractTimeframeEndNames?.add(queryName);
+        return ctx?.queryExtractTimeframeEndPrefetch?.get(queryName) ?? '';
+      },
+    );
+  }
+
+  budgetQuery(ast: ProcedureAst, state: InterpreterState) {
+    return this.runFunction(
+      ast.args,
+      state,
+      this.metadata('BUDGET_QUERY'),
+      (
+        dimension: string,
+        categories: SimpleRangeValue,
+        startMonth: string,
+        endMonth: string,
+      ) => {
+        const ctx = this.getFormulaQueryContext();
+        const request: BudgetQueryRequest = {
+          dimension: dimension.toLowerCase(),
+          categoryIds: categoryRangeToIds(categories),
+          startMonth,
+          endMonth,
+        };
+        const key = createBudgetQueryPrefetchKey(request);
+        ctx?.budgetQueryRequests?.set(key, request);
+        const error = ctx?.budgetQueryErrors?.get(key);
+        if (error) {
+          return new CellError(ErrorType.VALUE, error);
+        }
+        return ctx?.budgetQueryPrefetch?.get(key) ?? 0;
       },
     );
   }
@@ -258,6 +448,36 @@ CustomFunctionsPlugin.implementedFunctions = {
       },
     ],
   },
+  QUERY: {
+    method: 'query',
+    parameters: [{ argumentType: FunctionArgumentType.STRING }],
+  },
+  QUERY_COUNT: {
+    method: 'queryCount',
+    parameters: [{ argumentType: FunctionArgumentType.STRING }],
+  },
+  QUERY_EXTRACT_CATEGORIES: {
+    method: 'queryExtractCategories',
+    sizeOfResultArrayMethod: 'queryExtractCategoriesSize',
+    parameters: [{ argumentType: FunctionArgumentType.STRING }],
+  },
+  QUERY_EXTRACT_TIMEFRAME_END: {
+    method: 'queryExtractTimeframeEnd',
+    parameters: [{ argumentType: FunctionArgumentType.STRING }],
+  },
+  QUERY_EXTRACT_TIMEFRAME_START: {
+    method: 'queryExtractTimeframeStart',
+    parameters: [{ argumentType: FunctionArgumentType.STRING }],
+  },
+  BUDGET_QUERY: {
+    method: 'budgetQuery',
+    parameters: [
+      { argumentType: FunctionArgumentType.STRING },
+      { argumentType: FunctionArgumentType.RANGE },
+      { argumentType: FunctionArgumentType.STRING },
+      { argumentType: FunctionArgumentType.STRING },
+    ],
+  },
   FORMATNUMBER: {
     method: 'formatNumber',
     parameters: [
@@ -312,6 +532,12 @@ export const customFunctionsTranslations = {
     BALANCE_OF: 'BALANCE_OF',
     FIXED: 'FIXED',
     INTEGER_TO_AMOUNT: 'INTEGER_TO_AMOUNT',
+    QUERY: 'QUERY',
+    QUERY_COUNT: 'QUERY_COUNT',
+    QUERY_EXTRACT_CATEGORIES: 'QUERY_EXTRACT_CATEGORIES',
+    QUERY_EXTRACT_TIMEFRAME_END: 'QUERY_EXTRACT_TIMEFRAME_END',
+    QUERY_EXTRACT_TIMEFRAME_START: 'QUERY_EXTRACT_TIMEFRAME_START',
+    BUDGET_QUERY: 'BUDGET_QUERY',
     FORMATNUMBER: 'FORMATNUMBER',
     FORMATCURRENCY: 'FORMATCURRENCY',
   },

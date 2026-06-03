@@ -16,7 +16,9 @@ import { amountToInteger } from '#shared/util';
 
 import { assert } from './rule-utils';
 
-HyperFormula.registerLanguage('enUS', enUS);
+if (!HyperFormula.getRegisteredLanguagesCodes().includes('enUS')) {
+  HyperFormula.registerLanguage('enUS', enUS);
+}
 HyperFormula.registerFunctionPlugin(
   CustomFunctionsPlugin,
   customFunctionsTranslations,
