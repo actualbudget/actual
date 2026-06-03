@@ -2,8 +2,16 @@
   "name": "@actual-app/bank-sync-plugin-enablebanking",
   "version": "0.0.1",
   "description": "Enable Banking bank sync plugin for Actual Budget",
-  "main": "dist/index.js",
+  "keywords": [
+    "actual",
+    "bank-sync",
+    "enablebanking",
+    "plugin"
+  ],
+  "license": "MIT",
+  "author": "Actual Budget",
   "type": "module",
+  "main": "dist/index.js",
   "scripts": {
     "build": "npm run build:compile && npm run build:bundle && npm run build:frontend && npm run build:manifest && npm run build:zip",
     "build:compile": "tsc",
@@ -17,14 +25,19 @@
     "clean": "rm -rf dist frontend-build *.zip",
     "dev": "tsc --watch"
   },
-  "keywords": [
-    "actual",
-    "plugin",
-    "bank-sync",
-    "enablebanking"
-  ],
-  "author": "Actual Budget",
-  "license": "MIT",
+  "dependencies": {
+    "@actual-app/components": "workspace:*",
+    "@actual-app/plugins-core": "workspace:*",
+    "@actual-app/plugins-core-sync-server": "workspace:*",
+    "debug": "^4.3.7",
+    "express": "^4.18.0",
+    "i18next": "^25.2.1",
+    "jws": "^4.0.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-i18next": "^16.0.0",
+    "uuid": "^9.0.0"
+  },
   "devDependencies": {
     "@module-federation/vite": "^1.4.1",
     "@types/debug": "^4.1.12",
@@ -38,18 +51,5 @@
     "esbuild": "^0.24.0",
     "typescript": "^5.0.0",
     "vite": "^6.2.0"
-  },
-  "dependencies": {
-    "@actual-app/components": "workspace:*",
-    "@actual-app/plugins-core": "workspace:*",
-    "@actual-app/plugins-core-sync-server": "workspace:*",
-    "debug": "^4.3.7",
-    "express": "^4.18.0",
-    "i18next": "^25.2.1",
-    "jws": "^4.0.0",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "react-i18next": "^16.0.0",
-    "uuid": "^9.0.0"
   }
 }

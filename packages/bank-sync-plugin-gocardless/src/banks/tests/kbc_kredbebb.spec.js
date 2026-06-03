@@ -1,4 +1,4 @@
-import KBCkredbebb from '../kbc_kredbebb.js';
+import KBCkredbebb from '#banks/kbc_kredbebb';
 
 describe('kbc_kredbebb', () => {
   describe('#normalizeTransaction', () => {

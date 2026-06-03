@@ -23,8 +23,8 @@ import { format as formatDate, parseISO } from 'date-fns';
 import {
   useLinkAccountEnableBankingMutation,
   useLinkAccountMutation,
-  useLinkAccountPluginMutation,
   useLinkAccountPluggyAiMutation,
+  useLinkAccountPluginMutation,
   useLinkAccountSimpleFinMutation,
   useUnlinkAccountMutation,
 } from '#accounts';
@@ -112,15 +112,16 @@ export type SelectLinkedAccountsModalProps =
       upgradingAccountId?: string;
     };
 
-export function SelectLinkedAccountsModal(props: SelectLinkedAccountsModalProps) {
+export function SelectLinkedAccountsModal(
+  props: SelectLinkedAccountsModalProps,
+) {
   const {
     requisitionId = undefined,
     externalAccounts,
     syncSource,
     upgradingAccountId,
   } = props;
-  const providerSlug =
-    syncSource === 'plugin' ? props.providerSlug : undefined;
+  const providerSlug = syncSource === 'plugin' ? props.providerSlug : undefined;
   const pluginBankId = syncSource === 'plugin' ? props.bankId : undefined;
   const propsWithSortedExternalAccounts =
     useMemo<SelectLinkedAccountsModalProps>(() => {

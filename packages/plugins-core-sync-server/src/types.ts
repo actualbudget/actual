@@ -1,9 +1,9 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 
 /**
  * Plugin request data sent from sync-server to plugin via IPC
  */
-export interface PluginRequest {
+export type PluginRequest = {
   type: 'request';
   requestId: string;
   method: string;
@@ -13,34 +13,34 @@ export interface PluginRequest {
   body: unknown;
   user?: UserInfo; // User information for secrets access
   pluginSlug?: string; // Plugin slug for namespaced secrets
-}
+};
 
 /**
  * Plugin response sent from plugin to sync-server via IPC
  */
-export interface PluginResponse {
+export type PluginResponse = {
   type: 'response';
   requestId: string;
   status: number;
   headers?: Record<string, string | string[]>;
   body: unknown;
-}
+};
 
 /**
  * Plugin error response sent from plugin to sync-server via IPC
  */
-export interface PluginError {
+export type PluginError = {
   type: 'error';
   requestId: string;
   error: string;
-}
+};
 
 /**
  * Plugin ready message sent from plugin to sync-server via IPC
  */
-export interface PluginReady {
+export type PluginReady = {
   type: 'ready';
-}
+};
 
 /**
  * All possible IPC messages from plugin to sync-server
@@ -55,26 +55,26 @@ export type AuthLevel = 'anonymous' | 'authenticated' | 'admin';
 /**
  * Route configuration in manifest
  */
-export interface PluginRoute {
+export type PluginRoute = {
   path: string;
   methods: string[];
   auth?: AuthLevel;
   description?: string;
-}
+};
 
 /**
  * Bank sync endpoint mapping
  */
-export interface BankSyncEndpoints {
+export type BankSyncEndpoints = {
   status: string; // Route for checking connection status
   accounts: string; // Route for fetching accounts
   transactions: string; // Route for fetching transactions
-}
+};
 
 /**
  * Bank sync configuration in manifest
  */
-export interface BankSyncConfig {
+export type BankSyncConfig = {
   enabled: boolean;
   displayName: string; // Display name for the bank sync provider
   endpoints: BankSyncEndpoints; // Mapping of standard endpoints to plugin routes
@@ -83,7 +83,7 @@ export interface BankSyncConfig {
   setup?: {
     type: 'plugin' | 'json';
   };
-}
+};
 
 /**
  * Standardized error codes for bank sync plugins
@@ -105,18 +105,18 @@ export enum BankSyncErrorCode {
 /**
  * Standardized error response for bank sync operations
  */
-export interface BankSyncError {
+export type BankSyncError = {
   error_type: BankSyncErrorCode | string;
   error_code: BankSyncErrorCode | string;
   status: 'error' | 'rejected';
   reason: string; // Human-readable error message
   details?: Record<string, unknown>; // Optional provider-specific details
-}
+};
 
 /**
  * Manifest file structure for plugins
  */
-export interface PluginManifest {
+export type PluginManifest = {
   name: string;
   version: string;
   description?: string;
@@ -134,14 +134,14 @@ export interface PluginManifest {
   license?: string;
   routes?: PluginRoute[];
   bankSync?: BankSyncConfig; // Optional bank sync configuration
-}
+};
 
 /**
  * Express Request with plugin context
  */
-export interface PluginExpressRequest extends Request {
+export type PluginExpressRequest = {
   pluginSlug?: string;
-}
+} & Request;
 
 /**
  * Express Response type
@@ -151,8 +151,8 @@ export type PluginExpressResponse = Response;
 /**
  * User information extracted from request
  */
-export interface UserInfo {
+export type UserInfo = {
   id: string;
   role: 'user' | 'admin';
   [key: string]: unknown;
-}
+};

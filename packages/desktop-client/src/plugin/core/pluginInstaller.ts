@@ -1,9 +1,11 @@
 import { send } from '@actual-app/core/platform/client/connection';
 import {
-  type ActualPluginInitialized,
-  type ActualPluginManifest,
   isSyncServerPlugin,
   validateActualPluginManifest,
+} from '@actual-app/plugins-core';
+import type {
+  ActualPluginInitialized,
+  ActualPluginManifest,
 } from '@actual-app/plugins-core';
 import JSZip from 'jszip';
 

@@ -1,6 +1,6 @@
 import {
-  extractUserFromHeaders,
   checkAuth,
+  extractUserFromHeaders,
   getRouteAuthLevel,
 } from './auth-checker.js';
 

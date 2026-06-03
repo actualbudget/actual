@@ -2,7 +2,8 @@ import {
   attachPluginMiddleware,
   saveSecret,
 } from '@actual-app/plugins-core-sync-server';
-import express, { Request, Response } from 'express';
+import express from 'express';
+import type { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
 import './manifest';
@@ -11,8 +12,10 @@ import {
   normalizeAccount,
   normalizeBalance,
   normalizeTransaction,
-  type EnableBankingSession,
-  type PsuHeaders,
+} from './services/enablebanking-service';
+import type {
+  EnableBankingSession,
+  PsuHeaders,
 } from './services/enablebanking-service';
 import { EnableBankingError } from './utils/errors';
 

@@ -1,4 +1,4 @@
-import MbankRetailBrexplpw from '../mbank_retail_brexplpw.js';
+import MbankRetailBrexplpw from '#banks/mbank_retail_brexplpw';
 
 describe('MbankRetailBrexplpw', () => {
   describe('#normalizeAccount', () => {

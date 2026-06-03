@@ -1,10 +1,10 @@
-import { Express, Request, Response } from 'express';
+import type { Express, Request, Response } from 'express';
 
-import {
-  PluginRequest,
-  PluginResponse,
+import type {
   PluginError,
   PluginReady,
+  PluginRequest,
+  PluginResponse,
 } from './types';
 
 /**

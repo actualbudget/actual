@@ -1,5 +1,9 @@
-/**
- * Utility types for plugins-core
- */
-
-export type WithRequired<T, K extends keyof T> = T & Required<Pick<T, K>>;
+export type {
+  AtLeastOne,
+  EmptyObject,
+  EverythingButIdOptional,
+  StripNever,
+  TransObjectLiteral,
+  WithOptional,
+  WithRequired,
+} from '@actual-app/shared-types/util';

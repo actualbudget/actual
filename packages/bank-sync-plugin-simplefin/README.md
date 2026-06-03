@@ -17,11 +17,13 @@ This plugin enables Actual Budget to sync bank account data and transactions thr
 ## Installation
 
 1. Build the plugin:
+
    ```bash
    npm run build
    ```
 
 2. Install the plugin to your sync-server:
+
    ```bash
    npm run install:plugin
    ```
@@ -46,9 +48,11 @@ Once the plugin is installed, configure it in Actual Budget by providing your Si
 ## API Endpoints
 
 ### POST /status
+
 Check if the plugin is configured with valid credentials.
 
 **Response:**
+
 ```json
 {
   "status": "ok",
@@ -59,9 +63,11 @@ Check if the plugin is configured with valid credentials.
 ```
 
 ### POST /accounts
+
 Fetch available accounts from connected financial institutions.
 
 **Request Body:**
+
 ```json
 {
   "token": "your-simplefin-token" // optional, will be saved if provided
@@ -69,6 +75,7 @@ Fetch available accounts from connected financial institutions.
 ```
 
 **Response:**
+
 ```json
 {
   "status": "ok",
@@ -90,9 +97,11 @@ Fetch available accounts from connected financial institutions.
 ```
 
 ### POST /transactions
+
 Fetch transactions for specific accounts within a date range.
 
 **Request Body:**
+
 ```json
 {
   "accountId": "123456789",
@@ -101,6 +110,7 @@ Fetch transactions for specific accounts within a date range.
 ```
 
 **Response:**
+
 ```json
 {
   "status": "ok",

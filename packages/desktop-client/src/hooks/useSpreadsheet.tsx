@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 
 import { listen, send } from '@actual-app/core/platform/client/connection';
-import type { Query } from '@actual-app/core/shared/query';
+import type { QueryState } from '@actual-app/core/shared/query';
 import { LRUCache } from 'lru-cache';
 
 type SpreadsheetContextValue = ReturnType<typeof makeSpreadsheet>;
@@ -18,8 +18,12 @@ export function useSpreadsheet() {
   return context;
 }
 
+type SerializableQuery = {
+  serialize(): QueryState;
+};
+
 // TODO: Make this generic and replace the Binding type in the desktop-client package.
-type Binding = string | { name: string; query?: Query | undefined };
+type Binding = string | { name: string; query?: SerializableQuery | undefined };
 
 type CellCacheValue = { name: string; value: string | number | boolean | null };
 type CellCache = { [name: string]: Promise<CellCacheValue> | null };
@@ -132,7 +136,7 @@ function makeSpreadsheet() {
       return send('get-cell-names', { sheetName });
     }
 
-    createQuery(sheetName: string, name: string, query: Query) {
+    createQuery(sheetName: string, name: string, query: SerializableQuery) {
       return send('create-query', {
         sheetName,
         name,

@@ -6,7 +6,7 @@
  */
 
 const { writeFileSync } = require('fs');
-const { join } = require('path');
+const path = require('path');
 
 // Import the manifest from the built TypeScript file
 // Note: __dirname is already available in CommonJS and refers to the scripts/ directory
@@ -35,7 +35,7 @@ async function buildManifest() {
     const jsonContent = JSON.stringify(manifest, null, 2);
 
     // Write to manifest.json in the root directory
-    const manifestPath = join(__dirname, '..', 'manifest.json');
+    const manifestPath = path.join(__dirname, '..', 'manifest.json');
     writeFileSync(manifestPath, jsonContent + '\n');
 
     console.log('manifest.json created successfully');
@@ -50,4 +50,4 @@ async function buildManifest() {
   }
 }
 
-buildManifest();
+void buildManifest();

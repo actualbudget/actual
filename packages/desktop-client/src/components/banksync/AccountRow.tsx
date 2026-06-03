@@ -1,4 +1,5 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
+import type { ReactNode } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -18,7 +19,7 @@ type AccountRowProps = {
   onHover: (id: AccountEntity['id'] | null) => void;
   onAction: (account: AccountEntity, action: 'link' | 'edit') => void;
   locale: Locale;
-  renderLinkButton?: (account: AccountEntity) => React.ReactNode;
+  renderLinkButton?: (account: AccountEntity) => ReactNode;
 };
 
 export const AccountRow = memo(

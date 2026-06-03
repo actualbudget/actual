@@ -1,5 +1,4 @@
-// SelectNewPluginModal.tsx
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -8,13 +7,9 @@ import { SvgCheck } from '@actual-app/components/icons/v2';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { type ActualPluginManifest } from '@actual-app/plugins-core';
+import type { ActualPluginManifest } from '@actual-app/plugins-core';
 
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-} from '#components/common/Modal';
+import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { useActualPlugins } from '#plugin/ActualPluginsProvider';
 import { loadAllowListPlugins } from '#plugin/core/githubUtils';
@@ -44,7 +39,7 @@ export function SelectNewPluginModal({ onSave }: SelectNewPluginModalProps) {
   const { plugins, refreshPluginStore, pluginStore } = useActualPlugins();
 
   useEffect(() => {
-    refreshPluginStore().then(async () => {
+    void refreshPluginStore().then(async () => {
       try {
         const plugins = await loadAllowListPlugins();
         setAllowListPlugins(plugins);
@@ -71,11 +66,17 @@ export function SelectNewPluginModal({ onSave }: SelectNewPluginModalProps) {
         style: { height: '90vh', width: '90vw' },
       }}
     >
-      {({ state: { close } }) => (
+      {modalState => (
         <>
           <ModalHeader
             title={t('Select a Plugin to install')}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={
+              <ModalCloseButton
+                onPress={() => {
+                  modalState.state.close();
+                }}
+              />
+            }
           />
           {pluginsListLoading ? (
             <View style={{ alignItems: 'center', gap: 6 }}>
@@ -198,7 +199,7 @@ export function SelectNewPluginModal({ onSave }: SelectNewPluginModalProps) {
                     }}
                     onPress={async () => {
                       await _onSave();
-                      close();
+                      modalState.state.close();
                     }}
                   >
                     <SvgCheck

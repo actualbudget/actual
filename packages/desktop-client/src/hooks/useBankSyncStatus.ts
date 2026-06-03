@@ -71,7 +71,7 @@ export function useBankSyncStatus(
 
     if (syncServerStatus === 'online') {
       if (fileId) {
-        fetchStatus();
+        void fetchStatus();
       }
     }
   }, [providerSlug, fileId, syncServerStatus, refetchTrigger]);

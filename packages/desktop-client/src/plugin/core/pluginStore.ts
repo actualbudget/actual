@@ -1,6 +1,6 @@
 import { getDatabase } from '@actual-app/core/platform/server/indexeddb';
-import { type ActualPluginStored } from '@actual-app/core/types/models/actual-plugin-stored';
-import { type ActualPluginManifest } from '@actual-app/plugins-core';
+import type { ActualPluginStored } from '@actual-app/core/types/models/actual-plugin-stored';
+import type { ActualPluginManifest } from '@actual-app/plugins-core';
 
 /** Retrieve all plugins from the IndexedDB store */
 export async function getAllPlugins(): Promise<ActualPluginStored[]> {

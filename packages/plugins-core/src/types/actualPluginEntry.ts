@@ -1,5 +1,3 @@
-import React from 'react';
-
-import { ActualPluginInitialized } from './actualPlugin';
+import type { ActualPluginInitialized } from './actualPlugin';
 
 export type ActualPluginEntry = () => ActualPluginInitialized;

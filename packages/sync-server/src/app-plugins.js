@@ -10,11 +10,11 @@ import {
 import { config } from './load-config.js';
 import { PluginManager } from './plugin-manager.js';
 import { createPluginMiddleware } from './plugin-middleware.js';
+import { secretsService } from './services/secrets-service.js';
 import {
   errorMiddleware,
   requestLoggerMiddleware,
 } from './util/middlewares.js';
-import { secretsService } from './services/secrets-service.js';
 
 const app = express();
 app.use(express.json());
@@ -383,12 +383,7 @@ app.all(/^\/bank-sync\/([^/]+)\/(.+)$/, async (req, res) => {
     const [, providerSlug, route] = req.params;
     const routePath = `/${route || ''}`;
 
-    return forwardToBankSyncPluginEndpoint(
-      req,
-      res,
-      providerSlug,
-      routePath,
-    );
+    return forwardToBankSyncPluginEndpoint(req, res, providerSlug, routePath);
   } catch (error) {
     res.status(500).json({
       error_code: 'INTERNAL_ERROR',

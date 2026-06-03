@@ -1,7 +1,1 @@
-import { CategoryEntity } from './category';
-import { CategoryGroupEntity } from './category-group';
-
-export interface CategoryViews {
-  grouped: CategoryGroupEntity[];
-  list: CategoryEntity[];
-}
+export type { CategoryViews } from '@actual-app/shared-types/models/category-views';

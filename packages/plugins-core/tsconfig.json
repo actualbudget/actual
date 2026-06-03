@@ -10,8 +10,17 @@
     "jsx": "react-jsx",
     "module": "esnext",
     "moduleResolution": "bundler",
-    "types": ["node", "vite/client"]
+    "types": ["node", "vite/client"],
+    "paths": {
+      "@actual-app/query": ["../query/src/index.ts"],
+      "@actual-app/query/*": ["../query/src/*"],
+      "@actual-app/shared-types/*": ["../shared-types/src/*"]
+    }
   },
-  "references": [{ "path": "../component-library" }],
+  "references": [
+    { "path": "../component-library" },
+    { "path": "../query" },
+    { "path": "../shared-types" }
+  ],
   "include": ["src"]
 }

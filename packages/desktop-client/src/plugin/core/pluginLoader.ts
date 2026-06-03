@@ -1,15 +1,15 @@
-import { type Dispatch as ReactDispatch, type SetStateAction } from 'react';
+import type { Dispatch as ReactDispatch, SetStateAction } from 'react';
 
-import { type BasicModalProps } from '@actual-app/components/props/modalProps';
-import { type ActualPluginStored } from '@actual-app/core/types/models/actual-plugin-stored';
-import {
-  type ActualPluginEntry,
-  type ActualPluginInitialized,
+import type { BasicModalProps } from '@actual-app/components/props/modalProps';
+import type { ActualPluginStored } from '@actual-app/core/types/models/actual-plugin-stored';
+import type {
+  ActualPluginEntry,
+  ActualPluginInitialized,
 } from '@actual-app/plugins-core';
-import {
-  type BankSyncProviderLinkRenderProps,
-  type BankSyncProviderSetupRenderProps,
-  type HostContext,
+import type {
+  BankSyncProviderLinkRenderProps,
+  BankSyncProviderSetupRenderProps,
+  HostContext,
 } from '@actual-app/plugins-core/types/actualPlugin';
 import {
   createInstance,
@@ -126,10 +126,10 @@ export async function loadPlugins({
 
       const rawPlugin = pluginEntry();
 
-      await rawPlugin.activate({
+      rawPlugin.activate({
         ...hostContext,
         i18nInstance,
-      } as HostContext);
+      } as unknown as HostContext);
 
       // Mark plugin as initialized and push to list
       const initializedPlugin: ActualPluginInitialized = {
@@ -627,7 +627,7 @@ async function injectIntoGlobalHook(pluginName: string, pluginEntry: string) {
         ) {
           (
             window as Window & typeof globalThis & { $RefreshReg$: () => void }
-          ).$RefreshReg$ = () => {};
+          ).$RefreshReg$ = () => undefined;
         }
         if (
           !(

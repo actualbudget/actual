@@ -7,10 +7,10 @@
 /**
  * Represents a single file within a plugin package
  */
-export interface PluginFile {
+export type PluginFile = {
   name: string;
   content: string;
-}
+};
 
 /**
  * Collection of files that make up a plugin

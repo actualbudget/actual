@@ -2,35 +2,35 @@ import {
   AccessDeniedError,
   AccountNotLinkedToRequisition,
   GenericGoCardlessError,
-  InvalidInputDataError,
   InvalidGoCardlessTokenError,
+  InvalidInputDataError,
   NotFoundError,
   RateLimitError,
-  ResourceSuspended,
   RequisitionNotLinked,
+  ResourceSuspended,
   ServiceError,
   UnknownError,
 } from '../../errors.js';
 import {
+  client,
   goCardlessService,
   handleGoCardlessError,
-  client,
 } from '../gocardless-service.js';
 
 import {
-  mockedBalances,
-  mockTransactions,
-  mockDetailedAccount,
-  mockInstitution,
-  mockAccountMetaData,
   mockAccountDetails,
-  mockRequisition,
-  mockDeleteRequisition,
+  mockAccountMetaData,
   mockCreateRequisition,
-  mockRequisitionWithExampleAccounts,
+  mockDeleteRequisition,
+  mockDetailedAccount,
   mockDetailedAccountExample1,
   mockDetailedAccountExample2,
+  mockedBalances,
   mockExtendAccountsAboutInstitutions,
+  mockInstitution,
+  mockRequisition,
+  mockRequisitionWithExampleAccounts,
+  mockTransactions,
 } from './fixtures.js';
 
 describe('goCardlessService', () => {

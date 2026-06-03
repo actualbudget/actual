@@ -1,6 +1,6 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-
 import { send } from '@actual-app/core/platform/client/connection';
+import { createSlice } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { resetApp } from '#app/appSlice';
 import { createAppAsyncThunk } from '#redux';
@@ -218,8 +218,8 @@ const pluginsSlice = createSlice({
         state.errors.files[pluginUrl] =
           action.error.message || 'Failed to load plugin files';
       });
-      //. This is part of the full plugin support system that was removed from the initial bank sync MVP
-      /*
+    //. This is part of the full plugin support system that was removed from the initial bank sync MVP
+    /*
       // Plugin database creation
       .addCase(createPluginDatabase.pending, (state, action) => {
         const pluginId = action.meta.arg.pluginId;

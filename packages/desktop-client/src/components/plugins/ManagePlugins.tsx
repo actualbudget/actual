@@ -1,4 +1,5 @@
-import { type ChangeEvent, type RefObject, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import type { ChangeEvent, RefObject } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -9,7 +10,7 @@ import { Stack } from '@actual-app/components/stack';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { type ActualPluginStored } from '@actual-app/core/types/models/actual-plugin-stored';
+import type { ActualPluginStored } from '@actual-app/core/types/models/actual-plugin-stored';
 import { t } from 'i18next';
 
 import { InfiniteScrollWrapper } from '#components/common/InfiniteScrollWrapper';
@@ -44,12 +45,10 @@ export function ManagePlugins() {
           }}
         >
           <Text>
-            {
-              <Trans>
-                Manage and configure plugins to enhance functionality and
-                efficiency.
-              </Trans>
-            }{' '}
+            <Trans>
+              Manage and configure plugins to enhance functionality and
+              efficiency.
+            </Trans>{' '}
             <Link
               variant="external"
               to="https://actualbudget.org/docs/experimental/plugins/"
@@ -81,7 +80,7 @@ export function ManagePlugins() {
       </View>
       <View style={{ flex: 1, paddingTop: 16 }}>
         <PluginsHeader />
-        <InfiniteScrollWrapper loadMore={() => {}}>
+        <InfiniteScrollWrapper loadMore={() => undefined}>
           <div />
           <PluginList />
           {/* {filteredRules.length === 0 ? (
@@ -156,7 +155,7 @@ function PluginList() {
             backgroundColor: theme.tableBackground,
             borderLeft: `4px solid ${theme.noticeTextLight}`,
           }}
-          collapsed={true}
+          collapsed
         >
           <Cell
             name="name"
@@ -311,7 +310,7 @@ function PluginRow({ plugin, enabled }: PluginRowProps) {
         fontSize: 13,
         backgroundColor: theme.tableBackground,
       }}
-      collapsed={true}
+      collapsed
     >
       <Cell name="name" width={180} plain style={{ color: theme.tableText }}>
         <View

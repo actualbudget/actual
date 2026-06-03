@@ -2,8 +2,16 @@
   "name": "@actual-app/sync-server-plugin-example",
   "version": "0.0.1",
   "description": "Example plugin for Actual sync-server",
-  "main": "dist/index.js",
+  "keywords": [
+    "actual",
+    "example",
+    "plugin",
+    "sync-server"
+  ],
+  "license": "MIT",
+  "author": "Actual Budget",
   "type": "module",
+  "main": "dist/index.js",
   "scripts": {
     "build": "npm run build:compile && npm run build:bundle && npm run build:manifest && npm run build:zip",
     "build:compile": "tsc",
@@ -14,23 +22,15 @@
     "clean": "rm -rf dist *.zip",
     "dev": "tsc --watch"
   },
-  "keywords": [
-    "actual",
-    "plugin",
-    "sync-server",
-    "example"
-  ],
-  "author": "Actual Budget",
-  "license": "MIT",
+  "dependencies": {
+    "@actual-app/plugins-core-sync-server": "workspace:*",
+    "express": "^4.18.0"
+  },
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/node": "^20.0.0",
     "archiver": "^7.0.0",
     "esbuild": "^0.24.0",
     "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "@actual-app/plugins-core-sync-server": "workspace:*",
-    "express": "^4.18.0"
   }
 }

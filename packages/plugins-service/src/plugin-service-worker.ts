@@ -119,7 +119,9 @@ registerRoute(
     }
 
     const clientId =
-      event instanceof FetchEvent && event.clientId.length > 0
+      'clientId' in event &&
+      typeof event.clientId === 'string' &&
+      event.clientId.length > 0
         ? event.clientId
         : undefined;
 

@@ -41,9 +41,7 @@ export type {
 */
 
 // Plugin types (server-safe ones)
-export type {
-  PluginContext,
-} from './types/actualPlugin';
+export type { PluginContext } from './types/actualPlugin';
 
 //. This is part of the full plugin support system that was removed from the initial bank sync MVP
 /*

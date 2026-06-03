@@ -1,5 +1,5 @@
-import { mockTransactionAmount } from '../../services/tests/fixtures.js';
-import EasybankBawaatww from '../easybank_bawaatww.js';
+import EasybankBawaatww from '#banks/easybank_bawaatww';
+import { mockTransactionAmount } from '#services/tests/fixtures';
 
 describe('easybank', () => {
   describe('#normalizeTransaction', () => {

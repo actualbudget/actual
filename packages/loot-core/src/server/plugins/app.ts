@@ -10,11 +10,11 @@ import * as idb from '#platform/server/indexeddb';
 import { logger } from '#platform/server/log';
 import { createApp } from '#server/app';
 import { getServer } from '#server/server-config';
-import { type ActualPluginStored } from '#types/models';
+import type { ActualPluginStored } from '#types/models';
 
 import { extractZipToMap } from './pluginUtil';
 
-export interface PluginsHandlers {
+export type PluginsHandlers = {
   'plugin-files': typeof getPluginFiles;
   'plugin-sync-server-install': typeof installSyncServerPlugin;
   'plugin-sync-server-list': typeof listSyncServerPlugins;
@@ -32,7 +32,7 @@ export interface PluginsHandlers {
   'plugin-aql-query': typeof queryPluginAql;
   */
   'cors-proxy': typeof corsProxy;
-}
+};
 
 export const app = createApp<PluginsHandlers>();
 

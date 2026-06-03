@@ -8,8 +8,12 @@
     "rootDir": "src",
     "strict": true,
     "outDir": "dist",
-    "tsBuildInfoFile": "dist/.tsbuildinfo"
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "paths": {
+      "@actual-app/shared-types/*": ["../shared-types/src/*"]
+    }
   },
+  "references": [{ "path": "../shared-types" }],
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules"]
 }

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { type BasicModalProps } from '@actual-app/components/props/modalProps';
+import type { BasicModalProps } from '@actual-app/components/props/modalProps';
 
 import { Modal } from '#components/common/Modal';
 import { RenderPluginsComponent } from '#components/plugins/RenderPluginsComponent';

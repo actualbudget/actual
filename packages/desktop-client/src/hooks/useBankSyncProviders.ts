@@ -55,7 +55,7 @@ export function useBankSyncProviders() {
       }
     }
 
-    fetchProviders();
+    void fetchProviders();
   }, []);
 
   return {

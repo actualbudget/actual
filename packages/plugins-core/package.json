@@ -1,28 +1,10 @@
 {
   "name": "@actual-app/plugins-core",
-  "private": true,
   "version": "0.1.0",
+  "private": true,
   "description": "Core plugin system for Actual Budget",
   "main": "src/index.ts",
   "types": "src/index.ts",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "lint": "eslint src/ tests/ --ext .ts,.tsx",
-    "typecheck": "tsc --noEmit"
-  },
-  "devDependencies": {
-    "@actual-app/components": "workspace:*",
-    "@types/node": "^22.19.17",
-    "@types/react": "19.2.14",
-    "@types/react-dom": "19.2.3",
-    "typescript": "^5.5.4",
-    "typescript-eslint": "^8.18.1",
-    "typescript-strict-plugin": "^2.4.4",
-    "vite": "^6.2.0",
-    "vite-plugin-dts": "^4.5.3"
-  },
   "exports": {
     ".": {
       "types": "./src/index.ts",
@@ -56,6 +38,31 @@
       "development": "./src/query/index.ts"
     },
     "./src/*": "./src/*"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint src/ tests/ --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@actual-app/components": "workspace:*",
+    "@actual-app/query": "workspace:*",
+    "@actual-app/shared-types": "workspace:*",
+    "@types/node": "^22.19.17",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "i18next": "^25.10.10",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-i18next": "^16.6.6",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.18.1",
+    "typescript-strict-plugin": "^2.4.4",
+    "vite": "^6.2.0",
+    "vite-plugin-dts": "^4.5.3",
+    "vitest": "^4.1.2"
   },
   "peerDependencies": {
     "@emotion/css": "^11.13.5",

@@ -1,7 +1,7 @@
+import type { BasicModalProps } from '@actual-app/components/props/modalProps';
 import { send } from '@actual-app/core/platform/client/connection';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type { File } from '@actual-app/core/types/file';
-import type { BasicModalProps } from '@actual-app/components/props/modalProps';
 import type {
   AccountEntity,
   CategoryEntity,

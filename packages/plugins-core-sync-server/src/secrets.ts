@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import type { Request } from 'express';
 
 function getFileIdFromReq(req: Request): string | undefined {
   const header = req.headers['x-actual-file-id'];

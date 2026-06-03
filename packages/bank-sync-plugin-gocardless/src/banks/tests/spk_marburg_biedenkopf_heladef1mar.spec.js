@@ -1,4 +1,4 @@
-import SpkMarburgBiedenkopfHeladef1mar from '../spk_marburg_biedenkopf_heladef1mar.js';
+import SpkMarburgBiedenkopfHeladef1mar from '#banks/spk_marburg_biedenkopf_heladef1mar';
 
 describe('SpkMarburgBiedenkopfHeladef1mar', () => {
   describe('#normalizeAccount', () => {

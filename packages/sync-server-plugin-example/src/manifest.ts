@@ -1,4 +1,4 @@
-import { PluginManifest } from '@actual-app/plugins-core-sync-server';
+import type { PluginManifest } from '@actual-app/plugins-core-sync-server';
 
 export const manifest: PluginManifest = {
   name: 'example-plugin',

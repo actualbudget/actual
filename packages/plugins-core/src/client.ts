@@ -49,7 +49,7 @@ export type {
 export type { ThemeColorTypes } from './types/actualPlugin';
 */
 
-export type * from '@actual-app/components/props/modalProps';
+export type * from '@actual-app/shared-types/modalProps';
 
 //. This is part of the full plugin support system that was removed from the initial bank sync MVP
 /*

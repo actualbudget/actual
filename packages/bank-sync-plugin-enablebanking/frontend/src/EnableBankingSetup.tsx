@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { type ChangeEvent, useState } from 'react';
+import { useState } from 'react';
+import type { ChangeEvent } from 'react';
+import { Trans } from 'react-i18next';
 
 import {
   ButtonWithLoading,
@@ -10,8 +12,8 @@ import {
   ModalHeader,
   Text,
   View,
-  type BankSyncProviderSetupRenderProps,
 } from '@actual-app/plugins-core';
+import type { BankSyncProviderSetupRenderProps } from '@actual-app/plugins-core';
 
 function unwrapPluginResponse<T>(response: unknown): T {
   const typed = response as {
@@ -99,7 +101,7 @@ export function EnableBankingSetup({
   return (
     <>
       <ModalHeader
-        title="Set up Enable Banking"
+        title={t('Set up Enable Banking')}
         rightContent={<ModalCloseButton onPress={close} />}
       />
       <View style={{ display: 'flex', gap: 10, padding: 20, minWidth: 420 }}>
@@ -112,7 +114,7 @@ export function EnableBankingSetup({
             target="_blank"
             rel="noreferrer"
           >
-            Enable Banking
+            <Trans>Enable Banking</Trans>
           </a>
           .
         </Text>
@@ -170,7 +172,7 @@ export function EnableBankingSetup({
             void onSubmit();
           }}
         >
-          Save and continue
+          <Trans>Save and continue</Trans>
         </ButtonWithLoading>
       </ModalButtons>
     </>

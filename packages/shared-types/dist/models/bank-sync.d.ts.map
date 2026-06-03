@@ -1,0 +1,1 @@
+{"version":3,"file":"bank-sync.d.ts","sourceRoot":"","sources":["../../src/models/bank-sync.ts"],"names":[],"mappings":"AAAA,eAAO,MAAM,cAAc,YACzB,YAAY,EACZ,WAAW,EACX,UAAU,EACV,eAAe,CACP,CAAC;AAEX,MAAM,MAAM,uBAAuB,GAAG,CAAC,OAAO,cAAc,CAAC,CAAC,MAAM,CAAC,CAAC;AACtE,MAAM,MAAM,iBAAiB,GAAG,uBAAuB,GAAG,MAAM,CAAC"}

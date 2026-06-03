@@ -1,14 +1,7 @@
-import { resolve } from 'path';
-
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 
 export default defineConfig({
-  resolve: {
-    alias: {
-      '@actual-app/components': resolve(__dirname, '../component-library/src'),
-    },
-  },
   build: {
     outDir: 'build',
     lib: {

@@ -6,14 +6,14 @@
  */
 
 const esbuild = require('esbuild');
-const { join } = require('path');
+const path = require('path');
 
 async function bundle() {
   try {
     console.log('Bundling plugin with dependencies...');
 
-    const entryPoint = join(__dirname, '..', 'dist', 'index.js');
-    const outFile = join(__dirname, '..', 'dist', 'bundle.js');
+    const entryPoint = path.join(__dirname, '..', 'dist', 'index.js');
+    const outFile = path.join(__dirname, '..', 'dist', 'bundle.js');
 
     await esbuild.build({
       entryPoints: [entryPoint],
@@ -36,4 +36,4 @@ async function bundle() {
   }
 }
 
-bundle();
+void bundle();

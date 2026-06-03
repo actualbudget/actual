@@ -1,12 +1,13 @@
 import {
   attachPluginMiddleware,
-  saveSecret,
-  getSecret,
   BankSyncErrorCode,
-  BankSyncError,
+  getSecret,
+  saveSecret,
 } from '@actual-app/plugins-core-sync-server';
+import type { BankSyncError } from '@actual-app/plugins-core-sync-server';
 import axios from 'axios';
-import express, { Request, Response } from 'express';
+import express from 'express';
+import type { Request, Response } from 'express';
 
 // Import manifest (used during build)
 import './manifest';

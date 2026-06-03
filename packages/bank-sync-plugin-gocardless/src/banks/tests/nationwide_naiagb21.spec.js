@@ -1,5 +1,5 @@
-import { mockTransactionAmount } from '../../services/tests/fixtures.js';
-import Nationwide from '../nationwide_naiagb21.js';
+import Nationwide from '#banks/nationwide_naiagb21';
+import { mockTransactionAmount } from '#services/tests/fixtures';
 
 describe('Nationwide', () => {
   describe('#normalizeTransaction', () => {

@@ -17,8 +17,8 @@ import {
 import { SvgCalendar3 } from '@actual-app/components/icons/v2';
 import { View } from '@actual-app/components/view';
 
-import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
 import { Item } from './Item';

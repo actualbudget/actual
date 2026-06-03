@@ -1,9 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { ManagePlugins } from './ManagePlugins';
-
 import { Page } from '#components/Page';
+
+import { ManagePlugins } from './ManagePlugins';
 
 export function Plugins() {
   const { t } = useTranslation();

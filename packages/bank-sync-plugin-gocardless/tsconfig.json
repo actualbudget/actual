@@ -11,7 +11,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "noImplicitAny": false,
     "strictNullChecks": false,
@@ -25,7 +25,17 @@
     "noImplicitReturns": false,
     "noFallthroughCasesInSwitch": true
   },
-  "references": [{ "path": "../plugins-core-sync-server" }],
+  "references": [
+    {
+      "path": "../component-library"
+    },
+    {
+      "path": "../plugins-core"
+    },
+    {
+      "path": "../plugins-core-sync-server"
+    }
+  ],
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "src/banks/tests", "**/*.spec.js"]
 }

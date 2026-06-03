@@ -1,13 +1,9 @@
-import createDebug from 'debug';
-
-import {
-  EnableBankingError,
-  handleEnableBankingError,
-} from '../utils/errors';
-import { getJWT } from '../utils/jwt';
-
 import { getSecret } from '@actual-app/plugins-core-sync-server';
+import createDebug from 'debug';
 import type { Request } from 'express';
+
+import { EnableBankingError, handleEnableBankingError } from '#utils/errors';
+import { getJWT } from '#utils/jwt';
 
 const debug = createDebug('actual:enable-banking:service');
 
@@ -126,7 +122,9 @@ async function getCredentials(options?: SecretOptions): Promise<{
   return { applicationId, secretKey };
 }
 
-async function getAuthorizationHeader(options?: SecretOptions): Promise<string> {
+async function getAuthorizationHeader(
+  options?: SecretOptions,
+): Promise<string> {
   const { applicationId, secretKey } = await getCredentials(options);
   const token = getJWT(applicationId, secretKey);
   return `Bearer ${token}`;

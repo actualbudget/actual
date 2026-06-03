@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
+import { Trans } from 'react-i18next';
 
 import {
   ButtonWithLoading,
@@ -10,8 +11,8 @@ import {
   ModalHeader,
   Text,
   View,
-  type BankSyncProviderSetupRenderProps,
 } from '@actual-app/plugins-core';
+import type { BankSyncProviderSetupRenderProps } from '@actual-app/plugins-core';
 
 export function GoCardlessSetup({
   close,
@@ -56,7 +57,7 @@ export function GoCardlessSetup({
   return (
     <>
       <ModalHeader
-        title="Set up GoCardless"
+        title={t('Set up GoCardless')}
         rightContent={<ModalCloseButton onPress={close} />}
       />
       <View style={{ display: 'flex', gap: 10, padding: 20, minWidth: 360 }}>
@@ -69,7 +70,7 @@ export function GoCardlessSetup({
             target="_blank"
             rel="noreferrer"
           >
-            GoCardless
+            <Trans>GoCardless</Trans>
           </a>
           .
         </Text>
@@ -114,7 +115,7 @@ export function GoCardlessSetup({
             void onSubmit();
           }}
         >
-          Save and continue
+          <Trans>Save and continue</Trans>
         </ButtonWithLoading>
       </ModalButtons>
     </>

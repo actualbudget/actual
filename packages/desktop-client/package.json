@@ -129,6 +129,7 @@
     "@actual-app/components": "workspace:*",
     "@actual-app/core": "workspace:*",
     "@actual-app/plugins-core": "workspace:*",
+    "@actual-app/shared-types": "workspace:*",
     "@babel/core": "^7.29.0",
     "@codemirror/autocomplete": "^6.20.1",
     "@codemirror/language": "^6.12.3",

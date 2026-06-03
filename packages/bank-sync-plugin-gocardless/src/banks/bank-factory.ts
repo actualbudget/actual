@@ -20,6 +20,7 @@ import HypeHyeeit22 from './hype_hyeeit22.js';
 import IngIngbrobu from './ing_ingbrobu.js';
 import IngIngddeff from './ing_ingddeff.js';
 import IngPlIngbplpw from './ing_pl_ingbplpw.js';
+import IntegrationBank from './integration-bank.js';
 import IsybankItbbitmm from './isybank_itbbitmm.js';
 import KbcKredbebb from './kbc_kredbebb.js';
 import LhvLhvbee22 from './lhv-lhvbee22.js';
@@ -40,7 +41,6 @@ import SskDusseldorfDussdeddxxx from './ssk_dusseldorf_dussdeddxxx.js';
 import SskMunchen from './ssk_munchen.js';
 import SwedbankHabalv22 from './swedbank_habalv22.js';
 import VirginNrnbgb22 from './virgin_nrnbgb22.js';
-import IntegrationBank from './integration-bank.js';
 
 type Bankish = {
   institutionIds: string[];
@@ -50,7 +50,10 @@ type Bankish = {
     editedTransaction?: any,
   ) => any | null;
   sortTransactions: <T>(transactions: T[]) => T[];
-  calculateStartingBalance: (sortedTransactions: any[], balances: any[]) => number;
+  calculateStartingBalance: (
+    sortedTransactions: any[],
+    balances: any[],
+  ) => number;
 };
 
 export const banks: Bankish[] = [
@@ -101,8 +104,7 @@ export const banks: Bankish[] = [
 export function bankFactory(institutionId: string | null | undefined): Bankish {
   if (!institutionId) return IntegrationBank as Bankish;
   return (
-    banks.find((b) => b.institutionIds.includes(institutionId)) ??
+    banks.find(b => b.institutionIds.includes(institutionId)) ??
     (IntegrationBank as Bankish)
   );
 }
-

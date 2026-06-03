@@ -24,10 +24,7 @@ function getChildren(
         if (isValidElement(child) && child.type === Fragment) {
           const props = child.props as { children?: ReactNode } | null;
           return list.concat(
-            getChildren(
-              String(child.key ?? key),
-              props?.children ?? [],
-            ),
+            getChildren(String(child.key ?? key), props?.children ?? []),
           );
         }
         list.push({

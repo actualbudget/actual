@@ -1,8 +1,7 @@
-// githubUtils.ts
-import { type ActualPluginManifest } from '@actual-app/plugins-core';
-import semverGt from 'semver/functions/gt';
-
 import { send } from '@actual-app/core/platform/client/connection';
+// githubUtils.ts
+import type { ActualPluginManifest } from '@actual-app/plugins-core';
+import semverGt from 'semver/functions/gt';
 
 type GitHubAsset = {
   name: string;

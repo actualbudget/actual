@@ -1,8 +1,8 @@
+import IntegrationBank from '#banks/integration-bank';
 import {
   mockExtendAccountsAboutInstitutions,
   mockInstitution,
-} from '../../services/tests/fixtures.js';
-import IntegrationBank from '../integration-bank.js';
+} from '#services/tests/fixtures';
 
 describe('IntegrationBank', () => {
   let consoleSpy;

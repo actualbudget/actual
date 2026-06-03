@@ -101,7 +101,15 @@ export function EnableBankingCallback() {
     }
 
     void handleCallback();
-  }, [code, stateParam, stateValid, errorParam, t]);
+  }, [
+    code,
+    errorParam,
+    stateParam,
+    stateValid,
+    storedFileId,
+    storedProviderSlug,
+    t,
+  ]);
 
   return (
     <View

@@ -3,12 +3,13 @@ import { DialogTrigger } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { Menu, type MenuItem } from '@actual-app/components/menu';
+import { Menu } from '@actual-app/components/menu';
+import type { MenuItem } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 
-import { type ProviderStatusMap } from './useProviderStatusMap';
+import type { BankSyncProvider } from '#hooks/useBankSyncProviders';
 
-import { type BankSyncProvider } from '#hooks/useBankSyncProviders';
+import type { ProviderStatusMap } from './useProviderStatusMap';
 
 export function ProviderSelectButton({
   label,

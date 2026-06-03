@@ -1,7 +1,7 @@
 /**
  *  Credit for this code goes to Nebukadneza at https://github.com/Nebukadneza
  */
-import { amountToInteger } from '../utils.js';
+import { amountToInteger } from '#utils';
 
 import Fallback from './integration-bank.js';
 /** @type {import('./bank.interface.js').IBank} */

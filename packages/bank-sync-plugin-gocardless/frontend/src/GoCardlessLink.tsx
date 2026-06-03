@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
+import { Trans } from 'react-i18next';
 
 import {
   AnimatedLoading,
@@ -10,8 +11,10 @@ import {
   ModalHeader,
   Text,
   View,
-  type BankSyncProviderExternalAccount,
-  type BankSyncProviderLinkRenderProps,
+} from '@actual-app/plugins-core';
+import type {
+  BankSyncProviderExternalAccount,
+  BankSyncProviderLinkRenderProps,
 } from '@actual-app/plugins-core';
 
 type Institution = {
@@ -166,7 +169,7 @@ export function GoCardlessLink({
   return (
     <>
       <ModalHeader
-        title="Link Your Bank"
+        title={t('Link Your Bank')}
         rightContent={<ModalCloseButton onPress={close} />}
       />
       <View style={{ display: 'flex', gap: 12, padding: 20, minWidth: 420 }}>
@@ -192,7 +195,7 @@ export function GoCardlessLink({
               void onContinue();
             }}
           >
-            Success! Click to continue
+            <Trans>Success! Click to continue</Trans>
           </Button>
         ) : (
           <>
@@ -217,7 +220,7 @@ export function GoCardlessLink({
                 void loadBanks();
               }}
             >
-              {isLoadingBanks ? 'Loading banks...' : 'Load banks'}
+              {isLoadingBanks ? 'Loading banks...' : t('Load banks')}
             </Button>
 
             {banks.length > 0 && (
@@ -245,7 +248,7 @@ export function GoCardlessLink({
                 target="_blank"
                 rel="noreferrer"
               >
-                Privacy Policy
+                <Trans>Privacy Policy</Trans>
               </a>{' '}
               before proceeding.
             </Text>
@@ -259,7 +262,7 @@ export function GoCardlessLink({
                 void onJump();
               }}
             >
-              Link bank in browser
+              <Trans>Link bank in browser</Trans>
             </Button>
           </>
         )}

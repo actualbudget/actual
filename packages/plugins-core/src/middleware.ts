@@ -1,9 +1,9 @@
 import ReactDOM from 'react-dom/client';
 import { initReactI18next } from 'react-i18next';
 
-import type { BasicModalProps } from '@actual-app/components';
+import type { BasicModalProps } from '@actual-app/shared-types/modalProps';
 
-import {
+import type {
   ActualPlugin,
   ActualPluginInitialized,
   BankSyncProviderLinkRenderer,
@@ -135,10 +135,13 @@ export function initializePlugin(
                 root.render(element);
                 return () => unmountRoot(container);
               } catch (error) {
-                console.error('[plugins-core] failed to mount bank-sync link UI', {
-                  providerSlug,
-                  error,
-                });
+                console.error(
+                  '[plugins-core] failed to mount bank-sync link UI',
+                  {
+                    providerSlug,
+                    error,
+                  },
+                );
                 throw error;
               }
             },

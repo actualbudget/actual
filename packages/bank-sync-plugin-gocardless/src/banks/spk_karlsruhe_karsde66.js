@@ -1,4 +1,4 @@
-import { amountToInteger } from '../utils.js';
+import { amountToInteger } from '#utils';
 
 import Fallback from './integration-bank.js';
 

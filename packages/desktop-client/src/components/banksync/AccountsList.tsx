@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
 
@@ -10,7 +12,7 @@ type AccountsListProps = {
   hoveredAccount?: string | null;
   onHover: (id: AccountEntity['id'] | null) => void;
   onAction: (account: AccountEntity, action: 'link' | 'edit') => void;
-  renderLinkButton?: (account: AccountEntity) => React.ReactNode;
+  renderLinkButton?: (account: AccountEntity) => ReactNode;
 };
 
 export function AccountsList({

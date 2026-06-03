@@ -12,6 +12,7 @@ import { useAuth } from '#auth/AuthProvider';
 import { Permissions } from '#auth/types';
 import { Warning } from '#components/alerts';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
+import type { SelectLinkedAccountsModalProps } from '#components/modals/SelectLinkedAccountsModal';
 import { Page } from '#components/Page';
 import { useMultiuserEnabled } from '#components/ServerContext';
 import { useAccounts } from '#hooks/useAccounts';
@@ -35,6 +36,28 @@ import { ProviderSelectButton } from './ProviderSelectButton';
 import { ProviderSetupGrid } from './ProviderSetupGrid';
 import { useBuiltInBankSyncProviders } from './useBuiltInBankSyncProviders';
 import { useProviderStatusMap } from './useProviderStatusMap';
+
+type BankSyncStatusResult = {
+  status?: string;
+  error?: unknown;
+};
+
+type BankSyncAccountsResult = {
+  error_code?: string;
+  reason?: string;
+  accounts?: Extract<
+    SelectLinkedAccountsModalProps,
+    { syncSource: 'plugin' }
+  >['externalAccounts'];
+};
+
+function toBankSyncStatusResult(result: unknown): BankSyncStatusResult {
+  return result && typeof result === 'object' ? result : {};
+}
+
+function toBankSyncAccountsResult(result: unknown): BankSyncAccountsResult {
+  return result && typeof result === 'object' ? result : {};
+}
 
 export function BankSync() {
   const { t } = useTranslation();
@@ -209,10 +232,9 @@ export function BankSync() {
                   fileId,
                 });
 
-                if (
-                  (result as any)?.status === 'error' ||
-                  'error' in (result as any)
-                ) {
+                const statusResult = toBankSyncStatusResult(result);
+
+                if (statusResult.status === 'error' || statusResult.error) {
                   await send('bank-sync-accounts', {
                     providerSlug,
                     credentials,
@@ -326,10 +348,12 @@ export function BankSync() {
     }
 
     try {
-      const result = (await send('bank-sync-accounts', {
-        providerSlug,
-        fileId,
-      })) as any;
+      const result = toBankSyncAccountsResult(
+        await send('bank-sync-accounts', {
+          providerSlug,
+          fileId,
+        }),
+      );
 
       if (result?.error_code) {
         throw new Error(result.reason || result.error_code);
@@ -452,9 +476,9 @@ export function BankSync() {
                         onSelect={({ providerSlug }) =>
                           openPluginAccounts({
                             providerSlug,
-                            providerDisplayName:
-                              pluginProviders.find(p => p.slug === providerSlug)
-                                ?.displayName,
+                            providerDisplayName: pluginProviders.find(
+                              p => p.slug === providerSlug,
+                            )?.displayName,
                             upgradingAccountId: account.id,
                           })
                         }

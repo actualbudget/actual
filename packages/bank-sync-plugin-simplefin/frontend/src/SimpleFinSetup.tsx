@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
+import { Trans } from 'react-i18next';
 
 import {
   ButtonWithLoading,
@@ -10,8 +11,8 @@ import {
   ModalHeader,
   Text,
   View,
-  type BankSyncProviderSetupRenderProps,
 } from '@actual-app/plugins-core';
+import type { BankSyncProviderSetupRenderProps } from '@actual-app/plugins-core';
 
 export function SimpleFinSetup({
   close,
@@ -99,7 +100,7 @@ export function SimpleFinSetup({
             void onSubmit();
           }}
         >
-          Save and continue
+          <Trans>Save and continue</Trans>
         </ButtonWithLoading>
       </ModalButtons>
     </>

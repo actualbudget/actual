@@ -9,7 +9,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -23,7 +23,17 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true
   },
-  "references": [{ "path": "../plugins-core-sync-server" }],
+  "references": [
+    {
+      "path": "../component-library"
+    },
+    {
+      "path": "../plugins-core"
+    },
+    {
+      "path": "../plugins-core-sync-server"
+    }
+  ],
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

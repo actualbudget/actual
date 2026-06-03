@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
+import { Trans } from 'react-i18next';
 
 import {
   AnimatedLoading,
@@ -10,8 +11,10 @@ import {
   ModalHeader,
   Text,
   View,
-  type BankSyncProviderExternalAccount,
-  type BankSyncProviderLinkRenderProps,
+} from '@actual-app/plugins-core';
+import type {
+  BankSyncProviderExternalAccount,
+  BankSyncProviderLinkRenderProps,
 } from '@actual-app/plugins-core';
 
 type Aspsp = {
@@ -154,7 +157,10 @@ export function EnableBankingLink({
 
       stateRef.current = startData.state;
       localStorage.setItem('enablebanking_auth_state', startData.state);
-      localStorage.setItem('enablebanking_auth_provider_slug', 'enablebanking-bank-sync');
+      localStorage.setItem(
+        'enablebanking_auth_provider_slug',
+        'enablebanking-bank-sync',
+      );
       localStorage.setItem('enablebanking_auth_file_id', fileId);
       openExternalUrl(startData.url);
 
@@ -190,7 +196,7 @@ export function EnableBankingLink({
   return (
     <>
       <ModalHeader
-        title="Link Your Bank"
+        title={t('Link Your Bank')}
         rightContent={
           <ModalCloseButton
             onPress={() => {
@@ -241,7 +247,7 @@ export function EnableBankingLink({
                 void loadBanks();
               }}
             >
-              {isLoadingBanks ? 'Loading banks...' : 'Load banks'}
+              {isLoadingBanks ? 'Loading banks...' : t('Load banks')}
             </Button>
 
             {banks.length > 0 && (
@@ -269,7 +275,7 @@ export function EnableBankingLink({
                 target="_blank"
                 rel="noreferrer"
               >
-                Privacy Policy
+                <Trans>Privacy Policy</Trans>
               </a>{' '}
               before proceeding.
             </Text>
@@ -283,7 +289,7 @@ export function EnableBankingLink({
                 void onJump();
               }}
             >
-              Link bank in browser
+              <Trans>Link bank in browser</Trans>
             </Button>
           </>
         )}

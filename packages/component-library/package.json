@@ -53,6 +53,7 @@
     "typecheck": "tsgo -b"
   },
   "dependencies": {
+    "@actual-app/shared-types": "workspace:*",
     "@emotion/css": "^11.13.5",
     "react-aria-components": "^1.16.0",
     "usehooks-ts": "^3.1.1"

@@ -13,58 +13,43 @@
     "routes": [
       {
         "path": "/status",
-        "methods": [
-          "POST",
-          "GET"
-        ],
+        "methods": ["POST", "GET"],
         "auth": "authenticated",
         "description": "Check GoCardless configuration status"
       },
       {
         "path": "/accounts",
-        "methods": [
-          "POST"
-        ],
+        "methods": ["POST"],
         "auth": "authenticated",
         "description": "Fetch accounts from GoCardless"
       },
       {
         "path": "/transactions",
-        "methods": [
-          "POST"
-        ],
+        "methods": ["POST"],
         "auth": "authenticated",
         "description": "Fetch transactions from GoCardless"
       },
       {
         "path": "/banks",
-        "methods": [
-          "POST"
-        ],
+        "methods": ["POST"],
         "auth": "authenticated",
         "description": "Get list of banks/institutions by country"
       },
       {
         "path": "/create-web-token",
-        "methods": [
-          "POST"
-        ],
+        "methods": ["POST"],
         "auth": "authenticated",
         "description": "Create a requisition and return authorization link"
       },
       {
         "path": "/get-accounts",
-        "methods": [
-          "POST"
-        ],
+        "methods": ["POST"],
         "auth": "authenticated",
         "description": "Poll/fetch requisition status and linked accounts"
       },
       {
         "path": "/remove-account",
-        "methods": [
-          "POST"
-        ],
+        "methods": ["POST"],
         "auth": "authenticated",
         "description": "Delete a requisition"
       }

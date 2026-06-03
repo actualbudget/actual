@@ -12,12 +12,33 @@
     "tsBuildInfoFile": "@types/.tsbuildinfo",
     "types": ["vite/client", "vitest/globals", "node"],
     "paths": {
+      "@actual-app/query": ["../query/src/index.ts"],
+      "@actual-app/query/*": ["../query/src/*"],
+      "@actual-app/shared-types/*": ["../shared-types/src/*"],
       // Allow importing from hyperformula's internal typings for custom function plugins
       "hyperformula/typings/*": ["../../node_modules/hyperformula/typings/*"]
     },
-    "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
+    "plugins": [
+      {
+        "name": "typescript-strict-plugin",
+        "paths": ["."]
+      }
+    ]
   },
-  "references": [{ "path": "../crdt" }, { "path": "../plugins-core" }],
+  "references": [
+    {
+      "path": "../query"
+    },
+    {
+      "path": "../shared-types"
+    },
+    {
+      "path": "../crdt"
+    },
+    {
+      "path": "../plugins-core"
+    }
+  ],
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",

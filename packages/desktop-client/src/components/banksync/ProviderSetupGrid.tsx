@@ -6,9 +6,9 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { type ProviderStatusMap } from './useProviderStatusMap';
+import type { BankSyncProvider } from '#hooks/useBankSyncProviders';
 
-import { type BankSyncProvider } from '#hooks/useBankSyncProviders';
+import type { ProviderStatusMap } from './useProviderStatusMap';
 
 export function ProviderSetupGrid({
   providers,

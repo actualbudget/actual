@@ -173,6 +173,8 @@
     "postpack": "ts-node scripts/restore-package-json.mts"
   },
   "dependencies": {
+    "@actual-app/query": "workspace:*",
+    "@actual-app/shared-types": "workspace:*",
     "@jlongster/sql.js": "^1.6.7",
     "@rschedule/core": "^1.5.0",
     "@rschedule/standard-date-adapter": "^1.5.0",

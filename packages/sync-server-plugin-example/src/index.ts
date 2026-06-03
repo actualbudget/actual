@@ -1,5 +1,6 @@
 import { attachPluginMiddleware } from '@actual-app/plugins-core-sync-server';
-import express, { Request, Response } from 'express';
+import express from 'express';
+import type { Request, Response } from 'express';
 
 // The manifest is imported but not used in runtime code
 // It's only used during build time to generate the JSON manifest

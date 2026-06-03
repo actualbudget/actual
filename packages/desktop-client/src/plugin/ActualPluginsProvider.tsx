@@ -1,34 +1,34 @@
 import React, {
   createContext,
-  useContext,
-  type ReactNode,
   useCallback,
+  useContext,
+  useEffect,
   useRef,
   useState,
-  useEffect,
-  type MutableRefObject,
 } from 'react';
+import type { MutableRefObject, ReactNode } from 'react';
 
 import { send } from '@actual-app/core/platform/client/connection';
-import { type ActualPluginStored } from '@actual-app/core/types/models/actual-plugin-stored';
+import type { ActualPluginStored } from '@actual-app/core/types/models/actual-plugin-stored';
 import {
-  type ActualPluginEntry,
-  type ActualPluginInitialized,
-  type ActualPluginManifest,
   isFrontendPlugin,
   isSyncServerPlugin,
   validateActualPluginManifest,
+} from '@actual-app/plugins-core';
+import type {
+  ActualPluginEntry,
+  ActualPluginInitialized,
+  ActualPluginManifest,
 } from '@actual-app/plugins-core';
 import { createInstance } from '@module-federation/enhanced/runtime';
 
 import { useGlobalPref } from '#hooks/useGlobalPref';
 
-import {
-  loadPlugins,
-  loadPluginsScript,
-  type BankSyncProviderLinkRegistration,
-  type BankSyncProviderSetupRegistration,
-  type PluginModalModel,
+import { loadPlugins, loadPluginsScript } from './core/pluginLoader';
+import type {
+  BankSyncProviderLinkRegistration,
+  BankSyncProviderSetupRegistration,
+  PluginModalModel,
 } from './core/pluginLoader';
 import { getAllPlugins } from './core/pluginStore';
 

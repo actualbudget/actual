@@ -13,74 +13,55 @@
     "routes": [
       {
         "path": "/status",
-        "methods": [
-          "POST",
-          "GET"
-        ],
+        "methods": ["POST", "GET"],
         "auth": "authenticated",
         "description": "Check Enable Banking configuration status"
       },
       {
         "path": "/configure",
-        "methods": [
-          "POST"
-        ],
+        "methods": ["POST"],
         "auth": "authenticated",
         "description": "Configure Enable Banking credentials"
       },
       {
         "path": "/aspsps",
-        "methods": [
-          "POST"
-        ],
+        "methods": ["POST"],
         "auth": "authenticated",
         "description": "Get Enable Banking ASPSPs by country"
       },
       {
         "path": "/start-auth",
-        "methods": [
-          "POST"
-        ],
+        "methods": ["POST"],
         "auth": "authenticated",
         "description": "Start Enable Banking authorization"
       },
       {
         "path": "/complete-auth",
-        "methods": [
-          "POST"
-        ],
+        "methods": ["POST"],
         "auth": "authenticated",
         "description": "Complete Enable Banking authorization"
       },
       {
         "path": "/poll-auth",
-        "methods": [
-          "POST"
-        ],
+        "methods": ["POST"],
         "auth": "authenticated",
         "description": "Poll Enable Banking authorization"
       },
       {
         "path": "/poll-auth-stop",
-        "methods": [
-          "POST"
-        ],
+        "methods": ["POST"],
         "auth": "authenticated",
         "description": "Stop Enable Banking authorization polling"
       },
       {
         "path": "/accounts",
-        "methods": [
-          "POST"
-        ],
+        "methods": ["POST"],
         "auth": "authenticated",
         "description": "Fetch accounts from Enable Banking"
       },
       {
         "path": "/transactions",
-        "methods": [
-          "POST"
-        ],
+        "methods": ["POST"],
         "auth": "authenticated",
         "description": "Fetch transactions from Enable Banking"
       }

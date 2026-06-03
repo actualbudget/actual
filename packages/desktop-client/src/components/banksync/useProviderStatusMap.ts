@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { send } from '@actual-app/core/platform/client/connection';
 
-import { type BankSyncProvider } from '#hooks/useBankSyncProviders';
+import type { BankSyncProvider } from '#hooks/useBankSyncProviders';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
 type ProviderStatus = {
@@ -11,6 +11,20 @@ type ProviderStatus = {
 };
 
 export type ProviderStatusMap = Record<string, ProviderStatus>;
+
+function parseProviderStatus(result: unknown): ProviderStatus {
+  if (!result || typeof result !== 'object') {
+    return { configured: false };
+  }
+
+  return {
+    configured: 'configured' in result ? Boolean(result.configured) : false,
+    error:
+      'error' in result && typeof result.error === 'string'
+        ? result.error
+        : undefined,
+  };
+}
 
 export function useProviderStatusMap({
   providers,
@@ -62,13 +76,7 @@ export function useProviderStatusMap({
               error: err instanceof Error ? err.message : String(err),
             }));
 
-            return [
-              provider.slug,
-              {
-                configured: Boolean((result as any)?.configured),
-                error: (result as any)?.error,
-              },
-            ] as const;
+            return [provider.slug, parseProviderStatus(result)] as const;
           }),
         );
 
@@ -90,7 +98,7 @@ export function useProviderStatusMap({
       }
     }
 
-    load();
+    void load();
 
     return () => {
       didCancel = true;

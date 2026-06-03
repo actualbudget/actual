@@ -1,7 +1,7 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { useGlobalPref } from '#hooks/useGlobalPref';
-import { type PluginSlotRegistrationFn } from '#plugin/core/pluginLoader';
+import type { PluginSlotRegistrationFn } from '#plugin/core/pluginLoader';
 
 type RenderPluginsComponentProps = {
   toRender: Map<string, PluginSlotRegistrationFn>;

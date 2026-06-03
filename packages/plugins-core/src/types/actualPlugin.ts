@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 
-import type { BasicModalProps } from '@actual-app/components';
+import type { BasicModalProps } from '@actual-app/shared-types/modalProps';
 import type { i18n } from 'i18next';
 
 //. This is part of the full plugin support system that was removed from the initial bank sync MVP
@@ -496,7 +496,7 @@ export type PluginContext = Pick<HostContext, 'i18nInstance'> & {
   */
 };
 
-export interface ActualPlugin {
+export type ActualPlugin = {
   name: string;
   version: string;
   install: (
@@ -509,7 +509,7 @@ export interface ActualPlugin {
   // migrations?: () => PluginMigration[];
   activate: (context: PluginContext) => void;
   deactivate: (context: PluginContext) => void;
-}
+};
 
 export type ActualPluginInitialized = Omit<ActualPlugin, 'activate'> & {
   initialized: true;
@@ -526,7 +526,7 @@ export interface ContextEvent {
 }
 */
 
-export interface HostContext {
+export type HostContext = {
   //. This is part of the full plugin support system that was removed from the initial bank sync MVP
   /*
   navigate: (routePath: string) => void;
@@ -611,4 +611,4 @@ export interface HostContext {
   */
 
   i18nInstance: i18n;
-}
+};

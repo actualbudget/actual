@@ -1,14 +1,9 @@
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import {
-  Button,
-  CSSProperties,
-  Input,
-  styles,
-  SvgLogo,
-  View,
-} from '@actual-app/components';
+import { Button, Input, styles, SvgLogo, View } from '@actual-app/components';
+import type { CSSProperties } from '@actual-app/components';
 import { SvgDelete } from '@actual-app/components/icons/v0';
 
 type ModalButtonsProps = {
@@ -69,6 +64,7 @@ export function ModalHeader({
 }: ModalHeaderProps) {
   return (
     <View
+      aria-level={1}
       role="heading"
       style={{
         justifyContent: 'center',

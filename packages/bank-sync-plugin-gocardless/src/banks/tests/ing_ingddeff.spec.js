@@ -1,4 +1,4 @@
-import IngIngddeff from '../ing_ingddeff.js';
+import IngIngddeff from '#banks/ing_ingddeff';
 
 describe('IngIngddeff', () => {
   describe('#normalizeAccount', () => {

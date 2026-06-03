@@ -1,6 +1,6 @@
-import {
-  type ActualPluginManifest,
-  type PluginFileCollection,
+import type {
+  ActualPluginManifest,
+  PluginFileCollection,
 } from '@actual-app/plugins-core/server';
 
 //. This is part of the full plugin support system that was removed from the initial bank sync MVP
@@ -16,7 +16,7 @@ import type {
 } from '@actual-app/plugins-core/server';
 */
 
-export interface PluginHandlers {
+export type PluginHandlers = {
   'plugin-files': (args: {
     pluginUrl: string;
   }) => Promise<PluginFileCollection>;
@@ -81,4 +81,4 @@ export interface PluginHandlers {
     | { data: number[]; contentType: string; isBinary: true }
     | { error: string; details?: string }
   >;
-}
+};

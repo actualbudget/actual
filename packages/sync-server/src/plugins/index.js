@@ -5,7 +5,7 @@
  * for use in the sync-server application
  */
 
-import { PluginManager } from '../plugin-manager.js';
-import { createPluginMiddleware } from '../plugin-middleware.js';
+import { PluginManager } from '#plugin-manager';
+import { createPluginMiddleware } from '#plugin-middleware';
 
 export { PluginManager, createPluginMiddleware };

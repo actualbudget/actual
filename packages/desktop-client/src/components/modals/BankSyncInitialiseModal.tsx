@@ -14,7 +14,7 @@ import {
   ModalHeader,
 } from '#components/common/Modal';
 import { FormField, FormLabel } from '#components/forms';
-import { type Modal as ModalType } from '#modals/modalsSlice';
+import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type BankSyncInitialiseProps = Extract<
   ModalType,
@@ -44,7 +44,7 @@ export function BankSyncInitialiseModal({
       setIsValid(true);
       onSuccess(parsedCredentials);
       close();
-    } catch (err) {
+    } catch {
       setIsValid(false);
       setError(t('Invalid JSON format. Please check your input.'));
     }
@@ -52,11 +52,17 @@ export function BankSyncInitialiseModal({
 
   return (
     <Modal name="bank-sync-init" containerProps={{ style: { width: '40vw' } }}>
-      {({ state: { close } }) => (
+      {modalState => (
         <>
           <ModalHeader
             title={t('Set up {{provider}}', { provider: providerDisplayName })}
-            rightContent={<ModalCloseButton onPress={close} />}
+            rightContent={
+              <ModalCloseButton
+                onPress={() => {
+                  modalState.state.close();
+                }}
+              />
+            }
           />
           <View style={{ display: 'flex', gap: 10 }}>
             <Text>
@@ -126,7 +132,9 @@ export function BankSyncInitialiseModal({
             <ButtonWithLoading
               variant="primary"
               onPress={() => {
-                onSubmit(close);
+                onSubmit(() => {
+                  modalState.state.close();
+                });
               }}
             >
               <Trans>Save and continue</Trans>

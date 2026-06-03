@@ -11,6 +11,9 @@
     "rootDir": ".",
     "tsBuildInfoFile": "build/ts/.tsbuildinfo",
     "customConditions": ["electron-renderer"],
+    "paths": {
+      "@actual-app/shared-types/*": ["../shared-types/src/*"]
+    },
     "plugins": [
       {
         "name": "typescript-strict-plugin",
@@ -27,6 +30,9 @@
     },
     {
       "path": "../plugins-core"
+    },
+    {
+      "path": "../shared-types"
     },
     {
       "path": "../plugins-service"
