@@ -1,5 +1,6 @@
 import { execFileSync, fork } from 'child_process';
 import fs from 'fs';
+import { createRequire } from 'module';
 import os from 'os';
 import path from 'path';
 
@@ -10,6 +11,8 @@ import ipaddr from 'ipaddr.js';
 import { secretsService } from './services/secrets-service.js';
 
 const debug = createDebug('actual:config');
+const require = createRequire(import.meta.url);
+const pluginRunnerPath = require.resolve('#plugin-runner');
 
 function sanitizePluginSlug(pluginName) {
   return pluginName.replace(/[^a-zA-Z0-9._-]/g, '-');
@@ -83,6 +86,19 @@ function parseDevPluginUrl(rawUrl) {
     throw new Error('Dev plugin URLs must use localhost or a loopback address');
   }
   return url;
+}
+
+function toLocalDevPluginUrl(url) {
+  const protocol = url.protocol === 'https:' ? 'https:' : 'http:';
+  const hostname = url.hostname === 'localhost' ? 'localhost' : '127.0.0.1';
+  const port = url.port ? `:${url.port}` : '';
+  const pathname = path.posix.normalize(url.pathname);
+
+  if (pathname === '..' || pathname.startsWith('../')) {
+    throw new Error('Dev plugin URL path must stay inside the origin');
+  }
+
+  return `${protocol}//${hostname}${port}${pathname}${url.search}`;
 }
 
 function isFrontendPlugin(manifest) {
@@ -390,12 +406,13 @@ class PluginManager {
       );
     }
 
-    // Fork the plugin as a child process
-    const childProcess = fork(entryPath, {
+    // Fork a fixed runner; the runner imports the validated plugin entry.
+    const childProcess = fork(pluginRunnerPath, {
       cwd: pluginPath,
       silent: false,
       env: {
         ...process.env,
+        ACTUAL_PLUGIN_ENTRY_PATH: entryPath,
         PLUGIN_SLUG: pluginSlug,
         PLUGIN_PATH: pluginPath,
       },
@@ -713,7 +730,10 @@ class PluginManager {
 
   async registerDevPlugin(manifestUrl) {
     const parsedManifestUrl = parseDevPluginUrl(manifestUrl);
-    const manifestResponse = await fetch(parsedManifestUrl);
+    // codeql[js/request-forgery]: Dev plugin URLs are reconstructed by toLocalDevPluginUrl after localhost/loopback validation.
+    const manifestResponse = await fetch(
+      toLocalDevPluginUrl(parsedManifestUrl),
+    );
     if (!manifestResponse.ok) {
       throw new Error(
         `Failed to fetch dev plugin manifest: ${parsedManifestUrl.toString()}`,
@@ -752,7 +772,8 @@ class PluginManager {
     ) {
       throw new Error('Dev plugin entry URL must use the manifest URL origin');
     }
-    const entryResponse = await fetch(entryUrl);
+    // codeql[js/request-forgery]: Dev plugin entry URLs must use the already validated manifest origin.
+    const entryResponse = await fetch(toLocalDevPluginUrl(entryUrl));
     if (!entryResponse.ok) {
       throw new Error(
         `Failed to fetch dev plugin entry: ${entryUrl.toString()}`,

@@ -65,6 +65,7 @@ export default defineConfig({
           __dirname,
           'src/scripts/health-check.js',
         ),
+        'src/plugin-runner': path.resolve(__dirname, 'src/plugin-runner.js'),
       },
       output: {
         format: 'esm',
