@@ -14,6 +14,14 @@ async function bundle() {
 
     const entryPoint = path.join(__dirname, '..', 'dist', 'index.js');
     const outFile = path.join(__dirname, '..', 'dist', 'bundle.js');
+    const pluginsCoreSyncServerEntry = path.join(
+      __dirname,
+      '..',
+      '..',
+      'plugins-core-sync-server',
+      'src',
+      'index.ts',
+    );
 
     await esbuild.build({
       entryPoints: [entryPoint],
@@ -22,6 +30,17 @@ async function bundle() {
       target: 'node20',
       format: 'esm',
       outfile: outFile,
+      plugins: [
+        {
+          name: 'workspace-plugins-core-sync-server-source',
+          setup(build) {
+            build.onResolve(
+              { filter: /^@actual-app\/plugins-core-sync-server$/ },
+              () => ({ path: pluginsCoreSyncServerEntry }),
+            );
+          },
+        },
+      ],
       external: ['express', 'axios'],
       minify: false,
       sourcemap: false,

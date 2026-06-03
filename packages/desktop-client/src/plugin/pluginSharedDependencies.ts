@@ -4,6 +4,7 @@ import * as ReactDOMClient from 'react-dom/client';
 import * as ReactI18next from 'react-i18next';
 
 import * as I18next from 'i18next';
+import * as ReactJSXRuntime from 'react/jsx-runtime';
 
 export function getPluginSharedDependencies() {
   return {
@@ -23,6 +24,13 @@ export function getPluginSharedDependencies() {
     },
     'react-dom/client': {
       lib: () => ReactDOMClient,
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '19.2.4',
+      },
+    },
+    'react/jsx-runtime': {
+      lib: () => ReactJSXRuntime,
       shareConfig: {
         singleton: true,
         requiredVersion: '19.2.4',

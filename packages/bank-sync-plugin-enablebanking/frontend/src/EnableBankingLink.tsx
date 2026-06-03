@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
   AnimatedLoading,
@@ -64,6 +64,7 @@ export function EnableBankingLink({
   openExternalUrl,
   selectExternalAccounts,
 }: BankSyncProviderLinkRenderProps) {
+  const { t } = useTranslation();
   const [country, setCountry] = useState('GB');
   const [banks, setBanks] = useState<BankOption[]>([]);
   const [selectedAspsp, setSelectedAspsp] = useState<string>();

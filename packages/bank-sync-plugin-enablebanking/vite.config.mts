@@ -83,6 +83,10 @@ export default defineConfig({
           singleton: true,
           requiredVersion: '19.2.4',
         },
+        'react/jsx-runtime': {
+          singleton: true,
+          requiredVersion: '19.2.4',
+        },
         'react-i18next': {
           singleton: true,
           requiredVersion: '^16.6.6',

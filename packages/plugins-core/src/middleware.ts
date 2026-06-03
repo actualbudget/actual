@@ -1,3 +1,5 @@
+import { Component, createElement } from 'react';
+import type { ErrorInfo, ReactElement, ReactNode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { initReactI18next } from 'react-i18next';
 
@@ -11,6 +13,113 @@ import type {
 } from './types/actualPlugin';
 
 const containerRoots = new WeakMap<HTMLElement, ReactDOM.Root>();
+
+type PluginErrorBoundaryProps = {
+  children?: ReactNode;
+  pluginKey: string;
+  surface: string;
+};
+
+type PluginErrorBoundaryState = {
+  error: unknown;
+  hasError: boolean;
+};
+
+class PluginErrorBoundary extends Component<
+  PluginErrorBoundaryProps,
+  PluginErrorBoundaryState
+> {
+  state: PluginErrorBoundaryState = { error: null, hasError: false };
+
+  static getDerivedStateFromError(error: unknown) {
+    return { error, hasError: true };
+  }
+
+  componentDidCatch(error: unknown, errorInfo: ErrorInfo) {
+    console.error('[plugins-core] Plugin render failed', {
+      pluginKey: this.props.pluginKey,
+      surface: this.props.surface,
+      error,
+      componentStack: errorInfo.componentStack,
+    });
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return createElement(PluginErrorNotice, {
+        error: this.state.error,
+        pluginKey: this.props.pluginKey,
+        surface: this.props.surface,
+      });
+    }
+
+    return this.props.children;
+  }
+}
+
+function PluginErrorNotice({
+  error,
+  pluginKey,
+  surface,
+}: {
+  error: unknown;
+  pluginKey: string;
+  surface: string;
+}) {
+  const message = error instanceof Error ? error.message : String(error);
+
+  return createElement(
+    'div',
+    {
+      role: 'alert',
+      style: {
+        border: '1px solid #d97c7c',
+        borderRadius: 4,
+        color: '#8a1f1f',
+        margin: 12,
+        padding: 12,
+      },
+    },
+    createElement(
+      'div',
+      { style: { fontWeight: 600 } },
+      'Plugin failed to render',
+    ),
+    createElement(
+      'div',
+      { style: { fontSize: 12, marginTop: 4 } },
+      `${pluginKey} (${surface})`,
+    ),
+    createElement(
+      'pre',
+      { style: { fontSize: 12, margin: '8px 0 0', whiteSpace: 'pre-wrap' } },
+      message,
+    ),
+  );
+}
+
+function renderPluginElement({
+  root,
+  element,
+  pluginKey,
+  surface,
+}: {
+  root: ReactDOM.Root;
+  element: ReactElement;
+  pluginKey: string;
+  surface: string;
+}) {
+  root.render(
+    createElement(
+      PluginErrorBoundary,
+      {
+        pluginKey,
+        surface,
+      },
+      element,
+    ),
+  );
+}
 
 function getOrCreateRoot(container: HTMLElement) {
   let root = containerRoots.get(container);
@@ -99,7 +208,12 @@ export function initializePlugin(
                       ? element.type
                       : (element.type as { name?: string })?.name,
                 });
-                root.render(element);
+                renderPluginElement({
+                  root,
+                  element,
+                  pluginKey: providerSlug,
+                  surface: 'bank-sync-provider-setup',
+                });
                 return () => unmountRoot(container);
               } catch (error) {
                 console.error(
@@ -132,7 +246,12 @@ export function initializePlugin(
               try {
                 const root = getOrCreateRoot(container);
                 const element = renderLink(props);
-                root.render(element);
+                renderPluginElement({
+                  root,
+                  element,
+                  pluginKey: providerSlug,
+                  surface: 'bank-sync-provider-link',
+                });
                 return () => unmountRoot(container);
               } catch (error) {
                 console.error(

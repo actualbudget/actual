@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
   ButtonWithLoading,
@@ -20,6 +20,7 @@ export function GoCardlessSetup({
   onSuccess,
   setSecret,
 }: BankSyncProviderSetupRenderProps) {
+  const { t } = useTranslation();
   const [secretId, setSecretId] = useState('');
   const [secretKey, setSecretKey] = useState('');
   const [isValid, setIsValid] = useState(true);

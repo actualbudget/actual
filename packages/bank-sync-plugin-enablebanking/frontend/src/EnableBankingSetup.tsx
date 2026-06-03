@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useState } from 'react';
 import type { ChangeEvent } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
   ButtonWithLoading,
@@ -43,6 +43,7 @@ export function EnableBankingSetup({
   onError,
   onSuccess,
 }: BankSyncProviderSetupRenderProps) {
+  const { t } = useTranslation();
   const [applicationId, setApplicationId] = useState('');
   const [secretKey, setSecretKey] = useState('');
   const [keyFileName, setKeyFileName] = useState('');

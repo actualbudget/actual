@@ -1,3 +1,5 @@
+import { Readable } from 'stream';
+
 import type { Express, Request, Response } from 'express';
 
 import type {
@@ -47,9 +49,24 @@ async function handleIPCRequest(
   message: PluginRequest,
 ): Promise<void> {
   return new Promise(resolve => {
-    // Create mock request object
-    const requestHeaders = message.headers as Record<string, string>;
-    const mockReq = {
+    const requestBody =
+      message.body == null ? undefined : JSON.stringify(message.body);
+    const requestHeaders = {
+      ...((message.headers as Record<string, string>) ?? {}),
+    };
+
+    if (requestBody) {
+      requestHeaders['content-type'] ??= 'application/json';
+      requestHeaders['content-length'] =
+        Buffer.byteLength(requestBody).toString();
+    } else {
+      delete requestHeaders['content-length'];
+    }
+
+    // Create a real readable request stream so Express/body-parser can safely
+    // attach stream listeners when plugins include express.json().
+    const mockReq = Readable.from(requestBody ? [requestBody] : []) as Request;
+    Object.assign(mockReq, {
       method: message.method,
       path: message.path,
       url:
@@ -66,11 +83,10 @@ async function handleIPCRequest(
       params: {},
       user: message.user, // Add user info for secrets access
       pluginSlug: message.pluginSlug, // Add plugin slug for namespaced secrets
-      _body: true, // Mark body as already parsed to prevent body-parser from running
       get: function (name: string): string | undefined {
         return requestHeaders?.[name.toLowerCase()];
       },
-    } as unknown as Request;
+    });
 
     // Create mock response object
     let responseSent = false;
