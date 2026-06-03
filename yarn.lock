@@ -104,6 +104,8 @@ __metadata:
   resolution: "@actual-app/core@workspace:packages/loot-core"
   dependencies:
     "@actual-app/crdt": "workspace:*"
+    "@actual-app/query": "workspace:*"
+    "@actual-app/shared-types": "workspace:*"
     "@jlongster/sql.js": "npm:^1.6.7"
     "@rschedule/core": "npm:^1.5.0"
     "@rschedule/standard-date-adapter": "npm:^1.5.0"
@@ -170,6 +172,27 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@actual-app/query@workspace:*, @actual-app/query@workspace:packages/query":
+  version: 0.0.0-use.local
+  resolution: "@actual-app/query@workspace:packages/query"
+  dependencies:
+    "@actual-app/shared-types": "workspace:*"
+    "@typescript/native-preview": "npm:beta"
+    typescript-strict-plugin: "npm:^2.4.4"
+  languageName: unknown
+  linkType: soft
+
+"@actual-app/shared-types@workspace:*, @actual-app/shared-types@workspace:packages/shared-types":
+  version: 0.0.0-use.local
+  resolution: "@actual-app/shared-types@workspace:packages/shared-types"
+  dependencies:
+    "@types/react": "npm:^19.2.14"
+    "@typescript/native-preview": "npm:beta"
+    react: "npm:19.2.4"
+    typescript-strict-plugin: "npm:^2.4.4"
+  languageName: unknown
+  linkType: soft
+
 "@actual-app/sync-server@workspace:*, @actual-app/sync-server@workspace:packages/sync-server":
   version: 0.0.0-use.local
   resolution: "@actual-app/sync-server@workspace:packages/sync-server"
@@ -219,6 +242,7 @@ __metadata:
   dependencies:
     "@actual-app/components": "workspace:*"
     "@actual-app/core": "workspace:*"
+    "@actual-app/shared-types": "workspace:*"
     "@babel/core": "npm:^7.29.0"
     "@codemirror/autocomplete": "npm:^6.20.1"
     "@codemirror/language": "npm:^6.12.3"
@@ -21419,11 +21443,11 @@ __metadata:
   linkType: hard
 
 "node-abi@npm:^3.3.0":
-  version: 3.92.0
-  resolution: "node-abi@npm:3.92.0"
+  version: 3.78.0
+  resolution: "node-abi@npm:3.78.0"
   dependencies:
     semver: "npm:^7.3.5"
-  checksum: 10/b57a8eaa3e0f0531688b7f9c85ca0831e8b1195c9c331205f8a5ec3aa4e0a898671b85c8a0a0f4469ce550ce2cd32df1a4ccf437a7518bbff6459dc88f59d3a5
+  checksum: 10/59b41028d02070b79b491f0cb944efedd875d26de52a57bd0d11f02c2ef4268b320bdfe839eb576d3163709894b92b39e24a236179cb952051cbf4d83887ac88
   languageName: node
   linkType: hard
 

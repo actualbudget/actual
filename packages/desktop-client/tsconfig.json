@@ -26,6 +26,9 @@
       "path": "../loot-core"
     },
     {
+      "path": "../shared-types"
+    },
+    {
       "path": "../plugins-service"
     }
   ],

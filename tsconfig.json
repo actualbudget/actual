@@ -1,6 +1,8 @@
 {
   "references": [
     { "path": "./packages/crdt" },
+    { "path": "./packages/shared-types" },
+    { "path": "./packages/query" },
     { "path": "./packages/component-library" },
     { "path": "./packages/plugins-service" },
     { "path": "./packages/loot-core" },

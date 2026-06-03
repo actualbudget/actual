@@ -17,7 +17,11 @@
     },
     "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }]
   },
-  "references": [{ "path": "../crdt" }],
+  "references": [
+    { "path": "../query" },
+    { "path": "../shared-types" },
+    { "path": "../crdt" }
+  ],
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
