@@ -7,18 +7,21 @@
 // This runs before `docusaurus start` / `docusaurus build` (see package.json).
 
 import * as fs from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
   formatNotes,
   parseReleaseNotes,
-} from '../../ci-actions/src/release-notes/util.mjs';
+} from '@actual-app/ci-actions/src/release-notes/util.mjs';
 
-const scriptDir = dirname(fileURLToPath(import.meta.url));
+const repoRoot = fileURLToPath(new URL('../../..', import.meta.url));
 
-const notesDir = join(scriptDir, '..', '..', '..', 'upcoming-release-notes');
-const outputPath = join(scriptDir, '..', 'docs', 'upcoming-release-notes.md');
+const notesDir = join(repoRoot, 'upcoming-release-notes');
+const outputPath = join(
+  repoRoot,
+  'packages/docs/docs/upcoming-release-notes.md',
+);
 
 const intro = `:::info
 
@@ -43,12 +46,10 @@ ${intro}`;
 
 const { notesByCategory, files } = await parseReleaseNotes(notesDir, 'actual');
 
-let body;
-if (files.length === 0) {
-  body = `There are no unreleased changes right now — everything has shipped in a stable [release](/docs/releases).`;
-} else {
-  body = formatNotes(notesByCategory);
-}
+const body =
+  files.length === 0
+    ? `There are no unreleased changes right now — everything has shipped in a stable [release](/docs/releases).`
+    : formatNotes(notesByCategory);
 
 await fs.writeFile(outputPath, `${header}\n\n${body}\n`);
 
