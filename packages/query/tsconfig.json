@@ -5,15 +5,18 @@
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist",
     "rootDir": "src",
     "strict": true,
-    "outDir": "dist",
     "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "types": ["node"],
+    "plugins": [{ "name": "typescript-strict-plugin", "paths": ["."] }],
     "paths": {
       "@actual-app/shared-types/*": ["../shared-types/src/*"]
     }
   },
   "references": [{ "path": "../shared-types" }],
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }

@@ -29,7 +29,7 @@
     "start:desktop-client": "yarn workspace @actual-app/web watch",
     "start:desktop-server-client": "yarn workspace @actual-app/web build:browser",
     "start:desktop-electron": "yarn workspace desktop-electron watch",
-    "start:browser": "npm-run-all --parallel 'start:browser-*' 'start:service-plugins'",
+    "start:browser": "yarn workspace plugins-service build-dev && npm-run-all --parallel 'start:browser-*'",
     "start:service-plugins": "yarn workspace plugins-service watch",
     "start:browser-frontend": "yarn workspace @actual-app/web start:browser",
     "start:storybook": "yarn workspace @actual-app/components start:storybook",
@@ -110,6 +110,7 @@
   "resolutions": {
     "adm-zip": "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch",
     "minimatch@3.1.2": "3.1.5",
+    "node-abi@^4.2.0": "4.31.0",
     "serialize-javascript": "^7.0.5",
     "socks": ">=2.8.3",
     "webpackbar": "^7.0.0"

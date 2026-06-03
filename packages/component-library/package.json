@@ -6,6 +6,7 @@
     "#tokens": "./src/tokens.ts"
   },
   "exports": {
+    ".": "./src/index.ts",
     "./hooks/*": "./src/hooks/*.ts",
     "./icons/logo": "./src/icons/logo/index.ts",
     "./icons/v0": "./src/icons/v0/index.ts",
@@ -27,6 +28,7 @@
     "./popover": "./src/Popover.tsx",
     "./select": "./src/Select.tsx",
     "./space-between": "./src/SpaceBetween.tsx",
+    "./stack": "./src/Stack.tsx",
     "./styles": "./src/styles.ts",
     "./text": "./src/Text.tsx",
     "./text-one-line": "./src/TextOneLine.tsx",
@@ -39,17 +41,20 @@
     "./toggle": "./src/Toggle.tsx",
     "./tooltip": "./src/Tooltip.tsx",
     "./view": "./src/View.tsx",
-    "./color-picker": "./src/ColorPicker.tsx"
+    "./color-picker": "./src/ColorPicker.tsx",
+    "./props/*": "./src/props/*.ts"
   },
   "scripts": {
     "generate:icons": "rm src/icons/*/*.tsx; cd src/icons && svgr --template template.ts --index-template index-template.ts --typescript --expand-props start -d . .",
     "test": "npm-run-all -cp 'test:*'",
     "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
+    "build": "tsgo -b",
     "start:storybook": "storybook dev -p 6006",
     "build:storybook": "storybook build",
     "typecheck": "tsgo -b"
   },
   "dependencies": {
+    "@actual-app/shared-types": "workspace:*",
     "@emotion/css": "^11.13.5",
     "react-aria-components": "^1.16.0",
     "usehooks-ts": "^3.1.1"
