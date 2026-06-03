@@ -1,1 +1,0 @@
-{"version":3,"file":"category-views.d.ts","sourceRoot":"","sources":["../../src/models/category-views.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,cAAc,EAAE,MAAM,YAAY,CAAC;AACjD,OAAO,KAAK,EAAE,mBAAmB,EAAE,MAAM,kBAAkB,CAAC;AAE5D,MAAM,MAAM,aAAa,GAAG;IAC1B,OAAO,EAAE,mBAAmB,EAAE,CAAC;IAC/B,IAAI,EAAE,cAAc,EAAE,CAAC;CACxB,CAAC"}
