@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/web",
-  "version": "26.5.2",
+  "version": "26.6.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -59,6 +59,7 @@
     "#components/reports/getCustomTick": "./src/components/reports/getCustomTick.ts",
     "#components/reports/getLiveRange": "./src/components/reports/getLiveRange.ts",
     "#components/reports/graphs/showActivity": "./src/components/reports/graphs/showActivity.ts",
+    "#components/reports/graphs/util/computePadding": "./src/components/reports/graphs/util/computePadding.ts",
     "#components/reports/numberFormatter": "./src/components/reports/numberFormatter.ts",
     "#components/reports/ReportOptions": "./src/components/reports/ReportOptions.ts",
     "#components/reports/reportRanges": "./src/components/reports/reportRanges.ts",

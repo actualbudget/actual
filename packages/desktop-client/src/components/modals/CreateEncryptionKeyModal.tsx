@@ -13,7 +13,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
-import { getCreateKeyError } from '@actual-app/core/shared/errors';
 import { css } from '@emotion/css';
 
 import { sync } from '#app/appSlice';
@@ -28,6 +27,7 @@ import {
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { loadGlobalPrefs } from '#prefs/prefsSlice';
 import { useDispatch } from '#redux';
+import { getCreateKeyError } from '#util/error';
 
 type CreateEncryptionKeyModalProps = Extract<
   ModalType,

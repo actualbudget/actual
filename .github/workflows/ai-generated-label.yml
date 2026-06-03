@@ -21,7 +21,9 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.event.pull_request.title, '[AI]')
     steps:
-      - uses: actions-ecosystem/action-add-labels@bd52874380e3909a1ac983768df6976535ece7f8 # v1.1.0
-        with:
-          labels: AI generated
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Add 'AI generated' label
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: gh pr edit "$PR_NUMBER" --add-label "AI generated"
