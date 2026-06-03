@@ -1,7 +1,7 @@
 // Generates `docs/upcoming-release-notes.md` from the repo-root
 // `upcoming-release-notes/` directory. These per-PR notes are the changes that
 // have been merged but not yet published in a stable release — i.e. what ships
-// in the nightly/edge builds. The page is regenerated on every docs build, so
+// in the nightly builds. The page is regenerated on every docs build, so
 // it always reflects the current set of unreleased changes.
 //
 // This runs before `docusaurus start` / `docusaurus build` (see package.json).
@@ -26,15 +26,15 @@ const outputPath = join(
 const intro = `:::info
 
 These changes have been merged but are **not yet part of a stable release**. They
-ship in the nightly/edge builds — try them via the \`edge\` (or \`nightly\`) Docker
-image tag, or the hosted demo at [edge.actualbudget.org](https://edge.actualbudget.org).
+ship in the nightly builds — try them via the \`nightly\` Docker image tag, or the
+hosted demo at [edge.actualbudget.org](https://edge.actualbudget.org).
 For changes in stable releases, see the [Release Notes](/docs/releases).
 
 :::`;
 
 const header = `---
 title: Upcoming Release
-description: Release notes for changes that are merged but not yet released, available in the nightly/edge builds.
+description: Release notes for changes that are merged but not yet released, available in the nightly builds.
 sidebar_label: Upcoming Release
 ---
 
