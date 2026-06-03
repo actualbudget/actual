@@ -9,6 +9,8 @@ import {
   extractScheduleConds,
   getNextDate,
   getScheduledAmount,
+  indexPostedScheduleTransactions,
+  isScheduleOccurrencePosted,
 } from '#shared/schedules';
 import type { RuleConditionEntity, TransactionEntity } from '#types/models';
 import type { RecurConfig } from '#types/models/schedule';
@@ -28,6 +30,8 @@ type ScheduleDataBase = {
   name: string | null;
   next_date: string;
   rule?: string | null;
+  posts_transaction: boolean;
+  _conditions: RuleConditionEntity[];
   _payee: string | null;
   _account: string;
   _amount: number;
@@ -42,6 +46,7 @@ type RawScheduleData = {
   name: string | null;
   next_date: string;
   rule?: string | null;
+  posts_transaction?: boolean;
   _payee?: string | null;
   _account?: string | null;
   _amount?: number | { num1: number; num2: number } | null;
@@ -94,6 +99,8 @@ export function normalizeSchedule(
     name: schedule.name,
     next_date: schedule.next_date,
     rule: schedule.rule,
+    posts_transaction: schedule.posts_transaction ?? false,
+    _conditions: schedule._conditions ?? [],
     _payee: schedule._payee ?? conditions.payee?.value ?? null,
     _account: accountId,
     _amount: getScheduledAmount(amountValue),
@@ -178,7 +185,10 @@ export async function buildFutureScheduleOccurrences(
   endDateObj: Date,
   accountsById: Map<string, AccountWithComputedBalance>,
   ruleAccountsById: Map<string, DbAccountForRules>,
+  postedTransactions: TransactionEntity[],
 ) {
+  const postedByScheduleId =
+    indexPostedScheduleTransactions(postedTransactions);
   const transferPayeesByAccountId = await getTransferPayeesByAccountIds([
     ...ruleAccountsById.keys(),
   ]);
@@ -196,6 +206,17 @@ export async function buildFutureScheduleOccurrences(
     const scheduleName = schedule.name ?? 'Unknown';
 
     for (const date of getFutureOccurrenceDates(schedule, endDateObj)) {
+      if (
+        isScheduleOccurrencePosted({
+          schedule,
+          scheduleId: schedule.id,
+          occurrenceDate: date,
+          postedTransactions: postedByScheduleId.get(schedule.id) ?? [],
+        })
+      ) {
+        continue;
+      }
+
       const baseTransaction: TransactionEntity = {
         id: `forecast-${schedule.id}-${date}`,
         account: schedule._account,

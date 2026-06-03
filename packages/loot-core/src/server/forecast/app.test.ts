@@ -20,6 +20,56 @@ const createSchedule = createScheduleBase as (args: {
   conditions: RuleConditionEntity[];
 }) => Promise<string>;
 
+async function createForecastWithPostedMonthlySchedule({
+  txId,
+  txDate,
+}: {
+  txId: string;
+  txDate: string;
+}) {
+  const accountId = await db.insertAccount({ id: 'acct', name: 'Checking' });
+  const salaryAmount = 500_000;
+
+  const scheduleId = await createSchedule({
+    conditions: [
+      { op: 'is', field: 'account', value: accountId },
+      { op: 'is', field: 'amount', value: salaryAmount },
+      {
+        op: 'is',
+        field: 'date',
+        value: {
+          start: '2024-03-10',
+          frequency: 'monthly',
+        },
+      },
+    ] satisfies RuleConditionEntity[],
+  });
+
+  await db.insertTransaction({
+    id: txId,
+    account: accountId,
+    amount: salaryAmount,
+    date: txDate,
+    schedule: scheduleId,
+  });
+
+  const result = await generateForecast({
+    accountIds: [accountId],
+    startDate: '2024-03-01',
+    endDate: '2024-04-30',
+  });
+
+  return {
+    salaryAmount,
+    balanceByDate: Object.fromEntries(
+      result.dataPoints.map(({ date, balance }) => [date, balance]),
+    ),
+    dataPointByDate: Object.fromEntries(
+      result.dataPoints.map(dataPoint => [dataPoint.date, dataPoint]),
+    ),
+  };
+}
+
 beforeEach(async () => {
   await emptyDatabase()();
   await loadMappings();
@@ -383,6 +433,33 @@ describe('forecast app', () => {
     expect(balanceByDate['2024-03-09']).toBe(0);
     expect(balanceByDate['2024-03-10']).toBe(100);
     expect(balanceByDate['2024-03-31']).toBe(100);
+  });
+
+  it('does not double-count schedule occurrences already posted on the due date', async () => {
+    const { salaryAmount, balanceByDate, dataPointByDate } =
+      await createForecastWithPostedMonthlySchedule({
+        txId: 'posted-salary',
+        txDate: '2024-03-10',
+      });
+
+    expect(balanceByDate['2024-03-09']).toBe(0);
+    expect(balanceByDate['2024-03-10']).toBe(salaryAmount);
+    expect(balanceByDate['2024-04-09']).toBe(salaryAmount);
+    expect(balanceByDate['2024-04-10']).toBe(salaryAmount * 2);
+    expect(dataPointByDate['2024-03-10'].transactions).toEqual([]);
+  });
+
+  it('does not double-count schedule occurrences posted early within the lookback window', async () => {
+    const { salaryAmount, balanceByDate } =
+      await createForecastWithPostedMonthlySchedule({
+        txId: 'posted-salary-early',
+        txDate: '2024-03-09',
+      });
+
+    expect(balanceByDate['2024-03-08']).toBe(0);
+    expect(balanceByDate['2024-03-09']).toBe(salaryAmount);
+    expect(balanceByDate['2024-03-10']).toBe(salaryAmount);
+    expect(balanceByDate['2024-04-10']).toBe(salaryAmount * 2);
   });
 
   it('filters future schedule occurrences using rule-derived fields like category', async () => {
