@@ -127,7 +127,6 @@ __metadata:
     fast-check: "npm:^4.6.0"
     handlebars: "npm:^4.7.9"
     hyperformula: "npm:^3.2.0"
-    i18next: "npm:^25.10.10"
     jest-diff: "npm:^30.3.0"
     jsverify: "npm:^0.8.4"
     lodash: "npm:^4.18.1"

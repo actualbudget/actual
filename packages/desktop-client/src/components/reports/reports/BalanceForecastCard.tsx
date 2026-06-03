@@ -268,19 +268,19 @@ export function BalanceForecastCard({
                             offset="0%"
                             stopColor={
                               hasNegativeBalance
-                                ? theme.errorText
-                                : theme.noticeText
+                                ? theme.reportsNumberNegative
+                                : theme.reportsChartFill
                             }
                           />
                         ) : (
                           <>
                             <stop
                               offset={`${zeroCrossingGradientOffset}%`}
-                              stopColor={theme.noticeText}
+                              stopColor={theme.reportsChartFill}
                             />
                             <stop
                               offset={`${zeroCrossingGradientOffset}%`}
-                              stopColor={theme.errorText}
+                              stopColor={theme.reportsNumberNegative}
                             />
                           </>
                         )}
@@ -320,7 +320,7 @@ export function BalanceForecastCard({
                     {showsTodayReferenceLine && (
                       <ReferenceLine
                         x={todayReferenceDate}
-                        stroke={theme.noticeText}
+                        stroke={theme.reportsBlue}
                         strokeDasharray="4 4"
                       />
                     )}
