@@ -35,7 +35,7 @@ title: Actual Budget Vision
 
 ### Local-first
 
-Actual is local first; the database that powers Actual Budget, and ultimately your budget, lives on your device. It is not stored on a server. "Actual server" allows you to sync changes to your budget on different devices. To do this, only the changes to the budget are sent to the server. The server stores the messages, and the local client pulls down the change(s). If you are interested in this technology, search the internet for "conflict-free replicated data type".
+Actual is local first; the database that powers Actual Budget, and ultimately your budget, lives on your device. It is not stored on a server. "Actual server" allows you to sync changes to your budget on different devices. To do this, only the changes to the budget are sent to the server. The server stores the messages, and the local client pulls down the change(s).
 
 ### Open
 
