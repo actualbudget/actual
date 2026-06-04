@@ -4,7 +4,7 @@ sidebar_position: 1
 title: 'Introduction'
 ---
 
-Welcome to Actual's documentation! 
+Welcome to Actual's documentation!
 
 ## How to Get Around
 

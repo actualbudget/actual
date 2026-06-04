@@ -59,6 +59,6 @@ Development is driven by the community and the maintainers.
 
 ### Third-party use
 
-Actual is [MIT licensed](https://github.com/actualbudget/actual/blob/master/LICENSE.txt) which allows for the use of the software without restriction. The Actual Budget project and community appreciate any submissions from third-party contributors to enhance and improve this amazing project. This gratitude extends to single volunteers and company-sponsored participants alike. 
+Actual is [MIT licensed](https://github.com/actualbudget/actual/blob/master/LICENSE.txt) which allows for the use of the software without restriction. The Actual Budget project and community appreciate any submissions from third-party contributors to enhance and improve this amazing project. This gratitude extends to single volunteers and company-sponsored participants alike.
 
 Let's continue to make Actual Budget the best personal finance tool together!
