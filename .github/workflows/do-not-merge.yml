@@ -1,0 +1,19 @@
+name: Do not merge
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  do-not-merge:
+    name: Check for 'do not merge' label
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if 'do not merge' label is set
+        if: contains(github.event.pull_request.labels.*.name, 'do not merge')
+        run: |
+          echo "::error::This PR has the 'do not merge' label set."
+          exit 1
