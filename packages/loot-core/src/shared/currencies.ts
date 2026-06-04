@@ -76,7 +76,3 @@ export function getCurrency(code: string): Currency {
 export function getDecimalPlaces(currencyCode: string): number {
   return getCurrency(currencyCode)?.decimalPlaces ?? 2;
 }
-
-export function getCurrencyPrecisionMultiplier(currencyCode: string): number {
-  return Math.pow(10, getDecimalPlaces(currencyCode));
-}

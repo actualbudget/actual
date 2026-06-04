@@ -2,7 +2,7 @@
 import { formatDistanceToNow } from 'date-fns';
 import type { Locale } from 'date-fns';
 
-import { getCurrencyPrecisionMultiplier, getDecimalPlaces } from './currencies';
+import { getDecimalPlaces } from './currencies';
 
 export function last<T>(arr: Array<T>) {
   return arr[arr.length - 1];
@@ -482,8 +482,8 @@ export function integerToCurrencyWithDecimal(
   return integerToCurrency(integerAmount);
 }
 
-export function encodeAmount(amount: number, code: string): number {
-  return Math.round(amount * getCurrencyPrecisionMultiplier(code));
+export function amountToCurrencyInteger(amount: number, code: string): number {
+  return amountToInteger(amount, getDecimalPlaces(code));
 }
 
 export function amountToCurrency(amount: Amount): CurrencyAmount {

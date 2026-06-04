@@ -1,6 +1,6 @@
 import {
+  amountToCurrencyInteger,
   currencyToAmount,
-  encodeAmount,
   getNumberFormat,
   integerToCurrencyWithDecimal,
   looselyParseAmount,
@@ -271,34 +271,37 @@ describe('utility functions', () => {
     });
   });
 
-  describe('encodeAmount', () => {
+  describe('amountToCurrencyInteger', () => {
     test('empty string (None) uses 2dp', () => {
-      expect(encodeAmount(12.34, '')).toBe(1234);
+      expect(amountToCurrencyInteger(12.34, '')).toBe(1234);
     });
 
     test('USD uses 2dp', () => {
-      expect(encodeAmount(12.34, 'USD')).toBe(1234);
+      expect(amountToCurrencyInteger(12.34, 'USD')).toBe(1234);
     });
 
     test('JPY uses 0dp (multiply by 1)', () => {
-      expect(encodeAmount(1234, 'JPY')).toBe(1234);
+      expect(amountToCurrencyInteger(1234, 'JPY')).toBe(1234);
     });
 
     test('IRR uses 0dp (multiply by 1)', () => {
-      expect(encodeAmount(1234, 'IRR')).toBe(1234);
+      expect(amountToCurrencyInteger(1234, 'IRR')).toBe(1234);
     });
 
     it.each<[number, string]>([
       [12.34, 'USD'],
       [1234, 'JPY'],
       [5678, 'IRR'],
-    ])('round-trip encodeAmount/integerToCurrencyWithDecimal: %s %s', (amount, currency) => {
-      setNumberFormat({ format: 'comma-dot', hideFraction: false });
-      const encoded = encodeAmount(amount, currency);
-      const decoded = parseFloat(
-        integerToCurrencyWithDecimal(encoded, currency).replace(/,/g, ''),
-      );
-      expect(decoded).toBeCloseTo(amount, 8);
-    });
+    ])(
+      'round-trip amountToCurrencyInteger/integerToCurrencyWithDecimal: %s %s',
+      (amount, currency) => {
+        setNumberFormat({ format: 'comma-dot', hideFraction: false });
+        const encoded = amountToCurrencyInteger(amount, currency);
+        const decoded = parseFloat(
+          integerToCurrencyWithDecimal(encoded, currency).replace(/,/g, ''),
+        );
+        expect(decoded).toBeCloseTo(amount, 8);
+      },
+    );
   });
 });
