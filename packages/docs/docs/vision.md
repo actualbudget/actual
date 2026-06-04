@@ -22,7 +22,7 @@ title: Actual Budget Vision
   - The application supports multiple budgets, each one reachable by multiple devices
   - The application is accessible
 
-## Design principles 
+## Design principles
 
 Actual is designed using the following principles:
 
