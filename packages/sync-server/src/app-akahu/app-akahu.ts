@@ -1,10 +1,13 @@
 import { AkahuClient } from 'akahu';
 import type {
   Account,
+  CurrencyConversion,
   EnrichedTransaction,
   PendingTransaction,
   Transaction,
 } from 'akahu';
+// For some reason this is not provided in the provided index.d.ts file
+import type { EnrichedPendingTransaction } from 'akahu/dist/models/transactions';
 import express from 'express';
 
 import { handleError } from '#app-gocardless/util/handle-error';
@@ -18,10 +21,24 @@ type AkahuTransaction = {
   booked: boolean;
   date: string;
   payeeName: string;
-  notes?: string;
+  notes: string;
+  category?: string;
   transactionId?: string;
   sortOrder: number;
   transactionAmount: { amount: number; currency: string };
+  merchant?: {
+    name: string;
+    website?: string;
+  };
+  meta?: {
+    particulars?: string;
+    code?: string;
+    reference?: string;
+    other_account?: string;
+    conversion?: CurrencyConversion;
+    logo?: string;
+    card_suffix?: string;
+  };
 };
 
 const app = express();
@@ -248,9 +265,13 @@ app.post(
 );
 
 function isEnriched(
-  trans: Transaction | EnrichedTransaction,
+  trans:
+    | Transaction
+    | EnrichedTransaction
+    | PendingTransaction
+    | EnrichedPendingTransaction,
 ): trans is EnrichedTransaction {
-  return 'merchant' in trans || 'meta' in trans;
+  return 'merchant' in trans || 'meta' in trans || 'category' in trans;
 }
 
 function getDate(date: Date): string {
@@ -261,7 +282,13 @@ function convertToCents(amount: number): number {
   return Math.round(amount * 100);
 }
 
-function getPayeeName(trans: Transaction | EnrichedTransaction): string {
+function getPayeeName(
+  trans:
+    | Transaction
+    | EnrichedTransaction
+    | PendingTransaction
+    | EnrichedPendingTransaction,
+): string {
   if (isEnriched(trans)) {
     if (trans.merchant?.name) {
       return trans.merchant.name;
@@ -276,15 +303,16 @@ function getPayeeName(trans: Transaction | EnrichedTransaction): string {
 }
 
 function processPendingTransaction(
-  trans: PendingTransaction,
+  trans: PendingTransaction | EnrichedPendingTransaction,
   account: Account,
 ): AkahuTransaction {
   const transactionDate = new Date(trans.date);
 
   return {
+    ...trans,
     booked: false,
     date: getDate(transactionDate),
-    payeeName: '',
+    payeeName: getPayeeName(trans),
     notes: trans.description,
     sortOrder: transactionDate.getTime(),
     transactionAmount: {
@@ -298,8 +326,14 @@ function processTransaction(
   trans: Transaction | EnrichedTransaction,
   account: Account,
 ): AkahuTransaction {
+  let category = undefined;
+  if (isEnriched(trans)) {
+    category = trans.category?.name;
+  }
+
   return {
     ...processPendingTransaction(trans, account),
+    category,
     booked: true,
     payeeName: getPayeeName(trans),
     transactionId: trans._id,
