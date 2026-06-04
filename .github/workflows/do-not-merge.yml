@@ -3,6 +3,7 @@ name: Block PRs with "do not merge" label
 on:
   pull_request:
     types: [opened, reopened, synchronize, labeled, unlabeled]
+  merge_group:
 
 permissions:
   contents: read
