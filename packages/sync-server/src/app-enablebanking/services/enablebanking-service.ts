@@ -58,7 +58,7 @@ type EnableBankingAuthResponse = {
   authorization_id: string;
 };
 
-type BankSyncTransaction = EnableBankingTransaction & {
+export type BankSyncTransaction = EnableBankingTransaction & {
   transactionId: string;
   date: string;
   bookingDate: string;
@@ -262,6 +262,22 @@ export function normalizeTransaction(
     remittanceInformationUnstructured,
     booked: tx.status !== 'PDNG',
   };
+}
+
+const IMPORTABLE_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+// Actual's client imports a transaction by inserting it into a local SQLite
+// database: the `date` column is a required integer derived from an ISO date,
+// and the amount must be numeric. A record with an empty / non-ISO date or a
+// non-numeric amount makes that insert throw, which aborts the whole account
+// sync. Enable Banking occasionally returns such records — e.g. a pending
+// transaction with no booking/value/transaction date — so callers skip them
+// instead of failing the entire import.
+export function isImportableTransaction(tx: BankSyncTransaction): boolean {
+  return (
+    IMPORTABLE_DATE_REGEX.test(tx.date) &&
+    Number.isFinite(Number(tx.transactionAmount.amount))
+  );
 }
 
 export function normalizeBalance(bal: EnableBankingBalance): BankSyncBalance {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  isImportableTransaction,
   normalizeAccount,
   normalizeBalance,
   normalizeTransaction,
@@ -12,6 +13,7 @@ import {
   mockDebitTransaction,
   mockNegativeBalance,
   mockPendingTransaction,
+  mockPendingTransactionNoDate,
   mockSessionAccount,
   mockSessionAccountMinimal,
   mockSessionAccountNoName,
@@ -93,6 +95,45 @@ describe('normalizeTransaction', () => {
     expect(normalizeTransaction(noBookingOrValueDate).bookingDate).toBe(
       '2026-02-28',
     );
+  });
+});
+
+describe('isImportableTransaction', () => {
+  it('accepts a normal booked transaction (ISO date + numeric amount)', () => {
+    expect(
+      isImportableTransaction(normalizeTransaction(mockCreditTransaction)),
+    ).toBe(true);
+  });
+
+  it('accepts a pending transaction that carries a date (no regression)', () => {
+    expect(
+      isImportableTransaction(normalizeTransaction(mockPendingTransaction)),
+    ).toBe(true);
+  });
+
+  it('rejects a pending transaction with no date (the case that aborts the sync)', () => {
+    const normalized = normalizeTransaction(mockPendingTransactionNoDate);
+    expect(normalized.date).toBe('');
+    expect(normalized.booked).toBe(false);
+    expect(isImportableTransaction(normalized)).toBe(false);
+  });
+
+  it('rejects a non-ISO date', () => {
+    const normalized = normalizeTransaction({
+      ...mockCreditTransaction,
+      booking_date: '03/01/2026',
+      value_date: undefined,
+      transaction_date: undefined,
+    });
+    expect(isImportableTransaction(normalized)).toBe(false);
+  });
+
+  it('rejects a non-numeric amount', () => {
+    const normalized = normalizeTransaction({
+      ...mockCreditTransaction,
+      transaction_amount: { currency: 'EUR', amount: 'n/a' },
+    });
+    expect(isImportableTransaction(normalized)).toBe(false);
   });
 });
 
