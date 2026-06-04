@@ -25,6 +25,7 @@ import { amountToInteger } from '#shared/util';
 import type { ImportTransactionsOpts } from '#types/api-handlers';
 import type {
   AccountEntity,
+  BankSyncStatus,
   CategoryEntity,
   GoCardlessToken,
   ImportTransactionEntity,
@@ -121,6 +122,7 @@ async function getAccounts(): Promise<AccountEntity[]> {
         balance_limit: dbAccount.balance_limit ?? null,
         account_sync_source: dbAccount.account_sync_source ?? null,
         last_sync: dbAccount.last_sync ?? null,
+        bank_sync_status: dbAccount.bank_sync_status ?? null,
       }) satisfies AccountEntity,
   );
 }
@@ -218,7 +220,7 @@ async function linkGoCardlessAccount({
 
   connection.send('sync-event', {
     type: 'success',
-    tables: ['transactions'],
+    tables: ['transactions', 'accounts'],
   });
 
   return 'ok';
@@ -295,7 +297,7 @@ async function linkSimpleFinAccount({
 
   connection.send('sync-event', {
     type: 'success',
-    tables: ['transactions'],
+    tables: ['transactions', 'accounts'],
   });
 
   return 'ok';
@@ -372,7 +374,7 @@ async function linkPluggyAiAccount({
 
   connection.send('sync-event', {
     type: 'success',
-    tables: ['transactions'],
+    tables: ['transactions', 'accounts'],
   });
 
   return 'ok';
@@ -457,7 +459,7 @@ async function linkEnableBankingAccount({
 
   connection.send('sync-event', {
     type: 'success',
-    tables: ['transactions'],
+    tables: ['transactions', 'accounts'],
   });
 
   return 'ok';
@@ -1142,7 +1144,11 @@ async function handleSyncResponse(
   }
 
   const ts = new Date().getTime().toString();
-  await db.update('accounts', { id: acctId, last_sync: ts });
+  await db.update('accounts', {
+    id: acctId,
+    last_sync: ts,
+    bank_sync_status: 'ok',
+  });
 
   return {
     newTransactions,
@@ -1222,6 +1228,37 @@ function handleSyncError(
   };
 }
 
+function getBankSyncStatusFromError(
+  err: Error | PostError | BankSyncError,
+): BankSyncStatus {
+  if (isBankSyncError(err)) {
+    if (
+      (err.category === 'ITEM_ERROR' && err.code === 'ITEM_LOGIN_REQUIRED') ||
+      (err.category === 'INVALID_INPUT' &&
+        err.code === 'INVALID_ACCESS_TOKEN') ||
+      err.category === 'INVALID_ACCESS_TOKEN'
+    ) {
+      return 'reauth-required';
+    }
+
+    if (err.category === 'ACCOUNT_NEEDS_ATTENTION') {
+      return 'attention-required';
+    }
+  }
+
+  return 'failed';
+}
+
+function persistBankSyncError(
+  accountId: AccountEntity['id'],
+  err: Error | PostError | BankSyncError,
+) {
+  return db.update('accounts', {
+    id: accountId,
+    bank_sync_status: getBankSyncStatusFromError(err),
+  });
+}
+
 export type SyncResponseWithErrors = SyncResponse & {
   errors: SyncError[];
 };
@@ -1274,6 +1311,7 @@ async function accountsBankSync({
         updatedAccounts.push(...syncResponseData.updatedAccounts);
       } catch (err) {
         const error = err as Error;
+        await persistBankSyncError(acct.id, error);
         errors.push(handleSyncError(error, acct));
         captureException({
           ...error,
@@ -1288,7 +1326,7 @@ async function accountsBankSync({
   if (updatedAccounts.length > 0) {
     connection.send('sync-event', {
       type: 'success',
-      tables: ['transactions'],
+      tables: ['transactions', 'accounts'],
     });
   }
 
@@ -1356,17 +1394,15 @@ async function simpleFinBatchSync({
       const updatedAccounts: Array<AccountEntity['id']> = [];
 
       if (syncResponse.res?.error_code) {
-        errors.push(
-          handleSyncError(
-            {
-              type: 'BankSyncError',
-              reason: 'Failed syncing account "' + account.name + '."',
-              category: syncResponse.res.error_type,
-              code: syncResponse.res.error_code,
-            } as BankSyncError,
-            account,
-          ),
-        );
+        const bankSyncError = {
+          type: 'BankSyncError',
+          reason: 'Failed syncing account "' + account.name + '."',
+          category: syncResponse.res.error_type,
+          code: syncResponse.res.error_code,
+        } as BankSyncError;
+
+        await persistBankSyncError(account.id, bankSyncError);
+        errors.push(handleSyncError(bankSyncError, account));
       } else if (syncResponse.res) {
         const syncResponseData = await handleSyncResponse(
           syncResponse.res,
@@ -1377,14 +1413,11 @@ async function simpleFinBatchSync({
         matchedTransactions.push(...syncResponseData.matchedTransactions);
         updatedAccounts.push(...syncResponseData.updatedAccounts);
       } else {
-        errors.push(
-          handleSyncError(
-            new Error(
-              'Failed syncing account "' + account.name + '": empty response',
-            ),
-            account,
-          ),
+        const emptyResponseError = new Error(
+          'Failed syncing account "' + account.name + '": empty response',
         );
+        await persistBankSyncError(account.id, emptyResponseError);
+        errors.push(handleSyncError(emptyResponseError, account));
       }
 
       retVal.push({
@@ -1395,6 +1428,7 @@ async function simpleFinBatchSync({
   } catch (err) {
     for (const account of accounts) {
       const error = err as Error;
+      await persistBankSyncError(account.id, error);
       retVal.push({
         accountId: account.id,
         res: {
@@ -1410,7 +1444,7 @@ async function simpleFinBatchSync({
   if (retVal.some(a => a.res.updatedAccounts.length > 0)) {
     connection.send('sync-event', {
       type: 'success',
-      tables: ['transactions'],
+      tables: ['transactions', 'accounts'],
     });
   }
 
@@ -1497,6 +1531,7 @@ async function unlinkAccount({ id }: { id: AccountEntity['id'] }) {
     balance_available: null,
     balance_limit: null,
     account_sync_source: null,
+    bank_sync_status: null,
   });
 
   if (isGoCardless === false) {
@@ -1582,7 +1617,7 @@ app.method('simplefin-accounts', simpleFinAccounts);
 app.method('pluggyai-accounts', pluggyAiAccounts);
 app.method('gocardless-get-banks', getGoCardlessBanks);
 app.method('gocardless-create-web-token', createGoCardlessWebToken);
-app.method('accounts-bank-sync', accountsBankSync);
-app.method('simplefin-batch-sync', simpleFinBatchSync);
+app.method('accounts-bank-sync', mutator(accountsBankSync));
+app.method('simplefin-batch-sync', mutator(simpleFinBatchSync));
 app.method('transactions-import', mutator(undoable(importTransactions)));
 app.method('account-unlink', mutator(unlinkAccount));
