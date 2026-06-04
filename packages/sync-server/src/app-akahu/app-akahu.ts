@@ -8,6 +8,7 @@ import type {
 } from 'akahu';
 // For some reason this is not provided in the provided index.d.ts file
 import type { EnrichedPendingTransaction } from 'akahu/dist/models/transactions';
+import { formatISO } from 'date-fns';
 import express from 'express';
 
 import { handleError } from '#app-gocardless/util/handle-error';
@@ -275,7 +276,7 @@ function isEnriched(
 }
 
 function getDate(date: Date): string {
-  return date.toISOString().split('T')[0];
+  return formatISO(date).split('T')[0];
 }
 
 function convertToCents(amount: number): number {
