@@ -5,6 +5,7 @@ import type { Response as ExpressResponse, Request } from 'express';
 import ipaddr from 'ipaddr.js';
 import { Agent } from 'undici';
 
+import { assertUrlAllowed, isBlockedIp } from './util/ssrf';
 import { validateSession } from './util/validate-user';
 
 const MAX_RAW_BYTES = 32 * 1024;
@@ -49,10 +50,6 @@ function normalizeUrl(input: string): URL {
   } catch {
     throw new FaviconError(`Invalid URL: ${input}`, 400);
   }
-}
-
-function isBlockedIp(ipStr: string): boolean {
-  return ipaddr.process(ipStr).range() !== 'unicast';
 }
 
 // Intercepts DNS resolution at connection time so the IP that passes the
@@ -110,35 +107,14 @@ const ssrfSafeAgent = new Agent({
   connect: { lookup: ssrfSafeLookup },
 });
 
-async function assertHostnameSafe(hostname: string): Promise<void> {
-  if (ipaddr.isValid(hostname)) {
-    if (isBlockedIp(hostname)) {
-      throw new FaviconError(`Blocked hostname: ${hostname}`, 403);
-    }
-    return;
-  }
-
-  let addresses: { address: string; family: number }[];
+async function assertUrlSafe(url: string): Promise<void> {
   try {
-    addresses = await dnsLookup(hostname, { all: true });
-  } catch {
-    throw new FaviconError(`DNS lookup failed for: ${hostname}`, 502);
-  }
-
-  if (!addresses.length) {
-    throw new FaviconError(`No DNS records for: ${hostname}`, 502);
-  }
-
-  for (const { address } of addresses) {
-    if (!ipaddr.isValid(address)) {
-      throw new FaviconError(
-        `Invalid resolved IP for ${hostname}: ${address}`,
-        502,
-      );
-    }
-    if (isBlockedIp(address)) {
-      throw new FaviconError(`Blocked IP for ${hostname}: ${address}`, 403);
-    }
+    await assertUrlAllowed(url);
+  } catch (err) {
+    const msg = (err as Error).message;
+    if (msg === 'Invalid URL') throw new FaviconError(msg, 400);
+    if (msg.startsWith('Blocked')) throw new FaviconError(msg, 403);
+    throw new FaviconError(msg, 502);
   }
 }
 
@@ -396,7 +372,7 @@ export async function fetchFaviconForUrl(
   const origin = new URL(url.origin);
   const host = origin.hostname;
 
-  await assertHostnameSafe(host);
+  await assertUrlSafe(origin.toString());
 
   const direct = await tryDirect(origin);
   if (direct) return direct;
@@ -417,7 +393,7 @@ export async function fetchImageForUrl(
   imageUrl: string,
 ): Promise<FaviconResult> {
   const url = normalizeUrl(imageUrl);
-  await assertHostnameSafe(url.hostname);
+  await assertUrlSafe(url.toString());
   const dl = await downloadAsBase64(url.toString());
   return { ...dl, source: 'image' };
 }
