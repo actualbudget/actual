@@ -760,7 +760,7 @@ describe('Rule', () => {
       });
     });
 
-    test('fixed amount follows the parent transaction sign', () => {
+    it('fixed amount follows the parent transaction sign', () => {
       const rule = new Rule({
         conditionsOp: 'and',
         conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
