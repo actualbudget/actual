@@ -68,6 +68,7 @@ async function resolvePrNumber(dir, name) {
     const { stdout } = await execFile('git', [
       'log',
       '-1',
+      '--diff-filter=A',
       '--format=%s',
       '--',
       join(dir, name),
