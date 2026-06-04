@@ -349,4 +349,5 @@ export type DbTag = {
   color?: string | null;
   description?: string | null;
   tombstone: 1 | 0;
+  hidden?: 1 | 0;
 };
