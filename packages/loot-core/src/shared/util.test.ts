@@ -288,19 +288,17 @@ describe('utility functions', () => {
       expect(encodeAmount(1234, 'IRR')).toBe(1234);
     });
 
-    test('round-trip with integerToCurrencyWithDecimal', () => {
+    it.each<[number, string]>([
+      [12.34, 'USD'],
+      [1234, 'JPY'],
+      [5678, 'IRR'],
+    ])('round-trip encodeAmount/integerToCurrencyWithDecimal: %s %s', (amount, currency) => {
       setNumberFormat({ format: 'comma-dot', hideFraction: false });
-      for (const [amount, currency] of [
-        [12.34, 'USD'],
-        [1234, 'JPY'],
-        [5678, 'IRR'],
-      ] as const) {
-        const encoded = encodeAmount(amount, currency);
-        const decoded = parseFloat(
-          integerToCurrencyWithDecimal(encoded, currency).replace(/,/g, ''),
-        );
-        expect(decoded).toBeCloseTo(amount, 8);
-      }
+      const encoded = encodeAmount(amount, currency);
+      const decoded = parseFloat(
+        integerToCurrencyWithDecimal(encoded, currency).replace(/,/g, ''),
+      );
+      expect(decoded).toBeCloseTo(amount, 8);
     });
   });
 });

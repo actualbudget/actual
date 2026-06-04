@@ -26,17 +26,13 @@ describe('getDecimalPlaces', () => {
   });
 });
 
-describe('currency metadata completeness', () => {
-  it('every entry has a decimalPlaces field', () => {
-    for (const currency of currencies) {
-      expect(typeof currency.decimalPlaces).toBe('number');
-    }
+describe('currency metadata', () => {
+  it.each(currencies)('$name ($code) has a numeric decimalPlaces field', currency => {
+    expect(typeof currency.decimalPlaces).toBe('number');
   });
 
-  it('no entry has a negative decimalPlaces', () => {
-    for (const currency of currencies) {
-      expect(currency.decimalPlaces).toBeGreaterThanOrEqual(0);
-    }
+  it.each(currencies)('$name ($code) has non-negative decimalPlaces', currency => {
+    expect(currency.decimalPlaces).toBeGreaterThanOrEqual(0);
   });
 
   it('first entry is None with code empty string and decimalPlaces 2', () => {
