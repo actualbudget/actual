@@ -98,7 +98,7 @@ const mappableFields: MappableField[] = [
       'meta.code',
       'meta.reference',
       'meta.other_account',
-      'meta.card_suffix'
+      'meta.card_suffix',
     ],
   },
 ];
