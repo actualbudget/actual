@@ -274,9 +274,13 @@ const IMPORTABLE_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 // transaction with no booking/value/transaction date — so callers skip them
 // instead of failing the entire import.
 export function isImportableTransaction(tx: BankSyncTransaction): boolean {
+  // Trim and reject empty amounts explicitly: Number('') is 0 (finite), so an
+  // empty/whitespace amount would otherwise slip through as a zero transaction.
+  const amount = tx.transactionAmount.amount.trim();
   return (
     IMPORTABLE_DATE_REGEX.test(tx.date) &&
-    Number.isFinite(Number(tx.transactionAmount.amount))
+    amount !== '' &&
+    Number.isFinite(Number(amount))
   );
 }
 

@@ -135,6 +135,15 @@ describe('isImportableTransaction', () => {
     });
     expect(isImportableTransaction(normalized)).toBe(false);
   });
+
+  it('rejects an empty amount (Number("") would coerce to 0)', () => {
+    const normalized = normalizeTransaction({
+      ...mockCreditTransaction,
+      transaction_amount: { currency: 'EUR', amount: '' },
+    });
+    expect(normalized.transactionAmount.amount).toBe('');
+    expect(isImportableTransaction(normalized)).toBe(false);
+  });
 });
 
 describe('SEPA prefix stripping', () => {
