@@ -16,7 +16,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { sendCatch } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
-import { getRecurringDescription } from '@actual-app/core/shared/schedules';
 import type { RecurConfig, RecurPattern } from '@actual-app/core/types/models';
 import type {
   TransObjectLiteral,
@@ -27,6 +26,7 @@ import { Modal } from '#components/common/Modal';
 import { Checkbox } from '#components/forms';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useLocale } from '#hooks/useLocale';
+import { getRecurringDescription } from '#util/schedule';
 
 import { DateSelect } from './DateSelect';
 

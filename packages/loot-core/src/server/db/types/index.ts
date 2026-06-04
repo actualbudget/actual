@@ -37,7 +37,7 @@ export type DbAccount = {
 export type DbBank = {
   id: string;
   bank_id: string;
-  name: string;
+  name: string | null;
   tombstone: 1 | 0;
 };
 
@@ -357,4 +357,5 @@ export type DbTag = {
   color?: string | null;
   description?: string | null;
   tombstone: 1 | 0;
+  hidden?: 1 | 0;
 };
