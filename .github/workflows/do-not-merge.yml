@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   do-not-merge:
-    name: Check for 'do not merge' label
+    name: Block PRs with "do not merge" label
     runs-on: ubuntu-latest
     steps:
       - name: Fail if 'do not merge' label is set
