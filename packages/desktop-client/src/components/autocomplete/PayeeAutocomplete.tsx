@@ -515,7 +515,6 @@ export function PayeeAutocomplete({
         selector: item => item.name ?? '',
         limit: 100,
         casing: 'case-insensitive',
-
       })
         .find(value)
         .map(result => result.item);
