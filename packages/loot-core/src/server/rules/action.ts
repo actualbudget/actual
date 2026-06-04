@@ -193,7 +193,13 @@ export class Action {
       case 'set-split-amount':
         switch (this.options.method) {
           case 'fixed-amount':
-            object.amount = this.value;
+            object.amount =
+              typeof this.value === 'number' &&
+              typeof object.parent_amount === 'number' &&
+              object.parent_amount < 0 &&
+              this.value > 0
+                ? -this.value
+                : this.value;
             break;
           case 'formula':
             if (!object._ruleErrors) {

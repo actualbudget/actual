@@ -760,6 +760,38 @@ describe('Rule', () => {
       });
     });
 
+    test('fixed amount follows the parent transaction sign', () => {
+      const rule = new Rule({
+        conditionsOp: 'and',
+        conditions: [{ op: 'is', field: 'imported_payee', value: 'James' }],
+        actions: [
+          {
+            op: 'set-split-amount',
+            field: 'amount',
+            value: 8500,
+            options: { splitIndex: 1, method: 'fixed-amount' },
+          },
+          {
+            op: 'set-split-amount',
+            field: 'amount',
+            options: { splitIndex: 2, method: 'remainder' },
+          },
+        ],
+      });
+
+      expect(
+        rule.exec({ imported_payee: 'James', amount: -10000 }),
+      ).toMatchObject({
+        subtransactions: [{ amount: -8500 }, { amount: -1500 }],
+      });
+
+      expect(
+        rule.exec({ imported_payee: 'James', amount: 10000 }),
+      ).toMatchObject({
+        subtransactions: [{ amount: 8500 }, { amount: 1500 }],
+      });
+    });
+
     test('remainder/percent goes negative if less than expected after fixed amounts', () => {
       // Remainder/percent goes negative if less than expected after fixed amounts
       expect(
