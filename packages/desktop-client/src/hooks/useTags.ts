@@ -6,8 +6,16 @@ import { byLengthAsc, byStartAsc, Fzf } from 'fzf';
 
 import { tagQueries } from '#tags/queries';
 
+import { useSyncedPref } from './useSyncedPref';
+
 export function useTags() {
-  return useQuery(tagQueries.list());
+  const [showHiddenTags] = useSyncedPref('show-hidden-tags');
+  return useQuery({
+    ...tagQueries.list(),
+    select: data => {
+      return showHiddenTags === 'true' ? data : data.filter(tag => !tag.hidden);
+    },
+  });
 }
 
 export function filterTags<T extends TagEntity>(

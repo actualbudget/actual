@@ -641,7 +641,9 @@ export function conditionsToAQL(
 
       case 'hasAnyTag': {
         const tagValues = extractTagsForFilter(value);
-
+        if (tagValues.length === 0) {
+          return { id: null };
+        }
         return {
           $or: tagValues.map(v => {
             const escapedTag = v
