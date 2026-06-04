@@ -460,6 +460,7 @@ export function PayeeAutocomplete({
     return new Fzf(nearbyPayeesWithType, {
       selector: item => item.name ?? '',
       limit: 100,
+      casing: 'case-insensitive',
     })
       .find(rawPayee)
       .map(result => result.item);
@@ -513,6 +514,8 @@ export function PayeeAutocomplete({
       filtered = new Fzf(realSuggestions, {
         selector: item => item.name ?? '',
         limit: 100,
+        casing: 'case-insensitive',
+
       })
         .find(value)
         .map(result => result.item);
