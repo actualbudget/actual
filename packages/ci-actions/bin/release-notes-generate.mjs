@@ -7,6 +7,9 @@ import { formatNotes, parseReleaseNotes } from '../src/release-notes/util.mjs';
 
 const exec = promisify(childProcess.exec);
 
+if (!process.env.GITHUB_REPOSITORY) {
+  throw new Error('GITHUB_REPOSITORY env var is not set');
+}
 const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
 
 const releaseBranch = process.env.RELEASE_BRANCH;
@@ -128,6 +131,7 @@ await group('Prepare branch', async () => {
 
 const { notesByCategory, files } = await parseReleaseNotes(
   'upcoming-release-notes',
+  owner,
   repo,
 );
 const categorizedNotes = formatNotes(notesByCategory);
