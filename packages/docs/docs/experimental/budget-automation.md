@@ -221,8 +221,8 @@ Pass 1:<br />
 Snacks, 100 / 6 \* 3 = 50 (exceeds the cap, so Snack Fund receives 40.00, To Budget is now 60)
 
 Pass 2:<br />
-Vacation, 60 / 3 _ 1 = 20 (Vacation Fund receives 20.00)<br />
-Investment, 60 / 3 _ 2 = 40 (Investment Fund receives 40.00)
+Vacation, 60 / 3 \* 1 = 20 (Vacation Fund receives 20.00)<br />
+Investment, 60 / 3 \* 2 = 40 (Investment Fund receives 40.00)
 
 | Category        | Weight | Balance cap? | Amount applied |
 | --------------- | :----: | :----------: | :------------: |
