@@ -10,19 +10,21 @@ title: Actual Budget Vision
 - find financial peace of mind
 - actively engage in dreaming big and achieving their goals
 
-### Primary Objectives
+## Primary Objectives
 
 - The user has full visibility into their budget
   - The user has ownership and control of their data now, and in the future
   - The user can view the current status and trends in their budget
-  - The user can keep track of their priorities and goals, whether they are long term or short term.
+  - The user can keep track of their priorities and goals, whether they are long-term or short-term.
 
 - The user will enjoy a clean and fast experience
   - The application is fully usable across all devices, offline and online
   - The application supports multiple budgets, each one reachable by multiple devices
   - The application is accessible
 
-**Design principles**: Actual is designed using the following principles:
+## Design principles 
+
+Actual is designed using the following principles:
 
 - **Local-first**
 - **Open**
