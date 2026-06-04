@@ -3,6 +3,7 @@ import { lookup as dnsLookup } from 'node:dns/promises';
 import express from 'express';
 import type { Response as ExpressResponse, Request } from 'express';
 import ipaddr from 'ipaddr.js';
+import { Agent } from 'undici';
 
 import { validateSession } from './util/validate-user';
 
@@ -54,12 +55,62 @@ function isBlockedIp(ipStr: string): boolean {
   return ipaddr.process(ipStr).range() !== 'unicast';
 }
 
-/**
- * Resolve hostnames and block private/loopback/link-local targets (SSRF).
- */
-async function assertHostnameResolvesToAllowedIps(
+// Intercepts DNS resolution at connection time so the IP that passes the
+// SSRF check is the exact IP used for the TCP connection. A pre-fetch check
+// would be vulnerable to DNS rebinding (the hostname could resolve to a
+// different IP between the check and the actual connect).
+const ssrfSafeLookup = (
   hostname: string,
-): Promise<void> {
+  _options: unknown,
+  callback: (err: Error | null, address: string, family: number) => void,
+): void => {
+  if (ipaddr.isValid(hostname)) {
+    if (isBlockedIp(hostname)) {
+      callback(new FaviconError(`Blocked IP: ${hostname}`, 403), '', 4);
+      return;
+    }
+    const parsed = ipaddr.parse(hostname);
+    callback(null, hostname, parsed.kind() === 'ipv6' ? 6 : 4);
+    return;
+  }
+
+  dnsLookup(hostname, { all: true })
+    .then(addresses => {
+      if (!addresses.length) {
+        callback(
+          new FaviconError(`No DNS records for: ${hostname}`, 502),
+          '',
+          4,
+        );
+        return;
+      }
+      const safe = addresses.find(
+        a => ipaddr.isValid(a.address) && !isBlockedIp(a.address),
+      );
+      if (!safe) {
+        callback(
+          new FaviconError(`All resolved IPs for ${hostname} are blocked`, 403),
+          '',
+          4,
+        );
+        return;
+      }
+      callback(null, safe.address, safe.family);
+    })
+    .catch(() =>
+      callback(
+        new FaviconError(`DNS lookup failed for: ${hostname}`, 502),
+        '',
+        4,
+      ),
+    );
+};
+
+const ssrfSafeAgent = new Agent({
+  connect: { lookup: ssrfSafeLookup },
+});
+
+async function assertHostnameSafe(hostname: string): Promise<void> {
   if (ipaddr.isValid(hostname)) {
     if (isBlockedIp(hostname)) {
       throw new FaviconError(`Blocked hostname: ${hostname}`, 403);
@@ -91,7 +142,7 @@ async function assertHostnameResolvesToAllowedIps(
   }
 }
 
-async function assertUrlSafeForFetch(url: string): Promise<void> {
+function assertProtocolSafe(url: string): void {
   let parsed: URL;
   try {
     parsed = new URL(url);
@@ -101,7 +152,6 @@ async function assertUrlSafeForFetch(url: string): Promise<void> {
   if (!/^https?:$/i.test(parsed.protocol)) {
     throw new FaviconError(`Blocked URL scheme: ${parsed.protocol}`, 403);
   }
-  await assertHostnameResolvesToAllowedIps(parsed.hostname);
 }
 
 async function fetchWithTimeout(
@@ -111,7 +161,16 @@ async function fetchWithTimeout(
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
-    return await fetch(url, { ...options, signal: controller.signal });
+    // The hostname in `url` is validated by assertHostnameSafe() before this
+    // function is reached, and ssrfSafeAgent re-validates the resolved IP at
+    // TCP connection time via ssrfSafeLookup, preventing DNS rebinding.
+    // codeql[js/ssrf]
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+      // undici dispatcher: routes all connections through ssrfSafeLookup
+      dispatcher: ssrfSafeAgent,
+    } as unknown as RequestInit);
   } finally {
     clearTimeout(timer);
   }
@@ -120,7 +179,7 @@ async function fetchWithTimeout(
 async function safeFetch(url: string, init?: RequestInit): Promise<Response> {
   let next = url;
   for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
-    await assertUrlSafeForFetch(next);
+    assertProtocolSafe(next);
     const res = await fetchWithTimeout(next, {
       ...init,
       redirect: 'manual',
@@ -337,7 +396,7 @@ export async function fetchFaviconForUrl(
   const origin = new URL(url.origin);
   const host = origin.hostname;
 
-  await assertHostnameResolvesToAllowedIps(host);
+  await assertHostnameSafe(host);
 
   const direct = await tryDirect(origin);
   if (direct) return direct;
@@ -358,6 +417,7 @@ export async function fetchImageForUrl(
   imageUrl: string,
 ): Promise<FaviconResult> {
   const url = normalizeUrl(imageUrl);
+  await assertHostnameSafe(url.hostname);
   const dl = await downloadAsBase64(url.toString());
   return { ...dl, source: 'image' };
 }

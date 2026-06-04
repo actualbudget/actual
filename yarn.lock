@@ -206,6 +206,7 @@ __metadata:
     pluggy-sdk: "npm:^0.83.0"
     supertest: "npm:^7.2.2"
     typescript-strict-plugin: "npm:^2.4.4"
+    undici: "npm:^8.0.0"
     uuid: "npm:^14.0.0"
     vite: "npm:^8.0.5"
     vitest: "npm:^4.1.2"
@@ -27862,6 +27863,13 @@ __metadata:
   version: 7.24.1
   resolution: "undici@npm:7.24.1"
   checksum: 10/0af4ec2fc2ae50b1d0636895793ea2274a89a7cd445690089a1b957c4ac4a0336e48ab9ac48a4e8f5023d4b5eab56368c3f17c75d6b4c81b4281b674d1e60c9f
+  languageName: node
+  linkType: hard
+
+"undici@npm:^8.0.0":
+  version: 8.3.0
+  resolution: "undici@npm:8.3.0"
+  checksum: 10/812a8643c2506bcfa7d9d163864965e95fd1b7e5803431ad072321a6f80511d6fd800913eb4846ca3f19102287342f31f9fad142f40c89d897d6ecb81d61843c
   languageName: node
   linkType: hard
 
