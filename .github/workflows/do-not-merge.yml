@@ -1,4 +1,4 @@
-name: Do not merge
+name: Block PRs with "do not merge" label
 
 on:
   pull_request:
