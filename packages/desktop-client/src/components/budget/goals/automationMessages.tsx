@@ -187,6 +187,13 @@ export function GlobalConflictTitle({
           income
         </Trans>
       );
+    case 'schedule-priority-mismatch':
+      return (
+        <Trans>
+          All cover schedule and save by date automations must use the same
+          priority
+        </Trans>
+      );
     default:
       conflict satisfies never;
       return null;
@@ -216,6 +223,8 @@ export function GlobalConflictDetail({
           at 100%.
         </Trans>
       );
+    case 'schedule-priority-mismatch':
+      return null;
     default:
       conflict satisfies never;
       return null;
