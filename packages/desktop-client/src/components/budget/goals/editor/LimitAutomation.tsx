@@ -90,31 +90,35 @@ export const LimitAutomation = ({
     </FormField>
   );
 
+  const cadenceField = (
+    <FormField key="cadence-field" style={{ flex: 1 }}>
+      <FormLabel title={t('Every')} htmlFor="cadence-field" />
+
+      <Select
+        id="cadence-field"
+        value={period}
+        onChange={cadence =>
+          dispatch(updateTemplate({ type: 'limit', period: cadence }))
+        }
+        options={[
+          ['daily', t('Day')],
+          ['weekly', t('Week')],
+          ['monthly', t('Month')],
+        ]}
+        className={selectButtonClassName}
+      />
+    </FormField>
+  );
+
   return (
     <>
       <SpaceBetween align="center" gap={10} style={{ marginTop: 10 }}>
-        <FormField key="cadence-field" style={{ flex: 1 }}>
-          <FormLabel title={t('Cadence')} htmlFor="cadence-field" />
-
-          <Select
-            id="cadence-field"
-            value={period}
-            onChange={cadence =>
-              dispatch(updateTemplate({ type: 'limit', period: cadence }))
-            }
-            options={[
-              ['daily', t('Daily')],
-              ['weekly', t('Weekly')],
-              ['monthly', t('Monthly')],
-            ]}
-            className={selectButtonClassName}
-          />
-        </FormField>
-        {period === 'weekly' ? weekdayField : amountField}
+        {amountField}
+        {cadenceField}
       </SpaceBetween>
 
       <SpaceBetween align="center" gap={10} style={{ marginTop: 10 }}>
-        {period === 'weekly' && amountField}
+        {period === 'weekly' && weekdayField}
         <FormField key="hold-overflow-field" style={{ flex: 1 }}>
           <LabeledCheckbox
             id="hold-overflow-field"
