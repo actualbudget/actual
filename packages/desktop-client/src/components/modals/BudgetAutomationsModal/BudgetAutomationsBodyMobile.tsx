@@ -132,7 +132,7 @@ export function BudgetAutomationsBodyMobile({
     totalMonthly,
     contributions,
     hasErrors,
-    conflict,
+    conflicts,
     categoryNameMap,
     hasLimitAutomation,
     hasGoalAutomation,
@@ -190,7 +190,7 @@ export function BudgetAutomationsBodyMobile({
     <Button
       variant="primary"
       onPress={onSave}
-      isDisabled={hasErrors || conflict !== null || saving}
+      isDisabled={hasErrors || conflicts.length > 0 || saving}
     >
       <Trans>Save</Trans>
     </Button>
@@ -343,7 +343,9 @@ export function BudgetAutomationsBodyMobile({
         />
       )}
 
-      {conflict && <ConflictBanner conflict={conflict} />}
+      {conflicts.map((conflict, i) => (
+        <ConflictBanner key={i} conflict={conflict} />
+      ))}
 
       <View
         style={{
