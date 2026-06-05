@@ -372,7 +372,11 @@ export async function runSchedule(
       numSubMonthly > 0)
   ) {
     to_budget += Math.round(totalPayMonthOf + totalSinkingBaseContribution);
-    for (const c of t_payMonthOf) addContribution(c.name, c.target);
+    for (const c of t_payMonthOf) {
+      if (c.num_months === 0) {
+        addContribution(c.name, c.target);
+      }
+    }
     for (const c of t_sinking) {
       addContribution(c.name, getMonthlyBaseContribution(c));
     }
@@ -386,7 +390,11 @@ export async function runSchedule(
     } else {
       to_budget += Math.round(totalPayMonthOf + totalSinkingContribution);
     }
-    for (const c of t_payMonthOf) addContribution(c.name, c.target);
+    for (const c of t_payMonthOf) {
+      if (c.num_months === 0) {
+        addContribution(c.name, c.target);
+      }
+    }
     for (const [name, amount] of sinkingPerSchedule) {
       addContribution(name, amount);
     }
