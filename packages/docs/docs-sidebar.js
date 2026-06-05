@@ -169,8 +169,7 @@ const sidebars = {
             id: 'transactions/importing',
           },
           items: [
-            'transactions/payees',
-            'transactions/split-transactions',
+            'transactions/payees',            
             {
               type: 'category',
               label: 'Transfers',
@@ -181,6 +180,8 @@ const sidebars = {
               },
               items: ['advanced/scripts/modify-transfers'],
             },
+            'transactions/split-transactions',
+            'transactions/tags',
             'schedules',
             {
               type: 'category',
@@ -198,8 +199,7 @@ const sidebars = {
                   label: 'Excel Formula Mode - Rule Formulas (experimental)',
                 },
               ],
-            },
-            'transactions/tags',
+            },            
             'transactions/filters',
             'transactions/merging',
             'transactions/bulk-editing',
