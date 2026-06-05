@@ -63,6 +63,11 @@ export type SpendingEntity = {
     compareTo: number;
     budget: number;
   }[];
+  averageRange?: {
+    startMonth: string | null;
+    endMonth: string | null;
+    months: string[];
+  };
   startDate?: string;
   endDate?: string;
   totalDebts: number;
