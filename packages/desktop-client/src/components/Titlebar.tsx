@@ -268,13 +268,12 @@ function DegradedEnvIndicator() {
           Actual is running in a degraded state. Your server may not be using
           HTTPS or may be missing required security headers. Data loss or sync
           issues may occur. See{' '}
-          <a
-            href="https://actualbudget.org/docs/troubleshooting/shared-array-buffer"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            variant="external"
+            to="https://actualbudget.org/docs/troubleshooting/shared-array-buffer"
           >
             the troubleshooting docs
-          </a>{' '}
+          </Link>{' '}
           for more information.
         </Trans>
       }
