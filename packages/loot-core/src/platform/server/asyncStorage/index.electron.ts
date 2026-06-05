@@ -44,12 +44,21 @@ function loadStore(storePath: string): GlobalPrefsJson {
   }
 
   try {
-    return JSON.parse(contents);
+    const parsed = JSON.parse(contents);
+    if (
+      parsed === null ||
+      typeof parsed !== 'object' ||
+      Array.isArray(parsed)
+    ) {
+      throw new Error('Global preferences are not a JSON object');
+    }
+    return parsed;
   } catch (err) {
-    // The file exists but is not valid JSON - most likely truncated by an
-    // interrupted write (e.g. the process was killed mid-write during an app
-    // update). Don't silently discard the user's preferences: back the file up
-    // so it can be recovered, and log loudly.
+    // The file exists but isn't a usable preferences object - either invalid
+    // JSON (most likely truncated by an interrupted write, e.g. the process was
+    // killed mid-write during an app update) or valid JSON of the wrong shape.
+    // Don't silently discard the user's preferences: back the file up so it can
+    // be recovered, and log loudly.
     const backupPath = `${storePath}.corrupt`;
     try {
       fs.writeFileSync(backupPath, contents, 'utf8');

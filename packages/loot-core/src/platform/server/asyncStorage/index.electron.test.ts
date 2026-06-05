@@ -95,4 +95,18 @@ describe('electron asyncStorage', () => {
     expect(fs.existsSync(backupPath)).toBe(true);
     expect(fs.readFileSync(backupPath, 'utf8')).toBe(corrupt);
   });
+
+  it('backs up valid JSON of the wrong shape instead of using it as the store', async () => {
+    // Parseable JSON, but not a plain object (e.g. `null` or an array) would
+    // break `store[key]` access if used directly.
+    const invalid = '[]';
+    fs.writeFileSync(storePath(), invalid, 'utf8');
+
+    expect(() => asyncStorage.init()).not.toThrow();
+    expect(await asyncStorage.getItem('language')).toBeUndefined();
+
+    const backupPath = `${storePath()}.corrupt`;
+    expect(fs.existsSync(backupPath)).toBe(true);
+    expect(fs.readFileSync(backupPath, 'utf8')).toBe(invalid);
+  });
 });
