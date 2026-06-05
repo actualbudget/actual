@@ -1,7 +1,5 @@
 # @actual-app/cli
 
-> **WARNING:** This CLI is experimental.
-
 Command-line interface for [Actual Budget](https://actualbudget.org). Query and modify your budget data from the terminal — accounts, transactions, categories, payees, rules, schedules, and more.
 
 > **Note:** This CLI connects to a running [Actual sync server](https://actualbudget.org/docs/install/). It does not operate on local budget files directly.
