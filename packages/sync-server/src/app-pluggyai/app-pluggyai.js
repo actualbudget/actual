@@ -69,7 +69,7 @@ app.post(
     const { accountId, startDate } = req.body || {};
 
     try {
-      const transactions = await pluggyaiService.getTransactions(
+      const transactions = await pluggyaiService.getTransactionsByAccountId(
         accountId,
         startDate,
       );

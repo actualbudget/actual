@@ -93,10 +93,4 @@ export const pluggyaiService = {
       throw error;
     }
   },
-  getTransactions: async (accountId, startDate) => {
-    return await pluggyaiService.getTransactionsByAccountId(
-      accountId,
-      startDate,
-    );
-  },
 };
