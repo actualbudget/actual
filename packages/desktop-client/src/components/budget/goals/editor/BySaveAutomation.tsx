@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgInformationCircle } from '@actual-app/components/icons/v2';
 import { Input } from '@actual-app/components/input';
 import { Select } from '@actual-app/components/select';
@@ -16,11 +17,58 @@ import type {
 
 import { updateTemplate } from '#components/budget/goals/actions';
 import type { Action } from '#components/budget/goals/actions';
+import { TWO_UP_FIELD_FLEX } from '#components/budget/goals/editor/fieldLayout';
 import { FormField, FormLabel } from '#components/forms';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
+import {
+  hideNativeDateIconClassName,
+  InputField,
+} from '#components/mobile/MobileForms';
 import { AmountInput } from '#components/util/AmountInput';
 import { GenericInput } from '#components/util/GenericInput';
 import { useFormat } from '#hooks/useFormat';
+
+type MonthFieldProps = {
+  id: string;
+  value: string;
+  onChange: (month: string) => void;
+};
+
+// we can use a month picker for mobile because we use the native datepicker
+// no such luck on desktop (yet!)
+function MonthField({ id, value, onChange }: MonthFieldProps) {
+  const { isNarrowWidth } = useResponsive();
+  if (isNarrowWidth) {
+    return (
+      <InputField
+        id={id}
+        type="month"
+        value={value}
+        onChange={event => onChange(event.target.value)}
+        className={hideNativeDateIconClassName}
+        style={{
+          width: '100%',
+          marginLeft: 0,
+          marginRight: 0,
+          boxSizing: 'border-box',
+          WebkitAppearance: 'none',
+          appearance: 'none',
+        }}
+      />
+    );
+  }
+  return (
+    <GenericInput
+      // remount when the stored month changes so the picker re-syncs
+      // to day 01 instead of lingering on whatever day the user picked
+      key={value}
+      type="date"
+      field="date"
+      value={value ? `${value}-01` : ''}
+      onChange={(next: string) => onChange(next ? next.slice(0, 7) : '')}
+    />
+  );
+}
 
 type BySaveAutomationProps = {
   template: ByTemplate | SpendTemplate;
@@ -59,7 +107,7 @@ export const BySaveAutomation = ({
   return (
     <>
       <SpaceBetween align="center" gap={10} style={{ marginTop: 10 }}>
-        <FormField style={{ flex: 1 }}>
+        <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
           <FormLabel title={t('Total amount')} htmlFor="by-amount-field" />
           <AmountInput
             id="by-amount-field"
@@ -75,28 +123,19 @@ export const BySaveAutomation = ({
             }
           />
         </FormField>
-        <FormField style={{ flex: 1 }}>
+        <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
           <FormLabel title={t('Target month')} htmlFor="by-month-field" />
-          <GenericInput
-            // remount when the stored month changes so the picker re-syncs
-            // to day 01 instead of lingering on whatever day the user picked
-            key={template.month}
-            type="date"
-            field="date"
-            value={template.month ? `${template.month}-01` : ''}
-            onChange={(value: string) =>
-              dispatch(
-                updateTemplate({
-                  type: template.type,
-                  month: value ? value.slice(0, 7) : '',
-                }),
-              )
+          <MonthField
+            id="by-month-field"
+            value={template.month ?? ''}
+            onChange={month =>
+              dispatch(updateTemplate({ type: template.type, month }))
             }
           />
         </FormField>
       </SpaceBetween>
       <SpaceBetween align="center" gap={10} style={{ marginTop: 10 }}>
-        <FormField style={{ flex: 1 }}>
+        <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
           <LabeledCheckbox
             id="by-repeats-field"
             checked={repeats}
@@ -125,7 +164,7 @@ export const BySaveAutomation = ({
         </FormField>
         {repeats && (
           <>
-            <FormField style={{ flex: 1 }}>
+            <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
               <FormLabel
                 title={t('Repeat every')}
                 htmlFor="by-repeat-amount-field"
@@ -140,7 +179,7 @@ export const BySaveAutomation = ({
                 onBlur={commitRepeat}
               />
             </FormField>
-            <FormField style={{ flex: 1 }}>
+            <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
               <FormLabel title={t('Period')} htmlFor="by-period-field" />
               <Select
                 id="by-period-field"
@@ -163,7 +202,7 @@ export const BySaveAutomation = ({
         )}
       </SpaceBetween>
       <SpaceBetween align="center" gap={10} style={{ marginTop: 10 }}>
-        <FormField style={{ flex: 1 }}>
+        <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
           <LabeledCheckbox
             id="by-spend-down-field"
             checked={spendDown}
@@ -229,23 +268,16 @@ export const BySaveAutomation = ({
           </LabeledCheckbox>
         </FormField>
         {spendDown && (
-          <FormField style={{ flex: 1 }}>
+          <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
             <FormLabel
               title={t('Start spending in')}
               htmlFor="by-spend-from-field"
             />
-            <GenericInput
-              key={fromMonth}
-              type="date"
-              field="date"
-              value={fromMonth ? `${fromMonth}-01` : ''}
-              onChange={(value: string) =>
-                dispatch(
-                  updateTemplate({
-                    type: 'spend',
-                    from: value ? value.slice(0, 7) : '',
-                  }),
-                )
+            <MonthField
+              id="by-spend-from-field"
+              value={fromMonth ?? ''}
+              onChange={from =>
+                dispatch(updateTemplate({ type: 'spend', from }))
               }
             />
           </FormField>
