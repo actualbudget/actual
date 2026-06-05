@@ -26,17 +26,31 @@ const sidebars = {
   docs: [
     'index',
     'vision',
-    'releases',
-    'upcoming-release-notes',
+    {type: 'ref', id: 'releases'}, // take release and upcoming release notes out of navigation as they're too long
+    {type: 'ref', id: 'upcoming-release-notes'},
     {
       type: 'category',
-      label: 'Getting Started',
+      label: 'Getting Started with Actual',
       collapsible: false,
       className: 'no-indent',
       items: [
-        'getting-started/roadmap-for-new-users',
         'getting-started/envelope-budgeting',
         'getting-started/tracking-budget',
+        'getting-started/roadmap-for-new-users',
+         {
+            type: 'doc',
+            id: 'getting-started/starting-fresh', 
+            label: 'Getting Started', // Quick start guide will replace this eventually
+         },
+        'getting-started/tips-tricks',
+      },
+        
+    {
+      type: 'category',
+      label: 'User Manual',
+      collapsible: false,
+      className: 'no-indent',
+      items: [
         {
           type: 'category',
           label: 'Installation and Configuration',
@@ -45,15 +59,21 @@ const sidebars = {
             id: 'install/index',
           },
           items: [
+            'getting-started/sync',
             {
               type: 'category',
               label: 'On Your Own Machine',
               collapsible: false,
               className: 'no-indent',
               items: [
-                'install/docker',
-                'install/cli-tool',
                 'install/desktop-app',
+                {
+                  type: 'doc',
+                  id: 'getting-started/manage-files',
+                  label: 'Managing Files on the Dektop App',
+                },
+                'install/docker',
+                'install/cli-tool',                
                 'install/build-from-source',
               ],
             },
@@ -81,37 +101,28 @@ const sidebars = {
             },
           ],
         },
-
+        // end of installation
+        
         {
           type: 'category',
-          label: 'Migration',
+          label: 'Data Migration',
           link: {
             type: 'doc',
             id: 'migration/index',
           },
           items: ['migration/ynab4', 'migration/nynab'],
         },
-      ],
-    },
-
-    {
-      type: 'category',
-      label: 'Using Actual',
-      collapsible: false,
-      className: 'no-indent',
-      items: [
-        'getting-started/starting-fresh',
+        // end of migration
+        
         {
           type: 'category',
-          label: 'Budgeting',
+          label: 'Accounts',
           collapsed: true,
           link: {
             type: 'doc',
-            id: 'budgeting/index',
+            id: 'accounts/index',
           },
           items: [
-            'budgeting/categories',
-            'budgeting/returns-and-reimbursements',
             {
               type: 'category',
               label: 'Managing Credit Cards',
@@ -125,44 +136,8 @@ const sidebars = {
                 'budgeting/credit-cards/carrying-debt',
               ],
             },
-            'budgeting/multi-currency',
             'budgeting/joint-accounts',
-            'advanced/restart',
-          ],
-        },
-
-        // End of Budgeting
-
-        'schedules',
-
-        {
-          type: 'category',
-          label: 'Accounts & Transactions',
-          collapsed: true,
-          link: {
-            type: 'doc',
-            id: 'accounts/index',
-          },
-          items: [
-            'transactions/filters',
-            'transactions/transfers',
-            {
-              type: 'category',
-              label: 'Rules',
-              collapsed: true,
-              link: {
-                type: 'doc',
-                id: 'budgeting/rules/index',
-              },
-              items: ['budgeting/rules/custom'],
-            },
-            'transactions/importing',
-            'transactions/merging',
             'accounts/reconciliation',
-            'transactions/payees',
-            'transactions/bulk-editing',
-            'transactions/tags',
-            'transactions/split-transactions',
             {
               type: 'category',
               label: 'Connecting Your Bank',
@@ -171,15 +146,103 @@ const sidebars = {
                 id: 'advanced/bank-sync',
               },
               items: [
-                'advanced/bank-sync/enable-banking',
+                {
+                  type: 'doc',
+                  id: 'advanced/bank-sync/enable-banking', 
+                  label: 'Enable Banking - EU (experimental)', 
+                },                
                 'advanced/bank-sync/gocardless',
                 'advanced/bank-sync/simplefin',
                 'advanced/bank-sync/pluggyai',
               ],
-            },
-            'advanced/scripts/modify-transfers',
+            },    
           ],
         },
+        // end of accounts
+        {
+          type: 'category',
+          label: 'Transactions',
+          collapsed: true,
+          link: {
+            type: 'doc',
+            id: 'transactions/importing',
+          },
+          items: [
+            'transactions/split-transactions',
+            {
+              type: 'category',
+              label: 'Transfers',
+              collapsed: true,
+              link: {
+                type: 'doc',
+                id: 'transactions/transfers',
+              },
+              items: ['advanced/scripts/modify-transfers'],
+            },
+            'schedules',
+            'transactions/filters',
+            {
+              type: 'category',
+              label: 'Rules',
+              collapsed: true,
+              link: {
+                type: 'doc',
+                id: 'budgeting/rules/index',
+              },              
+              items: [
+                'budgeting/rules/custom'
+                {
+                  type: 'ref',
+                  id: 'experimental/formulas', // the primary link is in Reports
+                  label: 'Excel Formula Mode - Rule Formulas (experimental)',
+                },                
+              ],
+            },
+            'transactions/merging',
+            'transactions/payees',
+            'transactions/tags',
+            'transactions/bulk-editing',
+            'budgeting/multi-currency',
+          ],
+        },
+        // end of transactions
+
+        {
+          type: 'category',
+          label: 'Budgeting',
+          collapsed: true,
+          link: {
+            type: 'doc',
+            id: 'budgeting/index',
+          },
+          items: [
+            'budgeting/categories',
+            'budgeting/returns-and-reimbursements',
+            {
+            type: 'doc',
+            id: 'experimental/budget-automation', 
+            label: 'Budget Automations (experimental)', 
+            },
+            {
+            type: 'doc',
+            id: 'experimental/goal-templates',
+            label: 'Notes-based Templates (experimental)', 
+            },
+            {
+            type: 'doc',
+            id: 'experimental/monthly-cleanup', 
+            label: 'Notes-based Monthly Cleanup (experimental)', 
+            },
+            {
+            type: 'ref',
+            id: 'getting-started/tracking-budget', // secondary link to tracking budget
+            },
+            'advanced/restart',
+          ],
+        },
+
+        // End of Budgeting
+        
         {
           type: 'category',
           label: 'Reports Dashboard',
@@ -188,18 +251,42 @@ const sidebars = {
             type: 'doc',
             id: 'reports/index',
           },
-          items: ['reports/custom-reports'],
+          items: [
+            'reports/custom-reports'
+            {
+              type: 'doc',
+              id: 'experimental/formulas', // there is a secondary link above in Transactions/Rules and in Experimental below
+              label: 'Excel Formula Mode - Formula Cards (experimental)',
+            },
+            {
+              type: 'doc',
+              id: 'experimental/balance-forecast-report',
+              label: 'Balance Forecast Report (experimental)',
+            },
+            {
+              type: 'doc',
+              id: 'experimental/budget-analysis-report',
+              label: 'Budget Analysis Report (experimental)',
+            },
+          ],
         },
+        // end of Reports
+        
         {
           type: 'category',
           label: 'Backup & Restore',
           collapsed: true,
           items: ['backup-restore/backup', 'backup-restore/restore'],
         },
-        'settings/index',
-        'custom-themes',
-        'getting-started/sync',
-        'getting-started/manage-files',
+        // end of Backup
+        
+        {
+          type: 'category',
+          label: 'Settings',
+          collapsed: true,
+          items: ['settings/index', 'custom-themes'],
+        },
+        // end of Settings        
 
         {
           type: 'category',
@@ -207,39 +294,43 @@ const sidebars = {
           collapsed: true,
           link: {
             type: 'doc',
-            id: 'experimental/index',
+            id: 'experimental/index', 
           },
-          items: [
-            'experimental/budget-automation',
-            'experimental/goal-templates',
-            'experimental/monthly-cleanup',
-            'experimental/rule-templating',
-            'experimental/formulas',
-            'experimental/balance-forecast-report',
-            'experimental/budget-analysis-report',
-          ],
-        },
-        'getting-started/tips-tricks',
-
-        {
-          type: 'category',
-          label: 'API',
-          link: { type: 'doc', id: 'api/index' },
-          items: [
-            'api/reference',
-            'api/cli',
+          items: [ // Secondary links to documentation. Primary links above in navigation scheme.
             {
-              type: 'category',
-              label: 'ActualQL',
-              collapsed: true,
-              link: {
-                type: 'doc',
-                id: 'api/actual-ql/index',
-              },
-              items: ['api/actual-ql/functions', 'api/actual-ql/examples'],
+            type: 'ref',
+            id: 'experimental/budget-automation', 
+            label: 'Budget Automations', 
             },
-          ],
+            {
+            type: 'ref',
+            id: 'experimental/goal-templates',
+            label: 'Notes-based Templates', 
+            },
+            {
+            type: 'ref',
+            id: 'experimental/monthly-cleanup', 
+            label: 'Notes-based Monthly Cleanup', 
+            },
+            {
+              type: 'ref',
+              id: 'experimental/formulas', 
+              label: 'Excel Formula Mode - Formula Cards & Rule Formulas',
+            },
+            {
+              type: 'ref',
+              id: 'experimental/balance-forecast-report',
+              label: 'Balance Forecast Report',
+            },
+            {
+              type: 'ref',
+              id: 'experimental/budget-analysis-report',
+              label: 'Budget Analysis Report',
+            },
+            'experimental/rule-templating' // this has been deprecated, but leaving here for the notice. 
+          ],             
         },
+        // end of Experimental
       ],
     },
 
@@ -249,8 +340,7 @@ const sidebars = {
       collapsible: false,
       className: 'no-indent',
       items: [
-        'faq',
-        'actual-server-repo-move',
+        'faq',        
         {
           type: 'category',
           label: 'Troubleshooting',
@@ -263,6 +353,26 @@ const sidebars = {
           ],
         },
         'community-repos',
+        {
+          type: 'category', 
+          label: 'API',
+          link: { type: 'doc', id: 'api/index' },
+          items: [
+            'api/reference',
+            'api/cli',
+            {
+              type: 'category',
+              label: 'ActualQL',
+              collapsed: true,
+              link: {
+                type: 'doc',
+                id: 'api/actual-ql/index',
+                },
+              items: ['api/actual-ql/functions', 'api/actual-ql/examples'],
+            },
+          ],
+        },
+        'actual-server-repo-move',
       ],
     },
     {
