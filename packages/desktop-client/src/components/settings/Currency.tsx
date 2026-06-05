@@ -48,6 +48,7 @@ export function CurrencySettings() {
         ['KRW', t('South Korean Won')],
         ['LKR', t('Sri Lankan Rupee')],
         ['MDL', t('Moldovan Leu')],
+        ['MXN', t('Mexican Peso')],
         ['MYR', t('Malaysian Ringgit')],
         ['PHP', t('Philippine Peso')],
         ['PKR', t('Pakistani Rupee')],

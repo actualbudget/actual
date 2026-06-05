@@ -54,7 +54,6 @@ import { useAccounts } from '#hooks/useAccounts';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
-import { useFailedAccounts } from '#hooks/useFailedAccounts';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { usePayees } from '#hooks/usePayees';
 import { getSchedulesQuery } from '#hooks/useSchedules';
@@ -240,7 +239,6 @@ type AccountInternalProps = {
   onBatchDelete: ReturnType<typeof useTransactionBatchActions>['onBatchDelete'];
   categoryId?: string;
   location: ReturnType<typeof useLocation>;
-  failedAccounts: ReturnType<typeof useFailedAccounts>;
   dateFormat: ReturnType<typeof useDateFormat>;
   payees: PayeeEntity[];
   categoryGroups: CategoryGroupEntity[];
@@ -1713,7 +1711,6 @@ class AccountInternal extends PureComponent<
       dateFormat,
       hideFraction,
       accountsSyncing,
-      failedAccounts,
       showExtraBalances,
       accountId,
       categoryId,
@@ -1790,7 +1787,6 @@ class AccountInternal extends PureComponent<
                 savedFilters={this.props.savedFilters}
                 accountName={accountName}
                 accountsSyncing={accountsSyncing}
-                failedAccounts={failedAccounts}
                 accounts={accounts}
                 transactions={transactions}
                 showBalances={showBalances ?? false}
@@ -1985,7 +1981,6 @@ export function Account() {
   );
   const { data: accounts = [] } = useAccounts();
   const { data: payees = [] } = usePayees();
-  const failedAccounts = useFailedAccounts();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [hideFraction] = useSyncedPref('hideFraction');
   const [expandSplits] = useLocalPref('expand-splits');
@@ -2043,7 +2038,6 @@ export function Account() {
             newTransactions={newTransactions}
             matchedTransactions={matchedTransactions}
             accounts={accounts}
-            failedAccounts={failedAccounts}
             dateFormat={dateFormat}
             hideFraction={String(hideFraction) === 'true'}
             expandSplits={expandSplits}
