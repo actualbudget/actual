@@ -22,6 +22,7 @@ export const theme = {
   tableBackground: 'var(--color-tableBackground)',
   tableRowBackgroundHover: 'var(--color-tableRowBackgroundHover)',
   tableText: 'var(--color-tableText)',
+  tableTextItemAdded: 'var(--color-tableTextItemAdded)',
   tableTextLight: 'var(--color-tableTextLight)',
   tableTextSubdued: 'var(--color-tableTextSubdued)',
   tableTextSelected: 'var(--color-tableTextSelected)',
@@ -36,6 +37,8 @@ export const theme = {
   tableRowBackgroundHighlight: 'var(--color-tableRowBackgroundHighlight)',
   tableRowBackgroundHighlightText:
     'var(--color-tableRowBackgroundHighlightText)',
+  tableRowBackgroundAlternate:
+    'var(--color-tableRowBackgroundAlternate, var(--color-tableBackground))',
   tableRowHeaderBackground: 'var(--color-tableRowHeaderBackground)',
   tableRowHeaderText: 'var(--color-tableRowHeaderText)',
   sidebarBackground: 'var(--color-sidebarBackground)',
@@ -45,6 +48,7 @@ export const theme = {
   sidebarItemAccentSelected: 'var(--color-sidebarItemAccentSelected)',
   sidebarItemBackgroundHover: 'var(--color-sidebarItemBackgroundHover)',
   sidebarItemText: 'var(--color-sidebarItemText)',
+  sidebarItemTextUpdated: 'var(--color-sidebarItemTextUpdated)',
   sidebarItemTextSelected: 'var(--color-sidebarItemTextSelected)',
   sidebarBudgetName: 'var(--color-sidebarBudgetName)',
   menuBackground: 'var(--color-menuBackground)',

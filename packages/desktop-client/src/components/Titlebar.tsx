@@ -13,8 +13,8 @@ import {
   SvgViewShow,
 } from '@actual-app/components/icons/v2';
 import { SpaceBetween } from '@actual-app/components/space-between';
-import { styles } from '@actual-app/components/styles';
 import type { CSSProperties } from '@actual-app/components/styles';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -24,6 +24,7 @@ import * as Platform from '@actual-app/core/shared/platform';
 import { css } from '@emotion/css';
 
 import { sync } from '#app/appSlice';
+import { SharedArrayBufferWarning } from '#components/SharedArrayBufferWarning';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useMetadataPref } from '#hooks/useMetadataPref';
@@ -243,8 +244,8 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
       ) : (
         <AnimatedRefresh animating={syncing} />
       )}
-      <Text style={isMobile ? { ...mobileTextStyle } : { marginLeft: 3 }}>
-        {syncState === 'disabled' ? t('Disabled') : null}
+      <Text style={isMobile ? { ...mobileTextStyle } : null}>
+        {syncState === 'disabled' ? ` ${t('Disabled')}` : null}
       </Text>
     </Button>
   );
@@ -344,6 +345,7 @@ export function Titlebar({ style }: TitlebarProps) {
         {isDevelopmentEnvironment() && !isTestEnv && <ThemeSelector />}
         <PrivacyButton />
         {serverURL ? <ServerSyncButton /> : null}
+        <SharedArrayBufferWarning />
         <LoggedInUser />
         <HelpMenu />
       </SpaceBetween>

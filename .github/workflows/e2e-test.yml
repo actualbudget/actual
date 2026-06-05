@@ -28,8 +28,6 @@ jobs:
   build-web:
     name: Build web bundle
     runs-on: ubuntu-latest
-    container:
-      image: mcr.microsoft.com/playwright:v1.59.1-jammy
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -38,8 +36,6 @@ jobs:
         uses: ./.github/actions/setup
         with:
           download-translations: 'false'
-      - name: Trust the repository directory
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Build browser bundle
         # REACT_APP_NETLIFY=true flips isNonProductionEnvironment() on in the
         # bundle so the "Create test file" button (used by every e2e beforeEach
@@ -171,8 +167,6 @@ jobs:
     needs: vrt
     runs-on: ubuntu-latest
     if: ${{ !cancelled() }}
-    container:
-      image: mcr.microsoft.com/playwright:v1.59.1-jammy
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -199,11 +193,13 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           mkdir -p vrt-metadata
-          echo "${{ github.event.pull_request.number }}" > vrt-metadata/pr-number.txt
-          echo "${{ needs.vrt.result }}" > vrt-metadata/vrt-result.txt
+          echo "${PR_NUMBER}" > vrt-metadata/pr-number.txt
+          echo "${VRT_RESULT}" > vrt-metadata/vrt-result.txt
           echo "${STEPS_PLAYWRIGHT_REPORT_VRT_OUTPUTS_ARTIFACT_URL}" > vrt-metadata/artifact-url.txt
         env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
           STEPS_PLAYWRIGHT_REPORT_VRT_OUTPUTS_ARTIFACT_URL: ${{ steps.playwright-report-vrt.outputs.artifact-url }}
+          VRT_RESULT: ${{ needs.vrt.result }}
       - name: Upload VRT metadata
         if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

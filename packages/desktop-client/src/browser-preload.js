@@ -260,9 +260,14 @@ function createBackendWorker() {
   // Each budget gets its own leader tab running a dedicated Worker. All other
   // tabs on the same budget are followers — their messages are routed through
   // the SharedWorker to the leader's Worker.
-  // The SharedWorker never touches SharedArrayBuffer, so this works on all
-  // platforms including iOS/Safari.
-  if (typeof SharedWorker !== 'undefined' && !Platform.isPlaywright) {
+  // iOS is excluded: navigation to an OIDC provider and back creates a new
+  // SharedWorker port connection, leaving the returning tab stuck as UNASSIGNED
+  // with no backend Worker. The direct Worker fallback avoids this entirely.
+  if (
+    typeof SharedWorker !== 'undefined' &&
+    !Platform.isPlaywright &&
+    !Platform.isIOS
+  ) {
     try {
       const sharedWorker = new SharedBrowserServerWorker({
         name: 'actual-backend',
@@ -303,8 +308,12 @@ function createBackendWorker() {
     }
   }
 
-  // Fallback: regular Worker (Playwright, no SharedWorker support, or failure)
-  console.log('[WorkerBridge] No SharedWorker available, using direct Worker');
+  // Fallback: regular Worker (Playwright, iOS, no SharedWorker support, or failure)
+  console.log(
+    Platform.isIOS
+      ? '[WorkerBridge] iOS detected, using direct Worker'
+      : '[WorkerBridge] No SharedWorker available, using direct Worker',
+  );
   worker = new Worker(backendWorkerUrl);
   initSQLBackend(worker);
 
@@ -335,10 +344,17 @@ const isUpdateReadyForDownloadPromise = new Promise(resolve => {
     resolve(true);
   };
 });
-const updateSW = registerSW({
-  immediate: true,
-  onNeedRefresh: markUpdateReadyForDownload,
-});
+// Skip SW registration in dev so stale cached assets don't override edits
+// between page loads. Plugin code that needs a SW can register one itself.
+// In dev there is no SW to install, so applyAppUpdate() can't rely on the
+// SW lifecycle to swap the page — fall back to a plain reload so callers
+// don't hang on the never-resolving promise inside applyAppUpdate.
+const updateSW = IS_DEV
+  ? () => window.location.reload()
+  : registerSW({
+      immediate: true,
+      onNeedRefresh: markUpdateReadyForDownload,
+    });
 
 global.Actual = {
   IS_DEV,

@@ -4,6 +4,7 @@ import { send } from '@actual-app/core/platform/client/connection';
 import type { TagEntity } from '@actual-app/core/types/models';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { QueryClient, QueryKey } from '@tanstack/react-query';
+import { v4 as uuidv4 } from 'uuid';
 
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
@@ -25,7 +26,7 @@ function dispatchErrorNotification(
   dispatch(
     addNotification({
       notification: {
-        id: crypto.randomUUID(),
+        id: uuidv4(),
         type: 'error',
         message,
         pre: error ? error.message : undefined,
@@ -128,6 +129,56 @@ export function useDeleteTagsMutation() {
       dispatchErrorNotification(
         dispatch,
         t('There was an error deleting the tags. Please try again.'),
+        error,
+      );
+    },
+  });
+}
+
+type HideTagsPayload = {
+  ids: Array<TagEntity['id']>;
+};
+
+export function useHideTagsMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({ ids }: HideTagsPayload) => {
+      return await send('tags-hide-all', ids);
+    },
+    onSuccess: () => invalidateQueries(queryClient),
+    onError: error => {
+      console.error('Error hiding tags:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t('There was an error hiding the tags. Please try again.'),
+        error,
+      );
+    },
+  });
+}
+
+type UnhideTagsPayload = {
+  ids: Array<TagEntity['id']>;
+};
+
+export function useUnhideTagsMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({ ids }: UnhideTagsPayload) => {
+      return await send('tags-unhide-all', ids);
+    },
+    onSuccess: () => invalidateQueries(queryClient),
+    onError: error => {
+      console.error('Error hiding tags:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t('There was an error hiding the tags. Please try again.'),
         error,
       );
     },

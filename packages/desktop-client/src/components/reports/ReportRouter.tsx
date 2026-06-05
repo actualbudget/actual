@@ -6,6 +6,7 @@ import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 
 import { AgeOfMoney } from './reports/AgeOfMoney';
+import { BalanceForecast } from './reports/BalanceForecast';
 import { BudgetAnalysis } from './reports/BudgetAnalysis';
 import { Calendar } from './reports/Calendar';
 import { CashFlow } from './reports/CashFlow';
@@ -31,8 +32,8 @@ function ReportBoundary({ children }: { children: ReactNode }) {
 }
 
 export function ReportRouter() {
-  const crossoverReportEnabled = useFeatureFlag('crossoverReport');
   const ageOfMoneyReportEnabled = useFeatureFlag('ageOfMoneyReport');
+  const balanceForecastReportEnabled = useFeatureFlag('balanceForecastReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
   const sankeyReportEnabled = useFeatureFlag('sankeyReport');
 
@@ -56,26 +57,22 @@ export function ReportRouter() {
           </ReportBoundary>
         }
       />
-      {crossoverReportEnabled && (
-        <>
-          <Route
-            path="/crossover"
-            element={
-              <ReportBoundary>
-                <Crossover />
-              </ReportBoundary>
-            }
-          />
-          <Route
-            path="/crossover/:id"
-            element={
-              <ReportBoundary>
-                <Crossover />
-              </ReportBoundary>
-            }
-          />
-        </>
-      )}
+      <Route
+        path="/crossover"
+        element={
+          <ReportBoundary>
+            <Crossover />
+          </ReportBoundary>
+        }
+      />
+      <Route
+        path="/crossover/:id"
+        element={
+          <ReportBoundary>
+            <Crossover />
+          </ReportBoundary>
+        }
+      />
       {ageOfMoneyReportEnabled && (
         <>
           <Route
@@ -212,6 +209,26 @@ export function ReportRouter() {
           </ReportBoundary>
         }
       />
+      {balanceForecastReportEnabled && (
+        <>
+          <Route
+            path="/forecast"
+            element={
+              <ReportBoundary>
+                <BalanceForecast />
+              </ReportBoundary>
+            }
+          />
+          <Route
+            path="/forecast/:id"
+            element={
+              <ReportBoundary>
+                <BalanceForecast />
+              </ReportBoundary>
+            }
+          />
+        </>
+      )}
       {sankeyReportEnabled && (
         <>
           <Route

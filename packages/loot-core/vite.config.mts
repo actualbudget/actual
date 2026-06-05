@@ -62,7 +62,6 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       peggyLoader(),
-      // https://github.com/davidmyersdev/vite-plugin-node-polyfills/issues/142
       nodePolyfills({
         include: [
           'process',

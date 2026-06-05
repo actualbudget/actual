@@ -26,16 +26,17 @@ describe('migrateTemplatesToAutomations', () => {
     expect(migrateTemplatesToAutomations([simpleTemplate])).toEqual([]);
   });
 
-  it('throws when a goal directive reaches migration', () => {
+  it('migrates a goal directive to a long-term goal entry', () => {
     const goalTemplate = {
       type: 'goal',
       amount: 1000,
       directive: 'goal',
     } satisfies Template;
 
-    expect(() => migrateTemplatesToAutomations([goalTemplate])).toThrow(
-      /Unsupported template type/,
-    );
+    const [entry, ...rest] = migrateTemplatesToAutomations([goalTemplate]);
+    expect(rest).toHaveLength(0);
+    expect(entry.displayType).toBe('goal');
+    expect(entry.template).toEqual(goalTemplate);
   });
 
   it('expands a simple template with limit into limit and refill entries', () => {
@@ -96,6 +97,31 @@ describe('migrateTemplatesToAutomations', () => {
     });
     expect(result[0].template).toMatchObject({
       starting: expect.any(String),
+    });
+  });
+
+  it('expands `#template 0 up to N` into limit + fixed-zero (not refill)', () => {
+    const simpleTemplate = {
+      type: 'simple',
+      directive: 'template',
+      priority: 4,
+      monthly: 0,
+      limit: {
+        amount: 1000,
+        hold: false,
+        period: 'monthly',
+      },
+    } satisfies Template;
+
+    const result = migrateTemplatesToAutomations([simpleTemplate]);
+
+    expect(result).toHaveLength(2);
+    expect(result.map(entry => entry.displayType)).toEqual(['limit', 'fixed']);
+    expect(result[1].template).toMatchObject({
+      type: 'periodic',
+      amount: 0,
+      directive: 'template',
+      priority: 4,
     });
   });
 

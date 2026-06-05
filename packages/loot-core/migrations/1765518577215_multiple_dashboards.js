@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 export default async function runMigration(db) {
   db.transaction(() => {
     // 1. Create dashboards table
@@ -14,7 +16,7 @@ export default async function runMigration(db) {
     `);
 
     // 3. Create a default dashboard
-    const defaultDashboardId = crypto.randomUUID();
+    const defaultDashboardId = uuidv4();
     db.runQuery(`INSERT INTO dashboard_pages (id, name) VALUES (?, ?)`, [
       defaultDashboardId,
       'Main',
