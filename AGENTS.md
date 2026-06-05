@@ -44,8 +44,8 @@ yarn start:desktop
 
 ### ⚠️ PR titles must start with `[AI]`
 
-Every pull request title must be prefixed with `[AI]` — nothing checks this for
-you. See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md).
+Every pull request title must be prefixed with `[AI]` — this isn't enforced
+automatically, so you have to apply it yourself. See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md).
 
 ### Task Orchestration with Lage
 
