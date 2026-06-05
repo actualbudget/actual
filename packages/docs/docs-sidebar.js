@@ -71,7 +71,7 @@ const sidebars = {
                 {
                   type: 'doc',
                   id: 'getting-started/manage-files',
-                  label: 'Managing Files on the Dektop App',
+                  label: 'Managing Files on the Desktop App',
                 },
                 'install/docker',
                 'install/cli-tool',                
@@ -191,7 +191,7 @@ const sidebars = {
                 id: 'budgeting/rules/index',
               },              
               items: [
-                'budgeting/rules/custom'
+                'budgeting/rules/custom',
                 {
                   type: 'ref',
                   id: 'experimental/formulas', // the primary link is in Reports
@@ -253,7 +253,7 @@ const sidebars = {
             id: 'reports/index',
           },
           items: [
-            'reports/custom-reports'
+            'reports/custom-reports',
             {
               type: 'doc',
               id: 'experimental/formulas', // there is a secondary link above in Transactions/Rules and in Experimental below
@@ -328,7 +328,7 @@ const sidebars = {
               id: 'experimental/budget-analysis-report',
               label: 'Budget Analysis Report',
             },
-            'experimental/rule-templating' // this has been deprecated, but leaving here for the notice. 
+            'experimental/rule-templating', // this has been deprecated, but leaving here for the notice. 
           ],             
         },
         // end of Experimental
