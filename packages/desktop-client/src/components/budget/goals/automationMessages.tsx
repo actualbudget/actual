@@ -190,8 +190,8 @@ export function GlobalConflictTitle({
     case 'schedule-priority-mismatch':
       return (
         <Trans>
-          All cover schedule and save by date automations must use the same
-          priority
+          All <i>cover schedule</i> and <i>save by date</i> automations must use
+          the same priority
         </Trans>
       );
     default:
