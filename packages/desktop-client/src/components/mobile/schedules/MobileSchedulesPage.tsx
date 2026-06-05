@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
@@ -13,6 +14,7 @@ import { getScheduledAmount } from '@actual-app/core/shared/schedules';
 import type { ScheduleEntity } from '@actual-app/core/types/models';
 
 import { Search } from '#components/common/Search';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useAccounts } from '#hooks/useAccounts';
 import { useDateFormat } from '#hooks/useDateFormat';
@@ -117,6 +119,7 @@ export function MobileSchedulesPage() {
   );
 
   return (
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
     <Page
       header={
         <MobilePageHeader
@@ -165,5 +168,6 @@ export function MobileSchedulesPage() {
         onShowCompleted={() => setShowCompleted(true)}
       />
     </Page>
+    </ErrorBoundary>
   );
 }

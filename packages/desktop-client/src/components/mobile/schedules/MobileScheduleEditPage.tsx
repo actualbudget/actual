@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import React from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -16,6 +17,7 @@ import type {
   ScheduleEntity,
 } from '@actual-app/core/types/models';
 
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page } from '#components/Page';
 import { updateScheduleConditions } from '#components/schedules/schedule-edit-utils';
@@ -226,6 +228,7 @@ export function MobileScheduleEditPage() {
   }
 
   return (
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
     <Page
       header={
         <MobilePageHeader
@@ -274,5 +277,6 @@ export function MobileScheduleEditPage() {
         onUnlinkTransactions={onUnlinkTransactions}
       />
     </Page>
+    </ErrorBoundary>
   );
 }

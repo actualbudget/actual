@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -22,6 +23,7 @@ import type {
 } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
 
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { AppliedFilters } from '#components/filters/AppliedFilters';
 import { FilterButton } from '#components/filters/FiltersMenu';
@@ -65,7 +67,11 @@ export function Spending() {
     return <LoadingIndicator />;
   }
 
-  return <SpendingInternal widget={widget} />;
+  return (
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <SpendingInternal widget={widget} />
+    </ErrorBoundary>
+  );
 }
 
 type SpendingInternalProps = {

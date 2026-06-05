@@ -1,5 +1,6 @@
 import { lazy, Suspense, useCallback, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -12,6 +13,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { FormulaWidget } from '@actual-app/core/types/models';
 
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { QueryManager } from '#components/formula/QueryManager';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
@@ -43,7 +45,11 @@ export function Formula() {
     return <LoadingIndicator />;
   }
 
-  return <FormulaInner widget={widget} />;
+  return (
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <FormulaInner widget={widget} />
+    </ErrorBoundary>
+  );
 }
 
 type FormulaInnerProps = {

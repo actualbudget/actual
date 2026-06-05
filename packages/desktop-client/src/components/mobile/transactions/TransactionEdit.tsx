@@ -8,6 +8,7 @@ import {
   useState,
 } from 'react';
 import type { RefObject } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams, useSearchParams } from 'react-router';
 
@@ -73,6 +74,7 @@ import {
   parseISO,
 } from 'date-fns';
 
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import {
   FieldLabel,
@@ -2123,15 +2125,17 @@ export const TransactionEdit = (props: TransactionEditProps) => {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   return (
-    <SingleActiveEditFormProvider formName="mobile-transaction">
-      <TransactionEditUnconnected
-        {...props}
-        categories={categories}
-        payees={payees}
-        lastTransaction={lastTransaction}
-        accounts={accounts}
-        dateFormat={dateFormat}
-      />
-    </SingleActiveEditFormProvider>
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <SingleActiveEditFormProvider formName="mobile-transaction">
+        <TransactionEditUnconnected
+          {...props}
+          categories={categories}
+          payees={payees}
+          lastTransaction={lastTransaction}
+          accounts={accounts}
+          dateFormat={dateFormat}
+        />
+      </SingleActiveEditFormProvider>
+    </ErrorBoundary>
   );
 };

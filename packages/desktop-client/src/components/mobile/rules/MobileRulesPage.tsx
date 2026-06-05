@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
@@ -11,6 +12,7 @@ import { q } from '@actual-app/core/shared/query';
 import type { RuleEntity } from '@actual-app/core/types/models';
 
 import { Search } from '#components/common/Search';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { ruleToString } from '#components/ManageRules';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useAccounts } from '#hooks/useAccounts';
@@ -166,6 +168,7 @@ export function MobileRulesPage() {
   );
 
   return (
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
     <Page
       header={
         <MobilePageHeader title={t('Rules')} rightContent={<AddRuleButton />} />
@@ -203,5 +206,6 @@ export function MobileRulesPage() {
         onRuleDelete={handleRuleDelete}
       />
     </Page>
+    </ErrorBoundary>
   );
 }

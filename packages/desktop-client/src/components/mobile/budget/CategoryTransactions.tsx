@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 
 import { q } from '@actual-app/core/shared/query';
 import { isPreviewId } from '@actual-app/core/shared/transactions';
@@ -7,6 +8,7 @@ import type {
   TransactionEntity,
 } from '@actual-app/core/types/models';
 
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { TransactionListWithBalances } from '#components/mobile/transactions/TransactionListWithBalances';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useCategoryPreviewTransactions } from '#hooks/useCategoryPreviewTransactions';
@@ -28,9 +30,11 @@ export function CategoryTransactions({
   const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
 
   return (
-    <SchedulesProvider query={schedulesQuery}>
-      <TransactionListWithPreviews category={category} month={month} />
-    </SchedulesProvider>
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <SchedulesProvider query={schedulesQuery}>
+        <TransactionListWithPreviews category={category} month={month} />
+      </SchedulesProvider>
+    </ErrorBoundary>
   );
 }
 

@@ -6,6 +6,7 @@ import React, {
   useState,
 } from 'react';
 import type { CSSProperties } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import {
   Collection,
   Header,
@@ -39,6 +40,7 @@ import type {
   TransactionEntity,
 } from '@actual-app/core/types/models';
 
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { FloatingActionBar } from '#components/mobile/FloatingActionBar';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategoriesById } from '#hooks/useCategories';
@@ -156,6 +158,7 @@ export function TransactionList({
   );
 
   return (
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
     <View style={{ flex: 1 }}>
       {isLoading && (
         <Loading
@@ -265,6 +268,7 @@ export function TransactionList({
         />
       )}
     </View>
+    </ErrorBoundary>
   );
 }
 

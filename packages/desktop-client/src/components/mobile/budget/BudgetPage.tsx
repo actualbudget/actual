@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import { ErrorBoundary } from 'react-error-boundary';
 import React, {
   useCallback,
   useEffect,
@@ -44,6 +45,7 @@ import {
 } from '#budget';
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
 import { prewarmMonth } from '#components/budget/util';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { FinancialText } from '#components/FinancialText';
 import { MobilePageHeader, Page } from '#components/Page';
 import { SyncRefresh } from '#components/SyncRefresh';
@@ -542,6 +544,7 @@ export function BudgetPage() {
   }
 
   return (
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
     <Page
       padding={0}
       header={
@@ -615,6 +618,7 @@ export function BudgetPage() {
         </SyncRefresh>
       </SheetNameProvider>
     </Page>
+    </ErrorBoundary>
   );
 }
 

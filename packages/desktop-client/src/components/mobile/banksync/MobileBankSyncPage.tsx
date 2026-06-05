@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
@@ -14,6 +15,7 @@ import {
 } from '#components/banksync/bankSyncUtils';
 import type { GroupedBankSyncAccounts } from '#components/banksync/bankSyncUtils';
 import { Search } from '#components/common/Search';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useAccounts } from '#hooks/useAccounts';
 import { useNavigate } from '#hooks/useNavigate';
@@ -90,6 +92,7 @@ export function MobileBankSyncPage() {
   }, []);
 
   return (
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
     <Page header={<MobilePageHeader title={t('Bank Sync')} />} padding={0}>
       <View
         style={{
@@ -146,5 +149,6 @@ export function MobileBankSyncPage() {
         />
       )}
     </Page>
+    </ErrorBoundary>
   );
 }

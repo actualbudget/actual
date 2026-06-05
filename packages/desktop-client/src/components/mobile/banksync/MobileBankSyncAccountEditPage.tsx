@@ -1,4 +1,5 @@
 import React from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -9,6 +10,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { useUnlinkAccountMutation } from '#accounts';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { BankSyncCheckboxOptions } from '#components/banksync/BankSyncCheckboxOptions';
 import { FieldMapping } from '#components/banksync/FieldMapping';
 import { useBankSyncAccountSettings } from '#components/banksync/useBankSyncAccountSettings';
@@ -110,6 +112,7 @@ export function MobileBankSyncAccountEditPage() {
     mappings.get(transactionDirection) ?? new Map<string, string>();
 
   return (
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
     <Page
       header={
         <MobilePageHeader
@@ -192,5 +195,6 @@ export function MobileBankSyncAccountEditPage() {
         </View>
       </View>
     </Page>
+    </ErrorBoundary>
   );
 }

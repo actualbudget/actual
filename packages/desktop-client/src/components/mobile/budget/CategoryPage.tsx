@@ -1,4 +1,5 @@
 import React, { Fragment } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans } from 'react-i18next';
 import { useParams, useSearchParams } from 'react-router';
 
@@ -6,6 +7,7 @@ import { TextOneLine } from '@actual-app/components/text-one-line';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { AddTransactionButton } from '#components/mobile/transactions/AddTransactionButton';
 import { MobilePageHeader, Page } from '#components/Page';
@@ -28,6 +30,7 @@ export function CategoryPage() {
   const { data: category } = useCategory(categoryIdParam);
 
   return (
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
     <Page
       header={
         <MobilePageHeader
@@ -60,5 +63,6 @@ export function CategoryPage() {
         )}
       </Fragment>
     </Page>
+    </ErrorBoundary>
   );
 }

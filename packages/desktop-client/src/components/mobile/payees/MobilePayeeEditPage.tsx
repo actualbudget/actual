@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -10,6 +11,7 @@ import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import type { PayeeEntity } from '@actual-app/core/types/models';
 
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { InputField } from '#components/mobile/MobileForms';
 import { MobilePageHeader, Page } from '#components/Page';
@@ -109,6 +111,7 @@ export function MobilePayeeEditPage() {
   }
 
   return (
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
     <Page
       header={
         <MobilePageHeader
@@ -147,5 +150,6 @@ export function MobilePayeeEditPage() {
         />
       </View>
     </Page>
+    </ErrorBoundary>
   );
 }

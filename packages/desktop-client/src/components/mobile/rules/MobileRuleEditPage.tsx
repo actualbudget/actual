@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router';
 
@@ -9,6 +10,7 @@ import { send } from '@actual-app/core/platform/client/connection';
 import { q } from '@actual-app/core/shared/query';
 import type { NewRuleEntity, RuleEntity } from '@actual-app/core/types/models';
 
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page } from '#components/Page';
 import { RuleEditor } from '#components/rules/RuleEditor';
@@ -179,6 +181,7 @@ export function MobileRuleEditPage() {
   }
 
   return (
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
     <Page
       header={
         <MobilePageHeader
@@ -200,5 +203,6 @@ export function MobileRuleEditPage() {
         }}
       />
     </Page>
+    </ErrorBoundary>
   );
 }

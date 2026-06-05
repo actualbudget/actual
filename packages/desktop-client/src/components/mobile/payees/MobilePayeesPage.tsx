@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
@@ -9,6 +10,7 @@ import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 import type { PayeeEntity, RuleEntity } from '@actual-app/core/types/models';
 
 import { Search } from '#components/common/Search';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useNavigate } from '#hooks/useNavigate';
 import { usePayeeRuleCounts } from '#hooks/usePayeeRuleCounts';
@@ -109,6 +111,7 @@ export function MobilePayeesPage() {
   );
 
   return (
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
     <Page header={<MobilePageHeader title={t('Payees')} />} padding={0}>
       <View
         style={{
@@ -144,5 +147,6 @@ export function MobilePayeesPage() {
         onPayeeRuleAction={handlePayeeRuleAction}
       />
     </Page>
+    </ErrorBoundary>
   );
 }

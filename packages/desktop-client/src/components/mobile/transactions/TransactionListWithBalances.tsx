@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { ComponentProps } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 
 import { Label } from '@actual-app/components/label';
@@ -9,6 +10,7 @@ import { View } from '@actual-app/components/view';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { Search } from '#components/common/Search';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
@@ -105,6 +107,7 @@ export function TransactionListWithBalances({
   const selectedInst = useSelected('transactions', [...transactions], []);
 
   return (
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
     <DisplayPayeeProvider transactions={transactions}>
       <SelectedProvider instance={selectedInst}>
         <View
@@ -156,6 +159,7 @@ export function TransactionListWithBalances({
         </PullToRefresh>
       </SelectedProvider>
     </DisplayPayeeProvider>
+    </ErrorBoundary>
   );
 }
 

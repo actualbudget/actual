@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -30,6 +31,7 @@ import type { TFunction } from 'i18next';
 import debounce from 'lodash/debounce';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
@@ -70,7 +72,11 @@ export function Sankey() {
     return <LoadingIndicator />;
   }
 
-  return <SankeyInner widget={widget} />;
+  return (
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <SankeyInner widget={widget} />
+    </ErrorBoundary>
+  );
 }
 
 export function topNNodes(cardHeight: number): number {

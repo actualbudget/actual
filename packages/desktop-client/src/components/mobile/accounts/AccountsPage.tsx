@@ -1,6 +1,7 @@
 import { forwardRef, useCallback, useRef } from 'react';
 import type { ComponentPropsWithoutRef, CSSProperties } from 'react';
 import type { DragItem } from 'react-aria';
+import { ErrorBoundary } from 'react-error-boundary';
 import {
   DropIndicator,
   ListBox,
@@ -28,6 +29,7 @@ import { isAccountFailedSync } from '#accounts/syncStatus';
 import { makeAmountFullStyle } from '#components/budget/util';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { MobilePageHeader, Page } from '#components/Page';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { useAccounts } from '#hooks/useAccounts';
@@ -521,21 +523,23 @@ export function AccountsPage() {
   }, [syncAndDownload]);
 
   return (
-    <View style={{ flex: 1 }}>
-      <AllAccountList
-        // This key forces the whole table rerender when the number
-        // format changes
-        key={numberFormat + hideFraction}
-        accounts={accounts}
-        getAccountBalance={bindings.accountBalance}
-        getAllAccountsBalance={bindings.allAccountBalance}
-        getOnBudgetBalance={bindings.onBudgetAccountBalance}
-        getOffBudgetBalance={bindings.offBudgetAccountBalance}
-        getClosedAccountsBalance={bindings.closedAccountBalance}
-        onAddAccount={onAddAccount}
-        onOpenAccount={onOpenAccount}
-        onSync={onSync}
-      />
-    </View>
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <View style={{ flex: 1 }}>
+        <AllAccountList
+          // This key forces the whole table rerender when the number
+          // format changes
+          key={numberFormat + hideFraction}
+          accounts={accounts}
+          getAccountBalance={bindings.accountBalance}
+          getAllAccountsBalance={bindings.allAccountBalance}
+          getOnBudgetBalance={bindings.onBudgetAccountBalance}
+          getOffBudgetBalance={bindings.offBudgetAccountBalance}
+          getClosedAccountsBalance={bindings.closedAccountBalance}
+          onAddAccount={onAddAccount}
+          onOpenAccount={onOpenAccount}
+          onSync={onSync}
+        />
+      </View>
+    </ErrorBoundary>
   );
 }

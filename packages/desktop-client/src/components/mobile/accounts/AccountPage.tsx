@@ -1,4 +1,5 @@
 import React, { Fragment, useCallback } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -13,6 +14,7 @@ import type { AccountEntity } from '@actual-app/core/types/models';
 
 import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
 import { isAccountFailedSync } from '#accounts/syncStatus';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { AddTransactionButton } from '#components/mobile/transactions/AddTransactionButton';
 import { MobilePageHeader, Page } from '#components/Page';
@@ -59,35 +61,37 @@ export function AccountPage() {
   );
 
   return (
-    <Page
-      header={
-        <MobilePageHeader
-          title={
-            account ? (
-              <AccountHeader account={account} />
-            ) : (
-              <NameOnlyHeader name={nameFromId(accountIdParam)} />
-            )
-          }
-          leftContent={<MobileBackButton />}
-          rightContent={<AddTransactionButton accountId={account?.id} />}
-        />
-      }
-      padding={0}
-    >
-      {/* This key forces the whole table rerender when the number format changes */}
-      <Fragment key={numberFormat + hideFraction}>
-        {account ? (
-          <AccountTransactions account={account} />
-        ) : accountIdParam === 'onbudget' ? (
-          <OnBudgetAccountTransactions />
-        ) : accountIdParam === 'offbudget' ? (
-          <OffBudgetAccountTransactions />
-        ) : (
-          <AllAccountTransactions />
-        )}
-      </Fragment>
-    </Page>
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <Page
+        header={
+          <MobilePageHeader
+            title={
+              account ? (
+                <AccountHeader account={account} />
+              ) : (
+                <NameOnlyHeader name={nameFromId(accountIdParam)} />
+              )
+            }
+            leftContent={<MobileBackButton />}
+            rightContent={<AddTransactionButton accountId={account?.id} />}
+          />
+        }
+        padding={0}
+      >
+        {/* This key forces the whole table rerender when the number format changes */}
+        <Fragment key={numberFormat + hideFraction}>
+          {account ? (
+            <AccountTransactions account={account} />
+          ) : accountIdParam === 'onbudget' ? (
+            <OnBudgetAccountTransactions />
+          ) : accountIdParam === 'offbudget' ? (
+            <OffBudgetAccountTransactions />
+          ) : (
+            <AllAccountTransactions />
+          )}
+        </Fragment>
+      </Page>
+    </ErrorBoundary>
   );
 }
 
