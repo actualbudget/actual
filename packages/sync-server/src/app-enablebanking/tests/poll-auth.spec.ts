@@ -534,10 +534,7 @@ describe('Enable Banking Express routes', () => {
 
       // Both the balance and transaction fetch calls should include PSU headers
       for (const call of mockFetch.mock.calls) {
-        expect(call[1].headers).toHaveProperty(
-          'Psu-Ip-Address',
-          '8.8.8.8',
-        );
+        expect(call[1].headers).toHaveProperty('Psu-Ip-Address', '8.8.8.8');
         expect(call[1].headers).toHaveProperty(
           'Psu-User-Agent',
           'TestBrowser/1.0',
