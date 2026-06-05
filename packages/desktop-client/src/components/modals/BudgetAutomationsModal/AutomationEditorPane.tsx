@@ -57,6 +57,9 @@ const MOBILE_TOUCH_FIELDS_CLASS = css({
         minHeight: styles.mobileMinHeight,
         boxSizing: 'border-box',
       },
+    '& input[type="date"], & input[type="month"]': {
+      width: '100%',
+    },
   },
 });
 

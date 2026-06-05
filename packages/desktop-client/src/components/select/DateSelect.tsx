@@ -467,7 +467,7 @@ function DateSelectMobile(props: DateSelectProps) {
       onChange={event => {
         props.onSelect(event.target.value);
       }}
-      style={{ height: styles.mobileMinHeight, width: '100%', ...inputStyle }}
+      style={{ height: 28, ...inputStyle }}
       {...restInputProps}
     />
   );
