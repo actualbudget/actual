@@ -115,5 +115,8 @@ export function recalculate({
     totalTotals,
     totalBudgeted: totalTotals,
     intervalData,
+    ...(item.uncategorized_id !== undefined && {
+      uncategorized_id: item.uncategorized_id,
+    }),
   };
 }

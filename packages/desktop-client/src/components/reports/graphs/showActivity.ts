@@ -24,6 +24,7 @@ type showActivityProps = {
   endDate?: string;
   field?: string;
   id?: string | string[]; // changed: supports array for oneOf
+  uncategorized_id?: 'off_budget' | 'transfer' | 'other' | 'all';
   interval?: string;
 };
 
@@ -40,6 +41,7 @@ export function showActivity({
   endDate,
   field,
   id,
+  uncategorized_id,
   interval = 'Day',
 }: showActivityProps) {
   const isOutFlow =
@@ -53,15 +55,31 @@ export function showActivity({
           'FromDate') as 'dayFromDate' | 'monthFromDate' | 'yearFromDate');
   const isDateOp = interval === 'Weekly' || type !== 'time';
 
+  // Pseudo-category drill-downs: `id` is '' for transfer/off_budget/other groups.
+  // Build the correct filter based on uncategorized_id instead of the empty id.
+  const pseudoCategoryFilters =
+    uncategorized_id === 'transfer'
+      ? [{ field: 'transfer', op: 'is', value: true }]
+      : uncategorized_id === 'other'
+        ? [
+            { field: 'category', op: 'is', value: null, type: 'id' },
+            { field: 'transfer', op: 'is', value: false },
+          ]
+        : [];
+
   const filterConditions = [
     ...filters,
-    id && {
-      // changed: use oneOf when id is an array, is when it's a string
-      field,
-      op: Array.isArray(id) ? 'oneOf' : 'is',
-      value: id,
-      type: 'id',
-    },
+    // Skip the generic id-based category filter for pseudo-categories; their
+    // filters are handled by pseudoCategoryFilters above.
+    !uncategorized_id &&
+      id && {
+        // changed: use oneOf when id is an array, is when it's a string
+        field,
+        op: Array.isArray(id) ? 'oneOf' : 'is',
+        value: id,
+        type: 'id',
+      },
+    ...pseudoCategoryFilters,
     {
       field: 'date',
       op: isDateOp ? 'gte' : 'is',
