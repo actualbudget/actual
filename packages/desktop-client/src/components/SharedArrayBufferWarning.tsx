@@ -4,6 +4,7 @@ import { SvgAlertTriangle } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
+import { css } from '@emotion/css';
 
 import { Link } from '#components/common/Link';
 
@@ -35,7 +36,15 @@ export function SharedArrayBufferWarning() {
       <Link
         variant="external"
         to="https://actualbudget.org/docs/troubleshooting/shared-array-buffer"
-        styles={{ color: theme.warningText, textDecoration: 'none' }}
+        className={css({
+          color: `${theme.warningText} !important`,
+          textDecoration: 'none',
+          padding: '4px 6px',
+          borderRadius: 4,
+          display: 'flex',
+          alignItems: 'center',
+          ':hover': { backgroundColor: theme.buttonBareBackgroundHover },
+        })}
       >
         <Trans>Warning</Trans>
         <SvgAlertTriangle width={13} style={{ marginLeft: '6px' }} />

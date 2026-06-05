@@ -47,7 +47,7 @@ type ExternalLinkProps = {
   to?: string;
   linkColor?: keyof typeof externalLinkColors;
   onClick?: MouseEventHandler;
-  styles?: CSSProperties;
+  className?: string;
 };
 
 const ExternalLink = ({
@@ -55,7 +55,7 @@ const ExternalLink = ({
   to,
   linkColor = 'blue',
   onClick,
-  styles,
+  className,
 }: ExternalLinkProps) => {
   return (
     // we can't use <ExternalLink /> here for obvious reasons
@@ -63,7 +63,8 @@ const ExternalLink = ({
       href={to ?? ''}
       target="_blank"
       rel="noopener noreferrer"
-      style={{ color: externalLinkColors[linkColor], ...styles }}
+      style={{ color: externalLinkColors[linkColor] }}
+      className={className}
       onClick={onClick}
     >
       {children}
