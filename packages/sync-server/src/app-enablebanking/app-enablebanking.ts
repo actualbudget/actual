@@ -34,7 +34,6 @@ app.use(express.json());
 
 function extractPsuHeaders(req: Request): PsuHeaders {
   const ip = req.ip;
-
   const ua =
     typeof req.headers['user-agent'] === 'string'
       ? req.headers['user-agent']
