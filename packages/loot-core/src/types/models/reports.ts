@@ -90,6 +90,8 @@ export type LegendEntity = {
   id: string | null;
   color: string;
   dataKey: string; // Uses id for unique data lookup when categories have same name
+  /** Populated for pseudo-categories (transfer, off_budget, other) that share id: '' */
+  uncategorized_id?: 'off_budget' | 'transfer' | 'other' | 'all';
 };
 
 export type IntervalEntity = {
@@ -117,6 +119,8 @@ export type GroupedEntity = {
   netDebts: number;
   totalBudgeted: number;
   categories?: GroupedEntity[];
+  /** Populated for pseudo-categories (transfer, off_budget, other) that share id: '' */
+  uncategorized_id?: 'off_budget' | 'transfer' | 'other' | 'all';
 };
 
 export type Interval = {

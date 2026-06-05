@@ -190,6 +190,7 @@ export function LineGraph({
     : [];
 
   const onShowActivity = (item, id, payload) => {
+    const legendEntry = data.legend.find(e => e.id === id || e.dataKey === id);
     showActivity({
       navigate,
       categories,
@@ -203,6 +204,7 @@ export function LineGraph({
       endDate: payload.payload.intervalEndDate,
       field: groupBy.toLowerCase(),
       id,
+      uncategorized_id: legendEntry?.uncategorized_id,
       interval,
     });
   };

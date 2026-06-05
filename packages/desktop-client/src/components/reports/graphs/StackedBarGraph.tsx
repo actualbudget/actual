@@ -303,6 +303,7 @@ export function StackedBarGraph({
                         endDate: e.payload?.intervalEndDate,
                         field: groupBy.toLowerCase(),
                         id: entry.id,
+                        uncategorized_id: entry.uncategorized_id,
                         interval,
                       })
                     }

@@ -178,6 +178,7 @@ export const ReportTableRow = memo(
                         endDate: intervalItem.intervalEndDate || '',
                         field: groupBy.toLowerCase(),
                         id: item.id,
+                        uncategorized_id: item.uncategorized_id,
                         interval,
                       })
                     }
@@ -235,6 +236,7 @@ export const ReportTableRow = memo(
                         endDate,
                         field: groupBy.toLowerCase(),
                         id: item.id,
+                        uncategorized_id: item.uncategorized_id,
                       })
                     }
                   />
@@ -285,6 +287,7 @@ export const ReportTableRow = memo(
                         endDate,
                         field: groupBy.toLowerCase(),
                         id: item.id,
+                        uncategorized_id: item.uncategorized_id,
                       })
                     }
                   />
@@ -334,6 +337,7 @@ export const ReportTableRow = memo(
                 endDate,
                 field: groupBy.toLowerCase(),
                 id: item.id,
+                uncategorized_id: item.uncategorized_id,
               })
             }
             width="flex"

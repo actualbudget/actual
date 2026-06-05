@@ -66,12 +66,20 @@ export function calculateLegend(
   }
 
   const legend: LegendEntity[] = chooseData.map((item, index) => {
-    return {
+    const entry: LegendEntity = {
       id: item.id || '',
       name: item.name || '',
       color: getColor(item.data, index),
       dataKey: item.id || item.name || '', // Use id for unique data lookup
     };
+    const uncategorized_id =
+      groupBy !== 'Interval' &&
+      'uncategorized_id' in item.data &&
+      item.data.uncategorized_id;
+    if (uncategorized_id) {
+      entry.uncategorized_id = uncategorized_id;
+    }
+    return entry;
   });
   return legend;
 }

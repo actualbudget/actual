@@ -600,6 +600,7 @@ export function DonutGraph({
                           endDate: data.endDate,
                           field: 'category',
                           id: item.id,
+                          uncategorized_id: item.uncategorized_id,
                         });
                       }
                     }}
@@ -707,6 +708,10 @@ export function DonutGraph({
                             ? 'category'
                             : groupBy.toLowerCase(),
                         id: groupBy === 'Group' ? groupCategoryIds : item.id,
+                        uncategorized_id:
+                          groupBy === 'Group'
+                            ? undefined
+                            : item.uncategorized_id,
                       });
                     }
                   }}

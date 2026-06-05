@@ -329,6 +329,7 @@ export function BarGraph({
                     endDate: data.endDate,
                     field: groupBy.toLowerCase(),
                     id: item.id,
+                    uncategorized_id: item.uncategorized_id,
                   })
                 }
                 shape={(props: BarShapeProps) => (
