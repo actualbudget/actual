@@ -336,7 +336,6 @@ function processTransaction(
     ...processPendingTransaction(trans, account),
     category,
     booked: true,
-    payeeName: getPayeeName(trans),
     transactionId: trans._id,
   };
 }
