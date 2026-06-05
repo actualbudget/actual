@@ -542,13 +542,15 @@ export function BudgetAutomationsBody({
           )}
         </View>
 
-        <View style={{ flex: 1, minWidth: 0 }}>
+        <View style={{ flex: 1, minWidth: 0, minHeight: 0 }}>
           {cleanupActive ? (
             <View
               style={{
                 flex: 1,
                 padding: 20,
                 overflowY: 'auto',
+                overflowX: 'hidden',
+                scrollbarGutter: 'stable',
                 gap: 14,
               }}
             >

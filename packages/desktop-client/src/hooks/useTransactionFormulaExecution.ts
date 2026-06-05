@@ -9,7 +9,9 @@ import enUS from 'hyperformula/i18n/languages/enUS';
 
 import { useLocale } from './useLocale';
 
-HyperFormula.registerLanguage('enUS', enUS);
+if (!HyperFormula.getRegisteredLanguagesCodes().includes('enUS')) {
+  HyperFormula.registerLanguage('enUS', enUS);
+}
 HyperFormula.registerFunctionPlugin(
   CustomFunctionsPlugin,
   customFunctionsTranslations,

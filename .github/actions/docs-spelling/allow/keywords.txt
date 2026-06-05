@@ -111,6 +111,8 @@ portalization
 Postgresql
 protobuf
 publix
+pwa
+PWA
 QFX
 QIF
 Quicken
