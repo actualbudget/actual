@@ -6,6 +6,7 @@ import { Route, Routes, useLocation } from 'react-router';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgArrowLeft } from '@actual-app/components/icons/v1';
+import { Tooltip } from '@actual-app/components/tooltip';
 import {
   SvgAlertTriangle,
   SvgNavigationMenu,
@@ -250,6 +251,45 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
   );
 }
 
+function DegradedEnvIndicator() {
+  const { t } = useTranslation();
+  const isDegraded =
+    typeof SharedArrayBuffer === 'undefined' &&
+    !!localStorage.getItem('SharedArrayBufferOverride');
+
+  if (!isDegraded) {
+    return null;
+  }
+
+  return (
+    <Tooltip
+      content={
+        <Trans>
+          Actual is running in a degraded state. Your server may not be using
+          HTTPS or may be missing required security headers. Data loss or sync
+          issues may occur. See{' '}
+          <a
+            href="https://actualbudget.org/docs/troubleshooting/shared-array-buffer"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            the troubleshooting docs
+          </a>{' '}
+          for more information.
+        </Trans>
+      }
+    >
+      <Button
+        variant="bare"
+        aria-label={t('Degraded environment warning')}
+        style={{ color: theme.warningText }}
+      >
+        <SvgAlertTriangle style={{ width: 14, height: 14 }} />
+      </Button>
+    </Tooltip>
+  );
+}
+
 function BudgetTitlebar() {
   const [maxMonths, setMaxMonthsPref] = useGlobalPref('maxMonths');
 
@@ -342,6 +382,7 @@ export function Titlebar({ style }: TitlebarProps) {
       <SpaceBetween gap={10}>
         <UncategorizedButton />
         {isDevelopmentEnvironment() && !isTestEnv && <ThemeSelector />}
+        <DegradedEnvIndicator />
         <PrivacyButton />
         {serverURL ? <ServerSyncButton /> : null}
         <LoggedInUser />
