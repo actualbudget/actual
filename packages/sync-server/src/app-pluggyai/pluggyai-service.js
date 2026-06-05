@@ -58,7 +58,7 @@ export const pluggyaiService = {
     }
   },
 
-  getTransactionsByAccountId: async (accountId, startDate, pageSize, page) => {
+  getTransactionsByAccountId: async (accountId, startDate) => {
     try {
       const client = getPluggyClient();
 
@@ -72,10 +72,8 @@ export const pluggyaiService = {
 
       if (sandboxAccount) startDate = '2000-01-01';
 
-      const transactions = await client.fetchTransactions(accountId, {
-        from: startDate,
-        pageSize,
-        page,
+      const transactions = await client.fetchAllTransactions(accountId, {
+        dateFrom: startDate,
       });
 
       if (sandboxAccount) {
@@ -96,25 +94,9 @@ export const pluggyaiService = {
     }
   },
   getTransactions: async (accountId, startDate) => {
-    let transactions = [];
-    let result = await pluggyaiService.getTransactionsByAccountId(
+    return await pluggyaiService.getTransactionsByAccountId(
       accountId,
       startDate,
-      500,
-      1,
     );
-    transactions = transactions.concat(result.results);
-    const totalPages = result.totalPages;
-    while (result.page !== totalPages) {
-      result = await pluggyaiService.getTransactionsByAccountId(
-        accountId,
-        startDate,
-        500,
-        result.page + 1,
-      );
-      transactions = transactions.concat(result.results);
-    }
-
-    return transactions;
   },
 };
