@@ -43,6 +43,7 @@ const sidebars = {
             label: 'Getting Started', // Quick start guide will replace this eventually
          },
         'getting-started/tips-tricks',
+        ],
       },
         
     {
