@@ -1,5 +1,5 @@
 import { createContext, useContext, useRef, useState } from 'react';
-import type { ReactNode, Ref, RefObject } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import { Popover } from 'react-aria-components';
 
 import { Menu } from '@actual-app/components/menu';
@@ -7,14 +7,16 @@ import { theme } from '@actual-app/components/theme';
 
 import { useRefEventListener } from '#hooks/useRefEventListener';
 
-type Action = {
+export type ContextMenuAction = {
   name: string;
   text: string;
   onClick: () => void;
+  hidden?: boolean;
+  disabled?: boolean;
 };
 
 type ContextMenuContextData = {
-  addAction: (s: Action) => void;
+  addAction: (s: ContextMenuAction) => void;
 };
 
 const ContextMenuContext = createContext<ContextMenuContextData>({
@@ -27,17 +29,23 @@ export function ContextMenuContextProvider({
 }: {
   children?: ReactNode;
 }) {
-  const [actions, setActions] = useState<Action[]>([]);
+  const [actions, setActions] = useState<ContextMenuAction[]>([]);
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLDivElement | null>(null);
 
   // 1. Use a ref to collect actions synchronously during event bubbling
-  const pendingActions = useRef<Action[]>([]);
+  const pendingActions = useRef<ContextMenuAction[]>([]);
 
-  function addAction(action: Action) {
-    pendingActions.current.push(action);
+  function addAction(action: ContextMenuAction) {
+    if (
+      !pendingActions.current.some(
+        pendingAction => pendingAction.name === action.name,
+      )
+    ) {
+      pendingActions.current.push(action);
+    }
   }
 
   function handleOpenChange(newOpen: boolean) {
@@ -130,16 +138,15 @@ export function ContextMenuContextProvider({
 
 export function useContextMenuAction(
   triggerRef: RefObject<HTMLElement | null>,
-  action: Action,
+  ...actions: ContextMenuAction[]
 ) {
   const { addAction } = useContext(ContextMenuContext);
   useRefEventListener(
     triggerRef,
     'contextmenu',
     () => {
-      console.log(action);
-      addAction(action);
+      actions.filter(action => !action.hidden).forEach(addAction);
     },
-    [addAction, action],
+    [addAction, actions],
   );
 }

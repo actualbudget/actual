@@ -150,6 +150,7 @@ import type {
   TransactionUpdateFunction,
 } from './table/utils';
 import { TransactionMenu } from './TransactionMenu';
+import { useTransactionRowContextActions } from './useTransactionRowContextActions';
 
 type TransactionHeaderProps = {
   hasSelected: boolean;
@@ -1324,8 +1325,20 @@ const Transaction = memo(function Transaction({
     dropPos && isValidDropTarget && !isBeingDragged,
   );
 
+  useTransactionRowContextActions({
+    rowRef: triggerRef,
+    transaction,
+    getTransaction: id => allTransactions?.find(t => t.id === id),
+    onDelete: ids => onBatchDelete?.(ids),
+    onDuplicate: ids => onBatchDuplicate?.(ids),
+    onLinkSchedule: ids => onBatchLinkSchedule?.(ids),
+    onUnlinkSchedule: ids => onBatchUnlinkSchedule?.(ids),
+    onCreateRule: ids => onCreateRule?.(ids),
+    onScheduleAction: (name, ids) => onScheduleAction?.(name, ids),
+    onMakeAsNonSplitTransactions: ids => onMakeAsNonSplitTransactions?.(ids),
+  });
   useContextMenuAction(triggerRef, {
-    name: 'name',
+    name: 'delete',
     text: 'Name',
     onClick: () => {
       console.log('testing');
