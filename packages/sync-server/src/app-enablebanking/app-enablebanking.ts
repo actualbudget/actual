@@ -9,6 +9,7 @@ import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
+import { isBlockedIp } from '#util/ssrf';
 
 import type {
   EnableBankingSession,
@@ -31,22 +32,6 @@ app.use(express.json());
 
 // --- Shared helpers ---
 
-function isPrivateOrLocalIp(ip: string) {
-  const normalized = ip.replace(/^::ffff:/, '').toLowerCase();
-
-  return (
-    normalized === '::1' ||
-    normalized === '127.0.0.1' ||
-    normalized.startsWith('10.') ||
-    normalized.startsWith('192.168.') ||
-    normalized.startsWith('169.254.') ||
-    /^172\.(1[6-9]|2\d|3[0-1])\./.test(normalized) ||
-    normalized.startsWith('fc') ||
-    normalized.startsWith('fd') ||
-    normalized.startsWith('fe80:')
-  );
-}
-
 function extractPsuHeaders(req: Request): PsuHeaders {
   const ip = req.ip;
 
@@ -55,7 +40,7 @@ function extractPsuHeaders(req: Request): PsuHeaders {
       ? req.headers['user-agent']
       : undefined;
 
-  if (!ip || isPrivateOrLocalIp(ip)) {
+  if (!ip || isBlockedIp(ip)) {
     debug('Skipping PSU headers because PSU IP is local/private');
     return {};
   }
