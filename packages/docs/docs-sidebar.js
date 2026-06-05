@@ -169,7 +169,7 @@ const sidebars = {
             id: 'transactions/importing',
           },
           items: [
-            'transactions/payees',            
+            'transactions/payees',
             {
               type: 'category',
               label: 'Transfers',
@@ -199,7 +199,7 @@ const sidebars = {
                   label: 'Excel Formula Mode - Rule Formulas (experimental)',
                 },
               ],
-            },            
+            },
             'transactions/filters',
             'transactions/merging',
             'transactions/bulk-editing',
