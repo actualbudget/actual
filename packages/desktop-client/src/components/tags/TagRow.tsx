@@ -141,11 +141,11 @@ export const TagRow = memo(
           exposed={focusedField === 'description'}
           onExpose={name => onEdit(tag.id, name)}
           value={tag.description || t('No description')}
-          valueStyle={
-            tag.description
-              ? {}
-              : { fontStyle: 'italic', color: theme.tableTextLight }
-          }
+          valueStyle={{
+            opacity: tag.hidden ? 0.5 : undefined,
+            fontStyle: !tag.description ? 'italic' : undefined,
+            color: !tag.description ? theme.tableTextLight : undefined,
+          }}
           inputProps={{
             value: tag.description || '',
             onUpdate,
@@ -163,6 +163,7 @@ export const TagRow = memo(
               color: theme.noticeTextDark,
               fontSize: 12,
               cursor: 'pointer',
+              opacity: tag.hidden ? 0.5 : undefined,
               ':hover': { backgroundColor: theme.noticeBackgroundLight },
             }}
             onSelect={onShowActivity}

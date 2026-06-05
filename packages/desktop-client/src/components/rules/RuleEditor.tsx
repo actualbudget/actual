@@ -27,13 +27,10 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import {
   FIELD_TYPES,
-  friendlyOp,
-  getAllocationMethods,
   getFieldError,
   getValidOps,
   isValidOp,
   makeValue,
-  mapField,
   parse,
   unparse,
 } from '@actual-app/core/shared/rules';
@@ -46,6 +43,7 @@ import type {
 import { css } from '@emotion/css';
 import { v4 as uuidv4 } from 'uuid';
 
+import { TagMultiAutocomplete } from '#components/autocomplete/TagMultiAutocomplete';
 import { FinancialText } from '#components/FinancialText';
 import { StatusBadge } from '#components/schedules/StatusBadge';
 import { SimpleTransactionsTable } from '#components/transactions/SimpleTransactionsTable';
@@ -61,6 +59,7 @@ import { addNotification } from '#notifications/notificationsSlice';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
 import { disableUndo, enableUndo } from '#undo';
+import { friendlyOp, getAllocationMethods, mapField } from '#util/rule';
 
 import { FormulaActionEditor } from './FormulaActionEditor';
 
@@ -150,7 +149,13 @@ export function OpSelect<T extends string>({
       // TODO: Add matches op support for payees, accounts, categories.
       .filter(op =>
         type === 'id'
-          ? !['contains', 'matches', 'doesNotContain', 'hasTags'].includes(op)
+          ? ![
+              'contains',
+              'matches',
+              'doesNotContain',
+              'hasTags',
+              'hasAnyTag',
+            ].includes(op)
           : true,
       )
       .map(op => [op, formatOp(op, type)]);
@@ -305,6 +310,14 @@ function ConditionEditor({
         key={inputKey}
         defaultValue={value}
         onChange={v => onChange('value', v)}
+      />
+    );
+  } else if (type === 'string' && (op === 'hasTags' || op === 'hasAnyTag')) {
+    valueEditor = (
+      <TagMultiAutocomplete
+        key={inputKey}
+        value={value ?? ''}
+        setValue={(value: string) => onChange('value', value)}
       />
     );
   } else {

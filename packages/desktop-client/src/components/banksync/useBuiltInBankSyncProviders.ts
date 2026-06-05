@@ -77,11 +77,11 @@ async function ensureSuccessResponse(
   response: SecretSetResponse,
   fallbackMessage: string,
 ) {
-  if (response.error_code) {
+  if (response?.error_code) {
     throw new Error(response.reason || response.error_code);
   }
 
-  if (response.error) {
+  if (response?.error) {
     throw new Error(response.reason || response.error || fallbackMessage);
   }
 }

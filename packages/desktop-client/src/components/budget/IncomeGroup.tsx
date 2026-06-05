@@ -17,6 +17,10 @@ type IncomeGroupProps = {
   collapsed: boolean;
   onEditName: (id: CategoryGroupEntity['id']) => void;
   onSave: (group: CategoryGroupEntity) => void;
+  onSortCategories?: (
+    groupId: CategoryGroupEntity['id'],
+    direction: 'asc' | 'desc',
+  ) => void;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
   onShowNewCategory: (groupId: CategoryGroupEntity['id']) => void;
 };
@@ -27,6 +31,7 @@ export function IncomeGroup({
   collapsed,
   onEditName,
   onSave,
+  onSortCategories,
   onToggleCollapse,
   onShowNewCategory,
 }: IncomeGroupProps) {
@@ -49,6 +54,7 @@ export function IncomeGroup({
         }
         onEdit={onEditName}
         onSave={onSave}
+        onSortCategories={onSortCategories}
         onToggleCollapse={onToggleCollapse}
         onShowNewCategory={onShowNewCategory}
       />

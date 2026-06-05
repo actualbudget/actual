@@ -190,6 +190,7 @@ export function GetCardData({
         compact
         style={{ height: 'auto', flex: 1 }}
         intervalsCount={intervals.length}
+        showTrendLines={report.showTrendLines}
         showTooltip={!isNarrowWidth && showTooltip}
       />
     </ErrorBoundary>

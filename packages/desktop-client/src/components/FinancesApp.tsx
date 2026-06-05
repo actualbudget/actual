@@ -22,6 +22,7 @@ import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch, useSelector } from '#redux';
 
 import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
+import { UserDirectoryPage } from './admin/UserDirectory/UserDirectoryPage';
 import { BankSyncStatus } from './BankSyncStatus';
 import { CommandBar } from './CommandBar';
 import { EnableBankingCallback } from './EnableBankingCallback';
@@ -35,7 +36,6 @@ import { MobilePageHeaderProvider, MobilePageHeaderSlot } from './Page';
 import { Reports } from './reports';
 import { LoadingIndicator } from './reports/LoadingIndicator';
 import { NarrowAlternate, WideComponent } from './responsive';
-import { UserDirectoryPage } from './responsive/wide';
 import { useMultiuserEnabled } from './ServerContext';
 import { Settings } from './settings';
 import { FloatableSidebar } from './sidebar';

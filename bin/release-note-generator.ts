@@ -15,7 +15,9 @@ async function run() {
       `Found potentially matching PR ${activePr.number}: ${activePr.title}`,
     );
   }
-  const initialPrNumber = activePr?.number ?? (await getNextPrNumber());
+
+  const branchName = await execAsync('git rev-parse --abbrev-ref HEAD');
+  const initialSlug = slugify(activePr?.title ?? branchName ?? '');
 
   const result = await prompts([
     {
@@ -25,10 +27,14 @@ async function run() {
       initial: username,
     },
     {
-      name: 'pullRequestNumber',
-      message: 'PR Number',
-      type: 'number',
-      initial: initialPrNumber,
+      name: 'filenameSlug',
+      message: 'Filename slug (used as upcoming-release-notes/<slug>.md)',
+      type: 'text',
+      initial: initialSlug,
+      validate: value =>
+        /^[a-z0-9]+(-[a-z0-9]+)*$/.test(value)
+          ? true
+          : 'Use lowercase letters, digits, and single dashes between words',
     },
     {
       name: 'releaseNoteType',
@@ -53,7 +59,7 @@ async function run() {
     !result.githubUsername ||
     !result.oneLineSummary ||
     !result.releaseNoteType ||
-    !result.pullRequestNumber
+    !result.filenameSlug
   ) {
     console.log('All questions must be answered. Exiting');
     exit(1);
@@ -64,9 +70,8 @@ async function run() {
     result.githubUsername,
     result.oneLineSummary,
   );
-  const prNumber = result.pullRequestNumber;
 
-  const filepath = `./upcoming-release-notes/${prNumber}.md`;
+  const filepath = `./upcoming-release-notes/${result.filenameSlug}.md`;
   if (existsSync(filepath)) {
     const { confirm } = await prompts({
       name: 'confirm',
@@ -87,6 +92,15 @@ async function run() {
       console.log(`Release note generated successfully: ${filepath}`);
     }
   });
+}
+
+function slugify(input: string): string {
+  const slug = input
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80);
+  return slug || 'untitled';
 }
 
 // makes an attempt to find an existing open PR from <username>:<branch>
@@ -127,30 +141,6 @@ async function getPrNumberFromHead(
     }
   } catch (e) {
     console.warn('error fetching from github pulls api:', e);
-  }
-}
-
-async function getNextPrNumber(): Promise<number> {
-  try {
-    const resp = await fetch(
-      'https://api.github.com/repos/actualbudget/actual/issues?state=all&per_page=1',
-    );
-    if (!resp.ok) {
-      throw new Error(`API responded with status: ${resp.status}`);
-    }
-    const ghResponse = await resp.json();
-    const latestPrNumber = ghResponse?.[0]?.number;
-    if (!latestPrNumber) {
-      console.error(
-        'Could not find latest issue number in GitHub API response',
-        ghResponse,
-      );
-      exit(1);
-    }
-    return latestPrNumber + 1;
-  } catch (error) {
-    console.error('Failed to fetch next PR number:', error);
-    exit(1);
   }
 }
 

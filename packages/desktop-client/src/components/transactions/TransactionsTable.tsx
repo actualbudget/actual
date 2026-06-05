@@ -47,7 +47,6 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
-import { getStatusLabel } from '@actual-app/core/shared/schedules';
 import {
   addSplitTransaction,
   deleteTransaction,
@@ -134,6 +133,7 @@ import { addNotification } from '#notifications/notificationsSlice';
 import { getPayeesById } from '#payees';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
+import { getStatusLabel } from '#util/schedule';
 
 import {
   deserializeTransaction,
@@ -1184,7 +1184,9 @@ const Transaction = memo(function Transaction({
   const isBudgetTransfer = transferAcct && transferAcct.offbudget === 0;
   const isOffBudget = account && account.offbudget === 1;
 
-  const valueStyle = added ? { fontWeight: 600 } : null;
+  const valueStyle = added
+    ? { fontWeight: 600, color: theme.tableTextItemAdded }
+    : null;
   const backgroundFocus = focusedField === 'select';
   const amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
 
@@ -1591,6 +1593,7 @@ const Transaction = memo(function Transaction({
           note={notes ?? ''}
           scheduleNote={isPreview ? schedule?.name : null}
           focused={focusedField === 'notes'}
+          valueStyle={valueStyle}
           onClickTag={onNotesTagClick}
           onUpdate={value => {
             onUpdate('notes', value?.trim());
@@ -1968,6 +1971,7 @@ type NotesCellProps = {
   note: string;
   scheduleNote: string | null | undefined;
   focused: boolean;
+  valueStyle: CSSProperties | null;
   onUpdate: (value: string) => void;
   onClickTag: (tag: string) => void;
   onExpose: (name: string) => void;
@@ -1977,6 +1981,7 @@ function NotesCell({
   note,
   scheduleNote,
   focused,
+  valueStyle,
   onUpdate,
   onClickTag,
   onExpose,
@@ -2001,6 +2006,7 @@ function NotesCell({
       width="flex"
       name="notes"
       value={displayedNote}
+      valueStyle={valueStyle}
       formatter={value =>
         NotesTagFormatter({ notes: value, onNotesTagClick: onClickTag })
       }

@@ -35,6 +35,7 @@ import { formatMonthLabel } from '#components/budget/goals/formatMonthLabel';
 import {
   validateAutomation,
   validatePercentageAllocation,
+  validateSchedulePriorities,
 } from '#components/budget/goals/validateAutomation';
 import { Link } from '#components/common/Link';
 import { useCleanupGroups } from '#hooks/useCleanupGroups';
@@ -348,7 +349,10 @@ export function BudgetAutomationsBody({
     dryRun?.perTemplate?.[i] != null ? dryRun.perTemplate[i] : null,
   );
   const hasErrors = automationErrors.some(error => error !== null);
-  const conflict = validatePercentageAllocation(templates);
+  const conflicts = [
+    validatePercentageAllocation(templates),
+    validateSchedulePriorities(templates),
+  ].filter(conflict => conflict !== null);
 
   const categoryNameMap: Record<string, string> = {};
   for (const group of categories) {
@@ -465,7 +469,9 @@ export function BudgetAutomationsBody({
         />
       )}
 
-      {conflict && <ConflictBanner conflict={conflict} />}
+      {conflicts.map((conflict, i) => (
+        <ConflictBanner key={i} conflict={conflict} />
+      ))}
 
       <View
         style={{
@@ -542,13 +548,15 @@ export function BudgetAutomationsBody({
           )}
         </View>
 
-        <View style={{ flex: 1, minWidth: 0 }}>
+        <View style={{ flex: 1, minWidth: 0, minHeight: 0 }}>
           {cleanupActive ? (
             <View
               style={{
                 flex: 1,
                 padding: 20,
                 overflowY: 'auto',
+                overflowX: 'hidden',
+                scrollbarGutter: 'stable',
                 gap: 14,
               }}
             >
@@ -625,7 +633,7 @@ export function BudgetAutomationsBody({
         <Button
           variant="primary"
           onPress={onSave}
-          isDisabled={hasErrors || conflict !== null || saving}
+          isDisabled={hasErrors || conflicts.length > 0 || saving}
         >
           <Trans>Save</Trans>
         </Button>
