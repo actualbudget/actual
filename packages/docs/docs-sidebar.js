@@ -181,7 +181,7 @@ const sidebars = {
               },
               items: ['advanced/scripts/modify-transfers'],
             },
-            'schedules',            
+            'schedules',
             {
               type: 'category',
               label: 'Rules',
