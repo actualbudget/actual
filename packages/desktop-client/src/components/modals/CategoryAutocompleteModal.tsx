@@ -1,6 +1,7 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -28,6 +29,7 @@ export function CategoryAutocompleteModal({
   onSelect,
   categoryGroups,
   showHiddenCategories,
+  showNoneOption,
   closeOnSelect,
   clearOnSelect,
   onClose,
@@ -102,6 +104,19 @@ export function CategoryAutocompleteModal({
                 />
               </SheetNameProvider>
             </View>
+            {showNoneOption && (
+              <View style={{ flexShrink: 0, padding: 5 }}>
+                <Button
+                  variant="menu"
+                  onPress={() => {
+                    onSelect(null, '');
+                    state.close();
+                  }}
+                >
+                  <Trans>Uncategorized</Trans>
+                </Button>
+              </View>
+            )}
           </View>
         </>
       )}

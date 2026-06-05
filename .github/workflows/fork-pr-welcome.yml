@@ -12,7 +12,9 @@ name: Fork PR Welcome
 ##########################################################################################
 
 on:
-  pull_request_target:
+  # See banner above: posts a static welcome comment, no checkout,
+  # no PR-supplied script execution.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types: [opened, reopened]
 
 permissions:

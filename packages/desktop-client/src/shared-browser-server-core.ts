@@ -100,6 +100,7 @@ export function createCoordinator({
   }
 
   function broadcastConnect(budgetId: string) {
+    lastAppInitFailure = null;
     const connectMsg = { type: 'connect' };
     broadcastToAllInGroup(budgetId, connectMsg);
     for (const port of unassignedPorts) {
@@ -544,10 +545,22 @@ export function createCoordinator({
           return;
         }
 
+        // Drop the cache once the client has surfaced the failure, so a
+        // subsequent init can re-attempt. Falls through to the leader so
+        // the Worker still stops its retry interval.
+        if (msg.name === '__app-init-failure-acknowledged') {
+          lastAppInitFailure = null;
+        }
+
         // ── Initialization ─────────────────────────────────────────
 
         if (msg.type === 'init') {
           cachedInitMsg = msg;
+          // The leader that produced the failure is gone, so the cache
+          // can't recover — drop it and let this tab attempt a fresh init.
+          if (lastAppInitFailure && budgetGroups.size === 0) {
+            lastAppInitFailure = null;
+          }
           if (lastAppInitFailure) {
             port.postMessage(lastAppInitFailure);
           } else {

@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import { deserializeClock, getClock } from '@actual-app/crdt';
+import { v4 as uuidv4 } from 'uuid';
 
 import { expectSnapshotWithDiffer } from '#mocks/util';
 import * as connection from '#platform/server/connection';
@@ -180,7 +181,7 @@ describe('Budget', () => {
     // budgets for the earlier months
     db.runQuery("INSERT INTO accounts (id, name) VALUES ('one', 'boa')");
     await runHandler(handlers['transaction-add'], {
-      id: crypto.randomUUID(),
+      id: uuidv4(),
       date: '2016-05-06',
       amount: 50,
       account: 'one',

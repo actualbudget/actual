@@ -10,6 +10,10 @@ inputs:
     description: 'Whether to download translations as part of setup, default true'
     required: false
     default: 'true'
+  cache:
+    description: 'Whether to restore and save dependency and Lage caches, default true'
+    required: false
+    default: 'true'
 
 runs:
   using: composite
@@ -18,6 +22,7 @@ runs:
       uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
       with:
         node-version: 22
+        package-manager-cache: ${{ inputs.cache }}
     - name: Install yarn
       run: npm install -g yarn
       shell: bash
@@ -28,15 +33,19 @@ runs:
       shell: bash
     - name: Cache
       uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      if: ${{ inputs.cache == 'true' }}
       id: cache
       with:
         path: ${{ format('{0}/**/node_modules', inputs.working-directory) }}
         key: yarn-v1-${{ runner.os }}-${{ steps.get-node.outputs.version }}-${{ hashFiles(format('{0}/**/yarn.lock', inputs.working-directory)) }}
     - name: Ensure Lage cache directory exists
-      run: mkdir -p ${{ format('{0}/.lage', inputs.working-directory) }}
+      run: mkdir -p "$WORKING_DIRECTORY/.lage"
       shell: bash
+      env:
+        WORKING_DIRECTORY: ${{ inputs.working-directory }}
     - name: Cache Lage
       uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      if: ${{ inputs.cache == 'true' }}
       with:
         path: ${{ format('{0}/.lage', inputs.working-directory) }}
         key: lage-${{ runner.os }}-${{ github.sha }}

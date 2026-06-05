@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { t } from 'i18next';
+import { v4 as uuidv4 } from 'uuid';
 
 import * as undo from '#platform/client/undo';
 import { captureBreadcrumb, captureException } from '#platform/exceptions';
@@ -126,11 +126,9 @@ function connectWorker(worker, onOpen, onError) {
       );
 
       if (msg.message && msg.message.includes('indexeddb-quota-error')) {
-        alert(
-          t(
-            'We hit a limit on the local storage available. Edits may not be saved. Please get in touch https://actualbudget.org/contact/ so we can help debug this.',
-          ),
-        );
+        // Surface this as a typed event so the desktop-client can present a
+        // localized message - i18n must not live in loot-core.
+        handleMessage({ type: 'push', name: 'indexeddb-quota-error' });
       }
     } else if (msg.type === 'capture-breadcrumb') {
       captureBreadcrumb(msg.data);
@@ -160,7 +158,7 @@ export const send: T.Send = function (
 ): ReturnType<T.Send> {
   const [name, args, { catchErrors = false } = {}] = params;
   return new Promise((resolve, reject) => {
-    const id = crypto.randomUUID();
+    const id = uuidv4();
 
     replyHandlers.set(id, { resolve, reject });
     const message = {

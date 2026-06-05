@@ -34,6 +34,7 @@ function mockDbUpdate() {
 describe('storeNoteTemplates', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(db.all).mockResolvedValue([]);
   });
 
   const testCases = [
@@ -126,6 +127,92 @@ describe('storeNoteTemplates', () => {
         { id: 'cat1', name: 'Category 1', note: 'Not a template note' },
       ],
       expectedTemplates: [],
+    },
+    {
+      description: 'Captures a description above a template',
+      mockTemplateNotes: [
+        {
+          id: 'cat1',
+          name: 'Category 1',
+          note: 'Car insurance\n#template 10',
+        },
+      ],
+      expectedTemplates: [
+        {
+          type: 'simple',
+          monthly: 10,
+          limit: null,
+          priority: 0,
+          directive: 'template',
+          description: 'Car insurance',
+        },
+      ],
+    },
+    {
+      description: 'Captures a multi-line description above a template',
+      mockTemplateNotes: [
+        {
+          id: 'cat1',
+          name: 'Category 1',
+          note: 'Line one\nLine two\n#template 10',
+        },
+      ],
+      expectedTemplates: [
+        {
+          type: 'simple',
+          monthly: 10,
+          limit: null,
+          priority: 0,
+          directive: 'template',
+          description: 'Line one\nLine two',
+        },
+      ],
+    },
+    {
+      description: 'Ignores prose separated from the template by a blank line',
+      mockTemplateNotes: [
+        {
+          id: 'cat1',
+          name: 'Category 1',
+          note: 'Just a note\n\n#template 10',
+        },
+      ],
+      expectedTemplates: [
+        {
+          type: 'simple',
+          monthly: 10,
+          limit: null,
+          priority: 0,
+          directive: 'template',
+        },
+      ],
+    },
+    {
+      description: 'Only attaches a description to the template directly below',
+      mockTemplateNotes: [
+        {
+          id: 'cat1',
+          name: 'Category 1',
+          note: 'Groceries\n#template 10\n#template-2 20',
+        },
+      ],
+      expectedTemplates: [
+        {
+          type: 'simple',
+          monthly: 10,
+          limit: null,
+          priority: 0,
+          directive: 'template',
+          description: 'Groceries',
+        },
+        {
+          type: 'simple',
+          monthly: 20,
+          limit: null,
+          priority: 2,
+          directive: 'template',
+        },
+      ],
     },
   ];
 
@@ -392,5 +479,48 @@ describe('unparse limit templates', () => {
     ]);
 
     expect(serialized).toBe('#template 0 up to 200');
+  });
+});
+
+describe('unparse descriptions', () => {
+  it('writes a description above the template line', async () => {
+    const serialized = await unparse([
+      {
+        type: 'simple',
+        monthly: 10,
+        priority: 0,
+        directive: 'template',
+        description: 'Car insurance',
+      },
+    ]);
+
+    expect(serialized).toBe('Car insurance\n#template 10');
+  });
+
+  it('writes a multi-line description', async () => {
+    const serialized = await unparse([
+      {
+        type: 'goal',
+        amount: 100,
+        directive: 'goal',
+        description: 'Rainy day fund\nfor emergencies',
+      },
+    ]);
+
+    expect(serialized).toBe('Rainy day fund\nfor emergencies\n#goal 100');
+  });
+
+  it('drops blank lines so the note stays re-parseable', async () => {
+    const serialized = await unparse([
+      {
+        type: 'simple',
+        monthly: 10,
+        priority: 0,
+        directive: 'template',
+        description: 'first\n\nsecond',
+      },
+    ]);
+
+    expect(serialized).toBe('first\nsecond\n#template 10');
   });
 });

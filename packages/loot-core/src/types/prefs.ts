@@ -4,11 +4,12 @@ export type FeatureFlag =
   | 'actionTemplating'
   | 'formulaMode'
   | 'currency'
-  | 'crossoverReport'
   | 'ageOfMoneyReport'
+  | 'balanceForecastReport'
   | 'customThemes'
   | 'budgetAnalysisReport'
   | 'payeeLocations'
+  | 'enableBanking'
   | 'sankeyReport';
 
 /**
@@ -54,7 +55,8 @@ export type SyncedPrefs = Partial<
     | `camt-swap-payee-memo-${string}`
     | `flip-amount-${string}-${'csv' | 'qif'}`
     | `flags.${FeatureFlag}`
-    | `learn-categories`,
+    | `learn-categories`
+    | `show-hidden-tags`,
     string
   >
 >;

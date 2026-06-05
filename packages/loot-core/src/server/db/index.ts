@@ -9,6 +9,7 @@ import {
 } from '@actual-app/crdt';
 import type { Database, Statement } from '@jlongster/sql.js';
 import { LRUCache } from 'lru-cache';
+import { v4 as uuidv4 } from 'uuid';
 
 import * as fs from '#platform/server/fs';
 import * as sqlite from '#platform/server/sqlite';
@@ -55,7 +56,7 @@ import type {
 
 export * from './types';
 
-export { toDateRepr, fromDateRepr } from '#server/models';
+export { fromDateRepr, toDateRepr } from '#server/models';
 
 let dbPath: string | null = null;
 let db: Database | null = null;
@@ -223,7 +224,7 @@ export async function update(table, params) {
 
 export async function insertWithUUID(table, row) {
   if (!row.id) {
-    row = { ...row, id: crypto.randomUUID() };
+    row = { ...row, id: uuidv4() };
   }
 
   await insert(table, row);
@@ -292,7 +293,7 @@ export function insertWithSchema(table, row) {
   // Even though `insertWithUUID` does this, we need to do it here so
   // the schema validation passes
   if (!row.id) {
-    row = { ...row, id: crypto.randomUUID() };
+    row = { ...row, id: uuidv4() };
   }
 
   return insertWithUUID(
@@ -365,7 +366,9 @@ export async function insertCategoryGroup(
   );
   if (existingGroup) {
     throw new Error(
-      `A ${existingGroup.hidden ? 'hidden ' : ''}'${existingGroup.name}' category group already exists.`,
+      `A ${
+        existingGroup.hidden ? 'hidden ' : ''
+      }'${existingGroup.name}' category group already exists.`,
     );
   }
 
@@ -396,7 +399,9 @@ export async function updateCategoryGroup(
   );
   if (existingGroup) {
     throw new Error(
-      `A ${existingGroup.hidden ? 'hidden ' : ''}'${existingGroup.name}' category group already exists.`,
+      `A ${
+        existingGroup.hidden ? 'hidden ' : ''
+      }'${existingGroup.name}' category group already exists.`,
     );
   }
   group = categoryGroupModel.validate(group, { update: true });
@@ -956,30 +961,30 @@ function toSqlQueryParameters(params: unknown[]) {
 
 export function getTags() {
   return all<DbTag>(`
-    SELECT id, tag, color, description
+    SELECT id, tag, color, description, hidden
     FROM tags
     WHERE tombstone = 0
-    ORDER BY tag
   `);
 }
 
 export function getAllTags() {
   return all<DbTag>(`
-    SELECT id, tag, color, description
+    SELECT id, tag, color, description, hidden
     FROM tags
-    ORDER BY tag
   `);
 }
 
-export function insertTag(tag): Promise<DbTag['id']> {
+export function insertTag(
+  tag: Omit<DbTag, 'id' | 'tombstone'>,
+): Promise<DbTag['id']> {
   return insertWithUUID('tags', tag);
 }
 
-export async function deleteTag(tag) {
+export async function deleteTag(tag: Pick<DbTag, 'id'>) {
   return delete_('tags', tag.id);
 }
 
-export function updateTag(tag) {
+export function updateTag(tag: Partial<DbTag> & Pick<DbTag, 'id'>) {
   return update('tags', tag);
 }
 

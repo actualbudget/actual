@@ -1,6 +1,6 @@
 {
   "name": "desktop-electron",
-  "version": "26.5.0",
+  "version": "26.6.0",
   "description": "A simple and powerful personal finance system",
   "author": "Actual",
   "main": "build/desktop-electron/index.js",
@@ -29,7 +29,7 @@
     "@typescript/native-preview": "beta",
     "copyfiles": "^2.4.1",
     "cross-env": "^10.1.0",
-    "electron": "39.8.5",
+    "electron": "41.7.1",
     "electron-builder": "26.8.1",
     "typescript-strict-plugin": "^2.4.4"
   },
@@ -50,7 +50,7 @@
     "afterSign": "./build/desktop-electron/afterSignHook.js",
     "electronFuses": {
       "runAsNode": false,
-      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeOptionsEnvironmentVariable": true,
       "enableNodeCliInspectArguments": false
     },
     "mac": {

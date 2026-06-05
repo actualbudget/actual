@@ -21,8 +21,6 @@ const defaultDataDir = process.env.ACTUAL_DATA_DIR
 
 debug(`Project root: '${projectRoot}'`);
 
-export const sqlDir = path.join(__dirname, 'sql');
-
 const actualAppWebBuildPath = path.join(
   path.dirname(require.resolve('@actual-app/web/package.json')),
   'build',

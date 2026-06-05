@@ -1,5 +1,15 @@
 // @ts-strict-ignore
-import { SyncProtoBuf, Timestamp } from '@actual-app/crdt';
+import {
+  create,
+  EncryptedDataSchema,
+  fromBinary,
+  MessageEnvelopeSchema,
+  MessageSchema,
+  SyncRequestSchema,
+  SyncResponseSchema,
+  Timestamp,
+  toBinary,
+} from '@actual-app/crdt';
 
 import { logger } from '#platform/server/log';
 import * as encryption from '#server/encryption';
@@ -26,23 +36,27 @@ export async function encode(
   messages: Message[],
 ): Promise<Uint8Array> {
   const { encryptKeyId } = prefs.getPrefs();
-  const requestPb = new SyncProtoBuf.SyncRequest();
+  const requestPb = create(SyncRequestSchema, {
+    groupId,
+    fileId,
+    keyId: encryptKeyId ?? '',
+    since: since.toString(),
+  });
 
-  for (let i = 0; i < messages.length; i++) {
-    const msg = messages[i];
-    const envelopePb = new SyncProtoBuf.MessageEnvelope();
-    envelopePb.setTimestamp(msg.timestamp.toString());
+  for (const msg of messages) {
+    const binaryMsg = toBinary(
+      MessageSchema,
+      create(MessageSchema, {
+        dataset: msg.dataset,
+        row: msg.row,
+        column: msg.column,
+        value: msg.value as string,
+      }),
+    );
 
-    const messagePb = new SyncProtoBuf.Message();
-    messagePb.setDataset(msg.dataset);
-    messagePb.setRow(msg.row);
-    messagePb.setColumn(msg.column);
-    messagePb.setValue(msg.value as string);
-    const binaryMsg = messagePb.serializeBinary();
-
+    let content: Uint8Array;
+    let isEncrypted: boolean;
     if (encryptKeyId) {
-      const encrypted = new SyncProtoBuf.EncryptedData();
-
       let result;
       try {
         result = await encryption.encrypt(binaryMsg, encryptKeyId);
@@ -52,25 +66,30 @@ export async function encode(
         });
       }
 
-      encrypted.setData(result.value);
-      encrypted.setIv(Buffer.from(result.meta.iv, 'base64'));
-      encrypted.setAuthtag(Buffer.from(result.meta.authTag, 'base64'));
-
-      envelopePb.setContent(encrypted.serializeBinary());
-      envelopePb.setIsencrypted(true);
+      content = toBinary(
+        EncryptedDataSchema,
+        create(EncryptedDataSchema, {
+          data: result.value,
+          iv: Buffer.from(result.meta.iv, 'base64'),
+          authTag: Buffer.from(result.meta.authTag, 'base64'),
+        }),
+      );
+      isEncrypted = true;
     } else {
-      envelopePb.setContent(binaryMsg);
+      content = binaryMsg;
+      isEncrypted = false;
     }
 
-    requestPb.addMessages(envelopePb);
+    requestPb.messages.push(
+      create(MessageEnvelopeSchema, {
+        timestamp: msg.timestamp.toString(),
+        content,
+        isEncrypted,
+      }),
+    );
   }
 
-  requestPb.setGroupid(groupId);
-  requestPb.setFileid(fileId);
-  requestPb.setKeyid(encryptKeyId);
-  requestPb.setSince(since.toString());
-
-  return requestPb.serializeBinary();
+  return toBinary(SyncRequestSchema, requestPb);
 }
 
 export async function decode(
@@ -78,29 +97,23 @@ export async function decode(
 ): Promise<{ messages: Message[]; merkle: { hash: number } }> {
   const { encryptKeyId } = prefs.getPrefs();
 
-  const responsePb = SyncProtoBuf.SyncResponse.deserializeBinary(data);
-  const merkle = JSON.parse(responsePb.getMerkle());
-  const list = responsePb.getMessagesList();
+  const responsePb = fromBinary(SyncResponseSchema, data);
+  const merkle = JSON.parse(responsePb.merkle);
   const messages = [];
 
-  for (let i = 0; i < list.length; i++) {
-    const envelopePb = list[i];
-    const timestamp = Timestamp.parse(envelopePb.getTimestamp());
-    const encrypted = envelopePb.getIsencrypted();
+  for (const envelopePb of responsePb.messages) {
     let msg;
 
-    if (encrypted) {
-      const binary = SyncProtoBuf.EncryptedData.deserializeBinary(
-        envelopePb.getContent() as Uint8Array,
-      );
+    if (envelopePb.isEncrypted) {
+      const binary = fromBinary(EncryptedDataSchema, envelopePb.content);
 
       let decrypted;
       try {
-        decrypted = await encryption.decrypt(coerceBuffer(binary.getData()), {
+        decrypted = await encryption.decrypt(coerceBuffer(binary.data), {
           keyId: encryptKeyId,
           algorithm: 'aes-256-gcm',
-          iv: coerceBuffer(binary.getIv()),
-          authTag: coerceBuffer(binary.getAuthtag()),
+          iv: coerceBuffer(binary.iv),
+          authTag: coerceBuffer(binary.authTag),
         });
       } catch (e) {
         logger.log(e);
@@ -109,19 +122,17 @@ export async function decode(
         });
       }
 
-      msg = SyncProtoBuf.Message.deserializeBinary(decrypted);
+      msg = fromBinary(MessageSchema, decrypted);
     } else {
-      msg = SyncProtoBuf.Message.deserializeBinary(
-        envelopePb.getContent() as Uint8Array,
-      );
+      msg = fromBinary(MessageSchema, envelopePb.content);
     }
 
     messages.push({
-      timestamp,
-      dataset: msg.getDataset(),
-      row: msg.getRow(),
-      column: msg.getColumn(),
-      value: msg.getValue(),
+      timestamp: Timestamp.parse(envelopePb.timestamp),
+      dataset: msg.dataset,
+      row: msg.row,
+      column: msg.column,
+      value: msg.value,
     });
   }
 

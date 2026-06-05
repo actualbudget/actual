@@ -27,13 +27,10 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import {
   FIELD_TYPES,
-  friendlyOp,
-  getAllocationMethods,
   getFieldError,
   getValidOps,
   isValidOp,
   makeValue,
-  mapField,
   parse,
   unparse,
 } from '@actual-app/core/shared/rules';
@@ -44,7 +41,9 @@ import type {
   RuleEntity,
 } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
+import { v4 as uuidv4 } from 'uuid';
 
+import { TagMultiAutocomplete } from '#components/autocomplete/TagMultiAutocomplete';
 import { FinancialText } from '#components/FinancialText';
 import { StatusBadge } from '#components/schedules/StatusBadge';
 import { SimpleTransactionsTable } from '#components/transactions/SimpleTransactionsTable';
@@ -60,6 +59,7 @@ import { addNotification } from '#notifications/notificationsSlice';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
 import { disableUndo, enableUndo } from '#undo';
+import { friendlyOp, getAllocationMethods, mapField } from '#util/rule';
 
 import { FormulaActionEditor } from './FormulaActionEditor';
 
@@ -149,7 +149,13 @@ export function OpSelect<T extends string>({
       // TODO: Add matches op support for payees, accounts, categories.
       .filter(op =>
         type === 'id'
-          ? !['contains', 'matches', 'doesNotContain', 'hasTags'].includes(op)
+          ? ![
+              'contains',
+              'matches',
+              'doesNotContain',
+              'hasTags',
+              'hasAnyTag',
+            ].includes(op)
           : true,
       )
       .map(op => [op, formatOp(op, type)]);
@@ -304,6 +310,14 @@ function ConditionEditor({
         key={inputKey}
         defaultValue={value}
         onChange={v => onChange('value', v)}
+      />
+    );
+  } else if (type === 'string' && (op === 'hasTags' || op === 'hasAnyTag')) {
+    valueEditor = (
+      <TagMultiAutocomplete
+        key={inputKey}
+        value={value ?? ''}
+        setValue={(value: string) => onChange('value', value)}
       />
     );
   } else {
@@ -540,6 +554,20 @@ function ActionEditor({
                 />
               )}
             </View>
+            {templated && (
+              <Text
+                style={{
+                  ...styles.smallText,
+                  color: theme.warningText,
+                  marginTop: 3,
+                }}
+              >
+                <Trans>
+                  Templating is deprecated and will be removed in a future
+                  release. Switch this action to a formula instead.
+                </Trans>
+              </Text>
+            )}
           </View>
           {/*Due to that these fields have id's as value it is not helpful to have templating here*/}
           {isFormulaEnabled &&
@@ -782,7 +810,7 @@ function StageButton({
 }
 
 function newInput(item) {
-  return { ...item, inputKey: crypto.randomUUID() };
+  return { ...item, inputKey: uuidv4() };
 }
 
 function ConditionsList({
@@ -820,7 +848,7 @@ function ConditionsList({
       field,
       op: 'is',
       value: null,
-      inputKey: crypto.randomUUID(),
+      inputKey: uuidv4(),
     });
     onChangeConditions(copy);
   }
@@ -1006,9 +1034,7 @@ export function RuleEditor({
 }: RuleEditorProps) {
   const { t } = useTranslation();
   const [conditions, setConditions] = useState(
-    defaultRule.conditions
-      .map(parse)
-      .map(c => ({ ...c, inputKey: crypto.randomUUID() })),
+    defaultRule.conditions.map(parse).map(c => ({ ...c, inputKey: uuidv4() })),
   );
   const [actionSplits, setActionSplits] = useState(() => {
     const parsedActions = defaultRule.actions.map(parse);
@@ -1016,17 +1042,17 @@ export function RuleEditor({
       (acc, action) => {
         const splitIndex = action.options?.splitIndex ?? 0;
         acc[splitIndex] = acc[splitIndex] ?? {
-          id: crypto.randomUUID(),
+          id: uuidv4(),
           actions: [],
         };
         acc[splitIndex].actions.push({
           ...action,
-          inputKey: crypto.randomUUID(),
+          inputKey: uuidv4(),
         });
         return acc;
       },
       // The pre-split group is always there
-      [{ id: crypto.randomUUID(), actions: [] }],
+      [{ id: uuidv4(), actions: [] }],
     );
   });
   const [stage, setStage] = useState(defaultRule.stage);
@@ -1086,12 +1112,12 @@ export function RuleEditor({
   function addActionToSplitAfterIndex(splitIndex, actionIndex) {
     let newAction;
     if (splitIndex && !actionSplits[splitIndex]?.actions?.length) {
-      actionSplits[splitIndex] = { id: crypto.randomUUID(), actions: [] };
+      actionSplits[splitIndex] = { id: uuidv4(), actions: [] };
       newAction = {
         op: 'set-split-amount',
         options: { method: 'remainder', splitIndex },
         value: null,
-        inputKey: crypto.randomUUID(),
+        inputKey: uuidv4(),
       };
     } else {
       const fieldsArray =
@@ -1107,7 +1133,7 @@ export function RuleEditor({
         op: 'set',
         value: '',
         options: { splitIndex },
-        inputKey: crypto.randomUUID(),
+        inputKey: uuidv4(),
       };
     }
 

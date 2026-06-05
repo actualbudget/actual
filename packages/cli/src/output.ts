@@ -73,9 +73,7 @@ function formatCsv(data: unknown): string {
     if (data && typeof data === 'object') {
       const entries = Object.entries(data);
       const header = entries.map(([k]) => escapeCsv(k)).join(',');
-      const values = entries
-        .map(([k, v]) => escapeCsv(formatCellValue(k, v)))
-        .join(',');
+      const values = entries.map(([k, v]) => formatCsvCell(k, v)).join(',');
       return header + '\n' + values;
     }
     return String(data);
@@ -89,14 +87,31 @@ function formatCsv(data: unknown): string {
   const header = keys.map(k => escapeCsv(k)).join(',');
   const rows = data.map(row => {
     const r = row as Record<string, unknown>;
-    return keys.map(k => escapeCsv(formatCellValue(k, r[k]))).join(',');
+    return keys.map(k => formatCsvCell(k, r[k])).join(',');
   });
 
   return [header, ...rows].join('\n');
 }
 
+const FORMULA_TRIGGERS = /^[=+\-@\t\r]/;
+
+function formatCsvCell(key: string, value: unknown): string {
+  let formatted = formatCellValue(key, value);
+  // Skip neutralization for numeric values so legitimate negative amounts
+  // like "-25.00" aren't quoted as text.
+  if (typeof value !== 'number' && FORMULA_TRIGGERS.test(formatted)) {
+    formatted = "'" + formatted;
+  }
+  return escapeCsv(formatted);
+}
+
 function escapeCsv(value: string): string {
-  if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+  if (
+    value.includes(',') ||
+    value.includes('"') ||
+    value.includes('\n') ||
+    value.includes('\r')
+  ) {
     return '"' + value.replace(/"/g, '""') + '"';
   }
   return value;

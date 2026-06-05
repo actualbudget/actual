@@ -1,0 +1,17 @@
+name: Tech Support
+description: Need help with something? Having troubles setting up? Or perhaps issues using the API?
+title: '[Support]: '
+labels: ['tech-support']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > ⚠️ **Tech support tickets opened here are automatically closed.** GitHub Issues are reserved for bug reports and feature requests. The fastest way to get help is to ask the community on [Discord](https://discord.gg/pRYNYr4W5A) — that's where most of the community lives and can help you in real time.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Describe your problem
+      description: Please describe, in as much detail as you can, what you need help with.
+      placeholder: I'm trying to [...] but [...]
+    validations:
+      required: true

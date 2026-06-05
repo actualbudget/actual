@@ -24,12 +24,20 @@ export type DbAccount = {
   account_sync_source?: 'simpleFin' | 'goCardless' | null;
   last_reconciled?: string | null;
   last_sync?: string | null;
+  bank_sync_status?:
+    | 'ok'
+    | 'pending'
+    | 'sync-requested'
+    | 'failed'
+    | 'reauth-required'
+    | 'attention-required'
+    | null;
 };
 
 export type DbBank = {
   id: string;
   bank_id: string;
-  name: string;
+  name: string | null;
   tombstone: 1 | 0;
 };
 
@@ -41,6 +49,7 @@ export type DbCategory = {
   sort_order: number;
   hidden: 1 | 0;
   goal_def?: JsonString | null;
+  cleanup_def?: JsonString | null;
   template_settings?: { source: 'notes' | 'ui' };
   tombstone: 1 | 0;
 };
@@ -51,6 +60,12 @@ export type DbCategoryGroup = {
   is_income: 1 | 0;
   sort_order: number;
   hidden: 1 | 0;
+  tombstone: 1 | 0;
+};
+
+export type DbCleanupGroup = {
+  id: string;
+  name: string;
   tombstone: 1 | 0;
 };
 
@@ -293,6 +308,7 @@ export type DbViewCategory = {
   group: DbCategoryGroup['id'];
   sort_order: DbCategory['sort_order'];
   tombstone: DbCategory['tombstone'];
+  cleanup_def?: DbCategory['cleanup_def'];
 };
 
 export type DbViewCategoryWithGroupHidden = {
@@ -341,4 +357,5 @@ export type DbTag = {
   color?: string | null;
   description?: string | null;
   tombstone: 1 | 0;
+  hidden?: 1 | 0;
 };

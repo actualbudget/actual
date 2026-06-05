@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import type { RefObject } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams, useSearchParams } from 'react-router';
 
@@ -38,10 +39,7 @@ import { calculateDistance } from '@actual-app/core/shared/location-utils';
 import * as monthUtils from '@actual-app/core/shared/months';
 import * as Platform from '@actual-app/core/shared/platform';
 import { q } from '@actual-app/core/shared/query';
-import {
-  getStatusLabel,
-  getUpcomingDays,
-} from '@actual-app/core/shared/schedules';
+import { getUpcomingDays } from '@actual-app/core/shared/schedules';
 import {
   addSplitTransaction,
   deleteTransaction,
@@ -67,6 +65,7 @@ import type {
   PayeeEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
+import { css } from '@emotion/css';
 import {
   format as formatDate,
   isValid as isValidDate,
@@ -87,8 +86,11 @@ import { createSingleTimeScheduleFromTransaction } from '#components/transaction
 import { AmountInput } from '#components/util/AmountInput';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
+import { useCurrentWordRange } from '#hooks/useCurrentWordRange';
+import { useCursorPosition } from '#hooks/useCursorPosition';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useInitialMount } from '#hooks/useInitialMount';
+import { useInputRefValue } from '#hooks/useInputRefValue';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useLocationPermission } from '#hooks/useLocationPermission';
 import { useNavigate } from '#hooks/useNavigate';
@@ -99,6 +101,8 @@ import {
   useSingleActiveEditForm,
 } from '#hooks/useSingleActiveEditForm';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useTagCSS } from '#hooks/useTagCSS';
+import { useFilteredTags } from '#hooks/useTags';
 import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useSavePayeeLocationMutation } from '#payees';
@@ -106,6 +110,7 @@ import { locationService } from '#payees/location';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch, useSelector } from '#redux';
 import { setLastTransaction } from '#transactions/transactionsSlice';
+import { getStatusLabel } from '#util/schedule';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
 
@@ -419,6 +424,7 @@ const ChildTransactionEdit = forwardRef<
     const { editingField, onRequestActiveEdit, onClearActiveEdit } =
       useSingleActiveEditForm()!;
     const [hideFraction, _] = useSyncedPref('hideFraction');
+    const noteRef = useRef<HTMLInputElement | null>(null);
 
     const prettyPayee = getPrettyPayee({
       t,
@@ -521,6 +527,7 @@ const ChildTransactionEdit = forwardRef<
         <View>
           <FieldLabel title={t('Notes')} />
           <InputField
+            ref={noteRef}
             icon={<SvgNotesPaper width={17} height={17} />}
             placeholder={t('Add a note (optional)')}
             disabled={
@@ -533,6 +540,7 @@ const ChildTransactionEdit = forwardRef<
             }
             onUpdate={value => onUpdate(transaction, 'notes', value)}
           />
+          <NoteTagAutocomplete inputRef={noteRef} />
         </View>
 
         <View style={{ alignItems: 'center' }}>
@@ -590,6 +598,7 @@ type TransactionEditInnerProps = {
   shouldShowSaveLocation?: boolean;
   onSaveLocation?: () => void;
   onSelectNearestPayee?: () => void;
+  onRequestLocation?: () => void;
   nearestPayee?: PayeeEntity | null;
 };
 
@@ -609,6 +618,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     shouldShowSaveLocation,
     onSaveLocation,
     onSelectNearestPayee,
+    onRequestLocation,
     nearestPayee,
   }) {
     const { t } = useTranslation();
@@ -627,6 +637,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     );
     const { data: { grouped: categoryGroups } = { grouped: [] } } =
       useCategories();
+    const noteRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
       if (window.history.length === 1) {
@@ -903,11 +914,16 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                     options: {
                       categoryGroups,
                       showHiddenCategories,
+                      showNoneOption: true,
                       month: monthUtils.monthFromDate(
                         unserializedTransaction.date,
                       ),
                       onSelect: categoryId => {
-                        void onUpdateInner(transactionToEdit, name, categoryId);
+                        void onUpdateInner(
+                          transactionToEdit,
+                          name,
+                          categoryId as TransactionEntity['category'],
+                        );
                       },
                       onClose: () => {
                         onClearActiveEdit();
@@ -1190,7 +1206,9 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               onPress={() => onEditFieldInner(transaction.id, 'payee')}
               data-testid="payee-field"
               alwaysShowRightContent={
-                !!nearestPayee && !transaction.payee && !shouldShowSaveLocation
+                (!!nearestPayee || !!onRequestLocation) &&
+                !transaction.payee &&
+                !shouldShowSaveLocation
               }
               rightContent={
                 shouldShowSaveLocation ? (
@@ -1231,6 +1249,28 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                     }}
                   >
                     <Trans>Nearby</Trans>
+                    <SvgLocation
+                      width={10}
+                      height={10}
+                      style={{ marginLeft: 4 }}
+                    />
+                  </Button>
+                ) : onRequestLocation && !transaction.payee ? (
+                  <Button
+                    variant="bare"
+                    onPress={onRequestLocation}
+                    style={{
+                      backgroundColor: theme.buttonNormalBackground,
+                      border: `1px solid ${theme.buttonNormalBorder}`,
+                      color: theme.buttonNormalText,
+                      fontSize: '11px',
+                      padding: '4px 8px',
+                      borderRadius: 3,
+                      height: 'auto',
+                      minHeight: 'auto',
+                    }}
+                  >
+                    <Trans>Request Location</Trans>
                     <SvgLocation
                       width={10}
                       height={10}
@@ -1394,6 +1434,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
           <View>
             <FieldLabel title={t('Notes')} />
             <InputField
+              ref={noteRef}
               icon={<SvgNotesPaper width={17} height={17} />}
               placeholder={t('Add a note (optional)')}
               disabled={
@@ -1409,6 +1450,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                 onUpdateInner(transaction, 'notes', event.target.value)
               }
             />
+            <NoteTagAutocomplete inputRef={noteRef} />
           </View>
 
           {!isAdding && (
@@ -1447,6 +1489,151 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     );
   },
 );
+
+function NoteTagAutocomplete({
+  inputRef,
+}: {
+  inputRef: RefObject<HTMLInputElement | null>;
+}) {
+  const dispatch = useDispatch();
+  // Yes, there is a lot of ref usages in this component. Here's the motivation
+  // 1. This component purely modifies HTML Input state, app state is handled elsewhere
+  // 2. This component deals with cursor state, which is not easily accessible through regular React code
+  // 3. Child transaction notes (transaction.notes) does not update until blur, so we have to use input state
+  // 4. Given we are already using inputRef in multiple locations, I elected to simplify the props to just the ref and use HTML/JS events
+
+  const [note, setNote] = useInputRefValue(inputRef);
+
+  const [cursorPosition] = useCursorPosition(inputRef);
+  const [startIdx, endIdx] = useCurrentWordRange(note, cursorPosition);
+  const currentWord = note.slice(startIdx, endIdx);
+  const currentWordNoHash = currentWord.replace(/^#+/, '');
+  const { data: filteredTags, refetch } = useFilteredTags(currentWord, true);
+  const showNewTag =
+    currentWord.startsWith('#') &&
+    currentWordNoHash &&
+    !filteredTags.some(tag => tag.tag === currentWordNoHash);
+
+  const getTagCSS = useTagCSS({ ellipsis: true });
+
+  function handleSelect(tag: string) {
+    if (!inputRef.current) return;
+    const newValue =
+      note.slice(0, startIdx) + '#' + tag + ' ' + note.slice(endIdx);
+    setNote(newValue);
+    const newPos = startIdx + tag.length + 2;
+
+    inputRef.current.setSelectionRange(newPos, newPos);
+    document.dispatchEvent(new Event('selectionchange'));
+  }
+
+  async function handleCreate(tag: string) {
+    if (!inputRef.current) return;
+    try {
+      await send('tags-create', { tag });
+      void refetch();
+      handleSelect(tag);
+    } catch (e) {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: 'Failed to add tag, check logs',
+          },
+        }),
+      );
+      console.trace(e);
+    }
+  }
+
+  const hideScrollbar = css({
+    'scrollbar-width': 'none',
+    '-ms-overflow-style': 'none',
+    '&::-webkit-scrollbar': {
+      display: 'none',
+    },
+  });
+
+  return (
+    <View
+      style={{
+        width: '100%',
+        padding: '4px 8px 4px 8px',
+        borderRadius: 30,
+        overflowX: 'auto',
+        height: filteredTags.length || showNewTag ? 30 : 0,
+        transitionProperty: 'height',
+        transitionDuration: '100ms',
+      }}
+      className={hideScrollbar}
+    >
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'end',
+          flexWrap: 'nowrap',
+          gap: 4,
+          paddingRight: 8,
+        }}
+      >
+        {filteredTags.map(tag => (
+          <div key={tag.id}>
+            <button
+              type="button"
+              style={{
+                border: 'none',
+                height: 22,
+                maxWidth: '50dvw',
+              }}
+              className={getTagCSS(tag.tag)}
+              onMouseDown={e => e.preventDefault()} // stops input from losing focus
+              onClick={() => handleSelect(tag.tag)}
+            >
+              #{tag.tag}
+            </button>
+          </div>
+        ))}
+        {showNewTag && (
+          <button
+            type="button"
+            style={{
+              padding: '1px 1px 1px 9px',
+              borderRadius: 12,
+              borderWidth: 0,
+              backgroundColor: theme.noticeBackground,
+              color: theme.noticeTextDark,
+              display: 'flex',
+              alignItems: 'center',
+              flexWrap: 'nowrap',
+              gap: 4,
+            }}
+            onMouseDown={e => e.preventDefault()} // stops input from losing focus
+            onClick={() => handleCreate(currentWordNoHash)}
+          >
+            <SvgAdd height={8} width={8} />
+            <span style={{ whiteSpace: 'nowrap' }}>
+              <Trans>Create tag</Trans>
+            </span>
+            <div
+              style={{
+                borderWidth: 0,
+                height: 20,
+                maxWidth: '50dvw',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: 'inline-block',
+              }}
+              className={getTagCSS('')}
+            >
+              #{currentWordNoHash}
+            </div>
+          </button>
+        )}
+      </View>
+    </View>
+  );
+}
 
 function isTemporary(transaction: TransactionEntity) {
   return transaction.id.indexOf('temp') === 0;
@@ -1494,9 +1681,15 @@ function TransactionEditUnconnected({
     [payees, searchParams],
   );
 
-  const locationAccess = useLocationPermission();
+  const {
+    isGranted: isLocationGranted,
+    isPending: shouldPromptLocation,
+    requestPermission,
+  } = useLocationPermission();
+  const { data: nearbyPayees = [] } = useNearbyPayees({
+    enabled: isLocationGranted,
+  });
   const [shouldShowSaveLocation, setShouldShowSaveLocation] = useState(false);
-  const { data: nearbyPayees = [] } = useNearbyPayees();
   const nearestPayee = nearbyPayees[0]?.payee ?? null;
 
   useEffect(() => {
@@ -1537,10 +1730,10 @@ function TransactionEditUnconnected({
   }, [transactionId]);
 
   useEffect(() => {
-    if (!locationAccess) {
+    if (!isLocationGranted) {
       setShouldShowSaveLocation(false);
     }
-  }, [locationAccess]);
+  }, [isLocationGranted]);
 
   useEffect(() => {
     if (isAdding.current) {
@@ -1643,7 +1836,7 @@ function TransactionEditUnconnected({
       if (updatedField === 'payee') {
         setShouldShowSaveLocation(false);
 
-        if (newTransaction.payee && locationAccess) {
+        if (newTransaction.payee && isLocationGranted) {
           const payeeLocations = await locationService.getPayeeLocations(
             newTransaction.payee,
           );
@@ -1665,7 +1858,7 @@ function TransactionEditUnconnected({
         }
       }
     },
-    [dateFormat, transactions, locationAccess],
+    [dateFormat, transactions, isLocationGranted],
   );
 
   const onSave = useCallback(
@@ -1906,7 +2099,8 @@ function TransactionEditUnconnected({
         shouldShowSaveLocation={shouldShowSaveLocation}
         onSaveLocation={onSaveLocation}
         onSelectNearestPayee={onSelectNearestPayee}
-        nearestPayee={locationAccess ? nearestPayee : null}
+        nearestPayee={isLocationGranted ? nearestPayee : null}
+        onRequestLocation={shouldPromptLocation ? requestPermission : undefined}
       />
     </View>
   );

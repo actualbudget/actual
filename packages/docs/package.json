@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
-    "start": "docusaurus start",
-    "build": "docusaurus build",
+    "start": "node scripts/generate-upcoming-release-notes.mjs && docusaurus start",
+    "build": "node scripts/generate-upcoming-release-notes.mjs && docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "clear": "docusaurus clear",
@@ -28,6 +28,7 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@actual-app/ci-actions": "workspace:*",
     "@docusaurus/module-type-aliases": "^3.10.0",
     "@types/react": "^19.2.14"
   },
