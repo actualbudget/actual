@@ -26,8 +26,8 @@ const sidebars = {
   docs: [
     'index',
     'vision',
-    {type: 'ref', id: 'releases'}, // take release and upcoming release notes out of navigation as they're too long
-    {type: 'ref', id: 'upcoming-release-notes'},
+    { type: 'ref', id: 'releases' }, // take release and upcoming release notes out of navigation as they're too long
+    { type: 'ref', id: 'upcoming-release-notes' },
     {
       type: 'category',
       label: 'Getting Started with Actual',
@@ -37,15 +37,15 @@ const sidebars = {
         'getting-started/envelope-budgeting',
         'getting-started/tracking-budget',
         'getting-started/roadmap-for-new-users',
-         {
-            type: 'doc',
-            id: 'getting-started/starting-fresh', 
-            label: 'Getting Started', // Quick start guide will replace this eventually
-         },
+        {
+          type: 'doc',
+          id: 'getting-started/starting-fresh',
+          label: 'Getting Started', // Quick start guide will replace this eventually
+        },
         'getting-started/tips-tricks',
-        ],
-      },
-        
+      ],
+    },
+
     {
       type: 'category',
       label: 'User Manual',
@@ -74,7 +74,7 @@ const sidebars = {
                   label: 'Managing Files on the Desktop App',
                 },
                 'install/docker',
-                'install/cli-tool',                
+                'install/cli-tool',
                 'install/build-from-source',
               ],
             },
@@ -103,7 +103,7 @@ const sidebars = {
           ],
         },
         // end of installation
-        
+
         {
           type: 'category',
           label: 'Data Migration',
@@ -114,7 +114,7 @@ const sidebars = {
           items: ['migration/ynab4', 'migration/nynab'],
         },
         // end of migration
-        
+
         {
           type: 'category',
           label: 'Accounts',
@@ -149,14 +149,14 @@ const sidebars = {
               items: [
                 {
                   type: 'doc',
-                  id: 'advanced/bank-sync/enable-banking', 
-                  label: 'Enable Banking - EU (experimental)', 
-                },                
+                  id: 'advanced/bank-sync/enable-banking',
+                  label: 'Enable Banking - EU (experimental)',
+                },
                 'advanced/bank-sync/gocardless',
                 'advanced/bank-sync/simplefin',
                 'advanced/bank-sync/pluggyai',
               ],
-            },    
+            },
           ],
         },
         // end of accounts
@@ -189,14 +189,14 @@ const sidebars = {
               link: {
                 type: 'doc',
                 id: 'budgeting/rules/index',
-              },              
+              },
               items: [
                 'budgeting/rules/custom',
                 {
                   type: 'ref',
                   id: 'experimental/formulas', // the primary link is in Reports
                   label: 'Excel Formula Mode - Rule Formulas (experimental)',
-                },                
+                },
               ],
             },
             'transactions/merging',
@@ -220,30 +220,30 @@ const sidebars = {
             'budgeting/categories',
             'budgeting/returns-and-reimbursements',
             {
-            type: 'doc',
-            id: 'experimental/budget-automation', 
-            label: 'Budget Automations (experimental)', 
+              type: 'doc',
+              id: 'experimental/budget-automation',
+              label: 'Budget Automations (experimental)',
             },
             {
-            type: 'doc',
-            id: 'experimental/goal-templates',
-            label: 'Notes-based Templates (experimental)', 
+              type: 'doc',
+              id: 'experimental/goal-templates',
+              label: 'Notes-based Templates (experimental)',
             },
             {
-            type: 'doc',
-            id: 'experimental/monthly-cleanup', 
-            label: 'Notes-based Monthly Cleanup (experimental)', 
+              type: 'doc',
+              id: 'experimental/monthly-cleanup',
+              label: 'Notes-based Monthly Cleanup (experimental)',
             },
             {
-            type: 'ref',
-            id: 'getting-started/tracking-budget', // secondary link to tracking budget
+              type: 'ref',
+              id: 'getting-started/tracking-budget', // secondary link to tracking budget
             },
             'advanced/restart',
           ],
         },
 
         // End of Budgeting
-        
+
         {
           type: 'category',
           label: 'Reports Dashboard',
@@ -272,7 +272,7 @@ const sidebars = {
           ],
         },
         // end of Reports
-        
+
         {
           type: 'category',
           label: 'Backup & Restore',
@@ -280,14 +280,14 @@ const sidebars = {
           items: ['backup-restore/backup', 'backup-restore/restore'],
         },
         // end of Backup
-        
+
         {
           type: 'category',
           label: 'Settings',
           collapsed: true,
           items: ['settings/index', 'custom-themes'],
         },
-        // end of Settings        
+        // end of Settings
 
         {
           type: 'category',
@@ -295,27 +295,28 @@ const sidebars = {
           collapsed: true,
           link: {
             type: 'doc',
-            id: 'experimental/index', 
+            id: 'experimental/index',
           },
-          items: [ // Secondary links to documentation. Primary links above in navigation scheme.
+          items: [
+            // Secondary links to documentation. Primary links above in navigation scheme.
             {
-            type: 'ref',
-            id: 'experimental/budget-automation', 
-            label: 'Budget Automations', 
-            },
-            {
-            type: 'ref',
-            id: 'experimental/goal-templates',
-            label: 'Notes-based Templates', 
-            },
-            {
-            type: 'ref',
-            id: 'experimental/monthly-cleanup', 
-            label: 'Notes-based Monthly Cleanup', 
+              type: 'ref',
+              id: 'experimental/budget-automation',
+              label: 'Budget Automations',
             },
             {
               type: 'ref',
-              id: 'experimental/formulas', 
+              id: 'experimental/goal-templates',
+              label: 'Notes-based Templates',
+            },
+            {
+              type: 'ref',
+              id: 'experimental/monthly-cleanup',
+              label: 'Notes-based Monthly Cleanup',
+            },
+            {
+              type: 'ref',
+              id: 'experimental/formulas',
               label: 'Excel Formula Mode - Formula Cards & Rule Formulas',
             },
             {
@@ -328,8 +329,8 @@ const sidebars = {
               id: 'experimental/budget-analysis-report',
               label: 'Budget Analysis Report',
             },
-            'experimental/rule-templating', // this has been deprecated, but leaving here for the notice. 
-          ],             
+            'experimental/rule-templating', // this has been deprecated, but leaving here for the notice.
+          ],
         },
         // end of Experimental
       ],
@@ -341,7 +342,7 @@ const sidebars = {
       collapsible: false,
       className: 'no-indent',
       items: [
-        'faq',        
+        'faq',
         {
           type: 'category',
           label: 'Troubleshooting',
@@ -355,7 +356,7 @@ const sidebars = {
         },
         'community-repos',
         {
-          type: 'category', 
+          type: 'category',
           label: 'API',
           link: { type: 'doc', id: 'api/index' },
           items: [
@@ -368,7 +369,7 @@ const sidebars = {
               link: {
                 type: 'doc',
                 id: 'api/actual-ql/index',
-                },
+              },
               items: ['api/actual-ql/functions', 'api/actual-ql/examples'],
             },
           ],
