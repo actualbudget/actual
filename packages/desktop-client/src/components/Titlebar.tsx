@@ -6,7 +6,6 @@ import { Route, Routes, useLocation } from 'react-router';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgArrowLeft } from '@actual-app/components/icons/v1';
-import { Tooltip } from '@actual-app/components/tooltip';
 import {
   SvgAlertTriangle,
   SvgNavigationMenu,
@@ -18,6 +17,7 @@ import { styles } from '@actual-app/components/styles';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { listen } from '@actual-app/core/platform/client/connection';
 import { isDevelopmentEnvironment } from '@actual-app/core/shared/environment';
