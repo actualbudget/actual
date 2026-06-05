@@ -169,6 +169,7 @@ const sidebars = {
             id: 'transactions/importing',
           },
           items: [
+            'transactions/payees',
             'transactions/split-transactions',
             {
               type: 'category',
@@ -180,8 +181,7 @@ const sidebars = {
               },
               items: ['advanced/scripts/modify-transfers'],
             },
-            'schedules',
-            'transactions/filters',
+            'schedules',            
             {
               type: 'category',
               label: 'Rules',
@@ -199,9 +199,9 @@ const sidebars = {
                 },
               ],
             },
-            'transactions/merging',
-            'transactions/payees',
             'transactions/tags',
+            'transactions/filters',
+            'transactions/merging',
             'transactions/bulk-editing',
             'budgeting/multi-currency',
           ],
