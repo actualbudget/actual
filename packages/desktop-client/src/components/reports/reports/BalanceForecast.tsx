@@ -1,5 +1,6 @@
 // oxlint-disable typescript-paths/absolute-parent-import
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -27,6 +28,7 @@ import {
   YAxis,
 } from 'recharts';
 
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { Container } from '#components/reports/Container';
@@ -64,7 +66,11 @@ export function BalanceForecast() {
     return <LoadingIndicator />;
   }
 
-  return <BalanceForecastInner key={widget?.id ?? 'new'} widget={widget} />;
+  return (
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <BalanceForecastInner key={widget?.id ?? 'new'} widget={widget} />
+    </ErrorBoundary>
+  );
 }
 
 type BalanceForecastInnerProps = {

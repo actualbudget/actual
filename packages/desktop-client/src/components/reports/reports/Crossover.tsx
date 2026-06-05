@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -24,6 +25,7 @@ import type {
 
 import { Link } from '#components/common/Link';
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { FinancialText } from '#components/FinancialText';
 import { Checkbox } from '#components/forms';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
@@ -66,7 +68,11 @@ export function Crossover() {
     return <LoadingIndicator />;
   }
 
-  return <CrossoverInner widget={widget} />;
+  return (
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <CrossoverInner widget={widget} />
+    </ErrorBoundary>
+  );
 }
 
 type CrossoverInnerProps = { widget?: CrossoverWidget };

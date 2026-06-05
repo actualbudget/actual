@@ -1,4 +1,5 @@
 import React, { useEffect, useEffectEvent, useMemo, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router';
 
@@ -25,6 +26,7 @@ import type { TransObjectLiteral } from '@actual-app/core/types/util';
 import * as d from 'date-fns';
 
 import { Warning } from '#components/alerts';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { AppliedFilters } from '#components/filters/AppliedFilters';
 import { FinancialText } from '#components/FinancialText';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
@@ -126,11 +128,13 @@ export function CustomReport() {
   }
 
   return (
-    <CustomReportInner
-      key={report?.id}
-      report={report}
-      budgetType={budgetType}
-    />
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <CustomReportInner
+        key={report?.id}
+        report={report}
+        budgetType={budgetType}
+      />
+    </ErrorBoundary>
   );
 }
 

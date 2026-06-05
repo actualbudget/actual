@@ -5,6 +5,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -27,6 +28,7 @@ import type {
 import * as d from 'date-fns';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
@@ -58,7 +60,11 @@ export function AgeOfMoney() {
     return <LoadingIndicator />;
   }
 
-  return <AgeOfMoneyInner widget={widget} />;
+  return (
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <AgeOfMoneyInner widget={widget} />
+    </ErrorBoundary>
+  );
 }
 
 type AgeOfMoneyInnerProps = {

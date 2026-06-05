@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -20,6 +21,7 @@ import type {
 import * as d from 'date-fns';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { FinancialText } from '#components/FinancialText';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
@@ -58,7 +60,11 @@ export function CashFlow() {
     return <LoadingIndicator />;
   }
 
-  return <CashFlowInner widget={widget} />;
+  return (
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <CashFlowInner widget={widget} />
+    </ErrorBoundary>
+  );
 }
 
 type CashFlowInnerProps = {

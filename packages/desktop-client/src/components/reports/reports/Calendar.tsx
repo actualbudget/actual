@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Ref } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams, useSearchParams } from 'react-router';
 import { animated, config, useSpring } from 'react-spring';
@@ -31,6 +32,7 @@ import { useDrag } from '@use-gesture/react';
 import { format as formatDate, parseISO } from 'date-fns';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { FinancialText } from '#components/FinancialText';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { TransactionList as TransactionListMobile } from '#components/mobile/transactions/TransactionList';
@@ -84,7 +86,11 @@ export function Calendar() {
     return <LoadingIndicator />;
   }
 
-  return <CalendarInner widget={widget} parameters={searchParams} />;
+  return (
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <CalendarInner widget={widget} parameters={searchParams} />
+    </ErrorBoundary>
+  );
 }
 
 type CalendarInnerProps = {

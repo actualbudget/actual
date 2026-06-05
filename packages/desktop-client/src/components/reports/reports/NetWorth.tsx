@@ -5,6 +5,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -23,6 +24,7 @@ import type { NetWorthWidget, TimeFrame } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
 
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { FinancialText } from '#components/FinancialText';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
@@ -58,7 +60,11 @@ export function NetWorth() {
     return <LoadingIndicator />;
   }
 
-  return <NetWorthInner widget={widget} />;
+  return (
+    <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+      <NetWorthInner widget={widget} />
+    </ErrorBoundary>
+  );
 }
 
 type NetWorthInnerProps = {
