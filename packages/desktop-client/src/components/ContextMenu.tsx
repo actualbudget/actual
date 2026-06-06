@@ -1,5 +1,5 @@
 import { createContext, useContext, useRef, useState } from 'react';
-import type { Dispatch, ReactNode, RefObject, SetStateAction } from 'react';
+import type { ReactNode, RefObject } from 'react';
 
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
@@ -34,23 +34,23 @@ type MenuItem = ContextMenuAction | ContextMenuLabel | typeof Menu.line;
 
 export type ContextMenuItem = MenuItem | ContextMenuOrderedLine;
 
-type ContextMenuContextData = {
-  position: { x: number; y: number };
-  setPosition: Dispatch<SetStateAction<{ x: number; y: number }>>;
-  isOpen: boolean;
-  setIsOpen: Dispatch<SetStateAction<boolean>>;
+type ContextMenuActionContextData = {
   addItem: (s: ContextMenuItem) => void;
 };
 
-const ContextMenuContext = createContext<ContextMenuContextData>({
-  position: { x: 0, y: 0 },
-  // oxlint-disable-next-line no-empty-function
-  setPosition: () => {},
-  isOpen: false,
-  // oxlint-disable-next-line no-empty-function
-  setIsOpen: () => {},
+const ContextMenuActionContext = createContext<ContextMenuActionContextData>({
   // oxlint-disable-next-line no-empty-function
   addItem: () => {},
+});
+
+type ContextMenuStateContextData = {
+  position: { x: number; y: number };
+  isOpen: boolean;
+};
+
+const ContextMenuStateContext = createContext<ContextMenuStateContextData>({
+  position: { x: 0, y: 0 },
+  isOpen: false,
 });
 
 export function ContextMenuContextProvider({
@@ -129,41 +129,41 @@ export function ContextMenuContextProvider({
   }
 
   return (
-    <ContextMenuContext.Provider
-      value={{ position, setPosition, setIsOpen, isOpen, addItem }}
-    >
-      {/* THE INVISIBLE ANCHOR:
-        A 0x0 pixel real DOM node that follows your right-clicks.
-      */}
-      <div
-        ref={triggerRef}
-        style={{
-          position: 'fixed',
-          left: position.x,
-          top: position.y,
-          width: 0,
-          height: 0,
-          pointerEvents: 'none', // Prevents it from interfering with user clicks
-        }}
-      />
-
-      <Popover
-        ref={popoverRef}
-        triggerRef={triggerRef}
-        isOpen={isOpen}
-        onOpenChange={handleOpenChange}
-        placement="bottom start"
-        isNonModal
-        style={{ width: 200, margin: 1 }}
-      >
-        <Menu
-          onMenuSelect={handleMenuSelect}
-          items={items}
-          style={{ backgroundColor: theme.menuBackground }}
+    <ContextMenuActionContext.Provider value={{ addItem }}>
+      <ContextMenuStateContext.Provider value={{ position, isOpen }}>
+        {/* THE INVISIBLE ANCHOR:
+          A 0x0 pixel real DOM node that follows your right-clicks.
+        */}
+        <div
+          ref={triggerRef}
+          style={{
+            position: 'fixed',
+            left: position.x,
+            top: position.y,
+            width: 0,
+            height: 0,
+            pointerEvents: 'none', // Prevents it from interfering with user clicks
+          }}
         />
-      </Popover>
-      {children}
-    </ContextMenuContext.Provider>
+
+        <Popover
+          ref={popoverRef}
+          triggerRef={triggerRef}
+          isOpen={isOpen}
+          onOpenChange={handleOpenChange}
+          placement="bottom start"
+          isNonModal
+          style={{ width: 200, margin: 1 }}
+        >
+          <Menu
+            onMenuSelect={handleMenuSelect}
+            items={items}
+            style={{ backgroundColor: theme.menuBackground }}
+          />
+        </Popover>
+        {children}
+      </ContextMenuStateContext.Provider>
+    </ContextMenuActionContext.Provider>
   );
 }
 
@@ -181,7 +181,7 @@ export function useContextMenuAction(
   triggerRef: RefObject<HTMLElement | null>,
   ...actions: Falsy<ContextMenuItem>[]
 ) {
-  const { addItem: addAction, isOpen } = useContext(ContextMenuContext);
+  const { addItem: addAction } = useContext(ContextMenuActionContext);
   function addActions() {
     for (const action of actions) {
       if (action && (typeof action === 'symbol' || !action.hidden)) {
@@ -202,10 +202,10 @@ export function useContextMenuAction(
       }),
     );
   }
-  return { isOpen, handleContextMenu };
+  return { handleContextMenu };
 }
 
 export function useContextMenuState() {
-  const { isOpen } = useContext(ContextMenuContext);
+  const { isOpen } = useContext(ContextMenuStateContext);
   return { isOpen };
 }

@@ -23,7 +23,10 @@ import { css, cx } from '@emotion/css';
 import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
 import { BalanceHistoryGraph } from '#components/accounts/BalanceHistoryGraph';
 import { Link } from '#components/common/Link';
-import { useConditionalContextMenuAction } from '#components/ContextMenu';
+import {
+  useConditionalContextMenuAction,
+  useContextMenuState,
+} from '#components/ContextMenu';
 import { Notes } from '#components/Notes';
 import { DropHighlight, useDraggable, useDroppable } from '#components/sort';
 import type { OnDragChangeCallback, OnDropCallback } from '#components/sort';
@@ -128,7 +131,8 @@ export function Account<FieldName extends SheetFields<'account'>>({
 
   const balanceCell = <CellValue binding={query} type="financial" />;
 
-  const { isOpen: isContextMenuOpen } = useConditionalContextMenuAction(
+  const { isOpen: isContextMenuOpen } = useContextMenuState();
+  useConditionalContextMenuAction(
     triggerRef,
     account && needsTooltip,
     { name: 'rename', text: t('Rename'), onClick: () => setIsEditing(true) },
