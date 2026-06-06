@@ -81,7 +81,6 @@ import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplet
 import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
 import { TagAutocomplete } from '#components/autocomplete/TagAutocomplete';
-import { useContextMenuAction } from '#components/ContextMenu';
 import { getStatusProps } from '#components/schedules/StatusBadge';
 import type { StatusTypes } from '#components/schedules/StatusBadge';
 import { DateSelect } from '#components/select/DateSelect';
@@ -128,7 +127,6 @@ import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 import { SheetNameProvider } from '#hooks/useSheetName';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
 import type { SplitsExpandedContextValue } from '#hooks/useSplitsExpanded';
-import { useTransactionFilters } from '#hooks/useTransactionFilters';
 import { pushModal } from '#modals/modalsSlice';
 import { NotesTagFormatter } from '#notes/NotesTagFormatter';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -149,7 +147,6 @@ import type {
   TransactionEditFunction,
   TransactionUpdateFunction,
 } from './table/utils';
-import { TransactionMenu } from './TransactionMenu';
 import { useTransactionRowContextActions } from './useTransactionRowContextActions';
 
 type TransactionHeaderProps = {
