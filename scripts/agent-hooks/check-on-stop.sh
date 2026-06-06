@@ -37,7 +37,11 @@ done < <(
 [ "${#files[@]}" -gt 0 ] || exit 0
 
 # Map changed source files to the workspace dir that owns them (deduped).
-declare -A seen
+# Stock macOS ships bash 3.2, which has no associative arrays (`declare -A`) and
+# evaluates `arr[$d]` subscripts as arithmetic (slashes/hyphens in a path then
+# blow up under `set -u`). So dedupe via a space-padded string match instead —
+# `ws_dirs` stays a plain indexed array, which bash 3.2 handles fine.
+seen=" "
 ws_dirs=()
 for f in "${files[@]}"; do
   case "$f" in
@@ -47,10 +51,13 @@ for f in "${files[@]}"; do
   d=$(dirname "$f")
   while [ "$d" != "." ] && [ "$d" != "/" ]; do
     if [ -f "$ROOT/$d/package.json" ]; then
-      [ -n "${seen[$d]:-}" ] || {
-        seen[$d]=1
-        ws_dirs+=("$d")
-      }
+      case "$seen" in
+        *" $d "*) ;;
+        *)
+          seen="$seen$d "
+          ws_dirs+=("$d")
+          ;;
+      esac
       break
     fi
     d=$(dirname "$d")
@@ -61,21 +68,24 @@ done
 fail=0
 report=""
 for d in "${ws_dirs[@]}"; do
-  # One jq read per package.json: name + which scripts exist.
+  # One jq read per package.json: name + which scripts exist. Every field is a
+  # non-empty token (the name falls back to "-", the flags to yes/no) so that
+  # `read` can't collapse an empty middle field — tab is IFS-whitespace, so a
+  # package with test-but-no-typecheck would otherwise shift the columns.
   IFS=$'\t' read -r name tc te < <(
-    jq -r '[.name // "",
-            (if .scripts.typecheck then "tc" else "" end),
-            (if .scripts.test then "test" else "" end)] | @tsv' "$ROOT/$d/package.json"
+    jq -r '[.name // "-",
+            (if .scripts.typecheck then "yes" else "no" end),
+            (if .scripts.test then "yes" else "no" end)] | @tsv' "$ROOT/$d/package.json"
   )
-  [ -n "$name" ] || continue
+  [ "$name" != "-" ] || continue
 
-  if [ "$tc" = "tc" ]; then
+  if [ "$tc" = "yes" ]; then
     if ! out=$(yarn workspace "$name" run typecheck 2>&1); then
       report="$report"$'\n'"[typecheck failed: $name]"$'\n'"$(printf '%s' "$out" | tail -25)"
       fail=1
     fi
   fi
-  if [ "$te" = "test" ]; then
+  if [ "$te" = "yes" ]; then
     if ! out=$(yarn workspace "$name" run test 2>&1); then
       report="$report"$'\n'"[tests failed: $name]"$'\n'"$(printf '%s' "$out" | tail -25)"
       fail=1
