@@ -222,7 +222,7 @@ describe('accountsBankSync', () => {
   });
 });
 
-describe('bank sync handlers must not nest mutators (regression #8017)', () => {
+describe('bank sync handlers must not nest mutators', () => {
   it('does not register the sync handlers as mutating methods', () => {
     expect(isMutating(app.handlers['accounts-bank-sync'])).toBe(false);
     expect(isMutating(app.handlers['simplefin-batch-sync'])).toBe(false);
