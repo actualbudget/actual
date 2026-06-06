@@ -1,9 +1,9 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
-import ipaddr from 'ipaddr.js';
 
 import { config } from './load-config';
 import { requestLoggerMiddleware } from './util/middlewares';
+import { isBlockedIp } from './util/ssrf';
 import { validateSession } from './util/validate-user';
 
 const app = express();
@@ -68,20 +68,9 @@ function isUrlAllowed(targetUrl) {
     const hostname = url.hostname;
 
     // Block private/local IP addresses
-    if (ipaddr.isValid(hostname)) {
-      const ip = ipaddr.parse(hostname);
-      if (
-        [
-          'private',
-          'loopback',
-          'linkLocal',
-          'uniqueLocal',
-          'unspecified',
-        ].includes(ip.range())
-      ) {
-        console.warn(`Blocked request to private/localhost IP: ${hostname}`);
-        return false;
-      }
+    if (isBlockedIp(hostname)) {
+      console.warn(`Blocked request to private/localhost IP: ${hostname}`);
+      return false;
     }
 
     // Always allow the specific plugin-store URL
