@@ -58,7 +58,7 @@ type EnableBankingAuthResponse = {
   authorization_id: string;
 };
 
-export type BankSyncTransaction = EnableBankingTransaction & {
+type BankSyncTransaction = EnableBankingTransaction & {
   transactionId: string;
   date: string;
   bookingDate: string;
