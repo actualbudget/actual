@@ -7,11 +7,8 @@ export function useInputRefValue(
   inputRef: RefObject<HTMLInputElement | null>,
 ): [string, (newValue: string) => void] {
   const [value, setValue] = useState('');
-  useRefEventListener(
-    inputRef,
-    'input',
-    e => setValue((e.target as HTMLInputElement).value),
-    [setValue],
+  useRefEventListener(inputRef, 'input', e =>
+    setValue((e.target as HTMLInputElement).value),
   );
   useEffect(
     () => setValue(inputRef.current?.value ?? ''),

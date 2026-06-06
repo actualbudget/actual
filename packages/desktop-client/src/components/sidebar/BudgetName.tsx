@@ -60,7 +60,7 @@ function EditableBudgetName() {
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  useContextMenuAction(
+  const { handleContextMenu } = useContextMenuAction(
     triggerRef,
     {
       name: 'rename',
@@ -118,6 +118,7 @@ function EditableBudgetName() {
         marginLeft: -5,
         flex: '0 auto',
       }}
+      onClick={handleContextMenu}
     >
       <Text style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
         {budgetName || t('Unnamed')}

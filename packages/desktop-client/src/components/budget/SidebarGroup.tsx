@@ -17,10 +17,7 @@ import type {
 } from '@actual-app/core/types/models';
 import { css, cx } from '@emotion/css';
 
-import {
-  useConditionalContextMenuAction,
-  useContextMenuAction,
-} from '#components/ContextMenu';
+import { useContextMenuAction } from '#components/ContextMenu';
 import { NotesButton } from '#components/NotesButton';
 import { InputCell } from '#components/table';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
@@ -73,10 +70,14 @@ export function SidebarGroup({
   const canSortCategories =
     !!onSortCategories && (group.categories?.length ?? 0) > 1;
   const triggerRef = useRef(null);
-  useContextMenuAction(
+  const { handleContextMenu } = useContextMenuAction(
     triggerRef,
-    { name: 'rename', text: t('Rename'), onClick: () => onEdit(group.id) },
-    {
+    onEdit && {
+      name: 'rename',
+      text: t('Rename'),
+      onClick: () => onEdit(group.id),
+    },
+    onSave && {
       name: 'toggle-visibility',
       text: group.hidden ? t('Show') : t('Hide'),
       onClick: () => onSave({ ...group, hidden: !group.hidden }),
@@ -87,17 +88,13 @@ export function SidebarGroup({
       text: t('Delete'),
       onClick: () => onDelete(group.id),
     },
-  );
-  useConditionalContextMenuAction(
-    triggerRef,
-    canSortCategories,
-    Menu.line,
-    onSortCategories && {
+    canSortCategories && Menu.line,
+    canSortCategories && {
       name: 'sort-asc',
       text: t('Sort A to Z'),
       onClick: () => onSortCategories(group.id, 'asc'),
     },
-    onSortCategories && {
+    canSortCategories && {
       name: 'sort-desc',
       text: t('Sort Z to A'),
       onClick: () => onSortCategories(group.id, 'desc'),
@@ -158,6 +155,7 @@ export function SidebarGroup({
               variant="bare"
               className="hover-visible"
               style={{ padding: 3 }}
+              onPress={handleContextMenu}
             >
               <SvgCheveronDown width={14} height={14} />
             </Button>

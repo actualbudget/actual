@@ -1,5 +1,5 @@
 import { createContext, useContext, useRef, useState } from 'react';
-import type { ReactNode, RefObject } from 'react';
+import type { Dispatch, ReactNode, RefObject, SetStateAction } from 'react';
 
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
@@ -8,36 +8,44 @@ import _ from 'lodash';
 
 import { useRefEventListener } from '#hooks/useRefEventListener';
 
-export type ContextMenuAction = {
-  name: string;
-  text: string;
-  onClick: () => void;
-  hidden?: boolean;
-  disabled?: boolean;
-  order?: number;
-};
-
-type ContextMenuLabel = {
+export type ContextMenuLabel = {
   type: typeof Menu.label;
   name: string;
   text: string;
   hidden?: boolean;
+  order?: number;
 };
 
-type ContextMenuSection =
+export type ContextMenuAction = {
+  name: string;
+  text: string;
+  hidden?: boolean;
+  order?: number;
+  onClick: () => void;
+};
+
+export type ContextMenuSection =
   | typeof Menu.line
   | ContextMenuAction
   | ContextMenuLabel;
 
 type ContextMenuContextData = {
+  position: { x: number; y: number };
+  setPosition: Dispatch<SetStateAction<{ x: number; y: number }>>;
   isOpen: boolean;
+  setIsOpen: Dispatch<SetStateAction<boolean>>;
   addAction: (
     s: ContextMenuAction | typeof Menu.line | ContextMenuLabel,
   ) => void;
 };
 
 const ContextMenuContext = createContext<ContextMenuContextData>({
+  position: { x: 0, y: 0 },
+  // oxlint-disable-next-line no-empty-function
+  setPosition: () => {},
   isOpen: false,
+  // oxlint-disable-next-line no-empty-function
+  setIsOpen: () => {},
   // oxlint-disable-next-line no-empty-function
   addAction: () => {},
 });
@@ -48,7 +56,7 @@ export function ContextMenuContextProvider({
   children?: ReactNode;
 }) {
   const [actions, setActions] = useState<ContextMenuSection[]>([]);
-  const [open, setOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLDivElement | null>(null);
@@ -70,53 +78,43 @@ export function ContextMenuContextProvider({
   }
 
   function handleOpenChange(newOpen: boolean) {
-    setOpen(newOpen);
+    setIsOpen(newOpen);
     if (!newOpen) {
       setActions([]);
     }
   }
 
   // Handle right-clicks to OPEN or JUMP the menu
-  useRefEventListener(
-    document,
-    'contextmenu',
-    (e: MouseEvent) => {
-      if (pendingActions.current.length === 0) {
-        handleOpenChange(false);
-        return;
-      }
+  useRefEventListener(document, 'contextmenu', (e: MouseEvent) => {
+    if (pendingActions.current.length === 0) {
+      handleOpenChange(false);
+      return;
+    }
 
-      e.preventDefault();
-      setPosition({ x: e.clientX, y: e.clientY });
-      setActions(
-        _.orderBy(
-          pendingActions.current,
-          a => (typeof a === 'object' && 'order' in a && a.order) || 0,
-          'asc',
-        ),
-      );
-      setOpen(true);
-      pendingActions.current = [];
-    },
-    [],
-  );
+    e.preventDefault();
+    setPosition({ x: e.clientX, y: e.clientY });
+    setActions(
+      _.orderBy(
+        pendingActions.current,
+        a => (typeof a === 'object' && 'order' in a && a.order) || 0,
+        'asc',
+      ),
+    );
+    setIsOpen(true);
+    pendingActions.current = [];
+  });
 
   // 2. Handle left-clicks to DISMISS the menu
-  useRefEventListener(
-    document,
-    'pointerdown',
-    (e: PointerEvent) => {
-      // Close the menu if we click anywhere outside the popover DOM element
-      if (
-        open &&
-        popoverRef.current &&
-        !popoverRef.current.contains(e.target as Node)
-      ) {
-        handleOpenChange(false);
-      }
-    },
-    [open], // Re-bind when open state changes
-  );
+  useRefEventListener(document, 'pointerdown', (e: PointerEvent) => {
+    // Close the menu if we click anywhere outside the popover DOM element
+    if (
+      isOpen &&
+      popoverRef.current &&
+      !popoverRef.current.contains(e.target as Node)
+    ) {
+      handleOpenChange(false);
+    }
+  });
 
   function handleMenuSelect(actionName: string) {
     const action = actions.find(
@@ -129,7 +127,9 @@ export function ContextMenuContextProvider({
   }
 
   return (
-    <ContextMenuContext.Provider value={{ addAction, isOpen: open }}>
+    <ContextMenuContext.Provider
+      value={{ position, setPosition, setIsOpen, isOpen, addAction }}
+    >
       {/* THE INVISIBLE ANCHOR:
         A 0x0 pixel real DOM node that follows your right-clicks.
       */}
@@ -148,7 +148,7 @@ export function ContextMenuContextProvider({
       <Popover
         ref={popoverRef}
         triggerRef={triggerRef}
-        isOpen={open}
+        isOpen={isOpen}
         onOpenChange={handleOpenChange}
         placement="bottom start"
         isNonModal
@@ -165,48 +165,42 @@ export function ContextMenuContextProvider({
   );
 }
 
+type Falsy<T> = T | undefined | null | false | '';
+
 export function useConditionalContextMenuAction(
   triggerRef: RefObject<HTMLElement | null>,
   condition: unknown,
-  ...actions: (
-    | ContextMenuAction
-    | typeof Menu.line
-    | ContextMenuLabel
-    | undefined
-    | null
-    | false
-    | ''
-  )[]
+  ...actions: Falsy<ContextMenuSection>[]
 ) {
   return useContextMenuAction(triggerRef, ...(condition ? actions : []));
 }
 
 export function useContextMenuAction(
   triggerRef: RefObject<HTMLElement | null>,
-  ...actions: (
-    | ContextMenuAction
-    | typeof Menu.line
-    | ContextMenuLabel
-    | undefined
-    | null
-    | false
-    | ''
-  )[]
+  ...actions: Falsy<ContextMenuSection>[]
 ) {
   const { addAction, isOpen } = useContext(ContextMenuContext);
-  useRefEventListener(
-    triggerRef,
-    'contextmenu',
-    () => {
-      for (const action of actions) {
-        if (action && (typeof action === 'symbol' || !action.hidden)) {
-          addAction(action);
-        }
+  function addActions() {
+    for (const action of actions) {
+      if (action && (typeof action === 'symbol' || !action.hidden)) {
+        addAction(action);
       }
-    },
-    [addAction, actions],
-  );
-  return { isOpen };
+    }
+  }
+
+  useRefEventListener(triggerRef, 'contextmenu', addActions);
+  function handleContextMenu() {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    triggerRef.current.dispatchEvent(
+      new MouseEvent('contextmenu', {
+        clientX: rect.x,
+        clientY: rect.y + rect.height,
+        bubbles: true,
+      }),
+    );
+  }
+  return { isOpen, handleContextMenu };
 }
 
 export function useContextMenuState() {
