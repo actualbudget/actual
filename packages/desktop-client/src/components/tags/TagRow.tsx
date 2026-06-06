@@ -2,12 +2,11 @@ import React, { memo, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { SvgArrowThinRight } from '@actual-app/components/icons/v1';
-import { Menu } from '@actual-app/components/menu';
-import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import type { TagEntity } from '@actual-app/core/types/models';
 
+import { useContextMenuAction } from '#components/ContextMenu';
 import {
   Cell,
   CellButton,
@@ -15,27 +14,32 @@ import {
   Row,
   SelectCell,
 } from '#components/table';
-import { useContextMenu } from '#hooks/useContextMenu';
 import { useNavigate } from '#hooks/useNavigate';
 import { useProperFocus } from '#hooks/useProperFocus';
-import { useSelectedDispatch } from '#hooks/useSelected';
-import { useDeleteTagMutation, useUpdateTagMutation } from '#tags';
+import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
+import {
+  useDeleteTagsMutation,
+  useHideTagsMutation,
+  useUnhideTagsMutation,
+  useUpdateTagMutation,
+} from '#tags';
 
 import { TagEditor } from './TagEditor';
 
 type TagRowProps = {
   tag: TagEntity;
   hovered?: boolean;
-  selected?: boolean;
   onHover: (id?: string) => void;
   focusedField: string | null;
   onEdit: (id: string, field: string) => void;
 };
 
 export const TagRow = memo(
-  ({ tag, hovered, selected, onHover, focusedField, onEdit }: TagRowProps) => {
+  ({ tag, hovered, onHover, focusedField, onEdit }: TagRowProps) => {
     const { t } = useTranslation();
     const dispatchSelected = useSelectedDispatch();
+    const selectedIds = useSelectedItems();
+    const selected = selectedIds.has(tag.id);
     const borderColor = selected ? theme.tableBorderSelected : 'none';
 
     const colorButtonRef = useRef(null);
@@ -44,11 +48,11 @@ export const TagRow = memo(
     useProperFocus(resetButtonRef, focusedField === 'select');
 
     const triggerRef = useRef(null);
-    const { setMenuOpen, menuOpen, handleContextMenu, position } =
-      useContextMenu();
     const navigate = useNavigate();
     const { mutate: updateTag } = useUpdateTagMutation();
-    const { mutate: deleteTag } = useDeleteTagMutation();
+    const { mutate: deleteTags } = useDeleteTagsMutation();
+    const { mutate: hideTags } = useHideTagsMutation();
+    const { mutate: unhideTags } = useUnhideTagsMutation();
 
     const onUpdate = (description: string) => {
       updateTag({ tag: { ...tag, description } });
@@ -71,6 +75,28 @@ export const TagRow = memo(
       });
     };
 
+    const contextActionIds = selected ? Array.from(selectedIds) : [tag.id];
+
+    useContextMenuAction(
+      triggerRef,
+      {
+        name: 'delete',
+        text: t('Delete'),
+        onClick: () => deleteTags({ ids: contextActionIds }),
+      },
+      tag.hidden
+        ? {
+            name: 'unhide',
+            text: t('Unhide'),
+            onClick: () => unhideTags({ ids: contextActionIds }),
+          }
+        : {
+            name: 'hide',
+            text: t('Hide'),
+            onClick: () => hideTags({ ids: contextActionIds }),
+          },
+    );
+
     return (
       <Row
         ref={triggerRef}
@@ -86,37 +112,7 @@ export const TagRow = memo(
         collapsed
         onMouseEnter={() => onHover(tag.id)}
         onMouseLeave={() => onHover()}
-        onContextMenu={handleContextMenu}
       >
-        <Popover
-          triggerRef={triggerRef}
-          placement="bottom start"
-          isOpen={menuOpen}
-          onOpenChange={() => setMenuOpen(false)}
-          {...position}
-          style={{ width: 200, margin: 1 }}
-          isNonModal
-        >
-          <Menu
-            items={[
-              {
-                name: 'delete',
-                text: t('Delete'),
-              },
-            ]}
-            onMenuSelect={name => {
-              switch (name) {
-                case 'delete':
-                  deleteTag({ id: tag.id });
-                  break;
-                default:
-                  throw new Error(`Unrecognized menu option: ${String(name)}`);
-              }
-              setMenuOpen(false);
-            }}
-          />
-        </Popover>
-
         <SelectCell
           exposed={hovered || selected || focusedField === 'select'}
           focused={focusedField === 'select'}

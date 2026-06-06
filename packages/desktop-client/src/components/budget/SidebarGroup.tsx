@@ -7,7 +7,6 @@ import { Button } from '@actual-app/components/button';
 import { SvgAdd, SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
-import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
@@ -18,9 +17,12 @@ import type {
 } from '@actual-app/core/types/models';
 import { css, cx } from '@emotion/css';
 
+import {
+  useConditionalContextMenuAction,
+  useContextMenuAction,
+} from '#components/ContextMenu';
 import { NotesButton } from '#components/NotesButton';
 import { InputCell } from '#components/table';
-import { useContextMenu } from '#hooks/useContextMenu';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 
@@ -70,9 +72,46 @@ export function SidebarGroup({
   const temporary = group.id === 'new';
   const canSortCategories =
     !!onSortCategories && (group.categories?.length ?? 0) > 1;
-  const { setMenuOpen, menuOpen, handleContextMenu, resetPosition, position } =
-    useContextMenu();
   const triggerRef = useRef(null);
+  useContextMenuAction(
+    triggerRef,
+    { name: 'rename', text: t('Rename'), onClick: () => onEdit(group.id) },
+    {
+      name: 'toggle-visibility',
+      text: group.hidden ? t('Show') : t('Hide'),
+      onClick: () => onSave({ ...group, hidden: !group.hidden }),
+      hidden: group.is_income,
+    },
+    onDelete && {
+      name: 'delete',
+      text: t('Delete'),
+      onClick: () => onDelete(group.id),
+    },
+  );
+  useConditionalContextMenuAction(
+    triggerRef,
+    canSortCategories,
+    Menu.line,
+    onSortCategories && {
+      name: 'sort-asc',
+      text: t('Sort A to Z'),
+      onClick: () => onSortCategories(group.id, 'asc'),
+    },
+    onSortCategories && {
+      name: 'sort-desc',
+      text: t('Sort Z to A'),
+      onClick: () => onSortCategories(group.id, 'desc'),
+    },
+    isGoalTemplatesEnabled &&
+      onApplyBudgetTemplatesInGroup && {
+        name: 'apply-multiple-category-template',
+        text: t('Overwrite with templates'),
+        onClick: () =>
+          onApplyBudgetTemplatesInGroup(
+            group.categories.filter(c => !c.hidden).map(c => c.id),
+          ),
+      },
+  );
 
   const displayed = (
     <View
@@ -87,7 +126,6 @@ export function SidebarGroup({
       onClick={() => {
         onToggleCollapse(group.id);
       }}
-      onContextMenu={handleContextMenu}
     >
       {!dragPreview && (
         <SvgExpandArrow
@@ -119,70 +157,10 @@ export function SidebarGroup({
             <Button
               variant="bare"
               className="hover-visible"
-              onPress={() => {
-                resetPosition();
-                setMenuOpen(true);
-              }}
               style={{ padding: 3 }}
             >
               <SvgCheveronDown width={14} height={14} />
             </Button>
-
-            <Popover
-              triggerRef={triggerRef}
-              placement="bottom start"
-              isOpen={menuOpen}
-              onOpenChange={() => setMenuOpen(false)}
-              style={{ width: 200, margin: 1 }}
-              isNonModal
-              {...position}
-            >
-              <Menu
-                onMenuSelect={type => {
-                  if (type === 'rename') {
-                    onEdit(group.id);
-                  } else if (type === 'delete') {
-                    onDelete(group.id);
-                  } else if (type === 'toggle-visibility') {
-                    onSave({ ...group, hidden: !group.hidden });
-                  } else if (type === 'apply-multiple-category-template') {
-                    onApplyBudgetTemplatesInGroup?.(
-                      group.categories.filter(c => !c.hidden).map(c => c.id),
-                    );
-                  } else if (type === 'sort-asc') {
-                    onSortCategories?.(group.id, 'asc');
-                  } else if (type === 'sort-desc') {
-                    onSortCategories?.(group.id, 'desc');
-                  }
-                  setMenuOpen(false);
-                }}
-                items={[
-                  { name: 'rename', text: t('Rename') },
-                  !group.is_income && {
-                    name: 'toggle-visibility',
-                    text: group.hidden ? t('Show') : t('Hide'),
-                  },
-                  onDelete && { name: 'delete', text: t('Delete') },
-                  canSortCategories && Menu.line,
-                  canSortCategories && {
-                    name: 'sort-asc',
-                    text: t('Sort A to Z'),
-                  },
-                  canSortCategories && {
-                    name: 'sort-desc',
-                    text: t('Sort Z to A'),
-                  },
-                  ...(isGoalTemplatesEnabled
-                    ? [
-                        {
-                          name: 'apply-multiple-category-template',
-                          text: t('Overwrite with templates'),
-                        },
-                      ]
-                    : []),
-                ]}
-              />
-            </Popover>
           </View>
           <View style={{ flex: 1 }} />
           <View

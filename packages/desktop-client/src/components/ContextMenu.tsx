@@ -15,11 +15,15 @@ export type ContextMenuAction = {
   disabled?: boolean;
 };
 
+type ContextMenuSection = typeof Menu.line | ContextMenuAction;
+
 type ContextMenuContextData = {
-  addAction: (s: ContextMenuAction) => void;
+  isOpen: boolean;
+  addAction: (s: ContextMenuAction | typeof Menu.line) => void;
 };
 
 const ContextMenuContext = createContext<ContextMenuContextData>({
+  isOpen: false,
   // oxlint-disable-next-line no-empty-function
   addAction: () => {},
 });
@@ -29,19 +33,22 @@ export function ContextMenuContextProvider({
 }: {
   children?: ReactNode;
 }) {
-  const [actions, setActions] = useState<ContextMenuAction[]>([]);
+  const [actions, setActions] = useState<ContextMenuSection[]>([]);
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLDivElement | null>(null);
 
   // 1. Use a ref to collect actions synchronously during event bubbling
-  const pendingActions = useRef<ContextMenuAction[]>([]);
+  const pendingActions = useRef<ContextMenuSection[]>([]);
 
-  function addAction(action: ContextMenuAction) {
+  function addAction(action: ContextMenuSection) {
     if (
+      typeof action === 'symbol' ||
       !pendingActions.current.some(
-        pendingAction => pendingAction.name === action.name,
+        pendingAction =>
+          typeof pendingAction === 'object' &&
+          pendingAction.name === action.name,
       )
     ) {
       pendingActions.current.push(action);
@@ -92,15 +99,17 @@ export function ContextMenuContextProvider({
   );
 
   function handleMenuSelect(actionName: string) {
-    const action = actions.find(action => action.name === actionName);
-    if (action) {
+    const action = actions.find(
+      action => typeof action === 'object' && action.name === actionName,
+    );
+    if (action && typeof action === 'object') {
       action.onClick();
     }
     handleOpenChange(false);
   }
 
   return (
-    <ContextMenuContext.Provider value={{ addAction }}>
+    <ContextMenuContext.Provider value={{ addAction, isOpen: open }}>
       {/* THE INVISIBLE ANCHOR:
         A 0x0 pixel real DOM node that follows your right-clicks.
       */}
@@ -136,17 +145,49 @@ export function ContextMenuContextProvider({
   );
 }
 
+export function useConditionalContextMenuAction(
+  triggerRef: RefObject<HTMLElement | null>,
+  condition: unknown,
+  ...actions: (
+    | ContextMenuAction
+    | typeof Menu.line
+    | undefined
+    | null
+    | false
+    | ''
+  )[]
+) {
+  return useContextMenuAction(triggerRef, ...(condition ? actions : []));
+}
+
 export function useContextMenuAction(
   triggerRef: RefObject<HTMLElement | null>,
-  ...actions: ContextMenuAction[]
+  ...actions: (
+    | ContextMenuAction
+    | typeof Menu.line
+    | undefined
+    | null
+    | false
+    | ''
+  )[]
 ) {
-  const { addAction } = useContext(ContextMenuContext);
+  const { addAction, isOpen } = useContext(ContextMenuContext);
   useRefEventListener(
     triggerRef,
     'contextmenu',
     () => {
-      actions.filter(action => !action.hidden).forEach(addAction);
+      for (const action of actions) {
+        if (action && (typeof action === 'symbol' || !action.hidden)) {
+          addAction(action);
+        }
+      }
     },
     [addAction, actions],
   );
+  return { isOpen };
+}
+
+export function useContextMenuState() {
+  const { isOpen } = useContext(ContextMenuContext);
+  return { isOpen };
 }

@@ -40,7 +40,6 @@ export function TagsList({
             key={tag.id}
             tag={tag}
             hovered={hovered}
-            selected={selected}
             onHover={onHover}
             focusedField={focusedField}
             onEdit={onEdit}

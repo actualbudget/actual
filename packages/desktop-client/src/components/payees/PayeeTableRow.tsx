@@ -14,6 +14,7 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import type { PayeeEntity } from '@actual-app/core/types/models';
 
+import { useContextMenuAction } from '#components/ContextMenu';
 import {
   Cell,
   CellButton,
@@ -125,8 +126,45 @@ export const PayeeTableRow = memo(
     const { t } = useTranslation();
 
     const triggerRef = useRef(null);
-    const { setMenuOpen, menuOpen, handleContextMenu, position } =
-      useContextMenu();
+    useContextMenuAction(
+      triggerRef,
+      {
+        name: 'delete',
+        text: t('Delete'),
+        onClick: () => onDelete(selectedIds),
+        hidden: payee.transfer_acct != null,
+      },
+      {
+        name: 'favorite',
+        text: payee.favorite ? t('Unfavorite') : t('Favorite'),
+        onClick: () =>
+          selectedIds.forEach(id => onUpdate(id, 'favorite', !payee.favorite)),
+        hidden: payee.transfer_acct != null,
+      },
+      {
+        name: 'view-rules',
+        text: t('View rules'),
+        onClick: () => onViewRules(id),
+        hidden: !ruleCount,
+      },
+      {
+        name: 'create-rule',
+        text: t('Create rule'),
+        onClick: () => onCreateRule(id),
+        hidden: selectedIds.length !== 1,
+      },
+      {
+        name: 'learn',
+        text: payee.learn_categories
+          ? t('Disable learning')
+          : t('Enable learning'),
+        onClick: () =>
+          selectedIds.forEach(id =>
+            onUpdate(id, 'learn_categories', !payee.learn_categories),
+          ),
+        hidden: !isLearnCategoriesEnabled,
+      },
+    );
 
     return (
       <Row
@@ -149,68 +187,7 @@ export const PayeeTableRow = memo(
         }}
         data-focus-key={payee.id}
         onMouseEnter={() => onHover && onHover(payee.id)}
-        onContextMenu={handleContextMenu}
       >
-        <Popover
-          triggerRef={triggerRef}
-          placement="bottom start"
-          isOpen={menuOpen}
-          onOpenChange={() => setMenuOpen(false)}
-          {...position}
-          style={{ width: 200, margin: 1 }}
-          isNonModal
-        >
-          <Menu
-            items={[
-              payee.transfer_acct == null && {
-                name: 'delete',
-                text: t('Delete'),
-              },
-              payee.transfer_acct == null && {
-                name: 'favorite',
-                text: payee.favorite ? t('Unfavorite') : t('Favorite'),
-              },
-              ruleCount > 0 && { name: 'view-rules', text: t('View rules') },
-              selectedIds.length === 1 && {
-                name: 'create-rule',
-                text: t('Create rule'),
-              },
-              isLearnCategoriesEnabled &&
-                (payee.learn_categories
-                  ? {
-                      name: 'learn',
-                      text: t('Disable learning'),
-                    }
-                  : { name: 'learn', text: t('Enable learning') }),
-            ]}
-            onMenuSelect={name => {
-              switch (name) {
-                case 'delete':
-                  onDelete(selectedIds);
-                  break;
-                case 'favorite':
-                  selectedIds.forEach(id => {
-                    onUpdate(id, 'favorite', !payee.favorite);
-                  });
-                  break;
-                case 'learn':
-                  selectedIds.forEach(id => {
-                    onUpdate(id, 'learn_categories', !payee.learn_categories);
-                  });
-                  break;
-                case 'view-rules':
-                  onViewRules(id);
-                  break;
-                case 'create-rule':
-                  onCreateRule(id);
-                  break;
-                default:
-                  throw new Error(`Unrecognized menu option: ${String(name)}`);
-              }
-              setMenuOpen(false);
-            }}
-          />
-        </Popover>
         <SelectCell
           exposed={
             payee.transfer_acct == null && (hovered || selected || editing)
