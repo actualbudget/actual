@@ -1991,14 +1991,6 @@ function NotesCell({
 
   const displayedNote = note || scheduleNote || '';
 
-  useContextMenuAction(cellRef, {
-    name: 'transaction-note',
-    text: 'Filter by note',
-    onClick: () => {
-      console.log('notes');
-    },
-  });
-
   return (
     <CustomCell
       innerRef={cellRef}
