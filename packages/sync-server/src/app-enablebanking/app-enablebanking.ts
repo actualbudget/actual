@@ -526,7 +526,6 @@ app.post(
       const booked: ReturnType<typeof normalizeTransaction>[] = [];
       const pending: ReturnType<typeof normalizeTransaction>[] = [];
 
-      let skippedCount = 0;
       for (const tx of rawTransactions) {
         const normalized = normalizeTransaction(tx);
 
@@ -534,7 +533,6 @@ app.post(
         // non-numeric amount) — one of them would otherwise abort the entire
         // account sync. Pending transactions that carry a date are unaffected.
         if (!isImportableTransaction(normalized)) {
-          skippedCount += 1;
           debug(
             'Skipping unimportable transaction id=%s date=%s amount=%s',
             normalized.transactionId,
