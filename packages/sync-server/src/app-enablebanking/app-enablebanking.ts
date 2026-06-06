@@ -16,6 +16,7 @@ import type {
 } from './services/enablebanking-service';
 import {
   enableBankingService,
+  isImportableTransaction,
   normalizeAccount,
   normalizeBalance,
   normalizeTransaction,
@@ -527,6 +528,20 @@ app.post(
 
       for (const tx of rawTransactions) {
         const normalized = normalizeTransaction(tx);
+
+        // Drop records Actual's client can't insert (empty/non-ISO date or
+        // non-numeric amount) — one of them would otherwise abort the entire
+        // account sync. Pending transactions that carry a date are unaffected.
+        if (!isImportableTransaction(normalized)) {
+          debug(
+            'Skipping unimportable transaction id=%s date=%s amount=%s',
+            normalized.transactionId,
+            normalized.date,
+            normalized.transactionAmount.amount,
+          );
+          continue;
+        }
+
         all.push(normalized);
         if (normalized.booked) {
           booked.push(normalized);
