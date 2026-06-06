@@ -551,13 +551,6 @@ app.post(
           pending.push(normalized);
         }
       }
-      if (skippedCount > 0) {
-        debug(
-          'Skipped %d unimportable transaction(s) for account %s',
-          skippedCount,
-          accountId,
-        );
-      }
 
       res.send({
         status: 'ok',
