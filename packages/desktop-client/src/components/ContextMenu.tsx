@@ -1,8 +1,8 @@
 import { createContext, useContext, useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
-import { Popover } from 'react-aria-components';
 
 import { Menu } from '@actual-app/components/menu';
+import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 
 import { useRefEventListener } from '#hooks/useRefEventListener';

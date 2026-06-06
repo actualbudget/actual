@@ -1337,20 +1337,6 @@ const Transaction = memo(function Transaction({
     onScheduleAction: (name, ids) => onScheduleAction?.(name, ids),
     onMakeAsNonSplitTransactions: ids => onMakeAsNonSplitTransactions?.(ids),
   });
-  useContextMenuAction(triggerRef, {
-    name: 'delete',
-    text: 'Name',
-    onClick: () => {
-      console.log('testing');
-    },
-  });
-  useContextMenuAction(triggerRef, {
-    name: 'name2',
-    text: 'Name2',
-    onClick: () => {
-      console.log('testing2');
-    },
-  });
 
   return (
     <View
