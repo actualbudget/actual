@@ -31,7 +31,10 @@ const RADIAN = Math.PI / 180;
 
 const canDeviceHover = () => window.matchMedia('(hover: hover)').matches;
 
-type ClickablePieItem = PieSectorDataItem & { id?: string };
+type ClickablePieItem = PieSectorDataItem & {
+  id?: string;
+  uncategorized_id?: 'off_budget' | 'transfer' | 'other' | 'all';
+};
 
 // ---------------------------------------------------------------------------
 // Dimension helpers
