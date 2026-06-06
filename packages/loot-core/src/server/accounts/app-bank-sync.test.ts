@@ -248,7 +248,7 @@ describe('bank sync handlers must not nest mutators', () => {
       runHandler(app.handlers['accounts-bank-sync'], { ids: ['acct1'] }),
       new Promise<never>((_, reject) => {
         timer = setTimeout(
-          () => reject(new Error('bank sync deadlocked (nested mutator)')),
+          () => reject(new Error('bank sync deadlocked')),
           2000,
         );
       }),
