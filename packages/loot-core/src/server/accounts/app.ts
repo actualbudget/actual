@@ -25,9 +25,11 @@ import { amountToInteger } from '#shared/util';
 import type { ImportTransactionsOpts } from '#types/api-handlers';
 import type {
   AccountEntity,
+  BankSyncStatus,
   CategoryEntity,
   GoCardlessToken,
   ImportTransactionEntity,
+  SyncServerAkahuAccount,
   SyncServerEnableBankingAccount,
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
@@ -55,6 +57,7 @@ export type AccountHandlers = {
   'gocardless-accounts-link': typeof linkGoCardlessAccount;
   'simplefin-accounts-link': typeof linkSimpleFinAccount;
   'pluggyai-accounts-link': typeof linkPluggyAiAccount;
+  'akahu-accounts-link': typeof linkAkahuAccount;
   'enablebanking-accounts-link': typeof linkEnableBankingAccount;
   'account-create': typeof createAccount;
   'account-close': typeof closeAccount;
@@ -67,6 +70,7 @@ export type AccountHandlers = {
   'gocardless-status': typeof goCardlessStatus;
   'simplefin-status': typeof simpleFinStatus;
   'pluggyai-status': typeof pluggyAiStatus;
+  'akahu-status': typeof akahuStatus;
   'enablebanking-status': typeof enableBankingStatus;
   'enablebanking-aspsps': typeof enableBankingAspsps;
   'enablebanking-start-auth': typeof enableBankingStartAuth;
@@ -76,6 +80,7 @@ export type AccountHandlers = {
   'enablebanking-configure': typeof enableBankingConfigure;
   'simplefin-accounts': typeof simpleFinAccounts;
   'pluggyai-accounts': typeof pluggyAiAccounts;
+  'akahu-accounts': typeof akahuAccounts;
   'gocardless-get-banks': typeof getGoCardlessBanks;
   'gocardless-create-web-token': typeof createGoCardlessWebToken;
   'accounts-bank-sync': typeof accountsBankSync;
@@ -121,6 +126,7 @@ async function getAccounts(): Promise<AccountEntity[]> {
         balance_limit: dbAccount.balance_limit ?? null,
         account_sync_source: dbAccount.account_sync_source ?? null,
         last_sync: dbAccount.last_sync ?? null,
+        bank_sync_status: dbAccount.bank_sync_status ?? null,
       }) satisfies AccountEntity,
   );
 }
@@ -218,7 +224,7 @@ async function linkGoCardlessAccount({
 
   connection.send('sync-event', {
     type: 'success',
-    tables: ['transactions'],
+    tables: ['transactions', 'accounts'],
   });
 
   return 'ok';
@@ -295,7 +301,7 @@ async function linkSimpleFinAccount({
 
   connection.send('sync-event', {
     type: 'success',
-    tables: ['transactions'],
+    tables: ['transactions', 'accounts'],
   });
 
   return 'ok';
@@ -351,6 +357,80 @@ async function linkPluggyAiAccount({
       bank: bank.id,
       offbudget: offBudget ? 1 : 0,
       account_sync_source: 'pluggyai',
+    });
+    await db.insertPayee({
+      name: '',
+      transfer_acct: id,
+    });
+  }
+
+  const syncRes = await bankSync.syncAccount(
+    undefined,
+    undefined,
+    id,
+    externalAccount.account_id,
+    bank.bank_id,
+    startingDate,
+    startingBalance,
+  );
+
+  await handleSyncResponse(syncRes, id);
+
+  connection.send('sync-event', {
+    type: 'success',
+    tables: ['transactions', 'accounts'],
+  });
+
+  return 'ok';
+}
+
+async function linkAkahuAccount({
+  externalAccount,
+  upgradingId,
+  offBudget = false,
+  startingDate,
+  startingBalance,
+}: LinkAccountBaseParams & {
+  externalAccount: SyncServerAkahuAccount;
+}) {
+  let id;
+
+  const institution = {
+    name: externalAccount.institution ?? null,
+  };
+
+  const bank = await link.findOrCreateBank(
+    institution,
+    externalAccount.orgDomain ?? externalAccount.orgId,
+  );
+
+  if (upgradingId) {
+    const accRow = await db.first<db.DbAccount>(
+      'SELECT * FROM accounts WHERE id = ?',
+      [upgradingId],
+    );
+
+    if (!accRow) {
+      throw new Error(`Account with ID ${upgradingId} not found.`);
+    }
+
+    id = accRow.id;
+    await db.update('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      bank: bank.id,
+      account_sync_source: 'akahu',
+    });
+  } else {
+    id = uuidv4();
+    await db.insertWithUUID('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      name: externalAccount.name,
+      official_name: externalAccount.name,
+      bank: bank.id,
+      offbudget: offBudget ? 1 : 0,
+      account_sync_source: 'akahu',
     });
     await db.insertPayee({
       name: '',
@@ -457,7 +537,7 @@ async function linkEnableBankingAccount({
 
   connection.send('sync-event', {
     type: 'success',
-    tables: ['transactions'],
+    tables: ['transactions', 'accounts'],
   });
 
   return 'ok';
@@ -831,6 +911,27 @@ async function pluggyAiStatus() {
   );
 }
 
+async function akahuStatus() {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
+  return post(
+    serverConfig.AKAHU_SERVER + '/status',
+    {},
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+  );
+}
+
 async function simpleFinAccounts() {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -872,6 +973,32 @@ async function pluggyAiAccounts() {
   try {
     return await post(
       serverConfig.PLUGGYAI_SERVER + '/accounts',
+      {},
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+      60000,
+    );
+  } catch {
+    return { error_code: 'TIMED_OUT' };
+  }
+}
+
+async function akahuAccounts() {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
+  try {
+    return await post(
+      serverConfig.AKAHU_SERVER + '/accounts',
       {},
       {
         'X-ACTUAL-TOKEN': userToken,
@@ -1142,7 +1269,11 @@ async function handleSyncResponse(
   }
 
   const ts = new Date().getTime().toString();
-  await db.update('accounts', { id: acctId, last_sync: ts });
+  await db.update('accounts', {
+    id: acctId,
+    last_sync: ts,
+    bank_sync_status: 'ok',
+  });
 
   return {
     newTransactions,
@@ -1222,6 +1353,37 @@ function handleSyncError(
   };
 }
 
+function getBankSyncStatusFromError(
+  err: Error | PostError | BankSyncError,
+): BankSyncStatus {
+  if (isBankSyncError(err)) {
+    if (
+      (err.category === 'ITEM_ERROR' && err.code === 'ITEM_LOGIN_REQUIRED') ||
+      (err.category === 'INVALID_INPUT' &&
+        err.code === 'INVALID_ACCESS_TOKEN') ||
+      err.category === 'INVALID_ACCESS_TOKEN'
+    ) {
+      return 'reauth-required';
+    }
+
+    if (err.category === 'ACCOUNT_NEEDS_ATTENTION') {
+      return 'attention-required';
+    }
+  }
+
+  return 'failed';
+}
+
+function persistBankSyncError(
+  accountId: AccountEntity['id'],
+  err: Error | PostError | BankSyncError,
+) {
+  return db.update('accounts', {
+    id: accountId,
+    bank_sync_status: getBankSyncStatusFromError(err),
+  });
+}
+
 export type SyncResponseWithErrors = SyncResponse & {
   errors: SyncError[];
 };
@@ -1274,6 +1436,7 @@ async function accountsBankSync({
         updatedAccounts.push(...syncResponseData.updatedAccounts);
       } catch (err) {
         const error = err as Error;
+        await persistBankSyncError(acct.id, error);
         errors.push(handleSyncError(error, acct));
         captureException({
           ...error,
@@ -1288,7 +1451,7 @@ async function accountsBankSync({
   if (updatedAccounts.length > 0) {
     connection.send('sync-event', {
       type: 'success',
-      tables: ['transactions'],
+      tables: ['transactions', 'accounts'],
     });
   }
 
@@ -1356,17 +1519,15 @@ async function simpleFinBatchSync({
       const updatedAccounts: Array<AccountEntity['id']> = [];
 
       if (syncResponse.res?.error_code) {
-        errors.push(
-          handleSyncError(
-            {
-              type: 'BankSyncError',
-              reason: 'Failed syncing account "' + account.name + '."',
-              category: syncResponse.res.error_type,
-              code: syncResponse.res.error_code,
-            } as BankSyncError,
-            account,
-          ),
-        );
+        const bankSyncError = {
+          type: 'BankSyncError',
+          reason: 'Failed syncing account "' + account.name + '."',
+          category: syncResponse.res.error_type,
+          code: syncResponse.res.error_code,
+        } as BankSyncError;
+
+        await persistBankSyncError(account.id, bankSyncError);
+        errors.push(handleSyncError(bankSyncError, account));
       } else if (syncResponse.res) {
         const syncResponseData = await handleSyncResponse(
           syncResponse.res,
@@ -1377,14 +1538,11 @@ async function simpleFinBatchSync({
         matchedTransactions.push(...syncResponseData.matchedTransactions);
         updatedAccounts.push(...syncResponseData.updatedAccounts);
       } else {
-        errors.push(
-          handleSyncError(
-            new Error(
-              'Failed syncing account "' + account.name + '": empty response',
-            ),
-            account,
-          ),
+        const emptyResponseError = new Error(
+          'Failed syncing account "' + account.name + '": empty response',
         );
+        await persistBankSyncError(account.id, emptyResponseError);
+        errors.push(handleSyncError(emptyResponseError, account));
       }
 
       retVal.push({
@@ -1395,6 +1553,7 @@ async function simpleFinBatchSync({
   } catch (err) {
     for (const account of accounts) {
       const error = err as Error;
+      await persistBankSyncError(account.id, error);
       retVal.push({
         accountId: account.id,
         res: {
@@ -1410,7 +1569,7 @@ async function simpleFinBatchSync({
   if (retVal.some(a => a.res.updatedAccounts.length > 0)) {
     connection.send('sync-event', {
       type: 'success',
-      tables: ['transactions'],
+      tables: ['transactions', 'accounts'],
     });
   }
 
@@ -1497,6 +1656,7 @@ async function unlinkAccount({ id }: { id: AccountEntity['id'] }) {
     balance_available: null,
     balance_limit: null,
     account_sync_source: null,
+    bank_sync_status: null,
   });
 
   if (isGoCardless === false) {
@@ -1559,6 +1719,7 @@ app.method('account-properties', getAccountProperties);
 app.method('gocardless-accounts-link', linkGoCardlessAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);
 app.method('pluggyai-accounts-link', linkPluggyAiAccount);
+app.method('akahu-accounts-link', linkAkahuAccount);
 app.method('enablebanking-accounts-link', linkEnableBankingAccount);
 app.method('account-create', mutator(undoable(createAccount)));
 app.method('account-close', mutator(closeAccount));
@@ -1571,6 +1732,7 @@ app.method('gocardless-poll-web-token-stop', stopGoCardlessWebTokenPolling);
 app.method('gocardless-status', goCardlessStatus);
 app.method('simplefin-status', simpleFinStatus);
 app.method('pluggyai-status', pluggyAiStatus);
+app.method('akahu-status', akahuStatus);
 app.method('enablebanking-status', enableBankingStatus);
 app.method('enablebanking-aspsps', enableBankingAspsps);
 app.method('enablebanking-start-auth', enableBankingStartAuth);
@@ -1580,9 +1742,10 @@ app.method('enablebanking-poll-auth-stop', stopEnableBankingPollAuth);
 app.method('enablebanking-configure', enableBankingConfigure);
 app.method('simplefin-accounts', simpleFinAccounts);
 app.method('pluggyai-accounts', pluggyAiAccounts);
+app.method('akahu-accounts', akahuAccounts);
 app.method('gocardless-get-banks', getGoCardlessBanks);
 app.method('gocardless-create-web-token', createGoCardlessWebToken);
-app.method('accounts-bank-sync', accountsBankSync);
-app.method('simplefin-batch-sync', simpleFinBatchSync);
+app.method('accounts-bank-sync', mutator(accountsBankSync));
+app.method('simplefin-batch-sync', mutator(simpleFinBatchSync));
 app.method('transactions-import', mutator(undoable(importTransactions)));
 app.method('account-unlink', mutator(unlinkAccount));

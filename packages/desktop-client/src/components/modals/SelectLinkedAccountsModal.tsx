@@ -13,6 +13,7 @@ import { View } from '@actual-app/components/view';
 import { currentDay, subDays } from '@actual-app/core/shared/months';
 import type {
   AccountEntity,
+  SyncServerAkahuAccount,
   SyncServerEnableBankingAccount,
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
@@ -21,6 +22,7 @@ import type {
 import { format as formatDate, parseISO } from 'date-fns';
 
 import {
+  useLinkAccountAkahuMutation,
   useLinkAccountEnableBankingMutation,
   useLinkAccountMutation,
   useLinkAccountPluggyAiMutation,
@@ -95,6 +97,12 @@ export type SelectLinkedAccountsModalProps =
       externalAccounts: SyncServerEnableBankingAccount[];
       syncSource: 'enableBanking';
       upgradingAccountId?: string;
+    }
+  | {
+      requisitionId?: undefined;
+      externalAccounts: SyncServerAkahuAccount[];
+      syncSource: 'akahu';
+      upgradingAccountId?: string;
     };
 
 export function SelectLinkedAccountsModal({
@@ -122,6 +130,12 @@ export function SelectLinkedAccountsModal({
           return {
             syncSource: 'pluggyai',
             externalAccounts: toSort as SyncServerPluggyAiAccount[],
+            upgradingAccountId,
+          };
+        case 'akahu':
+          return {
+            syncSource: 'akahu',
+            externalAccounts: toSort as SyncServerAkahuAccount[],
             upgradingAccountId,
           };
         case 'goCardless':
@@ -206,6 +220,7 @@ export function SelectLinkedAccountsModal({
   const unlinkAccount = useUnlinkAccountMutation();
   const linkAccountSimpleFin = useLinkAccountSimpleFinMutation();
   const linkAccountPluggyAi = useLinkAccountPluggyAiMutation();
+  const linkAccountAkahu = useLinkAccountAkahuMutation();
   const linkAccountEnableBanking = useLinkAccountEnableBankingMutation();
 
   async function onNext() {
@@ -272,6 +287,21 @@ export function SelectLinkedAccountsModal({
             startingDate,
             startingBalance,
           });
+        } else if (propsWithSortedExternalAccounts.syncSource === 'akahu') {
+          linkAccountAkahu.mutate({
+            externalAccount:
+              propsWithSortedExternalAccounts.externalAccounts[
+                externalAccountIndex
+              ],
+            upgradingId:
+              chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+              chosenLocalAccountId !== addOffBudgetAccountOption.id
+                ? chosenLocalAccountId
+                : undefined,
+            offBudget,
+            startingDate,
+            startingBalance,
+          });
         } else if (
           propsWithSortedExternalAccounts.syncSource === 'enableBanking'
         ) {
@@ -320,7 +350,8 @@ export function SelectLinkedAccountsModal({
     externalAccount:
       | SyncServerGoCardlessAccount
       | SyncServerSimpleFinAccount
-      | SyncServerPluggyAiAccount,
+      | SyncServerPluggyAiAccount
+      | SyncServerAkahuAccount,
     localAccountId: string | null | undefined,
   ) {
     setChosenAccounts(accounts => {
@@ -545,6 +576,7 @@ type ExternalAccount =
   | SyncServerGoCardlessAccount
   | SyncServerSimpleFinAccount
   | SyncServerPluggyAiAccount
+  | SyncServerAkahuAccount
   | SyncServerEnableBankingAccount;
 
 type StartingBalanceInfo = {

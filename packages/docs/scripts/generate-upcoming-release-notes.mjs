@@ -44,7 +44,11 @@ sidebar_label: Upcoming Release
 
 ${intro}`;
 
-const { notesByCategory, files } = await parseReleaseNotes(notesDir, 'actual');
+const { notesByCategory, files } = await parseReleaseNotes(
+  notesDir,
+  'actualbudget',
+  'actual',
+);
 
 const body =
   files.length === 0
