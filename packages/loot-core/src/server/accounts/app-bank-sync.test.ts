@@ -254,19 +254,18 @@ describe('bank sync handlers must not nest mutators (regression #8017)', () => {
       return { added: [], updated: [], updatedPreview: [] };
     });
 
-    const handlerPromise = runHandler(app.handlers['accounts-bank-sync'], {
-      ids: ['acct1'],
-    });
-    const timeout = new Promise<never>((_, reject) =>
-      setTimeout(
-        () => reject(new Error('bank sync deadlocked (nested mutator)')),
-        2000,
-      ),
-    );
-
     // Rejects via the timeout if the handler deadlocks; otherwise resolves.
-    await Promise.race([handlerPromise, timeout]);
-    const result = await handlerPromise;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const result = await Promise.race([
+      runHandler(app.handlers['accounts-bank-sync'], { ids: ['acct1'] }),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error('bank sync deadlocked (nested mutator)')),
+          2000,
+        );
+      }),
+    ]);
+    clearTimeout(timer);
 
     expect(result.errors).toEqual([]);
   });
