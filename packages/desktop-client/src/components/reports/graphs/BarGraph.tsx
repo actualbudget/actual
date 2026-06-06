@@ -313,25 +313,30 @@ export function BarGraph({
                   !['Group', 'Interval'].includes(groupBy) &&
                   setPointer('pointer')
                 }
-                onClick={item =>
-                  ((compact && showTooltip) || !compact) &&
-                  !['Group', 'Interval'].includes(groupBy) &&
-                  showActivity({
-                    navigate,
-                    categories,
-                    accounts,
-                    balanceTypeOp,
-                    filters,
-                    showHiddenCategories,
-                    showOffBudget,
-                    type: 'totals',
-                    startDate: data.startDate,
-                    endDate: data.endDate,
-                    field: groupBy.toLowerCase(),
-                    id: item.id,
-                    uncategorized_id: item.uncategorized_id,
-                  })
-                }
+                onClick={item => {
+                  const groupItem = (data.data ?? []).find(
+                    d => d.id === item.id,
+                  );
+                  return (
+                    ((compact && showTooltip) || !compact) &&
+                    !['Group', 'Interval'].includes(groupBy) &&
+                    showActivity({
+                      navigate,
+                      categories,
+                      accounts,
+                      balanceTypeOp,
+                      filters,
+                      showHiddenCategories,
+                      showOffBudget,
+                      type: 'totals',
+                      startDate: data.startDate,
+                      endDate: data.endDate,
+                      field: groupBy.toLowerCase(),
+                      id: item.id,
+                      uncategorized_id: groupItem?.uncategorized_id,
+                    })
+                  );
+                }}
                 shape={(props: BarShapeProps) => (
                   <Rectangle
                     {...props}
