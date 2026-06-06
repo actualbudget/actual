@@ -24,6 +24,14 @@ export type DbAccount = {
   account_sync_source?: 'simpleFin' | 'goCardless' | null;
   last_reconciled?: string | null;
   last_sync?: string | null;
+  bank_sync_status?:
+    | 'ok'
+    | 'pending'
+    | 'sync-requested'
+    | 'failed'
+    | 'reauth-required'
+    | 'attention-required'
+    | null;
 };
 
 export type DbBank = {
@@ -349,4 +357,5 @@ export type DbTag = {
   color?: string | null;
   description?: string | null;
   tombstone: 1 | 0;
+  hidden?: 1 | 0;
 };

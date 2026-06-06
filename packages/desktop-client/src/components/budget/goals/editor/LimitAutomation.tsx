@@ -2,6 +2,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import {
   currentDate,
@@ -90,31 +91,71 @@ export const LimitAutomation = ({
     </FormField>
   );
 
+  const cadenceField = (
+    <FormField key="cadence-field" style={{ flex: 1 }}>
+      <FormLabel title={t('Every')} htmlFor="cadence-field" />
+
+      <Select
+        id="cadence-field"
+        value={period}
+        onChange={cadence =>
+          dispatch(updateTemplate({ type: 'limit', period: cadence }))
+        }
+        options={[
+          ['daily', t('Day')],
+          ['weekly', t('Week')],
+          ['monthly', t('Month')],
+        ]}
+        className={selectButtonClassName}
+      />
+    </FormField>
+  );
+
   return (
     <>
       <SpaceBetween align="center" gap={10} style={{ marginTop: 10 }}>
-        <FormField key="cadence-field" style={{ flex: 1 }}>
-          <FormLabel title={t('Cadence')} htmlFor="cadence-field" />
-
-          <Select
-            id="cadence-field"
-            value={period}
-            onChange={cadence =>
-              dispatch(updateTemplate({ type: 'limit', period: cadence }))
-            }
-            options={[
-              ['daily', t('Daily')],
-              ['weekly', t('Weekly')],
-              ['monthly', t('Monthly')],
-            ]}
-            className={selectButtonClassName}
-          />
-        </FormField>
-        {period === 'weekly' ? weekdayField : amountField}
+        {amountField}
+        {cadenceField}
       </SpaceBetween>
 
+      <Text
+        style={{
+          fontSize: 12,
+          color: theme.pageTextLight,
+          display: 'block',
+          marginTop: 8,
+        }}
+      >
+        <Trans>
+          A weekly or daily cap is multiplied by the number of weeks or days in
+          the month, so the effective monthly cap changes with each month. For
+          example, a{' '}
+          {{
+            weekly: format(
+              amountToInteger(50, format.currency.decimalPlaces),
+              'financial-no-decimals',
+            ),
+          }}
+          /week cap caps the balance at{' '}
+          {{
+            fourWeeks: format(
+              amountToInteger(200, format.currency.decimalPlaces),
+              'financial-no-decimals',
+            ),
+          }}{' '}
+          in months with 4 weeks and{' '}
+          {{
+            fiveWeeks: format(
+              amountToInteger(250, format.currency.decimalPlaces),
+              'financial-no-decimals',
+            ),
+          }}{' '}
+          in months with 5.
+        </Trans>
+      </Text>
+
       <SpaceBetween align="center" gap={10} style={{ marginTop: 10 }}>
-        {period === 'weekly' && amountField}
+        {period === 'weekly' && weekdayField}
         <FormField key="hold-overflow-field" style={{ flex: 1 }}>
           <LabeledCheckbox
             id="hold-overflow-field"
