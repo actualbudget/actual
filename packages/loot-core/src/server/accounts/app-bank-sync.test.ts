@@ -2,6 +2,7 @@
 import * as asyncStorage from '#platform/server/asyncStorage';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
+import { isMutating, runHandler, runMutator } from '#server/mutators';
 
 import { app } from './app';
 import * as bankSync from './sync';
@@ -218,5 +219,55 @@ describe('accountsBankSync', () => {
       ['acct1'],
     );
     expect(account!.bank_sync_status).toBe('failed');
+  });
+});
+
+// Regression test for #8017: the bank-sync handlers must NOT be registered as
+// mutating methods. `runHandler` runs a mutating method inside `runMutator`,
+// which is `sequential()` and only lets one mutator run at a time. The sync
+// itself reconciles transactions inside its own `runMutator` call, so wrapping
+// the handler in `mutator()` makes that inner `runMutator` wait forever behind
+// the still-running outer one — a deadlock that leaves the sync spinner stuck.
+describe('bank sync handlers must not nest mutators (regression #8017)', () => {
+  it('does not register the sync handlers as mutating methods', () => {
+    expect(isMutating(app.handlers['accounts-bank-sync'])).toBe(false);
+    expect(isMutating(app.handlers['simplefin-batch-sync'])).toBe(false);
+  });
+
+  it('completes when run through runHandler even though the sync runs its own mutator', async () => {
+    insertBank({ id: 'bank1', bank_id: 'gc-bank', name: 'GoCardless' });
+    await db.insertAccount({
+      id: 'acct1',
+      name: 'Checking',
+      bank: 'bank1',
+      account_id: 'ext-1',
+      account_sync_source: 'goCardless',
+    });
+
+    // Mimic the real syncAccount, which reconciles transactions inside its own
+    // runMutator. If the handler itself is also run as a mutator, this nested
+    // runMutator deadlocks and the promise below never resolves.
+    vi.mocked(bankSync.syncAccount).mockImplementation(async () => {
+      await runMutator(async () => {
+        // reconcileTransactions runs here in production
+      });
+      return { added: [], updated: [], updatedPreview: [] };
+    });
+
+    const handlerPromise = runHandler(app.handlers['accounts-bank-sync'], {
+      ids: ['acct1'],
+    });
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(
+        () => reject(new Error('bank sync deadlocked (nested mutator)')),
+        2000,
+      ),
+    );
+
+    // Rejects via the timeout if the handler deadlocks; otherwise resolves.
+    await Promise.race([handlerPromise, timeout]);
+    const result = await handlerPromise;
+
+    expect(result.errors).toEqual([]);
   });
 });
