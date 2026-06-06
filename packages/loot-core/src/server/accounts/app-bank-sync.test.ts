@@ -222,12 +222,6 @@ describe('accountsBankSync', () => {
   });
 });
 
-// Regression test for #8017: the bank-sync handlers must NOT be registered as
-// mutating methods. `runHandler` runs a mutating method inside `runMutator`,
-// which is `sequential()` and only lets one mutator run at a time. The sync
-// itself reconciles transactions inside its own `runMutator` call, so wrapping
-// the handler in `mutator()` makes that inner `runMutator` wait forever behind
-// the still-running outer one — a deadlock that leaves the sync spinner stuck.
 describe('bank sync handlers must not nest mutators (regression #8017)', () => {
   it('does not register the sync handlers as mutating methods', () => {
     expect(isMutating(app.handlers['accounts-bank-sync'])).toBe(false);
@@ -244,17 +238,11 @@ describe('bank sync handlers must not nest mutators (regression #8017)', () => {
       account_sync_source: 'goCardless',
     });
 
-    // Mimic the real syncAccount, which reconciles transactions inside its own
-    // runMutator. If the handler itself is also run as a mutator, this nested
-    // runMutator deadlocks and the promise below never resolves.
     vi.mocked(bankSync.syncAccount).mockImplementation(async () => {
-      await runMutator(async () => {
-        // reconcileTransactions runs here in production
-      });
+      await runMutator(async () => undefined);
       return { added: [], updated: [], updatedPreview: [] };
     });
 
-    // Rejects via the timeout if the handler deadlocks; otherwise resolves.
     let timer: ReturnType<typeof setTimeout> | undefined;
     const result = await Promise.race([
       runHandler(app.handlers['accounts-bank-sync'], { ids: ['acct1'] }),
