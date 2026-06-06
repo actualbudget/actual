@@ -364,6 +364,7 @@ export type Modal =
         onEditNotes: (id: NoteEntity['id']) => void;
         onDelete: (categoryId: CategoryEntity['id']) => void;
         onToggleVisibility: (categoryId: CategoryEntity['id']) => void;
+        onEditAutomations?: (categoryId: CategoryEntity['id']) => void;
         onClose?: () => void;
       };
     }

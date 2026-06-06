@@ -45,6 +45,7 @@
     "#components/budget/goals/cleanupModel": "./src/components/budget/goals/cleanupModel.ts",
     "#components/budget/goals/constants": "./src/components/budget/goals/constants.ts",
     "#components/budget/goals/displayTemplateMeta": "./src/components/budget/goals/displayTemplateMeta.ts",
+    "#components/budget/goals/editor/fieldLayout": "./src/components/budget/goals/editor/fieldLayout.ts",
     "#components/budget/goals/formatMonthLabel": "./src/components/budget/goals/formatMonthLabel.ts",
     "#components/budget/goals/reducer": "./src/components/budget/goals/reducer.ts",
     "#components/budget/goals/useBudgetAutomationCategories": "./src/components/budget/goals/useBudgetAutomationCategories.ts",
