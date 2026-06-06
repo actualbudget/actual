@@ -106,7 +106,6 @@ import {
   SchedulesProvider,
   useCachedSchedules,
 } from '#hooks/useCachedSchedules';
-import { useContextMenu } from '#hooks/useContextMenu';
 import { DisplayPayeeProvider, useDisplayPayee } from '#hooks/useDisplayPayee';
 import {
   DropHighlight,
@@ -1214,9 +1213,6 @@ const Transaction = memo(function Transaction({
     return () => clearTimeout(id);
   }, [splitError, allTransactions]);
 
-  const { setMenuOpen, menuOpen, handleContextMenu, position } =
-    useContextMenu();
-
   // Drag and drop support
   const isChildTransaction = transaction.is_child;
   const parentId = transaction.parent_id;
@@ -1375,7 +1371,6 @@ const Transaction = memo(function Transaction({
           ...(_unmatched && { opacity: 0.5 }),
           ...(isBeingDragged && { opacity: 0.5 }),
         }}
-        onContextMenu={handleContextMenu}
       >
         {splitError && listContainerRef?.current && (
           <Popover

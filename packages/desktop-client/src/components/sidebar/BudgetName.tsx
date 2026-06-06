@@ -6,8 +6,6 @@ import { Button } from '@actual-app/components/button';
 import { SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
-import { Menu } from '@actual-app/components/menu';
-import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -16,7 +14,6 @@ import * as Platform from '@actual-app/core/shared/platform';
 
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
 import { useContextMenuAction } from '#components/ContextMenu';
-import { useContextMenu } from '#hooks/useContextMenu';
 import { useMetadataPref } from '#hooks/useMetadataPref';
 import { useNavigate } from '#hooks/useNavigate';
 import { pushModal } from '#modals/modalsSlice';

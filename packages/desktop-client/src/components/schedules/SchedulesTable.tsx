@@ -6,8 +6,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
 import { SvgCheck } from '@actual-app/components/icons/v2';
-import { Menu } from '@actual-app/components/menu';
-import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -15,10 +13,7 @@ import { View } from '@actual-app/components/view';
 import { format as monthUtilFormat } from '@actual-app/core/shared/months';
 import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 import { getScheduledAmount } from '@actual-app/core/shared/schedules';
-import type {
-  ScheduleStatuses,
-  ScheduleStatusType,
-} from '@actual-app/core/shared/schedules';
+import type { ScheduleStatuses } from '@actual-app/core/shared/schedules';
 import type { ScheduleEntity } from '@actual-app/core/types/models';
 
 import { useContextMenuAction } from '#components/ContextMenu';
@@ -27,7 +22,6 @@ import { PrivacyFilter } from '#components/PrivacyFilter';
 import { Cell, Field, Row, Table, TableHeader } from '#components/table';
 import { DisplayId } from '#components/util/DisplayId';
 import { useAccounts } from '#hooks/useAccounts';
-import { useContextMenu } from '#hooks/useContextMenu';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
 import { usePayees } from '#hooks/usePayees';
@@ -247,8 +241,18 @@ function ScheduleRow({
               variant="bare"
               aria-label={t('Menu')}
               onPress={() => {
-                resetPosition();
-                setMenuOpen(true);
+                if (rowRef.current) {
+                  const rect = buttonRef.current?.getBoundingClientRect();
+                  const clientX = rect ? rect.left : 0;
+                  const clientY = rect ? rect.bottom : 0;
+                  (rowRef.current as HTMLElement).dispatchEvent(
+                    new MouseEvent('contextmenu', {
+                      bubbles: true,
+                      clientX,
+                      clientY,
+                    }),
+                  );
+                }
               }}
             >
               <SvgDotsHorizontalTriple

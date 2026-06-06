@@ -8,8 +8,6 @@ import {
   SvgBookmark,
   SvgLightBulb,
 } from '@actual-app/components/icons/v1';
-import { Menu } from '@actual-app/components/menu';
-import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import type { PayeeEntity } from '@actual-app/core/types/models';
@@ -23,7 +21,6 @@ import {
   Row,
   SelectCell,
 } from '#components/table';
-import { useContextMenu } from '#hooks/useContextMenu';
 import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
