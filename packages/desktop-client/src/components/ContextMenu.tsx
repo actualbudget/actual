@@ -16,6 +16,12 @@ export type ContextMenuLabel = {
   order?: number;
 };
 
+export type ContextMenuOrderedLine = {
+  type: typeof Menu.line;
+  order: number;
+  hidden?: boolean;
+};
+
 export type ContextMenuAction = {
   name: string;
   text: string;
@@ -24,19 +30,16 @@ export type ContextMenuAction = {
   onClick: () => void;
 };
 
-export type ContextMenuSection =
-  | typeof Menu.line
-  | ContextMenuAction
-  | ContextMenuLabel;
+type MenuItem = ContextMenuAction | ContextMenuLabel | typeof Menu.line;
+
+export type ContextMenuItem = MenuItem | ContextMenuOrderedLine;
 
 type ContextMenuContextData = {
   position: { x: number; y: number };
   setPosition: Dispatch<SetStateAction<{ x: number; y: number }>>;
   isOpen: boolean;
   setIsOpen: Dispatch<SetStateAction<boolean>>;
-  addAction: (
-    s: ContextMenuAction | typeof Menu.line | ContextMenuLabel,
-  ) => void;
+  addItem: (s: ContextMenuItem) => void;
 };
 
 const ContextMenuContext = createContext<ContextMenuContextData>({
@@ -47,7 +50,7 @@ const ContextMenuContext = createContext<ContextMenuContextData>({
   // oxlint-disable-next-line no-empty-function
   setIsOpen: () => {},
   // oxlint-disable-next-line no-empty-function
-  addAction: () => {},
+  addItem: () => {},
 });
 
 export function ContextMenuContextProvider({
@@ -55,53 +58,49 @@ export function ContextMenuContextProvider({
 }: {
   children?: ReactNode;
 }) {
-  const [actions, setActions] = useState<ContextMenuSection[]>([]);
+  const [items, setItems] = useState<MenuItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLDivElement | null>(null);
 
   // 1. Use a ref to collect actions synchronously during event bubbling
-  const pendingActions = useRef<ContextMenuSection[]>([]);
+  const pendingItems = useRef<ContextMenuItem[]>([]);
 
-  function addAction(action: ContextMenuSection) {
-    if (
-      typeof action === 'symbol' ||
-      !pendingActions.current.some(
-        pendingAction =>
-          typeof pendingAction === 'object' &&
-          pendingAction.name === action.name,
-      )
-    ) {
-      pendingActions.current.push(action);
-    }
+  function addItem(item: ContextMenuItem) {
+    pendingItems.current.push(item);
   }
 
   function handleOpenChange(newOpen: boolean) {
     setIsOpen(newOpen);
     if (!newOpen) {
-      setActions([]);
+      setItems([]);
     }
   }
 
   // Handle right-clicks to OPEN or JUMP the menu
   useRefEventListener(document, 'contextmenu', (e: MouseEvent) => {
-    if (pendingActions.current.length === 0) {
+    if (pendingItems.current.length === 0) {
       handleOpenChange(false);
       return;
     }
 
     e.preventDefault();
     setPosition({ x: e.clientX, y: e.clientY });
-    setActions(
-      _.orderBy(
-        pendingActions.current,
-        a => (typeof a === 'object' && 'order' in a && a.order) || 0,
-        'asc',
+    const sortedItems = _.orderBy(
+      pendingItems.current,
+      a => (typeof a === 'object' && 'order' in a && a.order) || 0,
+      'asc',
+    );
+    setItems(
+      sortedItems.map(item =>
+        typeof item === 'object' && 'type' in item && item.type === Menu.line
+          ? Menu.line
+          : item,
       ),
     );
     setIsOpen(true);
-    pendingActions.current = [];
+    pendingItems.current = [];
   });
 
   // 2. Handle left-clicks to DISMISS the menu
@@ -116,19 +115,22 @@ export function ContextMenuContextProvider({
     }
   });
 
-  function handleMenuSelect(actionName: string) {
-    const action = actions.find(
-      action => typeof action === 'object' && action.name === actionName,
+  function handleMenuSelect(itemName: string) {
+    const item = items.find(
+      action =>
+        typeof action === 'object' &&
+        'onClick' in action &&
+        action.name === itemName,
     );
-    if (action && typeof action === 'object' && 'onClick' in action) {
-      action.onClick();
+    if (item && typeof item === 'object' && 'onClick' in item) {
+      item.onClick();
     }
     handleOpenChange(false);
   }
 
   return (
     <ContextMenuContext.Provider
-      value={{ position, setPosition, setIsOpen, isOpen, addAction }}
+      value={{ position, setPosition, setIsOpen, isOpen, addItem }}
     >
       {/* THE INVISIBLE ANCHOR:
         A 0x0 pixel real DOM node that follows your right-clicks.
@@ -156,7 +158,7 @@ export function ContextMenuContextProvider({
       >
         <Menu
           onMenuSelect={handleMenuSelect}
-          items={actions}
+          items={items}
           style={{ backgroundColor: theme.menuBackground }}
         />
       </Popover>
@@ -170,16 +172,16 @@ type Falsy<T> = T | undefined | null | false | '';
 export function useConditionalContextMenuAction(
   triggerRef: RefObject<HTMLElement | null>,
   condition: unknown,
-  ...actions: Falsy<ContextMenuSection>[]
+  ...actions: Falsy<ContextMenuItem>[]
 ) {
   return useContextMenuAction(triggerRef, ...(condition ? actions : []));
 }
 
 export function useContextMenuAction(
   triggerRef: RefObject<HTMLElement | null>,
-  ...actions: Falsy<ContextMenuSection>[]
+  ...actions: Falsy<ContextMenuItem>[]
 ) {
-  const { addAction, isOpen } = useContext(ContextMenuContext);
+  const { addItem: addAction, isOpen } = useContext(ContextMenuContext);
   function addActions() {
     for (const action of actions) {
       if (action && (typeof action === 'symbol' || !action.hidden)) {
