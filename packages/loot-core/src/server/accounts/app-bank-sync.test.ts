@@ -2,6 +2,7 @@
 import * as asyncStorage from '#platform/server/asyncStorage';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
+import { isMutating, runHandler, runMutator } from '#server/mutators';
 
 import { app } from './app';
 import * as bankSync from './sync';
@@ -218,5 +219,42 @@ describe('accountsBankSync', () => {
       ['acct1'],
     );
     expect(account!.bank_sync_status).toBe('failed');
+  });
+});
+
+describe('bank sync handlers must not nest mutators', () => {
+  it('does not register the sync handlers as mutating methods', () => {
+    expect(isMutating(app.handlers['accounts-bank-sync'])).toBe(false);
+    expect(isMutating(app.handlers['simplefin-batch-sync'])).toBe(false);
+  });
+
+  it('completes when run through runHandler even though the sync runs its own mutator', async () => {
+    insertBank({ id: 'bank1', bank_id: 'gc-bank', name: 'GoCardless' });
+    await db.insertAccount({
+      id: 'acct1',
+      name: 'Checking',
+      bank: 'bank1',
+      account_id: 'ext-1',
+      account_sync_source: 'goCardless',
+    });
+
+    vi.mocked(bankSync.syncAccount).mockImplementation(async () => {
+      await runMutator(async () => undefined);
+      return { added: [], updated: [], updatedPreview: [] };
+    });
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const result = await Promise.race([
+      runHandler(app.handlers['accounts-bank-sync'], { ids: ['acct1'] }),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error('bank sync deadlocked')),
+          2000,
+        );
+      }),
+    ]);
+    clearTimeout(timer);
+
+    expect(result.errors).toEqual([]);
   });
 });
