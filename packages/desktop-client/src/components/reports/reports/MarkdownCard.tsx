@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { TextArea } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
@@ -12,9 +12,9 @@ import { css } from '@emotion/css';
 import rehypeExternalLinks from 'rehype-external-links';
 import remarkGfm from 'remark-gfm';
 
+import { useContextMenuAction } from '#components/ContextMenu';
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from '#components/reports/constants';
 import { ReportCard } from '#components/reports/ReportCard';
-import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
 import {
   markdownBaseStyles,
   remarkBreaks,
@@ -34,91 +34,72 @@ const markdownStyles = css(markdownBaseStyles, {
 });
 
 type MarkdownCardProps = {
+  widgetId: string;
   isEditing?: boolean;
   meta: MarkdownWidget['meta'];
   onMetaChange: (newMeta: MarkdownWidget['meta']) => void;
-  onRemove: () => void;
-  onCopy: (targetDashboardId: string) => void;
 };
 
 export function MarkdownCard({
+  widgetId,
   isEditing,
   meta,
   onMetaChange,
-  onRemove,
-  onCopy,
 }: MarkdownCardProps) {
   const { t } = useTranslation();
 
   const [isVisibleTextArea, setIsVisibleTextArea] = useState(false);
 
-  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
-    useDashboardWidgetCopyMenu(onCopy);
+  const contextMenuTriggerRef = useRef(null);
+
+  useContextMenuAction(
+    contextMenuTriggerRef,
+    {
+      type: Menu.label,
+      name: t('Text position:'),
+      text: '',
+    },
+    {
+      name: 'text-left',
+      text: t('Left'),
+      onClick: () =>
+        onMetaChange({
+          ...meta,
+          text_align: 'left',
+        }),
+    },
+    {
+      name: 'text-center',
+      text: t('Center'),
+      onClick: () =>
+        onMetaChange({
+          ...meta,
+          text_align: 'center',
+        }),
+    },
+    {
+      name: 'text-right',
+      text: t('Right'),
+      onClick: () =>
+        onMetaChange({
+          ...meta,
+          text_align: 'right',
+        }),
+    },
+    Menu.line,
+    {
+      name: 'edit',
+      text: t('Edit content'),
+      onClick: () => setIsVisibleTextArea(true),
+    },
+  );
 
   return (
     <ReportCard
       isEditing={isEditing}
       disableClick={isVisibleTextArea}
-      menuItems={[
-        {
-          type: Menu.label,
-          name: t('Text position:'),
-          text: '',
-        },
-        {
-          name: 'text-left',
-          text: t('Left'),
-        },
-        {
-          name: 'text-center',
-          text: t('Center'),
-        },
-        {
-          name: 'text-right',
-          text: t('Right'),
-        },
-        Menu.line,
-        {
-          name: 'edit',
-          text: t('Edit content'),
-        },
-        {
-          name: 'remove',
-          text: t('Remove'),
-        },
-        ...copyMenuItems,
-      ]}
-      onMenuSelect={item => {
-        if (handleCopyMenuSelect(item)) return;
-        switch (item) {
-          case 'text-left':
-            onMetaChange({
-              ...meta,
-              text_align: 'left',
-            });
-            break;
-          case 'text-center':
-            onMetaChange({
-              ...meta,
-              text_align: 'center',
-            });
-            break;
-          case 'text-right':
-            onMetaChange({
-              ...meta,
-              text_align: 'right',
-            });
-            break;
-          case 'edit':
-            setIsVisibleTextArea(true);
-            break;
-          case 'remove':
-            onRemove();
-            break;
-          default:
-            throw new Error(`Unrecognized selection: ${item}`);
-        }
-      }}
+      contextMenuTriggerRef={contextMenuTriggerRef}
+      widgetId={widgetId}
     >
       <View
         style={{

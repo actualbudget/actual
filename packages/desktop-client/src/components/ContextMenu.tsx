@@ -4,6 +4,7 @@ import type { ReactNode, RefObject } from 'react';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
+import _ from 'lodash';
 
 import { useRefEventListener } from '#hooks/useRefEventListener';
 
@@ -13,13 +14,26 @@ export type ContextMenuAction = {
   onClick: () => void;
   hidden?: boolean;
   disabled?: boolean;
+  order?: number;
 };
 
-type ContextMenuSection = typeof Menu.line | ContextMenuAction;
+type ContextMenuLabel = {
+  type: typeof Menu.label;
+  name: string;
+  text: string;
+  hidden?: boolean;
+};
+
+type ContextMenuSection =
+  | typeof Menu.line
+  | ContextMenuAction
+  | ContextMenuLabel;
 
 type ContextMenuContextData = {
   isOpen: boolean;
-  addAction: (s: ContextMenuAction | typeof Menu.line) => void;
+  addAction: (
+    s: ContextMenuAction | typeof Menu.line | ContextMenuLabel,
+  ) => void;
 };
 
 const ContextMenuContext = createContext<ContextMenuContextData>({
@@ -74,7 +88,13 @@ export function ContextMenuContextProvider({
 
       e.preventDefault();
       setPosition({ x: e.clientX, y: e.clientY });
-      setActions([...pendingActions.current]);
+      setActions(
+        _.orderBy(
+          pendingActions.current,
+          a => (typeof a === 'object' && 'order' in a && a.order) || 0,
+          'asc',
+        ),
+      );
       setOpen(true);
       pendingActions.current = [];
     },
@@ -102,7 +122,7 @@ export function ContextMenuContextProvider({
     const action = actions.find(
       action => typeof action === 'object' && action.name === actionName,
     );
-    if (action && typeof action === 'object') {
+    if (action && typeof action === 'object' && 'onClick' in action) {
       action.onClick();
     }
     handleOpenChange(false);
@@ -151,6 +171,7 @@ export function useConditionalContextMenuAction(
   ...actions: (
     | ContextMenuAction
     | typeof Menu.line
+    | ContextMenuLabel
     | undefined
     | null
     | false
@@ -165,6 +186,7 @@ export function useContextMenuAction(
   ...actions: (
     | ContextMenuAction
     | typeof Menu.line
+    | ContextMenuLabel
     | undefined
     | null
     | false

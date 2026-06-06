@@ -22,7 +22,6 @@ import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '#components/reports/spreadsheets/net-worth-spreadsheet';
-import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '#components/reports/useReport';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
@@ -34,8 +33,6 @@ type NetWorthCardProps = {
   accounts: AccountEntity[];
   meta?: NetWorthWidget['meta'];
   onMetaChange: (newMeta: NetWorthWidget['meta']) => void;
-  onRemove: () => void;
-  onCopy: (targetDashboardId: string) => void;
 };
 
 export function NetWorthCard({
@@ -44,8 +41,6 @@ export function NetWorthCard({
   accounts,
   meta = {},
   onMetaChange,
-  onRemove,
-  onCopy,
 }: NetWorthCardProps) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -57,9 +52,6 @@ export function NetWorthCard({
   const [latestTransaction, setLatestTransaction] = useState<string>('');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [isCardHovered, setIsCardHovered] = useState(false);
-
-  const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
-    useDashboardWidgetCopyMenu(onCopy);
 
   useEffect(() => {
     async function fetchLatestTransaction() {
@@ -108,33 +100,11 @@ export function NetWorthCard({
 
   return (
     <ReportCard
+      widgetId={widgetId}
       isEditing={isEditing}
       disableClick={nameMenuOpen}
       to={`/reports/net-worth/${widgetId}`}
-      menuItems={[
-        {
-          name: 'rename',
-          text: t('Rename'),
-        },
-        {
-          name: 'remove',
-          text: t('Remove'),
-        },
-        ...copyMenuItems,
-      ]}
-      onMenuSelect={item => {
-        if (handleCopyMenuSelect(item)) return;
-        switch (item) {
-          case 'rename':
-            setNameMenuOpen(true);
-            break;
-          case 'remove':
-            onRemove();
-            break;
-          default:
-            throw new Error(`Unrecognized selection: ${item}`);
-        }
-      }}
+      onRename={() => setNameMenuOpen(true)}
     >
       <View
         style={{ flex: 1 }}
