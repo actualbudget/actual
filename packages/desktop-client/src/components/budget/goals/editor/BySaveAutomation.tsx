@@ -162,45 +162,45 @@ export const BySaveAutomation = ({
             </span>
           </LabeledCheckbox>
         </FormField>
-        {repeats && (
-          <>
-            <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
-              <FormLabel
-                title={t('Repeat every')}
-                htmlFor="by-repeat-amount-field"
-              />
-              <Input
-                id="by-repeat-amount-field"
-                type="number"
-                min={1}
-                step={1}
-                value={rawRepeat}
-                onChangeValue={setRawRepeat}
-                onBlur={commitRepeat}
-              />
-            </FormField>
-            <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
-              <FormLabel title={t('Period')} htmlFor="by-period-field" />
-              <Select
-                id="by-period-field"
-                value={template.annual ? 'year' : 'month'}
-                onChange={value =>
-                  dispatch(
-                    updateTemplate({
-                      type: template.type,
-                      annual: value === 'year',
-                    }),
-                  )
-                }
-                options={[
-                  ['month', t('Months')],
-                  ['year', t('Years')],
-                ]}
-              />
-            </FormField>
-          </>
-        )}
       </SpaceBetween>
+      {repeats && (
+        <SpaceBetween align="center" gap={10} style={{ marginTop: 10 }}>
+          <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
+            <FormLabel
+              title={t('Repeat every')}
+              htmlFor="by-repeat-amount-field"
+            />
+            <Input
+              id="by-repeat-amount-field"
+              type="number"
+              min={1}
+              step={1}
+              value={rawRepeat}
+              onChangeValue={setRawRepeat}
+              onBlur={commitRepeat}
+            />
+          </FormField>
+          <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
+            <FormLabel title={t('Period')} htmlFor="by-period-field" />
+            <Select
+              id="by-period-field"
+              value={template.annual ? 'year' : 'month'}
+              onChange={value =>
+                dispatch(
+                  updateTemplate({
+                    type: template.type,
+                    annual: value === 'year',
+                  }),
+                )
+              }
+              options={[
+                ['month', t('Months')],
+                ['year', t('Years')],
+              ]}
+            />
+          </FormField>
+        </SpaceBetween>
+      )}
       <SpaceBetween align="center" gap={10} style={{ marginTop: 10 }}>
         <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
           <LabeledCheckbox
@@ -267,7 +267,9 @@ export const BySaveAutomation = ({
             </span>
           </LabeledCheckbox>
         </FormField>
-        {spendDown && (
+      </SpaceBetween>
+      {spendDown && (
+        <SpaceBetween align="center" gap={10} style={{ marginTop: 10 }}>
           <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
             <FormLabel
               title={t('Start spending in')}
@@ -281,8 +283,8 @@ export const BySaveAutomation = ({
               }
             />
           </FormField>
-        )}
-      </SpaceBetween>
+        </SpaceBetween>
+      )}
     </>
   );
 };
