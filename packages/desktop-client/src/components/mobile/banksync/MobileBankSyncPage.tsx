@@ -93,62 +93,62 @@ export function MobileBankSyncPage() {
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
-    <Page header={<MobilePageHeader title={t('Bank Sync')} />} padding={0}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: theme.mobilePageBackground,
-          padding: 10,
-          width: '100%',
-          borderBottomWidth: 2,
-          borderBottomStyle: 'solid',
-          borderBottomColor: theme.tableBorder,
-        }}
-      >
-        <Search
-          placeholder={t('Filter accounts…')}
-          value={filter}
-          onChange={onSearchChange}
-          width="100%"
-          height={styles.mobileMinHeight}
-          style={{
-            backgroundColor: theme.tableBackground,
-            borderColor: theme.formInputBorder,
-          }}
-        />
-      </View>
-
-      {openAccounts.length === 0 ? (
+      <Page header={<MobilePageHeader title={t('Bank Sync')} />} padding={0}>
         <View
           style={{
-            flex: 1,
+            flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: 'center',
-            paddingHorizontal: 20,
-            paddingTop: 40,
+            backgroundColor: theme.mobilePageBackground,
+            padding: 10,
+            width: '100%',
+            borderBottomWidth: 2,
+            borderBottomStyle: 'solid',
+            borderBottomColor: theme.tableBorder,
           }}
         >
-          <Text
+          <Search
+            placeholder={t('Filter accounts…')}
+            value={filter}
+            onChange={onSearchChange}
+            width="100%"
+            height={styles.mobileMinHeight}
             style={{
-              fontSize: 16,
-              color: theme.pageTextSubdued,
-              textAlign: 'center',
+              backgroundColor: theme.tableBackground,
+              borderColor: theme.formInputBorder,
+            }}
+          />
+        </View>
+
+        {openAccounts.length === 0 ? (
+          <View
+            style={{
+              flex: 1,
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingHorizontal: 20,
+              paddingTop: 40,
             }}
           >
-            <Trans>
-              To use the bank syncing features, you must first add an account.
-            </Trans>
-          </Text>
-        </View>
-      ) : (
-        <BankSyncAccountsList
-          groupedAccounts={filteredGroupedAccounts}
-          syncSourceReadable={syncSourceReadable}
-          onAction={onAction}
-        />
-      )}
-    </Page>
+            <Text
+              style={{
+                fontSize: 16,
+                color: theme.pageTextSubdued,
+                textAlign: 'center',
+              }}
+            >
+              <Trans>
+                To use the bank syncing features, you must first add an account.
+              </Trans>
+            </Text>
+          </View>
+        ) : (
+          <BankSyncAccountsList
+            groupedAccounts={filteredGroupedAccounts}
+            syncSourceReadable={syncSourceReadable}
+            onAction={onAction}
+          />
+        )}
+      </Page>
     </ErrorBoundary>
   );
 }

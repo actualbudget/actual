@@ -27,8 +27,8 @@ import type {
 } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
 
-import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';

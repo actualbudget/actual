@@ -31,38 +31,38 @@ export function CategoryPage() {
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
-    <Page
-      header={
-        <MobilePageHeader
-          title={
-            category ? (
-              <View>
-                <TextOneLine>{category.name}</TextOneLine>
+      <Page
+        header={
+          <MobilePageHeader
+            title={
+              category ? (
+                <View>
+                  <TextOneLine>{category.name}</TextOneLine>
+                  <TextOneLine>
+                    ({monthUtils.format(month, "MMMM ''yy", locale)})
+                  </TextOneLine>
+                </View>
+              ) : (
                 <TextOneLine>
-                  ({monthUtils.format(month, "MMMM ''yy", locale)})
+                  <Trans>Uncategorized</Trans>
                 </TextOneLine>
-              </View>
-            ) : (
-              <TextOneLine>
-                <Trans>Uncategorized</Trans>
-              </TextOneLine>
-            )
-          }
-          leftContent={<MobileBackButton />}
-          rightContent={<AddTransactionButton categoryId={category?.id} />}
-        />
-      }
-      padding={0}
-    >
-      {/* This key forces the whole table rerender when the number format changes */}
-      <Fragment key={numberFormat + hideFraction}>
-        {category ? (
-          <CategoryTransactions category={category} month={month} />
-        ) : (
-          <UncategorizedTransactions />
-        )}
-      </Fragment>
-    </Page>
+              )
+            }
+            leftContent={<MobileBackButton />}
+            rightContent={<AddTransactionButton categoryId={category?.id} />}
+          />
+        }
+        padding={0}
+      >
+        {/* This key forces the whole table rerender when the number format changes */}
+        <Fragment key={numberFormat + hideFraction}>
+          {category ? (
+            <CategoryTransactions category={category} month={month} />
+          ) : (
+            <UncategorizedTransactions />
+          )}
+        </Fragment>
+      </Page>
     </ErrorBoundary>
   );
 }

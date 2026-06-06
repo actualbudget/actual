@@ -10,10 +10,10 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { useUnlinkAccountMutation } from '#accounts';
-import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { BankSyncCheckboxOptions } from '#components/banksync/BankSyncCheckboxOptions';
 import { FieldMapping } from '#components/banksync/FieldMapping';
 import { useBankSyncAccountSettings } from '#components/banksync/useBankSyncAccountSettings';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useAccount } from '#hooks/useAccount';
@@ -113,88 +113,88 @@ export function MobileBankSyncAccountEditPage() {
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
-    <Page
-      header={
-        <MobilePageHeader
-          title={account.name}
-          leftContent={<MobileBackButton onPress={handleCancel} />}
-        />
-      }
-      padding={0}
-    >
-      <View style={{ flex: 1, backgroundColor: theme.mobilePageBackground }}>
-        <View
-          style={{
-            flex: 1,
-            overflow: 'auto',
-          }}
-        >
-          <View style={{ padding: 16 }}>
-            <Text style={{ fontSize: 15, marginBottom: 10 }}>
-              <Trans>Field mapping</Trans>
-            </Text>
+      <Page
+        header={
+          <MobilePageHeader
+            title={account.name}
+            leftContent={<MobileBackButton onPress={handleCancel} />}
+          />
+        }
+        padding={0}
+      >
+        <View style={{ flex: 1, backgroundColor: theme.mobilePageBackground }}>
+          <View
+            style={{
+              flex: 1,
+              overflow: 'auto',
+            }}
+          >
+            <View style={{ padding: 16 }}>
+              <Text style={{ fontSize: 15, marginBottom: 10 }}>
+                <Trans>Field mapping</Trans>
+              </Text>
 
-            <FieldMapping
-              transactionDirection={transactionDirection}
-              setTransactionDirection={setTransactionDirection}
-              fields={fields}
-              mapping={mapping}
-              setMapping={setMapping}
-              isMobile
-            />
+              <FieldMapping
+                transactionDirection={transactionDirection}
+                setTransactionDirection={setTransactionDirection}
+                fields={fields}
+                mapping={mapping}
+                setMapping={setMapping}
+                isMobile
+              />
 
-            <Text style={{ fontSize: 15, marginTop: 20, marginBottom: 10 }}>
-              <Trans>Options</Trans>
-            </Text>
+              <Text style={{ fontSize: 15, marginTop: 20, marginBottom: 10 }}>
+                <Trans>Options</Trans>
+              </Text>
 
-            <BankSyncCheckboxOptions
-              importPending={importPending}
-              setImportPending={setImportPending}
-              importNotes={importNotes}
-              setImportNotes={setImportNotes}
-              reimportDeleted={reimportDeleted}
-              setReimportDeleted={setReimportDeleted}
-              importTransactions={importTransactions}
-              setImportTransactions={setImportTransactions}
-              updateDates={updateDates}
-              setUpdateDates={setUpdateDates}
-              helpMode="mobile"
-            />
+              <BankSyncCheckboxOptions
+                importPending={importPending}
+                setImportPending={setImportPending}
+                importNotes={importNotes}
+                setImportNotes={setImportNotes}
+                reimportDeleted={reimportDeleted}
+                setReimportDeleted={setReimportDeleted}
+                importTransactions={importTransactions}
+                setImportTransactions={setImportTransactions}
+                updateDates={updateDates}
+                setUpdateDates={setUpdateDates}
+                helpMode="mobile"
+              />
+            </View>
+          </View>
+
+          <View
+            style={{
+              padding: 16,
+              paddingTop: 12,
+              borderTop: `1px solid ${theme.tableBorder}`,
+              backgroundColor: theme.mobilePageBackground,
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <Button
+              style={{
+                color: theme.errorText,
+              }}
+              onPress={handleUnlink}
+            >
+              <Trans>Unlink account</Trans>
+            </Button>
+
+            <SpaceBetween gap={10}>
+              <Button onPress={handleCancel}>
+                <Trans>Cancel</Trans>
+              </Button>
+              <Button variant="primary" onPress={handleSave}>
+                <Trans>Save</Trans>
+              </Button>
+            </SpaceBetween>
           </View>
         </View>
-
-        <View
-          style={{
-            padding: 16,
-            paddingTop: 12,
-            borderTop: `1px solid ${theme.tableBorder}`,
-            backgroundColor: theme.mobilePageBackground,
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
-          <Button
-            style={{
-              color: theme.errorText,
-            }}
-            onPress={handleUnlink}
-          >
-            <Trans>Unlink account</Trans>
-          </Button>
-
-          <SpaceBetween gap={10}>
-            <Button onPress={handleCancel}>
-              <Trans>Cancel</Trans>
-            </Button>
-            <Button variant="primary" onPress={handleSave}>
-              <Trans>Save</Trans>
-            </Button>
-          </SpaceBetween>
-        </View>
-      </View>
-    </Page>
+      </Page>
     </ErrorBoundary>
   );
 }

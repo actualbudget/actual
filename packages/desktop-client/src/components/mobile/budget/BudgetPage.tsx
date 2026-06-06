@@ -1,5 +1,3 @@
-// @ts-strict-ignore
-import { ErrorBoundary } from 'react-error-boundary';
 import React, {
   useCallback,
   useEffect,
@@ -8,6 +6,8 @@ import React, {
   useState,
 } from 'react';
 import { GridList, GridListItem } from 'react-aria-components';
+// @ts-strict-ignore
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -545,79 +545,82 @@ export function BudgetPage() {
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
-    <Page
-      padding={0}
-      header={
-        <MobilePageHeader
-          title={
-            <MonthSelector
-              month={startMonth}
-              monthBounds={monthBounds}
-              onOpenMonthMenu={onOpenBudgetMonthMenu}
-              onPrevMonth={onPrevMonth}
-              onNextMonth={onNextMonth}
-            />
-          }
-          leftContent={
-            <Button
-              variant="bare"
-              style={{ margin: 10 }}
-              onPress={onOpenBudgetPageMenu}
-              aria-label={t('Budget page menu')}
-            >
-              <SvgLogo
-                style={{ color: theme.mobileHeaderText }}
-                width="20"
-                height="20"
+      <Page
+        padding={0}
+        header={
+          <MobilePageHeader
+            title={
+              <MonthSelector
+                month={startMonth}
+                monthBounds={monthBounds}
+                onOpenMonthMenu={onOpenBudgetMonthMenu}
+                onPrevMonth={onPrevMonth}
+                onNextMonth={onNextMonth}
               />
-              <SvgCheveronRight
-                style={{ flexShrink: 0, color: theme.mobileHeaderTextSubdued }}
-                width="14"
-                height="14"
-              />
-            </Button>
-          }
-          rightContent={
-            !monthUtils.isCurrentMonth(startMonth) && (
+            }
+            leftContent={
               <Button
                 variant="bare"
-                onPress={onCurrentMonth}
-                aria-label={t('Today')}
                 style={{ margin: 10 }}
+                onPress={onOpenBudgetPageMenu}
+                aria-label={t('Budget page menu')}
               >
-                <SvgCalendar width={20} height={20} />
+                <SvgLogo
+                  style={{ color: theme.mobileHeaderText }}
+                  width="20"
+                  height="20"
+                />
+                <SvgCheveronRight
+                  style={{
+                    flexShrink: 0,
+                    color: theme.mobileHeaderTextSubdued,
+                  }}
+                  width="14"
+                  height="14"
+                />
               </Button>
-            )
-          }
-        />
-      }
-    >
-      <SheetNameProvider name={monthUtils.sheetForMonth(startMonth)}>
-        <SyncRefresh
-          onSync={async () => {
-            void dispatch(sync());
-          }}
-        >
-          {({ onRefresh }) => (
-            <>
-              <Banners month={startMonth} onBudgetAction={onBudgetAction} />
-              <BudgetTable
-                // This key forces the whole table rerender when the number
-                // format changes
-                key={`${numberFormat}${hideFraction}`}
-                categoryGroups={categoryGroups}
-                month={startMonth}
-                onShowBudgetSummary={onShowBudgetSummary}
-                onBudgetAction={onBudgetAction}
-                onRefresh={onRefresh}
-                onEditCategoryGroup={onOpenCategoryGroupMenuModal}
-                onEditCategory={onOpenCategoryMenuModal}
-              />
-            </>
-          )}
-        </SyncRefresh>
-      </SheetNameProvider>
-    </Page>
+            }
+            rightContent={
+              !monthUtils.isCurrentMonth(startMonth) && (
+                <Button
+                  variant="bare"
+                  onPress={onCurrentMonth}
+                  aria-label={t('Today')}
+                  style={{ margin: 10 }}
+                >
+                  <SvgCalendar width={20} height={20} />
+                </Button>
+              )
+            }
+          />
+        }
+      >
+        <SheetNameProvider name={monthUtils.sheetForMonth(startMonth)}>
+          <SyncRefresh
+            onSync={async () => {
+              void dispatch(sync());
+            }}
+          >
+            {({ onRefresh }) => (
+              <>
+                <Banners month={startMonth} onBudgetAction={onBudgetAction} />
+                <BudgetTable
+                  // This key forces the whole table rerender when the number
+                  // format changes
+                  key={`${numberFormat}${hideFraction}`}
+                  categoryGroups={categoryGroups}
+                  month={startMonth}
+                  onShowBudgetSummary={onShowBudgetSummary}
+                  onBudgetAction={onBudgetAction}
+                  onRefresh={onRefresh}
+                  onEditCategoryGroup={onOpenCategoryGroupMenuModal}
+                  onEditCategory={onOpenCategoryMenuModal}
+                />
+              </>
+            )}
+          </SyncRefresh>
+        </SheetNameProvider>
+      </Page>
     </ErrorBoundary>
   );
 }

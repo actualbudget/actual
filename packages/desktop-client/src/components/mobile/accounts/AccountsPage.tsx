@@ -1,13 +1,13 @@
 import { forwardRef, useCallback, useRef } from 'react';
 import type { ComponentPropsWithoutRef, CSSProperties } from 'react';
 import type { DragItem } from 'react-aria';
-import { ErrorBoundary } from 'react-error-boundary';
 import {
   DropIndicator,
   ListBox,
   ListBoxItem,
   useDragAndDrop,
 } from 'react-aria-components';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -27,9 +27,9 @@ import { css } from '@emotion/css';
 import { useMoveAccountMutation, useSyncAndDownloadMutation } from '#accounts';
 import { isAccountFailedSync } from '#accounts/syncStatus';
 import { makeAmountFullStyle } from '#components/budget/util';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';
-import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { MobilePageHeader, Page } from '#components/Page';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { useAccounts } from '#hooks/useAccounts';

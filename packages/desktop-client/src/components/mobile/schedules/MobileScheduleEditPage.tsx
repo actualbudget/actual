@@ -229,54 +229,54 @@ export function MobileScheduleEditPage() {
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
-    <Page
-      header={
-        <MobilePageHeader
-          title={pageTitle}
-          leftContent={<MobileBackButton onPress={() => navigate(-1)} />}
-        />
-      }
-      footer={
-        <View
-          style={{
-            paddingLeft: styles.mobileEditingPadding,
-            paddingRight: styles.mobileEditingPadding,
-            paddingTop: 10,
-            paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
-            backgroundColor: theme.tableHeaderBackground,
-            borderTopWidth: 1,
-            borderColor: theme.tableBorder,
-          }}
-        >
-          <Button
-            variant="primary"
-            onPress={onSave}
-            style={{ height: styles.mobileMinHeight }}
+      <Page
+        header={
+          <MobilePageHeader
+            title={pageTitle}
+            leftContent={<MobileBackButton onPress={() => navigate(-1)} />}
+          />
+        }
+        footer={
+          <View
+            style={{
+              paddingLeft: styles.mobileEditingPadding,
+              paddingRight: styles.mobileEditingPadding,
+              paddingTop: 10,
+              paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
+              backgroundColor: theme.tableHeaderBackground,
+              borderTopWidth: 1,
+              borderColor: theme.tableBorder,
+            }}
           >
-            <Trans>Save</Trans>
-          </Button>
-        </View>
-      }
-      padding={0}
-    >
-      <ScheduleEditForm
-        fields={state.fields}
-        dispatch={dispatch}
-        upcomingDates={state.upcomingDates}
-        repeats={repeats}
-        schedule={schedule}
-        adding={adding}
-        isCustom={state.isCustom ?? false}
-        onEditRule={onEditRule}
-        transactions={state.transactions}
-        transactionsMode={state.transactionsMode}
-        error={state.error}
-        selectedInst={selectedInst}
-        onSwitchTransactions={onSwitchTransactions}
-        onLinkTransactions={onLinkTransactions}
-        onUnlinkTransactions={onUnlinkTransactions}
-      />
-    </Page>
+            <Button
+              variant="primary"
+              onPress={onSave}
+              style={{ height: styles.mobileMinHeight }}
+            >
+              <Trans>Save</Trans>
+            </Button>
+          </View>
+        }
+        padding={0}
+      >
+        <ScheduleEditForm
+          fields={state.fields}
+          dispatch={dispatch}
+          upcomingDates={state.upcomingDates}
+          repeats={repeats}
+          schedule={schedule}
+          adding={adding}
+          isCustom={state.isCustom ?? false}
+          onEditRule={onEditRule}
+          transactions={state.transactions}
+          transactionsMode={state.transactionsMode}
+          error={state.error}
+          selectedInst={selectedInst}
+          onSwitchTransactions={onSwitchTransactions}
+          onLinkTransactions={onLinkTransactions}
+          onUnlinkTransactions={onUnlinkTransactions}
+        />
+      </Page>
     </ErrorBoundary>
   );
 }

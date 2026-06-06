@@ -169,43 +169,46 @@ export function MobileRulesPage() {
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
-    <Page
-      header={
-        <MobilePageHeader title={t('Rules')} rightContent={<AddRuleButton />} />
-      }
-      padding={0}
-    >
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: theme.mobilePageBackground,
-          padding: 10,
-          width: '100%',
-          borderBottomWidth: 2,
-          borderBottomStyle: 'solid',
-          borderBottomColor: theme.tableBorder,
-        }}
+      <Page
+        header={
+          <MobilePageHeader
+            title={t('Rules')}
+            rightContent={<AddRuleButton />}
+          />
+        }
+        padding={0}
       >
-        <Search
-          placeholder={t('Filter rules…')}
-          value={filter}
-          onChange={onSearchChange}
-          width="100%"
-          height={styles.mobileMinHeight}
+        <View
           style={{
-            backgroundColor: theme.tableBackground,
-            borderColor: theme.formInputBorder,
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme.mobilePageBackground,
+            padding: 10,
+            width: '100%',
+            borderBottomWidth: 2,
+            borderBottomStyle: 'solid',
+            borderBottomColor: theme.tableBorder,
           }}
+        >
+          <Search
+            placeholder={t('Filter rules…')}
+            value={filter}
+            onChange={onSearchChange}
+            width="100%"
+            height={styles.mobileMinHeight}
+            style={{
+              backgroundColor: theme.tableBackground,
+              borderColor: theme.formInputBorder,
+            }}
+          />
+        </View>
+        <RulesList
+          rules={filteredRules}
+          isLoading={isLoading}
+          onRulePress={handleRulePress}
+          onRuleDelete={handleRuleDelete}
         />
-      </View>
-      <RulesList
-        rules={filteredRules}
-        isLoading={isLoading}
-        onRulePress={handleRulePress}
-        onRuleDelete={handleRuleDelete}
-      />
-    </Page>
+      </Page>
     </ErrorBoundary>
   );
 }

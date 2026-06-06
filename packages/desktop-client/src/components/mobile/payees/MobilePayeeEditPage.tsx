@@ -112,44 +112,44 @@ export function MobilePayeeEditPage() {
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
-    <Page
-      header={
-        <MobilePageHeader
-          title={t('Edit Payee')}
-          leftContent={<MobileBackButton onPress={handleCancel} />}
-        />
-      }
-      footer={
-        <View
-          style={{
-            paddingLeft: styles.mobileEditingPadding,
-            paddingRight: styles.mobileEditingPadding,
-            paddingTop: 10,
-            paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
-            backgroundColor: theme.tableHeaderBackground,
-            borderTopWidth: 1,
-            borderColor: theme.tableBorder,
-          }}
-        >
-          <Button
-            variant="primary"
-            onPress={handleSave}
-            isDisabled={!editedPayeeName.trim()}
-            style={{ height: styles.mobileMinHeight }}
+      <Page
+        header={
+          <MobilePageHeader
+            title={t('Edit Payee')}
+            leftContent={<MobileBackButton onPress={handleCancel} />}
+          />
+        }
+        footer={
+          <View
+            style={{
+              paddingLeft: styles.mobileEditingPadding,
+              paddingRight: styles.mobileEditingPadding,
+              paddingTop: 10,
+              paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
+              backgroundColor: theme.tableHeaderBackground,
+              borderTopWidth: 1,
+              borderColor: theme.tableBorder,
+            }}
           >
-            <Trans>Save</Trans>
-          </Button>
+            <Button
+              variant="primary"
+              onPress={handleSave}
+              isDisabled={!editedPayeeName.trim()}
+              style={{ height: styles.mobileMinHeight }}
+            >
+              <Trans>Save</Trans>
+            </Button>
+          </View>
+        }
+      >
+        <View style={{ paddingTop: 20 }}>
+          <InputField
+            placeholder={t('Payee name')}
+            value={editedPayeeName}
+            onChangeValue={setEditedPayeeName}
+          />
         </View>
-      }
-    >
-      <View style={{ paddingTop: 20 }}>
-        <InputField
-          placeholder={t('Payee name')}
-          value={editedPayeeName}
-          onChangeValue={setEditedPayeeName}
-        />
-      </View>
-    </Page>
+      </Page>
     </ErrorBoundary>
   );
 }

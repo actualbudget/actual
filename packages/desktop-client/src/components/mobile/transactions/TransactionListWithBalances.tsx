@@ -10,8 +10,8 @@ import { View } from '@actual-app/components/view';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
-import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { Search } from '#components/common/Search';
+import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { DisplayPayeeProvider } from '#hooks/useDisplayPayee';
@@ -108,57 +108,57 @@ export function TransactionListWithBalances({
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
-    <DisplayPayeeProvider transactions={transactions}>
-      <SelectedProvider instance={selectedInst}>
-        <View
-          style={{
-            flexShrink: 0,
-            marginTop: 10,
-          }}
-        >
+      <DisplayPayeeProvider transactions={transactions}>
+        <SelectedProvider instance={selectedInst}>
           <View
             style={{
-              flexDirection: 'row',
-              justifyContent: 'space-evenly',
+              flexShrink: 0,
+              marginTop: 10,
             }}
           >
-            {balanceCleared && balanceUncleared ? (
-              <BalanceWithCleared
-                balance={balance}
-                balanceCleared={balanceCleared}
-                balanceUncleared={balanceUncleared}
-              />
-            ) : (
-              <Balance balance={balance} />
-            )}
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-evenly',
+              }}
+            >
+              {balanceCleared && balanceUncleared ? (
+                <BalanceWithCleared
+                  balance={balance}
+                  balanceCleared={balanceCleared}
+                  balanceUncleared={balanceUncleared}
+                />
+              ) : (
+                <Balance balance={balance} />
+              )}
+            </View>
+            <TransactionSearchInput
+              placeholder={searchPlaceholder}
+              onSearch={onSearch}
+            />
           </View>
-          <TransactionSearchInput
-            placeholder={searchPlaceholder}
-            onSearch={onSearch}
-          />
-        </View>
-        <PullToRefresh
-          isPullable={!isLoading && !!onRefresh}
-          onRefresh={async () => onRefresh?.()}
-          style={{
-            '& .ptr__children': {
-              display: 'flex',
-            },
-          }}
-        >
-          <TransactionList
-            isLoading={isLoading}
-            transactions={transactions}
-            showRunningBalances={showRunningBalances}
-            runningBalances={runningBalances}
-            isLoadingMore={isLoadingMore}
-            onLoadMore={onLoadMore}
-            onOpenTransaction={onOpenTransaction}
-            showMakeTransfer={showMakeTransfer}
-          />
-        </PullToRefresh>
-      </SelectedProvider>
-    </DisplayPayeeProvider>
+          <PullToRefresh
+            isPullable={!isLoading && !!onRefresh}
+            onRefresh={async () => onRefresh?.()}
+            style={{
+              '& .ptr__children': {
+                display: 'flex',
+              },
+            }}
+          >
+            <TransactionList
+              isLoading={isLoading}
+              transactions={transactions}
+              showRunningBalances={showRunningBalances}
+              runningBalances={runningBalances}
+              isLoadingMore={isLoadingMore}
+              onLoadMore={onLoadMore}
+              onOpenTransaction={onOpenTransaction}
+              showMakeTransfer={showMakeTransfer}
+            />
+          </PullToRefresh>
+        </SelectedProvider>
+      </DisplayPayeeProvider>
     </ErrorBoundary>
   );
 }

@@ -182,27 +182,27 @@ export function MobileRuleEditPage() {
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
-    <Page
-      header={
-        <MobilePageHeader
-          title={pageTitle}
-          leftContent={<MobileBackButton onPress={handleCancel} />}
+      <Page
+        header={
+          <MobilePageHeader
+            title={pageTitle}
+            leftContent={<MobileBackButton onPress={handleCancel} />}
+          />
+        }
+        padding={0}
+      >
+        <RuleEditor
+          rule={defaultRule}
+          onSave={handleSave}
+          onCancel={handleCancel}
+          onDelete={isEditing && !isLinkedToSchedule ? handleDelete : undefined}
+          style={{
+            paddingTop: 10,
+            flex: 1,
+            backgroundColor: theme.mobilePageBackground,
+          }}
         />
-      }
-      padding={0}
-    >
-      <RuleEditor
-        rule={defaultRule}
-        onSave={handleSave}
-        onCancel={handleCancel}
-        onDelete={isEditing && !isLinkedToSchedule ? handleDelete : undefined}
-        style={{
-          paddingTop: 10,
-          flex: 1,
-          backgroundColor: theme.mobilePageBackground,
-        }}
-      />
-    </Page>
+      </Page>
     </ErrorBoundary>
   );
 }

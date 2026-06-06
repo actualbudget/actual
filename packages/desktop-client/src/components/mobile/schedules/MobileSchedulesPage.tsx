@@ -120,54 +120,54 @@ export function MobileSchedulesPage() {
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
-    <Page
-      header={
-        <MobilePageHeader
-          title={
-            <Text style={{ ...styles.underlinedText, fontSize: 16 }}>
-              <Trans>Schedules</Trans>
-            </Text>
-          }
-          rightContent={<AddScheduleButton />}
-        />
-      }
-      padding={0}
-    >
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: theme.mobilePageBackground,
-          padding: 10,
-          width: '100%',
-          borderBottomWidth: 2,
-          borderBottomStyle: 'solid',
-          borderBottomColor: theme.tableBorder,
-        }}
+      <Page
+        header={
+          <MobilePageHeader
+            title={
+              <Text style={{ ...styles.underlinedText, fontSize: 16 }}>
+                <Trans>Schedules</Trans>
+              </Text>
+            }
+            rightContent={<AddScheduleButton />}
+          />
+        }
+        padding={0}
       >
-        <Search
-          placeholder={t('Filter schedules…')}
-          value={filter}
-          onChange={setFilter}
-          width="100%"
-          height={styles.mobileMinHeight}
+        <View
           style={{
-            backgroundColor: theme.tableBackground,
-            borderColor: theme.formInputBorder,
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme.mobilePageBackground,
+            padding: 10,
+            width: '100%',
+            borderBottomWidth: 2,
+            borderBottomStyle: 'solid',
+            borderBottomColor: theme.tableBorder,
           }}
+        >
+          <Search
+            placeholder={t('Filter schedules…')}
+            value={filter}
+            onChange={setFilter}
+            width="100%"
+            height={styles.mobileMinHeight}
+            style={{
+              backgroundColor: theme.tableBackground,
+              borderColor: theme.formInputBorder,
+            }}
+          />
+        </View>
+        <SchedulesList
+          schedules={filteredSchedules}
+          isLoading={isSchedulesLoading}
+          statuses={statuses}
+          onSchedulePress={handleSchedulePress}
+          onScheduleDelete={handleScheduleDelete}
+          hasCompletedSchedules={hasCompletedSchedules}
+          showCompleted={showCompleted}
+          onShowCompleted={() => setShowCompleted(true)}
         />
-      </View>
-      <SchedulesList
-        schedules={filteredSchedules}
-        isLoading={isSchedulesLoading}
-        statuses={statuses}
-        onSchedulePress={handleSchedulePress}
-        onScheduleDelete={handleScheduleDelete}
-        hasCompletedSchedules={hasCompletedSchedules}
-        showCompleted={showCompleted}
-        onShowCompleted={() => setShowCompleted(true)}
-      />
-    </Page>
+      </Page>
     </ErrorBoundary>
   );
 }

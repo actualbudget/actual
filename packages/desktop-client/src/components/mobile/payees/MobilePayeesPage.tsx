@@ -112,41 +112,41 @@ export function MobilePayeesPage() {
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
-    <Page header={<MobilePageHeader title={t('Payees')} />} padding={0}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: theme.mobilePageBackground,
-          padding: 10,
-          width: '100%',
-          borderBottomWidth: 2,
-          borderBottomStyle: 'solid',
-          borderBottomColor: theme.tableBorder,
-        }}
-      >
-        <Search
-          placeholder={t('Filter payees…')}
-          value={filter}
-          onChange={onSearchChange}
-          width="100%"
-          height={styles.mobileMinHeight}
+      <Page header={<MobilePageHeader title={t('Payees')} />} padding={0}>
+        <View
           style={{
-            backgroundColor: theme.tableBackground,
-            borderColor: theme.formInputBorder,
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme.mobilePageBackground,
+            padding: 10,
+            width: '100%',
+            borderBottomWidth: 2,
+            borderBottomStyle: 'solid',
+            borderBottomColor: theme.tableBorder,
           }}
+        >
+          <Search
+            placeholder={t('Filter payees…')}
+            value={filter}
+            onChange={onSearchChange}
+            width="100%"
+            height={styles.mobileMinHeight}
+            style={{
+              backgroundColor: theme.tableBackground,
+              borderColor: theme.formInputBorder,
+            }}
+          />
+        </View>
+        <PayeesList
+          payees={filteredPayees}
+          ruleCounts={ruleCounts}
+          isRuleCountsLoading={isRuleCountsLoading}
+          isLoading={isPending}
+          onPayeePress={handlePayeePress}
+          onPayeeDelete={handlePayeeDelete}
+          onPayeeRuleAction={handlePayeeRuleAction}
         />
-      </View>
-      <PayeesList
-        payees={filteredPayees}
-        ruleCounts={ruleCounts}
-        isRuleCountsLoading={isRuleCountsLoading}
-        isLoading={isPending}
-        onPayeePress={handlePayeePress}
-        onPayeeDelete={handlePayeeDelete}
-        onPayeeRuleAction={handlePayeeRuleAction}
-      />
-    </Page>
+      </Page>
     </ErrorBoundary>
   );
 }
