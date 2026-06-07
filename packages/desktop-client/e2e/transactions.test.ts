@@ -63,17 +63,17 @@ test.describe('Transactions', () => {
       await expect(autocomplete).toMatchThemeScreenshots();
 
       // Ensure that autocomplete filters properly
-      await page.keyboard.type('C');
+      await page.keyboard.type('Boo');
       await expect(autocomplete).toMatchThemeScreenshots();
 
       // Select the active item
-      await page.getByTestId('Clothing-category-item').click();
+      await page.getByTestId('Books-category-item').click();
       await filterTooltip.applyButton.click();
 
-      // Assert that there are only clothing transactions
+      // Assert that all visible transactions are Books
       for (let i = 0; i < 5; i++) {
         await expect(accountPage.getNthTransaction(i).category).toHaveText(
-          'Clothing',
+          'Books',
         );
       }
       await expect(page).toMatchThemeScreenshots();
@@ -109,7 +109,7 @@ test.describe('Transactions', () => {
       // Assert that there are only transactions with categories in the Usual Expenses group
       for (let i = 0; i < 5; i++) {
         await expect(accountPage.getNthTransaction(i).category).toHaveText(
-          /^(Savings|Medical|Gift|General|Clothing|Entertainment|Restaurants|Food)$/,
+          /^(Savings|Medical|Gift|General|Clothing|Entertainment|Restaurants|Food|Transportation|Gas|Parking & Tolls|Personal Care|Hair & Grooming|Subscriptions|Streaming Services|Software & Apps|Home Maintenance|Furniture & Decor|Fitness|Gym Membership|Education|Books|Pets|Vet & Pet Care|Travel|Hobbies)$/,
         );
       }
       await expect(page).toMatchThemeScreenshots();
