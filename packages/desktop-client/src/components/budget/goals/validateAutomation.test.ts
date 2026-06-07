@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import {
   validateAutomation,
   validatePercentageAllocation,
+  validateSchedulePriorities,
 } from './validateAutomation';
 
 function percent(
@@ -209,5 +210,55 @@ describe('validateAutomation adjustment range', () => {
         today,
       ),
     ).toEqual({ kind: 'schedule-not-found', name: 'Rent' });
+  });
+});
+
+describe('validateSchedulePriorities', () => {
+  function scheduleAt(name: string, priority: number): Template {
+    return { type: 'schedule', name, directive: 'template', priority };
+  }
+  function byAt(priority: number): Template {
+    return {
+      type: 'by',
+      amount: 100,
+      month: '2026-12',
+      directive: 'template',
+      priority,
+    };
+  }
+
+  it('returns null when there are no schedule or by templates', () => {
+    expect(validateSchedulePriorities([])).toBeNull();
+  });
+
+  it('returns null for a single schedule', () => {
+    expect(validateSchedulePriorities([scheduleAt('Rent', 1)])).toBeNull();
+  });
+
+  it('returns null when all schedules share a priority', () => {
+    expect(
+      validateSchedulePriorities([scheduleAt('Rent', 2), scheduleAt('Gym', 2)]),
+    ).toBeNull();
+  });
+
+  it('flags schedules with mismatched priorities', () => {
+    expect(
+      validateSchedulePriorities([scheduleAt('Rent', 1), scheduleAt('Gym', 2)]),
+    ).toEqual({ kind: 'schedule-priority-mismatch' });
+  });
+
+  it('flags a schedule and a by-date with mismatched priorities', () => {
+    expect(
+      validateSchedulePriorities([scheduleAt('Rent', 1), byAt(2)]),
+    ).toEqual({ kind: 'schedule-priority-mismatch' });
+  });
+
+  it('ignores priorities of other automation types', () => {
+    expect(
+      validateSchedulePriorities([
+        scheduleAt('Rent', 1),
+        percent('Salary', 10),
+      ]),
+    ).toBeNull();
   });
 });

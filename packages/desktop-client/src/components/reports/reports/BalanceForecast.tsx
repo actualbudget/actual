@@ -31,6 +31,7 @@ import { Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { Container } from '#components/reports/Container';
 import { getCustomTick } from '#components/reports/getCustomTick';
+import { computePadding } from '#components/reports/graphs/util/computePadding';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { useAccounts } from '#hooks/useAccounts';
@@ -46,6 +47,7 @@ import { useDispatch } from '#redux';
 import {
   buildBalanceForecastChartData,
   countForecastScheduledOccurrences,
+  getLowestChartDataPoint,
   getZeroCrossingGradientOffset,
 } from './balanceForecastChartData';
 
@@ -265,6 +267,12 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     end: chartRange.end,
     granularity,
   });
+  const formatYTick = (value: number) =>
+    getCustomTick(format(value, 'financial-no-decimals'), privacyMode);
+  const yAxisLeftPadding = computePadding(
+    chartData.map(point => point.balance),
+    formatYTick,
+  );
   const isUpdatingForecast = isFetching && isPlaceholderData;
 
   const scheduledOccurrenceCount = countForecastScheduledOccurrences(
@@ -279,7 +287,8 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     return <LoadingIndicator />;
   }
 
-  const lowestPoint = forecastData?.lowestBalance;
+  const endingPoint = chartData.at(-1);
+  const lowestPoint = getLowestChartDataPoint(chartData);
   const hasNegativeBalance = chartData.some(d => d.balance < 0);
   const zeroCrossingGradientOffset = getZeroCrossingGradientOffset(chartData);
   const todayReferenceDate =
@@ -344,7 +353,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
           <div style={{ color: theme.errorText, marginBottom: 20 }}>
             {errorMessage}
           </div>
-        ) : lowestPoint ? (
+        ) : endingPoint ? (
           <View
             style={{
               textAlign: 'right',
@@ -358,17 +367,31 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                 fontWeight: 400,
                 marginBottom: 5,
                 color:
-                  lowestPoint.balance < 0 ? theme.errorText : theme.pageText,
+                  endingPoint.balance < 0 ? theme.errorText : theme.pageText,
               }}
             >
               <PrivacyFilter>
-                {format(lowestPoint.balance, 'financial')}
+                {format(endingPoint.balance, 'financial')}
               </PrivacyFilter>
             </View>
             <View style={{ color: theme.pageTextLight }}>
-              <Trans>Lowest Point</Trans>: {lowestPoint.date}
-              {lowestPoint.accountName && <> ({lowestPoint.accountName})</>}
+              <Trans>Ending Balance</Trans>: {endingPoint.date}
             </View>
+            {lowestPoint && lowestPoint.date !== endingPoint.date ? (
+              <View
+                style={{
+                  color: theme.pageTextLight,
+                  fontSize: 12,
+                  marginTop: 4,
+                }}
+              >
+                <Trans>Lowest visible point</Trans>:{' '}
+                <PrivacyFilter>
+                  {format(lowestPoint.balance, 'financial')}
+                </PrivacyFilter>{' '}
+                ({lowestPoint.date})
+              </View>
+            ) : null}
           </View>
         ) : null}
 
@@ -382,7 +405,12 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                       width={width}
                       height={height}
                       data={chartData}
-                      margin={{ top: 10, right: 10, left: 5, bottom: 10 }}
+                      margin={{
+                        top: 10,
+                        right: 10,
+                        left: 5 + yAxisLeftPadding,
+                        bottom: 10,
+                      }}
                     >
                       <defs>
                         <linearGradient
@@ -397,19 +425,19 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                               offset="0%"
                               stopColor={
                                 hasNegativeBalance
-                                  ? theme.errorText
-                                  : theme.noticeText
+                                  ? theme.reportsNumberNegative
+                                  : theme.reportsChartFill
                               }
                             />
                           ) : (
                             <>
                               <stop
                                 offset={`${zeroCrossingGradientOffset}%`}
-                                stopColor={theme.noticeText}
+                                stopColor={theme.reportsChartFill}
                               />
                               <stop
                                 offset={`${zeroCrossingGradientOffset}%`}
-                                stopColor={theme.errorText}
+                                stopColor={theme.reportsNumberNegative}
                               />
                             </>
                           )}
@@ -437,12 +465,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                       />
                       <YAxis
                         domain={['auto', 'auto']}
-                        tickFormatter={value =>
-                          getCustomTick(
-                            format(value, 'financial-no-decimals'),
-                            privacyMode,
-                          )
-                        }
+                        tickFormatter={formatYTick}
                         tick={{ fill: theme.pageText }}
                         tickLine={{ stroke: theme.pageText }}
                         tickSize={0}
@@ -481,11 +504,11 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                       {showsTodayReferenceLine && (
                         <ReferenceLine
                           x={todayReferenceDate}
-                          stroke={theme.noticeText}
+                          stroke={theme.reportsBlue}
                           strokeDasharray="4 4"
                           label={{
                             value: t('Today'),
-                            fill: theme.noticeText,
+                            fill: theme.reportsBlue,
                             fontSize: 12,
                             position: 'insideTop',
                             offset: 8,

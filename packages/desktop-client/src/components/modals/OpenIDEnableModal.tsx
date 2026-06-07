@@ -8,7 +8,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as asyncStorage from '@actual-app/core/platform/server/asyncStorage';
-import { getOpenIdErrors } from '@actual-app/core/shared/errors';
 import type { OpenIdConfig } from '@actual-app/core/types/models';
 
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
@@ -19,6 +18,7 @@ import { useRefreshLoginMethods } from '#components/ServerContext';
 import { popModal } from '#modals/modalsSlice';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
+import { getOpenIdErrors } from '#util/error';
 
 type OpenIDEnableModalProps = Extract<
   ModalType,

@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/sync-server",
-  "version": "26.5.2",
+  "version": "26.6.0",
   "description": "actual syncing server",
   "license": "MIT",
   "repository": {
@@ -90,6 +90,7 @@
   "dependencies": {
     "@actual-app/crdt": "workspace:*",
     "@actual-app/web": "workspace:*",
+    "akahu": "^2.5.1",
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.8.0",
     "convict": "^6.2.5",

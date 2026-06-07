@@ -13,7 +13,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
-import { getTestKeyError } from '@actual-app/core/shared/errors';
 
 import { Link } from '#components/common/Link';
 import {
@@ -23,6 +22,7 @@ import {
   ModalHeader,
 } from '#components/common/Modal';
 import type { Modal as ModalType } from '#modals/modalsSlice';
+import { getTestKeyError } from '#util/error';
 
 type FixEncryptionKeyModalProps = Extract<
   ModalType,

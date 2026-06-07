@@ -19,7 +19,6 @@ jobs:
       && github.head_ref != 'release'
       && startsWith(github.head_ref, 'release-notes/') == false
     runs-on: ubuntu-latest
-    environment: pr-automation
     permissions:
       contents: read
     steps:
