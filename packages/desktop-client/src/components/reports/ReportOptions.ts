@@ -278,6 +278,18 @@ export const ReportOptions = {
   >(intervalOptions.map(item => [item.key, item.range])),
 };
 
+// Returns the display format for an interval, respecting the user's date-style
+// preference for Daily/Weekly where the raw YYMMDD default ignores it.
+export function getIntervalFormat(
+  interval: string,
+  dateFormat?: string | null,
+): string {
+  if ((interval === 'Daily' || interval === 'Weekly') && dateFormat) {
+    return dateFormat.replace('yyyy', 'yy');
+  }
+  return ReportOptions.intervalFormat.get(interval) || '';
+}
+
 export type QueryDataEntity = {
   date: string;
   category: string;

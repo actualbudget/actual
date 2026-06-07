@@ -43,6 +43,7 @@ import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportLegend } from '#components/reports/ReportLegend';
 import {
   defaultReport,
+  getIntervalFormat,
   ReportOptions,
 } from '#components/reports/ReportOptions';
 import type { dateRangeProps } from '#components/reports/ReportOptions';
@@ -151,6 +152,7 @@ function CustomReportInner({
   const { isNarrowWidth } = useResponsive();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const [dateFormat = 'MM/dd/yyyy'] = useSyncedPref('dateFormat');
 
   const [viewLegend = false, setViewLegendPref] =
     useLocalPref('reportsViewLegend');
@@ -403,7 +405,7 @@ function CustomReportInner({
           name: inter,
           pretty: monthUtils.format(
             inter,
-            ReportOptions.intervalFormat.get(interval) || '',
+            getIntervalFormat(interval, dateFormat),
             locale,
           ),
         }))
@@ -579,6 +581,7 @@ function CustomReportInner({
       accounts,
       graphType,
       firstDayOfWeekIdx,
+      dateFormat,
     });
   }, [
     startDate,
@@ -600,6 +603,7 @@ function CustomReportInner({
     sortByOp,
     graphType,
     firstDayOfWeekIdx,
+    dateFormat,
   ]);
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);
