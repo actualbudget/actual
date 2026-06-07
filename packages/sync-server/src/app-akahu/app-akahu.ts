@@ -281,7 +281,7 @@ async function getRefreshedAccount(
 
   // wait for the refresh to complete
   for (let i = 0; i < 5; i++) {
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
     account = await akahu.accounts.get(userToken, accountId);
     if (!account) {
       return null;
