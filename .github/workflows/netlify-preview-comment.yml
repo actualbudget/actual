@@ -1,0 +1,50 @@
+name: Netlify Preview Comment
+
+##########################################################################################
+# This workflow uses the 'pull_request_target' event so that it can post a comment on    #
+# PRs from forks (which is where most PRs come from). It runs in the context of the base  #
+# actualbudget/actual repo and therefore has a token that can write comments.            #
+#                                                                                         #
+# It is SAFE because it never checks out or executes any PR-supplied code. The only       #
+# input it uses is the PR number, from which the deterministic Netlify preview URLs are   #
+# constructed. Do NOT add a checkout step or run any PR code in this workflow.            #
+##########################################################################################
+# See: https://securitylab.github.com/research/github-actions-preventing-pwn-requests    #
+##########################################################################################
+
+on:
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
+    types:
+      - opened
+      - reopened
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  comment:
+    name: Post Netlify Preview Comment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post consolidated preview links comment
+        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        with:
+          number: ${{ github.event.pull_request.number }}
+          header: netlify-preview
+          message: |
+            <!-- netlify-preview -->
+            ## Netlify preview builds
+
+            | Preview | Link |
+            | --- | --- |
+            | App (Demo) | https://deploy-preview-${{ github.event.pull_request.number }}.demo.actualbudget.org/ |
+            | Website | https://deploy-preview-${{ github.event.pull_request.number }}.www.actualbudget.org/ |
+            | Storybook | https://deploy-preview-${{ github.event.pull_request.number }}--actualbudget-storybook.netlify.app/ |
+
+            Links go live once Netlify finishes deploying. There is no sync server on
+            preview builds, so when asked "Where's the server?" select "Don't use a server".

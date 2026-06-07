@@ -10,7 +10,7 @@ Three previews are deployed per PR:
 - **Storybook:** `https://deploy-preview-{pr-number}--actualbudget-storybook.netlify.app/`
 - **Website:** `https://deploy-preview-{pr-number}.www.actualbudget.org/`
 
-The exact URLs are also posted as a comment on each PR by the Netlify bot.
+A single comment listing all of these preview links is also posted on each PR.
 
 :::info
 There is no sync server on preview builds so when asked "Where's the server" select "Don't use a server." Alternatively, you can use your own self-hosted server. You should exercise caution when using a server with preview builds because they are much more likely to have bugs that could damage your budget. Consider running a separate local server for preview builds.
