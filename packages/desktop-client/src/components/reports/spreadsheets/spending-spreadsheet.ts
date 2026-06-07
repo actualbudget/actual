@@ -68,11 +68,18 @@ export function createSpendingSpreadsheet({
       conditions: conditions.filter(cond => !cond.customName),
     });
 
+    // Only pass category conditions whose ops generate direct ID comparisons
+    // (is/isNot/oneOf/notOneOf). Ops like contains/doesNotContain/matches
+    // append '.name' to the field path, which zero_budgets/reflect_budgets
+    // cannot resolve (those tables have no category join).
     const { filters: budgetFilters } = await send(
       'make-filters-from-conditions',
       {
         conditions: conditions.filter(
-          cond => !cond.customName && cond.field === 'category',
+          cond =>
+            !cond.customName &&
+            cond.field === 'category' &&
+            ['is', 'isNot', 'oneOf', 'notOneOf'].includes(cond.op),
         ),
         applySpecialCases: false,
       },
@@ -169,9 +176,11 @@ export function createSpendingSpreadsheet({
           .filter({
             $and: [{ month: { $eq: budgetMonth } }],
           })
-          .filter({
-            [conditionsOpKey]: budgetFilters,
-          })
+          .filter(
+            budgetFilters.length > 0
+              ? { [conditionsOpKey]: budgetFilters }
+              : {},
+          )
           .groupBy([{ $id: '$category' }])
           .select([
             { category: { $id: '$category' } },
