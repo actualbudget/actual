@@ -26,8 +26,8 @@ import { MODAL_Z_INDEX } from './common/Modal';
 const MAX_VISIBLE_NOTIFICATIONS = 3; // Maximum number of notifications visible in the stack
 const SCALE_MULTIPLIER = 0.05; // Scale reduction per stacked notification
 const OPACITY_MULTIPLIER = 0.2; // Opacity reduction per stacked notification
-const MIN_OPACITY = 1; // Minimum opacity for stacked notifications
-const Y_OFFSET_PER_LEVEL = -20; // Vertical offset in pixels per stacked notification
+const MIN_OPACITY = 0.5; // Minimum opacity for stacked notifications
+const Y_OFFSET_PER_LEVEL = -100; // Vertical offset in pixels per stacked notification
 const BASE_Z_INDEX = 10; // Base z-index for notification stacking
 
 function compileMessage(
