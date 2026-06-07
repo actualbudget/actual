@@ -51,7 +51,7 @@ app.use(validateSessionMiddleware);
 
 app.post(
   '/status',
-  handleError(async (req, res) => {
+  handleError(async (_req, res) => {
     const userToken = secretsService.get(SecretName.akahu_userToken);
     const appToken = secretsService.get(SecretName.akahu_appToken);
 
@@ -68,7 +68,7 @@ app.post(
 
 app.post(
   '/accounts',
-  handleError(async (req, res) => {
+  handleError(async (_req, res) => {
     const userToken = secretsService.get(SecretName.akahu_userToken);
     const appToken = secretsService.get(SecretName.akahu_appToken);
 
@@ -319,24 +319,28 @@ function convertToCents(amount: number): number {
   return Math.round(amount * 100);
 }
 
-function getPayeeName(
-  trans:
-    | Transaction
-    | EnrichedTransaction
-    | PendingTransaction
-    | EnrichedPendingTransaction,
-): string {
-  if (isEnriched(trans)) {
-    if (trans.merchant?.name) {
-      return trans.merchant.name;
-    }
+type AnyTransaction =
+  | Transaction
+  | EnrichedTransaction
+  | PendingTransaction
+  | EnrichedPendingTransaction;
 
-    if (trans.meta?.other_account) {
-      return trans.meta.other_account;
-    }
+function getPayeeName(trans: AnyTransaction): string {
+  return getMerchantName(trans) ?? getOtherAccount(trans) ?? trans.description;
+}
+
+function getMerchantName(trans: AnyTransaction): string | undefined {
+  if ('merchant' in trans) {
+    return trans.merchant.name;
   }
+  return undefined;
+}
 
-  return '';
+function getOtherAccount(trans: AnyTransaction): string | undefined {
+  if ('meta' in trans) {
+    return trans.meta.other_account ?? undefined;
+  }
+  return undefined;
 }
 
 function processPendingTransaction(
