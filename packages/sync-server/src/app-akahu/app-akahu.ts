@@ -135,7 +135,7 @@ app.post(
     try {
       const akahu = new AkahuClient({ appToken });
 
-      let account = await akahu.accounts.get(userToken, accountId);
+      const account = await akahu.accounts.get(userToken, accountId);
       if (!account) {
         return res.send({
           status: 'error',
@@ -160,16 +160,13 @@ app.post(
         // wait for the refresh to complete
         for (let i = 0; i < 5; i++) {
           await new Promise(resolve => setTimeout(resolve, 1000));
-          account = await akahu.accounts.get(userToken, accountId);
-          if (!account) {
-            return res.send({
-              status: 'error',
-              data: {
-                error: 'Account not found',
-              },
-            });
-          }
-          if (!shouldRefreshAccount(account.refreshed?.transactions)) {
+          const refreshedAccount = await akahu.accounts.get(
+            userToken,
+            accountId,
+          );
+          if (
+            !shouldRefreshAccount(refreshedAccount?.refreshed?.transactions)
+          ) {
             break;
           }
         }
