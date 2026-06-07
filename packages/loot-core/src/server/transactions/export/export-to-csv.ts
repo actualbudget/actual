@@ -95,9 +95,7 @@ export async function exportQueryToCSV(query) {
   // payee even though their parent has one. For those cases, fetch the
   // missing parents in a separate query.
   const parentPayeeById = new Map(
-    transactions
-      .filter(t => t.IsParent && t.Payee)
-      .map(t => [t.Id, t.Payee]),
+    transactions.filter(t => t.IsParent && t.Payee).map(t => [t.Id, t.Payee]),
   );
 
   const missingParentIds = [

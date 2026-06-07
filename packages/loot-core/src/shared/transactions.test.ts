@@ -238,10 +238,13 @@ describe('Transactions', () => {
   test('partially updating a sub-transaction preserves its amount and category', () => {
     const transactions = [
       makeTransaction({ amount: 2001 }),
-      ...makeSplitTransaction({ id: 't1', amount: 2500, category: 'parent-cat' }, [
-        { id: 't2', amount: 2000, category: 'cat-a' },
-        { id: 't3', amount: 500, category: 'cat-b' },
-      ]),
+      ...makeSplitTransaction(
+        { id: 't1', amount: 2500, category: 'parent-cat' },
+        [
+          { id: 't2', amount: 2000, category: 'cat-a' },
+          { id: 't3', amount: 500, category: 'cat-b' },
+        ],
+      ),
       makeTransaction({ amount: 3002 }),
     ];
 
