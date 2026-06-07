@@ -107,29 +107,31 @@ const CustomTooltip = ({
             <strong>{label}</strong>
           </div>
           <div style={{ lineHeight: 1.4 }}>
-            {items.map((pay, i) => {
+            {(compact
+              ? items.filter(pay => pay.value !== 0).slice(0, 5)
+              : items.filter(pay => pay.value !== 0)
+            ).map(pay => {
               const displayName = dataKeyToName.get(pay.name) ?? pay.name;
               return (
-                pay.value !== 0 &&
-                (compact ? i < 5 : true) && (
-                  <AlignedText
-                    key={pay.name}
-                    left={displayName}
-                    right={
-                      <FinancialText>
-                        {format(pay.value, 'financial')}
-                      </FinancialText>
-                    }
-                    style={{
-                      color: pay.color,
-                      textDecoration:
-                        tooltip === pay.name ? 'underline' : 'inherit',
-                    }}
-                  />
-                )
+                <AlignedText
+                  key={pay.name}
+                  left={displayName}
+                  right={
+                    <FinancialText>
+                      {format(pay.value, 'financial')}
+                    </FinancialText>
+                  }
+                  style={{
+                    color: pay.color,
+                    textDecoration:
+                      tooltip === pay.name ? 'underline' : 'inherit',
+                  }}
+                />
               );
             })}
-            {payload.length > 5 && compact && '...'}
+            {compact &&
+              items.filter(pay => pay.value !== 0).length > 5 &&
+              '...'}
             <AlignedText
               left={t('Total')}
               right={

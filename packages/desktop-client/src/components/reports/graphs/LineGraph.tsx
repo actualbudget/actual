@@ -104,10 +104,10 @@ const CustomTooltip = ({
             <strong>{payload[0].payload.date}</strong>
           </div>
           <div style={{ lineHeight: 1.5 }}>
-            {items.map((p: PayloadItem, index: number) => {
-              const displayName = dataKeyToName.get(p.dataKey) ?? p.dataKey;
-              return (
-                (compact ? index < 4 : true) && (
+            {(compact ? items.slice(0, 5) : items).map(
+              (p: PayloadItem, index: number) => {
+                const displayName = dataKeyToName.get(p.dataKey) ?? p.dataKey;
+                return (
                   <AlignedText
                     key={index}
                     left={displayName}
@@ -122,10 +122,10 @@ const CustomTooltip = ({
                         tooltip === p.dataKey ? 'underline' : 'inherit',
                     }}
                   />
-                )
-              );
-            })}
-            {payload.length > 5 && compact && '...'}
+                );
+              },
+            )}
+            {compact && items.length > 5 && '...'}
             <AlignedText
               left={t('Total')}
               right={
