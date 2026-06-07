@@ -636,8 +636,11 @@ describe('CategoryTemplateContext', () => {
 
   describe('runAverage', () => {
     let instance: TestCategoryTemplateContext;
+    let originalCurrentMonth: string | null;
 
     beforeEach(() => {
+      originalCurrentMonth = global.currentMonth;
+      global.currentMonth = '2024-02';
       const category: CategoryEntity = {
         id: 'test',
         name: 'Test Category',
@@ -646,6 +649,10 @@ describe('CategoryTemplateContext', () => {
       };
       instance = new TestCategoryTemplateContext([], category, '2024-01', 0, 0);
       vi.clearAllMocks();
+    });
+
+    afterEach(() => {
+      global.currentMonth = originalCurrentMonth;
     });
 
     it('should calculate average of 3 months', async () => {
@@ -771,6 +778,93 @@ describe('CategoryTemplateContext', () => {
         instance,
       );
       expect(result).toBe(100);
+    });
+
+    it('should skip the current month and future months', async () => {
+      global.currentMonth = '2024-01';
+      instance = new TestCategoryTemplateContext(
+        [],
+        instance.category,
+        '2024-03',
+        0,
+        0,
+      );
+      const template: Template = {
+        type: 'average',
+        numMonths: 3,
+        directive: 'template',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue)
+        .mockResolvedValueOnce(-100) // Dec 2023
+        .mockResolvedValueOnce(-200) // Nov 2023
+        .mockResolvedValueOnce(-300); // Oct 2023
+
+      const result = await CategoryTemplateContext.runAverage(
+        template,
+        instance,
+      );
+      expect(result).toBe(200);
+      expect(actions.getSheetValue).toHaveBeenNthCalledWith(
+        1,
+        'budget202312',
+        'sum-amount-test',
+      );
+      expect(actions.getSheetValue).toHaveBeenNthCalledWith(
+        2,
+        'budget202311',
+        'sum-amount-test',
+      );
+      expect(actions.getSheetValue).toHaveBeenNthCalledWith(
+        3,
+        'budget202310',
+        'sum-amount-test',
+      );
+    });
+
+    it('should include the current month when includeIncomplete is true', async () => {
+      global.currentMonth = '2024-01';
+      instance = new TestCategoryTemplateContext(
+        [],
+        instance.category,
+        '2024-03',
+        0,
+        0,
+      );
+      const template: Template = {
+        type: 'average',
+        numMonths: 3,
+        directive: 'template',
+        priority: 1,
+        includeIncomplete: true,
+      };
+
+      vi.mocked(actions.getSheetValue)
+        .mockResolvedValueOnce(-100) // Feb 2024
+        .mockResolvedValueOnce(-200) // Jan 2024
+        .mockResolvedValueOnce(-300); // Dec 2023
+
+      const result = await CategoryTemplateContext.runAverage(
+        template,
+        instance,
+      );
+      expect(result).toBe(200);
+      expect(actions.getSheetValue).toHaveBeenNthCalledWith(
+        1,
+        'budget202402',
+        'sum-amount-test',
+      );
+      expect(actions.getSheetValue).toHaveBeenNthCalledWith(
+        2,
+        'budget202401',
+        'sum-amount-test',
+      );
+      expect(actions.getSheetValue).toHaveBeenNthCalledWith(
+        3,
+        'budget202312',
+        'sum-amount-test',
+      );
     });
 
     it('should handle zero amount adjustments', async () => {

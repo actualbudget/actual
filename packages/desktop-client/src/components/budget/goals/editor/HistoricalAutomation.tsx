@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
@@ -19,6 +19,7 @@ import {
   STACKED_FIELD_FLEX,
 } from '#components/budget/goals/editor/fieldLayout';
 import { FormField, FormLabel } from '#components/forms';
+import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 
 type HistoricalAutomationProps = {
   template: CopyTemplate | AverageTemplate;
@@ -89,7 +90,26 @@ export const HistoricalAutomation = ({
         </FormField>
       </SpaceBetween>
       {template.type === 'average' && (
-        <AmountAdjustment template={template} dispatch={dispatch} />
+        <>
+          <LabeledCheckbox
+            id="include-incomplete-field"
+            checked={template.includeIncomplete ?? false}
+            onChange={e =>
+              dispatch(
+                updateTemplate({
+                  type: 'average',
+                  includeIncomplete: e.currentTarget.checked,
+                }),
+              )
+            }
+            style={{ marginTop: 10 }}
+          >
+            <span style={{ marginLeft: 6, fontSize: 12, whiteSpace: 'nowrap' }}>
+              <Trans>Include incomplete months</Trans>
+            </span>
+          </LabeledCheckbox>
+          <AmountAdjustment template={template} dispatch={dispatch} />
+        </>
       )}
     </>
   );

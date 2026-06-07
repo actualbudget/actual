@@ -428,6 +428,8 @@ describe('unparse/parse round-trip', () => {
     '#template remainder 3 up to 10',
     // average
     '#template average 6 months',
+    '#template average 6 months include incomplete',
+    '#template average 6 months include incomplete [increase 10%]',
     '#template-5 average 12 months',
     // copy
     '#template copy from 3 months ago',
@@ -442,6 +444,20 @@ describe('unparse/parse round-trip', () => {
     const reparsed: Template = parse(serialized);
 
     expect(parsed).toEqual(reparsed);
+  });
+});
+
+describe('parse average templates', () => {
+  it('sets includeIncomplete when the directive is present', () => {
+    const parsed: Template = parse(
+      '#template average 6 months include incomplete',
+    );
+
+    expect(parsed).toMatchObject({
+      type: 'average',
+      numMonths: 6,
+      includeIncomplete: true,
+    });
   });
 });
 

@@ -855,14 +855,18 @@ export class CategoryTemplateContext {
     templateContext: CategoryTemplateContext,
   ): Promise<number> {
     let sum = 0;
-    for (let i = 1; i <= template.numMonths; i++) {
-      const sheetName = monthUtils.sheetForMonth(
-        monthUtils.subMonths(templateContext.month, i),
-      );
+    let month = monthUtils.prevMonth(templateContext.month);
+    if (!template.includeIncomplete && month >= monthUtils.currentMonth()) {
+      month = monthUtils.prevMonth(monthUtils.currentMonth());
+    }
+
+    for (let i = 0; i < template.numMonths; i++) {
+      const sheetName = monthUtils.sheetForMonth(month);
       sum += await getSheetValue(
         sheetName,
         `sum-amount-${templateContext.category.id}`,
       );
+      month = monthUtils.prevMonth(month);
     }
 
     // negate as sheet value is cost ie negative

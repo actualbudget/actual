@@ -22,8 +22,8 @@ expr
     { return { type: 'schedule', name: name.trim(), priority: template.priority, directive: template.directive, full, adjustment: modifiers?.adjustment, adjustmentType: modifiers?.adjustmentType  }}
   / template: template _ remainder: remainder limit: limit?
     { return { type: 'remainder', priority: null, directive: template.directive, weight: remainder, limit }}
-  / template: template _ 'average'i _ amount: positive _ 'months'i? modifiers:modifiers?
-    { return { type: 'average', numMonths: +amount, priority: template.priority, directive: template.directive, adjustment: modifiers?.adjustment, adjustmentType: modifiers?.adjustmentType  }}
+  / template: template _ 'average'i _ amount: positive _ 'months'i? includeIncomplete:(_ includeIncomplete)? modifiers:modifiers?
+    { return { type: 'average', numMonths: +amount, priority: template.priority, directive: template.directive, includeIncomplete: !!includeIncomplete, adjustment: modifiers?.adjustment, adjustmentType: modifiers?.adjustmentType  }}
   / template: template _ 'copy from'i _ lookBack: positive _ 'months ago'i limit:limit?
     { return { type: 'copy', priority: template.priority, directive: template.directive, lookBack: +lookBack, limit }}
   / goal: goal amount: amount { return {type: 'goal', amount: amount, priority: null, directive: goal }}
@@ -76,6 +76,7 @@ upTo = 'up'i _ 'to'i
 hold = 'hold'i {return true}
 schedule = 'schedule'i { return text() }
 full = 'full'i _ {return true}
+includeIncomplete = 'include incomplete'i { return true }
 priority = '-'i number: number {return number}
 remainder = 'remainder'i _? weight: positive? { return +weight || 1 }
 template = '#template' priority: priority? {return {priority: +priority, directive: 'template'}}
