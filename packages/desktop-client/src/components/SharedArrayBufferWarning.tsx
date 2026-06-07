@@ -10,11 +10,10 @@ import { css } from '@emotion/css';
 import { Link } from '#components/common/Link';
 
 export function SharedArrayBufferWarning() {
-  const requiresSharedArrayBuffer =
-    !isElectron() && typeof SharedArrayBuffer !== 'undefined';
+  const hasSharedArrayBuffer = typeof SharedArrayBuffer !== 'undefined';
 
   // Only show warning if SharedArrayBuffer is required and not supported
-  if (requiresSharedArrayBuffer) {
+  if (isElectron() || hasSharedArrayBuffer) {
     return null;
   }
 
