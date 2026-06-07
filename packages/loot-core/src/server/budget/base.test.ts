@@ -337,4 +337,177 @@ describe('Base budget', () => {
     // Verify total spent includes both visible and hidden group amounts
     expect(sheet.getCellValue(sheetName, 'total-spent')).toBe(-3000);
   });
+
+  it('Seeds sum-amount across all months on a cold build (Envelope Budget)', async () => {
+    await sheet.loadSpreadsheet(db);
+    sheet.get().meta().budgetType = 'envelope';
+
+    await db.insertCategoryGroup({ id: 'group1', name: 'Expenses' });
+    await db.insertCategoryGroup({
+      id: 'group2',
+      name: 'Income',
+      is_income: 1,
+    });
+    const foodId = await db.insertCategory({
+      name: 'Food',
+      cat_group: 'group1',
+    });
+    const rentId = await db.insertCategory({
+      name: 'Rent',
+      cat_group: 'group1',
+    });
+
+    await db.insertAccount({ id: 'account1', name: 'Account 1' });
+
+    // Insert transactions across multiple months *before* building the
+    // budgets, so the cold build seeds the sum-amount cells from the
+    // batched query rather than per-cell queries.
+    await db.insertTransaction({
+      date: '2017-01-10',
+      amount: -1000,
+      account: 'account1',
+      category: foodId,
+    });
+    await db.insertTransaction({
+      date: '2017-01-20',
+      amount: -500,
+      account: 'account1',
+      category: foodId,
+    });
+    await db.insertTransaction({
+      date: '2017-02-15',
+      amount: -2500,
+      account: 'account1',
+      category: foodId,
+    });
+    await db.insertTransaction({
+      date: '2017-01-05',
+      amount: -90000,
+      account: 'account1',
+      category: rentId,
+    });
+    await db.insertTransaction({
+      date: '2017-03-01',
+      amount: -90000,
+      account: 'account1',
+      category: rentId,
+    });
+
+    await createAllBudgets();
+    await sheet.waitOnSpreadsheet();
+
+    const jan = monthUtils.sheetForMonth('2017-01');
+    const feb = monthUtils.sheetForMonth('2017-02');
+    const mar = monthUtils.sheetForMonth('2017-03');
+
+    // Per-category seeded sums
+    expect(sheet.getCellValue(jan, `sum-amount-${foodId}`)).toBe(-1500);
+    expect(sheet.getCellValue(feb, `sum-amount-${foodId}`)).toBe(-2500);
+    expect(sheet.getCellValue(mar, `sum-amount-${foodId}`)).toBe(0);
+    expect(sheet.getCellValue(jan, `sum-amount-${rentId}`)).toBe(-90000);
+    // A category with no transactions in a month seeds to 0
+    expect(sheet.getCellValue(feb, `sum-amount-${rentId}`)).toBe(0);
+    expect(sheet.getCellValue(mar, `sum-amount-${rentId}`)).toBe(-90000);
+
+    // Downstream cells read the seeded values correctly
+    expect(sheet.getCellValue(jan, 'group-sum-amount-group1')).toBe(-91500);
+    expect(sheet.getCellValue(feb, 'group-sum-amount-group1')).toBe(-2500);
+    expect(sheet.getCellValue(jan, `leftover-${foodId}`)).toBe(-1500);
+  });
+
+  it('Seeds sum-amount across all months on a cold build (Tracking Budget)', async () => {
+    await sheet.loadSpreadsheet(db);
+    sheet.get().meta().budgetType = 'tracking';
+
+    await db.insertCategoryGroup({ id: 'group1', name: 'Expenses' });
+    await db.insertCategoryGroup({
+      id: 'group2',
+      name: 'Income',
+      is_income: 1,
+    });
+    const foodId = await db.insertCategory({
+      name: 'Food',
+      cat_group: 'group1',
+    });
+    const rentId = await db.insertCategory({
+      name: 'Rent',
+      cat_group: 'group1',
+    });
+
+    await db.insertAccount({ id: 'account1', name: 'Account 1' });
+
+    await db.insertTransaction({
+      date: '2017-01-10',
+      amount: -1500,
+      account: 'account1',
+      category: foodId,
+    });
+    await db.insertTransaction({
+      date: '2017-01-05',
+      amount: -90000,
+      account: 'account1',
+      category: rentId,
+    });
+    await db.insertTransaction({
+      date: '2017-02-15',
+      amount: -2500,
+      account: 'account1',
+      category: foodId,
+    });
+
+    await createAllBudgets();
+    await sheet.waitOnSpreadsheet();
+
+    const jan = monthUtils.sheetForMonth('2017-01');
+    const feb = monthUtils.sheetForMonth('2017-02');
+
+    expect(sheet.getCellValue(jan, `sum-amount-${foodId}`)).toBe(-1500);
+    expect(sheet.getCellValue(jan, `sum-amount-${rentId}`)).toBe(-90000);
+    expect(sheet.getCellValue(feb, `sum-amount-${foodId}`)).toBe(-2500);
+    expect(sheet.getCellValue(jan, 'total-spent')).toBe(-91500);
+    expect(sheet.getCellValue(feb, 'total-spent')).toBe(-2500);
+  });
+
+  it('Excludes off-budget account spending when seeding sum-amount', async () => {
+    await sheet.loadSpreadsheet(db);
+    sheet.get().meta().budgetType = 'envelope';
+
+    await db.insertCategoryGroup({ id: 'group1', name: 'Expenses' });
+    await db.insertCategoryGroup({
+      id: 'group2',
+      name: 'Income',
+      is_income: 1,
+    });
+    const foodId = await db.insertCategory({
+      name: 'Food',
+      cat_group: 'group1',
+    });
+
+    await db.insertAccount({ id: 'onbudget', name: 'On budget' });
+    await db.insertAccount({
+      id: 'offbudget',
+      name: 'Off budget',
+      offbudget: 1,
+    });
+
+    await db.insertTransaction({
+      date: '2017-01-10',
+      amount: -1000,
+      account: 'onbudget',
+      category: foodId,
+    });
+    // Off-budget spending must not be counted, matching the per-cell query.
+    await db.insertTransaction({
+      date: '2017-01-12',
+      amount: -5000,
+      account: 'offbudget',
+      category: foodId,
+    });
+
+    await createAllBudgets();
+    await sheet.waitOnSpreadsheet();
+
+    const jan = monthUtils.sheetForMonth('2017-01');
+    expect(sheet.getCellValue(jan, `sum-amount-${foodId}`)).toBe(-1000);
+  });
 });
