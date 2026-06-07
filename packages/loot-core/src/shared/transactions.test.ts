@@ -235,6 +235,42 @@ describe('Transactions', () => {
     });
   });
 
+  test('partially updating a sub-transaction preserves its amount and category', () => {
+    const transactions = [
+      makeTransaction({ amount: 2001 }),
+      ...makeSplitTransaction({ id: 't1', amount: 2500, category: 'parent-cat' }, [
+        { id: 't2', amount: 2000, category: 'cat-a' },
+        { id: 't3', amount: 500, category: 'cat-b' },
+      ]),
+      makeTransaction({ amount: 3002 }),
+    ];
+
+    // Simulate the API call: updateTransaction(id, { notes: 'new note' })
+    // which becomes updateTransaction(transactions, { id, ...fields })
+    const { data, diff } = updateTransaction(transactions, {
+      id: 't2',
+      notes: 'child note',
+    } as TransactionEntity);
+
+    const child = data.find(d => d.id === 't2');
+    expect(child?.notes).toBe('child note');
+    expect(child?.amount).toBe(2000);
+    expect(child?.category).toBe('cat-a');
+
+    const sibling = data.find(d => d.id === 't3');
+    expect(sibling?.amount).toBe(500);
+    expect(sibling?.category).toBe('cat-b');
+
+    expect(diff).toEqual({
+      added: [],
+      deleted: [],
+      updated: [
+        expect.objectContaining({ id: 't1' }),
+        expect.objectContaining({ id: 't2', notes: 'child note' }),
+      ],
+    });
+  });
+
   test('deleting a split transaction works', () => {
     const transactions = [
       makeTransaction({ amount: 2001 }),

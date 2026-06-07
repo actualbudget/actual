@@ -280,7 +280,7 @@ export function updateTransaction(
             ...(newPayee != null ? { payee: newPayee } : {}),
           };
         } else if (t.id === transaction.id) {
-          child = transaction;
+          child = { ...t, ...transaction };
         }
 
         return makeChild(parent, child);
