@@ -301,16 +301,6 @@ function getRefreshedAccount(
   });
 }
 
-function isEnriched(
-  trans:
-    | Transaction
-    | EnrichedTransaction
-    | PendingTransaction
-    | EnrichedPendingTransaction,
-): trans is EnrichedTransaction {
-  return 'merchant' in trans || 'meta' in trans || 'category' in trans;
-}
-
 function getDate(date: Date): string {
   return formatISO(date).split('T')[0];
 }
@@ -330,14 +320,14 @@ function getPayeeName(trans: AnyTransaction): string {
 }
 
 function getMerchantName(trans: AnyTransaction): string | undefined {
-  if ('merchant' in trans) {
+  if ('merchant' in trans && trans.merchant) {
     return trans.merchant.name;
   }
   return undefined;
 }
 
 function getOtherAccount(trans: AnyTransaction): string | undefined {
-  if ('meta' in trans) {
+  if ('meta' in trans && trans.meta) {
     return trans.meta.other_account ?? undefined;
   }
   return undefined;
@@ -368,8 +358,8 @@ function processTransaction(
   account: Account,
 ): AkahuTransaction {
   let category = undefined;
-  if (isEnriched(trans)) {
-    category = trans.category?.name;
+  if ('category' in trans && trans.category) {
+    category = trans.category.name;
   }
 
   return {
