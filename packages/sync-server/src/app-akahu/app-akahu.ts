@@ -135,7 +135,7 @@ app.post(
     try {
       const akahu = new AkahuClient({ appToken });
 
-      const account = await akahu.accounts.get(userToken, accountId);
+      let account = await akahu.accounts.get(userToken, accountId);
       if (!account) {
         return res.send({
           status: 'error',
@@ -156,6 +156,17 @@ app.post(
 
       if (shouldRefreshAkahuTransactions(account.refreshed?.transactions)) {
         await akahu.accounts.refresh(userToken, accountId);
+
+        // wait for the refresh to complete
+        for (let i = 0; i < 5; i++) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          account = await akahu.accounts.get(userToken, accountId);
+          if (
+            !shouldRefreshAkahuTransactions(account.refreshed?.transactions)
+          ) {
+            break;
+          }
+        }
       }
 
       const now = new Date();
