@@ -3,4 +3,4 @@ category: Enhancements
 authors: [tim-smart]
 ---
 
-Refresh akahu account if stale
+Refresh Akahu account if stale
