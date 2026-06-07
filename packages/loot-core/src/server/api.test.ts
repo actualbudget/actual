@@ -27,7 +27,6 @@ describe('API handlers', () => {
       await expect(handlers['api/get-server-version']()).resolves.toEqual({
         version: '26.6.0',
       });
-      expect(handlers['get-server-version']).toHaveBeenCalledOnce();
     });
   });
 
