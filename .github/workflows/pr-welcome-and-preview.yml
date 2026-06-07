@@ -1,0 +1,85 @@
+name: PR Welcome & Preview
+
+##########################################################################################
+# WARNING! This workflow uses the 'pull_request_target' event. That means that it will     #
+# always run in the context of the main actualbudget/actual repo, even if the PR is from   #
+# a fork. This is necessary to get access to a GitHub token that can post a comment on     #
+# the PR. Be VERY CAREFUL about adding things to this workflow, since forks can inject     #
+# arbitrary code into their branch, and can pollute the artifacts we download. Arbitrary   #
+# code execution in this workflow could lead to a compromise of the main repo.             #
+#                                                                                          #
+# This workflow never checks out or executes any PR-supplied code. It only reads the PR    #
+# number and whether the PR comes from a fork, and builds a static comment from them. Do   #
+# NOT add a checkout step, and do NOT interpolate untrusted PR fields (title, branch, etc.)#
+# into the shell.                                                                          #
+##########################################################################################
+# See: https://securitylab.github.com/research/github-actions-preventing-pwn-requests     #
+##########################################################################################
+
+on:
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
+    types:
+      - opened
+      - reopened
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  pull-requests: write
+
+jobs:
+  comment:
+    name: Post Welcome & Preview Comment
+    runs-on: ubuntu-latest
+    env:
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      IS_FORK: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
+    steps:
+      - name: Build comment body
+        run: |
+          set -euo pipefail
+          FILE="$RUNNER_TEMP/comment.md"
+          echo '<!-- pr-info -->' > "$FILE"
+          # Contributor welcome is only relevant for PRs opened from forks.
+          if [ "$IS_FORK" = "true" ]; then
+          cat >> "$FILE" <<'EOF'
+          👋 Hello contributor!
+
+          We would love to review your PR! Before we can do that, please make sure:
+
+          - ✅ All CI checks pass
+          - ✅ The PR is moved from draft to open (if applicable)
+          - ✅ The "[WIP]" prefix is removed from the PR title
+          - ✅ All CodeRabbit code review comments are resolved (if you disagree with anything - reply to the bot with your reasoning so we can read through it). The bot will eventually approve the PR.
+
+          We do this to reduce the TOIL the core contributor team has to go through for each PR and to allow for speedy reviews and merges.
+
+          For more information, please see our [Contributing Guide](https://actualbudget.org/docs/contributing/).
+
+          ---
+
+          EOF
+          fi
+          cat >> "$FILE" <<EOF
+          ## Netlify preview builds
+
+          | Preview | Link | QR code |
+          | --- | --- | --- |
+          | **App (Demo)** | https://deploy-preview-${PR_NUMBER}.demo.actualbudget.org/ | ![App preview QR code](https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=8&data=https://deploy-preview-${PR_NUMBER}.demo.actualbudget.org/) |
+          | **Website** | https://deploy-preview-${PR_NUMBER}.www.actualbudget.org/ | ![Website preview QR code](https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=8&data=https://deploy-preview-${PR_NUMBER}.www.actualbudget.org/) |
+          | **Storybook** | https://deploy-preview-${PR_NUMBER}--actualbudget-storybook.netlify.app/ | ![Storybook preview QR code](https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=8&data=https://deploy-preview-${PR_NUMBER}--actualbudget-storybook.netlify.app/) |
+
+          Scan a QR code to open that preview on your phone. Links go live once Netlify
+          finishes deploying. There is no sync server on preview builds, so when asked
+          "Where's the server?" select "Don't use a server".
+          EOF
+
+      - name: Post comment
+        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ env.PR_NUMBER }}
+          header: pr-info
+          path: ${{ runner.temp }}/comment.md
