@@ -75,7 +75,7 @@ async function getPayeeRuleCounts() {
   const payeeCounts: Record<PayeeEntity['id'], number> = {};
 
   const completedScheduleRules = await db.all<Pick<db.DbSchedule, 'rule'>>(
-    'SELECT rule FROM schedules WHERE completed = 1',
+    'SELECT rule FROM schedules WHERE completed = 1 AND tombstone IS NOT 1',
   );
   const completedRuleIds = new Set(completedScheduleRules.map(s => s.rule));
 
