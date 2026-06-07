@@ -268,7 +268,7 @@ export function calculateSpendingReportTimeRange({
   mode?: 'budget' | 'average' | 'single-month';
 }): [string, string] {
   if (['budget', 'average'].includes(mode) && isLive) {
-    const month = compare ?? monthUtils.currentMonth();
+    const month = monthUtils.currentMonth();
     return [month, month];
   }
 

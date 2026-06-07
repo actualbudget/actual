@@ -24,26 +24,26 @@ describe('calculateTimeRange', () => {
 
 // In test mode, monthUtils.currentMonth() returns '2017-01'
 describe('calculateSpendingReportTimeRange', () => {
-  it('preserves the saved compare month for live average reports', () => {
+  it('ignores stale saved compare month for live average reports', () => {
     const [compare, compareTo] = calculateSpendingReportTimeRange({
       compare: '2016-12',
       isLive: true,
       mode: 'average',
     });
 
-    expect(compare).toBe('2016-12');
-    expect(compareTo).toBe('2016-12');
+    expect(compare).toBe('2017-01');
+    expect(compareTo).toBe('2017-01');
   });
 
-  it('preserves the saved compare month for live budget reports', () => {
+  it('ignores stale saved compare month for live budget reports', () => {
     const [compare, compareTo] = calculateSpendingReportTimeRange({
       compare: '2016-12',
       isLive: true,
       mode: 'budget',
     });
 
-    expect(compare).toBe('2016-12');
-    expect(compareTo).toBe('2016-12');
+    expect(compare).toBe('2017-01');
+    expect(compareTo).toBe('2017-01');
   });
 
   it('preserves the saved compare months for live single month reports', () => {
