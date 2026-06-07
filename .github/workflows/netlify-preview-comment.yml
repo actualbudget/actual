@@ -40,11 +40,12 @@ jobs:
             <!-- netlify-preview -->
             ## Netlify preview builds
 
-            | Preview | Link |
-            | --- | --- |
-            | App (Demo) | https://deploy-preview-${{ github.event.pull_request.number }}.demo.actualbudget.org/ |
-            | Website | https://deploy-preview-${{ github.event.pull_request.number }}.www.actualbudget.org/ |
-            | Storybook | https://deploy-preview-${{ github.event.pull_request.number }}--actualbudget-storybook.netlify.app/ |
+            | Preview | Link | QR code |
+            | --- | --- | --- |
+            | **App (Demo)** | https://deploy-preview-${{ github.event.pull_request.number }}.demo.actualbudget.org/ | ![App preview QR code](https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=8&data=https://deploy-preview-${{ github.event.pull_request.number }}.demo.actualbudget.org/) |
+            | **Website** | https://deploy-preview-${{ github.event.pull_request.number }}.www.actualbudget.org/ | ![Website preview QR code](https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=8&data=https://deploy-preview-${{ github.event.pull_request.number }}.www.actualbudget.org/) |
+            | **Storybook** | https://deploy-preview-${{ github.event.pull_request.number }}--actualbudget-storybook.netlify.app/ | ![Storybook preview QR code](https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=8&data=https://deploy-preview-${{ github.event.pull_request.number }}--actualbudget-storybook.netlify.app/) |
 
-            Links go live once Netlify finishes deploying. There is no sync server on
-            preview builds, so when asked "Where's the server?" select "Don't use a server".
+            Scan a QR code to open that preview on your phone. Links go live once Netlify
+            finishes deploying. There is no sync server on preview builds, so when asked
+            "Where's the server?" select "Don't use a server".
