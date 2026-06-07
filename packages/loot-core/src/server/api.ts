@@ -1057,7 +1057,6 @@ handlers['api/get-id-by-name'] = async function ({ type, name }) {
 };
 
 handlers['api/get-server-version'] = async function () {
-  checkFileOpen();
   return handlers['get-server-version']();
 };
 
