@@ -26,8 +26,19 @@ const contextMenuSlice = createSlice({
     addItems(state, action: PayloadAction<Falsy<ContextMenuItem>[]>) {
       for (const item of action.payload) {
         if (!item) continue;
-        if (typeof item === 'symbol') state.items.push(item);
-        else if (!item.hidden) state.items.push(item);
+        // always add menu lines
+        if (typeof item === 'symbol') {
+          state.items.push(item);
+          continue;
+        }
+
+        // only add other items if the provided name is unique
+        const isAlreadyPresent = state.items.filter(
+          i => typeof i === 'object' && i.name === item.name,
+        );
+        if (!item.hidden && !isAlreadyPresent) {
+          state.items.push(item);
+        }
       }
     },
     openContextMenu(
