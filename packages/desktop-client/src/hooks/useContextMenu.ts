@@ -1,36 +1,52 @@
-import { useState } from 'react';
-import type { MouseEventHandler } from 'react';
+import { useCallback, useRef } from 'react';
+import type { RefObject } from 'react';
 
-export function useContextMenu() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [asContextMenu, setAsContextMenu] = useState(false);
-  const [position, setPosition] = useState({ crossOffset: 0, offset: 0 });
+import type { Falsy } from '@actual-app/core/types/util';
 
-  const handleContextMenu: MouseEventHandler<HTMLElement> = e => {
-    e.preventDefault();
-    setAsContextMenu(true);
+import { addItems } from '#contextmenu/contextMenuSlice';
+import type { ContextMenuItem } from '#contextmenu/types.d';
+import { useRefEventListener } from '#hooks/useRefEventListener';
+import { useDispatch, useSelector } from '#redux';
 
-    const rect = e.currentTarget.getBoundingClientRect();
-    setPosition({
-      crossOffset: e.clientX - rect.left,
-      offset: e.clientY - rect.bottom,
-    });
-    setMenuOpen(true);
-  };
+type UseContextMenuProps = {
+  triggerRef: RefObject<HTMLElement | null>;
+  enabled?: boolean;
+  items: Falsy<ContextMenuItem>[];
+};
 
-  const resetPosition = (crossOffset = 0, offset = 0) => {
-    setPosition({ crossOffset, offset });
-  };
+export function useContextMenu({
+  triggerRef,
+  enabled = true,
+  items,
+}: UseContextMenuProps) {
+  const dispatch = useDispatch();
 
-  return {
-    menuOpen,
-    setMenuOpen: (open: boolean) => {
-      setMenuOpen(open);
-      setAsContextMenu(false);
-    },
-    position,
-    handleContextMenu,
-    resetPosition,
-    asContextMenu,
-  };
+  // Store actions in a ref to avoid re-binding the event listener on every render
+  const actionsRef = useRef(items);
+  actionsRef.current = items;
+
+  useRefEventListener(triggerRef, 'contextmenu', () => {
+    if (enabled) {
+      dispatch(addItems(actionsRef.current));
+    }
+  });
+
+  const handleContextMenu = useCallback(() => {
+    if (!triggerRef.current || !enabled) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    triggerRef.current.dispatchEvent(
+      new MouseEvent('contextmenu', {
+        clientX: rect.x,
+        clientY: rect.y + rect.height,
+        bubbles: true,
+      }),
+    );
+  }, [triggerRef, enabled]);
+
+  return { handleContextMenu };
+}
+
+export function useContextMenuState() {
+  const isOpen = useSelector(state => state.contextMenu.isOpen);
+  return { isOpen };
 }

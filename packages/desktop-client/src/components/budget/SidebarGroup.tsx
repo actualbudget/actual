@@ -17,9 +17,9 @@ import type {
 } from '@actual-app/core/types/models';
 import { css, cx } from '@emotion/css';
 
-import { useContextMenuAction } from '#components/ContextMenu';
 import { NotesButton } from '#components/NotesButton';
 import { InputCell } from '#components/table';
+import { useContextMenu } from '#hooks/useContextMenu';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 
@@ -70,45 +70,47 @@ export function SidebarGroup({
   const canSortCategories =
     !!onSortCategories && (group.categories?.length ?? 0) > 1;
   const triggerRef = useRef(null);
-  const { handleContextMenu } = useContextMenuAction(
+  const { handleContextMenu } = useContextMenu({
     triggerRef,
-    onEdit && {
-      name: 'rename',
-      text: t('Rename'),
-      onClick: () => onEdit(group.id),
-    },
-    onSave && {
-      name: 'toggle-visibility',
-      text: group.hidden ? t('Show') : t('Hide'),
-      onClick: () => onSave({ ...group, hidden: !group.hidden }),
-      hidden: group.is_income,
-    },
-    onDelete && {
-      name: 'delete',
-      text: t('Delete'),
-      onClick: () => onDelete(group.id),
-    },
-    canSortCategories && Menu.line,
-    canSortCategories && {
-      name: 'sort-asc',
-      text: t('Sort A to Z'),
-      onClick: () => onSortCategories(group.id, 'asc'),
-    },
-    canSortCategories && {
-      name: 'sort-desc',
-      text: t('Sort Z to A'),
-      onClick: () => onSortCategories(group.id, 'desc'),
-    },
-    isGoalTemplatesEnabled &&
-      onApplyBudgetTemplatesInGroup && {
-        name: 'apply-multiple-category-template',
-        text: t('Overwrite with templates'),
-        onClick: () =>
-          onApplyBudgetTemplatesInGroup(
-            group.categories.filter(c => !c.hidden).map(c => c.id),
-          ),
+    items: [
+      onEdit && {
+        name: 'rename',
+        text: t('Rename'),
+        onClick: () => onEdit(group.id),
       },
-  );
+      onSave && {
+        name: 'toggle-visibility',
+        text: group.hidden ? t('Show') : t('Hide'),
+        onClick: () => onSave({ ...group, hidden: !group.hidden }),
+        hidden: group.is_income,
+      },
+      onDelete && {
+        name: 'delete',
+        text: t('Delete'),
+        onClick: () => onDelete(group.id),
+      },
+      canSortCategories && Menu.line,
+      canSortCategories && {
+        name: 'sort-asc',
+        text: t('Sort A to Z'),
+        onClick: () => onSortCategories(group.id, 'asc'),
+      },
+      canSortCategories && {
+        name: 'sort-desc',
+        text: t('Sort Z to A'),
+        onClick: () => onSortCategories(group.id, 'desc'),
+      },
+      isGoalTemplatesEnabled &&
+        onApplyBudgetTemplatesInGroup && {
+          name: 'apply-multiple-category-template',
+          text: t('Overwrite with templates'),
+          onClick: () =>
+            onApplyBudgetTemplatesInGroup(
+              group.categories.filter(c => !c.hidden).map(c => c.id),
+            ),
+        },
+    ],
+  });
 
   const displayed = (
     <View

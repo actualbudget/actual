@@ -12,9 +12,9 @@ import { css } from '@emotion/css';
 import rehypeExternalLinks from 'rehype-external-links';
 import remarkGfm from 'remark-gfm';
 
-import { useContextMenuAction } from '#components/ContextMenu';
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from '#components/reports/constants';
 import { ReportCard } from '#components/reports/ReportCard';
+import { useContextMenu } from '#hooks/useContextMenu';
 import {
   markdownBaseStyles,
   remarkBreaks,
@@ -52,47 +52,49 @@ export function MarkdownCard({
 
   const contextMenuTriggerRef = useRef(null);
 
-  useContextMenuAction(
-    contextMenuTriggerRef,
-    {
-      type: Menu.label,
-      name: t('Text position:'),
-      text: '',
-    },
-    {
-      name: 'text-left',
-      text: t('Left'),
-      onClick: () =>
-        onMetaChange({
-          ...meta,
-          text_align: 'left',
-        }),
-    },
-    {
-      name: 'text-center',
-      text: t('Center'),
-      onClick: () =>
-        onMetaChange({
-          ...meta,
-          text_align: 'center',
-        }),
-    },
-    {
-      name: 'text-right',
-      text: t('Right'),
-      onClick: () =>
-        onMetaChange({
-          ...meta,
-          text_align: 'right',
-        }),
-    },
-    Menu.line,
-    {
-      name: 'edit',
-      text: t('Edit content'),
-      onClick: () => setIsVisibleTextArea(true),
-    },
-  );
+  useContextMenu({
+    triggerRef: contextMenuTriggerRef,
+    items: [
+      {
+        type: Menu.label,
+        name: t('Text position:'),
+        text: '',
+      },
+      {
+        name: 'text-left',
+        text: t('Left'),
+        onClick: () =>
+          onMetaChange({
+            ...meta,
+            text_align: 'left',
+          }),
+      },
+      {
+        name: 'text-center',
+        text: t('Center'),
+        onClick: () =>
+          onMetaChange({
+            ...meta,
+            text_align: 'center',
+          }),
+      },
+      {
+        name: 'text-right',
+        text: t('Right'),
+        onClick: () =>
+          onMetaChange({
+            ...meta,
+            text_align: 'right',
+          }),
+      },
+      Menu.line,
+      {
+        name: 'edit',
+        text: t('Edit content'),
+        onClick: () => setIsVisibleTextArea(true),
+      },
+    ],
+  });
 
   return (
     <ReportCard

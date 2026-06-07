@@ -13,7 +13,7 @@ import { isElectron } from '@actual-app/core/shared/environment';
 import * as Platform from '@actual-app/core/shared/platform';
 
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
-import { useContextMenuAction } from '#components/ContextMenu';
+import { useContextMenu } from '#hooks/useContextMenu';
 import { useMetadataPref } from '#hooks/useMetadataPref';
 import { useNavigate } from '#hooks/useNavigate';
 import { pushModal } from '#modals/modalsSlice';
@@ -60,30 +60,32 @@ function EditableBudgetName() {
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const { handleContextMenu } = useContextMenuAction(
+  const { handleContextMenu } = useContextMenu({
     triggerRef,
-    {
-      name: 'rename',
-      text: t('Rename budget'),
-      onClick: () => setEditing(true),
-    },
-    {
-      name: 'settings',
-      text: t('Settings'),
-      onClick: () => void navigate('/settings'),
-    },
-    isElectron() && {
-      name: 'loadBackup',
-      text: t('Load Backup…'),
-      onClick: () =>
-        dispatch(pushModal({ modal: { name: 'load-backup', options: {} } })),
-    },
-    {
-      name: 'close',
-      text: t('Switch file'),
-      onClick: () => void dispatch(closeBudget()),
-    },
-  );
+    items: [
+      {
+        name: 'rename',
+        text: t('Rename budget'),
+        onClick: () => setEditing(true),
+      },
+      {
+        name: 'settings',
+        text: t('Settings'),
+        onClick: () => void navigate('/settings'),
+      },
+      isElectron() && {
+        name: 'loadBackup',
+        text: t('Load Backup…'),
+        onClick: () =>
+          dispatch(pushModal({ modal: { name: 'load-backup', options: {} } })),
+      },
+      {
+        name: 'close',
+        text: t('Switch file'),
+        onClick: () => void dispatch(closeBudget()),
+      },
+    ],
+  });
 
   if (editing) {
     return (

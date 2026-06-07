@@ -10,8 +10,8 @@ import {
 import { isPreviewId } from '@actual-app/core/shared/transactions';
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
-import { useContextMenuAction } from '#components/ContextMenu';
-import type { ContextMenuAction } from '#components/ContextMenu';
+import type { ContextMenuItem } from '#contextmenu/types.d';
+import { useContextMenu } from '#hooks/useContextMenu';
 import { useSchedules } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';
 import { pushModal } from '#modals/modalsSlice';
@@ -151,7 +151,7 @@ export function useTransactionRowContextActions({
     }
   }
 
-  const scheduleActions: ContextMenuAction[] = [
+  const scheduleActions: ContextMenuItem[] = [
     {
       name: 'view-schedule',
       text: t('View Schedule'),
@@ -177,7 +177,7 @@ export function useTransactionRowContextActions({
     },
   ];
 
-  const transactionActions: ContextMenuAction[] = [
+  const transactionActions: ContextMenuItem[] = [
     {
       name: 'duplicate',
       text: t('Duplicate'),
@@ -223,8 +223,8 @@ export function useTransactionRowContextActions({
     },
   ];
 
-  useContextMenuAction(
-    rowRef,
-    ...(types.trans ? transactionActions : scheduleActions),
-  );
+  useContextMenu({
+    triggerRef: rowRef,
+    items: types.trans ? transactionActions : scheduleActions,
+  });
 }

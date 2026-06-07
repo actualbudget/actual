@@ -11,8 +11,8 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { RuleEntity } from '@actual-app/core/types/models';
 
-import { useContextMenuAction } from '#components/ContextMenu';
 import { Cell, Field, Row, SelectCell } from '#components/table';
+import { useContextMenu } from '#hooks/useContextMenu';
 import { useSelectedDispatch } from '#hooks/useSelected';
 import {
   friendlyOp,
@@ -54,20 +54,22 @@ export const RuleRow = memo(
 
     const triggerRef = useRef(null);
 
-    useContextMenuAction(
+    useContextMenu({
       triggerRef,
-      onEditRule && {
-        name: 'edit',
-        text: t('Edit'),
-        onClick: () => onEditRule(rule),
-      },
-      onDeleteRule &&
-        !hasSchedule && {
-          name: 'delete',
-          text: t('Delete'),
-          onClick: () => onDeleteRule(rule),
+      items: [
+        onEditRule && {
+          name: 'edit',
+          text: t('Edit'),
+          onClick: () => onEditRule(rule),
         },
-    );
+        onDeleteRule &&
+          !hasSchedule && {
+            name: 'delete',
+            text: t('Delete'),
+            onClick: () => onDeleteRule(rule),
+          },
+      ],
+    });
 
     return (
       <Row

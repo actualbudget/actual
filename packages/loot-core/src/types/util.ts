@@ -24,3 +24,5 @@ export type AtLeastOne<T extends Record<string, unknown>> =
       ? Pick<T, K & keyof T> & Partial<T>
       : never
     : never;
+
+export type Falsy<T> = T | undefined | null | false | '' | 0 | -0 | 0n;

@@ -23,20 +23,17 @@ import { css, cx } from '@emotion/css';
 import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
 import { BalanceHistoryGraph } from '#components/accounts/BalanceHistoryGraph';
 import { Link } from '#components/common/Link';
-import {
-  useConditionalContextMenuAction,
-  useContextMenuState,
-} from '#components/ContextMenu';
 import { Notes } from '#components/Notes';
 import { DropHighlight, useDraggable, useDroppable } from '#components/sort';
 import type { OnDragChangeCallback, OnDropCallback } from '#components/sort';
 import { CellValue } from '#components/spreadsheet/CellValue';
+import { useContextMenu } from '#hooks/useContextMenu';
 import { useDragRef } from '#hooks/useDragRef';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useNotes } from '#hooks/useNotes';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { openAccountCloseModal } from '#modals/modalsSlice';
-import { useDispatch } from '#redux';
+import { useDispatch, useSelector } from '#redux';
 import type { Binding, SheetFields } from '#spreadsheet';
 
 export const accountNameStyle: CSSProperties = {
@@ -131,24 +128,35 @@ export function Account<FieldName extends SheetFields<'account'>>({
 
   const balanceCell = <CellValue binding={query} type="financial" />;
 
-  const { isOpen: isContextMenuOpen } = useContextMenuState();
-  useConditionalContextMenuAction(
-    triggerRef,
-    account && needsTooltip,
-    { name: 'rename', text: t('Rename'), onClick: () => setIsEditing(true) },
-    account?.closed
-      ? {
-          name: 'reopen',
-          text: t('Reopen'),
-          onClick: () => reopenAccount.mutate({ id: account.id }),
-        }
-      : {
-          name: 'close',
-          text: t('Close'),
-          onClick: () =>
-            dispatch(openAccountCloseModal({ accountId: account.id })),
-        },
+  const isContextMenuOpen = useSelector(state =>
+    state.contextMenu.items.some(
+      i =>
+        typeof i === 'object' && 'name' in i && i.name.startsWith('account-'),
+    ),
   );
+  useContextMenu({
+    triggerRef,
+    enabled: account && needsTooltip,
+    items: [
+      {
+        name: 'account-rename',
+        text: t('Rename'),
+        onClick: () => setIsEditing(true),
+      },
+      account?.closed
+        ? {
+            name: 'account-reopen',
+            text: t('Reopen'),
+            onClick: () => reopenAccount.mutate({ id: account.id }),
+          }
+        : {
+            name: 'account-close',
+            text: t('Close'),
+            onClick: () =>
+              dispatch(openAccountCloseModal({ accountId: account.id })),
+          },
+    ],
+  });
 
   const accountRow = (
     <View innerRef={dropRef} style={{ flexShrink: 0, ...outerStyle }}>

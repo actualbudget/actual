@@ -1,5 +1,5 @@
-import React, { memo, useRef } from 'react';
-import type { ComponentProps, CSSProperties } from 'react';
+import React, { memo, useRef, useState } from 'react';
+import type { ComponentProps, CSSProperties, MouseEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -23,7 +23,6 @@ import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { Field, Row, SheetCell } from '#components/table';
 import type { SheetCellProps } from '#components/table';
 import { useCategoryScheduleGoalTemplateIndicator } from '#hooks/useCategoryScheduleGoalTemplateIndicator';
-import { useContextMenu } from '#hooks/useContextMenu';
 import { useFormat } from '#hooks/useFormat';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSheetName } from '#hooks/useSheetName';
@@ -206,20 +205,41 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
 
   const budgetMenuTriggerRef = useRef(null);
   const balanceMenuTriggerRef = useRef(null);
-  const {
-    setMenuOpen: setBudgetMenuOpen,
-    menuOpen: budgetMenuOpen,
-    handleContextMenu: handleBudgetContextMenu,
-    resetPosition: resetBudgetPosition,
-    position: budgetPosition,
-  } = useContextMenu();
-  const {
-    setMenuOpen: setBalanceMenuOpen,
-    menuOpen: balanceMenuOpen,
-    handleContextMenu: handleBalanceContextMenu,
-    resetPosition: resetBalancePosition,
-    position: balancePosition,
-  } = useContextMenu();
+  const [budgetMenuOpen, setBudgetMenuOpen] = useState(false);
+  const [budgetPosition, setBudgetPosition] = useState({
+    crossOffset: 0,
+    offset: 0,
+  });
+  const resetBudgetPosition = (crossOffset = 0, offset = 0) =>
+    setBudgetPosition({ crossOffset, offset });
+
+  const handleBudgetContextMenu = (e: MouseEvent) => {
+    e.preventDefault();
+    const rect = e.currentTarget.getBoundingClientRect();
+    setBudgetPosition({
+      crossOffset: e.clientX - rect.left,
+      offset: e.clientY - rect.bottom,
+    });
+    setBudgetMenuOpen(true);
+  };
+
+  const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
+  const [balancePosition, setBalancePosition] = useState({
+    crossOffset: 0,
+    offset: 0,
+  });
+  const resetBalancePosition = (crossOffset = 0, offset = 0) =>
+    setBalancePosition({ crossOffset, offset });
+
+  const handleBalanceContextMenu = (e: MouseEvent) => {
+    e.preventDefault();
+    const rect = e.currentTarget.getBoundingClientRect();
+    setBalancePosition({
+      crossOffset: e.clientX - rect.left,
+      offset: e.clientY - rect.bottom,
+    });
+    setBalanceMenuOpen(true);
+  };
 
   const onMenuAction = (...args: Parameters<typeof onBudgetAction>) => {
     onBudgetAction(...args);
@@ -566,13 +586,23 @@ export function IncomeCategoryMonth({
   onBudgetAction,
 }: CategoryMonthProps) {
   const incomeMenuTriggerRef = useRef(null);
-  const {
-    setMenuOpen: setIncomeMenuOpen,
-    menuOpen: incomeMenuOpen,
-    handleContextMenu: handleIncomeContextMenu,
-    resetPosition: resetIncomePosition,
-    position: incomePosition,
-  } = useContextMenu();
+  const [incomeMenuOpen, setIncomeMenuOpen] = useState(false);
+  const [incomePosition, setIncomePosition] = useState({
+    crossOffset: 0,
+    offset: 0,
+  });
+  const resetIncomePosition = (crossOffset = 0, offset = 0) =>
+    setIncomePosition({ crossOffset, offset });
+
+  const handleIncomeContextMenu = (e: MouseEvent) => {
+    e.preventDefault();
+    const rect = e.currentTarget.getBoundingClientRect();
+    setIncomePosition({
+      crossOffset: e.clientX - rect.left,
+      offset: e.clientY - rect.bottom,
+    });
+    setIncomeMenuOpen(true);
+  };
 
   return (
     <View style={{ flex: 1 }}>

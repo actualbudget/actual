@@ -6,7 +6,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import type { TagEntity } from '@actual-app/core/types/models';
 
-import { useContextMenuAction } from '#components/ContextMenu';
 import {
   Cell,
   CellButton,
@@ -14,6 +13,7 @@ import {
   Row,
   SelectCell,
 } from '#components/table';
+import { useContextMenu } from '#hooks/useContextMenu';
 import { useNavigate } from '#hooks/useNavigate';
 import { useProperFocus } from '#hooks/useProperFocus';
 import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
@@ -77,25 +77,27 @@ export const TagRow = memo(
 
     const contextActionIds = selected ? Array.from(selectedIds) : [tag.id];
 
-    useContextMenuAction(
+    useContextMenu({
       triggerRef,
-      {
-        name: 'delete',
-        text: t('Delete'),
-        onClick: () => deleteTags({ ids: contextActionIds }),
-      },
-      tag.hidden
-        ? {
-            name: 'unhide',
-            text: t('Unhide'),
-            onClick: () => unhideTags({ ids: contextActionIds }),
-          }
-        : {
-            name: 'hide',
-            text: t('Hide'),
-            onClick: () => hideTags({ ids: contextActionIds }),
-          },
-    );
+      items: [
+        {
+          name: 'delete',
+          text: t('Delete'),
+          onClick: () => deleteTags({ ids: contextActionIds }),
+        },
+        tag.hidden
+          ? {
+              name: 'unhide',
+              text: t('Unhide'),
+              onClick: () => unhideTags({ ids: contextActionIds }),
+            }
+          : {
+              name: 'hide',
+              text: t('Hide'),
+              onClick: () => hideTags({ ids: contextActionIds }),
+            },
+      ],
+    });
 
     return (
       <Row

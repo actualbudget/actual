@@ -8,7 +8,7 @@ import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { useContextMenuAction } from '#components/ContextMenu';
+import { useContextMenu } from '#hooks/useContextMenu';
 import { useIsInViewport } from '#hooks/useIsInViewport';
 import { useNavigate } from '#hooks/useNavigate';
 import { pushModal } from '#modals/modalsSlice';
@@ -153,43 +153,45 @@ function Layout({
   const removeDashboardWidgetMutation = useRemoveDashboardWidgetMutation();
   const copyDashboardWidgetMutation = useCopyDashboardWidgetMutation();
 
-  useContextMenuAction(
-    viewRef,
-    onRename && {
-      name: 'rename',
-      text: t('Rename'),
-      onClick: onRename,
-      order: 1,
-    },
-    {
-      name: 'remove',
-      text: t('Remove'),
-      onClick: () => removeDashboardWidgetMutation.mutate({ id: widgetId }),
-      order: 1,
-    },
-    {
-      name: 'copy',
-      text: t('Copy to dashboard'),
-      onClick: () => {
-        dispatch(
-          pushModal({
-            modal: {
-              name: 'copy-widget-to-dashboard',
-              options: {
-                onSelect: targetDashboardId => {
-                  copyDashboardWidgetMutation.mutate({
-                    id: widgetId,
-                    targetDashboardPageId: targetDashboardId,
-                  });
+  useContextMenu({
+    triggerRef: viewRef,
+    items: [
+      onRename && {
+        name: 'rename',
+        text: t('Rename'),
+        onClick: onRename,
+        order: 1,
+      },
+      {
+        name: 'remove',
+        text: t('Remove'),
+        onClick: () => removeDashboardWidgetMutation.mutate({ id: widgetId }),
+        order: 1,
+      },
+      {
+        name: 'copy',
+        text: t('Copy to dashboard'),
+        onClick: () => {
+          dispatch(
+            pushModal({
+              modal: {
+                name: 'copy-widget-to-dashboard',
+                options: {
+                  onSelect: targetDashboardId => {
+                    copyDashboardWidgetMutation.mutate({
+                      id: widgetId,
+                      targetDashboardPageId: targetDashboardId,
+                    });
+                  },
                 },
               },
-            },
-          }),
-        );
+            }),
+          );
+        },
+        order: 1,
       },
-      order: 1,
-    },
-  );
+    ],
+  });
 
   return (
     <View
