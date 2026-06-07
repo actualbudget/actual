@@ -78,13 +78,14 @@ const hslToRgb = (
   s: number,
   l: number,
 ): { r: number; g: number; b: number } => {
+  const normalizedHue = ((h % 360) + 360) % 360;
   if (s === 0) {
     const v = Math.round(l * 255);
     return { r: v, g: v, b: v };
   }
   const hue2rgb = (p: number, q: number, t: number) => {
-    if (t < 0) t += 1;
-    if (t > 1) t -= 1;
+    while (t < 0) t += 1;
+    while (t > 1) t -= 1;
     if (t < 1 / 6) return p + (q - p) * 6 * t;
     if (t < 0.5) return q;
     if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
@@ -93,16 +94,16 @@ const hslToRgb = (
   const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
   const p = 2 * l - q;
   return {
-    r: Math.round(hue2rgb(p, q, h / 360 + 1 / 3) * 255),
-    g: Math.round(hue2rgb(p, q, h / 360) * 255),
-    b: Math.round(hue2rgb(p, q, h / 360 - 1 / 3) * 255),
+    r: Math.round(hue2rgb(p, q, normalizedHue / 360 + 1 / 3) * 255),
+    g: Math.round(hue2rgb(p, q, normalizedHue / 360) * 255),
+    b: Math.round(hue2rgb(p, q, normalizedHue / 360 - 1 / 3) * 255),
   };
 };
 
 const hexToRgb = (color: string): { r: number; g: number; b: number } => {
   // Support hsl(h, s%, l%) and hsl(h s% l%) (with or without commas)
   const hslMatch = color.match(
-    /^hsla?\(\s*(\d+(?:\.\d+)?)\s*[,\s]\s*(\d+(?:\.\d+)?)%\s*[,\s]\s*(\d+(?:\.\d+)?)%/i,
+    /^hsla?\(\s*([+-]?\d+(?:\.\d+)?)\s*[,\s]\s*(\d+(?:\.\d+)?)%\s*[,\s]\s*(\d+(?:\.\d+)?)%/i,
   );
   if (hslMatch) {
     return hslToRgb(
