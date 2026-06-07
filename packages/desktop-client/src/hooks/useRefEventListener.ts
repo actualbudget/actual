@@ -16,7 +16,6 @@ export function useRefEventListener<
       ref instanceof Document || ref instanceof Window ? ref : ref.current;
     if (!el) return;
 
-    console.log('mounting', el);
     const callbackRef = callback as EventListener; // closure?
     el.addEventListener(event, callbackRef);
     return () => {
