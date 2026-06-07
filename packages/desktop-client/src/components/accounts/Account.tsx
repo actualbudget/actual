@@ -655,9 +655,7 @@ class AccountInternal extends PureComponent<
     if (this.state.sort === null) {
       return true;
     } else {
-      return (
-        this.state.sort.field === 'date' && this.state.sort.ascDesc === 'desc'
-      );
+      return this.state.sort.field === 'date';
     }
   };
 
