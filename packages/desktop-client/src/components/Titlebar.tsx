@@ -74,7 +74,7 @@ function PrivacyButton({ style }: PrivacyButtonProps) {
     useSyncedPref('isPrivacyEnabled');
   const isPrivacyEnabled = String(isPrivacyEnabledPref) === 'true';
 
-  const privacyIconStyle = { width: 15, height: 15 };
+  const privacyIconStyle = { color: theme.pageText, width: 15, height: 15 };
 
   useHotkeys(
     'shift+ctrl+p, shift+cmd+p, shift+meta+p',
