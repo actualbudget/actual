@@ -135,7 +135,7 @@ app.post(
     try {
       const akahu = new AkahuClient({ appToken });
 
-      const account = await akahu.accounts.get(userToken, accountId);
+      const account = await getRefreshedAccount(akahu, userToken, accountId);
       if (!account) {
         return res.send({
           status: 'error',
@@ -152,24 +152,6 @@ app.post(
             error: 'Account balance unavailable',
           },
         });
-      }
-
-      if (shouldRefreshAccount(account.refreshed?.transactions)) {
-        await akahu.accounts.refresh(userToken, accountId);
-
-        // wait for the refresh to complete
-        for (let i = 0; i < 5; i++) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          const refreshedAccount = await akahu.accounts.get(
-            userToken,
-            accountId,
-          );
-          if (
-            !shouldRefreshAccount(refreshedAccount?.refreshed?.transactions)
-          ) {
-            break;
-          }
-        }
       }
 
       const now = new Date();
@@ -282,6 +264,34 @@ app.post(
     }
   }),
 );
+
+async function getRefreshedAccount(
+  akahu: AkahuClient,
+  userToken: string,
+  accountId: string,
+): Promise<Account | null> {
+  let account = await akahu.accounts.get(userToken, accountId);
+  if (!account) {
+    return null;
+  } else if (!shouldRefreshAccount(account.refreshed?.transactions)) {
+    return account;
+  }
+
+  await akahu.accounts.refresh(userToken, accountId);
+
+  // wait for the refresh to complete
+  for (let i = 0; i < 5; i++) {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    account = await akahu.accounts.get(userToken, accountId);
+    if (!account) {
+      return null;
+    } else if (!shouldRefreshAccount(account.refreshed?.transactions)) {
+      break;
+    }
+  }
+
+  return account;
+}
 
 function isEnriched(
   trans:
