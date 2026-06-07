@@ -8,6 +8,7 @@ export function useSimpleFinStatus() {
   const [configuredSimpleFin, setConfiguredSimpleFin] = useState<
     boolean | null
   >(null);
+  const [simpleFinBlocked, setSimpleFinBlocked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const status = useSyncServerStatus();
 
@@ -18,6 +19,7 @@ export function useSimpleFinStatus() {
       const results = await send('simplefin-status');
 
       setConfiguredSimpleFin(results.configured || false);
+      setSimpleFinBlocked(results.cloudflareBlocked || false);
       setIsLoading(false);
     }
 
@@ -28,6 +30,7 @@ export function useSimpleFinStatus() {
 
   return {
     configuredSimpleFin,
+    simpleFinBlocked,
     isLoading,
   };
 }

@@ -119,7 +119,7 @@ export function useBuiltInBankSyncProviders({
   const enableBankingEnabled = useFeatureFlag('enableBanking');
   const akahuEnabled = useFeatureFlag('akahuBankSync');
   const { configuredGoCardless } = useGoCardlessStatus();
-  const { configuredSimpleFin } = useSimpleFinStatus();
+  const { configuredSimpleFin, simpleFinBlocked } = useSimpleFinStatus();
   const { configuredPluggyAi } = usePluggyAiStatus();
   const { configuredAkahu } = useAkahuStatus(akahuEnabled);
   const { configuredEnableBanking, isLoading: isEnableBankingLoading } =
@@ -361,6 +361,21 @@ export function useBuiltInBankSyncProviders({
   ]);
 
   const onConnectSimpleFin = useCallback(async () => {
+    if (simpleFinBlocked) {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            title: t('SimpleFIN is temporarily unavailable'),
+            message: t(
+              'SimpleFIN is being rate-limited by Cloudflare. Please wait a few minutes and try again.',
+            ),
+          },
+        }),
+      );
+      return;
+    }
+
     if (!isSimpleFinSetupComplete) {
       onSimpleFinInit();
       return;
@@ -414,6 +429,8 @@ export function useBuiltInBankSyncProviders({
     isSimpleFinSetupComplete,
     loadingSimpleFinAccounts,
     onSimpleFinInit,
+    simpleFinBlocked,
+    t,
     upgradingAccountId,
   ]);
 
