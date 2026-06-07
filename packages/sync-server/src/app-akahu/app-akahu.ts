@@ -154,16 +154,22 @@ app.post(
         });
       }
 
-      if (shouldRefreshAkahuTransactions(account.refreshed?.transactions)) {
+      if (shouldRefreshAccount(account.refreshed?.transactions)) {
         await akahu.accounts.refresh(userToken, accountId);
 
         // wait for the refresh to complete
         for (let i = 0; i < 5; i++) {
           await new Promise(resolve => setTimeout(resolve, 1000));
           account = await akahu.accounts.get(userToken, accountId);
-          if (
-            !shouldRefreshAkahuTransactions(account.refreshed?.transactions)
-          ) {
+          if (!account) {
+            return res.send({
+              status: 'error',
+              data: {
+                error: 'Account not found',
+              },
+            });
+          }
+          if (!shouldRefreshAccount(account.refreshed?.transactions)) {
             break;
           }
         }
@@ -357,7 +363,7 @@ function processTransaction(
 
 const AKAHU_TRANSACTION_REFRESH_INTERVAL_MS = 30 * 60 * 1000;
 
-function shouldRefreshAkahuTransactions(refreshedAt?: string) {
+function shouldRefreshAccount(refreshedAt?: string) {
   if (!refreshedAt) {
     return false;
   }
