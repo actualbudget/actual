@@ -100,6 +100,7 @@ type AllTransactionsProps = {
   balances: Record<TransactionEntity['id'], IntegerAmount> | null;
   showBalances?: boolean | undefined;
   filtered?: boolean | undefined;
+  prependPreviews?: boolean;
   children: (
     transactions: TransactionEntity[],
     balances: Record<TransactionEntity['id'], IntegerAmount> | null,
@@ -112,6 +113,7 @@ function AllTransactions({
   balances,
   showBalances,
   filtered,
+  prependPreviews = true,
   children,
 }: AllTransactionsProps) {
   const accountId = account?.id;
@@ -145,7 +147,7 @@ function AllTransactions({
   }, [showBalances, balances, transactions]);
 
   const prependBalances = useMemo(() => {
-    if (!showBalances) {
+    if (!showBalances || !prependPreviews) {
       return null;
     }
 
@@ -156,15 +158,17 @@ function AllTransactions({
         runningBalance,
       ),
     );
-  }, [showBalances, previewTransactions, runningBalance]);
+  }, [showBalances, prependPreviews, previewTransactions, runningBalance]);
 
   const allTransactions = useMemo(() => {
-    // Don't prepend scheduled transactions if we are filtering
+    // Don't include scheduled transactions if we are filtering
     if (!filtered && previewTransactions.length > 0) {
-      return previewTransactions.concat(transactions);
+      return prependPreviews
+        ? previewTransactions.concat(transactions)
+        : transactions.concat(previewTransactions);
     }
     return transactions;
-  }, [filtered, previewTransactions, transactions]);
+  }, [filtered, prependPreviews, previewTransactions, transactions]);
 
   const allBalances = useMemo(() => {
     // Don't prepend scheduled transactions if we are filtering
@@ -1765,6 +1769,12 @@ class AccountInternal extends PureComponent<
         balances={balances}
         showBalances={showBalances}
         filtered={transactionsFiltered}
+        prependPreviews={
+          !(
+            this.state.sort?.field === 'date' &&
+            this.state.sort?.ascDesc === 'asc'
+          )
+        }
       >
         {(allTransactions, allBalances) => (
           <SelectedProviderWithItems
