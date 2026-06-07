@@ -1403,7 +1403,7 @@ const Transaction = memo(function Transaction({
               padding: 5,
             }}
             shouldFlip={false}
-            placement="bottom end"
+            placement="bottom start"
             UNSTABLE_portalContainer={listContainerRef.current}
           >
             {splitError}
