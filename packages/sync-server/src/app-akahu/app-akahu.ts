@@ -154,6 +154,10 @@ app.post(
         });
       }
 
+      if (shouldRefreshAkahuTransactions(account.refreshed?.transactions)) {
+        await akahu.accounts.refresh(userToken, accountId);
+      }
+
       const now = new Date();
       const endDate = new Date(
         now.getFullYear(),
@@ -338,4 +342,18 @@ function processTransaction(
     booked: true,
     transactionId: trans._id,
   };
+}
+
+const AKAHU_TRANSACTION_REFRESH_INTERVAL_MS = 30 * 60 * 1000;
+
+function shouldRefreshAkahuTransactions(refreshedAt?: string) {
+  if (!refreshedAt) {
+    return false;
+  }
+
+  const refreshedAtTime = Date.parse(refreshedAt);
+  return (
+    Number.isFinite(refreshedAtTime) &&
+    Date.now() - refreshedAtTime > AKAHU_TRANSACTION_REFRESH_INTERVAL_MS
+  );
 }
