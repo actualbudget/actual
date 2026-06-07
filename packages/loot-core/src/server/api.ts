@@ -1050,7 +1050,9 @@ handlers['api/get-id-by-name'] = async function ({ type, name }) {
   }
 
   const { data } = await aqlQuery(
-    q(type).filter({ name: name.replace(/\$/g, '\\$') }).select('*'),
+    q(type)
+      .filter({ name: name.replace(/\$/g, '\\$') })
+      .select('*'),
   );
 
   if (!data || data.length === 0) {
