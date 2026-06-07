@@ -136,7 +136,9 @@ export const PayeeTableRow = memo(
           name: 'favorite',
           text: payee.favorite ? t('Unfavorite') : t('Favorite'),
           onClick: () =>
-            selectedIds.forEach(id => onUpdate(id, 'favorite', !payee.favorite)),
+            selectedIds.forEach(id =>
+              onUpdate(id, 'favorite', !payee.favorite),
+            ),
           hidden: payee.transfer_acct != null,
         },
         {
