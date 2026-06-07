@@ -281,65 +281,67 @@ export async function createBudget(months) {
     envelopeBudget.createBudget(meta, categories, months);
   }
 
-  // Spend totals for every category/month, computed once via a single
-  // grouped query and used to seed the `sum-amount` cells so they don't each
-  // run their own query. Loaded lazily so warm loads (values already
-  // restored from cache) never touch the database here.
+  // Only months that don't already exist need to be created and seeded.
+  const monthsToCreate = months.filter(month => !meta.createdMonths.has(month));
+
+  // Spend totals for every category in the months being created, computed
+  // once via a single grouped query and used to seed the `sum-amount` cells so
+  // they don't each run their own query. Scoped to the uncached month span so
+  // extending the budget horizon doesn't rescan the entire transaction
+  // history, and loaded lazily so warm loads never touch the database here.
   let sumAmounts: Map<string, number> | null = null;
   const getSumAmounts = () => {
     if (!sumAmounts) {
       sumAmounts = getSumAmountsByMonth(
-        monthUtils.bounds(months[0]).start,
-        monthUtils.bounds(months[months.length - 1]).end,
+        monthUtils.bounds(monthsToCreate[0]).start,
+        monthUtils.bounds(monthsToCreate[monthsToCreate.length - 1]).end,
       );
     }
     return sumAmounts;
   };
   const seededCells: string[] = [];
 
-  months.forEach(month => {
-    if (!meta.createdMonths.has(month)) {
-      const prevMonth = monthUtils.prevMonth(month);
-      const { start, end } = monthUtils.bounds(month);
-      const sheetName = monthUtils.sheetForMonth(month);
-      const prevSheetName = monthUtils.sheetForMonth(prevMonth);
-      const dbMonth = parseInt(month.replace('-', ''));
+  monthsToCreate.forEach(month => {
+    const prevMonth = monthUtils.prevMonth(month);
+    const { start, end } = monthUtils.bounds(month);
+    const sheetName = monthUtils.sheetForMonth(month);
+    const prevSheetName = monthUtils.sheetForMonth(prevMonth);
+    const dbMonth = parseInt(month.replace('-', ''));
 
-      categories.forEach(cat => {
-        // Seed the spend total before creating the dynamic cell so the cell
-        // skips its per-category query. Only happens on a cold build, when
-        // the value hasn't been restored from cache.
-        const sumCell = `sum-amount-${cat.id}`;
-        if (sheet.get().getCellValueLoose(sheetName, sumCell) == null) {
-          const name = resolveName(sheetName, sumCell);
-          sheet
-            .get()
-            .load(name, getSumAmounts().get(`${dbMonth}-${cat.id}`) || 0);
-          seededCells.push(name);
-        }
-        createCategory(cat, sheetName, prevSheetName, start, end);
-      });
-      groups.forEach(group => {
-        if (budgetType === 'envelope') {
-          envelopeBudget.createCategoryGroup(group, sheetName);
-        } else {
-          trackingBudget.createCategoryGroup(group, sheetName);
-        }
-      });
-
-      if (budgetType === 'envelope') {
-        envelopeBudget.createSummary(
-          groups,
-          categories,
-          prevSheetName,
-          sheetName,
-        );
-      } else {
-        trackingBudget.createSummary(groups, sheetName);
+    categories.forEach(cat => {
+      // Seed the spend total before creating the dynamic cell so the cell
+      // skips its per-category query. Only happens on a cold build, when
+      // the value hasn't been restored from cache.
+      const sumCell = `sum-amount-${cat.id}`;
+      if (sheet.get().getCellValueLoose(sheetName, sumCell) == null) {
+        const name = resolveName(sheetName, sumCell);
+        sheet
+          .get()
+          .load(name, getSumAmounts().get(`${dbMonth}-${cat.id}`) || 0);
+        seededCells.push(name);
       }
+      createCategory(cat, sheetName, prevSheetName, start, end);
+    });
+    groups.forEach(group => {
+      if (budgetType === 'envelope') {
+        envelopeBudget.createCategoryGroup(group, sheetName);
+      } else {
+        trackingBudget.createCategoryGroup(group, sheetName);
+      }
+    });
 
-      meta.createdMonths.add(month);
+    if (budgetType === 'envelope') {
+      envelopeBudget.createSummary(
+        groups,
+        categories,
+        prevSheetName,
+        sheetName,
+      );
+    } else {
+      trackingBudget.createSummary(groups, sheetName);
     }
+
+    meta.createdMonths.add(month);
   });
 
   sheet.get().setMeta(meta);
