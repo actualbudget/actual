@@ -35,6 +35,14 @@ If AI was used to generate a significant portion of an issue, PR, or the code it
 
 Issues and pull requests that appear to be AI-generated but do not disclose it may be closed without review. Contributors who repeatedly submit undisclosed AI content, or who ignore this policy, may be blocked from contributing.
 
+## Quality Over Quantity
+
+Modern AI tools make it easy to generate a large number of changes very quickly. Please resist the temptation to open many pull requests at once — for example, by pointing an AI tool at the codebase and submitting whatever it produces.
+
+A stack of simultaneous, similar pull requests from one author takes much longer for us to review than a single, well-tested change, and it is often a sign that the work has not been read or tested by a human. We would much rather receive one change that you understand and have verified than ten that you have not.
+
+A good rhythm is to open one pull request, work with us to get it reviewed and merged, and only then open the next one. Pull requests that are low-effort, untested, or undisclosed AI output may be closed without a detailed review, and authors who repeatedly submit them may be blocked from contributing.
+
 ## You are responsible for what you submit
 
 Before you open an issue or a PR, you should:
