@@ -963,4 +963,15 @@ describe('Type conversions', () => {
     );
     expect(result.sql).toMatch('WHERE (payees1.id IS NOT NULL)');
   });
+
+  it('treats \\$-escaped strings as literal values, not field references', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .filter({ 'payee.name': '\\$Rent' })
+        .select(['id'])
+        .serialize(),
+      schemaWithRefs,
+    );
+    expect(result.sql).toMatch("payees1.name = '$Rent'");
+  });
 });

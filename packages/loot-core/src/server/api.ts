@@ -918,7 +918,9 @@ handlers['api/schedule-update'] = withMutation(async function ({
       case 'name': {
         const newName = String(value);
         const { data: existing } = await aqlQuery(
-          q('schedules').filter({ name: newName }).select('*'),
+          q('schedules')
+            .filter({ name: newName.replace(/\$/g, '\\$') })
+            .select('*'),
         );
         if (!existing || existing.length === 0 || existing[0].id === sched.id) {
           sched.name = newName;
@@ -1047,7 +1049,9 @@ handlers['api/get-id-by-name'] = async function ({ type, name }) {
     throw APIError('Provide a valid type');
   }
 
-  const { data } = await aqlQuery(q(type).filter({ name }).select('*'));
+  const { data } = await aqlQuery(
+    q(type).filter({ name: name.replace(/\$/g, '\\$') }).select('*'),
+  );
 
   if (!data || data.length === 0) {
     throw APIError(`Not found: ${type} with name ${name}`);

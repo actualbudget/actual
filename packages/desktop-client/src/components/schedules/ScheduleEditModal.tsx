@@ -100,7 +100,9 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
 
     if (state.fields.name) {
       const { data: sameName } = await aqlQuery(
-        q('schedules').filter({ name: state.fields.name }).select('id'),
+        q('schedules')
+          .filter({ name: state.fields.name.replace(/\$/g, '\\$') })
+          .select('id'),
       );
       if (sameName.length > 0 && sameName[0].id !== state.schedule.id) {
         dispatch({
