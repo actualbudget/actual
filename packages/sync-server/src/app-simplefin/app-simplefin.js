@@ -20,12 +20,14 @@ app.post(
   '/status',
   handleError(async (req, res) => {
     const token = secretsService.get(SecretName.simplefin_token);
-    const configured = token != null && token !== 'Forbidden';
+    const cloudflareBlocked = token === 'Forbidden';
+    const configured = token != null && !cloudflareBlocked;
 
     res.send({
       status: 'ok',
       data: {
         configured,
+        cloudflareBlocked,
       },
     });
   }),
