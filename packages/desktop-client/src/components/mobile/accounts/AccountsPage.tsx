@@ -177,23 +177,21 @@ function AccountListItem({
               flexDirection: 'row',
             }}
           >
-            {account.bankId ? (
-              <View
-                style={{
-                  backgroundColor: isPending
-                    ? theme.sidebarItemBackgroundPending
-                    : isFailed
-                      ? theme.sidebarItemBackgroundFailed
-                      : theme.sidebarItemBackgroundPositive,
-                  marginRight: '8px',
-                  width: 8,
-                  flexShrink: 0,
-                  height: 8,
-                  borderRadius: 8,
-                  opacity: isConnected ? 1 : 0,
-                }}
-              />
-            ) : null}
+            <View
+              style={{
+                backgroundColor: isPending
+                  ? theme.sidebarItemBackgroundPending
+                  : isFailed
+                    ? theme.sidebarItemBackgroundFailed
+                    : theme.sidebarItemBackgroundPositive,
+                marginRight: '6px',
+                width: 8,
+                flexShrink: 0,
+                height: 8,
+                borderRadius: 8,
+                opacity: isConnected ? 1 : 0,
+              }}
+            />
             <MobileAccountIcon account={account} />
             <TextOneLine
               style={{
