@@ -17,6 +17,7 @@ import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
+import { createMutex } from '#util/mutex';
 
 type AkahuTransaction = {
   booked: boolean;
@@ -265,34 +266,39 @@ app.post(
   }),
 );
 
-async function getRefreshedAccount(
+// prevent race conditions when refreshing accounts
+const runRefresh = createMutex();
+
+function getRefreshedAccount(
   akahu: AkahuClient,
   userToken: string,
   accountId: string,
 ): Promise<Account | null> {
-  let account = await akahu.accounts.get(userToken, accountId);
-  if (!account) {
-    return null;
-  } else if (!shouldRefreshAccount(account.refreshed?.transactions)) {
-    return account;
-  }
-
-  await akahu.accounts.refresh(userToken, accountId);
-
-  // wait for the refresh to complete
-  for (let i = 0; i < 5; i++) {
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    account = await akahu.accounts.get(userToken, accountId);
+  return runRefresh(async () => {
+    let account = await akahu.accounts.get(userToken, accountId);
     if (!account) {
       return null;
     } else if (!shouldRefreshAccount(account.refreshed?.transactions)) {
-      // wait for transactions to settle
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      break;
+      return account;
     }
-  }
 
-  return account;
+    await akahu.accounts.refreshAll(userToken);
+
+    // wait for the refresh to complete
+    for (let i = 0; i < 5; i++) {
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      account = await akahu.accounts.get(userToken, accountId);
+      if (!account) {
+        return null;
+      } else if (!shouldRefreshAccount(account.refreshed?.transactions)) {
+        // wait for transactions to settle
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        break;
+      }
+    }
+
+    return account;
+  });
 }
 
 function isEnriched(
