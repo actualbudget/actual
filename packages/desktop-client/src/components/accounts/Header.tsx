@@ -273,7 +273,16 @@ export function AccountHeader({
 
   return (
     <>
-      <View style={{ ...styles.pageContent, paddingBottom: 10, flexShrink: 0 }}>
+      <View
+        style={{
+          ...styles.pageContent,
+          paddingBottom: 10,
+          flexShrink: 0,
+          '--color-buttonBareText': theme.pageText,
+          '--color-buttonBareTextHover': theme.pageText,
+          '--color-buttonBareDisabledText': theme.pageTextSubdued,
+        }}
+      >
         <View
           style={{
             flexDirection: 'column',
