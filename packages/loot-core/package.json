@@ -114,6 +114,8 @@
     "./client/transfer": "./src/client/transfer.ts",
     "./client/undo": "./src/client/undo.ts",
     "./mocks": "./src/mocks/index.ts",
+    "./platform/client/browser-preload": "./src/platform/client/browser-preload/index.ts",
+    "./platform/client/browser-server/coordinator": "./src/platform/client/browser-server/coordinator.ts",
     "./platform/client/connection": {
       "electron-renderer": "./src/platform/client/connection/index.electron.ts",
       "default": "./src/platform/client/connection/index.ts"
