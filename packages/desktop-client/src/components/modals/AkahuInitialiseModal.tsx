@@ -56,7 +56,8 @@ export const AkahuInitialiseModal = ({
         ? String(userTokenResponse.error)
         : undefined;
     const userTokenReason =
-      'reason' in userTokenResponse && typeof userTokenResponse.reason === 'string'
+      'reason' in userTokenResponse &&
+      typeof userTokenResponse.reason === 'string'
         ? userTokenResponse.reason
         : '';
 
@@ -75,7 +76,8 @@ export const AkahuInitialiseModal = ({
           ? String(appTokenResponse.error)
           : undefined;
       const appTokenReason =
-        'reason' in appTokenResponse && typeof appTokenResponse.reason === 'string'
+        'reason' in appTokenResponse &&
+        typeof appTokenResponse.reason === 'string'
           ? appTokenResponse.reason
           : '';
 
