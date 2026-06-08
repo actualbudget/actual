@@ -60,7 +60,7 @@ const HelpButton = forwardRef<HTMLButtonElement, HelpButtonProps>(
           display: 'flex',
           alignItems: 'center',
           gap: 4,
-          color: 'inherit'
+          color: 'inherit',
         }}
       >
         <SvgHelp width={size} height={size} />
