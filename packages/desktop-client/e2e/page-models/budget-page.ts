@@ -190,11 +190,13 @@ export class BudgetPage {
     // Click the last spent-amount cell currently visible in the scroll container
     // without triggering Playwright's auto-scroll-into-view, so the scroll
     // position is not changed before the click handler captures it.
-    await this.page.evaluate(() => {
+    const clicked = await this.page.evaluate(() => {
       const container = document.querySelector(
         '[data-testid="budget-table-scroll-container"]',
       );
-      if (!container) return;
+      if (!container) {
+        throw new Error('Budget scroll container not found');
+      }
       const containerRect = container.getBoundingClientRect();
       const cells = container.querySelectorAll<HTMLElement>(
         '[data-testid="category-month-spent"]',
@@ -206,10 +208,15 @@ export class BudgetPage {
           rect.bottom <= containerRect.bottom
         ) {
           cell.click();
-          return;
+          return true;
         }
       }
+      return false;
     });
+
+    if (!clicked) {
+      throw new Error('No visible spent-amount cell found to click');
+    }
     return new AccountPage(this.page);
   }
 
