@@ -8,6 +8,7 @@ import { isAdmin } from '#account-db';
 import { handleError } from '#app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '#services/secrets-service';
 import {
+  rejectApiTokenMiddleware,
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
@@ -235,6 +236,7 @@ function cleanupPendingAuth(state: string, waiterId?: string) {
 
 app.post(
   '/status',
+  rejectApiTokenMiddleware,
   handleError(async (req: Request, res: Response) => {
     const configured = enableBankingService.isConfigured();
 
@@ -249,6 +251,7 @@ app.post(
 
 app.post(
   '/configure',
+  rejectApiTokenMiddleware,
   handleError(async (req: Request, res: Response) => {
     if (!isAdmin(res.locals.user_id)) {
       res.status(403).send({
@@ -318,6 +321,7 @@ app.post(
 
 app.post(
   '/aspsps',
+  rejectApiTokenMiddleware,
   handleError(async (req: Request, res: Response) => {
     const { country } = req.body || {};
 
@@ -341,6 +345,7 @@ app.post(
 
 app.post(
   '/start-auth',
+  rejectApiTokenMiddleware,
   handleError(async (req: Request, res: Response) => {
     const { aspsp, redirectUrl, maxConsentValidity, psuType } = req.body || {};
 
@@ -387,6 +392,7 @@ app.post(
 
 app.post(
   '/complete-auth',
+  rejectApiTokenMiddleware,
   handleError(async (req: Request, res: Response) => {
     const { code, state } = req.body || {};
 
@@ -450,6 +456,7 @@ app.post(
 
 app.post(
   '/poll-auth',
+  rejectApiTokenMiddleware,
   handleError(async (req: Request, res: Response) => {
     const { state } = req.body || {};
 
@@ -541,6 +548,10 @@ app.post(
   }),
 );
 
+// API tokens are intentionally permitted on this route: token-driven data sync
+// may invoke bank sync. This route operates on server-level bank credentials
+// (accountId) rather than a budget fileId, so budget-scope enforcement does not
+// apply here.
 app.post(
   '/transactions',
   handleError(async (req: Request, res: Response) => {

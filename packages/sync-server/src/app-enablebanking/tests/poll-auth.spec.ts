@@ -29,6 +29,8 @@ vi.mock('../../util/middlewares', () => ({
     res.locals.user_id = 'genericAdmin';
     next();
   },
+  rejectApiTokenMiddleware: (_req: unknown, _res: unknown, next: () => void) =>
+    next(),
 }));
 
 vi.mock('../../app-gocardless/util/handle-error', () => ({

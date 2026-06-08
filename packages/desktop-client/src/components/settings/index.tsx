@@ -27,6 +27,7 @@ import { useMetadataPref } from '#hooks/useMetadataPref';
 import { loadPrefs, saveSyncedPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
 
+import { ApiTokensSettings } from './ApiTokens';
 import { AuthSettings } from './AuthSettings';
 import { Backups } from './Backups';
 import { BudgetTypeSettings } from './BudgetTypeSettings';
@@ -314,10 +315,12 @@ export function AdvancedSettings() {
 
 export function ExperimentalSettings() {
   const { t } = useTranslation();
+  const isApiTokensExperimentalEnabled = useFeatureFlag('apiTokens');
 
   return (
     <SettingsSections title={t('Experimental')}>
       <ExperimentalFeatures />
+      {isApiTokensExperimentalEnabled && <ApiTokensSettings />}
     </SettingsSections>
   );
 }
