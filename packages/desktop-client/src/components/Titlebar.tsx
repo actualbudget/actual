@@ -288,9 +288,9 @@ export function Titlebar({ style }: TitlebarProps) {
         pointerEvents: 'none',
         '& *': {
           pointerEvents: 'auto',
-        '--color-buttonBareText': theme.pageText, // make sure all bare buttons use page color variables on pageBackground
-        '--color-buttonBareTextHover': theme.pageText,
-        '--color-buttonBareDisabledText': theme.pageTextSubdued,
+          '--color-buttonBareText': theme.pageText, // make sure all bare buttons use page color variables on pageBackground
+          '--color-buttonBareTextHover': theme.pageText,
+          '--color-buttonBareDisabledText': theme.pageTextSubdued,
         },
         ...(!Platform.isBrowser && Platform.OS === 'mac' && floatingSidebar
           ? { paddingLeft: 80 }
