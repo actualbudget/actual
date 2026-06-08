@@ -42,11 +42,10 @@ yarn start:desktop
 - Use `yarn workspace <workspace-name> run <command>` for workspace-specific tasks
 - Tests run once and exit by default (using `vitest --run`)
 
-### ⚠️ CRITICAL REQUIREMENT: AI-Generated Commit Messages and PR Titles
+### ⚠️ PR titles must start with `[AI]`
 
-**ALL commit messages and PR titles MUST be prefixed with `[AI]`.** No exceptions.
-
-See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for the full specification, including git safety rules, pre-commit checklist, and PR workflow.
+Every pull request title must be prefixed with `[AI]` — this isn't enforced
+automatically, so you have to apply it yourself. See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md).
 
 ### Task Orchestration with Lage
 
@@ -200,10 +199,6 @@ When implementing changes:
 
 1. Read relevant files to understand current implementation
 2. Make focused, incremental changes
-3. Run type checking: `yarn typecheck`
-4. Run linting: `yarn lint:fix`
-5. Run relevant tests
-6. Fix any linter errors that are introduced
 
 ### 2. Testing Strategy
 
@@ -253,21 +248,20 @@ yarn workspace @actual-app/web e2e
 TypeScript configuration uses:
 
 - Incremental compilation
-- Strict type checking with `typescript-strict-plugin`
+- Strict type checking with `typescript-strict-plugin`. New files must be
+  type-strict — don't add `// @ts-strict-ignore` to a new file (existing files
+  are grandfathered).
 - Platform-specific exports in `loot-core` (node vs browser)
-
-Always run `yarn typecheck` before committing.
 
 ### 4. Internationalization (i18n)
 
-- Use `Trans` component instead of `t()` function when possible
-- All user-facing strings must be translated
-- Generate i18n files: `yarn generate:i18n`
-- Custom ESLint rules enforce translation usage
+Use the `Trans` component (and translated strings) for user-facing text.
+Regenerate i18n files with `yarn generate:i18n`.
 
 ### 5. Financial Number Typography
 
-- Wrap standalone financial numbers with `FinancialText` or apply `styles.tnum` directly if wrapping is not possible
+Wrap standalone financial numbers with `FinancialText` (or `styles.tnum` where
+wrapping isn't possible).
 
 ## Code Style & Conventions
 
@@ -275,17 +269,12 @@ Always run `yarn typecheck` before committing.
 
 **Type Usage:**
 
-- Use TypeScript for all code
-- Prefer `type` over `interface`
-- Avoid `enum` - use objects or maps
-- Avoid `any` or `unknown` unless absolutely necessary
-- Look for existing type definitions in the codebase
-- Avoid type assertions (`as`, `!`) - prefer `satisfies`
+- Use TypeScript for all code; look for existing type definitions before adding new ones
+- Prefer `satisfies` over type assertions (`as`, `!`) for narrowing
 
 **Naming:**
 
 - Use descriptive variable names with auxiliary verbs (e.g., `isLoaded`, `hasError`)
-- Named exports for components and utilities (avoid default exports except in specific cases)
 
 **Code Structure:**
 
@@ -298,14 +287,7 @@ Always run `yarn typecheck` before committing.
 **React Patterns:**
 
 - The project uses **React Compiler** (`babel-plugin-react-compiler`) in the desktop-client. The compiler auto-memoizes component bodies, so you can omit manual `useCallback`, `useMemo`, and `React.memo` when adding or refactoring code; prefer inline callbacks and values unless a stable identity is required by a non-compiled dependency.
-- Don't use `React.FunctionComponent` or `React.FC` - type props directly
-- Don't use `React.*` patterns - use named imports instead
-- Use `<Link>` instead of `<a>` tags
-- Use custom hooks from `src/hooks` (not react-router directly):
-  - `useNavigate()` from `src/hooks` (not react-router)
-  - `useDispatch()`, `useSelector()`, `useStore()` from `src/redux` (not react-redux)
 - Avoid unstable nested components
-- Use `satisfies` for type narrowing
 
 **JSX Style:**
 
@@ -314,37 +296,14 @@ Always run `yarn typecheck` before committing.
 - Use concise syntax for simple statements
 - Prefer explicit expressions (`condition && <Component />`)
 
-### Import Organization
-
-Imports are automatically organized by ESLint with the following order:
-
-1. React imports (first)
-2. Built-in Node.js modules
-3. External packages
-4. Actual packages (`loot-core`, `@actual-app/components` - legacy pattern `loot-design` may appear in old code)
-5. Parent imports
-6. Sibling imports
-7. Index imports
-
-Always maintain newlines between import groups.
-
 ### Platform-Specific Code
 
-- Don't directly reference platform-specific imports (`.api`, `.electron`)
-- Use conditional exports in `loot-core` for platform-specific code
-- Platform resolution happens at build time via package.json exports
+- Use conditional exports in `loot-core` for platform-specific code; platform
+  resolution happens at build time via package.json exports. Don't directly
+  import another platform's modules (`.api`, `.electron`).
 
-### Restricted Patterns
-
-**Never:**
-
-- Import from `uuid` without destructuring: use `import { v4 as uuidv4 } from 'uuid'`
-- Import colors directly - use theme instead
-- Import `@actual-app/web/*` in `loot-core`
-
-**Git Commands:**
-
-See [PR and Commit Rules](.github/agents/pr-and-commit-rules.md) for complete git safety rules, commit message requirements, and PR workflow.
+For commit and PR rules, see
+[PR and Commit Rules](.github/agents/pr-and-commit-rules.md).
 
 ## File Structure Patterns
 
@@ -386,7 +345,10 @@ describe('ComponentName', () => {
 
 - `/package.json` - Root workspace configuration, scripts
 - `/lage.config.js` - Lage task runner configuration
-- `/eslint.config.mjs` - ESLint configuration (flat config format)
+- `/.oxlintrc.json` - Lint rules (oxlint); `/.oxfmtrc.json` - formatting (oxfmt)
+- `/.nano-staged.json` - pre-commit format/lint config (run via Husky)
+- `/.claude/settings.json`, `/.codex/config.toml`, `/.cursor/hooks.json` - agent
+  hook wiring; shared scripts live in `/scripts/agent-hooks/`
 - `/tsconfig.json` - Root TypeScript configuration
 - `/.cursorignore`, `/.gitignore` - Ignored files
 - `/yarn.lock` - Dependency lockfile (Yarn 4)
@@ -479,13 +441,9 @@ Icons in `packages/component-library/src/icons/` are auto-generated. Don't manua
 
 ### Linter Errors
 
-1. Run `yarn lint:fix` to auto-fix many issues
-2. Check ESLint output for specific rule violations
-3. Custom rules:
-   - `actual/no-untranslated-strings` - Add i18n
-   - `actual/prefer-trans-over-t` - Use Trans component
-   - `actual/prefer-logger-over-console` - Use logger
-   - Check `eslint.config.mjs` for complete rules
+Run `yarn lint` to check. All rules — including the custom `actual/*` rules
+(`no-untranslated-strings`, `prefer-trans-over-t`, `prefer-logger-over-console`,
+`typography`, …) — are defined in [`.oxlintrc.json`](.oxlintrc.json).
 
 ### Test Failures
 
@@ -501,7 +459,7 @@ Icons in `packages/component-library/src/icons/` are auto-generated. Don't manua
 1. Check `tsconfig.json` for path mappings
 2. Check package.json `exports` field (especially for loot-core)
 3. Verify platform-specific imports (`.electron`, `.api`)
-4. Use absolute imports in `desktop-client` (enforced by ESLint)
+4. Use absolute imports in `desktop-client`
 
 ### Build Failures
 
@@ -544,15 +502,7 @@ Icons in `packages/component-library/src/icons/` are auto-generated. Don't manua
 Before committing changes, ensure:
 
 - [ ] Commit and PR rules followed (see [PR and Commit Rules](.github/agents/pr-and-commit-rules.md))
-- [ ] `yarn typecheck` passes
-- [ ] `yarn lint:fix` has been run
-- [ ] Relevant tests pass
-- [ ] User-facing strings are translated
-- [ ] Prefer `type` over `interface`
-- [ ] Named exports used (not default exports)
-- [ ] Imports are properly ordered
 - [ ] Platform-specific code uses proper exports
-- [ ] No unnecessary type assertions
 
 ## Pull Request Guidelines
 
@@ -633,7 +583,7 @@ When running the app for manual testing or demos, use **"View demo"** on the ini
 ### Gotchas
 
 - The `engines` field requires **Node.js >=22** and **Yarn ^4.9.1**. The `.nvmrc` specifies `v22/*`.
-- Pre-commit hook runs `lint-staged` (oxfmt + oxlint) via Husky. Run `yarn prepare` once after install to set up hooks.
+- Pre-commit hook runs `nano-staged` (oxfmt + oxlint, configured in `.nano-staged.json`) via Husky. Run `yarn prepare` once after install to set up hooks.
 - Lage caches test results in `.lage/`. If tests behave unexpectedly, clear with `rm -rf .lage`.
 - Native modules (`better-sqlite3`, `bcrypt`) require build tools (`gcc`, `make`, `python3`). These are pre-installed in the Cloud VM.
 - All yarn commands must be run from the repository root, never from child workspaces.
