@@ -70,6 +70,56 @@ async function createForecastWithPostedMonthlySchedule({
   };
 }
 
+async function createForecastWithPostedDailySchedule({
+  txId,
+  txDate,
+}: {
+  txId: string;
+  txDate: string;
+}) {
+  const accountId = await db.insertAccount({ id: 'acct', name: 'Checking' });
+  const amount = -5_000;
+
+  const scheduleId = await createSchedule({
+    conditions: [
+      { op: 'is', field: 'account', value: accountId },
+      { op: 'is', field: 'amount', value: amount },
+      {
+        op: 'is',
+        field: 'date',
+        value: {
+          start: '2024-03-10',
+          frequency: 'daily',
+        },
+      },
+    ] satisfies RuleConditionEntity[],
+  });
+
+  await db.insertTransaction({
+    id: txId,
+    account: accountId,
+    amount,
+    date: txDate,
+    schedule: scheduleId,
+  });
+
+  const result = await generateForecast({
+    accountIds: [accountId],
+    startDate: '2024-03-10',
+    endDate: '2024-03-12',
+  });
+
+  return {
+    amount,
+    balanceByDate: Object.fromEntries(
+      result.dataPoints.map(({ date, balance }) => [date, balance]),
+    ),
+    dataPointByDate: Object.fromEntries(
+      result.dataPoints.map(dataPoint => [dataPoint.date, dataPoint]),
+    ),
+  };
+}
+
 beforeEach(async () => {
   await emptyDatabase()();
   await loadMappings();
@@ -447,6 +497,25 @@ describe('forecast app', () => {
     expect(balanceByDate['2024-04-09']).toBe(salaryAmount);
     expect(balanceByDate['2024-04-10']).toBe(salaryAmount * 2);
     expect(dataPointByDate['2024-03-10'].transactions).toEqual([]);
+  });
+
+  it('does not double-count daily recurring schedule occurrences with op is posted on the due date', async () => {
+    const { amount, balanceByDate, dataPointByDate } =
+      await createForecastWithPostedDailySchedule({
+        txId: 'posted-daily',
+        txDate: '2024-03-10',
+      });
+
+    expect(balanceByDate['2024-03-10']).toBe(amount);
+    expect(dataPointByDate['2024-03-10'].transactions).toEqual([]);
+    expect(dataPointByDate['2024-03-11']).toMatchObject({
+      balance: amount * 2,
+      transactions: [{ amount }],
+    });
+    expect(dataPointByDate['2024-03-12']).toMatchObject({
+      balance: amount * 3,
+      transactions: [{ amount }],
+    });
   });
 
   it('filters future schedule occurrences using rule-derived fields like category', async () => {

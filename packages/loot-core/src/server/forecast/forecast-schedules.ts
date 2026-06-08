@@ -164,12 +164,9 @@ export function getFutureOccurrenceDates(
       break;
     }
 
-    if (parsedNextDate <= day) {
-      if (seenDates.has(nextDate)) {
-        day = monthUtils.parseDate(monthUtils.addDays(day, 1));
-        continue;
-      }
-      break;
+    if (seenDates.has(nextDate)) {
+      day = monthUtils.parseDate(monthUtils.addDays(day, 1));
+      continue;
     }
 
     dates.push(nextDate);
