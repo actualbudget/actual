@@ -1052,7 +1052,9 @@ handlers['api/get-id-by-name'] = async function ({ type, name }) {
 
   // Escape $ to prevent AQL from misinterpreting it as a field reference.
   const aqlSafeName = name.replace(/\$/g, '\\$');
-  const { data } = await aqlQuery(q(type).filter({ name: aqlSafeName }).select('*'));
+  const { data } = await aqlQuery(
+    q(type).filter({ name: aqlSafeName }).select('*'),
+  );
 
   if (!data || data.length === 0) {
     throw APIError(`Not found: ${type} with name ${name}`);
