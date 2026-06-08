@@ -242,7 +242,9 @@ export class Action {
         if (!object._forceApplyFields) {
           object._forceApplyFields = [];
         }
-        object._forceApplyFields.push(this.field);
+        if (!object._forceApplyFields.includes(this.field)) {
+          object._forceApplyFields.push(this.field);
+        }
         break;
       case 'append-notes':
         object[this.field] = object[this.field]
@@ -251,7 +253,9 @@ export class Action {
         if (!object._forceApplyFields) {
           object._forceApplyFields = [];
         }
-        object._forceApplyFields.push(this.field);
+        if (!object._forceApplyFields.includes(this.field)) {
+          object._forceApplyFields.push(this.field);
+        }
         break;
       case 'delete-transaction':
         object['tombstone'] = 1;
