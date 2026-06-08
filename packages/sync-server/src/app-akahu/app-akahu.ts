@@ -322,8 +322,8 @@ type AnyTransaction =
   | PendingTransaction
   | EnrichedPendingTransaction;
 
-function getPayeeName(trans: AnyTransaction): string {
-  return getMerchantName(trans) ?? getOtherAccount(trans) ?? trans.description;
+function getPayeeName(trans: AnyTransaction, fallback: string): string {
+  return getMerchantName(trans) ?? getOtherAccount(trans) ?? fallback;
 }
 
 function getMerchantName(trans: AnyTransaction): string | undefined {
@@ -350,7 +350,10 @@ function processPendingTransaction(
     ...trans,
     booked: false,
     date: getDate(transactionDate),
-    payeeName: getPayeeName(trans),
+    payeeName: getPayeeName(trans, trans.description),
+    merchant: {
+      name: getPayeeName(trans, ''),
+    },
     notes: trans.description,
     sortOrder: transactionDate.getTime(),
     transactionAmount: {
@@ -369,8 +372,16 @@ function processTransaction(
     category = trans.category.name;
   }
 
+  const merchant =
+    'merchant' in trans
+      ? trans.merchant
+      : {
+          name: getPayeeName(trans, ''),
+        };
+
   return {
     ...processPendingTransaction(trans, account),
+    merchant,
     category,
     booked: true,
     transactionId: trans._id,
