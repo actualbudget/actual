@@ -17,6 +17,7 @@ import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
+import { createMutex } from '#util/mutex';
 
 type AkahuTransaction = {
   booked: boolean;
@@ -135,7 +136,7 @@ app.post(
     try {
       const akahu = new AkahuClient({ appToken });
 
-      const account = await akahu.accounts.get(userToken, accountId);
+      const account = await getRefreshedAccount(akahu, userToken, accountId);
       if (!account) {
         return res.send({
           status: 'error',
@@ -265,6 +266,41 @@ app.post(
   }),
 );
 
+// prevent race conditions when refreshing accounts
+const runRefresh = createMutex();
+
+function getRefreshedAccount(
+  akahu: AkahuClient,
+  userToken: string,
+  accountId: string,
+): Promise<Account | null> {
+  return runRefresh(async () => {
+    let account = await akahu.accounts.get(userToken, accountId);
+    if (!account) {
+      return null;
+    } else if (!shouldRefreshAccount(account.refreshed?.transactions)) {
+      return account;
+    }
+
+    await akahu.accounts.refreshAll(userToken);
+
+    // wait for the refresh to complete
+    for (let i = 0; i < 5; i++) {
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      account = await akahu.accounts.get(userToken, accountId);
+      if (!account) {
+        return null;
+      } else if (!shouldRefreshAccount(account.refreshed?.transactions)) {
+        // wait for transactions to settle
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        break;
+      }
+    }
+
+    return account;
+  });
+}
+
 function isEnriched(
   trans:
     | Transaction
@@ -338,4 +374,18 @@ function processTransaction(
     booked: true,
     transactionId: trans._id,
   };
+}
+
+const AKAHU_TRANSACTION_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
+
+function shouldRefreshAccount(refreshedAt?: string) {
+  if (!refreshedAt) {
+    return false;
+  }
+
+  const refreshedAtTime = Date.parse(refreshedAt);
+  return (
+    Number.isFinite(refreshedAtTime) &&
+    Date.now() - refreshedAtTime > AKAHU_TRANSACTION_REFRESH_INTERVAL_MS
+  );
 }
