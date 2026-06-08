@@ -1,9 +1,6 @@
-import dns from 'dns';
-import { promisify } from 'util';
+import { lookup as dnsLookup } from 'node:dns/promises';
 
 import ipaddr from 'ipaddr.js';
-
-const dnsLookup = promisify(dns.lookup);
 
 // IP ranges (as classified by ipaddr.js) that are never a legitimate
 // destination and are the highest-risk SSRF targets, so they are blocked

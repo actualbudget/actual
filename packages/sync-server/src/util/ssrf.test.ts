@@ -1,37 +1,19 @@
-import dns from 'dns';
-
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { assertUrlAllowed } from './ssrf';
 
-vi.mock('dns', () => ({
-  default: {
-    lookup: vi.fn(),
-  },
-}));
+const lookupMock = vi.hoisted(() => vi.fn());
 
-type LookupCallback = (err: Error | null, addresses: unknown) => void;
-
-function setLookupImpl(handler: (callback: LookupCallback) => void) {
-  // dns.lookup has several overloads; the callback is always the last argument.
-  vi.mocked(dns.lookup).mockImplementation((...args: unknown[]) => {
-    const callback = args[args.length - 1] as LookupCallback;
-    handler(callback);
-  });
-}
+vi.mock('node:dns/promises', () => ({ lookup: lookupMock }));
 
 function mockDnsLookup(addresses: string[]) {
-  // promisify(dns.lookup) with { all: true } calls back with an array.
-  setLookupImpl(callback =>
-    callback(
-      null,
-      addresses.map(address => ({ address, family: 4 })),
-    ),
+  lookupMock.mockResolvedValue(
+    addresses.map(address => ({ address, family: 4 })),
   );
 }
 
 function mockDnsFailure() {
-  setLookupImpl(callback => callback(new Error('ENOTFOUND'), null));
+  lookupMock.mockRejectedValue(new Error('ENOTFOUND'));
 }
 
 describe('assertUrlAllowed', () => {
@@ -50,7 +32,7 @@ describe('assertUrlAllowed', () => {
     await expect(
       assertUrlAllowed('https://8.8.8.8/claim'),
     ).resolves.toBeUndefined();
-    expect(dns.lookup).not.toHaveBeenCalled();
+    expect(lookupMock).not.toHaveBeenCalled();
   });
 
   it('blocks the cloud metadata endpoint (link-local literal IP)', async () => {
