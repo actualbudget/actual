@@ -57,7 +57,6 @@ const HelpButton = forwardRef<HTMLButtonElement, HelpButtonProps>(
         ref={ref}
         onPress={onPress}
         style={{
-          color: theme.pageText,
           display: 'flex',
           alignItems: 'center',
           gap: 4,
