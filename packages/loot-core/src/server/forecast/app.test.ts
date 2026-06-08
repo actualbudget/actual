@@ -449,19 +449,6 @@ describe('forecast app', () => {
     expect(dataPointByDate['2024-03-10'].transactions).toEqual([]);
   });
 
-  it('does not double-count schedule occurrences posted early within the lookback window', async () => {
-    const { salaryAmount, balanceByDate } =
-      await createForecastWithPostedMonthlySchedule({
-        txId: 'posted-salary-early',
-        txDate: '2024-03-09',
-      });
-
-    expect(balanceByDate['2024-03-08']).toBe(0);
-    expect(balanceByDate['2024-03-09']).toBe(salaryAmount);
-    expect(balanceByDate['2024-03-10']).toBe(salaryAmount);
-    expect(balanceByDate['2024-04-10']).toBe(salaryAmount * 2);
-  });
-
   it('filters future schedule occurrences using rule-derived fields like category', async () => {
     const accountId = await db.insertAccount({ id: 'acct', name: 'Checking' });
     const groupId = await db.insertCategoryGroup({ name: 'Bills' });

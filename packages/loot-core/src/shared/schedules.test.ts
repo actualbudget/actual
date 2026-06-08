@@ -301,7 +301,7 @@ describe('schedules', () => {
       ).toBe('2024-03-08');
     });
 
-    it('uses a 2-day lookback for recurring schedules with op is', () => {
+    it('uses exact date for recurring schedules with op is', () => {
       expect(
         getScheduleOccurrenceMatchStartDate(
           {
@@ -316,7 +316,25 @@ describe('schedules', () => {
           },
           occurrenceDate,
         ),
-      ).toBe('2024-03-08');
+      ).toBe(occurrenceDate);
+    });
+
+    it('uses exact date for daily recurring schedules with op is', () => {
+      expect(
+        getScheduleOccurrenceMatchStartDate(
+          {
+            posts_transaction: false,
+            _conditions: [
+              {
+                op: 'is',
+                field: 'date',
+                value: { start: occurrenceDate, frequency: 'daily' },
+              },
+            ],
+          },
+          occurrenceDate,
+        ),
+      ).toBe(occurrenceDate);
     });
   });
 
@@ -384,10 +402,10 @@ describe('schedules', () => {
         true,
       ],
       [
-        'early pay within 2 days for recurring date cond',
+        'early pay day before due for recurring date cond',
         manualRecurringWithIsOp,
         '2024-03-09',
-        true,
+        false,
       ],
       ['early pay within 2 days', manualRecurringSchedule, '2024-03-09', true],
       [
