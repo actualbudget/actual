@@ -917,8 +917,11 @@ handlers['api/schedule-update'] = withMutation(async function ({
     switch (typedKey) {
       case 'name': {
         const newName = String(value);
+        // Escape $ to prevent AQL from misinterpreting it as a field reference
+        // when used as a literal filter value (e.g. schedule named "$Groceries").
+        const aqlSafeName = newName.replace(/\$/g, '\\$');
         const { data: existing } = await aqlQuery(
-          q('schedules').filter({ name: newName }).select('*'),
+          q('schedules').filter({ name: aqlSafeName }).select('*'),
         );
         if (!existing || existing.length === 0 || existing[0].id === sched.id) {
           sched.name = newName;
@@ -1047,7 +1050,9 @@ handlers['api/get-id-by-name'] = async function ({ type, name }) {
     throw APIError('Provide a valid type');
   }
 
-  const { data } = await aqlQuery(q(type).filter({ name }).select('*'));
+  // Escape $ to prevent AQL from misinterpreting it as a field reference.
+  const aqlSafeName = name.replace(/\$/g, '\\$');
+  const { data } = await aqlQuery(q(type).filter({ name: aqlSafeName }).select('*'));
 
   if (!data || data.length === 0) {
     throw APIError(`Not found: ${type} with name ${name}`);
