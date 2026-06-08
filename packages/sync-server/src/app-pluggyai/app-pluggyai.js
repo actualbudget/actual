@@ -3,6 +3,7 @@ import express from 'express';
 import { handleError } from '#app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '#services/secrets-service';
 import {
+  rejectApiTokenMiddleware,
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
@@ -17,6 +18,7 @@ app.use(validateSessionMiddleware);
 
 app.post(
   '/status',
+  rejectApiTokenMiddleware,
   handleError(async (req, res) => {
     const clientId = secretsService.get(SecretName.pluggyai_clientId);
     const configured = clientId != null;
@@ -32,6 +34,7 @@ app.post(
 
 app.post(
   '/accounts',
+  rejectApiTokenMiddleware,
   handleError(async (req, res) => {
     try {
       const itemIds = secretsService
@@ -63,6 +66,10 @@ app.post(
   }),
 );
 
+// API tokens are intentionally permitted on this route: token-driven data sync
+// may invoke bank sync. This route operates on server-level bank credentials
+// (accountId) rather than a budget fileId, so budget-scope enforcement does not
+// apply here.
 app.post(
   '/transactions',
   handleError(async (req, res) => {

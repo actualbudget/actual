@@ -19,6 +19,7 @@ import { app as dashboardApp } from './dashboard/app';
 import * as db from './db';
 import * as encryption from './encryption';
 import { app as encryptionApp } from './encryption/app';
+import { InvalidTokenError, TokenExpiredError } from './errors';
 import { app as filtersApp } from './filters/app';
 import { app as forecastApp } from './forecast/app';
 import { app as formulasApp } from './formulas/app';
@@ -238,22 +239,32 @@ type ServerInitConfig = BaseInitConfig & {
 type PasswordAuthConfig = ServerInitConfig & {
   password: string;
   sessionToken?: never;
+  token?: never;
 };
 
 type SessionTokenAuthConfig = ServerInitConfig & {
   sessionToken: string;
   password?: never;
+  token?: never;
+};
+
+type ApiTokenAuthConfig = ServerInitConfig & {
+  token: string;
+  password?: never;
+  sessionToken?: never;
 };
 
 type NoServerConfig = BaseInitConfig & {
   serverURL?: undefined;
   password?: never;
   sessionToken?: never;
+  token?: never;
 };
 
 export type InitConfig =
   | PasswordAuthConfig
   | SessionTokenAuthConfig
+  | ApiTokenAuthConfig
   | NoServerConfig;
 
 export async function init(config: InitConfig) {
@@ -281,7 +292,21 @@ export async function init(config: InitConfig) {
   if (serverURL) {
     setServer(serverURL);
 
-    if ('sessionToken' in config && config.sessionToken) {
+    if ('token' in config && config.token) {
+      // API token authentication
+      await runHandler(handlers['subscribe-set-token'], {
+        token: config.token,
+      });
+
+      // Validate the token
+      const user = await runHandler(handlers['subscribe-get-user'], undefined);
+      if (user === null) {
+        throw new InvalidTokenError();
+      }
+      if (user.tokenExpired) {
+        throw new TokenExpiredError();
+      }
+    } else if ('sessionToken' in config && config.sessionToken) {
       // Session token authentication
       await runHandler(handlers['subscribe-set-token'], {
         token: config.sessionToken,

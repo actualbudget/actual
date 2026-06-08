@@ -4,6 +4,7 @@ import express from 'express';
 
 import { sha256String } from '#util/hash';
 import {
+  rejectApiTokenMiddleware,
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
@@ -59,7 +60,7 @@ export { app as handlers };
 app.use(express.json());
 app.use(validateSessionMiddleware);
 
-app.post('/status', async (req, res) => {
+app.post('/status', rejectApiTokenMiddleware, async (req, res) => {
   res.send({
     status: 'ok',
     data: {
@@ -70,6 +71,7 @@ app.post('/status', async (req, res) => {
 
 app.post(
   '/create-web-token',
+  rejectApiTokenMiddleware,
   handleError(async (req, res) => {
     const { institutionId: rawInstitutionId } = req.body || {};
     const institutionId = sanitizeId<GoCardlessInstitutionId>(rawInstitutionId);
@@ -92,6 +94,7 @@ app.post(
 
 app.post(
   '/get-accounts',
+  rejectApiTokenMiddleware,
   handleError(async (req, res) => {
     const requisitionId = sanitizeId<GoCardlessRequisitionId>(
       (req.body || {}).requisitionId,
@@ -131,6 +134,7 @@ app.post(
 
 app.post(
   '/get-banks',
+  rejectApiTokenMiddleware,
   handleError(async (req, res) => {
     const { country: rawCountry, showDemo = false } = req.body || {};
     const country = sanitizeId(rawCountry);
@@ -155,6 +159,7 @@ app.post(
 
 app.post(
   '/remove-account',
+  rejectApiTokenMiddleware,
   handleError(async (req, res) => {
     const requisitionId = sanitizeId<GoCardlessRequisitionId>(
       (req.body || {}).requisitionId,
@@ -178,6 +183,10 @@ app.post(
   }),
 );
 
+// API tokens are intentionally permitted on this route: token-driven data sync
+// may invoke bank sync. This route operates on server-level bank credentials
+// (requisitionId/accountId) rather than a budget fileId, so budget-scope
+// enforcement does not apply here.
 app.post(
   '/transactions',
   handleError(async (req, res) => {
