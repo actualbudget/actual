@@ -26,6 +26,7 @@ type AkahuInitialiseModalProps = Extract<
 
 export const AkahuInitialiseModal = ({
   onSuccess,
+  fileId,
 }: AkahuInitialiseModalProps) => {
   const { t } = useTranslation();
   const [userToken, setUserToken] = useState('');
@@ -45,26 +46,42 @@ export const AkahuInitialiseModal = ({
     setIsLoading(true);
     let hasError = false;
 
-    const { error, reason } =
-      (await send('secret-set', {
-        name: 'akahu_userToken',
-        value: userToken,
-      })) || {};
+    const userTokenResponse = await send('secret-set', {
+      name: 'akahu_userToken',
+      value: userToken,
+      fileId,
+    });
+    const userTokenError =
+      'error' in userTokenResponse && userTokenResponse.error
+        ? String(userTokenResponse.error)
+        : undefined;
+    const userTokenReason =
+      'reason' in userTokenResponse && typeof userTokenResponse.reason === 'string'
+        ? userTokenResponse.reason
+        : '';
 
-    if (error) {
+    if (userTokenError) {
       setIsValid(false);
-      setError(getSecretsError(error, reason));
+      setError(getSecretsError(userTokenError, userTokenReason));
       hasError = true;
     } else {
-      const { error, reason } =
-        (await send('secret-set', {
-          name: 'akahu_appToken',
-          value: appToken,
-        })) || {};
+      const appTokenResponse = await send('secret-set', {
+        name: 'akahu_appToken',
+        value: appToken,
+        fileId,
+      });
+      const appTokenError =
+        'error' in appTokenResponse && appTokenResponse.error
+          ? String(appTokenResponse.error)
+          : undefined;
+      const appTokenReason =
+        'reason' in appTokenResponse && typeof appTokenResponse.reason === 'string'
+          ? appTokenResponse.reason
+          : '';
 
-      if (error) {
+      if (appTokenError) {
         setIsValid(false);
-        setError(getSecretsError(error, reason));
+        setError(getSecretsError(appTokenError, appTokenReason));
         hasError = true;
       } else {
         onSuccess();

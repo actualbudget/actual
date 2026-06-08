@@ -136,6 +136,7 @@ export type Modal =
       name: 'akahu-init';
       options: {
         onSuccess: () => void;
+        fileId: string;
       };
     }
   | {

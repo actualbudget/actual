@@ -216,11 +216,12 @@ export function useBuiltInBankSyncProviders({
           name: 'akahu-init',
           options: {
             onSuccess: () => setIsAkahuSetupComplete(true),
+            fileId: budgetFileId,
           },
         },
       }),
     );
-  }, [dispatch]);
+  }, [budgetFileId, dispatch]);
 
   const notifyResetFailure = useCallback(
     (providerName: string, error: unknown) => {
@@ -350,6 +351,7 @@ export function useBuiltInBankSyncProviders({
         await send('secret-set', {
           name: 'akahu_userToken',
           value: null,
+          fileId: budgetFileId,
         }),
         'Failed to clear Akahu user token',
       );
@@ -357,6 +359,7 @@ export function useBuiltInBankSyncProviders({
         await send('secret-set', {
           name: 'akahu_appToken',
           value: null,
+          fileId: budgetFileId,
         }),
         'Failed to clear Akahu app token',
       );
@@ -365,7 +368,7 @@ export function useBuiltInBankSyncProviders({
       console.log(error);
       notifyResetFailure('Akahu', error);
     }
-  }, [notifyResetFailure]);
+  }, [budgetFileId, notifyResetFailure]);
 
   const onConnectGoCardless = useCallback(() => {
     if (!isGoCardlessSetupComplete) {
