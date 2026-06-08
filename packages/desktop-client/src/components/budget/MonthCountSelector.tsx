@@ -45,7 +45,7 @@ export function MonthCountSelector({
     calendars.push(
       <Calendar
         key={i}
-        color={maxMonths >= i ? theme.pageTextLight : theme.pageTextSubdued}
+        color={maxMonths >= i ? theme.pageText : theme.pageTextLight} 
         onClick={() => onChange(i)}
       />,
     );
