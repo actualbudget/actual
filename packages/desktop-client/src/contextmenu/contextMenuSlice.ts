@@ -33,7 +33,7 @@ const contextMenuSlice = createSlice({
         }
 
         // only add other items if the provided name is unique
-        const isAlreadyPresent = state.items.filter(
+        const isAlreadyPresent = state.items.some(
           i => typeof i === 'object' && i.name === item.name,
         );
         if (!item.hidden && !isAlreadyPresent) {
