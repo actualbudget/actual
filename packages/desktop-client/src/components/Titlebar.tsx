@@ -74,7 +74,7 @@ function PrivacyButton({ style }: PrivacyButtonProps) {
     useSyncedPref('isPrivacyEnabled');
   const isPrivacyEnabled = String(isPrivacyEnabledPref) === 'true';
 
-  const privacyIconStyle = { color: theme.pageText, width: 15, height: 15 };
+  const privacyIconStyle = { color: 'inherit', width: 15, height: 15 };
 
   useHotkeys(
     'shift+ctrl+p, shift+cmd+p, shift+meta+p',
@@ -166,7 +166,7 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
       : syncState === 'disabled' ||
           syncState === 'offline' ||
           syncState === 'local'
-        ? theme.buttonBareDisabledText
+        ? theme.pageTextLight
         : 'inherit';
 
   const activeStyle = isMobile
@@ -313,7 +313,7 @@ export function Titlebar({ style }: TitlebarProps) {
         >
           <SvgNavigationMenu
             className="menu"
-            style={{ width: 15, height: 15, color: theme.pageText, left: 0 }}
+            style={{ width: 15, height: 15, color: 'inherit', left: 0 }}
           />
         </Button>
       )}
