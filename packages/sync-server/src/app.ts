@@ -10,6 +10,7 @@ import { bootstrap } from './account-db';
 import * as accountApp from './app-account';
 import * as adminApp from './app-admin';
 import * as akahuApp from './app-akahu/app-akahu.js';
+import * as apiTokensApp from './app-api-tokens';
 import * as corsApp from './app-cors-proxy';
 import * as enableBankingApp from './app-enablebanking/app-enablebanking';
 import * as goCardlessApp from './app-gocardless/app-gocardless';
@@ -71,6 +72,7 @@ if (config.get('corsProxy.enabled')) {
 
 app.use('/admin', adminApp.handlers);
 app.use('/openid', openidApp.handlers);
+app.use('/api-tokens', apiTokensApp.handlers);
 
 app.get('/mode', (req, res) => {
   res.send(config.get('mode'));

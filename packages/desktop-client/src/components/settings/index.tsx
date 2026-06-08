@@ -26,6 +26,7 @@ import { useMetadataPref } from '#hooks/useMetadataPref';
 import { loadPrefs, saveSyncedPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
 
+import { ApiTokensSettings } from './ApiTokens';
 import { AuthSettings } from './AuthSettings';
 import { Backups } from './Backups';
 import { BudgetTypeSettings } from './BudgetTypeSettings';
@@ -171,6 +172,7 @@ export function Settings() {
   const [budgetName] = useMetadataPref('budgetName');
   const dispatch = useDispatch();
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
+  const isApiTokensExperimentalEnabled = useFeatureFlag('apiTokens');
 
   const onCloseBudget = () => {
     void dispatch(closeBudget());
@@ -240,6 +242,7 @@ export function Settings() {
         {isCurrencyExperimentalEnabled && <CurrencySettings />}
         <LanguageSettings />
         <AuthSettings />
+        {isApiTokensExperimentalEnabled && <ApiTokensSettings />}
         <EncryptionSettings />
         <BudgetTypeSettings />
         {isElectron() && <Backups />}
