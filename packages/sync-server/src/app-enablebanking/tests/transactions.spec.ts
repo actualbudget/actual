@@ -63,6 +63,8 @@ app.use('/', handlers);
 const ids = (txns: Array<{ transactionId: string }>) =>
   txns.map(t => t.transactionId);
 
+const TEST_FILE_ID = 'test-file-id';
+
 describe('POST /transactions', () => {
   beforeEach(() => {
     vi.spyOn(enableBankingService, 'getBalances').mockResolvedValue({
@@ -85,6 +87,7 @@ describe('POST /transactions', () => {
 
     const res = await request(app)
       .post('/transactions')
+      .set('X-Actual-File-Id', TEST_FILE_ID)
       .send({ accountId: 'acc-1', startDate: '2026-03-01' });
 
     expect(res.body.status).toBe('ok');
@@ -107,6 +110,7 @@ describe('POST /transactions', () => {
 
     const res = await request(app)
       .post('/transactions')
+      .set('X-Actual-File-Id', TEST_FILE_ID)
       .send({ accountId: 'acc-1', startDate: '2026-03-01' });
 
     expect(res.body.data.transactions.all).toHaveLength(2);
