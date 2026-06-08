@@ -74,7 +74,17 @@ async function getOrphanedPayees(): Promise<Array<Pick<PayeeEntity, 'id'>>> {
 async function getPayeeRuleCounts() {
   const payeeCounts: Record<PayeeEntity['id'], number> = {};
 
+  // Exclude rules that belong to completed schedules — those rules exist
+  // only to drive the schedule and should not show as user-facing rules.
+  const completedScheduleRules = await db.all<{ rule: string }>(
+    'SELECT rule FROM schedules WHERE completed = 1 AND tombstone = 0',
+  );
+  const completedRuleIds = new Set(completedScheduleRules.map(s => s.rule));
+
   rules.iterateIds(rules.getRules(), 'payee', (rule, id) => {
+    if (completedRuleIds.has(rule.id)) {
+      return;
+    }
     if (payeeCounts[id] == null) {
       payeeCounts[id] = 0;
     }
