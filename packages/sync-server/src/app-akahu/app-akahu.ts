@@ -301,11 +301,15 @@ function getRefreshedAccount(
 }
 
 function getDate(date: Date): string {
-  return dateTimeFormatNZ.format(date);
+  const parts = dateTimeFormatNZ.formatToParts(date);
+  const month = parts[0].value;
+  const day = parts[2].value;
+  const year = parts[4].value;
+  return `${year}-${month}-${day}`;
 }
 
 // Akahu gives us dates in UTC, but we want to display them in NZ time
-const dateTimeFormatNZ = new Intl.DateTimeFormat('sv-SE', {
+const dateTimeFormatNZ = new Intl.DateTimeFormat('en-US', {
   timeZone: 'Pacific/Auckland',
   year: 'numeric',
   month: '2-digit',
