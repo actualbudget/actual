@@ -131,6 +131,12 @@ test.describe('Keyboard navigation', () => {
         debit: '12.00',
       });
 
+      // Wait for both newly created transactions to be in the list before
+      // selecting them. Otherwise the second row may still be mounting when
+      // the selection clicks land, the selection doesn't stick, and the
+      // select button (rendered only when items are selected) never appears.
+      await expect(accountPage.getNthTransaction(1).payee).toBeVisible();
+
       await accountPage.selectNthTransaction(0);
       await accountPage.selectNthTransaction(1);
       await expect(accountPage.selectButton).toBeVisible();
@@ -155,6 +161,10 @@ test.describe('Keyboard navigation', () => {
         notes: 'x',
         debit: '3.00',
       });
+
+      // Wait for the new transaction row to be in the list before selecting,
+      // so the selection sticks and the select button appears reliably.
+      await expect(accountPage.getNthTransaction(0).payee).toBeVisible();
 
       await accountPage.selectNthTransaction(0);
       await expect(accountPage.selectButton).toBeVisible();
@@ -189,6 +199,10 @@ test.describe('Keyboard navigation', () => {
         notes: 'x',
         debit: '3.00',
       });
+
+      // Wait for the new transaction row to be in the list before selecting,
+      // so the selection sticks and the select button appears reliably.
+      await expect(accountPage.getNthTransaction(0).payee).toBeVisible();
 
       await accountPage.selectNthTransaction(0);
       await expect(accountPage.selectButton).toBeVisible();
