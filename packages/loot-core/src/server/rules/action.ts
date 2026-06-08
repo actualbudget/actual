@@ -6,13 +6,15 @@ import enUS from 'hyperformula/i18n/languages/enUS';
 
 import { logger } from '#platform/server/log';
 import type { TransactionForRules } from '#server/transactions/transaction-rules';
+import { getDefaultCurrencyCodeSync } from '#server/util/currency';
+import { getDecimalPlaces } from '#shared/currencies';
 import {
   CustomFunctionsPlugin,
   customFunctionsTranslations,
 } from '#shared/formulas/customFunctions';
 import { currentDay, format, parseDate } from '#shared/months';
 import { FIELD_TYPES } from '#shared/rules';
-import { amountToInteger } from '#shared/util';
+import { amountToCurrencyInteger } from '#shared/util';
 
 import { assert } from './rule-utils';
 
@@ -357,7 +359,13 @@ export class Action {
       }
 
       if (typeof cellValue === 'number') {
-        return amountToInteger(Math.round(cellValue * 100) / 100);
+        const code = getDefaultCurrencyCodeSync();
+        const dp = getDecimalPlaces(code);
+        const scale = Math.pow(10, dp);
+        return amountToCurrencyInteger(
+          Math.round(cellValue * scale) / scale,
+          code,
+        );
       }
 
       return cellValue;

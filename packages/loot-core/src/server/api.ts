@@ -16,7 +16,7 @@ import {
   ungroupTransactions,
   updateTransaction,
 } from '#shared/transactions';
-import { integerToAmount } from '#shared/util';
+import { integerToCurrencyAmount } from '#shared/util';
 import type { Handlers } from '#types/handlers';
 import type {
   AccountEntity,
@@ -47,6 +47,7 @@ import { runMutator } from './mutators';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
 import { batchMessages, setSyncingMode } from './sync';
+import { getDefaultCurrencyCode } from './util/currency';
 
 let IMPORT_MODE = false;
 
@@ -601,13 +602,20 @@ handlers['api/account-create'] = withMutation(async function ({
   initialBalance = null,
 }) {
   checkFileOpen();
+  let balance: number | null = null;
+  if (initialBalance != null) {
+    // Currently the API expects an amount but it really should expect
+    // an integer
+    balance = integerToCurrencyAmount(
+      initialBalance,
+      await getDefaultCurrencyCode(),
+    );
+  }
   return handlers['account-create']({
     name: account.name,
     offBudget: account.offbudget,
     closed: account.closed,
-    // Current the API expects an amount but it really should expect
-    // an integer
-    balance: initialBalance != null ? integerToAmount(initialBalance) : null,
+    balance,
   });
 });
 

@@ -60,10 +60,14 @@ test.describe('Onboarding', () => {
     await expect(budgetPage.budgetTable).toBeVisible({ timeout: 30000 });
 
     const accountPage = await navigation.goToAccountPage('Checking');
-    await expect(accountPage.accountBalance).toHaveText('2,600.00');
+    // The nYNAB demo file declares a USD currency, so importing it sets the
+    // default currency and account balances render with the currency symbol.
+    // The symbol is wrapped in Unicode bidi isolates by the formatter, so the
+    // pattern tolerates those marks between the symbol and the amount.
+    await expect(accountPage.accountBalance).toHaveText(/\$\D*2,600\.00/);
 
     await navigation.goToAccountPage('Saving');
-    await expect(accountPage.accountBalance).toHaveText('250.00');
+    await expect(accountPage.accountBalance).toHaveText(/\$\D*250\.00/);
 
     await navigation.goToSchedulesPage();
     const scheduleRows = page.getByTestId('table').getByTestId('row');
