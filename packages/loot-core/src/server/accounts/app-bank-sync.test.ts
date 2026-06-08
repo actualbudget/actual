@@ -169,7 +169,10 @@ describe('accountsBankSync', () => {
       updatedPreview: [],
     });
 
-    const result = await accountsBankSyncHandler({ ids: ['acct1'] });
+    const result = await accountsBankSyncHandler({
+      ids: ['acct1'],
+      fileId: 'test-file-id',
+    });
 
     expect(result.errors).toEqual([]);
 
@@ -198,7 +201,7 @@ describe('accountsBankSync', () => {
       message: 'login required',
     });
 
-    await accountsBankSyncHandler({ ids: ['acct1'] });
+    await accountsBankSyncHandler({ ids: ['acct1'], fileId: 'test-file-id' });
 
     const account = await db.first<db.DbAccount>(
       'SELECT * FROM accounts WHERE id = ?',
@@ -221,7 +224,7 @@ describe('accountsBankSync', () => {
       new Error('connection timeout'),
     );
 
-    await accountsBankSyncHandler({ ids: ['acct1'] });
+    await accountsBankSyncHandler({ ids: ['acct1'], fileId: 'test-file-id' });
 
     const account = await db.first<db.DbAccount>(
       'SELECT * FROM accounts WHERE id = ?',
@@ -254,7 +257,10 @@ describe('bank sync handlers must not nest mutators', () => {
 
     let timer: ReturnType<typeof setTimeout> | undefined;
     const result = await Promise.race([
-      runHandler(app.handlers['accounts-bank-sync'], { ids: ['acct1'] }),
+      runHandler(app.handlers['accounts-bank-sync'], {
+        ids: ['acct1'],
+        fileId: 'test-file-id',
+      }),
       new Promise<never>((_, reject) => {
         timer = setTimeout(
           () => reject(new Error('bank sync deadlocked')),
