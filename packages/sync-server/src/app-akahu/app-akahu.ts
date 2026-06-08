@@ -8,7 +8,6 @@ import type {
 } from 'akahu';
 // For some reason this is not provided in the provided index.d.ts file
 import type { EnrichedPendingTransaction } from 'akahu/dist/models/transactions';
-import { formatISO } from 'date-fns';
 import express from 'express';
 
 import { handleError } from '#app-gocardless/util/handle-error';
@@ -302,8 +301,16 @@ function getRefreshedAccount(
 }
 
 function getDate(date: Date): string {
-  return formatISO(date).split('T')[0];
+  return dateTimeFormatNZ.format(date);
 }
+
+// Akahu gives us dates in UTC, but we want to display them in NZ time
+const dateTimeFormatNZ = new Intl.DateTimeFormat('sv-SE', {
+  timeZone: 'Pacific/Auckland',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
 
 function convertToCents(amount: number): number {
   return Math.round(amount * 100);
