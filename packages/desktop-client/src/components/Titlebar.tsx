@@ -74,7 +74,7 @@ function PrivacyButton({ style }: PrivacyButtonProps) {
     useSyncedPref('isPrivacyEnabled');
   const isPrivacyEnabled = String(isPrivacyEnabledPref) === 'true';
 
-  const privacyIconStyle = { color: theme.pageText, width: 15, height: 15 };
+  const privacyIconStyle = { width: 15, height: 15 };
 
   useHotkeys(
     'shift+ctrl+p, shift+cmd+p, shift+meta+p',
@@ -288,6 +288,9 @@ export function Titlebar({ style }: TitlebarProps) {
         pointerEvents: 'none',
         '& *': {
           pointerEvents: 'auto',
+        '--color-buttonBareText': theme.pageText, // make sure all bare buttons use page color variables on pageBackground
+        '--color-buttonBareTextHover': theme.pageText,
+        '--color-buttonBareDisabledText': theme.pageTextSubdued,
         },
         ...(!Platform.isBrowser && Platform.OS === 'mac' && floatingSidebar
           ? { paddingLeft: 80 }
@@ -313,7 +316,7 @@ export function Titlebar({ style }: TitlebarProps) {
         >
           <SvgNavigationMenu
             className="menu"
-            style={{ width: 15, height: 15, color: 'inherit', left: 0 }}
+            style={{ width: 15, height: 15, left: 0 }}
           />
         </Button>
       )}
@@ -327,7 +330,7 @@ export function Titlebar({ style }: TitlebarProps) {
                 <SvgArrowLeft
                   width={10}
                   height={10}
-                  style={{ marginRight: 5, color: 'currentColor' }}
+                  style={{ marginRight: 5 }}
                 />{' '}
                 <Trans>Back</Trans>
               </Button>
