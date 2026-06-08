@@ -1,9 +1,3 @@
-// Moved from packages/desktop-client/src/browser-preload.js — the
-// SharedWorker-port → Worker-like adapter that loot-core's client connection
-// layer consumes. Works identically for any browser consumer that opts into
-// multi-tab coordination; the only consumer-specific input is the URL of the
-// backend Worker script (`backendWorkerUrl`), passed in by the caller.
-
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
 
 import { logger } from '#platform/server/log';

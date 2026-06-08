@@ -1,9 +1,3 @@
-// Parameterized backend bootstrap moved out of desktop-client's
-// browser-preload.js. Picks between a SharedWorker-coordinated multi-tab setup
-// and a direct Worker fallback. Consumers hand in the concrete worker URL, the
-// init payload, and (if they want multi-tab coordination) a SharedWorker
-// factory — keeping loot-core free of bundler-specific asset imports.
-
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
 
 import { logger } from '#platform/server/log';

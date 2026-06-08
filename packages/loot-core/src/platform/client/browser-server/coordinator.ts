@@ -1,9 +1,8 @@
 // Core coordinator logic for multi-tab, multi-budget SharedWorker support.
 //
-// Moved from desktop-client so any browser consumer (desktop-client, api) can
-// reuse it. This module exports a factory so it can be tested independently.
-// The SharedWorker entry point (desktop-client's shared-browser-server.ts)
-// calls createCoordinator() and wires the result to self.onconnect.
+// This module exports a factory so it can be tested independently.
+// The SharedWorker entry point (shared-browser-server.js) calls
+// createCoordinator() and wires the result to self.onconnect.
 
 import { logger } from '#platform/server/log';
 
