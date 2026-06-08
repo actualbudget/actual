@@ -76,10 +76,12 @@ async function getPayeeRuleCounts() {
 
   // Exclude rules that belong to completed schedules — those rules exist
   // only to drive the schedule and should not show as user-facing rules.
-  const completedScheduleRules = await db.all<{ rule: string }>(
-    'SELECT rule FROM schedules WHERE completed = 1 AND tombstone = 0',
+  const completedScheduleRules = await db.all<{ rule: string | null }>(
+    'SELECT rule FROM schedules WHERE completed = 1 AND tombstone = 0 AND rule IS NOT NULL',
   );
-  const completedRuleIds = new Set(completedScheduleRules.map(s => s.rule));
+  const completedRuleIds = new Set(
+    completedScheduleRules.map(s => s.rule).filter((r): r is string => r !== null),
+  );
 
   rules.iterateIds(rules.getRules(), 'payee', (rule, id) => {
     if (completedRuleIds.has(rule.id)) {
