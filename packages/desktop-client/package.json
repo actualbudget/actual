@@ -128,7 +128,6 @@
   },
   "devDependencies": {
     "@actual-app/components": "workspace:*",
-    "@actual-app/contextmenu": "workspace:*",
     "@actual-app/core": "workspace:*",
     "@babel/core": "^7.29.0",
     "@codemirror/autocomplete": "^6.20.1",
