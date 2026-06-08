@@ -41,6 +41,10 @@ type BudgetTableProps = {
   onApplyBudgetTemplatesInGroup: (
     categoryIds: Array<CategoryEntity['id']>,
   ) => void;
+  onSortCategories?: (
+    groupId: CategoryGroupEntity['id'],
+    direction: 'asc' | 'desc',
+  ) => void;
   onReorderCategory: (params: {
     id: CategoryEntity['id'];
     groupId: CategoryGroupEntity['id'];
@@ -66,6 +70,7 @@ export function BudgetTable(props: BudgetTableProps) {
     onSaveGroup,
     onDeleteGroup,
     onApplyBudgetTemplatesInGroup,
+    onSortCategories,
     onReorderCategory,
     onReorderGroup,
     onShowActivity,
@@ -300,6 +305,7 @@ export function BudgetTable(props: BudgetTableProps) {
                 onBudgetAction={onBudgetAction}
                 onShowActivity={onShowActivity}
                 onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
+                onSortCategories={onSortCategories}
               />
             </SchedulesProvider>
           </View>

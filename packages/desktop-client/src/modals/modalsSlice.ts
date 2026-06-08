@@ -130,6 +130,12 @@ export type Modal =
       };
     }
   | {
+      name: 'akahu-init';
+      options: {
+        onSuccess: () => void;
+      };
+    }
+  | {
       name: 'enablebanking-init';
       options: {
         onSuccess: () => void;
@@ -358,6 +364,7 @@ export type Modal =
         onEditNotes: (id: NoteEntity['id']) => void;
         onDelete: (categoryId: CategoryEntity['id']) => void;
         onToggleVisibility: (categoryId: CategoryEntity['id']) => void;
+        onEditAutomations?: (categoryId: CategoryEntity['id']) => void;
         onClose?: () => void;
       };
     }
@@ -401,6 +408,10 @@ export type Modal =
         onClose?: () => void;
         onApplyBudgetTemplatesInGroup?: (
           categories: Array<CategoryEntity['id']>,
+        ) => void;
+        onSortCategories?: (
+          groupId: CategoryGroupEntity['id'],
+          direction: 'asc' | 'desc',
         ) => void;
       };
     }

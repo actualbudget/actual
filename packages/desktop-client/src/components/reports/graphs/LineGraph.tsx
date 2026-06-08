@@ -189,7 +189,7 @@ export function LineGraph({
     ? computeTrendLines(data.intervalData, data.legend)
     : [];
 
-  const onShowActivity = (item, id, payload) => {
+  const onShowActivity = (id, payload, uncategorizedId) => {
     showActivity({
       navigate,
       categories,
@@ -203,6 +203,7 @@ export function LineGraph({
       endDate: payload.payload.intervalEndDate,
       field: groupBy.toLowerCase(),
       id,
+      uncategorizedId,
       interval,
     });
   };
@@ -295,7 +296,11 @@ export function LineGraph({
                       onClick: (e, payload) =>
                         ((compact && showTooltip) || !compact) &&
                         !['Group', 'Interval'].includes(groupBy) &&
-                        onShowActivity(e, entry.id, payload),
+                        onShowActivity(
+                          entry.id,
+                          payload,
+                          entry.uncategorizedId,
+                        ),
                     }}
                   />
                 );

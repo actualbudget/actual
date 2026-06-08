@@ -94,6 +94,7 @@ Hampel
 healthcheck
 HELADEF
 HLOOKUP
+Hostim
 HUF
 IFERROR
 IFNA
