@@ -286,6 +286,8 @@ async function getRefreshedAccount(
     if (!account) {
       return null;
     } else if (!shouldRefreshAccount(account.refreshed?.transactions)) {
+      // wait for transactions to settle
+      await new Promise(resolve => setTimeout(resolve, 3000));
       break;
     }
   }
@@ -368,7 +370,7 @@ function processTransaction(
   };
 }
 
-const AKAHU_TRANSACTION_REFRESH_INTERVAL_MS = 30 * 60 * 1000;
+const AKAHU_TRANSACTION_REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 
 function shouldRefreshAccount(refreshedAt?: string) {
   if (!refreshedAt) {
