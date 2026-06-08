@@ -34,6 +34,10 @@
       "api": "./src/platform/server/connection/index.api.ts",
       "default": "./src/platform/server/connection/index.ts"
     },
+    "#platform/server/favicon-direct": {
+      "electron": "./src/platform/server/favicon-direct/index.electron.ts",
+      "default": "./src/platform/server/favicon-direct/index.ts"
+    },
     "#platform/server/fetch": {
       "electron": "./src/platform/server/fetch/index.electron.ts",
       "api": "./src/platform/server/fetch/index.api.ts",
@@ -131,6 +135,10 @@
       "electron": "./src/platform/server/connection/index.electron.ts",
       "api": "./src/platform/server/connection/index.api.ts",
       "default": "./src/platform/server/connection/index.ts"
+    },
+    "./platform/server/favicon-direct": {
+      "electron": "./src/platform/server/favicon-direct/index.electron.ts",
+      "default": "./src/platform/server/favicon-direct/index.ts"
     },
     "./platform/server/fetch": {
       "electron": "./src/platform/server/fetch/index.electron.ts",

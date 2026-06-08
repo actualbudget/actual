@@ -3,6 +3,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { captureException } from '#platform/exceptions';
 import * as asyncStorage from '#platform/server/asyncStorage';
 import * as connection from '#platform/server/connection';
+import {
+  fetchFaviconDirect,
+  fetchImageDirect,
+} from '#platform/server/favicon-direct';
 import { fetch } from '#platform/server/fetch';
 import { logger } from '#platform/server/log';
 import { createApp } from '#server/app';
@@ -228,6 +232,9 @@ async function fetchFaviconHandler({
 }): Promise<FaviconFetchResult> {
   const server = getServer();
   if (!server?.BASE_SERVER) {
+    if (fetchFaviconDirect) {
+      return fetchFaviconDirect(url);
+    }
     const err = new Error(FAVICON_NO_SYNC_SERVER);
     err.name = FAVICON_NO_SYNC_SERVER;
     throw err;
@@ -245,7 +252,6 @@ export async function tryAutoFetchBankIcon(
 ): Promise<void> {
   try {
     const server = getServer();
-    if (!server?.BASE_SERVER) return;
 
     const bank = await db.first<Pick<db.DbBank, 'id' | 'icon'>>(
       'SELECT id, icon FROM banks WHERE id = ?',
@@ -253,12 +259,22 @@ export async function tryAutoFetchBankIcon(
     );
     if (!bank || bank.icon) return;
 
-    const result = await fetchFaviconViaProxy(
-      server.BASE_SERVER,
-      source.kind === 'image'
-        ? { kind: 'image', url: source.imageUrl }
-        : { kind: 'website', url: source.website },
-    );
+    let result: FaviconFetchResult;
+    if (server?.BASE_SERVER) {
+      result = await fetchFaviconViaProxy(
+        server.BASE_SERVER,
+        source.kind === 'image'
+          ? { kind: 'image', url: source.imageUrl }
+          : { kind: 'website', url: source.website },
+      );
+    } else if (fetchFaviconDirect && fetchImageDirect) {
+      result =
+        source.kind === 'image'
+          ? await fetchImageDirect(source.imageUrl)
+          : await fetchFaviconDirect(source.website);
+    } else {
+      return;
+    }
 
     const raw = Buffer.from(result.base64, 'base64');
     if (raw.byteLength > MAX_ICON_INPUT_DECODE_BYTES) {

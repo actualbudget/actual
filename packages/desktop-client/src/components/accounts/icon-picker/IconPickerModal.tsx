@@ -4,12 +4,14 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { FormError } from '@actual-app/components/form-error';
+import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
+import { isElectron } from '@actual-app/core/shared/environment';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { accountQueries } from '#accounts';
@@ -106,8 +108,9 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
   const account = useAccount(accountId);
   const serverURL = useServerURL();
 
-  // Favicon fetch goes through the sync server; without it, default to Upload.
-  const hasFaviconProxy = !!serverURL;
+  // Favicon fetch uses the sync server proxy in web contexts. In Electron the
+  // loot-core server can fetch directly, so no external server is required.
+  const hasFaviconProxy = !!serverURL || isElectron();
 
   const [tab, setTab] = useState<Tab>(hasFaviconProxy ? 'favicon' : 'upload');
   const [scope, setScope] = useState<Scope>('account');
@@ -184,6 +187,7 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
             <CurrentIconPreview
               icon={previewIcon ?? effectiveIcon}
               accountName={account.name}
+              isBusy={isBusy}
             />
 
             {canEditBank && (
@@ -295,9 +299,11 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
 function CurrentIconPreview({
   icon,
   accountName,
+  isBusy,
 }: {
   icon: string | null;
   accountName: string;
+  isBusy: boolean;
 }) {
   return (
     <View
@@ -323,7 +329,13 @@ function CurrentIconPreview({
           overflow: 'hidden',
         }}
       >
-        {icon ? (
+        {isBusy ? (
+          <AnimatedLoading
+            width={24}
+            height={24}
+            style={{ color: theme.pageTextSubdued }}
+          />
+        ) : icon ? (
           <img
             src={icon}
             alt=""
@@ -479,8 +491,8 @@ function FaviconTab({
     <View style={{ gap: 8 }}>
       <Text style={{ fontSize: 12, color: theme.pageTextSubdued }}>
         <Trans>
-          Enter a bank or institution URL. The sync server will fetch the
-          favicon and embed it locally as base64 so it works offline.
+          Enter a bank or institution URL. The favicon will be fetched and
+          embedded locally so it works offline.
         </Trans>
       </Text>
       <View
