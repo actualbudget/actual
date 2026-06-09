@@ -650,7 +650,12 @@ export function createBudgetGraph(
   });
 
   if (aggregated.toBudget > 0) {
-    addNode(graph, SpecialNodeKeys.ToBudget, GraphLayers.Account, 'To budget');
+    addNode(
+      graph,
+      SpecialNodeKeys.ToBudget,
+      GraphLayers.CategoryGroup,
+      'To budget',
+    );
     addValueToLink(
       graph,
       SpecialNodeKeys.AvailableIncome,
