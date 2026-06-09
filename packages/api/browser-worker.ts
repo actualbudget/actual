@@ -1,8 +1,9 @@
-// Web Worker entry for @actual-app/api's browser build.
+// Web Worker entry for @actual-app/api's browser build. Owns the real
+// loot-core backend; built standalone by vite.browser-worker.config.mts.
 
-import * as connection from '#platform/server/connection';
-import { handlers, init } from '#server/main';
-import type { InitConfig } from '#server/main';
+import * as connection from '@actual-app/core/platform/server/connection';
+import { handlers, init } from '@actual-app/core/server/main';
+import type { InitConfig } from '@actual-app/core/server/main';
 
 // Consumer bundlers run import-analysis on `.js` URLs and choke on loot-core's
 // JS migrations (`#`-subpath imports). The build ships those with a `.data`

@@ -57,7 +57,7 @@ function copyMigrationsAndDefaultDb() {
       // loot-core's browser fs fetches `${PUBLIC_URL}data-file-index.txt` and
       // `${PUBLIC_URL}data/<name>`; PUBLIC_URL points at this dist/ at runtime.
       // JS migrations get a `.data` suffix so consumer bundlers don't run
-      // import-analysis on them; api-browser-worker.ts maps the names back.
+      // import-analysis on them; browser-worker.ts maps the names back.
       const dataDir = path.join(distDir, 'data');
       const dataMigrationsDir = path.join(dataDir, 'migrations');
       fs.mkdirSync(dataMigrationsDir, { recursive: true });

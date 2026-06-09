@@ -5,10 +5,8 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import peggyLoader from 'vite-plugin-peggy-loader';
 
 const distDir = path.resolve(__dirname, 'dist');
-const lootCoreRoot = path.resolve(__dirname, '../loot-core');
 
-// Worker bundle: full loot-core + sql.js + absurd-sql. Builds from loot-core's
-// source so its `#`-subpath imports resolve.
+// Worker bundle: full loot-core + sql.js + absurd-sql.
 export default defineConfig({
   define: {
     // Runtime env (PUBLIC_URL etc.) comes from the api-browser/init handler via
@@ -21,7 +19,7 @@ export default defineConfig({
     emptyOutDir: false,
     sourcemap: true,
     lib: {
-      entry: path.resolve(lootCoreRoot, 'src/server/api-browser-worker.ts'),
+      entry: path.resolve(__dirname, 'browser-worker.ts'),
       formats: ['es'],
       fileName: () => 'worker.js',
     },
