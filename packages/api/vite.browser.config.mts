@@ -4,19 +4,13 @@ import { defineConfig } from 'vite';
 
 const distDir = path.resolve(__dirname, 'dist');
 
-// Main-thread facade only. Small bundle: no sql.js, no absurd-sql, no
-// loot-core backend. The worker is built separately by
-// vite.browser-worker.config.mts.
-//
-// The `api-browser` resolve condition makes loot-core's `server/main` export
-// resolve to its worker-routing `lib` (server/main.api-browser.ts) instead of
-// the in-process Node backend, so methods.ts's `lib.send` goes over postMessage
-// without pulling the full loot-core graph into this bundle.
+// Main-thread facade only (no backend in this bundle). The `api-browser`
+// condition resolves loot-core's server/main to its worker-routing `lib`, so
+// methods.ts's `lib.send` crosses to the worker.
 export default defineConfig({
   define: {
-    // loot-core's client connection reads `global.Actual.getServerSocket()`;
-    // map the bare `global` reference onto `globalThis` (no node polyfills in
-    // this facade bundle) so the shim set in index.browser.ts is visible.
+    // loot-core's client connection reads `global.Actual`; map bare `global` to
+    // globalThis (no node polyfills here) so index.browser.ts's shim is visible.
     global: 'globalThis',
   },
   build: {

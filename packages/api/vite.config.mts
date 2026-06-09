@@ -50,25 +50,14 @@ function copyMigrationsAndDefaultDb() {
       }
       fs.copyFileSync(defaultDbPath, path.join(distDir, 'default-db.sqlite'));
 
-      // Browser consumers need sql.js' WASM to be served at the same origin
-      // as the bundle. Ship it alongside dist/ so downstream apps just point
-      // a static handler at dist and don't have to reach into node_modules.
+      // Ship sql.js' WASM next to the bundle so consumers serve it same-origin.
       const sqlJsWasm = require.resolve('@jlongster/sql.js/dist/sql-wasm.wasm');
       fs.copyFileSync(sqlJsWasm, path.join(distDir, 'sql-wasm.wasm'));
 
-      // loot-core's browser fs bootstraps by fetching:
-      //   `${PUBLIC_URL}data-file-index.txt`  - flat manifest
-      //   `${PUBLIC_URL}data/<name>`          - each file listed in the manifest
-      // We point PUBLIC_URL at the api's dist dir at runtime (see
-      // index.browser.ts), so these two shapes need to exist here.
-      //
-      // JS migrations get a `.data` suffix on the *wire* path. Consumer
-      // bundlers (Vite's dev server first, others to varying degrees)
-      // auto-transform `.js` URLs through their import-analysis pipelines,
-      // which fails on loot-core's `#`-subpath imports. The api's worker
-      // (browser-worker.ts) wraps `fetch` to translate back to `.js` so
-      // loot-core's migration runner finds the file under its original
-      // name in the virtual FS. `.sql` migrations stay as-is.
+      // loot-core's browser fs fetches `${PUBLIC_URL}data-file-index.txt` and
+      // `${PUBLIC_URL}data/<name>`; PUBLIC_URL points at this dist/ at runtime.
+      // JS migrations get a `.data` suffix so consumer bundlers don't run
+      // import-analysis on them; api-browser-worker.ts maps the names back.
       const dataDir = path.join(distDir, 'data');
       const dataMigrationsDir = path.join(dataDir, 'migrations');
       fs.mkdirSync(dataMigrationsDir, { recursive: true });
