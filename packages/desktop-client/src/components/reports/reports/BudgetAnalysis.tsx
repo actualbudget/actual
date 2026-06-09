@@ -6,7 +6,7 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { SvgChart, SvgChartBar } from '@actual-app/components/icons/v1';
+import { SvgChart, SvgChartBar, SvgViewHide, SvgViewShow } from '@actual-app/components/icons/v1';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Select } from '@actual-app/components/select';
 import { theme } from '@actual-app/components/theme';
@@ -373,11 +373,24 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
             ]}
           />
 
-          <Button onPress={() => setShowHiddenCategories(state => !state)}>
-            {showHiddenCategories
-              ? t('Hide hidden categories')
-              : t('Show hidden categories')}
-          </Button>
+          <Tooltip
+            content={
+              showHiddenCategories
+                ? t('Hide hidden categories')
+                : t('Show hidden categories')
+            }
+          >
+            <Button
+              variant="bare"
+              onPress={() => setShowHiddenCategories(state => !state)}
+            >
+              {showHiddenCategories ? (
+                <SvgViewHide style={{ width: 16, height: 16 }} />
+              ) : (
+                <SvgViewShow style={{ width: 16, height: 16 }} />
+              )}
+            </Button>
+          </Tooltip>
 
           {widget && (
             <Button variant="primary" onPress={onSaveWidget}>
