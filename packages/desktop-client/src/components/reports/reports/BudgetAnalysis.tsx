@@ -93,6 +93,9 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   const [showBalance, setShowBalance] = useState(
     widget?.meta?.showBalance ?? true,
   );
+  const [balanceOnly, setBalanceOnly] = useState(
+    widget?.meta?.balanceOnly ?? false,
+  );
   const [latestTransaction, setLatestTransaction] = useState('');
   const [isConcise, setIsConcise] = useState(() => {
     // Default to concise (monthly) view until we load the actual date range
@@ -225,6 +228,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
             },
             graphType,
             showBalance,
+            balanceOnly,
           },
         },
       },
@@ -337,9 +341,15 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         }
       >
         <View style={{ flexDirection: 'row', gap: 10 }}>
-          <Button onPress={() => setShowBalance(state => !state)}>
-            {showBalance ? t('Hide balance') : t('Show balance')}
+          <Button onPress={() => setBalanceOnly(state => !state)}>
+            {balanceOnly ? t('Show all series') : t('Balance only')}
           </Button>
+
+          {!balanceOnly && (
+            <Button onPress={() => setShowBalance(state => !state)}>
+              {showBalance ? t('Hide balance') : t('Show balance')}
+            </Button>
+          )}
 
           {widget && (
             <Button variant="primary" onPress={onSaveWidget}>
@@ -469,6 +479,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                 data={data}
                 graphType={graphType}
                 showBalance={showBalance}
+                balanceOnly={balanceOnly}
                 isConcise={isConcise}
               />
               <View style={{ marginTop: 30 }}>
