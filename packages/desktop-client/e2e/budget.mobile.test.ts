@@ -57,19 +57,29 @@ async function setBudgetAverage(
   ) => Promise<void>,
 ) {
   let totalSpent = 0;
+  let validNumberOfMonths = 0;
 
   for (let i = 0; i < numberOfMonths; i++) {
     await budgetPage.goToPreviousMonth();
     const spentButton = await budgetPage.getButtonForSpent(categoryName);
     const spent = await spentButton.textContent();
-    if (!spent) {
+    const budgetedButton = await budgetPage.getButtonForBudgeted(categoryName);
+    const budgeted = await budgetedButton.textContent();
+    if (!spent || !budgeted) {
       throw new Error('Failed to get spent amount');
     }
+    const spentAmount = currencyToAmount(spent) ?? 0;
+    const budgetedAmount = currencyToAmount(budgeted) ?? 0;
+    if (spentAmount === 0 && budgetedAmount === 0) {
+      break;
+    }
     totalSpent += currencyToAmount(spent) ?? 0;
+    validNumberOfMonths++;
   }
 
   // Calculate average amount
-  const averageSpent = totalSpent / numberOfMonths;
+  const averageSpent =
+    validNumberOfMonths === 0 ? 0 : totalSpent / validNumberOfMonths;
 
   // Go back to the current month
   for (let i = 0; i < numberOfMonths; i++) {
