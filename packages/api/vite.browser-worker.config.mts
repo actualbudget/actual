@@ -7,9 +7,8 @@ import peggyLoader from 'vite-plugin-peggy-loader';
 const distDir = path.resolve(__dirname, 'dist');
 const lootCoreRoot = path.resolve(__dirname, '../loot-core');
 
-// Worker bundle: full loot-core + sql.js + absurd-sql, run inside a Web Worker.
-// The entry lives in loot-core (generic browser-package plumbing); pointing at
-// the source directly lets the build resolve loot-core's `#`-subpath imports.
+// Worker bundle: full loot-core + sql.js + absurd-sql. Builds from loot-core's
+// source so its `#`-subpath imports resolve.
 export default defineConfig({
   define: {
     // Runtime env (PUBLIC_URL etc.) comes from the api-browser/init handler via

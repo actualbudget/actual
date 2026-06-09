@@ -3,8 +3,8 @@ import type { Handlers } from '#types/handlers';
 
 import type * as T from './index-types';
 
-// In-process client for the api/node platform: the backend runs in the same
-// process, so sends go straight to the server handlers.
+// In-process client for the api/node platform, where the backend runs in the
+// same process.
 export const send = (async <K extends keyof Handlers>(
   name: K,
   args?: Parameters<Handlers[K]>[0],

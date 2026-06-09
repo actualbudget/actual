@@ -1,5 +1,4 @@
-// Resolved per build: in-process (api/node condition) or the client connection
-// to the backend Worker (browser default).
+// Resolved per build: in-process (api condition) or the Worker client (browser).
 import { send } from '@actual-app/core/platform/client/connection';
 import type {
   APIAccountEntity,

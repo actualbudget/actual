@@ -1,6 +1,4 @@
-// Web Worker entry for loot-core shipped as a browser npm package (used by
-// @actual-app/api). Owns the real backend (sql.js + absurd-sql + IndexedDB) and
-// speaks loot-core's postMessage protocol via platform/server/connection.
+// Web Worker entry for @actual-app/api's browser build.
 
 import * as connection from '#platform/server/connection';
 import { handlers, init } from '#server/main';
@@ -36,8 +34,7 @@ import type { InitConfig } from '#server/main';
   }) as typeof fetch;
 }
 
-// Worker-local handler (not in the shared Handlers type): runs loot-core's
-// init() on demand and points its fs at the api's dist/ via PUBLIC_URL.
+// Worker-local handler, not part of the shared Handlers type.
 (handlers as Record<string, (args?: unknown) => Promise<unknown>>)[
   'api-browser/init'
 ] = async function (args?: unknown) {

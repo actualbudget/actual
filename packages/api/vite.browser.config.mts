@@ -4,8 +4,7 @@ import { defineConfig } from 'vite';
 
 const distDir = path.resolve(__dirname, 'dist');
 
-// Main-thread facade only — methods.ts sends over loot-core's client
-// connection, so the backend never enters this bundle.
+// Main-thread facade bundle — the backend never enters it.
 export default defineConfig({
   build: {
     target: 'esnext',

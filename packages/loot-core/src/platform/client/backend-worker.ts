@@ -3,16 +3,9 @@ import { initBackend } from 'absurd-sql/dist/indexeddb-main-thread';
 import * as connection from '#platform/client/connection';
 import type { InitConfig } from '#server/main';
 
-/**
- * Boot a backend Web Worker (see server/api-browser-worker.ts): install
- * absurd-sql's main-thread bridge (without it the worker's first sqlite write
- * hangs waiting for the IndexedDB helper to spawn), connect the client
- * connection, and run the server's init. `assetsBaseUrl` is where the worker
- * fetches loot-core's data files (sql wasm, default db, migrations) from.
- *
- * Used by @actual-app/api's browser entry; the desktop app has its own
- * multi-tab setup in browser-preload/.
- */
+// Boot a backend Web Worker (server/api-browser-worker.ts). initBackend
+// installs absurd-sql's main-thread bridge — without it the worker's first
+// sqlite write hangs waiting for the IndexedDB helper to spawn.
 export async function startBackendWorker(
   worker: Worker,
   config: InitConfig,

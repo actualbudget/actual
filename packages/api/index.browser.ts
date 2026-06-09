@@ -1,7 +1,3 @@
-// Browser entry for @actual-app/api: the backend runs in a Web Worker
-// (absurd-sql requires one); loot-core owns the worker plumbing. Public
-// surface matches the Node entry.
-
 import { startBackendWorker } from '@actual-app/core/platform/client/backend-worker';
 import { send } from '@actual-app/core/platform/client/connection';
 import type { InitConfig } from '@actual-app/core/server/main';
@@ -19,12 +15,11 @@ export async function init(
   const rel = './worker.js';
   worker = new Worker(new URL(rel, import.meta.url), { type: 'module' });
 
-  // Assets (sql wasm, default db, migrations) ship next to this bundle; derive
-  // the dir via string manipulation so consumer asset analyzers leave it alone.
+  // String manipulation, not `new URL('.', import.meta.url)`, so consumer
+  // asset analyzers leave it alone.
   const assetsBaseUrl = import.meta.url.replace(/[^/]+$/, '');
   await startBackendWorker(worker, config, assetsBaseUrl);
 
-  // {send} handle for parity with the Node entry's init() return.
   return { send };
 }
 
