@@ -261,14 +261,28 @@ export function CategoryAutocomplete({
         return suggestions;
       }
 
-      const filtered = new Fzf(realSuggestions, {
-        selector: item =>
-          item.group ? item.group.name + ' ' + item.name : item.name,
+      const nameMatches = new Fzf(realSuggestions, {
+        selector: item => item.name,
         limit: 100,
         casing: 'case-insensitive',
       })
         .find(value)
         .map(result => result.item);
+
+      const nameMatchIds = new Set(nameMatches.map(item => item.id));
+      const groupMatches = new Fzf(
+        realSuggestions.filter(item => !nameMatchIds.has(item.id)),
+        {
+          selector: item =>
+            item.group ? item.group.name + ' ' + item.name : item.name,
+          limit: 100,
+          casing: 'case-insensitive',
+        },
+      )
+        .find(value)
+        .map(result => result.item);
+
+      const filtered = [...nameMatches, ...groupMatches].slice(0, 100);
 
       return splitItem ? [splitItem, ...filtered] : filtered;
     },
