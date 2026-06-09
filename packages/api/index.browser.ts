@@ -19,8 +19,7 @@
 // them together in dist/; the consumer's bundler resolves the worker URL
 // via `new URL(..., import.meta.url)`.
 
-import { createBackendWorker } from '@actual-app/core/platform/client/backend-worker';
-import type { BackendWorker } from '@actual-app/core/platform/client/backend-worker';
+import { initBrowserBackend } from '@actual-app/core/platform/client/backend-worker';
 import * as connection from '@actual-app/core/platform/client/connection';
 import type { InitConfig } from '@actual-app/core/server/main';
 
@@ -28,8 +27,8 @@ export * from './methods';
 export * as utils from './utils';
 
 // The connection layer keeps the worker internally; hold our own handle so
-// shutdown() can terminate it (and the IDB helper worker absurd-sql spawned).
-let backend: BackendWorker | null = null;
+// shutdown() can terminate it.
+let worker: Worker | null = null;
 
 // connection.send is typed against the Handlers union; the api facade forwards
 // arbitrary names (including the worker-local 'api-browser/init'), so use a
@@ -50,15 +49,16 @@ function createWorker(): Worker {
 }
 
 export async function init(config: InitConfig = {}) {
-  // createBackendWorker installs absurd-sql's main-thread bridge. loot-core's
+  // initBrowserBackend installs absurd-sql's main-thread bridge. loot-core's
   // client connection grabs the worker through `global.Actual.getServerSocket`
   // (the same seam the desktop app uses); we satisfy it with a minimal shim
   // rather than the full desktop `global.Actual`.
-  backend = createBackendWorker(createWorker());
-  const worker = backend.worker;
+  worker = createWorker();
+  initBrowserBackend(worker);
+  const socket = worker;
   (
     globalThis as unknown as { Actual: { getServerSocket: () => Worker } }
-  ).Actual = { getServerSocket: () => worker };
+  ).Actual = { getServerSocket: () => socket };
 
   // Resolves once the worker posts `connect`; also drains the client's
   // message queue and completes the handshake.
@@ -89,8 +89,8 @@ export async function shutdown() {
   } catch {
     // ignore
   }
-  if (backend) {
-    backend.terminate();
-    backend = null;
+  if (worker) {
+    worker.terminate();
+    worker = null;
   }
 }

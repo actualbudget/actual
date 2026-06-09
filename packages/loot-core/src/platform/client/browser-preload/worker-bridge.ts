@@ -1,5 +1,5 @@
-import { createBackendWorker } from '#platform/client/backend-worker';
-import type { BackendWorker } from '#platform/client/backend-worker';
+import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
+
 import { logger } from '#platform/server/log';
 
 type BridgeMessage = { type?: string; [key: string]: unknown };
@@ -32,7 +32,7 @@ export class WorkerBridge {
   _currentBudgetId: string | null;
   _wasHidden: boolean;
   _onVisibilityChange: () => void;
-  localBackendWorker: BackendWorker | null;
+  localBackendWorker: Worker | null;
   backendWorkerUrl: URL;
 
   constructor(sharedPort: MessagePort, backendWorkerUrl: URL) {
@@ -222,15 +222,21 @@ export class WorkerBridge {
     pendingMsg: Record<string, unknown> | null,
   ) {
     this._terminateLocalBackendWorker();
-    // createBackendWorker installs absurd-sql's main-thread bridge and filters
-    // its internal __absurd:* messages, so onMessage only sees loot-core's
-    // backend protocol.
-    const backend = createBackendWorker(new Worker(this.backendWorkerUrl));
-    this.localBackendWorker = backend;
+    const localWorker = new Worker(this.backendWorkerUrl);
+    this.localBackendWorker = localWorker;
+    initSQLBackend(localWorker);
 
     const sharedPort = this._sharedPort;
-    backend.onMessage(data => {
-      const workerMsg = data as BridgeMessage;
+    localWorker.onmessage = workerEvent => {
+      const workerMsg = workerEvent.data as BridgeMessage;
+      // absurd-sql internal messages are handled by initSQLBackend
+      if (
+        workerMsg &&
+        typeof workerMsg.type === 'string' &&
+        workerMsg.type.startsWith('__absurd:')
+      ) {
+        return;
+      }
       // After the backend connects, automatically reload the budget that was
       // open before the leader left (e.g. page refresh). This lets other tabs
       // continue working without being sent to the budget list.
@@ -241,7 +247,7 @@ export class WorkerBridge {
           );
           const id = budgetToRestore;
           budgetToRestore = null;
-          backend.postMessage({
+          localWorker.postMessage({
             id: '__restore-budget',
             name: 'load-budget',
             args: { id },
@@ -257,12 +263,12 @@ export class WorkerBridge {
         } else if (pendingMsg) {
           const toSend = pendingMsg;
           pendingMsg = null;
-          backend.postMessage(toSend);
+          localWorker.postMessage(toSend);
         }
       }
       sharedPort.postMessage({ type: '__from-worker', msg: workerMsg });
-    });
+    };
 
-    backend.postMessage(initMsg);
+    localWorker.postMessage(initMsg);
   }
 }
