@@ -186,5 +186,5 @@ Use `oauth2` for providers like GitHub that don't fully support OpenID discovery
   **Possible Values:** `manual` or `login` (default is `manual`)
 
 :::tip
-Configuring the OpenID provider from options supports discovery; otherwise, use [file configuration](oauth-auth#config-using-configuration-file)
+Configuring the OpenID provider from options supports discovery; otherwise, use [file configuration](oauth-auth#configuration-using-a-configuration-file)
 :::

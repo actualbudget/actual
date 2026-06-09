@@ -12,7 +12,7 @@ Standard on most screens:
 
 ## Top Right Corner
 
-- The eye icon will scramble the numbers on the screen. This is useful if you need to report a bug to the Actual team but want to keep your numbers private. There are some caveats to this, so please read [Scramble and Hide Data](/docs/getting-started/tips-tricks#scramble-and-hide-data) in the Tips & Tricks guide.
+- The eye icon will scramble the numbers on the screen. This is useful if you need to report a bug to the Actual team but want to keep your numbers private. There are some caveats to this, so please read [Scramble and Hide Data](/docs/getting-started/tips-tricks#scramble-hide) in the Tips & Tricks guide.
 - Clicking on the refresh icon will force a sync of your local file to the server. Note: it does **not** perform a bank sync.
 - Server status: _Server online_ shows the server is connected, _Server offline_ shows the server is disconnected, and _No server_ shows if you are not using a server. If you click on this text a server menu pops up.
 - The farthest right item is a Help menu.

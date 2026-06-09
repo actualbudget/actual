@@ -522,7 +522,7 @@ Create a category group. Returns the `id` of the new group.
 
 <Method name="updateCategoryGroup" args={[{ name: 'id', type: 'id' }, { name: 'fields', type: 'object' }]} returns="Promise<id>" />
 
-Update fields of a category group. `fields` can specify any field described in [`CategoryGroup`](#categorygroup).
+Update fields of a category group. `fields` can specify any field described in [`CategoryGroup`](#category-group).
 
 #### `deleteCategoryGroup`
 
@@ -737,7 +737,7 @@ Create schedule based on information filled in the schedule object. Please refer
 
 <Method name="updateSchedule" args={[{ name: 'id', type: 'id' }, { name: 'fields', type: 'object' }]} returns="Promise<schedule>" />
 
-Update fields of a rule. `fields` can specify any field described in [`Schedule`](#Schedule). Returns the updated rule.
+Update fields of a rule. `fields` can specify any field described in [`Schedule`](#schedule). Returns the updated rule.
 
 #### `deleteSchedule`
 
