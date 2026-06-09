@@ -44,7 +44,10 @@ import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 
-type BalanceMode = 'balance-only' | 'balance-and-categories' | 'categories-only';
+type BalanceMode =
+  | 'balance-only'
+  | 'balance-and-categories'
+  | 'categories-only';
 
 export function BudgetAnalysis() {
   const params = useParams();

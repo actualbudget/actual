@@ -1,10 +1,11 @@
 import React from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
+
+import { TestProviders } from '#mocks';
 
 import { BudgetAnalysisGraph } from './BudgetAnalysisGraph';
-
-import { TestProviders } from '@desktop-client/mocks';
 
 const sampleData = {
   intervalData: [
@@ -74,11 +75,7 @@ describe('BudgetAnalysisGraph – balanceOnly', () => {
     // When balanceOnly=true the component always renders a LineChart
     render(
       <TestProviders>
-        <BudgetAnalysisGraph
-          data={sampleData}
-          graphType="Bar"
-          balanceOnly
-        />
+        <BudgetAnalysisGraph data={sampleData} graphType="Bar" balanceOnly />
       </TestProviders>,
     );
     expect(document.querySelector('svg')).toBeInTheDocument();
