@@ -16,7 +16,7 @@ It is the authoritative source for front matter, heading rules, folder structure
 1. Read `writing-docs.md` in full before drafting.
 2. When the guide does not cover something, match the closest existing document in the same section rather than inventing a new pattern — site-wide consistency matters more than a marginally better local choice.
 3. For new screenshots, follow both the placement rule (`/static/img/<section>/<doc-prefix>-...png`) and the annotation guidance from the guide. Annotate any screenshot showing more than one element the reader needs to distinguish.
-4. Before declaring the work done, sanity-check the file against the guide's structural rules: exactly one H1, Title Case headings, no time-bound phrasing, images referenced from the correct path, and any new technical terms added to `.github/actions/spelling/allow/keywords.txt` so the spell-check bot passes.
+4. Before declaring the work done, sanity-check the file against the guide's structural rules: exactly one H1, Title Case headings, no time-bound phrasing, internal links written as relative file paths with the `.md` extension (not `/docs/...` URLs), images referenced from the correct path, and any new technical terms added to `.github/actions/spelling/allow/keywords.txt` so the spell-check bot passes.
 
 ## Why this matters
 
