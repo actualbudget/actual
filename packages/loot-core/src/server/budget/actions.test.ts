@@ -8,9 +8,9 @@ import {
   copyUntilYearEnd,
   coverOverbudgeted,
   getSheetValue,
+  set3MonthAvg,
   setBudget,
   setCategoryCarryover,
-  set3MonthAvg,
   setNMonthAvg,
 } from './actions';
 import * as budget from './base';
