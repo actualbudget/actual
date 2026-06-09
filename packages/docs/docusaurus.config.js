@@ -15,6 +15,7 @@ module.exports = {
   url: 'https://actualbudget.org/',
   baseUrl: '/',
   onBrokenLinks: 'throw',
+  onBrokenAnchors: 'throw',
   favicon: 'img/favicon.ico',
 
   projectName: 'actualbudget.github.io',
