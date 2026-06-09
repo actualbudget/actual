@@ -14,6 +14,7 @@ import * as statements from './statements';
 
 // Mock getSheetValue and getCategories
 vi.mock('./actions', () => ({
+  getCategoryAverage: vi.fn(),
   getSheetValue: vi.fn(),
   getSheetBoolean: vi.fn(),
   isTrackingBudget: vi.fn(),
@@ -663,16 +664,18 @@ describe('CategoryTemplateContext', () => {
         priority: 1,
       };
 
-      vi.mocked(actions.getSheetValue)
-        .mockResolvedValueOnce(-100) // Dec 2023
-        .mockResolvedValueOnce(-200) // Nov 2023
-        .mockResolvedValueOnce(-300); // Oct 2023
+      vi.mocked(actions.getCategoryAverage).mockResolvedValue(-200);
 
       const result = await CategoryTemplateContext.runAverage(
         template,
         instance,
       );
       expect(result).toBe(200); // Average of -100, -200, -300
+      expect(actions.getCategoryAverage).toHaveBeenCalledWith({
+        month: '2024-01',
+        maxMonths: 3,
+        categoryId: 'test',
+      });
     });
 
     it('should handle zero amounts', async () => {
@@ -683,10 +686,7 @@ describe('CategoryTemplateContext', () => {
         priority: 1,
       };
 
-      vi.mocked(actions.getSheetValue)
-        .mockResolvedValueOnce(0)
-        .mockResolvedValueOnce(0)
-        .mockResolvedValueOnce(-300);
+      vi.mocked(actions.getCategoryAverage).mockResolvedValue(-100);
 
       const result = await CategoryTemplateContext.runAverage(
         template,
@@ -703,16 +703,36 @@ describe('CategoryTemplateContext', () => {
         priority: 1,
       };
 
-      vi.mocked(actions.getSheetValue)
-        .mockResolvedValueOnce(-100)
-        .mockResolvedValueOnce(200)
-        .mockResolvedValueOnce(-300);
+      vi.mocked(actions.getCategoryAverage).mockResolvedValue(-(200 / 3));
 
       const result = await CategoryTemplateContext.runAverage(
         template,
         instance,
       );
       expect(result).toBe(67); // Average of -100, 200, -300
+    });
+
+    it('should use the shared average helper with the template range', async () => {
+      const template: Template = {
+        type: 'average',
+        numMonths: 3,
+        directive: 'template',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getCategoryAverage).mockResolvedValue(-150);
+
+      const result = await CategoryTemplateContext.runAverage(
+        template,
+        instance,
+      );
+
+      expect(result).toBe(150);
+      expect(actions.getCategoryAverage).toHaveBeenCalledWith({
+        month: '2024-01',
+        maxMonths: 3,
+        categoryId: 'test',
+      });
     });
 
     it('should handle positive percent adjustments', async () => {
@@ -725,10 +745,7 @@ describe('CategoryTemplateContext', () => {
         adjustmentType: 'percent',
       };
 
-      vi.mocked(actions.getSheetValue)
-        .mockResolvedValueOnce(-100)
-        .mockResolvedValueOnce(-100)
-        .mockResolvedValueOnce(-100);
+      vi.mocked(actions.getCategoryAverage).mockResolvedValue(-100);
 
       const result = await CategoryTemplateContext.runAverage(
         template,
@@ -747,10 +764,7 @@ describe('CategoryTemplateContext', () => {
         adjustmentType: 'percent',
       };
 
-      vi.mocked(actions.getSheetValue)
-        .mockResolvedValueOnce(-100)
-        .mockResolvedValueOnce(-100)
-        .mockResolvedValueOnce(-100);
+      vi.mocked(actions.getCategoryAverage).mockResolvedValue(-100);
 
       const result = await CategoryTemplateContext.runAverage(
         template,
@@ -768,10 +782,7 @@ describe('CategoryTemplateContext', () => {
         adjustmentType: 'percent',
       };
 
-      vi.mocked(actions.getSheetValue)
-        .mockResolvedValueOnce(-100)
-        .mockResolvedValueOnce(-100)
-        .mockResolvedValueOnce(-100);
+      vi.mocked(actions.getCategoryAverage).mockResolvedValue(-100);
 
       const result = await CategoryTemplateContext.runAverage(
         template,
@@ -796,31 +807,18 @@ describe('CategoryTemplateContext', () => {
         priority: 1,
       };
 
-      vi.mocked(actions.getSheetValue)
-        .mockResolvedValueOnce(-100) // Dec 2023
-        .mockResolvedValueOnce(-200) // Nov 2023
-        .mockResolvedValueOnce(-300); // Oct 2023
+      vi.mocked(actions.getCategoryAverage).mockResolvedValue(-200);
 
       const result = await CategoryTemplateContext.runAverage(
         template,
         instance,
       );
       expect(result).toBe(200);
-      expect(actions.getSheetValue).toHaveBeenNthCalledWith(
-        1,
-        'budget202312',
-        'sum-amount-test',
-      );
-      expect(actions.getSheetValue).toHaveBeenNthCalledWith(
-        2,
-        'budget202311',
-        'sum-amount-test',
-      );
-      expect(actions.getSheetValue).toHaveBeenNthCalledWith(
-        3,
-        'budget202310',
-        'sum-amount-test',
-      );
+      expect(actions.getCategoryAverage).toHaveBeenCalledWith({
+        month: '2024-03',
+        maxMonths: 3,
+        categoryId: 'test',
+      });
     });
 
     it('should handle zero amount adjustments', async () => {
@@ -833,10 +831,7 @@ describe('CategoryTemplateContext', () => {
         adjustmentType: 'fixed',
       };
 
-      vi.mocked(actions.getSheetValue)
-        .mockResolvedValueOnce(-100)
-        .mockResolvedValueOnce(-100)
-        .mockResolvedValueOnce(-100);
+      vi.mocked(actions.getCategoryAverage).mockResolvedValue(-100);
 
       const result = await CategoryTemplateContext.runAverage(
         template,
@@ -855,10 +850,7 @@ describe('CategoryTemplateContext', () => {
         adjustmentType: 'fixed',
       };
 
-      vi.mocked(actions.getSheetValue)
-        .mockResolvedValueOnce(-10000)
-        .mockResolvedValueOnce(-10000)
-        .mockResolvedValueOnce(-10000);
+      vi.mocked(actions.getCategoryAverage).mockResolvedValue(-10000);
 
       const result = await CategoryTemplateContext.runAverage(
         template,
@@ -877,10 +869,7 @@ describe('CategoryTemplateContext', () => {
         adjustmentType: 'fixed',
       };
 
-      vi.mocked(actions.getSheetValue)
-        .mockResolvedValueOnce(-10000)
-        .mockResolvedValueOnce(-10000)
-        .mockResolvedValueOnce(-10000);
+      vi.mocked(actions.getCategoryAverage).mockResolvedValue(-10000);
 
       const result = await CategoryTemplateContext.runAverage(
         template,

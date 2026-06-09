@@ -59,6 +59,11 @@ function dbMonth(month: string): number {
   return parseInt(month.replace('-', ''));
 }
 
+function monthFromDbMonth(month: number): string {
+  const monthString = String(month).padStart(6, '0');
+  return `${monthString.slice(0, 4)}-${monthString.slice(4)}`;
+}
+
 // TODO: complete list of fields.
 type BudgetData = {
   is_income: 1 | 0;
@@ -282,30 +287,17 @@ export async function set3MonthAvg({
   `,
   );
 
-  const prevMonth1 = getAverageStartMonth(month);
-  const prevMonth2 = monthUtils.prevMonth(prevMonth1);
-  const prevMonth3 = monthUtils.prevMonth(prevMonth2);
-
   await batchMessages(async () => {
     for (const cat of categories) {
       if (cat.is_income === 1 && !isTrackingBudget()) {
         continue;
       }
 
-      const spent1 = await getSheetValue(
-        monthUtils.sheetForMonth(prevMonth1),
-        'sum-amount-' + cat.id,
-      );
-      const spent2 = await getSheetValue(
-        monthUtils.sheetForMonth(prevMonth2),
-        'sum-amount-' + cat.id,
-      );
-      const spent3 = await getSheetValue(
-        monthUtils.sheetForMonth(prevMonth3),
-        'sum-amount-' + cat.id,
-      );
-
-      let avg = Math.round((spent1 + spent2 + spent3) / 3);
+      let avg = await getCategoryAverage({
+        month,
+        maxMonths: 3,
+        categoryId: cat.id,
+      });
 
       if (cat.is_income === 0) {
         avg *= -1;
@@ -314,16 +306,6 @@ export async function set3MonthAvg({
       void setBudget({ category: cat.id, month, amount: avg });
     }
   });
-}
-
-function getAverageStartMonth(month: string): string {
-  const prevMonth = monthUtils.prevMonth(month);
-
-  if (prevMonth >= monthUtils.currentMonth()) {
-    return monthUtils.prevMonth(monthUtils.currentMonth());
-  }
-
-  return prevMonth;
 }
 
 export async function set12MonthAvg({
@@ -388,24 +370,104 @@ export async function setNMonthAvg({
     [category],
   );
 
-  let prevMonth = getAverageStartMonth(month);
-  let sumAmount = 0;
-  for (let l = 0; l < N; l++) {
-    sumAmount += await getSheetValue(
-      monthUtils.sheetForMonth(prevMonth),
-      'sum-amount-' + category,
-    );
-    prevMonth = monthUtils.prevMonth(prevMonth);
-  }
-  await batchMessages(async () => {
-    let avg = Math.round(sumAmount / N);
+  let avg = await getCategoryAverage({
+    month,
+    maxMonths: N,
+    categoryId: category,
+  });
 
+  await batchMessages(async () => {
     if (categoryFromDb.is_income === 0) {
       avg *= -1;
     }
 
     void setBudget({ category, month, amount: avg });
   });
+}
+
+export async function getCategoryAverage({
+  month,
+  maxMonths,
+  categoryId,
+}: {
+  month: string;
+  maxMonths: number;
+  categoryId: string;
+}): Promise<number> {
+  const months = await getAverageMonths({
+    month,
+    maxMonths,
+    categoryId,
+  });
+  if (months.length === 0) {
+    return 0;
+  }
+
+  let sumAmount = 0;
+  for (const prevMonth of months) {
+    sumAmount += await getSheetValue(
+      monthUtils.sheetForMonth(prevMonth),
+      'sum-amount-' + categoryId,
+    );
+  }
+  return sumAmount / months.length;
+}
+
+async function getAverageMonths({
+  month,
+  maxMonths,
+  categoryId,
+}: {
+  month: string;
+  maxMonths: number;
+  categoryId: string;
+}): Promise<string[]> {
+  const firstMonth = getAverageStartMonth(month);
+  const firstBudgetMonth = await getFirstBudgetMonth({
+    categoryId,
+    endMonth: firstMonth,
+  });
+  const months: string[] = [];
+  let prevMonth = firstMonth;
+
+  for (let l = 0; l < maxMonths; l++) {
+    if (firstBudgetMonth != null && prevMonth < firstBudgetMonth) {
+      break;
+    }
+
+    months.push(prevMonth);
+    prevMonth = monthUtils.prevMonth(prevMonth);
+  }
+
+  return months;
+}
+
+function getAverageStartMonth(month: string): string {
+  const prevMonth = monthUtils.prevMonth(month);
+
+  if (prevMonth >= monthUtils.currentMonth()) {
+    return monthUtils.prevMonth(monthUtils.currentMonth());
+  }
+
+  return prevMonth;
+}
+
+async function getFirstBudgetMonth({
+  categoryId,
+  endMonth,
+}: {
+  categoryId: string;
+  endMonth: string;
+}): Promise<string | null> {
+  const table = getBudgetTable();
+  const firstBudget = await db.first<{ month: number | null }>(
+    `SELECT MIN(month) AS month FROM ${table} WHERE category = ? AND month <= ?`,
+    [categoryId, dbMonth(endMonth)],
+  );
+
+  return firstBudget?.month == null
+    ? null
+    : monthFromDbMonth(firstBudget.month);
 }
 
 export async function holdForNextMonth({

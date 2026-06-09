@@ -20,7 +20,12 @@ import type {
   Template,
 } from '#types/models/templates';
 
-import { getSheetBoolean, getSheetValue, isTrackingBudget } from './actions';
+import {
+  getCategoryAverage,
+  getSheetBoolean,
+  getSheetValue,
+  isTrackingBudget,
+} from './actions';
 import { runSchedule } from './schedule-template';
 import { getActiveSchedules } from './statements';
 
@@ -854,23 +859,15 @@ export class CategoryTemplateContext {
     template: AverageTemplate,
     templateContext: CategoryTemplateContext,
   ): Promise<number> {
-    let sum = 0;
-    let month = monthUtils.prevMonth(templateContext.month);
-    if (month >= monthUtils.currentMonth()) {
-      month = monthUtils.prevMonth(monthUtils.currentMonth());
-    }
-
-    for (let i = 0; i < template.numMonths; i++) {
-      const sheetName = monthUtils.sheetForMonth(month);
-      sum += await getSheetValue(
-        sheetName,
-        `sum-amount-${templateContext.category.id}`,
-      );
-      month = monthUtils.prevMonth(month);
-    }
-
+    let average = await getCategoryAverage({
+      month: templateContext.month,
+      maxMonths: template.numMonths,
+      categoryId: templateContext.category.id,
+    });
     // negate as sheet value is cost ie negative
-    let average = -(sum / template.numMonths);
+    if (average < 0) {
+      average *= -1;
+    }
 
     if (template.adjustment !== undefined && template.adjustmentType) {
       switch (template.adjustmentType) {
