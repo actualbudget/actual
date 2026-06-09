@@ -26,7 +26,6 @@ __metadata:
     "@actual-app/core": "workspace:*"
     "@actual-app/crdt": "workspace:*"
     "@typescript/native-preview": "npm:beta"
-    absurd-sql: "npm:0.0.54"
     better-sqlite3: "npm:^12.8.0"
     compare-versions: "npm:^6.1.1"
     npm-run-all: "npm:^4.1.5"
