@@ -360,6 +360,15 @@ export async function runRules(
     formulaStrings,
   );
 
+  const appliedRules = new Set();
+  const applyRule = rule => {
+    const changes = rule.exec(finalTrans);
+    if (changes) {
+      appliedRules.add(rule);
+      finalTrans = Object.assign({}, finalTrans, changes);
+    }
+  };
+
   for (let i = 0; i < rules.length; i++) {
     // If there is a scheduleRuleID (meaning this transaction came from a schedule) then exclude rules linked to other schedules.
     if (scheduleRuleID !== '') {
@@ -367,16 +376,35 @@ export async function runRules(
         // bypass condition checking to run the rule even if the transaction date falls outside of the schedule's date range.
         const changes = rules[i].execActions(finalTrans);
         finalTrans = Object.assign({}, finalTrans, changes);
+        appliedRules.add(rules[i]);
       } else if (RuleIdsLinkedToSchedules.includes(rules[i].id)) {
         // skip all other rules that are linked to other schedules.
         continue;
       } else {
         // if a rule is not linked to a schedule, run it.
-        finalTrans = rules[i].apply(finalTrans);
+        applyRule(rules[i]);
       }
     } else {
       // if there is no scheduleRuleID then just run all rules.
-      finalTrans = rules[i].apply(finalTrans);
+      applyRule(rules[i]);
+    }
+  }
+
+  // A rule may have changed the payee (e.g. a renaming rule matching on
+  // imported_payee). Rules that match on the payee but ran before that
+  // rule never saw the final payee, so give them a second chance. Only
+  // rules that haven't applied yet are run, so no action runs twice.
+  if (finalTrans.payee !== trans.payee) {
+    for (const rule of rules) {
+      if (
+        appliedRules.has(rule) ||
+        (scheduleRuleID !== '' && RuleIdsLinkedToSchedules.includes(rule.id))
+      ) {
+        continue;
+      }
+      if (rule.conditions.some(cond => cond.field === 'payee')) {
+        applyRule(rule);
+      }
     }
   }
 
