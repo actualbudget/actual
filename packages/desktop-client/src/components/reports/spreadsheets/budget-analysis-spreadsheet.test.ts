@@ -1,4 +1,4 @@
-import type { CategoryEntity } from 'loot-core/types/models';
+import type { CategoryEntity } from '@actual-app/core/types/models';
 
 function filterBaseCategories(
   categories: CategoryEntity[],
