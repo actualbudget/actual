@@ -37,6 +37,8 @@ Desktop applications are available for Windows, Mac, and Linux. These can be [do
 - Automated backups
 - Offline use is ready out of the box
 
+If you want to preview upcoming features before they reach an official release, [nightly builds of the desktop app](../contributing/preview-builds.md#nightly-desktop-builds) are also available.
+
 ## Server-Based Client Options
 
 The server provides a web-based version of Actual. This web app can be used in a browser as a standard web page to view and edit your budget. The web page can also be installed on your device. For mobile devices, an installed web page will work offline.
