@@ -267,10 +267,14 @@ export function createBudgetAnalysisSpreadsheet({
         overspendingAdjustment: Math.abs(overspendingAdjustment), // Display as positive
       });
 
-      // Update running balance for next month
-      runningBalance = carryoverToNextMonth;
-      // Save this month's overspending to apply in next month
-      overspendingFromPrevMonth = overspendingThisMonth;
+      // Only update running balance if this month had budget data.
+      // Future months with no budget entries return no cells; carrying
+      // carryoverToNextMonth=0 would silently wipe the accumulated balance.
+      const monthHasData = monthData.length > 0;
+      if (monthHasData) {
+        runningBalance = carryoverToNextMonth;
+        overspendingFromPrevMonth = overspendingThisMonth;
+      }
     }
 
     setData({
