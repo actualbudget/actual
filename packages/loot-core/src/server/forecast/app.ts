@@ -115,6 +115,7 @@ export async function generateForecast({
     dateContext.endDateObj,
     accountsById,
     ruleAccountsById,
+    transactions,
   );
   const { dataPoints, lowestBalance } = projectForecastData({
     accounts,

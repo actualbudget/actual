@@ -4,6 +4,8 @@
 // The SharedWorker entry point (shared-browser-server.js) calls
 // createCoordinator() and wires the result to self.onconnect.
 
+import { logger } from '#platform/server/log';
+
 // ── Types ────────────────────────────────────────────────────────────────
 
 type ConsoleLevel = 'log' | 'warn' | 'error' | 'info';
@@ -49,6 +51,11 @@ export function createCoordinator({
   // ── Console forwarding ─────────────────────────────────────────────────
 
   if (enableConsoleForwarding) {
+    // This block deliberately captures and monkeypatches the real `console`
+    // so the SharedWorker's own logs (and `logger.*` calls, which delegate to
+    // console) get mirrored to every connected tab's DevTools. It must use the
+    // real console, not `logger`.
+    /* oxlint-disable actual/prefer-logger-over-console */
     const _originalConsole = {
       log: console.log.bind(console),
       warn: console.warn.bind(console),
@@ -82,6 +89,7 @@ export function createCoordinator({
     console.warn = (...args: unknown[]) => forwardConsole('warn', args);
     console.error = (...args: unknown[]) => forwardConsole('error', args);
     console.info = (...args: unknown[]) => forwardConsole('info', args);
+    /* oxlint-enable actual/prefer-logger-over-console */
   }
 
   // ── Helpers ────────────────────────────────────────────────────────────
@@ -113,7 +121,7 @@ export function createCoordinator({
     for (const [bid, g] of budgetGroups) {
       groups.push(`"${bid}": leader + ${g.followers.size} follower(s)`);
     }
-    console.log(
+    logger.log(
       `[SharedWorker] ${action} — ${connectedPorts.length} tab(s), ${unassignedPorts.size} unassigned, groups: [${groups.join(', ') || 'none'}]`,
     );
   }
@@ -275,12 +283,12 @@ export function createCoordinator({
         const candidate = group.followers.values().next()
           .value as CoordinatorPort;
         group.followers.delete(candidate);
-        console.log(
+        logger.log(
           `[SharedWorker] Leader left budget "${budgetId}" — promoting follower`,
         );
         electLeader(budgetId, candidate, budgetId);
       } else {
-        console.log(
+        logger.log(
           `[SharedWorker] Last tab left budget "${budgetId}" — removing group`,
         );
         budgetGroups.delete(budgetId);
@@ -327,7 +335,7 @@ export function createCoordinator({
     portToBudget.set(port, budgetId);
     unassignedPorts.delete(port);
 
-    console.log(
+    logger.log(
       `[SharedWorker] Elected leader for "${budgetId}" (${group.followers.size} follower(s))`,
     );
     port.postMessage({
@@ -408,7 +416,7 @@ export function createCoordinator({
 
     budgetGroups.delete(budgetId);
     if (evicted.length > 0) {
-      console.log(
+      logger.log(
         `[SharedWorker] Evicted ${evicted.length} tab(s) from budget "${budgetId}"`,
       );
     }
@@ -427,7 +435,7 @@ export function createCoordinator({
     if (oldGroupId !== newBudgetId) {
       const existingTarget = budgetGroups.get(newBudgetId);
       if (existingTarget && existingTarget !== oldGroup) {
-        console.warn(
+        logger.warn(
           `[SharedWorker] handleBudgetLoaded: conflict — group "${newBudgetId}" already exists`,
         );
         return;
@@ -440,7 +448,7 @@ export function createCoordinator({
         portToBudget.set(p, newBudgetId);
       }
 
-      console.log(
+      logger.log(
         `[SharedWorker] Budget loaded: "${newBudgetId}" (leader + ${oldGroup.followers.size} follower(s))`,
       );
     }
@@ -702,7 +710,7 @@ export function createCoordinator({
               unassignedPorts.add(p);
             }
             if (group.followers.size > 0) {
-              console.log(
+              logger.log(
                 `[SharedWorker] Leader switching budgets — pushed ${group.followers.size} follower(s) off "${portBudget}"`,
               );
               group.followers.clear();
@@ -731,7 +739,7 @@ export function createCoordinator({
               const newLeader = group.followers.values().next()
                 .value as CoordinatorPort;
               group.followers.delete(newLeader);
-              console.log(
+              logger.log(
                 `[SharedWorker] Leader closing budget "${portBudget}" but ${group.followers.size + 1} tab(s) remain — transferring`,
               );
               port.postMessage({
@@ -809,7 +817,7 @@ export function createCoordinator({
               unassignedPorts.add(p);
             }
             if (group.followers.size > 0) {
-              console.log(
+              logger.log(
                 `[SharedWorker] Budget-replacing "${msg.name}" — pushed ${group.followers.size} tab(s) off "${portBudget}"`,
               );
               group.followers.clear();
@@ -867,7 +875,7 @@ export function createCoordinator({
           targetGroup.leaderPort.postMessage({ type: '__to-worker', msg });
         }
       } catch (error) {
-        console.error('[SharedWorker] Error in message handler:', error);
+        logger.error('[SharedWorker] Error in message handler:', error);
       }
     };
 
