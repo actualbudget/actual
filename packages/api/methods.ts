@@ -1,3 +1,6 @@
+// Resolved per build: in-process (api/node condition) or the client connection
+// to the backend Worker (browser default).
+import { send } from '@actual-app/core/platform/client/connection';
 import type {
   APIAccountEntity,
   APICategoryEntity,
@@ -15,10 +18,6 @@ import type {
   RuleEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
-
-// send is wired per entry: in-process lib.send (Node) or the client
-// connection to the backend Worker (browser).
-import { send } from './send';
 
 export { q } from './app/query';
 

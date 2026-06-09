@@ -62,14 +62,14 @@ function copyMigrationsAndDefaultDb() {
       const dataMigrationsDir = path.join(dataDir, 'migrations');
       fs.mkdirSync(dataMigrationsDir, { recursive: true });
 
-      linkOrCopy(
+      fs.copyFileSync(
         path.join(distDir, 'default-db.sqlite'),
         path.join(dataDir, 'default-db.sqlite'),
       );
       const wireMigrationNames: string[] = [];
       for (const name of fs.readdirSync(migrationsDest)) {
         const wireName = name.endsWith('.js') ? `${name}.data` : name;
-        linkOrCopy(
+        fs.copyFileSync(
           path.join(migrationsDest, name),
           path.join(dataMigrationsDir, wireName),
         );
@@ -83,14 +83,6 @@ function copyMigrationsAndDefaultDb() {
       fs.writeFileSync(path.join(distDir, 'data-file-index.txt'), manifest);
     },
   };
-}
-
-function linkOrCopy(src: string, dest: string) {
-  try {
-    fs.linkSync(src, dest);
-  } catch {
-    fs.copyFileSync(src, dest);
-  }
 }
 
 export default defineConfig({

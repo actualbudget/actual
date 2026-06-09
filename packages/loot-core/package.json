@@ -119,6 +119,7 @@
     "./platform/client/browser-server/coordinator": "./src/platform/client/browser-server/coordinator.ts",
     "./platform/client/connection": {
       "electron-renderer": "./src/platform/client/connection/index.electron.ts",
+      "api": "./src/platform/client/connection/index.api.ts",
       "default": "./src/platform/client/connection/index.ts"
     },
     "./platform/client/undo": "./src/platform/client/undo/index.ts",

@@ -3,7 +3,6 @@
 // speaks loot-core's postMessage protocol via platform/server/connection.
 
 import * as connection from '#platform/server/connection';
-import { logger } from '#platform/server/log';
 import { handlers, init } from '#server/main';
 import type { InitConfig } from '#server/main';
 
@@ -50,19 +49,5 @@ import type { InitConfig } from '#server/main';
   }
   await init(config);
 };
-
-self.addEventListener('error', e => {
-  logger.error(
-    '[api worker] uncaught',
-    (e as ErrorEvent).error ?? (e as ErrorEvent).message,
-  );
-});
-
-self.addEventListener('unhandledrejection', e => {
-  logger.error(
-    '[api worker] unhandled rejection',
-    (e as PromiseRejectionEvent).reason,
-  );
-});
 
 connection.init(self, handlers);
