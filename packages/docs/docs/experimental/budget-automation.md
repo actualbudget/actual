@@ -171,7 +171,7 @@ Choose a mode (A) and the number of months back (B). This is another automation 
 **Modes:**
 
 - **Copy a previous month.** This will copy the **budget** from a previous month.
-- **Average of previous months.** This will average the **spending** from the previous number of months you choose. The average is calculated from only completed months, to ensure the amount accurately reflects actual spending behavior.
+- **Average of previous months.** This will average the **spending** from the previous number of months you choose. The average is calculated from completed months only, to ensure the amount accurately reflects actual spending behavior.
 
 ### % of Income {#percentage}
 
