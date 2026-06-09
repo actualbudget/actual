@@ -35,6 +35,9 @@ app.post(
       status: 'ok',
       data: {
         configured,
+        source: configured
+          ? pluggyaiService.getCredentialSource(options)
+          : null,
       },
     });
   }),

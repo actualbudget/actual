@@ -56,7 +56,9 @@ Pluggy integration is experimental at this point, so before you can use it you n
 
    ![](/img/connecting-your-bank/pluggy-setup-modal.webp)
 
-4. Click **Save**. The credentials will be securely stored on the server.
+4. Choose whether to save the credentials **For this budget only** or as **Global** credentials. **For this budget only** is selected by default.
+
+5. Click **Save**. The credentials will be stored on the server.
 
 ---
 
@@ -98,4 +100,4 @@ To reset your Pluggy connection:
 2. Next to "Set-up Pluggy for bank-sync", open the three-dot menu.
 3. Click **Reset Pluggy credentials**.
 
-You'll then need to generate a new API key and obtain a new Item ID to reconnect.
+You'll then need to generate a new API key and obtain a new Item ID to reconnect. Resetting removes credentials for the current budget file first. If there are no credentials for the current budget file, it removes the global credentials instead.

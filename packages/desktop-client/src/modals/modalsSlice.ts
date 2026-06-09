@@ -3,6 +3,7 @@ import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type { File } from '@actual-app/core/types/file';
 import type {
   AccountEntity,
+  BankSyncCredentialSource,
   CategoryEntity,
   CategoryGroupEntity,
   GoCardlessToken,
@@ -116,6 +117,8 @@ export type Modal =
       options: {
         onSuccess: () => void;
         fileId: string;
+        canSetGlobalCredentials?: boolean;
+        credentialSource?: BankSyncCredentialSource | null;
       };
     }
   | {
@@ -123,6 +126,8 @@ export type Modal =
       options: {
         onSuccess: () => void;
         fileId: string;
+        canSetGlobalCredentials?: boolean;
+        credentialSource?: BankSyncCredentialSource | null;
       };
     }
   | {
@@ -130,6 +135,8 @@ export type Modal =
       options: {
         onSuccess: () => void;
         fileId: string;
+        canSetGlobalCredentials?: boolean;
+        credentialSource?: BankSyncCredentialSource | null;
       };
     }
   | {
@@ -137,6 +144,8 @@ export type Modal =
       options: {
         onSuccess: () => void;
         fileId: string;
+        canSetGlobalCredentials?: boolean;
+        credentialSource?: BankSyncCredentialSource | null;
       };
     }
   | {
@@ -144,6 +153,8 @@ export type Modal =
       options: {
         onSuccess: () => void;
         fileId: string;
+        canSetGlobalCredentials?: boolean;
+        credentialSource?: BankSyncCredentialSource | null;
       };
     }
   | {

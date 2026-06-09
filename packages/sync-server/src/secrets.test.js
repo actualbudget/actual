@@ -62,6 +62,81 @@ describe('secretsService', () => {
     );
   });
 
+  describe('two-tier credentials', () => {
+    const fileAOptions = { fileId: 'test-file-a' };
+    const fileBOptions = { fileId: 'test-file-b' };
+
+    beforeEach(() => {
+      getAccountDb().mutate('DELETE FROM secrets WHERE name = ?', [
+        testSecretName,
+      ]);
+    });
+
+    it('falls back to global credentials when a budget file credential is missing', () => {
+      secretsService.set(testSecretName, 'global-value', {
+        ...fileAOptions,
+        perBudgetFile: false,
+      });
+
+      expect(secretsService.get(testSecretName, fileAOptions)).toBe(
+        'global-value',
+      );
+      expect(secretsService.getSource(testSecretName, fileAOptions)).toBe(
+        'global',
+      );
+    });
+
+    it('uses budget file credentials before global credentials', () => {
+      secretsService.set(testSecretName, 'global-value', {
+        ...fileAOptions,
+        perBudgetFile: false,
+      });
+      secretsService.set(testSecretName, 'file-value', fileAOptions);
+
+      expect(secretsService.get(testSecretName, fileAOptions)).toBe(
+        'file-value',
+      );
+      expect(secretsService.getSource(testSecretName, fileAOptions)).toBe(
+        'per-budget-file',
+      );
+    });
+
+    it('keeps budget file credentials when global credentials are saved later', () => {
+      secretsService.set(testSecretName, 'file-value', fileAOptions);
+      secretsService.set(testSecretName, 'global-value', {
+        ...fileBOptions,
+        perBudgetFile: false,
+      });
+
+      expect(secretsService.get(testSecretName, fileAOptions)).toBe(
+        'file-value',
+      );
+      expect(secretsService.get(testSecretName, fileBOptions)).toBe(
+        'global-value',
+      );
+    });
+
+    it('resets budget file credentials before global credentials', () => {
+      secretsService.set(testSecretName, 'global-value', {
+        ...fileAOptions,
+        perBudgetFile: false,
+      });
+      secretsService.set(testSecretName, 'file-value', fileAOptions);
+
+      expect(
+        secretsService.reset(testSecretName, fileAOptions).deletedFrom,
+      ).toBe('per-budget-file');
+      expect(secretsService.get(testSecretName, fileAOptions)).toBe(
+        'global-value',
+      );
+
+      expect(
+        secretsService.reset(testSecretName, fileAOptions).deletedFrom,
+      ).toBe('global');
+      expect(secretsService.get(testSecretName, fileAOptions)).toBeNull();
+    });
+  });
+
   describe('secrets api', () => {
     afterEach(() => {
       getAccountDb().mutate('DELETE FROM auth');
@@ -120,6 +195,38 @@ describe('secretsService', () => {
       });
     });
 
+    it('POST returns 403 when a shared user tries to manage another user file credentials', async () => {
+      getAccountDb().mutate(
+        'INSERT INTO files (id, deleted, owner) VALUES (?, FALSE, ?)',
+        ['shared-user-secret-file', 'genericAdmin'],
+      );
+      getAccountDb().mutate(
+        'INSERT INTO user_access (file_id, user_id) VALUES (?, ?)',
+        ['shared-user-secret-file', 'genericUser'],
+      );
+
+      const res = await request(app)
+        .post('/')
+        .set('x-actual-token', 'valid-token-user')
+        .send({
+          name: testSecretName,
+          value: testSecretValue,
+          fileId: 'shared-user-secret-file',
+        });
+
+      expect(res.statusCode).toEqual(403);
+      expect(res.body).toEqual({
+        status: 'error',
+        reason: 'file-access-denied',
+        details: "You don't have permissions over this file",
+      });
+      expect(
+        secretsService.getPerBudgetFile(testSecretName, {
+          fileId: 'shared-user-secret-file',
+        }),
+      ).toBeNull();
+    });
+
     it('POST returns 400 for unknown secret names', async () => {
       const res = await request(app)
         .post('/')
@@ -140,7 +247,7 @@ describe('secretsService', () => {
         secretsService.set(testSecretName, testSecretValue, testOptions);
       });
 
-      it('GET returns 403 for non-admin users', async () => {
+      it('GET returns 403 when the user does not own the file', async () => {
         const res = await request(app)
           .get(`/${testSecretName}?fileId=test-file-id`)
           .set('x-actual-token', 'valid-token-user');
@@ -148,8 +255,8 @@ describe('secretsService', () => {
         expect(res.statusCode).toEqual(403);
         expect(res.body).toEqual({
           status: 'error',
-          reason: 'not-admin',
-          details: 'You have to be admin to read secrets',
+          reason: 'file-access-denied',
+          details: "You don't have permissions over this file",
         });
       });
 
@@ -161,18 +268,53 @@ describe('secretsService', () => {
         expect(res.statusCode).toEqual(204);
       });
 
-      it('POST returns 403 for non-admin users', async () => {
+      it('POST returns 200 for non-admin file owners setting per-budget credentials', async () => {
+        getAccountDb().mutate(
+          'INSERT INTO files (id, deleted, owner) VALUES (?, FALSE, ?)',
+          ['owner-secret-file', 'genericUser'],
+        );
+
         const res = await request(app)
           .post('/')
           .set('x-actual-token', 'valid-token-user')
-          .send({ name: testSecretName, value: testSecretValue });
+          .send({
+            name: testSecretName,
+            value: testSecretValue,
+            fileId: 'owner-secret-file',
+          });
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toEqual({ status: 'ok' });
+        expect(
+          secretsService.getPerBudgetFile(testSecretName, {
+            fileId: 'owner-secret-file',
+          }),
+        ).toBe(testSecretValue);
+      });
+
+      it('POST returns 403 for non-admin file owners setting global credentials', async () => {
+        getAccountDb().mutate(
+          'INSERT INTO files (id, deleted, owner) VALUES (?, FALSE, ?)',
+          ['owner-global-secret-file', 'genericUser'],
+        );
+
+        const res = await request(app)
+          .post('/')
+          .set('x-actual-token', 'valid-token-user')
+          .send({
+            name: testSecretName,
+            value: testSecretValue,
+            fileId: 'owner-global-secret-file',
+            perBudgetFile: false,
+          });
 
         expect(res.statusCode).toEqual(403);
         expect(res.body).toEqual({
           status: 'error',
           reason: 'not-admin',
-          details: 'You have to be admin to set secrets',
+          details: 'You have to be admin to manage global secrets',
         });
+        expect(secretsService.getGlobal(testSecretName)).toBeNull();
       });
 
       it('POST returns 200 for admin users', async () => {

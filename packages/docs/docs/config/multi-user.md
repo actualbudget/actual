@@ -28,6 +28,12 @@ There are two user roles _Basic_ or _Admin_.
   This role can do everything the Basic user role can. It can also add new users to the user directory and allow all users to access budget files.
   The role can assign ownership of a budget to another person, ensuring efficient budget management.
 
+## Bank Sync Credentials
+
+[Bank sync](/docs/advanced/bank-sync) credentials can be saved globally for the server or for one budget file only. Admins can manage global credentials and credentials for individual budget files.
+
+Budget file owners who are not admins can manage bank sync credentials for their own budget file only. Users who have shared access to a budget file but are not the owner cannot manage bank sync credentials for that file.
+
 ## User Access Management
 
 Use this page to manage user access to the current open budget file.

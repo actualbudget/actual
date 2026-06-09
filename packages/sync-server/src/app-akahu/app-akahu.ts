@@ -49,11 +49,28 @@ app.use(express.json());
 app.use(requestLoggerMiddleware);
 app.use(validateSessionMiddleware);
 
+function getFileIdFromRequest(req: express.Request): string {
+  const rawFileId =
+    req.body?.fileId || req.query?.fileId || req.headers['x-actual-file-id'];
+  if (typeof rawFileId !== 'string') {
+    throw new Error('missing-file-id');
+  }
+
+  const fileId = rawFileId.trim();
+  if (!fileId) {
+    throw new Error('missing-file-id');
+  }
+
+  return fileId;
+}
+
 app.post(
   '/status',
   handleError(async (req, res) => {
-    const userToken = secretsService.get(SecretName.akahu_userToken);
-    const appToken = secretsService.get(SecretName.akahu_appToken);
+    const fileId = getFileIdFromRequest(req);
+    const options = { fileId };
+    const userToken = secretsService.get(SecretName.akahu_userToken, options);
+    const appToken = secretsService.get(SecretName.akahu_appToken, options);
 
     const configured = userToken != null && appToken != null;
 
@@ -61,6 +78,12 @@ app.post(
       status: 'ok',
       data: {
         configured,
+        source: configured
+          ? secretsService.getCredentialSource(
+              [SecretName.akahu_userToken, SecretName.akahu_appToken],
+              options,
+            )
+          : null,
       },
     });
   }),
@@ -69,8 +92,10 @@ app.post(
 app.post(
   '/accounts',
   handleError(async (req, res) => {
-    const userToken = secretsService.get(SecretName.akahu_userToken);
-    const appToken = secretsService.get(SecretName.akahu_appToken);
+    const fileId = getFileIdFromRequest(req);
+    const options = { fileId };
+    const userToken = secretsService.get(SecretName.akahu_userToken, options);
+    const appToken = secretsService.get(SecretName.akahu_appToken, options);
 
     if (!userToken || !appToken) {
       res.send({
@@ -110,6 +135,8 @@ app.post(
   '/transactions',
   handleError(async (req, res) => {
     const { accountId, startDate } = req.body || {};
+    const fileId = getFileIdFromRequest(req);
+    const options = { fileId };
 
     if (!accountId || !startDate) {
       return res.send({
@@ -120,8 +147,8 @@ app.post(
       });
     }
 
-    const userToken = secretsService.get(SecretName.akahu_userToken);
-    const appToken = secretsService.get(SecretName.akahu_appToken);
+    const userToken = secretsService.get(SecretName.akahu_userToken, options);
+    const appToken = secretsService.get(SecretName.akahu_appToken, options);
 
     if (!userToken || !appToken) {
       res.send({

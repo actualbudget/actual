@@ -4,28 +4,20 @@ import { SecretName, secretsService } from '#services/secrets-service';
 
 const pluggyClientCache = new Map();
 
-function getFileId(options = {}) {
-  if (!options.fileId) {
-    throw new Error('missing-file-id');
-  }
-  return options.fileId;
-}
-
 function getPluggyClient(options = {}) {
-  const fileId = getFileId(options);
   const credentials = {
     clientId: secretsService.get(SecretName.pluggyai_clientId, options),
     clientSecret: secretsService.get(SecretName.pluggyai_clientSecret, options),
   };
   const credentialsKey = JSON.stringify(credentials);
-  const cachedClient = pluggyClientCache.get(fileId);
+  const cachedClient = pluggyClientCache.get(credentialsKey);
 
   if (cachedClient?.credentialsKey === credentialsKey) {
     return cachedClient.client;
   }
 
   const client = new PluggyClient(credentials);
-  pluggyClientCache.set(fileId, { client, credentialsKey });
+  pluggyClientCache.set(credentialsKey, { client, credentialsKey });
 
   return client;
 }
@@ -38,6 +30,16 @@ export const pluggyaiService = {
       secretsService.get(SecretName.pluggyai_itemIds, options)
     );
   },
+
+  getCredentialSource: (options = {}) =>
+    secretsService.getCredentialSource(
+      [
+        SecretName.pluggyai_clientId,
+        SecretName.pluggyai_clientSecret,
+        SecretName.pluggyai_itemIds,
+      ],
+      options,
+    ),
 
   getAccountsByItemId: async (itemId, options = {}) => {
     try {

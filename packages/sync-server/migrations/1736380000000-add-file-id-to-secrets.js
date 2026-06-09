@@ -3,57 +3,39 @@ import { getAccountDb } from '../src/account-db';
 export const up = async function () {
   await getAccountDb().exec(`
     CREATE TABLE IF NOT EXISTS secrets_new (
-      file_id TEXT NOT NULL,
       name TEXT NOT NULL,
       value BLOB,
-      PRIMARY KEY(file_id, name)
+      file_id TEXT
     );
 
-    INSERT OR IGNORE INTO secrets_new (file_id, name, value)
-    SELECT files.id, secrets.name, secrets.value
-    FROM secrets
-    CROSS JOIN files
-    WHERE files.deleted = 0;
+    INSERT INTO secrets_new (name, value, file_id)
+    SELECT name, value, NULL FROM secrets;
 
     DROP TABLE secrets;
     ALTER TABLE secrets_new RENAME TO secrets;
+
+    CREATE UNIQUE INDEX IF NOT EXISTS secrets_global_name_idx
+      ON secrets(name)
+      WHERE file_id IS NULL;
+
+    CREATE UNIQUE INDEX IF NOT EXISTS secrets_file_name_idx
+      ON secrets(file_id, name)
+      WHERE file_id IS NOT NULL;
   `);
 };
 
 export const down = async function () {
-  const db = getAccountDb();
+  await getAccountDb().exec(`
+    DROP INDEX IF EXISTS secrets_global_name_idx;
+    DROP INDEX IF EXISTS secrets_file_name_idx;
 
-  // Detect secrets that have multiple distinct values across different budget files
-  const conflicts = db.all(`
-    SELECT name
-    FROM secrets
-    GROUP BY name
-    HAVING COUNT(DISTINCT value) > 1
-  `);
-
-  if (conflicts.length > 0) {
-    const conflictNames = conflicts.map(r => r.name).join(', ');
-    console.warn(
-      `[Bank Sync Migration] Rolling back per-file bank sync. ` +
-        `The following secrets have different values across budget files and ` +
-        `only one value will be kept (others discarded): ${conflictNames}. ` +
-        `You will need to reconfigure bank sync for your budget files after this rollback.`,
-    );
-  } else {
-    console.warn(
-      `[Bank Sync Migration] Rolling back per-file bank sync. ` +
-        `You will need to reconfigure bank sync for your budget files after this rollback.`,
-    );
-  }
-
-  await db.exec(`
     CREATE TABLE IF NOT EXISTS secrets_old (
       name TEXT PRIMARY KEY,
       value BLOB
     );
 
-    INSERT OR IGNORE INTO secrets_old (name, value)
-    SELECT name, value FROM secrets;
+    INSERT OR REPLACE INTO secrets_old (name, value)
+    SELECT name, value FROM secrets WHERE file_id IS NULL;
 
     DROP TABLE secrets;
     ALTER TABLE secrets_old RENAME TO secrets;

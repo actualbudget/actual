@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
+import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 
@@ -27,10 +28,15 @@ type AkahuInitialiseModalProps = Extract<
 export const AkahuInitialiseModal = ({
   onSuccess,
   fileId,
+  canSetGlobalCredentials = true,
+  credentialSource,
 }: AkahuInitialiseModalProps) => {
   const { t } = useTranslation();
   const [userToken, setUserToken] = useState('');
   const [appToken, setAppToken] = useState('');
+  const [perBudgetFile, setPerBudgetFile] = useState(
+    credentialSource ? credentialSource === 'per-budget-file' : true,
+  );
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(
@@ -50,6 +56,7 @@ export const AkahuInitialiseModal = ({
       name: 'akahu_userToken',
       value: userToken,
       fileId,
+      perBudgetFile,
     });
     const userTokenError =
       'error' in userTokenResponse && userTokenResponse.error
@@ -70,6 +77,7 @@ export const AkahuInitialiseModal = ({
         name: 'akahu_appToken',
         value: appToken,
         fileId,
+        perBudgetFile,
       });
       const appTokenError =
         'error' in appTokenResponse && appTokenResponse.error
@@ -120,6 +128,27 @@ export const AkahuInitialiseModal = ({
                 .
               </Trans>
             </Text>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 12,
+              }}
+            >
+              <Text>
+                <Trans>For this budget only</Trans>
+              </Text>
+              <Toggle
+                id="akahu-per-budget-file"
+                isOn={perBudgetFile}
+                isDisabled={
+                  Boolean(credentialSource) || !canSetGlobalCredentials
+                }
+                onToggle={setPerBudgetFile}
+              />
+            </View>
 
             <FormField>
               <FormLabel title={t('App ID Token:')} htmlFor="appToken-field" />

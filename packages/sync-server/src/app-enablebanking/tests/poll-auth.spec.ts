@@ -10,6 +10,7 @@ vi.mock('../../services/secrets-service', () => ({
   },
   secretsService: {
     get: vi.fn(() => 'test-value'),
+    getCredentialSource: vi.fn(() => 'per-budget-file'),
     set: vi.fn(),
   },
 }));
@@ -85,6 +86,7 @@ describe('Enable Banking Express routes', () => {
 
       expect(res.body.status).toBe('ok');
       expect(res.body.data.configured).toBe(true);
+      expect(res.body.data.source).toBe('per-budget-file');
     });
   });
 

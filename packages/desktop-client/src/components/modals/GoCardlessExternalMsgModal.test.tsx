@@ -11,7 +11,7 @@ vi.mock('#hooks/useGlobalPref', () => ({
 
 vi.mock('#hooks/useGoCardlessStatus', () => ({
   useGoCardlessStatus: () => ({
-    configuredGoCardless: true,
+    goCardlessStatus: { configured: true, source: 'per-budget-file' },
     isLoading: false,
   }),
 }));

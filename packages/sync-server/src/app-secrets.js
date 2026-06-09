@@ -1,7 +1,8 @@
 import express from 'express';
 
-import { getActiveLoginMethod, isAdmin } from './account-db';
+import { isAdmin } from './account-db';
 import { SecretName, secretsService } from './services/secrets-service';
+import * as UserService from './services/user-service';
 import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
@@ -14,23 +15,43 @@ app.use(express.json());
 app.use(requestLoggerMiddleware);
 app.use(validateSessionMiddleware);
 
-// In OpenID mode the secrets store is admin-managed; non-admins must be
-// blocked from both reads and writes, otherwise they can enumerate which
-// integrations are configured.
-function canManageSecrets(userId) {
-  return getActiveLoginMethod() !== 'openid' || isAdmin(userId);
+function canManageGlobalSecrets(userId) {
+  return isAdmin(userId);
+}
+
+function canManagePerBudgetFileSecrets(fileId, userId) {
+  const { granted } = UserService.checkFilePermission(fileId, userId) || {
+    granted: 0,
+  };
+  return isAdmin(userId) || granted > 0;
+}
+
+function sendGlobalAccessDenied(res) {
+  res.status(403).send({
+    status: 'error',
+    reason: 'not-admin',
+    details: 'You have to be admin to manage global secrets',
+  });
+}
+
+function sendMissingFileId(res) {
+  res.status(400).send({
+    status: 'error',
+    reason: 'missing-file-id',
+    details: 'fileId is required',
+  });
+}
+
+function sendFileAccessDenied(res) {
+  res.status(403).send({
+    status: 'error',
+    reason: 'file-access-denied',
+    details: "You don't have permissions over this file",
+  });
 }
 
 app.post('/', async (req, res) => {
-  if (!canManageSecrets(res.locals.user_id)) {
-    res.status(403).send({
-      status: 'error',
-      reason: 'not-admin',
-      details: 'You have to be admin to set secrets',
-    });
-    return;
-  }
-  const { name, value, fileId } = req.body || {};
+  const { name, value, fileId, perBudgetFile = true } = req.body || {};
 
   if (!(name in SecretName)) {
     res.status(400).send({
@@ -41,30 +62,47 @@ app.post('/', async (req, res) => {
     return;
   }
 
-  if (!fileId || typeof fileId !== 'string') {
-    res.status(400).send({
-      status: 'error',
-      reason: 'missing-file-id',
-      details: 'fileId is required',
-    });
+  if (value === null) {
+    if (!fileId || typeof fileId !== 'string') {
+      sendMissingFileId(res);
+      return;
+    }
+
+    if (!canManagePerBudgetFileSecrets(fileId, res.locals.user_id)) {
+      sendFileAccessDenied(res);
+      return;
+    }
+
+    if (canManageGlobalSecrets(res.locals.user_id)) {
+      secretsService.reset(name, { fileId });
+    } else {
+      secretsService.resetPerBudgetFile(name, { fileId });
+    }
+    res.status(200).send({ status: 'ok' });
     return;
   }
 
-  secretsService.set(name, value, { fileId });
+  if (perBudgetFile) {
+    if (!fileId || typeof fileId !== 'string') {
+      sendMissingFileId(res);
+      return;
+    }
+
+    if (!canManagePerBudgetFileSecrets(fileId, res.locals.user_id)) {
+      sendFileAccessDenied(res);
+      return;
+    }
+  } else if (!canManageGlobalSecrets(res.locals.user_id)) {
+    sendGlobalAccessDenied(res);
+    return;
+  }
+
+  secretsService.set(name, value, { fileId, perBudgetFile });
 
   res.status(200).send({ status: 'ok' });
 });
 
 app.get('/:name', async (req, res) => {
-  if (!canManageSecrets(res.locals.user_id)) {
-    res.status(403).send({
-      status: 'error',
-      reason: 'not-admin',
-      details: 'You have to be admin to read secrets',
-    });
-    return;
-  }
-
   const name = req.params.name;
   if (!(name in SecretName)) {
     res.status(404).send('key not found');
@@ -73,11 +111,12 @@ app.get('/:name', async (req, res) => {
 
   const fileId = req.query.fileId || req.headers['x-actual-file-id'];
   if (!fileId || typeof fileId !== 'string') {
-    res.status(400).send({
-      status: 'error',
-      reason: 'missing-file-id',
-      details: 'fileId is required',
-    });
+    sendMissingFileId(res);
+    return;
+  }
+
+  if (!canManagePerBudgetFileSecrets(fileId, res.locals.user_id)) {
+    sendFileAccessDenied(res);
     return;
   }
 

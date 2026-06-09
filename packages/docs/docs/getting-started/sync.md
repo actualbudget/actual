@@ -23,7 +23,7 @@ End-to-end encryption offers the ability for you to generate a key based on a pa
 This guarantees that only you will ever have access to your budget data. This is optional and using it requires you to enter a password whenever downloading [cloud files](#this-file-is-not-a-cloud-file) (this only needs to be done once per device). The password you enter should be different from the main server password.
 
 :::note
-End-to-end encryption applies only to your budget data. If you use [bank sync](/docs/advanced/bank-sync), the bank sync tokens (e.g. SimpleFIN, GoCardless, or Pluggy credentials) are stored separately on the server and are **not** covered by end-to-end encryption. Server administrators or hosting providers with direct access to the server's database can read these tokens. If this is a concern, consider self-hosting your server.
+End-to-end encryption applies only to your budget data. If you use [bank sync](/docs/advanced/bank-sync), the bank sync credentials (e.g. SimpleFIN, GoCardless, or Pluggy credentials) are stored separately on the server and are **not** covered by end-to-end encryption. These credentials may be saved for one budget file or globally for the server. Server administrators or hosting providers with direct access to the server's database can read them. If this is a concern, consider self-hosting your server.
 :::
 
 Data on your local device is still unencrypted. We recommend full disk encryption if you are interested in local encryption.

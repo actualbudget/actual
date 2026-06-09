@@ -49,28 +49,20 @@ type BankSyncFileOptions = {
   fileId: string;
 };
 
-function resolveFileId(options: BankSyncFileOptions): string {
-  if (!options.fileId) {
-    throw new Error('missing-file-id');
-  }
-  return options.fileId;
-}
-
 const getGocardlessClient = (options: BankSyncFileOptions): GoCardlessApi => {
-  const fileId = resolveFileId(options);
   const secrets = {
-    secretId: secretsService.get(SecretName.gocardless_secretId, { fileId }),
-    secretKey: secretsService.get(SecretName.gocardless_secretKey, { fileId }),
+    secretId: secretsService.get(SecretName.gocardless_secretId, options),
+    secretKey: secretsService.get(SecretName.gocardless_secretKey, options),
   };
 
   const credentialsKey = JSON.stringify(secrets);
-  const cachedClient = clients.get(fileId);
+  const cachedClient = clients.get(credentialsKey);
   if (cachedClient?.credentialsKey === credentialsKey) {
     return cachedClient.client;
   }
 
   const client = new GoCardlessApi(secrets);
-  clients.set(fileId, { client, credentialsKey });
+  clients.set(credentialsKey, { client, credentialsKey });
   return client;
 };
 
@@ -103,10 +95,16 @@ export const handleGoCardlessError = (error: unknown): never => {
 export const goCardlessService = {
   isConfigured: (options: BankSyncFileOptions): boolean => {
     return !!(
-      getGocardlessClient(options).secretId &&
-      getGocardlessClient(options).secretKey
+      secretsService.get(SecretName.gocardless_secretId, options) &&
+      secretsService.get(SecretName.gocardless_secretKey, options)
     );
   },
+
+  getCredentialSource: (options: BankSyncFileOptions) =>
+    secretsService.getCredentialSource(
+      [SecretName.gocardless_secretId, SecretName.gocardless_secretKey],
+      options,
+    ),
 
   setToken: async (options: BankSyncFileOptions): Promise<void> => {
     const isExpiredJwtToken = (token: string | null): boolean => {

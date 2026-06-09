@@ -154,10 +154,11 @@ export function EnableBankingExternalMsgModal({
     isLoading: isBankOptionsLoading,
     isError: isBankOptionError,
   } = useAvailableBanks(country, fileId, isEnableBankingSetupComplete);
-  const {
-    configuredEnableBanking: isConfigured,
-    isLoading: isConfigurationLoading,
-  } = useEnableBankingStatus(fileId);
+  const { enableBankingStatus, isLoading: isConfigurationLoading } =
+    useEnableBankingStatus(fileId);
+  const isConfigured = Boolean(
+    enableBankingStatus?.source ?? enableBankingStatus?.configured,
+  );
 
   const isJumpingRef = useRef(false);
   const stateRef = useRef<string | null>(null);

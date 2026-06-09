@@ -6,6 +6,7 @@ import { ButtonWithLoading } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
+import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 
@@ -29,10 +30,15 @@ type GoCardlessInitialiseModalProps = Extract<
 export const GoCardlessInitialiseModal = ({
   onSuccess,
   fileId,
+  canSetGlobalCredentials = true,
+  credentialSource,
 }: GoCardlessInitialiseModalProps) => {
   const { t } = useTranslation();
   const [secretId, setSecretId] = useState('');
   const [secretKey, setSecretKey] = useState('');
+  const [perBudgetFile, setPerBudgetFile] = useState(
+    credentialSource ? credentialSource === 'per-budget-file' : true,
+  );
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(
@@ -55,6 +61,7 @@ export const GoCardlessInitialiseModal = ({
         name: 'gocardless_secretId',
         value: secretId,
         fileId,
+        perBudgetFile,
       })) || {};
 
     if (error) {
@@ -68,6 +75,7 @@ export const GoCardlessInitialiseModal = ({
         name: 'gocardless_secretKey',
         value: secretKey,
         fileId,
+        perBudgetFile,
       })) || {});
     if (error) {
       setIsLoading(false);
@@ -106,6 +114,27 @@ export const GoCardlessInitialiseModal = ({
                 .
               </Trans>
             </Text>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 12,
+              }}
+            >
+              <Text>
+                <Trans>For this budget only</Trans>
+              </Text>
+              <Toggle
+                id="gocardless-per-budget-file"
+                isOn={perBudgetFile}
+                isDisabled={
+                  Boolean(credentialSource) || !canSetGlobalCredentials
+                }
+                onToggle={setPerBudgetFile}
+              />
+            </View>
 
             <FormField>
               <FormLabel title={t('Secret ID:')} htmlFor="secret-id-field" />

@@ -39,7 +39,7 @@ From July 2025 onwards, GoCardless has stopped accepting new Bank Account Data a
 
    ![Add account dialog](/img/connecting-your-bank/connecting-your-bank-gocardless-05.webp)
 
-8. You will be asked to enter your GoCardless secret ID and secret key. These values will be saved on the server, so you will only need to enter them once.
+8. You will be asked to enter your GoCardless secret ID and secret key. These values will be saved on the server as either **For this budget only** or **Global** credentials. **For this budget only** is selected by default.
 
    ![Set-up GoCardless dialoag](/img/connecting-your-bank/connecting-your-bank-gocardless-06.webp)
 

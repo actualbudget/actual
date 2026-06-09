@@ -18,6 +18,6 @@ Allowed redirect URLs: https://actualbudget.example.com/enablebanking/auth_callb
 
 Press **Register**, then link the accounts you want in the Enable Banking interface. Copy the Application ID (`12345678-1234-1234-1234-123456789012`) before going back to Actual Budget.
 
-Go to **More → Bank Sync**, choose **Set up Enable Banking**, paste the App ID, and upload the credential file.
+Go to **More → Bank Sync**, choose **Set up Enable Banking**, paste the App ID, and upload the credential file. The setup dialog lets you save the credentials **For this budget only** or as **Global** credentials. **For this budget only** is selected by default.
 
 Now go to an Actual Budget account and select **Link account → Enable Banking**. Select your country and bank, then follow the prompts to link your account.

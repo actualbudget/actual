@@ -76,6 +76,7 @@ app.post(
       status: 'ok',
       data: {
         configured: goCardlessService.isConfigured({ fileId }),
+        source: goCardlessService.getCredentialSource({ fileId }),
       },
     });
   }),

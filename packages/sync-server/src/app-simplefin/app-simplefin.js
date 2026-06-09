@@ -23,6 +23,13 @@ function getFileIdFromRequest(req) {
   return fileId;
 }
 
+function getSimpleFinCredentialSource(options) {
+  return secretsService.getCredentialSource(
+    [SecretName.simplefin_token],
+    options,
+  );
+}
+
 const app = express();
 export { app as handlers };
 app.use(requestLoggerMiddleware);
@@ -41,6 +48,7 @@ app.post(
       status: 'ok',
       data: {
         configured,
+        source: configured ? getSimpleFinCredentialSource(options) : null,
       },
     });
   }),
@@ -61,11 +69,12 @@ app.post(
           throw new Error('No token');
         } else {
           accessKey = await getAccessKey(token);
-          secretsService.set(
-            SecretName.simplefin_accessKey,
-            accessKey,
-            options,
-          );
+          secretsService.set(SecretName.simplefin_accessKey, accessKey, {
+            ...options,
+            perBudgetFile:
+              secretsService.getSource(SecretName.simplefin_token, options) ===
+              'per-budget-file',
+          });
           if (accessKey == null || accessKey === 'Forbidden') {
             throw new Error('No access key');
           }

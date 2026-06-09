@@ -39,7 +39,7 @@ Server Version 24.10.0 or higher are required for this feature.
 
    ![](/img/connecting-your-bank/connecting-your-bank-simplefin-05.webp)
 
-9. You will be asked to enter your SimpleFIN setup token. The keys from this value will be saved on the server, so you will only need to enter it once.
+9. You will be asked to enter your SimpleFIN setup token. The keys from this value will be saved on the server as either **For this budget only** or **Global** credentials. **For this budget only** is selected by default.
 
    ![](/img/connecting-your-bank/connecting-your-bank-simplefin-06.webp)
 
@@ -87,4 +87,4 @@ To reset your SimpleFIN setup token:
 
 3. Click "Reset SimpleFIN credentials".
 
-You will then need to obtain a new setup token from SimpleFIN and enter it into Actual.
+You will then need to obtain a new setup token from SimpleFIN and enter it into Actual. Resetting removes credentials for the current budget file first. If there are no credentials for the current budget file, it removes the global credentials instead.

@@ -8,6 +8,7 @@ import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 
@@ -31,10 +32,15 @@ type EnableBankingInitialiseProps = Extract<
 export function EnableBankingInitialiseModal({
   onSuccess,
   fileId,
+  canSetGlobalCredentials = true,
+  credentialSource,
 }: EnableBankingInitialiseProps) {
   const { t } = useTranslation();
   const [applicationId, setApplicationId] = useState('');
   const [secretKey, setSecretKey] = useState('');
+  const [perBudgetFile, setPerBudgetFile] = useState(
+    credentialSource ? credentialSource === 'per-budget-file' : true,
+  );
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [keyFileName, setKeyFileName] = useState('');
@@ -77,6 +83,7 @@ export function EnableBankingInitialiseModal({
         applicationId,
         secretKey,
         fileId,
+        perBudgetFile,
       });
 
       if (result?.error) {
@@ -155,6 +162,27 @@ export function EnableBankingInitialiseModal({
                 </Trans>
               </ErrorAlert>
             )}
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 12,
+              }}
+            >
+              <Text>
+                <Trans>For this budget only</Trans>
+              </Text>
+              <Toggle
+                id="enablebanking-per-budget-file"
+                isOn={perBudgetFile}
+                isDisabled={
+                  Boolean(credentialSource) || !canSetGlobalCredentials
+                }
+                onToggle={setPerBudgetFile}
+              />
+            </View>
 
             <FormField>
               <FormLabel

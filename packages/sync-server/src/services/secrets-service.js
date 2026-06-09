@@ -38,32 +38,96 @@ class SecretsDb {
     return options.fileId;
   }
 
-  set(name, value, options = {}) {
+  setGlobal(name, value) {
+    if (!this.db) {
+      this.db = this.open();
+    }
+
+    this.debug(`setting global secret '${name}'`);
+    this.db.mutate(`DELETE FROM secrets WHERE file_id IS NULL AND name = ?`, [
+      name,
+    ]);
+    return this.db.mutate(
+      `INSERT INTO secrets (name, value, file_id) VALUES (?, ?, NULL)`,
+      [name, value],
+    );
+  }
+
+  setPerBudgetFile(name, value, options = {}) {
     if (!this.db) {
       this.db = this.open();
     }
 
     const fileId = this._requireFileId(options);
     this.debug(`setting secret '${name}' for file '${fileId}'`);
-    const result = this.db.mutate(
-      `INSERT OR REPLACE INTO secrets (file_id, name, value) VALUES (?,?,?)`,
-      [fileId, name, value],
+    this.db.mutate(`DELETE FROM secrets WHERE file_id = ? AND name = ?`, [
+      fileId,
+      name,
+    ]);
+    return this.db.mutate(
+      `INSERT INTO secrets (name, value, file_id) VALUES (?, ?, ?)`,
+      [name, value, fileId],
     );
-    return result;
   }
 
-  get(name, options = {}) {
+  getGlobal(name) {
+    if (!this.db) {
+      this.db = this.open();
+    }
+
+    this.debug(`getting global secret '${name}'`);
+    return this.db.first(
+      `SELECT value FROM secrets WHERE file_id IS NULL AND name = ?`,
+      [name],
+    );
+  }
+
+  getPerBudgetFile(name, options = {}) {
     if (!this.db) {
       this.db = this.open();
     }
 
     const fileId = this._requireFileId(options);
     this.debug(`getting secret '${name}' for file '${fileId}'`);
-    const result = this.db.first(
+    return this.db.first(
       `SELECT value FROM secrets WHERE file_id = ? AND name = ?`,
       [fileId, name],
     );
-    return result;
+  }
+
+  reset(name, options = {}) {
+    if (!this.db) {
+      this.db = this.open();
+    }
+
+    const fileId = this._requireFileId(options);
+    const perBudgetResult = this.db.mutate(
+      `DELETE FROM secrets WHERE file_id = ? AND name = ?`,
+      [fileId, name],
+    );
+
+    if (perBudgetResult.changes > 0) {
+      return { ...perBudgetResult, deletedFrom: 'per-budget-file' };
+    }
+
+    const globalResult = this.db.mutate(
+      `DELETE FROM secrets WHERE file_id IS NULL AND name = ?`,
+      [name],
+    );
+    return { ...globalResult, deletedFrom: 'global' };
+  }
+
+  resetPerBudgetFile(name, options = {}) {
+    if (!this.db) {
+      this.db = this.open();
+    }
+
+    const fileId = this._requireFileId(options);
+    const result = this.db.mutate(
+      `DELETE FROM secrets WHERE file_id = ? AND name = ?`,
+      [fileId, name],
+    );
+    return { ...result, deletedFrom: 'per-budget-file' };
   }
 }
 
@@ -71,13 +135,20 @@ const secretsDb = new SecretsDb();
 const _cachedSecrets = new Map();
 
 /**
- * Create a cache key from file ID and name
- * @param {string} fileId
+ * Create a cache key from source and name
+ * @param {string|null} fileId
  * @param {string} name
  * @returns {string}
  */
 function _createCacheKey(fileId, name) {
-  return `${fileId}:${name}`;
+  return fileId == null ? `global:${name}` : `file:${fileId}:${name}`;
+}
+
+function _clearCache(name, fileId) {
+  _cachedSecrets.delete(_createCacheKey(null, name));
+  if (fileId != null) {
+    _cachedSecrets.delete(_createCacheKey(fileId, name));
+  }
 }
 
 /**
@@ -85,20 +156,74 @@ function _createCacheKey(fileId, name) {
  */
 export const secretsService = {
   /**
-   * Retrieves the value of a secret by name.
+   * Retrieves the active value of a secret by name.
    * @param {SecretName} name - The name of the secret to retrieve.
    * @param {Object} options
    * @param {string} options.fileId - Budget file ID for this secret.
    * @returns {string|null} The value of the secret, or null if the secret does not exist.
    */
   get: (name, options = {}) => {
+    return (
+      secretsService.getPerBudgetFile(name, options) ??
+      secretsService.getGlobal(name)
+    );
+  },
+
+  getPerBudgetFile: (name, options = {}) => {
     const fileId = secretsDb._requireFileId(options);
     const cacheKey = _createCacheKey(fileId, name);
-    return (
-      _cachedSecrets.get(cacheKey) ??
-      secretsDb.get(name, options)?.value ??
-      null
+    if (_cachedSecrets.has(cacheKey)) {
+      return _cachedSecrets.get(cacheKey);
+    }
+
+    const value = secretsDb.getPerBudgetFile(name, options)?.value ?? null;
+    if (value != null) {
+      _cachedSecrets.set(cacheKey, value);
+    }
+    return value;
+  },
+
+  getGlobal: name => {
+    const cacheKey = _createCacheKey(null, name);
+    if (_cachedSecrets.has(cacheKey)) {
+      return _cachedSecrets.get(cacheKey);
+    }
+
+    const value = secretsDb.getGlobal(name)?.value ?? null;
+    if (value != null) {
+      _cachedSecrets.set(cacheKey, value);
+    }
+    return value;
+  },
+
+  getSource: (name, options = {}) => {
+    if (secretsService.getPerBudgetFile(name, options) != null) {
+      return 'per-budget-file';
+    }
+
+    if (secretsService.getGlobal(name) != null) {
+      return 'global';
+    }
+
+    return null;
+  },
+
+  getCredentialSource: (names, options = {}) => {
+    const hasPerBudgetFileCredentials = names.every(
+      name => secretsService.getPerBudgetFile(name, options) != null,
     );
+    if (hasPerBudgetFileCredentials) {
+      return 'per-budget-file';
+    }
+
+    const hasGlobalCredentials = names.every(
+      name => secretsService.getGlobal(name) != null,
+    );
+    if (hasGlobalCredentials) {
+      return 'global';
+    }
+
+    return null;
   },
 
   /**
@@ -107,16 +232,34 @@ export const secretsService = {
    * @param {string} value - The value to set for the secret.
    * @param {Object} options
    * @param {string} options.fileId - Budget file ID for this secret.
+   * @param {boolean} options.perBudgetFile - Whether to save this secret for only the budget file.
    * @returns {Object}
    */
   set: (name, value, options = {}) => {
-    const result = secretsDb.set(name, value, options);
+    const perBudgetFile = options.perBudgetFile !== false;
+    const result = perBudgetFile
+      ? secretsDb.setPerBudgetFile(name, value, options)
+      : secretsDb.setGlobal(name, value);
 
     if (result.changes === 1) {
-      const fileId = secretsDb._requireFileId(options);
+      const fileId = perBudgetFile ? secretsDb._requireFileId(options) : null;
       const cacheKey = _createCacheKey(fileId, name);
       _cachedSecrets.set(cacheKey, value);
     }
+    return result;
+  },
+
+  reset: (name, options = {}) => {
+    const fileId = secretsDb._requireFileId(options);
+    const result = secretsDb.reset(name, options);
+    _clearCache(name, fileId);
+    return result;
+  },
+
+  resetPerBudgetFile: (name, options = {}) => {
+    const fileId = secretsDb._requireFileId(options);
+    const result = secretsDb.resetPerBudgetFile(name, options);
+    _cachedSecrets.delete(_createCacheKey(fileId, name));
     return result;
   },
 

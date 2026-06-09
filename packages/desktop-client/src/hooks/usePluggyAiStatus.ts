@@ -1,39 +1,34 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { send } from '@actual-app/core/platform/client/connection';
+import type { BankSyncProviderStatus } from '@actual-app/core/types/models';
 
 import { useSyncServerStatus } from './useSyncServerStatus';
 
 export function usePluggyAiStatus(fileId: string) {
-  const [configuredPluggyAi, setConfiguredPluggyAi] = useState<boolean | null>(
-    null,
-  );
+  const [pluggyAiStatus, setPluggyAiStatus] =
+    useState<BankSyncProviderStatus | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const status = useSyncServerStatus();
 
+  const refreshPluggyAiStatus = useCallback(async () => {
+    setIsLoading(true);
+
+    const result = await send('pluggyai-status', { fileId });
+
+    setPluggyAiStatus(result);
+    setIsLoading(false);
+  }, [fileId]);
+
   useEffect(() => {
-    const budgetFileId = fileId;
-
-    async function fetch() {
-      setIsLoading(true);
-
-      const result = await send('pluggyai-status', {
-        fileId: budgetFileId,
-      });
-
-      setConfiguredPluggyAi(
-        (result as { configured?: boolean })?.configured || false,
-      );
-      setIsLoading(false);
+    if (status === 'online') {
+      void refreshPluggyAiStatus();
     }
-
-    if (status === 'online' && budgetFileId) {
-      void fetch();
-    }
-  }, [status, fileId]);
+  }, [status, refreshPluggyAiStatus]);
 
   return {
-    configuredPluggyAi,
+    pluggyAiStatus,
+    refreshPluggyAiStatus,
     isLoading,
   };
 }

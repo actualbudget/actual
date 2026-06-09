@@ -226,6 +226,9 @@ app.post(
       status: 'ok',
       data: {
         configured,
+        source: configured
+          ? enableBankingService.getCredentialSource(options)
+          : null,
       },
     });
   }),
@@ -235,8 +238,8 @@ app.post(
   '/configure',
   handleError(async (req: Request, res: Response) => {
     const fileId = getFileIdFromRequest(req);
-    const options = { fileId };
-    const { applicationId, secretKey } = req.body || {};
+    const { applicationId, secretKey, perBudgetFile = true } = req.body || {};
+    const options = { fileId, perBudgetFile };
 
     if (!applicationId || !secretKey) {
       res.send({

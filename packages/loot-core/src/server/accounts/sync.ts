@@ -341,6 +341,7 @@ async function downloadPluggyAiTransactions(
 async function downloadAkahuTransactions(
   acctId: AccountEntity['id'],
   since: string,
+  fileId: string,
 ) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
@@ -352,9 +353,11 @@ async function downloadAkahuTransactions(
     {
       accountId: acctId,
       startDate: since,
+      fileId,
     },
     {
       'X-ACTUAL-TOKEN': userToken,
+      'X-Actual-File-Id': fileId,
     },
     60000,
   );
@@ -1220,7 +1223,7 @@ export async function syncAccount(
       fileId,
     );
   } else if (acctRow.account_sync_source === 'akahu') {
-    download = await downloadAkahuTransactions(acctId, syncStartDate);
+    download = await downloadAkahuTransactions(acctId, syncStartDate, fileId);
   } else if (acctRow.account_sync_source === 'goCardless') {
     download = await downloadGoCardlessTransactions(
       userId,

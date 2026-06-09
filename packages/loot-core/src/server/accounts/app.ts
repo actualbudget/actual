@@ -25,6 +25,7 @@ import { amountToInteger } from '#shared/util';
 import type { ImportTransactionsOpts } from '#types/api-handlers';
 import type {
   AccountEntity,
+  BankSyncProviderStatus,
   BankSyncStatus,
   CategoryEntity,
   GoCardlessToken,
@@ -734,10 +735,12 @@ async function setSecret({
   name,
   value,
   fileId,
+  perBudgetFile = true,
 }: {
   name: string;
   value: string | null;
   fileId: string;
+  perBudgetFile?: boolean;
 }) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -757,6 +760,7 @@ async function setSecret({
         name,
         value,
         fileId,
+        perBudgetFile,
       },
       {
         'X-ACTUAL-TOKEN': userToken,
@@ -888,7 +892,11 @@ async function stopGoCardlessWebTokenPolling() {
   return 'ok';
 }
 
-async function goCardlessStatus({ fileId }: { fileId: string }) {
+async function goCardlessStatus({
+  fileId,
+}: {
+  fileId: string;
+}): Promise<BankSyncProviderStatus> {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -909,7 +917,11 @@ async function goCardlessStatus({ fileId }: { fileId: string }) {
   );
 }
 
-async function simpleFinStatus({ fileId }: { fileId: string }) {
+async function simpleFinStatus({
+  fileId,
+}: {
+  fileId: string;
+}): Promise<BankSyncProviderStatus> {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -930,7 +942,11 @@ async function simpleFinStatus({ fileId }: { fileId: string }) {
   return post(serverConfig.SIMPLEFIN_SERVER + '/status', body, headers);
 }
 
-async function pluggyAiStatus({ fileId }: { fileId: string }) {
+async function pluggyAiStatus({
+  fileId,
+}: {
+  fileId: string;
+}): Promise<BankSyncProviderStatus> {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -951,7 +967,11 @@ async function pluggyAiStatus({ fileId }: { fileId: string }) {
   return post(serverConfig.PLUGGYAI_SERVER + '/status', body, headers);
 }
 
-async function akahuStatus() {
+async function akahuStatus({
+  fileId,
+}: {
+  fileId: string;
+}): Promise<BankSyncProviderStatus> {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -963,13 +983,13 @@ async function akahuStatus() {
     throw new Error('Failed to get server config.');
   }
 
-  return post(
-    serverConfig.AKAHU_SERVER + '/status',
-    {},
-    {
-      'X-ACTUAL-TOKEN': userToken,
-    },
-  );
+  const body = { fileId };
+  const headers: Record<string, string> = {
+    'X-ACTUAL-TOKEN': userToken,
+    'X-Actual-File-Id': fileId,
+  };
+
+  return post(serverConfig.AKAHU_SERVER + '/status', body, headers);
 }
 
 async function simpleFinAccounts({ fileId }: { fileId: string }) {
@@ -1032,7 +1052,7 @@ async function pluggyAiAccounts({ fileId }: { fileId: string }) {
   }
 }
 
-async function akahuAccounts() {
+async function akahuAccounts({ fileId }: { fileId: string }) {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -1045,12 +1065,16 @@ async function akahuAccounts() {
   }
 
   try {
+    const body = { fileId };
+    const headers: Record<string, string> = {
+      'X-ACTUAL-TOKEN': userToken,
+      'X-Actual-File-Id': fileId,
+    };
+
     return await post(
       serverConfig.AKAHU_SERVER + '/accounts',
-      {},
-      {
-        'X-ACTUAL-TOKEN': userToken,
-      },
+      body,
+      headers,
       60000,
     );
   } catch {
@@ -1058,7 +1082,11 @@ async function akahuAccounts() {
   }
 }
 
-async function enableBankingStatus({ fileId }: { fileId: string }) {
+async function enableBankingStatus({
+  fileId,
+}: {
+  fileId: string;
+}): Promise<BankSyncProviderStatus> {
   const userToken = await asyncStorage.getItem('user-token');
 
   if (!userToken) {
@@ -1237,6 +1265,7 @@ async function enableBankingConfigure(config: {
   applicationId: string;
   secretKey: string;
   fileId: string;
+  perBudgetFile?: boolean;
 }) {
   const userToken = await asyncStorage.getItem('user-token');
 

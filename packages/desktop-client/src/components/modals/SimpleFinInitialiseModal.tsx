@@ -5,6 +5,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
+import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 
@@ -28,9 +29,14 @@ type SimpleFinInitialiseModalProps = Extract<
 export const SimpleFinInitialiseModal = ({
   onSuccess,
   fileId,
+  canSetGlobalCredentials = true,
+  credentialSource,
 }: SimpleFinInitialiseModalProps) => {
   const { t } = useTranslation();
   const [token, setToken] = useState('');
+  const [perBudgetFile, setPerBudgetFile] = useState(
+    credentialSource ? credentialSource === 'per-budget-file' : true,
+  );
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(t('It is required to provide a token.'));
@@ -48,6 +54,7 @@ export const SimpleFinInitialiseModal = ({
         name: 'simplefin_token',
         value: token,
         fileId,
+        perBudgetFile,
       })) || {};
 
     if (error) {
@@ -84,6 +91,27 @@ export const SimpleFinInitialiseModal = ({
                 .
               </Trans>
             </Text>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 12,
+              }}
+            >
+              <Text>
+                <Trans>For this budget only</Trans>
+              </Text>
+              <Toggle
+                id="simplefin-per-budget-file"
+                isOn={perBudgetFile}
+                isDisabled={
+                  Boolean(credentialSource) || !canSetGlobalCredentials
+                }
+                onToggle={setPerBudgetFile}
+              />
+            </View>
 
             <FormField>
               <FormLabel title={t('Token:')} htmlFor="token-field" />

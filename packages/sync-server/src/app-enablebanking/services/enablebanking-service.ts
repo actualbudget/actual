@@ -342,6 +342,16 @@ export const enableBankingService = {
     return !!(applicationId && secretKey);
   },
 
+  getCredentialSource(options?: SecretOptions) {
+    return secretsService.getCredentialSource(
+      [
+        SecretName.enablebanking_applicationId,
+        SecretName.enablebanking_secretKey,
+      ],
+      options,
+    );
+  },
+
   async validateCredentials(
     applicationId: string,
     secretKey: string,

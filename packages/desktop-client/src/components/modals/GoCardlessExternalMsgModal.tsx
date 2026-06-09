@@ -127,10 +127,11 @@ export function GoCardlessExternalMsgModal({
     isLoading: isBankOptionsLoading,
     isError: isBankOptionError,
   } = useAvailableBanks(country ?? '', fileId);
-  const {
-    configuredGoCardless: isConfigured,
-    isLoading: isConfigurationLoading,
-  } = useGoCardlessStatus(fileId);
+  const { goCardlessStatus, isLoading: isConfigurationLoading } =
+    useGoCardlessStatus(fileId);
+  const isConfigured = Boolean(
+    goCardlessStatus?.source ?? goCardlessStatus?.configured,
+  );
 
   async function onJump() {
     setError(null);

@@ -6,6 +6,7 @@ import { ButtonWithLoading } from '@actual-app/components/button';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
+import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 
@@ -29,11 +30,16 @@ type PluggyAiInitialiseProps = Extract<
 export const PluggyAiInitialiseModal = ({
   onSuccess,
   fileId,
+  canSetGlobalCredentials = true,
+  credentialSource,
 }: PluggyAiInitialiseProps) => {
   const { t } = useTranslation();
   const [clientId, setClientId] = useState('');
   const [clientSecret, setClientSecret] = useState('');
   const [itemIds, setItemIds] = useState('');
+  const [perBudgetFile, setPerBudgetFile] = useState(
+    credentialSource ? credentialSource === 'per-budget-file' : true,
+  );
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(
@@ -60,6 +66,7 @@ export const PluggyAiInitialiseModal = ({
         name: 'pluggyai_clientId',
         value: clientId,
         fileId,
+        perBudgetFile,
       })) || {};
 
     let { error, reason } = result;
@@ -76,6 +83,7 @@ export const PluggyAiInitialiseModal = ({
         name: 'pluggyai_clientSecret',
         value: clientSecret,
         fileId,
+        perBudgetFile,
       })) || {};
     ({ error, reason } = result);
 
@@ -91,6 +99,7 @@ export const PluggyAiInitialiseModal = ({
         name: 'pluggyai_itemIds',
         value: itemIds,
         fileId,
+        perBudgetFile,
       })) || {};
     ({ error, reason } = result);
 
@@ -131,6 +140,27 @@ export const PluggyAiInitialiseModal = ({
                 .
               </Trans>
             </Text>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 12,
+              }}
+            >
+              <Text>
+                <Trans>For this budget only</Trans>
+              </Text>
+              <Toggle
+                id="pluggyai-per-budget-file"
+                isOn={perBudgetFile}
+                isDisabled={
+                  Boolean(credentialSource) || !canSetGlobalCredentials
+                }
+                onToggle={setPerBudgetFile}
+              />
+            </View>
 
             <FormField>
               <FormLabel title={t('Client ID:')} htmlFor="client-id-field" />
