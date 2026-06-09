@@ -263,7 +263,7 @@ As part of the build process, GitHub actions runs a spell checker bot on the doc
 
 ![Image of spelling bot error](/img/repo/spellingbot-example.webp)
 
-If the bot mistakes a word, you can add it to the `/.github/actions/spelling/allow/keywords.txt` file.
+If the bot mistakes a word, you can add it to the `/.github/actions/docs-spelling/allow/keywords.txt` file.
 This will prevent the bot from reporting this word as a spelling error in the future.
 
 ## Naming Standards
