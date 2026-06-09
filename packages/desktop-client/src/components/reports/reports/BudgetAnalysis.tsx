@@ -6,7 +6,11 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { SvgChart, SvgChartBar, SvgDownload } from '@actual-app/components/icons/v1';
+import {
+  SvgChart,
+  SvgChartBar,
+  SvgDownload,
+} from '@actual-app/components/icons/v1';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Select } from '@actual-app/components/select';
 import { theme } from '@actual-app/components/theme';

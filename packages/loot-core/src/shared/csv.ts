@@ -1,6 +1,6 @@
 // Characters that trigger formula execution in spreadsheet apps (Excel, Google Sheets, LibreOffice).
 // Prefix with a single quote to force string interpretation.
-const FORMULA_PREFIXES = ['=', '+', '-', '@', '\t', '\r'];
+const FORMULA_PREFIXES = ['=', '+', '@', '\t', '\r'];
 
 export function escapeCsvField(value: string): string {
   let sanitized = value;
@@ -17,10 +17,7 @@ export function escapeCsvField(value: string): string {
   return sanitized;
 }
 
-export function buildCsv(
-  headers: string[],
-  rows: string[][],
-): string {
+export function buildCsv(headers: string[], rows: string[][]): string {
   const lines = [
     headers.map(escapeCsvField).join(','),
     ...rows.map(row => row.map(escapeCsvField).join(',')),

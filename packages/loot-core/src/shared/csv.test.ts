@@ -25,8 +25,8 @@ describe('escapeCsvField', () => {
     expect(escapeCsvField('+cmd')).toBe("'+cmd");
   });
 
-  it('prefixes - to prevent formula injection', () => {
-    expect(escapeCsvField('-1+1')).toBe("'-1+1");
+  it('does not prefix plain negative numbers', () => {
+    expect(escapeCsvField('-1100.00')).toBe('-1100.00');
   });
 
   it('prefixes @ to prevent formula injection', () => {
@@ -38,13 +38,19 @@ describe('escapeCsvField', () => {
   });
 
   it('applies both formula prefix and quote wrapping when needed', () => {
-    expect(escapeCsvField('=A,B')).toBe("\"'=A,B\"");
+    expect(escapeCsvField('=A,B')).toBe('"\'=A,B"');
   });
 });
 
 describe('buildCsv', () => {
   it('produces a header row followed by data rows', () => {
-    const result = buildCsv(['Name', 'Value'], [['foo', '1'], ['bar', '2']]);
+    const result = buildCsv(
+      ['Name', 'Value'],
+      [
+        ['foo', '1'],
+        ['bar', '2'],
+      ],
+    );
     expect(result).toBe('Name,Value\nfoo,1\nbar,2');
   });
 
