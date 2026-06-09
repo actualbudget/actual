@@ -57,6 +57,19 @@ export type CashFlowWidget = AbstractWidget<
     showBalance?: boolean;
   } | null
 >;
+
+export type SpendingAverageRange =
+  | {
+      mode: 'last-n-months';
+      months: 3 | 6 | 12;
+    }
+  | {
+      mode: 'year-to-date';
+    }
+  | {
+      mode: 'all-time';
+    };
+
 export type SpendingWidget = AbstractWidget<
   'spending-card',
   {
@@ -67,6 +80,7 @@ export type SpendingWidget = AbstractWidget<
     compareTo?: string;
     isLive?: boolean;
     mode?: 'single-month' | 'budget' | 'average';
+    averageRange?: SpendingAverageRange;
   } | null
 >;
 export type BudgetAnalysisWidget = AbstractWidget<

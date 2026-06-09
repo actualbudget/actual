@@ -13,9 +13,11 @@ For web clients, PikaPods will automatically update about a week or so after the
 For desktop clients, you will need to reinstall the desktop client to update to the latest version.
 First check on the web client to see if PikaPods has updated, then reinstall the desktop client.
 
-:::note[Using Actual on Pikapods]
+:::caution[Desktop App Not Recommended with PikaPods]
 
-We suggest [using a PWA](#using-a-PWA) desktop client with PikaPods so you don't run into version issues.
+Using the Actual desktop app with PikaPods is not recommended. The desktop client version can fall out of sync with the server version, causing compatibility issues.
+
+It is best to install Actual as a PWA (Progressive Web App) instead. See the [Using a PWA](#using-a-pwa) section below for step-by-step instructions for Chrome, Firefox, Safari, and other browsers.
 
 :::
 
@@ -108,7 +110,7 @@ Keep your Actual Budget password safe, as it cannot be retrieved. If you forget 
 <br />
 <br />
 
-## Using a PWA (Progressive Web App) {#using-a-PWA}
+## Using a PWA (Progressive Web App) {#using-a-pwa}
 
 When using Actual Server over the internet, we suggest using a PWA web client. After you login and open Actual Budget, it's easy to set up a PWA from your browser of choice.
 

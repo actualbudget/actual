@@ -6,9 +6,9 @@ import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
 
 import { useMoveAccountMutation } from '#accounts';
+import { isAccountFailedSync } from '#accounts/syncStatus';
 import { useAccounts } from '#hooks/useAccounts';
 import { useClosedAccounts } from '#hooks/useClosedAccounts';
-import { useFailedAccounts } from '#hooks/useFailedAccounts';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useOffBudgetAccounts } from '#hooks/useOffBudgetAccounts';
 import { useOnBudgetAccounts } from '#hooks/useOnBudgetAccounts';
@@ -25,7 +25,6 @@ export function Accounts() {
   const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
   const { data: accounts = [] } = useAccounts();
-  const failedAccounts = useFailedAccounts();
   const updatedAccounts = useUpdatedAccounts();
   const { data: offbudgetAccounts = [] } = useOffBudgetAccounts();
   const { data: onBudgetAccounts = [] } = useOnBudgetAccounts();
@@ -122,7 +121,7 @@ export function Accounts() {
             account={account}
             connected={!!account.bank}
             pending={syncingAccountIds.includes(account.id)}
-            failed={failedAccounts.has(account.id)}
+            failed={isAccountFailedSync(account)}
             updated={updatedAccounts.includes(account.id)}
             to={getAccountPath(account)}
             query={bindings.accountBalance(account.id)}
@@ -154,7 +153,7 @@ export function Accounts() {
             account={account}
             connected={!!account.bank}
             pending={syncingAccountIds.includes(account.id)}
-            failed={failedAccounts.has(account.id)}
+            failed={isAccountFailedSync(account)}
             updated={updatedAccounts.includes(account.id)}
             to={getAccountPath(account)}
             query={bindings.accountBalance(account.id)}

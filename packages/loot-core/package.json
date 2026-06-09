@@ -114,6 +114,8 @@
     "./client/transfer": "./src/client/transfer.ts",
     "./client/undo": "./src/client/undo.ts",
     "./mocks": "./src/mocks/index.ts",
+    "./platform/client/browser-preload": "./src/platform/client/browser-preload/index.ts",
+    "./platform/client/browser-server/coordinator": "./src/platform/client/browser-server/coordinator.ts",
     "./platform/client/connection": {
       "electron-renderer": "./src/platform/client/connection/index.electron.ts",
       "default": "./src/platform/client/connection/index.ts"
@@ -162,7 +164,6 @@
   "scripts": {
     "build:node": "cross-env NODE_ENV=production vite build --config ./vite.desktop.config.mts",
     "watch:node": "cross-env NODE_ENV=development vite build --config ./vite.desktop.config.mts --watch",
-    "generate:i18n": "i18next",
     "test": "npm-run-all -cp 'test:*'",
     "test:node": "ENV=node vitest --run",
     "test:web": "ENV=web vitest --run -c vitest.web.config.ts",
@@ -207,7 +208,6 @@
     "crypto-browserify": "^3.12.1",
     "fake-indexeddb": "^6.2.5",
     "fast-check": "^4.6.0",
-    "i18next": "^25.10.10",
     "jest-diff": "^30.3.0",
     "jsverify": "^0.8.4",
     "mockdate": "^3.0.5",

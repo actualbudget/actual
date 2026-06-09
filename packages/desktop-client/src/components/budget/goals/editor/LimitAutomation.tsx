@@ -2,6 +2,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
+import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import {
   currentDate,
@@ -16,6 +17,7 @@ import { setDay } from 'date-fns/setDay';
 
 import { updateTemplate } from '#components/budget/goals/actions';
 import type { Action } from '#components/budget/goals/actions';
+import { TWO_UP_FIELD_FLEX } from '#components/budget/goals/editor/fieldLayout';
 import { FormField, FormLabel } from '#components/forms';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { AmountInput } from '#components/util/AmountInput';
@@ -51,7 +53,7 @@ export const LimitAutomation = ({
   });
 
   const weekdayField = (
-    <FormField style={{ flex: 1 }}>
+    <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
       <FormLabel title={t('Weekday')} htmlFor="weekday-field" />
 
       <Select
@@ -72,7 +74,7 @@ export const LimitAutomation = ({
   );
 
   const amountField = (
-    <FormField key="amount-field" style={{ flex: 1 }}>
+    <FormField key="amount-field" style={{ flex: TWO_UP_FIELD_FLEX }}>
       <FormLabel title={t('Amount')} htmlFor="amount-field" />
       <AmountInput
         id="amount-field"
@@ -90,32 +92,75 @@ export const LimitAutomation = ({
     </FormField>
   );
 
+  const cadenceField = (
+    <FormField key="cadence-field" style={{ flex: TWO_UP_FIELD_FLEX }}>
+      <FormLabel title={t('Every')} htmlFor="cadence-field" />
+
+      <Select
+        id="cadence-field"
+        value={period}
+        onChange={cadence =>
+          dispatch(updateTemplate({ type: 'limit', period: cadence }))
+        }
+        options={[
+          ['daily', t('Day')],
+          ['weekly', t('Week')],
+          ['monthly', t('Month')],
+        ]}
+        className={selectButtonClassName}
+      />
+    </FormField>
+  );
+
   return (
     <>
       <SpaceBetween align="center" gap={10} style={{ marginTop: 10 }}>
-        <FormField key="cadence-field" style={{ flex: 1 }}>
-          <FormLabel title={t('Cadence')} htmlFor="cadence-field" />
-
-          <Select
-            id="cadence-field"
-            value={period}
-            onChange={cadence =>
-              dispatch(updateTemplate({ type: 'limit', period: cadence }))
-            }
-            options={[
-              ['daily', t('Daily')],
-              ['weekly', t('Weekly')],
-              ['monthly', t('Monthly')],
-            ]}
-            className={selectButtonClassName}
-          />
-        </FormField>
-        {period === 'weekly' ? weekdayField : amountField}
+        {amountField}
+        {cadenceField}
       </SpaceBetween>
 
+      <Text
+        style={{
+          fontSize: 12,
+          color: theme.pageTextLight,
+          display: 'block',
+          marginTop: 8,
+        }}
+      >
+        <Trans>
+          A weekly or daily cap is multiplied by the number of weeks or days in
+          the month, so the effective monthly cap changes with each month. For
+          example, a{' '}
+          {{
+            weekly: format(
+              amountToInteger(50, format.currency.decimalPlaces),
+              'financial-no-decimals',
+            ),
+          }}
+          /week cap caps the balance at{' '}
+          {{
+            fourWeeks: format(
+              amountToInteger(200, format.currency.decimalPlaces),
+              'financial-no-decimals',
+            ),
+          }}{' '}
+          in months with 4 weeks and{' '}
+          {{
+            fiveWeeks: format(
+              amountToInteger(250, format.currency.decimalPlaces),
+              'financial-no-decimals',
+            ),
+          }}{' '}
+          in months with 5.
+        </Trans>
+      </Text>
+
       <SpaceBetween align="center" gap={10} style={{ marginTop: 10 }}>
-        {period === 'weekly' && amountField}
-        <FormField key="hold-overflow-field" style={{ flex: 1 }}>
+        {period === 'weekly' && weekdayField}
+        <FormField
+          key="hold-overflow-field"
+          style={{ flex: TWO_UP_FIELD_FLEX }}
+        >
           <LabeledCheckbox
             id="hold-overflow-field"
             checked={!!hold}

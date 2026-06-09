@@ -22,7 +22,6 @@ import {
   FIELD_TYPES,
   getFieldError,
   getValidOps,
-  mapField,
   unparse,
 } from '@actual-app/core/shared/rules';
 import { titleFirst } from '@actual-app/core/shared/util';
@@ -42,6 +41,7 @@ import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
 import { usePayees } from '#hooks/usePayees';
 import { useTransactionFilters } from '#hooks/useTransactionFilters';
+import { mapField } from '#util/rule';
 
 import { CompactFiltersButton } from './CompactFiltersButton';
 import { FiltersButton } from './FiltersButton';

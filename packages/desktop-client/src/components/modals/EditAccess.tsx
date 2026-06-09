@@ -9,7 +9,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
-import { getUserAccessErrors } from '@actual-app/core/shared/errors';
 
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { FormField, FormLabel } from '#components/forms';
@@ -18,6 +17,7 @@ import type { Modal as ModalType } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { signOut } from '#users/usersSlice';
+import { getUserAccessErrors } from '#util/error';
 
 type EditUserAccessProps = Extract<
   ModalType,
