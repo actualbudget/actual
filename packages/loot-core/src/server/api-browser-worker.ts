@@ -43,11 +43,8 @@ import type { InitConfig } from '#server/main';
       const patched = url.replace(/(\.js)(\?|$)/, '.js.data$2');
       return origFetch(patched, initArg);
     }
-    if (
-      url.endsWith('/data-file-index.txt') ||
-      url.endsWith('data-file-index.txt')
-    ) {
-      const res = await origFetch(input as RequestInfo | URL, initArg);
+    if (url.endsWith('data-file-index.txt')) {
+      const res = await origFetch(input, initArg);
       if (!res.ok) return res;
       const text = await res.text();
       const rewritten = text.replace(/\.js\.data(\r?\n|$)/g, '.js$1');
@@ -57,7 +54,7 @@ import type { InitConfig } from '#server/main';
         headers: res.headers,
       });
     }
-    return origFetch(input as RequestInfo | URL, initArg);
+    return origFetch(input, initArg);
   }) as typeof fetch;
 }
 

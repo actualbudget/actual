@@ -4,7 +4,7 @@
 // browser backend:
 //   - browser-preload/start.ts        (direct Worker fallback)
 //   - browser-preload/worker-bridge.ts (the SharedWorker leader's Worker)
-//   - packages/api/browser/rpc.ts     (thin @actual-app/api consumer)
+//   - packages/api/index.browser.ts   (@actual-app/api browser facade)
 //
 // They all need: initSQLBackend(worker) so absurd-sql's
 // __absurd:spawn-idb-worker messages are handled (without it any sqlite write
