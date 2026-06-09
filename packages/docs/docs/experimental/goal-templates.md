@@ -431,10 +431,10 @@ The average amount spent is calculated from completed months only. This will mea
 
 You can also adjust the budgeted amount from the average by a percentage or by a fixed whole number. This functionality may be useful when you want to budget an average, but bump it up or down a bit to account for inflation or to slowly wean off a category you'd like to spend less on. (See also [adjustments](#adjustments))
 
-| Syntax                                                                      | Description                                                                                                                                                                          |
-| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Syntax                                                                      | Description                                                                                                                                                                                   |
+| --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `#template average {number} months`                                         | Budget the average amount spent over the last `{number}` complete months. Can set the number to any number > 0. Matches the existing option on the budget page but with flexible month ranges |
-| `#template average {number} months [{increase/decrease} {number\|number%}]` | Budget the average amount spent over a period, with an adjustment                                                                                                                    |
+| `#template average {number} months [{increase/decrease} {number\|number%}]` | Budget the average amount spent over a period, with an adjustment                                                                                                                             |
 
 #### Examples
 
