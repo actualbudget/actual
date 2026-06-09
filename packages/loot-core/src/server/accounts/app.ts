@@ -610,16 +610,7 @@ async function closeAccount({
   // Unlink the account if it's linked. This makes sure to remove it from
   // bank-sync providers. (This should not be undo-able, as it mutates the
   // remote server and the user will have to link the account again)
-  const accountForUnlink = await db.first<Pick<db.DbAccount, 'bank'>>(
-    'SELECT bank FROM accounts WHERE id = ? AND tombstone = 0',
-    [id],
-  );
-  if (accountForUnlink?.bank) {
-    if (!fileId) {
-      throw new Error('missing-file-id');
-    }
-    await unlinkAccount({ id, fileId });
-  }
+  await unlinkAccount({ id, fileId });
 
   return withUndo(async () => {
     const account = await db.first<db.DbAccount>(
@@ -1759,7 +1750,7 @@ async function unlinkAccount({
   fileId,
 }: {
   id: AccountEntity['id'];
-  fileId: string;
+  fileId?: string;
 }) {
   const accRow = await db.first<db.DbAccount>(
     'SELECT * FROM accounts WHERE id = ?',
@@ -1800,6 +1791,10 @@ async function unlinkAccount({
 
   // No more accounts are associated with this bank. We can remove
   // it from GoCardless.
+  if (!fileId) {
+    return 'ok';
+  }
+
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) {
     return 'ok';
@@ -1823,20 +1818,13 @@ async function unlinkAccount({
     const requisitionId = bank.bank_id;
 
     try {
-      const body: Record<string, string> = { requisitionId };
-      if (fileId) {
-        body.fileId = fileId;
-      }
-      const headers: Record<string, string> = {
-        'X-ACTUAL-TOKEN': userToken,
-      };
-      if (fileId) {
-        headers['X-Actual-File-Id'] = fileId;
-      }
       await post(
         serverConfig.GOCARDLESS_SERVER + '/remove-account',
-        body,
-        headers,
+        { requisitionId, fileId },
+        {
+          'X-ACTUAL-TOKEN': userToken,
+          'X-Actual-File-Id': fileId,
+        },
       );
     } catch (error) {
       logger.log({ error });
