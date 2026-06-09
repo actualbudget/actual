@@ -40,3 +40,7 @@ To download the latest nightly desktop build:
 3. Scroll down to the **Artifacts** section at the bottom of the page.
 4. Download the artifact that matches your operating system and processor architecture.
 5. The artifact downloads as a `.zip` file. Extract it to get the installer, then install it as you would the regular desktop app.
+
+### Nightly Docker Images
+
+If you run your own sync server with Docker, nightly images are also available. See the [`nightly` tag](../install/docker.md#nightly-tag) section of the Docker install guide for details.
