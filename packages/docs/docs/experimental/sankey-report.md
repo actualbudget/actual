@@ -17,17 +17,17 @@ The chart has two main view modes. **Spent** shows how income flows into account
 - **Date range**: choose a fixed range or quick ranges (1 month, 3 months, year-to-date, etc.).
 - **Filters**: apply filters (Account, Category, Payee, Tag, etc.). Active filters appear as editable chips and updates the chart live.
 - **View mode**: view either spent or budgeted money.
-- **Number of nodes**: select the maximum number of nodes to view per layer in the graph (or show up to all layers). 
-- **Sorting**: switch between sorting per category group, sorting globally or sorting by budget order. 
+- **Number of nodes**: select the maximum number of nodes to view per layer in the graph (or show up to all layers).
+- **Sorting**: switch between sorting per category group, sorting globally or sorting by budget order.
 - **Layers**: show a subset of the graph by selecting the start and end layers (from Income payee to Category in Spent view and Income category to Category in Budgeted view).
-- **Options**: 
-    - Switch between viewing percentages or absolute values
-    - Choose to group all accounts in the Spent view. This is useful if most of your spending happens from accounts without direct income i.e. if you spend from credit cards, but get your salary on a different account.
+- **Options**:
+  - Switch between viewing percentages or absolute values
+  - Choose to group all accounts in the Spent view. This is useful if most of your spending happens from accounts without direct income i.e. if you spend from credit cards, but get your salary on a different account.
 
 ## Important information
 
 - A Sankey chart cannot directly represent negative numbers. In some cases, such as when funds are reallocated from categories with negative budgeting (e.g. using savings to cover overspending), the chart structure may differ from the main budget overview. As a result, some category totals and flows in this diagram may not exactly match the summary figures elsewhere in the app.
-- The number of nodes shown in a layer will automatically be adjusted to fit the amount of vertical space on the screen, up to the "Show up to N" cap specified. Excess nodes will be put to an 'Other' node, starting with the smallest nodes. Hover the link to see a tooltip, detailing which nodes are grouped in an 'Other' node. 
+- The number of nodes shown in a layer will automatically be adjusted to fit the amount of vertical space on the screen, up to the "Show up to N" cap specified. Excess nodes will be put to an 'Other' node, starting with the smallest nodes. Hover the link to see a tooltip, detailing which nodes are grouped in an 'Other' node.
 
 ## Known limitations
 
