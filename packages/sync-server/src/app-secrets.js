@@ -146,8 +146,13 @@ app.get('/:name', async (req, res) => {
     return;
   }
 
-  const fileId = req.query.fileId || req.headers['x-actual-file-id'];
-  if (!fileId || typeof fileId !== 'string') {
+  const rawFileId = req.headers['x-actual-file-id'];
+  if (typeof rawFileId !== 'string') {
+    sendMissingFileId(res);
+    return;
+  }
+  const fileId = rawFileId.trim();
+  if (!fileId) {
     sendMissingFileId(res);
     return;
   }

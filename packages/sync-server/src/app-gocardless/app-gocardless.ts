@@ -49,9 +49,12 @@ function sanitizeId<T extends string = string>(id: unknown): T {
 }
 
 function getRequiredFileIdFromRequest(req: express.Request): string {
-  const fileId =
-    req.body?.fileId || req.query?.fileId || req.headers['x-actual-file-id'];
-  if (!fileId || typeof fileId !== 'string') {
+  const rawFileId = req.headers['x-actual-file-id'];
+  if (typeof rawFileId !== 'string') {
+    throw new Error('missing-file-id');
+  }
+  const fileId = rawFileId.trim();
+  if (!fileId) {
     throw new Error('missing-file-id');
   }
   return fileId;

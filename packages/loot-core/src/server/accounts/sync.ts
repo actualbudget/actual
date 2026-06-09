@@ -153,7 +153,6 @@ async function downloadGoCardlessTransactions(
     'X-ACTUAL-TOKEN': userToken,
     'X-Actual-File-Id': fileId,
   };
-  body.fileId = fileId;
 
   const res = await post(
     getServer().GOCARDLESS_SERVER + '/transactions',
@@ -212,7 +211,6 @@ async function downloadSimpleFinTransactions(
     'X-ACTUAL-TOKEN': userToken,
     'X-Actual-File-Id': fileId,
   };
-  body.fileId = fileId;
 
   let res;
   try {
@@ -305,7 +303,6 @@ async function downloadPluggyAiTransactions(
     'X-ACTUAL-TOKEN': userToken,
     'X-Actual-File-Id': fileId,
   };
-  body.fileId = fileId;
 
   const res = await post(
     getServer().PLUGGYAI_SERVER + '/transactions',
@@ -347,7 +344,6 @@ async function downloadAkahuTransactions(
     {
       accountId: acctId,
       startDate: since,
-      fileId,
     },
     {
       'X-ACTUAL-TOKEN': userToken,
@@ -389,7 +385,6 @@ async function downloadEnableBankingTransactions(
     {
       accountId: acctId,
       startDate: since,
-      fileId,
     },
     {
       'X-ACTUAL-TOKEN': userToken,

@@ -156,7 +156,8 @@ describe('secretsService', () => {
 
     it('returns 404 if secret does not exist', async () => {
       const res = await request(app)
-        .get(`/${SecretName.gocardless_secretKey}?fileId=test-file-id`)
+        .get(`/${SecretName.gocardless_secretKey}`)
+        .set('X-Actual-File-Id', 'test-file-id')
         .set('x-actual-token', 'valid-token');
 
       expect(res.statusCode).toEqual(404);
@@ -173,7 +174,8 @@ describe('secretsService', () => {
     it('returns 204 if secret exists', async () => {
       secretsService.set(testSecretName, testSecretValue, testOptions);
       const res = await request(app)
-        .get(`/${testSecretName}?fileId=test-file-id`)
+        .get(`/${testSecretName}`)
+        .set('X-Actual-File-Id', 'test-file-id')
         .set('x-actual-token', 'valid-token');
 
       expect(res.statusCode).toEqual(204);
@@ -249,7 +251,8 @@ describe('secretsService', () => {
 
       it('GET returns 403 when the user does not own the file', async () => {
         const res = await request(app)
-          .get(`/${testSecretName}?fileId=test-file-id`)
+          .get(`/${testSecretName}`)
+          .set('X-Actual-File-Id', 'test-file-id')
           .set('x-actual-token', 'valid-token-user');
 
         expect(res.statusCode).toEqual(403);
@@ -262,7 +265,8 @@ describe('secretsService', () => {
 
       it('GET returns 204 for admin users when secret exists', async () => {
         const res = await request(app)
-          .get(`/${testSecretName}?fileId=test-file-id`)
+          .get(`/${testSecretName}`)
+          .set('X-Actual-File-Id', 'test-file-id')
           .set('x-actual-token', 'valid-token-admin');
 
         expect(res.statusCode).toEqual(204);

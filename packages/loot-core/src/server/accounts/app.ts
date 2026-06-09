@@ -462,7 +462,7 @@ async function linkAkahuAccount({
 
   connection.send('sync-event', {
     type: 'success',
-    tables: ['transactions', 'accounts'],
+    tables: ['transactions'],
   });
 
   return 'ok';
@@ -779,11 +779,10 @@ async function checkSecret(arg: { name: string; fileId: string }) {
   const { name, fileId } = arg;
 
   try {
-    const url = new URL(serverConfig.BASE_SERVER + '/secret/' + name);
-    url.searchParams.set('fileId', fileId);
-    return await get(url.toString(), {
+    return await get(serverConfig.BASE_SERVER + '/secret/' + name, {
       headers: {
         'X-ACTUAL-TOKEN': userToken,
+        'X-Actual-File-Id': fileId,
       },
     });
   } catch (error) {
@@ -830,7 +829,7 @@ async function pollGoCardlessWebToken({
       throw new Error('Failed to get server config.');
     }
 
-    const body: Record<string, string> = { requisitionId, fileId };
+    const body: Record<string, string> = { requisitionId };
     const headers: Record<string, string> = {
       'X-ACTUAL-TOKEN': token,
       'X-Actual-File-Id': fileId,
@@ -897,9 +896,10 @@ async function goCardlessStatus({
 
   return post(
     serverConfig.GOCARDLESS_SERVER + '/status',
-    { fileId },
+    {},
     {
       'X-ACTUAL-TOKEN': userToken,
+      'X-Actual-File-Id': fileId,
     },
   );
 }
@@ -920,13 +920,12 @@ async function simpleFinStatus({
     throw new Error('Failed to get server config.');
   }
 
-  const body = { fileId };
   const headers: Record<string, string> = {
     'X-ACTUAL-TOKEN': userToken,
     'X-Actual-File-Id': fileId,
   };
 
-  return post(serverConfig.SIMPLEFIN_SERVER + '/status', body, headers);
+  return post(serverConfig.SIMPLEFIN_SERVER + '/status', {}, headers);
 }
 
 async function pluggyAiStatus({
@@ -945,13 +944,12 @@ async function pluggyAiStatus({
     throw new Error('Failed to get server config.');
   }
 
-  const body = { fileId };
   const headers: Record<string, string> = {
     'X-ACTUAL-TOKEN': userToken,
     'X-Actual-File-Id': fileId,
   };
 
-  return post(serverConfig.PLUGGYAI_SERVER + '/status', body, headers);
+  return post(serverConfig.PLUGGYAI_SERVER + '/status', {}, headers);
 }
 
 async function akahuStatus({
@@ -970,13 +968,12 @@ async function akahuStatus({
     throw new Error('Failed to get server config.');
   }
 
-  const body = { fileId };
   const headers: Record<string, string> = {
     'X-ACTUAL-TOKEN': userToken,
     'X-Actual-File-Id': fileId,
   };
 
-  return post(serverConfig.AKAHU_SERVER + '/status', body, headers);
+  return post(serverConfig.AKAHU_SERVER + '/status', {}, headers);
 }
 
 async function simpleFinAccounts({ fileId }: { fileId: string }) {
@@ -991,7 +988,6 @@ async function simpleFinAccounts({ fileId }: { fileId: string }) {
     throw new Error('Failed to get server config.');
   }
 
-  const body = { fileId };
   const headers: Record<string, string> = {
     'X-ACTUAL-TOKEN': userToken,
     'X-Actual-File-Id': fileId,
@@ -1000,7 +996,7 @@ async function simpleFinAccounts({ fileId }: { fileId: string }) {
   try {
     return await post(
       serverConfig.SIMPLEFIN_SERVER + '/accounts',
-      body,
+      {},
       headers,
       60000,
     );
@@ -1021,7 +1017,6 @@ async function pluggyAiAccounts({ fileId }: { fileId: string }) {
     throw new Error('Failed to get server config.');
   }
 
-  const body = { fileId };
   const headers: Record<string, string> = {
     'X-ACTUAL-TOKEN': userToken,
     'X-Actual-File-Id': fileId,
@@ -1030,7 +1025,7 @@ async function pluggyAiAccounts({ fileId }: { fileId: string }) {
   try {
     return await post(
       serverConfig.PLUGGYAI_SERVER + '/accounts',
-      body,
+      {},
       headers,
       60000,
     );
@@ -1052,7 +1047,6 @@ async function akahuAccounts({ fileId }: { fileId: string }) {
   }
 
   try {
-    const body = { fileId };
     const headers: Record<string, string> = {
       'X-ACTUAL-TOKEN': userToken,
       'X-Actual-File-Id': fileId,
@@ -1060,7 +1054,7 @@ async function akahuAccounts({ fileId }: { fileId: string }) {
 
     return await post(
       serverConfig.AKAHU_SERVER + '/accounts',
-      body,
+      {},
       headers,
       60000,
     );
@@ -1085,13 +1079,12 @@ async function enableBankingStatus({
     throw new Error('Failed to get server config.');
   }
 
-  const body = { fileId };
   const headers: Record<string, string> = {
     'X-ACTUAL-TOKEN': userToken,
     'X-Actual-File-Id': fileId,
   };
 
-  return post(serverConfig.ENABLEBANKING_SERVER + '/status', body, headers);
+  return post(serverConfig.ENABLEBANKING_SERVER + '/status', {}, headers);
 }
 
 async function enableBankingAspsps({
@@ -1114,7 +1107,7 @@ async function enableBankingAspsps({
 
   return post(
     serverConfig.ENABLEBANKING_SERVER + '/aspsps',
-    { country, fileId },
+    { country },
     {
       'X-ACTUAL-TOKEN': userToken,
       'X-Actual-File-Id': fileId,
@@ -1165,7 +1158,6 @@ async function enableBankingStartAuth({
       redirectUrl,
       maxConsentValidity,
       psuType,
-      fileId,
     },
     {
       'X-ACTUAL-TOKEN': userToken,
@@ -1267,10 +1259,16 @@ async function enableBankingConfigure(config: {
 
   const { fileId } = config;
 
-  return post(serverConfig.ENABLEBANKING_SERVER + '/configure', config, {
-    'X-ACTUAL-TOKEN': userToken,
-    'X-Actual-File-Id': fileId,
-  });
+  const { applicationId, secretKey, perBudgetFile } = config;
+
+  return post(
+    serverConfig.ENABLEBANKING_SERVER + '/configure',
+    { applicationId, secretKey, perBudgetFile },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+      'X-Actual-File-Id': fileId,
+    },
+  );
 }
 
 async function getGoCardlessBanks({
@@ -1293,9 +1291,10 @@ async function getGoCardlessBanks({
 
   return post(
     serverConfig.GOCARDLESS_SERVER + '/get-banks',
-    { country, showDemo: isNonProductionEnvironment(), fileId },
+    { country, showDemo: isNonProductionEnvironment() },
     {
       'X-ACTUAL-TOKEN': userToken,
+      'X-Actual-File-Id': fileId,
     },
   );
 }
@@ -1323,7 +1322,6 @@ async function createGoCardlessWebToken({
   const body: Record<string, unknown> = {
     institutionId,
     accessValidForDays,
-    fileId,
   };
   const headers: Record<string, string> = {
     'X-ACTUAL-TOKEN': userToken,
@@ -1812,7 +1810,7 @@ async function unlinkAccount({
     try {
       await post(
         serverConfig.GOCARDLESS_SERVER + '/remove-account',
-        { requisitionId, fileId },
+        { requisitionId },
         {
           'X-ACTUAL-TOKEN': userToken,
           'X-Actual-File-Id': fileId,

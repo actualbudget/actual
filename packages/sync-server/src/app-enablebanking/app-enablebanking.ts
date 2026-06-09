@@ -31,8 +31,7 @@ app.use(requestLoggerMiddleware);
 app.use(express.json());
 
 function getFileIdFromRequest(req: Request): string {
-  const rawFileId =
-    req.body?.fileId || req.query?.fileId || req.headers['x-actual-file-id'];
+  const rawFileId = req.headers['x-actual-file-id'];
   if (typeof rawFileId !== 'string') {
     throw new Error('missing-file-id');
   }
