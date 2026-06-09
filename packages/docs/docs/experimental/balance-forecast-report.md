@@ -42,5 +42,5 @@ For each forecast day, Actual updates the running balance with posted transactio
 
 ## Related
 
-- [Reports index](/docs/reports/index.md) — other report types and tips.
-- [Schedules](/docs/schedules) — manage the scheduled transactions used by the forecast.
+- [Reports index](../reports/index.md) — other report types and tips.
+- [Schedules](../schedules.md) — manage the scheduled transactions used by the forecast.
