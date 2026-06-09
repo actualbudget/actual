@@ -162,6 +162,21 @@ describe('set budget average', () => {
     expect(await getSheetValue('budget202404', 'budget-cat1')).toBe(600);
   });
 
+  it('rounds a single category average to an integer amount', async () => {
+    await db.insertTransaction({
+      date: '2023-12-20',
+      amount: -100,
+      account: 'account1',
+      category: 'cat1',
+    });
+    await sheet.waitOnSpreadsheet();
+
+    await setNMonthAvg({ month: '2024-04', N: 3, category: 'cat1' });
+    await sheet.waitOnSpreadsheet();
+
+    expect(await getSheetValue('budget202404', 'budget-cat1')).toBe(633);
+  });
+
   it('sets a bulk 3 month average from complete months', async () => {
     await set3MonthAvg({ month: '2024-04' });
     await sheet.waitOnSpreadsheet();

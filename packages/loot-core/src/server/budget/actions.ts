@@ -410,7 +410,7 @@ export async function getCategoryAverage({
       'sum-amount-' + categoryId,
     );
   }
-  return sumAmount / months.length;
+  return Math.round(sumAmount / months.length);
 }
 
 async function getAverageMonths({
