@@ -146,8 +146,13 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         earliestMonth = yearAgo;
       }
 
+      // Extend the selectable range to December of next year so users can
+      // plan ahead (e.g. June 2026 → December 2027).
+      const futureYear = String(Number(currentMonth.slice(0, 4)) + 1);
+      const futureMonth = `${futureYear}-12`;
+
       const allMonthsData = monthUtils
-        .rangeInclusive(earliestMonth, latestMonth)
+        .rangeInclusive(earliestMonth, futureMonth)
         .map(month => ({
           name: month,
           pretty: monthUtils.format(month, 'MMMM, yyyy', locale),
