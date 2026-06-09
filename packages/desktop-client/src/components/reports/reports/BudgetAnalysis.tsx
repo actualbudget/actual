@@ -102,6 +102,9 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   const [balanceOnly, setBalanceOnly] = useState(
     widget?.meta?.balanceOnly ?? false,
   );
+  const [showHiddenCategories, setShowHiddenCategories] = useState(
+    widget?.meta?.showHiddenCategories ?? false,
+  );
   const [latestTransaction, setLatestTransaction] = useState('');
   const [isConcise, setIsConcise] = useState(() => {
     // Default to concise (monthly) view until we load the actual date range
@@ -192,8 +195,9 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         conditionsOp,
         startDate,
         endDate,
+        showHiddenCategories,
       }),
-    [conditions, conditionsOp, startDate, endDate],
+    [conditions, conditionsOp, startDate, endDate, showHiddenCategories],
   );
 
   const data = useReport('default', getGraphData);
@@ -235,6 +239,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
             graphType,
             showBalance,
             balanceOnly,
+            showHiddenCategories,
           },
         },
       },
@@ -367,6 +372,12 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
               ['categories-only', t('Categories only')],
             ]}
           />
+
+          <Button onPress={() => setShowHiddenCategories(state => !state)}>
+            {showHiddenCategories
+              ? t('Hide hidden categories')
+              : t('Show hidden categories')}
+          </Button>
 
           {widget && (
             <Button variant="primary" onPress={onSaveWidget}>
