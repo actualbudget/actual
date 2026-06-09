@@ -5,12 +5,15 @@ import type {
   CategoryEntity,
   CategoryGroupEntity,
   RuleConditionEntity,
+  SpendingAverageRange,
   SpendingEntity,
   SpendingMonthEntity,
 } from '@actual-app/core/types/models';
 // @ts-strict-ignore
 import keyBy from 'lodash/keyBy';
 
+import { resolveSpendingAverageRange } from '#components/reports/spendingAverageRange';
+import { fromDateRepr } from '#components/reports/util';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { aqlQuery } from '#queries/aqlQuery';
 
@@ -25,6 +28,7 @@ type createSpendingSpreadsheetProps = {
   conditionsOp?: 'and' | 'or';
   compare?: string;
   compareTo?: string;
+  averageRange?: SpendingAverageRange;
   budgetType?: 'envelope' | 'tracking';
 };
 
@@ -68,15 +72,17 @@ export function createSpendingSpreadsheet({
   conditionsOp,
   compare,
   compareTo,
+  averageRange,
   budgetType = 'envelope',
 }: createSpendingSpreadsheetProps) {
-  const startDate = monthUtils.subMonths(compare, 3) + '-01';
-  const endDate = monthUtils.getMonthEnd(compare + '-01');
-  const startDateTo = compareTo + '-01';
-  const endDateTo = monthUtils.getMonthEnd(compareTo + '-01');
+  const compareMonth = compare ?? monthUtils.currentMonth();
+  const compareToMonth = compareTo ?? monthUtils.subMonths(compareMonth, 1);
+  const endDate = monthUtils.getMonthEnd(compareMonth + '-01');
+  const startDateTo = compareToMonth + '-01';
+  const endDateTo = monthUtils.getMonthEnd(compareToMonth + '-01');
   const interval = 'Daily';
   const compareInterval = monthUtils.dayRangeInclusive(
-    compare + '-01',
+    compareMonth + '-01',
     endDate,
   );
 
@@ -84,6 +90,21 @@ export function createSpendingSpreadsheet({
     spreadsheet: ReturnType<typeof useSpreadsheet>,
     setData: (data: SpendingEntity) => void,
   ) => {
+    const earliestTrans =
+      averageRange?.mode === 'all-time'
+        ? await send('get-earliest-transaction')
+        : null;
+    const earliestMonth = earliestTrans
+      ? monthUtils.monthFromDate(fromDateRepr(earliestTrans.date))
+      : null;
+    const resolvedAverageRange = resolveSpendingAverageRange({
+      averageRange,
+      compare: compareMonth,
+      earliestMonth,
+    });
+    const averageMonths = new Set(resolvedAverageRange.months);
+    const startDate = (resolvedAverageRange.startMonth ?? compareMonth) + '-01';
+
     const { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
     });
@@ -143,8 +164,34 @@ export function createSpendingSpreadsheet({
 
     const combineAssets = [...assets, ...overlapAssets];
     const combineDebts = [...debts, ...overlapDebts];
+    const totalsByDate = new Map<
+      string,
+      { perIntervalAssets: number; perIntervalDebts: number }
+    >();
 
-    const budgetMonth = parseInt(compare.replace('-', ''));
+    combineAssets
+      .filter(e => !e.categoryIncome && !e.accountOffBudget)
+      .forEach(asset => {
+        const totals = totalsByDate.get(asset.date) ?? {
+          perIntervalAssets: 0,
+          perIntervalDebts: 0,
+        };
+        totals.perIntervalAssets += asset.amount;
+        totalsByDate.set(asset.date, totals);
+      });
+
+    combineDebts
+      .filter(e => !e.categoryIncome && !e.accountOffBudget)
+      .forEach(debt => {
+        const totals = totalsByDate.get(debt.date) ?? {
+          perIntervalAssets: 0,
+          perIntervalDebts: 0,
+        };
+        totals.perIntervalDebts += debt.amount;
+        totalsByDate.set(debt.date, totals);
+      });
+
+    const budgetMonth = parseInt(compareMonth.replace('-', ''));
     const budgetTable =
       budgetType === 'tracking' ? 'reflect_budgets' : 'zero_budgets';
     const hasBudgetConditions = conditions.some(
@@ -199,7 +246,7 @@ export function createSpendingSpreadsheet({
 
     if (endDateTo < startDate || startDateTo > endDate) {
       months.unshift({
-        month: compareTo,
+        month: compareToMonth,
         perMonthAssets: 0,
         perMonthDebts: 0,
       });
@@ -221,17 +268,9 @@ export function createSpendingSpreadsheet({
             month.month === monthUtils.getMonth(intervalItem) &&
             day === offsetDay
           ) {
-            const intervalAssets = combineAssets
-              .filter(e => !e.categoryIncome && !e.accountOffBudget)
-              .filter(asset => asset.date === intervalItem)
-              .reduce((a, v) => a + v.amount, 0);
-            perIntervalAssets += intervalAssets;
-
-            const intervalDebts = combineDebts
-              .filter(e => !e.categoryIncome && !e.accountOffBudget)
-              .filter(debt => debt.date === intervalItem)
-              .reduce((a, v) => a + v.amount, 0);
-            perIntervalDebts += intervalDebts;
+            const totals = totalsByDate.get(intervalItem);
+            perIntervalAssets += totals?.perIntervalAssets ?? 0;
+            perIntervalDebts += totals?.perIntervalDebts ?? 0;
 
             totalAssets += perIntervalAssets;
             totalDebts += perIntervalDebts;
@@ -239,7 +278,7 @@ export function createSpendingSpreadsheet({
             let cumulativeAssets = 0;
             let cumulativeDebts = 0;
 
-            if (month.month === compare) {
+            if (month.month === compareMonth) {
               totalBudget -= dailyBudget;
             }
 
@@ -251,10 +290,7 @@ export function createSpendingSpreadsheet({
               return null;
             });
 
-            if (
-              month.month >= monthUtils.monthFromDate(startDate) &&
-              month.month < compare
-            ) {
+            if (averageMonths.has(month.month)) {
               if (day === '28') {
                 if (monthUtils.getMonthEnd(intervalItem) === intervalItem) {
                   averageSum += cumulativeAssets + cumulativeDebts;
@@ -297,15 +333,17 @@ export function createSpendingSpreadsheet({
       return {
         months: indexedData,
         day,
-        average: Math.round(averageSum / monthCount),
-        compare: dayData.filter(c => c.month === compare)[0].cumulative,
-        compareTo: dayData.filter(c => c.month === compareTo)[0].cumulative,
+        average: monthCount === 0 ? 0 : Math.round(averageSum / monthCount),
+        compare: dayData.filter(c => c.month === compareMonth)[0].cumulative,
+        compareTo: dayData.filter(c => c.month === compareToMonth)[0]
+          .cumulative,
         budget: totalBudget,
       };
     });
 
     setData({
       intervalData,
+      averageRange: resolvedAverageRange,
       startDate,
       endDate,
       totalDebts,

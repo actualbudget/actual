@@ -136,6 +136,7 @@ export function EnableBankingExternalMsgModal({
   const [waiting, setWaiting] = useState<string | null>(null);
   const [selectedAspsp, setSelectedAspsp] = useState<string>();
   const [country, setCountry] = useState<string | undefined>(detectedCountry);
+  const [psuType, setPsuType] = useState<'personal' | 'business'>('personal');
   const [error, setError] = useState<{
     code: 'unknown' | 'timeout';
     message?: string;
@@ -206,6 +207,7 @@ export function EnableBankingExternalMsgModal({
         aspspId,
         country: aspspCountry,
         maxConsentValidity: selectedBank?.maxConsentValidity,
+        psuType,
         onStateReady: state => {
           if (myJumpId === jumpIdRef.current) {
             stateRef.current = state;
@@ -296,21 +298,49 @@ export function EnableBankingExternalMsgModal({
           (isBankOptionsLoading ? (
             t('Loading banks...')
           ) : (
-            <FormField>
-              <FormLabel title={t('Choose your bank:')} htmlFor="bank-field" />
-              <Autocomplete
-                focused
-                strict
-                highlightFirst
-                suggestions={bankOptions}
-                onSelect={setSelectedAspsp}
-                value={selectedAspsp}
-                inputProps={{
-                  id: 'bank-field',
-                  placeholder: t('(please select)'),
-                }}
-              />
-            </FormField>
+            <>
+              <FormField>
+                <FormLabel
+                  title={t('Choose your bank:')}
+                  htmlFor="bank-field"
+                />
+                <Autocomplete
+                  focused
+                  strict
+                  highlightFirst
+                  suggestions={bankOptions}
+                  onSelect={setSelectedAspsp}
+                  value={selectedAspsp}
+                  inputProps={{
+                    id: 'bank-field',
+                    placeholder: t('(please select)'),
+                  }}
+                />
+              </FormField>
+
+              <FormField>
+                <FormLabel
+                  title={t('Usage type:')}
+                  htmlFor="usage-type-field"
+                />
+                <Autocomplete
+                  strict
+                  highlightFirst
+                  suggestions={[
+                    { id: 'personal', name: t('personal') },
+                    { id: 'business', name: t('business') },
+                  ]}
+                  onSelect={value =>
+                    setPsuType(value === 'business' ? 'business' : 'personal')
+                  }
+                  value={psuType}
+                  inputProps={{
+                    id: 'usage-type-field',
+                    placeholder: t('(please select)'),
+                  }}
+                />
+              </FormField>
+            </>
           ))
         )}
 

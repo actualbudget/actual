@@ -265,6 +265,7 @@ export function CategoryAutocomplete({
         selector: item =>
           item.group ? item.group.name + ' ' + item.name : item.name,
         limit: 100,
+        casing: 'case-insensitive',
       })
         .find(value)
         .map(result => result.item);

@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 
 import { send } from '@actual-app/core/platform/client/connection';
+import {
+  createBudgetQueryPrefetchKey,
+  CustomFunctionsPlugin,
+  customFunctionsTranslations,
+} from '@actual-app/core/server/rules/customFunctions';
+import type { FormulaQueryContext } from '@actual-app/core/server/rules/customFunctions';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type { Query } from '@actual-app/core/shared/query';
@@ -11,6 +17,7 @@ import type {
   TimeFrame,
 } from '@actual-app/core/types/models';
 import { HyperFormula } from 'hyperformula';
+import enUS from 'hyperformula/i18n/languages/enUS';
 
 import { getLiveRange } from '#components/reports/getLiveRange';
 import { calculateTimeRange } from '#components/reports/reportRanges';
@@ -25,60 +32,104 @@ type QueryConfig = {
 
 type QueriesMap = Record<string, QueryConfig>;
 
-function escapeRegExp(s: string) {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+if (!HyperFormula.getRegisteredLanguagesCodes().includes('enUS')) {
+  HyperFormula.registerLanguage('enUS', enUS);
 }
 
-// Parse a BUDGET_QUERY parameter - can be extraction function, array literal, or string
-function parseBudgetParam(
-  param: string,
-): { type: 'extraction' | 'literal'; data: unknown } | null {
-  param = param.trim();
+HyperFormula.registerFunctionPlugin(
+  CustomFunctionsPlugin,
+  customFunctionsTranslations,
+);
 
-  // Try extraction function: QUERY_EXTRACT_*("queryName")
-  const extractMatch = param.match(
-    /^(QUERY_EXTRACT_\w+)\s*\(\s*["']([^"']+)["']\s*\)$/,
-  );
-  if (extractMatch) {
-    return {
-      type: 'extraction',
-      data: { funcName: extractMatch[1], queryName: extractMatch[2] },
-    };
-  }
+type FormulaCellValue = number | string | boolean | null;
 
-  // Try array literal: {"id1";"id2";...}
-  const arrayMatch = param.match(/^\{([^}]*)\}$/);
-  if (arrayMatch) {
-    const items = arrayMatch[1]
-      .split(';')
-      .map(item => item.replace(/^["']|["']$/g, '').trim())
-      .filter(item => item.length > 0);
-    return { type: 'literal', data: items };
-  }
-
-  // Try string literal: "value"
-  const stringMatch = param.match(/^["']([^"']*)["']$/);
-  if (stringMatch) {
-    return { type: 'literal', data: stringMatch[1] };
-  }
-
-  return null;
-}
-
-// Resolve a parsed BUDGET_QUERY parameter to its actual value
-function resolveBudgetParam(
-  parsed: ReturnType<typeof parseBudgetParam>,
-  extractionResults: Record<string, Record<string, unknown>>,
-): unknown {
-  if (!parsed || parsed.type === 'literal') {
-    return parsed?.data;
-  }
-
-  const { funcName, queryName } = parsed.data as {
-    funcName: string;
-    queryName: string;
+function createFormulaQueryContext(): Required<FormulaQueryContext> {
+  return {
+    queryNames: new Set(),
+    queryCountNames: new Set(),
+    queryExtractCategoryNames: new Set(),
+    queryExtractTimeframeStartNames: new Set(),
+    queryExtractTimeframeEndNames: new Set(),
+    budgetQueryRequests: new Map(),
+    querySumPrefetch: new Map(),
+    queryCountPrefetch: new Map(),
+    queryExtractCategoriesPrefetch: new Map(),
+    queryExtractTimeframeStartPrefetch: new Map(),
+    queryExtractTimeframeEndPrefetch: new Map(),
+    budgetQueryPrefetch: new Map(),
+    budgetQueryErrors: new Map(),
   };
-  return extractionResults[funcName]?.[`${funcName}(${queryName})`];
+}
+
+function isHyperFormulaError(
+  cellValue: unknown,
+): cellValue is { type: string; message?: string } {
+  return Boolean(
+    cellValue && typeof cellValue === 'object' && 'type' in cellValue,
+  );
+}
+
+function evaluateFormulaWithContext({
+  formula,
+  formulaQueryContext,
+  locale,
+  namedExpressions,
+  throwOnCellError = true,
+}: {
+  formula: string;
+  formulaQueryContext: FormulaQueryContext;
+  locale: unknown;
+  namedExpressions?: Record<string, number | string>;
+  throwOnCellError?: boolean;
+}): FormulaCellValue {
+  let hfInstance: ReturnType<typeof HyperFormula.buildEmpty> | null = null;
+
+  try {
+    hfInstance = HyperFormula.buildEmpty({
+      licenseKey: 'gpl-v3',
+      language: 'enUS',
+      localeLang: typeof locale === 'string' ? locale : 'en-US',
+      dateFormats: ['DD/MM/YYYY', 'YYYY-MM-DD', 'YYYY/MM/DD'],
+      context: {
+        formulaQuery: formulaQueryContext,
+      },
+    });
+
+    const sheetName = hfInstance.addSheet('Sheet1');
+    const sheetId = hfInstance.getSheetId(sheetName);
+
+    if (sheetId === undefined) {
+      throw new Error('Failed to create sheet');
+    }
+
+    if (namedExpressions) {
+      for (const [name, value] of Object.entries(namedExpressions)) {
+        hfInstance.addNamedExpression(
+          name,
+          typeof value === 'number' ? value : String(value),
+        );
+      }
+    }
+
+    hfInstance.setCellContents({ sheet: sheetId, col: 0, row: 0 }, [[formula]]);
+
+    const cellValue = hfInstance.getCellValue({
+      sheet: sheetId,
+      col: 0,
+      row: 0,
+    });
+
+    if (isHyperFormulaError(cellValue)) {
+      if (throwOnCellError) {
+        throw new Error(`Formula error: ${cellValue.type}`);
+      }
+      return null;
+    }
+
+    return cellValue as FormulaCellValue;
+  } finally {
+    hfInstance?.destroy();
+  }
 }
 
 export function useFormulaExecution(
@@ -96,8 +147,6 @@ export function useFormulaExecution(
     let cancelled = false;
 
     async function executeFormula() {
-      let hfInstance: ReturnType<typeof HyperFormula.buildEmpty> | null = null;
-
       if (!formula || !formula.startsWith('=')) {
         setResult(null);
         setError('Formula must start with =');
@@ -108,269 +157,40 @@ export function useFormulaExecution(
       setError(null);
 
       try {
-        // Extract QUERY() and QUERY_COUNT() function calls
-        const queryMatches = Array.from(
-          formula.matchAll(/QUERY\s*\(\s*["']([^"']+)["']\s*\)/gi),
-        );
-        const queryCountMatches = Array.from(
-          formula.matchAll(/QUERY_COUNT\s*\(\s*["']([^"']+)["']\s*\)/gi),
-        );
+        const formulaQueryContext = createFormulaQueryContext();
 
-        // Fetch data for each query
-        const queryData: Record<string, number> = {};
-        const queryCountData: Record<string, number> = {};
-
-        // Deduplicate names (a query can appear multiple times in the same formula)
-        const queryNames = Array.from(new Set(queryMatches.map(m => m[1])));
-        const queryCountNames = Array.from(
-          new Set(queryCountMatches.map(m => m[1])),
-        );
-
-        // Extract QUERY_EXTRACT_* calls for evaluation
-        // These extraction functions are used as parameters to BUDGET_QUERY
-        const extractionFunctions = {
-          QUERY_EXTRACT_CATEGORIES:
-            /QUERY_EXTRACT_CATEGORIES\s*\(\s*["']([^"']+)["']\s*\)/gi,
-          QUERY_EXTRACT_TIMEFRAME_START:
-            /QUERY_EXTRACT_TIMEFRAME_START\s*\(\s*["']([^"']+)["']\s*\)/gi,
-          QUERY_EXTRACT_TIMEFRAME_END:
-            /QUERY_EXTRACT_TIMEFRAME_END\s*\(\s*["']([^"']+)["']\s*\)/gi,
-        };
-
-        // Store extraction results
-        const extractionResults: Record<string, Record<string, unknown>> = {
-          QUERY_EXTRACT_CATEGORIES: {},
-          QUERY_EXTRACT_TIMEFRAME_START: {},
-          QUERY_EXTRACT_TIMEFRAME_END: {},
-        };
-
-        // Evaluate extraction functions first
-        for (const [funcName, regex] of Object.entries(extractionFunctions)) {
-          const matches = Array.from(formula.matchAll(regex));
-          for (const match of matches) {
-            const queryName = match[1];
-            const key = `${funcName}(${queryName})`;
-
-            if (!extractionResults[funcName][key]) {
-              try {
-                if (funcName === 'QUERY_EXTRACT_CATEGORIES') {
-                  extractionResults[funcName][key] =
-                    await extractQueryCategories(queryName, queries);
-                } else if (funcName === 'QUERY_EXTRACT_TIMEFRAME_START') {
-                  extractionResults[funcName][key] =
-                    await extractQueryTimeframeStart(queryName, queries);
-                } else if (funcName === 'QUERY_EXTRACT_TIMEFRAME_END') {
-                  extractionResults[funcName][key] =
-                    await extractQueryTimeframeEnd(queryName, queries);
-                }
-              } catch (err) {
-                console.error(
-                  `Error evaluating ${funcName}(${queryName})`,
-                  err,
-                );
-                extractionResults[funcName][key] = null;
-              }
-            }
-          }
-        }
-
-        // Match BUDGET_QUERY(dimension, param1, param2, param3) where each param can be:
-        // extraction function, array literal {...}, or string "..."
-        const paramPattern = String.raw`(?:QUERY_EXTRACT_\w+\s*\([^)]*\)|\{[^}]*\}|["'][^"']*["'])`;
-        const budgetMatches = Array.from(
-          formula.matchAll(
-            new RegExp(
-              `BUDGET_QUERY\\s*\\(\\s*["']([^"']+)["']\\s*,\\s*(${paramPattern})\\s*,\\s*(${paramPattern})\\s*,\\s*(${paramPattern})\\s*\\)`,
-              'gi',
-            ),
-          ),
-        );
-
-        for (const queryName of queryNames) {
-          const queryConfig = queries[queryName];
-
-          if (!queryConfig) {
-            console.warn(`Query "${queryName}" not found in queries config`);
-            queryData[queryName] = 0;
-            continue;
-          }
-
-          const data = await fetchQuerySum(queryConfig);
-          queryData[queryName] = integerToAmount(data, 2);
-        }
-
-        for (const queryName of queryCountNames) {
-          const queryConfig = queries[queryName];
-
-          if (!queryConfig) {
-            console.warn(`Query "${queryName}" not found in queries config`);
-            queryCountData[queryName] = 0;
-            continue;
-          }
-
-          const count = await fetchQueryCount(queryConfig);
-          queryCountData[queryName] = count;
-        }
-
-        // Replace QUERY() and QUERY_COUNT() calls with actual values in the formula
-        let processedFormula = formula;
-        for (const [queryName, value] of Object.entries(queryData)) {
-          const regex = new RegExp(
-            `QUERY\\s*\\(\\s*["']${escapeRegExp(queryName)}["']\\s*\\)`,
-            'gi',
-          );
-          processedFormula = processedFormula.replace(regex, String(value));
-        }
-        for (const [queryName, value] of Object.entries(queryCountData)) {
-          const regex = new RegExp(
-            `QUERY_COUNT\\s*\\(\\s*["']${escapeRegExp(queryName)}["']\\s*\\)`,
-            'gi',
-          );
-          processedFormula = processedFormula.replace(regex, String(value));
-        }
-
-        // Process BUDGET_QUERY BEFORE replacing extraction functions
-        // This ensures we match BUDGET_QUERY with extraction functions still intact
-        if (budgetMatches.length > 0) {
-          for (const match of budgetMatches) {
-            const dimension = match[1];
-            const param1Str = match[2].trim();
-            const param2Str = match[3].trim();
-            const param3Str = match[4].trim();
-
-            try {
-              // Parse and resolve parameters
-              const param1 = resolveBudgetParam(
-                parseBudgetParam(param1Str),
-                extractionResults,
-              );
-              const param2 = resolveBudgetParam(
-                parseBudgetParam(param2Str),
-                extractionResults,
-              );
-              const param3 = resolveBudgetParam(
-                parseBudgetParam(param3Str),
-                extractionResults,
-              );
-
-              // Validate resolved parameters
-              if (
-                !Array.isArray(param1) ||
-                typeof param2 !== 'string' ||
-                typeof param3 !== 'string'
-              ) {
-                console.error(
-                  'Failed to resolve BUDGET_QUERY parameters:',
-                  param1Str,
-                  param2Str,
-                  param3Str,
-                );
-                continue;
-              }
-
-              // Evaluate BUDGET_QUERY
-              const val = await fetchBudgetDimensionValueDirect(
-                dimension,
-                param1 as string[],
-                param2 as string,
-                param3 as string,
-              );
-
-              processedFormula = processedFormula.replace(
-                match[0],
-                String(val),
-              );
-            } catch (err) {
-              console.error('Error evaluating BUDGET_QUERY', err);
-            }
-          }
-        }
-
-        // NOW replace remaining QUERY_EXTRACT_* functions with their evaluated values
-        // (any that weren't consumed by BUDGET_QUERY)
-        for (const [funcName, regex] of Object.entries(extractionFunctions)) {
-          const matches = Array.from(processedFormula.matchAll(regex));
-          for (const match of matches) {
-            const queryName = match[1];
-            const key = `${funcName}(${queryName})`;
-            const value = extractionResults[funcName][key];
-
-            if (value !== null && value !== undefined) {
-              const escapedQueryName = escapeRegExp(queryName);
-              const replacementRegex = new RegExp(
-                `${funcName}\\s*\\(\\s*["']${escapedQueryName}["']\\s*\\)`,
-                'gi',
-              );
-
-              // Format the replacement value based on type
-              let replacement: string;
-              if (Array.isArray(value)) {
-                // For arrays, convert to HyperFormula array literal
-                replacement = `{${value.map(v => `"${v}"`).join(';')}}`;
-              } else if (typeof value === 'string') {
-                // For strings, wrap in quotes
-                replacement = `"${value}"`;
-              } else {
-                // For numbers
-                replacement = String(value);
-              }
-
-              processedFormula = processedFormula.replace(
-                replacementRegex,
-                replacement,
-              );
-            }
-          }
-        }
-
-        // Create HyperFormula instance
-        hfInstance = HyperFormula.buildEmpty({
-          licenseKey: 'gpl-v3',
-          language: 'enUS',
-          localeLang: typeof locale === 'string' ? locale : 'en-US',
-          dateFormats: ['DD/MM/YYYY', 'YYYY-MM-DD', 'YYYY/MM/DD'],
+        evaluateFormulaWithContext({
+          formula,
+          formulaQueryContext,
+          locale,
+          namedExpressions,
+          throwOnCellError: false,
         });
 
-        // Add a sheet and set the formula in cell A1
-        const sheetName = hfInstance.addSheet('Sheet1');
-        const sheetId = hfInstance.getSheetId(sheetName);
+        await prefetchFormulaQueries(formulaQueryContext, queries);
 
-        if (sheetId === undefined) {
-          throw new Error('Failed to create sheet');
-        }
+        formulaQueryContext.budgetQueryRequests.clear();
+        evaluateFormulaWithContext({
+          formula,
+          formulaQueryContext,
+          locale,
+          namedExpressions,
+          throwOnCellError: false,
+        });
 
-        // Add named expressions if provided
-        if (namedExpressions) {
-          for (const [name, value] of Object.entries(namedExpressions)) {
-            hfInstance.addNamedExpression(
-              name,
-              typeof value === 'number' ? value : String(value),
-            );
-          }
-        }
+        await prefetchBudgetQueries(formulaQueryContext);
 
-        // Set the formula
-        hfInstance.setCellContents({ sheet: sheetId, col: 0, row: 0 }, [
-          [processedFormula],
-        ]);
-
-        // Get the result
-        const cellValue = hfInstance.getCellValue({
-          sheet: sheetId,
-          col: 0,
-          row: 0,
+        const cellValue = evaluateFormulaWithContext({
+          formula,
+          formulaQueryContext,
+          locale,
+          namedExpressions,
         });
 
         if (cancelled) return;
 
-        // Check if there's an error
-        if (cellValue && typeof cellValue === 'object' && 'type' in cellValue) {
-          setError(`Formula error: ${cellValue.type}`);
-          setResult(null);
-        } else {
-          setResult(cellValue as number | string);
-          setError(null);
-        }
+        setResult(cellValue as number | string);
+        setError(null);
       } catch (err) {
         if (cancelled) return;
         console.error('Formula execution error:', err);
@@ -379,14 +199,6 @@ export function useFormulaExecution(
       } finally {
         if (!cancelled) {
           setIsLoading(false);
-        }
-
-        try {
-          hfInstance?.destroy();
-        } catch (err) {
-          console.error('Error destroying HyperFormula instance:', err);
-          setError('Error destroying HyperFormula instance');
-          setResult(null);
         }
       }
     }
@@ -399,6 +211,91 @@ export function useFormulaExecution(
   }, [formula, queriesVersion, locale, queries, namedExpressions]);
 
   return { result, isLoading, error };
+}
+
+async function prefetchFormulaQueries(
+  formulaQueryContext: Required<FormulaQueryContext>,
+  queries: QueriesMap,
+) {
+  for (const queryName of formulaQueryContext.queryNames) {
+    const queryConfig = queries[queryName];
+
+    if (!queryConfig) {
+      console.warn(`Query "${queryName}" not found in queries config`);
+      formulaQueryContext.querySumPrefetch.set(queryName, 0);
+      continue;
+    }
+
+    const data = await fetchQuerySum(queryConfig);
+    formulaQueryContext.querySumPrefetch.set(
+      queryName,
+      integerToAmount(data, 2),
+    );
+  }
+
+  for (const queryName of formulaQueryContext.queryCountNames) {
+    const queryConfig = queries[queryName];
+
+    if (!queryConfig) {
+      console.warn(`Query "${queryName}" not found in queries config`);
+      formulaQueryContext.queryCountPrefetch.set(queryName, 0);
+      continue;
+    }
+
+    formulaQueryContext.queryCountPrefetch.set(
+      queryName,
+      await fetchQueryCount(queryConfig),
+    );
+  }
+
+  for (const queryName of formulaQueryContext.queryExtractCategoryNames) {
+    formulaQueryContext.queryExtractCategoriesPrefetch.set(
+      queryName,
+      await extractQueryCategories(queryName, queries),
+    );
+  }
+
+  for (const queryName of formulaQueryContext.queryExtractTimeframeStartNames) {
+    formulaQueryContext.queryExtractTimeframeStartPrefetch.set(
+      queryName,
+      await extractQueryTimeframeStart(queryName, queries),
+    );
+  }
+
+  for (const queryName of formulaQueryContext.queryExtractTimeframeEndNames) {
+    formulaQueryContext.queryExtractTimeframeEndPrefetch.set(
+      queryName,
+      await extractQueryTimeframeEnd(queryName, queries),
+    );
+  }
+}
+
+async function prefetchBudgetQueries(
+  formulaQueryContext: Required<FormulaQueryContext>,
+) {
+  for (const request of formulaQueryContext.budgetQueryRequests.values()) {
+    const key = createBudgetQueryPrefetchKey(request);
+
+    try {
+      formulaQueryContext.budgetQueryPrefetch.set(
+        key,
+        await fetchBudgetDimensionValueDirect(
+          request.dimension,
+          request.categoryIds,
+          request.startMonth,
+          request.endMonth,
+        ),
+      );
+      formulaQueryContext.budgetQueryErrors.delete(key);
+    } catch (err) {
+      console.error('Error evaluating BUDGET_QUERY', err);
+      formulaQueryContext.budgetQueryPrefetch.delete(key);
+      formulaQueryContext.budgetQueryErrors.set(
+        key,
+        err instanceof Error ? err.message : String(err),
+      );
+    }
+  }
 }
 
 // Helper function to convert timeFrame mode to condition string for getLiveRange

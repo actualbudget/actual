@@ -27,6 +27,7 @@ const sidebars = {
     'index',
     'vision',
     'releases',
+    'upcoming-release-notes',
     {
       type: 'category',
       label: 'Getting Started',
