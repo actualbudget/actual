@@ -1,5 +1,5 @@
+import { rangeInclusive } from '@actual-app/core/shared/months';
 import type { CategoryEntity } from '@actual-app/core/types/models';
-import { rangeInclusive } from 'loot-core/shared/months';
 
 import { isBaseCategory } from './budget-analysis-spreadsheet';
 
