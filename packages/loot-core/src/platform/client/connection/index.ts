@@ -146,8 +146,8 @@ function connectWorker(worker, onOpen, onError) {
   }
 }
 
-export const init: T.Init = async function () {
-  const worker = await global.Actual.getServerSocket();
+export const init: T.Init = async function (socket) {
+  const worker = socket ?? (await global.Actual.getServerSocket());
   return new Promise((resolve, reject) =>
     connectWorker(worker, resolve, reject),
   );

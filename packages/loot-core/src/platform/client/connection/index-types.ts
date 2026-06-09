@@ -1,7 +1,13 @@
 import type { Handlers } from '#types/handlers';
 import type { ServerEvents } from '#types/server-events';
 
-export declare function init(): Promise<unknown>;
+/**
+ * Connect to the backend. In the browser the backend socket is normally read
+ * from `global.Actual.getServerSocket()` (set up by the app's preload); pass
+ * `socket` to inject one directly instead (used by @actual-app/api's browser
+ * facade, which spawns its own backend Worker).
+ */
+export declare function init(socket?: Worker | MessagePort): Promise<unknown>;
 export type Init = typeof init;
 
 /**

@@ -1,10 +1,17 @@
-import { init as initLootCore } from '@actual-app/core/server/main';
+import {
+  lib as coreLib,
+  init as initLootCore,
+} from '@actual-app/core/server/main';
 import type { InitConfig, lib } from '@actual-app/core/server/main';
 
+import { _setSend } from './send';
 import { validateNodeVersion } from './validateNodeVersion';
 
 export * from './methods';
 export * as utils from './utils';
+
+// In Node the backend runs in-process; methods.ts sends straight to it.
+_setSend(coreLib.send);
 
 /** @deprecated Please use return value of `init` instead */
 export let internal: typeof lib | null = null;

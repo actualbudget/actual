@@ -7,10 +7,8 @@ import type {
   APIScheduleEntity,
   APITagEntity,
 } from '@actual-app/core/server/api-models';
-import { lib } from '@actual-app/core/server/main';
 import type { Query } from '@actual-app/core/shared/query';
 import type { ImportTransactionsOpts } from '@actual-app/core/types/api-handlers';
-import type { Handlers } from '@actual-app/core/types/handlers';
 import type {
   ImportTransactionEntity,
   NoteEntity,
@@ -18,14 +16,11 @@ import type {
   TransactionEntity,
 } from '@actual-app/core/types/models';
 
-export { q } from './app/query';
+// send is wired per entry: in-process lib.send (Node) or the client
+// connection to the backend Worker (browser).
+import { send } from './send';
 
-function send<K extends keyof Handlers, T extends Handlers[K]>(
-  name: K,
-  args?: Parameters<T>[0],
-): Promise<Awaited<ReturnType<T>>> {
-  return lib.send(name, args);
-}
+export { q } from './app/query';
 
 export async function runImport(
   budgetName: APIFileEntity['name'],

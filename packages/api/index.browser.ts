@@ -1,22 +1,28 @@
 // Main-thread browser entry for @actual-app/api. The backend runs in a Web
-// Worker; this facade spawns it and forwards calls over loot-core's client
-// connection. Public surface matches the Node entry.
+// Worker (absurd-sql requires one); this facade spawns it, connects loot-core's
+// client connection to it, and routes methods.ts's sends over that connection.
+// Public surface matches the Node entry.
 
-import { initBrowserBackend } from '@actual-app/core/platform/client/backend-worker';
-import * as connection from '@actual-app/core/platform/client/connection';
+import { connectBackendWorker } from '@actual-app/core/platform/client/backend-worker';
+import { send as connectionSend } from '@actual-app/core/platform/client/connection';
 import type { InitConfig } from '@actual-app/core/server/main';
+
+import { _setSend } from './send';
 
 export * from './methods';
 export * as utils from './utils';
 
 let worker: Worker | null = null;
 
-// connection.send is typed against the Handlers union; the facade also forwards
-// the worker-local 'api-browser/init', so loosen the type.
-const send = connection.send as (
+// Loosened: the facade also sends the worker-local 'api-browser/init', which
+// isn't part of the shared Handlers union.
+const send = connectionSend as (
   name: string,
   args?: unknown,
 ) => Promise<unknown>;
+
+// In the browser, methods.ts sends over the client connection to the Worker.
+_setSend(connectionSend);
 
 function createWorker(): Worker {
   // Non-literal URL arg so the api's own lib build doesn't pre-bundle
@@ -27,15 +33,7 @@ function createWorker(): Worker {
 
 export async function init(config: InitConfig = {}) {
   worker = createWorker();
-  initBrowserBackend(worker);
-  // loot-core's client connection reads the worker from global.Actual; supply a
-  // minimal shim rather than the full desktop global.
-  const socket = worker;
-  (
-    globalThis as unknown as { Actual: { getServerSocket: () => Worker } }
-  ).Actual = { getServerSocket: () => socket };
-
-  await connection.init();
+  await connectBackendWorker(worker);
 
   // Point loot-core's browser fs at our dist/ dir. String manipulation, not
   // `new URL('.', import.meta.url)`, so consumer asset analyzers leave it alone.
