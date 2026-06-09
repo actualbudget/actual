@@ -4,22 +4,39 @@ import { SecretName, secretsService } from '#services/secrets-service';
 
 const pluggyClientCache = new Map();
 
+function getPluggyClientCacheKey(options = {}) {
+  const credentialSource = secretsService.getCredentialSource(
+    [
+      SecretName.pluggyai_clientId,
+      SecretName.pluggyai_clientSecret,
+      SecretName.pluggyai_itemIds,
+    ],
+    options,
+  );
+  return credentialSource === 'global'
+    ? 'global:pluggyai'
+    : `file:${options.fileId}:pluggyai`;
+}
+
+export function clearPluggyAiClientCache(clientKey) {
+  pluggyClientCache.delete(clientKey);
+}
+
 function getPluggyClient(options = {}) {
   const credentials = {
     clientId: secretsService.get(SecretName.pluggyai_clientId, options),
     clientSecret: secretsService.get(SecretName.pluggyai_clientSecret, options),
   };
-  const credentialsKey = JSON.stringify(credentials);
-  const cachedClient = pluggyClientCache.get(credentialsKey);
-
-  if (cachedClient?.credentialsKey === credentialsKey) {
-    return cachedClient.client;
+  const clientKey = getPluggyClientCacheKey(options);
+  const client = pluggyClientCache.get(clientKey);
+  if (client) {
+    return client;
   }
 
-  const client = new PluggyClient(credentials);
-  pluggyClientCache.set(credentialsKey, { client, credentialsKey });
+  const newClient = new PluggyClient(credentials);
+  pluggyClientCache.set(clientKey, newClient);
 
-  return client;
+  return newClient;
 }
 
 export const pluggyaiService = {

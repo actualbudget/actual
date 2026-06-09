@@ -40,14 +40,25 @@ import { SecretName, secretsService } from '#services/secrets-service';
 import type { AccountDetailsResponse, TokenResponse } from './gocardless-api';
 import { GoCardlessApi, GoCardlessApiError } from './gocardless-api';
 
-const clients = new Map<
-  string,
-  { client: GoCardlessApi; credentialsKey: string }
->();
+const clients = new Map<string, GoCardlessApi>();
 
 type BankSyncFileOptions = {
   fileId: string;
 };
+
+function getClientCacheKey(options: BankSyncFileOptions): string {
+  const credentialSource = secretsService.getCredentialSource(
+    [SecretName.gocardless_secretId, SecretName.gocardless_secretKey],
+    options,
+  );
+  return credentialSource === 'global'
+    ? 'global:gocardless'
+    : `file:${options.fileId}:gocardless`;
+}
+
+export function clearGoCardlessClientCache(clientKey: string) {
+  clients.delete(clientKey);
+}
 
 const getGocardlessClient = (options: BankSyncFileOptions): GoCardlessApi => {
   const secrets = {
@@ -55,15 +66,15 @@ const getGocardlessClient = (options: BankSyncFileOptions): GoCardlessApi => {
     secretKey: secretsService.get(SecretName.gocardless_secretKey, options),
   };
 
-  const credentialsKey = JSON.stringify(secrets);
-  const cachedClient = clients.get(credentialsKey);
-  if (cachedClient?.credentialsKey === credentialsKey) {
-    return cachedClient.client;
+  const clientKey = getClientCacheKey(options);
+  const client = clients.get(clientKey);
+  if (client) {
+    return client;
   }
 
-  const client = new GoCardlessApi(secrets);
-  clients.set(credentialsKey, { client, credentialsKey });
-  return client;
+  const newClient = new GoCardlessApi(secrets);
+  clients.set(clientKey, newClient);
+  return newClient;
 };
 
 export const handleGoCardlessError = (error: unknown): never => {

@@ -1,6 +1,8 @@
 import express from 'express';
 
 import { isAdmin } from './account-db';
+import { clearGoCardlessClientCache } from './app-gocardless/services/gocardless-service';
+import { clearPluggyAiClientCache } from './app-pluggyai/pluggyai-service';
 import { SecretName, secretsService } from './services/secrets-service';
 import * as UserService from './services/user-service';
 import {
@@ -50,6 +52,35 @@ function sendFileAccessDenied(res) {
   });
 }
 
+const goCardlessSecretNames = new Set([
+  SecretName.gocardless_secretId,
+  SecretName.gocardless_secretKey,
+]);
+
+const pluggyAiSecretNames = new Set([
+  SecretName.pluggyai_clientId,
+  SecretName.pluggyai_clientSecret,
+  SecretName.pluggyai_itemIds,
+]);
+
+function getProviderClientCacheKey(providerName, { fileId, source }) {
+  return source === 'global'
+    ? `global:${providerName}`
+    : `file:${fileId}:${providerName}`;
+}
+
+function clearProviderClientCache(name, { fileId, source }) {
+  if (goCardlessSecretNames.has(name)) {
+    clearGoCardlessClientCache(
+      getProviderClientCacheKey('gocardless', { fileId, source }),
+    );
+  } else if (pluggyAiSecretNames.has(name)) {
+    clearPluggyAiClientCache(
+      getProviderClientCacheKey('pluggyai', { fileId, source }),
+    );
+  }
+}
+
 app.post('/', async (req, res) => {
   const { name, value, fileId, perBudgetFile = true } = req.body || {};
 
@@ -74,9 +105,11 @@ app.post('/', async (req, res) => {
     }
 
     if (canManageGlobalSecrets(res.locals.user_id)) {
-      secretsService.reset(name, { fileId });
+      const result = secretsService.reset(name, { fileId });
+      clearProviderClientCache(name, { fileId, source: result.deletedFrom });
     } else {
-      secretsService.resetPerBudgetFile(name, { fileId });
+      const result = secretsService.resetPerBudgetFile(name, { fileId });
+      clearProviderClientCache(name, { fileId, source: result.deletedFrom });
     }
     res.status(200).send({ status: 'ok' });
     return;
@@ -98,6 +131,10 @@ app.post('/', async (req, res) => {
   }
 
   secretsService.set(name, value, { fileId, perBudgetFile });
+  clearProviderClientCache(name, {
+    fileId,
+    source: perBudgetFile ? 'per-budget-file' : 'global',
+  });
 
   res.status(200).send({ status: 'ok' });
 });
