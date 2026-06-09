@@ -6,18 +6,11 @@ import { HyperFormula } from 'hyperformula';
 import enUS from 'hyperformula/i18n/languages/enUS';
 
 export function bootstrapHyperFormula() {
-  try {
+  if (!HyperFormula.getRegisteredLanguagesCodes().includes('enUS')) {
     HyperFormula.registerLanguage('enUS', enUS);
-  } catch {
-    // Already registered.
   }
-
-  try {
-    HyperFormula.registerFunctionPlugin(
-      CustomFunctionsPlugin,
-      customFunctionsTranslations,
-    );
-  } catch {
-    // Already registered.
-  }
+  HyperFormula.registerFunctionPlugin(
+    CustomFunctionsPlugin,
+    customFunctionsTranslations,
+  );
 }
