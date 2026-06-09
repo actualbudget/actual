@@ -1,5 +1,5 @@
-import { buildCsv } from 'loot-core/shared/csv';
-import { integerToAmount } from 'loot-core/shared/util';
+import { buildCsv } from '@actual-app/core/shared/csv';
+import { integerToAmount } from '@actual-app/core/shared/util';
 
 type IntervalRow = {
   date: string;
