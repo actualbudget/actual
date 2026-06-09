@@ -153,13 +153,13 @@ describe('set budget average', () => {
     expect(await getSheetValue('budget202404', 'budget-cat1')).toBe(600);
   });
 
-  it('sets a single category average without looking before the first budgeted month', async () => {
+  it('sets a single category average from the first activity month', async () => {
     await setBudget({ category: 'cat1', month: '2023-12', amount: 1000 });
 
     await setNMonthAvg({ month: '2024-04', N: 3, category: 'cat1' });
     await sheet.waitOnSpreadsheet();
 
-    expect(await getSheetValue('budget202404', 'budget-cat1')).toBe(750);
+    expect(await getSheetValue('budget202404', 'budget-cat1')).toBe(600);
   });
 
   it('sets a bulk 3 month average from complete months', async () => {
@@ -169,13 +169,13 @@ describe('set budget average', () => {
     expect(await getSheetValue('budget202404', 'budget-cat1')).toBe(600);
   });
 
-  it('sets a bulk 3 month average without looking before the first budgeted month', async () => {
+  it('sets a bulk 3 month average from the first activity month', async () => {
     await setBudget({ category: 'cat1', month: '2023-12', amount: 1000 });
 
     await set3MonthAvg({ month: '2024-04' });
     await sheet.waitOnSpreadsheet();
 
-    expect(await getSheetValue('budget202404', 'budget-cat1')).toBe(750);
+    expect(await getSheetValue('budget202404', 'budget-cat1')).toBe(600);
   });
 });
 

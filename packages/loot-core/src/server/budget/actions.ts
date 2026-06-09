@@ -423,7 +423,7 @@ async function getAverageMonths({
   categoryId: string;
 }): Promise<string[]> {
   const firstMonth = getAverageStartMonth(month);
-  const firstBudgetMonth = await getFirstBudgetMonth({
+  const firstActivityMonth = await getFirstActivityMonth({
     categoryId,
     endMonth: firstMonth,
   });
@@ -431,7 +431,7 @@ async function getAverageMonths({
   let prevMonth = firstMonth;
 
   for (let l = 0; l < maxMonths; l++) {
-    if (firstBudgetMonth != null && prevMonth < firstBudgetMonth) {
+    if (firstActivityMonth != null && prevMonth < firstActivityMonth) {
       break;
     }
 
@@ -452,7 +452,7 @@ function getAverageStartMonth(month: string): string {
   return prevMonth;
 }
 
-async function getFirstBudgetMonth({
+async function getFirstActivityMonth({
   categoryId,
   endMonth,
 }: {
@@ -460,14 +460,27 @@ async function getFirstBudgetMonth({
   endMonth: string;
 }): Promise<string | null> {
   const table = getBudgetTable();
-  const firstBudget = await db.first<{ month: number | null }>(
-    `SELECT MIN(month) AS month FROM ${table} WHERE category = ? AND month <= ?`,
-    [categoryId, dbMonth(endMonth)],
+  const endDbMonth = dbMonth(endMonth);
+  const firstActivity = await db.first<{ month: number | null }>(
+    `SELECT MIN(month) AS month
+       FROM (
+         SELECT month
+           FROM ${table}
+          WHERE category = ? AND month <= ?
+         UNION ALL
+         SELECT CAST(t.date / 100 AS INTEGER) AS month
+           FROM v_transactions_internal_alive t
+           LEFT JOIN accounts a ON a.id = t.account
+          WHERE t.category = ?
+            AND CAST(t.date / 100 AS INTEGER) <= ?
+            AND a.offbudget = 0
+       )`,
+    [categoryId, endDbMonth, categoryId, endDbMonth],
   );
 
-  return firstBudget?.month == null
+  return firstActivity?.month == null
     ? null
-    : monthFromDbMonth(firstBudget.month);
+    : monthFromDbMonth(firstActivity.month);
 }
 
 export async function holdForNextMonth({
