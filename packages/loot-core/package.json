@@ -114,6 +114,7 @@
     "./client/transfer": "./src/client/transfer.ts",
     "./client/undo": "./src/client/undo.ts",
     "./mocks": "./src/mocks/index.ts",
+    "./platform/client/backend-worker": "./src/platform/client/backend-worker.ts",
     "./platform/client/browser-preload": "./src/platform/client/browser-preload/index.ts",
     "./platform/client/browser-server/coordinator": "./src/platform/client/browser-server/coordinator.ts",
     "./platform/client/connection": {

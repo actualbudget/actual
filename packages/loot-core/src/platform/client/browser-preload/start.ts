@@ -1,5 +1,4 @@
-import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
-
+import { createBackendWorker } from '#platform/client/backend-worker';
 import { logger } from '#platform/server/log';
 
 import { WorkerBridge } from './worker-bridge';
@@ -89,14 +88,13 @@ export function startBrowserBackend(
   // Fallback: regular Worker (Playwright, iOS, no SharedWorker support, the
   // consumer opted out by omitting createSharedWorker, or the path above threw).
   logger.log('[WorkerBridge] No SharedWorker available, using direct Worker');
-  const worker = new Worker(backendWorkerUrl);
-  initSQLBackend(worker);
+  const backend = createBackendWorker(new Worker(backendWorkerUrl));
 
   if (window.SharedArrayBuffer) {
     localStorage.removeItem('SharedArrayBufferOverride');
   }
 
-  worker.postMessage({
+  backend.postMessage({
     type: 'init',
     ...initPayload,
     hasSharedArrayBuffer: !!window.SharedArrayBuffer,
@@ -105,5 +103,7 @@ export function startBrowserBackend(
     ),
   });
 
-  return worker;
+  // The connection layer consumes a raw Worker (onmessage/addEventListener);
+  // createBackendWorker only needed the absurd-sql init side-effect here.
+  return backend.worker;
 }

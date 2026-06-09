@@ -49,8 +49,59 @@ function copyMigrationsAndDefaultDb() {
         throw new Error(`default-db.sqlite not found at ${defaultDbPath}`);
       }
       fs.copyFileSync(defaultDbPath, path.join(distDir, 'default-db.sqlite'));
+
+      // Browser consumers need sql.js' WASM to be served at the same origin
+      // as the bundle. Ship it alongside dist/ so downstream apps just point
+      // a static handler at dist and don't have to reach into node_modules.
+      const sqlJsWasm = require.resolve('@jlongster/sql.js/dist/sql-wasm.wasm');
+      fs.copyFileSync(sqlJsWasm, path.join(distDir, 'sql-wasm.wasm'));
+
+      // loot-core's browser fs bootstraps by fetching:
+      //   `${PUBLIC_URL}data-file-index.txt`  - flat manifest
+      //   `${PUBLIC_URL}data/<name>`          - each file listed in the manifest
+      // We point PUBLIC_URL at the api's dist dir at runtime (see
+      // index.browser.ts), so these two shapes need to exist here.
+      //
+      // JS migrations get a `.data` suffix on the *wire* path. Consumer
+      // bundlers (Vite's dev server first, others to varying degrees)
+      // auto-transform `.js` URLs through their import-analysis pipelines,
+      // which fails on loot-core's `#`-subpath imports. The api's worker
+      // (browser-worker.ts) wraps `fetch` to translate back to `.js` so
+      // loot-core's migration runner finds the file under its original
+      // name in the virtual FS. `.sql` migrations stay as-is.
+      const dataDir = path.join(distDir, 'data');
+      const dataMigrationsDir = path.join(dataDir, 'migrations');
+      fs.mkdirSync(dataMigrationsDir, { recursive: true });
+
+      linkOrCopy(
+        path.join(distDir, 'default-db.sqlite'),
+        path.join(dataDir, 'default-db.sqlite'),
+      );
+      const wireMigrationNames: string[] = [];
+      for (const name of fs.readdirSync(migrationsDest)) {
+        const wireName = name.endsWith('.js') ? `${name}.data` : name;
+        linkOrCopy(
+          path.join(migrationsDest, name),
+          path.join(dataMigrationsDir, wireName),
+        );
+        wireMigrationNames.push(`migrations/${wireName}`);
+      }
+      wireMigrationNames.sort();
+
+      // data-file-index.txt: one path per line, relative to `data/`.
+      const manifest =
+        ['default-db.sqlite', ...wireMigrationNames].join('\n') + '\n';
+      fs.writeFileSync(path.join(distDir, 'data-file-index.txt'), manifest);
     },
   };
+}
+
+function linkOrCopy(src: string, dest: string) {
+  try {
+    fs.linkSync(src, dest);
+  } catch {
+    fs.copyFileSync(src, dest);
+  }
 }
 
 export default defineConfig({
