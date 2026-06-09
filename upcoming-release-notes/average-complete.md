@@ -3,4 +3,4 @@ category: Enhancements
 authors: [tim-smart]
 ---
 
-Budget automation averages can exclude incomplete months
+Budget automation averages now exclude incomplete months by default

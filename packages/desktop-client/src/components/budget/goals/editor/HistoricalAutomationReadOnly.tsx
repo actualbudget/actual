@@ -22,12 +22,7 @@ export const HistoricalAutomationReadOnly = ({
     );
   }
 
-  const base = template.includeIncomplete ? (
-    <Trans count={template.numMonths}>
-      Budget the average of the last {{ count: template.numMonths }} months,
-      including incomplete months
-    </Trans>
-  ) : (
+  const base = (
     <Trans count={template.numMonths}>
       Budget the average of the last {{ count: template.numMonths }} complete
       months

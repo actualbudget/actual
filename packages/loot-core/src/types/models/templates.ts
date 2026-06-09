@@ -73,7 +73,6 @@ export type AverageTemplate = {
   numMonths: number;
   adjustment?: number;
   adjustmentType?: 'percent' | 'fixed';
-  includeIncomplete?: boolean;
 } & BaseTemplateWithPriority;
 
 export type CopyTemplate = {

@@ -856,7 +856,7 @@ export class CategoryTemplateContext {
   ): Promise<number> {
     let sum = 0;
     let month = monthUtils.prevMonth(templateContext.month);
-    if (!template.includeIncomplete && month >= monthUtils.currentMonth()) {
+    if (month >= monthUtils.currentMonth()) {
       month = monthUtils.prevMonth(monthUtils.currentMonth());
     }
 

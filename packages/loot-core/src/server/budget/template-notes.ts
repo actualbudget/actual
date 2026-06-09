@@ -254,11 +254,8 @@ function templateToLine(
       return result;
     }
     case 'average': {
-      // #template average <numMonths> months [include incomplete] [increase/decrease {number|number%}]
+      // #template average <numMonths> months [increase/decrease {number|number%}]
       let result = `${prefix} average ${template.numMonths} months`;
-      if (template.includeIncomplete) {
-        result += ' include incomplete';
-      }
       if (template.adjustment !== undefined) {
         const adj = template.adjustment;
         const op = adj >= 0 ? 'increase' : 'decrease';
