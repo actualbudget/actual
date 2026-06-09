@@ -1,36 +1,34 @@
-/// <reference lib="webworker" />
-
-// Worker entry for @actual-app/api's browser build.
+// Web Worker entry for loot-core when shipped as a browser npm package
+// (used by @actual-app/api's browser build).
 //
 // This owns the real loot-core instance (sql.js + absurd-sql + IndexedDB)
-// and speaks loot-core's existing backend protocol over postMessage:
+// and speaks loot-core's existing backend protocol over postMessage via
+// platform/server/connection:
 //   main → worker: {id, name, args, undoTag?, catchErrors?}
 //   worker → main: {type:'reply', id, result, mutated, undoTag}
 //                  {type:'error', id, error}
 //                  {type:'connect'}            (handshake heartbeat)
 //
 // Bootstrapping:
-//   - We register an `api-browser/init` handler that runs loot-core's public
-//     init(config), so the main-thread facade can kick off the DB + auth via
-//     a normal RPC call. The reply carries no return value (loot-core's
-//     `init(config)` resolves to `lib`, which isn't structured-cloneable).
+//   - An `api-browser/init` handler runs loot-core's public init(config), so
+//     the main-thread facade can kick off the DB + auth via a normal RPC call.
+//     The reply carries no return value (loot-core's `init(config)` resolves
+//     to `lib`, which isn't structured-cloneable).
 //   - connection.init(self, handlers) starts the message loop and the
-//     `{type:'connect'}` handshake loot-core's client connection expects.
+//     `{type:'connect'}` handshake the client connection expects.
 
-import * as connection from '@actual-app/core/platform/server/connection';
-import { handlers, init } from '@actual-app/core/server/main';
-import type { InitConfig } from '@actual-app/core/server/main';
+import * as connection from '#platform/server/connection';
+import { logger } from '#platform/server/log';
+import { handlers, init } from '#server/main';
+import type { InitConfig } from '#server/main';
 
 // Dev-server friendliness: consumer bundlers (Vite first, others too) run
 // import-analysis on every `.js` URL they serve. loot-core's JS migrations
 // use `#`-subpath imports that only resolve inside loot-core — analysis
 // fails when those files live under node_modules/@actual-app/api/dist/.
-// Our build writes those files with an extra `.data` suffix, so bundlers
+// The build writes those files with an extra `.data` suffix, so bundlers
 // leave them alone. Translate the URLs here so loot-core's fetch layer
 // still sees `.js` names both in the manifest and on-disk.
-//
-// The wrap has to install before connection.init() runs, and populateDefault-
-// Filesystem is kicked off lazily from the first `load-budget` / init call.
 {
   const origFetch = globalThis.fetch;
   const MIGRATION_JS = /\/data\/migrations\/[^/?]+\.js(\?.*)?$/;
@@ -72,7 +70,7 @@ import type { InitConfig } from '@actual-app/core/server/main';
   const payload = (args ?? {}) as InitConfig & { __assetsBaseUrl?: string };
   // Main thread hands us a URL pointing at the api's own dist/ dir. Setting
   // PUBLIC_URL here is what makes loot-core's populateDefaultFilesystem
-  // fetch `data-file-index.txt` / `data/<name>` / `sql-wasm.wasm` from our
+  // fetch `data-file-index.txt` / `data/<name>` / `sql-wasm.wasm` from the
   // package instead of the consumer's page origin — no manual copy step.
   const { __assetsBaseUrl, ...config } = payload;
   if (__assetsBaseUrl) {
@@ -84,19 +82,17 @@ import type { InitConfig } from '@actual-app/core/server/main';
 };
 
 self.addEventListener('error', e => {
-  // eslint-disable-next-line no-console
-  console.error(
+  logger.error(
     '[api worker] uncaught',
     (e as ErrorEvent).error ?? (e as ErrorEvent).message,
   );
 });
 
 self.addEventListener('unhandledrejection', e => {
-  // eslint-disable-next-line no-console
-  console.error(
+  logger.error(
     '[api worker] unhandled rejection',
     (e as PromiseRejectionEvent).reason,
   );
 });
 
-connection.init(self as unknown as Window, handlers);
+connection.init(self, handlers);

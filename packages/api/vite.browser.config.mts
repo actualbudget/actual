@@ -4,11 +4,21 @@ import { defineConfig } from 'vite';
 
 const distDir = path.resolve(__dirname, 'dist');
 
-// Main-thread facade only. Tiny bundle: no loot-core, no sql.js, no absurd-sql.
-// The worker is built separately by vite.browser-worker.config.mts. The
-// consumer constructs the Worker (handling URL resolution through their own
-// bundler) and hands it to init().
+// Main-thread facade only. Small bundle: no sql.js, no absurd-sql, no
+// loot-core backend. The worker is built separately by
+// vite.browser-worker.config.mts.
+//
+// The `api-browser` resolve condition makes loot-core's `server/main` export
+// resolve to its worker-routing `lib` (server/main.api-browser.ts) instead of
+// the in-process Node backend, so methods.ts's `lib.send` goes over postMessage
+// without pulling the full loot-core graph into this bundle.
 export default defineConfig({
+  define: {
+    // loot-core's client connection reads `global.Actual.getServerSocket()`;
+    // map the bare `global` reference onto `globalThis` (no node polyfills in
+    // this facade bundle) so the shim set in index.browser.ts is visible.
+    global: 'globalThis',
+  },
   build: {
     target: 'esnext',
     outDir: distDir,
@@ -26,12 +36,6 @@ export default defineConfig({
     },
   },
   resolve: {
-    // oxlint-disable-next-line actual/enforce-boundaries -- methods.ts reads `lib.send` from loot-core's server/main; aliasing that external package to the main-thread stub keeps the full loot-core graph out of the facade bundle (no #subpath equivalent for an external package).
-    alias: {
-      '@actual-app/core/server/main': path.resolve(
-        __dirname,
-        'browser/lib-stub.ts',
-      ),
-    },
+    conditions: ['api-browser'],
   },
 });

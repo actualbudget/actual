@@ -5,10 +5,17 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import peggyLoader from 'vite-plugin-peggy-loader';
 
 const distDir = path.resolve(__dirname, 'dist');
+const lootCoreRoot = path.resolve(__dirname, '../loot-core');
 
 // Worker bundle: contains the full loot-core + sql.js + absurd-sql stack.
 // Runs inside a Web Worker where absurd-sql's Atomics.wait has the right
 // thread context. Consumer spawns the worker with this file as the entry.
+//
+// The entry lives in loot-core (server/api-browser-worker.ts) — it's generic
+// "loot-core as a browser npm package" plumbing, not api-specific. We point at
+// the source directly (same as the migrations copy in vite.config.mts) so the
+// build resolves loot-core's `#`-subpath imports against loot-core's own
+// package.json.
 export default defineConfig({
   define: {
     // NODE_ENV is read at build time by dead-code elimination paths and
@@ -25,7 +32,7 @@ export default defineConfig({
     emptyOutDir: false,
     sourcemap: true,
     lib: {
-      entry: path.resolve(__dirname, 'browser-worker.ts'),
+      entry: path.resolve(lootCoreRoot, 'src/server/api-browser-worker.ts'),
       formats: ['es'],
       fileName: () => 'worker.js',
     },

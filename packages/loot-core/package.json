@@ -150,6 +150,10 @@
       "default": "./src/platform/server/sqlite/index.ts"
     },
     "./server/budget/types/*": "./src/server/budget/types/*.d.ts",
+    "./server/main": {
+      "api-browser": "./src/server/main.api-browser.ts",
+      "default": "./src/server/main.ts"
+    },
     "./server/*": "./src/server/*.ts",
     "./shared/platform": {
       "electron": "./src/shared/platform.electron.ts",
