@@ -151,11 +151,9 @@ async function downloadGoCardlessTransactions(
   };
   const headers: Record<string, string> = {
     'X-ACTUAL-TOKEN': userToken,
+    'X-Actual-File-Id': fileId,
   };
-  if (fileId) {
-    body.fileId = fileId;
-    headers['X-Actual-File-Id'] = fileId;
-  }
+  body.fileId = fileId;
 
   const res = await post(
     getServer().GOCARDLESS_SERVER + '/transactions',
@@ -212,11 +210,9 @@ async function downloadSimpleFinTransactions(
   };
   const headers: Record<string, string> = {
     'X-ACTUAL-TOKEN': userToken,
+    'X-Actual-File-Id': fileId,
   };
-  if (fileId) {
-    body.fileId = fileId;
-    headers['X-Actual-File-Id'] = fileId;
-  }
+  body.fileId = fileId;
 
   let res;
   try {
@@ -307,11 +303,9 @@ async function downloadPluggyAiTransactions(
   };
   const headers: Record<string, string> = {
     'X-ACTUAL-TOKEN': userToken,
+    'X-Actual-File-Id': fileId,
   };
-  if (fileId) {
-    body.fileId = fileId;
-    headers['X-Actual-File-Id'] = fileId;
-  }
+  body.fileId = fileId;
 
   const res = await post(
     getServer().PLUGGYAI_SERVER + '/transactions',

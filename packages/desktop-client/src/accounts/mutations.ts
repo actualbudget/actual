@@ -56,13 +56,6 @@ const dispatchErrorNotification = (
   );
 };
 
-function requireCloudFileId(cloudFileId: string | null | undefined): string {
-  if (!cloudFileId) {
-    throw new Error('missing-file-id');
-  }
-  return cloudFileId;
-}
-
 type CreateAccountPayload = {
   name: string;
   balance: number;
@@ -362,7 +355,7 @@ export function useUnlinkAccountMutation() {
     mutationFn: async ({ id }: UnlinkAccountPayload) => {
       await send('account-unlink', {
         id,
-        fileId: requireCloudFileId(cloudFileId),
+        fileId: cloudFileId || undefined,
       });
     },
     onSuccess: (_, { id }) => {
@@ -408,7 +401,10 @@ export function useLinkAccountMutation() {
       startingDate,
       startingBalance,
     }: LinkAccountPayload) => {
-      const fileId = requireCloudFileId(cloudFileId);
+      if (!cloudFileId) {
+        return;
+      }
+
       await send('gocardless-accounts-link', {
         requisitionId,
         account,
@@ -416,7 +412,7 @@ export function useLinkAccountMutation() {
         offBudget,
         startingDate,
         startingBalance,
-        fileId,
+        fileId: cloudFileId,
       });
     },
     onSuccess: () => {
@@ -452,14 +448,17 @@ export function useLinkAccountSimpleFinMutation() {
       startingDate,
       startingBalance,
     }: LinkAccountSimpleFinPayload) => {
-      const fileId = requireCloudFileId(cloudFileId);
+      if (!cloudFileId) {
+        return;
+      }
+
       await send('simplefin-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
         startingDate,
         startingBalance,
-        fileId,
+        fileId: cloudFileId,
       });
     },
     onSuccess: () => {
@@ -497,14 +496,17 @@ export function useLinkAccountPluggyAiMutation() {
       startingDate,
       startingBalance,
     }: LinkAccountPluggyAiPayload) => {
-      const fileId = requireCloudFileId(cloudFileId);
+      if (!cloudFileId) {
+        return;
+      }
+
       await send('pluggyai-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
         startingDate,
         startingBalance,
-        fileId,
+        fileId: cloudFileId,
       });
     },
     onSuccess: () => {
@@ -542,14 +544,17 @@ export function useLinkAccountAkahuMutation() {
       startingDate,
       startingBalance,
     }: LinkAccountAkahuPayload) => {
-      const fileId = requireCloudFileId(cloudFileId);
+      if (!cloudFileId) {
+        return;
+      }
+
       await send('akahu-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
         startingDate,
         startingBalance,
-        fileId,
+        fileId: cloudFileId,
       });
     },
     onSuccess: () => {
@@ -585,14 +590,17 @@ export function useLinkAccountEnableBankingMutation() {
       startingDate,
       startingBalance,
     }: LinkAccountEnableBankingPayload) => {
-      const fileId = requireCloudFileId(cloudFileId);
+      if (!cloudFileId) {
+        return;
+      }
+
       await send('enablebanking-accounts-link', {
         externalAccount,
         upgradingId,
         offBudget,
         startingDate,
         startingBalance,
-        fileId,
+        fileId: cloudFileId,
       });
     },
     onSuccess: () => {
@@ -627,7 +635,10 @@ export function useSyncAccountsMutation() {
 
   return useMutation({
     mutationFn: async ({ id }: SyncAccountsPayload) => {
-      const fileId = requireCloudFileId(cloudFileId);
+      if (!cloudFileId) {
+        return false;
+      }
+
       const {
         account: { accountsSyncing = [] },
       } = store.getState();
@@ -687,7 +698,7 @@ export function useSyncAccountsMutation() {
 
         const res = await send('simplefin-batch-sync', {
           ids: simpleFinAccounts.map(a => a.id),
-          fileId,
+          fileId: cloudFileId,
         });
 
         for (const account of res) {
@@ -717,7 +728,7 @@ export function useSyncAccountsMutation() {
         // Perform sync operation
         const res = await send('accounts-bank-sync', {
           ids: [accountId],
-          fileId,
+          fileId: cloudFileId,
         });
 
         const success = handleSyncResponse(

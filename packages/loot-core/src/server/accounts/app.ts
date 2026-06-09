@@ -830,15 +830,11 @@ async function pollGoCardlessWebToken({
       throw new Error('Failed to get server config.');
     }
 
-    const body: Record<string, string> = { requisitionId };
+    const body: Record<string, string> = { requisitionId, fileId };
     const headers: Record<string, string> = {
       'X-ACTUAL-TOKEN': token,
+      'X-Actual-File-Id': fileId,
     };
-    if (fileId) {
-      const f = fileId as string;
-      body.fileId = f;
-      headers['X-Actual-File-Id'] = f;
-    }
 
     const data = await post(
       serverConfig.GOCARDLESS_SERVER + '/get-accounts',
@@ -1327,16 +1323,12 @@ async function createGoCardlessWebToken({
   const body: Record<string, unknown> = {
     institutionId,
     accessValidForDays,
+    fileId,
   };
-  if (fileId) {
-    body.fileId = fileId;
-  }
   const headers: Record<string, string> = {
     'X-ACTUAL-TOKEN': userToken,
+    'X-Actual-File-Id': fileId,
   };
-  if (fileId) {
-    headers['X-Actual-File-Id'] = fileId;
-  }
 
   try {
     return await post(
