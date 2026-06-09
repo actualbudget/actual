@@ -50,7 +50,7 @@ function handleMessage(msg) {
       handler.reject(error);
     }
   } else if (msg.type === 'reply') {
-    const { id, result, mutated, undoTag } = msg;
+    const { id, result, mutated, undoTag, error } = msg;
 
     const handler = replyHandlers.get(id);
     if (handler) {
@@ -60,7 +60,13 @@ function handleMessage(msg) {
         undo.gc(undoTag);
       }
 
-      handler.resolve(result);
+      // api/* handler failures arrive as a reply carrying `error` (see
+      // platform/server/connection); reject rather than resolving undefined.
+      if (error) {
+        handler.reject(error);
+      } else {
+        handler.resolve(result);
+      }
     }
   } else if (msg.type === 'push') {
     const { name, args } = msg;
