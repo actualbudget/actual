@@ -452,23 +452,21 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                             </FinancialText>
                           }
                         />
-                        {showBalance && (
-                          <AlignedText
-                            style={{ marginBottom: 5, minWidth: 210 }}
-                            left={
-                              <Block>
-                                <Trans>Ending balance:</Trans>
-                              </Block>
-                            }
-                            right={
-                              <FinancialText style={{ fontWeight: 600 }}>
-                                <PrivacyFilter>
-                                  <Change amount={endingBalance} />
-                                </PrivacyFilter>
-                              </FinancialText>
-                            }
-                          />
-                        )}
+                        <AlignedText
+                          style={{ marginBottom: 5, minWidth: 210 }}
+                          left={
+                            <Block>
+                              <Trans>Ending balance:</Trans>
+                            </Block>
+                          }
+                          right={
+                            <FinancialText style={{ fontWeight: 600 }}>
+                              <PrivacyFilter>
+                                <Change amount={endingBalance} />
+                              </PrivacyFilter>
+                            </FinancialText>
+                          }
+                        />
                       </>
                     )}
                   </View>
