@@ -31,6 +31,9 @@ export type DbAccount = {
     | 'failed'
     | 'reauth-required'
     | 'attention-required'
+    | 'rate-limit-exceeded'
+    | 'timed-out'
+    | 'account-missing'
     | null;
 };
 

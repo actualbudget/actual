@@ -5,8 +5,9 @@ export function isAccountFailedSync(
 ) {
   const status = account.bank_sync_status;
   return (
-    status === 'failed' ||
-    status === 'attention-required' ||
-    status === 'reauth-required'
+    status != null &&
+    status !== 'ok' &&
+    status !== 'pending' &&
+    status !== 'sync-requested'
   );
 }

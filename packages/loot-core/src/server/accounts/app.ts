@@ -1369,6 +1369,18 @@ function getBankSyncStatusFromError(
     if (err.category === 'ACCOUNT_NEEDS_ATTENTION') {
       return 'attention-required';
     }
+
+    if (err.category === 'RATE_LIMIT_EXCEEDED') {
+      return 'rate-limit-exceeded';
+    }
+
+    if (err.category === 'TIMED_OUT') {
+      return 'timed-out';
+    }
+
+    if (err.category === 'ACCOUNT_MISSING') {
+      return 'account-missing';
+    }
   }
 
   return 'failed';

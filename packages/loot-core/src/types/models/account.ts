@@ -32,4 +32,7 @@ export type BankSyncStatus =
   | 'sync-requested'
   | 'failed'
   | 'reauth-required'
-  | 'attention-required';
+  | 'attention-required'
+  | 'rate-limit-exceeded'
+  | 'timed-out'
+  | 'account-missing';

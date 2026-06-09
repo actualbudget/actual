@@ -10,10 +10,13 @@ function makeAccount(
 }
 
 describe('syncStatus', () => {
-  it('treats failed, attention-required and reauth-required as failed', () => {
+  it('treats any durable non-ok status as failed', () => {
     expect(isAccountFailedSync(makeAccount('failed'))).toBe(true);
     expect(isAccountFailedSync(makeAccount('attention-required'))).toBe(true);
     expect(isAccountFailedSync(makeAccount('reauth-required'))).toBe(true);
+    expect(isAccountFailedSync(makeAccount('rate-limit-exceeded'))).toBe(true);
+    expect(isAccountFailedSync(makeAccount('timed-out'))).toBe(true);
+    expect(isAccountFailedSync(makeAccount('account-missing'))).toBe(true);
     expect(isAccountFailedSync(makeAccount('pending'))).toBe(false);
     expect(isAccountFailedSync(makeAccount('sync-requested'))).toBe(false);
     expect(isAccountFailedSync(makeAccount('ok'))).toBe(false);
