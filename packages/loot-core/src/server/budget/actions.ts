@@ -282,7 +282,7 @@ export async function set3MonthAvg({
   `,
   );
 
-  const prevMonth1 = monthUtils.prevMonth(month);
+  const prevMonth1 = getAverageStartMonth(month);
   const prevMonth2 = monthUtils.prevMonth(prevMonth1);
   const prevMonth3 = monthUtils.prevMonth(prevMonth2);
 
@@ -314,6 +314,16 @@ export async function set3MonthAvg({
       void setBudget({ category: cat.id, month, amount: avg });
     }
   });
+}
+
+function getAverageStartMonth(month: string): string {
+  const prevMonth = monthUtils.prevMonth(month);
+
+  if (prevMonth >= monthUtils.currentMonth()) {
+    return monthUtils.prevMonth(monthUtils.currentMonth());
+  }
+
+  return prevMonth;
 }
 
 export async function set12MonthAvg({
@@ -378,7 +388,7 @@ export async function setNMonthAvg({
     [category],
   );
 
-  let prevMonth = monthUtils.prevMonth(month);
+  let prevMonth = getAverageStartMonth(month);
   let sumAmount = 0;
   for (let l = 0; l < N; l++) {
     sumAmount += await getSheetValue(
