@@ -360,7 +360,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
             onChange={onBalanceModeChange}
             options={[
               ['balance-only', t('Balance only')],
-              ['balance-and-categories', t('Balance + categories')],
+              ['balance-and-categories', t('Balance + Categories')],
               ['categories-only', t('Categories only')],
             ]}
           />
