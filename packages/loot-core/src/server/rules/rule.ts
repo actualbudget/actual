@@ -108,7 +108,11 @@ export function execActions(
       0,
     ) + 1;
 
-  const nonSplitResult = execNonSplitActions(parentActions, transaction, forceFields);
+  const nonSplitResult = execNonSplitActions(
+    parentActions,
+    transaction,
+    forceFields,
+  );
   if (totalSplitCount === 1) {
     // No splits, no need to do anything else.
     return nonSplitResult;
@@ -165,9 +169,13 @@ export class Rule {
   }
 
   execActions<T>(object: T, forceFields?: Set<string>): Partial<T> {
-    const result = execActions(this.actions, {
-      ...object,
-    }, forceFields);
+    const result = execActions(
+      this.actions,
+      {
+        ...object,
+      },
+      forceFields,
+    );
     const changes = Object.keys(result).reduce((prev, cur) => {
       if (result[cur] !== object[cur]) {
         prev[cur] = result[cur];
