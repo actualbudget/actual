@@ -188,6 +188,6 @@ async function runRules({
   transaction,
 }: {
   transaction: TransactionEntity;
-}): Promise<TransactionEntity> {
+}): Promise<{ transaction: TransactionEntity; forceFields: string[] }> {
   return rules.runRules(transaction);
 }

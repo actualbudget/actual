@@ -515,7 +515,7 @@ export function TransactionList({
       transaction: TransactionEntity,
       updatedFieldName: string | null = null,
     ) => {
-      const afterRules = await send('rules-run', { transaction });
+      const { transaction: afterRules, forceFields } = await send('rules-run', { transaction });
 
       // Show formula errors if any
       if (afterRules._ruleErrors && afterRules._ruleErrors.length > 0) {
@@ -531,7 +531,7 @@ export function TransactionList({
       }
 
       const diff = getChangedValues(transaction, afterRules);
-      const forceApplyFields: string[] = afterRules._forceApplyFields || [];
+      const forceApplyFields: string[] = forceFields;
 
       const newTransaction: TransactionEntity = { ...transaction };
       if (diff) {

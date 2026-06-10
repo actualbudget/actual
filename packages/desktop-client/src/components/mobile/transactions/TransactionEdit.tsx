@@ -1787,11 +1787,11 @@ function TransactionEditUnconnected({
       // this on new transactions because that's how desktop works.
       const newTransaction = { ...transaction };
       if (isTemporary(newTransaction)) {
-        const afterRules = await send('rules-run', {
+        const { transaction: afterRules, forceFields } = await send('rules-run', {
           transaction: newTransaction,
         });
         const diff = getChangedValues(newTransaction, afterRules);
-        const forceApplyFields: string[] = afterRules._forceApplyFields || [];
+        const forceApplyFields: string[] = forceFields;
 
         if (diff) {
           Object.keys(diff).forEach(key => {

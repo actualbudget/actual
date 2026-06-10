@@ -12,9 +12,13 @@ import type { RuleEntity } from '#types/models';
 import { Action } from './action';
 import { Condition } from './condition';
 
-function execNonSplitActions(actions: Action[], transaction) {
+function execNonSplitActions(
+  actions: Action[],
+  transaction,
+  forceFields?: Set<string>,
+) {
   const update = transaction;
-  actions.forEach(action => action.exec(update));
+  actions.forEach(action => action.exec(update, forceFields));
   return update;
 }
 
@@ -91,7 +95,11 @@ function execSplitActions(actions: Action[], transaction) {
   return recalculateSplit(groupTransaction(newTransactions));
 }
 
-export function execActions(actions: Action[], transaction) {
+export function execActions(
+  actions: Action[],
+  transaction,
+  forceFields?: Set<string>,
+) {
   const parentActions = actions.filter(action => !action.options?.splitIndex);
   const childActions = actions.filter(action => action.options?.splitIndex);
   const totalSplitCount =
@@ -100,7 +108,7 @@ export function execActions(actions: Action[], transaction) {
       0,
     ) + 1;
 
-  const nonSplitResult = execNonSplitActions(parentActions, transaction);
+  const nonSplitResult = execNonSplitActions(parentActions, transaction, forceFields);
   if (totalSplitCount === 1) {
     // No splits, no need to do anything else.
     return nonSplitResult;
@@ -156,10 +164,10 @@ export class Rule {
     });
   }
 
-  execActions<T>(object: T): Partial<T> {
+  execActions<T>(object: T, forceFields?: Set<string>): Partial<T> {
     const result = execActions(this.actions, {
       ...object,
-    });
+    }, forceFields);
     const changes = Object.keys(result).reduce((prev, cur) => {
       if (result[cur] !== object[cur]) {
         prev[cur] = result[cur];
@@ -169,16 +177,16 @@ export class Rule {
     return changes;
   }
 
-  exec(object) {
+  exec(object, forceFields?: Set<string>) {
     if (this.evalConditions(object)) {
-      return this.execActions(object);
+      return this.execActions(object, forceFields);
     }
     return null;
   }
 
   // Apply is similar to exec but applies the changes for you
-  apply(object) {
-    const changes = this.exec(object);
+  apply(object, forceFields?: Set<string>) {
+    const changes = this.exec(object, forceFields);
     return Object.assign({}, object, changes);
   }
 

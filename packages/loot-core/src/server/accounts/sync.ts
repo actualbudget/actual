@@ -753,7 +753,7 @@ export async function matchTransactions(
     subtransactions,
   } of normalized) {
     // Run the rules
-    const trans = await runRules(originalTrans, accountsMap);
+    const { transaction: trans } = await runRules(originalTrans, accountsMap);
 
     let match = null;
     let fuzzyDataset = null;
@@ -934,7 +934,7 @@ export async function addTransactions(
 
   for (const { trans: originalTrans, subtransactions } of normalized) {
     // Run the rules
-    const trans = await runRules(originalTrans, accountsMap);
+    const { transaction: trans } = await runRules(originalTrans, accountsMap);
 
     const finalTransaction = {
       id: uuidv4(),
