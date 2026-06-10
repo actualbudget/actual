@@ -25,8 +25,9 @@ async function flushRunningMethods() {
   await wait(200);
 
   while (runningMethods.size > 0) {
-    // Wait for all of them
-    await Promise.all([...runningMethods.values()]);
+    // Wait for all of them; rejected methods already report their error to
+    // their caller and must not fail the flush.
+    await Promise.allSettled([...runningMethods.values()]);
 
     // We give clients more time to make other requests. This lets them continue
     // to do an async workflow
@@ -66,9 +67,10 @@ export async function runHandler<T extends Handlers[keyof Handlers]>(
 
   const promise = handler(args);
   runningMethods.add(promise);
-  void promise.then(() => {
-    runningMethods.delete(promise);
-  });
+  // Remove on rejection too, otherwise the stale promise poisons every
+  // subsequent flushRunningMethods (i.e. close-budget).
+  const remove = () => runningMethods.delete(promise);
+  void promise.then(remove, remove);
   return promise as Promise<ReturnType<T>>;
 }
 
