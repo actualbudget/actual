@@ -4,6 +4,7 @@ import path from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
 import peggyLoader from 'vite-plugin-peggy-loader';
+import { configDefaults } from 'vitest/config';
 
 const lootCoreRoot = path.resolve(__dirname, '../loot-core');
 const distDir = path.resolve(__dirname, 'dist');
@@ -114,6 +115,8 @@ export default defineConfig({
   },
   test: {
     globals: true,
+    // e2e/ holds Playwright tests (yarn e2e), not vitest ones.
+    exclude: [...configDefaults.exclude, 'e2e/**'],
     // Each test loads a budget file and runs all DB migrations, which can be
     // slow on busy CI runners; the default 5s timeout is too tight and causes
     // flaky timeouts (and a cascade of unhandled rejections from in-flight work

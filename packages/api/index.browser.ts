@@ -18,7 +18,13 @@ export async function init(
   // String manipulation instead of `new URL('.', import.meta.url)` so
   // consumer asset analyzers leave it alone.
   const assetsBaseUrl = import.meta.url.replace(/[^/]+$/, '');
-  await startBackendWorker(worker, config, assetsBaseUrl);
+  try {
+    await startBackendWorker(worker, config, assetsBaseUrl);
+  } catch (error) {
+    worker.terminate();
+    worker = null;
+    throw error;
+  }
 
   return { send };
 }

@@ -20,7 +20,10 @@
     ".": {
       "types": "./@types/index.d.ts",
       "development": "./index.ts",
-      "browser": "./dist/browser.js",
+      "browser": {
+        "types": "./@types/index.browser.d.ts",
+        "default": "./dist/browser.js"
+      },
       "default": "./dist/index.js"
     },
     "./models": {
@@ -33,7 +36,10 @@
     "exports": {
       ".": {
         "types": "./@types/index.d.ts",
-        "browser": "./dist/browser.js",
+        "browser": {
+          "types": "./@types/index.browser.d.ts",
+          "default": "./dist/browser.js"
+        },
         "default": "./dist/index.js"
       },
       "./models": {
