@@ -17,6 +17,7 @@ import { setDay } from 'date-fns/setDay';
 
 import { updateTemplate } from '#components/budget/goals/actions';
 import type { Action } from '#components/budget/goals/actions';
+import { TWO_UP_FIELD_FLEX } from '#components/budget/goals/editor/fieldLayout';
 import { FormField, FormLabel } from '#components/forms';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { AmountInput } from '#components/util/AmountInput';
@@ -52,7 +53,7 @@ export const LimitAutomation = ({
   });
 
   const weekdayField = (
-    <FormField style={{ flex: 1 }}>
+    <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
       <FormLabel title={t('Weekday')} htmlFor="weekday-field" />
 
       <Select
@@ -73,7 +74,7 @@ export const LimitAutomation = ({
   );
 
   const amountField = (
-    <FormField key="amount-field" style={{ flex: 1 }}>
+    <FormField key="amount-field" style={{ flex: TWO_UP_FIELD_FLEX }}>
       <FormLabel title={t('Amount')} htmlFor="amount-field" />
       <AmountInput
         id="amount-field"
@@ -92,7 +93,7 @@ export const LimitAutomation = ({
   );
 
   const cadenceField = (
-    <FormField key="cadence-field" style={{ flex: 1 }}>
+    <FormField key="cadence-field" style={{ flex: TWO_UP_FIELD_FLEX }}>
       <FormLabel title={t('Every')} htmlFor="cadence-field" />
 
       <Select
@@ -156,7 +157,10 @@ export const LimitAutomation = ({
 
       <SpaceBetween align="center" gap={10} style={{ marginTop: 10 }}>
         {period === 'weekly' && weekdayField}
-        <FormField key="hold-overflow-field" style={{ flex: 1 }}>
+        <FormField
+          key="hold-overflow-field"
+          style={{ flex: TWO_UP_FIELD_FLEX }}
+        >
           <LabeledCheckbox
             id="hold-overflow-field"
             checked={!!hold}

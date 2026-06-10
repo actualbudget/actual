@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, FocusEvent, FocusEventHandler, Ref } from 'react';
 
 import { Input } from '@actual-app/components/input';
@@ -39,16 +39,19 @@ export function PercentInput({
 }: PercentInputProps) {
   const format = useFormat();
 
+  const [isFocused, setIsFocused] = useState(focused ?? false);
   const [value, setValue] = useState(() =>
     format(clampToPercent(initialValue, max), 'percentage'),
   );
+
   useEffect(() => {
-    const clampedInitialValue = clampToPercent(initialValue, max);
-    if (clampedInitialValue !== initialValue) {
-      setValue(format(clampedInitialValue, 'percentage'));
-      onUpdatePercent?.(clampedInitialValue);
+    const clamped = clampToPercent(initialValue, max);
+    if (clamped !== initialValue) {
+      onUpdatePercent?.(clamped);
     }
-  }, [initialValue, max, onUpdatePercent, format]);
+    // drop the symbol while editing so the value can be edited freely
+    setValue(isFocused ? String(clamped) : format(clamped, 'percentage'));
+  }, [initialValue, max, isFocused, onUpdatePercent, format]);
 
   const ref = useRef<HTMLInputElement>(null);
   const mergedRef = useMergedRefs<HTMLInputElement>(inputRef, ref);
@@ -59,43 +62,31 @@ export function PercentInput({
     }
   }, [focused]);
 
-  function onSelectionChange() {
-    if (!ref.current) {
-      return;
-    }
-
-    const selectionStart = ref.current.selectionStart;
-    const selectionEnd = ref.current.selectionEnd;
-    if (
-      selectionStart === selectionEnd &&
-      selectionStart !== null &&
-      selectionStart >= ref.current.value.length
-    ) {
-      ref.current.setSelectionRange(
-        ref.current.value.length - 1,
-        ref.current.value.length - 1,
-      );
-    }
-  }
-
   function onInputTextChange(val: string) {
     const number = val.replace(/[^0-9.]/g, '');
-    setValue(number ? format(number, 'percentage') : '');
+    setValue(number);
     onChangeValue?.(number);
   }
 
   function fireUpdate() {
-    const clampedValue = clampToPercent(
+    const clamped = clampToPercent(
       evalArithmetic(value.replace('%', ''), 0) ?? 0,
       max,
     );
-    onUpdatePercent?.(clampedValue);
-    onInputTextChange(String(clampedValue));
+    onUpdatePercent?.(clamped);
+    return clamped;
   }
 
-  function onInputAmountBlur(e: FocusEvent<HTMLInputElement>) {
+  function onInputFocus(e: FocusEvent<HTMLInputElement>) {
+    setIsFocused(true);
+    onFocus?.(e);
+  }
+
+  function onInputBlur(e: FocusEvent<HTMLInputElement>) {
     if (!ref.current?.contains(e.relatedTarget)) {
-      fireUpdate();
+      const clamped = fireUpdate();
+      setIsFocused(false);
+      setValue(format(clamped, 'percentage'));
     }
     onBlur?.(e);
   }
@@ -110,9 +101,8 @@ export function PercentInput({
       style={{ flex: 1, alignItems: 'stretch', ...style }}
       onEnter={fireUpdate}
       onChangeValue={onInputTextChange}
-      onBlur={onInputAmountBlur}
-      onFocus={onFocus}
-      onSelect={onSelectionChange}
+      onBlur={onInputBlur}
+      onFocus={onInputFocus}
     />
   );
 }

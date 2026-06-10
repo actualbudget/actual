@@ -359,6 +359,7 @@
         ]
       }
     ],
+    "actual/no-enum": "error",
     "eslint/no-useless-constructor": "error",
     "eslint/no-undef": "error",
     "eslint/no-unused-expressions": "error",
@@ -370,6 +371,16 @@
       "files": ["packages/desktop-electron/**/*"],
       "rules": {
         "react/rules-of-hooks": "off"
+      }
+    },
+    {
+      // Grandfathered pre-existing enums; new enums are disallowed everywhere else.
+      "files": [
+        "packages/component-library/src/tokens.ts",
+        "packages/desktop-client/src/auth/types.ts"
+      ],
+      "rules": {
+        "actual/no-enum": "off"
       }
     },
     {

@@ -130,6 +130,12 @@ export type Modal =
       };
     }
   | {
+      name: 'akahu-init';
+      options: {
+        onSuccess: () => void;
+      };
+    }
+  | {
       name: 'enablebanking-init';
       options: {
         onSuccess: () => void;
@@ -142,6 +148,7 @@ export type Modal =
           aspspId: string;
           country: string;
           maxConsentValidity?: number;
+          psuType?: 'personal' | 'business';
           onStateReady?: (state: string) => void;
         }) => Promise<
           | { error: 'timeout' }
@@ -358,6 +365,7 @@ export type Modal =
         onEditNotes: (id: NoteEntity['id']) => void;
         onDelete: (categoryId: CategoryEntity['id']) => void;
         onToggleVisibility: (categoryId: CategoryEntity['id']) => void;
+        onEditAutomations?: (categoryId: CategoryEntity['id']) => void;
         onClose?: () => void;
       };
     }

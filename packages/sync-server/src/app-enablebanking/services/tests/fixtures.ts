@@ -107,6 +107,16 @@ export const mockTransactionMinimal = {
   status: 'BOOK',
 } satisfies EnableBankingTransaction;
 
+// A pending transaction with no booking/value/transaction date. Enable Banking
+// returns these for some pending entries; normalizeTransaction maps it to
+// date: '', which Actual's client cannot insert.
+export const mockPendingTransactionNoDate = {
+  transaction_id: 'tx-no-date',
+  transaction_amount: { currency: 'EUR', amount: '-7.50' },
+  status: 'PDNG',
+  remittance_information: ['Card payment, not yet booked'],
+} satisfies EnableBankingTransaction;
+
 export const mockBalance = {
   balance_amount: { currency: 'EUR', amount: '1234.56' },
   balance_type: 'CLAV',
