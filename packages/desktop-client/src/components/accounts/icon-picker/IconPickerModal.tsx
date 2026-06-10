@@ -667,6 +667,7 @@ function FullEmojiPicker({ onPick }: { onPick: (emoji: string) => void }) {
     onEmojiSelect: (e: { native?: string }) => void;
     autoFocus?: boolean;
     perLine?: number;
+    previewPosition?: 'top' | 'bottom' | 'none';
   }> | null>(null);
   const [data, setData] = useState<unknown>(null);
 
@@ -698,6 +699,7 @@ function FullEmojiPicker({ onPick }: { onPick: (emoji: string) => void }) {
     <Picker
       data={data}
       perLine={9}
+      previewPosition="top"
       onEmojiSelect={e => {
         if (e.native) onPick(e.native);
       }}
