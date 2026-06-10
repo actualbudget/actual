@@ -143,8 +143,9 @@ function remarkEnforceDocLinks() {
     const fileDir = path.dirname(filePath);
     const docsRoot = findDocsRoot(filePath);
     const slugCache = docsRoot ? getSlugCache(docsRoot) : null;
-    // Absolute path of the docs/ content tree, used to skip blog→docs cross-area checks.
+    // Absolute paths of the content trees, used for cross-plugin boundary checks.
     const docsContentDir = docsRoot ? path.join(docsRoot, 'docs') : null;
+    const blogDir = docsRoot ? path.join(docsRoot, 'blog') : null;
 
     const errors = [];
 
@@ -162,9 +163,10 @@ function remarkEnforceDocLinks() {
       // Rule 1: absolute internal links
       if (url.startsWith('/') && !url.startsWith('/img/')) {
         const pos = nodePos(node);
-        errors.push(
-          `${pos}: absolute link "${url}" — use a relative .md path instead`,
-        );
+        const hint = inDocs
+          ? 'use a relative .md path instead'
+          : 'use a relative URL instead (e.g. ../docs/... from a blog post)';
+        errors.push(`${pos}: absolute link "${url}" — ${hint}`);
         return;
       }
 
@@ -205,17 +207,24 @@ function remarkEnforceDocLinks() {
         }
       }
 
-      // Rule 3: slug-style link that matches a known frontmatter slug
+      // Rule 3: slug-style link that matches a known frontmatter slug.
+      // Skip for docs→blog cross-plugin links: Docusaurus cannot resolve .md
+      // file paths across plugins, so URL-slug style is the required format there.
       if (slugCache) {
         const slug = path.basename(base);
         const match = slugCache.get(slug);
         if (match) {
-          const relCorrect = toRelative(fileDir, match);
-          const pos = nodePos(node);
-          errors.push(
-            `${pos}: link "${url}" uses a Docusaurus slug instead of the file path — use "${relCorrect}"`,
-          );
-          return;
+          const matchInBlog = blogDir && match.startsWith(blogDir);
+          if (inDocs && matchInBlog) {
+            // Cross-plugin: docs→blog must use URL-slug style. OK.
+          } else {
+            const relCorrect = toRelative(fileDir, match);
+            const pos = nodePos(node);
+            errors.push(
+              `${pos}: link "${url}" uses a Docusaurus slug instead of the file path — use "${relCorrect}"`,
+            );
+            return;
+          }
         }
       }
 
