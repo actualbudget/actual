@@ -15,66 +15,12 @@ import { indexCashFlow, runAll } from '#components/reports/util';
 import type { FormatType } from '#hooks/useFormat';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 
-export function simpleCashFlow(
-  startMonth: string,
-  endMonth: string,
-  conditions: RuleConditionEntity[] = [],
-  conditionsOp: 'and' | 'or' = 'and',
-) {
-  const start = monthUtils.firstDayOfMonth(startMonth);
-  const end = monthUtils.lastDayOfMonth(endMonth);
-
-  return async (
-    spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: { graphData: { income: number; expense: number } }) => void,
-  ) => {
-    const { filters } = await send('make-filters-from-conditions', {
-      conditions: conditions.filter(cond => !cond.customName),
-    });
-    const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
-
-    function makeQuery() {
-      return q('transactions')
-        .filter({
-          [conditionsOpKey]: filters,
-        })
-        .filter({
-          $and: [
-            { date: { $gte: start } },
-            {
-              date: {
-                $lte:
-                  end > monthUtils.currentDay() ? monthUtils.currentDay() : end,
-              },
-            },
-          ],
-          'account.offbudget': false,
-          'payee.transfer_acct': null,
-        })
-        .calculate({ $sum: '$amount' });
-    }
-
-    return runAll(
-      [
-        makeQuery().filter({ amount: { $gt: 0 } }),
-        makeQuery().filter({ amount: { $lt: 0 } }),
-      ],
-      data => {
-        setData({
-          graphData: {
-            income: data[0],
-            expense: data[1],
-          },
-        });
-      },
-    );
-  };
-}
+export type CashFlowGranularity = 'Daily' | 'Monthly' | 'Yearly';
 
 export function cashFlowByDate(
   startMonth: string,
   endMonth: string,
-  isConcise: boolean,
+  granularity: CashFlowGranularity,
   conditions: RuleConditionEntity[] = [],
   conditionsOp: 'and' | 'or',
   locale: Locale,
@@ -107,11 +53,21 @@ export function cashFlowByDate(
           'account.offbudget': false,
         });
 
-      if (isConcise) {
+      if (granularity === 'Monthly') {
         return query
           .groupBy([{ $month: '$date' }, 'payee.transfer_acct'])
           .select([
             { date: { $month: '$date' } },
+            { isTransfer: 'payee.transfer_acct' },
+            { amount: { $sum: '$amount' } },
+          ]);
+      }
+
+      if (granularity === 'Yearly') {
+        return query
+          .groupBy([{ $year: '$date' }, 'payee.transfer_acct'])
+          .select([
+            { date: { $year: '$date' } },
             { isTransfer: 'payee.transfer_acct' },
             { amount: { $sum: '$amount' } },
           ]);
@@ -139,13 +95,17 @@ export function cashFlowByDate(
         makeQuery().filter({ amount: { $lt: 0 } }),
       ],
       data => {
-        setData(recalculate(data, start, fixedEnd, isConcise, locale, format));
+        setData(
+          recalculate(data, start, fixedEnd, granularity, locale, format),
+        );
       },
     );
   };
 }
 
-function recalculate(
+// Exported for unit testing. Pure function: given query results plus a date
+// window and granularity, build the chart series and per-period totals.
+export function recalculate(
   data: [
     number,
     Array<{ date: string; isTransfer: string | null; amount: number }>,
@@ -153,7 +113,7 @@ function recalculate(
   ],
   start: string,
   end: string,
-  isConcise: boolean,
+  granularity: CashFlowGranularity,
   locale: Locale,
   format: (value: unknown, type?: FormatType) => string,
 ) {
@@ -164,12 +124,15 @@ function recalculate(
   const convExpense = expense.map(trans => {
     return { ...trans, isTransfer: trans.isTransfer !== null };
   });
-  const dates = isConcise
-    ? monthUtils.rangeInclusive(
-        monthUtils.getMonth(start),
-        monthUtils.getMonth(end),
-      )
-    : monthUtils.dayRangeInclusive(start, end);
+  const dates =
+    granularity === 'Monthly'
+      ? monthUtils.rangeInclusive(
+          monthUtils.getMonth(start),
+          monthUtils.getMonth(end),
+        )
+      : granularity === 'Yearly'
+        ? monthUtils.yearRangeInclusive(start, end)
+        : monthUtils.dayRangeInclusive(start, end);
   const incomes = indexCashFlow(convIncome);
   const expenses = indexCashFlow(convExpense);
 
@@ -177,6 +140,13 @@ function recalculate(
   let totalExpenses = 0;
   let totalIncome = 0;
   let totalTransfers = 0;
+
+  const tooltipDateFormat =
+    granularity === 'Monthly'
+      ? 'MMMM yyyy'
+      : granularity === 'Yearly'
+        ? 'yyyy'
+        : 'MMMM d, yyyy';
 
   const graphData = dates.reduce<{
     expenses: Array<{ x: Date; y: number }>;
@@ -214,7 +184,7 @@ function recalculate(
         <div>
           <div style={{ marginBottom: 10 }}>
             <strong>
-              {d.format(x, isConcise ? 'MMMM yyyy' : 'MMMM d, yyyy', {
+              {d.format(x, tooltipDateFormat, {
                 locale,
               })}
             </strong>
@@ -278,13 +248,19 @@ function recalculate(
   );
 
   const { balances } = graphData;
+  const lastBalance =
+    balances.length > 0
+      ? balances[balances.length - 1].amount
+      : startingBalance;
+  const firstBalance =
+    balances.length > 0 ? balances[0].amount : startingBalance;
 
   return {
     graphData,
-    balance: balances[balances.length - 1].amount,
+    balance: lastBalance,
     totalExpenses,
     totalIncome,
     totalTransfers,
-    totalChange: balances[balances.length - 1].amount - balances[0].amount,
+    totalChange: lastBalance - firstBalance,
   };
 }
