@@ -25,7 +25,7 @@ const ALLOWED_CONTENT_TYPES = [
 type FaviconResult = {
   contentType: string;
   base64: string;
-  source: 'direct' | 'duckduckgo' | 'image';
+  source: 'direct' | 'image';
 };
 
 class FaviconError extends Error {
@@ -351,33 +351,24 @@ async function tryDirect(origin: URL): Promise<FaviconResult | null> {
   return null;
 }
 
-async function tryDuckDuckGo(host: string): Promise<FaviconResult> {
-  const url = `https://icons.duckduckgo.com/ip3/${encodeURIComponent(
-    host,
-  )}.ico`;
-  const dl = await downloadAsBase64(url);
-  return { ...dl, source: 'duckduckgo' };
-}
-
 /**
  * Fetch a favicon for a given website URL.
  *
  * Tries to parse `<link rel="icon">` from the homepage, then falls back to
- * `/favicon.ico`, and finally falls back to DuckDuckGo's favicon service.
+ * `/favicon.ico`. Throws a FaviconError if neither succeeds.
  */
 export async function fetchFaviconForUrl(
   websiteUrl: string,
 ): Promise<FaviconResult> {
   const url = normalizeUrl(websiteUrl);
   const origin = new URL(url.origin);
-  const host = origin.hostname;
 
   await assertUrlSafe(origin.toString());
 
   const direct = await tryDirect(origin);
   if (direct) return direct;
 
-  return tryDuckDuckGo(host);
+  throw new FaviconError(`No favicon found for ${origin.hostname}`, 502);
 }
 
 /**

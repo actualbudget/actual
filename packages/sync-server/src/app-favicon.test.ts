@@ -148,20 +148,6 @@ describe('app-favicon', () => {
     );
   });
 
-  it('falls back to DuckDuckGo when both direct attempts fail', async () => {
-    mockedFetch
-      .mockResolvedValueOnce(new Response('boom', { status: 500 }))
-      .mockResolvedValueOnce(new Response('boom', { status: 404 }))
-      .mockResolvedValueOnce(imageResponse('image/png', 256));
-
-    const res = await request(app).get('/').query({ url: 'bank.example' });
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body.source).toBe('duckduckgo');
-    const lastCall = mockedFetch.mock.calls.at(-1)?.[0] as string;
-    expect(lastCall).toContain('icons.duckduckgo.com/ip3/bank.example.ico');
-  });
-
   it('rejects payloads larger than the size cap', async () => {
     mockedFetch
       .mockResolvedValueOnce(
@@ -183,7 +169,6 @@ describe('app-favicon', () => {
 
   it('returns 502 if every source fails', async () => {
     mockedFetch
-      .mockRejectedValueOnce(new Error('network'))
       .mockRejectedValueOnce(new Error('network'))
       .mockRejectedValueOnce(new Error('network'));
 

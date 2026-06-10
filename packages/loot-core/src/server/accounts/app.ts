@@ -160,7 +160,7 @@ async function updateBank({
 export type FaviconFetchResult = {
   contentType: string;
   base64: string;
-  source: 'direct' | 'duckduckgo' | 'image';
+  source: 'direct' | 'image';
 };
 
 /** Thrown when no sync server is configured (client shows Upload/Emoji instead of auto-favicon). */
@@ -216,12 +216,7 @@ async function fetchFaviconViaProxy(
   return {
     contentType: payload.contentType,
     base64: payload.base64,
-    source:
-      payload.source === 'duckduckgo'
-        ? 'duckduckgo'
-        : payload.source === 'image'
-          ? 'image'
-          : 'direct',
+    source: payload.source === 'image' ? 'image' : 'direct',
   };
 }
 
