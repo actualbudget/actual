@@ -8,7 +8,6 @@ services:
     environment:
       - ACTUAL_PORT=5006
       - ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB=20
-      # Se você e sua namorada forem usar logins separados em vez de uma senha única do casal:
       - ACTUAL_MULTIUSER=false # Mude para true se quiserem instâncias/usuários totalmente isolados
     volumes:
       - ./actual-data:/data
