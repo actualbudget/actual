@@ -13,4 +13,9 @@ export class PayeesPage {
   async searchFor(payeeName: string) {
     await this.searchBox.fill(payeeName);
   }
+
+  async rightClickNthPayee(idx: number) {
+    await this.page.getByTestId('row').nth(idx).click({ button: 'right' });
+  }
 }
+

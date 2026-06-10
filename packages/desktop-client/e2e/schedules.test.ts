@@ -168,4 +168,19 @@ test.describe('Schedules', () => {
     }
     await expect(page).toMatchThemeScreenshots();
   });
+
+  test('right clicking a schedule opens context menu', async () => {
+    const scheduleEditModal = await schedulesPage.addNewSchedule();
+    await scheduleEditModal.fill({
+      payee: 'Home Depot',
+      account: 'HSBC',
+      amount: 25,
+    });
+    await scheduleEditModal.add();
+
+    await schedulesPage.rightClickNthSchedule(2);
+    const menu = page.getByRole('menu');
+    await expect(menu).toBeVisible();
+    await expect(menu.getByRole('button', { name: 'Complete' })).toBeVisible();
+  });
 });

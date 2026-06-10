@@ -57,4 +57,14 @@ test.describe('Payees', () => {
     // Assert it is visible
     await expect(noPayeesMessage).toBeVisible();
   });
+
+  test('right clicking a payee opens context menu', async () => {
+    await payeesPage.searchFor('Fast Internet');
+    await payeesPage.rightClickNthPayee(0);
+    const menu = page.getByRole('menu');
+    await expect(menu).toBeVisible();
+    await expect(
+      menu.getByRole('button', { name: 'Create rule' }),
+    ).toBeVisible();
+  });
 });

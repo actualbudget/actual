@@ -134,4 +134,18 @@ export class BudgetPage {
 
     await this.page.getByRole('button', { name: 'Transfer' }).click();
   }
+
+  async rightClickCategory(idx: number) {
+    await this.budgetTable
+      .getByTestId('row')
+      .nth(idx)
+      .getByTestId('category-name')
+      .click({ button: 'right' });
+  }
+
+  async rightClickCategoryGroup(name: string) {
+    // Assuming category groups have a specific text or role, or we can just find by text
+    await this.budgetTable.getByText(name, { exact: true }).click({ button: 'right' });
+  }
 }
+

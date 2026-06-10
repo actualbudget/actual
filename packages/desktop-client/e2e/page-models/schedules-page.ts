@@ -74,4 +74,9 @@ export class SchedulesPage {
     await actions.getByRole('button').click();
     await this.page.getByRole('button', { name: actionName }).click();
   }
+
+  async rightClickNthSchedule(index: number) {
+    await this.getNthScheduleRow(index).click({ button: 'right' });
+  }
 }
+

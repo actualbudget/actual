@@ -112,6 +112,7 @@ function EditableBudgetName() {
   return (
     <Button
       ref={triggerRef}
+      data-testid="budget-name"
       variant="bare"
       style={{
         color: theme.sidebarBudgetName,

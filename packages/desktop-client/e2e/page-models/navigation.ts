@@ -177,4 +177,15 @@ export class Navigation {
   async clickOnNoServer() {
     await this.page.getByRole('button', { name: 'No server' }).click();
   }
+
+  async rightClickAccount(accountName: string) {
+    await this.page
+      .getByRole('link', { name: new RegExp(`^${accountName}`) })
+      .click({ button: 'right' });
+  }
+
+  async rightClickBudgetName() {
+    await this.page.getByTestId('budget-name').click({ button: 'right' });
+  }
 }
+

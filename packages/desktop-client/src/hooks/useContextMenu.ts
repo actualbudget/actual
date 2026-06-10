@@ -3,10 +3,13 @@ import type { RefObject } from 'react';
 
 import type { Falsy } from '@actual-app/core/types/util';
 
-import { addItems } from '#contextmenu/contextMenuSlice';
+import {
+  addItems,
+  setContextMenuPosition,
+} from '#contextmenu/contextMenuSlice';
 import type { ContextMenuItem } from '#contextmenu/types.d';
 import { useRefEventListener } from '#hooks/useRefEventListener';
-import { useDispatch, useSelector } from '#redux';
+import { useDispatch } from '#redux';
 
 type UseContextMenuProps = {
   triggerRef: RefObject<HTMLElement | null>;
@@ -25,15 +28,23 @@ export function useContextMenu({
   const actionsRef = useRef(items);
   actionsRef.current = items;
 
-  useRefEventListener(triggerRef, 'contextmenu', () => {
+  const processedItems = items.filter(
+    item => item && (typeof item === 'symbol' || !item.hidden),
+  ) as ContextMenuItem[];
+
+  useRefEventListener(triggerRef, 'contextmenu', (e: MouseEvent) => {
     if (enabled) {
-      dispatch(addItems(actionsRef.current));
+      e.preventDefault();
+      dispatch(addItems(processedItems));
+      dispatch(setContextMenuPosition({ x: e.clientX, y: e.clientY }));
     }
   });
 
   const handleContextMenu = useCallback(() => {
     if (!triggerRef.current || !enabled) return;
     const rect = triggerRef.current.getBoundingClientRect();
+    // prefer MouseEvent bubbling over dispatching events to
+    // allow nesting context menu actions
     triggerRef.current.dispatchEvent(
       new MouseEvent('contextmenu', {
         clientX: rect.x,
@@ -44,9 +55,4 @@ export function useContextMenu({
   }, [triggerRef, enabled]);
 
   return { handleContextMenu };
-}
-
-export function useContextMenuState() {
-  const isOpen = useSelector(state => state.contextMenu.isOpen);
-  return { isOpen };
 }

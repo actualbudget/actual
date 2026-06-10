@@ -1,4 +1,3 @@
-import type { Falsy } from '@actual-app/core/types/util';
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import _ from 'lodash';
@@ -23,37 +22,28 @@ const contextMenuSlice = createSlice({
   name: sliceName,
   initialState,
   reducers: {
-    addItems(state, action: PayloadAction<Falsy<ContextMenuItem>[]>) {
+    addItems(state, action: PayloadAction<ContextMenuItem[]>) {
       for (const item of action.payload) {
-        if (!item) continue;
-        // always add menu lines
-        if (typeof item === 'symbol') {
-          state.items.push(item);
-          continue;
-        }
-
-        // only add other items if the provided name is unique
-        const isAlreadyPresent = state.items.some(
-          i => typeof i === 'object' && i.name === item.name,
-        );
-        if (!item.hidden && !isAlreadyPresent) {
+        if (typeof item === 'symbol' || !item.hidden) {
           state.items.push(item);
         }
       }
-    },
-    openContextMenu(
-      state,
-      action: PayloadAction<{
-        position: { x: number; y: number };
-      }>,
-    ) {
-      state.isOpen = true;
-      state.position = action.payload.position;
+
       state.items = _.orderBy(
         state.items,
         item => (typeof item === 'object' && item.order) || 0,
         'asc',
       );
+      state.isOpen = !!state.items.length;
+    },
+    setContextMenuPosition(
+      state,
+      action: PayloadAction<{
+        x: number;
+        y: number;
+      }>,
+    ) {
+      state.position = action.payload;
     },
     closeContextMenu(state) {
       state.isOpen = false;
@@ -63,5 +53,5 @@ const contextMenuSlice = createSlice({
 });
 
 export const { name, reducer, getInitialState } = contextMenuSlice;
-export const { openContextMenu, closeContextMenu, addItems } =
+export const { setContextMenuPosition, closeContextMenu, addItems } =
   contextMenuSlice.actions;

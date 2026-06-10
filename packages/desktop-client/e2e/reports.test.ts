@@ -45,6 +45,14 @@ test.describe.parallel('Reports', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('right clicking a report card opens context menu', async () => {
+    await reportsPage.rightClickReportCard('Net Worth');
+    const menu = page.getByRole('menu');
+    await expect(menu).toBeVisible();
+    await expect(menu.getByRole('button', { name: 'Rename' })).toBeVisible();
+  });
+
+
   test('loads net worth graph and checks visuals', async () => {
     await reportsPage.goToNetWorthPage();
     await expect(page).toMatchThemeScreenshots();

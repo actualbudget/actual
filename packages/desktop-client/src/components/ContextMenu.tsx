@@ -4,12 +4,11 @@ import { Menu } from '@actual-app/components/menu';
 import type { MenuItem } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
+import { Falsy } from '@actual-app/core/types/util';
 import _ from 'lodash';
 
-import {
-  closeContextMenu,
-  openContextMenu,
-} from '#contextmenu/contextMenuSlice';
+import { closeContextMenu } from '#contextmenu/contextMenuSlice';
+import type { ContextMenuAction, ContextMenuItem } from '#contextmenu/types.d';
 import { useRefEventListener } from '#hooks/useRefEventListener';
 import { useDispatch, useSelector } from '#redux';
 
@@ -26,15 +25,7 @@ export function ContextMenu() {
     }
   }
 
-  // Handle right-clicks to OPEN or JUMP the menu
-  useRefEventListener(document, 'contextmenu', (e: MouseEvent) => {
-    if (items.length) {
-      e.preventDefault();
-      dispatch(openContextMenu({ position: { x: e.clientX, y: e.clientY } }));
-    }
-  });
-
-  // 2. Handle left-clicks to DISMISS the menu
+  // Handle left-clicks and right-clicks to DISMISS the menu
   useRefEventListener(document, 'pointerdown', (e: PointerEvent) => {
     // Close the menu if we click anywhere outside the popover DOM element
     if (
@@ -48,12 +39,9 @@ export function ContextMenu() {
 
   function handleMenuSelect(itemName: string) {
     for (const item of items) {
-      if (
-        typeof item === 'object' &&
-        'onClick' in item &&
-        item.name === itemName
-      ) {
+      if (typeof item === 'object' && item.onClick && item.name === itemName) {
         item.onClick();
+        break;
       }
     }
     handleOpenChange(false);

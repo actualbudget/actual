@@ -66,4 +66,29 @@ test.describe('Budget', () => {
     expect(await accountPage.accountName.textContent()).toMatch('All Accounts');
     await page.getByRole('button', { name: 'Back' }).click();
   });
+
+  test('right clicking a category opens context menu', async () => {
+    await budgetPage.rightClickCategory(1);
+    const menu = page.getByRole('menu');
+    await expect(menu).toBeVisible();
+    await expect(menu.getByRole('button', { name: 'Rename' })).toBeVisible();
+  });
+
+  test('right clicking a category group opens context menu', async () => {
+    await budgetPage.rightClickCategoryGroup('Usual Expenses');
+    const menu = page.getByRole('menu');
+    await expect(menu).toBeVisible();
+    await expect(menu.getByRole('button', { name: 'Rename' })).toBeVisible();
+  });
+
+  test('right clicking budget name opens context menu', async () => {
+    const navigation = new ConfigurationPage(page); // wait, it's Navigation
+    // Actually we can just do this:
+    await page.getByTestId('budget-name').click({ button: 'right' });
+    const menu = page.getByRole('menu');
+    await expect(menu).toBeVisible();
+    await expect(
+      menu.getByRole('button', { name: 'Switch file' }),
+    ).toBeVisible();
+  });
 });

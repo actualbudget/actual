@@ -139,4 +139,13 @@ test.describe('Rules', () => {
     await expect(secondSplitTransaction.debit).toHaveText('10.00');
     await expect(secondSplitTransaction.category).toHaveText('Food');
   });
+
+  test('right clicking a rule opens context menu', async () => {
+    await rulesPage.searchFor('Fast Internet');
+    await rulesPage.rightClickNthRule(0);
+    const menu = page.getByRole('menu');
+    await expect(menu).toBeVisible();
+    await expect(menu.getByRole('button', { name: 'Edit' })).toBeVisible();
+  });
 });
+

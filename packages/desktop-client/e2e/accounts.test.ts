@@ -56,6 +56,26 @@ test.describe('Accounts', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('right clicking an account in sidebar opens context menu', async () => {
+    await navigation.rightClickAccount('Roth IRA');
+    const menu = page.getByRole('menu');
+    await expect(menu).toBeVisible();
+    await expect(menu.getByRole('button', { name: 'Rename' })).toBeVisible();
+  });
+
+  test('right clicking a transaction row opens context menu', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'New Account',
+      offBudget: false,
+      balance: 100,
+    });
+    
+    await accountPage.rightClickNthTransaction(0);
+    const menu = page.getByRole('menu');
+    await expect(menu).toBeVisible();
+    await expect(menu.getByRole('button', { name: 'Delete' })).toBeVisible();
+  });
+
   test.describe('On Budget Accounts', () => {
     // Reset filters
     test.afterEach(async () => {
