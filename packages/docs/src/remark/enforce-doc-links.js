@@ -160,13 +160,15 @@ function remarkEnforceDocLinks() {
       const ext = path.extname(base);
       if (IMG_EXTENSIONS.has(ext)) return;
 
-      // Rule 1: absolute internal links
-      if (url.startsWith('/') && !url.startsWith('/img/')) {
+      // Rule 1: absolute internal links (docs/ only).
+      // Blog posts appear in multiple URL contexts (post page, list pages,
+      // tag pages) so relative URLs would resolve differently per context.
+      // Blog→docs links must therefore use absolute URLs — don't flag them.
+      if (inDocs && url.startsWith('/') && !url.startsWith('/img/')) {
         const pos = nodePos(node);
-        const hint = inDocs
-          ? 'use a relative .md path instead'
-          : 'use a relative URL instead (e.g. ../docs/... from a blog post)';
-        errors.push(`${pos}: absolute link "${url}" — ${hint}`);
+        errors.push(
+          `${pos}: absolute link "${url}" — use a relative .md path instead`,
+        );
         return;
       }
 

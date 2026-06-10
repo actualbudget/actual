@@ -15,4 +15,4 @@ The short version is:
 - abandoned experimental features will be removed from the codebase
 - experimental features cannot be used as a toggle for small visual and/or functional quirks (i.e should category selector show hidden categories or not?)
 
-Read more in the [feature flags](../docs/contributing/project-details/feature-flags) page.
+Read more in the [feature flags](/docs/contributing/project-details/feature-flags) page.
