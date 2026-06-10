@@ -3,7 +3,16 @@
 const path = require('path');
 const fs = require('fs');
 
-const IMG_EXTENSIONS = new Set(['.png', '.jpg', '.jpeg', '.webp', '.svg', '.gif', '.ico', '.avif']);
+const IMG_EXTENSIONS = new Set([
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.webp',
+  '.svg',
+  '.gif',
+  '.ico',
+  '.avif',
+]);
 const DOC_EXTENSIONS = new Set(['.md', '.mdx']);
 
 // ---------------------------------------------------------------------------
@@ -139,7 +148,7 @@ function remarkEnforceDocLinks() {
 
     const errors = [];
 
-    visitLinks(ast, (node) => {
+    visitLinks(ast, node => {
       const url = node.url;
       if (!url) return;
 
@@ -153,7 +162,9 @@ function remarkEnforceDocLinks() {
       // Rule 1: absolute internal links
       if (url.startsWith('/') && !url.startsWith('/img/')) {
         const pos = nodePos(node);
-        errors.push(`${pos}: absolute link "${url}" — use a relative .md path instead`);
+        errors.push(
+          `${pos}: absolute link "${url}" — use a relative .md path instead`,
+        );
         return;
       }
 
@@ -164,7 +175,8 @@ function remarkEnforceDocLinks() {
 
       // Blog posts cannot use file-path references into docs/ (Docusaurus constraint).
       // Those links are URL references; leave them to onBrokenLinks validation.
-      if (inBlog && docsContentDir && resolved.startsWith(docsContentDir)) return;
+      if (inBlog && docsContentDir && resolved.startsWith(docsContentDir))
+        return;
 
       // Rule 2a: resolves to a .md/.mdx file directly (just missing the extension)
       for (const docExt of ['.md', '.mdx']) {
@@ -182,7 +194,10 @@ function remarkEnforceDocLinks() {
         const indexFile = path.join(resolved, 'index' + docExt);
         if (fs.existsSync(indexFile)) {
           const pos = nodePos(node);
-          const suggestion = path.posix.join(base.replace(/\\/g, '/'), 'index' + docExt);
+          const suggestion = path.posix.join(
+            base.replace(/\\/g, '/'),
+            'index' + docExt,
+          );
           errors.push(
             `${pos}: link "${url}" points to a directory — use "${suggestion}" instead`,
           );
@@ -215,7 +230,9 @@ function remarkEnforceDocLinks() {
 }
 
 function nodePos(node) {
-  return node.position ? `${node.position.start.line}:${node.position.start.column}` : '?';
+  return node.position
+    ? `${node.position.start.line}:${node.position.start.column}`
+    : '?';
 }
 
 /** Relative path from fromDir to toFile, always using forward slashes. */
