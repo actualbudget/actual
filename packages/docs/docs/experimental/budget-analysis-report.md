@@ -1,8 +1,6 @@
 # Budget Analysis Report
 
-:::warning
-This is an **experimental feature**. That means we’re still working on finishing it. There may be bugs, missing functionality or incomplete documentation, and we may decide to remove the feature in a future release. If you have any feedback, please comment on the [dedicated issue](https://github.com/actualbudget/actual/issues/6742) or post a message in the Discord.
-:::
+<ExperimentalFeatureWarning issueId="6742" />
 
 ## What it is
 
@@ -35,5 +33,5 @@ It tracks four separate series: **Budgeted**, **Spent**, **Overspending Adjustme
 
 ## Related
 
-- [Budget page](/docs/tour/budget.md) — configure budgets and rollover settings.
-- [Reports index](/docs/reports/index.md) — other report types and tips.
+- [Budget page](../tour/budget.md) — configure budgets and rollover settings.
+- [Reports index](../reports/index.md) — other report types and tips.
