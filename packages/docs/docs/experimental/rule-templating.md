@@ -1,14 +1,14 @@
 # Rule Action Templating
 
 :::danger Deprecated
-Rule action templating is **deprecated** and will be removed in a future release. New rules should use [Rule formulae](/docs/experimental/formulas#rule-formulas) instead, which cover the same use cases with a more powerful Excel-style syntax. If you have existing rules that use templating, please migrate them to formulae.
+Rule action templating is **deprecated** and will be removed in a future release. New rules should use [Rule formulae](./formulas.md#rule-formulas) instead, which cover the same use cases with a more powerful Excel-style syntax. If you have existing rules that use templating, please migrate them to formulae.
 :::
 
 :::warning
 This is an **experimental feature**. That means we're still working on finishing it. There may be bugs, missing functionality or incomplete documentation, and we may decide to remove the feature in a future release. If you have any feedback, please [open an issue](https://github.com/actualbudget/actual/issues) or post a message in the Discord.
 :::
 :::warning
-All functionality described here may not be available in the latest stable release. See [Experimental Features](/docs/experimental/) for instructions to enable experimental features. Use the `nightly` images for the latest implementation.
+All functionality described here may not be available in the latest stable release. See [Experimental Features](./index.md) for instructions to enable experimental features. Use the `nightly` images for the latest implementation.
 :::
 
 Rule action templating allows rules to dynamically set fields based on transaction data via meta programming inside the rule.
