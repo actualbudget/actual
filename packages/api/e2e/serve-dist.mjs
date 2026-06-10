@@ -13,7 +13,6 @@ const PORT = Number(process.env.PORT) || 4180;
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
-  '.mjs': 'text/javascript; charset=utf-8',
   '.map': 'application/json; charset=utf-8',
   '.txt': 'text/plain; charset=utf-8',
   '.sql': 'text/plain; charset=utf-8',
@@ -29,8 +28,7 @@ http
     const file = path.resolve(ROOT, urlPath.replace(/^\/+/, ''));
     if (
       path.relative(ROOT, file).startsWith('..') ||
-      !fs.existsSync(file) ||
-      !fs.statSync(file).isFile()
+      !fs.statSync(file, { throwIfNoEntry: false })?.isFile()
     ) {
       res.writeHead(404);
       res.end('Not found');

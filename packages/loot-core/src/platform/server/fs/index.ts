@@ -255,7 +255,9 @@ async function populateDefaultFilesystem() {
   await Promise.all(
     files.map(async file => {
       const contents = await fetchFile(process.env.PUBLIC_URL + 'data/' + file);
-      await _writeFile('/' + file, contents);
+      // A `.data` suffix lets bundles ship JS files (e.g. migrations) without
+      // consumer bundlers import-analyzing them; strip it for the fs name.
+      await _writeFile('/' + file.replace(/\.data$/, ''), contents);
     }),
   );
 }

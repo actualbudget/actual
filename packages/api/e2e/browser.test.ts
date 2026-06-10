@@ -1,7 +1,9 @@
 import { expect, test } from '@playwright/test';
 
-// Structural view of the api surface used inside page.evaluate. The real
-// module is loaded by harness.html from dist/browser.js.
+// Structural view (used inside page.evaluate) of the module harness.html
+// loads from dist/browser.js. `typeof import('../index.browser')` would be
+// self-maintaining but pulls the whole loot-core type graph into this
+// non-strict-plugin program.
 type Api = {
   init(config: { dataDir: string }): Promise<unknown>;
   shutdown(): Promise<void>;

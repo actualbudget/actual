@@ -55,26 +55,22 @@ function copyMigrationsAndDefaultDb() {
       fs.copyFileSync(sqlJsWasm, path.join(distDir, 'sql-wasm.wasm'));
 
       // The browser worker loads `data-file-index.txt` and `data/<name>` from
-      // PUBLIC_URL. JS migrations are stored with a `.data` suffix so bundlers
-      // don't import-analyze them; browser-worker.ts redirects the fetches.
+      // PUBLIC_URL. JS migrations are shipped with a `.data` suffix so
+      // consumer bundlers don't import-analyze them; loot-core's browser fs
+      // strips the suffix when naming the virtual file.
       const dataDir = path.join(distDir, 'data');
       const dataMigrationsDir = path.join(dataDir, 'migrations');
       fs.mkdirSync(dataMigrationsDir, { recursive: true });
 
-      fs.copyFileSync(
-        path.join(distDir, 'default-db.sqlite'),
-        path.join(dataDir, 'default-db.sqlite'),
-      );
+      fs.copyFileSync(defaultDbPath, path.join(dataDir, 'default-db.sqlite'));
       const migrationNames: string[] = [];
       for (const name of fs.readdirSync(migrationsDest)) {
+        const wireName = name.endsWith('.js') ? `${name}.data` : name;
         fs.copyFileSync(
           path.join(migrationsDest, name),
-          path.join(
-            dataMigrationsDir,
-            name.endsWith('.js') ? `${name}.data` : name,
-          ),
+          path.join(dataMigrationsDir, wireName),
         );
-        migrationNames.push(`migrations/${name}`);
+        migrationNames.push(`migrations/${wireName}`);
       }
       migrationNames.sort();
 
