@@ -25,6 +25,7 @@ __metadata:
   dependencies:
     "@actual-app/core": "workspace:*"
     "@actual-app/crdt": "workspace:*"
+    "@playwright/test": "npm:1.59.1"
     "@typescript/native-preview": "npm:beta"
     better-sqlite3: "npm:^12.8.0"
     compare-versions: "npm:^6.1.1"

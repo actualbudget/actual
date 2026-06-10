@@ -45,6 +45,7 @@
   "scripts": {
     "build": "vite build && tsgo --emitDeclarationOnly && vite build --config vite.browser-worker.config.mts && vite build --config vite.browser.config.mts",
     "test": "vitest --run",
+    "e2e": "playwright test",
     "typecheck": "tsgo -b && tsc-strict"
   },
   "dependencies": {
@@ -55,6 +56,7 @@
     "uuid": "^14.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.59.1",
     "@typescript/native-preview": "beta",
     "rollup-plugin-visualizer": "^7.0.1",
     "typescript-strict-plugin": "^2.4.4",
