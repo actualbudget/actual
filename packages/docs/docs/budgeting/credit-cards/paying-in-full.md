@@ -56,7 +56,7 @@ If necessary, remember to enter a transaction for any interest and or fees charg
 
 <br />
 
-When we [reconcile](/docs/accounts/reconciliation.md) our account for this first month, we clear all of the June purchases and payments (which should be part of the "Starting Balance") in one lump. In our case their lump sum is $35.00.
+When we [reconcile](../../accounts/reconciliation.md) our account for this first month, we clear all of the June purchases and payments (which should be part of the "Starting Balance") in one lump. In our case their lump sum is $35.00.
 
 <img width="100%" height="100%" alt="Chase Reconcile July" src="/img/credit-cards/CC-IND-04.webp" />
 
@@ -93,7 +93,7 @@ We continue to spend and categorize each transaction _Within the Budget_ and whe
 - Interest Charged: $0.00
 - New Balance: $213.15
 
-We [reconcile](/docs/accounts/reconciliation.md) our Chase account and it now looks like this:
+We [reconcile](../../accounts/reconciliation.md) our Chase account and it now looks like this:
 
 <img width="100%" height="100%" alt="Chase August Reconcile" src="/img/credit-cards/CC-IND-08.webp" />
 
