@@ -25,9 +25,9 @@ Currently, Actual comes with the following built-in widgets and reports:
 
 The following are available as experimental features:
 
-- [Budget Analysis report](/docs/experimental/budget-analysis-report)
-- [Balance Forecast report](/docs/experimental/balance-forecast-report)
-- [Sankey report](/docs/experimental/sankey-report)
+- [Budget Analysis report](../experimental/budget-analysis-report.md)
+- [Balance Forecast report](../experimental/balance-forecast-report.md)
+- [Sankey report](../experimental/sankey-report.md)
 
 ## Cash Flow Graph
 
