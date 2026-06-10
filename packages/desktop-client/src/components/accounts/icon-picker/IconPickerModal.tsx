@@ -648,7 +648,7 @@ function EmojiTab({
         )}
       </Button>
       {showFullPicker && (
-        <View>
+        <View style={{ alignItems: 'center' }}>
           <FullEmojiPicker
             onPick={value => {
               handleEmoji(value);
