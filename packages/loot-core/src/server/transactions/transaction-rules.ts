@@ -316,11 +316,16 @@ export async function getAllRuleIdsFromSchedules(
   return ruleIds;
 }
 
+export type RunRulesResult = {
+  transaction: Awaited<ReturnType<typeof finalizeTransactionForRules>>;
+  forceFields: string[];
+};
+
 // Runner
 export async function runRules(
   trans,
   accounts: Map<string, db.DbAccount> | null = null,
-) {
+): Promise<RunRulesResult> {
   let accountsMap: Map<string, db.DbAccount> = null;
   if (accounts === null) {
     accountsMap = new Map(
@@ -360,27 +365,32 @@ export async function runRules(
     formulaStrings,
   );
 
+  const forceFields = new Set<string>();
+
   for (let i = 0; i < rules.length; i++) {
     // If there is a scheduleRuleID (meaning this transaction came from a schedule) then exclude rules linked to other schedules.
     if (scheduleRuleID !== '') {
       if (rules[i].id === scheduleRuleID) {
         // bypass condition checking to run the rule even if the transaction date falls outside of the schedule's date range.
-        const changes = rules[i].execActions(finalTrans);
+        const changes = rules[i].execActions(finalTrans, forceFields);
         finalTrans = Object.assign({}, finalTrans, changes);
       } else if (RuleIdsLinkedToSchedules.includes(rules[i].id)) {
         // skip all other rules that are linked to other schedules.
         continue;
       } else {
         // if a rule is not linked to a schedule, run it.
-        finalTrans = rules[i].apply(finalTrans);
+        finalTrans = rules[i].apply(finalTrans, forceFields);
       }
     } else {
       // if there is no scheduleRuleID then just run all rules.
-      finalTrans = rules[i].apply(finalTrans);
+      finalTrans = rules[i].apply(finalTrans, forceFields);
     }
   }
 
-  return await finalizeTransactionForRules(finalTrans);
+  return {
+    transaction: await finalizeTransactionForRules(finalTrans),
+    forceFields: [...forceFields],
+  };
 }
 
 function conditionSpecialCases(cond: Condition | null): Condition | null {

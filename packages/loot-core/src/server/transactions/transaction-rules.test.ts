@@ -13,10 +13,15 @@ import {
   loadRules,
   makeRule,
   resetState,
-  runRules,
+  runRules as runRulesRaw,
   updateCategoryRules,
   updateRule,
 } from './transaction-rules';
+
+async function runRules(trans) {
+  const { transaction } = await runRulesRaw(trans);
+  return transaction;
+}
 
 // TODO: write tests to make sure payee renaming is "pre" and category
 // setting is "null" stage

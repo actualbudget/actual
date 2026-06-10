@@ -88,7 +88,7 @@ export class Action {
     this.options = options;
   }
 
-  exec(object) {
+  exec(object, forceFields?: Set<string>) {
     switch (this.op) {
       case 'set':
         if (this.options?.formula) {
@@ -239,23 +239,13 @@ export class Action {
         object[this.field] = object[this.field]
           ? this.value + object[this.field]
           : this.value;
-        if (!object._forceApplyFields) {
-          object._forceApplyFields = [];
-        }
-        if (!object._forceApplyFields.includes(this.field)) {
-          object._forceApplyFields.push(this.field);
-        }
+        forceFields?.add(this.field);
         break;
       case 'append-notes':
         object[this.field] = object[this.field]
           ? object[this.field] + this.value
           : this.value;
-        if (!object._forceApplyFields) {
-          object._forceApplyFields = [];
-        }
-        if (!object._forceApplyFields.includes(this.field)) {
-          object._forceApplyFields.push(this.field);
-        }
+        forceFields?.add(this.field);
         break;
       case 'delete-transaction':
         object['tombstone'] = 1;
