@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  actual_server:
+    image: docker.io/actualbudget/actual-server:latest
+    ports:
+      - "5006:5006"
+    environment:
+      - ACTUAL_PORT=5006
+      - ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB=20
+      # Se você e sua namorada forem usar logins separados em vez de uma senha única do casal:
+      - ACTUAL_MULTIUSER=false # Mude para true se quiserem instâncias/usuários totalmente isolados
+    volumes:
+      - ./actual-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "node src/scripts/health-check.js"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
