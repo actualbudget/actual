@@ -292,9 +292,21 @@ export async function createBudget(months) {
   let sumAmounts: Map<string, number> | null = null;
   const getSumAmounts = () => {
     if (!sumAmounts) {
+      // `monthsToCreate` isn't guaranteed to be sorted, so find the span
+      // explicitly ('YYYY-MM' strings compare chronologically).
+      let firstMonth = monthsToCreate[0];
+      let lastMonth = monthsToCreate[0];
+      for (const month of monthsToCreate) {
+        if (month < firstMonth) {
+          firstMonth = month;
+        }
+        if (month > lastMonth) {
+          lastMonth = month;
+        }
+      }
       sumAmounts = getSumAmountsByMonth(
-        monthUtils.bounds(monthsToCreate[0]).start,
-        monthUtils.bounds(monthsToCreate[monthsToCreate.length - 1]).end,
+        monthUtils.bounds(firstMonth).start,
+        monthUtils.bounds(lastMonth).end,
       );
     }
     return sumAmounts;
@@ -351,8 +363,8 @@ export async function createBudget(months) {
   // directly (rather than recomputed) they aren't part of the computation
   // queue that normally gets cached, so without this a warm load would have
   // to recompute them. The cells already hold their final values here.
-  if (seededCells.length > 0 && typeof sheet.get().saveCache === 'function') {
-    sheet.get().saveCache(seededCells);
+  if (seededCells.length > 0) {
+    sheet.get().saveCachedCells(seededCells);
   }
 
   // Wait for the spreadsheet to finish computing. Normally this won't
