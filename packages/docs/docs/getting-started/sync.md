@@ -23,7 +23,7 @@ End-to-end encryption offers the ability for you to generate a key based on a pa
 This guarantees that only you will ever have access to your budget data. This is optional and using it requires you to enter a password whenever downloading [cloud files](#this-file-is-not-a-cloud-file) (this only needs to be done once per device). The password you enter should be different from the main server password.
 
 :::note
-End-to-end encryption applies only to your budget data. If you use [bank sync](/docs/advanced/bank-sync), the bank sync tokens (e.g. SimpleFIN, GoCardless, or Pluggy credentials) are stored separately on the server and are **not** covered by end-to-end encryption. Server administrators or hosting providers with direct access to the server's database can read these tokens. If this is a concern, consider self-hosting your server.
+End-to-end encryption applies only to your budget data. If you use [bank sync](../advanced/bank-sync.md), the bank sync tokens (e.g. SimpleFIN, GoCardless, or Pluggy credentials) are stored separately on the server and are **not** covered by end-to-end encryption. Server administrators or hosting providers with direct access to the server's database can read these tokens. If this is a concern, consider self-hosting your server.
 :::
 
 Data on your local device is still unencrypted. We recommend full disk encryption if you are interested in local encryption.
@@ -71,7 +71,7 @@ After resetting, all other devices are now out-of-date. What happens when you tr
 
 When Actual detects a problem during syncing, you will see a notification with details and actions to solve the problem. Below are all the notifications you might see, with some greater detail about them.
 
-**You will rarely see these messages**, and if you do Actual will guide you through how to fix the problem. If you are still having problems, please [reach out to us](/contact).
+**You will rarely see these messages**, and if you do Actual will guide you through how to fix the problem. If you are still having problems, please [reach out to us](../../../contact).
 
 ### This File is not a Cloud File
 

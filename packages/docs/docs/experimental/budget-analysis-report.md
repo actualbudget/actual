@@ -35,5 +35,5 @@ It tracks four separate series: **Budgeted**, **Spent**, **Overspending Adjustme
 
 ## Related
 
-- [Budget page](/docs/tour/budget.md) — configure budgets and rollover settings.
-- [Reports index](/docs/reports/index.md) — other report types and tips.
+- [Budget page](../tour/budget.md) — configure budgets and rollover settings.
+- [Reports index](../reports/index.md) — other report types and tips.

@@ -2,7 +2,7 @@
 title: 'Desktop app'
 ---
 
-The simplest way to get started with Actual is by [downloading the desktop app](/download). This app bundles Actual's full budgeting capabilities into a streamlined application that's perfect for users looking for a smooth, hassle-free experience.
+The simplest way to get started with Actual is by [downloading the desktop app](../../../download). This app bundles Actual's full budgeting capabilities into a streamlined application that's perfect for users looking for a smooth, hassle-free experience.
 
 ## Who should use the desktop app?
 
@@ -27,7 +27,7 @@ In the server selection area, click **Change** as shown below:
 ![](/img/install/change-server.webp)
 <br />
 
-The server runs on `localhost` by default and mostly uses the default [server configuration](./../config/index.md). You can modify the port if necessary.
+The server runs on `localhost` by default and mostly uses the default [server configuration](../config/index.md). You can modify the port if necessary.
 
 Click **Start** to run the server.
 
