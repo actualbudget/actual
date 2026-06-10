@@ -26,6 +26,7 @@ import { UserDirectoryPage } from './admin/UserDirectory/UserDirectoryPage';
 import { BankSyncStatus } from './BankSyncStatus';
 import { CommandBar } from './CommandBar';
 import { EnableBankingCallback } from './EnableBankingCallback';
+import { ExchangeRatesPage } from './ExchangeRatesPage';
 import { FeatureErrorFallback } from './FeatureErrorFallback';
 import { GlobalKeys } from './GlobalKeys';
 import { MobileBankSyncAccountEditPage } from './mobile/banksync/MobileBankSyncAccountEditPage';
@@ -326,6 +327,10 @@ export function FinancesApp() {
                     }
                   />
                   <Route path="/tags" element={<ManageTagsPage />} />
+                  <Route
+                    path="/exchange-rates"
+                    element={<ExchangeRatesPage />}
+                  />
                   <Route path="/settings" element={<Settings />} />
 
                   <Route

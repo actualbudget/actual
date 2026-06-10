@@ -66,7 +66,10 @@ import {
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useTransactionBatchActions } from '#hooks/useTransactionBatchActions';
 import { useTransactionFilters } from '#hooks/useTransactionFilters';
-import { calculateRunningBalancesBottomUp } from '#hooks/useTransactions';
+import {
+  calculateBaseRunningBalancesBottomUp,
+  calculateRunningBalancesBottomUp,
+} from '#hooks/useTransactions';
 import {
   openAccountCloseModal,
   pushModal,
@@ -98,11 +101,13 @@ type AllTransactionsProps = {
   account?: AccountEntity | undefined;
   transactions: TransactionEntity[];
   balances: Record<TransactionEntity['id'], IntegerAmount> | null;
+  baseBalances: Record<TransactionEntity['id'], IntegerAmount> | null;
   showBalances?: boolean | undefined;
   filtered?: boolean | undefined;
   children: (
     transactions: TransactionEntity[],
     balances: Record<TransactionEntity['id'], IntegerAmount> | null,
+    baseBalances: Record<TransactionEntity['id'], IntegerAmount> | null,
   ) => ReactElement;
 };
 
@@ -110,6 +115,7 @@ function AllTransactions({
   account,
   transactions,
   balances,
+  baseBalances,
   showBalances,
   filtered,
   children,
@@ -158,6 +164,30 @@ function AllTransactions({
     );
   }, [showBalances, previewTransactions, runningBalance]);
 
+  const baseRunningBalance = useMemo(() => {
+    if (!showBalances) {
+      return 0;
+    }
+
+    return baseBalances && transactions?.length > 0
+      ? (baseBalances[transactions[0].id] ?? 0)
+      : 0;
+  }, [showBalances, baseBalances, transactions]);
+
+  const prependBaseBalances = useMemo(() => {
+    if (!showBalances) {
+      return null;
+    }
+
+    return Object.fromEntries(
+      calculateBaseRunningBalancesBottomUp(
+        previewTransactions,
+        'all',
+        baseRunningBalance,
+      ),
+    );
+  }, [showBalances, previewTransactions, baseRunningBalance]);
+
   const allTransactions = useMemo(() => {
     // Don't prepend scheduled transactions if we are filtering
     if (!filtered && previewTransactions.length > 0) {
@@ -174,10 +204,17 @@ function AllTransactions({
     return balances;
   }, [filtered, prependBalances, balances]);
 
+  const allBaseBalances = useMemo(() => {
+    if (!filtered && prependBaseBalances && baseBalances) {
+      return { ...prependBaseBalances, ...baseBalances };
+    }
+    return baseBalances;
+  }, [filtered, prependBaseBalances, baseBalances]);
+
   if (!previewTransactions?.length || filtered) {
-    return children(transactions, balances);
+    return children(transactions, balances, baseBalances);
   }
-  return children(allTransactions, allBalances);
+  return children(allTransactions, allBalances, allBaseBalances);
 }
 
 function getField(field?: string) {
@@ -208,6 +245,7 @@ type AccountInternalProps = {
     | 'offbudget'
     | 'uncategorized'
     | undefined;
+  accountCurrency?: string | null;
   filterConditions: RuleConditionEntity[];
   showBalances?: boolean;
   setShowBalances: (newValue: boolean) => void;
@@ -265,6 +303,7 @@ type AccountInternalState = {
   transactionsFiltered?: boolean;
   showBalances?: boolean | undefined;
   balances: Record<TransactionEntity['id'], IntegerAmount> | null;
+  baseBalances: Record<TransactionEntity['id'], IntegerAmount> | null;
   showCleared?: boolean | undefined;
   prevShowCleared?: boolean | undefined;
   showReconciled: boolean;
@@ -315,6 +354,7 @@ class AccountInternal extends PureComponent<
       transactions: [],
       showBalances: props.showBalances,
       balances: null,
+      baseBalances: null,
       showCleared: props.showCleared,
       showReconciled: props.showReconciled,
       nameError: '',
@@ -393,7 +433,11 @@ class AccountInternal extends PureComponent<
 
   componentDidUpdate(prevProps: AccountInternalProps) {
     // If the active account changes - close the transaction entry mode
-    if (this.state.isAdding && this.props.accountId !== prevProps.accountId) {
+    if (
+      this.state.isAdding &&
+      (this.props.accountId !== prevProps.accountId ||
+        this.props.accountCurrency !== prevProps.accountCurrency)
+    ) {
       this.setState({ isAdding: false });
     }
 
@@ -410,7 +454,10 @@ class AccountInternal extends PureComponent<
     }
 
     //Resest sort/filter/search on account change
-    if (this.props.accountId !== prevProps.accountId) {
+    if (
+      this.props.accountId !== prevProps.accountId ||
+      this.props.accountCurrency !== prevProps.accountCurrency
+    ) {
       this.setState({ sort: null, search: '', filterConditions: [] });
     }
   }
@@ -455,9 +502,17 @@ class AccountInternal extends PureComponent<
   };
 
   makeRootTransactionsQuery = () => {
-    const accountId = this.props.accountId;
+    const { accountId, accountCurrency } = this.props;
+    let query = queries.transactions(accountId);
 
-    return queries.transactions(accountId);
+    if (
+      accountCurrency &&
+      (accountId === 'onbudget' || accountId === 'offbudget')
+    ) {
+      query = query.filter({ 'account.currency': accountCurrency });
+    }
+
+    return query;
   };
 
   updateQuery(query: Query, isFiltered: boolean = false) {
@@ -498,6 +553,9 @@ class AccountInternal extends PureComponent<
         const balances = this.state.showBalances
           ? await this.calculateBalances()
           : null;
+        const baseBalances = this.state.showBalances
+          ? await this.calculateBalances('$amount')
+          : null;
         const filteredAmount = await this.getFilteredAmount();
         this.setState(
           {
@@ -506,6 +564,7 @@ class AccountInternal extends PureComponent<
             loading: false,
             workingHard: false,
             balances,
+            baseBalances,
             filteredAmount,
           },
           () => {
@@ -528,7 +587,10 @@ class AccountInternal extends PureComponent<
 
   // oxlint-disable-next-line react/no-unsafe
   UNSAFE_componentWillReceiveProps(nextProps: AccountInternalProps) {
-    if (this.props.accountId !== nextProps.accountId) {
+    if (
+      this.props.accountId !== nextProps.accountId ||
+      this.props.accountCurrency !== nextProps.accountCurrency
+    ) {
       this.setState(
         {
           loading: true,
@@ -661,7 +723,7 @@ class AccountInternal extends PureComponent<
     }
   };
 
-  async calculateBalances() {
+  async calculateBalances(amountField = '$native_amount') {
     if (!this.canCalculateBalance() || !this.paged) {
       return null;
     }
@@ -670,7 +732,7 @@ class AccountInternal extends PureComponent<
       await aqlQuery(
         this.paged.query
           .options({ splits: 'none' })
-          .select([{ balance: { $sumOver: '$amount' } }]),
+          .select([{ balance: { $sumOver: amountField } }]),
       );
 
     return data.reduce((balances: Record<string, number>, row) => {
@@ -894,6 +956,8 @@ class AccountInternal extends PureComponent<
 
   getAccountTitle(account?: AccountEntity, id?: string) {
     const { filterName } = this.props.location.state || {};
+    const { accountCurrency } = this.props;
+    const currencySuffix = accountCurrency ? ` (${accountCurrency})` : '';
 
     if (filterName) {
       return filterName;
@@ -901,9 +965,9 @@ class AccountInternal extends PureComponent<
 
     if (!account) {
       if (id === 'onbudget') {
-        return t('On Budget Accounts');
+        return `${t('On Budget Accounts')}${currencySuffix}`;
       } else if (id === 'offbudget') {
-        return t('Off Budget Accounts');
+        return `${t('Off Budget Accounts')}${currencySuffix}`;
       } else if (id === 'uncategorized') {
         return t('Uncategorized');
       } else if (!id) {
@@ -916,9 +980,12 @@ class AccountInternal extends PureComponent<
   }
 
   getBalanceQuery(id?: string) {
+    const amountField = this.props.accountCurrency
+      ? '$native_amount'
+      : '$amount';
     return {
       name: `balance-query-${id}`,
-      query: this.makeRootTransactionsQuery().calculate({ $sum: '$amount' }),
+      query: this.makeRootTransactionsQuery().calculate({ $sum: amountField }),
     } as const;
   }
 
@@ -927,8 +994,11 @@ class AccountInternal extends PureComponent<
       return 0;
     }
 
+    const amountField = this.props.accountCurrency
+      ? '$native_amount'
+      : '$amount';
     const { data: amount } = await aqlQuery(
-      this.paged.query.calculate({ $sum: '$amount' }),
+      this.paged.query.calculate({ $sum: amountField }),
     );
     return amount;
   };
@@ -1731,6 +1801,7 @@ class AccountInternal extends PureComponent<
 
     const account = accounts.find(account => account.id === accountId);
     const accountName = this.getAccountTitle(account, accountId);
+    const useNativeAmounts = !!account || !!this.props.accountCurrency;
 
     if (!accountName && !loading) {
       // This is probably an account that was deleted, so redirect to
@@ -1765,10 +1836,11 @@ class AccountInternal extends PureComponent<
         account={account}
         transactions={transactions}
         balances={balances}
+        baseBalances={this.state.baseBalances}
         showBalances={showBalances}
         filtered={transactionsFiltered}
       >
-        {(allTransactions, allBalances) => (
+        {(allTransactions, allBalances, allBaseBalances) => (
           <SelectedProviderWithItems
             name="transactions"
             items={allTransactions}
@@ -1854,6 +1926,7 @@ class AccountInternal extends PureComponent<
                   categoryGroups={categoryGroups}
                   payees={payees}
                   balances={allBalances}
+                  baseBalances={allBaseBalances}
                   showBalances={!!allBalances}
                   showReconciled={showReconciled}
                   showCleared={!!showCleared}
@@ -1875,6 +1948,7 @@ class AccountInternal extends PureComponent<
                   isFiltered={transactionsFiltered}
                   dateFormat={dateFormat}
                   hideFraction={hideFraction}
+                  useNativeAmounts={useNativeAmounts}
                   renderEmpty={() =>
                     showEmptyMessage ? (
                       <AccountEmptyMessage
@@ -1982,19 +2056,23 @@ export function Account() {
   const { data: accounts = [] } = useAccounts();
   const { data: payees = [] } = usePayees();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const accountCurrency = new URLSearchParams(location.search).get('currency');
+  const accountPrefId = accountCurrency
+    ? `${params.id}-${accountCurrency}`
+    : params.id;
   const [hideFraction] = useSyncedPref('hideFraction');
   const [expandSplits] = useLocalPref('expand-splits');
   const [showBalances, setShowBalances] = useSyncedPref(
-    `show-balances-${params.id}`,
+    `show-balances-${accountPrefId}`,
   );
   const [showNetWorthChart, setShowNetWorthChart] = useSyncedPref(
-    `show-account-${params.id}-net-worth-chart`,
+    `show-account-${accountPrefId}-net-worth-chart`,
   );
   const [hideCleared, setHideCleared] = useSyncedPref(
-    `hide-cleared-${params.id}`,
+    `hide-cleared-${accountPrefId}`,
   );
   const [hideReconciled, setHideReconciled] = useSyncedPref(
-    `hide-reconciled-${params.id}`,
+    `hide-reconciled-${accountPrefId}`,
   );
   const [showExtraBalances, setShowExtraBalances] = useSyncedPref(
     `show-extra-balances-${params.id || 'all-accounts'}`,
@@ -2061,6 +2139,7 @@ export function Account() {
             filterConditions={filterConditions}
             categoryGroups={categoryGroups}
             accountId={params.id}
+            accountCurrency={accountCurrency}
             categoryId={location?.state?.categoryId}
             location={location}
             savedFilters={savedFiters}

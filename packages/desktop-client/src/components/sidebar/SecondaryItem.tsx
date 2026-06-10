@@ -52,14 +52,26 @@ export function SecondaryItem({
     </View>
   );
 
+  const itemStyle = {
+    ...accountNameStyle,
+    color: theme.sidebarItemText,
+    paddingLeft: 14 + indent,
+    fontWeight: bold ? fontWeight : null,
+  };
+
+  if (!to && !onClick) {
+    return (
+      <View style={{ flexShrink: 0, ...style }}>
+        <View style={itemStyle}>{content}</View>
+      </View>
+    );
+  }
+
   return (
     <View style={{ flexShrink: 0, ...style }}>
       <ItemContent
         style={{
-          ...accountNameStyle,
-          color: theme.sidebarItemText,
-          paddingLeft: 14 + indent,
-          fontWeight: bold ? fontWeight : null,
+          ...itemStyle,
           ':hover': { backgroundColor: theme.sidebarItemBackgroundHover },
         }}
         to={to}

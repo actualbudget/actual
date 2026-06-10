@@ -131,6 +131,7 @@ export function TransactionListItem({
     notes,
     forceUpcoming,
   } = transaction;
+  const displayAmount = transaction.native_amount ?? amount;
 
   const previewStatus = forceUpcoming ? 'upcoming' : categoryId;
 
@@ -282,7 +283,7 @@ export function TransactionListItem({
             <Text
               style={{
                 ...styles.tnum,
-                ...makeAmountFullStyle(amount, {
+                ...makeAmountFullStyle(displayAmount, {
                   positiveColor: theme.tableText,
                   negativeColor: theme.tableText,
                   zeroColor: theme.numberNeutral,
@@ -290,7 +291,7 @@ export function TransactionListItem({
                 ...textStyle,
               }}
             >
-              {integerToCurrency(amount)}
+              {integerToCurrency(displayAmount)}
             </Text>
             {showRunningBalance && runningBalance !== undefined && (
               <Text
@@ -345,7 +346,7 @@ function PayeeIcons({ transaction, transferAccount }: PayeeIconsProps) {
           <SvgCalendar3 style={getScheduleIconStyle({ isPreview })} />
         ))}
       {transferAccount &&
-        (transaction.amount > 0 ? (
+        ((transaction.native_amount ?? transaction.amount) > 0 ? (
           <SvgLeftArrow2 style={{ width: 12, height: 12, marginRight: 5 }} />
         ) : (
           <SvgRightArrow2 style={{ width: 12, height: 12, marginRight: 5 }} />

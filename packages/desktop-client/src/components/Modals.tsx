@@ -15,6 +15,7 @@ import { EditSyncAccount } from './banksync/EditSyncAccount';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
 import { AkahuInitialiseModal } from './modals/AkahuInitialiseModal';
+import { BaseCurrencyConfirmModal } from './modals/BaseCurrencyConfirmModal';
 import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
@@ -33,6 +34,7 @@ import { CoverModal } from './modals/CoverModal';
 import { CreateAccountModal } from './modals/CreateAccountModal';
 import { CreateEncryptionKeyModal } from './modals/CreateEncryptionKeyModal';
 import { CreateLocalAccountModal } from './modals/CreateLocalAccountModal';
+import { CurrencyDisableConfirmModal } from './modals/CurrencyDisableConfirmModal';
 import { EditUserAccess } from './modals/EditAccess';
 import { EditFieldModal } from './modals/EditFieldModal';
 import { EditRuleModal } from './modals/EditRuleModal';
@@ -45,6 +47,8 @@ import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuMo
 import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal';
 import { EnvelopeIncomeBalanceMenuModal } from './modals/EnvelopeIncomeBalanceMenuModal';
 import { EnvelopeToBudgetMenuModal } from './modals/EnvelopeToBudgetMenuModal';
+import { ExchangeRateEditConfirmModal } from './modals/ExchangeRateEditConfirmModal';
+import { ExchangeRateModal } from './modals/ExchangeRateModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
 import { GoalTemplateModal } from './modals/GoalTemplateModal';
 import { GoCardlessExternalMsgModal } from './modals/GoCardlessExternalMsgModal';
@@ -134,6 +138,18 @@ export function Modals() {
 
         case 'add-local-account':
           return <CreateLocalAccountModal key={key} />;
+
+        case 'exchange-rate':
+          return <ExchangeRateModal key={key} {...modal.options} />;
+
+        case 'confirm-base-currency':
+          return <BaseCurrencyConfirmModal key={key} {...modal.options} />;
+
+        case 'confirm-exchange-rate-edit':
+          return <ExchangeRateEditConfirmModal key={key} {...modal.options} />;
+
+        case 'confirm-disable-currency':
+          return <CurrencyDisableConfirmModal key={key} {...modal.options} />;
 
         case 'close-account':
           return <CloseAccountModal key={key} {...modal.options} />;

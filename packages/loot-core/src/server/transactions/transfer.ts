@@ -1,4 +1,11 @@
 // @ts-strict-ignore
+import {
+  divideByRate,
+  getAccountCurrency,
+  getBaseCurrency,
+  getEffectiveExchangeRate,
+  normalizeTransactionCurrency,
+} from '#server/currencies/app';
 import * as db from '#server/db';
 
 import { runRules } from './transaction-rules';
@@ -44,6 +51,32 @@ async function clearCategory(transaction, transferAcct) {
   return false;
 }
 
+async function getDestinationNativeAmount(transaction, transferredAccount) {
+  const destinationCurrency = await getAccountCurrency(transferredAccount);
+  const sourceNativeCurrency =
+    transaction.native_currency ??
+    (await getAccountCurrency(transaction.account));
+
+  if (sourceNativeCurrency === destinationCurrency) {
+    return -(transaction.native_amount != null
+      ? transaction.native_amount
+      : transaction.amount);
+  }
+
+  const baseCurrency = transaction.base_currency ?? (await getBaseCurrency());
+  if (destinationCurrency === baseCurrency) {
+    return -transaction.amount;
+  }
+
+  const rate = await getEffectiveExchangeRate({
+    fromCurrency: destinationCurrency,
+    toCurrency: baseCurrency,
+    date: transaction.date,
+  });
+
+  return divideByRate(-transaction.amount, rate.rate);
+}
+
 export async function addTransfer(transaction, transferredAccount) {
   if (transaction.is_parent) {
     // For split transactions, we should create transfers using child transactions.
@@ -70,13 +103,20 @@ export async function addTransfer(transaction, transferredAccount) {
   };
   const { notes, cleared, schedule } = await runRules(transferTransaction);
   const matchedSchedule = schedule ?? transaction.schedule;
+  const nativeTransferAmount = await getDestinationNativeAmount(
+    transaction,
+    transferredAccount,
+  );
 
-  const id = await db.insertTransaction({
-    ...transferTransaction,
-    notes,
-    cleared,
-    schedule: matchedSchedule,
-  });
+  const id = await db.insertTransaction(
+    await normalizeTransactionCurrency({
+      ...transferTransaction,
+      native_amount: nativeTransferAmount,
+      notes,
+      cleared,
+      schedule: matchedSchedule,
+    }),
+  );
 
   await db.updateTransaction({
     id: transaction.id,
@@ -119,17 +159,25 @@ export async function removeTransfer(transaction) {
 
 export async function updateTransfer(transaction, transferredAccount) {
   const payee = await getPayee(transaction.account);
+  const nativeTransferAmount = await getDestinationNativeAmount(
+    transaction,
+    transferredAccount,
+  );
 
-  await db.updateTransaction({
-    id: transaction.transfer_id,
-    account: transferredAccount,
-    // Make sure to update the payee on the other side in case the
-    // user moved this transaction into another account
-    payee: payee.id,
-    notes: transaction.notes,
-    amount: -transaction.amount,
-    schedule: transaction.schedule,
-  });
+  await db.updateTransaction(
+    await normalizeTransactionCurrency({
+      id: transaction.transfer_id,
+      account: transferredAccount,
+      // Make sure to update the payee on the other side in case the
+      // user moved this transaction into another account
+      payee: payee.id,
+      notes: transaction.notes,
+      amount: -transaction.amount,
+      native_amount: nativeTransferAmount,
+      date: transaction.date,
+      schedule: transaction.schedule,
+    }),
+  );
 
   const categoryCleared = await clearCategory(transaction, transferredAccount);
   if (categoryCleared) {

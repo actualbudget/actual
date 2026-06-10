@@ -23,6 +23,10 @@ import { payeeQueries } from '#payees';
 import { useDispatch, useStore } from '#redux';
 import type { AppDispatch } from '#redux/store';
 import { setNewTransactions } from '#transactions/transactionsSlice';
+import {
+  getMissingExchangeRate,
+  showMissingExchangeRateNotification,
+} from '#util/missingExchangeRate';
 
 import {
   markAccountFailed,
@@ -55,10 +59,40 @@ const dispatchErrorNotification = (
   );
 };
 
+const dispatchImportErrorNotification = ({
+  dispatch,
+  t,
+  error,
+}: {
+  dispatch: AppDispatch;
+  t: ReturnType<typeof useTranslation>['t'];
+  error: { message: string; missingExchangeRate?: unknown };
+}) => {
+  const missingRate = getMissingExchangeRate(error);
+  if (missingRate) {
+    showMissingExchangeRateNotification({
+      dispatch,
+      t,
+      missingRate,
+    });
+    return;
+  }
+
+  dispatch(
+    addNotification({
+      notification: {
+        type: 'error',
+        message: error.message,
+      },
+    }),
+  );
+};
+
 type CreateAccountPayload = {
   name: string;
   balance: number;
   offBudget: boolean;
+  currency?: string | null;
 };
 
 export function useCreateAccountMutation() {
@@ -67,11 +101,17 @@ export function useCreateAccountMutation() {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async ({ name, balance, offBudget }: CreateAccountPayload) => {
+    mutationFn: async ({
+      name,
+      balance,
+      offBudget,
+      currency,
+    }: CreateAccountPayload) => {
       const id = await send('account-create', {
         name,
         balance,
         offBudget,
+        currency,
       });
       return id;
     },
@@ -232,16 +272,9 @@ export function useImportPreviewTransactionsMutation() {
         },
       );
 
-      errors.forEach(error => {
-        dispatch(
-          addNotification({
-            notification: {
-              type: 'error',
-              message: error.message,
-            },
-          }),
-        );
-      });
+      errors.forEach(error =>
+        dispatchImportErrorNotification({ dispatch, t, error }),
+      );
 
       return updatedPreview;
     },
@@ -298,16 +331,9 @@ export function useImportTransactionsMutation() {
         opts: reimportDeleted !== undefined ? { reimportDeleted } : undefined,
       });
 
-      errors.forEach(error => {
-        dispatch(
-          addNotification({
-            notification: {
-              type: 'error',
-              message: error.message,
-            },
-          }),
-        );
-      });
+      errors.forEach(error =>
+        dispatchImportErrorNotification({ dispatch, t, error }),
+      );
 
       dispatch(
         setNewTransactions({
@@ -663,6 +689,7 @@ export function useSyncAccountsMutation() {
             account.accountId,
             account.res,
             dispatch,
+            t,
             queryClient,
             newTransactions,
             matchedTransactions,
@@ -691,6 +718,7 @@ export function useSyncAccountsMutation() {
           accountId,
           res,
           dispatch,
+          t,
           queryClient,
           newTransactions,
           matchedTransactions,
@@ -734,6 +762,7 @@ function handleSyncResponse(
   accountId: AccountEntity['id'],
   res: SyncResponseWithErrors,
   dispatch: AppDispatch,
+  t: ReturnType<typeof useTranslation>['t'],
   queryClient: QueryClient,
   resNewTransactions: Array<TransactionEntity['id']>,
   resMatchedTransactions: Array<TransactionEntity['id']>,
@@ -761,6 +790,16 @@ function handleSyncResponse(
 
   // Dispatch errors (if any)
   errors.forEach(error => {
+    const missingRate = getMissingExchangeRate(error);
+    if (missingRate) {
+      showMissingExchangeRateNotification({
+        dispatch,
+        t,
+        missingRate,
+      });
+      return;
+    }
+
     if ('type' in error && error.type === 'SyncError') {
       dispatch(
         addNotification({

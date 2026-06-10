@@ -8,10 +8,16 @@ export type Spreadsheets = {
 
     // Account fields
     balance: number;
+    baseBalance: number;
+    [key: `baseBalance-${string}`]: number;
     [key: `balance-${string}-cleared`]: number | null;
     'accounts-balance': number;
     'onbudget-accounts-balance': number;
     'offbudget-accounts-balance': number;
+    [key: `onbudget-accounts-balance-${string}`]: number;
+    [key: `onbudget-accounts-base-balance-${string}`]: number;
+    [key: `offbudget-accounts-balance-${string}`]: number;
+    [key: `offbudget-accounts-base-balance-${string}`]: number;
     'closed-accounts-balance': number;
     balanceCleared: number;
     balanceUncleared: number;

@@ -5,15 +5,23 @@ exports[`Transfer > split transfers are retained on child transactions 1`] = `
   {
     "account": "one",
     "amount": 5000,
+    "base_currency": null,
     "category": null,
     "cleared": 1,
     "date": 20170101,
     "error": null,
+    "exchange_rate": null,
+    "exchange_rate_date": null,
+    "exchange_rate_id": null,
+    "exchange_rate_locked": 1,
+    "fx_recalculated_at": null,
     "id": "id5",
     "imported_id": null,
     "imported_payee": null,
     "is_child": 0,
     "is_parent": 0,
+    "native_amount": 5000,
+    "native_currency": null,
     "notes": null,
     "parent_id": null,
     "payee": "id3",
@@ -29,15 +37,23 @@ exports[`Transfer > split transfers are retained on child transactions 1`] = `
   {
     "account": "two",
     "amount": -5000,
+    "base_currency": "",
     "category": null,
     "cleared": 0,
     "date": 20170101,
     "error": null,
+    "exchange_rate": "1",
+    "exchange_rate_date": "2017-01-01T00:00:00",
+    "exchange_rate_id": null,
+    "exchange_rate_locked": 1,
+    "fx_recalculated_at": null,
     "id": "id6",
     "imported_id": null,
     "imported_payee": null,
     "is_child": 0,
     "is_parent": 0,
+    "native_amount": -5000,
+    "native_currency": "",
     "notes": null,
     "parent_id": null,
     "payee": "id2",
@@ -57,26 +73,26 @@ exports[`Transfer > split transfers are retained on child transactions 2`] = `
 "- First value
 + Second value
 
-@@ -8,11 +8,11 @@
-      "error": null,
+@@ -14,11 +14,11 @@
+      "fx_recalculated_at": null,
       "id": "id5",
       "imported_id": null,
       "imported_payee": null,
       "is_child": 0,
 -     "is_parent": 0,
 +     "is_parent": 1,
+      "native_amount": 5000,
+      "native_currency": null,
       "notes": null,
       "parent_id": null,
-      "payee": "id3",
-      "payee_name": "",
-      "raw_synced_data": null,"
+      "payee": "id3","
 `;
 
 exports[`Transfer > split transfers are retained on child transactions 3`] = `
 "- First value
 + Second value
 
-@@ -22,10 +22,58 @@
+@@ -30,10 +30,74 @@
       "starting_balance_flag": 0,
       "tombstone": 0,
       "transfer_id": "id6",
@@ -84,15 +100,23 @@ exports[`Transfer > split transfers are retained on child transactions 3`] = `
     Object {
 +     "account": "one",
 +     "amount": 2000,
++     "base_currency": null,
 +     "category": null,
 +     "cleared": 1,
 +     "date": 20170101,
 +     "error": null,
++     "exchange_rate": null,
++     "exchange_rate_date": null,
++     "exchange_rate_id": null,
++     "exchange_rate_locked": 1,
++     "fx_recalculated_at": null,
 +     "id": "id7",
 +     "imported_id": null,
 +     "imported_payee": null,
 +     "is_child": 1,
 +     "is_parent": 0,
++     "native_amount": 2000,
++     "native_currency": null,
 +     "notes": null,
 +     "parent_id": "id5",
 +     "payee": "id2",
@@ -108,15 +132,23 @@ exports[`Transfer > split transfers are retained on child transactions 3`] = `
 +   Object {
 +     "account": "one",
 +     "amount": -2000,
++     "base_currency": "",
 +     "category": null,
 +     "cleared": 0,
 +     "date": 20170101,
 +     "error": null,
++     "exchange_rate": "1",
++     "exchange_rate_date": "2017-01-01T00:00:00",
++     "exchange_rate_id": null,
++     "exchange_rate_locked": 1,
++     "fx_recalculated_at": null,
 +     "id": "id8",
 +     "imported_id": null,
 +     "imported_payee": null,
 +     "is_child": 0,
 +     "is_parent": 0,
++     "native_amount": -2000,
++     "native_currency": "",
 +     "notes": null,
 +     "parent_id": null,
 +     "payee": "id2",
@@ -132,9 +164,9 @@ exports[`Transfer > split transfers are retained on child transactions 3`] = `
 +   Object {
       "account": "two",
       "amount": -5000,
+      "base_currency": "",
       "category": null,
-      "cleared": 0,
-      "date": 20170101,"
+      "cleared": 0,"
 `;
 
 exports[`Transfer > transfers are properly de-categorized 1`] = `
@@ -142,15 +174,23 @@ exports[`Transfer > transfers are properly de-categorized 1`] = `
   {
     "account": "one",
     "amount": 5000,
+    "base_currency": null,
     "category": "1",
     "cleared": 1,
     "date": 20170101,
     "error": null,
+    "exchange_rate": null,
+    "exchange_rate_date": null,
+    "exchange_rate_id": null,
+    "exchange_rate_locked": 1,
+    "fx_recalculated_at": null,
     "id": "id6",
     "imported_id": null,
     "imported_payee": null,
     "is_child": 0,
     "is_parent": 0,
+    "native_amount": 5000,
+    "native_currency": null,
     "notes": null,
     "parent_id": null,
     "payee": "id5",
@@ -170,12 +210,12 @@ exports[`Transfer > transfers are properly de-categorized 2`] = `
 "- First value
 + Second value
 
-@@ -9,18 +9,42 @@
-      "id": "id6",
-      "imported_id": null,
+@@ -17,18 +17,50 @@
       "imported_payee": null,
       "is_child": 0,
       "is_parent": 0,
+      "native_amount": 5000,
+      "native_currency": null,
 -     "notes": null,
 +     "notes": "hi",
       "parent_id": null,
@@ -195,15 +235,23 @@ exports[`Transfer > transfers are properly de-categorized 2`] = `
 +   Object {
 +     "account": "three",
 +     "amount": -5000,
++     "base_currency": "",
 +     "category": null,
 +     "cleared": 0,
 +     "date": 20170101,
 +     "error": null,
++     "exchange_rate": "1",
++     "exchange_rate_date": "2017-01-01T00:00:00",
++     "exchange_rate_id": null,
++     "exchange_rate_locked": 1,
++     "fx_recalculated_at": null,
 +     "id": "id7",
 +     "imported_id": null,
 +     "imported_payee": null,
 +     "is_child": 0,
 +     "is_parent": 0,
++     "native_amount": -5000,
++     "native_currency": "",
 +     "notes": "hi",
 +     "parent_id": null,
 +     "payee": "id2",
@@ -223,21 +271,23 @@ exports[`Transfer > transfers are properly de-categorized 3`] = `
 "- First value
 + Second value
 
-@@ -1,32 +1,32 @@
+@@ -1,11 +1,11 @@
   Array [
     Object {
       "account": "one",
       "amount": 5000,
+      "base_currency": null,
 -     "category": "1",
 +     "category": null,
       "cleared": 1,
       "date": 20170101,
       "error": null,
-      "id": "id6",
-      "imported_id": null,
-      "imported_payee": null,
-      "is_child": 0,
+      "exchange_rate": null,
+      "exchange_rate_date": null,
+@@ -19,22 +19,22 @@
       "is_parent": 0,
+      "native_amount": 5000,
+      "native_currency": null,
       "notes": "hi",
       "parent_id": null,
 -     "payee": "id4",
@@ -255,10 +305,10 @@ exports[`Transfer > transfers are properly de-categorized 3`] = `
 -     "account": "three",
 +     "account": "two",
       "amount": -5000,
+      "base_currency": "",
       "category": null,
       "cleared": 0,
-      "date": 20170101,
-      "error": null,"
+      "date": 20170101,"
 `;
 
 exports[`Transfer > transfers are properly inserted/updated/deleted 1`] = `
@@ -266,15 +316,23 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 1`] = `
   {
     "account": "one",
     "amount": 5000,
+    "base_currency": null,
     "category": null,
     "cleared": 1,
     "date": 20170101,
     "error": null,
+    "exchange_rate": null,
+    "exchange_rate_date": null,
+    "exchange_rate_id": null,
+    "exchange_rate_locked": 1,
+    "fx_recalculated_at": null,
     "id": "id6",
     "imported_id": null,
     "imported_payee": null,
     "is_child": 0,
     "is_parent": 0,
+    "native_amount": 5000,
+    "native_currency": null,
     "notes": null,
     "parent_id": null,
     "payee": "id5",
@@ -294,7 +352,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 2`] = `
 "- First value
 + Second value
 
-@@ -21,6 +21,54 @@
+@@ -29,6 +29,70 @@
       "sort_order": 123456789,
       "starting_balance_flag": 0,
       "tombstone": 0,
@@ -303,15 +361,23 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 2`] = `
 +   Object {
 +     "account": "one",
 +     "amount": 5000,
++     "base_currency": null,
 +     "category": null,
 +     "cleared": 1,
 +     "date": 20170101,
 +     "error": null,
++     "exchange_rate": null,
++     "exchange_rate_date": null,
++     "exchange_rate_id": null,
++     "exchange_rate_locked": 1,
++     "fx_recalculated_at": null,
 +     "id": "id7",
 +     "imported_id": null,
 +     "imported_payee": null,
 +     "is_child": 0,
 +     "is_parent": 0,
++     "native_amount": 5000,
++     "native_currency": null,
 +     "notes": null,
 +     "parent_id": null,
 +     "payee": "id3",
@@ -327,15 +393,23 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 2`] = `
 +   Object {
 +     "account": "two",
 +     "amount": -5000,
++     "base_currency": "",
 +     "category": null,
 +     "cleared": 0,
 +     "date": 20170101,
 +     "error": null,
++     "exchange_rate": "1",
++     "exchange_rate_date": "2017-01-01T00:00:00",
++     "exchange_rate_id": null,
++     "exchange_rate_locked": 1,
++     "fx_recalculated_at": null,
 +     "id": "id8",
 +     "imported_id": null,
 +     "imported_payee": null,
 +     "is_child": 0,
 +     "is_parent": 0,
++     "native_amount": -5000,
++     "native_currency": "",
 +     "notes": null,
 +     "parent_id": null,
 +     "payee": "id2",
@@ -355,21 +429,28 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 3`] = `
 "- First value
 + Second value
 
-@@ -2,52 +2,52 @@
-    Object {
+@@ -3,96 +3,96 @@
       "account": "one",
       "amount": 5000,
+      "base_currency": null,
       "category": null,
       "cleared": 1,
 -     "date": 20170101,
 +     "date": 20170105,
       "error": null,
+      "exchange_rate": null,
+      "exchange_rate_date": null,
+      "exchange_rate_id": null,
+      "exchange_rate_locked": 1,
+      "fx_recalculated_at": null,
 -     "id": "id6",
 +     "id": "id7",
       "imported_id": null,
       "imported_payee": null,
       "is_child": 0,
       "is_parent": 0,
+      "native_amount": 5000,
+      "native_currency": null,
 -     "notes": null,
 +     "notes": "This is a note",
       "parent_id": null,
@@ -387,21 +468,82 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 3`] = `
 +     "transfer_id": "id8",
     },
     Object {
-      "account": "one",
-      "amount": 5000,
+-     "account": "one",
+-     "amount": 5000,
+-     "base_currency": null,
++     "account": "two",
++     "amount": -5000,
++     "base_currency": "",
       "category": null,
-      "cleared": 1,
+-     "cleared": 1,
+-     "date": 20170101,
++     "cleared": 0,
++     "date": 20170105,
+      "error": null,
+-     "exchange_rate": null,
+-     "exchange_rate_date": null,
++     "exchange_rate": "1",
++     "exchange_rate_date": "2017-01-05T00:00:00",
+      "exchange_rate_id": null,
+      "exchange_rate_locked": 1,
+      "fx_recalculated_at": null,
+-     "id": "id7",
++     "id": "id8",
+      "imported_id": null,
+      "imported_payee": null,
+      "is_child": 0,
+      "is_parent": 0,
+-     "native_amount": 5000,
+-     "native_currency": null,
+-     "notes": null,
++     "native_amount": -5000,
++     "native_currency": "",
++     "notes": "This is a note",
+      "parent_id": null,
+-     "payee": "id3",
++     "payee": "id2",
+      "payee_name": "",
+      "raw_synced_data": null,
+      "reconciled": 0,
+      "schedule": null,
+      "sort_order": 123456789,
+      "starting_balance_flag": 0,
+      "tombstone": 0,
+-     "transfer_id": "id8",
++     "transfer_id": "id7",
+    },
+    Object {
+-     "account": "two",
+-     "amount": -5000,
+-     "base_currency": "",
++     "account": "one",
++     "amount": 5000,
++     "base_currency": null,
+      "category": null,
+-     "cleared": 0,
++     "cleared": 1,
       "date": 20170101,
       "error": null,
--     "id": "id7",
+-     "exchange_rate": "1",
+-     "exchange_rate_date": "2017-01-01T00:00:00",
++     "exchange_rate": null,
++     "exchange_rate_date": null,
+      "exchange_rate_id": null,
+      "exchange_rate_locked": 1,
+      "fx_recalculated_at": null,
+-     "id": "id8",
 +     "id": "id6",
       "imported_id": null,
       "imported_payee": null,
       "is_child": 0,
       "is_parent": 0,
+-     "native_amount": -5000,
+-     "native_currency": "",
++     "native_amount": 5000,
++     "native_currency": null,
       "notes": null,
       "parent_id": null,
--     "payee": "id3",
+-     "payee": "id2",
 -     "payee_name": "",
 +     "payee": "id5",
 +     "payee_name": "Non-transfer",
@@ -411,36 +553,20 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 3`] = `
       "sort_order": 123456789,
       "starting_balance_flag": 0,
       "tombstone": 0,
--     "transfer_id": "id8",
+-     "transfer_id": "id7",
 +     "transfer_id": null,
     },
-    Object {
-      "account": "two",
-      "amount": -5000,
-      "category": null,
-@@ -57,11 +57,11 @@
-      "id": "id8",
-      "imported_id": null,
-      "imported_payee": null,
-      "is_child": 0,
-      "is_parent": 0,
--     "notes": null,
-+     "notes": "This is a note",
-      "parent_id": null,
-      "payee": "id2",
-      "payee_name": "",
-      "raw_synced_data": null,
-      "reconciled": 0,"
+  ]"
 `;
 
 exports[`Transfer > transfers are properly inserted/updated/deleted 4`] = `
 "- First value
 + Second value
 
-@@ -11,11 +11,11 @@
-      "imported_payee": null,
-      "is_child": 0,
+@@ -19,22 +19,22 @@
       "is_parent": 0,
+      "native_amount": 5000,
+      "native_currency": null,
       "notes": "This is a note",
       "parent_id": null,
 -     "payee": "id3",
@@ -450,29 +576,28 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 4`] = `
       "reconciled": 0,
       "schedule": null,
       "sort_order": 123456789,
-@@ -46,11 +46,11 @@
       "starting_balance_flag": 0,
       "tombstone": 0,
-      "transfer_id": null,
+      "transfer_id": "id8",
     },
     Object {
 -     "account": "two",
 +     "account": "three",
       "amount": -5000,
+      "base_currency": "",
       "category": null,
       "cleared": 0,
-      "date": 20170101,
-      "error": null,"
+      "date": 20170105,"
 `;
 
 exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
 "- First value
 + Second value
 
-@@ -11,19 +11,19 @@
-      "imported_payee": null,
-      "is_child": 0,
+@@ -19,51 +19,19 @@
       "is_parent": 0,
+      "native_amount": 5000,
+      "native_currency": null,
       "notes": "This is a note",
       "parent_id": null,
 -     "payee": "id4",
@@ -486,31 +611,27 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
       "starting_balance_flag": 0,
       "tombstone": 0,
 -     "transfer_id": "id8",
-+     "transfer_id": null,
-    },
-    Object {
-      "account": "one",
-      "amount": 5000,
-      "category": null,
-@@ -44,31 +44,7 @@
-      "schedule": null,
-      "sort_order": 123456789,
-      "starting_balance_flag": 0,
-      "tombstone": 0,
-      "transfer_id": null,
 -   },
 -   Object {
 -     "account": "three",
 -     "amount": -5000,
+-     "base_currency": "",
 -     "category": null,
 -     "cleared": 0,
--     "date": 20170101,
+-     "date": 20170105,
 -     "error": null,
+-     "exchange_rate": "1",
+-     "exchange_rate_date": "2017-01-05T00:00:00",
+-     "exchange_rate_id": null,
+-     "exchange_rate_locked": 1,
+-     "fx_recalculated_at": null,
 -     "id": "id8",
 -     "imported_id": null,
 -     "imported_payee": null,
 -     "is_child": 0,
 -     "is_parent": 0,
+-     "native_amount": -5000,
+-     "native_currency": "",
 -     "notes": "This is a note",
 -     "parent_id": null,
 -     "payee": "id2",
@@ -522,18 +643,22 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
 -     "starting_balance_flag": 0,
 -     "tombstone": 0,
 -     "transfer_id": "id7",
++     "transfer_id": null,
     },
-  ]"
+    Object {
+      "account": "one",
+      "amount": 5000,
+      "base_currency": null,"
 `;
 
 exports[`Transfer > transfers are properly inserted/updated/deleted 6`] = `
 "- First value
 + Second value
 
-@@ -11,19 +11,43 @@
-      "imported_payee": null,
-      "is_child": 0,
+@@ -19,19 +19,51 @@
       "is_parent": 0,
+      "native_amount": 5000,
+      "native_currency": null,
       "notes": "This is a note",
       "parent_id": null,
 -     "payee": "id9",
@@ -552,15 +677,23 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 6`] = `
 +   Object {
 +     "account": "two",
 +     "amount": -5000,
++     "base_currency": "",
 +     "category": null,
 +     "cleared": 0,
 +     "date": 20170105,
 +     "error": null,
++     "exchange_rate": "1",
++     "exchange_rate_date": "2017-01-05T00:00:00",
++     "exchange_rate_id": null,
++     "exchange_rate_locked": 1,
++     "fx_recalculated_at": null,
 +     "id": "id10",
 +     "imported_id": null,
 +     "imported_payee": null,
 +     "is_child": 0,
 +     "is_parent": 0,
++     "native_amount": -5000,
++     "native_currency": "",
 +     "notes": "This is a note",
 +     "parent_id": null,
 +     "payee": "id2",
@@ -576,26 +709,33 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 6`] = `
     Object {
       "account": "one",
       "amount": 5000,
-      "category": null,"
+      "base_currency": null,"
 `;
 
 exports[`Transfer > transfers are properly inserted/updated/deleted 7`] = `
 "- First value
 + Second value
 
-@@ -2,58 +2,10 @@
-    Object {
+@@ -3,74 +3,10 @@
       "account": "one",
       "amount": 5000,
+      "base_currency": null,
       "category": null,
       "cleared": 1,
 -     "date": 20170105,
 -     "error": null,
+-     "exchange_rate": null,
+-     "exchange_rate_date": null,
+-     "exchange_rate_id": null,
+-     "exchange_rate_locked": 1,
+-     "fx_recalculated_at": null,
 -     "id": "id7",
 -     "imported_id": null,
 -     "imported_payee": null,
 -     "is_child": 0,
 -     "is_parent": 0,
+-     "native_amount": 5000,
+-     "native_currency": null,
 -     "notes": "This is a note",
 -     "parent_id": null,
 -     "payee": "id3",
@@ -611,15 +751,23 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 7`] = `
 -   Object {
 -     "account": "two",
 -     "amount": -5000,
+-     "base_currency": "",
 -     "category": null,
 -     "cleared": 0,
 -     "date": 20170105,
 -     "error": null,
+-     "exchange_rate": "1",
+-     "exchange_rate_date": "2017-01-05T00:00:00",
+-     "exchange_rate_id": null,
+-     "exchange_rate_locked": 1,
+-     "fx_recalculated_at": null,
 -     "id": "id10",
 -     "imported_id": null,
 -     "imported_payee": null,
 -     "is_child": 0,
 -     "is_parent": 0,
+-     "native_amount": -5000,
+-     "native_currency": "",
 -     "notes": "This is a note",
 -     "parent_id": null,
 -     "payee": "id2",
@@ -635,11 +783,12 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 7`] = `
 -   Object {
 -     "account": "one",
 -     "amount": 5000,
+-     "base_currency": null,
 -     "category": null,
 -     "cleared": 1,
       "date": 20170101,
       "error": null,
-      "id": "id6",
-      "imported_id": null,
-      "imported_payee": null,"
+      "exchange_rate": null,
+      "exchange_rate_date": null,
+      "exchange_rate_id": null,"
 `;

@@ -15,6 +15,7 @@ import { aqlQuery } from './aql';
 import { app as authApp } from './auth/app';
 import { app as budgetApp } from './budget/app';
 import { app as budgetFilesApp } from './budgetfiles/app';
+import { app as currenciesApp } from './currencies/app';
 import { app as dashboardApp } from './dashboard/app';
 import * as db from './db';
 import * as encryption from './encryption';
@@ -130,6 +131,7 @@ app.combine(
   authApp,
   schedulesApp,
   budgetApp,
+  currenciesApp,
   dashboardApp,
   notesApp,
   preferencesApp,

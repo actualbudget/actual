@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import type { ComponentProps, ReactNode } from 'react';
+import type { ComponentProps, CSSProperties, ReactNode } from 'react';
 import { Tooltip as AriaTooltip, TooltipTrigger } from 'react-aria-components';
 
 import { styles } from './styles';
@@ -9,6 +9,7 @@ type TooltipProps = Partial<ComponentProps<typeof AriaTooltip>> & {
   children: ReactNode;
   content: ReactNode;
   triggerProps?: Partial<ComponentProps<typeof TooltipTrigger>>;
+  containerStyle?: CSSProperties;
   disablePointerEvents?: boolean;
 };
 
@@ -16,6 +17,7 @@ export const Tooltip = ({
   children,
   content,
   triggerProps = {},
+  containerStyle,
   disablePointerEvents = false,
   ...props
 }: TooltipProps) => {
@@ -54,7 +56,12 @@ export const Tooltip = ({
 
   return (
     <View
-      style={{ minHeight: 'auto', flexShrink: 0, maxWidth: '100%' }}
+      style={{
+        minHeight: 'auto',
+        flexShrink: 0,
+        maxWidth: '100%',
+        ...containerStyle,
+      }}
       ref={triggerRef}
       onMouseEnter={handlePointerEnter}
       onMouseLeave={handlePointerLeave}

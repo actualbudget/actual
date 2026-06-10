@@ -58,6 +58,39 @@ export type Modal =
       name: 'add-local-account';
     }
   | {
+      name: 'exchange-rate';
+      options: {
+        fromCurrency: string;
+        toCurrency: string;
+        date: string;
+        onSaved?: () => void | Promise<void>;
+        onCancel?: () => void;
+      };
+    }
+  | {
+      name: 'confirm-base-currency';
+      options: {
+        code: string;
+        mode: 'set' | 'change';
+        onConfirm: () => void | Promise<void>;
+      };
+    }
+  | {
+      name: 'confirm-exchange-rate-edit';
+      options: {
+        transactionCount: number;
+        onConfirm: () => void | Promise<void>;
+      };
+    }
+  | {
+      name: 'confirm-disable-currency';
+      options: {
+        code: string;
+        baseCurrency: string;
+        onConfirm: () => void | Promise<void>;
+      };
+    }
+  | {
       name: 'close-account';
       options: {
         account: AccountEntity;

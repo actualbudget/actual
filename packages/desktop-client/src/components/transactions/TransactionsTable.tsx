@@ -81,6 +81,7 @@ import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplet
 import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
 import { TagAutocomplete } from '#components/autocomplete/TagAutocomplete';
+import { BaseAmountTooltip } from '#components/currency/BaseAmountTooltip';
 import { getStatusProps } from '#components/schedules/StatusBadge';
 import type { StatusTypes } from '#components/schedules/StatusBadge';
 import { DateSelect } from '#components/select/DateSelect';
@@ -137,6 +138,7 @@ import { getStatusLabel } from '#util/schedule';
 
 import {
   deserializeTransaction,
+  getTransactionDisplayAmount,
   isLastChild,
   makeTemporaryTransactions,
   selectAscDesc,
@@ -865,8 +867,10 @@ type TransactionProps = {
   payees: PayeeEntity[];
   accounts: AccountEntity[];
   balance: number;
+  baseBalance?: number | null;
   dateFormat: string;
   hideFraction: boolean;
+  useNativeAmounts?: boolean;
   onSave: (
     tx: TransactionEntity,
     subTxs: TransactionEntity[] | null,
@@ -932,8 +936,10 @@ const Transaction = memo(function Transaction({
   payees,
   accounts,
   balance,
+  baseBalance,
   dateFormat = 'MM/dd/yyyy',
   hideFraction,
+  useNativeAmounts = true,
   onSave,
   onEdit,
   onDelete,
@@ -976,21 +982,33 @@ const Transaction = memo(function Transaction({
   const triggerRef = useRef(null);
 
   const [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
+  const [prevUseNativeAmounts, setPrevUseNativeAmounts] =
+    useState(useNativeAmounts);
   const [prevTransaction, setPrevTransaction] = useState(originalTransaction);
   const [transaction, setTransaction] = useState(() =>
-    serializeTransaction(originalTransaction, showZeroInDeposit),
+    serializeTransaction(
+      originalTransaction,
+      showZeroInDeposit,
+      useNativeAmounts,
+    ),
   );
   const isPreview = isPreviewId(transaction.id);
 
   if (
     originalTransaction !== prevTransaction ||
-    showZeroInDeposit !== prevShowZero
+    showZeroInDeposit !== prevShowZero ||
+    useNativeAmounts !== prevUseNativeAmounts
   ) {
     setTransaction(
-      serializeTransaction(originalTransaction, showZeroInDeposit),
+      serializeTransaction(
+        originalTransaction,
+        showZeroInDeposit,
+        useNativeAmounts,
+      ),
     );
     setPrevTransaction(originalTransaction);
     setPrevShowZero(showZeroInDeposit);
+    setPrevUseNativeAmounts(useNativeAmounts);
   }
 
   const [showReconciliationWarning, setShowReconciliationWarning] =
@@ -1134,10 +1152,13 @@ const Transaction = memo(function Transaction({
       const deserialized = deserializeTransaction(
         newTransaction,
         originalTransaction,
+        useNativeAmounts,
       );
       // Run the transaction through the formatting so that we know
       // it's always showing the formatted result
-      setTransaction(serializeTransaction(deserialized, showZeroInDeposit));
+      setTransaction(
+        serializeTransaction(deserialized, showZeroInDeposit, useNativeAmounts),
+      );
 
       const deserializedName = ['credit', 'debit'].includes(name)
         ? 'amount'
@@ -1148,7 +1169,6 @@ const Transaction = memo(function Transaction({
 
   const {
     id,
-    amount,
     debit,
     credit,
     payee: payeeId,
@@ -1163,6 +1183,7 @@ const Transaction = memo(function Transaction({
     is_parent: isParent,
     _unmatched = false,
   } = transaction;
+  const displayAmount = transaction.amount;
 
   const { schedules = [] } = useCachedSchedules();
   const schedule = transaction.schedule
@@ -1190,7 +1211,38 @@ const Transaction = memo(function Transaction({
   const backgroundFocus = focusedField === 'select';
   const amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
 
-  const runningBalance = !isTemporaryId(id) ? balance : balance + amount;
+  const runningBalance = !isTemporaryId(id)
+    ? balance
+    : balance + (displayAmount ?? 0);
+  const baseRunningBalance =
+    baseBalance == null
+      ? null
+      : !isTemporaryId(id)
+        ? baseBalance
+        : baseBalance + (originalTransaction.amount ?? 0);
+  const showBaseAmountTooltip =
+    originalTransaction.native_currency != null &&
+    originalTransaction.base_currency != null;
+  const isForeignCurrencyTransaction =
+    originalTransaction.native_currency !== originalTransaction.base_currency;
+  const transactionTooltipCurrency = isForeignCurrencyTransaction
+    ? (originalTransaction.native_currency ?? '')
+    : (originalTransaction.base_currency ?? '');
+  const transactionTooltipAmount = isForeignCurrencyTransaction
+    ? Math.abs(
+        originalTransaction.native_amount ?? originalTransaction.amount ?? 0,
+      )
+    : Math.abs(originalTransaction.amount ?? 0);
+  const amountTooltipProps = {
+    currency: originalTransaction.base_currency ?? '',
+    amount: Math.abs(originalTransaction.amount ?? 0),
+    nativeCurrency: transactionTooltipCurrency,
+    nativeAmount: transactionTooltipAmount,
+    exchangeRate: isForeignCurrencyTransaction
+      ? originalTransaction.exchange_rate
+      : null,
+    isDisabled: !showBaseAmountTooltip,
+  };
 
   // Ok this entire logic is a dirty, dirty hack.. but let me explain.
   // Problem: the split-error Popover (which has the buttons to distribute/add split)
@@ -1805,7 +1857,15 @@ const Transaction = memo(function Transaction({
           }
           valueStyle={valueStyle}
           textAlign="right"
-          title={debit}
+          unexposedContent={({ value, formatter }) => (
+            <BaseAmountTooltip
+              {...amountTooltipProps}
+              align="right"
+              isDisabled={amountTooltipProps.isDisabled || !debit}
+            >
+              <UnexposedCellContent value={value} formatter={formatter} />
+            </BaseAmountTooltip>
+          )}
           onExpose={name => !isPreview && onEdit(id, name)}
           style={{
             ...(isParent && { fontStyle: 'italic' }),
@@ -1836,7 +1896,15 @@ const Transaction = memo(function Transaction({
           }
           valueStyle={valueStyle}
           textAlign="right"
-          title={credit}
+          unexposedContent={({ value, formatter }) => (
+            <BaseAmountTooltip
+              {...amountTooltipProps}
+              align="right"
+              isDisabled={amountTooltipProps.isDisabled || !credit}
+            >
+              <UnexposedCellContent value={value} formatter={formatter} />
+            </BaseAmountTooltip>
+          )}
           onExpose={name => !isPreview && onEdit(id, name)}
           style={{
             ...(isParent && { fontStyle: 'italic' }),
@@ -1861,6 +1929,30 @@ const Transaction = memo(function Transaction({
               runningBalance == null || isChild || isTemporaryId(id)
                 ? ''
                 : integerToCurrency(runningBalance)
+            }
+            unexposedContent={({ value, formatter }) =>
+              baseRunningBalance == null ? (
+                <UnexposedCellContent value={value} formatter={formatter} />
+              ) : (
+                <BaseAmountTooltip
+                  currency={originalTransaction.base_currency ?? ''}
+                  amount={baseRunningBalance}
+                  nativeCurrency={
+                    useNativeAmounts && isForeignCurrencyTransaction
+                      ? (originalTransaction.native_currency ?? '')
+                      : (originalTransaction.base_currency ?? '')
+                  }
+                  nativeAmount={
+                    useNativeAmounts && isForeignCurrencyTransaction
+                      ? runningBalance
+                      : baseRunningBalance
+                  }
+                  align="right"
+                  isDisabled={!showBaseAmountTooltip}
+                >
+                  <UnexposedCellContent value={value} formatter={formatter} />
+                </BaseAmountTooltip>
+              )
             }
             valueStyle={{
               color:
@@ -1958,7 +2050,7 @@ const Transaction = memo(function Transaction({
                 textAlign: 'right',
               }}
             >
-              {integerToCurrency(amount)}
+              {integerToCurrency(displayAmount)}
             </Text>
           </View>
         )}
@@ -2100,6 +2192,7 @@ type NewTransactionProps = {
   editingTransaction: TransactionEntity['id'];
   focusedField: string;
   hideFraction: boolean;
+  useNativeAmounts?: boolean;
   onAdd: () => void;
   onAddAndClose: () => void;
   onAddSplit: (id: TransactionEntity['id']) => void;
@@ -2159,10 +2252,12 @@ function NewTransaction({
   onNavigateToSchedule,
   onNotesTagClick,
   balance,
+  useNativeAmounts = true,
   showHiddenCategories,
 }: NewTransactionProps) {
   const error = transactions[0].error;
-  const isDeposit = transactions[0].amount > 0;
+  const isDeposit =
+    getTransactionDisplayAmount(transactions[0], useNativeAmounts) > 0;
 
   const childTransactions = transactions.filter(
     t => t.parent_id === transactions[0].id,
@@ -2215,6 +2310,7 @@ function NewTransaction({
           payees={payees}
           dateFormat={dateFormat}
           hideFraction={!!hideFraction}
+          useNativeAmounts={useNativeAmounts}
           expanded
           onEdit={onEdit}
           onSave={onSave}
@@ -2297,6 +2393,7 @@ type TransactionTableInnerProps = {
   categoryGroups: CategoryGroupEntity[];
   payees: PayeeEntity[];
   balances: Record<TransactionEntity['id'], IntegerAmount> | null;
+  baseBalances?: Record<TransactionEntity['id'], IntegerAmount> | null;
   showBalances: boolean;
   showReconciled: boolean;
   showCleared: boolean;
@@ -2309,6 +2406,7 @@ type TransactionTableInnerProps = {
   isMatched: (id: TransactionEntity['id']) => boolean;
   dateFormat: string | undefined;
   hideFraction: boolean;
+  useNativeAmounts?: boolean;
   renderEmpty: ReactNode | (() => ReactNode);
   onSave: (transaction: TransactionEntity) => void;
   onApplyRules: (
@@ -2440,6 +2538,7 @@ function TransactionTableInner({
       showAccount,
       showBalances,
       balances,
+      baseBalances,
       hideFraction,
       isNew,
       isMatched,
@@ -2452,7 +2551,9 @@ function TransactionTableInner({
     const selected = selectedItems.has(trans.id);
 
     const parent = trans.parent_id && props.transactionMap.get(trans.parent_id);
-    const isChildDeposit = parent ? parent.amount > 0 : undefined;
+    const isChildDeposit = parent
+      ? getTransactionDisplayAmount(parent) > 0
+      : undefined;
     const expanded = isExpanded && isExpanded((parent || trans).id);
 
     // For backwards compatibility, read the error of the transaction
@@ -2519,12 +2620,14 @@ function TransactionTableInner({
         matched={isMatched?.(trans.id)}
         showZeroInDeposit={isChildDeposit}
         balance={balances?.[trans.id] ?? 0}
+        baseBalance={baseBalances?.[trans.id] ?? null}
         focusedField={editing ? tableNavigator.focusedField : undefined}
         accounts={accounts}
         categoryGroups={categoryGroups}
         payees={payees}
         dateFormat={dateFormat}
         hideFraction={hideFraction}
+        useNativeAmounts={props.useNativeAmounts}
         onEdit={tableNavigator.onEdit}
         onSave={props.onSave}
         onDelete={props.onDelete}
@@ -2618,6 +2721,7 @@ function TransactionTableInner({
               showCleared={props.showCleared}
               dateFormat={dateFormat}
               hideFraction={props.hideFraction}
+              useNativeAmounts={props.useNativeAmounts}
               onClose={props.onCloseAddTransaction}
               onAdd={props.onAddTemporary}
               onAddAndClose={props.onAddAndCloseTemporary}
@@ -2691,6 +2795,7 @@ export type TransactionTableProps = {
   categoryGroups: CategoryGroupEntity[];
   payees: PayeeEntity[];
   balances: Record<TransactionEntity['id'], IntegerAmount> | null;
+  baseBalances?: Record<TransactionEntity['id'], IntegerAmount> | null;
   showBalances: boolean;
   showReconciled: boolean;
   showCleared: boolean;
@@ -2704,6 +2809,7 @@ export type TransactionTableProps = {
   isFiltered?: boolean;
   dateFormat: string | undefined;
   hideFraction: boolean;
+  useNativeAmounts?: boolean;
   renderEmpty: ReactNode | (() => ReactNode);
   onSave: (transaction: TransactionEntity) => void;
   onApplyRules: (

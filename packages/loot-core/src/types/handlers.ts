@@ -3,6 +3,7 @@ import type { AdminHandlers } from '#server/admin/app';
 import type { AuthHandlers } from '#server/auth/app';
 import type { BudgetHandlers } from '#server/budget/app';
 import type { BudgetFileHandlers } from '#server/budgetfiles/app';
+import type { CurrencyHandlers } from '#server/currencies/app';
 import type { DashboardHandlers } from '#server/dashboard/app';
 import type { EncryptionHandlers } from '#server/encryption/app';
 import type { FiltersHandlers } from '#server/filters/app';
@@ -25,6 +26,7 @@ import type { ServerHandlers } from './server-handlers';
 export type Handlers = {} & ServerHandlers &
   ApiHandlers &
   BudgetHandlers &
+  CurrencyHandlers &
   DashboardHandlers &
   FiltersHandlers &
   ForecastHandlers &

@@ -5,6 +5,12 @@ import * as asyncStorage from '#platform/server/asyncStorage';
 import * as connection from '#platform/server/connection';
 import { logger } from '#platform/server/log';
 import { createApp } from '#server/app';
+import type { MissingExchangeRateMeta } from '#server/currencies/app';
+import {
+  getBaseCurrency,
+  normalizeTransactionCurrency,
+  serializeMissingExchangeRateError,
+} from '#server/currencies/app';
 import * as db from '#server/db';
 import {
   APIError,
@@ -92,12 +98,26 @@ export type AccountHandlers = {
 async function updateAccount({
   id,
   name,
+  currency,
   last_reconciled,
 }: Pick<AccountEntity, 'id' | 'name'> &
-  Partial<Pick<AccountEntity, 'last_reconciled'>>) {
+  Partial<Pick<AccountEntity, 'currency' | 'last_reconciled'>>) {
+  if (currency != null) {
+    const countResult = await db.first<{ count: number }>(
+      'SELECT count(id) as count FROM transactions WHERE acct = ? AND tombstone = 0',
+      [id],
+    );
+    if ((countResult?.count ?? 0) > 0) {
+      throw APIError(
+        'account currency cannot be changed directly after transactions exist; use account currency conversion',
+      );
+    }
+  }
+
   await db.update('accounts', {
     id,
     name,
+    ...(currency != null && { currency }),
     ...(last_reconciled && { last_reconciled }),
   });
   return {};
@@ -105,6 +125,7 @@ async function updateAccount({
 
 async function getAccounts(): Promise<AccountEntity[]> {
   const dbAccounts = await db.getAccounts();
+  const baseCurrency = await getBaseCurrency();
   return dbAccounts.map(
     dbAccount =>
       ({
@@ -127,6 +148,7 @@ async function getAccounts(): Promise<AccountEntity[]> {
         account_sync_source: dbAccount.account_sync_source ?? null,
         last_sync: dbAccount.last_sync ?? null,
         bank_sync_status: dbAccount.bank_sync_status ?? null,
+        currency: dbAccount.currency ?? baseCurrency,
       }) satisfies AccountEntity,
   );
 }
@@ -548,16 +570,20 @@ async function createAccount({
   balance = 0,
   offBudget = false,
   closed = false,
+  currency,
 }: {
   name: string;
   balance?: number | undefined;
   offBudget?: boolean | undefined;
   closed?: boolean | undefined;
+  currency?: string | null | undefined;
 }) {
+  const accountCurrency = currency ?? (await getBaseCurrency());
   const id: AccountEntity['id'] = await db.insertAccount({
     name,
     offbudget: offBudget ? 1 : 0,
     closed: closed ? 1 : 0,
+    currency: accountCurrency,
   });
 
   await db.insertPayee({
@@ -568,15 +594,19 @@ async function createAccount({
   if (balance != null && balance !== 0) {
     const payee = await getStartingBalancePayee();
 
-    await db.insertTransaction({
-      account: id,
-      amount: amountToInteger(balance),
-      category: offBudget ? null : payee.category,
-      payee: payee.id,
-      date: monthUtils.currentDay(),
-      cleared: true,
-      starting_balance_flag: true,
-    });
+    await db.insertTransaction(
+      await normalizeTransactionCurrency({
+        account: id,
+        amount: amountToInteger(balance),
+        native_amount: amountToInteger(balance),
+        native_currency: accountCurrency,
+        category: offBudget ? undefined : (payee.category ?? undefined),
+        payee: payee.id,
+        date: monthUtils.currentDay(),
+        cleared: true,
+        starting_balance_flag: true,
+      }),
+    );
   }
 
   return id;
@@ -1324,6 +1354,18 @@ function handleSyncError(
   err: Error | PostError | BankSyncError,
   acct: db.DbAccount,
 ): SyncError {
+  const missingExchangeRate = serializeMissingExchangeRateError(err);
+  if (missingExchangeRate) {
+    const { fromCurrency, toCurrency, date } = missingExchangeRate.meta;
+    return {
+      type: 'SyncError',
+      accountId: acct.id,
+      message: `Missing exchange rate for ${fromCurrency} to ${toCurrency} on or before ${date}. Add an exchange rate and sync again.`,
+      category: 'MISSING_EXCHANGE_RATE',
+      code: 'MISSING_EXCHANGE_RATE',
+    };
+  }
+
   if (isBankSyncError(err)) {
     const syncError = {
       type: 'SyncError',
@@ -1588,6 +1630,7 @@ async function simpleFinBatchSync({
 export type ImportTransactionsResult = bankSync.ReconcileTransactionsResult & {
   errors: Array<{
     message: string;
+    missingExchangeRate?: MissingExchangeRateMeta;
   }>;
 };
 
@@ -1624,6 +1667,22 @@ async function importTransactions({
       updatedPreview: reconciled.updatedPreview,
     };
   } catch (err) {
+    const missingExchangeRate = serializeMissingExchangeRateError(err);
+    if (missingExchangeRate) {
+      const { fromCurrency, toCurrency, date } = missingExchangeRate.meta;
+      return {
+        errors: [
+          {
+            message: `Missing exchange rate for ${fromCurrency} to ${toCurrency} on or before ${date}.`,
+            missingExchangeRate: missingExchangeRate.meta,
+          },
+        ],
+        added: [],
+        updated: [],
+        updatedPreview: [],
+      };
+    }
+
     if (err instanceof TransactionError) {
       return {
         errors: [{ message: err.message }],

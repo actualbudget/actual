@@ -27,6 +27,7 @@ export type SyncedPrefs = Partial<
     | 'isPrivacyEnabled'
     | 'currencySymbolPosition'
     | 'currencySpaceBetweenAmountAndSymbol'
+    | 'exchange-rate-last-to-currency'
     | 'defaultCurrencyCode'
     | `show-account-${string}-net-worth-chart`
     | `side-nav.show-balance-history-${string}`
@@ -84,6 +85,8 @@ export type MetadataPrefs = Partial<{
  */
 export type LocalPrefs = Partial<{
   'ui.showClosedAccounts': boolean;
+  'ui.accountsGroupBy': 'currency' | 'account-type';
+  'ui.collapsedCurrencyGroups': Record<string, boolean>;
   'expand-splits': boolean;
   'budget.collapsed': string[];
   'budget.summaryCollapsed': boolean;

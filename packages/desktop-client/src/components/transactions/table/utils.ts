@@ -28,11 +28,22 @@ export type TransactionUpdateFunction = <T extends keyof SerializedTransaction>(
   value: SerializedTransaction[T],
 ) => void;
 
+export function getTransactionDisplayAmount(
+  transaction: Pick<TransactionEntity, 'amount' | 'native_amount'>,
+  useNativeAmount = true,
+) {
+  return useNativeAmount
+    ? (transaction.native_amount ?? transaction.amount)
+    : transaction.amount;
+}
+
 export function serializeTransaction(
   transaction: TransactionEntity,
   showZeroInDeposit?: boolean,
+  useNativeAmount = true,
 ): SerializedTransaction {
-  const { amount, date: originalDate } = transaction;
+  const { date: originalDate } = transaction;
+  const amount = getTransactionDisplayAmount(transaction, useNativeAmount);
 
   let debit = amount < 0 ? -amount : null;
   let credit = amount > 0 ? amount : null;
@@ -60,6 +71,7 @@ export function serializeTransaction(
   // Convert with decimals here so the value doesn't lose decimals and formatter will show or hide them.
   return {
     ...transaction,
+    amount,
     date,
     debit: debit != null ? integerToCurrencyWithDecimal(debit) : '',
     credit: credit != null ? integerToCurrencyWithDecimal(credit) : '',
@@ -69,6 +81,7 @@ export function serializeTransaction(
 export function deserializeTransaction(
   transaction: SerializedTransaction,
   originalTransaction: TransactionEntity,
+  useNativeAmount = true,
 ) {
   const { debit, credit, date: originalDate, ...realTransaction } = transaction;
 
@@ -81,13 +94,17 @@ export function deserializeTransaction(
   }
 
   amount =
-    amount != null ? amountToInteger(amount) : originalTransaction.amount;
+    amount != null
+      ? amountToInteger(amount)
+      : getTransactionDisplayAmount(originalTransaction, useNativeAmount);
   let date = originalDate;
   if (date == null) {
     date = originalTransaction.date || currentDay();
   }
 
-  return { ...realTransaction, date, amount };
+  return useNativeAmount
+    ? { ...realTransaction, date, amount, native_amount: amount }
+    : { ...realTransaction, date, amount };
 }
 
 export function isLastChild(

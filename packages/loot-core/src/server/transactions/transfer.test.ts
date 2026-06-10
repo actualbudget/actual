@@ -218,4 +218,70 @@ describe('Transfer', () => {
     expect(child.transfer_id).not.toBe(parent.transfer_id);
     expect(child.payee).toBe(transferOne.id);
   });
+
+  test('cross-currency transfers store destination native amount', async () => {
+    await prepareDatabase();
+    await db.insert('preferences', {
+      id: 'defaultCurrencyCode',
+      value: 'BRL',
+    });
+    await db.insert('currencies', {
+      id: 'brl',
+      code: 'BRL',
+      name: 'Brazilian Real',
+      is_base: 1,
+      sort_order: 0,
+      tombstone: 0,
+    });
+    await db.insert('currencies', {
+      id: 'usd',
+      code: 'USD',
+      name: 'US Dollar',
+      is_base: 0,
+      sort_order: 1,
+      tombstone: 0,
+    });
+    await db.insert('exchange_rates', {
+      id: 'usd-brl-2026-06-10',
+      from_currency: 'USD',
+      to_currency: 'BRL',
+      date: '2026-06-10T00:00:00',
+      rate: '5',
+      source: 'manual',
+      tombstone: 0,
+    });
+    await db.update('accounts', { id: 'one', currency: 'BRL' });
+    await db.update('accounts', { id: 'two', currency: 'USD' });
+
+    const transferTwo = await db.first<db.DbPayee>(
+      "SELECT * FROM payees WHERE transfer_acct = 'two'",
+    );
+    const transaction = await db.getTransaction(
+      await db.insertTransaction({
+        account: 'one',
+        amount: -100000,
+        native_amount: -100000,
+        native_currency: 'BRL',
+        base_currency: 'BRL',
+        exchange_rate: '1',
+        payee: transferTwo.id,
+        date: '2026-06-10',
+      }),
+    );
+
+    await transfer.onInsert(transaction);
+
+    const destination = await db.first<db.DbViewTransaction>(
+      'SELECT * FROM v_transactions WHERE account = ?',
+      ['two'],
+    );
+    expect(destination).toMatchObject({
+      amount: 100000,
+      native_amount: 20000,
+      native_currency: 'USD',
+      base_currency: 'BRL',
+      exchange_rate: '5',
+      exchange_rate_date: '2026-06-10T00:00:00',
+    });
+  });
 });

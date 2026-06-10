@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 import React, { useRef, useState } from 'react';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
@@ -25,6 +25,7 @@ import { css, cx } from '@emotion/css';
 import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
 import { BalanceHistoryGraph } from '#components/accounts/BalanceHistoryGraph';
 import { Link } from '#components/common/Link';
+import { BaseAmountTooltip } from '#components/currency/BaseAmountTooltip';
 import { Notes } from '#components/Notes';
 import { DropHighlight, useDraggable, useDroppable } from '#components/sort';
 import type { OnDragChangeCallback, OnDropCallback } from '#components/sort';
@@ -53,8 +54,13 @@ export const accountNameStyle: CSSProperties = {
 
 type AccountProps<FieldName extends SheetFields<'account'>> = {
   name: string;
+  displayName?: ReactNode;
   to: string;
   query: Binding<'account', FieldName>;
+  baseAmountQuery?: Binding<'account', SheetFields<'account'>>;
+  baseCurrency?: string;
+  nativeCurrency?: string;
+  showBaseAmountTooltip?: boolean;
   account?: AccountEntity;
   connected?: boolean;
   pending?: boolean;
@@ -71,6 +77,7 @@ type AccountProps<FieldName extends SheetFields<'account'>> = {
 
 export function Account<FieldName extends SheetFields<'account'>>({
   name,
+  displayName,
   account,
   connected,
   pending = false,
@@ -78,6 +85,10 @@ export function Account<FieldName extends SheetFields<'account'>>({
   updated,
   to,
   query,
+  baseAmountQuery,
+  baseCurrency,
+  nativeCurrency,
+  showBaseAmountTooltip = false,
   style,
   outerStyle,
   onDragChange,
@@ -131,6 +142,28 @@ export function Account<FieldName extends SheetFields<'account'>>({
   const updateAccount = useUpdateAccountMutation();
 
   const balanceCell = <CellValue binding={query} type="financial" />;
+  const balanceContent =
+    baseAmountQuery && baseCurrency && nativeCurrency ? (
+      <CellValue binding={query} type="financial">
+        {({ value: nativeAmount }) => (
+          <CellValue binding={baseAmountQuery} type="financial">
+            {({ value: baseAmount }) => (
+              <BaseAmountTooltip
+                currency={baseCurrency}
+                amount={Number(baseAmount)}
+                nativeCurrency={nativeCurrency}
+                nativeAmount={Number(nativeAmount)}
+                isDisabled={!showBaseAmountTooltip}
+              >
+                {balanceCell}
+              </BaseAmountTooltip>
+            )}
+          </CellValue>
+        )}
+      </CellValue>
+    ) : (
+      balanceCell
+    );
 
   const accountRow = (
     <View
@@ -234,14 +267,14 @@ export function Account<FieldName extends SheetFields<'account'>>({
                     />
                   </InitialFocus>
                 ) : (
-                  name
+                  (displayName ?? name)
                 )
               }
               right={
                 balanceTestId ? (
-                  <View data-testid={balanceTestId}>{balanceCell}</View>
+                  <View data-testid={balanceTestId}>{balanceContent}</View>
                 ) : (
-                  balanceCell
+                  balanceContent
                 )
               }
             />

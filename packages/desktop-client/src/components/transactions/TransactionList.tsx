@@ -39,6 +39,10 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
+import {
+  getMissingExchangeRate,
+  openMissingExchangeRateModal,
+} from '#util/missingExchangeRate';
 
 import { TransactionTable } from './TransactionsTable';
 import type { TransactionTableProps } from './TransactionsTable';
@@ -242,6 +246,7 @@ type TransactionListProps = Pick<
   | 'allowSplitTransaction'
   | 'ascDesc'
   | 'balances'
+  | 'baseBalances'
   | 'categoryGroups'
   | 'dateFormat'
   | 'hideFraction'
@@ -268,6 +273,7 @@ type TransactionListProps = Pick<
   | 'showSelection'
   | 'sortField'
   | 'transactions'
+  | 'useNativeAmounts'
 > & {
   tableRef: RefObject<TableHandleRef<TransactionEntity> | null>;
   allTransactions: TransactionEntity[];
@@ -296,6 +302,7 @@ export function TransactionList({
   categoryGroups,
   payees,
   balances,
+  baseBalances,
   showBalances,
   showReconciled,
   showCleared,
@@ -318,6 +325,7 @@ export function TransactionList({
   onApplyFilter,
   showSelection = true,
   allowSplitTransaction = true,
+  useNativeAmounts,
   onBatchDelete,
   onBatchDuplicate,
   onBatchLinkSchedule,
@@ -340,6 +348,23 @@ export function TransactionList({
   useLayoutEffect(() => {
     transactionsLatest.current = transactions;
   }, [transactions]);
+
+  const handleMissingExchangeRate = useCallback(
+    (error: unknown, retry: () => void | Promise<void>) => {
+      const missingRate = getMissingExchangeRate(error);
+      if (!missingRate) {
+        throw error;
+      }
+
+      openMissingExchangeRateModal({
+        dispatch,
+        t,
+        missingRate,
+        onSaved: retry,
+      });
+    },
+    [dispatch, t],
+  );
 
   const promptToConvertToSchedule = useCallback(
     (
@@ -418,10 +443,19 @@ export function TransactionList({
         return;
       }
 
-      await saveDiff({ added: newTransactions }, isLearnCategoriesEnabled);
-      onRefetch();
+      try {
+        await saveDiff({ added: newTransactions }, isLearnCategoriesEnabled);
+        onRefetch();
+      } catch (error) {
+        handleMissingExchangeRate(error, () => onAdd(newTransactions));
+      }
     },
-    [isLearnCategoriesEnabled, onRefetch, promptToConvertToSchedule],
+    [
+      handleMissingExchangeRate,
+      isLearnCategoriesEnabled,
+      onRefetch,
+      promptToConvertToSchedule,
+    ],
   );
 
   const onSave = useCallback(
@@ -441,7 +475,7 @@ export function TransactionList({
             onRefetch();
           } else {
             onChange(changes.newTransaction, changes.data);
-            void saveDiffAndApply(
+            await saveDiffAndApply(
               changes.diff,
               changes,
               onChange,
@@ -451,33 +485,44 @@ export function TransactionList({
         }
       };
 
-      const isLinkedToSchedule = !!transaction.schedule;
-      if (isFutureTransaction(transaction) && !isLinkedToSchedule) {
-        const originalTransaction = transactionsLatest.current.find(
-          t => t.id === transaction.id,
-        );
-        const dateChanged =
-          !originalTransaction || originalTransaction.date !== transaction.date;
-
-        if (dateChanged || !originalTransaction) {
-          promptToConvertToSchedule(
-            transaction,
-            async () => {
-              if (transaction.id && !transaction.id.startsWith('temp')) {
-                await send('transaction-delete', { id: transaction.id });
-              }
-
-              await createSingleTimeScheduleFromTransaction(transaction);
-            },
-            saveTransaction,
+      try {
+        const isLinkedToSchedule = !!transaction.schedule;
+        if (isFutureTransaction(transaction) && !isLinkedToSchedule) {
+          const originalTransaction = transactionsLatest.current.find(
+            t => t.id === transaction.id,
           );
-          return;
-        }
-      }
+          const dateChanged =
+            !originalTransaction ||
+            originalTransaction.date !== transaction.date;
 
-      await saveTransaction();
+          if (dateChanged || !originalTransaction) {
+            promptToConvertToSchedule(
+              transaction,
+              async () => {
+                if (transaction.id && !transaction.id.startsWith('temp')) {
+                  await send('transaction-delete', { id: transaction.id });
+                }
+
+                await createSingleTimeScheduleFromTransaction(transaction);
+              },
+              saveTransaction,
+            );
+            return;
+          }
+        }
+
+        await saveTransaction();
+      } catch (error) {
+        handleMissingExchangeRate(error, () => onSave(transaction));
+      }
     },
-    [isLearnCategoriesEnabled, onChange, onRefetch, promptToConvertToSchedule],
+    [
+      handleMissingExchangeRate,
+      isLearnCategoriesEnabled,
+      onChange,
+      onRefetch,
+      promptToConvertToSchedule,
+    ],
   );
 
   const onAddSplit = useCallback(
@@ -733,6 +778,7 @@ export function TransactionList({
         categoryGroups={categoryGroups}
         payees={payees}
         balances={balances}
+        baseBalances={baseBalances}
         showBalances={showBalances}
         showReconciled={showReconciled}
         showCleared={showCleared}
@@ -745,6 +791,7 @@ export function TransactionList({
         isMatched={isMatched}
         dateFormat={dateFormat}
         hideFraction={hideFraction}
+        useNativeAmounts={useNativeAmounts}
         renderEmpty={renderEmpty}
         onSave={onSave}
         onApplyRules={onApplyRules}

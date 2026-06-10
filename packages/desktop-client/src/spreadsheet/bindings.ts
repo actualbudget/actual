@@ -25,8 +25,18 @@ export function accountBalance(accountId: AccountEntity['id']) {
     query: q('transactions')
       .filter({ account: accountId })
       .options({ splits: 'none' })
-      .calculate({ $sum: '$amount' }),
+      .calculate({ $sum: '$native_amount' }),
   } satisfies Binding<'account', 'balance'>;
+}
+
+export function accountBaseBalance(accountId: AccountEntity['id']) {
+  return {
+    name: `baseBalance-${accountId}`,
+    query: q('transactions')
+      .filter({ account: accountId })
+      .options({ splits: 'none' })
+      .calculate({ $sum: '$amount' }),
+  } satisfies Binding<'account', `baseBalance-${string}`>;
 }
 
 export function accountBalanceCleared(accountId: AccountEntity['id']) {
@@ -35,7 +45,7 @@ export function accountBalanceCleared(accountId: AccountEntity['id']) {
     query: q('transactions')
       .filter({ account: accountId, cleared: true })
       .options({ splits: 'none' })
-      .calculate({ $sum: '$amount' }),
+      .calculate({ $sum: '$native_amount' }),
   } satisfies Binding<'account', 'balanceCleared'>;
 }
 
@@ -45,7 +55,7 @@ export function accountBalanceUncleared(accountId: AccountEntity['id']) {
     query: q('transactions')
       .filter({ account: accountId, cleared: false })
       .options({ splits: 'none' })
-      .calculate({ $sum: '$amount' }),
+      .calculate({ $sum: '$native_amount' }),
   } satisfies Binding<'account', 'balanceUncleared'>;
 }
 
@@ -67,6 +77,32 @@ export function onBudgetAccountBalance() {
   } satisfies Binding<'account', 'onbudget-accounts-balance'>;
 }
 
+export function onBudgetAccountBalanceForCurrency(currency: string) {
+  return {
+    name: `onbudget-accounts-balance-${currency}`,
+    query: q('transactions')
+      .filter({
+        'account.offbudget': false,
+        'account.closed': false,
+        'account.currency': currency,
+      })
+      .calculate({ $sum: '$native_amount' }),
+  } satisfies Binding<'account', `onbudget-accounts-balance-${string}`>;
+}
+
+export function onBudgetAccountBaseBalanceForCurrency(currency: string) {
+  return {
+    name: `onbudget-accounts-base-balance-${currency}`,
+    query: q('transactions')
+      .filter({
+        'account.offbudget': false,
+        'account.closed': false,
+        'account.currency': currency,
+      })
+      .calculate({ $sum: '$amount' }),
+  } satisfies Binding<'account', `onbudget-accounts-base-balance-${string}`>;
+}
+
 export function offBudgetAccountBalance() {
   return {
     name: `offbudget-accounts-balance`,
@@ -74,6 +110,32 @@ export function offBudgetAccountBalance() {
       .filter({ 'account.offbudget': true, 'account.closed': false })
       .calculate({ $sum: '$amount' }),
   } satisfies Binding<'account', 'offbudget-accounts-balance'>;
+}
+
+export function offBudgetAccountBalanceForCurrency(currency: string) {
+  return {
+    name: `offbudget-accounts-balance-${currency}`,
+    query: q('transactions')
+      .filter({
+        'account.offbudget': true,
+        'account.closed': false,
+        'account.currency': currency,
+      })
+      .calculate({ $sum: '$native_amount' }),
+  } satisfies Binding<'account', `offbudget-accounts-balance-${string}`>;
+}
+
+export function offBudgetAccountBaseBalanceForCurrency(currency: string) {
+  return {
+    name: `offbudget-accounts-base-balance-${currency}`,
+    query: q('transactions')
+      .filter({
+        'account.offbudget': true,
+        'account.closed': false,
+        'account.currency': currency,
+      })
+      .calculate({ $sum: '$amount' }),
+  } satisfies Binding<'account', `offbudget-accounts-base-balance-${string}`>;
 }
 
 export function closedAccountBalance() {

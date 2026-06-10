@@ -32,6 +32,26 @@ export type DbAccount = {
     | 'reauth-required'
     | 'attention-required'
     | null;
+  currency?: string | null;
+};
+
+export type DbCurrency = {
+  id: string;
+  code: string;
+  name: string | null;
+  is_base: 1 | 0;
+  sort_order: number | null;
+  tombstone: 1 | 0;
+};
+
+export type DbExchangeRate = {
+  id: string;
+  from_currency: string;
+  to_currency: string;
+  date: string;
+  rate: string;
+  source: 'manual' | 'provider' | string;
+  tombstone: 1 | 0;
 };
 
 export type DbBank = {
@@ -172,6 +192,14 @@ export type DbTransaction = {
   date: number;
   acct: DbAccount['id'];
   amount: number;
+  native_amount?: number | null;
+  native_currency?: string | null;
+  base_currency?: string | null;
+  exchange_rate?: string | null;
+  exchange_rate_date?: string | null;
+  exchange_rate_id?: string | null;
+  exchange_rate_locked?: 1 | 0 | null;
+  fx_recalculated_at?: string | null;
   sort_order: number;
   parent_id?: DbTransaction['id'] | null;
   category?: DbCategory['id'] | null;
@@ -281,6 +309,14 @@ export type DbViewTransactionInternal = {
   date: DbTransaction['date'];
   account: DbAccount['id'];
   amount: DbTransaction['amount'];
+  native_amount: DbTransaction['native_amount'];
+  native_currency: DbTransaction['native_currency'];
+  base_currency: DbTransaction['base_currency'];
+  exchange_rate: DbTransaction['exchange_rate'];
+  exchange_rate_date: DbTransaction['exchange_rate_date'];
+  exchange_rate_id: DbTransaction['exchange_rate_id'];
+  exchange_rate_locked: DbTransaction['exchange_rate_locked'];
+  fx_recalculated_at: DbTransaction['fx_recalculated_at'];
   parent_id: DbTransaction['parent_id'] | null;
   category: DbCategory['id'] | null;
   payee: DbPayee['id'] | null;

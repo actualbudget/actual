@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 
 import * as connection from '#platform/server/connection';
+import { normalizeTransactionCurrency } from '#server/currencies/app';
 import * as db from '#server/db';
 import { incrFetch, whereIn } from '#server/db/util';
 import { batchMessages } from '#server/sync';
@@ -86,7 +87,7 @@ export async function batchUpdateTransactions({
           if (t.is_parent || account?.offbudget === 1) {
             t.category = null;
           }
-          return db.insertTransaction(t);
+          return db.insertTransaction(await normalizeTransactionCurrency(t));
         }),
       );
     }
@@ -115,7 +116,7 @@ export async function batchUpdateTransactions({
             }
           }
 
-          await db.updateTransaction(t);
+          await db.updateTransaction(await normalizeTransactionCurrency(t));
         }),
       );
     }

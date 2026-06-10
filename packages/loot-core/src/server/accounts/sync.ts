@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import * as asyncStorage from '#platform/server/asyncStorage';
 import { logger } from '#platform/server/log';
 import { aqlQuery } from '#server/aql';
+import { normalizeTransactionCurrency } from '#server/currencies/app';
 import * as db from '#server/db';
 import { TRANSACTION_SORT_INCREMENT } from '#server/db/sort';
 import { TransactionError } from '#server/errors';
@@ -792,7 +793,10 @@ export async function matchTransactions(
     subtransactions,
   } of normalized) {
     // Run the rules
-    const trans = await runRules(originalTrans, accountsMap);
+    const trans = await normalizeTransactionCurrency({
+      ...(await runRules(originalTrans, accountsMap)),
+      account: acctId,
+    });
 
     let match = null;
     let fuzzyDataset = null;
@@ -975,12 +979,12 @@ export async function addTransactions(
     // Run the rules
     const trans = await runRules(originalTrans, accountsMap);
 
-    const finalTransaction = {
+    const finalTransaction = await normalizeTransactionCurrency({
       id: uuidv4(),
       ...trans,
       account: acctId,
       cleared: trans.cleared != null ? trans.cleared : true,
-    };
+    });
 
     // Add split transactions if they are given
     const updatedSubtransactions =
@@ -1015,7 +1019,9 @@ export async function addTransactions(
   } else {
     await batchMessages(async () => {
       newTransactions = await Promise.all(
-        added.map(async trans => db.insertTransaction(trans)),
+        added.map(async trans =>
+          db.insertTransaction(await normalizeTransactionCurrency(trans)),
+        ),
       );
     });
   }
@@ -1112,15 +1118,18 @@ async function processBankSyncDownload(
     const payee = await getStartingBalancePayee();
 
     return runMutator(async () => {
-      const initialId = await db.insertTransaction({
-        account: id,
-        amount: balanceToUse,
-        category: acctRow.offbudget === 0 ? payee.category : null,
-        payee: payee.id,
-        date: startingBalanceDate,
-        cleared: true,
-        starting_balance_flag: true,
-      });
+      const initialId = await db.insertTransaction(
+        await normalizeTransactionCurrency({
+          account: id,
+          amount: balanceToUse,
+          native_amount: balanceToUse,
+          category: acctRow.offbudget === 0 ? payee.category : null,
+          payee: payee.id,
+          date: startingBalanceDate,
+          cleared: true,
+          starting_balance_flag: true,
+        }),
+      );
 
       const result = await reconcileTransactions(
         id,

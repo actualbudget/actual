@@ -178,6 +178,14 @@ function getCalculateRunningBalancesFn(
       : undefined;
 }
 
+function getTransactionDisplayAmount(transaction: TransactionEntity) {
+  return transaction.native_amount ?? transaction.amount;
+}
+
+function getTransactionBaseAmount(transaction: TransactionEntity) {
+  return transaction.amount;
+}
+
 export function calculateRunningBalancesBottomUp(
   transactions: readonly TransactionEntity[],
   splits: TransactionSplitsOption,
@@ -203,17 +211,52 @@ export function calculateRunningBalancesBottomUp(
         if (previousTransactionIndex >= arr.length) {
           // This is the last transaction in the list,
           // so we set the running balance to the starting balance + the amount of the transaction
-          acc.set(transaction.id, startingBalance + transaction.amount);
+          acc.set(
+            transaction.id,
+            startingBalance + getTransactionDisplayAmount(transaction),
+          );
           return acc;
         }
         const previousTransaction = arr[previousTransactionIndex];
         const previousRunningBalance = acc.get(previousTransaction.id) ?? 0;
         const currentRunningBalance =
-          previousRunningBalance + transaction.amount;
+          previousRunningBalance + getTransactionDisplayAmount(transaction);
         acc.set(transaction.id, currentRunningBalance);
         return acc;
       }, new Map<TransactionEntity['id'], IntegerAmount>())
   );
+}
+
+export function calculateBaseRunningBalancesBottomUp(
+  transactions: readonly TransactionEntity[],
+  splits: TransactionSplitsOption,
+  startingBalance: IntegerAmount = 0,
+) {
+  return transactions
+    .filter(t => {
+      switch (splits) {
+        case 'all':
+          return !t.parent_id;
+        default:
+          return true;
+      }
+    })
+    .reduceRight((acc, transaction, index, arr) => {
+      const previousTransactionIndex = index + 1;
+      if (previousTransactionIndex >= arr.length) {
+        acc.set(
+          transaction.id,
+          startingBalance + getTransactionBaseAmount(transaction),
+        );
+        return acc;
+      }
+      const previousTransaction = arr[previousTransactionIndex];
+      const previousRunningBalance = acc.get(previousTransaction.id) ?? 0;
+      const currentRunningBalance =
+        previousRunningBalance + getTransactionBaseAmount(transaction);
+      acc.set(transaction.id, currentRunningBalance);
+      return acc;
+    }, new Map<TransactionEntity['id'], IntegerAmount>());
 }
 
 export function calculateRunningBalancesTopDown(
@@ -245,13 +288,13 @@ export function calculateRunningBalancesTopDown(
       if (index === arr.length - 1) {
         // This is the last transaction in the list,
         // so we set the running balance to the amount of the transaction
-        acc.set(transaction.id, transaction.amount);
+        acc.set(transaction.id, getTransactionDisplayAmount(transaction));
         return acc;
       }
 
       const previousTransaction = arr[index - 1];
       const previousRunningBalance = acc.get(previousTransaction.id) ?? 0;
-      const previousAmount = previousTransaction.amount ?? 0;
+      const previousAmount = getTransactionDisplayAmount(previousTransaction);
       const currentRunningBalance = previousRunningBalance - previousAmount;
       acc.set(transaction.id, currentRunningBalance);
       return acc;
