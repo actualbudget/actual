@@ -9,8 +9,7 @@ const distDir = path.resolve(__dirname, 'dist');
 // Worker bundle: full loot-core + sql.js + absurd-sql.
 export default defineConfig({
   define: {
-    // Runtime env (PUBLIC_URL etc.) comes from the api-browser/init handler via
-    // the nodePolyfills process shim; only NODE_ENV must be a build literal.
+    // Other env vars (PUBLIC_URL etc.) are set at runtime via the process shim.
     'process.env.NODE_ENV': JSON.stringify('production'),
   },
   build: {

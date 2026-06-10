@@ -60,8 +60,8 @@ function handleMessage(msg) {
         undo.gc(undoTag);
       }
 
-      // api/* handler failures arrive as a reply carrying `error` (see
-      // platform/server/connection); reject rather than resolving undefined.
+      // api/* failures arrive as a reply carrying `error`; reject rather
+      // than resolving undefined.
       if (error) {
         handler.reject(error);
       } else {
@@ -102,12 +102,9 @@ function connectWorker(worker, onOpen, onError) {
     // available, but we don't know when the backend is actually
     // ready to handle messages.
     if (msg.type === 'connect') {
-      // Send any messages that were queued while closed. The queue must be
-      // dropped even when empty, otherwise sends issued after this point
-      // keep queueing and never reach the backend.
-      if (messageQueue?.length > 0) {
-        messageQueue.forEach(msg => worker.postMessage(msg));
-      }
+      // Flush messages queued while closed; null the queue so later sends
+      // post directly instead of queueing forever.
+      messageQueue?.forEach(msg => worker.postMessage(msg));
       messageQueue = null;
 
       // signal to the backend that we're connected to it

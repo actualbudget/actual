@@ -54,10 +54,9 @@ function copyMigrationsAndDefaultDb() {
       const sqlJsWasm = require.resolve('@jlongster/sql.js/dist/sql-wasm.wasm');
       fs.copyFileSync(sqlJsWasm, path.join(distDir, 'sql-wasm.wasm'));
 
-      // loot-core's browser fs fetches `${PUBLIC_URL}data-file-index.txt` and
-      // `${PUBLIC_URL}data/<name>`; PUBLIC_URL points at this dist/ at runtime.
-      // JS migrations get a `.data` suffix so consumer bundlers don't run
-      // import-analysis on them; browser-worker.ts maps the names back.
+      // The browser worker loads `data-file-index.txt` and `data/<name>` from
+      // PUBLIC_URL. JS migrations are stored with a `.data` suffix so bundlers
+      // don't import-analyze them; browser-worker.ts redirects the fetches.
       const dataDir = path.join(distDir, 'data');
       const dataMigrationsDir = path.join(dataDir, 'migrations');
       fs.mkdirSync(dataMigrationsDir, { recursive: true });
@@ -66,21 +65,23 @@ function copyMigrationsAndDefaultDb() {
         path.join(distDir, 'default-db.sqlite'),
         path.join(dataDir, 'default-db.sqlite'),
       );
-      const wireMigrationNames: string[] = [];
+      const migrationNames: string[] = [];
       for (const name of fs.readdirSync(migrationsDest)) {
-        const wireName = name.endsWith('.js') ? `${name}.data` : name;
         fs.copyFileSync(
           path.join(migrationsDest, name),
-          path.join(dataMigrationsDir, wireName),
+          path.join(
+            dataMigrationsDir,
+            name.endsWith('.js') ? `${name}.data` : name,
+          ),
         );
-        wireMigrationNames.push(`migrations/${wireName}`);
+        migrationNames.push(`migrations/${name}`);
       }
-      wireMigrationNames.sort();
+      migrationNames.sort();
 
-      // data-file-index.txt: one path per line, relative to `data/`.
-      const manifest =
-        ['default-db.sqlite', ...wireMigrationNames].join('\n') + '\n';
-      fs.writeFileSync(path.join(distDir, 'data-file-index.txt'), manifest);
+      fs.writeFileSync(
+        path.join(distDir, 'data-file-index.txt'),
+        ['default-db.sqlite', ...migrationNames].join('\n') + '\n',
+      );
     },
   };
 }
