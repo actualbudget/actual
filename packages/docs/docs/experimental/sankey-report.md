@@ -1,12 +1,10 @@
 # Sankey Report
 
-:::warning
-This is an **experimental feature**. That means we’re still working on finishing it. There may be bugs, missing functionality or incomplete documentation, and we may decide to remove the feature in a future release. If you have any feedback, please comment on the [dedicated issue](https://github.com/actualbudget/actual/issues/1919) or post a message in the Discord.
-:::
+<ExperimentalFeatureWarning issueId="1919" />
 
 ## What it is
 
-The Sankey Chart visualises flows of money between buckets in your budget — for example, how income flows into accounts, how money is budgeted into categories, or how spending flows from accounts into categories. The chart emphasises the relative sizes of flows and makes it easy to see major paths and where money is going.
+The Sankey Chart visualizes flows of money between buckets in your budget — for example, how income flows into accounts, how money is budgeted into categories, or how spending flows from accounts into categories. The chart emphasizes the relative sizes of flows and makes it easy to see major paths and where money is going.
 
 The chart has two main view modes. **Spent** shows how income flows into accounts and how they are spent. **Budgeted** shows the money available to budget, and how it is allocated across categories.
 
@@ -41,6 +39,6 @@ The chart has two main view modes. **Spent** shows how income flows into account
 
 ## Related
 
-- [Reports index](/docs/reports/index.md) — other report types and tips.
-- [Transactions](/docs/tour/transactions.md) — inspect the underlying transactions for flows you see in the chart.
-- [Budget page](/docs/tour/budget.md) — configure categories and rollover rules that affect how money is tracked.
+- [Reports index](../reports/index.md) — other report types and tips.
+- [Transactions](../transactions/filters.md) — inspect the underlying transactions for flows you see in the chart.
+- [Budget page](../tour/budget.md) — configure categories and rollover rules that affect how money is tracked.
