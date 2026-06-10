@@ -56,6 +56,71 @@ test.describe('Accounts', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('shift-click range selection skips hidden reconciled transactions', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'Range Select',
+      offBudget: false,
+      balance: 0,
+    });
+    await accountPage.waitFor();
+
+    // Newest transactions are shown first, so the rows read
+    // 'range-five' through 'range-one' from top to bottom.
+    for (const note of ['one', 'two', 'three', 'four', 'five']) {
+      await accountPage.createSingleTransaction({
+        payee: '',
+        notes: `range-${note}`,
+        category: 'Food',
+        debit: '10.00',
+      });
+    }
+
+    // Mark two transactions in the middle of the list as cleared and
+    // lock them via reconciliation so they become reconciled.
+    for (const note of ['range-two', 'range-four']) {
+      await accountPage.transactionTableRow
+        .filter({ hasText: note })
+        .getByTestId('cleared')
+        .click();
+    }
+
+    await page.getByRole('button', { name: 'Reconcile' }).click();
+    // The reconciliation amount is pre-filled with the cleared balance,
+    // so submitting right away results in a zero difference.
+    const reconcilePopover = page.locator('[data-popover]');
+    await reconcilePopover.getByRole('textbox').waitFor();
+    await reconcilePopover.getByRole('button', { name: 'Reconcile' }).click();
+    await page.getByRole('button', { name: 'Lock transactions' }).click();
+
+    // Showing the running balance keeps reconciled transactions loaded
+    // even when they are hidden; they must still be excluded from
+    // range selection.
+    await accountPage.accountMenuButton.click();
+    await page.getByRole('button', { name: 'Show running balance' }).click();
+    await accountPage.accountMenuButton.click();
+    await page
+      .getByRole('button', { name: 'Hide reconciled transactions' })
+      .click();
+
+    await expect(
+      accountPage.transactionTableRow.filter({ hasText: 'range-two' }),
+    ).not.toBeVisible();
+
+    // Shift-click from the first to the last visible transaction.
+    await accountPage.transactionTableRow
+      .filter({ hasText: 'range-five' })
+      .getByTestId('select')
+      .click();
+    await accountPage.transactionTableRow
+      .filter({ hasText: 'range-one' })
+      .getByTestId('select')
+      .click({ modifiers: ['Shift'] });
+
+    // Only the three visible transactions should be selected — not the
+    // hidden reconciled ones in between.
+    await expect(accountPage.selectButton).toHaveText('3 transactions');
+  });
+
   test.describe('On Budget Accounts', () => {
     // Reset filters
     test.afterEach(async () => {
