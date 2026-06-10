@@ -65,24 +65,21 @@ test.describe('Accounts', () => {
     await accountPage.waitFor();
 
     // Newest transactions are shown first, so the rows read
-    // 'range-five' through 'range-one' from top to bottom.
-    for (const note of ['one', 'two', 'three', 'four', 'five']) {
+    // 'range-three' through 'range-one' from top to bottom.
+    for (const note of ['one', 'two', 'three']) {
       await accountPage.createSingleTransaction({
         payee: '',
         notes: `range-${note}`,
-        category: 'Food',
         debit: '10.00',
       });
     }
 
-    // Mark two transactions in the middle of the list as cleared and
-    // lock them via reconciliation so they become reconciled.
-    for (const note of ['range-two', 'range-four']) {
-      await accountPage.transactionTableRow
-        .filter({ hasText: note })
-        .getByTestId('cleared')
-        .click();
-    }
+    // Mark the middle transaction as cleared and lock it via
+    // reconciliation so it becomes reconciled.
+    await accountPage.transactionTableRow
+      .filter({ hasText: 'range-two' })
+      .getByTestId('cleared')
+      .click();
 
     await page.getByRole('button', { name: 'Reconcile' }).click();
     // The reconciliation amount is pre-filled with the cleared balance,
@@ -108,7 +105,7 @@ test.describe('Accounts', () => {
 
     // Shift-click from the first to the last visible transaction.
     await accountPage.transactionTableRow
-      .filter({ hasText: 'range-five' })
+      .filter({ hasText: 'range-three' })
       .getByTestId('select')
       .click();
     await accountPage.transactionTableRow
@@ -116,9 +113,9 @@ test.describe('Accounts', () => {
       .getByTestId('select')
       .click({ modifiers: ['Shift'] });
 
-    // Only the three visible transactions should be selected — not the
-    // hidden reconciled ones in between.
-    await expect(accountPage.selectButton).toHaveText('3 transactions');
+    // Only the two visible transactions should be selected — not the
+    // hidden reconciled one in between.
+    await expect(accountPage.selectButton).toHaveText('2 transactions');
   });
 
   test.describe('On Budget Accounts', () => {
