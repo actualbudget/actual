@@ -77,7 +77,7 @@ buffer. Instead of aiming to save the full $ 3,000 in one go, begin by setting a
 For example, if you can set aside $ 200 each month, gradually build your buffer over several months. As you save
 more, you'll start to pay some of next month's bills with this reserve.
 
-You can also read about this strategy in [one of our blog posts](../../../blog/2023-12-15-automate-your-budget-with-goal-templates).
+You can also read about this strategy in [one of our blog posts](../../blog/2023-12-15-automate.md).
 
 ### Pay-Yourself-First Strategy
 

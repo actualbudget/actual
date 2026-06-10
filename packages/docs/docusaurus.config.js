@@ -5,7 +5,10 @@ const { themes } = require('prism-react-renderer');
 
 const defaultOptions = {
   editUrl: 'https://github.com/actualbudget/actual/tree/master/packages/docs',
-  beforeDefaultRemarkPlugins: [require('./src/remark/mentions')],
+  beforeDefaultRemarkPlugins: [
+    require('./src/remark/mentions'),
+    require('./src/remark/enforce-doc-links'),
+  ],
 };
 
 /** @type {import('@docusaurus/types').Config} */
@@ -33,7 +36,7 @@ module.exports = {
   markdown: {
     mermaid: true,
     hooks: {
-      onBrokenMarkdownLinks: 'warn',
+      onBrokenMarkdownLinks: 'throw',
     },
   },
 
