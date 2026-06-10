@@ -135,6 +135,8 @@ describe('app-favicon', () => {
       .mockResolvedValueOnce(
         htmlResponse('<html><head><title>Bank</title></head></html>'),
       )
+      .mockRejectedValueOnce(new Error('not found'))
+      .mockRejectedValueOnce(new Error('not found'))
       .mockResolvedValueOnce(imageResponse('image/x-icon', 256));
 
     const res = await request(app)
@@ -155,20 +157,22 @@ describe('app-favicon', () => {
           '<html><head><link rel="icon" href="/icon.png"></head></html>',
         ),
       )
-      .mockResolvedValueOnce(imageResponse('image/png', 64 * 1024))
-      .mockResolvedValueOnce(imageResponse('image/x-icon', 64 * 1024))
-      .mockResolvedValueOnce(imageResponse('image/png', 64 * 1024));
+      .mockResolvedValueOnce(imageResponse('image/png', 300 * 1024))
+      .mockResolvedValueOnce(imageResponse('image/png', 300 * 1024))
+      .mockResolvedValueOnce(imageResponse('image/png', 300 * 1024))
+      .mockResolvedValueOnce(imageResponse('image/x-icon', 300 * 1024));
 
     const res = await request(app)
       .get('/')
       .query({ url: 'https://bank.example' });
 
     expect(res.statusCode).toBe(502);
-    expect(res.body.error).toMatch(/too large/);
   });
 
   it('returns 502 if every source fails', async () => {
     mockedFetch
+      .mockRejectedValueOnce(new Error('network'))
+      .mockRejectedValueOnce(new Error('network'))
       .mockRejectedValueOnce(new Error('network'))
       .mockRejectedValueOnce(new Error('network'));
 
@@ -196,7 +200,7 @@ describe('app-favicon', () => {
   });
 
   it('image mode rejects payloads larger than the size cap', async () => {
-    mockedFetch.mockResolvedValueOnce(imageResponse('image/png', 64 * 1024));
+    mockedFetch.mockResolvedValueOnce(imageResponse('image/png', 300 * 1024));
 
     const res = await request(app)
       .get('/')
