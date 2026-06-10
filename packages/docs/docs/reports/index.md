@@ -20,7 +20,7 @@ Currently, Actual comes with the following built-in widgets and reports:
 - [Summary card](#summary-card)
 - [Calendar card](#calendar-card)
 - [Text widget](#text-widget)
-- [Custom Reports](/docs/reports/custom-reports)
+- [Custom Reports](./custom-reports.md)
 - [Crossover Point](#crossover-point)
 
 The following are available as experimental features:
