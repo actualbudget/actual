@@ -82,7 +82,7 @@ app.post(
       if (account.type === 'CREDIT') {
         startingBalance = -startingBalance;
       }
-      const date = getDate(new Date(account.updatedAt));
+      const date = getDate(account.updatedAt);
 
       const balances = [
         {
@@ -99,12 +99,17 @@ app.post(
       const booked = [];
       const pending = [];
 
-      for (const trans of transactions) {
+      for (const trans of Object.values(transactions)) {
+
+        if(typeof trans !== 'object' || Object.keys(trans).length === 0) {
+          continue;
+        }
+
         const newTrans = {};
 
         newTrans.booked = !(trans.status === 'PENDING');
 
-        const transactionDate = new Date(trans.date);
+        const transactionDate = trans.date;
 
         if (transactionDate < startDate && !trans.sandbox) {
           continue;
