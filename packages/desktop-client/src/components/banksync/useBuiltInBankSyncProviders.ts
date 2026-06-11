@@ -344,7 +344,6 @@ export function useBuiltInBankSyncProviders({
       );
       setIsAkahuSetupComplete(false);
     } catch (error) {
-      console.log(error);
       notifyResetFailure('Akahu', error);
     }
   }, [notifyResetFailure]);
