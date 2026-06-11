@@ -221,13 +221,17 @@ export class Spreadsheet {
       this.events.emit('change', { names: this.computeQueue });
 
       // Cache the updated cells
-      if (typeof this.saveCache === 'function') {
-        this.saveCache(this.computeQueue);
-      }
+      this.saveCachedCells(this.computeQueue);
       this.markCacheSafe();
 
       this.running = false;
       this.computeQueue = [];
+    }
+  }
+
+  saveCachedCells(names: string[]): void {
+    if (typeof this.saveCache === 'function') {
+      this.saveCache(names);
     }
   }
 
