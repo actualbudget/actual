@@ -342,9 +342,14 @@ async function getAccounts(): Promise<AccountEntity[]> {
         last_reconciled: dbAccount.last_reconciled ?? null,
         tombstone: dbAccount.tombstone,
         account_id: dbAccount.account_id ?? null,
-        bank: dbAccount.bank ?? null,
-        bankName: dbAccount.bankName ?? null,
-        bankId: dbAccount.bankId ?? null,
+        bank: dbAccount.bank
+          ? {
+              id: dbAccount.bank,
+              name: dbAccount.bankName ?? null,
+              icon: dbAccount.bankIcon ?? null,
+              website: dbAccount.bankWebsite ?? null,
+            }
+          : null,
         mask: dbAccount.mask ?? null,
         official_name: dbAccount.official_name ?? null,
         balance_current: dbAccount.balance_current ?? null,
@@ -355,9 +360,6 @@ async function getAccounts(): Promise<AccountEntity[]> {
         bank_sync_status: dbAccount.bank_sync_status ?? null,
         website: dbAccount.website ?? null,
         icon: dbAccount.icon ?? null,
-        bankIcon: dbAccount.bankIcon ?? null,
-        displayIcon: dbAccount.displayIcon ?? null,
-        displayWebsite: dbAccount.displayWebsite ?? null,
       }) satisfies AccountEntity,
   );
 }

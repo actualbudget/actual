@@ -13,6 +13,7 @@ import type { AccountEntity } from '@actual-app/core/types/models';
 
 import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
 import { isAccountFailedSync } from '#accounts/syncStatus';
+import { AccountIcon } from '#components/accounts/AccountIcon';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { AddTransactionButton } from '#components/mobile/transactions/AddTransactionButton';
 import { MobilePageHeader, Page } from '#components/Page';
@@ -25,7 +26,6 @@ import {
 } from '#modals/modalsSlice';
 import { useDispatch, useSelector } from '#redux';
 
-import { AccountHeaderIcon } from './AccountHeaderIcon';
 import { AccountTransactions } from './AccountTransactions';
 import { AllAccountTransactions } from './AllAccountTransactions';
 import { OffBudgetAccountTransactions } from './OffBudgetAccountTransactions';
@@ -176,7 +176,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     );
   };
 
-  const onClick = useCallback(() => {
+  const onClick = () => {
     dispatch(
       pushModal({
         modal: {
@@ -194,17 +194,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
         },
       }),
     );
-  }, [
-    account.id,
-    dispatch,
-    onCloseAccount,
-    onEditNotes,
-    onReopenAccount,
-    onSave,
-    onToggleRunningBalance,
-    onToggleReconciled,
-    onEditIcon,
-  ]);
+  };
 
   return (
     <View
@@ -230,7 +220,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
           }}
         />
       )}
-      <AccountHeaderIcon account={account} />
+      <AccountIcon account={account} size={20} />
       <Button variant="bare" onPress={onClick}>
         <Text
           style={{

@@ -25,6 +25,7 @@ import { css } from '@emotion/css';
 
 import { useMoveAccountMutation, useSyncAndDownloadMutation } from '#accounts';
 import { isAccountFailedSync } from '#accounts/syncStatus';
+import { AccountIcon } from '#components/accounts/AccountIcon';
 import { makeAmountFullStyle } from '#components/budget/util';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';
@@ -192,7 +193,7 @@ function AccountListItem({
                 opacity: isConnected ? 1 : 0,
               }}
             />
-            <MobileAccountIcon account={account} />
+            <AccountIcon account={account} size={20} />
             <TextOneLine
               style={{
                 ...styles.text,
@@ -495,27 +496,6 @@ const AccountList = forwardRef<HTMLDivElement, AccountListProps>(
 );
 
 AccountList.displayName = 'AccountList';
-
-const MOBILE_ACCOUNT_ICON_SIZE = 20;
-
-function MobileAccountIcon({ account }: { account: AccountEntity }) {
-  const icon = account.displayIcon;
-  if (!icon) return null;
-  return (
-    <img
-      src={icon}
-      alt=""
-      width={MOBILE_ACCOUNT_ICON_SIZE}
-      height={MOBILE_ACCOUNT_ICON_SIZE}
-      style={{
-        marginRight: 8,
-        objectFit: 'contain',
-        flexShrink: 0,
-        borderRadius: 4,
-      }}
-    />
-  );
-}
 
 export function AccountsPage() {
   const dispatch = useDispatch();

@@ -125,13 +125,22 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
     setError(null);
   };
 
+  const handleScopeChange = (newScope: Scope) => {
+    setScope(newScope);
+    setPreviewIcon(null);
+    setPendingWebsite(null);
+    setError(null);
+  };
+
   if (!account) return null;
 
-  const effectiveIcon = account.displayIcon;
-  const effectiveWebsite = account.displayWebsite;
+  const effectiveIcon =
+    scope === 'bank' ? (account.bank?.icon ?? null) : account.icon;
+  const effectiveWebsite =
+    scope === 'bank' ? (account.bank?.website ?? null) : account.website;
   const canEditBank = !!account.bank;
   const canClear =
-    scope === 'bank' ? !!account.bank && !!account.bankIcon : !!account.icon;
+    scope === 'bank' ? !!account.bank && !!account.bank.icon : !!account.icon;
 
   const refresh = () => {
     void queryClient.invalidateQueries({
@@ -149,7 +158,7 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
     await send('account-icon-picker-save', {
       scope,
       accountId: account.id,
-      bankId: scope === 'bank' ? (account.bank ?? undefined) : undefined,
+      bankId: scope === 'bank' ? (account.bank?.id ?? undefined) : undefined,
       icon,
       website,
     });
@@ -179,8 +188,8 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
             {canEditBank && (
               <ScopeSwitch
                 scope={scope}
-                onChange={setScope}
-                bankName={account.bankName}
+                onChange={handleScopeChange}
+                bankName={account.bank?.name ?? null}
               />
             )}
 
@@ -188,6 +197,7 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
 
             {tab === 'favicon' && (
               <FaviconTab
+                key={scope}
                 initialUrl={effectiveWebsite ?? ''}
                 hasFaviconProxy={hasFaviconProxy}
                 isBusy={isBusy}

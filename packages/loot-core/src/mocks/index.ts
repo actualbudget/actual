@@ -27,12 +27,11 @@ export function generateAccount(
   };
 
   if (isConnected) {
+    const bankId = Math.floor(random() * 10000).toString();
     return {
       ...offlineAccount,
       balance_current: Math.floor(random() * 100000),
-      bankId: Math.floor(random() * 10000).toString(),
-      bankName: 'boa',
-      bank: Math.floor(random() * 10000).toString(),
+      bank: { id: bankId, name: 'boa', icon: null, website: null },
       account_id: 'idx',
       mask: 'xxx',
       official_name: 'boa',
@@ -51,8 +50,6 @@ function emptySyncFields(): Pick<
   AccountEntity,
   | 'account_id'
   | 'bank'
-  | 'bankId'
-  | 'bankName'
   | 'mask'
   | 'official_name'
   | 'balance_current'
@@ -63,15 +60,10 @@ function emptySyncFields(): Pick<
   | 'bank_sync_status'
   | 'website'
   | 'icon'
-  | 'bankIcon'
-  | 'displayIcon'
-  | 'displayWebsite'
 > {
   return {
     account_id: null,
     bank: null,
-    bankId: null,
-    bankName: null,
     mask: null,
     official_name: null,
     balance_current: null,
@@ -82,9 +74,6 @@ function emptySyncFields(): Pick<
     bank_sync_status: null,
     website: null,
     icon: null,
-    bankIcon: null,
-    displayIcon: null,
-    displayWebsite: null,
   };
 }
 

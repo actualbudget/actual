@@ -65,7 +65,7 @@ export function BankSyncAccountsListItem({
                 color: theme.pageTextSubdued,
               }}
             >
-              {account.bankName ?? t('Unknown')}
+              {account.bank?.name ?? t('Unknown')}
             </Text>
           )}
           {isLinked && lastSyncString && (

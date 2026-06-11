@@ -23,6 +23,7 @@ import type { AccountEntity } from '@actual-app/core/types/models';
 import { css, cx } from '@emotion/css';
 
 import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
+import { AccountIcon } from '#components/accounts/AccountIcon';
 import { BalanceHistoryGraph } from '#components/accounts/BalanceHistoryGraph';
 import { Link } from '#components/common/Link';
 import { Notes } from '#components/Notes';
@@ -242,7 +243,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
                       minWidth: 0,
                     }}
                   >
-                    <AccountIcon account={account} />
+                    <AccountIcon account={account} size={16} />
                     <Text
                       style={{
                         overflow: 'hidden',
@@ -405,31 +406,5 @@ export function Account<FieldName extends SheetFields<'account'>>({
     >
       {accountRow}
     </Tooltip>
-  );
-}
-
-const SIDEBAR_ICON_SIZE = 16;
-const SIDEBAR_ICON_GUTTER = 6;
-
-function AccountIcon({ account }: { account: AccountEntity | undefined }) {
-  const icon = account?.displayIcon ?? null;
-
-  if (!account || !icon) {
-    return null;
-  }
-
-  return (
-    <img
-      src={icon}
-      alt=""
-      width={SIDEBAR_ICON_SIZE}
-      height={SIDEBAR_ICON_SIZE}
-      style={{
-        marginRight: SIDEBAR_ICON_GUTTER,
-        objectFit: 'contain',
-        flexShrink: 0,
-        borderRadius: 3,
-      }}
-    />
   );
 }

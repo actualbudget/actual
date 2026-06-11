@@ -28,7 +28,7 @@ export const AccountRow = memo(
     // The bank name is stored as null when the sync provider doesn't report an
     // institution; show a localized fallback for linked accounts.
     const bankName =
-      account.bank && !account.bankName ? t('Unknown') : account.bankName;
+      account.bank && !account.bank.name ? t('Unknown') : account.bank?.name;
 
     const lastSyncString = tsToRelativeTime(account.last_sync, locale, {
       capitalize: true,

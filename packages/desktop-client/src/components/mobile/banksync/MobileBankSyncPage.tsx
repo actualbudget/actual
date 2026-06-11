@@ -51,7 +51,7 @@ export function MobileBankSyncPage() {
         const filteredAccounts = accounts.filter(
           account =>
             account.name.toLowerCase().includes(filterLower) ||
-            account.bankName?.toLowerCase().includes(filterLower),
+            account.bank?.name?.toLowerCase().includes(filterLower),
         );
         if (filteredAccounts.length > 0) {
           filtered[provider] = filteredAccounts;

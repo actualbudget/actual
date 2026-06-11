@@ -51,6 +51,7 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
 import type { TableRef } from './Account';
+import { AccountIcon } from './AccountIcon';
 import { Balances } from './Balance';
 import { BalanceHistoryGraph } from './BalanceHistoryGraph';
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
@@ -679,7 +680,7 @@ function AccountNameField({
             },
           }}
         >
-          {account && <AccountHeaderIcon account={account} />}
+          {account && <AccountIcon account={account} size={24} />}
           <View
             style={{
               fontSize: 25,
@@ -828,25 +829,6 @@ function AccountMenu({
           ? [{ name: 'reopen', text: t('Reopen account') } as const]
           : [{ name: 'close', text: t('Close account') } as const]),
       ]}
-    />
-  );
-}
-
-function AccountHeaderIcon({ account }: { account: AccountEntity }) {
-  const icon = account.displayIcon;
-  if (!icon) return null;
-  return (
-    <img
-      src={icon}
-      alt=""
-      width={24}
-      height={24}
-      style={{
-        marginRight: 6,
-        objectFit: 'contain',
-        flexShrink: 0,
-        borderRadius: 4,
-      }}
     />
   );
 }
