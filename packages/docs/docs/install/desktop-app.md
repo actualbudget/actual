@@ -43,3 +43,7 @@ To access your local server from mobile devices or other networks, you'll need t
 For a practical walkthrough, check out the [Ngrok guide](../config/reverse-proxies.md#ngrok). If you plan to use your mobile device regularly while the desktop app is running, consider configuring the reverse proxy to launch automatically with your computer.
 
 When using a mobile device with Actual, installing the Web client as a Progressive Web App(PWA) is recommended so that it works when offline.
+
+## Trying the Nightly Builds
+
+If you want to preview upcoming features before they reach an official release, [nightly builds of the desktop app](../contributing/preview-builds.md#nightly-desktop-builds) are also available.
