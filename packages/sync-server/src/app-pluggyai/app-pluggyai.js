@@ -100,8 +100,7 @@ app.post(
       const pending = [];
 
       for (const trans of Object.values(transactions)) {
-
-        if(typeof trans !== 'object' || Object.keys(trans).length === 0) {
+        if (typeof trans !== 'object' || Object.keys(trans).length === 0) {
           continue;
         }
 
