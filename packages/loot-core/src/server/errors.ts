@@ -4,8 +4,8 @@ export class PostError extends Error {
   reason: string;
   type: 'PostError';
 
-  constructor(reason: string, meta?: { meta: string }) {
-    super('PostError: ' + reason);
+  constructor(reason: string, meta?: { meta: string }, options?: ErrorOptions) {
+    super('PostError: ' + reason, options);
     this.type = 'PostError';
     this.reason = reason;
     this.meta = meta;
