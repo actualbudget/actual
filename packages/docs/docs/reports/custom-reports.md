@@ -44,7 +44,7 @@ Grayed out options in dropdown menus are not yet available for the chosen report
 
 ## Center Menu
 
-Icons in the first group of the center menu are used to select the displayed report, the second group is used to show graph legends, summary and labels. The funnel icon can be used to [filter transactions](/docs/transactions/filters.md). Finally, the menu on the right-hand side is used to Save a Custom Report to the Reports page.
+Icons in the first group of the center menu are used to select the displayed report, the second group is used to show graph legends, summary and labels. The funnel icon can be used to [filter transactions](../transactions/filters.md). Finally, the menu on the right-hand side is used to Save a Custom Report to the Reports page.
 
 ![Custom reports center menu](/img/reports/cr-center-menu.webp)
 

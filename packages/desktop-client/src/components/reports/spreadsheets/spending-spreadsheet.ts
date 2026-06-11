@@ -2,6 +2,8 @@ import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type {
+  CategoryEntity,
+  CategoryGroupEntity,
   RuleConditionEntity,
   SpendingAverageRange,
   SpendingEntity,
@@ -15,16 +17,55 @@ import { fromDateRepr } from '#components/reports/util';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { aqlQuery } from '#queries/aqlQuery';
 
+import {
+  filterCategoriesByConditions,
+  isSupportedCategoryCondition,
+} from './budgetDataQuery';
 import { makeQuery } from './makeQuery';
 
 type createSpendingSpreadsheetProps = {
   conditions?: RuleConditionEntity[];
-  conditionsOp?: string;
+  conditionsOp?: 'and' | 'or';
   compare?: string;
   compareTo?: string;
   averageRange?: SpendingAverageRange;
   budgetType?: 'envelope' | 'tracking';
 };
+
+export function getSpendingBudgetFilters({
+  categories,
+  categoryGroups,
+  conditions,
+  conditionsOp,
+}: {
+  categories: CategoryEntity[];
+  categoryGroups: CategoryGroupEntity[];
+  conditions: RuleConditionEntity[];
+  conditionsOp?: 'and' | 'or';
+}) {
+  const budgetConditions = conditions.filter(
+    cond =>
+      !cond.customName &&
+      (cond.field === 'category' || cond.field === 'category_group'),
+  );
+
+  if (budgetConditions.length === 0) {
+    return [];
+  }
+
+  if (!budgetConditions.every(isSupportedCategoryCondition)) {
+    return [];
+  }
+
+  const matchingCategoryIds = filterCategoriesByConditions(
+    categories,
+    categoryGroups,
+    budgetConditions,
+    conditionsOp ?? 'and',
+  ).map(category => category.id);
+
+  return [{ category: { $oneof: matchingCategoryIds } }];
+}
 
 export function createSpendingSpreadsheet({
   conditions = [],
@@ -67,16 +108,6 @@ export function createSpendingSpreadsheet({
     const { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
     });
-
-    const { filters: budgetFilters } = await send(
-      'make-filters-from-conditions',
-      {
-        conditions: conditions.filter(
-          cond => !cond.customName && cond.field === 'category',
-        ),
-        applySpecialCases: false,
-      },
-    );
 
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
@@ -163,14 +194,26 @@ export function createSpendingSpreadsheet({
     const budgetMonth = parseInt(compareMonth.replace('-', ''));
     const budgetTable =
       budgetType === 'tracking' ? 'reflect_budgets' : 'zero_budgets';
+    const hasBudgetConditions = conditions.some(
+      cond =>
+        !cond.customName &&
+        (cond.field === 'category' || cond.field === 'category_group'),
+    );
+    const budgetFilters = hasBudgetConditions
+      ? await send('get-categories').then(({ list, grouped }) =>
+          getSpendingBudgetFilters({
+            categories: list,
+            categoryGroups: grouped,
+            conditions,
+            conditionsOp,
+          }),
+        )
+      : [];
     const [budgets] = await Promise.all([
       aqlQuery(
         q(budgetTable)
           .filter({
-            $and: [{ month: { $eq: budgetMonth } }],
-          })
-          .filter({
-            [conditionsOpKey]: budgetFilters,
+            $and: [{ month: { $eq: budgetMonth } }, ...budgetFilters],
           })
           .groupBy([{ $id: '$category' }])
           .select([
