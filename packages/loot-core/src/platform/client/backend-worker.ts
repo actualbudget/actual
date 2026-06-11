@@ -3,8 +3,8 @@ import { initBackend } from 'absurd-sql/dist/indexeddb-main-thread';
 import * as connection from '#platform/client/connection';
 import type { InitConfig } from '#server/main';
 
-// Boot a backend Web Worker. initBackend installs absurd-sql's main-thread
-// bridge — without it the worker's first sqlite write hangs.
+// initBackend installs absurd-sql's main-thread bridge — without it the
+// worker's first sqlite write hangs.
 export async function startBackendWorker(
   worker: Worker,
   config: InitConfig,

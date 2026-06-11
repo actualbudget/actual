@@ -1,5 +1,4 @@
-// Web Worker entry for @actual-app/api's browser build. Owns the real
-// loot-core backend; built standalone by vite.browser-worker.config.mts.
+// Web Worker entry for the browser build; owns the real loot-core backend.
 
 import * as connection from '@actual-app/core/platform/server/connection';
 import { handlers, init } from '@actual-app/core/server/main';

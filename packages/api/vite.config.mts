@@ -55,10 +55,8 @@ function copyMigrationsAndDefaultDb() {
       const sqlJsWasm = require.resolve('@jlongster/sql.js/dist/sql-wasm.wasm');
       fs.copyFileSync(sqlJsWasm, path.join(distDir, 'sql-wasm.wasm'));
 
-      // The browser worker loads `data-file-index.txt` and `data/<name>` from
-      // PUBLIC_URL. JS migrations are shipped with a `.data` suffix so
-      // consumer bundlers don't import-analyze them; loot-core's browser fs
-      // strips the suffix when naming the virtual file.
+      // Runtime data files for the browser worker. JS migrations get a `.data`
+      // suffix so consumer bundlers don't import-analyze them.
       const dataDir = path.join(distDir, 'data');
       const dataMigrationsDir = path.join(dataDir, 'migrations');
       fs.mkdirSync(dataMigrationsDir, { recursive: true });

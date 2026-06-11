@@ -45,8 +45,7 @@ function connectSocket(onOpen) {
             undo.gc(undoTag);
           }
 
-          // api/* failures arrive as a reply carrying `error`; reject rather
-          // than resolving undefined.
+          // api/* failures arrive as a reply carrying `error`.
           if (error) {
             handler.reject(error);
           } else {

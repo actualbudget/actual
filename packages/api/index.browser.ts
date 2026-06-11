@@ -10,13 +10,12 @@ let worker: Worker | null = null;
 export async function init(
   config: InitConfig = {},
 ): Promise<{ send: typeof send }> {
-  // Non-literal URL so bundlers don't pre-bundle ./worker.js, which only
-  // exists next to the built file; it resolves at runtime instead.
+  // Non-literal so bundlers don't pre-bundle ./worker.js, which only exists
+  // next to the built file.
   const rel = './worker.js';
   worker = new Worker(new URL(rel, import.meta.url), { type: 'module' });
 
-  // String manipulation instead of `new URL('.', import.meta.url)` so
-  // consumer asset analyzers leave it alone.
+  // Not `new URL('.', import.meta.url)` — consumer asset analyzers rewrite it.
   const assetsBaseUrl = import.meta.url.replace(/[^/]+$/, '');
   try {
     await startBackendWorker(worker, config, assetsBaseUrl);

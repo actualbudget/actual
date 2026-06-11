@@ -60,8 +60,7 @@ function handleMessage(msg) {
         undo.gc(undoTag);
       }
 
-      // api/* failures arrive as a reply carrying `error`; reject rather
-      // than resolving undefined.
+      // api/* failures arrive as a reply carrying `error`.
       if (error) {
         handler.reject(error);
       } else {
@@ -102,8 +101,7 @@ function connectWorker(worker, onOpen, onError) {
     // available, but we don't know when the backend is actually
     // ready to handle messages.
     if (msg.type === 'connect') {
-      // Flush messages queued while closed; null the queue so later sends
-      // post directly instead of queueing forever.
+      // Null the queue so later sends post directly instead of queueing.
       messageQueue?.forEach(msg => worker.postMessage(msg));
       messageQueue = null;
 

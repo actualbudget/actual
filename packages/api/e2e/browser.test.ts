@@ -1,9 +1,7 @@
 import { expect, test } from '@playwright/test';
 
-// Structural view (used inside page.evaluate) of the module harness.html
-// loads from dist/browser.js. `typeof import('../index.browser')` would be
-// self-maintaining but pulls the whole loot-core type graph into this
-// non-strict-plugin program.
+// Structural view of the module harness.html loads from dist/browser.js
+// (`typeof import` would pull the whole loot-core type graph in here).
 type Api = {
   init(config: { dataDir: string }): Promise<unknown>;
   shutdown(): Promise<void>;
@@ -34,14 +32,12 @@ test('boots, imports a budget, reads it back, and persists', async ({
 }) => {
   await page.goto('/e2e/harness.html');
 
-  // init boots the worker, sqlite/wasm, and the message channel.
   await page.evaluate(async () => {
     const api = await window.apiReady;
     await api.init({ dataDir: '/documents' });
   });
 
-  // Backend errors must reject, not resolve undefined. They arrive as plain
-  // `{ type: 'APIError', message }` envelopes.
+  // Backend errors must reject as `{ type: 'APIError', message }` envelopes.
   const error = await page.evaluate(async () => {
     const api = await window.apiReady;
     return api.getAccounts().then(
