@@ -1,4 +1,3 @@
-// Resolved per build: in-process (api condition) or the Worker client (browser).
 import { send } from '@actual-app/core/platform/client/connection';
 import type {
   APIAccountEntity,
