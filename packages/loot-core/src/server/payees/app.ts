@@ -53,6 +53,33 @@ app.method('payee-locations-get', getPayeeLocations);
 app.method('payee-location-delete', mutator(deletePayeeLocation));
 app.method('payees-get-nearby', getNearbyPayees);
 
+async function getScheduleRuleStatuses(): Promise<Map<string, boolean>> {
+  const rows = await db.all<Pick<db.DbSchedule, 'rule' | 'completed'>>(
+    'SELECT rule, completed FROM schedules WHERE rule IS NOT NULL AND tombstone = 0',
+  );
+
+  const scheduleRuleStatuses = new Map<string, boolean>();
+  for (const row of rows) {
+    if (row.completed === 0) {
+      scheduleRuleStatuses.set(row.rule, true);
+      continue;
+    }
+
+    if (!scheduleRuleStatuses.has(row.rule)) {
+      scheduleRuleStatuses.set(row.rule, false);
+    }
+  }
+
+  return scheduleRuleStatuses;
+}
+
+function shouldCountRule(
+  rule: { id: string },
+  scheduleRuleStatuses: Map<string, boolean>,
+) {
+  return scheduleRuleStatuses.get(rule.id) !== false;
+}
+
 async function createPayee({ name }: { name: PayeeEntity['name'] }) {
   return db.insertPayee({ name });
 }
@@ -71,10 +98,15 @@ async function getOrphanedPayees(): Promise<Array<Pick<PayeeEntity, 'id'>>> {
   return await db.syncGetOrphanedPayees();
 }
 
-async function getPayeeRuleCounts() {
+export async function getPayeeRuleCounts() {
+  const scheduleRuleStatuses = await getScheduleRuleStatuses();
   const payeeCounts: Record<PayeeEntity['id'], number> = {};
 
   rules.iterateIds(rules.getRules(), 'payee', (rule, id) => {
+    if (!shouldCountRule(rule, scheduleRuleStatuses)) {
+      return;
+    }
+
     if (payeeCounts[id] == null) {
       payeeCounts[id] = 0;
     }
@@ -131,12 +163,16 @@ async function checkOrphanedPayees({
   return ids.filter(id => orphaned.has(id));
 }
 
-async function getPayeeRules({
+export async function getPayeeRules({
   id,
 }: {
   id: PayeeEntity['id'];
 }): Promise<RuleEntity[]> {
-  return rules.getRulesForPayee(id).map(rule => rule.serialize());
+  const scheduleRuleStatuses = await getScheduleRuleStatuses();
+  return rules
+    .getRulesForPayee(id)
+    .filter(rule => shouldCountRule(rule, scheduleRuleStatuses))
+    .map(rule => rule.serialize());
 }
 
 async function createPayeeLocation({
