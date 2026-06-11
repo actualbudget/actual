@@ -7,9 +7,15 @@ import { validateSession } from './util/validate-user';
 const dnsLookupMock = vi.hoisted(() =>
   vi.fn().mockResolvedValue([{ address: '8.8.8.8', family: 4 as const }]),
 );
+const undiciFetchMock = vi.hoisted(() => vi.fn());
 
 vi.mock('node:dns/promises', () => ({
   lookup: dnsLookupMock,
+}));
+
+vi.mock('undici', () => ({
+  fetch: undiciFetchMock,
+  Agent: class MockAgent {},
 }));
 
 vi.mock('./util/middlewares', () => ({
@@ -21,10 +27,8 @@ vi.mock('./util/validate-user', () => ({
   validateSession: vi.fn(),
 }));
 
-global.fetch = vi.fn();
-
 const mockedValidateSession = vi.mocked(validateSession);
-const mockedFetch = vi.mocked(global.fetch);
+const mockedFetch = undiciFetchMock;
 
 function htmlResponse(html: string): Response {
   return new Response(html, {

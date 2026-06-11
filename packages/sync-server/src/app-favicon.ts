@@ -3,14 +3,15 @@ import { lookup as dnsLookup } from 'node:dns/promises';
 import express from 'express';
 import type { Response as ExpressResponse, Request } from 'express';
 import ipaddr from 'ipaddr.js';
-import { Agent } from 'undici';
+import { Agent, fetch as undiciFetch } from 'undici';
+import type { RequestInit as UndiciRequestInit } from 'undici';
 
 import { assertUrlAllowed, isBlockedIp } from './util/ssrf';
 import { validateSession } from './util/validate-user';
 
 const MAX_RAW_BYTES = 256 * 1024;
 const MAX_REDIRECTS = 8;
-const REQUEST_TIMEOUT_MS = 8000;
+const REQUEST_TIMEOUT_MS = 20000;
 const ALLOWED_CONTENT_TYPES = [
   'image/x-icon',
   'image/vnd.microsoft.icon',
@@ -56,29 +57,33 @@ function normalizeUrl(input: string): URL {
 // SSRF check is the exact IP used for the TCP connection. A pre-fetch check
 // would be vulnerable to DNS rebinding (the hostname could resolve to a
 // different IP between the check and the actual connect).
+//
+// Node.js 22 passes { all: true } to the lookup option, so the success
+// callback must use the array form: callback(null, [{address, family}]).
 const ssrfSafeLookup = (
   hostname: string,
   _options: unknown,
-  callback: (err: Error | null, address: string, family: number) => void,
+  callback: (
+    err: Error | null,
+    addresses: { address: string; family: number }[],
+  ) => void,
 ): void => {
   if (ipaddr.isValid(hostname)) {
     if (isBlockedIp(hostname)) {
-      callback(new FaviconError(`Blocked IP: ${hostname}`, 403), '', 4);
+      callback(new FaviconError(`Blocked IP: ${hostname}`, 403), []);
       return;
     }
     const parsed = ipaddr.parse(hostname);
-    callback(null, hostname, parsed.kind() === 'ipv6' ? 6 : 4);
+    callback(null, [
+      { address: hostname, family: parsed.kind() === 'ipv6' ? 6 : 4 },
+    ]);
     return;
   }
 
   dnsLookup(hostname, { all: true })
     .then(addresses => {
       if (!addresses.length) {
-        callback(
-          new FaviconError(`No DNS records for: ${hostname}`, 502),
-          '',
-          4,
-        );
+        callback(new FaviconError(`No DNS records for: ${hostname}`, 502), []);
         return;
       }
       const safe = addresses.find(
@@ -87,24 +92,19 @@ const ssrfSafeLookup = (
       if (!safe) {
         callback(
           new FaviconError(`All resolved IPs for ${hostname} are blocked`, 403),
-          '',
-          4,
+          [],
         );
         return;
       }
-      callback(null, safe.address, safe.family);
+      callback(null, [{ address: safe.address, family: safe.family }]);
     })
     .catch(() =>
-      callback(
-        new FaviconError(`DNS lookup failed for: ${hostname}`, 502),
-        '',
-        4,
-      ),
+      callback(new FaviconError(`DNS lookup failed for: ${hostname}`, 502), []),
     );
 };
 
 const ssrfSafeAgent = new Agent({
-  connect: { lookup: ssrfSafeLookup },
+  connect: { lookup: ssrfSafeLookup, timeout: REQUEST_TIMEOUT_MS },
 });
 
 async function assertUrlSafe(url: string): Promise<void> {
@@ -132,7 +132,7 @@ function assertProtocolSafe(url: string): void {
 
 async function fetchWithTimeout(
   url: string,
-  options: RequestInit = {},
+  options: UndiciRequestInit = {},
 ): Promise<Response> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -141,18 +141,32 @@ async function fetchWithTimeout(
     // function is reached, and ssrfSafeAgent re-validates the resolved IP at
     // TCP connection time via ssrfSafeLookup, preventing DNS rebinding.
     // codeql[js/ssrf]
-    return await fetch(url, {
+    return (await undiciFetch(url, {
       ...options,
+      headers: {
+        'user-agent': 'Mozilla/5.0 (compatible; ActualBudget/favicon-fetcher)',
+        ...(options.headers as Record<string, string> | undefined),
+      },
       signal: controller.signal,
-      // undici dispatcher: routes all connections through ssrfSafeLookup
       dispatcher: ssrfSafeAgent,
-    } as unknown as RequestInit);
+    })) as unknown as Response;
+  } catch (err) {
+    if ((err as Error).name === 'AbortError') {
+      throw new FaviconError(
+        `Request to ${url} timed out after ${REQUEST_TIMEOUT_MS / 1000}s`,
+        504,
+      );
+    }
+    throw err;
   } finally {
     clearTimeout(timer);
   }
 }
 
-async function safeFetch(url: string, init?: RequestInit): Promise<Response> {
+async function safeFetch(
+  url: string,
+  init?: UndiciRequestInit,
+): Promise<Response> {
   let next = url;
   for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
     assertProtocolSafe(next);
@@ -400,7 +414,11 @@ async function tryDirect(origin: URL): Promise<FaviconResult | null> {
     }
   } catch (err) {
     rethrowIfClientPolicyError(err);
-    console.warn('[favicon] homepage parse failed:', (err as Error).message);
+    console.warn(
+      '[favicon] homepage parse failed:',
+      (err as Error).message,
+      (err as { cause?: unknown }).cause ?? '',
+    );
   }
 
   const manifestCandidates: IconCandidate[] =
@@ -426,6 +444,7 @@ async function tryDirect(origin: URL): Promise<FaviconResult | null> {
         '[favicon] candidate failed:',
         candidate.href,
         (err as Error).message,
+        (err as { cause?: unknown }).cause ?? '',
       );
     }
   }
@@ -444,7 +463,12 @@ async function tryDirect(origin: URL): Promise<FaviconResult | null> {
       return { ...dl, source: 'direct' };
     } catch (err) {
       rethrowIfClientPolicyError(err);
-      console.warn('[favicon] fallback failed:', url, (err as Error).message);
+      console.warn(
+        '[favicon] fallback failed:',
+        url,
+        (err as Error).message,
+        (err as { cause?: unknown }).cause ?? '',
+      );
     }
   }
 

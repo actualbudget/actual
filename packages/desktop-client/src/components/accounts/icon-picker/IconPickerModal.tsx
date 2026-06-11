@@ -9,11 +9,12 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { send } from '@actual-app/core/platform/client/connection';
+import { send, sendCatch } from '@actual-app/core/platform/client/connection';
 import { isElectron } from '@actual-app/core/shared/environment';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { accountQueries } from '#accounts';
+import { Link } from '#components/common/Link';
 import {
   Modal,
   ModalCloseButton,
@@ -114,6 +115,7 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
   const [tab, setTab] = useState<Tab>(hasFaviconProxy ? 'favicon' : 'upload');
   const [scope, setScope] = useState<Scope>('account');
   const [error, setError] = useState<string | null>(null);
+  const [ddgFaviconUrl, setDdgFaviconUrl] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
   const [previewIcon, setPreviewIcon] = useState<string | null>(null);
   const [pendingWebsite, setPendingWebsite] = useState<string | null>(null);
@@ -123,6 +125,7 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
     setPreviewIcon(null);
     setPendingWebsite(null);
     setError(null);
+    setDdgFaviconUrl(null);
   };
 
   const handleScopeChange = (newScope: Scope) => {
@@ -130,6 +133,7 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
     setPreviewIcon(null);
     setPendingWebsite(null);
     setError(null);
+    setDdgFaviconUrl(null);
   };
 
   if (!account) return null;
@@ -203,6 +207,7 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
                 isBusy={isBusy}
                 setIsBusy={setIsBusy}
                 setError={setError}
+                setDdgFaviconUrl={setDdgFaviconUrl}
                 setPreview={setPreviewIcon}
                 setPendingWebsite={setPendingWebsite}
               />
@@ -223,6 +228,19 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
 
             {error && (
               <FormError style={{ color: theme.errorText }}>{error}</FormError>
+            )}
+
+            {ddgFaviconUrl && (
+              <Text style={{ fontSize: 12, color: theme.pageTextSubdued }}>
+                <Trans>
+                  The site may be blocking automated requests. Try opening{' '}
+                  <Link variant="external" to={ddgFaviconUrl}>
+                    this cached favicon via DuckDuckGo
+                  </Link>{' '}
+                  (a copy of the site&apos;s own icon), saving the image, then
+                  using the Upload tab.
+                </Trans>
+              </Text>
             )}
 
             <View
@@ -425,6 +443,7 @@ function FaviconTab({
   isBusy,
   setIsBusy,
   setError,
+  setDdgFaviconUrl,
   setPreview,
   setPendingWebsite,
 }: {
@@ -433,6 +452,7 @@ function FaviconTab({
   isBusy: boolean;
   setIsBusy: (b: boolean) => void;
   setError: (e: string | null) => void;
+  setDdgFaviconUrl: (url: string | null) => void;
   setPreview: (s: string | null) => void;
   setPendingWebsite: (s: string | null) => void;
 }) {
@@ -453,18 +473,39 @@ function FaviconTab({
     );
   }
 
+  const buildDdgUrl = (input: string): string | null => {
+    try {
+      const candidate = input.trim();
+      if (!candidate) return null;
+      const parsed = new URL(
+        /^https?:\/\//i.test(candidate) ? candidate : `https://${candidate}`,
+      );
+      return `https://icons.duckduckgo.com/ip3/${parsed.hostname}.ico`;
+    } catch {
+      return null;
+    }
+  };
+
   const handleFetch = async () => {
     if (!url.trim()) {
       setError(t('Enter a website URL first'));
       return;
     }
     setError(null);
+    setDdgFaviconUrl(null);
     setIsBusy(true);
     setPreview(null);
     setPendingWebsite(null);
     try {
-      const result = await send('favicon-fetch', { url });
-      const raw = toDataUrl(result.contentType, result.base64);
+      const result = await sendCatch('favicon-fetch', { url });
+      if (result.error) {
+        setError(result.error.message || t('Failed to fetch favicon'));
+        setDdgFaviconUrl(buildDdgUrl(url));
+        setPreview(null);
+        setPendingWebsite(null);
+        return;
+      }
+      const raw = toDataUrl(result.data.contentType, result.data.base64);
       const normalized = await normalizeImageToDataUrl(raw);
       setPreview(normalized);
       setPendingWebsite(url.trim());
@@ -476,6 +517,7 @@ function FaviconTab({
             ? err.message
             : t('Failed to fetch favicon');
       setError(message);
+      setDdgFaviconUrl(buildDdgUrl(url));
       setPreview(null);
       setPendingWebsite(null);
     } finally {
