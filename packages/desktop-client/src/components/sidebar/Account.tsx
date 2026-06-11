@@ -35,7 +35,7 @@ import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useNotes } from '#hooks/useNotes';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { openAccountCloseModal, pushModal } from '#modals/modalsSlice';
-import { useDispatch } from '#redux';
+import { useDispatch, useSelector } from '#redux';
 import type { Binding, SheetFields } from '#spreadsheet';
 
 export const accountNameStyle: CSSProperties = {
@@ -127,6 +127,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
     window.matchMedia('(hover: none)').matches ||
     window.matchMedia('(pointer: coarse)').matches;
   const needsTooltip = !!account?.id && !isTouchDevice;
+  const hasOpenModal = useSelector(state => state.modals.modalStack.length > 0);
   const reopenAccount = useReopenAccountMutation();
   const updateAccount = useUpdateAccountMutation();
 
@@ -399,7 +400,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
       triggerProps={{
         delay: 1000,
         closeDelay: 250,
-        isDisabled: menuOpen,
+        isDisabled: menuOpen || hasOpenModal,
       }}
     >
       {accountRow}

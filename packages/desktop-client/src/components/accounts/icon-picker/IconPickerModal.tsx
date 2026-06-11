@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
-import type { ComponentType } from 'react';
+import { useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -587,7 +586,6 @@ function EmojiTab({
 }) {
   const { t } = useTranslation();
   const [emoji, setEmoji] = useState('');
-  const [showFullPicker, setShowFullPicker] = useState(false);
 
   function handleEmoji(value: string) {
     setEmoji(value);
@@ -612,9 +610,7 @@ function EmojiTab({
   return (
     <View style={{ gap: 8 }}>
       <Text style={{ fontSize: 12, color: theme.pageTextSubdued }}>
-        <Trans>
-          Pick a suggested emoji, paste any character, or open the full picker.
-        </Trans>
+        <Trans>Pick a suggested emoji or paste any character.</Trans>
       </Text>
       <View
         style={{
@@ -640,69 +636,6 @@ function EmojiTab({
         onChangeValue={handleEmoji}
         style={{ textAlign: 'center', fontSize: 22 }}
       />
-      <Button onPress={() => setShowFullPicker(s => !s)}>
-        {showFullPicker ? (
-          <Trans>Hide picker</Trans>
-        ) : (
-          <Trans>Open full picker</Trans>
-        )}
-      </Button>
-      {showFullPicker && (
-        <View style={{ alignItems: 'center' }}>
-          <FullEmojiPicker
-            onPick={value => {
-              handleEmoji(value);
-              setShowFullPicker(false);
-            }}
-          />
-        </View>
-      )}
     </View>
-  );
-}
-
-function FullEmojiPicker({ onPick }: { onPick: (emoji: string) => void }) {
-  const [Picker, setPicker] = useState<ComponentType<{
-    data: unknown;
-    onEmojiSelect: (e: { native?: string }) => void;
-    autoFocus?: boolean;
-    perLine?: number;
-    previewPosition?: 'top' | 'bottom' | 'none';
-  }> | null>(null);
-  const [data, setData] = useState<unknown>(null);
-
-  useEffect(() => {
-    if (Picker && data) return;
-    let cancelled = false;
-    void Promise.all([
-      import('@emoji-mart/react'),
-      import('@emoji-mart/data'),
-    ]).then(([picker, d]) => {
-      if (cancelled) return;
-      setPicker(() => picker.default);
-      setData(d.default);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [Picker, data]);
-
-  if (!Picker || !data) {
-    return (
-      <Text style={{ color: theme.pageTextSubdued, fontSize: 12 }}>
-        <Trans>Loading emoji picker…</Trans>
-      </Text>
-    );
-  }
-
-  return (
-    <Picker
-      data={data}
-      perLine={9}
-      previewPosition="top"
-      onEmojiSelect={e => {
-        if (e.native) onPick(e.native);
-      }}
-    />
   );
 }
