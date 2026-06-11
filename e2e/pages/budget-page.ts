@@ -1,5 +1,6 @@
 import { type Locator, type Page } from '@playwright/test';
 import { BasePage } from './base-page';
+import { clickReactAriaButton, fillReactInput } from '../utils/react-helpers';
 
 /**
  * BudgetPage represents the main `/budget` view and its sidebar.
@@ -62,10 +63,10 @@ export class BudgetPage extends BasePage {
   async createLocalAccount(name: string, balance: number): Promise<void> {
     await this.openAddAccountModal();
 
-    await this.getByRole('button', { name: 'Create a local account' }).click();
-    await this.getByLabel('Name').fill(name);
-    await this.getByLabel('Balance').fill(String(balance));
-    await this.getByRole('button', { name: 'Create', exact: true }).click();
+    await clickReactAriaButton(this.getByRole('button', { name: 'Create a local account' }));
+    await fillReactInput(this.getByLabel('Name'), name);
+    await fillReactInput(this.getByLabel('Balance'), String(balance));
+    await clickReactAriaButton(this.getByRole('button', { name: 'Create', exact: true }));
 
     // Wait until the sidebar link for this account is rendered
     await this.page

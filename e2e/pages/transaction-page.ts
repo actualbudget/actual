@@ -62,7 +62,7 @@ export class TransactionPage extends BasePage {
 
   async fillPayee(payee: string): Promise<void> {
     await this.payeeCell.click();
-    await this.payeeCell.getByRole('textbox').fill(payee);
+    await this.payeeCell.getByRole('textbox').pressSequentially(payee);
     // Dismiss the autocomplete dropdown without selecting a suggestion
     await this.page.keyboard.press('Escape');
   }
@@ -70,7 +70,7 @@ export class TransactionPage extends BasePage {
   async fillNotes(notes: string): Promise<void> {
     await this.notesCell.click();
     // The notes field renders as a combobox (has autocomplete suggestions)
-    await this.notesCell.getByRole('combobox').fill(notes);
+    await this.notesCell.getByRole('combobox').pressSequentially(notes);
     await this.page.keyboard.press('Tab');
   }
 
@@ -84,7 +84,7 @@ export class TransactionPage extends BasePage {
   async fillAmount(amount: string, type: 'debit' | 'credit'): Promise<void> {
     const cell = type === 'debit' ? this.debitCell : this.creditCell;
     await cell.click();
-    await cell.getByRole('textbox').fill(amount);
+    await cell.getByRole('textbox').pressSequentially(amount);
     await this.page.keyboard.press('Tab');
   }
 

@@ -4,6 +4,7 @@ import {
   generateTransactionData,
   computeExpectedBalance,
 } from '../fixtures/test-data';
+import { clickReactAriaButton, fillReactInput } from '../utils/react-helpers';
 import { parseMoney, moneyEquals, roundMoney } from '../utils/money-utils';
 
 /**
@@ -164,11 +165,11 @@ test.describe('Account → Transaction → Balance', () => {
 
     // Create as off-budget — the UI has an "Off budget" toggle in the modal
     await budgetPage.openAddAccountModal();
-    await budgetPage.page.getByRole('button', { name: 'Create a local account' }).click();
-    await budgetPage.page.getByLabel('Name').fill(account.name);
-    await budgetPage.page.getByLabel('Balance').fill(String(account.initialBalance));
-    await budgetPage.page.getByLabel('Off budget').check();
-    await budgetPage.page.getByRole('button', { name: 'Create', exact: true }).click();
+    await clickReactAriaButton(budgetPage.page.getByRole('button', { name: 'Create a local account' }));
+    await fillReactInput(budgetPage.page.getByLabel('Name'), account.name);
+    await fillReactInput(budgetPage.page.getByLabel('Balance'), String(account.initialBalance));
+    await budgetPage.page.getByLabel('Off budget').click();
+    await clickReactAriaButton(budgetPage.page.getByRole('button', { name: 'Create', exact: true }));
     await budgetPage.page
       .getByRole('link', { name: new RegExp(`^${account.name}`) })
       .waitFor({ state: 'visible' });
@@ -201,6 +202,9 @@ test.describe('Account → Transaction → Balance', () => {
     await budgetPage.createLocalAccount(account.name, account.initialBalance);
     await budgetPage.navigateToAccount(account.name);
 
+    // Wait for the initial-balance row so the SQLite async fetch is complete
+    // before reading the balance — same pattern as every other scenario.
+    await accountPage.waitForTransactionCount(1);
     const balanceBefore = parseMoney(await accountPage.getBalanceText());
 
     // Open the form, fill it, then cancel
