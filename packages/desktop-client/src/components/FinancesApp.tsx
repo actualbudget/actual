@@ -88,7 +88,7 @@ function RouterBehaviors() {
 
 export function FinancesApp() {
   const { isNarrowWidth } = useResponsive();
-  useMetaThemeColor(isNarrowWidth ? theme.mobileViewTheme : undefined);
+  useMetaThemeColor(theme.mobileViewTheme);
 
   const location = useLocation();
   const dispatch = useDispatch();

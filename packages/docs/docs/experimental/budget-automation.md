@@ -1,8 +1,6 @@
 # Budget Automation
 
-:::warning
-This is an **experimental feature**. That means we're still working on finishing it. There may be bugs, missing functionality or incomplete documentation, and we may decide to remove the feature in a future release. If you have any feedback, please [use the feedback issue on github](https://github.com/actualbudget/actual/issues/7692) or post a message in the Discord.
-:::
+<ExperimentalFeatureWarning issueId="7692" />
 
 :::warning
 All functionality described here may not be available in the latest stable release. See [Experimental Features](./index.md) for instructions to enable experimental features. Use the `nightly` images for the latest implementation.
@@ -21,7 +19,7 @@ Here are a few examples of what you can do, all with a single click!
 - Budget 10% of your income for savings or charity
 - Budget the average you spend over the last 6 months
 - Save up for a big purchase many months or years in the future, and let Actual dynamically figure out how much to budget every month
-- And much more! Check out this [blog entry from 2023!](../../../blog/2023-12-15-automate-your-budget-with-goal-templates) Although it was written in the early days of note templates, it's still pertinent today!
+- And much more! Check out this [blog entry from 2023!](../../blog/2023-12-15-automate-your-budget-with-goal-templates) Although it was written in the early days of note templates, it's still pertinent today!
 
 ---
 
@@ -121,7 +119,7 @@ For weeks, the number of weeks in a month is based on the weekday of your start 
 :::tip
 You can give different priorities to multiple _Fixed amount_ automations in the same category and they will be respected when the budget fills.
 
-This [blog post using note templates](../../../blog/2024-03-25-goal-templates-with-a-twist) from 2024 goes into this in more detail.
+This [blog post using note templates](../../blog/2024-03-25-goal-templates-with-a-twist) from 2024 goes into this in more detail.
 :::
 
 ### Save by Date {#save-by-date}

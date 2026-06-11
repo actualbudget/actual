@@ -72,6 +72,10 @@ url: 'https://github.com/actualbudget/actual/releases/latest/download/Actual-lin
 
 </div>
 
+:::tip Nightly Builds
+If you want to preview upcoming features before they reach an official release, [nightly builds of the desktop app](/docs/contributing/preview-builds#nightly-desktop-builds) are also available.
+:::
+
 ## Server Download
 
 Actual has two parts, the client and a sync server. The primary task of the sync server is to sync your budget between devices, and to enable bank syncing. We have a full write up of [if you need a server or not](../docs/install/). We also have install guides on how to set up the server in the following ways
