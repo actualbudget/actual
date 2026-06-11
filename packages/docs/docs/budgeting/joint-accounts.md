@@ -4,14 +4,14 @@
 
 When joint budgeting with Actual Budget, you have several strategies to consider, each tailored to how you manage finances together.
 
-1. **Fully Combined Finances.** Partners use a single, common budget file. All partners have access to the file. There may be both personal and joint bank accounts in the budget. All income flows into the budget and all expenses, both persoanl and joint, are paid from the budget. Partners decide together how to save and budget the combined resources. This method guarantees total financial transparency.
+1. **Fully Combined Finances.** Partners use a single, common budget file. All partners have access to the file. There may be both personal and joint bank accounts in the budget. All income flows into the budget and all expenses, both personal and joint, are paid from the budget. Partners decide together how to save and budget the combined resources. This method guarantees total financial transparency.
 
 This document focuses on the next two scenarios.
 
 2. [**Joint Budget.**](#the-joint-budget) Each partner has a personal budget and the family has a separate budget file for joint expenses. All joint bank accounts are in the joint budget file. Each partner has access to the joint budget. The partners determine what expenses and shared goals belong in the joint budget and each contributes their share.
 3. [**Personal Budget with Contributions.**](#personal-budget-with-partner-contributions) One of the partners holds both their own personal budget and the joint expenses in their budget file. Partners determine the amount that should be contributed to meet shared goals and expenses. There may be both personal and joint bank accounts in the budget.
 
-See the [Multi-user](/docs/getting-started/sync#multi-user-support) guide for information on simultaneous edits in Actual.
+See the [Multi-user](/docs/getting-started/sync.md#multi-user-support) guide for information on simultaneous edits in Actual.
 
 Choosing the right approach depends on your communication style, financial goals, and the level of financial independence or collaboration you prefer.
 
