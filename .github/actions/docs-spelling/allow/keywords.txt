@@ -24,9 +24,7 @@ CLI
 clickable
 clsx
 codemirror
-COEP
 Coinbase
-COOP
 commandlet
 Coverflex
 Crd
