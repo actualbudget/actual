@@ -11,7 +11,7 @@ This document focuses on the next two scenarios.
 2. [**Joint Budget.**](#the-joint-budget) Each partner has a personal budget and the family has a separate budget file for joint expenses. All joint bank accounts are in the joint budget file. Each partner has access to the joint budget. The partners determine what expenses and shared goals belong in the joint budget and each contributes their share.
 3. [**Personal Budget with Contributions.**](#personal-budget-with-partner-contributions) One of the partners holds both their own personal budget and the joint expenses in their budget file. Partners determine the amount that should be contributed to meet shared goals and expenses. There may be both personal and joint bank accounts in the budget.
 
-See the [Multi-user](/docs/getting-started/sync.md#multi-user-support) guide for information on simultaneous edits in Actual.
+See the [Multi-user](../getting-started/sync.md#multi-user-support) guide for information on simultaneous edits in Actual.
 
 Choosing the right approach depends on your communication style, financial goals, and the level of financial independence or collaboration you prefer.
 
@@ -29,7 +29,7 @@ But how do you find your share?
 
 This model uses a separate budget file for joint accounts, expenses and goals.
 
-To keep track of each partner's contributions to the joint budget, create an separate income category for each partner. These categories are only used to track contributions from each partner.
+To keep track of each partner's contributions to the joint budget, create a separate income category for each partner. These categories are only used to track contributions from each partner.
 
 - When partners pay their share, add it to that _Partner's Income_ category. This way, it’s easy to ensure that everyone has contributed their part. When starting with joint budgeting, you will have partial insights into your spending habits, and extra funds may need to be added to the joint account, so good visibility is a must.
 - Optional: You may also want a _Common Income_ category. This could be the income from interest and dividends on joint accounts, stuff that you own together and sold, income from bottle returns or from selling scrap, etc.
