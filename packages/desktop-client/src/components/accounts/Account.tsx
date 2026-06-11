@@ -1771,7 +1771,16 @@ class AccountInternal extends PureComponent<
         {(allTransactions, allBalances) => (
           <SelectedProviderWithItems
             name="transactions"
-            items={allTransactions}
+            // When reconciled transactions are hidden they are still
+            // loaded (e.g. to calculate running balances), but they must
+            // not be selectable. Mirror the filtering the transaction
+            // table applies when rendering so that range selection
+            // (shift+click) only covers visible transactions.
+            items={
+              showReconciled
+                ? allTransactions
+                : allTransactions.filter(t => !t.reconciled)
+            }
             fetchAllIds={this.fetchAllIds}
             registerDispatch={dispatch => (this.dispatchSelected = dispatch)}
             selectAllFilter={selectAllFilter}
