@@ -26,6 +26,7 @@ All AI-generated code was reviewed, refined, executed, and validated manually.
 
 ## Initial Framework Generation Prompt
 
+```text
 Create the standalone Playwright framework under actual/e2e/ with the following standards.
 
 Core requirements:
@@ -81,6 +82,7 @@ Implementation expectations:
 
 Do not modify packages/desktop-client/e2e.
 All work must stay under actual/e2e/.
+```
 
 ---
 
@@ -143,6 +145,35 @@ Add a fixture called `schedulesPage` that:
 
 ---
 
+## Framework Review and Validation Prompt
+
+```text
+Use the browser to inspect the running application at:
+
+http://localhost:3001
+
+Review the Playwright framework under actual/e2e and verify:
+
+1. Every test step matches the current UI workflow.
+2. Locators are stable and not overly brittle.
+3. Page objects follow Playwright best practices.
+4. Assertions correctly validate the business behavior.
+5. Tests remain independent and parallel-safe.
+6. There are no unnecessary waits.
+7. The workflow Create Account → Add Transaction → Verify Balance is correctly implemented.
+
+Do not generate new features.
+Do not redesign the framework.
+
+Provide:
+- Issues found
+- Risk level (High/Medium/Low)
+- Recommended fixes
+- Any potential flaky locators
+```
+
+---
+
 
 ## Debugging and Stabilization Prompt
 
@@ -161,3 +192,20 @@ Do not modify packages/desktop-client/e2e.
 Keep all changes under actual/e2e/.
 Explain each fix and why it improves reliability.
 ```
+
+---
+
+
+## Future Enhancement: Playwright MCP
+
+A future improvement would be integrating Playwright MCP for interactive AI-assisted test authoring. The intended workflow would be:
+
+1. Open the app through Playwright MCP.
+2. Ask the AI agent to observe the target workflow.
+3. Capture user actions and stable locators.
+4. Generate or update page objects.
+5. Generate tests using fixtures and hooks.
+6. Run lint and tests through the existing npm scripts.
+7. Review generated code before committing.
+
+This was intentionally left out of the initial implementation to keep the interview submission focused, stable, and reviewable.
