@@ -24,7 +24,10 @@ CLI
 clickable
 clsx
 codemirror
+COEP
 Coinbase
+COOP
+CORS
 commandlet
 Coverflex
 Crd
@@ -141,6 +144,7 @@ usernames
 valign
 vfile
 Venmo
+Vite
 Weblate
 winsvg
 WSL
