@@ -665,6 +665,13 @@ async function linkAkahuAccount({
     externalAccount.orgDomain ?? externalAccount.orgId,
   );
 
+  if (externalAccount.logo) {
+    void tryAutoFetchBankIcon(bank.id, {
+      kind: 'image',
+      imageUrl: externalAccount.logo,
+    });
+  }
+
   if (upgradingId) {
     const accRow = await db.first<db.DbAccount>(
       'SELECT * FROM accounts WHERE id = ?',

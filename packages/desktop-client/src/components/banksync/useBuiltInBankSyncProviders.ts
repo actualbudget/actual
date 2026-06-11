@@ -544,6 +544,7 @@ export function useBuiltInBankSyncProviders({
         orgDomain: string;
         orgId: string;
         balance: number;
+        logo?: string;
       };
 
       for (const oldAccount of results.accounts ?? []) {
@@ -554,6 +555,7 @@ export function useBuiltInBankSyncProviders({
           orgDomain: oldAccount.connection.name,
           orgId: oldAccount.connection._id,
           balance: oldAccount.balance.current,
+          logo: oldAccount.connection.logo,
         };
 
         newAccounts.push(newAccount);

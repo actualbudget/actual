@@ -5,4 +5,5 @@ export type SyncServerAkahuAccount = {
   orgDomain?: string | null;
   orgId?: string;
   name: string;
+  logo?: string;
 };
