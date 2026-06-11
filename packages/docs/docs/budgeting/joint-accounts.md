@@ -1,150 +1,78 @@
-# Strategies For Handling Joint Accounts
+# Joint Budgeting
 
 ## Introduction
 
-Nothing derails a relationship faster than (not) talking about money and how it's spent.
+When joint budgeting with Actual Budget, you have several strategies to consider, each tailored to how you manage finances together.
 
-When budgeting with a partner in Actual Budget, you have several strategies to consider, each tailored to how you
-manage finances together.
+1.	**Fully Combined Finances.** Partners use a single, common budget file. All partners have access to the file. There may be both personal and joint bank accounts in the budget. All income flows into the budget and all expenses, both persoanl and joint, are paid from the budget. Partners decide together how to save and budget the combined resources. This method guarantees total financial transparency.
 
-One approach is maintaining a common budget where both partners share a single budget file.
-This method promotes transparency and ensures both parties agree regarding financial goals, expenses, and income.
-A shared budget fosters collaboration but requires consistent communication to keep everything current. It will help
-you both set clear boundaries for individual and shared expenses while working together toward common financial objectives.
-See [Multi-user](../getting-started/sync.md#multi-user-support) regarding simultaneous edits.
+This document focuses on the next two scenarios.
 
-Alternatively, you can track your partner's contributions within your personal Actual Budget file. This allows you to
-maintain individual control over your finances while still acknowledging and accounting for your partner's financial
-inputs. This method benefits couples who prefer to manage their finances independently but want to monitor how their
-spending aligns with joint expenses and goals.
+2.	[**Joint Budget.**](#the-joint-budget) Each partner has a personal budget and the family has a separate budget file for joint expenses. All joint bank accounts are in the joint budget file. Each partner has access to the joint budget. The partners determine what expenses and shared goals belong in the joint budget and each contributes their share.
+3.	[**Personal Budget with Contributions.**](#personal-budget-with-partner-contributions) One of the partners holds both their own personal budget and the joint expenses in their budget file. Partners determine the amount that should be contributed to meet shared goals and expenses. There may be both personal and joint bank accounts in the budget.
 
-Choosing the right approach depends on your communication style, financial goals, and the level of financial
-independence or collaboration you prefer in your relationship.
+See the [Multi-user](/docs/getting-started/sync#multi-user-support) guide for information on simultaneous edits in Actual.
 
-## Tracking A Shared Account With A Shared Actual Budget
+Choosing the right approach depends on your communication style, financial goals, and the level of financial independence or collaboration you prefer.
 
-If you and your partner are in a serious relationship and have begun reimbursing each other, you should consider the next step: creating a joint account for joint expenses.
+## Deciding on each partner's contribution
 
-If both agree, the natural next step is to have a joint budget. Your partner may not be
-ready for this, so be patient even if you previously have waxed lyrical about the good of budgeting, and envelope
-budgeting in particular. Not everyone is prepared for this kind of visibility and accountability into their (joint) finances.
+Envelope budgeting is about embracing true expenses, goal-oriented planning and flexibility. Over time, it will be clear what your common expenses are. Partners contribute their share of the joint expenses and shared goals.
 
-Also, stop using cash for common expenses, as this makes tracking so much more complicated.
+But how do you find your share? 
 
-When your partner is ready to embrace your true joint expenses, use our [Starting Fresh guide](../getting-started/starting-fresh.md) to get
-started. If your partner is new to budgeting, consider skipping the part about using historical data to find
-your initial budget numbers. Another tip is to set aside time each week by going through last week's spending; avoid doing
-this late in the evening when your energies are low.
+- **Even split:** Each partner contributes the same amount to common goals and expenses.
+- **Percent of Income:** Each partner contributes the same percentage of their income.
+- **Agreement:** Each partner contributes an amount agreed upon.
 
-Another tip is to let your partner be the primary account holder for your joint spending and billing account. Make sure the partner feels safe about this approach.
+## The Joint Budget
 
-### Basic setup steps
+This model uses a separate budget file for joint accounts, expenses and goals.
 
-1. Talk to your bank and have a joint account set up.
-2. Get two debit cards attached to the joint account, one for you and one for your partner.
-3. Create a joint Actual Budget file on a server that is also reachable by your partner.
-4. Decide how big each partner's contribution to the joint account should be (see below).
-5. Follow the [Starting Fresh guide](../getting-started/starting-fresh.md) with your partner.
+To keep track of each partner's contributions to the joint budget, create an separate income category for each partner. These categories are only used to track contributions from each partner. 
 
-### Deciding on how big each partner's contribution should be
+- When partners pay their share, add it to that _Partner's Income_ category. This way, it’s easy to ensure that everyone has contributed their part. When starting with joint budgeting, you will have partial insights into your spending habits, and extra funds may need to be added to the joint account, so good visibility is a must.
+- Optional: You may also want a _Common Income_ category. This could be the income from interest and dividends on joint accounts, stuff that you own together and sold, income from bottle returns or from selling scrap, etc.
 
-For many couples, this could be a very tough and emotional discussion. It might be a litmus test if your relationship
-will survive in the long run. If you cannot have a calm, two-way discussion about managing your joint finances,
-both must look hard at your approach to your relationship.
+Create joint expense categories as needed. You will also want an expense category for each partner in case personal spending occurs from an account in this budget.
+- A partner might use the debit card connected to the joint account for personal spending or borrow from the joint budget for a personal item. Create a budget category for each partner named _Partner Personal Spending_. For tracking purposes, these need to be rollover categories.
+- When the partner reimburses their spending, add the amount directly to this category.
 
-There are a few ways to decide how much each partner should contribute.
+## Personal Budget with Partner Contributions
 
-#### Pool all income into the joint account
+**Or, using a single Actual budget file to keep track of both personal and joint expenses.**
 
-A common way is to pool all income into the joint account and then withdraw personal spending from this account.
-As most partners have different spending habits, depending on their personal needs and wants, pooling all income may
-cause friction. The partners may refrain from spending joint money on personal projects or other needs.
+### Basic setup steps:
 
-Even if given amounts are transferred back to each partner for _their spending_, it might still cause friction
-because of different spending habits.
+1.	Create an **On Budget** account for your joint bank account. If you use a personal account for joint expenses, the accounting will be easier if you use an account that is not used for anything else.
+2.	Create a budget category **group** used to group your shared expense categories.
+3.	Create the budget **categories** you plan to budget using your joint expense account.
+4.	_For Option 1 below_: Create an **income category** called _Partner Name Contributions_ or something similar.
 
-#### Pool necessary income into the joint account
+### Adding funds to the joint expense account
 
-Envelope budgeting is about embracing true expenses, goal-oriented planning and flexibility. Over time, it will be clear
-what are your common expenses regarding groceries, utility bills, dining out, gifts, savings, etc.
+**Your contribution:**
 
-Both will then contribute their share of the joint expenses. This is called _planned income_.
+Each month you will add a transfer of your share to the joint expense account from one of your **On Budget** accounts. You don't need a category for your contribution since it is just a transfer from one of your accounts to another.
 
-But how do you find your just share? The most just way to do this is by percentage of normal income per partner.
-If Bob makes $ 4,000 a month and Alice makes $ 6,000, the total income is $ 10,000. Out of
-this, Bob will contribute 40% to the joint expenses. To compute the percentage for Bob: 4000 (Bob's income) \* 100 / 10000
-(total income). Alice's percentage is 60%, found by subtracting Bob's percentage from 100.
+  ![Screenshot of joint accounts in a personal Actual Budget file](/img/joint-accounts/jointaccount-2.webp)
 
-### Tracking personal spending in the budget
+**Partner contributions:**
 
-One of the partners might use the debit card connected to the joint account for
-personal spending by mistake. Have one budget category named _Partner Personal Spending_. For tracking purposes, this needs to be
-a rollover category.
+- **Option 1:** When your partner makes a contribution to the account, use the _Partner Name Contributions_ income category you created. Using a separate income category for this contribution, it will be easier to filter out when doing reports later since this isn't _your_ income, though it is inflow to the budget.
 
-When the partner reimburses their spending, add the amount to this category.
+  ![Screenshot of joint accounts in a personal Actual Budget file - option 1](/img/joint-accounts/jointaccount-3.webp)
 
-:::info
-If the reimbursements happen immediately, there is no need to enter these two transactions on the account register at all
-as they will zero each other out.
-:::
+- **Option 2:** In this case, you assign the contribution by treating the new inflow like a credit card return. Assign your partner’s deposit directly to the shared categories. The deposit should be made into the account ledger you use for the joint expenses. As you can see, you can fund each shared category using _split transaction_.
 
-### Adding funds to the joint account
-
-To keep track of your and your partner's contributions to your join account, create one income category named
-_Partners Contributions_. This category is _only used_ to track _planned income_ from each partner. You also want
-two categories called _Partner Reimbursements_ and _Common Income_.
-
-- When both partners pay their share, this is added to the _Partners Contributions_. This way makes it easy to track
-  that everyone has contributed their part. When starting with joint budgeting, you will have partial insights into your spending habits, and extra funds need to be added to the joint account, so
-  good visibility is a must.
-- When reimbursements for personal spending occur, use the _Partner Reimbursements_ income category and immediately
-  use this amount against the _Partner Personal Spending_ category.
-- _Common Income_ is all other income that is _not planned_. This could be gifts, or if you sell stuff that you own
-  together, etc.
-
-## Tracking A Shared Account With Your Personal Actual Budget
-
-Situation: I am using Actual to keep track of my budget and finances, but I share a joint account with my partner.
-
-### Basic setup steps
-
-1. Create an **on budget** account used to pay joint bills.
-2. Create a **category group** used to group your shared expense categories.
-3. Create the **categories** you plan to budget using your joint account.
-4. **Optional:** Create an **Income Category** called **Partner Contribution** or something similar. This will be explained further below.
-
-### Adding funds to the joint account
-
-#### Your contribution
-
-Each month you will add a transfer of your share to the joint account from one of your on budget accounts. You don't need a category for your contribution since it is just a transfer from one of your accounts to another.
-
-![Screenshot of joint accounts in a personal Actual Budget file](/img/joint-accounts/jointaccount-2.webp)
-
-#### Partner contribution
-
-##### Option 1
-
-When your partner makes a contribution to the joint account, use the **Income Category** you created as the category. By having a separate category for this contribution, it will be easier to filter out when doing reports later since this isn't true income, though it is income to the budget.
-
-![Screenshot of joint accounts in a personal Actual Budget file - option 1](/img/joint-accounts/jointaccount-3.webp)
-
-##### Option 2
-
-If option 1 doesn't seem right to you, the same result could be achieved by treating the new income like a return to a store. In this case, you can assign your partners deposit directly to the shared categories. The deposit should be made into the **Joint Account** ledger. As you can see, you can fund each shared category using the **split transaction** option.
-
-![Screenshot of joint accounts in a personal Actual Budget file - option 2](/img/joint-accounts/jointaccount-5.webp)
+  ![Screenshot of joint accounts in a personal Actual Budget file - option 2](/img/joint-accounts/jointaccount-5.webp)
 
 ### Budgeting
 
-#### Option 1
+- **Option 1:** If you are entering the inflow to the joint expense account according to option 1 above, budget the whole amount for the bill. The total budgeted of the shared expenses category group should equal the total amount available to spend in the joint bank account. The joint account and category group are loosely connected in this scenario. There is no safeguard to prevent over budgeting for that account so you will need to monitor the balance of the account and the balance of the category group to be sure there is enough in the bank account to cover the expenses.
 
-If you are entering the data for the joint account according to option 1, budget the whole amount for the bill. The total budgeted of the shared expenses category group should equal the total amount available in the joint account. The joint account and category group are loosely connected in this scenario. There is no safeguard to prevent over budgeting for that account so you will need to monitor the balance of the account and the balance of the category group to be sure they are the same.
+  ![Screenshot of budgeting with personal Actual Account file - option 1](/img/joint-accounts/jointaccount-1.webp)
 
-![Screenshot of budgeting with personal Actual Account file - option 1](/img/joint-accounts/jointaccount-1.webp)
+- **Option 2:** If you've decided to fund the categories directly with the contribution, you only need to fund the budget categories for your portion of the shared expense. As you can see, each of the budget categories is still funded to the same level but in this case, there is no income that will show in reports. The available amount to spend in the joint bank account and budgeted amount should still be the same.
 
-#### Option 2
-
-If you've decided to fund the categories directly with the deposit, you only need to fund the budget categories for your portion of the shared expense. As you can see, each of the budget categories is still funded to the same level but in this case there is no **income** that will show in reports. The Joint account balance and budgeted amount should still be the same.
-
-![Screenshot of budgeting with personal Actual Account file - option 2](/img/joint-accounts/jointaccount-4.webp)
+  ![Screenshot of budgeting with personal Actual Account file - option 2](/img/joint-accounts/jointaccount-4.webp)
