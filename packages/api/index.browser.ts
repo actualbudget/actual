@@ -35,8 +35,11 @@ export async function shutdown() {
     } catch {
       // most likely that no budget is loaded, so the sync failed
     }
-    await send('close-budget');
-    worker.terminate();
-    worker = null;
+    try {
+      await send('close-budget');
+    } finally {
+      worker.terminate();
+      worker = null;
+    }
   }
 }
