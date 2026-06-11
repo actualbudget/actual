@@ -105,17 +105,21 @@ case "$cmd" in
     # First line of the remainder tells us the message form. An empty result
     # means no inline message (editor/--amend/-F) — left alone.
     first=$(printf '%s\n' "$rest" | sed -n '1s/^[[:space:]]*//p')
+    msg=''
     case "$first" in
       *'$('*'<<'*)
         # Heredoc via command substitution: -m "$(cat <<'EOF' ... EOF)".
-        # The subject is the first line of the heredoc body, i.e. the line
-        # after the one carrying the flag.
-        msg=$(printf '%s\n' "$rest" | sed -n '2p') ;;
-      *)
-        # Inline string: strip one leading quote, truncate at the next quote
-        # (good enough for a prefix check).
-        msg=$(printf '%s\n' "$first" | sed "s/^['\"]//; s/['\"].*//") ;;
+        # The subject is the first non-blank line of the heredoc body (git's
+        # default cleanup strips leading blank lines).
+        msg=$(printf '%s\n' "$rest" | sed -n '2,$p' |
+          sed -n '/[^[:space:]]/{s/^[[:space:]]*//;p;q;}') ;;
     esac
+    # Inline string: strip one leading quote, truncate at the next quote
+    # (good enough for a prefix check). Also the fallback when the heredoc
+    # pattern matched but no body line followed — e.g. a single-line <<<
+    # here-string — so a statically unknowable message fails closed instead
+    # of slipping past as empty.
+    [ -n "$msg" ] || msg=$(printf '%s\n' "$first" | sed "s/^['\"]//; s/['\"].*//")
     case "$msg" in
       "" | "[AI]"*) ;;
       *) block "Blocked: commit messages must start with '[AI]'. Got: $msg" ;;
