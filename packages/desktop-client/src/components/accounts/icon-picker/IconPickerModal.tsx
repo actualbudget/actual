@@ -139,33 +139,20 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
     });
   };
 
-  const persist = async (icon: string | null) => {
-    if (scope === 'bank' && account.bank) {
-      await send('bank-update', { id: account.bank, icon });
-      if (icon) {
-        await send('account-set-icon', {
-          id: account.id,
-          icon: null,
-        });
-      }
-    } else {
-      await send('account-set-icon', {
-        id: account.id,
-        icon,
-      });
-    }
-    refresh();
-  };
-
-  const persistWebsite = async (website: string | null) => {
-    if (scope === 'bank' && account.bank) {
-      await send('bank-update', { id: account.bank, website });
-    } else {
-      await send('account-set-icon', {
-        id: account.id,
-        website,
-      });
-    }
+  const persistAll = async ({
+    icon,
+    website,
+  }: {
+    icon?: string | null;
+    website?: string | null;
+  }) => {
+    await send('account-icon-picker-save', {
+      scope,
+      accountId: account.id,
+      bankId: scope === 'bank' ? (account.bank ?? undefined) : undefined,
+      icon,
+      website,
+    });
     refresh();
   };
 
@@ -244,7 +231,7 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
                   setError(null);
                   setIsBusy(true);
                   try {
-                    await persist(null);
+                    await persistAll({ icon: null });
                     state.close();
                   } catch (err) {
                     setError(
@@ -271,10 +258,10 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
                   setError(null);
                   setIsBusy(true);
                   try {
-                    if (pendingWebsite !== null) {
-                      await persistWebsite(pendingWebsite);
-                    }
-                    await persist(previewIcon);
+                    await persistAll({
+                      icon: previewIcon,
+                      website: pendingWebsite ?? undefined,
+                    });
                     state.close();
                   } catch (err) {
                     setError(

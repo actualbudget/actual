@@ -63,6 +63,7 @@ export type AccountHandlers = {
   'account-update': typeof updateAccount;
   'account-set-icon': typeof setAccountIcon;
   'bank-update': typeof updateBank;
+  'account-icon-picker-save': typeof saveIconPickerState;
   'favicon-fetch': typeof fetchFaviconHandler;
   'accounts-get': typeof getAccounts;
   'account-balance': typeof getAccountBalance;
@@ -154,6 +155,48 @@ async function updateBank({
         icon === null ? null : await normalizeIconDataUrlForDbIfRaster(icon),
     }),
   });
+  return {};
+}
+
+async function saveIconPickerState({
+  scope,
+  accountId,
+  bankId,
+  icon,
+  website,
+}: {
+  scope: 'account' | 'bank';
+  accountId: AccountEntity['id'];
+  bankId?: string;
+  icon?: string | null;
+  website?: string | null;
+}) {
+  const normalizedIcon =
+    icon === undefined
+      ? undefined
+      : icon === null
+        ? null
+        : await normalizeIconDataUrlForDbIfRaster(icon);
+
+  if (scope === 'bank' && bankId) {
+    await db.asyncTransaction(async () => {
+      await db.update('banks', {
+        id: bankId,
+        ...(website !== undefined && { website }),
+        ...(normalizedIcon !== undefined && { icon: normalizedIcon }),
+      });
+      // Clear account-level icon override whenever the bank icon changes
+      if (icon !== undefined) {
+        await db.update('accounts', { id: accountId, icon: null });
+      }
+    });
+  } else {
+    await db.update('accounts', {
+      id: accountId,
+      ...(normalizedIcon !== undefined && { icon: normalizedIcon }),
+      ...(website !== undefined && { website }),
+    });
+  }
   return {};
 }
 
@@ -1945,6 +1988,7 @@ export const app = createApp<AccountHandlers>();
 app.method('account-update', mutator(undoable(updateAccount)));
 app.method('account-set-icon', mutator(undoable(setAccountIcon)));
 app.method('bank-update', mutator(undoable(updateBank)));
+app.method('account-icon-picker-save', mutator(undoable(saveIconPickerState)));
 app.method('favicon-fetch', fetchFaviconHandler);
 app.method('accounts-get', getAccounts);
 app.method('account-balance', getAccountBalance);
