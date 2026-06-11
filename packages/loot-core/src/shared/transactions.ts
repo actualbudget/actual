@@ -249,6 +249,7 @@ export function addSplitTransaction(
     trans.subtransactions?.push(
       makeChild(trans, {
         amount: 0,
+        payee: prevSub?.payee ?? trans.payee,
         sort_order: num(prevSub && prevSub.sort_order) - 1,
       }),
     );
@@ -345,6 +346,7 @@ export function splitTransaction(
     return {
       ...rest,
       is_parent: true,
+      payee: null,
       error: num(trans.amount) === 0 ? null : SplitTransactionError(0, trans),
       subtransactions: subtransactions.map(t => ({
         ...t,

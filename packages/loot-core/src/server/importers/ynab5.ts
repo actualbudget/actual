@@ -1150,7 +1150,11 @@ export function parseFile(buffer: Buffer): Budget {
   if (data.data) {
     data = data.data;
   }
-  if (data.budget) {
+  // YNAB renamed the top-level wrapper from `budget` to `plan` (API v1.78+).
+  // Older exports and third-party tools still emit `budget`, so accept both.
+  if (data.plan) {
+    data = data.plan;
+  } else if (data.budget) {
     data = data.budget;
   }
 

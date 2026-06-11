@@ -1238,7 +1238,7 @@ describe('Transactions', () => {
         id: expect.any(String),
         is_parent: true,
         notes: 'Notes',
-        payee: 'alice-id',
+        payee: null,
         reconciled: false,
         sort_order: 0,
       },
