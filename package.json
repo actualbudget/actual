@@ -99,6 +99,9 @@
     },
     "esbuild": {
       "built": true
+    },
+    "sharp": {
+      "built": true
     }
   },
   "optionalDependencies": {
