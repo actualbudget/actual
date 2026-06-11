@@ -164,7 +164,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
     );
   }, [hideReconciled, setHideReconciled, dispatch]);
 
-  const onEditIcon = useCallback(() => {
+  const onEditIcon = () => {
     dispatch(
       pushModal({
         modal: {
@@ -173,7 +173,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
         },
       }),
     );
-  }, [account.id, dispatch]);
+  };
 
   const onClick = useCallback(() => {
     dispatch(
