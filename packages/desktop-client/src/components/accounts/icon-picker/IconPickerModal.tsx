@@ -635,6 +635,7 @@ function EmojiTab({
         value={emoji}
         onChangeValue={handleEmoji}
         style={{ textAlign: 'center', fontSize: 22 }}
+        autoComplete="off"
       />
     </View>
   );
