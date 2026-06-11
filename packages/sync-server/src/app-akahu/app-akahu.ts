@@ -8,7 +8,6 @@ import type {
 } from 'akahu';
 // For some reason this is not provided in the provided index.d.ts file
 import type { EnrichedPendingTransaction } from 'akahu/dist/models/transactions';
-import { formatISO } from 'date-fns';
 import express from 'express';
 
 import { handleError } from '#app-gocardless/util/handle-error';
@@ -51,7 +50,7 @@ app.use(validateSessionMiddleware);
 
 app.post(
   '/status',
-  handleError(async (req, res) => {
+  handleError(async (_req, res) => {
     const userToken = secretsService.get(SecretName.akahu_userToken);
     const appToken = secretsService.get(SecretName.akahu_appToken);
 
@@ -68,7 +67,7 @@ app.post(
 
 app.post(
   '/accounts',
-  handleError(async (req, res) => {
+  handleError(async (_req, res) => {
     const userToken = secretsService.get(SecretName.akahu_userToken);
     const appToken = secretsService.get(SecretName.akahu_appToken);
 
@@ -301,42 +300,48 @@ function getRefreshedAccount(
   });
 }
 
-function isEnriched(
-  trans:
-    | Transaction
-    | EnrichedTransaction
-    | PendingTransaction
-    | EnrichedPendingTransaction,
-): trans is EnrichedTransaction {
-  return 'merchant' in trans || 'meta' in trans || 'category' in trans;
+function getDate(date: Date): string {
+  const parts = dateTimeFormatNZ.formatToParts(date);
+  const month = parts[0].value;
+  const day = parts[2].value;
+  const year = parts[4].value;
+  return `${year}-${month}-${day}`;
 }
 
-function getDate(date: Date): string {
-  return formatISO(date).split('T')[0];
-}
+// Akahu gives us dates in UTC, but we want to display them in NZ time
+const dateTimeFormatNZ = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'Pacific/Auckland',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
 
 function convertToCents(amount: number): number {
   return Math.round(amount * 100);
 }
 
-function getPayeeName(
-  trans:
-    | Transaction
-    | EnrichedTransaction
-    | PendingTransaction
-    | EnrichedPendingTransaction,
-): string {
-  if (isEnriched(trans)) {
-    if (trans.merchant?.name) {
-      return trans.merchant.name;
-    }
+type AnyTransaction =
+  | Transaction
+  | EnrichedTransaction
+  | PendingTransaction
+  | EnrichedPendingTransaction;
 
-    if (trans.meta?.other_account) {
-      return trans.meta.other_account;
-    }
+function getPayeeName(trans: AnyTransaction): string {
+  return getMerchantName(trans) ?? getOtherAccount(trans) ?? trans.description;
+}
+
+function getMerchantName(trans: AnyTransaction): string | undefined {
+  if ('merchant' in trans && trans.merchant) {
+    return trans.merchant.name;
   }
+  return undefined;
+}
 
-  return '';
+function getOtherAccount(trans: AnyTransaction): string | undefined {
+  if ('meta' in trans && trans.meta) {
+    return trans.meta.other_account ?? undefined;
+  }
+  return undefined;
 }
 
 function processPendingTransaction(
@@ -350,6 +355,9 @@ function processPendingTransaction(
     booked: false,
     date: getDate(transactionDate),
     payeeName: getPayeeName(trans),
+    merchant: {
+      name: getOtherAccount(trans) ?? '',
+    },
     notes: trans.description,
     sortOrder: transactionDate.getTime(),
     transactionAmount: {
@@ -364,12 +372,20 @@ function processTransaction(
   account: Account,
 ): AkahuTransaction {
   let category = undefined;
-  if (isEnriched(trans)) {
-    category = trans.category?.name;
+  if ('category' in trans && trans.category) {
+    category = trans.category.name;
   }
+
+  const merchant =
+    'merchant' in trans && trans.merchant
+      ? trans.merchant
+      : {
+          name: getOtherAccount(trans) ?? '',
+        };
 
   return {
     ...processPendingTransaction(trans, account),
+    merchant,
     category,
     booked: true,
     transactionId: trans._id,
