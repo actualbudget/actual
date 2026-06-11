@@ -27,7 +27,6 @@ codemirror
 COEP
 Coinbase
 COOP
-CORS
 commandlet
 Coverflex
 Crd

@@ -131,8 +131,6 @@ For this to work, your app needs to meet a few requirements:
    });
    ```
 
-3. **Allow CORS on your server.** Browsers enforce cross-origin rules, so your Actual server must allow requests from the origin your app runs on.
-
 ## Writing Data Importers
 
 If you are using another app, like YNAB or Mint, you might want to migrate your data into Actual. Right now, Actual officially supports [importing YNAB4 data](../migration/ynab4.md) and [importing nYNAB data](../migration/nynab.mdx) (and it works very well). But if you want to import all of your data into Actual, you can write a custom importer.
