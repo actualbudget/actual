@@ -111,6 +111,7 @@ vi.mock('#hooks/useLocationPermission', () => ({
   useLocationPermission: vi.fn(() => ({
     isGranted: true,
     isPending: false,
+    isDenied: false,
     requestPermission: vi.fn().mockResolvedValue(undefined),
   })),
 }));

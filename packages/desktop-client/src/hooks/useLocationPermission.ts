@@ -9,6 +9,7 @@ import { useFeatureFlag } from './useFeatureFlag';
 export type LocationPermission = {
   isGranted: boolean;
   isPending: boolean;
+  isDenied: boolean;
   requestPermission: () => Promise<void>;
 };
 
@@ -105,6 +106,7 @@ export function useLocationPermission(): LocationPermission {
   return {
     isGranted: state === 'granted',
     isPending: state === 'prompt',
+    isDenied: state === 'denied',
     requestPermission,
   };
 }

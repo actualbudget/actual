@@ -1684,6 +1684,7 @@ function TransactionEditUnconnected({
   const {
     isGranted: isLocationGranted,
     isPending: shouldPromptLocation,
+    isDenied: isLocationDenied,
     requestPermission,
   } = useLocationPermission();
   const { data: nearbyPayees = [] } = useNearbyPayees({
@@ -2100,7 +2101,11 @@ function TransactionEditUnconnected({
         onSaveLocation={onSaveLocation}
         onSelectNearestPayee={onSelectNearestPayee}
         nearestPayee={isLocationGranted ? nearestPayee : null}
-        onRequestLocation={shouldPromptLocation ? requestPermission : undefined}
+        onRequestLocation={
+          shouldPromptLocation || isLocationDenied
+            ? requestPermission
+            : undefined
+        }
       />
     </View>
   );
