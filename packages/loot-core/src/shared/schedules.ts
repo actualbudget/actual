@@ -3,7 +3,7 @@ import type { IRuleOptions } from '@rschedule/core';
 import * as d from 'date-fns';
 
 import { Condition } from '#server/rules';
-import type { ScheduleEntity } from '#types/models';
+import type { RuleConditionEntity, ScheduleEntity } from '#types/models';
 
 import * as monthUtils from './months';
 import { q } from './query';
@@ -34,29 +34,103 @@ export function getStatus(
   }
 }
 
+export type ScheduleOccurrenceMatchInput = {
+  posts_transaction?: boolean;
+  _conditions?: RuleConditionEntity[];
+};
+
+/**
+ * Lower bound for matching a posted transaction to a schedule occurrence date.
+ *
+ * Used by getHasTransactionsQuery for `next_date` (lower bound only). Forecast
+ * occurrence dedup also applies an upper bound of `occurrenceDate`; see
+ * isScheduleOccurrencePosted.
+ */
+export function getScheduleOccurrenceMatchStartDate(
+  schedule: ScheduleOccurrenceMatchInput,
+  occurrenceDate: string,
+): string {
+  const dateCond = schedule._conditions?.find(c => c.field === 'date');
+  if (dateCond?.op === 'is') {
+    return occurrenceDate;
+  }
+  if (schedule.posts_transaction) {
+    return occurrenceDate;
+  }
+  return monthUtils.subDays(occurrenceDate, 2);
+}
+
+export type PostedScheduleTransaction = {
+  schedule?: string | null;
+  date: string;
+};
+
+export function indexPostedScheduleTransactions(
+  transactions: PostedScheduleTransaction[],
+): Map<string, PostedScheduleTransaction[]> {
+  const byScheduleId = new Map<string, PostedScheduleTransaction[]>();
+
+  for (const transaction of transactions) {
+    if (!transaction.schedule) {
+      continue;
+    }
+
+    const existing = byScheduleId.get(transaction.schedule);
+    if (existing) {
+      existing.push(transaction);
+    } else {
+      byScheduleId.set(transaction.schedule, [transaction]);
+    }
+  }
+
+  return byScheduleId;
+}
+
+export function isScheduleOccurrencePosted({
+  schedule,
+  scheduleId,
+  occurrenceDate,
+  postedTransactions,
+}: {
+  schedule: ScheduleOccurrenceMatchInput;
+  scheduleId: string;
+  occurrenceDate: string;
+  postedTransactions: PostedScheduleTransaction[];
+}): boolean {
+  const matchStartDate = getScheduleOccurrenceMatchStartDate(
+    schedule,
+    occurrenceDate,
+  );
+
+  return postedTransactions.some(
+    tx =>
+      tx.schedule === scheduleId &&
+      tx.date >= matchStartDate &&
+      tx.date <= occurrenceDate,
+  );
+}
+
 /**
  * Builds a query to check if each schedule already has a matching transaction.
  *
  * The date lower-bound varies:
- * - `dateCond.op === 'is'` (one-time): exact `next_date`, no lookback.
+ * - `dateCond.op === 'is'` (one-time or recurring): exact `next_date`, no lookback.
  * - `posts_transaction` (auto-posted recurring): exact `next_date`, since
  *   auto-posted dates are always precise. A lookback here would cause
  *   yesterday's transaction to falsely match today's occurrence.
- * - Otherwise (manual recurring): 2-day lookback to catch early payments.
+ * - Otherwise (manual recurring with `isapprox`, etc.): 2-day lookback to catch
+ *   early payments.
  */
 export function getHasTransactionsQuery(schedules) {
   const filters = schedules.map(schedule => {
-    const dateCond = schedule._conditions?.find(c => c.field === 'date');
     return {
       $and: {
         schedule: schedule.id,
         date: {
-          $gte:
-            dateCond && dateCond.op === 'is'
-              ? schedule.next_date
-              : schedule.posts_transaction
-                ? schedule.next_date
-                : monthUtils.subDays(schedule.next_date, 2),
+          $gte: getScheduleOccurrenceMatchStartDate(
+            schedule,
+            schedule.next_date,
+          ),
         },
       },
     };

@@ -75,8 +75,8 @@
     "eslint-plugin-typescript-paths": "^0.0.33",
     "husky": "^9.1.7",
     "lage": "^2.15.5",
-    "lint-staged": "^16.4.0",
     "minimatch": "^10.2.5",
+    "nano-staged": "^0.8.0",
     "npm-run-all": "^4.1.5",
     "oxfmt": "^0.44.0",
     "oxlint": "^1.59.0",
@@ -113,18 +113,6 @@
     "serialize-javascript": "^7.0.5",
     "socks": ">=2.8.3",
     "webpackbar": "^7.0.0"
-  },
-  "lint-staged": {
-    "packages/*/{package.json,tsconfig.json}": [
-      "ts-node ./bin/validate-publish-imports.ts --fix",
-      "yarn sync:tsconfig-references"
-    ],
-    "*.{js,mjs,jsx,ts,tsx,md,json,yml,yaml}": [
-      "oxfmt --no-error-on-unmatched-pattern"
-    ],
-    "*.{js,mjs,jsx,ts,tsx}": [
-      "oxlint --fix --type-aware --quiet"
-    ]
   },
   "browserslist": [
     "electron >= 35.0",

@@ -71,6 +71,8 @@ export function calculateLegend(
       name: item.name || '',
       color: getColor(item.data, index),
       dataKey: item.id || item.name || '', // Use id for unique data lookup
+      uncategorizedId:
+        'uncategorizedId' in item.data ? item.data.uncategorizedId : undefined,
     };
   });
   return legend;

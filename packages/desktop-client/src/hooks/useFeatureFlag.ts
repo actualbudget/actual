@@ -15,6 +15,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   payeeLocations: false,
   enableBanking: false,
   sankeyReport: false,
+  akahuBankSync: false,
 };
 
 export function useFeatureFlag(name: FeatureFlag): boolean {

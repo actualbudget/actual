@@ -5,6 +5,11 @@ on:
   push:
     branches:
       - release
+  workflow_run: # zizmor: ignore[dangerous-triggers]
+    workflows: ['Cut release branch']
+    types:
+      - completed
+    branches: [master]
 
 permissions: {}
 
@@ -67,7 +72,10 @@ jobs:
         uses: ./.github/actions/release-notes/check
 
   generate-release-notes:
-    if: github.event_name == 'push'
+    if: >-
+      github.event_name == 'push'
+      || (github.event_name == 'workflow_run'
+          && github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     environment: release
     permissions:
@@ -77,7 +85,7 @@ jobs:
       - name: Resolve version
         id: version
         env:
-          GH_TOKEN: ${{ secrets.ACTIONS_UPDATE_TOKEN || github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           version=$(gh api "repos/${GITHUB_REPOSITORY}/contents/packages/desktop-client/package.json?ref=release" --jq '.content' | base64 -d | jq -r .version)
           echo "version=$version" >> "$GITHUB_OUTPUT"
@@ -88,7 +96,6 @@ jobs:
         with:
           ref: ${{ steps.version.outputs.notes_branch }}
           fetch-depth: 0
-          token: ${{ secrets.ACTIONS_UPDATE_TOKEN || github.token }}
           persist-credentials: true
 
       - name: Generate release notes

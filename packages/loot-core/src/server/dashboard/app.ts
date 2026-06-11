@@ -28,7 +28,9 @@ function isExportedCustomReportWidget(
   return widget.type === 'custom-report';
 }
 
-function isWidgetType(type: string): type is DashboardWidgetEntity['type'] {
+export function isWidgetType(
+  type: string,
+): type is DashboardWidgetEntity['type'] {
   return [
     'net-worth-card',
     'cash-flow-card',
@@ -41,6 +43,8 @@ function isWidgetType(type: string): type is DashboardWidgetEntity['type'] {
     'formula-card',
     'custom-report',
     'sankey-card',
+    'balance-forecast-card',
+    'age-of-money-card',
   ].includes(type);
 }
 
