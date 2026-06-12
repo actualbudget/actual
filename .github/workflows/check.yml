@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   setup:
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     permissions:
       contents: read
     steps:
@@ -29,7 +29,7 @@ jobs:
           download-translations: 'false'
   constraints:
     needs: setup
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -44,7 +44,7 @@ jobs:
         run: yarn check:tsconfig-references
   lint:
     needs: setup
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -57,7 +57,7 @@ jobs:
         run: yarn lint
   typecheck:
     needs: setup
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -70,7 +70,7 @@ jobs:
         run: yarn typecheck
   validate-cli:
     needs: setup
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -85,7 +85,7 @@ jobs:
         run: node packages/sync-server/build/bin/actual-server.js --version
   test:
     needs: setup
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -97,7 +97,7 @@ jobs:
       - name: Test
         run: yarn test
   check-gh-actions:
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     permissions:
       security-events: write
     steps:
@@ -109,7 +109,7 @@ jobs:
   migrations:
     needs: setup
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:

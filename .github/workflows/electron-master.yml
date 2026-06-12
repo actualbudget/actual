@@ -25,11 +25,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - ubuntu-22.04
-          - windows-latest
-          - macos-latest
-    runs-on: ${{ matrix.os }}
+        include:
+          - os: ubuntu-22.04
+            runner: depot-ubuntu-22.04
+          - os: windows-latest
+            runner: depot-windows-latest
+          - os: macos-latest
+            runner: depot-macos-latest
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:

@@ -81,3 +81,4 @@ Make Actual Budget accessible to more people by helping with the [Internationali
 Thanks to our wonderful sponsors who make Actual Budget possible!
 
 <a href="https://www.netlify.com"> <img src="https://www.netlify.com/v3/img/components/netlify-color-accent.svg" alt="Deploys by Netlify" /> </a>
+<a href="https://depot.dev"> <img src="https://depot.dev/badges/built-with-depot.svg" alt="Built with Depot" /> </a>

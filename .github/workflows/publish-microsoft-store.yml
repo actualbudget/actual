@@ -23,7 +23,7 @@ permissions:
 
 jobs:
   publish-microsoft-store:
-    runs-on: windows-latest
+    runs-on: depot-windows-latest
     environment: release
     steps:
       - name: Resolve version

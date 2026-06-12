@@ -11,7 +11,7 @@ permissions:
 jobs:
   do-not-merge:
     name: Block PRs with "do not merge" label
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     steps:
       - name: Fail if 'do not merge' label is set
         if: contains(github.event.pull_request.labels.*.name, 'do not merge')
