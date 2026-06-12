@@ -78,9 +78,9 @@ function getDayOfMonth(date: string) {
   return monthUtils.parseDate(date).getDate();
 }
 
-function getYnabMonthlyPatterns(dateFirst: string): RecurPattern[] | undefined {
+function getYnabMonthlyPatterns(dateFirst: string): RecurPattern[] {
   if (getDayOfMonth(dateFirst) !== 31) {
-    return undefined;
+    return [];
   }
 
   return [
