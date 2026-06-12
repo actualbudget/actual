@@ -10,6 +10,7 @@ import { assertUrlAllowed, isBlockedIp } from './util/ssrf';
 import { validateSession } from './util/validate-user';
 
 const MAX_RAW_BYTES = 256 * 1024;
+const MAX_TEXT_BYTES = 32 * 1024;
 const MAX_REDIRECTS = 8;
 const REQUEST_TIMEOUT_MS = 20000;
 const ALLOWED_CONTENT_TYPES = [
@@ -203,11 +204,12 @@ function rethrowIfClientPolicyError(err: unknown): void {
 async function readResponseBodyCapped(
   res: Response,
   url: string,
+  maxBytes = MAX_RAW_BYTES,
 ): Promise<ArrayBuffer> {
   const contentLengthHeader = res.headers.get('content-length');
   if (contentLengthHeader) {
     const parsed = Number.parseInt(contentLengthHeader, 10);
-    if (Number.isFinite(parsed) && parsed > MAX_RAW_BYTES) {
+    if (Number.isFinite(parsed) && parsed > maxBytes) {
       throw new FaviconError(`Favicon too large (${parsed} bytes) from ${url}`);
     }
   }
@@ -217,7 +219,7 @@ async function readResponseBodyCapped(
     if (buf.byteLength === 0) {
       throw new FaviconError(`Empty response from ${url}`);
     }
-    if (buf.byteLength > MAX_RAW_BYTES) {
+    if (buf.byteLength > maxBytes) {
       throw new FaviconError(
         `Favicon too large (${buf.byteLength} bytes) from ${url}`,
       );
@@ -237,10 +239,10 @@ async function readResponseBodyCapped(
       continue;
     }
     total += value.byteLength;
-    if (total > MAX_RAW_BYTES) {
+    if (total > maxBytes) {
       void reader.cancel();
       throw new FaviconError(
-        `Favicon too large (>${MAX_RAW_BYTES} bytes) from ${url}`,
+        `Favicon too large (>${maxBytes} bytes) from ${url}`,
       );
     }
     parts.push(value);
@@ -374,7 +376,8 @@ async function fetchManifestIconCandidates(
   try {
     const res = await safeFetch(manifestUrl);
     if (!res.ok) return [];
-    const json = (await res.json()) as {
+    const buf = await readResponseBodyCapped(res, manifestUrl, MAX_TEXT_BYTES);
+    const json = JSON.parse(new TextDecoder().decode(buf)) as {
       icons?: Array<{ src?: string; sizes?: string }>;
     };
     if (!Array.isArray(json.icons)) return [];
@@ -408,7 +411,12 @@ async function tryDirect(origin: URL): Promise<FaviconResult | null> {
     if (res.ok) {
       const ct = (res.headers.get('content-type') ?? '').toLowerCase();
       if (ct.includes('text/html')) {
-        html = await res.text();
+        const buf = await readResponseBodyCapped(
+          res,
+          origin.toString(),
+          MAX_TEXT_BYTES,
+        );
+        html = new TextDecoder().decode(buf);
         htmlCandidates = extractIconCandidatesFromHtml(html, origin);
       }
     }
