@@ -527,21 +527,34 @@ app.get('/', async (req: Request, res: ExpressResponse) => {
   const session = await validateSession(req, res);
   if (!session) return;
 
-  const imageTarget = req.query.image as string | undefined;
-  const target = (req.query.url ?? req.query.domain) as string | undefined;
+  const rawImage = Array.isArray(req.query.image)
+    ? req.query.image[0]
+    : req.query.image;
+  const imageValue =
+    typeof rawImage === 'string' && rawImage !== '' ? rawImage : undefined;
 
-  if (
-    (!target || typeof target !== 'string') &&
-    (!imageTarget || typeof imageTarget !== 'string')
-  ) {
+  const rawUrlParam = Array.isArray(req.query.url)
+    ? req.query.url[0]
+    : req.query.url;
+  const rawDomainParam = Array.isArray(req.query.domain)
+    ? req.query.domain[0]
+    : req.query.domain;
+  const urlValue =
+    typeof rawUrlParam === 'string' && rawUrlParam !== ''
+      ? rawUrlParam
+      : typeof rawDomainParam === 'string' && rawDomainParam !== ''
+        ? rawDomainParam
+        : undefined;
+
+  if (!imageValue && !urlValue) {
     res.status(400).json({ error: 'Missing url, domain, or image parameter' });
     return;
   }
 
   try {
-    const result = imageTarget
-      ? await fetchImageForUrl(imageTarget)
-      : await fetchFaviconForUrl(target!);
+    const result = imageValue
+      ? await fetchImageForUrl(imageValue)
+      : await fetchFaviconForUrl(urlValue!);
     res.set('Cache-Control', 'private, max-age=300');
     res.json(result);
   } catch (err) {
