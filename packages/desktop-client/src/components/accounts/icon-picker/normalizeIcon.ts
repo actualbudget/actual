@@ -105,8 +105,12 @@ export function emojiToDataUrl(emoji: string): string {
   const dataUrl = paintToCanvas(ctx => {
     ctx.font = `${ICON_SIZE_PX - 8}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", system-ui, sans-serif`;
     ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(trimmed, ICON_SIZE_PX / 2, ICON_SIZE_PX / 2 + 2);
+    ctx.textBaseline = 'alphabetic';
+    const metrics = ctx.measureText(trimmed);
+    const glyphH =
+      metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+    const y = (ICON_SIZE_PX - glyphH) / 2 + metrics.actualBoundingBoxAscent;
+    ctx.fillText(trimmed, ICON_SIZE_PX / 2, y);
   });
   return checkSize(dataUrl);
 }

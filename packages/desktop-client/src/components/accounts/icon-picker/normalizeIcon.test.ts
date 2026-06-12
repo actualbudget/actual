@@ -14,6 +14,11 @@ function withMockedCanvas(toDataUrlOutput: string, runnable: () => void) {
     clearRect: vi.fn(),
     drawImage: vi.fn(),
     fillText: vi.fn(),
+    measureText: vi.fn().mockReturnValue({
+      width: 56,
+      actualBoundingBoxAscent: 48,
+      actualBoundingBoxDescent: 8,
+    }),
     imageSmoothingEnabled: false,
     imageSmoothingQuality: 'low',
     font: '',
