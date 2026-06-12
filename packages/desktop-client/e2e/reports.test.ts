@@ -6,7 +6,9 @@ import type { CustomReportPage } from './page-models/custom-report-page';
 import { Navigation } from './page-models/navigation';
 import type { ReportsPage } from './page-models/reports-page';
 
-test.describe.parallel('Reports', () => {
+test.describe('Reports', () => {
+  test.describe.configure({ mode: 'serial' });
+
   let page: Page;
   let navigation: Navigation;
   let reportsPage: ReportsPage;
@@ -83,9 +85,29 @@ test.describe.parallel('Reports', () => {
 
       await expect(page).toMatchThemeScreenshots();
     });
+
+    test('loads tracking budget forecast report', async () => {
+      const settingsPage = await navigation.goToSettingsPage();
+      await settingsPage.useBudgetType('Tracking');
+
+      const budgetPage = await navigation.goToBudgetPage();
+      await budgetPage.goToNextMonth();
+      await budgetPage.setBudgetedAmount('Food', '1200', 0);
+      await budgetPage.goToNextMonth();
+      await budgetPage.setBudgetedAmount('Food', '1200', 0);
+      await budgetPage.goToNextMonth();
+      await budgetPage.setBudgetedAmount('Food', '1200', 0);
+
+      reportsPage = await navigation.goToReportsPage();
+      await reportsPage.waitToLoad();
+      await reportsPage.goToBalanceForecastPage();
+      await reportsPage.selectForecastSource('Tracking budget');
+
+      await expect(page).toMatchThemeScreenshots();
+    });
   });
 
-  test.describe.parallel('custom reports', () => {
+  test.describe('custom reports', () => {
     let customReportPage: CustomReportPage;
 
     test.beforeEach(async () => {

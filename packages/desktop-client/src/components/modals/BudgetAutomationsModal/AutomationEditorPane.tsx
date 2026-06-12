@@ -4,8 +4,10 @@ import { Button } from '@actual-app/components/button';
 import { SvgDelete } from '@actual-app/components/icons/v0';
 import { SvgAlertTriangle } from '@actual-app/components/icons/v2';
 import { Input } from '@actual-app/components/input';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type {
   CategoryGroupEntity,
@@ -44,6 +46,20 @@ const CONFIG_PANEL_CLASS = css({
   // is brighter than formInputBorder in dark/midnight themes).
   '& button[type="button"]:not([aria-pressed])': {
     borderColor: theme.formInputBorder,
+  },
+});
+
+// on mobile, size fields to the touch-friendly standard, not the desktop height
+const MOBILE_TOUCH_FIELDS_CLASS = css({
+  [`@media (max-width: ${parseInt(tokens.breakpoint_small, 10) - 1}px)`]: {
+    '& input:not([type="checkbox"]):not([type="radio"]), & button[type="button"]:not([aria-pressed])':
+      {
+        minHeight: styles.mobileMinHeight,
+        boxSizing: 'border-box',
+      },
+    '& input[type="date"], & input[type="month"]': {
+      width: '100%',
+    },
   },
 });
 
@@ -164,7 +180,10 @@ export function AutomationEditorPane({
         scrollbarGutter: 'stable',
       }}
     >
-      <View style={{ padding: 20, gap: 14, flexShrink: 0 }}>
+      <View
+        className={MOBILE_TOUCH_FIELDS_CLASS}
+        style={{ padding: 20, gap: 14, flexShrink: 0 }}
+      >
         {activeError && (
           <View
             style={{

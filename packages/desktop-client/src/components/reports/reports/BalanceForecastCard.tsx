@@ -28,6 +28,7 @@ import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { useBalanceForecast } from '#hooks/useBalanceForecast';
 import { useFormat } from '#hooks/useFormat';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 import {
   buildBalanceForecastChartData,
@@ -53,6 +54,13 @@ export function BalanceForecastCard({
 }: BalanceForecastCardProps) {
   const { t } = useTranslation();
   const format = useFormat();
+  const [budgetTypePref] = useSyncedPref('budgetType');
+  const budgetType = budgetTypePref === 'tracking' ? 'tracking' : 'envelope';
+  const source =
+    meta?.source === 'tracking-budget' && budgetType === 'tracking'
+      ? 'tracking-budget'
+      : 'schedules';
+  const isTrackingBudgetForecast = source === 'tracking-budget';
 
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [isCardHovered, setIsCardHovered] = useState(false);
@@ -80,12 +88,15 @@ export function BalanceForecastCard({
     isPlaceholderData,
     isPending: isLoading,
   } = useBalanceForecast({
-    accountIds: selectedAccountIds,
-    conditions: meta?.conditions,
-    conditionsOp: meta?.conditionsOp,
+    accountIds: isTrackingBudgetForecast ? undefined : selectedAccountIds,
+    conditions: isTrackingBudgetForecast ? undefined : meta?.conditions,
+    conditionsOp: isTrackingBudgetForecast ? undefined : meta?.conditionsOp,
     startDate,
     endDate,
-    includeAccountlessSchedules: meta?.accounts === undefined,
+    includeAccountlessSchedules: isTrackingBudgetForecast
+      ? undefined
+      : meta?.accounts === undefined,
+    source,
   });
   const errorMessage =
     error instanceof Error
@@ -129,7 +140,8 @@ export function BalanceForecastCard({
   const scheduledOccurrenceCount = countForecastScheduledOccurrences(
     normalizedForecastData,
   );
-  const hasFilters = (meta?.conditions?.length ?? 0) > 0;
+  const hasFilters =
+    !isTrackingBudgetForecast && (meta?.conditions?.length ?? 0) > 0;
 
   return (
     <ReportCard
@@ -317,7 +329,12 @@ export function BalanceForecastCard({
                 color: theme.pageTextLight,
               }}
             >
-              {scheduledOccurrenceCount === 0 ? (
+              {isTrackingBudgetForecast ? (
+                <Trans>
+                  Forecast = starting balance + budgeted income - budgeted
+                  expenses
+                </Trans>
+              ) : scheduledOccurrenceCount === 0 ? (
                 hasFilters ? (
                   <Trans>
                     Filtered running total only; no scheduled occurrences in

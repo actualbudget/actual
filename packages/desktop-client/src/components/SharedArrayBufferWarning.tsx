@@ -4,6 +4,7 @@ import { SvgAlertTriangle } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
+import { isElectron } from '@actual-app/core/shared/environment';
 import { css } from '@emotion/css';
 
 import { Link } from '#components/common/Link';
@@ -11,8 +12,8 @@ import { Link } from '#components/common/Link';
 export function SharedArrayBufferWarning() {
   const hasSharedArrayBuffer = typeof SharedArrayBuffer !== 'undefined';
 
-  // Only show warning if SharedArrayBuffer is not supported
-  if (hasSharedArrayBuffer) {
+  // Only show warning if SharedArrayBuffer is required and not supported
+  if (isElectron() || hasSharedArrayBuffer) {
     return null;
   }
 

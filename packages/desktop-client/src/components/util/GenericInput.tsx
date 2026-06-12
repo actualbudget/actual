@@ -19,6 +19,7 @@ import { FilterAutocomplete } from '#components/autocomplete/FilterAutocomplete'
 import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
 import { ReportAutocomplete } from '#components/autocomplete/ReportAutocomplete';
 import { Checkbox } from '#components/forms';
+import { hideNativeDateIconClassName } from '#components/mobile/MobileForms';
 import { DateSelect } from '#components/select/DateSelect';
 import { RecurringSchedulePicker } from '#components/select/RecurringSchedulePicker';
 import { useCategories } from '#hooks/useCategories';
@@ -407,7 +408,19 @@ export const GenericInput = ({
                 value={props.value}
                 dateFormat={dateFormat}
                 openOnFocus={false}
-                inputProps={{ placeholder: dateFormat.toLowerCase() }}
+                inputProps={{
+                  placeholder: dateFormat.toLowerCase(),
+                  className: hideNativeDateIconClassName,
+                  style: {
+                    marginLeft: 0,
+                    marginRight: 0,
+                    // ios renders native date inputs taller than other fields;
+                    // border-box + appearance reset bring it back in line
+                    boxSizing: 'border-box',
+                    WebkitAppearance: 'none',
+                    appearance: 'none',
+                  },
+                }}
                 onSelect={props.onChange}
               />
             );
