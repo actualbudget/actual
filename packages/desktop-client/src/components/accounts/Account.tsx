@@ -99,18 +99,25 @@ type AllTransactionsProps = {
   transactions: TransactionEntity[];
   balances: Record<TransactionEntity['id'], IntegerAmount> | null;
   showBalances?: boolean | undefined;
+  showUpcomingTransactions: boolean;
   filtered?: boolean | undefined;
   children: (
     transactions: TransactionEntity[],
     balances: Record<TransactionEntity['id'], IntegerAmount> | null,
+    hasUpcomingTransactions: boolean,
   ) => ReactElement;
 };
+
+function isUpcomingPreviewTransaction(transaction: TransactionEntity) {
+  return transaction.category === 'upcoming';
+}
 
 function AllTransactions({
   account,
   transactions,
   balances,
   showBalances,
+  showUpcomingTransactions,
   filtered,
   children,
 }: AllTransactionsProps) {
@@ -134,6 +141,15 @@ function AllTransactions({
 
   transactions ??= [];
 
+  const visiblePreviewTransactions = useMemo(() => {
+    return showUpcomingTransactions
+      ? previewTransactions
+      : previewTransactions.filter(t => !isUpcomingPreviewTransaction(t));
+  }, [previewTransactions, showUpcomingTransactions]);
+
+  const hasUpcomingTransactions =
+    !filtered && previewTransactions.some(isUpcomingPreviewTransaction);
+
   const runningBalance = useMemo(() => {
     if (!showBalances) {
       return 0;
@@ -151,20 +167,20 @@ function AllTransactions({
 
     return Object.fromEntries(
       calculateRunningBalancesBottomUp(
-        previewTransactions,
+        visiblePreviewTransactions,
         'all',
         runningBalance,
       ),
     );
-  }, [showBalances, previewTransactions, runningBalance]);
+  }, [showBalances, visiblePreviewTransactions, runningBalance]);
 
   const allTransactions = useMemo(() => {
     // Don't prepend scheduled transactions if we are filtering
-    if (!filtered && previewTransactions.length > 0) {
-      return previewTransactions.concat(transactions);
+    if (!filtered && visiblePreviewTransactions.length > 0) {
+      return visiblePreviewTransactions.concat(transactions);
     }
     return transactions;
-  }, [filtered, previewTransactions, transactions]);
+  }, [filtered, visiblePreviewTransactions, transactions]);
 
   const allBalances = useMemo(() => {
     // Don't prepend scheduled transactions if we are filtering
@@ -175,9 +191,9 @@ function AllTransactions({
   }, [filtered, prependBalances, balances]);
 
   if (!previewTransactions?.length || filtered) {
-    return children(transactions, balances);
+    return children(transactions, balances, hasUpcomingTransactions);
   }
-  return children(allTransactions, allBalances);
+  return children(allTransactions, allBalances, hasUpcomingTransactions);
 }
 
 function getField(field?: string) {
@@ -268,6 +284,7 @@ type AccountInternalState = {
   showCleared?: boolean | undefined;
   prevShowCleared?: boolean | undefined;
   showReconciled: boolean;
+  showUpcomingTransactions: boolean;
   nameError: string;
   isAdding: boolean;
   modalShowing?: boolean;
@@ -317,6 +334,7 @@ class AccountInternal extends PureComponent<
       balances: null,
       showCleared: props.showCleared,
       showReconciled: props.showReconciled,
+      showUpcomingTransactions: true,
       nameError: '',
       isAdding: false,
       sort: null,
@@ -1703,6 +1721,12 @@ class AccountInternal extends PureComponent<
     }
   };
 
+  onToggleUpcomingTransactions = () => {
+    this.setState(state => ({
+      showUpcomingTransactions: !state.showUpcomingTransactions,
+    }));
+  };
+
   render() {
     const {
       accounts,
@@ -1727,6 +1751,7 @@ class AccountInternal extends PureComponent<
       showCleared,
       showReconciled,
       filteredAmount,
+      showUpcomingTransactions,
     } = this.state;
 
     const account = accounts.find(account => account.id === accountId);
@@ -1766,9 +1791,10 @@ class AccountInternal extends PureComponent<
         transactions={transactions}
         balances={balances}
         showBalances={showBalances}
+        showUpcomingTransactions={showUpcomingTransactions}
         filtered={transactionsFiltered}
       >
-        {(allTransactions, allBalances) => (
+        {(allTransactions, allBalances, hasUpcomingTransactions) => (
           <SelectedProviderWithItems
             name="transactions"
             // When reconciled transactions are hidden they are still
@@ -1808,12 +1834,15 @@ class AccountInternal extends PureComponent<
                 filteredAmount={filteredAmount}
                 isFiltered={transactionsFiltered ?? false}
                 isSorted={this.state.sort !== null}
+                hasUpcomingTransactions={hasUpcomingTransactions}
+                showUpcomingTransactions={showUpcomingTransactions}
                 reconcileAmount={reconcileAmount}
                 search={this.state.search}
                 // @ts-expect-error fix me
                 filterConditions={this.state.filterConditions}
                 filterConditionsOp={this.state.filterConditionsOp}
                 onSearch={this.onSearch}
+                onToggleUpcomingTransactions={this.onToggleUpcomingTransactions}
                 onShowTransactions={this.onShowTransactions}
                 onMenuSelect={this.onMenuSelect}
                 onAddTransaction={this.onAddTransaction}

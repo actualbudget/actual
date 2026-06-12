@@ -9,6 +9,7 @@ import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import {
   SvgAdd,
   SvgDotsHorizontalTriple,
+  SvgTime,
 } from '@actual-app/components/icons/v1';
 import {
   SvgArrowsExpand3,
@@ -78,10 +79,13 @@ type AccountHeaderProps = {
   isFiltered: boolean;
   filteredAmount?: number | null;
   isSorted: boolean;
+  hasUpcomingTransactions: boolean;
+  showUpcomingTransactions: boolean;
   search: string;
   filterConditions: RuleConditionEntity[];
   filterConditionsOp: 'and' | 'or';
   onSearch: (newSearch: string) => void;
+  onToggleUpcomingTransactions: () => void;
   onAddTransaction: () => void;
   onShowTransactions: ComponentProps<
     typeof SelectedTransactionsButton
@@ -153,10 +157,13 @@ export function AccountHeader({
   isFiltered,
   filteredAmount,
   isSorted,
+  hasUpcomingTransactions,
+  showUpcomingTransactions,
   search,
   filterConditions,
   filterConditionsOp,
   onSearch,
+  onToggleUpcomingTransactions,
   onAddTransaction,
   onShowTransactions,
   onDoneReconciling,
@@ -384,6 +391,21 @@ export function AccountHeader({
             onChange={onSearch}
             ref={searchInput}
           />
+          {hasUpcomingTransactions && (
+            <Button
+              variant="bare"
+              aria-label={
+                showUpcomingTransactions
+                  ? t('Hide upcoming transactions')
+                  : t('Show upcoming transactions')
+              }
+              aria-pressed={showUpcomingTransactions}
+              onPress={onToggleUpcomingTransactions}
+              style={{ padding: 6 }}
+            >
+              <SvgTime width={14} height={14} />
+            </Button>
+          )}
           {workingHard ? (
             <View>
               <AnimatedLoading style={{ width: 16, height: 16 }} />
