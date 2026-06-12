@@ -1786,6 +1786,7 @@ function TransactionEditUnconnected({
       // Run the rules to auto-fill in any data. Right now we only do
       // this on new transactions because that's how desktop works.
       const newTransaction = { ...transaction };
+      const changedFields = new Set<keyof TransactionEntity>([updatedField]);
       if (isTemporary(newTransaction)) {
         const afterRules = await send('rules-run', {
           transaction: newTransaction,
@@ -1806,6 +1807,7 @@ function TransactionEditUnconnected({
               updatedField === 'payee'
             ) {
               (newTransaction as Record<string, unknown>)[field] = diff[field];
+              changedFields.add(field);
             }
           });
 
@@ -1823,15 +1825,28 @@ function TransactionEditUnconnected({
                 }),
               }),
             );
+            changedFields.add('subtransactions');
           }
         }
       }
 
-      const { data: newTransactions } = updateTransaction(
-        transactions,
-        newTransaction,
-      );
-      setTransactions(newTransactions);
+      // Updates can be in flight at the same time (e.g. an amount blur
+      // racing a nearby payee press), so merge only the changed fields onto
+      // the latest state rather than replacing the whole transaction.
+      setTransactions(prevTransactions => {
+        const latestTransaction = prevTransactions.find(
+          t => t.id === newTransaction.id,
+        );
+        if (!latestTransaction) {
+          // The transaction was deleted while this update was in flight.
+          return prevTransactions;
+        }
+        const merged = { ...latestTransaction };
+        for (const field of changedFields) {
+          (merged as Record<string, unknown>)[field] = newTransaction[field];
+        }
+        return updateTransaction(prevTransactions, merged).data;
+      });
 
       if (updatedField === 'payee') {
         setShouldShowSaveLocation(false);
@@ -1858,7 +1873,7 @@ function TransactionEditUnconnected({
         }
       }
     },
-    [dateFormat, transactions, isLocationGranted],
+    [dateFormat, isLocationGranted],
   );
 
   const onSave = useCallback(
