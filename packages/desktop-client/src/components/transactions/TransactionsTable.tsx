@@ -2300,6 +2300,7 @@ type TransactionTableInnerProps = {
   showBalances: boolean;
   showReconciled: boolean;
   showCleared: boolean;
+  hasUpcomingTransactions?: boolean;
   showUpcomingTransactions?: boolean;
   showAccount: boolean;
   showCategory: boolean;
@@ -2373,6 +2374,8 @@ function TransactionTableInner({
   const containerRef = createRef<HTMLDivElement>();
   const isAddingPrev = usePrevious(props.isAdding);
   const [scrollWidth, setScrollWidth] = useState(0);
+  const showUpcomingTransactionsDivider =
+    props.showUpcomingTransactions === false && !!props.hasUpcomingTransactions;
 
   function saveScrollWidth(parent: number, child: number) {
     const width = parent > 0 && child > 0 && parent - child;
@@ -2597,7 +2600,7 @@ function TransactionTableInner({
           field={props.sortField}
           showSelection={props.showSelection}
         />
-        {props.showUpcomingTransactions === false && (
+        {showUpcomingTransactionsDivider && (
           <View
             style={{
               height: 2,
@@ -2703,6 +2706,7 @@ export type TransactionTableProps = {
   showBalances: boolean;
   showReconciled: boolean;
   showCleared: boolean;
+  hasUpcomingTransactions?: boolean;
   showUpcomingTransactions?: boolean;
   showAccount: boolean;
   showCategory: boolean;

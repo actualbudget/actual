@@ -274,6 +274,7 @@ type TransactionListProps = Pick<
   account: AccountEntity | undefined;
   category: CategoryEntity | undefined;
   isFiltered?: boolean;
+  hasUpcomingTransactions?: boolean;
   showUpcomingTransactions?: boolean;
   allowReorder?: boolean;
   onChange: (
@@ -305,6 +306,7 @@ export function TransactionList({
   isNew,
   isMatched,
   isFiltered,
+  hasUpcomingTransactions,
   showUpcomingTransactions,
   allowReorder = true,
   dateFormat,
@@ -738,6 +740,7 @@ export function TransactionList({
         showBalances={showBalances}
         showReconciled={showReconciled}
         showCleared={showCleared}
+        hasUpcomingTransactions={hasUpcomingTransactions}
         showUpcomingTransactions={showUpcomingTransactions}
         showAccount={showAccount}
         showCategory
