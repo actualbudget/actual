@@ -1,4 +1,4 @@
-import { MAX_BASE64_BYTES } from '@actual-app/core/shared/accountIconLimits';
+import { MAX_DECODED_ICON_BYTES } from '@actual-app/core/shared/accountIconLimits';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -74,7 +74,7 @@ describe('emojiToDataUrl', () => {
   });
 
   it('throws when the rendered payload exceeds the size cap', () => {
-    const quadCount = Math.ceil((MAX_BASE64_BYTES + 1) / 3);
+    const quadCount = Math.ceil((MAX_DECODED_ICON_BYTES + 1) / 3);
     const oversized = 'data:image/png;base64,' + 'AAAA'.repeat(quadCount);
     withMockedCanvas(oversized, () => {
       expect(() => emojiToDataUrl('🏦')).toThrow(/too large/);

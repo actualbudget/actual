@@ -3,7 +3,7 @@ import type * as PhotonNS from '@silvia-odwyer/photon-node';
 import { PostError } from '#server/errors';
 import {
   ICON_SIZE_PX,
-  MAX_BASE64_BYTES,
+  MAX_DECODED_ICON_BYTES,
   MAX_ICON_INPUT_DECODE_BYTES,
 } from '#shared/accountIconLimits';
 
@@ -104,7 +104,7 @@ export async function normalizeRasterIconBufferForDb(
       const out = Buffer.from(cropped.get_bytes());
       cropped.free();
 
-      if (out.byteLength > MAX_BASE64_BYTES) {
+      if (out.byteLength > MAX_DECODED_ICON_BYTES) {
         throw new PostError('icon-too-large');
       }
       return `data:image/png;base64,${out.toString('base64')}`;
@@ -120,7 +120,7 @@ export async function normalizeRasterIconBufferForDb(
   if (mime === null) {
     throw new PostError('invalid-image-icon');
   }
-  if (input.byteLength > MAX_BASE64_BYTES) {
+  if (input.byteLength > MAX_DECODED_ICON_BYTES) {
     throw new PostError('icon-too-large');
   }
   return `data:${mime};base64,${input.toString('base64')}`;

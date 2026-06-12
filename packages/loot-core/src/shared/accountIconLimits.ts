@@ -1,5 +1,5 @@
-/** Decoded base64 payload cap for stored account/bank icons (matches client picker). */
-export const MAX_BASE64_BYTES = 16 * 1024;
+/** Decoded byte cap for stored account/bank icons (matches client picker). */
+export const MAX_DECODED_ICON_BYTES = 16 * 1024;
 
 /** Stored icons are normalized to this square size (matches client picker). */
 export const ICON_SIZE_PX = 64;

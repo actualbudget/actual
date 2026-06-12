@@ -1,6 +1,6 @@
 import {
   ICON_SIZE_PX,
-  MAX_BASE64_BYTES,
+  MAX_DECODED_ICON_BYTES,
 } from '@actual-app/core/shared/accountIconLimits';
 
 export class IconNormalizationError extends Error {
@@ -20,9 +20,9 @@ function checkSize(dataUrl: string): string {
   } catch {
     throw new IconNormalizationError('Invalid base64 in data URL');
   }
-  if (decodedLength > MAX_BASE64_BYTES) {
+  if (decodedLength > MAX_DECODED_ICON_BYTES) {
     throw new IconNormalizationError(
-      `Icon is too large after normalization (${decodedLength} bytes > ${MAX_BASE64_BYTES} bytes)`,
+      `Icon is too large after normalization (${decodedLength} bytes > ${MAX_DECODED_ICON_BYTES} bytes)`,
     );
   }
   return dataUrl;
@@ -66,7 +66,7 @@ function paintToCanvas(paint: (ctx: CanvasRenderingContext2D) => void): string {
  * 64x64 PNG data URL.
  *
  * Throws `IconNormalizationError` if decoding fails or the resulting base64
- * payload exceeds {@link MAX_BASE64_BYTES}.
+ * payload exceeds {@link MAX_DECODED_ICON_BYTES}.
  */
 export async function normalizeImageToDataUrl(
   source: Blob | string,
