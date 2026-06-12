@@ -155,6 +155,7 @@ type TransactionHeaderProps = {
   showCategory: boolean;
   showBalance: boolean;
   showCleared: boolean;
+  showUpcomingTransactions?: boolean;
   scrollWidth: number;
   showSelection: boolean;
   onSort: (field: string, ascDesc: 'asc' | 'desc') => void;
@@ -169,6 +170,7 @@ const TransactionHeader = memo(
     showCategory,
     showBalance,
     showCleared,
+    showUpcomingTransactions,
     scrollWidth,
     onSort,
     ascDesc,
@@ -197,7 +199,7 @@ const TransactionHeader = memo(
           backgroundColor: theme.tableHeaderBackground,
           paddingRight: `${5 + (scrollWidth ?? 0)}px`,
           borderTopWidth: 1,
-          borderBottomWidth: 1,
+          borderBottomWidth: showUpcomingTransactions === false ? 10 : 1,
           borderColor: theme.tableBorder,
         }}
       >
@@ -2300,6 +2302,7 @@ type TransactionTableInnerProps = {
   showBalances: boolean;
   showReconciled: boolean;
   showCleared: boolean;
+  showUpcomingTransactions?: boolean;
   showAccount: boolean;
   showCategory: boolean;
   currentAccountId: AccountEntity['id'];
@@ -2590,6 +2593,7 @@ function TransactionTableInner({
           showCategory={props.showCategory}
           showBalance={props.showBalances}
           showCleared={props.showCleared}
+          showUpcomingTransactions={props.showUpcomingTransactions}
           scrollWidth={scrollWidth}
           onSort={props.onSort}
           ascDesc={props.ascDesc}
@@ -2694,6 +2698,7 @@ export type TransactionTableProps = {
   showBalances: boolean;
   showReconciled: boolean;
   showCleared: boolean;
+  showUpcomingTransactions?: boolean;
   showAccount: boolean;
   showCategory: boolean;
   currentAccountId: AccountEntity['id'];

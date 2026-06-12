@@ -1895,6 +1895,7 @@ class AccountInternal extends PureComponent<
                   showBalances={!!allBalances}
                   showReconciled={showReconciled}
                   showCleared={!!showCleared}
+                  showUpcomingTransactions={showUpcomingTransactions}
                   showAccount={
                     !accountId ||
                     accountId === 'offbudget' ||

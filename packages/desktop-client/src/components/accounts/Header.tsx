@@ -211,6 +211,9 @@ export function AccountHeader({
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const locale = useLocale();
+  const upcomingTransactionsLabel = showUpcomingTransactions
+    ? t('Hide upcoming transactions')
+    : t('Show upcoming transactions');
 
   let canSync = !!(account?.account_id && isUsingServer);
   if (!account) {
@@ -392,19 +395,17 @@ export function AccountHeader({
             ref={searchInput}
           />
           {hasUpcomingTransactions && (
-            <Button
-              variant="bare"
-              aria-label={
-                showUpcomingTransactions
-                  ? t('Hide upcoming transactions')
-                  : t('Show upcoming transactions')
-              }
-              aria-pressed={showUpcomingTransactions}
-              onPress={onToggleUpcomingTransactions}
-              style={{ padding: 6 }}
-            >
-              <SvgTime width={14} height={14} />
-            </Button>
+            <Tooltip content={upcomingTransactionsLabel}>
+              <Button
+                variant="bare"
+                aria-label={upcomingTransactionsLabel}
+                aria-pressed={showUpcomingTransactions}
+                onPress={onToggleUpcomingTransactions}
+                style={{ padding: 6 }}
+              >
+                <SvgTime width={14} height={14} />
+              </Button>
+            </Tooltip>
           )}
           {workingHard ? (
             <View>
