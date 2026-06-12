@@ -2,7 +2,7 @@
 
 API tokens provide a secure way to authenticate with the Actual server when using the `@actual-app/api` package. This page covers how to use tokens in your scripts and integrations.
 
-For instructions on creating and managing tokens, see the [Settings documentation](/docs/settings/#api-tokens).
+For instructions on creating and managing tokens, see the [Settings documentation](../settings/index.md#api-tokens).
 
 ## Using Tokens
 

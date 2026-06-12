@@ -37,7 +37,7 @@ OpenID can be enabled here. [Learn more](../config/oauth-auth.md)
 
 ### API Tokens
 
-API tokens allow you to grant programmatic access to your budgets without sharing your password. This is useful for scripts, automations, and third-party integrations that use the [Actual API](/docs/api/).
+API tokens allow you to grant programmatic access to your budgets without sharing your password. This is useful for scripts, automations, and third-party integrations that use the [Actual API](../api/index.md).
 
 #### Creating a Token
 
@@ -70,7 +70,7 @@ To revoke a token, click the **Revoke** button next to it. This immediately inva
 - **Revoke unused tokens** - Regularly review your tokens and remove any that are no longer needed
 - **Monitor last used dates** - If a token hasn't been used in a long time, consider revoking it
 
-For information on using tokens in your scripts, see the [API documentation](/docs/api/api-tokens).
+For information on using tokens in your scripts, see the [API documentation](../api/api-tokens.md).
 
 ### Encryption
 
