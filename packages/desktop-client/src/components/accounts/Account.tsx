@@ -2033,10 +2033,9 @@ export function Account() {
   const [hideReconciled, setHideReconciled] = useSyncedPref(
     `hide-reconciled-${params.id}`,
   );
-  const [showUpcomingTransactions, setShowUpcomingTransactions] =
-    useSyncedPref(
-      `show-upcoming-transactions-${params.id || 'all-accounts'}`,
-    );
+  const [showUpcomingTransactions, setShowUpcomingTransactions] = useSyncedPref(
+    `show-upcoming-transactions-${params.id || 'all-accounts'}`,
+  );
   const [showExtraBalances, setShowExtraBalances] = useSyncedPref(
     `show-extra-balances-${params.id || 'all-accounts'}`,
   );
