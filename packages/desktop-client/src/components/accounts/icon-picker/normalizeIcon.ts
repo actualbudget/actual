@@ -62,8 +62,9 @@ function paintToCanvas(paint: (ctx: CanvasRenderingContext2D) => void): string {
 }
 
 /**
- * Decode an image (Blob, File, data URL or remote URL) and re-encode it as a
- * 64x64 PNG data URL.
+ * Decode an image (Blob, File, or data URL produced by {@link toDataUrl}) and
+ * re-encode it as a 64x64 PNG data URL. Remote http/https URLs are not
+ * supported and will throw {@link IconNormalizationError}.
  *
  * Throws `IconNormalizationError` if decoding fails or the resulting base64
  * payload exceeds {@link MAX_DECODED_ICON_BYTES}.
@@ -71,6 +72,14 @@ function paintToCanvas(paint: (ctx: CanvasRenderingContext2D) => void): string {
 export async function normalizeImageToDataUrl(
   source: Blob | string,
 ): Promise<string> {
+  if (
+    typeof source === 'string' &&
+    (source.startsWith('http://') || source.startsWith('https://'))
+  ) {
+    throw new IconNormalizationError(
+      'Remote URLs are not supported. Pass a Blob, File, or data URL instead.',
+    );
+  }
   const initial =
     typeof source === 'string' ? source : await blobToDataUrl(source);
   const img = await loadImage(initial);
