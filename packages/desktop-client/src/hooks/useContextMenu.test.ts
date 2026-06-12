@@ -1,9 +1,14 @@
-import { renderHook, act } from '@testing-library/react';
+import type { RefObject } from 'react';
+
+import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import { addItems } from '#contextmenu/contextMenuSlice';
+import { useRefEventListener } from '#hooks/useRefEventListener';
+import { useDispatch } from '#redux';
 
-import { useContextMenu, useContextMenuState } from './useContextMenu';
+import { useContextMenu } from './useContextMenu';
 
 // Mock dependencies
 vi.mock('#redux', () => ({
@@ -15,17 +20,16 @@ vi.mock('#hooks/useRefEventListener', () => ({
   useRefEventListener: vi.fn(),
 }));
 
-import { useRefEventListener } from '#hooks/useRefEventListener';
-import * as ReduxMock from '#redux';
-
 describe('useContextMenu', () => {
-  let mockDispatch: any;
-  let mockTriggerRef: any;
+  let mockDispatch: Mock;
+  let mockTriggerRef: {
+    current: { getBoundingClientRect: Mock; dispatchEvent: Mock };
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockDispatch = vi.fn();
-    (ReduxMock.useDispatch as any).mockReturnValue(mockDispatch);
+    (useDispatch as Mock).mockReturnValue(mockDispatch);
 
     mockTriggerRef = {
       current: {
@@ -36,9 +40,14 @@ describe('useContextMenu', () => {
   });
 
   it('should register contextmenu event listener on triggerRef', () => {
-    const items = [{ name: 'test', text: 'Test', onClick: () => {} }];
+    const items = [{ name: 'test', text: 'Test', onClick: vi.fn() }];
 
-    renderHook(() => useContextMenu({ triggerRef: mockTriggerRef, items }));
+    renderHook(() =>
+      useContextMenu({
+        triggerRef: mockTriggerRef as unknown as RefObject<HTMLElement | null>,
+        items,
+      }),
+    );
 
     expect(useRefEventListener).toHaveBeenCalledWith(
       mockTriggerRef,
@@ -48,11 +57,16 @@ describe('useContextMenu', () => {
   });
 
   it('should dispatch addItems when contextmenu event is fired and enabled is true', () => {
-    const items = [{ name: 'test', text: 'Test', onClick: () => {} }];
+    const items = [{ name: 'test', text: 'Test', onClick: vi.fn() }];
 
-    renderHook(() => useContextMenu({ triggerRef: mockTriggerRef, items }));
+    renderHook(() =>
+      useContextMenu({
+        triggerRef: mockTriggerRef as unknown as RefObject<HTMLElement | null>,
+        items,
+      }),
+    );
 
-    const listener = (useRefEventListener as any).mock.calls[0][2];
+    const listener = (useRefEventListener as Mock).mock.calls[0][2];
 
     // Simulate event
     listener({
@@ -65,13 +79,17 @@ describe('useContextMenu', () => {
   });
 
   it('should not dispatch addItems when enabled is false', () => {
-    const items = [{ name: 'test', text: 'Test', onClick: () => {} }];
+    const items = [{ name: 'test', text: 'Test', onClick: vi.fn() }];
 
     renderHook(() =>
-      useContextMenu({ triggerRef: mockTriggerRef, enabled: false, items }),
+      useContextMenu({
+        triggerRef: mockTriggerRef as unknown as RefObject<HTMLElement | null>,
+        enabled: false,
+        items,
+      }),
     );
 
-    const listener = (useRefEventListener as any).mock.calls[0][2];
+    const listener = (useRefEventListener as Mock).mock.calls[0][2];
 
     // Simulate event
     listener({
@@ -84,10 +102,13 @@ describe('useContextMenu', () => {
   });
 
   it('should provide handleContextMenu callback that dispatches contextmenu event', () => {
-    const items = [{ name: 'test', text: 'Test', onClick: () => {} }];
+    const items = [{ name: 'test', text: 'Test', onClick: vi.fn() }];
 
     const { result } = renderHook(() =>
-      useContextMenu({ triggerRef: mockTriggerRef, items }),
+      useContextMenu({
+        triggerRef: mockTriggerRef as unknown as RefObject<HTMLElement | null>,
+        items,
+      }),
     );
 
     act(() => {
@@ -105,10 +126,14 @@ describe('useContextMenu', () => {
   });
 
   it('handleContextMenu should do nothing if enabled is false', () => {
-    const items = [{ name: 'test', text: 'Test', onClick: () => {} }];
+    const items = [{ name: 'test', text: 'Test', onClick: vi.fn() }];
 
     const { result } = renderHook(() =>
-      useContextMenu({ triggerRef: mockTriggerRef, enabled: false, items }),
+      useContextMenu({
+        triggerRef: mockTriggerRef as unknown as RefObject<HTMLElement | null>,
+        enabled: false,
+        items,
+      }),
     );
 
     act(() => {

@@ -4,11 +4,9 @@ import { Menu } from '@actual-app/components/menu';
 import type { MenuItem } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
-import { Falsy } from '@actual-app/core/types/util';
 import _ from 'lodash';
 
 import { closeContextMenu } from '#contextmenu/contextMenuSlice';
-import type { ContextMenuAction, ContextMenuItem } from '#contextmenu/types.d';
 import { useRefEventListener } from '#hooks/useRefEventListener';
 import { useDispatch, useSelector } from '#redux';
 

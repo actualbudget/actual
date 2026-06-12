@@ -82,8 +82,6 @@ test.describe('Budget', () => {
   });
 
   test('right clicking budget name opens context menu', async () => {
-    const navigation = new ConfigurationPage(page); // wait, it's Navigation
-    // Actually we can just do this:
     await page.getByTestId('budget-name').click({ button: 'right' });
     const menu = page.getByRole('menu');
     await expect(menu).toBeVisible();
