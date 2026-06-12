@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import type { KeyboardEvent } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -175,135 +176,156 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
       onClose={onClose}
       containerProps={{ style: { width: 400 } }}
     >
-      {({ state }) => (
-        <>
-          <ModalHeader
-            title={<ModalTitle title={t('Account Icon')} shrinkOnOverflow />}
-            rightContent={<ModalCloseButton onPress={() => state.close()} />}
-          />
+      {({ state }) => {
+        const handleApply = async () => {
+          if (!previewIcon || isBusy) return;
+          setError(null);
+          setIsBusy(true);
+          try {
+            await persistAll({
+              icon: previewIcon,
+              website: pendingWebsite ?? undefined,
+            });
+            state.close();
+          } catch (err) {
+            setError(iconPersistErrorMessage(err, t, 'Failed to save icon'));
+          } finally {
+            setIsBusy(false);
+          }
+        };
 
-          <View style={{ padding: 12, gap: 16 }}>
-            <CurrentIconPreview
-              icon={previewIcon ?? effectiveIcon}
-              accountName={account.name}
-              isBusy={isBusy}
+        return (
+          <>
+            <ModalHeader
+              title={<ModalTitle title={t('Account Icon')} shrinkOnOverflow />}
+              rightContent={<ModalCloseButton onPress={() => state.close()} />}
             />
 
-            {canEditBank && (
-              <ScopeSwitch
-                scope={scope}
-                onChange={handleScopeChange}
-                bankName={account.bank?.name ?? null}
-              />
-            )}
-
-            <TabSwitch tab={tab} onChange={handleTabChange} />
-
-            {tab === 'favicon' && (
-              <FaviconTab
-                key={scope}
-                initialUrl={effectiveWebsite ?? ''}
-                hasFaviconProxy={hasFaviconProxy}
-                isBusy={isBusy}
-                setIsBusy={setIsBusy}
-                setError={setError}
-                setDdgFaviconUrl={setDdgFaviconUrl}
-                setPreview={setPreviewIcon}
-                setPendingWebsite={setPendingWebsite}
-              />
-            )}
-
-            {tab === 'upload' && (
-              <UploadTab
-                setError={setError}
-                setIsBusy={setIsBusy}
-                setPreview={setPreviewIcon}
-                isBusy={isBusy}
-              />
-            )}
-
-            {tab === 'emoji' && (
-              <EmojiTab setError={setError} setPreview={setPreviewIcon} />
-            )}
-
-            {error && (
-              <FormError style={{ color: theme.errorText }}>{error}</FormError>
-            )}
-
-            {ddgFaviconUrl && (
-              <Text style={{ fontSize: 12, color: theme.pageTextSubdued }}>
-                <Trans>
-                  The site may be blocking automated requests. Try opening{' '}
-                  <Link variant="external" to={ddgFaviconUrl}>
-                    this cached favicon via DuckDuckGo
-                  </Link>{' '}
-                  (a copy of the site&apos;s own icon), saving the image, then
-                  using the Upload tab.
-                </Trans>
-              </Text>
-            )}
-
             <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                gap: 8,
+              style={{ padding: 12, gap: 16 }}
+              onKeyDown={(e: KeyboardEvent<HTMLDivElement>) => {
+                if (
+                  e.key === 'Enter' &&
+                  previewIcon &&
+                  !isBusy &&
+                  !(e.target instanceof HTMLInputElement)
+                ) {
+                  e.preventDefault();
+                  void handleApply();
+                }
               }}
             >
-              <Button
-                isDisabled={isBusy || !canClear}
-                onPress={async () => {
-                  if (!canClear) {
-                    return;
-                  }
-                  setError(null);
-                  setIsBusy(true);
-                  try {
-                    await persistAll({ icon: null });
-                    state.close();
-                  } catch (err) {
-                    setError(
-                      iconPersistErrorMessage(err, t, 'Failed to clear icon'),
-                    );
-                  } finally {
-                    setIsBusy(false);
-                  }
+              <CurrentIconPreview
+                icon={previewIcon ?? effectiveIcon}
+                accountName={account.name}
+                isBusy={isBusy}
+              />
+
+              {canEditBank && (
+                <ScopeSwitch
+                  scope={scope}
+                  onChange={handleScopeChange}
+                  bankName={account.bank?.name ?? null}
+                />
+              )}
+
+              <TabSwitch tab={tab} onChange={handleTabChange} />
+
+              {tab === 'favicon' && (
+                <FaviconTab
+                  key={scope}
+                  initialUrl={effectiveWebsite ?? ''}
+                  hasFaviconProxy={hasFaviconProxy}
+                  isBusy={isBusy}
+                  setIsBusy={setIsBusy}
+                  setError={setError}
+                  setDdgFaviconUrl={setDdgFaviconUrl}
+                  setPreview={setPreviewIcon}
+                  setPendingWebsite={setPendingWebsite}
+                />
+              )}
+
+              {tab === 'upload' && (
+                <UploadTab
+                  setError={setError}
+                  setIsBusy={setIsBusy}
+                  setPreview={setPreviewIcon}
+                  isBusy={isBusy}
+                />
+              )}
+
+              {tab === 'emoji' && (
+                <EmojiTab
+                  setError={setError}
+                  setPreview={setPreviewIcon}
+                  onApply={handleApply}
+                />
+              )}
+
+              {error && (
+                <FormError style={{ color: theme.errorText }}>
+                  {error}
+                </FormError>
+              )}
+
+              {ddgFaviconUrl && (
+                <Text style={{ fontSize: 12, color: theme.pageTextSubdued }}>
+                  <Trans>
+                    The site may be blocking automated requests. Try opening{' '}
+                    <Link variant="external" to={ddgFaviconUrl}>
+                      this cached favicon via DuckDuckGo
+                    </Link>{' '}
+                    (a copy of the site&apos;s own icon), saving the image, then
+                    using the Upload tab.
+                  </Trans>
+                </Text>
+              )}
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  gap: 8,
                 }}
               >
-                {scope === 'account' && account.bank ? (
-                  <Trans>Clear override</Trans>
-                ) : (
-                  <Trans>Clear icon</Trans>
-                )}
-              </Button>
-              <Button
-                variant="primary"
-                isDisabled={isBusy || !previewIcon}
-                onPress={async () => {
-                  if (!previewIcon) return;
-                  setError(null);
-                  setIsBusy(true);
-                  try {
-                    await persistAll({
-                      icon: previewIcon,
-                      website: pendingWebsite ?? undefined,
-                    });
-                    state.close();
-                  } catch (err) {
-                    setError(
-                      iconPersistErrorMessage(err, t, 'Failed to save icon'),
-                    );
-                  } finally {
-                    setIsBusy(false);
-                  }
-                }}
-              >
-                <Trans>Apply</Trans>
-              </Button>
+                <Button
+                  isDisabled={isBusy || !canClear}
+                  onPress={async () => {
+                    if (!canClear) {
+                      return;
+                    }
+                    setError(null);
+                    setIsBusy(true);
+                    try {
+                      await persistAll({ icon: null });
+                      state.close();
+                    } catch (err) {
+                      setError(
+                        iconPersistErrorMessage(err, t, 'Failed to clear icon'),
+                      );
+                    } finally {
+                      setIsBusy(false);
+                    }
+                  }}
+                >
+                  {scope === 'account' && account.bank ? (
+                    <Trans>Clear override</Trans>
+                  ) : (
+                    <Trans>Clear icon</Trans>
+                  )}
+                </Button>
+                <Button
+                  variant="primary"
+                  isDisabled={isBusy || !previewIcon}
+                  onPress={() => void handleApply()}
+                >
+                  <Trans>Apply</Trans>
+                </Button>
+              </View>
             </View>
-          </View>
-        </>
-      )}
+          </>
+        );
+      }}
     </Modal>
   );
 }
@@ -542,6 +564,10 @@ function FaviconTab({
           placeholder={t('https://example.com')}
           value={url}
           onChangeValue={setUrl}
+          onEnter={(_, e) => {
+            e.stopPropagation();
+            void handleFetch();
+          }}
           style={{
             flex: 1,
             minWidth: 0,
@@ -617,9 +643,11 @@ function UploadTab({
 function EmojiTab({
   setError,
   setPreview,
+  onApply,
 }: {
   setError: (e: string | null) => void;
   setPreview: (s: string | null) => void;
+  onApply: () => void;
 }) {
   const { t } = useTranslation();
   const [emoji, setEmoji] = useState('');
@@ -671,6 +699,10 @@ function EmojiTab({
         placeholder={t('Paste any emoji')}
         value={emoji}
         onChangeValue={handleEmoji}
+        onEnter={(_, e) => {
+          e.stopPropagation();
+          onApply();
+        }}
         style={{ textAlign: 'center', fontSize: 22 }}
         autoComplete="off"
       />
