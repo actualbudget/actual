@@ -155,7 +155,6 @@ type TransactionHeaderProps = {
   showCategory: boolean;
   showBalance: boolean;
   showCleared: boolean;
-  showUpcomingTransactions?: boolean;
   scrollWidth: number;
   showSelection: boolean;
   onSort: (field: string, ascDesc: 'asc' | 'desc') => void;
@@ -170,7 +169,6 @@ const TransactionHeader = memo(
     showCategory,
     showBalance,
     showCleared,
-    showUpcomingTransactions,
     scrollWidth,
     onSort,
     ascDesc,
@@ -199,11 +197,8 @@ const TransactionHeader = memo(
           backgroundColor: theme.tableHeaderBackground,
           paddingRight: `${5 + (scrollWidth ?? 0)}px`,
           borderTopWidth: 1,
-          borderBottomWidth: showUpcomingTransactions === false ? 2 : 1,
-          borderColor:
-            showUpcomingTransactions === false
-              ? theme.upcomingText
-              : theme.tableBorder,
+          borderBottomWidth: 1,
+          borderColor: theme.tableBorder,
         }}
       >
         {showSelection && (
@@ -2596,13 +2591,20 @@ function TransactionTableInner({
           showCategory={props.showCategory}
           showBalance={props.showBalances}
           showCleared={props.showCleared}
-          showUpcomingTransactions={props.showUpcomingTransactions}
           scrollWidth={scrollWidth}
           onSort={props.onSort}
           ascDesc={props.ascDesc}
           field={props.sortField}
           showSelection={props.showSelection}
         />
+        {props.showUpcomingTransactions === false && (
+          <View
+            style={{
+              height: 2,
+              backgroundColor: theme.upcomingText,
+            }}
+          />
+        )}
 
         {props.isAdding && (
           <View

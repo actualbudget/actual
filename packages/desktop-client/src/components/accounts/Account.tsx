@@ -141,11 +141,9 @@ function AllTransactions({
 
   transactions ??= [];
 
-  const visiblePreviewTransactions = useMemo(() => {
-    return showUpcomingTransactions
-      ? previewTransactions
-      : previewTransactions.filter(t => !isUpcomingPreviewTransaction(t));
-  }, [previewTransactions, showUpcomingTransactions]);
+  const visiblePreviewTransactions = showUpcomingTransactions
+    ? previewTransactions
+    : previewTransactions.filter(t => !isUpcomingPreviewTransaction(t));
 
   const hasUpcomingTransactions =
     !filtered && previewTransactions.some(isUpcomingPreviewTransaction);
@@ -233,6 +231,8 @@ type AccountInternalProps = {
   setShowCleared: (newValue: boolean) => void;
   showReconciled: boolean;
   setShowReconciled: (newValue: boolean) => void;
+  showUpcomingTransactions: boolean;
+  setShowUpcomingTransactions: (newValue: boolean) => void;
   showExtraBalances?: boolean;
   setShowExtraBalances: (newValue: boolean) => void;
   modalShowing?: boolean;
@@ -284,7 +284,6 @@ type AccountInternalState = {
   showCleared?: boolean | undefined;
   prevShowCleared?: boolean | undefined;
   showReconciled: boolean;
-  showUpcomingTransactions: boolean;
   nameError: string;
   isAdding: boolean;
   modalShowing?: boolean;
@@ -334,7 +333,6 @@ class AccountInternal extends PureComponent<
       balances: null,
       showCleared: props.showCleared,
       showReconciled: props.showReconciled,
-      showUpcomingTransactions: true,
       nameError: '',
       isAdding: false,
       sort: null,
@@ -1722,9 +1720,9 @@ class AccountInternal extends PureComponent<
   };
 
   onToggleUpcomingTransactions = () => {
-    this.setState(state => ({
-      showUpcomingTransactions: !state.showUpcomingTransactions,
-    }));
+    this.props.setShowUpcomingTransactions(
+      !this.props.showUpcomingTransactions,
+    );
   };
 
   render() {
@@ -1751,8 +1749,8 @@ class AccountInternal extends PureComponent<
       showCleared,
       showReconciled,
       filteredAmount,
-      showUpcomingTransactions,
     } = this.state;
+    const { showUpcomingTransactions } = this.props;
 
     const account = accounts.find(account => account.id === accountId);
     const accountName = this.getAccountTitle(account, accountId);
@@ -2035,6 +2033,10 @@ export function Account() {
   const [hideReconciled, setHideReconciled] = useSyncedPref(
     `hide-reconciled-${params.id}`,
   );
+  const [showUpcomingTransactions, setShowUpcomingTransactions] =
+    useSyncedPref(
+      `show-upcoming-transactions-${params.id || 'all-accounts'}`,
+    );
   const [showExtraBalances, setShowExtraBalances] = useSyncedPref(
     `show-extra-balances-${params.id || 'all-accounts'}`,
   );
@@ -2090,6 +2092,12 @@ export function Account() {
             setShowCleared={val => setHideCleared(String(!val))}
             showReconciled={String(hideReconciled) !== 'true'}
             setShowReconciled={val => setHideReconciled(String(!val))}
+            showUpcomingTransactions={
+              String(showUpcomingTransactions) !== 'false'
+            }
+            setShowUpcomingTransactions={val =>
+              setShowUpcomingTransactions(String(val))
+            }
             showExtraBalances={String(showExtraBalances) === 'true'}
             setShowExtraBalances={extraBalances =>
               setShowExtraBalances(String(extraBalances))
