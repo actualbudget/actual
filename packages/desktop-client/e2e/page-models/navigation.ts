@@ -197,4 +197,3 @@ export class Navigation {
     await this.page.getByTestId('budget-name').click({ button: 'right' });
   }
 }
-

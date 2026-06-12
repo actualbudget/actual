@@ -56,7 +56,6 @@ test.describe('Accounts', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-
   test('right clicking an account in sidebar opens context menu', async () => {
     await navigation.rightClickAccount('Roth IRA');
     const menu = page.getByRole('menu');
@@ -75,6 +74,7 @@ test.describe('Accounts', () => {
     const menu = page.getByRole('menu');
     await expect(menu).toBeVisible();
     await expect(menu.getByRole('button', { name: 'Delete' })).toBeVisible();
+  });
 
   test('shift-click range selection skips hidden reconciled transactions', async () => {
     accountPage = await navigation.createAccount({

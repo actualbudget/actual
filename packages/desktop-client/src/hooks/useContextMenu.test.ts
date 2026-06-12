@@ -55,25 +55,33 @@ describe('useContextMenu', () => {
     const listener = (useRefEventListener as any).mock.calls[0][2];
 
     // Simulate event
-    listener({ preventDefault: vi.fn(), clientX: 100, clientY: 200 } as unknown as MouseEvent);
+    listener({
+      preventDefault: vi.fn(),
+      clientX: 100,
+      clientY: 200,
+    } as unknown as MouseEvent);
 
     expect(mockDispatch).toHaveBeenCalledWith(addItems(items));
   });
 
-    it('should not dispatch addItems when enabled is false', () => {
-      const items = [{ name: 'test', text: 'Test', onClick: () => {} }];
-  
-      renderHook(() =>
-        useContextMenu({ triggerRef: mockTriggerRef, enabled: false, items }),
-      );
-  
-      const listener = (useRefEventListener as any).mock.calls[0][2];
-  
-      // Simulate event
-      listener({ preventDefault: vi.fn(), clientX: 100, clientY: 200 } as unknown as MouseEvent);
-  
-      expect(mockDispatch).not.toHaveBeenCalled();
-    });
+  it('should not dispatch addItems when enabled is false', () => {
+    const items = [{ name: 'test', text: 'Test', onClick: () => {} }];
+
+    renderHook(() =>
+      useContextMenu({ triggerRef: mockTriggerRef, enabled: false, items }),
+    );
+
+    const listener = (useRefEventListener as any).mock.calls[0][2];
+
+    // Simulate event
+    listener({
+      preventDefault: vi.fn(),
+      clientX: 100,
+      clientY: 200,
+    } as unknown as MouseEvent);
+
+    expect(mockDispatch).not.toHaveBeenCalled();
+  });
 
   it('should provide handleContextMenu callback that dispatches contextmenu event', () => {
     const items = [{ name: 'test', text: 'Test', onClick: () => {} }];

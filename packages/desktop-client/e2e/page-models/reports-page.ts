@@ -131,4 +131,3 @@ export class ReportsPage {
       .click({ button: 'right' });
   }
 }
-

@@ -148,4 +148,3 @@ test.describe('Rules', () => {
     await expect(menu.getByRole('button', { name: 'Edit' })).toBeVisible();
   });
 });
-

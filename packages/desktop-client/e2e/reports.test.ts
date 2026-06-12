@@ -54,7 +54,6 @@ test.describe('Reports', () => {
     await expect(menu.getByRole('button', { name: 'Rename' })).toBeVisible();
   });
 
-
   test('loads net worth graph and checks visuals', async () => {
     await reportsPage.goToNetWorthPage();
     await expect(page).toMatchThemeScreenshots();

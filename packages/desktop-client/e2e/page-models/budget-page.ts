@@ -207,7 +207,8 @@ export class BudgetPage {
 
   async rightClickCategoryGroup(name: string) {
     // Assuming category groups have a specific text or role, or we can just find by text
-    await this.budgetTable.getByText(name, { exact: true }).click({ button: 'right' });
+    await this.budgetTable
+      .getByText(name, { exact: true })
+      .click({ button: 'right' });
   }
 }
-

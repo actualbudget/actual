@@ -41,7 +41,10 @@ export class RulesPage {
   }
 
   async rightClickNthRule(index: number) {
-    await this.page.getByTestId('table').getByTestId('row').nth(index).click({ button: 'right' });
+    await this.page
+      .getByTestId('table')
+      .getByTestId('row')
+      .nth(index)
+      .click({ button: 'right' });
   }
 }
-

@@ -77,10 +77,7 @@ describe('contextMenuSlice', () => {
       ];
 
       let state = reducer(initialState, addItems(items));
-      state = reducer(
-        state,
-        setContextMenuPosition({ x: 0, y: 0 }),
-      );
+      state = reducer(state, setContextMenuPosition({ x: 0, y: 0 }));
 
       expect(state.items).toHaveLength(3);
       expect((state.items[0] as any).name).toBe('test3'); // order 0

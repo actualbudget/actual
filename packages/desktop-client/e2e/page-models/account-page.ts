@@ -278,7 +278,6 @@ export class AccountPage {
   }
 }
 
-
 class FilterTooltip {
   readonly locator: Locator;
   readonly applyButton: Locator;

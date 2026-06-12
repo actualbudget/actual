@@ -79,4 +79,3 @@ export class SchedulesPage {
     await this.getNthScheduleRow(index).click({ button: 'right' });
   }
 }
-
