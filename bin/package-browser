@@ -31,3 +31,8 @@ if [ "$SKIP_TRANSLATIONS" = false ]; then
 fi
 
 lage build:browser --to=@actual-app/web
+
+# Guard against shipping a corrupted bundle (e.g. a torn write on a CI
+# runner): fully parse every emitted JS file before the artifacts get
+# published to npm / Docker images / Netlify. See issue #8197.
+node packages/desktop-client/bin/verify-build.mjs packages/desktop-client/build

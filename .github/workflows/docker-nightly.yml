@@ -99,6 +99,9 @@ jobs:
           HEALTHCMD=$(yq -r '.services.actual_server.healthcheck.test[1]' packages/sync-server/docker-compose.yml)
           until docker exec actual-server sh -c "$HEALTHCMD"; do sleep 1; done
 
+      - name: Verify the web build inside the image
+        run: ./bin/verify-image-web-build actual-server
+
       - name: Dump container logs on failure
         if: failure()
         run: docker logs actual-server || true

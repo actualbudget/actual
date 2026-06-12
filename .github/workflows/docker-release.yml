@@ -104,6 +104,9 @@ jobs:
           HEALTHCMD=$(yq -r '.services.actual_server.healthcheck.test[1]' packages/sync-server/docker-compose.yml)
           until docker exec actual-server sh -c "$HEALTHCMD"; do sleep 1; done
 
+      - name: Verify the web build inside the ubuntu image
+        run: ./bin/verify-image-web-build actual-server
+
       - name: Build and push ubuntu image
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
@@ -129,6 +132,9 @@ jobs:
           docker run --detach --network=host --name actual-server actualbudget/actual-server-testing
           HEALTHCMD=$(yq -r '.services.actual_server.healthcheck.test[1]' packages/sync-server/docker-compose.yml)
           until docker exec actual-server sh -c "$HEALTHCMD"; do sleep 1; done
+
+      - name: Verify the web build inside the alpine image
+        run: ./bin/verify-image-web-build actual-server
 
       - name: Build and push alpine image
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0

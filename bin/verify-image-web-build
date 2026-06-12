@@ -1,0 +1,32 @@
+#!/bin/bash -e
+
+# Verifies that the web build inside a running sync-server container is
+# byte-identical to the build on the host. The 26.6.0 Docker image shipped a
+# bundle with a corrupted 4KiB block (issue #8197): the server still booted,
+# so the existing health check passed and the broken image was published.
+# Comparing checksums of every file catches any corruption introduced while
+# the build artifacts travel through the Docker build (context tar, COPY,
+# symlink dereferencing, layer creation).
+#
+# Usage: bin/verify-image-web-build <container-name>
+
+CONTAINER="${1:?usage: bin/verify-image-web-build <container-name>}"
+HOST_BUILD_DIR=packages/desktop-client/build
+IMAGE_BUILD_DIR=node_modules/@actual-app/web/build
+
+# Checksum every file, with the file list sorted bytewise so the combined
+# digest is stable across GNU coreutils (host/ubuntu) and busybox (alpine).
+checksum_cmd='cd '"$IMAGE_BUILD_DIR"' && find . -type f | LC_ALL=C sort | xargs sha256sum | sha256sum'
+
+HOST_SUM=$(cd "$HOST_BUILD_DIR" && find . -type f | LC_ALL=C sort | xargs sha256sum | sha256sum | cut -d' ' -f1)
+IMAGE_SUM=$(docker exec "$CONTAINER" sh -c "$checksum_cmd" | cut -d' ' -f1)
+
+echo "host web build:  $HOST_SUM"
+echo "image web build: $IMAGE_SUM"
+
+if [ "$HOST_SUM" != "$IMAGE_SUM" ]; then
+  echo "::error::Web build inside the Docker image differs from the host build — the image artifacts are corrupted, refusing to publish (see issue #8197)"
+  exit 1
+fi
+
+echo "Web build inside the image matches the host build."
