@@ -113,7 +113,7 @@ function _authorize(
                 []
               ).map((acc: SyncServerEnableBankingAccount) => ({
                 ...acc,
-                logo: logo ?? undefined,
+                logo,
               }));
 
               return { data: { accounts } };
