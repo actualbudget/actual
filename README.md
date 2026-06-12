@@ -81,3 +81,6 @@ Make Actual Budget accessible to more people by helping with the [Internationali
 Thanks to our wonderful sponsors who make Actual Budget possible!
 
 <a href="https://www.netlify.com"> <img src="https://www.netlify.com/v3/img/components/netlify-color-accent.svg" alt="Deploys by Netlify" /> </a>
+<a href="https://www.docker.com"> <img src="https://www.docker.com/app/uploads/2023/05/symbol_blue-docker-logo.png" alt="Docker" height="48" /> </a>
+<a href="https://github.com"> <img src="https://avatars.githubusercontent.com/u/9919?s=200&v=4" alt="GitHub" height="48" /> </a>
+<a href="https://www.anthropic.com"> <img src="https://avatars.githubusercontent.com/u/76263028?s=200&v=4" alt="Anthropic" height="48" /> </a>
