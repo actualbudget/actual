@@ -401,7 +401,13 @@ export function AccountHeader({
                 aria-label={upcomingTransactionsLabel}
                 aria-pressed={showUpcomingTransactions}
                 onPress={onToggleUpcomingTransactions}
-                style={{ padding: 6 }}
+                style={{
+                  padding: 6,
+                  ...(!showUpcomingTransactions && {
+                    backgroundColor: theme.upcomingBackground,
+                    color: theme.upcomingText,
+                  }),
+                }}
               >
                 <SvgTime width={14} height={14} />
               </Button>
