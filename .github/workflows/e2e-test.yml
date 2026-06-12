@@ -58,7 +58,7 @@ jobs:
 
   functional:
     name: Functional (shard ${{ matrix.shard }}/3)
-    runs-on: depot-ubuntu-latest
+    runs-on: depot-ubuntu-latest-4
     needs: build-web
     strategy:
       fail-fast: false
@@ -95,7 +95,7 @@ jobs:
 
   functional-desktop-app:
     name: Functional Desktop App
-    runs-on: depot-ubuntu-latest
+    runs-on: depot-ubuntu-latest-4
     container:
       image: mcr.microsoft.com/playwright:v1.59.1-jammy
     steps:
