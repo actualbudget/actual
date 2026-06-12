@@ -304,7 +304,8 @@ async function tryDirect(origin: URL): Promise<FaviconDirectResult | null> {
     if (res.ok) {
       const ct = (res.headers.get('content-type') ?? '').toLowerCase();
       if (ct.includes('text/html')) {
-        html = await res.text();
+        const buf = await readBodyCapped(res, origin.toString());
+        html = Buffer.from(buf).toString('utf8');
         htmlCandidates = extractIconCandidatesFromHtml(html, origin);
       }
     }
