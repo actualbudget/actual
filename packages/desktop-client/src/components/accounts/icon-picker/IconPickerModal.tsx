@@ -479,6 +479,19 @@ function FaviconTab({
   const { t } = useTranslation();
   const [url, setUrl] = useState(initialUrl);
 
+  const isValidDomain = (() => {
+    const candidate = url.trim();
+    if (!candidate) return false;
+    try {
+      const u = new URL(
+        /^https?:\/\//i.test(candidate) ? candidate : `https://${candidate}`,
+      );
+      return u.hostname.includes('.');
+    } catch {
+      return false;
+    }
+  })();
+
   if (!hasFaviconProxy) {
     return (
       <View style={{ gap: 8 }}>
@@ -576,7 +589,11 @@ function FaviconTab({
             boxSizing: 'border-box',
           }}
         />
-        <Button isDisabled={isBusy} onPress={handleFetch} style={{ flex: 1 }}>
+        <Button
+          isDisabled={isBusy}
+          onPress={handleFetch}
+          variant={isValidDomain ? 'primary' : 'normal'}
+        >
           <Trans>Fetch favicon</Trans>
         </Button>
       </View>
