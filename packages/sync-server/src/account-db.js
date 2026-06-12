@@ -54,10 +54,18 @@ export function getActiveLoginMethod() {
  * fall back to using password
  */
 export function getLoginMethod(req) {
+  // When OpenID is enforced, the server must only ever authenticate via
+  // OpenID. A client must not be able to opt back into the (possibly
+  // dormant) password or header method by pinning `loginMethod` on the
+  // request — this mirrors listLoginMethods(), which already hides every
+  // non-OpenID method from the UI once enforcement is on.
+  const enforceOpenId = config.get('enforceOpenId');
+
   if (
     typeof req !== 'undefined' &&
     (req.body || { loginMethod: null }).loginMethod &&
-    config.get('allowedLoginMethods').includes(req.body.loginMethod)
+    config.get('allowedLoginMethods').includes(req.body.loginMethod) &&
+    (!enforceOpenId || req.body.loginMethod === 'openid')
   ) {
     const accountDb = getAccountDb();
     const row = accountDb.first('SELECT method FROM auth WHERE method = ?', [
@@ -68,6 +76,7 @@ export function getLoginMethod(req) {
 
   //BY-PASS ANY OTHER CONFIGURATION TO ENSURE HEADER AUTH
   if (
+    !enforceOpenId &&
     config.get('loginMethod') === 'header' &&
     config.get('allowedLoginMethods').includes('header')
   ) {

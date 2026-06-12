@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getAccountDb, getLoginMethod, getServerPrefs } from './account-db';
 import { bootstrapPassword } from './accounts/password';
 import { handlers as app, authRateLimiter } from './app-account';
+import { config } from './load-config';
 
 const ADMIN_ROLE = 'ADMIN';
 const BASIC_ROLE = 'BASIC';
@@ -217,6 +218,37 @@ describe('getLoginMethod()', () => {
     // config default for loginMethod is 'password'
     expect(getLoginMethod(undefined)).toBe('password');
   });
+
+  describe('when enforceOpenId is enabled', () => {
+    afterEach(() => {
+      config.set('enforceOpenId', false);
+    });
+
+    it('ignores a client-requested non-OpenID method', () => {
+      config.set('enforceOpenId', true);
+      insertAuthRow('openid', 1);
+      insertAuthRow('password', 0);
+      const req = { body: { loginMethod: 'password' } };
+      expect(getLoginMethod(req)).toBe('openid');
+    });
+
+    it('still honors a client-requested OpenID method', () => {
+      config.set('enforceOpenId', true);
+      insertAuthRow('openid', 1);
+      insertAuthRow('password', 0);
+      const req = { body: { loginMethod: 'openid' } };
+      expect(getLoginMethod(req)).toBe('openid');
+    });
+
+    it('does not fall back to header auth via config bypass', () => {
+      config.set('enforceOpenId', true);
+      config.set('loginMethod', 'header');
+      insertAuthRow('openid', 1);
+      const req = { body: { loginMethod: 'header' } };
+      expect(getLoginMethod(req)).toBe('openid');
+      config.set('loginMethod', 'password');
+    });
+  });
 });
 
 describe('/login', () => {
@@ -253,6 +285,32 @@ describe('/login', () => {
 
     expect(res.statusCode).toEqual(400);
     expect(res.body).toHaveProperty('reason', 'invalid-password');
+  });
+
+  it('should not allow a dormant password login to override enforced OpenID', async () => {
+    // Reproduces the OpenID migration state: the password row survives but is
+    // inactive, OpenID is the active method, and the operator has set
+    // enforceOpenId. Pinning loginMethod=password must not bypass enforcement.
+    bootstrapPassword('testpassword');
+    insertAuthRow('openid', 1, JSON.stringify({ server_hostname: '' }));
+    getAccountDb().mutate(
+      "UPDATE auth SET active = 0 WHERE method = 'password'",
+    );
+    config.set('enforceOpenId', true);
+
+    try {
+      const res = await request(app)
+        .post('/login')
+        .send({ loginMethod: 'password', password: 'testpassword' });
+
+      // The request is routed through OpenID instead of password; with no
+      // valid OpenID configuration/redirect it is rejected rather than
+      // issuing a password-backed admin token.
+      expect(res.statusCode).toEqual(400);
+      expect(res.body).not.toHaveProperty('data.token');
+    } finally {
+      config.set('enforceOpenId', false);
+    }
   });
 });
 
