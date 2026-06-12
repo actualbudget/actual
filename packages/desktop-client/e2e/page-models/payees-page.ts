@@ -15,7 +15,10 @@ export class PayeesPage {
   }
 
   async rightClickNthPayee(idx: number) {
-    await this.page.getByTestId('row').nth(idx).click({ button: 'right' });
+    await this.page
+      .getByTestId('table')
+      .getByTestId('row')
+      .nth(idx)
+      .click({ button: 'right' });
   }
 }
-
