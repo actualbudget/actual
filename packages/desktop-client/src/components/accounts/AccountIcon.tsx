@@ -1,11 +1,14 @@
+import type { CSSProperties } from 'react';
+
 import type { AccountEntity } from '@actual-app/core/types/models';
 
 type AccountIconProps = {
   account: AccountEntity | undefined;
   size?: number;
+  style?: CSSProperties;
 };
 
-export function AccountIcon({ account, size = 20 }: AccountIconProps) {
+export function AccountIcon({ account, size = 20, style }: AccountIconProps) {
   const icon = account?.icon ?? account?.bank?.icon ?? null;
   if (!account || !icon) return null;
   return (
@@ -19,6 +22,7 @@ export function AccountIcon({ account, size = 20 }: AccountIconProps) {
         objectFit: 'contain',
         flexShrink: 0,
         borderRadius: 4,
+        ...style,
       }}
     />
   );
