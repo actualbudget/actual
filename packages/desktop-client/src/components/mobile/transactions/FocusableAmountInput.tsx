@@ -2,6 +2,7 @@ import React, { memo, useEffect, useRef, useState } from 'react';
 import type {
   ComponentPropsWithRef,
   CSSProperties,
+  FocusEvent,
   HTMLProps,
   Ref,
 } from 'react';
@@ -166,7 +167,7 @@ const AmountInput = memo(function AmountInput({
   );
 });
 
-type FocusableAmountInputProps = Omit<AmountInputProps, 'onFocus'> & {
+export type FocusableAmountInputProps = Omit<AmountInputProps, 'onFocus'> & {
   sign?: '+' | '-';
   zeroSign?: '+' | '-';
   focused?: boolean;
@@ -175,7 +176,7 @@ type FocusableAmountInputProps = Omit<AmountInputProps, 'onFocus'> & {
   buttonProps?: Omit<ComponentPropsWithRef<typeof Button>, 'style'> & {
     style?: EmotionCSSProperties;
   };
-  onFocus?: () => void;
+  onFocus?: (event?: FocusEvent<HTMLInputElement>) => void;
 };
 
 export const FocusableAmountInput = memo(function FocusableAmountInput({
@@ -272,7 +273,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
           </Button>
         )}
         <Button
-          onPress={onFocus}
+          onPress={() => onFocus?.()}
           // Defines how far touch can start away from the button
           // hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
           {...buttonProps}
