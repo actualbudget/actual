@@ -1,3 +1,6 @@
+import dns from 'node:dns/promises';
+import net from 'node:net';
+
 import { fetch } from '#platform/server/fetch';
 import { logger } from '#platform/server/log';
 
@@ -25,6 +28,66 @@ class FaviconDirectError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'FaviconDirectError';
+  }
+}
+
+function isPrivateIp(address: string): boolean {
+  if (net.isIPv4(address)) {
+    const parts = address.split('.').map(Number);
+    const [a, b] = parts;
+    return (
+      a === 0 || // 0.0.0.0/8
+      a === 10 || // RFC-1918
+      a === 127 || // loopback
+      (a === 100 && b >= 64 && b <= 127) || // shared address (RFC 6598)
+      (a === 169 && b === 254) || // link-local / cloud metadata
+      (a === 172 && b >= 16 && b <= 31) || // RFC-1918
+      (a === 192 && b === 168) || // RFC-1918
+      a >= 240 // reserved / broadcast
+    );
+  }
+  if (net.isIPv6(address)) {
+    const lower = address.toLowerCase().replace(/^\[|\]$/g, '');
+    return (
+      lower === '::1' || // loopback
+      lower.startsWith('fe80') || // link-local
+      lower.startsWith('fc') || // unique-local
+      lower.startsWith('fd') || // unique-local
+      lower.startsWith('::ffff:') // IPv4-mapped — recurse on embedded addr
+    );
+  }
+  return false;
+}
+
+async function assertRedirectSafe(urlStr: string): Promise<void> {
+  let hostname: string;
+  try {
+    hostname = new URL(urlStr).hostname.replace(/^\[|\]$/g, '');
+  } catch {
+    throw new FaviconDirectError(`Invalid redirect URL: ${urlStr}`);
+  }
+  if (net.isIP(hostname) !== 0) {
+    if (isPrivateIp(hostname)) {
+      throw new FaviconDirectError(
+        `Redirect to private address blocked: ${hostname}`,
+      );
+    }
+    return;
+  }
+  let addresses: { address: string }[];
+  try {
+    addresses = await dns.lookup(hostname, { all: true });
+  } catch {
+    throw new FaviconDirectError(
+      `Unable to resolve redirect host: ${hostname}`,
+    );
+  }
+  for (const { address } of addresses) {
+    if (isPrivateIp(address)) {
+      throw new FaviconDirectError(
+        `Redirect to private address blocked: ${hostname} -> ${address}`,
+      );
+    }
   }
 }
 
@@ -61,6 +124,7 @@ async function safeFetch(url: string, init?: RequestInit): Promise<Response> {
         throw new FaviconDirectError(`Redirect without Location from ${next}`);
       }
       next = new URL(location, res.url || next).toString();
+      await assertRedirectSafe(next);
       continue;
     }
     return res;
