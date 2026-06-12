@@ -133,8 +133,8 @@ export async function del(url, data, headers = {}, timeout = null) {
     });
     clearTimeout(timeoutId);
     text = await res.text();
-  } catch {
-    throw new PostError('network-failure');
+  } catch (err) {
+    throw new PostError('network-failure', undefined, { cause: err });
   }
 
   throwIfNot200(res, text);
@@ -181,8 +181,8 @@ export async function patch(url, data, headers = {}, timeout = null) {
     });
     clearTimeout(timeoutId);
     text = await res.text();
-  } catch {
-    throw new PostError('network-failure');
+  } catch (err) {
+    throw new PostError('network-failure', undefined, { cause: err });
   }
 
   throwIfNot200(res, text);

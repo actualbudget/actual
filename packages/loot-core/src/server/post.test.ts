@@ -1,7 +1,7 @@
 import { fetch } from '#platform/server/fetch';
 
 import { PostError } from './errors';
-import { post, postBinary } from './post';
+import { del, patch, post, postBinary } from './post';
 
 vi.unmock('#server/post');
 vi.mock('#platform/server/fetch', () => ({
@@ -67,6 +67,44 @@ describe('post', () => {
 
     const error = await captureError(
       post('https://test.env/sync/sync', { foo: 'bar' }),
+    );
+
+    expect(error).toBeInstanceOf(PostError);
+    expect((error as PostError).reason).toBe('network-failure');
+    expect((error as PostError).cause).toBe(underlying);
+  });
+});
+
+describe('del', () => {
+  beforeEach(() => {
+    mockedFetch.mockReset();
+  });
+
+  it('preserves the underlying fetch error as cause on network failure', async () => {
+    const underlying = new TypeError('fetch failed');
+    mockedFetch.mockRejectedValue(underlying);
+
+    const error = await captureError(
+      del('https://test.env/sync/sync', { foo: 'bar' }),
+    );
+
+    expect(error).toBeInstanceOf(PostError);
+    expect((error as PostError).reason).toBe('network-failure');
+    expect((error as PostError).cause).toBe(underlying);
+  });
+});
+
+describe('patch', () => {
+  beforeEach(() => {
+    mockedFetch.mockReset();
+  });
+
+  it('preserves the underlying fetch error as cause on network failure', async () => {
+    const underlying = new TypeError('fetch failed');
+    mockedFetch.mockRejectedValue(underlying);
+
+    const error = await captureError(
+      patch('https://test.env/sync/sync', { foo: 'bar' }),
     );
 
     expect(error).toBeInstanceOf(PostError);
