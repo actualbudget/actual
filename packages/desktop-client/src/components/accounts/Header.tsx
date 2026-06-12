@@ -8,8 +8,8 @@ import { Button } from '@actual-app/components/button';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import {
   SvgAdd,
+  SvgCalendar,
   SvgDotsHorizontalTriple,
-  SvgTime,
 } from '@actual-app/components/icons/v1';
 import {
   SvgArrowsExpand3,
@@ -409,7 +409,7 @@ export function AccountHeader({
                   }),
                 }}
               >
-                <SvgTime width={14} height={14} />
+                <SvgCalendar width={14} height={14} />
               </Button>
             </Tooltip>
           )}

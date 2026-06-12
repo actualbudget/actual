@@ -199,8 +199,11 @@ const TransactionHeader = memo(
           backgroundColor: theme.tableHeaderBackground,
           paddingRight: `${5 + (scrollWidth ?? 0)}px`,
           borderTopWidth: 1,
-          borderBottomWidth: showUpcomingTransactions === false ? 5 : 1,
-          borderColor: theme.tableBorder,
+          borderBottomWidth: showUpcomingTransactions === false ? 2 : 1,
+          borderColor:
+            showUpcomingTransactions === false
+              ? theme.upcomingText
+              : theme.tableBorder,
         }}
       >
         {showSelection && (
