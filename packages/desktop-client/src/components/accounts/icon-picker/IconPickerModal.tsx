@@ -178,7 +178,7 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
       {({ state }) => (
         <>
           <ModalHeader
-            title={<ModalTitle title={t('Account icon')} shrinkOnOverflow />}
+            title={<ModalTitle title={t('Account Icon')} shrinkOnOverflow />}
             rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
 
