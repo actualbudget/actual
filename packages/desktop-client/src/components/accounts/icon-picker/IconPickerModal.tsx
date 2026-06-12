@@ -308,7 +308,9 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
                     }
                   }}
                 >
-                  {scope === 'account' && account.bank ? (
+                  {scope === 'bank' ? (
+                    <Trans>Clear bank icon</Trans>
+                  ) : account.bank?.icon && account.icon ? (
                     <Trans>Clear override</Trans>
                   ) : (
                     <Trans>Clear icon</Trans>
