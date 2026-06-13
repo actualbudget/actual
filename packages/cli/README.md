@@ -54,8 +54,23 @@ Configuration is resolved in this order (highest priority first):
 
 ### Config File
 
-Create an `.actualrc.json` (or `.actualrc`, `.actualrc.yaml`, `actual.config.json`, `actual.config.yaml`). The config file can be anywhere between the current working directory and your home directory. You can also store your configuration in the `actual` subdirectory of the global configuration directory (e.g. `~/.config/actual/` on Linux) in a file named `config.json` (or `config`, `config.yaml`, `config.yml`).
+The CLI uses [cosmiconfig](https://github.com/cosmiconfig/cosmiconfig) for configuration. The config file can be anywhere between the current working directory and your home directory.
 
+You can create a config file in any of these formats:
+
+- `.actualrc` (JSON or YAML)
+- `.actualrc.json`, `.actualrc.yaml`, `.actualrc.yml`
+- `actual.config.json`, `actual.config.yaml`, `actual.config.yml`
+- An `"actual"` key in your `package.json`
+
+You can instead store your configuration in the `actual` subdirectory of the global configuration directory (e.g. `~/.config/actual/` on Linux) in any of these formats:
+
+- `config` (JSON or YAML)
+- `config.json`
+- `config.yaml`
+- `config.yml`
+
+Example `.actualrc.json`:
 ```json
 {
   "serverUrl": "http://localhost:5006",
@@ -67,7 +82,7 @@ Create an `.actualrc.json` (or `.actualrc`, `.actualrc.yaml`, `actual.config.jso
 }
 ```
 
-**Security:** Do not store plaintext passwords in config files (e.g. `.actualrc.json`, `.actualrc`, `.actualrc.yaml`, `actual.config.js`). Add these files to `.gitignore` if they contain secrets. Prefer the `ACTUAL_SESSION_TOKEN` environment variable instead of the `password` field. See [Environment Variables](#environment-variables) for using a session token.
+**Security:** Avoid storing plaintext passwords in config files (including the `password` key above). Add these files to `.gitignore` if they contain passwords. Prefer environment variables such as `ACTUAL_PASSWORD` or `ACTUAL_SESSION_TOKEN`, or use a session token in config instead of a password. See [Environment Variables](#environment-variables) for details.
 
 ### Global Flags
 

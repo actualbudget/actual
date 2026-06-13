@@ -53,12 +53,21 @@ Global flags override environment variables:
 
 ### Config File
 
-The CLI uses [cosmiconfig](https://github.com/cosmiconfig/cosmiconfig) for configuration. You can create a config file in any of these formats:
+The CLI uses [cosmiconfig](https://github.com/cosmiconfig/cosmiconfig) for configuration. The config file can be anywhere between the current working directory and your home directory.
+
+You can create a config file in any of these formats:
 
 - `.actualrc` (JSON or YAML)
 - `.actualrc.json`, `.actualrc.yaml`, `.actualrc.yml`
 - `actual.config.json`, `actual.config.yaml`, `actual.config.yml`
 - An `"actual"` key in your `package.json`
+
+You can instead store your configuration in the `actual` subdirectory of the global configuration directory (e.g. `~/.config/actual/` on Linux) in any of these formats:
+
+- `config` (JSON or YAML)
+- `config.json`
+- `config.yaml`
+- `config.yml`
 
 Example `.actualrc.json`:
 
@@ -67,11 +76,14 @@ Example `.actualrc.json`:
   "serverUrl": "http://localhost:5006",
   "password": "your-password",
   "syncId": "1cfdbb80-6274-49bf-b0c2-737235a4c81f"
+  "cacheTtl": 60,
+  "lockTimeout": 10,
+  "noLock": false
 }
 ```
 
 :::caution Security
-Avoid storing plaintext passwords in config files (including the `password` key above). Prefer environment variables such as `ACTUAL_PASSWORD` or `ACTUAL_SESSION_TOKEN`, or use a session token in config instead of a password.
+Avoid storing plaintext passwords in config files (including the `password` key above). Add these files to `.gitignore` if they contain passwords. Prefer environment variables such as `ACTUAL_PASSWORD` or `ACTUAL_SESSION_TOKEN`, or use a session token in config instead of a password. See [Environment Variables](#environment-variables) for details.
 :::
 
 ## Usage
