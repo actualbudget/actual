@@ -27,7 +27,7 @@ jobs:
       matrix:
         os:
           - ubuntu-22.04
-          - windows-latest
+          - windows-2022
           - macos-latest
     runs-on: ${{ matrix.os }}
     steps:
@@ -36,12 +36,6 @@ jobs:
           persist-credentials: false
       - if: ${{ startsWith(matrix.os, 'windows') }}
         run: pip.exe install setuptools
-      - if: ${{ startsWith(matrix.os, 'windows') }}
-        name: Configure Visual Studio for node-gyp
-        # windows-latest uses windows-2025 where node-gyp cannot auto-detect
-        # the VS 2022 installation. Setting GYP_MSVS_VERSION explicitly is required
-        # for @electron/rebuild to compile native modules (bcrypt, better-sqlite3).
-        run: echo "GYP_MSVS_VERSION=2022" >> "$GITHUB_ENV"
       - if: ${{ ! startsWith(matrix.os, 'windows') }}
         run: |
           mkdir .venv
