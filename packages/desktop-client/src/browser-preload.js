@@ -63,6 +63,8 @@ const updateSW = IS_DEV
 
 global.Actual = {
   IS_DEV,
+  // Only ever true in the sandboxed Mac App Store (Electron) build.
+  IS_APP_STORE_BUILD: false,
   ACTUAL_VERSION,
 
   logToTerminal: (...args) => {

@@ -8,11 +8,15 @@ import type {
   SaveFileDialogPayload,
 } from './index';
 
-const { version: VERSION, isDev: IS_DEV }: GetBootstrapDataPayload =
-  ipcRenderer.sendSync('get-bootstrap-data');
+const {
+  version: VERSION,
+  isDev: IS_DEV,
+  isAppStoreBuild: IS_APP_STORE_BUILD,
+}: GetBootstrapDataPayload = ipcRenderer.sendSync('get-bootstrap-data');
 
 contextBridge.exposeInMainWorld('Actual', {
   IS_DEV,
+  IS_APP_STORE_BUILD,
   ACTUAL_VERSION: VERSION,
   logToTerminal: console.log,
   ipcConnect: (

@@ -8,9 +8,11 @@
     "clean": "rm -rf dist",
     "update-client": "bin/update-client",
     "build": "yarn build:dist && electron-builder",
+    "build:mas": "yarn build:dist && electron-builder --mac mas",
+    "build:mas-dev": "yarn build:dist && electron-builder --mac masDev",
     "build:dist": "tsgo && yarn copy-static-assets",
     "typecheck": "tsgo -b && tsc-strict",
-    "copy-static-assets": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* build/desktop-electron",
+    "copy-static-assets": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* entitlements.mas.plist entitlements.mas.inherit.plist build/desktop-electron",
     "watch": "yarn build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron .",
     "e2e": "npx playwright test"
   },
@@ -68,6 +70,27 @@
           ]
         }
       ]
+    },
+    "mas": {
+      "category": "public.app-category.finance",
+      "icon": "icons/icon.icns",
+      "hardenedRuntime": false,
+      "artifactName": "${productName}-mas-${arch}.${ext}",
+      "entitlements": "build/desktop-electron/entitlements.mas.plist",
+      "entitlementsInherit": "build/desktop-electron/entitlements.mas.inherit.plist",
+      "provisioningProfile": "embedded.provisionprofile",
+      "target": [
+        {
+          "target": "pkg",
+          "arch": [
+            "universal"
+          ]
+        }
+      ]
+    },
+    "masDev": {
+      "type": "development",
+      "provisioningProfile": "development.provisionprofile"
     },
     "linux": {
       "target": [

@@ -383,7 +383,13 @@ export function ConfigServer() {
   const [serverConfigView, onSetServerConfigView] = useState<
     'internal' | 'external'
   >(() => {
-    if (isElectron() && !hasExternalServerConfig) {
+    // The self-hosted ("internal") sync server can't run in the sandboxed Mac
+    // App Store build, so always start on the external-server view there.
+    if (
+      isElectron() &&
+      !hasExternalServerConfig &&
+      !window.Actual.IS_APP_STORE_BUILD
+    ) {
       return 'internal';
     }
 

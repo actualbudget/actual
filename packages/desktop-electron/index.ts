@@ -38,6 +38,16 @@ const BUILD_ROOT = `${__dirname}/..`;
 const isPlaywrightTest = process.env.EXECUTION_CONTEXT === 'playwright';
 const isDev = !isPlaywrightTest && !app.isPackaged; // dev mode if not packaged and not playwright
 
+// `process.mas` is set to `true` by Electron only in Mac App Store builds.
+// Those builds run inside the macOS App Sandbox, which forbids opening
+// listening sockets unless the (App-Review-scrutinised) network.server
+// entitlement is granted. To stay sandbox-safe we disable the two features
+// that act as network *servers* - the self-hosted sync server and the loopback
+// OAuth callback server - in this build. The loot-core backend keeps working
+// because it communicates purely over utilityProcess IPC, not the network.
+const isAppStoreBuild =
+  (process as NodeJS.Process & { mas?: boolean }).mas === true;
+
 process.env.lootCoreScript = isDev
   ? '@actual-app/core/lib-dist/electron/bundle.desktop.js' // serve from local output in development (provides hot-reloading)
   : path.resolve(BUILD_ROOT, 'loot-core/lib-dist/electron/bundle.desktop.js'); // serve from build in production
@@ -210,6 +220,14 @@ async function createBackgroundProcess() {
 
 async function startSyncServer() {
   try {
+    if (isAppStoreBuild) {
+      logMessage(
+        'info',
+        'Sync-Server: The self-hosted sync server is unavailable in the Mac App Store build (the App Sandbox forbids acting as a network server). Connect to a remote server instead.',
+      );
+      return;
+    }
+
     if (syncServerProcess) {
       logMessage(
         'info',
@@ -454,7 +472,7 @@ app.on('ready', async () => {
 
   const globalPrefs = await loadGlobalPrefs();
 
-  if (globalPrefs.syncServerConfig?.autoStart) {
+  if (!isAppStoreBuild && globalPrefs.syncServerConfig?.autoStart) {
     // wait for the server to start before starting the Actual client to ensure server is available
     await startSyncServer();
   }
@@ -540,12 +558,14 @@ app.on('activate', () => {
 export type GetBootstrapDataPayload = {
   version: string;
   isDev: boolean;
+  isAppStoreBuild: boolean;
 };
 
 ipcMain.on('get-bootstrap-data', event => {
   const payload: GetBootstrapDataPayload = {
     version: isPlaywrightTest ? '99.9.9' : app.getVersion(),
     isDev,
+    isAppStoreBuild,
   };
 
   event.returnValue = payload;
@@ -560,6 +580,15 @@ ipcMain.handle('is-sync-server-running', async () =>
 );
 
 ipcMain.handle('start-oauth-server', async () => {
+  if (isAppStoreBuild) {
+    // A loopback HTTP server can't be opened inside the App Sandbox without the
+    // network.server entitlement. The renderer guards against reaching here
+    // (see Login.tsx), but fail loudly in case it ever does.
+    throw new Error(
+      'OpenID login via the loopback callback is not available in the Mac App Store build.',
+    );
+  }
+
   const { url, server: newServer } = await createOAuthServer();
   oAuthServer = newServer;
   return url;

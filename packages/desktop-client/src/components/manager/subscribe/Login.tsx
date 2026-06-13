@@ -124,6 +124,13 @@ function OpenIdLogin({ setError }) {
   }, [loginMethods]);
 
   async function onSubmitOpenId() {
+    if (isElectron() && window.Actual.IS_APP_STORE_BUILD) {
+      // The loopback OAuth callback server can't run inside the App Sandbox, so
+      // OpenID login is unavailable in the Mac App Store build for now.
+      setError('openid-app-store-unavailable');
+      return;
+    }
+
     const { error, redirectUrl } = await send('subscribe-sign-in', {
       returnUrl: isElectron()
         ? await window.Actual.startOAuthServer()
@@ -343,6 +350,10 @@ export function Login() {
         return t('Invalid password');
       case 'network-failure':
         return t('Unable to contact the server');
+      case 'openid-app-store-unavailable':
+        return t(
+          'OpenID login is not available in the Mac App Store version yet. Please use password login instead.',
+        );
       case 'internal-error':
         return t('Internal error');
       default:

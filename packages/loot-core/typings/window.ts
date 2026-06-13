@@ -15,6 +15,10 @@ type FileDialogOptions = {
 
 type Actual = {
   IS_DEV: boolean;
+  // True only in Mac App Store builds, which run sandboxed. Used to hide
+  // features that require acting as a network server (self-hosted sync server,
+  // loopback OAuth callback).
+  IS_APP_STORE_BUILD: boolean;
   ACTUAL_VERSION: string;
   openURLInBrowser: (url: string) => void;
   openInFileManager: (filepath: string) => void;

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <!-- Mac App Store builds must run inside the App Sandbox. -->
+    <key>com.apple.security.app-sandbox</key>
+    <true/>
+
+    <!-- Outbound connections only: Actual can sync to a *remote* server, but
+         the build deliberately does NOT request com.apple.security.network.server.
+         The self-hosted sync server and the loopback OAuth callback server are
+         disabled in App Store builds (see index.ts `isAppStoreBuild`), so no
+         listening sockets are ever opened. -->
+    <key>com.apple.security.network.client</key>
+    <true/>
+
+    <!-- Import/export budget files and pick a custom data directory via the
+         native open/save dialogs. -->
+    <key>com.apple.security.files.user-selected.read-write</key>
+    <true/>
+
+    <!-- Required so V8 can allocate executable memory under the hardened
+         runtime / sandbox. Without this Electron crashes on launch. -->
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+  </dict>
+</plist>
