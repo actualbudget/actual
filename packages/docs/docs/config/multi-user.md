@@ -30,7 +30,7 @@ There are two user roles _Basic_ or _Admin_.
 
 ## Bank Sync Credentials
 
-[Bank sync](/docs/advanced/bank-sync) credentials can be saved globally for the server or for one budget file only. Admins can manage global credentials and credentials for individual budget files.
+[Bank sync](../advanced/bank-sync.md) credentials can be saved globally for the server or for one budget file only. Admins can manage global credentials and credentials for individual budget files.
 
 Budget file owners who are not admins can manage bank sync credentials for their own budget file only. Users who have shared access to a budget file but are not the owner cannot manage bank sync credentials for that file.
 
