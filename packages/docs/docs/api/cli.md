@@ -83,7 +83,7 @@ Example `.actualrc.json`:
 ```
 
 :::caution Security
-Avoid storing plaintext passwords in config files (including the `password` key above). If these files do contain passwords, set restrictive permissons (e.g. 600 on Linux), and, if they are in a git repo, add them to `.gitignore`. Prefer environment variables such as `ACTUAL_PASSWORD` or `ACTUAL_SESSION_TOKEN`, or use a session token in config instead of a password. See [Environment Variables](#environment-variables) for details.
+Avoid storing plaintext passwords in config files (including the `password` key above). If these files do contain passwords, set restrictive permissions (e.g. 600 on Linux), and, if they are in a git repo, add them to `.gitignore`. Prefer environment variables such as `ACTUAL_PASSWORD` or `ACTUAL_SESSION_TOKEN`, or use a session token in config instead of a password. See [Environment Variables](#environment-variables) for details.
 :::
 
 ## Usage
