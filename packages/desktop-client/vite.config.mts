@@ -308,7 +308,7 @@ export default defineConfig(async ({ mode, command }) => {
     base: '/',
     envPrefix: 'REACT_APP_',
     build: {
-      minify: false,
+      minify: 'oxc',
       target: 'es2022',
       sourcemap: true,
       outDir: mode === 'desktop' ? 'build-electron' : 'build',
@@ -318,6 +318,14 @@ export default defineConfig(async ({ mode, command }) => {
       chunkSizeWarningLimit: 1500,
       rolldownOptions: {
         output: {
+          // Users debug from raw stack traces, so compress and strip
+          // whitespace but never mangle identifiers (overrides the
+          // mangle: true that `minify: 'oxc'` implies).
+          minify: {
+            compress: true,
+            mangle: false,
+            codegen: true,
+          },
           assetFileNames: (assetInfo: PreRenderedAsset) => {
             const info = assetInfo.name?.split('.') ?? [];
             let extType = info[info.length - 1];

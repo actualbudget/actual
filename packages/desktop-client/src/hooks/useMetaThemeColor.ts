@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { usePreferredDarkTheme, useTheme } from '#style/theme';
 
@@ -8,11 +8,13 @@ const DEFAULT_THEME_COLOR = '#5c3dbb';
 /**
  * Sets the theme-color meta tag (for browsers that use it) and document.body
  * background-color (for Safari 26+, which derives status bar tint from body).
- * Re-runs when theme changes so the status bar follows the app theme.
+ * Re-runs when theme or system color scheme changes so the status bar follows
+ * the app theme.
  */
 export function useMetaThemeColor(color?: string) {
   const [activeTheme] = useTheme();
   const [darkThemePreference] = usePreferredDarkTheme();
+  const systemColorScheme = useSystemColorScheme();
 
   useEffect(() => {
     if (!color) return;
@@ -23,7 +25,42 @@ export function useMetaThemeColor(color?: string) {
     ensureThemeColorMetaTag();
     setThemeColorMetaContent(resolved);
     document.body.style.backgroundColor = resolved;
-  }, [color, activeTheme, darkThemePreference]);
+  }, [color, activeTheme, darkThemePreference, systemColorScheme]);
+}
+
+function useSystemColorScheme() {
+  const [systemColorScheme, setSystemColorScheme] = useState(() =>
+    getSystemColorScheme(),
+  );
+
+  useEffect(() => {
+    if (!window.matchMedia) return;
+
+    const darkThemeMediaQuery = window.matchMedia(
+      '(prefers-color-scheme: dark)',
+    );
+    const handleColorSchemeChange = () => {
+      setSystemColorScheme(darkThemeMediaQuery.matches ? 'dark' : 'light');
+    };
+
+    darkThemeMediaQuery.addEventListener('change', handleColorSchemeChange);
+    handleColorSchemeChange();
+
+    return () => {
+      darkThemeMediaQuery.removeEventListener(
+        'change',
+        handleColorSchemeChange,
+      );
+    };
+  }, []);
+
+  return systemColorScheme;
+}
+
+function getSystemColorScheme() {
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
 }
 
 function ensureThemeColorMetaTag() {

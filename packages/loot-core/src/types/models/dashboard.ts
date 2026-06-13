@@ -1,3 +1,4 @@
+import type { ForecastSource } from './forecast';
 import type { CustomReportEntity } from './reports';
 import type { RuleConditionEntity } from './rule';
 
@@ -256,5 +257,6 @@ export type BalanceForecastWidget = AbstractWidget<
     conditionsOp?: 'and' | 'or';
     timeFrame?: TimeFrame;
     granularity?: 'Daily' | 'Monthly';
+    source?: ForecastSource;
   } | null
 >;
