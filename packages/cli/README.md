@@ -54,7 +54,7 @@ Configuration is resolved in this order (highest priority first):
 
 ### Config File
 
-Create an `.actualrc.json` (or `.actualrc`, `.actualrc.yaml`, `actual.config.js`):
+Create an `.actualrc.json` (or `.actualrc`, `.actualrc.yaml`, `actual.config.json`, `actual.config.yaml`). The config file can be anywhere between the current working directory and your home directory. You can also store your configuration in the `actual` subdirectory of the global configuration directory (e.g. `~/.config/actual/` on Linux) in a file named `config.json` (or `config`, `config.yaml`, `config.yml`).
 
 ```json
 {
