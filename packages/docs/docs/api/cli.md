@@ -432,7 +432,9 @@ actual transactions add --account <id> --data '[{"date":"2026-03-14","amount":-2
 
 ## Self-Signed SSL Certificates
 
-If your Actual sync server uses a self-signed SSL certificate, the CLI will reject the connection by default. To allow connections with self-signed certificates, set the `NODE_TLS_REJECT_UNAUTHORIZED` environment variable:
+If your Actual sync server uses a self-signed SSL certificate, the CLI will reject the connection by default. You can address this by adding your CA certificate to the system's trusted certificates, though the details are beyond the scope of this document.
+
+Alternatively, you can allow connections to a server that uses a self-signed certificate by setting the `NODE_TLS_REJECT_UNAUTHORIZED` environment variable:
 
 ```bash
 NODE_TLS_REJECT_UNAUTHORIZED=0 actual budgets list
