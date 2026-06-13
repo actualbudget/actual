@@ -45,9 +45,9 @@ jobs:
       - if: ${{ startsWith(matrix.os, 'windows') }}
         name: Configure Visual Studio for node-gyp
         # windows-latest uses windows-2025 where node-gyp cannot auto-detect
-        # the VS 2022 installation. Setting msvs_version explicitly is required
+        # the VS 2022 installation. Setting GYP_MSVS_VERSION explicitly is required
         # for @electron/rebuild to compile native modules (bcrypt, better-sqlite3).
-        run: npm config set msvs_version 2022
+        run: echo "GYP_MSVS_VERSION=2022" >> "$GITHUB_ENV"
       - if: ${{ ! startsWith(matrix.os, 'windows') }}
         run: |
           mkdir .venv
