@@ -47,30 +47,62 @@ The fix is to make the build _not need_ `network.server` at all. We detect MAS
 builds at runtime via Electron's built-in `process.mas === true` flag
 (`isAppStoreBuild` in `index.ts`) and disable the two server features there:
 
-| Feature                             | Non-MAS build | MAS build                   |
-| ----------------------------------- | ------------- | --------------------------- |
-| loot-core backend (IPC)             | ✅            | ✅ (unchanged)              |
-| Connect to a **remote** sync server | ✅            | ✅ (`network.client`)       |
-| **Self-hosted** sync server         | ✅            | ❌ disabled + UI hidden     |
-| OpenID login (loopback callback)    | ✅            | ❌ disabled + clear message |
-| Password login to remote server     | ✅            | ✅                          |
+| Feature                             | Non-MAS build | MAS build                    |
+| ----------------------------------- | ------------- | ---------------------------- |
+| loot-core backend (IPC)             | ✅            | ✅ (unchanged)               |
+| Connect to a **remote** sync server | ✅            | ✅ (`network.client`)        |
+| **Self-hosted** sync server         | ✅            | ❌ disabled + UI hidden      |
+| OpenID login                        | ✅ (loopback) | ✅ via deep link (see below) |
+| Password login to remote server     | ✅            | ✅                           |
 
 Code touchpoints:
 
-- `index.ts` — `isAppStoreBuild`; `startSyncServer()` and the `start-oauth-server`
-  IPC short-circuit; sync-server autostart skipped; flag added to the bootstrap
-  payload.
+- `index.ts` — `isAppStoreBuild`; `startSyncServer()` short-circuit; sync-server
+  autostart skipped; the `start-oauth-server` IPC returns a deep-link URL in MAS
+  builds; the `open-url` handler routes the callback into the window; flag added
+  to the bootstrap payload.
 - `preload.ts` / `loot-core/typings/window.ts` / `browser-preload.js` —
   `IS_APP_STORE_BUILD` exposed to the renderer.
 - `ConfigServer.tsx` — defaults to the external-server view and hides the
   self-host option.
-- `Login.tsx` — OpenID login shows a clear "not available in the Mac App Store
-  version yet" message instead of failing obscurely.
 - `entitlements.mas.plist` / `entitlements.mas.inherit.plist` — sandbox
   entitlements **without** `network.server`.
-- `package.json` — `mas` / `masDev` build config and `build:mas` /
-  `build:mas-dev` scripts. The default `mac.target` stays DMG-only so existing
-  release CI is untouched.
+- `package.json` — `mas` / `masDev` build config, the `actualbudget://` URL
+  scheme (`protocols`), and `build:mas` / `build:mas-dev` scripts. The default
+  `mac.target` stays DMG-only so existing release CI is untouched.
+- `sync-server` `accounts/openid.ts` — `isValidRedirectUrl` allows the
+  `actualbudget:` redirect scheme.
+
+## OpenID (OIDC) login under the sandbox
+
+A loopback callback server (`http://localhost:3010`) can't be opened in the
+sandbox, so MAS builds use a **custom URL scheme** instead — the RFC 8252
+("OAuth for Native Apps") pattern:
+
+1. The renderer asks for a return URL; in MAS builds `start-oauth-server`
+   returns `actualbudget://actual` (no server is started) and registers the
+   scheme via `app.setAsDefaultProtocolClient`.
+2. After the user authenticates, the sync server redirects the **external
+   browser** to `actualbudget://actual/openid-cb?token=...`.
+3. macOS routes that URL to the running app via Electron's `open-url` event; the
+   `open-url` handler extracts the token and loads
+   `app://actual/openid-cb?token=...` in the window (queuing it if the app was
+   cold-launched by the link).
+
+The `actualbudget://` scheme is declared in the app's `Info.plist`
+(`CFBundleURLTypes`) through electron-builder's `protocols` config.
+
+**Important dependency:** the sync server validates the redirect target
+(`isValidRedirectUrl`). MAS OIDC therefore only works against a server new
+enough to allow the `actualbudget:` scheme — older servers will reject the login
+with "Invalid redirect URL". OIDC against remote servers you don't control is
+gated on them upgrading.
+
+**Known friction:** the final hop is a 302 from the server to a custom scheme.
+Most browsers honour it after the user's login interaction, but some prompt
+("Open in Actual?") or block automatic custom-scheme redirects. A future
+refinement is to have the server return a small interstitial page with an
+explicit "Return to Actual" link instead of a bare redirect.
 
 ## How to reproduce the reviewer's crash locally
 
@@ -111,9 +143,9 @@ and upload plumbing:
 
 ## Possible follow-ups
 
-- **Restore OpenID login** under the sandbox by replacing the loopback callback
-  server with a custom-protocol deep link (`app.setAsDefaultProtocolClient` +
-  the macOS `open-url` event). This needs no `network.server` entitlement.
+- **Smoother OIDC redirect.** Replace the server's bare 302-to-custom-scheme
+  with a small interstitial "Return to Actual" page so no browser prompts/blocks
+  the final hop (see "OpenID login under the sandbox" above).
 - **Exclude `@actual-app/sync-server` from the MAS package** entirely (it is
   bundled but never started) to reduce size and App Review surface.
 - **Data migration** consideration if a user runs both the DMG and MAS builds:

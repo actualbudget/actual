@@ -141,6 +141,53 @@ const createOAuthServer = async () => {
   });
 };
 
+// Custom URL scheme used as the OpenID callback in the sandboxed Mac App Store
+// build, where a loopback callback server isn't allowed. The server redirects
+// the browser to `actualbudget://actual/openid-cb?token=...`, macOS hands that
+// to the app via the `open-url` event, and we forward the token into the window.
+const OAUTH_DEEP_LINK_SCHEME = 'actualbudget';
+const OAUTH_DEEP_LINK_RETURN_URL = `${OAUTH_DEEP_LINK_SCHEME}://actual`;
+
+// Holds a callback URL that arrives before the client window exists, so it can
+// be replayed once the window is ready.
+let pendingOAuthCallbackUrl: string | null = null;
+
+const handleOAuthDeepLink = (rawUrl: string) => {
+  let token: string | null = null;
+  try {
+    token = new URL(rawUrl).searchParams.get('token');
+  } catch {
+    logMessage('error', `Ignoring malformed OAuth deep link: ${rawUrl}`);
+    return;
+  }
+
+  if (!token) {
+    return;
+  }
+
+  const target = isDev
+    ? `http://localhost:3001/openid-cb?token=${token}`
+    : `app://actual/openid-cb?token=${token}`;
+
+  if (clientWin) {
+    void clientWin.loadURL(target);
+    if (clientWin.isMinimized()) {
+      clientWin.restore();
+    }
+    clientWin.focus();
+  } else {
+    // The window isn't ready yet (e.g. the app was launched by the deep link).
+    // Replay it once createWindow() finishes.
+    pendingOAuthCallbackUrl = target;
+  }
+};
+
+// On macOS, custom-scheme launches are always delivered through `open-url`.
+app.on('open-url', (_event, url) => {
+  _event.preventDefault();
+  handleOAuthDeepLink(url);
+});
+
 if (isDev) {
   process.traceProcessWarnings = true;
 }
@@ -449,6 +496,15 @@ async function createWindow() {
 
   clientWin = win;
 
+  // Replay an OAuth callback that arrived before the window existed.
+  if (pendingOAuthCallbackUrl) {
+    const target = pendingOAuthCallbackUrl;
+    pendingOAuthCallbackUrl = null;
+    win.webContents.once('did-finish-load', () => {
+      void win.loadURL(target);
+    });
+  }
+
   // Execute queued logs - displaying them in the client window
   void Promise.all(
     queuedClientWinLogs.map((log: string) =>
@@ -581,12 +637,13 @@ ipcMain.handle('is-sync-server-running', async () =>
 
 ipcMain.handle('start-oauth-server', async () => {
   if (isAppStoreBuild) {
-    // A loopback HTTP server can't be opened inside the App Sandbox without the
-    // network.server entitlement. The renderer guards against reaching here
-    // (see Login.tsx), but fail loudly in case it ever does.
-    throw new Error(
-      'OpenID login via the loopback callback is not available in the Mac App Store build.',
-    );
+    // A loopback HTTP server can't be opened inside the App Sandbox. Use the
+    // custom-scheme deep link instead - the server redirects the browser to
+    // `actualbudget://actual/openid-cb?token=...`, which macOS routes back to
+    // the app via the `open-url` handler above. Requires a sync server new
+    // enough to allow the `actualbudget:` redirect scheme.
+    app.setAsDefaultProtocolClient(OAUTH_DEEP_LINK_SCHEME);
+    return OAUTH_DEEP_LINK_RETURN_URL;
   }
 
   const { url, server: newServer } = await createOAuthServer();

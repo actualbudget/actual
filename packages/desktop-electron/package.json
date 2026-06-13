@@ -37,6 +37,14 @@
   },
   "build": {
     "appId": "com.actualbudget.actual",
+    "protocols": [
+      {
+        "name": "Actual OpenID Callback",
+        "schemes": [
+          "actualbudget"
+        ]
+      }
+    ],
     "files": [
       "build",
       "!node_modules/@actual-app/web",

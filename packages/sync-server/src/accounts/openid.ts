@@ -369,7 +369,11 @@ export function isValidRedirectUrl(url: string | undefined): url is string {
 
     if (
       redirectUrl.hostname === serverUrl.hostname ||
-      redirectUrl.hostname === 'localhost'
+      redirectUrl.hostname === 'localhost' ||
+      // Native desktop deep link used by the sandboxed Mac App Store build,
+      // which can't open a loopback callback server. The token is delivered to
+      // whichever app registered the `actualbudget://` scheme locally.
+      redirectUrl.protocol === 'actualbudget:'
     ) {
       return true;
     } else {
