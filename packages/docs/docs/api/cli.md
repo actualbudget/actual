@@ -75,7 +75,7 @@ Example `.actualrc.json`:
 {
   "serverUrl": "http://localhost:5006",
   "password": "your-password",
-  "syncId": "1cfdbb80-6274-49bf-b0c2-737235a4c81f"
+  "syncId": "1cfdbb80-6274-49bf-b0c2-737235a4c81f",
   "cacheTtl": 60,
   "lockTimeout": 10,
   "noLock": false
@@ -83,7 +83,7 @@ Example `.actualrc.json`:
 ```
 
 :::caution Security
-Avoid storing plaintext passwords in config files (including the `password` key above). Add these files to `.gitignore` if they contain passwords. Prefer environment variables such as `ACTUAL_PASSWORD` or `ACTUAL_SESSION_TOKEN`, or use a session token in config instead of a password. See [Environment Variables](#environment-variables) for details.
+Avoid storing plaintext passwords in config files (including the `password` key above). If these files do contain passwords, set restrictive permissons (e.g. 600 on Linux), and, if they are in a git repo, add them to `.gitignore`. Prefer environment variables such as `ACTUAL_PASSWORD` or `ACTUAL_SESSION_TOKEN`, or use a session token in config instead of a password. See [Environment Variables](#environment-variables) for details.
 :::
 
 ## Usage
