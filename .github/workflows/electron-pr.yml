@@ -42,6 +42,12 @@ jobs:
           persist-credentials: false
       - if: ${{ startsWith(matrix.os, 'windows') }}
         run: pip.exe install setuptools
+      - if: ${{ startsWith(matrix.os, 'windows') }}
+        name: Configure Visual Studio for node-gyp
+        # windows-latest uses windows-2025 where node-gyp cannot auto-detect
+        # the VS 2022 installation. Setting msvs_version explicitly is required
+        # for @electron/rebuild to compile native modules (bcrypt, better-sqlite3).
+        run: npm config set msvs_version 2022
       - if: ${{ ! startsWith(matrix.os, 'windows') }}
         run: |
           mkdir .venv
