@@ -19,8 +19,8 @@ import { HyperFormula } from 'hyperformula';
 
 import { getLiveRange } from '#components/reports/getLiveRange';
 import { calculateTimeRange } from '#components/reports/reportRanges';
+import { bootstrapHyperFormula } from '#util/bootstrapHyperFormula';
 
-import { bootstrapHyperFormula } from './bootstrapHyperFormula';
 import { useGlobalPref } from './useGlobalPref';
 import { useLocale } from './useLocale';
 

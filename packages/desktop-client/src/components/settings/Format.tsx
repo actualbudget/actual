@@ -7,7 +7,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
-import { send } from '@actual-app/core/platform/client/connection';
 import { numberFormats } from '@actual-app/core/shared/util';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import { css } from '@emotion/css';
@@ -77,9 +76,7 @@ export function FormatSettings() {
               onChange={format => {
                 void dispatch(
                   saveSyncedPrefs({ prefs: { numberFormat: format } }),
-                )
-                  .unwrap()
-                  .then(() => send('formula-reset-preferences-cache'));
+                );
               }}
               options={numberFormats.map(f => [
                 f.value,

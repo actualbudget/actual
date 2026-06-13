@@ -78,10 +78,14 @@ export function FormulaCard({
       disableClick={nameMenuOpen}
       to={`/reports/formula/${widgetId}`}
       menuItems={[
-        {
-          name: 'rename',
-          text: t('Rename'),
-        },
+        ...(showTitle
+          ? [
+              {
+                name: 'rename',
+                text: t('Rename'),
+              },
+            ]
+          : []),
         {
           name: 'remove',
           text: t('Remove'),

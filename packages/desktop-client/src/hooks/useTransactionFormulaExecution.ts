@@ -4,7 +4,8 @@ import { send } from '@actual-app/core/platform/client/connection';
 import { setCachedUserPreferences } from '@actual-app/core/shared/formulas/customFunctions';
 import { HyperFormula } from 'hyperformula';
 
-import { bootstrapHyperFormula } from './bootstrapHyperFormula';
+import { bootstrapHyperFormula } from '#util/bootstrapHyperFormula';
+
 import { useGlobalPref } from './useGlobalPref';
 import { useLocale } from './useLocale';
 

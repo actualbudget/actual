@@ -343,6 +343,49 @@ describe('Formula-based rule actions', () => {
     expect(transaction.notes).toBe('€1,234,567.89');
   });
 
+  it('should use cached currency position and spacing preferences with custom symbols', () => {
+    setCachedUserPreferences({
+      currency: getCurrency('BRL'),
+      numberFormat: 'dot-comma',
+      thousandsSeparator: '.',
+      decimalSeparator: ',',
+      locale: 'pt-BR',
+      currencySymbolPosition: 'after',
+      currencySpaceBetweenAmountAndSymbol: true,
+    });
+
+    const action = new Action('set', 'notes', null, {
+      formula: '=FORMATCURRENCY(1234567.89, "€")',
+    });
+
+    const transaction = { notes: 'original' };
+    action.exec(transaction);
+
+    expect(transaction.notes).toBe('1.234.567,89\u202F€');
+  });
+
+  it('should override cached currency position and spacing preferences with custom arguments', () => {
+    setCachedUserPreferences({
+      currency: getCurrency('BRL'),
+      numberFormat: 'dot-comma',
+      thousandsSeparator: '.',
+      decimalSeparator: ',',
+      locale: 'pt-BR',
+      currencySymbolPosition: 'after',
+      currencySpaceBetweenAmountAndSymbol: true,
+    });
+
+    const action = new Action('set', 'notes', null, {
+      formula:
+        '=FORMATCURRENCY(1234567.89, "€", 2, ".", ",", "before", FALSE())',
+    });
+
+    const transaction = { notes: 'original' };
+    action.exec(transaction);
+
+    expect(transaction.notes).toBe('€1.234.567,89');
+  });
+
   it('should format negative currency correctly using FORMATCURRENCY', () => {
     const action = new Action('set', 'notes', null, {
       formula: '=FORMATCURRENCY(-1234567.89)',

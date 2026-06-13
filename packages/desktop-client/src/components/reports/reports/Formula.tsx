@@ -271,7 +271,7 @@ function FormulaInner({ widget }: FormulaInnerProps) {
               isOn={showTitle}
               onToggle={setShowTitle}
             />
-          </View>{' '}
+          </View>
           <View
             style={{
               padding: 20,

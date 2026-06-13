@@ -5,7 +5,6 @@ import { Menu } from '@actual-app/components/menu';
 import { Select } from '@actual-app/components/select';
 import type { SelectOption } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
-import { send } from '@actual-app/core/platform/client/connection';
 import type { TFunction } from 'i18next';
 
 import { Link } from '#components/common/Link';
@@ -35,9 +34,7 @@ const languageOptions = (t: TFunction): SelectOption[] =>
 
 export function LanguageSettings() {
   const { t } = useTranslation();
-  const [language, setLanguage] = useGlobalPref('language', () => {
-    void send('formula-reset-preferences-cache');
-  });
+  const [language, setLanguage] = useGlobalPref('language');
   const isEnabled = !!availableLanguages.length;
 
   return (

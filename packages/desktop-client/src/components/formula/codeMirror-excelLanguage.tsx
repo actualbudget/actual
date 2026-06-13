@@ -689,6 +689,7 @@ const tooltipPortalConfig =
 const autocompletePopoverTheme = EditorView.baseTheme({
   // Wrapper: keep transparent; the list and info panel are the actual "cards".
   '.cm-tooltip.cm-tooltip-autocomplete': {
+    ...styles.darkScrollbar,
     backgroundColor: 'transparent',
     border: 'none',
     boxShadow: 'none',
@@ -712,22 +713,7 @@ const autocompletePopoverTheme = EditorView.baseTheme({
     borderRadius: '6px',
     overflow: 'hidden',
     overflowY: 'auto',
-    scrollbarWidth: 'thin',
-    scrollbarColor: 'rgba(200, 200, 200, .5) transparent',
   },
-
-  '.cm-tooltip.cm-tooltip-autocomplete > ul::-webkit-scrollbar': {
-    width: '11px',
-    backgroundColor: 'rgba(0, 0, 0, 0)',
-  },
-  '.cm-tooltip.cm-tooltip-autocomplete > ul::-webkit-scrollbar-thumb:vertical':
-    {
-      width: '7px',
-      borderRadius: '30px',
-      backgroundClip: 'padding-box',
-      backgroundColor: 'rgba(200, 200, 200, .5)',
-      border: '2px solid rgba(0, 0, 0, 0)',
-    },
 
   // Hide CodeMirror's leading icons (gear / f / etc.)
   '.cm-tooltip.cm-tooltip-autocomplete .cm-completionIcon': {

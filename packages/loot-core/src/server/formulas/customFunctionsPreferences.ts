@@ -16,6 +16,20 @@ type CurrencySymbolPosition = 'before' | 'after';
 
 const DEFAULT_CURRENCY = getCurrency('USD');
 const LOCALE_NUMBER_FORMAT_SAMPLE = 1_000_000.23;
+type FormulaPreferenceId =
+  | 'flags.currency'
+  | 'defaultCurrencyCode'
+  | 'numberFormat'
+  | 'currencySymbolPosition'
+  | 'currencySpaceBetweenAmountAndSymbol';
+
+const FORMULA_PREFERENCE_IDS: FormulaPreferenceId[] = [
+  'flags.currency',
+  'defaultCurrencyCode',
+  'numberFormat',
+  'currencySymbolPosition',
+  'currencySpaceBetweenAmountAndSymbol',
+];
 
 function normalizeLocale(locale?: string | null): string | null {
   const normalized = locale?.trim();
@@ -92,29 +106,25 @@ export async function loadUserPreferencesForFormulas({
   browserLocale,
 }: FormulaPreferencesOptions = {}): Promise<UserPreferences> {
   try {
-    const isCurrencyFeatureEnabledPref = await aqlQuery(
-      q('preferences').filter({ id: 'flags.currency' }).select('*'),
+    const preferencesQuery = await aqlQuery(
+      q('preferences')
+        .filter({ id: { $oneof: FORMULA_PREFERENCE_IDS } })
+        .select('*'),
     );
-    const isCurrencyFeatureEnabled =
-      isCurrencyFeatureEnabledPref.data.length > 0 &&
-      isCurrencyFeatureEnabledPref.data[0].value === 'true';
 
-    const currencyPref = await aqlQuery(
-      q('preferences').filter({ id: 'defaultCurrencyCode' }).select('*'),
-    );
-    const currencyCode =
-      currencyPref.data.length > 0 ? currencyPref.data[0].value : null;
+    const preferences: Partial<Record<FormulaPreferenceId, string | null>> = {};
+    for (const preference of preferencesQuery.data) {
+      preferences[preference.id as FormulaPreferenceId] = preference.value;
+    }
+
+    const isCurrencyFeatureEnabled = preferences['flags.currency'] === 'true';
+    const currencyCode = preferences.defaultCurrencyCode ?? null;
     const currencyFromPreference = isCurrencyFeatureEnabled
       ? getCurrencyFromPreference(currencyCode)
       : null;
 
-    const numberFormatPref = await aqlQuery(
-      q('preferences').filter({ id: 'numberFormat' }).select('*'),
-    );
     const numberFormatValue =
-      numberFormatPref.data.length > 0
-        ? (numberFormatPref.data[0].value as NumberFormats)
-        : null;
+      (preferences.numberFormat as NumberFormats | undefined) ?? null;
 
     const locale =
       normalizeLocale(selectedLocale) ??
@@ -123,22 +133,9 @@ export async function loadUserPreferencesForFormulas({
       'en-US';
 
     const currency = currencyFromPreference ?? DEFAULT_CURRENCY;
-
-    const symbolPositionPref = await aqlQuery(
-      q('preferences').filter({ id: 'currencySymbolPosition' }).select('*'),
-    );
-    const symbolPositionValue =
-      symbolPositionPref.data.length > 0
-        ? symbolPositionPref.data[0].value
-        : null;
-
-    const spaceEnabledPref = await aqlQuery(
-      q('preferences')
-        .filter({ id: 'currencySpaceBetweenAmountAndSymbol' })
-        .select('*'),
-    );
+    const symbolPositionValue = preferences.currencySymbolPosition ?? null;
     const spaceEnabledValue =
-      spaceEnabledPref.data.length > 0 ? spaceEnabledPref.data[0].value : null;
+      preferences.currencySpaceBetweenAmountAndSymbol ?? null;
     const shouldUseCurrencyPreferences = currencyFromPreference !== null;
 
     const numberFormat = numberFormatValue

@@ -157,6 +157,13 @@ function formatCurrencyValue({
   return isNegative ? `-${formattedCurrency}` : formattedCurrency;
 }
 
+function getCurrencySymbolPositionFromArg(
+  value: string | undefined,
+  fallback: CurrencySymbolPosition,
+): CurrencySymbolPosition {
+  return value === 'before' || value === 'after' ? value : fallback;
+}
+
 export class CustomFunctionsPlugin extends FunctionPlugin {
   private getCustomFunctionsContext(): CustomFunctionsContext | undefined {
     return this.config.context as CustomFunctionsContext | undefined;
@@ -366,6 +373,8 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
     const hasDecimalsArg = ast.args.length > 2;
     const hasThousandsSeparatorArg = ast.args.length > 3;
     const hasDecimalSeparatorArg = ast.args.length > 4;
+    const hasCurrencySymbolPositionArg = ast.args.length > 5;
+    const hasCurrencySpaceBetweenAmountAndSymbolArg = ast.args.length > 6;
 
     return this.runFunction(
       ast.args,
@@ -377,6 +386,8 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
         decimals?: number,
         thousandsSeparator?: string,
         decimalSeparator?: string,
+        currencySymbolPosition?: string,
+        currencySpaceBetweenAmountAndSymbol?: boolean,
       ) => {
         const num = Number(value);
         if (isNaN(num)) {
@@ -399,12 +410,17 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
           hasDecimalSeparatorArg && decimalSeparator !== undefined
             ? decimalSeparator
             : prefs.decimalSeparator;
-        const actualCurrencySymbolPosition = hasCurrencySymbolArg
-          ? 'before'
+        const actualCurrencySymbolPosition = hasCurrencySymbolPositionArg
+          ? getCurrencySymbolPositionFromArg(
+              currencySymbolPosition,
+              prefs.currencySymbolPosition,
+            )
           : prefs.currencySymbolPosition;
-        const actualCurrencySpaceBetweenAmountAndSymbol = hasCurrencySymbolArg
-          ? false
-          : prefs.currencySpaceBetweenAmountAndSymbol;
+        const actualCurrencySpaceBetweenAmountAndSymbol =
+          hasCurrencySpaceBetweenAmountAndSymbolArg &&
+          currencySpaceBetweenAmountAndSymbol !== undefined
+            ? currencySpaceBetweenAmountAndSymbol
+            : prefs.currencySpaceBetweenAmountAndSymbol;
 
         return formatCurrencyValue({
           value: num,
@@ -522,6 +538,16 @@ CustomFunctionsPlugin.implementedFunctions = {
         argumentType: FunctionArgumentType.STRING,
         optionalArg: true,
         defaultValue: '.',
+      },
+      {
+        argumentType: FunctionArgumentType.STRING,
+        optionalArg: true,
+        defaultValue: 'before',
+      },
+      {
+        argumentType: FunctionArgumentType.BOOLEAN,
+        optionalArg: true,
+        defaultValue: false,
       },
     ],
   },

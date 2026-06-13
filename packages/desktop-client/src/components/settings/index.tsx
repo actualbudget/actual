@@ -9,7 +9,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
-import { listen, send } from '@actual-app/core/platform/client/connection';
+import { listen } from '@actual-app/core/platform/client/connection';
 import { isElectron } from '@actual-app/core/shared/environment';
 import { css } from '@emotion/css';
 
@@ -187,9 +187,7 @@ export function Settings() {
 
   useEffect(() => {
     if (!isCurrencyExperimentalEnabled) {
-      void dispatch(saveSyncedPrefs({ prefs: { defaultCurrencyCode: '' } }))
-        .unwrap()
-        .then(() => send('formula-reset-preferences-cache'));
+      void dispatch(saveSyncedPrefs({ prefs: { defaultCurrencyCode: '' } }));
     }
   }, [dispatch, isCurrencyExperimentalEnabled]);
 
