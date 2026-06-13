@@ -71,6 +71,7 @@ You can instead store your configuration in the `actual` subdirectory of the glo
 - `config.yml`
 
 Example `.actualrc.json`:
+
 ```json
 {
   "serverUrl": "http://localhost:5006",
