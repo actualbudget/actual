@@ -20,6 +20,7 @@ type FormulaPreferenceId =
   | 'flags.currency'
   | 'defaultCurrencyCode'
   | 'numberFormat'
+  | 'hideFraction'
   | 'currencySymbolPosition'
   | 'currencySpaceBetweenAmountAndSymbol';
 
@@ -27,6 +28,7 @@ const FORMULA_PREFERENCE_IDS: FormulaPreferenceId[] = [
   'flags.currency',
   'defaultCurrencyCode',
   'numberFormat',
+  'hideFraction',
   'currencySymbolPosition',
   'currencySpaceBetweenAmountAndSymbol',
 ];
@@ -125,6 +127,7 @@ export async function loadUserPreferencesForFormulas({
 
     const numberFormatValue =
       (preferences.numberFormat as NumberFormats | undefined) ?? null;
+    const hideFraction = preferences.hideFraction === 'true';
 
     const locale =
       normalizeLocale(selectedLocale) ??
@@ -154,6 +157,7 @@ export async function loadUserPreferencesForFormulas({
     return {
       currency,
       numberFormat,
+      decimalPlaces: hideFraction ? 0 : currency.decimalPlaces,
       thousandsSeparator:
         numberFormatSettings.thousandsSeparator ||
         localeDefaults.thousandsSeparator,
@@ -183,6 +187,7 @@ export async function loadUserPreferencesForFormulas({
     return {
       currency,
       numberFormat,
+      decimalPlaces: 2,
       thousandsSeparator:
         numberFormatSettings.thousandsSeparator ||
         localeDefaults.thousandsSeparator,

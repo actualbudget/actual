@@ -30,6 +30,7 @@ export const app = createApp<PreferencesHandlers>();
 
 const FORMULA_FORMAT_SYNCED_PREFS = new Set<keyof SyncedPrefs>([
   'numberFormat',
+  'hideFraction',
   'defaultCurrencyCode',
   'currencySymbolPosition',
   'currencySpaceBetweenAmountAndSymbol',

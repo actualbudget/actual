@@ -11,6 +11,7 @@ describe('Formula-based rule actions', () => {
     setCachedUserPreferences({
       currency: getCurrency('USD'),
       numberFormat: 'comma-dot',
+      decimalPlaces: 2,
       thousandsSeparator: ',',
       decimalSeparator: '.',
       locale: 'en-US',
@@ -240,6 +241,7 @@ describe('Formula-based rule actions', () => {
     setCachedUserPreferences({
       currency: getCurrency('USD'),
       numberFormat: 'dot-comma',
+      decimalPlaces: 2,
       thousandsSeparator: '.',
       decimalSeparator: ',',
       locale: 'en-US',
@@ -255,6 +257,50 @@ describe('Formula-based rule actions', () => {
     action.exec(transaction);
 
     expect(transaction.notes).toBe('1.234.567,89');
+  });
+
+  it('should format numbers using decimal-place preferences with FORMATNUMBER', () => {
+    setCachedUserPreferences({
+      currency: getCurrency('JPY'),
+      numberFormat: 'comma-dot',
+      decimalPlaces: 0,
+      thousandsSeparator: ',',
+      decimalSeparator: '.',
+      locale: 'en-US',
+      currencySymbolPosition: 'before',
+      currencySpaceBetweenAmountAndSymbol: false,
+    });
+
+    const action = new Action('set', 'notes', null, {
+      formula: '=FORMATNUMBER(1234567.89)',
+    });
+
+    const transaction = { notes: 'original' };
+    action.exec(transaction);
+
+    expect(transaction.notes).toBe('1,234,568');
+  });
+
+  it('should let FORMATNUMBER decimals override decimal-place preferences', () => {
+    setCachedUserPreferences({
+      currency: getCurrency('JPY'),
+      numberFormat: 'comma-dot',
+      decimalPlaces: 0,
+      thousandsSeparator: ',',
+      decimalSeparator: '.',
+      locale: 'en-US',
+      currencySymbolPosition: 'before',
+      currencySpaceBetweenAmountAndSymbol: false,
+    });
+
+    const action = new Action('set', 'notes', null, {
+      formula: '=FORMATNUMBER(1234567.89, 2)',
+    });
+
+    const transaction = { notes: 'original' };
+    action.exec(transaction);
+
+    expect(transaction.notes).toBe('1,234,567.89');
   });
 
   it('should format numbers with custom separators using FORMATNUMBER', () => {
@@ -294,6 +340,7 @@ describe('Formula-based rule actions', () => {
     setCachedUserPreferences({
       currency: getCurrency('BRL'),
       numberFormat: 'dot-comma',
+      decimalPlaces: 2,
       thousandsSeparator: '.',
       decimalSeparator: ',',
       locale: 'pt-BR',
@@ -315,6 +362,7 @@ describe('Formula-based rule actions', () => {
     setCachedUserPreferences({
       currency: getCurrency('BRL'),
       numberFormat: 'dot-comma',
+      decimalPlaces: 2,
       thousandsSeparator: '.',
       decimalSeparator: ',',
       locale: 'pt-BR',
@@ -347,6 +395,7 @@ describe('Formula-based rule actions', () => {
     setCachedUserPreferences({
       currency: getCurrency('BRL'),
       numberFormat: 'dot-comma',
+      decimalPlaces: 2,
       thousandsSeparator: '.',
       decimalSeparator: ',',
       locale: 'pt-BR',
@@ -368,6 +417,7 @@ describe('Formula-based rule actions', () => {
     setCachedUserPreferences({
       currency: getCurrency('BRL'),
       numberFormat: 'dot-comma',
+      decimalPlaces: 2,
       thousandsSeparator: '.',
       decimalSeparator: ',',
       locale: 'pt-BR',

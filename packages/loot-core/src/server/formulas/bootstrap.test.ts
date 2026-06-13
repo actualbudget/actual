@@ -51,8 +51,20 @@ describe('formula preference bootstrap', () => {
     });
 
     expect(preferences.numberFormat).toBe('dot-comma');
+    expect(preferences.decimalPlaces).toBe(2);
     expect(preferences.thousandsSeparator).toBe('.');
     expect(preferences.decimalSeparator).toBe(',');
+  });
+
+  it('loads hidden fraction preference for formula number formatting', async () => {
+    await db.update('preferences', {
+      id: 'hideFraction',
+      value: 'true',
+    });
+
+    const preferences = await loadUserPreferencesForFormulas();
+
+    expect(preferences.decimalPlaces).toBe(0);
   });
 
   it('loads formula preferences with one preferences query', async () => {
@@ -65,7 +77,7 @@ describe('formula preference bootstrap', () => {
 
   it('reloads cached user preferences after relevant synced preferences change', async () => {
     await ensureFormulaPreferencesLoaded();
-    expect(executeFormula('=FORMATNUMBER(1234.5, 2)')).toBe('1,234.50');
+    expect(executeFormula('=FORMATNUMBER(1234.5)')).toBe('1,234.50');
 
     await runHandler(handlers['preferences/save'], {
       id: 'numberFormat',
@@ -73,7 +85,20 @@ describe('formula preference bootstrap', () => {
     });
     await ensureFormulaPreferencesLoaded();
 
-    expect(executeFormula('=FORMATNUMBER(1234.5, 2)')).toBe('1.234,50');
+    expect(executeFormula('=FORMATNUMBER(1234.5)')).toBe('1.234,50');
+  });
+
+  it('reloads cached user preferences after hide fraction changes', async () => {
+    await ensureFormulaPreferencesLoaded();
+    expect(executeFormula('=FORMATNUMBER(1234.5)')).toBe('1,234.50');
+
+    await runHandler(handlers['preferences/save'], {
+      id: 'hideFraction',
+      value: 'true',
+    });
+    await ensureFormulaPreferencesLoaded();
+
+    expect(executeFormula('=FORMATNUMBER(1234.5)')).toBe('1,235');
   });
 
   it('keeps cached user preferences after unrelated synced preferences change', async () => {

@@ -48,6 +48,7 @@ type CustomFunctionsContext = {
 export type UserPreferences = {
   currency: Currency;
   numberFormat: NumberFormats;
+  decimalPlaces: number;
   thousandsSeparator: string;
   decimalSeparator: string;
   locale: string;
@@ -71,6 +72,7 @@ function getUserPreferences(): UserPreferences {
     return {
       currency: getCurrency('USD'),
       numberFormat: 'comma-dot',
+      decimalPlaces: 2,
       thousandsSeparator: ',',
       decimalSeparator: '.',
       locale: 'en-US',
@@ -321,6 +323,7 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
   }
 
   formatNumber(ast: ProcedureAst, state: InterpreterState) {
+    const hasDecimalsArg = ast.args.length > 1;
     const hasThousandsSeparatorArg = ast.args.length > 2;
     const hasDecimalSeparatorArg = ast.args.length > 3;
 
@@ -349,7 +352,9 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
           hasDecimalSeparatorArg && decimalSeparator !== undefined
             ? decimalSeparator
             : prefs.decimalSeparator;
-        const actualDecimals = decimals ?? 2;
+        const actualDecimals = hasDecimalsArg
+          ? (decimals ?? 2)
+          : prefs.decimalPlaces;
 
         const fixedNum = num.toFixed(actualDecimals);
         const [integerPart, decimalPart] = fixedNum.split('.');
