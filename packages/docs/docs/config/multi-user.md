@@ -2,7 +2,7 @@
 
 :::caution
 
-This feature requires you to have set up an [OpenID Provider](/docs/config/oauth-auth). The usernames which people will log into your Actual instance will be fetched from the provider.
+This feature requires you to have set up an [OpenID Provider](./oauth-auth.md). The usernames which people will log into your Actual instance will be fetched from the provider.
 
 :::
 

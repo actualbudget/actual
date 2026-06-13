@@ -10,7 +10,7 @@ There is an option to "Display a notification when updates are available" here.
 
 ### Themes
 
-Themes change the user interface colors. Pick from the built-in **Light**, **Dark**, **Midnight**, or **Auto** themes, or install a community-built theme from the catalog. See [Custom Themes](/docs/custom-themes) for the full guide.
+Themes change the user interface colors. Pick from the built-in **Light**, **Dark**, **Midnight**, or **Auto** themes, or install a community-built theme from the catalog. See [Custom Themes](../custom-themes.md) for the full guide.
 
 ### Formatting
 
@@ -31,13 +31,13 @@ The language choice alters the display language of all text. If you encounter a 
 
 ### Authentication Method
 
-OpenID can be enabled here. [Learn more](/docs/config/oauth-auth)
+OpenID can be enabled here. [Learn more](../config/oauth-auth.md)
 
 ![Image of OpenID setting](/img/using-actual/actual-openid.webp)
 
 ### Encryption
 
-End-to-end encryption allows you to encrypt your budget data on the remote server with a password. If you don't trust the server's owners, enable this setting to encrypt your budget data. Note that [bank sync](/docs/advanced/bank-sync) credentials are stored separately on the server and are not covered by this encryption. [Learn more](/docs/getting-started/sync/#end-to-end-encryption)
+End-to-end encryption allows you to encrypt your budget data on the remote server with a password. If you don't trust the server's owners, enable this setting to encrypt your budget data. Note that [bank sync](../advanced/bank-sync.md) tokens are stored separately on the server and are not covered by this encryption. [Learn more](../getting-started/sync.md#end-to-end-encryption)
 
 ![Image of Encryption setting](/img/using-actual/settings-encryption.webp)
 
@@ -45,16 +45,16 @@ End-to-end encryption allows you to encrypt your budget data on the remote serve
 
 Either Envelope or Tracking Budgeting methods are available in Actual. Envelope Budgeting is recommended and most of the documentation refers to this method.
 
-[Learn more about Envelope Budgeting](/docs/getting-started/envelope-budgeting)
+[Learn more about Envelope Budgeting](../getting-started/envelope-budgeting.md)
 <br />
-[Learn more about Tracking Budgeting](/docs/getting-started/tracking-budget)
+[Learn more about Tracking Budgeting](../getting-started/tracking-budget.md)
 <br />
 <br />
 ![Image of budgeting methods setting](/img/using-actual/actual-budget-method.webp)
 
 ### Export
 
-This section allows you to download a `.zip` archive of all of your server data for easy backup or migration. [Learn more](/docs/backup-restore/backup)
+This section allows you to download a `.zip` archive of all of your server data for easy backup or migration. [Learn more](../backup-restore/backup.md)
 
 ![Image of Export setting](/img/using-actual/settings-export.webp)
 
@@ -92,6 +92,6 @@ If you are experiencing bugs relating to split transactions or transfers and the
 ### Experimental Features
 
 This section is where you can enable features that are still in development and testing.
-See [Experimental features](../experimental) for more information.
+See [Experimental features](../experimental/index.md) for more information.
 
 ![Image of Experimental setting](/img/using-actual/actual-experimental.webp)

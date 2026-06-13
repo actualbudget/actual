@@ -217,6 +217,7 @@ const sidebars = {
             'experimental/formulas',
             'experimental/balance-forecast-report',
             'experimental/budget-analysis-report',
+            'experimental/sankey-report',
           ],
         },
         'getting-started/tips-tricks',

@@ -7,7 +7,7 @@ Here are a couple of considerations to know about before making the decision to 
 
 - The integration only works if you are using actual-server.
 
-- The API secrets and keys for bank sync are stored on the server and are **not** covered by [end-to-end encryption](/docs/getting-started/sync/#end-to-end-encryption). End-to-end encryption only protects your budget data. Server administrators or hosting providers with direct access to the server's database can read bank sync credentials. If this is a concern, consider self-hosting your server.
+- The API secrets and keys for bank sync are stored on the server and are **not** covered by [end-to-end encryption](../getting-started/sync.md#end-to-end-encryption). End-to-end encryption only protects your budget data. Server administrators or hosting providers with direct access to the server's database can read bank sync tokens. If this is a concern, consider self-hosting your server.
 
 - You will need to add a config file to your installation.
 
@@ -34,10 +34,10 @@ Resetting credentials removes the credentials for the current budget file first.
 
 ## Supported Providers
 
-- [Enable Banking](/docs/advanced/bank-sync/enable-banking) (European Banks)
-- GoCardless [BankAccountData](/docs/advanced/bank-sync/gocardless/) (European Banks, **not accepting new accounts**)
-- [SimpleFIN Bridge](/docs/advanced/bank-sync/simplefin) (North American Banks)
-- [Pluggy.ai](/docs/advanced/bank-sync/pluggyai) (Brazilian Banks)
+- [Enable Banking](./bank-sync/enable-banking.md) (European Banks)
+- GoCardless [BankAccountData](./bank-sync/gocardless.md) (European Banks, **not accepting new accounts**)
+- [SimpleFIN Bridge](./bank-sync/simplefin.md) (North American Banks)
+- [Pluggy.ai](./bank-sync/pluggyai.md) (Brazilian Banks)
 
 ### Retrieve Transactions
 

@@ -29,7 +29,7 @@ You can leave the resources at their lowest setting (although you will need a no
 
 _Your browser does most of Actual's computation,_ so purchasing more resources for the server won't necessarily result in a better experience.
 
-After setting up your Pod, head over to our [Starting Fresh](/docs/getting-started/starting-fresh) guide to get started with
+After setting up your Pod, head over to our [Starting Fresh](../getting-started/starting-fresh.md) guide to get started with
 Actual Budget.
 
 ## A step by step guide to setting up Actual Budget with PikaPods
@@ -68,7 +68,7 @@ Simply put, _a Pod is a very tiny computer running in the cloud_. Typically, a P
 
 Multiple budgets can reside in one Pod running Actual. You do not need to set up a new Pod for each budget you create. The number of budgets is limited only by the storage capacity you assign to your Pod.
 
-If you [connect to your bank](/docs/advanced/bank-sync.md), bank sync credentials can be saved globally for the Pod or for one budget file only. Choose **For this budget only** if you do not want another budget in the same Pod to use those credentials.
+If you [connect to your bank](../advanced/bank-sync.md), bank sync credentials can be saved globally for the Pod or for one budget file only. Choose **For this budget only** if you do not want another budget in the same Pod to use those credentials.
 
 :::
 
@@ -132,4 +132,4 @@ For other browsers or browser/OS combinations, most search engines or the browse
 
 ## Getting started with Actual Budget
 
-Go to our [Starting Fresh](/docs/getting-started/starting-fresh) guide to get started with Actual Budget.
+Go to our [Starting Fresh](../getting-started/starting-fresh.md) guide to get started with Actual Budget.
