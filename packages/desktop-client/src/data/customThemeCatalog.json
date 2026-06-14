@@ -283,7 +283,7 @@
       "#83a598"
     ],
     "mode": "dark"
-  }
+  },
   {
     "name": "Rosé Pine",
     "repo": "PencilKnot/rose-pine-actual",
@@ -295,8 +295,8 @@
       "#f6c177",
       "#9ccfd8"
     ],
-    "mode": "dark",
-  }
+    "mode": "dark"
+  },
   {
     "name": "Rosé Pine Moon",
     "repo": "PencilKnot/rose-pine-moon-actual",
@@ -308,8 +308,8 @@
       "#eb6f92",
       "#9ccfd8"
     ],
-    "mode": "dark",
-  }
+    "mode": "dark"
+  },
   {
     "name": "Rosé Pine Dawn",
     "repo": "PencilKnot/rose-pine-dawn-actual",
@@ -321,6 +321,6 @@
       "#b4637a",
       "#56949f"
     ],
-    "mode": "light",
+    "mode": "light"
   }
 ]
