@@ -73,8 +73,19 @@ async function getOrphanedPayees(): Promise<Array<Pick<PayeeEntity, 'id'>>> {
 
 async function getPayeeRuleCounts() {
   const payeeCounts: Record<PayeeEntity['id'], number> = {};
+  const completedScheduleRules = new Set(
+    (
+      await db.all<Pick<db.DbSchedule, 'rule'>>(
+        'SELECT rule FROM schedules WHERE completed = 1 AND tombstone = 0',
+      )
+    ).map(schedule => schedule.rule),
+  );
 
   rules.iterateIds(rules.getRules(), 'payee', (rule, id) => {
+    if (rule.id != null && completedScheduleRules.has(rule.id)) {
+      return;
+    }
+
     if (payeeCounts[id] == null) {
       payeeCounts[id] = 0;
     }
