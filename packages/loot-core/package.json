@@ -85,6 +85,11 @@
     "#platform/server/*": "./src/platform/server/*.ts",
     "#platform/*": "./src/platform/*.ts",
     "#server/*": "./src/server/*.ts",
+    "#shared/environment": {
+      "electron": "./src/shared/environment.ts",
+      "api": "./src/shared/environment.ts",
+      "default": "./src/shared/environment.browser.ts"
+    },
     "#shared/*": "./src/shared/*.ts",
     "#types/*": "./src/types/*.ts",
     "#mocks/*": "./src/mocks/*.ts",
@@ -154,6 +159,11 @@
       "electron": "./src/shared/platform.electron.ts",
       "api": "./src/shared/platform.api.ts",
       "default": "./src/shared/platform.ts"
+    },
+    "./shared/environment": {
+      "electron": "./src/shared/environment.ts",
+      "api": "./src/shared/environment.ts",
+      "default": "./src/shared/environment.browser.ts"
     },
     "./shared/*": "./src/shared/*.ts",
     "./types/models": "./src/types/models/index.ts",
