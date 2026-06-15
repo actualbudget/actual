@@ -46,6 +46,76 @@ const setToYearlyAverage = async (
   await budgetMenuModal.close();
 };
 
+function getAverageStartMonth(month: string) {
+  const previousMonth = monthUtils.prevMonth(month);
+
+  if (previousMonth >= monthUtils.currentMonth()) {
+    return monthUtils.prevMonth(monthUtils.currentMonth());
+  }
+
+  return previousMonth;
+}
+
+async function getAverageMonthAmounts(
+  budgetPage: MobileBudgetPage,
+  categoryName: string,
+  numberOfMonths: number,
+) {
+  const averageStartMonth = getAverageStartMonth(
+    await budgetPage.getSelectedMonth(),
+  );
+  const amounts: number[] = [];
+  let selectedMonth = await budgetPage.getSelectedMonth();
+  let navigatedMonths = 0;
+
+  while (selectedMonth > averageStartMonth) {
+    selectedMonth = await budgetPage.goToPreviousMonth();
+    navigatedMonths++;
+  }
+
+  for (let i = 0; i < numberOfMonths; i++) {
+    const spentButton = await budgetPage.getButtonForSpent(categoryName);
+    const spent = await spentButton.textContent();
+
+    if (!spent) {
+      throw new Error('Failed to get average month amounts');
+    }
+
+    amounts.push(currencyToAmount(spent) ?? 0);
+
+    if (i < numberOfMonths - 1) {
+      selectedMonth = await budgetPage.goToPreviousMonth();
+      navigatedMonths++;
+    }
+  }
+
+  for (let i = 0; i < navigatedMonths; i++) {
+    await budgetPage.goToNextMonth();
+  }
+
+  return amounts;
+}
+
+function getAverageSpent(amounts: number[]) {
+  let oldestActivityIndex = -1;
+
+  for (let i = 0; i < amounts.length; i++) {
+    if (amounts[i] !== 0) {
+      oldestActivityIndex = i;
+    }
+  }
+
+  const averageMonths =
+    oldestActivityIndex === -1
+      ? amounts
+      : amounts.slice(0, oldestActivityIndex + 1);
+  const totalSpent = averageMonths.reduce((sum, spentAmount) => {
+    return sum + spentAmount;
+  }, 0);
+
+  return Math.round((totalSpent / averageMonths.length) * 100) / 100;
+}
+
 async function setBudgetAverage(
   budgetPage: MobileBudgetPage,
   categoryName: string,
@@ -56,25 +126,9 @@ async function setBudgetAverage(
     numberOfMonths: number,
   ) => Promise<void>,
 ) {
-  let totalSpent = 0;
-
-  for (let i = 0; i < numberOfMonths; i++) {
-    await budgetPage.goToPreviousMonth();
-    const spentButton = await budgetPage.getButtonForSpent(categoryName);
-    const spent = await spentButton.textContent();
-    if (!spent) {
-      throw new Error('Failed to get spent amount');
-    }
-    totalSpent += currencyToAmount(spent) ?? 0;
-  }
-
-  // Calculate average amount
-  const averageSpent = totalSpent / numberOfMonths;
-
-  // Go back to the current month
-  for (let i = 0; i < numberOfMonths; i++) {
-    await budgetPage.goToNextMonth();
-  }
+  const averageSpent = getAverageSpent(
+    await getAverageMonthAmounts(budgetPage, categoryName, numberOfMonths),
+  );
 
   await setBudgetAverageFn(budgetPage, categoryName, numberOfMonths);
 
