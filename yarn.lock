@@ -160,7 +160,7 @@ __metadata:
   resolution: "@actual-app/crdt@workspace:packages/crdt"
   dependencies:
     "@bufbuild/protobuf": "npm:^2.12.0"
-    "@bufbuild/protoc-gen-es": "npm:^2.11.0"
+    "@bufbuild/protoc-gen-es": "npm:^2.12.0"
     "@typescript/native-preview": "npm:beta"
     murmurhash: "npm:^2.0.1"
     rollup-plugin-visualizer: "npm:^7.0.1"
@@ -1962,7 +1962,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bufbuild/protoc-gen-es@npm:^2.11.0":
+"@bufbuild/protoc-gen-es@npm:^2.12.0":
   version: 2.12.0
   resolution: "@bufbuild/protoc-gen-es@npm:2.12.0"
   dependencies:
