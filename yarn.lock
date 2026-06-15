@@ -224,7 +224,7 @@ __metadata:
     "@codemirror/autocomplete": "npm:^6.20.3"
     "@codemirror/language": "npm:^6.12.3"
     "@codemirror/state": "npm:^6.6.0"
-    "@codemirror/view": "npm:^6.41.0"
+    "@codemirror/view": "npm:^6.43.1"
     "@emotion/css": "npm:^11.13.5"
     "@fontsource-variable/inter": "npm:^5.2.8"
     "@fontsource/redacted-script": "npm:^5.2.8"
@@ -2293,15 +2293,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.17.0, @codemirror/view@npm:^6.23.0, @codemirror/view@npm:^6.27.0, @codemirror/view@npm:^6.35.0, @codemirror/view@npm:^6.41.0":
-  version: 6.41.0
-  resolution: "@codemirror/view@npm:6.41.0"
+"@codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.17.0, @codemirror/view@npm:^6.23.0, @codemirror/view@npm:^6.27.0, @codemirror/view@npm:^6.35.0, @codemirror/view@npm:^6.43.1":
+  version: 6.43.1
+  resolution: "@codemirror/view@npm:6.43.1"
   dependencies:
     "@codemirror/state": "npm:^6.6.0"
     crelt: "npm:^1.0.6"
     style-mod: "npm:^4.1.0"
     w3c-keyname: "npm:^2.2.4"
-  checksum: 10/8251e981b7ee95891b0957855154a2e2eb07fed1e122e4d8a1bff6629faa4fc820285e821436b16ee087538323afaa6e942b8455d9e60485f09ad1587e1a7ced
+  checksum: 10/a867a26cb511f161a8ef60b2574afae2561cfe94abd822e0af2a6e4bd94d1ff46f0d5085428c89f6f6b80a52482c8d23f80362173491903f49fb93462a216b95
   languageName: node
   linkType: hard
 
