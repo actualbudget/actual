@@ -6279,10 +6279,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@oxlint/plugins@npm:^1.60.0":
-  version: 1.60.0
-  resolution: "@oxlint/plugins@npm:1.60.0"
-  checksum: 10/282aa3373fb4533af9c8ead48716ad3a3621f110a7aa7061ce615b8373fd667189eab1515d3e324ad26fc2b0507fc4434b407100e617fe59749c3deb673e975c
+"@oxlint/plugins@npm:^1.69.0":
+  version: 1.69.0
+  resolution: "@oxlint/plugins@npm:1.69.0"
+  checksum: 10/f584d9a56e9295dcf22423077d7fa9c12cf7c34f81fdd72e41a62016f92a0728f72ae8ad726c78d545459a2faffd38dbf822c3e79fea26867566ed4b5b8bf6ab
   languageName: node
   linkType: hard
 
@@ -15018,7 +15018,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "eslint-plugin-actual@workspace:packages/eslint-plugin-actual"
   dependencies:
-    "@oxlint/plugins": "npm:^1.60.0"
+    "@oxlint/plugins": "npm:^1.69.0"
     eslint-vitest-rule-tester: "npm:^3.1.0"
     vitest: "npm:^4.1.8"
   languageName: unknown
