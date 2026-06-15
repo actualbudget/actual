@@ -3325,7 +3325,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docusaurus/module-type-aliases@npm:3.10.1":
+"@docusaurus/module-type-aliases@npm:3.10.1, @docusaurus/module-type-aliases@npm:^3.10.1":
   version: 3.10.1
   resolution: "@docusaurus/module-type-aliases@npm:3.10.1"
   dependencies:
@@ -3358,24 +3358,6 @@ __metadata:
     react: "*"
     react-dom: "*"
   checksum: 10/6b47ea9f31871e7200ca8c76016496a524fa0b0458ab9bdd582afbd79a9c1756c1ad8414c1cf8ff942b94b2505d1a50492963d8d59294cafc5f7b894e82f3d5f
-  languageName: node
-  linkType: hard
-
-"@docusaurus/module-type-aliases@npm:^3.10.0":
-  version: 3.10.0
-  resolution: "@docusaurus/module-type-aliases@npm:3.10.0"
-  dependencies:
-    "@docusaurus/types": "npm:3.10.0"
-    "@types/history": "npm:^4.7.11"
-    "@types/react": "npm:*"
-    "@types/react-router-config": "npm:*"
-    "@types/react-router-dom": "npm:*"
-    react-helmet-async: "npm:@slorber/react-helmet-async@1.3.0"
-    react-loadable: "npm:@docusaurus/react-loadable@6.0.0"
-  peerDependencies:
-    react: "*"
-    react-dom: "*"
-  checksum: 10/0c5355fa87e76b5f633a59b7b11b465f131cd1dadc3bf0f6a677cab9d05459dae559dcd21bf9c90751f540bf7707967a23b1e163a24b2bdd127f6126b546a878
   languageName: node
   linkType: hard
 
@@ -3821,27 +3803,6 @@ __metadata:
     fs-extra: "npm:^11.1.1"
     tslib: "npm:^2.6.0"
   checksum: 10/a98b5a7b1d7f123b5609caadea4000b4ee956426396d4a62ce675bd1e0fe7fd65be3bba2ef97b2ec3f84bafd65fd53d1d55d3a35c585ddc7288ebca199c5a865
-  languageName: node
-  linkType: hard
-
-"@docusaurus/types@npm:3.10.0":
-  version: 3.10.0
-  resolution: "@docusaurus/types@npm:3.10.0"
-  dependencies:
-    "@mdx-js/mdx": "npm:^3.0.0"
-    "@types/history": "npm:^4.7.11"
-    "@types/mdast": "npm:^4.0.2"
-    "@types/react": "npm:*"
-    commander: "npm:^5.1.0"
-    joi: "npm:^17.9.2"
-    react-helmet-async: "npm:@slorber/react-helmet-async@1.3.0"
-    utility-types: "npm:^3.10.0"
-    webpack: "npm:^5.95.0"
-    webpack-merge: "npm:^5.9.0"
-  peerDependencies:
-    react: ^18.0.0 || ^19.0.0
-    react-dom: ^18.0.0 || ^19.0.0
-  checksum: 10/93bca66d61e53b61aefd096e0cc3bb473469b65fe0d7cda7a0a0478bf08f4fd690c2b5c840cd21ac73864b7fec54a012d8d4ab5243543c56d8aedd346d462396
   languageName: node
   linkType: hard
 
@@ -14180,7 +14141,7 @@ __metadata:
   dependencies:
     "@actual-app/ci-actions": "workspace:*"
     "@docusaurus/core": "npm:^3.10.1"
-    "@docusaurus/module-type-aliases": "npm:^3.10.0"
+    "@docusaurus/module-type-aliases": "npm:^3.10.1"
     "@docusaurus/plugin-content-docs": "npm:^3.10.1"
     "@docusaurus/plugin-ideal-image": "npm:^3.10.1"
     "@docusaurus/preset-classic": "npm:^3.10.1"
