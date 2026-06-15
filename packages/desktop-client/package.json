@@ -152,7 +152,7 @@
     "@types/lodash": "^4",
     "@types/pikaday": "^1.7.10",
     "@types/promise-retry": "^1.1.6",
-    "@types/react": "^19.2.14",
+    "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@typescript/native-preview": "beta",
     "@uiw/react-codemirror": "^4.25.9",
