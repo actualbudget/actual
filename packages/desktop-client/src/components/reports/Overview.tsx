@@ -34,6 +34,7 @@ import { CustomReportListCards } from './reports/CustomReportListCards';
 import { FormulaCard } from './reports/FormulaCard';
 import { MarkdownCard } from './reports/MarkdownCard';
 import { NetWorthCard } from './reports/NetWorthCard';
+import { QueryReportCard } from './reports/QueryReportCard';
 import { SpendingCard } from './reports/SpendingCard';
 import './overview.scss';
 import { SummaryCard } from './reports/SummaryCard';
@@ -86,6 +87,7 @@ export function Overview({ dashboard }: OverviewProps) {
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
 
   const formulaMode = useFeatureFlag('formulaMode');
+  const queryReportEnabled = useFeatureFlag('queryReport');
 
   const [isImporting, setIsImporting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -608,6 +610,14 @@ export function Overview({ dashboard }: OverviewProps) {
                                   },
                                 ]
                               : []),
+                            ...(queryReportEnabled
+                              ? [
+                                  {
+                                    name: 'query-report' as const,
+                                    text: t('Query report'),
+                                  },
+                                ]
+                              : []),
                             {
                               name: 'custom-report' as const,
                               text: t('New custom report'),
@@ -852,6 +862,18 @@ export function Overview({ dashboard }: OverviewProps) {
                         />
                       ) : widget.type === 'formula-card' && formulaMode ? (
                         <FormulaCard
+                          widgetId={item.i}
+                          isEditing={isEditing}
+                          meta={widget.meta}
+                          onMetaChange={newMeta => onMetaChange(item, newMeta)}
+                          onRemove={() => onRemoveWidget(item.i)}
+                          onCopy={targetDashboardId =>
+                            onCopyWidget(item.i, targetDashboardId)
+                          }
+                        />
+                      ) : widget.type === 'query-report' &&
+                        queryReportEnabled ? (
+                        <QueryReportCard
                           widgetId={item.i}
                           isEditing={isEditing}
                           meta={widget.meta}

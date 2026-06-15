@@ -1,5 +1,7 @@
 import type { QueryState } from '../shared/query';
 
+import type { AqlQueryResult } from './aql';
+
 export type ServerHandlers = {
   undo: () => Promise<void>;
   redo: () => Promise<void>;
@@ -9,8 +11,7 @@ export type ServerHandlers = {
     applySpecialCases?: boolean;
   }) => Promise<{ filters: unknown[] }>;
 
-  // oxlint-disable-next-line typescript/no-explicit-any
-  query: (query: QueryState) => Promise<{ data: any; dependencies: string[] }>;
+  query: (query: QueryState) => Promise<AqlQueryResult>;
 
   'get-server-version': () => Promise<
     { error: 'no-server' } | { error: 'network-failure' } | { version: string }

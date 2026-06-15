@@ -501,7 +501,8 @@ async function execBudget(
     }
 
     const fromParts = sqlPieces.from.split(' ');
-    const alias = fromParts.length > 1 ? fromParts[fromParts.length - 1] : 'budget';
+    const alias =
+      fromParts.length > 1 ? fromParts[fromParts.length - 1] : 'budget';
     const newFrom = `${tempTableName} ${alias}`;
     const s = { ...sqlPieces, from: newFrom };
 

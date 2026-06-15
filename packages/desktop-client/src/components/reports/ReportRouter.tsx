@@ -8,6 +8,7 @@ import { Crossover } from './reports/Crossover';
 import { CustomReport } from './reports/CustomReport';
 import { Formula } from './reports/Formula';
 import { NetWorth } from './reports/NetWorth';
+import { QueryReport } from './reports/QueryReport';
 import { Spending } from './reports/Spending';
 import { Summary } from './reports/Summary';
 import { ReportsDashboardRouter } from './ReportsDashboardRouter';
@@ -17,6 +18,7 @@ import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 export function ReportRouter() {
   const crossoverReportEnabled = useFeatureFlag('crossoverReport');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
+  const queryReportEnabled = useFeatureFlag('queryReport');
 
   return (
     <Routes>
@@ -48,6 +50,12 @@ export function ReportRouter() {
       <Route path="/calendar/:id" element={<Calendar />} />
       <Route path="/formula" element={<Formula />} />
       <Route path="/formula/:id" element={<Formula />} />
+      {queryReportEnabled && (
+        <>
+          <Route path="/query" element={<QueryReport />} />
+          <Route path="/query/:id" element={<QueryReport />} />
+        </>
+      )}
     </Routes>
   );
 }

@@ -1,5 +1,10 @@
 // @ts-strict-ignore
 import type { QueryState } from '../../shared/query';
+import type {
+  AqlErrorDetail as AqlError,
+  AqlQueryColumn,
+  AqlQueryResult,
+} from '../../types/aql';
 import * as db from '../db';
 
 import { compileQuery, defaultConstructQuery } from './compiler';
@@ -11,23 +16,7 @@ import type {
 } from './compiler';
 import { convertInputType, convertOutputType } from './schema-helpers';
 
-export type AqlQueryColumn = {
-  name: string;
-  type: string;
-};
-
-export type AqlError = {
-  type: 'compile-error' | 'runtime-error' | 'executor-error';
-  message: string;
-};
-
-export type AqlQueryResult = {
-  // oxlint-disable-next-line typescript/no-explicit-any
-  data: any;
-  dependencies: string[];
-  columns?: AqlQueryColumn[];
-  error?: AqlError;
-};
+export type { AqlQueryColumn, AqlError, AqlQueryResult };
 
 // TODO (compiler):
 // * Properly safeguard all inputs against SQL injection

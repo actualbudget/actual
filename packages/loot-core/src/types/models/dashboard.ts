@@ -108,7 +108,8 @@ export type MarkdownWidget = AbstractWidget<
 >;
 
 export type QueryEntry = {
-  query: QueryState;
+  source: string;
+  query?: QueryState;
   label?: string;
   timeFrame?: TimeFrame;
 };

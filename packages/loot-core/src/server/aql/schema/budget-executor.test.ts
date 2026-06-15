@@ -48,9 +48,7 @@ describe('Budget executor', () => {
     await setupBudget();
 
     const { data } = await aqlQuery(
-      q('budget')
-        .filter({ month: TEST_MONTH })
-        .select('*'),
+      q('budget').filter({ month: TEST_MONTH }).select('*'),
     );
     expect(data.length).toBeGreaterThan(0);
 
@@ -139,10 +137,7 @@ describe('Budget executor', () => {
     await setupBudget();
 
     const { data } = await aqlQuery(
-      q('budget')
-        .filter({ month: TEST_MONTH })
-        .select('*')
-        .limit(2),
+      q('budget').filter({ month: TEST_MONTH }).select('*').limit(2),
     );
     expect(data.length).toBeLessThanOrEqual(2);
   });
