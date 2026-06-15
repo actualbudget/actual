@@ -60,6 +60,7 @@ export const MonthPicker = ({
   const firstMonthEl = useRef<Element | null>(null);
   const containerEl = useRef<Element | null>(null);
   const calendarIconEl = useRef<Element | null>(null);
+  const collapseIconEl = useRef<Element | null>(null);
 
   // Use a ref so the layout effect closure is always fresh without being a dep.
   const onFirstMonthXOffsetRef = useRef(onFirstMonthXOffset);
@@ -67,6 +68,11 @@ export const MonthPicker = ({
 
   const onMonthPickerLayoutRef = useRef(onMonthPickerLayout);
   onMonthPickerLayoutRef.current = onMonthPickerLayout;
+  const lastFirstMonthXOffset = useRef<number | null>(null);
+  const lastMonthPickerLayout = useRef<{
+    calendarOffset: number;
+    width: number;
+  } | null>(null);
 
   const pickerRootRef = useCallback((el: Element | null) => {
     pickerRootEl.current = el;
@@ -80,26 +86,47 @@ export const MonthPicker = ({
     calendarIconEl.current = el;
   }, []);
 
+  const collapseIconRefCallback = useCallback((el: Element | null) => {
+    collapseIconEl.current = el;
+  }, []);
+
   // Fire after every render (no deps) so any resize/reflow that triggers a
   // React re-render also triggers a fresh measurement.
   useLayoutEffect(() => {
     if (pickerRootEl.current && firstMonthEl.current) {
       const rootLeft = pickerRootEl.current.getBoundingClientRect().left;
       const firstLeft = firstMonthEl.current.getBoundingClientRect().left;
-      onFirstMonthXOffsetRef.current?.(firstLeft - rootLeft);
+      const offset = firstLeft - rootLeft;
+
+      if (lastFirstMonthXOffset.current !== offset) {
+        lastFirstMonthXOffset.current = offset;
+        onFirstMonthXOffsetRef.current?.(offset);
+      }
     }
 
     if (
       onMonthPickerLayoutRef.current &&
       containerEl.current &&
-      calendarIconEl.current
+      calendarIconEl.current &&
+      collapseIconEl.current
     ) {
       const containerRect = containerEl.current.getBoundingClientRect();
       const calendarRect = calendarIconEl.current.getBoundingClientRect();
-      onMonthPickerLayoutRef.current({
+      const collapseRect = collapseIconEl.current.getBoundingClientRect();
+      const layout = {
         calendarOffset: calendarRect.left - containerRect.left,
-        width: containerRect.width,
-      });
+        width: collapseRect.right - containerRect.left,
+      };
+      const lastLayout = lastMonthPickerLayout.current;
+
+      if (
+        !lastLayout ||
+        lastLayout.calendarOffset !== layout.calendarOffset ||
+        lastLayout.width !== layout.width
+      ) {
+        lastMonthPickerLayout.current = layout;
+        onMonthPickerLayoutRef.current(layout);
+      }
     }
   });
 
@@ -342,7 +369,7 @@ export const MonthPicker = ({
             marginLeft: 15,
           }}
         >
-          <View>
+          <View innerRef={collapseIconRefCallback}>
             <ExpandOrCollapseIcon
               style={{
                 width: 13,

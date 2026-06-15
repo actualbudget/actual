@@ -241,7 +241,7 @@ export function FocusedViewsBar({
         alignItems: 'center',
         justifyContent: 'flex-start',
         paddingLeft: startOffset,
-        paddingRight: 10,
+        paddingRight: maxWidth ? 0 : 10,
         maxWidth,
         marginTop: 8,
         marginBottom: 12,

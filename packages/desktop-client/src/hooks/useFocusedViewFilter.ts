@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type { CategoryGroupEntity } from '@actual-app/core/types/models';
 
@@ -12,9 +12,11 @@ export function useFocusedViewFilter(
   const { activeViewId, views } = useFocusedViews();
   const spreadsheet = useSpreadsheet();
 
-  // Memoize sheet names to prevent unnecessary re-binds
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const memoizedSheetNames = useMemo(() => sheetNames, [sheetNames.join(',')]);
+  const stableSheetNamesRef = useRef(sheetNames);
+  if (!areSameSheetNames(stableSheetNamesRef.current, sheetNames)) {
+    stableSheetNamesRef.current = sheetNames;
+  }
+  const stableSheetNames = stableSheetNamesRef.current;
 
   const [matchingCategoryIds, setMatchingCategoryIds] = useState<Set<string>>(
     new Set(),
@@ -139,7 +141,7 @@ export function useFocusedViewFilter(
           months: new Map(),
         };
 
-        memoizedSheetNames.forEach(sheetName => {
+        stableSheetNames.forEach(sheetName => {
           state.months.set(sheetName, {
             balance: 0,
             budgeted: 0,
@@ -202,7 +204,7 @@ export function useFocusedViewFilter(
     return () => {
       unbinds.forEach(unbind => unbind());
     };
-  }, [activeViewId, categoryGroups, memoizedSheetNames, spreadsheet]);
+  }, [activeViewId, categoryGroups, spreadsheet, stableSheetNames]);
 
   const filteredCategoryGroups = useMemo(() => {
     if (!activeViewId) return categoryGroups;
@@ -234,4 +236,10 @@ export function useFocusedViewFilter(
   }, [categoryGroups, activeViewId, views, matchingCategoryIds]);
 
   return { filteredCategoryGroups, availableBuiltInViews };
+}
+
+function areSameSheetNames(previous: string[], next: string[]) {
+  if (previous.length !== next.length) return false;
+
+  return previous.every((sheetName, index) => sheetName === next[index]);
 }
