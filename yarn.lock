@@ -231,7 +231,7 @@ __metadata:
     "@juggle/resize-observer": "npm:^3.4.0"
     "@lezer/highlight": "npm:^1.2.3"
     "@playwright/test": "npm:1.59.1"
-    "@react-aria/interactions": "npm:^3.27.1"
+    "@react-aria/interactions": "npm:^3.28.1"
     "@reduxjs/toolkit": "npm:^2.11.2"
     "@rolldown/plugin-babel": "npm:~0.1.8"
     "@rollup/plugin-inject": "npm:^5.0.5"
@@ -7333,6 +7333,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-aria/interactions@npm:^3.28.1":
+  version: 3.28.1
+  resolution: "@react-aria/interactions@npm:3.28.1"
+  dependencies:
+    "@react-types/shared": "npm:^3.34.0"
+    "@swc/helpers": "npm:^0.5.0"
+    react-aria: "npm:^3.48.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
+    react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
+  checksum: 10/cc0ea32ecd28cc0a81c37e8bd2cf0d7b9af264df97702840d4679c5324c55f5fde3ff84f790f8df5d88e26f399968882fc078082a64ae4381366cd48f5894e20
+  languageName: node
+  linkType: hard
+
 "@react-aria/label@npm:^3.7.25":
   version: 3.7.25
   resolution: "@react-aria/label@npm:3.7.25"
@@ -8642,7 +8656,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-types/shared@npm:^3.35.0":
+"@react-types/shared@npm:^3.34.0, @react-types/shared@npm:^3.35.0":
   version: 3.35.0
   resolution: "@react-types/shared@npm:3.35.0"
   peerDependencies:
@@ -24807,7 +24821,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-aria@npm:3.49.0":
+"react-aria@npm:3.49.0, react-aria@npm:^3.48.0":
   version: 3.49.0
   resolution: "react-aria@npm:3.49.0"
   dependencies:
