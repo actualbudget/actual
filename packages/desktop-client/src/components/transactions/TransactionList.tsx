@@ -515,7 +515,9 @@ export function TransactionList({
       transaction: TransactionEntity,
       updatedFieldName: string | null = null,
     ) => {
-      const { transaction: afterRules, forceFields } = await send('rules-run', { transaction });
+      const { transaction: afterRules, forceFields } = await send('rules-run', {
+        transaction,
+      });
 
       // Show formula errors if any
       if (afterRules._ruleErrors && afterRules._ruleErrors.length > 0) {
