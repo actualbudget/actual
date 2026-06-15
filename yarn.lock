@@ -124,7 +124,7 @@ __metadata:
     csv-stringify: "npm:^6.7.0"
     date-fns: "npm:^4.4.0"
     fake-indexeddb: "npm:^6.2.5"
-    fast-check: "npm:^4.6.0"
+    fast-check: "npm:^4.8.0"
     handlebars: "npm:^4.7.9"
     hyperformula: "npm:^3.3.0"
     jest-diff: "npm:^30.3.0"
@@ -15582,12 +15582,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-check@npm:^4.6.0":
-  version: 4.6.0
-  resolution: "fast-check@npm:4.6.0"
+"fast-check@npm:^4.8.0":
+  version: 4.8.0
+  resolution: "fast-check@npm:4.8.0"
   dependencies:
     pure-rand: "npm:^8.0.0"
-  checksum: 10/b53b88ebf6247ea0eaa7f3f6d8923035e0cfd6f78bc8c393754cc1ccbdb591756dfbff02058a136b472e011279594fa72c05a30378177d6055a08ad7ed1b823e
+  checksum: 10/32101d27e69f7f0a3ea486f1a6feee6b34c824ba14bf3efce2ad1741fcd412817ac3ed14f53ef57a55d6fe2e00038e399c4a9c62444446a6e7a1a4b04bc6b88d
   languageName: node
   linkType: hard
 
