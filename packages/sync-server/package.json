@@ -95,7 +95,7 @@
     "better-sqlite3": "^12.10.0",
     "convict": "^6.2.5",
     "cors": "^2.8.6",
-    "date-fns": "^4.1.0",
+    "date-fns": "^4.4.0",
     "debug": "^4.4.3",
     "express": "^5.2.1",
     "express-rate-limit": "^8.5.2",

@@ -181,7 +181,7 @@
     "better-sqlite3": "^12.10.0",
     "csv-parse": "^6.2.1",
     "csv-stringify": "^6.7.0",
-    "date-fns": "^4.1.0",
+    "date-fns": "^4.4.0",
     "handlebars": "^4.7.9",
     "hyperformula": "^3.2.0",
     "lodash": "^4.18.1",
