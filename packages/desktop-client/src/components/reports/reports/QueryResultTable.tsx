@@ -85,10 +85,6 @@ export function QueryResultTable({
       case 'date-year':
         return String(value);
       case 'integer':
-        if (typeof value === 'number') {
-          return format(integerToAmount(value), 'financial');
-        }
-        return String(value);
       case 'float':
       case 'number':
         if (typeof value === 'number') {
