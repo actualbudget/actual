@@ -215,6 +215,12 @@ export function ExperimentalFeatures() {
             >
               <Trans>Budget Analysis Report</Trans>
             </FeatureToggle>
+            <FeatureToggle
+              flag="queryReport"
+              feedbackLink="https://github.com/actualbudget/actual/issues"
+            >
+              <Trans>Query Report</Trans>
+            </FeatureToggle>
             {showServerPrefs && (
               <ServerFeatureToggle
                 prefName="flags.plugins"
