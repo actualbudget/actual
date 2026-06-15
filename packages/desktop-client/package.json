@@ -129,7 +129,7 @@
   "devDependencies": {
     "@actual-app/components": "workspace:*",
     "@actual-app/core": "workspace:*",
-    "@babel/core": "^7.29.0",
+    "@babel/core": "^7.29.7",
     "@codemirror/autocomplete": "^6.20.1",
     "@codemirror/language": "^6.12.3",
     "@codemirror/state": "^6.6.0",
