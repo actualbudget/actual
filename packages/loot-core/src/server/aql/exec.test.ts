@@ -282,4 +282,27 @@ describe('compileAndRunQuery', () => {
     );
     expect(data.map(row => row.id).sort()).toEqual(ids);
   });
+
+  it('returns column metadata', async () => {
+    await insertTransactions();
+
+    const { columns } = await compileAndRunAqlQuery(
+      q('transactions').select(['date', 'amount', 'category']).serialize(),
+    );
+
+    expect(columns).toBeDefined();
+    expect(columns!.length).toBeGreaterThanOrEqual(3);
+    expect(columns!.find(c => c.name === 'date')).toEqual({
+      name: 'date',
+      type: 'date',
+    });
+    expect(columns!.find(c => c.name === 'amount')).toEqual({
+      name: 'amount',
+      type: 'integer',
+    });
+    expect(columns!.find(c => c.name === 'category')).toEqual({
+      name: 'category',
+      type: 'id',
+    });
+  });
 });

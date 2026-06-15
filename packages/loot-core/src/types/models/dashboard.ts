@@ -1,3 +1,5 @@
+import type { QueryState } from '../../shared/query';
+
 import type { CustomReportEntity } from './reports';
 import type { RuleConditionEntity } from './rule';
 
@@ -105,6 +107,33 @@ export type MarkdownWidget = AbstractWidget<
   { content: string; text_align?: 'left' | 'right' | 'center' }
 >;
 
+export type QueryEntry = {
+  query: QueryState;
+  label?: string;
+  timeFrame?: TimeFrame;
+};
+
+export type QueryVisualization =
+  | { type: 'scalar' }
+  | { type: 'time-series'; chartStyle: 'line' | 'area' }
+  | { type: 'bar'; chartStyle: 'grouped' | 'stacked' }
+  | { type: 'table'; columns?: string[] }
+  | { type: 'donut' };
+
+export type QueryReportWidget = AbstractWidget<
+  'query-report',
+  {
+    name?: string;
+    queries: QueryEntry[];
+    defaultTimeFrame?: TimeFrame;
+    visualization: QueryVisualization;
+    label?: string;
+    colorFormula?: string;
+    showTrend?: boolean;
+    compact?: boolean;
+  } | null
+>;
+
 type SpecializedWidget =
   | NetWorthWidget
   | CashFlowWidget
@@ -114,7 +143,8 @@ type SpecializedWidget =
   | MarkdownWidget
   | SummaryWidget
   | CalendarWidget
-  | FormulaWidget;
+  | FormulaWidget
+  | QueryReportWidget;
 export type DashboardWidgetEntity = SpecializedWidget | CustomReportWidget;
 export type NewDashboardWidgetEntity = Omit<
   DashboardWidgetEntity,

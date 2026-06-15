@@ -34,6 +34,10 @@ packages/desktop-electron/loot-core
 packages/desktop-client/service-worker
 packages/plugins-service/dist
 packages/loot-core/lib-dist
+packages/loot-core/@types
+packages/component-library/dist
+packages/cli/dist
+packages/ci-actions/dist
 packages/sync-server/coverage
 bundle.desktop.js
 bundle.desktop.js.map
@@ -73,6 +77,8 @@ build/
 
 # .d.ts files aren't type-checked with skipLibCheck set to true
 *.d.ts
+*.d.ts.map
+*.tsbuildinfo
 
 # Lage cache
 .lage/

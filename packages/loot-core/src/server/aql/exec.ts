@@ -11,6 +11,24 @@ import type {
 } from './compiler';
 import { convertInputType, convertOutputType } from './schema-helpers';
 
+export type AqlQueryColumn = {
+  name: string;
+  type: string;
+};
+
+export type AqlError = {
+  type: 'compile-error' | 'runtime-error' | 'executor-error';
+  message: string;
+};
+
+export type AqlQueryResult = {
+  // oxlint-disable-next-line typescript/no-explicit-any
+  data: any;
+  dependencies: string[];
+  columns?: AqlQueryColumn[];
+  error?: AqlError;
+};
+
 // TODO (compiler):
 // * Properly safeguard all inputs against SQL injection
 // * Functions for incr/decr dates
@@ -115,14 +133,51 @@ export async function compileAndRunAqlQuery(
   schemaConfig: SchemaConfig,
   queryState: QueryState,
   options: RunCompiledAqlQueryOptions,
-) {
-  const { sqlPieces, state } = compileQuery(queryState, schema, schemaConfig);
-  // oxlint-disable-next-line typescript/no-explicit-any
-  const data: any = await runCompiledAqlQuery(
-    queryState,
-    sqlPieces,
-    state,
-    options,
-  );
-  return { data, dependencies: state.dependencies };
+): Promise<AqlQueryResult> {
+  let sqlPieces;
+  let state;
+  try {
+    const result = compileQuery(queryState, schema, schemaConfig);
+    sqlPieces = result.sqlPieces;
+    state = result.state;
+  } catch (e) {
+    return {
+      data: [],
+      dependencies: [],
+      error: {
+        type: 'compile-error',
+        message: e instanceof Error ? e.message : String(e),
+      },
+    };
+  }
+
+  const columns: AqlQueryColumn[] = Array.from(
+    state.outputTypes.entries() as IterableIterator<
+      [string, string | number | null]
+    >,
+  ).map(([name, type]) => ({
+    name,
+    type: String(type),
+  }));
+
+  try {
+    // oxlint-disable-next-line typescript/no-explicit-any
+    const data: any = await runCompiledAqlQuery(
+      queryState,
+      sqlPieces,
+      state,
+      options,
+    );
+    return { data, dependencies: state.dependencies, columns };
+  } catch (e) {
+    return {
+      data: [],
+      dependencies: [],
+      columns,
+      error: {
+        type: 'runtime-error',
+        message: e instanceof Error ? e.message : String(e),
+      },
+    };
+  }
 }

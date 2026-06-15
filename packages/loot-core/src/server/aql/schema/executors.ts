@@ -1,11 +1,13 @@
 // @ts-strict-ignore
 
 import { aqlQuery } from '..';
+import * as monthUtils from '../../../shared/months';
 import { q } from '../../../shared/query';
 import type { QueryState } from '../../../shared/query';
 import type { CategoryEntity } from '../../../types/models';
 import * as db from '../../db';
 import { whereIn } from '../../db/util';
+import * as sheet from '../../sheet';
 import { isAggregateQuery } from '../compiler';
 import type { CompilerState, OutputTypes, SqlPieces } from '../compiler';
 import { execQuery } from '../exec';
@@ -339,7 +341,178 @@ function isValidCategoriesOption(
   return ['all', 'none'].includes(categories);
 }
 
+// Budget executor
+
+function monthIntToString(monthInt: number): string {
+  const str = String(monthInt);
+  return str.slice(0, 4) + '-' + str.slice(4, 6);
+}
+
+function parseMonthRange(
+  filterExpressions: readonly Record<string, unknown>[],
+): { start: number; end: number } | null {
+  let start: number | null = null;
+  let end: number | null = null;
+
+  for (const filter of filterExpressions) {
+    if (filter.month) {
+      const monthFilter = filter.month;
+      if (typeof monthFilter === 'string') {
+        const intVal = parseInt(monthFilter.replace('-', ''));
+        start = intVal;
+        end = intVal;
+      } else if (typeof monthFilter === 'object' && monthFilter !== null) {
+        const mf = monthFilter as Record<string, unknown>;
+        if (mf.$gte) {
+          start = parseInt((mf.$gte as string).replace('-', ''));
+        }
+        if (mf.$lte) {
+          end = parseInt((mf.$lte as string).replace('-', ''));
+        }
+        if (mf.$eq) {
+          const intVal = parseInt((mf.$eq as string).replace('-', ''));
+          start = intVal;
+          end = intVal;
+        }
+      }
+    }
+  }
+
+  if (start && end) {
+    return { start, end };
+  }
+  return null;
+}
+
+function getDefaultMonthRange(): { start: number; end: number } {
+  const s = sheet.get();
+  if (s) {
+    const createdMonths = s.meta().createdMonths;
+    if (createdMonths && createdMonths.size > 0) {
+      const sorted = [...createdMonths].sort();
+      const first = sorted[0];
+      const last = sorted[sorted.length - 1];
+      return {
+        start: parseInt(first.replace('-', '')),
+        end: parseInt(last.replace('-', '')),
+      };
+    }
+  }
+  const current = monthUtils.currentMonth();
+  const startMonth = monthUtils.subMonths(current, 3);
+  const endMonth = monthUtils.addMonths(current, 1);
+  return {
+    start: parseInt(startMonth.replace('-', '')),
+    end: parseInt(endMonth.replace('-', '')),
+  };
+}
+
+async function execBudget(
+  compilerState: CompilerState,
+  queryState: QueryState,
+  sqlPieces: SqlPieces,
+  params: (string | number)[],
+  outputTypes: OutputTypes,
+) {
+  if (!sheet.get()) {
+    throw new Error(
+      'Budget data is not available. Please open a budget file first.',
+    );
+  }
+
+  const monthRange = parseMonthRange(queryState.filterExpressions);
+  const { start, end } = monthRange ?? getDefaultMonthRange();
+  const months = monthUtils.rangeInclusive(
+    monthIntToString(start),
+    monthIntToString(end),
+  );
+
+  const groups = await db.getCategoriesGrouped();
+  const categories = groups.flatMap(g =>
+    g.categories.map(c => ({
+      ...c,
+      groupName: g.name,
+    })),
+  );
+
+  const rows: Record<string, unknown>[] = [];
+  for (const month of months) {
+    const sheetName = monthUtils.sheetForMonth(month);
+    const monthInt = parseInt(month.replace('-', ''));
+
+    for (const cat of categories) {
+      const budgeted = sheet.getCellValue(sheetName, `budget-${cat.id}`) ?? 0;
+      const spent = sheet.getCellValue(sheetName, `sum-amount-${cat.id}`) ?? 0;
+      const leftover = sheet.getCellValue(sheetName, `leftover-${cat.id}`) ?? 0;
+      const carryover =
+        sheet.getCellValue(sheetName, `carryover-${cat.id}`) ?? 0;
+
+      rows.push({
+        id: `${month}-${cat.id}`,
+        month: monthInt,
+        category: cat.id,
+        category_name: cat.name,
+        group: cat.cat_group,
+        group_name: (cat as typeof cat & { groupName: string }).groupName,
+        is_income: cat.is_income ? 1 : 0,
+        budgeted: Number(budgeted),
+        spent: Number(spent),
+        leftover: Number(leftover),
+        carryover: carryover === true || carryover === 1 ? 1 : 0,
+      });
+    }
+  }
+
+  const tempTableName = `budget_data_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  db.execQuery(
+    `CREATE TEMP TABLE ${tempTableName} (
+    id TEXT,
+    month INTEGER,
+    category TEXT,
+    category_name TEXT,
+    "group" TEXT,
+    group_name TEXT,
+    is_income INTEGER,
+    budgeted REAL,
+    spent REAL,
+    leftover REAL,
+    carryover INTEGER
+  )`,
+  );
+
+  try {
+    for (const row of rows) {
+      db.runQuery(
+        `INSERT INTO ${tempTableName} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          row.id as string,
+          row.month as number,
+          row.category as string,
+          row.category_name as string,
+          row.group as string,
+          row.group_name as string,
+          row.is_income as number,
+          row.budgeted as number,
+          row.spent as number,
+          row.leftover as number,
+          row.carryover as number,
+        ],
+      );
+    }
+
+    const fromParts = sqlPieces.from.split(' ');
+    const alias = fromParts.length > 1 ? fromParts[fromParts.length - 1] : 'budget';
+    const newFrom = `${tempTableName} ${alias}`;
+    const s = { ...sqlPieces, from: newFrom };
+
+    return execQuery(queryState, compilerState, s, params, outputTypes);
+  } finally {
+    db.execQuery(`DROP TABLE IF EXISTS ${tempTableName}`);
+  }
+}
+
 export const schemaExecutors: Record<string, AqlQueryExecutor> = {
   transactions: execTransactions,
   category_groups: execCategoryGroups,
+  budget: execBudget,
 };

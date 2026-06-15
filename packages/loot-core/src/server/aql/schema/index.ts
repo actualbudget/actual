@@ -198,6 +198,19 @@ export const schema = {
     meta: f('json'),
     tombstone: f('boolean'),
   },
+  budget: {
+    id: f('string'),
+    month: f('date-month'),
+    category: f('id', { ref: 'categories' }),
+    category_name: f('string'),
+    group: f('id', { ref: 'category_groups' }),
+    group_name: f('string'),
+    is_income: f('boolean'),
+    budgeted: f('float'),
+    spent: f('float'),
+    leftover: f('float'),
+    carryover: f('boolean'),
+  },
 };
 
 export const schemaConfig: SchemaConfig = {
