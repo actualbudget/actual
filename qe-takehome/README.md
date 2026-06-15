@@ -8,7 +8,7 @@ Playwright + pytest (Python). **Author:** Shreya Kumari
 
 Tests run against the local dev app (`yarn start` on port 3001).
 
-Docker is not required for these flows — budget and transactions work in the browser without a sync server. 
+Docker is not required for these flows — budget and transactions work in the browser without a sync server.
 
 ## Run
 
