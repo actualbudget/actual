@@ -144,7 +144,7 @@
     "@reduxjs/toolkit": "^2.12.0",
     "@rolldown/plugin-babel": "~0.1.8",
     "@rollup/plugin-inject": "^5.0.5",
-    "@tanstack/react-query": "^5.96.2",
+    "@tanstack/react-query": "^5.101.0",
     "@testing-library/dom": "10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "16.3.2",
