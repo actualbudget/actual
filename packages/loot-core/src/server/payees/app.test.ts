@@ -47,6 +47,10 @@ describe('payee app', () => {
       ],
     });
 
+    expect(await payeesApp.handlers['payees-get-rule-counts']()).toEqual({
+      [payeeId]: 3,
+    });
+
     await updateSchedule({
       schedule: {
         id: completedScheduleId,

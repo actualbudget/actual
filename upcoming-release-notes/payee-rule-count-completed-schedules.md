@@ -3,4 +3,4 @@ category: Bugfixes
 authors: [pupuking723]
 ---
 
-Fix payee rule counts including rules from completed schedules.
+Fix payee rule counts to exclude rules from completed schedules.
