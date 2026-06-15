@@ -433,8 +433,7 @@ export function Modals() {
             />
           );
         default:
-          console.error('Unknown modal:', modal.name);
-          return null;
+          throw new Error('Unknown modal');
       }
     })
     .map((modal, idx) => (

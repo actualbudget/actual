@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useMemo, useRef } from 'react';
 import type { ComponentProps, CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
 
@@ -25,12 +25,12 @@ import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { Field, SheetCell } from '#components/table';
 import type { SheetCellProps } from '#components/table';
 import { useCategoryScheduleGoalTemplateIndicator } from '#hooks/useCategoryScheduleGoalTemplateIndicator';
+import { useCategorySum } from '#hooks/useCategorySum';
 import { useFocusedViews } from '#hooks/useFocusedViews';
 import { useFormat } from '#hooks/useFormat';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSheetName } from '#hooks/useSheetName';
 import { useSheetValue } from '#hooks/useSheetValue';
-import { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { useUndo } from '#hooks/useUndo';
 import type { Binding, SheetFields } from '#spreadsheet';
 import { trackingBudget } from '#spreadsheet/bindings';
@@ -70,44 +70,6 @@ const cellStyle: CSSProperties = {
   fontWeight: 600,
 };
 
-function useGroupCategorySum(
-  sheetName: string,
-  categoryIds: string[],
-  field: (categoryId: string) => SheetFields<'tracking-budget'>,
-  enabled: boolean,
-) {
-  const spreadsheet = useSpreadsheet();
-  const [sum, setSum] = useState(0);
-
-  useEffect(() => {
-    if (!enabled) {
-      setSum(0);
-      return;
-    }
-
-    const values = new Map<string, number>();
-
-    const updateSum = () => {
-      setSum([...values.values()].reduce((total, value) => total + value, 0));
-    };
-
-    const unbinds = categoryIds.map(categoryId =>
-      spreadsheet.bind(sheetName, { name: field(categoryId) }, node => {
-        values.set(categoryId, typeof node.value === 'number' ? node.value : 0);
-        updateSum();
-      }),
-    );
-
-    updateSum();
-
-    return () => {
-      unbinds.forEach(unbind => unbind());
-    };
-  }, [categoryIds, enabled, field, sheetName, spreadsheet]);
-
-  return sum;
-}
-
 function FilteredGroupCell({
   categoryIds,
   field,
@@ -125,7 +87,7 @@ function FilteredGroupCell({
   const { sheetName } = useSheetName<'tracking-budget', 'total-budgeted'>(
     trackingBudget.totalBudgetedExpense,
   );
-  const value = useGroupCategorySum(
+  const value = useCategorySum(
     sheetName,
     categoryIds,
     field,

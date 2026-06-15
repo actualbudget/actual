@@ -98,11 +98,6 @@ export type LocalPrefs = Partial<{
   'budget.focusedViewsCollapsed': boolean;
   'flags.updateNotificationShownForVersion': string;
   'schedules.showCompleted': boolean;
-  'show-extra-balances': boolean;
-  'categories.hiddenFromSidebar': string[];
-  isPrivacyEnabled: boolean;
-  'net-worth.currentMode': 'graph' | 'table';
-  'net-worth.netWorthHidden': boolean;
   reportsViewLegend: boolean;
   reportsViewSummary: boolean;
   reportsViewLabel: boolean;

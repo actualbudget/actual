@@ -92,10 +92,6 @@ export function CellValueText<
     ...props,
   };
 
-  const normalizedValue = (
-    (value as unknown) === 0 ? 0 : value
-  ) as Spreadsheets[SheetName][FieldName];
-
   if (isFinancial) {
     return (
       <FinancialText
@@ -108,9 +104,7 @@ export function CellValueText<
         <PrivacyFilter
           activationFilters={[PRIVACY_FILTER_TYPES.includes(type)]}
         >
-          {formatter
-            ? formatter(normalizedValue, type)
-            : format(normalizedValue, type)}
+          {formatter ? formatter(value, type) : format(value, type)}
         </PrivacyFilter>
       </FinancialText>
     );
@@ -119,9 +113,7 @@ export function CellValueText<
   return (
     <Text {...sharedProps}>
       <PrivacyFilter activationFilters={[PRIVACY_FILTER_TYPES.includes(type)]}>
-        {formatter
-          ? formatter(normalizedValue, type)
-          : format(normalizedValue, type)}
+        {formatter ? formatter(value, type) : format(value, type)}
       </PrivacyFilter>
     </Text>
   );
