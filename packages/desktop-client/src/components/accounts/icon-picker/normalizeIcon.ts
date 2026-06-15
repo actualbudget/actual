@@ -3,6 +3,8 @@ import {
   MAX_DECODED_ICON_BYTES,
 } from '@actual-app/core/shared/accountIconLimits';
 
+const EMOJI_FONT_PADDING_PX = 8;
+
 export class IconNormalizationError extends Error {
   constructor(message: string) {
     super(message);
@@ -14,9 +16,7 @@ function checkSize(dataUrl: string): string {
   const base64 = dataUrl.split(',')[1] ?? '';
   let decodedLength: number;
   try {
-    decodedLength = Uint8Array.from(atob(base64.replace(/\s/g, '')), c =>
-      c.charCodeAt(0),
-    ).byteLength;
+    decodedLength = atob(base64.replace(/\s/g, '')).length;
   } catch {
     throw new IconNormalizationError('Invalid base64 in data URL');
   }
@@ -112,7 +112,7 @@ export function emojiToDataUrl(emoji: string): string {
     throw new IconNormalizationError('Empty emoji');
   }
   const dataUrl = paintToCanvas(ctx => {
-    ctx.font = `${ICON_SIZE_PX - 8}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", system-ui, sans-serif`;
+    ctx.font = `${ICON_SIZE_PX - EMOJI_FONT_PADDING_PX}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", system-ui, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
     const metrics = ctx.measureText(trimmed);

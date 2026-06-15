@@ -7,6 +7,8 @@ import { logger } from '#platform/server/log';
 const MAX_RAW_BYTES = 256 * 1024;
 const MAX_REDIRECTS = 8;
 const REQUEST_TIMEOUT_MS = 8000;
+const REDIRECT_STATUS_CODES = new Set([301, 302, 303, 307, 308]);
+const MAX_CANDIDATES_TO_TRY = 5;
 const ALLOWED_CONTENT_TYPES = [
   'image/x-icon',
   'image/vnd.microsoft.icon',
@@ -53,7 +55,8 @@ function isPrivateIp(address: string): boolean {
       lower.startsWith('fe80') || // link-local
       lower.startsWith('fc') || // unique-local
       lower.startsWith('fd') || // unique-local
-      lower.startsWith('::ffff:') // IPv4-mapped — recurse on embedded addr
+      (lower.startsWith('::ffff:') &&
+        isPrivateIp(lower.slice('::ffff:'.length))) // IPv4-mapped
     );
   }
   return false;
@@ -118,7 +121,7 @@ async function safeFetch(url: string, init?: RequestInit): Promise<Response> {
     } finally {
       clearTimeout(timer);
     }
-    if ([301, 302, 303, 307, 308].includes(res.status)) {
+    if (REDIRECT_STATUS_CODES.has(res.status)) {
       const location = res.headers.get('location');
       if (!location) {
         throw new FaviconDirectError(`Redirect without Location from ${next}`);
@@ -281,7 +284,7 @@ async function fetchManifestIconCandidates(
       try {
         const href = new URL(icon.src, base).toString();
         const area = parseIconSizeArea(icon.sizes ?? null);
-        candidates.push({ href, score: area > 0 ? area : 192 * 192 });
+        candidates.push({ href, score: area > 0 ? area : ICON_SIZE_TARGET });
       } catch {
         // skip invalid src
       }
@@ -329,7 +332,7 @@ async function tryDirect(origin: URL): Promise<FaviconDirectResult | null> {
     .map(([href, score]) => ({ href, score }))
     .sort((a, b) => b.score - a.score);
 
-  for (const candidate of merged.slice(0, 5)) {
+  for (const candidate of merged.slice(0, MAX_CANDIDATES_TO_TRY)) {
     try {
       const dl = await downloadAsBase64(candidate.href);
       return { ...dl, source: 'direct' };
@@ -343,7 +346,9 @@ async function tryDirect(origin: URL): Promise<FaviconDirectResult | null> {
   }
 
   // Well-known fallback paths not already tried.
-  const triedHrefs = new Set(merged.slice(0, 5).map(c => c.href));
+  const triedHrefs = new Set(
+    merged.slice(0, MAX_CANDIDATES_TO_TRY).map(c => c.href),
+  );
   const fallbackPaths = [
     new URL('/apple-touch-icon.png', origin).toString(),
     new URL('/apple-touch-icon-precomposed.png', origin).toString(),

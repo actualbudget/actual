@@ -680,7 +680,7 @@ function AccountNameField({
             },
           }}
         >
-          {account && <AccountIcon account={account} size={24} />}
+          <AccountIcon account={account} size={24} />
           <View
             style={{
               fontSize: 25,

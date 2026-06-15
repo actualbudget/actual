@@ -12,6 +12,8 @@ import { validateSession } from './util/validate-user';
 const MAX_RAW_BYTES = 256 * 1024;
 const MAX_TEXT_BYTES = 32 * 1024;
 const MAX_REDIRECTS = 8;
+const MAX_ICON_CANDIDATES = 5;
+const FAVICON_CACHE_MAX_AGE_SECONDS = 300;
 const REQUEST_TIMEOUT_MS = 20000;
 const ALLOWED_CONTENT_TYPES = [
   'image/x-icon',
@@ -387,7 +389,7 @@ async function fetchManifestIconCandidates(
       try {
         const href = new URL(icon.src, base).toString();
         const area = parseIconSizeArea(icon.sizes ?? null);
-        candidates.push({ href, score: area > 0 ? area : 192 * 192 });
+        candidates.push({ href, score: area > 0 ? area : ICON_SIZE_TARGET });
       } catch {
         // skip invalid src
       }
@@ -442,7 +444,7 @@ async function tryDirect(origin: URL): Promise<FaviconResult | null> {
     .map(([href, score]) => ({ href, score }))
     .sort((a, b) => b.score - a.score);
 
-  for (const candidate of merged.slice(0, 5)) {
+  for (const candidate of merged.slice(0, MAX_ICON_CANDIDATES)) {
     try {
       const dl = await downloadAsBase64(candidate.href);
       return { ...dl, source: 'direct' };
@@ -458,7 +460,9 @@ async function tryDirect(origin: URL): Promise<FaviconResult | null> {
   }
 
   // Well-known fallback paths not already tried.
-  const triedHrefs = new Set(merged.slice(0, 5).map(c => c.href));
+  const triedHrefs = new Set(
+    merged.slice(0, MAX_ICON_CANDIDATES).map(c => c.href),
+  );
   const fallbackPaths = [
     new URL('/apple-touch-icon.png', origin).toString(),
     new URL('/apple-touch-icon-precomposed.png', origin).toString(),
@@ -521,30 +525,20 @@ export async function fetchImageForUrl(
   return { ...dl, source: 'image' };
 }
 
+function getQueryString(v: unknown): string | undefined {
+  const raw = Array.isArray(v) ? v[0] : v;
+  return typeof raw === 'string' && raw !== '' ? raw : undefined;
+}
+
 const app = express();
 
 app.get('/', async (req: Request, res: ExpressResponse) => {
   const session = await validateSession(req, res);
   if (!session) return;
 
-  const rawImage = Array.isArray(req.query.image)
-    ? req.query.image[0]
-    : req.query.image;
-  const imageValue =
-    typeof rawImage === 'string' && rawImage !== '' ? rawImage : undefined;
-
-  const rawUrlParam = Array.isArray(req.query.url)
-    ? req.query.url[0]
-    : req.query.url;
-  const rawDomainParam = Array.isArray(req.query.domain)
-    ? req.query.domain[0]
-    : req.query.domain;
+  const imageValue = getQueryString(req.query.image);
   const urlValue =
-    typeof rawUrlParam === 'string' && rawUrlParam !== ''
-      ? rawUrlParam
-      : typeof rawDomainParam === 'string' && rawDomainParam !== ''
-        ? rawDomainParam
-        : undefined;
+    getQueryString(req.query.url) ?? getQueryString(req.query.domain);
 
   if (!imageValue && !urlValue) {
     res.status(400).json({ error: 'Missing url, domain, or image parameter' });
@@ -555,7 +549,10 @@ app.get('/', async (req: Request, res: ExpressResponse) => {
     const result = imageValue
       ? await fetchImageForUrl(imageValue)
       : await fetchFaviconForUrl(urlValue!);
-    res.set('Cache-Control', 'private, max-age=300');
+    res.set(
+      'Cache-Control',
+      `private, max-age=${FAVICON_CACHE_MAX_AGE_SECONDS}`,
+    );
     res.json(result);
   } catch (err) {
     if (err instanceof FaviconError) {

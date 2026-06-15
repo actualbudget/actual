@@ -83,6 +83,8 @@ type Tab = 'favicon' | 'upload' | 'emoji';
 type Scope = 'account' | 'bank';
 
 const PREVIEW_SIZE = 64;
+const SUBTEXT_FONT_SIZE = 12;
+const MODAL_WIDTH = 400;
 const SUGGESTED_EMOJI = [
   '🏦',
   '💳',
@@ -176,24 +178,35 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
     <Modal
       name="account-icon-picker"
       onClose={onClose}
-      containerProps={{ style: { width: 400 } }}
+      containerProps={{ style: { width: MODAL_WIDTH } }}
     >
       {({ state }) => {
-        const handleApply = async () => {
-          if (!previewIcon || isBusy) return;
+        const handlePersist = async (
+          action: () => Promise<void>,
+          fallbackKey: string,
+        ) => {
           setError(null);
           setIsBusy(true);
           try {
-            await persistAll({
-              icon: previewIcon,
-              website: pendingWebsite ?? undefined,
-            });
+            await action();
             state.close();
           } catch (err) {
-            setError(iconPersistErrorMessage(err, t, 'Failed to save icon'));
+            setError(iconPersistErrorMessage(err, t, fallbackKey));
           } finally {
             setIsBusy(false);
           }
+        };
+
+        const handleApply = async () => {
+          if (!previewIcon || isBusy) return;
+          await handlePersist(
+            () =>
+              persistAll({
+                icon: previewIcon,
+                website: pendingWebsite ?? undefined,
+              }),
+            'Failed to save icon',
+          );
         };
 
         return (
@@ -271,7 +284,12 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
               )}
 
               {ddgFaviconUrl && (
-                <Text style={{ fontSize: 12, color: theme.pageTextSubdued }}>
+                <Text
+                  style={{
+                    fontSize: SUBTEXT_FONT_SIZE,
+                    color: theme.pageTextSubdued,
+                  }}
+                >
                   <Trans>
                     The site may be blocking automated requests. Try opening{' '}
                     <Link variant="external" to={ddgFaviconUrl}>
@@ -292,20 +310,12 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
               >
                 <Button
                   isDisabled={isBusy || !canClear}
-                  onPress={async () => {
-                    setError(null);
-                    setIsBusy(true);
-                    try {
-                      await persistAll({ icon: null });
-                      state.close();
-                    } catch (err) {
-                      setError(
-                        iconPersistErrorMessage(err, t, 'Failed to clear icon'),
-                      );
-                    } finally {
-                      setIsBusy(false);
-                    }
-                  }}
+                  onPress={() =>
+                    void handlePersist(
+                      () => persistAll({ icon: null }),
+                      'Failed to clear icon',
+                    )
+                  }
                 >
                   {scope === 'bank' ? (
                     <Trans>Clear bank icon</Trans>
@@ -379,7 +389,12 @@ function CurrentIconPreview({
             style={{ objectFit: 'contain' }}
           />
         ) : (
-          <Text style={{ color: theme.pageTextSubdued, fontSize: 12 }}>
+          <Text
+            style={{
+              color: theme.pageTextSubdued,
+              fontSize: SUBTEXT_FONT_SIZE,
+            }}
+          >
             <Trans>No icon</Trans>
           </Text>
         )}
@@ -388,7 +403,9 @@ function CurrentIconPreview({
         <Text style={{ ...styles.mediumText, fontWeight: 500 }}>
           {accountName}
         </Text>
-        <Text style={{ color: theme.pageTextSubdued, fontSize: 12 }}>
+        <Text
+          style={{ color: theme.pageTextSubdued, fontSize: SUBTEXT_FONT_SIZE }}
+        >
           <Trans>Preview</Trans>
         </Text>
       </View>
@@ -509,7 +526,9 @@ function FaviconTab({
   if (!hasFaviconProxy) {
     return (
       <View style={{ gap: 8 }}>
-        <Text style={{ fontSize: 12, color: theme.pageTextSubdued }}>
+        <Text
+          style={{ fontSize: SUBTEXT_FONT_SIZE, color: theme.pageTextSubdued }}
+        >
           <Trans>
             Auto-favicon requires a connected sync server, which fetches the
             icon and embeds it locally. Without a sync server, please use the
@@ -557,7 +576,9 @@ function FaviconTab({
 
   return (
     <View style={{ gap: 8 }}>
-      <Text style={{ fontSize: 12, color: theme.pageTextSubdued }}>
+      <Text
+        style={{ fontSize: SUBTEXT_FONT_SIZE, color: theme.pageTextSubdued }}
+      >
         <Trans>
           Enter a bank or institution URL. The favicon will be fetched and
           embedded locally so it works offline.
@@ -614,7 +635,9 @@ function UploadTab({
 
   return (
     <View style={{ gap: 8 }}>
-      <Text style={{ fontSize: 12, color: theme.pageTextSubdued }}>
+      <Text
+        style={{ fontSize: SUBTEXT_FONT_SIZE, color: theme.pageTextSubdued }}
+      >
         <Trans>
           Upload an image. It will be resized to 64x64 pixels and stored inline.
         </Trans>
@@ -684,7 +707,9 @@ function EmojiTab({
 
   return (
     <View style={{ gap: 8 }}>
-      <Text style={{ fontSize: 12, color: theme.pageTextSubdued }}>
+      <Text
+        style={{ fontSize: SUBTEXT_FONT_SIZE, color: theme.pageTextSubdued }}
+      >
         <Trans>Pick a suggested emoji or paste any character.</Trans>
       </Text>
       <View

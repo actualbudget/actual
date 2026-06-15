@@ -117,6 +117,10 @@ async function updateAccount({
   return {};
 }
 
+async function normalizeIconForDb(icon: string | null): Promise<string | null> {
+  return icon === null ? null : normalizeIconDataUrlForDbIfRaster(icon);
+}
+
 // Icon/website updates are isolated from `updateAccount` so rename flows cannot overwrite them.
 async function setAccountIcon({
   id,
@@ -130,8 +134,7 @@ async function setAccountIcon({
   await db.update('accounts', {
     id,
     ...(icon !== undefined && {
-      icon:
-        icon === null ? null : await normalizeIconDataUrlForDbIfRaster(icon),
+      icon: await normalizeIconForDb(icon),
     }),
     ...(website !== undefined && { website }),
   });
@@ -151,8 +154,7 @@ async function updateBank({
     id,
     ...(website !== undefined && { website }),
     ...(icon !== undefined && {
-      icon:
-        icon === null ? null : await normalizeIconDataUrlForDbIfRaster(icon),
+      icon: await normalizeIconForDb(icon),
     }),
   });
   return {};
@@ -172,11 +174,7 @@ async function saveIconPickerState({
   website?: string | null;
 }) {
   const normalizedIcon =
-    icon === undefined
-      ? undefined
-      : icon === null
-        ? null
-        : await normalizeIconDataUrlForDbIfRaster(icon);
+    icon === undefined ? undefined : await normalizeIconForDb(icon);
 
   if (scope === 'bank' && bankId) {
     await db.asyncTransaction(async () => {
@@ -209,9 +207,7 @@ export type FaviconFetchResult = {
 /** Thrown when no sync server is configured (client shows Upload/Emoji instead of auto-favicon). */
 export const FAVICON_NO_SYNC_SERVER = 'no-sync-server';
 
-type ProxyMode =
-  | { kind: 'website'; url: string }
-  | { kind: 'image'; url: string };
+type ProxyMode = { kind: 'website' | 'image'; url: string };
 
 async function fetchFaviconViaProxy(
   baseUrl: string,

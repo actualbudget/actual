@@ -60,6 +60,30 @@ function detectRasterMime(buf: Buffer): string | null {
   return null;
 }
 
+// Photon resize filter ID: 5 = Lanczos3 (best quality for downscaling)
+const PHOTON_FILTER_LANCZOS3 = 5;
+
+function resizeAndCropCenter(
+  photon: typeof PhotonNS,
+  img: PhotonNS.PhotonImage,
+  sizePx: number,
+): Buffer {
+  const srcW = img.get_width();
+  const srcH = img.get_height();
+  const scale = Math.max(sizePx / srcW, sizePx / srcH);
+  const scaledW = Math.round(srcW * scale);
+  const scaledH = Math.round(srcH * scale);
+  const resized = photon.resize(img, scaledW, scaledH, PHOTON_FILTER_LANCZOS3);
+  img.free();
+  const x1 = Math.floor((scaledW - sizePx) / 2);
+  const y1 = Math.floor((scaledH - sizePx) / 2);
+  const cropped = photon.crop(resized, x1, y1, x1 + sizePx, y1 + sizePx);
+  resized.free();
+  const out = Buffer.from(cropped.get_bytes());
+  cropped.free();
+  return out;
+}
+
 export async function normalizeRasterIconBufferForDb(
   input: Buffer,
 ): Promise<string> {
@@ -80,30 +104,7 @@ export async function normalizeRasterIconBufferForDb(
   if (photon) {
     try {
       const img = photon.PhotonImage.new_from_byteslice(new Uint8Array(input));
-
-      const srcW = img.get_width();
-      const srcH = img.get_height();
-      const scale = Math.max(ICON_SIZE_PX / srcW, ICON_SIZE_PX / srcH);
-      const scaledW = Math.round(srcW * scale);
-      const scaledH = Math.round(srcH * scale);
-
-      const resized = photon.resize(img, scaledW, scaledH, 5); // 5 = Lanczos3
-      img.free();
-
-      const x1 = Math.floor((scaledW - ICON_SIZE_PX) / 2);
-      const y1 = Math.floor((scaledH - ICON_SIZE_PX) / 2);
-      const cropped = photon.crop(
-        resized,
-        x1,
-        y1,
-        x1 + ICON_SIZE_PX,
-        y1 + ICON_SIZE_PX,
-      );
-      resized.free();
-
-      const out = Buffer.from(cropped.get_bytes());
-      cropped.free();
-
+      const out = resizeAndCropCenter(photon, img, ICON_SIZE_PX);
       if (out.byteLength > MAX_DECODED_ICON_BYTES) {
         throw new PostError('icon-too-large');
       }
