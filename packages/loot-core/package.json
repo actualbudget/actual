@@ -185,7 +185,7 @@
     "handlebars": "^4.7.9",
     "hyperformula": "^3.3.0",
     "lodash": "^4.18.1",
-    "lru-cache": "^11.2.7",
+    "lru-cache": "^11.5.1",
     "memoize-one": "^6.0.0",
     "mitt": "^3.0.1",
     "promise-retry": "^2.0.1",
