@@ -1,0 +1,167 @@
+---
+alwaysApply: false
+---
+# QE Take-Home — Playwright + pytest E2E Tests
+
+## What this is
+
+End-to-end tests for **Actual Budget** covering **envelope budgeting** and
+**account transactions**. Tests run in the browser against the local dev server
+(`http://localhost:3001`) — no backend API, no sync server, no Docker.
+
+- **Stack:** Python 3.12+, pytest, pytest-playwright, Chromium
+- **App:** Actual Budget started via `yarn start` (from repo root, port 3001)
+
+## Project layout
+
+```
+qe-takehome/
+├── data/constants.py          # all test data (names, amounts, display values)
+├── pages/                     # Page Object Model classes
+│   ├── budget_page.py         # BudgetPage — set budget, read balance/spent, transfer
+│   ├── account_page.py        # AccountPage — add/cancel txn, mark cleared
+│   └── configuration_page.py  # ConfigurationPage — first-run setup
+├── flows/app_flows.py         # shared setup: open_test_budget(), clear_sidebar_hover()
+├── tests/
+│   ├── test_budget.py         # BUD-01 to BUD-04
+│   ├── test_transactions.py   # TXN-01 to TXN-04
+│   └── test_journeys.py       # J-01, J-02
+├── conftest.py                # adds project root to sys.path
+├── pytest.ini                 # testpaths, base_url, browser
+└── TEST_PLAN.md               # test plan and manual findings
+```
+
+## Rules you MUST follow
+
+1. **Page objects in `pages/`, tests in `tests/`, flows in `flows/`.**
+   Never put assertions in page objects. Never put page interactions in test files
+   (use page object methods instead).
+
+2. **All test data in `data/constants.py`.**
+   No hardcoded strings or numbers in test files. Add new constants there and
+   import them.
+
+3. **Locators: `get_by_test_id()` and `get_by_role()` only.**
+   Do not use raw CSS selectors or XPath.
+
+4. **Compare money as integer cents.**
+   Use `to_cents()` and `balance_cents()` from `budget_page.py`.
+   Never compare money as floats.
+
+5. **Every test starts fresh.**
+   Call `open_test_budget(page)` from `flows/app_flows.py` at the top of each
+   test. This navigates to `/` and creates a new test file.
+
+6. **Call `clear_sidebar_hover(page)` before budget interactions.**
+   Sidebar tooltips can block clicks. Move the mouse to `(0, 0)` first.
+
+7. **Type hints on all function signatures.** Docstrings on page object classes
+   and non-obvious helpers.
+
+8. **One page object per page.** Don't mix budget actions into `AccountPage` or
+   vice versa.
+
+## How to run
+
+```bash
+# Terminal 1 — app (repo root)
+yarn start
+
+# Terminal 2 — tests (qe-takehome/)
+source .venv/bin/activate
+pytest -v                              # headless
+pytest -v --headed --slowmo=1000       # watch mode
+```
+
+## Patterns to follow
+
+### Adding a new test
+
+```python
+from playwright.sync_api import Page, expect
+from data.constants import SOME_VALUE
+from flows.app_flows import open_test_budget
+
+def test_my_new_case(page: Page):
+    budget_page = open_test_budget(page)
+    # interact via page objects, then assert
+    expect(some_locator).to_be_visible()
+```
+
+### Adding a new page object
+
+```python
+from playwright.sync_api import Page
+
+class NewPage:
+    def __init__(self, page: Page) -> None:
+        self.page = page
+        # locators via get_by_test_id / get_by_role
+
+    def some_action(self) -> None:
+        pass  # no assertions here
+```
+
+### Adding test data
+
+```python
+# data/constants.py
+NEW_CATEGORY = "Rent"
+NEW_AMOUNT_INPUT = "100"
+NEW_AMOUNT_DISPLAY = "100.00"
+```
+
+## Scope
+
+**In scope:** Budget page, Account/Transactions page (browser-only).
+**Out of scope:** Bank sync, Docker, REST API, Reports, Settings, sync server.
+
+## Do's and Don'ts
+
+### Do
+
+- **Do** use `open_test_budget(page)` to start every test with a clean state.
+- **Do** use `expect()` from Playwright for UI visibility/text checks and plain
+  `assert` for computed numeric comparisons (e.g. money in cents).
+- **Do** wait for elements before interacting — use `wait_for()`, `wait_for_timeout()`,
+  or Playwright's auto-waiting locators.
+- **Do** give test functions descriptive names matching the test plan IDs
+  (e.g. `test_overbudget_warning` for BUD-03).
+- **Do** keep page object methods small and single-purpose — one action per method.
+- **Do** use `parse_money()` and `to_cents()` for reading displayed amounts.
+- **Do** run `pytest -v` (headless) to validate before pushing, and `--headed` to debug.
+- **Do** keep `TEST_PLAN.md` in sync when adding or changing test cases.
+- **Do** add a comment with the test ID at the top of each test
+  (e.g. `# BUD-03: budgeting too much shows an overbudget warning`).
+- **Do** use `press_sequentially()` for typing into filtered/autocomplete fields
+  (e.g. payee, category pickers) — `fill()` skips input events the app relies on.
+
+### Don't
+
+- **Don't** use `page.locator("css=...")` or XPath — always use `get_by_test_id()`
+  or `get_by_role()`.
+- **Don't** hardcode strings like `"Food"` or `"25"` in test files — import from
+  `data/constants.py`.
+- **Don't** put `expect()` or `assert` inside page objects — page objects return
+  values, tests make assertions.
+- **Don't** compare money as floats (`==`). Convert to cents first with `to_cents()`.
+- **Don't** use `time.sleep()` — use Playwright's `wait_for_timeout()` or auto-waiting
+  locators instead.
+- **Don't** share state between tests — each test creates its own budget via
+  `open_test_budget()`. No fixtures that persist across tests.
+- **Don't** use `page.evaluate()` for things Playwright locators can handle natively.
+- **Don't** add new dependencies without updating `requirements.txt`.
+- **Don't** write one giant test that covers multiple features — split into focused
+  unit tests and use journey tests (`test_journeys.py`) for cross-feature flows.
+- **Don't** forget `clear_sidebar_hover(page)` before budget page interactions —
+  tooltip overlays will cause flaky click failures.
+
+## Troubleshooting
+
+| Problem                          | Fix                                                    |
+| -------------------------------- | ------------------------------------------------------ |
+| Tests fail before starting       | Is `yarn start` running on port 3001?                  |
+| Sidebar tooltip blocks a click   | Call `clear_sidebar_hover(page)` first                 |
+| Money comparison is flaky        | Use `balance_cents()` / `to_cents()`, never floats     |
+| Import error on pages/flows/data | `conftest.py` adds project root to `sys.path`          |
+| Playwright not found             | `pip install -r requirements.txt && playwright install chromium` |
