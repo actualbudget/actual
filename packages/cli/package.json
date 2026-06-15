@@ -39,7 +39,7 @@
     "proper-lockfile": "^4.1.2"
   },
   "devDependencies": {
-    "@types/node": "^22.19.17",
+    "@types/node": "^22.19.21",
     "@types/proper-lockfile": "^4",
     "@typescript/native-preview": "beta",
     "rollup-plugin-visualizer": "^7.0.1",

@@ -116,7 +116,7 @@
     "@types/express": "^5.0.6",
     "@types/express-actuator": "^1.8.3",
     "@types/jws": "^3.2.11",
-    "@types/node": "^22.19.17",
+    "@types/node": "^22.19.21",
     "@types/supertest": "^7.2.0",
     "@typescript/native-preview": "beta",
     "http-proxy-middleware": "^3.0.5",
