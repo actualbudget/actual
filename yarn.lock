@@ -85,7 +85,7 @@ __metadata:
     "@types/react": "npm:^19.2.17"
     "@typescript/native-preview": "npm:beta"
     "@vitejs/plugin-react": "npm:^6.0.2"
-    eslint-plugin-storybook: "npm:^10.3.4"
+    eslint-plugin-storybook: "npm:^10.4.4"
     react: "npm:19.2.4"
     react-aria-components: "npm:^1.18.0"
     react-dom: "npm:19.2.4"
@@ -15863,15 +15863,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-storybook@npm:^10.3.4":
-  version: 10.3.5
-  resolution: "eslint-plugin-storybook@npm:10.3.5"
+"eslint-plugin-storybook@npm:^10.4.4":
+  version: 10.4.4
+  resolution: "eslint-plugin-storybook@npm:10.4.4"
   dependencies:
     "@typescript-eslint/utils": "npm:^8.48.0"
   peerDependencies:
     eslint: ">=8"
-    storybook: ^10.3.5
-  checksum: 10/4212860839ae8a681df052d80b771d50ba6566a2aafec87745467e136bf1cc8eba0bf7ed195ed160a65096fb20db96f99ee2ef4589bec22af73a73fd2e161032
+    storybook: ^10.4.4
+  checksum: 10/033294b8a884222d8acfc45b3ad6bb29b3ff70399bc6b01e85204090cd2f3115ef754ca3e03c14ea688472fba7db0f8874389489de3ad203a0874b223d0d55e4
   languageName: node
   linkType: hard
 
