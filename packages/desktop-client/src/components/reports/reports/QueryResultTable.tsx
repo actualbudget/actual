@@ -4,7 +4,6 @@ import { Trans } from 'react-i18next';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { logger } from 'loot-core/platform/server/log';
 import * as monthUtils from 'loot-core/shared/months';
 
 import { useFormat } from '@desktop-client/hooks/useFormat';
@@ -86,19 +85,7 @@ export function QueryResultTable({
         return String(value);
       case 'integer':
         if (typeof value === 'number') {
-          try {
-            return format(value, 'financial');
-          } catch (e) {
-            logger.warn(
-              '[QueryResultTable] financial format failed, falling back to number',
-              {
-                value,
-                type,
-                error: e instanceof Error ? e.message : String(e),
-              },
-            );
-            return format(value, 'number');
-          }
+          return format(value, 'financial');
         }
         return String(value);
       case 'float':
