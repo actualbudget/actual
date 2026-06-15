@@ -6,7 +6,6 @@ import { View } from '@actual-app/components/view';
 
 import { logger } from 'loot-core/platform/server/log';
 import * as monthUtils from 'loot-core/shared/months';
-import { integerToAmount } from 'loot-core/shared/util';
 
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import type { QueryResult } from '@desktop-client/queries/processQueryResult';
@@ -86,24 +85,25 @@ export function QueryResultTable({
       case 'date-year':
         return String(value);
       case 'integer':
+        if (typeof value === 'number') {
+          try {
+            return format(value, 'financial');
+          } catch (e) {
+            logger.warn(
+              '[QueryResultTable] financial format failed, falling back to number',
+              {
+                value,
+                type,
+                error: e instanceof Error ? e.message : String(e),
+              },
+            );
+            return format(value, 'number');
+          }
+        }
+        return String(value);
       case 'float':
       case 'number':
         if (typeof value === 'number') {
-          if (Number.isInteger(value)) {
-            try {
-              return format(integerToAmount(value), 'financial');
-            } catch (e) {
-              logger.warn(
-                '[QueryResultTable] integerToAmount failed, falling back to number format',
-                {
-                  value,
-                  type,
-                  error: e instanceof Error ? e.message : String(e),
-                },
-              );
-              return format(value, 'number');
-            }
-          }
           return format(value, 'number');
         }
         return String(value);

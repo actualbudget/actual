@@ -4,7 +4,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { integerToAmount } from 'loot-core/shared/util';
 import type { QueryReportWidget } from 'loot-core/types/models';
 
 import { QueryResultTable } from './QueryResultTable';
@@ -144,7 +143,7 @@ export function QueryReportCard({
                   color: theme.pageText,
                 }}
               >
-                {format(integerToAmount(result.scalar), 'financial')}
+                {format(result.scalar, 'financial')}
               </View>
             ) : (
               <QueryResultTable result={result} compact />
