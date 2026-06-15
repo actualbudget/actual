@@ -56,6 +56,10 @@ const DynamicBudgetTable = ({
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
   const [firstMonthOffset, setFirstMonthOffset] = useState(0);
+  const [monthPickerLayout, setMonthPickerLayout] = useState<{
+    calendarOffset: number;
+    width: number;
+  } | null>(null);
 
   const numPossible = getNumPossibleMonths(
     width,
@@ -156,10 +160,12 @@ const DynamicBudgetTable = ({
             monthBounds={monthBounds}
             onMonthSelect={_onMonthSelect}
             onFirstMonthXOffset={setFirstMonthOffset}
+            onMonthPickerLayout={setMonthPickerLayout}
           />
           <BudgetTable
             type={type}
             firstMonthOffset={firstMonthOffset}
+            monthPickerLayout={monthPickerLayout}
             prewarmStartMonth={prewarmStartMonth}
             startMonth={startMonth}
             numMonths={numMonths}

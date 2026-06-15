@@ -20,6 +20,7 @@ type FocusedViewsBarProps = {
   activeViewId: string | null;
   isCollapsed: boolean;
   startOffset: number;
+  maxWidth?: number;
   availableBuiltInViews: {
     underfunded: boolean;
     overfunded: boolean;
@@ -214,6 +215,7 @@ export function FocusedViewsBar({
   activeViewId,
   isCollapsed,
   startOffset,
+  maxWidth,
   availableBuiltInViews,
   viewOrder,
   hiddenViews,
@@ -240,6 +242,7 @@ export function FocusedViewsBar({
         justifyContent: 'flex-start',
         paddingLeft: startOffset,
         paddingRight: 10,
+        maxWidth,
         marginTop: 8,
         marginBottom: 12,
         flexShrink: 0,

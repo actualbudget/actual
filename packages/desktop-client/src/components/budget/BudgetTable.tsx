@@ -41,6 +41,7 @@ type BudgetTableProps = {
   type: string;
   /** Measured x-offset from MonthPicker root to the first month label, in px. */
   firstMonthOffset?: number;
+  monthPickerLayout?: { calendarOffset: number; width: number } | null;
   prewarmStartMonth: string;
   startMonth: string;
   numMonths: number;
@@ -74,6 +75,7 @@ export function BudgetTable(props: BudgetTableProps) {
   const {
     type,
     firstMonthOffset = 0,
+    monthPickerLayout,
     prewarmStartMonth,
     startMonth,
     numMonths,
@@ -138,6 +140,10 @@ export function BudgetTable(props: BudgetTableProps) {
     5 -
     offsetMultipleMonths +
     firstMonthOffset;
+
+  const monthPickerContainerLeft =
+    200 + 100 * categoryExpandedState + 5 - offsetMultipleMonths;
+
   const [editing, setEditing] = useState<{ id: string; cell: string } | null>(
     null,
   );
@@ -301,7 +307,12 @@ export function BudgetTable(props: BudgetTableProps) {
         views={views}
         activeViewId={activeViewId}
         isCollapsed={isCollapsed}
-        startOffset={monthHeaderOffset}
+        startOffset={monthPickerContainerLeft}
+        maxWidth={
+          monthPickerLayout
+            ? monthPickerContainerLeft + monthPickerLayout.width
+            : undefined
+        }
         availableBuiltInViews={availableBuiltInViews}
         viewOrder={viewOrder}
         hiddenViews={hiddenViews}

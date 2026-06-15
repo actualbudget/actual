@@ -5,7 +5,6 @@ import { Button } from '@actual-app/components/button';
 import { SvgFilter, SvgFilterOutline } from '@actual-app/components/icons/v1';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
-
 import type { FocusedViewDefinition } from '@actual-app/core/types/prefs';
 
 import { BUILT_IN_VIEWS } from '#hooks/useFocusedViews';
@@ -93,13 +92,19 @@ export function ViewFilterButton({
           <SvgFilter
             width={18}
             height={17}
-            style={{ color: theme.mobileHeaderText, transform: 'translateY(2px)' }}
+            style={{
+              color: theme.mobileHeaderText,
+              transform: 'translateY(2px)',
+            }}
           />
         ) : (
           <SvgFilterOutline
             width={18}
             height={17}
-            style={{ color: theme.mobileHeaderText, transform: 'translateY(2px)' }}
+            style={{
+              color: theme.mobileHeaderText,
+              transform: 'translateY(2px)',
+            }}
           />
         )}
       </Button>

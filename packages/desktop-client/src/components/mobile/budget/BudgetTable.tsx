@@ -558,7 +558,9 @@ function BudgetTableHeader({
   const normalizeZero = (v: number) => (Object.is(v, -0) || v === 0 ? 0 : v);
 
   const budgetedDisplay = normalizeZero(
-    budgetType === 'tracking' ? budgetedValueRaw : -budgetedValueRaw,
+    budgetType === 'tracking' || isViewActive
+      ? budgetedValueRaw
+      : -budgetedValueRaw,
   );
   const spentDisplay = normalizeZero(spentValueRaw);
   const balanceDisplay = normalizeZero(balanceValueRaw);

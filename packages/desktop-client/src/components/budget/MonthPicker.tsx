@@ -32,6 +32,11 @@ type MonthPickerProps = {
   onSelect: (month: string) => void;
   /** Called with the x-offset (in px) from the MonthPicker root's left edge to the first month label. */
   onFirstMonthXOffset?: (offset: number) => void;
+  /** Called with the layout measurements for the filter views bar (from calendar to collapse icon). */
+  onMonthPickerLayout?: (layout: {
+    calendarOffset: number;
+    width: number;
+  }) => void;
 };
 
 export const MonthPicker = ({
@@ -41,6 +46,7 @@ export const MonthPicker = ({
   style,
   onSelect,
   onFirstMonthXOffset,
+  onMonthPickerLayout,
 }: MonthPickerProps) => {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -52,9 +58,13 @@ export const MonthPicker = ({
   // label and report it to the parent so the views bar can align precisely.
   const pickerRootEl = useRef<Element | null>(null);
   const firstMonthEl = useRef<Element | null>(null);
+
   // Use a ref so the layout effect closure is always fresh without being a dep.
   const onFirstMonthXOffsetRef = useRef(onFirstMonthXOffset);
   onFirstMonthXOffsetRef.current = onFirstMonthXOffset;
+
+  const onMonthPickerLayoutRef = useRef(onMonthPickerLayout);
+  onMonthPickerLayoutRef.current = onMonthPickerLayout;
 
   const pickerRootRef = useCallback((el: Element | null) => {
     pickerRootEl.current = el;
@@ -112,6 +122,12 @@ export const MonthPicker = ({
     setTargetMonthCount(
       Math.min(Math.max(Math.floor(rect.width / 50), 12), 24),
     );
+    if (onMonthPickerLayoutRef.current) {
+      onMonthPickerLayoutRef.current({
+        calendarOffset: 0,
+        width: rect.width,
+      });
+    }
   });
 
   const yearHeadersShown = [];
@@ -196,7 +212,9 @@ export const MonthPicker = ({
           return (
             <View
               key={month}
-              innerRef={idx === 0 ? firstMonthRefCallback : undefined}
+              innerRef={el => {
+                if (idx === 0) firstMonthRefCallback(el);
+              }}
               data-testid={selected ? 'selected-budget-month' : undefined}
               data-month={selected ? month : undefined}
               style={{
@@ -308,20 +326,14 @@ export const MonthPicker = ({
           onPress={() => setCollapsed(!isCollapsed)}
           style={{
             padding: '3px 3px',
-            marginLeft: '12px',
+            marginLeft: 15,
           }}
         >
-          <View
-            title={
-              isCollapsed
-                ? t('Expand focused views')
-                : t('Collapse focused views')
-            }
-          >
+          <View>
             <ExpandOrCollapseIcon
               style={{
-                width: 16,
-                height: 16,
+                width: 13,
+                height: 13,
               }}
             />
           </View>
