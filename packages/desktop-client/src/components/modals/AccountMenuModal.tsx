@@ -93,13 +93,6 @@ export function AccountMenuModal({
     onEditNotes?.(account.id);
   };
 
-  const _onEditIcon = () => {
-    if (!account) {
-      return;
-    }
-    onEditIcon?.();
-  };
-
   const buttonStyle: CSSProperties = {
     ...styles.mediumText,
     height: styles.mobileMinHeight,
@@ -197,7 +190,7 @@ export function AccountMenuModal({
                 />
                 <Trans>Edit notes</Trans>
               </Button>
-              <Button style={buttonStyle} onPress={_onEditIcon}>
+              <Button style={buttonStyle} onPress={() => onEditIcon?.()}>
                 <SvgPhoto width={20} height={20} style={{ paddingRight: 5 }} />
                 <Trans>Edit icon</Trans>
               </Button>

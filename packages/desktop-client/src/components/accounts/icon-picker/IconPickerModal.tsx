@@ -47,13 +47,14 @@ function isPostError(err: unknown): err is PostErrorLike {
   if (!('reason' in err)) {
     return false;
   }
-  if (typeof Reflect.get(err, 'reason') !== 'string') {
+  const e = err as Record<string, unknown>;
+  if (typeof e.reason !== 'string') {
     return false;
   }
   if (!('type' in err)) {
     return true;
   }
-  return Reflect.get(err, 'type') === 'PostError';
+  return e.type === 'PostError';
 }
 
 function iconPersistErrorMessage(
@@ -121,20 +122,21 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
   const [previewIcon, setPreviewIcon] = useState<string | null>(null);
   const [pendingWebsite, setPendingWebsite] = useState<string | null>(null);
 
-  const handleTabChange = (newTab: Tab) => {
-    setTab(newTab);
+  const resetPickerState = () => {
     setPreviewIcon(null);
     setPendingWebsite(null);
     setError(null);
     setDdgFaviconUrl(null);
   };
 
+  const handleTabChange = (newTab: Tab) => {
+    setTab(newTab);
+    resetPickerState();
+  };
+
   const handleScopeChange = (newScope: Scope) => {
     setScope(newScope);
-    setPreviewIcon(null);
-    setPendingWebsite(null);
-    setError(null);
-    setDdgFaviconUrl(null);
+    resetPickerState();
   };
 
   if (!account) return null;
@@ -291,9 +293,6 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
                 <Button
                   isDisabled={isBusy || !canClear}
                   onPress={async () => {
-                    if (!canClear) {
-                      return;
-                    }
                     setError(null);
                     setIsBusy(true);
                     try {
@@ -459,6 +458,19 @@ function TabSwitch({
   );
 }
 
+function buildDdgUrl(input: string): string | null {
+  try {
+    const candidate = input.trim();
+    if (!candidate) return null;
+    const parsed = new URL(
+      /^https?:\/\//i.test(candidate) ? candidate : `https://${candidate}`,
+    );
+    return `https://icons.duckduckgo.com/ip3/${parsed.hostname}.ico`;
+  } catch {
+    return null;
+  }
+}
+
 function FaviconTab({
   initialUrl,
   hasFaviconProxy,
@@ -508,19 +520,6 @@ function FaviconTab({
     );
   }
 
-  const buildDdgUrl = (input: string): string | null => {
-    try {
-      const candidate = input.trim();
-      if (!candidate) return null;
-      const parsed = new URL(
-        /^https?:\/\//i.test(candidate) ? candidate : `https://${candidate}`,
-      );
-      return `https://icons.duckduckgo.com/ip3/${parsed.hostname}.ico`;
-    } catch {
-      return null;
-    }
-  };
-
   const handleFetch = async () => {
     if (!url.trim()) {
       setError(t('Enter a website URL first'));
@@ -546,11 +545,7 @@ function FaviconTab({
       setPendingWebsite(url.trim());
     } catch (err) {
       const message =
-        err instanceof IconNormalizationError
-          ? err.message
-          : err instanceof Error
-            ? err.message
-            : t('Failed to fetch favicon');
+        err instanceof Error ? err.message : t('Failed to fetch favicon');
       setError(message);
       setDdgFaviconUrl(buildDdgUrl(url));
       setPreview(null);
@@ -640,11 +635,7 @@ function UploadTab({
             setPreview(dataUrl);
           } catch (err) {
             const message =
-              err instanceof IconNormalizationError
-                ? err.message
-                : err instanceof Error
-                  ? err.message
-                  : t('Failed to process image');
+              err instanceof Error ? err.message : t('Failed to process image');
             setError(message);
             setPreview(null);
           } finally {

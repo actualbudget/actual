@@ -1,5 +1,5 @@
 import { MAX_DECODED_ICON_BYTES } from '@actual-app/core/shared/accountIconLimits';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
   emojiToDataUrl,
@@ -54,10 +54,6 @@ describe('toDataUrl', () => {
 });
 
 describe('emojiToDataUrl', () => {
-  beforeEach(() => {
-    vi.restoreAllMocks();
-  });
-
   afterEach(() => {
     vi.restoreAllMocks();
   });
