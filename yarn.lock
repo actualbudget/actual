@@ -75,7 +75,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@actual-app/components@workspace:packages/component-library"
   dependencies:
-    "@chromatic-com/storybook": "npm:^5.1.1"
+    "@chromatic-com/storybook": "npm:^5.2.1"
     "@emotion/css": "npm:^11.13.5"
     "@storybook/addon-a11y": "npm:^10.3.4"
     "@storybook/addon-docs": "npm:^10.3.4"
@@ -1997,18 +1997,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@chromatic-com/storybook@npm:^5.1.1":
-  version: 5.1.2
-  resolution: "@chromatic-com/storybook@npm:5.1.2"
+"@chromatic-com/storybook@npm:^5.2.1":
+  version: 5.2.1
+  resolution: "@chromatic-com/storybook@npm:5.2.1"
   dependencies:
     "@neoconfetti/react": "npm:^1.0.0"
-    chromatic: "npm:^13.3.4"
-    filesize: "npm:^10.0.12"
+    chromatic: "npm:16.10.0"
     jsonfile: "npm:^6.1.0"
     strip-ansi: "npm:^7.1.0"
   peerDependencies:
-    storybook: ^0.0.0-0 || ^10.1.0 || ^10.1.0-0 || ^10.2.0-0 || ^10.3.0-0 || ^10.4.0-0
-  checksum: 10/1b414ada6a558c4dad7bef7cbe8b7f92b1240015a909c778ecc9c9d807f25e1d71b3b67a57aadac0a16649a8030fceff76112a4450e7c97c6b9cf1ece12332cb
+    storybook: ^0.0.0-0 || ^10.1.0 || ^10.1.0-0 || ^10.2.0-0 || ^10.3.0-0 || ^10.4.0-0 || ^10.5.0-0 || ^10.6.0-0
+  checksum: 10/cb0e50221c5ba5abea743443ecaa71d8038099b2afca0e2f498bf7b15dd0530d2ea8dfd105c614b306431546cd07247a7f87bcdc38fda7e85f83fe06a2ef470a
   languageName: node
   linkType: hard
 
@@ -12809,22 +12808,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chromatic@npm:^13.3.4":
-  version: 13.3.5
-  resolution: "chromatic@npm:13.3.5"
+"chromatic@npm:16.10.0":
+  version: 16.10.0
+  resolution: "chromatic@npm:16.10.0"
+  dependencies:
+    semver: "npm:^7.3.5"
   peerDependencies:
     "@chromatic-com/cypress": ^0.*.* || ^1.0.0
     "@chromatic-com/playwright": ^0.*.* || ^1.0.0
+    "@chromatic-com/vitest": ^0.*.* || ^1.0.0
   peerDependenciesMeta:
     "@chromatic-com/cypress":
       optional: true
     "@chromatic-com/playwright":
       optional: true
+    "@chromatic-com/vitest":
+      optional: true
   bin:
-    chroma: dist/bin.js
-    chromatic: dist/bin.js
-    chromatic-cli: dist/bin.js
-  checksum: 10/d660e926e2763158eb216c12fd443ac909235b62e0855d6485c5ec270cbde8ce6d5467fc9792a988f2cd4c32722efb9899982b26d4bd8265381846c7d7006c21
+    chroma: dist/bin.cjs
+    chromatic: dist/bin.cjs
+    chromatic-cli: dist/bin.cjs
+  checksum: 10/8c69384f7043dcc3d38632480da3c66619e3e2ac4aa596e38591f3ab1edf52bdc22aedfcd4166f6049fdb9db797c59cd0d0887e166aced558449cd46eb60fa23
   languageName: node
   linkType: hard
 
@@ -16552,13 +16556,6 @@ __metadata:
   dependencies:
     minimatch: "npm:^5.0.1"
   checksum: 10/4b436fa944b1508b95cffdfc8176ae6947b92825483639ef1b9a89b27d82f3f8aa22b21eed471993f92709b431670d4e015b39c087d435a61e1bb04564cf51de
-  languageName: node
-  linkType: hard
-
-"filesize@npm:^10.0.12":
-  version: 10.1.6
-  resolution: "filesize@npm:10.1.6"
-  checksum: 10/e800837c4fc02303f1944d5a4c7b706df1c5cd95d745181852604fb00a1c2d55d2d3921252722bd2f0c86b59c94edaba23fa224776bbf977455d4034e7be1f45
   languageName: node
   linkType: hard
 
