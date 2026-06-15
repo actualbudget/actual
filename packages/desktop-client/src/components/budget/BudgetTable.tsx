@@ -24,10 +24,11 @@ import { useDispatch } from '#redux';
 import { BudgetCategories } from './BudgetCategories';
 import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
+import { FilteredCategoriesContext } from './FilteredCategoriesContext';
 import { FocusedViewBanner } from './FocusedViewBanner';
 import { FocusedViewEditor } from './FocusedViewEditor';
 import { FocusedViewsBar } from './FocusedViewsBar';
-import { MonthsProvider, getValidMonthBounds } from './MonthsContext';
+import { getValidMonthBounds, MonthsProvider } from './MonthsContext';
 import type { MonthBounds } from './MonthsContext';
 import {
   findSortDown,
@@ -35,7 +36,6 @@ import {
   getScrollbarWidth,
   separateGroups,
 } from './util';
-
 
 type BudgetTableProps = {
   type: string;
@@ -133,7 +133,11 @@ export function BudgetTable(props: BudgetTableProps) {
   // (which matches the BudgetPageHeader's own marginLeft), this gives the exact
   // padding-left needed to align the tabs with the first month.
   const monthHeaderOffset =
-    200 + 100 * categoryExpandedState + 5 - offsetMultipleMonths + firstMonthOffset;
+    200 +
+    100 * categoryExpandedState +
+    5 -
+    offsetMultipleMonths +
+    firstMonthOffset;
   const [editing, setEditing] = useState<{ id: string; cell: string } | null>(
     null,
   );
@@ -306,7 +310,9 @@ export function BudgetTable(props: BudgetTableProps) {
         onCreateView={() => setEditorState({ isOpen: true })}
         onEditView={id => setEditorState({ isOpen: true, viewId: id })}
         onDeleteView={deleteView}
-        onReorderViews={() => dispatch(pushModal({ modal: { name: 'reorder-views-editor' } }))}
+        onReorderViews={() =>
+          dispatch(pushModal({ modal: { name: 'reorder-views-editor' } }))
+        }
         onToggleViewVisibility={toggleViewVisibility}
         onToggleShowHiddenViews={toggleShowHiddenViews}
       />
@@ -317,78 +323,80 @@ export function BudgetTable(props: BudgetTableProps) {
         />
       )}
 
-      <View
-        style={{
-          flexDirection: 'row',
-          overflow: 'hidden',
-          flexShrink: 0,
-          // This is necessary to align with the table because the
-          // table has this padding to allow the shadow to show
-          paddingLeft: 5,
-          paddingRight: 5 + getScrollbarWidth(),
-        }}
-      >
-        <View style={{ width: 200 + 100 * categoryExpandedState }} />
+      <FilteredCategoriesContext.Provider value={filteredCategoryGroups}>
+        <View
+          style={{
+            flexDirection: 'row',
+            overflow: 'hidden',
+            flexShrink: 0,
+            // This is necessary to align with the table because the
+            // table has this padding to allow the shadow to show
+            paddingLeft: 5,
+            paddingRight: 5 + getScrollbarWidth(),
+          }}
+        >
+          <View style={{ width: 200 + 100 * categoryExpandedState }} />
+          <MonthsProvider
+            startMonth={prewarmStartMonth}
+            numMonths={numMonths}
+            monthBounds={monthBounds}
+            type={type}
+          >
+            <BudgetSummaries />
+          </MonthsProvider>
+        </View>
+
         <MonthsProvider
-          startMonth={prewarmStartMonth}
+          startMonth={startMonth}
           numMonths={numMonths}
           monthBounds={monthBounds}
           type={type}
         >
-          <BudgetSummaries />
-        </MonthsProvider>
-      </View>
-
-      <MonthsProvider
-        startMonth={startMonth}
-        numMonths={numMonths}
-        monthBounds={monthBounds}
-        type={type}
-      >
-        <BudgetTotals
-          toggleHiddenCategories={toggleHiddenCategories}
-          expandAllCategories={expandAllCategories}
-          collapseAllCategories={collapseAllCategories}
-        />
-        <View
-          style={{
-            overflowY: 'scroll',
-            overflowAnchor: 'none',
-            flex: 1,
-            paddingLeft: 5,
-            paddingRight: 5,
-          }}
-        >
+          <BudgetTotals
+            toggleHiddenCategories={toggleHiddenCategories}
+            expandAllCategories={expandAllCategories}
+            collapseAllCategories={collapseAllCategories}
+          />
           <View
             style={{
-              flexShrink: 0,
+              overflowY: 'scroll',
+              overflowAnchor: 'none',
+              flex: 1,
+              paddingLeft: 5,
+              paddingRight: 5,
             }}
-            onKeyDown={onKeyDown}
           >
-            <SchedulesProvider query={schedulesQuery}>
-              <BudgetCategories
-                categoryGroups={filteredCategoryGroups}
-                editingCell={editing}
-                onEditMonth={onEditMonth}
-                onEditName={onEditName}
-                onSaveCategory={onSaveCategory}
-                onSaveGroup={onSaveGroup}
-                onDeleteCategory={onDeleteCategory}
-                onDeleteGroup={onDeleteGroup}
-                onReorderCategory={_onReorderCategory}
-                onReorderGroup={_onReorderGroup}
-                onBudgetAction={onBudgetAction}
-                onShowActivity={onShowActivity}
-                onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
-                onSortCategories={onSortCategories}
-              />
-              {activeViewId && (
-                <FocusedViewBanner onViewAll={() => setActiveView(null)} />
-              )}
-            </SchedulesProvider>
+            <View
+              style={{
+                flexShrink: 0,
+              }}
+              onKeyDown={onKeyDown}
+            >
+              <SchedulesProvider query={schedulesQuery}>
+                <BudgetCategories
+                  categoryGroups={filteredCategoryGroups}
+                  editingCell={editing}
+                  onEditMonth={onEditMonth}
+                  onEditName={onEditName}
+                  onSaveCategory={onSaveCategory}
+                  onSaveGroup={onSaveGroup}
+                  onDeleteCategory={onDeleteCategory}
+                  onDeleteGroup={onDeleteGroup}
+                  onReorderCategory={_onReorderCategory}
+                  onReorderGroup={_onReorderGroup}
+                  onBudgetAction={onBudgetAction}
+                  onShowActivity={onShowActivity}
+                  onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
+                  onSortCategories={onSortCategories}
+                />
+                {activeViewId && (
+                  <FocusedViewBanner onViewAll={() => setActiveView(null)} />
+                )}
+              </SchedulesProvider>
+            </View>
           </View>
-        </View>
-      </MonthsProvider>
+        </MonthsProvider>
+      </FilteredCategoriesContext.Provider>
     </View>
   );
 }

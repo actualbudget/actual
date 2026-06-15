@@ -309,3 +309,4 @@ export { SvgWrench } from './Wrench';
 export { SvgYinYang } from './YinYang';
 export { SvgZoomIn } from './ZoomIn';
 export { SvgZoomOut } from './ZoomOut';
+export { SvgFilterOutline } from './FilterOutline';

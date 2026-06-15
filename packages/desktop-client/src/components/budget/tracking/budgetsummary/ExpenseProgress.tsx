@@ -1,20 +1,36 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
 import { useTrackingSheetValue } from '#components/budget/tracking/TrackingBudgetComponents';
-import type { Binding } from '#spreadsheet';
+import type { Binding, SheetFields } from '#spreadsheet';
 
 import { fraction } from './fraction';
 import { PieProgress } from './PieProgress';
 
 type ExpenseProgressProps = {
-  current: Binding<'tracking-budget', 'total-spent'>;
-  target: Binding<'tracking-budget', 'total-budgeted'>;
+  current: Binding<'tracking-budget', SheetFields<'tracking-budget'>> | number;
+  target: Binding<'tracking-budget', SheetFields<'tracking-budget'>> | number;
 };
 export function ExpenseProgress({ current, target }: ExpenseProgressProps) {
-  let totalSpent = useTrackingSheetValue(current) || 0;
-  const totalBudgeted = useTrackingSheetValue(target) || 0;
+  const dummyBinding = useMemo(
+    () =>
+      ({ name: 'dummy' }) as unknown as Binding<
+        'tracking-budget',
+        SheetFields<'tracking-budget'>
+      >,
+    [],
+  );
+  const currentBound = useTrackingSheetValue(
+    typeof current === 'number' ? dummyBinding : current,
+  );
+  const targetBound = useTrackingSheetValue(
+    typeof target === 'number' ? dummyBinding : target,
+  );
+
+  let totalSpent = (typeof current === 'number' ? current : currentBound) || 0;
+  const totalBudgeted =
+    (typeof target === 'number' ? target : targetBound) || 0;
 
   // Reverse total spent, and also set a bottom boundary of 0 (in case
   // income goes into an expense category and it's "positive", don't

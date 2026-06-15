@@ -49,6 +49,8 @@ import { MobilePageHeader, Page } from '#components/Page';
 import { SyncRefresh } from '#components/SyncRefresh';
 import { useCategories } from '#hooks/useCategories';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useFocusedViewFilter } from '#hooks/useFocusedViewFilter';
+import { useFocusedViews } from '#hooks/useFocusedViews';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { useLocalPref } from '#hooks/useLocalPref';
@@ -64,9 +66,6 @@ import { collapseModals, pushModal } from '#modals/modalsSlice';
 import { uncategorizedTransactions } from '#queries';
 import { useDispatch } from '#redux';
 import { envelopeBudget } from '#spreadsheet/bindings';
-
-import { useFocusedViewFilter } from '#hooks/useFocusedViewFilter';
-import { useFocusedViews } from '#hooks/useFocusedViews';
 
 import { BudgetTable, PILL_STYLE } from './BudgetTable';
 import { ViewFilterButton } from './ViewFilterButton';
@@ -90,13 +89,8 @@ export function BudgetPage() {
   const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
   const spreadsheet = useSpreadsheet();
 
-  const {
-    views,
-    viewOrder,
-    hiddenViews,
-    activeViewId,
-    setActiveView,
-  } = useFocusedViews();
+  const { views, viewOrder, hiddenViews, activeViewId, setActiveView } =
+    useFocusedViews();
 
   const currMonth = monthUtils.currentMonth();
   const [startMonth = currMonth, setStartMonthPref] =

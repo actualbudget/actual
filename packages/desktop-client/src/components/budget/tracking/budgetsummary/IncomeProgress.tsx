@@ -1,21 +1,36 @@
-import React from 'react';
-import type { ComponentProps } from 'react';
+import React, { useMemo } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
-import type { CellValue } from '#components/spreadsheet/CellValue';
 import { useSheetValue } from '#hooks/useSheetValue';
+import type { Binding, SheetFields } from '#spreadsheet';
 
 import { fraction } from './fraction';
 import { PieProgress } from './PieProgress';
 
 type IncomeProgressProps = {
-  current: ComponentProps<typeof CellValue>['binding'];
-  target: ComponentProps<typeof CellValue>['binding'];
+  current: Binding<'tracking-budget', SheetFields<'tracking-budget'>> | number;
+  target: Binding<'tracking-budget', SheetFields<'tracking-budget'>> | number;
 };
 export function IncomeProgress({ current, target }: IncomeProgressProps) {
-  let totalIncome = useSheetValue(current) || 0;
-  const totalBudgeted = useSheetValue(target) || 0;
+  const dummyBinding = useMemo(
+    () =>
+      ({ name: 'dummy' }) as unknown as Binding<
+        'tracking-budget',
+        SheetFields<'tracking-budget'>
+      >,
+    [],
+  );
+  const currentBound = useSheetValue(
+    typeof current === 'number' ? dummyBinding : current,
+  );
+  const targetBound = useSheetValue(
+    typeof target === 'number' ? dummyBinding : target,
+  );
+
+  let totalIncome = (typeof current === 'number' ? current : currentBound) || 0;
+  const totalBudgeted =
+    (typeof target === 'number' ? target : targetBound) || 0;
 
   let over = false;
 

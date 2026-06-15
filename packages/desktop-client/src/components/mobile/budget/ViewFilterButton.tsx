@@ -2,10 +2,10 @@ import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgFilter } from '@actual-app/components/icons/v1';
+import { SvgFilter, SvgFilterOutline } from '@actual-app/components/icons/v1';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
+
 import type { FocusedViewDefinition } from '@actual-app/core/types/prefs';
 
 import { BUILT_IN_VIEWS } from '#hooks/useFocusedViews';
@@ -89,22 +89,17 @@ export function ViewFilterButton({
         aria-label={t('Filter views')}
         style={{ margin: 10, position: 'relative' }}
       >
-        <SvgFilter
-          width={20}
-          height={20}
-          style={{ color: theme.mobileHeaderText }}
-        />
-        {isFilterActive && (
-          <View
-            style={{
-              position: 'absolute',
-              top: -2,
-              right: -2,
-              width: 8,
-              height: 8,
-              borderRadius: 4,
-              backgroundColor: theme.buttonPrimaryBackground,
-            }}
+        {isFilterActive ? (
+          <SvgFilter
+            width={18}
+            height={17}
+            style={{ color: theme.mobileHeaderText, transform: 'translateY(2px)' }}
+          />
+        ) : (
+          <SvgFilterOutline
+            width={18}
+            height={17}
+            style={{ color: theme.mobileHeaderText, transform: 'translateY(2px)' }}
           />
         )}
       </Button>

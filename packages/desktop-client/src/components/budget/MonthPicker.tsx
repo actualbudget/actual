@@ -18,9 +18,9 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 
 import { Link } from '#components/common/Link';
+import { useFocusedViews } from '#hooks/useFocusedViews';
 import { useLocale } from '#hooks/useLocale';
 import { useResizeObserver } from '#hooks/useResizeObserver';
-import { useFocusedViews } from '#hooks/useFocusedViews';
 
 import type { MonthBounds } from './MonthsContext';
 

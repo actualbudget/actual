@@ -13,7 +13,7 @@ import {
 import { DropHighlight, useDraggable, useDroppable } from '#components/sort';
 import type { DragState, OnDropCallback } from '#components/sort';
 import { useDragRef } from '#hooks/useDragRef';
-import { useFocusedViews, BUILT_IN_VIEWS } from '#hooks/useFocusedViews';
+import { BUILT_IN_VIEWS, useFocusedViews } from '#hooks/useFocusedViews';
 
 type ReorderViewsModalProps = {
   onClose: () => void;
@@ -32,7 +32,13 @@ type SortableViewItemProps = {
   onReorder: OnDropCallback;
 };
 
-function SortableViewItem({ item, dragState, onDragChange, onReorder }: SortableViewItemProps) {
+function SortableViewItem({
+  item,
+  dragState,
+  onDragChange,
+  onReorder,
+}: SortableViewItemProps) {
+  const { t } = useTranslation();
   const dragging = dragState?.item?.id === item.id;
 
   const { dragRef } = useDraggable({
@@ -54,7 +60,9 @@ function SortableViewItem({ item, dragState, onDragChange, onReorder }: Sortable
       innerRef={dropRef}
       style={{
         padding: '10px',
-        backgroundColor: dragging ? theme.tableRowBackgroundHighlight : theme.tableBackground,
+        backgroundColor: dragging
+          ? theme.tableRowBackgroundHighlight
+          : theme.tableBackground,
         borderBottom: '1px solid ' + theme.tableBorder,
         position: 'relative',
         cursor: 'grab',
@@ -65,11 +73,9 @@ function SortableViewItem({ item, dragState, onDragChange, onReorder }: Sortable
         innerRef={handleDragRef}
         style={{ flexDirection: 'row', alignItems: 'center' }}
       >
-        <View style={{ flex: 1, userSelect: 'none' }}>
-          {item.name}
-        </View>
+        <View style={{ flex: 1, userSelect: 'none' }}>{item.name}</View>
         <View style={{ color: theme.pageTextSubdued, fontSize: 12 }}>
-          {item.isBuiltIn ? 'Standard' : 'Custom'}
+          {item.isBuiltIn ? t('Standard') : t('Custom')}
         </View>
       </View>
     </View>
@@ -78,24 +84,32 @@ function SortableViewItem({ item, dragState, onDragChange, onReorder }: Sortable
 
 export function ReorderViewsModal({ onClose }: ReorderViewsModalProps) {
   const { t } = useTranslation();
-  const {
-    views,
-    viewOrder,
-    reorderViewToTarget
-  } = useFocusedViews();
+  const { views, viewOrder, reorderViewToTarget } = useFocusedViews();
 
   const [dragState, setDragState] = useState<DragState<ViewItem> | null>(null);
 
   const allItems: ViewItem[] = useMemo(() => {
     return viewOrder.map(id => {
-      const isBuiltIn = Object.values(BUILT_IN_VIEWS).includes(id as any);
+      const isBuiltIn = Object.values(BUILT_IN_VIEWS).includes(
+        id as unknown as (typeof BUILT_IN_VIEWS)[keyof typeof BUILT_IN_VIEWS],
+      );
       let name = '';
       if (isBuiltIn) {
         switch (id) {
-          case BUILT_IN_VIEWS.OVERSPENT: name = t('Overspent'); break;
-          case BUILT_IN_VIEWS.UNDERFUNDED: name = t('Underfunded'); break;
-          case BUILT_IN_VIEWS.OVERFUNDED: name = t('Overfunded'); break;
-          case BUILT_IN_VIEWS.MONEY_AVAILABLE: name = t('Money Available'); break;
+          case BUILT_IN_VIEWS.OVERSPENT:
+            name = t('Overspent');
+            break;
+          case BUILT_IN_VIEWS.UNDERFUNDED:
+            name = t('Underfunded');
+            break;
+          case BUILT_IN_VIEWS.OVERFUNDED:
+            name = t('Overfunded');
+            break;
+          case BUILT_IN_VIEWS.MONEY_AVAILABLE:
+            name = t('Money Available');
+            break;
+          default:
+            break;
         }
       } else {
         const customView = views.find(v => v.id === id);
@@ -116,8 +130,16 @@ export function ReorderViewsModal({ onClose }: ReorderViewsModalProps) {
         rightContent={<ModalCloseButton onPress={onClose} />}
       />
 
-      <View style={{ padding: 15, flex: 1, overflowY: 'auto', maxHeight: '60vh' }}>
-        <View style={{ border: '1px solid ' + theme.tableBorder, borderRadius: 4, overflow: 'hidden' }}>
+      <View
+        style={{ padding: 15, flex: 1, overflowY: 'auto', maxHeight: '60vh' }}
+      >
+        <View
+          style={{
+            border: '1px solid ' + theme.tableBorder,
+            borderRadius: 4,
+            overflow: 'hidden',
+          }}
+        >
           {allItems.map(item => (
             <SortableViewItem
               key={item.id}

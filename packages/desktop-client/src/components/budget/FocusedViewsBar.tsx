@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SvgAdd } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
+import type { MenuItem } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -83,13 +84,13 @@ function ViewPill({
 
   if (isOverspent) {
     if (isActive) {
-      pillBackground = theme.errorBackground;
-      pillColor = theme.errorTextDark;
-      pillBorder = '1px solid ' + theme.errorText;
-    } else {
       pillBackground = theme.budgetNumberNegative;
       pillColor = theme.buttonPrimaryText;
       pillBorder = '1px solid ' + theme.budgetNumberNegative;
+    } else {
+      pillBackground = theme.errorBackground;
+      pillColor = theme.errorTextDark;
+      pillBorder = '1px solid ' + theme.errorText;
     }
   }
 
@@ -113,7 +114,8 @@ function ViewPill({
     );
   };
 
-  const hasContextMenu = isCustom || onReorderViews || onToggleVisibility || onToggleShowHiddenViews;
+  const hasContextMenu =
+    isCustom || onReorderViews || onToggleVisibility || onToggleShowHiddenViews;
 
   return (
     <View
@@ -185,12 +187,20 @@ function ViewPill({
             items={
               [
                 isCustom && { name: 'edit', text: t('Edit view') },
-                onToggleVisibility && { name: 'toggle-visibility', text: isHidden ? t('Show view') : t('Hide view') },
-                onToggleShowHiddenViews && { name: 'toggle-show-hidden', text: showHiddenViews ? t('Hide hidden views') : t('Show hidden views') },
+                onToggleVisibility && {
+                  name: 'toggle-visibility',
+                  text: isHidden ? t('Show view') : t('Hide view'),
+                },
+                onToggleShowHiddenViews && {
+                  name: 'toggle-show-hidden',
+                  text: showHiddenViews
+                    ? t('Hide hidden views')
+                    : t('Show hidden views'),
+                },
                 onReorderViews && { name: 'reorder', text: t('Reorder views') },
                 isCustom && Menu.line,
                 isCustom && { name: 'delete', text: t('Delete view') },
-              ].filter(Boolean) as any
+              ].filter(Boolean) as MenuItem[]
             }
           />
         </Popover>
@@ -251,11 +261,13 @@ export function FocusedViewsBar({
           label={t('All')}
           isActive={activeViewId === null}
           onClick={() => onSelectView(null)}
-          onToggleShowHiddenViews={hiddenViews.length > 0 ? onToggleShowHiddenViews : undefined}
+          onToggleShowHiddenViews={
+            hiddenViews.length > 0 ? onToggleShowHiddenViews : undefined
+          }
           showHiddenViews={showHiddenViews}
         />
-        
-        {viewOrder.map((viewId) => {
+
+        {viewOrder.map(viewId => {
           const isHidden = hiddenViews.includes(viewId);
           if (isHidden && !showHiddenViews) return null;
 
@@ -266,17 +278,19 @@ export function FocusedViewsBar({
             isHidden,
             isGreyedOut: isHidden && showHiddenViews,
             onClick: () => onSelectView(viewId),
-            onReorderViews: onReorderViews,
+            onReorderViews,
             onToggleVisibility: () => onToggleViewVisibility(viewId),
           };
 
-          const isBuiltIn = Object.values(BUILT_IN_VIEWS).includes(viewId as any);
+          const isBuiltIn = (
+            Object.values(BUILT_IN_VIEWS) as string[]
+          ).includes(viewId);
 
           if (isBuiltIn) {
             switch (viewId) {
               case BUILT_IN_VIEWS.OVERSPENT:
                 return availableBuiltInViews.overspent ? (
-                  <ViewPill {...pillProps} label={t('Overspent')} isOverspent={true} />
+                  <ViewPill {...pillProps} label={t('Overspent')} isOverspent />
                 ) : null;
               case BUILT_IN_VIEWS.UNDERFUNDED:
                 return availableBuiltInViews.underfunded ? (

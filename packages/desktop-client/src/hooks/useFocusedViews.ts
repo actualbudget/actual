@@ -82,80 +82,70 @@ export function useFocusedViews() {
     [views, activeViewId, normalizeSortOrder, setViews, setActiveViewId],
   );
 
-  const reorderView = useCallback(
-    (id: string, direction: -1 | 1) => {
-      const currentIndex = views.findIndex(view => view.id === id);
-      const nextIndex = currentIndex + direction;
-
-      if (currentIndex === -1 || nextIndex < 0 || nextIndex >= views.length) {
-        return;
-      }
-
-      const nextViews = [...views];
-      const [view] = nextViews.splice(currentIndex, 1);
-      nextViews.splice(nextIndex, 0, view);
-      setViews(normalizeSortOrder(nextViews));
-    },
-    [views, normalizeSortOrder, setViews],
-  );
-
   const isBuiltInView = useCallback((id: string) => {
     return Object.values(BUILT_IN_VIEWS).some(viewId => viewId === id);
   }, []);
 
-  const [builtInViewsOrder = [
-    BUILT_IN_VIEWS.OVERSPENT,
-    BUILT_IN_VIEWS.UNDERFUNDED,
-    BUILT_IN_VIEWS.OVERFUNDED,
-    BUILT_IN_VIEWS.MONEY_AVAILABLE
-  ], setBuiltInViewsOrder] = useLocalPref('budget.builtInViewsOrder');
+  const [
+    builtInViewsOrder = [
+      BUILT_IN_VIEWS.OVERSPENT,
+      BUILT_IN_VIEWS.UNDERFUNDED,
+      BUILT_IN_VIEWS.OVERFUNDED,
+      BUILT_IN_VIEWS.MONEY_AVAILABLE,
+    ],
+  ] = useLocalPref('budget.builtInViewsOrder');
 
   const [storedViewOrder = [], setViewOrder] = useLocalPref('budget.viewOrder');
 
   const [hiddenViews = [], setHiddenViews] = useLocalPref('budget.hiddenViews');
-  const [showHiddenViews = false, setShowHiddenViews] = useLocalPref('budget.showHiddenViews');
+  const [showHiddenViews = false, setShowHiddenViews] = useLocalPref(
+    'budget.showHiddenViews',
+  );
 
   const viewOrder = useMemo(() => {
     // Merge builtInViewsOrder and views.map(v => v.id) into storedViewOrder if missing
     let nextOrder = [...storedViewOrder];
-    const allExpectedIds = [
-      ...builtInViewsOrder,
-      ...views.map(v => v.id)
-    ];
+    const allExpectedIds = [...builtInViewsOrder, ...views.map(v => v.id)];
 
     for (const id of allExpectedIds) {
       if (!nextOrder.includes(id)) {
         nextOrder.push(id);
       }
     }
-    
+
     // Clean up deleted views
     nextOrder = nextOrder.filter(id => allExpectedIds.includes(id));
-    
+
     return nextOrder;
   }, [storedViewOrder, builtInViewsOrder, views]);
 
-  const saveViewOrder = useCallback((nextOrder: string[]) => {
-    setViewOrder(nextOrder);
-  }, [setViewOrder]);
+  const saveViewOrder = useCallback(
+    (nextOrder: string[]) => {
+      setViewOrder(nextOrder);
+    },
+    [setViewOrder],
+  );
 
-  const reorderViewToTarget = useCallback((id: string, dropPos: 'top' | 'bottom' | null, targetId: string) => {
-    let nextOrder = [...viewOrder];
-    const currentIndex = nextOrder.indexOf(id);
-    if (currentIndex === -1) return;
-    
-    nextOrder.splice(currentIndex, 1);
-    
-    let targetIndex = nextOrder.indexOf(targetId);
-    if (targetIndex === -1) return;
-    
-    if (dropPos === 'bottom') {
-      targetIndex += 1;
-    }
-    
-    nextOrder.splice(targetIndex, 0, id);
-    saveViewOrder(nextOrder);
-  }, [viewOrder, saveViewOrder]);
+  const reorderViewToTarget = useCallback(
+    (id: string, dropPos: 'top' | 'bottom' | null, targetId: string) => {
+      const nextOrder = [...viewOrder];
+      const currentIndex = nextOrder.indexOf(id);
+      if (currentIndex === -1) return;
+
+      nextOrder.splice(currentIndex, 1);
+
+      let targetIndex = nextOrder.indexOf(targetId);
+      if (targetIndex === -1) return;
+
+      if (dropPos === 'bottom') {
+        targetIndex += 1;
+      }
+
+      nextOrder.splice(targetIndex, 0, id);
+      saveViewOrder(nextOrder);
+    },
+    [viewOrder, saveViewOrder],
+  );
 
   const toggleViewVisibility = useCallback(
     (id: string) => {

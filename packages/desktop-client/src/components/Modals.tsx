@@ -12,6 +12,7 @@ import { closeModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
 import { EditSyncAccount } from './banksync/EditSyncAccount';
+import { ReorderViewsModal } from './budget/ReorderViewsModal';
 import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
 import { AkahuInitialiseModal } from './modals/AkahuInitialiseModal';
@@ -22,7 +23,6 @@ import { CategoryGroupAutocompleteModal } from './modals/CategoryGroupAutocomple
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
 import { CategoryMenuModal } from './modals/CategoryMenuModal';
 import { CloseAccountModal } from './modals/CloseAccountModal';
-import { ReorderViewsModal } from './budget/ReorderViewsModal';
 import { ConfirmCategoryDeleteModal } from './modals/ConfirmCategoryDeleteModal';
 import { ConfirmDeleteModal } from './modals/ConfirmDeleteModal';
 import { ConfirmPayeesMergeModal } from './modals/ConfirmPayeesMergeModal';
