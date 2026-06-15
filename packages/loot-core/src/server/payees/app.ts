@@ -80,7 +80,9 @@ async function getPayeeRuleCounts() {
     'SELECT rule FROM schedules WHERE completed = 1 AND tombstone = 0 AND rule IS NOT NULL',
   );
   const completedRuleIds = new Set(
-    completedScheduleRules.map(s => s.rule).filter((r): r is string => r !== null),
+    completedScheduleRules
+      .map(s => s.rule)
+      .filter((r): r is string => r !== null),
   );
 
   rules.iterateIds(rules.getRules(), 'payee', (rule, id) => {
