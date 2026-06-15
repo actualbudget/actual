@@ -84,11 +84,17 @@ export function QueryResultTable({
         return monthUtils.format(value as string, 'MMM yyyy');
       case 'date-year':
         return String(value);
-      case 'float':
       case 'integer':
-      case 'number':
         if (typeof value === 'number') {
           return format(integerToAmount(value), 'financial');
+        }
+        return String(value);
+      case 'float':
+      case 'number':
+        if (typeof value === 'number') {
+          return Number.isInteger(value)
+            ? format(integerToAmount(value), 'financial')
+            : format(value, 'number');
         }
         return String(value);
       case 'boolean':
