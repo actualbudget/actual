@@ -130,7 +130,7 @@
     "@actual-app/components": "workspace:*",
     "@actual-app/core": "workspace:*",
     "@babel/core": "^7.29.7",
-    "@codemirror/autocomplete": "^6.20.1",
+    "@codemirror/autocomplete": "^6.20.3",
     "@codemirror/language": "^6.12.3",
     "@codemirror/state": "^6.6.0",
     "@codemirror/view": "^6.41.0",
