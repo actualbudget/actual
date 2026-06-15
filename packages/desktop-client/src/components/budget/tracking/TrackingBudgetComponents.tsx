@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { memo, useMemo, useRef } from 'react';
+import React, { memo, useMemo, useRef, useState } from 'react';
 import type { ComponentProps, CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
 
