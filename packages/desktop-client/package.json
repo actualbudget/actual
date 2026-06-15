@@ -167,7 +167,7 @@
     "downshift": "9.3.2",
     "fzf": "^0.5.2",
     "html-to-image": "^1.11.13",
-    "hyperformula": "^3.2.0",
+    "hyperformula": "^3.3.0",
     "i18next": "^25.10.10",
     "i18next-parser": "^9.4.0",
     "i18next-resources-to-backend": "^1.2.1",
