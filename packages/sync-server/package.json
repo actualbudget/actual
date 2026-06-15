@@ -101,7 +101,7 @@
     "express-rate-limit": "^8.5.2",
     "express-winston": "^4.2.0",
     "ipaddr.js": "^2.4.0",
-    "jws": "^3.2.2",
+    "jws": "^3.2.3",
     "migrate": "^2.1.0",
     "openid-client": "^5.7.1",
     "pluggy-sdk": "^0.83.0",

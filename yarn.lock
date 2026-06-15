@@ -198,7 +198,7 @@ __metadata:
     express-winston: "npm:^4.2.0"
     http-proxy-middleware: "npm:^3.0.5"
     ipaddr.js: "npm:^2.4.0"
-    jws: "npm:^3.2.2"
+    jws: "npm:^3.2.3"
     migrate: "npm:^2.1.0"
     nodemon: "npm:^3.1.14"
     openid-client: "npm:^5.7.1"
@@ -18596,7 +18596,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jws@npm:^3.2.2":
+"jws@npm:^3.2.2, jws@npm:^3.2.3":
   version: 3.2.3
   resolution: "jws@npm:3.2.3"
   dependencies:
