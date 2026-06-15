@@ -5095,7 +5095,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@monorepo-utils/workspaces-to-typescript-project-references@npm:^2.10.3":
+"@monorepo-utils/workspaces-to-typescript-project-references@npm:^2.11.0":
   version: 2.11.0
   resolution: "@monorepo-utils/workspaces-to-typescript-project-references@npm:2.11.0"
   dependencies:
@@ -10957,7 +10957,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "actual@workspace:."
   dependencies:
-    "@monorepo-utils/workspaces-to-typescript-project-references": "npm:^2.10.3"
+    "@monorepo-utils/workspaces-to-typescript-project-references": "npm:^2.11.0"
     "@octokit/rest": "npm:^22.0.1"
     "@types/node": "npm:^22.19.17"
     "@types/prompts": "npm:^2.4.9"
