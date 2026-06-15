@@ -71,7 +71,7 @@
     "@typescript/native-preview": "beta",
     "@yarnpkg/types": "^4.0.1",
     "eslint": "^10.5.0",
-    "eslint-plugin-perfectionist": "^5.8.0",
+    "eslint-plugin-perfectionist": "^5.9.0",
     "eslint-plugin-typescript-paths": "^0.0.33",
     "husky": "^9.1.7",
     "lage": "^2.15.5",
