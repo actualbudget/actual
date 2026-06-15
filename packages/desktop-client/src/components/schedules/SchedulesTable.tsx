@@ -146,12 +146,12 @@ export function ScheduleAmountCell({
       currencyAmount,
     });
   } else if (isBetween && typeof amount != 'number') {
-    cellText = t(' {{currency1}} to {{currency2}}', {
+    cellText = t('{{currency1}} to {{currency2}}', {
       currency1: format(Math.abs(amount.num1 || 0), 'financial'),
       currency2: format(Math.abs(amount.num2 || 0), 'financial'),
     });
   } else {
-    cellText = t('{{currencyAmount}}', currencyAmount);
+    cellText = t('{{currencyAmount}}', { currencyAmount });
   }
   return (
     <Cell
