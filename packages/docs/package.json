@@ -17,7 +17,7 @@
     "@docusaurus/core": "^3.10.1",
     "@docusaurus/plugin-content-docs": "^3.10.1",
     "@docusaurus/plugin-ideal-image": "^3.10.1",
-    "@docusaurus/preset-classic": "^3.10.0",
+    "@docusaurus/preset-classic": "^3.10.1",
     "@docusaurus/theme-common": "^3.10.0",
     "@docusaurus/theme-mermaid": "^3.10.0",
     "@easyops-cn/docusaurus-search-local": "^0.55.1",
