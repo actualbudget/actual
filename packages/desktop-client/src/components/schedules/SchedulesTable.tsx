@@ -140,13 +140,18 @@ export function ScheduleAmountCell({
   const currencyAmount = format(Math.abs(num || 0), 'financial');
   const isApprox = op === 'isapprox';
   const isBetween = op === 'isbetween';
-  let cellText = ""
+  let cellText = '';
   if (isApprox) {
-    cellText = t("Approximately {{currencyAmount}}", { currencyAmount: currencyAmount })
-  } else if (isBetween && typeof (amount) != "number") {
-    cellText = t(" {{currency1}} to {{currency2}}", { currency1: format(Math.abs(amount.num1 || 0), 'financial'), currency2: format(Math.abs(amount.num2 || 0), 'financial') })
+    cellText = t('Approximately {{currencyAmount}}', {
+      currencyAmount,
+    });
+  } else if (isBetween && typeof amount != 'number') {
+    cellText = t(' {{currency1}} to {{currency2}}', {
+      currency1: format(Math.abs(amount.num1 || 0), 'financial'),
+      currency2: format(Math.abs(amount.num2 || 0), 'financial'),
+    });
   } else {
-    cellText = t("{{currencyAmount}}", currencyAmount)
+    cellText = t('{{currencyAmount}}', currencyAmount);
   }
   return (
     <Cell
@@ -362,14 +367,14 @@ export function SchedulesTable({
       const payee = payees.find(p => schedule._payee === p.id);
       const account = accounts.find(a => schedule._account === a.id);
       const amount = getScheduledAmount(schedule._amount);
-      let amountStr = ""
-      if (schedule._amountOp === "isbetween") {
-        amountStr = "±"
-      } else if (schedule._amountOp === "isapprox") {
-        amountStr = "~"
+      let amountStr = '';
+      if (schedule._amountOp === 'isbetween') {
+        amountStr = '±';
+      } else if (schedule._amountOp === 'isapprox') {
+        amountStr = '~';
       }
-      amountStr += (amount > 0 ? '+' : '') +
-        format(Math.abs(amount || 0), 'financial');
+      amountStr +=
+        (amount > 0 ? '+' : '') + format(Math.abs(amount || 0), 'financial');
       const dateStr = schedule.next_date
         ? monthUtilFormat(schedule.next_date, dateFormat)
         : null;
