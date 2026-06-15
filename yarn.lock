@@ -3383,16 +3383,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docusaurus/lqip-loader@npm:3.10.0":
-  version: 3.10.0
-  resolution: "@docusaurus/lqip-loader@npm:3.10.0"
+"@docusaurus/lqip-loader@npm:3.10.1":
+  version: 3.10.1
+  resolution: "@docusaurus/lqip-loader@npm:3.10.1"
   dependencies:
-    "@docusaurus/logger": "npm:3.10.0"
+    "@docusaurus/logger": "npm:3.10.1"
     file-loader: "npm:^6.2.0"
     lodash: "npm:^4.17.21"
     sharp: "npm:^0.32.3"
     tslib: "npm:^2.6.0"
-  checksum: 10/140db5feb54b9c915283dfa94c4ba8225bd552f47336fad1957b58c8e35ead5627097349da7f26ea0f2acda65d0bf6dc5ad3af840cd3da7f780820b90b718882
+  checksum: 10/6c2d3a0209573554b803f5495145061cd9651377e118d383ac46f308e37974af13050616234c2162f79ef16804974b58df686b54d8897af9693a27ee3da59b63
   languageName: node
   linkType: hard
 
@@ -3768,16 +3768,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docusaurus/plugin-ideal-image@npm:^3.10.0":
-  version: 3.10.0
-  resolution: "@docusaurus/plugin-ideal-image@npm:3.10.0"
+"@docusaurus/plugin-ideal-image@npm:^3.10.1":
+  version: 3.10.1
+  resolution: "@docusaurus/plugin-ideal-image@npm:3.10.1"
   dependencies:
-    "@docusaurus/core": "npm:3.10.0"
-    "@docusaurus/lqip-loader": "npm:3.10.0"
+    "@docusaurus/core": "npm:3.10.1"
+    "@docusaurus/lqip-loader": "npm:3.10.1"
     "@docusaurus/responsive-loader": "npm:^1.7.0"
-    "@docusaurus/theme-translations": "npm:3.10.0"
-    "@docusaurus/types": "npm:3.10.0"
-    "@docusaurus/utils-validation": "npm:3.10.0"
+    "@docusaurus/theme-translations": "npm:3.10.1"
+    "@docusaurus/types": "npm:3.10.1"
+    "@docusaurus/utils-validation": "npm:3.10.1"
     sharp: "npm:^0.32.3"
     tslib: "npm:^2.6.0"
     webpack: "npm:^5.88.1"
@@ -3788,7 +3788,7 @@ __metadata:
   peerDependenciesMeta:
     jimp:
       optional: true
-  checksum: 10/f52d5a9d48cc97da030c9ee69b9c9de671c5432b43726fc81382a12ed66f084cb3678e621b6e9c27514c31608e2a6230aa537db8cffcbbed8cfa28df9ea41c1a
+  checksum: 10/0bce9d1ce7975145eb35a35fe78e5a1bc51e95152041aecfba8fc8d38741a7bdef13b39c27f707027254e5299dbb8a3f744c2c109cf27448c988818ad742636a
   languageName: node
   linkType: hard
 
@@ -4040,6 +4040,16 @@ __metadata:
     fs-extra: "npm:^11.1.1"
     tslib: "npm:^2.6.0"
   checksum: 10/3181469e799574995d90343b4c29549d6050b06ae7b8d7246da07d4eecd0edac22526883e333298b323b046c87606e7ff696acd9a696e755d77a5789b6ca71d6
+  languageName: node
+  linkType: hard
+
+"@docusaurus/theme-translations@npm:3.10.1":
+  version: 3.10.1
+  resolution: "@docusaurus/theme-translations@npm:3.10.1"
+  dependencies:
+    fs-extra: "npm:^11.1.1"
+    tslib: "npm:^2.6.0"
+  checksum: 10/eeebe25b79a59896fb438e09adc6499eb22c47bdace4aec73d7ebe3c73185eb8e590d93f71f57dbd2fe508d6aae9eac89d4de548f566678fb4cbb9c0d987a8f3
   languageName: node
   linkType: hard
 
@@ -14466,7 +14476,7 @@ __metadata:
     "@docusaurus/core": "npm:^3.10.1"
     "@docusaurus/module-type-aliases": "npm:^3.10.0"
     "@docusaurus/plugin-content-docs": "npm:^3.10.1"
-    "@docusaurus/plugin-ideal-image": "npm:^3.10.0"
+    "@docusaurus/plugin-ideal-image": "npm:^3.10.1"
     "@docusaurus/preset-classic": "npm:^3.10.0"
     "@docusaurus/theme-common": "npm:^3.10.0"
     "@docusaurus/theme-mermaid": "npm:^3.10.0"
