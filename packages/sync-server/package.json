@@ -124,7 +124,7 @@
     "supertest": "^7.2.2",
     "typescript-strict-plugin": "^2.4.4",
     "vite": "^8.0.5",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.8"
   },
   "engines": {
     "node": ">=22"

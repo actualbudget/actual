@@ -222,7 +222,7 @@
     "vite": "^8.0.5",
     "vite-plugin-node-polyfills": "^0.27.0",
     "vite-plugin-peggy-loader": "^2.0.1",
-    "vitest": "^4.1.2",
+    "vitest": "^4.1.8",
     "yargs": "^18.0.0"
   }
 }
