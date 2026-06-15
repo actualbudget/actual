@@ -47,7 +47,7 @@
     "@bufbuild/protoc-gen-es": "^2.11.0",
     "@typescript/native-preview": "beta",
     "rollup-plugin-visualizer": "^7.0.1",
-    "vite": "^8.0.5",
+    "vite": "^8.0.16",
     "vitest": "^4.1.8"
   }
 }

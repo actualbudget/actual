@@ -56,7 +56,7 @@
     "@typescript/native-preview": "beta",
     "rollup-plugin-visualizer": "^7.0.1",
     "typescript-strict-plugin": "^2.4.4",
-    "vite": "^8.0.5",
+    "vite": "^8.0.16",
     "vite-plugin-peggy-loader": "^2.0.1",
     "vitest": "^4.1.8"
   },
