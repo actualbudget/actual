@@ -65,7 +65,11 @@ import { uncategorizedTransactions } from '#queries';
 import { useDispatch } from '#redux';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
+import { useFocusedViewFilter } from '#hooks/useFocusedViewFilter';
+import { useFocusedViews } from '#hooks/useFocusedViews';
+
 import { BudgetTable, PILL_STYLE } from './BudgetTable';
+import { ViewFilterButton } from './ViewFilterButton';
 
 function isBudgetType(input?: string): input is 'envelope' | 'tracking' {
   return ['envelope', 'tracking'].includes(input);
@@ -86,9 +90,25 @@ export function BudgetPage() {
   const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
   const spreadsheet = useSpreadsheet();
 
+  const {
+    views,
+    viewOrder,
+    hiddenViews,
+    activeViewId,
+    setActiveView,
+  } = useFocusedViews();
+
   const currMonth = monthUtils.currentMonth();
   const [startMonth = currMonth, setStartMonthPref] =
     useLocalPref('budget.startMonth');
+
+  const sheetNames = useMemo(
+    () => [monthUtils.sheetForMonth(startMonth)],
+    [startMonth],
+  );
+
+  const { filteredCategoryGroups, availableBuiltInViews } =
+    useFocusedViewFilter(categoryGroups, sheetNames);
   const [monthBounds, setMonthBounds] = useState({
     start: startMonth,
     end: startMonth,
@@ -599,16 +619,32 @@ export function BudgetPage() {
             </Button>
           }
           rightContent={
-            !monthUtils.isCurrentMonth(startMonth) && (
-              <Button
-                variant="bare"
-                onPress={onCurrentMonth}
-                aria-label={t('Today')}
-                style={{ margin: 10 }}
-              >
-                <SvgCalendar width={20} height={20} />
-              </Button>
-            )
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+              }}
+            >
+              <ViewFilterButton
+                views={views}
+                viewOrder={viewOrder}
+                hiddenViews={hiddenViews}
+                activeViewId={activeViewId}
+                availableBuiltInViews={availableBuiltInViews}
+                onSelectView={setActiveView}
+              />
+              {!monthUtils.isCurrentMonth(startMonth) && (
+                <Button
+                  variant="bare"
+                  onPress={onCurrentMonth}
+                  aria-label={t('Today')}
+                  style={{ margin: 10 }}
+                >
+                  <SvgCalendar width={20} height={20} />
+                </Button>
+              )}
+            </View>
           }
         />
       }
@@ -626,7 +662,7 @@ export function BudgetPage() {
                 // This key forces the whole table rerender when the number
                 // format changes
                 key={`${numberFormat}${hideFraction}`}
-                categoryGroups={categoryGroups}
+                categoryGroups={filteredCategoryGroups}
                 month={startMonth}
                 onShowBudgetSummary={onShowBudgetSummary}
                 onBudgetAction={onBudgetAction}

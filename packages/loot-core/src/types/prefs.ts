@@ -89,14 +89,33 @@ export type LocalPrefs = Partial<{
   'budget.summaryCollapsed': boolean;
   'budget.showHiddenCategories': boolean;
   'budget.startMonth': string;
+  'budget.focusedViews': FocusedViewDefinition[];
+  'budget.builtInViewsOrder': string[];
+  'budget.viewOrder': string[];
+  'budget.hiddenViews': string[];
+  'budget.showHiddenViews': boolean;
+  'budget.activeFocusedView': string | null;
+  'budget.focusedViewsCollapsed': boolean;
   'flags.updateNotificationShownForVersion': string;
   'schedules.showCompleted': boolean;
+  'show-extra-balances': boolean;
+  'categories.hiddenFromSidebar': string[];
+  isPrivacyEnabled: boolean;
+  'net-worth.currentMode': 'graph' | 'table';
+  'net-worth.netWorthHidden': boolean;
   reportsViewLegend: boolean;
   reportsViewSummary: boolean;
   reportsViewLabel: boolean;
   sidebarWidth: number;
   'mobile.showSpentColumn': boolean;
 }>;
+
+export type FocusedViewDefinition = {
+  id: string;
+  name: string;
+  categoryIds: string[];
+  sortOrder: number;
+};
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | string;
 export type DarkTheme = 'dark' | 'midnight';

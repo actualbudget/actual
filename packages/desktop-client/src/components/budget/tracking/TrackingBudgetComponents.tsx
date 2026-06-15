@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { memo, useRef, useState } from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import type { ComponentProps, CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
 
@@ -25,9 +25,12 @@ import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { Field, SheetCell } from '#components/table';
 import type { SheetCellProps } from '#components/table';
 import { useCategoryScheduleGoalTemplateIndicator } from '#hooks/useCategoryScheduleGoalTemplateIndicator';
+import { useFocusedViews } from '#hooks/useFocusedViews';
 import { useFormat } from '#hooks/useFormat';
 import { useNavigate } from '#hooks/useNavigate';
+import { useSheetName } from '#hooks/useSheetName';
 import { useSheetValue } from '#hooks/useSheetValue';
+import { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { useUndo } from '#hooks/useUndo';
 import type { Binding, SheetFields } from '#spreadsheet';
 import { trackingBudget } from '#spreadsheet/bindings';
@@ -66,6 +69,95 @@ const cellStyle: CSSProperties = {
   color: theme.tableHeaderText,
   fontWeight: 600,
 };
+
+function useGroupCategorySum(
+  sheetName: string,
+  categoryIds: string[],
+  field: (categoryId: string) => SheetFields<'tracking-budget'>,
+  enabled: boolean,
+) {
+  const spreadsheet = useSpreadsheet();
+  const [sum, setSum] = useState(0);
+
+  useEffect(() => {
+    if (!enabled) {
+      setSum(0);
+      return;
+    }
+
+    const values = new Map<string, number>();
+
+    const updateSum = () => {
+      setSum([...values.values()].reduce((total, value) => total + value, 0));
+    };
+
+    const unbinds = categoryIds.map(categoryId =>
+      spreadsheet.bind(sheetName, { name: field(categoryId) }, node => {
+        values.set(categoryId, typeof node.value === 'number' ? node.value : 0);
+        updateSum();
+      }),
+    );
+
+    updateSum();
+
+    return () => {
+      unbinds.forEach(unbind => unbind());
+    };
+  }, [categoryIds, enabled, field, sheetName, spreadsheet]);
+
+  return sum;
+}
+
+function FilteredGroupCell({
+  categoryIds,
+  field,
+  groupBinding,
+  name,
+  style,
+}: {
+  categoryIds: string[];
+  field: (categoryId: string) => SheetFields<'tracking-budget'>;
+  groupBinding: SheetFields<'tracking-budget'>;
+  name: string;
+  style?: CSSProperties;
+}) {
+  const { activeViewId } = useFocusedViews();
+  const { sheetName } = useSheetName<'tracking-budget', 'total-budgeted'>(
+    trackingBudget.totalBudgetedExpense,
+  );
+  const value = useGroupCategorySum(
+    sheetName,
+    categoryIds,
+    field,
+    activeViewId !== null,
+  );
+
+  if (activeViewId === null) {
+    return (
+      <TrackingSheetCell
+        name={name}
+        width="flex"
+        textAlign="right"
+        style={{ fontWeight: 600, ...styles.tnum, ...style }}
+        valueProps={{
+          binding: groupBinding,
+          type: 'financial',
+        }}
+      />
+    );
+  }
+
+  return (
+    <Field name={name} width="flex" style={{ textAlign: 'right', ...style }}>
+      <CellValueText
+        name={`${sheetName}!${name}`}
+        value={value}
+        type="financial"
+        style={{ fontWeight: 600, ...styles.tnum }}
+      />
+    </Field>
+  );
+}
 
 export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
   return (
@@ -139,7 +231,11 @@ export const GroupMonth = memo(function GroupMonth({
   month,
   group,
 }: CategoryGroupMonthProps) {
-  const { id } = group;
+  const { categories = [] } = group;
+  const categoryIds = useMemo(
+    () => categories.map(category => category.id),
+    [categories],
+  );
 
   return (
     <View
@@ -151,40 +247,25 @@ export const GroupMonth = memo(function GroupMonth({
           : theme.budgetHeaderOtherMonth,
       }}
     >
-      <TrackingSheetCell
+      <FilteredGroupCell
+        categoryIds={categoryIds}
+        field={trackingBudget.catBudgeted}
+        groupBinding={trackingBudget.groupBudgeted(group.id)}
         name="budgeted"
-        width="flex"
-        textAlign="right"
-        style={{ fontWeight: 600, ...styles.tnum }}
-        valueProps={{
-          binding: trackingBudget.groupBudgeted(id),
-          type: 'financial',
-        }}
       />
-      <TrackingSheetCell
+      <FilteredGroupCell
+        categoryIds={categoryIds}
+        field={trackingBudget.catSumAmount}
+        groupBinding={trackingBudget.groupSumAmount(group.id)}
         name="spent"
-        width="flex"
-        textAlign="right"
-        style={{ fontWeight: 600, ...styles.tnum }}
-        valueProps={{
-          binding: trackingBudget.groupSumAmount(id),
-          type: 'financial',
-        }}
       />
       {!group.is_income && (
-        <TrackingSheetCell
+        <FilteredGroupCell
+          categoryIds={categoryIds}
+          field={trackingBudget.catBalance}
+          groupBinding={trackingBudget.groupBalance(group.id)}
           name="balance"
-          width="flex"
-          textAlign="right"
-          style={{
-            fontWeight: 600,
-            paddingRight: styles.monthRightPadding,
-            ...styles.tnum,
-          }}
-          valueProps={{
-            binding: trackingBudget.groupBalance(id),
-            type: 'financial',
-          }}
+          style={{ paddingRight: styles.monthRightPadding }}
         />
       )}
     </View>

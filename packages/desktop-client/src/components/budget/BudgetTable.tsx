@@ -4,6 +4,7 @@ import type { KeyboardEvent } from 'react';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type {
   CategoryEntity,
@@ -13,13 +14,20 @@ import type {
 import type { DropPosition } from '#components/sort';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useCategories } from '#hooks/useCategories';
+import { useFocusedViewFilter } from '#hooks/useFocusedViewFilter';
+import { useFocusedViews } from '#hooks/useFocusedViews';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 import { BudgetCategories } from './BudgetCategories';
 import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
-import { MonthsProvider } from './MonthsContext';
+import { FocusedViewBanner } from './FocusedViewBanner';
+import { FocusedViewEditor } from './FocusedViewEditor';
+import { FocusedViewsBar } from './FocusedViewsBar';
+import { MonthsProvider, getValidMonthBounds } from './MonthsContext';
 import type { MonthBounds } from './MonthsContext';
 import {
   findSortDown,
@@ -28,8 +36,11 @@ import {
   separateGroups,
 } from './util';
 
+
 type BudgetTableProps = {
   type: string;
+  /** Measured x-offset from MonthPicker root to the first month label, in px. */
+  firstMonthOffset?: number;
   prewarmStartMonth: string;
   startMonth: string;
   numMonths: number;
@@ -59,8 +70,10 @@ type BudgetTableProps = {
 };
 
 export function BudgetTable(props: BudgetTableProps) {
+  const dispatch = useDispatch();
   const {
     type,
+    firstMonthOffset = 0,
     prewarmStartMonth,
     startMonth,
     numMonths,
@@ -77,8 +90,36 @@ export function BudgetTable(props: BudgetTableProps) {
     onBudgetAction,
   } = props;
 
-  const { data: { grouped: categoryGroups } = { grouped: [] } } =
+  const { data: { grouped: categoryGroups = [] } = { grouped: [] } } =
     useCategories();
+
+  const {
+    views,
+    activeViewId,
+    isCollapsed,
+    viewOrder,
+    hiddenViews,
+    showHiddenViews,
+    setActiveView,
+    deleteView,
+    toggleViewVisibility,
+    toggleShowHiddenViews,
+  } = useFocusedViews();
+
+  const endMonth = monthUtils.addMonths(startMonth, numMonths - 1);
+  const bounds = getValidMonthBounds(monthBounds, startMonth, endMonth);
+  const months = monthUtils.rangeInclusive(bounds.start!, bounds.end);
+
+  const { filteredCategoryGroups, availableBuiltInViews } =
+    useFocusedViewFilter(
+      categoryGroups,
+      months.map(month => monthUtils.sheetForMonth(month)),
+    );
+
+  const [editorState, setEditorState] = useState<{
+    isOpen: boolean;
+    viewId?: string;
+  }>({ isOpen: false });
   const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
     useLocalPref('budget.collapsed');
   const [showHiddenCategories, setShowHiddenCategoriesPef] = useLocalPref(
@@ -86,6 +127,13 @@ export function BudgetTable(props: BudgetTableProps) {
   );
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
+  const offsetMultipleMonths = numMonths === 1 ? 4 : 0;
+  // firstMonthOffset is the measured real distance from the MonthPicker root's
+  // left edge to the first month label. Combined with the category column width
+  // (which matches the BudgetPageHeader's own marginLeft), this gives the exact
+  // padding-left needed to align the tabs with the first month.
+  const monthHeaderOffset =
+    200 + 100 * categoryExpandedState + 5 - offsetMultipleMonths + firstMonthOffset;
   const [editing, setEditing] = useState<{ id: string; cell: string } | null>(
     null,
   );
@@ -103,6 +151,9 @@ export function BudgetTable(props: BudgetTableProps) {
     dropPos: DropPosition | null,
     targetId: string,
   ) => {
+    // Disable reordering when a focused view is active
+    if (activeViewId !== null) return;
+
     const isGroup = !!categoryGroups.find(g => g.id === targetId);
 
     if (isGroup) {
@@ -144,6 +195,9 @@ export function BudgetTable(props: BudgetTableProps) {
     dropPos: DropPosition | null,
     targetId: string,
   ) => {
+    // Disable reordering when a focused view is active
+    if (activeViewId !== null) return;
+
     const [expenseGroups] = separateGroups(categoryGroups); // exclude Income group from sortable groups to fix off-by-one error
     onReorderGroup({
       id,
@@ -239,6 +293,30 @@ export function BudgetTable(props: BudgetTableProps) {
         }),
       }}
     >
+      <FocusedViewsBar
+        views={views}
+        activeViewId={activeViewId}
+        isCollapsed={isCollapsed}
+        startOffset={monthHeaderOffset}
+        availableBuiltInViews={availableBuiltInViews}
+        viewOrder={viewOrder}
+        hiddenViews={hiddenViews}
+        showHiddenViews={showHiddenViews}
+        onSelectView={setActiveView}
+        onCreateView={() => setEditorState({ isOpen: true })}
+        onEditView={id => setEditorState({ isOpen: true, viewId: id })}
+        onDeleteView={deleteView}
+        onReorderViews={() => dispatch(pushModal({ modal: { name: 'reorder-views-editor' } }))}
+        onToggleViewVisibility={toggleViewVisibility}
+        onToggleShowHiddenViews={toggleShowHiddenViews}
+      />
+      {editorState.isOpen && (
+        <FocusedViewEditor
+          viewId={editorState.viewId}
+          onClose={() => setEditorState({ isOpen: false })}
+        />
+      )}
+
       <View
         style={{
           flexDirection: 'row',
@@ -289,7 +367,7 @@ export function BudgetTable(props: BudgetTableProps) {
           >
             <SchedulesProvider query={schedulesQuery}>
               <BudgetCategories
-                categoryGroups={categoryGroups}
+                categoryGroups={filteredCategoryGroups}
                 editingCell={editing}
                 onEditMonth={onEditMonth}
                 onEditName={onEditName}
@@ -304,6 +382,9 @@ export function BudgetTable(props: BudgetTableProps) {
                 onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
                 onSortCategories={onSortCategories}
               />
+              {activeViewId && (
+                <FocusedViewBanner onViewAll={() => setActiveView(null)} />
+              )}
             </SchedulesProvider>
           </View>
         </View>

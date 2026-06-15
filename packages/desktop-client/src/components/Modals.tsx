@@ -22,6 +22,7 @@ import { CategoryGroupAutocompleteModal } from './modals/CategoryGroupAutocomple
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
 import { CategoryMenuModal } from './modals/CategoryMenuModal';
 import { CloseAccountModal } from './modals/CloseAccountModal';
+import { ReorderViewsModal } from './budget/ReorderViewsModal';
 import { ConfirmCategoryDeleteModal } from './modals/ConfirmCategoryDeleteModal';
 import { ConfirmDeleteModal } from './modals/ConfirmDeleteModal';
 import { ConfirmPayeesMergeModal } from './modals/ConfirmPayeesMergeModal';
@@ -423,8 +424,17 @@ export function Modals() {
         case 'enable-password-auth':
           return <PasswordEnableModal key={key} {...modal.options} />;
 
+        case 'reorder-views-editor':
+          return (
+            <ReorderViewsModal
+              key={modal.name}
+              {...(modal.options || {})}
+              onClose={onCloseModal}
+            />
+          );
         default:
-          throw new Error('Unknown modal');
+          console.error('Unknown modal:', modal.name);
+          return null;
       }
     })
     .map((modal, idx) => (

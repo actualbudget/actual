@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
+import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -7,7 +7,11 @@ import {
   SvgCheveronLeft,
   SvgCheveronRight,
 } from '@actual-app/components/icons/v1';
-import { SvgCalendar } from '@actual-app/components/icons/v2';
+import {
+  SvgArrowButtonDown1,
+  SvgArrowButtonUp1,
+  SvgCalendar,
+} from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -16,6 +20,7 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import { Link } from '#components/common/Link';
 import { useLocale } from '#hooks/useLocale';
 import { useResizeObserver } from '#hooks/useResizeObserver';
+import { useFocusedViews } from '#hooks/useFocusedViews';
 
 import type { MonthBounds } from './MonthsContext';
 
@@ -25,6 +30,8 @@ type MonthPickerProps = {
   monthBounds: MonthBounds;
   style: CSSProperties;
   onSelect: (month: string) => void;
+  /** Called with the x-offset (in px) from the MonthPicker root's left edge to the first month label. */
+  onFirstMonthXOffset?: (offset: number) => void;
 };
 
 export const MonthPicker = ({
@@ -33,11 +40,48 @@ export const MonthPicker = ({
   monthBounds,
   style,
   onSelect,
+  onFirstMonthXOffset,
 }: MonthPickerProps) => {
   const locale = useLocale();
   const { t } = useTranslation();
   const [hoverId, setHoverId] = useState(null);
   const [targetMonthCount, setTargetMonthCount] = useState(12);
+  const { isCollapsed, setCollapsed } = useFocusedViews();
+
+  // Measure the real pixel offset from the MonthPicker root to the first month
+  // label and report it to the parent so the views bar can align precisely.
+  const pickerRootEl = useRef<Element | null>(null);
+  const firstMonthEl = useRef<Element | null>(null);
+  // Use a ref so the layout effect closure is always fresh without being a dep.
+  const onFirstMonthXOffsetRef = useRef(onFirstMonthXOffset);
+  onFirstMonthXOffsetRef.current = onFirstMonthXOffset;
+
+  const pickerRootRef = useCallback((el: Element | null) => {
+    pickerRootEl.current = el;
+  }, []);
+
+  const firstMonthRefCallback = useCallback((el: Element | null) => {
+    firstMonthEl.current = el;
+  }, []);
+
+  // Fire after every render (no deps) so any resize/reflow that triggers a
+  // React re-render also triggers a fresh measurement.
+  useLayoutEffect(() => {
+    if (
+      !onFirstMonthXOffsetRef.current ||
+      !pickerRootEl.current ||
+      !firstMonthEl.current
+    ) {
+      return;
+    }
+    const rootLeft = pickerRootEl.current.getBoundingClientRect().left;
+    const firstLeft = firstMonthEl.current.getBoundingClientRect().left;
+    onFirstMonthXOffsetRef.current(firstLeft - rootLeft);
+  });
+
+  const ExpandOrCollapseIcon = isCollapsed
+    ? SvgArrowButtonDown1
+    : SvgArrowButtonUp1;
 
   const currentMonth = monthUtils.currentMonth();
   const firstSelectedMonth = startMonth;
@@ -74,6 +118,7 @@ export const MonthPicker = ({
 
   return (
     <View
+      innerRef={pickerRootRef}
       style={{
         flexDirection: 'row',
         alignItems: 'center',
@@ -151,6 +196,7 @@ export const MonthPicker = ({
           return (
             <View
               key={month}
+              innerRef={idx === 0 ? firstMonthRefCallback : undefined}
               data-testid={selected ? 'selected-budget-month' : undefined}
               data-month={selected ? month : undefined}
               style={{
@@ -255,13 +301,31 @@ export const MonthPicker = ({
             />
           </View>
         </Link>
-        {/*Keep range centered*/}
-        <span
+        {/*Keep range centered. If we have a toggle button on the right, it will offset the today button on the left, keeping it balanced.*/}
+        <Link
+          variant="button"
+          buttonVariant="bare"
+          onPress={() => setCollapsed(!isCollapsed)}
           style={{
-            width: '22px',
+            padding: '3px 3px',
             marginLeft: '12px',
           }}
-        />
+        >
+          <View
+            title={
+              isCollapsed
+                ? t('Expand focused views')
+                : t('Collapse focused views')
+            }
+          >
+            <ExpandOrCollapseIcon
+              style={{
+                width: 16,
+                height: 16,
+              }}
+            />
+          </View>
+        </Link>
       </View>
     </View>
   );
