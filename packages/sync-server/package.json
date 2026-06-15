@@ -92,7 +92,7 @@
     "@actual-app/web": "workspace:*",
     "akahu": "^2.5.1",
     "bcrypt": "^6.0.0",
-    "better-sqlite3": "^12.8.0",
+    "better-sqlite3": "^12.10.0",
     "convict": "^6.2.5",
     "cors": "^2.8.6",
     "date-fns": "^4.1.0",
