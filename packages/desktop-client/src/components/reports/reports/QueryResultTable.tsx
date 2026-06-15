@@ -4,6 +4,7 @@ import { Trans } from 'react-i18next';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { logger } from 'loot-core/platform/server/log';
 import * as monthUtils from 'loot-core/shared/months';
 import { integerToAmount } from 'loot-core/shared/util';
 
@@ -88,9 +89,22 @@ export function QueryResultTable({
       case 'float':
       case 'number':
         if (typeof value === 'number') {
-          return Number.isInteger(value)
-            ? format(integerToAmount(value), 'financial')
-            : format(value, 'number');
+          if (Number.isInteger(value)) {
+            try {
+              return format(integerToAmount(value), 'financial');
+            } catch (e) {
+              logger.warn(
+                '[QueryResultTable] integerToAmount failed, falling back to number format',
+                {
+                  value,
+                  type,
+                  error: e instanceof Error ? e.message : String(e),
+                },
+              );
+              return format(value, 'number');
+            }
+          }
+          return format(value, 'number');
         }
         return String(value);
       case 'boolean':
