@@ -22179,7 +22179,7 @@ __metadata:
     cross-env: "npm:^10.1.0"
     typescript-strict-plugin: "npm:^2.4.4"
     vite: "npm:^8.0.16"
-    workbox-precaching: "npm:^7.4.0"
+    workbox-precaching: "npm:^7.4.1"
   languageName: unknown
   linkType: soft
 
@@ -28827,13 +28827,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"workbox-core@npm:7.4.0":
-  version: 7.4.0
-  resolution: "workbox-core@npm:7.4.0"
-  checksum: 10/160bfbd8957fa59e72b7202caa111e7a099fb405719f7ba2fb489c7dbac0bddfc99fab10122a7b6053821dd89974dc9f9ddb19af574606634d392f89b1d8735f
-  languageName: node
-  linkType: hard
-
 "workbox-core@npm:7.4.1":
   version: 7.4.1
   resolution: "workbox-core@npm:7.4.1"
@@ -28872,7 +28865,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"workbox-precaching@npm:7.4.1":
+"workbox-precaching@npm:7.4.1, workbox-precaching@npm:^7.4.1":
   version: 7.4.1
   resolution: "workbox-precaching@npm:7.4.1"
   dependencies:
@@ -28880,17 +28873,6 @@ __metadata:
     workbox-routing: "npm:7.4.1"
     workbox-strategies: "npm:7.4.1"
   checksum: 10/69921db9e40b43246365671ecb1e06b579e96791ba90d1b13da51631b680b877329adcf9505717c241c3a2e40d959eace85659bc2df73e12ff85881052457ec6
-  languageName: node
-  linkType: hard
-
-"workbox-precaching@npm:^7.4.0":
-  version: 7.4.0
-  resolution: "workbox-precaching@npm:7.4.0"
-  dependencies:
-    workbox-core: "npm:7.4.0"
-    workbox-routing: "npm:7.4.0"
-    workbox-strategies: "npm:7.4.0"
-  checksum: 10/81bf4f2503603c82e9fa3c1244727fb121a823fc43235aeb2f77df83f90d3bf8fc288e83320f3421f8a7776e174b9e7c2a3294d78025f2696b6ca60d578dc33d
   languageName: node
   linkType: hard
 
@@ -28917,30 +28899,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"workbox-routing@npm:7.4.0":
-  version: 7.4.0
-  resolution: "workbox-routing@npm:7.4.0"
-  dependencies:
-    workbox-core: "npm:7.4.0"
-  checksum: 10/4adb156d902953b59988a55d8d92c57141c4cecdc042e6157208b5384ed3f9c453e90e57bc819582f8aa56706f01d5a171d4c8a4406bdef1d5db9d757516903e
-  languageName: node
-  linkType: hard
-
 "workbox-routing@npm:7.4.1":
   version: 7.4.1
   resolution: "workbox-routing@npm:7.4.1"
   dependencies:
     workbox-core: "npm:7.4.1"
   checksum: 10/684ffa7531784a914681911a245fa0041e8a4fe78d5db0690f7475508b3438c41a591646c58f733b0add24e788952a94128e5061f30158b0926995a9fac5d68c
-  languageName: node
-  linkType: hard
-
-"workbox-strategies@npm:7.4.0":
-  version: 7.4.0
-  resolution: "workbox-strategies@npm:7.4.0"
-  dependencies:
-    workbox-core: "npm:7.4.0"
-  checksum: 10/792a302d38e3401dd73e2d64dbb36a47bd7060cd6ea0f33151226ac19ef8a89d2987d3f4f8765e3645113917efcbadc52027887a53e181ad7a817acd6cd08139
   languageName: node
   linkType: hard
 
