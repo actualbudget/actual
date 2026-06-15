@@ -144,6 +144,10 @@ export function BudgetTable(props: BudgetTableProps) {
   const monthPickerContainerLeft =
     200 + 100 * categoryExpandedState + 5 - offsetMultipleMonths;
 
+  const viewsBarStartOffset = monthPickerLayout
+    ? monthPickerContainerLeft + monthPickerLayout.calendarOffset
+    : monthHeaderOffset;
+
   const [editing, setEditing] = useState<{ id: string; cell: string } | null>(
     null,
   );
@@ -307,7 +311,7 @@ export function BudgetTable(props: BudgetTableProps) {
         views={views}
         activeViewId={activeViewId}
         isCollapsed={isCollapsed}
-        startOffset={monthPickerContainerLeft}
+        startOffset={viewsBarStartOffset}
         maxWidth={
           monthPickerLayout
             ? monthPickerContainerLeft + monthPickerLayout.width

@@ -58,6 +58,8 @@ export const MonthPicker = ({
   // label and report it to the parent so the views bar can align precisely.
   const pickerRootEl = useRef<Element | null>(null);
   const firstMonthEl = useRef<Element | null>(null);
+  const containerEl = useRef<Element | null>(null);
+  const calendarIconEl = useRef<Element | null>(null);
 
   // Use a ref so the layout effect closure is always fresh without being a dep.
   const onFirstMonthXOffsetRef = useRef(onFirstMonthXOffset);
@@ -74,19 +76,31 @@ export const MonthPicker = ({
     firstMonthEl.current = el;
   }, []);
 
+  const calendarIconRefCallback = useCallback((el: Element | null) => {
+    calendarIconEl.current = el;
+  }, []);
+
   // Fire after every render (no deps) so any resize/reflow that triggers a
   // React re-render also triggers a fresh measurement.
   useLayoutEffect(() => {
-    if (
-      !onFirstMonthXOffsetRef.current ||
-      !pickerRootEl.current ||
-      !firstMonthEl.current
-    ) {
-      return;
+    if (pickerRootEl.current && firstMonthEl.current) {
+      const rootLeft = pickerRootEl.current.getBoundingClientRect().left;
+      const firstLeft = firstMonthEl.current.getBoundingClientRect().left;
+      onFirstMonthXOffsetRef.current?.(firstLeft - rootLeft);
     }
-    const rootLeft = pickerRootEl.current.getBoundingClientRect().left;
-    const firstLeft = firstMonthEl.current.getBoundingClientRect().left;
-    onFirstMonthXOffsetRef.current(firstLeft - rootLeft);
+
+    if (
+      onMonthPickerLayoutRef.current &&
+      containerEl.current &&
+      calendarIconEl.current
+    ) {
+      const containerRect = containerEl.current.getBoundingClientRect();
+      const calendarRect = calendarIconEl.current.getBoundingClientRect();
+      onMonthPickerLayoutRef.current({
+        calendarOffset: calendarRect.left - containerRect.left,
+        width: containerRect.width,
+      });
+    }
   });
 
   const ExpandOrCollapseIcon = isCollapsed
@@ -122,12 +136,6 @@ export const MonthPicker = ({
     setTargetMonthCount(
       Math.min(Math.max(Math.floor(rect.width / 50), 12), 24),
     );
-    if (onMonthPickerLayoutRef.current) {
-      onMonthPickerLayoutRef.current({
-        calendarOffset: 0,
-        width: rect.width,
-      });
-    }
   });
 
   const yearHeadersShown = [];
@@ -143,7 +151,10 @@ export const MonthPicker = ({
       }}
     >
       <View
-        innerRef={containerRef}
+        innerRef={el => {
+          containerRef(el);
+          containerEl.current = el;
+        }}
         style={{
           flexDirection: 'row',
           flex: 1,
@@ -151,24 +162,26 @@ export const MonthPicker = ({
           justifyContent: 'center',
         }}
       >
-        <Link
-          variant="button"
-          buttonVariant="bare"
-          onPress={() => onSelect(currentMonth)}
-          style={{
-            padding: '3px 3px',
-            marginRight: '12px',
-          }}
-        >
-          <View title={t('Today')}>
-            <SvgCalendar
-              style={{
-                width: 16,
-                height: 16,
-              }}
-            />
-          </View>
-        </Link>
+        <View innerRef={calendarIconRefCallback}>
+          <Link
+            variant="button"
+            buttonVariant="bare"
+            onPress={() => onSelect(currentMonth)}
+            style={{
+              padding: '3px 3px',
+              marginRight: '12px',
+            }}
+          >
+            <View title={t('Today')}>
+              <SvgCalendar
+                style={{
+                  width: 16,
+                  height: 16,
+                }}
+              />
+            </View>
+          </Link>
+        </View>
         <Link
           variant="button"
           buttonVariant="bare"
