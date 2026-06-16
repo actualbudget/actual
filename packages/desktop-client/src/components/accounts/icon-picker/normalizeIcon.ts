@@ -114,12 +114,14 @@ export function emojiToDataUrl(emoji: string): string {
   const dataUrl = paintToCanvas(ctx => {
     ctx.font = `${ICON_SIZE_PX - EMOJI_FONT_PADDING_PX}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", system-ui, sans-serif`;
     ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    const metrics = ctx.measureText(trimmed);
-    const glyphH =
-      metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
-    const y = (ICON_SIZE_PX - glyphH) / 2 + metrics.actualBoundingBoxAscent;
-    ctx.fillText(trimmed, ICON_SIZE_PX / 2, y);
+    // Center on the font's em box rather than per-glyph
+    // actualBoundingBox metrics, which vary widely between emoji families
+    // (flags, symbols and hearts in particular) and produced visibly
+    // off-center icons. Color emoji are designed to fill the em square
+    // consistently, so a middle baseline at the canvas center aligns them
+    // uniformly.
+    ctx.textBaseline = 'middle';
+    ctx.fillText(trimmed, ICON_SIZE_PX / 2, ICON_SIZE_PX / 2);
   });
   return checkSize(dataUrl);
 }

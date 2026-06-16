@@ -706,7 +706,19 @@ function EmojiTab({
   }
 
   return (
-    <View style={{ gap: 8 }}>
+    <View
+      style={{ gap: 8 }}
+      // Capture Enter before the react-aria suggestion buttons consume it, so
+      // a selected emoji can be applied with the keyboard regardless of which
+      // control holds focus.
+      onKeyDownCapture={(e: KeyboardEvent<HTMLDivElement>) => {
+        if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+          e.preventDefault();
+          e.stopPropagation();
+          onApply();
+        }
+      }}
+    >
       <Text
         style={{ fontSize: SUBTEXT_FONT_SIZE, color: theme.pageTextSubdued }}
       >

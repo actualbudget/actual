@@ -59,10 +59,16 @@ export const Modal = ({
   const { isNarrowWidth } = useResponsive();
   const { enableScope, disableScope } = useHotkeysContext();
 
-  // This deactivates any key handlers in the "app" scope
+  // Activate this modal's scope and deactivate the "app" scope so global
+  // keyboard shortcuts (e.g. budget navigation) don't fire while a modal is
+  // open. Restore the "app" scope on close.
   useEffect(() => {
     enableScope(name);
-    return () => disableScope(name);
+    disableScope('app');
+    return () => {
+      disableScope(name);
+      enableScope('app');
+    };
   }, [enableScope, disableScope, name]);
 
   const { isHidden, isActive, onClose: closeModal } = useModalState();
