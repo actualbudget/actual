@@ -3,7 +3,7 @@ import {
   MAX_DECODED_ICON_BYTES,
 } from '@actual-app/core/shared/accountIconLimits';
 
-const EMOJI_FONT_PADDING_PX = 8;
+const EMOJI_MAX_LENGTH = 16;
 
 export class IconNormalizationError extends Error {
   constructor(message: string) {
@@ -103,27 +103,32 @@ export async function normalizeImageToDataUrl(
 }
 
 /**
- * Render an emoji glyph into a 64x64 PNG data URL so that storage and
- * rendering of all icon types is uniform.
+ * True when a stored icon value is an emoji rather than an image. Image icons
+ * are always data URLs; emoji are stored as the raw unicode character.
  */
-export function emojiToDataUrl(emoji: string): string {
+export function isEmojiIcon(icon: string): boolean {
+  return icon.length > 0 && !icon.startsWith('data:');
+}
+
+/**
+ * Validate emoji input and return it for storage as the raw unicode character.
+ * Emoji are stored and rendered as text (not rasterized to an image) so they
+ * stay crisp and center reliably across emoji families.
+ */
+export function emojiToStoredIcon(emoji: string): string {
   const trimmed = emoji.trim();
   if (!trimmed) {
     throw new IconNormalizationError('Empty emoji');
   }
-  const dataUrl = paintToCanvas(ctx => {
-    ctx.font = `${ICON_SIZE_PX - EMOJI_FONT_PADDING_PX}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", system-ui, sans-serif`;
-    ctx.textAlign = 'center';
-    // Center on the font's em box rather than per-glyph
-    // actualBoundingBox metrics, which vary widely between emoji families
-    // (flags, symbols and hearts in particular) and produced visibly
-    // off-center icons. Color emoji are designed to fill the em square
-    // consistently, so a middle baseline at the canvas center aligns them
-    // uniformly.
-    ctx.textBaseline = 'middle';
-    ctx.fillText(trimmed, ICON_SIZE_PX / 2, ICON_SIZE_PX / 2);
-  });
-  return checkSize(dataUrl);
+  // Regional indicators (flags) are not Extended_Pictographic, so accept them
+  // explicitly alongside ordinary pictographic emoji.
+  if (
+    trimmed.length > EMOJI_MAX_LENGTH ||
+    !/\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(trimmed)
+  ) {
+    throw new IconNormalizationError('Enter a single emoji');
+  }
+  return trimmed;
 }
 
 /** Convert a {contentType, base64} response from the backend into a data URL. */

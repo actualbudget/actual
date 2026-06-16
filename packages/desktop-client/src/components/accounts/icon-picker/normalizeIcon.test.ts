@@ -1,51 +1,6 @@
-import { MAX_DECODED_ICON_BYTES } from '@actual-app/core/shared/accountIconLimits';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import {
-  emojiToDataUrl,
-  IconNormalizationError,
-  toDataUrl,
-} from './normalizeIcon';
-
-const originalCreateElement = document.createElement.bind(document);
-
-function withMockedCanvas(toDataUrlOutput: string, runnable: () => void) {
-  const ctx = {
-    clearRect: vi.fn(),
-    drawImage: vi.fn(),
-    fillText: vi.fn(),
-    measureText: vi.fn().mockReturnValue({
-      width: 56,
-      actualBoundingBoxAscent: 48,
-      actualBoundingBoxDescent: 8,
-    }),
-    imageSmoothingEnabled: false,
-    imageSmoothingQuality: 'low',
-    font: '',
-    textAlign: '',
-    textBaseline: '',
-  };
-
-  const spy = vi.spyOn(document, 'createElement').mockImplementation(((
-    name: string,
-  ) => {
-    if (name === 'canvas') {
-      return {
-        width: 0,
-        height: 0,
-        getContext: () => ctx,
-        toDataURL: () => toDataUrlOutput,
-      } as unknown as HTMLCanvasElement;
-    }
-    return originalCreateElement(name as 'div');
-  }) as typeof document.createElement);
-
-  try {
-    runnable();
-  } finally {
-    spy.mockRestore();
-  }
-}
+import { emojiToStoredIcon, isEmojiIcon, toDataUrl } from './normalizeIcon';
 
 describe('toDataUrl', () => {
   it('builds a valid data URL', () => {
@@ -53,27 +8,35 @@ describe('toDataUrl', () => {
   });
 });
 
-describe('emojiToDataUrl', () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
+describe('emojiToStoredIcon', () => {
   it('rejects empty input', () => {
-    expect(() => emojiToDataUrl('   ')).toThrow(IconNormalizationError);
+    expect(() => emojiToStoredIcon('   ')).toThrow();
   });
 
-  it('returns the canvas-rendered data URL when within the size cap', () => {
-    // Valid base64 so checkSize() can decode and enforce decoded-byte cap.
-    withMockedCanvas('data:image/png;base64,AAAA', () => {
-      expect(emojiToDataUrl('🏦')).toBe('data:image/png;base64,AAAA');
-    });
+  it('rejects non-emoji text', () => {
+    expect(() => emojiToStoredIcon('hello')).toThrow();
   });
 
-  it('throws when the rendered payload exceeds the size cap', () => {
-    const quadCount = Math.ceil((MAX_DECODED_ICON_BYTES + 1) / 3);
-    const oversized = 'data:image/png;base64,' + 'AAAA'.repeat(quadCount);
-    withMockedCanvas(oversized, () => {
-      expect(() => emojiToDataUrl('🏦')).toThrow(/too large/);
-    });
+  it('rejects overly long input', () => {
+    expect(() => emojiToStoredIcon('🏦'.repeat(20))).toThrow();
+  });
+
+  it('returns the trimmed emoji for storage', () => {
+    expect(emojiToStoredIcon('  🏦  ')).toBe('🏦');
+  });
+
+  it('accepts multi-codepoint emoji (flags, ZWJ sequences)', () => {
+    expect(emojiToStoredIcon('🇳🇿')).toBe('🇳🇿');
+    expect(emojiToStoredIcon('👨‍👩‍👧')).toBe('👨‍👩‍👧');
+  });
+});
+
+describe('isEmojiIcon', () => {
+  it('treats raw unicode as an emoji', () => {
+    expect(isEmojiIcon('🏦')).toBe(true);
+  });
+
+  it('treats data URLs as images', () => {
+    expect(isEmojiIcon('data:image/png;base64,AAAA')).toBe(false);
   });
 });

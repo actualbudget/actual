@@ -27,8 +27,9 @@ import { useAccount } from '#hooks/useAccount';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 
 import {
-  emojiToDataUrl,
+  emojiToStoredIcon,
   IconNormalizationError,
+  isEmojiIcon,
   normalizeImageToDataUrl,
   toDataUrl,
 } from './normalizeIcon';
@@ -257,6 +258,8 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
                   setDdgFaviconUrl={setDdgFaviconUrl}
                   setPreview={setPreviewIcon}
                   setPendingWebsite={setPendingWebsite}
+                  onApply={handleApply}
+                  canApply={!!previewIcon && !isBusy}
                 />
               )}
 
@@ -266,6 +269,8 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
                   setIsBusy={setIsBusy}
                   setPreview={setPreviewIcon}
                   isBusy={isBusy}
+                  onApply={handleApply}
+                  canApply={!!previewIcon && !isBusy}
                 />
               )}
 
@@ -274,6 +279,7 @@ export function IconPickerModal({ accountId, onClose }: IconPickerModalProps) {
                   setError={setError}
                   setPreview={setPreviewIcon}
                   onApply={handleApply}
+                  canApply={!!previewIcon && !isBusy}
                 />
               )}
 
@@ -380,6 +386,16 @@ function CurrentIconPreview({
             height={24}
             style={{ color: theme.pageTextSubdued }}
           />
+        ) : icon && isEmojiIcon(icon) ? (
+          <Text
+            aria-hidden
+            style={{
+              fontSize: Math.round(PREVIEW_SIZE * 0.7),
+              lineHeight: 1,
+            }}
+          >
+            {icon}
+          </Text>
         ) : icon ? (
           <img
             src={icon}
@@ -497,6 +513,8 @@ function FaviconTab({
   setDdgFaviconUrl,
   setPreview,
   setPendingWebsite,
+  onApply,
+  canApply,
 }: {
   initialUrl: string;
   hasFaviconProxy: boolean;
@@ -506,6 +524,8 @@ function FaviconTab({
   setDdgFaviconUrl: (url: string | null) => void;
   setPreview: (s: string | null) => void;
   setPendingWebsite: (s: string | null) => void;
+  onApply: () => void;
+  canApply: boolean;
 }) {
   const { t } = useTranslation();
   const [url, setUrl] = useState(initialUrl);
@@ -575,7 +595,18 @@ function FaviconTab({
   };
 
   return (
-    <View style={{ gap: 8 }}>
+    <View
+      style={{ gap: 8 }}
+      // Once a favicon has been fetched, Enter applies it (matching the emoji
+      // and upload tabs). Before that, Enter fetches via the URL input below.
+      onKeyDownCapture={(e: KeyboardEvent<HTMLDivElement>) => {
+        if (canApply && e.key === 'Enter') {
+          e.preventDefault();
+          e.stopPropagation();
+          onApply();
+        }
+      }}
+    >
       <Text
         style={{ fontSize: SUBTEXT_FONT_SIZE, color: theme.pageTextSubdued }}
       >
@@ -624,17 +655,33 @@ function UploadTab({
   setError,
   setIsBusy,
   setPreview,
+  onApply,
+  canApply,
 }: {
   isBusy: boolean;
   setError: (e: string | null) => void;
   setIsBusy: (b: boolean) => void;
   setPreview: (s: string | null) => void;
+  onApply: () => void;
+  canApply: boolean;
 }) {
   const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <View style={{ gap: 8 }}>
+    <View
+      style={{ gap: 8 }}
+      // Once an image is chosen, Enter applies it even while the "Choose
+      // image" button holds focus (react-aria would otherwise consume the
+      // key). Before a selection, Enter keeps opening the file picker.
+      onKeyDownCapture={(e: KeyboardEvent<HTMLDivElement>) => {
+        if (canApply && e.key === 'Enter') {
+          e.preventDefault();
+          e.stopPropagation();
+          onApply();
+        }
+      }}
+    >
       <Text
         style={{ fontSize: SUBTEXT_FONT_SIZE, color: theme.pageTextSubdued }}
       >
@@ -677,10 +724,12 @@ function EmojiTab({
   setError,
   setPreview,
   onApply,
+  canApply,
 }: {
   setError: (e: string | null) => void;
   setPreview: (s: string | null) => void;
   onApply: () => void;
+  canApply: boolean;
 }) {
   const { t } = useTranslation();
   const [emoji, setEmoji] = useState('');
@@ -692,8 +741,7 @@ function EmojiTab({
         setPreview(null);
         return;
       }
-      const dataUrl = emojiToDataUrl(value);
-      setPreview(dataUrl);
+      setPreview(emojiToStoredIcon(value));
       setError(null);
     } catch (err) {
       const message =
@@ -710,9 +758,10 @@ function EmojiTab({
       style={{ gap: 8 }}
       // Capture Enter before the react-aria suggestion buttons consume it, so
       // a selected emoji can be applied with the keyboard regardless of which
-      // control holds focus.
+      // control holds focus. Only intercept once something is selected so the
+      // buttons keep their normal Enter behavior otherwise.
       onKeyDownCapture={(e: KeyboardEvent<HTMLDivElement>) => {
-        if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+        if (canApply && e.key === 'Enter' && !e.nativeEvent.isComposing) {
           e.preventDefault();
           e.stopPropagation();
           onApply();
