@@ -171,7 +171,7 @@
     "i18next": "^26.3.1",
     "i18next-parser": "^9.4.0",
     "i18next-resources-to-backend": "^1.2.1",
-    "jsdom": "^27.4.0",
+    "jsdom": "^29.1.1",
     "lodash": "^4.18.1",
     "lru-cache": "^11.5.1",
     "mdast-util-newline-to-break": "^2.0.0",
