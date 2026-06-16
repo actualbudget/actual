@@ -23,8 +23,18 @@ export default {
   normalizeTransaction(transaction, booked) {
     const editedTrans = { ...transaction };
 
-    let payeeName = formatPayeeName(transaction);
-    if (!payeeName) payeeName = extractPayeeName(transaction);
+    let payeeName: string | null = formatPayeeName(transaction);
+
+    // sometimes the creditor is not provided
+    // the formatPayeeName then falls back to debtor
+    // but that is not correct in case of a negative booking, as it is just the account holders IBAN.
+    const isInvalidFallback =
+      Number(transaction.transactionAmount.amount) < 0 &&
+      !(transaction.creditorName || transaction.creditorAccount);
+
+    if (!payeeName || isInvalidFallback) {
+      payeeName = extractPayeeName(transaction);
+    }
     editedTrans.payeeName = payeeName;
 
     return Fallback.normalizeTransaction(transaction, booked, editedTrans);
