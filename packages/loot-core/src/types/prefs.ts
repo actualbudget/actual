@@ -57,7 +57,14 @@ export type SyncedPrefs = Partial<
     | `flip-amount-${string}-${'csv' | 'qif'}`
     | `flags.${FeatureFlag}`
     | `learn-categories`
-    | `show-hidden-tags`,
+    | `show-hidden-tags`
+    | 'budget.focusedViews'
+    | 'budget.builtInViewsOrder'
+    | 'budget.viewOrder'
+    | 'budget.hiddenViews'
+    | 'budget.showHiddenViews'
+    | 'budget.activeFocusedView'
+    | 'budget.focusedViewsCollapsed',
     string
   >
 >;
@@ -89,13 +96,6 @@ export type LocalPrefs = Partial<{
   'budget.summaryCollapsed': boolean;
   'budget.showHiddenCategories': boolean;
   'budget.startMonth': string;
-  'budget.focusedViews': FocusedViewDefinition[];
-  'budget.builtInViewsOrder': string[];
-  'budget.viewOrder': string[];
-  'budget.hiddenViews': string[];
-  'budget.showHiddenViews': boolean;
-  'budget.activeFocusedView': string | null;
-  'budget.focusedViewsCollapsed': boolean;
   'flags.updateNotificationShownForVersion': string;
   'schedules.showCompleted': boolean;
   reportsViewLegend: boolean;

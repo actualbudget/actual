@@ -1,9 +1,46 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { FocusedViewDefinition } from '@actual-app/core/types/prefs';
 import { v4 as uuidv4 } from 'uuid';
 
-import { useLocalPref } from './useLocalPref';
+import { useSyncedPref } from './useSyncedPref';
+
+function useSyncedPrefJson<T>(
+  prefName: any,
+  defaultValue: T,
+): [T, (val: T) => void] {
+  const [pref, setPref] = useSyncedPref(prefName);
+  
+  // Use optimistic local state for instant UI updates
+  const [localValue, setLocalValue] = useState<T>(() => {
+    try {
+      return pref !== undefined ? JSON.parse(pref) : defaultValue;
+    } catch {
+      return defaultValue;
+    }
+  });
+
+  const lastPrefRef = useRef(pref);
+
+  // Sync local state if Redux state changes externally
+  useEffect(() => {
+    if (pref !== lastPrefRef.current) {
+      lastPrefRef.current = pref;
+      try {
+        setLocalValue(pref !== undefined ? JSON.parse(pref) : defaultValue);
+      } catch {
+        setLocalValue(defaultValue);
+      }
+    }
+  }, [pref, defaultValue]);
+  
+  const setValue = useCallback((val: T) => {
+    setLocalValue(val);
+    setPref(JSON.stringify(val));
+  }, [setPref]);
+  
+  return [localValue, setValue];
+}
 
 export const BUILT_IN_VIEWS = {
   UNDERFUNDED: '__underfunded',
@@ -13,12 +50,14 @@ export const BUILT_IN_VIEWS = {
 } as const;
 
 export function useFocusedViews() {
-  const [storedViews = [], setViews] = useLocalPref('budget.focusedViews');
-  const [activeViewId = null, setActiveViewId] = useLocalPref(
+  const [storedViews, setViews] = useSyncedPrefJson<FocusedViewDefinition[]>('budget.focusedViews', []);
+  const [activeViewId, setActiveViewId] = useSyncedPrefJson<string | null>(
     'budget.activeFocusedView',
+    null
   );
-  const [isCollapsed = false, setIsCollapsed] = useLocalPref(
+  const [isCollapsed, setIsCollapsed] = useSyncedPrefJson<boolean>(
     'budget.focusedViewsCollapsed',
+    false
   );
 
   const views = useMemo(
@@ -86,20 +125,19 @@ export function useFocusedViews() {
     return Object.values(BUILT_IN_VIEWS).some(viewId => viewId === id);
   }, []);
 
-  const [
-    builtInViewsOrder = [
-      BUILT_IN_VIEWS.OVERSPENT,
-      BUILT_IN_VIEWS.UNDERFUNDED,
-      BUILT_IN_VIEWS.OVERFUNDED,
-      BUILT_IN_VIEWS.MONEY_AVAILABLE,
-    ],
-  ] = useLocalPref('budget.builtInViewsOrder');
+  const [builtInViewsOrder] = useSyncedPrefJson<string[]>('budget.builtInViewsOrder', [
+    BUILT_IN_VIEWS.OVERSPENT,
+    BUILT_IN_VIEWS.UNDERFUNDED,
+    BUILT_IN_VIEWS.OVERFUNDED,
+    BUILT_IN_VIEWS.MONEY_AVAILABLE,
+  ]);
 
-  const [storedViewOrder = [], setViewOrder] = useLocalPref('budget.viewOrder');
+  const [storedViewOrder, setViewOrder] = useSyncedPrefJson<string[]>('budget.viewOrder', []);
 
-  const [hiddenViews = [], setHiddenViews] = useLocalPref('budget.hiddenViews');
-  const [showHiddenViews = false, setShowHiddenViews] = useLocalPref(
+  const [hiddenViews, setHiddenViews] = useSyncedPrefJson<string[]>('budget.hiddenViews', []);
+  const [showHiddenViews, setShowHiddenViews] = useSyncedPrefJson<boolean>(
     'budget.showHiddenViews',
+    false
   );
 
   const viewOrder = useMemo(() => {
