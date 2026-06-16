@@ -25,7 +25,7 @@
     "@r74tech/docusaurus-plugin-panzoom": "^2.4.2",
     "prism-react-renderer": "^2.4.1",
     "react": "19.2.7",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.7"
   },
   "devDependencies": {
     "@actual-app/ci-actions": "workspace:*",

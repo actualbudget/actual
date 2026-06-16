@@ -88,14 +88,14 @@ __metadata:
     eslint-plugin-storybook: "npm:^10.4.4"
     react: "npm:19.2.7"
     react-aria-components: "npm:^1.18.0"
-    react-dom: "npm:19.2.4"
+    react-dom: "npm:19.2.7"
     storybook: "npm:^10.4.4"
     usehooks-ts: "npm:^3.1.1"
     vite: "npm:^8.0.16"
     vitest: "npm:^4.1.8"
   peerDependencies:
     react: 19.2.7
-    react-dom: ">=19.2"
+    react-dom: 19.2.7
   languageName: unknown
   linkType: soft
 
@@ -276,7 +276,7 @@ __metadata:
     react-aria-components: "npm:^1.18.0"
     react-dnd: "npm:^16.0.1"
     react-dnd-html5-backend: "npm:^16.0.1"
-    react-dom: "npm:19.2.4"
+    react-dom: "npm:19.2.7"
     react-error-boundary: "npm:^6.1.2"
     react-grid-layout: "npm:^2.2.3"
     react-hotkeys-hook: "npm:^5.3.2"
@@ -13172,7 +13172,7 @@ __metadata:
     "@types/react": "npm:^19.2.17"
     prism-react-renderer: "npm:^2.4.1"
     react: "npm:19.2.7"
-    react-dom: "npm:19.2.4"
+    react-dom: "npm:19.2.7"
   languageName: unknown
   linkType: soft
 
@@ -22510,7 +22510,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:19.2.4, react-dom@npm:^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0":
+"react-dom@npm:19.2.7":
+  version: 19.2.7
+  resolution: "react-dom@npm:19.2.7"
+  dependencies:
+    scheduler: "npm:^0.27.0"
+  peerDependencies:
+    react: ^19.2.7
+  checksum: 10/9564f4b83843ca5518ed5f807c93cb1663706559cde52f3ef814b41e60b63b16e684d849926458f0ba436745d7eabf822cba1c528be370e7b2f35a4c91e35941
+  languageName: node
+  linkType: hard
+
+"react-dom@npm:^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0":
   version: 19.2.4
   resolution: "react-dom@npm:19.2.4"
   dependencies:

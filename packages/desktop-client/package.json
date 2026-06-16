@@ -185,7 +185,7 @@
     "react-aria-components": "^1.18.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
-    "react-dom": "19.2.4",
+    "react-dom": "19.2.7",
     "react-error-boundary": "^6.1.2",
     "react-grid-layout": "^2.2.3",
     "react-hotkeys-hook": "^5.3.2",
