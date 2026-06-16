@@ -34,7 +34,7 @@
   "dependencies": {
     "@actual-app/api": "workspace:*",
     "cli-table3": "^0.6.5",
-    "commander": "^14.0.3",
+    "commander": "^15.0.0",
     "cosmiconfig": "^9.0.2",
     "proper-lockfile": "^4.1.2"
   },
