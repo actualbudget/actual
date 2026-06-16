@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  actual_server:
+    image: docker.io/SEU_USUARIO_DOCKERHUB/actual-server:myimage
+    container_name: actual-server
+    ports:
+      - '5006:5006'
+    environment:
+      - ACTUAL_PORT=5006
+      - ACTUAL_UPLOAD_FILE_SIZE_LIMIT_MB=20
+      - ACTUAL_MULTIUSER=false
+    volumes:
+      - ./actual-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'node src/scripts/health-check.js']
+      interval: 60s
+      timeout: 10s
+      retries: 3
