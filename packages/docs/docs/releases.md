@@ -6,17 +6,17 @@ Release date: 2026-06-01
 
 This release adds new reports, a new bank sync provider, a UI for budget automations (goal templates) and releases custom themes as stable, as well as numerous other fixes.
 
-- [Crossover report](/docs/reports/#crossover-point) released as a first-party feature
-- [Custom themes](/docs/custom-themes) released as a first-party feature
+- [Crossover report](./reports/index.md#crossover-point) released as a first-party feature
+- [Custom themes](./custom-themes.md) released as a first-party feature
 - Redesigned bank sync configuration and account linking process
 - Add Tag autocomplete when editing transaction notes
-- Experimental: Add a [UI for budget automations](/docs/experimental/budget-automation) (goal templates)
-- Experimental: Add [Enable Banking integration](/docs/advanced/bank-sync/enable-banking) as a bank sync provider
-- Experimental: Add [Balance Forecast report](/docs/experimental/balance-forecast-report)
+- Experimental: Add a [UI for budget automations](./experimental/budget-automation.md) (goal templates)
+- Experimental: Add [Enable Banking integration](./advanced/bank-sync/enable-banking.md) as a bank sync provider
+- Experimental: Add [Balance Forecast report](./experimental/balance-forecast-report.md)
 
 :::warning Deprecation
 
-Starting this release, rule action templating is deprecated in favour of formulae and will be removed in a future release. For more information, see [Rule Action Templating](/docs/experimental/rule-templating).
+Starting this release, rule action templating is deprecated in favour of formulae and will be removed in a future release. For more information, see [Rule Action Templating](./experimental/rule-templating.md).
 
 :::
 
@@ -364,7 +364,7 @@ This release contains the following notable improvements, along with numerous fi
 - Concentric donut charts that show category groups in an outer ring
 - Smarter autocomplete with an improved search algorithm for payees and categories
 - Experimental: Payee Locations: Actual can now remember where you've used a payee and suggest payees based on nearby locations
-- Experimental: Actual CLI: a new command-line tool for interacting with your budget, see [the docs](/docs/api/cli) to get started
+- Experimental: Actual CLI: a new command-line tool for interacting with your budget, see [the docs](./api/cli.md) to get started
 
 **Docker Tag: 26.4.0**
 

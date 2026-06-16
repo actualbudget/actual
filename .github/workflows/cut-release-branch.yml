@@ -24,13 +24,14 @@ jobs:
     if: github.repository_owner == 'actualbudget'
     runs-on: ubuntu-latest
     environment: release
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: master
           fetch-depth: 0
-          token: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
           persist-credentials: true
 
       - name: Set up environment
@@ -54,8 +55,6 @@ jobs:
 
       - name: Determine previous tag
         id: prev_tag
-        env:
-          GH_TOKEN: ${{ secrets.ACTIONS_UPDATE_TOKEN || github.token }}
         run: |
           prev_tag=$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" --jq '.tag_name' 2>/dev/null) || prev_tag=""
           echo "tag=${prev_tag:-master}" >> "$GITHUB_OUTPUT"
@@ -75,7 +74,6 @@ jobs:
 
       - name: Validate target version
         env:
-          GH_TOKEN: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
           VERSION: ${{ steps.version.outputs.version }}
           TYPE: ${{ steps.version.outputs.type }}
         shell: bash
@@ -106,7 +104,6 @@ jobs:
       - name: Open release-notes branch and PR
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
-          token: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
           commit-message: '🔖 (${{ steps.version.outputs.version }})'
           title: '🔖 (${{ steps.version.outputs.version }})'
           body: |
@@ -120,7 +117,6 @@ jobs:
 
       - name: Update release branch
         env:
-          GH_TOKEN: ${{ secrets.ACTIONS_UPDATE_TOKEN }}
           VERSION: ${{ steps.version.outputs.version }}
           TYPE: ${{ steps.version.outputs.type }}
         shell: bash

@@ -25,7 +25,7 @@ The great thing is that you are not limited to just one Filter. You can select m
 
 There are further options within each area to narrow the filter further. Here are a couple to illustrate the choices – Dates and Categories:
 
-The `matches` operator uses _[regular expressions](https://regextutorial.org/)_, the other condition types are further explained at [Rules Page](../budgeting/rules/#condition-types).
+The `matches` operator uses _[regular expressions](https://regextutorial.org/)_, the other condition types are further explained at [Rules Page](../budgeting/rules/index.md#condition-types).
 
 ![](/img/filtering/conditions-1.webp)
 

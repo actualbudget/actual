@@ -159,7 +159,7 @@ You can resolve this issue in one of two ways.
 
 ## How To Use Rules With Schedules
 
-Many times it's desired to add notes to the scheduled transactions or to assign categories automatically. This is done with the [Rules](/docs/budgeting/rules) tool. The tool can be reached directly from the Schedules page by clicking on the **Edit as a rule** button in the edit dialog of a schedule.
+Many times it's desired to add notes to the scheduled transactions or to assign categories automatically. This is done with the [Rules](./budgeting/rules/index.md) tool. The tool can be reached directly from the Schedules page by clicking on the **Edit as a rule** button in the edit dialog of a schedule.
 
 When you edit a schedule, the **Edit as rule** button will appear in the dialog
 
