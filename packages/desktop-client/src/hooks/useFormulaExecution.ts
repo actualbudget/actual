@@ -3,10 +3,9 @@ import { useEffect, useState } from 'react';
 import { send } from '@actual-app/core/platform/client/connection';
 import {
   createBudgetQueryPrefetchKey,
-  CustomFunctionsPlugin,
-  customFunctionsTranslations,
-} from '@actual-app/core/server/rules/customFunctions';
-import type { FormulaQueryContext } from '@actual-app/core/server/rules/customFunctions';
+  setCachedUserPreferences,
+} from '@actual-app/core/shared/formulas/customFunctions';
+import type { FormulaQueryContext } from '@actual-app/core/shared/formulas/customFunctions';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type { Query } from '@actual-app/core/shared/query';
@@ -17,12 +16,15 @@ import type {
   TimeFrame,
 } from '@actual-app/core/types/models';
 import { HyperFormula } from 'hyperformula';
-import enUS from 'hyperformula/i18n/languages/enUS';
 
 import { getLiveRange } from '#components/reports/getLiveRange';
 import { calculateTimeRange } from '#components/reports/reportRanges';
+import { bootstrapHyperFormula } from '#util/bootstrapHyperFormula';
 
+import { useGlobalPref } from './useGlobalPref';
 import { useLocale } from './useLocale';
+
+bootstrapHyperFormula();
 
 type QueryConfig = {
   conditions?: RuleConditionEntity[];
@@ -31,15 +33,6 @@ type QueryConfig = {
 };
 
 type QueriesMap = Record<string, QueryConfig>;
-
-if (!HyperFormula.getRegisteredLanguagesCodes().includes('enUS')) {
-  HyperFormula.registerLanguage('enUS', enUS);
-}
-
-HyperFormula.registerFunctionPlugin(
-  CustomFunctionsPlugin,
-  customFunctionsTranslations,
-);
 
 type FormulaCellValue = number | string | boolean | null;
 
@@ -139,6 +132,7 @@ export function useFormulaExecution(
   namedExpressions?: Record<string, number | string>,
 ) {
   const locale = useLocale();
+  const [language] = useGlobalPref('language');
   const [result, setResult] = useState<number | string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -157,12 +151,27 @@ export function useFormulaExecution(
       setError(null);
 
       try {
+        const browserLocale =
+          typeof navigator === 'undefined' ? undefined : navigator.language;
+        const formulaLocale = language || browserLocale || locale || 'en-US';
+
+        try {
+          setCachedUserPreferences(
+            await send('formula-load-user-preferences', {
+              selectedLocale: language,
+              browserLocale,
+            }),
+          );
+        } catch (err) {
+          console.error('Error loading formula preferences:', err);
+        }
+
         const formulaQueryContext = createFormulaQueryContext();
 
         evaluateFormulaWithContext({
           formula,
           formulaQueryContext,
-          locale,
+          locale: formulaLocale,
           namedExpressions,
           throwOnCellError: false,
         });
@@ -173,7 +182,7 @@ export function useFormulaExecution(
         evaluateFormulaWithContext({
           formula,
           formulaQueryContext,
-          locale,
+          locale: formulaLocale,
           namedExpressions,
           throwOnCellError: false,
         });
@@ -183,7 +192,7 @@ export function useFormulaExecution(
         const cellValue = evaluateFormulaWithContext({
           formula,
           formulaQueryContext,
-          locale,
+          locale: formulaLocale,
           namedExpressions,
         });
 
@@ -208,7 +217,7 @@ export function useFormulaExecution(
     return () => {
       cancelled = true;
     };
-  }, [formula, queriesVersion, locale, queries, namedExpressions]);
+  }, [formula, queriesVersion, locale, language, queries, namedExpressions]);
 
   return { result, isLoading, error };
 }
@@ -461,7 +470,9 @@ function extractCategoryConditions(
   conditions: RuleConditionEntity[],
 ): RuleConditionEntity[] {
   return conditions.filter(
-    cond => !cond.customName && cond.field === 'category',
+    cond =>
+      !cond.customName &&
+      (cond.field === 'category' || cond.field === 'category_group'),
   );
 }
 
@@ -478,32 +489,53 @@ async function getCategoriesFromConditions(
       .map((cat: CategoryEntity) => cat.id);
   }
 
+  // Get category groups for resolving group IDs to names
+  const { grouped: categoryGroups } = await send('get-categories');
+  const groupNameById = new Map(
+    categoryGroups.map((g: { id: string; name: string }) => [g.id, g.name]),
+  );
+
   // Evaluate each condition to get sets of matching categories
   const conditionResults = conditions.map(cond => {
+    // For category_group conditions, we check cat.group; for category, we check cat.id
+    const getKey = (cat: CategoryEntity) =>
+      cond.field === 'category_group' ? cat.group : cat.id;
+
     const matching = allCategories.filter((cat: CategoryEntity) => {
+      const key = getKey(cat);
+
+      const textValue =
+        cond.field === 'category_group'
+          ? (groupNameById.get(key) ?? key)
+          : cat.name;
+
       if (cond.op === 'is') {
-        return cond.value === cat.id;
+        return cond.value === key;
       } else if (cond.op === 'isNot') {
-        return cond.value !== cat.id;
+        return cond.value !== key;
       } else if (cond.op === 'oneOf') {
-        return cond.value.includes(cat.id);
+        return cond.value.includes(key);
       } else if (cond.op === 'notOneOf') {
-        return !cond.value.includes(cat.id);
+        return !cond.value.includes(key);
       } else if (cond.op === 'contains') {
-        return cat.name.includes(cond.value as string);
+        return textValue
+          .toLowerCase()
+          .includes((cond.value as string).toLowerCase());
       } else if (cond.op === 'doesNotContain') {
-        return !cat.name.includes(cond.value as string);
+        return !textValue
+          .toLowerCase()
+          .includes((cond.value as string).toLowerCase());
       } else if (cond.op === 'matches') {
         try {
-          return new RegExp(cond.value as string).test(cat.name);
+          return new RegExp(cond.value as string, 'i').test(textValue);
         } catch (e) {
           console.warn('Invalid regexp in matches condition', e);
-          return true;
+          return false;
         }
       }
-      // Unknown operator: include category by default and log warning
+      // Unknown operator: exclude category by default and log warning
       console.warn(`Unknown category condition operator: ${cond.op}`);
-      return true;
+      return false;
     });
     return matching.map((cat: CategoryEntity) => cat.id);
   });
