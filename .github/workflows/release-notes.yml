@@ -23,6 +23,7 @@ jobs:
       github.event_name == 'pull_request'
       && github.head_ref != 'release'
       && startsWith(github.head_ref, 'release-notes/') == false
+      && github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     permissions:
       contents: read

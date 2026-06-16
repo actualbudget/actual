@@ -38,6 +38,16 @@ export default defineConfig(({ mode }) => {
           warn(warning);
         },
         output: {
+          // Users debug from raw stack traces, so compress and strip
+          // whitespace but never mangle identifiers (overrides the
+          // mangle: true that `minify: 'oxc'` implies).
+          ...(!isDev && {
+            minify: {
+              compress: true,
+              mangle: false,
+              codegen: true,
+            },
+          }),
           chunkFileNames: isDev
             ? '[name].kcab.worker.dev.js'
             : '[id].[name].kcab.worker.[hash].js',
@@ -51,7 +61,7 @@ export default defineConfig(({ mode }) => {
         external: [],
       },
       sourcemap: true,
-      minify: false,
+      minify: isDev ? false : 'oxc',
     },
     define: {
       'process.env': '{}',

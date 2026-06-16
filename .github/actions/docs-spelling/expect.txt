@@ -95,7 +95,6 @@ Hampel
 healthcheck
 HELADEF
 HLOOKUP
-Hostim
 HUF
 IFERROR
 IFNA
@@ -192,6 +191,7 @@ THB
 TIMEFRAME
 touchscreen
 triaging
+trustedauthproxies
 tsgo
 tsgolint
 TWD

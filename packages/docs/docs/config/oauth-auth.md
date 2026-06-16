@@ -3,12 +3,12 @@
 ## Setup
 
 :::info
-This feature requires use of [Actual Server](../config/)
+This feature requires use of [Actual Server](./index.md)
 :::
 
 If you require a more robust authentication method than a server password, it is recommended to use an OpenID provider. Most OpenID providers support multi-factor authentication, enhancing your application's security. Additionally, if you need support for multiple users, you must enable this feature.
 
-To enable this feature, you can use a [configuration file](/docs/config/) `config.json` on the Actual server, or use the UI.
+To enable this feature, you can use a [configuration file](./index.md) `config.json` on the Actual server, or use the UI.
 
 ### Configuration Using a Configuration File
 
@@ -186,5 +186,5 @@ Use `oauth2` for providers like GitHub that don't fully support OpenID discovery
   **Possible Values:** `manual` or `login` (default is `manual`)
 
 :::tip
-Configuring the OpenID provider from options supports discovery; otherwise, use [file configuration](oauth-auth#config-using-configuration-file)
+Configuring the OpenID provider from options supports discovery; otherwise, use [file configuration](./oauth-auth.md#configuration-using-a-configuration-file)
 :::

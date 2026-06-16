@@ -31,7 +31,7 @@ The alternative options all require a YNAB Personal Access Token. Follow these s
 ![Generating a new YNAB Personal Access Token](/img/migrating/nynab-api-ui-pat-token.png)
 
 :::caution
-The token is only displayed once. Copy it to a safe place before closing the page. More information about the YNAB API can be found at [api.youneedabudget.com](https://api.youneedabudget.com/).
+The token is only displayed once. Copy it to a safe place before closing the page. More information about the YNAB API can be found at [api.ynab.com](https://api.ynab.com/).
 :::
 
 ### Options
@@ -43,7 +43,7 @@ This method uses YNAB's official API documentation website, which has a built-in
 
 Before you start, [get your YNAB API token](#getting-your-ynab-api-token) if you have not already.
 
-#### Step 1: Get Your Budget ID
+#### Step 1: Get Your Plan ID
 
 1. Open the [Get All Plans endpoint](https://api.ynab.com/v1#tag/plans/GET/plans) in your browser
 2. Click **Try it out**, then click **Execute** (or "Test Request")
@@ -54,32 +54,22 @@ Before you start, [get your YNAB API token](#getting-your-ynab-api-token) if you
 
 ![Pasting the bearer token and sending the request](/img/migrating/nynab-api-ui-bearer-token.webp)
 
-4. In the response body, find the entry for your budget and copy its `id` value (for example, `8800b4e7-937f-4cdb-a7e7-fc35b794f85b`)
+4. In the response body, find the entry for your plan and copy its `id` value (for example, `8800b4e7-937f-4cdb-a7e7-fc35b794f85b`)
 
-#### Step 2: Download Your Budget
+#### Step 2: Download Your Plan
 
 1. Open the [Get a Plan endpoint](https://api.ynab.com/v1#tag/plans/GET/plans/{plan_id}) in your browser
 2. Click **Try it out**
 
 ![The Get Plan by ID endpoint in the YNAB API documentation](/img/migrating/nynab-api-ui-get-plan.webp)
 
-3. Paste your budget ID into the `plan_id` field and click **Send**
+3. Paste your plan ID into the `plan_id` field and click **Send**
 4. Once the response appears in the Body panel on the right, click **Download** to save the JSON file
 
 ![Clicking Download to save the YNAB plan JSON file](/img/migrating/nynab-api-ui-download.webp)
 
-#### Step 3: Fix the JSON File
-
-The file from this endpoint uses a slightly different format than what Actual expects. You need to make one small edit before importing.
-
-1. Open the downloaded JSON file in a plain text editor (Notepad on Windows, TextEdit on macOS)
-2. At the very start of the file, find the text `"plan"` and change it to `"budget"`
-3. Save the file
-
-![The JSON file in a text editor, showing "plan" that must be changed to "budget"](/img/migrating/nynab-api-ui-json-edit.png)
-
-:::warning
-Skipping this step causes a **not-ynab5** error when importing. Make sure the file begins with `{"data": {"budget"` before proceeding.
+:::note
+If the import later fails with a **not-ynab5** error, you are likely on an older version of Actual. Either update Actual, or open the downloaded file in a plain text editor and change the leading `"plan"` to `"budget"` before importing.
 :::
 
   </TabItem>
@@ -146,37 +136,37 @@ When done, your budget file is saved to your Downloads folder with a name like `
   </TabItem>
   <TabItem value="curl" label="cURL">
 
-If you are comfortable with the command line, you can download your budget directly using `curl`.
+If you are comfortable with the command line, you can download your plan directly using `curl`.
 
 Before you start, [get your YNAB API token](#getting-your-ynab-api-token) if you have not already.
 
-#### Step 1: Get Your Budget ID
+#### Step 1: Get Your Plan ID
 
 Open a terminal window and run the following, replacing `<ACCESS_TOKEN>` with the token you copied:
 
 ```
-curl -H "Authorization: Bearer <ACCESS_TOKEN>" https://api.youneedabudget.com/v1/budgets
+curl -H "Authorization: Bearer <ACCESS_TOKEN>" https://api.ynab.com/v1/plans
 ```
 
-This returns a list of your budgets. Find the `id` for the budget you want to export.
+This returns a list of your plans. Find the `id` for the plan you want to export.
 
 :::note
 To format the output more readably, pipe it to `jq` (install with `brew install jq` on macOS):
 
 ```
-curl -sH "Authorization: Bearer <ACCESS_TOKEN>" https://api.youneedabudget.com/v1/budgets | jq -r '.data.budgets | sort_by(.last_modified_on) | reverse | .[] | "\(.name): \(.id)"'
+curl -sH "Authorization: Bearer <ACCESS_TOKEN>" https://api.ynab.com/v1/plans | jq -r '.data.plans | sort_by(.last_modified_on) | reverse | .[] | "\(.name): \(.id)"'
 ```
 
 If you see the error `Invoke-WebRequest : Cannot bind parameter 'Headers'` on Windows, use `curl.exe` instead of `curl`.
 :::
 
-#### Step 2: Download Your Budget
+#### Step 2: Download Your Plan
 
 ```
-curl -H "Authorization: Bearer <ACCESS_TOKEN>" https://api.youneedabudget.com/v1/budgets/<BUDGET ID> --output budget.json
+curl -H "Authorization: Bearer <ACCESS_TOKEN>" https://api.ynab.com/v1/plans/<PLAN ID> --output plan.json
 ```
 
-Replace `<ACCESS_TOKEN>` and `<BUDGET ID>` with your values.
+Replace `<ACCESS_TOKEN>` and `<PLAN ID>` with your values.
 
   </TabItem>
 </Tabs>
@@ -229,7 +219,7 @@ To `hold` the leftover funds for the next month follow these steps:
 4. Click `Hold`.
 5. Repeat for all desired months.
 
-A full description of how funds rollover and the `hold` feature can be found in [this article.](../budgeting/#how-money-rolls-over)
+A full description of how funds rollover and the `hold` feature can be found in [this article.](../budgeting/index.md#how-money-rolls-over)
 
 ### Duplicate Categories or Groups
 
