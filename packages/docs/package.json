@@ -24,7 +24,7 @@
     "@mdx-js/react": "^3.1.1",
     "@r74tech/docusaurus-plugin-panzoom": "^2.4.2",
     "prism-react-renderer": "^2.4.1",
-    "react": "19.2.4",
+    "react": "19.2.7",
     "react-dom": "19.2.4"
   },
   "devDependencies": {

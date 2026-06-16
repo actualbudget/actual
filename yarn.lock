@@ -86,7 +86,7 @@ __metadata:
     "@typescript/native-preview": "npm:beta"
     "@vitejs/plugin-react": "npm:^6.0.2"
     eslint-plugin-storybook: "npm:^10.4.4"
-    react: "npm:19.2.4"
+    react: "npm:19.2.7"
     react-aria-components: "npm:^1.18.0"
     react-dom: "npm:19.2.4"
     storybook: "npm:^10.4.4"
@@ -94,7 +94,7 @@ __metadata:
     vite: "npm:^8.0.16"
     vitest: "npm:^4.1.8"
   peerDependencies:
-    react: ">=19.2"
+    react: 19.2.7
     react-dom: ">=19.2"
   languageName: unknown
   linkType: soft
@@ -271,7 +271,7 @@ __metadata:
     plugins-service: "workspace:*"
     promise-retry: "npm:^2.0.1"
     re-resizable: "npm:^6.11.2"
-    react: "npm:19.2.4"
+    react: "npm:19.2.7"
     react-aria: "npm:^3.49.0"
     react-aria-components: "npm:^1.18.0"
     react-dnd: "npm:^16.0.1"
@@ -13171,7 +13171,7 @@ __metadata:
     "@r74tech/docusaurus-plugin-panzoom": "npm:^2.4.2"
     "@types/react": "npm:^19.2.17"
     prism-react-renderer: "npm:^2.4.1"
-    react: "npm:19.2.4"
+    react: "npm:19.2.7"
     react-dom: "npm:19.2.4"
   languageName: unknown
   linkType: soft
@@ -22906,7 +22906,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:19.2.4, react@npm:^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0":
+"react@npm:19.2.7":
+  version: 19.2.7
+  resolution: "react@npm:19.2.7"
+  checksum: 10/2939997e87d7f0ee0d9d2bb556866b616b999dfb7916283647034eda867a045a39c4f7a736c8ea6beffffcd78397fc30f63a7a3aaf8425b683c3060670859560
+  languageName: node
+  linkType: hard
+
+"react@npm:^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0":
   version: 19.2.4
   resolution: "react@npm:19.2.4"
   checksum: 10/18179fe217f67eb2d0bc61cd04e7ad3c282ea09a1dface7eacd71816f62609f4bbf566c447c704335284deb8397b00bca084e0cd60e6f437279a7498e2d0bfe0
