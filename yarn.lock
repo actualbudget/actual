@@ -280,7 +280,7 @@ __metadata:
     react-error-boundary: "npm:^6.1.2"
     react-grid-layout: "npm:^2.2.3"
     react-hotkeys-hook: "npm:^5.3.2"
-    react-i18next: "npm:^16.6.6"
+    react-i18next: "npm:^17.0.8"
     react-markdown: "npm:^10.1.0"
     react-redux: "npm:^9.3.0"
     react-router: "npm:7.15.0"
@@ -22608,15 +22608,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-i18next@npm:^16.6.6":
-  version: 16.6.6
-  resolution: "react-i18next@npm:16.6.6"
+"react-i18next@npm:^17.0.8":
+  version: 17.0.8
+  resolution: "react-i18next@npm:17.0.8"
   dependencies:
     "@babel/runtime": "npm:^7.29.2"
     html-parse-stringify: "npm:^3.0.1"
     use-sync-external-store: "npm:^1.6.0"
   peerDependencies:
-    i18next: ">= 25.10.9"
+    i18next: ">= 26.2.0"
     react: ">= 16.8.0"
     typescript: ^5 || ^6
   peerDependenciesMeta:
@@ -22626,7 +22626,7 @@ __metadata:
       optional: true
     typescript:
       optional: true
-  checksum: 10/5916b8eb0bf2e8d6aef06077640c2ac81603b47aca82c1314c73be3604f0a64337964049d6efc07607f296209f02ffe2ba7a0fa6fbed570f3d5e1b83ee8a4059
+  checksum: 10/7ac39b9b38ae2e572b6ffcf1e2e3ef9479daef9cd4c51e2e16464b5e0e641a55d16b2a5988fc99da8f749a63c8bb21a6ebf810182c22fb63cc7a18fbbd6334dd
   languageName: node
   linkType: hard
 
