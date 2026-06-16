@@ -106,7 +106,7 @@ export type SelectLinkedAccountsModalProps =
     };
 
 export function SelectLinkedAccountsModal({
-  requisitionId = undefined,
+  requisitionId,
   externalAccounts,
   syncSource,
   upgradingAccountId,
