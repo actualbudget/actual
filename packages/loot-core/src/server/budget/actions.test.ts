@@ -8,8 +8,10 @@ import {
   copyUntilYearEnd,
   coverOverbudgeted,
   getSheetValue,
+  set3MonthAvg,
   setBudget,
   setCategoryCarryover,
+  setNMonthAvg,
 } from './actions';
 import * as budget from './base';
 
@@ -129,6 +131,69 @@ describe('copyUntilYearEnd', () => {
   });
 });
 
+describe('set budget average', () => {
+  let originalCurrentMonth: string | null;
+
+  beforeEach(async () => {
+    await global.emptyDatabase()();
+    originalCurrentMonth = global.currentMonth;
+    global.currentMonth = '2024-02';
+    await setupAverageDatabase();
+  });
+
+  afterEach(async () => {
+    global.currentMonth = originalCurrentMonth;
+    await global.emptyDatabase()();
+  });
+
+  it('sets a single category average from complete months', async () => {
+    await setNMonthAvg({ month: '2024-04', N: 3, category: 'cat1' });
+    await sheet.waitOnSpreadsheet();
+
+    expect(await getSheetValue('budget202404', 'budget-cat1')).toBe(600);
+  });
+
+  it('sets a single category average from the first activity month', async () => {
+    await setBudget({ category: 'cat1', month: '2023-12', amount: 1000 });
+
+    await setNMonthAvg({ month: '2024-04', N: 3, category: 'cat1' });
+    await sheet.waitOnSpreadsheet();
+
+    expect(await getSheetValue('budget202404', 'budget-cat1')).toBe(600);
+  });
+
+  it('rounds a single category average to an integer amount', async () => {
+    await db.insertTransaction({
+      date: '2023-12-20',
+      amount: -100,
+      account: 'account1',
+      category: 'cat1',
+    });
+    await sheet.waitOnSpreadsheet();
+
+    await setNMonthAvg({ month: '2024-04', N: 3, category: 'cat1' });
+    await sheet.waitOnSpreadsheet();
+
+    expect(await getSheetValue('budget202404', 'budget-cat1')).toBe(633);
+  });
+
+  it('sets a bulk 3 month average from complete months', async () => {
+    await set3MonthAvg({ month: '2024-04' });
+    await sheet.waitOnSpreadsheet();
+
+    expect(await getSheetValue('budget202404', 'budget-cat1')).toBe(600);
+  });
+
+  it('sets a bulk 3 month average from the first activity month', async () => {
+    await setBudget({ category: 'cat1', month: '2023-12', amount: 1000 });
+
+    await set3MonthAvg({ month: '2024-04' });
+    await sheet.waitOnSpreadsheet();
+
+    expect(await getSheetValue('budget202404', 'budget-cat1')).toBe(600);
+  });
+});
+
 describe('coverOverbudgeted', () => {
   beforeEach(global.emptyDatabase());
   afterEach(global.emptyDatabase());
@@ -213,5 +278,65 @@ async function prepareDatabase() {
     category: 'cat2',
     flag: true,
   });
+  await sheet.waitOnSpreadsheet();
+}
+
+async function setupAverageDatabase() {
+  await db.insertAccount({ id: 'account1', name: 'Account 1' });
+
+  await db.insertCategoryGroup({
+    id: 'income-group',
+    name: 'Income',
+    is_income: 1,
+  });
+  await db.insertCategoryGroup({ id: 'group1', name: 'group1', is_income: 0 });
+  await db.insertCategory({
+    id: 'cat1',
+    name: 'cat1',
+    cat_group: 'group1',
+    is_income: 0,
+  });
+
+  await sheet.loadSpreadsheet(db);
+  await budget.createBudget([
+    '2023-11',
+    '2023-12',
+    '2024-01',
+    '2024-02',
+    '2024-03',
+    '2024-04',
+  ]);
+
+  await db.insertTransaction({
+    date: '2023-11-15',
+    amount: -300,
+    account: 'account1',
+    category: 'cat1',
+  });
+  await db.insertTransaction({
+    date: '2023-12-15',
+    amount: -600,
+    account: 'account1',
+    category: 'cat1',
+  });
+  await db.insertTransaction({
+    date: '2024-01-15',
+    amount: -900,
+    account: 'account1',
+    category: 'cat1',
+  });
+  await db.insertTransaction({
+    date: '2024-02-15',
+    amount: -3000,
+    account: 'account1',
+    category: 'cat1',
+  });
+  await db.insertTransaction({
+    date: '2024-03-15',
+    amount: -1200,
+    account: 'account1',
+    category: 'cat1',
+  });
+
   await sheet.waitOnSpreadsheet();
 }

@@ -64,28 +64,28 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@monorepo-utils/workspaces-to-typescript-project-references": "^2.10.3",
+    "@monorepo-utils/workspaces-to-typescript-project-references": "^2.11.0",
     "@octokit/rest": "^22.0.1",
-    "@types/node": "^22.19.17",
+    "@types/node": "^22.19.21",
     "@types/prompts": "^2.4.9",
     "@typescript/native-preview": "beta",
     "@yarnpkg/types": "^4.0.1",
-    "eslint": "^10.2.0",
-    "eslint-plugin-perfectionist": "^5.8.0",
+    "eslint": "^10.5.0",
+    "eslint-plugin-perfectionist": "^5.9.0",
     "eslint-plugin-typescript-paths": "^0.0.33",
     "husky": "^9.1.7",
-    "lage": "^2.15.5",
+    "lage": "^2.15.13",
     "minimatch": "^10.2.5",
-    "nano-staged": "^0.8.0",
+    "nano-staged": "^1.0.2",
     "npm-run-all": "^4.1.5",
     "oxfmt": "^0.44.0",
-    "oxlint": "^1.59.0",
-    "oxlint-tsgolint": "^0.20.0",
+    "oxlint": "^1.69.0",
+    "oxlint-tsgolint": "^0.23.0",
     "p-limit": "^7.3.0",
     "prompts": "^2.4.2",
     "ts-node": "^10.9.2",
-    "typescript": "^6.0.2",
-    "vitest": "^4.1.2"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
   },
   "dependenciesMeta": {
     "bcrypt": {
