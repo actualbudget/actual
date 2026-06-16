@@ -188,8 +188,26 @@ const TransactionHeader = memo(
       [dispatchSelected],
     );
 
+    const headerColIndex = useMemo(() => {
+      let colIndex = 2;
+
+      return {
+        date: colIndex++,
+        account: showAccount ? colIndex++ : null,
+        payee: colIndex++,
+        notes: colIndex++,
+        category: showCategory ? colIndex++ : null,
+        payment: colIndex++,
+        deposit: colIndex++,
+        balance: showBalance ? colIndex++ : null,
+        cleared: showCleared ? colIndex++ : null,
+      };
+    }, [showAccount, showCategory, showBalance, showCleared]);
+
     return (
       <Row
+        role="row"
+        aria-rowindex={1}
         style={{
           fontWeight: 300,
           zIndex: 200,
@@ -203,6 +221,9 @@ const TransactionHeader = memo(
       >
         {showSelection && (
           <SelectCell
+            role="columnheader"
+            aria-colindex={1}
+            aria-label={t('Select')}
             exposed
             focused={false}
             selected={hasSelected}
@@ -222,6 +243,8 @@ const TransactionHeader = memo(
         )}
         {!showSelection && (
           <Field
+            role="columnheader"
+            aria-colindex={1}
             style={{
               width: '20px',
               border: 0,
@@ -233,6 +256,14 @@ const TransactionHeader = memo(
           width={110}
           alignItems="flex"
           marginLeft={-5}
+          colIndex={headerColIndex.date}
+          ariaSort={
+            field === 'date'
+              ? ascDesc === 'asc'
+                ? 'ascending'
+                : 'descending'
+              : 'none'
+          }
           id="date"
           icon={field === 'date' ? ascDesc : 'clickable'}
           onClick={() =>
@@ -245,6 +276,14 @@ const TransactionHeader = memo(
             width="flex"
             alignItems="flex"
             marginLeft={-5}
+            colIndex={headerColIndex.account}
+            ariaSort={
+              field === 'account'
+                ? ascDesc === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
             id="account"
             icon={field === 'account' ? ascDesc : 'clickable'}
             onClick={() =>
@@ -257,6 +296,14 @@ const TransactionHeader = memo(
           width="flex"
           alignItems="flex"
           marginLeft={-5}
+          colIndex={headerColIndex.payee}
+          ariaSort={
+            field === 'payee'
+              ? ascDesc === 'asc'
+                ? 'ascending'
+                : 'descending'
+              : 'none'
+          }
           id="payee"
           icon={field === 'payee' ? ascDesc : 'clickable'}
           onClick={() =>
@@ -268,6 +315,14 @@ const TransactionHeader = memo(
           width="flex"
           alignItems="flex"
           marginLeft={-5}
+          colIndex={headerColIndex.notes}
+          ariaSort={
+            field === 'notes'
+              ? ascDesc === 'asc'
+                ? 'ascending'
+                : 'descending'
+              : 'none'
+          }
           id="notes"
           icon={field === 'notes' ? ascDesc : 'clickable'}
           onClick={() =>
@@ -280,6 +335,14 @@ const TransactionHeader = memo(
             width="flex"
             alignItems="flex"
             marginLeft={-5}
+            colIndex={headerColIndex.category}
+            ariaSort={
+              field === 'category'
+                ? ascDesc === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
             id="category"
             icon={field === 'category' ? ascDesc : 'clickable'}
             onClick={() =>
@@ -295,6 +358,14 @@ const TransactionHeader = memo(
           width={100}
           alignItems="flex-end"
           marginRight={-5}
+          colIndex={headerColIndex.payment}
+          ariaSort={
+            field === 'payment'
+              ? ascDesc === 'asc'
+                ? 'ascending'
+                : 'descending'
+              : 'none'
+          }
           id="payment"
           icon={field === 'payment' ? ascDesc : 'clickable'}
           onClick={() =>
@@ -306,6 +377,14 @@ const TransactionHeader = memo(
           width={100}
           alignItems="flex-end"
           marginRight={-5}
+          colIndex={headerColIndex.deposit}
+          ariaSort={
+            field === 'deposit'
+              ? ascDesc === 'asc'
+                ? 'ascending'
+                : 'descending'
+              : 'none'
+          }
           id="deposit"
           icon={field === 'deposit' ? ascDesc : 'clickable'}
           onClick={() =>
@@ -318,6 +397,7 @@ const TransactionHeader = memo(
             width={103}
             alignItems="flex-end"
             marginRight={-5}
+            colIndex={headerColIndex.balance}
             id="balance"
           />
         )}
@@ -326,6 +406,14 @@ const TransactionHeader = memo(
             value="✓"
             width={38}
             alignItems="center"
+            colIndex={headerColIndex.cleared}
+            ariaSort={
+              field === 'cleared'
+                ? ascDesc === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : 'none'
+            }
             id="cleared"
             icon={field === 'cleared' ? ascDesc : 'clickable'}
             onClick={() => {
@@ -435,6 +523,8 @@ function StatusCell({
 type HeaderCellProps = {
   value: string;
   id: string;
+  colIndex: number;
+  ariaSort?: 'ascending' | 'descending' | 'none';
   icon?: 'asc' | 'desc' | 'clickable';
   onClick?: () => void;
 } & Pick<CSSProperties, 'width' | 'alignItems' | 'marginLeft' | 'marginRight'>;
@@ -442,6 +532,8 @@ type HeaderCellProps = {
 function HeaderCell({
   value,
   id,
+  colIndex,
+  ariaSort,
   width,
   alignItems,
   marginLeft,
@@ -461,6 +553,9 @@ function HeaderCell({
 
   return (
     <CustomCell
+      role="columnheader"
+      aria-colindex={colIndex}
+      aria-sort={ariaSort}
       width={width}
       name={id}
       alignItems={alignItems}
@@ -2363,9 +2458,25 @@ function TransactionTableInner({
   showHiddenCategories,
   ...props
 }: TransactionTableInnerProps) {
+  const { t } = useTranslation();
   const containerRef = createRef<HTMLDivElement>();
   const isAddingPrev = usePrevious(props.isAdding);
   const [scrollWidth, setScrollWidth] = useState(0);
+
+  const transactionColumnCount = useMemo(
+    () =>
+      7 +
+      (props.showAccount ? 1 : 0) +
+      (props.showCategory ? 1 : 0) +
+      (props.showBalances ? 1 : 0) +
+      (props.showCleared ? 1 : 0),
+    [
+      props.showAccount,
+      props.showCategory,
+      props.showBalances,
+      props.showCleared,
+    ],
+  );
 
   function saveScrollWidth(parent: number, child: number) {
     const width = parent > 0 && child > 0 && parent - child;
@@ -2577,7 +2688,7 @@ function TransactionTableInner({
         ...props.style,
       }}
     >
-      <View>
+      <View role="rowgroup">
         <TransactionHeader
           hasSelected={props.selectedItems.size > 0}
           showAccount={props.showAccount}
@@ -2644,6 +2755,9 @@ function TransactionTableInner({
           ref={tableRef}
           listContainerRef={listContainerRef}
           items={transactionsToRender}
+          ariaLabel={t('Transactions')}
+          ariaColCount={transactionColumnCount}
+          headerRowCount={0}
           renderItem={renderRow}
           renderEmpty={renderEmpty}
           loadMore={props.loadMoreTransactions}
