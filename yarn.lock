@@ -233,7 +233,7 @@ __metadata:
     "@playwright/test": "npm:1.59.1"
     "@react-aria/interactions": "npm:^3.28.1"
     "@reduxjs/toolkit": "npm:^2.12.0"
-    "@rolldown/plugin-babel": "npm:~0.1.8"
+    "@rolldown/plugin-babel": "npm:~0.2.3"
     "@rollup/plugin-inject": "npm:^5.0.5"
     "@tanstack/react-query": "npm:^5.101.0"
     "@testing-library/dom": "npm:10.4.1"
@@ -6692,19 +6692,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rolldown/plugin-babel@npm:~0.1.8":
-  version: 0.1.8
-  resolution: "@rolldown/plugin-babel@npm:0.1.8"
+"@rolldown/plugin-babel@npm:~0.2.3":
+  version: 0.2.3
+  resolution: "@rolldown/plugin-babel@npm:0.2.3"
   dependencies:
-    picomatch: "npm:^4.0.3"
+    picomatch: "npm:^4.0.4"
   peerDependencies:
     "@babel/core": ^7.29.0 || ^8.0.0-rc.1
+    "@babel/plugin-transform-runtime": ^7.29.0 || ^8.0.0-rc.1
+    "@babel/runtime": ^7.27.0 || ^8.0.0-rc.1
     rolldown: ^1.0.0-rc.5
     vite: ^8.0.0
   peerDependenciesMeta:
+    "@babel/plugin-transform-runtime":
+      optional: true
+    "@babel/runtime":
+      optional: true
     vite:
       optional: true
-  checksum: 10/7d2bdf18b081f37b1d8b800c7237a12f2c70e8449006a250b245c2b4969362aa205e7b586e1348870e1e06e656a98923eee7e24441b3602d24b28dc589dd7bf2
+  checksum: 10/dd40e5605dc6e0482a54545ee7ac9cdc9a7d29db7e75ac9be1999eafec30618a574f6a1356ad6e4337d220eb38ac980dc4d8c5f552eaa985ea331a7c0e07375a
   languageName: node
   linkType: hard
 
