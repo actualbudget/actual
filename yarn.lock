@@ -9374,7 +9374,7 @@ __metadata:
     husky: "npm:^9.1.7"
     lage: "npm:^2.15.13"
     minimatch: "npm:^10.2.5"
-    nano-staged: "npm:^0.8.0"
+    nano-staged: "npm:^1.0.2"
     npm-run-all: "npm:^4.1.5"
     oxfmt: "npm:^0.44.0"
     oxlint: "npm:^1.69.0"
@@ -19576,14 +19576,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nano-staged@npm:^0.8.0":
-  version: 0.8.0
-  resolution: "nano-staged@npm:0.8.0"
-  dependencies:
-    picocolors: "npm:^1.0.0"
+"nano-staged@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "nano-staged@npm:1.0.2"
   bin:
     nano-staged: lib/bin.js
-  checksum: 10/33051331ee280e42fcb4863662678d9eabb54869282dda4d1425880d1f179a9a720369f9e9b66d551cda334cb41c447209d5884a9172783b0393069f96ae549e
+  checksum: 10/e6369d2a13b7a3c6ede165a3193eef341ed47f56f3b591a5a5ef2896631cb69d71b113843a76c65d86d7bc9d4745c66f4f39736849f132ac53e322342f7e4c57
   languageName: node
   linkType: hard
 
