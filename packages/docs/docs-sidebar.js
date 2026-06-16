@@ -159,7 +159,16 @@ const sidebars = {
             'transactions/importing',
             'transactions/merging',
             'accounts/reconciliation',
-            'transactions/payees',
+            {
+              type: 'category',
+              label: 'Payees',
+              collapsed: true,
+              link: {
+                type: 'doc',
+                id: 'transactions/payees',
+              },
+              items: ['transactions/payee-locations'],
+            },
             'transactions/bulk-editing',
             'transactions/tags',
             'transactions/split-transactions',

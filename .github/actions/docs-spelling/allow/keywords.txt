@@ -153,3 +153,4 @@ Zsolt
 IDBy
 isapprox
 isbetween
+geolocation
