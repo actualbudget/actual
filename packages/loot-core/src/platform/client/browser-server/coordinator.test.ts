@@ -2,7 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { createCoordinator } from './shared-browser-server-core';
+import { createCoordinator } from './coordinator';
 
 // ── Types ───────────────────────────────────────────────────────────────
 

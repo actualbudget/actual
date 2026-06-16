@@ -1057,11 +1057,13 @@ async function enableBankingStartAuth({
   country,
   redirectUrl,
   maxConsentValidity,
+  psuType = 'personal',
 }: {
   aspspId: string;
   country: string;
   redirectUrl: string;
   maxConsentValidity?: number;
+  psuType?: 'personal' | 'business';
 }) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -1086,7 +1088,12 @@ async function enableBankingStartAuth({
 
   return post(
     serverConfig.ENABLEBANKING_SERVER + '/start-auth',
-    { aspsp: { name: aspspId, country }, redirectUrl, maxConsentValidity },
+    {
+      aspsp: { name: aspspId, country },
+      redirectUrl,
+      maxConsentValidity,
+      psuType,
+    },
     {
       'X-ACTUAL-TOKEN': userToken,
     },

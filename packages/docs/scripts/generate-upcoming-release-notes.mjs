@@ -28,7 +28,7 @@ const intro = `:::info
 These changes have been merged but are **not yet part of a stable release**. They
 ship in the nightly builds — try them via the \`nightly\` Docker image tag, or the
 hosted demo at [nightly.actualbudget.org](https://nightly.actualbudget.org).
-For changes in stable releases, see the [Release Notes](/docs/releases).
+For changes in stable releases, see the [Release Notes](./releases.md).
 
 :::`;
 
@@ -52,7 +52,7 @@ const { notesByCategory, files } = await parseReleaseNotes(
 
 const body =
   files.length === 0
-    ? `There are no unreleased changes right now — everything has shipped in a stable [release](/docs/releases).`
+    ? `There are no unreleased changes right now — everything has shipped in a stable [release](./releases.md).`
     : formatNotes(notesByCategory);
 
 await fs.writeFile(outputPath, `${header}\n\n${body}\n`);

@@ -114,7 +114,7 @@ describe('Transactions', () => {
 
   test('splitting a transaction works', () => {
     const transactions = [
-      makeTransaction({ id: 't1', amount: 5000 }),
+      makeTransaction({ id: 't1', amount: 5000, payee: 'payee-id' }),
       makeTransaction({ amount: 3000 }),
     ];
     const { data, diff } = splitTransaction(transactions, 't1');
@@ -127,6 +127,7 @@ describe('Transactions', () => {
         {
           id: 't1',
           is_parent: true,
+          payee: null,
           error: splitError(5000),
         },
       ],
@@ -136,8 +137,13 @@ describe('Transactions', () => {
         id: 't1',
         amount: 5000,
         error: splitError(5000),
+        payee: null,
       }),
-      expect.objectContaining({ parent_id: 't1', amount: 0 }),
+      expect.objectContaining({
+        parent_id: 't1',
+        amount: 0,
+        payee: 'payee-id',
+      }),
       expect.objectContaining({ amount: 3000 }),
     ]);
   });
@@ -171,6 +177,24 @@ describe('Transactions', () => {
       updated: [],
     });
     expect(data.length).toBe(6);
+  });
+
+  test('adding a split transaction reuses the previous child payee', () => {
+    const transactions = [
+      ...makeSplitTransaction({ id: 't1', amount: 2500, payee: null }, [
+        { id: 't2', amount: 2000, payee: 'payee-id' },
+      ]),
+    ];
+
+    const { diff } = addSplitTransaction(transactions, 't1');
+
+    expect(diff.added).toEqual([
+      expect.objectContaining({
+        amount: 0,
+        parent_id: 't1',
+        payee: 'payee-id',
+      }),
+    ]);
   });
 
   test('updating a split transaction works', () => {

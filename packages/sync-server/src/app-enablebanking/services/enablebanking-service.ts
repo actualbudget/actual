@@ -58,6 +58,8 @@ type EnableBankingAuthResponse = {
   authorization_id: string;
 };
 
+type PsuType = 'personal' | 'business';
+
 type BankSyncTransaction = EnableBankingTransaction & {
   transactionId: string;
   date: string;
@@ -347,6 +349,7 @@ export const enableBankingService = {
     redirectUrl: string,
     state: string,
     maxConsentValidity?: number,
+    psuType: PsuType = 'personal',
   ): Promise<EnableBankingAuthResponse> {
     const DEFAULT_CONSENT_DAYS = 90;
     const defaultMs = DEFAULT_CONSENT_DAYS * 24 * 60 * 60 * 1000;
@@ -367,6 +370,7 @@ export const enableBankingService = {
       access: {
         valid_until: validUntil.toISOString(),
       },
+      psu_type: psuType,
     });
   },
 
