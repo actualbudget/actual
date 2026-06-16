@@ -429,7 +429,9 @@ async function buildFilteredTransactionsQuery(
 async function fetchQuerySum(config: QueryConfig): Promise<number> {
   try {
     const transQuery = await buildFilteredTransactionsQuery(config);
-    const summedQuery = transQuery.calculate({ $sum: '$amount' });
+    const summedQuery = transQuery
+      .options({ splits: 'grouped' })
+      .calculate({ $sum: '$amount' });
     const { data } = await send('query', summedQuery.serialize());
     return data || 0;
   } catch (err) {
@@ -441,7 +443,9 @@ async function fetchQuerySum(config: QueryConfig): Promise<number> {
 async function fetchQueryCount(config: QueryConfig): Promise<number> {
   try {
     const transQuery = await buildFilteredTransactionsQuery(config);
-    const countQuery = transQuery.calculate({ $count: '*' });
+    const countQuery = transQuery
+      .options({ splits: 'grouped' })
+      .calculate({ $count: '*' });
     const { data } = await send('query', countQuery.serialize());
     return data || 0;
   } catch (err) {

@@ -211,11 +211,31 @@ describe('transaction executors', () => {
 
             const { data } = await aqlQuery(aggQuery.serialize());
 
-            const sum = aliveTransactions(arr).reduce((sum, trans) => {
+            const matchedParentGroups = new Set<string>();
+            const matchedTransactionIds = new Set<string>();
+
+            aliveTransactions(arr).forEach(trans => {
               const amount = trans.amount || 0;
               const matched =
                 (amount < -5 || amount > -2) && trans.payee != null;
-              if (!trans.tombstone && !trans.is_parent && matched) {
+
+              if (matched) {
+                if (trans.is_parent) {
+                  matchedParentGroups.add(trans.id);
+                } else {
+                  matchedTransactionIds.add(trans.id);
+                }
+              }
+            });
+
+            const sum = aliveTransactions(arr).reduce((sum, trans) => {
+              const amount = trans.amount || 0;
+              const groupId = trans.parent_id || trans.id;
+              if (
+                !trans.is_parent &&
+                (matchedParentGroups.has(groupId) ||
+                  matchedTransactionIds.has(trans.id))
+              ) {
                 return sum + amount;
               }
               return sum;
@@ -235,6 +255,84 @@ describe('transaction executors', () => {
         }),
     );
   }, 20_000);
+
+  it('aggregate grouped queries include child amounts when parent matches', async () => {
+    await insertTransactions([
+      {
+        id: 'parent1',
+        date: '2018-01-03',
+        account: 'foo',
+        amount: -3000,
+        is_parent: true,
+        notes: 'Trip expenses #something',
+      },
+      {
+        id: 'child1',
+        date: '2018-01-03',
+        account: 'foo',
+        amount: -1000,
+        is_child: true,
+        parent_id: 'parent1',
+      },
+      {
+        id: 'child2',
+        date: '2018-01-03',
+        account: 'foo',
+        amount: -2000,
+        is_child: true,
+        parent_id: 'parent1',
+      },
+    ]);
+
+    const { data } = await aqlQuery(
+      q('transactions')
+        .filter({ notes: { $regexp: '(?<!#)#something([\\s#]|$)' } })
+        .options({ splits: 'grouped' })
+        .calculate({ $sum: '$amount' })
+        .serialize(),
+    );
+
+    expect(data).toBe(-3000);
+  });
+
+  it('aggregate grouped queries include only matching child amounts when a child matches', async () => {
+    await insertTransactions([
+      {
+        id: 'parent1',
+        date: '2018-01-03',
+        account: 'foo',
+        amount: -3000,
+        is_parent: true,
+      },
+      {
+        id: 'child1',
+        date: '2018-01-03',
+        account: 'foo',
+        amount: -1000,
+        is_child: true,
+        parent_id: 'parent1',
+        notes: 'Lunch #something',
+      },
+      {
+        id: 'child2',
+        date: '2018-01-03',
+        account: 'foo',
+        amount: -2000,
+        is_child: true,
+        parent_id: 'parent1',
+      },
+    ]);
+
+    const { data } = await aqlQuery(
+      q('transactions')
+        .filter({ notes: { $regexp: '(?<!#)#something([\\s#]|$)' } })
+        .options({ splits: 'grouped' })
+        .calculate({ $sum: '$amount' })
+        .serialize(),
+    );
+
+    expect(data).toBe(-1000);
+  });
 
   function runTest(makeQuery) {
     const payeeIds = ['payee1', 'payee2', 'payee3', 'payee4', 'payee5'];

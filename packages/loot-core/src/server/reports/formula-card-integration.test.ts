@@ -97,7 +97,9 @@ describe('Formula Card - Integration Tests with Queries', () => {
       transQuery = transQuery.filter({ $and: filters });
     }
 
-    const summedQuery = transQuery.calculate({ $sum: '$amount' });
+    const summedQuery = transQuery
+      .options({ splits: 'grouped' })
+      .calculate({ $sum: '$amount' });
     const { data } = await aqlQuery(summedQuery);
     return data || 0;
   }
@@ -155,6 +157,90 @@ describe('Formula Card - Integration Tests with Queries', () => {
   }
 
   describe('Basic Query Integration', () => {
+    it('should include split child amounts when parent notes match query tags', async () => {
+      const accountId = await createTestAccount('Checking');
+      const groupId = await createCategoryGroup('Expenses');
+      const foodCategoryId = await createTestCategory('Food', groupId);
+      const fuelCategoryId = await createTestCategory('Fuel', groupId);
+
+      const parentId = await db.insertTransaction({
+        account: accountId,
+        amount: -3000,
+        date: '2024-01-15',
+        is_parent: true,
+        notes: 'Trip expenses #something',
+      });
+      await db.insertTransaction({
+        account: accountId,
+        amount: -1000,
+        date: '2024-01-15',
+        category: foodCategoryId,
+        is_child: true,
+        parent_id: parentId,
+      });
+      await db.insertTransaction({
+        account: accountId,
+        amount: -2000,
+        date: '2024-01-15',
+        category: fuelCategoryId,
+        is_child: true,
+        parent_id: parentId,
+      });
+
+      const queryResult = await executeQuery([
+        { field: 'notes', op: 'hasTags', value: '#something', type: 'string' },
+      ]);
+
+      const formula = '=FORMATCURRENCY(QUERY("Tagged"))';
+      const result = await executeFormulaWithQuery(formula, {
+        Tagged: queryResult,
+      });
+
+      expect(result).toBe('-$30.00');
+    });
+
+    it('should include only matching split children when child notes match query tags', async () => {
+      const accountId = await createTestAccount('Checking');
+      const groupId = await createCategoryGroup('Expenses');
+      const foodCategoryId = await createTestCategory('Food', groupId);
+      const fuelCategoryId = await createTestCategory('Fuel', groupId);
+
+      const parentId = await db.insertTransaction({
+        account: accountId,
+        amount: -3000,
+        date: '2024-01-15',
+        is_parent: true,
+      });
+      await db.insertTransaction({
+        account: accountId,
+        amount: -1000,
+        date: '2024-01-15',
+        category: foodCategoryId,
+        is_child: true,
+        parent_id: parentId,
+        notes: 'Lunch #something',
+      });
+      await db.insertTransaction({
+        account: accountId,
+        amount: -2000,
+        date: '2024-01-15',
+        category: fuelCategoryId,
+        is_child: true,
+        parent_id: parentId,
+      });
+
+      const queryResult = await executeQuery([
+        { field: 'notes', op: 'hasTags', value: '#something', type: 'string' },
+      ]);
+
+      const formula = '=FORMATCURRENCY(QUERY("Tagged"))';
+      const result = await executeFormulaWithQuery(formula, {
+        Tagged: queryResult,
+      });
+
+      expect(result).toBe('-$10.00');
+    });
+
     it('should execute formula with single query result', async () => {
       // Integration test: Simple query sum with formula
       const accountId = await createTestAccount('Checking');

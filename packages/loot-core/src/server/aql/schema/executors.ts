@@ -104,28 +104,18 @@ async function execTransactionsGrouped(
   const { withDead } = queryState;
   const whereDead = withDead ? '' : `AND ${sqlPieces.from}.tombstone = 0`;
 
-  // Aggregate queries don't make sense for a grouped transactions
-  // query. We never should include both parent and children
-  // transactions as it would duplicate amounts and the final number
-  // would never make sense. In this case, switch back to the "inline"
-  // type where only non-parent transactions are considered
+  // Aggregate grouped queries are used by reports/formulas that need split-aware
+  // totals. A filter can match either the split parent or individual children:
+  // if the parent matches, include every child amount in that split; if only a
+  // child matches, include just that child. Parent rows are never aggregated
+  // directly, so split amounts are not double-counted.
   if (isAggregateQuery(queryState)) {
-    const s = { ...sqlPieces };
-
-    // Modify the where to only include non-parents
-    s.where = `${s.where} AND ${s.from}.is_parent = 0`;
-
-    // We also want to exclude deleted transactions. Normally we
-    // handle this manually down below, but now that we are doing a
-    // normal query we want to rely on the view. Unfortunately, SQL
-    // has already been generated so we can't easily change the view
-    // name here; instead, we change it and map it back to the name
-    // used elsewhere in the query. Ideally we'd improve this
-    if (!withDead) {
-      s.from = 'v_transactions_internal_alive v_transactions_internal';
-    }
-
-    return execQuery(queryState, compilerState, s, params, outputTypes);
+    return execTransactionsGroupedAggregate(
+      queryState,
+      sqlPieces,
+      params,
+      outputTypes,
+    );
   }
 
   let rows;
@@ -223,6 +213,73 @@ async function execTransactionsGrouped(
   };
 
   return toGroup(parents, children, mapper);
+}
+
+async function execTransactionsGroupedAggregate(
+  queryState: QueryState,
+  sqlPieces: SqlPieces,
+  params: (string | number)[],
+  outputTypes: OutputTypes,
+) {
+  const aggregateFrom = queryState.withDead
+    ? sqlPieces.from
+    : 'v_transactions_internal_alive v_transactions_internal';
+  const aggregateSource = queryState.withDead
+    ? sqlPieces.from
+    : 'v_transactions_internal_alive';
+
+  const sql = `
+    WITH matched_transactions AS (
+      SELECT
+        ${sqlPieces.from}.id AS matched_id,
+        IFNULL(${sqlPieces.from}.parent_id, ${sqlPieces.from}.id) AS group_id
+      FROM ${sqlPieces.from}
+      LEFT JOIN transactions _t2
+        ON ${sqlPieces.from}.is_child = 1
+        AND _t2.id = ${sqlPieces.from}.parent_id
+      ${sqlPieces.joins}
+      ${sqlPieces.where}
+        AND ${sqlPieces.from}.tombstone = 0
+        AND IFNULL(_t2.tombstone, 0) = 0
+    ),
+    aggregate_transaction_ids AS (
+      SELECT DISTINCT aggregate_transactions.id
+      FROM ${aggregateSource} aggregate_transactions
+      WHERE aggregate_transactions.is_parent = 0
+        AND (
+          IFNULL(
+            aggregate_transactions.parent_id,
+            aggregate_transactions.id
+          ) IN (
+            SELECT group_id
+            FROM matched_transactions
+            WHERE matched_id = group_id
+          )
+          OR aggregate_transactions.id IN (
+            SELECT matched_id
+            FROM matched_transactions
+          )
+        )
+    )
+    SELECT ${sqlPieces.select}
+    FROM ${aggregateFrom}
+    ${sqlPieces.joins}
+    WHERE ${sqlPieces.from}.id IN (
+      SELECT id FROM aggregate_transaction_ids
+    )
+    ${sqlPieces.groupBy}
+    ${sqlPieces.orderBy}
+    ${sqlPieces.limit != null ? `LIMIT ${sqlPieces.limit}` : ''}
+    ${sqlPieces.offset != null ? `OFFSET ${sqlPieces.offset}` : ''}
+  `;
+
+  const data = await db.all<Record<string, unknown>>(sql, params);
+  data.forEach(item => {
+    Object.keys(item).forEach(name => {
+      item[name] = convertOutputType(item[name], outputTypes.get(name));
+    });
+  });
+  return data;
 }
 
 async function execTransactionsBasic(
