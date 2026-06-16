@@ -51,28 +51,28 @@
   },
   "dependencies": {
     "@emotion/css": "^11.13.5",
-    "react-aria-components": "^1.16.0",
+    "react-aria-components": "^1.18.0",
     "usehooks-ts": "^3.1.1"
   },
   "devDependencies": {
-    "@chromatic-com/storybook": "^5.1.1",
-    "@storybook/addon-a11y": "^10.3.4",
-    "@storybook/addon-docs": "^10.3.4",
-    "@storybook/react-vite": "^10.3.4",
+    "@chromatic-com/storybook": "^5.2.1",
+    "@storybook/addon-a11y": "^10.4.4",
+    "@storybook/addon-docs": "^10.4.4",
+    "@storybook/react-vite": "^10.4.4",
     "@svgr/babel-plugin-add-jsx-attribute": "^8.0.0",
     "@svgr/cli": "^8.1.0",
-    "@types/react": "^19.2.14",
+    "@types/react": "^19.2.17",
     "@typescript/native-preview": "beta",
-    "@vitejs/plugin-react": "^6.0.1",
-    "eslint-plugin-storybook": "^10.3.4",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "storybook": "^10.3.4",
-    "vite": "^8.0.5",
-    "vitest": "^4.1.2"
+    "@vitejs/plugin-react": "^6.0.2",
+    "eslint-plugin-storybook": "^10.4.4",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "storybook": "^10.4.4",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8"
   },
   "peerDependencies": {
-    "react": ">=19.2",
-    "react-dom": ">=19.2"
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
   }
 }
