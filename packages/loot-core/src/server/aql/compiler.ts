@@ -524,9 +524,25 @@ const compileFunction = saveStack('function', (state, func) => {
     );
   }
 
-  let args = argExprs;
-  // `$condition` is a special-case where it will be evaluated later
-  if (name !== '$condition') {
+  let args;
+  // `$condition` is a special-case: it accepts a raw filter expression
+  // that is compiled later via `compileConditions`.
+  if (name === '$condition') {
+    args = argExprs;
+  } else if (
+    // The conditional aggregates (`$sumIf`, `$countIf`, `$avgIf`) take a
+    // filter expression as their first argument and normal expressions
+    // for the rest. We compile all but the first argument here and
+    // handle the raw condition in the case branch.
+    name === '$sumIf' ||
+    name === '$countIf' ||
+    name === '$avgIf'
+  ) {
+    args = [
+      argExprs[0],
+      ...argExprs.slice(1).map(arg => compileExpr(state, arg)),
+    ];
+  } else {
     args = argExprs.map(arg => compileExpr(state, arg));
   }
 
@@ -554,6 +570,57 @@ const compileFunction = saveStack('function', (state, func) => {
       validateArgLength(args, 1);
       const [arg1] = valArray(state, args);
       return typed(`COUNT(${arg1})`, 'integer');
+    }
+
+    case '$sumIf': {
+      validateArgLength(args, 2);
+      const conditionSql = compileConditionExpr(state, args[0]);
+      const valueSql = valArray(state, [args[1]], ['float']);
+      return typed(
+        `SUM(CASE WHEN ${conditionSql} THEN ${valueSql[0]} ELSE 0 END)`,
+        args[1].type,
+      );
+    }
+
+    case '$countIf': {
+      validateArgLength(args, 1);
+      const conditionSql = compileConditionExpr(state, args[0]);
+      return typed(
+        `SUM(CASE WHEN ${conditionSql} THEN 1 ELSE 0 END)`,
+        'integer',
+      );
+    }
+
+    case '$avgIf': {
+      validateArgLength(args, 2);
+      const conditionSql = compileConditionExpr(state, args[0]);
+      const valueSql = valArray(state, [args[1]], ['float']);
+      return typed(
+        `AVG(CASE WHEN ${conditionSql} THEN ${valueSql[0]} ELSE NULL END)`,
+        'float',
+      );
+    }
+
+    case '$avg': {
+      validateArgLength(args, 1);
+      const [arg1] = valArray(state, args, ['float']);
+      return typed(`AVG(${arg1})`, 'float');
+    }
+
+    case '$min': {
+      validateArgLength(args, 1);
+      return typed(`MIN(${val(state, args[0])})`, args[0].type);
+    }
+
+    case '$max': {
+      validateArgLength(args, 1);
+      return typed(`MAX(${val(state, args[0])})`, args[0].type);
+    }
+
+    case '$countDistinct': {
+      validateArgLength(args, 1);
+      const [arg1] = valArray(state, args);
+      return typed(`COUNT(DISTINCT ${arg1})`, 'integer');
     }
 
     // string functions
@@ -610,6 +677,19 @@ const compileFunction = saveStack('function', (state, func) => {
     case '$year': {
       validateArgLength(args, 1);
       return castInput(state, args[0], 'date-year');
+    }
+    case '$week': {
+      validateArgLength(args, 1);
+      const dateExpr = castInput(state, args[0], 'date');
+      if (dateExpr.literal) {
+        return typed(dateExpr.value, 'string', { literal: true });
+      }
+      // Date is stored as an integer (YYYYMMDD). SQLite's `strftime`
+      // expects a date string, so build the ISO date first.
+      return typed(
+        `strftime('%Y-W%W', SUBSTR(${dateExpr.value}, 1, 4) || '-' || SUBSTR(${dateExpr.value}, 5, 2) || '-' || SUBSTR(${dateExpr.value}, 7, 2))`,
+        'string',
+      );
     }
 
     // various functions
@@ -810,6 +890,14 @@ const compileWhere = saveStack('filter', (state, conds) => {
   return compileAnd(state, conds);
 });
 
+function compileConditionExpr(state, expr) {
+  // A condition is the same shape as a filter expression. We compile it
+  // to a list of SQL boolean fragments and join them with AND so it can
+  // be embedded inside a CASE WHEN expression.
+  const conds = compileConditions(state, expr);
+  return conds.length > 0 ? conds.join(' AND ') : '1';
+}
+
 function compileJoins(state, tableRef, internalTableFilters) {
   const joins = [];
   state.paths.forEach((desc, path) => {
@@ -960,7 +1048,17 @@ const compileOrderBy = saveStack('orderBy', (state, exprs) => {
   return orderBy.join(', ');
 });
 
-const AGGREGATE_FUNCTIONS = ['$sum', '$count'];
+const AGGREGATE_FUNCTIONS = [
+  '$sum',
+  '$count',
+  '$sumIf',
+  '$countIf',
+  '$avgIf',
+  '$avg',
+  '$min',
+  '$max',
+  '$countDistinct',
+];
 function isAggregateFunction(expr) {
   if (typeof expr !== 'object' || Array.isArray(expr)) {
     return false;

@@ -4,15 +4,16 @@ import { Trans, useTranslation } from 'react-i18next';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import type { QueryReportWidget } from 'loot-core/types/models';
+import type {
+  QueryReportWidget,
+  QueryVisualization,
+} from 'loot-core/types/models';
 
-import { QueryResultTable } from './QueryResultTable';
-
+import { QueryVisualization as QueryVizDispatcher } from '@desktop-client/components/query-report/visualizations/QueryVisualization';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
 import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useFormat } from '@desktop-client/hooks/useFormat';
 import { useQueryReport } from '@desktop-client/hooks/useQueryReport';
 
 type QueryReportCardProps = {
@@ -23,6 +24,8 @@ type QueryReportCardProps = {
   onRemove: () => void;
   onCopy: (targetDashboardId: string) => void;
 };
+
+const DEFAULT_VISUALIZATION: QueryVisualization = { type: 'table' };
 
 export function QueryReportCard({
   widgetId,
@@ -37,12 +40,13 @@ export function QueryReportCard({
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
     useDashboardWidgetCopyMenu(onCopy);
-  const format = useFormat();
 
   const firstQuery = meta?.queries?.[0];
   const querySource = useMemo(() => {
     return firstQuery?.source ?? '';
   }, [firstQuery]);
+
+  const visualization = meta?.visualization || DEFAULT_VISUALIZATION;
 
   const { result, isLoading, error } = useQueryReport(
     querySource || null,
@@ -129,25 +133,13 @@ export function QueryReportCard({
               {error.message}
             </View>
           )}
-          {!isLoading &&
-            !error &&
-            result &&
-            (result.scalar !== undefined ? (
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  fontSize: 28,
-                  fontWeight: 600,
-                  color: theme.pageText,
-                }}
-              >
-                {format(result.scalar, 'financial')}
-              </View>
-            ) : (
-              <QueryResultTable result={result} compact />
-            ))}
+          {!isLoading && !error && result && (
+            <QueryVizDispatcher
+              result={result}
+              config={visualization}
+              compact
+            />
+          )}
           {!isLoading && !error && !result && (
             <View
               style={{

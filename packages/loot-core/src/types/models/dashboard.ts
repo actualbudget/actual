@@ -115,11 +115,30 @@ export type QueryEntry = {
 };
 
 export type QueryVisualization =
-  | { type: 'scalar' }
-  | { type: 'time-series'; chartStyle: 'line' | 'area' }
-  | { type: 'bar'; chartStyle: 'grouped' | 'stacked' }
-  | { type: 'table'; columns?: string[] }
-  | { type: 'donut' };
+  | {
+      type: 'scalar';
+      measureColumn?: string;
+    }
+  | {
+      type: 'time-series';
+      chartStyle: 'line' | 'area';
+      timeColumn?: string;
+      measureColumns?: string[];
+    }
+  | {
+      type: 'bar';
+      chartStyle: 'grouped' | 'stacked';
+      categoryColumn?: string;
+      measureColumns?: string[];
+    }
+  | {
+      type: 'table';
+    }
+  | {
+      type: 'donut';
+      categoryColumn?: string;
+      measureColumn?: string;
+    };
 
 export type QueryReportWidget = AbstractWidget<
   'query-report',

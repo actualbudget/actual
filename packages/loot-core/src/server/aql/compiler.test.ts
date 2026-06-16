@@ -817,6 +817,176 @@ describe('sheet language', () => {
   });
 });
 
+describe('Aggregate functions', () => {
+  it('$avg compiles to AVG(value)', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select({ avg: { $avg: '$amount' } })
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch('AVG(transactions.amount) AS avg');
+  });
+
+  it('$min compiles to MIN(value)', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select({ earliest: { $min: '$date' } })
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch('MIN(transactions.date) AS earliest');
+  });
+
+  it('$max compiles to MAX(value)', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select({ latest: { $max: '$date' } })
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch('MAX(transactions.date) AS latest');
+  });
+
+  it('$countDistinct compiles to COUNT(DISTINCT value)', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select({ unique: { $countDistinct: '$amount' } })
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch('COUNT(DISTINCT transactions.amount) AS unique');
+  });
+});
+
+describe('Conditional aggregates', () => {
+  it('$sumIf compiles to SUM(CASE WHEN cond THEN val ELSE 0 END)', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select({
+          deposits: { $sumIf: [{ amount: { $gte: 0 } }, '$amount'] },
+        })
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch(
+      'SUM(CASE WHEN transactions.amount >= 0 THEN transactions.amount ELSE 0 END) AS deposits',
+    );
+  });
+
+  it('$sumIf requires 2 arguments', () => {
+    expect(() =>
+      generateSQLWithState(
+        q('transactions')
+          .select({ x: { $sumIf: '$amount' } })
+          .serialize(),
+        basicSchema,
+      ),
+    ).toThrow(/Too few arguments/);
+  });
+
+  it('$countIf compiles to SUM(CASE WHEN cond THEN 1 ELSE 0 END)', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select({
+          deposit_count: { $countIf: { amount: { $gte: 0 } } },
+        })
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch(
+      'SUM(CASE WHEN transactions.amount >= 0 THEN 1 ELSE 0 END) AS deposit_count',
+    );
+  });
+
+  it('$countIf supports $or and $and in condition', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select({
+          cnt: {
+            $countIf: {
+              $or: [{ amount: { $gte: 100 } }, { amount: { $lte: -100 } }],
+            },
+          },
+        })
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch(
+      'SUM(CASE WHEN (transactions.amount >= 100\n  OR transactions.amount <= -100) THEN 1 ELSE 0 END) AS cnt',
+    );
+  });
+
+  it('$avgIf compiles to AVG(CASE WHEN cond THEN val ELSE NULL END)', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select({
+          avg_deposit: { $avgIf: [{ amount: { $gte: 0 } }, '$amount'] },
+        })
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch(
+      'AVG(CASE WHEN transactions.amount >= 0 THEN transactions.amount ELSE NULL END) AS avg_deposit',
+    );
+  });
+
+  it('conditional aggregates are recognised as aggregate functions', () => {
+    // Without a groupBy, a conditional aggregate is still an aggregate
+    // query (no `id` is auto-added to the SELECT).
+    const result = generateSQLWithState(
+      q('transactions')
+        .select({ x: { $sumIf: [{ amount: { $gte: 0 } }, '$amount'] } })
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).not.toMatch('transactions.id AS id');
+  });
+});
+
+describe('$week date bucketing', () => {
+  it('compiles non-literal date to strftime on ISO date', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select({ week: { $week: '$date' } })
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch(
+      "strftime('%Y-W%W', SUBSTR(transactions.date, 1, 4) || '-' || SUBSTR(transactions.date, 5, 2) || '-' || SUBSTR(transactions.date, 7, 2)) AS week",
+    );
+  });
+
+  it('works in groupBy and select together', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .groupBy({ $week: '$date' })
+        .select([{ week: { $week: '$date' } }, { total: { $sum: '$amount' } }])
+        .serialize(),
+      basicSchema,
+    );
+    expect(result.sql).toMatch(
+      "GROUP BY strftime('%Y-W%W', SUBSTR(transactions.date, 1, 4) || '-' || SUBSTR(transactions.date, 5, 2) || '-' || SUBSTR(transactions.date, 7, 2))",
+    );
+    expect(result.sql).toMatch(
+      "strftime('%Y-W%W', SUBSTR(transactions.date, 1, 4) || '-' || SUBSTR(transactions.date, 5, 2) || '-' || SUBSTR(transactions.date, 7, 2)) AS week",
+    );
+    expect(result.sql).toMatch('SUM(transactions.amount) AS total');
+  });
+
+  it('casts string literals to date when used with $week', () => {
+    const result = generateSQLWithState(
+      q('transactions')
+        .select({ week: { $week: '2020-01-01' } })
+        .serialize(),
+      basicSchema,
+    );
+    // A literal date is kept as the date integer (20200101), not run
+    // through strftime.
+    expect(result.sql).toMatch('20200101 AS week');
+  });
+});
+
 describe('Type conversions', () => {
   it('date literals are converted to ints on input', () => {
     let result = generateSQLWithState(
