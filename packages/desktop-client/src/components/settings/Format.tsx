@@ -16,6 +16,8 @@ import { useSidebar } from '#components/sidebar/SidebarProvider';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useDaysOfWeek } from '#hooks/useDaysOfWeek';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+import { saveSyncedPrefs } from '#prefs/prefsSlice';
+import { useDispatch } from '#redux';
 
 import { Column, Setting } from './UI';
 
@@ -30,6 +32,7 @@ const dateFormats: { value: SyncedPrefs['dateFormat']; label: string }[] = [
 
 export function FormatSettings() {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
 
   const sidebar = useSidebar();
   const [_firstDayOfWeekIdx, setFirstDayOfWeekIdxPref] =
@@ -37,7 +40,7 @@ export function FormatSettings() {
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const [, setDateFormatPref] = useSyncedPref('dateFormat');
-  const [_numberFormat, setNumberFormatPref] = useSyncedPref('numberFormat');
+  const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction, setHideFractionPref] = useSyncedPref('hideFraction');
 
@@ -70,7 +73,11 @@ export function FormatSettings() {
             <Select
               key={String(hideFraction)} // needed because label does not update
               value={numberFormat}
-              onChange={format => setNumberFormatPref(format)}
+              onChange={format => {
+                void dispatch(
+                  saveSyncedPrefs({ prefs: { numberFormat: format } }),
+                );
+              }}
               options={numberFormats.map(f => [
                 f.value,
                 String(hideFraction) === 'true' ? f.labelNoFraction : f.label,

@@ -213,3 +213,5 @@ WOR
 worktree
 youngcw
 zizmor
+FORMATCURRENCY
+FORMATNUMBER
