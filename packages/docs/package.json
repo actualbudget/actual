@@ -14,23 +14,23 @@
     "write-heading-ids": "docusaurus write-heading-ids"
   },
   "dependencies": {
-    "@docusaurus/core": "^3.10.0",
-    "@docusaurus/plugin-content-docs": "^3.10.0",
-    "@docusaurus/plugin-ideal-image": "^3.10.0",
-    "@docusaurus/preset-classic": "^3.10.0",
-    "@docusaurus/theme-common": "^3.10.0",
-    "@docusaurus/theme-mermaid": "^3.10.0",
-    "@easyops-cn/docusaurus-search-local": "^0.55.1",
+    "@docusaurus/core": "^3.10.1",
+    "@docusaurus/plugin-content-docs": "^3.10.1",
+    "@docusaurus/plugin-ideal-image": "^3.10.1",
+    "@docusaurus/preset-classic": "^3.10.1",
+    "@docusaurus/theme-common": "^3.10.1",
+    "@docusaurus/theme-mermaid": "^3.10.1",
+    "@easyops-cn/docusaurus-search-local": "^0.55.2",
     "@mdx-js/react": "^3.1.1",
     "@r74tech/docusaurus-plugin-panzoom": "^2.4.2",
     "prism-react-renderer": "^2.4.1",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
   },
   "devDependencies": {
     "@actual-app/ci-actions": "workspace:*",
-    "@docusaurus/module-type-aliases": "^3.10.0",
-    "@types/react": "^19.2.14"
+    "@docusaurus/module-type-aliases": "^3.10.1",
+    "@types/react": "^19.2.17"
   },
   "browserslist": {
     "production": [

@@ -10,7 +10,12 @@ import {
 import type { InterpreterState } from 'hyperformula/typings/interpreter/InterpreterState';
 import type { ProcedureAst } from 'hyperformula/typings/parser';
 
+import { getCurrency } from '#shared/currencies';
+import type { Currency } from '#shared/currencies';
 import { integerToAmount } from '#shared/util';
+import type { NumberFormats } from '#shared/util';
+
+type CurrencySymbolPosition = 'before' | 'after';
 
 export type BudgetQueryRequest = {
   dimension: string;
@@ -39,6 +44,44 @@ type CustomFunctionsContext = {
   balanceOfPrefetch?: Map<string, number>;
   formulaQuery?: FormulaQueryContext;
 };
+
+export type UserPreferences = {
+  currency: Currency;
+  numberFormat: NumberFormats;
+  decimalPlaces: number;
+  thousandsSeparator: string;
+  decimalSeparator: string;
+  locale: string;
+  currencySymbolPosition: CurrencySymbolPosition;
+  currencySpaceBetweenAmountAndSymbol: boolean;
+};
+
+let cachedUserPreferences: UserPreferences | null = null;
+
+export function setCachedUserPreferences(prefs: UserPreferences): void {
+  cachedUserPreferences = prefs;
+}
+
+export function clearCachedUserPreferences(): void {
+  cachedUserPreferences = null;
+}
+
+function getUserPreferences(): UserPreferences {
+  if (!cachedUserPreferences) {
+    // If not loaded, use defaults
+    return {
+      currency: getCurrency('USD'),
+      numberFormat: 'comma-dot',
+      decimalPlaces: 2,
+      thousandsSeparator: ',',
+      decimalSeparator: '.',
+      locale: 'en-US',
+      currencySymbolPosition: 'before',
+      currencySpaceBetweenAmountAndSymbol: false,
+    };
+  }
+  return cachedUserPreferences;
+}
 
 export function createBudgetQueryPrefetchKey({
   dimension,
@@ -73,6 +116,54 @@ function categoryIdsToRange(categoryIds: string[]): SimpleRangeValue {
       ? categoryIds.map(categoryId => [categoryId])
       : [['']],
   );
+}
+
+function formatCurrencyValue({
+  value,
+  currencySymbol,
+  decimals,
+  thousandsSeparator,
+  decimalSeparator,
+  currencySymbolPosition,
+  currencySpaceBetweenAmountAndSymbol,
+}: {
+  value: number;
+  currencySymbol: string;
+  decimals: number;
+  thousandsSeparator: string;
+  decimalSeparator: string;
+  currencySymbolPosition: CurrencySymbolPosition;
+  currencySpaceBetweenAmountAndSymbol: boolean;
+}): string {
+  const isNegative = value < 0;
+  const absNum = Math.abs(value);
+  const fixedNum = absNum.toFixed(decimals);
+  const [integerPart, decimalPart] = fixedNum.split('.');
+
+  const formattedInteger = integerPart.replace(
+    /\B(?=(\d{3})+(?!\d))/g,
+    thousandsSeparator,
+  );
+
+  const formattedAmount =
+    decimals > 0 && decimalPart
+      ? `${formattedInteger}${decimalSeparator}${decimalPart}`
+      : formattedInteger;
+
+  const space = currencySpaceBetweenAmountAndSymbol ? '\u202F' : '';
+  const formattedCurrency =
+    currencySymbolPosition === 'after'
+      ? `${formattedAmount}${space}${currencySymbol}`
+      : `${currencySymbol}${space}${formattedAmount}`;
+
+  return isNegative ? `-${formattedCurrency}` : formattedCurrency;
+}
+
+function getCurrencySymbolPositionFromArg(
+  value: string | undefined,
+  fallback: CurrencySymbolPosition,
+): CurrencySymbolPosition {
+  return value === 'before' || value === 'after' ? value : fallback;
 }
 
 export class CustomFunctionsPlugin extends FunctionPlugin {
@@ -230,6 +321,125 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
       },
     );
   }
+
+  formatNumber(ast: ProcedureAst, state: InterpreterState) {
+    const hasDecimalsArg = ast.args.length > 1;
+    const hasThousandsSeparatorArg = ast.args.length > 2;
+    const hasDecimalSeparatorArg = ast.args.length > 3;
+
+    return this.runFunction(
+      ast.args,
+      state,
+      this.metadata('FORMATNUMBER'),
+      (
+        value: number,
+        decimals?: number,
+        thousandsSeparator?: string,
+        decimalSeparator?: string,
+      ) => {
+        const num = Number(value);
+        if (isNaN(num)) {
+          return new CellError(ErrorType.VALUE);
+        }
+
+        const prefs = getUserPreferences();
+
+        const actualThousandsSeparator =
+          hasThousandsSeparatorArg && thousandsSeparator !== undefined
+            ? thousandsSeparator
+            : prefs.thousandsSeparator;
+        const actualDecimalSeparator =
+          hasDecimalSeparatorArg && decimalSeparator !== undefined
+            ? decimalSeparator
+            : prefs.decimalSeparator;
+        const actualDecimals = hasDecimalsArg
+          ? (decimals ?? 2)
+          : prefs.decimalPlaces;
+
+        const fixedNum = num.toFixed(actualDecimals);
+        const [integerPart, decimalPart] = fixedNum.split('.');
+
+        const formattedInteger = integerPart.replace(
+          /\B(?=(\d{3})+(?!\d))/g,
+          actualThousandsSeparator,
+        );
+
+        if (actualDecimals > 0 && decimalPart) {
+          return `${formattedInteger}${actualDecimalSeparator}${decimalPart}`;
+        }
+
+        return formattedInteger;
+      },
+    );
+  }
+
+  formatCurrency(ast: ProcedureAst, state: InterpreterState) {
+    const hasCurrencySymbolArg = ast.args.length > 1;
+    const hasDecimalsArg = ast.args.length > 2;
+    const hasThousandsSeparatorArg = ast.args.length > 3;
+    const hasDecimalSeparatorArg = ast.args.length > 4;
+    const hasCurrencySymbolPositionArg = ast.args.length > 5;
+    const hasCurrencySpaceBetweenAmountAndSymbolArg = ast.args.length > 6;
+
+    return this.runFunction(
+      ast.args,
+      state,
+      this.metadata('FORMATCURRENCY'),
+      (
+        value: number,
+        currencySymbol?: string,
+        decimals?: number,
+        thousandsSeparator?: string,
+        decimalSeparator?: string,
+        currencySymbolPosition?: string,
+        currencySpaceBetweenAmountAndSymbol?: boolean,
+      ) => {
+        const num = Number(value);
+        if (isNaN(num)) {
+          return new CellError(ErrorType.VALUE);
+        }
+
+        const prefs = getUserPreferences();
+
+        const actualCurrencySymbol = hasCurrencySymbolArg
+          ? (currencySymbol ?? '')
+          : prefs.currency.symbol;
+        const actualDecimals = hasDecimalsArg
+          ? (decimals ?? 2)
+          : prefs.currency.decimalPlaces;
+        const actualThousandsSeparator =
+          hasThousandsSeparatorArg && thousandsSeparator !== undefined
+            ? thousandsSeparator
+            : prefs.thousandsSeparator;
+        const actualDecimalSeparator =
+          hasDecimalSeparatorArg && decimalSeparator !== undefined
+            ? decimalSeparator
+            : prefs.decimalSeparator;
+        const actualCurrencySymbolPosition = hasCurrencySymbolPositionArg
+          ? getCurrencySymbolPositionFromArg(
+              currencySymbolPosition,
+              prefs.currencySymbolPosition,
+            )
+          : prefs.currencySymbolPosition;
+        const actualCurrencySpaceBetweenAmountAndSymbol =
+          hasCurrencySpaceBetweenAmountAndSymbolArg &&
+          currencySpaceBetweenAmountAndSymbol !== undefined
+            ? currencySpaceBetweenAmountAndSymbol
+            : prefs.currencySpaceBetweenAmountAndSymbol;
+
+        return formatCurrencyValue({
+          value: num,
+          currencySymbol: actualCurrencySymbol,
+          decimals: actualDecimals,
+          thousandsSeparator: actualThousandsSeparator,
+          decimalSeparator: actualDecimalSeparator,
+          currencySymbolPosition: actualCurrencySymbolPosition,
+          currencySpaceBetweenAmountAndSymbol:
+            actualCurrencySpaceBetweenAmountAndSymbol,
+        });
+      },
+    );
+  }
 }
 
 CustomFunctionsPlugin.implementedFunctions = {
@@ -246,15 +456,6 @@ CustomFunctionsPlugin.implementedFunctions = {
         optionalArg: true,
         defaultValue: 0,
       },
-    ],
-  },
-  BUDGET_QUERY: {
-    method: 'budgetQuery',
-    parameters: [
-      { argumentType: FunctionArgumentType.STRING },
-      { argumentType: FunctionArgumentType.RANGE },
-      { argumentType: FunctionArgumentType.STRING },
-      { argumentType: FunctionArgumentType.STRING },
     ],
   },
   INTEGER_TO_AMOUNT: {
@@ -289,12 +490,77 @@ CustomFunctionsPlugin.implementedFunctions = {
     method: 'queryExtractTimeframeStart',
     parameters: [{ argumentType: FunctionArgumentType.STRING }],
   },
+  BUDGET_QUERY: {
+    method: 'budgetQuery',
+    parameters: [
+      { argumentType: FunctionArgumentType.STRING },
+      { argumentType: FunctionArgumentType.RANGE },
+      { argumentType: FunctionArgumentType.STRING },
+      { argumentType: FunctionArgumentType.STRING },
+    ],
+  },
+  FORMATNUMBER: {
+    method: 'formatNumber',
+    parameters: [
+      { argumentType: FunctionArgumentType.NUMBER },
+      {
+        argumentType: FunctionArgumentType.NUMBER,
+        optionalArg: true,
+        defaultValue: 2,
+      },
+      {
+        argumentType: FunctionArgumentType.STRING,
+        optionalArg: true,
+        defaultValue: ',',
+      },
+      {
+        argumentType: FunctionArgumentType.STRING,
+        optionalArg: true,
+        defaultValue: '.',
+      },
+    ],
+  },
+  FORMATCURRENCY: {
+    method: 'formatCurrency',
+    parameters: [
+      { argumentType: FunctionArgumentType.NUMBER },
+      {
+        argumentType: FunctionArgumentType.STRING,
+        optionalArg: true,
+        defaultValue: '$',
+      },
+      {
+        argumentType: FunctionArgumentType.NUMBER,
+        optionalArg: true,
+        defaultValue: 2,
+      },
+      {
+        argumentType: FunctionArgumentType.STRING,
+        optionalArg: true,
+        defaultValue: ',',
+      },
+      {
+        argumentType: FunctionArgumentType.STRING,
+        optionalArg: true,
+        defaultValue: '.',
+      },
+      {
+        argumentType: FunctionArgumentType.STRING,
+        optionalArg: true,
+        defaultValue: 'before',
+      },
+      {
+        argumentType: FunctionArgumentType.BOOLEAN,
+        optionalArg: true,
+        defaultValue: false,
+      },
+    ],
+  },
 };
 
 export const customFunctionsTranslations = {
   enUS: {
     BALANCE_OF: 'BALANCE_OF',
-    BUDGET_QUERY: 'BUDGET_QUERY',
     FIXED: 'FIXED',
     INTEGER_TO_AMOUNT: 'INTEGER_TO_AMOUNT',
     QUERY: 'QUERY',
@@ -302,5 +568,8 @@ export const customFunctionsTranslations = {
     QUERY_EXTRACT_CATEGORIES: 'QUERY_EXTRACT_CATEGORIES',
     QUERY_EXTRACT_TIMEFRAME_END: 'QUERY_EXTRACT_TIMEFRAME_END',
     QUERY_EXTRACT_TIMEFRAME_START: 'QUERY_EXTRACT_TIMEFRAME_START',
+    BUDGET_QUERY: 'BUDGET_QUERY',
+    FORMATNUMBER: 'FORMATNUMBER',
+    FORMATCURRENCY: 'FORMATCURRENCY',
   },
 };
