@@ -437,14 +437,6 @@ export const queryModeFunctions: Record<string, FunctionDef> = {
         name: 'decimalSeparator',
         description: 'Decimal separator (optional, uses app settings)',
       },
-      {
-        name: 'symbolPosition',
-        description: '"before" or "after" (optional, uses app settings)',
-      },
-      {
-        name: 'spaceBetweenAmountAndSymbol',
-        description: 'TRUE or FALSE (optional, uses app settings)',
-      },
     ],
   },
   FORMATCURRENCY: {
@@ -469,6 +461,14 @@ export const queryModeFunctions: Record<string, FunctionDef> = {
       {
         name: 'decimalSeparator',
         description: 'Decimal separator (optional, uses app settings)',
+      },
+      {
+        name: 'symbolPosition',
+        description: '"before" or "after" (optional, uses app settings)',
+      },
+      {
+        name: 'spaceBetweenAmountAndSymbol',
+        description: 'TRUE or FALSE (optional, uses app settings)',
       },
     ],
   },

@@ -339,7 +339,7 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
       ) => {
         const num = Number(value);
         if (isNaN(num)) {
-          return '#VALUE!';
+          return new CellError(ErrorType.VALUE);
         }
 
         const prefs = getUserPreferences();
@@ -396,7 +396,7 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
       ) => {
         const num = Number(value);
         if (isNaN(num)) {
-          return '#VALUE!';
+          return new CellError(ErrorType.VALUE);
         }
 
         const prefs = getUserPreferences();

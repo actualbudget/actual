@@ -325,6 +325,17 @@ describe('Formula-based rule actions', () => {
     expect(transaction.notes).toBe('1,234,567');
   });
 
+  it('should let IFERROR catch invalid FORMATNUMBER values', () => {
+    const action = new Action('set', 'notes', null, {
+      formula: '=IFERROR(FORMATNUMBER("not a number"), "fallback")',
+    });
+
+    const transaction = { notes: 'original' };
+    action.exec(transaction);
+
+    expect(transaction.notes).toBe('fallback');
+  });
+
   it('should format currency with default settings using FORMATCURRENCY', () => {
     const action = new Action('set', 'notes', null, {
       formula: '=FORMATCURRENCY(1234567.89)',
@@ -456,5 +467,16 @@ describe('Formula-based rule actions', () => {
     action.exec(transaction);
 
     expect(transaction.notes).toBe('€1.234.567,89');
+  });
+
+  it('should let IFERROR catch invalid FORMATCURRENCY values', () => {
+    const action = new Action('set', 'notes', null, {
+      formula: '=IFERROR(FORMATCURRENCY("not a number"), "fallback")',
+    });
+
+    const transaction = { notes: 'original' };
+    action.exec(transaction);
+
+    expect(transaction.notes).toBe('fallback');
   });
 });
