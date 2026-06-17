@@ -133,6 +133,10 @@ export function formatMonthYear(month: string, format: MonthYearFormat) {
   return month;
 }
 
+function applyStyle(element: HTMLElement, style: Record<string, string>) {
+  Object.assign(element.style, style);
+}
+
 class FormulaBadgeWidget extends WidgetType {
   constructor(
     readonly label: string,
@@ -160,50 +164,87 @@ class FormulaBadgeWidget extends WidgetType {
     const isQueryBadge = this.variant === 'query-name';
     const isBudgetBadge = this.variant.startsWith('budget-');
     const isCategoryList = this.variant === 'budget-category-list';
+    const baseElementStyle = {
+      display: 'inline-flex',
+      alignItems: 'center',
+      margin: '0 1px',
+      border: `1px solid ${theme.formInputBorder}`,
+      color: theme.pageText,
+      fontSize: '12px',
+    };
+    const categoryListElementStyle = {
+      maxWidth: '100%',
+      overflow: 'visible',
+      textOverflow: 'clip',
+      whiteSpace: 'normal',
+      padding: '2px 4px',
+      borderRadius: '4px',
+      backgroundColor: theme.tableRowBackgroundHover,
+      lineHeight: '20px',
+      gap: '4px',
+      flexWrap: 'wrap',
+      verticalAlign: 'middle',
+    };
+    const singleBadgeElementStyle = {
+      maxWidth: '220px',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      padding: '0 6px',
+      borderRadius: '999px',
+      lineHeight: '18px',
+    };
+    let singleBadgeColorStyle = {
+      backgroundColor: theme.pillBackground,
+    };
+
+    if (isQueryBadge) {
+      singleBadgeColorStyle = {
+        backgroundColor: theme.noticeBackground,
+      };
+    } else if (isBudgetBadge) {
+      singleBadgeColorStyle = {
+        backgroundColor: theme.buttonNormalBackground,
+      };
+    }
+
     element.title = this.label;
-    element.style.display = 'inline-flex';
-    element.style.alignItems = 'center';
-    element.style.maxWidth = isCategoryList ? '100%' : '220px';
-    element.style.overflow = isCategoryList ? 'visible' : 'hidden';
-    element.style.textOverflow = isCategoryList ? 'clip' : 'ellipsis';
-    element.style.whiteSpace = isCategoryList ? 'normal' : 'nowrap';
-    element.style.padding = isCategoryList ? '2px 4px' : '0 6px';
-    element.style.margin = '0 1px';
-    element.style.borderRadius = isCategoryList ? '4px' : '999px';
-    element.style.border = `1px solid ${theme.formInputBorder}`;
-    element.style.backgroundColor = isCategoryList
-      ? theme.tableRowBackgroundHover
-      : isQueryBadge
-        ? theme.noticeBackground
-        : isBudgetBadge
-          ? theme.buttonNormalBackground
-          : theme.pillBackground;
-    element.style.color = theme.pageText;
-    element.style.fontSize = '12px';
-    element.style.lineHeight = isCategoryList ? '20px' : '18px';
     if (isCategoryList) {
-      element.style.gap = '4px';
-      element.style.flexWrap = 'wrap';
-      element.style.verticalAlign = 'middle';
+      applyStyle(element, {
+        ...baseElementStyle,
+        ...categoryListElementStyle,
+      });
+
       for (const category of this.categories ?? []) {
         const badge = document.createElement('span');
+        const categoryBadgeStyle = {
+          display: 'inline-flex',
+          alignItems: 'center',
+          maxWidth: '100%',
+          overflow: 'visible',
+          textOverflow: 'clip',
+          whiteSpace: 'normal',
+          overflowWrap: 'anywhere',
+          padding: '0 6px',
+          borderRadius: '999px',
+          backgroundColor: theme.buttonNormalBackground,
+          color: theme.pageText,
+          lineHeight: '18px',
+        };
+
         badge.textContent = category.label;
         badge.title = category.label;
-        badge.style.display = 'inline-flex';
-        badge.style.alignItems = 'center';
-        badge.style.maxWidth = '100%';
-        badge.style.overflow = 'visible';
-        badge.style.textOverflow = 'clip';
-        badge.style.whiteSpace = 'normal';
-        badge.style.overflowWrap = 'anywhere';
-        badge.style.padding = '0 6px';
-        badge.style.borderRadius = '999px';
-        badge.style.backgroundColor = theme.buttonNormalBackground;
-        badge.style.color = theme.pageText;
-        badge.style.lineHeight = '18px';
+        applyStyle(badge, {
+          ...categoryBadgeStyle,
+        });
         element.appendChild(badge);
       }
     } else {
+      applyStyle(element, {
+        ...baseElementStyle,
+        ...singleBadgeElementStyle,
+        ...singleBadgeColorStyle,
+      });
       element.textContent = this.label;
     }
 
