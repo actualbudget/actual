@@ -198,6 +198,60 @@ describe('accountsBankSync', () => {
     expect(account!.bank_sync_status).toBe('reauth-required');
   });
 
+  it('persists rate-limit-exceeded status after a rate limit error', async () => {
+    insertBank({ id: 'bank1', bank_id: 'gc-bank', name: 'GoCardless' });
+    await db.insertAccount({
+      id: 'acct1',
+      name: 'Checking',
+      bank: 'bank1',
+      account_id: 'ext-1',
+      account_sync_source: 'goCardless',
+    });
+
+    vi.mocked(bankSync.syncAccount).mockRejectedValue({
+      type: 'BankSyncError',
+      reason: 'rate limit exceeded',
+      category: 'RATE_LIMIT_EXCEEDED',
+      code: 'NORDIGEN_ERROR',
+      message: 'rate limit exceeded',
+    });
+
+    await accountsBankSyncHandler({ ids: ['acct1'] });
+
+    const account = await db.first<db.DbAccount>(
+      'SELECT * FROM accounts WHERE id = ?',
+      ['acct1'],
+    );
+    expect(account!.bank_sync_status).toBe('rate-limit-exceeded');
+  });
+
+  it('persists timed-out status after a timeout error', async () => {
+    insertBank({ id: 'bank1', bank_id: 'sfin-bank', name: 'SimpleFin' });
+    await db.insertAccount({
+      id: 'acct1',
+      name: 'Checking',
+      bank: 'bank1',
+      account_id: 'ext-1',
+      account_sync_source: 'simpleFin',
+    });
+
+    vi.mocked(bankSync.syncAccount).mockRejectedValue({
+      type: 'BankSyncError',
+      reason: 'timed out',
+      category: 'TIMED_OUT',
+      code: 'TIMED_OUT',
+      message: 'timed out',
+    });
+
+    await accountsBankSyncHandler({ ids: ['acct1'] });
+
+    const account = await db.first<db.DbAccount>(
+      'SELECT * FROM accounts WHERE id = ?',
+      ['acct1'],
+    );
+    expect(account!.bank_sync_status).toBe('timed-out');
+  });
+
   it('persists failed status after an operational sync error', async () => {
     insertBank({ id: 'bank1', bank_id: 'gc-bank', name: 'GoCardless' });
     await db.insertAccount({
