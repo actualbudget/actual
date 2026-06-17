@@ -6,12 +6,11 @@ import { clearExpiredSessions, getAccountDb } from '#account-db';
 import { config } from '#load-config';
 import { TOKEN_EXPIRATION_NEVER } from '#util/validate-user';
 
-// OWASP-recommended argon2id parameters: 19 MiB memory, 2 iterations, 1 parallelism.
 // https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#argon2id
 const ARGON2_OPTIONS = {
   type: argon2.argon2id,
-  memoryCost: 19456,
-  timeCost: 2,
+  memoryCost: 47104,
+  timeCost: 1,
   parallelism: 1,
 };
 
