@@ -12,17 +12,28 @@ import {
   syntaxHighlighting,
 } from '@codemirror/language';
 import type { StreamParser } from '@codemirror/language';
+import { RangeSetBuilder } from '@codemirror/state';
 import type { Extension } from '@codemirror/state';
 import {
+  Decoration,
   EditorView,
   hoverTooltip,
   tooltips,
   ViewPlugin,
+  WidgetType,
 } from '@codemirror/view';
-import type { Tooltip } from '@codemirror/view';
+import type { DecorationSet, Tooltip, ViewUpdate } from '@codemirror/view';
 import { tags } from '@lezer/highlight';
 import { t } from 'i18next';
 
+import {
+  budgetQueryDimensions,
+  getFormulaBadgeRanges,
+} from './formulaBadgeRanges';
+import type {
+  BudgetCategoryBadge,
+  FormulaBadgeVariant,
+} from './formulaBadgeRanges';
 import { queryModeFunctions } from './queryModeFunctions';
 import type { FunctionDef } from './queryModeFunctions';
 import { transactionModeFunctions } from './transactionModeFunctions';
@@ -74,6 +85,225 @@ function FieldTooltip({ label, info }: { label: string; info: string }) {
 }
 
 type FormulaMode = 'query' | 'transaction';
+
+export type FormulaBadgeClick = {
+  view: EditorView;
+  anchorRect: DOMRect;
+  from: number;
+  to: number;
+  label: string;
+  variant: FormulaBadgeVariant;
+  categories?: BudgetCategoryBadge[];
+};
+
+export type MonthYearFormat = 'year-month' | 'month-year';
+
+export function parseMonthYear(
+  value: string,
+): { month: string; format: MonthYearFormat } | null {
+  const yearMonth = value.match(/^(\d{4})-(\d{1,2})$/);
+  if (yearMonth) {
+    const month = Number(yearMonth[2]);
+    if (month >= 1 && month <= 12) {
+      return {
+        month: `${yearMonth[1]}-${String(month).padStart(2, '0')}`,
+        format: 'year-month',
+      };
+    }
+  }
+
+  const monthYear = value.match(/^(\d{1,2})-(\d{4})$/);
+  if (monthYear) {
+    const month = Number(monthYear[1]);
+    if (month >= 1 && month <= 12) {
+      return {
+        month: `${monthYear[2]}-${String(month).padStart(2, '0')}`,
+        format: 'month-year',
+      };
+    }
+  }
+
+  return null;
+}
+
+export function formatMonthYear(month: string, format: MonthYearFormat) {
+  if (format === 'month-year') {
+    return `${month.slice(5, 7)}-${month.slice(0, 4)}`;
+  }
+  return month;
+}
+
+class FormulaBadgeWidget extends WidgetType {
+  constructor(
+    readonly label: string,
+    readonly variant: FormulaBadgeVariant,
+    readonly range: { from: number; to: number },
+    readonly onBadgeClick?: (details: FormulaBadgeClick) => void,
+    readonly categories?: BudgetCategoryBadge[],
+  ) {
+    super();
+  }
+
+  eq(other: FormulaBadgeWidget) {
+    return (
+      other.label === this.label &&
+      other.variant === this.variant &&
+      other.range.from === this.range.from &&
+      other.range.to === this.range.to &&
+      other.onBadgeClick === this.onBadgeClick &&
+      JSON.stringify(other.categories) === JSON.stringify(this.categories)
+    );
+  }
+
+  toDOM(view: EditorView) {
+    const element = document.createElement('span');
+    const isQueryBadge = this.variant === 'query-name';
+    const isBudgetBadge = this.variant.startsWith('budget-');
+    const isCategoryList = this.variant === 'budget-category-list';
+    element.title = this.label;
+    element.style.display = 'inline-flex';
+    element.style.alignItems = 'center';
+    element.style.maxWidth = isCategoryList ? '100%' : '220px';
+    element.style.overflow = isCategoryList ? 'visible' : 'hidden';
+    element.style.textOverflow = isCategoryList ? 'clip' : 'ellipsis';
+    element.style.whiteSpace = isCategoryList ? 'normal' : 'nowrap';
+    element.style.padding = isCategoryList ? '2px 4px' : '0 6px';
+    element.style.margin = '0 1px';
+    element.style.borderRadius = isCategoryList ? '4px' : '999px';
+    element.style.border = `1px solid ${theme.formInputBorder}`;
+    element.style.backgroundColor = isCategoryList
+      ? theme.tableRowBackgroundHover
+      : isQueryBadge
+        ? theme.noticeBackground
+        : isBudgetBadge
+          ? theme.buttonNormalBackground
+          : theme.pillBackground;
+    element.style.color = theme.pageText;
+    element.style.fontSize = '12px';
+    element.style.lineHeight = isCategoryList ? '20px' : '18px';
+    if (isCategoryList) {
+      element.style.gap = '4px';
+      element.style.flexWrap = 'wrap';
+      element.style.verticalAlign = 'middle';
+      for (const category of this.categories ?? []) {
+        const badge = document.createElement('span');
+        badge.textContent = category.label;
+        badge.title = category.label;
+        badge.style.display = 'inline-flex';
+        badge.style.alignItems = 'center';
+        badge.style.maxWidth = '100%';
+        badge.style.overflow = 'visible';
+        badge.style.textOverflow = 'clip';
+        badge.style.whiteSpace = 'normal';
+        badge.style.overflowWrap = 'anywhere';
+        badge.style.padding = '0 6px';
+        badge.style.borderRadius = '999px';
+        badge.style.backgroundColor = theme.buttonNormalBackground;
+        badge.style.color = theme.pageText;
+        badge.style.lineHeight = '18px';
+        element.appendChild(badge);
+      }
+    } else {
+      element.textContent = this.label;
+    }
+
+    if (
+      this.onBadgeClick &&
+      [
+        'query-name',
+        'budget-dimension',
+        'budget-timeframe',
+        'budget-category-list',
+      ].includes(this.variant)
+    ) {
+      element.style.cursor = 'pointer';
+      element.addEventListener('mousedown', event => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+      element.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        this.onBadgeClick?.({
+          view,
+          anchorRect: element.getBoundingClientRect(),
+          from: this.range.from,
+          to: this.range.to,
+          label: this.label,
+          variant: this.variant,
+          categories: this.categories,
+        });
+      });
+    }
+    return element;
+  }
+}
+
+function formulaBadgeExtension(
+  mode: FormulaMode,
+  queries?: Record<string, unknown>,
+  variables?: Record<string, number | string>,
+  onBadgeClick?: (details: FormulaBadgeClick) => void,
+  categoryBadges?: Record<string, string>,
+): Extension {
+  const buildDecorations = (view: EditorView): DecorationSet => {
+    const builder = new RangeSetBuilder<Decoration>();
+    const badgeRanges = getFormulaBadgeRanges({
+      formula: view.state.doc.toString(),
+      mode,
+      queries,
+      variables,
+      categoryBadges,
+    });
+
+    badgeRanges
+      .filter(({ from, to }) =>
+        view.visibleRanges.some(range => from < range.to && to > range.from),
+      )
+      .sort((a, b) => a.from - b.from || a.to - b.to)
+      .forEach(({ from, to, label, variant, categories }) => {
+        builder.add(
+          from,
+          to,
+          Decoration.replace({
+            widget: new FormulaBadgeWidget(
+              label,
+              variant,
+              { from, to },
+              onBadgeClick,
+              categories,
+            ),
+            inclusive: false,
+          }),
+        );
+      });
+
+    return builder.finish();
+  };
+
+  return ViewPlugin.fromClass(
+    class {
+      decorations: DecorationSet;
+
+      constructor(view: EditorView) {
+        this.decorations = buildDecorations(view);
+      }
+
+      update(update: ViewUpdate) {
+        if (update.docChanged || update.viewportChanged) {
+          this.decorations = buildDecorations(update.view);
+        }
+      }
+    },
+    {
+      decorations: plugin => plugin.decorations,
+      provide: plugin =>
+        EditorView.atomicRanges.of(
+          view => view.plugin(plugin)?.decorations ?? Decoration.none,
+        ),
+    },
+  );
+}
 
 const MATH_FUNCTIONS = new Set([
   'SUM',
@@ -444,11 +674,101 @@ function getFunctionCompletions(mode: FormulaMode): Completion[] {
   return completions;
 }
 
+function createContextFunctionCompletion(
+  name: string,
+  func: FunctionDef,
+): Completion {
+  return {
+    label: name,
+    type: 'function',
+    section: 'ℹ️ Function Signature',
+    detail: `(${func.parameters.map(p => p.name).join(', ')})`,
+    info: [
+      func.description,
+      '',
+      `${t('Parameters:')} ${func.parameters.map(p => p.name).join(', ')}`,
+      '',
+      func.parameters.map(p => `- ${p.name}: ${p.description}`).join('\n'),
+    ].join('\n'),
+    apply: view => {
+      view.dispatch({ selection: view.state.selection });
+    },
+    boost: 99,
+  };
+}
+
+function getActiveFunctionArgumentContext(text: string, functionName: string) {
+  const stack: Array<{
+    kind: 'function' | 'group' | 'array';
+    name?: string;
+    argumentIndex: number;
+  }> = [];
+  let isInString = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    if (char === '"') {
+      isInString = !isInString;
+      continue;
+    }
+
+    if (isInString) {
+      continue;
+    }
+
+    if (char === '(') {
+      const functionMatch = text
+        .slice(0, index)
+        .match(/([A-Za-z_][A-Za-z0-9_]*)\s*$/);
+      stack.push({
+        kind: functionMatch ? 'function' : 'group',
+        name: functionMatch?.[1].toUpperCase(),
+        argumentIndex: 0,
+      });
+      continue;
+    }
+
+    if (char === '{') {
+      stack.push({ kind: 'array', argumentIndex: 0 });
+      continue;
+    }
+
+    if (char === ')' || char === '}') {
+      stack.pop();
+      continue;
+    }
+
+    if (char === ',') {
+      const activeFrame = stack.at(-1);
+      if (activeFrame?.kind === 'function') {
+        activeFrame.argumentIndex += 1;
+      }
+    }
+  }
+
+  let activeFunction: {
+    kind: 'function' | 'group' | 'array';
+    name?: string;
+    argumentIndex: number;
+  } | null = null;
+  for (let index = stack.length - 1; index >= 0; index -= 1) {
+    if (stack[index].kind === 'function') {
+      activeFunction = stack[index];
+      break;
+    }
+  }
+
+  return activeFunction?.name === functionName
+    ? { argumentIndex: activeFunction.argumentIndex }
+    : null;
+}
+
 // Autocomplete extension
 export function excelFormulaAutocomplete(
   mode: FormulaMode,
   queries?: Record<string, unknown>,
   variables?: Record<string, number | string>,
+  categoryBadges?: Record<string, string>,
 ): Extension {
   const functionCompletions = getFunctionCompletions(mode);
 
@@ -536,6 +856,39 @@ export function excelFormulaAutocomplete(
       }))
     : [];
 
+  const budgetDimensionCompletions: Completion[] =
+    mode === 'query'
+      ? budgetQueryDimensions.map(dimension => ({
+          label: dimension,
+          type: 'constant',
+          section: '💸 Budget Dimensions',
+          info: t('Budget query dimension.'),
+          apply: `"${dimension}"`,
+          boost: 18,
+        }))
+      : [];
+
+  const budgetCategoryCompletions: Completion[] =
+    mode === 'query' && categoryBadges
+      ? Object.entries(categoryBadges).map(([categoryId, label]) => ({
+          label,
+          type: 'constant',
+          section: '🏷️ Budget Categories',
+          detail: categoryId,
+          info: t('Budget category for BUDGET_QUERY category arrays.'),
+          apply: `"${categoryId}"`,
+          boost: 17,
+        }))
+      : [];
+
+  const budgetQuerySignatureCompletion: Completion | null =
+    mode === 'query' && queryModeFunctions.BUDGET_QUERY
+      ? createContextFunctionCompletion(
+          'BUDGET_QUERY',
+          queryModeFunctions.BUDGET_QUERY,
+        )
+      : null;
+
   return autocompletion({
     override: [
       (context: CompletionContext) => {
@@ -544,53 +897,148 @@ export function excelFormulaAutocomplete(
           return null;
         }
 
-        const suggestions: Completion[] = [
+        const budgetQueryContext =
+          mode === 'query'
+            ? getActiveFunctionArgumentContext(
+                context.state.doc.sliceString(0, context.pos),
+                'BUDGET_QUERY',
+              )
+            : null;
+
+        const baseSuggestions: Completion[] = [
           ...variableCompletions, // Put variable completions first
+          ...budgetDimensionCompletions,
+          ...budgetCategoryCompletions,
           ...queryCompletions, // Put query completions first
           ...functionCompletions,
         ];
+
+        const contextualSuggestions: Completion[] = budgetQueryContext
+          ? [
+              ...(budgetQuerySignatureCompletion
+                ? [budgetQuerySignatureCompletion]
+                : []),
+              ...(budgetQueryContext.argumentIndex === 0
+                ? budgetDimensionCompletions
+                : []),
+              ...(budgetQueryContext.argumentIndex === 1
+                ? budgetCategoryCompletions
+                : []),
+              ...(budgetQueryContext.argumentIndex === 2 ||
+              budgetQueryContext.argumentIndex === 3
+                ? queryCompletions
+                : []),
+            ]
+          : [];
+
+        const suggestions: Completion[] = budgetQueryContext
+          ? [
+              ...contextualSuggestions,
+              ...baseSuggestions.filter(
+                suggestion => !contextualSuggestions.includes(suggestion),
+              ),
+            ]
+          : baseSuggestions;
 
         if (mode === 'transaction') {
           suggestions.push(...transactionFields);
         }
 
         // Sort by section first, then by boost (descending), then by label
-        const sortedSuggestions = suggestions.sort((a, b) => {
-          // Define section priority order
-          const sectionOrder: Record<string, number> = {
-            '🔢 Variables': -1,
-            '🔍 Query Functions': 0,
-            '📊 Math Functions': 1,
-            '🔀 Logical Functions': 2,
-            '📝 Text Functions': 3,
-            '📅 Date Functions': 4,
-            '⚙️ Other Functions': 5,
-            '💰 Transaction Fields': 6,
-          };
+        const sortedSuggestions = budgetQueryContext
+          ? [
+              ...contextualSuggestions,
+              ...suggestions
+                .filter(
+                  suggestion => !contextualSuggestions.includes(suggestion),
+                )
+                .sort((a, b) => {
+                  // Define section priority order
+                  const sectionOrder: Record<string, number> = {
+                    'ℹ️ Function Signature': -2,
+                    '🔢 Variables': -1,
+                    '💸 Budget Dimensions': 0,
+                    '🏷️ Budget Categories': 1,
+                    '🔍 Query Functions': 2,
+                    '📊 Math Functions': 3,
+                    '🔀 Logical Functions': 4,
+                    '📝 Text Functions': 5,
+                    '📅 Date Functions': 6,
+                    '⚙️ Other Functions': 7,
+                    '💰 Transaction Fields': 8,
+                  };
 
-          // Get section names
-          const sectionA =
-            typeof a.section === 'string' ? a.section : a.section?.name || '';
-          const sectionB =
-            typeof b.section === 'string' ? b.section : b.section?.name || '';
+                  // Get section names
+                  const sectionA =
+                    typeof a.section === 'string'
+                      ? a.section
+                      : a.section?.name || '';
+                  const sectionB =
+                    typeof b.section === 'string'
+                      ? b.section
+                      : b.section?.name || '';
 
-          // Compare by section priority
-          const orderA = sectionOrder[sectionA] ?? 999;
-          const orderB = sectionOrder[sectionB] ?? 999;
-          if (orderA !== orderB) {
-            return orderA - orderB;
-          }
+                  // Compare by section priority
+                  const orderA = sectionOrder[sectionA] ?? 999;
+                  const orderB = sectionOrder[sectionB] ?? 999;
+                  if (orderA !== orderB) {
+                    return orderA - orderB;
+                  }
 
-          // Within same section, sort by boost (higher first)
-          const boostA = a.boost || 0;
-          const boostB = b.boost || 0;
-          if (boostA !== boostB) {
-            return boostB - boostA;
-          }
+                  // Within same section, sort by boost (higher first)
+                  const boostA = a.boost || 0;
+                  const boostB = b.boost || 0;
+                  if (boostA !== boostB) {
+                    return boostB - boostA;
+                  }
 
-          // Finally, sort by label alphabetically
-          return a.label.localeCompare(b.label);
-        });
+                  // Finally, sort by label alphabetically
+                  return a.label.localeCompare(b.label);
+                }),
+            ]
+          : suggestions.sort((a, b) => {
+              // Define section priority order
+              const sectionOrder: Record<string, number> = {
+                'ℹ️ Function Signature': -2,
+                '🔢 Variables': -1,
+                '💸 Budget Dimensions': 0,
+                '🏷️ Budget Categories': 1,
+                '🔍 Query Functions': 2,
+                '📊 Math Functions': 3,
+                '🔀 Logical Functions': 4,
+                '📝 Text Functions': 5,
+                '📅 Date Functions': 6,
+                '⚙️ Other Functions': 7,
+                '💰 Transaction Fields': 8,
+              };
+
+              // Get section names
+              const sectionA =
+                typeof a.section === 'string'
+                  ? a.section
+                  : a.section?.name || '';
+              const sectionB =
+                typeof b.section === 'string'
+                  ? b.section
+                  : b.section?.name || '';
+
+              // Compare by section priority
+              const orderA = sectionOrder[sectionA] ?? 999;
+              const orderB = sectionOrder[sectionB] ?? 999;
+              if (orderA !== orderB) {
+                return orderA - orderB;
+              }
+
+              // Within same section, sort by boost (higher first)
+              const boostA = a.boost || 0;
+              const boostB = b.boost || 0;
+              if (boostA !== boostB) {
+                return boostB - boostA;
+              }
+
+              // Finally, sort by label alphabetically
+              return a.label.localeCompare(b.label);
+            });
 
         return {
           from: word.from,
@@ -1075,11 +1523,20 @@ export function excelFormulaExtension(
   queries?: Record<string, unknown>,
   isDark?: boolean,
   variables?: Record<string, number | string>,
+  onBadgeClick?: (details: FormulaBadgeClick) => void,
+  categoryBadges?: Record<string, string>,
 ): Extension[] {
   return [
     excelFormulaLanguage,
-    excelFormulaAutocomplete(mode, queries, variables),
+    excelFormulaAutocomplete(mode, queries, variables, categoryBadges),
     excelFormulaHover(mode),
+    formulaBadgeExtension(
+      mode,
+      queries,
+      variables,
+      onBadgeClick,
+      categoryBadges,
+    ),
     isDark ? excelFormulaDarkHighlighting : excelFormulaHighlighting,
     isDark ? functionCategoryThemeDark : functionCategoryTheme,
     tooltipZIndexTheme,
