@@ -3,7 +3,10 @@ import { join, resolve } from 'node:path';
 import { bootstrapOpenId } from './accounts/openid';
 import {
   bootstrapPassword,
+  hashPassword,
+  isValidPassword,
   loginWithPassword,
+  setPasswordHash,
   verifyPassword,
 } from './accounts/password';
 import { openDatabase } from './db';
@@ -88,6 +91,15 @@ export async function bootstrap(loginSettings, forced = false) {
   const openIdEnabled = 'openId' in loginSettings;
 
   const accountDb = getAccountDb();
+
+  let passwordHash;
+  if (passEnabled) {
+    if (!isValidPassword(loginSettings.password)) {
+      return { error: 'invalid-password' };
+    }
+    passwordHash = await hashPassword(loginSettings.password);
+  }
+
   accountDb.mutate('BEGIN TRANSACTION');
   try {
     const { countOfOwner } =
@@ -115,11 +127,7 @@ export async function bootstrap(loginSettings, forced = false) {
     }
 
     if (passEnabled) {
-      const { error } = await bootstrapPassword(loginSettings.password);
-      if (error) {
-        accountDb.mutate('ROLLBACK');
-        return { error };
-      }
+      setPasswordHash(passwordHash);
     }
 
     if (openIdEnabled && forced) {

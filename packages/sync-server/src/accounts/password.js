@@ -15,7 +15,7 @@ const ARGON2_OPTIONS = {
   parallelism: 1,
 };
 
-function isValidPassword(password) {
+export function isValidPassword(password) {
   return password != null && password !== '';
 }
 
@@ -45,12 +45,7 @@ function isLegacyHash(hash) {
   return typeof hash === 'string' && !hash.startsWith('$argon2');
 }
 
-export async function bootstrapPassword(password) {
-  if (!isValidPassword(password)) {
-    return { error: 'invalid-password' };
-  }
-
-  const hashed = await hashPassword(password);
+export function setPasswordHash(hashed) {
   const accountDb = getAccountDb();
   accountDb.transaction(() => {
     accountDb.mutate('DELETE FROM auth WHERE method = ?', ['password']);
@@ -60,6 +55,15 @@ export async function bootstrapPassword(password) {
       [hashed],
     );
   });
+}
+
+export async function bootstrapPassword(password) {
+  if (!isValidPassword(password)) {
+    return { error: 'invalid-password' };
+  }
+
+  const hashed = await hashPassword(password);
+  setPasswordHash(hashed);
 
   return {};
 }
@@ -88,8 +92,8 @@ export async function loginWithPassword(password) {
   if (isLegacyHash(passwordHash)) {
     const rehashed = await hashPassword(password);
     accountDb.mutate(
-      "UPDATE auth SET extra_data = ? WHERE method = 'password'",
-      [rehashed],
+      "UPDATE auth SET extra_data = ? WHERE method = 'password' AND extra_data = ?",
+      [rehashed, passwordHash],
     );
   }
 
