@@ -166,7 +166,7 @@ function getCurrencySymbolPositionFromArg(
   return value === 'before' || value === 'after' ? value : fallback;
 }
 
-const regexLiteral = /^\/(.*)\/([gimuy]*)$/;
+const regexLiteral = /^\/(.*)\/([a-z]*)$/;
 
 function buildRegExp(pattern: string): RegExp {
   const match = regexLiteral.exec(pattern);

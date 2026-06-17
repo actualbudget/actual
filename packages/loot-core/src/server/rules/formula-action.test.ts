@@ -546,6 +546,17 @@ describe('Formula-based rule actions', () => {
     expect(result).toBe('Sarah');
   });
 
+  it('should support modern RegExp flags like dotAll in REGEX', () => {
+    const action = new Action('set', 'notes', null, {});
+    const transaction = { notes: 'a\nb' };
+    const result = action.executeFormulaSync(
+      '=REGEX(notes, "/a.b/s", "X")',
+      transaction,
+    );
+
+    expect(result).toBe('X');
+  });
+
   it('should let IFERROR catch invalid REGEX patterns', () => {
     const action = new Action('set', 'notes', null, {
       formula: '=IFERROR(REGEX(notes, "/[/", "x"), "fallback")',
