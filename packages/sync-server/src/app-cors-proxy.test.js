@@ -280,6 +280,31 @@ describe('app-cors-proxy', () => {
       expect(res.statusCode).toBe(200);
     });
 
+    it('should not authorize a prefix-matched GitHub API repo for an allowlisted repo', async () => {
+      const res = await request(app).get('/').query({
+        url: 'https://api.github.com/repos/user/repo1-private/contents/.env',
+      });
+
+      expect(res.statusCode).toBe(403);
+      expect(res.body.error).toBe('URL not allowed');
+    });
+
+    it('should allow the exact GitHub API repo for an allowlisted repo', async () => {
+      const res = await request(app)
+        .get('/')
+        .query({ url: 'https://api.github.com/repos/user/repo1' });
+
+      expect(res.statusCode).toBe(200);
+    });
+
+    it('should allow GitHub API sub-paths for an allowlisted repo', async () => {
+      const res = await request(app)
+        .get('/')
+        .query({ url: 'https://api.github.com/repos/user/repo1/releases' });
+
+      expect(res.statusCode).toBe(200);
+    });
+
     it('should block non-allowlisted URLs', async () => {
       const res = await request(app)
         .get('/')
