@@ -4,9 +4,9 @@ The documentation under `packages/docs` is spell-checked by the
 [crate-ci/typos](https://github.com/crate-ci/typos) action, wired up in
 [`.github/workflows/docs-spelling.yml`](../../workflows/docs-spelling.yml).
 
-| File                       | Purpose                                                                            |
-| -------------------------- | ---------------------------------------------------------------------------------- |
-| [typos.toml](typos.toml)   | typos configuration: the allowlist of accepted words and the list of excluded files |
+| File                     | Purpose                                                                             |
+| ------------------------ | ----------------------------------------------------------------------------------- |
+| [typos.toml](typos.toml) | typos configuration: the allowlist of accepted words and the list of excluded files |
 
 ## How it works
 
