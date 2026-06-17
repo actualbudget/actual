@@ -28,9 +28,9 @@ export default {
     // sometimes the creditor is not provided
     // the formatPayeeName then falls back to debtor
     // but that is not correct in case of a negative booking, as it is just the account holders IBAN.
-    const isInvalidFallback =
-      Number(transaction.transactionAmount.amount) < 0 &&
-      !(transaction.creditorName || transaction.creditorAccount);
+    const creditorAccount = typeof transaction.creditorAccount === 'string' ? transaction.creditorAccount : transaction.creditorAccount?.iban;
+    const hasCreditor = Boolean(transaction.creditorName || creditorAccount);
+    const isInvalidFallback = Number(transaction.transactionAmount.amount) < 0 && !(hasCreditor);
 
     if (!payeeName || isInvalidFallback) {
       payeeName = extractPayeeName(transaction);
