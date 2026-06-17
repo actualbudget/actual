@@ -21,6 +21,7 @@ import { getLiveRange } from '#components/reports/getLiveRange';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { bootstrapHyperFormula } from '#util/bootstrapHyperFormula';
 
+import { getLiveSlidingWindowRange } from './querySlidingWindow';
 import { useGlobalPref } from './useGlobalPref';
 import { useLocale } from './useLocale';
 
@@ -337,12 +338,6 @@ function isMonthOnlyDate(s: string) {
   return s.includes('-') && s.split('-').length === 2;
 }
 
-function toMonth(dateOrMonth: string) {
-  return isMonthOnlyDate(dateOrMonth)
-    ? dateOrMonth
-    : monthUtils.monthFromDate(dateOrMonth);
-}
-
 async function buildFilteredTransactionsQuery(
   config: QueryConfig,
 ): Promise<Query> {
@@ -371,20 +366,10 @@ async function buildFilteredTransactionsQuery(
       timeFrame.end
     ) {
       if (timeFrame.mode === 'sliding-window') {
-        // Sliding-window should move with time. Interpret start/end as a window length
-        // (in months) and always anchor the end to the current month/day.
-        const startMonth = toMonth(timeFrame.start);
-        const endMonth = toMonth(timeFrame.end);
-        const offset = monthUtils.differenceInCalendarMonths(
-          endMonth,
-          startMonth,
-        );
-
-        const liveEndMonth = monthUtils.currentMonth();
-        const liveStartMonth = monthUtils.subMonths(liveEndMonth, offset);
-
-        startDate = monthUtils.firstDayOfMonth(liveStartMonth);
-        endDate = monthUtils.currentDay();
+        ({ startDate, endDate } = getLiveSlidingWindowRange(
+          timeFrame.start,
+          timeFrame.end,
+        ));
       } else {
         // Static mode: use the actual stored start/end dates.
         // Convert month format (YYYY-MM) to full date format (YYYY-MM-DD) if needed
