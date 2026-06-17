@@ -64,7 +64,7 @@ describe('resolveChannels', () => {
       expect(resolved.encoding.x?.type).toBe('date');
     });
 
-    it('auto-assigns x when only y is bound', () => {
+    it('auto-assigns x to all non-id dimensions when only y is bound', () => {
       const result = makeResult([
         { name: 'category', type: 'string' },
         { name: 'amount', type: 'float' },
@@ -74,48 +74,53 @@ describe('resolveChannels', () => {
         encoding: { y: { field: 'amount' } },
       };
       const resolved = resolveChannels(spec, result);
-      expect(resolved.encoding.x?.field).toBe('category');
-      expect(resolved.encoding.x?.type).toBe('category');
-      expect(resolved.encoding.x?.autoAssigned).toBe(true);
+      expect(Array.isArray(resolved.encoding.x)).toBe(true);
+      if (Array.isArray(resolved.encoding.x)) {
+        expect(resolved.encoding.x[0]?.field).toBe('category');
+        expect(resolved.encoding.x[0]?.type).toBe('category');
+        expect(resolved.encoding.x[0]?.autoAssigned).toBe(true);
+      }
     });
 
-    it('auto-assigns y (numeric) when color is bound', () => {
+    it('resolves x as array of two fields with types inferred', () => {
       const result = makeResult([
-        { name: 'month', type: 'date' },
         { name: 'category', type: 'string' },
-        { name: 'total', type: 'float' },
+        { name: 'month', type: 'date-month' },
+        { name: 'amount', type: 'float' },
       ]);
       const spec: ChartSpec = {
         mark: 'table',
         encoding: {
-          x: { field: 'month' },
-          color: { field: 'category' },
+          x: [{ field: 'category' }, { field: 'month' }],
+          y: { field: 'amount' },
         },
       };
       const resolved = resolveChannels(spec, result);
-      expect(resolved.encoding.y).toBeDefined();
-      if (!Array.isArray(resolved.encoding.y)) {
-        expect(resolved.encoding.y?.field).toBe('total');
-        expect(resolved.encoding.y?.type).toBe('number');
-        expect(resolved.encoding.y?.autoAssigned).toBe(true);
-      } else {
-        throw new Error('Expected single Y, got array');
+      expect(Array.isArray(resolved.encoding.x)).toBe(true);
+      if (Array.isArray(resolved.encoding.x)) {
+        expect(resolved.encoding.x).toHaveLength(2);
+        expect(resolved.encoding.x[0]?.field).toBe('category');
+        expect(resolved.encoding.x[0]?.type).toBe('category');
+        expect(resolved.encoding.x[1]?.field).toBe('month');
+        expect(resolved.encoding.x[1]?.type).toBe('date');
       }
     });
 
-    it('warns when color is bound but no measure column exists', () => {
+    it('warns when an x array field does not exist in the result', () => {
       const result = makeResult([
         { name: 'category', type: 'string' },
-        { name: 'subcategory', type: 'string' },
+        { name: 'amount', type: 'float' },
       ]);
       const spec: ChartSpec = {
         mark: 'table',
-        encoding: { color: { field: 'subcategory' } },
+        encoding: {
+          x: [{ field: 'category' }, { field: 'missing' }],
+          y: { field: 'amount' },
+        },
       };
       const resolved = resolveChannels(spec, result);
-      expect(resolved.warnings).toContain(
-        'Color channel requires a numeric Y channel for cell values, but no numeric columns are available.',
-      );
+      expect(resolved.errors).toHaveLength(1);
+      expect(resolved.errors[0]).toMatch(/missing/);
     });
 
     it('errors on y[] + color combination', () => {
@@ -269,6 +274,46 @@ describe('resolveChannels', () => {
         expect(resolved.encoding.y[0]?.type).toBe('number');
         expect(resolved.encoding.y[0]?.autoAssigned).toBe(true);
       }
+    });
+
+    it('warns and uses first x field when x is an array on column', () => {
+      const result = makeResult([
+        { name: 'month', type: 'date-month' },
+        { name: 'category', type: 'string' },
+        { name: 'amount', type: 'float' },
+      ]);
+      const spec: ChartSpec = {
+        mark: 'column',
+        encoding: {
+          x: [{ field: 'month' }, { field: 'category' }],
+          y: { field: 'amount' },
+        },
+      };
+      const resolved = resolveChannels(spec, result);
+      expect(resolved.warnings).toContain(
+        'Multiple X fields are not supported on column/bar marks. Only the first field will be used.',
+      );
+      expect(resolved.encoding.x?.field).toBe('month');
+    });
+
+    it('warns and uses first x field when x is an array on line', () => {
+      const result = makeResult([
+        { name: 'month', type: 'date-month' },
+        { name: 'category', type: 'string' },
+        { name: 'amount', type: 'float' },
+      ]);
+      const spec: ChartSpec = {
+        mark: 'line',
+        encoding: {
+          x: [{ field: 'month' }, { field: 'category' }],
+          y: { field: 'amount' },
+        },
+      };
+      const resolved = resolveChannels(spec, result);
+      expect(resolved.warnings).toContain(
+        'Multiple X fields are not supported on line/area marks. Only the first field will be used.',
+      );
+      expect(resolved.encoding.x?.field).toBe('month');
     });
   });
 

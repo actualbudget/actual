@@ -6,14 +6,7 @@ import { Select } from '@actual-app/components/select';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import type {
-  ChannelDef,
-  ChartSpec,
-  Encoding,
-  Mark,
-} from 'loot-core/types/chart-spec';
-
-import { MarkSelector } from './MarkSelector';
+import type { ChannelDef, ChartSpec, Mark } from 'loot-core/types/chart-spec';
 
 import { Checkbox } from '@desktop-client/components/forms';
 import { toFieldType } from '@desktop-client/queries/chart-spec';
@@ -35,7 +28,7 @@ type ChannelVisibility = {
 };
 
 const CHANNEL_VISIBILITY: Record<Mark, ChannelVisibility> = {
-  table: { x: true, y: true, color: true, size: false },
+  table: { x: true, y: true, color: false, size: false },
   number: { x: false, y: true, color: false, size: false },
   column: { x: true, y: true, color: true, size: false },
   bar: { x: true, y: true, color: true, size: false },
@@ -59,6 +52,23 @@ function isMultiYMark(mark: Mark): boolean {
     mark === 'line' ||
     mark === 'area'
   );
+}
+
+function isMultiXMark(mark: Mark): boolean {
+  return mark === 'table';
+}
+
+function channelLabel(mark: Mark, channel: 'x' | 'y' | 'color'): string {
+  if (mark === 'table') {
+    if (channel === 'x') return 'Groups';
+    if (channel === 'y') return 'Values';
+  }
+  if (mark === 'number') {
+    if (channel === 'y') return 'Number';
+  }
+  if (channel === 'x') return 'X Axis';
+  if (channel === 'y') return 'Y Axis';
+  return 'Series';
 }
 
 function inferTypeFromColumns(
@@ -96,18 +106,6 @@ export function EncodingConfig({
     };
   }, [result]);
 
-  const handleMarkChange = (nextMark: Mark) => {
-    if (nextMark === chartSpec.mark) return;
-    const currentY = chartSpec.encoding.y;
-    const newEncoding: Encoding = {};
-
-    if (nextMark === 'number' && currentY && !Array.isArray(currentY)) {
-      newEncoding.y = currentY;
-    }
-
-    onChartSpecChange({ mark: nextMark, encoding: newEncoding });
-  };
-
   const handleXChange = (value: string) => {
     onChartSpecChange({
       ...chartSpec,
@@ -116,6 +114,40 @@ export function EncodingConfig({
         x: value ? { field: value } : undefined,
       },
     });
+  };
+
+  const handleXMultiToggle = (field: string) => {
+    if (!result) return;
+    const current = chartSpec.encoding.x;
+    const currentArray: ChannelDef[] = Array.isArray(current)
+      ? current
+      : current
+        ? [current]
+        : [];
+    const existing = currentArray.findIndex(ch => ch.field === field);
+
+    if (existing >= 0) {
+      const next = currentArray.filter((_, i) => i !== existing);
+      onChartSpecChange({
+        ...chartSpec,
+        encoding: {
+          ...chartSpec.encoding,
+          x: next.length > 0 ? next : undefined,
+        },
+      });
+    } else {
+      const next = [
+        ...currentArray,
+        { field, type: inferTypeFromColumns(field, result) },
+      ];
+      onChartSpecChange({
+        ...chartSpec,
+        encoding: {
+          ...chartSpec.encoding,
+          x: next,
+        },
+      });
+    }
   };
 
   const handleYSingleChange = (value: string) => {
@@ -175,6 +207,23 @@ export function EncodingConfig({
     });
   };
 
+  const handleStackChange = (value: string) => {
+    onChartSpecChange({
+      ...chartSpec,
+      config: {
+        ...chartSpec.config,
+        stack: value === 'none' ? undefined : (value as 'stack' | 'normalize'),
+      },
+    });
+  };
+
+  const selectedXFields = useMemo(() => {
+    const current = chartSpec.encoding.x;
+    if (Array.isArray(current)) return current.map(ch => ch.field);
+    if (current) return [current.field];
+    return [];
+  }, [chartSpec.encoding.x]);
+
   const selectedYFields = useMemo(() => {
     const current = chartSpec.encoding.y;
     if (Array.isArray(current)) return current.map(ch => ch.field);
@@ -182,7 +231,10 @@ export function EncodingConfig({
     return [];
   }, [chartSpec.encoding.y]);
 
-  const xFieldForSelect = chartSpec.encoding.x?.field ?? '';
+  const xFieldForSelect =
+    chartSpec.encoding.x && !Array.isArray(chartSpec.encoding.x)
+      ? chartSpec.encoding.x.field
+      : '';
   const yFieldForSingleSelect =
     chartSpec.encoding.y && !Array.isArray(chartSpec.encoding.y)
       ? chartSpec.encoding.y.field
@@ -195,24 +247,16 @@ export function EncodingConfig({
       ? columnOptions.numeric
       : columnOptions.all;
 
-  const yLabel =
-    chartSpec.mark === 'number' ? t('Y (Number)') : t('Y (Values)');
+  const showStackConfig = ['column', 'bar', 'area'].includes(chartSpec.mark);
+  const stackOptions: Array<readonly [string, string]> = [
+    ['none', t('None')],
+    ['stack', t('Stacked')],
+    ['normalize', t('100%')],
+  ];
+  const stackValue = chartSpec.config?.stack ?? 'none';
 
   return (
     <View style={{ gap: 12 }}>
-      <View>
-        <div
-          style={{
-            fontSize: 13,
-            color: theme.pageTextSubdued,
-            marginBottom: 8,
-          }}
-        >
-          <Trans>Visualization</Trans>
-        </div>
-        <MarkSelector value={chartSpec.mark} onChange={handleMarkChange} />
-      </View>
-
       {!result && (
         <div style={{ fontSize: 12, color: theme.pageTextSubdued }}>
           <Trans>Run the query to configure encoding channels.</Trans>
@@ -240,19 +284,33 @@ export function EncodingConfig({
         ))}
 
       {result && visibility.x && (
-        <Field label={t('X (Groups)')}>
-          <Select
-            value={xFieldForSelect}
-            options={toOptions(columnOptions.all)}
-            onChange={handleXChange}
-            defaultLabel={t('(none)')}
-          />
-          {resolved?.encoding.x?.autoAssigned && <AutoLabel />}
+        <Field label={t(channelLabel(chartSpec.mark, 'x'))}>
+          {isMultiXMark(chartSpec.mark) ? (
+            <CheckboxList
+              options={columnOptions.all.map(c => c.value)}
+              selected={selectedXFields}
+              onToggle={handleXMultiToggle}
+            />
+          ) : (
+            <View
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+            >
+              <Select
+                value={xFieldForSelect}
+                options={toOptions(columnOptions.all)}
+                onChange={handleXChange}
+                defaultLabel={t('(none)')}
+              />
+              {resolved?.encoding.x &&
+                !Array.isArray(resolved.encoding.x) &&
+                resolved.encoding.x.autoAssigned && <AutoLabel />}
+            </View>
+          )}
         </Field>
       )}
 
       {result && visibility.y && (
-        <Field label={yLabel}>
+        <Field label={t(channelLabel(chartSpec.mark, 'y'))}>
           {isMultiYMark(chartSpec.mark) ? (
             <CheckboxList
               options={yOptionsForMark.map(c => c.value)}
@@ -278,7 +336,7 @@ export function EncodingConfig({
       )}
 
       {result && visibility.color && (
-        <Field label={t('Color (Dynamic Columns)')}>
+        <Field label={t(channelLabel(chartSpec.mark, 'color'))}>
           <Select
             value={colorFieldForSelect}
             options={toOptions(columnOptions.categorical)}
@@ -288,10 +346,14 @@ export function EncodingConfig({
         </Field>
       )}
 
-      {!['table', 'number'].includes(chartSpec.mark) && (
-        <div style={{ fontSize: 12, color: theme.pageTextSubdued }}>
-          <Trans>This visualization type is coming soon.</Trans>
-        </div>
+      {result && showStackConfig && (
+        <Field label={t('Stack')}>
+          <Select
+            value={stackValue}
+            options={stackOptions}
+            onChange={handleStackChange}
+          />
+        </Field>
       )}
     </View>
   );

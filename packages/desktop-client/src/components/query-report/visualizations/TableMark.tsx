@@ -1,9 +1,6 @@
 import { useMemo } from 'react';
 
-import type { FieldType } from 'loot-core/types/chart-spec';
-
 import { QueryResultTable } from '@desktop-client/components/reports/reports/QueryResultTable';
-import { toColumnType } from '@desktop-client/queries/chart-spec';
 import type {
   QueryResult,
   QueryResultColumn,
@@ -13,98 +10,88 @@ import type { ResolvedChartSpec } from '@desktop-client/queries/resolveChannels'
 type TableMarkProps = {
   result: QueryResult;
   resolved: ResolvedChartSpec;
-  data: Record<string, unknown>[];
-  seriesKeys: string[];
   compact?: boolean;
+};
+
+type DeriveResult = {
+  columns: QueryResultColumn[];
+  groupColumnCount: number;
+  columnTitles: Record<string, string>;
+  columnFormats: Record<string, string>;
 };
 
 function deriveTableColumns(
   result: QueryResult,
   resolved: ResolvedChartSpec,
-  seriesKeys: string[],
-): QueryResultColumn[] {
+): DeriveResult {
   const encoding = resolved.encoding;
   const resultColumns = result.columns;
 
-  if (!encoding.x && !encoding.y && !encoding.color) {
-    return resultColumns;
-  }
-
-  if (encoding.color) {
-    const cols: QueryResultColumn[] = [];
-
-    if (encoding.x) {
-      const xCol = resultColumns.find(c => c.name === encoding.x!.field);
-      if (xCol) {
-        cols.push(xCol);
-      } else {
-        cols.push({
-          name: encoding.x.field,
-          type:
-            encoding.x.type === 'date'
-              ? 'date'
-              : encoding.x.type === 'number'
-                ? 'float'
-                : 'string',
-        });
-      }
-    }
-
-    const yType: QueryResultColumn['type'] =
-      encoding.y && !Array.isArray(encoding.y)
-        ? toColumnType(encoding.y.type as FieldType)
-        : 'float';
-
-    for (const key of seriesKeys) {
-      cols.push({ name: key, type: yType });
-    }
-
-    return cols;
-  }
-
-  if (encoding.x && !encoding.y) {
-    const xCol = resultColumns.find(c => c.name === encoding.x!.field);
-    if (!xCol) return resultColumns;
-    const remaining = resultColumns.filter(c => c.name !== encoding.x!.field);
-    return [xCol, ...remaining];
+  if (!encoding.x && !encoding.y) {
+    return {
+      columns: resultColumns,
+      groupColumnCount: 0,
+      columnTitles: {},
+      columnFormats: {},
+    };
   }
 
   const cols: QueryResultColumn[] = [];
   const addedNames = new Set<string>();
+  const columnTitles: Record<string, string> = {};
+  const columnFormats: Record<string, string> = {};
+
+  const collectMeta = (ch: {
+    field: string;
+    title?: string;
+    format?: string;
+  }) => {
+    if (ch.title) columnTitles[ch.field] = ch.title;
+    if (ch.format) columnFormats[ch.field] = ch.format;
+  };
 
   if (encoding.x) {
-    const xCol = resultColumns.find(c => c.name === encoding.x!.field);
-    if (xCol) {
-      cols.push(xCol);
-      addedNames.add(xCol.name);
-    }
-  }
-
-  if (encoding.y) {
-    const yChannels = Array.isArray(encoding.y) ? encoding.y : [encoding.y];
-    for (const ch of yChannels) {
+    const xChannels = Array.isArray(encoding.x) ? encoding.x : [encoding.x];
+    for (const ch of xChannels) {
+      collectMeta(ch);
       if (addedNames.has(ch.field)) continue;
-      const yCol = resultColumns.find(c => c.name === ch.field);
-      if (yCol) {
-        cols.push(yCol);
-        addedNames.add(yCol.name);
+      const col = resultColumns.find(c => c.name === ch.field);
+      if (col) {
+        cols.push(col);
+        addedNames.add(col.name);
       }
     }
   }
 
-  return cols;
+  const groupColumnCount = cols.length;
+
+  if (encoding.y) {
+    const yChannels = Array.isArray(encoding.y) ? encoding.y : [encoding.y];
+    for (const ch of yChannels) {
+      collectMeta(ch);
+      if (addedNames.has(ch.field)) continue;
+      const col = resultColumns.find(c => c.name === ch.field);
+      if (col) {
+        cols.push(col);
+        addedNames.add(col.name);
+      }
+    }
+  }
+
+  return { columns: cols, groupColumnCount, columnTitles, columnFormats };
 }
 
 function applySortToData(
   data: Record<string, unknown>[],
   resolved: ResolvedChartSpec,
 ): Record<string, unknown>[] {
-  if (!resolved.encoding.x?.sort) return data;
   const xChannel = resolved.encoding.x;
   if (!xChannel) return data;
+  const primary = Array.isArray(xChannel) ? xChannel[0] : xChannel;
+  if (!primary?.sort) return data;
 
-  const field = xChannel.field;
-  const direction = xChannel.sort;
+  const field = primary.field;
+  const direction = primary.sort;
 
   if (direction !== 'asc' && direction !== 'desc') return data;
 
@@ -127,12 +114,13 @@ function applySortToData(
   });
 }
 
-export function TableMark({ result, resolved, data, compact }: TableMarkProps) {
-  const columns = deriveTableColumns(result, resolved, []);
+export function TableMark({ result, resolved, compact }: TableMarkProps) {
+  const { columns, groupColumnCount, columnTitles, columnFormats } =
+    deriveTableColumns(result, resolved);
 
   const sortedData = useMemo(
-    () => applySortToData(data, resolved),
-    [data, resolved],
+    () => applySortToData(result.rows, resolved),
+    [result.rows, resolved],
   );
 
   const syntheticResult: QueryResult = useMemo(
@@ -140,5 +128,14 @@ export function TableMark({ result, resolved, data, compact }: TableMarkProps) {
     [columns, sortedData],
   );
 
-  return <QueryResultTable result={syntheticResult} compact={compact} />;
+  return (
+    <QueryResultTable
+      result={syntheticResult}
+      compact={compact}
+      groupColumnCount={groupColumnCount}
+      conditionalRules={resolved.config?.conditionalRules}
+      columnTitles={columnTitles}
+      columnFormats={columnFormats}
+    />
+  );
 }

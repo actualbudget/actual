@@ -3,6 +3,8 @@ import { Trans } from 'react-i18next';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { evaluateConditionalFormat } from './conditionalFormat';
+
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import type { QueryResult } from '@desktop-client/queries/processQueryResult';
 import type { ResolvedChartSpec } from '@desktop-client/queries/resolveChannels';
@@ -50,6 +52,28 @@ export function NumberMark({ result, resolved, compact }: NumberMarkProps) {
     );
   }
 
+  const columnValues = result.rows.map(r => r[yField]);
+  const conditional = evaluateConditionalFormat(
+    yField,
+    value,
+    columnValues,
+    resolved.config?.conditionalRules,
+  );
+
+  const displayValue = (() => {
+    const fmt =
+      yChannel && !Array.isArray(yChannel) ? yChannel.format : undefined;
+    if (fmt === 'percent') return `${(value * 100).toFixed(1)}%`;
+    if (fmt === 'number') return format(value, 'number');
+    if (fmt === 'financial-no-decimals') {
+      return format(value, 'financial-no-decimals');
+    }
+    if (fmt === 'financial-with-sign') {
+      return format(value, 'financial-with-sign');
+    }
+    return format(value, 'financial');
+  })();
+
   return (
     <View
       style={{
@@ -59,10 +83,13 @@ export function NumberMark({ result, resolved, compact }: NumberMarkProps) {
         alignItems: 'center',
         fontSize: compact ? 24 : 28,
         fontWeight: 600,
-        color: theme.pageText,
+        color: conditional?.textColor ?? theme.pageText,
+        backgroundColor: conditional?.backgroundColor,
+        ...(conditional?.bold ? { fontWeight: 700 } : {}),
+        ...(conditional?.italic ? { fontStyle: 'italic' } : {}),
       }}
     >
-      {format(value, 'financial')}
+      {displayValue}
     </View>
   );
 }

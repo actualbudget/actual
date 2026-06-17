@@ -38,7 +38,7 @@ const OPTIONS: Option[] = [
     mark: 'column',
     icon: <SvgChartBar width={15} height={15} />,
     label: 'Column',
-    enabled: false,
+    enabled: true,
   },
   {
     mark: 'bar',
@@ -50,7 +50,7 @@ const OPTIONS: Option[] = [
       />
     ),
     label: 'Bar',
-    enabled: false,
+    enabled: true,
   },
   {
     mark: 'line',

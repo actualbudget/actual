@@ -16,7 +16,8 @@ export function pivotData(
     return { data: rows, seriesKeys: [] };
   }
 
-  const xField = xChannel?.field;
+  const xField =
+    xChannel && !Array.isArray(xChannel) ? xChannel.field : undefined;
   const yField = yChannel?.field;
   const colorField = colorChannel.field;
 
@@ -82,7 +83,8 @@ export function pivotData(
       }
     }
 
-    const xSort = xChannel?.sort;
+    const xSort =
+      xChannel && !Array.isArray(xChannel) ? xChannel.sort : undefined;
     if (xSort) {
       sortData(data, xField, xSort);
     }

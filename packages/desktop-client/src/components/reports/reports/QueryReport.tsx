@@ -17,7 +17,9 @@ import {
   Page,
   PageHeader,
 } from '@desktop-client/components/Page';
+import { ChartConfigPanel } from '@desktop-client/components/query-report/ChartConfigPanel';
 import { EncodingConfig } from '@desktop-client/components/query-report/EncodingConfig';
+import { MarkSelector } from '@desktop-client/components/query-report/MarkSelector';
 import { ChartRenderer } from '@desktop-client/components/query-report/visualizations/ChartRenderer';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
@@ -36,6 +38,8 @@ const AqlEditor = lazy(() =>
 
 const DEFAULT_QUERY_SOURCE = `q('transactions')\n  .select('*')\n  .limit(100)`;
 const DEFAULT_CHART_SPEC: ChartSpec = { mark: 'table', encoding: {} };
+
+type ConfigTab = 'encoding' | 'customize';
 
 export function QueryReport() {
   const params = useParams();
@@ -68,6 +72,7 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
   const [chartSpec, setChartSpec] = useState<ChartSpec>(
     widget?.meta?.chartSpec ?? DEFAULT_CHART_SPEC,
   );
+  const [activeTab, setActiveTab] = useState<ConfigTab>('encoding');
 
   const title = widget?.meta?.name || t('Query Report');
 
@@ -159,6 +164,11 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
     dispatch,
     t,
   ]);
+
+  const handleMarkChange = (nextMark: ChartSpec['mark']) => {
+    if (nextMark === chartSpec.mark) return;
+    setChartSpec({ mark: nextMark, encoding: {} });
+  };
 
   if (!isFeatureFlagEnabled) {
     return (
@@ -385,13 +395,58 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
               padding: 20,
               borderTop: `1px solid ${theme.tableBorder}`,
               backgroundColor: theme.pageBackground,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12,
+              maxHeight: isNarrowWidth ? 600 : '60vh',
+              overflow: 'auto',
             }}
           >
-            <EncodingConfig
-              result={result ?? null}
-              chartSpec={chartSpec}
-              onChartSpecChange={setChartSpec}
-            />
+            <div
+              style={{
+                fontSize: 13,
+                color: theme.pageTextSubdued,
+              }}
+            >
+              <Trans>Visualization</Trans>
+            </div>
+            <MarkSelector value={chartSpec.mark} onChange={handleMarkChange} />
+            <View
+              style={{
+                flexDirection: 'row',
+                gap: 8,
+                marginTop: 4,
+              }}
+            >
+              <Button
+                variant={activeTab === 'encoding' ? 'primary' : 'normal'}
+                onPress={() => setActiveTab('encoding')}
+                style={{ flex: 1 }}
+              >
+                <Trans>Encoding</Trans>
+              </Button>
+              <Button
+                variant={activeTab === 'customize' ? 'primary' : 'normal'}
+                onPress={() => setActiveTab('customize')}
+                style={{ flex: 1 }}
+              >
+                <Trans>Customize</Trans>
+              </Button>
+            </View>
+            {activeTab === 'encoding' && (
+              <EncodingConfig
+                result={result ?? null}
+                chartSpec={chartSpec}
+                onChartSpecChange={setChartSpec}
+              />
+            )}
+            {activeTab === 'customize' && (
+              <ChartConfigPanel
+                result={result ?? null}
+                chartSpec={chartSpec}
+                onChartSpecChange={setChartSpec}
+              />
+            )}
           </View>
         </View>
       </View>

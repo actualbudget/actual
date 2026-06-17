@@ -6,6 +6,7 @@ import { View } from '@actual-app/components/view';
 
 import type { ChartSpec } from 'loot-core/types/chart-spec';
 
+import { ColumnBarMark } from './ColumnBarMark';
 import { NumberMark } from './NumberMark';
 import { TableMark } from './TableMark';
 
@@ -27,7 +28,10 @@ export function ChartRenderer({
   const resolved = useMemo(() => resolveChannels(spec, result), [spec, result]);
 
   const pivoted = useMemo(
-    () => (needsPivot(resolved) ? pivotData(result.rows, resolved) : null),
+    () =>
+      resolved.mark !== 'table' && needsPivot(resolved)
+        ? pivotData(result.rows, resolved)
+        : null,
     [result.rows, resolved],
   );
 
@@ -57,17 +61,22 @@ export function ChartRenderer({
   switch (resolved.mark) {
     case 'table':
       return (
-        <TableMark
+        <TableMark result={result} resolved={resolved} compact={compact} />
+      );
+    case 'number':
+      return (
+        <NumberMark result={result} resolved={resolved} compact={compact} />
+      );
+    case 'column':
+    case 'bar':
+      return (
+        <ColumnBarMark
           result={result}
           resolved={resolved}
           data={data}
           seriesKeys={seriesKeys}
           compact={compact}
         />
-      );
-    case 'number':
-      return (
-        <NumberMark result={result} resolved={resolved} compact={compact} />
       );
     default:
       return (

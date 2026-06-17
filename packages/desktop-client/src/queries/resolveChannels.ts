@@ -15,7 +15,7 @@ export type ResolvedChannel = ChannelDef & {
 };
 
 export type ResolvedEncoding = {
-  x?: ResolvedChannel;
+  x?: ResolvedChannel | ResolvedChannel[];
   y?: ResolvedChannel | ResolvedChannel[];
   color?: ResolvedChannel;
   size?: ResolvedChannel;
@@ -77,13 +77,19 @@ function nonIdDimensions(roles: ColumnRoles): string[] {
 
 function resolveEmpty(encoding: Encoding): ResolvedEncoding {
   return {
-    x: encoding.x
-      ? {
-          ...encoding.x,
-          type: encoding.x.type ?? 'category',
+    x: Array.isArray(encoding.x)
+      ? encoding.x.map(ch => ({
+          ...ch,
+          type: ch.type ?? 'category',
           autoAssigned: false,
-        }
-      : undefined,
+        }))
+      : encoding.x
+        ? {
+            ...encoding.x,
+            type: encoding.x.type ?? 'category',
+            autoAssigned: false,
+          }
+        : undefined,
     y: Array.isArray(encoding.y)
       ? encoding.y.map(ch => ({
           ...ch,
@@ -175,7 +181,7 @@ export function resolveChannels(
   }
 
   const columnNames = new Set(columns.map(c => c.name));
-  for (const channelName of ['x', 'color', 'size', 'text'] as const) {
+  for (const channelName of ['color', 'size', 'text'] as const) {
     const ch = encoding[channelName];
     if (ch && !columnNames.has(ch.field)) {
       errors.push(
@@ -183,6 +189,18 @@ export function resolveChannels(
           .map(c => c.name)
           .join(', ')}.`,
       );
+    }
+  }
+  if (encoding.x) {
+    const xChannels = Array.isArray(encoding.x) ? encoding.x : [encoding.x];
+    for (const ch of xChannels) {
+      if (!columnNames.has(ch.field)) {
+        errors.push(
+          `Channel "x" references field "${ch.field}" which does not exist in the query result. Available fields: ${columns
+            .map(c => c.name)
+            .join(', ')}.`,
+        );
+      }
     }
   }
   if (encoding.y) {
@@ -219,7 +237,12 @@ export function resolveChannels(
     };
   }
 
-  let resolvedX = resolveChannel(encoding.x);
+  let resolvedX: ResolvedChannel | ResolvedChannel[] | undefined;
+  if (Array.isArray(encoding.x)) {
+    resolvedX = encoding.x.map(ch => resolveChannel(ch));
+  } else if (encoding.x) {
+    resolvedX = resolveChannel(encoding.x as ChannelDef);
+  }
   let resolvedY: ResolvedChannel | ResolvedChannel[] | undefined;
   const resolvedColor = resolveChannel(encoding.color);
   let resolvedSize = resolveChannel(encoding.size);
@@ -234,28 +257,16 @@ export function resolveChannels(
 
   switch (spec.mark) {
     case 'table': {
-      if (!resolvedX && (resolvedY || resolvedColor)) {
-        const candidate = roles.timeColumns[0] ?? nonIdDimensions(roles)[0];
-        if (candidate) {
-          resolvedX = {
-            field: candidate,
-            type: inferFieldType(candidate, columns),
+      const xIsEmpty =
+        !resolvedX || (Array.isArray(resolvedX) && resolvedX.length === 0);
+      if (xIsEmpty && resolvedY) {
+        const candidates = nonIdDimensions(roles);
+        if (candidates.length > 0) {
+          resolvedX = candidates.map(field => ({
+            field,
+            type: inferFieldType(field, columns),
             autoAssigned: true,
-          };
-        }
-      }
-      if (resolvedColor && !resolvedY) {
-        const candidate = roles.measureColumns[0];
-        if (candidate) {
-          resolvedY = {
-            field: candidate,
-            type: 'number',
-            autoAssigned: true,
-          };
-        } else {
-          warnings.push(
-            'Color channel requires a numeric Y channel for cell values, but no numeric columns are available.',
-          );
+          }));
         }
       }
       break;
@@ -291,7 +302,14 @@ export function resolveChannels(
 
     case 'column':
     case 'bar': {
-      if (!resolvedX) {
+      if (Array.isArray(resolvedX)) {
+        if (resolvedX.length > 1) {
+          warnings.push(
+            'Multiple X fields are not supported on column/bar marks. Only the first field will be used.',
+          );
+        }
+        resolvedX = resolvedX[0];
+      } else if (!resolvedX) {
         const candidate = roles.timeColumns[0] ?? nonIdDimensions(roles)[0];
         if (candidate) {
           resolvedX = {
@@ -315,7 +333,14 @@ export function resolveChannels(
 
     case 'line':
     case 'area': {
-      if (!resolvedX) {
+      if (Array.isArray(resolvedX)) {
+        if (resolvedX.length > 1) {
+          warnings.push(
+            'Multiple X fields are not supported on line/area marks. Only the first field will be used.',
+          );
+        }
+        resolvedX = resolvedX[0];
+      } else if (!resolvedX) {
         const candidate = roles.timeColumns[0] ?? roles.dimensionColumns[0];
         if (candidate) {
           resolvedX = {
@@ -338,7 +363,14 @@ export function resolveChannels(
     }
 
     case 'point': {
-      if (!resolvedX) {
+      if (Array.isArray(resolvedX)) {
+        if (resolvedX.length > 1) {
+          warnings.push(
+            'Multiple X fields are not supported on point marks. Only the first field will be used.',
+          );
+        }
+        resolvedX = resolvedX[0];
+      } else if (!resolvedX) {
         const candidate = nonIdDimensions(roles)[0];
         if (candidate) {
           resolvedX = {

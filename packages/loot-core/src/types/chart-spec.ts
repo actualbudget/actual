@@ -20,7 +20,7 @@ export type ChannelDef = {
 };
 
 export type Encoding = {
-  x?: ChannelDef;
+  x?: ChannelDef | ChannelDef[];
   y?: ChannelDef | ChannelDef[];
   color?: ChannelDef;
   size?: ChannelDef;
@@ -28,8 +28,68 @@ export type Encoding = {
   tooltip?: ChannelDef[];
 };
 
+export type ConditionOperator =
+  | 'equals'
+  | 'not_equals'
+  | 'greater_than'
+  | 'less_than'
+  | 'greater_than_or_equal'
+  | 'less_than_or_equal'
+  | 'between'
+  | 'is_null'
+  | 'is_not_null';
+
+export type ConditionalRuleCondition = {
+  operator: ConditionOperator;
+  value?: string | number;
+  valueMax?: string | number;
+};
+
+export type ConditionalRuleStyling = {
+  textColor?: string;
+  backgroundColor?: string;
+  bold?: boolean;
+  italic?: boolean;
+};
+
+export type ConditionalSingleRule = {
+  type: 'single_color';
+  field: string;
+  conditions: ConditionalRuleCondition[];
+  styling: ConditionalRuleStyling;
+  formatEntireRow?: boolean;
+};
+
+export type ConditionalColorScaleRule = {
+  type: 'color_scale';
+  field: string;
+  minColor: string;
+  maxColor: string;
+  invert?: boolean;
+};
+
+export type ConditionalRule = ConditionalSingleRule | ConditionalColorScaleRule;
+
+export type ValueAxisConfig = {
+  min?: number;
+  max?: number;
+  logarithmic?: boolean;
+  labelOverride?: string;
+};
+
+export type CategoryAxisConfig = {
+  labelOverride?: string;
+};
+
+export type AxesConfig = {
+  valueAxis?: ValueAxisConfig;
+  categoryAxis?: CategoryAxisConfig;
+};
+
 export type ChartConfig = {
   stack?: 'stack' | 'normalize' | 'none';
+  conditionalRules?: ConditionalRule[];
+  axes?: AxesConfig;
 };
 
 export type ChartSpec = {

@@ -5,13 +5,20 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import * as monthUtils from 'loot-core/shared/months';
+import type { ConditionalRule } from 'loot-core/types/chart-spec';
 
+import { evaluateConditionalFormat } from '@desktop-client/components/query-report/visualizations/conditionalFormat';
+import type { ConditionalStyling } from '@desktop-client/components/query-report/visualizations/conditionalFormat';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import type { QueryResult } from '@desktop-client/queries/processQueryResult';
 
 type QueryResultTableProps = {
   result: QueryResult;
   compact?: boolean;
+  groupColumnCount?: number;
+  conditionalRules?: ConditionalRule[];
+  columnTitles?: Record<string, string>;
+  columnFormats?: Record<string, string>;
 };
 
 type SortDirection = 'asc' | 'desc' | null;
@@ -24,6 +31,10 @@ type SortState = {
 export function QueryResultTable({
   result,
   compact = false,
+  groupColumnCount = 0,
+  conditionalRules,
+  columnTitles,
+  columnFormats,
 }: QueryResultTableProps) {
   const format = useFormat();
   const [sortState, setSortState] = useState<SortState>({
@@ -73,8 +84,28 @@ export function QueryResultTable({
     });
   };
 
-  const formatCellValue = (value: unknown, type: string): string => {
+  const formatCellValue = (
+    value: unknown,
+    type: string,
+    formatOverride?: string,
+  ): string => {
     if (value === null || value === undefined) return '—';
+
+    if (formatOverride) {
+      if (typeof value === 'number') {
+        if (formatOverride === 'percent') {
+          return `${(value * 100).toFixed(1)}%`;
+        }
+        if (
+          formatOverride === 'financial' ||
+          formatOverride === 'financial-no-decimals' ||
+          formatOverride === 'financial-with-sign' ||
+          formatOverride === 'number'
+        ) {
+          return format(value, formatOverride);
+        }
+      }
+    }
 
     switch (type) {
       case 'date':
@@ -103,6 +134,14 @@ export function QueryResultTable({
     }
   };
 
+  const columnValuesByName = useMemo(() => {
+    const map: Record<string, unknown[]> = {};
+    for (const col of result.columns) {
+      map[col.name] = result.rows.map(r => r[col.name]);
+    }
+    return map;
+  }, [result]);
+
   if (result.columns.length === 0) {
     return (
       <View style={{ padding: 20, color: theme.pageTextSubdued }}>
@@ -122,56 +161,120 @@ export function QueryResultTable({
       >
         <thead>
           <tr>
-            {result.columns.map(col => (
-              <th
-                key={col.name}
-                onClick={() => handleSort(col.name)}
-                style={{
-                  padding: '8px 12px',
-                  textAlign: 'left',
-                  borderBottom: `2px solid ${theme.tableBorder}`,
-                  backgroundColor: theme.tableHeaderBackground,
-                  color: theme.tableHeaderText,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  userSelect: 'none',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {col.name}
-                {sortState.column === col.name && sortState.direction && (
-                  <span style={{ marginLeft: 4 }}>
-                    {sortState.direction === 'asc' ? '↑' : '↓'}
-                  </span>
-                )}
-              </th>
-            ))}
+            {result.columns.map((col, colIdx) => {
+              const isGroupSeparator =
+                groupColumnCount > 0 && colIdx === groupColumnCount - 1;
+              return (
+                <th
+                  key={col.name}
+                  onClick={() => handleSort(col.name)}
+                  style={{
+                    padding: '8px 12px',
+                    textAlign: 'left',
+                    borderBottom: `2px solid ${theme.tableBorder}`,
+                    backgroundColor: theme.tableHeaderBackground,
+                    color: theme.tableHeaderText,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                    whiteSpace: 'nowrap',
+                    ...(isGroupSeparator
+                      ? { borderRight: `2px solid ${theme.tableBorder}` }
+                      : {}),
+                  }}
+                >
+                  {columnTitles?.[col.name] ?? col.name}
+                  {sortState.column === col.name && sortState.direction && (
+                    <span style={{ marginLeft: 4 }}>
+                      {sortState.direction === 'asc' ? '↑' : '↓'}
+                    </span>
+                  )}
+                </th>
+              );
+            })}
           </tr>
         </thead>
         <tbody>
-          {displayRows.map((row, idx) => (
-            <tr
-              key={idx}
-              style={{
-                backgroundColor:
-                  idx % 2 === 0 ? theme.tableBackground : theme.pageBackground,
-              }}
-            >
-              {result.columns.map(col => (
-                <td
-                  key={col.name}
-                  style={{
-                    padding: '6px 12px',
-                    borderBottom: `1px solid ${theme.tableBorder}`,
-                    color: theme.tableText,
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {formatCellValue(row[col.name], col.type)}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {displayRows.map((row, idx) => {
+            const rowFormatting: ConditionalStyling[] = [];
+            for (const col of result.columns) {
+              const cellValue = row[col.name];
+              const styling = evaluateConditionalFormat(
+                col.name,
+                cellValue,
+                columnValuesByName[col.name] ?? [],
+                conditionalRules,
+              );
+              if (styling?.formatEntireRow) {
+                rowFormatting.push(styling);
+              }
+            }
+            const rowMerged: ConditionalStyling =
+              rowFormatting.reduce<ConditionalStyling | null>(
+                (acc, next) => (acc ? { ...acc, ...next } : next),
+                null,
+              );
+            return (
+              <tr
+                key={idx}
+                style={{
+                  backgroundColor:
+                    idx % 2 === 0
+                      ? theme.tableBackground
+                      : theme.pageBackground,
+                  ...(rowMerged?.backgroundColor
+                    ? { backgroundColor: rowMerged.backgroundColor }
+                    : {}),
+                  ...(rowMerged?.textColor
+                    ? { color: rowMerged.textColor }
+                    : {}),
+                  ...(rowMerged?.bold ? { fontWeight: 600 } : {}),
+                  ...(rowMerged?.italic ? { fontStyle: 'italic' } : {}),
+                }}
+              >
+                {result.columns.map((col, colIdx) => {
+                  const isGroupSeparator =
+                    groupColumnCount > 0 && colIdx === groupColumnCount - 1;
+                  const cellValue = row[col.name];
+                  const cellStyling = evaluateConditionalFormat(
+                    col.name,
+                    cellValue,
+                    columnValuesByName[col.name] ?? [],
+                    conditionalRules,
+                  );
+                  return (
+                    <td
+                      key={col.name}
+                      style={{
+                        padding: '6px 12px',
+                        borderBottom: `1px solid ${theme.tableBorder}`,
+                        color:
+                          cellStyling?.textColor ??
+                          rowMerged?.textColor ??
+                          theme.tableText,
+                        whiteSpace: 'nowrap',
+                        ...(cellStyling?.bold || rowMerged?.bold
+                          ? { fontWeight: 600 }
+                          : {}),
+                        ...(cellStyling?.italic || rowMerged?.italic
+                          ? { fontStyle: 'italic' }
+                          : {}),
+                        ...(isGroupSeparator
+                          ? { borderRight: `2px solid ${theme.tableBorder}` }
+                          : {}),
+                      }}
+                    >
+                      {formatCellValue(
+                        cellValue,
+                        col.type,
+                        columnFormats?.[col.name],
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
       {hasMoreRows && (
