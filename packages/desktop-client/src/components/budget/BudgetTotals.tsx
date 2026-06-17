@@ -13,15 +13,15 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { FocusedViewDefinition } from '@actual-app/core/types/prefs';
 
 import { useGlobalPref } from '#hooks/useGlobalPref';
 
+import { BudgetFilterButton } from './BudgetFilterButton';
 import { RenderMonths } from './RenderMonths';
 import { getScrollbarWidth } from './util';
 
 import { useBudgetComponents } from '.';
-import { BudgetFilterButton } from './BudgetFilterButton';
-import type { FocusedViewDefinition } from '@actual-app/core/types/prefs';
 
 type BudgetTotalsProps = {
   toggleHiddenCategories: () => void;

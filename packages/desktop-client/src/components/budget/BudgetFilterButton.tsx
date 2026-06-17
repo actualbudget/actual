@@ -1,9 +1,14 @@
 import React, { useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { SvgAdd, SvgFilter, SvgFilterOutline } from '@actual-app/components/icons/v1';
-import { Menu, type MenuItem } from '@actual-app/components/menu';
+import {
+  SvgAdd,
+  SvgFilter,
+  SvgFilterOutline,
+} from '@actual-app/components/icons/v1';
+import { Menu } from '@actual-app/components/menu';
+import type { MenuItem } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -28,7 +33,7 @@ type ViewListItemProps = {
 };
 
 function ViewListItem({
-  viewId,
+  viewId: _viewId,
   label,
   isActive,
   isCustom,
@@ -46,10 +51,10 @@ function ViewListItem({
 
   const hasContextMenu = Boolean(
     onEdit ||
-      onDelete ||
-      onReorderViews ||
-      onToggleVisibility ||
-      onToggleShowHiddenViews,
+    onDelete ||
+    onReorderViews ||
+    onToggleVisibility ||
+    onToggleShowHiddenViews,
   );
 
   const { position, menuOpen, setMenuOpen, handleContextMenu, resetPosition } =
@@ -77,7 +82,9 @@ function ViewListItem({
           padding: '8px 12px',
           justifyContent: 'flex-start',
           borderRadius: 4,
-          backgroundColor: isActive ? theme.buttonPrimaryBackground : 'transparent',
+          backgroundColor: isActive
+            ? theme.buttonPrimaryBackground
+            : 'transparent',
           color: isActive ? theme.buttonPrimaryText : theme.buttonNormalText,
           fontWeight: isActive ? 600 : 400,
           fontSize: 14,
@@ -133,7 +140,9 @@ function ViewListItem({
                 },
                 onToggleShowHiddenViews && {
                   name: 'toggle-show-hidden',
-                  text: showHiddenViews ? t('Hide hidden views') : t('Show hidden views'),
+                  text: showHiddenViews
+                    ? t('Hide hidden views')
+                    : t('Show hidden views'),
                 },
                 onReorderViews && { name: 'reorder', text: t('Reorder views') },
                 isCustom && Menu.line,
@@ -214,15 +223,17 @@ export function BudgetFilterButton({
         variant="bare"
         onPress={() => setIsOpen(!isOpen)}
         aria-label={t('Filter views')}
-        style={{ padding: 2, marginLeft: 5, display: 'flex', alignItems: 'center' }}
+        style={{
+          padding: 2,
+          marginLeft: 5,
+          marginTop: 1,
+          display: 'flex',
+          alignItems: 'center',
+        }}
         className={!isFilterActive && !isOpen ? 'hover-visible' : undefined}
       >
         {isFilterActive ? (
-          <SvgFilter
-            width={14}
-            height={14}
-            style={{ color: 'currentColor' }}
-          />
+          <SvgFilter width={14} height={14} style={{ color: 'currentColor' }} />
         ) : (
           <SvgFilterOutline
             width={14}
@@ -293,7 +304,7 @@ export function BudgetFilterButton({
                 viewId={viewId}
                 label={customView.name}
                 isActive={activeViewId === viewId}
-                isCustom={true}
+                isCustom
                 isHidden={isHidden}
                 showHiddenViews={showHiddenViews}
                 onSelect={() => {
@@ -329,7 +340,7 @@ export function BudgetFilterButton({
           }}
         >
           <SvgAdd style={{ width: 14, height: 14, marginRight: 8 }} />
-          {t('Add view')}
+          <Trans>Add view</Trans>
         </Button>
       </Popover>
     </>

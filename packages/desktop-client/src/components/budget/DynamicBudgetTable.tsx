@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import type { ComponentProps } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -55,11 +55,6 @@ const DynamicBudgetTable = ({
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
-  const [firstMonthOffset, setFirstMonthOffset] = useState(0);
-  const [monthPickerLayout, setMonthPickerLayout] = useState<{
-    calendarOffset: number;
-    width: number;
-  } | null>(null);
 
   const numPossible = getNumPossibleMonths(
     width,
@@ -159,13 +154,9 @@ const DynamicBudgetTable = ({
             numMonths={numMonths}
             monthBounds={monthBounds}
             onMonthSelect={_onMonthSelect}
-            onFirstMonthXOffset={setFirstMonthOffset}
-            onMonthPickerLayout={setMonthPickerLayout}
           />
           <BudgetTable
             type={type}
-            firstMonthOffset={firstMonthOffset}
-            monthPickerLayout={monthPickerLayout}
             prewarmStartMonth={prewarmStartMonth}
             startMonth={startMonth}
             numMonths={numMonths}

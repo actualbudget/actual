@@ -14,22 +14,10 @@ type BudgetPageHeaderProps = {
   onMonthSelect: (month: string) => void;
   numMonths: number;
   monthBounds: ComponentProps<typeof MonthPicker>['monthBounds'];
-  onFirstMonthXOffset?: (offset: number) => void;
-  onMonthPickerLayout?: (layout: {
-    calendarOffset: number;
-    width: number;
-  }) => void;
 };
 
 export const BudgetPageHeader = memo<BudgetPageHeaderProps>(
-  ({
-    startMonth,
-    onMonthSelect,
-    numMonths,
-    monthBounds,
-    onFirstMonthXOffset,
-    onMonthPickerLayout,
-  }) => {
+  ({ startMonth, onMonthSelect, numMonths, monthBounds }) => {
     const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
     const categoryExpandedState = categoryExpandedStatePref ?? 0;
     const offsetMultipleMonths = numMonths === 1 ? 4 : 0;
@@ -53,8 +41,6 @@ export const BudgetPageHeader = memo<BudgetPageHeaderProps>(
             monthBounds={monthBounds}
             style={{ paddingTop: 5 }}
             onSelect={month => onMonthSelect(month)}
-            onFirstMonthXOffset={onFirstMonthXOffset}
-            onMonthPickerLayout={onMonthPickerLayout}
           />
         </View>
       </View>

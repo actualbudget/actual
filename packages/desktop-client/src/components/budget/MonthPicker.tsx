@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -14,7 +14,6 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 
 import { Link } from '#components/common/Link';
-import { useFocusedViews } from '#hooks/useFocusedViews';
 import { useLocale } from '#hooks/useLocale';
 import { useResizeObserver } from '#hooks/useResizeObserver';
 
@@ -26,13 +25,6 @@ type MonthPickerProps = {
   monthBounds: MonthBounds;
   style: CSSProperties;
   onSelect: (month: string) => void;
-  /** Called with the x-offset (in px) from the MonthPicker root's left edge to the first month label. */
-  onFirstMonthXOffset?: (offset: number) => void;
-  /** Called with the layout measurements for the filter views bar (from calendar to collapse icon). */
-  onMonthPickerLayout?: (layout: {
-    calendarOffset: number;
-    width: number;
-  }) => void;
 };
 
 export const MonthPicker = ({
@@ -41,90 +33,11 @@ export const MonthPicker = ({
   monthBounds,
   style,
   onSelect,
-  onFirstMonthXOffset,
-  onMonthPickerLayout,
 }: MonthPickerProps) => {
   const locale = useLocale();
   const { t } = useTranslation();
   const [hoverId, setHoverId] = useState(null);
   const [targetMonthCount, setTargetMonthCount] = useState(12);
-
-
-  // Measure the real pixel offset from the MonthPicker root to the first month
-  // label and report it to the parent so the views bar can align precisely.
-  const pickerRootEl = useRef<Element | null>(null);
-  const firstMonthEl = useRef<Element | null>(null);
-  const containerEl = useRef<Element | null>(null);
-  const calendarIconEl = useRef<Element | null>(null);
-  const collapseIconEl = useRef<Element | null>(null);
-
-  // Use a ref so the layout effect closure is always fresh without being a dep.
-  const onFirstMonthXOffsetRef = useRef(onFirstMonthXOffset);
-  onFirstMonthXOffsetRef.current = onFirstMonthXOffset;
-
-  const onMonthPickerLayoutRef = useRef(onMonthPickerLayout);
-  onMonthPickerLayoutRef.current = onMonthPickerLayout;
-  const lastFirstMonthXOffset = useRef<number | null>(null);
-  const lastMonthPickerLayout = useRef<{
-    calendarOffset: number;
-    width: number;
-  } | null>(null);
-
-  const pickerRootRef = useCallback((el: Element | null) => {
-    pickerRootEl.current = el;
-  }, []);
-
-  const firstMonthRefCallback = useCallback((el: Element | null) => {
-    firstMonthEl.current = el;
-  }, []);
-
-  const calendarIconRefCallback = useCallback((el: Element | null) => {
-    calendarIconEl.current = el;
-  }, []);
-
-  const collapseIconRefCallback = useCallback((el: Element | null) => {
-    collapseIconEl.current = el;
-  }, []);
-
-  // Fire after every render (no deps) so any resize/reflow that triggers a
-  // React re-render also triggers a fresh measurement.
-  useLayoutEffect(() => {
-    if (pickerRootEl.current && firstMonthEl.current) {
-      const rootLeft = pickerRootEl.current.getBoundingClientRect().left;
-      const firstLeft = firstMonthEl.current.getBoundingClientRect().left;
-      const offset = firstLeft - rootLeft;
-
-      if (lastFirstMonthXOffset.current !== offset) {
-        lastFirstMonthXOffset.current = offset;
-        onFirstMonthXOffsetRef.current?.(offset);
-      }
-    }
-
-    if (
-      onMonthPickerLayoutRef.current &&
-      containerEl.current &&
-      calendarIconEl.current &&
-      collapseIconEl.current
-    ) {
-      const containerRect = containerEl.current.getBoundingClientRect();
-      const calendarRect = calendarIconEl.current.getBoundingClientRect();
-      const collapseRect = collapseIconEl.current.getBoundingClientRect();
-      const layout = {
-        calendarOffset: calendarRect.left - containerRect.left,
-        width: collapseRect.right - containerRect.left,
-      };
-      const lastLayout = lastMonthPickerLayout.current;
-
-      if (
-        !lastLayout ||
-        lastLayout.calendarOffset !== layout.calendarOffset ||
-        lastLayout.width !== layout.width
-      ) {
-        lastMonthPickerLayout.current = layout;
-        onMonthPickerLayoutRef.current(layout);
-      }
-    }
-  });
 
   const currentMonth = monthUtils.currentMonth();
   const firstSelectedMonth = startMonth;
@@ -161,7 +74,6 @@ export const MonthPicker = ({
 
   return (
     <View
-      innerRef={pickerRootRef}
       style={{
         flexDirection: 'row',
         alignItems: 'center',
@@ -170,10 +82,7 @@ export const MonthPicker = ({
       }}
     >
       <View
-        innerRef={el => {
-          containerRef(el);
-          containerEl.current = el;
-        }}
+        innerRef={containerRef}
         style={{
           flexDirection: 'row',
           flex: 1,
@@ -181,7 +90,7 @@ export const MonthPicker = ({
           justifyContent: 'center',
         }}
       >
-        <View innerRef={calendarIconRefCallback}>
+        <View>
           <Link
             variant="button"
             buttonVariant="bare"
@@ -244,9 +153,6 @@ export const MonthPicker = ({
           return (
             <View
               key={month}
-              innerRef={el => {
-                if (idx === 0) firstMonthRefCallback(el);
-              }}
               data-testid={selected ? 'selected-budget-month' : undefined}
               data-month={selected ? month : undefined}
               style={{

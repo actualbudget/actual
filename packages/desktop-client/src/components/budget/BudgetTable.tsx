@@ -27,7 +27,6 @@ import { BudgetTotals } from './BudgetTotals';
 import { FilteredCategoriesContext } from './FilteredCategoriesContext';
 import { FocusedViewBanner } from './FocusedViewBanner';
 import { FocusedViewEditor } from './FocusedViewEditor';
-
 import { getValidMonthBounds, MonthsProvider } from './MonthsContext';
 import type { MonthBounds } from './MonthsContext';
 import {
@@ -39,9 +38,6 @@ import {
 
 type BudgetTableProps = {
   type: string;
-  /** Measured x-offset from MonthPicker root to the first month label, in px. */
-  firstMonthOffset?: number;
-  monthPickerLayout?: { calendarOffset: number; width: number } | null;
   prewarmStartMonth: string;
   startMonth: string;
   numMonths: number;
@@ -74,8 +70,6 @@ export function BudgetTable(props: BudgetTableProps) {
   const dispatch = useDispatch();
   const {
     type,
-    firstMonthOffset = 0,
-    monthPickerLayout,
     prewarmStartMonth,
     startMonth,
     numMonths,
@@ -128,24 +122,6 @@ export function BudgetTable(props: BudgetTableProps) {
   );
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
-  const offsetMultipleMonths = numMonths === 1 ? 4 : 0;
-  // firstMonthOffset is the measured real distance from the MonthPicker root's
-  // left edge to the first month label. Combined with the category column width
-  // (which matches the BudgetPageHeader's own marginLeft), this gives the exact
-  // padding-left needed to align the tabs with the first month.
-  const monthHeaderOffset =
-    200 +
-    100 * categoryExpandedState +
-    5 -
-    offsetMultipleMonths +
-    firstMonthOffset;
-
-  const monthPickerContainerLeft =
-    200 + 100 * categoryExpandedState + 5 - offsetMultipleMonths;
-
-  const viewsBarStartOffset = monthPickerLayout
-    ? monthPickerContainerLeft + monthPickerLayout.calendarOffset
-    : monthHeaderOffset;
 
   const [editing, setEditing] = useState<{ id: string; cell: string } | null>(
     null,
@@ -306,7 +282,6 @@ export function BudgetTable(props: BudgetTableProps) {
         }),
       }}
     >
-
       {editorState.isOpen && (
         <FocusedViewEditor
           viewId={editorState.viewId}
