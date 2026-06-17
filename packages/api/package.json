@@ -67,7 +67,7 @@
     "rollup-plugin-visualizer": "^7.0.1",
     "typescript-strict-plugin": "^2.4.4",
     "vite": "^8.0.16",
-    "vite-plugin-node-polyfills": "^0.27.0",
+    "vite-plugin-node-polyfills": "^0.28.0",
     "vite-plugin-peggy-loader": "^2.0.1",
     "vitest": "^4.1.8"
   },
