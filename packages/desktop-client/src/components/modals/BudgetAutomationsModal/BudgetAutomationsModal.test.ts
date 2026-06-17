@@ -100,6 +100,31 @@ describe('migrateTemplatesToAutomations', () => {
     });
   });
 
+  it('expands `#template 0 up to N` into limit + fixed-zero (not refill)', () => {
+    const simpleTemplate = {
+      type: 'simple',
+      directive: 'template',
+      priority: 4,
+      monthly: 0,
+      limit: {
+        amount: 1000,
+        hold: false,
+        period: 'monthly',
+      },
+    } satisfies Template;
+
+    const result = migrateTemplatesToAutomations([simpleTemplate]);
+
+    expect(result).toHaveLength(2);
+    expect(result.map(entry => entry.displayType)).toEqual(['limit', 'fixed']);
+    expect(result[1].template).toMatchObject({
+      type: 'periodic',
+      amount: 0,
+      directive: 'template',
+      priority: 4,
+    });
+  });
+
   it('expands a simple template with both limit and monthly into limit + periodic (no implicit refill)', () => {
     // `#template 20 up to 200 per week` budgets 20/month and caps at the
     // limit — the engine's runSimple returns just the monthly value, so

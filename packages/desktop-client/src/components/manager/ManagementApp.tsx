@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { Trans } from 'react-i18next';
 import { Navigate, Route, Routes } from 'react-router';
 
-import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
@@ -65,10 +64,7 @@ function Version() {
 }
 
 export function ManagementApp() {
-  const { isNarrowWidth } = useResponsive();
-  useMetaThemeColor(
-    isNarrowWidth ? theme.mobileConfigServerViewTheme : undefined,
-  );
+  useMetaThemeColor(theme.mobileConfigServerViewTheme);
 
   const files = useSelector(state => state.budgetfiles.allFiles);
   const isLoading = useSelector(state => state.app.loadingText !== null);

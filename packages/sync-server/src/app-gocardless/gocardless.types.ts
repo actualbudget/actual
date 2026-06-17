@@ -35,7 +35,7 @@ export type NormalizedAccountDetails = {
   /**
    * the account iban
    */
-  iban: string;
+  iban: string | null;
 
   /**
    * Name displayed on the UI of Actual app
@@ -67,7 +67,7 @@ export type GetTransactionsParams = {
   /**
    * Begin date of the period from which we want to download transactions
    */
-  startDate: string;
+  startDate?: string;
 
   /**
    * End date of the period from which we want to download transactions

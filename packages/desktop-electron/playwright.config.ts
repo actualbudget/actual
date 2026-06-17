@@ -16,7 +16,8 @@ export default defineConfig({
     ignoreHTTPSErrors: true,
   },
   expect: {
-    toHaveScreenshot: { maxDiffPixels: 5 },
+    // See desktop-client playwright.config.ts for the threshold rationale.
+    toHaveScreenshot: { maxDiffPixels: 5, threshold: 0.05 },
     timeout: 60000, // 60 seconds
   },
 });

@@ -139,6 +139,22 @@ export type ImportTransaction = {
   date?: string;
 } & Record<string, string | number | boolean>;
 
+type ImportCategory = {
+  id: string;
+  name: string;
+};
+
+export function parseCategoryFields(
+  trans: Pick<ImportTransaction, 'category'>,
+  categories: ImportCategory[],
+) {
+  const match = categories.find(
+    category =>
+      category.id !== trans.category && category.name === trans.category,
+  );
+  return match?.id ?? null;
+}
+
 export type FieldMapping = {
   date: string | null;
   amount: string | null;

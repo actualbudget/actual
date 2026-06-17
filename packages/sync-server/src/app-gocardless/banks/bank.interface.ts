@@ -15,6 +15,14 @@ type TransactionExtended = Transaction & {
   remittanceInformationStructuredArrayString?: string;
 };
 
+type NormalizedTransaction = Transaction & {
+  date: string;
+  payeeName: string;
+  notes: string;
+  remittanceInformationUnstructuredArrayString?: string;
+  remittanceInformationStructuredArrayString?: string;
+};
+
 export type IBank = {
   institutionIds: string[];
 
@@ -37,7 +45,7 @@ export type IBank = {
     transaction: TransactionExtended,
     booked: boolean,
     editedTransaction?: TransactionExtended,
-  ) => TransactionExtended | null;
+  ) => NormalizedTransaction | null;
 
   /**
    * Function sorts an array of transactions from newest to oldest

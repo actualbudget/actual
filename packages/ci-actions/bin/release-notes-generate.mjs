@@ -3,17 +3,24 @@ import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { inspect, promisify } from 'node:util';
 
-import matter from 'gray-matter';
-import listify from 'listify';
-
-import {
-  categoryAutocorrections,
-  categoryOrder,
-} from '../src/release-notes/util.mjs';
+import { formatNotes, parseReleaseNotes } from '../src/release-notes/util.mjs';
 
 const exec = promisify(childProcess.exec);
 
+if (!process.env.GITHUB_REPOSITORY) {
+  throw new Error('GITHUB_REPOSITORY env var is not set');
+}
 const [owner, repo] = process.env.GITHUB_REPOSITORY.split('/');
+
+const releaseBranch = process.env.RELEASE_BRANCH;
+const notesBranch = process.env.NOTES_BRANCH;
+const version = process.env.VERSION;
+
+if (!releaseBranch || !notesBranch || !version) {
+  throw new Error(
+    'RELEASE_BRANCH, NOTES_BRANCH, and VERSION env vars are required',
+  );
+}
 
 const apiResult = await fetch('https://api.github.com/graphql', {
   method: 'POST',
@@ -44,24 +51,38 @@ const apiResult = await fetch('https://api.github.com/graphql', {
     variables: {
       name: repo,
       owner,
-      headRefName: process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME,
+      headRefName: notesBranch,
     },
   }),
 }).then(res => res.json());
 
 await collapsedLog('API Response', apiResult);
 
-const prData = apiResult.data.repository.pullRequests.edges[0].node;
-
-const version = prData.headRefName.split('/')[1].replace(/^v/, '');
-const slug = version.replace(/\./g, '-');
-const author = process.env.GITHUB_ACTOR || 'TODO';
-const commitMessage = `Generate release notes for v${version}`;
+const prData = apiResult.data.repository.pullRequests.edges[0]?.node;
+if (!prData) {
+  console.error(`No PR found for branch ${notesBranch}`);
+  process.exit(1);
+}
 
 const releaseDateMatch = (prData.body || '').match(
   /<!-- release-date:(\d{4}-\d{2}-\d{2}) -->/,
 );
-const releaseDate = releaseDateMatch ? releaseDateMatch[1] : 'TODO';
+if (!releaseDateMatch) {
+  console.error(
+    `PR for ${notesBranch} body missing <!-- release-date:YYYY-MM-DD --> marker`,
+  );
+  process.exit(1);
+}
+const releaseDate = releaseDateMatch[1];
+
+const author = process.env.GITHUB_ACTOR;
+if (!author) {
+  console.error('::error::GITHUB_ACTOR env var is not set');
+  process.exit(1);
+}
+
+const slug = version.replace(/\./g, '-');
+const commitMessage = `Generate release notes for v${version}`;
 
 const botName = 'github-actions[bot]';
 const botEmail = '41898282+github-actions[bot]@users.noreply.github.com';
@@ -72,17 +93,8 @@ await exec(`git config user.email '${botEmail}'`);
 const AUTOGEN_MARKER = '<!-- release-notes:auto-generated -->';
 
 await group('Prepare branch', async () => {
-  if (process.env.GITHUB_HEAD_REF) {
-    await exec(`git fetch origin ${process.env.GITHUB_HEAD_REF}`, {
-      stdio: 'inherit',
-    });
-    await exec(`git checkout ${process.env.GITHUB_HEAD_REF}`, {
-      stdio: 'inherit',
-    });
-  }
-
   // recover deleted release note files from previous generation commits
-  const baseRef = process.env.GITHUB_BASE_REF || 'master';
+  const baseRef = 'master';
   await exec(`git fetch origin ${baseRef}`, { stdio: 'inherit' });
   const { stdout: mergeBase } = await exec(
     `git merge-base HEAD origin/${baseRef}`,
@@ -110,10 +122,17 @@ await group('Prepare branch', async () => {
       await fs.unlink(patchPath).catch(() => undefined);
     }
   }
+
+  await exec(`git fetch origin ${releaseBranch}`, { stdio: 'inherit' });
+  await exec(`git checkout origin/${releaseBranch} -- upcoming-release-notes`, {
+    stdio: 'inherit',
+  });
 });
 
 const { notesByCategory, files } = await parseReleaseNotes(
   'upcoming-release-notes',
+  owner,
+  repo,
 );
 const categorizedNotes = formatNotes(notesByCategory);
 
@@ -253,46 +272,8 @@ await group('Commit and push', async () => {
   await exec('git push origin', { stdio: 'inherit' });
 });
 
-async function parseReleaseNotes(dir) {
-  const files = (await fs.readdir(dir)).filter(f => f.match(/^\d+\.md$/));
-  const notes = files.map(async name => {
-    const content = await fs.readFile(join(dir, name), 'utf-8');
-    const { data, content: body } = matter(content);
-    const number = name.replace('.md', '');
-    const authors = listify(
-      data.authors.map(a => `@${a}`),
-      { finalWord: '&' },
-    );
-    return {
-      category: categoryAutocorrections[data.category] ?? data.category,
-      value: `- [#${number}](https://github.com/actualbudget/${repo}/pull/${number}) ${body.trim()} — thanks ${authors}`,
-    };
-  });
-
-  const notesByCategory = (await Promise.all(notes)).reduce(
-    (acc, note) => {
-      if (!acc[note.category]) {
-        console.log(`WARNING: Unrecognized category "${note.category}"`);
-        acc[note.category] = [];
-      }
-      acc[note.category].push(note.value);
-      return acc;
-    },
-    Object.fromEntries(categoryOrder.map(c => [c, []])),
-  );
-
-  return { notesByCategory, files };
-}
-
 function escapeRegExp(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function formatNotes(notes) {
-  return Object.entries(notes)
-    .filter(([_, values]) => values.length > 0)
-    .map(([category, values]) => `#### ${category}\n\n${values.join('\n')}`)
-    .join('\n\n');
 }
 
 async function collapsedLog(name, value) {

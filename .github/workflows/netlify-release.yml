@@ -12,13 +12,16 @@ on:
     tags:
       - v**
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     environment: release
     steps:
       - name: Repository Checkout

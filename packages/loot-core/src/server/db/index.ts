@@ -56,7 +56,7 @@ import type {
 
 export * from './types';
 
-export { toDateRepr, fromDateRepr } from '#server/models';
+export { fromDateRepr, toDateRepr } from '#server/models';
 
 let dbPath: string | null = null;
 let db: Database | null = null;
@@ -366,7 +366,9 @@ export async function insertCategoryGroup(
   );
   if (existingGroup) {
     throw new Error(
-      `A ${existingGroup.hidden ? 'hidden ' : ''}'${existingGroup.name}' category group already exists.`,
+      `A ${
+        existingGroup.hidden ? 'hidden ' : ''
+      }'${existingGroup.name}' category group already exists.`,
     );
   }
 
@@ -397,7 +399,9 @@ export async function updateCategoryGroup(
   );
   if (existingGroup) {
     throw new Error(
-      `A ${existingGroup.hidden ? 'hidden ' : ''}'${existingGroup.name}' category group already exists.`,
+      `A ${
+        existingGroup.hidden ? 'hidden ' : ''
+      }'${existingGroup.name}' category group already exists.`,
     );
   }
   group = categoryGroupModel.validate(group, { update: true });
@@ -957,30 +961,30 @@ function toSqlQueryParameters(params: unknown[]) {
 
 export function getTags() {
   return all<DbTag>(`
-    SELECT id, tag, color, description
+    SELECT id, tag, color, description, hidden
     FROM tags
     WHERE tombstone = 0
-    ORDER BY tag
   `);
 }
 
 export function getAllTags() {
   return all<DbTag>(`
-    SELECT id, tag, color, description
+    SELECT id, tag, color, description, hidden
     FROM tags
-    ORDER BY tag
   `);
 }
 
-export function insertTag(tag): Promise<DbTag['id']> {
+export function insertTag(
+  tag: Omit<DbTag, 'id' | 'tombstone'>,
+): Promise<DbTag['id']> {
   return insertWithUUID('tags', tag);
 }
 
-export async function deleteTag(tag) {
+export async function deleteTag(tag: Pick<DbTag, 'id'>) {
   return delete_('tags', tag.id);
 }
 
-export function updateTag(tag) {
+export function updateTag(tag: Partial<DbTag> & Pick<DbTag, 'id'>) {
   return update('tags', tag);
 }
 

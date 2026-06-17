@@ -7,7 +7,7 @@ Any Revolving Credit Account that has both purchases and payments in any month s
 :::
 
 :::warning
-We recommend that you place all your credit card accounts **On Budget**. You can [close](/docs/accounts/index.md#closing-or-deleting-an-account) an On Budget account when you are through with it (and reopen, if necessary) but you **cannot** change an Off Budget account to On Budget! _Only_ set a credit card account to Off Budget and treat it as a loan if there will be _no_ new purchases and the account will be closed once it's paid off.
+We recommend that you place all your credit card accounts **On Budget**. You can [close](../../accounts/index.md#closing-or-deleting-an-account) an On Budget account when you are through with it (and reopen, if necessary) but you **cannot** change an Off Budget account to On Budget! _Only_ set a credit card account to Off Budget and treat it as a loan if there will be _no_ new purchases and the account will be closed once it's paid off.
 :::
 
 If you pay off your credit card statement every month, then you will want to use the [Paying in Full](./paying-in-full.md) page to understand how Actual helps you work with your credit card to stay _Within the Budget_.

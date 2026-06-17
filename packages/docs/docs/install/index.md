@@ -19,9 +19,9 @@ The standard way of using Actual is to set up a personal server and use a web br
 
 If you are okay with not having sync, auto-save, or backups then the easiest and fastest way to get started is by using the Actual [web app](https://app.actualbudget.org). This solution requires less setup but more maintenance.
 
-All data is saved to your local browser. The Actual web app never has access to any of your personal data. It is recommended that you save your data (from the [settings](/docs/backup-restore/backup) menu) after every session. If your browser memory is cleared, your data will be lost, so a backup is crucial.
+All data is saved to your local browser. The Actual web app never has access to any of your personal data. It is recommended that you save your data (from the [settings](../backup-restore/backup.md) menu) after every session. If your browser memory is cleared, your data will be lost, so a backup is crucial.
 
-Using a new device or browser requires you to [restore](/docs/backup-restore/restore) the saved file for each new device or browser. Remember that these new devices and browsers will not sync without a server set up, so anything you modify on one browser will not appear on others.
+Using a new device or browser requires you to [restore](../backup-restore/restore.md) the saved file for each new device or browser. Remember that these new devices and browsers will not sync without a server set up, so anything you modify on one browser will not appear on others.
 
 :::caution
 
@@ -37,6 +37,8 @@ Desktop applications are available for Windows, Mac, and Linux. These can be [do
 - Automated backups
 - Offline use is ready out of the box
 
+If you want to preview upcoming features before they reach an official release, [nightly builds of the desktop app](../contributing/preview-builds.md#nightly-desktop-builds) are also available.
+
 ## Server-Based Client Options
 
 The server provides a web-based version of Actual. This web app can be used in a browser as a standard web page to view and edit your budget. The web page can also be installed on your device. For mobile devices, an installed web page will work offline.
@@ -45,12 +47,12 @@ The server provides a web-based version of Actual. This web app can be used in a
 
 While running a server can be a complicated endeavor, we've tried to make it fairly easy to set up and hands-off to maintain. Choose one of the following options to get started:
 
-- If you're not comfortable with the command line and are willing to pay a small amount of money to have your version of Actual hosted on the cloud for you, we recommend [PikaPods](pikapods.md).[^2]
+- If you're not comfortable with the command line and are willing to pay a small amount of money to have your version of Actual hosted on the cloud for you, we recommend [PikaPods](./pikapods.md).[^2]
 - If you're willing to run a few commands in the terminal:
-  - You can run the server with a simple command using the [Server CLI](cli-tool.md)
-  - [Fly.io](fly.md) also offers cloud hosting for a similar amount of money.
-  - If you want to use Docker, we have instructions for [using our provided Docker containers](docker.md).
-  - You could [build Actual from source](build-from-source.md) on macOS, Windows, or Linux if you don't want to use a tool like Docker. (This method is the best option if you want to contribute to Actual's development!)
+  - You can run the server with a simple command using the [Server CLI](./cli-tool.md)
+  - [Fly.io](./fly.md) also offers cloud hosting for a similar amount of money.
+  - If you want to use Docker, we have instructions for [using our provided Docker containers](./docker.md).
+  - You could [build Actual from source](./build-from-source.md) on macOS, Windows, or Linux if you don't want to use a tool like Docker. (This method is the best option if you want to contribute to Actual's development!)
 
 Once you've set up your server, you can [configure it](../config/index.md) to change a few of the ways it works.
 
@@ -69,6 +71,7 @@ Content contained on external links is not managed or maintained by the Actual B
 - [Google Cloud always free tier](https://github.com/eatonc/actual-gcp)
 - [Google Cloud Run (serverless)](https://github.com/daniefdz/actual-run)
 - [Home Assistant](https://github.com/sztupy/hassio-actualbudget/blob/main/README.md)
+- [Hostim](https://hostim.dev/docs/templates/actual) - one-click managed Docker hosting with a persistent volume and free SSL.
 - [Proxmox VE Helper-Scripts](https://community-scripts.github.io/ProxmoxVE/scripts?id=actualbudget)
 - Synology NAS
   - [Marius Bogdan Lixandru's guide](https://mariushosting.com/how-to-install-actual-on-your-synology-nas/)

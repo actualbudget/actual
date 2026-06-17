@@ -4,10 +4,13 @@ on:
   issues:
     types: [labeled]
 
+permissions:
+  issues: write
+
 jobs:
   tech-support:
     if: ${{ github.event.label.name == 'tech-support' }}
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     steps:
       - name: Create comment and close issue
         run: |

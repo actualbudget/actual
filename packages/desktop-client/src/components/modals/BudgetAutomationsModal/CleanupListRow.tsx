@@ -58,7 +58,7 @@ export function CleanupListRow({
           backgroundColor: isActive
             ? theme.upcomingBackground
             : theme.pillBackground,
-          color: isActive ? theme.pageTextPositive : theme.pageTextSubdued,
+          color: isActive ? theme.pageTextPositive : theme.pageTextLight,
           alignItems: 'center',
           justifyContent: 'center',
           flexShrink: 0,
@@ -80,7 +80,7 @@ export function CleanupListRow({
         <Text
           style={{
             fontSize: 11,
-            color: theme.pageTextSubdued,
+            color: theme.pageTextLight,
             display: 'block',
           }}
         >

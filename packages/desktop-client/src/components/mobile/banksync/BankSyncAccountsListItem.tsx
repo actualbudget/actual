@@ -1,4 +1,4 @@
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
@@ -20,6 +20,7 @@ export function BankSyncAccountsListItem({
   onAction,
   isLinked,
 }: BankSyncAccountsListItemProps) {
+  const { t } = useTranslation();
   const locale = useLocale();
 
   const lastSyncString = isLinked
@@ -57,14 +58,14 @@ export function BankSyncAccountsListItem({
           >
             {account.name}
           </Text>
-          {isLinked && account.bankName && (
+          {isLinked && (
             <Text
               style={{
                 fontSize: 13,
                 color: theme.pageTextSubdued,
               }}
             >
-              {account.bankName}
+              {account.bankName ?? t('Unknown')}
             </Text>
           )}
           {isLinked && lastSyncString && (

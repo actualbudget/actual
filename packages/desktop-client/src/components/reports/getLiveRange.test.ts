@@ -35,7 +35,7 @@ describe('getLiveRange', () => {
       expect(endExclude).toBe(endInclude);
     });
 
-    it('clamps start date to earliestTransaction when data is scarce', () => {
+    it('clamps start date to earliestTransaction when data starts later', () => {
       const [start, end] = getLiveRange(
         'Last 30 days',
         '2016-12-20',
@@ -46,7 +46,7 @@ describe('getLiveRange', () => {
       expect(end).toBe('2017-01-01');
     });
 
-    it('clamps end date to latestTransaction when it precedes today', () => {
+    it('returns the live range even when latestTransaction precedes today', () => {
       const [start, end] = getLiveRange(
         'Last 30 days',
         EARLIEST,
@@ -54,12 +54,26 @@ describe('getLiveRange', () => {
         false,
       );
       expect(start).toBe('2016-12-03');
-      expect(end).toBe('2016-12-25');
+      expect(end).toBe('2017-01-01');
     });
 
     it('returns sliding-window mode', () => {
       const [, , mode] = getLiveRange('Last 30 days', EARLIEST, LATEST, false);
       expect(mode).toBe('sliding-window');
+    });
+  });
+
+  describe('Year to date', () => {
+    it('ends today even when latestTransaction precedes today', () => {
+      const [start, end] = getLiveRange(
+        'Year to date',
+        EARLIEST,
+        '2016-12-25',
+        false,
+      );
+
+      expect(start).toBe('2017-01-01');
+      expect(end).toBe('2017-01-01');
     });
   });
 });

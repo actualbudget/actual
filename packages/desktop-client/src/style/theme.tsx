@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 
+import darkThemeCss from '@actual-app/components/themes/dark.css?inline';
+import lightThemeCss from '@actual-app/components/themes/light.css?inline';
+import midnightThemeCss from '@actual-app/components/themes/midnight.css?inline';
+import paletteCss from '@actual-app/components/themes/palette.css?inline';
 import type { DarkTheme, Theme } from '@actual-app/core/types/prefs';
 
 import { useGlobalPref } from '#hooks/useGlobalPref';
@@ -10,15 +14,12 @@ import {
   validateThemeCss,
 } from './customThemes';
 import type { BaseTheme } from './customThemes';
-import * as darkTheme from './themes/dark';
-import * as lightTheme from './themes/light';
-import * as midnightTheme from './themes/midnight';
 
 const themes = {
-  light: { name: 'Light', colors: lightTheme },
-  dark: { name: 'Dark', colors: darkTheme },
-  midnight: { name: 'Midnight', colors: midnightTheme },
-  auto: { name: 'System default', colors: darkTheme },
+  light: { name: 'Light', colors: lightThemeCss },
+  dark: { name: 'Dark', colors: darkThemeCss },
+  midnight: { name: 'Midnight', colors: midnightThemeCss },
+  auto: { name: 'System default', colors: darkThemeCss },
 } as const;
 
 type ThemeKey = keyof typeof themes;
@@ -100,9 +101,7 @@ export function ThemeStyle() {
   const [installedCustomDarkThemeJson] = useGlobalPref(
     'installedCustomDarkTheme',
   );
-  const [themeColors, setThemeColors] = useState<
-    typeof lightTheme | typeof darkTheme | typeof midnightTheme | undefined
-  >(undefined);
+  const [themeColors, setThemeColors] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (activeTheme === 'auto') {
@@ -166,10 +165,12 @@ export function ThemeStyle() {
 
   if (!themeColors) return null;
 
-  const css = Object.entries(themeColors)
-    .map(([key, value]) => `  --color-${key}: ${value};`)
-    .join('\n');
-  return <style>{`:root {\n${css}}`}</style>;
+  return (
+    <>
+      <style>{paletteCss}</style>
+      <style>{themeColors}</style>
+    </>
+  );
 }
 
 /**

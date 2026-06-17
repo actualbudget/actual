@@ -1,8 +1,10 @@
+import * as monthUtils from '@actual-app/core/shared/months';
 import { describe, expect, it } from 'vitest';
 
 import {
   calculateSpendingReportTimeRange,
   calculateTimeRange,
+  getFullFutureRange,
 } from './reportRanges';
 
 // In test mode, monthUtils.currentMonth() returns '2017-01'
@@ -64,5 +66,28 @@ describe('calculateSpendingReportTimeRange', () => {
 
     expect(compare).toBe('2017-01');
     expect(compareTo).toBe('2017-01');
+  });
+});
+
+describe('getFullFutureRange', () => {
+  it('uses a future month as the end of the range', () => {
+    const start = monthUtils.currentMonth();
+    const futureMonth = monthUtils.addMonths(start, 36);
+
+    expect(getFullFutureRange(futureMonth)).toEqual([
+      start,
+      futureMonth,
+      'static',
+    ]);
+  });
+
+  it('falls back to a default future horizon without a future month', () => {
+    const start = monthUtils.currentMonth();
+
+    expect(getFullFutureRange()).toEqual([
+      start,
+      monthUtils.addMonths(start, 24),
+      'static',
+    ]);
   });
 });

@@ -47,13 +47,13 @@ import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
-import { getStatusLabel } from '@actual-app/core/shared/schedules';
 import {
   addSplitTransaction,
   deleteTransaction,
   groupTransaction,
   isPreviewId,
   isTemporaryId,
+  makeEmptySplitSubtransactions,
   splitTransaction,
   ungroupTransactions,
   updateTransaction,
@@ -81,6 +81,7 @@ import { getAccountsById } from '#accounts/accountsSlice';
 import { AccountAutocomplete } from '#components/autocomplete/AccountAutocomplete';
 import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocomplete';
 import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
+import { TagAutocomplete } from '#components/autocomplete/TagAutocomplete';
 import { getStatusProps } from '#components/schedules/StatusBadge';
 import type { StatusTypes } from '#components/schedules/StatusBadge';
 import { DateSelect } from '#components/select/DateSelect';
@@ -133,6 +134,7 @@ import { addNotification } from '#notifications/notificationsSlice';
 import { getPayeesById } from '#payees';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
+import { getStatusLabel } from '#util/schedule';
 
 import {
   deserializeTransaction,
@@ -623,7 +625,10 @@ function PayeeCell({
                     </Text>
                   </View>
                 }
-                style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
+                style={{
+                  ...styles.tooltip,
+                  borderRadius: '0px 5px 5px 0px',
+                }}
                 placement="bottom"
                 triggerProps={{ delay: 750 }}
               >
@@ -701,7 +706,10 @@ function PayeeCell({
                       </Text>
                     </View>
                   }
-                  style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
+                  style={{
+                    ...styles.tooltip,
+                    borderRadius: '0px 5px 5px 0px',
+                  }}
                   placement="bottom"
                   triggerProps={{ delay: 750 }}
                 >
@@ -901,6 +909,7 @@ type TransactionProps = {
   ascDesc?: 'asc' | 'desc';
   onDragChange?: OnDragChangeCallback<TransactionEntity>;
   onDrop?: OnDropCallback;
+  index: number;
 };
 
 const Transaction = memo(function Transaction({
@@ -959,6 +968,7 @@ const Transaction = memo(function Transaction({
   ascDesc,
   onDragChange,
   onDrop,
+  index,
 }: TransactionProps) {
   const { t } = useTranslation();
 
@@ -1175,7 +1185,9 @@ const Transaction = memo(function Transaction({
   const isBudgetTransfer = transferAcct && transferAcct.offbudget === 0;
   const isOffBudget = account && account.offbudget === 1;
 
-  const valueStyle = added ? { fontWeight: 600 } : null;
+  const valueStyle = added
+    ? { fontWeight: 600, color: theme.tableTextItemAdded }
+    : null;
   const backgroundFocus = focusedField === 'select';
   const amountStyle = hideFraction ? { letterSpacing: -0.5 } : null;
 
@@ -1328,7 +1340,9 @@ const Transaction = memo(function Transaction({
             ? theme.tableRowBackgroundHighlight
             : backgroundFocus
               ? theme.tableRowBackgroundHover
-              : theme.tableBackground,
+              : index % 2 === 0
+                ? theme.tableBackground
+                : theme.tableRowBackgroundAlternate,
           ':hover': !(backgroundFocus || selected) && {
             backgroundColor: theme.tableRowBackgroundHover,
           },
@@ -1427,7 +1441,10 @@ const Transaction = memo(function Transaction({
             <DeleteCell
               onDelete={() => onDelete && onDelete(transaction.id)}
               exposed={editing}
-              style={{ ...(isChild && { borderLeftWidth: 1 }), lineHeight: 0 }}
+              style={{
+                ...(isChild && { borderLeftWidth: 1 }),
+                lineHeight: 0,
+              }}
             />
           ) : (
             <Cell width={20} />
@@ -1573,22 +1590,16 @@ const Transaction = memo(function Transaction({
           />
         ))()}
 
-        <InputCell
-          width="flex"
-          name="notes"
-          textAlign="flex"
-          exposed={focusedField === 'notes'}
+        <NotesCell
+          note={notes ?? ''}
+          scheduleNote={isPreview ? schedule?.name : null}
           focused={focusedField === 'notes'}
-          value={notes ?? (isPreview ? schedule?.name : null) ?? ''}
           valueStyle={valueStyle}
-          formatter={value =>
-            NotesTagFormatter({ notes: value, onNotesTagClick })
-          }
-          onExpose={name => !isPreview && onEdit(id, name)}
-          inputProps={{
-            value: notes || '',
-            onUpdate: onUpdate.bind(null, 'notes'),
+          onClickTag={onNotesTagClick}
+          onUpdate={value => {
+            onUpdate('notes', value?.trim());
           }}
+          onExpose={name => !isPreview && onEdit(id, name)}
         />
 
         {(isPreview && !isChild) || isParent ? (
@@ -1689,7 +1700,7 @@ const Transaction = memo(function Transaction({
         ) : isBudgetTransfer || isOffBudget ? (
           <InputCell
             /* Category field for transfer and off budget transactions
-     (NOT preview, it is covered first) */
+              (NOT preview, it is covered first) */
             name="category"
             width="flex"
             exposed={focusedField === 'category'}
@@ -1957,6 +1968,70 @@ const Transaction = memo(function Transaction({
   );
 });
 
+type NotesCellProps = {
+  note: string;
+  scheduleNote: string | null | undefined;
+  focused: boolean;
+  valueStyle: CSSProperties | null;
+  onUpdate: (value: string) => void;
+  onClickTag: (tag: string) => void;
+  onExpose: (name: string) => void;
+};
+
+function NotesCell({
+  note,
+  scheduleNote,
+  focused,
+  valueStyle,
+  onUpdate,
+  onClickTag,
+  onExpose,
+}: NotesCellProps) {
+  const [inputValue, setInputValue] = useState(note);
+  useEffect(() => {
+    setInputValue(note);
+  }, [note, setInputValue]);
+
+  function onKeyDown(e: KeyboardEvent) {
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      onUpdate(inputValue);
+    } else if (e.key === 'Escape') {
+      setInputValue(note);
+    }
+  }
+
+  const displayedNote = note || scheduleNote || '';
+
+  return (
+    <CustomCell
+      width="flex"
+      name="notes"
+      value={displayedNote}
+      valueStyle={valueStyle}
+      formatter={value =>
+        NotesTagFormatter({ notes: value, onNotesTagClick: onClickTag })
+      }
+      focused={focused}
+      exposed={focused}
+      onExpose={onExpose}
+      onUpdate={onUpdate}
+      onKeyDown={onKeyDown}
+      onBlur={() => onUpdate(inputValue)}
+    >
+      {({ inputStyle, onKeyDown, onBlur }) => (
+        <TagAutocomplete
+          inputValue={inputValue}
+          setInputValue={setInputValue}
+          inputStyle={inputStyle}
+          onBlur={onBlur}
+          onKeyDown={onKeyDown}
+          onUpdate={onUpdate}
+        />
+      )}
+    </CustomCell>
+  );
+}
+
 type TransactionErrorProps = {
   error: NonNullable<TransactionEntity['error']>;
   isDeposit: boolean;
@@ -2121,9 +2196,10 @@ function NewTransaction({
         }
       }}
     >
-      {transactions.map(transaction => (
+      {transactions.map((transaction, index) => (
         <Transaction
           key={transaction.id}
+          index={index}
           editing={editingTransaction === transaction.id}
           transaction={transaction}
           subtransactions={transaction.is_parent ? childTransactions : null}
@@ -2494,6 +2570,7 @@ function TransactionTableInner({
         ascDesc={props.ascDesc}
         onDragChange={props.onDragChange}
         onDrop={props.onDrop}
+        index={index}
       />
     );
   };
@@ -3189,7 +3266,11 @@ export const TransactionTable = forwardRef(
         if (isTemporaryId(id)) {
           const { newNavigator } = latestState.current;
           const newTrans = latestState.current.newTransactions;
-          const { data, diff } = splitTransaction(newTrans, id);
+          const { data, diff } = splitTransaction(
+            newTrans,
+            id,
+            makeEmptySplitSubtransactions,
+          );
           setNewTransactions(data);
 
           // Jump next to "debit" field if it is empty

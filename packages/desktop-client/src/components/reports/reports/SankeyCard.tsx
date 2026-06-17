@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -7,6 +7,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { SankeyWidget } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
+import debounce from 'lodash/debounce';
 
 import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
@@ -14,9 +15,17 @@ import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import {
+  getDefaultLayerRange,
+  topNNodes,
+} from '#components/reports/reports/Sankey';
+import {
+  buildSankeyData,
+  createBaseGraphSpreadsheet,
+  isGraphLayer,
+} from '#components/reports/spreadsheets/sankey-spreadsheet';
+import type {
+  Graph,
   GraphLayers,
-  // compactSankeyData,
-  createSpreadsheet as sankeySpreadsheet,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useDashboardWidgetCopyMenu } from '#components/reports/useDashboardWidgetCopyMenu';
 import { useReport } from '#components/reports/useReport';
@@ -52,58 +61,55 @@ export function SankeyCard({
   const mode = meta?.mode ?? 'spent';
 
   const [cardHeight, setCardHeight] = useState(0);
+  const throttledSetCardHeight = useMemo(
+    () =>
+      debounce(
+        (height: number) => {
+          setCardHeight(prev => (prev === height ? prev : height));
+        },
+        200,
+        { leading: true, trailing: true, maxWait: 100 },
+      ),
+    [],
+  );
+
+  useEffect(() => {
+    return () => {
+      throttledSetCardHeight.cancel();
+    };
+  }, [throttledSetCardHeight]);
+
   const containerRef = useResizeObserver<HTMLDivElement>(rect => {
-    setCardHeight(rect.height);
+    throttledSetCardHeight(rect.height);
   });
 
-  const HEADER_HEIGHT = 82;
-  const PX_PER_NODE = 50;
-  const heightBasedTopN = Math.max(
-    2,
-    Math.floor((cardHeight - HEADER_HEIGHT) / PX_PER_NODE),
-  );
-  const topN = meta?.topNcategories ?? heightBasedTopN;
+  const heightBasedTopN = topNNodes(cardHeight);
+  const configuredTopN = meta?.topNcategories ?? 15;
+  const topN = Math.min(configuredTopN, heightBasedTopN);
 
-  const isGraphLayer = (value: unknown): value is GraphLayers =>
-    typeof value === 'string' &&
-    (Object.values(GraphLayers) as string[]).includes(value);
+  const defaultLayerRange = getDefaultLayerRange(mode);
+  let layerFrom: GraphLayers;
+  let layerTo: GraphLayers;
+  if (isGraphLayer(meta?.layerFrom) && isGraphLayer(meta?.layerTo)) {
+    layerFrom = meta.layerFrom as GraphLayers;
+    layerTo = meta.layerTo as GraphLayers;
+  } else {
+    layerFrom = defaultLayerRange.from;
+    layerTo = defaultLayerRange.to;
+  }
 
-  const defaultLayerFrom =
-    mode === 'budgeted' ? GraphLayers.IncomeCategory : GraphLayers.IncomePayee;
-  const defaultLayerTo = GraphLayers.CategoryGroup;
+  const groupAccounts = meta?.groupAccounts ?? false;
 
-  const metaLayerFrom = isGraphLayer(meta?.layerFrom)
-    ? meta.layerFrom
-    : undefined;
-  const metaLayerTo = isGraphLayer(meta?.layerTo) ? meta.layerTo : undefined;
-
-  const layerFrom =
-    metaLayerFrom &&
-    !(mode === 'budgeted' && metaLayerFrom === GraphLayers.IncomePayee) &&
-    !(mode === 'spent' && metaLayerFrom === GraphLayers.Budget)
-      ? metaLayerFrom
-      : defaultLayerFrom;
-
-  const layerTo =
-    metaLayerTo &&
-    !(mode === 'budgeted' && metaLayerTo === GraphLayers.IncomePayee) &&
-    !(mode === 'spent' && metaLayerTo === GraphLayers.Budget)
-      ? metaLayerTo
-      : defaultLayerTo;
-
-  const params = useMemo(
+  const baseGraphParams = useMemo(
     () =>
-      sankeySpreadsheet(
+      createBaseGraphSpreadsheet(
         start,
         end,
         groupedCategories,
         meta?.conditions ?? [],
         meta?.conditionsOp ?? 'and',
         mode,
-        topN,
-        meta?.categorySort,
-        layerFrom,
-        layerTo,
+        groupAccounts,
       ),
     [
       start,
@@ -112,15 +118,45 @@ export function SankeyCard({
       meta?.conditions,
       meta?.conditionsOp,
       mode,
-      topN,
-      meta?.categorySort,
-      layerFrom,
-      layerTo,
+      groupAccounts,
     ],
   );
-  const data = useReport('sankey', params);
+  const defaultGetBaseGraph = async (
+    _spreadsheet: unknown,
+    setData: (data: Graph) => void,
+  ) => setData(new Map());
 
-  const compactData = useMemo(() => data, [data]);
+  const baseGraph = useReport('sankey', baseGraphParams ?? defaultGetBaseGraph);
+  const baseGraphRef = useRef(baseGraph);
+
+  useEffect(() => {
+    if (baseGraph) {
+      baseGraphRef.current = baseGraph;
+    }
+  }, [baseGraph]);
+
+  const displayBaseGraph = baseGraph || baseGraphRef.current;
+  const compactData = useMemo(() => {
+    if (!displayBaseGraph) {
+      return null;
+    }
+
+    return buildSankeyData(
+      displayBaseGraph,
+      topN,
+      groupedCategories,
+      meta?.categorySort ?? 'per-group',
+      layerFrom,
+      layerTo,
+    );
+  }, [
+    displayBaseGraph,
+    topN,
+    groupedCategories,
+    meta?.categorySort,
+    layerFrom,
+    layerTo,
+  ]);
 
   const startDate = d.parseISO(start);
   const endDate = d.parseISO(end);
@@ -171,7 +207,7 @@ export function SankeyCard({
         }
       }}
     >
-      <View ref={containerRef} style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <ReportCardName
@@ -193,12 +229,14 @@ export function SankeyCard({
         </View>
 
         {compactData ? (
-          <SankeyGraph
-            data={compactData}
-            showPercentages={meta?.showPercentages}
-            showTooltip={!isEditing}
-            style={{ height: 'auto', flex: 1 }}
-          />
+          <View ref={containerRef} style={{ flexGrow: 1 }}>
+            <SankeyGraph
+              data={compactData}
+              showPercentages={meta?.showPercentages}
+              showTooltip={!isEditing}
+              style={{ flex: 1 }}
+            />
+          </View>
         ) : (
           <LoadingIndicator />
         )}

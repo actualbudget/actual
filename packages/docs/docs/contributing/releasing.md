@@ -2,8 +2,9 @@
 
 ## General information
 
-In the open-source version of Actual, there are 4 NPM packages:
+In the open-source version of Actual, there are 5 NPM packages:
 
+- [@actual-app/core](https://www.npmjs.com/package/@actual-app/core): The shared core library (loot-core) used by the other packages. Platform-agnostic business logic, database operations, and calculations.
 - [@actual-app/api](https://www.npmjs.com/package/@actual-app/api): The API for the underlying functionality. This includes the entire backend of Actual, meant to be used with Node.
 - [@actual-app/web](https://www.npmjs.com/package/@actual-app/web): A web build that will serve the app with a web frontend. This includes both the frontend and backend of Actual. It includes the backend as well because it's built to be used as a Web Worker.
 - [@actual-app/sync-server](https://www.npmjs.com/package/@actual-app/sync-server): The entire sync-server and underlying web client in one package. This includes the Server CLI, meant to be used with Node.
@@ -24,28 +25,33 @@ For example:
 - `v23.3.2` - another bugfix launched later in the month of March;
 - `v23.4.0` - first release launched on 9th of April, 2023;
 
-### Release branch
+### Release branches
 
-A release branch and PR are automatically cut at 17:00 UTC on the 25th of each month. To cut one manually, run [this GitHub Action](https://github.com/actualbudget/actual/actions/workflows/cut-release-branch.yml).
+There are two branches involved in every release:
 
-The release notes workflow automatically generates a blog post and updates `docs/releases.md` from the files in `upcoming-release-notes/`. This runs each time the release PR is updated, so there is no need to manually copy notes into the docs.
+- `release`: the single long-lived branch where release tags live. This is the branch we actually base the release on, and where commits are cherry-picked to if we want them included.
+- `release-notes/X.Y.Z`: the branch that is used for the release PR. It holds the generated docs pages. It is deleted once a version ships.
 
-Fixes that need to be included in the release should be cherry-picked onto the release branch manually.
+Splitting them avoids merge conflicts between cherry-picks on the release branch and the version-bump/docs commits that need to be merged back to `master`.
+
+Monthly cuts run automatically at 17:00 UTC on the 25th of each month. To cut a release manually (monthly or patch), run the [Cut release workflow](https://github.com/actualbudget/actual/actions/workflows/cut-release-branch.yml).
+
+Changes that need to be included in the release after the cut has been made should be cherry-picked onto `release`. Each cherry-pick triggers regeneration of the release notes on `release-notes/X.Y.Z`. Human edits to frontmatter (release highlights, author, etc.) on `release-notes/X.Y.Z` are preserved across regenerations as long as they are above the autogen marker.
 
 ## Release process
 
 ### Stabilize the release
 
-- [ ] Fix spelling in the generated release notes as needed.
+- [ ] Fix spelling and add highlights in the generated release notes as needed (edit `release-notes/X.Y.Z` directly).
 - [ ] Share the release PR in the release channel on Discord.
 - [ ] Wait until at least 2 other maintainers have approved the release.
 
 ### Merge and tag the release
 
-- [ ] Merge the release PR to master.
-- [ ] Create the tag on the **release branch** and push it. When the tag is pushed, it triggers the Docker stable image, all NPM packages and the Desktop app to be built and published.
+- [ ] Merge the `release-notes/X.Y.Z` PR to master.
+- [ ] Create the tag on the **`release` branch** and push it. When the tag is pushed, it triggers the Docker stable image, all NPM packages and the Desktop app to be built and published.
   ```bash
-  git checkout release/vX.Y.Z
+  git checkout release
   git tag vX.Y.Z
   git push {remote} vX.Y.Z
   ```
@@ -71,43 +77,15 @@ Finally, a draft GitHub release should be automatically created; confirm [on the
 
 ## Cutting a patch release
 
-Patch releases (e.g. `v26.5.1`) ship a small, targeted set of fixes on top of an existing release. Unlike monthly releases, the release branch is built by cherry-picking specific commits from `master` onto the previous release tag, so unrelated in-progress work on `master` is not pulled in.
+Patch releases (e.g. `26.6.1`) ship a small, targeted set of fixes on top of the latest release. Because `release` is a single long-lived branch, a patch is just a version bump and cherry-picks on top of the previous release, with no new branch to create.
 
-### Build the release branch
+### Cut the patch
 
-- [ ] Identify the commits on `master` that should be included in the patch release and note their commit hashes.
-- [ ] Check out the previous release tag and create a new release branch from it:
-  ```bash
-  git checkout v26.5.0
-  git checkout -b release/v26.5.1
-  ```
-- [ ] Cherry-pick each commit onto the new branch, in the same order they were merged to `master`:
-  ```bash
-  git cherry-pick <commit-sha>
-  ```
-- [ ] Push the release branch. This is the branch that will be tagged later — **do not tag it yet**:
-  ```bash
-  git push -u {remote} release/v26.5.1
-  ```
+Run the [Cut release workflow](https://github.com/actualbudget/actual/actions/workflows/cut-release-branch.yml) manually with:
 
-### Open the release PR against master
+- `version`: the patch version (e.g. `26.6.1`).
+- `release-date`: when the patch is expected to ship (optional).
 
-The release branch is what gets tagged, but the version bump, release notes cleanup, and blog post still need to land on `master` so future releases pick them up.
+This creates `release-notes/26.6.1`. It's worth noting that the release branch after a prior releases have no `upcoming-release-notes/*.md` files in them, so the initial release-notes run generates an empty blog, content will fill in once changes are cherry-picked in to the `release` branch.
 
-- [ ] Check out `master` and create a new branch from it (e.g. `release-notes/v26.5.1`).
-- [ ] In this branch:
-  - Bump the version in the relevant `package.json` files.
-  - Delete the `upcoming-release-notes/*.md` files that correspond to the cherry-picked commits.
-  - Add a new blog post under `packages/docs/blog/` (see [`2026-02-22-release-26-2-1.md`](https://github.com/actualbudget/actual/blob/master/packages/docs/blog/2026-02-22-release-26-2-1.md) for an example).
-- [ ] Commit the changes and open a PR against `master`. Include a link to the previously pushed release branch (e.g. `release/v26.5.1`) in the PR description so reviewers can see exactly what is shipping.
-
-### Tag the release
-
-- [ ] Once the PR has been approved and merged, tag the **release branch** (not `master`) and push the tag:
-  ```bash
-  git checkout release/v26.5.1
-  git tag v26.5.1
-  git push {remote} v26.5.1
-  ```
-
-From here the rest of the release pipeline (NPM, Docker, Desktop, GitHub draft release) runs automatically. Follow the [Verify the release](#verify-the-release) and [Finalize the release](#finalize-the-release) steps above to complete the rollout.
+The rest of the release process remains the same as a major release. Cherry-pick the appropriate changes into the `release` branch. Follow the steps to get the `release-notes/X.Y.Z` branch ready, then follow the merging and tagging steps outlined above.

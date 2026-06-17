@@ -19,6 +19,7 @@ import {
   useReorderCategoryMutation,
   useSaveCategoryGroupMutation,
   useSaveCategoryMutation,
+  useSortCategoriesMutation,
 } from '#budget';
 import { useCategories } from '#hooks/useCategories';
 import { useGlobalPref } from '#hooks/useGlobalPref';
@@ -167,6 +168,7 @@ export function Budget() {
     deleteCategoryGroup.mutate({ id });
   };
   const reorderCategoryGroup = useReorderCategoryGroupMutation();
+  const sortCategories = useSortCategoriesMutation();
   const applyBudgetAction = useBudgetActions();
 
   const onBudgetAction = (month, type, args) => {
@@ -201,6 +203,9 @@ export function Budget() {
           onReorderCategory={reorderCategory.mutate}
           onReorderGroup={reorderCategoryGroup.mutate}
           onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
+          onSortCategories={(groupId, direction) =>
+            sortCategories.mutate({ groupId, direction })
+          }
         />
       </TrackingBudgetProvider>
     );
@@ -227,6 +232,9 @@ export function Budget() {
           onReorderCategory={reorderCategory.mutate}
           onReorderGroup={reorderCategoryGroup.mutate}
           onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
+          onSortCategories={(groupId, direction) =>
+            sortCategories.mutate({ groupId, direction })
+          }
         />
       </EnvelopeBudgetProvider>
     );

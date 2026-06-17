@@ -22,13 +22,13 @@ function getDisplayTypeFromTemplate(template: Template): DisplayTemplateType {
     case 'copy':
       return 'historical';
     case 'by':
+    case 'spend':
       return 'by';
     case 'remainder':
       return 'remainder';
     case 'goal':
       return 'goal';
     case 'error':
-    case 'spend':
       // filtered upstream by hasUnsupportedDirective; surface if it ever isn't
       throw new Error(`Unsupported template type reached migration`);
     default: {
@@ -47,7 +47,9 @@ export function migrateTemplatesToAutomations(
   templates.forEach(template => {
     if (template.type === 'simple') {
       const monthly = template.monthly;
-      const hasMonthly = monthly != null && monthly !== 0;
+      const hasMonthly =
+        monthly != null && (monthly !== 0 || template.limit != null);
+      const { description } = template;
 
       if (template.limit) {
         entries.push(
@@ -60,14 +62,14 @@ export function migrateTemplatesToAutomations(
               start: template.limit.start,
               directive: 'template',
               priority: null,
+              // a description on a limit-only simple template belongs to the
+              // limit; with a monthly amount it goes on that instead
+              ...(description && !hasMonthly ? { description } : {}),
             },
             'limit',
           ),
         );
-        // The implicit refill only applies to a limit-only simple template
-        // (e.g. `#template up to 200`). When a monthly amount is also set
-        // (`#template 50 up to 200`), the engine just budgets the monthly
-        // amount and clamps to the cap — no top-up to the limit.
+
         if (!hasMonthly) {
           entries.push(
             createAutomationEntry(
@@ -81,6 +83,7 @@ export function migrateTemplatesToAutomations(
           );
         }
       }
+
       if (hasMonthly) {
         entries.push(
           createAutomationEntry(
@@ -91,6 +94,7 @@ export function migrateTemplatesToAutomations(
               starting: dayFromDate(firstDayOfMonth(new Date())),
               directive: 'template',
               priority: template.priority,
+              ...(description ? { description } : {}),
             },
             'fixed',
           ),

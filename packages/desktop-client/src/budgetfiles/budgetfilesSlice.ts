@@ -1,6 +1,5 @@
 import { send } from '@actual-app/core/platform/client/connection';
 import type { RemoteFile } from '@actual-app/core/server/cloud-storage';
-import { getDownloadError, getSyncError } from '@actual-app/core/shared/errors';
 import type { Budget } from '@actual-app/core/types/budget';
 import type { File } from '@actual-app/core/types/file';
 import type { Handlers } from '@actual-app/core/types/handlers';
@@ -13,6 +12,7 @@ import { closeModal, pushModal } from '#modals/modalsSlice';
 import { loadGlobalPrefs, loadPrefs } from '#prefs/prefsSlice';
 import { createAppAsyncThunk } from '#redux';
 import { signOut } from '#users/usersSlice';
+import { getDownloadError, getSyncError } from '#util/error';
 
 const sliceName = 'budgetfiles';
 

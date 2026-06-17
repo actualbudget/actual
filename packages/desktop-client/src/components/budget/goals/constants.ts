@@ -9,6 +9,7 @@ import type {
   RefillTemplate,
   RemainderTemplate,
   ScheduleTemplate,
+  SpendTemplate,
 } from '@actual-app/core/types/models/templates';
 
 export const displayTemplateTypes = [
@@ -51,7 +52,7 @@ export type ReducerState =
       displayType: 'historical';
     }
   | {
-      template: ByTemplate;
+      template: ByTemplate | SpendTemplate;
       displayType: 'by';
     }
   | {

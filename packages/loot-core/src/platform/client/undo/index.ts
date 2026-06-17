@@ -2,8 +2,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 import type { UndoState as ServerUndoState } from '#server/undo';
 
-// oxlint-disable-next-line @typescript-eslint/no-explicit-any
-type Modal = any; // TODO: fix me
+// Minimal structural shape of desktop-client's Modal union. loot-core can't
+// import the full type from @actual-app/web; the undo system only stores the
+// modal and reads `name`. `options` is kept loose so the real Modal assigns.
+type Modal = { name: string; options?: unknown };
 
 type UndoState = {
   url: string | null;

@@ -2,12 +2,14 @@ import { listen } from '@actual-app/core/platform/client/connection';
 import * as undo from '@actual-app/core/platform/client/undo';
 // @ts-strict-ignore
 import type { QueryClient } from '@tanstack/react-query';
+import { t } from 'i18next';
 
 import { accountQueries } from './accounts';
 import { setAppState } from './app/appSlice';
 import { categoryQueries } from './budget';
 import { closeBudgetUI } from './budgetfiles/budgetfilesSlice';
 import { closeModal, pushModal, replaceModal } from './modals/modalsSlice';
+import type { Modal } from './modals/modalsSlice';
 import {
   addGenericErrorNotification,
   addNotification,
@@ -90,13 +92,19 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
 
         // If a modal has been tagged, open it instead of navigating
         if (tagged.openModal) {
+          // The undo store keeps modals as an opaque structural shape; re-narrow
+          // to the real Modal union now that we're back in desktop-client.
+          // TODO: drop this cast once the Modal type lives somewhere both
+          // loot-core and desktop-client can import (e.g. consolidated under
+          // @actual-app/core types).
+          const openModal = tagged.openModal as Modal;
           const { modalStack } = store.getState().modals;
 
           if (
             modalStack.length === 0 ||
-            modalStack[modalStack.length - 1].name !== tagged.openModal.name
+            modalStack[modalStack.length - 1].name !== openModal.name
           ) {
-            store.dispatch(replaceModal({ modal: tagged.openModal }));
+            store.dispatch(replaceModal({ modal: openModal }));
           }
         } else {
           store.dispatch(closeModal());
@@ -129,6 +137,14 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
             'from this tab; please close it and continue working in the other one.',
         },
       }),
+    );
+  });
+
+  const unlistenIndexeddbQuotaError = listen('indexeddb-quota-error', () => {
+    alert(
+      t(
+        'We hit a limit on the local storage available. Edits may not be saved. Please get in touch https://actualbudget.org/contact/ so we can help debug this.',
+      ),
     );
   });
 
@@ -169,6 +185,7 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     unlistenSync();
     unlistenUndo();
     unlistenFallbackWriteError();
+    unlistenIndexeddbQuotaError();
     unlistenStartLoad();
     unlistenFinishLoad();
     unlistenStartImport();

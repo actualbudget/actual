@@ -192,7 +192,7 @@ export function AreaGraph({
   showTooltip = true,
 }: AreaGraphProps) {
   const format = useFormat();
-  const animationProps = useRechartsAnimation({ isAnimationActive: false });
+  const animationProps = useRechartsAnimation({ animationDuration: 1000 });
 
   const privacyMode = usePrivacyMode();
   const dataMax = Math.max(...data.intervalData.map(i => i[balanceTypeOp]));

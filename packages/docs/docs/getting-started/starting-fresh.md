@@ -4,10 +4,10 @@ title: 'Starting Fresh'
 
 For most users it's best to start fresh with a blank file.
 This guide will walk through setting up a budget file fresh without migrating from a previous budget software export.
-Before continuing, it might be a good idea to read about the [envelope method](/docs/getting-started/envelope-budgeting), or zero-sum
+Before continuing, it might be a good idea to read about the [envelope method](./envelope-budgeting.md), or zero-sum
 budgeting as it's also called.
 
-If you want to restart an existing budget while keeping your categories, payees, rules, and schedules, you can follow the guide on [Restarting Your Budget](/docs/advanced/restart).
+If you want to restart an existing budget while keeping your categories, payees, rules, and schedules, you can follow the guide on [Restarting Your Budget](../advanced/restart.md).
 
 ## 1. Setting up Accounts
 
@@ -106,7 +106,7 @@ You may also want a category for interest and dividends.
 Actual has a nifty and useful feature where you can organize your expense categories into groups.
 This not only provides more visibility and control over your spending but also empowers you
 to make informed financial decisions.
-When using the [envelope method](/docs/getting-started/envelope-budgeting), one will move available funds between categories when
+When using the [envelope method](./envelope-budgeting.md), one will move available funds between categories when
 needed. However, there are some categories that you should be very wary about moving funds away
 from. By grouping, you'll get an extra visual indication that moving funds from the Electricity 
 category, for instance, may not be the wisest choice. Another reason is to have a more convenient
@@ -124,7 +124,7 @@ way of reporting your spending habits.
    categories in this group are Mortgage, Car Payments, Student Loans, Short Term Credit.
    Should you put your credit card debts in this category?
    The answer is *it depends*. For some input on this, please read our article on 
-   [Carrying Debt](/docs/budgeting/credit-cards/carrying-debt).
+   [Carrying Debt](../budgeting/credit-cards/carrying-debt.md).
 
 3. **Daily expenses**. Group your everyday expenses for a more organized and convenient way
    of tracking. This makes it easy to report on expenditures that fluctuate from month to month.
@@ -263,16 +263,16 @@ Shortly this method goes like this:
 
 :::info
 
-This topic is so important on how to actually use Actual, that we have devoted a separate page on **[envelope budgeting](/docs/getting-started/envelope-budgeting)**.
+This topic is so important on how to actually use Actual, that we have devoted a separate page on **[envelope budgeting](./envelope-budgeting.md)**.
 
 :::
 
 ## The next step in your budgeting journey
 
 A good next step is to read through the "Using Actual" section of the documentation. This section has detailed explanations on the
-features of Actual and how to use them. Some of the most useful features are [Rules](/docs/budgeting/rules/index.md),
-[Schedules](/docs/schedules.md), [Reconciliation](/docs/accounts/reconciliation.md),
-and [Reports](/docs/reports/index.md).
+features of Actual and how to use them. Some of the most useful features are [Rules](../budgeting/rules/index.md),
+[Schedules](../schedules.md), [Reconciliation](../accounts/reconciliation.md),
+and [Reports](../reports/index.md).
 
 If you feel a bit overwhelmed, don't worry.
 

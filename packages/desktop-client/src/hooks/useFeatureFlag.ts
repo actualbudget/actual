@@ -9,10 +9,13 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   formulaMode: false,
   currency: false,
   ageOfMoneyReport: false,
+  balanceForecastReport: false,
+  customThemes: false,
   budgetAnalysisReport: false,
   payeeLocations: false,
   enableBanking: false,
   sankeyReport: false,
+  akahuBankSync: false,
 };
 
 export function useFeatureFlag(name: FeatureFlag): boolean {

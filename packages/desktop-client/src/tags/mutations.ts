@@ -135,6 +135,56 @@ export function useDeleteTagsMutation() {
   });
 }
 
+type HideTagsPayload = {
+  ids: Array<TagEntity['id']>;
+};
+
+export function useHideTagsMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({ ids }: HideTagsPayload) => {
+      return await send('tags-hide-all', ids);
+    },
+    onSuccess: () => invalidateQueries(queryClient),
+    onError: error => {
+      console.error('Error hiding tags:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t('There was an error hiding the tags. Please try again.'),
+        error,
+      );
+    },
+  });
+}
+
+type UnhideTagsPayload = {
+  ids: Array<TagEntity['id']>;
+};
+
+export function useUnhideTagsMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({ ids }: UnhideTagsPayload) => {
+      return await send('tags-unhide-all', ids);
+    },
+    onSuccess: () => invalidateQueries(queryClient),
+    onError: error => {
+      console.error('Error hiding tags:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t('There was an error hiding the tags. Please try again.'),
+        error,
+      );
+    },
+  });
+}
+
 export function useDiscoverTagsMutation() {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
