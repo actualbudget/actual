@@ -1,0 +1,49 @@
+diff --git a/lib/engines.js b/lib/engines.js
+index 38f993db06cf364191ac635a6590c2d29303297d..e1a21d22ea92403f1e2e09c1d9139750b292d448 100644
+--- a/lib/engines.js
++++ b/lib/engines.js
+@@ -6,15 +6,17 @@ const yaml = require('js-yaml');
+  * Default engines
+  */
+ 
+-const engines = exports = module.exports;
++const engines = (exports = module.exports);
+ 
+ /**
+  * YAML
+  */
+ 
++// js-yaml 4 removed `safeLoad`/`safeDump`; `load`/`dump` are safe by default.
++// Fall back to the legacy names so this works on js-yaml 3 as well.
+ engines.yaml = {
+-  parse: yaml.safeLoad.bind(yaml),
+-  stringify: yaml.safeDump.bind(yaml)
++  parse: (yaml.load || yaml.safeLoad).bind(yaml),
++  stringify: (yaml.dump || yaml.safeDump).bind(yaml),
+ };
+ 
+ /**
+@@ -23,10 +25,10 @@ engines.yaml = {
+ 
+ engines.json = {
+   parse: JSON.parse.bind(JSON),
+-  stringify: function(obj, options) {
+-    const opts = Object.assign({replacer: null, space: 2}, options);
++  stringify: function (obj, options) {
++    const opts = Object.assign({ replacer: null, space: 2 }, options);
+     return JSON.stringify(obj, opts.replacer, opts.space);
+-  }
++  },
+ };
+ 
+ /**
+@@ -48,7 +50,7 @@ engines.javascript = {
+       throw new SyntaxError(err);
+     }
+   },
+-  stringify: function() {
++  stringify: function () {
+     throw new Error('stringifying JavaScript is not supported');
+-  }
++  },
+ };
