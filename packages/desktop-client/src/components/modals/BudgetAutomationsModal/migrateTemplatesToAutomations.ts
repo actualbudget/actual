@@ -106,6 +106,31 @@ export function migrateTemplatesToAutomations(
       return;
     }
 
+    if (
+      (template.type === 'periodic' || template.type === 'remainder') &&
+      template.limit
+    ) {
+      const { limit, ...base } = template;
+      entries.push(
+        createAutomationEntry(base, getDisplayTypeFromTemplate(base)),
+      );
+      entries.push(
+        createAutomationEntry(
+          {
+            type: 'limit',
+            amount: limit.amount,
+            hold: limit.hold,
+            period: limit.period,
+            start: limit.start,
+            directive: 'template',
+            priority: null,
+          },
+          'limit',
+        ),
+      );
+      return;
+    }
+
     entries.push(
       createAutomationEntry(template, getDisplayTypeFromTemplate(template)),
     );
