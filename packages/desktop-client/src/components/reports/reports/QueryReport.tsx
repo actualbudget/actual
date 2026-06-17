@@ -7,11 +7,8 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { q } from 'loot-core/shared/query';
-import type {
-  QueryReportWidget,
-  QueryVisualization,
-} from 'loot-core/types/models';
+import type { ChartSpec } from 'loot-core/types/chart-spec';
+import type { QueryReportWidget } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
@@ -20,8 +17,8 @@ import {
   Page,
   PageHeader,
 } from '@desktop-client/components/Page';
-import { QueryVizConfig } from '@desktop-client/components/query-report/QueryVizConfig';
-import { QueryVisualization as QueryVizDispatcher } from '@desktop-client/components/query-report/visualizations/QueryVisualization';
+import { EncodingConfig } from '@desktop-client/components/query-report/EncodingConfig';
+import { ChartRenderer } from '@desktop-client/components/query-report/visualizations/ChartRenderer';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
@@ -38,7 +35,7 @@ const AqlEditor = lazy(() =>
 );
 
 const DEFAULT_QUERY_SOURCE = `q('transactions')\n  .select('*')\n  .limit(100)`;
-const DEFAULT_VISUALIZATION: QueryVisualization = { type: 'table' };
+const DEFAULT_CHART_SPEC: ChartSpec = { mark: 'table', encoding: {} };
 
 export function QueryReport() {
   const params = useParams();
@@ -68,8 +65,8 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
   const [querySource, setQuerySource] = useState(
     widget?.meta?.queries?.[0]?.source || DEFAULT_QUERY_SOURCE,
   );
-  const [visualization, setVisualization] = useState<QueryVisualization>(
-    widget?.meta?.visualization || DEFAULT_VISUALIZATION,
+  const [chartSpec, setChartSpec] = useState<ChartSpec>(
+    widget?.meta?.chartSpec ?? DEFAULT_CHART_SPEC,
   );
 
   const title = widget?.meta?.name || t('Query Report');
@@ -137,7 +134,7 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
           meta: {
             ...(widget.meta ?? {}),
             queries: updatedQueries,
-            visualization,
+            chartSpec,
           },
         },
       },
@@ -157,7 +154,7 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
   }, [
     widget,
     querySource,
-    visualization,
+    chartSpec,
     updateDashboardWidgetMutation,
     dispatch,
     t,
@@ -295,7 +292,7 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
               </View>
             )}
             {!isLoading && !error && result && (
-              <QueryVizDispatcher result={result} config={visualization} />
+              <ChartRenderer result={result} spec={chartSpec} />
             )}
             {!isLoading && !error && !result && (
               <View
@@ -390,10 +387,10 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
               backgroundColor: theme.pageBackground,
             }}
           >
-            <QueryVizConfig
+            <EncodingConfig
               result={result ?? null}
-              visualization={visualization}
-              onConfigChange={setVisualization}
+              chartSpec={chartSpec}
+              onChartSpecChange={setChartSpec}
             />
           </View>
         </View>

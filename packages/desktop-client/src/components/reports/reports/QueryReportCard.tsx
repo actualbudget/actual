@@ -4,12 +4,10 @@ import { Trans, useTranslation } from 'react-i18next';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import type {
-  QueryReportWidget,
-  QueryVisualization,
-} from 'loot-core/types/models';
+import type { ChartSpec } from 'loot-core/types/chart-spec';
+import type { QueryReportWidget } from 'loot-core/types/models';
 
-import { QueryVisualization as QueryVizDispatcher } from '@desktop-client/components/query-report/visualizations/QueryVisualization';
+import { ChartRenderer } from '@desktop-client/components/query-report/visualizations/ChartRenderer';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
 import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
@@ -25,7 +23,7 @@ type QueryReportCardProps = {
   onCopy: (targetDashboardId: string) => void;
 };
 
-const DEFAULT_VISUALIZATION: QueryVisualization = { type: 'table' };
+const DEFAULT_CHART_SPEC: ChartSpec = { mark: 'table', encoding: {} };
 
 export function QueryReportCard({
   widgetId,
@@ -46,7 +44,7 @@ export function QueryReportCard({
     return firstQuery?.source ?? '';
   }, [firstQuery]);
 
-  const visualization = meta?.visualization || DEFAULT_VISUALIZATION;
+  const chartSpec = meta?.chartSpec ?? DEFAULT_CHART_SPEC;
 
   const { result, isLoading, error } = useQueryReport(
     querySource || null,
@@ -134,11 +132,7 @@ export function QueryReportCard({
             </View>
           )}
           {!isLoading && !error && result && (
-            <QueryVizDispatcher
-              result={result}
-              config={visualization}
-              compact
-            />
+            <ChartRenderer result={result} spec={chartSpec} compact />
           )}
           {!isLoading && !error && !result && (
             <View

@@ -1,4 +1,5 @@
 import type { QueryState } from '../../shared/query';
+import type { ChartSpec } from '../chart-spec';
 
 import type { CustomReportEntity } from './reports';
 import type { RuleConditionEntity } from './rule';
@@ -114,39 +115,13 @@ export type QueryEntry = {
   timeFrame?: TimeFrame;
 };
 
-export type QueryVisualization =
-  | {
-      type: 'scalar';
-      measureColumn?: string;
-    }
-  | {
-      type: 'time-series';
-      chartStyle: 'line' | 'area';
-      timeColumn?: string;
-      measureColumns?: string[];
-    }
-  | {
-      type: 'bar';
-      chartStyle: 'grouped' | 'stacked';
-      categoryColumn?: string;
-      measureColumns?: string[];
-    }
-  | {
-      type: 'table';
-    }
-  | {
-      type: 'donut';
-      categoryColumn?: string;
-      measureColumn?: string;
-    };
-
 export type QueryReportWidget = AbstractWidget<
   'query-report',
   {
     name?: string;
     queries: QueryEntry[];
     defaultTimeFrame?: TimeFrame;
-    visualization: QueryVisualization;
+    chartSpec: ChartSpec;
     label?: string;
     colorFormula?: string;
     showTrend?: boolean;

@@ -4,40 +4,37 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { useFormat } from '@desktop-client/hooks/useFormat';
-import { assignColumns } from '@desktop-client/queries/columnRoles';
 import type { QueryResult } from '@desktop-client/queries/processQueryResult';
+import type { ResolvedChartSpec } from '@desktop-client/queries/resolveChannels';
 
-type QueryScalarProps = {
+type NumberMarkProps = {
   result: QueryResult;
-  measureColumn?: string;
+  resolved: ResolvedChartSpec;
+  compact?: boolean;
 };
 
-export function QueryScalar({ result, measureColumn }: QueryScalarProps) {
+export function NumberMark({ result, resolved, compact }: NumberMarkProps) {
   const format = useFormat();
 
-  // `result.scalar` is set by `processQueryResult` for single-value
-  // calculation queries — it bypasses the column-lookup entirely.
-  if (typeof result.scalar === 'number') {
+  const yChannel = resolved.encoding.y;
+  const yField =
+    yChannel && !Array.isArray(yChannel) ? yChannel.field : undefined;
+
+  if (!yField) {
     return (
       <View
         style={{
-          flex: 1,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          fontSize: 28,
-          fontWeight: 600,
-          color: theme.pageText,
+          padding: 20,
+          color: theme.pageTextSubdued,
+          textAlign: 'center',
         }}
       >
-        {format(result.scalar, 'financial')}
+        <Trans>No numeric result to display</Trans>
       </View>
     );
   }
 
-  const assignment = assignColumns(result);
-  const column = measureColumn ?? assignment.measureColumns[0];
-  const value = column ? result.rows[0]?.[column] : undefined;
+  const value = result.rows[0]?.[yField];
 
   if (typeof value !== 'number') {
     return (
@@ -60,7 +57,7 @@ export function QueryScalar({ result, measureColumn }: QueryScalarProps) {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        fontSize: 28,
+        fontSize: compact ? 24 : 28,
         fontWeight: 600,
         color: theme.pageText,
       }}
