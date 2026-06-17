@@ -23,69 +23,19 @@ export const queryModeFunctions: Record<string, FunctionDef> = {
       { name: 'numbers', description: 'Number1, Number2, ...NumberN' },
     ],
   },
-  AVERAGEA: {
-    name: 'AVERAGEA',
-    description: t('Returns the average, including text and logical values.'),
-    parameters: [{ name: 'values', description: 'Value1, Value2, ...ValueN' }],
-  },
-  COUNT: {
-    name: 'COUNT',
-    description: t('Counts the number of numeric values.'),
-    parameters: [{ name: 'values', description: 'Value1, Value2, ...ValueN' }],
-  },
-  COUNTA: {
-    name: 'COUNTA',
-    description: t('Counts non-empty values.'),
-    parameters: [{ name: 'values', description: 'Value1, Value2, ...ValueN' }],
-  },
-  COUNTBLANK: {
-    name: 'COUNTBLANK',
-    description: t('Counts empty cells.'),
-    parameters: [{ name: 'range', description: 'Range' }],
-  },
-  COUNTIF: {
-    name: 'COUNTIF',
-    description: t('Counts cells that meet a criteria.'),
-    parameters: [
-      { name: 'range', description: 'Range' },
-      { name: 'criteria', description: 'Criteria' },
-    ],
-  },
-  COUNTIFS: {
-    name: 'COUNTIFS',
-    description: t('Counts cells that meet multiple criteria.'),
-    parameters: [
-      { name: 'range1', description: 'Range1' },
-      { name: 'criteria1', description: 'Criteria1' },
-    ],
-  },
   MAX: {
     name: 'MAX',
-    description: t('Returns the maximum value.'),
+    description: t('Returns the maximum value from numbers.'),
     parameters: [
       { name: 'numbers', description: 'Number1, Number2, ...NumberN' },
     ],
-  },
-  MAXA: {
-    name: 'MAXA',
-    description: t(
-      'Returns the maximum value, including text and logical values.',
-    ),
-    parameters: [{ name: 'values', description: 'Value1, Value2, ...ValueN' }],
   },
   MIN: {
     name: 'MIN',
-    description: t('Returns the minimum value.'),
+    description: t('Returns the minimum value from numbers.'),
     parameters: [
       { name: 'numbers', description: 'Number1, Number2, ...NumberN' },
     ],
-  },
-  MINA: {
-    name: 'MINA',
-    description: t(
-      'Returns the minimum value, including text and logical values.',
-    ),
-    parameters: [{ name: 'values', description: 'Value1, Value2, ...ValueN' }],
   },
   ABS: {
     name: 'ABS',
@@ -251,105 +201,6 @@ export const queryModeFunctions: Record<string, FunctionDef> = {
       { name: 'numbers', description: 'Number1, Number2, ...NumberN' },
     ],
   },
-  SUMIF: {
-    name: 'SUMIF',
-    description: t('Sums cells that meet a criteria.'),
-    parameters: [
-      { name: 'range', description: 'Range' },
-      { name: 'criteria', description: 'Criteria' },
-      { name: 'sum_range', description: 'SumRange' },
-    ],
-  },
-  SUMIFS: {
-    name: 'SUMIFS',
-    description: t('Sums cells that meet multiple criteria.'),
-    parameters: [
-      { name: 'sum_range', description: 'SumRange' },
-      { name: 'range1', description: 'Range1' },
-      { name: 'criteria1', description: 'Criteria1' },
-    ],
-  },
-  SUMPRODUCT: {
-    name: 'SUMPRODUCT',
-    description: t('Multiplies corresponding elements and returns the sum.'),
-    parameters: [
-      { name: 'array1', description: 'Array1' },
-      { name: 'array2', description: 'Array2' },
-    ],
-  },
-  SUMSQ: {
-    name: 'SUMSQ',
-    description: t('Returns the sum of the squares.'),
-    parameters: [
-      { name: 'numbers', description: 'Number1, Number2, ...NumberN' },
-    ],
-  },
-
-  // Statistical Functions
-  MEDIAN: {
-    name: 'MEDIAN',
-    description: t('Returns the median value.'),
-    parameters: [
-      { name: 'numbers', description: 'Number1, Number2, ...NumberN' },
-    ],
-  },
-  MODE: {
-    name: 'MODE',
-    description: t('Returns the most frequently occurring value.'),
-    parameters: [
-      { name: 'numbers', description: 'Number1, Number2, ...NumberN' },
-    ],
-  },
-  STDEV: {
-    name: 'STDEV',
-    description: t('Returns the standard deviation of a sample.'),
-    parameters: [
-      { name: 'numbers', description: 'Number1, Number2, ...NumberN' },
-    ],
-  },
-  STDEVP: {
-    name: 'STDEVP',
-    description: t('Returns the standard deviation of a population.'),
-    parameters: [
-      { name: 'numbers', description: 'Number1, Number2, ...NumberN' },
-    ],
-  },
-  VAR: {
-    name: 'VAR',
-    description: t('Returns the variance of a sample.'),
-    parameters: [{ name: 'values', description: 'Value1, Value2, ...ValueN' }],
-  },
-  VARP: {
-    name: 'VARP',
-    description: t('Returns the variance of a population.'),
-    parameters: [{ name: 'values', description: 'Value1, Value2, ...ValueN' }],
-  },
-  PERCENTILE: {
-    name: 'PERCENTILE',
-    description: t('Returns the k-th percentile.'),
-    parameters: [
-      { name: 'array', description: 'Array' },
-      { name: 'k', description: 'K' },
-    ],
-  },
-  QUARTILE: {
-    name: 'QUARTILE',
-    description: t('Returns the quartile of a dataset.'),
-    parameters: [
-      { name: 'array', description: 'Array' },
-      { name: 'quart', description: 'Quart' },
-    ],
-  },
-  RANK: {
-    name: 'RANK',
-    description: t('Returns the rank of a number in a list.'),
-    parameters: [
-      { name: 'value', description: 'Value' },
-      { name: 'array', description: 'Array' },
-      { name: 'order', description: 'Order' },
-    ],
-  },
-
   // Logical Functions
   IF: {
     name: 'IF',
@@ -567,6 +418,60 @@ export const queryModeFunctions: Record<string, FunctionDef> = {
       { name: 'decimals', description: 'Decimals' },
     ],
   },
+  FORMATNUMBER: {
+    name: 'FORMATNUMBER',
+    description: t(
+      'Formats a number with thousands separators. Uses your app number format settings by default.',
+    ),
+    parameters: [
+      { name: 'value', description: 'Number to format' },
+      {
+        name: 'decimals',
+        description: 'Decimal places (optional, uses app settings)',
+      },
+      {
+        name: 'thousandsSeparator',
+        description: 'Thousands separator (optional, uses app settings)',
+      },
+      {
+        name: 'decimalSeparator',
+        description: 'Decimal separator (optional, uses app settings)',
+      },
+    ],
+  },
+  FORMATCURRENCY: {
+    name: 'FORMATCURRENCY',
+    description: t(
+      'Formats a number as currency. Uses your app currency and number format settings by default.',
+    ),
+    parameters: [
+      { name: 'value', description: 'Number to format' },
+      {
+        name: 'currencySymbol',
+        description: 'Currency symbol (optional, uses app settings)',
+      },
+      {
+        name: 'decimals',
+        description: 'Decimal places (optional, uses app settings)',
+      },
+      {
+        name: 'thousandsSeparator',
+        description: 'Thousands separator (optional, uses app settings)',
+      },
+      {
+        name: 'decimalSeparator',
+        description: 'Decimal separator (optional, uses app settings)',
+      },
+      {
+        name: 'symbolPosition',
+        description: '"before" or "after" (optional, uses app settings)',
+      },
+      {
+        name: 'spaceBetweenAmountAndSymbol',
+        description: 'TRUE or FALSE (optional, uses app settings)',
+      },
+    ],
+  },
   REPT: {
     name: 'REPT',
     description: t('Repeats text specified number of times.'),
@@ -686,61 +591,13 @@ export const queryModeFunctions: Record<string, FunctionDef> = {
       { name: 'type', description: 'Type' },
     ],
   },
-
-  // Lookup and Reference
-  VLOOKUP: {
-    name: 'VLOOKUP',
-    description: t('Searches vertically in first column and returns value.'),
-    parameters: [
-      { name: 'lookup_value', description: 'LookupValue' },
-      { name: 'table_array', description: 'TableArray' },
-      { name: 'col_index', description: 'ColIndex' },
-      { name: 'range_lookup', description: 'RangeLookup' },
-    ],
-  },
-  HLOOKUP: {
-    name: 'HLOOKUP',
-    description: t('Searches horizontally in first row and returns value.'),
-    parameters: [
-      { name: 'lookup_value', description: 'LookupValue' },
-      { name: 'table_array', description: 'TableArray' },
-      { name: 'row_index', description: 'RowIndex' },
-      { name: 'range_lookup', description: 'RangeLookup' },
-    ],
-  },
-  INDEX: {
-    name: 'INDEX',
-    description: t('Returns value at specified row and column.'),
-    parameters: [
-      { name: 'array', description: 'Array' },
-      { name: 'row', description: 'Row' },
-      { name: 'column', description: 'Column' },
-    ],
-  },
-  MATCH: {
-    name: 'MATCH',
-    description: t('Returns position of value in array.'),
-    parameters: [
-      { name: 'lookup_value', description: 'LookupValue' },
-      { name: 'lookup_array', description: 'LookupArray' },
-      { name: 'match_type', description: 'MatchType' },
-    ],
-  },
   CHOOSE: {
     name: 'CHOOSE',
     description: t('Returns value from list based on index.'),
     parameters: [
-      { name: 'index', description: 'Index' },
+      { name: 'index', description: 'Index (1-based)' },
       { name: 'value1', description: 'Value1' },
-      { name: 'value2', description: 'Value2' },
-    ],
-  },
-  LOOKUP: {
-    name: 'LOOKUP',
-    description: t('Looks up values in a vector or array.'),
-    parameters: [
-      { name: 'lookup_value', description: 'LookupValue' },
-      { name: 'lookup_vector', description: 'LookupVector' },
+      { name: 'value2', description: 'Value2, ...ValueN' },
     ],
   },
 

@@ -53,6 +53,7 @@ import {
   groupTransaction,
   isPreviewId,
   isTemporaryId,
+  makeChild,
   splitTransaction,
   ungroupTransactions,
   updateTransaction,
@@ -3265,7 +3266,10 @@ export const TransactionTable = forwardRef(
         if (isTemporaryId(id)) {
           const { newNavigator } = latestState.current;
           const newTrans = latestState.current.newTransactions;
-          const { data, diff } = splitTransaction(newTrans, id);
+          const { data, diff } = splitTransaction(newTrans, id, parent => [
+            makeChild(parent),
+            makeChild(parent),
+          ]);
           setNewTransactions(data);
 
           // Jump next to "debit" field if it is empty
