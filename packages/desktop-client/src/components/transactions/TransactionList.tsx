@@ -14,7 +14,7 @@ import {
   addSplitTransaction,
   applyTransactionDiff,
   isPreviewId,
-  makeChild,
+  makeEmptySplitSubtransactions,
   realizeTempTransactions,
   splitTransaction,
   updateTransaction,
@@ -501,7 +501,7 @@ export function TransactionList({
       const changes = splitTransaction(
         transactionsLatest.current,
         id,
-        parent => [makeChild(parent), makeChild(parent)],
+        makeEmptySplitSubtransactions,
       );
       onChange(changes.newTransaction, changes.data);
       void saveDiffAndApply(
