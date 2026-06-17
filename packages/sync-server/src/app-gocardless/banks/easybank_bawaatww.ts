@@ -23,7 +23,7 @@ export default {
   normalizeTransaction(transaction, booked) {
     const editedTrans = { ...transaction };
 
-    let payeeName: string | null = formatPayeeName(transaction);
+    let payeeName: string | undefined = formatPayeeName(transaction);
 
     // sometimes the creditor is not provided
     // the formatPayeeName then falls back to debtor
