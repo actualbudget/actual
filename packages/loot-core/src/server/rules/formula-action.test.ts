@@ -479,4 +479,81 @@ describe('Formula-based rule actions', () => {
 
     expect(transaction.notes).toBe('fallback');
   });
+
+  it('should replace all matches with REGEX when the global flag is set', () => {
+    const action = new Action('set', 'notes', null, {});
+    const transaction = { notes: 'Sarah Condition' };
+    const result = action.executeFormulaSync(
+      '=REGEX(notes, "/[aeuio]/g", "a")',
+      transaction,
+    );
+
+    expect(result).toBe('Sarah Candataan');
+  });
+
+  it('should replace only the first match with REGEX without the global flag', () => {
+    const action = new Action('set', 'notes', null, {});
+    const transaction = { notes: 'Sarah Condition' };
+    const result = action.executeFormulaSync(
+      '=REGEX(notes, "/[aeuio]/", "")',
+      transaction,
+    );
+
+    expect(result).toBe('Srah Condition');
+  });
+
+  it('should support capture group references in the REGEX replacement', () => {
+    const action = new Action('set', 'notes', null, {});
+    const transaction = { notes: 'Sarah Condition' };
+    const result = action.executeFormulaSync(
+      '=REGEX(notes, "/^.+ (.+)$/", "$1")',
+      transaction,
+    );
+
+    expect(result).toBe('Condition');
+  });
+
+  it('should leave the text unchanged when the REGEX pattern does not match', () => {
+    const action = new Action('set', 'notes', null, {});
+    const transaction = { notes: 'Sarah Condition' };
+    const result = action.executeFormulaSync(
+      '=REGEX(notes, "/Klaas/", "Jantje")',
+      transaction,
+    );
+
+    expect(result).toBe('Sarah Condition');
+  });
+
+  it('should treat a plain REGEX pattern as a regular expression', () => {
+    const action = new Action('set', 'notes', null, {});
+    const transaction = { notes: 'Sarah Condition' };
+    const result = action.executeFormulaSync(
+      '=REGEX(notes, "Sarah", "Jantje")',
+      transaction,
+    );
+
+    expect(result).toBe('Jantje Condition');
+  });
+
+  it('should default the REGEX replacement to an empty string', () => {
+    const action = new Action('set', 'notes', null, {});
+    const transaction = { notes: 'Sarah Condition' };
+    const result = action.executeFormulaSync(
+      '=REGEX(notes, "/ Condition/")',
+      transaction,
+    );
+
+    expect(result).toBe('Sarah');
+  });
+
+  it('should let IFERROR catch invalid REGEX patterns', () => {
+    const action = new Action('set', 'notes', null, {
+      formula: '=IFERROR(REGEX(notes, "/[/", "x"), "fallback")',
+    });
+
+    const transaction = { notes: 'original' };
+    action.exec(transaction);
+
+    expect(transaction.notes).toBe('fallback');
+  });
 });

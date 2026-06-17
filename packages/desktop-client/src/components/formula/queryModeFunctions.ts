@@ -384,6 +384,23 @@ export const queryModeFunctions: Record<string, FunctionDef> = {
       { name: 'new_text', description: 'New_text' },
     ],
   },
+  REGEX: {
+    name: 'REGEX',
+    description: t(
+      'Replaces text matching a regular expression. Write the pattern as "/expression/flags" (e.g. "/[0-9]+/g"); a plain string is also treated as a pattern. The replacement supports capture groups like $1.',
+    ),
+    parameters: [
+      { name: 'text', description: 'Text to search' },
+      {
+        name: 'pattern',
+        description: 'Regular expression, e.g. "/[0-9]+/g"',
+      },
+      {
+        name: 'replacement',
+        description: 'Replacement text, supports $1, $2 (optional, default "")',
+      },
+    ],
+  },
   FIND: {
     name: 'FIND',
     description: t('Finds text within text (case-sensitive).'),

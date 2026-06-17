@@ -139,6 +139,7 @@ const TEXT_FUNCTIONS = new Set([
   'PROPER',
   'SUBSTITUTE',
   'REPLACE',
+  'REGEX',
   'FIND',
   'SEARCH',
   'REPT',
