@@ -17,6 +17,7 @@ export type ResolvedChannel = ChannelDef & {
 export type ResolvedEncoding = {
   x?: ResolvedChannel | ResolvedChannel[];
   y?: ResolvedChannel | ResolvedChannel[];
+  series?: ResolvedChannel;
   color?: ResolvedChannel;
   size?: ResolvedChannel;
   text?: ResolvedChannel;
@@ -103,6 +104,13 @@ function resolveEmpty(encoding: Encoding): ResolvedEncoding {
             autoAssigned: false,
           }
         : undefined,
+    series: encoding.series
+      ? {
+          ...encoding.series,
+          type: encoding.series.type ?? 'category',
+          autoAssigned: false,
+        }
+      : undefined,
     color: encoding.color
       ? {
           ...encoding.color,
@@ -152,10 +160,10 @@ export function resolveChannels(
   }
 
   const yIsArray = Array.isArray(encoding.y);
-  if (yIsArray && encoding.color) {
+  if (yIsArray && encoding.series) {
     errors.push(
-      'Multiple Y fields and Color channel are mutually exclusive. ' +
-        'Use a single Y channel with Color to create series, or use multiple Y channels without Color.',
+      'Multiple Y fields and Series channel are mutually exclusive. ' +
+        'Use a single Y channel with Series to create stacks, or use multiple Y channels for grouped series.',
     );
   }
 
@@ -166,10 +174,21 @@ export function resolveChannels(
   }
 
   if (spec.mark === 'arc') {
-    if (!encoding.color || !encoding.y) {
+    if (!encoding.color && !encoding.series) {
       errors.push(
-        'Arc mark requires both Color and Y channels. ' +
-          'Bind a category field to Color and a numeric field to Y.',
+        'Arc mark requires a Color or Series channel, and a Y channel. ' +
+          'Bind a category field to Color/Series and a numeric field to Y.',
+      );
+    }
+    if (!encoding.y) {
+      errors.push(
+        'Arc mark requires both Color/Series and Y channels. ' +
+          'Bind a category field to Color/Series and a numeric field to Y.',
+      );
+    }
+    if (encoding.series) {
+      warnings.push(
+        'Series channel on arc marks is not yet supported. It will be treated as a Color channel.',
       );
     }
   }
@@ -181,7 +200,7 @@ export function resolveChannels(
   }
 
   const columnNames = new Set(columns.map(c => c.name));
-  for (const channelName of ['color', 'size', 'text'] as const) {
+  for (const channelName of ['series', 'color', 'size', 'text'] as const) {
     const ch = encoding[channelName];
     if (ch && !columnNames.has(ch.field)) {
       errors.push(
@@ -247,6 +266,7 @@ export function resolveChannels(
   const resolvedColor = resolveChannel(encoding.color);
   let resolvedSize = resolveChannel(encoding.size);
   const resolvedText = resolveChannel(encoding.text);
+  let resolvedSeries = resolveChannel(encoding.series);
 
   if (yIsArray) {
     resolvedY = (encoding.y as ChannelDef[]).map(ch => resolveChannel(ch));
@@ -268,6 +288,11 @@ export function resolveChannels(
             autoAssigned: true,
           }));
         }
+      }
+      if (resolvedSeries) {
+        warnings.push(
+          'Series channel is not used on number marks and will be ignored.',
+        );
       }
       break;
     }
@@ -297,6 +322,11 @@ export function resolveChannels(
           'Color channel is not used on number marks and will be ignored.',
         );
       }
+      if (resolvedSeries) {
+        warnings.push(
+          'Series channel is not used on number marks and will be ignored.',
+        );
+      }
       break;
     }
 
@@ -320,7 +350,13 @@ export function resolveChannels(
         }
       }
       if (!resolvedY) {
-        if (roles.measureColumns.length > 0) {
+        if (roles.measureColumns.length === 1) {
+          resolvedY = {
+            field: roles.measureColumns[0],
+            type: 'number',
+            autoAssigned: true,
+          };
+        } else if (roles.measureColumns.length >= 2) {
           resolvedY = roles.measureColumns.map(field => ({
             field,
             type: 'number' as const,
@@ -351,7 +387,13 @@ export function resolveChannels(
         }
       }
       if (!resolvedY) {
-        if (roles.measureColumns.length > 0) {
+        if (roles.measureColumns.length === 1) {
+          resolvedY = {
+            field: roles.measureColumns[0],
+            type: 'number',
+            autoAssigned: true,
+          };
+        } else if (roles.measureColumns.length >= 2) {
           resolvedY = roles.measureColumns.map(field => ({
             field,
             type: 'number' as const,
@@ -407,11 +449,19 @@ export function resolveChannels(
     resolvedSize = undefined;
   }
 
+  if (
+    resolvedSeries &&
+    !['column', 'bar', 'line', 'area'].includes(spec.mark)
+  ) {
+    resolvedSeries = undefined;
+  }
+
   return {
     mark: spec.mark,
     encoding: {
       x: resolvedX,
       y: resolvedY,
+      series: resolvedSeries,
       color: resolvedColor,
       size: resolvedSize,
       text: resolvedText,

@@ -248,6 +248,11 @@ export function QueryResultTable({
                       style={{
                         padding: '6px 12px',
                         borderBottom: `1px solid ${theme.tableBorder}`,
+                        backgroundColor:
+                          cellStyling?.backgroundColor ??
+                          (cellStyling?.formatEntireRow
+                            ? rowMerged?.backgroundColor
+                            : undefined),
                         color:
                           cellStyling?.textColor ??
                           rowMerged?.textColor ??

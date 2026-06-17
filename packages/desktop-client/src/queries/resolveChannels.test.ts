@@ -123,7 +123,7 @@ describe('resolveChannels', () => {
       expect(resolved.errors[0]).toMatch(/missing/);
     });
 
-    it('errors on y[] + color combination', () => {
+    it('errors on y[] + series combination', () => {
       const result = makeResult([
         { name: 'category', type: 'string' },
         { name: 'amount', type: 'float' },
@@ -132,12 +132,14 @@ describe('resolveChannels', () => {
         mark: 'table',
         encoding: {
           y: [{ field: 'amount' }, { field: 'amount' }],
-          color: { field: 'category' },
+          series: { field: 'category' },
         },
       };
       const resolved = resolveChannels(spec, result);
       expect(resolved.errors).toHaveLength(1);
-      expect(resolved.errors[0]).toMatch(/Multiple Y fields and Color channel/);
+      expect(resolved.errors[0]).toMatch(
+        /Multiple Y fields and Series channel/,
+      );
     });
   });
 
@@ -258,7 +260,7 @@ describe('resolveChannels', () => {
   });
 
   describe('mark-specific auto-assignment (column)', () => {
-    it('auto-assigns x to time column and y to measures', () => {
+    it('auto-assigns x to time column and y to single measure as object', () => {
       const result = makeResult([
         { name: 'month', type: 'date-month' },
         { name: 'amount', type: 'float' },
@@ -268,11 +270,27 @@ describe('resolveChannels', () => {
       expect(resolved.encoding.x?.field).toBe('month');
       expect(resolved.encoding.x?.type).toBe('date');
       expect(resolved.encoding.x?.autoAssigned).toBe(true);
+      expect(Array.isArray(resolved.encoding.y)).toBe(false);
+      if (!Array.isArray(resolved.encoding.y)) {
+        expect(resolved.encoding.y?.field).toBe('amount');
+        expect(resolved.encoding.y?.type).toBe('number');
+        expect(resolved.encoding.y?.autoAssigned).toBe(true);
+      }
+    });
+
+    it('auto-assigns y as array when multiple measures exist', () => {
+      const result = makeResult([
+        { name: 'month', type: 'date-month' },
+        { name: 'amount', type: 'float' },
+        { name: 'count', type: 'integer' },
+      ]);
+      const spec: ChartSpec = { mark: 'column', encoding: {} };
+      const resolved = resolveChannels(spec, result);
       expect(Array.isArray(resolved.encoding.y)).toBe(true);
       if (Array.isArray(resolved.encoding.y)) {
+        expect(resolved.encoding.y).toHaveLength(2);
         expect(resolved.encoding.y[0]?.field).toBe('amount');
-        expect(resolved.encoding.y[0]?.type).toBe('number');
-        expect(resolved.encoding.y[0]?.autoAssigned).toBe(true);
+        expect(resolved.encoding.y[1]?.field).toBe('count');
       }
     });
 
@@ -333,6 +351,174 @@ describe('resolveChannels', () => {
         'Size channel is only supported on point marks, not on "table". The size channel will be ignored.',
       );
       expect(resolved.encoding.size).toBeUndefined();
+    });
+  });
+
+  describe('series channel', () => {
+    it('passes through explicit series on column mark', () => {
+      const result = makeResult([
+        { name: 'month', type: 'date-month' },
+        { name: 'category', type: 'string' },
+        { name: 'amount', type: 'float' },
+      ]);
+      const spec: ChartSpec = {
+        mark: 'column',
+        encoding: {
+          x: { field: 'month' },
+          y: { field: 'amount' },
+          series: { field: 'category' },
+        },
+      };
+      const resolved = resolveChannels(spec, result);
+      expect(resolved.errors).toEqual([]);
+      expect(resolved.encoding.series?.field).toBe('category');
+      expect(resolved.encoding.series?.autoAssigned).toBe(false);
+    });
+
+    it('allows single y + series without error', () => {
+      const result = makeResult([
+        { name: 'month', type: 'date-month' },
+        { name: 'category', type: 'string' },
+        { name: 'amount', type: 'float' },
+      ]);
+      const spec: ChartSpec = {
+        mark: 'column',
+        encoding: {
+          x: { field: 'month' },
+          y: { field: 'amount' },
+          series: { field: 'category' },
+        },
+      };
+      const resolved = resolveChannels(spec, result);
+      expect(resolved.errors).toEqual([]);
+      expect(Array.isArray(resolved.encoding.y)).toBe(false);
+    });
+
+    it('errors on y[] + series combination', () => {
+      const result = makeResult([
+        { name: 'category', type: 'string' },
+        { name: 'amount', type: 'float' },
+      ]);
+      const spec: ChartSpec = {
+        mark: 'column',
+        encoding: {
+          y: [{ field: 'amount' }],
+          series: { field: 'category' },
+        },
+      };
+      const resolved = resolveChannels(spec, result);
+      expect(resolved.errors).toHaveLength(1);
+      expect(resolved.errors[0]).toMatch(
+        /Multiple Y fields and Series channel/,
+      );
+    });
+
+    it('warns when series is bound on number mark', () => {
+      const result = makeResult([
+        { name: 'category', type: 'string' },
+        { name: 'total', type: 'float' },
+      ]);
+      const spec: ChartSpec = {
+        mark: 'number',
+        encoding: {
+          y: { field: 'total' },
+          series: { field: 'category' },
+        },
+      };
+      const resolved = resolveChannels(spec, result);
+      expect(resolved.warnings).toContain(
+        'Series channel is not used on number marks and will be ignored.',
+      );
+      expect(resolved.encoding.series).toBeUndefined();
+    });
+
+    it('warns when series is bound on table mark', () => {
+      const result = makeResult([
+        { name: 'category', type: 'string' },
+        { name: 'amount', type: 'float' },
+      ]);
+      const spec: ChartSpec = {
+        mark: 'table',
+        encoding: {
+          x: { field: 'category' },
+          y: { field: 'amount' },
+          series: { field: 'amount' },
+        },
+      };
+      const resolved = resolveChannels(spec, result);
+      expect(resolved.warnings).toContain(
+        'Series channel is not used on number marks and will be ignored.',
+      );
+      expect(resolved.encoding.series).toBeUndefined();
+    });
+
+    it('errors when series references a non-existent field', () => {
+      const result = makeResult([
+        { name: 'amount', type: 'float' },
+        { name: 'category', type: 'string' },
+      ]);
+      const spec: ChartSpec = {
+        mark: 'column',
+        encoding: {
+          x: { field: 'amount' },
+          y: { field: 'amount' },
+          series: { field: 'missing' },
+        },
+      };
+      const resolved = resolveChannels(spec, result);
+      expect(resolved.errors[0]).toMatch(/series.*missing/);
+    });
+
+    it('keeps series on column, bar, line, and area marks', () => {
+      const result = makeResult([
+        { name: 'month', type: 'date-month' },
+        { name: 'category', type: 'string' },
+        { name: 'amount', type: 'float' },
+      ]);
+      for (const mark of ['column', 'bar', 'line', 'area'] as const) {
+        const spec: ChartSpec = {
+          mark,
+          encoding: {
+            x: { field: 'month' },
+            y: { field: 'amount' },
+            series: { field: 'category' },
+          },
+        };
+        const resolved = resolveChannels(spec, result);
+        expect(resolved.encoding.series?.field).toBe('category');
+      }
+    });
+
+    it('clears series on point and arc marks', () => {
+      const result = makeResult([
+        { name: 'x', type: 'string' },
+        { name: 'y', type: 'float' },
+        { name: 'category', type: 'string' },
+      ]);
+      const pointSpec: ChartSpec = {
+        mark: 'point',
+        encoding: {
+          x: { field: 'x' },
+          y: { field: 'y' },
+          series: { field: 'category' },
+        },
+      };
+      expect(
+        resolveChannels(pointSpec, result).encoding.series,
+      ).toBeUndefined();
+
+      const arcSpec: ChartSpec = {
+        mark: 'arc',
+        encoding: {
+          y: { field: 'y' },
+          series: { field: 'category' },
+        },
+      };
+      const arcResolved = resolveChannels(arcSpec, result);
+      expect(arcResolved.encoding.series).toBeUndefined();
+      expect(arcResolved.warnings).toContain(
+        'Series channel on arc marks is not yet supported. It will be treated as a Color channel.',
+      );
     });
   });
 

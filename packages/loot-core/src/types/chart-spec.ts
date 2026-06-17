@@ -22,6 +22,7 @@ export type ChannelDef = {
 export type Encoding = {
   x?: ChannelDef | ChannelDef[];
   y?: ChannelDef | ChannelDef[];
+  series?: ChannelDef;
   color?: ChannelDef;
   size?: ChannelDef;
   text?: ChannelDef;
@@ -88,6 +89,7 @@ export type AxesConfig = {
 
 export type ChartConfig = {
   stack?: 'stack' | 'normalize' | 'none';
+  fillGaps?: boolean;
   conditionalRules?: ConditionalRule[];
   axes?: AxesConfig;
 };

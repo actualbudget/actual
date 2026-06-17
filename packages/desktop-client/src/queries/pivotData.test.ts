@@ -21,7 +21,7 @@ function resolve(spec: ChartSpec, result: QueryResult) {
 
 describe('pivotData', () => {
   describe('needsPivot', () => {
-    it('returns true when color is bound and y is a single channel', () => {
+    it('returns true when series is bound and y is a single channel', () => {
       const result = makeResult(
         [
           { name: 'month', type: 'date-month' },
@@ -31,19 +31,19 @@ describe('pivotData', () => {
         [],
       );
       const spec: ChartSpec = {
-        mark: 'table',
+        mark: 'column',
         encoding: {
           x: { field: 'month' },
           y: { field: 'total' },
-          color: { field: 'category' },
+          series: { field: 'category' },
         },
       };
       expect(needsPivot(resolve(spec, result))).toBe(true);
     });
 
-    it('returns false when color is unbound', () => {
+    it('returns false when series is unbound', () => {
       const result = makeResult([{ name: 'total', type: 'float' }], []);
-      const spec: ChartSpec = { mark: 'table', encoding: {} };
+      const spec: ChartSpec = { mark: 'column', encoding: {} };
       expect(needsPivot(resolve(spec, result))).toBe(false);
     });
 
@@ -57,11 +57,11 @@ describe('pivotData', () => {
         [],
       );
       const spec: ChartSpec = {
-        mark: 'table',
+        mark: 'column',
         encoding: {
           x: { field: 'month' },
           y: [{ field: 'amount' }],
-          color: { field: 'category' },
+          series: { field: 'category' },
         },
       };
       expect(needsPivot(resolve(spec, result))).toBe(false);
@@ -84,11 +84,11 @@ describe('pivotData', () => {
         ],
       );
       const spec: ChartSpec = {
-        mark: 'table',
+        mark: 'column',
         encoding: {
           x: { field: 'month' },
           y: { field: 'total' },
-          color: { field: 'category' },
+          series: { field: 'category' },
         },
       };
       const pivoted = pivotData(result.rows, resolve(spec, result));
@@ -99,7 +99,7 @@ describe('pivotData', () => {
       ]);
     });
 
-    it('fills missing (x, color) combinations with null', () => {
+    it('fills missing (x, series) combinations with null', () => {
       const result = makeResult(
         [
           { name: 'month', type: 'date-month' },
@@ -112,11 +112,11 @@ describe('pivotData', () => {
         ],
       );
       const spec: ChartSpec = {
-        mark: 'table',
+        mark: 'column',
         encoding: {
           x: { field: 'month' },
           y: { field: 'total' },
-          color: { field: 'category' },
+          series: { field: 'category' },
         },
       };
       const pivoted = pivotData(result.rows, resolve(spec, result));
@@ -127,7 +127,7 @@ describe('pivotData', () => {
       ]);
     });
 
-    it('sums duplicate (x, color) combinations', () => {
+    it('sums duplicate (x, series) combinations', () => {
       const result = makeResult(
         [
           { name: 'month', type: 'date-month' },
@@ -140,18 +140,18 @@ describe('pivotData', () => {
         ],
       );
       const spec: ChartSpec = {
-        mark: 'table',
+        mark: 'column',
         encoding: {
           x: { field: 'month' },
           y: { field: 'total' },
-          color: { field: 'category' },
+          series: { field: 'category' },
         },
       };
       const pivoted = pivotData(result.rows, resolve(spec, result));
       expect(pivoted.data).toEqual([{ month: '2024-01', Food: 77 }]);
     });
 
-    it('skips rows with null/undefined color values', () => {
+    it('skips rows with null/undefined series values', () => {
       const result = makeResult(
         [
           { name: 'month', type: 'date-month' },
@@ -165,11 +165,11 @@ describe('pivotData', () => {
         ],
       );
       const spec: ChartSpec = {
-        mark: 'table',
+        mark: 'column',
         encoding: {
           x: { field: 'month' },
           y: { field: 'total' },
-          color: { field: 'category' },
+          series: { field: 'category' },
         },
       };
       const pivoted = pivotData(result.rows, resolve(spec, result));
@@ -190,11 +190,11 @@ describe('pivotData', () => {
         ],
       );
       const spec: ChartSpec = {
-        mark: 'table',
+        mark: 'column',
         encoding: {
           x: { field: 'month' },
           y: { field: 'total' },
-          color: { field: 'category' },
+          series: { field: 'category' },
         },
       };
       const pivoted = pivotData(result.rows, resolve(spec, result));
@@ -202,7 +202,7 @@ describe('pivotData', () => {
       expect(pivoted.data).toEqual([{ month: '2024-01', Food: 30 }]);
     });
 
-    it('returns empty data when all color values are null', () => {
+    it('returns empty data when all series values are null', () => {
       const result = makeResult(
         [
           { name: 'month', type: 'date-month' },
@@ -215,11 +215,11 @@ describe('pivotData', () => {
         ],
       );
       const spec: ChartSpec = {
-        mark: 'table',
+        mark: 'column',
         encoding: {
           x: { field: 'month' },
           y: { field: 'total' },
-          color: { field: 'category' },
+          series: { field: 'category' },
         },
       };
       const pivoted = pivotData(result.rows, resolve(spec, result));
@@ -244,7 +244,7 @@ describe('pivotData', () => {
         mark: 'table',
         encoding: {
           y: { field: 'total', type: 'number' },
-          color: { field: 'category', type: 'category' },
+          series: { field: 'category', type: 'category' },
         },
         warnings: [],
         errors: [],
@@ -270,11 +270,11 @@ describe('pivotData', () => {
         ],
       );
       const spec: ChartSpec = {
-        mark: 'table',
+        mark: 'column',
         encoding: {
           x: { field: 'month', sort: 'asc' },
           y: { field: 'total' },
-          color: { field: 'category' },
+          series: { field: 'category' },
         },
       };
       const pivoted = pivotData(result.rows, resolve(spec, result));
@@ -299,11 +299,11 @@ describe('pivotData', () => {
         ],
       );
       const spec: ChartSpec = {
-        mark: 'table',
+        mark: 'column',
         encoding: {
           x: { field: 'month', sort: 'desc' },
           y: { field: 'total' },
-          color: { field: 'category' },
+          series: { field: 'category' },
         },
       };
       const pivoted = pivotData(result.rows, resolve(spec, result));
@@ -315,7 +315,7 @@ describe('pivotData', () => {
     });
   });
 
-  describe('color not bound', () => {
+  describe('series not bound', () => {
     it('returns original rows and empty seriesKeys', () => {
       const rows = [
         { a: 1, b: 2 },
@@ -329,7 +329,7 @@ describe('pivotData', () => {
         rows,
       );
       const spec: ChartSpec = {
-        mark: 'table',
+        mark: 'column',
         encoding: { y: { field: 'b' } },
       };
       const pivoted = pivotData(result.rows, resolve(spec, result));

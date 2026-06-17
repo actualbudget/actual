@@ -76,6 +76,27 @@ export function ColumnBarMark({
     stackMode === 'stack' || stackMode === 'normalize' ? 'a' : undefined;
   const isNormalized = stackMode === 'normalize';
 
+  const axesConfig = resolved.config?.axes;
+  const valueAxisConfig = axesConfig?.valueAxis;
+  const categoryAxisConfig = axesConfig?.categoryAxis;
+
+  const valueAxisDomain =
+    valueAxisConfig?.min !== undefined || valueAxisConfig?.max !== undefined
+      ? ([valueAxisConfig?.min ?? 'auto', valueAxisConfig?.max ?? 'auto'] as [
+          number | string,
+          number | string,
+        ])
+      : undefined;
+  const valueAxisScale = valueAxisConfig?.logarithmic ? 'log' : undefined;
+
+  const xChannelLabel =
+    xChannel && !Array.isArray(xChannel) ? xChannel.title : undefined;
+  const yChannelLabel =
+    yChannels && !Array.isArray(yChannels) ? yChannels.title : undefined;
+
+  const categoryAxisLabel = categoryAxisConfig?.labelOverride ?? xChannelLabel;
+  const valueAxisLabel = valueAxisConfig?.labelOverride ?? yChannelLabel;
+
   if (!xField) {
     return (
       <View
@@ -159,6 +180,17 @@ export function ColumnBarMark({
               <XAxis
                 type="number"
                 hide={compact}
+                domain={valueAxisDomain}
+                scale={valueAxisScale}
+                label={
+                  valueAxisLabel
+                    ? {
+                        value: valueAxisLabel,
+                        angle: 0,
+                        position: 'insideBottom',
+                      }
+                    : undefined
+                }
                 tickFormatter={valueFormatter}
                 tick={{ fill: theme.pageText, fontSize: 11 }}
               />
@@ -166,6 +198,15 @@ export function ColumnBarMark({
                 type="category"
                 dataKey={xField}
                 hide={compact}
+                label={
+                  categoryAxisLabel
+                    ? {
+                        value: categoryAxisLabel,
+                        angle: -90,
+                        position: 'insideLeft',
+                      }
+                    : undefined
+                }
                 tickFormatter={xFormatter}
                 tick={{ fill: theme.pageText, fontSize: 11 }}
                 width={80}
@@ -176,12 +217,28 @@ export function ColumnBarMark({
               <XAxis
                 dataKey={xField}
                 hide={compact}
+                label={
+                  categoryAxisLabel
+                    ? { value: categoryAxisLabel, position: 'insideBottom' }
+                    : undefined
+                }
                 tickFormatter={xFormatter}
                 tick={{ fill: theme.pageText, fontSize: 11 }}
               />
               <YAxis
                 type="number"
                 hide={compact}
+                domain={valueAxisDomain}
+                scale={valueAxisScale}
+                label={
+                  valueAxisLabel
+                    ? {
+                        value: valueAxisLabel,
+                        angle: -90,
+                        position: 'insideLeft',
+                      }
+                    : undefined
+                }
                 tickFormatter={valueFormatter}
                 tick={{ fill: theme.pageText, fontSize: 11 }}
               />

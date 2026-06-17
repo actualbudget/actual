@@ -23,19 +23,20 @@ type EncodingConfigProps = {
 type ChannelVisibility = {
   x: boolean;
   y: boolean;
+  series: boolean;
   color: boolean;
   size: boolean;
 };
 
 const CHANNEL_VISIBILITY: Record<Mark, ChannelVisibility> = {
-  table: { x: true, y: true, color: false, size: false },
-  number: { x: false, y: true, color: false, size: false },
-  column: { x: true, y: true, color: true, size: false },
-  bar: { x: true, y: true, color: true, size: false },
-  line: { x: true, y: true, color: true, size: false },
-  area: { x: true, y: true, color: true, size: false },
-  point: { x: true, y: true, color: true, size: true },
-  arc: { x: false, y: true, color: true, size: false },
+  table: { x: true, y: true, series: false, color: false, size: false },
+  number: { x: false, y: true, series: false, color: false, size: false },
+  column: { x: true, y: true, series: true, color: false, size: false },
+  bar: { x: true, y: true, series: true, color: false, size: false },
+  line: { x: true, y: true, series: true, color: false, size: false },
+  area: { x: true, y: true, series: true, color: false, size: false },
+  point: { x: true, y: true, series: false, color: false, size: true },
+  arc: { x: false, y: true, series: false, color: false, size: false },
 };
 
 function toOptions(
@@ -58,7 +59,10 @@ function isMultiXMark(mark: Mark): boolean {
   return mark === 'table';
 }
 
-function channelLabel(mark: Mark, channel: 'x' | 'y' | 'color'): string {
+function channelLabel(
+  mark: Mark,
+  channel: 'x' | 'y' | 'series' | 'color',
+): string {
   if (mark === 'table') {
     if (channel === 'x') return 'Groups';
     if (channel === 'y') return 'Values';
@@ -68,7 +72,9 @@ function channelLabel(mark: Mark, channel: 'x' | 'y' | 'color'): string {
   }
   if (channel === 'x') return 'X Axis';
   if (channel === 'y') return 'Y Axis';
-  return 'Series';
+  if (channel === 'series') return 'Series';
+  if (channel === 'color') return 'Color';
+  return channel;
 }
 
 function inferTypeFromColumns(
@@ -197,12 +203,12 @@ export function EncodingConfig({
     }
   };
 
-  const handleColorChange = (value: string) => {
+  const handleSeriesChange = (value: string) => {
     onChartSpecChange({
       ...chartSpec,
       encoding: {
         ...chartSpec.encoding,
-        color: value ? { field: value } : undefined,
+        series: value ? { field: value } : undefined,
       },
     });
   };
@@ -239,7 +245,7 @@ export function EncodingConfig({
     chartSpec.encoding.y && !Array.isArray(chartSpec.encoding.y)
       ? chartSpec.encoding.y.field
       : '';
-  const colorFieldForSelect = chartSpec.encoding.color?.field ?? '';
+  const seriesFieldForSelect = chartSpec.encoding.series?.field ?? '';
 
   const yOptionsForMark = isMultiYMark(chartSpec.mark)
     ? columnOptions.all
@@ -335,12 +341,15 @@ export function EncodingConfig({
         </Field>
       )}
 
-      {result && visibility.color && (
-        <Field label={t(channelLabel(chartSpec.mark, 'color'))}>
+      {result && visibility.series && (
+        <Field label={t(channelLabel(chartSpec.mark, 'series'))}>
           <Select
-            value={colorFieldForSelect}
-            options={toOptions(columnOptions.categorical)}
-            onChange={handleColorChange}
+            value={seriesFieldForSelect}
+            options={toOptions([
+              { value: '', label: t('(none)') },
+              ...columnOptions.all,
+            ])}
+            onChange={handleSeriesChange}
             defaultLabel={t('(none)')}
           />
         </Field>

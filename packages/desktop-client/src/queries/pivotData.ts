@@ -1,7 +1,9 @@
 import type { ResolvedChannel, ResolvedChartSpec } from './resolveChannels';
 
 export function needsPivot(resolved: ResolvedChartSpec): boolean {
-  return resolved.encoding.color != null && !Array.isArray(resolved.encoding.y);
+  return (
+    resolved.encoding.series != null && !Array.isArray(resolved.encoding.y)
+  );
 }
 
 export function pivotData(
@@ -10,21 +12,21 @@ export function pivotData(
 ): { data: Record<string, unknown>[]; seriesKeys: string[] } {
   const xChannel = resolved.encoding.x;
   const yChannel = resolved.encoding.y as ResolvedChannel | undefined;
-  const colorChannel = resolved.encoding.color;
+  const seriesChannel = resolved.encoding.series;
 
-  if (!colorChannel) {
+  if (!seriesChannel) {
     return { data: rows, seriesKeys: [] };
   }
 
   const xField =
     xChannel && !Array.isArray(xChannel) ? xChannel.field : undefined;
   const yField = yChannel?.field;
-  const colorField = colorChannel.field;
+  const seriesField = seriesChannel.field;
 
   const seriesKeySet = new Set<string>();
   const seriesKeys: string[] = [];
   for (const row of rows) {
-    const val = row[colorField];
+    const val = row[seriesField];
     if (val === null || val === undefined) continue;
     const key = String(val);
     if (!seriesKeySet.has(key)) {
@@ -42,14 +44,14 @@ export function pivotData(
 
     for (const row of rows) {
       const xVal = row[xField];
-      const colorVal = row[colorField];
+      const seriesVal = row[seriesField];
       const yVal = yField ? row[yField] : undefined;
 
       if (xVal === null || xVal === undefined) continue;
-      if (colorVal === null || colorVal === undefined) continue;
+      if (seriesVal === null || seriesVal === undefined) continue;
 
       const xKey = String(xVal);
-      const seriesKey = String(colorVal);
+      const seriesKey = String(seriesVal);
 
       let pivotRow = pivotMap.get(xKey);
       if (!pivotRow) {
@@ -94,12 +96,12 @@ export function pivotData(
     const summaryRow: Record<string, unknown> = {};
 
     for (const row of rows) {
-      const colorVal = row[colorField];
+      const seriesVal = row[seriesField];
       const yVal = yField ? row[yField] : undefined;
 
-      if (colorVal === null || colorVal === undefined) continue;
+      if (seriesVal === null || seriesVal === undefined) continue;
 
-      const seriesKey = String(colorVal);
+      const seriesKey = String(seriesVal);
       if (yVal !== undefined) {
         const existing = summaryRow[seriesKey];
         if (

@@ -45,18 +45,18 @@ function sectionVisibility(mark: Mark): {
 }
 
 function getAllChannels(encoding: Encoding): Array<{
-  key: 'x' | 'y' | 'color' | 'size';
+  key: 'x' | 'y' | 'series' | 'size';
   channel: ChannelDef;
   isArray: boolean;
   index?: number;
 }> {
   const result: Array<{
-    key: 'x' | 'y' | 'color' | 'size';
+    key: 'x' | 'y' | 'series' | 'size';
     channel: ChannelDef;
     isArray: boolean;
     index?: number;
   }> = [];
-  for (const key of ['x', 'y', 'color', 'size'] as const) {
+  for (const key of ['x', 'y', 'series', 'size'] as const) {
     const ch = encoding[key];
     if (!ch) continue;
     if (Array.isArray(ch)) {
@@ -97,7 +97,7 @@ function formatOptionsForType(type: string): Array<readonly [string, string]> {
 
 function updateChannel(
   chartSpec: ChartSpec,
-  key: 'x' | 'y' | 'color' | 'size',
+  key: 'x' | 'y' | 'series' | 'size',
   isArray: boolean,
   index: number | undefined,
   patch: Partial<ChannelDef>,
@@ -338,6 +338,22 @@ export function ChartConfigPanel({
               }
             />
           </Field>
+          <LabeledCheckbox
+            id="chart-config-fill-gaps"
+            checked={chartSpec.config?.fillGaps !== false}
+            onChange={() =>
+              onChartSpecChange({
+                ...chartSpec,
+                config: {
+                  ...chartSpec.config,
+                  fillGaps:
+                    chartSpec.config?.fillGaps === false ? undefined : false,
+                },
+              })
+            }
+          >
+            <Trans>Fill date gaps</Trans>
+          </LabeledCheckbox>
         </Section>
       )}
 
