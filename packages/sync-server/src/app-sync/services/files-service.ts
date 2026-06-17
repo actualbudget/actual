@@ -88,15 +88,15 @@ class File extends FileBase {
  */
 class FileUpdate extends FileBase {
   constructor({
-    name = undefined,
-    groupId = undefined,
-    encryptSalt = undefined,
-    encryptTest = undefined,
-    encryptKeyId = undefined,
-    encryptMeta = undefined,
-    syncVersion = undefined,
-    deleted = undefined,
-    owner = undefined,
+    name,
+    groupId,
+    encryptSalt,
+    encryptTest,
+    encryptKeyId,
+    encryptMeta,
+    syncVersion,
+    deleted,
+    owner,
   }: Partial<FileConstructorArgs>) {
     super(
       name,

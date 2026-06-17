@@ -27,7 +27,7 @@ concurrency:
 jobs:
   build-web:
     name: Build web bundle
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -58,7 +58,7 @@ jobs:
 
   functional:
     name: Functional (shard ${{ matrix.shard }}/3)
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest-4
     needs: build-web
     strategy:
       fail-fast: false
@@ -95,7 +95,7 @@ jobs:
 
   functional-desktop-app:
     name: Functional Desktop App
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest-4
     container:
       image: mcr.microsoft.com/playwright:v1.59.1-jammy
     steps:
