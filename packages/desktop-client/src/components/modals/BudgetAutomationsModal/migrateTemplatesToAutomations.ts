@@ -47,8 +47,7 @@ export function migrateTemplatesToAutomations(
   templates.forEach(template => {
     if (template.type === 'simple') {
       const monthly = template.monthly;
-      const hasMonthly =
-        monthly != null && (monthly !== 0 || template.limit != null);
+      const hasMonthly = monthly != null && monthly !== 0;
       const { description } = template;
 
       if (template.limit) {
@@ -70,7 +69,7 @@ export function migrateTemplatesToAutomations(
           ),
         );
 
-        if (!hasMonthly) {
+        if (monthly == null) {
           entries.push(
             createAutomationEntry(
               {

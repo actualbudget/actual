@@ -100,7 +100,7 @@ describe('migrateTemplatesToAutomations', () => {
     });
   });
 
-  it('expands `#template 0 up to N` into limit + fixed-zero (not refill)', () => {
+  it('expands `#template 0 up to N` into a standalone limit (no refill, no $0 contribution)', () => {
     const simpleTemplate = {
       type: 'simple',
       directive: 'template',
@@ -115,13 +115,12 @@ describe('migrateTemplatesToAutomations', () => {
 
     const result = migrateTemplatesToAutomations([simpleTemplate]);
 
-    expect(result).toHaveLength(2);
-    expect(result.map(entry => entry.displayType)).toEqual(['limit', 'fixed']);
-    expect(result[1].template).toMatchObject({
-      type: 'periodic',
-      amount: 0,
+    expect(result).toHaveLength(1);
+    expect(result.map(entry => entry.displayType)).toEqual(['limit']);
+    expect(result[0].template).toMatchObject({
+      type: 'limit',
+      amount: 1000,
       directive: 'template',
-      priority: 4,
     });
   });
 
