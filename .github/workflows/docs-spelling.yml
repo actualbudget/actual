@@ -74,7 +74,7 @@ jobs:
       security-events: write
     outputs:
       followup: ${{ steps.spelling.outputs.followup }}
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     if: "contains(github.event_name, 'pull_request') || github.event_name == 'push'"
     concurrency:
       group: spelling-${{ github.event.pull_request.number || github.ref }}
@@ -111,7 +111,7 @@ jobs:
   comment-push:
     name: Report (Push)
     # If your workflow isn't running on push, you can remove this job
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     needs: spelling
     permissions:
       contents: write
@@ -128,7 +128,7 @@ jobs:
   comment-pr:
     name: Report (PR)
     # If you workflow isn't running on pull_request*, you can remove this job
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     needs: spelling
     permissions:
       pull-requests: write
@@ -149,7 +149,7 @@ jobs:
       contents: write
       pull-requests: write
       actions: read
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     environment: docs-spelling
     if: ${{
       github.event_name == 'issue_comment' &&
