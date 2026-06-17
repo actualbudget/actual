@@ -151,7 +151,7 @@ export function ScheduleAmountCell({
       currency2: format(Math.abs(amount.num2 || 0), 'financial'),
     });
   } else {
-    cellText = t('{{currencyAmount}}', { currencyAmount });
+    cellText = currencyAmount;
   }
   return (
     <Cell
