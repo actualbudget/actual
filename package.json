@@ -109,21 +109,10 @@
   },
   "resolutions": {
     "adm-zip": "patch:adm-zip@npm%3A0.5.16#~/.yarn/patches/adm-zip-npm-0.5.16-4556fea098.patch",
-    "brace-expansion@npm:^5.0.5": "^5.0.6",
-    "diff": "^4.0.4",
-    "dompurify": "^3.4.9",
-    "form-data": "^4.0.6",
-    "js-yaml@npm:^4.1.0": "^4.2.0",
-    "launch-editor": "^2.14.1",
     "minimatch@3.1.2": "3.1.5",
     "serialize-javascript": "^7.0.5",
     "socks": ">=2.8.3",
-    "tar": "^7.5.16",
-    "uuid@npm:^8.3.2": "^11.1.1",
-    "webpack-dev-server": "^5.2.5",
-    "webpackbar": "^7.0.0",
-    "ws@npm:^7.3.1": "^7.5.11",
-    "ws@npm:^8.18.0": "^8.21.0"
+    "webpackbar": "^7.0.0"
   },
   "browserslist": [
     "electron >= 35.0",
