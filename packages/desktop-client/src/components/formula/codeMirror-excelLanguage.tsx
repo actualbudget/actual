@@ -697,7 +697,7 @@ function createContextFunctionCompletion(
   };
 }
 
-function getActiveFunctionArgumentContext(text: string, functionName: string) {
+function getActiveFunctionArgumentContext(text: string) {
   const stack: Array<{
     kind: 'function' | 'group' | 'array';
     name?: string;
@@ -758,9 +758,52 @@ function getActiveFunctionArgumentContext(text: string, functionName: string) {
     }
   }
 
-  return activeFunction?.name === functionName
-    ? { argumentIndex: activeFunction.argumentIndex }
+  return activeFunction?.name
+    ? {
+        name: activeFunction.name,
+        argumentIndex: activeFunction.argumentIndex,
+      }
     : null;
+}
+
+function sortFormulaCompletions(a: Completion, b: Completion) {
+  // Define section priority order
+  const sectionOrder: Record<string, number> = {
+    'ℹ️ Function Signature': -2,
+    '🔢 Variables': -1,
+    '💸 Budget Dimensions': 0,
+    '🏷️ Budget Categories': 1,
+    '🔍 Query Functions': 2,
+    '📊 Math Functions': 3,
+    '🔀 Logical Functions': 4,
+    '📝 Text Functions': 5,
+    '📅 Date Functions': 6,
+    '⚙️ Other Functions': 7,
+    '💰 Transaction Fields': 8,
+  };
+
+  // Get section names
+  const sectionA =
+    typeof a.section === 'string' ? a.section : a.section?.name || '';
+  const sectionB =
+    typeof b.section === 'string' ? b.section : b.section?.name || '';
+
+  // Compare by section priority
+  const orderA = sectionOrder[sectionA] ?? 999;
+  const orderB = sectionOrder[sectionB] ?? 999;
+  if (orderA !== orderB) {
+    return orderA - orderB;
+  }
+
+  // Within same section, sort by boost (higher first)
+  const boostA = a.boost || 0;
+  const boostB = b.boost || 0;
+  if (boostA !== boostB) {
+    return boostB - boostA;
+  }
+
+  // Finally, sort by label alphabetically
+  return a.label.localeCompare(b.label);
 }
 
 // Autocomplete extension
@@ -881,14 +924,6 @@ export function excelFormulaAutocomplete(
         }))
       : [];
 
-  const budgetQuerySignatureCompletion: Completion | null =
-    mode === 'query' && queryModeFunctions.BUDGET_QUERY
-      ? createContextFunctionCompletion(
-          'BUDGET_QUERY',
-          queryModeFunctions.BUDGET_QUERY,
-        )
-      : null;
-
   return autocompletion({
     override: [
       (context: CompletionContext) => {
@@ -897,13 +932,22 @@ export function excelFormulaAutocomplete(
           return null;
         }
 
-        const budgetQueryContext =
-          mode === 'query'
-            ? getActiveFunctionArgumentContext(
-                context.state.doc.sliceString(0, context.pos),
-                'BUDGET_QUERY',
-              )
-            : null;
+        const activeFunctionContext = getActiveFunctionArgumentContext(
+          context.state.doc.sliceString(0, context.pos),
+        );
+        const activeFunctionDefinition =
+          activeFunctionContext &&
+          (mode === 'query' ? queryModeFunctions : transactionModeFunctions)[
+            activeFunctionContext.name
+          ];
+        const activeFunctionSignatureCompletion = activeFunctionDefinition
+          ? createContextFunctionCompletion(
+              activeFunctionContext.name,
+              activeFunctionDefinition,
+            )
+          : null;
+        const isBudgetQueryContext =
+          mode === 'query' && activeFunctionContext?.name === 'BUDGET_QUERY';
 
         const baseSuggestions: Completion[] = [
           ...variableCompletions, // Put variable completions first
@@ -913,25 +957,28 @@ export function excelFormulaAutocomplete(
           ...functionCompletions,
         ];
 
-        const contextualSuggestions: Completion[] = budgetQueryContext
+        const contextualSuggestions: Completion[] = activeFunctionContext
           ? [
-              ...(budgetQuerySignatureCompletion
-                ? [budgetQuerySignatureCompletion]
+              ...(activeFunctionSignatureCompletion
+                ? [activeFunctionSignatureCompletion]
                 : []),
-              ...(budgetQueryContext.argumentIndex === 0
+              ...(isBudgetQueryContext &&
+              activeFunctionContext.argumentIndex === 0
                 ? budgetDimensionCompletions
                 : []),
-              ...(budgetQueryContext.argumentIndex === 1
+              ...(isBudgetQueryContext &&
+              activeFunctionContext.argumentIndex === 1
                 ? budgetCategoryCompletions
                 : []),
-              ...(budgetQueryContext.argumentIndex === 2 ||
-              budgetQueryContext.argumentIndex === 3
+              ...(isBudgetQueryContext &&
+              (activeFunctionContext.argumentIndex === 2 ||
+                activeFunctionContext.argumentIndex === 3)
                 ? queryCompletions
                 : []),
             ]
           : [];
 
-        const suggestions: Completion[] = budgetQueryContext
+        const suggestions: Completion[] = activeFunctionContext
           ? [
               ...contextualSuggestions,
               ...baseSuggestions.filter(
@@ -945,100 +992,16 @@ export function excelFormulaAutocomplete(
         }
 
         // Sort by section first, then by boost (descending), then by label
-        const sortedSuggestions = budgetQueryContext
+        const sortedSuggestions = activeFunctionContext
           ? [
               ...contextualSuggestions,
               ...suggestions
                 .filter(
                   suggestion => !contextualSuggestions.includes(suggestion),
                 )
-                .sort((a, b) => {
-                  // Define section priority order
-                  const sectionOrder: Record<string, number> = {
-                    'ℹ️ Function Signature': -2,
-                    '🔢 Variables': -1,
-                    '💸 Budget Dimensions': 0,
-                    '🏷️ Budget Categories': 1,
-                    '🔍 Query Functions': 2,
-                    '📊 Math Functions': 3,
-                    '🔀 Logical Functions': 4,
-                    '📝 Text Functions': 5,
-                    '📅 Date Functions': 6,
-                    '⚙️ Other Functions': 7,
-                    '💰 Transaction Fields': 8,
-                  };
-
-                  // Get section names
-                  const sectionA =
-                    typeof a.section === 'string'
-                      ? a.section
-                      : a.section?.name || '';
-                  const sectionB =
-                    typeof b.section === 'string'
-                      ? b.section
-                      : b.section?.name || '';
-
-                  // Compare by section priority
-                  const orderA = sectionOrder[sectionA] ?? 999;
-                  const orderB = sectionOrder[sectionB] ?? 999;
-                  if (orderA !== orderB) {
-                    return orderA - orderB;
-                  }
-
-                  // Within same section, sort by boost (higher first)
-                  const boostA = a.boost || 0;
-                  const boostB = b.boost || 0;
-                  if (boostA !== boostB) {
-                    return boostB - boostA;
-                  }
-
-                  // Finally, sort by label alphabetically
-                  return a.label.localeCompare(b.label);
-                }),
+                .sort(sortFormulaCompletions),
             ]
-          : suggestions.sort((a, b) => {
-              // Define section priority order
-              const sectionOrder: Record<string, number> = {
-                'ℹ️ Function Signature': -2,
-                '🔢 Variables': -1,
-                '💸 Budget Dimensions': 0,
-                '🏷️ Budget Categories': 1,
-                '🔍 Query Functions': 2,
-                '📊 Math Functions': 3,
-                '🔀 Logical Functions': 4,
-                '📝 Text Functions': 5,
-                '📅 Date Functions': 6,
-                '⚙️ Other Functions': 7,
-                '💰 Transaction Fields': 8,
-              };
-
-              // Get section names
-              const sectionA =
-                typeof a.section === 'string'
-                  ? a.section
-                  : a.section?.name || '';
-              const sectionB =
-                typeof b.section === 'string'
-                  ? b.section
-                  : b.section?.name || '';
-
-              // Compare by section priority
-              const orderA = sectionOrder[sectionA] ?? 999;
-              const orderB = sectionOrder[sectionB] ?? 999;
-              if (orderA !== orderB) {
-                return orderA - orderB;
-              }
-
-              // Within same section, sort by boost (higher first)
-              const boostA = a.boost || 0;
-              const boostB = b.boost || 0;
-              if (boostA !== boostB) {
-                return boostB - boostA;
-              }
-
-              // Finally, sort by label alphabetically
-              return a.label.localeCompare(b.label);
-            });
+          : suggestions.sort(sortFormulaCompletions);
 
         return {
           from: word.from,
