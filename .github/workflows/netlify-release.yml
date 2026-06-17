@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     environment: release
     steps:
       - name: Repository Checkout

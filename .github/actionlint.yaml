@@ -1,0 +1,4 @@
+self-hosted-runner:
+  # Depot-managed GitHub Actions runners (https://depot.dev/docs/github-actions/runner-types)
+  labels:
+    - depot-*

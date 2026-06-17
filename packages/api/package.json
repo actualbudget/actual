@@ -48,7 +48,7 @@
   "dependencies": {
     "@actual-app/core": "workspace:*",
     "@actual-app/crdt": "workspace:*",
-    "better-sqlite3": "^12.8.0",
+    "better-sqlite3": "^12.10.0",
     "compare-versions": "^6.1.1",
     "uuid": "^14.0.0"
   },
@@ -56,9 +56,9 @@
     "@typescript/native-preview": "beta",
     "rollup-plugin-visualizer": "^7.0.1",
     "typescript-strict-plugin": "^2.4.4",
-    "vite": "^8.0.5",
+    "vite": "^8.0.16",
     "vite-plugin-peggy-loader": "^2.0.1",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.8"
   },
   "engines": {
     "node": ">=20"
