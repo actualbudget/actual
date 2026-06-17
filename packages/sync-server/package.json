@@ -104,7 +104,7 @@
     "jws": "^4.0.1",
     "migrate": "^2.1.0",
     "openid-client": "^5.7.1",
-    "pluggy-sdk": "^0.83.0",
+    "pluggy-sdk": "^0.85.3",
     "uuid": "^14.0.0",
     "winston": "^3.19.0"
   },
