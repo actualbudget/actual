@@ -27,7 +27,7 @@ import { BudgetTotals } from './BudgetTotals';
 import { FilteredCategoriesContext } from './FilteredCategoriesContext';
 import { FocusedViewBanner } from './FocusedViewBanner';
 import { FocusedViewEditor } from './FocusedViewEditor';
-import { FocusedViewsBar } from './FocusedViewsBar';
+
 import { getValidMonthBounds, MonthsProvider } from './MonthsContext';
 import type { MonthBounds } from './MonthsContext';
 import {
@@ -98,7 +98,6 @@ export function BudgetTable(props: BudgetTableProps) {
   const {
     views,
     activeViewId,
-    isCollapsed,
     viewOrder,
     hiddenViews,
     showHiddenViews,
@@ -307,30 +306,7 @@ export function BudgetTable(props: BudgetTableProps) {
         }),
       }}
     >
-      <FocusedViewsBar
-        views={views}
-        activeViewId={activeViewId}
-        isCollapsed={isCollapsed}
-        startOffset={viewsBarStartOffset}
-        maxWidth={
-          monthPickerLayout
-            ? monthPickerContainerLeft + monthPickerLayout.width
-            : undefined
-        }
-        availableBuiltInViews={availableBuiltInViews}
-        viewOrder={viewOrder}
-        hiddenViews={hiddenViews}
-        showHiddenViews={showHiddenViews}
-        onSelectView={setActiveView}
-        onCreateView={() => setEditorState({ isOpen: true })}
-        onEditView={id => setEditorState({ isOpen: true, viewId: id })}
-        onDeleteView={deleteView}
-        onReorderViews={() =>
-          dispatch(pushModal({ modal: { name: 'reorder-views-editor' } }))
-        }
-        onToggleViewVisibility={toggleViewVisibility}
-        onToggleShowHiddenViews={toggleShowHiddenViews}
-      />
+
       {editorState.isOpen && (
         <FocusedViewEditor
           viewId={editorState.viewId}
@@ -371,6 +347,21 @@ export function BudgetTable(props: BudgetTableProps) {
             toggleHiddenCategories={toggleHiddenCategories}
             expandAllCategories={expandAllCategories}
             collapseAllCategories={collapseAllCategories}
+            views={views}
+            viewOrder={viewOrder}
+            hiddenViews={hiddenViews}
+            showHiddenViews={showHiddenViews}
+            activeViewId={activeViewId}
+            availableBuiltInViews={availableBuiltInViews}
+            onSelectView={setActiveView}
+            onCreateView={() => setEditorState({ isOpen: true })}
+            onEditView={id => setEditorState({ isOpen: true, viewId: id })}
+            onDeleteView={deleteView}
+            onReorderViews={() =>
+              dispatch(pushModal({ modal: { name: 'reorder-views-editor' } }))
+            }
+            onToggleViewVisibility={toggleViewVisibility}
+            onToggleShowHiddenViews={toggleShowHiddenViews}
           />
           <View
             style={{

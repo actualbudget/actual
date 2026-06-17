@@ -7,11 +7,7 @@ import {
   SvgCheveronLeft,
   SvgCheveronRight,
 } from '@actual-app/components/icons/v1';
-import {
-  SvgArrowButtonDown1,
-  SvgArrowButtonUp1,
-  SvgCalendar,
-} from '@actual-app/components/icons/v2';
+import { SvgCalendar } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -52,7 +48,7 @@ export const MonthPicker = ({
   const { t } = useTranslation();
   const [hoverId, setHoverId] = useState(null);
   const [targetMonthCount, setTargetMonthCount] = useState(12);
-  const { isCollapsed, setCollapsed } = useFocusedViews();
+
 
   // Measure the real pixel offset from the MonthPicker root to the first month
   // label and report it to the parent so the views bar can align precisely.
@@ -129,10 +125,6 @@ export const MonthPicker = ({
       }
     }
   });
-
-  const ExpandOrCollapseIcon = isCollapsed
-    ? SvgArrowButtonDown1
-    : SvgArrowButtonUp1;
 
   const currentMonth = monthUtils.currentMonth();
   const firstSelectedMonth = startMonth;
@@ -355,25 +347,6 @@ export const MonthPicker = ({
               style={{
                 width: 16,
                 height: 16,
-              }}
-            />
-          </View>
-        </Link>
-        {/*Keep range centered. If we have a toggle button on the right, it will offset the today button on the left, keeping it balanced.*/}
-        <Link
-          variant="button"
-          buttonVariant="bare"
-          onPress={() => setCollapsed(!isCollapsed)}
-          style={{
-            padding: '3px 3px',
-            marginLeft: 15,
-          }}
-        >
-          <View innerRef={collapseIconRefCallback}>
-            <ExpandOrCollapseIcon
-              style={{
-                width: 13,
-                height: 13,
               }}
             />
           </View>

@@ -158,10 +158,16 @@ export function useFocusedViews() {
     false,
   );
 
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
+
   const viewOrder = useMemo(() => {
     // Merge builtInViewsOrder and views.map(v => v.id) into storedViewOrder if missing
     let nextOrder = [...storedViewOrder];
-    const allExpectedIds = [...builtInViewsOrder, ...views.map(v => v.id)];
+    const expectedBuiltIns =
+      budgetType === 'tracking'
+        ? builtInViewsOrder.filter(id => id !== BUILT_IN_VIEWS.MONEY_AVAILABLE)
+        : builtInViewsOrder;
+    const allExpectedIds = [...expectedBuiltIns, ...views.map(v => v.id)];
 
     for (const id of allExpectedIds) {
       if (!nextOrder.includes(id)) {
@@ -173,7 +179,7 @@ export function useFocusedViews() {
     nextOrder = nextOrder.filter(id => allExpectedIds.includes(id));
 
     return nextOrder;
-  }, [storedViewOrder, builtInViewsOrder, views]);
+  }, [storedViewOrder, builtInViewsOrder, views, budgetType]);
 
   const saveViewOrder = useCallback(
     (nextOrder: string[]) => {

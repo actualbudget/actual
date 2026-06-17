@@ -20,17 +20,49 @@ import { RenderMonths } from './RenderMonths';
 import { getScrollbarWidth } from './util';
 
 import { useBudgetComponents } from '.';
+import { BudgetFilterButton } from './BudgetFilterButton';
+import type { FocusedViewDefinition } from '@actual-app/core/types/prefs';
 
 type BudgetTotalsProps = {
   toggleHiddenCategories: () => void;
   expandAllCategories: () => void;
   collapseAllCategories: () => void;
+  views?: FocusedViewDefinition[];
+  viewOrder?: string[];
+  hiddenViews?: string[];
+  showHiddenViews?: boolean;
+  activeViewId?: string | null;
+  availableBuiltInViews?: {
+    underfunded: boolean;
+    overfunded: boolean;
+    overspent: boolean;
+  };
+  onSelectView?: (id: string | null) => void;
+  onCreateView?: () => void;
+  onEditView?: (id: string) => void;
+  onDeleteView?: (id: string) => void;
+  onReorderViews?: () => void;
+  onToggleViewVisibility?: (id: string) => void;
+  onToggleShowHiddenViews?: () => void;
 };
 
 export const BudgetTotals = memo(function BudgetTotals({
   toggleHiddenCategories,
   expandAllCategories,
   collapseAllCategories,
+  views = [],
+  viewOrder = [],
+  hiddenViews = [],
+  showHiddenViews = false,
+  activeViewId = null,
+  availableBuiltInViews,
+  onSelectView,
+  onCreateView,
+  onEditView,
+  onDeleteView,
+  onReorderViews,
+  onToggleViewVisibility,
+  onToggleShowHiddenViews,
 }: BudgetTotalsProps) {
   const { t } = useTranslation();
   const [categoryExpandedStatePref, setCategoryExpandedStatePref] =
@@ -128,8 +160,39 @@ export const BudgetTotals = memo(function BudgetTotals({
             />
           )}
         </Button>
-        <View style={{ flexGrow: '1' }}>
+        <View
+          style={{
+            flexGrow: '1',
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 4,
+          }}
+        >
           <Trans>Category</Trans>
+          {availableBuiltInViews &&
+            onSelectView &&
+            onCreateView &&
+            onEditView &&
+            onDeleteView &&
+            onReorderViews &&
+            onToggleViewVisibility &&
+            onToggleShowHiddenViews && (
+              <BudgetFilterButton
+                views={views}
+                viewOrder={viewOrder}
+                hiddenViews={hiddenViews}
+                showHiddenViews={showHiddenViews}
+                activeViewId={activeViewId}
+                availableBuiltInViews={availableBuiltInViews}
+                onSelectView={onSelectView}
+                onCreateView={onCreateView}
+                onEditView={onEditView}
+                onDeleteView={onDeleteView}
+                onReorderViews={onReorderViews}
+                onToggleViewVisibility={onToggleViewVisibility}
+                onToggleShowHiddenViews={onToggleShowHiddenViews}
+              />
+            )}
         </View>
         <Button
           ref={triggerRef}
