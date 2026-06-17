@@ -1,14 +1,17 @@
-import { lazy, Suspense, useCallback, useState } from 'react';
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { Select } from '@actual-app/components/select';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { Resizable } from 're-resizable';
 
+import * as monthUtils from 'loot-core/shared/months';
 import type { ChartSpec } from 'loot-core/types/chart-spec';
-import type { QueryReportWidget } from 'loot-core/types/models';
+import type { QueryReportWidget, TimeFrame } from 'loot-core/types/models';
 
 import { EditablePageHeaderTitle } from '@desktop-client/components/EditablePageHeaderTitle';
 import { MobileBackButton } from '@desktop-client/components/mobile/MobileBackButton';
@@ -27,6 +30,7 @@ import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
 import { useQueryReport } from '@desktop-client/hooks/useQueryReport';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
+import { resolveChannels } from '@desktop-client/queries/resolveChannels';
 import { useDispatch } from '@desktop-client/redux';
 import { useUpdateDashboardWidgetMutation } from '@desktop-client/reports/mutations';
 
@@ -40,6 +44,51 @@ const DEFAULT_QUERY_SOURCE = `q('transactions')\n  .select('*')\n  .limit(100)`;
 const DEFAULT_CHART_SPEC: ChartSpec = { mark: 'table', encoding: {} };
 
 type ConfigTab = 'encoding' | 'customize';
+type TimeRangeValue =
+  | 'none'
+  | 'last3'
+  | 'last6'
+  | 'last12'
+  | 'ytd'
+  | 'lastYear';
+
+function timeFrameFromRange(value: TimeRangeValue): TimeFrame | undefined {
+  if (value === 'none') return undefined;
+  const end = monthUtils.currentMonth();
+  let start: string;
+  switch (value) {
+    case 'last3':
+      start = monthUtils.subMonths(end, 3);
+      break;
+    case 'last6':
+      start = monthUtils.subMonths(end, 6);
+      break;
+    case 'last12':
+      start = monthUtils.subMonths(end, 12);
+      break;
+    case 'ytd':
+      start = monthUtils.currentYear() + '-01';
+      break;
+    case 'lastYear':
+      return {
+        start: monthUtils.getYearStart(monthUtils.prevYear(end)),
+        end: monthUtils.getYearEnd(monthUtils.prevYear(end)),
+        mode: 'lastYear',
+      };
+    default:
+      return undefined;
+  }
+  return { start, end, mode: 'sliding-window' };
+}
+
+const TIME_RANGE_OPTIONS: Array<readonly [TimeRangeValue, string]> = [
+  ['none', 'No date filter'],
+  ['last3', 'Last 3 months'],
+  ['last6', 'Last 6 months'],
+  ['last12', 'Last 12 months'],
+  ['ytd', 'Year to date'],
+  ['lastYear', 'Last year'],
+];
 
 export function QueryReport() {
   const params = useParams();
@@ -73,12 +122,23 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
     widget?.meta?.chartSpec ?? DEFAULT_CHART_SPEC,
   );
   const [activeTab, setActiveTab] = useState<ConfigTab>('encoding');
+  const [timeRange, setTimeRange] = useState<TimeRangeValue>('none');
 
   const title = widget?.meta?.name || t('Query Report');
 
+  const activeTimeFrame = useMemo<TimeFrame | undefined>(
+    () => timeFrameFromRange(timeRange),
+    [timeRange],
+  );
+
   const { result, isLoading, error } = useQueryReport(
     querySource,
-    widget?.meta?.defaultTimeFrame,
+    activeTimeFrame ?? widget?.meta?.defaultTimeFrame,
+  );
+
+  const resolved = useMemo(
+    () => (result ? resolveChannels(chartSpec, result) : null),
+    [chartSpec, result],
   );
 
   const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
@@ -170,6 +230,16 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
     setChartSpec({ mark: nextMark, encoding: {} });
   };
 
+  const handleStackChange = (value: string) => {
+    setChartSpec({
+      ...chartSpec,
+      config: {
+        ...chartSpec.config,
+        stack: value === 'none' ? undefined : (value as 'stack' | 'normalize'),
+      },
+    });
+  };
+
   if (!isFeatureFlagEnabled) {
     return (
       <Page header={<PageHeader title={t('Query Report')} />}>
@@ -189,6 +259,9 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
       </Page>
     );
   }
+
+  const showStackConfig = ['column', 'bar', 'area'].includes(chartSpec.mark);
+  const stackValue = chartSpec.config?.stack ?? 'none';
 
   return (
     <Page
@@ -330,15 +403,15 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
               : 'none',
             display: 'flex',
             flexDirection: 'column',
+            overflow: 'auto',
           }}
         >
           <View
             style={{
               padding: 20,
-              flex: 1,
+              flexShrink: 0,
               display: 'flex',
               flexDirection: 'column',
-              minHeight: 0,
             }}
           >
             <div
@@ -348,32 +421,48 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
                 marginBottom: 8,
               }}
             >
-              <Trans>AQL Query:</Trans>
+              <Trans>ActualQL Query:</Trans>
             </div>
-            <View
-              style={{
-                flex: 1,
-                border: `1px solid ${theme.formInputBorder}`,
-                borderRadius: 6,
-                overflow: 'hidden',
-                minHeight: 200,
+            <Resizable
+              defaultSize={{ width: '100%', height: 200 }}
+              minHeight={100}
+              maxHeight={400}
+              enable={{
+                top: false,
+                right: false,
+                bottom: true,
+                left: false,
+                topRight: false,
+                bottomRight: false,
+                bottomLeft: false,
+                topLeft: false,
               }}
             >
-              <Suspense
-                fallback={
-                  <div style={{ padding: 10 }}>
-                    <Trans>Loading editor...</Trans>
-                  </div>
-                }
+              <View
+                style={{
+                  flex: 1,
+                  border: `1px solid ${theme.formInputBorder}`,
+                  borderRadius: 6,
+                  overflow: 'hidden',
+                  height: '100%',
+                }}
               >
-                <AqlEditor
-                  value={querySource}
-                  onChange={setQuerySource}
-                  error={error?.message ?? null}
-                  showLineNumbers
-                />
-              </Suspense>
-            </View>
+                <Suspense
+                  fallback={
+                    <div style={{ padding: 10 }}>
+                      <Trans>Loading editor...</Trans>
+                    </div>
+                  }
+                >
+                  <AqlEditor
+                    value={querySource}
+                    onChange={setQuerySource}
+                    error={error?.message ?? null}
+                    showLineNumbers
+                  />
+                </Suspense>
+              </View>
+            </Resizable>
             <div
               style={{
                 fontSize: 11,
@@ -383,10 +472,16 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
               }}
             >
               <Trans>
-                Write AQL queries using the <code>q()</code> builder. Example:{' '}
+                Write ActualQL queries using the <code>q()</code> builder.
+                Example:{' '}
                 <code>
                   q(&apos;transactions&apos;).select(&apos;*&apos;).limit(100)
                 </code>
+              </Trans>
+              <br />
+              <Trans>
+                Use <code>:startDate</code> and <code>:endDate</code> in your
+                query to reference the selected time range.
               </Trans>
             </div>
           </View>
@@ -398,8 +493,7 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
               display: 'flex',
               flexDirection: 'column',
               gap: 12,
-              maxHeight: isNarrowWidth ? 600 : '60vh',
-              overflow: 'auto',
+              flexShrink: 0,
             }}
           >
             <div
@@ -411,6 +505,63 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
               <Trans>Visualization</Trans>
             </div>
             <MarkSelector value={chartSpec.mark} onChange={handleMarkChange} />
+            {showStackConfig && (
+              <View>
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: theme.pageTextSubdued,
+                    marginBottom: 4,
+                  }}
+                >
+                  <Trans>Stack</Trans>
+                </div>
+                <Select
+                  value={stackValue}
+                  options={[
+                    ['none', t('None')],
+                    ['stack', t('Stacked')],
+                    ['normalize', t('100%')],
+                  ]}
+                  onChange={handleStackChange}
+                />
+              </View>
+            )}
+            <View>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: theme.pageTextSubdued,
+                  marginBottom: 4,
+                }}
+              >
+                <Trans>Time range</Trans>
+              </div>
+              <Select
+                value={timeRange}
+                options={TIME_RANGE_OPTIONS.map(([value, label]) => [
+                  value,
+                  t(label),
+                ])}
+                onChange={v => setTimeRange(v as TimeRangeValue)}
+              />
+              {timeRange === 'none' &&
+                (querySource.includes(':startDate') ||
+                  querySource.includes(':endDate')) && (
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: theme.warningText,
+                      marginTop: 4,
+                    }}
+                  >
+                    <Trans>
+                      Your query uses date variables but no time range is
+                      selected. Select a time range to provide values.
+                    </Trans>
+                  </div>
+                )}
+            </View>
             <View
               style={{
                 flexDirection: 'row',
@@ -444,6 +595,7 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
               <ChartConfigPanel
                 result={result ?? null}
                 chartSpec={chartSpec}
+                resolved={resolved}
                 onChartSpecChange={setChartSpec}
               />
             )}

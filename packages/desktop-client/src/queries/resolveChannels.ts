@@ -160,7 +160,12 @@ export function resolveChannels(
   }
 
   const yIsArray = Array.isArray(encoding.y);
-  if (yIsArray && encoding.series) {
+  const yFieldCount = yIsArray
+    ? (encoding.y as ChannelDef[]).length
+    : encoding.y
+      ? 1
+      : 0;
+  if (yFieldCount > 1 && encoding.series) {
     errors.push(
       'Multiple Y fields and Series channel are mutually exclusive. ' +
         'Use a single Y channel with Series to create stacks, or use multiple Y channels for grouped series.',

@@ -213,16 +213,6 @@ export function EncodingConfig({
     });
   };
 
-  const handleStackChange = (value: string) => {
-    onChartSpecChange({
-      ...chartSpec,
-      config: {
-        ...chartSpec.config,
-        stack: value === 'none' ? undefined : (value as 'stack' | 'normalize'),
-      },
-    });
-  };
-
   const selectedXFields = useMemo(() => {
     const current = chartSpec.encoding.x;
     if (Array.isArray(current)) return current.map(ch => ch.field);
@@ -252,14 +242,6 @@ export function EncodingConfig({
     : chartSpec.mark === 'number'
       ? columnOptions.numeric
       : columnOptions.all;
-
-  const showStackConfig = ['column', 'bar', 'area'].includes(chartSpec.mark);
-  const stackOptions: Array<readonly [string, string]> = [
-    ['none', t('None')],
-    ['stack', t('Stacked')],
-    ['normalize', t('100%')],
-  ];
-  const stackValue = chartSpec.config?.stack ?? 'none';
 
   return (
     <View style={{ gap: 12 }}>
@@ -351,16 +333,6 @@ export function EncodingConfig({
             ])}
             onChange={handleSeriesChange}
             defaultLabel={t('(none)')}
-          />
-        </Field>
-      )}
-
-      {result && showStackConfig && (
-        <Field label={t('Stack')}>
-          <Select
-            value={stackValue}
-            options={stackOptions}
-            onChange={handleStackChange}
           />
         </Field>
       )}

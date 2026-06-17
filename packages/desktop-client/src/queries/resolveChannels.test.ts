@@ -394,8 +394,9 @@ describe('resolveChannels', () => {
       expect(Array.isArray(resolved.encoding.y)).toBe(false);
     });
 
-    it('errors on y[] + series combination', () => {
+    it('allows single-element y[] + series without error', () => {
       const result = makeResult([
+        { name: 'month', type: 'date-month' },
         { name: 'category', type: 'string' },
         { name: 'amount', type: 'float' },
       ]);
@@ -403,6 +404,22 @@ describe('resolveChannels', () => {
         mark: 'column',
         encoding: {
           y: [{ field: 'amount' }],
+          series: { field: 'category' },
+        },
+      };
+      const resolved = resolveChannels(spec, result);
+      expect(resolved.errors).toEqual([]);
+    });
+
+    it('errors on y[] + series combination when y[] has more than 1 field', () => {
+      const result = makeResult([
+        { name: 'category', type: 'string' },
+        { name: 'amount', type: 'float' },
+      ]);
+      const spec: ChartSpec = {
+        mark: 'column',
+        encoding: {
+          y: [{ field: 'amount' }, { field: 'amount' }],
           series: { field: 'category' },
         },
       };

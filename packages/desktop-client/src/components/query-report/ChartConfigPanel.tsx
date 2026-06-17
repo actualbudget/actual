@@ -20,10 +20,15 @@ import { ConditionalRuleEditor } from './ConditionalRuleEditor';
 
 import { LabeledCheckbox } from '@desktop-client/components/forms/LabeledCheckbox';
 import type { QueryResult } from '@desktop-client/queries/processQueryResult';
+import type {
+  ResolvedChannel,
+  ResolvedChartSpec,
+} from '@desktop-client/queries/resolveChannels';
 
 type ChartConfigPanelProps = {
   result: QueryResult | null;
   chartSpec: ChartSpec;
+  resolved: ResolvedChartSpec | null;
   onChartSpecChange: (next: ChartSpec) => void;
 };
 
@@ -44,29 +49,76 @@ function sectionVisibility(mark: Mark): {
   };
 }
 
-function getAllChannels(encoding: Encoding): Array<{
-  key: 'x' | 'y' | 'series' | 'size';
+type ChannelKey = 'x' | 'y' | 'series' | 'size';
+type ChannelEntry = {
+  key: ChannelKey;
   channel: ChannelDef;
   isArray: boolean;
   index?: number;
-}> {
-  const result: Array<{
-    key: 'x' | 'y' | 'series' | 'size';
-    channel: ChannelDef;
-    isArray: boolean;
-    index?: number;
-  }> = [];
+  autoAssigned?: boolean;
+};
+
+function resolvedToChannelDef(ch: ResolvedChannel): ChannelDef {
+  const def: ChannelDef = { field: ch.field };
+  if (ch.type !== undefined) def.type = ch.type;
+  if (ch.title !== undefined) def.title = ch.title;
+  if (ch.format !== undefined) def.format = ch.format;
+  if (ch.sort !== undefined) def.sort = ch.sort;
+  if (ch.aggregate !== undefined) def.aggregate = ch.aggregate;
+  return def;
+}
+
+function getAllChannels(
+  encoding: Encoding,
+  resolved: ResolvedChartSpec | null,
+): ChannelEntry[] {
+  const result: ChannelEntry[] = [];
+  const seen = new Set<string>();
+
   for (const key of ['x', 'y', 'series', 'size'] as const) {
     const ch = encoding[key];
     if (!ch) continue;
     if (Array.isArray(ch)) {
-      ch.forEach((c, i) =>
-        result.push({ key, channel: c, isArray: true, index: i }),
-      );
+      ch.forEach((c, i) => {
+        result.push({ key, channel: c, isArray: true, index: i });
+        seen.add(`${key}:${c.field}`);
+      });
     } else {
       result.push({ key, channel: ch, isArray: false });
+      seen.add(`${key}:${ch.field}`);
     }
   }
+
+  if (resolved) {
+    const resolvedEncoding = resolved.encoding;
+    for (const key of ['x', 'y', 'series', 'size'] as const) {
+      const ch = resolvedEncoding[key];
+      if (!ch) continue;
+      if (Array.isArray(ch)) {
+        ch.forEach((c, i) => {
+          if (!seen.has(`${key}:${c.field}`)) {
+            result.push({
+              key,
+              channel: resolvedToChannelDef(c),
+              isArray: true,
+              index: i,
+              autoAssigned: true,
+            });
+            seen.add(`${key}:${c.field}`);
+          }
+        });
+      } else if (!seen.has(`${key}:${ch.field}`)) {
+        result.push({
+          key,
+          channel: resolvedToChannelDef(ch),
+          isArray: false,
+          autoAssigned: true,
+        });
+        seen.add(`${key}:${ch.field}`);
+      }
+    }
+  }
+
   return result;
 }
 
@@ -97,23 +149,64 @@ function formatOptionsForType(type: string): Array<readonly [string, string]> {
 
 function updateChannel(
   chartSpec: ChartSpec,
-  key: 'x' | 'y' | 'series' | 'size',
-  isArray: boolean,
-  index: number | undefined,
+  key: ChannelKey,
+  entry: ChannelEntry,
   patch: Partial<ChannelDef>,
   onChartSpecChange: (next: ChartSpec) => void,
 ) {
   const encoding = chartSpec.encoding;
   const current = encoding[key];
-  if (isArray && Array.isArray(current) && index !== undefined) {
+
+  if (entry.autoAssigned) {
+    const existing = Array.isArray(current)
+      ? current.find(c => c.field === entry.channel.field)
+      : current &&
+          !Array.isArray(current) &&
+          current.field === entry.channel.field
+        ? current
+        : undefined;
+
+    if (Array.isArray(current)) {
+      if (existing) {
+        const nextArr = current.map(c =>
+          c.field === entry.channel.field ? { ...c, ...patch } : c,
+        );
+        onChartSpecChange({
+          ...chartSpec,
+          encoding: { ...encoding, [key]: nextArr },
+        });
+      } else {
+        onChartSpecChange({
+          ...chartSpec,
+          encoding: {
+            ...encoding,
+            [key]: [...current, { ...entry.channel, ...patch }],
+          },
+        });
+      }
+    } else if (existing) {
+      onChartSpecChange({
+        ...chartSpec,
+        encoding: { ...encoding, [key]: { ...existing, ...patch } },
+      });
+    } else {
+      onChartSpecChange({
+        ...chartSpec,
+        encoding: { ...encoding, [key]: { ...entry.channel, ...patch } },
+      });
+    }
+    return;
+  }
+
+  if (entry.isArray && Array.isArray(current) && entry.index !== undefined) {
     const nextArr = current.map((c, i) =>
-      i === index ? { ...c, ...patch } : c,
+      i === entry.index ? { ...c, ...patch } : c,
     );
     onChartSpecChange({
       ...chartSpec,
       encoding: { ...encoding, [key]: nextArr },
     });
-  } else if (!isArray && current && !Array.isArray(current)) {
+  } else if (!entry.isArray && current && !Array.isArray(current)) {
     onChartSpecChange({
       ...chartSpec,
       encoding: { ...encoding, [key]: { ...current, ...patch } },
@@ -124,14 +217,15 @@ function updateChannel(
 export function ChartConfigPanel({
   result,
   chartSpec,
+  resolved,
   onChartSpecChange,
 }: ChartConfigPanelProps) {
   const { t } = useTranslation();
   const visibility = sectionVisibility(chartSpec.mark);
 
   const allChannels = useMemo(
-    () => getAllChannels(chartSpec.encoding),
-    [chartSpec.encoding],
+    () => getAllChannels(chartSpec.encoding, resolved),
+    [chartSpec.encoding, resolved],
   );
 
   const rules = chartSpec.config?.conditionalRules ?? [];
@@ -262,65 +356,21 @@ export function ChartConfigPanel({
           <div style={{ fontSize: 12, color: theme.pageTextSubdued }}>
             <Trans>Value axis</Trans>
           </div>
-          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-            <Field label={t('Min')}>
-              <Input
-                type="number"
-                value={valueAxis.min !== undefined ? String(valueAxis.min) : ''}
-                onChangeValue={v =>
-                  updateAxes({
-                    valueAxis: {
-                      ...valueAxis,
-                      ...(v === '' ? { min: undefined } : { min: Number(v) }),
-                    },
-                  })
-                }
-              />
-            </Field>
-            <Field label={t('Max')}>
-              <Input
-                type="number"
-                value={valueAxis.max !== undefined ? String(valueAxis.max) : ''}
-                onChangeValue={v =>
-                  updateAxes({
-                    valueAxis: {
-                      ...valueAxis,
-                      ...(v === '' ? { max: undefined } : { max: Number(v) }),
-                    },
-                  })
-                }
-              />
-            </Field>
-            <Field label={t('Label')}>
-              <Input
-                value={valueAxis.labelOverride ?? ''}
-                onChangeValue={v =>
-                  updateAxes({
-                    valueAxis: {
-                      ...valueAxis,
-                      ...(v
-                        ? { labelOverride: v }
-                        : { labelOverride: undefined }),
-                    },
-                  })
-                }
-              />
-            </Field>
-          </View>
-          <LabeledCheckbox
-            id="chart-config-logarithmic"
-            checked={valueAxis.logarithmic ?? false}
-            onChange={() =>
-              updateAxes({
-                valueAxis: {
-                  ...valueAxis,
-                  logarithmic: !valueAxis.logarithmic,
-                },
-              })
-            }
-          >
-            <Trans>Logarithmic scale</Trans>
-          </LabeledCheckbox>
+          <Field label={t('Label')}>
+            <Input
+              value={valueAxis.labelOverride ?? ''}
+              onChangeValue={v =>
+                updateAxes({
+                  valueAxis: {
+                    ...valueAxis,
+                    ...(v
+                      ? { labelOverride: v }
+                      : { labelOverride: undefined }),
+                  },
+                })
+              }
+            />
+          </Field>
           <div
             style={{ fontSize: 12, color: theme.pageTextSubdued, marginTop: 8 }}
           >
@@ -384,6 +434,18 @@ export function ChartConfigPanel({
                   }}
                 >
                   {entry.key.toUpperCase()}: {entry.channel.field}
+                  {entry.autoAssigned && (
+                    <span
+                      style={{
+                        fontSize: 11,
+                        color: theme.pageTextSubdued,
+                        marginLeft: 4,
+                        fontWeight: 400,
+                      }}
+                    >
+                      (auto)
+                    </span>
+                  )}
                 </div>
                 <Field label={t('Label')}>
                   <Input
@@ -392,8 +454,7 @@ export function ChartConfigPanel({
                       updateChannel(
                         chartSpec,
                         entry.key,
-                        entry.isArray,
-                        entry.index,
+                        entry,
                         { title: v === entry.channel.field ? undefined : v },
                         onChartSpecChange,
                       )
@@ -408,8 +469,7 @@ export function ChartConfigPanel({
                       updateChannel(
                         chartSpec,
                         entry.key,
-                        entry.isArray,
-                        entry.index,
+                        entry,
                         v === 'default' ? { format: undefined } : { format: v },
                         onChartSpecChange,
                       )

@@ -1,13 +1,38 @@
 import * as monthUtils from 'loot-core/shared/months';
 
 import { getColorScale } from '@desktop-client/components/reports/chart-theme';
-import type { UseFormatResult } from '@desktop-client/hooks/useFormat';
+import type {
+  FormatType,
+  UseFormatResult,
+} from '@desktop-client/hooks/useFormat';
 import type { QueryResultColumn } from '@desktop-client/queries/processQueryResult';
 import type { ResolvedChannel } from '@desktop-client/queries/resolveChannels';
 
 export function getSeriesColor(index: number): string {
   const colors = getColorScale('qualitative');
   return colors[index % colors.length];
+}
+
+export function channelFormatType(
+  channel: ResolvedChannel | ResolvedChannel[] | undefined,
+  fallback: FormatType = 'financial-no-decimals',
+): FormatType {
+  const ch = Array.isArray(channel) ? channel[0] : channel;
+  if (!ch?.format) return fallback;
+  switch (ch.format) {
+    case 'financial':
+      return 'financial';
+    case 'financial-no-decimals':
+      return 'financial-no-decimals';
+    case 'financial-with-sign':
+      return 'financial-with-sign';
+    case 'number':
+      return 'number';
+    case 'percent':
+      return 'percentage';
+    default:
+      return fallback;
+  }
 }
 
 export function getAxisFormatter(

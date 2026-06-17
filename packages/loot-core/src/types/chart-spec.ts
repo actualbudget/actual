@@ -72,9 +72,6 @@ export type ConditionalColorScaleRule = {
 export type ConditionalRule = ConditionalSingleRule | ConditionalColorScaleRule;
 
 export type ValueAxisConfig = {
-  min?: number;
-  max?: number;
-  logarithmic?: boolean;
   labelOverride?: string;
 };
 
