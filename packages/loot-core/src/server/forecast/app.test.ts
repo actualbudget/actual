@@ -1,12 +1,14 @@
 import MockDate from 'mockdate';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { createAllBudgets } from '#server/budget/base';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
 import {
   createSchedule as createScheduleBase,
   getRuleForSchedule,
 } from '#server/schedules/app';
+import * as sheet from '#server/sheet';
 import { loadRules, updateRule } from '#server/transactions/transaction-rules';
 import type { RuleConditionEntity } from '#types/models';
 
@@ -19,6 +21,106 @@ const { emptyDatabase } = global as typeof globalThis & {
 const createSchedule = createScheduleBase as (args: {
   conditions: RuleConditionEntity[];
 }) => Promise<string>;
+
+async function createForecastWithPostedMonthlySchedule({
+  txId,
+  txDate,
+}: {
+  txId: string;
+  txDate: string;
+}) {
+  const accountId = await db.insertAccount({ id: 'acct', name: 'Checking' });
+  const salaryAmount = 500_000;
+
+  const scheduleId = await createSchedule({
+    conditions: [
+      { op: 'is', field: 'account', value: accountId },
+      { op: 'is', field: 'amount', value: salaryAmount },
+      {
+        op: 'is',
+        field: 'date',
+        value: {
+          start: '2024-03-10',
+          frequency: 'monthly',
+        },
+      },
+    ] satisfies RuleConditionEntity[],
+  });
+
+  await db.insertTransaction({
+    id: txId,
+    account: accountId,
+    amount: salaryAmount,
+    date: txDate,
+    schedule: scheduleId,
+  });
+
+  const result = await generateForecast({
+    accountIds: [accountId],
+    startDate: '2024-03-01',
+    endDate: '2024-04-30',
+  });
+
+  return {
+    salaryAmount,
+    balanceByDate: Object.fromEntries(
+      result.dataPoints.map(({ date, balance }) => [date, balance]),
+    ),
+    dataPointByDate: Object.fromEntries(
+      result.dataPoints.map(dataPoint => [dataPoint.date, dataPoint]),
+    ),
+  };
+}
+
+async function createForecastWithPostedDailySchedule({
+  txId,
+  txDate,
+}: {
+  txId: string;
+  txDate: string;
+}) {
+  const accountId = await db.insertAccount({ id: 'acct', name: 'Checking' });
+  const amount = -5_000;
+
+  const scheduleId = await createSchedule({
+    conditions: [
+      { op: 'is', field: 'account', value: accountId },
+      { op: 'is', field: 'amount', value: amount },
+      {
+        op: 'is',
+        field: 'date',
+        value: {
+          start: '2024-03-10',
+          frequency: 'daily',
+        },
+      },
+    ] satisfies RuleConditionEntity[],
+  });
+
+  await db.insertTransaction({
+    id: txId,
+    account: accountId,
+    amount,
+    date: txDate,
+    schedule: scheduleId,
+  });
+
+  const result = await generateForecast({
+    accountIds: [accountId],
+    startDate: '2024-03-10',
+    endDate: '2024-03-12',
+  });
+
+  return {
+    amount,
+    balanceByDate: Object.fromEntries(
+      result.dataPoints.map(({ date, balance }) => [date, balance]),
+    ),
+    dataPointByDate: Object.fromEntries(
+      result.dataPoints.map(dataPoint => [dataPoint.date, dataPoint]),
+    ),
+  };
+}
 
 beforeEach(async () => {
   await emptyDatabase()();
@@ -95,6 +197,52 @@ describe('forecast app', () => {
       accountId: '',
       accountName: '',
     });
+  });
+
+  it('generates tracking budget forecasts only for tracking budget files', async () => {
+    await expect(
+      generateForecast({
+        source: 'tracking-budget',
+        startDate: '2024-03-01',
+        endDate: '2024-03-31',
+      }),
+    ).rejects.toThrow(
+      'Tracking budget forecasts require a Tracking Budget file.',
+    );
+
+    await sheet.loadSpreadsheet(db);
+    sheet.get().meta().budgetType = 'tracking';
+    await db.update('preferences', { id: 'budgetType', value: 'tracking' });
+    await db.insertCategoryGroup({ id: 'expenses', name: 'Expenses' });
+    await db.insertCategoryGroup({
+      id: 'income',
+      name: 'Income',
+      is_income: 1,
+    });
+    await createAllBudgets();
+    await db.insertAccount({ id: 'acct', name: 'Checking' });
+    await db.insertTransaction({
+      id: 'starting-deposit',
+      account: 'acct',
+      amount: 1000,
+      date: '2024-01-05',
+    });
+
+    const result = await generateForecast({
+      source: 'tracking-budget',
+      startDate: '2024-03-01',
+      endDate: '2024-03-31',
+    });
+
+    expect(result.dataPoints).toMatchObject([
+      {
+        date: '2024-03-31',
+        balance: 1000,
+        accountId: 'tracking-budget',
+        accountName: 'Tracking Budget',
+        transactions: [],
+      },
+    ]);
   });
 
   it('ignores reconstructed schedule occurrences before today', async () => {
@@ -383,6 +531,39 @@ describe('forecast app', () => {
     expect(balanceByDate['2024-03-09']).toBe(0);
     expect(balanceByDate['2024-03-10']).toBe(100);
     expect(balanceByDate['2024-03-31']).toBe(100);
+  });
+
+  it('does not double-count schedule occurrences already posted on the due date', async () => {
+    const { salaryAmount, balanceByDate, dataPointByDate } =
+      await createForecastWithPostedMonthlySchedule({
+        txId: 'posted-salary',
+        txDate: '2024-03-10',
+      });
+
+    expect(balanceByDate['2024-03-09']).toBe(0);
+    expect(balanceByDate['2024-03-10']).toBe(salaryAmount);
+    expect(balanceByDate['2024-04-09']).toBe(salaryAmount);
+    expect(balanceByDate['2024-04-10']).toBe(salaryAmount * 2);
+    expect(dataPointByDate['2024-03-10'].transactions).toEqual([]);
+  });
+
+  it('does not double-count daily recurring schedule occurrences with op is posted on the due date', async () => {
+    const { amount, balanceByDate, dataPointByDate } =
+      await createForecastWithPostedDailySchedule({
+        txId: 'posted-daily',
+        txDate: '2024-03-10',
+      });
+
+    expect(balanceByDate['2024-03-10']).toBe(amount);
+    expect(dataPointByDate['2024-03-10'].transactions).toEqual([]);
+    expect(dataPointByDate['2024-03-11']).toMatchObject({
+      balance: amount * 2,
+      transactions: [{ amount }],
+    });
+    expect(dataPointByDate['2024-03-12']).toMatchObject({
+      balance: amount * 3,
+      transactions: [{ amount }],
+    });
   });
 
   it('filters future schedule occurrences using rule-derived fields like category', async () => {

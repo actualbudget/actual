@@ -1057,11 +1057,13 @@ async function enableBankingStartAuth({
   country,
   redirectUrl,
   maxConsentValidity,
+  psuType = 'personal',
 }: {
   aspspId: string;
   country: string;
   redirectUrl: string;
   maxConsentValidity?: number;
+  psuType?: 'personal' | 'business';
 }) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -1086,7 +1088,12 @@ async function enableBankingStartAuth({
 
   return post(
     serverConfig.ENABLEBANKING_SERVER + '/start-auth',
-    { aspsp: { name: aspspId, country }, redirectUrl, maxConsentValidity },
+    {
+      aspsp: { name: aspspId, country },
+      redirectUrl,
+      maxConsentValidity,
+      psuType,
+    },
     {
       'X-ACTUAL-TOKEN': userToken,
     },
@@ -1368,6 +1375,18 @@ function getBankSyncStatusFromError(
 
     if (err.category === 'ACCOUNT_NEEDS_ATTENTION') {
       return 'attention-required';
+    }
+
+    if (err.category === 'RATE_LIMIT_EXCEEDED') {
+      return 'rate-limit-exceeded';
+    }
+
+    if (err.category === 'TIMED_OUT') {
+      return 'timed-out';
+    }
+
+    if (err.category === 'ACCOUNT_MISSING') {
+      return 'account-missing';
     }
   }
 
