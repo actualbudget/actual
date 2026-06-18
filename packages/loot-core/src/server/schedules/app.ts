@@ -123,14 +123,22 @@ export function updateConditions(conditions, newConditions) {
 // also carry a plain `set amount` *action* (e.g. when customized via "Edit as
 // rule"). Posting a scheduled transaction runs the rule, so a stale action
 // would revert the posted amount to the old value, ignoring the edited
-// amount. Keep such actions in sync with the amount condition. Templated and
-// `set-split-amount` actions compute their own value and are left untouched.
+// amount. Keep such actions in sync with the amount condition.
+//
+// Only plain `set amount` actions are rewritten:
+//   - Templated/formula actions (`options.template`/`options.formula`) compute
+//     their own value, so they're left untouched.
+//   - `set-split-amount` actions have a different `op` and so are excluded by
+//     the `action.op === 'set'` check below.
 function updateAmountActions(conditions, actions) {
   const { amount: amountCond } = extractScheduleConds(conditions);
   if (amountCond == null) {
     return null;
   }
 
+  // Mirrors how `_amount` resolves: a deleted/empty amount condition value
+  // yields 0, so the action is synced to 0 too, keeping it consistent with
+  // the amount the schedule actually posts.
   const amount = getScheduledAmount(amountCond.value);
 
   let changed = false;
