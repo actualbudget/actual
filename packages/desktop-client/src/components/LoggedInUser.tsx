@@ -28,13 +28,11 @@ import { useMultiuserEnabled, useServerURL } from './ServerContext';
 type LoggedInUserProps = {
   hideIfNoServer?: boolean;
   style?: CSSProperties;
-  color?: string;
 };
 
 export function LoggedInUser({
   hideIfNoServer,
   style,
-  color,
 }: LoggedInUserProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -226,7 +224,6 @@ export function LoggedInUser({
         ref={triggerRef}
         variant="bare"
         onPress={() => setMenuOpen(true)}
-        // style={{ color: color || color: theme.buttonBareText }}
       >
         {serverMessage()}
       </Button>
