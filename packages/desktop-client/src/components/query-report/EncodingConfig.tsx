@@ -455,14 +455,14 @@ export function EncodingConfig({
         ))}
 
       {(isMultiXMark(chartSpec.mark) || isMultiYMark(chartSpec.mark)) && (
-        <View style={{ alignItems: 'flex-end', marginBottom: 4 }}>
+        <View style={{ alignItems: 'flex-end' }}>
           <Button
             variant="bare"
             onPress={handleAuto}
             style={{ fontSize: 11, padding: '2px 6px' }}
           >
             <SvgBolt width={12} height={12} style={{ marginRight: 4 }} />
-            <Trans>Auto</Trans>
+            <Trans>Reset to auto</Trans>
           </Button>
         </View>
       )}
