@@ -10,7 +10,9 @@ export function escapeCsvField(value: string): string {
   if (
     sanitized.includes(',') ||
     sanitized.includes('"') ||
-    sanitized.includes('\n')
+    sanitized.includes('\n') ||
+    sanitized.includes('\r') ||
+    sanitized.includes('\t')
   ) {
     return `"${sanitized.replace(/"/g, '""')}"`;
   }
