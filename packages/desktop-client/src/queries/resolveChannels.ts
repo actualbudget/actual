@@ -297,19 +297,24 @@ export function resolveChannels(
     case 'table': {
       const xIsEmpty =
         !resolvedX || (Array.isArray(resolvedX) && resolvedX.length === 0);
-      if (xIsEmpty && resolvedY) {
-        const candidates = nonIdDimensions(roles);
-        if (candidates.length > 0) {
-          resolvedX = candidates.map(field => ({
-            field,
-            type: inferFieldType(field, columns),
-            autoAssigned: true,
-          }));
-        }
+      const yIsEmpty =
+        !resolvedY || (Array.isArray(resolvedY) && resolvedY.length === 0);
+      if (xIsEmpty && yIsEmpty) {
+        resolvedX = nonIdDimensions(roles).map(field => ({
+          field,
+          type: inferFieldType(field, columns),
+          autoAssigned: true,
+        }));
+        resolvedY = roles.measureColumns.map(field => ({
+          field,
+          type: 'number' as const,
+          autoAssigned: true,
+        }));
       }
+
       if (resolvedSeries) {
         warnings.push(
-          'Series channel is not used on number marks and will be ignored.',
+          'Series channel is not used on table marks and will be ignored.',
         );
       }
       break;

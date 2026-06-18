@@ -42,15 +42,19 @@ describe('resolveChannels', () => {
       }
     });
 
-    it('leaves channels unbound when no encoding provided', () => {
+    it('auto-assigns x and y when no encoding provided', () => {
       const result = makeResult([
         { name: 'category', type: 'string' },
         { name: 'amount', type: 'float' },
       ]);
       const spec: ChartSpec = { mark: 'table', encoding: {} };
       const resolved = resolveChannels(spec, result);
-      expect(resolved.encoding.x).toBeUndefined();
-      expect(resolved.encoding.y).toBeUndefined();
+      expect(Array.isArray(resolved.encoding.x)).toBe(true);
+      expect(resolved.encoding.x?.[0]?.field).toBe('category');
+      expect(resolved.encoding.x?.[0]?.autoAssigned).toBe(true);
+      expect(Array.isArray(resolved.encoding.y)).toBe(true);
+      expect(resolved.encoding.y?.[0]?.field).toBe('amount');
+      expect(resolved.encoding.y?.[0]?.autoAssigned).toBe(true);
       expect(resolved.encoding.color).toBeUndefined();
     });
 
@@ -64,7 +68,7 @@ describe('resolveChannels', () => {
       expect(resolved.encoding.x?.type).toBe('date');
     });
 
-    it('auto-assigns x to all non-id dimensions when only y is bound', () => {
+    it('does not auto-assign x when only y is bound for table marks', () => {
       const result = makeResult([
         { name: 'category', type: 'string' },
         { name: 'amount', type: 'float' },
@@ -74,12 +78,7 @@ describe('resolveChannels', () => {
         encoding: { y: { field: 'amount' } },
       };
       const resolved = resolveChannels(spec, result);
-      expect(Array.isArray(resolved.encoding.x)).toBe(true);
-      if (Array.isArray(resolved.encoding.x)) {
-        expect(resolved.encoding.x[0]?.field).toBe('category');
-        expect(resolved.encoding.x[0]?.type).toBe('category');
-        expect(resolved.encoding.x[0]?.autoAssigned).toBe(true);
-      }
+      expect(resolved.encoding.x).toBeUndefined();
     });
 
     it('resolves x as array of two fields with types inferred', () => {
@@ -564,7 +563,7 @@ describe('resolveChannels', () => {
       };
       const resolved = resolveChannels(spec, result);
       expect(resolved.warnings).toContain(
-        'Series channel is not used on number marks and will be ignored.',
+        'Series channel is not used on table marks and will be ignored.',
       );
       expect(resolved.encoding.series).toBeUndefined();
     });

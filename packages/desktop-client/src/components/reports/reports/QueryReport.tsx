@@ -1,4 +1,11 @@
-import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
@@ -161,6 +168,24 @@ const TIME_RANGE_OPTIONS: Array<readonly [TimeRangeValue, string]> = [
   ['allTime', 'All time'],
 ];
 
+function getAllSelectedFields(encoding: ChartSpec['encoding']): string[] {
+  if (!encoding) return [];
+  const fields: string[] = [];
+  for (const key of ['x', 'y', 'series', 'color', 'size', 'text'] as const) {
+    const ch = encoding[key];
+    if (!ch) continue;
+    if (Array.isArray(ch)) {
+      fields.push(...ch.map(c => c.field));
+    } else {
+      fields.push(ch.field);
+    }
+  }
+  if (encoding.tooltip) {
+    fields.push(...encoding.tooltip.map(c => c.field));
+  }
+  return fields;
+}
+
 export function QueryReport() {
   const params = useParams();
   const { data: widget, isPending } = useDashboardWidget<QueryReportWidget>({
@@ -213,6 +238,26 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
     () => (result ? resolveChannels(chartSpec, result) : null),
     [chartSpec, result],
   );
+
+  useEffect(() => {
+    if (!result) return;
+
+    const validColumnNames = new Set(result.columns.map(c => c.name));
+    const selectedFields = getAllSelectedFields(chartSpec.encoding);
+    const hasStaleFields = selectedFields.some(f => !validColumnNames.has(f));
+
+    if (hasStaleFields) {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'message',
+            message: t('Query result changed; visualization reset.'),
+          },
+        }),
+      );
+      setChartSpec(prev => ({ ...prev, encoding: {} }));
+    }
+  }, [result, t, dispatch, chartSpec.encoding]);
 
   const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
 
@@ -553,62 +598,49 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
                 query to reference the selected time range.
               </Trans>
             </div>
-          </View>
-          <View
-            style={{
-              padding: 20,
-              borderTop: `1px solid ${theme.tableBorder}`,
-              backgroundColor: theme.pageBackground,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 12,
-              flexShrink: 0,
-            }}
-          >
             <div
               style={{
                 fontSize: 13,
                 color: theme.pageTextSubdued,
+                marginTop: 16,
+              }}
+            >
+              <Trans>Time range</Trans>
+            </div>
+            <Select
+              value={timeRange}
+              options={TIME_RANGE_OPTIONS.map(([value, label]) => [
+                value,
+                t(label),
+              ])}
+              onChange={v => setTimeRange(v as TimeRangeValue)}
+            />
+            {timeRange === 'none' &&
+              (querySource.includes(':startDate') ||
+                querySource.includes(':endDate')) && (
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: theme.warningText,
+                    marginTop: 4,
+                  }}
+                >
+                  <Trans>
+                    Your query uses date variables but no time range is
+                    selected. Select a time range to provide values.
+                  </Trans>
+                </div>
+              )}
+            <div
+              style={{
+                fontSize: 13,
+                color: theme.pageTextSubdued,
+                marginTop: 16,
               }}
             >
               <Trans>Visualization</Trans>
             </div>
             <MarkSelector value={chartSpec} onChange={handleMarkChange} />
-            <View>
-              <div
-                style={{
-                  fontSize: 12,
-                  color: theme.pageTextSubdued,
-                  marginBottom: 4,
-                }}
-              >
-                <Trans>Time range</Trans>
-              </div>
-              <Select
-                value={timeRange}
-                options={TIME_RANGE_OPTIONS.map(([value, label]) => [
-                  value,
-                  t(label),
-                ])}
-                onChange={v => setTimeRange(v as TimeRangeValue)}
-              />
-              {timeRange === 'none' &&
-                (querySource.includes(':startDate') ||
-                  querySource.includes(':endDate')) && (
-                  <div
-                    style={{
-                      fontSize: 11,
-                      color: theme.warningText,
-                      marginTop: 4,
-                    }}
-                  >
-                    <Trans>
-                      Your query uses date variables but no time range is
-                      selected. Select a time range to provide values.
-                    </Trans>
-                  </div>
-                )}
-            </View>
             <View
               style={{
                 flexDirection: 'row',
@@ -632,11 +664,13 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
               </Button>
             </View>
             {activeTab === 'encoding' && (
-              <EncodingConfig
-                result={result ?? null}
-                chartSpec={chartSpec}
-                onChartSpecChange={setChartSpec}
-              />
+              <View style={{ marginTop: 12 }}>
+                <EncodingConfig
+                  result={result ?? null}
+                  chartSpec={chartSpec}
+                  onChartSpecChange={setChartSpec}
+                />
+              </View>
             )}
             {activeTab === 'customize' && (
               <ChartConfigPanel

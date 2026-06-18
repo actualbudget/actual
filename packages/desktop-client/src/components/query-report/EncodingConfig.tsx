@@ -2,6 +2,9 @@ import { useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
+import { SvgCheckAll, SvgUncheckAll } from '@actual-app/components/icons/v2';
+import { SvgRefreshArrow } from '@actual-app/components/icons/v2';
 import { Select } from '@actual-app/components/select';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -9,10 +12,14 @@ import { View } from '@actual-app/components/view';
 import type { ChannelDef, ChartSpec, Mark } from 'loot-core/types/chart-spec';
 
 import { Checkbox } from '@desktop-client/components/forms';
+import { GraphButton } from '@desktop-client/components/reports/GraphButton';
 import { toFieldType } from '@desktop-client/queries/chart-spec';
 import type { QueryResult } from '@desktop-client/queries/processQueryResult';
 import { resolveChannels } from '@desktop-client/queries/resolveChannels';
-import type { ResolvedChartSpec } from '@desktop-client/queries/resolveChannels';
+import type {
+  ResolvedChannel,
+  ResolvedChartSpec,
+} from '@desktop-client/queries/resolveChannels';
 
 type EncodingConfigProps = {
   result: QueryResult | null;
@@ -88,6 +95,41 @@ function inferTypeFromColumns(
   return toFieldType(col.type);
 }
 
+function resolvedChannelToChannelDef(ch: ResolvedChannel): ChannelDef {
+  return {
+    field: ch.field,
+    type: ch.type,
+    ...(ch.title ? { title: ch.title } : {}),
+    ...(ch.format ? { format: ch.format } : {}),
+    ...(ch.sort ? { sort: ch.sort } : {}),
+    ...(ch.aggregate ? { aggregate: ch.aggregate } : {}),
+  };
+}
+
+function materializeChannels(
+  chartSpec: ChartSpec,
+  resolved: ResolvedChartSpec,
+): ChartSpec {
+  return {
+    ...chartSpec,
+    encoding: {
+      ...chartSpec.encoding,
+      x: resolved.encoding.x
+        ? (Array.isArray(resolved.encoding.x)
+            ? resolved.encoding.x
+            : [resolved.encoding.x]
+          ).map(ch => resolvedChannelToChannelDef(ch))
+        : undefined,
+      y: resolved.encoding.y
+        ? (Array.isArray(resolved.encoding.y)
+            ? resolved.encoding.y
+            : [resolved.encoding.y]
+          ).map(ch => resolvedChannelToChannelDef(ch))
+        : undefined,
+    },
+  };
+}
+
 export function EncodingConfig({
   result,
   chartSpec,
@@ -125,34 +167,62 @@ export function EncodingConfig({
   };
 
   const handleXMultiToggle = (field: string) => {
-    if (!result) return;
-    const current = chartSpec.encoding.x;
-    const currentArray: ChannelDef[] = Array.isArray(current)
-      ? current
-      : current
-        ? [current]
-        : [];
-    const existing = currentArray.findIndex(ch => ch.field === field);
+    if (!result || !resolved) return;
 
-    if (existing >= 0) {
-      const next = currentArray.filter((_, i) => i !== existing);
+    const isTableMark = chartSpec.mark === 'table';
+    const specBeforeMaterialize = isTableMark
+      ? materializeChannels(chartSpec, resolved)
+      : chartSpec;
+
+    const currentEncoding = specBeforeMaterialize.encoding;
+    const currentX = currentEncoding.x;
+    const currentXArray: ChannelDef[] = Array.isArray(currentX)
+      ? currentX
+      : currentX
+        ? [currentX]
+        : [];
+    const existingX = currentXArray.findIndex(ch => ch.field === field);
+
+    if (existingX >= 0) {
+      const nextX = currentXArray.filter((_, i) => i !== existingX);
       onChartSpecChange({
-        ...chartSpec,
+        ...specBeforeMaterialize,
         encoding: {
-          ...chartSpec.encoding,
-          x: next.length > 0 ? next : undefined,
+          ...currentEncoding,
+          x:
+            nextX.length > 0
+              ? nextX.length === 1
+                ? nextX[0]
+                : nextX
+              : undefined,
         },
       });
     } else {
-      const next = [
-        ...currentArray,
+      const nextX = [
+        ...currentXArray,
         { field, type: inferTypeFromColumns(field, result) },
       ];
+
+      let nextY = currentEncoding.y;
+      if (isTableMark && currentEncoding.y) {
+        const currentYArray: ChannelDef[] = Array.isArray(currentEncoding.y)
+          ? currentEncoding.y
+          : [currentEncoding.y];
+        const filteredY = currentYArray.filter(ch => ch.field !== field);
+        nextY =
+          filteredY.length > 0
+            ? filteredY.length === 1
+              ? filteredY[0]
+              : filteredY
+            : undefined;
+      }
+
       onChartSpecChange({
-        ...chartSpec,
+        ...specBeforeMaterialize,
         encoding: {
-          ...chartSpec.encoding,
-          x: next,
+          ...currentEncoding,
+          x: nextX,
+          y: nextY,
         },
       });
     }
@@ -172,34 +242,62 @@ export function EncodingConfig({
   };
 
   const handleYMultiToggle = (field: string) => {
-    if (!result) return;
-    const current = chartSpec.encoding.y;
-    const currentArray: ChannelDef[] = Array.isArray(current)
-      ? current
-      : current
-        ? [current]
-        : [];
-    const existing = currentArray.findIndex(ch => ch.field === field);
+    if (!result || !resolved) return;
 
-    if (existing >= 0) {
-      const next = currentArray.filter((_, i) => i !== existing);
+    const isTableMark = chartSpec.mark === 'table';
+    const specBeforeMaterialize = isTableMark
+      ? materializeChannels(chartSpec, resolved)
+      : chartSpec;
+
+    const currentEncoding = specBeforeMaterialize.encoding;
+    const currentY = currentEncoding.y;
+    const currentYArray: ChannelDef[] = Array.isArray(currentY)
+      ? currentY
+      : currentY
+        ? [currentY]
+        : [];
+    const existingY = currentYArray.findIndex(ch => ch.field === field);
+
+    if (existingY >= 0) {
+      const nextY = currentYArray.filter((_, i) => i !== existingY);
       onChartSpecChange({
-        ...chartSpec,
+        ...specBeforeMaterialize,
         encoding: {
-          ...chartSpec.encoding,
-          y: next.length > 0 ? next : undefined,
+          ...currentEncoding,
+          y:
+            nextY.length > 0
+              ? nextY.length === 1
+                ? nextY[0]
+                : nextY
+              : undefined,
         },
       });
     } else {
-      const next = [
-        ...currentArray,
+      const nextY = [
+        ...currentYArray,
         { field, type: inferTypeFromColumns(field, result) },
       ];
+
+      let nextX = currentEncoding.x;
+      if (isTableMark && currentEncoding.x) {
+        const currentXArray: ChannelDef[] = Array.isArray(currentEncoding.x)
+          ? currentEncoding.x
+          : [currentEncoding.x];
+        const filteredX = currentXArray.filter(ch => ch.field !== field);
+        nextX =
+          filteredX.length > 0
+            ? filteredX.length === 1
+              ? filteredX[0]
+              : filteredX
+            : undefined;
+      }
+
       onChartSpecChange({
-        ...chartSpec,
+        ...specBeforeMaterialize,
         encoding: {
-          ...chartSpec.encoding,
-          y: next,
+          ...currentEncoding,
+          x: nextX,
+          y: nextY,
         },
       });
     }
@@ -215,19 +313,88 @@ export function EncodingConfig({
     });
   };
 
+  const handleXSelectAll = () => {
+    if (!result || !resolved) return;
+    const specBeforeMaterialize = materializeChannels(chartSpec, resolved);
+    const currentEncoding = specBeforeMaterialize.encoding;
+    const allCols = columnOptions.all.map(c => ({
+      field: c.value,
+      type: c.type as ChannelDef['type'],
+    }));
+    onChartSpecChange({
+      ...specBeforeMaterialize,
+      encoding: {
+        ...currentEncoding,
+        x: allCols.length === 1 ? allCols[0] : allCols,
+        y: undefined,
+      },
+    });
+  };
+
+  const handleXClear = () => {
+    if (!result || !resolved) return;
+    const specBeforeMaterialize = materializeChannels(chartSpec, resolved);
+    const currentEncoding = specBeforeMaterialize.encoding;
+    onChartSpecChange({
+      ...specBeforeMaterialize,
+      encoding: {
+        ...currentEncoding,
+        x: undefined,
+      },
+    });
+  };
+
+  const handleYSelectAll = () => {
+    if (!result || !resolved) return;
+    const specBeforeMaterialize = materializeChannels(chartSpec, resolved);
+    const currentEncoding = specBeforeMaterialize.encoding;
+    const numericCols = columnOptions.numeric.map(c => ({
+      field: c.value,
+      type: c.type as ChannelDef['type'],
+    }));
+    onChartSpecChange({
+      ...specBeforeMaterialize,
+      encoding: {
+        ...currentEncoding,
+        x: undefined,
+        y: numericCols.length === 1 ? numericCols[0] : numericCols,
+      },
+    });
+  };
+
+  const handleYClear = () => {
+    if (!result || !resolved) return;
+    const specBeforeMaterialize = materializeChannels(chartSpec, resolved);
+    const currentEncoding = specBeforeMaterialize.encoding;
+    onChartSpecChange({
+      ...specBeforeMaterialize,
+      encoding: {
+        ...currentEncoding,
+        y: undefined,
+      },
+    });
+  };
+
+  const handleAuto = () => {
+    if (!result) return;
+    onChartSpecChange({ ...chartSpec, encoding: {} });
+  };
+
   const selectedXFields = useMemo(() => {
-    const current = chartSpec.encoding.x;
+    if (!resolved) return [];
+    const current = resolved.encoding.x;
     if (Array.isArray(current)) return current.map(ch => ch.field);
     if (current) return [current.field];
     return [];
-  }, [chartSpec.encoding.x]);
+  }, [resolved]);
 
   const selectedYFields = useMemo(() => {
-    const current = chartSpec.encoding.y;
+    if (!resolved) return [];
+    const current = resolved.encoding.y;
     if (Array.isArray(current)) return current.map(ch => ch.field);
     if (current) return [current.field];
     return [];
-  }, [chartSpec.encoding.y]);
+  }, [resolved]);
 
   const xFieldForSelect =
     chartSpec.encoding.x && !Array.isArray(chartSpec.encoding.x)
@@ -244,6 +411,20 @@ export function EncodingConfig({
     : chartSpec.mark === 'number'
       ? columnOptions.numeric
       : columnOptions.all;
+
+  const autoAssignedXFields = useMemo(() => {
+    if (!resolved) return new Set<string>();
+    const current = resolved.encoding.x;
+    const arr = Array.isArray(current) ? current : current ? [current] : [];
+    return new Set(arr.filter(ch => ch.autoAssigned).map(ch => ch.field));
+  }, [resolved]);
+
+  const autoAssignedYFields = useMemo(() => {
+    if (!resolved) return new Set<string>();
+    const current = resolved.encoding.y;
+    const arr = Array.isArray(current) ? current : current ? [current] : [];
+    return new Set(arr.filter(ch => ch.autoAssigned).map(ch => ch.field));
+  }, [resolved]);
 
   return (
     <View style={{ gap: 12 }}>
@@ -283,11 +464,46 @@ export function EncodingConfig({
           }
         >
           {isMultiXMark(chartSpec.mark) ? (
-            <CheckboxList
-              options={columnOptions.all.map(c => c.value)}
-              selected={selectedXFields}
-              onToggle={handleXMultiToggle}
-            />
+            <View>
+              {chartSpec.mark === 'table' && (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    gap: 4,
+                    marginBottom: 8,
+                  }}
+                >
+                  <GraphButton
+                    title={t('Select all')}
+                    onSelect={handleXSelectAll}
+                    style={{ padding: 4 }}
+                  >
+                    <SvgCheckAll width={15} height={15} />
+                  </GraphButton>
+                  <GraphButton
+                    title={t('Clear')}
+                    onSelect={handleXClear}
+                    style={{ padding: 4 }}
+                  >
+                    <SvgUncheckAll width={15} height={15} />
+                  </GraphButton>
+                  <View style={{ flex: 1 }} />
+                  <GraphButton
+                    title={t('Auto')}
+                    onSelect={handleAuto}
+                    style={{ padding: 4 }}
+                  >
+                    <SvgRefreshArrow width={15} height={15} />
+                  </GraphButton>
+                </View>
+              )}
+              <CheckboxList
+                options={columnOptions.all.map(c => c.value)}
+                selected={selectedXFields}
+                onToggle={handleXMultiToggle}
+                autoAssignedFields={autoAssignedXFields}
+              />
+            </View>
           ) : (
             <View
               style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
@@ -310,17 +526,54 @@ export function EncodingConfig({
         <Field
           label={t(channelLabel(chartSpec.mark, 'y'))}
           help={
-            chartSpec.mark !== 'bar' && selectedYFields.length > 1
+            chartSpec.mark !== 'bar' &&
+            chartSpec.mark !== 'table' &&
+            selectedYFields.length > 1
               ? t('Each Y field creates a separate series in the chart.')
               : undefined
           }
         >
           {isMultiYMark(chartSpec.mark) ? (
-            <CheckboxList
-              options={yOptionsForMark.map(c => c.value)}
-              selected={selectedYFields}
-              onToggle={handleYMultiToggle}
-            />
+            <View>
+              {chartSpec.mark === 'table' && (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    gap: 4,
+                    marginBottom: 8,
+                  }}
+                >
+                  <GraphButton
+                    title={t('Select all')}
+                    onSelect={handleYSelectAll}
+                    style={{ padding: 4 }}
+                  >
+                    <SvgCheckAll width={15} height={15} />
+                  </GraphButton>
+                  <GraphButton
+                    title={t('Clear')}
+                    onSelect={handleYClear}
+                    style={{ padding: 4 }}
+                  >
+                    <SvgUncheckAll width={15} height={15} />
+                  </GraphButton>
+                  <View style={{ flex: 1 }} />
+                  <GraphButton
+                    title={t('Auto')}
+                    onSelect={handleAuto}
+                    style={{ padding: 4 }}
+                  >
+                    <SvgRefreshArrow width={15} height={15} />
+                  </GraphButton>
+                </View>
+              )}
+              <CheckboxList
+                options={yOptionsForMark.map(c => c.value)}
+                selected={selectedYFields}
+                onToggle={handleYMultiToggle}
+                autoAssignedFields={autoAssignedYFields}
+              />
+            </View>
           ) : (
             <View
               style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
@@ -364,7 +617,7 @@ type FieldProps = {
 
 function Field({ label, help, children }: FieldProps) {
   return (
-    <View>
+    <View style={{ marginBottom: 16 }}>
       <div
         style={{
           fontSize: 12,
@@ -400,9 +653,15 @@ type CheckboxListProps = {
   options: string[];
   selected: string[];
   onToggle: (col: string) => void;
+  autoAssignedFields?: Set<string>;
 };
 
-function CheckboxList({ options, selected, onToggle }: CheckboxListProps) {
+function CheckboxList({
+  options,
+  selected,
+  onToggle,
+  autoAssignedFields,
+}: CheckboxListProps) {
   if (options.length === 0) {
     return (
       <div style={{ fontSize: 12, color: theme.pageTextSubdued }}>
@@ -428,6 +687,7 @@ function CheckboxList({ options, selected, onToggle }: CheckboxListProps) {
             onChange={() => onToggle(col)}
           />
           {col}
+          {autoAssignedFields?.has(col) && <AutoLabel />}
         </label>
       ))}
     </View>
