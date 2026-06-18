@@ -1,13 +1,6 @@
 import type { CategoryEntity } from '@actual-app/core/types/models';
 
-function filterBaseCategories(
-  categories: CategoryEntity[],
-  showHiddenCategories: boolean,
-): CategoryEntity[] {
-  return categories.filter(
-    cat => !cat.is_income && (showHiddenCategories || !cat.hidden),
-  );
-}
+import { isBaseCategory } from './budget-analysis-spreadsheet';
 
 const makeCategory = (
   overrides: Partial<CategoryEntity> & Pick<CategoryEntity, 'id' | 'name'>,
@@ -37,6 +30,13 @@ const hiddenIncome = makeCategory({
 });
 
 const all = [visibleExpense, hiddenExpense, incomeCategory, hiddenIncome];
+
+function filterBaseCategories(
+  categories: CategoryEntity[],
+  showHiddenCategories: boolean,
+): CategoryEntity[] {
+  return categories.filter(cat => isBaseCategory(cat, showHiddenCategories));
+}
 
 describe('createBudgetAnalysisSpreadsheet', () => {
   describe('hidden category filtering', () => {
