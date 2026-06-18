@@ -21,9 +21,17 @@ export type BudgetAnalysisCsvLabels = {
   balance: string;
 };
 
+const DEFAULT_LABELS: BudgetAnalysisCsvLabels = {
+  month: 'Month',
+  budgeted: 'Budgeted',
+  spent: 'Spent',
+  overspendingAdjustment: 'Overspending Adjustment',
+  balance: 'Balance',
+};
+
 export function buildBudgetAnalysisCsv(
   rows: IntervalRow[],
-  labels: BudgetAnalysisCsvLabels,
+  labels: BudgetAnalysisCsvLabels = DEFAULT_LABELS,
 ): string {
   return buildCsv(
     [

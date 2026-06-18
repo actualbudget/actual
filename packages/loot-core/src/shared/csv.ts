@@ -11,8 +11,7 @@ export function escapeCsvField(value: string): string {
     sanitized.includes(',') ||
     sanitized.includes('"') ||
     sanitized.includes('\n') ||
-    sanitized.includes('\r') ||
-    sanitized.includes('\t')
+    sanitized.includes('\r')
   ) {
     return `"${sanitized.replace(/"/g, '""')}"`;
   }
