@@ -96,5 +96,11 @@ export default defineConfig({
       return type === 'stderr';
     },
     maxWorkers: 2,
+    reporters: process.env.CI
+      ? [
+          'default',
+          ['junit', { outputFile: './test-results/junit.xml', suiteName: 'api' }],
+        ]
+      : ['default'],
   },
 });

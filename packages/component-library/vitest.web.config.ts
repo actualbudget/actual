@@ -8,6 +8,18 @@ export default defineConfig({
     globals: true,
     include: ['src/**/*.web.test.(js|jsx|ts|tsx)'],
     maxWorkers: 2,
+    reporters: process.env.CI
+      ? [
+          'default',
+          [
+            'junit',
+            {
+              outputFile: './test-results/junit-web.xml',
+              suiteName: 'component-library (web)',
+            },
+          ],
+        ]
+      : ['default'],
   },
   plugins: [react(), peggyLoader()],
 });
