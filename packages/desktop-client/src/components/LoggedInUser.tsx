@@ -30,10 +30,7 @@ type LoggedInUserProps = {
   style?: CSSProperties;
 };
 
-export function LoggedInUser({
-  hideIfNoServer,
-  style,
-}: LoggedInUserProps) {
+export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -220,11 +217,7 @@ export function LoggedInUser({
 
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', ...style }}>
-      <Button
-        ref={triggerRef}
-        variant="bare"
-        onPress={() => setMenuOpen(true)}
-      >
+      <Button ref={triggerRef} variant="bare" onPress={() => setMenuOpen(true)}>
         {serverMessage()}
       </Button>
       {!loading &&

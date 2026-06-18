@@ -150,7 +150,7 @@
   --color-buttonBareDisabledBackground: var(--color-buttonBareBackground);
   --color-buttonBareBackgroundHover: rgba(200, 200, 200, 0.3);
   --color-buttonBareBackgroundActive: rgba(200, 200, 200, 0.5);
-  
+
   --color-noticeBackground: var(--palette-green800);
   --color-noticeBackgroundLight: var(--palette-green900);
   --color-noticeBackgroundDark: var(--palette-green500);
