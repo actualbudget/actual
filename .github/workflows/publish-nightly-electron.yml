@@ -29,7 +29,7 @@ jobs:
           - os: ubuntu-22.04
             runner: depot-ubuntu-22.04-4
           - os: windows-latest
-            runner: windows-latest
+            runner: depot-windows-2022
           - os: macos-latest
             runner: depot-macos-latest
     runs-on: ${{ matrix.runner }}

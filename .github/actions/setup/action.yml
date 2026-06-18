@@ -22,7 +22,7 @@ runs:
       uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
       with:
         node-version: 22
-        package-manager-cache: ${{ inputs.cache }}
+        package-manager-cache: false
     - name: Install yarn
       run: npm install -g yarn
       shell: bash
@@ -38,6 +38,15 @@ runs:
       with:
         path: ${{ format('{0}/**/node_modules', inputs.working-directory) }}
         key: yarn-v1-${{ runner.os }}-${{ steps.get-node.outputs.version }}-${{ hashFiles(format('{0}/**/yarn.lock', inputs.working-directory)) }}
+    - name: Cache Yarn download cache
+      uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+      if: ${{ inputs.cache == 'true' && steps.cache.outputs.cache-hit != 'true' }}
+      with:
+        path: ${{ format('{0}/.yarn/cache', inputs.working-directory) }}
+        key: yarn-dl-${{ runner.os }}-${{ steps.get-node.outputs.version }}-${{ hashFiles(format('{0}/**/yarn.lock', inputs.working-directory)) }}
+        restore-keys: |
+          yarn-dl-${{ runner.os }}-${{ steps.get-node.outputs.version }}-
+          yarn-dl-${{ runner.os }}-
     - name: Ensure Lage cache directory exists
       run: mkdir -p "$WORKING_DIRECTORY/.lage"
       shell: bash
