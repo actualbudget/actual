@@ -172,6 +172,19 @@ export function resolveChannels(
     );
   }
 
+  const xIsArray = Array.isArray(encoding.x);
+  const xFieldCount = xIsArray
+    ? (encoding.x as ChannelDef[]).length
+    : encoding.x
+      ? 1
+      : 0;
+  if (xFieldCount > 1 && encoding.series && spec.mark === 'bar') {
+    errors.push(
+      'Multiple X fields and Series channel are mutually exclusive on bar marks. ' +
+        'Use a single X channel with Series to create stacks, or use multiple X channels for grouped series.',
+    );
+  }
+
   if (encoding.size && spec.mark !== 'point') {
     warnings.push(
       `Size channel is only supported on point marks, not on "${spec.mark}". The size channel will be ignored.`,
@@ -335,12 +348,11 @@ export function resolveChannels(
       break;
     }
 
-    case 'column':
-    case 'bar': {
+    case 'column': {
       if (Array.isArray(resolvedX)) {
         if (resolvedX.length > 1) {
           warnings.push(
-            'Multiple X fields are not supported on column/bar marks. Only the first field will be used.',
+            'Multiple X fields are not supported on column marks. Only the first field will be used.',
           );
         }
         resolvedX = resolvedX[0];
@@ -367,6 +379,39 @@ export function resolveChannels(
             type: 'number' as const,
             autoAssigned: true,
           }));
+        }
+      }
+      break;
+    }
+
+    case 'bar': {
+      // Bar: X = value (horizontal), Y = category (vertical)
+      if (!resolvedX) {
+        const candidate = roles.measureColumns[0];
+        if (candidate) {
+          resolvedX = {
+            field: candidate,
+            type: 'number',
+            autoAssigned: true,
+          };
+        } else {
+          warnings.push(
+            'Bar mark expects a numeric X field, but the query has no numeric columns.',
+          );
+        }
+      } else if (!Array.isArray(resolvedX) && resolvedX.type !== 'number') {
+        warnings.push(
+          'Bar mark expects X (horizontal axis) to be a numeric field. Consider using a column mark for categorical X-axis data.',
+        );
+      }
+      if (!resolvedY) {
+        const candidate = roles.timeColumns[0] ?? nonIdDimensions(roles)[0];
+        if (candidate) {
+          resolvedY = {
+            field: candidate,
+            type: inferFieldType(candidate, columns),
+            autoAssigned: true,
+          };
         }
       }
       break;

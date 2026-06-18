@@ -309,7 +309,7 @@ describe('resolveChannels', () => {
       };
       const resolved = resolveChannels(spec, result);
       expect(resolved.warnings).toContain(
-        'Multiple X fields are not supported on column/bar marks. Only the first field will be used.',
+        'Multiple X fields are not supported on column marks. Only the first field will be used.',
       );
       expect(resolved.encoding.x?.field).toBe('month');
     });
@@ -332,6 +332,106 @@ describe('resolveChannels', () => {
         'Multiple X fields are not supported on line/area marks. Only the first field will be used.',
       );
       expect(resolved.encoding.x?.field).toBe('month');
+    });
+  });
+
+  describe('mark-specific auto-assignment (bar)', () => {
+    it('auto-assigns x to first measure (numeric) and y to first time/dimension', () => {
+      const result = makeResult([
+        { name: 'month', type: 'date-month' },
+        { name: 'amount', type: 'float' },
+      ]);
+      const spec: ChartSpec = { mark: 'bar', encoding: {} };
+      const resolved = resolveChannels(spec, result);
+      if (!Array.isArray(resolved.encoding.x)) {
+        expect(resolved.encoding.x?.field).toBe('amount');
+        expect(resolved.encoding.x?.type).toBe('number');
+        expect(resolved.encoding.x?.autoAssigned).toBe(true);
+      } else {
+        throw new Error('Expected single X, got array');
+      }
+      if (!Array.isArray(resolved.encoding.y)) {
+        expect(resolved.encoding.y?.field).toBe('month');
+        expect(resolved.encoding.y?.type).toBe('date');
+        expect(resolved.encoding.y?.autoAssigned).toBe(true);
+      } else {
+        throw new Error('Expected single Y, got array');
+      }
+    });
+
+    it('warns when bar x is bound to a non-numeric field', () => {
+      const result = makeResult([
+        { name: 'month', type: 'date-month' },
+        { name: 'category', type: 'string' },
+        { name: 'amount', type: 'float' },
+      ]);
+      const spec: ChartSpec = {
+        mark: 'bar',
+        encoding: {
+          x: { field: 'category' },
+          y: { field: 'month' },
+        },
+      };
+      const resolved = resolveChannels(spec, result);
+      expect(resolved.warnings).toContain(
+        'Bar mark expects X (horizontal axis) to be a numeric field. Consider using a column mark for categorical X-axis data.',
+      );
+    });
+
+    it('warns when bar has no numeric columns available', () => {
+      const result = makeResult([{ name: 'category', type: 'string' }]);
+      const spec: ChartSpec = { mark: 'bar', encoding: {} };
+      const resolved = resolveChannels(spec, result);
+      expect(resolved.warnings).toContain(
+        'Bar mark expects a numeric X field, but the query has no numeric columns.',
+      );
+    });
+
+    it('errors on bar x[] + series combination when x[] has more than 1 field', () => {
+      const result = makeResult([
+        { name: 'category', type: 'string' },
+        { name: 'amount1', type: 'float' },
+        { name: 'amount2', type: 'float' },
+      ]);
+      const spec: ChartSpec = {
+        mark: 'bar',
+        encoding: {
+          x: [{ field: 'amount1' }, { field: 'amount2' }],
+          y: { field: 'category' },
+          series: { field: 'category' },
+        },
+      };
+      const resolved = resolveChannels(spec, result);
+      expect(resolved.errors).toHaveLength(1);
+      expect(resolved.errors[0]).toMatch(
+        /Multiple X fields and Series channel/,
+      );
+    });
+
+    it('allows bar with single x (numeric) and y (category) without error', () => {
+      const result = makeResult([
+        { name: 'category', type: 'string' },
+        { name: 'amount', type: 'float' },
+      ]);
+      const spec: ChartSpec = {
+        mark: 'bar',
+        encoding: {
+          x: { field: 'amount' },
+          y: { field: 'category' },
+        },
+      };
+      const resolved = resolveChannels(spec, result);
+      expect(resolved.errors).toEqual([]);
+      if (!Array.isArray(resolved.encoding.x)) {
+        expect(resolved.encoding.x?.field).toBe('amount');
+      } else {
+        throw new Error('Expected single X, got array');
+      }
+      if (!Array.isArray(resolved.encoding.y)) {
+        expect(resolved.encoding.y?.field).toBe('category');
+      } else {
+        throw new Error('Expected single Y, got array');
+      }
     });
   });
 

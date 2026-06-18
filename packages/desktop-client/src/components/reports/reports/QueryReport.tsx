@@ -46,48 +46,119 @@ const DEFAULT_CHART_SPEC: ChartSpec = { mark: 'table', encoding: {} };
 type ConfigTab = 'encoding' | 'customize';
 type TimeRangeValue =
   | 'none'
+  | 'last1'
   | 'last3'
   | 'last6'
   | 'last12'
   | 'ytd'
-  | 'lastYear';
+  | 'lastMonth'
+  | 'lastYear'
+  | 'priorYearToDate'
+  | 'allTime';
 
 function timeFrameFromRange(value: TimeRangeValue): TimeFrame | undefined {
-  if (value === 'none') return undefined;
   const end = monthUtils.currentMonth();
-  let start: string;
   switch (value) {
+    case 'none':
+      return undefined;
+    case 'last1':
+      return {
+        start: monthUtils.subMonths(end, 1),
+        end,
+        mode: 'sliding-window',
+      };
     case 'last3':
-      start = monthUtils.subMonths(end, 3);
-      break;
+      return {
+        start: monthUtils.subMonths(end, 3),
+        end,
+        mode: 'sliding-window',
+      };
     case 'last6':
-      start = monthUtils.subMonths(end, 6);
-      break;
+      return {
+        start: monthUtils.subMonths(end, 6),
+        end,
+        mode: 'sliding-window',
+      };
     case 'last12':
-      start = monthUtils.subMonths(end, 12);
-      break;
+      return {
+        start: monthUtils.subMonths(end, 12),
+        end,
+        mode: 'sliding-window',
+      };
     case 'ytd':
-      start = monthUtils.currentYear() + '-01';
-      break;
+      return {
+        start: monthUtils.currentYear() + '-01',
+        end,
+        mode: 'yearToDate',
+      };
+    case 'lastMonth':
+      return {
+        start: monthUtils.subMonths(end, 1),
+        end: monthUtils.subMonths(end, 1),
+        mode: 'lastMonth',
+      };
     case 'lastYear':
       return {
         start: monthUtils.getYearStart(monthUtils.prevYear(end)),
         end: monthUtils.getYearEnd(monthUtils.prevYear(end)),
         mode: 'lastYear',
       };
+    case 'priorYearToDate':
+      return {
+        start: monthUtils.getYearStart(monthUtils.prevYear(end)),
+        end: monthUtils.prevYear(monthUtils.currentDate(), 'yyyy-MM-dd'),
+        mode: 'priorYearToDate',
+      };
+    case 'allTime':
+      return {
+        start: '2000-01',
+        end,
+        mode: 'full',
+      };
     default:
       return undefined;
   }
-  return { start, end, mode: 'sliding-window' };
+}
+
+function timeRangeFromTimeFrame(tf: TimeFrame | undefined): TimeRangeValue {
+  if (!tf) return 'none';
+  switch (tf.mode) {
+    case 'sliding-window': {
+      const offset = monthUtils.differenceInCalendarMonths(tf.end, tf.start);
+      if (offset === 1) return 'last1';
+      if (offset === 3) return 'last3';
+      if (offset === 6) return 'last6';
+      if (offset === 12) return 'last12';
+      return 'last3';
+    }
+    case 'yearToDate':
+      return 'ytd';
+    case 'lastMonth':
+      return 'lastMonth';
+    case 'lastYear':
+      return 'lastYear';
+    case 'priorYearToDate':
+      return 'priorYearToDate';
+    case 'full':
+      return 'allTime';
+    case 'static':
+      return 'none';
+    default:
+      return 'none';
+  }
 }
 
 const TIME_RANGE_OPTIONS: Array<readonly [TimeRangeValue, string]> = [
   ['none', 'No date filter'],
+  ['last1', '1 month'],
   ['last3', 'Last 3 months'],
   ['last6', 'Last 6 months'],
-  ['last12', 'Last 12 months'],
+  ['last12', '1 year'],
   ['ytd', 'Year to date'],
+  ['lastMonth', 'Last month'],
   ['lastYear', 'Last year'],
+  ['priorYearToDate', 'Prior year to date'],
+  ['allTime', 'All time'],
 ];
 
 export function QueryReport() {
@@ -122,7 +193,9 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
     widget?.meta?.chartSpec ?? DEFAULT_CHART_SPEC,
   );
   const [activeTab, setActiveTab] = useState<ConfigTab>('encoding');
-  const [timeRange, setTimeRange] = useState<TimeRangeValue>('none');
+  const [timeRange, setTimeRange] = useState<TimeRangeValue>(() =>
+    timeRangeFromTimeFrame(widget?.meta?.defaultTimeFrame),
+  );
 
   const title = widget?.meta?.name || t('Query Report');
 
@@ -158,17 +231,21 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
       }
 
       const name = newName || t('Query Report');
+      const currentDefaultTimeFrame =
+        timeFrameFromRange(timeRange) ?? widget.meta?.defaultTimeFrame;
+
       updateDashboardWidgetMutation.mutate({
         widget: {
           id: widget.id,
           meta: {
             ...(widget.meta ?? {}),
             name,
+            defaultTimeFrame: currentDefaultTimeFrame,
           },
         },
       });
     },
-    [widget, updateDashboardWidgetMutation, dispatch, t],
+    [widget, updateDashboardWidgetMutation, dispatch, t, timeRange],
   );
 
   const onSaveWidget = useCallback(() => {
@@ -192,14 +269,19 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
           )
         : [{ source: querySource }];
 
+    const currentDefaultTimeFrame =
+      timeFrameFromRange(timeRange) ?? widget.meta?.defaultTimeFrame;
+
     updateDashboardWidgetMutation.mutate(
       {
         widget: {
           id: widget.id,
           meta: {
             ...(widget.meta ?? {}),
+            name: widget.meta?.name || t('Query Report'),
             queries: updatedQueries,
             chartSpec,
+            defaultTimeFrame: currentDefaultTimeFrame,
           },
         },
       },
@@ -223,21 +305,11 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
     updateDashboardWidgetMutation,
     dispatch,
     t,
+    timeRange,
   ]);
 
-  const handleMarkChange = (nextMark: ChartSpec['mark']) => {
-    if (nextMark === chartSpec.mark) return;
-    setChartSpec({ mark: nextMark, encoding: {} });
-  };
-
-  const handleStackChange = (value: string) => {
-    setChartSpec({
-      ...chartSpec,
-      config: {
-        ...chartSpec.config,
-        stack: value === 'none' ? undefined : (value as 'stack' | 'normalize'),
-      },
-    });
+  const handleMarkChange = (nextSpec: ChartSpec) => {
+    setChartSpec(nextSpec);
   };
 
   if (!isFeatureFlagEnabled) {
@@ -259,9 +331,6 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
       </Page>
     );
   }
-
-  const showStackConfig = ['column', 'bar', 'area'].includes(chartSpec.mark);
-  const stackValue = chartSpec.config?.stack ?? 'none';
 
   return (
     <Page
@@ -504,29 +573,7 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
             >
               <Trans>Visualization</Trans>
             </div>
-            <MarkSelector value={chartSpec.mark} onChange={handleMarkChange} />
-            {showStackConfig && (
-              <View>
-                <div
-                  style={{
-                    fontSize: 12,
-                    color: theme.pageTextSubdued,
-                    marginBottom: 4,
-                  }}
-                >
-                  <Trans>Stack</Trans>
-                </div>
-                <Select
-                  value={stackValue}
-                  options={[
-                    ['none', t('None')],
-                    ['stack', t('Stacked')],
-                    ['normalize', t('100%')],
-                  ]}
-                  onChange={handleStackChange}
-                />
-              </View>
-            )}
+            <MarkSelector value={chartSpec} onChange={handleMarkChange} />
             <View>
               <div
                 style={{

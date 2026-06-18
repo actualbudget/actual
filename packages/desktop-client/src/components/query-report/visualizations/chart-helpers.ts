@@ -44,6 +44,37 @@ export function getAxisFormatter(
   const colType = columns.find(c => c.name === channel.field)?.type;
   const fieldType = channel.type;
 
+  if (channel.format && channel.format !== 'default') {
+    switch (channel.format) {
+      case 'date-year':
+        return (value: unknown) => {
+          if (value === null || value === undefined) return '';
+          if (typeof value === 'string') {
+            return monthUtils.format(value, 'yyyy');
+          }
+          return String(value);
+        };
+      case 'date-month':
+        return (value: unknown) => {
+          if (value === null || value === undefined) return '';
+          if (typeof value === 'string') {
+            return monthUtils.format(value, 'MMM yyyy');
+          }
+          return String(value);
+        };
+      case 'date':
+        return (value: unknown) => {
+          if (value === null || value === undefined) return '';
+          if (typeof value === 'string') {
+            return monthUtils.format(value, 'MM/dd/yyyy');
+          }
+          return String(value);
+        };
+      default:
+        break;
+    }
+  }
+
   if (fieldType === 'date' || colType?.startsWith('date')) {
     return (value: unknown) => {
       if (value === null || value === undefined) return '';

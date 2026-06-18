@@ -32,6 +32,7 @@ const CHANNEL_VISIBILITY: Record<Mark, ChannelVisibility> = {
   table: { x: true, y: true, series: false, color: false, size: false },
   number: { x: false, y: true, series: false, color: false, size: false },
   column: { x: true, y: true, series: true, color: false, size: false },
+  // For bar: X is multi-select (value fields); Y is single-select (category).
   bar: { x: true, y: true, series: true, color: false, size: false },
   line: { x: true, y: true, series: true, color: false, size: false },
   area: { x: true, y: true, series: true, color: false, size: false },
@@ -45,18 +46,19 @@ function toOptions(
   return items.map(item => [item.value, item.label] as const);
 }
 
+// Marks that allow multiple Y (value) channels.
+// Note: bar is NOT here — after the X/Y swap, bar uses multi-X for grouped values.
 function isMultiYMark(mark: Mark): boolean {
   return (
-    mark === 'table' ||
-    mark === 'column' ||
-    mark === 'bar' ||
-    mark === 'line' ||
-    mark === 'area'
+    mark === 'table' || mark === 'column' || mark === 'line' || mark === 'area'
   );
 }
 
+// Marks that allow multiple X channels.
+// table: groups (multi-X).
+// bar: after the X/Y swap, X is values — multi-X gives grouped horizontal bars.
 function isMultiXMark(mark: Mark): boolean {
-  return mark === 'table';
+  return mark === 'table' || mark === 'bar';
 }
 
 function channelLabel(
@@ -272,7 +274,14 @@ export function EncodingConfig({
         ))}
 
       {result && visibility.x && (
-        <Field label={t(channelLabel(chartSpec.mark, 'x'))}>
+        <Field
+          label={t(channelLabel(chartSpec.mark, 'x'))}
+          help={
+            chartSpec.mark === 'bar' && selectedXFields.length > 1
+              ? t('Each X field creates a separate series in the chart.')
+              : undefined
+          }
+        >
           {isMultiXMark(chartSpec.mark) ? (
             <CheckboxList
               options={columnOptions.all.map(c => c.value)}
@@ -298,7 +307,14 @@ export function EncodingConfig({
       )}
 
       {result && visibility.y && (
-        <Field label={t(channelLabel(chartSpec.mark, 'y'))}>
+        <Field
+          label={t(channelLabel(chartSpec.mark, 'y'))}
+          help={
+            chartSpec.mark !== 'bar' && selectedYFields.length > 1
+              ? t('Each Y field creates a separate series in the chart.')
+              : undefined
+          }
+        >
           {isMultiYMark(chartSpec.mark) ? (
             <CheckboxList
               options={yOptionsForMark.map(c => c.value)}

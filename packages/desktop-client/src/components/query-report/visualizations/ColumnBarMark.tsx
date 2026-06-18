@@ -51,7 +51,7 @@ type ChartTooltipProps = {
   isNormalized: boolean;
   isStacked: boolean;
   format: (value: unknown, type: FormatType) => string;
-  yFormatType: FormatType;
+  valueFormatType: FormatType;
   formatLabel?: (label: unknown) => string;
 };
 
@@ -62,7 +62,7 @@ function ChartTooltip({
   isNormalized,
   isStacked,
   format,
-  yFormatType,
+  valueFormatType,
   formatLabel,
 }: ChartTooltipProps) {
   if (!active || !payload || !payload.length) return null;
@@ -90,7 +90,7 @@ function ChartTooltip({
         zIndex: 1000,
         pointerEvents: 'none',
         borderRadius: 2,
-        boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
+        boxShadow: '0 1px 6px rgba(0, 0, .20)',
         backgroundColor: theme.menuBackground,
         color: theme.menuItemText,
         padding: 10,
@@ -111,7 +111,7 @@ function ChartTooltip({
                       10
                     : 0
                 }%`
-              : format(p.value, yFormatType);
+              : format(p.value, valueFormatType);
             return (
               <AlignedText
                 key={i}
@@ -150,7 +150,7 @@ function ChartTooltip({
               }
               right={
                 <FinancialText>
-                  <strong>{format(total, yFormatType)}</strong>
+                  <strong>{format(total, valueFormatType)}</strong>
                 </FinancialText>
               }
               style={{
@@ -178,16 +178,40 @@ export function ColumnBarMark({
   const isBar = resolved.mark === 'bar';
 
   const xChannel = resolved.encoding.x;
-  const xField =
-    xChannel && !Array.isArray(xChannel) ? xChannel.field : undefined;
-
   const yChannels = resolved.encoding.y;
+
+  const xFieldList: string[] = useMemo(() => {
+    if (!xChannel) return [];
+    return Array.isArray(xChannel)
+      ? xChannel.map(ch => ch.field)
+      : [xChannel.field];
+  }, [xChannel]);
+
   const yFieldList: string[] = useMemo(() => {
     if (!yChannels) return [];
     return Array.isArray(yChannels)
       ? yChannels.map(ch => ch.field)
       : [yChannels.field];
   }, [yChannels]);
+
+  // For bar mark, X is the value (horizontal) and Y is the category (vertical).
+  // The category axis is the field that defines the rows/buckets.
+  const categoryField = isBar
+    ? (yFieldList[0] ?? xFieldList[0])
+    : (xFieldList[0] ?? yFieldList[0]);
+
+  // The value fields drive the bars themselves.
+  const valueFields = isBar ? xFieldList : yFieldList;
+
+  const xChannelByField = useMemo(() => {
+    const map = new Map<string, ResolvedChannel>();
+    if (!xChannel) return map;
+    const channels = Array.isArray(xChannel) ? xChannel : [xChannel];
+    for (const ch of channels) {
+      map.set(ch.field, ch);
+    }
+    return map;
+  }, [xChannel]);
 
   const yChannelByField = useMemo(() => {
     const map = new Map<string, ResolvedChannel>();
@@ -199,20 +223,35 @@ export function ColumnBarMark({
     return map;
   }, [yChannels]);
 
+  const valueChannelByField = isBar ? xChannelByField : yChannelByField;
+
   const hasColorSeries = seriesKeys.length > 0;
-  const useMultiYSeries = !hasColorSeries && yFieldList.length > 1;
+  const useMultiValueSeries = !hasColorSeries && valueFields.length > 1;
 
-  const xFormatter = useMemo(
+  const categoryFormatter = useMemo(() => {
+    if (!categoryField) return undefined;
+    // Pick the channel for the category field, whichever encoding owns it.
+    // For bar, the category is on Y. For column, the category is on X.
+    const candidates = isBar
+      ? Array.isArray(yChannels)
+        ? yChannels
+        : yChannels
+          ? [yChannels]
+          : []
+      : Array.isArray(xChannel)
+        ? xChannel
+        : xChannel
+          ? [xChannel]
+          : [];
+    const ch = candidates.find(c => c.field === categoryField);
+    if (!ch) return undefined;
+    return getAxisFormatter(ch, result.columns, format);
+  }, [categoryField, isBar, xChannel, yChannels, result.columns, format]);
+
+  const valueFormatType = useMemo(
     () =>
-      xChannel && !Array.isArray(xChannel)
-        ? getAxisFormatter(xChannel, result.columns, format)
-        : undefined,
-    [xChannel, result.columns, format],
-  );
-
-  const yFormatType = useMemo(
-    () => channelFormatType(yChannels, 'financial-no-decimals'),
-    [yChannels],
+      channelFormatType(isBar ? xChannel : yChannels, 'financial-no-decimals'),
+    [xChannel, yChannels, isBar],
   );
 
   const stackMode = resolved.config?.stack;
@@ -222,15 +261,15 @@ export function ColumnBarMark({
   // near zero for mixed-sign data, producing nonsensical bar heights.
   // Detect negative values and fall back to regular stacked.
   const hasNegativeValues = useMemo(() => {
-    const yKeys = hasColorSeries ? seriesKeys : yFieldList;
-    if (yKeys.length === 0) return false;
+    const vKeys = hasColorSeries ? seriesKeys : valueFields;
+    if (vKeys.length === 0) return false;
     return data.some(row =>
-      yKeys.some(key => {
+      vKeys.some(key => {
         const val = row[key];
         return typeof val === 'number' && val < 0;
       }),
     );
-  }, [data, seriesKeys, yFieldList, hasColorSeries]);
+  }, [data, seriesKeys, valueFields, hasColorSeries]);
 
   const effectiveStackMode = useMemo(() => {
     if (stackMode === 'normalize' && hasNegativeValues) return 'stack';
@@ -257,11 +296,11 @@ export function ColumnBarMark({
     return (value: unknown) => {
       if (value === null || value === undefined) return '';
       if (typeof value === 'number') {
-        return format(value, yFormatType);
+        return format(value, valueFormatType);
       }
       return String(value);
     };
-  }, [format, yFormatType, isNormalized]);
+  }, [format, valueFormatType, isNormalized]);
 
   const axesConfig = resolved.config?.axes;
   const valueAxisConfig = axesConfig?.valueAxis;
@@ -272,20 +311,27 @@ export function ColumnBarMark({
   const yChannelLabel =
     yChannels && !Array.isArray(yChannels) ? yChannels.title : undefined;
 
-  const categoryAxisLabel = categoryAxisConfig?.labelOverride ?? xChannelLabel;
-  const valueAxisLabel = valueAxisConfig?.labelOverride ?? yChannelLabel;
+  // Pick the appropriate title for each axis depending on bar/column orientation.
+  // For bar: category axis label comes from Y channel; value axis label from X channel.
+  // For column: category axis label from X channel; value axis label from Y channel.
+  const categoryChannelTitle = isBar ? yChannelLabel : xChannelLabel;
+  const valueChannelTitle = isBar ? xChannelLabel : yChannelLabel;
+
+  const categoryAxisLabel =
+    categoryAxisConfig?.labelOverride ?? categoryChannelTitle;
+  const valueAxisLabel = valueAxisConfig?.labelOverride ?? valueChannelTitle;
 
   const labelFormatter = useMemo(() => {
-    if (!xFormatter) return undefined;
+    if (!categoryFormatter) return undefined;
     return (label: unknown) => {
       if (typeof label === 'string' || typeof label === 'number') {
-        return xFormatter(label) ?? String(label);
+        return categoryFormatter(label) ?? String(label);
       }
       return String(label);
     };
-  }, [xFormatter]);
+  }, [categoryFormatter]);
 
-  if (!xField) {
+  if (!categoryField) {
     return (
       <View
         style={{
@@ -312,14 +358,14 @@ export function ColumnBarMark({
         />
       ));
     }
-    if (useMultiYSeries) {
-      return yFieldList.map((field, i) => {
-        const yCh = yChannelByField.get(field);
+    if (useMultiValueSeries) {
+      return valueFields.map((field, i) => {
+        const vCh = valueChannelByField.get(field);
         return (
           <Bar
             key={field}
             dataKey={field}
-            name={yCh?.title ?? yCh?.field ?? field}
+            name={vCh?.title ?? vCh?.field ?? field}
             stackId={stackId}
             fill={getSeriesColor(i)}
             isAnimationActive={false}
@@ -327,22 +373,22 @@ export function ColumnBarMark({
         );
       });
     }
-    const singleField = yFieldList[0];
+    const singleField = valueFields[0];
     if (!singleField) {
       return (
         <Bar
-          dataKey={xField}
+          dataKey={categoryField}
           stackId={stackId}
           fill={getSeriesColor(0)}
           isAnimationActive={false}
         />
       );
     }
-    const yCh = yChannelByField.get(singleField);
+    const vCh = valueChannelByField.get(singleField);
     return (
       <Bar
         dataKey={singleField}
-        name={yCh?.title ?? yCh?.field ?? singleField}
+        name={vCh?.title ?? vCh?.field ?? singleField}
         stackId={stackId}
         fill={getSeriesColor(0)}
         isAnimationActive={false}
@@ -412,7 +458,7 @@ export function ColumnBarMark({
               />
               <YAxis
                 type="category"
-                dataKey={xField}
+                dataKey={categoryField}
                 hide={compact}
                 label={
                   categoryAxisLabel
@@ -423,7 +469,7 @@ export function ColumnBarMark({
                       }
                     : undefined
                 }
-                tickFormatter={xFormatter}
+                tickFormatter={categoryFormatter}
                 tick={{ fill: theme.pageText, fontSize: 11 }}
                 width={80}
               />
@@ -431,14 +477,14 @@ export function ColumnBarMark({
           ) : (
             <>
               <XAxis
-                dataKey={xField}
+                dataKey={categoryField}
                 hide={compact}
                 label={
                   categoryAxisLabel
                     ? { value: categoryAxisLabel, position: 'insideBottom' }
                     : undefined
                 }
-                tickFormatter={xFormatter}
+                tickFormatter={categoryFormatter}
                 tick={{ fill: theme.pageText, fontSize: 11 }}
               />
               <YAxis
@@ -466,7 +512,7 @@ export function ColumnBarMark({
                   isNormalized={isNormalized}
                   isStacked={isStacked}
                   format={format}
-                  yFormatType={yFormatType}
+                  valueFormatType={valueFormatType}
                   formatLabel={labelFormatter}
                 />
               }
