@@ -295,10 +295,8 @@ export function resolveChannels(
 
   switch (spec.mark) {
     case 'table': {
-      const xIsEmpty =
-        !resolvedX || (Array.isArray(resolvedX) && resolvedX.length === 0);
-      const yIsEmpty =
-        !resolvedY || (Array.isArray(resolvedY) && resolvedY.length === 0);
+      const xIsEmpty = resolvedX === undefined;
+      const yIsEmpty = resolvedY === undefined;
       if (xIsEmpty && yIsEmpty) {
         resolvedX = nonIdDimensions(roles).map(field => ({
           field,
@@ -360,7 +358,9 @@ export function resolveChannels(
             'Multiple X fields are not supported on column marks. Only the first field will be used.',
           );
         }
-        resolvedX = resolvedX[0];
+        if (resolvedX.length > 0) {
+          resolvedX = resolvedX[0];
+        }
       } else if (!resolvedX) {
         const candidate = roles.timeColumns[0] ?? nonIdDimensions(roles)[0];
         if (candidate) {
@@ -430,7 +430,9 @@ export function resolveChannels(
             'Multiple X fields are not supported on line/area marks. Only the first field will be used.',
           );
         }
-        resolvedX = resolvedX[0];
+        if (resolvedX.length > 0) {
+          resolvedX = resolvedX[0];
+        }
       } else if (!resolvedX) {
         const candidate = roles.timeColumns[0] ?? roles.dimensionColumns[0];
         if (candidate) {
@@ -466,7 +468,9 @@ export function resolveChannels(
             'Multiple X fields are not supported on point marks. Only the first field will be used.',
           );
         }
-        resolvedX = resolvedX[0];
+        if (resolvedX.length > 0) {
+          resolvedX = resolvedX[0];
+        }
       } else if (!resolvedX) {
         const candidate = nonIdDimensions(roles)[0];
         if (candidate) {

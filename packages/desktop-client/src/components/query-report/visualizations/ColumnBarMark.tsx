@@ -1,26 +1,21 @@
 import { useMemo } from 'react';
 import { Trans } from 'react-i18next';
+import { AutoSizer } from 'react-virtualized-auto-sizer';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
 
 import {
+  axisFormatType,
   channelFormatType,
   getAxisFormatter,
   getSeriesColor,
 } from './chart-helpers';
 
 import { FinancialText } from '@desktop-client/components/FinancialText';
+import { useRechartsAnimation } from '@desktop-client/components/reports/chart-theme';
 import { useFormat } from '@desktop-client/hooks/useFormat';
 import type { FormatType } from '@desktop-client/hooks/useFormat';
 import type { QueryResult } from '@desktop-client/queries/processQueryResult';
@@ -53,6 +48,7 @@ type ChartTooltipProps = {
   format: (value: unknown, type: FormatType) => string;
   valueFormatType: FormatType;
   formatLabel?: (label: unknown) => string;
+  channelByField?: Map<string, ResolvedChannel>;
 };
 
 function ChartTooltip({
@@ -64,15 +60,13 @@ function ChartTooltip({
   format,
   valueFormatType,
   formatLabel,
+  channelByField,
 }: ChartTooltipProps) {
   if (!active || !payload || !payload.length) return null;
 
   const items = payload.filter(p => p.value !== 0);
   const total = items.reduce((sum, p) => sum + p.value, 0);
 
-  // For normalized mode, compute percentages from the raw values rather
-  // than relying on Recharts' `stackOffset="expand"` (which only normalizes
-  // visually but passes raw values to the tooltip payload).
   const totalAbsValue = isNormalized
     ? items.reduce((sum, p) => sum + Math.abs(p.value), 0)
     : 0;
@@ -90,7 +84,7 @@ function ChartTooltip({
         zIndex: 1000,
         pointerEvents: 'none',
         borderRadius: 2,
-        boxShadow: '0 1px 6px rgba(0, 0, .20)',
+        boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
         backgroundColor: theme.menuBackground,
         color: theme.menuItemText,
         padding: 10,
@@ -104,6 +98,13 @@ function ChartTooltip({
         )}
         <div style={{ lineHeight: 1.5 }}>
           {items.map((p, i) => {
+            const fieldFormat = channelByField?.get(p.dataKey)?.format;
+            const fieldFormatType = fieldFormat
+              ? channelFormatType(
+                  { field: p.dataKey, format: fieldFormat } as ResolvedChannel,
+                  'financial-no-decimals',
+                )
+              : valueFormatType;
             const displayValue = isNormalized
               ? `${
                   totalAbsValue !== 0
@@ -111,7 +112,7 @@ function ChartTooltip({
                       10
                     : 0
                 }%`
-              : format(p.value, valueFormatType);
+              : format(p.value, fieldFormatType);
             return (
               <AlignedText
                 key={i}
@@ -176,6 +177,7 @@ export function ColumnBarMark({
 }: ColumnBarMarkProps) {
   const format = useFormat();
   const isBar = resolved.mark === 'bar';
+  const animationProps = useRechartsAnimation();
 
   const xChannel = resolved.encoding.x;
   const yChannels = resolved.encoding.y;
@@ -225,6 +227,14 @@ export function ColumnBarMark({
 
   const valueChannelByField = isBar ? xChannelByField : yChannelByField;
 
+  const deriveAxisTitle = (channels: ResolvedChannel[]): string | undefined => {
+    if (!channels || channels.length === 0) return undefined;
+    if (channels.length === 1) return channels[0].title ?? channels[0].field;
+    const labels = channels.map(ch => ch.title ?? ch.field);
+    if (labels.length <= 2) return labels.join(', ');
+    return `${labels[0]}, ${labels[1]} +${labels.length - 2}`;
+  };
+
   const hasColorSeries = seriesKeys.length > 0;
   const useMultiValueSeries = !hasColorSeries && valueFields.length > 1;
 
@@ -249,8 +259,7 @@ export function ColumnBarMark({
   }, [categoryField, isBar, xChannel, yChannels, result.columns, format]);
 
   const valueFormatType = useMemo(
-    () =>
-      channelFormatType(isBar ? xChannel : yChannels, 'financial-no-decimals'),
+    () => axisFormatType(isBar ? xChannel : yChannels, 'financial-no-decimals'),
     [xChannel, yChannels, isBar],
   );
 
@@ -307,19 +316,29 @@ export function ColumnBarMark({
   const categoryAxisConfig = axesConfig?.categoryAxis;
 
   const xChannelLabel =
-    xChannel && !Array.isArray(xChannel) ? xChannel.title : undefined;
+    xChannel && !Array.isArray(xChannel)
+      ? (xChannel.title ?? xChannel.field)
+      : Array.isArray(xChannel)
+        ? deriveAxisTitle(xChannel)
+        : undefined;
   const yChannelLabel =
-    yChannels && !Array.isArray(yChannels) ? yChannels.title : undefined;
+    yChannels && !Array.isArray(yChannels)
+      ? (yChannels.title ?? yChannels.field)
+      : Array.isArray(yChannels)
+        ? deriveAxisTitle(yChannels)
+        : undefined;
 
-  // Pick the appropriate title for each axis depending on bar/column orientation.
-  // For bar: category axis label comes from Y channel; value axis label from X channel.
-  // For column: category axis label from X channel; value axis label from Y channel.
   const categoryChannelTitle = isBar ? yChannelLabel : xChannelLabel;
   const valueChannelTitle = isBar ? xChannelLabel : yChannelLabel;
 
   const categoryAxisLabel =
-    categoryAxisConfig?.labelOverride ?? categoryChannelTitle;
-  const valueAxisLabel = valueAxisConfig?.labelOverride ?? valueChannelTitle;
+    categoryAxisConfig?.showLabel === true
+      ? (categoryAxisConfig?.labelOverride ?? categoryChannelTitle)
+      : undefined;
+  const valueAxisLabel =
+    valueAxisConfig?.showLabel === true
+      ? (valueAxisConfig?.labelOverride ?? valueChannelTitle)
+      : undefined;
 
   const labelFormatter = useMemo(() => {
     if (!categoryFormatter) return undefined;
@@ -354,7 +373,7 @@ export function ColumnBarMark({
           name={key}
           stackId={stackId}
           fill={getSeriesColor(i)}
-          isAnimationActive={false}
+          {...animationProps}
         />
       ));
     }
@@ -368,7 +387,7 @@ export function ColumnBarMark({
             name={vCh?.title ?? vCh?.field ?? field}
             stackId={stackId}
             fill={getSeriesColor(i)}
-            isAnimationActive={false}
+            {...animationProps}
           />
         );
       });
@@ -380,7 +399,7 @@ export function ColumnBarMark({
           dataKey={categoryField}
           stackId={stackId}
           fill={getSeriesColor(0)}
-          isAnimationActive={false}
+          {...animationProps}
         />
       );
     }
@@ -391,7 +410,7 @@ export function ColumnBarMark({
         name={vCh?.title ?? vCh?.field ?? singleField}
         stackId={stackId}
         fill={getSeriesColor(0)}
-        isAnimationActive={false}
+        {...animationProps}
       />
     );
   };
@@ -406,9 +425,10 @@ export function ColumnBarMark({
     <View
       style={{
         width: '100%',
-        height: '100%',
+        flex: 1,
         padding: compact ? 4 : 12,
         minHeight: compact ? 0 : 200,
+        position: 'relative',
       }}
     >
       {stackMode === 'normalize' && hasNegativeValues && !compact && (
@@ -426,103 +446,143 @@ export function ColumnBarMark({
           </Trans>
         </div>
       )}
-      <ResponsiveContainer width="100%" height={compact ? 120 : '100%'}>
-        <BarChart
-          data={data}
-          layout={isBar ? 'vertical' : 'horizontal'}
-          margin={
-            compact
-              ? { top: 0, right: 0, left: 0, bottom: 0 }
-              : { top: 8, right: 16, left: 8, bottom: 8 }
-          }
-          stackOffset={stackOffset}
-        >
-          {!compact && <CartesianGrid strokeDasharray="3 3" />}
-          {isBar ? (
-            <>
-              <XAxis
-                type="number"
-                hide={compact}
-                domain={isNormalized ? [0, 1] : undefined}
-                label={
-                  valueAxisLabel
+      <div style={{ width: '100%', height: '100%' }}>
+        <AutoSizer
+          renderProp={({ width = 0, height = 0 }) => {
+            if (width === 0 || height === 0) {
+              return null;
+            }
+            return (
+              <BarChart
+                width={width}
+                height={height}
+                data={data}
+                layout={isBar ? 'vertical' : 'horizontal'}
+                margin={
+                  compact
                     ? {
-                        value: valueAxisLabel,
-                        angle: 0,
-                        position: 'insideBottom',
+                        top: 4,
+                        right: 4,
+                        left: Math.max(10, Math.round(width * 0.06)),
+                        bottom: 4,
                       }
-                    : undefined
+                    : { top: 8, right: 16, left: 20, bottom: 28 }
                 }
-                tickFormatter={valueFormatter}
-                tick={{ fill: theme.pageText, fontSize: 11 }}
-              />
-              <YAxis
-                type="category"
-                dataKey={categoryField}
-                hide={compact}
-                label={
-                  categoryAxisLabel
-                    ? {
-                        value: categoryAxisLabel,
-                        angle: -90,
-                        position: 'insideLeft',
+                stackOffset={stackOffset}
+              >
+                {!compact && (
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke={theme.tableBorder}
+                  />
+                )}
+                {isBar ? (
+                  <>
+                    <XAxis
+                      type="number"
+                      hide={compact}
+                      domain={isNormalized ? [0, 1] : undefined}
+                      label={
+                        !compact && valueAxisLabel
+                          ? {
+                              value: valueAxisLabel,
+                              angle: 0,
+                              position: 'bottom',
+                              offset: 5,
+                              fill: theme.pageText,
+                              style: { fill: theme.pageText },
+                            }
+                          : undefined
                       }
-                    : undefined
-                }
-                tickFormatter={categoryFormatter}
-                tick={{ fill: theme.pageText, fontSize: 11 }}
-                width={80}
-              />
-            </>
-          ) : (
-            <>
-              <XAxis
-                dataKey={categoryField}
-                hide={compact}
-                label={
-                  categoryAxisLabel
-                    ? { value: categoryAxisLabel, position: 'insideBottom' }
-                    : undefined
-                }
-                tickFormatter={categoryFormatter}
-                tick={{ fill: theme.pageText, fontSize: 11 }}
-              />
-              <YAxis
-                type="number"
-                hide={compact}
-                domain={isNormalized ? [0, 1] : undefined}
-                label={
-                  valueAxisLabel
-                    ? {
-                        value: valueAxisLabel,
-                        angle: -90,
-                        position: 'insideLeft',
+                      tickFormatter={valueFormatter}
+                      tick={{ fill: theme.pageText }}
+                      tickLine={{ stroke: theme.pageTextLight }}
+                      tickMargin={4}
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey={categoryField}
+                      label={
+                        !compact && categoryAxisLabel
+                          ? {
+                              value: categoryAxisLabel,
+                              angle: -90,
+                              position: 'left',
+                              offset: 10,
+                              fill: theme.pageText,
+                              style: { fill: theme.pageText },
+                            }
+                          : undefined
                       }
-                    : undefined
-                }
-                tickFormatter={valueFormatter}
-                tick={{ fill: theme.pageText, fontSize: 11 }}
-              />
-            </>
-          )}
-          {!compact && (
-            <Tooltip
-              content={
-                <ChartTooltip
-                  isNormalized={isNormalized}
-                  isStacked={isStacked}
-                  format={format}
-                  valueFormatType={valueFormatType}
-                  formatLabel={labelFormatter}
+                      tickFormatter={categoryFormatter}
+                      tick={{ fill: theme.pageText }}
+                      tickLine={{ stroke: theme.pageTextLight }}
+                      tickMargin={4}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <XAxis
+                      dataKey={categoryField}
+                      label={
+                        !compact && categoryAxisLabel
+                          ? {
+                              value: categoryAxisLabel,
+                              position: 'bottom',
+                              offset: 5,
+                              fill: theme.pageText,
+                              style: { fill: theme.pageText },
+                            }
+                          : undefined
+                      }
+                      tickFormatter={categoryFormatter}
+                      tick={{ fill: theme.pageText }}
+                      tickLine={{ stroke: theme.pageTextLight }}
+                      tickMargin={4}
+                    />
+                    <YAxis
+                      type="number"
+                      hide={compact}
+                      domain={isNormalized ? [0, 1] : undefined}
+                      label={
+                        !compact && valueAxisLabel
+                          ? {
+                              value: valueAxisLabel,
+                              angle: -90,
+                              position: 'left',
+                              offset: 10,
+                              fill: theme.pageText,
+                              style: { fill: theme.pageText },
+                            }
+                          : undefined
+                      }
+                      tickFormatter={valueFormatter}
+                      tick={{ fill: theme.pageText }}
+                      tickLine={{ stroke: theme.pageTextLight }}
+                      tickMargin={4}
+                    />
+                  </>
+                )}
+                <Tooltip
+                  content={
+                    <ChartTooltip
+                      isNormalized={isNormalized}
+                      isStacked={isStacked}
+                      format={format}
+                      valueFormatType={valueFormatType}
+                      formatLabel={labelFormatter}
+                      channelByField={valueChannelByField}
+                    />
+                  }
+                  cursor={{ fill: 'transparent' }}
+                  isAnimationActive={false}
                 />
-              }
-              cursor={{ fill: 'transparent' }}
-              isAnimationActive={false}
-            />
-          )}
-          {renderBars()}
-        </BarChart>
-      </ResponsiveContainer>
+                {renderBars()}
+              </BarChart>
+            );
+          }}
+        />
+      </div>
     </View>
   );
 }

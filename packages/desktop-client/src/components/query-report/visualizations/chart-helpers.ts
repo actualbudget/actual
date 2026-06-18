@@ -8,6 +8,26 @@ import type {
 import type { QueryResultColumn } from '@desktop-client/queries/processQueryResult';
 import type { ResolvedChannel } from '@desktop-client/queries/resolveChannels';
 
+export function axisFormatType(
+  channels: ResolvedChannel | ResolvedChannel[] | undefined,
+  fallback: FormatType = 'financial-no-decimals',
+): FormatType {
+  if (!channels) return fallback;
+  const channelArray = Array.isArray(channels) ? channels : [channels];
+  const formats = channelArray
+    .map(ch => ch.format)
+    .filter((f): f is string => !!f && f !== 'default');
+  if (formats.length === 0) return fallback;
+  const first = formats[0];
+  if (formats.every(f => f === first)) {
+    return channelFormatType(
+      { field: '', format: first } as ResolvedChannel,
+      fallback,
+    );
+  }
+  return 'number';
+}
+
 export function getSeriesColor(index: number): string {
   const colors = getColorScale('qualitative');
   return colors[index % colors.length];

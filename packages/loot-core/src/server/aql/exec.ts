@@ -150,8 +150,7 @@ export async function compileAndRunAqlQuery(
   }));
 
   try {
-    // oxlint-disable-next-line typescript/no-explicit-any
-    const data: any = await runCompiledAqlQuery(
+    const data = await runCompiledAqlQuery(
       queryState,
       sqlPieces,
       state,

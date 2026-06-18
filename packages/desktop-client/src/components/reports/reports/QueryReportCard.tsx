@@ -4,10 +4,12 @@ import { Trans, useTranslation } from 'react-i18next';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import * as monthUtils from 'loot-core/shared/months';
 import type { ChartSpec } from 'loot-core/types/chart-spec';
 import type { QueryReportWidget } from 'loot-core/types/models';
 
 import { ChartRenderer } from '@desktop-client/components/query-report/visualizations/ChartRenderer';
+import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
 import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
 import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
@@ -51,6 +53,35 @@ export function QueryReportCard({
     meta?.defaultTimeFrame,
   );
 
+  const rangeLabel = (() => {
+    const df = meta?.defaultTimeFrame;
+    if (!df) return null;
+    if (!querySource) return null;
+    if (!/:startDate|:endDate/.test(querySource)) return null;
+    switch (df.mode) {
+      case 'sliding-window': {
+        const offset = monthUtils.differenceInCalendarMonths(df.end, df.start);
+        if (offset === 0) return t('1 month');
+        if (offset === 2) return t('Last 3 months');
+        if (offset === 5) return t('Last 6 months');
+        if (offset === 11) return t('1 year');
+        return null;
+      }
+      case 'yearToDate':
+        return t('Year to date');
+      case 'lastMonth':
+        return t('Last month');
+      case 'lastYear':
+        return t('Last year');
+      case 'priorYearToDate':
+        return t('Prior year to date');
+      case 'full':
+        return t('All time');
+      default:
+        return null;
+    }
+  })();
+
   if (!isFeatureFlagEnabled) return null;
 
   return (
@@ -83,8 +114,8 @@ export function QueryReportCard({
         }
       }}
     >
-      <View style={{ flex: 1, overflow: 'hidden', padding: 20 }}>
-        <View style={{ flexGrow: 0, flexShrink: 0, marginBottom: 12 }}>
+      <View style={{ flex: 1, overflow: 'hidden', padding: 12 }}>
+        <View style={{ flexGrow: 0, flexShrink: 0, marginBottom: 8 }}>
           <ReportCardName
             name={meta?.name || t('Query Report')}
             isEditing={nameMenuOpen}
@@ -97,6 +128,16 @@ export function QueryReportCard({
             }}
             onClose={() => setNameMenuOpen(false)}
           />
+          {rangeLabel && (
+            <div
+              style={{
+                color: theme.pageTextSubdued,
+                marginTop: 2,
+              }}
+            >
+              {rangeLabel}
+            </div>
+          )}
         </View>
         <View
           style={{
@@ -105,18 +146,7 @@ export function QueryReportCard({
             overflow: 'hidden',
           }}
         >
-          {isLoading && (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-                color: theme.pageTextSubdued,
-              }}
-            >
-              {t('Loading...')}
-            </View>
-          )}
+          {isLoading && <LoadingIndicator />}
           {error && (
             <View
               style={{
@@ -134,7 +164,7 @@ export function QueryReportCard({
           {!isLoading && !error && result && (
             <ChartRenderer result={result} spec={chartSpec} compact />
           )}
-          {!isLoading && !error && !result && (
+          {!isLoading && !error && !result && !querySource && (
             <View
               style={{
                 flex: 1,

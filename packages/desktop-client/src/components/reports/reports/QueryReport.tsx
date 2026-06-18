@@ -70,25 +70,25 @@ function timeFrameFromRange(value: TimeRangeValue): TimeFrame | undefined {
       return undefined;
     case 'last1':
       return {
-        start: monthUtils.subMonths(end, 1),
+        start: monthUtils.subMonths(end, 0),
         end,
         mode: 'sliding-window',
       };
     case 'last3':
       return {
-        start: monthUtils.subMonths(end, 3),
+        start: monthUtils.subMonths(end, 2),
         end,
         mode: 'sliding-window',
       };
     case 'last6':
       return {
-        start: monthUtils.subMonths(end, 6),
+        start: monthUtils.subMonths(end, 5),
         end,
         mode: 'sliding-window',
       };
     case 'last12':
       return {
-        start: monthUtils.subMonths(end, 12),
+        start: monthUtils.subMonths(end, 11),
         end,
         mode: 'sliding-window',
       };
@@ -132,10 +132,10 @@ function timeRangeFromTimeFrame(tf: TimeFrame | undefined): TimeRangeValue {
   switch (tf.mode) {
     case 'sliding-window': {
       const offset = monthUtils.differenceInCalendarMonths(tf.end, tf.start);
-      if (offset === 1) return 'last1';
-      if (offset === 3) return 'last3';
-      if (offset === 6) return 'last6';
-      if (offset === 12) return 'last12';
+      if (offset === 0) return 'last1';
+      if (offset === 2) return 'last3';
+      if (offset === 5) return 'last6';
+      if (offset === 11) return 'last12';
       return 'last3';
     }
     case 'yearToDate':
@@ -445,6 +445,7 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
               padding: 20,
               flex: 1,
               overflow: 'auto',
+              backgroundColor: theme.tableBackground,
             }}
           >
             <div
@@ -592,11 +593,6 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
                   q(&apos;transactions&apos;).select(&apos;*&apos;).limit(100)
                 </code>
               </Trans>
-              <br />
-              <Trans>
-                Use <code>:startDate</code> and <code>:endDate</code> in your
-                query to reference the selected time range.
-              </Trans>
             </div>
             <div
               style={{
@@ -631,6 +627,19 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
                   </Trans>
                 </div>
               )}
+            <div
+              style={{
+                fontSize: 11,
+                color: theme.pageTextSubdued,
+                marginTop: 8,
+                lineHeight: 1.5,
+              }}
+            >
+              <Trans>
+                Use <code>:startDate</code> and <code>:endDate</code> in your
+                query to reference the selected time range.
+              </Trans>
+            </div>
             <div
               style={{
                 fontSize: 13,
@@ -673,12 +682,14 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
               </View>
             )}
             {activeTab === 'customize' && (
-              <ChartConfigPanel
-                result={result ?? null}
-                chartSpec={chartSpec}
-                resolved={resolved}
-                onChartSpecChange={setChartSpec}
-              />
+              <View style={{ marginTop: 12 }}>
+                <ChartConfigPanel
+                  result={result ?? null}
+                  chartSpec={chartSpec}
+                  resolved={resolved}
+                  onChartSpecChange={setChartSpec}
+                />
+              </View>
             )}
           </View>
         </View>

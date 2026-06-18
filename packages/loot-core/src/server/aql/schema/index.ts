@@ -206,9 +206,9 @@ export const schema = {
     group: f('id', { ref: 'category_groups' }),
     group_name: f('string'),
     is_income: f('boolean'),
-    budgeted: f('float'),
-    spent: f('float'),
-    leftover: f('float'),
+    budgeted: f('integer'),
+    spent: f('integer'),
+    leftover: f('integer'),
     carryover: f('boolean'),
   },
 };

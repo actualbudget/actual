@@ -92,10 +92,16 @@ describe('resolveTimeFrameParams', () => {
     expect(resolveTimeFrameParams(undefined)).toEqual({});
   });
 
-  it('returns empty object when timeFrame mode is "full"', () => {
-    expect(
-      resolveTimeFrameParams({ start: '', end: '', mode: 'full' }),
-    ).toEqual({});
+  it('returns startDate and endDate when timeFrame mode is "full"', () => {
+    const params = resolveTimeFrameParams({
+      start: '2020-01',
+      end: '2024-06',
+      mode: 'full',
+    });
+    expect(params).toHaveProperty('startDate');
+    expect(params).toHaveProperty('endDate');
+    expect(params.startDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(params.endDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
   it('returns startDate and endDate for a static time frame', () => {

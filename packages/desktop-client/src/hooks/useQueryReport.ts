@@ -92,12 +92,12 @@ export function useQueryReport(
       return;
     }
 
+    setIsLoading(true);
+    setError(null);
+
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
     debounceRef.current = setTimeout(async () => {
-      setIsLoading(true);
-      setError(null);
-
       try {
         const params = resolveTimeFrameParams(timeFrame);
         const resolvedSource = applyQueryParams(querySource, params);
@@ -152,7 +152,7 @@ export function applyQueryParams(
 export function resolveTimeFrameParams(
   timeFrame?: TimeFrame,
 ): Record<string, string> {
-  if (!timeFrame || timeFrame.mode === 'full') return {};
+  if (!timeFrame) return {};
 
   const [start, end] = calculateTimeRange(timeFrame);
   return {

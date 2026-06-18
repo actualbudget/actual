@@ -389,11 +389,15 @@ export function EncodingConfig({
   const xFieldForSelect =
     chartSpec.encoding.x && !Array.isArray(chartSpec.encoding.x)
       ? chartSpec.encoding.x.field
-      : '';
+      : resolved?.encoding.x && !Array.isArray(resolved.encoding.x)
+        ? resolved.encoding.x.field
+        : '';
   const yFieldForSingleSelect =
     chartSpec.encoding.y && !Array.isArray(chartSpec.encoding.y)
       ? chartSpec.encoding.y.field
-      : '';
+      : resolved?.encoding.y && !Array.isArray(resolved.encoding.y)
+        ? resolved.encoding.y.field
+        : '';
   const seriesFieldForSelect = chartSpec.encoding.series?.field ?? '';
 
   const yOptionsForMark = isMultiYMark(chartSpec.mark)

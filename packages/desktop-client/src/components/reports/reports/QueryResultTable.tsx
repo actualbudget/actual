@@ -69,8 +69,7 @@ export function QueryResultTable({
     });
   }, [result.rows, sortState]);
 
-  const displayRows = compact ? sortedRows.slice(0, 5) : sortedRows;
-  const hasMoreRows = compact && sortedRows.length > 5;
+  const displayRows = sortedRows;
 
   const handleSort = (columnName: string) => {
     setSortState(prev => {
@@ -151,12 +150,12 @@ export function QueryResultTable({
   }
 
   return (
-    <View style={{ overflow: 'auto', maxHeight: compact ? 300 : '100%' }}>
+    <View style={{ overflow: 'auto', flex: 1 }}>
       <table
         style={{
           width: '100%',
           borderCollapse: 'collapse',
-          fontSize: 13,
+          fontSize: compact ? 11 : 13,
         }}
       >
         <thead>
@@ -169,7 +168,7 @@ export function QueryResultTable({
                   key={col.name}
                   onClick={() => handleSort(col.name)}
                   style={{
-                    padding: '8px 12px',
+                    padding: compact ? '4px 8px' : '8px 12px',
                     textAlign: 'left',
                     borderBottom: `2px solid ${theme.tableBorder}`,
                     backgroundColor: theme.tableHeaderBackground,
@@ -178,6 +177,9 @@ export function QueryResultTable({
                     cursor: 'pointer',
                     userSelect: 'none',
                     whiteSpace: 'nowrap',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 1,
                     ...(isGroupSeparator
                       ? { borderRight: `2px solid ${theme.tableBorder}` }
                       : {}),
@@ -221,7 +223,7 @@ export function QueryResultTable({
                   backgroundColor:
                     idx % 2 === 0
                       ? theme.tableBackground
-                      : theme.pageBackground,
+                      : theme.tableRowBackgroundHover,
                   ...(rowMerged?.backgroundColor
                     ? { backgroundColor: rowMerged.backgroundColor }
                     : {}),
@@ -246,7 +248,7 @@ export function QueryResultTable({
                     <td
                       key={col.name}
                       style={{
-                        padding: '6px 12px',
+                        padding: compact ? '3px 8px' : '6px 12px',
                         borderBottom: `1px solid ${theme.tableBorder}`,
                         backgroundColor:
                           cellStyling?.backgroundColor ??
@@ -282,18 +284,6 @@ export function QueryResultTable({
           })}
         </tbody>
       </table>
-      {hasMoreRows && (
-        <View
-          style={{
-            padding: '8px 12px',
-            textAlign: 'center',
-            color: theme.pageTextSubdued,
-            fontSize: 12,
-          }}
-        >
-          {sortedRows.length - 5} more rows
-        </View>
-      )}
     </View>
   );
 }

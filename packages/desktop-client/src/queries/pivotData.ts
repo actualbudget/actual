@@ -47,15 +47,17 @@ export function pivotData(
       const seriesVal = row[seriesField];
       const yVal = yField ? row[yField] : undefined;
 
-      if (xVal === null || xVal === undefined) continue;
+      if (xVal === null || xVal === undefined) {
+        row[xField] = '—';
+      }
       if (seriesVal === null || seriesVal === undefined) continue;
 
-      const xKey = String(xVal);
+      const xKey = String(row[xField]);
       const seriesKey = String(seriesVal);
 
       let pivotRow = pivotMap.get(xKey);
       if (!pivotRow) {
-        pivotRow = { [xField]: xVal };
+        pivotRow = { [xField]: row[xField] };
         pivotMap.set(xKey, pivotRow);
       }
 

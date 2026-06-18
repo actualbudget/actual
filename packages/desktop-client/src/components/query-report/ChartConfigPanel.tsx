@@ -32,20 +32,23 @@ type ChartConfigPanelProps = {
   onChartSpecChange: (next: ChartSpec) => void;
 };
 
-type Section = 'conditional' | 'axes' | 'fields';
+type Section = 'conditional' | 'axes' | 'fields' | 'numberDisplay';
 
 const CHART_MARKS: Mark[] = ['column', 'bar', 'line', 'area', 'point'];
 const CONDITIONAL_MARKS: Mark[] = ['table', 'number'];
+const NUMBER_MARKS: Mark[] = ['number'];
 
 function sectionVisibility(mark: Mark): {
   conditional: boolean;
   axes: boolean;
   fields: boolean;
+  numberDisplay: boolean;
 } {
   return {
     conditional: CONDITIONAL_MARKS.includes(mark),
     axes: CHART_MARKS.includes(mark),
     fields: true,
+    numberDisplay: NUMBER_MARKS.includes(mark),
   };
 }
 
@@ -253,6 +256,9 @@ export function ChartConfigPanel({
   const valueAxis = chartSpec.config?.axes?.valueAxis ?? {};
   const categoryAxis = chartSpec.config?.axes?.categoryAxis ?? {};
 
+  const xEnc = chartSpec.encoding.x;
+  const xIsDate = xEnc && !Array.isArray(xEnc) && xEnc.type === 'date';
+
   if (!visibility.conditional && !visibility.axes && !visibility.fields) {
     return (
       <div style={{ fontSize: 12, color: theme.pageTextSubdued }}>
@@ -356,53 +362,155 @@ export function ChartConfigPanel({
           <div style={{ fontSize: 12, color: theme.pageTextSubdued }}>
             <Trans>Value axis</Trans>
           </div>
-          <Field label={t('Label')}>
-            <Input
-              value={valueAxis.labelOverride ?? ''}
-              onChangeValue={v =>
-                updateAxes({
-                  valueAxis: {
-                    ...valueAxis,
-                    ...(v
-                      ? { labelOverride: v }
-                      : { labelOverride: undefined }),
-                  },
-                })
-              }
-            />
-          </Field>
+          <LabeledCheckbox
+            id="chart-config-value-axis-show-label"
+            checked={valueAxis.showLabel === true}
+            onChange={() =>
+              updateAxes({
+                valueAxis: {
+                  ...valueAxis,
+                  showLabel: valueAxis.showLabel === true ? false : true,
+                },
+              })
+            }
+          >
+            <Trans>Show label</Trans>
+          </LabeledCheckbox>
+          {valueAxis.showLabel === true && (
+            <Field label={t('Override label')}>
+              <Input
+                value={valueAxis.labelOverride ?? ''}
+                onChangeValue={v =>
+                  updateAxes({
+                    valueAxis: {
+                      ...valueAxis,
+                      ...(v
+                        ? { labelOverride: v }
+                        : { labelOverride: undefined }),
+                    },
+                  })
+                }
+              />
+            </Field>
+          )}
           <div
-            style={{ fontSize: 12, color: theme.pageTextSubdued, marginTop: 8 }}
+            style={{
+              fontSize: 12,
+              color: theme.pageTextSubdued,
+              marginTop: 8,
+            }}
           >
             <Trans>Category axis</Trans>
           </div>
-          <Field label={t('Label')}>
-            <Input
-              value={categoryAxis.labelOverride ?? ''}
-              onChangeValue={v =>
-                updateAxes({
-                  categoryAxis: v
-                    ? { labelOverride: v }
-                    : { labelOverride: undefined },
+          <LabeledCheckbox
+            id="chart-config-category-axis-show-label"
+            checked={categoryAxis.showLabel === true}
+            onChange={() =>
+              updateAxes({
+                categoryAxis: {
+                  ...categoryAxis,
+                  showLabel: categoryAxis.showLabel === true ? false : true,
+                },
+              })
+            }
+          >
+            <Trans>Show label</Trans>
+          </LabeledCheckbox>
+          {categoryAxis.showLabel === true && (
+            <Field label={t('Override label')}>
+              <Input
+                value={categoryAxis.labelOverride ?? ''}
+                onChangeValue={v =>
+                  updateAxes({
+                    categoryAxis: v
+                      ? { labelOverride: v }
+                      : { labelOverride: undefined },
+                  })
+                }
+              />
+            </Field>
+          )}
+          {xIsDate && (
+            <LabeledCheckbox
+              id="chart-config-fill-gaps"
+              checked={chartSpec.config?.fillGaps !== false}
+              onChange={() =>
+                onChartSpecChange({
+                  ...chartSpec,
+                  config: {
+                    ...chartSpec.config,
+                    fillGaps:
+                      chartSpec.config?.fillGaps === false ? undefined : false,
+                  },
                 })
               }
-            />
-          </Field>
+            >
+              <Trans>Fill date gaps</Trans>
+            </LabeledCheckbox>
+          )}
+        </Section>
+      )}
+      {visibility.numberDisplay && (
+        <Section title={t('Number display')}>
           <LabeledCheckbox
-            id="chart-config-fill-gaps"
-            checked={chartSpec.config?.fillGaps !== false}
+            id="chart-config-number-static-font"
+            checked={chartSpec.config?.fontSizeMode === 'static'}
             onChange={() =>
               onChartSpecChange({
                 ...chartSpec,
                 config: {
                   ...chartSpec.config,
-                  fillGaps:
-                    chartSpec.config?.fillGaps === false ? undefined : false,
+                  fontSizeMode:
+                    chartSpec.config?.fontSizeMode === 'static'
+                      ? 'dynamic'
+                      : 'static',
                 },
               })
             }
           >
-            <Trans>Fill date gaps</Trans>
+            <Trans>Static font size</Trans>
+          </LabeledCheckbox>
+          {chartSpec.config?.fontSizeMode === 'static' && (
+            <Field label={t('Font size')}>
+              <Input
+                type="number"
+                value={
+                  chartSpec.config?.staticFontSize !== undefined
+                    ? String(chartSpec.config.staticFontSize)
+                    : '32'
+                }
+                onChangeValue={v => {
+                  const num = parseInt(v, 10);
+                  onChartSpecChange({
+                    ...chartSpec,
+                    config: {
+                      ...chartSpec.config,
+                      staticFontSize: Number.isNaN(num) ? undefined : num,
+                    },
+                  });
+                }}
+              />
+            </Field>
+          )}
+        </Section>
+      )}
+      {chartSpec.mark === 'table' && (
+        <Section title={t('Table options')}>
+          <LabeledCheckbox
+            id="chart-config-show-group-divider"
+            checked={chartSpec.config?.showGroupDivider !== false}
+            onChange={() =>
+              onChartSpecChange({
+                ...chartSpec,
+                config: {
+                  ...chartSpec.config,
+                  showGroupDivider:
+                    chartSpec.config?.showGroupDivider === false ? true : false,
+                },
+              })
+            }
+          >
+            <Trans>Show group divider</Trans>
           </LabeledCheckbox>
         </Section>
       )}

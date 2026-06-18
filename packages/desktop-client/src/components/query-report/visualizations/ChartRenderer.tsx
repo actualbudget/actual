@@ -77,6 +77,40 @@ export function ChartRenderer({
     result.columns,
   ]);
 
+  const normalizedData = useMemo(() => {
+    const xEnc = resolved.encoding.x;
+    const yEnc = resolved.encoding.y;
+
+    const categoryFields = new Set<string>();
+    const addFields = (
+      enc: ResolvedChannel | ResolvedChannel[] | undefined,
+    ) => {
+      if (!enc) return;
+      const channels = Array.isArray(enc) ? enc : [enc];
+      for (const ch of channels) {
+        if (ch.type !== 'number') {
+          categoryFields.add(ch.field);
+        }
+      }
+    };
+    addFields(xEnc);
+    addFields(yEnc);
+    if (categoryFields.size === 0) return data;
+
+    return data.map(row => {
+      let needsUpdate = false;
+      const updated = { ...row };
+      for (const field of categoryFields) {
+        const val = row[field];
+        if (val === null || val === undefined) {
+          updated[field] = '—';
+          needsUpdate = true;
+        }
+      }
+      return needsUpdate ? updated : row;
+    });
+  }, [data, resolved.encoding.x, resolved.encoding.y]);
+
   if (resolved.errors.length > 0) {
     return (
       <View
@@ -112,7 +146,7 @@ export function ChartRenderer({
         <ColumnBarMark
           result={result}
           resolved={resolved}
-          data={data}
+          data={normalizedData}
           seriesKeys={seriesKeys}
           compact={compact}
         />

@@ -473,9 +473,9 @@ async function execBudget(
     "group" TEXT,
     group_name TEXT,
     is_income INTEGER,
-    budgeted REAL,
-    spent REAL,
-    leftover REAL,
+    budgeted INTEGER,
+    spent INTEGER,
+    leftover INTEGER,
     carryover INTEGER
   )`,
   );

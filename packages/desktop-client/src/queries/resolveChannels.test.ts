@@ -140,6 +140,53 @@ describe('resolveChannels', () => {
         /Multiple Y fields and Series channel/,
       );
     });
+
+    it('does not auto-assign when x is explicitly empty array', () => {
+      const result = makeResult([
+        { name: 'category', type: 'string' },
+        { name: 'amount', type: 'float' },
+      ]);
+      const spec: ChartSpec = {
+        mark: 'table',
+        encoding: { x: [], y: { field: 'amount' } },
+      };
+      const resolved = resolveChannels(spec, result);
+      expect(Array.isArray(resolved.encoding.x)).toBe(true);
+      expect(resolved.encoding.x).toHaveLength(0);
+      expect(Array.isArray(resolved.encoding.y)).toBe(false);
+      expect(resolved.encoding.y?.field).toBe('amount');
+    });
+
+    it('does not auto-assign when y is explicitly empty array', () => {
+      const result = makeResult([
+        { name: 'category', type: 'string' },
+        { name: 'amount', type: 'float' },
+      ]);
+      const spec: ChartSpec = {
+        mark: 'table',
+        encoding: { x: { field: 'category' }, y: [] },
+      };
+      const resolved = resolveChannels(spec, result);
+      expect(resolved.encoding.x?.field).toBe('category');
+      expect(Array.isArray(resolved.encoding.y)).toBe(true);
+      expect(resolved.encoding.y).toHaveLength(0);
+    });
+
+    it('does not auto-assign when both x and y are explicitly empty arrays', () => {
+      const result = makeResult([
+        { name: 'category', type: 'string' },
+        { name: 'amount', type: 'float' },
+      ]);
+      const spec: ChartSpec = {
+        mark: 'table',
+        encoding: { x: [], y: [] },
+      };
+      const resolved = resolveChannels(spec, result);
+      expect(Array.isArray(resolved.encoding.x)).toBe(true);
+      expect(resolved.encoding.x).toHaveLength(0);
+      expect(Array.isArray(resolved.encoding.y)).toBe(true);
+      expect(resolved.encoding.y).toHaveLength(0);
+    });
   });
 
   describe('number mark', () => {
@@ -332,6 +379,36 @@ describe('resolveChannels', () => {
       );
       expect(resolved.encoding.x?.field).toBe('month');
     });
+
+    it('does not auto-assign y when y is explicitly empty array on column', () => {
+      const result = makeResult([
+        { name: 'month', type: 'date-month' },
+        { name: 'amount', type: 'float' },
+      ]);
+      const spec: ChartSpec = {
+        mark: 'column',
+        encoding: { x: { field: 'month' }, y: [] },
+      };
+      const resolved = resolveChannels(spec, result);
+      expect(resolved.encoding.x?.field).toBe('month');
+      expect(Array.isArray(resolved.encoding.y)).toBe(true);
+      expect(resolved.encoding.y).toHaveLength(0);
+    });
+
+    it('does not auto-assign y when y is explicitly empty array on line', () => {
+      const result = makeResult([
+        { name: 'month', type: 'date-month' },
+        { name: 'amount', type: 'float' },
+      ]);
+      const spec: ChartSpec = {
+        mark: 'line',
+        encoding: { x: { field: 'month' }, y: [] },
+      };
+      const resolved = resolveChannels(spec, result);
+      expect(resolved.encoding.x?.field).toBe('month');
+      expect(Array.isArray(resolved.encoding.y)).toBe(true);
+      expect(resolved.encoding.y).toHaveLength(0);
+    });
   });
 
   describe('mark-specific auto-assignment (bar)', () => {
@@ -431,6 +508,21 @@ describe('resolveChannels', () => {
       } else {
         throw new Error('Expected single Y, got array');
       }
+    });
+
+    it('does not auto-assign x when x is explicitly empty array', () => {
+      const result = makeResult([
+        { name: 'category', type: 'string' },
+        { name: 'amount', type: 'float' },
+      ]);
+      const spec: ChartSpec = {
+        mark: 'bar',
+        encoding: { x: [], y: { field: 'category' } },
+      };
+      const resolved = resolveChannels(spec, result);
+      expect(Array.isArray(resolved.encoding.x)).toBe(true);
+      expect(resolved.encoding.x).toHaveLength(0);
+      expect(resolved.encoding.y?.field).toBe('category');
     });
   });
 

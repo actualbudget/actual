@@ -73,10 +73,12 @@ export type ConditionalRule = ConditionalSingleRule | ConditionalColorScaleRule;
 
 export type ValueAxisConfig = {
   labelOverride?: string;
+  showLabel?: boolean;
 };
 
 export type CategoryAxisConfig = {
   labelOverride?: string;
+  showLabel?: boolean;
 };
 
 export type AxesConfig = {
@@ -89,6 +91,9 @@ export type ChartConfig = {
   fillGaps?: boolean;
   conditionalRules?: ConditionalRule[];
   axes?: AxesConfig;
+  showGroupDivider?: boolean;
+  fontSizeMode?: 'dynamic' | 'static';
+  staticFontSize?: number;
 };
 
 export type ChartSpec = {

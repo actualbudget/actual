@@ -128,11 +128,14 @@ export function TableMark({ result, resolved, compact }: TableMarkProps) {
     [columns, sortedData],
   );
 
+  const effectiveGroupColumnCount =
+    resolved.config?.showGroupDivider !== false ? groupColumnCount : 0;
+
   return (
     <QueryResultTable
       result={syntheticResult}
       compact={compact}
-      groupColumnCount={groupColumnCount}
+      groupColumnCount={effectiveGroupColumnCount}
       conditionalRules={resolved.config?.conditionalRules}
       columnTitles={columnTitles}
       columnFormats={columnFormats}
