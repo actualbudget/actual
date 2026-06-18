@@ -13,7 +13,12 @@ import {
 } from '@codemirror/language';
 import type { StreamParser } from '@codemirror/language';
 import type { Extension } from '@codemirror/state';
-import { EditorView, hoverTooltip, tooltips } from '@codemirror/view';
+import {
+  EditorView,
+  hoverTooltip,
+  tooltips,
+  ViewPlugin,
+} from '@codemirror/view';
 import type { Tooltip } from '@codemirror/view';
 import { tags } from '@lezer/highlight';
 import { t } from 'i18next';
@@ -70,20 +75,11 @@ function FieldTooltip({ label, info }: { label: string; info: string }) {
 
 type FormulaMode = 'query' | 'transaction';
 
-// Function categories for different syntax highlighting
 const MATH_FUNCTIONS = new Set([
   'SUM',
   'AVERAGE',
-  'AVERAGEA',
-  'COUNT',
-  'COUNTA',
-  'COUNTBLANK',
-  'COUNTIF',
-  'COUNTIFS',
   'MAX',
-  'MAXA',
   'MIN',
-  'MINA',
   'ABS',
   'ROUND',
   'ROUNDUP',
@@ -105,19 +101,6 @@ const MATH_FUNCTIONS = new Set([
   'LOG10',
   'EXP',
   'PRODUCT',
-  'SUMIF',
-  'SUMIFS',
-  'SUMPRODUCT',
-  'SUMSQ',
-  'MEDIAN',
-  'MODE',
-  'STDEV',
-  'STDEVP',
-  'VAR',
-  'VARP',
-  'PERCENTILE',
-  'QUARTILE',
-  'RANK',
   'PMT',
   'FV',
   'PV',
@@ -143,6 +126,8 @@ const LOGICAL_FUNCTIONS = new Set([
 const TEXT_FUNCTIONS = new Set([
   'TEXT',
   'FIXED',
+  'FORMATNUMBER',
+  'FORMATCURRENCY',
   'CONCATENATE',
   'LEFT',
   'RIGHT',
@@ -192,11 +177,6 @@ const QUERY_FUNCTIONS = new Set([
   'QUERY_EXTRACT_CATEGORIES',
   'QUERY_EXTRACT_TIMEFRAME_START',
   'QUERY_EXTRACT_TIMEFRAME_END',
-  'LOOKUP',
-  'VLOOKUP',
-  'HLOOKUP',
-  'INDEX',
-  'MATCH',
   'CHOOSE',
   'ISBLANK',
   'ISERROR',
@@ -204,7 +184,6 @@ const QUERY_FUNCTIONS = new Set([
   'ISNUMBER',
   'ISTEXT',
   'ISLOGICAL',
-  'ISREF',
   'ISEVEN',
   'ISODD',
 ]);
@@ -296,7 +275,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Transaction amount in cents. Use for calculations and comparisons.\n\nExample: `=amount / 100` to get dollar value',
+      'Transaction amount in cents. Use for calculations and comparisons.\n\nExample: =amount / 100 to get dollar value',
     ),
   },
   {
@@ -305,7 +284,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Transaction date in YYYY-MM-DD format. Use with date functions.\n\nExample: `=TEXT(date, "MMMM")` to get month name',
+      'Transaction date in YYYY-MM-DD format. Use with date functions.\n\nExample: =TEXT(date, "MMMM") to get month name',
     ),
   },
   {
@@ -314,7 +293,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Transaction notes/memo text. Use for string operations.\n\nExample: `=UPPER(notes)` to convert to uppercase',
+      'Transaction notes/memo text. Use for string operations.\n\nExample: =UPPER(notes) to convert to uppercase',
     ),
   },
   {
@@ -323,7 +302,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Original imported payee name from bank import. Contains the raw text before matching.\n\nExample: `=LEFT(imported_payee, 10)` to get first 10 characters',
+      'Original imported payee name from bank import. Contains the raw text before matching.\n\nExample: =LEFT(imported_payee, 10) to get first 10 characters',
     ),
   },
   {
@@ -332,7 +311,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Payee ID (string). The ID of the payee.\n\nExample: `=CONCATENATE("Payment to ", payee)`',
+      'Payee ID (string). The ID of the payee.\n\nExample: =CONCATENATE("Payment to ", payee)',
     ),
   },
   {
@@ -341,7 +320,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Payee name (string). The human-readable name of the payee.\n\nExample: `=UPPER(payee_name)` or `=CONCATENATE("Payment to ", payee_name)`',
+      'Payee name (string). The human-readable name of the payee.\n\nExample: =UPPER(payee_name) or =CONCATENATE("Payment to ", payee_name)',
     ),
   },
   {
@@ -350,7 +329,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Account ID (string). The ID of the account.\n\nExample: `=CONCATENATE("Paid from ", account)`',
+      'Account ID (string). The ID of the account.\n\nExample: =CONCATENATE("Paid from ", account)',
     ),
   },
   {
@@ -359,7 +338,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Account name (string). The human-readable name of the account.\n\nExample: `=CONCATENATE("Paid from ", account_name)`',
+      'Account name (string). The human-readable name of the account.\n\nExample: =CONCATENATE("Paid from ", account_name)',
     ),
   },
   {
@@ -368,7 +347,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Category ID (string). The ID of the category.\n\nExample: `=IF(category="Groceries", "Food", "Other")`',
+      'Category ID (string). The ID of the category.\n\nExample: =IF(category="Groceries", "Food", "Other")',
     ),
   },
   {
@@ -377,7 +356,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Category Name (string). The human-readable name of the category.\n\nExample: `=IF(category_name="Groceries", "Food", "Other")`',
+      'Category Name (string). The human-readable name of the category.\n\nExample: =IF(category_name="Groceries", "Food", "Other")',
     ),
   },
   {
@@ -386,7 +365,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Boolean cleared status. TRUE if transaction is cleared, FALSE otherwise.\n\nExample: `=IF(cleared, "Cleared", "Pending")`',
+      'Boolean cleared status. TRUE if transaction is cleared, FALSE otherwise.\n\nExample: =IF(cleared, "Cleared", "Pending")',
     ),
   },
   {
@@ -404,7 +383,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'Account balance as of the date of the transaction, excluding the transaction amount. Use for calculations and comparisons.\n\nExample: `=IF(balance < 0, "Negative Balance", "Positive Balance")`',
+      'Account balance as of the date of the transaction, excluding the transaction amount. Use for calculations and comparisons.\n\nExample: =IF(balance < 0, "Negative Balance", "Positive Balance")',
     ),
   },
   {
@@ -413,7 +392,7 @@ const transactionFields: Completion[] = [
     section: '💰 Transaction Fields',
     boost: 5,
     info: t(
-      'The amount of the parent transaction in cents in split transactions.\n\nExample: `=(parent_amount / 100) * .05`',
+      'The amount of the parent transaction in cents in split transactions.\n\nExample: =(parent_amount / 100) * .05',
     ),
   },
 ];
@@ -710,6 +689,7 @@ const tooltipPortalConfig =
 const autocompletePopoverTheme = EditorView.baseTheme({
   // Wrapper: keep transparent; the list and info panel are the actual "cards".
   '.cm-tooltip.cm-tooltip-autocomplete': {
+    ...styles.darkScrollbar,
     backgroundColor: 'transparent',
     border: 'none',
     boxShadow: 'none',
@@ -724,13 +704,12 @@ const autocompletePopoverTheme = EditorView.baseTheme({
   '.cm-tooltip.cm-tooltip-autocomplete > ul': {
     ...styles.shadowLarge,
     margin: 0,
-    // Outer inset gutter for the whole list (so content never hugs the edges)
-    padding: '12px',
+    padding: '5px 0',
     maxHeight: '260px',
     minWidth: '280px',
     listStyle: 'none',
-    backgroundColor: theme.menuBackground,
-    color: theme.menuItemText,
+    backgroundColor: theme.menuAutoCompleteBackground,
+    color: theme.menuAutoCompleteText,
     borderRadius: '6px',
     overflow: 'hidden',
     overflowY: 'auto',
@@ -748,44 +727,64 @@ const autocompletePopoverTheme = EditorView.baseTheme({
   },
 
   // Section headers
-  '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionSection': {
-    padding: '6px 10px 4px',
-    fontSize: '11px',
-    lineHeight: '1em',
-    textTransform: 'uppercase',
-    letterSpacing: '0.03em',
-    color: theme.menuItemTextHeader,
-    opacity: 0.9,
-    marginTop: '8px',
-  },
-  '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionSection:first-child': {
-    marginTop: 0,
-  },
-
+  '.cm-tooltip.cm-tooltip-autocomplete > ul > completion-section, .cm-tooltip.cm-tooltip-autocomplete li.cm-completionSection':
+    {
+      padding: '7px 12px 3px !important',
+      paddingLeft: '12px !important',
+      paddingRight: '12px !important',
+      fontSize: '11px',
+      lineHeight: '1em',
+      textTransform: 'uppercase',
+      letterSpacing: '0.03em',
+      color: theme.menuItemTextHeader,
+      opacity: '1 !important',
+      marginTop: '8px',
+      position: 'sticky',
+      top: 0,
+      backgroundColor: theme.menuAutoCompleteBackground,
+      borderTop: 'none !important',
+      borderBottom: 'none !important',
+      zIndex: 1,
+    },
+  '.cm-tooltip.cm-tooltip-autocomplete > ul > completion-section:first-child, .cm-tooltip.cm-tooltip-autocomplete li.cm-completionSection:first-child':
+    {
+      marginTop: 0,
+    },
+  '.cm-tooltip.cm-tooltip-autocomplete > ul > completion-section::before, .cm-tooltip.cm-tooltip-autocomplete > ul > completion-section::after, .cm-tooltip.cm-tooltip-autocomplete li.cm-completionSection::before, .cm-tooltip.cm-tooltip-autocomplete li.cm-completionSection::after':
+    {
+      display: 'none !important',
+    },
   // Completion rows
+  '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem, .cm-tooltip.cm-tooltip-autocomplete li[role="option"]':
+    {
+      padding: '5px 14px !important',
+      paddingLeft: '14px !important',
+      paddingRight: '14px !important',
+      lineHeight: '1.2',
+      cursor: 'default',
+      display: 'flex',
+      alignItems: 'baseline',
+      gap: '8px',
+      borderRadius: 0,
+    },
+
   '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem': {
-    padding: '8px 10px',
     lineHeight: '1.2',
     cursor: 'default',
     display: 'flex',
     alignItems: 'baseline',
     gap: '8px',
-    borderRadius: '4px',
+    borderRadius: 0,
   },
 
-  '.cm-tooltip.cm-tooltip-autocomplete > ul > completion-section, .cm-tooltip.cm-tooltip-autocomplete li.cm-completionSection':
+  '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem[aria-selected], .cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem:hover, .cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem-hover':
     {
-      padding: '0 !important',
-      position: 'sticky',
-      top: 0,
-      backgroundColor: theme.menuBackground,
-      opacity: '1 !important',
-      zIndex: 1,
+      backgroundColor: theme.menuAutoCompleteBackgroundHover,
+      color: theme.menuAutoCompleteItemTextHover,
     },
-
-  '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem[aria-selected]': {
-    backgroundColor: theme.menuItemBackgroundHover,
-    color: theme.menuItemTextHover,
+  '.cm-tooltip.cm-tooltip-autocomplete li[role="option"]:hover': {
+    backgroundColor: theme.menuAutoCompleteBackgroundHover,
+    color: theme.menuAutoCompleteItemTextHover,
   },
 
   // Matched text within a label
@@ -811,7 +810,7 @@ const autocompletePopoverTheme = EditorView.baseTheme({
   },
   '.cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem[aria-selected] .cm-completionDetail':
     {
-      color: theme.menuItemTextHover,
+      color: theme.menuAutoCompleteItemTextHover,
     },
 
   // Docs panel for selected completion
@@ -828,6 +827,202 @@ const autocompletePopoverTheme = EditorView.baseTheme({
     borderRadius: '6px',
     marginLeft: '8px',
   },
+});
+
+//hack: this is a workaround to forward the pointer events to the completion item.
+//isPointInsideRect / findAutocompleteElementAtPoint / autocompletePopoverPointerHandler are needed to forward the pointer events to the completion item.
+//Otherwise the mouse interactions will not work as expected.
+function isPointInsideRect(x: number, y: number, rect: DOMRect) {
+  return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+}
+
+function findAutocompleteElementAtPoint(
+  document: Document,
+  selector: string,
+  x: number,
+  y: number,
+) {
+  return Array.from(document.querySelectorAll(selector)).find(element =>
+    isPointInsideRect(x, y, element.getBoundingClientRect()),
+  );
+}
+
+const autocompletePopoverPointerHandler = ViewPlugin.define(view => {
+  let hoveredCompletionItem: HTMLElement | null = null;
+
+  function setHoveredCompletionItem(completionItem: HTMLElement | null) {
+    if (hoveredCompletionItem === completionItem) {
+      return;
+    }
+
+    hoveredCompletionItem?.classList.remove('cm-completionItem-hover');
+    hoveredCompletionItem = completionItem;
+    hoveredCompletionItem?.classList.add('cm-completionItem-hover');
+  }
+
+  const handleWheel = (event: WheelEvent) => {
+    if (!(event.target instanceof Element)) {
+      return;
+    }
+
+    let scrollContainer: Element | null | undefined = event.target.closest(
+      '.cm-tooltip.cm-tooltip-autocomplete > ul',
+    );
+    if (!(scrollContainer instanceof HTMLElement)) {
+      // React Aria modals use the browser top layer, so wheel events can target
+      // modal content even when the autocomplete list is visually under the pointer.
+      scrollContainer = findAutocompleteElementAtPoint(
+        view.dom.ownerDocument,
+        '.cm-tooltip.cm-tooltip-autocomplete > ul',
+        event.clientX,
+        event.clientY,
+      );
+    }
+
+    if (!(scrollContainer instanceof HTMLElement)) {
+      return;
+    }
+
+    const canScrollY =
+      scrollContainer.scrollHeight > scrollContainer.clientHeight;
+    const canScrollX =
+      scrollContainer.scrollWidth > scrollContainer.clientWidth;
+    if (!canScrollY && !canScrollX) {
+      return;
+    }
+
+    const deltaMultiplier =
+      event.deltaMode === WheelEvent.DOM_DELTA_LINE
+        ? 16
+        : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
+          ? scrollContainer.clientHeight
+          : 1;
+
+    const previousScrollTop = scrollContainer.scrollTop;
+    const previousScrollLeft = scrollContainer.scrollLeft;
+
+    scrollContainer.scrollTop += event.deltaY * deltaMultiplier;
+    scrollContainer.scrollLeft += event.deltaX * deltaMultiplier;
+
+    if (
+      scrollContainer.scrollTop !== previousScrollTop ||
+      scrollContainer.scrollLeft !== previousScrollLeft
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
+
+  const handleMouseDown = (event: MouseEvent) => {
+    if (!(event.target instanceof Element)) {
+      return;
+    }
+
+    if (event.target.closest('.cm-tooltip.cm-tooltip-autocomplete')) {
+      return;
+    }
+
+    const completionItem = findAutocompleteElementAtPoint(
+      view.dom.ownerDocument,
+      '.cm-tooltip.cm-tooltip-autocomplete li[role="option"], .cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem',
+      event.clientX,
+      event.clientY,
+    );
+
+    if (!(completionItem instanceof HTMLElement)) {
+      setHoveredCompletionItem(null);
+      return;
+    }
+
+    setHoveredCompletionItem(completionItem);
+
+    completionItem.dispatchEvent(
+      new MouseEvent(event.type, {
+        bubbles: true,
+        cancelable: true,
+        view: view.dom.ownerDocument.defaultView,
+        clientX: event.clientX,
+        clientY: event.clientY,
+        screenX: event.screenX,
+        screenY: event.screenY,
+        button: event.button,
+        buttons: event.buttons,
+        ctrlKey: event.ctrlKey,
+        shiftKey: event.shiftKey,
+        altKey: event.altKey,
+        metaKey: event.metaKey,
+      }),
+    );
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
+  const handleMouseMove = (event: MouseEvent) => {
+    if (!(event.target instanceof Element)) {
+      return;
+    }
+
+    if (event.target.closest('.cm-tooltip.cm-tooltip-autocomplete')) {
+      return;
+    }
+
+    const completionItem = findAutocompleteElementAtPoint(
+      view.dom.ownerDocument,
+      '.cm-tooltip.cm-tooltip-autocomplete li[role="option"], .cm-tooltip.cm-tooltip-autocomplete li.cm-completionItem',
+      event.clientX,
+      event.clientY,
+    );
+
+    if (!(completionItem instanceof HTMLElement)) {
+      return;
+    }
+
+    completionItem.dispatchEvent(
+      new MouseEvent(event.type, {
+        bubbles: true,
+        cancelable: true,
+        view: view.dom.ownerDocument.defaultView,
+        clientX: event.clientX,
+        clientY: event.clientY,
+        screenX: event.screenX,
+        screenY: event.screenY,
+        button: event.button,
+        buttons: event.buttons,
+        ctrlKey: event.ctrlKey,
+        shiftKey: event.shiftKey,
+        altKey: event.altKey,
+        metaKey: event.metaKey,
+      }),
+    );
+  };
+
+  view.dom.ownerDocument.addEventListener('wheel', handleWheel, {
+    capture: true,
+    passive: false,
+  });
+  view.dom.ownerDocument.addEventListener('mousedown', handleMouseDown, {
+    capture: true,
+    passive: false,
+  });
+  view.dom.ownerDocument.addEventListener('mousemove', handleMouseMove, {
+    capture: true,
+    passive: true,
+  });
+
+  return {
+    destroy() {
+      view.dom.ownerDocument.removeEventListener('wheel', handleWheel, {
+        capture: true,
+      });
+      view.dom.ownerDocument.removeEventListener('mousedown', handleMouseDown, {
+        capture: true,
+      });
+      view.dom.ownerDocument.removeEventListener('mousemove', handleMouseMove, {
+        capture: true,
+      });
+      setHoveredCompletionItem(null);
+    },
+  };
 });
 
 // Custom theme for categorized function highlighting (light)
@@ -890,5 +1085,6 @@ export function excelFormulaExtension(
     tooltipZIndexTheme,
     tooltipPortalConfig,
     autocompletePopoverTheme,
+    autocompletePopoverPointerHandler,
   ];
 }

@@ -109,14 +109,12 @@ export const pluggyaiService = {
 
       if (sandboxAccount) startDate = '2000-01-01';
 
-      const transactions = await client.fetchTransactions(accountId, {
-        from: startDate,
-        pageSize,
-        page,
+      let transactions = await client.fetchAllTransactions(accountId, {
+        dateFrom: startDate,
       });
 
       if (sandboxAccount) {
-        transactions.results = transactions.results.map(t => ({
+        transactions = transactions.map(t => ({
           ...t,
           sandbox: true,
         }));

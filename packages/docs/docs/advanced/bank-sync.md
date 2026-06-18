@@ -34,6 +34,7 @@ Resetting credentials removes the credentials for the current budget file first.
 
 ## Supported Providers
 
+- [Akahu](./bank-sync/akahu.md) (New Zealand Banks)
 - [Enable Banking](./bank-sync/enable-banking.md) (European Banks)
 - GoCardless [BankAccountData](./bank-sync/gocardless.md) (European Banks, **not accepting new accounts**)
 - [SimpleFIN Bridge](./bank-sync/simplefin.md) (North American Banks)
