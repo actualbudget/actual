@@ -3,8 +3,8 @@ import type { ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgBolt } from '@actual-app/components/icons/v1';
 import { SvgCheckAll, SvgUncheckAll } from '@actual-app/components/icons/v2';
-import { SvgRefreshArrow } from '@actual-app/components/icons/v2';
 import { Select } from '@actual-app/components/select';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -455,55 +455,49 @@ export function EncodingConfig({
         ))}
 
       {result && visibility.x && (
-        <Field
-          label={t(channelLabel(chartSpec.mark, 'x'))}
-          help={
-            chartSpec.mark === 'bar' && selectedXFields.length > 1
-              ? t('Each X field creates a separate series in the chart.')
-              : undefined
-          }
-        >
-          {isMultiXMark(chartSpec.mark) ? (
-            <View>
-              {chartSpec.mark === 'table' && (
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    gap: 4,
-                    marginBottom: 8,
-                  }}
+        <View style={{ marginBottom: 16 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 4,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 12,
+                color: theme.pageTextSubdued,
+                flex: 1,
+              }}
+            >
+              {t(channelLabel(chartSpec.mark, 'x'))}
+            </div>
+            {isMultiXMark(chartSpec.mark) && (
+              <View style={{ flexDirection: 'row', gap: 4 }}>
+                <GraphButton
+                  title={t('Select all')}
+                  onSelect={handleXSelectAll}
+                  style={{ padding: 4 }}
                 >
-                  <GraphButton
-                    title={t('Select all')}
-                    onSelect={handleXSelectAll}
-                    style={{ padding: 4 }}
-                  >
-                    <SvgCheckAll width={15} height={15} />
-                  </GraphButton>
-                  <GraphButton
-                    title={t('Clear')}
-                    onSelect={handleXClear}
-                    style={{ padding: 4 }}
-                  >
-                    <SvgUncheckAll width={15} height={15} />
-                  </GraphButton>
-                  <View style={{ flex: 1 }} />
-                  <GraphButton
-                    title={t('Auto')}
-                    onSelect={handleAuto}
-                    style={{ padding: 4 }}
-                  >
-                    <SvgRefreshArrow width={15} height={15} />
-                  </GraphButton>
-                </View>
-              )}
-              <CheckboxList
-                options={columnOptions.all.map(c => c.value)}
-                selected={selectedXFields}
-                onToggle={handleXMultiToggle}
-                autoAssignedFields={autoAssignedXFields}
-              />
-            </View>
+                  <SvgCheckAll width={15} height={15} />
+                </GraphButton>
+                <GraphButton
+                  title={t('Clear')}
+                  onSelect={handleXClear}
+                  style={{ padding: 4 }}
+                >
+                  <SvgUncheckAll width={15} height={15} />
+                </GraphButton>
+              </View>
+            )}
+          </View>
+          {isMultiXMark(chartSpec.mark) ? (
+            <CheckboxList
+              options={columnOptions.all.map(c => c.value)}
+              selected={selectedXFields}
+              onToggle={handleXMultiToggle}
+              autoAssignedFields={autoAssignedXFields}
+            />
           ) : (
             <View
               style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
@@ -519,61 +513,58 @@ export function EncodingConfig({
                 resolved.encoding.x.autoAssigned && <AutoLabel />}
             </View>
           )}
-        </Field>
+          {chartSpec.mark === 'bar' && selectedXFields.length > 1 && (
+            <div style={{ fontSize: 11, color: theme.pageTextSubdued, marginTop: 4 }}>
+              {t('Each X field creates a separate series in the chart.')}
+            </div>
+          )}
+        </View>
       )}
 
       {result && visibility.y && (
-        <Field
-          label={t(channelLabel(chartSpec.mark, 'y'))}
-          help={
-            chartSpec.mark !== 'bar' &&
-            chartSpec.mark !== 'table' &&
-            selectedYFields.length > 1
-              ? t('Each Y field creates a separate series in the chart.')
-              : undefined
-          }
-        >
-          {isMultiYMark(chartSpec.mark) ? (
-            <View>
-              {chartSpec.mark === 'table' && (
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    gap: 4,
-                    marginBottom: 8,
-                  }}
+        <View style={{ marginBottom: 16 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 4,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 12,
+                color: theme.pageTextSubdued,
+                flex: 1,
+              }}
+            >
+              {t(channelLabel(chartSpec.mark, 'y'))}
+            </div>
+            {isMultiYMark(chartSpec.mark) && (
+              <View style={{ flexDirection: 'row', gap: 4 }}>
+                <GraphButton
+                  title={t('Select all')}
+                  onSelect={handleYSelectAll}
+                  style={{ padding: 4 }}
                 >
-                  <GraphButton
-                    title={t('Select all')}
-                    onSelect={handleYSelectAll}
-                    style={{ padding: 4 }}
-                  >
-                    <SvgCheckAll width={15} height={15} />
-                  </GraphButton>
-                  <GraphButton
-                    title={t('Clear')}
-                    onSelect={handleYClear}
-                    style={{ padding: 4 }}
-                  >
-                    <SvgUncheckAll width={15} height={15} />
-                  </GraphButton>
-                  <View style={{ flex: 1 }} />
-                  <GraphButton
-                    title={t('Auto')}
-                    onSelect={handleAuto}
-                    style={{ padding: 4 }}
-                  >
-                    <SvgRefreshArrow width={15} height={15} />
-                  </GraphButton>
-                </View>
-              )}
-              <CheckboxList
-                options={yOptionsForMark.map(c => c.value)}
-                selected={selectedYFields}
-                onToggle={handleYMultiToggle}
-                autoAssignedFields={autoAssignedYFields}
-              />
-            </View>
+                  <SvgCheckAll width={15} height={15} />
+                </GraphButton>
+                <GraphButton
+                  title={t('Clear')}
+                  onSelect={handleYClear}
+                  style={{ padding: 4 }}
+                >
+                  <SvgUncheckAll width={15} height={15} />
+                </GraphButton>
+              </View>
+            )}
+          </View>
+          {isMultiYMark(chartSpec.mark) ? (
+            <CheckboxList
+              options={yOptionsForMark.map(c => c.value)}
+              selected={selectedYFields}
+              onToggle={handleYMultiToggle}
+              autoAssignedFields={autoAssignedYFields}
+            />
           ) : (
             <View
               style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
@@ -589,7 +580,28 @@ export function EncodingConfig({
                 resolved.encoding.y.autoAssigned && <AutoLabel />}
             </View>
           )}
-        </Field>
+          {chartSpec.mark !== 'bar' &&
+            chartSpec.mark !== 'table' &&
+            selectedYFields.length > 1 && (
+              <div
+                style={{ fontSize: 11, color: theme.pageTextSubdued, marginTop: 4 }}
+              >
+                {t('Each Y field creates a separate series in the chart.')}
+              </div>
+            )}
+        </View>
+      )}
+
+      {(isMultiXMark(chartSpec.mark) || isMultiYMark(chartSpec.mark)) && (
+        <View style={{ alignItems: 'flex-end', marginBottom: 16 }}>
+          <GraphButton
+            title={t('Auto')}
+            onSelect={handleAuto}
+            style={{ padding: 4 }}
+          >
+            <SvgBolt width={15} height={15} />
+          </GraphButton>
+        </View>
       )}
 
       {result && visibility.series && (
