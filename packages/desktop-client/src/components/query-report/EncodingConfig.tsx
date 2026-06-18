@@ -454,6 +454,18 @@ export function EncodingConfig({
           </div>
         ))}
 
+      {(isMultiXMark(chartSpec.mark) || isMultiYMark(chartSpec.mark)) && (
+        <View style={{ alignItems: 'flex-end', marginBottom: 12 }}>
+          <GraphButton
+            title={t('Auto')}
+            onSelect={handleAuto}
+            style={{ padding: 4 }}
+          >
+            <SvgBolt width={15} height={15} />
+          </GraphButton>
+        </View>
+      )}
+
       {result && visibility.x && (
         <View style={{ marginBottom: 16 }}>
           <View
@@ -589,18 +601,6 @@ export function EncodingConfig({
                 {t('Each Y field creates a separate series in the chart.')}
               </div>
             )}
-        </View>
-      )}
-
-      {(isMultiXMark(chartSpec.mark) || isMultiYMark(chartSpec.mark)) && (
-        <View style={{ alignItems: 'flex-end', marginBottom: 16 }}>
-          <GraphButton
-            title={t('Auto')}
-            onSelect={handleAuto}
-            style={{ padding: 4 }}
-          >
-            <SvgBolt width={15} height={15} />
-          </GraphButton>
         </View>
       )}
 
