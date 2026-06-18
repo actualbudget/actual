@@ -43,7 +43,7 @@ import { AdvancedToggle, Setting } from './UI';
 function About() {
   const version = useServerVersion();
   const serverRevision = useServerRevision();
-  const gitRevision = import.meta.env.REACT_APP_GIT_REVISION;
+  const clientRevision = import.meta.env.REACT_APP_GIT_REVISION;
   const versionInfo = useSelector(state => state.app.versionInfo);
   const [notifyWhenUpdateIsAvailable, setNotifyWhenUpdateIsAvailablePref] =
     useGlobalPref('notifyWhenUpdateIsAvailable', () => {
@@ -79,7 +79,7 @@ function About() {
           <Trans>
             Client version: {{ version: `v${window.Actual?.ACTUAL_VERSION}` }}
           </Trans>
-          {gitRevision ? ` (${gitRevision})` : ''}
+          {clientRevision ? ` (${clientRevision})` : ''}
         </Text>
         <Text>
           <Trans>Server version: {{ version }}</Trans>
