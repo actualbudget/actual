@@ -50,7 +50,7 @@ jobs:
   publish:
     needs: check-version
     if: needs.check-version.outputs.should-publish == 'true'
-    runs-on: depot-ubuntu-latest
+    runs-on: ubuntu-latest
     name: Publish @actual-app/crdt to npm
     permissions:
       contents: read

@@ -90,7 +90,7 @@ jobs:
             packages/cli/@actual-app/cli.tgz
 
   publish:
-    runs-on: depot-ubuntu-latest
+    runs-on: ubuntu-latest
     name: Publish npm packages
     needs: build-and-pack
     environment: release
