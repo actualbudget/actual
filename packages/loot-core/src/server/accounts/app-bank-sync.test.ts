@@ -228,7 +228,7 @@ describe('accountsBankSync', () => {
       message: 'rate limit exceeded',
     });
 
-    await accountsBankSyncHandler({ ids: ['acct1'] });
+    await accountsBankSyncHandler({ ids: ['acct1'], fileId: 'test-file-id' });
 
     const account = await db.first<db.DbAccount>(
       'SELECT * FROM accounts WHERE id = ?',
@@ -255,7 +255,7 @@ describe('accountsBankSync', () => {
       message: 'timed out',
     });
 
-    await accountsBankSyncHandler({ ids: ['acct1'] });
+    await accountsBankSyncHandler({ ids: ['acct1'], fileId: 'test-file-id' });
 
     const account = await db.first<db.DbAccount>(
       'SELECT * FROM accounts WHERE id = ?',
