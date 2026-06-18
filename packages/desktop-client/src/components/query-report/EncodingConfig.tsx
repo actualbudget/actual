@@ -189,12 +189,7 @@ export function EncodingConfig({
         ...specBeforeMaterialize,
         encoding: {
           ...currentEncoding,
-          x:
-            nextX.length > 0
-              ? nextX.length === 1
-                ? nextX[0]
-                : nextX
-              : undefined,
+          x: nextX.length > 0 ? (nextX.length === 1 ? nextX[0] : nextX) : [],
         },
       });
     } else {
@@ -214,7 +209,7 @@ export function EncodingConfig({
             ? filteredY.length === 1
               ? filteredY[0]
               : filteredY
-            : undefined;
+            : [];
       }
 
       onChartSpecChange({
@@ -264,12 +259,7 @@ export function EncodingConfig({
         ...specBeforeMaterialize,
         encoding: {
           ...currentEncoding,
-          y:
-            nextY.length > 0
-              ? nextY.length === 1
-                ? nextY[0]
-                : nextY
-              : undefined,
+          y: nextY.length > 0 ? (nextY.length === 1 ? nextY[0] : nextY) : [],
         },
       });
     } else {
@@ -289,7 +279,7 @@ export function EncodingConfig({
             ? filteredX.length === 1
               ? filteredX[0]
               : filteredX
-            : undefined;
+            : [];
       }
 
       onChartSpecChange({
@@ -326,7 +316,7 @@ export function EncodingConfig({
       encoding: {
         ...currentEncoding,
         x: allCols.length === 1 ? allCols[0] : allCols,
-        y: undefined,
+        y: [],
       },
     });
   };
@@ -339,7 +329,7 @@ export function EncodingConfig({
       ...specBeforeMaterialize,
       encoding: {
         ...currentEncoding,
-        x: undefined,
+        x: [],
       },
     });
   };
@@ -348,7 +338,7 @@ export function EncodingConfig({
     if (!result || !resolved) return;
     const specBeforeMaterialize = materializeChannels(chartSpec, resolved);
     const currentEncoding = specBeforeMaterialize.encoding;
-    const numericCols = columnOptions.numeric.map(c => ({
+    const allCols = columnOptions.all.map(c => ({
       field: c.value,
       type: c.type as ChannelDef['type'],
     }));
@@ -356,8 +346,8 @@ export function EncodingConfig({
       ...specBeforeMaterialize,
       encoding: {
         ...currentEncoding,
-        x: undefined,
-        y: numericCols.length === 1 ? numericCols[0] : numericCols,
+        x: [],
+        y: allCols.length === 1 ? allCols[0] : allCols,
       },
     });
   };
@@ -370,7 +360,7 @@ export function EncodingConfig({
       ...specBeforeMaterialize,
       encoding: {
         ...currentEncoding,
-        y: undefined,
+        y: [],
       },
     });
   };
@@ -455,14 +445,14 @@ export function EncodingConfig({
         ))}
 
       {(isMultiXMark(chartSpec.mark) || isMultiYMark(chartSpec.mark)) && (
-        <View style={{ alignItems: 'flex-end' }}>
+        <View style={{ alignItems: 'flex-start' }}>
           <Button
-            variant="bare"
+            variant="normal"
             onPress={handleAuto}
             style={{ fontSize: 11, padding: '2px 6px' }}
           >
             <SvgBolt width={12} height={12} style={{ marginRight: 4 }} />
-            <Trans>Reset to auto</Trans>
+            <Trans>Auto select</Trans>
           </Button>
         </View>
       )}
@@ -527,7 +517,13 @@ export function EncodingConfig({
             </View>
           )}
           {chartSpec.mark === 'bar' && selectedXFields.length > 1 && (
-            <div style={{ fontSize: 11, color: theme.pageTextSubdued, marginTop: 4 }}>
+            <div
+              style={{
+                fontSize: 11,
+                color: theme.pageTextSubdued,
+                marginTop: 4,
+              }}
+            >
               {t('Each X field creates a separate series in the chart.')}
             </div>
           )}
@@ -597,7 +593,11 @@ export function EncodingConfig({
             chartSpec.mark !== 'table' &&
             selectedYFields.length > 1 && (
               <div
-                style={{ fontSize: 11, color: theme.pageTextSubdued, marginTop: 4 }}
+                style={{
+                  fontSize: 11,
+                  color: theme.pageTextSubdued,
+                  marginTop: 4,
+                }}
               >
                 {t('Each Y field creates a separate series in the chart.')}
               </div>
