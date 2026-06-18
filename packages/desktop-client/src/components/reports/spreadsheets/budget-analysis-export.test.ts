@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { buildBudgetAnalysisCsv } from './budget-analysis-export';
 
 describe('buildBudgetAnalysisCsv', () => {
