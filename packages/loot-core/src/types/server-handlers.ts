@@ -13,7 +13,9 @@ export type ServerHandlers = {
   query: (query: QueryState) => Promise<{ data: any; dependencies: string[] }>;
 
   'get-server-version': () => Promise<
-    { error: 'no-server' } | { error: 'network-failure' } | { version: string }
+    | { error: 'no-server' }
+    | { error: 'network-failure' }
+    | { version: string; revision?: string }
   >;
 
   'get-server-url': () => Promise<string | null>;

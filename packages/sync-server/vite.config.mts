@@ -1,3 +1,4 @@
+import { execSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
@@ -7,6 +8,28 @@ import type { Plugin } from 'vite';
 const pkg = JSON.parse(
   readFileSync(path.resolve(__dirname, 'package.json'), 'utf-8'),
 );
+
+// Resolve a short git revision at build time so the /info endpoint can report a
+// unique identifier for nightly/edge images (where the package.json version is
+// the same across many commits). Prefers an explicit env var, then the
+// CI-provided commit SHA, then the local git checkout. Never throws.
+function resolveGitRevision(): string {
+  if (process.env.ACTUAL_GIT_REVISION) {
+    return process.env.ACTUAL_GIT_REVISION;
+  }
+  if (process.env.GITHUB_SHA) {
+    return process.env.GITHUB_SHA.slice(0, 7);
+  }
+  try {
+    return execSync('git rev-parse --short HEAD', {
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+      .toString()
+      .trim();
+  } catch {
+    return '';
+  }
+}
 
 const shebangPlugin = (entryFile: string): Plugin => ({
   name: 'sync-server-shebang',
@@ -67,6 +90,7 @@ export default defineConfig({
   },
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
+    __GIT_REVISION__: JSON.stringify(resolveGitRevision()),
   },
   assetsInclude: ['**/*.sql'],
   plugins: [shebangPlugin('bin/actual-server.js')],

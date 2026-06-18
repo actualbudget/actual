@@ -25,6 +25,7 @@ type LoginMethod = {
 type ServerContextValue = {
   url: string | null;
   version: string;
+  revision: string;
   multiuserEnabled: boolean;
   availableLoginMethods: LoginMethod[];
   setURL: (
@@ -39,6 +40,7 @@ type ServerContextValue = {
 const ServerContext = createContext<ServerContextValue>({
   url: null,
   version: '',
+  revision: '',
   multiuserEnabled: false,
   availableLoginMethods: [],
   setURL: () => Promise.reject(new Error('ServerContext not initialized')),
@@ -54,6 +56,7 @@ const ServerContext = createContext<ServerContextValue>({
 
 export const useServerURL = () => useContext(ServerContext).url;
 export const useServerVersion = () => useContext(ServerContext).version;
+export const useServerRevision = () => useContext(ServerContext).revision;
 export const useSetServerURL = () => useContext(ServerContext).setURL;
 export const useMultiuserEnabled = () => {
   const { multiuserEnabled } = useContext(ServerContext);
@@ -73,15 +76,18 @@ export const useLoginMethod = () => {
 export const useAvailableLoginMethods = () =>
   useContext(ServerContext).availableLoginMethods;
 
-async function getServerVersion() {
+async function getServerVersion(): Promise<{
+  version: string;
+  revision: string;
+}> {
   if (Platform.isPlaywright) {
-    return '99.9.9';
+    return { version: '99.9.9', revision: '' };
   }
   const result = await send('get-server-version');
   if ('version' in result) {
-    return result.version;
+    return { version: result.version, revision: result.revision ?? '' };
   }
-  return '';
+  return { version: '', revision: '' };
 }
 
 export const useRefreshLoginMethods = () =>
@@ -97,6 +103,7 @@ export function ServerProvider({ children }: { children: ReactNode }) {
   const dispatch = useDispatch();
   const [serverURL, setServerURL] = useState('');
   const [version, setVersion] = useState('');
+  const [revision, setRevision] = useState('');
   const [multiuserEnabled, setMultiuserEnabled] = useState(false);
   const [availableLoginMethods, setAvailableLoginMethods] = useState<
     LoginMethod[]
@@ -109,15 +116,18 @@ export function ServerProvider({ children }: { children: ReactNode }) {
         return;
       }
       setServerURL(serverURL);
-      setVersion(await getServerVersion());
+      const { version, revision } = await getServerVersion();
+      setVersion(version);
+      setRevision(revision);
     }
     void run();
   }, []);
 
   useOnVisible(
     async () => {
-      const version = await getServerVersion();
+      const { version, revision } = await getServerVersion();
       setVersion(version);
+      setRevision(revision);
     },
     {
       isEnabled: !!serverURL,
@@ -166,7 +176,9 @@ export function ServerProvider({ children }: { children: ReactNode }) {
       if (!error) {
         const serverURL = await send('get-server-url');
         setServerURL(serverURL!);
-        setVersion(await getServerVersion());
+        const { version, revision } = await getServerVersion();
+        setVersion(version);
+        setRevision(revision);
       }
       return { error };
     },
@@ -181,6 +193,7 @@ export function ServerProvider({ children }: { children: ReactNode }) {
         availableLoginMethods,
         setURL,
         version: version ? `v${version}` : 'N/A',
+        revision,
         refreshLoginMethods,
         setMultiuserEnabled,
         setLoginMethods: setAvailableLoginMethods,

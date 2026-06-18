@@ -77,16 +77,18 @@ handlers['get-server-version'] = async function () {
   }
 
   let version;
+  let revision;
   try {
     const res = await get(getServer().BASE_SERVER + '/info');
 
     const info = JSON.parse(res);
     version = info.build.version;
+    revision = info.build.revision;
   } catch {
     return { error: 'network-failure' };
   }
 
-  return { version };
+  return { version, revision };
 };
 
 handlers['get-server-url'] = async function () {

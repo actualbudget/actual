@@ -20,6 +20,11 @@ import * as simpleFinApp from './app-simplefin/app-simplefin';
 import * as syncApp from './app-sync';
 import { config } from './load-config';
 
+// Replaced at build time by Vite's `define` (see vite.config.mts). Declared
+// here so it typechecks; guarded with `typeof` at the use site so it is safe
+// when the bundle runs without the define applied.
+declare const __GIT_REVISION__: string;
+
 const app = express();
 
 process.on('unhandledRejection', reason => {
@@ -113,6 +118,9 @@ app.get('/info', (_req, res) => {
       name: packageJson?.name,
       description: packageJson?.description,
       version: packageJson?.version,
+      // Injected at build time (see vite.config.mts). Empty when built
+      // outside a git checkout / CI.
+      revision: typeof __GIT_REVISION__ !== 'undefined' ? __GIT_REVISION__ : '',
     },
   });
 });

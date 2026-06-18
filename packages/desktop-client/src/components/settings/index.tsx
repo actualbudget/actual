@@ -19,7 +19,7 @@ import { Link } from '#components/common/Link';
 import { Checkbox, FormField, FormLabel } from '#components/forms';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { Page } from '#components/Page';
-import { useServerVersion } from '#components/ServerContext';
+import { useServerRevision, useServerVersion } from '#components/ServerContext';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useMetadataPref } from '#hooks/useMetadataPref';
@@ -42,6 +42,7 @@ import { AdvancedToggle, Setting } from './UI';
 
 function About() {
   const version = useServerVersion();
+  const serverRevision = useServerRevision();
   const gitRevision = import.meta.env.REACT_APP_GIT_REVISION;
   const versionInfo = useSelector(state => state.app.versionInfo);
   const [notifyWhenUpdateIsAvailable, setNotifyWhenUpdateIsAvailablePref] =
@@ -82,6 +83,7 @@ function About() {
         </Text>
         <Text>
           <Trans>Server version: {{ version }}</Trans>
+          {serverRevision ? ` (${serverRevision})` : ''}
         </Text>
 
         {notifyWhenUpdateIsAvailable && versionInfo?.isOutdated ? (
