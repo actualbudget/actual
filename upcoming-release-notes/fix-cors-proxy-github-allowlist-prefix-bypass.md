@@ -1,6 +1,6 @@
 ---
 category: Bugfix
-authors: [actual-github-bot]
+authors: [MatissJanis]
 ---
 
-Fix CORS proxy GitHub API allowlist prefix bypass that could leak private repositories through the server GitHub token (GHSA-m62c-5q34-f3cf)
+Fix a CORS proxy security issue that could expose private GitHub repositories.
