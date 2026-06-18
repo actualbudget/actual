@@ -226,7 +226,7 @@ export function LoggedInUser({
         ref={triggerRef}
         variant="bare"
         onPress={() => setMenuOpen(true)}
-        style={{ color: color || color: theme.buttonBareText }}
+        // style={{ color: color || color: theme.buttonBareText }}
       >
         {serverMessage()}
       </Button>
