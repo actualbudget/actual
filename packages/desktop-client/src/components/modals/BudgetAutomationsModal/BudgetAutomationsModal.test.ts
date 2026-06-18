@@ -15,7 +15,7 @@ describe('migrateTemplatesToAutomations', () => {
     expect(migrateTemplatesToAutomations([simpleTemplate])).toEqual([]);
   });
 
-  it('drops simple templates whose monthly amount is zero with no limit', () => {
+  it('migrates a standalone `#template 0` (no limit) into a $0 fixed entry', () => {
     const simpleTemplate = {
       type: 'simple',
       directive: 'template',
@@ -23,7 +23,17 @@ describe('migrateTemplatesToAutomations', () => {
       monthly: 0,
     } satisfies Template;
 
-    expect(migrateTemplatesToAutomations([simpleTemplate])).toEqual([]);
+    const result = migrateTemplatesToAutomations([simpleTemplate]);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].displayType).toBe('fixed');
+    expect(result[0].template).toMatchObject({
+      type: 'periodic',
+      amount: 0,
+      period: { period: 'month', amount: 1 },
+      directive: 'template',
+      priority: 5,
+    });
   });
 
   it('migrates a goal directive to a long-term goal entry', () => {

@@ -83,12 +83,17 @@ export function migrateTemplatesToAutomations(
         }
       }
 
-      if (hasMonthly) {
+      const contribution =
+        hasMonthly || (monthly === 0 && template.limit == null)
+          ? monthly
+          : null;
+
+      if (contribution != null) {
         entries.push(
           createAutomationEntry(
             {
               type: 'periodic',
-              amount: monthly,
+              amount: contribution,
               period: { period: 'month', amount: 1 },
               starting: dayFromDate(firstDayOfMonth(new Date())),
               directive: 'template',
