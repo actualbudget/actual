@@ -108,6 +108,7 @@ export function recalculate({
   return {
     id: item.id || '',
     name: item.name,
+    uncategorizedId: item.uncategorized_id,
     totalAssets,
     totalDebts,
     netAssets: totalTotals > 0 ? totalTotals : 0,

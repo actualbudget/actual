@@ -8,6 +8,6 @@ When two transactions are merged, one is determined to be the 'kept' transaction
 
 The following logic is used to determine which transaction is kept:
 
-1. If one transaction is imported through [bank sync](/docs/advanced/bank-sync) and the other is not, the synced transaction is kept. Otherwise, continue to the next step.
-2. If one transaction is imported through a [file import](/docs/transactions/importing) and the other is not, the imported transaction is kept. Otherwise, continue to the final step.
+1. If one transaction is imported through [bank sync](../advanced/bank-sync.md) and the other is not, the synced transaction is kept. Otherwise, continue to the next step.
+2. If one transaction is imported through a [file import](./importing.md) and the other is not, the imported transaction is kept. Otherwise, continue to the final step.
 3. The transaction with the earlier date is kept.

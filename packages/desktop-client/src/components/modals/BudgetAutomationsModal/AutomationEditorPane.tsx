@@ -4,9 +4,12 @@ import { Button } from '@actual-app/components/button';
 import { SvgDelete } from '@actual-app/components/icons/v0';
 import { SvgAlertTriangle } from '@actual-app/components/icons/v2';
 import { Input } from '@actual-app/components/input';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
+import { dayFromDate, firstDayOfMonth } from '@actual-app/core/shared/months';
 import type {
   CategoryGroupEntity,
   ScheduleEntity,
@@ -47,11 +50,45 @@ const CONFIG_PANEL_CLASS = css({
   },
 });
 
+// on mobile, size fields to the touch-friendly standard, not the desktop height
+const MOBILE_TOUCH_FIELDS_CLASS = css({
+  [`@media (max-width: ${parseInt(tokens.breakpoint_small, 10) - 1}px)`]: {
+    '& input:not([type="checkbox"]):not([type="radio"]), & button[type="button"]:not([aria-pressed])':
+      {
+        minHeight: styles.mobileMinHeight,
+        boxSizing: 'border-box',
+      },
+    '& input[type="date"], & input[type="month"]': {
+      width: '100%',
+    },
+  },
+});
+
 const SINGLETON_TYPES: ReadonlySet<DisplayTemplateType> = new Set([
   'limit',
   'refill',
   'remainder',
 ]);
+
+function getDefaultWeeklyStart(entries: AutomationEntry[]): string {
+  const starts: string[] = [];
+
+  for (const { template } of entries) {
+    if (template.type === 'periodic' && template.starting) {
+      starts.push(template.starting);
+    } else if (
+      (template.type === 'by' || template.type === 'spend') &&
+      template.month
+    ) {
+      starts.push(`${template.month}-01`);
+    }
+  }
+
+  const earliest =
+    starts.length > 0 ? starts.reduce((a, b) => (a < b ? a : b)) : null;
+
+  return earliest ?? dayFromDate(firstDayOfMonth(new Date()));
+}
 
 type AutomationEditorPaneProps = {
   entries: AutomationEntry[];
@@ -81,6 +118,7 @@ export function AutomationEditorPane({
   const activeError = automationErrors[activeIdx];
 
   const state = active ? getInitialState(active.template) : null;
+  const defaultWeeklyStart = getDefaultWeeklyStart(entries);
 
   const dispatch = (action: Parameters<typeof templateReducer>[1]) => {
     setEntries(prev =>
@@ -164,7 +202,10 @@ export function AutomationEditorPane({
         scrollbarGutter: 'stable',
       }}
     >
-      <View style={{ padding: 20, gap: 14, flexShrink: 0 }}>
+      <View
+        className={MOBILE_TOUCH_FIELDS_CLASS}
+        style={{ padding: 20, gap: 14, flexShrink: 0 }}
+      >
         {activeError && (
           <View
             style={{
@@ -265,6 +306,7 @@ export function AutomationEditorPane({
                 categories={categories}
                 hasLimitAutomation={hasLimitAutomation}
                 onAddLimitAutomation={onAddLimitAutomation}
+                defaultWeeklyStart={defaultWeeklyStart}
               />
             </View>
           </>
@@ -279,6 +321,7 @@ export function AutomationEditorPane({
             categories={categories}
             hasLimitAutomation={hasLimitAutomation}
             onAddLimitAutomation={onAddLimitAutomation}
+            defaultWeeklyStart={defaultWeeklyStart}
           />
         )}
 

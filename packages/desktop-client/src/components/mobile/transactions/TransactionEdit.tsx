@@ -43,7 +43,7 @@ import { getUpcomingDays } from '@actual-app/core/shared/schedules';
 import {
   addSplitTransaction,
   deleteTransaction,
-  makeChild,
+  makeEmptySplitSubtransactions,
   realizeTempTransactions,
   splitTransaction,
   ungroupTransactions,
@@ -1928,10 +1928,11 @@ function TransactionEditUnconnected({
 
   const onSplit = useCallback(
     (id: TransactionEntity['id']) => {
-      const changes = splitTransaction(transactions, id, parent => [
-        makeChild(parent),
-        makeChild(parent),
-      ]);
+      const changes = splitTransaction(
+        transactions,
+        id,
+        makeEmptySplitSubtransactions,
+      );
 
       setTransactions(changes.data);
     },

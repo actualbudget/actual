@@ -276,7 +276,7 @@ This method has the following optional flags (passed as the `opts` object):
 
 - `defaultCleared`: whether imported transactions should be marked as cleared (defaults to `true`)
 - `dryRun`: if `true`, returns what would be added/updated without actually modifying the database (defaults to `false`)
-- `reimportDeleted`: if `true`, transactions that were previously imported and then deleted will be reimported; if `false`, they will be skipped (defaults to `true` for backward compatibility — note that the [file import UI](/docs/transactions/importing#avoiding-duplicate-transactions) defaults to `false`)
+- `reimportDeleted`: if `true`, transactions that were previously imported and then deleted will be reimported; if `false`, they will be skipped (defaults to `true` for backward compatibility — note that the [file import UI](../transactions/importing.md#avoiding-duplicate-transactions) defaults to `false`)
 
 Example using opts:
 
@@ -522,7 +522,7 @@ Create a category group. Returns the `id` of the new group.
 
 <Method name="updateCategoryGroup" args={[{ name: 'id', type: 'id' }, { name: 'fields', type: 'object' }]} returns="Promise<id>" />
 
-Update fields of a category group. `fields` can specify any field described in [`CategoryGroup`](#categorygroup).
+Update fields of a category group. `fields` can specify any field described in [`CategoryGroup`](#category-group).
 
 #### `deleteCategoryGroup`
 
@@ -737,7 +737,7 @@ Create schedule based on information filled in the schedule object. Please refer
 
 <Method name="updateSchedule" args={[{ name: 'id', type: 'id' }, { name: 'fields', type: 'object' }]} returns="Promise<schedule>" />
 
-Update fields of a rule. `fields` can specify any field described in [`Schedule`](#Schedule). Returns the updated rule.
+Update fields of a rule. `fields` can specify any field described in [`Schedule`](#schedule). Returns the updated rule.
 
 #### `deleteSchedule`
 

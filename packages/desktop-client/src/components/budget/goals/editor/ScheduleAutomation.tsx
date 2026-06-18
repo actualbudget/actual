@@ -1,5 +1,6 @@
 import { Trans, useTranslation } from 'react-i18next';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
@@ -9,6 +10,11 @@ import type { ScheduleTemplate } from '@actual-app/core/types/models/templates';
 import { updateTemplate } from '#components/budget/goals/actions';
 import type { Action } from '#components/budget/goals/actions';
 import { AmountAdjustment } from '#components/budget/goals/editor/AmountAdjustment';
+import {
+  DESKTOP_FIELD_GAP,
+  MOBILE_FIELD_GAP,
+  STACKED_FIELD_FLEX,
+} from '#components/budget/goals/editor/fieldLayout';
 import { Link } from '#components/common/Link';
 import { FormField, FormLabel } from '#components/forms';
 
@@ -24,6 +30,8 @@ export const ScheduleAutomation = ({
   dispatch,
 }: ScheduleAutomationProps) => {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
+  const fieldFlex = isNarrowWidth ? STACKED_FIELD_FLEX : 1;
   // Match the filter applied to the Select options below — completed and
   // tombstoned schedules aren't selectable, so a category whose only
   // schedules are completed should fall through to the "no schedules" state
@@ -41,8 +49,11 @@ export const ScheduleAutomation = ({
 
   return selectableSchedules.length ? (
     <>
-      <SpaceBetween gap={50} style={{ marginTop: 10 }}>
-        <FormField style={{ flex: 1 }}>
+      <SpaceBetween
+        gap={isNarrowWidth ? MOBILE_FIELD_GAP : DESKTOP_FIELD_GAP}
+        style={{ marginTop: 10 }}
+      >
+        <FormField style={{ flex: fieldFlex }}>
           <FormLabel title={t('Schedule')} htmlFor="schedule-field" />
           <Select
             id="schedule-field"
@@ -60,7 +71,7 @@ export const ScheduleAutomation = ({
             options={selectableSchedules.map(s => [s.name, s.name] as const)}
           />
         </FormField>
-        <FormField style={{ flex: 1 }}>
+        <FormField style={{ flex: fieldFlex }}>
           <FormLabel title={t('Savings mode')} htmlFor="schedule-full-field" />
           <Select
             id="schedule-full-field"

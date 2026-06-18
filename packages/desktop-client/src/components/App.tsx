@@ -219,7 +219,7 @@ export function App() {
                     }}
                   >
                     <ErrorBoundary FallbackComponent={ErrorFallback}>
-                      {process.env.REACT_APP_REVIEW_ID && !isTestEnv && (
+                      {import.meta.env.REACT_APP_REVIEW_ID && !isTestEnv && (
                         <DevelopmentTopBar />
                       )}
                       <AppInner />

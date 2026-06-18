@@ -47,7 +47,7 @@ const valueStyle = {
   height: styles.mobileMinHeight,
 };
 
-const hideNativeDateIconClassName = css({
+export const hideNativeDateIconClassName = css({
   '&::-webkit-calendar-picker-indicator': {
     display: 'none',
   },

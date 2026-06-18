@@ -58,6 +58,8 @@ type EnableBankingAuthResponse = {
   authorization_id: string;
 };
 
+type PsuType = 'personal' | 'business';
+
 type BankSyncTransaction = EnableBankingTransaction & {
   transactionId: string;
   date: string;
@@ -264,6 +266,26 @@ export function normalizeTransaction(
   };
 }
 
+const IMPORTABLE_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+// Actual's client imports a transaction by inserting it into a local SQLite
+// database: the `date` column is a required integer derived from an ISO date,
+// and the amount must be numeric. A record with an empty / non-ISO date or a
+// non-numeric amount makes that insert throw, which aborts the whole account
+// sync. Enable Banking occasionally returns such records — e.g. a pending
+// transaction with no booking/value/transaction date — so callers skip them
+// instead of failing the entire import.
+export function isImportableTransaction(tx: BankSyncTransaction): boolean {
+  // Trim and reject empty amounts explicitly: Number('') is 0 (finite), so an
+  // empty/whitespace amount would otherwise slip through as a zero transaction.
+  const amount = tx.transactionAmount.amount.trim();
+  return (
+    IMPORTABLE_DATE_REGEX.test(tx.date) &&
+    amount !== '' &&
+    Number.isFinite(Number(amount))
+  );
+}
+
 export function normalizeBalance(bal: EnableBankingBalance): BankSyncBalance {
   const amount = Math.round(parseFloat(bal.balance_amount.amount) * 100);
   return {
@@ -327,6 +349,7 @@ export const enableBankingService = {
     redirectUrl: string,
     state: string,
     maxConsentValidity?: number,
+    psuType: PsuType = 'personal',
   ): Promise<EnableBankingAuthResponse> {
     const DEFAULT_CONSENT_DAYS = 90;
     const defaultMs = DEFAULT_CONSENT_DAYS * 24 * 60 * 60 * 1000;
@@ -347,6 +370,7 @@ export const enableBankingService = {
       access: {
         valid_until: validUntil.toISOString(),
       },
+      psu_type: psuType,
     });
   },
 

@@ -10,7 +10,8 @@ export type FeatureFlag =
   | 'budgetAnalysisReport'
   | 'payeeLocations'
   | 'enableBanking'
-  | 'sankeyReport';
+  | 'sankeyReport'
+  | 'akahuBankSync';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.

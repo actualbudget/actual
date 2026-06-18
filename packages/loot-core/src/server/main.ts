@@ -21,6 +21,7 @@ import * as encryption from './encryption';
 import { app as encryptionApp } from './encryption/app';
 import { app as filtersApp } from './filters/app';
 import { app as forecastApp } from './forecast/app';
+import { app as formulasApp } from './formulas/app';
 import { app } from './main-app';
 import { mutator, runHandler } from './mutators';
 import { app as notesApp } from './notes/app';
@@ -135,6 +136,7 @@ app.combine(
   preferencesApp,
   toolsApp,
   filtersApp,
+  formulasApp,
   forecastApp,
   reportsApp,
   rulesApp,

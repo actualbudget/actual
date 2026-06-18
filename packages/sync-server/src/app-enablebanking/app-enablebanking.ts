@@ -17,6 +17,7 @@ import type {
 } from './services/enablebanking-service';
 import {
   enableBankingService,
+  isImportableTransaction,
   normalizeAccount,
   normalizeBalance,
   normalizeTransaction,
@@ -286,7 +287,7 @@ app.post(
 app.post(
   '/start-auth',
   handleError(async (req: Request, res: Response) => {
-    const { aspsp, redirectUrl, maxConsentValidity } = req.body || {};
+    const { aspsp, redirectUrl, maxConsentValidity, psuType } = req.body || {};
 
     if (!aspsp || !redirectUrl) {
       res.send({
@@ -307,6 +308,7 @@ app.post(
         redirectUrl,
         state,
         typeof maxConsentValidity === 'number' ? maxConsentValidity : undefined,
+        psuType === 'business' ? 'business' : 'personal',
       );
 
       res.send({
@@ -540,6 +542,20 @@ app.post(
 
       for (const tx of rawTransactions) {
         const normalized = normalizeTransaction(tx);
+
+        // Drop records Actual's client can't insert (empty/non-ISO date or
+        // non-numeric amount) — one of them would otherwise abort the entire
+        // account sync. Pending transactions that carry a date are unaffected.
+        if (!isImportableTransaction(normalized)) {
+          debug(
+            'Skipping unimportable transaction id=%s date=%s amount=%s',
+            normalized.transactionId,
+            normalized.date,
+            normalized.transactionAmount.amount,
+          );
+          continue;
+        }
+
         all.push(normalized);
         if (normalized.booked) {
           booked.push(normalized);

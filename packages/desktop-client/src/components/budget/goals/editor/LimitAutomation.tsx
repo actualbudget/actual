@@ -5,8 +5,8 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import {
-  currentDate,
   dayFromDate,
+  firstDayOfMonth,
   parseDate,
 } from '@actual-app/core/shared/months';
 import { amountToInteger, integerToAmount } from '@actual-app/core/shared/util';
@@ -17,6 +17,7 @@ import { setDay } from 'date-fns/setDay';
 
 import { updateTemplate } from '#components/budget/goals/actions';
 import type { Action } from '#components/budget/goals/actions';
+import { TWO_UP_FIELD_FLEX } from '#components/budget/goals/editor/fieldLayout';
 import { FormField, FormLabel } from '#components/forms';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { AmountInput } from '#components/util/AmountInput';
@@ -26,11 +27,13 @@ import { useFormat } from '#hooks/useFormat';
 type LimitAutomationProps = {
   template: LimitTemplate;
   dispatch: (action: Action) => void;
+  defaultWeeklyStart?: string;
 };
 
 export const LimitAutomation = ({
   template,
   dispatch,
+  defaultWeeklyStart,
 }: LimitAutomationProps) => {
   const { t } = useTranslation();
   const format = useFormat();
@@ -41,8 +44,11 @@ export const LimitAutomation = ({
     template.amount,
     format.currency.decimalPlaces,
   );
-  const start = template.start;
-  const dayOfWeek = start ? getDay(parseDate(start)) : 0;
+  const start =
+    template.start ??
+    defaultWeeklyStart ??
+    dayFromDate(firstDayOfMonth(new Date()));
+  const dayOfWeek = getDay(parseDate(start));
   const hold = template.hold;
 
   const selectButtonClassName = css({
@@ -52,7 +58,7 @@ export const LimitAutomation = ({
   });
 
   const weekdayField = (
-    <FormField style={{ flex: 1 }}>
+    <FormField style={{ flex: TWO_UP_FIELD_FLEX }}>
       <FormLabel title={t('Weekday')} htmlFor="weekday-field" />
 
       <Select
@@ -62,7 +68,7 @@ export const LimitAutomation = ({
           dispatch(
             updateTemplate({
               type: 'limit',
-              start: dayFromDate(setDay(currentDate(), Number(value))),
+              start: dayFromDate(setDay(parseDate(start), Number(value))),
             }),
           )
         }
@@ -73,7 +79,7 @@ export const LimitAutomation = ({
   );
 
   const amountField = (
-    <FormField key="amount-field" style={{ flex: 1 }}>
+    <FormField key="amount-field" style={{ flex: TWO_UP_FIELD_FLEX }}>
       <FormLabel title={t('Amount')} htmlFor="amount-field" />
       <AmountInput
         id="amount-field"
@@ -92,14 +98,18 @@ export const LimitAutomation = ({
   );
 
   const cadenceField = (
-    <FormField key="cadence-field" style={{ flex: 1 }}>
+    <FormField key="cadence-field" style={{ flex: TWO_UP_FIELD_FLEX }}>
       <FormLabel title={t('Every')} htmlFor="cadence-field" />
 
       <Select
         id="cadence-field"
         value={period}
         onChange={cadence =>
-          dispatch(updateTemplate({ type: 'limit', period: cadence }))
+          dispatch(
+            cadence === 'weekly' && !template.start
+              ? updateTemplate({ type: 'limit', period: cadence, start })
+              : updateTemplate({ type: 'limit', period: cadence }),
+          )
         }
         options={[
           ['daily', t('Day')],
@@ -156,7 +166,10 @@ export const LimitAutomation = ({
 
       <SpaceBetween align="center" gap={10} style={{ marginTop: 10 }}>
         {period === 'weekly' && weekdayField}
-        <FormField key="hold-overflow-field" style={{ flex: 1 }}>
+        <FormField
+          key="hold-overflow-field"
+          style={{ flex: TWO_UP_FIELD_FLEX }}
+        >
           <LabeledCheckbox
             id="hold-overflow-field"
             checked={!!hold}

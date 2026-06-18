@@ -9,6 +9,6 @@ The system is very flexible:
 - Recurring transactions can be set to one or multiple specific days of the month. For example, a single schedule can be created for a cell phone plan with multiple users and different payment cycles for each phone. If you have three cell phones that all get paid on different days of the month, each day can be defined in a single schedule.
 - Schedules have various options for the frequency of transactions, such as every month, every month on the 2nd Wednesday, every 2 months, every 2 years, etc.
 
-For more details, see [Schedules](/docs/schedules).
+For more details, see [Schedules](../schedules.md).
 
 ![Overview of the schedule screen](/img/a-tour-of-actual/tour-schedules-overview.webp)

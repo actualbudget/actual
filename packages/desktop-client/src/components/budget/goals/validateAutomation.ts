@@ -30,7 +30,8 @@ function isAdjustmentOutOfRange(template: Template): boolean {
 
 export type GlobalConflictKind =
   | { kind: 'over-income'; total: number; income: number }
-  | { kind: 'percent-over-100'; total: number };
+  | { kind: 'percent-over-100'; total: number }
+  | { kind: 'schedule-priority-mismatch' };
 
 export function validateAutomation(
   template: Template,
@@ -149,4 +150,20 @@ export function validatePercentageAllocation(
   return maxPercent > 100
     ? { kind: 'percent-over-100', total: maxPercent }
     : null;
+}
+
+// The engine (CategoryTemplateContext.checkByAndScheduleAndSpend) requires
+// every schedule and by-date template in a category to share one priority; if
+// they don't, none of them budget. Surface that as a conflict so it can't be
+// saved.
+export function validateSchedulePriorities(
+  templates: readonly Template[],
+): GlobalConflictKind | null {
+  const priorities = new Set<number>();
+  for (const t of templates) {
+    if (t.type === 'schedule' || t.type === 'by') {
+      priorities.add(t.priority);
+    }
+  }
+  return priorities.size > 1 ? { kind: 'schedule-priority-mismatch' } : null;
 }

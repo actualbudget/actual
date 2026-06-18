@@ -86,7 +86,7 @@ The API communicates with the server using Node's built-in `fetch`. There are a 
 
 ## Writing Data Importers
 
-If you are using another app, like YNAB or Mint, you might want to migrate your data into Actual. Right now, Actual officially supports [importing YNAB4 data](../migration/ynab4.md) and [importing nYNAB data](../migration/nynab.md) (and it works very well). But if you want to import all of your data into Actual, you can write a custom importer.
+If you are using another app, like YNAB or Mint, you might want to migrate your data into Actual. Right now, Actual officially supports [importing YNAB4 data](../migration/ynab4.md) and [importing nYNAB data](../migration/nynab.mdx) (and it works very well). But if you want to import all of your data into Actual, you can write a custom importer.
 
 Note that this is not about importing transactions. If all you want to do is add transactions from a custom source (like your bank's API), use [`importTransactions`](./reference.md#importtransactions). In this context, a custom importer is something that takes _all_ of your data (budgets, transactions, payees, etc) and dumps them all into a new file in Actual.
 

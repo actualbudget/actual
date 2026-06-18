@@ -31,7 +31,8 @@ const RADIAN = Math.PI / 180;
 
 const canDeviceHover = () => window.matchMedia('(hover: hover)').matches;
 
-type ClickablePieItem = PieSectorDataItem & { id?: string };
+type ClickablePieItem = PieSectorDataItem &
+  Partial<Pick<GroupedEntity, 'id' | 'uncategorizedId'>>;
 
 // ---------------------------------------------------------------------------
 // Dimension helpers
@@ -600,6 +601,7 @@ export function DonutGraph({
                           endDate: data.endDate,
                           field: 'category',
                           id: item.id,
+                          uncategorizedId: item.uncategorizedId,
                         });
                       }
                     }}

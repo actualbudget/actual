@@ -43,6 +43,7 @@ export function useFilteredTags(
       selector: tag => tag.tag,
       limit: 100,
       tiebreakers: [byLengthAsc, byStartAsc],
+      casing: 'case-insensitive',
     })
       .find(filterStr.replace(/^#/, ''))
       .map(item => item.item);
