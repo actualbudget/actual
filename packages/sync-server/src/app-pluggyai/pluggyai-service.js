@@ -89,13 +89,7 @@ export const pluggyaiService = {
     }
   },
 
-  getTransactionsByAccountId: async (
-    accountId,
-    startDate,
-    pageSize,
-    page,
-    options = {},
-  ) => {
+  getTransactionsByAccountId: async (accountId, startDate, options = {}) => {
     try {
       const client = getPluggyClient(options);
 
@@ -129,29 +123,5 @@ export const pluggyaiService = {
       console.error(`Error fetching transactions: ${error.message}`);
       throw error;
     }
-  },
-  getTransactions: async (accountId, startDate, options = {}) => {
-    let transactions = [];
-    let result = await pluggyaiService.getTransactionsByAccountId(
-      accountId,
-      startDate,
-      500,
-      1,
-      options,
-    );
-    transactions = transactions.concat(result.results);
-    const totalPages = result.totalPages;
-    while (result.page !== totalPages) {
-      result = await pluggyaiService.getTransactionsByAccountId(
-        accountId,
-        startDate,
-        500,
-        result.page + 1,
-        options,
-      );
-      transactions = transactions.concat(result.results);
-    }
-
-    return transactions;
   },
 };
