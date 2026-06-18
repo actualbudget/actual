@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { execSync, spawn } from 'node:child_process';
 import type { ChildProcess } from 'node:child_process';
 import { createReadStream } from 'node:fs';
 import { cp, mkdir, readdir, rename, rm, writeFile } from 'node:fs/promises';
@@ -93,6 +93,29 @@ const pluginsServiceDistDir = path.resolve(
 const serviceWorkerDir = path.resolve(__dirname, 'service-worker');
 
 const WORKER_FILENAME_RE = /^kcab\.worker\.(.+)\.js$/;
+
+// Resolve a short git revision so builds (most importantly the `edge`/nightly
+// build, where the package.json version is identical across many commits) can
+// surface a unique identifier in the About settings. Prefers an explicit env
+// var, then the CI-provided commit SHA, then the local git checkout. Never
+// throws — an unavailable revision just yields an empty string.
+function resolveGitRevision(): string {
+  if (process.env.REACT_APP_GIT_REVISION) {
+    return process.env.REACT_APP_GIT_REVISION;
+  }
+  if (process.env.GITHUB_SHA) {
+    return process.env.GITHUB_SHA.slice(0, 7);
+  }
+  try {
+    return execSync('git rev-parse --short HEAD', {
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+      .toString()
+      .trim();
+  } catch {
+    return '';
+  }
+}
 
 async function extractWorkerHash(): Promise<string> {
   const files = await readdir(lootCoreOutDir);
@@ -247,6 +270,10 @@ export default defineConfig(async ({ mode, command }) => {
     process.env.REACT_APP_REVIEW_ID = process.env.REVIEW_ID;
     process.env.REACT_APP_BRANCH = process.env.BRANCH;
   }
+
+  // Expose the build's git revision to the client (via the REACT_APP_ env
+  // prefix) so the About page can show a unique identifier for edge builds.
+  process.env.REACT_APP_GIT_REVISION = resolveGitRevision();
 
   // Electron packaging (--mode=desktop) bundles loot-core directly, so skip
   // all browser-only staging there.
