@@ -410,7 +410,13 @@ export default defineConfig(async ({ mode, command }) => {
       reporters: process.env.CI
         ? [
             'default',
-            ['junit', { outputFile: './test-results/junit.xml', suiteName: 'desktop-client' }],
+            [
+              'junit',
+              {
+                outputFile: './test-results/junit.xml',
+                suiteName: 'desktop-client',
+              },
+            ],
           ]
         : ['default'],
     },

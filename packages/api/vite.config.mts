@@ -99,7 +99,10 @@ export default defineConfig({
     reporters: process.env.CI
       ? [
           'default',
-          ['junit', { outputFile: './test-results/junit.xml', suiteName: 'api' }],
+          [
+            'junit',
+            { outputFile: './test-results/junit.xml', suiteName: 'api' },
+          ],
         ]
       : ['default'],
   },

@@ -8,7 +8,13 @@ export default defineConfig({
     maxWorkers: 1,
     isolate: false,
     reporters: process.env.CI
-      ? ['default', ['junit', { outputFile: './test-results/junit.xml', suiteName: 'ci-actions' }]]
+      ? [
+          'default',
+          [
+            'junit',
+            { outputFile: './test-results/junit.xml', suiteName: 'ci-actions' },
+          ],
+        ]
       : ['default'],
   },
 });
