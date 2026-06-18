@@ -90,7 +90,9 @@ jobs:
             packages/cli/@actual-app/cli.tgz
 
   publish:
-    runs-on: depot-ubuntu-latest
+    # must use GitHub hosted runners as NPM will not allow publishing from
+    # self-hosted
+    runs-on: ubuntu-latest
     name: Publish npm packages
     needs: build-and-pack
     environment: release
