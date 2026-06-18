@@ -127,7 +127,7 @@ jobs:
 
   vrt:
     name: Visual regression (shard ${{ matrix.shard }}/3)
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     needs: build-web
     strategy:
       fail-fast: false
@@ -165,7 +165,7 @@ jobs:
   merge-vrt:
     name: Merge VRT Reports
     needs: vrt
-    runs-on: ubuntu-latest
+    runs-on: depot-ubuntu-latest
     if: ${{ !cancelled() }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
