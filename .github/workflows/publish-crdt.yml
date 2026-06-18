@@ -50,7 +50,9 @@ jobs:
   publish:
     needs: check-version
     if: needs.check-version.outputs.should-publish == 'true'
-    runs-on: depot-ubuntu-latest
+    # must use GitHub hosted runners as NPM will not allow publishing from
+    # self-hosted
+    runs-on: ubuntu-latest
     name: Publish @actual-app/crdt to npm
     permissions:
       contents: read
