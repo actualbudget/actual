@@ -17,6 +17,7 @@ import {
   emptyCleanupConfig,
 } from '#components/budget/goals/cleanupModel';
 import type { CleanupConfig } from '#components/budget/goals/cleanupModel';
+import { displayTemplateTypes } from '#components/budget/goals/constants';
 import { MonthsContext } from '#components/budget/MonthsContext';
 import { migrateTemplatesToAutomations } from '#components/modals/BudgetAutomationsModal/migrateTemplatesToAutomations';
 import { useCategories } from '#hooks/useCategories';
@@ -102,6 +103,11 @@ export function CategoryAutomationButton({
   }
 
   const automations = getAutomationEntries(category.goal_def);
+  const sortedAutomations = [...automations].sort(
+    (a, b) =>
+      displayTemplateTypes.indexOf(a.displayType) -
+      displayTemplateTypes.indexOf(b.displayType),
+  );
   const categoryNameMap: Record<string, string> = {};
   for (const cat of categoriesData?.list ?? []) {
     categoryNameMap[cat.id] = cat.name;
@@ -152,7 +158,7 @@ export function CategoryAutomationButton({
       placement="bottom start"
       content={
         <View style={{ maxWidth: 320, padding: 10, gap: 10 }}>
-          {automations.map(entry => (
+          {sortedAutomations.map(entry => (
             <View key={entry.id} style={{ gap: 4 }}>
               <Text style={{ display: 'block' }}>
                 <TemplateSentence

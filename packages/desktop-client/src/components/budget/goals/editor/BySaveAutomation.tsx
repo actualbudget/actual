@@ -89,9 +89,19 @@ export const BySaveAutomation = ({
 
   const committedRepeat = template.repeat ?? 1;
   const [rawRepeat, setRawRepeat] = useState(String(committedRepeat));
+
   useEffect(() => {
     setRawRepeat(String(committedRepeat));
   }, [committedRepeat]);
+
+  const onRepeatChange = (value: string) => {
+    setRawRepeat(value);
+    const parsed = Math.trunc(Number(value));
+    if (value.trim() !== '' && parsed >= 1 && parsed !== committedRepeat) {
+      dispatch(updateTemplate({ type: template.type, repeat: parsed }));
+    }
+  };
+
   const commitRepeat = () => {
     const parsed = Math.max(1, Math.trunc(Number(rawRepeat)) || 1);
     setRawRepeat(String(parsed));
@@ -176,7 +186,7 @@ export const BySaveAutomation = ({
               min={1}
               step={1}
               value={rawRepeat}
-              onChangeValue={setRawRepeat}
+              onChangeValue={onRepeatChange}
               onBlur={commitRepeat}
             />
           </FormField>

@@ -5,8 +5,8 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import {
-  currentDate,
   dayFromDate,
+  firstDayOfMonth,
   parseDate,
 } from '@actual-app/core/shared/months';
 import { amountToInteger, integerToAmount } from '@actual-app/core/shared/util';
@@ -27,11 +27,13 @@ import { useFormat } from '#hooks/useFormat';
 type LimitAutomationProps = {
   template: LimitTemplate;
   dispatch: (action: Action) => void;
+  defaultWeeklyStart?: string;
 };
 
 export const LimitAutomation = ({
   template,
   dispatch,
+  defaultWeeklyStart,
 }: LimitAutomationProps) => {
   const { t } = useTranslation();
   const format = useFormat();
@@ -42,8 +44,11 @@ export const LimitAutomation = ({
     template.amount,
     format.currency.decimalPlaces,
   );
-  const start = template.start;
-  const dayOfWeek = start ? getDay(parseDate(start)) : 0;
+  const start =
+    template.start ??
+    defaultWeeklyStart ??
+    dayFromDate(firstDayOfMonth(new Date()));
+  const dayOfWeek = getDay(parseDate(start));
   const hold = template.hold;
 
   const selectButtonClassName = css({
@@ -63,7 +68,7 @@ export const LimitAutomation = ({
           dispatch(
             updateTemplate({
               type: 'limit',
-              start: dayFromDate(setDay(currentDate(), Number(value))),
+              start: dayFromDate(setDay(parseDate(start), Number(value))),
             }),
           )
         }
@@ -100,7 +105,11 @@ export const LimitAutomation = ({
         id="cadence-field"
         value={period}
         onChange={cadence =>
-          dispatch(updateTemplate({ type: 'limit', period: cadence }))
+          dispatch(
+            cadence === 'weekly' && !template.start
+              ? updateTemplate({ type: 'limit', period: cadence, start })
+              : updateTemplate({ type: 'limit', period: cadence }),
+          )
         }
         options={[
           ['daily', t('Day')],
