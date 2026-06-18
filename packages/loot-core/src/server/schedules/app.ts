@@ -119,6 +119,38 @@ export function updateConditions(conditions, newConditions) {
   return updated.concat(added);
 }
 
+// A schedule's amount lives in the rule's amount *condition*, but a rule can
+// also carry a plain `set amount` *action* (e.g. when customized via "Edit as
+// rule"). Posting a scheduled transaction runs the rule, so a stale action
+// would revert the posted amount to the old value, ignoring the edited
+// amount. Keep such actions in sync with the amount condition. Templated and
+// `set-split-amount` actions compute their own value and are left untouched.
+function updateAmountActions(conditions, actions) {
+  const { amount: amountCond } = extractScheduleConds(conditions);
+  if (amountCond == null) {
+    return null;
+  }
+
+  const amount = getScheduledAmount(amountCond.value);
+
+  let changed = false;
+  const updated = actions.map(action => {
+    if (
+      action.op === 'set' &&
+      action.field === 'amount' &&
+      !action.options?.template &&
+      !action.options?.formula &&
+      action.value !== amount
+    ) {
+      changed = true;
+      return { ...action, value: amount };
+    }
+    return action;
+  });
+
+  return changed ? updated : null;
+}
+
 export async function getRuleForSchedule(id: string | null): Promise<Rule> {
   if (id == null) {
     throw new Error('Schedule not attached to a rule');
@@ -362,7 +394,16 @@ export async function updateSchedule({
       const oldConditions = rule.serialize().conditions;
       const newConditions = updateConditions(oldConditions, conditions);
 
-      await updateRule({ id: rule.id, conditions: newConditions });
+      const newActions = updateAmountActions(
+        newConditions,
+        rule.serialize().actions,
+      );
+
+      await updateRule({
+        id: rule.id,
+        conditions: newConditions,
+        ...(newActions ? { actions: newActions } : {}),
+      });
 
       // Annoyingly, sometimes it has `type` and sometimes it doesn't
       const stripType = ({ type: _type, ...fields }) => fields;
