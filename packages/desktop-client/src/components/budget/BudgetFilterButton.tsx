@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import {
   SvgAdd,
+  SvgDotsHorizontalTriple,
   SvgFilter,
   SvgFilterOutline,
 } from '@actual-app/components/icons/v1';
@@ -72,6 +73,16 @@ function ViewListItem({
       onContextMenu={hasContextMenu ? handleContextMenu : undefined}
       style={{
         width: '100%',
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        '& .hover-visible': {
+          opacity: 0,
+        },
+        '&:hover .hover-visible, &:focus-within .hover-visible': {
+          opacity: 1,
+        },
       }}
     >
       <Button
@@ -80,6 +91,7 @@ function ViewListItem({
         style={{
           width: '100%',
           padding: '8px 12px',
+          paddingRight: hasContextMenu ? 32 : 12,
           justifyContent: 'flex-start',
           borderRadius: 4,
           backgroundColor: isActive
@@ -92,6 +104,26 @@ function ViewListItem({
       >
         {label}
       </Button>
+
+      {hasContextMenu && (
+        <Button
+          variant="bare"
+          className={menuOpen ? undefined : 'hover-visible'}
+          style={{
+            position: 'absolute',
+            right: 8,
+            padding: 4,
+            borderRadius: 4,
+            color: isActive ? theme.buttonPrimaryText : theme.buttonNormalText,
+          }}
+          onPress={() => {
+            resetPosition();
+            setMenuOpen(true);
+          }}
+        >
+          <SvgDotsHorizontalTriple style={{ width: 14, height: 14 }} />
+        </Button>
+      )}
 
       {hasContextMenu && (
         <Popover
