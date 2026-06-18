@@ -395,7 +395,6 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
               <SvgDownload style={{ width: 16, height: 16 }} />
             </Button>
           </Tooltip>
-          </Tooltip>
 
           {widget && (
             <Button variant="primary" onPress={onSaveWidget}>
