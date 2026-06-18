@@ -74,7 +74,13 @@ async function getOrphanedPayees(): Promise<Array<Pick<PayeeEntity, 'id'>>> {
 async function getPayeeRuleCounts() {
   const payeeCounts: Record<PayeeEntity['id'], number> = {};
 
+  const scheduleRuleIds = new Set(await rules.getAllRuleIdsFromSchedules(''));
+
   rules.iterateIds(rules.getRules(), 'payee', (rule, id) => {
+    const ruleId = rule.getId();
+    if (ruleId != null && scheduleRuleIds.has(ruleId)) {
+      return;
+    }
     if (payeeCounts[id] == null) {
       payeeCounts[id] = 0;
     }
@@ -83,6 +89,8 @@ async function getPayeeRuleCounts() {
 
   return payeeCounts;
 }
+
+export { getPayeeRuleCounts as getPayeeRuleCountsForTest };
 
 async function mergePayees({
   targetId,
