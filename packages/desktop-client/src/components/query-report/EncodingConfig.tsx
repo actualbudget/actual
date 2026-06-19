@@ -157,13 +157,36 @@ export function EncodingConfig({
   }, [result]);
 
   const handleXChange = (value: string) => {
-    onChartSpecChange({
-      ...chartSpec,
-      encoding: {
-        ...chartSpec.encoding,
-        x: value ? { field: value } : undefined,
-      },
-    });
+    const nextEncoding: ChartSpec['encoding'] = {
+      ...chartSpec.encoding,
+      x: value ? { field: value } : undefined,
+    };
+    if (value && nextEncoding.y) {
+      const yArr = Array.isArray(nextEncoding.y)
+        ? nextEncoding.y
+        : [nextEncoding.y];
+      const filteredY = yArr.filter(ch => ch.field !== value);
+      nextEncoding.y =
+        filteredY.length > 0
+          ? filteredY.length === 1
+            ? filteredY[0]
+            : filteredY
+          : [];
+    }
+    if (value && !nextEncoding.y && resolved) {
+      const resolvedY = resolved.encoding.y;
+      if (resolvedY) {
+        const yArr = Array.isArray(resolvedY) ? resolvedY : [resolvedY];
+        const materializedY = yArr
+          .filter(ch => ch.autoAssigned && ch.field !== value)
+          .map(ch => resolvedChannelToChannelDef(ch));
+        if (materializedY.length > 0) {
+          nextEncoding.y =
+            materializedY.length === 1 ? materializedY[0] : materializedY;
+        }
+      }
+    }
+    onChartSpecChange({ ...chartSpec, encoding: nextEncoding });
   };
 
   const handleXMultiToggle = (field: string) => {
@@ -224,16 +247,27 @@ export function EncodingConfig({
   };
 
   const handleYSingleChange = (value: string) => {
-    onChartSpecChange({
-      ...chartSpec,
-      encoding: {
-        ...chartSpec.encoding,
-        y:
-          value && result
-            ? { field: value, type: inferTypeFromColumns(value, result) }
-            : undefined,
-      },
-    });
+    const nextEncoding: ChartSpec['encoding'] = {
+      ...chartSpec.encoding,
+      y:
+        value && result
+          ? { field: value, type: inferTypeFromColumns(value, result) }
+          : undefined,
+    };
+    if (value && !nextEncoding.x && resolved) {
+      const resolvedX = resolved.encoding.x;
+      if (resolvedX) {
+        const xArr = Array.isArray(resolvedX) ? resolvedX : [resolvedX];
+        const materializedX = xArr
+          .filter(ch => ch.autoAssigned && ch.field !== value)
+          .map(ch => resolvedChannelToChannelDef(ch));
+        if (materializedX.length > 0) {
+          nextEncoding.x =
+            materializedX.length === 1 ? materializedX[0] : materializedX;
+        }
+      }
+    }
+    onChartSpecChange({ ...chartSpec, encoding: nextEncoding });
   };
 
   const handleYMultiToggle = (field: string) => {
@@ -269,7 +303,7 @@ export function EncodingConfig({
       ];
 
       let nextX = currentEncoding.x;
-      if (isTableMark && currentEncoding.x) {
+      if (currentEncoding.x) {
         const currentXArray: ChannelDef[] = Array.isArray(currentEncoding.x)
           ? currentEncoding.x
           : [currentEncoding.x];
@@ -280,6 +314,19 @@ export function EncodingConfig({
               ? filteredX[0]
               : filteredX
             : [];
+      }
+      if (!nextX && resolved) {
+        const resolvedX = resolved.encoding.x;
+        if (resolvedX) {
+          const xArr = Array.isArray(resolvedX) ? resolvedX : [resolvedX];
+          const materializedX = xArr
+            .filter(ch => ch.autoAssigned && ch.field !== field)
+            .map(ch => resolvedChannelToChannelDef(ch));
+          if (materializedX.length > 0) {
+            nextX =
+              materializedX.length === 1 ? materializedX[0] : materializedX;
+          }
+        }
       }
 
       onChartSpecChange({

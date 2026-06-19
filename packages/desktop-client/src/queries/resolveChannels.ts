@@ -362,7 +362,10 @@ export function resolveChannels(
           resolvedX = resolvedX[0];
         }
       } else if (!resolvedX) {
-        const candidate = roles.timeColumns[0] ?? nonIdDimensions(roles)[0];
+        const candidate =
+          roles.timeColumns[0] ??
+          nonIdDimensions(roles)[0] ??
+          roles.measureColumns[0];
         if (candidate) {
           resolvedX = {
             field: candidate,
@@ -372,14 +375,19 @@ export function resolveChannels(
         }
       }
       if (!resolvedY) {
-        if (roles.measureColumns.length === 1) {
+        const xField =
+          resolvedX && !Array.isArray(resolvedX) ? resolvedX.field : undefined;
+        const measuresForY = xField
+          ? roles.measureColumns.filter(f => f !== xField)
+          : roles.measureColumns;
+        if (measuresForY.length === 1) {
           resolvedY = {
-            field: roles.measureColumns[0],
+            field: measuresForY[0],
             type: 'number',
             autoAssigned: true,
           };
-        } else if (roles.measureColumns.length >= 2) {
-          resolvedY = roles.measureColumns.map(field => ({
+        } else if (measuresForY.length >= 2) {
+          resolvedY = measuresForY.map(field => ({
             field,
             type: 'number' as const,
             autoAssigned: true,

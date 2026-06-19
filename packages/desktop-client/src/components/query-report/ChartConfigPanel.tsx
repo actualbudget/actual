@@ -156,6 +156,7 @@ function updateChannel(
   entry: ChannelEntry,
   patch: Partial<ChannelDef>,
   onChartSpecChange: (next: ChartSpec) => void,
+  resolved?: ResolvedChartSpec | null,
 ) {
   const encoding = chartSpec.encoding;
   const current = encoding[key];
@@ -193,9 +194,27 @@ function updateChannel(
         encoding: { ...encoding, [key]: { ...existing, ...patch } },
       });
     } else {
+      const siblingDefs: ChannelDef[] = [];
+      if (resolved) {
+        const resolvedCh = resolved.encoding[key];
+        if (resolvedCh) {
+          const resolvedArr = Array.isArray(resolvedCh)
+            ? resolvedCh
+            : [resolvedCh];
+          for (const ch of resolvedArr) {
+            if (ch.autoAssigned && ch.field !== entry.channel.field) {
+              siblingDefs.push(resolvedToChannelDef(ch));
+            }
+          }
+        }
+      }
+      const allDefs = [{ ...entry.channel, ...patch }, ...siblingDefs];
       onChartSpecChange({
         ...chartSpec,
-        encoding: { ...encoding, [key]: { ...entry.channel, ...patch } },
+        encoding: {
+          ...encoding,
+          [key]: allDefs.length === 1 ? allDefs[0] : allDefs,
+        },
       });
     }
     return;
@@ -422,9 +441,12 @@ export function ChartConfigPanel({
                 value={categoryAxis.labelOverride ?? ''}
                 onChangeValue={v =>
                   updateAxes({
-                    categoryAxis: v
-                      ? { labelOverride: v }
-                      : { labelOverride: undefined },
+                    categoryAxis: {
+                      ...categoryAxis,
+                      ...(v
+                        ? { labelOverride: v }
+                        : { labelOverride: undefined }),
+                    },
                   })
                 }
               />
@@ -565,6 +587,7 @@ export function ChartConfigPanel({
                         entry,
                         { title: v === entry.channel.field ? undefined : v },
                         onChartSpecChange,
+                        resolved,
                       )
                     }
                   />
@@ -580,6 +603,7 @@ export function ChartConfigPanel({
                         entry,
                         v === 'default' ? { format: undefined } : { format: v },
                         onChartSpecChange,
+                        resolved,
                       )
                     }
                   />

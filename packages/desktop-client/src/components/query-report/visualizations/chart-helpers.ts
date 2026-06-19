@@ -109,10 +109,14 @@ export function getAxisFormatter(
   }
 
   if (fieldType === 'number') {
+    const fmtType =
+      channel?.format && channel.format !== 'default'
+        ? channelFormatType(channel, 'number')
+        : 'number';
     return (value: unknown) => {
       if (value === null || value === undefined) return '';
       if (typeof value === 'number') {
-        return format(value, 'financial-no-decimals');
+        return format(value, fmtType);
       }
       return String(value);
     };
