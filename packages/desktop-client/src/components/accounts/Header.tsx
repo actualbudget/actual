@@ -16,6 +16,7 @@ import {
   SvgDownloadThickBottom,
   SvgLockClosed,
   SvgPencil1,
+  SvgUploadThickBottom,
 } from '@actual-app/components/icons/v2';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
@@ -97,6 +98,7 @@ type AccountHeaderProps = {
   saveNameError: AccountNameFieldProps['saveNameError'];
   onSync: () => void;
   onImport: () => void;
+  onExport: () => void;
   onMenuSelect: AccountMenuProps['onMenuSelect'];
   onReconcile: ComponentProps<typeof ReconcileMenu>['onReconcile'];
   onBatchEdit: ComponentProps<typeof SelectedTransactionsButton>['onEdit'];
@@ -166,6 +168,7 @@ export function AccountHeader({
   saveNameError,
   onSync,
   onImport,
+  onExport,
   onMenuSelect,
   onReconcile,
   onBatchDelete,
@@ -363,6 +366,17 @@ export function AccountHeader({
                 style={{ marginRight: 4 }}
               />{' '}
               <Trans>Import</Trans>
+            </Button>
+          )}
+
+          {(isFiltered || search) && (
+            <Button variant="bare" onPress={onExport}>
+              <SvgUploadThickBottom
+                width={13}
+                height={13}
+                style={{ marginRight: 4 }}
+              />{' '}
+              <Trans>Export</Trans>
             </Button>
           )}
 
