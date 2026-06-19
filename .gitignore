@@ -73,6 +73,9 @@ bundle.mobile.js.map
 # Local Netlify folder
 .netlify
 
+# Personal devcontainer config
+.devcontainer/*.local
+
 # build output
 package.tgz
 
