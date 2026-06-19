@@ -1,6 +1,8 @@
 import {
+  amountToInteger,
   currencyToAmount,
   getNumberFormat,
+  integerToCurrency,
   integerToCurrencyWithDecimal,
   looselyParseAmount,
   setNumberFormat,
@@ -282,6 +284,43 @@ describe('utility functions', () => {
     test('no currency argument preserves existing behavior', () => {
       expect(integerToCurrencyWithDecimal(1234)).toBe('12.34');
       expect(integerToCurrencyWithDecimal(1200)).toBe('12.00');
+    });
+  });
+
+  describe('amountToInteger', () => {
+    it.each<[number, number, number]>([
+      [0.5, 0, 0],
+      [1.5, 0, 2],
+      [2.5, 0, 2],
+      [-1.5, 0, -2],
+      [-2.5, 0, -2],
+      [0.125, 2, 12],
+      [0.375, 2, 38],
+      [-0.001, 2, 0],
+      [-12.349, 2, -1235],
+      // Decimal ties whose binary scaling lands just off .5
+      [1.225, 2, 122],
+      [-1.225, 2, -122],
+      [1.005, 2, 100],
+      [0.005, 2, 0],
+      [1.0005, 3, 1000],
+      // Near-ties round normally
+      [1.2251, 2, 123],
+      [1.2249, 2, 122],
+      [0.0005, 2, 0],
+    ])('rounds %s at %sdp to %s with ties to even', (amount, dp, expected) => {
+      expect(amountToInteger(amount, dp)).toBe(expected);
+    });
+
+    it('formats a negative subunit rounded to zero without a negative sign', () => {
+      setNumberFormat({ format: 'comma-dot', hideFraction: false });
+      expect(
+        integerToCurrency(
+          amountToInteger(-0.001, 2),
+          getNumberFormat({ decimalPlaces: 2 }).formatter,
+          2,
+        ),
+      ).toBe('0.00');
     });
   });
 });
