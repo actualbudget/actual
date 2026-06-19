@@ -14,7 +14,7 @@ import { ReportCard } from '@desktop-client/components/reports/ReportCard';
 import { ReportCardName } from '@desktop-client/components/reports/ReportCardName';
 import { useDashboardWidgetCopyMenu } from '@desktop-client/components/reports/useDashboardWidgetCopyMenu';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
-import { useQueryReport } from '@desktop-client/hooks/useQueryReport';
+import { useMultiQueryReport } from '@desktop-client/hooks/useMultiQueryReport';
 
 type QueryReportCardProps = {
   widgetId: string;
@@ -41,23 +41,23 @@ export function QueryReportCard({
   const { menuItems: copyMenuItems, handleMenuSelect: handleCopyMenuSelect } =
     useDashboardWidgetCopyMenu(onCopy);
 
-  const firstQuery = meta?.queries?.[0];
-  const querySource = useMemo(() => {
-    return firstQuery?.source ?? '';
-  }, [firstQuery]);
+  const querySources = useMemo(() => {
+    return (meta?.queries ?? []).map(q => q.source);
+  }, [meta?.queries]);
 
   const chartSpec = meta?.chartSpec ?? DEFAULT_CHART_SPEC;
 
-  const { result, isLoading, error } = useQueryReport(
-    querySource || null,
+  const { merged: result, isLoading } = useMultiQueryReport(
+    querySources.length > 0 ? querySources : [null],
     meta?.defaultTimeFrame,
+    meta?.mergeKey,
   );
 
   const rangeLabel = (() => {
     const df = meta?.defaultTimeFrame;
     if (!df) return null;
-    if (!querySource) return null;
-    if (!/:startDate|:endDate/.test(querySource)) return null;
+    if (querySources.length === 0) return null;
+    if (!querySources.some(s => /:startDate|:endDate/.test(s))) return null;
     switch (df.mode) {
       case 'sliding-window': {
         const offset = monthUtils.differenceInCalendarMonths(df.end, df.start);
@@ -147,24 +147,10 @@ export function QueryReportCard({
           }}
         >
           {isLoading && <LoadingIndicator />}
-          {error && (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-                color: theme.errorText,
-                fontSize: 12,
-                padding: 8,
-              }}
-            >
-              {error.message}
-            </View>
-          )}
-          {!isLoading && !error && result && (
+          {!isLoading && result && (
             <ChartRenderer result={result} spec={chartSpec} compact />
           )}
-          {!isLoading && !error && !result && !querySource && (
+          {!isLoading && !result && querySources.length === 0 && (
             <View
               style={{
                 flex: 1,

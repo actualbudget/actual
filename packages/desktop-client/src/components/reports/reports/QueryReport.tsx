@@ -32,10 +32,11 @@ import { EncodingConfig } from '@desktop-client/components/query-report/Encoding
 import { MarkSelector } from '@desktop-client/components/query-report/MarkSelector';
 import { ChartRenderer } from '@desktop-client/components/query-report/visualizations/ChartRenderer';
 import { LoadingIndicator } from '@desktop-client/components/reports/LoadingIndicator';
+import { QueryTabBar } from './QueryTabBar';
 import { useDashboardWidget } from '@desktop-client/hooks/useDashboardWidget';
 import { useFeatureFlag } from '@desktop-client/hooks/useFeatureFlag';
+import { useMultiQueryReport } from '@desktop-client/hooks/useMultiQueryReport';
 import { useNavigate } from '@desktop-client/hooks/useNavigate';
-import { useQueryReport } from '@desktop-client/hooks/useQueryReport';
 import { addNotification } from '@desktop-client/notifications/notificationsSlice';
 import { resolveChannels } from '@desktop-client/queries/resolveChannels';
 import { useDispatch } from '@desktop-client/redux';
@@ -211,15 +212,22 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
   const { isNarrowWidth } = useResponsive();
   const isFeatureFlagEnabled = useFeatureFlag('queryReport');
 
-  const [querySource, setQuerySource] = useState(
-    widget?.meta?.queries?.[0]?.source || DEFAULT_QUERY_SOURCE,
-  );
+  const defaultSources =
+    (widget?.meta?.queries || []).length > 0
+      ? widget.meta!.queries.map(q => q.source)
+      : [DEFAULT_QUERY_SOURCE];
+
+  const [querySources, setQuerySources] = useState<string[]>(defaultSources);
+  const [activeQueryIndex, setActiveQueryIndex] = useState(0);
   const [chartSpec, setChartSpec] = useState<ChartSpec>(
     widget?.meta?.chartSpec ?? DEFAULT_CHART_SPEC,
   );
   const [activeTab, setActiveTab] = useState<ConfigTab>('encoding');
   const [timeRange, setTimeRange] = useState<TimeRangeValue>(() =>
     timeRangeFromTimeFrame(widget?.meta?.defaultTimeFrame),
+  );
+  const [mergeKey, setMergeKey] = useState<string | undefined>(
+    widget?.meta?.mergeKey,
   );
 
   const title = widget?.meta?.name || t('Query Report');
@@ -229,15 +237,39 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
     [timeRange],
   );
 
-  const { result, isLoading, error } = useQueryReport(
-    querySource,
+  const {
+    merged: result,
+    isLoading,
+    mergeError,
+    perQueryErrors,
+    results,
+  } = useMultiQueryReport(
+    querySources,
     activeTimeFrame ?? widget?.meta?.defaultTimeFrame,
+    mergeKey,
   );
 
   const resolved = useMemo(
     () => (result ? resolveChannels(chartSpec, result) : null),
     [chartSpec, result],
   );
+
+  const intersectingColumns = useMemo(() => {
+    if (results.length < 2) return [];
+    const columnSets = results.map(r => new Set(r.columns.map(c => c.name)));
+    return [...columnSets[0]].filter(name =>
+      columnSets.every(s => s.has(name)),
+    );
+  }, [results]);
+
+  const mergeKeyOptions = useMemo(() => {
+    return intersectingColumns.map(name => ({
+      value: name,
+      label: name,
+    }));
+  }, [intersectingColumns]);
+
+  const activeError = perQueryErrors[activeQueryIndex] ?? null;
 
   useEffect(() => {
     if (!result) return;
@@ -306,13 +338,9 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
       return;
     }
 
-    const currentQueries = widget.meta?.queries || [];
-    const updatedQueries =
-      currentQueries.length > 0
-        ? currentQueries.map((q, i) =>
-            i === 0 ? { ...q, source: querySource } : q,
-          )
-        : [{ source: querySource }];
+    const updatedQueries = querySources.map(source => ({
+      source,
+    }));
 
     const currentDefaultTimeFrame =
       timeFrameFromRange(timeRange) ?? widget.meta?.defaultTimeFrame;
@@ -325,6 +353,7 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
             ...(widget.meta ?? {}),
             name: widget.meta?.name || t('Query Report'),
             queries: updatedQueries,
+            mergeKey: mergeKey ?? null,
             chartSpec,
             defaultTimeFrame: currentDefaultTimeFrame,
           },
@@ -345,7 +374,8 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
     );
   }, [
     widget,
-    querySource,
+    querySources,
+    mergeKey,
     chartSpec,
     updateDashboardWidgetMutation,
     dispatch,
@@ -468,7 +498,24 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
                 <LoadingIndicator message={t('Executing query...')} />
               </View>
             )}
-            {error && (
+            {mergeError && result && (
+              <View
+                style={{
+                  padding: 10,
+                  backgroundColor: theme.warningBackground || '#fff8e1',
+                  borderRadius: 6,
+                  color: theme.warningText,
+                  fontSize: 12,
+                  marginBottom: 8,
+                }}
+              >
+                {mergeError}
+              </View>
+            )}
+            {!isLoading && result && (
+              <ChartRenderer result={result} spec={chartSpec} />
+            )}
+            {!isLoading && !result && perQueryErrors.some(e => e !== null) && (
               <View
                 style={{
                   padding: 16,
@@ -480,19 +527,15 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
                 }}
               >
                 <div style={{ fontWeight: 600, marginBottom: 4 }}>
-                  {error.type === 'compile-error'
-                    ? t('Compile Error')
-                    : error.type === 'runtime-error'
-                      ? t('Runtime Error')
-                      : t('Error')}
+                  {t('Compile Error')}
                 </div>
-                <div>{error.message}</div>
+                <div>
+                  {perQueryErrors.find(e => e !== null)?.message ??
+                    t('Unknown error')}
+                </div>
               </View>
             )}
-            {!isLoading && !error && result && (
-              <ChartRenderer result={result} spec={chartSpec} />
-            )}
-            {!isLoading && !error && !result && (
+            {!isLoading && !result && !perQueryErrors.some(e => e !== null) && (
               <View
                 style={{
                   padding: 40,
@@ -529,6 +572,24 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
               flexDirection: 'column',
             }}
           >
+            <QueryTabBar
+              count={querySources.length}
+              activeIndex={activeQueryIndex}
+              onSelect={setActiveQueryIndex}
+              onAdd={() => {
+                setQuerySources(prev => [
+                  ...prev,
+                  `q('transactions')\n  .select('*')\n  .limit(100)`,
+                ]);
+                setActiveQueryIndex(querySources.length);
+              }}
+              onRemove={index => {
+                setQuerySources(prev => prev.filter((_, i) => i !== index));
+                if (activeQueryIndex >= index) {
+                  setActiveQueryIndex(Math.max(0, index - 1));
+                }
+              }}
+            />
             <div
               style={{
                 fontSize: 13,
@@ -536,7 +597,7 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
                 marginBottom: 8,
               }}
             >
-              <Trans>ActualQL Query:</Trans>
+              <Trans>Query {activeQueryIndex + 1}</Trans>
             </div>
             <Resizable
               defaultSize={{ width: '100%', height: 200 }}
@@ -570,30 +631,20 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
                   }
                 >
                   <AqlEditor
-                    value={querySource}
-                    onChange={setQuerySource}
-                    error={error?.message ?? null}
+                    value={querySources[activeQueryIndex] ?? ''}
+                    onChange={value => {
+                      setQuerySources(prev => {
+                        const next = [...prev];
+                        next[activeQueryIndex] = value;
+                        return next;
+                      });
+                    }}
+                    error={activeError?.message ?? null}
                     showLineNumbers
                   />
                 </Suspense>
               </View>
             </Resizable>
-            <div
-              style={{
-                fontSize: 11,
-                color: theme.pageTextSubdued,
-                marginTop: 8,
-                lineHeight: 1.5,
-              }}
-            >
-              <Trans>
-                Write ActualQL queries using the <code>q()</code> builder.
-                Example:{' '}
-                <code>
-                  q(&apos;transactions&apos;).select(&apos;*&apos;).limit(100)
-                </code>
-              </Trans>
-            </div>
             <div
               style={{
                 fontSize: 13,
@@ -612,8 +663,9 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
               onChange={v => setTimeRange(v as TimeRangeValue)}
             />
             {timeRange === 'none' &&
-              (querySource.includes(':startDate') ||
-                querySource.includes(':endDate')) && (
+              querySources.some(
+                s => s.includes(':startDate') || s.includes(':endDate'),
+              ) && (
                 <div
                   style={{
                     fontSize: 11,
@@ -627,19 +679,50 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
                   </Trans>
                 </div>
               )}
-            <div
-              style={{
-                fontSize: 11,
-                color: theme.pageTextSubdued,
-                marginTop: 8,
-                lineHeight: 1.5,
-              }}
-            >
-              <Trans>
-                Use <code>:startDate</code> and <code>:endDate</code> in your
-                query to reference the selected time range.
-              </Trans>
-            </div>
+            {querySources.length > 1 && (
+              <>
+                <div
+                  style={{
+                    fontSize: 13,
+                    color: theme.pageTextSubdued,
+                    marginTop: 16,
+                  }}
+                >
+                  <Trans>Merge key</Trans>
+                </div>
+                <Select
+                  value={mergeKey || ''}
+                  options={[
+                    ['', mergeKey ? `Auto (${mergeKey})` : t('Auto')],
+                    ...mergeKeyOptions.map(o => [o.value, o.label] as const),
+                  ]}
+                  onChange={v => setMergeKey(v || undefined)}
+                />
+                {mergeError && (
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: theme.warningText,
+                      marginTop: 4,
+                    }}
+                  >
+                    {mergeError}
+                  </div>
+                )}
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: theme.pageTextSubdued,
+                    marginTop: 4,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  <Trans>
+                    All queries must share this column to combine results.
+                  </Trans>
+                </div>
+              </>
+            )}
             <div
               style={{
                 fontSize: 13,

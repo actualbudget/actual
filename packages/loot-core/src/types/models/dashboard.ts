@@ -120,6 +120,7 @@ export type QueryReportWidget = AbstractWidget<
   {
     name?: string;
     queries: QueryEntry[];
+    mergeKey?: string;
     defaultTimeFrame?: TimeFrame;
     chartSpec: ChartSpec;
     label?: string;
