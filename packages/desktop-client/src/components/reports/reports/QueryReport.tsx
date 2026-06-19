@@ -664,6 +664,22 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
                 </Suspense>
               </View>
             </Resizable>
+            <div
+              style={{
+                fontSize: 11,
+                color: theme.pageTextSubdued,
+                marginTop: 8,
+                lineHeight: 1.5,
+              }}
+            >
+              <Trans>
+                Write ActualQL queries using the <code>q()</code> builder.
+                Example:{' '}
+                <code>
+                  q(&apos;transactions&apos;).select(&apos;*&apos;).limit(100)
+                </code>
+              </Trans>
+            </div>
             <View
               style={{
                 borderTop: `1px solid ${theme.tableBorder}`,
@@ -689,6 +705,19 @@ function QueryReportInner({ widget }: QueryReportInnerProps) {
               ])}
               onChange={v => setTimeRange(v as TimeRangeValue)}
             />
+            <div
+              style={{
+                fontSize: 11,
+                color: theme.pageTextSubdued,
+                marginTop: 4,
+                lineHeight: 1.5,
+              }}
+            >
+              <Trans>
+                Use <code>:startDate</code> and <code>:endDate</code> in your
+                query to reference the selected time range.
+              </Trans>
+            </div>
             {timeRange === 'none' &&
               querySources.some(
                 s => s.includes(':startDate') || s.includes(':endDate'),
